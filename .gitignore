@@ -30,22 +30,22 @@ node_modules/
 .idea/
 
 # next.js
-/apps/*/.next/
-/apps/*/next-env.d.ts
-/apps/*/out/
+.next/
+next-env.d.ts
+out/
 
 # self-signed certificates
-/certificates/
+certificates/
 
 # i18n
-/apps/*/content/**/*.d.json.ts
-/apps/*/messages/**/*.d.json.ts
+apps/*/content/**/*.d.json.ts
+apps/*/messages/**/*.d.json.ts
 
 # test
-/coverage/
+coverage/
 
 # playwright
-/apps/*/blob-report/
-/apps/*/playwright/.cache/
-/apps/*/playwright-report/
-/apps/*/test-results/
+blob-report/
+playwright/.cache/
+playwright-report/
+test-results/
