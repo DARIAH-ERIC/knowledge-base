@@ -1,0 +1,15 @@
+services:
+  drizzle-gateway:
+    image: ghcr.io/drizzle-team/gateway:latest
+    ports:
+      - "${DRIZZLE_GATEWAY_PORT}:4983"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    volumes:
+      - drizzle-gateway-data:/app
+
+volumes:
+  drizzle-gateway-data:

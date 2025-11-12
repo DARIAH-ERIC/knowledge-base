@@ -1,0 +1,12 @@
+services:
+  typesense:
+    image: typesense/typesense:29.0
+    ports:
+      - "${NEXT_PUBLIC_TYPESENSE_PORT}:8081"
+    volumes:
+      - ./typesense-data:/data
+    restart: on-failure
+    command: "--data-dir /data --api-key=${TYPESENSE_ADMIN_API_KEY} --enable-cors"
+
+volumes:
+  typesense-data:
