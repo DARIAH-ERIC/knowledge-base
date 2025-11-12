@@ -20,6 +20,7 @@
 		"test": "pnpm run --recursive test",
 		"test:e2e": "pnpm run --recursive test:e2e",
 		"test:e2e:install": "playwright install --with-deps",
+		"test:e2e:update-snapshots": "pnpm run --recursive test:e2e:update-snapshots",
 		"types:check": "pnpm run --recursive types:check"
 	},
 	"devDependencies": {
