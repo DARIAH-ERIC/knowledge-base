@@ -57,6 +57,8 @@ export function DashboardFooter(props: Readonly<DashboardFooterProps>): ReactNod
 }
 
 async function CurrentYear() {
+	// "use cache";
+
 	/** Ensure `new Date()` is computed at request time. */
 	await connection();
 

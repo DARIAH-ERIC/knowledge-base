@@ -57,6 +57,8 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 }
 
 async function CurrentYear() {
+	// "use cache";
+
 	/** Ensure `new Date()` is computed at request time. */
 	await connection();
 
