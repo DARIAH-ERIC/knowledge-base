@@ -1,0 +1,131 @@
+{
+	"ColorSchemeSelect": {
+		"change-color-scheme": "Change color scheme",
+		"color-schemes": {
+			"dark": "Dark",
+			"light": "Light",
+			"system": "System"
+		}
+	},
+	"DashboardFooter": {
+		"navigation": {
+			"items": {
+				"contact": "Contact",
+				"home": "Home",
+				"imprint": "Imprint"
+			},
+			"label": "Secondary"
+		},
+		"navigation-social-media": {
+			"items": {
+				"bluesky": "Bluesky",
+				"email": "Email",
+				"facebook": "Facebook",
+				"flickr": "Flickr",
+				"github": "GitHub",
+				"instagram": "Instagram",
+				"linkedin": "LinkedIn",
+				"mastodon": "Mastodon",
+				"orcid": "ORCID",
+				"rss": "RSS",
+				"twitter": "Twitter",
+				"website": "Website",
+				"youtube": "YouTube"
+			},
+			"label": "Social media"
+		}
+	},
+	"DashboardHeader": {
+		"navigation": {
+			"drawer": {
+				"close": "Close navigation menu",
+				"label": "Navigation menu",
+				"open": "Open navigation menu"
+			},
+			"items": {
+				"about": "About the project",
+				"documentation": "Documentation",
+				"home": "Home",
+				"search": "Search"
+			},
+			"label": "Main"
+		}
+	},
+	"DashboardLayout": {
+		"skip-link": "Skip to main content"
+	},
+	"DefaultFooter": {
+		"navigation": {
+			"items": {
+				"contact": "Contact",
+				"home": "Home",
+				"imprint": "Imprint"
+			},
+			"label": "Secondary"
+		},
+		"navigation-social-media": {
+			"items": {
+				"bluesky": "Bluesky",
+				"email": "Email",
+				"facebook": "Facebook",
+				"flickr": "Flickr",
+				"github": "GitHub",
+				"instagram": "Instagram",
+				"linkedin": "LinkedIn",
+				"mastodon": "Mastodon",
+				"orcid": "ORCID",
+				"rss": "RSS",
+				"twitter": "Twitter",
+				"website": "Website",
+				"youtube": "YouTube"
+			},
+			"label": "Social media"
+		}
+	},
+	"DefaultHeader": {
+		"navigation": {
+			"drawer": {
+				"close": "Close navigation menu",
+				"label": "Navigation menu",
+				"open": "Open navigation menu"
+			},
+			"items": {
+				"about": "About the project",
+				"documentation": "Documentation",
+				"home": "Home",
+				"search": "Search"
+			},
+			"label": "Main"
+		}
+	},
+	"DefaultLayout": {
+		"skip-link": "Skip to main content"
+	},
+	"ErrorPage": {
+		"meta": {
+			"title": "Error"
+		},
+		"reset": "Try again",
+		"title": "Something went wrong"
+	},
+	"GlobalNotFoundPage": {
+		"meta": {
+			"title": "Page not found"
+		},
+		"title": "Page not found"
+	},
+	"ImprintPage": {
+		"meta": {
+			"title": "Imprint"
+		},
+		"title": "Imprint"
+	},
+	"IndexPage": {
+		"title": "Home"
+	},
+	"LocaleSelect": {
+		"change-locale": "Switch locale",
+		"change-locale-to": "Switch to {locale}",
+		"current-locale": "Current language: {locale}"
+	}
+}
