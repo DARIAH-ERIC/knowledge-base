@@ -114,7 +114,13 @@ test.describe("i18n", () => {
 		}
 	});
 
-	test("should set alternate links in response header", async ({
+	/**
+	 * `next-intl` only adds alternate language headers when more than one locale is configured.
+	 *
+	 * @see {@link https://github.com/amannn/next-intl/blob/main/packages/next-intl/src/middleware/middleware.tsx#L328}
+	 */
+	// eslint-disable-next-line playwright/no-skipped-test
+	test.skip("should set alternate links in response header", async ({
 		createIndexPage,
 		createImprintPage,
 	}) => {

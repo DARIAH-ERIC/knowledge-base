@@ -36,7 +36,7 @@ function getConfig():
 		kind: "local",
 		baseUrl,
 		webServer: {
-			command: `pnpm run start --port ${String(port)}`,
+			command: `pnpm run --filter "@dariah-eric/dariah-knowledge-base" start --port ${String(port)}`,
 			url: baseUrl,
 			reuseExistingServer: !isCI,
 		},
