@@ -1,16 +1,16 @@
 services:
   mailpit:
-    image: axllent/mailpit
-    container_name: mailpit
+    image: axllent/mailpit:latest
+    container_name: dariah-knowledge-base-mailpit
     restart: unless-stopped
-    volumes:
-      - mailpit-data:/data
-    ports:
-      - "${MAILPIT_WEB_UI_PORT}:8025"
-      - "${EMAIL_SMTP_PORT}:1025"
     environment:
       MP_DATABASE: /data/mailpit.db
       MP_ENABLE_CHAOS: true
+    ports:
+      - "${MAILPIT_API_PORT:-8025}:8025"
+      - "${EMAIL_SMTP_PORT:-1025}:1025"
+    volumes:
+      - mailpit-data:/data
 
 volumes:
   mailpit-data:

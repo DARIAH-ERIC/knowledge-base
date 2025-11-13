@@ -2,7 +2,7 @@
 	"name": "dariah knowledge base",
 	"dockerComposeFile": [
 		"docker-compose.app.yaml",
-		"docker-compose.drizzle_gateway.yaml",
+		"docker-compose.drizzle-gateway.yaml",
 		"docker-compose.mailpit.yaml",
 		"docker-compose.postgres.yaml",
 		"docker-compose.typesense.yaml"
@@ -51,7 +51,7 @@
 			"label": "Mailpit SMTP Server"
 		},
 		"mailpit:8025": {
-			"label": "Mailpit Web UI"
+			"label": "Mailpit API and Web UI"
 		}
 	},
 	"remoteUser": "node"
