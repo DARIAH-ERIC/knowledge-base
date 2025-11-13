@@ -4,8 +4,6 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
     ports:
       - "${DRIZZLE_GATEWAY_PORT:-4983}:4983"
     volumes:
