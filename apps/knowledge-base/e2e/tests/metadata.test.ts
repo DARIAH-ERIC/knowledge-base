@@ -30,7 +30,8 @@ test("should set a canonical url", async ({ createIndexPage }) => {
 	}
 });
 
-test("should set document title on not-found page", async ({ createI18n, page }) => {
+/** @see {@link https://github.com/vercel/next.js/issues/86095} */
+test.fixme("should set document title on not-found page", async ({ createI18n, page }) => {
 	const i18n = await createI18n(defaultLocale);
 	await page.goto("/unknown");
 	await expect(page).toHaveTitle(
