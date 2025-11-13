@@ -25,10 +25,10 @@
 	},
 	"files.eol": "\n",
 	"files.readonlyInclude": {
-		".next/**": true
+		"**/.next/**": true
 	},
 	"files.watcherExclude": {
-		".next/**": true
+		"**/.next/**": true
 	},
 	"i18n-ally.annotations": false,
 	"i18n-ally.enabledFrameworks": ["next-intl"],
@@ -42,7 +42,7 @@
 	"mdx.server.enable": true,
 	"scss.validate": false,
 	"search.exclude": {
-		".next/**": true
+		"**/.next/**": true
 	},
 	"stylelint.enable": true,
 	"stylelint.snippet": ["css", "postcss", "tailwindcss"],
