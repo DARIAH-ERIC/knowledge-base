@@ -31,10 +31,14 @@ test("should set a canonical url", async ({ createIndexPage }) => {
 });
 
 test("should set document title on not-found page", async ({ createI18n, page }) => {
-	const en = await createI18n(defaultLocale);
+	const i18n = await createI18n(defaultLocale);
 	await page.goto("/unknown");
 	await expect(page).toHaveTitle(
-		[en.t("GlobalNotFoundPage.meta.title"), en.messages.metadata.title].join(" | "),
+		[i18n.t("GlobalNotFoundPage.meta.title"), i18n.messages.metadata.title].join(" | "),
+	);
+	await page.goto("/en/unknown");
+	await expect(page).toHaveTitle(
+		[i18n.t("GlobalNotFoundPage.meta.title"), i18n.messages.metadata.title].join(" | "),
 	);
 
 	// const de = await createI18n("de-AT");
