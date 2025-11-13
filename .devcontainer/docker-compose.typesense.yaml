@@ -4,9 +4,9 @@ services:
     container_name: dariah-knowledge-base-typesense
     restart: unless-stopped
     environment:
-      - TYPESENSE_API_KEY=${TYPESENSE_ADMIN_API_KEY}
-      - TYPESENSE_DATA_DIR=/data
-      - TYPESENSE_ENABLE_CORS=true
+      TYPESENSE_API_KEY: ${TYPESENSE_ADMIN_API_KEY}
+      TYPESENSE_DATA_DIR: /data
+      TYPESENSE_ENABLE_CORS: true
     ports:
       - "${NEXT_PUBLIC_TYPESENSE_PORT:-8081}:8081"
     volumes:
