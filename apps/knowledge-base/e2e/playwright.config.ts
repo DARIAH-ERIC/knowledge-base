@@ -13,7 +13,7 @@ import isCI from "is-in-ci";
  * available to the vs code plugin as well.
  */
 for (const envFilePath of [".env.test.local", ".env.local", ".env.test", ".env"]) {
-	expand(dotenv({ path: join(process.cwd(), envFilePath), quiet: true }));
+	expand(dotenv({ path: join(import.meta.dirname, "..", envFilePath), quiet: true }));
 }
 
 function getConfig():
@@ -36,7 +36,7 @@ function getConfig():
 		kind: "local",
 		baseUrl,
 		webServer: {
-			command: `pnpm run start --port ${String(port)}`,
+			command: `pnpm run --filter "@dariah-eric/dariah-knowledge-base" start --port ${String(port)}`,
 			url: baseUrl,
 			reuseExistingServer: !isCI,
 		},

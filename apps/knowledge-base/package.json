@@ -18,7 +18,7 @@
 		"analyze": "TURBOPACK_STATS=1 next build --experimental-next-config-strip-types && echo '\n✅ Saved stats to \".next/server/webpack-stats.json\". Analyze at \"https://statoscope.tech\".'",
 		"build": "next build --experimental-next-config-strip-types",
 		"dev": "next dev --experimental-next-config-strip-types",
-		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore",
+		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
 		"format:fix": "pnpm run format:check --write",
 		"lint:check": "run-p --continue-on-error \"lint:*:check\"",
 		"lint:fix": "run-p --continue-on-error \"lint:*:fix\"",
@@ -112,13 +112,13 @@
 	"lint-staged": {
 		"*.@(js|ts|tsx)": [
 			"eslint --fix --flag unstable_native_nodejs_ts_config",
-			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --write"
+			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write"
 		],
 		"*.@(css)": [
 			"stylelint --cache --fix",
-			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --write"
+			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write"
 		],
-		"*.!(css|js|ts|tsx)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-unknown --write"
+		"*.!(css|js|ts|tsx)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
 	},
 	"postcss": {
 		"plugins": {

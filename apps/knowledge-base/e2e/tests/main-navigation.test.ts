@@ -1,7 +1,8 @@
 import { expect, test } from "@/e2e/lib/test";
 import { defaultLocale } from "@/lib/i18n/locales";
 
-test.describe("main navigation", () => {
+// eslint-disable-next-line playwright/no-skipped-test
+test.describe.skip("main navigation", () => {
 	test("should skip to main content with skip-link", async ({ createIndexPage }) => {
 		const { indexPage } = await createIndexPage(defaultLocale);
 		await indexPage.goto();

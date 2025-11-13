@@ -11,3 +11,6 @@ pnpm-workspace.yaml
 
 # public assets
 /apps/*/public
+
+# e2e test snapshots
+/apps/*/e2e/snapshots
