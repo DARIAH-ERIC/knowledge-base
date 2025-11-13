@@ -1,10 +1,10 @@
 {
 	"name": "dariah knowledge base",
 	"dockerComposeFile": [
+		"docker-compose.postgres.yaml",
 		"docker-compose.app.yaml",
 		"docker-compose.drizzle-gateway.yaml",
 		"docker-compose.mailpit.yaml",
-		"docker-compose.postgres.yaml",
 		"docker-compose.typesense.yaml"
 	],
 	"service": "app",
