@@ -6,4 +6,5 @@ docker compose \
   -f ./.devcontainer/docker-compose.typesense.yaml \
   -f ./.devcontainer/docker-compose.mailpit.yaml \
   -f ./.devcontainer/docker-compose.drizzle-gateway.yaml \
+  -f ./.devcontainer/docker-compose.imgproxy.yaml \
   down --volumes

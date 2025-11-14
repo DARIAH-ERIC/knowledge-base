@@ -27,7 +27,16 @@ const result = createEnv({
 			const schema = v.object({
 				BUILD_MODE: v.optional(v.picklist(["export", "standalone"])),
 				CI: v.optional(v.pipe(v.unknown(), v.transform(Boolean), v.boolean())),
+				IMGPROXY_BASE_URL: v.pipe(v.string(), v.url()),
+				IMGPROXY_KEY: v.pipe(v.string(), v.nonEmpty()),
+				IMGPROXY_SALT: v.pipe(v.string(), v.nonEmpty()),
 				NEXT_RUNTIME: v.optional(v.picklist(["edge", "nodejs"])),
+				S3_ACCESS_KEY: v.pipe(v.string(), v.nonEmpty()),
+				S3_BUCKET: v.pipe(v.string(), v.nonEmpty()),
+				S3_HOST: v.pipe(v.string(), v.nonEmpty()),
+				S3_PORT: v.pipe(v.string(), v.transform(Number), v.number(), v.integer(), v.minValue(1)),
+				S3_PROTOCOL: v.optional(v.picklist(["http", "https"]), "https"),
+				S3_SECRET_KEY: v.pipe(v.string(), v.nonEmpty()),
 			});
 
 			const result = v.safeParse(schema, environment);
@@ -77,6 +86,9 @@ const result = createEnv({
 	environment: {
 		BUILD_MODE: process.env.BUILD_MODE,
 		CI: process.env.CI,
+		IMGPROXY_BASE_URL: process.env.IMGPROXY_BASE_URL,
+		IMGPROXY_KEY: process.env.IMGPROXY_KEY,
+		IMGPROXY_SALT: process.env.IMGPROXY_SALT,
 		NEXT_PUBLIC_APP_BASE_URL: process.env.NEXT_PUBLIC_APP_BASE_URL,
 		NEXT_PUBLIC_BOTS: process.env.NEXT_PUBLIC_BOTS,
 		NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
@@ -86,6 +98,12 @@ const result = createEnv({
 		NEXT_PUBLIC_REDMINE_ID: process.env.NEXT_PUBLIC_REDMINE_ID,
 		NEXT_RUNTIME: process.env.NEXT_RUNTIME,
 		NODE_ENV: process.env.NODE_ENV,
+		S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
+		S3_BUCKET: process.env.S3_BUCKET,
+		S3_HOST: process.env.S3_HOST,
+		S3_PORT: process.env.S3_PORT,
+		S3_PROTOCOL: process.env.S3_PROTOCOL,
+		S3_SECRET_KEY: process.env.S3_SECRET_KEY,
 	},
 	validation: v.parse(
 		v.optional(v.picklist(["disabled", "enabled", "public"]), "enabled"),
