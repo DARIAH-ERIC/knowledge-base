@@ -1,0 +1,8 @@
+services:
+  app:
+    image: ghcr.io/acdh-oeaw/devcontainer-frontend:24
+    volumes:
+      - ..:/workspace:cached
+    command: sleep infinity
+    depends_on:
+      - postgres

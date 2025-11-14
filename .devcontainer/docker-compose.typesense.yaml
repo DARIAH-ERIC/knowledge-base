@@ -1,0 +1,25 @@
+services:
+  typesense:
+    image: typesense/typesense:29.0
+    container_name: dariah-knowledge-base-typesense
+    restart: unless-stopped
+    environment:
+      TYPESENSE_API_KEY: ${TYPESENSE_ADMIN_API_KEY}
+      TYPESENSE_DATA_DIR: /data
+      TYPESENSE_ENABLE_CORS: true
+    ports:
+      - "${NEXT_PUBLIC_TYPESENSE_PORT:-8081}:8081"
+    volumes:
+      - typesense-data:/data
+
+  typesense-dashboard:
+    image: ghcr.io/bfritscher/typesense-dashboard:latest
+    container_name: dariah-knowledge-base-typesense-dashboard
+    restart: unless-stopped
+    depends_on:
+      - typesense
+    ports:
+      - "${TYPESENSE_DASHBOARD_PORT:-5050}:80"
+
+volumes:
+  typesense-data:
