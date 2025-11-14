@@ -28,6 +28,7 @@ const result = createEnv({
 				BUILD_MODE: v.optional(v.picklist(["export", "standalone"])),
 				CI: v.optional(v.pipe(v.unknown(), v.transform(Boolean), v.boolean())),
 				NEXT_RUNTIME: v.optional(v.picklist(["edge", "nodejs"])),
+				SENTRY_AUTH_TOKEN: v.optional(v.pipe(v.string(), v.nonEmpty())),
 			});
 
 			const result = v.safeParse(schema, environment);
@@ -59,6 +60,10 @@ const result = createEnv({
 					v.integer(),
 					v.minValue(1),
 				),
+				NEXT_PUBLIC_SENTRY_DSN: v.optional(v.pipe(v.string(), v.nonEmpty())),
+				NEXT_PUBLIC_SENTRY_ORG: v.optional(v.pipe(v.string(), v.nonEmpty())),
+				NEXT_PUBLIC_SENTRY_PII: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
+				NEXT_PUBLIC_SENTRY_PROJECT: v.optional(v.pipe(v.string(), v.nonEmpty())),
 			});
 
 			const result = v.safeParse(schema, environment);
@@ -84,8 +89,13 @@ const result = createEnv({
 		NEXT_PUBLIC_MATOMO_BASE_URL: process.env.NEXT_PUBLIC_MATOMO_BASE_URL,
 		NEXT_PUBLIC_MATOMO_ID: process.env.NEXT_PUBLIC_MATOMO_ID,
 		NEXT_PUBLIC_REDMINE_ID: process.env.NEXT_PUBLIC_REDMINE_ID,
+		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
+		NEXT_PUBLIC_SENTRY_ORG: process.env.NEXT_PUBLIC_SENTRY_ORG,
+		NEXT_PUBLIC_SENTRY_PII: process.env.NEXT_PUBLIC_SENTRY_PII,
+		NEXT_PUBLIC_SENTRY_PROJECT: process.env.NEXT_PUBLIC_SENTRY_PROJECT,
 		NEXT_RUNTIME: process.env.NEXT_RUNTIME,
 		NODE_ENV: process.env.NODE_ENV,
+		SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
 	},
 	validation: v.parse(
 		v.optional(v.picklist(["disabled", "enabled", "public"]), "enabled"),
