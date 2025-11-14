@@ -41,6 +41,7 @@
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/validate-env": "catalog:",
 		"@react-aria/utils": "catalog:",
+		"@sentry/nextjs": "catalog:",
 		"@valibot/i18n": "catalog:",
 		"client-only": "catalog:",
 		"clsx": "catalog:",
