@@ -39,6 +39,8 @@ export async function AcdhImprint(props: Readonly<AcdhImprintProps>): Promise<Re
 
 	const html = await getImprintHtml(locale);
 
-	// eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
-	return <div className="richtext" dangerouslySetInnerHTML={{ __html: html }} />;
+	return (
+		// eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
+		<div className="richtext max-w-(--breakpoint-md)" dangerouslySetInnerHTML={{ __html: html }} />
+	);
 }

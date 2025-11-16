@@ -3,10 +3,8 @@ import { Fragment, type ReactNode } from "react";
 
 import { DashboardFooter } from "@/app/(app)/[locale]/(dashboard)/_components/dashboard-footer";
 import { DashboardHeader } from "@/app/(app)/[locale]/(dashboard)/_components/dashboard-header";
-import { Main } from "@/components/main";
+import { mainContentId } from "@/app/(app)/[locale]/(dashboard)/_components/main-content";
 import { SkipLink } from "@/components/skip-link";
-
-const mainContentId = "main-content";
 
 interface DashbardLayoutProps extends LayoutProps<"/[locale]"> {}
 
@@ -22,9 +20,7 @@ export default function DashbardLayout(props: Readonly<DashbardLayoutProps>): Re
 			<div className="relative isolate flex h-full flex-col">
 				<DashboardHeader />
 
-				<Main className="flex-1" id={mainContentId}>
-					{children}
-				</Main>
+				{children}
 
 				<DashboardFooter />
 			</div>

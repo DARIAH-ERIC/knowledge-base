@@ -1,13 +1,13 @@
 import cn from "clsx/lite";
-import { connection } from "next/server";
+// import { connection } from "next/server";
 import { useTranslations } from "next-intl";
-import { type ComponentProps, type ReactNode, Suspense } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
-// import { Logo } from "@/components/logo";
-// import { NavLink } from "@/components/nav-link";
+import { Logo } from "@/components/logo";
+import { NavLink } from "@/components/nav-link";
 import { useMetadata } from "@/lib/i18n/metadata";
 import { createHref } from "@/lib/navigation/create-href";
-import type { NavigationConfig, NavigationLink } from "@/lib/navigation/navigation";
+import type { NavigationLink } from "@/lib/navigation/navigation";
 import { config as socialMediaConfig } from "@/lib/social-media/social-media.config";
 
 interface DefaultFooterProps extends ComponentProps<"footer"> {}
@@ -18,7 +18,12 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 	const t = useTranslations("DefaultFooter");
 	const meta = useMetadata();
 
-	const _links = {
+	const links = {
+		home: {
+			type: "link",
+			href: createHref({ pathname: "/" }),
+			label: t("navigation.items.home"),
+		},
 		contact: {
 			type: "link",
 			href: createHref({ pathname: "/contact" }),
@@ -31,36 +36,109 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 		},
 	} satisfies Record<string, NavigationLink>;
 
-	const socialMedia: NavigationConfig = {};
-
-	for (const [_kind, href] of Object.entries(meta.social)) {
-		const kind = _kind as keyof typeof meta.social;
-
-		const label = t(`navigation-social-media.items.${kind}`);
-		const Icon = socialMediaConfig[kind].icon;
-
-		socialMedia[kind] = {
-			type: "link",
-			href,
-			label,
-			icon: <Icon />,
-		};
-	}
-
 	return (
-		<footer {...rest} className={cn("", className)}>
-			<Suspense>
-				<CurrentYear />
-			</Suspense>
+		<footer {...rest} className={cn("border-t border-border", className)}>
+			<div className="container flex flex-col gap-y-6 px-8 py-12 xs:px-16">
+				<div className="flex flex-col gap-y-8 xs:flex-row xs:items-center xs:justify-between">
+					<NavLink
+						className={cn(
+							"mr-auto -ml-1 inline-grid shrink-0 place-content-center self-center rounded-xs p-1 text-muted-fg transition duration-200",
+							"touch-target",
+							"hover:text-fg",
+							"outline-2 outline-offset-2 outline-transparent focus-visible:outline-ring",
+						)}
+						href={links.home.href}
+					>
+						<span className="sr-only">{links.home.label}</span>
+						<Logo className="h-8 w-auto" />
+					</NavLink>
+
+					<nav aria-label={t("navigation-social-media.label")}>
+						<ul className="flex flex-wrap items-center gap-x-4 gap-y-2" role="list">
+							{Object.entries(meta.social).map(([_kind, href]) => {
+								const kind = _kind as keyof typeof meta.social;
+
+								if (kind === "email" || kind === "website") {
+									return null;
+								}
+
+								const label = t(`navigation-social-media.items.${kind}`);
+								const Icon = socialMediaConfig[kind].icon;
+
+								return (
+									<li key={kind} className="inline-flex shrink-0">
+										<NavLink
+											className={cn(
+												"inline-flex items-center rounded-xs p-1 text-muted-fg transition duration-200",
+												"touch-target",
+												"hover:text-fg",
+												"outline-2 outline-offset-2 outline-transparent focus-visible:outline-ring",
+											)}
+											href={href}
+										>
+											<span className="sr-only">{label}</span>
+											<Icon aria-hidden={true} className="size-6" />
+										</NavLink>
+									</li>
+								);
+							})}
+						</ul>
+					</nav>
+				</div>
+
+				<div className="flex flex-col gap-y-8">
+					<nav aria-label={t("navigation.label")}>
+						<ul
+							className="-mx-2.5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-fg"
+							role="list"
+						>
+							{Object.entries(links).map(([id, link]) => {
+								if (id === "home") {
+									return null;
+								}
+
+								return (
+									<li key={id}>
+										<NavLink
+											className={cn(
+												"inline-flex items-center gap-x-2 rounded-xs px-2.5 py-1 text-sm font-medium tracking-tight text-muted-fg transition duration-200",
+												"hover:text-fg",
+												"outline-2 outline-offset-2 outline-transparent focus-visible:outline-ring",
+											)}
+											href={link.href}
+										>
+											{link.label}
+										</NavLink>
+									</li>
+								);
+							})}
+						</ul>
+					</nav>
+
+					<small className="text-xs text-muted-fg">
+						&copy; {new Date().getUTCFullYear()}{" "}
+						<a
+							className={cn(
+								"inline-flex items-center gap-x-2 rounded-xs px-1.5 py-0.5 text-muted-fg transition duration-200",
+								"hover:text-fg",
+								"outline-2 outline-offset-2 outline-transparent focus-visible:outline-ring",
+							)}
+							href={meta.social.website}
+						>
+							{meta.creator}
+						</a>
+					</small>
+				</div>
+			</div>
 		</footer>
 	);
 }
 
-async function CurrentYear() {
-	// "use cache";
+// async function CurrentYear() {
+// 	// "use cache";
 
-	/** Ensure `new Date()` is computed at request time. */
-	await connection();
+// 	/** Ensure `new Date()` is computed at request time. */
+// 	await connection();
 
-	return <span>{new Date().getUTCFullYear()}</span>;
-}
+// 	return <span>{new Date().getUTCFullYear()}</span>;
+// }

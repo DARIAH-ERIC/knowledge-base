@@ -4,6 +4,9 @@
 <loc>http://localhost:3000/en/imprint</loc>
 </url>
 <url>
+<loc>http://localhost:3000/en/contact</loc>
+</url>
+<url>
 <loc>http://localhost:3000/en</loc>
 </url>
 </urlset>

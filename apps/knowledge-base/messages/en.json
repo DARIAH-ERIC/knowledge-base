@@ -7,6 +7,12 @@
 			"system": "System"
 		}
 	},
+	"ContactPage": {
+		"meta": {
+			"title": "Contact"
+		},
+		"title": "Contact"
+	},
 	"DashboardFooter": {
 		"navigation": {
 			"items": {
@@ -53,6 +59,12 @@
 	},
 	"DashboardLayout": {
 		"skip-link": "Skip to main content"
+	},
+	"DashboardPage": {
+		"meta": {
+			"title": "Dashboard"
+		},
+		"title": "Welcome!"
 	},
 	"DefaultFooter": {
 		"navigation": {
@@ -121,7 +133,8 @@
 		"title": "Imprint"
 	},
 	"IndexPage": {
-		"title": "Home"
+		"lead": "Your central hub for everything DARIAH-related.",
+		"title": "DARIAH Knowledge Base"
 	},
 	"LocaleSelect": {
 		"change-locale": "Switch locale",

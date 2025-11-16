@@ -3,10 +3,8 @@ import { Fragment, type ReactNode } from "react";
 
 import { DefaultFooter } from "@/app/(app)/[locale]/(default)/_components/default-footer";
 import { DefaultHeader } from "@/app/(app)/[locale]/(default)/_components/default-header";
-import { Main } from "@/components/main";
+import { mainContentId } from "@/app/(app)/[locale]/(default)/_components/main-content";
 import { SkipLink } from "@/components/skip-link";
-
-const mainContentId = "main-content";
 
 interface DefaultLayoutProps extends LayoutProps<"/[locale]"> {}
 
@@ -22,9 +20,7 @@ export default function DefaultLayout(props: Readonly<DefaultLayoutProps>): Reac
 			<div className="relative isolate flex min-h-full flex-col">
 				<DefaultHeader />
 
-				<Main className="flex-1" id={mainContentId}>
-					{children}
-				</Main>
+				{children}
 
 				<DefaultFooter />
 			</div>
