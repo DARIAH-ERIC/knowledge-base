@@ -1,3 +1,7 @@
+/* eslint-disable no-param-reassign */
+/* eslint-disable @eslint-react/prefer-read-only-props */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+
 "use client";
 
 import { ChevronRightIcon } from "@heroicons/react/24/solid";
@@ -12,12 +16,12 @@ import {
 import { twMerge } from "tailwind-merge";
 
 import { cx } from "@/components/ui/cx";
-
-import { Link } from "./link";
+import { Link } from "@/components/ui/link";
 
 interface BreadcrumbsContextProps {
 	separator?: "chevron" | "slash" | boolean;
 }
+
 const BreadcrumbsProvider = createContext<BreadcrumbsContextProps>({
 	separator: "chevron",
 });
@@ -44,6 +48,7 @@ function BreadcrumbsItem({
 	...props
 }: BreadcrumbsItemProps & Partial<Omit<LinkProps, "className">>) {
 	const { separator: contextSeparator } = use(BreadcrumbsProvider);
+
 	separator = contextSeparator ?? separator;
 	const separatorValue = separator === true ? "chevron" : separator;
 
@@ -75,4 +80,5 @@ function Separator({ separator = "chevron" }: { separator?: BreadcrumbsItemProps
 }
 
 export type { BreadcrumbsItemProps, BreadcrumbsProps };
+
 export { Breadcrumbs, BreadcrumbsItem };

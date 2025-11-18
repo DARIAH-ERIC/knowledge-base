@@ -1,5 +1,9 @@
+/* eslint-disable @eslint-react/prefer-read-only-props */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+
 "use client";
 
+import type { Ref } from "react";
 import {
 	Button as ButtonPrimitive,
 	type ButtonProps as ButtonPrimitiveProps,
@@ -90,7 +94,7 @@ export const buttonStyles = tv({
 });
 
 export interface ButtonProps extends ButtonPrimitiveProps, VariantProps<typeof buttonStyles> {
-	ref?: React.Ref<HTMLButtonElement>;
+	ref?: Ref<HTMLButtonElement>;
 }
 
 export function Button({ className, intent, size, isCircle, ref, ...props }: ButtonProps) {

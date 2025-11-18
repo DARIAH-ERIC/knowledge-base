@@ -1,11 +1,15 @@
+/* eslint-disable @eslint-react/prefer-read-only-props */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+
 "use client";
 
+import type { RefObject } from "react";
 import { Link as LinkPrimitive, type LinkProps as LinkPrimitiveProps } from "react-aria-components";
 
 import { cx } from "@/components/ui/cx";
 
 interface LinkProps extends LinkPrimitiveProps {
-	ref?: React.RefObject<HTMLAnchorElement>;
+	ref?: RefObject<HTMLAnchorElement>;
 }
 
 function Link({ className, ref, ...props }: LinkProps) {
@@ -27,4 +31,5 @@ function Link({ className, ref, ...props }: LinkProps) {
 }
 
 export type { LinkProps };
+
 export { Link };

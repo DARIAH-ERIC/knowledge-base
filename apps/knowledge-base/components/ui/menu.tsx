@@ -1,6 +1,12 @@
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+/* eslint-disable @eslint-react/prefer-read-only-props */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+
 "use client";
 
 import { CheckIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
+import { type ComponentProps, Fragment, type Ref } from "react";
 import {
 	Button,
 	type ButtonProps,
@@ -15,13 +21,12 @@ import {
 	type MenuSectionProps as MenuSectionPrimitiveProps,
 	MenuTrigger as MenuTriggerPrimitive,
 	type MenuTriggerProps as MenuTriggerPrimitiveProps,
-	SubmenuTrigger as SubmenuTriggerPrimitive
+	SubmenuTrigger as SubmenuTriggerPrimitive,
 } from "react-aria-components";
 import { twJoin, twMerge } from "tailwind-merge";
 import { tv, type VariantProps } from "tailwind-variants";
 
 import { cx } from "@/components/ui/cx";
-
 import {
 	DropdownDescription,
 	dropdownItemStyles,
@@ -29,34 +34,38 @@ import {
 	DropdownLabel,
 	dropdownSectionStyles,
 	DropdownSeparator,
-} from "./dropdown";
-import { PopoverContent, type PopoverContentProps } from "./popover";
+} from "@/components/ui/dropdown";
+import { PopoverContent, type PopoverContentProps } from "@/components/ui/popover";
 
 function Menu(props: MenuTriggerPrimitiveProps) {
-  return <MenuTriggerPrimitive {...props} />
+	return <MenuTriggerPrimitive {...props} />;
 }
 
 function MenuSubMenu({ delay = 0, ...props }) {
-  return <SubmenuTriggerPrimitive {...props} delay={delay}>
-		{props.children}
-	</SubmenuTriggerPrimitive>
+	return (
+		<SubmenuTriggerPrimitive {...props} delay={delay}>
+			{props.children}
+		</SubmenuTriggerPrimitive>
+	);
 }
 
 interface MenuTriggerProps extends ButtonProps {
-	ref?: React.Ref<HTMLButtonElement>;
+	ref?: Ref<HTMLButtonElement>;
 }
 
 function MenuTrigger({ className, ref, ...props }: MenuTriggerProps) {
-  return <Button
-		ref={ref}
-		className={cx(
-			"relative inline text-left outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
-			"*:data-[slot=chevron]:size-5 sm:*:data-[slot=chevron]:size-4",
-			className,
-		)}
-		data-slot="menu-trigger"
-		{...props}
-	/>
+	return (
+		<Button
+			ref={ref}
+			className={cx(
+				"relative inline text-left outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
+				"*:data-[slot=chevron]:size-5 sm:*:data-[slot=chevron]:size-4",
+				className,
+			)}
+			data-slot="menu-trigger"
+			{...props}
+		/>
+	);
 }
 
 interface MenuContentProps<T>
@@ -107,10 +116,11 @@ interface MenuItemProps extends MenuItemPrimitiveProps, VariantProps<typeof drop
 
 function MenuItem({ className, intent, children, ...props }: MenuItemProps) {
 	const textValue = props.textValue || (typeof children === "string" ? children : undefined);
+
 	return (
 		<MenuItemPrimitive
-			className={composeRenderProps(className, (className, { hasSubmenu, ...renderProps }) =>
-				{return dropdownItemStyles({
+			className={composeRenderProps(className, (className, { hasSubmenu, ...renderProps }) => {
+				return dropdownItemStyles({
 					...renderProps,
 					intent,
 					className: hasSubmenu
@@ -122,60 +132,64 @@ function MenuItem({ className, intent, children, ...props }: MenuItemProps) {
 								className,
 							)
 						: className,
-				})},
-			)}
+				});
+			})}
 			data-slot="menu-item"
 			textValue={textValue}
 			{...props}
 		>
-			{(values) => {return (
-				<>
-					{values.isSelected && (
-						<span
-							className={twJoin(
-								"group-has-data-[slot=avatar]:absolute group-has-data-[slot=avatar]:right-0",
-								"group-has-data-[slot=icon]:absolute group-has-data-[slot=icon]:right-0",
-							)}
-						>
-							{values.selectionMode === "single" && (
-								<CheckIcon className="-mx-0.5 mr-2 size-4" data-slot="check-indicator" />
-							)}
-							{values.selectionMode === "multiple" && (
-								<CheckIcon className="-mx-0.5 mr-2 size-4" data-slot="check-indicator" />
-							)}
-						</span>
-					)}
+			{(values) => {
+				return (
+					<Fragment>
+						{values.isSelected && (
+							<span
+								className={twJoin(
+									"group-has-data-[slot=avatar]:absolute group-has-data-[slot=avatar]:right-0",
+									"group-has-data-[slot=icon]:absolute group-has-data-[slot=icon]:right-0",
+								)}
+							>
+								{values.selectionMode === "single" && (
+									<CheckIcon className="-mx-0.5 mr-2 size-4" data-slot="check-indicator" />
+								)}
+								{values.selectionMode === "multiple" && (
+									<CheckIcon className="-mx-0.5 mr-2 size-4" data-slot="check-indicator" />
+								)}
+							</span>
+						)}
 
-					{typeof children === "function" ? children(values) : children}
+						{typeof children === "function" ? children(values) : children}
 
-					{values.hasSubmenu && (
-						<ChevronRightIcon className="absolute right-2 size-3.5" data-slot="chevron" />
-					)}
-				</>
-			)}}
+						{values.hasSubmenu && (
+							<ChevronRightIcon className="absolute right-2 size-3.5" data-slot="chevron" />
+						)}
+					</Fragment>
+				);
+			}}
 		</MenuItemPrimitive>
 	);
 }
 
-export interface MenuHeaderProps extends React.ComponentProps<typeof Header> {
+export interface MenuHeaderProps extends ComponentProps<typeof Header> {
 	separator?: boolean;
 }
 
 function MenuHeader({ className, separator = false, ...props }: MenuHeaderProps) {
-  return <Header
-		className={twMerge(
-			"col-span-full px-2.5 py-2 font-medium text-base sm:text-sm",
-			separator && "-mx-1 mb-1 border-b sm:px-3 sm:pb-[0.625rem]",
-			className,
-		)}
-		{...props}
-	/>
+	return (
+		<Header
+			className={twMerge(
+				"col-span-full px-2.5 py-2 font-medium text-base sm:text-sm",
+				separator && "-mx-1 mb-1 border-b sm:px-3 sm:pb-2.5",
+				className,
+			)}
+			{...props}
+		/>
+	);
 }
 
 const { section, header } = dropdownSectionStyles();
 
 interface MenuSectionProps<T> extends MenuSectionPrimitiveProps<T> {
-	ref?: React.Ref<HTMLDivElement>;
+	ref?: Ref<HTMLDivElement>;
 	label?: string;
 }
 
@@ -193,7 +207,8 @@ const MenuShortcut = DropdownKeyboard;
 const MenuLabel = DropdownLabel;
 const MenuDescription = DropdownDescription;
 
-export type { MenuContentProps, MenuItemProps, MenuSectionProps,MenuTriggerProps };
+export type { MenuContentProps, MenuItemProps, MenuSectionProps, MenuTriggerProps };
+
 export {
 	Menu,
 	MenuContent,

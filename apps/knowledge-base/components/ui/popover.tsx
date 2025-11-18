@@ -1,14 +1,18 @@
+/* eslint-disable @eslint-react/prefer-read-only-props */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+
 "use client";
 
+import type { Ref } from "react";
 import {
 	DialogTrigger as DialogTriggerPrimitive,
 	type DialogTriggerProps,
 	OverlayArrow,
 	Popover as PopoverPrimitive,
-	type PopoverProps as PopoverPrimitiveProps} from "react-aria-components";
+	type PopoverProps as PopoverPrimitiveProps,
+} from "react-aria-components";
 
 import { cx } from "@/components/ui/cx";
-
 import {
 	DialogBody,
 	DialogClose,
@@ -17,9 +21,10 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "./dialog";
+} from "@/components/ui/dialog";
 
 type PopoverProps = DialogTriggerProps;
+
 function Popover(props: PopoverProps) {
 	return <DialogTriggerPrimitive {...props} />;
 }
@@ -31,7 +36,7 @@ const PopoverFooter = DialogFooter;
 
 interface PopoverContentProps extends PopoverPrimitiveProps {
 	arrow?: boolean;
-	ref?: React.Ref<HTMLDivElement>;
+	ref?: Ref<HTMLDivElement>;
 }
 
 function PopoverContent({
@@ -42,6 +47,7 @@ function PopoverContent({
 	...props
 }: PopoverContentProps) {
 	const offset = props.offset ?? (arrow ? 12 : 8);
+
 	return (
 		<PopoverPrimitive
 			ref={ref}
@@ -57,23 +63,25 @@ function PopoverContent({
 			offset={offset}
 			{...props}
 		>
-			{(values) => {return (
-				<>
-					{arrow && (
-						<OverlayArrow className="group">
-							<svg
-								className="block fill-overlay stroke-border group-placement-left:-rotate-90 group-placement-right:rotate-90 group-placement-bottom:rotate-180 forced-colors:fill-[Canvas] forced-colors:stroke-[ButtonBorder]"
-								height={12}
-								viewBox="0 0 12 12"
-								width={12}
-							>
-								<path d="M0 0 L6 6 L12 0" />
-							</svg>
-						</OverlayArrow>
-					)}
-					{typeof children === "function" ? children(values) : children}
-				</>
-			)}}
+			{(values) => {
+				return (
+					<>
+						{arrow && (
+							<OverlayArrow className="group">
+								<svg
+									className="block fill-overlay stroke-border group-placement-left:-rotate-90 group-placement-right:rotate-90 group-placement-bottom:rotate-180 forced-colors:fill-[Canvas] forced-colors:stroke-[ButtonBorder]"
+									height={12}
+									viewBox="0 0 12 12"
+									width={12}
+								>
+									<path d="M0 0 L6 6 L12 0" />
+								</svg>
+							</OverlayArrow>
+						)}
+						{typeof children === "function" ? children(values) : children}
+					</>
+				);
+			}}
 		</PopoverPrimitive>
 	);
 }
@@ -82,7 +90,8 @@ const PopoverTrigger = DialogTrigger;
 const PopoverClose = DialogClose;
 const PopoverDescription = DialogDescription;
 
-export type { PopoverContentProps,PopoverProps };
+export type { PopoverContentProps, PopoverProps };
+
 export {
 	Popover,
 	PopoverBody,

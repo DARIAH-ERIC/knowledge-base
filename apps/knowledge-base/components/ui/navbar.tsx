@@ -1,17 +1,32 @@
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable @eslint-react/prefer-read-only-props */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+/* eslint-disable react/jsx-no-literals */
+
 "use client";
 
 import { Bars2Icon } from "@heroicons/react/20/solid";
 import { LayoutGroup, motion } from "motion/react";
-import { createContext, use, useCallback, useId, useMemo, useState } from "react";
+import {
+	type ComponentProps,
+	createContext,
+	type RefObject,
+	use,
+	useCallback,
+	useId,
+	useMemo,
+	useState,
+} from "react";
 import { Link, type LinkProps } from "react-aria-components";
 import { twJoin, twMerge } from "tailwind-merge";
 
+import { Button, type ButtonProps } from "@/components/ui/button";
 import { cx } from "@/components/ui/cx";
+import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetBody, SheetContent } from "@/components/ui/sheet";
 import { useMediaQuery } from "@/components/ui/use-media-query";
-
-import { Button, type ButtonProps } from "./button";
-import { Separator } from "./separator";
-import { Sheet, SheetBody, SheetContent } from "./sheet";
 
 interface NavbarContextProps {
 	open: boolean;
@@ -31,7 +46,7 @@ const useNavbar = () => {
 	return context;
 };
 
-interface NavbarProviderProps extends React.ComponentProps<"div"> {
+interface NavbarProviderProps extends ComponentProps<"div"> {
 	defaultOpen?: boolean;
 	isOpen?: boolean;
 	onOpenChange?: (open: boolean) => void;
@@ -45,6 +60,7 @@ function NavbarProvider({
 	...props
 }: NavbarProviderProps) {
 	const [openInternal, setOpenInternal] = useState(defaultOpen);
+
 	const open = openProp ?? openInternal;
 
 	const setOpen = useCallback(
@@ -98,14 +114,14 @@ type Intent = "default" | "float" | "inset";
 type Placement = "top" | "bottom";
 type Side = "left" | "right";
 
-interface StickyWithPlacement extends React.ComponentProps<"div"> {
+interface StickyWithPlacement extends ComponentProps<"div"> {
 	isSticky: true;
 	placement?: Placement;
 	side?: Side;
 	intent?: Intent;
 }
 
-interface NonStickyWithoutPlacement extends React.ComponentProps<"div"> {
+interface NonStickyWithoutPlacement extends ComponentProps<"div"> {
 	isSticky?: false;
 	placement?: never;
 	side?: Side;
@@ -125,6 +141,7 @@ function Navbar({
 	...props
 }: NavbarProps) {
 	const { isMobile, open, setOpen } = useNavbar();
+
 	if (isMobile) {
 		return (
 			<>
@@ -186,8 +203,9 @@ function Navbar({
 	);
 }
 
-function NavbarSection({ className, ...props }: React.ComponentProps<"div">) {
+function NavbarSection({ className, ...props }: ComponentProps<"div">) {
 	const id = useId();
+
 	return (
 		<LayoutGroup id={id}>
 			<div
@@ -256,23 +274,23 @@ function NavbarItem({ className, isCurrent, ...props }: NavbarItemProps) {
 	);
 }
 
-function NavbarSpacer({ className, ref, ...props }: React.ComponentProps<"div">) {
+function NavbarSpacer({ className, ref, ...props }: ComponentProps<"div">) {
 	return <div ref={ref} className={twMerge("-ml-4 flex-1", className)} {...props} />;
 }
 
-function NavbarStart({ className, ref, ...props }: React.ComponentProps<"div">) {
+function NavbarStart({ className, ref, ...props }: ComponentProps<"div">) {
 	return <div ref={ref} className={twMerge("relative p-2 py-4 md:p-0.5", className)} {...props} />;
 }
 
-function NavbarGap({ className, ref, ...props }: React.ComponentProps<"div">) {
+function NavbarGap({ className, ref, ...props }: ComponentProps<"div">) {
 	return <div ref={ref} className={twMerge("mx-2", className)} {...props} />;
 }
 
-function NavbarSeparator({ className, ...props }: React.ComponentProps<typeof Separator>) {
+function NavbarSeparator({ className, ...props }: ComponentProps<typeof Separator>) {
 	return <Separator className={twMerge("h-5", className)} orientation="vertical" {...props} />;
 }
 
-function NavbarMobile({ className, ref, ...props }: React.ComponentProps<"div">) {
+function NavbarMobile({ className, ref, ...props }: ComponentProps<"div">) {
 	return (
 		<div
 			ref={ref}
@@ -280,9 +298,9 @@ function NavbarMobile({ className, ref, ...props }: React.ComponentProps<"div">)
 				"group/navbar-mobile flex items-center gap-x-3 px-4 py-2.5 md:hidden",
 				"group-has-data-navbar-sticky/navbar:sticky group-has-data-navbar-sticky/navbar:bg-navbar",
 				// top
-				"group-has-data-navbar-sticky/navbar:group-has-data-[placement=top]/navbar:top-0 group-has-data-navbar-sticky/navbar:group-has-data-[placement=top]/navbar:border-b",
+				"group-has-data-navbar-sticky/navbar:group-has-placement-top/navbar:top-0 group-has-data-navbar-sticky/navbar:group-has-placement-top/navbar:border-b",
 				// bottom
-				"group-has-data-navbar-sticky/navbar:group-has-data-[placement=bottom]/navbar:bottom-0 group-has-data-navbar-sticky/navbar:group-has-data-[placement=bottom]/navbar:border-t",
+				"group-has-data-navbar-sticky/navbar:group-has-placement-bottom/navbar:bottom-0 group-has-data-navbar-sticky/navbar:group-has-placement-bottom/navbar:border-t",
 				className,
 			)}
 			data-slot="navbar-mobile"
@@ -291,7 +309,7 @@ function NavbarMobile({ className, ref, ...props }: React.ComponentProps<"div">)
 	);
 }
 
-function NavbarInset({ className, ref, children, ...props }: React.ComponentProps<"div">) {
+function NavbarInset({ className, ref, children, ...props }: ComponentProps<"div">) {
 	return (
 		<div
 			ref={ref}
@@ -307,16 +325,17 @@ function NavbarInset({ className, ref, children, ...props }: React.ComponentProp
 }
 
 interface NavbarTriggerProps extends ButtonProps {
-	ref?: React.RefObject<HTMLButtonElement>;
+	ref?: RefObject<HTMLButtonElement>;
 }
 
 function NavbarTrigger({ className, onPress, ref, ...props }: NavbarTriggerProps) {
 	const { toggleNavbar } = useNavbar();
+
 	return (
 		<Button
 			ref={ref}
 			aria-label={props["aria-label"] || "Toggle Navbar"}
-			className={cx("-ml-2 min-lg:hidden", className)}
+			className={cx("-ml-2 lg:hidden", className)}
 			data-slot="navbar-trigger"
 			intent="plain"
 			onPress={(event) => {
@@ -332,7 +351,7 @@ function NavbarTrigger({ className, onPress, ref, ...props }: NavbarTriggerProps
 	);
 }
 
-function NavbarLabel({ className, ...props }: React.ComponentProps<"span">) {
+function NavbarLabel({ className, ...props }: ComponentProps<"span">) {
 	return (
 		<span
 			className={twJoin("col-start-2 row-start-1 truncate", className)}
@@ -343,6 +362,7 @@ function NavbarLabel({ className, ...props }: React.ComponentProps<"span">) {
 }
 
 export type { NavbarItemProps, NavbarProps, NavbarProviderProps, NavbarTriggerProps };
+
 export {
 	Navbar,
 	NavbarGap,

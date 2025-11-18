@@ -1,21 +1,25 @@
+/* eslint-disable @eslint-react/prefer-read-only-props */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+
 "use client";
 
 import { XMarkIcon } from "@heroicons/react/24/solid";
-import { useEffect, useRef } from "react";
-import { 	Button as PrimitiveButton,
+import { type ComponentProps, type Ref, useEffect, useRef } from "react";
+import {
+	Button as PrimitiveButton,
 	Dialog as PrimitiveDialog,
-	Heading,type HeadingProps, type TextProps } from "react-aria-components";
+	Heading,
+	type HeadingProps,
+	type TextProps,
+} from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
+import { Button, type ButtonProps } from "@/components/ui/button";
 import { cx } from "@/components/ui/cx";
 
-import { Button, type ButtonProps } from "./button";
-
-function Dialog({
-	role = "dialog",
-	className,
-	...props
-}: React.ComponentProps<typeof PrimitiveDialog>) {
+function Dialog({ role = "dialog", className, ...props }: ComponentProps<typeof PrimitiveDialog>) {
 	return (
 		<PrimitiveDialog
 			className={twMerge(
@@ -30,10 +34,10 @@ function Dialog({
 }
 
 function DialogTrigger({ className, ...props }: ButtonProps) {
-  return <PrimitiveButton className={cx("cursor-pointer", className)} {...props} />
+	return <PrimitiveButton className={cx("cursor-pointer", className)} {...props} />;
 }
 
-interface DialogHeaderProps extends Omit<React.ComponentProps<"div">, "title"> {
+interface DialogHeaderProps extends Omit<ComponentProps<"div">, "title"> {
 	title?: string;
 	description?: string;
 }
@@ -57,7 +61,10 @@ function DialogHeader({ className, ...props }: DialogHeaderProps) {
 		});
 
 		observer.observe(header);
-		return () => { observer.unobserve(header); };
+
+		return () => {
+			observer.unobserve(header);
+		};
 	}, []);
 
 	return (
@@ -81,47 +88,57 @@ function DialogHeader({ className, ...props }: DialogHeaderProps) {
 }
 
 interface DialogTitleProps extends HeadingProps {
-	ref?: React.Ref<HTMLHeadingElement>;
+	ref?: Ref<HTMLHeadingElement>;
 }
+
 function DialogTitle({ className, ref, ...props }: DialogTitleProps) {
-  return <Heading
-		ref={ref}
-		className={twMerge("text-balance font-semibold text-fg text-lg/6 sm:text-base/6", className)}
-		slot="title"
-		{...props}
-	/>
+	return (
+		<Heading
+			ref={ref}
+			className={twMerge("text-balance font-semibold text-fg text-lg/6 sm:text-base/6", className)}
+			slot="title"
+			{...props}
+		/>
+	);
 }
 
 interface DialogDescriptionProps extends TextProps {
-	ref?: React.Ref<HTMLDivElement>;
+	ref?: Ref<HTMLDivElement>;
 }
+
 function DialogDescription({ className, ref, ...props }: DialogDescriptionProps) {
-  return <p
-		ref={ref}
-		className={twMerge(
-			"text-pretty text-base/6 text-muted-fg group-disabled:opacity-50 sm:text-sm/6",
-			className,
-		)}
-		data-slot="description"
-		{...props}
-	/>
+	return (
+		<p
+			ref={ref}
+			className={twMerge(
+				"text-pretty text-base/6 text-muted-fg group-disabled:opacity-50 sm:text-sm/6",
+				className,
+			)}
+			data-slot="description"
+			{...props}
+		/>
+	);
 }
 
-interface DialogBodyProps extends React.ComponentProps<"div"> {}
+interface DialogBodyProps extends ComponentProps<"div"> {}
+
 function DialogBody({ className, ref, ...props }: DialogBodyProps) {
-  return <div
-		ref={ref}
-		className={twMerge(
-			"isolate flex max-h-[calc(var(--visual-viewport-height)-var(--visual-viewport-vertical-padding)-var(--dialog-header-height,0px)-var(--dialog-footer-height,0px))] flex-1 flex-col overflow-auto px-(--gutter) py-1",
-			"**:data-[slot=dialog-footer]:px-0 **:data-[slot=dialog-footer]:pt-0",
-			className,
-		)}
-		data-slot="dialog-body"
-		{...props}
-	/>
+	return (
+		<div
+			ref={ref}
+			className={twMerge(
+				"isolate flex max-h-[calc(var(--visual-viewport-height)-var(--visual-viewport-vertical-padding)-var(--dialog-header-height,0px)-var(--dialog-footer-height,0px))] flex-1 flex-col overflow-auto px-(--gutter) py-1",
+				"**:data-[slot=dialog-footer]:px-0 **:data-[slot=dialog-footer]:pt-0",
+				className,
+			)}
+			data-slot="dialog-body"
+			{...props}
+		/>
+	);
 }
 
-interface DialogFooterProps extends React.ComponentProps<"div"> {}
+interface DialogFooterProps extends ComponentProps<"div"> {}
+
 function DialogFooter({ className, ...props }: DialogFooterProps) {
 	const footerRef = useRef<HTMLDivElement>(null);
 
@@ -191,6 +208,7 @@ export type {
 	DialogHeaderProps,
 	DialogTitleProps,
 };
+
 export {
 	Dialog,
 	DialogBody,

@@ -43,7 +43,8 @@
 	"mdx.server.enable": true,
 	"scss.validate": false,
 	"search.exclude": {
-		"**/.next/**": true
+		"**/.next/**": true,
+		"**/node_modules/**": true
 	},
 	"stylelint.enable": true,
 	"stylelint.snippet": ["css", "postcss", "tailwindcss"],

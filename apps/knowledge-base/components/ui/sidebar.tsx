@@ -1,7 +1,29 @@
+/* eslint-disable @eslint-react/no-leaked-conditional-rendering */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+/* eslint-disable unicorn/explicit-length-check */
+/* eslint-disable no-param-reassign */
+/* eslint-disable unicorn/no-document-cookie */
+/* eslint-disable @eslint-react/prefer-read-only-props */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+
 "use client";
 
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
-import { createContext, use, useCallback, useEffect, useMemo, useState } from "react";
+import {
+	type ComponentProps,
+	createContext,
+	type ReactNode,
+	type Ref,
+	type RefObject,
+	use,
+	useCallback,
+	useEffect,
+	useMemo,
+	useState,
+} from "react";
 import {
 	Button as Trigger,
 	type ButtonProps,
@@ -22,13 +44,12 @@ import {
 } from "react-aria-components";
 import { twJoin, twMerge } from "tailwind-merge";
 
+import { Button } from "@/components/ui/button";
 import { cx } from "@/components/ui/cx";
+import { Link } from "@/components/ui/link";
 import { SheetContent } from "@/components/ui/sheet";
+import { Tooltip, TooltipContent } from "@/components/ui/tooltip";
 import { useMediaQuery } from "@/components/ui/use-media-query";
-
-import { Button } from "./button";
-import { Link } from "./link";
-import { Tooltip, TooltipContent } from "./tooltip";
 
 const SIDEBAR_WIDTH = "17rem";
 const SIDEBAR_WIDTH_DOCK = "3.25rem";
@@ -56,7 +77,7 @@ const useSidebar = () => {
 	return context;
 };
 
-interface SidebarProviderProps extends React.ComponentProps<"div"> {
+interface SidebarProviderProps extends ComponentProps<"div"> {
 	defaultOpen?: boolean;
 	isOpen?: boolean;
 	shortcut?: string;
@@ -78,6 +99,7 @@ function SidebarProvider({
 
 	const [internalOpenState, setInternalOpenState] = useState(defaultOpen);
 	const open = openProp ?? internalOpenState;
+
 	const setOpen = useCallback(
 		(value: boolean | ((value: boolean) => boolean)) => {
 			const openState = typeof value === "function" ? value(open) : value;
@@ -96,13 +118,15 @@ function SidebarProvider({
 	const isMobile = useMediaQuery("(max-width: 767px)");
 
 	const toggleSidebar = useCallback(() => {
-		isMobile
-			? setOpenMobile((open) => {
-					return !open;
-				})
-			: setOpen((open) => {
-					return !open;
-				});
+		if (isMobile) {
+			setOpenMobile((open) => {
+				return !open;
+			});
+		} else {
+			setOpen((open) => {
+				return !open;
+			});
+		}
 	}, [isMobile, setOpen]);
 
 	useEffect(() => {
@@ -114,6 +138,7 @@ function SidebarProvider({
 		};
 
 		window.addEventListener("keydown", handleKeyDown);
+
 		return () => {
 			window.removeEventListener("keydown", handleKeyDown);
 		};
@@ -147,13 +172,11 @@ function SidebarProvider({
 					"group/sidebar-root peer/sidebar-root has-data-[intent=inset]:bg-sidebar dark:has-data-[intent=inset]:bg-bg",
 					className,
 				)}
-				style={
-					{
-						"--sidebar-width": SIDEBAR_WIDTH,
-						"--sidebar-width-dock": SIDEBAR_WIDTH_DOCK,
-						...style,
-					} as React.CSSProperties
-				}
+				style={{
+					"--sidebar-width": SIDEBAR_WIDTH,
+					"--sidebar-width-dock": SIDEBAR_WIDTH_DOCK,
+					...style,
+				}}
 				{...props}
 			>
 				{children}
@@ -162,7 +185,7 @@ function SidebarProvider({
 	);
 }
 
-interface SidebarProps extends React.ComponentProps<"div"> {
+interface SidebarProps extends ComponentProps<"div"> {
 	intent?: "default" | "float" | "inset";
 	collapsible?: "hidden" | "dock" | "none";
 	side?: "left" | "right";
@@ -179,6 +202,7 @@ function Sidebar({
 	...props
 }: SidebarProps) {
 	const { isMobile, state, isOpenOnMobile, setIsOpenOnMobile } = useSidebar();
+
 	if (collapsible === "none") {
 		return (
 			<div
@@ -279,8 +303,9 @@ function Sidebar({
 	);
 }
 
-function SidebarHeader({ className, ref, ...props }: React.ComponentProps<"div">) {
+function SidebarHeader({ className, ref, ...props }: ComponentProps<"div">) {
 	const { state } = useSidebar();
+
 	return (
 		<div
 			ref={ref}
@@ -296,7 +321,7 @@ function SidebarHeader({ className, ref, ...props }: React.ComponentProps<"div">
 	);
 }
 
-function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
+function SidebarFooter({ className, ...props }: ComponentProps<"div">) {
 	return (
 		<div
 			className={twMerge([
@@ -310,8 +335,9 @@ function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
+function SidebarContent({ className, ...props }: ComponentProps<"div">) {
 	const { state } = useSidebar();
+
 	return (
 		<div
 			className={twMerge(
@@ -327,9 +353,11 @@ function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
 	);
 }
 
-function SidebarSectionGroup({ className, ...props }: React.ComponentProps<"section">) {
+function SidebarSectionGroup({ className, ...props }: ComponentProps<"section">) {
 	const { state, isMobile } = useSidebar();
+
 	const collapsed = state === "collapsed" && !isMobile;
+
 	return (
 		<section
 			className={twMerge(
@@ -343,12 +371,13 @@ function SidebarSectionGroup({ className, ...props }: React.ComponentProps<"sect
 	);
 }
 
-interface SidebarSectionProps extends React.ComponentProps<"div"> {
+interface SidebarSectionProps extends ComponentProps<"div"> {
 	label?: string;
 }
 
 function SidebarSection({ className, ...props }: SidebarSectionProps) {
 	const { state } = useSidebar();
+
 	return (
 		<div
 			className={twMerge(
@@ -374,15 +403,15 @@ function SidebarSection({ className, ...props }: SidebarSectionProps) {
 	);
 }
 
-interface SidebarItemProps extends Omit<React.ComponentProps<typeof Link>, "children"> {
+interface SidebarItemProps extends Omit<ComponentProps<typeof Link>, "children"> {
 	isCurrent?: boolean;
 	children?:
-		| React.ReactNode
+		| ReactNode
 		| ((
-				values: LinkRenderProps & { defaultChildren: React.ReactNode; isCollapsed: boolean },
-		  ) => React.ReactNode);
+				values: LinkRenderProps & { defaultChildren: ReactNode; isCollapsed: boolean },
+		  ) => ReactNode);
 	badge?: string | number | undefined;
-	tooltip?: string | React.ComponentProps<typeof TooltipContent>;
+	tooltip?: string | ComponentProps<typeof TooltipContent>;
 }
 
 function SidebarItem({
@@ -395,7 +424,9 @@ function SidebarItem({
 	...props
 }: SidebarItemProps) {
 	const { state, isMobile } = useSidebar();
+
 	const isCollapsed = state === "collapsed" && !isMobile;
+
 	const link = (
 		<Link
 			ref={ref}
@@ -411,7 +442,7 @@ function SidebarItem({
 						"**:last:data-[slot=icon]:size-5 sm:**:last:data-[slot=icon]:size-4",
 						"[&_[data-slot='icon']:not([class*='size-'])]:size-4 [&_[data-slot='icon']:not([class*='size-'])]:*:size-5",
 						"*:data-[slot=avatar]:*:size-5 *:data-[slot=avatar]:size-5",
-						"has-[[data-slot=avatar]]:has-[[data-slot=sidebar-label]]:gap-x-2 has-[[data-slot=icon]]:has-[[data-slot=sidebar-label]]:gap-x-2",
+						"has-data-[slot=avatar]:has-data-[slot=sidebar-label]:gap-x-2 has-data-[slot=icon]:has-data-[slot=sidebar-label]:gap-x-2",
 						"grid grid-cols-[auto_1fr_1.5rem_0.5rem_auto] **:last:data-[slot=icon]:ml-auto supports-[grid-template-columns:subgrid]:grid-cols-subgrid sm:text-sm/5",
 						"p-2 has-[a]:p-0",
 						"[--sidebar-current-bg:var(--color-sidebar-primary)] [--sidebar-current-fg:var(--color-sidebar-primary-fg)]",
@@ -452,6 +483,7 @@ function SidebarItem({
 			}}
 		</Link>
 	);
+
 	if (typeof tooltip === "string") {
 		tooltip = {
 			children: tooltip,
@@ -474,7 +506,7 @@ function SidebarItem({
 }
 
 interface SidebarLinkProps extends LinkProps {
-	ref?: React.RefObject<HTMLAnchorElement>;
+	ref?: RefObject<HTMLAnchorElement>;
 }
 
 function SidebarLink({ className, ref, ...props }: SidebarLinkProps) {
@@ -491,7 +523,7 @@ function SidebarLink({ className, ref, ...props }: SidebarLinkProps) {
 	);
 }
 
-function SidebarInset({ className, ref, ...props }: React.ComponentProps<"main">) {
+function SidebarInset({ className, ref, ...props }: ComponentProps<"main">) {
 	return (
 		<main
 			ref={ref}
@@ -531,11 +563,12 @@ function SidebarDisclosureGroup({
 }
 
 interface SidebarDisclosureProps extends DisclosureProps {
-	ref?: React.Ref<HTMLDivElement>;
+	ref?: Ref<HTMLDivElement>;
 }
 
 function SidebarDisclosure({ className, ref, ...props }: SidebarDisclosureProps) {
 	const { state } = useSidebar();
+
 	return (
 		<Disclosure
 			ref={ref}
@@ -547,11 +580,12 @@ function SidebarDisclosure({ className, ref, ...props }: SidebarDisclosureProps)
 }
 
 interface SidebarDisclosureTriggerProps extends ButtonProps {
-	ref?: React.Ref<HTMLButtonElement>;
+	ref?: Ref<HTMLButtonElement>;
 }
 
 function SidebarDisclosureTrigger({ className, ref, ...props }: SidebarDisclosureTriggerProps) {
 	const { state } = useSidebar();
+
 	return (
 		<Heading level={3}>
 			<Trigger
@@ -630,13 +664,9 @@ function SidebarSeparator({ className, ...props }: SidebarSeparatorProps) {
 	);
 }
 
-function SidebarTrigger({
-	onPress,
-	className,
-	children,
-	...props
-}: React.ComponentProps<typeof Button>) {
+function SidebarTrigger({ onPress, className, children, ...props }: ComponentProps<typeof Button>) {
 	const { toggleSidebar } = useSidebar();
+
 	return (
 		<Button
 			aria-label={props["aria-label"] || "Toggle Sidebar"}
@@ -665,35 +695,37 @@ function SidebarTrigger({
 	);
 }
 
-function SidebarRail({ className, ref, ...props }: React.ComponentProps<"button">) {
+function SidebarRail({ className, ref, ...props }: ComponentProps<"button">) {
 	const { toggleSidebar } = useSidebar();
 
-	return !props.children ? (
-		<button
-			ref={ref}
-			aria-label="Toggle Sidebar"
-			className={twMerge(
-				"-translate-x-1/2 group-data-[side=left]:-right-4 absolute inset-y-0 z-20 hidden w-4 outline-hidden transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-transparent group-data-[side=right]:left-0 sm:flex",
-				"in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
-				"[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
-				"group-data-[collapsible=hidden]:translate-x-0 group-data-[collapsible=hidden]:hover:bg-sidebar-accent group-data-[collapsible=hidden]:after:left-full",
-				"[[data-side=left][data-collapsible=hidden]_&]:-right-2 [[data-side=right][data-collapsible=hidden]_&]:-left-2",
-				className,
-			)}
-			data-slot="sidebar-rail"
-			onClick={toggleSidebar}
-			tabIndex={-1}
-			title="Toggle Sidebar"
-			{...props}
-		/>
-	) : (
-		props.children
+	return (
+		props.children ?? (
+			<button
+				ref={ref}
+				aria-label="Toggle Sidebar"
+				className={twMerge(
+					"-translate-x-1/2 group-data-[side=left]:-right-4 absolute inset-y-0 z-20 hidden w-4 outline-hidden transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-transparent group-data-[side=right]:left-0 sm:flex",
+					"in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
+					"[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
+					"group-data-[collapsible=hidden]:translate-x-0 group-data-[collapsible=hidden]:hover:bg-sidebar-accent group-data-[collapsible=hidden]:after:left-full",
+					"[[data-side=left][data-collapsible=hidden]_&]:-right-2 [[data-side=right][data-collapsible=hidden]_&]:-left-2",
+					className,
+				)}
+				data-slot="sidebar-rail"
+				onClick={toggleSidebar}
+				tabIndex={-1}
+				title="Toggle Sidebar"
+				{...props}
+			/>
+		)
 	);
 }
 
-function SidebarLabel({ className, ref, ...props }: React.ComponentProps<typeof Text>) {
+function SidebarLabel({ className, ref, ...props }: ComponentProps<typeof Text>) {
 	const { state, isMobile } = useSidebar();
+
 	const collapsed = state === "collapsed" && !isMobile;
+
 	if (!collapsed) {
 		return (
 			<Text
@@ -711,10 +743,11 @@ function SidebarLabel({ className, ref, ...props }: React.ComponentProps<typeof 
 			</Text>
 		);
 	}
+
 	return null;
 }
 
-interface SidebarNavProps extends React.ComponentProps<"nav"> {
+interface SidebarNavProps extends ComponentProps<"nav"> {
 	isSticky?: boolean;
 }
 
@@ -735,6 +768,7 @@ function SidebarNav({ isSticky = false, className, ...props }: SidebarNavProps) 
 interface SidebarMenuTriggerProps extends ButtonProps {
 	alwaysVisible?: boolean;
 }
+
 function SidebarMenuTrigger({
 	alwaysVisible = false,
 	className,

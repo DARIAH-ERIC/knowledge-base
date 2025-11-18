@@ -13,52 +13,6 @@
 		},
 		"title": "Contact"
 	},
-	"DashboardFooter": {
-		"navigation": {
-			"items": {
-				"contact": "Contact",
-				"home": "Home",
-				"imprint": "Imprint",
-				"privacy-policy": "Privacy policy",
-				"terms-of-use": "Terms of use"
-			},
-			"label": "Secondary"
-		},
-		"navigation-social-media": {
-			"items": {
-				"bluesky": "Bluesky",
-				"email": "Email",
-				"facebook": "Facebook",
-				"flickr": "Flickr",
-				"github": "GitHub",
-				"instagram": "Instagram",
-				"linkedin": "LinkedIn",
-				"mastodon": "Mastodon",
-				"orcid": "ORCID",
-				"rss": "RSS",
-				"twitter": "Twitter",
-				"website": "Website",
-				"youtube": "YouTube"
-			},
-			"label": "Social media"
-		}
-	},
-	"DashboardHeader": {
-		"navigation": {
-			"drawer": {
-				"close": "Close navigation menu",
-				"label": "Navigation menu",
-				"open": "Open navigation menu"
-			},
-			"items": {
-				"about": "About the project",
-				"documentation": "Documentation",
-				"home": "Home",
-				"search": "Search"
-			},
-			"label": "Main"
-		}
-	},
 	"DashboardLayout": {
 		"skip-link": "Skip to main content"
 	},
@@ -73,7 +27,9 @@
 			"items": {
 				"contact": "Contact",
 				"home": "Home",
-				"imprint": "Imprint"
+				"imprint": "Imprint",
+				"privacy-policy": "Privacy policy",
+				"terms-of-use": "Terms of use"
 			},
 			"label": "Secondary"
 		},
