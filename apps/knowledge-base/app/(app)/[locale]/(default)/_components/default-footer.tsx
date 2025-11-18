@@ -1,4 +1,5 @@
 import cn from "clsx/lite";
+import { connection } from "next/server";
 // import { connection } from "next/server";
 import { useTranslations } from "next-intl";
 import type { ComponentProps, ReactNode } from "react";
@@ -126,7 +127,7 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 					</nav>
 
 					<small className="text-xs text-text-weak">
-						&copy; {new Date().getUTCFullYear()}{" "}
+						&copy; <CurrentYear />{" "}
 						<a
 							className={cn(
 								"inline-flex items-center gap-x-2 rounded-xs px-1.5 py-0.5 text-text-weak transition duration-200",
@@ -144,11 +145,11 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 	);
 }
 
-// async function CurrentYear() {
-// 	// "use cache";
+async function CurrentYear() {
+	// "use cache";
 
-// 	/** Ensure `new Date()` is computed at request time. */
-// 	await connection();
+	/** Ensure `new Date()` is computed at request time. */
+	await connection();
 
-// 	return <span>{new Date().getUTCFullYear()}</span>;
-// }
+	return new Date().getUTCFullYear();
+}
