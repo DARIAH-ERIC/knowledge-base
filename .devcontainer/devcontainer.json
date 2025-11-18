@@ -32,7 +32,8 @@
 		"drizzle-gateway:4983",
 		"typesense:8108",
 		"mailpit:1025",
-		"mailpit:8025"
+		"mailpit:8025",
+		"typesense-dashboard:5050"
 	],
 	"portsAttributes": {
 		"3000": {
@@ -46,6 +47,9 @@
 		},
 		"typesense:8108": {
 			"label": "Typesense"
+		},
+		"typesense-dashboard:5050": {
+			"label": "Typesense dashboard"
 		},
 		"mailpit:1025": {
 			"label": "Mailpit SMTP Server"

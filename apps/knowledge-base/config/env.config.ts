@@ -37,6 +37,15 @@ const result = createEnv({
 					v.integer(),
 					v.minValue(1),
 				),
+				DATABASE_USE_SSL_CONNECTION: v.optional(
+					v.pipe(
+						v.string(),
+						v.transform((val) => {
+							return val === "false" ? false : true;
+						}),
+						v.boolean(),
+					),
+				),
 				DATABASE_USER: v.pipe(v.string(), v.nonEmpty()),
 				EMAIL_ADDRESS: v.pipe(v.string(), v.email()),
 				EMAIL_SMTP_PASSWORD: v.optional(v.pipe(v.string(), v.nonEmpty())),
@@ -120,6 +129,7 @@ const result = createEnv({
 		DATABASE_NAME: process.env.DATABASE_NAME,
 		DATABASE_PASSWORD: process.env.DATABASE_PASSWORD,
 		DATABASE_PORT: process.env.DATABASE_PORT,
+		DATABASE_USE_SSL_CONNECTION: process.env.DATABASE_USE_SSL_CONNECTION,
 		DATABASE_USER: process.env.DATABASE_USER,
 		EMAIL_ADDRESS: process.env.EMAIL_ADDRESS,
 		EMAIL_SMTP_PASSWORD: process.env.EMAIL_SMTP_PASSWORD,

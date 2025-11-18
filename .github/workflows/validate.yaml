@@ -30,6 +30,7 @@ jobs:
       DATABASE_NAME: "dariah-knowledge-base"
       DATABASE_PASSWORD: "dariah-knowledge-base"
       DATABASE_PORT: "5432"
+      DATABASE_USE_SSL_CONNECTION: true
       DATABASE_USER: "dariah-knowledge-base"
       EMAIL_ADDRESS: "acdh@example.com"
       EMAIL_SMTP_PORT: "1025"
