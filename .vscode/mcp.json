@@ -3,6 +3,10 @@
 		"next-devtools": {
 			"command": "npx",
 			"args": ["-y", "next-devtools-mcp@latest"]
+		},
+		"Sentry": {
+			"url": "https://mcp.sentry.dev/mcp/acdh/dariah-knowledge-base",
+			"type": "http"
 		}
 	}
 }
