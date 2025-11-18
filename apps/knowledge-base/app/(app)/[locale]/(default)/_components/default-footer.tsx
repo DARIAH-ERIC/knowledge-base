@@ -29,6 +29,16 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 			href: createHref({ pathname: "/contact" }),
 			label: t("navigation.items.contact"),
 		},
+		"privacy-policy": {
+			type: "link",
+			href: createHref({ pathname: "/privacy-policy" }),
+			label: t("navigation.items.privacy-policy"),
+		},
+		"terms-of-use": {
+			type: "link",
+			href: createHref({ pathname: "/terms-of-use" }),
+			label: t("navigation.items.terms-of-use"),
+		},
 		imprint: {
 			type: "link",
 			href: createHref({ pathname: "/imprint" }),
@@ -37,14 +47,14 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 	} satisfies Record<string, NavigationLink>;
 
 	return (
-		<footer {...rest} className={cn("border-t border-border", className)}>
+		<footer {...rest} className={cn("border-t border-stroke-weak", className)}>
 			<div className="container flex flex-col gap-y-6 px-8 py-12 xs:px-16">
 				<div className="flex flex-col gap-y-8 xs:flex-row xs:items-center xs:justify-between">
 					<NavLink
 						className={cn(
-							"mr-auto -ml-1 inline-grid shrink-0 place-content-center self-center rounded-xs p-1 text-muted-fg transition duration-200",
+							"mr-auto -ml-1 inline-grid shrink-0 place-content-center self-center rounded-xs p-1 text-text-weak transition duration-200",
 							"touch-target",
-							"hover:text-fg",
+							"hover:text-text-strong",
 							"outline-2 outline-offset-2 outline-transparent focus-visible:outline-ring",
 						)}
 						href={links.home.href}
@@ -69,9 +79,9 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 									<li key={kind} className="inline-flex shrink-0">
 										<NavLink
 											className={cn(
-												"inline-flex items-center rounded-xs p-1 text-muted-fg transition duration-200",
+												"inline-flex items-center rounded-xs p-1 text-text-weak transition duration-200",
 												"touch-target",
-												"hover:text-fg",
+												"hover:text-text-strong",
 												"outline-2 outline-offset-2 outline-transparent focus-visible:outline-ring",
 											)}
 											href={href}
@@ -89,7 +99,7 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 				<div className="flex flex-col gap-y-8">
 					<nav aria-label={t("navigation.label")}>
 						<ul
-							className="-mx-2.5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-fg"
+							className="-mx-2.5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-text-weak"
 							role="list"
 						>
 							{Object.entries(links).map(([id, link]) => {
@@ -101,8 +111,8 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 									<li key={id}>
 										<NavLink
 											className={cn(
-												"inline-flex items-center gap-x-2 rounded-xs px-2.5 py-1 text-sm font-medium tracking-tight text-muted-fg transition duration-200",
-												"hover:text-fg",
+												"inline-flex items-center gap-x-2 rounded-xs px-2.5 py-1 text-sm font-medium tracking-tight text-text-weak transition duration-200",
+												"hover:text-text-strong",
 												"outline-2 outline-offset-2 outline-transparent focus-visible:outline-ring",
 											)}
 											href={link.href}
@@ -115,13 +125,13 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 						</ul>
 					</nav>
 
-					<small className="text-xs text-muted-fg">
+					<small className="text-xs text-text-weak">
 						&copy; {new Date().getUTCFullYear()}{" "}
 						<a
 							className={cn(
-								"inline-flex items-center gap-x-2 rounded-xs px-1.5 py-0.5 text-muted-fg transition duration-200",
-								"hover:text-fg",
-								"outline-2 outline-offset-2 outline-transparent focus-visible:outline-ring",
+								"inline-flex items-center gap-x-2 rounded-xs px-1.5 py-0.5 text-text-weak transition duration-200",
+								"hover:text-text-strong",
+								"outline-2 outline-offset-2 outline-transparent focus-visible:outline-focus-indicator",
 							)}
 							href={meta.social.website}
 						>

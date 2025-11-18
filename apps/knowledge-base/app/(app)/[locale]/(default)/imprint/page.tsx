@@ -23,7 +23,7 @@ export default function ImprintPage(): ReactNode {
 	return (
 		<MainContent className="container flex-1 px-8 py-12 xs:px-16">
 			<section className="flex flex-col gap-y-8">
-				<h1 className="text-5xl font-extrabold tracking-tight text-fg">{t("title")}</h1>
+				<h1 className="text-5xl font-extrabold tracking-tight text-text-strong">{t("title")}</h1>
 				<AcdhImprint locale={locale} />
 			</section>
 		</MainContent>

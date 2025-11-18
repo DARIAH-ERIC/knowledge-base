@@ -1,10 +1,11 @@
 import { useTranslations } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
-import { DashboardFooter } from "@/app/(app)/[locale]/(dashboard)/_components/dashboard-footer";
-import { DashboardHeader } from "@/app/(app)/[locale]/(dashboard)/_components/dashboard-header";
+import { DashboardSidebar } from "@/app/(app)/[locale]/(dashboard)/_components/dashboard-sidebar";
+import { DashboardSidebarNav } from "@/app/(app)/[locale]/(dashboard)/_components/dashboard-sidebar-nav";
 import { mainContentId } from "@/app/(app)/[locale]/(dashboard)/_components/main-content";
 import { SkipLink } from "@/components/skip-link";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 interface DashbardLayoutProps extends LayoutProps<"/[locale]"> {}
 
@@ -18,11 +19,14 @@ export default function DashbardLayout(props: Readonly<DashbardLayoutProps>): Re
 			<SkipLink href={`#${mainContentId}`}>{t("skip-link")}</SkipLink>
 
 			<div className="relative isolate flex h-full flex-col">
-				<DashboardHeader />
+				<SidebarProvider>
+					<DashboardSidebar intent="float" />
 
-				{children}
-
-				<DashboardFooter />
+					<SidebarInset>
+						<DashboardSidebarNav />
+						<div className="p-4 lg:p-6">{children}</div>
+					</SidebarInset>
+				</SidebarProvider>
 			</div>
 		</Fragment>
 	);

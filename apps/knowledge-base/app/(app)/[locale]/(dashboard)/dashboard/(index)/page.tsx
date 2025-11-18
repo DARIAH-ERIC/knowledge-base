@@ -21,7 +21,7 @@ export default function DashboardPage(): ReactNode {
 	return (
 		<MainContent className="flex-1">
 			<section className="flex flex-col gap-y-8">
-				<h1 className="text-5xl font-extrabold tracking-tight text-fg">{t("title")}</h1>
+				<h1 className="text-5xl font-extrabold tracking-tight text-text-strong">{t("title")}</h1>
 			</section>
 		</MainContent>
 	);

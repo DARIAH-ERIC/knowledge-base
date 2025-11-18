@@ -23,8 +23,12 @@ export default function IndexPage(): ReactNode {
 	return (
 		<MainContent className="container flex-1 px-8 py-12 xs:px-16">
 			<section className="flex min-h-full flex-col items-center justify-center gap-y-4 py-24">
-				<h1 className="text-center text-6xl font-extrabold tracking-tight text-fg">{t("title")}</h1>
-				<p className="text-center text-2xl font-medium tracking-tight text-muted-fg">{t("lead")}</p>
+				<h1 className="text-center text-6xl font-extrabold tracking-tight text-text-strong">
+					{t("title")}
+				</h1>
+				<p className="text-center text-2xl font-medium tracking-tight text-text-weak">
+					{t("lead")}
+				</p>
 			</section>
 		</MainContent>
 	);

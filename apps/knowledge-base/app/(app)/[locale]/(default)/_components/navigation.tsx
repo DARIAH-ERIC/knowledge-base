@@ -17,10 +17,10 @@ export function Navigation(props: Readonly<NavigationProps>): ReactNode {
 		<nav aria-label={label} className="hidden lg:flex lg:gap-x-6">
 			<NavLink
 				className={cn(
-					"-ml-1 inline-grid shrink-0 place-content-center self-center rounded-xs p-1 text-muted-fg transition duration-200",
+					"-ml-1 inline-grid shrink-0 place-content-center self-center rounded-xs p-1 text-text-weak transition duration-200",
 					"touch-target",
-					"hover:text-fg",
-					"outline-2 outline-offset-2 outline-transparent focus-visible:outline-ring",
+					"hover:text-text-strong",
+					"outline-2 outline-offset-2 outline-transparent focus-visible:outline-focus-indicator",
 				)}
 				href={navigation.home.href}
 			>
@@ -40,9 +40,9 @@ export function Navigation(props: Readonly<NavigationProps>): ReactNode {
 								<li key={id}>
 									<NavLink
 										className={cn(
-											"inline-flex items-center gap-x-2 rounded-xs px-2.5 py-1 text-sm font-medium tracking-tight text-muted-fg transition duration-200",
-											"hover:text-fg",
-											"outline-2 outline-offset-2 outline-transparent focus-visible:outline-ring",
+											"inline-flex items-center gap-x-2 rounded-xs px-2.5 py-1 text-sm font-medium tracking-tight text-text-weak transition duration-200",
+											"hover:text-text-strong",
+											"outline-2 outline-offset-2 outline-transparent focus-visible:outline-focus-indicator",
 										)}
 										href={item.href}
 									>

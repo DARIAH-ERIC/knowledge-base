@@ -18,7 +18,9 @@
 			"items": {
 				"contact": "Contact",
 				"home": "Home",
-				"imprint": "Imprint"
+				"imprint": "Imprint",
+				"privacy-policy": "Privacy policy",
+				"terms-of-use": "Terms of use"
 			},
 			"label": "Secondary"
 		},
@@ -140,5 +142,17 @@
 		"change-locale": "Switch locale",
 		"change-locale-to": "Switch to {locale}",
 		"current-locale": "Current language: {locale}"
+	},
+	"PrivacyPolicyPage": {
+		"meta": {
+			"title": "Privacy policy"
+		},
+		"title": "Privacy policy"
+	},
+	"TermsOfUsePage": {
+		"meta": {
+			"title": "Terms of use"
+		},
+		"title": "Terms of use"
 	}
 }

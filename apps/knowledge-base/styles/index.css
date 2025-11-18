@@ -303,7 +303,10 @@
 	[data-ui-color-scheme="light"] {
 		--_color-background-base: var(--color-bg);
 		--_color-text-strong: var(--color-fg);
-		--_color-focus-outline: var(--color-fg);
+		--_color-text-weak: var(--color-muted-fg);
+		--_color-stroke-strong: var(--color-input);
+		--_color-stroke-weak: var(--color-border);
+		--_color-focus-indicator: var(--color-ring);
 
 		color-scheme: light;
 	}
@@ -311,7 +314,10 @@
 	[data-ui-color-scheme="dark"] {
 		--_color-background-base: var(--color-bg);
 		--_color-text-strong: var(--color-fg);
-		--_color-focus-outline: var(--color-fg);
+		--_color-text-weak: var(--color-muted-fg);
+		--_color-stroke-strong: var(--color-input);
+		--_color-stroke-weak: var(--color-border);
+		--_color-focus-indicator: var(--color-ring);
 
 		color-scheme: dark;
 	}
@@ -320,7 +326,10 @@
 @theme inline {
 	--color-background-base: var(--_color-background-base);
 	--color-text-strong: var(--_color-text-strong);
-	--color-focus-outline: var(--_color-focus-outline);
+	--color-text-weak: var(--_color-text-weak);
+	--color-stroke-strong: var(--_color-stroke-strong);
+	--color-stroke-weak: var(--_color-stroke-weak);
+	--color-focus-indicator: var(--_color-focus-indicator);
 }
 
 /**************************************************************************************************
@@ -516,7 +525,7 @@
 
 			&:focus-visible {
 				border-radius: var(--radius-xs);
-				outline: 2px solid var(--color-focus-outline);
+				outline: 2px solid var(--color-focus-indicator);
 				outline-offset: 2px;
 			}
 		}

@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { MainContent } from "@/app/(app)/[locale]/(default)/_components/main-content";
 
 export async function generateMetadata(): Promise<Metadata> {
-	const t = await getTranslations("ContactPage");
+	const t = await getTranslations("TermsOfUsePage");
 
 	const metadata: Metadata = {
 		title: t("meta.title"),
@@ -15,8 +15,8 @@ export async function generateMetadata(): Promise<Metadata> {
 	return metadata;
 }
 
-export default function ContactPage(): ReactNode {
-	const t = useTranslations("ContactPage");
+export default function TermsOfUsePage(): ReactNode {
+	const t = useTranslations("TermsOfUsePage");
 
 	return (
 		<MainContent className="container flex-1 px-8 py-12 xs:px-16">
