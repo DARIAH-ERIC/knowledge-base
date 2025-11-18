@@ -42,6 +42,7 @@
 		"@acdh-oeaw/validate-env": "catalog:",
 		"@heroicons/react": "catalog:",
 		"@react-aria/utils": "catalog:",
+		"@sentry/nextjs": "catalog:",
 		"@valibot/i18n": "catalog:",
 		"client-only": "catalog:",
 		"clsx": "catalog:",
