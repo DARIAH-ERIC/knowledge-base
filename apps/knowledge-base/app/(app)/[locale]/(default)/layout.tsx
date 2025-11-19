@@ -3,7 +3,7 @@ import { Fragment, type ReactNode } from "react";
 
 import { DefaultFooter } from "@/app/(app)/[locale]/(default)/_components/default-footer";
 import { DefaultHeader } from "@/app/(app)/[locale]/(default)/_components/default-header";
-import { mainContentId } from "@/app/(app)/[locale]/(default)/_components/main-content";
+import { mainContentId } from "@/app/(app)/[locale]/(default)/_components/main";
 import { SkipLink } from "@/components/skip-link";
 
 interface DefaultLayoutProps extends LayoutProps<"/[locale]"> {}

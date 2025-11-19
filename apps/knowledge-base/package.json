@@ -39,6 +39,7 @@
 	},
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
+		"@acdh-oeaw/style-variants": "catalog:",
 		"@acdh-oeaw/validate-env": "catalog:",
 		"@heroicons/react": "catalog:",
 		"@react-aria/utils": "catalog:",

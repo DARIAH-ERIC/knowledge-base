@@ -3,7 +3,7 @@ import { Fragment, type ReactNode } from "react";
 
 import { DashboardSidebar } from "@/app/(app)/[locale]/(dashboard)/_components/dashboard-sidebar";
 import { DashboardSidebarNav } from "@/app/(app)/[locale]/(dashboard)/_components/dashboard-sidebar-nav";
-import { mainContentId } from "@/app/(app)/[locale]/(dashboard)/_components/main-content";
+import { mainContentId } from "@/app/(app)/[locale]/(dashboard)/_components/main";
 import { SkipLink } from "@/components/skip-link";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 

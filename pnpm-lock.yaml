@@ -30,6 +30,9 @@ catalogs:
     '@acdh-oeaw/prettier-config':
       specifier: 2.0.1
       version: 2.0.1
+    '@acdh-oeaw/style-variants':
+      specifier: ^0.1.0
+      version: 0.1.0
     '@acdh-oeaw/stylelint-config':
       specifier: ^2.3.2
       version: 2.3.2
@@ -256,6 +259,9 @@ importers:
       '@acdh-oeaw/lib':
         specifier: 'catalog:'
         version: 0.3.5
+      '@acdh-oeaw/style-variants':
+        specifier: 'catalog:'
+        version: 0.1.0
       '@acdh-oeaw/validate-env':
         specifier: 'catalog:'
         version: 0.1.1(typescript@5.9.3)
@@ -504,6 +510,10 @@ packages:
     resolution: {integrity: sha512-0M77qAD8Uhks+S6lPaKzq6ylwQJzjS33jE6uWKNM9dt7iJ1KHgsuZ3xVhWNmw5h/cUGYJvBi0V/ZSy65ow+9Ag==}
     peerDependencies:
       prettier: 3.x
+
+  '@acdh-oeaw/style-variants@0.1.0':
+    resolution: {integrity: sha512-raVq99q1TyJSbQ2bQGDTaWCqbaKQG1Uj5sythsDj5qMZJURrpujGzJ8nC4RRRX1bLb5t3Xbm4MDL4JT51JqA5Q==}
+    engines: {node: '>=22', pnpm: 9.x}
 
   '@acdh-oeaw/stylelint-config@2.3.2':
     resolution: {integrity: sha512-1BetwUt3INSJZmIjaSYPIlpkSFJsJoD7HEUxS7nxB6zukG5Yho1/DJn/V+FryTOdl3EPAucGYR+bKEsiMeOVIQ==}
@@ -5647,6 +5657,10 @@ snapshots:
   '@acdh-oeaw/prettier-config@2.0.1(prettier@3.6.2)':
     dependencies:
       prettier: 3.6.2
+
+  '@acdh-oeaw/style-variants@0.1.0':
+    dependencies:
+      clsx: 2.1.1
 
   '@acdh-oeaw/stylelint-config@2.3.2(postcss-html@1.8.0)(stylelint-order@7.0.0(stylelint@16.25.0(typescript@5.9.3)))(stylelint@16.25.0(typescript@5.9.3))':
     dependencies:

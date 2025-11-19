@@ -63,150 +63,153 @@ export function DashboardSidebar(props: Readonly<ComponentProps<typeof Sidebar>>
 			</SidebarHeader>
 
 			<SidebarContent>
-				<SidebarSectionGroup>
-					<SidebarDisclosureGroup>
-						<SidebarDisclosure id={1}>
-							<SidebarDisclosureTrigger>
-								<EllipsisHorizontalIcon />
-								<SidebarLabel>Administrator</SidebarLabel>
-							</SidebarDisclosureTrigger>
+				<SidebarDisclosureGroup allowsMultipleExpanded={false}>
+					<SidebarDisclosure id={1}>
+						<SidebarDisclosureTrigger>
+							<EllipsisHorizontalIcon />
+							<SidebarLabel>Administrator</SidebarLabel>
+						</SidebarDisclosureTrigger>
 
-							<SidebarDisclosurePanel>
-								<SidebarItem href="#contributions" tooltip="Contributions">
-									<ChatBubbleLeftRightIcon />
-									<SidebarLabel>Contributions</SidebarLabel>
-								</SidebarItem>
+						<SidebarDisclosurePanel>
+							<SidebarItem href="#contributions" tooltip="Contributions">
+								<ChatBubbleLeftRightIcon />
+								<SidebarLabel>Contributions</SidebarLabel>
+							</SidebarItem>
 
-								<SidebarItem href="#countries" tooltip="Countries">
-									<QuestionMarkCircleIcon />
-									<SidebarLabel>Countries</SidebarLabel>
-								</SidebarItem>
+							<SidebarItem href="#countries" tooltip="Countries">
+								<QuestionMarkCircleIcon />
+								<SidebarLabel>Countries</SidebarLabel>
+							</SidebarItem>
 
-								<SidebarItem href="#institutions" tooltip="Institutions">
-									<BuildingOfficeIcon />
-									<SidebarLabel>Institutions</SidebarLabel>
-								</SidebarItem>
+							<SidebarItem href="#institutions" tooltip="Institutions">
+								<BuildingOfficeIcon />
+								<SidebarLabel>Institutions</SidebarLabel>
+							</SidebarItem>
 
-								<SidebarItem href="#outreach" tooltip="Outreach">
-									<EnvelopeIcon />
-									<SidebarLabel>Outreach</SidebarLabel>
-								</SidebarItem>
+							<SidebarItem href="#outreach" tooltip="Outreach">
+								<EnvelopeIcon />
+								<SidebarLabel>Outreach</SidebarLabel>
+							</SidebarItem>
 
-								<SidebarItem href="#persons" tooltip="Persons">
-									<UserGroupIcon />
-									<SidebarLabel>Persons</SidebarLabel>
-								</SidebarItem>
+							<SidebarItem href="#persons" tooltip="Persons">
+								<UserGroupIcon />
+								<SidebarLabel>Persons</SidebarLabel>
+							</SidebarItem>
 
-								<SidebarItem href="#projects" tooltip="Projects">
-									<BriefcaseIcon />
-									<SidebarLabel>Projects</SidebarLabel>
-								</SidebarItem>
+							<SidebarItem href="#projects" tooltip="Projects">
+								<BriefcaseIcon />
+								<SidebarLabel>Projects</SidebarLabel>
+							</SidebarItem>
 
-								<SidebarItem href="#reports" tooltip="Reports">
-									<TicketIcon />
-									<SidebarLabel>Reports</SidebarLabel>
-								</SidebarItem>
+							<SidebarItem href="#reports" tooltip="Reports">
+								<TicketIcon />
+								<SidebarLabel>Reports</SidebarLabel>
+							</SidebarItem>
 
-								<SidebarItem href="#services" tooltip="Services">
-									<QuestionMarkCircleIcon />
-									<SidebarLabel>Services</SidebarLabel>
-								</SidebarItem>
+							<SidebarItem href="#services" tooltip="Services">
+								<QuestionMarkCircleIcon />
+								<SidebarLabel>Services</SidebarLabel>
+							</SidebarItem>
 
-								<SidebarItem href="#software" tooltip="Software">
-									<QuestionMarkCircleIcon />
-									<SidebarLabel>Software</SidebarLabel>
-								</SidebarItem>
+							<SidebarItem href="#software" tooltip="Software">
+								<QuestionMarkCircleIcon />
+								<SidebarLabel>Software</SidebarLabel>
+							</SidebarItem>
 
-								<SidebarItem href="#users" tooltip="Users">
-									<UserCircleIcon />
-									<SidebarLabel>Users</SidebarLabel>
-								</SidebarItem>
+							<SidebarItem href="#users" tooltip="Users">
+								<UserCircleIcon />
+								<SidebarLabel>Users</SidebarLabel>
+							</SidebarItem>
 
-								<SidebarItem href="#working-groups" tooltip="Working groups">
-									<QuestionMarkCircleIcon />
-									<SidebarLabel>Working groups</SidebarLabel>
-								</SidebarItem>
-							</SidebarDisclosurePanel>
-						</SidebarDisclosure>
-
-						<SidebarDisclosure id={2}>
-							<SidebarDisclosureTrigger>
-								<EllipsisHorizontalIcon />
-								<SidebarLabel>National consortium</SidebarLabel>
-							</SidebarDisclosureTrigger>
-
-							<SidebarDisclosurePanel>
-								<SidebarItem href="#austria" tooltip="Austria">
-									<QuestionMarkCircleIcon />
-									<SidebarLabel>Austria</SidebarLabel>
-								</SidebarItem>
-
-								<SidebarItem href="#reports" tooltip="Reports">
-									<TicketIcon />
-									<SidebarLabel>Reports</SidebarLabel>
-								</SidebarItem>
-
-								<SidebarItem href="#current-report" tooltip="Current report">
-									<TicketIcon />
-									<SidebarLabel>Current report</SidebarLabel>
-								</SidebarItem>
-							</SidebarDisclosurePanel>
-						</SidebarDisclosure>
-
-						<SidebarDisclosure id={3}>
-							<SidebarDisclosureTrigger>
-								<EllipsisHorizontalIcon />
+							<SidebarItem href="#working-groups" tooltip="Working groups">
+								<QuestionMarkCircleIcon />
 								<SidebarLabel>Working groups</SidebarLabel>
-							</SidebarDisclosureTrigger>
+							</SidebarItem>
+						</SidebarDisclosurePanel>
+					</SidebarDisclosure>
 
-							<SidebarDisclosurePanel>
-								<SidebarItem href="#bibliographic-data" tooltip="WG Bibliographic data">
-									<QuestionMarkCircleIcon />
-									<SidebarLabel>WG Bibliographic data</SidebarLabel>
-								</SidebarItem>
+					<SidebarDisclosure id={2}>
+						<SidebarDisclosureTrigger>
+							<EllipsisHorizontalIcon />
+							<SidebarLabel>National consortium</SidebarLabel>
+						</SidebarDisclosureTrigger>
 
-								<SidebarItem href="#reports" tooltip="Reports">
-									<TicketIcon />
-									<SidebarLabel>Reports</SidebarLabel>
-								</SidebarItem>
+						<SidebarDisclosurePanel>
+							<SidebarItem href="#austria" tooltip="Austria">
+								<QuestionMarkCircleIcon />
+								<SidebarLabel>Austria</SidebarLabel>
+							</SidebarItem>
 
-								<SidebarItem href="#current-report" tooltip="Current report">
-									<TicketIcon />
-									<SidebarLabel>Current report</SidebarLabel>
-								</SidebarItem>
-							</SidebarDisclosurePanel>
-						</SidebarDisclosure>
+							<SidebarItem href="#reports" tooltip="Reports">
+								<TicketIcon />
+								<SidebarLabel>Reports</SidebarLabel>
+							</SidebarItem>
 
-						<SidebarDisclosure id={4}>
-							<SidebarDisclosureTrigger>
-								<EllipsisHorizontalIcon />
-								<SidebarLabel>Website</SidebarLabel>
-							</SidebarDisclosureTrigger>
+							<SidebarItem href="#current-report" tooltip="Current report">
+								<TicketIcon />
+								<SidebarLabel>Current report</SidebarLabel>
+							</SidebarItem>
+						</SidebarDisclosurePanel>
+					</SidebarDisclosure>
 
-							<SidebarDisclosurePanel>
-								<SidebarItem href="#pages" tooltip="Pages">
-									<QuestionMarkCircleIcon />
-									<SidebarLabel>Pages</SidebarLabel>
-								</SidebarItem>
+					<SidebarDisclosure id={3}>
+						<SidebarDisclosureTrigger>
+							<EllipsisHorizontalIcon />
+							<SidebarLabel>Working groups</SidebarLabel>
+						</SidebarDisclosureTrigger>
 
-								<SidebarItem href="#events" tooltip="Events">
-									<QuestionMarkCircleIcon />
-									<SidebarLabel>Events</SidebarLabel>
-								</SidebarItem>
+						<SidebarDisclosurePanel>
+							<SidebarItem href="#bibliographic-data" tooltip="WG Bibliographic data">
+								<QuestionMarkCircleIcon />
+								<SidebarLabel>WG Bibliographic data</SidebarLabel>
+							</SidebarItem>
 
-								<SidebarItem href="#news" tooltip="News">
-									<QuestionMarkCircleIcon />
-									<SidebarLabel>News</SidebarLabel>
-								</SidebarItem>
+							<SidebarItem href="#reports" tooltip="Reports">
+								<TicketIcon />
+								<SidebarLabel>Reports</SidebarLabel>
+							</SidebarItem>
 
-								<SidebarItem href="#impact-case-studies" tooltip="Impact case studies">
-									<QuestionMarkCircleIcon />
-									<SidebarLabel>Impact case studies</SidebarLabel>
-								</SidebarItem>
-							</SidebarDisclosurePanel>
-						</SidebarDisclosure>
-					</SidebarDisclosureGroup>
-				</SidebarSectionGroup>
+							<SidebarItem href="#current-report" tooltip="Current report">
+								<TicketIcon />
+								<SidebarLabel>Current report</SidebarLabel>
+							</SidebarItem>
+						</SidebarDisclosurePanel>
+					</SidebarDisclosure>
+
+					<SidebarDisclosure id={4}>
+						<SidebarDisclosureTrigger>
+							<EllipsisHorizontalIcon />
+							<SidebarLabel>Website</SidebarLabel>
+						</SidebarDisclosureTrigger>
+
+						<SidebarDisclosurePanel>
+							<SidebarItem href="#metadata" tooltip="Metadata">
+								<QuestionMarkCircleIcon />
+								<SidebarLabel>Metadata</SidebarLabel>
+							</SidebarItem>
+
+							<SidebarItem href="#pages" tooltip="Pages">
+								<QuestionMarkCircleIcon />
+								<SidebarLabel>Pages</SidebarLabel>
+							</SidebarItem>
+
+							<SidebarItem href="#events" tooltip="Events">
+								<QuestionMarkCircleIcon />
+								<SidebarLabel>Events</SidebarLabel>
+							</SidebarItem>
+
+							<SidebarItem href="#news" tooltip="News">
+								<QuestionMarkCircleIcon />
+								<SidebarLabel>News</SidebarLabel>
+							</SidebarItem>
+
+							<SidebarItem href="#impact-case-studies" tooltip="Impact case studies">
+								<QuestionMarkCircleIcon />
+								<SidebarLabel>Impact case studies</SidebarLabel>
+							</SidebarItem>
+						</SidebarDisclosurePanel>
+					</SidebarDisclosure>
+				</SidebarDisclosureGroup>
 			</SidebarContent>
 
 			<SidebarFooter className="flex flex-row justify-between gap-4 group-data-[state=collapsed]:flex-col">

@@ -4,8 +4,8 @@ import { connection } from "next/server";
 import { useTranslations } from "next-intl";
 import type { ComponentProps, ReactNode } from "react";
 
+import { NavLink } from "@/app/(app)/[locale]/(default)/_components/nav-link";
 import { Logo } from "@/components/logo";
-import { NavLink } from "@/components/nav-link";
 import { useMetadata } from "@/lib/i18n/metadata";
 import { createHref } from "@/lib/navigation/create-href";
 import type { NavigationLink } from "@/lib/navigation/navigation";
@@ -51,15 +51,7 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 		<footer {...rest} className={cn("border-t border-stroke-weak", className)}>
 			<div className="container flex flex-col gap-y-6 px-8 py-12 xs:px-16">
 				<div className="flex flex-col gap-y-8 xs:flex-row xs:items-center xs:justify-between">
-					<NavLink
-						className={cn(
-							"mr-auto -ml-1 inline-grid shrink-0 place-content-center self-center rounded-xs p-1 text-text-weak transition duration-200",
-							"touch-target",
-							"hover:text-text-strong",
-							"outline-2 outline-offset-2 outline-transparent focus-visible:outline-ring",
-						)}
-						href={links.home.href}
-					>
+					<NavLink className="mr-auto -ml-1" href={links.home.href} size="icon">
 						<span className="sr-only">{links.home.label}</span>
 						<Logo className="h-8 w-auto" />
 					</NavLink>
@@ -78,15 +70,7 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 
 								return (
 									<li key={kind} className="inline-flex shrink-0">
-										<NavLink
-											className={cn(
-												"inline-flex items-center rounded-xs p-1 text-text-weak transition duration-200",
-												"touch-target",
-												"hover:text-text-strong",
-												"outline-2 outline-offset-2 outline-transparent focus-visible:outline-ring",
-											)}
-											href={href}
-										>
+										<NavLink href={href} size="icon">
 											<span className="sr-only">{label}</span>
 											<Icon aria-hidden={true} className="size-6" />
 										</NavLink>
@@ -97,12 +81,9 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 					</nav>
 				</div>
 
-				<div className="flex flex-col gap-y-8">
+				<div className="flex flex-col gap-y-6">
 					<nav aria-label={t("navigation.label")}>
-						<ul
-							className="-mx-2.5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-text-weak"
-							role="list"
-						>
+						<ul className="-mx-2.5 flex flex-wrap items-center gap-x-4 gap-y-2" role="list">
 							{Object.entries(links).map(([id, link]) => {
 								if (id === "home") {
 									return null;
@@ -110,14 +91,7 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 
 								return (
 									<li key={id}>
-										<NavLink
-											className={cn(
-												"inline-flex items-center gap-x-2 rounded-xs px-2.5 py-1 text-sm font-medium tracking-tight text-text-weak transition duration-200",
-												"hover:text-text-strong",
-												"outline-2 outline-offset-2 outline-transparent focus-visible:outline-ring",
-											)}
-											href={link.href}
-										>
+										<NavLink href={link.href} size="md">
 											{link.label}
 										</NavLink>
 									</li>
@@ -128,16 +102,13 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 
 					<small className="text-xs text-text-weak">
 						&copy; <CurrentYear />{" "}
-						<a
-							className={cn(
-								"inline-flex items-center gap-x-2 rounded-xs px-1.5 py-0.5 text-text-weak transition duration-200",
-								"hover:text-text-strong",
-								"outline-2 outline-offset-2 outline-transparent focus-visible:outline-focus-indicator",
-							)}
-							href={meta.social.website}
-						>
-							{meta.creator}
-						</a>
+						{meta.social.website != null ? (
+							<NavLink href={meta.social.website} size="sm">
+								{meta.creator}
+							</NavLink>
+						) : (
+							meta.creator
+						)}
 					</small>
 				</div>
 			</div>

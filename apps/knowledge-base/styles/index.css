@@ -306,7 +306,7 @@
 		--_color-text-weak: var(--color-muted-fg);
 		--_color-stroke-strong: var(--color-input);
 		--_color-stroke-weak: var(--color-border);
-		--_color-focus-indicator: var(--color-ring);
+		--_color-focus-outline: var(--color-ring);
 
 		color-scheme: light;
 	}
@@ -317,7 +317,7 @@
 		--_color-text-weak: var(--color-muted-fg);
 		--_color-stroke-strong: var(--color-input);
 		--_color-stroke-weak: var(--color-border);
-		--_color-focus-indicator: var(--color-ring);
+		--_color-focus-outline: var(--color-ring);
 
 		color-scheme: dark;
 	}
@@ -329,7 +329,7 @@
 	--color-text-weak: var(--_color-text-weak);
 	--color-stroke-strong: var(--_color-stroke-strong);
 	--color-stroke-weak: var(--_color-stroke-weak);
-	--color-focus-indicator: var(--_color-focus-indicator);
+	--color-focus-outline: var(--_color-focus-outline);
 }
 
 /**************************************************************************************************
@@ -525,7 +525,7 @@
 
 			&:focus-visible {
 				border-radius: var(--radius-xs);
-				outline: 2px solid var(--color-focus-indicator);
+				outline: 2px solid var(--color-focus-outline);
 				outline-offset: 2px;
 			}
 		}

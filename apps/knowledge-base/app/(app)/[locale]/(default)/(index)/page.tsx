@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
-import { MainContent } from "@/app/(app)/[locale]/(default)/_components/main-content";
+import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 
 export function generateMetadata(): Metadata {
 	const metadata: Metadata = {
@@ -21,7 +21,7 @@ export default function IndexPage(): ReactNode {
 	const t = useTranslations("IndexPage");
 
 	return (
-		<MainContent className="container flex-1 px-8 py-12 xs:px-16">
+		<Main className="container flex-1 px-8 py-12 xs:px-16">
 			<section className="flex min-h-full flex-col items-center justify-center gap-y-4 py-24">
 				<h1 className="text-center text-6xl font-extrabold tracking-tight text-text-strong">
 					{t("title")}
@@ -30,6 +30,6 @@ export default function IndexPage(): ReactNode {
 					{t("lead")}
 				</p>
 			</section>
-		</MainContent>
+		</Main>
 	);
 }

@@ -27,7 +27,7 @@ export function DefaultHeader(props: Readonly<DefaultHeaderProps>): ReactNode {
 
 	return (
 		<header {...rest} className={cn("border-b border-stroke-weak", className)}>
-			<div className="container flex items-center justify-between gap-x-12 px-8 py-4 text-sm xs:px-16">
+			<div className="container flex items-center justify-between gap-x-12 px-8 py-4 xs:px-16">
 				<Navigation label={label} navigation={navigation} />
 
 				<div className="flex items-center gap-x-6">

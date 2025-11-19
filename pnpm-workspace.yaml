@@ -11,6 +11,7 @@ catalog:
   '@acdh-oeaw/eslint-config-tailwindcss': ^3.0.2
   '@acdh-oeaw/lib': ^0.3.5
   '@acdh-oeaw/prettier-config': 2.0.1
+  '@acdh-oeaw/style-variants': ^0.1.0
   '@acdh-oeaw/stylelint-config': ^2.3.2
   '@acdh-oeaw/tsconfig': ^1.5.1
   '@acdh-oeaw/validate-env': ^0.1.1

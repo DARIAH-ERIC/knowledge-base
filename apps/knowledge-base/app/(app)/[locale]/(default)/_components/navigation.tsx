@@ -1,8 +1,7 @@
-import cn from "clsx/lite";
 import type { ReactNode } from "react";
 
+import { NavLink } from "@/app/(app)/[locale]/(default)/_components/nav-link";
 import { Logo } from "@/components/logo";
-import { NavLink } from "@/components/nav-link";
 import type { NavigationConfig, NavigationLink } from "@/lib/navigation/navigation";
 
 interface NavigationProps {
@@ -15,15 +14,7 @@ export function Navigation(props: Readonly<NavigationProps>): ReactNode {
 
 	return (
 		<nav aria-label={label} className="hidden lg:flex lg:gap-x-6">
-			<NavLink
-				className={cn(
-					"-ml-1 inline-grid shrink-0 place-content-center self-center rounded-xs p-1 text-text-weak transition duration-200",
-					"touch-target",
-					"hover:text-text-strong",
-					"outline-2 outline-offset-2 outline-transparent focus-visible:outline-focus-indicator",
-				)}
-				href={navigation.home.href}
-			>
+			<NavLink href={navigation.home.href} size="icon">
 				<span className="sr-only">{navigation.home.label}</span>
 				<Logo className="h-8 w-auto" />
 			</NavLink>
@@ -38,14 +29,7 @@ export function Navigation(props: Readonly<NavigationProps>): ReactNode {
 						case "link": {
 							return (
 								<li key={id}>
-									<NavLink
-										className={cn(
-											"inline-flex items-center gap-x-2 rounded-xs px-2.5 py-1 text-sm font-medium tracking-tight text-text-weak transition duration-200",
-											"hover:text-text-strong",
-											"outline-2 outline-offset-2 outline-transparent focus-visible:outline-focus-indicator",
-										)}
-										href={item.href}
-									>
+									<NavLink href={item.href} size="md">
 										{item.label}
 									</NavLink>
 								</li>
