@@ -13,14 +13,152 @@
 		},
 		"title": "Contact"
 	},
+	"DashboardAdministratorPage": {
+		"meta": {
+			"title": "Administrator dashboard"
+		},
+		"title": "Administrator dashboard"
+	},
+	"DashboardAdministratorContributionsPage": {
+		"meta": {
+			"title": "Administrator dashboard - Contributions"
+		},
+		"title": "Contributions"
+	},
+	"DashboardAdministratorCountriesPage": {
+		"meta": {
+			"title": "Administrator dashboard - Countries"
+		},
+		"title": "Countries"
+	},
+	"DashboardAdministratorInstitutionsPage": {
+		"meta": {
+			"title": "Administrator dashboard - Institutions"
+		},
+		"title": "Institutions"
+	},
+	"DashboardAdministratorOutreachPage": {
+		"meta": {
+			"title": "Administrator dashboard - Outreach"
+		},
+		"title": "Outreach"
+	},
+	"DashboardAdministratorPersonsPage": {
+		"meta": {
+			"title": "Administrator dashboard - Persons"
+		},
+		"title": "Persons"
+	},
+	"DashboardAdministratorProjectsPage": {
+		"meta": {
+			"title": "Administrator dashboard - Projects"
+		},
+		"title": "Projects"
+	},
+	"DashboardAdministratorReportsPage": {
+		"meta": {
+			"title": "Administrator dashboard - Reports"
+		},
+		"title": "Reports"
+	},
+	"DashboardAdministratorServicesPage": {
+		"meta": {
+			"title": "Administrator dashboard - Services"
+		},
+		"title": "Services"
+	},
+	"DashboardAdministratorSoftwarePage": {
+		"meta": {
+			"title": "Administrator dashboard - Software"
+		},
+		"title": "Software"
+	},
+	"DashboardAdministratorUsersPage": {
+		"meta": {
+			"title": "Administrator dashboard - Users"
+		},
+		"title": "Users"
+	},
+	"DashboardAdministratorWorkingGroupsPage": {
+		"meta": {
+			"title": "Administrator dashboard - Working groups"
+		},
+		"title": "Working groups"
+	},
+	"DashboardNationalConsortiumPage": {
+		"meta": {
+			"title": "National consortium dashboard"
+		},
+		"title": "National consortium dashboard"
+	},
+	"DashboardNationalConsortiumReportPage": {
+		"meta": {
+			"title": "National consortium dashboard - Report"
+		},
+		"title": "Report"
+	},
+	"DashboardNationalConsortiumReportsPage": {
+		"meta": {
+			"title": "National consortium dashboard - Reports"
+		},
+		"title": "Reports"
+	},
+	"DashboardWebsitePage": {
+		"meta": {
+			"title": "Website dashboard"
+		},
+		"title": "Website dashboard"
+	},
+	"DashboardWebsiteEventsPage": {
+		"meta": {
+			"title": "Website dashboard - Events"
+		},
+		"title": "Events"
+	},
+	"DashboardWebsiteImpactCaseStudiesPage": {
+		"meta": {
+			"title": "Website dashboard - Impact case studies"
+		},
+		"title": "Impact case studies"
+	},
+	"DashboardWebsiteMetadataPage": {
+		"meta": {
+			"title": "Website dashboard - Metadata"
+		},
+		"title": "Metadata"
+	},
+	"DashboardWebsiteNewsPage": {
+		"meta": {
+			"title": "Website dashboard - News"
+		},
+		"title": "News"
+	},
+	"DashboardWebsitePagesPage": {
+		"meta": {
+			"title": "Website dashboard - Pages"
+		},
+		"title": "Pages"
+	},
+	"DashboardWorkingGroupPage": {
+		"meta": {
+			"title": "Working group dashboard"
+		},
+		"title": "Working group dashboard"
+	},
+	"DashboardWorkingGroupReportPage": {
+		"meta": {
+			"title": "Working group dashboard - Report"
+		},
+		"title": "Report"
+	},
+	"DashboardWorkingGroupReportsPage": {
+		"meta": {
+			"title": "Working group dashboard - Reports"
+		},
+		"title": "Reports"
+	},
 	"DashboardLayout": {
 		"skip-link": "Skip to main content"
-	},
-	"DashboardPage": {
-		"meta": {
-			"title": "Dashboard"
-		},
-		"title": "Welcome!"
 	},
 	"DefaultFooter": {
 		"navigation": {

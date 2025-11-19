@@ -70,57 +70,62 @@ export function DashboardSidebar(props: Readonly<ComponentProps<typeof Sidebar>>
 						</SidebarDisclosureTrigger>
 
 						<SidebarDisclosurePanel>
-							<SidebarItem href="#contributions" tooltip="Contributions">
+							<SidebarItem href="/dashboard/administrator" tooltip="Overview">
+								<QuestionMarkCircleIcon />
+								<SidebarLabel>Overview</SidebarLabel>
+							</SidebarItem>
+
+							<SidebarItem href="/dashboard/administrator/contributions" tooltip="Contributions">
 								<ChatBubbleLeftRightIcon />
 								<SidebarLabel>Contributions</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#countries" tooltip="Countries">
+							<SidebarItem href="/dashboard/administrator/countries" tooltip="Countries">
 								<QuestionMarkCircleIcon />
 								<SidebarLabel>Countries</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#institutions" tooltip="Institutions">
+							<SidebarItem href="/dashboard/administrator/institutions" tooltip="Institutions">
 								<BuildingOfficeIcon />
 								<SidebarLabel>Institutions</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#outreach" tooltip="Outreach">
+							<SidebarItem href="/dashboard/administrator/outreach" tooltip="Outreach">
 								<EnvelopeIcon />
 								<SidebarLabel>Outreach</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#persons" tooltip="Persons">
+							<SidebarItem href="/dashboard/administrator/persons" tooltip="Persons">
 								<UserGroupIcon />
 								<SidebarLabel>Persons</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#projects" tooltip="Projects">
+							<SidebarItem href="/dashboard/administrator/projects" tooltip="Projects">
 								<BriefcaseIcon />
 								<SidebarLabel>Projects</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#reports" tooltip="Reports">
+							<SidebarItem href="/dashboard/administrator/reports" tooltip="Reports">
 								<TicketIcon />
 								<SidebarLabel>Reports</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#services" tooltip="Services">
+							<SidebarItem href="/dashboard/administrator/services" tooltip="Services">
 								<QuestionMarkCircleIcon />
 								<SidebarLabel>Services</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#software" tooltip="Software">
+							<SidebarItem href="/dashboard/administrator/software" tooltip="Software">
 								<QuestionMarkCircleIcon />
 								<SidebarLabel>Software</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#users" tooltip="Users">
+							<SidebarItem href="/dashboard/administrator/users" tooltip="Users">
 								<UserCircleIcon />
 								<SidebarLabel>Users</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#working-groups" tooltip="Working groups">
+							<SidebarItem href="/dashboard/administrator/working-groups" tooltip="Working groups">
 								<QuestionMarkCircleIcon />
 								<SidebarLabel>Working groups</SidebarLabel>
 							</SidebarItem>
@@ -134,17 +139,20 @@ export function DashboardSidebar(props: Readonly<ComponentProps<typeof Sidebar>>
 						</SidebarDisclosureTrigger>
 
 						<SidebarDisclosurePanel>
-							<SidebarItem href="#austria" tooltip="Austria">
+							<SidebarItem href="/dashboard/national-consortia/at" tooltip="Austria">
 								<QuestionMarkCircleIcon />
 								<SidebarLabel>Austria</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#reports" tooltip="Reports">
+							<SidebarItem href="/dashboard/national-consortia/at/reports" tooltip="Reports">
 								<TicketIcon />
 								<SidebarLabel>Reports</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#current-report" tooltip="Current report">
+							<SidebarItem
+								href="/dashboard/national-consortia/at/reports/2025"
+								tooltip="Current report"
+							>
 								<TicketIcon />
 								<SidebarLabel>Current report</SidebarLabel>
 							</SidebarItem>
@@ -158,17 +166,26 @@ export function DashboardSidebar(props: Readonly<ComponentProps<typeof Sidebar>>
 						</SidebarDisclosureTrigger>
 
 						<SidebarDisclosurePanel>
-							<SidebarItem href="#bibliographic-data" tooltip="WG Bibliographic data">
+							<SidebarItem
+								href="/dashboard/working-groups/bibliographic-data"
+								tooltip="WG Bibliographic data"
+							>
 								<QuestionMarkCircleIcon />
 								<SidebarLabel>WG Bibliographic data</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#reports" tooltip="Reports">
+							<SidebarItem
+								href="/dashboard/working-groups/bibliographic-data/reports"
+								tooltip="Reports"
+							>
 								<TicketIcon />
 								<SidebarLabel>Reports</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#current-report" tooltip="Current report">
+							<SidebarItem
+								href="/dashboard/working-groups/bibliographic-data/reports/2025"
+								tooltip="Current report"
+							>
 								<TicketIcon />
 								<SidebarLabel>Current report</SidebarLabel>
 							</SidebarItem>
@@ -182,27 +199,35 @@ export function DashboardSidebar(props: Readonly<ComponentProps<typeof Sidebar>>
 						</SidebarDisclosureTrigger>
 
 						<SidebarDisclosurePanel>
-							<SidebarItem href="#metadata" tooltip="Metadata">
+							<SidebarItem href="/dashboard/website" tooltip="Overview">
+								<QuestionMarkCircleIcon />
+								<SidebarLabel>Overview</SidebarLabel>
+							</SidebarItem>
+
+							<SidebarItem href="/dashboard/website/metadata" tooltip="Metadata">
 								<QuestionMarkCircleIcon />
 								<SidebarLabel>Metadata</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#pages" tooltip="Pages">
+							<SidebarItem href="/dashboard/website/pages" tooltip="Pages">
 								<QuestionMarkCircleIcon />
 								<SidebarLabel>Pages</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#events" tooltip="Events">
+							<SidebarItem href="/dashboard/website/events" tooltip="Events">
 								<QuestionMarkCircleIcon />
 								<SidebarLabel>Events</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#news" tooltip="News">
+							<SidebarItem href="/dashboard/website/news" tooltip="News">
 								<QuestionMarkCircleIcon />
 								<SidebarLabel>News</SidebarLabel>
 							</SidebarItem>
 
-							<SidebarItem href="#impact-case-studies" tooltip="Impact case studies">
+							<SidebarItem
+								href="/dashboard/website/impact-case-studies"
+								tooltip="Impact case studies"
+							>
 								<QuestionMarkCircleIcon />
 								<SidebarLabel>Impact case studies</SidebarLabel>
 							</SidebarItem>

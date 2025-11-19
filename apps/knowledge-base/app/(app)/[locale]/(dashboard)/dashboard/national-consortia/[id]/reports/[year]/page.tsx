@@ -3,10 +3,10 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
-import { Main } from "@/app/(app)/[locale]/(dashboard)/_components/main";
+import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 
 export async function generateMetadata(): Promise<Metadata> {
-	const t = await getTranslations("DashboardPage");
+	const t = await getTranslations("DashboardNationalConsortiumReportPage");
 
 	const metadata: Metadata = {
 		title: t("meta.title"),
@@ -15,11 +15,11 @@ export async function generateMetadata(): Promise<Metadata> {
 	return metadata;
 }
 
-export default function DashboardPage(): ReactNode {
-	const t = useTranslations("DashboardPage");
+export default function DashboardNationalConsortiumReportPage(): ReactNode {
+	const t = useTranslations("DashboardNationalConsortiumReportPage");
 
 	return (
-		<Main className="flex-1">
+		<Main className="container flex-1 px-8 py-12 xs:px-16">
 			<section className="flex flex-col gap-y-8">
 				<h1 className="text-5xl font-extrabold tracking-tight text-text-strong">{t("title")}</h1>
 			</section>
