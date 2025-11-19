@@ -44,7 +44,6 @@ import {
 	SidebarItem,
 	SidebarLabel,
 	SidebarRail,
-	SidebarSectionGroup,
 } from "@/components/ui/sidebar";
 
 export function DashboardSidebar(props: Readonly<ComponentProps<typeof Sidebar>>): ReactNode {
