@@ -553,7 +553,7 @@ function SidebarDisclosureGroup({
 		<DisclosureGroup
 			allowsMultipleExpanded={allowsMultipleExpanded}
 			className={cx(
-				"col-span-full flex min-w-0 flex-col gap-y-0.5 in-data-[state=collapsed]:gap-y-1.5",
+				"col-span-full flex min-w-0 flex-col gap-y-1 in-data-[state=collapsed]:gap-y-1.5",
 				className,
 			)}
 			data-slot="sidebar-disclosure-group"
@@ -634,7 +634,7 @@ function SidebarDisclosurePanel({ className, ...props }: DisclosurePanelProps) {
 	return (
 		<DisclosurePanel
 			className={cx(
-				"h-(--disclosure-panel-height) overflow-clip transition-[height] duration-200",
+				"h-(--disclosure-panel-height) ml-4 overflow-clip transition-[height] duration-200",
 				className,
 			)}
 			data-slot="sidebar-disclosure-panel"
