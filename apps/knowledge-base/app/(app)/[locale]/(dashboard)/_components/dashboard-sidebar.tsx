@@ -247,10 +247,12 @@ export function DashboardSidebar(props: Readonly<ComponentProps<typeof Sidebar>>
 							/>
 							<div className="text-sm in-data-[collapsible=dock]:hidden">
 								<SidebarLabel>Stefan Probst</SidebarLabel>
-								<span className="-mt-0.5 block text-muted-fg">stefan.probst@oeaw.ac.at</span>
+								<span className="-mt-0.5 block truncate text-muted-fg">
+									stefan.probst@oeaw.ac.at
+								</span>
 							</div>
 						</div>
-						<ChevronUpDownIcon data-slot="chevron" />
+						<ChevronUpDownIcon className="shrink-0" data-slot="chevron" />
 					</MenuTrigger>
 
 					<MenuContent

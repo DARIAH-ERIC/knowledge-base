@@ -97,6 +97,66 @@
 		},
 		"title": "Report"
 	},
+	"DashboardNationalConsortiumReportEditPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit report"
+		},
+		"title": "Edit report"
+	},
+	"DashboardNationalConsortiumReportEditStepContributionsPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit contributions"
+		},
+		"title": "Edit contributions"
+	},
+	"DashboardNationalConsortiumReportEditStepEventsPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit events"
+		},
+		"title": "Edit events"
+	},
+	"DashboardNationalConsortiumReportEditStepInstitutionsPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit institutions"
+		},
+		"title": "Edit institutions"
+	},
+	"DashboardNationalConsortiumReportEditStepOutreachPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit outreach"
+		},
+		"title": "Edit outreach"
+	},
+	"DashboardNationalConsortiumReportEditStepProjectsPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit projects"
+		},
+		"title": "Edit projects"
+	},
+	"DashboardNationalConsortiumReportEditStepPublicationsPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit publications"
+		},
+		"title": "Edit publications"
+	},
+	"DashboardNationalConsortiumReportEditStepServicesPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit services"
+		},
+		"title": "Edit services"
+	},
+	"DashboardNationalConsortiumReportEditStepSoftwarePage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit software"
+		},
+		"title": "Edit software"
+	},
+	"DashboardNationalConsortiumReportEditStepSummaryPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit summary"
+		},
+		"title": "Edit summary"
+	},
 	"DashboardNationalConsortiumReportsPage": {
 		"meta": {
 			"title": "National consortium dashboard - Reports"
