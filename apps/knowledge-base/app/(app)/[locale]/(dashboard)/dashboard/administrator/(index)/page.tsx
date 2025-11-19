@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(dashboard)/_components/main";
+import { TableExample } from "@/components/ui/table-example";
 
 export async function generateMetadata(): Promise<Metadata> {
 	const t = await getTranslations("DashboardAdministratorPage");
@@ -20,9 +21,8 @@ export default function DashboardAdministratorPage(): ReactNode {
 
 	return (
 		<Main className="flex-1">
-			<section className="flex flex-col gap-y-8">
-				<h1 className="text-5xl font-extrabold tracking-tight text-text-strong">{t("title")}</h1>
-			</section>
+			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">{t("title")}</h1>
+			<TableExample />
 		</Main>
 	);
 }
