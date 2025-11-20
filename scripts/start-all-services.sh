@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 
 docker compose \
-  --env-file=./apps/knowledge-base/.env.local \
+  --env-file=./.devcontainer/.env \
   -f ./.devcontainer/docker-compose.postgres.yaml \
   -f ./.devcontainer/docker-compose.typesense.yaml \
   -f ./.devcontainer/docker-compose.mailpit.yaml \
