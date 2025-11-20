@@ -5,7 +5,8 @@
 		"docker-compose.app.yaml",
 		"docker-compose.drizzle-gateway.yaml",
 		"docker-compose.mailpit.yaml",
-		"docker-compose.typesense.yaml"
+		"docker-compose.typesense.yaml",
+		"docker-compose.imgproxy.yaml"
 	],
 	"service": "app",
 	"workspaceFolder": "/workspace",
@@ -31,8 +32,12 @@
 		"postgres:5432",
 		"drizzle-gateway:4983",
 		"typesense:8108",
+		"typesense-dashboard:5050",
 		"mailpit:1025",
-		"mailpit:8025"
+		"mailpit:8025",
+		"imgproxy:8080",
+		"minio:9000",
+		"minio:9001"
 	],
 	"portsAttributes": {
 		"3000": {
@@ -47,11 +52,23 @@
 		"typesense:8108": {
 			"label": "Typesense"
 		},
+		"typesense-dashboard:5050": {
+			"label": "Typesense Dashboard"
+		},
 		"mailpit:1025": {
 			"label": "Mailpit SMTP Server"
 		},
 		"mailpit:8025": {
 			"label": "Mailpit API and Web UI"
+		},
+		"imgproxy:8080": {
+			"label": "Imgproxy"
+		},
+		"minio:9000": {
+			"label": "MinIO"
+		},
+		"minio:9001": {
+			"label": "MinIO Web UI"
 		}
 	},
 	"remoteUser": "node"
