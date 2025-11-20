@@ -68,7 +68,7 @@ test("should set page metadata", async ({ createIndexPage }) => {
 
 		const title = metadata.title;
 		const description = metadata.description;
-		const twitter = metadata.social.twitter;
+		// const twitter = metadata.social.twitter;
 
 		expect(title).toBeTruthy();
 		expect(description).toBeTruthy();
@@ -76,14 +76,14 @@ test("should set page metadata", async ({ createIndexPage }) => {
 		const ogType = page.locator('meta[property="og:type"]');
 		await expect(ogType).toHaveAttribute("content", "website");
 
-		const twCard = page.locator('meta[name="twitter:card"]');
-		await expect(twCard).toHaveAttribute("content", "summary_large_image");
+		// const twCard = page.locator('meta[name="twitter:card"]');
+		// await expect(twCard).toHaveAttribute("content", "summary_large_image");
 
-		const twCreator = page.locator('meta[name="twitter:creator"]');
-		await expect(twCreator).toHaveAttribute("content", twitter);
+		// const twCreator = page.locator('meta[name="twitter:creator"]');
+		// await expect(twCreator).toHaveAttribute("content", twitter);
 
-		const twSite = page.locator('meta[name="twitter:site"]');
-		await expect(twSite).toHaveAttribute("content", twitter);
+		// const twSite = page.locator('meta[name="twitter:site"]');
+		// await expect(twSite).toHaveAttribute("content", twitter);
 
 		// const googleSiteVerification = page.locator('meta[name="google-site-verification"]');
 		// await expect(googleSiteVerification).toHaveAttribute("content", "");

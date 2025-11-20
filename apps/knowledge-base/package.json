@@ -39,7 +39,9 @@
 	},
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
+		"@acdh-oeaw/style-variants": "catalog:",
 		"@acdh-oeaw/validate-env": "catalog:",
+		"@heroicons/react": "catalog:",
 		"@react-aria/utils": "catalog:",
 		"@sentry/nextjs": "catalog:",
 		"@valibot/i18n": "catalog:",
@@ -47,6 +49,7 @@
 		"clsx": "catalog:",
 		"is-network-error": "catalog:",
 		"lucide-react": "catalog:",
+		"motion": "catalog:",
 		"next": "catalog:",
 		"next-intl": "catalog:",
 		"react": "catalog:",
@@ -57,6 +60,8 @@
 		"server-nodejs-only": "catalog:",
 		"server-only": "catalog:",
 		"sharp": "catalog:",
+		"tailwind-merge": "catalog:",
+		"tailwind-variants": "catalog:",
 		"valibot": "catalog:"
 	},
 	"devDependencies": {

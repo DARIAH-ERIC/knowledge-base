@@ -30,6 +30,9 @@ catalogs:
     '@acdh-oeaw/prettier-config':
       specifier: 2.0.1
       version: 2.0.1
+    '@acdh-oeaw/style-variants':
+      specifier: ^0.1.0
+      version: 0.1.0
     '@acdh-oeaw/stylelint-config':
       specifier: ^2.3.2
       version: 2.3.2
@@ -39,6 +42,9 @@ catalogs:
     '@acdh-oeaw/validate-env':
       specifier: ^0.1.1
       version: 0.1.1
+    '@heroicons/react':
+      specifier: ^2.2.0
+      version: 2.2.0
     '@next/eslint-plugin-next':
       specifier: ^16.0.1
       version: 16.0.1
@@ -126,6 +132,9 @@ catalogs:
     lucide-react:
       specifier: ^0.553.0
       version: 0.553.0
+    motion:
+      specifier: ^12.23.24
+      version: 12.23.24
     next:
       specifier: ^16.0.1
       version: 16.0.1
@@ -177,6 +186,12 @@ catalogs:
     stylelint:
       specifier: ^16.25.0
       version: 16.25.0
+    tailwind-merge:
+      specifier: ^3.4.0
+      version: 3.4.0
+    tailwind-variants:
+      specifier: ^3.1.1
+      version: 3.1.1
     tailwindcss:
       specifier: ^4.1.17
       version: 4.1.17
@@ -244,9 +259,15 @@ importers:
       '@acdh-oeaw/lib':
         specifier: 'catalog:'
         version: 0.3.5
+      '@acdh-oeaw/style-variants':
+        specifier: 'catalog:'
+        version: 0.1.0
       '@acdh-oeaw/validate-env':
         specifier: 'catalog:'
         version: 0.1.1(typescript@5.9.3)
+      '@heroicons/react':
+        specifier: 'catalog:'
+        version: 2.2.0(react@19.2.0)
       '@react-aria/utils':
         specifier: 'catalog:'
         version: 3.31.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -268,6 +289,9 @@ importers:
       lucide-react:
         specifier: 'catalog:'
         version: 0.553.0(react@19.2.0)
+      motion:
+        specifier: 'catalog:'
+        version: 12.23.24(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       next:
         specifier: 'catalog:'
         version: 16.0.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -298,6 +322,12 @@ importers:
       sharp:
         specifier: 'catalog:'
         version: 0.34.5
+      tailwind-merge:
+        specifier: 'catalog:'
+        version: 3.4.0
+      tailwind-variants:
+        specifier: 'catalog:'
+        version: 3.1.1(tailwind-merge@3.4.0)(tailwindcss@4.1.17)
       valibot:
         specifier: 'catalog:'
         version: 1.1.0(typescript@5.9.3)
@@ -480,6 +510,10 @@ packages:
     resolution: {integrity: sha512-0M77qAD8Uhks+S6lPaKzq6ylwQJzjS33jE6uWKNM9dt7iJ1KHgsuZ3xVhWNmw5h/cUGYJvBi0V/ZSy65ow+9Ag==}
     peerDependencies:
       prettier: 3.x
+
+  '@acdh-oeaw/style-variants@0.1.0':
+    resolution: {integrity: sha512-raVq99q1TyJSbQ2bQGDTaWCqbaKQG1Uj5sythsDj5qMZJURrpujGzJ8nC4RRRX1bLb5t3Xbm4MDL4JT51JqA5Q==}
+    engines: {node: '>=22', pnpm: 9.x}
 
   '@acdh-oeaw/stylelint-config@2.3.2':
     resolution: {integrity: sha512-1BetwUt3INSJZmIjaSYPIlpkSFJsJoD7HEUxS7nxB6zukG5Yho1/DJn/V+FryTOdl3EPAucGYR+bKEsiMeOVIQ==}
@@ -865,6 +899,11 @@ packages:
 
   '@formatjs/intl-localematcher@0.6.2':
     resolution: {integrity: sha512-XOMO2Hupl0wdd172Y06h6kLpBz6Dv+J4okPLl4LPtzbr8f66WbIoy4ev98EBuZ6ZK4h5ydTN6XneT4QVpD7cdA==}
+
+  '@heroicons/react@2.2.0':
+    resolution: {integrity: sha512-LMcepvRaS9LYHJGsF0zzmgKCUim/X3N/DQKc4jepAXJ7l8QxJ1PmxJzqplF2Z3FE4PqBAIGyJAQ/w4B5dsqbtQ==}
+    peerDependencies:
+      react: '>= 16 || ^19.0.0-rc'
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -3544,6 +3583,20 @@ packages:
     resolution: {integrity: sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==}
     engines: {node: '>= 0.6'}
 
+  framer-motion@12.23.24:
+    resolution: {integrity: sha512-HMi5HRoRCTou+3fb3h9oTLyJGBxHfW+HnNE25tAXOvVx/IvwMHK0cx7IR4a2ZU6sh3IX1Z+4ts32PcYBOqka8w==}
+    peerDependencies:
+      '@emotion/is-prop-valid': '*'
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@emotion/is-prop-valid':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
   fresh@2.0.0:
     resolution: {integrity: sha512-Rx/WycZ60HOaqLKAi6cHRKKI7zxWbJ31MhntmtwMoaTeF7XFH9hhBp8vITaMidfljRQ6eYWCKkaTK+ykVJHP2A==}
     engines: {node: '>= 0.8'}
@@ -4256,6 +4309,26 @@ packages:
 
   module-details-from-path@1.0.4:
     resolution: {integrity: sha512-EGWKgxALGMgzvxYF1UyGTy0HXX/2vHLkw6+NvDKW2jypWbHpjQuj4UMcqQWXHERJhVGKikolT06G3bcKe4fi7w==}
+
+  motion-dom@12.23.23:
+    resolution: {integrity: sha512-n5yolOs0TQQBRUFImrRfs/+6X4p3Q4n1dUEqt/H58Vx7OW6RF+foWEgmTVDhIWJIMXOuNNL0apKH2S16en9eiA==}
+
+  motion-utils@12.23.6:
+    resolution: {integrity: sha512-eAWoPgr4eFEOFfg2WjIsMoqJTW6Z8MTUCgn/GZ3VRpClWBdnbjryiA3ZSNLyxCTmCQx4RmYX6jX1iWHbenUPNQ==}
+
+  motion@12.23.24:
+    resolution: {integrity: sha512-Rc5E7oe2YZ72N//S3QXGzbnXgqNrTESv8KKxABR20q2FLch9gHLo0JLyYo2hZ238bZ9Gx6cWhj9VO0IgwbMjCw==}
+    peerDependencies:
+      '@emotion/is-prop-valid': '*'
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@emotion/is-prop-valid':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
 
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
@@ -5154,6 +5227,19 @@ packages:
     peerDependencies:
       tailwindcss: ^3.3.0 || ^4.0.0 || ^4.0.0-beta
 
+  tailwind-merge@3.4.0:
+    resolution: {integrity: sha512-uSaO4gnW+b3Y2aWoWfFpX62vn2sR3skfhbjsEnaBI81WD1wBLlHZe5sWf0AqjksNdYTbGBEd0UasQMT3SNV15g==}
+
+  tailwind-variants@3.1.1:
+    resolution: {integrity: sha512-ftLXe3krnqkMHsuBTEmaVUXYovXtPyTK7ckEfDRXS8PBZx0bAUas+A0jYxuKA5b8qg++wvQ3d2MQ7l/xeZxbZQ==}
+    engines: {node: '>=16.x', pnpm: '>=7.x'}
+    peerDependencies:
+      tailwind-merge: '>=3.0.0'
+      tailwindcss: '*'
+    peerDependenciesMeta:
+      tailwind-merge:
+        optional: true
+
   tailwindcss-react-aria-components@2.0.1:
     resolution: {integrity: sha512-yTAfYv9BE/gKczS+b8UiFMqxnrEYKKNE6Y4vAWzGadkHGb4Yuawp0SHbZKkZJQgFvK0KjO3JpCq/0kzR5jJ9tw==}
     peerDependencies:
@@ -5572,6 +5658,10 @@ snapshots:
     dependencies:
       prettier: 3.6.2
 
+  '@acdh-oeaw/style-variants@0.1.0':
+    dependencies:
+      clsx: 2.1.1
+
   '@acdh-oeaw/stylelint-config@2.3.2(postcss-html@1.8.0)(stylelint-order@7.0.0(stylelint@16.25.0(typescript@5.9.3)))(stylelint@16.25.0(typescript@5.9.3))':
     dependencies:
       stylelint: 16.25.0(typescript@5.9.3)
@@ -5983,6 +6073,10 @@ snapshots:
   '@formatjs/intl-localematcher@0.6.2':
     dependencies:
       tslib: 2.8.1
+
+  '@heroicons/react@2.2.0(react@19.2.0)':
+    dependencies:
+      react: 19.2.0
 
   '@humanfs/core@0.19.1': {}
 
@@ -9411,6 +9505,15 @@ snapshots:
 
   forwarded@0.2.0: {}
 
+  framer-motion@12.23.24(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+    dependencies:
+      motion-dom: 12.23.23
+      motion-utils: 12.23.6
+      tslib: 2.8.1
+    optionalDependencies:
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
+
   fresh@2.0.0: {}
 
   fs.realpath@1.0.0: {}
@@ -10077,6 +10180,20 @@ snapshots:
       ufo: 1.6.1
 
   module-details-from-path@1.0.4: {}
+
+  motion-dom@12.23.23:
+    dependencies:
+      motion-utils: 12.23.6
+
+  motion-utils@12.23.6: {}
+
+  motion@12.23.24(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+    dependencies:
+      framer-motion: 12.23.24(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      tslib: 2.8.1
+    optionalDependencies:
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
 
   ms@2.1.3: {}
 
@@ -11102,6 +11219,14 @@ snapshots:
       jiti: 2.6.1
       local-pkg: 1.1.2
       tailwindcss: 4.1.17
+
+  tailwind-merge@3.4.0: {}
+
+  tailwind-variants@3.1.1(tailwind-merge@3.4.0)(tailwindcss@4.1.17):
+    dependencies:
+      tailwindcss: 4.1.17
+    optionalDependencies:
+      tailwind-merge: 3.4.0
 
   tailwindcss-react-aria-components@2.0.1(tailwindcss@4.1.17):
     dependencies:

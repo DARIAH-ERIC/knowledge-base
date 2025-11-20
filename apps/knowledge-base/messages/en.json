@@ -7,49 +7,215 @@
 			"system": "System"
 		}
 	},
-	"DashboardFooter": {
-		"navigation": {
-			"items": {
-				"contact": "Contact",
-				"home": "Home",
-				"imprint": "Imprint"
-			},
-			"label": "Secondary"
+	"ContactPage": {
+		"meta": {
+			"title": "Contact"
 		},
-		"navigation-social-media": {
-			"items": {
-				"bluesky": "Bluesky",
-				"email": "Email",
-				"facebook": "Facebook",
-				"flickr": "Flickr",
-				"github": "GitHub",
-				"instagram": "Instagram",
-				"linkedin": "LinkedIn",
-				"mastodon": "Mastodon",
-				"orcid": "ORCID",
-				"rss": "RSS",
-				"twitter": "Twitter",
-				"website": "Website",
-				"youtube": "YouTube"
-			},
-			"label": "Social media"
-		}
+		"title": "Contact"
 	},
-	"DashboardHeader": {
-		"navigation": {
-			"drawer": {
-				"close": "Close navigation menu",
-				"label": "Navigation menu",
-				"open": "Open navigation menu"
-			},
-			"items": {
-				"about": "About the project",
-				"documentation": "Documentation",
-				"home": "Home",
-				"search": "Search"
-			},
-			"label": "Main"
-		}
+	"DashboardAdministratorPage": {
+		"meta": {
+			"title": "Administrator dashboard"
+		},
+		"title": "Administrator dashboard"
+	},
+	"DashboardAdministratorContributionsPage": {
+		"meta": {
+			"title": "Administrator dashboard - Contributions"
+		},
+		"title": "Contributions"
+	},
+	"DashboardAdministratorCountriesPage": {
+		"meta": {
+			"title": "Administrator dashboard - Countries"
+		},
+		"title": "Countries"
+	},
+	"DashboardAdministratorInstitutionsPage": {
+		"meta": {
+			"title": "Administrator dashboard - Institutions"
+		},
+		"title": "Institutions"
+	},
+	"DashboardAdministratorOutreachPage": {
+		"meta": {
+			"title": "Administrator dashboard - Outreach"
+		},
+		"title": "Outreach"
+	},
+	"DashboardAdministratorPersonsPage": {
+		"meta": {
+			"title": "Administrator dashboard - Persons"
+		},
+		"title": "Persons"
+	},
+	"DashboardAdministratorProjectsPage": {
+		"meta": {
+			"title": "Administrator dashboard - Projects"
+		},
+		"title": "Projects"
+	},
+	"DashboardAdministratorReportsPage": {
+		"meta": {
+			"title": "Administrator dashboard - Reports"
+		},
+		"title": "Reports"
+	},
+	"DashboardAdministratorServicesPage": {
+		"meta": {
+			"title": "Administrator dashboard - Services"
+		},
+		"title": "Services"
+	},
+	"DashboardAdministratorSoftwarePage": {
+		"meta": {
+			"title": "Administrator dashboard - Software"
+		},
+		"title": "Software"
+	},
+	"DashboardAdministratorUsersPage": {
+		"meta": {
+			"title": "Administrator dashboard - Users"
+		},
+		"title": "Users"
+	},
+	"DashboardAdministratorWorkingGroupsPage": {
+		"meta": {
+			"title": "Administrator dashboard - Working groups"
+		},
+		"title": "Working groups"
+	},
+	"DashboardNationalConsortiumPage": {
+		"meta": {
+			"title": "National consortium dashboard"
+		},
+		"title": "National consortium dashboard"
+	},
+	"DashboardNationalConsortiumReportPage": {
+		"meta": {
+			"title": "National consortium dashboard - Report"
+		},
+		"title": "Report"
+	},
+	"DashboardNationalConsortiumReportEditPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit report"
+		},
+		"title": "Edit report"
+	},
+	"DashboardNationalConsortiumReportEditStepContributionsPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit contributions"
+		},
+		"title": "Edit contributions"
+	},
+	"DashboardNationalConsortiumReportEditStepEventsPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit events"
+		},
+		"title": "Edit events"
+	},
+	"DashboardNationalConsortiumReportEditStepInstitutionsPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit institutions"
+		},
+		"title": "Edit institutions"
+	},
+	"DashboardNationalConsortiumReportEditStepOutreachPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit outreach"
+		},
+		"title": "Edit outreach"
+	},
+	"DashboardNationalConsortiumReportEditStepProjectsPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit projects"
+		},
+		"title": "Edit projects"
+	},
+	"DashboardNationalConsortiumReportEditStepPublicationsPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit publications"
+		},
+		"title": "Edit publications"
+	},
+	"DashboardNationalConsortiumReportEditStepServicesPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit services"
+		},
+		"title": "Edit services"
+	},
+	"DashboardNationalConsortiumReportEditStepSoftwarePage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit software"
+		},
+		"title": "Edit software"
+	},
+	"DashboardNationalConsortiumReportEditStepSummaryPage": {
+		"meta": {
+			"title": "National consortium dashboard - Edit summary"
+		},
+		"title": "Edit summary"
+	},
+	"DashboardNationalConsortiumReportsPage": {
+		"meta": {
+			"title": "National consortium dashboard - Reports"
+		},
+		"title": "Reports"
+	},
+	"DashboardWebsitePage": {
+		"meta": {
+			"title": "Website dashboard"
+		},
+		"title": "Website dashboard"
+	},
+	"DashboardWebsiteEventsPage": {
+		"meta": {
+			"title": "Website dashboard - Events"
+		},
+		"title": "Events"
+	},
+	"DashboardWebsiteImpactCaseStudiesPage": {
+		"meta": {
+			"title": "Website dashboard - Impact case studies"
+		},
+		"title": "Impact case studies"
+	},
+	"DashboardWebsiteMetadataPage": {
+		"meta": {
+			"title": "Website dashboard - Metadata"
+		},
+		"title": "Metadata"
+	},
+	"DashboardWebsiteNewsPage": {
+		"meta": {
+			"title": "Website dashboard - News"
+		},
+		"title": "News"
+	},
+	"DashboardWebsitePagesPage": {
+		"meta": {
+			"title": "Website dashboard - Pages"
+		},
+		"title": "Pages"
+	},
+	"DashboardWorkingGroupPage": {
+		"meta": {
+			"title": "Working group dashboard"
+		},
+		"title": "Working group dashboard"
+	},
+	"DashboardWorkingGroupReportPage": {
+		"meta": {
+			"title": "Working group dashboard - Report"
+		},
+		"title": "Report"
+	},
+	"DashboardWorkingGroupReportsPage": {
+		"meta": {
+			"title": "Working group dashboard - Reports"
+		},
+		"title": "Reports"
 	},
 	"DashboardLayout": {
 		"skip-link": "Skip to main content"
@@ -59,7 +225,9 @@
 			"items": {
 				"contact": "Contact",
 				"home": "Home",
-				"imprint": "Imprint"
+				"imprint": "Imprint",
+				"privacy-policy": "Privacy policy",
+				"terms-of-use": "Terms of use"
 			},
 			"label": "Secondary"
 		},
@@ -121,11 +289,24 @@
 		"title": "Imprint"
 	},
 	"IndexPage": {
-		"title": "Home"
+		"lead": "Your central hub for everything DARIAH-related.",
+		"title": "DARIAH Knowledge Base"
 	},
 	"LocaleSelect": {
 		"change-locale": "Switch locale",
 		"change-locale-to": "Switch to {locale}",
 		"current-locale": "Current language: {locale}"
+	},
+	"PrivacyPolicyPage": {
+		"meta": {
+			"title": "Privacy policy"
+		},
+		"title": "Privacy policy"
+	},
+	"TermsOfUsePage": {
+		"meta": {
+			"title": "Terms of use"
+		},
+		"title": "Terms of use"
 	}
 }
