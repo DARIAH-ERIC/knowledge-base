@@ -15,9 +15,10 @@ catalog:
   '@acdh-oeaw/tsconfig': ^1.5.1
   '@acdh-oeaw/validate-env': ^0.1.1
   '@next/eslint-plugin-next': ^16.0.1
-  '@playwright/test': 1.56.1
+  '@playwright/test': ^1.56.1
   '@react-aria/optimize-locales-plugin': ^1.1.5
   '@react-aria/utils': ^3.31.0
+  '@sentry/nextjs': ^10.25.0
   '@tailwindcss/postcss': ^4.1.17
   '@types/pg': ^8.15.6
   '@types/node': ^24.10.0
@@ -76,6 +77,7 @@ catalogMode: strict
 cleanupUnusedCatalogs: true
 
 onlyBuiltDependencies:
+  - '@sentry/cli'
   - '@swc/core'
   - esbuild
   - sharp
