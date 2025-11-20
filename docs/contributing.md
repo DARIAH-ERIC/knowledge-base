@@ -25,10 +25,10 @@ to start only some services:
 ```bash
 docker compose \
   --env-file=./.devcontainer/.env \
-  -f ./.devcontainer/docker-compose.postgres.yaml \
-  -f ./.devcontainer/docker-compose.typesense.yaml \
-  -f ./.devcontainer/docker-compose.mailpit.yaml \
-  -f ./.devcontainer/docker-compose.drizzle-gateway.yaml \
+  --file ./.devcontainer/docker-compose.postgres.yaml \
+  --file ./.devcontainer/docker-compose.typesense.yaml \
+  --file ./.devcontainer/docker-compose.mailpit.yaml \
+  --file ./.devcontainer/docker-compose.drizzle-gateway.yaml \
   up --detach
 ```
 
@@ -37,10 +37,10 @@ to stop the services and automatically clean up any created volumes:
 ```bash
 docker compose \
   --env-file=./.devcontainer/.env \
-  -f ./.devcontainer/docker-compose.postgres.yaml \
-  -f ./.devcontainer/docker-compose.typesense.yaml \
-  -f ./.devcontainer/docker-compose.mailpit.yaml \
-  -f ./.devcontainer/docker-compose.drizzle-gateway.yaml \
+  --file ./.devcontainer/docker-compose.postgres.yaml \
+  --file ./.devcontainer/docker-compose.typesense.yaml \
+  --file ./.devcontainer/docker-compose.mailpit.yaml \
+  --file ./.devcontainer/docker-compose.drizzle-gateway.yaml \
   down --volumes
 ```
 
