@@ -97,5 +97,5 @@ internally, this will invoke scripts from the `db-client` package, and pass in e
 from `.devcontainer/.env`:
 
 ```bash
-dotenv ./.devcontainer/.env -- pnpm run --filter @dariah-eric/db-client db:migrations:create
+dotenv ./.devcontainer/.env -- pnpm run --filter @dariah-eric/dariah-knowledge-base-db-client db:migrations:create
 ```
