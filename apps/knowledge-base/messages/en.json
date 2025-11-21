@@ -169,6 +169,12 @@
 		},
 		"title": "Website dashboard"
 	},
+	"DashboardWebsiteAssetsPage": {
+		"meta": {
+			"title": "Website dashboard - Assets"
+		},
+		"title": "Assets"
+	},
 	"DashboardWebsiteEventsPage": {
 		"meta": {
 			"title": "Website dashboard - Events"
@@ -186,6 +192,12 @@
 			"title": "Website dashboard - Metadata"
 		},
 		"title": "Metadata"
+	},
+	"DashboardWebsiteNavigationPage": {
+		"meta": {
+			"title": "Website dashboard - Navigation"
+		},
+		"title": "Navigation"
 	},
 	"DashboardWebsiteNewsPage": {
 		"meta": {
