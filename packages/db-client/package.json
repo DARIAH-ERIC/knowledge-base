@@ -1,0 +1,68 @@
+{
+	"name": "@dariah-eric/dariah-knowledge-base-db-client",
+	"private": true,
+	"license": "MIT",
+	"type": "module",
+	"engines": {
+		"node": "^24"
+	},
+	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": "^24",
+			"onFail": "download"
+		}
+	},
+	"packageManager": "pnpm@10.21.0",
+	"scripts": {
+		"db:generate": "dotenv -e ./../../apps/knowledge-base/.env.local -- drizzle-kit generate --config ./config/drizzle.config.ts",
+		"db:migrate": "dotenv -e ./../../apps/knowledge-base/.env.local -- drizzle-kit migrate --config ./config/drizzle.config.ts",
+		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore",
+		"format:fix": "pnpm run format:check --write",
+		"lint:check": "run-p --continue-on-error \"lint:*:check\"",
+		"lint:fix": "run-p --continue-on-error \"lint:*:fix\"",
+		"lint:code:check": "eslint . --flag unstable_native_nodejs_ts_config",
+		"lint:code:fix": "pnpm run lint:code:check --fix",
+		"types:check": "tsc --noEmit",
+		"types:prepare": "ENV_VALIDATION=\"disabled\" next typegen"
+	},
+	"dependencies": {
+		"@acdh-oeaw/lib": "catalog:",
+		"@acdh-oeaw/validate-env": "catalog:",
+		"drizzle-orm": "catalog:",
+		"pg": "catalog:",
+		"valibot": "catalog:"
+	},
+	"devDependencies": {
+		"@acdh-oeaw/eslint-config": "catalog:",
+		"@acdh-oeaw/eslint-config-node": "catalog:",
+		"@acdh-oeaw/prettier-config": "catalog:",
+		"@acdh-oeaw/stylelint-config": "catalog:",
+		"@acdh-oeaw/tsconfig": "catalog:",
+		"@types/node": "catalog:",
+		"@types/pg": "catalog:",
+		"dotenv": "catalog:",
+		"dotenv-cli": "catalog:",
+		"dotenv-expand": "catalog:",
+		"drizzle-kit": "catalog:",
+		"eslint": "catalog:",
+		"eslint-config-flat-gitignore": "catalog:",
+		"eslint-plugin-check-file": "catalog:",
+		"eslint-plugin-perfectionist": "catalog:",
+		"eslint-plugin-unicorn": "catalog:",
+		"globals": "catalog:",
+		"prettier": "catalog:",
+		"tsx": "catalog:",
+		"typescript": "catalog:"
+	},
+	"lint-staged": {
+		"*.@(js|ts|tsx)": [
+			"eslint --fix --flag unstable_native_nodejs_ts_config",
+			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --write"
+		]
+	},
+	"prettier": "@acdh-oeaw/prettier-config",
+	"simple-git-hooks": {
+		"pre-commit": "pnpm exec lint-staged"
+	}
+}
