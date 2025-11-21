@@ -6,5 +6,5 @@ export const credentials = {
 	host: env.DATABASE_HOST,
 	port: env.DATABASE_PORT,
 	database: env.DATABASE_NAME,
-	ssl: env.DATABASE_USE_SSL_CONNECTION
+	ssl: env.DATABASE_USE_SSL_CONNECTION,
 };
