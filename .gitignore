@@ -49,3 +49,6 @@ blob-report/
 playwright/.cache/
 playwright-report/
 test-results/
+
+# turborepo
+.turbo/
