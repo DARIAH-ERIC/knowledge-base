@@ -13,7 +13,7 @@
 			"onFail": "download"
 		}
 	},
-	"packageManager": "pnpm@10.21.0",
+	"packageManager": "pnpm@10.24.0",
 	"scripts": {
 		"analyze": "TURBOPACK_STATS=1 next build --experimental-next-config-strip-types && echo '\n✅ Saved stats to \".next/server/webpack-stats.json\". Analyze at \"https://statoscope.tech\".'",
 		"build": "next build --experimental-next-config-strip-types",
@@ -26,8 +26,7 @@
 		"lint:code:fix": "pnpm run lint:code:check --fix",
 		"lint:styles:check": "stylelint \"./styles/**/*.css\" --cache --ignore-path ./../../.gitignore",
 		"lint:styles:fix": "pnpm run lint:styles:check --fix",
-		"prepare": "run-s setup types:prepare",
-		"setup": "is-in-ci || simple-git-hooks",
+		"prepare": "run-s types:prepare",
 		"start": "next start --experimental-next-config-strip-types",
 		"test:e2e": "playwright test --config ./e2e/playwright.config.ts",
 		"test:e2e:codegen": "playwright codegen",
@@ -41,6 +40,7 @@
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/style-variants": "catalog:",
 		"@acdh-oeaw/validate-env": "catalog:",
+		"@dariah-eric/dariah-knowledge-base-database-client": "workspace:^",
 		"@heroicons/react": "catalog:",
 		"@react-aria/utils": "catalog:",
 		"@sentry/nextjs": "catalog:",
@@ -91,6 +91,7 @@
 		"eslint": "catalog:",
 		"eslint-config-flat-gitignore": "catalog:",
 		"eslint-plugin-check-file": "catalog:",
+		"eslint-plugin-drizzle": "catalog:",
 		"eslint-plugin-perfectionist": "catalog:",
 		"eslint-plugin-unicorn": "catalog:",
 		"globals": "catalog:",
@@ -132,9 +133,6 @@
 		}
 	},
 	"prettier": "@acdh-oeaw/prettier-config",
-	"simple-git-hooks": {
-		"pre-commit": "pnpm exec lint-staged"
-	},
 	"stylelint": {
 		"extends": "@acdh-oeaw/stylelint-config"
 	}
