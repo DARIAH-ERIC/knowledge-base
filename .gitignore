@@ -34,6 +34,9 @@ node_modules/
 next-env.d.ts
 out/
 
+# package build artefacts
+dist/
+
 # self-signed certificates
 certificates/
 

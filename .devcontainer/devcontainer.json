@@ -4,7 +4,9 @@
 		"docker-compose.postgres.yaml",
 		"docker-compose.app.yaml",
 		"docker-compose.drizzle-gateway.yaml",
+		"docker-compose.imgproxy.yaml",
 		"docker-compose.mailpit.yaml",
+		"docker-compose.pgadmin.yaml",
 		"docker-compose.typesense.yaml"
 	],
 	"service": "app",
@@ -28,30 +30,50 @@
 	},
 	"forwardPorts": [
 		3000,
-		"postgres:5432",
 		"drizzle-gateway:4983",
-		"typesense:8108",
+		"imgproxy:8080",
 		"mailpit:1025",
-		"mailpit:8025"
+		"mailpit:8025",
+		"minio:9000",
+		"minio:9001",
+		"pgadmin:5555",
+		"postgres:5432",
+		"typesense:8108",
+		"typesense-dashboard:5050"
 	],
 	"portsAttributes": {
 		"3000": {
 			"label": "Next.js Frontend"
 		},
-		"postgres:5432": {
-			"label": "PostgreSQL"
-		},
 		"drizzle-gateway:4983": {
 			"label": "Drizzle UI"
 		},
-		"typesense:8108": {
-			"label": "Typesense"
+		"imgproxy:8080": {
+			"label": "Imgproxy"
 		},
 		"mailpit:1025": {
 			"label": "Mailpit SMTP Server"
 		},
 		"mailpit:8025": {
 			"label": "Mailpit API and Web UI"
+		},
+		"minio:9000": {
+			"label": "MinIO"
+		},
+		"minio:9001": {
+			"label": "MinIO Web UI"
+		},
+		"pgadmin:5555": {
+			"label": "pgAdmin"
+		},
+		"postgres:5432": {
+			"label": "PostgreSQL"
+		},
+		"typesense:8108": {
+			"label": "Typesense"
+		},
+		"typesense-dashboard:5050": {
+			"label": "Typesense Dashboard"
 		}
 	},
 	"remoteUser": "node"

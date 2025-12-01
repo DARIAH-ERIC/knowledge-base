@@ -53,7 +53,7 @@ async function getIntlMessages(locale: IntlLocale) {
 		..._messages,
 		metadata: {
 			..._metadata,
-			social: _social as Record<SocialMediaKind, string>,
+			social: _social as Record<SocialMediaKind, string | undefined>,
 		},
 	};
 

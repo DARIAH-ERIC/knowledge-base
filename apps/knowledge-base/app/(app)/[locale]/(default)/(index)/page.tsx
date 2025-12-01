@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { useTranslations } from "next-intl";
-import { Fragment, type ReactNode } from "react";
+import type { ReactNode } from "react";
+
+import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 
 export function generateMetadata(): Metadata {
 	const metadata: Metadata = {
@@ -19,9 +21,15 @@ export default function IndexPage(): ReactNode {
 	const t = useTranslations("IndexPage");
 
 	return (
-		<Fragment>
-			<h1>{t("title")}</h1>
-			<p></p>
-		</Fragment>
+		<Main className="container flex-1 px-8 py-12 xs:px-16">
+			<section className="flex min-h-full flex-col items-center justify-center gap-y-4 py-24">
+				<h1 className="text-center text-6xl font-extrabold tracking-tight text-text-strong">
+					{t("title")}
+				</h1>
+				<p className="text-center text-2xl font-medium tracking-tight text-text-weak">
+					{t("lead")}
+				</p>
+			</section>
+		</Main>
 	);
 }

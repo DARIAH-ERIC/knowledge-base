@@ -1,6 +1,7 @@
 "use client";
 
 import { log } from "@acdh-oeaw/lib";
+import * as Sentry from "@sentry/nextjs";
 import { type ReactNode, useEffect } from "react";
 
 import { DocumentBody } from "@/app/_components/document-body";
@@ -37,8 +38,8 @@ export default function GlobalErrorPage(props: Readonly<GlobalErrorPageProps>): 
 	};
 
 	useEffect(() => {
-		// TODO: Log the error to an error reporting service.
 		log.error(error);
+		Sentry.captureException(error);
 	}, [error]);
 
 	return (
