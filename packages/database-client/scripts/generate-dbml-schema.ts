@@ -6,7 +6,7 @@ import { pgGenerate } from "drizzle-dbml-generator";
 import * as schema from "../src/schema";
 
 // eslint-disable-next-line @typescript-eslint/require-await
-async function generate() {
+async function main() {
 	const { positionals } = parseArgs({ allowPositionals: true });
 	const out = positionals.at(0);
 
@@ -19,6 +19,6 @@ async function generate() {
 	}
 }
 
-generate().catch((error: unknown) => {
+main().catch((error: unknown) => {
 	log.error("Failed to generate dbml schema.\n", error);
 });
