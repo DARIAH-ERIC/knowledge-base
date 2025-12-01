@@ -1,16 +1,16 @@
 import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
 
-import { timestamps, uuidv7 } from "../fields";
+import * as f from "../fields";
 import { lower } from "../functions";
 
 export const users = p.pgTable(
 	"users",
 	{
-		id: uuidv7().primaryKey().notNull(),
+		id: f.uuidv7().primaryKey(),
 		email: p.text().notNull(),
 		username: p.text().notNull(),
-		...timestamps(),
+		...f.timestamps(),
 	},
 	(table) => {
 		return [p.uniqueIndex("users_email_index").on(lower(table.email))];
