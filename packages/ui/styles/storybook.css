@@ -1,0 +1,26 @@
+/*
+ * Imports.
+ * ============================================================================
+ */
+@import "@fontsource-variable/inter/standard.css";
+@import "@fontsource-variable/inter/standard-italic.css";
+@import "@fontsource-variable/fira-code";
+
+/*
+ * Fonts.
+ * ============================================================================
+ */
+:root {
+	--_font-body: "Inter Variable";
+	--_font-code: "Fira Code Variable";
+}
+
+/*
+ * Storybook.
+ * ============================================================================
+ */
+.docs-story {
+	background-color: var(--color-background-base);
+	color: var(--color-text-strong);
+	font-family: var(--font-body);
+}
