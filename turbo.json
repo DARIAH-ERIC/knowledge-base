@@ -1,5 +1,13 @@
 {
 	"$schema": "https://turborepo.com/schema.v2.json",
+	"globalEnv": [
+		"DATABASE_HOST",
+		"DATABASE_NAME",
+		"DATABASE_PASSWORD",
+		"DATABASE_PORT",
+		"DATABASE_USER"
+	],
+	"globalPassThroughEnv": ["CI", "NODE_ENV"],
 	"tasks": {
 		"build": {
 			"dependsOn": ["^build"],
@@ -37,5 +45,5 @@
 			"dependsOn": ["^types:check"]
 		}
 	},
-	"ui": "stream"
+	"ui": "tui"
 }
