@@ -16,6 +16,6 @@ export default defineConfig({
 	minify: false,
 	sourcemap: true,
 	treeshake: true,
-	tsconfig: "tsconfig.build.json",
+	tsconfig: "./tsconfig.build.json",
 	unbundle: true,
 });

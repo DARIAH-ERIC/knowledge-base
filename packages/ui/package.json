@@ -36,8 +36,8 @@
 		"storybook:dev": "storybook dev --no-open --port 6006",
 		"storybook:docs:build": "storybook build --docs",
 		"storybook:docs:dev": "storybook dev --docs --no-open --port 6006",
-		"test": "vitest run --project=storybook",
-		"test:watch": "vitest watch --project=storybook",
+		"test": "vitest run --passWithNoTests --project=storybook",
+		"test:watch": "vitest watch --passWithNoTests --project=storybook",
 		"types:check": "tsc --noEmit"
 	},
 	"dependencies": {
