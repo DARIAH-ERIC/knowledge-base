@@ -2,16 +2,16 @@ name: Validate
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}-validate"
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 on:
-  workflow_dispatch:
   pull_request:
     branches:
       - main
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   validate:
@@ -48,17 +48,17 @@ jobs:
       NEXT_PUBLIC_TYPESENSE_HOST: "localhost"
       NEXT_PUBLIC_TYPESENSE_PORT: "8108"
       NEXT_PUBLIC_TYPESENSE_PROTOCOL: "http"
-      S3_ACCESS_KEY: "abc"
+      S3_ACCESS_KEY: "c8c7bab1e784e088780bdc97876cfdc0"
       S3_BUCKET: "dariah-knowledge-base"
       S3_HOST: "localhost"
       S3_PORT: "9000"
       S3_PROTOCOL: "http"
-      S3_SECRET_KEY: "xyz"
-      TYPESENSE_ADMIN_API_KEY: "xyz"
+      S3_SECRET_KEY: "f98c5ba01f5e5781f0eb09d7b74b36bc8c10cc67b010cead4fcbe8c1605ccf33"
+      TYPESENSE_ADMIN_API_KEY: "050b1c25823ea77fe35fa8814373a000b031e27d27fb38b3d2b573cc1516f8da"
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
