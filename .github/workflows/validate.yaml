@@ -63,11 +63,14 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
+
+      - name: Install turborepo cli globally
+        run: pnpm add --global turbo
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -106,7 +109,7 @@ jobs:
         run: pnpm exec playwright install-deps
 
       # https://nextjs.org/docs/pages/building-your-application/deploying/ci-build-caching#github-actions
-      - name: Cache Next.js build output
+      - name: Cache next.js build output
         uses: actions/cache@v4
         with:
           path: "${{ github.workspace }}/.next/cache"
