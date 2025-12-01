@@ -8,6 +8,7 @@ import storybookConfig from "@acdh-oeaw/eslint-config-storybook";
 import tailwindConfig from "@acdh-oeaw/eslint-config-tailwindcss";
 import { defineConfig, globalIgnores } from "eslint/config";
 import gitignore from "eslint-config-flat-gitignore";
+import turboConfig from "eslint-config-turbo/flat";
 import checkFilePlugin from "eslint-plugin-check-file";
 import perfectionistPlugin from "eslint-plugin-perfectionist";
 import unicornPlugin from "eslint-plugin-unicorn";
@@ -164,4 +165,5 @@ export default defineConfig(
 			],
 		},
 	},
+	turboConfig,
 );

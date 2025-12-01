@@ -54,6 +54,7 @@ catalog:
   drizzle-valibot: ^0.4.2-7722e6a
   eslint: ^9.39.1
   eslint-config-flat-gitignore: ^2.1.0
+  eslint-config-turbo: ^2.6.1
   eslint-plugin-check-file: ^3.3.1
   eslint-plugin-drizzle: ^0.2.3-7722e6a
   eslint-plugin-perfectionist: ^4.15.1
