@@ -26,4 +26,5 @@ async function main() {
 
 main().catch((error: unknown) => {
 	log.error("Failed to seed database.\n", error);
+	process.exitCode = 1;
 });

@@ -21,4 +21,5 @@ async function main() {
 
 main().catch((error: unknown) => {
 	log.error("Failed to generate dbml schema.\n", error);
+	process.exitCode = 1;
 });
