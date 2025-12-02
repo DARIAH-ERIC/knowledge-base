@@ -28,10 +28,16 @@
 		"S3_HOST",
 		"S3_PORT",
 		"S3_PROTOCOL",
-		"S3_SECRET_KEY",
+		"S3_SECRET_KEY"
+	],
+	"globalPassThroughEnv": [
+		"CI",
+		"ENV_VALIDATION",
+		"NEXT_RUNTIME",
+		"MAILPIT_API_BASE_URL",
+		"SENTRY_AUTH_TOKEN",
 		"TYPESENSE_ADMIN_API_KEY"
 	],
-	"globalPassThroughEnv": ["CI", "ENV_VALIDATION", "NEXT_RUNTIME"],
 	"tasks": {
 		"build": {
 			"dependsOn": ["^build"],
