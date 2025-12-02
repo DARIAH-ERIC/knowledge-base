@@ -61,6 +61,7 @@
 		"@acdh-oeaw/prettier-config": "catalog:",
 		"@acdh-oeaw/stylelint-config": "catalog:",
 		"@acdh-oeaw/tsconfig": "catalog:",
+		"@chromatic-com/storybook": "catalog:",
 		"@fontsource-variable/fira-code": "catalog:",
 		"@fontsource-variable/inter": "catalog:",
 		"@storybook/addon-a11y": "catalog:",
