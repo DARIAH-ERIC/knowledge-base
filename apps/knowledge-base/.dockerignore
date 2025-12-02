@@ -18,6 +18,9 @@ node_modules/
 .stylelintcache
 *.tsbuildinfo
 
+# turborepo
+.turbo/
+
 # performance profiles
 *.cpuprofile
 *.heapprofile
@@ -51,9 +54,6 @@ out/
 /playwright/.cache/
 /playwright-report/
 /test-results/
-
-# turborepo
-.turbo/
 
 
 ## .dockerignore ##

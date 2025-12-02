@@ -37,36 +37,69 @@
 			"dependsOn": ["^build"],
 			"env": ["BUILD_MODE"],
 			"inputs": ["$TURBO_DEFAULT$", ".env", ".env.*"],
-			"outputs": [".next/**", "!.next/cache/**", "dist/**", "out/**"]
+			"outputs": [".next/**", "!.next/cache/**", "dist/**", "out/**", "tsconfig.tsbuildinfo"]
 		},
-		"dev": {
+		"db:migrations:apply": {
+			"cache": false
+		},
+		"db:migrations:check": {
+			"cache": false
+		},
+		"db:migrations:generate": {
+			"cache": false,
+			"interactive": true
+		},
+		"db:push": {
+			"cache": false,
+			"interactive": true
+		},
+		"db:studio": {
 			"cache": false,
 			"persistent": true
 		},
-		"//#format:check": {},
-		"//#format:fix": {},
-		"format:check": {},
-		"format:fix": {},
+		"dev": {
+			"cache": false,
+			"dependsOn": ["^dev"],
+			"persistent": true
+		},
+		"//#format:check": {
+			"outputs": [".prettiercache"]
+		},
+		"//#format:fix": {
+			"outputs": [".prettiercache"]
+		},
+		"format:check": {
+			"outputs": [".prettiercache"]
+		},
+		"format:fix": {
+			"outputs": [".prettiercache"]
+		},
 		"lint:check": {
-			"dependsOn": ["^lint:check"]
+			"dependsOn": ["^topo", "^build", "^lint:check"],
+			"outputs": [".eslintcache", ".stylelintcache"]
 		},
 		"lint:fix": {
-			"dependsOn": ["^lint:fix"]
+			"dependsOn": ["^topo", "^build", "^lint:fix"],
+			"outputs": [".eslintcache", ".stylelintcache"]
 		},
 		"start": {
-			"dependsOn": ["build"]
+			"dependsOn": ["^build"]
 		},
 		"test": {},
 		"test:e2e": {
-			"dependsOn": ["build"],
+			"dependsOn": ["^build"],
 			"env": ["PLAYWRIGHT_TEST_APP_BASE_URL", "PORT"]
 		},
 		"test:e2e:update-snapshots": {
-			"dependsOn": ["build"],
+			"dependsOn": ["^build"],
 			"env": ["PLAYWRIGHT_TEST_APP_BASE_URL", "PORT"]
 		},
+		"topo": {
+			"dependsOn": ["^topo"]
+		},
 		"types:check": {
-			"dependsOn": ["^types:check"]
+			"dependsOn": ["^topo", "^build", "^types:check"],
+			"outputs": ["tsconfig.tsbuildinfo"]
 		}
 	},
 	"ui": "tui"

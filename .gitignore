@@ -21,6 +21,9 @@ node_modules/
 *.heapprofile
 *.heapsnapshot
 
+# turborepo
+.turbo/
+
 # vercel
 .vercel
 
@@ -52,6 +55,3 @@ blob-report/
 playwright/.cache/
 playwright-report/
 test-results/
-
-# turborepo
-.turbo/
