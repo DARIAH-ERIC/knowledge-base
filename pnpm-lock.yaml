@@ -528,18 +528,6 @@ importers:
       '@types/pg':
         specifier: 'catalog:'
         version: 8.15.6
-      concurrently:
-        specifier: 'catalog:'
-        version: 9.2.1
-      dotenv:
-        specifier: 'catalog:'
-        version: 17.2.3
-      dotenv-cli:
-        specifier: 'catalog:'
-        version: 11.0.0
-      dotenv-expand:
-        specifier: 'catalog:'
-        version: 12.0.3
       drizzle-dbml-generator:
         specifier: 'catalog:'
         version: 0.10.0(drizzle-orm@1.0.0-beta.1-7722e6a(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(pg@8.16.3))
@@ -573,9 +561,6 @@ importers:
       node:
         specifier: runtime:^24
         version: runtime:24.11.1
-      npm-run-all2:
-        specifier: 'catalog:'
-        version: 8.0.4
       prettier:
         specifier: 'catalog:'
         version: 3.6.2
