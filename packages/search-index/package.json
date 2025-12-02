@@ -1,0 +1,79 @@
+{
+	"name": "@dariah-eric/dariah-knowledge-base-search-index",
+	"private": true,
+	"license": "MIT",
+	"type": "module",
+	"engines": {
+		"node": "^24"
+	},
+	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": "^24",
+			"onFail": "download"
+		}
+	},
+	"packageManager": "pnpm@10.24.0",
+	"exports": {
+		"./client": {
+			"types": "./dist/src/client.d.ts",
+			"default": "./src/client.ts"
+		},
+		"./schema": {
+			"types": "./dist/src/schema.d.ts",
+			"default": "./src/schema.ts"
+		}
+	},
+	"sideEffects": false,
+	"scripts": {
+		"build": "rm -rf dist && tsc --project ./tsconfig.build.json",
+		"dev": "tsc --preserveWatchOutput --project ./tsconfig.build.json --watch",
+		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
+		"format:fix": "pnpm run format:check --write",
+		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
+		"lint:fix": "pnpm run lint:code:check --fix",
+		"search-index:api-keys:generate": "tsx ./scripts/generate-search-api-key.ts",
+		"search-index:collections:create": "tsx ./scripts/create-collection.ts",
+		"search-index:collections:ingest": "tsx ./scripts/ingest.ts",
+		"search-index:collections:seed": "tsx ./scripts/seed.ts",
+		"types:check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@acdh-oeaw/lib": "catalog:",
+		"is-network-error": "catalog:",
+		"typesense": "catalog:",
+		"valibot": "catalog:"
+	},
+	"devDependencies": {
+		"@acdh-oeaw/eslint-config": "catalog:",
+		"@acdh-oeaw/eslint-config-node": "catalog:",
+		"@acdh-oeaw/prettier-config": "catalog:",
+		"@acdh-oeaw/tsconfig": "catalog:",
+		"@faker-js/faker": "catalog:",
+		"@types/node": "catalog:",
+		"eslint": "catalog:",
+		"eslint-config-flat-gitignore": "catalog:",
+		"eslint-plugin-check-file": "catalog:",
+		"eslint-plugin-unicorn": "catalog:",
+		"globals": "catalog:",
+		"prettier": "catalog:",
+		"tsx": "catalog:",
+		"typescript": "catalog:"
+	},
+	"browserslist": {
+		"development": [
+			"baseline newly available"
+		],
+		"production": [
+			"baseline widely available"
+		]
+	},
+	"lint-staged": {
+		"*.@(js|ts)": [
+			"eslint --fix --flag unstable_native_nodejs_ts_config",
+			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write"
+		],
+		"*.!(js|ts)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
+	},
+	"prettier": "@acdh-oeaw/prettier-config"
+}
