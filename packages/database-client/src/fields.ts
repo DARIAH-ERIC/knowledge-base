@@ -26,7 +26,7 @@ export function timestamps() {
 			.notNull()
 			.defaultNow()
 			.$onUpdate(() => {
-				return new Date();
+				return sql`CURRENT_TIMESTAMP`;
 			}),
 		deletedAt: p.timestamp({
 			mode: "date",
