@@ -40,8 +40,8 @@ catalogs:
       specifier: ^1.5.1
       version: 1.5.1
     '@acdh-oeaw/validate-env':
-      specifier: ^0.1.1
-      version: 0.1.1
+      specifier: ^0.2.1
+      version: 0.2.1
     '@heroicons/react':
       specifier: ^2.2.0
       version: 2.2.0
@@ -291,7 +291,7 @@ importers:
         version: 0.1.0
       '@acdh-oeaw/validate-env':
         specifier: 'catalog:'
-        version: 0.1.1(typescript@5.9.3)
+        version: 0.2.1(typescript@5.9.3)
       '@dariah-eric/dariah-knowledge-base-database-client':
         specifier: workspace:^
         version: link:../../packages/database-client
@@ -497,6 +497,9 @@ importers:
       '@acdh-oeaw/lib':
         specifier: 'catalog:'
         version: 0.3.5
+      '@acdh-oeaw/validate-env':
+        specifier: 'catalog:'
+        version: 0.2.1(typescript@5.9.3)
       drizzle-orm:
         specifier: 'catalog:'
         version: 1.0.0-beta.2-e93475f(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.15.6)(mssql@11.0.1)(pg@8.16.3)
@@ -634,8 +637,8 @@ packages:
     peerDependencies:
       typescript: '>=5.8'
 
-  '@acdh-oeaw/validate-env@0.1.1':
-    resolution: {integrity: sha512-E3SHFNDblbPA4N0Jtn3bktKEYkAqCxf5dG0HKXuqTQWcM9XQBmKkez1muuLUQOAvEk4RGow1LWAtSOjOd04faQ==}
+  '@acdh-oeaw/validate-env@0.2.1':
+    resolution: {integrity: sha512-HuU7IwYhvumCQN1Nk1wppujSEvXl03JZ4G8oGuhDG01Kepq86GNq0OKPEgenA74teyTTHu3B7N5buCfq5edINQ==}
     engines: {node: ^22 || ^24}
     peerDependencies:
       typescript: '>=5.4'
@@ -6198,7 +6201,7 @@ snapshots:
     dependencies:
       typescript: 5.9.3
 
-  '@acdh-oeaw/validate-env@0.1.1(typescript@5.9.3)':
+  '@acdh-oeaw/validate-env@0.2.1(typescript@5.9.3)':
     dependencies:
       '@acdh-oeaw/lib': 0.3.5
       typescript: 5.9.3
