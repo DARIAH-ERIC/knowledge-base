@@ -93,7 +93,7 @@ export async function getDocuments(): Promise<Result<Array<CollectionDocument>, 
 		pages = data.pages;
 
 		documents.push(
-			...data.items.map((item) => {
+			...data.items.map<CollectionDocument>((item) => {
 				const keywords = [];
 
 				for (const property of item.properties) {
@@ -121,19 +121,46 @@ export async function getDocuments(): Promise<Result<Array<CollectionDocument>, 
 				const source_id = item.persistentId;
 				const id = [source, source_id].join(":");
 
-				const document: CollectionDocument = {
+				const document = {
 					id,
 					source,
 					source_id,
 					imported_at: Date.now(),
-					kind: item.category,
 					title: item.label,
 					description: item.description,
 					keywords,
 					links,
-				};
+				} satisfies Partial<CollectionDocument>;
 
-				return document;
+				switch (item.category) {
+					case "tool-or-service": {
+						const isCoreService = item.properties.some((property) => {
+							return (
+								property.type.code === "keyword" && property.concept.label === "DARIAH Core Service"
+							);
+						});
+
+						return {
+							...document,
+							kind: "tool-or-service",
+							type: isCoreService ? "core" : "community",
+						};
+					}
+
+					case "training-material": {
+						return {
+							...document,
+							kind: "training-material",
+						};
+					}
+
+					case "workflow": {
+						return {
+							...document,
+							kind: "workflow",
+						};
+					}
+				}
 			}),
 		);
 	} while (page++ <= pages);

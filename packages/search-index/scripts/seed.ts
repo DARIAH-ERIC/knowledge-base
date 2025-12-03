@@ -51,7 +51,7 @@ function generateDocuments() {
 					},
 					{ count: { min: 1, max: 3 } },
 				),
-			};
+			} satisfies Partial<CollectionDocument>;
 
 			switch (kind) {
 				case "publication": {
@@ -84,6 +84,7 @@ function generateDocuments() {
 						kind,
 						source: "ssh-open-marketplace",
 						source_id: faker.string.alphanumeric(12),
+						type: faker.helpers.arrayElement(["community", "core"]),
 					};
 				}
 

@@ -43,6 +43,7 @@ interface PublicationDocument extends CollectionDocumentBase {
 interface ToolOrServiceDocument extends CollectionDocumentBase {
 	kind: "tool-or-service";
 	source: "ssh-open-marketplace";
+	type: "community" | "core";
 }
 
 interface TrainingMaterialDocument extends CollectionDocumentBase {
