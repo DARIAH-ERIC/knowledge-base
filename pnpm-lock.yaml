@@ -555,9 +555,6 @@ importers:
       globals:
         specifier: 'catalog:'
         version: 16.5.0
-      is-in-ci:
-        specifier: 'catalog:'
-        version: 2.0.0
       node:
         specifier: runtime:^24
         version: runtime:24.11.1

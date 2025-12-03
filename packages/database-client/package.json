@@ -43,10 +43,10 @@
 		"db:studio": "drizzle-kit studio --config=./config/drizzle.config.ts",
 		"dev": "tsc --preserveWatchOutput --project ./tsconfig.build.json --watch",
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
-		"format:fix": "pnpm run format:check --write",
+		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
 		"generate:dbml-schema": "tsx ./scripts/generate-dbml-schema.ts",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
-		"lint:fix": "pnpm run lint:code:check --fix",
+		"lint:fix": "eslint . --flag unstable_native_nodejs_ts_config --fix",
 		"types:check": "tsc --noEmit"
 	},
 	"dependencies": {
@@ -72,7 +72,6 @@
 		"eslint-plugin-drizzle": "catalog:",
 		"eslint-plugin-unicorn": "catalog:",
 		"globals": "catalog:",
-		"is-in-ci": "catalog:",
 		"prettier": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:"
