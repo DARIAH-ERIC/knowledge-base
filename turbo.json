@@ -59,6 +59,9 @@
 			"cache": false,
 			"interactive": true
 		},
+		"db:seed": {
+			"cache": false
+		},
 		"db:studio": {
 			"cache": false,
 			"persistent": true
@@ -87,6 +90,18 @@
 		"lint:fix": {
 			"dependsOn": ["^topo", "^build", "^lint:fix"],
 			"outputs": [".eslintcache", ".stylelintcache"]
+		},
+		"search-index:api-keys:generate": {
+			"cache": false
+		},
+		"search-index:collections:create": {
+			"cache": false
+		},
+		"search-index:collections:ingest": {
+			"cache": false
+		},
+		"search-index:collections:seed": {
+			"cache": false
 		},
 		"start": {
 			"dependsOn": ["^build"]
