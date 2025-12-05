@@ -1,0 +1,127 @@
+{
+	"$schema": "https://turborepo.com/schema.v2.json",
+	"globalEnv": [
+		"BUILD_MODE",
+		"DATABASE_HOST",
+		"DATABASE_NAME",
+		"DATABASE_PASSWORD",
+		"DATABASE_PORT",
+		"DATABASE_SSL_CONNECTION",
+		"DATABASE_USER",
+		"EMAIL_ADDRESS",
+		"EMAIL_SMTP_PASSWORD",
+		"EMAIL_SMTP_PORT",
+		"EMAIL_SMTP_SERVER",
+		"EMAIL_SMTP_USERNAME",
+		"IMGPROXY_BASE_URL",
+		"IMGPROXY_KEY",
+		"IMGPROXY_PORT",
+		"IMGPROXY_SALT",
+		"NEXT_PUBLIC_TYPESENSE_COLLECTION_NAME",
+		"NEXT_PUBLIC_TYPESENSE_HOST",
+		"NEXT_PUBLIC_TYPESENSE_PORT",
+		"NEXT_PUBLIC_TYPESENSE_PROTOCOL",
+		"NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY",
+		"NODE_ENV",
+		"S3_BUCKET",
+		"S3_ACCESS_KEY",
+		"S3_HOST",
+		"S3_PORT",
+		"S3_PROTOCOL",
+		"S3_SECRET_KEY"
+	],
+	"globalPassThroughEnv": [
+		"CI",
+		"ENV_VALIDATION",
+		"NEXT_RUNTIME",
+		"MAILPIT_API_BASE_URL",
+		"SENTRY_AUTH_TOKEN",
+		"TYPESENSE_ADMIN_API_KEY"
+	],
+	"tasks": {
+		"build": {
+			"dependsOn": ["^build"],
+			"env": ["BUILD_MODE"],
+			"inputs": ["$TURBO_DEFAULT$", ".env", ".env.*"],
+			"outputs": [".next/**", "!.next/cache/**", "dist/**", "out/**", "tsconfig.tsbuildinfo"]
+		},
+		"db:migrations:apply": {
+			"cache": false
+		},
+		"db:migrations:check": {
+			"cache": false
+		},
+		"db:migrations:generate": {
+			"cache": false,
+			"interactive": true
+		},
+		"db:push": {
+			"cache": false,
+			"interactive": true
+		},
+		"db:seed": {
+			"cache": false
+		},
+		"db:studio": {
+			"cache": false,
+			"persistent": true
+		},
+		"dev": {
+			"cache": false,
+			"dependsOn": ["^dev"],
+			"persistent": true
+		},
+		"//#format:check": {
+			"outputs": [".prettiercache"]
+		},
+		"//#format:fix": {
+			"outputs": [".prettiercache"]
+		},
+		"format:check": {
+			"outputs": [".prettiercache"]
+		},
+		"format:fix": {
+			"outputs": [".prettiercache"]
+		},
+		"lint:check": {
+			"dependsOn": ["^topo", "^build", "^lint:check"],
+			"outputs": [".eslintcache", ".stylelintcache"]
+		},
+		"lint:fix": {
+			"dependsOn": ["^topo", "^build", "^lint:fix"],
+			"outputs": [".eslintcache", ".stylelintcache"]
+		},
+		"search-index:api-keys:generate": {
+			"cache": false
+		},
+		"search-index:collections:create": {
+			"cache": false
+		},
+		"search-index:collections:ingest": {
+			"cache": false
+		},
+		"search-index:collections:seed": {
+			"cache": false
+		},
+		"start": {
+			"dependsOn": ["^build"]
+		},
+		"test": {},
+		"test:e2e": {
+			"dependsOn": ["^build"],
+			"env": ["PLAYWRIGHT_TEST_APP_BASE_URL", "PORT"]
+		},
+		"test:e2e:update-snapshots": {
+			"dependsOn": ["^build"],
+			"env": ["PLAYWRIGHT_TEST_APP_BASE_URL", "PORT"]
+		},
+		"topo": {
+			"dependsOn": ["^topo"]
+		},
+		"types:check": {
+			"dependsOn": ["^topo", "^build", "^types:check"],
+			"outputs": ["tsconfig.tsbuildinfo"]
+		}
+	},
+	"ui": "tui"
+}
