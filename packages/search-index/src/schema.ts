@@ -9,7 +9,7 @@ export const collection = createCollection({
 		{ name: "description", type: "string" },
 		{ name: "keywords", type: "string[]" },
 		{ name: "links", type: "string[]" },
-		{ name: "actor_ids", type: "string[]" },
+		{ name: "actor_ids", type: "string[]", optional: true },
 	],
 	queryableFields: ["label", "description", "actor_ids"],
 	facetableFields: ["keywords", "kind", "actor_ids"],
