@@ -7,9 +7,9 @@ import { lower } from "../functions";
 export const users = p.pgTable(
 	"users",
 	{
-		id: f.uuidv7().primaryKey(),
-		email: p.text().notNull(),
-		username: p.text().notNull(),
+		id: f.uuidv7("id").primaryKey(),
+		email: p.text("email").notNull(),
+		username: p.text("username").notNull(),
 		...f.timestamps(),
 	},
 	(t) => {

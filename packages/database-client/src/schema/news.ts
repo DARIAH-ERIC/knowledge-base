@@ -8,19 +8,19 @@ import { assets } from "./assets";
 export const news = p.pgTable(
 	"news",
 	{
-		id: f.uuidv7().primaryKey(),
-		title: p.text().notNull(),
-		summary: p.text().notNull(),
+		id: f.uuidv7("id").primaryKey(),
+		title: p.text("title").notNull(),
+		summary: p.text("summary").notNull(),
 		imageId: f
-			.uuidv7()
+			.uuidv7("image_id")
 			.notNull()
 			.references(() => {
 				return assets.id;
 			}),
-		description: p.text().notNull(),
-		slug: p.text().notNull().unique(),
-		documentId: f.uuidv7().notNull(),
-		publishedAt: f.timestamp(),
+		description: p.text("description").notNull(),
+		slug: p.text("slug").notNull().unique(),
+		documentId: f.uuidv7("document_id").notNull(),
+		publishedAt: f.timestamp("published_at"),
 		...f.timestamps(),
 	},
 	(table) => {
@@ -48,14 +48,19 @@ export const newsToResources = p.pgTable(
 	"news_to_resources",
 	{
 		newsId: f
-			.uuidv7()
+			.uuidv7("news_id")
 			.notNull()
 			.references(() => {
 				return news.id;
 			}),
-		resourceId: p.text().notNull(),
+		resourceId: p.text("resource_id").notNull(),
 	},
 	(t) => {
-		return [p.primaryKey({ columns: [t.newsId, t.resourceId] })];
+		return [
+			p.primaryKey({
+				columns: [t.newsId, t.resourceId],
+				name: "news_to_resources_pkey",
+			}),
+		];
 	},
 );

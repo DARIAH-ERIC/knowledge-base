@@ -4,9 +4,9 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 import * as f from "../fields";
 
 export const assets = p.pgTable("assets", {
-	id: f.uuidv7().primaryKey(),
-	url: p.text().notNull(),
-	caption: p.text(),
+	id: f.uuidv7("id").primaryKey(),
+	url: p.text("url").notNull(),
+	caption: p.text("caption"),
 	...f.timestamps(),
 });
 
