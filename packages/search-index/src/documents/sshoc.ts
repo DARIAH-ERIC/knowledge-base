@@ -51,6 +51,30 @@ interface Response {
 		persistentId: string;
 		lastInfoUpdate: string;
 		accessibleAt?: Array<string>;
+		contributors: Array<{
+			actor: {
+				affiliations: Array<unknown>;
+				externalIds: Array<{
+					identifier: string;
+					identifierService: {
+						code: string;
+						label: string;
+						ord: number;
+						urlTemplate?: string;
+					};
+				}>;
+				id: number;
+				name: string;
+				website: string;
+				email?: string;
+			};
+			role: {
+				code: string;
+				label: string;
+				ord: number;
+				urlTemplate?: string;
+			};
+		}>;
 	}>;
 	categories: Record<string, { count: number; checked: boolean; label: string }>;
 	facets: Record<string, unknown>;
@@ -118,18 +142,26 @@ export async function getDocuments(): Promise<Result<Array<CollectionDocument>, 
 				}
 
 				const source = "ssh-open-marketplace";
-				const source_id = item.persistentId;
-				const id = [source, source_id].join(":");
+				const sourceId = item.persistentId;
+				const id = [source, sourceId].join(":");
+
+				const sourceActorIds = item.contributors.flatMap((contributor) => {
+					return contributor.actor.id;
+				});
+				const actorIds = sourceActorIds.map((sourceActorId) => {
+					return [source, sourceActorId].join(":");
+				});
 
 				const document = {
 					id,
 					source,
-					source_id,
+					source_id: sourceId,
 					imported_at: Date.now(),
 					label: item.label,
 					description: item.description,
 					keywords,
 					links,
+					actor_ids: actorIds,
 				} satisfies Partial<CollectionDocument>;
 
 				switch (item.category) {

@@ -157,13 +157,13 @@ export async function getDocuments(): Promise<Result<Array<CollectionDocument>, 
 				}
 
 				const source = "open-aire";
-				const source_id = item.id;
-				const id = [source, source_id].join(":");
+				const sourceId = item.id;
+				const id = [source, sourceId].join(":");
 
 				const document: CollectionDocument = {
 					id,
 					source,
-					source_id,
+					source_id: sourceId,
 					imported_at: Date.now(),
 					kind: "publication",
 					label: item.mainTitle,

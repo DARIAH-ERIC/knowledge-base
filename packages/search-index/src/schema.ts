@@ -9,9 +9,10 @@ export const collection = createCollection({
 		{ name: "description", type: "string" },
 		{ name: "keywords", type: "string[]" },
 		{ name: "links", type: "string[]" },
+		{ name: "actor_ids", type: "string[]" },
 	],
-	queryableFields: ["label", "description"],
-	facetableFields: ["keywords", "kind"],
+	queryableFields: ["label", "description", "actor_ids"],
+	facetableFields: ["keywords", "kind", "actor_ids"],
 	sortableFields: ["label"],
 });
 
@@ -19,9 +20,20 @@ export type CollectionQueryield = (typeof collection)["queryableFields"][number]
 export type CollectionFacetField = (typeof collection)["facetableFields"][number];
 export type CollectionSortield = (typeof collection)["sortableFields"][number];
 
+export const resourceKinds = [
+	"publication",
+	"tool-or-service",
+	"training-material",
+	"workflow",
+] as const;
+export type ResourceKind = (typeof resourceKinds)[number];
+
+export const toolOrServiceTypes = ["community", "core"] as const;
+export type ToolOrServiceType = (typeof toolOrServiceTypes)[number];
+
 interface CollectionDocumentBase {
 	id: string;
-	kind: "publication" | "tool-or-service" | "training-material" | "workflow";
+	kind: ResourceKind;
 	source: "open-aire" | "ssh-open-marketplace" | "zotero";
 	source_id: string;
 	imported_at: number;
@@ -43,17 +55,20 @@ interface PublicationDocument extends CollectionDocumentBase {
 interface ToolOrServiceDocument extends CollectionDocumentBase {
 	kind: "tool-or-service";
 	source: "ssh-open-marketplace";
-	type: "community" | "core";
+	type: ToolOrServiceType;
+	actor_ids: Array<string>;
 }
 
 interface TrainingMaterialDocument extends CollectionDocumentBase {
 	kind: "training-material";
 	source: "ssh-open-marketplace";
+	actor_ids: Array<string>;
 }
 
 interface WorkflowDocument extends CollectionDocumentBase {
 	kind: "workflow";
 	source: "ssh-open-marketplace";
+	actor_ids: Array<string>;
 }
 
 export type CollectionDocument =
