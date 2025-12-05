@@ -12,8 +12,8 @@ export const users = p.pgTable(
 		username: p.text().notNull(),
 		...f.timestamps(),
 	},
-	(table) => {
-		return [p.uniqueIndex("users_email_index").on(lower(table.email))];
+	(t) => {
+		return [p.uniqueIndex("users_email_index").on(lower(t.email))];
 	},
 );
 

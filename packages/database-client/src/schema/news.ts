@@ -1,4 +1,4 @@
-import { isNotNull, isNull, sql } from "drizzle-orm";
+import { isNotNull, isNull } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
 
@@ -18,10 +18,6 @@ export const news = p.pgTable(
 				return assets.id;
 			}),
 		description: p.text().notNull(),
-		relatedResourceIds: p
-			.text()
-			.array()
-			.default(sql`ARRAY[]::text[]`),
 		slug: p.text().notNull().unique(),
 		documentId: f.uuidv7().notNull(),
 		publishedAt: f.timestamp(),
@@ -47,3 +43,19 @@ export type NewsItemInput = typeof news.$inferInsert;
 export const NewsItemSelectSchema = createSelectSchema(news);
 export const NewsItemInsertSchema = createInsertSchema(news);
 export const NewsItemUpdateSchema = createUpdateSchema(news);
+
+export const newsToResources = p.pgTable(
+	"news_to_resources",
+	{
+		newsId: f
+			.uuidv7()
+			.notNull()
+			.references(() => {
+				return news.id;
+			}),
+		resourceId: p.text().notNull(),
+	},
+	(t) => {
+		return [p.primaryKey({ columns: [t.newsId, t.resourceId] })];
+	},
+);
