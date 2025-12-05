@@ -18,6 +18,7 @@ for file in "$DEVCONTAINER_DIR"/docker-compose.*.yaml; do
 	name=${file##*/}
 	service=${name#docker-compose.}
 	service=${service%.yaml}
+	[ "$service" = "app" ] && continue
 	ALL_SERVICES="$ALL_SERVICES $service"
 done
 
