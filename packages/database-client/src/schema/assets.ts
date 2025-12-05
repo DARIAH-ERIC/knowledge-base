@@ -6,7 +6,7 @@ import * as f from "../fields";
 export const assets = p.pgTable("assets", {
 	id: f.uuidv7("id").primaryKey(),
 	url: p.text("url").notNull(),
-	caption: p.text("caption"),
+	license: p.text("license", { enum: ["cc-by-4.0", "cc-by-sa-4.0", "cc0-1.0"] }),
 	...f.timestamps(),
 });
 
