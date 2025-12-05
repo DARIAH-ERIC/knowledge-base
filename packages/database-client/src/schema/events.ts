@@ -17,7 +17,6 @@ export const events = p.pgTable(
 			.references(() => {
 				return assets.id;
 			}),
-		description: p.text("description").notNull(),
 		location: p.text("location").notNull(),
 		startDate: p.date("start_date", { mode: "date" }).notNull(),
 		endDate: p.date("end_date", { mode: "date" }),
@@ -66,5 +65,23 @@ export const eventsToResources = p.pgTable(
 				name: "events_to_resources_pkey",
 			}),
 		];
+	},
+);
+
+export const eventsToBlocks = p.pgTable(
+	"events_to_blocks",
+	{
+		eventDocumentId: f
+			.uuidv7("event_document_id")
+			.notNull()
+			.references(() => {
+				return events.documentId;
+			}),
+		blockId: f.uuidv7("block_id").notNull(),
+		order: p.integer().notNull(),
+	},
+
+	(t) => {
+		return [p.primaryKey({ columns: [t.eventDocumentId, t.blockId] })];
 	},
 );

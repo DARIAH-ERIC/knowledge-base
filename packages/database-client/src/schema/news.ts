@@ -17,7 +17,6 @@ export const news = p.pgTable(
 			.references(() => {
 				return assets.id;
 			}),
-		description: p.text("description").notNull(),
 		slug: p.text("slug").notNull().unique(),
 		documentId: f.uuidv7("document_id").notNull(),
 		publishedAt: f.timestamp("published_at"),
@@ -62,5 +61,22 @@ export const newsToResources = p.pgTable(
 				name: "news_to_resources_pkey",
 			}),
 		];
+	},
+);
+
+export const newsToBlocks = p.pgTable(
+	"news_to_blocks",
+	{
+		newsItemDocumentId: f
+			.uuidv7("news_item_document_id")
+			.notNull()
+			.references(() => {
+				return news.documentId;
+			}),
+		blockId: f.uuidv7("block_id").notNull(),
+		order: p.integer().notNull(),
+	},
+	(t) => {
+		return [p.primaryKey({ columns: [t.newsItemDocumentId, t.blockId] })];
 	},
 );
