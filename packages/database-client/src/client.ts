@@ -4,10 +4,11 @@ import { env } from "../config/env.config";
 import { relations } from "./relations";
 
 declare global {
-	var __db: Awaited<ReturnType<typeof createDatabaseClient>> | undefined;
+	var __db: Awaited<ReturnType<typeof createClient>> | undefined;
 }
 
-function createDatabaseClient() {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function createClient() {
 	const db = drizzle({
 		casing: "snake_case",
 		connection: {
@@ -25,7 +26,7 @@ function createDatabaseClient() {
 	return db;
 }
 
-export const db = globalThis.__db ?? createDatabaseClient();
+export const db = globalThis.__db ?? createClient();
 
 /** Avoid re-creating database client on hot-module-reload. */
 if (env.NODE_ENV !== "production") {

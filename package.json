@@ -16,6 +16,7 @@
 		"db:migrations:check": "dotenv -e ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-database-client run db:migrations:check",
 		"db:migrations:generate": "dotenv -e ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-database-client run db:migrations:generate",
 		"db:push": "dotenv -e ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-database-client run db:push",
+		"db:seed": "dotenv -e ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-database-client run db:seed",
 		"db:studio": "dotenv -e ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-database-client run db:studio",
 		"dev": "pnpm run --aggregate-output --parallel --recursive dev",
 		"dev:services:down": "sh ./scripts/services.sh stop",
