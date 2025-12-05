@@ -37,7 +37,7 @@ function generateDocuments() {
 			const document = {
 				id: faker.string.uuid(),
 				imported_at: faker.date.past().getTime(),
-				title: faker.lorem.sentence(),
+				label: faker.lorem.sentence(),
 				description: faker.lorem.paragraphs(2, "\n\n"),
 				keywords: faker.helpers.multiple(
 					() => {

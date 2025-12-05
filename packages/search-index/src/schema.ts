@@ -5,14 +5,14 @@ export const collection = createCollection({
 	name: env.NEXT_PUBLIC_TYPESENSE_COLLECTION_NAME,
 	fields: [
 		{ name: "kind", type: "string" },
-		{ name: "title", type: "string" },
+		{ name: "label", type: "string" },
 		{ name: "description", type: "string" },
 		{ name: "keywords", type: "string[]" },
 		{ name: "links", type: "string[]" },
 	],
-	queryableFields: ["title", "description"],
+	queryableFields: ["label", "description"],
 	facetableFields: ["keywords", "kind"],
-	sortableFields: ["title"],
+	sortableFields: ["label"],
 });
 
 export type CollectionQueryield = (typeof collection)["queryableFields"][number];
@@ -25,7 +25,7 @@ interface CollectionDocumentBase {
 	source: "open-aire" | "ssh-open-marketplace" | "zotero";
 	source_id: string;
 	imported_at: number;
-	title: string;
+	label: string;
 	description: string;
 	keywords: Array<string>;
 	links: Array<string>;

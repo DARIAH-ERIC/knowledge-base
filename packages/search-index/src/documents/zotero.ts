@@ -99,7 +99,7 @@ export async function getDocuments(): Promise<Result<Array<CollectionDocument>, 
 					source_id,
 					imported_at: Date.now(),
 					kind: "publication",
-					title: item.data.title,
+					label: item.data.title,
 					description: item.data.abstractNote ?? "",
 					links: [item.links.alternate.href],
 					keywords: item.data.tags.map((tag) => {
