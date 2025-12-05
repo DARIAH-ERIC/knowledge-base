@@ -4,6 +4,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 import { assets } from "./assets";
+import { blocksFields } from "./blocks-fields";
 
 export const news = p.pgTable(
 	"news",
@@ -16,6 +17,13 @@ export const news = p.pgTable(
 			.notNull()
 			.references(() => {
 				return assets.id;
+			}),
+		contentFieldId: f
+			.uuidv7("content_field_id")
+			.notNull()
+			.unique()
+			.references(() => {
+				return blocksFields.id;
 			}),
 		slug: p.text("slug").notNull().unique(),
 		documentId: f.uuidv7("document_id").notNull(),
@@ -61,22 +69,5 @@ export const newsToResources = p.pgTable(
 				name: "news_to_resources_pkey",
 			}),
 		];
-	},
-);
-
-export const newsToBlocks = p.pgTable(
-	"news_to_blocks",
-	{
-		newsItemDocumentId: f
-			.uuidv7("news_item_document_id")
-			.notNull()
-			.references(() => {
-				return news.documentId;
-			}),
-		blockId: f.uuidv7("block_id").notNull(),
-		order: p.integer().notNull(),
-	},
-	(t) => {
-		return [p.primaryKey({ columns: [t.newsItemDocumentId, t.blockId] })];
 	},
 );

@@ -4,6 +4,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 import { assets } from "./assets";
+import { blocksFields } from "./blocks-fields";
 
 export const events = p.pgTable(
 	"events",
@@ -16,6 +17,13 @@ export const events = p.pgTable(
 			.notNull()
 			.references(() => {
 				return assets.id;
+			}),
+		contentFieldId: f
+			.uuidv7("content_field_id")
+			.notNull()
+			.unique()
+			.references(() => {
+				return blocksFields.id;
 			}),
 		location: p.text("location").notNull(),
 		startDate: p.date("start_date", { mode: "date" }).notNull(),
@@ -65,23 +73,5 @@ export const eventsToResources = p.pgTable(
 				name: "events_to_resources_pkey",
 			}),
 		];
-	},
-);
-
-export const eventsToBlocks = p.pgTable(
-	"events_to_blocks",
-	{
-		eventDocumentId: f
-			.uuidv7("event_document_id")
-			.notNull()
-			.references(() => {
-				return events.documentId;
-			}),
-		blockId: f.uuidv7("block_id").notNull(),
-		order: p.integer().notNull(),
-	},
-
-	(t) => {
-		return [p.primaryKey({ columns: [t.eventDocumentId, t.blockId] })];
 	},
 );

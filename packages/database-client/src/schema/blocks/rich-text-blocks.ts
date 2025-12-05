@@ -5,7 +5,7 @@ import * as f from "../../fields";
 
 export const richTextBlocks = p.pgTable("rich_text_blocks", {
 	id: f.uuidv7("id").primaryKey(),
-	text: p.text("text"),
+	content: p.jsonb("content"),
 });
 
 export type RichTextBlock = typeof richTextBlocks.$inferSelect;
