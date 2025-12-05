@@ -28,7 +28,11 @@ export const events = p.pgTable(
 			.default(sql`ARRAY[]::text[]`),
 		slug: p.text().notNull().unique(),
 		documentId: f.uuidv7().notNull(),
-		publishedAt: p.date({ mode: "date" }),
+		publishedAt: p.timestamp({
+			mode: "date",
+			precision: 3,
+			withTimezone: true,
+		}),
 		...f.timestamps(),
 	},
 	(table) => {
