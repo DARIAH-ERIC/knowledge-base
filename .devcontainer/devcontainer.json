@@ -4,9 +4,10 @@
 		"docker-compose.postgres.yaml",
 		"docker-compose.app.yaml",
 		"docker-compose.drizzle-gateway.yaml",
+		"docker-compose.imgproxy.yaml",
 		"docker-compose.mailpit.yaml",
-		"docker-compose.typesense.yaml",
-		"docker-compose.imgproxy.yaml"
+		"docker-compose.pgadmin.yaml",
+		"docker-compose.typesense.yaml"
 	],
 	"service": "app",
 	"workspaceFolder": "/workspace",
@@ -16,11 +17,11 @@
 				"bradlc.vscode-tailwindcss",
 				"dbaeumer.vscode-eslint",
 				"editorconfig.editorconfig",
-				"esbenp.prettier-vscode",
 				"github.vscode-github-actions",
 				"lokalise.i18n-ally",
 				"mikestead.dotenv",
 				"ms-playwright.playwright",
+				"prettier.prettier-vscode",
 				"stylelint.vscode-stylelint",
 				"unifiedjs.vscode-mdx",
 				"vercel.turbo-vsc"
@@ -29,31 +30,26 @@
 	},
 	"forwardPorts": [
 		3000,
-		"postgres:5432",
 		"drizzle-gateway:4983",
-		"typesense:8108",
-		"typesense-dashboard:5050",
+		"imgproxy:8080",
 		"mailpit:1025",
 		"mailpit:8025",
-		"imgproxy:8080",
 		"minio:9000",
-		"minio:9001"
+		"minio:9001",
+		"pgadmin:5555",
+		"postgres:5432",
+		"typesense:8108",
+		"typesense-dashboard:5050"
 	],
 	"portsAttributes": {
 		"3000": {
 			"label": "Next.js Frontend"
 		},
-		"postgres:5432": {
-			"label": "PostgreSQL"
-		},
 		"drizzle-gateway:4983": {
 			"label": "Drizzle UI"
 		},
-		"typesense:8108": {
-			"label": "Typesense"
-		},
-		"typesense-dashboard:5050": {
-			"label": "Typesense Dashboard"
+		"imgproxy:8080": {
+			"label": "Imgproxy"
 		},
 		"mailpit:1025": {
 			"label": "Mailpit SMTP Server"
@@ -61,14 +57,23 @@
 		"mailpit:8025": {
 			"label": "Mailpit API and Web UI"
 		},
-		"imgproxy:8080": {
-			"label": "Imgproxy"
-		},
 		"minio:9000": {
 			"label": "MinIO"
 		},
 		"minio:9001": {
 			"label": "MinIO Web UI"
+		},
+		"pgadmin:5555": {
+			"label": "pgAdmin"
+		},
+		"postgres:5432": {
+			"label": "PostgreSQL"
+		},
+		"typesense:8108": {
+			"label": "Typesense"
+		},
+		"typesense-dashboard:5050": {
+			"label": "Typesense Dashboard"
 		}
 	},
 	"remoteUser": "node"
