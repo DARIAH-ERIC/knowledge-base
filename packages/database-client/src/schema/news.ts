@@ -47,8 +47,8 @@ export const NewsItemUpdateSchema = createUpdateSchema(news);
 export const newsToResources = p.pgTable(
 	"news_to_resources",
 	{
-		newsId: f
-			.uuidv7("news_id")
+		newsItemId: f
+			.uuidv7("news_item_id")
 			.notNull()
 			.references(() => {
 				return news.id;
@@ -58,7 +58,7 @@ export const newsToResources = p.pgTable(
 	(t) => {
 		return [
 			p.primaryKey({
-				columns: [t.newsId, t.resourceId],
+				columns: [t.newsItemId, t.resourceId],
 				name: "news_to_resources_pkey",
 			}),
 		];
