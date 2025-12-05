@@ -40,7 +40,7 @@ jobs:
 
       - name: Set environment variables
         run: |
-          sed -E '/^[[:space:]]*#/d;/^[[:space:]]*$/d;s/[[:space:]]+#.*$//' ./.devcontainer/.env >> "$GITHUB_ENV"
+          sed -E '/^[[:space:]]*#/d;/^[[:space:]]*$/d;s/[[:space:]]+#.*$//' ./.devcontainer/.env.example >> "$GITHUB_ENV"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
