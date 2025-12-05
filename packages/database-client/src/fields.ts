@@ -22,7 +22,7 @@ export function timestamps() {
 			.notNull()
 			.defaultNow()
 			.$onUpdate(() => {
-				return sql`CURRENT_TIMESTAMP`;
+				return sql`now()`;
 			}),
 		deletedAt: timestamp(),
 	};
