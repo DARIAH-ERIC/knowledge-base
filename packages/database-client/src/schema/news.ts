@@ -24,11 +24,7 @@ export const news = p.pgTable(
 			.default(sql`ARRAY[]::text[]`),
 		slug: p.text().notNull().unique(),
 		documentId: f.uuidv7().notNull(),
-		publishedAt: p.timestamp({
-			mode: "date",
-			precision: 3,
-			withTimezone: true,
-		}),
+		publishedAt: f.timestamp(),
 		...f.timestamps(),
 	},
 	(table) => {

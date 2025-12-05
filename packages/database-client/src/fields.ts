@@ -7,31 +7,23 @@ export function uuidv7(name?: string) {
 	return p.uuid(name).default(sql`uuidv7()`);
 }
 
+export function timestamp() {
+	return p.timestamp({
+		mode: "date",
+		precision: 3,
+		withTimezone: true,
+	});
+}
+
 export function timestamps() {
 	return {
-		createdAt: p
-			.timestamp({
-				mode: "date",
-				precision: 3,
-				withTimezone: true,
-			})
-			.notNull()
-			.defaultNow(),
-		updatedAt: p
-			.timestamp({
-				mode: "date",
-				precision: 3,
-				withTimezone: true,
-			})
+		createdAt: timestamp().notNull().defaultNow(),
+		updatedAt: timestamp()
 			.notNull()
 			.defaultNow()
 			.$onUpdate(() => {
 				return sql`CURRENT_TIMESTAMP`;
 			}),
-		deletedAt: p.timestamp({
-			mode: "date",
-			precision: 3,
-			withTimezone: true,
-		}),
+		deletedAt: timestamp(),
 	};
 }
