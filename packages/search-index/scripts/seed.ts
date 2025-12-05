@@ -85,6 +85,12 @@ function generateDocuments() {
 						source: "ssh-open-marketplace",
 						source_id: faker.string.alphanumeric(12),
 						type: faker.helpers.arrayElement(["community", "core"]),
+						actor_ids: faker.helpers.multiple(
+							() => {
+								return faker.string.alphanumeric(12);
+							},
+							{ count: { min: 1, max: 3 } },
+						),
 					};
 				}
 
@@ -94,6 +100,12 @@ function generateDocuments() {
 						kind,
 						source: "ssh-open-marketplace",
 						source_id: faker.string.alphanumeric(12),
+						actor_ids: faker.helpers.multiple(
+							() => {
+								return faker.string.alphanumeric(12);
+							},
+							{ count: { min: 1, max: 3 } },
+						),
 					};
 				}
 
@@ -103,6 +115,12 @@ function generateDocuments() {
 						kind,
 						source: "ssh-open-marketplace",
 						source_id: faker.string.alphanumeric(12),
+						actor_ids: faker.helpers.multiple(
+							() => {
+								return faker.string.alphanumeric(12);
+							},
+							{ count: { min: 1, max: 3 } },
+						),
 					};
 				}
 			}
