@@ -6,9 +6,11 @@ import nodeConfig from "@acdh-oeaw/eslint-config-node";
 import playwrightConfig from "@acdh-oeaw/eslint-config-playwright";
 import reactConfig from "@acdh-oeaw/eslint-config-react";
 import tailwindConfig from "@acdh-oeaw/eslint-config-tailwindcss";
-import { defineConfig } from "eslint/config";
+import { defineConfig, globalIgnores } from "eslint/config";
 import gitignore from "eslint-config-flat-gitignore";
 import checkFilePlugin from "eslint-plugin-check-file";
+// @ts-expect-error Missing type declarations.
+import drizzlePlugin from "eslint-plugin-drizzle";
 import perfectionistPlugin from "eslint-plugin-perfectionist";
 import unicornPlugin from "eslint-plugin-unicorn";
 
@@ -38,8 +40,9 @@ const restrictedImports = {
 
 export default defineConfig(
 	gitignore({ strict: true }),
-	{ ignores: ["content/**", "public/**"] },
+	globalIgnores(["content/**", "public/**"]),
 	{
+		name: "base-config",
 		extends: [baseConfig],
 		rules: {
 			"@typescript-eslint/explicit-module-boundary-types": "error",
@@ -59,6 +62,7 @@ export default defineConfig(
 		},
 	},
 	{
+		name: "unicorn-config",
 		extends: [unicornPlugin.configs.unopinionated],
 		rules: {
 			"unicorn/catch-error-name": "error",
@@ -90,6 +94,7 @@ export default defineConfig(
 		},
 	},
 	{
+		name: "react-config",
 		extends: [reactConfig],
 		rules: {
 			"@eslint-react/prefer-read-only-props": "error",
@@ -128,6 +133,7 @@ export default defineConfig(
 	nextConfig,
 	tailwindConfig,
 	{
+		name: "tailwindcss-config",
 		rules: {
 			"tailwindcss/no-custom-classname": ["error", { whitelist: ["lead", "not-richtext"] }],
 		},
@@ -139,33 +145,12 @@ export default defineConfig(
 	},
 	playwrightConfig,
 	{
-		name: "file-naming-conventions",
-		plugins: {
-			"check-file": checkFilePlugin,
-		},
-		rules: {
-			"check-file/filename-naming-convention": [
-				"error",
-				{
-					"**/*": "?(_)+([a-z])*([a-z0-9])*(-+([a-z0-9]))",
-				},
-				{ ignoreMiddleExtensions: true },
-			],
-			"check-file/folder-naming-convention": [
-				"error",
-				{
-					"**/": "NEXT_JS_APP_ROUTER_CASE",
-				},
-			],
-		},
-	},
-	{
+		name: "node-config",
 		extends: [nodeConfig],
 		files: ["db/**/*.ts", "lib/server/**/*.ts", "**/_lib/actions/**/*.ts", "scripts/**/*.ts"],
-		name: "node-environment",
 	},
 	{
-		name: "stylistic",
+		name: "stylistic-config",
 		plugins: {
 			perfectionist: perfectionistPlugin,
 		},
@@ -181,6 +166,38 @@ export default defineConfig(
 					],
 					groups: ["reserved", "unknown"],
 					partitionByNewLine: true,
+				},
+			],
+		},
+	},
+	{
+		name: "drizzle-config",
+		plugins: {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			drizzle: drizzlePlugin,
+		},
+		rules: {
+			"drizzle/enforce-delete-with-where": ["error", { drizzleObjectName: ["db", "tx"] }],
+			"drizzle/enforce-update-with-where": ["error", { drizzleObjectName: ["db", "tx"] }],
+		},
+	},
+	{
+		name: "file-naming-conventions-config",
+		plugins: {
+			"check-file": checkFilePlugin,
+		},
+		rules: {
+			"check-file/filename-naming-convention": [
+				"error",
+				{
+					"**/*": "?(_)+([a-z])*([a-z0-9])*(-+([a-z0-9]))",
+				},
+				{ ignoreMiddleExtensions: true },
+			],
+			"check-file/folder-naming-convention": [
+				"error",
+				{
+					"**/": "NEXT_JS_APP_ROUTER_CASE",
 				},
 			],
 		},

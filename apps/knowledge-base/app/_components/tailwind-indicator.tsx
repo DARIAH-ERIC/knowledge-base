@@ -8,8 +8,7 @@ export function TailwindIndicator(): ReactNode {
 	}
 
 	return (
-		<div className="fixed right-5 bottom-5 z-10 grid size-9 cursor-default place-content-center rounded-full bg-[#000c] font-code text-xs font-medium text-white shadow-[0_0_0_1px_#171717,_inset_0_0_0_1px_#ffffff24,_0px_16px_32px_-8px_#0000003d] backdrop-blur-[48px] select-none">
-			<span className="sr-only">{"Breakpoint: "}</span>
+		<div className="fixed right-5 bottom-5 z-10 inline-grid size-9 cursor-default place-content-center rounded-full bg-[#000c] font-code text-xs font-medium text-white shadow-[0_0_0_1px_#171717,_inset_0_0_0_1px_#ffffff24,_0px_16px_32px_-8px_#0000003d] backdrop-blur-[48px] select-none">
 			<span className="block xs:hidden">{"2xs"}</span>
 			<span className="hidden xs:block sm:hidden">{"xs"}</span>
 			<span className="hidden sm:block md:hidden">{"sm"}</span>

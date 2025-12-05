@@ -14,6 +14,7 @@
 	},
 	"editor.rulers": [100],
 	"editor.stickyScroll.enabled": true,
+	"emmet.showExpandedAbbreviation": "never",
 	"eslint.enable": true,
 	"eslint.options": {
 		"flags": ["unstable_native_nodejs_ts_config"]
@@ -42,7 +43,8 @@
 	"mdx.server.enable": true,
 	"scss.validate": false,
 	"search.exclude": {
-		"**/.next/**": true
+		"**/.next/**": true,
+		"**/node_modules/**": true
 	},
 	"stylelint.enable": true,
 	"stylelint.snippet": ["css", "postcss", "tailwindcss"],
