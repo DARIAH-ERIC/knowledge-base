@@ -28,7 +28,7 @@
 		"lint:styles:fix": "pnpm run lint:styles:check --fix",
 		"prepare": "run-s types:prepare",
 		"start": "next start --experimental-next-config-strip-types",
-		"test:e2e": "playwright test --config ./e2e/playwright.config.ts",
+		"test:e2e": "PORT=3001 playwright test --config ./e2e/playwright.config.ts",
 		"test:e2e:codegen": "playwright codegen",
 		"test:e2e:install": "playwright install --with-deps",
 		"test:e2e:ui": "pnpm run test:e2e --ui",
