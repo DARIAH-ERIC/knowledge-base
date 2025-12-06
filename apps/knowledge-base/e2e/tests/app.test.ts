@@ -6,7 +6,7 @@ test.describe("app", () => {
 		const response = await request.get("/robots.txt");
 		const body = await response.body();
 
-		expect(body.toString()).toMatchSnapshot(`robots.bots-${env.NEXT_PUBLIC_BOTS}.txt`);
+		expect(body.toString()).toMatchSnapshot(`robots.bots-${env.NEXT_PUBLIC_APP_BOTS}.txt`);
 	});
 
 	test("should serve a webmanifest", async ({ request }) => {

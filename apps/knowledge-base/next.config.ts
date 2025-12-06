@@ -66,8 +66,8 @@ const plugins: Array<(config: Config) => Config> = [
 	function createSentryPlugin(config) {
 		return withSentryConfig(config, {
 			disableLogger: true,
-			org: env.NEXT_PUBLIC_SENTRY_ORG,
-			project: env.NEXT_PUBLIC_SENTRY_PROJECT,
+			org: env.NEXT_PUBLIC_APP_SENTRY_ORG,
+			project: env.NEXT_PUBLIC_APP_SENTRY_PROJECT,
 			reactComponentAnnotation: {
 				enabled: true,
 			},
