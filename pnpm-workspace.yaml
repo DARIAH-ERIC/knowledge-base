@@ -94,6 +94,10 @@ onlyBuiltDependencies:
   - simple-git-hooks
   - unrs-resolver
 
+overrides:
+  # @see {@link https://github.com/motdotla/dotenv-expand/issues/140}
+  dotenv: $dotenv
+
 patchedDependencies:
   next: patches/next.patch
 

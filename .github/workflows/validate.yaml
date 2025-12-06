@@ -39,8 +39,9 @@ jobs:
           cache: "pnpm"
 
       - name: Set environment variables
-        run: |
-          sed -E '/^[[:space:]]*#/d;/^[[:space:]]*$/d;s/[[:space:]]+#.*$//' ./.devcontainer/.env.example >> "$GITHUB_ENV"
+        uses: ./.github/actions/dotenv
+        with:
+          path: ./.devcontainer/.env.example
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
