@@ -3,7 +3,7 @@ import * as Sentry from "@sentry/nextjs";
 import { env } from "@/config/env.config";
 
 Sentry.init({
-	dsn: env.NEXT_PUBLIC_SENTRY_DSN,
+	dsn: env.NEXT_PUBLIC_APP_SENTRY_DSN,
 	enableLogs: true,
 	integrations: [Sentry.replayIntegration()],
 	replaysOnErrorSampleRate: 1,
@@ -13,7 +13,7 @@ Sentry.init({
 	 *
 	 * @see {@link https://docs.sentry.io/platforms/javascript/guides/nextjs/data-management/data-collected/}
 	 */
-	sendDefaultPii: env.NEXT_PUBLIC_SENTRY_PII === "enabled",
+	sendDefaultPii: env.NEXT_PUBLIC_APP_SENTRY_PII === "enabled",
 	tracesSampleRate: 0.1,
 });
 

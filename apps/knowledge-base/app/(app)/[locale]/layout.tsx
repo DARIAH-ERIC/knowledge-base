@@ -53,7 +53,7 @@ export async function generateMetadata(): Promise<Promise<Metadata>> {
 			site: meta.social.twitter,
 		},
 		verification: {
-			google: env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+			google: env.NEXT_PUBLIC_APP_GOOGLE_SITE_VERIFICATION,
 		},
 	};
 
@@ -96,8 +96,8 @@ export default async function LocaleLayout(props: Readonly<LocaleLayoutProps>): 
 					{children}
 
 					<AnalyticsScript
-						baseUrl={env.NEXT_PUBLIC_MATOMO_BASE_URL}
-						id={env.NEXT_PUBLIC_MATOMO_ID}
+						baseUrl={env.NEXT_PUBLIC_APP_MATOMO_BASE_URL}
+						id={env.NEXT_PUBLIC_APP_MATOMO_ID}
 					/>
 				</Providers>
 			</DocumentBody>
