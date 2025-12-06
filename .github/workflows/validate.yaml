@@ -38,13 +38,13 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
 
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Set environment variables
         uses: ./.github/actions/dotenv
         with:
           path: ./.devcontainer/.env.example
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
 
       - name: Format
         run: pnpm run format:check
