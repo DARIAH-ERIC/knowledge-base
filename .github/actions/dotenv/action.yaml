@@ -1,0 +1,11 @@
+name: "Load .env file into GitHub Actions environment"
+
+inputs:
+  path:
+    description: "Path to the .env file"
+    required: true
+    default: ".env"
+
+runs:
+  using: "node24"
+  main: "index.ts"
