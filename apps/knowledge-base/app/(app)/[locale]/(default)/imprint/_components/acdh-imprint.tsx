@@ -8,8 +8,8 @@ import { HttpError, request } from "@/lib/utils/request";
 
 async function getImprintHtml(locale: IntlLocale): Promise<string> {
 	const url = createUrl({
-		baseUrl: env.NEXT_PUBLIC_IMPRINT_SERVICE_BASE_URL,
-		pathname: `/${String(env.NEXT_PUBLIC_REDMINE_ID)}`,
+		baseUrl: env.NEXT_PUBLIC_APP_IMPRINT_SERVICE_BASE_URL,
+		pathname: `/${String(env.NEXT_PUBLIC_APP_REDMINE_ID)}`,
 		searchParams: createUrlSearchParams({ locale }),
 	});
 
