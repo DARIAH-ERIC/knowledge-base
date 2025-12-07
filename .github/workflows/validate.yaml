@@ -25,6 +25,13 @@ jobs:
         node-version: [24.x]
         os: [ubuntu-24.04]
 
+    env:
+      NEXT_PUBLIC_APP_BASE_URL: "http://localhost:3000"
+      NEXT_PUBLIC_APP_IMPRINT_SERVICE_BASE_URL: "${{ vars.NEXT_PUBLIC_IMPRINT_SERVICE_BASE_URL }}"
+      NEXT_PUBLIC_APP_MATOMO_BASE_URL: "${{ vars.NEXT_PUBLIC_MATOMO_BASE_URL }}"
+      NEXT_PUBLIC_APP_MATOMO_ID: "${{ vars.NEXT_PUBLIC_APP_MATOMO_ID }}"
+      NEXT_PUBLIC_APP_REDMINE_ID: "${{ vars.APP_SERVICE_ID }}"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6

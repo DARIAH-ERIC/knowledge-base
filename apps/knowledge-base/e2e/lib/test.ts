@@ -24,14 +24,14 @@ export const test = base.extend<Fixtures>({
 	/** @see {@link https://playwright.dev/docs/test-fixtures#adding-global-beforeeachaftereach-hooks} */
 	beforeEachTest: [
 		async ({ context }, use) => {
-			if (env.NEXT_PUBLIC_MATOMO_BASE_URL != null) {
+			if (env.NEXT_PUBLIC_APP_MATOMO_BASE_URL != null) {
 				/**
 				 * If we were to block loading the actual matomo javascript snippet, we would need to
 				 * check if `windows._paq` was pushed to (because no requests to `matomo.php`
 				 * would be dispatched).
 				 */
 				// const scriptUrl = String(
-				// 	createUrl({ baseUrl: env.NEXT_PUBLIC_MATOMO_BASE_URL, pathname: "/matomo.js" }),
+				// 	createUrl({ baseUrl: env.NEXT_PUBLIC_APP_MATOMO_BASE_URL, pathname: "/matomo.js" }),
 				// );
 
 				// await context.route(scriptUrl, (route) => {
@@ -39,7 +39,7 @@ export const test = base.extend<Fixtures>({
 				// });
 
 				const baseUrl = String(
-					createUrl({ baseUrl: env.NEXT_PUBLIC_MATOMO_BASE_URL, pathname: "/matomo.php?**" }),
+					createUrl({ baseUrl: env.NEXT_PUBLIC_APP_MATOMO_BASE_URL, pathname: "/matomo.php?**" }),
 				);
 
 				await context.route(baseUrl, (route) => {
