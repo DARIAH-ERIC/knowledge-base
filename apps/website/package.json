@@ -17,7 +17,7 @@
 	"scripts": {
 		"analyze": "TURBOPACK_STATS=1 next build --experimental-next-config-strip-types && echo '\n✅ Saved stats to \".next/server/webpack-stats.json\". Analyze at \"https://statoscope.tech\".'",
 		"build": "next build --experimental-next-config-strip-types",
-		"dev": "next dev --experimental-next-config-strip-types",
+		"dev": "PORT=3002 next dev --experimental-next-config-strip-types",
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
 		"format:fix": "pnpm run format:check --write",
 		"lint:check": "run-p --continue-on-error \"lint:*:check\"",
@@ -27,7 +27,7 @@
 		"lint:styles:check": "stylelint \"./styles/**/*.css\" --cache --ignore-path ./../../.gitignore",
 		"lint:styles:fix": "pnpm run lint:styles:check --fix",
 		"prepare": "run-s types:prepare",
-		"start": "next start --experimental-next-config-strip-types",
+		"start": "PORT=3002 next start --experimental-next-config-strip-types",
 		"test:e2e": "PORT=3002 playwright test --config ./e2e/playwright.config.ts",
 		"test:e2e:codegen": "playwright codegen",
 		"test:e2e:install": "playwright install --with-deps",
