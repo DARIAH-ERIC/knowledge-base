@@ -42,9 +42,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Set environment variables
-        uses: ./.github/actions/dotenv
-        with:
-          path: ./.devcontainer/.env.example
+        run: dotenvx get --env-file ./.devcontainer/.env.example --format eval >> $GITHUB_ENV
 
       - name: Format
         run: pnpm run format:check

@@ -15,6 +15,7 @@ catalog:
   '@acdh-oeaw/stylelint-config': ^2.3.2
   '@acdh-oeaw/tsconfig': ^1.5.1
   '@acdh-oeaw/validate-env': ^0.2.1
+  '@dotenvx/dotenvx': ^1.51.1
   '@faker-js/faker': ^10.1.0
   '@heroicons/react': ^2.2.0
   '@next/eslint-plugin-next': ^16.0.1
@@ -93,10 +94,6 @@ onlyBuiltDependencies:
   - sharp
   - simple-git-hooks
   - unrs-resolver
-
-overrides:
-  # @see {@link https://github.com/motdotla/dotenv-expand/issues/140}
-  dotenv: $dotenv
 
 patchedDependencies:
   next: patches/next.patch
