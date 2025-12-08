@@ -18,8 +18,8 @@ export const events = p.pgTable(
 			.references(() => {
 				return assets.id;
 			}),
-		contentFieldId: f
-			.uuidv7("content_field_id")
+		contentId: f
+			.uuidv7("content_id")
 			.notNull()
 			.unique()
 			.references(() => {
