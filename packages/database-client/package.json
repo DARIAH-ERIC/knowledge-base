@@ -39,6 +39,7 @@
 		"db:migrations:check": "drizzle-kit check --config=./config/drizzle.config.ts",
 		"db:migrations:generate": "drizzle-kit generate --config=./config/drizzle.config.ts",
 		"db:push": "drizzle-kit push --config=./config/drizzle.config.ts",
+		"db:reset": "tsx ./scripts/reset.ts",
 		"db:seed": "tsx ./scripts/seed.ts",
 		"db:studio": "drizzle-kit studio --config=./config/drizzle.config.ts",
 		"dev": "tsc --preserveWatchOutput --project ./tsconfig.build.json --watch",
