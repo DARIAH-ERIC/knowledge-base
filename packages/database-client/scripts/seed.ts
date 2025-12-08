@@ -1,9 +1,9 @@
 import { log } from "@acdh-oeaw/lib";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { seed } from "drizzle-seed";
+import { reset, seed } from "drizzle-seed";
 
 import { env } from "../config/env.config";
-import { assets, events, news } from "../src/schema";
+import * as schema from "../src/schema";
 
 async function main() {
 	const db = drizzle({
@@ -19,7 +19,8 @@ async function main() {
 		logger: true,
 	});
 
-	await seed(db, { assets, events, news });
+	await reset(db, schema);
+	await seed(db, schema, { seed: 42 });
 
 	log.success("Successfully seeded database.");
 }
