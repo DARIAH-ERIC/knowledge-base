@@ -20,7 +20,101 @@ async function main() {
 	});
 
 	await reset(db, schema);
-	await seed(db, schema, { seed: 42 });
+
+	/**
+	 * We are seeding in multiple steps because `drizzle-seed` currently does not automatically
+	 * handle unique constraints.
+	 *
+	 * @see {@link https://github.com/drizzle-team/drizzle-orm/issues/4354}
+	 */
+
+	await seed(db, {
+		assets: schema.assets,
+		users: schema.users,
+	}, { seed: 42 }).refine(() => {
+		return {
+			assets: {
+				count: 100,
+			},
+			users: {
+				count: 10,
+			},
+		};
+	});
+
+	const assetIds = (await db.select({ id: schema.assets.id }).from(schema.assets)).map((row) => {
+		return row.id;
+	});
+
+	await seed(db, {
+		dataBlocks: schema.dataBlocks,
+		imageBlocks: schema.imageBlocks,
+		richTextBlocks: schema.richTextBlocks,
+		blocks: schema.blocks,
+		blocksFields: schema.blocksFields,
+	 }, { seed: 42 }).refine((f) => {
+		return {
+			dataBlocks: {
+				count: 50,
+			},
+			imageBlocks: {
+				columns: {
+					imageId: f.valuesFromArray({
+						values: assetIds,
+						isUnique: true
+					}),
+				},
+				count: 50,
+			},
+			richTextBlocks: {
+				count: 50,
+			},
+			blocks: {
+				count: 50,
+			},
+			blocksFields: {
+				count: 50,
+			},
+		};
+	});
+
+	const blocksFieldIds = (await db.select({ id: schema.blocksFields.id }).from(schema.blocksFields)).map((row) => {
+		return row.id;
+	});
+
+	await seed(db, {
+		events: schema.events,
+		news: schema.news,
+	}, { seed: 42 }).refine((f) => {
+		return {
+			events: {
+				columns: {
+					imageId: f.valuesFromArray({
+						values: assetIds,
+						isUnique: true
+					}),
+					contentId: f.valuesFromArray({
+						values: blocksFieldIds,
+						isUnique: true,
+					}),
+				},
+				count: 25,
+			},
+			news: {
+				columns: {
+					imageId: f.valuesFromArray({
+						values: assetIds,
+						isUnique: true
+					}),
+					contentId: f.valuesFromArray({
+						values: blocksFieldIds,
+						isUnique: true,
+					}),
+				},
+				count: 25,
+			},
+		};
+	});
 
 	log.success("Successfully seeded database.");
 }
