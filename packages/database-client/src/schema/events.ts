@@ -37,11 +37,11 @@ export const events = p.pgTable(
 	(t) => {
 		return [
 			p
-				.uniqueIndex("events_document_id_published_unique_index")
+				.uniqueIndex("events_document_id_published_unique")
 				.on(t.documentId)
 				.where(isNotNull(t.publishedAt)),
 			p
-				.uniqueIndex("events_document_id_unpublished_unique_index")
+				.uniqueIndex("events_document_id_unpublished_unique")
 				.on(t.documentId)
 				.where(isNull(t.publishedAt)),
 		];

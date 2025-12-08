@@ -13,7 +13,7 @@ export const users = p.pgTable(
 		...f.timestamps(),
 	},
 	(t) => {
-		return [p.uniqueIndex("users_email_index").on(lower(t.email))];
+		return [p.uniqueIndex("users_email_unique").on(lower(t.email))];
 	},
 );
 
