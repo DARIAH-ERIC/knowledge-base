@@ -1,5 +1,5 @@
 import { assert, log } from "@acdh-oeaw/lib";
-import { faker } from "@faker-js/faker";
+import { faker as f } from "@faker-js/faker";
 import { Client } from "typesense";
 
 import { env } from "../config/env.config";
@@ -25,29 +25,29 @@ function createClient() {
 }
 
 function generateDocuments() {
-	faker.seed(42);
-	faker.setDefaultRefDate(new Date(Date.UTC(2025, 0, 1)));
+	f.seed(42);
+	f.setDefaultRefDate(new Date(Date.UTC(2025, 0, 1)));
 
 	const kinds = ["publication", "tool-or-service", "training-material", "workflow"] as const;
 
-	const documents = faker.helpers.multiple<CollectionDocument>(
+	const documents = f.helpers.multiple<CollectionDocument>(
 		() => {
-			const kind = faker.helpers.arrayElement(kinds);
+			const kind = f.helpers.arrayElement(kinds);
 
 			const document = {
-				id: faker.string.uuid(),
-				imported_at: faker.date.past().getTime(),
-				label: faker.lorem.sentence(),
-				description: faker.lorem.paragraphs(2, "\n\n"),
-				keywords: faker.helpers.multiple(
+				id: f.string.uuid(),
+				imported_at: f.date.past().getTime(),
+				label: f.lorem.sentence(),
+				description: f.lorem.paragraphs(2, "\n\n"),
+				keywords: f.helpers.multiple(
 					() => {
-						return faker.lorem.word();
+						return f.lorem.word();
 					},
 					{ count: { min: 3, max: 8 } },
 				),
-				links: faker.helpers.multiple(
+				links: f.helpers.multiple(
 					() => {
-						return faker.internet.url();
+						return f.internet.url();
 					},
 					{ count: { min: 1, max: 3 } },
 				),
@@ -58,20 +58,20 @@ function generateDocuments() {
 					return {
 						...document,
 						kind,
-						source: faker.helpers.arrayElement(["open-aire", "zotero"]),
-						source_id: faker.string.alphanumeric(12),
-						type: faker.helpers.arrayElement(["article", "book", "conference", "thesis", null]),
-						authors: faker.helpers.multiple(
+						source: f.helpers.arrayElement(["open-aire", "zotero"]),
+						source_id: f.string.alphanumeric(12),
+						type: f.helpers.arrayElement(["article", "book", "conference", "thesis", null]),
+						authors: f.helpers.multiple(
 							() => {
-								return faker.person.fullName();
+								return f.person.fullName();
 							},
 							{ count: { min: 1, max: 5 } },
 						),
-						year: faker.number.int({ min: 1990, max: 2024 }),
+						year: f.number.int({ min: 1990, max: 2024 }),
 						pid:
-							faker.helpers.maybe(
+							f.helpers.maybe(
 								() => {
-									return faker.string.alphanumeric(10);
+									return f.string.alphanumeric(10);
 								},
 								{ probability: 0.7 },
 							) ?? null,
@@ -83,11 +83,11 @@ function generateDocuments() {
 						...document,
 						kind,
 						source: "ssh-open-marketplace",
-						source_id: faker.string.alphanumeric(12),
-						type: faker.helpers.arrayElement(["community", "core"]),
-						actor_ids: faker.helpers.multiple(
+						source_id: f.string.alphanumeric(12),
+						type: f.helpers.arrayElement(["community", "core"]),
+						actor_ids: f.helpers.multiple(
 							() => {
-								return faker.string.alphanumeric(12);
+								return f.string.alphanumeric(12);
 							},
 							{ count: { min: 1, max: 3 } },
 						),
@@ -99,10 +99,10 @@ function generateDocuments() {
 						...document,
 						kind,
 						source: "ssh-open-marketplace",
-						source_id: faker.string.alphanumeric(12),
-						actor_ids: faker.helpers.multiple(
+						source_id: f.string.alphanumeric(12),
+						actor_ids: f.helpers.multiple(
 							() => {
-								return faker.string.alphanumeric(12);
+								return f.string.alphanumeric(12);
 							},
 							{ count: { min: 1, max: 3 } },
 						),
@@ -114,10 +114,10 @@ function generateDocuments() {
 						...document,
 						kind,
 						source: "ssh-open-marketplace",
-						source_id: faker.string.alphanumeric(12),
-						actor_ids: faker.helpers.multiple(
+						source_id: f.string.alphanumeric(12),
+						actor_ids: f.helpers.multiple(
 							() => {
-								return faker.string.alphanumeric(12);
+								return f.string.alphanumeric(12);
 							},
 							{ count: { min: 1, max: 3 } },
 						),
