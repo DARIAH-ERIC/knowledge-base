@@ -2,11 +2,17 @@ import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
 
 import * as f from "../fields";
+import { licenses } from "./licenses";
 
 export const assets = p.pgTable("assets", {
 	id: f.uuidv7("id").primaryKey(),
 	key: p.text("key").notNull(),
-	license: p.text("license", { enum: ["cc-by-4.0", "cc-by-sa-4.0", "cc0-1.0"] }),
+	license: f
+		.uuidv7("license")
+		.notNull()
+		.references(() => {
+			return licenses.id;
+		}),
 	...f.timestamps(),
 });
 

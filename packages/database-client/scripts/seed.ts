@@ -28,13 +28,21 @@ async function main() {
 	 * @see {@link https://github.com/drizzle-team/drizzle-orm/issues/4354}
 	 */
 
-	await seed(db, {
-		assets: schema.assets,
-		users: schema.users,
-	}, { seed: 42 }).refine(() => {
+	await seed(
+		db,
+		{
+			assets: schema.assets,
+			licenses: schema.licenses,
+			users: schema.users,
+		},
+		{ seed: 42 },
+	).refine(() => {
 		return {
 			assets: {
 				count: 100,
+			},
+			licenses: {
+				count: 3,
 			},
 			users: {
 				count: 10,
