@@ -30,20 +30,38 @@
 		"S3_PROTOCOL",
 		"S3_SECRET_KEY"
 	],
-	"globalPassThroughEnv": [
-		"CI",
-		"ENV_VALIDATION",
-		"NEXT_RUNTIME",
-		"MAILPIT_API_BASE_URL",
-		"SENTRY_AUTH_TOKEN",
-		"TYPESENSE_ADMIN_API_KEY"
-	],
+	"globalPassThroughEnv": ["CI", "ENV_VALIDATION", "NEXT_RUNTIME", "MAILPIT_API_BASE_URL"],
 	"tasks": {
 		"build": {
 			"dependsOn": ["^build"],
-			"env": ["BUILD_MODE"],
+			"env": [
+				"BUILD_MODE",
+				"NEXT_PUBLIC_APP_BASE_URL",
+				"NEXT_PUBLIC_APP_IMPRINT_SERVICE_BASE_URL",
+				"NEXT_PUBLIC_APP_BOTS",
+				"NEXT_PUBLIC_APP_GOOGLE_SITE_VERIFICATION",
+				"NEXT_PUBLIC_APP_MATOMO_BASE_URL",
+				"NEXT_PUBLIC_APP_MATOMO_ID",
+				"NEXT_PUBLIC_APP_SENTRY_DSN",
+				"NEXT_PUBLIC_APP_SENTRY_ORG",
+				"NEXT_PUBLIC_APP_SENTRY_PII",
+				"NEXT_PUBLIC_APP_SENTRY_PROJECT",
+				"NEXT_PUBLIC_APP_SERVICE_ID",
+				"NEXT_PUBLIC_WEBSITE_BASE_URL",
+				"NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL",
+				"NEXT_PUBLIC_WEBSITE_BOTS",
+				"NEXT_PUBLIC_WEBSITE_GOOGLE_SITE_VERIFICATION",
+				"NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL",
+				"NEXT_PUBLIC_WEBSITE_MATOMO_ID",
+				"NEXT_PUBLIC_WEBSITE_SENTRY_DSN",
+				"NEXT_PUBLIC_WEBSITE_SENTRY_ORG",
+				"NEXT_PUBLIC_WEBSITE_SENTRY_PII",
+				"NEXT_PUBLIC_WEBSITE_SENTRY_PROJECT",
+				"NEXT_PUBLIC_WEBSITE_SERVICE_ID"
+			],
 			"inputs": ["$TURBO_DEFAULT$", ".env", ".env.*"],
-			"outputs": [".next/**", "!.next/cache/**", "dist/**", "out/**", "tsconfig.tsbuildinfo"]
+			"outputs": [".next/**", "!.next/cache/**", "dist/**", "out/**", "tsconfig.tsbuildinfo"],
+			"passThroughEnv": ["APP_SENTRY_AUTH_TOKEN", "WEBSITE_SENTRY_AUTH_TOKEN"]
 		},
 		"db:migrations:apply": {
 			"cache": false
@@ -59,8 +77,13 @@
 			"cache": false,
 			"interactive": true
 		},
+		"db:reset": {
+			"cache": false,
+			"interactive": true
+		},
 		"db:seed": {
-			"cache": false
+			"cache": false,
+			"interactive": true
 		},
 		"db:studio": {
 			"cache": false,
@@ -92,16 +115,20 @@
 			"outputs": [".eslintcache", ".stylelintcache"]
 		},
 		"search-index:api-keys:generate": {
-			"cache": false
+			"cache": false,
+			"passThroughEnv": ["TYPESENSE_ADMIN_API_KEY"]
 		},
 		"search-index:collections:create": {
-			"cache": false
+			"cache": false,
+			"passThroughEnv": ["TYPESENSE_ADMIN_API_KEY"]
 		},
 		"search-index:collections:ingest": {
-			"cache": false
+			"cache": false,
+			"passThroughEnv": ["TYPESENSE_ADMIN_API_KEY"]
 		},
 		"search-index:collections:seed": {
-			"cache": false
+			"cache": false,
+			"passThroughEnv": ["TYPESENSE_ADMIN_API_KEY"]
 		},
 		"start": {
 			"dependsOn": ["^build"]
@@ -109,11 +136,15 @@
 		"test": {},
 		"test:e2e": {
 			"dependsOn": ["^build"],
-			"env": ["PLAYWRIGHT_TEST_APP_BASE_URL", "PORT"]
+			"env": ["PLAYWRIGHT_TEST_APP_BASE_URL"],
+			"interactive": true,
+			"passThroughEnv": ["PORT"]
 		},
 		"test:e2e:update-snapshots": {
 			"dependsOn": ["^build"],
-			"env": ["PLAYWRIGHT_TEST_APP_BASE_URL", "PORT"]
+			"env": ["PLAYWRIGHT_TEST_APP_BASE_URL"],
+			"interactive": true,
+			"passThroughEnv": ["PORT"]
 		},
 		"topo": {
 			"dependsOn": ["^topo"]

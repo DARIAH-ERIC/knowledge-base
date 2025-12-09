@@ -16,6 +16,7 @@
 		"db:migrations:check": "dotenv -e ./.devcontainer/.env -- turbo --filter dariah-knowledge-base-database-client run db:migrations:check",
 		"db:migrations:generate": "dotenv -e ./.devcontainer/.env -- turbo --filter dariah-knowledge-base-database-client run db:migrations:generate",
 		"db:push": "dotenv -e ./.devcontainer/.env -- turbo --filter dariah-knowledge-base-database-client run db:push",
+		"db:reset": "dotenv -e ./.devcontainer/.env -- turbo --filter dariah-knowledge-base-database-client run db:reset",
 		"db:seed": "dotenv -e ./.devcontainer/.env -- turbo --filter dariah-knowledge-base-database-client run db:seed",
 		"db:studio": "dotenv -e ./.devcontainer/.env -- turbo --filter dariah-knowledge-base-database-client run db:studio",
 		"dev": "turbo run dev",
