@@ -30,7 +30,7 @@
 	},
 	"forwardPorts": [
 		3000,
-		"drizzle-gateway:4983",
+		"drizzle-gateway:4984",
 		"imgproxy:8080",
 		"mailpit:1025",
 		"mailpit:8025",
@@ -45,7 +45,7 @@
 		"3000": {
 			"label": "Next.js Frontend"
 		},
-		"drizzle-gateway:4983": {
+		"drizzle-gateway:4984": {
 			"label": "Drizzle UI"
 		},
 		"imgproxy:8080": {
