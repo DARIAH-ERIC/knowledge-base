@@ -38,6 +38,7 @@
 	},
 	"devDependencies": {
 		"@acdh-oeaw/prettier-config": "catalog:",
+		"@playwright/test": "catalog:",
 		"dotenv-cli": "catalog:",
 		"is-in-ci": "catalog:",
 		"lint-staged": "catalog:",

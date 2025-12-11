@@ -253,6 +253,9 @@ importers:
       '@acdh-oeaw/prettier-config':
         specifier: 'catalog:'
         version: 2.0.1(prettier@3.6.2)
+      '@playwright/test':
+        specifier: 'catalog:'
+        version: 1.56.1
       dotenv-cli:
         specifier: 'catalog:'
         version: 11.0.0
