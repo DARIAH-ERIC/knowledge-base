@@ -6,34 +6,28 @@ import type { BucketItem, ItemBucketMetadata } from "minio";
 import { env } from "../config/env.config";
 import { createMinioClient } from "./create-minio-client";
 import { generateObjectName } from "./generate-object-name";
+import { generateSignedImageUrl } from "./generate-signed-image-url";
 
 const bucketName = env.S3_BUCKET;
 
 interface Client {
-	create: (
-		fileName: string,
-		fileStream: Readable,
-		fileSize: number,
-		metadata: ItemBucketMetadata,
-	) => Promise<{ objectName: string }>;
-	get: () => Promise<{ images: Array<{ objectName: string }> }>;
+	images: {
+		get: () => Promise<{ images: Array<{ objectName: string }> }>;
+		remove: (objectName: string) => Promise<void>;
+		upload: (
+			fileName: string,
+			fileStream: Readable,
+			fileSize: number,
+			metadata: ItemBucketMetadata,
+		) => Promise<{ objectName: string }>;
+	};
+	urls: {
+		generate: typeof generateSignedImageUrl;
+	};
 }
 
 export function createClient(): Client {
 	const client = createMinioClient();
-
-	async function create(
-		fileName: string,
-		fileStream: Readable,
-		fileSize: number,
-		metadata: ItemBucketMetadata,
-	) {
-		const objectName = generateObjectName(fileName);
-
-		await client.putObject(bucketName, objectName, fileStream, fileSize, metadata);
-
-		return { objectName };
-	}
 
 	async function get() {
 		const stream = client.listObjectsV2(bucketName);
@@ -50,8 +44,31 @@ export function createClient(): Client {
 		return { images };
 	}
 
+	async function remove(objectName: string) {
+		await client.removeObject(bucketName, objectName);
+	}
+
+	async function upload(
+		fileName: string,
+		fileStream: Readable,
+		fileSize: number,
+		metadata: ItemBucketMetadata,
+	) {
+		const objectName = generateObjectName(fileName);
+
+		await client.putObject(bucketName, objectName, fileStream, fileSize, metadata);
+
+		return { objectName };
+	}
+
 	return {
-		create,
-		get,
+		images: {
+			get,
+			remove,
+			upload,
+		},
+		urls: {
+			generate: generateSignedImageUrl,
+		},
 	};
 }
