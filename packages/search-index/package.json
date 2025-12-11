@@ -9,11 +9,11 @@
 	"devEngines": {
 		"runtime": {
 			"name": "node",
-			"version": "^24",
+			"version": "^24.12.0",
 			"onFail": "download"
 		}
 	},
-	"packageManager": "pnpm@10.24.0",
+	"packageManager": "pnpm@10.25.0",
 	"exports": {
 		"./client": {
 			"types": "./dist/src/client.d.ts",
