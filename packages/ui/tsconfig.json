@@ -1,0 +1,25 @@
+{
+	"$schema": "https://www.schemastore.org/tsconfig",
+	"extends": "@acdh-oeaw/tsconfig",
+	"compilerOptions": {
+		"jsx": "react-jsx",
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"paths": {
+			"@/*": ["./*"]
+		}
+	},
+	"include": [
+		"./**/*.js",
+		"./**/*.ts",
+		"./**/*.tsx",
+		"./types/**/*.d.ts",
+		"./.storybook/**/*.ts",
+		"./.storybook/**/*.tsx"
+	],
+	"exclude": ["dist", "node_modules", "storybook-static"],
+	"mdx": {
+		"checkMdx": false,
+		"plugins": []
+	}
+}
