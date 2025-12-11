@@ -1,0 +1,22 @@
+{
+	"configurations": [
+		{
+			"name": "Apps: Website (server-side)",
+			"type": "node-terminal",
+			"request": "launch",
+			"command": "NODE_OPTIONS=\"--inspect\" pnpm run dev"
+		},
+		{
+			"name": "Apps: Website (client-side)",
+			"type": "chrome",
+			"request": "launch",
+			"url": "http://localhost:3002"
+		}
+	],
+	"compounds": [
+		{
+			"name": "Apps: Website",
+			"configurations": ["Apps: Website (server-side)", "Apps: Website (client-side)"]
+		}
+	]
+}
