@@ -29,6 +29,10 @@
 			"href": "https://mastodon.social/@dariaheu"
 		},
 		{
+			"kind": "rss",
+			"href": "/rss.xml"
+		},
+		{
 			"kind": "twitter",
 			"href": "https://x.com/dariaheu"
 		},
