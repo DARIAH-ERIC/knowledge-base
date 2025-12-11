@@ -83,7 +83,7 @@ test.describe("contact page", () => {
 
 			const emailService = createEmailService();
 
-			const { contactPage, i18n: _i18n } = await createContactPage(locale);
+			const { contactPage, i18n } = await createContactPage(locale);
 			await contactPage.goto();
 
 			const name = "Firstname Lastname";
@@ -141,7 +141,7 @@ test.describe("contact page", () => {
 
 			const emailService = createEmailService();
 
-			const { contactPage, i18n: _i18n } = await createContactPage(locale);
+			const { contactPage, i18n } = await createContactPage(locale);
 			await contactPage.goto();
 
 			//  CHAOS

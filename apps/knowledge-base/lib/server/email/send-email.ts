@@ -2,8 +2,10 @@ import { createTransport, type SendMailOptions } from "nodemailer";
 
 import { env } from "@/config/env.config";
 
-interface SendEmailParams
-	extends Pick<SendMailOptions, "attachments" | "from" | "html" | "subject" | "text" | "to"> {}
+interface SendEmailParams extends Pick<
+	SendMailOptions,
+	"attachments" | "from" | "html" | "subject" | "text" | "to"
+> {}
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function sendEmail(params: SendEmailParams) {
