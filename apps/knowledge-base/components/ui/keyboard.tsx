@@ -1,5 +1,6 @@
 /* eslint-disable @eslint-react/prefer-read-only-props */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable better-tailwindcss/no-unknown-classes */
 
 "use client";
 
