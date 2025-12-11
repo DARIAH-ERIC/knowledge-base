@@ -1,13 +1,13 @@
 /* eslint-disable @eslint-react/no-leaked-conditional-rendering */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
-/* eslint-disable unicorn/explicit-length-check */
-/* eslint-disable no-param-reassign */
-/* eslint-disable unicorn/no-document-cookie */
 /* eslint-disable @eslint-react/prefer-read-only-props */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/strict-boolean-expressions */
+/* eslint-disable no-param-reassign */
+/* eslint-disable unicorn/explicit-length-check */
+/* eslint-disable unicorn/no-document-cookie */
 
 "use client";
 
@@ -467,7 +467,7 @@ function SidebarItem({
 						{badge &&
 							(state !== "collapsed" ? (
 								<span
-									className="absolute inset-y-1/2 right-1.5 h-5.5 w-auto -translate-y-1/2 rounded-full bg-fg/5 px-2 text-[10px]/5.5 inset-ring-1 inset-ring-sidebar-border group-hover/sidebar-item:inset-ring-muted-fg/30 group-data-current:inset-ring-transparent"
+									className="absolute inset-y-1/2 right-1.5 h-5.5 w-auto -translate-y-1/2 rounded-full bg-fg/5 px-2 text-[10px]/5.5 inset-ring-1 inset-ring-sidebar-border group-hover/sidebar-item:inset-ring-muted-fg/30 group-current:inset-ring-transparent"
 									data-slot="sidebar-badge"
 								>
 									{badge}
@@ -715,6 +715,7 @@ function SidebarRail({ className, ref, ...props }: ComponentProps<"button">) {
 				onClick={toggleSidebar}
 				tabIndex={-1}
 				title="Toggle Sidebar"
+				type="button"
 				{...props}
 			/>
 		)
