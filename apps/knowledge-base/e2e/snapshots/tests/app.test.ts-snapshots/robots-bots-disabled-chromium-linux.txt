@@ -1,4 +1,4 @@
 User-Agent: *
 Disallow: /
 
-Host: http://localhost:3000
+Host: http://localhost:3001

@@ -9,11 +9,11 @@
 	"devEngines": {
 		"runtime": {
 			"name": "node",
-			"version": "^24",
+			"version": "^24.12.0",
 			"onFail": "download"
 		}
 	},
-	"packageManager": "pnpm@10.24.0",
+	"packageManager": "pnpm@10.25.0",
 	"exports": {
 		".": {
 			"types": "./dist/src/index.d.ts",
@@ -47,7 +47,7 @@
 		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
 		"generate:dbml-schema": "tsx ./scripts/generate-dbml-schema.ts",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
-		"lint:fix": "eslint . --flag unstable_native_nodejs_ts_config --fix",
+		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
 		"types:check": "tsc --noEmit"
 	},
 	"dependencies": {
