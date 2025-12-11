@@ -1,0 +1,56 @@
+{
+	"folders": [
+		{
+			"name": "workspace",
+			"path": ".",
+		},
+		{
+			"name": "knowledge-base",
+			"path": "apps/knowledge-base",
+		},
+		{
+			"name": "website",
+			"path": "apps/website",
+		},
+		{
+			"name": "database-client",
+			"path": "packages/database-client",
+		},
+		{
+			"name": "image-service",
+			"path": "packages/image-service",
+		},
+		{
+			"name": "search-index",
+			"path": "packages/search-index",
+		},
+		{
+			"name": "ui-components",
+			"path": "packages/ui",
+		},
+	],
+	"settings": {
+		"debug.toolBarLocation": "docked",
+		"emmet.showExpandedAbbreviation": "never",
+		"eslint.workingDirectories": [{ "pattern": "./apps/*/" }, { "pattern": "./packages/*/" }],
+		"files.watcherExclude": {
+			"**/.next/**": true,
+			"**/dist/**": true,
+			"**/node_modules/**": true,
+		},
+		"terminal.integrated.enablePersistentSessions": false,
+		"typescript.enablePromptUseWorkspaceTsdk": true,
+		"typescript.tsserver.maxTsServerMemory": 4096,
+		"workbench.tree.enableStickyScroll": true,
+	},
+	"extensions": {
+		"recommendations": [
+			"dbaeumer.vscode-eslint",
+			"editorconfig.editorconfig",
+			"github.vscode-github-actions",
+			"mikestead.dotenv",
+			"prettier.prettier-vscode",
+			"vercel.turbo-vsc",
+		],
+	},
+}

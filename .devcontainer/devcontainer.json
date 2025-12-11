@@ -25,7 +25,8 @@
 				"stylelint.vscode-stylelint",
 				"unifiedjs.vscode-mdx",
 				"vercel.turbo-vsc"
-			]
+			],
+			"openFolder": "/workspace/workspace.code-workspace"
 		}
 	},
 	"forwardPorts": [
