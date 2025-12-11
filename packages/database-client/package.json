@@ -70,6 +70,7 @@
 		"drizzle-kit": "catalog:",
 		"eslint": "catalog:",
 		"eslint-config-flat-gitignore": "catalog:",
+		"eslint-config-turbo": "catalog:",
 		"eslint-plugin-check-file": "catalog:",
 		"eslint-plugin-drizzle": "catalog:",
 		"eslint-plugin-unicorn": "catalog:",

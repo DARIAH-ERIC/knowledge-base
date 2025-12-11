@@ -2,6 +2,7 @@ import baseConfig from "@acdh-oeaw/eslint-config";
 import nodeConfig from "@acdh-oeaw/eslint-config-node";
 import { defineConfig, globalIgnores } from "eslint/config";
 import gitignore from "eslint-config-flat-gitignore";
+import turboConfig from "eslint-config-turbo/flat";
 import checkFilePlugin from "eslint-plugin-check-file";
 // @ts-expect-error Missing type declarations.
 import drizzlePlugin from "eslint-plugin-drizzle";
@@ -94,4 +95,5 @@ export default defineConfig(
 			],
 		},
 	},
+	turboConfig,
 );
