@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
-/* eslint-disable tailwindcss/no-custom-classname */
-/* eslint-disable @typescript-eslint/strict-boolean-expressions */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
 /* eslint-disable @eslint-react/prefer-read-only-props */
+/* eslint-disable better-tailwindcss/no-unknown-classes */
 
 "use client";
 
