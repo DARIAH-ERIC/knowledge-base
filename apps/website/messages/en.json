@@ -53,7 +53,7 @@
 				"linkedin": "LinkedIn",
 				"mastodon": "Mastodon",
 				"orcid": "ORCID",
-				"rss": "RSS",
+				"rss": "RSS feed",
 				"twitter": "Twitter",
 				"website": "Website",
 				"youtube": "YouTube"
@@ -102,6 +102,9 @@
 	"IndexPage": {
 		"lead": "The pan-European infrastructure for the arts & humanities scholars.",
 		"title": "Digital Research Infrastructure for the Arts and Humanities (DARIAH)"
+	},
+	"LocaleLayout": {
+		"rss-feed": "RSS feed ({locale})"
 	},
 	"LocaleSelect": {
 		"change-locale": "Switch locale",

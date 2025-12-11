@@ -50,8 +50,7 @@ function Tooltip(props: TooltipProps) {
 }
 
 interface TooltipContentProps
-	extends Omit<TooltipPrimitiveProps, "children">,
-		VariantProps<typeof tooltipStyles> {
+	extends Omit<TooltipPrimitiveProps, "children">, VariantProps<typeof tooltipStyles> {
 	arrow?: boolean;
 	children?: ReactNode;
 }

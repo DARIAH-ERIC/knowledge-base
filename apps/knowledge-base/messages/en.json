@@ -272,7 +272,7 @@
 				"linkedin": "LinkedIn",
 				"mastodon": "Mastodon",
 				"orcid": "ORCID",
-				"rss": "RSS",
+				"rss": "RSS feed",
 				"twitter": "Twitter",
 				"website": "Website",
 				"youtube": "YouTube"
@@ -321,6 +321,9 @@
 	"IndexPage": {
 		"lead": "Your central hub for everything DARIAH-related.",
 		"title": "DARIAH Knowledge Base"
+	},
+	"LocaleLayout": {
+		"rss-feed": "RSS feed ({locale})"
 	},
 	"LocaleSelect": {
 		"change-locale": "Switch locale",

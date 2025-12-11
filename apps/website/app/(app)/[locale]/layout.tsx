@@ -1,7 +1,7 @@
 import { createUrl } from "@acdh-oeaw/lib";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { jsonLdScriptProps } from "react-schemaorg";
 import type { WebSite, WithContext } from "schema-dts";
@@ -27,12 +27,16 @@ export function generateStaticParams(): Array<Awaited<LocaleLayoutProps["params"
 
 export async function generateMetadata(): Promise<Promise<Metadata>> {
 	const locale = await getLocale();
+	const t = await getTranslations("LocaleLayout");
 	const meta = await getMetadata();
 
 	const metadata: Metadata = {
 		metadataBase: createUrl({ baseUrl: env.NEXT_PUBLIC_WEBSITE_BASE_URL }),
 		alternates: {
 			canonical: "./",
+			types: {
+				"application/rss+xml": [{ title: t("rss-feed", { locale }), url: `/${locale}/rss.xml` }],
+			},
 		},
 		title: {
 			default: meta.title,
