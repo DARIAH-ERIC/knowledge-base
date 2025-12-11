@@ -36,15 +36,27 @@ async function main() {
 			users: schema.users,
 		},
 		{ seed: 42 },
-	).refine(() => {
+	).refine((f) => {
 		return {
 			assets: {
 				count: 100,
 			},
 			licenses: {
+				columns: {
+					name: f.valuesFromArray({
+						values: ["CC-BY 4.0", "CC-BY-SA 4.0", "CC0"],
+					}),
+					url: f.valuesFromArray({
+						values: ["https://choosealicense.com/"],
+					}),
+				},
 				count: 3,
 			},
 			users: {
+				columns: {
+					email: f.email(),
+					username: f.firstName(),
+				},
 				count: 10,
 			},
 		};
@@ -54,14 +66,24 @@ async function main() {
 		return row.id;
 	});
 
-	await seed(db, {
-		dataBlocks: schema.dataBlocks,
-		imageBlocks: schema.imageBlocks,
-		richTextBlocks: schema.richTextBlocks,
-		blocks: schema.blocks,
-		blocksFields: schema.blocksFields,
-	 }, { seed: 42 }).refine((f) => {
+	await seed(
+		db,
+		{
+			contents: schema.contents,
+			blocks: schema.blocks,
+			dataBlocks: schema.dataBlocks,
+			imageBlocks: schema.imageBlocks,
+			richTextBlocks: schema.richTextBlocks,
+		},
+		{ seed: 42 },
+	).refine((f) => {
 		return {
+			contents: {
+				count: 50,
+			},
+			blocks: {
+				count: 50,
+			},
 			dataBlocks: {
 				count: 50,
 			},
@@ -69,7 +91,7 @@ async function main() {
 				columns: {
 					imageId: f.valuesFromArray({
 						values: assetIds,
-						isUnique: true
+						isUnique: true,
 					}),
 				},
 				count: 50,
@@ -77,47 +99,49 @@ async function main() {
 			richTextBlocks: {
 				count: 50,
 			},
-			blocks: {
-				count: 50,
-			},
-			blocksFields: {
-				count: 50,
-			},
 		};
 	});
 
-	const blocksFieldIds = (await db.select({ id: schema.blocksFields.id }).from(schema.blocksFields)).map((row) => {
-		return row.id;
-	});
+	const blocksFieldIds = (await db.select({ id: schema.contents.id }).from(schema.contents)).map(
+		(row) => {
+			return row.id;
+		},
+	);
 
-	await seed(db, {
-		events: schema.events,
-		news: schema.news,
-	}, { seed: 42 }).refine((f) => {
+	await seed(
+		db,
+		{
+			events: schema.events,
+			news: schema.news,
+		},
+		{ seed: 42 },
+	).refine((f) => {
 		return {
 			events: {
 				columns: {
-					imageId: f.valuesFromArray({
-						values: assetIds,
-						isUnique: true
-					}),
 					contentId: f.valuesFromArray({
 						values: blocksFieldIds,
 						isUnique: true,
 					}),
+					imageId: f.valuesFromArray({
+						values: assetIds,
+						isUnique: true,
+					}),
+					title: f.line(),
 				},
 				count: 25,
 			},
 			news: {
 				columns: {
-					imageId: f.valuesFromArray({
-						values: assetIds,
-						isUnique: true
-					}),
 					contentId: f.valuesFromArray({
 						values: blocksFieldIds,
 						isUnique: true,
 					}),
+					imageId: f.valuesFromArray({
+						values: assetIds,
+						isUnique: true,
+					}),
+					title: f.line(),
 				},
 				count: 25,
 			},

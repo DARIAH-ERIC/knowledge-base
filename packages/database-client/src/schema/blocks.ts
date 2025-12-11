@@ -1,20 +1,17 @@
 import * as p from "drizzle-orm/pg-core";
 
 import * as f from "../fields";
-
-export const blocksFields = p.pgTable("blocks_fields", {
-	id: f.uuidv7("id").primaryKey(),
-});
+import { contents } from "./contents";
 
 export const blocks = p.pgTable(
 	"blocks",
 	{
 		id: f.uuidv7("id").primaryKey(),
-		fieldId: f
-			.uuidv7("field_id")
+		contentId: f
+			.uuidv7("content_id")
 			.notNull()
 			.references(() => {
-				return blocksFields.id;
+				return contents.id;
 			}),
 		blockId: f.uuidv7("block_id").notNull(),
 		blockKind: p.text("block_kind", { enum: ["data", "image", "rich-text"] }).notNull(),
