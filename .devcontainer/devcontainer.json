@@ -2,7 +2,7 @@
 	"name": "dariah knowledge base",
 	"dockerComposeFile": [
 		"docker-compose.postgres.yaml",
-		"docker-compose.app.yaml",
+		"docker-compose.apps.yaml",
 		"docker-compose.drizzle-gateway.yaml",
 		"docker-compose.imgproxy.yaml",
 		"docker-compose.mailpit.yaml",
@@ -29,7 +29,8 @@
 		}
 	},
 	"forwardPorts": [
-		3000,
+		3001,
+		3002,
 		"drizzle-gateway:4984",
 		"imgproxy:8080",
 		"mailpit:1025",
@@ -42,8 +43,11 @@
 		"typesense-dashboard:5050"
 	],
 	"portsAttributes": {
-		"3000": {
-			"label": "Next.js Frontend"
+		"3001": {
+			"label": "DARIAH Knowledge-Base"
+		},
+		"3002": {
+			"label": "DARIAH Website"
 		},
 		"drizzle-gateway:4984": {
 			"label": "Drizzle UI"
