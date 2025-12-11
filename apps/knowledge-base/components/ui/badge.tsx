@@ -38,8 +38,7 @@ const badgeStyles = tv({
 });
 
 interface BadgeProps
-	extends React.HTMLAttributes<HTMLDivElement>,
-		VariantProps<typeof badgeStyles> {
+	extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeStyles> {
 	className?: string;
 	children: React.ReactNode;
 }

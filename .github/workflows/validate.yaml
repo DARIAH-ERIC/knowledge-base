@@ -26,11 +26,41 @@ jobs:
         os: [ubuntu-24.04]
 
     env:
-      NEXT_PUBLIC_APP_BASE_URL: "http://localhost:3000"
+      DATABASE_HOST: "localhost"
+      DATABASE_NAME: "dariah-knowledge-base"
+      DATABASE_PASSWORD: "dariah-knowledge-base"
+      DATABASE_PORT: "5432"
+      DATABASE_USER: "dariah-knowledge-base"
+      EMAIL_ADDRESS: "acdh@example.com"
+      EMAIL_SMTP_PORT: "1025"
+      EMAIL_SMTP_SERVER: "localhost"
+      IMGPROXY_BASE_URL: "http://localhost:8080"
+      IMGPROXY_KEY: "799b9a1ea1ee6b18339b9b3c03b7424ac9fd75d0e5777e5a6258f5a541609a45"
+      IMGPROXY_PORT: "8080"
+      IMGPROXY_SALT: "b803f8f06b44263bd41dfee1d0e5e958"
+      MAILPIT_API_BASE_URL: "http://localhost:8025"
+      NEXT_PUBLIC_APP_BASE_URL: "http://localhost:3001"
       NEXT_PUBLIC_APP_IMPRINT_SERVICE_BASE_URL: "${{ vars.NEXT_PUBLIC_IMPRINT_SERVICE_BASE_URL }}"
       NEXT_PUBLIC_APP_MATOMO_BASE_URL: "${{ vars.NEXT_PUBLIC_MATOMO_BASE_URL }}"
       NEXT_PUBLIC_APP_MATOMO_ID: "${{ vars.NEXT_PUBLIC_APP_MATOMO_ID }}"
-      NEXT_PUBLIC_APP_REDMINE_ID: "${{ vars.APP_SERVICE_ID }}"
+      NEXT_PUBLIC_APP_SERVICE_ID: "${{ vars.APP_SERVICE_ID }}"
+      NEXT_PUBLIC_WEBSITE_BASE_URL: "http://localhost:3002"
+      NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL:
+        "${{ vars.NEXT_PUBLIC_IMPRINT_SERVICE_BASE_URL }}"
+      NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL: "${{ vars.NEXT_PUBLIC_MATOMO_BASE_URL }}"
+      NEXT_PUBLIC_WEBSITE_MATOMO_ID: "${{ vars.NEXT_PUBLIC_WEBSITE_MATOMO_ID }}"
+      NEXT_PUBLIC_WEBSITE_SERVICE_ID: "${{ vars.WEBSITE_SERVICE_ID }}"
+      NEXT_PUBLIC_TYPESENSE_COLLECTION_NAME: "dariah-knowledge-base"
+      NEXT_PUBLIC_TYPESENSE_HOST: "localhost"
+      NEXT_PUBLIC_TYPESENSE_PORT: "8108"
+      NEXT_PUBLIC_TYPESENSE_PROTOCOL: "http"
+      S3_ACCESS_KEY: "c8c7bab1e784e088780bdc97876cfdc0"
+      S3_BUCKET: "dariah-knowledge-base"
+      S3_HOST: "localhost"
+      S3_PORT: "9000"
+      S3_PROTOCOL: "http"
+      S3_SECRET_KEY: "f98c5ba01f5e5781f0eb09d7b74b36bc8c10cc67b010cead4fcbe8c1605ccf33"
+      TYPESENSE_ADMIN_API_KEY: "050b1c25823ea77fe35fa8814373a000b031e27d27fb38b3d2b573cc1516f8da"
 
     steps:
       - name: Checkout repository
