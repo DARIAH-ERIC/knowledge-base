@@ -31,7 +31,7 @@
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
 		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
-		"lint:fix": "eslint . --flag unstable_native_nodejs_ts_config --fix",
+		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
 		"search-index:api-keys:generate": "tsx ./scripts/generate-search-api-key.ts",
 		"search-index:collections:create": "tsx ./scripts/create-collection.ts",
 		"search-index:collections:ingest": "tsx ./scripts/ingest.ts",
