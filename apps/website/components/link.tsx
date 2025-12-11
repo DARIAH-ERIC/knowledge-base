@@ -46,9 +46,9 @@ export function Link(props: Readonly<LinkProps>): ReactNode {
 		}, [forwardedRef, ref]),
 	);
 
-	const isDisabled = props.isDisabled === true;
-	const isCurrent = Boolean(props["aria-current"]);
-	const isLinkElement = Boolean(props.href) && !isDisabled;
+	const isDisabled = interactionProps.isDisabled === true;
+	const isCurrent = Boolean(interactionProps["aria-current"]);
+	const isLinkElement = Boolean(interactionProps.href) && !isDisabled;
 	const ElementType: ElementType = isLinkElement ? LocaleLink : "span";
 
 	const { focusableProps } = useFocusable(interactionProps, linkRef);
