@@ -62,7 +62,9 @@
 		"sharp": "catalog:",
 		"tailwind-merge": "catalog:",
 		"tailwind-variants": "catalog:",
-		"valibot": "catalog:"
+		"valibot": "catalog:",
+		"xast-util-feed": "catalog:",
+		"xast-util-to-xml": "catalog:"
 	},
 	"devDependencies": {
 		"@acdh-oeaw/eslint-config": "catalog:",
