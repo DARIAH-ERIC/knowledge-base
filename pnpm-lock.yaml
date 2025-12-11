@@ -495,6 +495,205 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
+  apps/website:
+    dependencies:
+      '@acdh-oeaw/lib':
+        specifier: 'catalog:'
+        version: 0.3.5
+      '@acdh-oeaw/style-variants':
+        specifier: 'catalog:'
+        version: 0.1.0
+      '@acdh-oeaw/validate-env':
+        specifier: 'catalog:'
+        version: 0.2.1(typescript@5.9.3)
+      '@dariah-eric/dariah-knowledge-base-database-client':
+        specifier: workspace:^
+        version: link:../../packages/database-client
+      '@react-aria/utils':
+        specifier: 'catalog:'
+        version: 3.31.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      '@sentry/nextjs':
+        specifier: 'catalog:'
+        version: 10.25.0(@opentelemetry/context-async-hooks@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(next@16.0.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)(webpack@5.102.1)
+      '@valibot/i18n':
+        specifier: 'catalog:'
+        version: 1.0.0(valibot@1.1.0(typescript@5.9.3))
+      client-only:
+        specifier: 'catalog:'
+        version: 0.0.1
+      clsx:
+        specifier: 'catalog:'
+        version: 2.1.1
+      is-network-error:
+        specifier: 'catalog:'
+        version: 1.3.0
+      lucide-react:
+        specifier: 'catalog:'
+        version: 0.553.0(react@19.2.0)
+      next:
+        specifier: 'catalog:'
+        version: 16.0.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      next-intl:
+        specifier: 'catalog:'
+        version: 4.5.1(@swc/helpers@0.5.17)(next@16.0.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)(typescript@5.9.3)
+      react:
+        specifier: 'catalog:'
+        version: 19.2.0
+      react-aria:
+        specifier: 'catalog:'
+        version: 3.44.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      react-aria-components:
+        specifier: 'catalog:'
+        version: 1.13.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.0(react@19.2.0)
+      react-schemaorg:
+        specifier: 'catalog:'
+        version: 2.0.0(react@19.2.0)(schema-dts@1.1.5)(typescript@5.9.3)
+      server-nodejs-only:
+        specifier: 'catalog:'
+        version: 0.0.1
+      server-only:
+        specifier: 'catalog:'
+        version: 0.0.1
+      sharp:
+        specifier: 'catalog:'
+        version: 0.34.5
+      valibot:
+        specifier: 'catalog:'
+        version: 1.1.0(typescript@5.9.3)
+    devDependencies:
+      '@acdh-oeaw/eslint-config':
+        specifier: 'catalog:'
+        version: 2.0.10(@eslint/config-helpers@0.4.2)(@typescript-eslint/utils@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(globals@16.5.0)(typescript@5.9.3)
+      '@acdh-oeaw/eslint-config-next':
+        specifier: 'catalog:'
+        version: 4.0.3(@acdh-oeaw/eslint-config-react@3.0.2(@acdh-oeaw/eslint-config@2.0.10(@eslint/config-helpers@0.4.2)(@typescript-eslint/utils@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(globals@16.5.0)(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(@acdh-oeaw/eslint-config@2.0.10(@eslint/config-helpers@0.4.2)(@typescript-eslint/utils@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(globals@16.5.0)(typescript@5.9.3))(@next/eslint-plugin-next@16.0.1)
+      '@acdh-oeaw/eslint-config-node':
+        specifier: 'catalog:'
+        version: 2.0.10(@acdh-oeaw/eslint-config@2.0.10(@eslint/config-helpers@0.4.2)(@typescript-eslint/utils@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(globals@16.5.0)(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
+      '@acdh-oeaw/eslint-config-playwright':
+        specifier: 'catalog:'
+        version: 2.0.12(@acdh-oeaw/eslint-config@2.0.10(@eslint/config-helpers@0.4.2)(@typescript-eslint/utils@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(globals@16.5.0)(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))
+      '@acdh-oeaw/eslint-config-react':
+        specifier: 'catalog:'
+        version: 3.0.2(@acdh-oeaw/eslint-config@2.0.10(@eslint/config-helpers@0.4.2)(@typescript-eslint/utils@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(globals@16.5.0)(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
+      '@acdh-oeaw/eslint-config-tailwindcss':
+        specifier: 'catalog:'
+        version: 3.0.2(@acdh-oeaw/eslint-config@2.0.10(@eslint/config-helpers@0.4.2)(@typescript-eslint/utils@8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(globals@16.5.0)(typescript@5.9.3))(tailwindcss@4.1.17)
+      '@acdh-oeaw/prettier-config':
+        specifier: 'catalog:'
+        version: 2.0.1(prettier@3.6.2)
+      '@acdh-oeaw/stylelint-config':
+        specifier: 'catalog:'
+        version: 2.3.2(postcss-html@1.8.0)(stylelint-order@7.0.0(stylelint@16.25.0(typescript@5.9.3)))(stylelint@16.25.0(typescript@5.9.3))
+      '@acdh-oeaw/tsconfig':
+        specifier: 'catalog:'
+        version: 1.5.1(typescript@5.9.3)
+      '@next/eslint-plugin-next':
+        specifier: 'catalog:'
+        version: 16.0.1
+      '@playwright/test':
+        specifier: 'catalog:'
+        version: 1.56.1
+      '@react-aria/optimize-locales-plugin':
+        specifier: 'catalog:'
+        version: 1.1.5
+      '@tailwindcss/postcss':
+        specifier: 'catalog:'
+        version: 4.1.17
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.0
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.2
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.2.2(@types/react@19.2.2)
+      axe-core:
+        specifier: 'catalog:'
+        version: 4.11.0
+      axe-playwright:
+        specifier: 'catalog:'
+        version: 2.2.2(playwright@1.56.1)
+      babel-plugin-react-compiler:
+        specifier: 'catalog:'
+        version: 1.0.0
+      concurrently:
+        specifier: 'catalog:'
+        version: 9.2.1
+      dotenv:
+        specifier: 'catalog:'
+        version: 17.2.3
+      dotenv-cli:
+        specifier: 'catalog:'
+        version: 11.0.0
+      dotenv-expand:
+        specifier: 'catalog:'
+        version: 12.0.3
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.1(jiti@2.6.1)
+      eslint-config-flat-gitignore:
+        specifier: 'catalog:'
+        version: 2.1.0(eslint@9.39.1(jiti@2.6.1))
+      eslint-plugin-check-file:
+        specifier: 'catalog:'
+        version: 3.3.1(eslint@9.39.1(jiti@2.6.1))
+      eslint-plugin-drizzle:
+        specifier: 'catalog:'
+        version: 0.2.3-7722e6a(eslint@9.39.1(jiti@2.6.1))
+      eslint-plugin-perfectionist:
+        specifier: 'catalog:'
+        version: 4.15.1(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
+      eslint-plugin-unicorn:
+        specifier: 'catalog:'
+        version: 62.0.0(eslint@9.39.1(jiti@2.6.1))
+      globals:
+        specifier: 'catalog:'
+        version: 16.5.0
+      is-in-ci:
+        specifier: 'catalog:'
+        version: 2.0.0
+      next-devtools-mcp:
+        specifier: 'catalog:'
+        version: 0.3.2
+      node:
+        specifier: runtime:^24
+        version: runtime:24.11.1
+      npm-run-all2:
+        specifier: 'catalog:'
+        version: 8.0.4
+      null-loader:
+        specifier: 'catalog:'
+        version: 4.0.1(webpack@5.102.1)
+      prettier:
+        specifier: 'catalog:'
+        version: 3.6.2
+      schema-dts:
+        specifier: 'catalog:'
+        version: 1.1.5
+      stylelint:
+        specifier: 'catalog:'
+        version: 16.25.0(typescript@5.9.3)
+      tailwindcss:
+        specifier: 'catalog:'
+        version: 4.1.17
+      tailwindcss-react-aria-components:
+        specifier: 'catalog:'
+        version: 2.0.1(tailwindcss@4.1.17)
+      tsx:
+        specifier: 'catalog:'
+        version: 4.20.6
+      tw-animate-css:
+        specifier: 'catalog:'
+        version: 1.4.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
   packages/database-client:
     dependencies:
       '@acdh-oeaw/lib':
