@@ -1,0 +1,44 @@
+{
+	"configurations": [
+		{
+			"name": "Apps: Knowledge-Base (server-side)",
+			"request": "launch",
+			"runtimeArgs": ["run", "dev"],
+			"runtimeExecutable": "pnpm",
+			"skipFiles": ["<node_internals>/**"],
+			"type": "node",
+			"cwd": "${workspaceFolder}"
+		},
+		{
+			"name": "Apps: Knowledge-Base (client-side)",
+			"type": "chrome",
+			"request": "launch",
+			"url": "http://localhost:3001"
+		},
+		{
+			"name": "Apps: Website (server-side)",
+			"request": "launch",
+			"runtimeArgs": ["run", "dev"],
+			"runtimeExecutable": "pnpm",
+			"skipFiles": ["<node_internals>/**"],
+			"type": "node",
+			"cwd": "${workspaceFolder}/apps/website"
+		},
+		{
+			"name": "Apps: Website (client-side)",
+			"type": "chrome",
+			"request": "launch",
+			"url": "http://localhost:3002"
+		}
+	],
+	"compounds": [
+		{
+			"name": "Apps: Knowledge-Base",
+			"configurations": ["Apps: Knowledge-Base (server-side)", "Apps: Knowledge-Base (client-side)"]
+		},
+		{
+			"name": "Apps: Website",
+			"configurations": ["Apps: Website (server-side)", "Apps: Website (client-side)"]
+		}
+	]
+}

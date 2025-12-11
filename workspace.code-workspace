@@ -31,8 +31,19 @@
 	],
 	"settings": {
 		"debug.toolBarLocation": "docked",
+		"editor.codeActionsOnSave": {
+			"source.fixAll": "explicit",
+		},
+		"editor.defaultFormatter": "prettier.prettier-vscode",
+		"editor.detectIndentation": false,
+		"editor.formatOnSave": true,
+		"editor.inlayHints.enabled": "offUnlessPressed",
+		"editor.linkedEditing": true,
+		"editor.rulers": [100],
+		"editor.stickyScroll.enabled": true,
 		"emmet.showExpandedAbbreviation": "never",
 		"eslint.workingDirectories": [{ "pattern": "./apps/*/" }, { "pattern": "./packages/*/" }],
+		"files.eol": "\n",
 		"files.watcherExclude": {
 			"**/.next/**": true,
 			"**/dist/**": true,
@@ -40,12 +51,17 @@
 		},
 		"terminal.integrated.enablePersistentSessions": false,
 		"typescript.enablePromptUseWorkspaceTsdk": true,
+		"typescript.inlayHints.parameterNames.enabled": "all",
+		"typescript.preferences.importModuleSpecifier": "non-relative",
+		"typescript.preferences.preferTypeOnlyAutoImports": true,
 		"typescript.tsserver.maxTsServerMemory": 4096,
 		"workbench.tree.enableStickyScroll": true,
+		"[markdown]": {
+			"editor.wordWrap": "on",
+		},
 	},
 	"extensions": {
 		"recommendations": [
-			"dbaeumer.vscode-eslint",
 			"editorconfig.editorconfig",
 			"github.vscode-github-actions",
 			"mikestead.dotenv",

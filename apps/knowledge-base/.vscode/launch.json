@@ -7,7 +7,7 @@
 			"runtimeExecutable": "pnpm",
 			"skipFiles": ["<node_internals>/**"],
 			"type": "node",
-			"cwd": "${workspaceFolder}/apps/knowledge-base"
+			"cwd": "${workspaceFolder}"
 		},
 		{
 			"name": "Apps: Knowledge-Base (client-side)",

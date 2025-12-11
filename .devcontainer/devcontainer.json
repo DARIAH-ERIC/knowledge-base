@@ -2,7 +2,7 @@
 	"name": "dariah knowledge base",
 	"dockerComposeFile": [
 		"docker-compose.postgres.yaml",
-		"docker-compose.apps.yaml",
+		"docker-compose.workspace.yaml",
 		"docker-compose.drizzle-gateway.yaml",
 		"docker-compose.imgproxy.yaml",
 		"docker-compose.mailpit.yaml",
