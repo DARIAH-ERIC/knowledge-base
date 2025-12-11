@@ -132,15 +132,15 @@ export default defineConfig(
 		},
 	},
 	nextConfig,
-	tailwindConfig,
 	{
 		name: "tailwindcss-config",
+		extends: [tailwindConfig],
 		rules: {
-			"tailwindcss/no-custom-classname": ["error", { whitelist: ["lead", "not-richtext"] }],
+			"better-tailwindcss/no-unknown-classes": ["error", { ignore: ["lead", "not-richtext"] }],
 		},
 		settings: {
-			tailwindcss: {
-				config: path.resolve("./styles/index.css"),
+			"better-tailwindcss": {
+				entryPoint: path.resolve("./styles/index.css"),
 			},
 		},
 	},
