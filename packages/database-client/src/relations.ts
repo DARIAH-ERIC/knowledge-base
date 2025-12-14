@@ -4,10 +4,22 @@ import * as schema from "./schema";
 
 export const relations = defineRelations(schema, (r) => {
 	return {
+		assets: {
+			license: r.one.licenses({
+				from: r.assets.licenseId,
+				to: r.licenses.id,
+			}),
+		},
+		contentBlocks: {
+			field: r.one.contentBlocksFields({
+				from: r.contentBlocks.fieldId,
+				to: r.contentBlocksFields.id,
+			}),
+		},
 		events: {
-			content: r.one.contents({
+			content: r.one.contentBlocksFields({
 				from: r.events.contentId,
-				to: r.contents.id,
+				to: r.contentBlocksFields.id,
 			}),
 			image: r.one.assets({
 				from: r.events.imageId,
@@ -15,9 +27,9 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 		},
 		news: {
-			content: r.one.contents({
+			content: r.one.contentBlocksFields({
 				from: r.news.contentId,
-				to: r.contents.id,
+				to: r.contentBlocksFields.id,
 			}),
 			image: r.one.assets({
 				from: r.news.imageId,

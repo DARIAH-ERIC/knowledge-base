@@ -748,12 +748,18 @@ importers:
       '@acdh-oeaw/tsconfig':
         specifier: 'catalog:'
         version: 1.5.1(typescript@5.9.3)
+      '@faker-js/faker':
+        specifier: 'catalog:'
+        version: 10.1.0
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.3
       '@types/pg':
         specifier: 'catalog:'
         version: 8.16.0
+      concurrently:
+        specifier: 'catalog:'
+        version: 9.2.1
       drizzle-dbml-generator:
         specifier: 'catalog:'
         version: 0.10.0(drizzle-orm@1.0.0-beta.2-ec83fa8(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3))
@@ -5356,6 +5362,7 @@ packages:
   next@16.0.8:
     resolution: {integrity: sha512-LmcZzG04JuzNXi48s5P+TnJBsTGPJunViNKV/iE4uM6kstjTQsQhvsAv+xF6MJxU2Pr26tl15eVbp0jQnsv6/g==}
     engines: {node: '>=20.9.0'}
+    deprecated: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/security-update-2025-12-11 for more details.
     hasBin: true
     peerDependencies:
       '@opentelemetry/api': ^1.1.0

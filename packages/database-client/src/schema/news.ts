@@ -4,7 +4,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 import { assets } from "./assets";
-import { contents } from "./contents";
+import { contentBlocksFields } from "./content-blocks";
 
 export const news = p.pgTable(
 	"news",
@@ -23,7 +23,7 @@ export const news = p.pgTable(
 			.notNull()
 			.unique()
 			.references(() => {
-				return contents.id;
+				return contentBlocksFields.id;
 			}),
 		slug: p.text("slug").notNull().unique(),
 		documentId: f.uuidv7("document_id").notNull(),

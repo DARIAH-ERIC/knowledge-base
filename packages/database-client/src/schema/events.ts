@@ -4,7 +4,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 import { assets } from "./assets";
-import { contents } from "./contents";
+import { contentBlocksFields } from "./content-blocks";
 
 export const events = p.pgTable(
 	"events",
@@ -23,7 +23,7 @@ export const events = p.pgTable(
 			.notNull()
 			.unique()
 			.references(() => {
-				return contents.id;
+				return contentBlocksFields.id;
 			}),
 		location: p.text("location").notNull(),
 		startDate: p.date("start_date", { mode: "date" }).notNull(),

@@ -1,8 +1,8 @@
+import { sql } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
 
 import * as f from "../fields";
-import { lower } from "../functions";
 
 export const users = p.pgTable(
 	"users",
@@ -13,7 +13,7 @@ export const users = p.pgTable(
 		...f.timestamps(),
 	},
 	(t) => {
-		return [p.uniqueIndex("users_email_unique").on(lower(t.email))];
+		return [p.uniqueIndex("users_email_unique").on(sql`lower(${t.email})`)];
 	},
 );
 

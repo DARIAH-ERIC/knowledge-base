@@ -1,6 +1,6 @@
 import { createUrl, createUrlSearchParams, err, isErr, ok, type Result } from "@acdh-oeaw/lib";
 
-import type { CollectionDocument } from "../schema";
+import type { ResourceCollectionDocument } from "../schema";
 import { request } from "../utils/request";
 
 interface Response {
@@ -112,8 +112,8 @@ interface Response {
 /**
  * @see {@link https://api.openaire.eu/graph/swagger-ui/index.html}
  */
-export async function getDocuments(): Promise<Result<Array<CollectionDocument>, Error>> {
-	const documents: Array<CollectionDocument> = [];
+export async function getDocuments(): Promise<Result<Array<ResourceCollectionDocument>, Error>> {
+	const documents: Array<ResourceCollectionDocument> = [];
 
 	const headers = {
 		Accept: "application/json",
@@ -160,17 +160,17 @@ export async function getDocuments(): Promise<Result<Array<CollectionDocument>, 
 				const sourceId = item.id;
 				const id = [source, sourceId].join(":");
 
-				const document: CollectionDocument = {
+				const document: ResourceCollectionDocument = {
 					id,
 					source,
 					source_id: sourceId,
 					imported_at: Date.now(),
-					kind: "publication",
+					type: "publication",
 					label: item.mainTitle,
 					description: item.descriptions?.join("\n") ?? "",
 					links: [],
 					keywords,
-					type: null,
+					kind: null,
 					authors: [],
 					year: null,
 					pid: null,

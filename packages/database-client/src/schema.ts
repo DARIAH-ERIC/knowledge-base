@@ -1,6 +1,5 @@
 export * from "./schema/assets";
-export * from "./schema/blocks";
-export * from "./schema/contents";
+export * from "./schema/content-blocks";
 export * from "./schema/events";
 export * from "./schema/licenses";
 export * from "./schema/news";

@@ -3,7 +3,12 @@ import { faker as f } from "@faker-js/faker";
 import { Client } from "typesense";
 
 import { env } from "../config/env.config";
-import { collection, type CollectionDocument } from "../src/schema";
+import {
+	type ResourceCollectionDocument,
+	resources,
+	resourceTypes,
+	toolOrServiceKinds,
+} from "../src/schema";
 
 function createClient() {
 	const apiKey = env.TYPESENSE_ADMIN_API_KEY;
@@ -28,11 +33,11 @@ function generateDocuments() {
 	f.seed(42);
 	f.setDefaultRefDate(new Date(Date.UTC(2025, 0, 1)));
 
-	const kinds = ["publication", "tool-or-service", "training-material", "workflow"] as const;
+	const types = resourceTypes;
 
-	const documents = f.helpers.multiple<CollectionDocument>(
+	const documents = f.helpers.multiple<ResourceCollectionDocument>(
 		() => {
-			const kind = f.helpers.arrayElement(kinds);
+			const type = f.helpers.arrayElement(types);
 
 			const document = {
 				id: f.string.uuid(),
@@ -51,16 +56,16 @@ function generateDocuments() {
 					},
 					{ count: { min: 1, max: 3 } },
 				),
-			} satisfies Partial<CollectionDocument>;
+			} satisfies Partial<ResourceCollectionDocument>;
 
-			switch (kind) {
+			switch (type) {
 				case "publication": {
 					return {
 						...document,
-						kind,
+						type,
 						source: f.helpers.arrayElement(["open-aire", "zotero"]),
 						source_id: f.string.alphanumeric(12),
-						type: f.helpers.arrayElement(["article", "book", "conference", "thesis", null]),
+						kind: f.helpers.arrayElement(["article", "book", "conference", "thesis", null]),
 						authors: f.helpers.multiple(
 							() => {
 								return f.person.fullName();
@@ -81,10 +86,10 @@ function generateDocuments() {
 				case "tool-or-service": {
 					return {
 						...document,
-						kind,
+						type,
 						source: "ssh-open-marketplace",
 						source_id: f.string.alphanumeric(12),
-						type: f.helpers.arrayElement(["community", "core"]),
+						kind: f.helpers.arrayElement(toolOrServiceKinds),
 						actor_ids: f.helpers.multiple(
 							() => {
 								return f.string.alphanumeric(12);
@@ -97,7 +102,7 @@ function generateDocuments() {
 				case "training-material": {
 					return {
 						...document,
-						kind,
+						type,
 						source: "ssh-open-marketplace",
 						source_id: f.string.alphanumeric(12),
 						actor_ids: f.helpers.multiple(
@@ -112,7 +117,7 @@ function generateDocuments() {
 				case "workflow": {
 					return {
 						...document,
-						kind,
+						type,
 						source: "ssh-open-marketplace",
 						source_id: f.string.alphanumeric(12),
 						actor_ids: f.helpers.multiple(
@@ -136,9 +141,9 @@ async function seed() {
 
 	const documents = generateDocuments();
 
-	await client.collections(collection.name).documents().delete({ truncate: true });
+	await client.collections(resources.name).documents().delete({ truncate: true });
 
-	await client.collections(collection.name).documents().import(documents);
+	await client.collections(resources.name).documents().import(documents);
 }
 
 async function main() {
