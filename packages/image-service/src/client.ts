@@ -6,7 +6,7 @@ import type { BucketItem, ItemBucketMetadata } from "minio";
 import { env } from "../config/env.config";
 import { createMinioClient } from "./create-minio-client";
 import { generateObjectName } from "./generate-object-name";
-import { generateSignedImageUrl } from "./generate-signed-image-url";
+import { generateSignedImageUrl, type ImageUrlOptions } from "./generate-signed-image-url";
 
 const bucketName = env.S3_BUCKET;
 
@@ -22,7 +22,7 @@ interface Client {
 		) => Promise<{ objectName: string }>;
 	};
 	urls: {
-		generate: typeof generateSignedImageUrl;
+		generate: (objectName: string, options: ImageUrlOptions) => { url: string };
 	};
 }
 
@@ -61,6 +61,12 @@ export function createClient(): Client {
 		return { objectName };
 	}
 
+	function generate(objectName: string, options: ImageUrlOptions) {
+		const url = generateSignedImageUrl(bucketName, objectName, options);
+
+		return { url };
+	}
+
 	return {
 		images: {
 			get,
@@ -68,7 +74,9 @@ export function createClient(): Client {
 			upload,
 		},
 		urls: {
-			generate: generateSignedImageUrl,
+			generate,
 		},
 	};
 }
+
+export const client = createClient();

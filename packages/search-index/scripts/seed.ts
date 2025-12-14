@@ -1,4 +1,4 @@
-import { assert, log } from "@acdh-oeaw/lib";
+import { log } from "@acdh-oeaw/lib";
 import { faker } from "@faker-js/faker";
 import { Client } from "typesense";
 
@@ -7,7 +7,6 @@ import { collection, type CollectionDocument } from "../src/schema";
 
 function createClient() {
 	const apiKey = env.TYPESENSE_ADMIN_API_KEY;
-	assert(apiKey, "Missing `TYPESENSE_ADMIN_API_KEY` environment variable.");
 
 	const client = new Client({
 		apiKey,
