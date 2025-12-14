@@ -364,6 +364,9 @@ importers:
       '@dariah-eric/dariah-knowledge-base-database-client':
         specifier: workspace:^
         version: link:../../packages/database-client
+      '@dariah-eric/dariah-knowledge-base-ui':
+        specifier: workspace:^
+        version: link:../../packages/ui
       '@heroicons/react':
         specifier: 'catalog:'
         version: 2.2.0(react@19.2.1)
@@ -581,6 +584,9 @@ importers:
       '@dariah-eric/dariah-knowledge-base-database-client':
         specifier: workspace:^
         version: link:../../packages/database-client
+      '@dariah-eric/dariah-knowledge-base-ui':
+        specifier: workspace:^
+        version: link:../../packages/ui
       '@react-aria/utils':
         specifier: 'catalog:'
         version: 3.31.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
