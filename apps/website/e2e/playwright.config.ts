@@ -8,7 +8,7 @@ import { defineConfig, devices, type PlaywrightTestConfig } from "@playwright/te
 import isCI from "is-in-ci";
 
 /**
- * Reading `.env` files here instead of using `dotenv-cli` so environment variables are
+ * Reading `.env` files here instead of using `dotenvx run` so environment variables are
  * available to the vs code plugin as well.
  */
 for (const envFilePath of [".env.test.local", ".env.local", ".env.test", ".env"]) {
