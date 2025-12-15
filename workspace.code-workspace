@@ -42,7 +42,6 @@
 		"editor.rulers": [100],
 		"editor.stickyScroll.enabled": true,
 		"emmet.showExpandedAbbreviation": "never",
-		"eslint.workingDirectories": [{ "pattern": "./apps/*/" }, { "pattern": "./packages/*/" }],
 		"files.eol": "\n",
 		"files.watcherExclude": {
 			"**/.next/**": true,
