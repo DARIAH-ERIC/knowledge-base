@@ -112,16 +112,16 @@ catalogs:
       specifier: ^0.10.0
       version: 0.10.0
     drizzle-kit:
-      specifier: ^1.0.0-beta.2-58a4521
+      specifier: ^1.0.0-beta.2-3a98f3a
       version: 1.0.0-beta.2-ec83fa8
     drizzle-orm:
-      specifier: ^1.0.0-beta.2-58a4521
+      specifier: ^1.0.0-beta.2-3a98f3a
       version: 1.0.0-beta.2-ec83fa8
     drizzle-seed:
-      specifier: ^1.0.0-beta.2-58a4521
+      specifier: ^1.0.0-beta.2-3a98f3a
       version: 1.0.0-beta.2-ec83fa8
     drizzle-valibot:
-      specifier: ^1.0.0-beta.2-58a4521
+      specifier: ^1.0.0-beta.2-3a98f3a
       version: 1.0.0-beta.2-ec83fa8
     eslint:
       specifier: ^9.39.1
@@ -133,7 +133,7 @@ catalogs:
       specifier: ^3.3.1
       version: 3.3.1
     eslint-plugin-drizzle:
-      specifier: ^1.0.0-beta.2-58a4521
+      specifier: ^1.0.0-beta.2-3a98f3a
       version: 1.0.0-beta.2-ec83fa8
     eslint-plugin-perfectionist:
       specifier: ^4.15.1

@@ -1,11 +1,15 @@
-import { log } from "@acdh-oeaw/lib";
+import { assert, log } from "@acdh-oeaw/lib";
+import { faker as f } from "@faker-js/faker";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { reset, seed } from "drizzle-seed";
+import { reset } from "drizzle-seed";
 
 import { env } from "../config/env.config";
 import * as schema from "../src/schema";
 
 async function main() {
+	f.seed(42);
+	f.setDefaultRefDate(new Date(Date.UTC(2025, 0, 1)));
+
 	const db = drizzle({
 		casing: "snake_case",
 		connection: {
@@ -21,194 +25,186 @@ async function main() {
 
 	await reset(db, schema);
 
-	/**
-	 * We are seeding in multiple steps because `drizzle-seed` currently does not automatically
-	 * handle unique constraints.
-	 *
-	 * @see {@link https://github.com/drizzle-team/drizzle-orm/issues/4354}
-	 */
-
-	await seed(
-		db,
-		{
-			assets: schema.assets,
-			licenses: schema.licenses,
-			users: schema.users,
+	const users = f.helpers.multiple(
+		() => {
+			return { username: f.internet.username(), email: f.internet.email() };
 		},
-		{ seed: 42 },
-	).refine((f) => {
-		return {
-			assets: {
-				columns: {
-					key: f.uuid(),
-				},
-				count: 100,
-			},
-			licenses: {
-				columns: {
-					name: f.valuesFromArray({
-						values: ["CC-BY-4.0", "CC-BY-SA-4.0", "CC0-1.0"],
-						isUnique: true,
-					}),
-					url: f.valuesFromArray({
-						values: ["https://choosealicense.com/"],
-					}),
-				},
-				count: 3,
-			},
-			users: {
-				columns: {
-					email: f.email(),
-					username: f.fullName(),
-				},
-				count: 10,
-			},
-		};
-	});
+		{ count: 10 },
+	);
 
-	const assetIds = (await db.select({ id: schema.assets.id }).from(schema.assets)).map((row) => {
-		return row.id;
-	});
+	const _userIds = await db.insert(schema.users).values(users).returning({ id: schema.users.id });
 
-	await seed(
-		db,
-		{
-			contentBlocksFields: schema.contentBlocksFields,
-			dataContentBlocks: schema.dataContentBlocks,
-			imageContentBlocks: schema.imageContentBlocks,
-			richTextContentBlocks: schema.richTextContentBlocks,
+	const licenses = [
+		{ name: "CC0-1.0", url: "https://choosealicense.com/licenses/cc0-1.0/" },
+		{ name: "CC-BY-4.0", url: "https://choosealicense.com/licenses/cc-by-4.0/" },
+		{ name: "CC-BY-SA-4.0", url: "https://choosealicense.com/licenses/cc-by-sa-4.0/" },
+	];
+
+	const licenseIds = await db
+		.insert(schema.licenses)
+		.values(licenses)
+		.returning({ id: schema.licenses.id });
+
+	const assets = f.helpers.multiple(
+		() => {
+			return {
+				// TODO: should use actual s3 object keys from our object store.
+				key: f.string.alphanumeric(12),
+				licenseId: f.helpers.arrayElement(licenseIds).id,
+			};
 		},
-		{ seed: 42 },
-	).refine((f) => {
-		return {
-			contentBlocksFields: {
-				count: 50,
-			},
-			dataContentBlocks: {
-				columns: {
-					limit: f.int({ minValue: 1, maxValue: 100 }),
-					type: f.valuesFromArray({
-						values: [...schema.dataContentBlockTypes],
-					}),
-				},
-				count: 50,
-			},
-			imageContentBlocks: {
-				columns: {
-					caption: f.loremIpsum({ sentencesCount: 1 }),
-					imageId: f.valuesFromArray({
-						values: assetIds,
-						isUnique: true,
-					}),
-				},
-				count: 50,
-			},
-			richTextContentBlocks: {
-				count: 50,
-			},
-		};
-	});
+		{ count: 100 },
+	);
 
-	const contentBlocksFieldsIds = (
-		await db.select({ id: schema.contentBlocksFields.id }).from(schema.contentBlocksFields)
-	).map((row) => {
-		return row.id;
-	});
+	const assetIds = await db
+		.insert(schema.assets)
+		.values(assets)
+		.returning({ id: schema.assets.id });
 
-	const dataContentBlocksIds = (
-		await db.select({ id: schema.dataContentBlocks.id }).from(schema.dataContentBlocks)
-	).map((row) => {
-		return row.id;
-	});
+	const events = f.helpers.multiple(
+		() => {
+			const title = f.lorem.sentence();
 
-	const imageContentBlocksIds = (
-		await db.select({ id: schema.imageContentBlocks.id }).from(schema.imageContentBlocks)
-	).map((row) => {
-		return row.id;
-	});
-
-	const richTextContentBlocksIds = (
-		await db.select({ id: schema.richTextContentBlocks.id }).from(schema.richTextContentBlocks)
-	).map((row) => {
-		return row.id;
-	});
-
-	await seed(
-		db,
-		{
-			contentBlocks: schema.contentBlocks,
-			events: schema.events,
-			eventsToResources: schema.eventsToResources,
-			news: schema.news,
-			newsToResources: schema.newsToResources,
+			return {
+				title,
+				summary: f.lorem.paragraph(),
+				imageId: f.helpers.arrayElement(assetIds).id,
+				location: f.location.city(),
+				startDate: f.date.past({ years: 5 }),
+				endDate: f.helpers.maybe(
+					() => {
+						return f.date.past();
+					},
+					{ probability: 0.25 },
+				),
+				website: f.helpers.maybe(
+					() => {
+						return f.internet.url();
+					},
+					{ probability: 0.75 },
+				),
+				slug: f.helpers.slugify(title),
+				// FIXME:
+				documentId: f.string.uuid(),
+			};
 		},
-		{ seed: 42 },
-	).refine((f) => {
-		return {
-			contentBlocks: {
-				columns: {
-					fieldId: f.valuesFromArray({
-						values: contentBlocksFieldsIds,
-					}),
-					blockType: f.valuesFromArray({
-						values: [...schema.contentBlockTypes],
-					}),
-					blockId: f.valuesFromArray({
-						// FIXME:
-						values: [
-							...dataContentBlocksIds,
-							...imageContentBlocksIds,
-							...richTextContentBlocksIds,
-						],
-						isUnique: true,
-					}),
-					// FIXME:
-					sortOrder: f.int({ minValue: 0, maxValue: 3 }),
-				},
-				count: 150,
-			},
-			events: {
-				columns: {
-					contentId: f.valuesFromArray({
-						values: contentBlocksFieldsIds,
-						isUnique: true,
-					}),
-					imageId: f.valuesFromArray({
-						values: assetIds,
-						isUnique: true,
-					}),
-					location: f.city(),
-					slug: f.uuid(),
-					summary: f.loremIpsum({ sentencesCount: 3 }),
-					title: f.loremIpsum({ sentencesCount: 1 }),
-					website: f.inet(),
-				},
-				count: 25,
-			},
-			eventsToResources: {
-				count: 25,
-			},
-			news: {
-				columns: {
-					contentId: f.valuesFromArray({
-						values: contentBlocksFieldsIds,
-						isUnique: true,
-					}),
-					imageId: f.valuesFromArray({
-						values: assetIds,
-						isUnique: true,
-					}),
-					slug: f.uuid(),
-					summary: f.loremIpsum({ sentencesCount: 3 }),
-					title: f.loremIpsum({ sentencesCount: 1 }),
-				},
-				count: 25,
-			},
-			newsToResources: {
-				count: 25,
-			},
-		};
+		{ count: 25 },
+	);
+
+	const eventIds = await db
+		.insert(schema.events)
+		.values(events)
+		.returning({ id: schema.events.id });
+
+	const news = f.helpers.multiple(
+		() => {
+			const title = f.lorem.sentence();
+
+			return {
+				title,
+				summary: f.lorem.paragraph(),
+				imageId: f.helpers.arrayElement(assetIds).id,
+				slug: f.helpers.slugify(title),
+				// FIXME:
+				documentId: f.string.uuid(),
+			};
+		},
+		{ count: 25 },
+	);
+
+	const newsItemIds = await db.insert(schema.news).values(news).returning({ id: schema.news.id });
+
+	const entities = [
+		...eventIds.map(({ id }) => {
+			return {
+				entityId: id,
+				entityType: "events" as const,
+			};
+		}),
+		...newsItemIds.map(({ id }) => {
+			return {
+				entityId: id,
+				entityType: "news" as const,
+			};
+		}),
+	];
+
+	// TODO: this should work automatically via database trigger
+	const entityIds = await db
+		.insert(schema.entities)
+		.values(entities)
+		.returning({ id: schema.entities.id });
+
+	const fields = entityIds.map(({ id }) => {
+		return { entityId: id, name: "content" };
 	});
+
+	const fieldIds = await db
+		.insert(schema.fields)
+		.values(fields)
+		.returning({ id: schema.fields.id });
+
+	const imageContentBlocks = f.helpers.multiple(
+		() => {
+			return {
+				imageId: f.helpers.arrayElement(assetIds).id,
+				caption: f.helpers.maybe(
+					() => {
+						return f.lorem.sentence();
+					},
+					{ probability: 0.5 },
+				),
+			};
+		},
+		{ count: 50 },
+	);
+
+	const imageContentBlockIds = await db
+		.insert(schema.imageContentBlocks)
+		.values(imageContentBlocks)
+		.returning({ id: schema.imageContentBlocks.id });
+
+	const richTextContentBlocks = f.helpers.multiple(
+		() => {
+			return {
+				content: JSON.stringify({ hello: "world" }),
+			};
+		},
+		{ count: 50 },
+	);
+
+	const richTextContentBlockIds = await db
+		.insert(schema.richTextContentBlocks)
+		.values(richTextContentBlocks)
+		.returning({ id: schema.richTextContentBlocks.id });
+
+	const contentBlocks = fieldIds.flatMap(({ id }, index) => {
+		const imageContentBlock = imageContentBlockIds[index];
+		assert(imageContentBlock, "Missing image content block.");
+
+		const richTextContentBlock = richTextContentBlockIds[index];
+		assert(richTextContentBlock, "Missing rich-text content block.");
+
+		return [
+			{
+				id: imageContentBlock.id,
+				fieldId: id,
+				position: 1,
+				type: "image" as const,
+			},
+			{
+				id: richTextContentBlock.id,
+				fieldId: id,
+				position: 2,
+				type: "rich_text" as const,
+			},
+		];
+	});
+
+	const _contentBlockIds = await db
+		.insert(schema.contentBlocks)
+		.values(contentBlocks)
+		.returning({ id: schema.contentBlocks.id });
 
 	log.success("Successfully seeded database.");
 }

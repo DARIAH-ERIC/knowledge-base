@@ -16,10 +16,11 @@ async function main() {
 		schema: {
 			assets: schema.assets,
 			contentBlocks: schema.contentBlocks,
-			contentBlocksFields: schema.contentBlocksFields,
 			dataContentBlocks: schema.dataContentBlocks,
+			entities: schema.entities,
 			events: schema.events,
 			eventsToResources: schema.eventsToResources,
+			fields: schema.fields,
 			imageContentBlocks: schema.imageContentBlocks,
 			licenses: schema.licenses,
 			news: schema.news,

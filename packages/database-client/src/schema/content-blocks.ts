@@ -4,23 +4,9 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 import { assets } from "./assets";
+import { fields } from "./entities";
 
-// - we don't enforce global uniqueness of content block fields
-//   - that would mean removing contentId fields from events/news, and
-//   - adding a polymorphic owner_id / owner_type field on content_blocks_fields
-
-export const contentBlocksFields = p.pgTable("content_blocks_fields", {
-	id: f.uuidv7("id").primaryKey(),
-});
-
-export type ContentBlocksField = typeof contentBlocksFields.$inferSelect;
-export type ContentBlocksFieldInput = typeof contentBlocksFields.$inferInsert;
-
-export const ContentBlocksFieldSelectSchema = createSelectSchema(contentBlocksFields);
-export const ContentBlocksFieldInsertSchema = createInsertSchema(contentBlocksFields);
-export const ContentBlocksFieldUpdateSchema = createUpdateSchema(contentBlocksFields);
-
-export const contentBlockTypes = ["data", "image", "rich-text"] as const;
+export const contentBlockTypes = ["data", "image", "rich_text"] as const;
 
 export const contentBlocks = p.pgTable(
 	"content_blocks",
@@ -30,18 +16,13 @@ export const contentBlocks = p.pgTable(
 			.uuidv7("field_id")
 			.notNull()
 			.references(() => {
-				return contentBlocksFields.id;
+				return fields.id;
 			}),
-		// FIXME: should blockId + blockType be primary key instead of unique constraint
-		blockId: f.uuidv7("block_id").notNull(),
-		blockType: p.text("block_type", { enum: contentBlockTypes }).notNull(),
-		sortOrder: p.integer("sort_order").notNull(),
+		type: p.text("type", { enum: contentBlockTypes }).notNull(),
+		position: p.integer("position").notNull(),
 	},
 	(t) => {
-		return [
-			p.check("content_blocks_block_type_enum_check", inArray(t.blockType, contentBlockTypes)),
-			p.unique("content_blocks_block_id_block_type_unique").on(t.blockId, t.blockType),
-		];
+		return [p.check("content_blocks_type_enum_check", inArray(t.type, contentBlockTypes))];
 	},
 );
 
@@ -52,19 +33,18 @@ export const ContentBlockSelectSchema = createSelectSchema(contentBlocks);
 export const ContentBlockInsertSchema = createInsertSchema(contentBlocks);
 export const ContentBlockUpdateSchema = createUpdateSchema(contentBlocks);
 
-export const dataContentBlockTypes = [
-	"events",
-	"impact-case-studies",
-	"news",
-	"projects",
-	"working_groups",
-] as const;
+export const dataContentBlockTypes = ["events", "news"] as const;
 
 export const dataContentBlocks = p.pgTable(
 	"content_blocks_type_data",
 	{
-		id: f.uuidv7("id").primaryKey(),
-		type: p.text("type", { enum: dataContentBlockTypes }),
+		id: f
+			.uuidv7("id")
+			.primaryKey()
+			.references(() => {
+				return contentBlocks.id;
+			}),
+		type: p.text("type", { enum: dataContentBlockTypes }).notNull(),
 		limit: p.integer("limit"),
 	},
 	(t) => {
@@ -82,7 +62,12 @@ export const DataContentBlockInsertSchema = createInsertSchema(dataContentBlocks
 export const DataContentBlockUpdateSchema = createUpdateSchema(dataContentBlocks);
 
 export const imageContentBlocks = p.pgTable("content_blocks_type_image", {
-	id: f.uuidv7("id").primaryKey(),
+	id: f
+		.uuidv7("id")
+		.primaryKey()
+		.references(() => {
+			return contentBlocks.id;
+		}),
 	imageId: f
 		.uuidv7("image_id")
 		.notNull()
@@ -100,8 +85,13 @@ export const ImageContentBlockInsertSchema = createInsertSchema(imageContentBloc
 export const ImageContentBlockUpdateSchema = createUpdateSchema(imageContentBlocks);
 
 export const richTextContentBlocks = p.pgTable("content_blocks_type_rich_text", {
-	id: f.uuidv7("id").primaryKey(),
-	content: p.jsonb("content"),
+	id: f
+		.uuidv7("id")
+		.primaryKey()
+		.references(() => {
+			return contentBlocks.id;
+		}),
+	content: p.jsonb("content").notNull(),
 });
 
 export type RichTextContentBlock = typeof richTextContentBlocks.$inferSelect;
