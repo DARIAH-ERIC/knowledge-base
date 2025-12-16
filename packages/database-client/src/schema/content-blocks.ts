@@ -6,7 +6,7 @@ import * as f from "../fields";
 import { assets } from "./assets";
 import { fields } from "./entities";
 
-export const contentBlockTypes = ["data", "image", "rich_text"] as const;
+export const contentBlockTypes = ["data", "embed", "image", "rich_text"] as const;
 
 export const contentBlocks = p.pgTable(
 	"content_blocks",
@@ -60,6 +60,24 @@ export type DataContentBlockInput = typeof dataContentBlocks.$inferInsert;
 export const DataContentBlockSelectSchema = createSelectSchema(dataContentBlocks);
 export const DataContentBlockInsertSchema = createInsertSchema(dataContentBlocks);
 export const DataContentBlockUpdateSchema = createUpdateSchema(dataContentBlocks);
+
+export const embedContentBlocks = p.pgTable("content_blocks_type_embed", {
+	id: f
+		.uuidv7("id")
+		.primaryKey()
+		.references(() => {
+			return contentBlocks.id;
+		}),
+	url: p.text("caption").notNull(),
+	caption: p.text("caption"),
+});
+
+export type EmbedContentBlock = typeof embedContentBlocks.$inferSelect;
+export type EmbedContentBlockInput = typeof embedContentBlocks.$inferInsert;
+
+export const EmbedContentBlockSelectSchema = createSelectSchema(embedContentBlocks);
+export const EmbedContentBlockInsertSchema = createInsertSchema(embedContentBlocks);
+export const EmbedContentBlockUpdateSchema = createUpdateSchema(embedContentBlocks);
 
 export const imageContentBlocks = p.pgTable("content_blocks_type_image", {
 	id: f
