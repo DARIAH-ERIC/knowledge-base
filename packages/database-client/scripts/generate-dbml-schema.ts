@@ -27,6 +27,7 @@ async function main() {
 			impactCaseStudies: schema.impactCaseStudies,
 			licenses: schema.licenses,
 			news: schema.news,
+			pages: schema.pages,
 			richTextContentBlocks: schema.richTextContentBlocks,
 			spotlightArticles: schema.spotlightArticles,
 			users: schema.users,
