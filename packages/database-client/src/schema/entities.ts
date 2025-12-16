@@ -77,3 +77,29 @@ export const entitiesToResources = p.pgTable(
 		];
 	},
 );
+
+export const entitiesToEntities = p.pgTable(
+	"entities_to_entities",
+	{
+		entityId: f
+			.uuidv7("entity_id")
+			.notNull()
+			.references(() => {
+				return entities.id;
+			}),
+		relatedEntityId: f
+			.uuidv7("related_entity_id")
+			.notNull()
+			.references(() => {
+				return entities.id;
+			}),
+	},
+	(t) => {
+		return [
+			p.primaryKey({
+				columns: [t.entityId, t.relatedEntityId],
+				name: "entities_to_entities_pkey",
+			}),
+		];
+	},
+);
