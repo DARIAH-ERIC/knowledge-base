@@ -7,12 +7,9 @@ import { licenses } from "./licenses";
 export const assets = p.pgTable("assets", {
 	id: f.uuidv7("id").primaryKey(),
 	key: p.text("key").notNull(),
-	licenseId: f
-		.uuidv7("license_id")
-		.notNull()
-		.references(() => {
-			return licenses.id;
-		}),
+	licenseId: f.uuidv7("license_id").references(() => {
+		return licenses.id;
+	}),
 	...f.timestamps(),
 });
 
