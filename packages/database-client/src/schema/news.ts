@@ -24,24 +24,3 @@ export type NewsItemInput = typeof news.$inferInsert;
 export const NewsItemSelectSchema = createSelectSchema(news);
 export const NewsItemInsertSchema = createInsertSchema(news);
 export const NewsItemUpdateSchema = createUpdateSchema(news);
-
-export const newsToResources = p.pgTable(
-	"news_to_resources",
-	{
-		newsItemId: f
-			.uuidv7("news_item_id")
-			.notNull()
-			.references(() => {
-				return news.id;
-			}),
-		resourceId: p.text("resource_id").notNull(),
-	},
-	(t) => {
-		return [
-			p.primaryKey({
-				columns: [t.newsItemId, t.resourceId],
-				name: "news_to_resources_pkey",
-			}),
-		];
-	},
-);

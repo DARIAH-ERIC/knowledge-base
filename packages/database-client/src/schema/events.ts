@@ -28,24 +28,3 @@ export type EventInput = typeof events.$inferInsert;
 export const EventSelectSchema = createSelectSchema(events);
 export const EventInsertSchema = createInsertSchema(events);
 export const EventUpdateSchema = createUpdateSchema(events);
-
-export const eventsToResources = p.pgTable(
-	"events_to_resources",
-	{
-		eventId: f
-			.uuidv7("event_id")
-			.notNull()
-			.references(() => {
-				return events.id;
-			}),
-		resourceId: p.text("resource_id").notNull(),
-	},
-	(t) => {
-		return [
-			p.primaryKey({
-				columns: [t.eventId, t.resourceId],
-				name: "events_to_resources_pkey",
-			}),
-		];
-	},
-);

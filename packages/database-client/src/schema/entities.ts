@@ -56,3 +56,24 @@ export type FieldInput = typeof fields.$inferInsert;
 export const FieldSelectSchema = createSelectSchema(fields);
 export const FieldInsertSchema = createInsertSchema(fields);
 export const FieldUpdateSchema = createUpdateSchema(fields);
+
+export const entitiesToResources = p.pgTable(
+	"entities_to_resources",
+	{
+		entityId: f
+			.uuidv7("entity_id")
+			.notNull()
+			.references(() => {
+				return entities.id;
+			}),
+		resourceId: p.text("resource_id").notNull(),
+	},
+	(t) => {
+		return [
+			p.primaryKey({
+				columns: [t.entityId, t.resourceId],
+				name: "entities_to_resources_pkey",
+			}),
+		];
+	},
+);
