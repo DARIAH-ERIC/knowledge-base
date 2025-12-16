@@ -1,4 +1,4 @@
-import { assert, log } from "@acdh-oeaw/lib";
+import { assert, groupBy, log } from "@acdh-oeaw/lib";
 import { faker as f } from "@faker-js/faker";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { reset } from "drizzle-seed";
@@ -32,7 +32,7 @@ async function main() {
 		{ count: 10 },
 	);
 
-	const _userIds = await db.insert(schema.users).values(users).returning({ id: schema.users.id });
+	await db.insert(schema.users).values(users);
 
 	const licenses = [
 		{ name: "CC0-1.0", url: "https://choosealicense.com/licenses/cc0-1.0/" },
@@ -169,67 +169,64 @@ async function main() {
 		.values(fields)
 		.returning({ id: schema.fields.id });
 
-	const imageContentBlocks = f.helpers.multiple(
-		() => {
-			return {
-				imageId: f.helpers.arrayElement(assetIds).id,
-				caption: f.helpers.maybe(
-					() => {
-						return f.lorem.sentence();
-					},
-					{ probability: 0.5 },
-				),
-			};
-		},
-		{ count: 50 },
-	);
-
-	const imageContentBlockIds = await db
-		.insert(schema.imageContentBlocks)
-		.values(imageContentBlocks)
-		.returning({ id: schema.imageContentBlocks.id });
-
-	const richTextContentBlocks = f.helpers.multiple(
-		() => {
-			return {
-				content: JSON.stringify({ hello: "world" }),
-			};
-		},
-		{ count: 50 },
-	);
-
-	const richTextContentBlockIds = await db
-		.insert(schema.richTextContentBlocks)
-		.values(richTextContentBlocks)
-		.returning({ id: schema.richTextContentBlocks.id });
-
-	const contentBlocks = fieldIds.flatMap(({ id }, index) => {
-		const imageContentBlock = imageContentBlockIds[index];
-		assert(imageContentBlock, "Missing image content block.");
-
-		const richTextContentBlock = richTextContentBlockIds[index];
-		assert(richTextContentBlock, "Missing rich-text content block.");
-
+	const contentBlocks = fieldIds.flatMap(({ id: fieldId }) => {
 		return [
-			{
-				id: imageContentBlock.id,
-				fieldId: id,
-				position: 1,
-				type: "image" as const,
-			},
-			{
-				id: richTextContentBlock.id,
-				fieldId: id,
-				position: 2,
-				type: "rich_text" as const,
-			},
+			{ fieldId, type: "image" as const, position: 1 },
+			{ fieldId, type: "rich_text" as const, position: 2 },
 		];
 	});
 
-	const _contentBlockIds = await db
+	const contentBlockIds = await db
 		.insert(schema.contentBlocks)
 		.values(contentBlocks)
-		.returning({ id: schema.contentBlocks.id });
+		.returning({ id: schema.contentBlocks.id, type: schema.contentBlocks.type });
+
+	const contentBlockIdsByType = groupBy(contentBlockIds, ({ type }) => {
+		return type;
+	});
+
+	const imageContentBlocks = contentBlockIdsByType.image.map(({ id }) => {
+		return {
+			id,
+			imageId: f.helpers.arrayElement(assetIds).id,
+			caption: f.helpers.maybe(
+				() => {
+					return f.lorem.sentence();
+				},
+				{ probability: 0.5 },
+			),
+		};
+	});
+
+	await db.insert(schema.imageContentBlocks).values(imageContentBlocks);
+
+	const richTextContentBlocks = contentBlockIdsByType.rich_text.map(({ id }) => {
+		return {
+			id,
+			content: JSON.stringify({ hello: "world" }),
+		};
+	});
+
+	await db.insert(schema.richTextContentBlocks).values(richTextContentBlocks);
+
+	const entitiesToResources = entityIds.flatMap(({ id: entityId }) => {
+		return f.helpers.multiple(
+			() => {
+				return { entityId, resourceId: f.string.uuid() };
+			},
+			{ count: f.number.int({ min: 0, max: 5 }) },
+		);
+	});
+
+	await db.insert(schema.entitiesToResources).values(entitiesToResources);
+
+	const entitiesToEntities = entityIds.flatMap(({ id: entityId }) => {
+		return f.helpers.arrayElements(entityIds, { min: 0, max: 5 }).map(({ id: relatedEntityId }) => {
+			return { entityId, relatedEntityId };
+		});
+	});
+
+	await db.insert(schema.entitiesToEntities).values(entitiesToEntities);
 
 	log.success("Successfully seeded database.");
 }
