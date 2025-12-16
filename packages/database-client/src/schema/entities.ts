@@ -6,7 +6,7 @@ import * as f from "../fields";
 
 export const entityTypes = ["events", "news"] as const;
 
-const entityStatus = ["draft", "published"] as const;
+export const entityStatus = ["draft", "published"] as const;
 
 export const entities = p.pgTable(
 	"entities",
