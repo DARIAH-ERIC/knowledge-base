@@ -64,18 +64,43 @@ async function main() {
 	const events = f.helpers.multiple(
 		() => {
 			const title = f.lorem.sentence();
+			const startDate = f.date.past({ years: 5 });
 
 			return {
 				title,
 				summary: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
 				location: f.location.city(),
-				startDate: f.date.past({ years: 5 }),
+				startDate,
+				startTime: f.helpers.maybe(
+					() => {
+						return f.date
+							.between({
+								from: new Date(Date.UTC(2025, 0, 1, 0, 0, 0)),
+								to: new Date(Date.UTC(2025, 0, 1, 23, 59, 59)),
+							})
+							.toTimeString()
+							.slice(0, 8);
+					},
+					{ probability: 0.1 },
+				),
 				endDate: f.helpers.maybe(
 					() => {
-						return f.date.past();
+						return f.date.soon({ refDate: startDate, days: 7 });
 					},
 					{ probability: 0.25 },
+				),
+				endTime: f.helpers.maybe(
+					() => {
+						return f.date
+							.between({
+								from: new Date(Date.UTC(2025, 0, 1, 0, 0, 0)),
+								to: new Date(Date.UTC(2025, 0, 1, 23, 59, 59)),
+							})
+							.toTimeString()
+							.slice(0, 8);
+					},
+					{ probability: 0.05 },
 				),
 				website: f.helpers.maybe(
 					() => {
@@ -84,8 +109,6 @@ async function main() {
 					{ probability: 0.75 },
 				),
 				slug: f.helpers.slugify(title),
-				// FIXME:
-				documentId: f.string.uuid(),
 			};
 		},
 		{ count: 25 },
@@ -105,8 +128,6 @@ async function main() {
 				summary: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
 				slug: f.helpers.slugify(title),
-				// FIXME:
-				documentId: f.string.uuid(),
 			};
 		},
 		{ count: 25 },
