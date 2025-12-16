@@ -119,12 +119,16 @@ async function main() {
 			return {
 				entityId: id,
 				entityType: "events" as const,
+				documentId: f.string.uuid(),
+				status: "draft" as const,
 			};
 		}),
 		...newsItemIds.map(({ id }) => {
 			return {
 				entityId: id,
 				entityType: "news" as const,
+				documentId: f.string.uuid(),
+				status: "draft" as const,
 			};
 		}),
 	];

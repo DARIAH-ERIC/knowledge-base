@@ -1,3 +1,4 @@
+import { inArray } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
 
@@ -5,15 +6,23 @@ import * as f from "../fields";
 
 export const entityTypes = ["events", "news"] as const;
 
+const entityStatus = ["draft", "published"] as const;
+
 export const entities = p.pgTable(
 	"entities",
 	{
 		id: f.uuidv7("id").primaryKey(),
 		entityId: f.uuidv7("entity_id").notNull(),
 		entityType: p.text("entity_type", { enum: entityTypes }).notNull(),
+		documentId: f.uuidv7("document_id").notNull(),
+		status: p.text("status", { enum: ["draft", "published"] }).notNull(),
 	},
 	(t) => {
-		return [p.unique("entities_entity_id_entity_type_unique").on(t.entityId, t.entityType)];
+		return [
+			p.check("entities_status_enum_check", inArray(t.status, entityStatus)),
+			p.unique("entities_entity_id_entity_type_unique").on(t.entityId, t.entityType),
+			p.unique("entities_document_id_status_unique").on(t.documentId, t.status),
+		];
 	},
 );
 
