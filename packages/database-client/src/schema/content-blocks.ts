@@ -41,9 +41,12 @@ export const dataContentBlocks = p.pgTable(
 		id: f
 			.uuidv7("id")
 			.primaryKey()
-			.references(() => {
-				return contentBlocks.id;
-			}),
+			.references(
+				() => {
+					return contentBlocks.id;
+				},
+				{ onDelete: "cascade" },
+			),
 		type: p.text("type", { enum: dataContentBlockTypes }).notNull(),
 		limit: p.integer("limit"),
 	},
@@ -65,9 +68,12 @@ export const embedContentBlocks = p.pgTable("content_blocks_type_embed", {
 	id: f
 		.uuidv7("id")
 		.primaryKey()
-		.references(() => {
-			return contentBlocks.id;
-		}),
+		.references(
+			() => {
+				return contentBlocks.id;
+			},
+			{ onDelete: "cascade" },
+		),
 	url: p.text("caption").notNull(),
 	caption: p.text("caption"),
 });
@@ -83,9 +89,12 @@ export const imageContentBlocks = p.pgTable("content_blocks_type_image", {
 	id: f
 		.uuidv7("id")
 		.primaryKey()
-		.references(() => {
-			return contentBlocks.id;
-		}),
+		.references(
+			() => {
+				return contentBlocks.id;
+			},
+			{ onDelete: "cascade" },
+		),
 	imageId: f
 		.uuidv7("image_id")
 		.notNull()
@@ -106,9 +115,12 @@ export const richTextContentBlocks = p.pgTable("content_blocks_type_rich_text", 
 	id: f
 		.uuidv7("id")
 		.primaryKey()
-		.references(() => {
-			return contentBlocks.id;
-		}),
+		.references(
+			() => {
+				return contentBlocks.id;
+			},
+			{ onDelete: "cascade" },
+		),
 	content: p.jsonb("content").notNull(),
 });
 
