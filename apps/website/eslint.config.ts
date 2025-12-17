@@ -182,6 +182,29 @@ export default defineConfig(
 		},
 	},
 	{
+		name: "data-access-layer-config",
+		ignores: ["lib/data/**"],
+		rules: {
+			"@typescript-eslint/no-restricted-imports": [
+				"error",
+				{
+					...restrictedImports,
+					patterns: [
+						{
+							group: [
+								"@dariah-eric/dariah-knowledge-base-database-client",
+								"@dariah-eric/dariah-knowledge-base-image-service",
+								"@dariah-eric/dariah-knowledge-base-search-index",
+							],
+							message: "Please use the data access layer in `lib/data/`.",
+							allowTypeImports: true,
+						},
+					],
+				},
+			],
+		},
+	},
+	{
 		name: "file-naming-conventions-config",
 		plugins: {
 			"check-file": checkFilePlugin,

@@ -3,7 +3,7 @@ import { Client } from "typesense";
 
 import { env } from "../config/env.config";
 import { getDocuments } from "../src/get-documents";
-import { collection } from "../src/schema";
+import { resources } from "../src/schema";
 
 function createClient() {
 	const apiKey = env.TYPESENSE_ADMIN_API_KEY;
@@ -34,9 +34,9 @@ async function ingest() {
 
 	const documents = result.value;
 
-	await client.collections(collection.name).documents().delete({ truncate: true });
+	await client.collections(resources.name).documents().delete({ truncate: true });
 
-	await client.collections(collection.name).documents().import(documents);
+	await client.collections(resources.name).documents().import(documents);
 }
 
 async function main() {

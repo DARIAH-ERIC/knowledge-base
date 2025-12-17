@@ -8,7 +8,7 @@ import * as v from "valibot";
 const result = createEnv({
 	schema(environment) {
 		const schema = v.object({
-			NEXT_PUBLIC_TYPESENSE_COLLECTION_NAME: v.pipe(v.string(), v.nonEmpty()),
+			NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME: v.pipe(v.string(), v.nonEmpty()),
 			NEXT_PUBLIC_TYPESENSE_HOST: v.pipe(v.string(), v.nonEmpty()),
 			NEXT_PUBLIC_TYPESENSE_PORT: v.pipe(
 				v.string(),
@@ -40,7 +40,8 @@ const result = createEnv({
 		return ok(result.output);
 	},
 	environment: {
-		NEXT_PUBLIC_TYPESENSE_COLLECTION_NAME: process.env.NEXT_PUBLIC_TYPESENSE_COLLECTION_NAME,
+		NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME:
+			process.env.NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME,
 		NEXT_PUBLIC_TYPESENSE_HOST: process.env.NEXT_PUBLIC_TYPESENSE_HOST,
 		NEXT_PUBLIC_TYPESENSE_PORT: process.env.NEXT_PUBLIC_TYPESENSE_PORT,
 		NEXT_PUBLIC_TYPESENSE_PROTOCOL: process.env.NEXT_PUBLIC_TYPESENSE_PROTOCOL,
