@@ -11,9 +11,13 @@ import isCI from "is-in-ci";
  * Reading `.env` files here instead of using `dotenvx run` so environment variables are
  * available to the vs code plugin as well.
  */
-for (const envFilePath of [".env.test.local", ".env.local", ".env.test", ".env"]) {
-	dotenv({ path: join(import.meta.dirname, "..", envFilePath), quiet: true });
-}
+dotenv({
+	path: [".env.test.local", ".env.local", ".env.test", ".env"].map((filePath) => {
+		return join(import.meta.dirname, "..", filePath);
+	}),
+	ignore: ["MISSING_ENV_FILE"],
+	quiet: true,
+});
 
 function getConfig():
 	| { kind: "remote"; baseUrl: string; webServer: undefined }
