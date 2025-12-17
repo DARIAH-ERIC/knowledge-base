@@ -54,7 +54,6 @@
 	"devDependencies": {
 		"@acdh-oeaw/eslint-config": "catalog:",
 		"@acdh-oeaw/eslint-config-node": "catalog:",
-		"@acdh-oeaw/eslint-config-playwright": "catalog:",
 		"@acdh-oeaw/eslint-config-react": "catalog:",
 		"@acdh-oeaw/eslint-config-storybook": "catalog:",
 		"@acdh-oeaw/eslint-config-tailwindcss": "catalog:",

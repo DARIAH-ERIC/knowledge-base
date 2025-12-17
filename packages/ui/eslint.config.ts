@@ -2,13 +2,11 @@ import * as path from "node:path";
 
 import baseConfig from "@acdh-oeaw/eslint-config";
 import nodeConfig from "@acdh-oeaw/eslint-config-node";
-import playwrightConfig from "@acdh-oeaw/eslint-config-playwright";
 import reactConfig from "@acdh-oeaw/eslint-config-react";
 import storybookConfig from "@acdh-oeaw/eslint-config-storybook";
 import tailwindConfig from "@acdh-oeaw/eslint-config-tailwindcss";
 import { defineConfig, globalIgnores } from "eslint/config";
 import gitignore from "eslint-config-flat-gitignore";
-import turboConfig from "eslint-config-turbo/flat";
 import checkFilePlugin from "eslint-plugin-check-file";
 import perfectionistPlugin from "eslint-plugin-perfectionist";
 import unicornPlugin from "eslint-plugin-unicorn";
@@ -104,24 +102,23 @@ export default defineConfig(
 			],
 		},
 	},
-	tailwindConfig,
 	{
 		name: "tailwindcss-config",
+		extends: [tailwindConfig],
 		rules: {
-			"tailwindcss/no-custom-classname": ["error", { whitelist: ["lead", "not-richtext"] }],
+			"better-tailwindcss/no-unknown-classes": ["error", { ignore: ["lead", "not-richtext"] }],
 		},
 		settings: {
-			tailwindcss: {
-				config: path.resolve("./styles/index.css"),
+			"better-tailwindcss": {
+				entryPoint: path.resolve("./styles/index.css"),
 			},
 		},
 	},
 	storybookConfig,
-	playwrightConfig,
 	{
 		name: "node-config",
 		extends: [nodeConfig],
-		files: ["scripts/**/*.ts"],
+		files: ["vite.config.ts", "scripts/**/*.ts"],
 	},
 	{
 		name: "stylistic-config",
@@ -165,5 +162,4 @@ export default defineConfig(
 			],
 		},
 	},
-	turboConfig,
 );

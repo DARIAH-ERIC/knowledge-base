@@ -954,9 +954,6 @@ importers:
       '@acdh-oeaw/eslint-config-node':
         specifier: 'catalog:'
         version: 2.0.11(@acdh-oeaw/eslint-config@2.0.11(@eslint/config-helpers@0.4.2)(@typescript-eslint/utils@8.49.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(globals@16.5.0)(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
-      '@acdh-oeaw/eslint-config-playwright':
-        specifier: 'catalog:'
-        version: 2.0.13(@acdh-oeaw/eslint-config@2.0.11(@eslint/config-helpers@0.4.2)(@typescript-eslint/utils@8.49.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(globals@16.5.0)(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))
       '@acdh-oeaw/eslint-config-react':
         specifier: 'catalog:'
         version: 3.0.3(@acdh-oeaw/eslint-config@2.0.11(@eslint/config-helpers@0.4.2)(@typescript-eslint/utils@8.49.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(globals@16.5.0)(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
