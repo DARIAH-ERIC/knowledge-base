@@ -15,6 +15,7 @@ catalog:
   '@acdh-oeaw/stylelint-config': ^2.3.2
   '@acdh-oeaw/tsconfig': ^1.5.1
   '@acdh-oeaw/validate-env': ^0.2.1
+  '@dotenvx/dotenvx': ^1.51.2
   '@faker-js/faker': ^10.1.0
   '@heroicons/react': ^2.2.0
   '@next/eslint-plugin-next': ^16.0.8
@@ -34,9 +35,6 @@ catalog:
   client-only: ^0.0.1
   clsx: ^2.1.1
   concurrently: ^9.2.1
-  dotenv: ^17.2.3
-  dotenv-cli: ^11.0.0
-  dotenv-expand: ^12.0.3
   drizzle-dbml-generator: ^0.10.0
   drizzle-kit: ^1.0.0-beta.2-ec83fa8
   drizzle-orm: ^1.0.0-beta.2-ec83fa8
