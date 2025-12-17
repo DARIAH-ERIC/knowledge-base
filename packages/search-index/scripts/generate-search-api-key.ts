@@ -2,7 +2,7 @@ import { assert, log } from "@acdh-oeaw/lib";
 import { Client } from "typesense";
 
 import { env } from "../config/env.config";
-import { collection } from "../src/schema";
+import { resources } from "../src/schema";
 
 function createClient() {
 	const apiKey = env.TYPESENSE_ADMIN_API_KEY;
@@ -28,8 +28,8 @@ async function generate() {
 
 	const response = await client.keys().create({
 		actions: ["documents:export", "documents:get", "documents:search"],
-		collections: [collection.name],
-		description: `Search-only api key for "${collection.name}".`,
+		collections: [resources.name],
+		description: `Search-only api key for "${resources.name}".`,
 	});
 
 	return response.value!;
@@ -39,13 +39,13 @@ async function main() {
 	const apiKey = await generate();
 
 	log.success(
-		`Successfully generated api key "${apiKey}" for collection "${collection.name}" in typesense search index.`,
+		`Successfully generated api key "${apiKey}" for collection "${resources.name}" in typesense search index.`,
 	);
 }
 
 main().catch((error: unknown) => {
 	log.error(
-		`Failed to generate api key for collection "${collection.name}" in typesense search index.\n`,
+		`Failed to generate api key for collection "${resources.name}" in typesense search index.\n`,
 		error,
 	);
 	process.exitCode = 1;

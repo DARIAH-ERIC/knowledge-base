@@ -2,7 +2,7 @@ import { assert, log } from "@acdh-oeaw/lib";
 import { Client, Errors } from "typesense";
 
 import { env } from "../config/env.config";
-import { collection } from "../src/schema";
+import { resources } from "../src/schema";
 
 function createClient() {
 	const apiKey = env.TYPESENSE_ADMIN_API_KEY;
@@ -27,23 +27,23 @@ async function createCollection() {
 	const client = createClient();
 
 	try {
-		await client.collections(collection.name).delete();
+		await client.collections(resources.name).delete();
 	} catch (error) {
 		if (!(error instanceof Errors.ObjectNotFound)) {
 			throw error;
 		}
 	}
 
-	await client.collections().create(collection.schema);
+	await client.collections().create(resources.schema);
 }
 
 async function main() {
 	await createCollection();
 
-	log.success(`Successfully created collection "${collection.name}".`);
+	log.success(`Successfully created collection "${resources.name}".`);
 }
 
 main().catch((error: unknown) => {
-	log.error(`Failed to create collection "${collection.name}".\n`, error);
+	log.error(`Failed to create collection "${resources.name}".\n`, error);
 	process.exitCode = 1;
 });
