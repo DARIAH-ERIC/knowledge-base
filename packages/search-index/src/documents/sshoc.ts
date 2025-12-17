@@ -1,6 +1,6 @@
 import { createUrl, createUrlSearchParams, err, isErr, ok, type Result } from "@acdh-oeaw/lib";
 
-import type { CollectionDocument } from "../schema";
+import type { ResourceCollectionDocument } from "../schema";
 import { request } from "../utils/request";
 
 interface Response {
@@ -83,8 +83,8 @@ interface Response {
 /**
  * @see {@link https://marketplace-api.sshopencloud.eu/swagger-ui/index.html}
  */
-export async function getDocuments(): Promise<Result<Array<CollectionDocument>, Error>> {
-	const documents: Array<CollectionDocument> = [];
+export async function getDocuments(): Promise<Result<Array<ResourceCollectionDocument>, Error>> {
+	const documents: Array<ResourceCollectionDocument> = [];
 
 	const headers = {
 		Accept: "application/json",
@@ -117,7 +117,7 @@ export async function getDocuments(): Promise<Result<Array<CollectionDocument>, 
 		pages = data.pages;
 
 		documents.push(
-			...data.items.map<CollectionDocument>((item) => {
+			...data.items.map<ResourceCollectionDocument>((item) => {
 				const keywords = [];
 
 				for (const property of item.properties) {
@@ -162,7 +162,7 @@ export async function getDocuments(): Promise<Result<Array<CollectionDocument>, 
 					keywords,
 					links,
 					actor_ids: actorIds,
-				} satisfies Partial<CollectionDocument>;
+				} satisfies Partial<ResourceCollectionDocument>;
 
 				switch (item.category) {
 					case "tool-or-service": {
@@ -174,22 +174,22 @@ export async function getDocuments(): Promise<Result<Array<CollectionDocument>, 
 
 						return {
 							...document,
-							kind: "tool-or-service",
-							type: isCoreService ? "core" : "community",
+							type: "tool-or-service",
+							kind: isCoreService ? "core" : "community",
 						};
 					}
 
 					case "training-material": {
 						return {
 							...document,
-							kind: "training-material",
+							type: "training-material",
 						};
 					}
 
 					case "workflow": {
 						return {
 							...document,
-							kind: "workflow",
+							type: "workflow",
 						};
 					}
 				}
