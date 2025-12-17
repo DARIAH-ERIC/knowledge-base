@@ -27,11 +27,11 @@ catalog:
   '@react-aria/optimize-locales-plugin': ^1.1.5
   '@react-aria/utils': ^3.31.0
   '@sentry/nextjs': ^10.30.0
-  '@storybook/addon-a11y': ^10.1.2
-  '@storybook/addon-docs': ^10.1.2
-  '@storybook/addon-themes': ^10.1.2
-  '@storybook/addon-vitest': ^10.1.2
-  '@storybook/react-vite': ^10.1.2
+  '@storybook/addon-a11y': ^10.1.10
+  '@storybook/addon-docs': ^10.1.10
+  '@storybook/addon-themes': ^10.1.10
+  '@storybook/addon-vitest': ^10.1.10
+  '@storybook/react-vite': ^10.1.10
   '@tailwindcss/postcss': ^4.1.17
   '@tailwindcss/vite': ^4.1.17
   '@types/node': ^24.10.3
@@ -84,7 +84,7 @@ catalog:
   server-only: ^0.0.1
   sharp: ^0.34.5
   simple-git-hooks: ^2.13.1
-  storybook: ^10.1.2
+  storybook: ^10.1.10
   stylelint: ^16.26.1
   tailwind-merge: ^3.4.0
   tailwind-variants: ^3.2.2
