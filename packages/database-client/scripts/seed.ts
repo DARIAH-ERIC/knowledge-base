@@ -1,4 +1,4 @@
-import { assert, groupBy, log } from "@acdh-oeaw/lib";
+import { groupBy, log } from "@acdh-oeaw/lib";
 import { faker as f } from "@faker-js/faker";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { reset } from "drizzle-seed";
