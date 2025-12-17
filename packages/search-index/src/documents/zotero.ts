@@ -1,6 +1,6 @@
 import { createUrl, createUrlSearchParams, err, isErr, ok, type Result } from "@acdh-oeaw/lib";
 
-import type { CollectionDocument } from "../schema";
+import type { ResourceCollectionDocument } from "../schema";
 import { parseLinkHeader } from "../utils/parse-link-header";
 import { request } from "../utils/request";
 
@@ -47,8 +47,8 @@ type Response = Array<{
 /**
  * @see {@link https://www.zotero.org/support/dev/web_api/v3/start}
  */
-export async function getDocuments(): Promise<Result<Array<CollectionDocument>, Error>> {
-	const documents: Array<CollectionDocument> = [];
+export async function getDocuments(): Promise<Result<Array<ResourceCollectionDocument>, Error>> {
+	const documents: Array<ResourceCollectionDocument> = [];
 
 	const headers = {
 		Accept: "application/json",
@@ -93,19 +93,19 @@ export async function getDocuments(): Promise<Result<Array<CollectionDocument>, 
 				const sourceId = item.key;
 				const id = [source, sourceId].join(":");
 
-				const document: CollectionDocument = {
+				const document: ResourceCollectionDocument = {
 					id,
 					source,
 					source_id: sourceId,
 					imported_at: Date.now(),
-					kind: "publication",
+					type: "publication",
 					label: item.data.title,
 					description: item.data.abstractNote ?? "",
 					links: [item.links.alternate.href],
 					keywords: item.data.tags.map((tag) => {
 						return tag.tag;
 					}),
-					type: item.data.itemType,
+					kind: item.data.itemType,
 					authors,
 					year,
 					pid: item.data.DOI,
