@@ -8,6 +8,7 @@ export const events = p.pgTable("events", {
 	id: f.uuidv7("id").primaryKey(),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
+	leadIn: p.text("lead_in"),
 	imageId: f
 		.uuidv7("image_id")
 		.notNull()

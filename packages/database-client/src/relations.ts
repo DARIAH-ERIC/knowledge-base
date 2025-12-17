@@ -10,29 +10,33 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.licenses.id,
 			}),
 		},
-		contentBlocks: {
-			field: r.one.contentBlocksFields({
-				from: r.contentBlocks.fieldId,
-				to: r.contentBlocksFields.id,
-			}),
-		},
 		events: {
-			content: r.one.contentBlocksFields({
-				from: r.events.contentId,
-				to: r.contentBlocksFields.id,
-			}),
 			image: r.one.assets({
 				from: r.events.imageId,
 				to: r.assets.id,
 			}),
 		},
-		news: {
-			content: r.one.contentBlocksFields({
-				from: r.news.contentId,
-				to: r.contentBlocksFields.id,
+		impactCaseStudies: {
+			image: r.one.assets({
+				from: r.impactCaseStudies.imageId,
+				to: r.assets.id,
 			}),
+		},
+		news: {
 			image: r.one.assets({
 				from: r.news.imageId,
+				to: r.assets.id,
+			}),
+		},
+		pages: {
+			image: r.one.assets({
+				from: r.pages.imageId,
+				to: r.assets.id,
+			}),
+		},
+		spotlightArticles: {
+			image: r.one.assets({
+				from: r.spotlightArticles.imageId,
 				to: r.assets.id,
 			}),
 		},
