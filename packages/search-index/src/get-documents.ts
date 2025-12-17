@@ -3,15 +3,15 @@ import { err, isErr, log, ok, type Result } from "@acdh-oeaw/lib";
 import { getDocuments as getOpenAireDocuments } from "./documents/open-aire";
 import { getDocuments as getSshOpenMarketplaceDocuments } from "./documents/sshoc";
 import { getDocuments as getZoteroDocuments } from "./documents/zotero";
-import type { CollectionDocument } from "./schema";
+import type { ResourceCollectionDocument } from "./schema";
 
 const formatters = {
 	duration: new Intl.NumberFormat("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
 	items: new Intl.NumberFormat("en-GB"),
 };
 
-export async function getDocuments(): Promise<Result<Array<CollectionDocument>, Error>> {
-	const documents: Array<CollectionDocument> = [];
+export async function getDocuments(): Promise<Result<Array<ResourceCollectionDocument>, Error>> {
+	const documents: Array<ResourceCollectionDocument> = [];
 
 	/** ========================================================================================== */
 
