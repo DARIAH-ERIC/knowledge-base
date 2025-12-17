@@ -2,7 +2,7 @@ import { env } from "../../config/env.config";
 import { createCollection } from "../create-collection";
 
 export const resources = createCollection({
-	name: env.NEXT_PUBLIC_TYPESENSE_COLLECTION_NAME,
+	name: env.NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME,
 	fields: [
 		{ name: "kind", type: "string" },
 		{ name: "label", type: "string" },
