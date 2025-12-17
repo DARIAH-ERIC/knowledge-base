@@ -1,0 +1,22 @@
+{
+	"configurations": [
+		{
+			"name": "Apps: Knowledge-Base (server-side)",
+			"type": "node-terminal",
+			"request": "launch",
+			"command": "NODE_OPTIONS=\"--inspect\" pnpm run dev"
+		},
+		{
+			"name": "Apps: Knowledge-Base (client-side)",
+			"type": "chrome",
+			"request": "launch",
+			"url": "http://localhost:3001"
+		}
+	],
+	"compounds": [
+		{
+			"name": "Apps: Knowledge-Base",
+			"configurations": ["Apps: Knowledge-Base (server-side)", "Apps: Knowledge-Base (client-side)"]
+		}
+	]
+}
