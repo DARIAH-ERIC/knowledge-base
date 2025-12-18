@@ -72,7 +72,7 @@ async function main() {
 				name,
 				description: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
-				slug: f.helpers.slugify(name),
+				slug: f.helpers.slugify(name).toLowerCase(),
 			};
 		},
 		{ count: 10 },
@@ -130,7 +130,7 @@ async function main() {
 					},
 					{ probability: 0.75 },
 				),
-				slug: f.helpers.slugify(title),
+				slug: f.helpers.slugify(title).toLowerCase(),
 			};
 		},
 		{ count: 25 },
@@ -149,7 +149,7 @@ async function main() {
 				title,
 				summary: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
-				slug: f.helpers.slugify(title),
+				slug: f.helpers.slugify(title).toLowerCase(),
 			};
 		},
 		{ count: 25 },
@@ -178,7 +178,7 @@ async function main() {
 				title,
 				summary: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
-				slug: f.helpers.slugify(title),
+				slug: f.helpers.slugify(title).toLowerCase(),
 			};
 		},
 		{ count: 25 },
@@ -194,7 +194,7 @@ async function main() {
 				title,
 				summary: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
-				slug: f.helpers.slugify(title),
+				slug: f.helpers.slugify(title).toLowerCase(),
 			};
 		},
 		{ count: 25 },
@@ -210,7 +210,7 @@ async function main() {
 				title,
 				summary: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
-				slug: f.helpers.slugify(title),
+				slug: f.helpers.slugify(title).toLowerCase(),
 			};
 		},
 		{ count: 25 },
