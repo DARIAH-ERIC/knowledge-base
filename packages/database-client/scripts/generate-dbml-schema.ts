@@ -33,6 +33,7 @@ async function main() {
 			richTextContentBlocks: schema.richTextContentBlocks,
 			spotlightArticles: schema.spotlightArticles,
 			users: schema.users,
+			website: schema.website,
 		},
 		out,
 		relational: false,
