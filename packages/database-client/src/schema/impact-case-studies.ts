@@ -8,7 +8,6 @@ export const impactCaseStudies = p.pgTable("impact_case_studies", {
 	id: f.uuidv7("id").primaryKey(),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
-	leadIn: p.text("lead_in"),
 	imageId: f
 		.uuidv7("image_id")
 		.notNull()
