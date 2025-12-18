@@ -8,3 +8,4 @@ export * from "./schema/news";
 export * from "./schema/pages";
 export * from "./schema/spotlight-articles";
 export * from "./schema/users";
+export * from "./schema/website";
