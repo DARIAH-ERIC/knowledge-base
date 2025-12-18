@@ -1,3 +1,4 @@
+import { isNull } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
 
@@ -21,7 +22,10 @@ export const impactCaseStudies = p.pgTable(
 		...f.timestamps(),
 	},
 	(t) => {
-		return [p.index("impact_case_studies_slug_index").on(t.slug)];
+		return [
+			p.index("impact_case_studies_slug_index").on(t.slug),
+			p.index("impact_case_studies_deleted_at_index").on(t.deletedAt).where(isNull(t.deletedAt)),
+		];
 	},
 );
 
