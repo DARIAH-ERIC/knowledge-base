@@ -28,6 +28,16 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.assets.id,
 			}),
 		},
+		organisationalUnits: {
+			image: r.one.assets({
+				from: r.organisationalUnits.imageId,
+				to: r.assets.id,
+			}),
+			organisationalUnitsRelations: r.many.assets({
+				from: r.organisationalUnits.id.through(r.organisationalUnitsRelations.unitId),
+				to: r.organisationalUnits.id.through(r.organisationalUnitsRelations.relatedUnitId),
+			}),
+		},
 		pages: {
 			image: r.one.assets({
 				from: r.pages.imageId,
