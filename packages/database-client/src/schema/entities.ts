@@ -4,7 +4,13 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 
-export const entityTypes = ["events", "impact_case_studies", "news", "spotlight_articles"] as const;
+export const entityTypes = [
+	"events",
+	"impact_case_studies",
+	"news",
+	"pages",
+	"spotlight_articles",
+] as const;
 
 export const entityStatus = ["draft", "published"] as const;
 
