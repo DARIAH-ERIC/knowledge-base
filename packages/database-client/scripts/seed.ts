@@ -27,7 +27,10 @@ async function main() {
 
 	const users = f.helpers.multiple(
 		() => {
-			return { username: f.internet.username(), email: f.internet.email() };
+			return {
+				username: f.internet.username(),
+				email: f.internet.email(),
+			};
 		},
 		{ count: 10 },
 	);
@@ -60,6 +63,22 @@ async function main() {
 		.insert(schema.assets)
 		.values(assets)
 		.returning({ id: schema.assets.id });
+
+	const persons = f.helpers.multiple(
+		() => {
+			const name = f.person.fullName();
+
+			return {
+				name,
+				description: f.lorem.paragraph(),
+				imageId: f.helpers.arrayElement(assetIds).id,
+				slug: f.helpers.slugify(name),
+			};
+		},
+		{ count: 10 },
+	);
+
+	await db.insert(schema.persons).values(persons);
 
 	const events = f.helpers.multiple(
 		() => {

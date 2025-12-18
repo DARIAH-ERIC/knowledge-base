@@ -28,6 +28,7 @@ async function main() {
 			licenses: schema.licenses,
 			news: schema.news,
 			pages: schema.pages,
+			persons: schema.persons,
 			richTextContentBlocks: schema.richTextContentBlocks,
 			spotlightArticles: schema.spotlightArticles,
 			users: schema.users,
