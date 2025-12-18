@@ -25,6 +25,7 @@ async function main() {
 			fields: schema.fields,
 			imageContentBlocks: schema.imageContentBlocks,
 			impactCaseStudies: schema.impactCaseStudies,
+			impactCaseStudiesToPersons: schema.impactCaseStudiesToPersons,
 			licenses: schema.licenses,
 			news: schema.news,
 			pages: schema.pages,
