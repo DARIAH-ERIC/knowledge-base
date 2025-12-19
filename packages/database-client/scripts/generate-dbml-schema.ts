@@ -28,6 +28,8 @@ async function main() {
 			impactCaseStudiesToPersons: schema.impactCaseStudiesToPersons,
 			licenses: schema.licenses,
 			news: schema.news,
+			organisationalUnits: schema.organisationalUnits,
+			organisationalUnitsRelations: schema.organisationalUnitsRelations,
 			pages: schema.pages,
 			persons: schema.persons,
 			richTextContentBlocks: schema.richTextContentBlocks,
