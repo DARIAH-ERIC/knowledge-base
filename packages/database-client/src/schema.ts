@@ -7,5 +7,6 @@ export * from "./schema/licenses";
 export * from "./schema/news";
 export * from "./schema/organisational-units";
 export * from "./schema/pages";
+export * from "./schema/persons";
 export * from "./schema/spotlight-articles";
 export * from "./schema/users";
