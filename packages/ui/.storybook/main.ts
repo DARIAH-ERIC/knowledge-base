@@ -21,6 +21,7 @@ const config: StorybookConfig = {
 				return !prop.name.startsWith("aria-");
 			},
 			shouldExtractLiteralValuesFromEnum: true,
+			shouldRemoveUndefinedFromOptional: true,
 		},
 	},
 };
