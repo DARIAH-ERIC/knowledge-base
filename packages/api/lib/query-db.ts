@@ -1,11 +1,11 @@
-import { db } from "../../database-client/src/client";
+import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
 import {
 	events,
 	impactCaseStudies,
 	news,
 	pages,
 	spotlightArticles,
-} from "../../database-client/src/schema";
+} from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 
 interface QueryProps {
 	page: number;

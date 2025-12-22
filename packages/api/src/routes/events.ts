@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { describeRoute, resolver, validator } from "hono-openapi";
-import { EventSelectSchema } from "../../../database-client/src/schema/events";
+import { EventSelectSchema } from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import { array, object, omit } from "valibot";
 import { PaginationQuerySchema } from "../../lib/pagination";
 import { getEvents } from "../../lib/query-db";

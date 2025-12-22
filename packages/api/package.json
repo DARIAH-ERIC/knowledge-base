@@ -17,21 +17,22 @@
 	"scripts": {
 		"api:dev": "tsx watch src/server.ts"
 	},
-	"devDependencies": {
-		"@acdh-oeaw/eslint-config": "catalog:",
-		"@acdh-oeaw/eslint-config-node": "catalog:",
-		"@acdh-oeaw/prettier-config": "catalog:",
-		"@acdh-oeaw/tsconfig": "catalog:",
-		"tsx": "catalog:"
-	},
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/validate-env": "catalog:",
+		"@dariah-eric/dariah-knowledge-base-database-client": "workspace:^",
 		"@hono/node-server": "catalog:",
 		"@hono/standard-validator": "catalog:",
 		"@hono/swagger-ui": "catalog:",
 		"hono": "catalog:",
 		"hono-openapi": "catalog:",
 		"valibot": "catalog:"
+	},
+	"devDependencies": {
+		"@acdh-oeaw/eslint-config": "catalog:",
+		"@acdh-oeaw/eslint-config-node": "catalog:",
+		"@acdh-oeaw/prettier-config": "catalog:",
+		"@acdh-oeaw/tsconfig": "catalog:",
+		"tsx": "catalog:"
 	}
 }

@@ -726,6 +726,9 @@ importers:
       '@acdh-oeaw/validate-env':
         specifier: 'catalog:'
         version: 0.2.1(typescript@5.9.3)
+      '@dariah-eric/dariah-knowledge-base-database-client':
+        specifier: workspace:^
+        version: link:../database-client
       '@hono/node-server':
         specifier: 'catalog:'
         version: 1.19.7(hono@4.11.1)

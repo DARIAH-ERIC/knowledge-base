@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { describeRoute, resolver, validator } from "hono-openapi";
-import { PageSelectSchema } from "../../../database-client/src/schema/pages";
+import { PageSelectSchema } from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import { array, object, omit } from "valibot";
 import { PaginationQuerySchema } from "../../lib/pagination";
 import { getPages } from "../../lib/query-db";
