@@ -27,11 +27,11 @@ pagesRoute.get(
 	}),
 	validator("query", PaginationQuerySchema),
 	async (c) => {
-		const { page, pageSize } = c.req.valid("query");
-		const data = await getPages({ page, pageSize });
+		const { limit, offset } = c.req.valid("query");
+		const data = await getPages({ limit, offset });
 		return c.json({
-			page,
-			pageSize,
+			limit,
+			offset,
 			data,
 		});
 	},

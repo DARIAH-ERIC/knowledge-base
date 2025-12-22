@@ -27,11 +27,11 @@ impactCaseStudiesRoute.get(
 	}),
 	validator("query", PaginationQuerySchema),
 	async (c) => {
-		const { page, pageSize } = c.req.valid("query");
-		const data = await getImpactCaseStudies({ page, pageSize });
+		const { limit, offset } = c.req.valid("query");
+		const data = await getImpactCaseStudies({ limit, offset });
 		return c.json({
-			page,
-			pageSize,
+			limit,
+			offset,
 			data,
 		});
 	},
