@@ -1,5 +1,5 @@
 {
-	"name": "@dariah-eric/dariah-knowledge-base-api",
+	"name": "@dariah-eric/dariah-knowledge-base-api-server",
 	"private": true,
 	"licence": "MIT",
 	"type": "module",
