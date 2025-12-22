@@ -26,10 +26,10 @@ app.get(
 
 app.get("/", swaggerUI({ url: "/docs" }));
 
-app.route("/events", eventsRoute);
-app.route("/impact-case-studies", impactCaseStudiesRoute);
-app.route("/news", newsRoute);
-app.route("/pages", pagesRoute);
-app.route("/spotlight-articles", spotlightArticlesRoute);
+app.route("/api/events", eventsRoute);
+app.route("/api/impact-case-studies", impactCaseStudiesRoute);
+app.route("/api/news", newsRoute);
+app.route("/api/pages", pagesRoute);
+app.route("/api/spotlight-articles", spotlightArticlesRoute);
 
 export default app;
