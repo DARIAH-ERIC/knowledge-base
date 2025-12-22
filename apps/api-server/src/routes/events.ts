@@ -3,7 +3,8 @@ import { describeRoute, resolver, validator } from "hono-openapi";
 import { EventSelectSchema } from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import { array, object, omit } from "valibot";
 import { PaginationQuerySchema } from "../lib/pagination";
-import { getEvents } from "../lib/query-db";
+import { getEvent, getEvents } from "../lib/query-db";
+import { PathParamsSchema } from "../lib/path";
 
 export const eventsRoute = new Hono();
 
@@ -11,6 +12,8 @@ const EventsResponseSchema = object({
 	...PaginationQuerySchema.entries,
 	data: array(omit(EventSelectSchema, ["createdAt", "deletedAt", "updatedAt"])),
 });
+
+const EventResponseSchema = omit(EventSelectSchema, ["createdAt", "deletedAt", "updatedAt"]);
 
 eventsRoute.get(
 	"/",
@@ -34,5 +37,26 @@ eventsRoute.get(
 			offset,
 			data,
 		});
+	},
+);
+
+eventsRoute.get(
+	"/:id",
+	describeRoute({
+		description: "Event",
+		responses: {
+			200: {
+				description: "Successful response",
+				content: {
+					"application/json": { schema: resolver(EventResponseSchema) },
+				},
+			},
+		},
+	}),
+	validator("param", PathParamsSchema),
+	async (c) => {
+		const { id } = c.req.valid("param");
+		const data = await getEvent({ id });
+		return c.json(data);
 	},
 );

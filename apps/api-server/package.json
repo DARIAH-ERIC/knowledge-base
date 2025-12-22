@@ -24,6 +24,7 @@
 		"@hono/node-server": "catalog:",
 		"@hono/standard-validator": "catalog:",
 		"@hono/swagger-ui": "catalog:",
+		"drizzle-orm": "catalog:",
 		"hono": "catalog:",
 		"hono-openapi": "catalog:",
 		"valibot": "catalog:"

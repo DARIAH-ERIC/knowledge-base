@@ -3,7 +3,8 @@ import { describeRoute, resolver, validator } from "hono-openapi";
 import { NewsItemSelectSchema } from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import { array, object, omit } from "valibot";
 import { PaginationQuerySchema } from "../lib/pagination";
-import { getNews } from "../lib/query-db";
+import { getNews, getNewsItem } from "../lib/query-db";
+import { PathParamsSchema } from "../lib/path";
 
 export const newsRoute = new Hono();
 
@@ -11,6 +12,8 @@ const NewsResponseSchema = object({
 	...PaginationQuerySchema.entries,
 	data: array(omit(NewsItemSelectSchema, ["createdAt", "deletedAt", "updatedAt"])),
 });
+
+const NewsItemResponseSchema = omit(NewsItemSelectSchema, ["createdAt", "deletedAt", "updatedAt"]);
 
 newsRoute.get(
 	"/",
@@ -34,5 +37,26 @@ newsRoute.get(
 			offset,
 			data,
 		});
+	},
+);
+
+newsRoute.get(
+	"/:id",
+	describeRoute({
+		description: "News Item",
+		responses: {
+			200: {
+				description: "Successful response",
+				content: {
+					"application/json": { schema: resolver(NewsItemResponseSchema) },
+				},
+			},
+		},
+	}),
+	validator("param", PathParamsSchema),
+	async (c) => {
+		const { id } = c.req.valid("param");
+		const data = await getNewsItem({ id });
+		return c.json(data);
 	},
 );
