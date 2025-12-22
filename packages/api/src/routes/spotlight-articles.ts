@@ -2,8 +2,8 @@ import { Hono } from "hono";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import { SpotlightArticleSelectSchema } from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import { array, object, omit } from "valibot";
-import { PaginationQuerySchema } from "../../lib/pagination";
-import { getSpotLightArticles } from "../../lib/query-db";
+import { PaginationQuerySchema } from "../lib/pagination";
+import { getSpotLightArticles } from "../lib/query-db";
 
 export const spotlightArticlesRoute = new Hono();
 

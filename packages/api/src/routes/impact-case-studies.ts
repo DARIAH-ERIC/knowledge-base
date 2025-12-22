@@ -2,8 +2,8 @@ import { Hono } from "hono";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import { ImpactCaseStudySelectSchema } from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import { array, object, omit } from "valibot";
-import { PaginationQuerySchema } from "../../lib/pagination";
-import { getImpactCaseStudies } from "../../lib/query-db";
+import { PaginationQuerySchema } from "../lib/pagination";
+import { getImpactCaseStudies } from "../lib/query-db";
 
 export const impactCaseStudiesRoute = new Hono();
 
