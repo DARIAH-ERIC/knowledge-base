@@ -74,7 +74,7 @@ export const embedContentBlocks = p.pgTable("content_blocks_type_embed", {
 			},
 			{ onDelete: "cascade" },
 		),
-	url: p.text("caption").notNull(),
+	url: p.text("url").notNull(),
 	caption: p.text("caption"),
 });
 

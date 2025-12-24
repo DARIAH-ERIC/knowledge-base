@@ -21,6 +21,10 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.impactCaseStudies.imageId,
 				to: r.assets.id,
 			}),
+			contributors: r.many.persons({
+				from: r.impactCaseStudies.id.through(r.impactCaseStudiesToPersons.impactCaseStudyId),
+				to: r.persons.id.through(r.impactCaseStudiesToPersons.personId),
+			}),
 		},
 		news: {
 			image: r.one.assets({

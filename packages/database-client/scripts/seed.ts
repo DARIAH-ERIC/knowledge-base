@@ -27,7 +27,10 @@ async function main() {
 
 	const users = f.helpers.multiple(
 		() => {
-			return { username: f.internet.username(), email: f.internet.email() };
+			return {
+				username: f.internet.username(),
+				email: f.internet.email(),
+			};
 		},
 		{ count: 10 },
 	);
@@ -53,13 +56,32 @@ async function main() {
 				licenseId: f.helpers.arrayElement(licenseIds).id,
 			};
 		},
-		{ count: 100 },
+		{ count: 275 },
 	);
 
 	const assetIds = await db
 		.insert(schema.assets)
 		.values(assets)
 		.returning({ id: schema.assets.id });
+
+	const persons = f.helpers.multiple(
+		() => {
+			const name = f.person.fullName();
+
+			return {
+				name,
+				description: f.lorem.paragraph(),
+				imageId: f.helpers.arrayElement(assetIds).id,
+				slug: f.helpers.slugify(name).toLowerCase(),
+			};
+		},
+		{ count: 10 },
+	);
+
+	const personIds = await db
+		.insert(schema.persons)
+		.values(persons)
+		.returning({ id: schema.persons.id });
 
 	const events = f.helpers.multiple(
 		() => {
@@ -108,7 +130,7 @@ async function main() {
 					},
 					{ probability: 0.75 },
 				),
-				slug: f.helpers.slugify(title),
+				slug: f.helpers.slugify(title).toLowerCase(),
 			};
 		},
 		{ count: 25 },
@@ -119,6 +141,35 @@ async function main() {
 		.values(events)
 		.returning({ id: schema.events.id });
 
+	const impactCaseStudies = f.helpers.multiple(
+		() => {
+			const title = f.lorem.sentence();
+
+			return {
+				title,
+				summary: f.lorem.paragraph(),
+				imageId: f.helpers.arrayElement(assetIds).id,
+				slug: f.helpers.slugify(title).toLowerCase(),
+			};
+		},
+		{ count: 25 },
+	);
+
+	const impactCaseStudiyIds = await db
+		.insert(schema.impactCaseStudies)
+		.values(impactCaseStudies)
+		.returning({ id: schema.impactCaseStudies.id });
+
+	const impactCaseStudiesToPersons = impactCaseStudiyIds.flatMap(({ id: impactCaseStudyId }) => {
+		const persons = f.helpers.arrayElements(personIds, { min: 0, max: 3 });
+
+		return persons.map(({ id: personId }) => {
+			return { impactCaseStudyId, personId };
+		});
+	});
+
+	await db.insert(schema.impactCaseStudiesToPersons).values(impactCaseStudiesToPersons);
+
 	const news = f.helpers.multiple(
 		() => {
 			const title = f.lorem.sentence();
@@ -127,13 +178,48 @@ async function main() {
 				title,
 				summary: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
-				slug: f.helpers.slugify(title),
+				slug: f.helpers.slugify(title).toLowerCase(),
 			};
 		},
 		{ count: 25 },
 	);
 
 	const newsItemIds = await db.insert(schema.news).values(news).returning({ id: schema.news.id });
+
+	const pages = f.helpers.multiple(
+		() => {
+			const title = f.lorem.sentence();
+
+			return {
+				title,
+				summary: f.lorem.paragraph(),
+				imageId: f.helpers.arrayElement(assetIds).id,
+				slug: f.helpers.slugify(title).toLowerCase(),
+			};
+		},
+		{ count: 25 },
+	);
+
+	const pageIds = await db.insert(schema.pages).values(pages).returning({ id: schema.pages.id });
+
+	const spotlightArticles = f.helpers.multiple(
+		() => {
+			const title = f.lorem.sentence();
+
+			return {
+				title,
+				summary: f.lorem.paragraph(),
+				imageId: f.helpers.arrayElement(assetIds).id,
+				slug: f.helpers.slugify(title).toLowerCase(),
+			};
+		},
+		{ count: 25 },
+	);
+
+	const spotlightArticleIds = await db
+		.insert(schema.spotlightArticles)
+		.values(spotlightArticles)
+		.returning({ id: schema.spotlightArticles.id });
 
 	const entities = [
 		...eventIds.map(({ id }) => {
@@ -144,10 +230,34 @@ async function main() {
 				status: "draft" as const,
 			};
 		}),
+		...impactCaseStudiyIds.map(({ id }) => {
+			return {
+				entityId: id,
+				entityType: "impact_case_studies" as const,
+				documentId: f.string.uuid(),
+				status: "draft" as const,
+			};
+		}),
 		...newsItemIds.map(({ id }) => {
 			return {
 				entityId: id,
 				entityType: "news" as const,
+				documentId: f.string.uuid(),
+				status: "draft" as const,
+			};
+		}),
+		...pageIds.map(({ id }) => {
+			return {
+				entityId: id,
+				entityType: "pages" as const,
+				documentId: f.string.uuid(),
+				status: "draft" as const,
+			};
+		}),
+		...spotlightArticleIds.map(({ id }) => {
+			return {
+				entityId: id,
+				entityType: "spotlight_articles" as const,
 				documentId: f.string.uuid(),
 				status: "draft" as const,
 			};
