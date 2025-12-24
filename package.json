@@ -25,6 +25,8 @@
 		"dev:services:up": "sh ./scripts/services.sh start",
 		"format:check": "prettier . --cache --cache-location ./.prettiercache --check",
 		"format:fix": "prettier . --cache --cache-location ./.prettiercache --check --write",
+		"image-service:buckets:create": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-search-index run image-service:buckets:create",
+		"image-service:buckets:seed": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-search-index run image-service:buckets:seed",
 		"lint:check": "pnpm run --recursive lint:check",
 		"lint:fix": "pnpm run --recursive lint:fix",
 		"prepare": "run-s setup",
