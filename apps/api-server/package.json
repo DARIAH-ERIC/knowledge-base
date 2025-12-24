@@ -15,7 +15,7 @@
 	},
 	"packageManager": "pnpm@10.25.0",
 	"scripts": {
-		"api:dev": "tsx watch src/index.ts"
+		"dev": "dotenvx run --env-file ./.env.local -- tsx watch ./src/index.ts"
 	},
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
@@ -24,7 +24,6 @@
 		"@hono/node-server": "catalog:",
 		"@hono/standard-validator": "catalog:",
 		"@hono/swagger-ui": "catalog:",
-		"drizzle-orm": "catalog:",
 		"hono": "catalog:",
 		"hono-openapi": "catalog:",
 		"valibot": "catalog:"
@@ -34,6 +33,8 @@
 		"@acdh-oeaw/eslint-config-node": "catalog:",
 		"@acdh-oeaw/prettier-config": "catalog:",
 		"@acdh-oeaw/tsconfig": "catalog:",
-		"tsx": "catalog:"
+		"@dotenvx/dotenvx": "catalog:",
+		"tsx": "catalog:",
+		"typescript": "catalog:"
 	}
 }

@@ -12,7 +12,6 @@
 	"packageManager": "pnpm@10.25.0",
 	"scripts": {
 		"build": "pnpm run --recursive build",
-		"api:dev": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-api-server run api:dev",
 		"db:migrations:apply": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-database-client run db:migrations:apply",
 		"db:migrations:check": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-database-client run db:migrations:check",
 		"db:migrations:generate": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-database-client run db:migrations:generate",

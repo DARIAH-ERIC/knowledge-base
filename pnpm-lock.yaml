@@ -334,9 +334,6 @@ importers:
       '@hono/swagger-ui':
         specifier: 'catalog:'
         version: 0.5.2(hono@4.11.1)
-      drizzle-orm:
-        specifier: 'catalog:'
-        version: 1.0.0-beta.2-ec83fa8(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3)
       hono:
         specifier: 'catalog:'
         version: 4.11.1
@@ -359,12 +356,18 @@ importers:
       '@acdh-oeaw/tsconfig':
         specifier: 'catalog:'
         version: 1.5.1(typescript@5.9.3)
+      '@dotenvx/dotenvx':
+        specifier: 'catalog:'
+        version: 1.51.2
       node:
         specifier: runtime:^24.12.0
         version: runtime:24.12.0
       tsx:
         specifier: 'catalog:'
         version: 4.21.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   apps/knowledge-base:
     dependencies:

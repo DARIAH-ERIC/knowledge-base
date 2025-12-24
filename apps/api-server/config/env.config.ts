@@ -8,9 +8,10 @@ import * as v from "valibot";
 const result = createEnv({
 	schema(environment) {
 		const schema = v.object({
-			API_HOST: v.pipe(v.string(), v.nonEmpty()),
-			API_PORT: v.pipe(v.string(), v.transform(Number), v.number(), v.integer(), v.minValue(1)),
 			NODE_ENV: v.optional(v.picklist(["development", "production", "test"]), "production"),
+			PORT: v.optional(
+				v.pipe(v.string(), v.transform(Number), v.number(), v.integer(), v.minValue(1)),
+			),
 		});
 
 		const result = v.safeParse(schema, environment);
@@ -26,9 +27,8 @@ const result = createEnv({
 		return ok(result.output);
 	},
 	environment: {
-		API_HOST: process.env.API_HOST,
-		API_PORT: process.env.API_PORT,
 		NODE_ENV: process.env.NODE_ENV,
+		PORT: process.env.PORT,
 	},
 	validation: v.parse(
 		v.optional(v.picklist(["disabled", "enabled"]), "enabled"),
