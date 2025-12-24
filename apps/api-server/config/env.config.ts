@@ -8,10 +8,20 @@ import * as v from "valibot";
 const result = createEnv({
 	schema(environment) {
 		const schema = v.object({
-			NODE_ENV: v.optional(v.picklist(["development", "production", "test"]), "production"),
-			PORT: v.optional(
-				v.pipe(v.string(), v.transform(Number), v.number(), v.integer(), v.minValue(1)),
+			APP_BASE_URL: v.pipe(v.string(), v.url()),
+			CI: v.optional(v.pipe(v.unknown(), v.toBoolean())),
+			DATABASE_HOST: v.pipe(v.string(), v.nonEmpty()),
+			DATABASE_NAME: v.pipe(v.string(), v.nonEmpty()),
+			DATABASE_PASSWORD: v.pipe(v.string(), v.minLength(8)),
+			DATABASE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
+			DATABASE_SSL_CONNECTION: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
+			DATABASE_USER: v.pipe(v.string(), v.nonEmpty()),
+			LOG_LEVEL: v.optional(
+				v.picklist(["silent", "fatal", "error", "warn", "info", "debug", "trace"]),
+				"info",
 			),
+			NODE_ENV: v.optional(v.picklist(["development", "production", "test"]), "production"),
+			PORT: v.optional(v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1))),
 		});
 
 		const result = v.safeParse(schema, environment);
@@ -27,6 +37,15 @@ const result = createEnv({
 		return ok(result.output);
 	},
 	environment: {
+		APP_BASE_URL: process.env.APP_BASE_URL,
+		CI: process.env.CI,
+		DATABASE_HOST: process.env.DATABASE_HOST,
+		DATABASE_NAME: process.env.DATABASE_NAME,
+		DATABASE_PASSWORD: process.env.DATABASE_PASSWORD,
+		DATABASE_PORT: process.env.DATABASE_PORT,
+		DATABASE_SSL_CONNECTION: process.env.DATABASE_SSL_CONNECTION,
+		DATABASE_USER: process.env.DATABASE_USER,
+		LOG_LEVEL: process.env.LOG_LEVEL,
 		NODE_ENV: process.env.NODE_ENV,
 		PORT: process.env.PORT,
 	},

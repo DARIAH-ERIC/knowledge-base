@@ -1,5 +1,6 @@
 import { groupBy, log } from "@acdh-oeaw/lib";
 import { faker as f } from "@faker-js/faker";
+import slugify from "@sindresorhus/slugify"
 import { drizzle } from "drizzle-orm/node-postgres";
 import { reset } from "drizzle-seed";
 
@@ -72,7 +73,7 @@ async function main() {
 				name,
 				description: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
-				slug: f.helpers.slugify(name).toLowerCase(),
+				slug: slugify(name),
 			};
 		},
 		{ count: 10 },
@@ -130,7 +131,7 @@ async function main() {
 					},
 					{ probability: 0.75 },
 				),
-				slug: f.helpers.slugify(title).toLowerCase(),
+				slug: slugify(title),
 			};
 		},
 		{ count: 25 },
@@ -149,7 +150,7 @@ async function main() {
 				title,
 				summary: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
-				slug: f.helpers.slugify(title).toLowerCase(),
+				slug: slugify(title),
 			};
 		},
 		{ count: 25 },
@@ -178,7 +179,7 @@ async function main() {
 				title,
 				summary: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
-				slug: f.helpers.slugify(title).toLowerCase(),
+				slug: slugify(title),
 			};
 		},
 		{ count: 25 },
@@ -194,7 +195,7 @@ async function main() {
 				title,
 				summary: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
-				slug: f.helpers.slugify(title).toLowerCase(),
+				slug: slugify(title),
 			};
 		},
 		{ count: 25 },
@@ -210,7 +211,7 @@ async function main() {
 				title,
 				summary: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
-				slug: f.helpers.slugify(title).toLowerCase(),
+				slug: slugify(title),
 			};
 		},
 		{ count: 25 },

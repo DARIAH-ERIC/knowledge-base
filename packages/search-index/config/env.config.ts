@@ -12,8 +12,7 @@ const result = createEnv({
 			NEXT_PUBLIC_TYPESENSE_HOST: v.pipe(v.string(), v.nonEmpty()),
 			NEXT_PUBLIC_TYPESENSE_PORT: v.pipe(
 				v.string(),
-				v.transform(Number),
-				v.number(),
+				v.toNumber(),
 				v.integer(),
 				v.minValue(1),
 			),

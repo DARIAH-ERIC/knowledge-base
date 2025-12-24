@@ -20,6 +20,7 @@ export const contentBlocks = p.pgTable(
 			}),
 		type: p.text("type", { enum: contentBlockTypes }).notNull(),
 		position: p.integer("position").notNull(),
+		...f.timestamps(),
 	},
 	(t) => {
 		return [p.check("content_blocks_type_enum_check", inArray(t.type, contentBlockTypes))];
@@ -49,6 +50,7 @@ export const dataContentBlocks = p.pgTable(
 			),
 		type: p.text("type", { enum: dataContentBlockTypes }).notNull(),
 		limit: p.integer("limit"),
+		...f.timestamps(),
 	},
 	(t) => {
 		return [
@@ -76,6 +78,7 @@ export const embedContentBlocks = p.pgTable("content_blocks_type_embed", {
 		),
 	url: p.text("url").notNull(),
 	caption: p.text("caption"),
+	...f.timestamps(),
 });
 
 export type EmbedContentBlock = typeof embedContentBlocks.$inferSelect;
@@ -102,6 +105,7 @@ export const imageContentBlocks = p.pgTable("content_blocks_type_image", {
 			return assets.id;
 		}),
 	caption: p.text("caption"),
+	...f.timestamps(),
 });
 
 export type ImageContentBlock = typeof imageContentBlocks.$inferSelect;
@@ -122,6 +126,7 @@ export const richTextContentBlocks = p.pgTable("content_blocks_type_rich_text", 
 			{ onDelete: "cascade" },
 		),
 	content: p.jsonb("content").notNull(),
+	...f.timestamps(),
 });
 
 export type RichTextContentBlock = typeof richTextContentBlocks.$inferSelect;

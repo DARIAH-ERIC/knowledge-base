@@ -3,9 +3,10 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 import { assets } from "./assets";
+import { entities } from "./entities";
 
 export const news = p.pgTable("news", {
-	id: f.uuidv7("id").primaryKey(),
+	id: f.uuidv7("id").primaryKey().references(() => {return entities.id}),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
 	imageId: f
@@ -14,7 +15,6 @@ export const news = p.pgTable("news", {
 		.references(() => {
 			return assets.id;
 		}),
-	slug: p.text("slug").notNull().unique(),
 	...f.timestamps(),
 });
 

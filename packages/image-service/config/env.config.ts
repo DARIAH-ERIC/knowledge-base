@@ -15,7 +15,7 @@ const result = createEnv({
 			S3_ACCESS_KEY: v.pipe(v.string(), v.nonEmpty()),
 			S3_BUCKET: v.pipe(v.string(), v.nonEmpty()),
 			S3_HOST: v.pipe(v.string(), v.nonEmpty()),
-			S3_PORT: v.pipe(v.string(), v.transform(Number), v.number(), v.integer(), v.minValue(1)),
+			S3_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 			S3_PROTOCOL: v.optional(v.picklist(["http", "https"]), "https"),
 			S3_SECRET_KEY: v.pipe(v.string(), v.nonEmpty()),
 		});

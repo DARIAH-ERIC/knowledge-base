@@ -1,35 +1,22 @@
-import { Hono } from "hono";
-import { openAPIRouteHandler } from "hono-openapi";
-import { swaggerUI } from "@hono/swagger-ui";
-import { eventsRoute } from "./routes/events";
-import { newsRoute } from "./routes/news";
-import { pagesRoute } from "./routes/pages";
-import { impactCaseStudiesRoute } from "./routes/impact-case-studies";
-import { spotlightArticlesRoute } from "./routes/spotlight-articles";
-import { env } from "../config/env.config";
+import { createApp, createRouter } from "@/lib/factory";
+import { createOpenApi } from "@/lib/openapi/index";
+import { router as events } from "@/routes/events";
+import { router as impactCaseStudies } from "@/routes/impact-case-studies";
+import { router as news } from "@/routes/news";
+import { router as pages } from "@/routes/pages";
+import { router as spotlightArticles } from "@/routes/spotlight-articles";
 
-const app = new Hono();
+const app = createApp();
 
-app.get(
-	"/docs",
-	openAPIRouteHandler(app, {
-		documentation: {
-			info: {
-				title: "Dariah Knowledge Base API",
-				version: "1.0.0",
-				description: "Dariah Knowledge Base API",
-			},
-			servers: [{ url: `http://${env.API_HOST}:${env.API_PORT}`, description: "Local Server" }],
-		},
-	}),
-);
+const openapi = createOpenApi(app);
 
-app.get("/", swaggerUI({ url: "/docs" }));
+const api = createRouter()
+	.route("/events", events)
+	.route("/impact-case-studies", impactCaseStudies)
+	.route("/news", news)
+	.route("/pages", pages)
+	.route("/spotlight-articles", spotlightArticles);
 
-app.route("/api/events", eventsRoute);
-app.route("/api/impact-case-studies", impactCaseStudiesRoute);
-app.route("/api/news", newsRoute);
-app.route("/api/pages", pagesRoute);
-app.route("/api/spotlight-articles", spotlightArticlesRoute);
+app.route("/", openapi).route("/api", api);
 
-export default app;
+export { api, app, openapi };

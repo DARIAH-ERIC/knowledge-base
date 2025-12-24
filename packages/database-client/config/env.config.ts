@@ -13,8 +13,7 @@ const result = createEnv({
 			DATABASE_PASSWORD: v.pipe(v.string(), v.nonEmpty()),
 			DATABASE_PORT: v.pipe(
 				v.string(),
-				v.transform(Number),
-				v.number(),
+				v.toNumber(),
 				v.integer(),
 				v.minValue(1),
 			),
