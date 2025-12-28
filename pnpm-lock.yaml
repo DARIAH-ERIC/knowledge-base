@@ -112,17 +112,17 @@ catalogs:
       specifier: ^0.10.0
       version: 0.10.0
     drizzle-kit:
-      specifier: ^1.0.0-beta.2-3a98f3a
-      version: 1.0.0-beta.2-ec83fa8
+      specifier: ^1.0.0-beta.6-4414a19
+      version: 1.0.0-beta.6-ea4d663
     drizzle-orm:
-      specifier: ^1.0.0-beta.2-3a98f3a
-      version: 1.0.0-beta.2-ec83fa8
+      specifier: ^1.0.0-beta.6-4414a19
+      version: 1.0.0-beta.6-ea4d663
     drizzle-seed:
-      specifier: ^1.0.0-beta.2-3a98f3a
-      version: 1.0.0-beta.2-ec83fa8
+      specifier: ^1.0.0-beta.6-4414a19
+      version: 1.0.0-beta.6-ea4d663
     drizzle-valibot:
-      specifier: ^1.0.0-beta.2-3a98f3a
-      version: 1.0.0-beta.2-ec83fa8
+      specifier: ^1.0.0-beta.6-4414a19
+      version: 1.0.0-beta.6-ea4d663
     eslint:
       specifier: ^9.39.1
       version: 9.39.1
@@ -133,8 +133,8 @@ catalogs:
       specifier: ^3.3.1
       version: 3.3.1
     eslint-plugin-drizzle:
-      specifier: ^1.0.0-beta.2-3a98f3a
-      version: 1.0.0-beta.2-ec83fa8
+      specifier: ^1.0.0-beta.6-4414a19
+      version: 1.0.0-beta.6-ea4d663
     eslint-plugin-perfectionist:
       specifier: ^4.15.1
       version: 4.15.1
@@ -466,7 +466,7 @@ importers:
         version: 3.3.1(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-drizzle:
         specifier: 'catalog:'
-        version: 1.0.0-beta.2-ec83fa8(eslint@9.39.1(jiti@2.6.1))
+        version: 1.0.0-beta.6-ea4d663(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-perfectionist:
         specifier: 'catalog:'
         version: 4.15.1(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
@@ -671,7 +671,7 @@ importers:
         version: 3.3.1(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-drizzle:
         specifier: 'catalog:'
-        version: 1.0.0-beta.2-ec83fa8(eslint@9.39.1(jiti@2.6.1))
+        version: 1.0.0-beta.6-ea4d663(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-perfectionist:
         specifier: 'catalog:'
         version: 4.15.1(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
@@ -731,10 +731,10 @@ importers:
         version: 0.2.1(typescript@5.9.3)
       drizzle-orm:
         specifier: 'catalog:'
-        version: 1.0.0-beta.2-ec83fa8(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3)
+        version: 1.0.0-beta.6-ea4d663(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3)
       drizzle-valibot:
         specifier: 'catalog:'
-        version: 1.0.0-beta.2-ec83fa8(drizzle-orm@1.0.0-beta.2-ec83fa8(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3))(valibot@1.2.0(typescript@5.9.3))
+        version: 1.0.0-beta.6-ea4d663(drizzle-orm@1.0.0-beta.6-ea4d663(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3))(valibot@1.2.0(typescript@5.9.3))
       pg:
         specifier: 'catalog:'
         version: 8.16.3
@@ -771,13 +771,13 @@ importers:
         version: 9.2.1
       drizzle-dbml-generator:
         specifier: 'catalog:'
-        version: 0.10.0(drizzle-orm@1.0.0-beta.2-ec83fa8(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3))
+        version: 0.10.0(drizzle-orm@1.0.0-beta.6-ea4d663(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3))
       drizzle-kit:
         specifier: 'catalog:'
-        version: 1.0.0-beta.2-ec83fa8
+        version: 1.0.0-beta.6-ea4d663
       drizzle-seed:
         specifier: 'catalog:'
-        version: 1.0.0-beta.2-ec83fa8(drizzle-orm@1.0.0-beta.2-ec83fa8(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3))
+        version: 1.0.0-beta.6-ea4d663(drizzle-orm@1.0.0-beta.6-ea4d663(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3))
       eslint:
         specifier: 'catalog:'
         version: 9.39.1(jiti@2.6.1)
@@ -789,7 +789,7 @@ importers:
         version: 3.3.1(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-drizzle:
         specifier: 'catalog:'
-        version: 1.0.0-beta.2-ec83fa8(eslint@9.39.1(jiti@2.6.1))
+        version: 1.0.0-beta.6-ea4d663(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-unicorn:
         specifier: 'catalog:'
         version: 62.0.0(eslint@9.39.1(jiti@2.6.1))
@@ -4028,12 +4028,12 @@ packages:
     peerDependencies:
       drizzle-orm: '>=0.36.0'
 
-  drizzle-kit@1.0.0-beta.2-ec83fa8:
-    resolution: {integrity: sha512-1lrzKLih+0qk71R1x5mK4h7+qayK/YclHnD837ojWz/l6G6G7t741ZC2hIYOeWSXAX8XDy0NManKmXhEYZzlTA==}
+  drizzle-kit@1.0.0-beta.6-ea4d663:
+    resolution: {integrity: sha512-HU0H5mqPKmdcIEjnV4amHchNfoZOBAhY08fGdv9RRvA7lObD2M0g8McaCOY/cnPUQII9e/KuJAZM4s0y6FW1Iw==}
     hasBin: true
 
-  drizzle-orm@1.0.0-beta.2-ec83fa8:
-    resolution: {integrity: sha512-aCBxMmsuXgGdNj2LriIYDj/T3sXl5ondTYDxja8Y4c9tX0AuPuX8e4DM5Vnv7YAmrhNf13LtbkqDzdlc/4PpPg==}
+  drizzle-orm@1.0.0-beta.6-ea4d663:
+    resolution: {integrity: sha512-NqDEW7qOceptF6f3AmDBOm73GVH53nlnLUpkZyXDX9oL3PnrEsOx/wWV7U3bcp2KhzPxF/xXOuL8Q4BTYuzT6w==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=4'
@@ -4132,13 +4132,13 @@ packages:
       sqlite3:
         optional: true
 
-  drizzle-seed@1.0.0-beta.2-ec83fa8:
-    resolution: {integrity: sha512-uP0RfYXbBhFZeJuAFmY4w5DE9bnTtHJ/ecCHOHGoibwS6fBayXHVmtBh5uqauFCZYYwJUrHJm+I2YiyP2lEteA==}
+  drizzle-seed@1.0.0-beta.6-ea4d663:
+    resolution: {integrity: sha512-fNP0Wdr/1bDBvC/2Hg4HJvhuAOKq8StsrX0lxgB9UxZaYbYGJwKRNoZYQu2T0AN02U00kV7TuMptAnExWsNM9Q==}
     peerDependencies:
       drizzle-orm: '>=1.0.0-beta.2'
 
-  drizzle-valibot@1.0.0-beta.2-ec83fa8:
-    resolution: {integrity: sha512-zoB90iSMcB1kKV1DQXf9zr8nfRucKm5aY3GTUvWPqNRD8uBgPVlGp8xpVnM0YzMwm22SgPn6wQkzIDmmSgcT9w==}
+  drizzle-valibot@1.0.0-beta.6-ea4d663:
+    resolution: {integrity: sha512-ey6MkpL4LREOX4xdS1csfm5v6fJ3IHAPpWj1lVCRyAmKSoIIfP7hgRF+W59A3ISDM+B4Mcfxi+cbx/QABgKMcA==}
     peerDependencies:
       drizzle-orm: '>=1.0.0-beta.2'
       valibot: '>=1.0.0-beta.7'
@@ -4320,8 +4320,8 @@ packages:
     peerDependencies:
       eslint: '>=9.0.0'
 
-  eslint-plugin-drizzle@1.0.0-beta.2-ec83fa8:
-    resolution: {integrity: sha512-H39HuS40e5nfMynuKlRNpCs3oyNumRM9stLR8DIt+X9PRiRLwcGsKI1bVYIrIjevThzHIc/U44cDblmcCQPeig==}
+  eslint-plugin-drizzle@1.0.0-beta.6-ea4d663:
+    resolution: {integrity: sha512-C2c1xKV6ZHA5SxQB/H141XizJtcIzxat7rjYjKgaFa6l6UEPmjY6Kqtfgb4WFdKyNWU/gbNioZEpdBTv/TGg3w==}
     peerDependencies:
       eslint: '>=8.0.0'
 
@@ -10509,11 +10509,11 @@ snapshots:
 
   dotenv@17.2.3: {}
 
-  drizzle-dbml-generator@0.10.0(drizzle-orm@1.0.0-beta.2-ec83fa8(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3)):
+  drizzle-dbml-generator@0.10.0(drizzle-orm@1.0.0-beta.6-ea4d663(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3)):
     dependencies:
-      drizzle-orm: 1.0.0-beta.2-ec83fa8(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3)
+      drizzle-orm: 1.0.0-beta.6-ea4d663(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3)
 
-  drizzle-kit@1.0.0-beta.2-ec83fa8:
+  drizzle-kit@1.0.0-beta.6-ea4d663:
     dependencies:
       '@drizzle-team/brocli': 0.11.0
       '@js-temporal/polyfill': 0.5.1
@@ -10522,7 +10522,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@1.0.0-beta.2-ec83fa8(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3):
+  drizzle-orm@1.0.0-beta.6-ea4d663(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3):
     dependencies:
       '@types/mssql': 9.1.8
       mssql: 11.0.1
@@ -10531,14 +10531,14 @@ snapshots:
       '@types/pg': 8.16.0
       pg: 8.16.3
 
-  drizzle-seed@1.0.0-beta.2-ec83fa8(drizzle-orm@1.0.0-beta.2-ec83fa8(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3)):
+  drizzle-seed@1.0.0-beta.6-ea4d663(drizzle-orm@1.0.0-beta.6-ea4d663(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3)):
     dependencies:
-      drizzle-orm: 1.0.0-beta.2-ec83fa8(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3)
+      drizzle-orm: 1.0.0-beta.6-ea4d663(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3)
       pure-rand: 6.1.0
 
-  drizzle-valibot@1.0.0-beta.2-ec83fa8(drizzle-orm@1.0.0-beta.2-ec83fa8(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3))(valibot@1.2.0(typescript@5.9.3)):
+  drizzle-valibot@1.0.0-beta.6-ea4d663(drizzle-orm@1.0.0-beta.6-ea4d663(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3))(valibot@1.2.0(typescript@5.9.3)):
     dependencies:
-      drizzle-orm: 1.0.0-beta.2-ec83fa8(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3)
+      drizzle-orm: 1.0.0-beta.6-ea4d663(@opentelemetry/api@1.9.0)(@types/mssql@9.1.8)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.16.3)
       valibot: 1.2.0(typescript@5.9.3)
 
   dunder-proto@1.0.1:
@@ -10824,7 +10824,7 @@ snapshots:
       is-glob: 4.0.3
       micromatch: 4.0.8
 
-  eslint-plugin-drizzle@1.0.0-beta.2-ec83fa8(eslint@9.39.1(jiti@2.6.1)):
+  eslint-plugin-drizzle@1.0.0-beta.6-ea4d663(eslint@9.39.1(jiti@2.6.1)):
     dependencies:
       eslint: 9.39.1(jiti@2.6.1)
 
