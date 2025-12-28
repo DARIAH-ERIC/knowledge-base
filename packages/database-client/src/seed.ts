@@ -5,15 +5,22 @@ import type { drizzle } from "drizzle-orm/node-postgres";
 
 import * as schema from "./schema";
 
+interface SeedManifest {
+	assets: Array<{
+		key: string;
+	}>;
+}
+
 interface SeedConfig {
 	/** @default "2025-01-01" */
 	defaultRefDate?: Date;
 	/** default 42 */
 	seed?: number;
+	seedManifest?: SeedManifest;
 }
 
 export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = {}): Promise<void> {
-	const { defaultRefDate = new Date(Date.UTC(2025, 0, 1)), seed = 42 } = config;
+	const { defaultRefDate = new Date(Date.UTC(2025, 0, 1)), seed = 42, seedManifest } = config;
 
 	f.seed(seed);
 	f.setDefaultRefDate(defaultRefDate);
@@ -43,8 +50,13 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 
 	const assets = f.helpers.multiple(
 		() => {
+			const key =
+				seedManifest?.assets != null
+					? f.helpers.arrayElement(seedManifest.assets).key
+					: f.string.uuid();
+
 			return {
-				key: f.string.uuid(),
+				key,
 				licenseId: f.helpers.arrayElement(licenseIds).id,
 			};
 		},
