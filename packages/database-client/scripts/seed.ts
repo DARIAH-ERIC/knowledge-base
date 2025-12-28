@@ -68,10 +68,12 @@ async function main() {
 
 	const persons = f.helpers.multiple(
 		() => {
-			const name = f.person.fullName();
+			const firstName = f.person.firstName();
+			const lastName = f.person.lastName();
 
 			return {
-				name,
+				firstName,
+				lastName,
 				description: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
 			};
@@ -84,7 +86,7 @@ async function main() {
 			type: "persons" as const,
 			documentId: f.string.uuid(),
 			status: "draft" as const,
-			slug: slugify(person.name),
+			slug: slugify([person.lastName, person.firstName].join("-")),
 		};
 	});
 
