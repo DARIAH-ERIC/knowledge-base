@@ -1,4 +1,4 @@
-import { groupBy } from "@acdh-oeaw/lib";
+import { groupBy, keyBy } from "@acdh-oeaw/lib";
 import { faker as f } from "@faker-js/faker";
 import slugify from "@sindresorhus/slugify";
 import type { drizzle } from "drizzle-orm/node-postgres";
@@ -68,6 +68,32 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		.values(assets)
 		.returning({ id: schema.assets.id });
 
+	const entityTypeIds = await db
+		.insert(schema.entityTypes)
+		.values(
+			schema.entityTypesEnum.map((type) => {
+				return { type };
+			}),
+		)
+		.returning({ id: schema.entityTypes.id, type: schema.entityTypes.type });
+
+	const entityTypesByType = keyBy(entityTypeIds, ({ type }) => {
+		return type;
+	});
+
+	const entityStatusIds = await db
+		.insert(schema.entityStatus)
+		.values(
+			schema.entityStatusEnum.map((type) => {
+				return { type };
+			}),
+		)
+		.returning({ id: schema.entityStatus.id, type: schema.entityStatus.type });
+
+	const entityStatusByType = keyBy(entityStatusIds, ({ type }) => {
+		return type;
+	});
+
 	const persons = f.helpers.multiple(
 		() => {
 			const firstName = f.person.firstName();
@@ -85,9 +111,9 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 
 	const personEntities = persons.map((person) => {
 		return {
-			type: "persons" as const,
+			typeId: entityTypesByType.persons.id,
 			documentId: f.string.uuid(),
-			status: "draft" as const,
+			statusId: entityStatusByType.draft.id,
 			slug: slugify([person.lastName, person.firstName].join(", ")),
 		};
 	});
@@ -157,9 +183,9 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 
 	const eventEntities = events.map((event) => {
 		return {
-			type: "events" as const,
+			typeId: entityTypesByType.events.id,
 			documentId: f.string.uuid(),
-			status: "draft" as const,
+			statusId: entityStatusByType.draft.id,
 			slug: slugify(event.title),
 		};
 	});
@@ -190,9 +216,9 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 
 	const impactCaseStudyEntities = impactCaseStudies.map((impactCaseStudy) => {
 		return {
-			type: "impact_case_studies" as const,
+			typeId: entityTypesByType.impact_case_studies.id,
 			documentId: f.string.uuid(),
-			status: "draft" as const,
+			statusId: entityStatusByType.draft.id,
 			slug: slugify(impactCaseStudy.title),
 		};
 	});
@@ -233,9 +259,9 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 
 	const newsItemEntities = news.map((newsItem) => {
 		return {
-			type: "news" as const,
+			typeId: entityTypesByType.news.id,
 			documentId: f.string.uuid(),
-			status: "draft" as const,
+			statusId: entityStatusByType.draft.id,
 			slug: slugify(newsItem.title),
 		};
 	});
@@ -266,9 +292,9 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 
 	const pageEntities = pages.map((page) => {
 		return {
-			type: "pages" as const,
+			typeId: entityTypesByType.pages.id,
 			documentId: f.string.uuid(),
-			status: "draft" as const,
+			statusId: entityStatusByType.draft.id,
 			slug: slugify(page.title),
 		};
 	});
@@ -299,9 +325,9 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 
 	const spotlightArticleEntities = spotlightArticles.map((spotlightArticle) => {
 		return {
-			type: "spotlight_articles" as const,
+			typeId: entityTypesByType.spotlight_articles.id,
 			documentId: f.string.uuid(),
-			status: "draft" as const,
+			statusId: entityStatusByType.draft.id,
 			slug: slugify(spotlightArticle.title),
 		};
 	});
@@ -328,20 +354,36 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		.values(fields)
 		.returning({ id: schema.fields.id });
 
-	const contentBlocks = fieldIds.flatMap(({ id: fieldId }) => {
+	const contentBlockTypeIds = await db
+		.insert(schema.contentBlockTypes)
+		.values(
+			schema.contentBlockTypesEnum.map((type) => {
+				return { type };
+			}),
+		)
+		.returning({ id: schema.contentBlockTypes.id, type: schema.contentBlockTypes.type });
+
+	const contentBlockTypesById = keyBy(contentBlockTypeIds, ({ id }) => {
+		return id;
+	});
+	const contentBlockTypesByType = keyBy(contentBlockTypeIds, ({ type }) => {
+		return type;
+	});
+
+	const contentBlocks: Array<schema.ContentBlockInput> = fieldIds.flatMap(({ id: fieldId }) => {
 		return [
-			{ fieldId, type: "image" as const, position: 1 },
-			{ fieldId, type: "rich_text" as const, position: 2 },
+			{ fieldId, typeId: contentBlockTypesByType.image.id, position: 1 },
+			{ fieldId, typeId: contentBlockTypesByType.rich_text.id, position: 2 },
 		];
 	});
 
 	const contentBlockIds = await db
 		.insert(schema.contentBlocks)
 		.values(contentBlocks)
-		.returning({ id: schema.contentBlocks.id, type: schema.contentBlocks.type });
+		.returning({ id: schema.contentBlocks.id, typeId: schema.contentBlocks.typeId });
 
-	const contentBlockIdsByType = groupBy(contentBlockIds, ({ type }) => {
-		return type;
+	const contentBlockIdsByType = groupBy(contentBlockIds, ({ typeId }) => {
+		return contentBlockTypesById[typeId]!.type;
 	});
 
 	const imageContentBlocks = contentBlockIdsByType.image.map(({ id }) => {
