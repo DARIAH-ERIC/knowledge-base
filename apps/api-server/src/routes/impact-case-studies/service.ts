@@ -17,7 +17,9 @@ export async function getImpactCaseStudies(params: GetImpactCaseStudiesParams) {
 		db.query.impactCaseStudies.findMany({
 			where: {
 				entity: {
-					status: "published",
+					status: {
+						type: "published",
+					},
 				},
 			},
 			columns: {
@@ -62,7 +64,9 @@ export async function getImpactCaseStudyById(params: GetImpactCaseStudyByIdParam
 		where: {
 			id,
 			entity: {
-				status: "published",
+				status: {
+					type: "published",
+				},
 			},
 		},
 		columns: {
@@ -74,7 +78,8 @@ export async function getImpactCaseStudyById(params: GetImpactCaseStudyByIdParam
 			contributors: {
 				columns: {
 					id: true,
-					name: true,
+					firstName: true,
+					lastName: true,
 				},
 				with: {
 					image: {
@@ -117,7 +122,9 @@ export async function getImpactCaseStudyBySlug(params: GetImpactCaseStudyBySlugP
 		where: {
 			entity: {
 				slug,
-				status: "published",
+				status: {
+					type: "published",
+				},
 			},
 		},
 		columns: {
@@ -129,7 +136,8 @@ export async function getImpactCaseStudyBySlug(params: GetImpactCaseStudyBySlugP
 			contributors: {
 				columns: {
 					id: true,
-					name: true,
+					firstName: true,
+					lastName: true,
 				},
 				with: {
 					image: {

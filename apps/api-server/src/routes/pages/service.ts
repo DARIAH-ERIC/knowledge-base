@@ -17,7 +17,9 @@ export async function getPages(params: GetPagesParams) {
 		db.query.pages.findMany({
 			where: {
 				entity: {
-					status: "published",
+					status: {
+						type: "published",
+					},
 				},
 			},
 			columns: {
@@ -62,7 +64,9 @@ export async function getPageById(params: GetPageByIdParams) {
 		where: {
 			id,
 			entity: {
-				status: "published",
+				status: {
+					type: "published",
+				},
 			},
 		},
 		columns: {
@@ -104,7 +108,9 @@ export async function getPageBySlug(params: GetPageBySlugParams) {
 		where: {
 			entity: {
 				slug,
-				status: "published",
+				status: {
+					type: "published",
+				},
 			},
 		},
 		columns: {

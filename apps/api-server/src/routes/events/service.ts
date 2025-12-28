@@ -17,7 +17,9 @@ export async function getEvents(params: GetEventsParams) {
 		db.query.events.findMany({
 			where: {
 				entity: {
-					status: "published",
+					status: {
+						type: "published",
+					},
 				},
 			},
 			columns: {
@@ -67,7 +69,9 @@ export async function getEventById(params: GetEventByIdParams) {
 		where: {
 			id,
 			entity: {
-				status: "published",
+				status: {
+					type: "published",
+				},
 			},
 		},
 		columns: {
@@ -114,7 +118,9 @@ export async function getEventBySlug(params: GetEventBySlugParams) {
 		where: {
 			entity: {
 				slug,
-				status: "published",
+				status: {
+					type: "published",
+				},
 			},
 		},
 		columns: {

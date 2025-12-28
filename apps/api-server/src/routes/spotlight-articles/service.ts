@@ -17,7 +17,9 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 		db.query.spotlightArticles.findMany({
 			where: {
 				entity: {
-					status: "published",
+					status: {
+						type: "published",
+					},
 				},
 			},
 			columns: {
@@ -62,7 +64,9 @@ export async function getSpotlightArticleById(params: GetSpotlightArticleByIdPar
 		where: {
 			id,
 			entity: {
-				status: "published",
+				status: {
+					type: "published",
+				},
 			},
 		},
 		columns: {
@@ -104,7 +108,9 @@ export async function getSpotlightArticleBySlug(params: GetSpotlightArticleBySlu
 		where: {
 			entity: {
 				slug,
-				status: "published",
+				status: {
+					type: "published",
+				},
 			},
 		},
 		columns: {

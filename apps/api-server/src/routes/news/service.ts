@@ -17,7 +17,9 @@ export async function getNews(params: GetNewsParams) {
 		db.query.news.findMany({
 			where: {
 				entity: {
-					status: "published",
+					status: {
+						type: "published",
+					},
 				},
 			},
 			columns: {
@@ -62,7 +64,9 @@ export async function getNewsItemById(params: GetNewsItemByIdParams) {
 		where: {
 			id,
 			entity: {
-				status: "published",
+				status: {
+					type: "published",
+				},
 			},
 		},
 		columns: {
@@ -104,7 +108,9 @@ export async function getNewsItemBySlug(params: GetNewsItemBySlugParams) {
 		where: {
 			entity: {
 				slug,
-				status: "published",
+				status: {
+					type: "published",
+				},
 			},
 		},
 		columns: {
