@@ -57,15 +57,15 @@ export const entities = p.pgTable(
 	"entities",
 	{
 		id: f.uuidv7("id").primaryKey(),
-		typeId: p
-			.text("type_id")
+		typeId: f
+			.uuidv7("type_id")
 			.notNull()
 			.references(() => {
 				return entityTypes.id;
 			}),
 		documentId: f.uuidv7("document_id").notNull(),
-		statusId: p
-			.text("status_id")
+		statusId: f
+			.uuidv7("status_id")
 			.notNull()
 			.references(() => {
 				return entityStatus.id;

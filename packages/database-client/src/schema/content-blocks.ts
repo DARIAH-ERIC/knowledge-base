@@ -37,8 +37,8 @@ export const contentBlocks = p.pgTable("content_blocks", {
 		.references(() => {
 			return fields.id;
 		}),
-	typeId: p
-		.text("type_id")
+	typeId: f
+		.uuidv7("type_id")
 		.notNull()
 		.references(() => {
 			return contentBlockTypes.id;
@@ -91,8 +91,8 @@ export const dataContentBlocks = p.pgTable("content_blocks_type_data", {
 			},
 			{ onDelete: "cascade" },
 		),
-	typeId: p
-		.text("type_id")
+	typeId: f
+		.uuidv7("type_id")
 		.notNull()
 		.references(() => {
 			return dataContentBlockTypes.id;
