@@ -32,7 +32,7 @@ main()
 		process.exitCode = 1;
 	})
 	.finally(() => {
-		db.$client.end().catch((error: unknown) => {
+		return db.$client.end().catch((error: unknown) => {
 			log.error("Failed to close database connection.\n", error);
 			process.exitCode = 1;
 		});
