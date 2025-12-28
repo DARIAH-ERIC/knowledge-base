@@ -11,12 +11,7 @@ const result = createEnv({
 			DATABASE_HOST: v.pipe(v.string(), v.nonEmpty()),
 			DATABASE_NAME: v.pipe(v.string(), v.nonEmpty()),
 			DATABASE_PASSWORD: v.pipe(v.string(), v.nonEmpty()),
-			DATABASE_PORT: v.pipe(
-				v.string(),
-				v.toNumber(),
-				v.integer(),
-				v.minValue(1),
-			),
+			DATABASE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 			DATABASE_SSL_CONNECTION: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 			DATABASE_USER: v.pipe(v.string(), v.nonEmpty()),
 			NODE_ENV: v.optional(v.picklist(["development", "production", "test"]), "production"),

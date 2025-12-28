@@ -7,7 +7,12 @@ import { entities } from "./entities";
 import { persons } from "./persons";
 
 export const impactCaseStudies = p.pgTable("impact_case_studies", {
-	id: f.uuidv7("id").primaryKey().references(() => {return entities.id}),
+	id: f
+		.uuidv7("id")
+		.primaryKey()
+		.references(() => {
+			return entities.id;
+		}),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
 	imageId: f

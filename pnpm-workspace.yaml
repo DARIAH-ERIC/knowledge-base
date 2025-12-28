@@ -42,14 +42,14 @@ catalog:
   clsx: ^2.1.1
   concurrently: ^9.2.1
   drizzle-dbml-generator: ^0.10.0
-  drizzle-kit: ^1.0.0-beta.2-3a98f3a
-  drizzle-orm: ^1.0.0-beta.2-3a98f3a
-  drizzle-seed: ^1.0.0-beta.2-3a98f3a
-  drizzle-valibot: ^1.0.0-beta.2-3a98f3a
+  drizzle-kit: ^1.0.0-beta.6-4414a19
+  drizzle-orm: ^1.0.0-beta.6-4414a19
+  drizzle-seed: ^1.0.0-beta.6-4414a19
+  drizzle-valibot: ^1.0.0-beta.6-4414a19
   eslint: ^9.39.1
   eslint-config-flat-gitignore: ^2.1.0
   eslint-plugin-check-file: ^3.3.1
-  eslint-plugin-drizzle: ^1.0.0-beta.2-3a98f3a
+  eslint-plugin-drizzle: ^1.0.0-beta.6-4414a19
   eslint-plugin-perfectionist: ^4.15.1
   eslint-plugin-unicorn: ^62.0.0
   globals: ^16.5.0

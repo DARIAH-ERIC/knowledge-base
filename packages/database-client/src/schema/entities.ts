@@ -4,7 +4,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 
-export const entityTypes = [
+export const entityTypesEnum = [
 	"events",
 	"impact_case_studies",
 	"news",
@@ -13,23 +13,70 @@ export const entityTypes = [
 	"spotlight_articles",
 ] as const;
 
-export const entityStatus = ["draft", "published"] as const;
+export const entityTypes = p.pgTable(
+	"entity_types",
+	{
+		id: f.uuidv7("id").primaryKey(),
+		type: p.text("type", { enum: entityTypesEnum }).notNull(),
+		...f.timestamps(),
+	},
+	(t) => {
+		return [p.check("entity_types_type_enum_check", inArray(t.type, entityTypesEnum))];
+	},
+);
+
+export type EntityType = typeof entityTypes.$inferSelect;
+export type EntityTypeInput = typeof entityTypes.$inferInsert;
+
+export const EntityTypeSelectSchema = createSelectSchema(entityTypes);
+export const EntityTypeInsertSchema = createInsertSchema(entityTypes);
+export const EntityTypeUpdateSchema = createUpdateSchema(entityTypes);
+
+export const entityStatusEnum = ["draft", "published"] as const;
+
+export const entityStatus = p.pgTable(
+	"entity_status",
+	{
+		id: f.uuidv7("id").primaryKey(),
+		type: p.text("type", { enum: entityStatusEnum }).notNull(),
+		...f.timestamps(),
+	},
+	(t) => {
+		return [p.check("entity_status_type_enum_check", inArray(t.type, entityStatusEnum))];
+	},
+);
+
+export type EntityStatus = typeof entityStatus.$inferSelect;
+export type EntityStatusInput = typeof entityStatus.$inferInsert;
+
+export const EntityStatusSelectSchema = createSelectSchema(entityStatus);
+export const EntityStatusInsertSchema = createInsertSchema(entityStatus);
+export const EntityStatusUpdateSchema = createUpdateSchema(entityStatus);
 
 export const entities = p.pgTable(
 	"entities",
 	{
 		id: f.uuidv7("id").primaryKey(),
-		type: p.text("type", { enum: entityTypes }).notNull(),
+		typeId: f
+			.uuidv7("type_id")
+			.notNull()
+			.references(() => {
+				return entityTypes.id;
+			}),
 		documentId: f.uuidv7("document_id").notNull(),
-		status: p.text("status", { enum: ["draft", "published"] }).notNull(),
+		statusId: f
+			.uuidv7("status_id")
+			.notNull()
+			.references(() => {
+				return entityStatus.id;
+			}),
 		slug: p.text("slug").notNull(),
 		...f.timestamps(),
 	},
 	(t) => {
 		return [
-			p.check("entities_status_enum_check", inArray(t.status, entityStatus)),
-			p.unique("entities_document_id_status_unique").on(t.documentId, t.status),
-			p.unique("entities_slug_status_unique").on(t.slug, t.status), // FIXME: only enforce uniquness for published status?
+			p.unique("entities_document_id_status_id_unique").on(t.documentId, t.statusId),
+			p.unique("entities_document_id_slug_unique").on(t.documentId, t.slug),
 		];
 	},
 );
