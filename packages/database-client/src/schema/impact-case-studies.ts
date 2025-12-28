@@ -3,10 +3,16 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 import { assets } from "./assets";
+import { entities } from "./entities";
 import { persons } from "./persons";
 
 export const impactCaseStudies = p.pgTable("impact_case_studies", {
-	id: f.uuidv7("id").primaryKey(),
+	id: f
+		.uuidv7("id")
+		.primaryKey()
+		.references(() => {
+			return entities.id;
+		}),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
 	imageId: f
@@ -15,7 +21,6 @@ export const impactCaseStudies = p.pgTable("impact_case_studies", {
 		.references(() => {
 			return assets.id;
 		}),
-	slug: p.text("slug").notNull().unique(),
 	...f.timestamps(),
 });
 
@@ -41,6 +46,7 @@ export const impactCaseStudiesToPersons = p.pgTable(
 			.references(() => {
 				return persons.id;
 			}),
+		...f.timestamps(),
 	},
 	(t) => {
 		return [
