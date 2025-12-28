@@ -9,6 +9,7 @@ export const entityTypes = [
 	"impact_case_studies",
 	"news",
 	"pages",
+	"persons",
 	"spotlight_articles",
 ] as const;
 
@@ -18,16 +19,17 @@ export const entities = p.pgTable(
 	"entities",
 	{
 		id: f.uuidv7("id").primaryKey(),
-		entityId: f.uuidv7("entity_id").notNull(),
-		entityType: p.text("entity_type", { enum: entityTypes }).notNull(),
+		type: p.text("type", { enum: entityTypes }).notNull(),
 		documentId: f.uuidv7("document_id").notNull(),
 		status: p.text("status", { enum: ["draft", "published"] }).notNull(),
+		slug: p.text("slug").notNull(),
+		...f.timestamps(),
 	},
 	(t) => {
 		return [
 			p.check("entities_status_enum_check", inArray(t.status, entityStatus)),
-			p.unique("entities_entity_id_entity_type_unique").on(t.entityId, t.entityType),
 			p.unique("entities_document_id_status_unique").on(t.documentId, t.status),
+			p.unique("entities_slug_status_unique").on(t.slug, t.status), // FIXME: only enforce uniquness for published status?
 		];
 	},
 );
@@ -50,6 +52,7 @@ export const fields = p.pgTable(
 				return entities.id;
 			}),
 		name: p.text("name").notNull(),
+		...f.timestamps(),
 	},
 	(t) => {
 		return [p.unique("fields_entity_id_name_unique").on(t.entityId, t.name)];
@@ -73,6 +76,7 @@ export const entitiesToResources = p.pgTable(
 				return entities.id;
 			}),
 		resourceId: p.text("resource_id").notNull(),
+		...f.timestamps(),
 	},
 	(t) => {
 		return [
@@ -99,6 +103,7 @@ export const entitiesToEntities = p.pgTable(
 			.references(() => {
 				return entities.id;
 			}),
+		...f.timestamps(),
 	},
 	(t) => {
 		return [

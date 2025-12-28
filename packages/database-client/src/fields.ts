@@ -24,6 +24,6 @@ export function timestamps() {
 			.$onUpdate(() => {
 				return sql`now()`;
 			}),
-		deletedAt: timestamp("deleted_at"),
+		// deletedAt: timestamp("deleted_at"),
 	};
 }

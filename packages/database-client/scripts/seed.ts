@@ -1,16 +1,19 @@
 import { groupBy, log } from "@acdh-oeaw/lib";
 import { faker as f } from "@faker-js/faker";
+import slugify from "@sindresorhus/slugify";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { reset } from "drizzle-seed";
 
 import { env } from "../config/env.config";
 import * as schema from "../src/schema";
 
+let db: ReturnType<typeof drizzle>;
+
 async function main() {
 	f.seed(42);
 	f.setDefaultRefDate(new Date(Date.UTC(2025, 0, 1)));
 
-	const db = drizzle({
+	db = drizzle({
 		casing: "snake_case",
 		connection: {
 			database: env.DATABASE_NAME,
@@ -51,8 +54,7 @@ async function main() {
 	const assets = f.helpers.multiple(
 		() => {
 			return {
-				// TODO: should use actual s3 object keys from our object store.
-				key: f.string.alphanumeric(12),
+				key: f.string.uuid(),
 				licenseId: f.helpers.arrayElement(licenseIds).id,
 			};
 		},
@@ -72,16 +74,30 @@ async function main() {
 				name,
 				description: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
-				slug: f.helpers.slugify(name).toLowerCase(),
 			};
 		},
 		{ count: 10 },
 	);
 
+	const personEntities = persons.map((person) => {
+		return {
+			type: "persons" as const,
+			documentId: f.string.uuid(),
+			status: "draft" as const,
+			slug: slugify(person.name),
+		};
+	});
+
 	const personIds = await db
-		.insert(schema.persons)
-		.values(persons)
-		.returning({ id: schema.persons.id });
+		.insert(schema.entities)
+		.values(personEntities)
+		.returning({ id: schema.entities.id });
+
+	await db.insert(schema.persons).values(
+		personIds.map(({ id }, index) => {
+			return { ...persons[index]!, id };
+		}),
+	);
 
 	const events = f.helpers.multiple(
 		() => {
@@ -130,16 +146,30 @@ async function main() {
 					},
 					{ probability: 0.75 },
 				),
-				slug: f.helpers.slugify(title).toLowerCase(),
 			};
 		},
 		{ count: 25 },
 	);
 
+	const eventEntities = events.map((event) => {
+		return {
+			type: "events" as const,
+			documentId: f.string.uuid(),
+			status: "draft" as const,
+			slug: slugify(event.title),
+		};
+	});
+
 	const eventIds = await db
-		.insert(schema.events)
-		.values(events)
-		.returning({ id: schema.events.id });
+		.insert(schema.entities)
+		.values(eventEntities)
+		.returning({ id: schema.entities.id });
+
+	await db.insert(schema.events).values(
+		eventIds.map(({ id }, index) => {
+			return { ...events[index]!, id };
+		}),
+	);
 
 	const impactCaseStudies = f.helpers.multiple(
 		() => {
@@ -149,18 +179,32 @@ async function main() {
 				title,
 				summary: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
-				slug: f.helpers.slugify(title).toLowerCase(),
 			};
 		},
 		{ count: 25 },
 	);
 
-	const impactCaseStudiyIds = await db
-		.insert(schema.impactCaseStudies)
-		.values(impactCaseStudies)
-		.returning({ id: schema.impactCaseStudies.id });
+	const impactCaseStudyEntities = impactCaseStudies.map((impactCaseStudy) => {
+		return {
+			type: "impact_case_studies" as const,
+			documentId: f.string.uuid(),
+			status: "draft" as const,
+			slug: slugify(impactCaseStudy.title),
+		};
+	});
 
-	const impactCaseStudiesToPersons = impactCaseStudiyIds.flatMap(({ id: impactCaseStudyId }) => {
+	const impactCaseStudyIds = await db
+		.insert(schema.entities)
+		.values(impactCaseStudyEntities)
+		.returning({ id: schema.entities.id });
+
+	await db.insert(schema.impactCaseStudies).values(
+		impactCaseStudyIds.map(({ id }, index) => {
+			return { ...impactCaseStudies[index]!, id };
+		}),
+	);
+
+	const impactCaseStudiesToPersons = impactCaseStudyIds.flatMap(({ id: impactCaseStudyId }) => {
 		const persons = f.helpers.arrayElements(personIds, { min: 0, max: 3 });
 
 		return persons.map(({ id: personId }) => {
@@ -178,13 +222,30 @@ async function main() {
 				title,
 				summary: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
-				slug: f.helpers.slugify(title).toLowerCase(),
 			};
 		},
 		{ count: 25 },
 	);
 
-	const newsItemIds = await db.insert(schema.news).values(news).returning({ id: schema.news.id });
+	const newsItemEntities = news.map((newsItem) => {
+		return {
+			type: "news" as const,
+			documentId: f.string.uuid(),
+			status: "draft" as const,
+			slug: slugify(newsItem.title),
+		};
+	});
+
+	const newsItemIds = await db
+		.insert(schema.entities)
+		.values(newsItemEntities)
+		.returning({ id: schema.entities.id });
+
+	await db.insert(schema.news).values(
+		newsItemIds.map(({ id }, index) => {
+			return { ...news[index]!, id };
+		}),
+	);
 
 	const pages = f.helpers.multiple(
 		() => {
@@ -194,13 +255,30 @@ async function main() {
 				title,
 				summary: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
-				slug: f.helpers.slugify(title).toLowerCase(),
 			};
 		},
 		{ count: 25 },
 	);
 
-	const pageIds = await db.insert(schema.pages).values(pages).returning({ id: schema.pages.id });
+	const pageEntities = pages.map((page) => {
+		return {
+			type: "pages" as const,
+			documentId: f.string.uuid(),
+			status: "draft" as const,
+			slug: slugify(page.title),
+		};
+	});
+
+	const pageIds = await db
+		.insert(schema.entities)
+		.values(pageEntities)
+		.returning({ id: schema.entities.id });
+
+	await db.insert(schema.pages).values(
+		pageIds.map(({ id }, index) => {
+			return { ...pages[index]!, id };
+		}),
+	);
 
 	const spotlightArticles = f.helpers.multiple(
 		() => {
@@ -210,65 +288,32 @@ async function main() {
 				title,
 				summary: f.lorem.paragraph(),
 				imageId: f.helpers.arrayElement(assetIds).id,
-				slug: f.helpers.slugify(title).toLowerCase(),
 			};
 		},
 		{ count: 25 },
 	);
 
+	const spotlightArticleEntities = spotlightArticles.map((spotlightArticle) => {
+		return {
+			type: "spotlight_articles" as const,
+			documentId: f.string.uuid(),
+			status: "draft" as const,
+			slug: slugify(spotlightArticle.title),
+		};
+	});
+
 	const spotlightArticleIds = await db
-		.insert(schema.spotlightArticles)
-		.values(spotlightArticles)
-		.returning({ id: schema.spotlightArticles.id });
-
-	const entities = [
-		...eventIds.map(({ id }) => {
-			return {
-				entityId: id,
-				entityType: "events" as const,
-				documentId: f.string.uuid(),
-				status: "draft" as const,
-			};
-		}),
-		...impactCaseStudiyIds.map(({ id }) => {
-			return {
-				entityId: id,
-				entityType: "impact_case_studies" as const,
-				documentId: f.string.uuid(),
-				status: "draft" as const,
-			};
-		}),
-		...newsItemIds.map(({ id }) => {
-			return {
-				entityId: id,
-				entityType: "news" as const,
-				documentId: f.string.uuid(),
-				status: "draft" as const,
-			};
-		}),
-		...pageIds.map(({ id }) => {
-			return {
-				entityId: id,
-				entityType: "pages" as const,
-				documentId: f.string.uuid(),
-				status: "draft" as const,
-			};
-		}),
-		...spotlightArticleIds.map(({ id }) => {
-			return {
-				entityId: id,
-				entityType: "spotlight_articles" as const,
-				documentId: f.string.uuid(),
-				status: "draft" as const,
-			};
-		}),
-	];
-
-	// TODO: this should work automatically via database trigger
-	const entityIds = await db
 		.insert(schema.entities)
-		.values(entities)
+		.values(spotlightArticleEntities)
 		.returning({ id: schema.entities.id });
+
+	await db.insert(schema.spotlightArticles).values(
+		spotlightArticleIds.map(({ id }, index) => {
+			return { ...spotlightArticles[index]!, id };
+		}),
+	);
+
+	const entityIds = await db.select({ id: schema.entities.id }).from(schema.entities);
 
 	const fields = entityIds.map(({ id }) => {
 		return { entityId: id, name: "content" };
@@ -341,7 +386,14 @@ async function main() {
 	log.success("Successfully seeded database.");
 }
 
-main().catch((error: unknown) => {
-	log.error("Failed to seed database.\n", error);
-	process.exitCode = 1;
-});
+main()
+	.catch((error: unknown) => {
+		log.error("Failed to seed database.\n", error);
+		process.exitCode = 1;
+	})
+	.finally(() => {
+		db.$client.end().catch((error: unknown) => {
+			log.error("Failed to close database connection.\n", error);
+			process.exitCode = 1;
+		});
+	});

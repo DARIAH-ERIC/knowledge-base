@@ -5,8 +5,10 @@ import { reset } from "drizzle-seed";
 import { env } from "../config/env.config";
 import * as schema from "../src/schema";
 
+let db: ReturnType<typeof drizzle>;
+
 async function main() {
-	const db = drizzle({
+	db = drizzle({
 		casing: "snake_case",
 		connection: {
 			database: env.DATABASE_NAME,
@@ -24,7 +26,14 @@ async function main() {
 	log.success("Successfully reset database.");
 }
 
-main().catch((error: unknown) => {
-	log.error("Failed to reset database.\n", error);
-	process.exitCode = 1;
-});
+main()
+	.catch((error: unknown) => {
+		log.error("Failed to reset database.\n", error);
+		process.exitCode = 1;
+	})
+	.finally(() => {
+		db.$client.end().catch((error: unknown) => {
+			log.error("Failed to close database connection.\n", error);
+			process.exitCode = 1;
+		});
+	});

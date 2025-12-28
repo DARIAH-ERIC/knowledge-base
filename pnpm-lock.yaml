@@ -757,6 +757,9 @@ importers:
       '@faker-js/faker':
         specifier: 'catalog:'
         version: 10.1.0
+      '@sindresorhus/slugify':
+        specifier: 'catalog:'
+        version: 3.0.0
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.3
