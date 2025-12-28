@@ -22,6 +22,13 @@ export const contentBlockTypes = p.pgTable(
 	},
 );
 
+export type ContentBlockTypes = typeof contentBlockTypes.$inferSelect;
+export type ContentBlockTypesInput = typeof contentBlockTypes.$inferInsert;
+
+export const ContentBlockTypesSelectSchema = createSelectSchema(contentBlockTypes);
+export const ContentBlockTypesInsertSchema = createInsertSchema(contentBlockTypes);
+export const ContentBlockTypesUpdateSchema = createUpdateSchema(contentBlockTypes);
+
 export const contentBlocks = p.pgTable("content_blocks", {
 	id: f.uuidv7("id").primaryKey(),
 	fieldId: f
@@ -66,6 +73,13 @@ export const dataContentBlockTypes = p.pgTable(
 		];
 	},
 );
+
+export type DataContentBlockTypes = typeof dataContentBlockTypes.$inferSelect;
+export type DataContentBlockTypesInput = typeof dataContentBlockTypes.$inferInsert;
+
+export const DataContentBlockTypesSelectSchema = createSelectSchema(dataContentBlockTypes);
+export const DataContentBlockTypesInsertSchema = createInsertSchema(dataContentBlockTypes);
+export const DataContentBlockTypesUpdateSchema = createUpdateSchema(dataContentBlockTypes);
 
 export const dataContentBlocks = p.pgTable("content_blocks_type_data", {
 	id: f

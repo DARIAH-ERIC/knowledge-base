@@ -25,6 +25,13 @@ export const entityTypes = p.pgTable(
 	},
 );
 
+export type EntityType = typeof entityTypes.$inferSelect;
+export type EntityTypeInput = typeof entityTypes.$inferInsert;
+
+export const EntityTypeSelectSchema = createSelectSchema(entityTypes);
+export const EntityTypeInsertSchema = createInsertSchema(entityTypes);
+export const EntityTypeUpdateSchema = createUpdateSchema(entityTypes);
+
 export const entityStatusEnum = ["draft", "published"] as const;
 
 export const entityStatus = p.pgTable(
@@ -38,6 +45,13 @@ export const entityStatus = p.pgTable(
 		return [p.check("entity_status_type_enum_check", inArray(t.type, entityStatusEnum))];
 	},
 );
+
+export type EntityStatus = typeof entityStatus.$inferSelect;
+export type EntityStatusInput = typeof entityStatus.$inferInsert;
+
+export const EntityStatusSelectSchema = createSelectSchema(entityStatus);
+export const EntityStatusInsertSchema = createInsertSchema(entityStatus);
+export const EntityStatusUpdateSchema = createUpdateSchema(entityStatus);
 
 export const entities = p.pgTable(
 	"entities",

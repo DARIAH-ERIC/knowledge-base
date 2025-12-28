@@ -25,7 +25,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 	f.seed(seed);
 	f.setDefaultRefDate(defaultRefDate);
 
-	const users = f.helpers.multiple(
+	const users: Array<schema.UserInput> = f.helpers.multiple(
 		() => {
 			return {
 				username: f.internet.username(),
@@ -37,7 +37,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 
 	await db.insert(schema.users).values(users);
 
-	const licenses = [
+	const licenses: Array<schema.LicenseInput> = [
 		{ name: "CC0-1.0", url: "https://choosealicense.com/licenses/cc0-1.0/" },
 		{ name: "CC-BY-4.0", url: "https://choosealicense.com/licenses/cc-by-4.0/" },
 		{ name: "CC-BY-SA-4.0", url: "https://choosealicense.com/licenses/cc-by-sa-4.0/" },
@@ -48,7 +48,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		.values(licenses)
 		.returning({ id: schema.licenses.id });
 
-	const assets = f.helpers.multiple(
+	const assets: Array<schema.AssetInput> = f.helpers.multiple(
 		() => {
 			const key =
 				seedManifest?.assets != null
@@ -68,33 +68,33 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		.values(assets)
 		.returning({ id: schema.assets.id });
 
+	const entityTypes: Array<schema.EntityTypeInput> = schema.entityTypesEnum.map((type) => {
+		return { type };
+	});
+
 	const entityTypeIds = await db
 		.insert(schema.entityTypes)
-		.values(
-			schema.entityTypesEnum.map((type) => {
-				return { type };
-			}),
-		)
+		.values(entityTypes)
 		.returning({ id: schema.entityTypes.id, type: schema.entityTypes.type });
 
 	const entityTypesByType = keyBy(entityTypeIds, ({ type }) => {
 		return type;
 	});
 
+	const entityStatus: Array<schema.EntityStatusInput> = schema.entityStatusEnum.map((type) => {
+		return { type };
+	});
+
 	const entityStatusIds = await db
 		.insert(schema.entityStatus)
-		.values(
-			schema.entityStatusEnum.map((type) => {
-				return { type };
-			}),
-		)
+		.values(entityStatus)
 		.returning({ id: schema.entityStatus.id, type: schema.entityStatus.type });
 
 	const entityStatusByType = keyBy(entityStatusIds, ({ type }) => {
 		return type;
 	});
 
-	const persons = f.helpers.multiple(
+	const persons: Array<schema.PersonInput> = f.helpers.multiple(
 		() => {
 			const firstName = f.person.firstName();
 			const lastName = f.person.lastName();
@@ -109,7 +109,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		{ count: 10 },
 	);
 
-	const personEntities = persons.map((person) => {
+	const personEntities: Array<schema.EntityInput> = persons.map((person) => {
 		return {
 			typeId: entityTypesByType.persons.id,
 			documentId: f.string.uuid(),
@@ -129,7 +129,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		}),
 	);
 
-	const events = f.helpers.multiple(
+	const events: Array<schema.EventInput> = f.helpers.multiple(
 		() => {
 			const title = f.lorem.sentence();
 			const startDate = f.date.past({ years: 5 });
@@ -181,7 +181,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		{ count: 25 },
 	);
 
-	const eventEntities = events.map((event) => {
+	const eventEntities: Array<schema.EntityInput> = events.map((event) => {
 		return {
 			typeId: entityTypesByType.events.id,
 			documentId: f.string.uuid(),
@@ -201,7 +201,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		}),
 	);
 
-	const impactCaseStudies = f.helpers.multiple(
+	const impactCaseStudies: Array<schema.ImpactCaseStudyInput> = f.helpers.multiple(
 		() => {
 			const title = f.lorem.sentence();
 
@@ -214,14 +214,16 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		{ count: 25 },
 	);
 
-	const impactCaseStudyEntities = impactCaseStudies.map((impactCaseStudy) => {
-		return {
-			typeId: entityTypesByType.impact_case_studies.id,
-			documentId: f.string.uuid(),
-			statusId: entityStatusByType.draft.id,
-			slug: slugify(impactCaseStudy.title),
-		};
-	});
+	const impactCaseStudyEntities: Array<schema.EntityInput> = impactCaseStudies.map(
+		(impactCaseStudy) => {
+			return {
+				typeId: entityTypesByType.impact_case_studies.id,
+				documentId: f.string.uuid(),
+				statusId: entityStatusByType.draft.id,
+				slug: slugify(impactCaseStudy.title),
+			};
+		},
+	);
 
 	const impactCaseStudyIds = await db
 		.insert(schema.entities)
@@ -244,7 +246,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 
 	await db.insert(schema.impactCaseStudiesToPersons).values(impactCaseStudiesToPersons);
 
-	const news = f.helpers.multiple(
+	const news: Array<schema.NewsItemInput> = f.helpers.multiple(
 		() => {
 			const title = f.lorem.sentence();
 
@@ -257,7 +259,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		{ count: 25 },
 	);
 
-	const newsItemEntities = news.map((newsItem) => {
+	const newsItemEntities: Array<schema.EntityInput> = news.map((newsItem) => {
 		return {
 			typeId: entityTypesByType.news.id,
 			documentId: f.string.uuid(),
@@ -277,7 +279,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		}),
 	);
 
-	const pages = f.helpers.multiple(
+	const pages: Array<schema.PageInput> = f.helpers.multiple(
 		() => {
 			const title = f.lorem.sentence();
 
@@ -290,7 +292,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		{ count: 25 },
 	);
 
-	const pageEntities = pages.map((page) => {
+	const pageEntities: Array<schema.EntityInput> = pages.map((page) => {
 		return {
 			typeId: entityTypesByType.pages.id,
 			documentId: f.string.uuid(),
@@ -310,7 +312,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		}),
 	);
 
-	const spotlightArticles = f.helpers.multiple(
+	const spotlightArticles: Array<schema.SpotlightArticleInput> = f.helpers.multiple(
 		() => {
 			const title = f.lorem.sentence();
 
@@ -323,14 +325,16 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		{ count: 25 },
 	);
 
-	const spotlightArticleEntities = spotlightArticles.map((spotlightArticle) => {
-		return {
-			typeId: entityTypesByType.spotlight_articles.id,
-			documentId: f.string.uuid(),
-			statusId: entityStatusByType.draft.id,
-			slug: slugify(spotlightArticle.title),
-		};
-	});
+	const spotlightArticleEntities: Array<schema.EntityInput> = spotlightArticles.map(
+		(spotlightArticle) => {
+			return {
+				typeId: entityTypesByType.spotlight_articles.id,
+				documentId: f.string.uuid(),
+				statusId: entityStatusByType.draft.id,
+				slug: slugify(spotlightArticle.title),
+			};
+		},
+	);
 
 	const spotlightArticleIds = await db
 		.insert(schema.entities)
@@ -345,7 +349,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 
 	const entityIds = await db.select({ id: schema.entities.id }).from(schema.entities);
 
-	const fields = entityIds.map(({ id }) => {
+	const fields: Array<schema.FieldInput> = entityIds.map(({ id }) => {
 		return { entityId: id, name: "content" };
 	});
 
@@ -354,13 +358,15 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		.values(fields)
 		.returning({ id: schema.fields.id });
 
+	const contentBlockTypes: Array<schema.ContentBlockTypesInput> = schema.contentBlockTypesEnum.map(
+		(type) => {
+			return { type };
+		},
+	);
+
 	const contentBlockTypeIds = await db
 		.insert(schema.contentBlockTypes)
-		.values(
-			schema.contentBlockTypesEnum.map((type) => {
-				return { type };
-			}),
-		)
+		.values(contentBlockTypes)
 		.returning({ id: schema.contentBlockTypes.id, type: schema.contentBlockTypes.type });
 
 	const contentBlockTypesById = keyBy(contentBlockTypeIds, ({ id }) => {
@@ -386,27 +392,30 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		return contentBlockTypesById[typeId]!.type;
 	});
 
-	const imageContentBlocks = contentBlockIdsByType.image.map(({ id }) => {
-		return {
-			id,
-			imageId: f.helpers.arrayElement(assetIds).id,
-			caption: f.helpers.maybe(
-				() => {
-					return f.lorem.sentence();
-				},
-				{ probability: 0.5 },
-			),
-		};
-	});
+	const imageContentBlocks: Array<schema.ImageContentBlockInput> = contentBlockIdsByType.image.map(
+		({ id }) => {
+			return {
+				id,
+				imageId: f.helpers.arrayElement(assetIds).id,
+				caption: f.helpers.maybe(
+					() => {
+						return f.lorem.sentence();
+					},
+					{ probability: 0.5 },
+				),
+			};
+		},
+	);
 
 	await db.insert(schema.imageContentBlocks).values(imageContentBlocks);
 
-	const richTextContentBlocks = contentBlockIdsByType.rich_text.map(({ id }) => {
-		return {
-			id,
-			content: JSON.stringify({ hello: "world" }),
-		};
-	});
+	const richTextContentBlocks: Array<schema.RichTextContentBlockInput> =
+		contentBlockIdsByType.rich_text.map(({ id }) => {
+			return {
+				id,
+				content: JSON.stringify({ hello: "world" }),
+			};
+		});
 
 	await db.insert(schema.richTextContentBlocks).values(richTextContentBlocks);
 
