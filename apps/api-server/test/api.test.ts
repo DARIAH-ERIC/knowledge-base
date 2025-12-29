@@ -7,18 +7,21 @@ const client = testClient(api);
 
 describe("events endpoints", () => {
 	it("GET /api/events should return paginated list of events", async () => {
+		const limit = 20;
+		const offset = 0;
+
 		const response = await client.events.$get({
-			cookie: {},
-			form: {},
-			header: {},
-			json: {},
-			param: {},
-			query: { limit: "10", offset: "0" },
+			query: {
+				limit: String(limit),
+				offset: String(offset),
+			},
 		});
 
-		const { data, total } = await response.json();
+		const data = await response.json();
 
-		expect(total).toBe(25);
-		expect(data.length).toBe(10);
+		expect(data.total).toBe(25);
+		expect(data.data.length).toBe(limit);
+		expect(data.limit).toBe(limit);
+		expect(data.offset).toBe(offset);
 	});
 });

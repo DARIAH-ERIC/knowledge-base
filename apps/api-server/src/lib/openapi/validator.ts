@@ -6,10 +6,10 @@ import { validator as openApiValidator } from "hono-openapi";
 import * as v from "valibot";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function validator<TSchema extends v.GenericSchema | v.GenericSchemaAsync>(
-	target: keyof ValidationTargets,
-	schema: TSchema,
-) {
+export function validator<
+	TValidationTargets extends keyof ValidationTargets,
+	TSchema extends v.GenericSchema | v.GenericSchemaAsync,
+>(target: TValidationTargets, schema: TSchema) {
 	return openApiValidator(target, schema, (result) => {
 		if (!result.success) {
 			const status = 400;
