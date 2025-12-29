@@ -22,6 +22,8 @@
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
 		"start": "dotenvx run --env-file ./.env.local -- node ./dist/index.mjs",
+		"test": "dotenvx run --env-file ./.env.local -- vitest run",
+		"test:watch": "dotenvx run --env-file ./.env.local -- vitest watch",
 		"types:check": "tsc --noEmit"
 	},
 	"dependencies": {
@@ -56,7 +58,9 @@
 		"prettier": "catalog:",
 		"tsdown": "catalog:",
 		"tsx": "catalog:",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"vite-tsconfig-paths": "catalog:",
+		"vitest": "catalog:"
 	},
 	"lint-staged": {
 		"*.@(js|ts)": [
