@@ -30,22 +30,12 @@ const result = createEnv({
 				DATABASE_HOST: v.pipe(v.string(), v.nonEmpty()),
 				DATABASE_NAME: v.pipe(v.string(), v.nonEmpty()),
 				DATABASE_PASSWORD: v.pipe(v.string(), v.minLength(8)),
-				DATABASE_PORT: v.pipe(
-					v.string(),
-					v.toNumber(),
-					v.integer(),
-					v.minValue(1),
-				),
+				DATABASE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 				DATABASE_SSL_CONNECTION: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 				DATABASE_USER: v.pipe(v.string(), v.nonEmpty()),
 				EMAIL_ADDRESS: v.pipe(v.string(), v.email()),
 				EMAIL_SMTP_PASSWORD: v.optional(v.pipe(v.string(), v.nonEmpty())),
-				EMAIL_SMTP_PORT: v.pipe(
-					v.string(),
-					v.toNumber(),
-					v.integer(),
-					v.minValue(1),
-				),
+				EMAIL_SMTP_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 				EMAIL_SMTP_SERVER: v.pipe(v.string(), v.nonEmpty()),
 				EMAIL_SMTP_USERNAME: v.optional(v.pipe(v.string(), v.nonEmpty())),
 				IMGPROXY_BASE_URL: v.pipe(v.string(), v.url()),
@@ -79,12 +69,7 @@ const result = createEnv({
 			const schema = v.object({
 				NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME: v.pipe(v.string(), v.nonEmpty()),
 				NEXT_PUBLIC_TYPESENSE_HOST: v.pipe(v.string(), v.nonEmpty()),
-				NEXT_PUBLIC_TYPESENSE_PORT: v.pipe(
-					v.string(),
-					v.toNumber(),
-					v.integer(),
-					v.minValue(1),
-				),
+				NEXT_PUBLIC_TYPESENSE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 				NEXT_PUBLIC_TYPESENSE_PROTOCOL: v.optional(v.picklist(["http", "https"]), "https"),
 				/**
 				 * Optional, because we need to be able to create a collection, before we create
