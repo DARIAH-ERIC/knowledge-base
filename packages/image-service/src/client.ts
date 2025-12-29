@@ -12,9 +12,9 @@ const bucketName = env.S3_BUCKET;
 
 interface Client {
 	bucket: {
-		create: () => Promise<void>
-		exists: () => Promise<boolean>
-	}
+		create: () => Promise<void>;
+		exists: () => Promise<boolean>;
+	};
 	images: {
 		get: () => Promise<{ images: Array<{ objectName: string }> }>;
 		remove: (objectName: string) => Promise<void>;
@@ -35,12 +35,12 @@ export function createClient(): Client {
 
 	const bucket = {
 		async create() {
-			return client.makeBucket(bucketName)
+			return client.makeBucket(bucketName);
 		},
 		async exists() {
-			return client.bucketExists(bucketName)
+			return client.bucketExists(bucketName);
 		},
-	}
+	};
 
 	const images = {
 		async get() {
@@ -71,21 +71,21 @@ export function createClient(): Client {
 			await client.putObject(bucketName, objectName, fileStream, fileSize, metadata);
 
 			return { objectName };
-		}
-	}
+		},
+	};
 
 	const urls = {
 		generate(objectName: string, options: ImageUrlOptions) {
 			const url = generateSignedImageUrl(bucketName, objectName, options);
 
 			return { url };
-		}
-	}
+		},
+	};
 
 	return {
 		bucket,
 		images,
-		urls
+		urls,
 	};
 }
 
