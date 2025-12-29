@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
 import { count, eq } from "@dariah-eric/dariah-knowledge-base-database-client";
-import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
+import { db as _db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 
 interface GetEventsParams {
@@ -11,7 +11,7 @@ interface GetEventsParams {
 	offset?: number;
 }
 
-export async function getEvents(params: GetEventsParams) {
+export async function getEvents(params: GetEventsParams, db = _db) {
 	const { limit = 10, offset = 0 } = params;
 
 	const [data, rows] = await Promise.all([
@@ -70,7 +70,7 @@ interface GetEventByIdParams {
 	id: schema.Event["id"];
 }
 
-export async function getEventById(params: GetEventByIdParams) {
+export async function getEventById(params: GetEventByIdParams, db = _db) {
 	const { id } = params;
 
 	const data = await db.query.events.findFirst({
@@ -119,7 +119,7 @@ interface GetEventBySlugParams {
 	slug: schema.Entity["slug"];
 }
 
-export async function getEventBySlug(params: GetEventBySlugParams) {
+export async function getEventBySlug(params: GetEventBySlugParams, db = _db) {
 	const { slug } = params;
 
 	const data = await db.query.events.findFirst({

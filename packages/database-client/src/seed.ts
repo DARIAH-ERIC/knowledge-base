@@ -41,6 +41,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		{ name: "CC0 1.0", url: "https://creativecommons.org/publicdomain/zero/1.0/" },
 		{ name: "CC BY 4.0", url: "https://creativecommons.org/licenses/by/4.0/" },
 		{ name: "CC BY-SA 4.0", url: "https://creativecommons.org/licenses/by-sa/4.0/" },
+		{ name: "CC BY-NC-SA 4.0", url: "https://creativecommons.org/licenses/by-nc-sa/4.0/" },
 	];
 
 	const licenseIds = await db

@@ -8,6 +8,16 @@ import * as v from "valibot";
 const result = createEnv({
 	schema(environment) {
 		const schema = v.object({
+			ALLOWED_ORIGINS: v.optional(
+				v.pipe(
+					v.string(),
+					v.nonEmpty(),
+					v.transform((value) => {
+						return value.split(",");
+					}),
+					v.array(v.pipe(v.string(), v.trim(), v.url())),
+				),
+			),
 			APP_BASE_URL: v.pipe(v.string(), v.url()),
 			CI: v.optional(v.pipe(v.unknown(), v.toBoolean())),
 			DATABASE_HOST: v.pipe(v.string(), v.nonEmpty()),
@@ -37,6 +47,7 @@ const result = createEnv({
 		return ok(result.output);
 	},
 	environment: {
+		ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
 		APP_BASE_URL: process.env.APP_BASE_URL,
 		CI: process.env.CI,
 		DATABASE_HOST: process.env.DATABASE_HOST,

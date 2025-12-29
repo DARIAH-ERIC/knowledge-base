@@ -165,6 +165,9 @@ catalogs:
     hono-pino:
       specifier: ^0.10.3
       version: 0.10.3
+    hono-rate-limiter:
+      specifier: ^0.5.3
+      version: 0.5.3
     is-in-ci:
       specifier: ^2.0.0
       version: 2.0.0
@@ -370,6 +373,9 @@ importers:
       hono-pino:
         specifier: 'catalog:'
         version: 0.10.3(hono@4.11.3)(pino@10.1.0)
+      hono-rate-limiter:
+        specifier: 'catalog:'
+        version: 0.5.3(hono@4.11.3)
       pino:
         specifier: 'catalog:'
         version: 10.1.0
@@ -5252,6 +5258,15 @@ packages:
     peerDependencies:
       hono: '>=4.0.0'
       pino: '>=7.1.0'
+
+  hono-rate-limiter@0.5.3:
+    resolution: {integrity: sha512-M0DxbVMpPELEzLi0AJg1XyBHLGJXz7GySjsPoK+gc5YeeBsdGDGe+2RvVuCAv8ydINiwlbxqYMNxUEyYfRji/A==}
+    peerDependencies:
+      hono: ^4.10.8
+      unstorage: ^1.17.3
+    peerDependenciesMeta:
+      unstorage:
+        optional: true
 
   hono@4.11.3:
     resolution: {integrity: sha512-PmQi306+M/ct/m5s66Hrg+adPnkD5jiO6IjA7WhWw0gSBSo1EcRegwuI1deZ+wd5pzCGynCcn2DprnE4/yEV4w==}
@@ -12398,6 +12413,10 @@ snapshots:
       defu: 6.1.4
       hono: 4.11.3
       pino: 10.1.0
+
+  hono-rate-limiter@0.5.3(hono@4.11.3):
+    dependencies:
+      hono: 4.11.3
 
   hono@4.11.3: {}
 

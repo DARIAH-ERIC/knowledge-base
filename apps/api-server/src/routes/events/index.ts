@@ -34,7 +34,9 @@ export const router = createRouter()
 		async (c) => {
 			const { limit, offset } = c.req.valid("query");
 
-			const data = await getEvents({ limit, offset });
+			const db = c.get("db");
+
+			const data = await getEvents({ limit, offset }, db);
 
 			const payload = await validate(GetEvents.ResponseSchema, data);
 
@@ -69,7 +71,9 @@ export const router = createRouter()
 		async (c) => {
 			const { id } = c.req.valid("param");
 
-			const data = await getEventById({ id });
+			const db = c.get("db");
+
+			const data = await getEventById({ id }, db);
 
 			if (data == null) {
 				return c.notFound();
@@ -108,7 +112,9 @@ export const router = createRouter()
 		async (c) => {
 			const { slug } = c.req.valid("param");
 
-			const data = await getEventBySlug({ slug });
+			const db = c.get("db");
+
+			const data = await getEventBySlug({ slug }, db);
 
 			if (data == null) {
 				return c.notFound();

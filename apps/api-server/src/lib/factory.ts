@@ -1,16 +1,19 @@
 import { STATUS_CODES } from "node:http";
 
-import { serveStatic } from "@hono/node-server/serve-static";
 import { cors } from "hono/cors";
 import { createFactory } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { requestId } from "hono/request-id";
+import { rateLimiter } from "hono-rate-limiter";
 
+import type { Database } from "@/middlewares/db";
 import { type Logger, logger } from "@/middlewares/logger";
-import { config } from "~/config/cors.config";
+import { config as corsConfig } from "~/config/cors.config";
+import { config as rateLimiterConfig } from "~/config/rate-limiter.config";
 
 interface Env {
 	Variables: {
+		db?: Database;
 		logger: Logger;
 	};
 }
@@ -21,16 +24,10 @@ const factory = createFactory<Env>({ defaultAppOptions: { strict: false } });
 export function createApp() {
 	const app = factory
 		.createApp()
-		.use(cors(config))
+		.use(cors(corsConfig))
 		.use(requestId())
 		.use(logger())
-
-		.get("/health", (c) => {
-			const status = 200;
-			return c.json({ message: STATUS_CODES[status] }, status);
-		})
-
-		.use("/favicon.ico", serveStatic({ root: "./public" }))
+		.use(rateLimiter(rateLimiterConfig))
 
 		.notFound((c) => {
 			const status = 404;
@@ -38,7 +35,7 @@ export function createApp() {
 		})
 
 		.onError((error, c) => {
-			const { logger } = c.var;
+			const logger = c.get("logger");
 
 			logger.error(error);
 

@@ -9,7 +9,11 @@ export const BAD_REQUEST = {
 		content: {
 			"application/json": {
 				schema: resolver(
-					v.object({ message: v.pipe(v.string(), v.examples([STATUS_CODES[400]!])) }),
+					v.pipe(
+						v.object({ message: v.pipe(v.string(), v.examples([STATUS_CODES[400]!])) }),
+						v.description("Bad request response"),
+						v.metadata({ ref: "BadRequestResponse" }),
+					),
 				),
 			},
 		},
@@ -22,7 +26,11 @@ export const NOT_FOUND = {
 		content: {
 			"application/json": {
 				schema: resolver(
-					v.object({ message: v.pipe(v.string(), v.examples([STATUS_CODES[404]!])) }),
+					v.pipe(
+						v.object({ message: v.pipe(v.string(), v.examples([STATUS_CODES[404]!])) }),
+						v.description("Not found response"),
+						v.metadata({ ref: "NotFoundResponse" }),
+					),
 				),
 			},
 		},
@@ -35,7 +43,11 @@ export const INTERNAL_SERVER_ERROR = {
 		content: {
 			"application/json": {
 				schema: resolver(
-					v.object({ message: v.pipe(v.string(), v.examples([STATUS_CODES[500]!])) }),
+					v.pipe(
+						v.object({ message: v.pipe(v.string(), v.examples([STATUS_CODES[500]!])) }),
+						v.description("Internal server error response"),
+						v.metadata({ ref: "InternalServerErrorResponse" }),
+					),
 				),
 			},
 		},

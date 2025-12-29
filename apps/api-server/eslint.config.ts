@@ -18,7 +18,7 @@ export default defineConfig(
 			"no-restricted-syntax": [
 				"error",
 				{
-					message: "Please use `@/config/env.config` instead.",
+					message: "Please use `~/config/env.config` instead.",
 					selector: 'MemberExpression[computed!=true][object.name="process"][property.name="env"]',
 				},
 			],
