@@ -42,7 +42,7 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.entities.id.through(r.entitiesToEntities.relatedEntityId),
 			}),
 			status: r.one.entityStatus({
-				from: r.entities.typeId,
+				from: r.entities.statusId,
 				to: r.entityStatus.id,
 			}),
 			type: r.one.entityTypes({

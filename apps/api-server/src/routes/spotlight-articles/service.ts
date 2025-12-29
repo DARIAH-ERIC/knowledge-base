@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
+import { count, eq } from "@dariah-eric/dariah-knowledge-base-database-client";
 import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 
@@ -13,7 +14,7 @@ interface GetSpotlightArticlesParams {
 export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 	const { limit = 10, offset = 0 } = params;
 
-	const [data, total] = await Promise.all([
+	const [data, rows] = await Promise.all([
 		db.query.spotlightArticles.findMany({
 			where: {
 				entity: {
@@ -45,8 +46,15 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 			limit,
 			offset,
 		}),
-		db.$count(schema.spotlightArticles),
+		db
+			.select({ total: count() })
+			.from(schema.spotlightArticles)
+			.innerJoin(schema.entities, eq(schema.spotlightArticles.id, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.where(eq(schema.entityStatus.type, "published")),
 	]);
+
+	const total = rows.at(0)?.total ?? 0;
 
 	return { data, limit, offset, total };
 }
