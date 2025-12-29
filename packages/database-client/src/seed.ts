@@ -113,7 +113,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		return {
 			typeId: entityTypesByType.persons.id,
 			documentId: f.string.uuid(),
-			statusId: entityStatusByType.draft.id,
+			statusId: entityStatusByType.published.id,
 			slug: slugify([person.lastName, person.firstName].join(", ")),
 		};
 	});
@@ -185,7 +185,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		return {
 			typeId: entityTypesByType.events.id,
 			documentId: f.string.uuid(),
-			statusId: entityStatusByType.draft.id,
+			statusId: entityStatusByType.published.id,
 			slug: slugify(event.title),
 		};
 	});
@@ -219,7 +219,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 			return {
 				typeId: entityTypesByType.impact_case_studies.id,
 				documentId: f.string.uuid(),
-				statusId: entityStatusByType.draft.id,
+				statusId: entityStatusByType.published.id,
 				slug: slugify(impactCaseStudy.title),
 			};
 		},
@@ -263,7 +263,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		return {
 			typeId: entityTypesByType.news.id,
 			documentId: f.string.uuid(),
-			statusId: entityStatusByType.draft.id,
+			statusId: entityStatusByType.published.id,
 			slug: slugify(newsItem.title),
 		};
 	});
@@ -296,7 +296,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		return {
 			typeId: entityTypesByType.pages.id,
 			documentId: f.string.uuid(),
-			statusId: entityStatusByType.draft.id,
+			statusId: entityStatusByType.published.id,
 			slug: slugify(page.title),
 		};
 	});
@@ -330,7 +330,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 			return {
 				typeId: entityTypesByType.spotlight_articles.id,
 				documentId: f.string.uuid(),
-				statusId: entityStatusByType.draft.id,
+				statusId: entityStatusByType.published.id,
 				slug: slugify(spotlightArticle.title),
 			};
 		},
