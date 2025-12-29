@@ -18,6 +18,10 @@
 		"./client": {
 			"types": "./dist/src/client.d.ts",
 			"default": "./src/client.ts"
+		},
+		"./seed": {
+			"types": "./dist/src/seed.d.ts",
+			"default": "./src/seed.ts"
 		}
 	},
 	"sideEffects": false,

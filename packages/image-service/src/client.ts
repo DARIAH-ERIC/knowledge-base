@@ -11,14 +11,18 @@ import { generateSignedImageUrl, type ImageUrlOptions } from "./generate-signed-
 const bucketName = env.S3_BUCKET;
 
 interface Client {
+	bucket: {
+		create: () => Promise<void>;
+		exists: () => Promise<boolean>;
+	};
 	images: {
 		get: () => Promise<{ images: Array<{ objectName: string }> }>;
 		remove: (objectName: string) => Promise<void>;
 		upload: (
 			fileName: string,
 			fileStream: Readable,
-			fileSize: number,
-			metadata: ItemBucketMetadata,
+			fileSize?: number,
+			metadata?: ItemBucketMetadata,
 		) => Promise<{ objectName: string }>;
 	};
 	urls: {
@@ -29,53 +33,59 @@ interface Client {
 export function createClient(): Client {
 	const client = createMinioClient();
 
-	async function get() {
-		const stream = client.listObjectsV2(bucketName);
+	const bucket = {
+		async create() {
+			return client.makeBucket(bucketName);
+		},
+		async exists() {
+			return client.bucketExists(bucketName);
+		},
+	};
 
-		const images: Array<{ objectName: string }> = [];
+	const images = {
+		async get() {
+			const stream = client.listObjectsV2(bucketName);
 
-		for await (const bucketItem of stream) {
-			const item = bucketItem as BucketItem;
-			const objectName = item.name;
-			assert(objectName);
-			images.push({ objectName });
-		}
+			const images: Array<{ objectName: string }> = [];
 
-		return { images };
-	}
+			for await (const bucketItem of stream) {
+				const item = bucketItem as BucketItem;
+				const objectName = item.name;
+				assert(objectName);
+				images.push({ objectName });
+			}
 
-	async function remove(objectName: string) {
-		await client.removeObject(bucketName, objectName);
-	}
+			return { images };
+		},
+		async remove(objectName: string) {
+			await client.removeObject(bucketName, objectName);
+		},
+		async upload(
+			fileName: string,
+			fileStream: Readable,
+			fileSize?: number,
+			metadata?: ItemBucketMetadata,
+		) {
+			const objectName = generateObjectName(fileName);
 
-	async function upload(
-		fileName: string,
-		fileStream: Readable,
-		fileSize: number,
-		metadata: ItemBucketMetadata,
-	) {
-		const objectName = generateObjectName(fileName);
+			await client.putObject(bucketName, objectName, fileStream, fileSize, metadata);
 
-		await client.putObject(bucketName, objectName, fileStream, fileSize, metadata);
+			return { objectName };
+		},
+	};
 
-		return { objectName };
-	}
+	const urls = {
+		generate(objectName: string, options: ImageUrlOptions) {
+			const url = generateSignedImageUrl(bucketName, objectName, options);
 
-	function generate(objectName: string, options: ImageUrlOptions) {
-		const url = generateSignedImageUrl(bucketName, objectName, options);
-
-		return { url };
-	}
+			return { url };
+		},
+	};
 
 	return {
-		images: {
-			get,
-			remove,
-			upload,
-		},
-		urls: {
-			generate,
-		},
+		bucket,
+		images,
+		urls,
 	};
 }
 
