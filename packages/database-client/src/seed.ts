@@ -38,9 +38,9 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 	await db.insert(schema.users).values(users);
 
 	const licenses: Array<schema.LicenseInput> = [
-		{ name: "CC0-1.0", url: "https://choosealicense.com/licenses/cc0-1.0/" },
-		{ name: "CC-BY-4.0", url: "https://choosealicense.com/licenses/cc-by-4.0/" },
-		{ name: "CC-BY-SA-4.0", url: "https://choosealicense.com/licenses/cc-by-sa-4.0/" },
+		{ name: "CC0 1.0", url: "https://creativecommons.org/publicdomain/zero/1.0/" },
+		{ name: "CC BY 4.0", url: "https://creativecommons.org/licenses/by/4.0/" },
+		{ name: "CC BY-SA 4.0", url: "https://creativecommons.org/licenses/by-sa/4.0/" },
 	];
 
 	const licenseIds = await db
