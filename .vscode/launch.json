@@ -29,6 +29,15 @@
 			"type": "chrome",
 			"request": "launch",
 			"url": "http://localhost:3002"
+		},
+		{
+			"name": "Apps: API Server",
+			"request": "launch",
+			"runtimeArgs": ["run", "dev"],
+			"runtimeExecutable": "pnpm",
+			"skipFiles": ["<node_internals>/**"],
+			"type": "node",
+			"cwd": "${workspaceFolder}/apps/api-server"
 		}
 	],
 	"compounds": [

@@ -400,7 +400,7 @@ importers:
         version: 3.3.1(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-drizzle:
         specifier: 'catalog:'
-        version: 1.0.0-beta.2-ec83fa8(eslint@9.39.1(jiti@2.6.1))
+        version: 1.0.0-beta.6-ea4d663(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-unicorn:
         specifier: 'catalog:'
         version: 62.0.0(eslint@9.39.1(jiti@2.6.1))
