@@ -3,8 +3,10 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { env } from "../config/env.config";
 import { relations } from "./relations";
 
+type Client = Awaited<ReturnType<typeof createClient>>;
+
 declare global {
-	var __db: Awaited<ReturnType<typeof createClient>> | undefined;
+	var __db: Client | undefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types

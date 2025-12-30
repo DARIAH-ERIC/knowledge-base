@@ -4,7 +4,7 @@ import { createCollection } from "../create-collection";
 export const resources = createCollection({
 	name: env.NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME,
 	fields: [
-		{ name: "kind", type: "string" },
+		{ name: "type", type: "string" },
 		{ name: "label", type: "string" },
 		{ name: "description", type: "string" },
 		{ name: "keywords", type: "string[]" },
@@ -12,13 +12,14 @@ export const resources = createCollection({
 		{ name: "actor_ids", type: "string[]", optional: true },
 	],
 	queryableFields: ["label", "description", "actor_ids"],
-	facetableFields: ["keywords", "kind", "actor_ids"],
+	facetableFields: ["type", "keywords", "actor_ids"],
 	sortableFields: ["label"],
 });
 
-export type ResourceCollectionQueryield = (typeof resources)["queryableFields"][number];
+export type ResourceCollectionField = (typeof resources)["fields"][number];
+export type ResourceCollectionQueryField = (typeof resources)["queryableFields"][number];
 export type ResourceCollectionFacetField = (typeof resources)["facetableFields"][number];
-export type ResourceCollectionSortield = (typeof resources)["sortableFields"][number];
+export type ResourceCollectionSortField = (typeof resources)["sortableFields"][number];
 
 export const resourceTypes = [
 	"publication",
