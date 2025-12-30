@@ -15,17 +15,13 @@
 	},
 	"packageManager": "pnpm@10.25.0",
 	"exports": {
-		"./admin-client": {
-			"types": "./dist/src/admin-client.d.ts",
-			"default": "./src/admin-client.ts"
-		},
 		"./client": {
 			"types": "./dist/src/client.d.ts",
 			"default": "./src/client.ts"
 		},
-		"./seed": {
-			"types": "./dist/src/seed.d.ts",
-			"default": "./src/seed.ts"
+		"./lib": {
+			"types": "./dist/src/lib/index.d.ts",
+			"default": "./src/lib/index.ts"
 		}
 	},
 	"sideEffects": false,

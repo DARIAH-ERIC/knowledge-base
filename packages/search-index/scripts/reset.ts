@@ -1,10 +1,10 @@
 import { log } from "@acdh-oeaw/lib";
 
-import { client } from "../src/admin-client";
-import { resources } from "../src/schema";
+import { client } from "../src/lib/admin-client";
+import { reset } from "../src/lib/reset";
 
 async function main() {
-	await client.collections(resources.name).documents().delete({ truncate: true });
+	await reset(client);
 
 	log.success("Successfully reset typesense search index.");
 }

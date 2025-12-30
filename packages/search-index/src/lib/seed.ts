@@ -1,12 +1,12 @@
 import { faker as f } from "@faker-js/faker";
 
-import type { Client } from "./admin-client";
 import {
 	type ResourceCollectionDocument,
 	resources,
 	resourceTypes,
 	toolOrServiceKinds,
-} from "./schema";
+} from "../schema";
+import type { Client } from "./admin-client";
 
 export interface SeedConfig {
 	/** @default "2025-01-01" */
@@ -120,8 +120,6 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 		},
 		{ count: 100 },
 	);
-
-	await client.collections(resources.name).documents().delete({ truncate: true });
 
 	await client.collections(resources.name).documents().import(documents);
 }

@@ -1,16 +1,18 @@
 import { log } from "@acdh-oeaw/lib";
 
-import { env } from "../config/env.config";
-import { client } from "../src/admin-client";
+import { client } from "../src/lib/admin-client";
+import { createBucket } from "../src/lib/create-bucket";
 
-const bucketName = env.S3_BUCKET;
+const bucketName = client.bucket.name;
 
 async function main() {
-	if (!(await client.bucket.exists())) {
-		await client.bucket.create();
-	}
+	const isCreated = await createBucket(client);
 
-	log.success(`Successfully created "${bucketName}" bucket in object store.`);
+	if (isCreated) {
+		log.success(`Successfully created "${bucketName}" bucket in object store.`);
+	} else {
+		log.success(`Bucket "${bucketName}" already exists in object store.`);
+	}
 }
 
 main().catch((error: unknown) => {

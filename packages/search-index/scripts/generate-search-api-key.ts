@@ -1,16 +1,11 @@
 import { log } from "@acdh-oeaw/lib";
 
-import { client } from "../src/admin-client";
+import { client } from "../src/lib/admin-client";
+import { generateSearchApiKey } from "../src/lib/generate-search-api-key";
 import { resources } from "../src/schema";
 
 async function main() {
-	const response = await client.keys().create({
-		actions: ["documents:export", "documents:get", "documents:search"],
-		collections: [resources.name],
-		description: `Search-only api key for "${resources.name}".`,
-	});
-
-	const apiKey = response.value!;
+	const apiKey = await generateSearchApiKey(client);
 
 	log.success(
 		`Successfully generated api key "${apiKey}" for collection "${resources.name}" in typesense search index.`,

@@ -1,11 +1,10 @@
 import { log } from "@acdh-oeaw/lib";
-import { reset } from "drizzle-seed";
 
-import { db } from "../src/admin-client";
-import * as schema from "../src/schema";
+import { db } from "../src/lib/admin-client";
+import { reset } from "../src/lib/reset";
 
 async function main() {
-	await reset(db, schema);
+	await reset(db);
 
 	log.success("Successfully reset database.");
 }
