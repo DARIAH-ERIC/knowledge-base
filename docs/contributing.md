@@ -8,49 +8,36 @@ monorepo managed with `pnpm` workspaces.
 
 local instances of services this application depends on can be started with `docker compose`.
 
-to start all necessary services:
+to start all services:
 
 ```bash
-sh ./scripts/start-all-services.sh
+pnpm dev:services:up
 ```
 
-to stop all necessary services:
+to stop all services:
 
 ```bash
-sh ./scripts/start-all-services.sh
+pnpm dev:services:down
 ```
 
-to start only some services:
+to start only some services, you can provide them as arguments to the script, for example:
 
 ```bash
-docker compose \
-  --env-file=./.devcontainer/.env \
-  --file ./.devcontainer/docker-compose.postgres.yaml \
-  --file ./.devcontainer/docker-compose.typesense.yaml \
-  --file ./.devcontainer/docker-compose.mailpit.yaml \
-  --file ./.devcontainer/docker-compose.drizzle-gateway.yaml \
-  up --detach
+pnpm dev:services:up postgres imgproxy typesense
 ```
 
-to stop the services and automatically clean up any created volumes:
+### services
 
-```bash
-docker compose \
-  --env-file=./.devcontainer/.env \
-  --file ./.devcontainer/docker-compose.postgres.yaml \
-  --file ./.devcontainer/docker-compose.typesense.yaml \
-  --file ./.devcontainer/docker-compose.mailpit.yaml \
-  --file ./.devcontainer/docker-compose.drizzle-gateway.yaml \
-  down --volumes
-```
-
-| service             | description                                |
-| ------------------- | ------------------------------------------ |
-| postgres            | database                                   |
-| typesense           | search index                               |
-| typesense-dashboard | web ui for typesense                       |
-| mailpit             | smtp email server with http api and web ui |
-| drizzle-gateway     | dashboard for postgres database            |
+| service         | container           | description                                | ports      |
+| --------------- | ------------------- | ------------------------------------------ | ---------- |
+| postgres        | postgres            | database                                   | 5432       |
+| imgproxy        | imgproxy            | image service                              | 8080       |
+| imgproxy        | minio               | includes minio object store                | 9000, 9001 |
+| typesense       | typesense           | search index                               | 8108       |
+| typesense       | typesense-dashboard | search index web dashboard                 | 5050       |
+| mailpit         | mailpit             | smtp email server with http api and web ui | 1025, 8025 |
+| pgadmin         | pgadmin             | dashboard for postgres database            | 5555       |
+| drizzle-gateway | drizzle-gateway     | dashboard for postgres database            | 4984       |
 
 ### configuring services via `.env`
 
@@ -77,6 +64,16 @@ and is passed to containers via `docker compose`.
 | EMAIL_SMTP_SERVER                     |             |               |
 | MAILPIT_API_BASE_URL                  |             |               |
 | MAILPIT_API_PORT                      |             |               |
+
+### setup and seed
+
+to create the object store bucket, create the typesense collection, push the database schema, and
+seed all three services with mock data:
+
+```bash
+pnpm dev:services:up
+pnpm run dev:services:setup
+```
 
 ### devcontainer
 
