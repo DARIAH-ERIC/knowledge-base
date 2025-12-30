@@ -5,7 +5,7 @@ import { env } from "../../config/env.config";
 import { client as _client } from "../client";
 import { client as minio } from "../minio-client";
 
-const bucketName = env.S3_BUCKET;
+const bucketName = env.S3_BUCKET_NAME;
 
 type _Client = typeof _client;
 

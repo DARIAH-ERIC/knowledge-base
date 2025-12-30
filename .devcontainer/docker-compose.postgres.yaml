@@ -18,3 +18,4 @@ services:
 
 volumes:
   postgres-data:
+    name: dariah-knowledge-base-postgres-data

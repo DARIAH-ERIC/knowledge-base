@@ -8,7 +8,7 @@ import { generateObjectName } from "./generate-object-name";
 import { generateSignedImageUrl, type ImageUrlOptions } from "./generate-signed-image-url";
 import { client as minio } from "./minio-client";
 
-const bucketName = env.S3_BUCKET;
+const bucketName = env.S3_BUCKET_NAME;
 
 export interface Client {
 	bucket: {

@@ -23,3 +23,4 @@ services:
 
 volumes:
   typesense-data:
+    name: dariah-knowledge-base-typesense-data
