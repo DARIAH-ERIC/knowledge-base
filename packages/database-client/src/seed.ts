@@ -1,17 +1,21 @@
 import { groupBy, keyBy } from "@acdh-oeaw/lib";
 import { faker as f } from "@faker-js/faker";
 import slugify from "@sindresorhus/slugify";
-import type { drizzle } from "drizzle-orm/node-postgres";
+import { reset } from "drizzle-seed";
 
+import type { Client } from "./admin-client";
 import * as schema from "./schema";
 
 interface SeedManifest {
-	assets: Array<{
+	avatars: Array<{
+		key: string;
+	}>;
+	images: Array<{
 		key: string;
 	}>;
 }
 
-interface SeedConfig {
+export interface SeedConfig {
 	/** @default "2025-01-01" */
 	defaultRefDate?: Date;
 	/** default 42 */
@@ -19,11 +23,13 @@ interface SeedConfig {
 	seedManifest?: SeedManifest;
 }
 
-export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = {}): Promise<void> {
+export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 	const { defaultRefDate = new Date(Date.UTC(2025, 0, 1)), seed = 42, seedManifest } = config;
 
 	f.seed(seed);
 	f.setDefaultRefDate(defaultRefDate);
+
+	await reset(db, schema);
 
 	const users: Array<schema.UserInput> = f.helpers.multiple(
 		() => {
@@ -41,6 +47,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		{ name: "CC0 1.0", url: "https://creativecommons.org/publicdomain/zero/1.0/" },
 		{ name: "CC BY 4.0", url: "https://creativecommons.org/licenses/by/4.0/" },
 		{ name: "CC BY-SA 4.0", url: "https://creativecommons.org/licenses/by-sa/4.0/" },
+		{ name: "CC BY-NC-SA 4.0", url: "https://creativecommons.org/licenses/by-nc-sa/4.0/" },
 	];
 
 	const licenseIds = await db
@@ -48,11 +55,11 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		.values(licenses)
 		.returning({ id: schema.licenses.id });
 
-	const assets: Array<schema.AssetInput> = f.helpers.multiple(
+	const images: Array<schema.AssetInput> = f.helpers.multiple(
 		() => {
 			const key =
-				seedManifest?.assets != null
-					? f.helpers.arrayElement(seedManifest.assets).key
+				seedManifest?.images != null
+					? f.helpers.arrayElement(seedManifest.images).key
 					: f.string.uuid();
 
 			return {
@@ -60,12 +67,32 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 				licenseId: f.helpers.arrayElement(licenseIds).id,
 			};
 		},
-		{ count: 275 },
+		{ count: 250 },
 	);
 
-	const assetIds = await db
+	const imageIds = await db
 		.insert(schema.assets)
-		.values(assets)
+		.values(images)
+		.returning({ id: schema.assets.id });
+
+	const avatars: Array<schema.AssetInput> = f.helpers.multiple(
+		() => {
+			const key =
+				seedManifest?.avatars != null
+					? f.helpers.arrayElement(seedManifest.avatars).key
+					: f.string.uuid();
+
+			return {
+				key,
+				licenseId: f.helpers.arrayElement(licenseIds).id,
+			};
+		},
+		{ count: 25 },
+	);
+
+	const avatarIds = await db
+		.insert(schema.assets)
+		.values(avatars)
 		.returning({ id: schema.assets.id });
 
 	const entityTypes: Array<schema.EntityTypeInput> = schema.entityTypesEnum.map((type) => {
@@ -103,10 +130,10 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 				firstName,
 				lastName,
 				description: f.lorem.paragraph(),
-				imageId: f.helpers.arrayElement(assetIds).id,
+				imageId: f.helpers.arrayElement(avatarIds).id,
 			};
 		},
-		{ count: 10 },
+		{ count: 25 },
 	);
 
 	const personEntities: Array<schema.EntityInput> = persons.map((person) => {
@@ -137,7 +164,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 			return {
 				title,
 				summary: f.lorem.paragraph(),
-				imageId: f.helpers.arrayElement(assetIds).id,
+				imageId: f.helpers.arrayElement(imageIds).id,
 				location: f.location.city(),
 				startDate,
 				startTime: f.helpers.maybe(
@@ -208,7 +235,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 			return {
 				title,
 				summary: f.lorem.paragraph(),
-				imageId: f.helpers.arrayElement(assetIds).id,
+				imageId: f.helpers.arrayElement(imageIds).id,
 			};
 		},
 		{ count: 25 },
@@ -253,7 +280,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 			return {
 				title,
 				summary: f.lorem.paragraph(),
-				imageId: f.helpers.arrayElement(assetIds).id,
+				imageId: f.helpers.arrayElement(imageIds).id,
 			};
 		},
 		{ count: 25 },
@@ -286,7 +313,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 			return {
 				title,
 				summary: f.lorem.paragraph(),
-				imageId: f.helpers.arrayElement(assetIds).id,
+				imageId: f.helpers.arrayElement(imageIds).id,
 			};
 		},
 		{ count: 25 },
@@ -319,7 +346,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 			return {
 				title,
 				summary: f.lorem.paragraph(),
-				imageId: f.helpers.arrayElement(assetIds).id,
+				imageId: f.helpers.arrayElement(imageIds).id,
 			};
 		},
 		{ count: 25 },
@@ -396,7 +423,7 @@ export async function seed(db: ReturnType<typeof drizzle>, config: SeedConfig = 
 		({ id }) => {
 			return {
 				id,
-				imageId: f.helpers.arrayElement(assetIds).id,
+				imageId: f.helpers.arrayElement(imageIds).id,
 				caption: f.helpers.maybe(
 					() => {
 						return f.lorem.sentence();

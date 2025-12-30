@@ -1,42 +1,16 @@
-import { assert, log } from "@acdh-oeaw/lib";
-import { Client } from "typesense";
+import { log } from "@acdh-oeaw/lib";
 
-import { env } from "../config/env.config";
+import { client } from "../src/admin-client";
 import { resources } from "../src/schema";
 
-function createClient() {
-	const apiKey = env.TYPESENSE_ADMIN_API_KEY;
-	assert(apiKey, "Missing `TYPESENSE_ADMIN_API_KEY` environment variable.");
-
-	const client = new Client({
-		apiKey,
-		connectionTimeoutSeconds: 3,
-		nodes: [
-			{
-				host: env.NEXT_PUBLIC_TYPESENSE_HOST,
-				port: env.NEXT_PUBLIC_TYPESENSE_PORT,
-				protocol: env.NEXT_PUBLIC_TYPESENSE_PROTOCOL,
-			},
-		],
-	});
-
-	return client;
-}
-
-async function generate() {
-	const client = createClient();
-
+async function main() {
 	const response = await client.keys().create({
 		actions: ["documents:export", "documents:get", "documents:search"],
 		collections: [resources.name],
 		description: `Search-only api key for "${resources.name}".`,
 	});
 
-	return response.value!;
-}
-
-async function main() {
-	const apiKey = await generate();
+	const apiKey = response.value!;
 
 	log.success(
 		`Successfully generated api key "${apiKey}" for collection "${resources.name}" in typesense search index.`,

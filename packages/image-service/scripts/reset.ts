@@ -1,15 +1,16 @@
 import { log } from "@acdh-oeaw/lib";
 
 import { client } from "../src/admin-client";
-import { seed } from "../src/seed";
 
 async function main() {
-	await seed(client);
+	if (await client.bucket.exists()) {
+		await client.bucket.reset();
+	}
 
-	log.success("Successfully uploaded images.");
+	log.success("Successfully reset object store.");
 }
 
 main().catch((error: unknown) => {
-	log.error("Failed to upload images.\n", error);
+	log.error("Failed to reset object store.\n", error);
 	process.exitCode = 1;
 });

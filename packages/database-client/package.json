@@ -19,6 +19,10 @@
 			"types": "./dist/src/index.d.ts",
 			"default": "./src/index.ts"
 		},
+		"./admin-client": {
+			"types": "./dist/src/admin-client.d.ts",
+			"default": "./src/admin-client.ts"
+		},
 		"./client": {
 			"types": "./dist/src/client.d.ts",
 			"default": "./src/client.ts"

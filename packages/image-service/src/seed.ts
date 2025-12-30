@@ -1,45 +1,120 @@
 import { createReadStream } from "node:fs";
 import * as path from "node:path";
+import { Readable } from "node:stream";
+import type { ReadableStream } from "node:stream/web";
 
-import sharp from "sharp";
+import { faker as f } from "@faker-js/faker";
+import sharp, { type Metadata } from "sharp";
 
-import { createClient } from "./client";
+import type { Client } from "./admin-client";
 
-interface SeedConfig {
-	images: Array<{
-		filePath: string;
-	}>;
+export interface SeedConfig {
+	/** @default "2025-01-01" */
+	defaultRefDate?: Date;
+	/** default 42 */
+	seed?: number;
 }
 
-interface SeedManifest {
-	assets: Array<{
+export interface SeedManifest {
+	avatars: Array<{
+		key: string;
+	}>;
+	images: Array<{
 		key: string;
 	}>;
 }
 
-export async function seed(config: SeedConfig): Promise<SeedManifest> {
-	const { images } = config;
+export async function seed(client: Client, config: SeedConfig = {}): Promise<SeedManifest> {
+	const { defaultRefDate = new Date(Date.UTC(2025, 0, 1)), seed = 42 } = config;
 
-	const client = createClient();
+	f.seed(seed);
+	f.setDefaultRefDate(defaultRefDate);
 
-	if (!(await client.bucket.exists())) {
+	if (await client.bucket.exists()) {
+		await client.bucket.reset();
+	} else {
 		await client.bucket.create();
 	}
 
-	const assets: Array<{ key: string }> = [];
+	const avatars = f.helpers.multiple(
+		() => {
+			return { url: f.image.personPortrait() };
+		},
+		{ count: 25 },
+	);
 
-	for (const { filePath } of images) {
-		const fileName = path.basename(filePath);
+	const images = f.helpers.multiple(
+		() => {
+			return {
+				url: f.image.url({
+					height: f.number.int({ min: 600, max: 1200 }),
+					width: f.number.int({ min: 600, max: 1200 }),
+				}),
+			};
+		},
+		{ count: 25 },
+	);
 
-		const inputStream = createReadStream(filePath);
-		const imageStream = inputStream.pipe(sharp());
-		const { format, size } = await imageStream.metadata();
-		const metadata = { "Content-Type": `image/${format}` };
+	const seedManifest: SeedManifest = { avatars: [], images: [] };
 
-		const { objectName } = await client.images.upload(fileName, imageStream, size, metadata);
+	function getImageMetadata(metadata: Metadata) {
+		const { format, height, orientation, size, width } = metadata;
 
-		assets.push({ key: objectName });
+		return {
+			height,
+			"mime-type": `image/${format}`,
+			orientation,
+			size,
+			width,
+		};
 	}
 
-	return { assets };
+	async function _fromFilePath(filePath: string) {
+		const inputStream = createReadStream(filePath);
+
+		const imageStream = inputStream.pipe(sharp());
+		const metadata = getImageMetadata(await imageStream.metadata());
+
+		const fileName = path.basename(filePath).slice(0, -path.extname(filePath).length);
+
+		return { fileName, imageStream, size: metadata.size, metadata };
+	}
+
+	async function fromUrl(url: string) {
+		const response = await fetch(url);
+		const inputStream = Readable.fromWeb(response.body! as ReadableStream);
+
+		const imageStream = inputStream.pipe(sharp());
+		const metadata = getImageMetadata(await imageStream.metadata());
+
+		const fileName = f.lorem.words({ min: 1, max: 3 });
+
+		return { fileName, imageStream, size: metadata.size, metadata };
+	}
+
+	for (const { url } of avatars) {
+		const { fileName, imageStream, size, metadata } = await fromUrl(url);
+		const { objectName } = await client.images.upload(
+			`avatar-${fileName}`,
+			imageStream,
+			size,
+			metadata,
+		);
+
+		seedManifest.avatars.push({ key: objectName });
+	}
+
+	for (const { url } of images) {
+		const { fileName, imageStream, size, metadata } = await fromUrl(url);
+		const { objectName } = await client.images.upload(
+			`image-${fileName}`,
+			imageStream,
+			size,
+			metadata,
+		);
+
+		seedManifest.images.push({ key: objectName });
+	}
+
+	return seedManifest;
 }
