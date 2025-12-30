@@ -55,8 +55,9 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<See
 		const { format, height, orientation, size, width } = metadata;
 
 		return {
+			/** Used in minio web ui. */
+			"content-type": `image/${format}`,
 			height,
-			"mime-type": `image/${format}`,
 			orientation,
 			size,
 			width,
