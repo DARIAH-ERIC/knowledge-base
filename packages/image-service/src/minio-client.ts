@@ -2,6 +2,8 @@ import { Client } from "minio";
 
 import { env } from "../config/env.config";
 
+export type { Client };
+
 export function createMinioClient(): Client {
 	const client = new Client({
 		accessKey: env.S3_ACCESS_KEY,

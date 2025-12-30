@@ -1,7 +1,7 @@
 import { assert } from "@acdh-oeaw/lib";
 import { Client } from "typesense";
 
-import { env } from "../config/env.config";
+import { env } from "../../config/env.config";
 
 export type { Client };
 

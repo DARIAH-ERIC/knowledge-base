@@ -19,13 +19,13 @@
 			"types": "./dist/src/index.d.ts",
 			"default": "./src/index.ts"
 		},
-		"./admin-client": {
-			"types": "./dist/src/admin-client.d.ts",
-			"default": "./src/admin-client.ts"
-		},
 		"./client": {
 			"types": "./dist/src/client.d.ts",
 			"default": "./src/client.ts"
+		},
+		"./lib": {
+			"types": "./dist/src/lib/index.d.ts",
+			"default": "./src/lib/index.ts"
 		},
 		"./relations": {
 			"types": "./dist/src/relations.d.ts",
@@ -34,10 +34,6 @@
 		"./schema": {
 			"types": "./dist/src/schema.d.ts",
 			"default": "./src/schema.ts"
-		},
-		"./seed": {
-			"types": "./dist/src/seed.d.ts",
-			"default": "./src/seed.ts"
 		}
 	},
 	"sideEffects": false,

@@ -721,7 +721,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  lib/seed-scripts:
+  lib/scripts:
     dependencies:
       '@acdh-oeaw/lib':
         specifier: 'catalog:'

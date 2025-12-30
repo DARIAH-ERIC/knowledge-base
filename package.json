@@ -20,7 +20,7 @@
 		"db:seed": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter \"dariah-knowledge-base-database-client\" run db:seed",
 		"db:studio": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter \"dariah-knowledge-base-database-client\" run db:studio",
 		"dev": "pnpm run --aggregate-output --parallel --recursive dev",
-		"dev:seed": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter \"dariah-knowledge-base-seed-scripts\" run seed",
+		"dev:seed": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter \"dariah-knowledge-base-scripts\" run seed",
 		"dev:services:down": "sh ./scripts/services.sh stop",
 		"dev:services:up": "sh ./scripts/services.sh start",
 		"format:check": "prettier . --cache --cache-location ./.prettiercache --check",

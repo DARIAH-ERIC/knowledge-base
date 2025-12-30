@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 
-import { env } from "../config/env.config";
+import { env } from "../../config/env.config";
 
 export type Client = Awaited<ReturnType<typeof createClient>>;
 

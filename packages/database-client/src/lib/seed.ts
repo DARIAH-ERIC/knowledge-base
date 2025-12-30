@@ -3,8 +3,8 @@ import { faker as f } from "@faker-js/faker";
 import slugify from "@sindresorhus/slugify";
 import { reset } from "drizzle-seed";
 
+import * as schema from "../schema";
 import type { Client } from "./admin-client";
-import * as schema from "./schema";
 
 interface SeedManifest {
 	avatars: Array<{

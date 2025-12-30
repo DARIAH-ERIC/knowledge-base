@@ -1,7 +1,7 @@
 import { log } from "@acdh-oeaw/lib";
 
-import { db } from "../src/admin-client";
-import { seed } from "../src/seed";
+import { db } from "../src/lib/admin-client";
+import { seed } from "../src/lib/seed";
 
 async function main() {
 	await seed(db);

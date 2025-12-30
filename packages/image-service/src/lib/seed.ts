@@ -30,12 +30,6 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<See
 	f.seed(seed);
 	f.setDefaultRefDate(defaultRefDate);
 
-	if (await client.bucket.exists()) {
-		await client.bucket.reset();
-	} else {
-		await client.bucket.create();
-	}
-
 	const avatars = f.helpers.multiple(
 		() => {
 			return { url: f.image.personPortrait() };

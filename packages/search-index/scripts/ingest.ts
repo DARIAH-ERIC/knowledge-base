@@ -1,21 +1,10 @@
-import { isErr, log } from "@acdh-oeaw/lib";
+import { log } from "@acdh-oeaw/lib";
 
-import { client } from "../src/admin-client";
-import { getDocuments } from "../src/get-documents";
-import { resources } from "../src/schema";
+import { client } from "../src/lib/admin-client";
+import { ingest } from "../src/lib/ingest";
 
 async function main() {
-	const result = await getDocuments();
-
-	if (isErr(result)) {
-		throw result.error;
-	}
-
-	const documents = result.value;
-
-	await client.collections(resources.name).documents().delete({ truncate: true });
-
-	await client.collections(resources.name).documents().import(documents);
+	await ingest(client);
 
 	log.success("Successfully ingested documents into typesense search index.");
 }

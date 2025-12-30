@@ -11,6 +11,9 @@ import { client as minio } from "./minio-client";
 const bucketName = env.S3_BUCKET;
 
 export interface Client {
+	bucket: {
+		name: string;
+	};
 	images: {
 		get: () => Promise<{ images: Array<{ objectName: string }> }>;
 		remove: (objectName: string) => Promise<void>;
@@ -68,6 +71,9 @@ export function createClient(): Client {
 	};
 
 	return {
+		bucket: {
+			name: bucketName,
+		},
 		images,
 		urls,
 	};

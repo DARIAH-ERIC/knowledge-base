@@ -1,21 +1,17 @@
 import { log } from "@acdh-oeaw/lib";
-import { Errors } from "typesense";
 
-import { client } from "../src/admin-client";
+import { client } from "../src/lib/admin-client";
+import { createCollection } from "../src/lib/create-collection";
 import { resources } from "../src/schema";
 
 async function main() {
-	try {
-		await client.collections(resources.name).delete();
-	} catch (error) {
-		if (!(error instanceof Errors.ObjectNotFound)) {
-			throw error;
-		}
+	const isCreated = await createCollection(client);
+
+	if (isCreated) {
+		log.success(`Successfully created collection "${resources.name}".`);
+	} else {
+		log.success(`Collection "${resources.name}" already exists.`);
 	}
-
-	await client.collections().create(resources.schema);
-
-	log.success(`Successfully created collection "${resources.name}".`);
 }
 
 main().catch((error: unknown) => {

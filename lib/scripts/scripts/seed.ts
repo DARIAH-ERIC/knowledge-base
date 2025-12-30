@@ -1,15 +1,19 @@
 import { parseArgs } from "node:util";
 
 import { log } from "@acdh-oeaw/lib";
-import { db as databaseClient } from "@dariah-eric/dariah-knowledge-base-database-client/admin-client";
-import { seed as seedDatabase } from "@dariah-eric/dariah-knowledge-base-database-client/seed";
-import { client as objectStoreClient } from "@dariah-eric/dariah-knowledge-base-image-service/admin-client";
 import {
+	db as databaseClient,
+	seed as seedDatabase,
+} from "@dariah-eric/dariah-knowledge-base-database-client/lib";
+import {
+	adminClient as objectStoreClient,
 	seed as seedObjectStore,
 	type SeedManifest,
-} from "@dariah-eric/dariah-knowledge-base-image-service/seed";
-import { client as searchIndexClient } from "@dariah-eric/dariah-knowledge-base-search-index/admin-client";
-import { seed as seedSearchIndex } from "@dariah-eric/dariah-knowledge-base-search-index/seed";
+} from "@dariah-eric/dariah-knowledge-base-image-service/lib";
+import {
+	adminClient as searchIndexClient,
+	seed as seedSearchIndex,
+} from "@dariah-eric/dariah-knowledge-base-search-index/lib";
 import * as v from "valibot";
 
 const _services = ["database", "object-store", "search-index"] as const;
@@ -45,7 +49,14 @@ async function main() {
 	log.success("Successfully seeded services.");
 }
 
-main().catch((error: unknown) => {
-	log.error("Failed to seed services.", error);
-	process.exitCode = 1;
-});
+main()
+	.catch((error: unknown) => {
+		log.error("Failed to seed services.", error);
+		process.exitCode = 1;
+	})
+	.finally(() => {
+		return databaseClient.$client.end().catch((error: unknown) => {
+			log.error("Failed to close database connection.\n", error);
+			process.exitCode = 1;
+		});
+	});
