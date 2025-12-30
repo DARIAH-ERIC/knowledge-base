@@ -721,6 +721,67 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
+  lib/seed-scripts:
+    dependencies:
+      '@acdh-oeaw/lib':
+        specifier: 'catalog:'
+        version: 0.3.7
+      '@dariah-eric/dariah-knowledge-base-database-client':
+        specifier: workspace:^
+        version: link:../../packages/database-client
+      '@dariah-eric/dariah-knowledge-base-image-service':
+        specifier: workspace:^
+        version: link:../../packages/image-service
+      '@dariah-eric/dariah-knowledge-base-search-index':
+        specifier: workspace:^
+        version: link:../../packages/search-index
+      valibot:
+        specifier: 'catalog:'
+        version: 1.2.0(typescript@5.9.3)
+    devDependencies:
+      '@acdh-oeaw/eslint-config':
+        specifier: 'catalog:'
+        version: 2.0.11(@eslint/config-helpers@0.4.2)(@typescript-eslint/utils@8.49.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(globals@16.5.0)(typescript@5.9.3)
+      '@acdh-oeaw/eslint-config-node':
+        specifier: 'catalog:'
+        version: 2.0.11(@acdh-oeaw/eslint-config@2.0.11(@eslint/config-helpers@0.4.2)(@typescript-eslint/utils@8.49.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(globals@16.5.0)(typescript@5.9.3))(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
+      '@acdh-oeaw/prettier-config':
+        specifier: 'catalog:'
+        version: 2.0.1(prettier@3.7.4)
+      '@acdh-oeaw/tsconfig':
+        specifier: 'catalog:'
+        version: 1.5.1(typescript@5.9.3)
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.3
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.1(jiti@2.6.1)
+      eslint-config-flat-gitignore:
+        specifier: 'catalog:'
+        version: 2.1.0(eslint@9.39.1(jiti@2.6.1))
+      eslint-plugin-check-file:
+        specifier: 'catalog:'
+        version: 3.3.1(eslint@9.39.1(jiti@2.6.1))
+      eslint-plugin-unicorn:
+        specifier: 'catalog:'
+        version: 62.0.0(eslint@9.39.1(jiti@2.6.1))
+      globals:
+        specifier: 'catalog:'
+        version: 16.5.0
+      node:
+        specifier: runtime:^24.12.0
+        version: runtime:24.12.0
+      prettier:
+        specifier: 'catalog:'
+        version: 3.7.4
+      tsx:
+        specifier: 'catalog:'
+        version: 4.21.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
   packages/database-client:
     dependencies:
       '@acdh-oeaw/lib':
@@ -845,6 +906,9 @@ importers:
       '@acdh-oeaw/tsconfig':
         specifier: 'catalog:'
         version: 1.5.1(typescript@5.9.3)
+      '@faker-js/faker':
+        specifier: 'catalog:'
+        version: 10.1.0
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.3
@@ -9698,7 +9762,7 @@ snapshots:
 
   '@types/pg@8.16.0':
     dependencies:
-      '@types/node': 24.10.3
+      '@types/node': 25.0.0
       pg-protocol: 1.10.3
       pg-types: 2.2.0
 

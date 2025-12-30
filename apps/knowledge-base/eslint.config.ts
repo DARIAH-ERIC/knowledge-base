@@ -87,6 +87,7 @@ export default defineConfig(
 			"unicorn/no-useless-undefined": "off",
 			"unicorn/prefer-global-this": "off",
 			"unicorn/prefer-single-call": "off",
+			"unicorn/prefer-ternary": "off",
 			"unicorn/prefer-top-level-await": "off",
 			"unicorn/require-module-specifiers": "off",
 			"unicorn/switch-case-braces": "error",

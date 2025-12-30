@@ -13,3 +13,5 @@ export function createMinioClient(): Client {
 
 	return client;
 }
+
+export const client = createMinioClient();

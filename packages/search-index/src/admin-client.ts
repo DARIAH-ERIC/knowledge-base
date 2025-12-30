@@ -2,17 +2,15 @@ import { assert } from "@acdh-oeaw/lib";
 import { Client } from "typesense";
 
 import { env } from "../config/env.config";
-import { cacheSearchResultsForSeconds } from "../config/search.config";
 
 export type { Client };
 
 export function createClient(): Client {
-	const apiKey = env.NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY;
-	assert(apiKey, "Missing `NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY` environment variable.");
+	const apiKey = env.TYPESENSE_ADMIN_API_KEY;
+	assert(apiKey, "Missing `TYPESENSE_ADMIN_API_KEY` environment variable.");
 
 	const client = new Client({
 		apiKey,
-		cacheSearchResultsForSeconds,
 		connectionTimeoutSeconds: 3,
 		nodes: [
 			{
