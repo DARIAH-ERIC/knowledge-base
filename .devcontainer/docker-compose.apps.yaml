@@ -6,3 +6,7 @@ services:
     command: sleep infinity
     depends_on:
       - postgres
+
+networks:
+  default:
+    name: dariah-knowledge-base

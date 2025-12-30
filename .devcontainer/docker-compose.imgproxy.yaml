@@ -34,3 +34,8 @@ services:
 
 volumes:
   minio-data:
+    name: dariah-knowledge-base-minio-data
+
+networks:
+  default:
+    name: dariah-knowledge-base

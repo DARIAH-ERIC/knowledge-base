@@ -14,3 +14,7 @@ services:
 
 volumes:
   mailpit-data:
+
+networks:
+  default:
+    name: dariah-knowledge-base
