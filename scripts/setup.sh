@@ -6,4 +6,4 @@ pnpm image-service:buckets:create
 pnpm db:push
 pnpm search-index:collections:create
 
-pnpm dev:seed
+pnpm dev:services:seed
