@@ -50,12 +50,12 @@ jobs:
       NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL: "${{ vars.NEXT_PUBLIC_MATOMO_BASE_URL }}"
       NEXT_PUBLIC_WEBSITE_MATOMO_ID: "${{ vars.NEXT_PUBLIC_WEBSITE_MATOMO_ID }}"
       NEXT_PUBLIC_WEBSITE_SERVICE_ID: "${{ vars.WEBSITE_SERVICE_ID }}"
-      NEXT_PUBLIC_TYPESENSE_COLLECTION_NAME: "dariah-knowledge-base"
+      NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME: "dariah-resources"
       NEXT_PUBLIC_TYPESENSE_HOST: "localhost"
       NEXT_PUBLIC_TYPESENSE_PORT: "8108"
       NEXT_PUBLIC_TYPESENSE_PROTOCOL: "http"
       S3_ACCESS_KEY: "c8c7bab1e784e088780bdc97876cfdc0"
-      S3_BUCKET: "dariah-knowledge-base"
+      S3_BUCKET_NAME: "dariah-knowledge-base"
       S3_HOST: "localhost"
       S3_PORT: "9000"
       S3_PROTOCOL: "http"
@@ -80,6 +80,9 @@ jobs:
 
       - name: Format
         run: pnpm run format:check
+
+      - name: Build packages
+        run: pnpm --filter "./packages/*" run build
 
       - name: Lint
         run: pnpm run lint:check

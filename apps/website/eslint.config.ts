@@ -87,6 +87,7 @@ export default defineConfig(
 			"unicorn/no-useless-undefined": "off",
 			"unicorn/prefer-global-this": "off",
 			"unicorn/prefer-single-call": "off",
+			"unicorn/prefer-ternary": "off",
 			"unicorn/prefer-top-level-await": "off",
 			"unicorn/require-module-specifiers": "off",
 			"unicorn/switch-case-braces": "error",
@@ -179,6 +180,29 @@ export default defineConfig(
 		rules: {
 			"drizzle/enforce-delete-with-where": ["error", { drizzleObjectName: ["db", "tx"] }],
 			"drizzle/enforce-update-with-where": ["error", { drizzleObjectName: ["db", "tx"] }],
+		},
+	},
+	{
+		name: "data-access-layer-config",
+		ignores: ["lib/data/**"],
+		rules: {
+			"@typescript-eslint/no-restricted-imports": [
+				"error",
+				{
+					...restrictedImports,
+					patterns: [
+						{
+							group: [
+								"@dariah-eric/dariah-knowledge-base-database-client",
+								"@dariah-eric/dariah-knowledge-base-image-service",
+								"@dariah-eric/dariah-knowledge-base-search-index",
+							],
+							message: "Please use the data access layer in `lib/data/`.",
+							allowTypeImports: true,
+						},
+					],
+				},
+			],
 		},
 	},
 	{

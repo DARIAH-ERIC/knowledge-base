@@ -56,7 +56,7 @@ const result = createEnv({
 				MAILPIT_API_BASE_URL: v.optional(v.pipe(v.string(), v.url())),
 				NEXT_RUNTIME: v.optional(v.picklist(["edge", "nodejs"])),
 				S3_ACCESS_KEY: v.pipe(v.string(), v.nonEmpty()),
-				S3_BUCKET: v.pipe(v.string(), v.nonEmpty()),
+				S3_BUCKET_NAME: v.pipe(v.string(), v.nonEmpty()),
 				S3_HOST: v.pipe(v.string(), v.nonEmpty()),
 				S3_PORT: v.pipe(v.string(), v.transform(Number), v.number(), v.integer(), v.minValue(1)),
 				S3_PROTOCOL: v.optional(v.picklist(["http", "https"]), "https"),
@@ -79,7 +79,7 @@ const result = createEnv({
 		},
 		public(environment) {
 			const schema = v.object({
-				NEXT_PUBLIC_TYPESENSE_COLLECTION_NAME: v.pipe(v.string(), v.nonEmpty()),
+				NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME: v.pipe(v.string(), v.nonEmpty()),
 				NEXT_PUBLIC_TYPESENSE_HOST: v.pipe(v.string(), v.nonEmpty()),
 				NEXT_PUBLIC_TYPESENSE_PORT: v.pipe(
 					v.string(),
@@ -159,7 +159,8 @@ const result = createEnv({
 		NEXT_PUBLIC_WEBSITE_SENTRY_PII: process.env.NEXT_PUBLIC_WEBSITE_SENTRY_PII,
 		NEXT_PUBLIC_WEBSITE_SENTRY_PROJECT: process.env.NEXT_PUBLIC_WEBSITE_SENTRY_PROJECT,
 		NEXT_PUBLIC_WEBSITE_SERVICE_ID: process.env.NEXT_PUBLIC_WEBSITE_SERVICE_ID,
-		NEXT_PUBLIC_TYPESENSE_COLLECTION_NAME: process.env.NEXT_PUBLIC_TYPESENSE_COLLECTION_NAME,
+		NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME:
+			process.env.NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME,
 		NEXT_PUBLIC_TYPESENSE_HOST: process.env.NEXT_PUBLIC_TYPESENSE_HOST,
 		NEXT_PUBLIC_TYPESENSE_PORT: process.env.NEXT_PUBLIC_TYPESENSE_PORT,
 		NEXT_PUBLIC_TYPESENSE_PROTOCOL: process.env.NEXT_PUBLIC_TYPESENSE_PROTOCOL,
@@ -167,7 +168,7 @@ const result = createEnv({
 		NEXT_RUNTIME: process.env.NEXT_RUNTIME,
 		NODE_ENV: process.env.NODE_ENV,
 		S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
-		S3_BUCKET: process.env.S3_BUCKET,
+		S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
 		S3_HOST: process.env.S3_HOST,
 		S3_PORT: process.env.S3_PORT,
 		S3_PROTOCOL: process.env.S3_PROTOCOL,
