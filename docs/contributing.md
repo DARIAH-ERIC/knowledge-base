@@ -44,26 +44,41 @@ pnpm dev:services:up postgres imgproxy typesense
 configuration for local development services lives in [`.devcontainer/.env`](`./.devcontainer/.env`)
 and is passed to containers via `docker compose`.
 
-| environment variable                  | description | default value |
-| ------------------------------------- | ----------- | ------------- |
-| DATABASE_HOST                         |             |               |
-| DATABASE_NAME                         |             |               |
-| DATABASE_PASSWORD                     |             |               |
-| DATABASE_PORT                         |             |               |
-| DATABASE_USER                         |             |               |
-| DRIZZLE_GATEWAY_PORT                  |             |               |
-| NEXT_PUBLIC_TYPESENSE_COLLECTION_NAME |             |               |
-| NEXT_PUBLIC_TYPESENSE_HOST            |             |               |
-| NEXT_PUBLIC_TYPESENSE_PORT            |             |               |
-| NEXT_PUBLIC_TYPESENSE_PROTOCOL        |             |               |
-| NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY  |             |               |
-| TYPESENSE_ADMIN_API_KEY               |             |               |
-| TYPESENSE_DASHBOARD_PORT              |             |               |
-| EMAIL_ADDRESS                         |             |               |
-| EMAIL_SMTP_PORT                       |             |               |
-| EMAIL_SMTP_SERVER                     |             |               |
-| MAILPIT_API_BASE_URL                  |             |               |
-| MAILPIT_API_PORT                      |             |               |
+| environment variable                           | description | default value |
+| ---------------------------------------------- | ----------- | ------------- |
+| DATABASE_HOST                                  |             |               |
+| DATABASE_NAME                                  |             |               |
+| DATABASE_PASSWORD                              |             |               |
+| DATABASE_PORT                                  |             |               |
+| DATABASE_SSL_CONNECTION                        |             |               |
+| DATABASE_USER                                  |             |               |
+| DRIZZLE_GATEWAY_PORT                           |             |               |
+| PGADMIN_DEFAULT_EMAIL                          |             |               |
+| PGADMIN_DEFAULT_PASSWORD                       |             |               |
+| PGADMIN_PORT                                   |             |               |
+| NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME |             |               |
+| NEXT_PUBLIC_TYPESENSE_HOST                     |             |               |
+| NEXT_PUBLIC_TYPESENSE_PORT                     |             |               |
+| NEXT_PUBLIC_TYPESENSE_PROTOCOL                 |             |               |
+| NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY           |             |               |
+| TYPESENSE_ADMIN_API_KEY                        |             |               |
+| TYPESENSE_DASHBOARD_PORT                       |             |               |
+| EMAIL_ADDRESS                                  |             |               |
+| EMAIL_SMTP_PORT                                |             |               |
+| EMAIL_SMTP_SERVER                              |             |               |
+| MAILPIT_API_BASE_URL                           |             |               |
+| MAILPIT_API_PORT                               |             |               |
+| S3_BUCKET_NAME                                 |             |               |
+| S3_ACCESS_KEY                                  |             |               |
+| S3_HOST                                        |             |               |
+| S3_PORT                                        |             |               |
+| S3_PROTOCOL                                    |             |               |
+| S3_SECRET_KEY                                  |             |               |
+| MINIO_WEB_UI_PORT                              |             |               |
+| IMGPROXY_BASE_UR                               |             |               |
+| IMGPROXY_KE                                    |             |               |
+| IMGPROXY_POR                                   |             |               |
+| IMGPROXY_SAL                                   |             |               |
 
 ### setup and seed
 
