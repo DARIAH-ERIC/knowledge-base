@@ -66,7 +66,7 @@ describe("events", () => {
 	describe("GET /api/events", () => {
 		it("should return paginated list of events", async () => {
 			await withTransaction(async (db) => {
-				const limit = 50;
+				const limit = 10;
 				const offset = 0;
 
 				const client = createTestClient(db);
