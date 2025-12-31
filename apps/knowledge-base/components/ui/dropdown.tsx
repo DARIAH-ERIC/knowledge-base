@@ -1,5 +1,6 @@
 /* eslint-disable @eslint-react/prefer-read-only-props */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable better-tailwindcss/enforce-consistent-class-order */
 
 "use client";
 
@@ -53,11 +54,11 @@ function DropdownSection<T extends object>({
 const dropdownItemStyles = tv({
 	base: [
 		"min-w-0 [--mr-icon:--spacing(2)] sm:[--mr-icon:--spacing(1.5)]",
-		"col-span-full grid grid-cols-[auto_1fr_1.5rem_0.5rem_auto] px-3 py-2 supports-[grid-template-columns:subgrid]:grid-cols-subgrid sm:px-2.5 sm:py-1.5",
+		"col-span-full grid grid-cols-[auto_1fr_1.5rem_0.5rem_auto] px-3 py-2 sm:px-2.5 sm:py-1.5 supports-[grid-template-columns:subgrid]:grid-cols-subgrid",
 		"not-has-[[slot=description]]:items-center",
 		"group relative cursor-default select-none rounded-[calc(var(--radius-xl)-(--spacing(1)))] text-base/6 text-fg outline-0 sm:text-sm/6",
-		"**:data-[slot=avatar]:*:mr-(--mr-icon) **:data-[slot=avatar]:mr-(--mr-icon) **:data-[slot=avatar]:[--avatar-size:--spacing(6)] sm:**:data-[slot=avatar]:[--avatar-size:--spacing(5)]",
-		"*:data-[slot=icon]:mr-(--mr-icon) **:data-[slot=icon]:h-5 **:data-[slot=icon]:w-5 **:data-[slot=icon]:shrink-0 has-[[slot=description]]:**:data-[slot=icon]:h-[1lh] sm:**:data-[slot=icon]:h-4 sm:**:data-[slot=icon]:w-4 [&_[data-slot='icon']:not([class*='text-'])]:text-muted-fg",
+		"**:data-[slot=avatar]:mr-(--mr-icon) **:data-[slot=avatar]:[--avatar-size:--spacing(6)] **:data-[slot=avatar]:*:mr-(--mr-icon) sm:**:data-[slot=avatar]:[--avatar-size:--spacing(5)]",
+		"**:data-[slot=icon]:w-5 **:data-[slot=icon]:shrink-0 [&_[data-slot=icon]:not([class*='text-'])]:text-muted-fg *:data-[slot=icon]:mr-(--mr-icon) sm:**:data-[slot=icon]:size-4 has-[[slot=description]]:**:data-[slot=icon]:h-lh",
 		"[&>[slot=label]+[data-slot=icon]]:absolute [&>[slot=label]+[data-slot=icon]]:right-1",
 		"forced-color-adjust-none forced-colors:text-[CanvasText] forced-colors:**:data-[slot=icon]:text-[CanvasText] forced-colors:group-focus:**:data-[slot=icon]:text-[CanvasText]",
 	],
@@ -66,7 +67,7 @@ const dropdownItemStyles = tv({
 			danger: [
 				"text-danger-subtle-fg focus:text-danger-subtle-fg [&_[data-slot='icon']:not([class*='text-'])]:text-danger-subtle-fg/70",
 				"*:[[slot=description]]:text-danger-subtle-fg/80 focus:*:[[slot=description]]:text-danger-subtle-fg focus:*:[[slot=label]]:text-danger-subtle-fg",
-				"focus:bg-danger-subtle focus:text-danger-subtle-fg forced-colors:focus:text-[Mark] focus:[&_[data-slot='icon']:not([class*='text-'])]:text-danger-subtle-fg",
+				"focus:bg-danger-subtle focus:text-danger-subtle-fg focus:[&_[data-slot='icon']:not([class*='text-'])]:text-danger-subtle-fg forced-colors:focus:text-[Mark]",
 			],
 			warning: [
 				"text-warning-subtle-fg focus:text-warning-subtle-fg [&_[data-slot='icon']:not([class*='text-'])]:text-warning-subtle-fg/70",
@@ -84,14 +85,14 @@ const dropdownItemStyles = tv({
 			true: [
 				"**:data-[slot=icon]:text-accent-fg **:[kbd]:text-accent-fg",
 				"bg-accent text-accent-fg forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]",
-				"[&_.text-muted-fg]:text-accent-fg/80 *:[[slot=description]]:text-accent-fg *:[[slot=label]]:text-accent-fg",
+				"*:[[slot=description]]:text-accent-fg *:[[slot=label]]:text-accent-fg [&_.text-muted-fg]:text-accent-fg/80",
 			],
 		},
 		isHovered: {
 			true: [
 				"**:data-[slot=icon]:text-accent-fg **:[kbd]:text-accent-fg",
 				"bg-accent text-accent-fg forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]",
-				"[&_.text-muted-fg]:text-accent-fg/80 *:[[slot=description]]:text-accent-fg *:[[slot=label]]:text-accent-fg",
+				"*:[[slot=description]]:text-accent-fg *:[[slot=label]]:text-accent-fg [&_.text-muted-fg]:text-accent-fg/80",
 			],
 		},
 	},
