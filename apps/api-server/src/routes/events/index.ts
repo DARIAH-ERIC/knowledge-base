@@ -1,3 +1,4 @@
+import { assert } from "@acdh-oeaw/lib";
 import { describeRoute } from "hono-openapi";
 
 import { createRouter } from "@/lib/factory";
@@ -35,8 +36,9 @@ export const router = createRouter()
 			const { limit, offset } = c.req.valid("query");
 
 			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
 
-			const data = await getEvents({ limit, offset }, db);
+			const data = await getEvents(db, { limit, offset });
 
 			const payload = await validate(GetEvents.ResponseSchema, data);
 
@@ -72,8 +74,9 @@ export const router = createRouter()
 			const { id } = c.req.valid("param");
 
 			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
 
-			const data = await getEventById({ id }, db);
+			const data = await getEventById(db, { id });
 
 			if (data == null) {
 				return c.notFound();
@@ -113,8 +116,9 @@ export const router = createRouter()
 			const { slug } = c.req.valid("param");
 
 			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
 
-			const data = await getEventBySlug({ slug }, db);
+			const data = await getEventBySlug(db, { slug });
 
 			if (data == null) {
 				return c.notFound();

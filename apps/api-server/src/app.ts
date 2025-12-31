@@ -27,10 +27,10 @@ app.get("/health", (c) => {
 	return c.json({ message: STATUS_CODES[status] }, status);
 });
 
+app.use(database()).route("/api/v1", api);
+
+app.route("/docs", openapi);
+
 app.use("/favicon.ico", serveStatic({ root: "./public" }));
-
-app.route("/", openapi);
-
-app.use(database()).route("/api", api);
 
 export { api, app, openapi };

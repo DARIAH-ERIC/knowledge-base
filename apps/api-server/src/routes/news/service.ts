@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
 import { count, eq } from "@dariah-eric/dariah-knowledge-base-database-client";
-import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
+
+import type { Database } from "@/middlewares/db";
 
 interface GetNewsParams {
 	/** @default 10 */
@@ -11,7 +12,7 @@ interface GetNewsParams {
 	offset?: number;
 }
 
-export async function getNews(params: GetNewsParams) {
+export async function getNews(db: Database, params: GetNewsParams) {
 	const { limit = 10, offset = 0 } = params;
 
 	const [data, rows] = await Promise.all([
@@ -32,9 +33,6 @@ export async function getNews(params: GetNewsParams) {
 				entity: {
 					columns: {
 						slug: true,
-					},
-					orderBy: {
-						updatedAt: "desc",
 					},
 				},
 				image: {
@@ -65,7 +63,7 @@ interface GetNewsItemByIdParams {
 	id: schema.NewsItem["id"];
 }
 
-export async function getNewsItemById(params: GetNewsItemByIdParams) {
+export async function getNewsItemById(db: Database, params: GetNewsItemByIdParams) {
 	const { id } = params;
 
 	const data = await db.query.news.findFirst({
@@ -109,7 +107,7 @@ interface GetNewsItemBySlugParams {
 	slug: schema.Entity["slug"];
 }
 
-export async function getNewsItemBySlug(params: GetNewsItemBySlugParams) {
+export async function getNewsItemBySlug(db: Database, params: GetNewsItemBySlugParams) {
 	const { slug } = params;
 
 	const data = await db.query.news.findFirst({

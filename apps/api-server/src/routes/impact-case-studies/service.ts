@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
 import { count, eq } from "@dariah-eric/dariah-knowledge-base-database-client";
-import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
+
+import type { Database } from "@/middlewares/db";
 
 interface GetImpactCaseStudiesParams {
 	/** @default 10 */
@@ -11,7 +12,7 @@ interface GetImpactCaseStudiesParams {
 	offset?: number;
 }
 
-export async function getImpactCaseStudies(params: GetImpactCaseStudiesParams) {
+export async function getImpactCaseStudies(db: Database, params: GetImpactCaseStudiesParams) {
 	const { limit = 10, offset = 0 } = params;
 
 	const [data, rows] = await Promise.all([
@@ -32,9 +33,6 @@ export async function getImpactCaseStudies(params: GetImpactCaseStudiesParams) {
 				entity: {
 					columns: {
 						slug: true,
-					},
-					orderBy: {
-						updatedAt: "desc",
 					},
 				},
 				image: {
@@ -65,7 +63,7 @@ interface GetImpactCaseStudyByIdParams {
 	id: schema.ImpactCaseStudy["id"];
 }
 
-export async function getImpactCaseStudyById(params: GetImpactCaseStudyByIdParams) {
+export async function getImpactCaseStudyById(db: Database, params: GetImpactCaseStudyByIdParams) {
 	const { id } = params;
 
 	const data = await db.query.impactCaseStudies.findFirst({
@@ -123,7 +121,10 @@ interface GetImpactCaseStudyBySlugParams {
 	slug: schema.Entity["slug"];
 }
 
-export async function getImpactCaseStudyBySlug(params: GetImpactCaseStudyBySlugParams) {
+export async function getImpactCaseStudyBySlug(
+	db: Database,
+	params: GetImpactCaseStudyBySlugParams,
+) {
 	const { slug } = params;
 
 	const data = await db.query.impactCaseStudies.findFirst({

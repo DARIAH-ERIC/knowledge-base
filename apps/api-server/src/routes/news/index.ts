@@ -1,3 +1,4 @@
+import { assert } from "@acdh-oeaw/lib";
 import { describeRoute } from "hono-openapi";
 
 import { createRouter } from "@/lib/factory";
@@ -34,7 +35,10 @@ export const router = createRouter()
 		async (c) => {
 			const { limit, offset } = c.req.valid("query");
 
-			const data = await getNews({ limit, offset });
+			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
+
+			const data = await getNews(db, { limit, offset });
 
 			const payload = await validate(GetNews.ResponseSchema, data);
 
@@ -69,7 +73,10 @@ export const router = createRouter()
 		async (c) => {
 			const { id } = c.req.valid("param");
 
-			const data = await getNewsItemById({ id });
+			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
+
+			const data = await getNewsItemById(db, { id });
 
 			if (data == null) {
 				return c.notFound();
@@ -108,7 +115,10 @@ export const router = createRouter()
 		async (c) => {
 			const { slug } = c.req.valid("param");
 
-			const data = await getNewsItemBySlug({ slug });
+			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
+
+			const data = await getNewsItemBySlug(db, { slug });
 
 			if (data == null) {
 				return c.notFound();

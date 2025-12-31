@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
 import { count, eq } from "@dariah-eric/dariah-knowledge-base-database-client";
-import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
+
+import type { Database } from "@/middlewares/db";
 
 interface GetPagesParams {
 	/** @default 10 */
@@ -11,7 +12,7 @@ interface GetPagesParams {
 	offset?: number;
 }
 
-export async function getPages(params: GetPagesParams) {
+export async function getPages(db: Database, params: GetPagesParams) {
 	const { limit = 10, offset = 0 } = params;
 
 	const [data, rows] = await Promise.all([
@@ -32,9 +33,6 @@ export async function getPages(params: GetPagesParams) {
 				entity: {
 					columns: {
 						slug: true,
-					},
-					orderBy: {
-						updatedAt: "desc",
 					},
 				},
 				image: {
@@ -65,7 +63,7 @@ interface GetPageByIdParams {
 	id: schema.Page["id"];
 }
 
-export async function getPageById(params: GetPageByIdParams) {
+export async function getPageById(db: Database, params: GetPageByIdParams) {
 	const { id } = params;
 
 	const data = await db.query.pages.findFirst({
@@ -109,7 +107,7 @@ interface GetPageBySlugParams {
 	slug: schema.Entity["slug"];
 }
 
-export async function getPageBySlug(params: GetPageBySlugParams) {
+export async function getPageBySlug(db: Database, params: GetPageBySlugParams) {
 	const { slug } = params;
 
 	const data = await db.query.pages.findFirst({

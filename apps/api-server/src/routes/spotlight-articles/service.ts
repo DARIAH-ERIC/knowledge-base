@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
 import { count, eq } from "@dariah-eric/dariah-knowledge-base-database-client";
-import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
+
+import type { Database } from "@/middlewares/db";
 
 interface GetSpotlightArticlesParams {
 	/** @default 10 */
@@ -11,7 +12,7 @@ interface GetSpotlightArticlesParams {
 	offset?: number;
 }
 
-export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
+export async function getSpotlightArticles(db: Database, params: GetSpotlightArticlesParams) {
 	const { limit = 10, offset = 0 } = params;
 
 	const [data, rows] = await Promise.all([
@@ -32,9 +33,6 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 				entity: {
 					columns: {
 						slug: true,
-					},
-					orderBy: {
-						updatedAt: "desc",
 					},
 				},
 				image: {
@@ -65,7 +63,7 @@ interface GetSpotlightArticleByIdParams {
 	id: schema.SpotlightArticle["id"];
 }
 
-export async function getSpotlightArticleById(params: GetSpotlightArticleByIdParams) {
+export async function getSpotlightArticleById(db: Database, params: GetSpotlightArticleByIdParams) {
 	const { id } = params;
 
 	const data = await db.query.spotlightArticles.findFirst({
@@ -109,7 +107,10 @@ interface GetSpotlightArticleBySlugParams {
 	slug: schema.Entity["slug"];
 }
 
-export async function getSpotlightArticleBySlug(params: GetSpotlightArticleBySlugParams) {
+export async function getSpotlightArticleBySlug(
+	db: Database,
+	params: GetSpotlightArticleBySlugParams,
+) {
 	const { slug } = params;
 
 	const data = await db.query.spotlightArticles.findFirst({

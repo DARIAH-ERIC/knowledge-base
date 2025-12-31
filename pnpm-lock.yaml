@@ -398,6 +398,12 @@ importers:
       '@dotenvx/dotenvx':
         specifier: 'catalog:'
         version: 1.51.2
+      '@faker-js/faker':
+        specifier: 'catalog:'
+        version: 10.1.0
+      '@sindresorhus/slugify':
+        specifier: 'catalog:'
+        version: 3.0.0
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.3
@@ -440,6 +446,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+      uuid:
+        specifier: 'catalog:'
+        version: 13.0.0
       vite-tsconfig-paths:
         specifier: 'catalog:'
         version: 6.0.3(typescript@5.9.3)(vite@7.3.0(@types/node@24.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
