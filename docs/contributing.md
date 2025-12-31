@@ -68,17 +68,21 @@ and is passed to containers via `docker compose`.
 | EMAIL_SMTP_SERVER                              |             |               |
 | MAILPIT_API_BASE_URL                           |             |               |
 | MAILPIT_API_PORT                               |             |               |
-| S3_BUCKET_NAME                                 |             |               |
 | S3_ACCESS_KEY                                  |             |               |
+| S3_BUCKET_NAME                                 |             |               |
 | S3_HOST                                        |             |               |
 | S3_PORT                                        |             |               |
 | S3_PROTOCOL                                    |             |               |
 | S3_SECRET_KEY                                  |             |               |
 | MINIO_WEB_UI_PORT                              |             |               |
-| IMGPROXY_BASE_UR                               |             |               |
-| IMGPROXY_KE                                    |             |               |
-| IMGPROXY_POR                                   |             |               |
-| IMGPROXY_SAL                                   |             |               |
+| IMGPROXY_BASE_URL                              |             |               |
+| IMGPROXY_KEY                                   |             |               |
+| IMGPROXY_PORT                                  |             |               |
+| IMGPROXY_SALT                                  |             |               |
+| API_ALLOWED_ORIGINS                            |             |               |
+| API_BASE_URL                                   |             |               |
+| API_LOG_LEVEL                                  |             |               |
+| API_PORT                                       |             |               |
 
 ### setup and seed
 
