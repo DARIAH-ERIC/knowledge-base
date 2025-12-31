@@ -23,15 +23,13 @@ function createItems(count: number) {
 				documentId,
 			};
 
-			const event = {
+			const newsItem = {
 				id,
 				title,
 				summary: f.lorem.paragraph(),
-				location: f.location.city(),
-				startDate: f.date.past({ years: 5 }),
 			};
 
-			return { entity, event };
+			return { entity, newsItem };
 		},
 		{ count },
 	);
@@ -41,7 +39,7 @@ function createItems(count: number) {
 async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	const [status, type, asset] = await Promise.all([
 		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
-		db.query.entityTypes.findFirst({ columns: { id: true }, where: { type: "events" } }),
+		db.query.entityTypes.findFirst({ columns: { id: true }, where: { type: "news" } }),
 		db.query.assets.findFirst({ columns: { id: true } }),
 	]);
 
@@ -55,16 +53,16 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 		}),
 	);
 
-	await db.insert(schema.events).values(
+	await db.insert(schema.news).values(
 		items.map((item) => {
-			return { ...item.event, imageId: asset.id };
+			return { ...item.newsItem, imageId: asset.id };
 		}),
 	);
 }
 
-describe("events", () => {
-	describe("GET /api/events", () => {
-		it("should return paginated list of events", async () => {
+describe("news", () => {
+	describe("GET /api/news", () => {
+		it("should return paginated list of news items", async () => {
 			await withTransaction(async (db) => {
 				const limit = 10;
 				const offset = 0;
@@ -75,9 +73,9 @@ describe("events", () => {
 				await seed(db, items);
 
 				const item = items.at(1)!;
-				const title = item.event.title;
+				const title = item.newsItem.title;
 
-				const response = await client.events.$get({
+				const response = await client.news.$get({
 					query: {
 						limit: String(limit),
 						offset: String(offset),
@@ -96,8 +94,8 @@ describe("events", () => {
 		});
 	});
 
-	describe("GET /api/events/:id", () => {
-		it("should return single event", async () => {
+	describe("GET /api/news/:id", () => {
+		it("should return single news item", async () => {
 			await withTransaction(async (db) => {
 				const client = createTestClient(db);
 
@@ -106,9 +104,9 @@ describe("events", () => {
 
 				const item = items.at(1)!;
 				const id = item.entity.id;
-				const title = item.event.title;
+				const title = item.newsItem.title;
 
-				const response = await client.events[":id"].$get({
+				const response = await client.news[":id"].$get({
 					param: {
 						id,
 					},
@@ -121,10 +119,48 @@ describe("events", () => {
 				expect(data).toMatchObject({ title });
 			});
 		});
+
+		it("should return 400 for invalid id", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const items = createItems(3);
+				await seed(db, items);
+
+				const id = "no-uuid";
+
+				const response = await client.news[":id"].$get({
+					param: {
+						id,
+					},
+				});
+
+				expect(response.status).toBe(400);
+			});
+		});
+
+		it("should return 404 for non-existing id", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const items = createItems(3);
+				await seed(db, items);
+
+				const id = "019b75fd-6d6a-757c-acc2-c3c6266a0f31";
+
+				const response = await client.news[":id"].$get({
+					param: {
+						id,
+					},
+				});
+
+				expect(response.status).toBe(404);
+			});
+		});
 	});
 
-	describe("GET /api/events/slugs/:slug", () => {
-		it("should return single event", async () => {
+	describe("GET /api/news/slugs/:slug", () => {
+		it("should return single news item", async () => {
 			await withTransaction(async (db) => {
 				const client = createTestClient(db);
 
@@ -133,9 +169,9 @@ describe("events", () => {
 
 				const item = items.at(1)!;
 				const slug = item.entity.slug;
-				const title = item.event.title;
+				const title = item.newsItem.title;
 
-				const response = await client.events.slugs[":slug"].$get({
+				const response = await client.news.slugs[":slug"].$get({
 					param: {
 						slug,
 					},
@@ -146,6 +182,25 @@ describe("events", () => {
 				const data = await response.json();
 
 				expect(data).toMatchObject({ title });
+			});
+		});
+
+		it("should return 404 for non-existing slug", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const items = createItems(3);
+				await seed(db, items);
+
+				const slug = "non-existing-slug";
+
+				const response = await client.news.slugs[":slug"].$get({
+					param: {
+						slug,
+					},
+				});
+
+				expect(response.status).toBe(404);
 			});
 		});
 	});
