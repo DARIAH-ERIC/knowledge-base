@@ -3,6 +3,7 @@
 /* eslint-disable @eslint-react/prefer-read-only-props */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/strict-boolean-expressions */
+/* eslint-disable better-tailwindcss/no-unknown-classes */
 /* eslint-disable react/jsx-no-literals */
 
 "use client";
@@ -235,7 +236,7 @@ function NavbarItem({ className, isCurrent, ...props }: NavbarItemProps) {
 					"href" in props ? "cursor-pointer" : "cursor-default",
 					"group/sidebar-item pressed:bg-secondary pressed:text-secondary-fg hover:bg-secondary hover:text-secondary-fg",
 					"aria-[current=page]:text-fg aria-[current=page]*:data-[slot=icon]:text-fg",
-					"col-span-full grid grid-cols-[auto_1fr_1.5rem_0.5rem_auto] supports-[grid-template-columns:subgrid]:grid-cols-subgrid md:supports-[grid-template-columns:subgrid]:grid-cols-none",
+					"col-span-full grid grid-cols-[auto_1fr_1.5rem_0.5rem_auto] md:supports-[grid-template-columns:subgrid]:grid-cols-none supports-[grid-template-columns:subgrid]:grid-cols-subgrid",
 					"relative min-w-0 items-center gap-x-3 rounded-lg p-2 text-left font-medium text-base/6 md:gap-x-(--navbar-gutter) md:px-(--navbar-gutter) md:py-[calc(var(--navbar-gutter)---spacing(0.5))] md:text-sm/5",
 					"*:data-[slot=icon]:size-5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:text-muted-fg md:*:data-[slot=icon]:size-4",
 					"*:data-[slot=loader]:size-5 *:data-[slot=loader]:shrink-0 md:*:data-[slot=loader]:size-4",
