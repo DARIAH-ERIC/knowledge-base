@@ -33,6 +33,7 @@ export async function getImpactCaseStudies(db: Database, params: GetImpactCaseSt
 				entity: {
 					columns: {
 						slug: true,
+						updatedAt: true,
 					},
 				},
 				image: {
@@ -40,6 +41,9 @@ export async function getImpactCaseStudies(db: Database, params: GetImpactCaseSt
 						key: true,
 					},
 				},
+			},
+			orderBy(t, { desc, sql }) {
+				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,

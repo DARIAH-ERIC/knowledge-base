@@ -38,6 +38,7 @@ export async function getEvents(db: Database, params: GetEventsParams) {
 				entity: {
 					columns: {
 						slug: true,
+						updatedAt: true,
 					},
 				},
 				image: {
@@ -45,6 +46,9 @@ export async function getEvents(db: Database, params: GetEventsParams) {
 						key: true,
 					},
 				},
+			},
+			orderBy(t, { desc, sql }) {
+				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,

@@ -33,6 +33,7 @@ export async function getPages(db: Database, params: GetPagesParams) {
 				entity: {
 					columns: {
 						slug: true,
+						updatedAt: true,
 					},
 				},
 				image: {
@@ -40,6 +41,9 @@ export async function getPages(db: Database, params: GetPagesParams) {
 						key: true,
 					},
 				},
+			},
+			orderBy(t, { desc, sql }) {
+				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
