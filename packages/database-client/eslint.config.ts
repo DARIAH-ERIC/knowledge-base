@@ -18,7 +18,7 @@ export default defineConfig(
 			"no-restricted-syntax": [
 				"error",
 				{
-					message: "Please use `@/config/env.config` instead.",
+					message: "Please use `./config/env.config` instead.",
 					selector: 'MemberExpression[computed!=true][object.name="process"][property.name="env"]',
 				},
 			],
@@ -55,6 +55,7 @@ export default defineConfig(
 			"unicorn/no-useless-undefined": "off",
 			"unicorn/prefer-global-this": "off",
 			"unicorn/prefer-single-call": "off",
+			"unicorn/prefer-ternary": "off",
 			"unicorn/prefer-top-level-await": "off",
 			"unicorn/require-module-specifiers": "off",
 			"unicorn/switch-case-braces": "error",

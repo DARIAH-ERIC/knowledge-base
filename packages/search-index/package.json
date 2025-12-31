@@ -19,13 +19,13 @@
 			"types": "./dist/src/client.d.ts",
 			"default": "./src/client.ts"
 		},
+		"./lib": {
+			"types": "./dist/src/lib/index.d.ts",
+			"default": "./src/lib/index.ts"
+		},
 		"./schema": {
 			"types": "./dist/src/schema.d.ts",
 			"default": "./src/schema.ts"
-		},
-		"./seed": {
-			"types": "./dist/src/seed.d.ts",
-			"default": "./src/seed.ts"
 		}
 	},
 	"sideEffects": false,

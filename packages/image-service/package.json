@@ -19,9 +19,9 @@
 			"types": "./dist/src/client.d.ts",
 			"default": "./src/client.ts"
 		},
-		"./seed": {
-			"types": "./dist/src/seed.d.ts",
-			"default": "./src/seed.ts"
+		"./lib": {
+			"types": "./dist/src/lib/index.d.ts",
+			"default": "./src/lib/index.ts"
 		}
 	},
 	"sideEffects": false,
@@ -50,6 +50,7 @@
 		"@acdh-oeaw/eslint-config-node": "catalog:",
 		"@acdh-oeaw/prettier-config": "catalog:",
 		"@acdh-oeaw/tsconfig": "catalog:",
+		"@faker-js/faker": "catalog:",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
 		"eslint-config-flat-gitignore": "catalog:",

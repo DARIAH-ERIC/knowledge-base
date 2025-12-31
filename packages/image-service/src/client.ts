@@ -4,16 +4,15 @@ import { assert } from "@acdh-oeaw/lib";
 import type { BucketItem, ItemBucketMetadata } from "minio";
 
 import { env } from "../config/env.config";
-import { createMinioClient } from "./create-minio-client";
 import { generateObjectName } from "./generate-object-name";
 import { generateSignedImageUrl, type ImageUrlOptions } from "./generate-signed-image-url";
+import { client as minio } from "./minio-client";
 
-const bucketName = env.S3_BUCKET;
+const bucketName = env.S3_BUCKET_NAME;
 
-interface Client {
+export interface Client {
 	bucket: {
-		create: () => Promise<void>;
-		exists: () => Promise<boolean>;
+		name: string;
 	};
 	images: {
 		get: () => Promise<{ images: Array<{ objectName: string }> }>;
@@ -31,20 +30,9 @@ interface Client {
 }
 
 export function createClient(): Client {
-	const client = createMinioClient();
-
-	const bucket = {
-		async create() {
-			return client.makeBucket(bucketName);
-		},
-		async exists() {
-			return client.bucketExists(bucketName);
-		},
-	};
-
 	const images = {
 		async get() {
-			const stream = client.listObjectsV2(bucketName);
+			const stream = minio.listObjectsV2(bucketName);
 
 			const images: Array<{ objectName: string }> = [];
 
@@ -58,7 +46,7 @@ export function createClient(): Client {
 			return { images };
 		},
 		async remove(objectName: string) {
-			await client.removeObject(bucketName, objectName);
+			await minio.removeObject(bucketName, objectName);
 		},
 		async upload(
 			fileName: string,
@@ -68,7 +56,7 @@ export function createClient(): Client {
 		) {
 			const objectName = generateObjectName(fileName);
 
-			await client.putObject(bucketName, objectName, fileStream, fileSize, metadata);
+			await minio.putObject(bucketName, objectName, fileStream, fileSize, metadata);
 
 			return { objectName };
 		},
@@ -83,7 +71,9 @@ export function createClient(): Client {
 	};
 
 	return {
-		bucket,
+		bucket: {
+			name: bucketName,
+		},
 		images,
 		urls,
 	};

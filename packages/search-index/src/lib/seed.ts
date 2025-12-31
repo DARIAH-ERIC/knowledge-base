@@ -1,48 +1,25 @@
-import { assert } from "@acdh-oeaw/lib";
 import { faker as f } from "@faker-js/faker";
-import { Client } from "typesense";
 
-import { env } from "../config/env.config";
 import {
 	type ResourceCollectionDocument,
 	resources,
 	resourceTypes,
 	toolOrServiceKinds,
-} from "./schema";
+} from "../schema";
+import type { Client } from "./admin-client";
 
-function createClient() {
-	const apiKey = env.TYPESENSE_ADMIN_API_KEY;
-	assert(apiKey, "Missing `TYPESENSE_ADMIN_API_KEY` environment variable.");
-
-	const client = new Client({
-		apiKey,
-		connectionTimeoutSeconds: 3,
-		nodes: [
-			{
-				host: env.NEXT_PUBLIC_TYPESENSE_HOST,
-				port: env.NEXT_PUBLIC_TYPESENSE_PORT,
-				protocol: env.NEXT_PUBLIC_TYPESENSE_PROTOCOL,
-			},
-		],
-	});
-
-	return client;
-}
-
-interface SeedConfig {
+export interface SeedConfig {
 	/** @default "2025-01-01" */
 	defaultRefDate?: Date;
 	/** default 42 */
 	seed?: number;
 }
 
-export async function seed(config: SeedConfig = {}): Promise<void> {
+export async function seed(client: Client, config: SeedConfig = {}): Promise<void> {
 	const { defaultRefDate = new Date(Date.UTC(2025, 0, 1)), seed = 42 } = config;
 
 	f.seed(seed);
 	f.setDefaultRefDate(defaultRefDate);
-
-	const client = createClient();
 
 	const types = resourceTypes;
 
@@ -143,8 +120,6 @@ export async function seed(config: SeedConfig = {}): Promise<void> {
 		},
 		{ count: 100 },
 	);
-
-	await client.collections(resources.name).documents().delete({ truncate: true });
 
 	await client.collections(resources.name).documents().import(documents);
 }

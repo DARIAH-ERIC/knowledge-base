@@ -9,7 +9,7 @@
 			"onFail": "download"
 		}
 	},
-	"packageManager": "pnpm@10.25.0",
+	"packageManager": "pnpm@10.26.2",
 	"scripts": {
 		"build": "pnpm run --recursive build",
 		"db:migrations:apply": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter \"dariah-knowledge-base-database-client\" run db:migrations:apply",
@@ -21,11 +21,13 @@
 		"db:studio": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter \"dariah-knowledge-base-database-client\" run db:studio",
 		"dev": "pnpm run --aggregate-output --parallel --recursive dev",
 		"dev:services:down": "sh ./scripts/services.sh stop",
+		"dev:services:seed": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter \"dariah-knowledge-base-scripts\" run seed",
+		"dev:services:setup": "sh ./scripts/setup.sh",
 		"dev:services:up": "sh ./scripts/services.sh start",
 		"format:check": "prettier . --cache --cache-location ./.prettiercache --check",
 		"format:fix": "prettier . --cache --cache-location ./.prettiercache --check --write",
-		"image-service:buckets:create": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter \"dariah-knowledge-base-search-index\" run image-service:buckets:create",
-		"image-service:buckets:seed": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter \"dariah-knowledge-base-search-index\" run image-service:buckets:seed",
+		"image-service:buckets:create": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter \"dariah-knowledge-base-image-service\" run image-service:buckets:create",
+		"image-service:buckets:seed": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter \"dariah-knowledge-base-image-service\" run image-service:buckets:seed",
 		"lint:check": "pnpm run --recursive lint:check",
 		"lint:fix": "pnpm run --recursive lint:fix",
 		"prepare": "run-s setup",

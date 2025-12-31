@@ -1,9 +1,10 @@
 import { log } from "@acdh-oeaw/lib";
 
-import { seed } from "../src/seed";
+import { client } from "../src/lib/admin-client";
+import { seed } from "../src/lib/seed";
 
 async function main() {
-	await seed();
+	await seed(client);
 
 	log.success("Successfully seeded documents into typesense search index.");
 }

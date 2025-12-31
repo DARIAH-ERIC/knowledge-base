@@ -10,3 +10,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     ports:
       - "${PGADMIN_PORT:-5555}:80"
+
+networks:
+  default:
+    name: dariah-knowledge-base

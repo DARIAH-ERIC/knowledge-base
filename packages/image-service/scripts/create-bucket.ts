@@ -1,18 +1,18 @@
 import { log } from "@acdh-oeaw/lib";
 
-import { env } from "../config/env.config";
-import { createMinioClient } from "../src/create-minio-client";
+import { client } from "../src/lib/admin-client";
+import { createBucket } from "../src/lib/create-bucket";
 
-const bucketName = env.S3_BUCKET;
+const bucketName = client.bucket.name;
 
 async function main() {
-	const client = createMinioClient();
+	const isCreated = await createBucket(client);
 
-	if (!(await client.bucketExists(bucketName))) {
-		await client.makeBucket(bucketName);
+	if (isCreated) {
+		log.success(`Successfully created "${bucketName}" bucket in object store.`);
+	} else {
+		log.success(`Bucket "${bucketName}" already exists in object store.`);
 	}
-
-	log.success(`Successfully created "${bucketName}" bucket in object store.`);
 }
 
 main().catch((error: unknown) => {

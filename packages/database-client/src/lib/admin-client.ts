@@ -1,13 +1,8 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 
-import { env } from "../config/env.config";
-import { relations } from "./relations";
+import { env } from "../../config/env.config";
 
-type Client = Awaited<ReturnType<typeof createClient>>;
-
-declare global {
-	var __db: Client | undefined;
-}
+export type Client = Awaited<ReturnType<typeof createClient>>;
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createClient() {
@@ -21,16 +16,10 @@ export function createClient() {
 			ssl: env.DATABASE_SSL_CONNECTION === "enabled",
 			user: env.DATABASE_USER,
 		},
-		logger: env.NODE_ENV === "development",
-		relations,
+		logger: true,
 	});
 
 	return db;
 }
 
-export const db = globalThis.__db ?? createClient();
-
-/** Avoid re-creating database client on hot-module-reload. */
-if (env.NODE_ENV !== "production") {
-	globalThis.__db = db;
-}
+export const db = createClient();
