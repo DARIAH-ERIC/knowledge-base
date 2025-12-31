@@ -16,15 +16,15 @@
 	"packageManager": "pnpm@10.27.0",
 	"scripts": {
 		"build": "tsdown ./src/index.ts",
-		"dev": "dotenvx run --env-file ./.env.local --ignore=MISSING_ENV_FILE -- tsx watch ./src/index.ts | pino-pretty",
+		"dev": "dotenvx run -f ./.env.local --ignore MISSING_ENV_FILE -- tsx watch ./src/index.ts | pino-pretty",
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
 		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
-		"start": "dotenvx run --env-file ./.env.local --ignore=MISSING_ENV_FILE -- node ./dist/index.mjs",
-		"test": "dotenvx run --env-file ./.env.local --ignore=MISSING_ENV_FILE -- vitest run",
-		"test:coverage": "dotenvx run --env-file ./.env.local --ignore=MISSING_ENV_FILE -- vitest run --coverage",
-		"test:watch": "dotenvx run --env-file ./.env.local --ignore=MISSING_ENV_FILE -- vitest watch",
+		"start": "dotenvx run -f ./.env.local --ignore MISSING_ENV_FILE -- node ./dist/index.mjs",
+		"test": "dotenvx run -f ./.env.local --ignore MISSING_ENV_FILE -- vitest run",
+		"test:coverage": "dotenvx run -f ./.env.local --ignore MISSING_ENV_FILE -- vitest run --coverage",
+		"test:watch": "dotenvx run -f ./.env.local --ignore MISSING_ENV_FILE -- vitest watch",
 		"types:check": "tsc --noEmit"
 	},
 	"dependencies": {
