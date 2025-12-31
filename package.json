@@ -9,7 +9,7 @@
 			"onFail": "download"
 		}
 	},
-	"packageManager": "pnpm@10.26.2",
+	"packageManager": "pnpm@10.27.0",
 	"scripts": {
 		"build": "pnpm run --recursive build",
 		"db:migrations:apply": "dotenvx run --env-file ./.devcontainer/.env --ignore=MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-database-client\" run db:migrations:apply",

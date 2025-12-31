@@ -13,7 +13,7 @@
 			"onFail": "download"
 		}
 	},
-	"packageManager": "pnpm@10.25.0",
+	"packageManager": "pnpm@10.27.0",
 	"scripts": {
 		"build": "tsdown ./src/index.ts",
 		"dev": "dotenvx run --env-file ./.env.local -- tsx watch ./src/index.ts | pino-pretty",
