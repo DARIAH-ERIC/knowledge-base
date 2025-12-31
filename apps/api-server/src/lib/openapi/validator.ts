@@ -1,0 +1,31 @@
+import { STATUS_CODES } from "node:http";
+
+import type { ValidationTargets } from "hono";
+import { HTTPException } from "hono/http-exception";
+import { validator as openApiValidator } from "hono-openapi";
+import * as v from "valibot";
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function validator<
+	TValidationTargets extends keyof ValidationTargets,
+	TSchema extends v.GenericSchema | v.GenericSchemaAsync,
+>(target: TValidationTargets, schema: TSchema) {
+	return openApiValidator(target, schema, (result) => {
+		if (!result.success) {
+			const status = 400;
+			throw new HTTPException(status, { cause: result.error, message: STATUS_CODES[status] });
+		}
+	});
+}
+
+export async function validate<TValidationSchema extends v.GenericSchema | v.GenericSchemaAsync>(
+	schema: TValidationSchema,
+	value: unknown,
+): Promise<v.InferOutput<TValidationSchema>> {
+	try {
+		return await v.parseAsync(schema, value);
+	} catch (error) {
+		const status = 400;
+		throw new HTTPException(status, { cause: error, message: STATUS_CODES[status] });
+	}
+}

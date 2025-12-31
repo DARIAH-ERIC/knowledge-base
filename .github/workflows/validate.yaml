@@ -26,6 +26,10 @@ jobs:
         os: [ubuntu-24.04]
 
     env:
+      # API_ALLOWED_ORIGINS:
+      API_BASE_URL: "http://localhost:3003"
+      API_LOG_LEVEL: "info"
+      API_PORT: "3003"
       DATABASE_HOST: "localhost"
       DATABASE_NAME: "dariah-knowledge-base"
       DATABASE_PASSWORD: "dariah-knowledge-base"
@@ -90,6 +94,15 @@ jobs:
       - name: Typecheck
         run: pnpm run types:check
 
+      - name: Start services
+        run: pnpm run dev:services:up postgres
+
+      - name: Push database schema
+        run: pnpm run db:push
+
+      - name: Seed database
+        run: pnpm run db:seed
+
       - name: Test
         run: pnpm run test
 
@@ -115,18 +128,21 @@ jobs:
         run: pnpm exec playwright install-deps
 
       # https://nextjs.org/docs/pages/building-your-application/deploying/ci-build-caching#github-actions
-      - name: Cache Next.js build output
-        uses: actions/cache@v4
-        with:
-          path: "${{ github.workspace }}/.next/cache"
-          key:
-            "${{ matrix.os }}-${{ matrix.node-version }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}"
+      # - name: Cache Next.js build output
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: "${{ github.workspace }}/.next/cache"
+      #     key:
+      #       "${{ matrix.os }}-${{ matrix.node-version }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}"
 
       - name: Build app
         run: pnpm run build
 
       - name: Run e2e tests
         run: pnpm run test:e2e
+
+      - name: Stop services
+        run: pnpm run dev:services:down postgres
 
       - uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}

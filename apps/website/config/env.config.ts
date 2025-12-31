@@ -26,28 +26,16 @@ const result = createEnv({
 		private(environment) {
 			const schema = v.object({
 				BUILD_MODE: v.optional(v.picklist(["export", "standalone"])),
-				CI: v.optional(v.pipe(v.unknown(), v.transform(Boolean), v.boolean())),
+				CI: v.optional(v.pipe(v.unknown(), v.toBoolean())),
 				DATABASE_HOST: v.pipe(v.string(), v.nonEmpty()),
 				DATABASE_NAME: v.pipe(v.string(), v.nonEmpty()),
 				DATABASE_PASSWORD: v.pipe(v.string(), v.minLength(8)),
-				DATABASE_PORT: v.pipe(
-					v.string(),
-					v.transform(Number),
-					v.number(),
-					v.integer(),
-					v.minValue(1),
-				),
+				DATABASE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 				DATABASE_SSL_CONNECTION: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 				DATABASE_USER: v.pipe(v.string(), v.nonEmpty()),
 				EMAIL_ADDRESS: v.pipe(v.string(), v.email()),
 				EMAIL_SMTP_PASSWORD: v.optional(v.pipe(v.string(), v.nonEmpty())),
-				EMAIL_SMTP_PORT: v.pipe(
-					v.string(),
-					v.transform(Number),
-					v.number(),
-					v.integer(),
-					v.minValue(1),
-				),
+				EMAIL_SMTP_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 				EMAIL_SMTP_SERVER: v.pipe(v.string(), v.nonEmpty()),
 				EMAIL_SMTP_USERNAME: v.optional(v.pipe(v.string(), v.nonEmpty())),
 				IMGPROXY_BASE_URL: v.pipe(v.string(), v.url()),
@@ -58,7 +46,7 @@ const result = createEnv({
 				S3_ACCESS_KEY: v.pipe(v.string(), v.nonEmpty()),
 				S3_BUCKET_NAME: v.pipe(v.string(), v.nonEmpty()),
 				S3_HOST: v.pipe(v.string(), v.nonEmpty()),
-				S3_PORT: v.pipe(v.string(), v.transform(Number), v.number(), v.integer(), v.minValue(1)),
+				S3_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 				S3_PROTOCOL: v.optional(v.picklist(["http", "https"]), "https"),
 				S3_SECRET_KEY: v.pipe(v.string(), v.nonEmpty()),
 				TYPESENSE_ADMIN_API_KEY: v.pipe(v.string(), v.nonEmpty()),
@@ -81,13 +69,7 @@ const result = createEnv({
 			const schema = v.object({
 				NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME: v.pipe(v.string(), v.nonEmpty()),
 				NEXT_PUBLIC_TYPESENSE_HOST: v.pipe(v.string(), v.nonEmpty()),
-				NEXT_PUBLIC_TYPESENSE_PORT: v.pipe(
-					v.string(),
-					v.transform(Number),
-					v.number(),
-					v.integer(),
-					v.minValue(1),
-				),
+				NEXT_PUBLIC_TYPESENSE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 				NEXT_PUBLIC_TYPESENSE_PROTOCOL: v.optional(v.picklist(["http", "https"]), "https"),
 				/**
 				 * Optional, because we need to be able to create a collection, before we create
@@ -100,7 +82,7 @@ const result = createEnv({
 				NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL: v.pipe(v.string(), v.url()),
 				NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL: v.optional(v.pipe(v.string(), v.url())),
 				NEXT_PUBLIC_WEBSITE_MATOMO_ID: v.optional(
-					v.pipe(v.string(), v.transform(Number), v.number(), v.integer(), v.minValue(1)),
+					v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 				),
 				NEXT_PUBLIC_WEBSITE_SENTRY_DSN: v.optional(v.pipe(v.string(), v.nonEmpty())),
 				NEXT_PUBLIC_WEBSITE_SENTRY_ORG: v.optional(v.pipe(v.string(), v.nonEmpty())),
@@ -108,8 +90,7 @@ const result = createEnv({
 				NEXT_PUBLIC_WEBSITE_SENTRY_PROJECT: v.optional(v.pipe(v.string(), v.nonEmpty())),
 				NEXT_PUBLIC_WEBSITE_SERVICE_ID: v.pipe(
 					v.string(),
-					v.transform(Number),
-					v.number(),
+					v.toNumber(),
 					v.integer(),
 					v.minValue(1),
 				),
