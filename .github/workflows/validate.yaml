@@ -26,6 +26,10 @@ jobs:
         os: [ubuntu-24.04]
 
     env:
+      # API_ALLOWED_ORIGINS:
+      API_BASE_URL: "http://localhost:3003"
+      API_LOG_LEVEL: "info"
+      API_PORT: "3003"
       DATABASE_HOST: "localhost"
       DATABASE_NAME: "dariah-knowledge-base"
       DATABASE_PASSWORD: "dariah-knowledge-base"

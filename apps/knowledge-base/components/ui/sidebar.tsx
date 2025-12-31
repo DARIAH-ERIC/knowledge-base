@@ -439,19 +439,19 @@ function SidebarItem({
 						"href" in props ? "cursor-pointer" : "cursor-default",
 						"w-full min-w-0 items-center rounded-lg text-left font-medium text-base/6 text-sidebar-fg",
 						"group/sidebar-item relative col-span-full overflow-hidden focus-visible:outline-hidden",
-						"**:data-[slot=icon]:shrink-0 [&_[data-slot='icon']:not([class*='size-'])]:size-5 [&_[data-slot='icon']:not([class*='text-'])]:text-muted-fg sm:[&_[data-slot='icon']:not([class*='size-'])]:size-4",
+						"**:data-[slot=icon]:shrink-0 [&_[data-slot=icon]:not([class*='size-'])]:size-5 [&_[data-slot=icon]:not([class*='text-'])]:text-muted-fg sm:[&_[data-slot=icon]:not([class*='size-'])]:size-4",
 						"**:last:data-[slot=icon]:size-5 sm:**:last:data-[slot=icon]:size-4",
-						"[&_[data-slot='icon']:not([class*='size-'])]:size-4 [&_[data-slot='icon']:not([class*='size-'])]:*:size-5",
+						"[&_[data-slot=icon]:not([class*='size-'])]:size-4 [&_[data-slot=icon]:not([class*='size-'])]:*:size-5",
 						"*:data-[slot=avatar]:size-5 *:data-[slot=avatar]:*:size-5",
 						"has-data-[slot=avatar]:has-data-[slot=sidebar-label]:gap-x-2 has-data-[slot=icon]:has-data-[slot=sidebar-label]:gap-x-2",
 						"grid grid-cols-[auto_1fr_1.5rem_0.5rem_auto] sm:text-sm/5 **:last:data-[slot=icon]:ml-auto supports-[grid-template-columns:subgrid]:grid-cols-subgrid",
 						"p-2 has-[a]:p-0",
 						"[--sidebar-current-bg:var(--color-sidebar-primary)] [--sidebar-current-fg:var(--color-sidebar-primary-fg)]",
 						isCurrent &&
-							"font-medium text-(--sidebar-current-fg) hover:bg-(--sidebar-current-bg) hover:text-(--sidebar-current-fg) hover:[&_[data-slot='icon']:not([class*='text-'])]:text-(--sidebar-current-fg) [&_.text-muted-fg]:text-fg/80 [&_[data-slot='icon']:not([class*='text-'])]:text-(--sidebar-current-fg)",
+							"font-medium text-(--sidebar-current-fg) hover:bg-(--sidebar-current-bg) hover:text-(--sidebar-current-fg) hover:[&_[data-slot=icon]:not([class*='text-'])]:text-(--sidebar-current-fg) [&_.text-muted-fg]:text-fg/80 [&_[data-slot=icon]:not([class*='text-'])]:text-(--sidebar-current-fg)",
 						isFocusVisible && "inset-ring inset-ring-sidebar-ring outline-hidden",
 						(isPressed || isHovered) &&
-							"bg-sidebar-accent text-sidebar-accent-fg [&_[data-slot='icon']:not([class*='text-'])]:text-sidebar-accent-fg",
+							"bg-sidebar-accent text-sidebar-accent-fg [&_[data-slot=icon]:not([class*='text-'])]:text-sidebar-accent-fg",
 						isDisabled && "opacity-50",
 						className,
 					]);
@@ -782,7 +782,7 @@ function SidebarMenuTrigger({
 				!alwaysVisible &&
 					"opacity-0 pressed:opacity-100 group-hover/sidebar-item:opacity-100 group-focus-visible/sidebar-item:opacity-100 group/sidebar-item:pressed:opacity-100",
 				"absolute right-0 flex h-full w-[calc(var(--sidebar-width)-90%)] items-center justify-end pr-2.5 outline-hidden",
-				"**:data-[slot=icon]:shrink-0 [&_[data-slot='icon']:not([class*='size-'])]:size-5 sm:[&_[data-slot='icon']:not([class*='size-'])]:size-4",
+				"**:data-[slot=icon]:shrink-0 [&_[data-slot=icon]:not([class*='size-'])]:size-5 sm:[&_[data-slot=icon]:not([class*='size-'])]:size-4",
 				"text-muted-fg pressed:text-fg hover:text-fg",
 				className,
 			)}

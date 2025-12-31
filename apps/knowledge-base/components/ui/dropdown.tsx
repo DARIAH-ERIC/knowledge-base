@@ -65,14 +65,14 @@ const dropdownItemStyles = tv({
 	variants: {
 		intent: {
 			danger: [
-				"text-danger-subtle-fg focus:text-danger-subtle-fg [&_[data-slot='icon']:not([class*='text-'])]:text-danger-subtle-fg/70",
+				"text-danger-subtle-fg focus:text-danger-subtle-fg [&_[data-slot=icon]:not([class*='text-'])]:text-danger-subtle-fg/70",
 				"*:[[slot=description]]:text-danger-subtle-fg/80 focus:*:[[slot=description]]:text-danger-subtle-fg focus:*:[[slot=label]]:text-danger-subtle-fg",
-				"focus:bg-danger-subtle focus:text-danger-subtle-fg focus:[&_[data-slot='icon']:not([class*='text-'])]:text-danger-subtle-fg forced-colors:focus:text-[Mark]",
+				"focus:bg-danger-subtle focus:text-danger-subtle-fg focus:[&_[data-slot=icon]:not([class*='text-'])]:text-danger-subtle-fg forced-colors:focus:text-[Mark]",
 			],
 			warning: [
-				"text-warning-subtle-fg focus:text-warning-subtle-fg [&_[data-slot='icon']:not([class*='text-'])]:text-warning-subtle-fg/70",
+				"text-warning-subtle-fg focus:text-warning-subtle-fg [&_[data-slot=icon]:not([class*='text-'])]:text-warning-subtle-fg/70",
 				"*:[[slot=description]]:text-warning-subtle-fg/80 focus:*:[[slot=description]]:text-warning-subtle-fg focus:*:[[slot=label]]:text-warning-subtle-fg",
-				"focus:bg-warning-subtle focus:text-warning-subtle-fg focus:[&_[data-slot='icon']:not([class*='text-'])]:text-warning-subtle-fg",
+				"focus:bg-warning-subtle focus:text-warning-subtle-fg focus:[&_[data-slot=icon]:not([class*='text-'])]:text-warning-subtle-fg",
 			],
 		},
 		isDisabled: {

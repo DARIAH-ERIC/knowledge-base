@@ -8,7 +8,7 @@ import * as v from "valibot";
 const result = createEnv({
 	schema(environment) {
 		const schema = v.object({
-			ALLOWED_ORIGINS: v.optional(
+			API_ALLOWED_ORIGINS: v.optional(
 				v.pipe(
 					v.string(),
 					v.nonEmpty(),
@@ -18,7 +18,12 @@ const result = createEnv({
 					v.array(v.pipe(v.string(), v.trim(), v.url())),
 				),
 			),
-			APP_BASE_URL: v.pipe(v.string(), v.url()),
+			API_BASE_URL: v.pipe(v.string(), v.url()),
+			API_LOG_LEVEL: v.optional(
+				v.picklist(["silent", "fatal", "error", "warn", "info", "debug", "trace"]),
+				"info",
+			),
+			API_PORT: v.optional(v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1))),
 			CI: v.optional(v.pipe(v.unknown(), v.toBoolean())),
 			DATABASE_HOST: v.pipe(v.string(), v.nonEmpty()),
 			DATABASE_NAME: v.pipe(v.string(), v.nonEmpty()),
@@ -26,12 +31,7 @@ const result = createEnv({
 			DATABASE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 			DATABASE_SSL_CONNECTION: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 			DATABASE_USER: v.pipe(v.string(), v.nonEmpty()),
-			LOG_LEVEL: v.optional(
-				v.picklist(["silent", "fatal", "error", "warn", "info", "debug", "trace"]),
-				"info",
-			),
 			NODE_ENV: v.optional(v.picklist(["development", "production", "test"]), "production"),
-			PORT: v.optional(v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1))),
 		});
 
 		const result = v.safeParse(schema, environment);
@@ -47,8 +47,10 @@ const result = createEnv({
 		return ok(result.output);
 	},
 	environment: {
-		ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
-		APP_BASE_URL: process.env.APP_BASE_URL,
+		API_ALLOWED_ORIGINS: process.env.API_ALLOWED_ORIGINS,
+		API_BASE_URL: process.env.API_BASE_URL,
+		API_LOG_LEVEL: process.env.API_LOG_LEVEL,
+		API_PORT: process.env.API_PORT,
 		CI: process.env.CI,
 		DATABASE_HOST: process.env.DATABASE_HOST,
 		DATABASE_NAME: process.env.DATABASE_NAME,
@@ -56,9 +58,7 @@ const result = createEnv({
 		DATABASE_PORT: process.env.DATABASE_PORT,
 		DATABASE_SSL_CONNECTION: process.env.DATABASE_SSL_CONNECTION,
 		DATABASE_USER: process.env.DATABASE_USER,
-		LOG_LEVEL: process.env.LOG_LEVEL,
 		NODE_ENV: process.env.NODE_ENV,
-		PORT: process.env.PORT,
 	},
 	validation: v.parse(
 		v.optional(v.picklist(["disabled", "enabled"]), "enabled"),

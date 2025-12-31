@@ -13,7 +13,7 @@ export function createOpenApi(app: ReturnType<typeof createApp>) {
 			openAPIRouteHandler(app, {
 				documentation: {
 					info: config,
-					servers: [{ url: env.APP_BASE_URL, description: config.description }],
+					servers: [{ url: env.API_BASE_URL, description: config.description }],
 				},
 			}),
 		)

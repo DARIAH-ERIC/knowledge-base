@@ -7,5 +7,7 @@ type CORSOptions = Parameters<typeof cors>[0];
 export const config: CORSOptions = {
 	allowMethods: ["GET", "HEAD"],
 	origin:
-		env.ALLOWED_ORIGINS != null ? [env.APP_BASE_URL, ...env.ALLOWED_ORIGINS] : env.APP_BASE_URL,
+		env.API_ALLOWED_ORIGINS != null
+			? [env.API_BASE_URL, ...env.API_ALLOWED_ORIGINS]
+			: env.API_BASE_URL,
 };

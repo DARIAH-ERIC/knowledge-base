@@ -7,6 +7,6 @@ export type { PinoLogger as Logger } from "hono-pino";
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function logger() {
 	return pinoLogger({
-		pino: { level: env.LOG_LEVEL },
+		pino: { level: env.API_LOG_LEVEL },
 	});
 }
