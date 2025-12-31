@@ -93,6 +93,9 @@ jobs:
       - name: Start services
         run: pnpm run dev:services:up postgres
 
+      - name: Push database schema
+        run: pnpm run db:push
+
       - name: Test
         run: pnpm run test
 
