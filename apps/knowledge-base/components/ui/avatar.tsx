@@ -80,7 +80,7 @@ function Avatar({
 					</text>
 				</svg>
 			)}
-			{src && <img alt={alt} className="size-full object-cover object-center" src={src} />}
+			{src ? <img alt={alt} className="size-full object-cover object-center" src={src} /> : null}
 		</span>
 	);
 }

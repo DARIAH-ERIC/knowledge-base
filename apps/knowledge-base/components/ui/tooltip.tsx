@@ -79,7 +79,7 @@ function TooltipContent({
 					<svg
 						// inverse
 						className={twJoin(
-							"group-placement-left:-rotate-90 block group-placement-bottom:rotate-180 group-placement-right:rotate-90 forced-colors:fill-[Canvas] forced-colors:stroke-[ButtonBorder]",
+							"block group-placement-left:-rotate-90 group-placement-bottom:rotate-180 group-placement-right:rotate-90 forced-colors:fill-[Canvas] forced-colors:stroke-[ButtonBorder]",
 							inverse ? "fill-fg stroke-transparent" : "fill-overlay stroke-(--tooltip-border)",
 						)}
 						height={12}

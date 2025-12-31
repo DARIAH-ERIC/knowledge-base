@@ -1,0 +1,78 @@
+{
+	"name": "@dariah-eric/dariah-knowledge-base-api-server",
+	"private": true,
+	"licence": "MIT",
+	"type": "module",
+	"engines": {
+		"node": "^24"
+	},
+	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": "^24.12.0",
+			"onFail": "download"
+		}
+	},
+	"packageManager": "pnpm@10.27.0",
+	"scripts": {
+		"build": "tsdown ./src/index.ts",
+		"dev": "dotenvx run -f ./.env.local --ignore MISSING_ENV_FILE -- tsx watch ./src/index.ts | pino-pretty",
+		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
+		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
+		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
+		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
+		"start": "dotenvx run -f ./.env.local --ignore MISSING_ENV_FILE -- node ./dist/index.mjs",
+		"test": "dotenvx run -f ./.env.local --ignore MISSING_ENV_FILE -- vitest run",
+		"test:coverage": "dotenvx run -f ./.env.local --ignore MISSING_ENV_FILE -- vitest run --coverage",
+		"test:watch": "dotenvx run -f ./.env.local --ignore MISSING_ENV_FILE -- vitest watch",
+		"types:check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@acdh-oeaw/lib": "catalog:",
+		"@acdh-oeaw/validate-env": "catalog:",
+		"@dariah-eric/dariah-knowledge-base-database-client": "workspace:^",
+		"@hono/node-server": "catalog:",
+		"@hono/standard-validator": "catalog:",
+		"@hono/swagger-ui": "catalog:",
+		"@valibot/to-json-schema": "catalog:",
+		"hono": "catalog:",
+		"hono-openapi": "catalog:",
+		"hono-pino": "catalog:",
+		"hono-rate-limiter": "catalog:",
+		"pino": "catalog:",
+		"valibot": "catalog:"
+	},
+	"devDependencies": {
+		"@acdh-oeaw/eslint-config": "catalog:",
+		"@acdh-oeaw/eslint-config-node": "catalog:",
+		"@acdh-oeaw/prettier-config": "catalog:",
+		"@acdh-oeaw/tsconfig": "catalog:",
+		"@dotenvx/dotenvx": "catalog:",
+		"@faker-js/faker": "catalog:",
+		"@sindresorhus/slugify": "catalog:",
+		"@types/node": "catalog:",
+		"eslint": "catalog:",
+		"eslint-config-flat-gitignore": "catalog:",
+		"eslint-plugin-check-file": "catalog:",
+		"eslint-plugin-drizzle": "catalog:",
+		"eslint-plugin-unicorn": "catalog:",
+		"globals": "catalog:",
+		"openapi-types": "catalog:",
+		"pino-pretty": "catalog:",
+		"prettier": "catalog:",
+		"tsdown": "catalog:",
+		"tsx": "catalog:",
+		"typescript": "catalog:",
+		"uuid": "catalog:",
+		"vite-tsconfig-paths": "catalog:",
+		"vitest": "catalog:"
+	},
+	"lint-staged": {
+		"*.@(js|ts)": [
+			"eslint --fix --flag unstable_native_nodejs_ts_config",
+			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write"
+		],
+		"*.!(js|ts)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
+	},
+	"prettier": "@acdh-oeaw/prettier-config"
+}
