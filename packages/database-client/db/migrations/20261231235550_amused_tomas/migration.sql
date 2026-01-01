@@ -5,21 +5,21 @@ VALUES
 	('embed'),
 	('image'),
 	('rich_text')
-ON CONFLICT DO NOTHING;
+ON CONFLICT ("type") DO NOTHING;
 
 INSERT INTO
 	"content_blocks_type_data_types" ("type")
 VALUES
 	('events'),
 	('news')
-ON CONFLICT DO NOTHING;
+ON CONFLICT ("type") DO NOTHING;
 
 INSERT INTO
 	"entity_status" ("type")
 VALUES
 	('draft'),
 	('published')
-ON CONFLICT DO NOTHING;
+ON CONFLICT ("type") DO NOTHING;
 
 INSERT INTO
 	"entity_types" ("type")
@@ -30,4 +30,4 @@ VALUES
 	('pages'),
 	('persons'),
 	('spotlight_articles')
-ON CONFLICT DO NOTHING;
+ON CONFLICT ("type") DO NOTHING;
