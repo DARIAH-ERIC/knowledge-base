@@ -12,7 +12,7 @@ export const contentBlockTypes = p.pgTable(
 	"content_blocks_types",
 	{
 		id: f.uuidv7("id").primaryKey(),
-		type: p.text("type", { enum: contentBlockTypesEnum }).notNull(),
+		type: p.text("type", { enum: contentBlockTypesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
 	(t) => {
@@ -60,7 +60,7 @@ export const dataContentBlockTypes = p.pgTable(
 	"content_blocks_type_data_types",
 	{
 		id: f.uuidv7("id").primaryKey(),
-		type: p.text("type", { enum: dataContentBlockTypesEnum }).notNull(),
+		type: p.text("type", { enum: dataContentBlockTypesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
 
