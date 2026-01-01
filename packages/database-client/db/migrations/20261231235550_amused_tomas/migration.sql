@@ -1,5 +1,5 @@
 INSERT INTO
-	"content_block_types" ("type")
+	"content_blocks_types" ("type")
 VALUES
 	('data'),
 	('embed'),

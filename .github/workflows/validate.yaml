@@ -142,7 +142,7 @@ jobs:
         run: pnpm run test:e2e
 
       - name: Stop services
-        run: pnpm run dev:services:down postgres
+        run: pnpm run dev:services:down
 
       - uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
