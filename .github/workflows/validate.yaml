@@ -97,8 +97,8 @@ jobs:
       - name: Start services
         run: pnpm run dev:services:up postgres
 
-      - name: Push database schema
-        run: pnpm run db:push
+      - name: Apply database migrations
+        run: pnpm run db:push && pnpm run db:migrations:apply
 
       - name: Seed database
         run: pnpm run db:seed
