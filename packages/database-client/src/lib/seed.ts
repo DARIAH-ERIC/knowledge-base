@@ -95,27 +95,17 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 		.values(avatars)
 		.returning({ id: schema.assets.id });
 
-	const entityTypes: Array<schema.EntityTypeInput> = schema.entityTypesEnum.map((type) => {
-		return { type };
-	});
-
 	const entityTypeIds = await db
-		.insert(schema.entityTypes)
-		.values(entityTypes)
-		.returning({ id: schema.entityTypes.id, type: schema.entityTypes.type });
+		.select({ id: schema.entityTypes.id, type: schema.entityTypes.type })
+		.from(schema.entityTypes);
 
 	const entityTypesByType = keyBy(entityTypeIds, ({ type }) => {
 		return type;
 	});
 
-	const entityStatus: Array<schema.EntityStatusInput> = schema.entityStatusEnum.map((type) => {
-		return { type };
-	});
-
 	const entityStatusIds = await db
-		.insert(schema.entityStatus)
-		.values(entityStatus)
-		.returning({ id: schema.entityStatus.id, type: schema.entityStatus.type });
+		.select({ id: schema.entityStatus.id, type: schema.entityStatus.type })
+		.from(schema.entityStatus);
 
 	const entityStatusByType = keyBy(entityStatusIds, ({ type }) => {
 		return type;
@@ -385,16 +375,9 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 		.values(fields)
 		.returning({ id: schema.fields.id });
 
-	const contentBlockTypes: Array<schema.ContentBlockTypesInput> = schema.contentBlockTypesEnum.map(
-		(type) => {
-			return { type };
-		},
-	);
-
 	const contentBlockTypeIds = await db
-		.insert(schema.contentBlockTypes)
-		.values(contentBlockTypes)
-		.returning({ id: schema.contentBlockTypes.id, type: schema.contentBlockTypes.type });
+		.select({ id: schema.contentBlockTypes.id, type: schema.contentBlockTypes.type })
+		.from(schema.contentBlockTypes);
 
 	const contentBlockTypesById = keyBy(contentBlockTypeIds, ({ id }) => {
 		return id;
