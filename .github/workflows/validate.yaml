@@ -100,11 +100,11 @@ jobs:
       - name: Apply database migrations
         run: pnpm run db:push && pnpm run db:migrations:apply
 
-      - name: Test
-        run: pnpm run test
-
       - name: Seed database
         run: pnpm run db:seed
+
+      - name: Test
+        run: pnpm run test
 
       # https://nextjs.org/docs/pages/building-your-application/deploying/ci-build-caching#github-actions
       # - name: Cache Next.js build output
