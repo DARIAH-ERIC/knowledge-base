@@ -7,7 +7,7 @@ import { env } from "./config/env.config.ts";
 const config: Config = {
 	allowedDevOrigins: ["127.0.0.1"],
 	// cacheComponents: true,
-	/** Compression should be handled by the `nginx` reverse proxy. */
+	/** Compression should be handled by the reverse proxy. */
 	compress: false,
 	experimental: {
 		browserDebugInfoInTerminal: true,

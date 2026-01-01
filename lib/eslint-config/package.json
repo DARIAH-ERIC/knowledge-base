@@ -1,5 +1,5 @@
 {
-	"name": "@dariah-eric/dariah-knowledge-base-prettier-config",
+	"name": "@dariah-eric/dariah-knowledge-base-eslint-config",
 	"private": true,
 	"license": "MIT",
 	"type": "module",
@@ -15,7 +15,9 @@
 	},
 	"packageManager": "pnpm@10.27.0",
 	"exports": {
-		".": "./src/index.ts"
+		"./drizzle": "./src/drizzle.ts",
+		"./next": "./src/next.ts",
+		"./node": "./src/node.ts"
 	},
 	"sideEffects": false,
 	"scripts": {
@@ -26,16 +28,24 @@
 		"types:check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@acdh-oeaw/prettier-config": "catalog:",
-		"prettier": "catalog:",
-		"prettier-plugin-embed": "catalog:",
-		"prettier-plugin-sql": "catalog:"
+		"@acdh-oeaw/eslint-config": "catalog:",
+		"@acdh-oeaw/eslint-config-next": "catalog:",
+		"@acdh-oeaw/eslint-config-node": "catalog:",
+		"@acdh-oeaw/eslint-config-playwright": "catalog:",
+		"@acdh-oeaw/eslint-config-react": "catalog:",
+		"@acdh-oeaw/eslint-config-tailwindcss": "catalog:",
+		"eslint": "catalog:",
+		"eslint-config-flat-gitignore": "catalog:",
+		"eslint-plugin-check-file": "catalog:",
+		"eslint-plugin-drizzle": "catalog:",
+		"eslint-plugin-perfectionist": "catalog:",
+		"eslint-plugin-unicorn": "catalog:",
+		"globals": "catalog:"
 	},
 	"devDependencies": {
 		"@acdh-oeaw/tsconfig": "catalog:",
-		"@dariah-eric/dariah-knowledge-base-eslint-config": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
 		"@types/node": "catalog:",
-		"eslint": "catalog:",
 		"typescript": "catalog:"
 	},
 	"browserslist": {
@@ -53,5 +63,5 @@
 		],
 		"*.!(js|ts)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
 	},
-	"prettier": "./src/index.ts"
+	"prettier": "@dariah-eric/dariah-knowledge-base-prettier-config"
 }

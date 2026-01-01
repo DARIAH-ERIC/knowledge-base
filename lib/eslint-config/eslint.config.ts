@@ -1,5 +1,6 @@
-import preset from "@dariah-eric/dariah-knowledge-base-eslint-config/node";
 import { defineConfig } from "eslint/config";
+
+import preset from "./src/node.ts";
 
 const config = defineConfig(preset);
 
