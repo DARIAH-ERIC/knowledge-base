@@ -17,7 +17,7 @@ export const entityTypes = p.pgTable(
 	"entity_types",
 	{
 		id: f.uuidv7("id").primaryKey(),
-		type: p.text("type", { enum: entityTypesEnum }).notNull(),
+		type: p.text("type", { enum: entityTypesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
 	(t) => {
@@ -38,7 +38,7 @@ export const entityStatus = p.pgTable(
 	"entity_status",
 	{
 		id: f.uuidv7("id").primaryKey(),
-		type: p.text("type", { enum: entityStatusEnum }).notNull(),
+		type: p.text("type", { enum: entityStatusEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
 	(t) => {

@@ -5,6 +5,7 @@ import * as f from "../fields";
 
 export const licenses = p.pgTable("licenses", {
 	id: f.uuidv7("id").primaryKey(),
+	code: p.text("code").notNull().unique(),
 	name: p.text("name").notNull(),
 	url: p.text("url").notNull(),
 	...f.timestamps(),
