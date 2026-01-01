@@ -1,0 +1,6 @@
+{
+	"$schema": "https://www.schemastore.org/tsconfig",
+	"extends": "@acdh-oeaw/tsconfig",
+	"include": ["./**/*.js", "./**/*.ts"],
+	"exclude": ["dist", "node_modules"]
+}

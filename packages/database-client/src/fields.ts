@@ -4,7 +4,7 @@ import { sql } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 
 export function uuidv7(name: string) {
-	return p.uuid(name).default(sql`uuidv7()`);
+	return p.uuid(name).default(sql`UUIDV7()`);
 }
 
 export function timestamp(name: string) {
@@ -22,7 +22,7 @@ export function timestamps() {
 			.notNull()
 			.defaultNow()
 			.$onUpdate(() => {
-				return sql`now()`;
+				return sql`NOW()`;
 			}),
 		// deletedAt: timestamp("deleted_at"),
 	};
