@@ -75,9 +75,9 @@
 		"@acdh-oeaw/eslint-config-playwright": "catalog:",
 		"@acdh-oeaw/eslint-config-react": "catalog:",
 		"@acdh-oeaw/eslint-config-tailwindcss": "catalog:",
-		"@acdh-oeaw/prettier-config": "catalog:",
 		"@acdh-oeaw/stylelint-config": "catalog:",
 		"@acdh-oeaw/tsconfig": "catalog:",
+		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
 		"@dotenvx/dotenvx": "catalog:",
 		"@next/eslint-plugin-next": "catalog:",
 		"@playwright/test": "catalog:",
@@ -134,7 +134,7 @@
 			"@tailwindcss/postcss": {}
 		}
 	},
-	"prettier": "@acdh-oeaw/prettier-config",
+	"prettier": "@dariah-eric/dariah-knowledge-base-prettier-config",
 	"stylelint": {
 		"extends": "@acdh-oeaw/stylelint-config"
 	}
