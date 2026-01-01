@@ -134,6 +134,7 @@ const config = defineConfig(
 		name: "tailwindcss-config",
 		extends: [tailwindConfig],
 		rules: {
+			"better-tailwindcss/enforce-consistent-line-wrapping": "warn",
 			"better-tailwindcss/no-unknown-classes": ["error", { ignore: ["lead", "not-richtext"] }],
 		},
 		settings: {
@@ -146,7 +147,7 @@ const config = defineConfig(
 	{
 		name: "node-config",
 		extends: [nodeConfig],
-		files: ["db/**/*.ts", "lib/server/**/*.ts", "**/_lib/actions/**/*.ts", "scripts/**/*.ts"],
+		files: ["lib/server/**/*.ts", "**/_lib/actions/**/*.ts", "scripts/**/*.ts"],
 	},
 	{
 		name: "stylistic-config",
@@ -164,7 +165,6 @@ const config = defineConfig(
 						},
 					],
 					groups: ["reserved", "unknown"],
-					partitionByNewLine: true,
 				},
 			],
 		},
@@ -192,4 +192,4 @@ const config = defineConfig(
 	},
 );
 
-export default config
+export default config;
