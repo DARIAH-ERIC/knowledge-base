@@ -1,6 +1,7 @@
 import { STATUS_CODES } from "node:http";
 
 import { serveStatic } from "@hono/node-server/serve-static";
+import { timing } from "hono/timing";
 
 import { createApp, createRouter } from "@/lib/factory";
 import { createOpenApi } from "@/lib/openapi/index";
@@ -27,7 +28,7 @@ app.get("/health", (c) => {
 	return c.json({ message: STATUS_CODES[status] }, status);
 });
 
-app.use(database()).route("/api/v1", api);
+app.use(database()).use(timing()).route("/api/v1", api);
 
 app.route("/docs", openapi);
 
