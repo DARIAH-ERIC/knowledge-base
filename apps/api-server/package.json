@@ -31,6 +31,7 @@
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/validate-env": "catalog:",
 		"@dariah-eric/dariah-knowledge-base-database-client": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-image-service": "workspace:^",
 		"@hono/node-server": "catalog:",
 		"@hono/standard-validator": "catalog:",
 		"@hono/swagger-ui": "catalog:",

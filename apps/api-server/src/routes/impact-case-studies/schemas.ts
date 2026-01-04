@@ -6,7 +6,7 @@ import { PaginationQuerySchema } from "@/lib/schemas";
 export const ImpactCaseStudyBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.ImpactCaseStudySelectSchema, ["id", "title", "summary"]).entries,
-		image: v.pick(schema.AssetSelectSchema, ["key"]),
+		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
 	v.description("Impact case study"),
@@ -26,11 +26,11 @@ export type ImpactCaseStudyList = v.InferOutput<typeof ImpactCaseStudyListSchema
 export const ImpactCaseStudySchema = v.pipe(
 	v.object({
 		...v.pick(schema.ImpactCaseStudySelectSchema, ["id", "title", "summary"]).entries,
-		image: v.pick(schema.AssetSelectSchema, ["key"]),
+		image: v.object({ url: v.string() }),
 		contributors: v.array(
 			v.object({
 				...v.pick(schema.PersonSelectSchema, ["id", "firstName", "lastName"]).entries,
-				image: v.pick(schema.AssetSelectSchema, ["key"]),
+				image: v.object({ url: v.string() }),
 			}),
 		),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
