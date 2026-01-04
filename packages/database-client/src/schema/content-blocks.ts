@@ -3,6 +3,7 @@ import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
 
 import * as f from "../fields";
+import { uuidv7 } from "../functions";
 import { assets } from "./assets";
 import { fields } from "./entities";
 
@@ -11,7 +12,7 @@ export const contentBlockTypesEnum = ["data", "embed", "image", "rich_text"] as 
 export const contentBlockTypes = p.pgTable(
 	"content_blocks_types",
 	{
-		id: f.uuidv7("id").primaryKey(),
+		id: p.uuid("id").primaryKey().default(uuidv7()),
 		type: p.text("type", { enum: contentBlockTypesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
@@ -30,15 +31,15 @@ export const ContentBlockTypesInsertSchema = createInsertSchema(contentBlockType
 export const ContentBlockTypesUpdateSchema = createUpdateSchema(contentBlockTypes);
 
 export const contentBlocks = p.pgTable("content_blocks", {
-	id: f.uuidv7("id").primaryKey(),
-	fieldId: f
-		.uuidv7("field_id")
+	id: p.uuid("id").primaryKey().default(uuidv7()),
+	fieldId: p
+		.uuid("field_id")
 		.notNull()
 		.references(() => {
 			return fields.id;
 		}),
-	typeId: f
-		.uuidv7("type_id")
+	typeId: p
+		.uuid("type_id")
 		.notNull()
 		.references(() => {
 			return contentBlockTypes.id;
@@ -59,7 +60,7 @@ export const dataContentBlockTypesEnum = ["events", "news"] as const;
 export const dataContentBlockTypes = p.pgTable(
 	"content_blocks_type_data_types",
 	{
-		id: f.uuidv7("id").primaryKey(),
+		id: p.uuid("id").primaryKey().default(uuidv7()),
 		type: p.text("type", { enum: dataContentBlockTypesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
@@ -82,8 +83,8 @@ export const DataContentBlockTypesInsertSchema = createInsertSchema(dataContentB
 export const DataContentBlockTypesUpdateSchema = createUpdateSchema(dataContentBlockTypes);
 
 export const dataContentBlocks = p.pgTable("content_blocks_type_data", {
-	id: f
-		.uuidv7("id")
+	id: p
+		.uuid("id")
 		.primaryKey()
 		.references(
 			() => {
@@ -91,8 +92,8 @@ export const dataContentBlocks = p.pgTable("content_blocks_type_data", {
 			},
 			{ onDelete: "cascade" },
 		),
-	typeId: f
-		.uuidv7("type_id")
+	typeId: p
+		.uuid("type_id")
 		.notNull()
 		.references(() => {
 			return dataContentBlockTypes.id;
@@ -109,8 +110,8 @@ export const DataContentBlockInsertSchema = createInsertSchema(dataContentBlocks
 export const DataContentBlockUpdateSchema = createUpdateSchema(dataContentBlocks);
 
 export const embedContentBlocks = p.pgTable("content_blocks_type_embed", {
-	id: f
-		.uuidv7("id")
+	id: p
+		.uuid("id")
 		.primaryKey()
 		.references(
 			() => {
@@ -131,8 +132,8 @@ export const EmbedContentBlockInsertSchema = createInsertSchema(embedContentBloc
 export const EmbedContentBlockUpdateSchema = createUpdateSchema(embedContentBlocks);
 
 export const imageContentBlocks = p.pgTable("content_blocks_type_image", {
-	id: f
-		.uuidv7("id")
+	id: p
+		.uuid("id")
 		.primaryKey()
 		.references(
 			() => {
@@ -140,8 +141,8 @@ export const imageContentBlocks = p.pgTable("content_blocks_type_image", {
 			},
 			{ onDelete: "cascade" },
 		),
-	imageId: f
-		.uuidv7("image_id")
+	imageId: p
+		.uuid("image_id")
 		.notNull()
 		.references(() => {
 			return assets.id;
@@ -158,8 +159,8 @@ export const ImageContentBlockInsertSchema = createInsertSchema(imageContentBloc
 export const ImageContentBlockUpdateSchema = createUpdateSchema(imageContentBlocks);
 
 export const richTextContentBlocks = p.pgTable("content_blocks_type_rich_text", {
-	id: f
-		.uuidv7("id")
+	id: p
+		.uuid("id")
 		.primaryKey()
 		.references(
 			() => {
