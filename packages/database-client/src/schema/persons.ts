@@ -6,8 +6,8 @@ import { assets } from "./assets";
 import { entities } from "./entities";
 
 export const persons = p.pgTable("persons", {
-	id: f
-		.uuidv7("id")
+	id: p
+		.uuid("id")
 		.primaryKey()
 		.references(() => {
 			return entities.id;
@@ -15,8 +15,8 @@ export const persons = p.pgTable("persons", {
 	firstName: p.text("first_name"),
 	lastName: p.text("last_name").notNull(),
 	description: p.text("description").notNull(),
-	imageId: f
-		.uuidv7("image_id")
+	imageId: p
+		.uuid("image_id")
 		.notNull()
 		.references(() => {
 			return assets.id;

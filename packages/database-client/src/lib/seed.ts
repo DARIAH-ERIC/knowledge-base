@@ -99,7 +99,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			return type;
 		});
 
-		const persons: Array<schema.PersonInput> = f.helpers.multiple(
+		const persons: Array<Omit<schema.PersonInput, "id">> = f.helpers.multiple(
 			() => {
 				const firstName = f.person.firstName();
 				const lastName = f.person.lastName();
@@ -134,7 +134,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			}),
 		);
 
-		const events: Array<schema.EventInput> = f.helpers.multiple(
+		const events: Array<Omit<schema.EventInput, "id">> = f.helpers.multiple(
 			() => {
 				const title = f.lorem.sentence();
 				const startDate = f.date.past({ years: 5 });
@@ -206,7 +206,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			}),
 		);
 
-		const impactCaseStudies: Array<schema.ImpactCaseStudyInput> = f.helpers.multiple(
+		const impactCaseStudies: Array<Omit<schema.ImpactCaseStudyInput, "id">> = f.helpers.multiple(
 			() => {
 				const title = f.lorem.sentence();
 
@@ -251,7 +251,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 
 		await db.insert(schema.impactCaseStudiesToPersons).values(impactCaseStudiesToPersons);
 
-		const news: Array<schema.NewsItemInput> = f.helpers.multiple(
+		const news: Array<Omit<schema.NewsItemInput, "id">> = f.helpers.multiple(
 			() => {
 				const title = f.lorem.sentence();
 
@@ -284,7 +284,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			}),
 		);
 
-		const pages: Array<schema.PageInput> = f.helpers.multiple(
+		const pages: Array<Omit<schema.PageInput, "id">> = f.helpers.multiple(
 			() => {
 				const title = f.lorem.sentence();
 
@@ -317,7 +317,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			}),
 		);
 
-		const spotlightArticles: Array<schema.SpotlightArticleInput> = f.helpers.multiple(
+		const spotlightArticles: Array<Omit<schema.SpotlightArticleInput, "id">> = f.helpers.multiple(
 			() => {
 				const title = f.lorem.sentence();
 

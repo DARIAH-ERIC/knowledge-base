@@ -6,15 +6,15 @@ import { assets } from "./assets";
 import { entities } from "./entities";
 
 export const pages = p.pgTable("pages", {
-	id: f
-		.uuidv7("id")
+	id: p
+		.uuid("id")
 		.primaryKey()
 		.references(() => {
 			return entities.id;
 		}),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
-	imageId: f.uuidv7("image_id").references(() => {
+	imageId: p.uuid("image_id").references(() => {
 		return assets.id;
 	}),
 	...f.timestamps(),
