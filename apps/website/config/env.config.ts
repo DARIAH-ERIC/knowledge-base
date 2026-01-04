@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 
-import { err, isErr, ok } from "@acdh-oeaw/lib";
+import { addTrailingSlash, err, isErr, ok, removeTrailingSlash } from "@acdh-oeaw/lib";
 import { createEnv, ValidationError } from "@acdh-oeaw/validate-env/next";
 import * as v from "valibot";
 
@@ -76,11 +76,21 @@ const result = createEnv({
 				 * a search-only api key for that collection.
 				 */
 				NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY: v.optional(v.pipe(v.string(), v.nonEmpty())),
-				NEXT_PUBLIC_WEBSITE_BASE_URL: v.pipe(v.string(), v.url()),
+				NEXT_PUBLIC_WEBSITE_BASE_URL: v.pipe(v.string(), v.url(), v.transform(removeTrailingSlash)),
 				NEXT_PUBLIC_WEBSITE_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 				NEXT_PUBLIC_WEBSITE_GOOGLE_SITE_VERIFICATION: v.optional(v.pipe(v.string(), v.nonEmpty())),
-				NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL: v.pipe(v.string(), v.url()),
-				NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL: v.optional(v.pipe(v.string(), v.url())),
+				NEXT_PUBLIC_WEBSITE_IMPRINT_CUSTOM_CONFIG: v.optional(
+					v.picklist(["disabled", "enabled"]),
+					"enabled",
+				),
+				NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL: v.pipe(
+					v.string(),
+					v.url(),
+					v.transform(removeTrailingSlash),
+				),
+				NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL: v.optional(
+					v.pipe(v.string(), v.url(), v.transform(addTrailingSlash)),
+				),
 				NEXT_PUBLIC_WEBSITE_MATOMO_ID: v.optional(
 					v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 				),
@@ -131,6 +141,8 @@ const result = createEnv({
 		NEXT_PUBLIC_WEBSITE_BOTS: process.env.NEXT_PUBLIC_WEBSITE_BOTS,
 		NEXT_PUBLIC_WEBSITE_GOOGLE_SITE_VERIFICATION:
 			process.env.NEXT_PUBLIC_WEBSITE_GOOGLE_SITE_VERIFICATION,
+		NEXT_PUBLIC_WEBSITE_IMPRINT_CUSTOM_CONFIG:
+			process.env.NEXT_PUBLIC_WEBSITE_IMPRINT_CUSTOM_CONFIG,
 		NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL:
 			process.env.NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL,
 		NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL: process.env.NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL,
