@@ -63,9 +63,8 @@
 		"valibot": "catalog:"
 	},
 	"devDependencies": {
-		"@acdh-oeaw/eslint-config": "catalog:",
-		"@acdh-oeaw/eslint-config-node": "catalog:",
 		"@acdh-oeaw/tsconfig": "catalog:",
+		"@dariah-eric/dariah-knowledge-base-eslint-config": "workspace:^",
 		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
 		"@faker-js/faker": "catalog:",
 		"@sindresorhus/slugify": "catalog:",
@@ -76,11 +75,6 @@
 		"drizzle-kit": "catalog:",
 		"drizzle-seed": "catalog:",
 		"eslint": "catalog:",
-		"eslint-config-flat-gitignore": "catalog:",
-		"eslint-plugin-check-file": "catalog:",
-		"eslint-plugin-drizzle": "catalog:",
-		"eslint-plugin-unicorn": "catalog:",
-		"globals": "catalog:",
 		"prettier": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:"

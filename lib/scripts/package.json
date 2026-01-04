@@ -31,16 +31,11 @@
 		"valibot": "catalog:"
 	},
 	"devDependencies": {
-		"@acdh-oeaw/eslint-config": "catalog:",
-		"@acdh-oeaw/eslint-config-node": "catalog:",
 		"@acdh-oeaw/tsconfig": "catalog:",
+		"@dariah-eric/dariah-knowledge-base-eslint-config": "workspace:^",
 		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
-		"eslint-config-flat-gitignore": "catalog:",
-		"eslint-plugin-check-file": "catalog:",
-		"eslint-plugin-unicorn": "catalog:",
-		"globals": "catalog:",
 		"prettier": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:"
