@@ -1,6 +1,6 @@
 import { defineConfig } from "tsdown";
 
-export default defineConfig({
+const config = defineConfig({
 	clean: true,
 	dts: false,
 	format: ["esm"],
@@ -9,3 +9,5 @@ export default defineConfig({
 	treeshake: true,
 	tsconfig: "./tsconfig.build.json",
 });
+
+export default config;

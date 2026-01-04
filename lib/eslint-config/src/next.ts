@@ -134,7 +134,6 @@ const config = defineConfig(
 		name: "tailwindcss-config",
 		extends: [tailwindConfig],
 		rules: {
-			"better-tailwindcss/enforce-consistent-line-wrapping": "warn",
 			"better-tailwindcss/no-unknown-classes": ["error", { ignore: ["lead", "not-richtext"] }],
 		},
 		settings: {
