@@ -120,6 +120,8 @@ onlyBuiltDependencies:
 patchedDependencies:
   next: patches/next.patch
 
+ignoreWorkspaceCycles: true
+
 shellEmulator: true
 
 strictDepBuilds: true
