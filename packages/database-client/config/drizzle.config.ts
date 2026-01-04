@@ -2,7 +2,7 @@ import { defineConfig } from "drizzle-kit";
 
 import { env } from "./env.config";
 
-export default defineConfig({
+const config = defineConfig({
 	casing: "snake_case",
 	dbCredentials: {
 		database: env.DATABASE_NAME,
@@ -18,3 +18,5 @@ export default defineConfig({
 	strict: true,
 	verbose: true,
 });
+
+export default config;
