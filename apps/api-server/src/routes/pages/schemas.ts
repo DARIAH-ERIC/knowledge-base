@@ -6,7 +6,7 @@ import { PaginationQuerySchema } from "@/lib/schemas";
 export const PageBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.PageSelectSchema, ["id", "title", "summary"]).entries,
-		image: v.pick(schema.AssetSelectSchema, ["key"]),
+		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
 	v.description("Page"),
@@ -26,7 +26,7 @@ export type PageList = v.InferOutput<typeof PageListSchema>;
 export const PageSchema = v.pipe(
 	v.object({
 		...v.pick(schema.PageSelectSchema, ["id", "title", "summary"]).entries,
-		image: v.pick(schema.AssetSelectSchema, ["key"]),
+		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
 	v.description("Page"),

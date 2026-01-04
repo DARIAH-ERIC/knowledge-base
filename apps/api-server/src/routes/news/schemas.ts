@@ -6,7 +6,7 @@ import { PaginationQuerySchema } from "@/lib/schemas";
 export const NewsItemBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.NewsItemSelectSchema, ["id", "title", "summary"]).entries,
-		image: v.pick(schema.AssetSelectSchema, ["key"]),
+		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
 	v.description("NewsItem"),
@@ -26,7 +26,7 @@ export type NewsItemList = v.InferOutput<typeof NewsItemListSchema>;
 export const NewsItemSchema = v.pipe(
 	v.object({
 		...v.pick(schema.NewsItemSelectSchema, ["id", "title", "summary"]).entries,
-		image: v.pick(schema.AssetSelectSchema, ["key"]),
+		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
 	v.description("NewsItem"),

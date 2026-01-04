@@ -358,6 +358,9 @@ importers:
       '@dariah-eric/dariah-knowledge-base-database-client':
         specifier: workspace:^
         version: link:../../packages/database-client
+      '@dariah-eric/dariah-knowledge-base-image-service':
+        specifier: workspace:^
+        version: link:../../packages/image-service
       '@hono/node-server':
         specifier: 'catalog:'
         version: 1.19.7(hono@4.11.3)

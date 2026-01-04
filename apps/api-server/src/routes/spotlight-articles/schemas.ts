@@ -6,7 +6,7 @@ import { PaginationQuerySchema } from "@/lib/schemas";
 export const SpotlightArticleBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.SpotlightArticleSelectSchema, ["id", "title", "summary"]).entries,
-		image: v.pick(schema.AssetSelectSchema, ["key"]),
+		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
 	v.description("Spotlight article"),
@@ -26,7 +26,7 @@ export type SpotlightArticleList = v.InferOutput<typeof SpotlightArticleListSche
 export const SpotlightArticleSchema = v.pipe(
 	v.object({
 		...v.pick(schema.SpotlightArticleSelectSchema, ["id", "title", "summary"]).entries,
-		image: v.pick(schema.AssetSelectSchema, ["key"]),
+		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
 	v.description("Spotlight article"),
