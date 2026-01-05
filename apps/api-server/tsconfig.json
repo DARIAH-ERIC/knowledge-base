@@ -1,6 +1,6 @@
 {
 	"$schema": "https://www.schemastore.org/tsconfig",
-	"extends": "@acdh-oeaw/tsconfig",
+	"extends": "@dariah-eric/dariah-knowledge-base-typescript-config/app",
 	"compilerOptions": {
 		"paths": {
 			"@/*": ["./src/*"],
