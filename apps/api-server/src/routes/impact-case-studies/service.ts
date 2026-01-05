@@ -96,8 +96,7 @@ export async function getImpactCaseStudyById(db: Database, params: GetImpactCase
 			contributors: {
 				columns: {
 					id: true,
-					firstName: true,
-					lastName: true,
+					name: true,
 				},
 				with: {
 					image: {
@@ -125,7 +124,7 @@ export async function getImpactCaseStudyById(db: Database, params: GetImpactCase
 	}
 
 	const contributors = item.contributors.map((contributor) => {
-		const image = client.urls.generate(item.image.key, { width: imageAvatarWidth });
+		const image = client.urls.generate(contributor.image.key, { width: imageAvatarWidth });
 
 		return { ...contributor, image };
 	});
@@ -167,8 +166,7 @@ export async function getImpactCaseStudyBySlug(
 			contributors: {
 				columns: {
 					id: true,
-					firstName: true,
-					lastName: true,
+					name: true,
 				},
 				with: {
 					image: {
@@ -196,7 +194,7 @@ export async function getImpactCaseStudyBySlug(
 	}
 
 	const contributors = item.contributors.map((contributor) => {
-		const image = client.urls.generate(item.image.key, { width: imageAvatarWidth });
+		const image = client.urls.generate(contributor.image.key, { width: imageAvatarWidth });
 
 		return { ...contributor, image };
 	});
