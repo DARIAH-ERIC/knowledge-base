@@ -1,7 +1,7 @@
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import * as v from "valibot";
 
-import { PaginationQuerySchema } from "@/lib/schemas";
+import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const PageBaseSchema = v.pipe(
 	v.object({
@@ -39,10 +39,8 @@ export const GetPages = {
 	QuerySchema: PaginationQuerySchema,
 	ResponseSchema: v.pipe(
 		v.object({
+			...PaginatedResponseSchema.entries,
 			data: PageListSchema,
-			limit: v.number(),
-			offset: v.number(),
-			total: v.number(),
 		}),
 		v.description("Paginated list of pages"),
 		v.metadata({ ref: "GetPagesResponse" }),
