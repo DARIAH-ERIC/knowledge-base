@@ -30,10 +30,10 @@ export default function DashboardWebsiteAssetsPage(
 	return (
 		<Main className="flex-1">
 			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">{t("title")}</h1>
+			<UploadImageForm />
 			<Suspense>
 				<ImageGrid />
 			</Suspense>
-			<UploadImageForm />
 		</Main>
 	);
 }

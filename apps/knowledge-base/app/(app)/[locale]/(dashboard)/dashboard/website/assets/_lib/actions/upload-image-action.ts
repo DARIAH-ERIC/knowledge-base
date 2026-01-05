@@ -1,6 +1,7 @@
-"use sever";
+"use server";
 
 import { getFormDataValues, includes, log } from "@acdh-oeaw/lib";
+import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import * as v from "valibot";
 
@@ -44,6 +45,8 @@ export async function uploadImageAction(
 		const { file } = await v.parseAsync(InputSchema, getFormDataValues(formData));
 
 		const { objectName } = await uploadAsset({ file });
+
+		revalidatePath("/dashboard/website/assets", "page");
 
 		return createSuccessActionState({ message: t("success"), data: { objectName } });
 	} catch (error) {

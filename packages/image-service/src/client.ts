@@ -10,7 +10,7 @@ import { client as minio } from "./minio-client";
 
 const bucketName = env.S3_BUCKET_NAME;
 
-export type { ImageUrlOptions }
+export type { ImageUrlOptions };
 
 export interface Client {
 	bucket: {
