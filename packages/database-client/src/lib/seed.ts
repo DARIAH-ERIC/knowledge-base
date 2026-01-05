@@ -103,10 +103,11 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			() => {
 				const firstName = f.person.firstName();
 				const lastName = f.person.lastName();
+				const name = f.person.fullName({ firstName, lastName });
 
 				return {
-					firstName,
-					lastName,
+					name,
+					sortName: [lastName, firstName].join(" "),
 					description: f.lorem.paragraph(),
 					imageId: f.helpers.arrayElement(avatarIds).id,
 				};
@@ -119,7 +120,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 				typeId: entityTypesByType.persons.id,
 				documentId: f.string.uuid(),
 				statusId: entityStatusByType.published.id,
-				slug: slugify([person.lastName, person.firstName].join(", ")),
+				slug: slugify(person.sortName),
 			};
 		});
 

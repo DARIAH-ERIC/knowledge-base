@@ -12,8 +12,8 @@ export const persons = p.pgTable("persons", {
 		.references(() => {
 			return entities.id;
 		}),
-	firstName: p.text("first_name"),
-	lastName: p.text("last_name").notNull(),
+	name: p.text("name").notNull(),
+	sortName: p.text("sort_name").notNull(),
 	description: p.text("description").notNull(),
 	imageId: p
 		.uuid("image_id")

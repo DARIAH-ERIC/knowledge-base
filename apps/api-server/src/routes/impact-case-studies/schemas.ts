@@ -29,7 +29,7 @@ export const ImpactCaseStudySchema = v.pipe(
 		image: v.object({ url: v.string() }),
 		contributors: v.array(
 			v.object({
-				...v.pick(schema.PersonSelectSchema, ["id", "firstName", "lastName"]).entries,
+				...v.pick(schema.PersonSelectSchema, ["id", "name"]).entries,
 				image: v.object({ url: v.string() }),
 			}),
 		),

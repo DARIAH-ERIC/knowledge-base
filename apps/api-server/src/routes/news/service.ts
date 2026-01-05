@@ -5,7 +5,7 @@ import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/sche
 import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
 
 import type { Database } from "@/middlewares/db";
-import { imageFeaturedWidth, imagePreviewWidth } from "~/config/api.config";
+import { imageWidth } from "~/config/api.config";
 
 interface GetNewsParams {
 	/** @default 10 */
@@ -61,7 +61,7 @@ export async function getNews(db: Database, params: GetNewsParams) {
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = client.urls.generate(item.image.key, { width: imagePreviewWidth });
+		const image = client.urls.generate(item.image.key, { width: imageWidth.preview });
 
 		return { ...item, image };
 	});
@@ -110,7 +110,7 @@ export async function getNewsItemById(db: Database, params: GetNewsItemByIdParam
 		return null;
 	}
 
-	const image = client.urls.generate(item.image.key, { width: imageFeaturedWidth });
+	const image = client.urls.generate(item.image.key, { width: imageWidth.featured });
 
 	const data = { ...item, image };
 
@@ -158,7 +158,7 @@ export async function getNewsItemBySlug(db: Database, params: GetNewsItemBySlugP
 		return null;
 	}
 
-	const image = client.urls.generate(item.image.key, { width: imageFeaturedWidth });
+	const image = client.urls.generate(item.image.key, { width: imageWidth.featured });
 
 	const data = { ...item, image };
 
