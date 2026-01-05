@@ -13,6 +13,9 @@ const config: Config = {
 		browserDebugInfoInTerminal: true,
 		globalNotFound: true,
 		rootParams: true,
+		serverActions: {
+			bodySizeLimit: "2mb",
+		},
 		turbopackFileSystemCacheForDev: true,
 		viewTransition: true,
 	},
