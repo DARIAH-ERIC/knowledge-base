@@ -17,3 +17,9 @@ export const PaginationQuerySchema = v.object({
 		v.metadata({ ref: "OffsetParam" }),
 	),
 });
+
+export const PaginatedResponseSchema = v.object({
+	limit: v.number(),
+	offset: v.number(),
+	total: v.number(),
+});
