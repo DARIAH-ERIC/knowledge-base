@@ -97,6 +97,12 @@
 		},
 		"title": "Working groups"
 	},
+	"DashboardAdministratorWorkingGroupReportsPage": {
+		"meta": {
+			"title": "Administrator dashboard - Working group reports"
+		},
+		"title": "Working group reports"
+	},
 	"DashboardNationalConsortiumPage": {
 		"meta": {
 			"title": "National consortium dashboard"
@@ -222,6 +228,12 @@
 			"title": "Website dashboard - Pages"
 		},
 		"title": "Pages"
+	},
+	"DashboardWebsiteSpotlightArticlesPage": {
+		"meta": {
+			"title": "Website dashboard - Spotlight articles"
+		},
+		"title": "Spotlight articles"
 	},
 	"DashboardWorkingGroupPage": {
 		"meta": {
