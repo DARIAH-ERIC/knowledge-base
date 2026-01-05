@@ -95,13 +95,19 @@ jobs:
         run: pnpm run types:check
 
       - name: Start services
-        run: pnpm run dev:services:up postgres
+        run: pnpm run dev:services:up postgres imgproxy
 
       - name: Apply database migrations
         run: pnpm run db:push && pnpm run db:migrations:apply
 
       - name: Seed database
         run: pnpm run db:seed
+
+      - name: Create object store bucket
+        run: pnpm run image-service:buckets:create
+
+      - name: Seed object store
+        run: pnpm run image-service:buckets:seed
 
       - name: Test
         run: pnpm run test
