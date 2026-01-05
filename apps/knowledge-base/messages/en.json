@@ -1,4 +1,16 @@
 {
+	"actions": {
+		"uploadImageAction": {
+			"success": "Successfully uploaded image."
+		}
+	},
+	"errors": {
+		"forbidden": "Forbidden.",
+		"internal-server-error": "Internal server error.",
+		"invalid-form-fields": "Invalid or missing fields.",
+		"not-authenticated": "Not authenticated.",
+		"too-many-requests": "Too many requests."
+	},
 	"ColorSchemeSelect": {
 		"change-color-scheme": "Change color scheme",
 		"color-schemes": {
@@ -323,5 +335,9 @@
 			"title": "Terms of use"
 		},
 		"title": "Terms of use"
+	},
+	"UploadImageForm": {
+		"input": "Select an image to upload",
+		"submit": "Upload image"
 	}
 }
