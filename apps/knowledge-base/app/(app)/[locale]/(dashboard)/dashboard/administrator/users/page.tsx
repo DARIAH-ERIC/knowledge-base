@@ -6,7 +6,11 @@ import type { ReactNode } from "react";
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { TableExample } from "@/components/ui/table-example";
 
-export async function generateMetadata(): Promise<Metadata> {
+interface DashboardAdministratorUsersPageProps extends PageProps<"/[locale]/dashboard/administrator/users"> {}
+
+export async function generateMetadata(
+	_props: Readonly<DashboardAdministratorUsersPageProps>,
+): Promise<Metadata> {
 	const t = await getTranslations("DashboardAdministratorUsersPage");
 
 	const metadata: Metadata = {
@@ -16,7 +20,9 @@ export async function generateMetadata(): Promise<Metadata> {
 	return metadata;
 }
 
-export default function DashboardAdministratorUsersPage(): ReactNode {
+export default function DashboardAdministratorUsersPage(
+	_props: Readonly<DashboardAdministratorUsersPageProps>,
+): ReactNode {
 	const t = useTranslations("DashboardAdministratorUsersPage");
 
 	return (

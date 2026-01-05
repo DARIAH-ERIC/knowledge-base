@@ -6,7 +6,9 @@ import type { ReactNode } from "react";
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { TableExample } from "@/components/ui/table-example";
 
-export async function generateMetadata(): Promise<Metadata> {
+interface DashboardWebsiteSpotlightArticlesPageProps extends PageProps<"/[locale]/dashboard/website/spotlight-articles"> {}
+
+export async function generateMetadata(_props: Readonly<DashboardWebsiteSpotlightArticlesPageProps>): Promise<Metadata> {
 	const t = await getTranslations("DashboardWebsiteSpotlightArticlesPage");
 
 	const metadata: Metadata = {
@@ -16,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 	return metadata;
 }
 
-export default function DashboardWebsiteSpotlightArticlesPage(): ReactNode {
+export default function DashboardWebsiteSpotlightArticlesPage(_props: Readonly<DashboardWebsiteSpotlightArticlesPageProps>): ReactNode {
 	const t = useTranslations("DashboardWebsiteSpotlightArticlesPage");
 
 	return (
