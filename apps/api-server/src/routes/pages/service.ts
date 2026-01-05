@@ -5,7 +5,7 @@ import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/sche
 import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
 
 import type { Database } from "@/middlewares/db";
-import { imageFeaturedWidth, imagePreviewWidth } from "~/config/api.config";
+import { imageWidth } from "~/config/api.config";
 
 interface GetPagesParams {
 	/** @default 10 */
@@ -63,7 +63,7 @@ export async function getPages(db: Database, params: GetPagesParams) {
 	const data = items.map((item) => {
 		const image =
 			item.image != null
-				? client.urls.generate(item.image.key, { width: imagePreviewWidth })
+				? client.urls.generate(item.image.key, { width: imageWidth.preview })
 				: null;
 
 		return { ...item, image };
@@ -114,7 +114,9 @@ export async function getPageById(db: Database, params: GetPageByIdParams) {
 	}
 
 	const image =
-		item.image != null ? client.urls.generate(item.image.key, { width: imageFeaturedWidth }) : null;
+		item.image != null
+			? client.urls.generate(item.image.key, { width: imageWidth.featured })
+			: null;
 
 	const data = { ...item, image };
 
@@ -163,7 +165,9 @@ export async function getPageBySlug(db: Database, params: GetPageBySlugParams) {
 	}
 
 	const image =
-		item.image != null ? client.urls.generate(item.image.key, { width: imageFeaturedWidth }) : null;
+		item.image != null
+			? client.urls.generate(item.image.key, { width: imageWidth.featured })
+			: null;
 
 	const data = { ...item, image };
 

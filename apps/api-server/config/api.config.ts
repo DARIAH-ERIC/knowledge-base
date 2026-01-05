@@ -1,5 +1,7 @@
 export const maxLimit = 100;
 
-export const imageAvatarWidth = 200;
-export const imageFeaturedWidth = 800;
-export const imagePreviewWidth = 400;
+export const imageWidth = {
+	avatar: 200,
+	featured: 800,
+	preview: 400,
+};
