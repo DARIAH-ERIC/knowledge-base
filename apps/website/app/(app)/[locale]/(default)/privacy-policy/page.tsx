@@ -7,7 +7,9 @@ import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 
 interface PrivacyPolicyPageProps extends PageProps<"/[locale]/privacy-policy"> {}
 
-export async function generateMetadata(_props: Readonly<PrivacyPolicyPageProps>): Promise<Metadata> {
+export async function generateMetadata(
+	_props: Readonly<PrivacyPolicyPageProps>,
+): Promise<Metadata> {
 	const t = await getTranslations("PrivacyPolicyPage");
 
 	const metadata: Metadata = {

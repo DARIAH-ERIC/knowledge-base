@@ -8,7 +8,9 @@ import { TableExample } from "@/components/ui/table-example";
 
 interface DashboardWebsiteSpotlightArticlesPageProps extends PageProps<"/[locale]/dashboard/website/spotlight-articles"> {}
 
-export async function generateMetadata(_props: Readonly<DashboardWebsiteSpotlightArticlesPageProps>): Promise<Metadata> {
+export async function generateMetadata(
+	_props: Readonly<DashboardWebsiteSpotlightArticlesPageProps>,
+): Promise<Metadata> {
 	const t = await getTranslations("DashboardWebsiteSpotlightArticlesPage");
 
 	const metadata: Metadata = {
@@ -18,7 +20,9 @@ export async function generateMetadata(_props: Readonly<DashboardWebsiteSpotligh
 	return metadata;
 }
 
-export default function DashboardWebsiteSpotlightArticlesPage(_props: Readonly<DashboardWebsiteSpotlightArticlesPageProps>): ReactNode {
+export default function DashboardWebsiteSpotlightArticlesPage(
+	_props: Readonly<DashboardWebsiteSpotlightArticlesPageProps>,
+): ReactNode {
 	const t = useTranslations("DashboardWebsiteSpotlightArticlesPage");
 
 	return (

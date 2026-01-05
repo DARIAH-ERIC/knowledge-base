@@ -8,7 +8,9 @@ import { TableExample } from "@/components/ui/table-example";
 
 interface DashboardAdministratorWorkingGroupReportsPageProps extends PageProps<"/[locale]/dashboard/administrator/working-group-reports"> {}
 
-export async function generateMetadata(_props: Readonly<DashboardAdministratorWorkingGroupReportsPageProps>): Promise<Metadata> {
+export async function generateMetadata(
+	_props: Readonly<DashboardAdministratorWorkingGroupReportsPageProps>,
+): Promise<Metadata> {
 	const t = await getTranslations("DashboardAdministratorWorkingGroupReportsPage");
 
 	const metadata: Metadata = {
@@ -18,7 +20,9 @@ export async function generateMetadata(_props: Readonly<DashboardAdministratorWo
 	return metadata;
 }
 
-export default function DashboardAdministratorWorkingGroupReportsPage(_props: Readonly<DashboardAdministratorWorkingGroupReportsPageProps>): ReactNode {
+export default function DashboardAdministratorWorkingGroupReportsPage(
+	_props: Readonly<DashboardAdministratorWorkingGroupReportsPageProps>,
+): ReactNode {
 	const t = useTranslations("DashboardAdministratorWorkingGroupReportsPage");
 
 	return (
