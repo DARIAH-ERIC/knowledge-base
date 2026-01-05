@@ -101,12 +101,15 @@ catalog:
   valibot: ^1.2.0
   vite-tsconfig-paths: ^6.0.3
   vitest: ^4.0.16
+  wp-types: ^4.69.0
   xast-util-feed: ^2.0.0
   xast-util-to-xml: ^4.0.0
 
 catalogMode: strict
 
 cleanupUnusedCatalogs: true
+
+ignoreWorkspaceCycles: true
 
 onlyBuiltDependencies:
   - '@parcel/watcher'
@@ -119,8 +122,6 @@ onlyBuiltDependencies:
 
 patchedDependencies:
   next: patches/next.patch
-
-ignoreWorkspaceCycles: true
 
 shellEmulator: true
 

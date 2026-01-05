@@ -297,6 +297,9 @@ catalogs:
     vitest:
       specifier: ^4.0.16
       version: 4.0.16
+    wp-types:
+      specifier: ^4.69.0
+      version: 4.69.0
     xast-util-feed:
       specifier: ^2.0.0
       version: 2.0.0
@@ -802,6 +805,52 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+
+  lib/data-migration:
+    dependencies:
+      '@acdh-oeaw/lib':
+        specifier: 'catalog:'
+        version: 0.3.7
+      '@dariah-eric/dariah-knowledge-base-database-client':
+        specifier: workspace:^
+        version: link:../../packages/database-client
+      '@dariah-eric/dariah-knowledge-base-image-service':
+        specifier: workspace:^
+        version: link:../../packages/image-service
+      valibot:
+        specifier: 'catalog:'
+        version: 1.2.0(typescript@5.9.3)
+    devDependencies:
+      '@acdh-oeaw/tsconfig':
+        specifier: 'catalog:'
+        version: 1.5.1(typescript@5.9.3)
+      '@dariah-eric/dariah-knowledge-base-eslint-config':
+        specifier: workspace:^
+        version: link:../eslint-config
+      '@dariah-eric/dariah-knowledge-base-prettier-config':
+        specifier: workspace:^
+        version: link:../prettier-config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.4
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      node:
+        specifier: runtime:^24.12.0
+        version: runtime:24.12.0
+      prettier:
+        specifier: 'catalog:'
+        version: 3.7.4
+      tsx:
+        specifier: 'catalog:'
+        version: 4.21.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      wp-types:
+        specifier: 'catalog:'
+        version: 4.69.0
 
   lib/eslint-config:
     dependencies:
@@ -7744,6 +7793,9 @@ packages:
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
+
+  wp-types@4.69.0:
+    resolution: {integrity: sha512-2w0i2ygylpbYpqFskg1NlvH/1DM8thZuhxjihFRHdvjgFkmzJ2cHl2kq9cBnxYWHyLHzRiLI2TupKbq3yl2STQ==}
 
   wrap-ansi@7.0.0:
     resolution: {integrity: sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==}
@@ -15190,6 +15242,10 @@ snapshots:
       stackback: 0.0.2
 
   word-wrap@1.2.5: {}
+
+  wp-types@4.69.0:
+    dependencies:
+      typescript: 5.9.3
 
   wrap-ansi@7.0.0:
     dependencies:
