@@ -5,7 +5,9 @@ import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 
-export async function generateMetadata(): Promise<Metadata> {
+interface TermsOfUsePageProps extends PageProps<"/[locale]/terms-of-use"> {}
+
+export async function generateMetadata(_props: Readonly<TermsOfUsePageProps>): Promise<Metadata> {
 	const t = await getTranslations("TermsOfUsePage");
 
 	const metadata: Metadata = {
@@ -15,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 	return metadata;
 }
 
-export default function TermsOfUsePage(): ReactNode {
+export default function TermsOfUsePage(_props: Readonly<TermsOfUsePageProps>): ReactNode {
 	const t = useTranslations("TermsOfUsePage");
 
 	return (

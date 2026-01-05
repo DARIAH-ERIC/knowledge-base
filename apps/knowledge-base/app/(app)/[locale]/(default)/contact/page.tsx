@@ -5,7 +5,9 @@ import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 
-export async function generateMetadata(): Promise<Metadata> {
+interface ContactPageProps extends PageProps<"/[locale]/contact"> {}
+
+export async function generateMetadata(_props: Readonly<ContactPageProps>): Promise<Metadata> {
 	const t = await getTranslations("ContactPage");
 
 	const metadata: Metadata = {
@@ -15,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 	return metadata;
 }
 
-export default function ContactPage(): ReactNode {
+export default function ContactPage(_props: Readonly<ContactPageProps>): ReactNode {
 	const t = useTranslations("ContactPage");
 
 	return (

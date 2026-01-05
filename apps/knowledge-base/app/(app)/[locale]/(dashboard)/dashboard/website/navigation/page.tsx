@@ -5,7 +5,11 @@ import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 
-export async function generateMetadata(): Promise<Metadata> {
+interface DashboardWebsiteNavigationPageProps extends PageProps<"/[locale]/dashboard/website/navigation"> {}
+
+export async function generateMetadata(
+	_props: Readonly<DashboardWebsiteNavigationPageProps>,
+): Promise<Metadata> {
 	const t = await getTranslations("DashboardWebsiteNavigationPage");
 
 	const metadata: Metadata = {
@@ -15,7 +19,9 @@ export async function generateMetadata(): Promise<Metadata> {
 	return metadata;
 }
 
-export default function DashboardWebsiteNavigationPage(): ReactNode {
+export default function DashboardWebsiteNavigationPage(
+	_props: Readonly<DashboardWebsiteNavigationPageProps>,
+): ReactNode {
 	const t = useTranslations("DashboardWebsiteNavigationPage");
 
 	return (
