@@ -31,6 +31,7 @@
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
 		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
 		"image-service:buckets:create": "tsx ./scripts/create-bucket.ts",
+		"image-service:buckets:reset": "tsx ./scripts/reset.ts",
 		"image-service:buckets:seed": "tsx ./scripts/seed.ts",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
