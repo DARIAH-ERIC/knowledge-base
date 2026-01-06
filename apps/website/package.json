@@ -66,9 +66,9 @@
 	},
 	"devDependencies": {
 		"@acdh-oeaw/stylelint-config": "catalog:",
-		"@acdh-oeaw/tsconfig": "catalog:",
 		"@dariah-eric/dariah-knowledge-base-eslint-config": "workspace:^",
 		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-typescript-config": "workspace:^",
 		"@dotenvx/dotenvx": "catalog:",
 		"@next/eslint-plugin-next": "catalog:",
 		"@playwright/test": "catalog:",

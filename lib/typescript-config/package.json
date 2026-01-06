@@ -1,5 +1,5 @@
 {
-	"name": "@dariah-eric/dariah-knowledge-base-image-service",
+	"name": "@dariah-eric/dariah-knowledge-base-typescript-config",
 	"private": true,
 	"license": "MIT",
 	"type": "module",
@@ -9,52 +9,38 @@
 	"devEngines": {
 		"runtime": {
 			"name": "node",
-			"version": "^24",
+			"version": "^24.12.0",
 			"onFail": "download"
 		}
 	},
 	"packageManager": "pnpm@10.27.0",
 	"exports": {
-		"./client": {
-			"types": "./dist/src/client.d.ts",
-			"default": "./src/client.ts"
-		},
-		"./lib": {
-			"types": "./dist/src/lib/index.d.ts",
-			"default": "./src/lib/index.ts"
-		}
+		"./app": "./src/app.json",
+		"./app-build": "./src/app-build.json",
+		"./lib": "./src/lib.json",
+		"./lib-build": "./src/lib-build.json"
 	},
 	"sideEffects": false,
 	"scripts": {
-		"build": "rm -rf dist && tsc --project ./tsconfig.build.json",
-		"dev": "tsc --preserveWatchOutput --project ./tsconfig.build.json --watch",
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
 		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
-		"image-service:buckets:create": "tsx ./scripts/create-bucket.ts",
-		"image-service:buckets:seed": "tsx ./scripts/seed.ts",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
 		"types:check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@acdh-oeaw/lib": "catalog:",
-		"@acdh-oeaw/validate-env": "catalog:",
-		"@imgproxy/imgproxy-node": "catalog:",
-		"@sindresorhus/slugify": "catalog:",
-		"minio": "catalog:",
-		"uuid": "catalog:",
-		"valibot": "catalog:"
+		"@acdh-oeaw/tsconfig": "catalog:",
+		"@acdh-oeaw/tsconfig-lib": "catalog:"
+	},
+	"peerDependencies": {
+		"typescript": "catalog:"
 	},
 	"devDependencies": {
 		"@dariah-eric/dariah-knowledge-base-eslint-config": "workspace:^",
 		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
-		"@dariah-eric/dariah-knowledge-base-typescript-config": "workspace:^",
-		"@faker-js/faker": "catalog:",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
 		"prettier": "catalog:",
-		"sharp": "catalog:",
-		"tsx": "catalog:",
 		"typescript": "catalog:"
 	},
 	"browserslist": {

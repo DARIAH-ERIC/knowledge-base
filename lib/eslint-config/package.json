@@ -34,7 +34,6 @@
 		"@acdh-oeaw/eslint-config-playwright": "catalog:",
 		"@acdh-oeaw/eslint-config-react": "catalog:",
 		"@acdh-oeaw/eslint-config-tailwindcss": "catalog:",
-		"eslint": "catalog:",
 		"eslint-config-flat-gitignore": "catalog:",
 		"eslint-plugin-check-file": "catalog:",
 		"eslint-plugin-drizzle": "catalog:",
@@ -42,10 +41,15 @@
 		"eslint-plugin-unicorn": "catalog:",
 		"globals": "catalog:"
 	},
+	"peerDependencies": {
+		"eslint": "catalog:"
+	},
 	"devDependencies": {
-		"@acdh-oeaw/tsconfig": "catalog:",
 		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-typescript-config": "workspace:^",
 		"@types/node": "catalog:",
+		"eslint": "catalog:",
+		"prettier": "catalog:",
 		"typescript": "catalog:"
 	},
 	"browserslist": {

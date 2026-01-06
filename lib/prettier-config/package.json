@@ -27,15 +27,18 @@
 	},
 	"dependencies": {
 		"@acdh-oeaw/prettier-config": "catalog:",
-		"prettier": "catalog:",
 		"prettier-plugin-embed": "catalog:",
 		"prettier-plugin-sql": "catalog:"
 	},
+	"peerDependencies": {
+		"prettier": "catalog:"
+	},
 	"devDependencies": {
-		"@acdh-oeaw/tsconfig": "catalog:",
 		"@dariah-eric/dariah-knowledge-base-eslint-config": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-typescript-config": "workspace:^",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
+		"prettier": "catalog:",
 		"typescript": "catalog:"
 	},
 	"browserslist": {

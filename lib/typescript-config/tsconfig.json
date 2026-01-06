@@ -1,6 +1,6 @@
 {
 	"$schema": "https://www.schemastore.org/tsconfig",
-	"extends": "@dariah-eric/dariah-knowledge-base-typescript-config/lib",
+	"extends": "./src/lib.json",
 	"include": ["./**/*.js", "./**/*.ts"],
 	"exclude": ["dist", "node_modules"]
 }
