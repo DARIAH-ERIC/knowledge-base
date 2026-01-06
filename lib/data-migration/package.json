@@ -30,9 +30,9 @@
 		"valibot": "catalog:"
 	},
 	"devDependencies": {
-		"@acdh-oeaw/tsconfig": "catalog:",
 		"@dariah-eric/dariah-knowledge-base-eslint-config": "workspace:^",
 		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-typescript-config": "workspace:^",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
 		"prettier": "catalog:",
