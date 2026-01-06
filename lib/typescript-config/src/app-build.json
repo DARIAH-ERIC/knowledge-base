@@ -5,8 +5,6 @@
 		"allowJs": false,
 		"checkJs": false,
 		"noEmit": false,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
 		"outDir": "${configDir}/dist"
 	},
 	"files": ["../types/intl-duration-format.d.ts"]

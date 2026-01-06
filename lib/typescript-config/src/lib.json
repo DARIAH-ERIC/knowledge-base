@@ -1,9 +1,5 @@
 {
 	"$schema": "https://www.schemastore.org/tsconfig",
 	"extends": "@acdh-oeaw/tsconfig",
-	"compilerOptions": {
-		"noUnusedLocals": true,
-		"noUnusedParameters": true
-	},
 	"files": ["../types/intl-duration-format.d.ts"]
 }
