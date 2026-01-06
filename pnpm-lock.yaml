@@ -39,6 +39,9 @@ catalogs:
     '@acdh-oeaw/tsconfig':
       specifier: ^1.5.1
       version: 1.5.1
+    '@acdh-oeaw/tsconfig-lib':
+      specifier: ^1.3.0
+      version: 1.3.0
     '@acdh-oeaw/validate-env':
       specifier: ^0.2.1
       version: 0.2.1
@@ -395,15 +398,15 @@ importers:
         specifier: 'catalog:'
         version: 1.2.0(typescript@5.9.3)
     devDependencies:
-      '@acdh-oeaw/tsconfig':
-        specifier: 'catalog:'
-        version: 1.5.1(typescript@5.9.3)
       '@dariah-eric/dariah-knowledge-base-eslint-config':
         specifier: workspace:^
         version: link:../../lib/eslint-config
       '@dariah-eric/dariah-knowledge-base-prettier-config':
         specifier: workspace:^
         version: link:../../lib/prettier-config
+      '@dariah-eric/dariah-knowledge-base-typescript-config':
+        specifier: workspace:^
+        version: link:../../lib/typescript-config
       '@dotenvx/dotenvx':
         specifier: 'catalog:'
         version: 1.51.4
@@ -546,15 +549,15 @@ importers:
       '@acdh-oeaw/stylelint-config':
         specifier: 'catalog:'
         version: 2.3.2(postcss-html@1.8.0)(stylelint-order@7.0.1(stylelint@16.26.1(typescript@5.9.3)))(stylelint@16.26.1(typescript@5.9.3))
-      '@acdh-oeaw/tsconfig':
-        specifier: 'catalog:'
-        version: 1.5.1(typescript@5.9.3)
       '@dariah-eric/dariah-knowledge-base-eslint-config':
         specifier: workspace:^
         version: link:../../lib/eslint-config
       '@dariah-eric/dariah-knowledge-base-prettier-config':
         specifier: workspace:^
         version: link:../../lib/prettier-config
+      '@dariah-eric/dariah-knowledge-base-typescript-config':
+        specifier: workspace:^
+        version: link:../../lib/typescript-config
       '@dotenvx/dotenvx':
         specifier: 'catalog:'
         version: 1.51.4
@@ -718,15 +721,15 @@ importers:
       '@acdh-oeaw/stylelint-config':
         specifier: 'catalog:'
         version: 2.3.2(postcss-html@1.8.0)(stylelint-order@7.0.1(stylelint@16.26.1(typescript@5.9.3)))(stylelint@16.26.1(typescript@5.9.3))
-      '@acdh-oeaw/tsconfig':
-        specifier: 'catalog:'
-        version: 1.5.1(typescript@5.9.3)
       '@dariah-eric/dariah-knowledge-base-eslint-config':
         specifier: workspace:^
         version: link:../../lib/eslint-config
       '@dariah-eric/dariah-knowledge-base-prettier-config':
         specifier: workspace:^
         version: link:../../lib/prettier-config
+      '@dariah-eric/dariah-knowledge-base-typescript-config':
+        specifier: workspace:^
+        version: link:../../lib/typescript-config
       '@dotenvx/dotenvx':
         specifier: 'catalog:'
         version: 1.51.4
@@ -872,9 +875,6 @@ importers:
       '@acdh-oeaw/eslint-config-tailwindcss':
         specifier: 'catalog:'
         version: 4.1.1(@acdh-oeaw/eslint-config@2.0.11(@eslint/config-helpers@0.4.2)(@typescript-eslint/utils@8.51.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(globals@16.5.0)(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(tailwindcss@4.1.18)(typescript@5.9.3)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.2(jiti@2.6.1)
       eslint-config-flat-gitignore:
         specifier: 'catalog:'
         version: 2.1.0(eslint@9.39.2(jiti@2.6.1))
@@ -894,43 +894,12 @@ importers:
         specifier: 'catalog:'
         version: 16.5.0
     devDependencies:
-      '@acdh-oeaw/tsconfig':
-        specifier: 'catalog:'
-        version: 1.5.1(typescript@5.9.3)
       '@dariah-eric/dariah-knowledge-base-prettier-config':
         specifier: workspace:^
         version: link:../prettier-config
-      '@types/node':
-        specifier: 'catalog:'
-        version: 24.10.4
-      node:
-        specifier: runtime:^24.12.0
-        version: runtime:24.12.0
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-
-  lib/prettier-config:
-    dependencies:
-      '@acdh-oeaw/prettier-config':
-        specifier: 'catalog:'
-        version: 2.0.1(prettier@3.7.4)
-      prettier:
-        specifier: 'catalog:'
-        version: 3.7.4
-      prettier-plugin-embed:
-        specifier: 'catalog:'
-        version: 0.5.1
-      prettier-plugin-sql:
-        specifier: 'catalog:'
-        version: 0.19.2(prettier@3.7.4)
-    devDependencies:
-      '@acdh-oeaw/tsconfig':
-        specifier: 'catalog:'
-        version: 1.5.1(typescript@5.9.3)
-      '@dariah-eric/dariah-knowledge-base-eslint-config':
+      '@dariah-eric/dariah-knowledge-base-typescript-config':
         specifier: workspace:^
-        version: link:../eslint-config
+        version: link:../typescript-config
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.4
@@ -940,6 +909,43 @@ importers:
       node:
         specifier: runtime:^24.12.0
         version: runtime:24.12.0
+      prettier:
+        specifier: 'catalog:'
+        version: 3.7.4
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  lib/prettier-config:
+    dependencies:
+      '@acdh-oeaw/prettier-config':
+        specifier: 'catalog:'
+        version: 2.0.1(prettier@3.7.4)
+      prettier-plugin-embed:
+        specifier: 'catalog:'
+        version: 0.5.1
+      prettier-plugin-sql:
+        specifier: 'catalog:'
+        version: 0.19.2(prettier@3.7.4)
+    devDependencies:
+      '@dariah-eric/dariah-knowledge-base-eslint-config':
+        specifier: workspace:^
+        version: link:../eslint-config
+      '@dariah-eric/dariah-knowledge-base-typescript-config':
+        specifier: workspace:^
+        version: link:../typescript-config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.4
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      node:
+        specifier: runtime:^24.12.0
+        version: runtime:24.12.0
+      prettier:
+        specifier: 'catalog:'
+        version: 3.7.4
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -962,9 +968,43 @@ importers:
         specifier: 'catalog:'
         version: 1.2.0(typescript@5.9.3)
     devDependencies:
+      '@dariah-eric/dariah-knowledge-base-eslint-config':
+        specifier: workspace:^
+        version: link:../eslint-config
+      '@dariah-eric/dariah-knowledge-base-prettier-config':
+        specifier: workspace:^
+        version: link:../prettier-config
+      '@dariah-eric/dariah-knowledge-base-typescript-config':
+        specifier: workspace:^
+        version: link:../typescript-config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.4
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      node:
+        specifier: runtime:^24.12.0
+        version: runtime:24.12.0
+      prettier:
+        specifier: 'catalog:'
+        version: 3.7.4
+      tsx:
+        specifier: 'catalog:'
+        version: 4.21.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  lib/typescript-config:
+    dependencies:
       '@acdh-oeaw/tsconfig':
         specifier: 'catalog:'
         version: 1.5.1(typescript@5.9.3)
+      '@acdh-oeaw/tsconfig-lib':
+        specifier: 'catalog:'
+        version: 1.3.0(typescript@5.9.3)
+    devDependencies:
       '@dariah-eric/dariah-knowledge-base-eslint-config':
         specifier: workspace:^
         version: link:../eslint-config
@@ -983,9 +1023,6 @@ importers:
       prettier:
         specifier: 'catalog:'
         version: 3.7.4
-      tsx:
-        specifier: 'catalog:'
-        version: 4.21.0
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -1011,15 +1048,15 @@ importers:
         specifier: 'catalog:'
         version: 1.2.0(typescript@5.9.3)
     devDependencies:
-      '@acdh-oeaw/tsconfig':
-        specifier: 'catalog:'
-        version: 1.5.1(typescript@5.9.3)
       '@dariah-eric/dariah-knowledge-base-eslint-config':
         specifier: workspace:^
         version: link:../../lib/eslint-config
       '@dariah-eric/dariah-knowledge-base-prettier-config':
         specifier: workspace:^
         version: link:../../lib/prettier-config
+      '@dariah-eric/dariah-knowledge-base-typescript-config':
+        specifier: workspace:^
+        version: link:../../lib/typescript-config
       '@faker-js/faker':
         specifier: 'catalog:'
         version: 10.1.0
@@ -1084,15 +1121,15 @@ importers:
         specifier: 'catalog:'
         version: 1.2.0(typescript@5.9.3)
     devDependencies:
-      '@acdh-oeaw/tsconfig':
-        specifier: 'catalog:'
-        version: 1.5.1(typescript@5.9.3)
       '@dariah-eric/dariah-knowledge-base-eslint-config':
         specifier: workspace:^
         version: link:../../lib/eslint-config
       '@dariah-eric/dariah-knowledge-base-prettier-config':
         specifier: workspace:^
         version: link:../../lib/prettier-config
+      '@dariah-eric/dariah-knowledge-base-typescript-config':
+        specifier: workspace:^
+        version: link:../../lib/typescript-config
       '@faker-js/faker':
         specifier: 'catalog:'
         version: 10.1.0
@@ -1136,15 +1173,15 @@ importers:
         specifier: 'catalog:'
         version: 1.2.0(typescript@5.9.3)
     devDependencies:
-      '@acdh-oeaw/tsconfig':
-        specifier: 'catalog:'
-        version: 1.5.1(typescript@5.9.3)
       '@dariah-eric/dariah-knowledge-base-eslint-config':
         specifier: workspace:^
         version: link:../../lib/eslint-config
       '@dariah-eric/dariah-knowledge-base-prettier-config':
         specifier: workspace:^
         version: link:../../lib/prettier-config
+      '@dariah-eric/dariah-knowledge-base-typescript-config':
+        specifier: workspace:^
+        version: link:../../lib/typescript-config
       '@faker-js/faker':
         specifier: 'catalog:'
         version: 10.1.0
@@ -1227,6 +1264,11 @@ packages:
     resolution: {integrity: sha512-1BetwUt3INSJZmIjaSYPIlpkSFJsJoD7HEUxS7nxB6zukG5Yho1/DJn/V+FryTOdl3EPAucGYR+bKEsiMeOVIQ==}
     peerDependencies:
       stylelint: '>=16.23'
+
+  '@acdh-oeaw/tsconfig-lib@1.3.0':
+    resolution: {integrity: sha512-9fpjKabAqNhQMCYin1isNxRFiDtnn10X3VcFEfrvhA/sVhTVsb8VJ3O4xj43x2B7Suj1DojT/o8faygJzgwXFw==}
+    peerDependencies:
+      typescript: '>=5.8'
 
   '@acdh-oeaw/tsconfig@1.5.1':
     resolution: {integrity: sha512-/tY4cU7Mq6YAxs5cG3ZaLYJfH3k8rmn4kEHw9Yn4lxdPUOQhVyAe1wrqr6+jakWCiZJRFKszcUSH1/M5BkzPeA==}
@@ -7975,6 +8017,10 @@ snapshots:
     transitivePeerDependencies:
       - postcss-html
       - stylelint-order
+
+  '@acdh-oeaw/tsconfig-lib@1.3.0(typescript@5.9.3)':
+    dependencies:
+      typescript: 5.9.3
 
   '@acdh-oeaw/tsconfig@1.5.1(typescript@5.9.3)':
     dependencies:
