@@ -1,8 +1,15 @@
-import { createUrl, createUrlSearchParams, err, isErr, ok, type Result } from "@acdh-oeaw/lib";
+import {
+	createUrl,
+	createUrlSearchParams,
+	err,
+	isErr,
+	ok,
+	request,
+	type Result,
+} from "@acdh-oeaw/lib";
 
 import type { ResourceCollectionDocument } from "../schema";
 import { parseLinkHeader } from "../utils/parse-link-header";
-import { request } from "../utils/request";
 
 type Response = Array<{
 	key: string;

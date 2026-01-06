@@ -1,7 +1,14 @@
-import { createUrl, createUrlSearchParams, err, isErr, ok, type Result } from "@acdh-oeaw/lib";
+import {
+	createUrl,
+	createUrlSearchParams,
+	err,
+	isErr,
+	ok,
+	request,
+	type Result,
+} from "@acdh-oeaw/lib";
 
 import type { ResourceCollectionDocument } from "../schema";
-import { request } from "../utils/request";
 
 interface Response {
 	header: {
