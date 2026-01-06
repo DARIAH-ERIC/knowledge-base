@@ -1,12 +1,12 @@
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import * as v from "valibot";
 
-import { PaginationQuerySchema } from "@/lib/schemas";
+import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const NewsItemBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.NewsItemSelectSchema, ["id", "title", "summary"]).entries,
-		image: v.pick(schema.AssetSelectSchema, ["key"]),
+		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
 	v.description("NewsItem"),
@@ -26,7 +26,7 @@ export type NewsItemList = v.InferOutput<typeof NewsItemListSchema>;
 export const NewsItemSchema = v.pipe(
 	v.object({
 		...v.pick(schema.NewsItemSelectSchema, ["id", "title", "summary"]).entries,
-		image: v.pick(schema.AssetSelectSchema, ["key"]),
+		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
 	v.description("NewsItem"),
@@ -39,10 +39,8 @@ export const GetNews = {
 	QuerySchema: PaginationQuerySchema,
 	ResponseSchema: v.pipe(
 		v.object({
+			...PaginatedResponseSchema.entries,
 			data: NewsItemListSchema,
-			limit: v.number(),
-			offset: v.number(),
-			total: v.number(),
 		}),
 		v.description("Paginated list of news"),
 		v.metadata({ ref: "GetNewsResponse" }),

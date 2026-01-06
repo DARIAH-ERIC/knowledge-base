@@ -5,8 +5,8 @@
 
 @plugin "tailwindcss-react-aria-components";
 
-@custom-variant base {
-	@layer base {
+@custom-variant ui {
+	@layer components {
 		@slot;
 	}
 }
@@ -411,7 +411,7 @@
 
 @utility container {
 	width: 100%;
-	max-width: var(--breakpoint-2xl);
+	max-width: var(--breakpoint-3xl);
 	margin-inline: auto;
 }
 

@@ -1,12 +1,12 @@
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import * as v from "valibot";
 
-import { PaginationQuerySchema } from "@/lib/schemas";
+import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const PageBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.PageSelectSchema, ["id", "title", "summary"]).entries,
-		image: v.pick(schema.AssetSelectSchema, ["key"]),
+		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
 	v.description("Page"),
@@ -26,7 +26,7 @@ export type PageList = v.InferOutput<typeof PageListSchema>;
 export const PageSchema = v.pipe(
 	v.object({
 		...v.pick(schema.PageSelectSchema, ["id", "title", "summary"]).entries,
-		image: v.pick(schema.AssetSelectSchema, ["key"]),
+		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
 	v.description("Page"),
@@ -39,10 +39,8 @@ export const GetPages = {
 	QuerySchema: PaginationQuerySchema,
 	ResponseSchema: v.pipe(
 		v.object({
+			...PaginatedResponseSchema.entries,
 			data: PageListSchema,
-			limit: v.number(),
-			offset: v.number(),
-			total: v.number(),
 		}),
 		v.description("Paginated list of pages"),
 		v.metadata({ ref: "GetPagesResponse" }),

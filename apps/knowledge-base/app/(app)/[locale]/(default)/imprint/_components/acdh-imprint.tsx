@@ -10,7 +10,10 @@ async function getImprintHtml(locale: IntlLocale): Promise<string> {
 	const url = createUrl({
 		baseUrl: env.NEXT_PUBLIC_APP_IMPRINT_SERVICE_BASE_URL,
 		pathname: `/${String(env.NEXT_PUBLIC_APP_SERVICE_ID)}`,
-		searchParams: createUrlSearchParams({ locale }),
+		searchParams: createUrlSearchParams({
+			locale,
+			redmine: env.NEXT_PUBLIC_APP_IMPRINT_CUSTOM_CONFIG,
+		}),
 	});
 
 	const result = await request(url, { responseType: "text" });

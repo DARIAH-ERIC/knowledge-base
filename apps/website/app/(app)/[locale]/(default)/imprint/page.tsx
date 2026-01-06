@@ -6,7 +6,9 @@ import type { ReactNode } from "react";
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { AcdhImprint } from "@/app/(app)/[locale]/(default)/imprint/_components/acdh-imprint";
 
-export async function generateMetadata(): Promise<Metadata> {
+interface ImprintPageProps extends PageProps<"/[locale]/imprint"> {}
+
+export async function generateMetadata(_props: Readonly<ImprintPageProps>): Promise<Metadata> {
 	const t = await getTranslations("ImprintPage");
 
 	const metadata: Metadata = {
@@ -16,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 	return metadata;
 }
 
-export default function ImprintPage(): ReactNode {
+export default function ImprintPage(_props: Readonly<ImprintPageProps>): ReactNode {
 	const locale = useLocale();
 	const t = useTranslations("ImprintPage");
 

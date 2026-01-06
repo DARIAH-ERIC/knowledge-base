@@ -6,8 +6,18 @@ import { getDocuments as getZoteroDocuments } from "./documents/zotero";
 import type { ResourceCollectionDocument } from "./schema";
 
 const formatters = {
-	duration: new Intl.NumberFormat("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-	items: new Intl.NumberFormat("en-GB"),
+	duration(ms: number) {
+		const value = Math.abs(ms);
+		return new Intl.DurationFormat("en-GB").format({
+			hours: Math.floor(value / 3_600_000),
+			minutes: Math.floor((value % 3_600_000) / 60_000),
+			seconds: Math.floor((value % 60_000) / 1000),
+			milliseconds: value % 1000,
+		});
+	},
+	items(count: number) {
+		return new Intl.NumberFormat("en-GB").format(count);
+	},
 };
 
 export async function getDocuments(): Promise<Result<Array<ResourceCollectionDocument>, Error>> {
@@ -30,10 +40,10 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 	documents.push(...openAireResponse.value);
 
 	let end = performance.now();
-	let duration = formatters.duration.format(end - start);
-	let count = formatters.items.format(openAireResponse.value.length);
+	let duration = formatters.duration(end - start);
+	let count = formatters.items(openAireResponse.value.length);
 
-	log.success(`Retrieved ${count} documents from OpenAIRE in ${duration} ms.`);
+	log.success(`Retrieved ${count} documents from OpenAIRE in ${duration}.`);
 
 	/** ========================================================================================== */
 
@@ -54,10 +64,10 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 	documents.push(...sshOpenMarketplaceResponse.value);
 
 	end = performance.now();
-	duration = formatters.duration.format(end - start);
-	count = formatters.items.format(sshOpenMarketplaceResponse.value.length);
+	duration = formatters.duration(end - start);
+	count = formatters.items(sshOpenMarketplaceResponse.value.length);
 
-	log.success(`Retrieved ${count} documents from SSH Open Marketplace in ${duration} ms.`);
+	log.success(`Retrieved ${count} documents from SSH Open Marketplace in ${duration}.`);
 
 	/** ========================================================================================== */
 
@@ -74,10 +84,10 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 	documents.push(...zoteroResponse.value);
 
 	end = performance.now();
-	duration = formatters.duration.format(end - start);
-	count = formatters.items.format(zoteroResponse.value.length);
+	duration = formatters.duration(end - start);
+	count = formatters.items(zoteroResponse.value.length);
 
-	log.success(`Retrieved ${count} documents from Zotero in ${duration} ms.`);
+	log.success(`Retrieved ${count} documents from Zotero in ${duration}.`);
 
 	/** ========================================================================================== */
 

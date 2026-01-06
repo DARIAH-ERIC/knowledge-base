@@ -2,8 +2,10 @@
 
 import { count, eq } from "@dariah-eric/dariah-knowledge-base-database-client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
+import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
 
 import type { Database } from "@/middlewares/db";
+import { imageWidth } from "~/config/api.config";
 
 interface GetPagesParams {
 	/** @default 10 */
@@ -15,7 +17,7 @@ interface GetPagesParams {
 export async function getPages(db: Database, params: GetPagesParams) {
 	const { limit = 10, offset = 0 } = params;
 
-	const [data, rows] = await Promise.all([
+	const [items, aggregate] = await Promise.all([
 		db.query.pages.findMany({
 			where: {
 				entity: {
@@ -56,7 +58,16 @@ export async function getPages(db: Database, params: GetPagesParams) {
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
-	const total = rows.at(0)?.total ?? 0;
+	const total = aggregate.at(0)?.total ?? 0;
+
+	const data = items.map((item) => {
+		const image =
+			item.image != null
+				? client.urls.generate(item.image.key, { width: imageWidth.preview })
+				: null;
+
+		return { ...item, image };
+	});
 
 	return { data, limit, offset, total };
 }
@@ -70,7 +81,7 @@ interface GetPageByIdParams {
 export async function getPageById(db: Database, params: GetPageByIdParams) {
 	const { id } = params;
 
-	const data = await db.query.pages.findFirst({
+	const item = await db.query.pages.findFirst({
 		where: {
 			id,
 			entity: {
@@ -98,9 +109,16 @@ export async function getPageById(db: Database, params: GetPageByIdParams) {
 		},
 	});
 
-	if (data == null) {
+	if (item == null) {
 		return null;
 	}
+
+	const image =
+		item.image != null
+			? client.urls.generate(item.image.key, { width: imageWidth.featured })
+			: null;
+
+	const data = { ...item, image };
 
 	return data;
 }
@@ -114,7 +132,7 @@ interface GetPageBySlugParams {
 export async function getPageBySlug(db: Database, params: GetPageBySlugParams) {
 	const { slug } = params;
 
-	const data = await db.query.pages.findFirst({
+	const item = await db.query.pages.findFirst({
 		where: {
 			entity: {
 				slug,
@@ -142,9 +160,16 @@ export async function getPageBySlug(db: Database, params: GetPageBySlugParams) {
 		},
 	});
 
-	if (data == null) {
+	if (item == null) {
 		return null;
 	}
+
+	const image =
+		item.image != null
+			? client.urls.generate(item.image.key, { width: imageWidth.featured })
+			: null;
+
+	const data = { ...item, image };
 
 	return data;
 }

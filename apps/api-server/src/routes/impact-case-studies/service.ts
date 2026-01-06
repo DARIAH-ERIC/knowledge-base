@@ -2,8 +2,10 @@
 
 import { count, eq } from "@dariah-eric/dariah-knowledge-base-database-client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
+import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
 
 import type { Database } from "@/middlewares/db";
+import { imageWidth } from "~/config/api.config";
 
 interface GetImpactCaseStudiesParams {
 	/** @default 10 */
@@ -15,7 +17,7 @@ interface GetImpactCaseStudiesParams {
 export async function getImpactCaseStudies(db: Database, params: GetImpactCaseStudiesParams) {
 	const { limit = 10, offset = 0 } = params;
 
-	const [data, rows] = await Promise.all([
+	const [items, aggregate] = await Promise.all([
 		db.query.impactCaseStudies.findMany({
 			where: {
 				entity: {
@@ -56,7 +58,13 @@ export async function getImpactCaseStudies(db: Database, params: GetImpactCaseSt
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
-	const total = rows.at(0)?.total ?? 0;
+	const total = aggregate.at(0)?.total ?? 0;
+
+	const data = items.map((item) => {
+		const image = client.urls.generate(item.image.key, { width: imageWidth.preview });
+
+		return { ...item, image };
+	});
 
 	return { data, limit, offset, total };
 }
@@ -70,7 +78,7 @@ interface GetImpactCaseStudyByIdParams {
 export async function getImpactCaseStudyById(db: Database, params: GetImpactCaseStudyByIdParams) {
 	const { id } = params;
 
-	const data = await db.query.impactCaseStudies.findFirst({
+	const item = await db.query.impactCaseStudies.findFirst({
 		where: {
 			id,
 			entity: {
@@ -88,8 +96,7 @@ export async function getImpactCaseStudyById(db: Database, params: GetImpactCase
 			contributors: {
 				columns: {
 					id: true,
-					firstName: true,
-					lastName: true,
+					name: true,
 				},
 				with: {
 					image: {
@@ -112,9 +119,19 @@ export async function getImpactCaseStudyById(db: Database, params: GetImpactCase
 		},
 	});
 
-	if (data == null) {
+	if (item == null) {
 		return null;
 	}
+
+	const contributors = item.contributors.map((contributor) => {
+		const image = client.urls.generate(contributor.image.key, { width: imageWidth.avatar });
+
+		return { ...contributor, image };
+	});
+
+	const image = client.urls.generate(item.image.key, { width: imageWidth.featured });
+
+	const data = { ...item, contributors, image };
 
 	return data;
 }
@@ -131,7 +148,7 @@ export async function getImpactCaseStudyBySlug(
 ) {
 	const { slug } = params;
 
-	const data = await db.query.impactCaseStudies.findFirst({
+	const item = await db.query.impactCaseStudies.findFirst({
 		where: {
 			entity: {
 				slug,
@@ -149,8 +166,7 @@ export async function getImpactCaseStudyBySlug(
 			contributors: {
 				columns: {
 					id: true,
-					firstName: true,
-					lastName: true,
+					name: true,
 				},
 				with: {
 					image: {
@@ -173,9 +189,19 @@ export async function getImpactCaseStudyBySlug(
 		},
 	});
 
-	if (data == null) {
+	if (item == null) {
 		return null;
 	}
+
+	const contributors = item.contributors.map((contributor) => {
+		const image = client.urls.generate(contributor.image.key, { width: imageWidth.avatar });
+
+		return { ...contributor, image };
+	});
+
+	const image = client.urls.generate(item.image.key, { width: imageWidth.featured });
+
+	const data = { ...item, contributors, image };
 
 	return data;
 }

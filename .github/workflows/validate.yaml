@@ -44,11 +44,13 @@ jobs:
       IMGPROXY_SALT: "b803f8f06b44263bd41dfee1d0e5e958"
       MAILPIT_API_BASE_URL: "http://localhost:8025"
       NEXT_PUBLIC_APP_BASE_URL: "http://localhost:3001"
+      NEXT_PUBLIC_APP_IMPRINT_CUSTOM_CONFIG: "disabled"
       NEXT_PUBLIC_APP_IMPRINT_SERVICE_BASE_URL: "${{ vars.NEXT_PUBLIC_IMPRINT_SERVICE_BASE_URL }}"
       NEXT_PUBLIC_APP_MATOMO_BASE_URL: "${{ vars.NEXT_PUBLIC_MATOMO_BASE_URL }}"
       NEXT_PUBLIC_APP_MATOMO_ID: "${{ vars.NEXT_PUBLIC_APP_MATOMO_ID }}"
       NEXT_PUBLIC_APP_SERVICE_ID: "${{ vars.APP_SERVICE_ID }}"
       NEXT_PUBLIC_WEBSITE_BASE_URL: "http://localhost:3002"
+      NEXT_PUBLIC_WEBSITE_IMPRINT_CUSTOM_CONFIG: "disabled"
       NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL:
         "${{ vars.NEXT_PUBLIC_IMPRINT_SERVICE_BASE_URL }}"
       NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL: "${{ vars.NEXT_PUBLIC_MATOMO_BASE_URL }}"
@@ -95,16 +97,33 @@ jobs:
         run: pnpm run types:check
 
       - name: Start services
-        run: pnpm run dev:services:up postgres
+        run: pnpm run dev:services:up postgres imgproxy
 
-      - name: Push database schema
-        run: pnpm run db:push
+      - name: Apply database migrations
+        run: pnpm run db:push && pnpm run db:migrations:apply
 
       - name: Seed database
         run: pnpm run db:seed
 
+      - name: Create object store bucket
+        run: pnpm run image-service:buckets:create
+
+      - name: Seed object store
+        run: pnpm run image-service:buckets:seed
+
       - name: Test
         run: pnpm run test
+
+      # https://nextjs.org/docs/pages/building-your-application/deploying/ci-build-caching#github-actions
+      # - name: Cache Next.js build output
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: "${{ github.workspace }}/.next/cache"
+      #     key:
+      #       "${{ matrix.os }}-${{ matrix.node-version }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}"
+
+      - name: Build app
+        run: pnpm run build
 
       - name: Get playwright version
         run: |
@@ -127,22 +146,11 @@ jobs:
         if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
         run: pnpm exec playwright install-deps
 
-      # https://nextjs.org/docs/pages/building-your-application/deploying/ci-build-caching#github-actions
-      # - name: Cache Next.js build output
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: "${{ github.workspace }}/.next/cache"
-      #     key:
-      #       "${{ matrix.os }}-${{ matrix.node-version }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}"
-
-      - name: Build app
-        run: pnpm run build
-
       - name: Run e2e tests
         run: pnpm run test:e2e
 
       - name: Stop services
-        run: pnpm run dev:services:down postgres
+        run: pnpm run dev:services:down
 
       - uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}

@@ -43,7 +43,7 @@
 		"types:check": "pnpm run --recursive types:check"
 	},
 	"devDependencies": {
-		"@acdh-oeaw/prettier-config": "catalog:",
+		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
 		"@dotenvx/dotenvx": "catalog:",
 		"@playwright/test": "catalog:",
 		"is-in-ci": "catalog:",
@@ -54,10 +54,10 @@
 		"turbo": "catalog:",
 		"typescript": "catalog:"
 	},
-	"prettier": "@acdh-oeaw/prettier-config",
 	"lint-staged": {
 		"*": "prettier --cache --cache-location ./.prettiercache --ignore-unknown --write"
 	},
+	"prettier": "@dariah-eric/dariah-knowledge-base-prettier-config",
 	"simple-git-hooks": {
 		"pre-commit": "pnpm exec lint-staged"
 	}

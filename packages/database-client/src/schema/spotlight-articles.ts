@@ -6,16 +6,16 @@ import { assets } from "./assets";
 import { entities } from "./entities";
 
 export const spotlightArticles = p.pgTable("spotlight_articles", {
-	id: f
-		.uuidv7("id")
+	id: p
+		.uuid("id")
 		.primaryKey()
 		.references(() => {
 			return entities.id;
 		}),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
-	imageId: f
-		.uuidv7("image_id")
+	imageId: p
+		.uuid("image_id")
 		.notNull()
 		.references(() => {
 			return assets.id;

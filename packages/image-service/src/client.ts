@@ -10,6 +10,8 @@ import { client as minio } from "./minio-client";
 
 const bucketName = env.S3_BUCKET_NAME;
 
+export type { ImageUrlOptions };
+
 export interface Client {
 	bucket: {
 		name: string;
@@ -32,6 +34,7 @@ export interface Client {
 export function createClient(): Client {
 	const images = {
 		async get() {
+			// TODO: `@aws-sdk/client-s3` has `max_keys` option and `listObjectsV2WithMetadata` method.
 			const stream = minio.listObjectsV2(bucketName);
 
 			const images: Array<{ objectName: string }> = [];

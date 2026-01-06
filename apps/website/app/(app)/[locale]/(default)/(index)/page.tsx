@@ -4,7 +4,9 @@ import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 
-export function generateMetadata(): Metadata {
+interface IndexPageProps extends PageProps<"/[locale]"> {}
+
+export function generateMetadata(_props: Readonly<IndexPageProps>): Metadata {
 	const metadata: Metadata = {
 		/**
 		 * Fall back to `title.default` from `layout.tsx`.
@@ -17,7 +19,7 @@ export function generateMetadata(): Metadata {
 	return metadata;
 }
 
-export default function IndexPage(): ReactNode {
+export default function IndexPage(_props: Readonly<IndexPageProps>): ReactNode {
 	const t = useTranslations("IndexPage");
 
 	return (

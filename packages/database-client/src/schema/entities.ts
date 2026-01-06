@@ -3,6 +3,7 @@ import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
 
 import * as f from "../fields";
+import { uuidv7 } from "../functions";
 
 export const entityTypesEnum = [
 	"events",
@@ -16,8 +17,8 @@ export const entityTypesEnum = [
 export const entityTypes = p.pgTable(
 	"entity_types",
 	{
-		id: f.uuidv7("id").primaryKey(),
-		type: p.text("type", { enum: entityTypesEnum }).notNull(),
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		type: p.text("type", { enum: entityTypesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
 	(t) => {
@@ -37,8 +38,8 @@ export const entityStatusEnum = ["draft", "published"] as const;
 export const entityStatus = p.pgTable(
 	"entity_status",
 	{
-		id: f.uuidv7("id").primaryKey(),
-		type: p.text("type", { enum: entityStatusEnum }).notNull(),
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		type: p.text("type", { enum: entityStatusEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
 	(t) => {
@@ -56,16 +57,16 @@ export const EntityStatusUpdateSchema = createUpdateSchema(entityStatus);
 export const entities = p.pgTable(
 	"entities",
 	{
-		id: f.uuidv7("id").primaryKey(),
-		typeId: f
-			.uuidv7("type_id")
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		typeId: p
+			.uuid("type_id")
 			.notNull()
 			.references(() => {
 				return entityTypes.id;
 			}),
-		documentId: f.uuidv7("document_id").notNull(),
-		statusId: f
-			.uuidv7("status_id")
+		documentId: p.uuid("document_id").notNull().default(uuidv7()),
+		statusId: p
+			.uuid("status_id")
 			.notNull()
 			.references(() => {
 				return entityStatus.id;
@@ -91,9 +92,9 @@ export const EntityUpdateSchema = createUpdateSchema(entities);
 export const fields = p.pgTable(
 	"fields",
 	{
-		id: f.uuidv7("id").primaryKey(),
-		entityId: f
-			.uuidv7("entity_id")
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		entityId: p
+			.uuid("entity_id")
 			.notNull()
 			.references(() => {
 				return entities.id;
@@ -116,8 +117,8 @@ export const FieldUpdateSchema = createUpdateSchema(fields);
 export const entitiesToResources = p.pgTable(
 	"entities_to_resources",
 	{
-		entityId: f
-			.uuidv7("entity_id")
+		entityId: p
+			.uuid("entity_id")
 			.notNull()
 			.references(() => {
 				return entities.id;
@@ -138,14 +139,14 @@ export const entitiesToResources = p.pgTable(
 export const entitiesToEntities = p.pgTable(
 	"entities_to_entities",
 	{
-		entityId: f
-			.uuidv7("entity_id")
+		entityId: p
+			.uuid("entity_id")
 			.notNull()
 			.references(() => {
 				return entities.id;
 			}),
-		relatedEntityId: f
-			.uuidv7("related_entity_id")
+		relatedEntityId: p
+			.uuid("related_entity_id")
 			.notNull()
 			.references(() => {
 				return entities.id;

@@ -7,16 +7,16 @@ import { entities } from "./entities";
 import { persons } from "./persons";
 
 export const impactCaseStudies = p.pgTable("impact_case_studies", {
-	id: f
-		.uuidv7("id")
+	id: p
+		.uuid("id")
 		.primaryKey()
 		.references(() => {
 			return entities.id;
 		}),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
-	imageId: f
-		.uuidv7("image_id")
+	imageId: p
+		.uuid("image_id")
 		.notNull()
 		.references(() => {
 			return assets.id;
@@ -34,14 +34,14 @@ export const ImpactCaseStudyUpdateSchema = createUpdateSchema(impactCaseStudies)
 export const impactCaseStudiesToPersons = p.pgTable(
 	"impact_case_studies_to_persons",
 	{
-		impactCaseStudyId: f
-			.uuidv7("impact_case_study_id")
+		impactCaseStudyId: p
+			.uuid("impact_case_study_id")
 			.notNull()
 			.references(() => {
 				return impactCaseStudies.id;
 			}),
-		personId: f
-			.uuidv7("person_id")
+		personId: p
+			.uuid("person_id")
 			.notNull()
 			.references(() => {
 				return persons.id;

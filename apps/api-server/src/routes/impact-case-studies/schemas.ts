@@ -1,12 +1,12 @@
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import * as v from "valibot";
 
-import { PaginationQuerySchema } from "@/lib/schemas";
+import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const ImpactCaseStudyBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.ImpactCaseStudySelectSchema, ["id", "title", "summary"]).entries,
-		image: v.pick(schema.AssetSelectSchema, ["key"]),
+		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
 	v.description("Impact case study"),
@@ -26,11 +26,11 @@ export type ImpactCaseStudyList = v.InferOutput<typeof ImpactCaseStudyListSchema
 export const ImpactCaseStudySchema = v.pipe(
 	v.object({
 		...v.pick(schema.ImpactCaseStudySelectSchema, ["id", "title", "summary"]).entries,
-		image: v.pick(schema.AssetSelectSchema, ["key"]),
+		image: v.object({ url: v.string() }),
 		contributors: v.array(
 			v.object({
-				...v.pick(schema.PersonSelectSchema, ["id", "firstName", "lastName"]).entries,
-				image: v.pick(schema.AssetSelectSchema, ["key"]),
+				...v.pick(schema.PersonSelectSchema, ["id", "name"]).entries,
+				image: v.object({ url: v.string() }),
 			}),
 		),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
@@ -45,10 +45,8 @@ export const GetImpactCaseStudies = {
 	QuerySchema: PaginationQuerySchema,
 	ResponseSchema: v.pipe(
 		v.object({
+			...PaginatedResponseSchema.entries,
 			data: ImpactCaseStudyListSchema,
-			limit: v.number(),
-			offset: v.number(),
-			total: v.number(),
 		}),
 		v.description("Paginated list of impact case studies"),
 		v.metadata({ ref: "GetImpactCaseStudiesResponse" }),

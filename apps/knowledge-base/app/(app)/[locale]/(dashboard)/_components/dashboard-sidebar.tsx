@@ -129,6 +129,14 @@ export function DashboardSidebar(props: Readonly<ComponentProps<typeof Sidebar>>
 								<QuestionMarkCircleIcon />
 								<SidebarLabel>Working groups</SidebarLabel>
 							</SidebarItem>
+
+							<SidebarItem
+								href="/dashboard/administrator/working-group-reports"
+								tooltip="Working group reports"
+							>
+								<QuestionMarkCircleIcon />
+								<SidebarLabel>Working group reports</SidebarLabel>
+							</SidebarItem>
 						</SidebarDisclosurePanel>
 					</SidebarDisclosure>
 
@@ -209,6 +217,16 @@ export function DashboardSidebar(props: Readonly<ComponentProps<typeof Sidebar>>
 								<SidebarLabel>Metadata</SidebarLabel>
 							</SidebarItem>
 
+							<SidebarItem href="/dashboard/website/navigation" tooltip="Navigation">
+								<QuestionMarkCircleIcon />
+								<SidebarLabel>Navigation</SidebarLabel>
+							</SidebarItem>
+
+							<SidebarItem href="/dashboard/website/assets" tooltip="Assets">
+								<QuestionMarkCircleIcon />
+								<SidebarLabel>Assets</SidebarLabel>
+							</SidebarItem>
+
 							<SidebarItem href="/dashboard/website/pages" tooltip="Pages">
 								<QuestionMarkCircleIcon />
 								<SidebarLabel>Pages</SidebarLabel>
@@ -230,6 +248,14 @@ export function DashboardSidebar(props: Readonly<ComponentProps<typeof Sidebar>>
 							>
 								<QuestionMarkCircleIcon />
 								<SidebarLabel>Impact case studies</SidebarLabel>
+							</SidebarItem>
+
+							<SidebarItem
+								href="/dashboard/website/spotlight-articles"
+								tooltip="Spotlight articles"
+							>
+								<QuestionMarkCircleIcon />
+								<SidebarLabel>Spotlight articles</SidebarLabel>
 							</SidebarItem>
 						</SidebarDisclosurePanel>
 					</SidebarDisclosure>

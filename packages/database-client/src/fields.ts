@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { sql } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 
-export function uuidv7(name: string) {
-	return p.uuid(name).default(sql`uuidv7()`);
-}
+import { now } from "./functions";
 
 export function timestamp(name: string) {
 	return p.timestamp(name, {
@@ -22,7 +19,7 @@ export function timestamps() {
 			.notNull()
 			.defaultNow()
 			.$onUpdate(() => {
-				return sql`now()`;
+				return now();
 			}),
 		// deletedAt: timestamp("deleted_at"),
 	};
