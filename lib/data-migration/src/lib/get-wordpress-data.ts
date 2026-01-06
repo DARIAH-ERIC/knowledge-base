@@ -15,17 +15,113 @@ import type {
 import { getAll } from "./get-all";
 import { keyById } from "./key-by-id";
 
+interface WP_Event {
+	id: number;
+	global_id: string;
+	global_id_lineage: Array<string>;
+	author: string;
+	status: string;
+	date: Date;
+	date_utc: Date;
+	modified: Date;
+	modified_utc: Date;
+	url: string;
+	rest_url: string;
+	title: string;
+	description: string;
+	excerpt: string;
+	slug: string;
+	image: boolean;
+	all_day: boolean;
+	start_date: Date;
+	start_date_details: DateDetails;
+	end_date: Date;
+	end_date_details: DateDetails;
+	utc_start_date: Date;
+	utc_start_date_details: DateDetails;
+	utc_end_date: Date;
+	utc_end_date_details: DateDetails;
+	timezone: string;
+	timezone_abbr: string;
+	cost: string;
+	cost_details: CostDetails;
+	website: string;
+	show_map: boolean;
+	show_map_link: boolean;
+	hide_from_listings: boolean;
+	sticky: boolean;
+	featured: boolean;
+	categories: Array<Category>;
+	tags: Array<unknown>;
+	venue: Venue;
+	organizer: Array<unknown>;
+}
+
+export interface Category {
+	name: string;
+	slug: string;
+	term_group: number;
+	term_taxonomy_id: number;
+	taxonomy: string;
+	description: string;
+	parent: number;
+	count: number;
+	filter: string;
+	id: number;
+	urls: Urls;
+}
+
+export interface Urls {
+	self: string;
+	collection: string;
+}
+
+export interface CostDetails {
+	currency_symbol: string;
+	currency_position: string;
+	values: Array<unknown>;
+}
+
+export interface DateDetails {
+	year: string;
+	month: string;
+	day: string;
+	hour: string;
+	minutes: string;
+	seconds: string;
+}
+
+export interface Venue {
+	id: number;
+	author: string;
+	status: string;
+	date: Date;
+	date_utc: Date;
+	modified: Date;
+	modified_utc: Date;
+	url: string;
+	venue: string;
+	slug: string;
+	country: string;
+	show_map: boolean;
+	show_map_link: boolean;
+	global_id: string;
+	global_id_lineage: Array<string>;
+}
+
 export interface WordPressData {
 	categories: Record<WP_REST_API_Category["id"], WP_REST_API_Category>;
+	events: Record<WP_Event["id"], WP_Event>;
 	pages: Record<WP_REST_API_Page["id"], WP_REST_API_Page>;
 	posts: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
 	media: Record<WP_REST_API_Attachment["id"], WP_REST_API_Attachment>;
-	tags: Record<WP_REST_API_Category["id"], WP_REST_API_Tag>;
+	tags: Record<WP_REST_API_Tag["id"], WP_REST_API_Tag>;
 }
 
 export async function getWordPressData(apiBaseUrl: string): Promise<WordPressData> {
-	const [categories, pages, posts, media, tags] = await Promise.all([
+	const [categories, events, pages, posts, media, tags] = await Promise.all([
 		getCategories(apiBaseUrl),
+		getEvents(apiBaseUrl),
 		getPages(apiBaseUrl),
 		getPosts(apiBaseUrl),
 		getMedia(apiBaseUrl),
@@ -34,6 +130,7 @@ export async function getWordPressData(apiBaseUrl: string): Promise<WordPressDat
 
 	const data: WordPressData = {
 		categories: keyById(categories),
+		events: keyById(events),
 		pages: keyById(pages),
 		posts: keyById(posts),
 		media: keyById(media),
@@ -53,10 +150,20 @@ function getCategories(baseUrl: string): Promise<WP_REST_API_Categories> {
 	return getAll(url);
 }
 
-function getTags(baseUrl: string): Promise<WP_REST_API_Tags> {
+function getEvents(baseUrl: string): Promise<Array<WP_Event>> {
 	const url = createUrl({
 		baseUrl,
-		pathname: "/wp-json/wp/v2/tags",
+		pathname: "/wp-json/tribe/events/v1/events",
+		searchParams: createUrlSearchParams({ per_page: 100, start_date: "2000-01-01" }),
+	});
+
+	return getAll(url, "x-tec-totalpages");
+}
+
+function getMedia(baseUrl: string): Promise<WP_REST_API_Attachments> {
+	const url = createUrl({
+		baseUrl,
+		pathname: "/wp-json/wp/v2/media",
 		searchParams: createUrlSearchParams({ per_page: 100 }),
 	});
 
@@ -83,10 +190,10 @@ function getPosts(baseUrl: string): Promise<WP_REST_API_Posts> {
 	return getAll(url);
 }
 
-function getMedia(baseUrl: string): Promise<WP_REST_API_Attachments> {
+function getTags(baseUrl: string): Promise<WP_REST_API_Tags> {
 	const url = createUrl({
 		baseUrl,
-		pathname: "/wp-json/wp/v2/media",
+		pathname: "/wp-json/wp/v2/tags",
 		searchParams: createUrlSearchParams({ per_page: 100 }),
 	});
 
