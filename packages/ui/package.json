@@ -52,15 +52,11 @@
 		"react-dom": "catalog:"
 	},
 	"devDependencies": {
-		"@acdh-oeaw/eslint-config": "catalog:",
-		"@acdh-oeaw/eslint-config-node": "catalog:",
-		"@acdh-oeaw/eslint-config-react": "catalog:",
-		"@acdh-oeaw/eslint-config-storybook": "catalog:",
-		"@acdh-oeaw/eslint-config-tailwindcss": "catalog:",
-		"@acdh-oeaw/prettier-config": "catalog:",
 		"@acdh-oeaw/stylelint-config": "catalog:",
-		"@acdh-oeaw/tsconfig": "catalog:",
 		"@chromatic-com/storybook": "catalog:",
+		"@dariah-eric/dariah-knowledge-base-eslint-config": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-typescript-config": "workspace:^",
 		"@fontsource-variable/fira-code": "catalog:",
 		"@fontsource-variable/inter": "catalog:",
 		"@storybook/addon-a11y": "catalog:",
@@ -76,12 +72,6 @@
 		"@vitest/browser-playwright": "catalog:",
 		"@vitest/coverage-v8": "catalog:",
 		"eslint": "catalog:",
-		"eslint-config-flat-gitignore": "catalog:",
-		"eslint-config-turbo": "catalog:",
-		"eslint-plugin-check-file": "catalog:",
-		"eslint-plugin-perfectionist": "catalog:",
-		"eslint-plugin-unicorn": "catalog:",
-		"globals": "catalog:",
 		"npm-run-all2": "catalog:",
 		"playwright": "catalog:",
 		"prettier": "catalog:",
@@ -120,7 +110,7 @@
 			"@tailwindcss/postcss": {}
 		}
 	},
-	"prettier": "@acdh-oeaw/prettier-config",
+	"prettier": "@dariah-eric/dariah-knowledge-base-prettier-config",
 	"stylelint": {
 		"extends": "@acdh-oeaw/stylelint-config"
 	}

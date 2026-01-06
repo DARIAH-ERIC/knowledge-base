@@ -15,9 +15,17 @@
 	},
 	"packageManager": "pnpm@10.27.0",
 	"exports": {
+		"./base": "./src/base.ts",
 		"./drizzle": "./src/drizzle.ts",
+		"./naming-conventions": "./src/naming-conventions.ts",
+		"./naming-conventions-next": "./src/naming-conventions-next.ts",
 		"./next": "./src/next.ts",
-		"./node": "./src/node.ts"
+		"./node": "./src/node.ts",
+		"./playwright": "./src/playwright.ts",
+		"./react": "./src/react.ts",
+		"./storybook": "./src/storybook.ts",
+		"./tailwindcss": "./src/tailwindcss.ts",
+		"./turbo": "./src/turbo.ts"
 	},
 	"sideEffects": false,
 	"scripts": {
@@ -33,8 +41,10 @@
 		"@acdh-oeaw/eslint-config-node": "catalog:",
 		"@acdh-oeaw/eslint-config-playwright": "catalog:",
 		"@acdh-oeaw/eslint-config-react": "catalog:",
+		"@acdh-oeaw/eslint-config-storybook": "catalog:",
 		"@acdh-oeaw/eslint-config-tailwindcss": "catalog:",
 		"eslint-config-flat-gitignore": "catalog:",
+		"eslint-config-turbo": "catalog:",
 		"eslint-plugin-check-file": "catalog:",
 		"eslint-plugin-drizzle": "catalog:",
 		"eslint-plugin-perfectionist": "catalog:",

@@ -8,6 +8,8 @@
 		"declarationMap": true,
 		"emitDeclarationOnly": true,
 		"noEmit": false,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
 		"outDir": "${configDir}/dist"
 	},
 	"files": ["../types/intl-duration-format.d.ts"]
