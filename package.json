@@ -40,7 +40,8 @@
 		"test:e2e": "pnpm run --recursive test:e2e",
 		"test:e2e:install": "playwright install --with-deps",
 		"test:e2e:update-snapshots": "pnpm run --recursive test:e2e:update-snapshots",
-		"types:check": "pnpm run --recursive types:check"
+		"types:check": "pnpm run --recursive types:check",
+		"wordpress:migrate": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-data-migration\" run migrate"
 	},
 	"devDependencies": {
 		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",

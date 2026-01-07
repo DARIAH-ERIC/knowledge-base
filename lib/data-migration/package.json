@@ -27,6 +27,7 @@
 		"@acdh-oeaw/lib": "catalog:",
 		"@dariah-eric/dariah-knowledge-base-database-client": "workspace:^",
 		"@dariah-eric/dariah-knowledge-base-image-service": "workspace:^",
+		"@sindresorhus/slugify": "catalog:",
 		"valibot": "catalog:"
 	},
 	"devDependencies": {

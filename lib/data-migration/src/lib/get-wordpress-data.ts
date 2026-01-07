@@ -157,7 +157,10 @@ function getEvents(baseUrl: string): Promise<Array<WP_Event>> {
 		searchParams: createUrlSearchParams({ per_page: 100, start_date: "2000-01-01" }),
 	});
 
-	return getAll(url, "x-tec-totalpages");
+	return getAll(url, "x-tec-totalpages", (response) => {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+		return response.events as Array<WP_Event>;
+	});
 }
 
 function getMedia(baseUrl: string): Promise<WP_REST_API_Attachments> {
