@@ -3,16 +3,31 @@
 import { Readable } from "node:stream";
 import type { ReadableStream } from "node:stream/web";
 
+import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
 import {
 	client,
 	type ImageUrlOptions,
 } from "@dariah-eric/dariah-knowledge-base-image-service/client";
 
-export async function getAssets(options: ImageUrlOptions) {
-	const { images } = await client.images.get();
+interface GetAssetsParams {
+	imageUrlOptions: ImageUrlOptions;
+	limit: number;
+	offset: number;
+}
 
-	const urls = images.map((image) => {
-		const { url } = client.urls.generate(image.objectName, options);
+export async function getAssets(params: GetAssetsParams) {
+	const { limit, offset, imageUrlOptions } = params;
+
+	const assets = await db.query.assets.findMany({
+		orderBy: {
+			updatedAt: "desc",
+		},
+		limit,
+		offset,
+	});
+
+	const urls = assets.map((asset) => {
+		const { url } = client.urls.generate(asset.key, imageUrlOptions);
 
 		return url;
 	});
@@ -24,6 +39,9 @@ interface UploadAssetParams {
 	file: File;
 }
 
+// FIXME: currently, the whole image upload is proxied through the nextjs server.
+// it would be better to create a presigned url and let the client upload directly to s3.
+// FIXME: need to store the asset in the db
 export async function uploadAsset(params: UploadAssetParams) {
 	const { file } = params;
 

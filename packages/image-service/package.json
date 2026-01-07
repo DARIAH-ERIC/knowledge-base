@@ -40,9 +40,9 @@
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/validate-env": "catalog:",
+		"@aws-sdk/client-s3": "catalog:",
 		"@imgproxy/imgproxy-node": "catalog:",
 		"@sindresorhus/slugify": "catalog:",
-		"minio": "catalog:",
 		"uuid": "catalog:",
 		"valibot": "catalog:"
 	},

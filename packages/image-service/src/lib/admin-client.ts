@@ -3,7 +3,7 @@ import type { BucketItem } from "minio";
 
 import { env } from "../../config/env.config";
 import { client as _client } from "../client";
-import { client as minio } from "../minio-client";
+import { s3client as minio } from "../s3-client";
 
 const bucketName = env.S3_BUCKET_NAME;
 
