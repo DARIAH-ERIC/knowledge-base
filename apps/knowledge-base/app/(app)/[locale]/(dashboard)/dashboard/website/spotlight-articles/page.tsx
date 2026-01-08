@@ -1,11 +1,10 @@
-import type { Metadata, ResolvingMetadata } from "next";
-import { useTranslations } from "next-intl";
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { TableExample } from "@/components/ui/table-example";
-import { createMetadata } from "@/lib/server/metadata";
+import { SpotlightArticlesTable } from "@/components/ui/tables/spotlight-articles-table";
+import { getSpotlightArticles } from "@/lib/data/spotlight-articles";
 
 interface DashboardWebsiteSpotlightArticlesPageProps extends PageProps<"/[locale]/dashboard/website/spotlight-articles"> {}
 
@@ -22,15 +21,17 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardWebsiteSpotlightArticlesPage(
+export default async function DashboardWebsiteSpotlightArticlesPage(
 	_props: Readonly<DashboardWebsiteSpotlightArticlesPageProps>,
-): ReactNode {
-	const t = useTranslations("DashboardWebsiteSpotlightArticlesPage");
+): Promise<ReactNode> {
+	const t = await getTranslations("DashboardWebsiteSpotlightArticlesPage");
+
+	const spotlightArticles = await getSpotlightArticles({});
 
 	return (
 		<Main className="flex-1">
 			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">{t("title")}</h1>
-			<TableExample />
+			<SpotlightArticlesTable data={spotlightArticles} />
 		</Main>
 	);
 }
