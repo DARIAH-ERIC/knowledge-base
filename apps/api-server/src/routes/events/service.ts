@@ -4,7 +4,6 @@ import { count, eq } from "@dariah-eric/dariah-knowledge-base-database-client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
 
-import type { Database } from "@/middlewares/db";
 import { imageWidth } from "~/config/api.config";
 
 interface GetEventsParams {

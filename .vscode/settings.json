@@ -20,7 +20,11 @@
 		"flags": ["unstable_native_nodejs_ts_config"]
 	},
 	"eslint.validate": ["javascript", "typescript", "typescriptreact"],
-	"eslint.workingDirectories": [{ "mode": "auto" }],
+	"eslint.workingDirectories": [
+		{ "pattern": "./apps/*" },
+		{ "pattern": "./lib/*" },
+		{ "pattern": "./packages/*" }
+	],
 	"files.associations": {
 		"*.css": "tailwindcss"
 	},

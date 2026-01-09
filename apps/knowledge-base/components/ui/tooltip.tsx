@@ -43,25 +43,25 @@ const tooltipStyles = tv({
 	},
 });
 
-type TooltipProps = ComponentProps<typeof TooltipTriggerPrimitive>;
+export type TooltipProps = ComponentProps<typeof TooltipTriggerPrimitive>;
 
-function Tooltip(props: TooltipProps) {
+export function Tooltip(props: Readonly<TooltipProps>): ReactNode {
 	return <TooltipTriggerPrimitive {...props} />;
 }
 
-interface TooltipContentProps
+export interface TooltipContentProps
 	extends Omit<TooltipPrimitiveProps, "children">, VariantProps<typeof tooltipStyles> {
 	arrow?: boolean;
 	children?: ReactNode;
 }
 
-function TooltipContent({
+export function TooltipContent({
 	offset = 10,
 	arrow = true,
 	inverse,
 	children,
 	...props
-}: TooltipContentProps) {
+}: Readonly<TooltipContentProps>): ReactNode {
 	return (
 		<TooltipPrimitive
 			{...props}
@@ -95,8 +95,4 @@ function TooltipContent({
 	);
 }
 
-const TooltipTrigger = Button;
-
-export type { TooltipContentProps, TooltipProps };
-
-export { Tooltip, TooltipContent, TooltipTrigger };
+export {  Button as TooltipTrigger };

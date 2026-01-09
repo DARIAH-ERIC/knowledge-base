@@ -1,18 +1,17 @@
 /* eslint-disable @eslint-react/prefer-read-only-props */
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
 "use client";
 
-import type { RefObject } from "react";
-import { Link as LinkPrimitive, type LinkProps as LinkPrimitiveProps } from "react-aria-components";
+import type { ReactNode, RefObject } from "react";
+import { Link as LinkPrimitive, type LinkProps as LinkPrimitiveProps } from "@/components/link";
 
 import { cx } from "@/components/ui/cx";
 
-interface LinkProps extends LinkPrimitiveProps {
+export interface LinkProps extends LinkPrimitiveProps {
 	ref?: RefObject<HTMLAnchorElement>;
 }
 
-function Link({ className, ref, ...props }: LinkProps) {
+export function Link({ className, ref, ...props }: LinkProps): ReactNode {
 	return (
 		<LinkPrimitive
 			ref={ref}
@@ -29,7 +28,3 @@ function Link({ className, ref, ...props }: LinkProps) {
 		/>
 	);
 }
-
-export type { LinkProps };
-
-export { Link };

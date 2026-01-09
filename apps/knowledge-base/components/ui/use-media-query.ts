@@ -6,11 +6,12 @@ export function useMediaQuery(query: string): boolean | undefined {
 	const [value, setValue] = useState<boolean | undefined>();
 
 	useEffect(() => {
-		const onChange = (event: MediaQueryListEvent) => {
+		function onChange(event: MediaQueryListEvent) {
 			setValue(event.matches);
-		};
+		}
 
 		const result = matchMedia(query);
+
 		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setValue(result.matches);
 

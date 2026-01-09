@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import type { ActionState } from "@/lib/server/actions";
 
-interface FormSuccessMessageProps {
+export interface FormSuccessMessageProps {
 	children?: ReactNode | ((state: ActionState) => ReactNode);
 	className?: string;
 	state: ActionState;

@@ -24,7 +24,7 @@ import { LocaleLink, type LocaleLinkProps } from "@/lib/navigation/navigation";
  * @see {@link https://github.com/adobe/react-spectrum/blob/main/packages/%40react-aria/link/src/useLink.ts}
  */
 
-interface LinkProps
+export interface LinkProps
 	extends
 		Pick<
 			LocaleLinkProps,

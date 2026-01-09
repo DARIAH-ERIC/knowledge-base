@@ -1,7 +1,5 @@
 /* eslint-disable react/jsx-no-literals */
 
-"use client";
-
 import {
 	ArrowLeftStartOnRectangleIcon,
 	Cog6ToothIcon,

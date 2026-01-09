@@ -1,7 +1,5 @@
 /* eslint-disable react/jsx-no-literals */
 
-"use client";
-
 import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
 import { ChevronUpDownIcon } from "@heroicons/react/24/outline";
 import {
@@ -18,7 +16,7 @@ import {
 	UserCircleIcon,
 	UserGroupIcon,
 } from "@heroicons/react/24/solid";
-import type { ComponentProps, ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Link } from "@/components/ui/link";
@@ -44,9 +42,10 @@ import {
 	SidebarItem,
 	SidebarLabel,
 	SidebarRail,
+	type SidebarProps
 } from "@/components/ui/sidebar";
 
-export function DashboardSidebar(props: Readonly<ComponentProps<typeof Sidebar>>): ReactNode {
+export function DashboardSidebar(props: Readonly<SidebarProps>): ReactNode {
 	return (
 		<Sidebar {...props}>
 			<SidebarHeader>

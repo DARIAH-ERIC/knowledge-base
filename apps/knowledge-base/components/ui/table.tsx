@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 /* eslint-disable @typescript-eslint/strict-boolean-expressions */
 /* eslint-disable @eslint-react/prefer-read-only-props */
@@ -7,7 +6,7 @@
 "use client";
 
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import { createContext, use } from "react";
+import { createContext, type ReactNode, use } from "react";
 import {
 	Button,
 	Cell,
@@ -34,7 +33,7 @@ import { twJoin, twMerge } from "tailwind-merge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cx } from "@/components/ui/cx";
 
-interface TableProps extends Omit<TablePrimitiveProps, "className"> {
+export interface TableProps extends Omit<TablePrimitiveProps, "className"> {
 	allowResize?: boolean;
 	className?: string;
 	bleed?: boolean;
@@ -43,15 +42,15 @@ interface TableProps extends Omit<TablePrimitiveProps, "className"> {
 	ref?: React.Ref<HTMLTableElement>;
 }
 
-const TableContext = createContext<TableProps>({
+export const TableContext = createContext<TableProps>({
 	allowResize: false,
 });
 
-const useTableContext = () => {
+export function useTableContext() {
 	return use(TableContext);
-};
+}
 
-function Root(props: TableProps) {
+export function Root(props: TableProps): ReactNode {
 	return (
 		<TablePrimitive
 			className="w-full min-w-full caption-bottom text-sm/6 outline-hidden [--table-selected-bg:var(--color-secondary)]/50"
@@ -60,7 +59,7 @@ function Root(props: TableProps) {
 	);
 }
 
-function Table({
+export function Table({
 	allowResize,
 	className,
 	bleed = false,
@@ -68,7 +67,8 @@ function Table({
 	striped = false,
 	ref,
 	...props
-}: TableProps) {
+}: Readonly<TableProps>): ReactNode {
+	// eslint-disable-next-line @eslint-react/no-unstable-context-value
 	const value = { allowResize, bleed, grid, striped };
 
 	return (
@@ -97,7 +97,7 @@ function Table({
 	);
 }
 
-function ColumnResizer({ className, ...props }: ColumnResizerProps) {
+export function ColumnResizer({ className, ...props }: Readonly<ColumnResizerProps>): ReactNode {
 	return (
 		<ColumnResizerPrimitive
 			{...props}
@@ -111,16 +111,21 @@ function ColumnResizer({ className, ...props }: ColumnResizerProps) {
 	);
 }
 
-function TableBody<T extends object>(props: TableBodyProps<T>) {
+export function TableBody<T extends object>(props: Readonly<TableBodyProps<T>>): ReactNode {
 	return <TableBodyPrimitive data-slot="table-body" {...props} />;
 }
 
-interface TableColumnProps extends ColumnProps {
+export interface TableColumnProps extends ColumnProps {
 	isResizable?: boolean;
 }
 
-function TableColumn({ isResizable = false, className, ...props }: TableColumnProps) {
+export function TableColumn({
+	isResizable = false,
+	className,
+	...props
+}: Readonly<TableColumnProps>): ReactNode {
 	const { bleed, grid } = useTableContext();
+	
 	return (
 		<Column
 			data-slot="table-column"
@@ -162,19 +167,20 @@ function TableColumn({ isResizable = false, className, ...props }: TableColumnPr
 	);
 }
 
-interface TableHeaderProps<T extends object> extends HeaderProps<T> {
+export interface TableHeaderProps<T extends object> extends HeaderProps<T> {
 	ref?: React.Ref<HTMLTableSectionElement>;
 }
 
-function TableHeader<T extends object>({
+export function TableHeader<T extends object>({
 	children,
 	ref,
 	columns,
 	className,
 	...props
-}: TableHeaderProps<T>) {
+}: Readonly<TableHeaderProps<T>>): ReactNode {
 	const { bleed } = useTableContext();
 	const { selectionBehavior, selectionMode, allowsDragging } = useTableOptions();
+
 	return (
 		<TableHeaderPrimitive
 			ref={ref}
@@ -207,20 +213,21 @@ function TableHeader<T extends object>({
 	);
 }
 
-interface TableRowProps<T extends object> extends RowProps<T> {
+export interface TableRowProps<T extends object> extends RowProps<T> {
 	ref?: React.Ref<HTMLTableRowElement>;
 }
 
-function TableRow<T extends object>({
+export function TableRow<T extends object>({
 	children,
 	className,
 	columns,
 	id,
 	ref,
 	...props
-}: TableRowProps<T>) {
+}: Readonly<TableRowProps<T>>): ReactNode {
 	const { selectionBehavior, allowsDragging } = useTableOptions();
 	const { striped } = useTableContext();
+
 	return (
 		<Row
 			ref={ref}
@@ -298,12 +305,13 @@ function TableRow<T extends object>({
 	);
 }
 
-interface TableCellProps extends CellProps {
+export interface TableCellProps extends CellProps {
 	ref?: React.Ref<HTMLTableCellElement>;
 }
 
-function TableCell({ className, ref, ...props }: TableCellProps) {
+export function TableCell({ className, ref, ...props }: Readonly<TableCellProps>): ReactNode {
 	const { allowResize, bleed, grid, striped } = useTableContext();
+
 	return (
 		<Cell
 			ref={ref}
@@ -322,7 +330,3 @@ function TableCell({ className, ref, ...props }: TableCellProps) {
 		/>
 	);
 }
-
-export type { TableColumnProps, TableProps, TableRowProps };
-
-export { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow };

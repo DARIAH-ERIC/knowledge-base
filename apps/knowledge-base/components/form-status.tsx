@@ -7,7 +7,7 @@ import { FormErrorMessage } from "@/components/form-error-message";
 import { FormSuccessMessage } from "@/components/form-success-message";
 import type { ActionState } from "@/lib/server/actions";
 
-interface FormStatusProps {
+export interface FormStatusProps {
 	state: ActionState;
 }
 
