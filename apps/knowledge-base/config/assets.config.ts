@@ -10,3 +10,9 @@ export const imageGridOptions: ImageUrlOptions = {
 	resizing_type: "fit",
 	width: 400,
 };
+
+export const imageAssetWidth = {
+	avatar: 200,
+	featured: 800,
+	preview: 400,
+};
