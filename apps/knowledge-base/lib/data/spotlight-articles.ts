@@ -6,6 +6,8 @@ import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/sche
 import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
 
 import { imageAssetWidth } from "@/config/assets.config";
+import { config as fieldsConfig } from "@/config/fields.config";
+import { createEntities, createFields } from "@/lib/data/entities";
 
 interface GetSpotlightArticlesParams {
 	/** @default 10 */
@@ -57,7 +59,7 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 }
 
 interface GetSpotlightArticleByIdParams {
-	id: schema.Page["id"];
+	id: schema.SpotlightArticle["id"];
 }
 
 export async function getSpotlightArticleById(params: GetSpotlightArticleByIdParams) {
@@ -90,6 +92,74 @@ export async function getSpotlightArticleById(params: GetSpotlightArticleByIdPar
 	const data = { ...item, image };
 
 	return data;
+}
+
+interface CreateSpotlightArticleParams extends Omit<
+	schema.SpotlightArticleInput,
+	"id" | "createdAt" | "updatedAt"
+> {
+	slug: string;
+	resourceIds?: Array<string>;
+}
+export async function createSpotlightArticle(params: CreateSpotlightArticleParams) {
+	const { imageId, slug, summary, title } = params;
+
+	const entityType =
+		(await db.query.entityTypes.findFirst({
+			columns: {
+				id: true,
+			},
+			where: { type: "spotlight_articles" },
+		})) ?? undefined;
+
+	if (!entityType) return;
+
+	const entityStatus = await db.query.entityStatus.findFirst({
+		columns: {
+			id: true,
+		},
+		where: { type: "draft" },
+	});
+
+	if (!entityStatus) return;
+
+	const entityId = await db.transaction(async (tx) => {
+		const entityIds = await createEntities({
+			ctx: tx,
+			data: [
+				{
+					typeId: entityType.id,
+					documentId: undefined,
+					statusId: entityStatus.id,
+					slug,
+				},
+			],
+		});
+
+		if (!entityIds[0]) return tx.rollback();
+
+		const { id } = entityIds[0];
+
+		const spotlightArticle = {
+			id,
+			title,
+			summary,
+			imageId,
+		};
+		await tx.insert(schema.spotlightArticles).values(spotlightArticle);
+
+		const fields = fieldsConfig.spotlightArticles.map((fieldName) => {
+			return { entityId: id, name: fieldName };
+		});
+
+		await createFields({ ctx: tx, data: fields });
+		return id;
+	});
+
+	// decide, what we need to return here
+	return {
+		entityId,
+	};
 }
 
 export type SpotlightArticlesWithEntities = Awaited<ReturnType<typeof getSpotlightArticles>>;

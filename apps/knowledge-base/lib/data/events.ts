@@ -6,6 +6,8 @@ import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/sche
 import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
 
 import { imageAssetWidth } from "@/config/assets.config";
+import { config as fieldsConfig } from "@/config/fields.config";
+import { createEntities, createFields } from "@/lib/data/entities";
 
 interface GetEventsParams {
 	/** @default 10 */
@@ -90,6 +92,88 @@ export async function getEventById(params: GetEventByIdParams) {
 	const data = { ...item, image };
 
 	return data;
+}
+
+interface CreateEventParams extends Omit<schema.EventInput, "id" | "createdAt" | "updatedAt"> {
+	slug: string;
+	resourceIds?: Array<string>;
+}
+export async function createEvent(params: CreateEventParams) {
+	const {
+		endDate,
+		endTime,
+		imageId,
+		location,
+		slug,
+		startDate,
+		startTime,
+		summary,
+		title,
+		website,
+	} = params;
+
+	const entityType =
+		(await db.query.entityTypes.findFirst({
+			columns: {
+				id: true,
+			},
+			where: { type: "events" },
+		})) ?? undefined;
+
+	if (!entityType) return;
+
+	const entityStatus = await db.query.entityStatus.findFirst({
+		columns: {
+			id: true,
+		},
+		where: { type: "draft" },
+	});
+
+	if (!entityStatus) return;
+
+	const entityId = await db.transaction(async (tx) => {
+		const entityIds = await createEntities({
+			ctx: tx,
+			data: [
+				{
+					typeId: entityType.id,
+					documentId: undefined,
+					statusId: entityStatus.id,
+					slug,
+				},
+			],
+		});
+
+		if (!entityIds[0]) return tx.rollback();
+
+		const { id } = entityIds[0];
+
+		const event = {
+			id,
+			title,
+			summary,
+			imageId,
+			location,
+			startDate,
+			startTime,
+			endDate,
+			endTime,
+			website,
+		};
+		await tx.insert(schema.events).values(event);
+
+		const fields = fieldsConfig.events.map((fieldName) => {
+			return { entityId: id, name: fieldName };
+		});
+
+		await createFields({ ctx: tx, data: fields });
+		return id;
+	});
+
+	// decide, what we need to return here
+	return {
+		entityId,
+	};
 }
 
 export type EventsWithEntities = Awaited<ReturnType<typeof getEvents>>;
