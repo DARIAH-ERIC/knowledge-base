@@ -31,7 +31,16 @@ interface WP_Event {
 	description: string;
 	excerpt: string;
 	slug: string;
-	image: boolean;
+	image:
+		| false
+		| {
+				url: string;
+				id: number;
+				extension: string;
+				width: number;
+				height: number;
+				sizes: unknown;
+		  };
 	all_day: boolean;
 	start_date: Date;
 	start_date_details: DateDetails;
@@ -111,30 +120,57 @@ export interface Venue {
 
 export interface WordPressData {
 	categories: Record<WP_REST_API_Category["id"], WP_REST_API_Category>;
+	countries: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
 	events: Record<WP_Event["id"], WP_Event>;
+	institutions: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
 	pages: Record<WP_REST_API_Page["id"], WP_REST_API_Page>;
+	people: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
 	posts: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
+	projects: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
 	media: Record<WP_REST_API_Attachment["id"], WP_REST_API_Attachment>;
 	tags: Record<WP_REST_API_Tag["id"], WP_REST_API_Tag>;
+	workingGroups: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
 }
 
 export async function getWordPressData(apiBaseUrl: string): Promise<WordPressData> {
-	const [categories, events, pages, posts, media, tags] = await Promise.all([
+	const [
+		categories,
+		countries,
+		events,
+		institutions,
+		pages,
+		people,
+		posts,
+		media,
+		projects,
+		tags,
+		workingGroups,
+	] = await Promise.all([
 		getCategories(apiBaseUrl),
+		getCountries(apiBaseUrl),
 		getEvents(apiBaseUrl),
+		getInstitutions(apiBaseUrl),
 		getPages(apiBaseUrl),
+		getPeople(apiBaseUrl),
 		getPosts(apiBaseUrl),
 		getMedia(apiBaseUrl),
+		getProjects(apiBaseUrl),
 		getTags(apiBaseUrl),
+		getWorkingGroups(apiBaseUrl),
 	]);
 
 	const data: WordPressData = {
 		categories: keyById(categories),
+		countries: keyById(countries),
 		events: keyById(events),
+		institutions: keyById(institutions),
 		pages: keyById(pages),
+		people: keyById(people),
 		posts: keyById(posts),
 		media: keyById(media),
+		projects: keyById(projects),
 		tags: keyById(tags),
+		workingGroups: keyById(workingGroups),
 	};
 
 	return data;
@@ -145,6 +181,16 @@ function getCategories(baseUrl: string): Promise<WP_REST_API_Categories> {
 		baseUrl,
 		pathname: "/wp-json/wp/v2/categories",
 		searchParams: createUrlSearchParams({ per_page: 100 }),
+	});
+
+	return getAll(url);
+}
+
+function getCountries(baseUrl: string): Promise<WP_REST_API_Posts> {
+	const url = createUrl({
+		baseUrl,
+		pathname: "/wp-json/wp/v2/dariah_country",
+		searchParams: createUrlSearchParams({ per_page: 100, _embed: "author" }),
 	});
 
 	return getAll(url);
@@ -162,6 +208,26 @@ function getEvents(baseUrl: string): Promise<Array<WP_Event>> {
 		return response.events as Array<WP_Event>;
 	});
 }
+
+function getInstitutions(baseUrl: string): Promise<WP_REST_API_Posts> {
+	const url = createUrl({
+		baseUrl,
+		pathname: "/wp-json/wp/v2/dariah_institution",
+		searchParams: createUrlSearchParams({ per_page: 100, _embed: "author" }),
+	});
+
+	return getAll(url);
+}
+
+// function getInitiatives(baseUrl: string): Promise<WP_REST_API_Posts> {
+// 	const url = createUrl({
+// 		baseUrl,
+// 		pathname: "/wp-json/wp/v2/dariah_initiative",
+// 		searchParams: createUrlSearchParams({ per_page: 100, _embed: "author" }),
+// 	});
+
+// 	return getAll(url);
+// }
 
 function getMedia(baseUrl: string): Promise<WP_REST_API_Attachments> {
 	const url = createUrl({
@@ -183,10 +249,30 @@ function getPages(baseUrl: string): Promise<WP_REST_API_Pages> {
 	return getAll(url);
 }
 
+function getPeople(baseUrl: string): Promise<WP_REST_API_Posts> {
+	const url = createUrl({
+		baseUrl,
+		pathname: "/wp-json/wp/v2/dariah_person",
+		searchParams: createUrlSearchParams({ per_page: 100, _embed: "author" }),
+	});
+
+	return getAll(url);
+}
+
 function getPosts(baseUrl: string): Promise<WP_REST_API_Posts> {
 	const url = createUrl({
 		baseUrl,
 		pathname: "/wp-json/wp/v2/posts",
+		searchParams: createUrlSearchParams({ per_page: 100, _embed: "author" }),
+	});
+
+	return getAll(url);
+}
+
+function getProjects(baseUrl: string): Promise<WP_REST_API_Posts> {
+	const url = createUrl({
+		baseUrl,
+		pathname: "/wp-json/wp/v2/dariah_project",
 		searchParams: createUrlSearchParams({ per_page: 100, _embed: "author" }),
 	});
 
@@ -198,6 +284,16 @@ function getTags(baseUrl: string): Promise<WP_REST_API_Tags> {
 		baseUrl,
 		pathname: "/wp-json/wp/v2/tags",
 		searchParams: createUrlSearchParams({ per_page: 100 }),
+	});
+
+	return getAll(url);
+}
+
+function getWorkingGroups(baseUrl: string): Promise<WP_REST_API_Posts> {
+	const url = createUrl({
+		baseUrl,
+		pathname: "/wp-json/wp/v2/dariah_wg",
+		searchParams: createUrlSearchParams({ per_page: 100, _embed: "author" }),
 	});
 
 	return getAll(url);
