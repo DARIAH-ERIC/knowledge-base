@@ -2,6 +2,7 @@ import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
 
 import * as f from "../fields";
+import { uuidv7 } from "../functions";
 import { assets } from "./assets";
 
 export const organisationalUnitTypes = ["body", "consortium", "institution"] as const;
@@ -14,12 +15,15 @@ export const organisationalUnitStatus = [
 ] as const;
 
 export const organisationalUnits = p.pgTable("organisational_units", {
-	id: f.uuidv7("id").primaryKey(),
+	id: p.uuid("id").primaryKey().default(uuidv7()),
 	name: p.text("name").notNull(),
 	summary: p.text("summary").notNull(),
-	imageId: f.uuidv7("image_id").references(() => {
-		return assets.id;
-	}),
+	imageId: p
+		.uuid("image_id")
+		.notNull()
+		.references(() => {
+			return assets.id;
+		}),
 	slug: p.text("slug").notNull().unique(),
 	type: p.text("type", { enum: organisationalUnitTypes }).notNull(),
 	...f.timestamps(),
@@ -28,14 +32,14 @@ export const organisationalUnits = p.pgTable("organisational_units", {
 export const organisationalUnitsRelations = p.pgTable(
 	"organisational_units_to_units",
 	{
-		unitId: f
-			.uuidv7("unit_id")
+		unitId: p
+			.uuid("unit_id")
 			.notNull()
 			.references(() => {
 				return organisationalUnits.id;
 			}),
-		relatedUnitId: f
-			.uuidv7("related_unit_id")
+		relatedUnitId: p
+			.uuid("related_unit_id")
 			.notNull()
 			.references(() => {
 				return organisationalUnits.id;
