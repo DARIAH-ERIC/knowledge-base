@@ -40,7 +40,6 @@
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/validate-env": "catalog:",
 		"@imgproxy/imgproxy-node": "catalog:",
-		"@sindresorhus/slugify": "catalog:",
 		"minio": "catalog:",
 		"uuid": "catalog:",
 		"valibot": "catalog:"

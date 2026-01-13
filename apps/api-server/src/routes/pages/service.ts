@@ -63,7 +63,7 @@ export async function getPages(db: Database, params: GetPagesParams) {
 	const data = items.map((item) => {
 		const image =
 			item.image != null
-				? client.urls.generate(item.image.key, { width: imageWidth.preview })
+				? client.urls.generate({ key: item.image.key, options: { width: imageWidth.preview } })
 				: null;
 
 		return { ...item, image };
@@ -115,7 +115,7 @@ export async function getPageById(db: Database, params: GetPageByIdParams) {
 
 	const image =
 		item.image != null
-			? client.urls.generate(item.image.key, { width: imageWidth.featured })
+			? client.urls.generate({ key: item.image.key, options: { width: imageWidth.featured } })
 			: null;
 
 	const data = { ...item, image };
@@ -166,7 +166,7 @@ export async function getPageBySlug(db: Database, params: GetPageBySlugParams) {
 
 	const image =
 		item.image != null
-			? client.urls.generate(item.image.key, { width: imageWidth.featured })
+			? client.urls.generate({ key: item.image.key, options: { width: imageWidth.featured } })
 			: null;
 
 	const data = { ...item, image };

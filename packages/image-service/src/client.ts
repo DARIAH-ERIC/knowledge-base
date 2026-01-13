@@ -1,73 +1,86 @@
 import type { Readable } from "node:stream";
 
-import { assert } from "@acdh-oeaw/lib";
 import type { BucketItem, ItemBucketMetadata } from "minio";
 
 import { env } from "../config/env.config";
-import { generateObjectName } from "./generate-object-name";
+import { generateObjectKey } from "./generate-object-key";
 import { generateSignedImageUrl, type ImageUrlOptions } from "./generate-signed-image-url";
 import { client as minio } from "./minio-client";
 
 const bucketName = env.S3_BUCKET_NAME;
 
+export type AssetPrefix = "avatars" | "images";
+
 export type { ImageUrlOptions };
+
+export interface AssetMetadata extends ItemBucketMetadata {
+	"content-type": string;
+}
 
 export interface Client {
 	bucket: {
 		name: string;
 	};
 	images: {
-		get: () => Promise<{ images: Array<{ objectName: string }> }>;
-		remove: (objectName: string) => Promise<void>;
-		upload: (
-			fileName: string,
-			fileStream: Readable,
-			fileSize?: number,
-			metadata?: ItemBucketMetadata,
-		) => Promise<{ objectName: string }>;
+		get: (prefix: AssetPrefix) => Promise<{ images: Array<{ key: string }> }>;
+		remove: (params: { key: string }) => Promise<void>;
+		upload: (params: {
+			input: Readable | Buffer;
+			metadata: AssetMetadata;
+			prefix: AssetPrefix;
+			size?: number;
+		}) => Promise<{ key: string }>;
 	};
 	urls: {
-		generate: (objectName: string, options: ImageUrlOptions) => { url: string };
+		generate: (params: { key: string; options: ImageUrlOptions }) => { url: string };
 	};
 }
 
 export function createClient(): Client {
 	const images = {
-		async get() {
+		async get(prefix: AssetPrefix) {
 			// TODO: `@aws-sdk/client-s3` has `max_keys` option and `listObjectsV2WithMetadata` method.
-			const stream = minio.listObjectsV2(bucketName);
+			const stream = minio.listObjectsV2(bucketName, prefix, true);
 
-			const images: Array<{ objectName: string }> = [];
+			const images: Array<{ key: string }> = [];
 
-			for await (const bucketItem of stream) {
-				const item = bucketItem as BucketItem;
-				const objectName = item.name;
-				assert(objectName);
-				images.push({ objectName });
+			for await (const _item of stream) {
+				const item = _item as BucketItem;
+
+				/** Always defined because we query `listObjectsV2` with `recursive: true`.  */
+				const key = item.name!;
+
+				images.push({ key });
 			}
 
 			return { images };
 		},
-		async remove(objectName: string) {
-			await minio.removeObject(bucketName, objectName);
+		async remove(params: { key: string }) {
+			const { key } = params;
+
+			await minio.removeObject(bucketName, key);
 		},
-		async upload(
-			fileName: string,
-			fileStream: Readable,
-			fileSize?: number,
-			metadata?: ItemBucketMetadata,
-		) {
-			const objectName = generateObjectName(fileName);
+		async upload(params: {
+			input: Readable | Buffer;
+			metadata: AssetMetadata;
+			prefix: AssetPrefix;
+			size?: number;
+		}) {
+			const { input, metadata, prefix, size } = params;
 
-			await minio.putObject(bucketName, objectName, fileStream, fileSize, metadata);
+			const key = generateObjectKey(prefix);
 
-			return { objectName };
+			await minio.putObject(bucketName, key, input, size, metadata);
+
+			return { key };
 		},
 	};
 
 	const urls = {
-		generate(objectName: string, options: ImageUrlOptions) {
-			const url = generateSignedImageUrl(bucketName, objectName, options);
+		generate(params: { key: string; options: ImageUrlOptions }) {
+			const { key, options } = params;
+
+			const url = generateSignedImageUrl(bucketName, key, options);
 
 			return { url };
 		},

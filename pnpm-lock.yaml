@@ -1111,9 +1111,6 @@ importers:
       '@imgproxy/imgproxy-node':
         specifier: 'catalog:'
         version: 1.1.0
-      '@sindresorhus/slugify':
-        specifier: 'catalog:'
-        version: 3.0.0
       minio:
         specifier: 'catalog:'
         version: 8.0.6

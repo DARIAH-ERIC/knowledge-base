@@ -12,7 +12,7 @@ export async function getAssets(options: ImageUrlOptions) {
 	const { images } = await client.images.get();
 
 	const urls = images.map((image) => {
-		const { url } = client.urls.generate(image.objectName, options);
+		const { url } = client.urls.generate({ key: image.key, options });
 
 		return url;
 	});
@@ -27,12 +27,11 @@ interface UploadAssetParams {
 export async function uploadAsset(params: UploadAssetParams) {
 	const { file } = params;
 
-	const fileName = file.name;
-	const fileStream = Readable.fromWeb(file.stream() as ReadableStream);
-	const fileSize = file.size;
-	const metadata = { "content-type": file.type };
+	const input = Readable.fromWeb(file.stream() as ReadableStream);
+	const size = file.size;
+	const metadata = { "content-type": file.type, name: file.name };
 
-	const data = await client.images.upload(fileName, fileStream, fileSize, metadata);
+	const data = await client.images.upload({ prefix: "images", input, size, metadata });
 
 	return data;
 }

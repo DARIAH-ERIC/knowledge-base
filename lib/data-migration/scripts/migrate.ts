@@ -1,63 +1,52 @@
 import { randomUUID } from "node:crypto";
-import { existsSync, createWriteStream } from "node:fs";
+import { existsSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { pipeline } from "node:stream/promises";
 
 import { assert, isNonEmptyString, keyBy, log } from "@acdh-oeaw/lib";
 import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
-import { read } from "@dariah-eric/dariah-knowledge-base-image-service/lib";
+import { buffer } from "@dariah-eric/dariah-knowledge-base-image-service/lib";
 
+import {
+	apiBaseUrl,
+	assetsCacheFilePath,
+	assetsCacheFolderPath,
+	cacheFilePath,
+	cacheFolderPath,
+	placeholderImageUrl,
+} from "../config/data-migration.config";
 import { getWordPressData, type WordPressData } from "../src/lib/get-wordpress-data";
-import { Readable } from "node:stream";
-
-const apiBaseUrl = "https://www.dariah.eu";
-
-const cacheFolderPath = path.join(process.cwd(), ".cache");
-const cacheFilePath = path.join(cacheFolderPath, "wordpress.json");
 
 type AssetsCache = Map<string, string>;
-
-const assetsCacheFolderPath = path.join(cacheFolderPath, "assets");
-const assetsCacheFilePath = path.join(assetsCacheFolderPath, "wordpress-assets.json");
-
-const placeholderImageUrl = new URL("https://placehold.co/600x400/transparent/069");
 
 async function readCached(assetsCache: AssetsCache, url: URL) {
 	const cacheKey = String(url);
 
 	if (assetsCache.has(cacheKey)) {
-		const cacheEntry = assetsCache.get(cacheKey)!;
+		const filePath = path.join(assetsCacheFolderPath, assetsCache.get(cacheKey)!);
+		const input = await buffer.fromFilePath(filePath);
+		const metadata = await buffer.getMetadata(input);
 
-		return await read.fromFilePath(cacheEntry);
+		return { input, metadata };
 	}
 
-	const result = await read.fromUrl(url);
+	const input = await buffer.fromUrl(url);
+	const metadata = await buffer.getMetadata(input);
 
-	const outputFilePath = path.join(
-		assetsCacheFolderPath,
-		randomUUID() + "." + result.metadata.format,
-	);
+	const outputFilePath = path.join(assetsCacheFolderPath, `${randomUUID()}.${metadata.format}`);
+	await fs.writeFile(outputFilePath, input);
+	assetsCache.set(cacheKey, path.relative(assetsCacheFolderPath, outputFilePath));
+	await writeAssetsCacheData(assetsCache);
 
-	const outputStream = createWriteStream(outputFilePath);
-	await pipeline(result.stream, outputStream);
-
-	assetsCache.set(cacheKey, outputFilePath);
-
-	return result;
+	return { input, metadata };
 }
 
-async function upload(assetsCache: AssetsCache, url: URL, fileName?: string) {
-	const uploaded = await readCached(assetsCache, url);
+async function upload(assetsCache: AssetsCache, url: URL) {
+	const { input, metadata } = await readCached(assetsCache, url);
 
-	const { objectName: key } = await client.images.upload(
-		fileName ?? uploaded.fileName,
-		Readable.from(uploaded.stream),
-		uploaded.metadata.size,
-		uploaded.metadata,
-	);
+	const { key } = await client.images.upload({ prefix: "images", input, metadata });
 
 	const [asset] = await db
 		.insert(schema.assets)
@@ -103,7 +92,7 @@ async function readAssetsCacheData(): Promise<AssetsCache> {
 }
 
 async function writeAssetsCacheData(cache: AssetsCache): Promise<void> {
-	await fs.writeFile(JSON.stringify(Array.from(cache)), assetsCacheFilePath, { encoding: "utf-8" });
+	await fs.writeFile(assetsCacheFilePath, JSON.stringify(Array.from(cache)), { encoding: "utf-8" });
 }
 
 async function getData(): Promise<WordPressData> {
@@ -143,7 +132,7 @@ async function main() {
 
 	//
 
-	const placeholderImage = await upload(assetsCache, placeholderImageUrl, "placeholder.svg");
+	const placeholderImage = await upload(assetsCache, placeholderImageUrl);
 	assert(placeholderImage, "Missing placeholder image.");
 
 	//

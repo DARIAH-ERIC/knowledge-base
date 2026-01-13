@@ -61,7 +61,10 @@ export async function getImpactCaseStudies(db: Database, params: GetImpactCaseSt
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = client.urls.generate(item.image.key, { width: imageWidth.preview });
+		const image = client.urls.generate({
+			key: item.image.key,
+			options: { width: imageWidth.preview },
+		});
 
 		return { ...item, image };
 	});
@@ -124,12 +127,18 @@ export async function getImpactCaseStudyById(db: Database, params: GetImpactCase
 	}
 
 	const contributors = item.contributors.map((contributor) => {
-		const image = client.urls.generate(contributor.image.key, { width: imageWidth.avatar });
+		const image = client.urls.generate({
+			key: contributor.image.key,
+			options: { width: imageWidth.avatar },
+		});
 
 		return { ...contributor, image };
 	});
 
-	const image = client.urls.generate(item.image.key, { width: imageWidth.featured });
+	const image = client.urls.generate({
+		key: item.image.key,
+		options: { width: imageWidth.featured },
+	});
 
 	const data = { ...item, contributors, image };
 
@@ -194,12 +203,18 @@ export async function getImpactCaseStudyBySlug(
 	}
 
 	const contributors = item.contributors.map((contributor) => {
-		const image = client.urls.generate(contributor.image.key, { width: imageWidth.avatar });
+		const image = client.urls.generate({
+			key: contributor.image.key,
+			options: { width: imageWidth.avatar },
+		});
 
 		return { ...contributor, image };
 	});
 
-	const image = client.urls.generate(item.image.key, { width: imageWidth.featured });
+	const image = client.urls.generate({
+		key: item.image.key,
+		options: { width: imageWidth.featured },
+	});
 
 	const data = { ...item, contributors, image };
 

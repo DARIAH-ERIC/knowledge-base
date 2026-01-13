@@ -44,11 +44,11 @@ export async function uploadImageAction(
 
 		const { file } = await v.parseAsync(InputSchema, getFormDataValues(formData));
 
-		const { objectName } = await uploadAsset({ file });
+		const { key } = await uploadAsset({ file });
 
 		revalidatePath("/dashboard/website/assets", "page");
 
-		return createSuccessActionState({ message: t("success"), data: { objectName } });
+		return createSuccessActionState({ message: t("success"), data: { key } });
 	} catch (error) {
 		log.error(error);
 
