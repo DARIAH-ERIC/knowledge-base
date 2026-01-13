@@ -5,7 +5,12 @@ import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { assets } from "./assets";
 
-export const organisationalUnitTypes = ["body", "consortium", "institution"] as const;
+export const organisationalUnitTypes = [
+	"body",
+	"consortium",
+	"institution",
+	"umbrella_consortium",
+] as const;
 export const organisationalUnitStatus = [
 	"cooperating_partner",
 	"member",
@@ -16,6 +21,7 @@ export const organisationalUnitStatus = [
 
 export const organisationalUnits = p.pgTable("organisational_units", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
+	metadata: p.jsonb("metadata"),
 	name: p.text("name").notNull(),
 	summary: p.text("summary").notNull(),
 	imageId: p
@@ -61,17 +67,13 @@ export const organisationalUnitsRelations = p.pgTable(
 export const organisationalUnitsAllowedRelations = p.pgTable(
 	"organisational_units_allowed_relations",
 	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
 		unitType: p.text("type", { enum: organisationalUnitTypes }).notNull(),
 		relatedUnitType: p.text("related_unit_type", { enum: organisationalUnitTypes }).notNull(),
 		relationType: p.text("relation_type", { enum: organisationalUnitStatus }).notNull(),
 	},
 	(t) => {
-		return [
-			p.primaryKey({
-				columns: [t.unitType, t.relatedUnitType, t.relationType],
-				name: "organisational_units_allowed_relations_pkey",
-			}),
-		];
+		return [p.unique().on(t.unitType, t.relatedUnitType, t.relationType)];
 	},
 );
 
