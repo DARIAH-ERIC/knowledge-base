@@ -438,37 +438,9 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 
 		await db.insert(schema.entitiesToEntities).values(entitiesToEntities);
 
-		const organisationalUnitsAllowedRelationsValues = [
-			{
-				unitType: "consortium" as const,
-				relatedUnitType: "consortium" as const,
-				relationType: "member" as const,
-			},
-			{
-				unitType: "consortium" as const,
-				relatedUnitType: "consortium" as const,
-				relationType: "cooperating_partner" as const,
-			},
-			{
-				unitType: "institution" as const,
-				relatedUnitType: "consortium" as const,
-				relationType: "national_coordinating_institution" as const,
-			},
-			{
-				unitType: "institution" as const,
-				relatedUnitType: "consortium" as const,
-				relationType: "national_representative_institution" as const,
-			},
-			{
-				unitType: "institution" as const,
-				relatedUnitType: "consortium" as const,
-				relationType: "partner_institution" as const,
-			},
-		];
-
-		await db
-			.insert(schema.organisationalUnitsAllowedRelations)
-			.values(organisationalUnitsAllowedRelationsValues);
+		const organisationalUnitsAllowedRelationsValues = await db
+			.select()
+			.from(schema.organisationalUnitsAllowedRelations);
 
 		const organisationalUnits: Array<schema.OrganisationalUnitInput> = f.helpers.multiple(
 			(_, i) => {
