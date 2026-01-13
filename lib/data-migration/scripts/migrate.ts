@@ -1,34 +1,62 @@
-import { existsSync } from "node:fs";
+import { randomUUID } from "node:crypto";
+import { existsSync, createWriteStream } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { Readable } from "node:stream";
-import type { ReadableStream } from "node:stream/web";
+import { pipeline } from "node:stream/promises";
 
-import { assert, isNonEmptyString, keyBy, log, request } from "@acdh-oeaw/lib";
+import { assert, isNonEmptyString, keyBy, log } from "@acdh-oeaw/lib";
 import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
-import slugify from "@sindresorhus/slugify";
+import { read } from "@dariah-eric/dariah-knowledge-base-image-service/lib";
 
 import { getWordPressData, type WordPressData } from "../src/lib/get-wordpress-data";
+import { Readable } from "node:stream";
 
 const apiBaseUrl = "https://www.dariah.eu";
 
-const outputFolderPath = path.join(process.cwd(), ".cache");
-const outputFilePath = path.join(outputFolderPath, "wordpress.json");
+const cacheFolderPath = path.join(process.cwd(), ".cache");
+const cacheFilePath = path.join(cacheFolderPath, "wordpress.json");
 
-const placeholderImageUrl = "https://placehold.co/600x400/transparent/069";
+type AssetsCache = Map<string, string>;
 
-async function upload(url: string, fileName: string, mimeType: string) {
-	const stream = Readable.fromWeb(
-		(await request(url, { responseType: "stream" })) as ReadableStream,
+const assetsCacheFolderPath = path.join(cacheFolderPath, "assets");
+const assetsCacheFilePath = path.join(assetsCacheFolderPath, "wordpress-assets.json");
+
+const placeholderImageUrl = new URL("https://placehold.co/600x400/transparent/069");
+
+async function readCached(assetsCache: AssetsCache, url: URL) {
+	const cacheKey = String(url);
+
+	if (assetsCache.has(cacheKey)) {
+		const cacheEntry = assetsCache.get(cacheKey)!;
+
+		return await read.fromFilePath(cacheEntry);
+	}
+
+	const result = await read.fromUrl(url);
+
+	const outputFilePath = path.join(
+		assetsCacheFolderPath,
+		randomUUID() + "." + result.metadata.format,
 	);
 
+	const outputStream = createWriteStream(outputFilePath);
+	await pipeline(result.stream, outputStream);
+
+	assetsCache.set(cacheKey, outputFilePath);
+
+	return result;
+}
+
+async function upload(assetsCache: AssetsCache, url: URL, fileName?: string) {
+	const uploaded = await readCached(assetsCache, url);
+
 	const { objectName: key } = await client.images.upload(
-		slugify(path.basename(fileName)),
-		stream,
-		undefined,
-		{ "content-type": mimeType },
+		fileName ?? uploaded.fileName,
+		Readable.from(uploaded.stream),
+		uploaded.metadata.size,
+		uploaded.metadata,
 	);
 
 	const [asset] = await db
@@ -42,6 +70,7 @@ async function upload(url: string, fileName: string, mimeType: string) {
 }
 
 async function uploadFeaturedImage(
+	assetsCache: AssetsCache,
 	media: WordPressData["media"],
 	mediaId: number | undefined,
 	id: number,
@@ -53,27 +82,40 @@ async function uploadFeaturedImage(
 	const image = media[mediaId];
 	assert(image != null, `Missing featured image (entity id ${String(id)}).`);
 
-	const url = image.source_url;
-	const fileName = image.media_details.file as string | undefined;
-	assert(fileName, "Missing image file name.");
-	const mimeType = image.mime_type;
-	const asset = await upload(url, fileName, mimeType);
+	const url = new URL(image.source_url);
+	const asset = await upload(assetsCache, url);
 
-	assert(asset, `Missing asset (entity  id ${String(id)}).`);
+	assert(asset, `Missing asset (entity id ${String(id)}).`);
 
 	return asset.id;
 }
 
+async function readAssetsCacheData(): Promise<AssetsCache> {
+	if (existsSync(assetsCacheFilePath)) {
+		const data = await fs.readFile(assetsCacheFilePath, { encoding: "utf-8" });
+		const cache = JSON.parse(data) as Array<[string, string]>;
+		return new Map(cache);
+	}
+
+	await fs.mkdir(assetsCacheFolderPath, { recursive: true });
+
+	return new Map();
+}
+
+async function writeAssetsCacheData(cache: AssetsCache): Promise<void> {
+	await fs.writeFile(JSON.stringify(Array.from(cache)), assetsCacheFilePath, { encoding: "utf-8" });
+}
+
 async function getData(): Promise<WordPressData> {
-	if (existsSync(outputFolderPath)) {
-		const data = await fs.readFile(outputFilePath, { encoding: "utf-8" });
+	if (existsSync(cacheFilePath)) {
+		const data = await fs.readFile(cacheFilePath, { encoding: "utf-8" });
 		return JSON.parse(data) as WordPressData;
 	}
 
 	const data = await getWordPressData(apiBaseUrl);
 
-	await fs.mkdir(outputFolderPath, { recursive: true });
-	await fs.writeFile(outputFilePath, JSON.stringify(data, null, 2), { encoding: "utf-8" });
+	await fs.mkdir(cacheFolderPath, { recursive: true });
+	await fs.writeFile(cacheFilePath, JSON.stringify(data, null, 2), { encoding: "utf-8" });
 
 	return data;
 }
@@ -82,6 +124,8 @@ async function main() {
 	log.info("Retrieving data from wordpress...");
 
 	const data = await getData();
+
+	const assetsCache = await readAssetsCacheData();
 
 	const categoriesBySlug = keyBy(Object.values(data.categories), (item) => {
 		return item.slug;
@@ -99,7 +143,7 @@ async function main() {
 
 	//
 
-	const placeholderImage = await upload(placeholderImageUrl, "placeholder.svg", "image/svg+xml");
+	const placeholderImage = await upload(assetsCache, placeholderImageUrl, "placeholder.svg");
 	assert(placeholderImage, "Missing placeholder image.");
 
 	//
@@ -123,7 +167,12 @@ async function main() {
 
 			const id = entity!.id;
 
-			const imageId = await uploadFeaturedImage(data.media, page.featured_media, page.id);
+			const imageId = await uploadFeaturedImage(
+				assetsCache,
+				data.media,
+				page.featured_media,
+				page.id,
+			);
 			if (imageId == null) {
 				log.warn(`Missing image (page id ${String(page.id)}).`);
 			}
@@ -172,7 +221,12 @@ async function main() {
 
 			const id = entity!.id;
 
-			const imageId = await uploadFeaturedImage(data.media, post.featured_media, post.id);
+			const imageId = await uploadFeaturedImage(
+				assetsCache,
+				data.media,
+				post.featured_media,
+				post.id,
+			);
 			if (imageId == null) {
 				log.warn(`Missing image (news id ${String(post.id)}).`);
 			}
@@ -213,7 +267,7 @@ async function main() {
 
 			const imageId =
 				event.image !== false
-					? await uploadFeaturedImage(data.media, event.image.id, event.id)
+					? await uploadFeaturedImage(assetsCache, data.media, event.image.id, event.id)
 					: null;
 			if (imageId == null) {
 				log.warn(`Missing image (event id ${String(event.id)}).`);
@@ -274,7 +328,7 @@ async function main() {
 
 	// 		const id = entity!.id;
 
-	// 		const imageId = await uploadFeaturedImage(data.media, country.featured_media, country.id);
+	// 		const imageId = await uploadFeaturedImage(assetsCache, data.media, country.featured_media, country.id);
 	// 		if (imageId == null) {
 	// 			log.warn(`Missing image (country id ${String(country.id)}).`);
 	// 		}
@@ -313,7 +367,7 @@ async function main() {
 
 	// 		const id = entity!.id;
 
-	// 		const imageId = await uploadFeaturedImage(data.media, person.featured_media, person.id);
+	// 		const imageId = await uploadFeaturedImage(assetsCache, data.media, person.featured_media, person.id);
 	// 		if (imageId == null) {
 	// 			log.warn(`Missing image (person id ${String(person.id)}).`);
 	// 		}
@@ -353,6 +407,7 @@ async function main() {
 	// 		const id = entity!.id;
 
 	// 		const imageId = await uploadFeaturedImage(
+	//      assetsCache,
 	// 			data.media,
 	// 			institution.featured_media,
 	// 			institution.id,
@@ -393,6 +448,7 @@ async function main() {
 	// 		const id = entity!.id;
 
 	// 		const imageId = await uploadFeaturedImage(
+	//      assetsCache,
 	// 			data.media,
 	// 			workingGroup.featured_media,
 	// 			workingGroup.id,
@@ -432,7 +488,7 @@ async function main() {
 
 	// 		const id = entity!.id;
 
-	// 		const imageId = await uploadFeaturedImage(data.media, project.featured_media, project.id);
+	// 		const imageId = await uploadFeaturedImage(assetsCache, data.media, project.featured_media, project.id);
 
 	// 		await tx.insert(schema.projects).values({
 	// 			id,
@@ -446,6 +502,12 @@ async function main() {
 	// 		// TODO: create content block for project.content
 	// 	});
 	// }
+
+	//
+
+	log.info("Writing assets cache manifest...");
+
+	await writeAssetsCacheData(assetsCache);
 
 	//
 
