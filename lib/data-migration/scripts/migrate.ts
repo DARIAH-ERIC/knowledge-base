@@ -4,7 +4,7 @@ import * as path from "node:path";
 import { Readable } from "node:stream";
 import type { ReadableStream } from "node:stream/web";
 
-import { assert, isNonEmptyString, keyBy, log } from "@acdh-oeaw/lib";
+import { assert, isNonEmptyString, keyBy, log, request } from "@acdh-oeaw/lib";
 import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
@@ -20,8 +20,9 @@ const outputFilePath = path.join(outputFolderPath, "wordpress.json");
 const placeholderImageUrl = "https://placehold.co/600x400/transparent/069";
 
 async function upload(url: string, fileName: string, mimeType: string) {
-	const response = await fetch(url);
-	const stream = Readable.fromWeb(response.body! as ReadableStream);
+	const stream = Readable.fromWeb(
+		(await request(url, { responseType: "stream" })) as ReadableStream,
+	);
 
 	const { objectName: key } = await client.images.upload(
 		slugify(path.basename(fileName)),
@@ -52,7 +53,7 @@ async function uploadFeaturedImage(
 	const image = media[mediaId];
 	assert(image != null, `Missing featured image (entity id ${String(id)}).`);
 
-	const url = image.link;
+	const url = image.source_url;
 	const fileName = image.media_details.file as string | undefined;
 	assert(fileName, "Missing image file name.");
 	const mimeType = image.mime_type;
