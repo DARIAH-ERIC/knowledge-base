@@ -22,7 +22,7 @@ export interface Client {
 		name: string;
 	};
 	images: {
-		get: (prefix: AssetPrefix) => Promise<{ images: Array<{ key: string }> }>;
+		get: (prefix?: AssetPrefix) => Promise<{ images: Array<{ key: string }> }>;
 		remove: (params: { key: string }) => Promise<void>;
 		upload: (params: {
 			input: Readable | Buffer;
@@ -38,7 +38,7 @@ export interface Client {
 
 export function createClient(): Client {
 	const images = {
-		async get(prefix: AssetPrefix) {
+		async get(prefix?: AssetPrefix) {
 			// TODO: `@aws-sdk/client-s3` has `max_keys` option and `listObjectsV2WithMetadata` method.
 			const stream = minio.listObjectsV2(bucketName, prefix, true);
 
