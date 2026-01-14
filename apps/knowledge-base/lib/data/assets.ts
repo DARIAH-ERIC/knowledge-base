@@ -3,10 +3,15 @@
 import { Readable } from "node:stream";
 import type { ReadableStream } from "node:stream/web";
 
+// import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
+// import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import {
 	client,
 	type ImageUrlOptions,
 } from "@dariah-eric/dariah-knowledge-base-image-service/client";
+
+// FIXME: query assets table, not object store
+// FIXME: pagination
 
 export async function getAssets(options: ImageUrlOptions) {
 	const { images } = await client.images.get();
@@ -23,6 +28,9 @@ export async function getAssets(options: ImageUrlOptions) {
 interface UploadAssetParams {
 	file: File;
 }
+
+// FIXME: use presigned url to allow client to upload directly to object store
+// (also avoids increasing body size limit in next.config.ts)
 
 export async function uploadAsset(params: UploadAssetParams) {
 	const { file } = params;
