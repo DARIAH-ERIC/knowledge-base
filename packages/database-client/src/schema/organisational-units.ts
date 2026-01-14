@@ -35,34 +35,24 @@ export const organisationalUnits = p.pgTable("organisational_units", {
 	...f.timestamps(),
 });
 
-export const organisationalUnitsRelations = p.pgTable(
-	"organisational_units_to_units",
-	{
-		unitId: p
-			.uuid("unit_id")
-			.notNull()
-			.references(() => {
-				return organisationalUnits.id;
-			}),
-		relatedUnitId: p
-			.uuid("related_unit_id")
-			.notNull()
-			.references(() => {
-				return organisationalUnits.id;
-			}),
-		startDate: p.date("start_date", { mode: "date" }),
-		endDate: p.date("end_date", { mode: "date" }),
-		status: p.text("status", { enum: organisationalUnitStatus }).notNull(),
-	},
-	(t) => {
-		return [
-			p.primaryKey({
-				columns: [t.unitId, t.relatedUnitId],
-				name: "organisational_units_to_units_pkey",
-			}),
-		];
-	},
-);
+export const organisationalUnitsRelations = p.pgTable("organisational_units_to_units", {
+	id: p.uuid("id").primaryKey().default(uuidv7()),
+	unitId: p
+		.uuid("unit_id")
+		.notNull()
+		.references(() => {
+			return organisationalUnits.id;
+		}),
+	relatedUnitId: p
+		.uuid("related_unit_id")
+		.notNull()
+		.references(() => {
+			return organisationalUnits.id;
+		}),
+	startDate: p.date("start_date", { mode: "date" }),
+	endDate: p.date("end_date", { mode: "date" }),
+	status: p.text("status", { enum: organisationalUnitStatus }).notNull(),
+});
 
 export const organisationalUnitsAllowedRelations = p.pgTable(
 	"organisational_units_allowed_relations",
