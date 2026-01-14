@@ -121,7 +121,7 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.organisationalUnits.imageId,
 				to: r.assets.id,
 			}),
-			organisationalUnitsRelations: r.many.assets({
+			organisationalUnitsRelations: r.many.organisationalUnits({
 				from: r.organisationalUnits.id.through(r.organisationalUnitsRelations.unitId),
 				to: r.organisationalUnits.id.through(r.organisationalUnitsRelations.relatedUnitId),
 			}),
