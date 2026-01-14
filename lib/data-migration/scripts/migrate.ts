@@ -179,7 +179,51 @@ async function main() {
 		});
 	}
 
-	// //
+	//
+
+	log.info("Migrating initiatives...");
+
+	for (const page of Object.values(data.initiatives)) {
+		assert(page.status === "publish", "Initiative has not been published.");
+
+		await db.transaction(async (tx) => {
+			const [entity] = await tx
+				.insert(schema.entities)
+				.values({
+					slug: page.slug,
+					statusId: statusByType.draft.id,
+					typeId: typesByType.pages.id,
+					createdAt: new Date(page.date_gmt),
+					updatedAt: new Date(page.modified_gmt),
+				})
+				.returning({ id: schema.entities.id });
+
+			const id = entity!.id;
+
+			const imageId = await uploadFeaturedImage(
+				assetsCache,
+				data.media,
+				page.featured_media,
+				page.id,
+			);
+			if (imageId == null) {
+				log.warn(`Missing image (initiative id ${String(page.id)}).`);
+			}
+
+			await tx.insert(schema.pages).values({
+				id,
+				title: page.title.rendered,
+				summary: page.excerpt.rendered,
+				imageId,
+				createdAt: new Date(page.date_gmt),
+				updatedAt: new Date(page.modified_gmt),
+			});
+
+			// TODO: create content block for page.content
+		});
+	}
+
+	//
 
 	log.info("Migrating news...");
 

@@ -122,6 +122,7 @@ export interface WordPressData {
 	categories: Record<WP_REST_API_Category["id"], WP_REST_API_Category>;
 	countries: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
 	events: Record<WP_Event["id"], WP_Event>;
+	initiatives: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
 	institutions: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
 	pages: Record<WP_REST_API_Page["id"], WP_REST_API_Page>;
 	people: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
@@ -137,6 +138,7 @@ export async function getWordPressData(apiBaseUrl: string): Promise<WordPressDat
 		categories,
 		countries,
 		events,
+		initiatives,
 		institutions,
 		pages,
 		people,
@@ -149,6 +151,7 @@ export async function getWordPressData(apiBaseUrl: string): Promise<WordPressDat
 		getCategories(apiBaseUrl),
 		getCountries(apiBaseUrl),
 		getEvents(apiBaseUrl),
+		getInitiatives(apiBaseUrl),
 		getInstitutions(apiBaseUrl),
 		getPages(apiBaseUrl),
 		getPeople(apiBaseUrl),
@@ -163,6 +166,7 @@ export async function getWordPressData(apiBaseUrl: string): Promise<WordPressDat
 		categories: keyById(categories),
 		countries: keyById(countries),
 		events: keyById(events),
+		initiatives: keyById(initiatives),
 		institutions: keyById(institutions),
 		pages: keyById(pages),
 		people: keyById(people),
@@ -209,6 +213,16 @@ function getEvents(baseUrl: string): Promise<Array<WP_Event>> {
 	});
 }
 
+function getInitiatives(baseUrl: string): Promise<WP_REST_API_Posts> {
+	const url = createUrl({
+		baseUrl,
+		pathname: "/wp-json/wp/v2/dariah_initiative",
+		searchParams: createUrlSearchParams({ per_page: 100, _embed: "author" }),
+	});
+
+	return getAll(url);
+}
+
 function getInstitutions(baseUrl: string): Promise<WP_REST_API_Posts> {
 	const url = createUrl({
 		baseUrl,
@@ -218,16 +232,6 @@ function getInstitutions(baseUrl: string): Promise<WP_REST_API_Posts> {
 
 	return getAll(url);
 }
-
-// function getInitiatives(baseUrl: string): Promise<WP_REST_API_Posts> {
-// 	const url = createUrl({
-// 		baseUrl,
-// 		pathname: "/wp-json/wp/v2/dariah_initiative",
-// 		searchParams: createUrlSearchParams({ per_page: 100, _embed: "author" }),
-// 	});
-
-// 	return getAll(url);
-// }
 
 function getMedia(baseUrl: string): Promise<WP_REST_API_Attachments> {
 	const url = createUrl({
