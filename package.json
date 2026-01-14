@@ -31,6 +31,7 @@
 		"image-service:buckets:seed": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-image-service\" run image-service:buckets:seed",
 		"lint:check": "pnpm run --recursive lint:check",
 		"lint:fix": "pnpm run --recursive lint:fix",
+		"migrate-website-data": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-data-migration\" run migrate",
 		"prepare": "run-s setup",
 		"search-index:api-keys:generate": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-search-index\" run search-index:api-keys:generate",
 		"search-index:collections:create": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-search-index\" run search-index:collections:create",
@@ -42,8 +43,7 @@
 		"test:e2e": "pnpm run --recursive test:e2e",
 		"test:e2e:install": "playwright install --with-deps",
 		"test:e2e:update-snapshots": "pnpm run --recursive test:e2e:update-snapshots",
-		"types:check": "pnpm run --recursive types:check",
-		"wordpress:migrate": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-data-migration\" run migrate"
+		"types:check": "pnpm run --recursive types:check"
 	},
 	"devDependencies": {
 		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
