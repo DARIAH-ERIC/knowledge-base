@@ -448,19 +448,22 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 
 				return {
 					name,
+					metadata: { country: f.lorem.word() },
 					summary: f.lorem.paragraph(),
 					imageId: f.helpers.arrayElement(imageIds).id,
 					slug: f.helpers.slugify(name),
-					type: schema.organisationalUnitTypes[i % schema.organisationalUnitTypes.length]!,
+					type:
+						i === 0
+							? "umbrella_consortium"
+							: schema.organisationalUnitTypes[
+									i %
+										schema.organisationalUnitTypes.filter((organisationalUnitType) => {
+											return organisationalUnitType !== "umbrella_consortium";
+										}).length
+								]!,
 				};
 			},
 			{ count: 25 },
-		);
-
-		const allowedUnitTypesForRelations = new Set<string>(
-			organisationalUnitsAllowedRelationsValues.flatMap(({ unitType, relatedUnitType }) => {
-				return [unitType, relatedUnitType];
-			}),
 		);
 
 		const organisationalUnitsResult = await db
@@ -468,54 +471,34 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			.values(organisationalUnits)
 			.returning({ id: schema.organisationalUnits.id, type: schema.organisationalUnits.type });
 
-		const unitsToUnits = organisationalUnitsResult
-			.filter((organisationalUnit) => {
-				return allowedUnitTypesForRelations.has(organisationalUnit.type);
-			})
-			.flatMap(({ id: unitId, type: unitType }) => {
-				return f.helpers
-					.arrayElements(
-						organisationalUnitsResult.filter((organisationalUnit) => {
-							return allowedUnitTypesForRelations.has(organisationalUnit.type);
-						}),
-						{ min: 3, max: 7 },
-					)
-					.filter((unit) => {
-						return organisationalUnitsAllowedRelationsValues.some(
-							(organisationalUnitsAllowedRelationsValue) => {
-								return (
-									organisationalUnitsAllowedRelationsValue.unitType === unit.type &&
-									organisationalUnitsAllowedRelationsValue.relatedUnitType === unit.type
-								);
-							},
-						);
-					})
-					.map(({ id: relatedUnitId, type: relatedUnitType }) => {
-						const startDate = f.date.past({ years: 5 });
-						return {
-							unitId,
-							relatedUnitId,
-							startDate,
-							endDate: f.helpers.maybe(
-								() => {
-									return f.date.between({ from: startDate, to: Date.now() });
-								},
-								{ probability: 0.25 },
-							),
-							status: f.helpers.arrayElement(
-								organisationalUnitsAllowedRelationsValues.filter((allowedRelationsValue) => {
-									return (
-										(allowedRelationsValue.unitType === unitType ||
-											allowedRelationsValue.unitType === relatedUnitType) &&
-										(allowedRelationsValue.relatedUnitType === unitType ||
-											allowedRelationsValue.relatedUnitType === relatedUnitType)
-									);
-								}),
-							).relationType,
-						};
-					});
-			});
+		const unitsToUnits: Array<schema.OrganisationalUnitRelationInput> = f.helpers
+			.arrayElements(organisationalUnitsAllowedRelationsValues, 10)
+			.map((organisationalUnitsAllowedRelation) => {
+				const unit = f.helpers.arrayElement(
+					organisationalUnitsResult.filter((organisationalUnit) => {
+						return organisationalUnit.type === organisationalUnitsAllowedRelation.unitType;
+					}),
+				);
+				const relatedUnit = f.helpers.arrayElement(
+					organisationalUnitsResult.filter((organisationalUnit) => {
+						return organisationalUnit.type === organisationalUnitsAllowedRelation.relatedUnitType;
+					}),
+				);
+				const startDate = f.date.past({ years: 5 });
 
+				return {
+					unitId: unit.id,
+					relatedUnitId: relatedUnit.id,
+					status: organisationalUnitsAllowedRelation.relationType,
+					startDate,
+					endDate: f.helpers.maybe(
+						() => {
+							return f.date.soon({ refDate: startDate, days: 7 });
+						},
+						{ probability: 0.25 },
+					),
+				};
+			});
 		await db.insert(schema.organisationalUnitsRelations).values(unitsToUnits);
 	});
 }
