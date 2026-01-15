@@ -61,7 +61,7 @@ export async function getNews(db: Database, params: GetNewsParams) {
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = client.urls.generate({
+		const image = client.urls.generateSignedImageUrl({
 			key: item.image.key,
 			options: { width: imageWidth.preview },
 		});
@@ -113,7 +113,7 @@ export async function getNewsItemById(db: Database, params: GetNewsItemByIdParam
 		return null;
 	}
 
-	const image = client.urls.generate({
+	const image = client.urls.generateSignedImageUrl({
 		key: item.image.key,
 		options: { width: imageWidth.featured },
 	});
@@ -164,7 +164,7 @@ export async function getNewsItemBySlug(db: Database, params: GetNewsItemBySlugP
 		return null;
 	}
 
-	const image = client.urls.generate({
+	const image = client.urls.generateSignedImageUrl({
 		key: item.image.key,
 		options: { width: imageWidth.featured },
 	});

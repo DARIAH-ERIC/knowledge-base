@@ -61,7 +61,7 @@ export async function getImpactCaseStudies(db: Database, params: GetImpactCaseSt
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = client.urls.generate({
+		const image = client.urls.generateSignedImageUrl({
 			key: item.image.key,
 			options: { width: imageWidth.preview },
 		});
@@ -127,7 +127,7 @@ export async function getImpactCaseStudyById(db: Database, params: GetImpactCase
 	}
 
 	const contributors = item.contributors.map((contributor) => {
-		const image = client.urls.generate({
+		const image = client.urls.generateSignedImageUrl({
 			key: contributor.image.key,
 			options: { width: imageWidth.avatar },
 		});
@@ -135,7 +135,7 @@ export async function getImpactCaseStudyById(db: Database, params: GetImpactCase
 		return { ...contributor, image };
 	});
 
-	const image = client.urls.generate({
+	const image = client.urls.generateSignedImageUrl({
 		key: item.image.key,
 		options: { width: imageWidth.featured },
 	});
@@ -203,7 +203,7 @@ export async function getImpactCaseStudyBySlug(
 	}
 
 	const contributors = item.contributors.map((contributor) => {
-		const image = client.urls.generate({
+		const image = client.urls.generateSignedImageUrl({
 			key: contributor.image.key,
 			options: { width: imageWidth.avatar },
 		});
@@ -211,7 +211,7 @@ export async function getImpactCaseStudyBySlug(
 		return { ...contributor, image };
 	});
 
-	const image = client.urls.generate({
+	const image = client.urls.generateSignedImageUrl({
 		key: item.image.key,
 		options: { width: imageWidth.featured },
 	});

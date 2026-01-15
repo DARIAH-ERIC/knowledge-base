@@ -3,13 +3,16 @@ import type { Readable } from "node:stream";
 import type { BucketItem, ItemBucketMetadata } from "minio";
 
 import { env } from "../config/env.config";
+import { assetPrefixes, presignedUrlExpirySeconds } from "../config/images.config";
 import { generateObjectKey } from "./generate-object-key";
 import { generateSignedImageUrl, type ImageUrlOptions } from "./generate-signed-image-url";
 import { client as minio } from "./minio-client";
 
 const bucketName = env.S3_BUCKET_NAME;
 
-export type AssetPrefix = "avatars" | "images";
+export { assetPrefixes };
+
+export type AssetPrefix = (typeof assetPrefixes)[number];
 
 export type { ImageUrlOptions };
 
@@ -32,7 +35,10 @@ export interface Client {
 		}) => Promise<{ key: string }>;
 	};
 	urls: {
-		generate: (params: { key: string; options: ImageUrlOptions }) => { url: string };
+		generatePresignedUploadUrl: (params: {
+			prefix: AssetPrefix;
+		}) => Promise<{ key: string; url: string }>;
+		generateSignedImageUrl: (params: { key: string; options: ImageUrlOptions }) => { url: string };
 	};
 }
 
@@ -77,7 +83,16 @@ export function createClient(): Client {
 	};
 
 	const urls = {
-		generate(params: { key: string; options: ImageUrlOptions }) {
+		async generatePresignedUploadUrl(params: { prefix: AssetPrefix }) {
+			const { prefix } = params;
+
+			const key = generateObjectKey(prefix);
+
+			const url = await minio.presignedPutObject(bucketName, key, presignedUrlExpirySeconds);
+
+			return { key, url };
+		},
+		generateSignedImageUrl(params: { key: string; options: ImageUrlOptions }) {
 			const { key, options } = params;
 
 			const url = generateSignedImageUrl(bucketName, key, options);

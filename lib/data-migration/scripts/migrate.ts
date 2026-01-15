@@ -162,6 +162,7 @@ async function main() {
 				page.featured_media,
 				page.id,
 			);
+
 			if (imageId == null) {
 				log.warn(`Missing image (page id ${String(page.id)}).`);
 			}
@@ -206,6 +207,7 @@ async function main() {
 				page.featured_media,
 				page.id,
 			);
+
 			if (imageId == null) {
 				log.warn(`Missing image (initiative id ${String(page.id)}).`);
 			}
@@ -213,7 +215,8 @@ async function main() {
 			await tx.insert(schema.pages).values({
 				id,
 				title: page.title.rendered,
-				summary: page.excerpt.rendered,
+				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+				summary: page.excerpt?.rendered ?? "",
 				imageId,
 				createdAt: new Date(page.date_gmt),
 				updatedAt: new Date(page.modified_gmt),
@@ -260,6 +263,7 @@ async function main() {
 				post.featured_media,
 				post.id,
 			);
+
 			if (imageId == null) {
 				log.warn(`Missing image (news id ${String(post.id)}).`);
 			}
@@ -302,6 +306,7 @@ async function main() {
 				event.image !== false
 					? await uploadFeaturedImage(assetsCache, data.media, event.image.id, event.id)
 					: null;
+
 			if (imageId == null) {
 				log.warn(`Missing image (event id ${String(event.id)}).`);
 			}
@@ -362,6 +367,7 @@ async function main() {
 	// 		const id = entity!.id;
 
 	// 		const imageId = await uploadFeaturedImage(assetsCache, data.media, country.featured_media, country.id);
+
 	// 		if (imageId == null) {
 	// 			log.warn(`Missing image (country id ${String(country.id)}).`);
 	// 		}
@@ -401,6 +407,7 @@ async function main() {
 	// 		const id = entity!.id;
 
 	// 		const imageId = await uploadFeaturedImage(assetsCache, data.media, person.featured_media, person.id);
+
 	// 		if (imageId == null) {
 	// 			log.warn(`Missing image (person id ${String(person.id)}).`);
 	// 		}

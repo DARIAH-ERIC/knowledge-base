@@ -6,7 +6,7 @@ import { getTranslations } from "next-intl/server";
 import * as v from "valibot";
 
 import { imageMimeTypes, imageSizeLimit } from "@/config/assets.config";
-import { uploadAsset } from "@/lib/data/assets";
+import { assetPrefixes, uploadAsset } from "@/lib/data/assets";
 import {
 	type ActionState,
 	createErrorActionState,
@@ -25,6 +25,7 @@ const InputSchema = v.object({
 			return input.size <= imageSizeLimit;
 		}),
 	),
+	prefix: v.picklist(assetPrefixes),
 });
 
 export async function uploadImageAction(
@@ -42,9 +43,9 @@ export async function uploadImageAction(
 
 		const t = await getTranslations("actions.uploadImageAction");
 
-		const { file } = await v.parseAsync(InputSchema, getFormDataValues(formData));
+		const { file, prefix } = await v.parseAsync(InputSchema, getFormDataValues(formData));
 
-		const { key } = await uploadAsset({ file });
+		const { key } = await uploadAsset({ file, prefix });
 
 		revalidatePath("/dashboard/website/assets", "page");
 
