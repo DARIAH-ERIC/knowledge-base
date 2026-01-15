@@ -116,6 +116,21 @@ export const relations = defineRelations(schema, (r) => {
 				optional: false,
 			}),
 		},
+		organisationalUnits: {
+			image: r.one.assets({
+				from: r.organisationalUnits.imageId,
+				to: r.assets.id,
+			}),
+			entity: r.one.entities({
+				from: r.organisationalUnits.id,
+				to: r.entities.id,
+				optional: false,
+			}),
+			organisationalUnitsRelations: r.many.organisationalUnits({
+				from: r.organisationalUnits.id.through(r.organisationalUnitsRelations.unitId),
+				to: r.organisationalUnits.id.through(r.organisationalUnitsRelations.relatedUnitId),
+			}),
+		},
 		pages: {
 			entity: r.one.entities({
 				from: r.pages.id,
