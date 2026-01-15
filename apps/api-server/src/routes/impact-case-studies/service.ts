@@ -4,7 +4,7 @@ import { count, eq } from "@dariah-eric/dariah-knowledge-base-database-client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
 
-import type { Database } from "@/middlewares/db";
+import type { Database, Transaction } from "@/middlewares/db";
 import { imageWidth } from "~/config/api.config";
 
 interface GetImpactCaseStudiesParams {
@@ -14,7 +14,10 @@ interface GetImpactCaseStudiesParams {
 	offset?: number;
 }
 
-export async function getImpactCaseStudies(db: Database, params: GetImpactCaseStudiesParams) {
+export async function getImpactCaseStudies(
+	db: Database | Transaction,
+	params: GetImpactCaseStudiesParams,
+) {
 	const { limit = 10, offset = 0 } = params;
 
 	const [items, aggregate] = await Promise.all([
@@ -75,7 +78,10 @@ interface GetImpactCaseStudyByIdParams {
 	id: schema.ImpactCaseStudy["id"];
 }
 
-export async function getImpactCaseStudyById(db: Database, params: GetImpactCaseStudyByIdParams) {
+export async function getImpactCaseStudyById(
+	db: Database | Transaction,
+	params: GetImpactCaseStudyByIdParams,
+) {
 	const { id } = params;
 
 	const item = await db.query.impactCaseStudies.findFirst({
@@ -143,7 +149,7 @@ interface GetImpactCaseStudyBySlugParams {
 }
 
 export async function getImpactCaseStudyBySlug(
-	db: Database,
+	db: Database | Transaction,
 	params: GetImpactCaseStudyBySlugParams,
 ) {
 	const { slug } = params;
