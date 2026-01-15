@@ -49,6 +49,12 @@
 		},
 		"title": "Institutions"
 	},
+	"DashboardAdministratorNewslettersPage": {
+		"meta": {
+			"title": "Administrator dashboard - Newsletters"
+		},
+		"title": "Newsletters"
+	},
 	"DashboardAdministratorOutreachPage": {
 		"meta": {
 			"title": "Administrator dashboard - Outreach"

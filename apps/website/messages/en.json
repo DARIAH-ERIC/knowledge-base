@@ -93,6 +93,19 @@
 		"change-locale-to": "Switch to {locale}",
 		"current-locale": "Current language: {locale}"
 	},
+	"NewslettersPage": {
+		"meta": {
+			"title": "Newsletters"
+		},
+		"title": "Newsletters"
+	},
+	"NewsletterSubscriptionForm": {
+		"email": "Email",
+		"first-name": "First name",
+		"institution": "Institution",
+		"last-name": "Last name",
+		"submit": "Subscribe"
+	},
 	"PrivacyPolicyPage": {
 		"meta": {
 			"title": "Privacy policy"
