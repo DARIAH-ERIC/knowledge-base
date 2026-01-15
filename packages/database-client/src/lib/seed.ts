@@ -442,38 +442,58 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			.select()
 			.from(schema.organisationalUnitsAllowedRelations);
 
-		const organisationalUnits: Array<schema.OrganisationalUnitInput> = f.helpers.multiple(
-			(_, i) => {
-				const name = f.lorem.sentence();
+		const organisationalUnits: Array<Omit<schema.OrganisationalUnitInput, "id">> =
+			f.helpers.multiple(
+				(_, i) => {
+					const name = f.lorem.sentence();
 
-				return {
-					name,
-					metadata: { country: f.lorem.word() },
-					summary: f.lorem.paragraph(),
-					imageId: f.helpers.maybe(
-						() => {
-							return f.helpers.arrayElement(imageIds).id;
-						},
-						{ probability: 0.5 },
-					),
-					slug: slugify(name),
-					type:
-						i === 0
-							? "umbrella_consortium"
-							: schema.organisationalUnitTypes[
-									i %
-										schema.organisationalUnitTypes.filter((organisationalUnitType) => {
-											return organisationalUnitType !== "umbrella_consortium";
-										}).length
+					return {
+						name,
+						metadata: { country: f.lorem.word() },
+						summary: f.lorem.paragraph(),
+						imageId: f.helpers.maybe(
+							() => {
+								return f.helpers.arrayElement(imageIds).id;
+							},
+							{ probability: 0.5 },
+						),
+						type:
+							i === 0
+								? "umbrella_consortium"
+								: schema.organisationalUnitTypes[
+								i %
+								schema.organisationalUnitTypes.filter((organisationalUnitType) => {
+									return organisationalUnitType !== "umbrella_consortium";
+								}).length
 								]!,
+					};
+				},
+				{ count: 25 },
+			);
+
+		const organisationalUnitsEntities: Array<schema.EntityInput> = organisationalUnits.map(
+			(organisationalUnit) => {
+				return {
+					typeId: entityTypesByType.organisational_units.id,
+					documentId: f.string.uuid(),
+					statusId: entityStatusByType.published.id,
+					slug: slugify(organisationalUnit.name),
 				};
 			},
-			{ count: 25 },
 		);
 
-		const organisationalUnitsResult = await db
+		const organisationalUnitIds = await db
+			.insert(schema.entities)
+			.values(organisationalUnitsEntities)
+			.returning({ id: schema.entities.id });
+
+		const organisationalUnitsIds = await db
 			.insert(schema.organisationalUnits)
-			.values(organisationalUnits)
+			.values(
+				organisationalUnitIds.map(({ id }, index) => {
+					return { ...organisationalUnits[index]!, id };
+				}),
+			)
 			.returning({ id: schema.organisationalUnits.id, type: schema.organisationalUnits.type });
 
 		const unitsToUnits: Array<schema.OrganisationalUnitRelationInput> = f.helpers
@@ -485,12 +505,12 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			)
 			.map((organisationalUnitsAllowedRelation) => {
 				const unit = f.helpers.arrayElement(
-					organisationalUnitsResult.filter((organisationalUnit) => {
+					organisationalUnitsIds.filter((organisationalUnit) => {
 						return organisationalUnit.type === organisationalUnitsAllowedRelation.unitType;
 					}),
 				);
 				const relatedUnit = f.helpers.arrayElement(
-					organisationalUnitsResult.filter((organisationalUnit) => {
+					organisationalUnitsIds.filter((organisationalUnit) => {
 						return organisationalUnit.type === organisationalUnitsAllowedRelation.relatedUnitType;
 					}),
 				);
@@ -509,11 +529,11 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 					endDate:
 						minEndDate < yesterday
 							? f.helpers.maybe(
-									() => {
-										return f.date.between({ from: minEndDate, to: yesterday });
-									},
-									{ probability: 0.25 },
-								)
+								() => {
+									return f.date.between({ from: minEndDate, to: yesterday });
+								},
+								{ probability: 0.25 },
+							)
 							: null,
 				};
 			});

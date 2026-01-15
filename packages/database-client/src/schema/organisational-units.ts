@@ -4,6 +4,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { assets } from "./assets";
+import { entities } from "./entities";
 
 export const organisationalUnitTypes = [
 	"body",
@@ -20,14 +21,18 @@ export const organisationalUnitStatus = [
 ] as const;
 
 export const organisationalUnits = p.pgTable("organisational_units", {
-	id: p.uuid("id").primaryKey().default(uuidv7()),
+	id: p
+		.uuid("id")
+		.primaryKey()
+		.references(() => {
+			return entities.id;
+		}),
 	metadata: p.jsonb("metadata"),
 	name: p.text("name").notNull(),
 	summary: p.text("summary").notNull(),
 	imageId: p.uuid("image_id").references(() => {
 		return assets.id;
 	}),
-	slug: p.text("slug").notNull().unique(),
 	type: p.text("type", { enum: organisationalUnitTypes }).notNull(),
 	...f.timestamps(),
 });
