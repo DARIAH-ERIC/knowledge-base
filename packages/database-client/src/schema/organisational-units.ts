@@ -24,12 +24,9 @@ export const organisationalUnits = p.pgTable("organisational_units", {
 	metadata: p.jsonb("metadata"),
 	name: p.text("name").notNull(),
 	summary: p.text("summary").notNull(),
-	imageId: p
-		.uuid("image_id")
-		.notNull()
-		.references(() => {
-			return assets.id;
-		}),
+	imageId: p.uuid("image_id").references(() => {
+		return assets.id;
+	}),
 	slug: p.text("slug").notNull().unique(),
 	type: p.text("type", { enum: organisationalUnitTypes }).notNull(),
 	...f.timestamps(),
