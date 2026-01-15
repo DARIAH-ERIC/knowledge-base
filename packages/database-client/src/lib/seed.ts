@@ -450,7 +450,12 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 					name,
 					metadata: { country: f.lorem.word() },
 					summary: f.lorem.paragraph(),
-					imageId: f.helpers.arrayElement(imageIds).id,
+					imageId: f.helpers.maybe(
+						() => {
+							return f.helpers.arrayElement(imageIds).id;
+						},
+						{ probability: 0.5 },
+					),
 					slug: slugify(name),
 					type:
 						i === 0
@@ -472,7 +477,12 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			.returning({ id: schema.organisationalUnits.id, type: schema.organisationalUnits.type });
 
 		const unitsToUnits: Array<schema.OrganisationalUnitRelationInput> = f.helpers
-			.arrayElements(organisationalUnitsAllowedRelationsValues, 10)
+			.multiple(
+				() => {
+					return f.helpers.arrayElement(organisationalUnitsAllowedRelationsValues);
+				},
+				{ count: 25 },
+			)
 			.map((organisationalUnitsAllowedRelation) => {
 				const unit = f.helpers.arrayElement(
 					organisationalUnitsResult.filter((organisationalUnit) => {
@@ -486,17 +496,25 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 				);
 				const startDate = f.date.past({ years: 5 });
 
+				const yesterday = new Date();
+				yesterday.setDate(yesterday.getDate() - 1);
+				const minEndDate = new Date(startDate);
+				minEndDate.setFullYear(startDate.getFullYear() + 1);
+
 				return {
 					unitId: unit.id,
 					relatedUnitId: relatedUnit.id,
 					status: organisationalUnitsAllowedRelation.relationType,
 					startDate,
-					endDate: f.helpers.maybe(
-						() => {
-							return f.date.soon({ refDate: startDate, days: 7 });
-						},
-						{ probability: 0.25 },
-					),
+					endDate:
+						minEndDate < yesterday
+							? f.helpers.maybe(
+									() => {
+										return f.date.between({ from: minEndDate, to: yesterday });
+									},
+									{ probability: 0.25 },
+								)
+							: null,
 				};
 			});
 		await db.insert(schema.organisationalUnitsRelations).values(unitsToUnits);
