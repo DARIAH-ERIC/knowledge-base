@@ -4,7 +4,7 @@ import { count, eq } from "@dariah-eric/dariah-knowledge-base-database-client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
 
-import type { Database } from "@/middlewares/db";
+import type { Database, Transaction } from "@/middlewares/db";
 import { imageWidth } from "~/config/api.config";
 
 interface GetPagesParams {
@@ -14,7 +14,7 @@ interface GetPagesParams {
 	offset?: number;
 }
 
-export async function getPages(db: Database, params: GetPagesParams) {
+export async function getPages(db: Database | Transaction, params: GetPagesParams) {
 	const { limit = 10, offset = 0 } = params;
 
 	const [items, aggregate] = await Promise.all([
@@ -78,7 +78,7 @@ interface GetPageByIdParams {
 	id: schema.Page["id"];
 }
 
-export async function getPageById(db: Database, params: GetPageByIdParams) {
+export async function getPageById(db: Database | Transaction, params: GetPageByIdParams) {
 	const { id } = params;
 
 	const item = await db.query.pages.findFirst({
@@ -129,7 +129,7 @@ interface GetPageBySlugParams {
 	slug: schema.Entity["slug"];
 }
 
-export async function getPageBySlug(db: Database, params: GetPageBySlugParams) {
+export async function getPageBySlug(db: Database | Transaction, params: GetPageBySlugParams) {
 	const { slug } = params;
 
 	const item = await db.query.pages.findFirst({
