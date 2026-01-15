@@ -451,7 +451,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 					metadata: { country: f.lorem.word() },
 					summary: f.lorem.paragraph(),
 					imageId: f.helpers.arrayElement(imageIds).id,
-					slug: f.helpers.slugify(name),
+					slug: slugify(name),
 					type:
 						i === 0
 							? "umbrella_consortium"
