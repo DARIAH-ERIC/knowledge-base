@@ -461,11 +461,11 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 							i === 0
 								? "umbrella_consortium"
 								: schema.organisationalUnitTypes[
-								i %
-								schema.organisationalUnitTypes.filter((organisationalUnitType) => {
-									return organisationalUnitType !== "umbrella_consortium";
-								}).length
-								]!,
+										i %
+											schema.organisationalUnitTypes.filter((organisationalUnitType) => {
+												return organisationalUnitType !== "umbrella_consortium";
+											}).length
+									]!,
 					};
 				},
 				{ count: 25 },
@@ -529,11 +529,11 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 					endDate:
 						minEndDate < yesterday
 							? f.helpers.maybe(
-								() => {
-									return f.date.between({ from: minEndDate, to: yesterday });
-								},
-								{ probability: 0.25 },
-							)
+									() => {
+										return f.date.between({ from: minEndDate, to: yesterday });
+									},
+									{ probability: 0.25 },
+								)
 							: null,
 				};
 			});
