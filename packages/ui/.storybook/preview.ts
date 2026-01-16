@@ -5,7 +5,7 @@ import { withThemeByDataAttribute } from "@storybook/addon-themes";
 import type { Preview } from "@storybook/react-vite";
 import { themes } from "storybook/theming";
 
-import { defaultLocale, locales, messages } from "@/config/i18n.config";
+import { defaultLocale, getIntlLanguage, locales, messages } from "@/config/i18n.config";
 
 const preview: Preview = {
 	decorators: [
@@ -22,7 +22,9 @@ const preview: Preview = {
 		locale: defaultLocale,
 		locales: Object.fromEntries(
 			locales.map((locale) => {
-				return [locale, new Intl.DisplayNames(locale, { type: "language" }).of(locale)];
+				const language = getIntlLanguage(locale)
+
+				return [locale, new Intl.DisplayNames(locale, { type: "language" }).of(language)];
 			}),
 		),
 	},
