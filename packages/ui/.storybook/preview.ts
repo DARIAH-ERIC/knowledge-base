@@ -5,9 +5,7 @@ import { withThemeByDataAttribute } from "@storybook/addon-themes";
 import type { Preview } from "@storybook/react-vite";
 import { themes } from "storybook/theming";
 
-import en from "../messages/en.json";
-
-const defaultLocale = "en";
+import { defaultLocale, locales, messages } from "@/config/i18n.config";
 
 const preview: Preview = {
 	decorators: [
@@ -22,9 +20,11 @@ const preview: Preview = {
 	],
 	initialGlobals: {
 		locale: defaultLocale,
-		locales: {
-			en: "English",
-		},
+		locales: Object.fromEntries(
+			locales.map((locale) => {
+				return [locale, new Intl.DisplayNames(locale, { type: "language" }).of(locale)];
+			}),
+		),
 	},
 	parameters: {
 		a11y: {
@@ -58,9 +58,7 @@ const preview: Preview = {
 		},
 		nextIntl: {
 			defaultLocale,
-			messagesByLocale: {
-				en,
-			},
+			messagesByLocale: messages,
 		},
 	},
 };
