@@ -7,6 +7,7 @@ const config: StorybookConfig = {
 		"@chromatic-com/storybook",
 		"@storybook/addon-themes",
 		"@storybook/addon-docs",
+		"storybook-next-intl",
 	],
 	core: {
 		disableWhatsNewNotifications: true,

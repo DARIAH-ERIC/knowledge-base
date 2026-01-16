@@ -5,6 +5,10 @@ import { withThemeByDataAttribute } from "@storybook/addon-themes";
 import type { Preview } from "@storybook/react-vite";
 import { themes } from "storybook/theming";
 
+import en from "../messages/en.json";
+
+const defaultLocale = "en";
+
 const preview: Preview = {
 	decorators: [
 		withThemeByDataAttribute({
@@ -16,6 +20,12 @@ const preview: Preview = {
 			},
 		}),
 	],
+	initialGlobals: {
+		locale: defaultLocale,
+		locales: {
+			en: "English",
+		},
+	},
 	parameters: {
 		a11y: {
 			config: {
@@ -45,6 +55,12 @@ const preview: Preview = {
 				sort: "requiredFirst",
 			},
 			theme: window.matchMedia("(prefers-color-scheme: dark)").matches ? themes.dark : themes.light,
+		},
+		nextIntl: {
+			defaultLocale,
+			messagesByLocale: {
+				en,
+			},
 		},
 	},
 };

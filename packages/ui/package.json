@@ -13,12 +13,13 @@
 			"onFail": "download"
 		}
 	},
-	"packageManager": "pnpm@10.25.0",
+	"packageManager": "pnpm@10.28.0",
 	"exports": {
 		".": {
 			"types": "./dist/src/index.d.ts",
 			"default": "./src/index.ts"
-		}
+		},
+		"./i18n/en": "./messages/en.json"
 	},
 	"sideEffects": false,
 	"scripts": {
@@ -46,6 +47,7 @@
 		"@react-aria/utils": "catalog:",
 		"clsx": "catalog:",
 		"lucide-react": "catalog:",
+		"next-intl": "catalog:",
 		"react": "catalog:",
 		"react-aria": "catalog:",
 		"react-aria-components": "catalog:",
@@ -76,6 +78,7 @@
 		"playwright": "catalog:",
 		"prettier": "catalog:",
 		"storybook": "catalog:",
+		"storybook-next-intl": "catalog:",
 		"stylelint": "catalog:",
 		"tailwindcss": "catalog:",
 		"tailwindcss-react-aria-components": "catalog:",
