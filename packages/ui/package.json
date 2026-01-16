@@ -19,7 +19,8 @@
 			"types": "./dist/src/index.d.ts",
 			"default": "./src/index.ts"
 		},
-		"./i18n/en": "./messages/en.json"
+		"./i18n/en": "./messages/en.json",
+		"./styles": "./styles/index.css"
 	},
 	"sideEffects": false,
 	"scripts": {
