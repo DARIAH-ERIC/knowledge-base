@@ -1,3 +1,5 @@
+import type ui from "@dariah-eric/knowledge-base-ui/i18n/en";
+
 import type metadata from "@/content/en/metadata/index.json";
 import { getIntlLanguage, type IntlLocale } from "@/lib/i18n/locales";
 import type { SocialMediaKind } from "@/lib/social-media/social-media.config";
@@ -5,6 +7,7 @@ import type messages from "@/messages/en.json";
 
 type Messages = typeof messages;
 type Metadata = typeof metadata;
+type UiMessages = typeof ui;
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getIntlMessages(locale: IntlLocale) {
