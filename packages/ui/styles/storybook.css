@@ -2,9 +2,12 @@
  * Imports.
  * ============================================================================
  */
+
+@import "tailwindcss";
 @import "@fontsource-variable/inter/standard.css";
 @import "@fontsource-variable/inter/standard-italic.css";
 @import "@fontsource-variable/fira-code";
+@import "@/styles/index.css";
 
 /*
  * Fonts.

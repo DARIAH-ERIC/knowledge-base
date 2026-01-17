@@ -1,4 +1,3 @@
-import "@/styles/index.css";
 import "@/styles/storybook.css";
 
 import { withThemeByDataAttribute } from "@storybook/addon-themes";
@@ -22,7 +21,7 @@ const preview: Preview = {
 		locale: defaultLocale,
 		locales: Object.fromEntries(
 			locales.map((locale) => {
-				const language = getIntlLanguage(locale)
+				const language = getIntlLanguage(locale);
 
 				return [locale, new Intl.DisplayNames(locale, { type: "language" }).of(language)];
 			}),
