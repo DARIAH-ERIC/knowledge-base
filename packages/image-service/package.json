@@ -39,6 +39,7 @@
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/validate-env": "catalog:",
+		"@imgproxy/imgproxy-js-core": "catalog:",
 		"@imgproxy/imgproxy-node": "catalog:",
 		"minio": "catalog:",
 		"uuid": "catalog:",

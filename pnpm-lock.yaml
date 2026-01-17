@@ -63,6 +63,9 @@ catalogs:
     '@hono/swagger-ui':
       specifier: ^0.5.3
       version: 0.5.3
+    '@imgproxy/imgproxy-js-core':
+      specifier: ^1.7.0
+      version: 1.7.0
     '@imgproxy/imgproxy-node':
       specifier: ^1.1.0
       version: 1.1.0
@@ -336,7 +339,7 @@ importers:
         version: 16.2.7
       node:
         specifier: runtime:^24.12.0
-        version: runtime:24.12.0
+        version: runtime:24.13.0
       npm-run-all2:
         specifier: 'catalog:'
         version: 8.0.4
@@ -424,7 +427,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       node:
         specifier: runtime:^24.12.0
-        version: runtime:24.12.0
+        version: runtime:24.13.0
       openapi-types:
         specifier: 'catalog:'
         version: 12.1.3
@@ -481,7 +484,7 @@ importers:
         version: 3.32.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@sentry/nextjs':
         specifier: 'catalog:'
-        version: 10.32.1(@opentelemetry/context-async-hooks@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(next@16.1.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(webpack@5.104.1)
+        version: 10.32.1(@opentelemetry/context-async-hooks@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(next@16.1.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(webpack@5.104.1)
       '@valibot/i18n':
         specifier: 'catalog:'
         version: 1.0.0(valibot@1.2.0(typescript@5.9.3))
@@ -505,7 +508,7 @@ importers:
         version: 16.1.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       next-intl:
         specifier: 'catalog:'
-        version: 4.7.0(@swc/helpers@0.5.18)(next@16.1.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
+        version: 4.7.0(@swc/helpers@0.5.18)(next@16.1.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
       react:
         specifier: 'catalog:'
         version: 19.2.3
@@ -605,7 +608,7 @@ importers:
         version: 0.3.9
       node:
         specifier: runtime:^24.12.0
-        version: runtime:24.12.0
+        version: runtime:24.13.0
       npm-run-all2:
         specifier: 'catalog:'
         version: 8.0.4
@@ -662,7 +665,7 @@ importers:
         version: 3.32.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@sentry/nextjs':
         specifier: 'catalog:'
-        version: 10.32.1(@opentelemetry/context-async-hooks@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(next@16.1.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(webpack@5.104.1)
+        version: 10.32.1(@opentelemetry/context-async-hooks@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(next@16.1.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(webpack@5.104.1)
       '@valibot/i18n':
         specifier: 'catalog:'
         version: 1.0.0(valibot@1.2.0(typescript@5.9.3))
@@ -683,7 +686,7 @@ importers:
         version: 16.1.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       next-intl:
         specifier: 'catalog:'
-        version: 4.7.0(@swc/helpers@0.5.18)(next@16.1.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
+        version: 4.7.0(@swc/helpers@0.5.18)(next@16.1.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
       react:
         specifier: 'catalog:'
         version: 19.2.3
@@ -777,7 +780,7 @@ importers:
         version: 0.3.9
       node:
         specifier: runtime:^24.12.0
-        version: runtime:24.12.0
+        version: runtime:24.13.0
       npm-run-all2:
         specifier: 'catalog:'
         version: 8.0.4
@@ -813,7 +816,7 @@ importers:
     dependencies:
       '@acdh-oeaw/lib':
         specifier: 'catalog:'
-        version: 0.3.7
+        version: 1.0.1
       '@dariah-eric/dariah-knowledge-base-database-client':
         specifier: workspace:^
         version: link:../../packages/database-client
@@ -844,7 +847,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       node:
         specifier: runtime:^24.12.0
-        version: runtime:24.12.0
+        version: runtime:24.13.0
       prettier:
         specifier: 'catalog:'
         version: 3.7.4
@@ -911,7 +914,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       node:
         specifier: runtime:^24.12.0
-        version: runtime:24.12.0
+        version: runtime:24.13.0
       prettier:
         specifier: 'catalog:'
         version: 3.7.4
@@ -945,7 +948,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       node:
         specifier: runtime:^24.12.0
-        version: runtime:24.12.0
+        version: runtime:24.13.0
       prettier:
         specifier: 'catalog:'
         version: 3.7.4
@@ -988,7 +991,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       node:
         specifier: runtime:^24.12.0
-        version: runtime:24.12.0
+        version: runtime:24.13.0
       prettier:
         specifier: 'catalog:'
         version: 3.7.4
@@ -1022,7 +1025,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       node:
         specifier: runtime:^24.12.0
-        version: runtime:24.12.0
+        version: runtime:24.13.0
       prettier:
         specifier: 'catalog:'
         version: 3.7.4
@@ -1089,7 +1092,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       node:
         specifier: runtime:^24.12.0
-        version: runtime:24.12.0
+        version: runtime:24.13.0
       prettier:
         specifier: 'catalog:'
         version: 3.7.4
@@ -1108,6 +1111,9 @@ importers:
       '@acdh-oeaw/validate-env':
         specifier: 'catalog:'
         version: 0.2.1(typescript@5.9.3)
+      '@imgproxy/imgproxy-js-core':
+        specifier: 'catalog:'
+        version: 1.7.0
       '@imgproxy/imgproxy-node':
         specifier: 'catalog:'
         version: 1.1.0
@@ -1141,7 +1147,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       node:
         specifier: runtime:^24
-        version: runtime:24.12.0
+        version: runtime:24.13.0
       prettier:
         specifier: 'catalog:'
         version: 3.7.4
@@ -1193,7 +1199,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       node:
         specifier: runtime:^24.12.0
-        version: runtime:24.12.0
+        version: runtime:24.13.0
       prettier:
         specifier: 'catalog:'
         version: 3.7.4
@@ -1253,6 +1259,10 @@ packages:
 
   '@acdh-oeaw/lib@1.0.0':
     resolution: {integrity: sha512-8ELHMd4+VC8FKLO92QrN2ccKboEzm+Ty9EwyAPdSlGgTqDVcF9jU/vdx+Oq93DSHlc7eI/mCTx+SNesfb+xXZw==}
+    engines: {node: '>=24'}
+
+  '@acdh-oeaw/lib@1.0.1':
+    resolution: {integrity: sha512-qCMBDpbKxFoSzCxZB9TmcYzuNWnG4CZr+MmOtUFWrhxKwGzUN0fpC7tGoxDUCDCLgD4BkYYrt8qSx/SyzGHg/g==}
     engines: {node: '>=24'}
 
   '@acdh-oeaw/prettier-config@2.0.1':
@@ -6349,94 +6359,94 @@ packages:
     resolution: {integrity: sha512-heyWv3lLjKHpcBDMUSR+R0DohRYZTYq+Ro3hJ4m9Ia8ccdKbL5UijIaWr2L4co+bmmFuvBVZ4v23QW2PqvBFAA==}
     engines: {node: '>=8'}
 
-  node@runtime:24.12.0:
+  node@runtime:24.13.0:
     resolution:
       type: variations
       variants:
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-MfPQZbuE8GnlIuVdDTA1vTZMul2KIiM/9oAF0oHou3g=
+            integrity: sha256-rCHprwik1UsFfYAMA7yVMilGlSuNqoEcramL+2aozo8=
             type: binary
-            url: https://nodejs.org/download/release/v24.12.0/node-v24.12.0-aix-ppc64.tar.gz
+            url: https://nodejs.org/download/release/v24.13.0/node-v24.13.0-aix-ppc64.tar.gz
           targets:
             - cpu: ppc64
               os: aix
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-MZ8iGtxeRP8O1X6KRBsihPArjcb8h7jrkqapNkP9gIA=
+            integrity: sha256-1ZWWHlY/yuBX1KD7mS8XWlTZf8xKFNwtR02S3e6jufg=
             type: binary
-            url: https://nodejs.org/download/release/v24.12.0/node-v24.12.0-darwin-arm64.tar.gz
+            url: https://nodejs.org/download/release/v24.13.0/node-v24.13.0-darwin-arm64.tar.gz
           targets:
             - cpu: arm64
               os: darwin
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-uC6kxi/QjiUMq1nWJeddd8xbCj1gxmmOvuRUXIihacU=
+            integrity: sha256-bwPBtI3b4bEppvgDi+COCJnwXxcYW00+Q1AYCrZpp/M=
             type: binary
-            url: https://nodejs.org/download/release/v24.12.0/node-v24.12.0-darwin-x64.tar.gz
+            url: https://nodejs.org/download/release/v24.13.0/node-v24.13.0-darwin-x64.tar.gz
           targets:
             - cpu: x64
               os: darwin
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-myou65io6zc2EiTiodBgMArS3RQ69Y39sW3nhd8PEig=
+            integrity: sha256-D21AuUxqLra0wkD/yLn9Otp6sETBd91BPAbh75pj8IE=
             type: binary
-            url: https://nodejs.org/download/release/v24.12.0/node-v24.12.0-linux-arm64.tar.gz
+            url: https://nodejs.org/download/release/v24.13.0/node-v24.13.0-linux-arm64.tar.gz
           targets:
             - cpu: arm64
               os: linux
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-Zux5tNZPQQmu34IhCHFdC2CXEY35FZwvYyFHfaTqF6o=
+            integrity: sha256-GAEZMLGCocW0nSMmGR/bpYJwvfe0W4x9+FXvMZMbFIo=
             type: binary
-            url: https://nodejs.org/download/release/v24.12.0/node-v24.12.0-linux-ppc64le.tar.gz
+            url: https://nodejs.org/download/release/v24.13.0/node-v24.13.0-linux-ppc64le.tar.gz
           targets:
             - cpu: ppc64le
               os: linux
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-jclgolVdsap3/RMcJb5XG594RLyLJ454cyufWA/n1YA=
+            integrity: sha256-V0RhC2JPLoKuHKJ52OznuMpGZDcjlTPS0DNWUwO8HTk=
             type: binary
-            url: https://nodejs.org/download/release/v24.12.0/node-v24.12.0-linux-s390x.tar.gz
+            url: https://nodejs.org/download/release/v24.13.0/node-v24.13.0-linux-s390x.tar.gz
           targets:
             - cpu: s390x
               os: linux
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-YVkifgr318PGuy+pAEUrBKbLiEGnAqeazGEyCdcLBNA=
+            integrity: sha256-YiOq0agfnR57aCxZ0S4t4jP3tMN0dc1A0cicQrc3/6g=
             type: binary
-            url: https://nodejs.org/download/release/v24.12.0/node-v24.12.0-linux-x64.tar.gz
+            url: https://nodejs.org/download/release/v24.13.0/node-v24.13.0-linux-x64.tar.gz
           targets:
             - cpu: x64
               os: linux
         - resolution:
             archive: zip
             bin: node.exe
-            integrity: sha256-sF5+Bm+BPTWtPNnCTu2u4HTAEqx+AAcSl2CP3S6UiuM=
-            prefix: node-v24.12.0-win-arm64
+            integrity: sha256-krn5sMDBI+EeSvxTXw7BnNmHRl7qUGQnVTpJlxNkFYo=
+            prefix: node-v24.13.0-win-arm64
             type: binary
-            url: https://nodejs.org/download/release/v24.12.0/node-v24.12.0-win-arm64.zip
+            url: https://nodejs.org/download/release/v24.13.0/node-v24.13.0-win-arm64.zip
           targets:
             - cpu: arm64
               os: win32
         - resolution:
             archive: zip
             bin: node.exe
-            integrity: sha256-nBJfYa6Ue1LneQlYMPnKwmeEagQ+9xkhg8hAFqqtKBI=
-            prefix: node-v24.12.0-win-x64
+            integrity: sha256-yidCaVvo3kQCfXGz9TpL2zYAm5VXX+Gub38LXOCRy4g=
+            prefix: node-v24.13.0-win-x64
             type: binary
-            url: https://nodejs.org/download/release/v24.12.0/node-v24.12.0-win-x64.zip
+            url: https://nodejs.org/download/release/v24.13.0/node-v24.13.0-win-x64.zip
           targets:
             - cpu: x64
               os: win32
-    version: 24.12.0
+    version: 24.13.0
     hasBin: true
 
   normalize-path@3.0.0:
@@ -8058,6 +8068,10 @@ snapshots:
   '@acdh-oeaw/lib@0.3.7': {}
 
   '@acdh-oeaw/lib@1.0.0':
+    dependencies:
+      is-network-error: 1.3.0
+
+  '@acdh-oeaw/lib@1.0.1':
     dependencies:
       is-network-error: 1.3.0
 
@@ -10598,7 +10612,7 @@ snapshots:
 
   '@sentry/core@10.32.1': {}
 
-  '@sentry/nextjs@10.32.1(@opentelemetry/context-async-hooks@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(next@16.1.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(webpack@5.104.1)':
+  '@sentry/nextjs@10.32.1(@opentelemetry/context-async-hooks@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(next@16.1.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(webpack@5.104.1)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.38.0
@@ -13604,7 +13618,7 @@ snapshots:
 
   next-intl-swc-plugin-extractor@4.7.0: {}
 
-  next-intl@4.7.0(@swc/helpers@0.5.18)(next@16.1.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(typescript@5.9.3):
+  next-intl@4.7.0(@swc/helpers@0.5.18)(next@16.1.1(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(@playwright/test@1.57.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(typescript@5.9.3):
     dependencies:
       '@formatjs/intl-localematcher': 0.5.10
       '@parcel/watcher': 2.5.1
@@ -13660,7 +13674,7 @@ snapshots:
       '@types/pegjs': 0.10.6
       big-integer: 1.6.52
 
-  node@runtime:24.12.0: {}
+  node@runtime:24.13.0: {}
 
   normalize-path@3.0.0: {}
 
