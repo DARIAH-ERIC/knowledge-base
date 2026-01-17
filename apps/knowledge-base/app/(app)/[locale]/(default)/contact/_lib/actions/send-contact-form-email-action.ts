@@ -16,14 +16,14 @@ import { isHoneypotError, isRateLimitError } from "@/lib/server/errors";
 import { assertValidFormSubmission } from "@/lib/server/honeypot";
 import { assertGlobalPostRateLimit } from "@/lib/server/rate-limit/global-rate-limit";
 
-const ContactFormSchema = v.object({
+const FormDataSchema = v.object({
 	email: v.pipe(v.string(), v.email()),
 	message: v.pipe(v.string(), v.nonEmpty()),
 	subject: v.pipe(v.string(), v.nonEmpty()),
 });
 
 export async function sendContactFormEmailAction(
-	state: ActionState,
+	previousState: ActionState,
 	formData: FormData,
 ): Promise<ActionState> {
 	const locale = await getLocale();
@@ -35,11 +35,13 @@ export async function sendContactFormEmailAction(
 
 		assertValidFormSubmission(formData);
 
-		const { email, message, subject } = await v.parseAsync(
-			ContactFormSchema,
+		const validation = await v.parseAsync(
+			FormDataSchema,
 			getFormDataValues(formData),
 			{ lang: getIntlLanguage(locale) },
 		);
+
+		const { email, message, subject } = validation
 
 		const info = await sendEmail({
 			from: email,
@@ -60,8 +62,8 @@ export async function sendContactFormEmailAction(
 			return createErrorActionState({ message: e("invalid-form-fields"), formData });
 		}
 
-		if (v.isValiError<typeof ContactFormSchema>(error)) {
-			const errors = v.flatten<typeof ContactFormSchema>(error.issues).nested;
+		if (v.isValiError<typeof FormDataSchema>(error)) {
+			const errors = v.flatten<typeof FormDataSchema>(error.issues).nested;
 			return createErrorActionState({ message: e("invalid-form-fields"), errors, formData });
 		}
 
