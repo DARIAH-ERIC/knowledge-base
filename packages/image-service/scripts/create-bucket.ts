@@ -11,7 +11,7 @@ async function main() {
 	if (isCreated) {
 		log.success(`Successfully created "${bucketName}" bucket in object store.`);
 	} else {
-		log.success(`Bucket "${bucketName}" already exists in object store.`);
+		log.info(`Bucket "${bucketName}" already exists in object store.`);
 	}
 }
 

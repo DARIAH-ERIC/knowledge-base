@@ -9,6 +9,9 @@ import { FormStatus } from "@/components/form-status";
 import { SubmitButton } from "@/components/submit-button";
 import { createInitialActionState, getFieldErrors } from "@/lib/server/actions";
 
+// TODO: use getPresignedUploadUrl to upload directly from the client to the object store, and then
+// call a server action to create a record in the assets table for that object key.
+
 export function UploadImageForm(): ReactNode {
 	const t = useTranslations("UploadImageForm");
 

@@ -23,6 +23,7 @@ catalog:
   '@hono/node-server': ^1.19.7
   '@hono/standard-validator': ^0.2.1
   '@hono/swagger-ui': ^0.5.3
+  '@imgproxy/imgproxy-js-core': ^1.7.0
   '@imgproxy/imgproxy-node': ^1.1.0
   '@next/eslint-plugin-next': ^16.0.8
   '@playwright/test': ^1.57.0
@@ -102,6 +103,7 @@ catalog:
   valibot: ^1.2.0
   vite-tsconfig-paths: ^6.0.3
   vitest: ^4.0.16
+  wp-types: ^4.69.0
   xast-util-feed: ^2.0.0
   xast-util-to-xml: ^4.0.0
 

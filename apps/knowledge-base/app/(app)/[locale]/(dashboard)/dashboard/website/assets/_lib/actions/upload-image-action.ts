@@ -1,12 +1,12 @@
 "use server";
 
-import { getFormDataValues, includes, log } from "@acdh-oeaw/lib";
+import { getFormDataValues, log } from "@acdh-oeaw/lib";
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import * as v from "valibot";
 
 import { imageMimeTypes, imageSizeLimit } from "@/config/assets.config";
-import { uploadAsset } from "@/lib/data/assets";
+import { assetPrefixes, uploadAsset } from "@/lib/data/assets";
 import {
 	type ActionState,
 	createErrorActionState,
@@ -15,16 +15,15 @@ import {
 import { ForbiddenError, RateLimitError } from "@/lib/server/errors";
 import { globalPOSTRateLimit } from "@/lib/server/rate-limit/global-rate-limit";
 
-const InputSchema = v.object({
+const FormDataSchema = v.object({
 	file: v.pipe(
-		v.instance(File),
-		v.check((input) => {
-			return includes(imageMimeTypes, input.type);
-		}),
+		v.file(),
+		v.mimeType(imageMimeTypes),
 		v.check((input) => {
 			return input.size <= imageSizeLimit;
 		}),
 	),
+	prefix: v.picklist(assetPrefixes),
 });
 
 export async function uploadImageAction(
@@ -42,13 +41,15 @@ export async function uploadImageAction(
 
 		const t = await getTranslations("actions.uploadImageAction");
 
-		const { file } = await v.parseAsync(InputSchema, getFormDataValues(formData));
+		const validation = await v.parseAsync(FormDataSchema, getFormDataValues(formData));
 
-		const { objectName } = await uploadAsset({ file });
+		const { file, prefix } = validation;
+
+		const { key } = await uploadAsset({ file, prefix });
 
 		revalidatePath("/dashboard/website/assets", "page");
 
-		return createSuccessActionState({ message: t("success"), data: { objectName } });
+		return createSuccessActionState({ message: t("success"), data: { key } });
 	} catch (error) {
 		log.error(error);
 
@@ -62,8 +63,8 @@ export async function uploadImageAction(
 			return createErrorActionState({ message: e("too-many-requests") });
 		}
 
-		if (v.isValiError<typeof InputSchema>(error)) {
-			const errors = v.flatten<typeof InputSchema>(error.issues);
+		if (v.isValiError<typeof FormDataSchema>(error)) {
+			const errors = v.flatten<typeof FormDataSchema>(error.issues);
 
 			return createErrorActionState({
 				message: errors.root ?? e("invalid-form-fields"),
