@@ -15,7 +15,7 @@ import {
 import { ForbiddenError, RateLimitError } from "@/lib/server/errors";
 import { globalPOSTRateLimit } from "@/lib/server/rate-limit/global-rate-limit";
 
-const InputSchema = v.object({
+const FormDataSchema = v.object({
 	file: v.pipe(
 		v.file(),
 		v.mimeType(imageMimeTypes),
@@ -41,7 +41,9 @@ export async function uploadImageAction(
 
 		const t = await getTranslations("actions.uploadImageAction");
 
-		const { file, prefix } = await v.parseAsync(InputSchema, getFormDataValues(formData));
+		const validation = await v.parseAsync(FormDataSchema, getFormDataValues(formData));
+
+		const { file, prefix } = validation;
 
 		const { key } = await uploadAsset({ file, prefix });
 
@@ -61,8 +63,8 @@ export async function uploadImageAction(
 			return createErrorActionState({ message: e("too-many-requests") });
 		}
 
-		if (v.isValiError<typeof InputSchema>(error)) {
-			const errors = v.flatten<typeof InputSchema>(error.issues);
+		if (v.isValiError<typeof FormDataSchema>(error)) {
+			const errors = v.flatten<typeof FormDataSchema>(error.issues);
 
 			return createErrorActionState({
 				message: errors.root ?? e("invalid-form-fields"),
