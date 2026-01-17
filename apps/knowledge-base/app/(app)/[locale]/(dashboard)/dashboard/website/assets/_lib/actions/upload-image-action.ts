@@ -1,6 +1,6 @@
 "use server";
 
-import { getFormDataValues, includes, log } from "@acdh-oeaw/lib";
+import { getFormDataValues, log } from "@acdh-oeaw/lib";
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import * as v from "valibot";
@@ -17,10 +17,8 @@ import { globalPOSTRateLimit } from "@/lib/server/rate-limit/global-rate-limit";
 
 const InputSchema = v.object({
 	file: v.pipe(
-		v.instance(File),
-		v.check((input) => {
-			return includes(imageMimeTypes, input.type);
-		}),
+		v.file(),
+		v.mimeType(imageMimeTypes),
 		v.check((input) => {
 			return input.size <= imageSizeLimit;
 		}),
