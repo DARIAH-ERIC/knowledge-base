@@ -1,6 +1,7 @@
 "use server";
 
-import { getFormDataValues, HttpError, isErr } from "@acdh-oeaw/lib";
+import { getFormDataValues, HttpError, isErr, log } from "@acdh-oeaw/lib";
+import { getTranslations } from "next-intl/server";
 import * as v from "valibot";
 
 import { client } from "@/lib/mailchimp/client";
@@ -9,10 +10,11 @@ import {
 	createErrorActionState,
 	createSuccessActionState,
 } from "@/lib/server/actions";
+import { globalPOSTRateLimit } from "@/lib/server/rate-limit/global-rate-limit";
 
 // FIXME: currently the subscription form requires first and last name.
 // can we change to a full name field? (dependent on required merge_fields)
-const Schema = v.object({
+const FormDataSchema = v.object({
 	email: v.pipe(v.string(), v.email()),
 	firstName: v.pipe(v.string(), v.nonEmpty()),
 	lastName: v.pipe(v.string(), v.nonEmpty()),
@@ -23,40 +25,41 @@ export async function subscribeNewsletterAction(
 	previousActionState: ActionState,
 	formData: FormData,
 ): Promise<ActionState> {
+	const t = await getTranslations("actions.subscribeNewsletterAction");
+	const e = await getTranslations("errors");
+
 	try {
-		const { email, firstName, institution, lastName } = await v.parseAsync(
-			Schema,
-			getFormDataValues(formData),
-		);
+		if (!(await globalPOSTRateLimit())) {
+			return createErrorActionState({ message: e("too-many-requests") });
+		}
 
-		const result = await client.subscribe({
-			email,
-			firstName,
-			lastName,
-			institution,
-		});
+		const validation = await v.safeParseAsync(FormDataSchema, getFormDataValues(formData));
 
-		if (isErr(result)) {
-			if (HttpError.is(result.error) && result.error.response.status === 214) {
-				return createErrorActionState({
-					message: "Already subscribed to newsletter mailing list.",
-				});
-			}
+		if (!validation.success) {
+			const errors = v.flatten<typeof FormDataSchema>(validation.issues);
 
-			// TODO:
 			return createErrorActionState({
-				message: "Failed to add to newsletter mailing list.",
+				message: errors.root ?? e("invalid-form-fields"),
+				errors: errors.nested,
 			});
 		}
 
-		// TODO:
-		return createSuccessActionState({
-			message: "Successfully subscribed to newsletter mailing list.",
-		});
-	} catch {
-		// TODO:
-		return createErrorActionState({
-			message: "Internal server error.",
-		});
+		const { email, firstName, institution, lastName } = validation.output;
+
+		const result = await client.subscribe({ email, firstName, institution, lastName });
+
+		if (isErr(result)) {
+			if (HttpError.is(result.error) && result.error.response.status === 214) {
+				return createErrorActionState({ message: t("already-subscribed") });
+			}
+
+			return createErrorActionState({ message: t("error") });
+		}
+
+		return createSuccessActionState({ message: t("success") });
+	} catch (error) {
+		log.error(error);
+
+		return createErrorActionState({ message: e("internal-server-error") });
 	}
 }

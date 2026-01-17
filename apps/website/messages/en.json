@@ -1,4 +1,18 @@
 {
+	"actions": {
+		"subscribeNewsletterAction": {
+			"already-subscribed": "Already subscribed",
+			"error": "Failed to add email address to newsletter mailing list.",
+			"success": "Successfully added email address to newsletter mailing list."
+		}
+	},
+	"errors": {
+		"forbidden": "Forbidden.",
+		"internal-server-error": "Internal server error.",
+		"invalid-form-fields": "Invalid or missing fields.",
+		"not-authenticated": "Not authenticated.",
+		"too-many-requests": "Too many requests."
+	},
 	"ColorSchemeSelect": {
 		"change-color-scheme": "Change color scheme",
 		"color-schemes": {
