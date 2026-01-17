@@ -1,12 +1,6 @@
 {
 	"$schema": "https://www.schemastore.org/tsconfig",
-	"extends": "@dariah-eric/dariah-knowledge-base-typescript-config/lib-build",
-	"compilerOptions": {
-		"jsx": "react-jsx",
-		"paths": {
-			"@/*": ["./*"]
-		}
-	},
+	"extends": ["@dariah-eric/dariah-knowledge-base-typescript-config/lib-build", "./tsconfig.json"],
 	"include": ["./src/**/*.ts"],
 	"exclude": ["dist", "node_modules"]
 }
