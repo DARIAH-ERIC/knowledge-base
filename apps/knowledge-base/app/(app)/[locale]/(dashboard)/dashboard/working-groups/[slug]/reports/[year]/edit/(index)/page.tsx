@@ -6,13 +6,13 @@ import type { ReactNode } from "react";
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { createMetadata } from "@/lib/server/metadata";
 
-interface DashboardNationalConsortiumReportEditStepEventsPageProps extends PageProps<"/[locale]/dashboard/national-consortia/[code]/reports/[year]/edit/events"> {}
+interface DashboardWorkingGroupReportEditPageProps extends PageProps<"/[locale]/dashboard/working-groups/[slug]/reports/[year]"> {}
 
 export async function generateMetadata(
-	_props: Readonly<DashboardNationalConsortiumReportEditStepEventsPageProps>,
+	_props: Readonly<DashboardWorkingGroupReportEditPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
-	const t = await getTranslations("DashboardNationalConsortiumReportEditStepEventsPage");
+	const t = await getTranslations("DashboardWorkingGroupReportEditPage");
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
 		title: t("meta.title"),
@@ -21,10 +21,10 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardNationalConsortiumReportEditStepEventsPage(
-	_props: Readonly<DashboardNationalConsortiumReportEditStepEventsPageProps>,
+export default function DashboardWorkingGroupReportEditPage(
+	_props: Readonly<DashboardWorkingGroupReportEditPageProps>,
 ): ReactNode {
-	const t = useTranslations("DashboardNationalConsortiumReportEditStepEventsPage");
+	const t = useTranslations("DashboardWorkingGroupReportEditPage");
 
 	return (
 		<Main className="container flex-1 px-8 py-12 xs:px-16">

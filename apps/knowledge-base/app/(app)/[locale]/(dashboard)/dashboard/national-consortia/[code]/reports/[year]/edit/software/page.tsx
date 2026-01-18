@@ -1,20 +1,22 @@
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
+import { createMetadata } from "@/lib/server/metadata";
 
 interface DashboardNationalConsortiumReportEditStepSoftwarePageProps extends PageProps<"/[locale]/dashboard/national-consortia/[code]/reports/[year]/edit/software"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardNationalConsortiumReportEditStepSoftwarePageProps>,
+	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
 	const t = await getTranslations("DashboardNationalConsortiumReportEditStepSoftwarePage");
 
-	const metadata: Metadata = {
+	const metadata: Metadata = await createMetadata(resolvingMetadata, {
 		title: t("meta.title"),
-	};
+	});
 
 	return metadata;
 }

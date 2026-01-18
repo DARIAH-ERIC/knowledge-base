@@ -247,6 +247,12 @@
 		},
 		"title": "Report"
 	},
+	"DashboardWorkingGroupReportEditPage": {
+		"meta": {
+			"title": "Working group dashboard - Edit report"
+		},
+		"title": "Edit report"
+	},
 	"DashboardWorkingGroupReportsPage": {
 		"meta": {
 			"title": "Working group dashboard - Reports"
