@@ -69,6 +69,12 @@
 		"reset": "Try again",
 		"title": "Something went wrong"
 	},
+	"ForbiddenPage": {
+		"meta": {
+			"title": "Forbidden"
+		},
+		"title": "Forbidden"
+	},
 	"GlobalNotFoundPage": {
 		"meta": {
 			"title": "Page not found"
@@ -104,5 +110,11 @@
 			"title": "Terms of use"
 		},
 		"title": "Terms of use"
+	},
+	"UnauthorizedPage": {
+		"meta": {
+			"title": "Unauthorized"
+		},
+		"title": "Unauthorized"
 	}
 }

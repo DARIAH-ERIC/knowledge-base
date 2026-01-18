@@ -4,5 +4,3 @@ declare module "react" {
 		[key: `--${string}`]: number | string | null;
 	}
 }
-
-export {};

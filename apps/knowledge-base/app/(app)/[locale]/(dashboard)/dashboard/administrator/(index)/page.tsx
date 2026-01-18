@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
-import { Main } from "@/app/(app)/[locale]/(dashboard)/_components/main";
+import { Main } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/main";
 import { TableExample } from "@/components/ui/table-example";
 
 interface DashboardAdministratorPageProps extends PageProps<"/[locale]/dashboard/administrator"> {}

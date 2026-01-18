@@ -5,6 +5,7 @@
 "use client";
 
 import { CheckIcon, MinusIcon } from "@heroicons/react/20/solid";
+import type { ComponentProps } from "react";
 import {
 	Checkbox as CheckboxPrimitive,
 	CheckboxGroup as CheckboxGroupPrimitive,
@@ -92,6 +93,6 @@ export function Checkbox({ className, children, ...props }: CheckboxProps) {
 	);
 }
 
-export function CheckboxLabel(props: React.ComponentProps<typeof Label>) {
+export function CheckboxLabel(props: ComponentProps<typeof Label>) {
 	return <Label elementType="span" {...props} />;
 }

@@ -7,7 +7,7 @@ import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/we
 import { Form } from "@/components/form";
 import { FormStatus } from "@/components/form-status";
 import { SubmitButton } from "@/components/submit-button";
-import { createActionStateInitial, isActionStateError } from "@/lib/server/actions";
+import { createActionStateInitial } from "@/lib/server/actions";
 
 export function UploadImageForm(): ReactNode {
 	const t = useTranslations("UploadImageForm");
@@ -15,11 +15,7 @@ export function UploadImageForm(): ReactNode {
 	const [state, action] = useActionState(uploadImageAction, createActionStateInitial());
 
 	return (
-		<Form
-			action={action}
-			className="grid gap-y-6"
-			validationErrors={isActionStateError(state) ? state.validationErrors : undefined}
-		>
+		<Form action={action} className="grid gap-y-6" state={state}>
 			<FormStatus state={state} />
 
 			<label>

@@ -15,7 +15,7 @@
 	},
 	"packageManager": "pnpm@10.28.0",
 	"scripts": {
-		"analyze": "TURBOPACK_STATS=1 next build --experimental-next-config-strip-types && echo '\n✅ Saved stats to \".next/server/webpack-stats.json\". Analyze at \"https://statoscope.tech\".'",
+		"analyze": "next experimental-analyze",
 		"build": "next build --experimental-next-config-strip-types",
 		"dev": "PORT=3002 next dev --experimental-next-config-strip-types",
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
@@ -37,6 +37,7 @@
 		"types:prepare": "ENV_VALIDATION=\"disabled\" next typegen"
 	},
 	"dependencies": {
+		"@acdh-oeaw/color-schemes": "catalog:",
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/style-variants": "catalog:",
 		"@acdh-oeaw/validate-env": "catalog:",

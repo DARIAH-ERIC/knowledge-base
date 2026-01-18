@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   default:
+    '@acdh-oeaw/color-schemes':
+      specifier: ^0.1.0
+      version: 0.1.0
     '@acdh-oeaw/eslint-config':
       specifier: ^2.0.12
       version: 2.0.12
@@ -452,6 +455,9 @@ importers:
 
   apps/knowledge-base:
     dependencies:
+      '@acdh-oeaw/color-schemes':
+        specifier: 'catalog:'
+        version: 0.1.0
       '@acdh-oeaw/lib':
         specifier: 'catalog:'
         version: 1.0.4
@@ -639,6 +645,9 @@ importers:
 
   apps/website:
     dependencies:
+      '@acdh-oeaw/color-schemes':
+        specifier: 'catalog:'
+        version: 0.1.0
       '@acdh-oeaw/lib':
         specifier: 'catalog:'
         version: 1.0.4
@@ -1162,6 +1171,9 @@ importers:
         version: 5.9.3
 
 packages:
+
+  '@acdh-oeaw/color-schemes@0.1.0':
+    resolution: {integrity: sha512-LGwjRBEv51g6FvRiAtUtZrJkqoya4NX2nGYcEpDSG3XGOE0Lnz1sAR7CETZyDDZdNiYOPUm/I4tetjG06j3c7Q==}
 
   '@acdh-oeaw/eslint-config-next@4.0.6':
     resolution: {integrity: sha512-GX1dsIIc51+Qkt9Werh1ZsR5EHuXpDyo+Mrzwk96Aiqs0RbwneR2UVKvQsnbn8lYowUIL8T1+kH3/NueZsnniA==}
@@ -7996,6 +8008,8 @@ packages:
     resolution: {integrity: sha512-k7Nwx6vuWx1IJ9Bjuf4Zt1PEllcwe7cls3VNzm4CQ1/hgtFUK2bRNG3rvnpPUhFjmqJKAKtjV576KnUkHocg/g==}
 
 snapshots:
+
+  '@acdh-oeaw/color-schemes@0.1.0': {}
 
   '@acdh-oeaw/eslint-config-next@4.0.6(@acdh-oeaw/eslint-config-react@3.0.5(@acdh-oeaw/eslint-config@2.0.12(@eslint/config-helpers@0.4.2)(@typescript-eslint/utils@8.53.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(globals@17.0.0)(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(@acdh-oeaw/eslint-config@2.0.12(@eslint/config-helpers@0.4.2)(@typescript-eslint/utils@8.53.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(globals@17.0.0)(typescript@5.9.3))(@next/eslint-plugin-next@16.1.3)':
     dependencies:
