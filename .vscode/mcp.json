@@ -4,7 +4,15 @@
 			"command": "npx",
 			"args": ["-y", "next-devtools-mcp@latest"]
 		},
-		"Sentry": {
+		"playwright": {
+			"command": "npx",
+			"args": ["-y", "@playwright/mcp@latest"]
+		},
+		"react-aria": {
+			"command": "npx",
+			"args": ["-y", "@react-aria/mcp@latest"]
+		},
+		"sentry": {
 			"url": "https://mcp.sentry.dev/mcp/acdh/dariah-knowledge-base",
 			"type": "http"
 		}

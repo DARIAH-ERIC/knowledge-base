@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import { type ActionState, isActionStateError } from "@/lib/server/actions";
 
-interface FormErrorMessageProps {
+export interface FormErrorMessageProps {
 	children?: ReactNode | ((state: ActionState) => ReactNode);
 	className?: string;
 	state: ActionState;

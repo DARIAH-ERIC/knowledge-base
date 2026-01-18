@@ -1,7 +1,10 @@
 import { type GetVariantProps, styles } from "@acdh-oeaw/style-variants";
-import type { ComponentProps, ReactNode } from "react";
+import type { ReactNode } from "react";
 
-import { NavLink as BaseNavLink } from "@/components/nav-link";
+import {
+	NavLink as BaseNavLink,
+	type NavLinkProps as BaseNavLinkProps,
+} from "@/components/nav-link";
 
 const navLinkStyles = styles({
 	base: [
@@ -13,7 +16,7 @@ const navLinkStyles = styles({
 		size: {
 			sm: "gap-x-2 px-1.5 py-0.5 text-xs",
 			md: "gap-x-2 px-2.5 py-1 text-sm",
-			icon: "touch-target shrink-0 p-1",
+			icon: "touch-area shrink-0 p-1",
 		},
 	},
 	defaults: {
@@ -23,7 +26,7 @@ const navLinkStyles = styles({
 
 type NavLinkStyleProps = GetVariantProps<typeof navLinkStyles>;
 
-interface NavLinkProps extends ComponentProps<typeof BaseNavLink>, NavLinkStyleProps {}
+interface NavLinkProps extends BaseNavLinkProps, NavLinkStyleProps {}
 
 export function NavLink(props: Readonly<NavLinkProps>): ReactNode {
 	const { children, className, size, ...rest } = props;

@@ -247,6 +247,12 @@
 		},
 		"title": "Report"
 	},
+	"DashboardWorkingGroupReportEditPage": {
+		"meta": {
+			"title": "Working group dashboard - Edit report"
+		},
+		"title": "Edit report"
+	},
 	"DashboardWorkingGroupReportsPage": {
 		"meta": {
 			"title": "Working group dashboard - Reports"
@@ -312,6 +318,12 @@
 		"reset": "Try again",
 		"title": "Something went wrong"
 	},
+	"ForbiddenPage": {
+		"meta": {
+			"title": "Forbidden"
+		},
+		"title": "Forbidden"
+	},
 	"GlobalNotFoundPage": {
 		"meta": {
 			"title": "Page not found"
@@ -347,6 +359,12 @@
 			"title": "Terms of use"
 		},
 		"title": "Terms of use"
+	},
+	"UnauthorizedPage": {
+		"meta": {
+			"title": "Unauthorized"
+		},
+		"title": "Unauthorized"
 	},
 	"UploadImageForm": {
 		"input": "Select an image to upload",
