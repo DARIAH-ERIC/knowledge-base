@@ -17,7 +17,7 @@ export const middleware: Middleware = function middleware(request, response) {
 
 		const origin = URL.parse(originHeader);
 
-		if (origin?.host !== hostHeader) {
+		if (origin?.host !== hostHeader.toLowerCase()) {
 			return new NextResponse(null, { status: 403 });
 		}
 	}

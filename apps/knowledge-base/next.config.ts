@@ -10,6 +10,7 @@ const config: Config = {
 	/** Compression should be handled by the reverse proxy. */
 	compress: false,
 	experimental: {
+		authInterrupts: true,
 		browserDebugInfoInTerminal: true,
 		globalNotFound: true,
 		rootParams: true,
