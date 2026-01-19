@@ -334,6 +334,10 @@ function createClient() {
 			const url = createUrl({
 				baseUrl,
 				pathname: `/3.0/lists/${env.MAILCHIMP_LIST_ID}/members`,
+				searchParams: createUrlSearchParams({
+					// FIXME: currently FNAME and LNAME are required but not in the mockups
+					skip_merge_validation: true,
+				}),
 			});
 
 			const data = {
