@@ -61,7 +61,10 @@ export async function getNews(db: Database | Transaction, params: GetNewsParams)
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = client.urls.generate(item.image.key, { width: imageWidth.preview });
+		const image = client.urls.generateSignedImageUrl({
+			key: item.image.key,
+			options: { width: imageWidth.preview },
+		});
 
 		return { ...item, image };
 	});
@@ -110,7 +113,10 @@ export async function getNewsItemById(db: Database | Transaction, params: GetNew
 		return null;
 	}
 
-	const image = client.urls.generate(item.image.key, { width: imageWidth.featured });
+	const image = client.urls.generateSignedImageUrl({
+		key: item.image.key,
+		options: { width: imageWidth.featured },
+	});
 
 	const data = { ...item, image };
 
@@ -161,7 +167,10 @@ export async function getNewsItemBySlug(
 		return null;
 	}
 
-	const image = client.urls.generate(item.image.key, { width: imageWidth.featured });
+	const image = client.urls.generateSignedImageUrl({
+		key: item.image.key,
+		options: { width: imageWidth.featured },
+	});
 
 	const data = { ...item, image };
 

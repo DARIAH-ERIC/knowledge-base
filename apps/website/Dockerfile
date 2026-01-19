@@ -1,6 +1,4 @@
-# syntax=docker/dockerfile:1-labs
-# labs version is needed for `COPY --exclude`.
-# @see {@link https://docs.docker.com/reference/dockerfile/#copy---exclude}
+# syntax=docker/dockerfile:1
 
 # using alpine base image to avoid `sharp` memory leaks.
 # @see {@link https://sharp.pixelplumbing.com/install#linux-memory-allocator}

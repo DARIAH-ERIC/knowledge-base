@@ -4,10 +4,10 @@
 
 "use client";
 
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentProps } from "react";
 import { twMerge } from "tailwind-merge";
 
-type HeadingType = { level?: 1 | 2 | 3 | 4 } & ComponentPropsWithoutRef<"h1" | "h2" | "h3" | "h4">;
+type HeadingType = { level?: 1 | 2 | 3 | 4 } & ComponentProps<"h1" | "h2" | "h3" | "h4">;
 
 interface HeadingProps extends HeadingType {
 	tracking?: "tighter" | "tight" | "normal" | "wide" | "wider" | "widest";

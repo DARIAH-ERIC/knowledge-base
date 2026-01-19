@@ -1,10 +1,10 @@
-import type { ComponentProps, ReactNode } from "react";
+import type { ReactNode } from "react";
 
-import { Main as BaseMain } from "@/components/main";
+import { Main as BaseMain, type MainProps as BaseMainProps } from "@/components/main";
 
 export const mainContentId = "main-content";
 
-interface MainProps extends Omit<ComponentProps<typeof BaseMain>, "id"> {
+interface MainProps extends Omit<BaseMainProps, "id"> {
 	children: ReactNode;
 }
 

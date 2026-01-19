@@ -63,7 +63,10 @@ export async function getPages(db: Database | Transaction, params: GetPagesParam
 	const data = items.map((item) => {
 		const image =
 			item.image != null
-				? client.urls.generate(item.image.key, { width: imageWidth.preview })
+				? client.urls.generateSignedImageUrl({
+						key: item.image.key,
+						options: { width: imageWidth.preview },
+					})
 				: null;
 
 		return { ...item, image };
@@ -115,7 +118,10 @@ export async function getPageById(db: Database | Transaction, params: GetPageByI
 
 	const image =
 		item.image != null
-			? client.urls.generate(item.image.key, { width: imageWidth.featured })
+			? client.urls.generateSignedImageUrl({
+					key: item.image.key,
+					options: { width: imageWidth.featured },
+				})
 			: null;
 
 	const data = { ...item, image };
@@ -166,7 +172,10 @@ export async function getPageBySlug(db: Database | Transaction, params: GetPageB
 
 	const image =
 		item.image != null
-			? client.urls.generate(item.image.key, { width: imageWidth.featured })
+			? client.urls.generateSignedImageUrl({
+					key: item.image.key,
+					options: { width: imageWidth.featured },
+				})
 			: null;
 
 	const data = { ...item, image };

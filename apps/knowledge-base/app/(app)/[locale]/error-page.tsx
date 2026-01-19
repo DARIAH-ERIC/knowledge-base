@@ -6,8 +6,6 @@ import { type ReactNode, useEffect } from "react";
 
 import { Main } from "@/components/main";
 
-export { viewport } from "@/app/_lib/viewport.config";
-
 interface ErrorPageProps {
 	error: Error & { digest?: string };
 	reset: () => void;

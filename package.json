@@ -5,11 +5,11 @@
 	"devEngines": {
 		"runtime": {
 			"name": "node",
-			"version": "^24.12.0",
+			"version": "^24.13.0",
 			"onFail": "download"
 		}
 	},
-	"packageManager": "pnpm@10.27.0",
+	"packageManager": "pnpm@10.28.0",
 	"scripts": {
 		"build": "pnpm run --recursive build",
 		"db:migrations:apply": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-database-client\" run db:migrations:apply",
@@ -27,13 +27,16 @@
 		"format:check": "prettier . --cache --cache-location ./.prettiercache --check",
 		"format:fix": "prettier . --cache --cache-location ./.prettiercache --check --write",
 		"image-service:buckets:create": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-image-service\" run image-service:buckets:create",
+		"image-service:buckets:reset": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-image-service\" run image-service:buckets:reset",
 		"image-service:buckets:seed": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-image-service\" run image-service:buckets:seed",
 		"lint:check": "pnpm run --recursive lint:check",
 		"lint:fix": "pnpm run --recursive lint:fix",
+		"migrate-website-data": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-data-migration\" run migrate",
 		"prepare": "run-s setup",
 		"search-index:api-keys:generate": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-search-index\" run search-index:api-keys:generate",
 		"search-index:collections:create": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-search-index\" run search-index:collections:create",
 		"search-index:collections:ingest": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-search-index\" run search-index:collections:ingest",
+		"search-index:collections:reset": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-search-index\" run search-index:collections:reset",
 		"search-index:collections:seed": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-search-index\" run search-index:collections:seed",
 		"setup": "is-in-ci || simple-git-hooks",
 		"test": "pnpm run --recursive test",

@@ -146,7 +146,7 @@ const config = defineConfig(
 	{
 		name: "node-config",
 		extends: [nodeConfig],
-		files: ["lib/server/**/*.ts", "**/_lib/actions/**/*.ts", "scripts/**/*.ts"],
+		files: ["lib/server/**/*.ts", "**/_lib/**/*.action.ts", "scripts/**/*.ts"],
 	},
 	{
 		name: "stylistic-config",
