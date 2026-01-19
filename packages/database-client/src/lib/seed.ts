@@ -446,18 +446,23 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 		});
 
 		const organisationalUnitsAllowedRelationsValues = await db
-			.select()
+			.select({
+				relatedUnitTypeId: schema.organisationalUnitsAllowedRelations.relatedUnitTypeId,
+				relationTypeId: schema.organisationalUnitsAllowedRelations.relationTypeId,
+				unitTypeId: schema.organisationalUnitsAllowedRelations.unitTypeId,
+			})
 			.from(schema.organisationalUnitsAllowedRelations);
 
 		const { umbrella_consortium, ...rest } = organisationalUnitsTypesByType;
+
 		const organisationalUnits: Array<Omit<schema.OrganisationalUnitInput, "id">> =
 			f.helpers.multiple(
 				(_, i) => {
-					const name = f.lorem.sentence();
+					const name = f.commerce.productName();
 
 					return {
 						name,
-						metadata: { country: f.lorem.word() },
+						metadata: { country: f.location.country() },
 						summary: f.lorem.paragraph(),
 						imageId: f.helpers.maybe(
 							() => {
@@ -514,6 +519,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 						return organisationalUnit.typeId === organisationalUnitsAllowedRelation.unitTypeId;
 					}),
 				);
+
 				const relatedUnit = f.helpers.arrayElement(
 					organisationalUnitsIds.filter((organisationalUnit) => {
 						return (
@@ -521,6 +527,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 						);
 					}),
 				);
+
 				const startDate = f.date.past({ years: 5 });
 				const yesterday = new Date();
 				yesterday.setDate(yesterday.getDate() - 1);
@@ -543,6 +550,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 							: null,
 				};
 			});
+
 		await db.insert(schema.organisationalUnitsRelations).values(unitsToUnits);
 	});
 }
