@@ -5,6 +5,7 @@ export * from "./schema/events";
 export * from "./schema/impact-case-studies";
 export * from "./schema/licenses";
 export * from "./schema/news";
+export * from "./schema/organisational-units";
 export * from "./schema/pages";
 export * from "./schema/persons";
 export * from "./schema/spotlight-articles";
