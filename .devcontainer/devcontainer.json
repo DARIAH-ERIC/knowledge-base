@@ -19,6 +19,7 @@
 				"editorconfig.editorconfig",
 				"github.vscode-github-actions",
 				"lokalise.i18n-ally",
+				"matt-meyers.vscode-dbml",
 				"mikestead.dotenv",
 				"ms-playwright.playwright",
 				"prettier.prettier-vscode",
@@ -31,6 +32,7 @@
 	"forwardPorts": [
 		3001,
 		3002,
+		3003,
 		"drizzle-gateway:4984",
 		"imgproxy:8080",
 		"mailpit:1025",
@@ -44,10 +46,13 @@
 	],
 	"portsAttributes": {
 		"3001": {
-			"label": "DARIAH Knowledge-Base"
+			"label": "DARIAH Knowledge Base"
 		},
 		"3002": {
 			"label": "DARIAH Website"
+		},
+		"3003": {
+			"label": "DARIAH Knowledge Base API"
 		},
 		"drizzle-gateway:4984": {
 			"label": "Drizzle UI"

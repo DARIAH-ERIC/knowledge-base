@@ -3,11 +3,18 @@
 		"sendContactFormEmailAction": {
 			"error": "Failed to send message.",
 			"success": "Successfully sent message."
+		},
+		"subscribeNewsletterAction": {
+			"already-subscribed": "Already subscribed.",
+			"error": "Failed to add email address to newsletter mailing list.",
+			"success": "Successfully added email address to newsletter mailing list."
 		}
 	},
 	"errors": {
+		"forbidden": "Forbidden.",
 		"internal-server-error": "Internal server error.",
 		"invalid-form-fields": "Invalid or missing fields.",
+		"not-authenticated": "Not authenticated.",
 		"too-many-requests": "Too many requests."
 	},
 	"ColorSchemeSelect": {
@@ -87,6 +94,12 @@
 		"reset": "Try again",
 		"title": "Something went wrong"
 	},
+	"ForbiddenPage": {
+		"meta": {
+			"title": "Forbidden"
+		},
+		"title": "Forbidden"
+	},
 	"GlobalNotFoundPage": {
 		"meta": {
 			"title": "Page not found"
@@ -111,6 +124,19 @@
 		"change-locale-to": "Switch to {locale}",
 		"current-locale": "Current language: {locale}"
 	},
+	"NewslettersPage": {
+		"meta": {
+			"title": "Newsletters"
+		},
+		"title": "Newsletters"
+	},
+	"NewsletterSubscriptionForm": {
+		"email": "Email",
+		"first-name": "First name",
+		"institution": "Institution",
+		"last-name": "Last name",
+		"submit": "Subscribe"
+	},
 	"PrivacyPolicyPage": {
 		"meta": {
 			"title": "Privacy policy"
@@ -122,5 +148,11 @@
 			"title": "Terms of use"
 		},
 		"title": "Terms of use"
+	},
+	"UnauthorizedPage": {
+		"meta": {
+			"title": "Unauthorized"
+		},
+		"title": "Unauthorized"
 	}
 }

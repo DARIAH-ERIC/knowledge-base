@@ -2,9 +2,11 @@ import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
 
 import * as f from "../fields";
+import { uuidv7 } from "../functions";
 
 export const licenses = p.pgTable("licenses", {
-	id: f.uuidv7("id").primaryKey(),
+	id: p.uuid("id").primaryKey().default(uuidv7()),
+	code: p.text("code").notNull().unique(),
 	name: p.text("name").notNull(),
 	url: p.text("url").notNull(),
 	...f.timestamps(),

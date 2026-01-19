@@ -13,12 +13,14 @@ interface CollectionConfig<TField extends SchemaField, TFieldName extends string
 }
 
 export interface Collection<
-	TQueryField extends string,
-	TFacetField extends string,
-	TSortField extends string,
+	TField extends string,
+	TQueryField extends TField,
+	TFacetField extends TField,
+	TSortField extends TField,
 > {
 	name: string;
 	schema: CollectionCreateSchema;
+	fields: Array<TField>;
 	queryableFields: Array<TQueryField>;
 	facetableFields: Array<TFacetField>;
 	sortableFields: Array<TSortField>;
@@ -36,7 +38,7 @@ export function createCollection<
 		facetableFields: Array<TFacetFields>;
 		sortableFields: Array<TSortFields>;
 	},
-): Collection<TQueryFields, TFacetFields, TSortFields> {
+): Collection<TFieldName, TQueryFields, TFacetFields, TSortFields> {
 	const { name, fields, queryableFields, facetableFields, sortableFields } = config;
 
 	const schema: CollectionCreateSchema = {
@@ -55,6 +57,9 @@ export function createCollection<
 	return {
 		name,
 		schema,
+		fields: fields.map((field) => {
+			return field.name;
+		}),
 		queryableFields,
 		facetableFields,
 		sortableFields,

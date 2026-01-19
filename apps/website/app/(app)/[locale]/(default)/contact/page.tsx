@@ -1,22 +1,28 @@
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { ContactForm } from "@/app/(app)/[locale]/(default)/contact/_components/contact-form";
+import { createMetadata } from "@/lib/server/metadata";
 
-export async function generateMetadata(): Promise<Metadata> {
+interface ContactPageProps extends PageProps<"/[locale]/contact"> {}
+
+export async function generateMetadata(
+	_props: Readonly<ContactPageProps>,
+
+	resolvingMetadata: ResolvingMetadata,
+): Promise<Metadata> {
 	const t = await getTranslations("ContactPage");
 
-	const metadata: Metadata = {
+	const metadata: Metadata = await createMetadata(resolvingMetadata, {
 		title: t("meta.title"),
-	};
+	});
 
 	return metadata;
 }
 
-export default function ContactPage(): ReactNode {
+export default function ContactPage(_props: Readonly<ContactPageProps>): ReactNode {
 	const t = useTranslations("ContactPage");
 
 	return (

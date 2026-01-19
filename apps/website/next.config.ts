@@ -2,14 +2,19 @@ import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig as Config } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
+/**
+ * File extensions and import attributes are necessary for node.js native typescript resolution
+ * with `--experimental-next-config-strip-types` next.js cli option.
+ */
 import { env } from "./config/env.config.ts";
 
 const config: Config = {
 	allowedDevOrigins: ["127.0.0.1"],
 	// cacheComponents: true,
-	/** Compression should be handled by the `nginx` reverse proxy. */
+	/** Compression should be handled by the reverse proxy. */
 	compress: false,
 	experimental: {
+		authInterrupts: true,
 		browserDebugInfoInTerminal: true,
 		globalNotFound: true,
 		rootParams: true,

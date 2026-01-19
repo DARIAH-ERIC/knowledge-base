@@ -6,6 +6,7 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/strict-boolean-expressions */
 /* eslint-disable no-param-reassign */
+/* eslint-disable better-tailwindcss/enforce-consistent-class-order */
 /* eslint-disable unicorn/explicit-length-check */
 /* eslint-disable unicorn/no-document-cookie */
 
@@ -169,7 +170,7 @@ function SidebarProvider({
 				className={twMerge(
 					"@container **:data-[slot=icon]:shrink-0",
 					"flex w-full text-sidebar-fg",
-					"group/sidebar-root peer/sidebar-root has-data-[intent=inset]:bg-sidebar dark:has-data-[intent=inset]:bg-bg",
+					"group/sidebar-root peer/sidebar-root dark:has-data-[intent=inset]:bg-bg has-data-[intent=inset]:bg-sidebar",
 					className,
 				)}
 				style={{
@@ -226,7 +227,7 @@ function Sidebar({
 				<span aria-hidden={true} className="sr-only" data-intent={intent} />
 				<SheetContent
 					aria-label="Sidebar"
-					className="w-(--sidebar-width) [--sidebar-width:18rem] has-data-[slot=calendar]:[--sidebar-width:23rem] entering:blur-in exiting:blur-out"
+					className="w-(--sidebar-width) [--sidebar-width:18rem] entering:blur-in exiting:blur-out has-data-[slot=calendar]:[--sidebar-width:23rem]"
 					closeButton={closeButton}
 					data-intent="default"
 					data-slot="sidebar"
@@ -277,7 +278,7 @@ function Sidebar({
 					intent === "float" &&
 						"bg-bg p-2 group-data-[collapsible=dock]:w-[calc(--spacing(4)+2px)]",
 					intent === "inset" &&
-						"bg-sidebar group-data-[collapsible=dock]:w-[calc(var(--sidebar-width-dock)+--spacing(2)+2px)] dark:bg-bg",
+						"bg-sidebar dark:bg-bg group-data-[collapsible=dock]:w-[calc(var(--sidebar-width-dock)+--spacing(2)+2px)]",
 					intent === "default" && [
 						"group-data-[collapsible=dock]:w-(--sidebar-width-dock)",
 						"border-sidebar-border group-data-[side=left]:border-r group-data-[side=right]:border-l",
@@ -289,8 +290,8 @@ function Sidebar({
 			>
 				<div
 					className={twJoin(
-						"flex h-full w-full flex-col text-sidebar-fg",
-						"group-data-[intent=inset]:bg-sidebar dark:group-data-[intent=inset]:bg-bg",
+						"flex size-full flex-col text-sidebar-fg",
+						"dark:group-data-[intent=inset]:bg-bg group-data-[intent=inset]:bg-sidebar",
 						"group-data-[intent=float]:rounded-lg group-data-[intent=float]:border group-data-[intent=float]:border-sidebar-border group-data-[intent=float]:bg-sidebar group-data-[intent=float]:shadow-xs",
 					)}
 					data-sidebar="default"
@@ -382,14 +383,14 @@ function SidebarSection({ className, ...props }: SidebarSectionProps) {
 		<div
 			className={twMerge(
 				"col-span-full flex min-w-0 flex-col gap-y-0.5 **:data-[slot=sidebar-section]:**:gap-y-0",
-				"in-data-[state=collapsed]:p-2 p-4",
+				"p-4 in-data-[state=collapsed]:p-2",
 				className,
 			)}
 			data-slot="sidebar-section"
 			{...props}
 		>
 			{state !== "collapsed" && "label" in props && (
-				<Header className="mb-1 flex shrink-0 items-center rounded-md px-2 text-xs/6 font-medium text-sidebar-fg/70 ring-sidebar-ring transition-[margin,opa] duration-200 ease-linear outline-none group-data-[collapsible=dock]:-mt-8 group-data-[collapsible=dock]:opacity-0 *:data-[slot=icon]:size-4 *:data-[slot=icon]:shrink-0">
+				<Header className="mb-1 flex shrink-0 items-center rounded-md px-2 text-xs/6 font-medium text-sidebar-fg/70 ring-sidebar-ring transition-[margin,opa] duration-200 ease-linear outline-none *:data-[slot=icon]:size-4 *:data-[slot=icon]:shrink-0 group-data-[collapsible=dock]:-mt-8 group-data-[collapsible=dock]:opacity-0">
 					{props.label}
 				</Header>
 			)}
@@ -438,19 +439,19 @@ function SidebarItem({
 						"href" in props ? "cursor-pointer" : "cursor-default",
 						"w-full min-w-0 items-center rounded-lg text-left font-medium text-base/6 text-sidebar-fg",
 						"group/sidebar-item relative col-span-full overflow-hidden focus-visible:outline-hidden",
-						"**:data-[slot=icon]:shrink-0 [&_[data-slot='icon']:not([class*='size-'])]:size-5 sm:[&_[data-slot='icon']:not([class*='size-'])]:size-4 [&_[data-slot='icon']:not([class*='text-'])]:text-muted-fg",
+						"**:data-[slot=icon]:shrink-0 [&_[data-slot=icon]:not([class*='size-'])]:size-5 [&_[data-slot=icon]:not([class*='text-'])]:text-muted-fg sm:[&_[data-slot=icon]:not([class*='size-'])]:size-4",
 						"**:last:data-[slot=icon]:size-5 sm:**:last:data-[slot=icon]:size-4",
-						"[&_[data-slot='icon']:not([class*='size-'])]:size-4 [&_[data-slot='icon']:not([class*='size-'])]:*:size-5",
-						"*:data-[slot=avatar]:*:size-5 *:data-[slot=avatar]:size-5",
+						"[&_[data-slot=icon]:not([class*='size-'])]:size-4 [&_[data-slot=icon]:not([class*='size-'])]:*:size-5",
+						"*:data-[slot=avatar]:size-5 *:data-[slot=avatar]:*:size-5",
 						"has-data-[slot=avatar]:has-data-[slot=sidebar-label]:gap-x-2 has-data-[slot=icon]:has-data-[slot=sidebar-label]:gap-x-2",
-						"grid grid-cols-[auto_1fr_1.5rem_0.5rem_auto] **:last:data-[slot=icon]:ml-auto supports-[grid-template-columns:subgrid]:grid-cols-subgrid sm:text-sm/5",
+						"grid grid-cols-[auto_1fr_1.5rem_0.5rem_auto] sm:text-sm/5 **:last:data-[slot=icon]:ml-auto supports-[grid-template-columns:subgrid]:grid-cols-subgrid",
 						"p-2 has-[a]:p-0",
 						"[--sidebar-current-bg:var(--color-sidebar-primary)] [--sidebar-current-fg:var(--color-sidebar-primary-fg)]",
 						isCurrent &&
-							"font-medium text-(--sidebar-current-fg) hover:bg-(--sidebar-current-bg) hover:text-(--sidebar-current-fg) [&_.text-muted-fg]:text-fg/80 [&_[data-slot='icon']:not([class*='text-'])]:text-(--sidebar-current-fg) hover:[&_[data-slot='icon']:not([class*='text-'])]:text-(--sidebar-current-fg)",
+							"font-medium text-(--sidebar-current-fg) hover:bg-(--sidebar-current-bg) hover:text-(--sidebar-current-fg) hover:[&_[data-slot=icon]:not([class*='text-'])]:text-(--sidebar-current-fg) [&_.text-muted-fg]:text-fg/80 [&_[data-slot=icon]:not([class*='text-'])]:text-(--sidebar-current-fg)",
 						isFocusVisible && "inset-ring inset-ring-sidebar-ring outline-hidden",
 						(isPressed || isHovered) &&
-							"bg-sidebar-accent text-sidebar-accent-fg [&_[data-slot='icon']:not([class*='text-'])]:text-sidebar-accent-fg",
+							"bg-sidebar-accent text-sidebar-accent-fg [&_[data-slot=icon]:not([class*='text-'])]:text-sidebar-accent-fg",
 						isDisabled && "opacity-50",
 						className,
 					]);
@@ -599,11 +600,11 @@ function SidebarDisclosureTrigger({ className, ref, ...props }: SidebarDisclosur
 							"**:data-[slot=icon]:size-5 **:data-[slot=icon]:shrink-0 **:data-[slot=icon]:text-muted-fg sm:**:data-[slot=icon]:size-4",
 							"**:last:data-[slot=icon]:size-5 sm:**:last:data-[slot=icon]:size-4",
 							"**:data-[slot=avatar]:size-6 sm:**:data-[slot=avatar]:size-5",
-							"col-span-full gap-3 p-2 **:data-[slot=chevron]:text-muted-fg **:last:data-[slot=icon]:ml-auto sm:gap-2 sm:text-sm/5",
+							"col-span-full gap-3 p-2 sm:gap-2 sm:text-sm/5 **:last:data-[slot=icon]:ml-auto **:data-[slot=chevron]:text-muted-fg",
 
 							isFocusVisible && "inset-ring inset-ring-ring/70",
 							(isPressed || isHovered) &&
-								"bg-sidebar-accent text-sidebar-accent-fg **:data-[slot=chevron]:text-sidebar-accent-fg **:data-[slot=icon]:text-sidebar-accent-fg **:last:data-[slot=icon]:text-sidebar-accent-fg",
+								"bg-sidebar-accent text-sidebar-accent-fg **:last:data-[slot=icon]:text-sidebar-accent-fg **:data-[slot=chevron]:text-sidebar-accent-fg **:data-[slot=icon]:text-sidebar-accent-fg",
 							isDisabled && "opacity-50",
 							className,
 						);
@@ -704,7 +705,7 @@ function SidebarRail({ className, ref, ...props }: ComponentProps<"button">) {
 				ref={ref}
 				aria-label="Toggle Sidebar"
 				className={twMerge(
-					"-translate-x-1/2 group-data-[side=left]:-right-4 absolute inset-y-0 z-20 hidden w-4 outline-hidden transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-transparent group-data-[side=right]:left-0 sm:flex",
+					"-translate-x-1/2 absolute inset-y-0 z-20 hidden w-4 outline-hidden transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] sm:flex hover:after:bg-transparent group-data-[side=left]:-right-4 group-data-[side=right]:left-0",
 					"in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
 					"[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
 					"group-data-[collapsible=hidden]:translate-x-0 group-data-[collapsible=hidden]:hover:bg-sidebar-accent group-data-[collapsible=hidden]:after:left-full",
@@ -781,8 +782,8 @@ function SidebarMenuTrigger({
 				!alwaysVisible &&
 					"opacity-0 pressed:opacity-100 group-hover/sidebar-item:opacity-100 group-focus-visible/sidebar-item:opacity-100 group/sidebar-item:pressed:opacity-100",
 				"absolute right-0 flex h-full w-[calc(var(--sidebar-width)-90%)] items-center justify-end pr-2.5 outline-hidden",
-				"**:data-[slot=icon]:shrink-0 [&_[data-slot='icon']:not([class*='size-'])]:size-5 sm:[&_[data-slot='icon']:not([class*='size-'])]:size-4",
-				"pressed:text-fg text-muted-fg hover:text-fg",
+				"**:data-[slot=icon]:shrink-0 [&_[data-slot=icon]:not([class*='size-'])]:size-5 sm:[&_[data-slot=icon]:not([class*='size-'])]:size-4",
+				"text-muted-fg pressed:text-fg hover:text-fg",
 				className,
 			)}
 			{...props}

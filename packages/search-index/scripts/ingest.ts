@@ -1,47 +1,10 @@
-import { assert, isErr, log } from "@acdh-oeaw/lib";
-import { Client } from "typesense";
+import { log } from "@acdh-oeaw/lib";
 
-import { env } from "../config/env.config";
-import { getDocuments } from "../src/get-documents";
-import { resources } from "../src/schema";
-
-function createClient() {
-	const apiKey = env.TYPESENSE_ADMIN_API_KEY;
-	assert(apiKey, "Missing `TYPESENSE_ADMIN_API_KEY` environment variable.");
-
-	const client = new Client({
-		apiKey,
-		connectionTimeoutSeconds: 3,
-		nodes: [
-			{
-				host: env.NEXT_PUBLIC_TYPESENSE_HOST,
-				port: env.NEXT_PUBLIC_TYPESENSE_PORT,
-				protocol: env.NEXT_PUBLIC_TYPESENSE_PROTOCOL,
-			},
-		],
-	});
-
-	return client;
-}
-
-async function ingest() {
-	const client = createClient();
-
-	const result = await getDocuments();
-
-	if (isErr(result)) {
-		throw result.error;
-	}
-
-	const documents = result.value;
-
-	await client.collections(resources.name).documents().delete({ truncate: true });
-
-	await client.collections(resources.name).documents().import(documents);
-}
+import { client } from "../src/lib/admin-client";
+import { ingest } from "../src/lib/ingest";
 
 async function main() {
-	await ingest();
+	await ingest(client);
 
 	log.success("Successfully ingested documents into typesense search index.");
 }

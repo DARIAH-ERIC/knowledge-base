@@ -1,6 +1,4 @@
-# syntax=docker/dockerfile:1-labs
-# labs version is needed for `COPY --exclude`.
-# @see {@link https://docs.docker.com/reference/dockerfile/#copy---exclude}
+# syntax=docker/dockerfile:1
 
 # using alpine base image to avoid `sharp` memory leaks.
 # @see {@link https://sharp.pixelplumbing.com/install#linux-memory-allocator}
@@ -28,6 +26,7 @@ COPY --chown=node:node ./ ./
 ARG NEXT_PUBLIC_APP_BASE_URL
 ARG NEXT_PUBLIC_APP_BOTS
 ARG NEXT_PUBLIC_APP_GOOGLE_SITE_VERIFICATION
+ARG NEXT_PUBLIC_APP_IMPRINT_CUSTOM_CONFIG
 ARG NEXT_PUBLIC_APP_IMPRINT_SERVICE_BASE_URL
 ARG NEXT_PUBLIC_APP_MATOMO_BASE_URL
 ARG NEXT_PUBLIC_APP_MATOMO_ID

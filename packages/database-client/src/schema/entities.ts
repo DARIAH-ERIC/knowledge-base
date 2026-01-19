@@ -3,25 +3,82 @@ import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
 
 import * as f from "../fields";
+import { uuidv7 } from "../functions";
 
-export const entityTypes = ["events", "news"] as const;
+export const entityTypesEnum = [
+	"events",
+	"impact_case_studies",
+	"news",
+	"organisational_units",
+	"pages",
+	"persons",
+	"spotlight_articles",
+] as const;
 
-export const entityStatus = ["draft", "published"] as const;
+export const entityTypes = p.pgTable(
+	"entity_types",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		type: p.text("type", { enum: entityTypesEnum }).notNull().unique(),
+		...f.timestamps(),
+	},
+	(t) => {
+		return [p.check("entity_types_type_enum_check", inArray(t.type, entityTypesEnum))];
+	},
+);
+
+export type EntityType = typeof entityTypes.$inferSelect;
+export type EntityTypeInput = typeof entityTypes.$inferInsert;
+
+export const EntityTypeSelectSchema = createSelectSchema(entityTypes);
+export const EntityTypeInsertSchema = createInsertSchema(entityTypes);
+export const EntityTypeUpdateSchema = createUpdateSchema(entityTypes);
+
+export const entityStatusEnum = ["draft", "published"] as const;
+
+export const entityStatus = p.pgTable(
+	"entity_status",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		type: p.text("type", { enum: entityStatusEnum }).notNull().unique(),
+		...f.timestamps(),
+	},
+	(t) => {
+		return [p.check("entity_status_type_enum_check", inArray(t.type, entityStatusEnum))];
+	},
+);
+
+export type EntityStatus = typeof entityStatus.$inferSelect;
+export type EntityStatusInput = typeof entityStatus.$inferInsert;
+
+export const EntityStatusSelectSchema = createSelectSchema(entityStatus);
+export const EntityStatusInsertSchema = createInsertSchema(entityStatus);
+export const EntityStatusUpdateSchema = createUpdateSchema(entityStatus);
 
 export const entities = p.pgTable(
 	"entities",
 	{
-		id: f.uuidv7("id").primaryKey(),
-		entityId: f.uuidv7("entity_id").notNull(),
-		entityType: p.text("entity_type", { enum: entityTypes }).notNull(),
-		documentId: f.uuidv7("document_id").notNull(),
-		status: p.text("status", { enum: ["draft", "published"] }).notNull(),
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		typeId: p
+			.uuid("type_id")
+			.notNull()
+			.references(() => {
+				return entityTypes.id;
+			}),
+		documentId: p.uuid("document_id").notNull().default(uuidv7()),
+		statusId: p
+			.uuid("status_id")
+			.notNull()
+			.references(() => {
+				return entityStatus.id;
+			}),
+		slug: p.text("slug").notNull(),
+		...f.timestamps(),
 	},
 	(t) => {
 		return [
-			p.check("entities_status_enum_check", inArray(t.status, entityStatus)),
-			p.unique("entities_entity_id_entity_type_unique").on(t.entityId, t.entityType),
-			p.unique("entities_document_id_status_unique").on(t.documentId, t.status),
+			p.unique("entities_document_id_status_id_unique").on(t.documentId, t.statusId),
+			p.unique("entities_document_id_slug_unique").on(t.documentId, t.slug),
 		];
 	},
 );
@@ -36,14 +93,15 @@ export const EntityUpdateSchema = createUpdateSchema(entities);
 export const fields = p.pgTable(
 	"fields",
 	{
-		id: f.uuidv7("id").primaryKey(),
-		entityId: f
-			.uuidv7("entity_id")
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		entityId: p
+			.uuid("entity_id")
 			.notNull()
 			.references(() => {
 				return entities.id;
 			}),
 		name: p.text("name").notNull(),
+		...f.timestamps(),
 	},
 	(t) => {
 		return [p.unique("fields_entity_id_name_unique").on(t.entityId, t.name)];
@@ -60,13 +118,14 @@ export const FieldUpdateSchema = createUpdateSchema(fields);
 export const entitiesToResources = p.pgTable(
 	"entities_to_resources",
 	{
-		entityId: f
-			.uuidv7("entity_id")
+		entityId: p
+			.uuid("entity_id")
 			.notNull()
 			.references(() => {
 				return entities.id;
 			}),
 		resourceId: p.text("resource_id").notNull(),
+		...f.timestamps(),
 	},
 	(t) => {
 		return [
@@ -81,18 +140,19 @@ export const entitiesToResources = p.pgTable(
 export const entitiesToEntities = p.pgTable(
 	"entities_to_entities",
 	{
-		entityId: f
-			.uuidv7("entity_id")
+		entityId: p
+			.uuid("entity_id")
 			.notNull()
 			.references(() => {
 				return entities.id;
 			}),
-		relatedEntityId: f
-			.uuidv7("related_entity_id")
+		relatedEntityId: p
+			.uuid("related_entity_id")
 			.notNull()
 			.references(() => {
 				return entities.id;
 			}),
+		...f.timestamps(),
 	},
 	(t) => {
 		return [
