@@ -52,7 +52,7 @@ export const uploadImageAction = createServerAction<
 
 		return createActionStateSuccess({ message: t("success"), data: { key } });
 	} catch (error) {
-		rethrow(error)
+		rethrow(error);
 
 		log.error(error);
 
