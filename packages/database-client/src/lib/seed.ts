@@ -407,13 +407,12 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 
 		await db.insert(schema.imageContentBlocks).values(imageContentBlocks);
 
-		const richTextContentBlocks: Array<schema.RichTextContentBlockInput> =
-			contentBlockIdsByType.rich_text.map(({ id }) => {
-				return {
-					id,
-					content: JSON.stringify({ hello: "world" }),
-				};
-			});
+		const richTextContentBlocks = contentBlockIdsByType.rich_text.map(({ id }) => {
+			return {
+				id,
+				content: JSON.stringify({ hello: "world" }),
+			};
+		}) satisfies Array<schema.RichTextContentBlockInput>; // FIXME: type regression
 
 		await db.insert(schema.richTextContentBlocks).values(richTextContentBlocks);
 

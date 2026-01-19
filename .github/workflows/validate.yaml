@@ -116,7 +116,7 @@ jobs:
 
       # https://nextjs.org/docs/pages/building-your-application/deploying/ci-build-caching#github-actions
       # - name: Cache Next.js build output
-      #   uses: actions/cache@v4
+      #   uses: actions/cache@v5
       #   with:
       #     path: "${{ github.workspace }}/.next/cache"
       #     key:
@@ -131,7 +131,7 @@ jobs:
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
 
       - name: Cache playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-playwright-browsers
         with:
           path: "~/.cache/ms-playwright"
@@ -152,7 +152,7 @@ jobs:
       - name: Stop services
         run: pnpm run dev:services:down
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: ${{ !cancelled() }}
         with:
           name: playwright-report

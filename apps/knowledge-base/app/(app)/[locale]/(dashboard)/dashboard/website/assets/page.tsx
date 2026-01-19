@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { type ReactNode, Suspense } from "react";
@@ -6,18 +6,20 @@ import { type ReactNode, Suspense } from "react";
 import { UploadImageForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form";
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { imageGridOptions } from "@/config/assets.config";
-import { getAssets } from "@/lib/queries/assets";
+import { getAssets } from "@/lib/data/queries/assets";
+import { createMetadata } from "@/lib/server/metadata";
 
 interface DashboardWebsiteAssetsPageProps extends PageProps<"/[locale]/dashboard/website/assets"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardWebsiteAssetsPageProps>,
+	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
 	const t = await getTranslations("DashboardWebsiteAssetsPage");
 
-	const metadata: Metadata = {
+	const metadata: Metadata = await createMetadata(resolvingMetadata, {
 		title: t("meta.title"),
-	};
+	});
 
 	return metadata;
 }

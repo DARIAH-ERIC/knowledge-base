@@ -1,13 +1,13 @@
 import { useTranslations } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
-import { DashboardSidebar } from "@/app/(app)/[locale]/(dashboard)/_components/dashboard-sidebar";
-import { DashboardSidebarNav } from "@/app/(app)/[locale]/(dashboard)/_components/dashboard-sidebar-nav";
-import { mainContentId } from "@/app/(app)/[locale]/(dashboard)/_components/main";
+import { DashboardSidebar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar";
+import { DashboardSidebarNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav";
+import { mainContentId } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/main";
 import { SkipLink } from "@/components/skip-link";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-interface DashbardLayoutProps extends LayoutProps<"/[locale]"> {}
+interface DashbardLayoutProps extends LayoutProps<"/[locale]/dashboard"> {}
 
 export default function DashbardLayout(props: Readonly<DashbardLayoutProps>): ReactNode {
 	const { children } = props;
