@@ -3,19 +3,21 @@
 import { useTranslations } from "next-intl";
 import { type ReactNode, useActionState } from "react";
 
-import { subscribeNewsletterAction } from "@/app/(app)/[locale]/(default)/_lib/actions/subscribe-newsletter-action";
-import { createInitialActionState } from "@/lib/server/actions";
+import { subscribeNewsletterAction } from "@/app/(app)/[locale]/(default)/_lib/subscribe-newsletter.action";
+import { Form } from "@/components/form";
+import { FormStatus } from "@/components/form-status";
+import { SubmitButton } from "@/components/submit-button";
+import { createActionStateInitial } from "@/lib/server/actions";
 
 export function NewsletterSubscriptionForm(): ReactNode {
 	const t = useTranslations("NewsletterSubscriptionForm");
 
-	const [_formState, formAction] = useActionState(
-		subscribeNewsletterAction,
-		createInitialActionState({}),
-	);
+	const [state, action] = useActionState(subscribeNewsletterAction, createActionStateInitial());
 
 	return (
-		<form action={formAction}>
+		<Form action={action} className="grid gap-y-6" state={state}>
+			<FormStatus state={state} />
+
 			<label>
 				<div>{t("first-name")}</div>
 				<input name="firstName" required={true} />
@@ -36,7 +38,9 @@ export function NewsletterSubscriptionForm(): ReactNode {
 				<input name="institution" />
 			</label>
 
-			<button type="submit">{t("submit")}</button>
-		</form>
+			<div>
+				<SubmitButton>{t("submit")}</SubmitButton>
+			</div>
+		</Form>
 	);
 }
