@@ -1,5 +1,5 @@
 import { isErr } from "@acdh-oeaw/lib";
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -7,15 +7,19 @@ import type { ReactNode } from "react";
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { Link } from "@/components/link";
 import { client } from "@/lib/mailchimp/client";
+import { createMetadata } from "@/lib/server/metadata";
 
 interface NewslettersPageProps extends PageProps<"/[locale]/imprint"> {}
 
-export async function generateMetadata(_props: Readonly<NewslettersPageProps>): Promise<Metadata> {
+export async function generateMetadata(
+	_props: Readonly<NewslettersPageProps>,
+	resolvingMetadata: ResolvingMetadata,
+): Promise<Metadata> {
 	const t = await getTranslations("NewslettersPage");
 
-	const metadata: Metadata = {
+	const metadata: Metadata = await createMetadata(resolvingMetadata, {
 		title: t("meta.title"),
-	};
+	});
 
 	return metadata;
 }
