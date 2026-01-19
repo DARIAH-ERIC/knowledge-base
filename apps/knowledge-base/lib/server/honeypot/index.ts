@@ -1,4 +1,4 @@
-import { HoneypotError } from "@/lib/server/errors";
+import { HoneypotError } from "@/lib/server/errors/index";
 
 export const fieldName = "phone-numbers";
 

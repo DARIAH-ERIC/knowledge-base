@@ -3,11 +3,12 @@
 import { getFormDataValues, log } from "@acdh-oeaw/lib";
 import { revalidatePath } from "next/cache";
 import { unstable_rethrow as rethrow } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import * as v from "valibot";
 
 import { UploadImageInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.schema";
 import { uploadAsset } from "@/lib/data/assets";
+import { getIntlLanguage } from "@/lib/i18n/locales";
 import {
 	createActionStateError,
 	createActionStateSuccess,
@@ -31,14 +32,18 @@ export const uploadImageAction = createServerAction<
 		// const user = await assertAuthenticated()
 		// await assertAuthorized(user)
 
+		const locale = await getLocale();
 		const t = await getTranslations("actions.uploadImageAction");
 
-		const validation = await v.safeParseAsync(UploadImageInputSchema, getFormDataValues(formData));
+		const validation = await v.safeParseAsync(UploadImageInputSchema, getFormDataValues(formData), {
+			lang: getIntlLanguage(locale),
+		});
 
 		if (!validation.success) {
 			const errors = v.flatten<typeof UploadImageInputSchema>(validation.issues);
 
 			return createActionStateError({
+				formData,
 				message: errors.root ?? e("invalid-form-fields"),
 				validationErrors: errors.nested,
 			});
@@ -56,6 +61,9 @@ export const uploadImageAction = createServerAction<
 
 		log.error(error);
 
-		return createActionStateError({ message: e("internal-server-error") });
+		return createActionStateError({
+			formData,
+			message: e("internal-server-error"),
+		});
 	}
 });

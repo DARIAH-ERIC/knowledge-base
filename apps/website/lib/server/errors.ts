@@ -18,6 +18,24 @@ export class ForbiddenError extends Error {
 	}
 }
 
+export class HoneyPotError extends Error {
+	static readonly type = "HoneyPotError";
+
+	static is(error: unknown): error is HoneyPotError {
+		if (error instanceof HoneyPotError) {
+			return true;
+		}
+
+		return error instanceof Error && error.name === HoneyPotError.type;
+	}
+
+	constructor(message = "Not found", cause?: Error) {
+		super(message, { cause });
+
+		this.name = HoneyPotError.type;
+	}
+}
+
 export class NotFoundError extends Error {
 	static readonly type = "NotFoundError";
 

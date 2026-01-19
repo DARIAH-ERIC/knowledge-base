@@ -1,13 +1,13 @@
 "use server";
 
-import { getFormDataValues, HttpError, isErr, log } from "@acdh-oeaw/lib";
+import { getFormDataValues, log } from "@acdh-oeaw/lib";
 import { unstable_rethrow as rethrow } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import * as v from "valibot";
 
-import { SubscribeNewsletterInputSchema } from "@/app/(app)/[locale]/(default)/_lib/subscribe-newsletter.schema";
+import { SendContactFormInputSchema } from "@/app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.schema";
+import { env } from "@/config/env.config";
 import { getIntlLanguage } from "@/lib/i18n/locales";
-import { client } from "@/lib/mailchimp/client";
 import {
 	type ActionState,
 	createActionStateError,
@@ -15,13 +15,14 @@ import {
 	createServerAction,
 	type GetValidationErrors,
 } from "@/lib/server/actions";
+import { sendEmail } from "@/lib/server/email/send-email";
 // import { assertValidFormSubmission } from "@/lib/server/honeypot";
 import { globalPOSTRateLimit } from "@/lib/server/rate-limit/global-rate-limit";
 
-export const subscribeNewsletterAction = createServerAction<
+export const sendContactFormEmailAction = createServerAction<
 	unknown,
-	GetValidationErrors<typeof SubscribeNewsletterInputSchema>
->(async function subscribeNewsletterAction(
+	GetValidationErrors<typeof SendContactFormInputSchema>
+>(async function sendContactFormEmailAction(
 	state: ActionState,
 	formData: FormData,
 ): Promise<ActionState> {
@@ -38,16 +39,16 @@ export const subscribeNewsletterAction = createServerAction<
 		// }
 
 		const locale = await getLocale();
-		const t = await getTranslations("actions.subscribeNewsletterAction");
+		const t = await getTranslations("actions.sendContactFormEmailAction");
 
 		const validation = await v.safeParseAsync(
-			SubscribeNewsletterInputSchema,
+			SendContactFormInputSchema,
 			getFormDataValues(formData),
 			{ lang: getIntlLanguage(locale) },
 		);
 
 		if (!validation.success) {
-			const errors = v.flatten<typeof SubscribeNewsletterInputSchema>(validation.issues);
+			const errors = v.flatten<typeof SendContactFormInputSchema>(validation.issues);
 
 			return createActionStateError({
 				formData,
@@ -56,23 +57,16 @@ export const subscribeNewsletterAction = createServerAction<
 			});
 		}
 
-		const { email } = validation.output;
+		const { email, message, subject } = validation.output;
 
-		const result = await client.subscribe({ email });
+		const info = await sendEmail({
+			from: email,
+			to: env.EMAIL_ADDRESS,
+			subject,
+			text: message,
+		});
 
-		if (isErr(result)) {
-			if (HttpError.is(result.error) && result.error.response.status === 214) {
-				return createActionStateError({
-					formData,
-					message: t("already-subscribed"),
-				});
-			}
-
-			return createActionStateError({
-				formData,
-				message: t("error"),
-			});
-		}
+		log.info(info);
 
 		return createActionStateSuccess({ message: t("success") });
 	} catch (error) {
