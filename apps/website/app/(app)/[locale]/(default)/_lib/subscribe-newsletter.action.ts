@@ -1,6 +1,7 @@
 "use server";
 
 import { getFormDataValues, HttpError, isErr, log } from "@acdh-oeaw/lib";
+import { unstable_rethrow as rethrow } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import * as v from "valibot";
 
@@ -19,7 +20,7 @@ export const subscribeNewsletterAction = createServerAction<
 	unknown,
 	GetValidationErrors<typeof SubscribeNewsletterInputSchema>
 >(async function subscribeNewsletterAction(
-	previousActionState: ActionState,
+	state: ActionState,
 	formData: FormData,
 ): Promise<ActionState> {
 	const e = await getTranslations("errors");
@@ -45,9 +46,9 @@ export const subscribeNewsletterAction = createServerAction<
 			});
 		}
 
-		const { email, firstName, institution, lastName } = validation.output;
+		const { email } = validation.output;
 
-		const result = await client.subscribe({ email, firstName, institution, lastName });
+		const result = await client.subscribe({ email });
 
 		if (isErr(result)) {
 			if (HttpError.is(result.error) && result.error.response.status === 214) {
@@ -59,6 +60,8 @@ export const subscribeNewsletterAction = createServerAction<
 
 		return createActionStateSuccess({ message: t("success") });
 	} catch (error) {
+		rethrow(error)
+
 		log.error(error);
 
 		return createActionStateError({ message: e("internal-server-error") });

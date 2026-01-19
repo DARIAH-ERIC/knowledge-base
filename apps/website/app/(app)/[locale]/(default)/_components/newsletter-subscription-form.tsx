@@ -18,25 +18,13 @@ export function NewsletterSubscriptionForm(): ReactNode {
 		<Form action={action} className="grid gap-y-6" state={state}>
 			<FormStatus state={state} />
 
-			<label>
-				<div>{t("first-name")}</div>
-				<input name="firstName" required={true} />
-			</label>
-
-			<label>
-				<div>{t("last-name")}</div>
-				<input name="lastName" required={true} />
-			</label>
 
 			<label>
 				<div>{t("email")}</div>
 				<input name="email" required={true} type="email" />
 			</label>
 
-			<label>
-				<div>{t("institution")}</div>
-				<input name="institution" />
-			</label>
+
 
 			<div>
 				<SubmitButton>{t("submit")}</SubmitButton>

@@ -322,20 +322,17 @@ function createClient() {
 		},
 		async subscribe({
 			email,
-			firstName,
-			lastName,
-			institution,
 		}: {
 			email: string;
-			firstName: string;
-			lastName: string;
-			institution?: string;
 		}) {
 			const url = createUrl({
 				baseUrl,
 				pathname: `/3.0/lists/${env.MAILCHIMP_LIST_ID}/members`,
 				searchParams: createUrlSearchParams({
-					// FIXME: currently FNAME and LNAME are required but not in the mockups
+					/**
+					 * Currently `FNAME` and `LNAME` custom `merge_fields` are still required in `mailchimp`
+					 * settings, but the subscription forms only provide `email`.
+					 */
 					skip_merge_validation: true,
 				}),
 			});
@@ -344,11 +341,7 @@ function createClient() {
 				email_address: email,
 				status: "pending",
 				/** @see {@link https://mailchimp.com/developer/marketing/docs/merge-fields/} */
-				merge_fields: {
-					FNAME: firstName,
-					LNAME: lastName,
-					MMERGE3: institution,
-				},
+				merge_fields: {},
 			};
 
 			/** @see {@link https://mailchimp.com/developer/marketing/api/list-members/add-member-to-list/} */
