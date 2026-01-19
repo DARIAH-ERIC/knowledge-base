@@ -14,13 +14,6 @@ export const organisationalUnitTypesEnum = [
 	"regional_hub",
 	"umbrella_consortium",
 ] as const;
-export const organisationalUnitStatusEnum = [
-	"is_cooperating_partner",
-	"is_member",
-	"is_national_coordinating_institution",
-	"is_national_representative_institution",
-	"is_partner_institution",
-] as const;
 
 export const organisationalUnitTypes = p.pgTable(
 	"organisational_unit_types",
@@ -38,6 +31,14 @@ export const organisationalUnitTypes = p.pgTable(
 		];
 	},
 );
+
+export const organisationalUnitStatusEnum = [
+	"is_cooperating_partner",
+	"is_member",
+	"is_national_coordinating_institution",
+	"is_national_representative_institution",
+	"is_partner_institution",
+] as const;
 
 export const organisationalUnitStatus = p.pgTable(
 	"organisational_unit_status",
@@ -71,12 +72,19 @@ export const organisationalUnits = p.pgTable("organisational_units", {
 	}),
 	typeId: p
 		.uuid("type_id")
+		.notNull()
 		.references(() => {
 			return organisationalUnitTypes.id;
-		})
-		.notNull(),
+		}),
 	...f.timestamps(),
 });
+
+export type OrganisationalUnit = typeof organisationalUnits.$inferSelect;
+export type OrganisationalUnitInput = typeof organisationalUnits.$inferInsert;
+
+export const OrganisationalUnitSelectSchema = createSelectSchema(organisationalUnits);
+export const OrganisationalUnitInsertSchema = createInsertSchema(organisationalUnits);
+export const OrganisationalUnitUpdateSchema = createUpdateSchema(organisationalUnits);
 
 export const organisationalUnitsRelations = p.pgTable("organisational_units_to_units", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -96,54 +104,14 @@ export const organisationalUnitsRelations = p.pgTable("organisational_units_to_u
 	endDate: p.date("end_date", { mode: "date" }),
 	status: p
 		.uuid("status")
+		.notNull()
 		.references(() => {
 			return organisationalUnitStatus.id;
-		})
-		.notNull(),
+		}),
 });
-
-export const organisationalUnitsAllowedRelations = p.pgTable(
-	"organisational_units_allowed_relations",
-	{
-		id: p.uuid("id").primaryKey().default(uuidv7()),
-		unitTypeId: p
-			.uuid("unit_type_id")
-			.references(() => {
-				return organisationalUnitTypes.id;
-			})
-			.notNull(),
-		relatedUnitTypeId: p
-			.uuid("related_unit_type_id")
-			.references(() => {
-				return organisationalUnitTypes.id;
-			})
-			.notNull(),
-		relationTypeId: p
-			.uuid("relation_type_id")
-			.references(() => {
-				return organisationalUnitStatus.id;
-			})
-			.notNull(),
-	},
-	(t) => {
-		return [p.unique().on(t.unitTypeId, t.relatedUnitTypeId, t.relationTypeId)];
-	},
-);
-
-export type OrganisationalUnit = typeof organisationalUnits.$inferSelect;
-export type OrganisationalUnitInput = typeof organisationalUnits.$inferInsert;
 
 export type OrganisationalUnitRelation = typeof organisationalUnitsRelations.$inferSelect;
 export type OrganisationalUnitRelationInput = typeof organisationalUnitsRelations.$inferInsert;
-
-export type OrganisationalUnitAllowedRelation =
-	typeof organisationalUnitsAllowedRelations.$inferSelect;
-export type OrganisationalUnitAllowedRelationInput =
-	typeof organisationalUnitsAllowedRelations.$inferInsert;
-
-export const OrganisationalUnitSelectSchema = createSelectSchema(organisationalUnits);
-export const OrganisationalUnitInsertSchema = createInsertSchema(organisationalUnits);
-export const OrganisationalUnitUpdateSchema = createUpdateSchema(organisationalUnits);
 
 export const OrganisationalUnitRelationSelectSchema = createSelectSchema(
 	organisationalUnitsRelations,
@@ -154,6 +122,39 @@ export const OrganisationalUnitRelationInsertSchema = createInsertSchema(
 export const OrganisationalUnitRelationUpdateSchema = createUpdateSchema(
 	organisationalUnitsRelations,
 );
+
+export const organisationalUnitsAllowedRelations = p.pgTable(
+	"organisational_units_allowed_relations",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		unitTypeId: p
+			.uuid("unit_type_id")
+			.notNull()
+			.references(() => {
+				return organisationalUnitTypes.id;
+			}),
+		relatedUnitTypeId: p
+			.uuid("related_unit_type_id")
+			.notNull()
+			.references(() => {
+				return organisationalUnitTypes.id;
+			}),
+		relationTypeId: p
+			.uuid("relation_type_id")
+			.notNull()
+			.references(() => {
+				return organisationalUnitStatus.id;
+			}),
+	},
+	(t) => {
+		return [p.unique().on(t.unitTypeId, t.relatedUnitTypeId, t.relationTypeId)];
+	},
+);
+
+export type OrganisationalUnitAllowedRelation =
+	typeof organisationalUnitsAllowedRelations.$inferSelect;
+export type OrganisationalUnitAllowedRelationInput =
+	typeof organisationalUnitsAllowedRelations.$inferInsert;
 
 export const OrganisationalUnitAllowedRelationSelectSchema = createSelectSchema(
 	organisationalUnitsAllowedRelations,

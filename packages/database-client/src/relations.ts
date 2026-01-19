@@ -133,6 +133,7 @@ export const relations = defineRelations(schema, (r) => {
 			type: r.one.organisationalUnitTypes({
 				from: r.organisationalUnits.typeId,
 				to: r.organisationalUnitTypes.id,
+				optional: false,
 			}),
 		},
 		pages: {
