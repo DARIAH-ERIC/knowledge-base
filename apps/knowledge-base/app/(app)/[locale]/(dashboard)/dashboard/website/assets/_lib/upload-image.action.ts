@@ -13,16 +13,17 @@ import {
 	createServerAction,
 	type GetValidationErrors,
 } from "@/lib/server/actions";
-import { ForbiddenError, RateLimitError } from "@/lib/server/errors";
 import { globalPOSTRateLimit } from "@/lib/server/rate-limit/global-rate-limit";
 
 export const uploadImageAction = createServerAction<
-	{ objectName: string },
+	{ key: string },
 	GetValidationErrors<typeof UploadImageInputSchema>
 >(async function uploadImageAction(state, formData) {
+	const e = await getTranslations("errors");
+
 	try {
 		if (!(await globalPOSTRateLimit())) {
-			throw new RateLimitError();
+			return createActionStateError({ message: e("too-many-requests") });
 		}
 
 		// FIXME:
@@ -31,34 +32,26 @@ export const uploadImageAction = createServerAction<
 
 		const t = await getTranslations("actions.uploadImageAction");
 
-		const { file } = await v.parseAsync(UploadImageInputSchema, getFormDataValues(formData));
+		const validation = await v.safeParseAsync(UploadImageInputSchema, getFormDataValues(formData));
 
-		const { objectName } = await uploadAsset({ file });
-
-		revalidatePath("/dashboard/website/assets", "page");
-
-		return createActionStateSuccess({ message: t("success"), data: { objectName } });
-	} catch (error) {
-		log.error(error);
-
-		const e = await getTranslations("errors");
-
-		if (error instanceof ForbiddenError) {
-			return createActionStateError({ message: e("forbidden") });
-		}
-
-		if (error instanceof RateLimitError) {
-			return createActionStateError({ message: e("too-many-requests") });
-		}
-
-		if (v.isValiError<typeof UploadImageInputSchema>(error)) {
-			const errors = v.flatten<typeof UploadImageInputSchema>(error.issues);
+		if (!validation.success) {
+			const errors = v.flatten<typeof UploadImageInputSchema>(validation.issues);
 
 			return createActionStateError({
 				message: errors.root ?? e("invalid-form-fields"),
 				validationErrors: errors.nested,
 			});
 		}
+
+		const { file, licenseId, prefix } = validation.output;
+
+		const { key } = await uploadAsset({ file, licenseId, prefix });
+
+		revalidatePath("/dashboard/website/assets", "page");
+
+		return createActionStateSuccess({ message: t("success"), data: { key } });
+	} catch (error) {
+		log.error(error);
 
 		return createActionStateError({ message: e("internal-server-error") });
 	}

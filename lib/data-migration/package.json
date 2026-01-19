@@ -1,5 +1,5 @@
 {
-	"name": "@dariah-eric/dariah-knowledge-base-search-index",
+	"name": "@dariah-eric/dariah-knowledge-base-data-migration",
 	"private": true,
 	"license": "MIT",
 	"type": "module",
@@ -9,57 +9,37 @@
 	"devEngines": {
 		"runtime": {
 			"name": "node",
-			"version": "^24.13.0",
+			"version": "^24.12.0",
 			"onFail": "download"
 		}
 	},
-	"packageManager": "pnpm@10.28.0",
-	"exports": {
-		"./client": {
-			"types": "./dist/src/client.d.ts",
-			"default": "./src/client.ts"
-		},
-		"./lib": {
-			"types": "./dist/src/lib/index.d.ts",
-			"default": "./src/lib/index.ts"
-		},
-		"./schema": {
-			"types": "./dist/src/schema.d.ts",
-			"default": "./src/schema.ts"
-		}
-	},
+	"packageManager": "pnpm@10.27.0",
 	"sideEffects": false,
 	"scripts": {
-		"build": "rm -rf dist && tsc --project ./tsconfig.build.json",
-		"dev": "tsc --preserveWatchOutput --project ./tsconfig.build.json --watch",
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
 		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
-		"search-index:api-keys:generate": "tsx ./scripts/generate-search-api-key.ts",
-		"search-index:collections:create": "tsx ./scripts/create-collection.ts",
-		"search-index:collections:ingest": "tsx ./scripts/ingest.ts",
-		"search-index:collections:reset": "tsx ./scripts/reset.ts",
-		"search-index:collections:seed": "tsx ./scripts/seed.ts",
+		"migrate": "tsx ./scripts/migrate.ts",
 		"types:check": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
-		"@acdh-oeaw/validate-env": "catalog:",
-		"is-network-error": "catalog:",
-		"typesense": "catalog:",
+		"@dariah-eric/dariah-knowledge-base-database-client": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-image-service": "workspace:^",
+		"@sindresorhus/slugify": "catalog:",
 		"valibot": "catalog:"
 	},
 	"devDependencies": {
 		"@dariah-eric/dariah-knowledge-base-eslint-config": "workspace:^",
 		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
 		"@dariah-eric/dariah-knowledge-base-typescript-config": "workspace:^",
-		"@faker-js/faker": "catalog:",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
 		"prettier": "catalog:",
 		"tsx": "catalog:",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"wp-types": "catalog:"
 	},
 	"browserslist": {
 		"development": [

@@ -66,6 +66,9 @@ catalogs:
     '@hono/swagger-ui':
       specifier: ^0.5.3
       version: 0.5.3
+    '@imgproxy/imgproxy-js-core':
+      specifier: ^1.7.0
+      version: 1.7.0
     '@imgproxy/imgproxy-node':
       specifier: ^1.1.0
       version: 1.1.0
@@ -303,6 +306,9 @@ catalogs:
     vitest:
       specifier: ^4.0.17
       version: 4.0.17
+    wp-types:
+      specifier: ^4.69.0
+      version: 4.69.0
     xast-util-feed:
       specifier: ^2.0.0
       version: 2.0.0
@@ -821,6 +827,55 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
+  lib/data-migration:
+    dependencies:
+      '@acdh-oeaw/lib':
+        specifier: 'catalog:'
+        version: 1.0.4
+      '@dariah-eric/dariah-knowledge-base-database-client':
+        specifier: workspace:^
+        version: link:../../packages/database-client
+      '@dariah-eric/dariah-knowledge-base-image-service':
+        specifier: workspace:^
+        version: link:../../packages/image-service
+      '@sindresorhus/slugify':
+        specifier: 'catalog:'
+        version: 3.0.0
+      valibot:
+        specifier: 'catalog:'
+        version: 1.2.0(typescript@5.9.3)
+    devDependencies:
+      '@dariah-eric/dariah-knowledge-base-eslint-config':
+        specifier: workspace:^
+        version: link:../eslint-config
+      '@dariah-eric/dariah-knowledge-base-prettier-config':
+        specifier: workspace:^
+        version: link:../prettier-config
+      '@dariah-eric/dariah-knowledge-base-typescript-config':
+        specifier: workspace:^
+        version: link:../typescript-config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.9
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      node:
+        specifier: runtime:^24.12.0
+        version: runtime:24.13.0
+      prettier:
+        specifier: 'catalog:'
+        version: 3.8.0
+      tsx:
+        specifier: 'catalog:'
+        version: 4.21.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      wp-types:
+        specifier: 'catalog:'
+        version: 4.69.0
+
   lib/eslint-config:
     dependencies:
       '@acdh-oeaw/eslint-config':
@@ -1071,12 +1126,12 @@ importers:
       '@acdh-oeaw/validate-env':
         specifier: 'catalog:'
         version: 0.2.1(typescript@5.9.3)
+      '@imgproxy/imgproxy-js-core':
+        specifier: 'catalog:'
+        version: 1.7.0
       '@imgproxy/imgproxy-node':
         specifier: 'catalog:'
         version: 1.1.0
-      '@sindresorhus/slugify':
-        specifier: 'catalog:'
-        version: 3.0.0
       minio:
         specifier: 'catalog:'
         version: 8.0.6
@@ -7914,6 +7969,9 @@ packages:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
 
+  wp-types@4.69.0:
+    resolution: {integrity: sha512-2w0i2ygylpbYpqFskg1NlvH/1DM8thZuhxjihFRHdvjgFkmzJ2cHl2kq9cBnxYWHyLHzRiLI2TupKbq3yl2STQ==}
+
   wrap-ansi@7.0.0:
     resolution: {integrity: sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==}
     engines: {node: '>=10'}
@@ -10966,7 +11024,7 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 25.0.9
 
   '@types/deep-eql@4.0.2': {}
 
@@ -10996,7 +11054,7 @@ snapshots:
 
   '@types/mysql@2.15.27':
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 25.0.9
 
   '@types/node@24.10.9':
     dependencies:
@@ -11014,13 +11072,13 @@ snapshots:
 
   '@types/pg@8.15.6':
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 25.0.9
       pg-protocol: 1.11.0
       pg-types: 2.2.0
 
   '@types/pg@8.16.0':
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 25.0.9
       pg-protocol: 1.11.0
       pg-types: 2.2.0
 
@@ -11038,7 +11096,7 @@ snapshots:
 
   '@types/tedious@4.0.14':
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 25.0.9
 
   '@types/unist@3.0.3': {}
 
@@ -15424,6 +15482,10 @@ snapshots:
       stackback: 0.0.2
 
   word-wrap@1.2.5: {}
+
+  wp-types@4.69.0:
+    dependencies:
+      typescript: 5.9.3
 
   wrap-ansi@7.0.0:
     dependencies:

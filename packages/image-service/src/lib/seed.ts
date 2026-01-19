@@ -1,12 +1,7 @@
-import { createReadStream } from "node:fs";
-import * as path from "node:path";
-import { Readable } from "node:stream";
-import type { ReadableStream } from "node:stream/web";
-
 import { faker as f } from "@faker-js/faker";
-import sharp, { type Metadata } from "sharp";
 
 import type { Client } from "./admin-client";
+import { stream } from "./stream";
 
 export interface SeedConfig {
 	/** @default "2025-01-01" */
@@ -51,64 +46,32 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<See
 
 	const seedManifest: SeedManifest = { avatars: [], images: [] };
 
-	function getImageMetadata(metadata: Metadata) {
-		const { format, height, orientation, size, width } = metadata;
-
-		return {
-			/** Used in minio web ui. */
-			"content-type": `image/${format}`,
-			height,
-			orientation,
-			size,
-			width,
-		};
-	}
-
-	async function _fromFilePath(filePath: string) {
-		const inputStream = createReadStream(filePath);
-
-		const imageStream = inputStream.pipe(sharp());
-		const metadata = getImageMetadata(await imageStream.metadata());
-
-		const fileName = path.basename(filePath).slice(0, -path.extname(filePath).length);
-
-		return { fileName, imageStream, size: metadata.size, metadata };
-	}
-
-	async function fromUrl(url: string) {
-		const response = await fetch(url);
-		const inputStream = Readable.fromWeb(response.body! as ReadableStream);
-
-		const imageStream = inputStream.pipe(sharp());
-		const metadata = getImageMetadata(await imageStream.metadata());
-
-		const fileName = f.lorem.words({ min: 1, max: 3 });
-
-		return { fileName, imageStream, size: metadata.size, metadata };
-	}
-
 	for (const { url } of avatars) {
-		const { fileName, imageStream, size, metadata } = await fromUrl(url);
-		const { objectName } = await client.images.upload(
-			`avatar-${fileName}`,
-			imageStream,
-			size,
-			metadata,
-		);
+		const input = await stream.fromUrl(new URL(url));
+		const [metadata, _stream] = await stream.getMetadata(input);
 
-		seedManifest.avatars.push({ key: objectName });
+		const { key } = await client.images.upload({
+			input: _stream,
+			metadata,
+			prefix: "avatars",
+			size: metadata.size,
+		});
+
+		seedManifest.avatars.push({ key });
 	}
 
 	for (const { url } of images) {
-		const { fileName, imageStream, size, metadata } = await fromUrl(url);
-		const { objectName } = await client.images.upload(
-			`image-${fileName}`,
-			imageStream,
-			size,
-			metadata,
-		);
+		const input = await stream.fromUrl(new URL(url));
+		const [metadata, _stream] = await stream.getMetadata(input);
 
-		seedManifest.images.push({ key: objectName });
+		const { key } = await client.images.upload({
+			input: _stream,
+			metadata,
+			prefix: "images",
+			size: metadata.size,
+		});
+
+		seedManifest.images.push({ key });
 	}
 
 	return seedManifest;
