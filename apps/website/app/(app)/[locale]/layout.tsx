@@ -33,6 +33,13 @@ export async function generateMetadata(): Promise<Promise<Metadata>> {
 	const metadata: Metadata = {
 		metadataBase: createUrl({ baseUrl: env.NEXT_PUBLIC_WEBSITE_BASE_URL }),
 		alternates: {
+			/**
+			 * Note that this currently only uses the correct locale prefix on dynamically rendered pages.
+			 * On fully static pages it will use the actual locale instead of the locale prefix used for
+			 * routing.
+			 *
+			 * @see {@link https://github.com/amannn/next-intl/issues/2119}
+			 */
 			canonical: "./",
 			types: {
 				"application/rss+xml": [{ title: t("rss-feed", { locale }), url: `/${locale}/rss.xml` }],

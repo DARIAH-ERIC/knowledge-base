@@ -30,6 +30,10 @@ export function createClient() {
 
 export const db = globalThis.__db ?? createClient();
 
+export type Database = Client;
+
+export type Transaction = Parameters<Parameters<Client["transaction"]>[0]>[0];
+
 /** Avoid re-creating database client on hot-module-reload. */
 if (env.NODE_ENV !== "production") {
 	globalThis.__db = db;

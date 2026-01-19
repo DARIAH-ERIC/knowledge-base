@@ -1,5 +1,5 @@
 import { createUrlSearchParams } from "@acdh-oeaw/lib";
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { type ReactNode, Suspense } from "react";
@@ -9,8 +9,9 @@ import { UploadImageForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/webs
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { Link } from "@/components/link";
 import { imageGridOptions } from "@/config/assets.config";
+import { getAssets } from "@/lib/data/queries/assets";
 import { createHref } from "@/lib/navigation/create-href";
-import { getAssets } from "@/lib/queries/assets";
+import { createMetadata } from "@/lib/server/metadata";
 
 const SearchParamsSchema = v.object({
 	limit: v.optional(v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)), "10"),
@@ -21,12 +22,13 @@ interface DashboardWebsiteAssetsPageProps extends PageProps<"/[locale]/dashboard
 
 export async function generateMetadata(
 	_props: Readonly<DashboardWebsiteAssetsPageProps>,
+	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
 	const t = await getTranslations("DashboardWebsiteAssetsPage");
 
-	const metadata: Metadata = {
+	const metadata: Metadata = await createMetadata(resolvingMetadata, {
 		title: t("meta.title"),
-	};
+	});
 
 	return metadata;
 }

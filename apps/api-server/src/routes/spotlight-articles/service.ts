@@ -4,7 +4,7 @@ import { count, eq } from "@dariah-eric/dariah-knowledge-base-database-client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
 
-import type { Database } from "@/middlewares/db";
+import type { Database, Transaction } from "@/middlewares/db";
 import { imageWidth } from "~/config/api.config";
 
 interface GetSpotlightArticlesParams {
@@ -14,7 +14,10 @@ interface GetSpotlightArticlesParams {
 	offset?: number;
 }
 
-export async function getSpotlightArticles(db: Database, params: GetSpotlightArticlesParams) {
+export async function getSpotlightArticles(
+	db: Database | Transaction,
+	params: GetSpotlightArticlesParams,
+) {
 	const { limit = 10, offset = 0 } = params;
 
 	const [items, aggregate] = await Promise.all([
@@ -78,7 +81,10 @@ interface GetSpotlightArticleByIdParams {
 	id: schema.SpotlightArticle["id"];
 }
 
-export async function getSpotlightArticleById(db: Database, params: GetSpotlightArticleByIdParams) {
+export async function getSpotlightArticleById(
+	db: Database | Transaction,
+	params: GetSpotlightArticleByIdParams,
+) {
 	const { id } = params;
 
 	const item = await db.query.spotlightArticles.findFirst({
@@ -130,7 +136,7 @@ interface GetSpotlightArticleBySlugParams {
 }
 
 export async function getSpotlightArticleBySlug(
-	db: Database,
+	db: Database | Transaction,
 	params: GetSpotlightArticleBySlugParams,
 ) {
 	const { slug } = params;
