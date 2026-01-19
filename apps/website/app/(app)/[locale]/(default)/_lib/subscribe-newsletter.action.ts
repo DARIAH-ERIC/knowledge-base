@@ -60,7 +60,7 @@ export const subscribeNewsletterAction = createServerAction<
 
 		return createActionStateSuccess({ message: t("success") });
 	} catch (error) {
-		rethrow(error)
+		rethrow(error);
 
 		log.error(error);
 

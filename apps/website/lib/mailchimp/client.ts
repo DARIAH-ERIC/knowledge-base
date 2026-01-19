@@ -320,11 +320,7 @@ function createClient() {
 
 			return result;
 		},
-		async subscribe({
-			email,
-		}: {
-			email: string;
-		}) {
+		async subscribe({ email }: { email: string }) {
 			const url = createUrl({
 				baseUrl,
 				pathname: `/3.0/lists/${env.MAILCHIMP_LIST_ID}/members`,
