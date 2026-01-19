@@ -3,7 +3,7 @@ import { generateImageUrl } from "@imgproxy/imgproxy-node";
 
 import { env } from "../config/env.config";
 
-export type ImageUrlOptions = Options
+export type ImageUrlOptions = Options;
 
 export function generateSignedImageUrl(
 	bucketName: string,
