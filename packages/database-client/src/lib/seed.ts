@@ -438,10 +438,19 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 
 		await db.insert(schema.entitiesToEntities).values(entitiesToEntities);
 
+		const organisationalUnitTypeIds = await db
+			.select({ id: schema.organisationalUnitTypes.id, type: schema.organisationalUnitTypes.type })
+			.from(schema.organisationalUnitTypes);
+
+		const organisationalUnitsTypesByType = keyBy(organisationalUnitTypeIds, ({ type }) => {
+			return type;
+		});
+
 		const organisationalUnitsAllowedRelationsValues = await db
 			.select()
 			.from(schema.organisationalUnitsAllowedRelations);
 
+		const { umbrella_consortium, ...rest } = organisationalUnitsTypesByType;
 		const organisationalUnits: Array<Omit<schema.OrganisationalUnitInput, "id">> =
 			f.helpers.multiple(
 				(_, i) => {
@@ -457,15 +466,12 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 							},
 							{ probability: 0.5 },
 						),
-						type:
+						typeId:
 							i === 0
-								? "umbrella_consortium"
-								: schema.organisationalUnitTypes[
-										i %
-											schema.organisationalUnitTypes.filter((organisationalUnitType) => {
-												return organisationalUnitType !== "umbrella_consortium";
-											}).length
-									]!,
+								? umbrella_consortium.id
+								: Object.values(rest).map((type) => {
+										return type.id;
+									})[i % Object.values(rest).length]!,
 					};
 				},
 				{ count: 25 },
@@ -494,7 +500,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 					return { ...organisationalUnits[index]!, id };
 				}),
 			)
-			.returning({ id: schema.organisationalUnits.id, type: schema.organisationalUnits.type });
+			.returning({ id: schema.organisationalUnits.id, typeId: schema.organisationalUnits.typeId });
 
 		const unitsToUnits: Array<schema.OrganisationalUnitRelationInput> = f.helpers
 			.multiple(
@@ -506,16 +512,17 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			.map((organisationalUnitsAllowedRelation) => {
 				const unit = f.helpers.arrayElement(
 					organisationalUnitsIds.filter((organisationalUnit) => {
-						return organisationalUnit.type === organisationalUnitsAllowedRelation.unitType;
+						return organisationalUnit.typeId === organisationalUnitsAllowedRelation.unitTypeId;
 					}),
 				);
 				const relatedUnit = f.helpers.arrayElement(
 					organisationalUnitsIds.filter((organisationalUnit) => {
-						return organisationalUnit.type === organisationalUnitsAllowedRelation.relatedUnitType;
+						return (
+							organisationalUnit.typeId === organisationalUnitsAllowedRelation.relatedUnitTypeId
+						);
 					}),
 				);
 				const startDate = f.date.past({ years: 5 });
-
 				const yesterday = new Date();
 				yesterday.setDate(yesterday.getDate() - 1);
 				const minEndDate = new Date(startDate);
@@ -524,7 +531,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 				return {
 					unitId: unit.id,
 					relatedUnitId: relatedUnit.id,
-					status: organisationalUnitsAllowedRelation.relationType,
+					status: organisationalUnitsAllowedRelation.relationTypeId,
 					startDate,
 					endDate:
 						minEndDate < yesterday
