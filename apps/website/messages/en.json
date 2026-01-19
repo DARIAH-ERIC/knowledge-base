@@ -1,4 +1,18 @@
 {
+	"actions": {
+		"subscribeNewsletterAction": {
+			"already-subscribed": "Already subscribed",
+			"error": "Failed to add email address to newsletter mailing list.",
+			"success": "Successfully added email address to newsletter mailing list."
+		}
+	},
+	"errors": {
+		"forbidden": "Forbidden.",
+		"internal-server-error": "Internal server error.",
+		"invalid-form-fields": "Invalid or missing fields.",
+		"not-authenticated": "Not authenticated.",
+		"too-many-requests": "Too many requests."
+	},
 	"ColorSchemeSelect": {
 		"change-color-scheme": "Change color scheme",
 		"color-schemes": {
@@ -98,6 +112,19 @@
 		"change-locale": "Switch locale",
 		"change-locale-to": "Switch to {locale}",
 		"current-locale": "Current language: {locale}"
+	},
+	"NewslettersPage": {
+		"meta": {
+			"title": "Newsletters"
+		},
+		"title": "Newsletters"
+	},
+	"NewsletterSubscriptionForm": {
+		"email": "Email",
+		"first-name": "First name",
+		"institution": "Institution",
+		"last-name": "Last name",
+		"submit": "Subscribe"
 	},
 	"PrivacyPolicyPage": {
 		"meta": {

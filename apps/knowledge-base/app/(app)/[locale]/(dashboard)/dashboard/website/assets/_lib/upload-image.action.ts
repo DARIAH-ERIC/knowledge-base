@@ -2,6 +2,7 @@
 
 import { getFormDataValues, log } from "@acdh-oeaw/lib";
 import { revalidatePath } from "next/cache";
+import { unstable_rethrow as rethrow } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import * as v from "valibot";
 
@@ -51,6 +52,8 @@ export const uploadImageAction = createServerAction<
 
 		return createActionStateSuccess({ message: t("success"), data: { key } });
 	} catch (error) {
+		rethrow(error);
+
 		log.error(error);
 
 		return createActionStateError({ message: e("internal-server-error") });

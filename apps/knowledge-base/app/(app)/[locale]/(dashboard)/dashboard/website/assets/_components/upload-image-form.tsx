@@ -5,9 +5,7 @@ import { type ReactNode, useActionState } from "react";
 
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
 import { Form } from "@/components/form";
-import { FormErrorMessage } from "@/components/form-error-message";
 import { FormStatus } from "@/components/form-status";
-import { FormSuccessMessage } from "@/components/form-success-message";
 import { SubmitButton } from "@/components/submit-button";
 import { createActionStateInitial } from "@/lib/server/actions";
 
@@ -32,11 +30,6 @@ export function UploadImageForm(): ReactNode {
 
 			<div>
 				<SubmitButton>{t("submit")}</SubmitButton>
-			</div>
-
-			<div>
-				<FormSuccessMessage state={state} />
-				<FormErrorMessage state={state} />
 			</div>
 		</Form>
 	);
