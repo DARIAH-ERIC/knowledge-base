@@ -1,10 +1,10 @@
 import { createUrlSearchParams } from "@acdh-oeaw/lib";
 import type { Metadata, ResolvingMetadata } from "next";
-import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { type ReactNode, Suspense } from "react";
 import * as v from "valibot";
 
+import { ImageGrid } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/image-grid";
 import { UploadImageForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form";
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { Link } from "@/components/link";
@@ -33,12 +33,16 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardWebsiteAssetsPage(
+export default async function DashboardWebsiteAssetsPage(
 	props: Readonly<DashboardWebsiteAssetsPageProps>,
-): ReactNode {
+): Promise<ReactNode> {
 	const { searchParams } = props;
 
-	const t = useTranslations("DashboardWebsiteAssetsPage");
+	const t = await getTranslations("DashboardWebsiteAssetsPage");
+
+	const { limit, offset } = await v.parseAsync(SearchParamsSchema, await searchParams);
+
+	const { urls, total } = await getAssets({ imageUrlOptions: imageGridOptions, limit, offset });
 
 	return (
 		<Main className="flex-1">
@@ -47,39 +51,8 @@ export default function DashboardWebsiteAssetsPage(
 			<UploadImageForm />
 
 			<Suspense>
-				<ImageGrid searchParams={searchParams} />
+				<ImageGrid urls={urls} />
 			</Suspense>
-		</Main>
-	);
-}
-
-interface ImageGridProps {
-	searchParams: DashboardWebsiteAssetsPageProps["searchParams"];
-}
-
-async function ImageGrid(props: Readonly<ImageGridProps>): Promise<ReactNode> {
-	const { searchParams } = props;
-
-	const { limit, offset } = await v.parseAsync(SearchParamsSchema, await searchParams);
-
-	const { urls, total } = await getAssets({ imageUrlOptions: imageGridOptions, limit, offset });
-
-	return (
-		<section>
-			<ul
-				className="grid grid-cols-[repeat(auto-fill,minmax(min(18rem,100%),1fr))] gap-6 content-start"
-				role="list"
-			>
-				{urls.map((url) => {
-					return (
-						<li key={url}>
-							<figure className="grid grid-rows-[18rem]">
-								<img alt="" className="object-cover size-full rounded-sm" src={url} />
-							</figure>
-						</li>
-					);
-				})}
-			</ul>
 
 			<div className="flex items-center justify-between gap-x-6 py-2">
 				<Link
@@ -105,6 +78,6 @@ async function ImageGrid(props: Readonly<ImageGridProps>): Promise<ReactNode> {
 					Next
 				</Link>
 			</div>
-		</section>
+		</Main>
 	);
 }
