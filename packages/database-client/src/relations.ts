@@ -126,9 +126,13 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.entities.id,
 				optional: false,
 			}),
-			organisationalUnitsRelations: r.many.organisationalUnits({
+			organisationalUnits: r.many.organisationalUnits({
 				from: r.organisationalUnits.id.through(r.organisationalUnitsRelations.unitId),
 				to: r.organisationalUnits.id.through(r.organisationalUnitsRelations.relatedUnitId),
+			}),
+			type: r.one.organisationalUnitTypes({
+				from: r.organisationalUnits.typeId,
+				to: r.organisationalUnitTypes.id,
 			}),
 		},
 		pages: {

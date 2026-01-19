@@ -1,3 +1,4 @@
+import { inArray } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
 
@@ -6,19 +7,54 @@ import { uuidv7 } from "../functions";
 import { assets } from "./assets";
 import { entities } from "./entities";
 
-export const organisationalUnitTypes = [
+export const organisationalUnitTypesEnum = [
 	"body",
 	"consortium",
 	"institution",
+	"regional_hub",
 	"umbrella_consortium",
 ] as const;
-export const organisationalUnitStatus = [
-	"cooperating_partner",
-	"member",
-	"national_coordinating_institution",
-	"national_representative_institution",
-	"partner_institution",
+export const organisationalUnitStatusEnum = [
+	"is_cooperating_partner",
+	"is_member",
+	"is_national_coordinating_institution",
+	"is_national_representative_institution",
+	"is_partner_institution",
 ] as const;
+
+export const organisationalUnitTypes = p.pgTable(
+	"organisational_unit_types",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		type: p.text("type", { enum: organisationalUnitTypesEnum }).notNull().unique(),
+		...f.timestamps(),
+	},
+	(t) => {
+		return [
+			p.check(
+				"organisational_unit_types_type_enum_check",
+				inArray(t.type, organisationalUnitTypesEnum),
+			),
+		];
+	},
+);
+
+export const organisationalUnitStatus = p.pgTable(
+	"organisational_unit_status",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		status: p.text("status", { enum: organisationalUnitStatusEnum }).notNull().unique(),
+		...f.timestamps(),
+	},
+	(t) => {
+		return [
+			p.check(
+				"organisational_unit_status_status_enum_check",
+				inArray(t.status, organisationalUnitStatusEnum),
+			),
+		];
+	},
+);
 
 export const organisationalUnits = p.pgTable("organisational_units", {
 	id: p
@@ -33,7 +69,12 @@ export const organisationalUnits = p.pgTable("organisational_units", {
 	imageId: p.uuid("image_id").references(() => {
 		return assets.id;
 	}),
-	type: p.text("type", { enum: organisationalUnitTypes }).notNull(),
+	typeId: p
+		.uuid("type_id")
+		.references(() => {
+			return organisationalUnitTypes.id;
+		})
+		.notNull(),
 	...f.timestamps(),
 });
 
@@ -53,19 +94,39 @@ export const organisationalUnitsRelations = p.pgTable("organisational_units_to_u
 		}),
 	startDate: p.date("start_date", { mode: "date" }).notNull(),
 	endDate: p.date("end_date", { mode: "date" }),
-	status: p.text("status", { enum: organisationalUnitStatus }).notNull(),
+	status: p
+		.uuid("status")
+		.references(() => {
+			return organisationalUnitStatus.id;
+		})
+		.notNull(),
 });
 
 export const organisationalUnitsAllowedRelations = p.pgTable(
 	"organisational_units_allowed_relations",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
-		unitType: p.text("type", { enum: organisationalUnitTypes }).notNull(),
-		relatedUnitType: p.text("related_unit_type", { enum: organisationalUnitTypes }).notNull(),
-		relationType: p.text("relation_type", { enum: organisationalUnitStatus }).notNull(),
+		unitTypeId: p
+			.uuid("unit_type_id")
+			.references(() => {
+				return organisationalUnitTypes.id;
+			})
+			.notNull(),
+		relatedUnitTypeId: p
+			.uuid("related_unit_type_id")
+			.references(() => {
+				return organisationalUnitTypes.id;
+			})
+			.notNull(),
+		relationTypeId: p
+			.uuid("relation_type_id")
+			.references(() => {
+				return organisationalUnitStatus.id;
+			})
+			.notNull(),
 	},
 	(t) => {
-		return [p.unique().on(t.unitType, t.relatedUnitType, t.relationType)];
+		return [p.unique().on(t.unitTypeId, t.relatedUnitTypeId, t.relationTypeId)];
 	},
 );
 
