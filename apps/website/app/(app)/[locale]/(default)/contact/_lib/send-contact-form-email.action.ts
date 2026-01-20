@@ -1,7 +1,6 @@
 "use server";
 
 import { getFormDataValues, isErr, log } from "@acdh-oeaw/lib";
-import { unstable_rethrow as rethrow } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import * as v from "valibot";
 
@@ -12,12 +11,11 @@ import {
 	type ActionState,
 	createActionStateError,
 	createActionStateSuccess,
-	createServerAction,
 	type GetValidationErrors,
 } from "@/lib/server/actions";
+import { createServerAction } from "@/lib/server/actions/create-server-action";
 import { sendEmail } from "@/lib/server/email/send-email";
 // import { assertValidFormSubmission } from "@/lib/server/honeypot";
-import { globalPOSTRateLimit } from "@/lib/server/rate-limit/global-rate-limit";
 
 export const sendContactFormEmailAction = createServerAction<
 	unknown,
@@ -28,62 +26,47 @@ export const sendContactFormEmailAction = createServerAction<
 ): Promise<ActionState> {
 	const e = await getTranslations("errors");
 
-	try {
-		if (!(await globalPOSTRateLimit())) {
-			return createActionStateError({ message: e("too-many-requests") });
-		}
+	// assertValidFormSubmission(formData);
+	// if (isHoneypotError(error)) {
+	// 	return createActionStateError({ message: e("invalid-form-fields"), formData });
+	// }
 
-		// assertValidFormSubmission(formData);
-		// if (isHoneypotError(error)) {
-		// 	return createActionStateError({ message: e("invalid-form-fields"), formData });
-		// }
+	const locale = await getLocale();
+	const t = await getTranslations("actions.sendContactFormEmailAction");
 
-		const locale = await getLocale();
-		const t = await getTranslations("actions.sendContactFormEmailAction");
+	const validation = await v.safeParseAsync(
+		SendContactFormInputSchema,
+		getFormDataValues(formData),
+		{ lang: getIntlLanguage(locale) },
+	);
 
-		const validation = await v.safeParseAsync(
-			SendContactFormInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!validation.success) {
-			const errors = v.flatten<typeof SendContactFormInputSchema>(validation.issues);
-
-			return createActionStateError({
-				formData,
-				message: errors.root ?? e("invalid-form-fields"),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { email, message, name, subject } = validation.output;
-
-		const result = await sendEmail({
-			from: `${name} <${email}>`,
-			to: env.EMAIL_ADDRESS,
-			subject,
-			text: message,
-		});
-
-		if (isErr(result)) {
-			return createActionStateError({
-				formData,
-				message: t("error"),
-			});
-		}
-
-		log.info(result.value);
-
-		return createActionStateSuccess({ message: t("success") });
-	} catch (error) {
-		rethrow(error);
-
-		log.error(error);
+	if (!validation.success) {
+		const errors = v.flatten<typeof SendContactFormInputSchema>(validation.issues);
 
 		return createActionStateError({
 			formData,
-			message: e("internal-server-error"),
+			message: errors.root ?? e("invalid-form-fields"),
+			validationErrors: errors.nested,
 		});
 	}
+
+	const { email, message, name, subject } = validation.output;
+
+	const result = await sendEmail({
+		from: `${name} <${email}>`,
+		to: env.EMAIL_ADDRESS,
+		subject,
+		text: message,
+	});
+
+	if (isErr(result)) {
+		return createActionStateError({
+			formData,
+			message: t("error"),
+		});
+	}
+
+	log.info(result.value);
+
+	return createActionStateSuccess({ message: t("success") });
 });
