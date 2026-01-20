@@ -1,5 +1,5 @@
 import { assert, createUrl } from "@acdh-oeaw/lib";
-import type { APIRequestContext } from "@playwright/test";
+import type { APIRequestContext, APIResponse } from "@playwright/test";
 
 import { env } from "@/config/env.config";
 
@@ -26,6 +26,8 @@ interface MailpitListResponse {
 
 export interface EmailService {
 	clear: () => Promise<void>;
+	disableChaos: () => Promise<APIResponse>;
+	enableChaos: () => Promise<APIResponse>;
 	getMessages: () => Promise<MailpitListResponse>;
 	getMessage: (id: string) => Promise<MailMessage>;
 }
@@ -64,6 +66,36 @@ export function createEmailService(request: APIRequestContext): EmailService {
 			const data = (await response.json()) as MailMessage;
 
 			return data;
+		},
+		async enableChaos() {
+			const url = createUrl({
+				baseUrl: env.MAILPIT_API_BASE_URL!,
+				pathname: "/api/v1/chaos",
+			});
+
+			const body = {
+				data: {
+					Recipient: { ErrorCode: 451, Probability: 100 },
+					Sender: { ErrorCode: 451, Probability: 100 },
+				},
+			};
+
+			return await request.put(String(url), body);
+		},
+		async disableChaos() {
+			const url = createUrl({
+				baseUrl: env.MAILPIT_API_BASE_URL!,
+				pathname: "/api/v1/chaos",
+			});
+
+			const body = {
+				data: {
+					Recipient: { Probability: 0 },
+					Sender: { Probability: 0 },
+				},
+			};
+
+			return await request.put(String(url), body);
 		},
 	};
 }

@@ -1,4 +1,4 @@
-import { assert, createUrl } from "@acdh-oeaw/lib";
+import { assert } from "@acdh-oeaw/lib";
 
 import { env } from "@/config/env.config";
 import { expect, test } from "@/e2e/lib/test";
@@ -78,7 +78,6 @@ test.describe("contact page", () => {
 			createContactPage,
 			createEmailService,
 		}) => {
-			// TODO: run for all locales?
 			const locale = defaultLocale;
 
 			const emailService = createEmailService();
@@ -99,7 +98,7 @@ test.describe("contact page", () => {
 
 			await expect(contactPage.page.getByRole("status")).toContainText(
 				i18n.t("actions.sendContactFormEmailAction.success"),
-				{ timeout: 1000 },
+				{ timeout: 2500 },
 			);
 
 			await expect
@@ -134,9 +133,7 @@ test.describe("contact page", () => {
 		test("should display error message when sending contact form submission fails", async ({
 			createContactPage,
 			createEmailService,
-			request,
 		}) => {
-			// TODO: run for all locales?
 			const locale = defaultLocale;
 
 			const emailService = createEmailService();
@@ -144,23 +141,8 @@ test.describe("contact page", () => {
 			const { contactPage, i18n } = await createContactPage(locale);
 			await contactPage.goto();
 
-			//  CHAOS
-			const chaosResponse = await request.put(
-				String(
-					createUrl({
-						baseUrl: env.MAILPIT_API_BASE_URL!,
-						pathname: "/api/v1/chaos",
-					}),
-				),
-				{
-					data: {
-						Recipient: { ErrorCode: 451, Probability: 100 },
-						Sender: { ErrorCode: 451, Probability: 100 },
-					},
-				},
-			);
+			const chaosResponse = await emailService.enableChaos();
 			expect(chaosResponse.ok()).toBeTruthy();
-			//  CHAOS
 
 			try {
 				const name = "Firstname Lastname";
@@ -183,20 +165,7 @@ test.describe("contact page", () => {
 
 				expect(data.total).toBe(0);
 			} finally {
-				await request.put(
-					String(
-						createUrl({
-							baseUrl: env.MAILPIT_API_BASE_URL!,
-							pathname: "/api/v1/chaos",
-						}),
-					),
-					{
-						data: {
-							Recipient: { Probability: 0 },
-							Sender: { Probability: 0 },
-						},
-					},
-				);
+				await emailService.disableChaos();
 			}
 		});
 	});

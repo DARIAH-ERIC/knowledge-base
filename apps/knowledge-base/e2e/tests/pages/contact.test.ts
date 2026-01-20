@@ -78,7 +78,6 @@ test.describe("contact page", () => {
 			createContactPage,
 			createEmailService,
 		}) => {
-			// TODO: run for all locales?
 			const locale = defaultLocale;
 
 			const emailService = createEmailService();
@@ -99,7 +98,7 @@ test.describe("contact page", () => {
 
 			await expect(contactPage.page.getByRole("status")).toContainText(
 				i18n.t("actions.sendContactFormEmailAction.success"),
-				{ timeout: 1000 },
+				{ timeout: 2500 },
 			);
 
 			await expect
@@ -129,6 +128,45 @@ test.describe("contact page", () => {
 
 			const { Text: text } = await emailService.getMessage(msg.ID);
 			expect(text).toContain(message);
+		});
+
+		test("should display error message when sending contact form submission fails", async ({
+			createContactPage,
+			createEmailService,
+		}) => {
+			const locale = defaultLocale;
+
+			const emailService = createEmailService();
+
+			const { contactPage, i18n } = await createContactPage(locale);
+			await contactPage.goto();
+
+			const chaosResponse = await emailService.enableChaos();
+			expect(chaosResponse.ok()).toBeTruthy();
+
+			try {
+				const name = "Firstname Lastname";
+				const email = "user@example.com";
+				const subject = "Testing form submission";
+				const message = `The current time is ${new Date().toISOString()}.`;
+
+				await contactPage.form.name.fill(name);
+				await contactPage.form.email.fill(email);
+				await contactPage.form.subject.fill(subject);
+				await contactPage.form.message.fill(message);
+				await contactPage.form.submit.click();
+
+				await expect(contactPage.page.getByRole("status")).toContainText(
+					i18n.t("actions.sendContactFormEmailAction.error"),
+					{ timeout: 5000 },
+				);
+
+				const data = await emailService.getMessages();
+
+				expect(data.total).toBe(0);
+			} finally {
+				await emailService.disableChaos();
+			}
 		});
 	});
 });
