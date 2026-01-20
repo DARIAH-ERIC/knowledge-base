@@ -7,7 +7,6 @@ import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client"
 
 import { imageAssetWidth } from "@/config/assets.config";
 import { config as fieldsConfig } from "@/config/fields.config";
-import { createEntities, createFields } from "@/lib/data/entities";
 
 interface GetPagesParams {
 	/** @default 10 */
@@ -51,7 +50,10 @@ export async function getPages(params: GetPagesParams) {
 
 	const data = items.map((item) => {
 		const image = item.image
-			? client.urls.generate(item.image.key, { width: imageAssetWidth.preview })
+			? client.urls.generateSignedImageUrl({
+					key: item.image.key,
+					options: { width: imageAssetWidth.preview },
+				})
 			: null;
 
 		return { ...item, image };
@@ -90,7 +92,10 @@ export async function getPageById(params: GetPageByIdParams) {
 	}
 
 	const image = item.image
-		? client.urls.generate(item.image.key, { width: imageAssetWidth.featured })
+		? client.urls.generateSignedImageUrl({
+				key: item.image.key,
+				options: { width: imageAssetWidth.featured },
+			})
 		: null;
 
 	const data = { ...item, image };
@@ -125,17 +130,17 @@ export async function createPage(params: CreatePageParams) {
 	if (!entityStatus) return;
 
 	const entityId = await db.transaction(async (tx) => {
-		const entityIds = await createEntities({
-			ctx: tx,
-			data: [
-				{
-					typeId: entityType.id,
-					documentId: undefined,
-					statusId: entityStatus.id,
-					slug,
-				},
-			],
-		});
+		const entityIds = await tx
+			.insert(schema.entities)
+			.values({
+				typeId: entityType.id,
+				documentId: undefined,
+				statusId: entityStatus.id,
+				slug,
+			})
+			.returning({
+				id: schema.entities.id,
+			});
 
 		if (!entityIds[0]) return tx.rollback();
 
@@ -149,11 +154,14 @@ export async function createPage(params: CreatePageParams) {
 		};
 		await tx.insert(schema.pages).values(page);
 
-		const fields = fieldsConfig.pages.map((fieldName) => {
+		const fields = fieldsConfig.events.map((fieldName) => {
 			return { entityId: id, name: fieldName };
 		});
 
-		await createFields({ ctx: tx, data: fields });
+		await tx.insert(schema.fields).values(fields).returning({
+			id: schema.fields.id,
+			typeId: schema.fields.name,
+		});
 		return id;
 	});
 

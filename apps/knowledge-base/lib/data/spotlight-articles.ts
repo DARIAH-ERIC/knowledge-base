@@ -7,7 +7,6 @@ import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client"
 
 import { imageAssetWidth } from "@/config/assets.config";
 import { config as fieldsConfig } from "@/config/fields.config";
-import { createEntities, createFields } from "@/lib/data/entities";
 
 interface GetSpotlightArticlesParams {
 	/** @default 10 */
@@ -50,7 +49,10 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = client.urls.generate(item.image.key, { width: imageAssetWidth.preview });
+		const image = client.urls.generateSignedImageUrl({
+			key: item.image.key,
+			options: { width: imageAssetWidth.featured },
+		});
 
 		return { ...item, image };
 	});
@@ -87,7 +89,10 @@ export async function getSpotlightArticleById(params: GetSpotlightArticleByIdPar
 		return null;
 	}
 
-	const image = client.urls.generate(item.image.key, { width: imageAssetWidth.featured });
+	const image = client.urls.generateSignedImageUrl({
+		key: item.image.key,
+		options: { width: imageAssetWidth.featured },
+	});
 
 	const data = { ...item, image };
 
@@ -124,17 +129,17 @@ export async function createSpotlightArticle(params: CreateSpotlightArticleParam
 	if (!entityStatus) return;
 
 	const entityId = await db.transaction(async (tx) => {
-		const entityIds = await createEntities({
-			ctx: tx,
-			data: [
-				{
-					typeId: entityType.id,
-					documentId: undefined,
-					statusId: entityStatus.id,
-					slug,
-				},
-			],
-		});
+		const entityIds = await tx
+			.insert(schema.entities)
+			.values({
+				typeId: entityType.id,
+				documentId: undefined,
+				statusId: entityStatus.id,
+				slug,
+			})
+			.returning({
+				id: schema.entities.id,
+			});
 
 		if (!entityIds[0]) return tx.rollback();
 
@@ -148,11 +153,14 @@ export async function createSpotlightArticle(params: CreateSpotlightArticleParam
 		};
 		await tx.insert(schema.spotlightArticles).values(spotlightArticle);
 
-		const fields = fieldsConfig.spotlightArticles.map((fieldName) => {
+		const fields = fieldsConfig.events.map((fieldName) => {
 			return { entityId: id, name: fieldName };
 		});
 
-		await createFields({ ctx: tx, data: fields });
+		await tx.insert(schema.fields).values(fields).returning({
+			id: schema.fields.id,
+			typeId: schema.fields.name,
+		});
 		return id;
 	});
 

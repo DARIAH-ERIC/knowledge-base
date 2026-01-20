@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
 import { count, eq } from "@dariah-eric/dariah-knowledge-base-database-client";
-import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
+import { db, type Transaction } from "@dariah-eric/dariah-knowledge-base-database-client/client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
 
 import { imageAssetWidth } from "@/config/assets.config";
 import { config as fieldsConfig } from "@/config/fields.config";
-import { createEntities, createFields } from "@/lib/data/entities";
 
 interface GetEventsParams {
 	/** @default 10 */
@@ -50,7 +49,10 @@ export async function getEvents(params: GetEventsParams) {
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = client.urls.generate(item.image.key, { width: imageAssetWidth.preview });
+		const image = client.urls.generateSignedImageUrl({
+			key: item.image.key,
+			options: { width: imageAssetWidth.preview },
+		});
 
 		return { ...item, image };
 	});
@@ -87,7 +89,10 @@ export async function getEventById(params: GetEventByIdParams) {
 		return null;
 	}
 
-	const image = client.urls.generate(item.image.key, { width: imageAssetWidth.featured });
+	const image = client.urls.generateSignedImageUrl({
+		key: item.image.key,
+		options: { width: imageAssetWidth.featured },
+	});
 
 	const data = { ...item, image };
 
@@ -131,18 +136,18 @@ export async function createEvent(params: CreateEventParams) {
 
 	if (!entityStatus) return;
 
-	const entityId = await db.transaction(async (tx) => {
-		const entityIds = await createEntities({
-			ctx: tx,
-			data: [
-				{
-					typeId: entityType.id,
-					documentId: undefined,
-					statusId: entityStatus.id,
-					slug,
-				},
-			],
-		});
+	const entityId = await db.transaction(async (tx: Transaction) => {
+		const entityIds = await tx
+			.insert(schema.entities)
+			.values({
+				typeId: entityType.id,
+				documentId: undefined,
+				statusId: entityStatus.id,
+				slug,
+			})
+			.returning({
+				id: schema.entities.id,
+			});
 
 		if (!entityIds[0]) return tx.rollback();
 
@@ -166,10 +171,13 @@ export async function createEvent(params: CreateEventParams) {
 			return { entityId: id, name: fieldName };
 		});
 
-		await createFields({ ctx: tx, data: fields });
+		await tx.insert(schema.fields).values(fields).returning({
+			id: schema.fields.id,
+			typeId: schema.fields.name,
+		});
+
 		return id;
 	});
-
 	// decide, what we need to return here
 	return {
 		entityId,

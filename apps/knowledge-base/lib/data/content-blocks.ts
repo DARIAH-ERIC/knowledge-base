@@ -7,8 +7,6 @@ import type {
 } from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 
-import type { DBContext } from "@/lib/data/types";
-
 export async function getContentBlockTypes() {
 	const contentBlockTypes = await db.query.contentBlockTypes.findMany({
 		columns: {
@@ -28,7 +26,7 @@ export async function getContentBlockByType(type: ContentBlockTypes["type"]) {
 	return contentBlockType;
 }
 
-interface CreateContentBlocksParams extends DBContext {
+interface CreateContentBlocksParams {
 	data: Array<{
 		fieldId: ContentBlockInput["fieldId"];
 		typeId: ContentBlockInput["typeId"];
@@ -37,8 +35,8 @@ interface CreateContentBlocksParams extends DBContext {
 }
 
 export async function createContentBlocks(params: CreateContentBlocksParams) {
-	const { ctx, data } = params;
-	const contentBlockIds = await ctx.insert(schema.contentBlocks).values(data).returning({
+	const { data } = params;
+	const contentBlockIds = await db.insert(schema.contentBlocks).values(data).returning({
 		id: schema.contentBlocks.id,
 		typeId: schema.contentBlocks.typeId,
 	});
