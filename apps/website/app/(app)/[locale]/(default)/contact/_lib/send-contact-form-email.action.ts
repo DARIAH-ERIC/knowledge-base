@@ -1,6 +1,6 @@
 "use server";
 
-import { getFormDataValues, log } from "@acdh-oeaw/lib";
+import { getFormDataValues, isErr, log } from "@acdh-oeaw/lib";
 import { unstable_rethrow as rethrow } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import * as v from "valibot";
@@ -59,14 +59,21 @@ export const sendContactFormEmailAction = createServerAction<
 
 		const { email, message, name, subject } = validation.output;
 
-		const info = await sendEmail({
+		const result = await sendEmail({
 			from: `${name} <${email}>`,
 			to: env.EMAIL_ADDRESS,
 			subject,
 			text: message,
 		});
 
-		log.info(info);
+		if (isErr(result)) {
+			return createActionStateError({
+				formData,
+				message: t("error"),
+			});
+		}
+
+		log.info(result.value);
 
 		return createActionStateSuccess({ message: t("success") });
 	} catch (error) {

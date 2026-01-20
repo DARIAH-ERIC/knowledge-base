@@ -96,9 +96,10 @@ test.describe("contact page", () => {
 			await contactPage.form.message.fill(message);
 			await contactPage.form.submit.click();
 
-			await expect(contactPage.page.getByRole("status")).toContainText(
+			await expect(contactPage.page.getByRole("main").getByRole("alert")).toBeEmpty();
+			await expect(contactPage.page.getByRole("main").getByRole("status")).toContainText(
 				i18n.t("actions.sendContactFormEmailAction.success"),
-				{ timeout: 2500 },
+				{ timeout: 5000 },
 			);
 
 			await expect
@@ -156,7 +157,8 @@ test.describe("contact page", () => {
 				await contactPage.form.message.fill(message);
 				await contactPage.form.submit.click();
 
-				await expect(contactPage.page.getByRole("status")).toContainText(
+				await expect(contactPage.page.getByRole("main").getByRole("status")).toBeEmpty();
+				await expect(contactPage.page.getByRole("main").getByRole("alert")).toContainText(
 					i18n.t("actions.sendContactFormEmailAction.error"),
 					{ timeout: 5000 },
 				);
