@@ -57,10 +57,10 @@ export const sendContactFormEmailAction = createServerAction<
 			});
 		}
 
-		const { email, message, subject } = validation.output;
+		const { email, message, name, subject } = validation.output;
 
 		const info = await sendEmail({
-			from: email,
+			from: `${name} <${email}>`,
 			to: env.EMAIL_ADDRESS,
 			subject,
 			text: message,

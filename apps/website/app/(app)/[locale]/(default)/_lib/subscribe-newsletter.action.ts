@@ -74,6 +74,8 @@ export const subscribeNewsletterAction = createServerAction<
 			});
 		}
 
+		// TODO: log mailchimp success message
+
 		return createActionStateSuccess({ message: t("success") });
 	} catch (error) {
 		rethrow(error);

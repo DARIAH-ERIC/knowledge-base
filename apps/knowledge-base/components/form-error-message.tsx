@@ -22,6 +22,7 @@ export function FormErrorMessage(props: Readonly<FormErrorMessageProps>): ReactN
 			aria-atomic={true}
 			aria-live="assertive"
 			className={cn(className, !isErrorState ? "sr-only" : null)}
+			role="alert"
 		>
 			{/* eslint-disable-next-line @eslint-react/no-unnecessary-key */}
 			<div key={state.id}>
