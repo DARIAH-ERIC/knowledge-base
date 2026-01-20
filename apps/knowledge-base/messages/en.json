@@ -1,5 +1,9 @@
 {
 	"actions": {
+		"sendContactFormEmailAction": {
+			"error": "Failed to send message.",
+			"success": "Successfully sent message."
+		},
 		"uploadImageAction": {
 			"success": "Successfully uploaded image."
 		}
@@ -18,6 +22,13 @@
 			"light": "Light",
 			"system": "System"
 		}
+	},
+	"ContactForm": {
+		"email": "Email",
+		"message": "Message",
+		"name": "Name",
+		"subject": "Subject",
+		"submit": "Send"
 	},
 	"ContactPage": {
 		"meta": {
