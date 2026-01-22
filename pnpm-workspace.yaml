@@ -4,6 +4,7 @@ packages:
   - ./packages/*
 
 catalog:
+  '@acdh-oeaw/api-client-sshoc': ^0.0.2
   '@acdh-oeaw/color-schemes': ^0.1.0
   '@acdh-oeaw/eslint-config': ^2.0.12
   '@acdh-oeaw/eslint-config-next': ^4.0.6

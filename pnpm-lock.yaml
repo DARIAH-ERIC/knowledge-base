@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   default:
+    '@acdh-oeaw/api-client-sshoc':
+      specifier: ^0.0.2
+      version: 0.0.2
     '@acdh-oeaw/color-schemes':
       specifier: ^0.1.0
       version: 0.1.0
@@ -1212,6 +1215,9 @@ importers:
         specifier: 'catalog:'
         version: 1.2.0(typescript@5.9.3)
     devDependencies:
+      '@acdh-oeaw/api-client-sshoc':
+        specifier: 'catalog:'
+        version: 0.0.2
       '@dariah-eric/dariah-knowledge-base-eslint-config':
         specifier: workspace:^
         version: link:../../lib/eslint-config
@@ -1244,6 +1250,10 @@ importers:
         version: 5.9.3
 
 packages:
+
+  '@acdh-oeaw/api-client-sshoc@0.0.2':
+    resolution: {integrity: sha512-S0/LmsH/nr8bDivoZz97kMnDFLqs1f1+LpdNVYdzHgllf24QTbEq7tYQQmgBhH6n+bmO6cXkH7ni5WJEDzdzeg==}
+    engines: {node: '>=24'}
 
   '@acdh-oeaw/color-schemes@0.1.0':
     resolution: {integrity: sha512-LGwjRBEv51g6FvRiAtUtZrJkqoya4NX2nGYcEpDSG3XGOE0Lnz1sAR7CETZyDDZdNiYOPUm/I4tetjG06j3c7Q==}
@@ -1295,6 +1305,10 @@ packages:
 
   '@acdh-oeaw/lib@1.0.4':
     resolution: {integrity: sha512-Mem8CG3n2yeZHdRb/YIjmjNY1vXGWf83bGntvikQ7ubw1dkncU7gtPQiQoHzRy2JzLwCJ4gJGar2SJFMTGtMGA==}
+    engines: {node: '>=24'}
+
+  '@acdh-oeaw/lib@1.0.5':
+    resolution: {integrity: sha512-TmXBjyP47+WhI49wSyOULgE0TNH7D2s7HiNL7mCS0d384xKoE62ZNdPPcTZN82wXL3voWtU3i/Ejz0YNrKI37Q==}
     engines: {node: '>=24'}
 
   '@acdh-oeaw/prettier-config@2.0.1':
@@ -8403,6 +8417,10 @@ packages:
 
 snapshots:
 
+  '@acdh-oeaw/api-client-sshoc@0.0.2':
+    dependencies:
+      '@acdh-oeaw/lib': 1.0.5
+
   '@acdh-oeaw/color-schemes@0.1.0': {}
 
   '@acdh-oeaw/eslint-config-next@4.0.6(@acdh-oeaw/eslint-config-react@3.0.5(@acdh-oeaw/eslint-config@2.0.12(@eslint/config-helpers@0.4.2)(@typescript-eslint/utils@8.53.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(globals@17.0.0)(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(@acdh-oeaw/eslint-config@2.0.12(@eslint/config-helpers@0.4.2)(@typescript-eslint/utils@8.53.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(globals@17.0.0)(typescript@5.9.3))(@next/eslint-plugin-next@16.1.3)':
@@ -8472,6 +8490,10 @@ snapshots:
   '@acdh-oeaw/lib@0.3.7': {}
 
   '@acdh-oeaw/lib@1.0.4':
+    dependencies:
+      is-network-error: 1.3.0
+
+  '@acdh-oeaw/lib@1.0.5':
     dependencies:
       is-network-error: 1.3.0
 
