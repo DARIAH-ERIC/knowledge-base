@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { NewsTable } from "@/components/ui/tables/news-table";
 import { getNews } from "@/lib/data/news";
+import { createMetadata } from "@/lib/server/metadata";
 
 interface DashboardWebsiteNewsPageProps extends PageProps<"/[locale]/dashboard/website/news"> {}
 

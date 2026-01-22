@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { EventsTable } from "@/components/ui/tables/events-table";
 import { getEvents } from "@/lib/data/events";
+import { createMetadata } from "@/lib/server/metadata";
 
 interface DashboardWebsiteEventsPageProps extends PageProps<"/[locale]/dashboard/website/events"> {}
 

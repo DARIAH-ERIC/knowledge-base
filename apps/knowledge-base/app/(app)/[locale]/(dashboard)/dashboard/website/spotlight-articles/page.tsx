@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { SpotlightArticlesTable } from "@/components/ui/tables/spotlight-articles-table";
 import { getSpotlightArticles } from "@/lib/data/spotlight-articles";
+import { createMetadata } from "@/lib/server/metadata";
 
 interface DashboardWebsiteSpotlightArticlesPageProps extends PageProps<"/[locale]/dashboard/website/spotlight-articles"> {}
 
