@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { type ReactNode, useActionState } from "react";
+import { Input, Label, TextField } from "react-aria-components";
 
 import { subscribeNewsletterAction } from "@/app/(app)/[locale]/(default)/_lib/subscribe-newsletter.action";
 import { Form } from "@/components/form";
@@ -18,10 +19,18 @@ export function NewsletterSubscriptionForm(): ReactNode {
 		<Form action={action} className="grid gap-y-6" state={state}>
 			<FormStatus state={state} />
 
-			<label>
-				<div>{t("email")}</div>
-				<input name="email" required={true} type="email" />
-			</label>
+			{/* <HoneypotField /> */}
+
+			<TextField
+				autoComplete="email"
+				defaultValue={(state.formData?.get("email") ?? "") as string}
+				isRequired={true}
+				name="email"
+				type="email"
+			>
+				<Label>{t("email")}</Label>
+				<Input />
+			</TextField>
 
 			<div>
 				<SubmitButton>{t("submit")}</SubmitButton>

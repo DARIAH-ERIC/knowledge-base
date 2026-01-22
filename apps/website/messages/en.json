@@ -1,7 +1,11 @@
 {
 	"actions": {
+		"sendContactFormEmailAction": {
+			"error": "Failed to send message.",
+			"success": "Successfully sent message."
+		},
 		"subscribeNewsletterAction": {
-			"already-subscribed": "Already subscribed",
+			"already-subscribed": "Already subscribed.",
 			"error": "Failed to add email address to newsletter mailing list.",
 			"success": "Successfully added email address to newsletter mailing list."
 		}
@@ -20,6 +24,13 @@
 			"light": "Light",
 			"system": "System"
 		}
+	},
+	"ContactForm": {
+		"email": "Email",
+		"message": "Message",
+		"name": "Name",
+		"subject": "Subject",
+		"submit": "Send"
 	},
 	"ContactPage": {
 		"meta": {
