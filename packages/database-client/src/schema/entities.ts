@@ -90,6 +90,32 @@ export const EntitySelectSchema = createSelectSchema(entities);
 export const EntityInsertSchema = createInsertSchema(entities);
 export const EntityUpdateSchema = createUpdateSchema(entities);
 
+export const entityTypesFieldsNames = p.pgTable(
+	"entity_types_fields_names",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		entityTypeId: p
+			.uuid("entity_type_id")
+			.notNull()
+			.references(() => {
+				return entityTypes.id;
+			}),
+		fieldName: p.text("field_name").notNull(),
+	},
+	(t) => {
+		return [
+			p
+				.unique("entity_types_fields_names_entity_type_id_field_name_unique")
+				.on(t.entityTypeId, t.fieldName),
+		];
+	},
+);
+
+// only provide select for now: the entity type fields mapping should be changed via migrations
+export type EntityTypesFieldsNames = typeof entityTypesFieldsNames.$inferSelect;
+
+export const entityTypesFieldsNamesSelectSchema = createSelectSchema(entityTypesFieldsNames);
+
 export const fields = p.pgTable(
 	"fields",
 	{
@@ -100,11 +126,16 @@ export const fields = p.pgTable(
 			.references(() => {
 				return entities.id;
 			}),
-		name: p.text("name").notNull(),
+		fieldNameId: p
+			.uuid()
+			.notNull()
+			.references(() => {
+				return entityTypesFieldsNames.id;
+			}),
 		...f.timestamps(),
 	},
 	(t) => {
-		return [p.unique("fields_entity_id_name_unique").on(t.entityId, t.name)];
+		return [p.unique("fields_entity_id_field_name_id_unique").on(t.entityId, t.fieldNameId)];
 	},
 );
 

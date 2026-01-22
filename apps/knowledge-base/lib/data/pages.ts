@@ -6,7 +6,6 @@ import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/sche
 import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
 
 import { imageAssetWidth } from "@/config/assets.config";
-import { config as fieldsConfig } from "@/config/fields.config";
 
 interface GetPagesParams {
 	/** @default 10 */
@@ -51,9 +50,9 @@ export async function getPages(params: GetPagesParams) {
 	const data = items.map((item) => {
 		const image = item.image
 			? client.urls.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageAssetWidth.preview },
-				})
+				key: item.image.key,
+				options: { width: imageAssetWidth.preview },
+			})
 			: null;
 
 		return { ...item, image };
@@ -93,9 +92,9 @@ export async function getPageById(params: GetPageByIdParams) {
 
 	const image = item.image
 		? client.urls.generateSignedImageUrl({
-				key: item.image.key,
-				options: { width: imageAssetWidth.featured },
-			})
+			key: item.image.key,
+			options: { width: imageAssetWidth.featured },
+		})
 		: null;
 
 	const data = { ...item, image };
@@ -154,14 +153,20 @@ export async function createPage(params: CreatePageParams) {
 		};
 		await tx.insert(schema.pages).values(page);
 
-		const fields = fieldsConfig.events.map((fieldName) => {
-			return { entityId: id, name: fieldName };
+		const fieldNamesIds = await tx.query.entityTypesFieldsNames.findMany({
+			where: {
+				entityTypeId: entityType.id,
+			},
+		});
+
+		const fields = fieldNamesIds.map(({ id: fieldNameId }) => {
+			return { entityId: id, fieldNameId };
 		});
 
 		await tx.insert(schema.fields).values(fields).returning({
 			id: schema.fields.id,
-			typeId: schema.fields.name,
 		});
+
 		return id;
 	});
 

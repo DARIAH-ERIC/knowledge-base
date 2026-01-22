@@ -6,7 +6,6 @@ import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/sche
 import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
 
 import { imageAssetWidth } from "@/config/assets.config";
-import { config as fieldsConfig } from "@/config/fields.config";
 
 interface GetEventsParams {
 	/** @default 10 */
@@ -167,13 +166,18 @@ export async function createEvent(params: CreateEventParams) {
 		};
 		await tx.insert(schema.events).values(event);
 
-		const fields = fieldsConfig.events.map((fieldName) => {
-			return { entityId: id, name: fieldName };
+		const fieldNamesIds = await tx.query.entityTypesFieldsNames.findMany({
+			where: {
+				entityTypeId: entityType.id,
+			},
+		});
+
+		const fields = fieldNamesIds.map(({ id: fieldNameId }) => {
+			return { entityId: id, fieldNameId };
 		});
 
 		await tx.insert(schema.fields).values(fields).returning({
 			id: schema.fields.id,
-			typeId: schema.fields.name,
 		});
 
 		return id;
