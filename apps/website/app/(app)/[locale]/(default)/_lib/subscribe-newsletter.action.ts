@@ -54,11 +54,19 @@ export const subscribeNewsletterAction = createServerAction<
 	const result = await client.subscribe({ email });
 
 	if (isErr(result)) {
-		if (HttpError.is(result.error) && result.error.response.status === 214) {
-			return createActionStateError({
-				formData,
-				message: t("already-subscribed"),
-			});
+		if (HttpError.is(result.error) && result.error.response.status === 400) {
+			try {
+				const message = (await result.error.response.json()) as { title?: string };
+
+				if (message.title === "Member Exists") {
+					return createActionStateError({
+						formData,
+						message: t("already-subscribed"),
+					});
+				}
+			} catch {
+				/** noop */
+			}
 		}
 
 		return createActionStateError({
@@ -66,8 +74,6 @@ export const subscribeNewsletterAction = createServerAction<
 			message: t("error"),
 		});
 	}
-
-	// TODO: log mailchimp success message
 
 	return createActionStateSuccess({ message: t("success") });
 });
