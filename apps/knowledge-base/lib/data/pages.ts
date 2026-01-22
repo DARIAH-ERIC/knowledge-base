@@ -50,9 +50,9 @@ export async function getPages(params: GetPagesParams) {
 	const data = items.map((item) => {
 		const image = item.image
 			? client.urls.generateSignedImageUrl({
-				key: item.image.key,
-				options: { width: imageAssetWidth.preview },
-			})
+					key: item.image.key,
+					options: { width: imageAssetWidth.preview },
+				})
 			: null;
 
 		return { ...item, image };
@@ -92,9 +92,9 @@ export async function getPageById(params: GetPageByIdParams) {
 
 	const image = item.image
 		? client.urls.generateSignedImageUrl({
-			key: item.image.key,
-			options: { width: imageAssetWidth.featured },
-		})
+				key: item.image.key,
+				options: { width: imageAssetWidth.featured },
+			})
 		: null;
 
 	const data = { ...item, image };
