@@ -4,6 +4,7 @@
 		"docker-compose.postgres.yaml",
 		"docker-compose.apps.yaml",
 		"docker-compose.drizzle-gateway.yaml",
+		"docker-compose.minio.yaml",
 		"docker-compose.imgproxy.yaml",
 		"docker-compose.mailpit.yaml",
 		"docker-compose.pgadmin.yaml",
