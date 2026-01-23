@@ -100,7 +100,7 @@ jobs:
         run: pnpm run types:check
 
       - name: Start services
-        run: pnpm run dev:services:up postgres imgproxy mailpit
+        run: pnpm run dev:services:up postgres minio imgproxy mailpit
 
       - name: Apply database migrations
         run: pnpm run db:push && pnpm run db:migrations:apply
