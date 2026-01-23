@@ -43,6 +43,7 @@
 		"@acdh-oeaw/validate-env": "catalog:",
 		"@dariah-eric/dariah-knowledge-base-database-client": "workspace:^",
 		"@dariah-eric/dariah-knowledge-base-image-service": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-object-store": "workspace:^",
 		"@dariah-eric/dariah-knowledge-base-search-index": "workspace:^",
 		"@heroicons/react": "catalog:",
 		"@react-aria/utils": "catalog:",

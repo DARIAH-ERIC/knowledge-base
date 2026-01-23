@@ -109,10 +109,10 @@ jobs:
         run: pnpm run db:seed
 
       - name: Create object store bucket
-        run: pnpm run image-service:buckets:create
+        run: pnpm run object-store:buckets:create
 
       - name: Seed object store
-        run: pnpm run image-service:buckets:seed
+        run: pnpm run object-store:buckets:seed
 
       - name: Test
         run: pnpm run test

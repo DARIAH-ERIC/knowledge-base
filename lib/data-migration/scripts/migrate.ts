@@ -6,8 +6,8 @@ import * as path from "node:path";
 import { assert, isNonEmptyString, keyBy, log } from "@acdh-oeaw/lib";
 import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
-import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
-import { buffer } from "@dariah-eric/dariah-knowledge-base-image-service/lib";
+import { client } from "@dariah-eric/dariah-knowledge-base-object-store/client";
+import { buffer } from "@dariah-eric/dariah-knowledge-base-object-store/lib";
 
 import {
 	apiBaseUrl,

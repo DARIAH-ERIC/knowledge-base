@@ -26,7 +26,7 @@
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
 		"@dariah-eric/dariah-knowledge-base-database-client": "workspace:^",
-		"@dariah-eric/dariah-knowledge-base-image-service": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-object-store": "workspace:^",
 		"@sindresorhus/slugify": "catalog:",
 		"valibot": "catalog:"
 	},

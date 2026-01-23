@@ -485,6 +485,9 @@ importers:
       '@dariah-eric/dariah-knowledge-base-image-service':
         specifier: workspace:^
         version: link:../../packages/image-service
+      '@dariah-eric/dariah-knowledge-base-object-store':
+        specifier: workspace:^
+        version: link:../../packages/object-store
       '@dariah-eric/dariah-knowledge-base-search-index':
         specifier: workspace:^
         version: link:../../packages/search-index
@@ -853,9 +856,9 @@ importers:
       '@dariah-eric/dariah-knowledge-base-database-client':
         specifier: workspace:^
         version: link:../../packages/database-client
-      '@dariah-eric/dariah-knowledge-base-image-service':
+      '@dariah-eric/dariah-knowledge-base-object-store':
         specifier: workspace:^
-        version: link:../../packages/image-service
+        version: link:../../packages/object-store
       '@sindresorhus/slugify':
         specifier: 'catalog:'
         version: 3.0.0
@@ -997,9 +1000,9 @@ importers:
       '@dariah-eric/dariah-knowledge-base-database-client':
         specifier: workspace:^
         version: link:../../packages/database-client
-      '@dariah-eric/dariah-knowledge-base-image-service':
+      '@dariah-eric/dariah-knowledge-base-object-store':
         specifier: workspace:^
-        version: link:../../packages/image-service
+        version: link:../../packages/object-store
       '@dariah-eric/dariah-knowledge-base-search-index':
         specifier: workspace:^
         version: link:../../packages/search-index
@@ -1144,12 +1147,55 @@ importers:
       '@acdh-oeaw/validate-env':
         specifier: 'catalog:'
         version: 0.2.1(typescript@5.9.3)
+      '@dariah-eric/dariah-knowledge-base-object-store':
+        specifier: workspace:^
+        version: link:../object-store
       '@imgproxy/imgproxy-js-core':
         specifier: 'catalog:'
         version: 1.7.0
       '@imgproxy/imgproxy-node':
         specifier: 'catalog:'
         version: 1.1.0
+      valibot:
+        specifier: 'catalog:'
+        version: 1.2.0(typescript@5.9.3)
+    devDependencies:
+      '@dariah-eric/dariah-knowledge-base-eslint-config':
+        specifier: workspace:^
+        version: link:../../lib/eslint-config
+      '@dariah-eric/dariah-knowledge-base-prettier-config':
+        specifier: workspace:^
+        version: link:../../lib/prettier-config
+      '@dariah-eric/dariah-knowledge-base-typescript-config':
+        specifier: workspace:^
+        version: link:../../lib/typescript-config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.9
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      node:
+        specifier: runtime:^24
+        version: runtime:24.13.0
+      prettier:
+        specifier: 'catalog:'
+        version: 3.8.1
+      tsx:
+        specifier: 'catalog:'
+        version: 4.21.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  packages/object-store:
+    dependencies:
+      '@acdh-oeaw/lib':
+        specifier: 'catalog:'
+        version: 1.0.5
+      '@acdh-oeaw/validate-env':
+        specifier: 'catalog:'
+        version: 0.2.1(typescript@5.9.3)
       minio:
         specifier: 'catalog:'
         version: 8.0.6
@@ -12101,7 +12147,7 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 25.0.10
 
   '@types/deep-eql@4.0.2': {}
 
@@ -12131,7 +12177,7 @@ snapshots:
 
   '@types/mysql@2.15.27':
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 25.0.10
 
   '@types/node@24.10.9':
     dependencies:
@@ -12160,7 +12206,7 @@ snapshots:
 
   '@types/pg@8.15.6':
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 25.0.10
       pg-protocol: 1.11.0
       pg-types: 2.2.0
 
@@ -12184,7 +12230,7 @@ snapshots:
 
   '@types/tedious@4.0.14':
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 25.0.10
 
   '@types/unist@3.0.3': {}
 
