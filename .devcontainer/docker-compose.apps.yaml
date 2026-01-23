@@ -1,6 +1,7 @@
 services:
   app:
     image: ghcr.io/acdh-oeaw/devcontainer-frontend:24
+    container_name: dariah-knowledge-base-devcontainer
     volumes:
       - ..:/workspace:cached
     command: sleep infinity
