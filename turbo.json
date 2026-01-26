@@ -150,13 +150,11 @@
 		"test:e2e": {
 			"dependsOn": ["^build"],
 			"env": ["PLAYWRIGHT_TEST_APP_BASE_URL"],
-			"interactive": true,
 			"passThroughEnv": ["PORT"]
 		},
 		"test:e2e:update-snapshots": {
 			"dependsOn": ["^build"],
 			"env": ["PLAYWRIGHT_TEST_APP_BASE_URL"],
-			"interactive": true,
 			"passThroughEnv": ["PORT"]
 		},
 		"topo": {
