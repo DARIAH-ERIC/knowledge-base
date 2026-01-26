@@ -1,10 +1,10 @@
 import type { Metadata, ResolvingMetadata } from "next";
-import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { TableExample } from "@/components/ui/table-example";
+import { EventsTable } from "@/components/ui/tables/events-table";
+import { getEvents } from "@/lib/data/events";
 import { createMetadata } from "@/lib/server/metadata";
 
 interface DashboardWebsiteEventsPageProps extends PageProps<"/[locale]/dashboard/website/events"> {}
@@ -22,15 +22,17 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardWebsiteEventsPage(
+export default async function DashboardWebsiteEventsPage(
 	_props: Readonly<DashboardWebsiteEventsPageProps>,
-): ReactNode {
-	const t = useTranslations("DashboardWebsiteEventsPage");
+): Promise<ReactNode> {
+	const t = await getTranslations("DashboardWebsiteEventsPage");
+
+	const events = await getEvents({});
 
 	return (
 		<Main className="flex-1">
 			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">{t("title")}</h1>
-			<TableExample />
+			<EventsTable data={events} />
 		</Main>
 	);
 }

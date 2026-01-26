@@ -1,10 +1,10 @@
 import type { Metadata, ResolvingMetadata } from "next";
-import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { TableExample } from "@/components/ui/table-example";
+import { ImpactCaseStudiesTable } from "@/components/ui/tables/impact-case-studies-table";
+import { getImpactCaseStudies } from "@/lib/data/impact-case-studies";
 import { createMetadata } from "@/lib/server/metadata";
 
 interface DashboardWebsiteImpactCaseStudiesPageProps extends PageProps<"/[locale]/dashboard/website/impact-case-studies"> {}
@@ -22,15 +22,17 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardWebsiteImpactCaseStudiesPage(
+export default async function DashboardWebsiteImpactCaseStudiesPage(
 	_props: Readonly<DashboardWebsiteImpactCaseStudiesPageProps>,
-): ReactNode {
-	const t = useTranslations("DashboardWebsiteImpactCaseStudiesPage");
+): Promise<ReactNode> {
+	const t = await getTranslations("DashboardWebsiteImpactCaseStudiesPage");
+
+	const impactCaseStudies = await getImpactCaseStudies({});
 
 	return (
 		<Main className="flex-1">
 			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">{t("title")}</h1>
-			<TableExample />
+			<ImpactCaseStudiesTable data={impactCaseStudies} />
 		</Main>
 	);
 }

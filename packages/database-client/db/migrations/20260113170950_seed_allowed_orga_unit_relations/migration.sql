@@ -62,3 +62,31 @@ ON CONFLICT (
 	"related_unit_type_id",
 	"relation_type_id"
 ) DO NOTHING;
+
+--> statement-breakpoint
+INSERT INTO "entity_types_fields_names" (
+		"entity_type_id",
+		"field_name"
+	)
+	SELECT
+		"entity_types"."id",
+		"tmp"."field_name"
+	FROM
+		(
+			VALUES
+			('events', 'content'),
+			('impact_case_studies', 'content'),
+			('news', 'content'),
+			('organisational_units', 'description'),
+			('pages', 'content'),
+			('persons', 'biography'),
+			('spotlight_articles', 'content')
+	) AS "tmp" ("entity_type_name", "field_name")
+	JOIN "entity_types" ON "tmp"."entity_type_name" = "entity_types"."type"
+	ON CONFLICT (
+	"entity_type_id",
+	"field_name"
+) DO NOTHING;
+
+
+

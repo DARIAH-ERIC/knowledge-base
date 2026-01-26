@@ -1,6 +1,7 @@
 import { groupBy, keyBy } from "@acdh-oeaw/lib";
 import { faker as f } from "@faker-js/faker";
 import slugify from "@sindresorhus/slugify";
+import { eq } from "drizzle-orm";
 
 import * as schema from "../schema";
 import type { Client } from "./admin-client";
@@ -97,6 +98,22 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 
 		const entityStatusByType = keyBy(entityStatusIds, ({ type }) => {
 			return type;
+		});
+
+		const fieldNameIds = await db
+			.select({
+				id: schema.entityTypesFieldsNames.id,
+				entityTypeId: schema.entityTypes.id,
+				entityType: schema.entityTypes.type,
+			})
+			.from(schema.entityTypesFieldsNames)
+			.innerJoin(
+				schema.entityTypes,
+				eq(schema.entityTypesFieldsNames.entityTypeId, schema.entityTypes.id),
+			);
+
+		const fieldNamesByEntityTypeId = groupBy(fieldNameIds, ({ entityTypeId }) => {
+			return entityTypeId;
 		});
 
 		const persons: Array<Omit<schema.PersonInput, "id">> = f.helpers.multiple(
@@ -353,10 +370,14 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			}),
 		);
 
-		const entityIds = await db.select({ id: schema.entities.id }).from(schema.entities);
+		const entityIds = await db
+			.select({ id: schema.entities.id, typeId: schema.entities.typeId })
+			.from(schema.entities);
 
-		const fields: Array<schema.FieldInput> = entityIds.map(({ id }) => {
-			return { entityId: id, name: "content" };
+		const fields: Array<schema.FieldInput> = entityIds.flatMap(({ id, typeId }) => {
+			return fieldNamesByEntityTypeId[typeId]!.map((fieldName) => {
+				return { entityId: id, fieldNameId: fieldName.id };
+			});
 		});
 
 		const fieldIds = await db

@@ -69,10 +69,21 @@ export const relations = defineRelations(schema, (r) => {
 				optional: false,
 			}),
 		},
+		entityTypesFieldsNames: {
+			entityType: r.one.entityTypes({
+				from: r.entityTypesFieldsNames.entityTypeId,
+				to: r.entityTypes.id,
+			}),
+		},
 		fields: {
 			entity: r.one.entities({
 				from: r.fields.entityId,
 				to: r.entities.id,
+				optional: false,
+			}),
+			name: r.one.entityTypesFieldsNames({
+				from: r.fields.fieldNameId,
+				to: r.entityTypesFieldsNames.id,
 				optional: false,
 			}),
 		},
