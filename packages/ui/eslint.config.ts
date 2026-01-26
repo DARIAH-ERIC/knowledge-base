@@ -3,10 +3,12 @@ import * as path from "node:path";
 import next from "@dariah-eric/dariah-knowledge-base-eslint-config/next";
 import node from "@dariah-eric/dariah-knowledge-base-eslint-config/node";
 import storybook from "@dariah-eric/dariah-knowledge-base-eslint-config/storybook";
+import turbo from "@dariah-eric/dariah-knowledge-base-eslint-config/turbo";
 import { defineConfig } from "eslint/config";
 
 export default defineConfig(
 	next,
+	turbo,
 	{
 		settings: {
 			"better-tailwindcss": {
