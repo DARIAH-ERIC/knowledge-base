@@ -24,7 +24,7 @@ import { LocaleLink, type LocaleLinkProps } from "@/lib/navigation/navigation";
  * @see {@link https://github.com/adobe/react-spectrum/blob/main/packages/%40react-aria/link/src/useLink.ts}
  */
 
-interface LinkProps
+export interface LinkProps
 	extends
 		Pick<
 			LocaleLinkProps,
@@ -39,7 +39,7 @@ export function Link(props: Readonly<LinkProps>): ReactNode {
 	const { className: _, ref: forwardedRef, ...interactionProps } = props;
 
 	const ref = useRef<HTMLAnchorElement | HTMLSpanElement>(null);
-	const linkRef = useObjectRef(
+	const mergedRef = useObjectRef(
 		useMemo(() => {
 			// eslint-disable-next-line react-hooks/refs
 			return mergeRefs(forwardedRef, ref);
@@ -51,8 +51,8 @@ export function Link(props: Readonly<LinkProps>): ReactNode {
 	const isLinkElement = Boolean(interactionProps.href) && !isDisabled;
 	const ElementType: ElementType = isLinkElement ? LocaleLink : "span";
 
-	const { focusableProps } = useFocusable(interactionProps, linkRef);
-	const { pressProps, isPressed } = usePress({ ...interactionProps, ref: linkRef });
+	const { focusableProps } = useFocusable(interactionProps, mergedRef);
+	const { pressProps, isPressed } = usePress({ ...interactionProps, ref: mergedRef });
 	const { hoverProps, isHovered } = useHover(interactionProps);
 	const { focusProps, isFocused, isFocusVisible } = useFocusRing();
 
@@ -70,7 +70,7 @@ export function Link(props: Readonly<LinkProps>): ReactNode {
 
 	return (
 		<ElementType
-			ref={linkRef}
+			ref={mergedRef}
 			{...mergeProps(
 				renderProps,
 				filterDOMProps(props, { labelable: true, isLink: isLinkElement }),

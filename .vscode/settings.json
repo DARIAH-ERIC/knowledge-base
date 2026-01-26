@@ -20,18 +20,20 @@
 		"flags": ["unstable_native_nodejs_ts_config"]
 	},
 	"eslint.validate": ["javascript", "typescript", "typescriptreact"],
-	"eslint.workingDirectories": [{ "mode": "auto" }],
+	"eslint.workingDirectories": [
+		{ "pattern": "./apps/*" },
+		{ "pattern": "./lib/*" },
+		{ "pattern": "./packages/*" }
+	],
 	"files.associations": {
 		"*.css": "tailwindcss"
 	},
 	"files.eol": "\n",
-	"files.readonlyInclude": {
-		"**/.next/**": true
-	},
 	"files.watcherExclude": {
 		"**/.next/**": true
 	},
 	"i18n-ally.annotations": false,
+	"i18n-ally.displayLanguage": "en",
 	"i18n-ally.enabledFrameworks": ["next-intl"],
 	"i18n-ally.keepFulfilled": true,
 	"i18n-ally.keystyle": "nested",
@@ -63,6 +65,8 @@
 	"typescript.preferences.importModuleSpecifier": "non-relative",
 	"typescript.preferences.preferTypeOnlyAutoImports": true,
 	"typescript.tsdk": "node_modules/typescript/lib",
+	"vitest.cliArguments": "--passWithNoTests",
+	"vitest.shellType": "terminal",
 	"workbench.editor.customLabels.patterns": {
 		"**/app/**/error.tsx": "${dirname} - error",
 		"**/app/**/forbidden.tsx": "${dirname} - forbidden",

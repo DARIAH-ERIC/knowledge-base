@@ -1,22 +1,30 @@
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { TableExample } from "@/components/ui/table-example";
+import { createMetadata } from "@/lib/server/metadata";
 
-export async function generateMetadata(): Promise<Metadata> {
+interface DashboardAdministratorWorkingGroupsPageProps extends PageProps<"/[locale]/dashboard/administrator/working-groups"> {}
+
+export async function generateMetadata(
+	_props: Readonly<DashboardAdministratorWorkingGroupsPageProps>,
+	resolvingMetadata: ResolvingMetadata,
+): Promise<Metadata> {
 	const t = await getTranslations("DashboardAdministratorWorkingGroupsPage");
 
-	const metadata: Metadata = {
+	const metadata: Metadata = await createMetadata(resolvingMetadata, {
 		title: t("meta.title"),
-	};
+	});
 
 	return metadata;
 }
 
-export default function DashboardAdministratorWorkingGroupsPage(): ReactNode {
+export default function DashboardAdministratorWorkingGroupsPage(
+	_props: Readonly<DashboardAdministratorWorkingGroupsPageProps>,
+): ReactNode {
 	const t = useTranslations("DashboardAdministratorWorkingGroupsPage");
 
 	return (

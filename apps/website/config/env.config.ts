@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 
-import { err, isErr, ok } from "@acdh-oeaw/lib";
+import { addTrailingSlash, err, isErr, ok, removeTrailingSlash } from "@acdh-oeaw/lib";
 import { createEnv, ValidationError } from "@acdh-oeaw/validate-env/next";
 import * as v from "valibot";
 
@@ -26,39 +26,31 @@ const result = createEnv({
 		private(environment) {
 			const schema = v.object({
 				BUILD_MODE: v.optional(v.picklist(["export", "standalone"])),
-				CI: v.optional(v.pipe(v.unknown(), v.transform(Boolean), v.boolean())),
+				CI: v.optional(v.pipe(v.unknown(), v.toBoolean())),
 				DATABASE_HOST: v.pipe(v.string(), v.nonEmpty()),
 				DATABASE_NAME: v.pipe(v.string(), v.nonEmpty()),
 				DATABASE_PASSWORD: v.pipe(v.string(), v.minLength(8)),
-				DATABASE_PORT: v.pipe(
-					v.string(),
-					v.transform(Number),
-					v.number(),
-					v.integer(),
-					v.minValue(1),
-				),
+				DATABASE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 				DATABASE_SSL_CONNECTION: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 				DATABASE_USER: v.pipe(v.string(), v.nonEmpty()),
 				EMAIL_ADDRESS: v.pipe(v.string(), v.email()),
 				EMAIL_SMTP_PASSWORD: v.optional(v.pipe(v.string(), v.nonEmpty())),
-				EMAIL_SMTP_PORT: v.pipe(
-					v.string(),
-					v.transform(Number),
-					v.number(),
-					v.integer(),
-					v.minValue(1),
-				),
+				EMAIL_SMTP_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 				EMAIL_SMTP_SERVER: v.pipe(v.string(), v.nonEmpty()),
 				EMAIL_SMTP_USERNAME: v.optional(v.pipe(v.string(), v.nonEmpty())),
+				EMAIL_SSL_CONNECTION: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 				IMGPROXY_BASE_URL: v.pipe(v.string(), v.url()),
 				IMGPROXY_KEY: v.pipe(v.string(), v.nonEmpty()),
 				IMGPROXY_SALT: v.pipe(v.string(), v.nonEmpty()),
+				MAILCHIMP_API_BASE_URL: v.pipe(v.string(), v.url()),
+				MAILCHIMP_API_KEY: v.pipe(v.string(), v.nonEmpty()),
+				MAILCHIMP_LIST_ID: v.pipe(v.string(), v.nonEmpty()),
 				MAILPIT_API_BASE_URL: v.optional(v.pipe(v.string(), v.url())),
 				NEXT_RUNTIME: v.optional(v.picklist(["edge", "nodejs"])),
 				S3_ACCESS_KEY: v.pipe(v.string(), v.nonEmpty()),
-				S3_BUCKET: v.pipe(v.string(), v.nonEmpty()),
+				S3_BUCKET_NAME: v.pipe(v.string(), v.nonEmpty()),
 				S3_HOST: v.pipe(v.string(), v.nonEmpty()),
-				S3_PORT: v.pipe(v.string(), v.transform(Number), v.number(), v.integer(), v.minValue(1)),
+				S3_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 				S3_PROTOCOL: v.optional(v.picklist(["http", "https"]), "https"),
 				S3_SECRET_KEY: v.pipe(v.string(), v.nonEmpty()),
 				TYPESENSE_ADMIN_API_KEY: v.pipe(v.string(), v.nonEmpty()),
@@ -81,26 +73,30 @@ const result = createEnv({
 			const schema = v.object({
 				NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME: v.pipe(v.string(), v.nonEmpty()),
 				NEXT_PUBLIC_TYPESENSE_HOST: v.pipe(v.string(), v.nonEmpty()),
-				NEXT_PUBLIC_TYPESENSE_PORT: v.pipe(
-					v.string(),
-					v.transform(Number),
-					v.number(),
-					v.integer(),
-					v.minValue(1),
-				),
+				NEXT_PUBLIC_TYPESENSE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 				NEXT_PUBLIC_TYPESENSE_PROTOCOL: v.optional(v.picklist(["http", "https"]), "https"),
 				/**
 				 * Optional, because we need to be able to create a collection, before we create
 				 * a search-only api key for that collection.
 				 */
 				NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY: v.optional(v.pipe(v.string(), v.nonEmpty())),
-				NEXT_PUBLIC_WEBSITE_BASE_URL: v.pipe(v.string(), v.url()),
+				NEXT_PUBLIC_WEBSITE_BASE_URL: v.pipe(v.string(), v.url(), v.transform(removeTrailingSlash)),
 				NEXT_PUBLIC_WEBSITE_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 				NEXT_PUBLIC_WEBSITE_GOOGLE_SITE_VERIFICATION: v.optional(v.pipe(v.string(), v.nonEmpty())),
-				NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL: v.pipe(v.string(), v.url()),
-				NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL: v.optional(v.pipe(v.string(), v.url())),
+				NEXT_PUBLIC_WEBSITE_IMPRINT_CUSTOM_CONFIG: v.optional(
+					v.picklist(["disabled", "enabled"]),
+					"enabled",
+				),
+				NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL: v.pipe(
+					v.string(),
+					v.url(),
+					v.transform(removeTrailingSlash),
+				),
+				NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL: v.optional(
+					v.pipe(v.string(), v.url(), v.transform(addTrailingSlash)),
+				),
 				NEXT_PUBLIC_WEBSITE_MATOMO_ID: v.optional(
-					v.pipe(v.string(), v.transform(Number), v.number(), v.integer(), v.minValue(1)),
+					v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 				),
 				NEXT_PUBLIC_WEBSITE_SENTRY_DSN: v.optional(v.pipe(v.string(), v.nonEmpty())),
 				NEXT_PUBLIC_WEBSITE_SENTRY_ORG: v.optional(v.pipe(v.string(), v.nonEmpty())),
@@ -108,8 +104,7 @@ const result = createEnv({
 				NEXT_PUBLIC_WEBSITE_SENTRY_PROJECT: v.optional(v.pipe(v.string(), v.nonEmpty())),
 				NEXT_PUBLIC_WEBSITE_SERVICE_ID: v.pipe(
 					v.string(),
-					v.transform(Number),
-					v.number(),
+					v.toNumber(),
 					v.integer(),
 					v.minValue(1),
 				),
@@ -142,14 +137,20 @@ const result = createEnv({
 		EMAIL_SMTP_PORT: process.env.EMAIL_SMTP_PORT,
 		EMAIL_SMTP_SERVER: process.env.EMAIL_SMTP_SERVER,
 		EMAIL_SMTP_USERNAME: process.env.EMAIL_SMTP_USERNAME,
+		EMAIL_SSL_CONNECTION: process.env.EMAIL_SSL_CONNECTION,
 		IMGPROXY_BASE_URL: process.env.IMGPROXY_BASE_URL,
 		IMGPROXY_KEY: process.env.IMGPROXY_KEY,
 		IMGPROXY_SALT: process.env.IMGPROXY_SALT,
+		MAILCHIMP_API_BASE_URL: process.env.MAILCHIMP_API_BASE_URL,
+		MAILCHIMP_API_KEY: process.env.MAILCHIMP_API_KEY,
+		MAILCHIMP_LIST_ID: process.env.MAILCHIMP_LIST_ID,
 		MAILPIT_API_BASE_URL: process.env.MAILPIT_API_BASE_URL,
 		NEXT_PUBLIC_WEBSITE_BASE_URL: process.env.NEXT_PUBLIC_WEBSITE_BASE_URL,
 		NEXT_PUBLIC_WEBSITE_BOTS: process.env.NEXT_PUBLIC_WEBSITE_BOTS,
 		NEXT_PUBLIC_WEBSITE_GOOGLE_SITE_VERIFICATION:
 			process.env.NEXT_PUBLIC_WEBSITE_GOOGLE_SITE_VERIFICATION,
+		NEXT_PUBLIC_WEBSITE_IMPRINT_CUSTOM_CONFIG:
+			process.env.NEXT_PUBLIC_WEBSITE_IMPRINT_CUSTOM_CONFIG,
 		NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL:
 			process.env.NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL,
 		NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL: process.env.NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL,
@@ -168,7 +169,7 @@ const result = createEnv({
 		NEXT_RUNTIME: process.env.NEXT_RUNTIME,
 		NODE_ENV: process.env.NODE_ENV,
 		S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
-		S3_BUCKET: process.env.S3_BUCKET,
+		S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
 		S3_HOST: process.env.S3_HOST,
 		S3_PORT: process.env.S3_PORT,
 		S3_PROTOCOL: process.env.S3_PROTOCOL,

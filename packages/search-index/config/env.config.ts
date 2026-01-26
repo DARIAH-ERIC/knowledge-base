@@ -10,13 +10,7 @@ const result = createEnv({
 		const schema = v.object({
 			NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME: v.pipe(v.string(), v.nonEmpty()),
 			NEXT_PUBLIC_TYPESENSE_HOST: v.pipe(v.string(), v.nonEmpty()),
-			NEXT_PUBLIC_TYPESENSE_PORT: v.pipe(
-				v.string(),
-				v.transform(Number),
-				v.number(),
-				v.integer(),
-				v.minValue(1),
-			),
+			NEXT_PUBLIC_TYPESENSE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 			NEXT_PUBLIC_TYPESENSE_PROTOCOL: v.optional(v.picklist(["http", "https"]), "https"),
 			/**
 			 * Optional, because we need to be able to create a collection, before we create

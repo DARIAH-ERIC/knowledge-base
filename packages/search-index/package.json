@@ -9,15 +9,19 @@
 	"devEngines": {
 		"runtime": {
 			"name": "node",
-			"version": "^24.12.0",
+			"version": "^24.13.0",
 			"onFail": "download"
 		}
 	},
-	"packageManager": "pnpm@10.25.0",
+	"packageManager": "pnpm@10.28.0",
 	"exports": {
 		"./client": {
 			"types": "./dist/src/client.d.ts",
 			"default": "./src/client.ts"
+		},
+		"./lib": {
+			"types": "./dist/src/lib/index.d.ts",
+			"default": "./src/lib/index.ts"
 		},
 		"./schema": {
 			"types": "./dist/src/schema.d.ts",
@@ -35,6 +39,7 @@
 		"search-index:api-keys:generate": "tsx ./scripts/generate-search-api-key.ts",
 		"search-index:collections:create": "tsx ./scripts/create-collection.ts",
 		"search-index:collections:ingest": "tsx ./scripts/ingest.ts",
+		"search-index:collections:reset": "tsx ./scripts/reset.ts",
 		"search-index:collections:seed": "tsx ./scripts/seed.ts",
 		"types:check": "tsc --noEmit"
 	},
@@ -46,17 +51,12 @@
 		"valibot": "catalog:"
 	},
 	"devDependencies": {
-		"@acdh-oeaw/eslint-config": "catalog:",
-		"@acdh-oeaw/eslint-config-node": "catalog:",
-		"@acdh-oeaw/prettier-config": "catalog:",
-		"@acdh-oeaw/tsconfig": "catalog:",
+		"@dariah-eric/dariah-knowledge-base-eslint-config": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-typescript-config": "workspace:^",
 		"@faker-js/faker": "catalog:",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
-		"eslint-config-flat-gitignore": "catalog:",
-		"eslint-plugin-check-file": "catalog:",
-		"eslint-plugin-unicorn": "catalog:",
-		"globals": "catalog:",
 		"prettier": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:"
@@ -76,5 +76,5 @@
 		],
 		"*.!(js|ts)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
 	},
-	"prettier": "@acdh-oeaw/prettier-config"
+	"prettier": "@dariah-eric/dariah-knowledge-base-prettier-config"
 }

@@ -1,4 +1,20 @@
 {
+	"actions": {
+		"sendContactFormEmailAction": {
+			"error": "Failed to send message.",
+			"success": "Successfully sent message."
+		},
+		"uploadImageAction": {
+			"success": "Successfully uploaded image."
+		}
+	},
+	"errors": {
+		"forbidden": "Forbidden.",
+		"internal-server-error": "Internal server error.",
+		"invalid-form-fields": "Invalid or missing fields.",
+		"not-authenticated": "Not authenticated.",
+		"too-many-requests": "Too many requests."
+	},
 	"ColorSchemeSelect": {
 		"change-color-scheme": "Change color scheme",
 		"color-schemes": {
@@ -6,6 +22,13 @@
 			"light": "Light",
 			"system": "System"
 		}
+	},
+	"ContactForm": {
+		"email": "Email",
+		"message": "Message",
+		"name": "Name",
+		"subject": "Subject",
+		"submit": "Send"
 	},
 	"ContactPage": {
 		"meta": {
@@ -36,6 +59,12 @@
 			"title": "Administrator dashboard - Institutions"
 		},
 		"title": "Institutions"
+	},
+	"DashboardAdministratorNewslettersPage": {
+		"meta": {
+			"title": "Administrator dashboard - Newsletters"
+		},
+		"title": "Newsletters"
 	},
 	"DashboardAdministratorOutreachPage": {
 		"meta": {
@@ -84,6 +113,12 @@
 			"title": "Administrator dashboard - Working groups"
 		},
 		"title": "Working groups"
+	},
+	"DashboardAdministratorWorkingGroupReportsPage": {
+		"meta": {
+			"title": "Administrator dashboard - Working group reports"
+		},
+		"title": "Working group reports"
 	},
 	"DashboardNationalConsortiumPage": {
 		"meta": {
@@ -211,6 +246,12 @@
 		},
 		"title": "Pages"
 	},
+	"DashboardWebsiteSpotlightArticlesPage": {
+		"meta": {
+			"title": "Website dashboard - Spotlight articles"
+		},
+		"title": "Spotlight articles"
+	},
 	"DashboardWorkingGroupPage": {
 		"meta": {
 			"title": "Working group dashboard"
@@ -222,6 +263,12 @@
 			"title": "Working group dashboard - Report"
 		},
 		"title": "Report"
+	},
+	"DashboardWorkingGroupReportEditPage": {
+		"meta": {
+			"title": "Working group dashboard - Edit report"
+		},
+		"title": "Edit report"
 	},
 	"DashboardWorkingGroupReportsPage": {
 		"meta": {
@@ -288,6 +335,12 @@
 		"reset": "Try again",
 		"title": "Something went wrong"
 	},
+	"ForbiddenPage": {
+		"meta": {
+			"title": "Forbidden"
+		},
+		"title": "Forbidden"
+	},
 	"GlobalNotFoundPage": {
 		"meta": {
 			"title": "Page not found"
@@ -323,5 +376,15 @@
 			"title": "Terms of use"
 		},
 		"title": "Terms of use"
+	},
+	"UnauthorizedPage": {
+		"meta": {
+			"title": "Unauthorized"
+		},
+		"title": "Unauthorized"
+	},
+	"UploadImageForm": {
+		"input": "Select an image to upload",
+		"submit": "Upload image"
 	}
 }

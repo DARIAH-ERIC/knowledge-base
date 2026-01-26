@@ -7,7 +7,7 @@
 "use client";
 
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import { createContext, use } from "react";
+import { createContext, type Ref, use } from "react";
 import {
 	Button,
 	Cell,
@@ -40,7 +40,7 @@ interface TableProps extends Omit<TablePrimitiveProps, "className"> {
 	bleed?: boolean;
 	grid?: boolean;
 	striped?: boolean;
-	ref?: React.Ref<HTMLTableElement>;
+	ref?: Ref<HTMLTableElement>;
 }
 
 const TableContext = createContext<TableProps>({
@@ -69,8 +69,10 @@ function Table({
 	ref,
 	...props
 }: TableProps) {
+	const value = { allowResize, bleed, grid, striped };
+
 	return (
-		<TableContext value={{ allowResize, bleed, grid, striped }}>
+		<TableContext value={value}>
 			<div className="flow-root">
 				<div
 					className={twMerge(
@@ -100,7 +102,7 @@ function ColumnResizer({ className, ...props }: ColumnResizerProps) {
 		<ColumnResizerPrimitive
 			{...props}
 			className={cx(
-				"absolute top-0 right-0 bottom-0 grid w-px &[data-resizable-direction=left]:cursor-e-resize &[data-resizable-direction=right]:cursor-w-resize touch-none place-content-center px-1 data-[resizable-direction=both]:cursor-ew-resize [&[data-resizing]>div]:bg-primary",
+				"absolute top-0 right-0 bottom-0 grid w-px touch-none place-content-center px-1 resizable-both:cursor-ew-resize &[data-resizable-direction=left]:cursor-e-resize &[data-resizable-direction=right]:cursor-w-resize [&[data-resizing]>div]:bg-primary",
 				className,
 			)}
 		>
@@ -126,7 +128,7 @@ function TableColumn({ isResizable = false, className, ...props }: TableColumnPr
 			className={cx(
 				[
 					"text-left font-medium text-muted-fg",
-					"relative allows-sorting:cursor-default outline-hidden data-dragging:cursor-grabbing",
+					"relative outline-hidden allows-sorting:cursor-default dragging:cursor-grabbing",
 					"px-4 py-(--gutter-y)",
 					"first:pl-(--gutter,--spacing(2)) last:pr-(--gutter,--spacing(2))",
 					!bleed && "sm:last:pr-1 sm:first:pl-1",
@@ -143,7 +145,7 @@ function TableColumn({ isResizable = false, className, ...props }: TableColumnPr
 						{values.allowsSorting && (
 							<span
 								className={twJoin(
-									"grid size-[1.15rem] flex-none shrink-0 place-content-center rounded bg-secondary text-fg *:data-[slot=icon]:size-3.5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:transition-transform *:data-[slot=icon]:duration-200",
+									"grid size-[1.15rem] flex-none shrink-0 place-content-center rounded-sm bg-secondary text-fg *:data-[slot=icon]:size-3.5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:transition-transform *:data-[slot=icon]:duration-200",
 									values.isHovered ? "bg-secondary-fg/10" : "",
 								)}
 							>
@@ -161,7 +163,7 @@ function TableColumn({ isResizable = false, className, ...props }: TableColumnPr
 }
 
 interface TableHeaderProps<T extends object> extends HeaderProps<T> {
-	ref?: React.Ref<HTMLTableSectionElement>;
+	ref?: Ref<HTMLTableSectionElement>;
 }
 
 function TableHeader<T extends object>({
@@ -206,7 +208,7 @@ function TableHeader<T extends object>({
 }
 
 interface TableRowProps<T extends object> extends RowProps<T> {
-	ref?: React.Ref<HTMLTableRowElement>;
+	ref?: Ref<HTMLTableRowElement>;
 }
 
 function TableRow<T extends object>({
@@ -249,7 +251,7 @@ function TableRow<T extends object>({
 							"hover:bg-(--table-selected-bg) hover:text-fg",
 						(props.href || props.onAction || selectionMode === "multiple") &&
 							isFocusVisibleWithin &&
-							"bg-(--table-selected-bg)/50 selected:bg-(--table-selected-bg)/50 text-fg",
+							"bg-(--table-selected-bg)/50 text-fg selected:bg-(--table-selected-bg)/50",
 						isDisabled && "opacity-50",
 						className,
 					);
@@ -297,7 +299,7 @@ function TableRow<T extends object>({
 }
 
 interface TableCellProps extends CellProps {
-	ref?: React.Ref<HTMLTableCellElement>;
+	ref?: Ref<HTMLTableCellElement>;
 }
 
 function TableCell({ className, ref, ...props }: TableCellProps) {

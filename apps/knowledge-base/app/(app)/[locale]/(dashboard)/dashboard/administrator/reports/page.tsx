@@ -1,22 +1,30 @@
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { TableExample } from "@/components/ui/table-example";
+import { createMetadata } from "@/lib/server/metadata";
 
-export async function generateMetadata(): Promise<Metadata> {
+interface DashboardAdministratorReportsPageProps extends PageProps<"/[locale]/dashboard/administrator/reports"> {}
+
+export async function generateMetadata(
+	_props: Readonly<DashboardAdministratorReportsPageProps>,
+	resolvingMetadata: ResolvingMetadata,
+): Promise<Metadata> {
 	const t = await getTranslations("DashboardAdministratorReportsPage");
 
-	const metadata: Metadata = {
+	const metadata: Metadata = await createMetadata(resolvingMetadata, {
 		title: t("meta.title"),
-	};
+	});
 
 	return metadata;
 }
 
-export default function DashboardAdministratorReportsPage(): ReactNode {
+export default function DashboardAdministratorReportsPage(
+	_props: Readonly<DashboardAdministratorReportsPageProps>,
+): ReactNode {
 	const t = useTranslations("DashboardAdministratorReportsPage");
 
 	return (

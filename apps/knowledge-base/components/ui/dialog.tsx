@@ -168,7 +168,7 @@ function DialogFooter({ className, ...props }: DialogFooterProps) {
 		<div
 			ref={footerRef}
 			className={twMerge(
-				"isolate mt-auto flex flex-col-reverse justify-end gap-3 p-(--gutter) pt-[calc(var(--gutter)---spacing(3))] group-not-has-data-[slot=dialog-body]/dialog:pt-0 group-not-has-data-[slot=dialog-body]/popover:pt-0 sm:flex-row",
+				"isolate mt-auto flex flex-col-reverse justify-end gap-3 p-(--gutter) pt-[calc(var(--gutter)---spacing(3))] sm:flex-row group-not-has-data-[slot=dialog-body]/dialog:pt-0 group-not-has-data-[slot=dialog-body]/popover:pt-0",
 				className,
 			)}
 			data-slot="dialog-footer"

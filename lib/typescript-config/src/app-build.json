@@ -1,0 +1,11 @@
+{
+	"$schema": "https://www.schemastore.org/tsconfig",
+	"extends": "@acdh-oeaw/tsconfig",
+	"compilerOptions": {
+		"allowJs": false,
+		"checkJs": false,
+		"noEmit": false,
+		"outDir": "${configDir}/dist"
+	},
+	"files": ["../types/intl-duration-format.d.ts"]
+}

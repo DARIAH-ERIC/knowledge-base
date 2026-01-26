@@ -1,6 +1,6 @@
 /* eslint-disable @eslint-react/prefer-read-only-props */
 
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { tv, type VariantProps } from "tailwind-variants";
 
 const badgeStyles = tv({
@@ -37,10 +37,9 @@ const badgeStyles = tv({
 	},
 });
 
-interface BadgeProps
-	extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeStyles> {
+interface BadgeProps extends HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeStyles> {
 	className?: string;
-	children: React.ReactNode;
+	children: ReactNode;
 }
 
 function Badge({ children, intent, isCircle = true, className, ...props }: BadgeProps): ReactNode {

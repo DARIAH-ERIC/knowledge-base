@@ -9,11 +9,11 @@
 	"devEngines": {
 		"runtime": {
 			"name": "node",
-			"version": "^24.12.0",
+			"version": "^24.13.0",
 			"onFail": "download"
 		}
 	},
-	"packageManager": "pnpm@10.25.0",
+	"packageManager": "pnpm@10.28.0",
 	"exports": {
 		".": {
 			"types": "./dist/src/index.d.ts",
@@ -22,6 +22,10 @@
 		"./client": {
 			"types": "./dist/src/client.d.ts",
 			"default": "./src/client.ts"
+		},
+		"./lib": {
+			"types": "./dist/src/lib/index.d.ts",
+			"default": "./src/lib/index.ts"
 		},
 		"./relations": {
 			"types": "./dist/src/relations.d.ts",
@@ -59,11 +63,11 @@
 		"valibot": "catalog:"
 	},
 	"devDependencies": {
-		"@acdh-oeaw/eslint-config": "catalog:",
-		"@acdh-oeaw/eslint-config-node": "catalog:",
-		"@acdh-oeaw/prettier-config": "catalog:",
-		"@acdh-oeaw/tsconfig": "catalog:",
+		"@dariah-eric/dariah-knowledge-base-eslint-config": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-typescript-config": "workspace:^",
 		"@faker-js/faker": "catalog:",
+		"@sindresorhus/slugify": "catalog:",
 		"@types/node": "catalog:",
 		"@types/pg": "catalog:",
 		"concurrently": "catalog:",
@@ -71,15 +75,17 @@
 		"drizzle-kit": "catalog:",
 		"drizzle-seed": "catalog:",
 		"eslint": "catalog:",
-		"eslint-config-flat-gitignore": "catalog:",
-		"eslint-config-turbo": "catalog:",
-		"eslint-plugin-check-file": "catalog:",
-		"eslint-plugin-drizzle": "catalog:",
-		"eslint-plugin-unicorn": "catalog:",
-		"globals": "catalog:",
 		"prettier": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:"
+	},
+	"browserslist": {
+		"development": [
+			"baseline newly available"
+		],
+		"production": [
+			"baseline widely available"
+		]
 	},
 	"lint-staged": {
 		"*.@(js|ts)": [
@@ -88,5 +94,5 @@
 		],
 		"*.!(js|ts)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
 	},
-	"prettier": "@acdh-oeaw/prettier-config"
+	"prettier": "@dariah-eric/dariah-knowledge-base-prettier-config"
 }

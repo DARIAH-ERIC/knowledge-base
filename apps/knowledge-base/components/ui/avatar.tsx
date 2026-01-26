@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/strict-boolean-expressions */
 
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentProps } from "react";
 import { twMerge } from "tailwind-merge";
 
 interface AvatarProps {
@@ -35,7 +35,7 @@ function Avatar({
 	alt = "",
 	className,
 	...props
-}: AvatarProps & ComponentPropsWithoutRef<"span">) {
+}: AvatarProps & ComponentProps<"span">) {
 	return (
 		<span
 			data-slot="avatar"
@@ -80,7 +80,7 @@ function Avatar({
 					</text>
 				</svg>
 			)}
-			{src && <img alt={alt} className="size-full object-cover object-center" src={src} />}
+			{src ? <img alt={alt} className="size-full object-cover object-center" src={src} /> : null}
 		</span>
 	);
 }

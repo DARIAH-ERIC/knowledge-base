@@ -5,6 +5,7 @@
 "use client";
 
 import { CheckIcon, MinusIcon } from "@heroicons/react/20/solid";
+import type { ComponentProps } from "react";
 import {
 	Checkbox as CheckboxPrimitive,
 	CheckboxGroup as CheckboxGroupPrimitive,
@@ -22,7 +23,7 @@ export function CheckboxGroup({ className, ...props }: CheckboxGroupProps) {
 		<CheckboxGroupPrimitive
 			{...props}
 			className={cx(
-				"space-y-3 has-[[slot=description]]:space-y-6 has-[[slot=description]]:**:data-[slot=label]:font-medium **:[[slot=description]]:block",
+				"space-y-3 **:[[slot=description]]:block has-[[slot=description]]:space-y-6 has-[[slot=description]]:**:data-[slot=label]:font-medium",
 				className,
 			)}
 			data-slot="control"
@@ -55,7 +56,7 @@ export function Checkbox({ className, children, ...props }: CheckboxProps) {
 					return (
 						<div
 							className={twMerge(
-								"grid grid-cols-[1.125rem_1fr] gap-y-1 has-data-[slot=label]:gap-x-3 sm:grid-cols-[1rem_1fr]",
+								"grid grid-cols-[1.125rem_1fr] gap-y-1 sm:grid-cols-[1rem_1fr] has-data-[slot=label]:gap-x-3",
 								"*:data-[slot=indicator]:col-start-1 *:data-[slot=indicator]:row-start-1 *:data-[slot=indicator]:mt-(--indicator-mt)",
 								"*:data-[slot=label]:col-start-2 *:data-[slot=label]:row-start-1",
 								"*:[[slot=description]]:col-start-2 *:[[slot=description]]:row-start-2",
@@ -64,7 +65,7 @@ export function Checkbox({ className, children, ...props }: CheckboxProps) {
 						>
 							<span
 								className={twMerge([
-									"relative inset-ring inset-ring-input isolate flex shrink-0 items-center justify-center rounded text-bg transition group-hover:inset-ring-muted-fg/30",
+									"relative inset-ring inset-ring-input isolate flex shrink-0 items-center justify-center rounded-sm text-bg transition group-hover:inset-ring-muted-fg/30",
 									"sm:size-4 sm:*:data-[slot=check-indicator]:size-3.5",
 									"size-4.5 *:data-[slot=check-indicator]:size-4",
 									"in-disabled:bg-muted",
@@ -92,6 +93,6 @@ export function Checkbox({ className, children, ...props }: CheckboxProps) {
 	);
 }
 
-export function CheckboxLabel(props: React.ComponentProps<typeof Label>) {
+export function CheckboxLabel(props: ComponentProps<typeof Label>) {
 	return <Label elementType="span" {...props} />;
 }

@@ -5,32 +5,39 @@
 	"devEngines": {
 		"runtime": {
 			"name": "node",
-			"version": "^24.12.0",
+			"version": "^24.13.0",
 			"onFail": "download"
 		}
 	},
-	"packageManager": "pnpm@10.25.0",
+	"packageManager": "pnpm@10.28.1",
 	"scripts": {
 		"build": "turbo run build",
-		"db:migrations:apply": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-database-client run db:migrations:apply",
-		"db:migrations:check": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-database-client run db:migrations:check",
-		"db:migrations:generate": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-database-client run db:migrations:generate",
-		"db:push": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-database-client run db:push",
-		"db:reset": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-database-client run db:reset",
-		"db:seed": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-database-client run db:seed",
-		"db:studio": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-database-client run db:studio",
+		"db:migrations:apply": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-database-client\" run db:migrations:apply",
+		"db:migrations:check": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-database-client\" run db:migrations:check",
+		"db:migrations:generate": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-database-client\" run db:migrations:generate",
+		"db:push": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-database-client\" run db:push",
+		"db:reset": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-database-client\" run db:reset",
+		"db:seed": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-database-client\" run db:seed",
+		"db:studio": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-database-client\" run db:studio",
 		"dev": "turbo run dev",
 		"dev:services:down": "sh ./scripts/services.sh stop",
+		"dev:services:seed": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-scripts\" run seed",
+		"dev:services:setup": "sh ./scripts/setup.sh",
 		"dev:services:up": "sh ./scripts/services.sh start",
 		"format:check": "prettier . --cache --cache-location ./.prettiercache --check",
 		"format:fix": "prettier . --cache --cache-location ./.prettiercache --check --write",
+		"object-store:buckets:create": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-object-store\" run object-store:buckets:create",
+		"object-store:buckets:reset": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-object-store\" run object-store:buckets:reset",
+		"object-store:buckets:seed": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-object-store\" run object-store:buckets:seed",
 		"lint:check": "turbo run lint:check",
 		"lint:fix": "turbo run lint:fix",
+		"migrate-website-data": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-data-migration\" run migrate",
 		"prepare": "run-s setup",
-		"search-index:api-keys:generate": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-search-index run search-index:api-keys:generate",
-		"search-index:collections:create": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-search-index run search-index:collections:create",
-		"search-index:collections:ingest": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-search-index run search-index:collections:ingest",
-		"search-index:collections:seed": "dotenvx run --env-file ./.devcontainer/.env -- pnpm --filter dariah-knowledge-base-search-index run search-index:collections:seed",
+		"search-index:api-keys:generate": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-search-index\" run search-index:api-keys:generate",
+		"search-index:collections:create": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-search-index\" run search-index:collections:create",
+		"search-index:collections:ingest": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-search-index\" run search-index:collections:ingest",
+		"search-index:collections:reset": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-search-index\" run search-index:collections:reset",
+		"search-index:collections:seed": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-search-index\" run search-index:collections:seed",
 		"setup": "is-in-ci || simple-git-hooks",
 		"test": "turbo run test",
 		"test:e2e": "turbo run test:e2e",
@@ -39,7 +46,7 @@
 		"types:check": "turbo run types:check"
 	},
 	"devDependencies": {
-		"@acdh-oeaw/prettier-config": "catalog:",
+		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
 		"@dotenvx/dotenvx": "catalog:",
 		"@playwright/test": "catalog:",
 		"is-in-ci": "catalog:",
@@ -53,7 +60,7 @@
 	"lint-staged": {
 		"*": "prettier --cache --cache-location ./.prettiercache --ignore-unknown --write"
 	},
-	"prettier": "@acdh-oeaw/prettier-config",
+	"prettier": "@dariah-eric/dariah-knowledge-base-prettier-config",
 	"simple-git-hooks": {
 		"pre-commit": "pnpm exec lint-staged"
 	}
