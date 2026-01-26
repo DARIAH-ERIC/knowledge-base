@@ -127,7 +127,7 @@ export const fields = p.pgTable(
 				return entities.id;
 			}),
 		fieldNameId: p
-			.uuid()
+			.uuid("field_name_id")
 			.notNull()
 			.references(() => {
 				return entityTypesFieldsNames.id;
