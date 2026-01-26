@@ -57,9 +57,7 @@
 	"devDependencies": {
 		"@acdh-oeaw/stylelint-config": "catalog:",
 		"@chromatic-com/storybook": "catalog:",
-		"@dariah-eric/dariah-knowledge-base-eslint-config": "workspace:^",
-		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
-		"@dariah-eric/dariah-knowledge-base-typescript-config": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-configs": "workspace:^",
 		"@fontsource-variable/fira-code": "catalog:",
 		"@fontsource-variable/inter": "catalog:",
 		"@storybook/addon-a11y": "catalog:",
@@ -114,7 +112,7 @@
 			"@tailwindcss/postcss": {}
 		}
 	},
-	"prettier": "@dariah-eric/dariah-knowledge-base-prettier-config",
+	"prettier": "@dariah-eric/dariah-knowledge-base-configs/prettier",
 	"stylelint": {
 		"extends": "@acdh-oeaw/stylelint-config"
 	}

@@ -1,5 +1,5 @@
 import { defineConfig } from "eslint/config";
-import turboConfig from "eslint-config-turbo";
+import turboConfig from "eslint-config-turbo/flat";
 
 const config = defineConfig(turboConfig);
 

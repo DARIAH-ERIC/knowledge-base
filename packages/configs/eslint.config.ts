@@ -1,7 +1,7 @@
 import { defineConfig } from "eslint/config";
 
-import node from "./src/node.ts";
-import turbo from "./src/turbo.ts";
+import node from "./src/eslint/node.ts";
+import turbo from "./src/eslint/turbo.ts";
 
 const config = defineConfig(node, turbo);
 

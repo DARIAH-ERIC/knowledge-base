@@ -39,9 +39,7 @@
 		"valibot": "catalog:"
 	},
 	"devDependencies": {
-		"@dariah-eric/dariah-knowledge-base-eslint-config": "workspace:^",
-		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
-		"@dariah-eric/dariah-knowledge-base-typescript-config": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-configs": "workspace:^",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
 		"prettier": "catalog:",
@@ -63,5 +61,5 @@
 		],
 		"*.!(js|ts)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
 	},
-	"prettier": "@dariah-eric/dariah-knowledge-base-prettier-config"
+	"prettier": "@dariah-eric/dariah-knowledge-base-configs/prettier"
 }

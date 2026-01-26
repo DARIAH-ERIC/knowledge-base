@@ -5,11 +5,11 @@
 	"devEngines": {
 		"runtime": {
 			"name": "node",
-			"version": "^24.13.0",
+			"version": "24.x",
 			"onFail": "download"
 		}
 	},
-	"packageManager": "pnpm@10.28.1",
+	"packageManager": "pnpm@10.28.2",
 	"scripts": {
 		"build": "turbo run build",
 		"db:migrations:apply": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"dariah-knowledge-base-database-client\" run db:migrations:apply",
@@ -46,7 +46,7 @@
 		"types:check": "turbo run types:check"
 	},
 	"devDependencies": {
-		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-configs": "workspace:^",
 		"@dotenvx/dotenvx": "catalog:",
 		"@playwright/test": "catalog:",
 		"is-in-ci": "catalog:",
@@ -60,7 +60,7 @@
 	"lint-staged": {
 		"*": "prettier --cache --cache-location ./.prettiercache --ignore-unknown --write"
 	},
-	"prettier": "@dariah-eric/dariah-knowledge-base-prettier-config",
+	"prettier": "@dariah-eric/dariah-knowledge-base-configs/prettier",
 	"simple-git-hooks": {
 		"pre-commit": "pnpm exec lint-staged"
 	}
