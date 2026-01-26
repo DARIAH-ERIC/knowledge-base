@@ -14,7 +14,14 @@ export function ColorSchemeProvider(props: Readonly<ColorSchemeProviderProps>): 
 	 * e.g. on locale change.
 	 */
 	useLayoutEffect(() => {
-		window.__colorScheme.apply();
+		/**
+		 * On global error pages, scripts are not executed (unless the error location is wrapped in a
+		 * suspense boundary).
+		 *
+		 * @see {@link https://github.com/vercel/next.js/issues/63980#issuecomment-2056307152}
+		 */
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		window.__colorScheme?.apply();
 	}, []);
 
 	return children;

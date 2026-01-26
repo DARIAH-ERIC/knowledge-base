@@ -4,7 +4,7 @@ import { count, eq } from "@dariah-eric/dariah-knowledge-base-database-client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
 
-import type { Database } from "@/middlewares/db";
+import type { Database, Transaction } from "@/middlewares/db";
 import { imageWidth } from "~/config/api.config";
 
 interface GetNewsParams {
@@ -14,7 +14,7 @@ interface GetNewsParams {
 	offset?: number;
 }
 
-export async function getNews(db: Database, params: GetNewsParams) {
+export async function getNews(db: Database | Transaction, params: GetNewsParams) {
 	const { limit = 10, offset = 0 } = params;
 
 	const [items, aggregate] = await Promise.all([
@@ -61,7 +61,10 @@ export async function getNews(db: Database, params: GetNewsParams) {
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = client.urls.generate(item.image.key, { width: imageWidth.preview });
+		const image = client.urls.generateSignedImageUrl({
+			key: item.image.key,
+			options: { width: imageWidth.preview },
+		});
 
 		return { ...item, image };
 	});
@@ -75,7 +78,7 @@ interface GetNewsItemByIdParams {
 	id: schema.NewsItem["id"];
 }
 
-export async function getNewsItemById(db: Database, params: GetNewsItemByIdParams) {
+export async function getNewsItemById(db: Database | Transaction, params: GetNewsItemByIdParams) {
 	const { id } = params;
 
 	const item = await db.query.news.findFirst({
@@ -110,7 +113,10 @@ export async function getNewsItemById(db: Database, params: GetNewsItemByIdParam
 		return null;
 	}
 
-	const image = client.urls.generate(item.image.key, { width: imageWidth.featured });
+	const image = client.urls.generateSignedImageUrl({
+		key: item.image.key,
+		options: { width: imageWidth.featured },
+	});
 
 	const data = { ...item, image };
 
@@ -123,7 +129,10 @@ interface GetNewsItemBySlugParams {
 	slug: schema.Entity["slug"];
 }
 
-export async function getNewsItemBySlug(db: Database, params: GetNewsItemBySlugParams) {
+export async function getNewsItemBySlug(
+	db: Database | Transaction,
+	params: GetNewsItemBySlugParams,
+) {
 	const { slug } = params;
 
 	const item = await db.query.news.findFirst({
@@ -158,7 +167,10 @@ export async function getNewsItemBySlug(db: Database, params: GetNewsItemBySlugP
 		return null;
 	}
 
-	const image = client.urls.generate(item.image.key, { width: imageWidth.featured });
+	const image = client.urls.generateSignedImageUrl({
+		key: item.image.key,
+		options: { width: imageWidth.featured },
+	});
 
 	const data = { ...item, image };
 

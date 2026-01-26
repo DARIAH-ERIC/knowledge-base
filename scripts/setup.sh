@@ -2,7 +2,7 @@
 
 set -eu
 
-pnpm image-service:buckets:create
+pnpm object-store:buckets:create
 pnpm db:push && pnpm run db:migrations:apply
 pnpm search-index:collections:create
 

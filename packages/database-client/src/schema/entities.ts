@@ -9,6 +9,7 @@ export const entityTypesEnum = [
 	"events",
 	"impact_case_studies",
 	"news",
+	"organisational_units",
 	"pages",
 	"persons",
 	"spotlight_articles",

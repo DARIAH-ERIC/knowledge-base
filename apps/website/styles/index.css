@@ -45,7 +45,7 @@
  * ============================================================================
  */
 
-@layer base {
+@layer theme {
 	:root,
 	[data-ui-color-scheme="light"] {
 		--bg: oklch(100% 0 0deg);
@@ -316,7 +316,7 @@
 	--color-neutral-1000: var(--color-black);
 }
 
-@layer base {
+@layer theme {
 	:root,
 	[data-ui-color-scheme="light"] {
 		--_color-background-base: var(--color-bg);
@@ -435,7 +435,16 @@
 	margin-inline: auto;
 }
 
-@utility touch-target {
+@utility focus-visible-outline {
+	outline: transparent none 2px;
+
+	&:is(:focus-visible, [data-focus-visible]) {
+		outline: 2px solid var(--color-focus-outline);
+		outline-offset: 2px;
+	}
+}
+
+@utility touch-area {
 	--touch-area: 44px;
 
 	position: relative;
@@ -465,7 +474,7 @@
 
 /* stylelint-disable number-max-precision */
 
-@layer base {
+@layer theme {
 	:root,
 	[data-ui-color-scheme="light"] {
 		--richtext-body: var(--color-neutral-700);

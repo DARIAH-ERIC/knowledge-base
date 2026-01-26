@@ -9,13 +9,13 @@
 	"devEngines": {
 		"runtime": {
 			"name": "node",
-			"version": "^24.12.0",
+			"version": "^24.13.0",
 			"onFail": "download"
 		}
 	},
-	"packageManager": "pnpm@10.27.0",
+	"packageManager": "pnpm@10.28.0",
 	"scripts": {
-		"analyze": "TURBOPACK_STATS=1 next build --experimental-next-config-strip-types && echo '\n✅ Saved stats to \".next/server/webpack-stats.json\". Analyze at \"https://statoscope.tech\".'",
+		"analyze": "next experimental-analyze",
 		"build": "next build --experimental-next-config-strip-types",
 		"dev": "PORT=3002 next dev --experimental-next-config-strip-types",
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
@@ -37,6 +37,7 @@
 		"types:prepare": "ENV_VALIDATION=\"disabled\" next typegen"
 	},
 	"dependencies": {
+		"@acdh-oeaw/color-schemes": "catalog:",
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/style-variants": "catalog:",
 		"@acdh-oeaw/validate-env": "catalog:",
@@ -53,6 +54,7 @@
 		"lucide-react": "catalog:",
 		"next": "catalog:",
 		"next-intl": "catalog:",
+		"nodemailer": "catalog:",
 		"react": "catalog:",
 		"react-aria": "catalog:",
 		"react-aria-components": "catalog:",
@@ -61,6 +63,7 @@
 		"server-nodejs-only": "catalog:",
 		"server-only": "catalog:",
 		"sharp": "catalog:",
+		"uuid": "catalog:",
 		"valibot": "catalog:",
 		"xast-util-feed": "catalog:",
 		"xast-util-to-xml": "catalog:"
@@ -76,6 +79,7 @@
 		"@react-aria/optimize-locales-plugin": "catalog:",
 		"@tailwindcss/postcss": "catalog:",
 		"@types/node": "catalog:",
+		"@types/nodemailer": "catalog:",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
 		"axe-core": "catalog:",

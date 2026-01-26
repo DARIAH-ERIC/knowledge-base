@@ -10,7 +10,7 @@ async function main() {
 	if (isCreated) {
 		log.success(`Successfully created collection "${resources.name}".`);
 	} else {
-		log.success(`Collection "${resources.name}" already exists.`);
+		log.info(`Collection "${resources.name}" already exists.`);
 	}
 }
 

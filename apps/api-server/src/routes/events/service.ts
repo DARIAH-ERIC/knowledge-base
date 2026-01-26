@@ -4,7 +4,7 @@ import { count, eq } from "@dariah-eric/dariah-knowledge-base-database-client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
 
-import type { Database } from "@/middlewares/db";
+import type { Database, Transaction } from "@/middlewares/db";
 import { imageWidth } from "~/config/api.config";
 
 interface GetEventsParams {
@@ -14,7 +14,7 @@ interface GetEventsParams {
 	offset?: number;
 }
 
-export async function getEvents(db: Database, params: GetEventsParams) {
+export async function getEvents(db: Database | Transaction, params: GetEventsParams) {
 	const { limit = 10, offset = 0 } = params;
 
 	const [items, aggregate] = await Promise.all([
@@ -66,7 +66,10 @@ export async function getEvents(db: Database, params: GetEventsParams) {
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = client.urls.generate(item.image.key, { width: imageWidth.preview });
+		const image = client.urls.generateSignedImageUrl({
+			key: item.image.key,
+			options: { width: imageWidth.preview },
+		});
 
 		return { ...item, image };
 	});
@@ -80,7 +83,7 @@ interface GetEventByIdParams {
 	id: schema.Event["id"];
 }
 
-export async function getEventById(db: Database, params: GetEventByIdParams) {
+export async function getEventById(db: Database | Transaction, params: GetEventByIdParams) {
 	const { id } = params;
 
 	const item = await db.query.events.findFirst({
@@ -120,7 +123,10 @@ export async function getEventById(db: Database, params: GetEventByIdParams) {
 		return null;
 	}
 
-	const image = client.urls.generate(item.image.key, { width: imageWidth.featured });
+	const image = client.urls.generateSignedImageUrl({
+		key: item.image.key,
+		options: { width: imageWidth.featured },
+	});
 
 	const data = { ...item, image };
 
@@ -133,7 +139,7 @@ interface GetEventBySlugParams {
 	slug: schema.Entity["slug"];
 }
 
-export async function getEventBySlug(db: Database, params: GetEventBySlugParams) {
+export async function getEventBySlug(db: Database | Transaction, params: GetEventBySlugParams) {
 	const { slug } = params;
 
 	const item = await db.query.events.findFirst({
@@ -173,7 +179,10 @@ export async function getEventBySlug(db: Database, params: GetEventBySlugParams)
 		return null;
 	}
 
-	const image = client.urls.generate(item.image.key, { width: imageWidth.featured });
+	const image = client.urls.generateSignedImageUrl({
+		key: item.image.key,
+		options: { width: imageWidth.featured },
+	});
 
 	const data = { ...item, image };
 

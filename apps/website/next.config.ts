@@ -2,6 +2,10 @@ import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig as Config } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
+/**
+ * File extensions and import attributes are necessary for node.js native typescript resolution
+ * with `--experimental-next-config-strip-types` next.js cli option.
+ */
 import { env } from "./config/env.config.ts";
 
 const config: Config = {
@@ -10,6 +14,7 @@ const config: Config = {
 	/** Compression should be handled by the reverse proxy. */
 	compress: false,
 	experimental: {
+		authInterrupts: true,
 		browserDebugInfoInTerminal: true,
 		globalNotFound: true,
 		rootParams: true,

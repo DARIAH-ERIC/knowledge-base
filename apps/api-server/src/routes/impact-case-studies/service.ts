@@ -4,7 +4,7 @@ import { count, eq } from "@dariah-eric/dariah-knowledge-base-database-client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
 
-import type { Database } from "@/middlewares/db";
+import type { Database, Transaction } from "@/middlewares/db";
 import { imageWidth } from "~/config/api.config";
 
 interface GetImpactCaseStudiesParams {
@@ -14,7 +14,10 @@ interface GetImpactCaseStudiesParams {
 	offset?: number;
 }
 
-export async function getImpactCaseStudies(db: Database, params: GetImpactCaseStudiesParams) {
+export async function getImpactCaseStudies(
+	db: Database | Transaction,
+	params: GetImpactCaseStudiesParams,
+) {
 	const { limit = 10, offset = 0 } = params;
 
 	const [items, aggregate] = await Promise.all([
@@ -61,7 +64,10 @@ export async function getImpactCaseStudies(db: Database, params: GetImpactCaseSt
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = client.urls.generate(item.image.key, { width: imageWidth.preview });
+		const image = client.urls.generateSignedImageUrl({
+			key: item.image.key,
+			options: { width: imageWidth.preview },
+		});
 
 		return { ...item, image };
 	});
@@ -75,7 +81,10 @@ interface GetImpactCaseStudyByIdParams {
 	id: schema.ImpactCaseStudy["id"];
 }
 
-export async function getImpactCaseStudyById(db: Database, params: GetImpactCaseStudyByIdParams) {
+export async function getImpactCaseStudyById(
+	db: Database | Transaction,
+	params: GetImpactCaseStudyByIdParams,
+) {
 	const { id } = params;
 
 	const item = await db.query.impactCaseStudies.findFirst({
@@ -124,12 +133,18 @@ export async function getImpactCaseStudyById(db: Database, params: GetImpactCase
 	}
 
 	const contributors = item.contributors.map((contributor) => {
-		const image = client.urls.generate(contributor.image.key, { width: imageWidth.avatar });
+		const image = client.urls.generateSignedImageUrl({
+			key: contributor.image.key,
+			options: { width: imageWidth.avatar },
+		});
 
 		return { ...contributor, image };
 	});
 
-	const image = client.urls.generate(item.image.key, { width: imageWidth.featured });
+	const image = client.urls.generateSignedImageUrl({
+		key: item.image.key,
+		options: { width: imageWidth.featured },
+	});
 
 	const data = { ...item, contributors, image };
 
@@ -143,7 +158,7 @@ interface GetImpactCaseStudyBySlugParams {
 }
 
 export async function getImpactCaseStudyBySlug(
-	db: Database,
+	db: Database | Transaction,
 	params: GetImpactCaseStudyBySlugParams,
 ) {
 	const { slug } = params;
@@ -194,12 +209,18 @@ export async function getImpactCaseStudyBySlug(
 	}
 
 	const contributors = item.contributors.map((contributor) => {
-		const image = client.urls.generate(contributor.image.key, { width: imageWidth.avatar });
+		const image = client.urls.generateSignedImageUrl({
+			key: contributor.image.key,
+			options: { width: imageWidth.avatar },
+		});
 
 		return { ...contributor, image };
 	});
 
-	const image = client.urls.generate(item.image.key, { width: imageWidth.featured });
+	const image = client.urls.generateSignedImageUrl({
+		key: item.image.key,
+		options: { width: imageWidth.featured },
+	});
 
 	const data = { ...item, contributors, image };
 

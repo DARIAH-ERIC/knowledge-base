@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-interface LogoProps {
+export interface LogoProps {
 	className?: string;
 }
 

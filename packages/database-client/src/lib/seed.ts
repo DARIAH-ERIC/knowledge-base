@@ -407,13 +407,12 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 
 		await db.insert(schema.imageContentBlocks).values(imageContentBlocks);
 
-		const richTextContentBlocks: Array<schema.RichTextContentBlockInput> =
-			contentBlockIdsByType.rich_text.map(({ id }) => {
-				return {
-					id,
-					content: JSON.stringify({ hello: "world" }),
-				};
-			});
+		const richTextContentBlocks = contentBlockIdsByType.rich_text.map(({ id }) => {
+			return {
+				id,
+				content: JSON.stringify({ hello: "world" }),
+			};
+		}) satisfies Array<schema.RichTextContentBlockInput>; // FIXME: type regression
 
 		await db.insert(schema.richTextContentBlocks).values(richTextContentBlocks);
 
@@ -437,5 +436,121 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 		});
 
 		await db.insert(schema.entitiesToEntities).values(entitiesToEntities);
+
+		const organisationalUnitTypeIds = await db
+			.select({ id: schema.organisationalUnitTypes.id, type: schema.organisationalUnitTypes.type })
+			.from(schema.organisationalUnitTypes);
+
+		const organisationalUnitsTypesByType = keyBy(organisationalUnitTypeIds, ({ type }) => {
+			return type;
+		});
+
+		const organisationalUnitsAllowedRelationsValues = await db
+			.select({
+				relatedUnitTypeId: schema.organisationalUnitsAllowedRelations.relatedUnitTypeId,
+				relationTypeId: schema.organisationalUnitsAllowedRelations.relationTypeId,
+				unitTypeId: schema.organisationalUnitsAllowedRelations.unitTypeId,
+			})
+			.from(schema.organisationalUnitsAllowedRelations);
+
+		const { umbrella_consortium, ...rest } = organisationalUnitsTypesByType;
+
+		const organisationalUnits: Array<Omit<schema.OrganisationalUnitInput, "id">> =
+			f.helpers.multiple(
+				(_, i) => {
+					const name = f.commerce.productName();
+
+					return {
+						name,
+						metadata: { country: f.location.country() },
+						summary: f.lorem.paragraph(),
+						imageId: f.helpers.maybe(
+							() => {
+								return f.helpers.arrayElement(imageIds).id;
+							},
+							{ probability: 0.5 },
+						),
+						typeId:
+							i === 0
+								? umbrella_consortium.id
+								: Object.values(rest).map((type) => {
+										return type.id;
+									})[i % Object.values(rest).length]!,
+					};
+				},
+				{ count: 25 },
+			);
+
+		const organisationalUnitsEntities: Array<schema.EntityInput> = organisationalUnits.map(
+			(organisationalUnit) => {
+				return {
+					typeId: entityTypesByType.organisational_units.id,
+					documentId: f.string.uuid(),
+					statusId: entityStatusByType.published.id,
+					slug: slugify(organisationalUnit.name),
+				};
+			},
+		);
+
+		const organisationalUnitIds = await db
+			.insert(schema.entities)
+			.values(organisationalUnitsEntities)
+			.returning({ id: schema.entities.id });
+
+		const organisationalUnitsIds = await db
+			.insert(schema.organisationalUnits)
+			.values(
+				organisationalUnitIds.map(({ id }, index) => {
+					return { ...organisationalUnits[index]!, id };
+				}),
+			)
+			.returning({ id: schema.organisationalUnits.id, typeId: schema.organisationalUnits.typeId });
+
+		const unitsToUnits: Array<schema.OrganisationalUnitRelationInput> = f.helpers
+			.multiple(
+				() => {
+					return f.helpers.arrayElement(organisationalUnitsAllowedRelationsValues);
+				},
+				{ count: 25 },
+			)
+			.map((organisationalUnitsAllowedRelation) => {
+				const unit = f.helpers.arrayElement(
+					organisationalUnitsIds.filter((organisationalUnit) => {
+						return organisationalUnit.typeId === organisationalUnitsAllowedRelation.unitTypeId;
+					}),
+				);
+
+				const relatedUnit = f.helpers.arrayElement(
+					organisationalUnitsIds.filter((organisationalUnit) => {
+						return (
+							organisationalUnit.typeId === organisationalUnitsAllowedRelation.relatedUnitTypeId
+						);
+					}),
+				);
+
+				const startDate = f.date.past({ years: 5 });
+				const yesterday = new Date();
+				yesterday.setDate(yesterday.getDate() - 1);
+				const minEndDate = new Date(startDate);
+				minEndDate.setFullYear(startDate.getFullYear() + 1);
+
+				return {
+					unitId: unit.id,
+					relatedUnitId: relatedUnit.id,
+					status: organisationalUnitsAllowedRelation.relationTypeId,
+					startDate,
+					endDate:
+						minEndDate < yesterday
+							? f.helpers.maybe(
+									() => {
+										return f.date.between({ from: minEndDate, to: yesterday });
+									},
+									{ probability: 0.25 },
+								)
+							: null,
+				};
+			});
+
+		await db.insert(schema.organisationalUnitsRelations).values(unitsToUnits);
 	});
 }

@@ -1,1 +1,1 @@
-# dariah knowledge base seed scripts
+# dariah knowledge base scripts

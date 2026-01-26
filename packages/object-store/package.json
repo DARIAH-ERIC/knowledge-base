@@ -1,0 +1,75 @@
+{
+	"name": "@dariah-eric/dariah-knowledge-base-object-store",
+	"private": true,
+	"license": "MIT",
+	"type": "module",
+	"engines": {
+		"node": "^24"
+	},
+	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": "^24",
+			"onFail": "download"
+		}
+	},
+	"packageManager": "pnpm@10.28.0",
+	"exports": {
+		"./client": {
+			"types": "./dist/src/client.d.ts",
+			"default": "./src/client.ts"
+		},
+		"./lib": {
+			"types": "./dist/src/lib/index.d.ts",
+			"default": "./src/lib/index.ts"
+		}
+	},
+	"sideEffects": false,
+	"scripts": {
+		"build": "rm -rf dist && tsc --project ./tsconfig.build.json",
+		"dev": "tsc --preserveWatchOutput --project ./tsconfig.build.json --watch",
+		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
+		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
+		"object-store:buckets:create": "tsx ./scripts/create-bucket.ts",
+		"object-store:buckets:reset": "tsx ./scripts/reset.ts",
+		"object-store:buckets:seed": "tsx ./scripts/seed.ts",
+		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
+		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
+		"types:check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@acdh-oeaw/lib": "catalog:",
+		"@acdh-oeaw/validate-env": "catalog:",
+		"minio": "catalog:",
+		"uuid": "catalog:",
+		"valibot": "catalog:"
+	},
+	"devDependencies": {
+		"@dariah-eric/dariah-knowledge-base-eslint-config": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-typescript-config": "workspace:^",
+		"@faker-js/faker": "catalog:",
+		"@types/node": "catalog:",
+		"eslint": "catalog:",
+		"prettier": "catalog:",
+		"sharp": "catalog:",
+		"tsx": "catalog:",
+		"typescript": "catalog:"
+	},
+	"browserslist": {
+		"development": [
+			"baseline newly available"
+		],
+		"production": [
+			"baseline widely available"
+		]
+	},
+	"lint-staged": {
+		"*.@(js|ts)": [
+			"eslint --fix --flag unstable_native_nodejs_ts_config",
+			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write"
+		],
+		"*.!(js|ts)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
+	},
+	"prettier": "@dariah-eric/dariah-knowledge-base-prettier-config"
+}

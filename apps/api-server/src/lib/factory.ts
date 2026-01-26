@@ -6,14 +6,14 @@ import { HTTPException } from "hono/http-exception";
 import { requestId } from "hono/request-id";
 import { rateLimiter } from "hono-rate-limiter";
 
-import type { Database } from "@/middlewares/db";
+import type { Database, Transaction } from "@/middlewares/db";
 import { type Logger, logger } from "@/middlewares/logger";
 import { config as corsConfig } from "~/config/cors.config";
 import { config as rateLimiterConfig } from "~/config/rate-limiter.config";
 
 interface Env {
 	Variables: {
-		db?: Database;
+		db?: Database | Transaction;
 		logger: Logger;
 	};
 }
