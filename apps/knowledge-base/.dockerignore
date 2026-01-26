@@ -55,6 +55,9 @@ out/
 # storybook
 storybook-static/
 
+# data migration cache
+.cache/
+
 
 ## .dockerignore ##
 

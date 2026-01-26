@@ -1,18 +1,13 @@
 import * as path from "node:path";
 
-import base from "@dariah-eric/dariah-knowledge-base-eslint-config/base";
-import naming from "@dariah-eric/dariah-knowledge-base-eslint-config/naming-conventions";
+import next from "@dariah-eric/dariah-knowledge-base-eslint-config/next";
 import node from "@dariah-eric/dariah-knowledge-base-eslint-config/node";
-import react from "@dariah-eric/dariah-knowledge-base-eslint-config/react";
 import storybook from "@dariah-eric/dariah-knowledge-base-eslint-config/storybook";
-import tailwindcss from "@dariah-eric/dariah-knowledge-base-eslint-config/tailwindcss";
 import { defineConfig } from "eslint/config";
 
 export default defineConfig(
-	base,
-	react,
+	next,
 	{
-		extends: [tailwindcss],
 		settings: {
 			"better-tailwindcss": {
 				entryPoint: path.resolve("./styles/index.css"),
@@ -25,5 +20,27 @@ export default defineConfig(
 		extends: [node],
 		files: ["vite.config.ts", "scripts/**/*.ts"],
 	},
-	naming,
+	{
+		rules: {
+			"check-file/filename-naming-convention": [
+				"error",
+				{
+					"**/*": "KEBAB_CASE",
+				},
+				{ ignoreMiddleExtensions: true },
+			],
+			"check-file/folder-naming-convention": [
+				"error",
+				{
+					"**/": "?(.)+([a-z])*([a-z0-9])*(-+([a-z0-9]))",
+				},
+			],
+		},
+	},
+	{
+		files: [".storybook/main.ts", ".storybook/preview.ts"],
+		rules: {
+			"import-x/no-default-export": "off",
+		},
+	},
 );

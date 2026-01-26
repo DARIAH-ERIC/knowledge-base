@@ -15,17 +15,10 @@
 	},
 	"packageManager": "pnpm@10.28.0",
 	"exports": {
-		"./base": "./src/base.ts",
 		"./drizzle": "./src/drizzle.ts",
-		"./naming-conventions": "./src/naming-conventions.ts",
-		"./naming-conventions-next": "./src/naming-conventions-next.ts",
 		"./next": "./src/next.ts",
 		"./node": "./src/node.ts",
-		"./playwright": "./src/playwright.ts",
-		"./react": "./src/react.ts",
-		"./storybook": "./src/storybook.ts",
-		"./tailwindcss": "./src/tailwindcss.ts",
-		"./turbo": "./src/turbo.ts"
+		"./storybook": "./src/storybook.ts"
 	},
 	"sideEffects": false,
 	"scripts": {

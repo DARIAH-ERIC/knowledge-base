@@ -1,7 +1,7 @@
 import { defineConfig } from "eslint/config";
 
-import preset from "./src/node.ts";
+import node from "./src/node.ts";
 
-const config = defineConfig(preset);
+const config = defineConfig(node);
 
 export default config;

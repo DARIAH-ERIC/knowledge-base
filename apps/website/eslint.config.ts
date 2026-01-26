@@ -1,8 +1,8 @@
 import drizzle from "@dariah-eric/dariah-knowledge-base-eslint-config/drizzle";
-import preset, { restrictedImports } from "@dariah-eric/dariah-knowledge-base-eslint-config/next";
+import next, { restrictedImports } from "@dariah-eric/dariah-knowledge-base-eslint-config/next";
 import { defineConfig } from "eslint/config";
 
-const config = defineConfig(preset, drizzle, {
+const config = defineConfig(next, drizzle, {
 	name: "data-access-layer-config",
 	ignores: ["lib/data/**"],
 	rules: {
