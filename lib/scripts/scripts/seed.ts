@@ -9,7 +9,7 @@ import {
 	adminClient as objectStoreClient,
 	seed as seedObjectStore,
 	type SeedManifest,
-} from "@dariah-eric/dariah-knowledge-base-image-service/lib";
+} from "@dariah-eric/dariah-knowledge-base-object-store/lib";
 import {
 	adminClient as searchIndexClient,
 	seed as seedSearchIndex,

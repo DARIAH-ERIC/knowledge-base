@@ -12,6 +12,7 @@ services:
 
 volumes:
   drizzle-gateway-data:
+    name: dariah-knowledge-base-drizzle-gateway-data
 
 networks:
   default:

@@ -6,11 +6,14 @@ import type { ReadableStream } from "node:stream/web";
 import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
 import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
 import {
-	type AssetPrefix,
-	assetPrefixes,
 	client,
 	type ImageUrlOptions,
 } from "@dariah-eric/dariah-knowledge-base-image-service/client";
+import {
+	type AssetPrefix,
+	assetPrefixes,
+	client as s3,
+} from "@dariah-eric/dariah-knowledge-base-object-store/client";
 
 export { assetPrefixes };
 
@@ -67,7 +70,7 @@ export async function uploadAsset(params: UploadAssetParams) {
 	const size = file.size;
 	const metadata = { "content-type": file.type, name: file.name };
 
-	const { key } = await client.images.upload({ input, prefix, metadata, size });
+	const { key } = await s3.images.upload({ input, prefix, metadata, size });
 
 	await db.insert(schema.assets).values({ key, licenseId });
 
@@ -83,7 +86,7 @@ interface GetPresignedUploadUrlParams {
 export async function getPresignedUploadUrl(params: GetPresignedUploadUrlParams) {
 	const { prefix } = params;
 
-	const { key, url } = await client.urls.generatePresignedUploadUrl({ prefix });
+	const { key, url } = await s3.urls.generatePresignedUploadUrl({ prefix });
 
 	return {
 		key,
