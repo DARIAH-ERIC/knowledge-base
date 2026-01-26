@@ -17,7 +17,8 @@
 	"exports": {
 		"./drizzle": "./src/drizzle.ts",
 		"./next": "./src/next.ts",
-		"./node": "./src/node.ts"
+		"./node": "./src/node.ts",
+		"./storybook": "./src/storybook.ts"
 	},
 	"sideEffects": false,
 	"scripts": {
@@ -33,8 +34,10 @@
 		"@acdh-oeaw/eslint-config-node": "catalog:",
 		"@acdh-oeaw/eslint-config-playwright": "catalog:",
 		"@acdh-oeaw/eslint-config-react": "catalog:",
+		"@acdh-oeaw/eslint-config-storybook": "catalog:",
 		"@acdh-oeaw/eslint-config-tailwindcss": "catalog:",
 		"eslint-config-flat-gitignore": "catalog:",
+		"eslint-config-turbo": "catalog:",
 		"eslint-plugin-check-file": "catalog:",
 		"eslint-plugin-drizzle": "catalog:",
 		"eslint-plugin-perfectionist": "catalog:",

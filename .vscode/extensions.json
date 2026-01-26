@@ -11,6 +11,7 @@
 		"ms-playwright.playwright",
 		"stylelint.vscode-stylelint",
 		"unifiedjs.vscode-mdx",
-		"vercel.turbo-vsc"
+		"vercel.turbo-vsc",
+		"vitest.explorer"
 	]
 }

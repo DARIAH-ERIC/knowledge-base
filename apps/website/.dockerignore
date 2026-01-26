@@ -52,6 +52,12 @@ out/
 /playwright-report/
 /test-results/
 
+# storybook
+storybook-static/
+
+# data migration cache
+.cache/
+
 
 ## .dockerignore ##
 

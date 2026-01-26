@@ -1,6 +1,6 @@
-import preset from "@dariah-eric/dariah-knowledge-base-eslint-config/node";
+import node from "@dariah-eric/dariah-knowledge-base-eslint-config/node";
 import { defineConfig } from "eslint/config";
 
-const config = defineConfig(preset);
+const config = defineConfig(node);
 
 export default config;

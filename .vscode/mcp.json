@@ -15,6 +15,10 @@
 		"sentry": {
 			"url": "https://mcp.sentry.dev/mcp/acdh/dariah-knowledge-base",
 			"type": "http"
+		},
+		"storybook": {
+			"command": "npx",
+			"args": ["-y", "@storybook/mcp@latest"]
 		}
 	}
 }

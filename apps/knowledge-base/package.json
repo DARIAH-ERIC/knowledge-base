@@ -45,6 +45,7 @@
 		"@dariah-eric/dariah-knowledge-base-image-service": "workspace:^",
 		"@dariah-eric/dariah-knowledge-base-object-store": "workspace:^",
 		"@dariah-eric/dariah-knowledge-base-search-index": "workspace:^",
+		"@dariah-eric/dariah-knowledge-base-ui": "workspace:^",
 		"@heroicons/react": "catalog:",
 		"@react-aria/utils": "catalog:",
 		"@sentry/nextjs": "catalog:",
