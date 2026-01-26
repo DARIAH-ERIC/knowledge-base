@@ -1,6 +1,10 @@
 {
 	"$schema": "https://turborepo.com/schema.v2.json",
 	"globalEnv": [
+		"API_ALLOWED_ORIGINS",
+		"API_BASE_URL",
+		"API_LOG_LEVEL",
+		"API_PORT",
 		"BUILD_MODE",
 		"DATABASE_HOST",
 		"DATABASE_NAME",
@@ -41,10 +45,6 @@
 		"build": {
 			"dependsOn": ["^build"],
 			"env": [
-				"API_ALLOWED_ORIGINS",
-				"API_BASE_URL",
-				"API_LOG_LEVEL",
-				"API_PORT",
 				"BUILD_MODE",
 				"NEXT_PUBLIC_APP_BASE_URL",
 				"NEXT_PUBLIC_APP_IMPRINT_CUSTOM_CONFIG",
