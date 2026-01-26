@@ -1,24 +1,20 @@
 {
-	"name": "@dariah-eric/dariah-knowledge-base-eslint-config",
+	"name": "@dariah-eric/dariah-knowledge-base-configs",
 	"private": true,
 	"license": "MIT",
 	"type": "module",
-	"engines": {
-		"node": "^24"
-	},
-	"devEngines": {
-		"runtime": {
-			"name": "node",
-			"version": "^24.13.0",
-			"onFail": "download"
-		}
-	},
-	"packageManager": "pnpm@10.28.0",
 	"exports": {
-		"./drizzle": "./src/drizzle.ts",
-		"./next": "./src/next.ts",
-		"./node": "./src/node.ts",
-		"./storybook": "./src/storybook.ts"
+		"./eslint/drizzle": "./src/eslint/drizzle.ts",
+		"./eslint/next": "./src/eslint/next.ts",
+		"./eslint/node": "./src/eslint/node.ts",
+		"./eslint/storybook": "./src/eslint/storybook.ts",
+		"./eslint/turbo": "./src/eslint/turbo.ts",
+		"./prettier": "./src/prettier/index.ts",
+		"./stylelint": "./src/stylelint/index.ts",
+		"./typescript/app": "./src/typescript/app.json",
+		"./typescript/app-build": "./src/typescript/app-build.json",
+		"./typescript/lib": "./src/typescript/lib.json",
+		"./typescript/lib-build": "./src/typescript/lib-build.json"
 	},
 	"sideEffects": false,
 	"scripts": {
@@ -36,23 +32,36 @@
 		"@acdh-oeaw/eslint-config-react": "catalog:",
 		"@acdh-oeaw/eslint-config-storybook": "catalog:",
 		"@acdh-oeaw/eslint-config-tailwindcss": "catalog:",
+		"@acdh-oeaw/prettier-config": "catalog:",
+		"@acdh-oeaw/stylelint-config": "catalog:",
+		"@acdh-oeaw/tsconfig": "catalog:",
+		"@acdh-oeaw/tsconfig-lib": "catalog:",
 		"eslint-config-flat-gitignore": "catalog:",
 		"eslint-config-turbo": "catalog:",
 		"eslint-plugin-check-file": "catalog:",
 		"eslint-plugin-drizzle": "catalog:",
 		"eslint-plugin-perfectionist": "catalog:",
 		"eslint-plugin-unicorn": "catalog:",
-		"globals": "catalog:"
+		"globals": "catalog:",
+		"prettier-plugin-embed": "catalog:",
+		"prettier-plugin-sql": "catalog:"
 	},
 	"peerDependencies": {
-		"eslint": "catalog:"
+		"eslint": "catalog:",
+		"prettier": "catalog:",
+		"stylelint": "catalog:",
+		"typescript": "catalog:"
+	},
+	"peerDependenciesMeta": {
+		"stylelint": {
+			"optional": true
+		}
 	},
 	"devDependencies": {
-		"@dariah-eric/dariah-knowledge-base-prettier-config": "workspace:^",
-		"@dariah-eric/dariah-knowledge-base-typescript-config": "workspace:^",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
 		"prettier": "catalog:",
+		"stylelint": "catalog:",
 		"typescript": "catalog:"
 	},
 	"browserslist": {
@@ -70,5 +79,5 @@
 		],
 		"*.!(js|ts)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
 	},
-	"prettier": "@dariah-eric/dariah-knowledge-base-prettier-config"
+	"prettier": "./src/prettier/index.ts"
 }

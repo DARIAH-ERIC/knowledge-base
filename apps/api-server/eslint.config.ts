@@ -1,8 +1,9 @@
-import drizzle from "@dariah-eric/dariah-knowledge-base-eslint-config/drizzle";
-import node from "@dariah-eric/dariah-knowledge-base-eslint-config/node";
+import drizzle from "@dariah-eric/dariah-knowledge-base-configs/eslint/drizzle";
+import node from "@dariah-eric/dariah-knowledge-base-configs/eslint/node";
+import turbo from "@dariah-eric/dariah-knowledge-base-configs/eslint/turbo";
 import { defineConfig } from "eslint/config";
 
-const config = defineConfig(node, drizzle, {
+const config = defineConfig(node, turbo, drizzle, {
 	name: "data-access-layer-config",
 	ignores: [
 		"src/middlewares/db.ts",

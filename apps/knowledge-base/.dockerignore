@@ -18,6 +18,9 @@ node_modules/
 .stylelintcache
 *.tsbuildinfo
 
+# turborepo
+.turbo/
+
 # performance profiles
 *.cpuprofile
 *.heapprofile
