@@ -321,22 +321,10 @@ async function main() {
 					Array.isArray(event.venue) && event.venue.length === 0
 						? ""
 						: [event.venue.venue, event.venue.country].filter(isNonEmptyString).join(", "),
-				startDate: event.utc_start_date,
-				endDate: event.utc_end_date,
-				startTime: event.all_day
-					? null
-					: [
-							event.utc_start_date_details.hour,
-							event.utc_start_date_details.minutes,
-							event.utc_start_date_details.seconds,
-						].join(":"),
-				endTime: event.all_day
-					? null
-					: [
-							event.utc_end_date_details.hour,
-							event.utc_end_date_details.minutes,
-							event.utc_end_date_details.seconds,
-						].join(":"),
+				duration: {
+					start: event.utc_start_date,
+					end: event.utc_end_date,
+				},
 				createdAt: new Date(event.date_utc),
 				updatedAt: new Date(event.modified_utc),
 			});

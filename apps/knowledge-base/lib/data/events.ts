@@ -103,18 +103,7 @@ interface CreateEventParams extends Omit<schema.EventInput, "id" | "createdAt" |
 	resourceIds?: Array<string>;
 }
 export async function createEvent(params: CreateEventParams) {
-	const {
-		endDate,
-		endTime,
-		imageId,
-		location,
-		slug,
-		startDate,
-		startTime,
-		summary,
-		title,
-		website,
-	} = params;
+	const { duration, imageId, location, slug, summary, title, website } = params;
 
 	const entityType =
 		(await db.query.entityTypes.findFirst({
@@ -158,10 +147,7 @@ export async function createEvent(params: CreateEventParams) {
 			summary,
 			imageId,
 			location,
-			startDate,
-			startTime,
-			endDate,
-			endTime,
+			duration,
 			website,
 		};
 		await tx.insert(schema.events).values(event);

@@ -5,16 +5,7 @@ import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const EventBaseSchema = v.pipe(
 	v.object({
-		...v.pick(schema.EventSelectSchema, [
-			"id",
-			"title",
-			"summary",
-			"location",
-			"startDate",
-			"endDate",
-			"startTime",
-			"endTime",
-		]).entries,
+		...v.pick(schema.EventSelectSchema, ["id", "title", "summary", "location", "duration"]).entries,
 		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
@@ -34,16 +25,7 @@ export type EventList = v.InferOutput<typeof EventListSchema>;
 
 export const EventSchema = v.pipe(
 	v.object({
-		...v.pick(schema.EventSelectSchema, [
-			"id",
-			"title",
-			"summary",
-			"location",
-			"startDate",
-			"endDate",
-			"startTime",
-			"endTime",
-		]).entries,
+		...v.pick(schema.EventSelectSchema, ["id", "title", "summary", "location", "duration"]).entries,
 		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
