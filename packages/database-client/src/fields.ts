@@ -26,7 +26,7 @@ export function timestamps() {
 	};
 }
 
-export const DateRangeSchema = v.pipe(
+export const TimestampRange = v.pipe(
 	v.object({
 		start: v.date(),
 		end: v.optional(v.date()),
@@ -36,10 +36,10 @@ export const DateRangeSchema = v.pipe(
 	}),
 );
 
-type DateRange = v.InferInput<typeof DateRangeSchema>;
+type TimestampRange = v.InferInput<typeof TimestampRange>;
 
-export const dateRange = p.customType<{
-	data: DateRange;
+export const timestampRange = p.customType<{
+	data: TimestampRange;
 	driverData: string;
 }>({
 	dataType() {
@@ -48,12 +48,12 @@ export const dateRange = p.customType<{
 	toDriver({ start, end }) {
 		return `[${start.toISOString()},${end?.toISOString() ?? ""}]`;
 	},
-	fromDriver(value: string): DateRange {
+	fromDriver(value: string): TimestampRange {
 		const [start, end] = value.slice(1, -1).split(",");
 
 		return {
 			start: new Date(String(start)),
-			end: end != null ? new Date(String(end)) : undefined,
+			end: end != null ? new Date(end) : undefined,
 		};
 	},
 });

@@ -32,6 +32,7 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 				summary: true,
 				location: true,
 				duration: true,
+				isFullDay: true,
 			},
 			with: {
 				entity: {
@@ -98,6 +99,7 @@ export async function getEventById(db: Database | Transaction, params: GetEventB
 			summary: true,
 			location: true,
 			duration: true,
+			isFullDay: true,
 		},
 		with: {
 			entity: {
@@ -151,6 +153,7 @@ export async function getEventBySlug(db: Database | Transaction, params: GetEven
 			summary: true,
 			location: true,
 			duration: true,
+			isFullDay: true,
 		},
 		with: {
 			entity: {

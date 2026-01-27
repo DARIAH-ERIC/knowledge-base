@@ -21,7 +21,8 @@ export const events = p.pgTable("events", {
 			return assets.id;
 		}),
 	location: p.text("location").notNull(),
-	duration: f.dateRange("duration").notNull(),
+	duration: f.timestampRange("duration").notNull(),
+	isFullDay: p.boolean().notNull().default(false),
 	website: p.text("website"),
 	...f.timestamps(),
 });

@@ -156,6 +156,17 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			() => {
 				const title = f.lorem.sentence();
 				const start = f.date.past({ years: 5 });
+				const end = f.helpers.maybe(
+					() => {
+						return f.date.soon({ refDate: start, days: 7 });
+					},
+					{ probability: 0.25 },
+				);
+				const isFullDay = f.datatype.boolean({ probability: 0.5 });
+				if (isFullDay) {
+					start.setUTCHours(0, 0, 0, 0);
+					end?.setUTCHours(23, 59, 59, 999);
+				}
 
 				return {
 					title,
@@ -164,13 +175,9 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 					location: f.location.city(),
 					duration: {
 						start,
-						end: f.helpers.maybe(
-							() => {
-								return f.date.soon({ refDate: start, days: 7 });
-							},
-							{ probability: 0.25 },
-						),
+						end,
 					},
+					isFullDay,
 					website: f.helpers.maybe(
 						() => {
 							return f.internet.url();
@@ -537,7 +544,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 					unitId: unit.id,
 					relatedUnitId: relatedUnit.id,
 					status: organisationalUnitsAllowedRelation.relationTypeId,
-					period: {
+					duration: {
 						start,
 						end:
 							minEndDate < yesterday

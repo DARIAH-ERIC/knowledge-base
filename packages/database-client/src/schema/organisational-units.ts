@@ -100,7 +100,7 @@ export const organisationalUnitsRelations = p.pgTable("organisational_units_to_u
 		.references(() => {
 			return organisationalUnits.id;
 		}),
-	period: f.dateRange("period").notNull(),
+	duration: f.timestampRange("duration").notNull(),
 	status: p
 		.uuid("status")
 		.notNull()

@@ -325,6 +325,7 @@ async function main() {
 					start: event.utc_start_date,
 					end: event.utc_end_date,
 				},
+				isFullDay: event.all_day,
 				createdAt: new Date(event.date_utc),
 				updatedAt: new Date(event.modified_utc),
 			});
