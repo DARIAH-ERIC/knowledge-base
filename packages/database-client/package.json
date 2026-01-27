@@ -4,41 +4,21 @@
 	"license": "MIT",
 	"type": "module",
 	"engines": {
-		"node": "^24"
+		"node": "24.x"
 	},
-	"devEngines": {
-		"runtime": {
-			"name": "node",
-			"version": "^24.13.0",
-			"onFail": "download"
-		}
-	},
-	"packageManager": "pnpm@10.28.0",
 	"exports": {
-		".": {
-			"types": "./dist/src/index.d.ts",
-			"default": "./src/index.ts"
-		},
-		"./client": {
-			"types": "./dist/src/client.d.ts",
-			"default": "./src/client.ts"
-		},
-		"./lib": {
-			"types": "./dist/src/lib/index.d.ts",
-			"default": "./src/lib/index.ts"
-		},
-		"./relations": {
-			"types": "./dist/src/relations.d.ts",
-			"default": "./src/relations.ts"
-		},
-		"./schema": {
-			"types": "./dist/src/schema.d.ts",
-			"default": "./src/schema.ts"
-		}
+		".": "./dist/index.mjs",
+		"./client": "./dist/client.mjs",
+		"./lib": "./src/lib/index.ts",
+		"./relations": "./dist/relations.mjs",
+		"./schema": "./dist/schema.mjs"
 	},
+	"files": [
+		"./dist/"
+	],
 	"sideEffects": false,
 	"scripts": {
-		"build": "rm -rf dist && tsc --project ./tsconfig.build.json",
+		"build": "tsdown",
 		"db:migrations:apply": "drizzle-kit migrate --config=./config/drizzle.config.ts",
 		"db:migrations:check": "drizzle-kit check --config=./config/drizzle.config.ts",
 		"db:migrations:generate": "drizzle-kit generate --config=./config/drizzle.config.ts",
@@ -46,7 +26,7 @@
 		"db:reset": "tsx ./scripts/reset.ts",
 		"db:seed": "tsx ./scripts/seed.ts",
 		"db:studio": "drizzle-kit studio --config=./config/drizzle.config.ts",
-		"dev": "tsc --preserveWatchOutput --project ./tsconfig.build.json --watch",
+		"dev": "tsdown --watch",
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
 		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
 		"generate:dbml-schema": "tsx ./scripts/generate-dbml-schema.ts",
@@ -74,6 +54,7 @@
 		"drizzle-seed": "catalog:",
 		"eslint": "catalog:",
 		"prettier": "catalog:",
+		"tsdown": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:"
 	},

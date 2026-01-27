@@ -4,16 +4,8 @@
 	"license": "MIT",
 	"type": "module",
 	"engines": {
-		"node": "^24"
+		"node": "24.x"
 	},
-	"devEngines": {
-		"runtime": {
-			"name": "node",
-			"version": "^24.13.0",
-			"onFail": "download"
-		}
-	},
-	"packageManager": "pnpm@10.28.0",
 	"scripts": {
 		"analyze": "next experimental-analyze",
 		"build": "next build --experimental-next-config-strip-types",
@@ -24,7 +16,7 @@
 		"lint:fix": "run-p --continue-on-error \"lint:*:fix\"",
 		"lint:code:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:code:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
-		"lint:styles:check": "stylelint \"./styles/**/*.css\" --cache --ignore-path ./../../.gitignore",
+		"lint:styles:check": "stylelint \"./styles/**/*.css\" --cache --config-basedir ../../packages/config --ignore-path ./../../.gitignore",
 		"lint:styles:fix": "stylelint \"./styles/**/*.css\" --cache --fix --ignore-path ./../../.gitignore",
 		"prepare": "run-s types:prepare",
 		"start": "PORT=3002 next start --experimental-next-config-strip-types",
@@ -92,6 +84,7 @@
 		"prettier": "catalog:",
 		"schema-dts": "catalog:",
 		"stylelint": "catalog:",
+		"stylelint-config-standard": "catalog:",
 		"tailwindcss": "catalog:",
 		"tailwindcss-react-aria-components": "catalog:",
 		"tsx": "catalog:",
