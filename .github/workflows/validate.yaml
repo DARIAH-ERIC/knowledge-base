@@ -78,26 +78,29 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
 
+      - name: Install turborepo cli globally
+        run: pnpm add --global turbo
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Format
-        run: pnpm run format:check
+        run: turbo run format:check
 
       - name: Build packages
-        run: pnpm --filter "./packages/*" run build
+        run: turbo run --filter "./packages/*" build
 
       - name: Lint
-        run: pnpm run lint:check
+        run: turbo run lint:check
 
       - name: Typecheck
-        run: pnpm run types:check
+        run: turbo run types:check
 
       - name: Start services
         run: pnpm run dev:services:up postgres minio imgproxy mailpit
@@ -115,7 +118,7 @@ jobs:
         run: pnpm run object-store:buckets:seed
 
       - name: Test
-        run: pnpm run test
+        run: turbo run test
 
       # https://nextjs.org/docs/pages/building-your-application/deploying/ci-build-caching#github-actions
       # - name: Cache Next.js build output
@@ -126,7 +129,7 @@ jobs:
       #       "${{ matrix.os }}-${{ matrix.node-version }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}"
 
       - name: Build app
-        run: pnpm run build
+        run: turbo run build
 
       - name: Get playwright version
         run: |
@@ -150,7 +153,7 @@ jobs:
         run: pnpm exec playwright install-deps
 
       - name: Run e2e tests
-        run: pnpm run test:e2e
+        run: turbo run test:e2e
 
       - name: Stop services
         run: pnpm run dev:services:down
