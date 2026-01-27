@@ -21,10 +21,7 @@ export const events = p.pgTable("events", {
 			return assets.id;
 		}),
 	location: p.text("location").notNull(),
-	startDate: p.date("start_date", { mode: "date" }).notNull(),
-	startTime: p.time("start_time", { precision: 0 }),
-	endDate: p.date("end_date", { mode: "date" }),
-	endTime: p.time("end_time", { precision: 0 }),
+	duration: f.dateRange("duration").notNull(),
 	website: p.text("website"),
 	...f.timestamps(),
 });
