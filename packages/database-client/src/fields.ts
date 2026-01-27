@@ -53,7 +53,7 @@ export const dateRange = p.customType<{
 
 		return {
 			start: new Date(String(start)),
-			end: new Date(String(end)),
+			end: end != null ? new Date(String(end)) : undefined,
 		};
 	},
 });
