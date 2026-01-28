@@ -28,7 +28,9 @@ function createItems(count: number) {
 				title,
 				summary: f.lorem.paragraph(),
 				location: f.location.city(),
-				startDate: f.date.past({ years: 5 }),
+				duration: {
+					start: f.date.past({ years: 5 }),
+				},
 			};
 
 			return { entity, event };

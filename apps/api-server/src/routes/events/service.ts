@@ -31,10 +31,8 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 				title: true,
 				summary: true,
 				location: true,
-				startDate: true,
-				endDate: true,
-				startTime: true,
-				endTime: true,
+				duration: true,
+				isFullDay: true,
 			},
 			with: {
 				entity: {
@@ -100,10 +98,8 @@ export async function getEventById(db: Database | Transaction, params: GetEventB
 			title: true,
 			summary: true,
 			location: true,
-			startDate: true,
-			endDate: true,
-			startTime: true,
-			endTime: true,
+			duration: true,
+			isFullDay: true,
 		},
 		with: {
 			entity: {
@@ -156,10 +152,8 @@ export async function getEventBySlug(db: Database | Transaction, params: GetEven
 			title: true,
 			summary: true,
 			location: true,
-			startDate: true,
-			endDate: true,
-			startTime: true,
-			endTime: true,
+			duration: true,
+			isFullDay: true,
 		},
 		with: {
 			entity: {

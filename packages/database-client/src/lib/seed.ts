@@ -155,44 +155,29 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 		const events: Array<Omit<schema.EventInput, "id">> = f.helpers.multiple(
 			() => {
 				const title = f.lorem.sentence();
-				const startDate = f.date.past({ years: 5 });
+				const start = f.date.past({ years: 5 });
+				const end = f.helpers.maybe(
+					() => {
+						return f.date.soon({ refDate: start, days: 7 });
+					},
+					{ probability: 0.25 },
+				);
+				const isFullDay = f.datatype.boolean({ probability: 0.5 });
+				if (isFullDay) {
+					start.setUTCHours(0, 0, 0, 0);
+					end?.setUTCHours(23, 59, 59, 999);
+				}
 
 				return {
 					title,
 					summary: f.lorem.paragraph(),
 					imageId: f.helpers.arrayElement(imageIds).id,
 					location: f.location.city(),
-					startDate,
-					startTime: f.helpers.maybe(
-						() => {
-							return f.date
-								.between({
-									from: new Date(Date.UTC(2025, 0, 1, 0, 0, 0)),
-									to: new Date(Date.UTC(2025, 0, 1, 23, 59, 59)),
-								})
-								.toTimeString()
-								.slice(0, 8);
-						},
-						{ probability: 0.1 },
-					),
-					endDate: f.helpers.maybe(
-						() => {
-							return f.date.soon({ refDate: startDate, days: 7 });
-						},
-						{ probability: 0.25 },
-					),
-					endTime: f.helpers.maybe(
-						() => {
-							return f.date
-								.between({
-									from: new Date(Date.UTC(2025, 0, 1, 0, 0, 0)),
-									to: new Date(Date.UTC(2025, 0, 1, 23, 59, 59)),
-								})
-								.toTimeString()
-								.slice(0, 8);
-						},
-						{ probability: 0.05 },
-					),
+					duration: {
+						start,
+						end,
+					},
+					isFullDay,
 					website: f.helpers.maybe(
 						() => {
 							return f.internet.url();
@@ -549,26 +534,28 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 					}),
 				);
 
-				const startDate = f.date.past({ years: 5 });
+				const start = f.date.past({ years: 5 });
 				const yesterday = new Date();
 				yesterday.setDate(yesterday.getDate() - 1);
-				const minEndDate = new Date(startDate);
-				minEndDate.setFullYear(startDate.getFullYear() + 1);
+				const minEndDate = new Date(start);
+				minEndDate.setFullYear(start.getFullYear() + 1);
 
 				return {
 					unitId: unit.id,
 					relatedUnitId: relatedUnit.id,
 					status: organisationalUnitsAllowedRelation.relationTypeId,
-					startDate,
-					endDate:
-						minEndDate < yesterday
-							? f.helpers.maybe(
-									() => {
-										return f.date.between({ from: minEndDate, to: yesterday });
-									},
-									{ probability: 0.25 },
-								)
-							: null,
+					duration: {
+						start,
+						end:
+							minEndDate < yesterday
+								? f.helpers.maybe(
+										() => {
+											return f.date.between({ from: minEndDate, to: yesterday });
+										},
+										{ probability: 0.25 },
+									)
+								: undefined,
+					},
 				};
 			});
 
