@@ -22,7 +22,7 @@ export const events = p.pgTable("events", {
 		}),
 	location: p.text("location").notNull(),
 	duration: f.timestampRange("duration").notNull(),
-	isFullDay: p.boolean().notNull().default(false),
+	isFullDay: p.boolean("is_full_day").notNull().default(false),
 	website: p.text("website"),
 	...f.timestamps(),
 });
