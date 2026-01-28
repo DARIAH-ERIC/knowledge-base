@@ -152,6 +152,8 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 				const sourceId = item.persistentId;
 				const id = [source, sourceId].join(":");
 
+				const updatedAt = new Date(item.lastInfoUpdate).getTime();
+
 				const sourceActorIds = item.contributors.flatMap((contributor) => {
 					return contributor.actor.id;
 				});
@@ -164,6 +166,7 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 					source,
 					source_id: sourceId,
 					imported_at: Date.now(),
+					updated_at: updatedAt,
 					label: item.label,
 					description: item.description,
 					keywords,

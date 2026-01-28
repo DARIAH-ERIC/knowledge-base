@@ -38,6 +38,7 @@ interface ResourceCollectionDocumentBase {
 	source: "open-aire" | "ssh-open-marketplace" | "zotero";
 	source_id: string;
 	imported_at: number;
+	updated_at: number | null;
 	label: string;
 	description: string;
 	keywords: Array<string>;
