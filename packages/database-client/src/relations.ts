@@ -1,6 +1,9 @@
 import { defineRelations } from "drizzle-orm";
+import { type RelationsFilter, relationsFilterToSQL } from "drizzle-orm/relations";
 
 import * as schema from "./schema";
+
+export { type RelationsFilter, relationsFilterToSQL };
 
 export const relations = defineRelations(schema, (r) => {
 	return {
