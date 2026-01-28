@@ -2,7 +2,7 @@ import { defineConfig } from "tsdown";
 
 export default defineConfig({
 	clean: true,
-	copy: ["./styles/"],
+	copy: ["./messages/", "./styles/"],
 	dts: true,
 	entry: [
 		"./src/**/*.ts",
@@ -16,6 +16,5 @@ export default defineConfig({
 	minify: false,
 	sourcemap: true,
 	treeshake: true,
-	tsconfig: "./tsconfig.build.json",
 	unbundle: true,
 });

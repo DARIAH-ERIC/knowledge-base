@@ -4,30 +4,19 @@
 	"license": "MIT",
 	"type": "module",
 	"engines": {
-		"node": "^24"
+		"node": "24.x"
 	},
-	"devEngines": {
-		"runtime": {
-			"name": "node",
-			"version": "^24",
-			"onFail": "download"
-		}
-	},
-	"packageManager": "pnpm@10.28.0",
 	"exports": {
-		"./client": {
-			"types": "./dist/src/client.d.ts",
-			"default": "./src/client.ts"
-		},
-		"./lib": {
-			"types": "./dist/src/lib/index.d.ts",
-			"default": "./src/lib/index.ts"
-		}
+		"./client": "./dist/client.mjs",
+		"./lib": "./src/lib/index.ts"
 	},
+	"files": [
+		"./dist/"
+	],
 	"sideEffects": false,
 	"scripts": {
-		"build": "rm -rf dist && tsc --project ./tsconfig.build.json",
-		"dev": "tsc --preserveWatchOutput --project ./tsconfig.build.json --watch",
+		"build": "tsdown",
+		"dev": "tsdown --watch",
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
 		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
 		"object-store:buckets:create": "tsx ./scripts/create-bucket.ts",
@@ -51,6 +40,7 @@
 		"eslint": "catalog:",
 		"prettier": "catalog:",
 		"sharp": "catalog:",
+		"tsdown": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:"
 	},

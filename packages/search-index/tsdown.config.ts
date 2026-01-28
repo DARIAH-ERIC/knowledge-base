@@ -1,12 +1,11 @@
 import { defineConfig } from "tsdown";
 
-const config = defineConfig({
+export default defineConfig({
 	clean: true,
-	dts: false,
+	dts: true,
+	entry: ["./src/client.ts", "./src/schema.ts"],
 	format: ["esm"],
-	minify: true,
+	minify: false,
 	sourcemap: true,
 	treeshake: true,
 });
-
-export default config;

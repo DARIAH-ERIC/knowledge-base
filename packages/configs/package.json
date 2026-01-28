@@ -10,7 +10,6 @@
 		"./eslint/storybook": "./src/eslint/storybook.ts",
 		"./eslint/turbo": "./src/eslint/turbo.ts",
 		"./prettier": "./src/prettier/index.ts",
-		"./stylelint": "./src/stylelint/index.ts",
 		"./typescript/app": "./src/typescript/app.json",
 		"./typescript/app-build": "./src/typescript/app-build.json",
 		"./typescript/lib": "./src/typescript/lib.json",
@@ -33,7 +32,6 @@
 		"@acdh-oeaw/eslint-config-storybook": "catalog:",
 		"@acdh-oeaw/eslint-config-tailwindcss": "catalog:",
 		"@acdh-oeaw/prettier-config": "catalog:",
-		"@acdh-oeaw/stylelint-config": "catalog:",
 		"@acdh-oeaw/tsconfig": "catalog:",
 		"@acdh-oeaw/tsconfig-lib": "catalog:",
 		"eslint-config-flat-gitignore": "catalog:",
@@ -47,21 +45,14 @@
 		"prettier-plugin-sql": "catalog:"
 	},
 	"peerDependencies": {
-		"eslint": "catalog:",
-		"prettier": "catalog:",
-		"stylelint": "catalog:",
-		"typescript": "catalog:"
-	},
-	"peerDependenciesMeta": {
-		"stylelint": {
-			"optional": true
-		}
+		"eslint": "*",
+		"prettier": "*",
+		"typescript": "*"
 	},
 	"devDependencies": {
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
 		"prettier": "catalog:",
-		"stylelint": "catalog:",
 		"typescript": "catalog:"
 	},
 	"browserslist": {
