@@ -45,18 +45,6 @@ jobs:
             environment: "production"
             public_url: "${{ vars.K8S_SECRET_API_BASE_URL }}"
 
-    env:
-      NEXT_PUBLIC_APP_IMPRINT_CUSTOM_CONFIG: "disabled"
-      NEXT_PUBLIC_APP_IMPRINT_SERVICE_BASE_URL: "${{ vars.NEXT_PUBLIC_IMPRINT_SERVICE_BASE_URL }}"
-      NEXT_PUBLIC_APP_MATOMO_BASE_URL: "${{ vars.NEXT_PUBLIC_MATOMO_BASE_URL }}"
-      NEXT_PUBLIC_APP_MATOMO_ID: "${{ vars.NEXT_PUBLIC_APP_MATOMO_ID }}"
-      NEXT_PUBLIC_APP_SERVICE_ID: "${{ vars.APP_SERVICE_ID }}"
-      NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME:
-        "${{ vars.NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME }}"
-      NEXT_PUBLIC_TYPESENSE_HOST: "${{ vars.NEXT_PUBLIC_TYPESENSE_HOST }}"
-      NEXT_PUBLIC_TYPESENSE_PORT: "${{ vars.NEXT_PUBLIC_TYPESENSE_PORT }}"
-      NEXT_PUBLIC_TYPESENSE_PROTOCOL: "${{ vars.NEXT_PUBLIC_TYPESENSE_PROTOCOL }}"
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -88,6 +76,17 @@ jobs:
           push: true
           tags: "${{ steps.meta.outputs.tags }}"
           labels: "${{ steps.meta.outputs.labels }}"
+          build-args: |
+            "NEXT_PUBLIC_APP_BASE_URL=${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
+            "NEXT_PUBLIC_APP_IMPRINT_CUSTOM_CONFIG=disabled"
+            "NEXT_PUBLIC_APP_IMPRINT_SERVICE_BASE_URL=${{ vars.NEXT_PUBLIC_IMPRINT_SERVICE_BASE_URL }}"
+            "NEXT_PUBLIC_APP_MATOMO_BASE_URL=${{ vars.NEXT_PUBLIC_MATOMO_BASE_URL }}"
+            "NEXT_PUBLIC_APP_MATOMO_ID=${{ vars.NEXT_PUBLIC_APP_MATOMO_ID }}"
+            "NEXT_PUBLIC_APP_SERVICE_ID=${{ vars.APP_SERVICE_ID }}"
+            "NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME=${{ vars.NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME }}"
+            "NEXT_PUBLIC_TYPESENSE_HOST=${{ vars.NEXT_PUBLIC_TYPESENSE_HOST }}"
+            "NEXT_PUBLIC_TYPESENSE_PORT=${{ vars.NEXT_PUBLIC_TYPESENSE_PORT }}"
+            "NEXT_PUBLIC_TYPESENSE_PROTOCOL=${{ vars.NEXT_PUBLIC_TYPESENSE_PROTOCOL }}"
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
