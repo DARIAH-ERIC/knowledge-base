@@ -39,7 +39,7 @@ const result = createEnv({
 		S3_SECRET_KEY: process.env.S3_SECRET_KEY,
 	},
 	validation: v.parse(
-		v.optional(v.picklist(["disabled", "enabled"]), "enabled"),
+		v.optional(v.picklist(["disabled", "enabled", "public"]), "enabled"),
 		process.env.ENV_VALIDATION,
 	),
 });

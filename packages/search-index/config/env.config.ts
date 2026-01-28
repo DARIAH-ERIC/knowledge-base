@@ -44,7 +44,7 @@ const result = createEnv({
 		TYPESENSE_ADMIN_API_KEY: process.env.TYPESENSE_ADMIN_API_KEY,
 	},
 	validation: v.parse(
-		v.optional(v.picklist(["disabled", "enabled"]), "enabled"),
+		v.optional(v.picklist(["disabled", "enabled", "public"]), "enabled"),
 		process.env.ENV_VALIDATION,
 	),
 });

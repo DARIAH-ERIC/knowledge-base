@@ -33,7 +33,7 @@ const result = createEnv({
 		NODE_ENV: process.env.NODE_ENV,
 	},
 	validation: v.parse(
-		v.optional(v.picklist(["disabled", "enabled"]), "enabled"),
+		v.optional(v.picklist(["disabled", "enabled", "public"]), "enabled"),
 		process.env.ENV_VALIDATION,
 	),
 });
