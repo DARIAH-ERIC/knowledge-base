@@ -42,6 +42,7 @@ type Response = Array<{
 			firstName: string;
 			lastName: string;
 		}>;
+		dateModified: string;
 		abstractNote: string | null;
 		language: string;
 		tags: Array<{
@@ -105,6 +106,7 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 					source,
 					source_id: sourceId,
 					imported_at: Date.now(),
+					updated_at: new Date(item.data.dateModified).getTime(),
 					type: "publication",
 					label: item.data.title,
 					description: item.data.abstractNote ?? "",
