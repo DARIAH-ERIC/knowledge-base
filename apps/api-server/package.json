@@ -27,6 +27,7 @@
 		"@hono/node-server": "catalog:",
 		"@hono/standard-validator": "catalog:",
 		"@hono/swagger-ui": "catalog:",
+		"@sentry/node": "catalog:",
 		"@valibot/to-json-schema": "catalog:",
 		"hono": "catalog:",
 		"hono-openapi": "catalog:",

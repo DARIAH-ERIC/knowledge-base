@@ -46,6 +46,10 @@
 		"build": {
 			"dependsOn": ["^build"],
 			"env": [
+				"API_SENTRY_DSN",
+				"API_SENTRY_ORG",
+				"API_SENTRY_PII",
+				"API_SENTRY_PROJECT",
 				"BUILD_MODE",
 				"NEXT_PUBLIC_APP_BASE_URL",
 				"NEXT_PUBLIC_APP_IMPRINT_CUSTOM_CONFIG",
@@ -74,7 +78,11 @@
 			],
 			"inputs": ["$TURBO_DEFAULT$", ".env", ".env.*"],
 			"outputs": [".next/**", "!.next/cache/**", "dist/**", "out/**", "tsconfig.tsbuildinfo"],
-			"passThroughEnv": ["APP_SENTRY_AUTH_TOKEN", "WEBSITE_SENTRY_AUTH_TOKEN"]
+			"passThroughEnv": [
+				"API_SENTRY_AUTH_TOKEN",
+				"APP_SENTRY_AUTH_TOKEN",
+				"WEBSITE_SENTRY_AUTH_TOKEN"
+			]
 		},
 		"db:migrations:apply": {
 			"cache": false

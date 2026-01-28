@@ -1,5 +1,6 @@
 import { STATUS_CODES } from "node:http";
 
+import * as Sentry from "@sentry/node";
 import { cors } from "hono/cors";
 import { createFactory } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
@@ -38,6 +39,8 @@ export function createApp() {
 			const logger = c.get("logger");
 
 			logger.error(error);
+
+			Sentry.captureException(error);
 
 			if (error instanceof HTTPException) {
 				return c.json({ message: error.message }, error.status);
