@@ -38,12 +38,13 @@ jobs:
       fail-fast: true
       matrix:
         target:
-          - name: "knowledge-base"
-            environment: "production"
-            public_url: "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
+          # - name: "knowledge-base"
+          #   environment: "production"
+          #   public_url: "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
           - name: "api-server"
             environment: "production"
             public_url: "${{ vars.K8S_SECRET_API_BASE_URL }}"
+      max-parallel: 1
 
     steps:
       - name: Checkout repository
@@ -100,14 +101,15 @@ jobs:
       fail-fast: true
       matrix:
         target:
-          - name: "knowledge-base"
-            environment: "production"
-            public_url: "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
-            service_id: "${{ vars.APP_SERVICE_ID }}"
+          # - name: "knowledge-base"
+          #   environment: "production"
+          #   public_url: "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
+          #   service_id: "${{ vars.APP_SERVICE_ID }}"
           - name: "api-server"
             environment: "production"
             public_url: "${{ vars.K8S_SECRET_API_BASE_URL }}"
             service_id: "${{ vars.API_SERVICE_ID }}"
+      max-parallel: 1
 
     with:
       default_port: "3000"
