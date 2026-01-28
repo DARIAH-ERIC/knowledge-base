@@ -1,3 +1,5 @@
+import "@/instrumentation";
+
 import { log } from "@acdh-oeaw/lib";
 import { serve } from "@hono/node-server";
 
