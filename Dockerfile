@@ -24,10 +24,12 @@ USER node
 WORKDIR /app
 COPY --from=api-server-build /out/node_modules/ /app/node_modules/
 COPY --from=api-server-build /out/dist/ /app/dist/
+ENV NODE_ENV=production
 EXPOSE 3000
 CMD [ "node", "./dist/index.mjs" ]
 
 FROM build AS knowledge-base-build
+ENV ENV_VALIDATION="public"
 ARG NEXT_PUBLIC_APP_BASE_URL
 ARG NEXT_PUBLIC_APP_IMPRINT_CUSTOM_CONFIG
 ARG NEXT_PUBLIC_APP_IMPRINT_SERVICE_BASE_URL
@@ -47,6 +49,10 @@ FROM base AS knowledge-base
 USER node
 WORKDIR /app
 COPY --from=knowledge-base-build /out/node_modules/ /app/node_modules/
-COPY --from=knowledge-base-build /out/dist/ /app/dist/
+COPY --from=knowledge-base-build /out/public/ /app/public/
+COPY --from=knowledge-base-build /out/next.config.ts /app/next.config.ts
+COPY --from=knowledge-base-build /out/.next/standalone/ /app/.next/standalone/
+COPY --from=knowledge-base-build /out/.next/static/ /app/.next/static/
+ENV NODE_ENV=production
 EXPOSE 3000
-CMD [ "node", "./dist/index.mjs" ]
+CMD [ "node", "./server.js" ]
