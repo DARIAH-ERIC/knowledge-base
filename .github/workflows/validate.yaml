@@ -111,10 +111,10 @@ jobs:
       - name: Seed database
         run: pnpm run db:seed
 
-      - name: Create object store bucket
+      - name: Create storage bucket
         run: pnpm run object-store:buckets:create
 
-      - name: Seed object store
+      - name: Seed storage
         run: pnpm run object-store:buckets:seed
 
       - name: Test
