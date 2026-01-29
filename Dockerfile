@@ -23,6 +23,7 @@ FROM base AS api-server
 USER node
 WORKDIR /app
 COPY --from=api-server-build /out/node_modules/ /app/node_modules/
+COPY --from=api-server-build /out/public/ /app/public/
 COPY --from=api-server-build /out/dist/ /app/dist/
 ENV NODE_ENV=production
 EXPOSE 3000
