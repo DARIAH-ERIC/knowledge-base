@@ -23,12 +23,13 @@ jobs:
       - name: Detect changed apps
         id: changes
         run: |
-          APPS=$(pnpm -r list --depth -1 --json \
-            --filter "./apps/*[origin/main]..." \
-            | jq -c '[.[].name | sub("^@dariah-eric/dariah-knowledge-base-"; "")]'
-          )
-          echo "Changed apps: $APPS"
-          echo "APPS=${APPS}" >> $GITHUB_OUTPUT
+          CHANGED_PACKAGES=$(pnpm -r list --depth -1 --json --filter "./apps/*[origin/main]...")
+          echo "Changed packages: $CHANGED_PACKAGES"
+
+          CHANGED_APPS=$(echo "$CHANGED_PACKAGES" | jq -c '[.[] | select(.name != null) | .name | sub("^@dariah-eric/dariah-knowledge-base-"; "")]')
+          echo "Changed apps: $CHANGED_APPS"
+
+          echo "CHANGED_APPS=${CHANGED_APPS}" >> "$GITHUB_OUTPUT"
 
   build:
     name: Build and push docker images
