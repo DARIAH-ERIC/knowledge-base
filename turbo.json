@@ -104,8 +104,7 @@
 		},
 		"dev": {
 			"cache": false,
-			"dependsOn": ["^dev"],
-			"persistent": true
+			"dependsOn": ["^dev"]
 		},
 		"//#format:check": {
 			"outputs": [".prettiercache"]
