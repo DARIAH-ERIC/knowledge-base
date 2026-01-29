@@ -58,6 +58,7 @@ const config = defineConfig(
 			"unicorn/require-module-specifiers": "off",
 			"unicorn/switch-case-braces": "error",
 			"unicorn/text-encoding-identifier-case": ["error", { withDash: true }],
+			"unicorn/throw-new-error": "off",
 		},
 	},
 	nodeConfig,

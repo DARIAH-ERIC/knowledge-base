@@ -42,6 +42,7 @@
 		"@react-aria/utils": "catalog:",
 		"@sentry/nextjs": "catalog:",
 		"@valibot/i18n": "catalog:",
+		"better-result": "catalog:",
 		"client-only": "catalog:",
 		"clsx": "catalog:",
 		"is-network-error": "catalog:",

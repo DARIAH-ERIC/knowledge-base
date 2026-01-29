@@ -28,6 +28,7 @@
 		"@hono/standard-validator": "catalog:",
 		"@hono/swagger-ui": "catalog:",
 		"@valibot/to-json-schema": "catalog:",
+		"better-result": "catalog:",
 		"hono": "catalog:",
 		"hono-openapi": "catalog:",
 		"hono-pino": "catalog:",
