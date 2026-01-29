@@ -23,6 +23,8 @@ jobs:
       - name: Detect changed apps
         id: changes
         run: |
+          set -eux
+
           CHANGED_PACKAGES=$(pnpm -r list --depth -1 --json --filter "./apps/*[origin/main]...")
           echo "Changed packages: $CHANGED_PACKAGES"
 
