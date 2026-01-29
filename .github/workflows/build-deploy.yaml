@@ -30,13 +30,10 @@ jobs:
         id: changes
         run: |
           set -eux
-
-          CHANGED_PACKAGES=$(pnpm -r list --depth -1 --json --filter "./apps/*[origin/main]...")
-          echo "Changed packages: $CHANGED_PACKAGES"
-
-          CHANGED_APPS=$(echo "$CHANGED_PACKAGES" | jq -c '[.[] | select(.name != null) | .name | sub("^@dariah-eric/dariah-knowledge-base-"; "")]')
-          echo "Changed apps: $CHANGED_APPS"
-
+          CHANGED_APPS=$(
+            pnpm -r list --depth -1 --json --filter "./apps/*[origin/main]..." \
+            | jq -c '[.[] | select(.name != null) | .name | sub("^@dariah-eric/dariah-knowledge-base-"; "")]'
+          )
           echo "CHANGED_APPS=${CHANGED_APPS}" >> "$GITHUB_OUTPUT"
 
   build:
