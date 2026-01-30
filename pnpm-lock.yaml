@@ -99,6 +99,9 @@ catalogs:
     '@sentry/nextjs':
       specifier: ^10.36.0
       version: 10.37.0
+    '@sentry/node':
+      specifier: ^10.37.0
+      version: 10.37.0
     '@sindresorhus/slugify':
       specifier: ^3.0.0
       version: 3.0.0
@@ -442,6 +445,9 @@ importers:
       '@hono/swagger-ui':
         specifier: 'catalog:'
         version: 0.5.3(hono@4.11.7)
+      '@sentry/node':
+        specifier: 'catalog:'
+        version: 10.37.0
       '@valibot/to-json-schema':
         specifier: 'catalog:'
         version: 1.5.0(valibot@1.2.0(typescript@5.9.3))
@@ -11854,7 +11860,7 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 25.1.0
 
   '@types/deep-eql@4.0.2': {}
 
@@ -11890,7 +11896,7 @@ snapshots:
 
   '@types/mysql@2.15.27':
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 25.1.0
 
   '@types/node@24.10.9':
     dependencies:
@@ -11908,11 +11914,11 @@ snapshots:
 
   '@types/pg-pool@2.0.7':
     dependencies:
-      '@types/pg': 8.15.6
+      '@types/pg': 8.16.0
 
   '@types/pg@8.15.6':
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 25.1.0
       pg-protocol: 1.11.0
       pg-types: 2.2.0
 
@@ -11938,7 +11944,7 @@ snapshots:
 
   '@types/tedious@4.0.14':
     dependencies:
-      '@types/node': 24.10.9
+      '@types/node': 25.1.0
 
   '@types/unist@3.0.3': {}
 
