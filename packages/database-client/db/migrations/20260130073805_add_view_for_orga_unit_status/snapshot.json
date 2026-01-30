@@ -1,0 +1,2972 @@
+{
+  "id": "3ec8cb52-2ead-4462-ba8e-5f8f8caa6301",
+  "prevIds": [
+    "91e0e9db-a020-4bf3-b258-c7e7c2605162"
+  ],
+  "version": "8",
+  "dialect": "postgres",
+  "ddl": [
+    {
+      "isRlsEnabled": false,
+      "name": "assets",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "content_blocks_types",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "content_blocks",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "content_blocks_type_data_types",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "content_blocks_type_data",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "content_blocks_type_embed",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "content_blocks_type_image",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "content_blocks_type_rich_text",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "entities",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "entities_to_entities",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "entities_to_resources",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "entity_status",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "entity_types",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "fields",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "events",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "impact_case_studies",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "impact_case_studies_to_persons",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "licenses",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "news",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "organisational_units",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "organisational_units_allowed_relations",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "organisational_units_to_units",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "pages",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "persons",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "spotlight_articles",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "users",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "UUIDV7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "assets"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "key",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "assets"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "license_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "assets"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "assets"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "assets"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "UUIDV7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_types"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_types"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_types"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_types"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "UUIDV7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "field_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "type_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "position",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "UUIDV7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_data_types"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_data_types"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_data_types"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_data_types"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_data"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "type_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_data"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "limit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_data"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_data"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_data"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_embed"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "url",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_embed"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "caption",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_embed"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_embed"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_embed"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_image"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "image_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_image"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "caption",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_image"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_image"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_image"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_rich_text"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "content",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_rich_text"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_rich_text"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "content_blocks_type_rich_text"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "UUIDV7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entities"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "type_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entities"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "UUIDV7()",
+      "generated": null,
+      "identity": null,
+      "name": "document_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entities"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "status_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entities"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "slug",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entities"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entities"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entities"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "entity_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entities_to_entities"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "related_entity_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entities_to_entities"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entities_to_entities"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entities_to_entities"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "entity_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entities_to_resources"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "resource_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entities_to_resources"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entities_to_resources"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entities_to_resources"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "UUIDV7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entity_status"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entity_status"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entity_status"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entity_status"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "UUIDV7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entity_types"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entity_types"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entity_types"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "entity_types"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "UUIDV7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "entity_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "title",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "summary",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "image_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "location",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "start_date",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "time(0)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "start_time",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "end_date",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "time(0)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "end_time",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "website",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "impact_case_studies"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "title",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "impact_case_studies"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "summary",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "impact_case_studies"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "image_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "impact_case_studies"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "impact_case_studies"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "impact_case_studies"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "impact_case_study_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "impact_case_studies_to_persons"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "person_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "impact_case_studies_to_persons"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "impact_case_studies_to_persons"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "impact_case_studies_to_persons"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "UUIDV7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "licenses"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "code",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "licenses"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "licenses"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "url",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "licenses"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "licenses"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "licenses"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "news"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "title",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "news"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "summary",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "news"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "image_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "news"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "news"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "news"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "UUIDV7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "metadata",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "summary",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "image_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "slug",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "UUIDV7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units_allowed_relations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units_allowed_relations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "related_unit_type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units_allowed_relations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "relation_type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units_allowed_relations"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "unit_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units_to_units"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "related_unit_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units_to_units"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "start_date",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units_to_units"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "end_date",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units_to_units"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "organisational_units_to_units"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pages"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "title",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pages"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "summary",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pages"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "image_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pages"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pages"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "pages"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "persons"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "persons"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "sort_name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "persons"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "description",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "persons"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "image_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "persons"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "persons"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "persons"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "spotlight_articles"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "title",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "spotlight_articles"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "summary",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "spotlight_articles"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "image_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "spotlight_articles"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "spotlight_articles"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "spotlight_articles"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "UUIDV7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "email",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "username",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "LOWER(\"email\")",
+          "isExpression": true,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "users_email_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "license_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "licenses",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "assets_license_id_licenses_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "assets"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "field_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "fields",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "content_blocks_field_id_fields_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "content_blocks"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "type_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "content_blocks_types",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "content_blocks_type_id_content_blocks_types_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "content_blocks"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "content_blocks",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "content_blocks_type_data_id_content_blocks_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "content_blocks_type_data"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "type_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "content_blocks_type_data_types",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "content_blocks_type_data_SC8kKM2VecFw_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "content_blocks_type_data"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "content_blocks",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "content_blocks_type_embed_id_content_blocks_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "content_blocks_type_embed"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "content_blocks",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "content_blocks_type_image_id_content_blocks_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "content_blocks_type_image"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "image_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "assets",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "content_blocks_type_image_image_id_assets_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "content_blocks_type_image"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "content_blocks",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "content_blocks_type_rich_text_id_content_blocks_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "content_blocks_type_rich_text"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "type_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "entity_types",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "entities_type_id_entity_types_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "entities"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "status_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "entity_status",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "entities_status_id_entity_status_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "entities"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "entity_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "entities",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "entities_to_entities_entity_id_entities_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "entities_to_entities"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "related_entity_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "entities",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "entities_to_entities_related_entity_id_entities_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "entities_to_entities"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "entity_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "entities",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "entities_to_resources_entity_id_entities_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "entities_to_resources"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "entity_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "entities",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "fields_entity_id_entities_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "entities",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "events_id_entities_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "image_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "assets",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "events_image_id_assets_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "events"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "entities",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "impact_case_studies_id_entities_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "impact_case_studies"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "image_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "assets",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "impact_case_studies_image_id_assets_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "impact_case_studies"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "impact_case_study_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "impact_case_studies",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "impact_case_studies_to_persons_8FuSNOPNo61s_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "impact_case_studies_to_persons"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "person_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "persons",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "impact_case_studies_to_persons_person_id_persons_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "impact_case_studies_to_persons"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "entities",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "news_id_entities_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "news"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "image_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "assets",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "news_image_id_assets_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "news"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "image_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "assets",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "organisational_units_image_id_assets_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "organisational_units"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "unit_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "organisational_units",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "organisational_units_to_units_bA2YSfMXccfw_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "organisational_units_to_units"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "related_unit_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "organisational_units",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "organisational_units_to_units_z2LwdLPTj94S_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "organisational_units_to_units"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "entities",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "pages_id_entities_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "pages"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "image_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "assets",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "pages_image_id_assets_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "pages"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "entities",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "persons_id_entities_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "persons"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "image_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "assets",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "persons_image_id_assets_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "persons"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "entities",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "spotlight_articles_id_entities_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "spotlight_articles"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "image_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "assets",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "spotlight_articles_image_id_assets_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "spotlight_articles"
+    },
+    {
+      "columns": [
+        "entity_id",
+        "related_entity_id"
+      ],
+      "nameExplicit": true,
+      "name": "entities_to_entities_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "entities_to_entities"
+    },
+    {
+      "columns": [
+        "entity_id",
+        "resource_id"
+      ],
+      "nameExplicit": true,
+      "name": "entities_to_resources_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "entities_to_resources"
+    },
+    {
+      "columns": [
+        "impact_case_study_id",
+        "person_id"
+      ],
+      "nameExplicit": true,
+      "name": "impact_case_studies_to_persons_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "impact_case_studies_to_persons"
+    },
+    {
+      "columns": [
+        "unit_id",
+        "related_unit_id"
+      ],
+      "nameExplicit": true,
+      "name": "organisational_units_to_units_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "organisational_units_to_units"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "assets_pkey",
+      "schema": "public",
+      "table": "assets",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "content_blocks_types_pkey",
+      "schema": "public",
+      "table": "content_blocks_types",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "content_blocks_pkey",
+      "schema": "public",
+      "table": "content_blocks",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "content_blocks_type_data_types_pkey",
+      "schema": "public",
+      "table": "content_blocks_type_data_types",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "content_blocks_type_data_pkey",
+      "schema": "public",
+      "table": "content_blocks_type_data",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "content_blocks_type_embed_pkey",
+      "schema": "public",
+      "table": "content_blocks_type_embed",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "content_blocks_type_image_pkey",
+      "schema": "public",
+      "table": "content_blocks_type_image",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "content_blocks_type_rich_text_pkey",
+      "schema": "public",
+      "table": "content_blocks_type_rich_text",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "entities_pkey",
+      "schema": "public",
+      "table": "entities",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "entity_status_pkey",
+      "schema": "public",
+      "table": "entity_status",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "entity_types_pkey",
+      "schema": "public",
+      "table": "entity_types",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "fields_pkey",
+      "schema": "public",
+      "table": "fields",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "events_pkey",
+      "schema": "public",
+      "table": "events",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "impact_case_studies_pkey",
+      "schema": "public",
+      "table": "impact_case_studies",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "licenses_pkey",
+      "schema": "public",
+      "table": "licenses",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "news_pkey",
+      "schema": "public",
+      "table": "news",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "organisational_units_pkey",
+      "schema": "public",
+      "table": "organisational_units",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "organisational_units_allowed_relations_pkey",
+      "schema": "public",
+      "table": "organisational_units_allowed_relations",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "pages_pkey",
+      "schema": "public",
+      "table": "pages",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "persons_pkey",
+      "schema": "public",
+      "table": "persons",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "spotlight_articles_pkey",
+      "schema": "public",
+      "table": "spotlight_articles",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "users_pkey",
+      "schema": "public",
+      "table": "users",
+      "entityType": "pks"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "document_id",
+        "status_id"
+      ],
+      "nullsNotDistinct": false,
+      "name": "entities_document_id_status_id_unique",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "entities"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "document_id",
+        "slug"
+      ],
+      "nullsNotDistinct": false,
+      "name": "entities_document_id_slug_unique",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "entities"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "entity_id",
+        "name"
+      ],
+      "nullsNotDistinct": false,
+      "name": "fields_entity_id_name_unique",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "fields"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "type"
+      ],
+      "nullsNotDistinct": false,
+      "name": "content_blocks_types_type_key",
+      "schema": "public",
+      "table": "content_blocks_types",
+      "entityType": "uniques"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "type"
+      ],
+      "nullsNotDistinct": false,
+      "name": "content_blocks_type_data_types_type_key",
+      "schema": "public",
+      "table": "content_blocks_type_data_types",
+      "entityType": "uniques"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "type"
+      ],
+      "nullsNotDistinct": false,
+      "name": "entity_status_type_key",
+      "schema": "public",
+      "table": "entity_status",
+      "entityType": "uniques"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "type"
+      ],
+      "nullsNotDistinct": false,
+      "name": "entity_types_type_key",
+      "schema": "public",
+      "table": "entity_types",
+      "entityType": "uniques"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "code"
+      ],
+      "nullsNotDistinct": false,
+      "name": "licenses_code_key",
+      "schema": "public",
+      "table": "licenses",
+      "entityType": "uniques"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "slug"
+      ],
+      "nullsNotDistinct": false,
+      "name": "organisational_units_slug_key",
+      "schema": "public",
+      "table": "organisational_units",
+      "entityType": "uniques"
+    },
+    {
+      "value": "\"type\" in ('data', 'embed', 'image', 'rich_text')",
+      "name": "content_blocks_types_type_enum_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "content_blocks_types"
+    },
+    {
+      "value": "\"type\" in ('events', 'news')",
+      "name": "content_blocks_type_data_types_type_enum_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "content_blocks_type_data_types"
+    },
+    {
+      "value": "\"type\" in ('draft', 'published')",
+      "name": "entity_status_type_enum_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "entity_status"
+    },
+    {
+      "value": "\"type\" in ('events', 'impact_case_studies', 'news', 'pages', 'persons', 'spotlight_articles')",
+      "name": "entity_types_type_enum_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "entity_types"
+    }
+  ],
+  "renames": []
+}

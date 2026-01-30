@@ -8,6 +8,7 @@ import { createOpenApi } from "@/lib/openapi/index";
 import { database } from "@/middlewares/db";
 import { router as events } from "@/routes/events";
 import { router as impactCaseStudies } from "@/routes/impact-case-studies";
+import { router as membersAndPartners } from "@/routes/members-partners";
 import { router as news } from "@/routes/news";
 import { router as pages } from "@/routes/pages";
 import { router as spotlightArticles } from "@/routes/spotlight-articles";
@@ -19,6 +20,7 @@ const openapi = createOpenApi(app);
 const api = createRouter()
 	.route("/events", events)
 	.route("/impact-case-studies", impactCaseStudies)
+	.route("/members-partners", membersAndPartners)
 	.route("/news", news)
 	.route("/pages", pages)
 	.route("/spotlight-articles", spotlightArticles);
