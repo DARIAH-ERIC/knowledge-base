@@ -164,3 +164,20 @@ export const OrganisationalUnitAllowedRelationInsertSchema = createInsertSchema(
 export const OrganisationalUnitAllowedRelationUpdateSchema = createUpdateSchema(
 	organisationalUnitsAllowedRelations,
 );
+
+export const membersAndPartnersUnitType = "consortium";
+
+export const membersAndPartnersUnitStatusEnum = ["is_cooperating_partner", "is_member"] as const;
+
+export const membersAndPartners = p
+	.pgView("members_and_partners", {
+		id: p.uuid("id").notNull(),
+		metadata: p.jsonb("metadata"),
+		name: p.text("name").notNull(),
+		summary: p.text("summary").notNull(),
+		type: p.text("type"),
+		status: p.text("status"),
+		slug: p.text("slug"),
+		imageId: p.uuid("image_id"),
+	})
+	.existing();
