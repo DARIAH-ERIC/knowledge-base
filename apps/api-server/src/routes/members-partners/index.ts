@@ -18,12 +18,12 @@ import {
 
 export const router = createRouter()
 	/**
-	 * GET /api/members-and-partners
+	 * GET /api/members-partners
 	 */
 	.get(
 		"/",
 		describeRoute({
-			tags: ["members-and-partners"],
+			tags: ["members-partners"],
 			summary: "Get members and partners",
 			description: "Retrieve a paginated list of members and partners",
 			operationId: "getMembersAndPartners",
@@ -55,12 +55,12 @@ export const router = createRouter()
 	)
 
 	/**
-	 * GET /api/members-and-partners/:id
+	 * GET /api/members-partners/:id
 	 */
 	.get(
 		"/:id",
 		describeRoute({
-			tags: ["members-and-partners"],
+			tags: ["members-partners"],
 			summary: "Get member or partner by id",
 			description: "Retrieve a member or partner by id",
 			operationId: "getMembersAndPartnersById",
@@ -97,12 +97,12 @@ export const router = createRouter()
 	)
 
 	/**
-	 * GET /api/members-and-partners/slugs/:slug
+	 * GET /api/members-partners/slugs/:slug
 	 */
 	.get(
 		"/slugs/:slug",
 		describeRoute({
-			tags: ["members-and-partners"],
+			tags: ["members-partners"],
 			summary: "Get member or partner by slug",
 			description: "Retrieve a member or partner by slug",
 			operationId: "getMemberOrPartnerBySlug",
