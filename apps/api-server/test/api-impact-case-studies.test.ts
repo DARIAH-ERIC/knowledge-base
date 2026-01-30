@@ -36,6 +36,7 @@ function createItems(count: number) {
 
 	return items;
 }
+
 async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	const [status, type, asset] = await Promise.all([
 		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
