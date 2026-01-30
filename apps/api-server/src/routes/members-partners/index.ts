@@ -23,7 +23,7 @@ export const router = createRouter()
 	.get(
 		"/",
 		describeRoute({
-			tags: ["members-partners"],
+			tags: ["members-and-partners"],
 			summary: "Get members and partners",
 			description: "Retrieve a paginated list of members and partners",
 			operationId: "getMembersAndPartners",
