@@ -172,6 +172,7 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 					source,
 					source_id: sourceId,
 					imported_at: Date.now(),
+					updated_at: item.lastUpdateTimeStamp,
 					type: "publication",
 					label: item.mainTitle,
 					description: item.descriptions?.join("\n") ?? "",
