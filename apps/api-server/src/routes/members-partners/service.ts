@@ -63,9 +63,9 @@ export async function getMembersAndPartners(
 		const image =
 			item.image != null
 				? client.urls.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.preview },
-				})
+						key: item.image.key,
+						options: { width: imageWidth.preview },
+					})
 				: null;
 
 		return { ...item, image };
@@ -124,9 +124,9 @@ export async function getMemberOrPartnerById(
 	const image =
 		item.image != null
 			? client.urls.generateSignedImageUrl({
-				key: item.image.key,
-				options: { width: imageWidth.featured },
-			})
+					key: item.image.key,
+					options: { width: imageWidth.featured },
+				})
 			: null;
 
 	const data = { ...item, image };
@@ -184,9 +184,9 @@ export async function getMemberOrPartnerBySlug(
 	const image =
 		item.image != null
 			? client.urls.generateSignedImageUrl({
-				key: item.image.key,
-				options: { width: imageWidth.featured },
-			})
+					key: item.image.key,
+					options: { width: imageWidth.featured },
+				})
 			: null;
 
 	const data = { ...item, image };
