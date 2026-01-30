@@ -18,5 +18,5 @@ export function createOpenApi(app: ReturnType<typeof createApp>) {
 			}),
 		)
 
-		.get("/", swaggerUI({ url: "/openapi.json", title: config.title }));
+		.get("/", swaggerUI({ url: "/docs/openapi.json", title: config.title }));
 }
