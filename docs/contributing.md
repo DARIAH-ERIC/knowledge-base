@@ -115,3 +115,17 @@ from `.devcontainer/.env`:
 ```bash
 dotenv ./.devcontainer/.env -- pnpm run --filter @dariah-eric/dariah-knowledge-base-db-client db:migrations:create
 ```
+
+## production
+
+to connect to the production s3 storage:
+
+```bash
+docker run -it \
+  -p 8080:8080 \
+  -e ACCESS_KEY_ID=${S3_ACCESS_KEY} \
+  -e SECRET_ACCESS_KEY=${S3_SECRET_KEY} \
+  -e ENDPOINT=s3.acdh-ch-dev.oeaw.ac.at \
+  -e SKIP_SSL_VERIFICATION=false \
+  cloudlena/s3manager
+```
