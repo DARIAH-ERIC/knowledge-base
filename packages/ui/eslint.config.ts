@@ -1,9 +1,9 @@
 import * as path from "node:path";
 
-import next from "@dariah-eric/dariah-knowledge-base-configs/eslint/next";
-import node from "@dariah-eric/dariah-knowledge-base-configs/eslint/node";
-import storybook from "@dariah-eric/dariah-knowledge-base-configs/eslint/storybook";
-import turbo from "@dariah-eric/dariah-knowledge-base-configs/eslint/turbo";
+import next from "@dariah-eric/configs/eslint/next";
+import node from "@dariah-eric/configs/eslint/node";
+import storybook from "@dariah-eric/configs/eslint/storybook";
+import turbo from "@dariah-eric/configs/eslint/turbo";
 import { defineConfig } from "eslint/config";
 
 export default defineConfig(

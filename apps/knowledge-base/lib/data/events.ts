@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq } from "@dariah-eric/dariah-knowledge-base-database-client";
-import { db, type Transaction } from "@dariah-eric/dariah-knowledge-base-database-client/client";
-import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
-import { client } from "@dariah-eric/dariah-knowledge-base-image-service/client";
+import { count, eq } from "@dariah-eric/database";
+import { db, type Transaction } from "@dariah-eric/database/client";
+import * as schema from "@dariah-eric/database/schema";
+import { client } from "@dariah-eric/images/client";
 
 import { imageAssetWidth } from "@/config/assets.config";
 

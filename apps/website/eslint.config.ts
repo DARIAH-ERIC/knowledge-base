@@ -1,6 +1,6 @@
-import drizzle from "@dariah-eric/dariah-knowledge-base-configs/eslint/drizzle";
-import next, { restrictedImports } from "@dariah-eric/dariah-knowledge-base-configs/eslint/next";
-import turbo from "@dariah-eric/dariah-knowledge-base-configs/eslint/turbo";
+import drizzle from "@dariah-eric/configs/eslint/drizzle";
+import next, { restrictedImports } from "@dariah-eric/configs/eslint/next";
+import turbo from "@dariah-eric/configs/eslint/turbo";
 import { defineConfig } from "eslint/config";
 
 const config = defineConfig(next, turbo, drizzle, {
@@ -14,11 +14,7 @@ const config = defineConfig(next, turbo, drizzle, {
 				patterns: [
 					{
 						allowTypeImports: true,
-						group: [
-							"@dariah-eric/dariah-knowledge-base-database-client",
-							"@dariah-eric/dariah-knowledge-base-image-service",
-							"@dariah-eric/dariah-knowledge-base-search-index",
-						],
+						group: ["@dariah-eric/database", "@dariah-eric/images", "@dariah-eric/search"],
 						message: "Please use the data access layer in `lib/data/`.",
 					},
 				],

@@ -2,8 +2,8 @@
 
 set -eu
 
-pnpm object-store:buckets:create
+pnpm storage:buckets:create
 pnpm db:push && pnpm run db:migrations:apply
-pnpm search-index:collections:create
+pnpm search:collections:create
 
 pnpm dev:services:seed

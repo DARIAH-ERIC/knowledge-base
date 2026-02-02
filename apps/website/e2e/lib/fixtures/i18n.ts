@@ -1,4 +1,4 @@
-import type ui from "@dariah-eric/dariah-knowledge-base-ui/i18n/en";
+import type ui from "@dariah-eric/ui/i18n/en";
 import type { Page } from "@playwright/test";
 import { createFormatter, createTranslator } from "next-intl";
 
@@ -44,7 +44,7 @@ async function getIntlMessages(locale: IntlLocale) {
 	const { default: _metadata } = (await import(`@/content/${language}/metadata/index.json`, {
 		with: { type: "json" },
 	})) as { default: Metadata };
-	const { default: _ui } = (await import(`@dariah-eric/dariah-knowledge-base-ui/i18n/${language}`, {
+	const { default: _ui } = (await import(`@dariah-eric/ui/i18n/${language}`, {
 		with: { type: "json" },
 	})) as { default: UiMessages };
 

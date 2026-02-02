@@ -1,4 +1,4 @@
-import type { ImageUrlOptions } from "@dariah-eric/dariah-knowledge-base-image-service/client";
+import type { ImageUrlOptions } from "@dariah-eric/images/client";
 
 export const imageMimeTypes = ["image/jpeg", "image/png"] as const;
 

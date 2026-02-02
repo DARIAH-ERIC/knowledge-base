@@ -1,6 +1,6 @@
 {
 	"$schema": "https://www.schemastore.org/tsconfig",
-	"extends": "@dariah-eric/dariah-knowledge-base-configs/typescript/lib",
+	"extends": "@dariah-eric/configs/typescript/lib",
 	"compilerOptions": {
 		"jsx": "react-jsx",
 		"paths": {
