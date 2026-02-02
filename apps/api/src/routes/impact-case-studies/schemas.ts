@@ -41,6 +41,25 @@ export const ImpactCaseStudySchema = v.pipe(
 
 export type ImpactCaseStudy = v.InferOutput<typeof ImpactCaseStudySchema>;
 
+export const ImpactCaseStudySlugSchema = v.pipe(
+	v.object({
+		...v.pick(schema.ImpactCaseStudySelectSchema, ["id"]).entries,
+		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+	}),
+	v.description("Impact case study slug"),
+	v.metadata({ ref: "ImpactCaseStudySlug" }),
+);
+
+export type ImpactCaseStudySlug = v.InferOutput<typeof ImpactCaseStudySlugSchema>;
+
+export const ImpactCaseStudySlugListSchema = v.pipe(
+	v.array(ImpactCaseStudySlugSchema),
+	v.description("List of impact case study slugs"),
+	v.metadata({ ref: "ImpactCaseStudySlugList" }),
+);
+
+export type ImpactCaseStudySlugList = v.InferOutput<typeof ImpactCaseStudySlugListSchema>;
+
 export const GetImpactCaseStudies = {
 	QuerySchema: PaginationQuerySchema,
 	ResponseSchema: v.pipe(
@@ -62,6 +81,18 @@ export const GetImpactCaseStudyById = {
 		v.metadata({ ref: "GetImpactCaseStudyByIdParams" }),
 	),
 	ResponseSchema: ImpactCaseStudySchema,
+};
+
+export const GetImpactCaseStudySlugs = {
+	QuerySchema: PaginationQuerySchema,
+	ResponseSchema: v.pipe(
+		v.object({
+			...PaginatedResponseSchema.entries,
+			data: ImpactCaseStudySlugListSchema,
+		}),
+		v.description("Paginated list of impact case study slugs"),
+		v.metadata({ ref: "GetImpactCaseStudySlugsResponse" }),
+	),
 };
 
 export const GetImpactCaseStudyBySlug = {

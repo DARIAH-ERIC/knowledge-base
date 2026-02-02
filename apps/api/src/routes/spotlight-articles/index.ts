@@ -9,11 +9,13 @@ import {
 	GetSpotlightArticleById,
 	GetSpotlightArticleBySlug,
 	GetSpotlightArticles,
+	GetSpotlightArticleSlugs,
 } from "@/routes/spotlight-articles/schemas";
 import {
 	getSpotlightArticleById,
 	getSpotlightArticleBySlug,
 	getSpotlightArticles,
+	getSpotlightArticleSlugs,
 } from "@/routes/spotlight-articles/service";
 
 export const router = createRouter()
@@ -49,6 +51,43 @@ export const router = createRouter()
 			const data = await getSpotlightArticles(db, { limit, offset });
 
 			const payload = await validate(GetSpotlightArticles.ResponseSchema, data);
+
+			return c.json(payload);
+		},
+	)
+
+	/**
+	 * GET /api/spotlight-articles/slugs
+	 */
+	.get(
+		"/slugs",
+		describeRoute({
+			tags: ["spotlight-articles"],
+			summary: "Get spotlight article slugs",
+			description: "Retrieve a paginated list of spotlight article slugs",
+			operationId: "getSpotlightArticleSlugs",
+			responses: {
+				200: {
+					description: "Success response",
+					content: {
+						"application/json": {
+							schema: resolver(GetSpotlightArticleSlugs.ResponseSchema),
+						},
+					},
+				},
+				...BAD_REQUEST,
+			},
+		}),
+		validator("query", GetSpotlightArticleSlugs.QuerySchema),
+		async (c) => {
+			const { limit, offset } = c.req.valid("query");
+
+			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
+
+			const data = await getSpotlightArticleSlugs(db, { limit, offset });
+
+			const payload = await validate(GetSpotlightArticleSlugs.ResponseSchema, data);
 
 			return c.json(payload);
 		},

@@ -35,6 +35,25 @@ export const PageSchema = v.pipe(
 
 export type Page = v.InferOutput<typeof PageSchema>;
 
+export const PageSlugSchema = v.pipe(
+	v.object({
+		...v.pick(schema.PageSelectSchema, ["id"]).entries,
+		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+	}),
+	v.description("Page slug"),
+	v.metadata({ ref: "PageSlug" }),
+);
+
+export type PageSlug = v.InferOutput<typeof PageSlugSchema>;
+
+export const PageSlugListSchema = v.pipe(
+	v.array(PageSlugSchema),
+	v.description("List of page slugs"),
+	v.metadata({ ref: "PageSlugList" }),
+);
+
+export type PageSlugList = v.InferOutput<typeof PageSlugListSchema>;
+
 export const GetPages = {
 	QuerySchema: PaginationQuerySchema,
 	ResponseSchema: v.pipe(
@@ -56,6 +75,18 @@ export const GetPageById = {
 		v.metadata({ ref: "GetPageByIdParams" }),
 	),
 	ResponseSchema: PageSchema,
+};
+
+export const GetPageSlugs = {
+	QuerySchema: PaginationQuerySchema,
+	ResponseSchema: v.pipe(
+		v.object({
+			...PaginatedResponseSchema.entries,
+			data: PageSlugListSchema,
+		}),
+		v.description("Paginated list of page slugs"),
+		v.metadata({ ref: "GetPageSlugsResponse" }),
+	),
 };
 
 export const GetPageBySlug = {

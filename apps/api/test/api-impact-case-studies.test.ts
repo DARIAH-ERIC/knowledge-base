@@ -163,6 +163,41 @@ describe("impact-case-studies", () => {
 		});
 	});
 
+	describe("GET /api/impact-case-studies/slugs", () => {
+		it("should return paginated list of slugs", async () => {
+			await withTransaction(async (db) => {
+				const limit = 10;
+				const offset = 0;
+
+				const client = createTestClient(db);
+
+				const items = createItems(3);
+				await seed(db, items);
+
+				const item = items.at(1)!;
+				const slug = item.entity.slug;
+
+				const response = await client["impact-case-studies"].slugs.$get({
+					query: {
+						limit: String(limit),
+						offset: String(offset),
+					},
+				});
+
+				expect(response.status).toBe(200);
+
+				const data = await response.json();
+
+				expect(data.total).toBeGreaterThanOrEqual(items.length);
+				expect(data.data).toEqual(
+					expect.arrayContaining([expect.objectContaining({ entity: { slug } })]),
+				);
+				expect(data.limit).toBe(limit);
+				expect(data.offset).toBe(offset);
+			});
+		});
+	});
+
 	describe("GET /api/impact-case-studies/slugs/:slug", () => {
 		it("should return single impact case study", async () => {
 			await withTransaction(async (db) => {

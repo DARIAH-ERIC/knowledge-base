@@ -35,6 +35,25 @@ export const SpotlightArticleSchema = v.pipe(
 
 export type SpotlightArticle = v.InferOutput<typeof SpotlightArticleSchema>;
 
+export const SpotlightArticleSlugSchema = v.pipe(
+	v.object({
+		...v.pick(schema.SpotlightArticleSelectSchema, ["id"]).entries,
+		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+	}),
+	v.description("Spotlight article slug"),
+	v.metadata({ ref: "SpotlightArticleSlug" }),
+);
+
+export type SpotlightArticleSlug = v.InferOutput<typeof SpotlightArticleSlugSchema>;
+
+export const SpotlightArticleSlugListSchema = v.pipe(
+	v.array(SpotlightArticleSlugSchema),
+	v.description("List of spotlight article slugs"),
+	v.metadata({ ref: "SpotlightArticleSlugList" }),
+);
+
+export type SpotlightArticleSlugList = v.InferOutput<typeof SpotlightArticleSlugListSchema>;
+
 export const GetSpotlightArticles = {
 	QuerySchema: PaginationQuerySchema,
 	ResponseSchema: v.pipe(
@@ -56,6 +75,18 @@ export const GetSpotlightArticleById = {
 		v.metadata({ ref: "GetSpotlightArticleByIdParams" }),
 	),
 	ResponseSchema: SpotlightArticleSchema,
+};
+
+export const GetSpotlightArticleSlugs = {
+	QuerySchema: PaginationQuerySchema,
+	ResponseSchema: v.pipe(
+		v.object({
+			...PaginatedResponseSchema.entries,
+			data: SpotlightArticleSlugListSchema,
+		}),
+		v.description("Paginated list of spotlight article slugs"),
+		v.metadata({ ref: "GetSpotlightArticleSlugsResponse" }),
+	),
 };
 
 export const GetSpotlightArticleBySlug = {
