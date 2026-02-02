@@ -4,10 +4,10 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
 import { assert, isNonEmptyString, keyBy, log } from "@acdh-oeaw/lib";
-import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
-import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
-import { client } from "@dariah-eric/dariah-knowledge-base-object-store/client";
-import { buffer } from "@dariah-eric/dariah-knowledge-base-object-store/lib";
+import { db } from "@dariah-eric/database/client";
+import * as schema from "@dariah-eric/database/schema";
+import { client } from "@dariah-eric/storage/client";
+import { buffer } from "@dariah-eric/storage/lib";
 
 import {
 	apiBaseUrl,

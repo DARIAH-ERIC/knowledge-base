@@ -1,4 +1,4 @@
-import type ui from "@dariah-eric/dariah-knowledge-base-ui/i18n/en";
+import type ui from "@dariah-eric/ui/i18n/en";
 
 import type metadata from "@/content/en/metadata/index.json";
 import { getIntlLanguage, type IntlLocale } from "@/lib/i18n/locales";
@@ -15,9 +15,7 @@ export async function getIntlMessages(locale: IntlLocale) {
 
 	const _messages = (await import(`@/messages/${language}.json`)) as Messages;
 	const _metadata = (await import(`@/content/${language}/metadata/index.json`)) as Metadata;
-	const _ui = (await import(
-		`@dariah-eric/dariah-knowledge-base-ui/i18n/${language}`
-	)) as UiMessages;
+	const _ui = (await import(`@dariah-eric/ui/i18n/${language}`)) as UiMessages;
 
 	const _social: Record<string, string> = {};
 

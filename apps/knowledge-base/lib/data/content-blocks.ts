@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
-import type {
-	ContentBlockInput,
-	ContentBlockTypes,
-} from "@dariah-eric/dariah-knowledge-base-database-client/schema";
-import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
+import { db } from "@dariah-eric/database/client";
+import type { ContentBlockInput, ContentBlockTypes } from "@dariah-eric/database/schema";
+import * as schema from "@dariah-eric/database/schema";
 
 export async function getContentBlockTypes() {
 	const contentBlockTypes = await db.query.contentBlockTypes.findMany({

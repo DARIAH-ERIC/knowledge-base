@@ -1,5 +1,5 @@
 {
-	"name": "@dariah-eric/dariah-knowledge-base-data-migration",
+	"name": "@dariah-eric/data-migration",
 	"private": true,
 	"license": "MIT",
 	"type": "module",
@@ -17,13 +17,13 @@
 	},
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
-		"@dariah-eric/dariah-knowledge-base-database-client": "workspace:^",
-		"@dariah-eric/dariah-knowledge-base-object-store": "workspace:^",
+		"@dariah-eric/database": "workspace:^",
+		"@dariah-eric/storage": "workspace:^",
 		"@sindresorhus/slugify": "catalog:",
 		"valibot": "catalog:"
 	},
 	"devDependencies": {
-		"@dariah-eric/dariah-knowledge-base-configs": "workspace:^",
+		"@dariah-eric/configs": "workspace:^",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
 		"prettier": "catalog:",
@@ -46,5 +46,5 @@
 		],
 		"*.!(js|ts)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
 	},
-	"prettier": "@dariah-eric/dariah-knowledge-base-configs/prettier"
+	"prettier": "@dariah-eric/configs/prettier"
 }

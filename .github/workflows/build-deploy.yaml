@@ -53,7 +53,7 @@ jobs:
           # - name: "knowledge-base"
           #   environment: "production"
           #   public_url: "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
-          - name: "api-server"
+          - name: "api"
             environment: "production"
             public_url: "${{ vars.K8S_SECRET_API_BASE_URL }}"
       max-parallel: 1
@@ -117,7 +117,7 @@ jobs:
           #   environment: "production"
           #   public_url: "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
           #   service_id: "${{ vars.APP_SERVICE_ID }}"
-          - name: "api-server"
+          - name: "api"
             environment: "production"
             public_url: "${{ vars.K8S_SECRET_API_BASE_URL }}"
             service_id: "${{ vars.API_SERVICE_ID }}"

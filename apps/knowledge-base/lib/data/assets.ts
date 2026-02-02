@@ -3,17 +3,10 @@
 import { Readable } from "node:stream";
 import type { ReadableStream } from "node:stream/web";
 
-import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
-import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
-import {
-	client,
-	type ImageUrlOptions,
-} from "@dariah-eric/dariah-knowledge-base-image-service/client";
-import {
-	type AssetPrefix,
-	assetPrefixes,
-	client as s3,
-} from "@dariah-eric/dariah-knowledge-base-object-store/client";
+import { db } from "@dariah-eric/database/client";
+import * as schema from "@dariah-eric/database/schema";
+import { client, type ImageUrlOptions } from "@dariah-eric/images/client";
+import { type AssetPrefix, assetPrefixes, client as s3 } from "@dariah-eric/storage/client";
 
 export { assetPrefixes };
 

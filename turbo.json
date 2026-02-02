@@ -134,19 +134,19 @@
 			"dependsOn": ["^topo", "^build", "^lint:fix"],
 			"outputs": [".stylelintcache"]
 		},
-		"search-index:api-keys:generate": {
+		"search:api-keys:generate": {
 			"cache": false,
 			"passThroughEnv": ["TYPESENSE_ADMIN_API_KEY"]
 		},
-		"search-index:collections:create": {
+		"search:collections:create": {
 			"cache": false,
 			"passThroughEnv": ["TYPESENSE_ADMIN_API_KEY"]
 		},
-		"search-index:collections:ingest": {
+		"search:collections:ingest": {
 			"cache": false,
 			"passThroughEnv": ["TYPESENSE_ADMIN_API_KEY"]
 		},
-		"search-index:collections:seed": {
+		"search:collections:seed": {
 			"cache": false,
 			"passThroughEnv": ["TYPESENSE_ADMIN_API_KEY"]
 		},

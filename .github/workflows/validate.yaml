@@ -112,10 +112,10 @@ jobs:
         run: pnpm run db:seed
 
       - name: Create storage bucket
-        run: pnpm run object-store:buckets:create
+        run: pnpm run storage:buckets:create
 
       - name: Seed storage
-        run: pnpm run object-store:buckets:seed
+        run: pnpm run storage:buckets:seed
 
       - name: Test
         run: turbo run test

@@ -13,18 +13,18 @@ COPY . .
 RUN pnpm install --frozen-lockfile
 RUN pnpm run --filter "./packages/*" build
 
-FROM build AS api-server-build
-RUN pnpm run --filter dariah-knowledge-base-api-server build
+FROM build AS api-build
+RUN pnpm run --filter api build
 # We don't set `injectWorkspacePackages` directly in `pnpm-workspace.yaml` because it currently
 # produces lots of peer dependency warnings.
-RUN pnpm deploy --filter dariah-knowledge-base-api-server --config.inject-workspace-packages=true --prod /out
+RUN pnpm deploy --filter api --config.inject-workspace-packages=true --prod /out
 
-FROM base AS api-server
+FROM base AS api
 USER node
 WORKDIR /app
-COPY --from=api-server-build /out/node_modules/ /app/node_modules/
-COPY --from=api-server-build /out/public/ /app/public/
-COPY --from=api-server-build /out/dist/ /app/dist/
+COPY --from=api-build /out/node_modules/ /app/node_modules/
+COPY --from=api-build /out/public/ /app/public/
+COPY --from=api-build /out/dist/ /app/dist/
 ENV NODE_ENV=production
 EXPOSE 3000
 CMD [ "node", "./dist/index.mjs" ]
@@ -41,10 +41,10 @@ ARG NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME
 ARG NEXT_PUBLIC_TYPESENSE_HOST
 ARG NEXT_PUBLIC_TYPESENSE_PORT
 ARG NEXT_PUBLIC_TYPESENSE_PROTOCOL
-RUN pnpm run --filter dariah-knowledge-base build
+RUN pnpm run --filter knowledge-base build
 # We don't set `injectWorkspacePackages` directly in `pnpm-workspace.yaml` because it currently
 # produces lots of peer dependency warnings.
-RUN pnpm deploy --filter dariah-knowledge-base --config.inject-workspace-packages=true --prod /out
+RUN pnpm deploy --filter knowledge-base --config.inject-workspace-packages=true --prod /out
 
 FROM base AS knowledge-base
 USER node

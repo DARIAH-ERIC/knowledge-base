@@ -1,5 +1,5 @@
 {
-	"name": "@dariah-eric/dariah-website",
+	"name": "@dariah-eric/website",
 	"private": true,
 	"license": "MIT",
 	"type": "module",
@@ -33,10 +33,10 @@
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/style-variants": "catalog:",
 		"@acdh-oeaw/validate-env": "catalog:",
-		"@dariah-eric/dariah-knowledge-base-database-client": "workspace:^",
-		"@dariah-eric/dariah-knowledge-base-image-service": "workspace:^",
-		"@dariah-eric/dariah-knowledge-base-search-index": "workspace:^",
-		"@dariah-eric/dariah-knowledge-base-ui": "workspace:^",
+		"@dariah-eric/database": "workspace:^",
+		"@dariah-eric/images": "workspace:^",
+		"@dariah-eric/search": "workspace:^",
+		"@dariah-eric/ui": "workspace:^",
 		"@react-aria/utils": "catalog:",
 		"@sentry/nextjs": "catalog:",
 		"@valibot/i18n": "catalog:",
@@ -62,7 +62,7 @@
 	},
 	"devDependencies": {
 		"@acdh-oeaw/stylelint-config": "catalog:",
-		"@dariah-eric/dariah-knowledge-base-configs": "workspace:^",
+		"@dariah-eric/configs": "workspace:^",
 		"@dotenvx/dotenvx": "catalog:",
 		"@next/eslint-plugin-next": "catalog:",
 		"@playwright/test": "catalog:",
@@ -115,7 +115,7 @@
 			"@tailwindcss/postcss": {}
 		}
 	},
-	"prettier": "@dariah-eric/dariah-knowledge-base-configs/prettier",
+	"prettier": "@dariah-eric/configs/prettier",
 	"stylelint": {
 		"extends": "@acdh-oeaw/stylelint-config"
 	}

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { db } from "@dariah-eric/dariah-knowledge-base-database-client/client";
-import type { EntityInput } from "@dariah-eric/dariah-knowledge-base-database-client/schema";
-import * as schema from "@dariah-eric/dariah-knowledge-base-database-client/schema";
+import { db } from "@dariah-eric/database/client";
+import type { EntityInput } from "@dariah-eric/database/schema";
+import * as schema from "@dariah-eric/database/schema";
 
 interface CreateEntitiesParams {
 	data: Array<{

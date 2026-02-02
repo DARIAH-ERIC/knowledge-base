@@ -1,5 +1,5 @@
 {
-	"name": "@dariah-eric/dariah-knowledge-base-ui",
+	"name": "@dariah-eric/ui",
 	"private": true,
 	"license": "MIT",
 	"type": "module",
@@ -51,7 +51,7 @@
 	"devDependencies": {
 		"@acdh-oeaw/stylelint-config": "catalog:",
 		"@chromatic-com/storybook": "catalog:",
-		"@dariah-eric/dariah-knowledge-base-configs": "workspace:^",
+		"@dariah-eric/configs": "workspace:^",
 		"@fontsource-variable/fira-code": "catalog:",
 		"@fontsource-variable/inter": "catalog:",
 		"@storybook/addon-a11y": "catalog:",
@@ -106,7 +106,7 @@
 			"@tailwindcss/postcss": {}
 		}
 	},
-	"prettier": "@dariah-eric/dariah-knowledge-base-configs/prettier",
+	"prettier": "@dariah-eric/configs/prettier",
 	"stylelint": {
 		"extends": "@acdh-oeaw/stylelint-config"
 	}
