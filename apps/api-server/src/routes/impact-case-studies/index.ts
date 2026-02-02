@@ -57,6 +57,43 @@ export const router = createRouter()
 	)
 
 	/**
+	 * GET /api/impact-case-studies/slugs
+	 */
+	.get(
+		"/slugs",
+		describeRoute({
+			tags: ["impact-case-studies"],
+			summary: "Get impact case study slugs",
+			description: "Retrieve a paginated list of impact case study slugs",
+			operationId: "getImpactCaseStudySlugs",
+			responses: {
+				200: {
+					description: "Success response",
+					content: {
+						"application/json": {
+							schema: resolver(GetImpactCaseStudySlugs.ResponseSchema),
+						},
+					},
+				},
+				...BAD_REQUEST,
+			},
+		}),
+		validator("query", GetImpactCaseStudySlugs.QuerySchema),
+		async (c) => {
+			const { limit, offset } = c.req.valid("query");
+
+			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
+
+			const data = await getImpactCaseStudySlugs(db, { limit, offset });
+
+			const payload = await validate(GetImpactCaseStudySlugs.ResponseSchema, data);
+
+			return c.json(payload);
+		},
+	)
+
+	/**
 	 * GET /api/impact-case-studies/:id
 	 */
 	.get(
@@ -93,43 +130,6 @@ export const router = createRouter()
 			}
 
 			const payload = await validate(GetImpactCaseStudyById.ResponseSchema, data);
-
-			return c.json(payload);
-		},
-	)
-
-	/**
-	 * GET /api/impact-case-studies/slugs
-	 */
-	.get(
-		"/slugs",
-		describeRoute({
-			tags: ["impact-case-studies"],
-			summary: "Get impact case study slugs",
-			description: "Retrieve a paginated list of impact case study slugs",
-			operationId: "getImpactCaseStudySlugs",
-			responses: {
-				200: {
-					description: "Success response",
-					content: {
-						"application/json": {
-							schema: resolver(GetImpactCaseStudySlugs.ResponseSchema),
-						},
-					},
-				},
-				...BAD_REQUEST,
-			},
-		}),
-		validator("query", GetImpactCaseStudySlugs.QuerySchema),
-		async (c) => {
-			const { limit, offset } = c.req.valid("query");
-
-			const db = c.get("db");
-			assert(db, "Database must be provided via middleware.");
-
-			const data = await getImpactCaseStudySlugs(db, { limit, offset });
-
-			const payload = await validate(GetImpactCaseStudySlugs.ResponseSchema, data);
 
 			return c.json(payload);
 		},

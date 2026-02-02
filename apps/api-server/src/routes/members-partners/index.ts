@@ -57,6 +57,43 @@ export const router = createRouter()
 	)
 
 	/**
+	 * GET /api/members-partners/slugs
+	 */
+	.get(
+		"/slugs",
+		describeRoute({
+			tags: ["members-partners"],
+			summary: "Get member or partner slugs",
+			description: "Retrieve a paginated list of member or partner slugs",
+			operationId: "getMemberOrPartnerSlugs",
+			responses: {
+				200: {
+					description: "Success response",
+					content: {
+						"application/json": {
+							schema: resolver(GetMemberOrPartnerSlugs.ResponseSchema),
+						},
+					},
+				},
+				...BAD_REQUEST,
+			},
+		}),
+		validator("query", GetMemberOrPartnerSlugs.QuerySchema),
+		async (c) => {
+			const { limit, offset } = c.req.valid("query");
+
+			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
+
+			const data = await getMemberOrPartnerSlugs(db, { limit, offset });
+
+			const payload = await validate(GetMemberOrPartnerSlugs.ResponseSchema, data);
+
+			return c.json(payload);
+		},
+	)
+
+	/**
 	 * GET /api/members-partners/:id
 	 */
 	.get(
@@ -93,43 +130,6 @@ export const router = createRouter()
 			}
 
 			const payload = await validate(GetMemberOrPartnerById.ResponseSchema, data);
-
-			return c.json(payload);
-		},
-	)
-
-	/**
-	 * GET /api/members-partners/slugs
-	 */
-	.get(
-		"/slugs",
-		describeRoute({
-			tags: ["members-partners"],
-			summary: "Get member or partner slugs",
-			description: "Retrieve a paginated list of member or partner slugs",
-			operationId: "getMemberOrPartnerSlugs",
-			responses: {
-				200: {
-					description: "Success response",
-					content: {
-						"application/json": {
-							schema: resolver(GetMemberOrPartnerSlugs.ResponseSchema),
-						},
-					},
-				},
-				...BAD_REQUEST,
-			},
-		}),
-		validator("query", GetMemberOrPartnerSlugs.QuerySchema),
-		async (c) => {
-			const { limit, offset } = c.req.valid("query");
-
-			const db = c.get("db");
-			assert(db, "Database must be provided via middleware.");
-
-			const data = await getMemberOrPartnerSlugs(db, { limit, offset });
-
-			const payload = await validate(GetMemberOrPartnerSlugs.ResponseSchema, data);
 
 			return c.json(payload);
 		},

@@ -57,6 +57,43 @@ export const router = createRouter()
 	)
 
 	/**
+	 * GET /api/spotlight-articles/slugs
+	 */
+	.get(
+		"/slugs",
+		describeRoute({
+			tags: ["spotlight-articles"],
+			summary: "Get spotlight article slugs",
+			description: "Retrieve a paginated list of spotlight article slugs",
+			operationId: "getSpotlightArticleSlugs",
+			responses: {
+				200: {
+					description: "Success response",
+					content: {
+						"application/json": {
+							schema: resolver(GetSpotlightArticleSlugs.ResponseSchema),
+						},
+					},
+				},
+				...BAD_REQUEST,
+			},
+		}),
+		validator("query", GetSpotlightArticleSlugs.QuerySchema),
+		async (c) => {
+			const { limit, offset } = c.req.valid("query");
+
+			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
+
+			const data = await getSpotlightArticleSlugs(db, { limit, offset });
+
+			const payload = await validate(GetSpotlightArticleSlugs.ResponseSchema, data);
+
+			return c.json(payload);
+		},
+	)
+
+	/**
 	 * GET /api/spotlight-articles/:id
 	 */
 	.get(
@@ -93,43 +130,6 @@ export const router = createRouter()
 			}
 
 			const payload = await validate(GetSpotlightArticleById.ResponseSchema, data);
-
-			return c.json(payload);
-		},
-	)
-
-	/**
-	 * GET /api/spotlight-articles/slugs
-	 */
-	.get(
-		"/slugs",
-		describeRoute({
-			tags: ["spotlight-articles"],
-			summary: "Get spotlight article slugs",
-			description: "Retrieve a paginated list of spotlight article slugs",
-			operationId: "getSpotlightArticleSlugs",
-			responses: {
-				200: {
-					description: "Success response",
-					content: {
-						"application/json": {
-							schema: resolver(GetSpotlightArticleSlugs.ResponseSchema),
-						},
-					},
-				},
-				...BAD_REQUEST,
-			},
-		}),
-		validator("query", GetSpotlightArticleSlugs.QuerySchema),
-		async (c) => {
-			const { limit, offset } = c.req.valid("query");
-
-			const db = c.get("db");
-			assert(db, "Database must be provided via middleware.");
-
-			const data = await getSpotlightArticleSlugs(db, { limit, offset });
-
-			const payload = await validate(GetSpotlightArticleSlugs.ResponseSchema, data);
 
 			return c.json(payload);
 		},

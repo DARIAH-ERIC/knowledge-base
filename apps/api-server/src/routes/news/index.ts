@@ -57,6 +57,43 @@ export const router = createRouter()
 	)
 
 	/**
+	 * GET /api/news/slugs
+	 */
+	.get(
+		"/slugs",
+		describeRoute({
+			tags: ["news"],
+			summary: "Get news item slugs",
+			description: "Retrieve a paginated list of news item slugs",
+			operationId: "getNewsItemSlugs",
+			responses: {
+				200: {
+					description: "Success response",
+					content: {
+						"application/json": {
+							schema: resolver(GetNewsItemSlugs.ResponseSchema),
+						},
+					},
+				},
+				...BAD_REQUEST,
+			},
+		}),
+		validator("query", GetNewsItemSlugs.QuerySchema),
+		async (c) => {
+			const { limit, offset } = c.req.valid("query");
+
+			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
+
+			const data = await getNewsItemSlugs(db, { limit, offset });
+
+			const payload = await validate(GetNewsItemSlugs.ResponseSchema, data);
+
+			return c.json(payload);
+		},
+	)
+
+	/**
 	 * GET /api/news/:id
 	 */
 	.get(
@@ -93,43 +130,6 @@ export const router = createRouter()
 			}
 
 			const payload = await validate(GetNewsItemById.ResponseSchema, data);
-
-			return c.json(payload);
-		},
-	)
-
-	/**
-	 * GET /api/news/slugs
-	 */
-	.get(
-		"/slugs",
-		describeRoute({
-			tags: ["news"],
-			summary: "Get news item slugs",
-			description: "Retrieve a paginated list of news item slugs",
-			operationId: "getNewsItemSlugs",
-			responses: {
-				200: {
-					description: "Success response",
-					content: {
-						"application/json": {
-							schema: resolver(GetNewsItemSlugs.ResponseSchema),
-						},
-					},
-				},
-				...BAD_REQUEST,
-			},
-		}),
-		validator("query", GetNewsItemSlugs.QuerySchema),
-		async (c) => {
-			const { limit, offset } = c.req.valid("query");
-
-			const db = c.get("db");
-			assert(db, "Database must be provided via middleware.");
-
-			const data = await getNewsItemSlugs(db, { limit, offset });
-
-			const payload = await validate(GetNewsItemSlugs.ResponseSchema, data);
 
 			return c.json(payload);
 		},

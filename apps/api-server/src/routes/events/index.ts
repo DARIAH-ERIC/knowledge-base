@@ -47,6 +47,43 @@ export const router = createRouter()
 	)
 
 	/**
+	 * GET /api/events/slugs
+	 */
+	.get(
+		"/slugs",
+		describeRoute({
+			tags: ["events"],
+			summary: "Get event slugs",
+			description: "Retrieve a paginated list of event slugs",
+			operationId: "getEventSlugs",
+			responses: {
+				200: {
+					description: "Success response",
+					content: {
+						"application/json": {
+							schema: resolver(GetEventSlugs.ResponseSchema),
+						},
+					},
+				},
+				...BAD_REQUEST,
+			},
+		}),
+		validator("query", GetEventSlugs.QuerySchema),
+		async (c) => {
+			const { limit, offset } = c.req.valid("query");
+
+			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
+
+			const data = await getEventSlugs(db, { limit, offset });
+
+			const payload = await validate(GetEventSlugs.ResponseSchema, data);
+
+			return c.json(payload);
+		},
+	)
+
+	/**
 	 * GET /api/events/:id
 	 */
 	.get(
@@ -83,43 +120,6 @@ export const router = createRouter()
 			}
 
 			const payload = await validate(GetEventById.ResponseSchema, data);
-
-			return c.json(payload);
-		},
-	)
-
-	/**
-	 * GET /api/events/slugs
-	 */
-	.get(
-		"/slugs",
-		describeRoute({
-			tags: ["events"],
-			summary: "Get event slugs",
-			description: "Retrieve a paginated list of event slugs",
-			operationId: "getEventSlugs",
-			responses: {
-				200: {
-					description: "Success response",
-					content: {
-						"application/json": {
-							schema: resolver(GetEventSlugs.ResponseSchema),
-						},
-					},
-				},
-				...BAD_REQUEST,
-			},
-		}),
-		validator("query", GetEventSlugs.QuerySchema),
-		async (c) => {
-			const { limit, offset } = c.req.valid("query");
-
-			const db = c.get("db");
-			assert(db, "Database must be provided via middleware.");
-
-			const data = await getEventSlugs(db, { limit, offset });
-
-			const payload = await validate(GetEventSlugs.ResponseSchema, data);
 
 			return c.json(payload);
 		},

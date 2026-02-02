@@ -47,6 +47,43 @@ export const router = createRouter()
 	)
 
 	/**
+	 * GET /api/pages/slugs
+	 */
+	.get(
+		"/slugs",
+		describeRoute({
+			tags: ["pages"],
+			summary: "Get page slugs",
+			description: "Retrieve a paginated list of page slugs",
+			operationId: "getPageSlugs",
+			responses: {
+				200: {
+					description: "Success response",
+					content: {
+						"application/json": {
+							schema: resolver(GetPageSlugs.ResponseSchema),
+						},
+					},
+				},
+				...BAD_REQUEST,
+			},
+		}),
+		validator("query", GetPageSlugs.QuerySchema),
+		async (c) => {
+			const { limit, offset } = c.req.valid("query");
+
+			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
+
+			const data = await getPageSlugs(db, { limit, offset });
+
+			const payload = await validate(GetPageSlugs.ResponseSchema, data);
+
+			return c.json(payload);
+		},
+	)
+
+	/**
 	 * GET /api/pages/:id
 	 */
 	.get(
@@ -83,43 +120,6 @@ export const router = createRouter()
 			}
 
 			const payload = await validate(GetPageById.ResponseSchema, data);
-
-			return c.json(payload);
-		},
-	)
-
-	/**
-	 * GET /api/pages/slugs
-	 */
-	.get(
-		"/slugs",
-		describeRoute({
-			tags: ["pages"],
-			summary: "Get page slugs",
-			description: "Retrieve a paginated list of page slugs",
-			operationId: "getPageSlugs",
-			responses: {
-				200: {
-					description: "Success response",
-					content: {
-						"application/json": {
-							schema: resolver(GetPageSlugs.ResponseSchema),
-						},
-					},
-				},
-				...BAD_REQUEST,
-			},
-		}),
-		validator("query", GetPageSlugs.QuerySchema),
-		async (c) => {
-			const { limit, offset } = c.req.valid("query");
-
-			const db = c.get("db");
-			assert(db, "Database must be provided via middleware.");
-
-			const data = await getPageSlugs(db, { limit, offset });
-
-			const payload = await validate(GetPageSlugs.ResponseSchema, data);
 
 			return c.json(payload);
 		},
