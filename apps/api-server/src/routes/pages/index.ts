@@ -5,8 +5,8 @@ import { createRouter } from "@/lib/factory";
 import { resolver } from "@/lib/openapi/resolver";
 import { BAD_REQUEST, NOT_FOUND } from "@/lib/openapi/responses";
 import { validate, validator } from "@/lib/openapi/validator";
-import { GetPageById, GetPageBySlug, GetPages } from "@/routes/pages/schemas";
-import { getPageById, getPageBySlug, getPages } from "@/routes/pages/service";
+import { GetPageById, GetPageBySlug, GetPages, GetPageSlugs } from "@/routes/pages/schemas";
+import { getPageById, getPageBySlug, getPages, getPageSlugs } from "@/routes/pages/service";
 
 export const router = createRouter()
 	/**
@@ -83,6 +83,43 @@ export const router = createRouter()
 			}
 
 			const payload = await validate(GetPageById.ResponseSchema, data);
+
+			return c.json(payload);
+		},
+	)
+
+	/**
+	 * GET /api/pages/slugs
+	 */
+	.get(
+		"/slugs",
+		describeRoute({
+			tags: ["pages"],
+			summary: "Get page slugs",
+			description: "Retrieve a paginated list of page slugs",
+			operationId: "getPageSlugs",
+			responses: {
+				200: {
+					description: "Success response",
+					content: {
+						"application/json": {
+							schema: resolver(GetPageSlugs.ResponseSchema),
+						},
+					},
+				},
+				...BAD_REQUEST,
+			},
+		}),
+		validator("query", GetPageSlugs.QuerySchema),
+		async (c) => {
+			const { limit, offset } = c.req.valid("query");
+
+			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
+
+			const data = await getPageSlugs(db, { limit, offset });
+
+			const payload = await validate(GetPageSlugs.ResponseSchema, data);
 
 			return c.json(payload);
 		},

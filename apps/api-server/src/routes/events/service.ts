@@ -131,6 +131,64 @@ export async function getEventById(db: Database | Transaction, params: GetEventB
 
 //
 
+interface GetEventSlugsParams {
+	/** @default 10 */
+	limit?: number;
+	/** @default 0 */
+	offset?: number;
+}
+
+export async function getEventSlugs(db: Database | Transaction, params: GetEventSlugsParams) {
+	const { limit = 10, offset = 0 } = params;
+
+	const [items, aggregate] = await Promise.all([
+		db.query.events.findMany({
+			where: {
+				entity: {
+					status: {
+						type: "published",
+					},
+				},
+			},
+			columns: {
+				id: true,
+			},
+			with: {
+				entity: {
+					columns: {
+						slug: true,
+						updatedAt: true,
+					},
+				},
+				image: {
+					columns: {
+						key: true,
+					},
+				},
+			},
+			orderBy(t, { desc, sql }) {
+				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+			},
+			limit,
+			offset,
+		}),
+		db
+			.select({ total: count() })
+			.from(schema.events)
+			.innerJoin(schema.entities, eq(schema.events.id, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.where(eq(schema.entityStatus.type, "published")),
+	]);
+
+	const total = aggregate.at(0)?.total ?? 0;
+
+	const data = items;
+
+	return { data, limit, offset, total };
+}
+
+//
+
 interface GetEventBySlugParams {
 	slug: schema.Entity["slug"];
 }

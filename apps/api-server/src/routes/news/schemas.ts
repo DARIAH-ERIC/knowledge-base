@@ -9,7 +9,7 @@ export const NewsItemBaseSchema = v.pipe(
 		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
-	v.description("NewsItem"),
+	v.description("News item"),
 	v.metadata({ ref: "NewsItemBase" }),
 );
 
@@ -29,11 +29,30 @@ export const NewsItemSchema = v.pipe(
 		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
-	v.description("NewsItem"),
+	v.description("News item"),
 	v.metadata({ ref: "NewsItem" }),
 );
 
 export type NewsItem = v.InferOutput<typeof NewsItemSchema>;
+
+export const NewsItemSlugSchema = v.pipe(
+	v.object({
+		...v.pick(schema.NewsItemSelectSchema, ["id"]).entries,
+		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+	}),
+	v.description("News item slug"),
+	v.metadata({ ref: "NewsItemSlug" }),
+);
+
+export type NewsItemSlug = v.InferOutput<typeof NewsItemSlugSchema>;
+
+export const NewsItemSlugListSchema = v.pipe(
+	v.array(NewsItemSlugSchema),
+	v.description("List of news item slugs"),
+	v.metadata({ ref: "NewsItemSlugList" }),
+);
+
+export type NewsItemSlugList = v.InferOutput<typeof NewsItemSlugListSchema>;
 
 export const GetNews = {
 	QuerySchema: PaginationQuerySchema,
@@ -56,6 +75,18 @@ export const GetNewsItemById = {
 		v.metadata({ ref: "GetNewsItemByIdParams" }),
 	),
 	ResponseSchema: NewsItemSchema,
+};
+
+export const GetNewsItemSlugs = {
+	QuerySchema: PaginationQuerySchema,
+	ResponseSchema: v.pipe(
+		v.object({
+			...PaginatedResponseSchema.entries,
+			data: NewsItemSlugListSchema,
+		}),
+		v.description("Paginated list of news item slugs"),
+		v.metadata({ ref: "GetNewsItemSlugsResponse" }),
+	),
 };
 
 export const GetNewsItemBySlug = {

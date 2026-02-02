@@ -5,8 +5,18 @@ import { createRouter } from "@/lib/factory";
 import { resolver } from "@/lib/openapi/resolver";
 import { BAD_REQUEST, NOT_FOUND } from "@/lib/openapi/responses";
 import { validate, validator } from "@/lib/openapi/validator";
-import { GetNews, GetNewsItemById, GetNewsItemBySlug } from "@/routes/news/schemas";
-import { getNews, getNewsItemById, getNewsItemBySlug } from "@/routes/news/service";
+import {
+	GetNews,
+	GetNewsItemById,
+	GetNewsItemBySlug,
+	GetNewsItemSlugs,
+} from "@/routes/news/schemas";
+import {
+	getNews,
+	getNewsItemById,
+	getNewsItemBySlug,
+	getNewsItemSlugs,
+} from "@/routes/news/service";
 
 export const router = createRouter()
 	/**
@@ -83,6 +93,43 @@ export const router = createRouter()
 			}
 
 			const payload = await validate(GetNewsItemById.ResponseSchema, data);
+
+			return c.json(payload);
+		},
+	)
+
+	/**
+	 * GET /api/news/slugs
+	 */
+	.get(
+		"/slugs",
+		describeRoute({
+			tags: ["news"],
+			summary: "Get news item slugs",
+			description: "Retrieve a paginated list of news item slugs",
+			operationId: "getNewsItemSlugs",
+			responses: {
+				200: {
+					description: "Success response",
+					content: {
+						"application/json": {
+							schema: resolver(GetNewsItemSlugs.ResponseSchema),
+						},
+					},
+				},
+				...BAD_REQUEST,
+			},
+		}),
+		validator("query", GetNewsItemSlugs.QuerySchema),
+		async (c) => {
+			const { limit, offset } = c.req.valid("query");
+
+			const db = c.get("db");
+			assert(db, "Database must be provided via middleware.");
+
+			const data = await getNewsItemSlugs(db, { limit, offset });
+
+			const payload = await validate(GetNewsItemSlugs.ResponseSchema, data);
 
 			return c.json(payload);
 		},
