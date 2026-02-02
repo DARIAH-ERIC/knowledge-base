@@ -66,6 +66,7 @@ test.describe("contact page", () => {
 		/** Run sequentially. */
 		test.describe.configure({ mode: "default" });
 
+		const statusTimeoutMs = 5000;
 		const pollIntervalMs = 500;
 		const pollTimeoutMs = 10_000;
 
@@ -99,7 +100,7 @@ test.describe("contact page", () => {
 			await expect(contactPage.page.getByRole("main").getByRole("alert")).toBeEmpty();
 			await expect(contactPage.page.getByRole("main").getByRole("status")).toContainText(
 				i18n.t("actions.sendContactFormEmailAction.success"),
-				{ timeout: 5000 },
+				{ timeout: statusTimeoutMs },
 			);
 
 			await expect
@@ -160,7 +161,7 @@ test.describe("contact page", () => {
 				await expect(contactPage.page.getByRole("main").getByRole("status")).toBeEmpty();
 				await expect(contactPage.page.getByRole("main").getByRole("alert")).toContainText(
 					i18n.t("actions.sendContactFormEmailAction.error"),
-					{ timeout: 5000 },
+					{ timeout: statusTimeoutMs },
 				);
 
 				const data = await emailService.getMessages();

@@ -49,6 +49,25 @@ export const EventSchema = v.pipe(
 
 export type Event = v.InferOutput<typeof EventSchema>;
 
+export const EventSlugSchema = v.pipe(
+	v.object({
+		...v.pick(schema.EventSelectSchema, ["id"]).entries,
+		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+	}),
+	v.description("Event slug"),
+	v.metadata({ ref: "EventSlug" }),
+);
+
+export type EventSlug = v.InferOutput<typeof EventSlugSchema>;
+
+export const EventSlugListSchema = v.pipe(
+	v.array(EventSlugSchema),
+	v.description("List of event slugs"),
+	v.metadata({ ref: "EventSlugList" }),
+);
+
+export type EventSlugList = v.InferOutput<typeof EventSlugListSchema>;
+
 export const GetEvents = {
 	QuerySchema: PaginationQuerySchema,
 	ResponseSchema: v.pipe(
@@ -70,6 +89,18 @@ export const GetEventById = {
 		v.metadata({ ref: "GetEventByIdParams" }),
 	),
 	ResponseSchema: EventSchema,
+};
+
+export const GetEventSlugs = {
+	QuerySchema: PaginationQuerySchema,
+	ResponseSchema: v.pipe(
+		v.object({
+			...PaginatedResponseSchema.entries,
+			data: EventSlugListSchema,
+		}),
+		v.description("Paginated list of event slugs"),
+		v.metadata({ ref: "GetEventSlugsResponse" }),
+	),
 };
 
 export const GetEventBySlug = {
