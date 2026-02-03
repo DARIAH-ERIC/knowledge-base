@@ -106,18 +106,20 @@ interface CreatePageParams extends Omit<schema.PageInput, "id" | "createdAt" | "
 	slug: string;
 	resourceIds?: Array<string>;
 }
+
 export async function createPage(params: CreatePageParams) {
 	const { imageId, slug, summary, title } = params;
 
-	const entityType =
-		(await db.query.entityTypes.findFirst({
-			columns: {
-				id: true,
-			},
-			where: { type: "pages" },
-		})) ?? undefined;
+	const entityType = await db.query.entityTypes.findFirst({
+		columns: {
+			id: true,
+		},
+		where: { type: "pages" },
+	});
 
-	if (!entityType) return;
+	if (entityType == null) {
+		return null;
+	}
 
 	const entityStatus = await db.query.entityStatus.findFirst({
 		columns: {
@@ -126,10 +128,12 @@ export async function createPage(params: CreatePageParams) {
 		where: { type: "draft" },
 	});
 
-	if (!entityStatus) return;
+	if (entityStatus == null) {
+		return null;
+	}
 
 	const entityId = await db.transaction(async (tx) => {
-		const entityIds = await tx
+		const [item] = await tx
 			.insert(schema.entities)
 			.values({
 				typeId: entityType.id,
@@ -141,9 +145,11 @@ export async function createPage(params: CreatePageParams) {
 				id: schema.entities.id,
 			});
 
-		if (!entityIds[0]) return tx.rollback();
+		if (item == null) {
+			return tx.rollback();
+		}
 
-		const { id } = entityIds[0];
+		const { id } = item;
 
 		const page = {
 			id,
@@ -151,6 +157,7 @@ export async function createPage(params: CreatePageParams) {
 			summary,
 			imageId,
 		};
+
 		await tx.insert(schema.pages).values(page);
 
 		const fieldNamesIds = await tx.query.entityTypesFieldsNames.findMany({
@@ -170,7 +177,6 @@ export async function createPage(params: CreatePageParams) {
 		return id;
 	});
 
-	// decide, what we need to return here
 	return {
 		entityId,
 	};
