@@ -11,6 +11,7 @@ export async function getContentBlockTypes() {
 			type: true,
 		},
 	});
+
 	return contentBlockTypes;
 }
 
@@ -20,6 +21,7 @@ export async function getContentBlockByType(type: ContentBlockTypes["type"]) {
 			type,
 		},
 	});
+
 	return contentBlockType;
 }
 
@@ -33,9 +35,11 @@ interface CreateContentBlocksParams {
 
 export async function createContentBlocks(params: CreateContentBlocksParams) {
 	const { data } = params;
+
 	const contentBlockIds = await db.insert(schema.contentBlocks).values(data).returning({
 		id: schema.contentBlocks.id,
 		typeId: schema.contentBlocks.typeId,
 	});
+
 	return contentBlockIds;
 }

@@ -105,18 +105,20 @@ interface CreateImpactCaseStudyParams extends Omit<
 	slug: string;
 	resourceIds?: Array<string>;
 }
+
 export async function createImpactCaseStudy(params: CreateImpactCaseStudyParams) {
 	const { imageId, slug, summary, title } = params;
 
-	const entityType =
-		(await db.query.entityTypes.findFirst({
-			columns: {
-				id: true,
-			},
-			where: { type: "impact_case_studies" },
-		})) ?? undefined;
+	const entityType = await db.query.entityTypes.findFirst({
+		columns: {
+			id: true,
+		},
+		where: { type: "impact_case_studies" },
+	});
 
-	if (!entityType) return;
+	if (entityType == null) {
+		return;
+	}
 
 	const entityStatus = await db.query.entityStatus.findFirst({
 		columns: {
@@ -125,14 +127,15 @@ export async function createImpactCaseStudy(params: CreateImpactCaseStudyParams)
 		where: { type: "draft" },
 	});
 
-	if (!entityStatus) return;
+	if (entityStatus == null) {
+		return;
+	}
 
 	const entityId = await db.transaction(async (tx) => {
-		const entityIds = await tx
+		const [item] = await tx
 			.insert(schema.entities)
 			.values({
 				typeId: entityType.id,
-				documentId: undefined,
 				statusId: entityStatus.id,
 				slug,
 			})
@@ -140,9 +143,11 @@ export async function createImpactCaseStudy(params: CreateImpactCaseStudyParams)
 				id: schema.entities.id,
 			});
 
-		if (!entityIds[0]) return tx.rollback();
+		if (item == null) {
+			return tx.rollback();
+		}
 
-		const { id } = entityIds[0];
+		const { id } = item;
 
 		const impactCaseStudy = {
 			id,
@@ -151,6 +156,7 @@ export async function createImpactCaseStudy(params: CreateImpactCaseStudyParams)
 			imageId,
 			location,
 		};
+
 		await tx.insert(schema.impactCaseStudies).values(impactCaseStudy);
 
 		const fieldNamesIds = await tx.query.entityTypesFieldsNames.findMany({
@@ -170,7 +176,6 @@ export async function createImpactCaseStudy(params: CreateImpactCaseStudyParams)
 		return id;
 	});
 
-	// decide, what we need to return here
 	return {
 		entityId,
 	};
