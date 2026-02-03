@@ -105,18 +105,20 @@ interface CreateNewsItemParams extends Omit<
 	slug: string;
 	resourceIds?: Array<string>;
 }
+
 export async function createNewsItem(params: CreateNewsItemParams) {
 	const { imageId, slug, summary, title } = params;
 
-	const entityType =
-		(await db.query.entityTypes.findFirst({
-			columns: {
-				id: true,
-			},
-			where: { type: "news" },
-		})) ?? undefined;
+	const entityType = await db.query.entityTypes.findFirst({
+		columns: {
+			id: true,
+		},
+		where: { type: "news" },
+	});
 
-	if (!entityType) return;
+	if (entityType == null) {
+		return null;
+	}
 
 	const entityStatus = await db.query.entityStatus.findFirst({
 		columns: {
@@ -125,10 +127,12 @@ export async function createNewsItem(params: CreateNewsItemParams) {
 		where: { type: "draft" },
 	});
 
-	if (!entityStatus) return;
+	if (entityStatus == null) {
+		return null;
+	}
 
 	const entityId = await db.transaction(async (tx) => {
-		const entityIds = await tx
+		const [item] = await tx
 			.insert(schema.entities)
 			.values({
 				typeId: entityType.id,
@@ -140,9 +144,11 @@ export async function createNewsItem(params: CreateNewsItemParams) {
 				id: schema.entities.id,
 			});
 
-		if (!entityIds[0]) return tx.rollback();
+		if (item == null) {
+			return tx.rollback();
+		}
 
-		const { id } = entityIds[0];
+		const { id } = item;
 
 		const newsItem = {
 			id,
@@ -150,6 +156,7 @@ export async function createNewsItem(params: CreateNewsItemParams) {
 			summary,
 			imageId,
 		};
+
 		await tx.insert(schema.news).values(newsItem);
 
 		const fieldNamesIds = await tx.query.entityTypesFieldsNames.findMany({
@@ -169,7 +176,6 @@ export async function createNewsItem(params: CreateNewsItemParams) {
 		return id;
 	});
 
-	// decide, what we need to return here
 	return {
 		entityId,
 	};

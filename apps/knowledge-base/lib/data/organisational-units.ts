@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
 import { count, eq } from "@dariah-eric/database";
-import { db, type Transaction } from "@dariah-eric/database/client";
+import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { client } from "@dariah-eric/images/client";
 
@@ -107,18 +107,20 @@ interface CreateOrganisationalUnitParams extends Omit<
 	slug: string;
 	resourceIds?: Array<string>;
 }
+
 export async function createOrganisationalUnit(params: CreateOrganisationalUnitParams) {
 	const { imageId, metadata, name, slug, summary, typeId } = params;
 
-	const entityType =
-		(await db.query.entityTypes.findFirst({
-			columns: {
-				id: true,
-			},
-			where: { type: "organisational_units" },
-		})) ?? undefined;
+	const entityType = await db.query.entityTypes.findFirst({
+		columns: {
+			id: true,
+		},
+		where: { type: "organisational_units" },
+	});
 
-	if (!entityType) return;
+	if (entityType == null) {
+		return null;
+	}
 
 	const entityStatus = await db.query.entityStatus.findFirst({
 		columns: {
@@ -127,10 +129,12 @@ export async function createOrganisationalUnit(params: CreateOrganisationalUnitP
 		where: { type: "draft" },
 	});
 
-	if (!entityStatus) return;
+	if (entityStatus == null) {
+		return null;
+	}
 
-	const entityId = await db.transaction(async (tx: Transaction) => {
-		const entityIds = await tx
+	const entityId = await db.transaction(async (tx) => {
+		const [item] = await tx
 			.insert(schema.entities)
 			.values({
 				typeId: entityType.id,
@@ -142,9 +146,11 @@ export async function createOrganisationalUnit(params: CreateOrganisationalUnitP
 				id: schema.entities.id,
 			});
 
-		if (!entityIds[0]) return tx.rollback();
+		if (item == null) {
+			return tx.rollback();
+		}
 
-		const { id } = entityIds[0];
+		const { id } = item;
 
 		const organisationalUnit = {
 			id,
@@ -154,6 +160,7 @@ export async function createOrganisationalUnit(params: CreateOrganisationalUnitP
 			imageId,
 			typeId,
 		};
+
 		await tx.insert(schema.organisationalUnits).values(organisationalUnit);
 
 		const fieldNamesIds = await tx.query.entityTypesFieldsNames.findMany({
@@ -172,7 +179,7 @@ export async function createOrganisationalUnit(params: CreateOrganisationalUnitP
 
 		return id;
 	});
-	// decide, what we need to return here
+
 	return {
 		entityId,
 	};

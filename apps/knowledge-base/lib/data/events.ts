@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
 import { count, eq } from "@dariah-eric/database";
-import { db, type Transaction } from "@dariah-eric/database/client";
+import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { client } from "@dariah-eric/images/client";
 
@@ -102,18 +102,20 @@ interface CreateEventParams extends Omit<schema.EventInput, "id" | "createdAt" |
 	slug: string;
 	resourceIds?: Array<string>;
 }
+
 export async function createEvent(params: CreateEventParams) {
 	const { duration, imageId, isFullDay, location, slug, summary, title, website } = params;
 
-	const entityType =
-		(await db.query.entityTypes.findFirst({
-			columns: {
-				id: true,
-			},
-			where: { type: "events" },
-		})) ?? undefined;
+	const entityType = await db.query.entityTypes.findFirst({
+		columns: {
+			id: true,
+		},
+		where: { type: "events" },
+	});
 
-	if (!entityType) return;
+	if (entityType == null) {
+		return null;
+	}
 
 	const entityStatus = await db.query.entityStatus.findFirst({
 		columns: {
@@ -122,14 +124,15 @@ export async function createEvent(params: CreateEventParams) {
 		where: { type: "draft" },
 	});
 
-	if (!entityStatus) return;
+	if (entityStatus == null) {
+		return null;
+	}
 
-	const entityId = await db.transaction(async (tx: Transaction) => {
-		const entityIds = await tx
+	const entityId = await db.transaction(async (tx) => {
+		const [item] = await tx
 			.insert(schema.entities)
 			.values({
 				typeId: entityType.id,
-				documentId: undefined,
 				statusId: entityStatus.id,
 				slug,
 			})
@@ -137,9 +140,11 @@ export async function createEvent(params: CreateEventParams) {
 				id: schema.entities.id,
 			});
 
-		if (!entityIds[0]) return tx.rollback();
+		if (item == null) {
+			return tx.rollback();
+		}
 
-		const { id } = entityIds[0];
+		const { id } = item;
 
 		const event = {
 			id,
@@ -151,6 +156,7 @@ export async function createEvent(params: CreateEventParams) {
 			isFullDay,
 			website,
 		};
+
 		await tx.insert(schema.events).values(event);
 
 		const fieldNamesIds = await tx.query.entityTypesFieldsNames.findMany({
@@ -169,7 +175,7 @@ export async function createEvent(params: CreateEventParams) {
 
 		return id;
 	});
-	// decide, what we need to return here
+
 	return {
 		entityId,
 	};
