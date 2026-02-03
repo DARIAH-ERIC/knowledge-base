@@ -82,13 +82,11 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 		}),
 	);
 
-	await db
-		.insert(schema.organisationalUnits)
-		.values({
-			...items[0]!.organisationalUnit,
-			typeId: umbrellaConsortiumType.id,
-			imageId: asset.id,
-		});
+	await db.insert(schema.organisationalUnits).values({
+		...items[0]!.organisationalUnit,
+		typeId: umbrellaConsortiumType.id,
+		imageId: asset.id,
+	});
 
 	await db.insert(schema.organisationalUnits).values(
 		items.slice(1).map((item) => {
