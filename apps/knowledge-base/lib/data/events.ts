@@ -98,9 +98,8 @@ export async function getEventById(params: GetEventByIdParams) {
 	return data;
 }
 
-interface CreateEventParams extends Omit<schema.EventInput, "id" | "createdAt" | "updatedAt"> {
-	slug: string;
-	resourceIds?: Array<string>;
+interface CreateEventParams extends schema.EventInput {
+	slug: schema.EntityInput["slug"];
 }
 
 export async function createEvent(params: CreateEventParams) {

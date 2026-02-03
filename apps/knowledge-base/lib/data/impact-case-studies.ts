@@ -98,12 +98,8 @@ export async function getImpactCaseStudyById(params: GetImpactCaseStudyByIdParam
 	return data;
 }
 
-interface CreateImpactCaseStudyParams extends Omit<
-	schema.ImpactCaseStudyInput,
-	"id" | "createdAt" | "updatedAt"
-> {
-	slug: string;
-	resourceIds?: Array<string>;
+interface CreateImpactCaseStudyParams extends schema.ImpactCaseStudyInput {
+	slug: schema.EntityInput["slug"];
 }
 
 export async function createImpactCaseStudy(params: CreateImpactCaseStudyParams) {

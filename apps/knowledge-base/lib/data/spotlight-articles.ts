@@ -98,12 +98,8 @@ export async function getSpotlightArticleById(params: GetSpotlightArticleByIdPar
 	return data;
 }
 
-interface CreateSpotlightArticleParams extends Omit<
-	schema.SpotlightArticleInput,
-	"id" | "createdAt" | "updatedAt"
-> {
-	slug: string;
-	resourceIds?: Array<string>;
+interface CreateSpotlightArticleParams extends schema.SpotlightArticleInput {
+	slug: schema.EntityInput["slug"];
 }
 
 export async function createSpotlightArticle(params: CreateSpotlightArticleParams) {

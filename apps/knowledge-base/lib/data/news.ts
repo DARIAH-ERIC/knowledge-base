@@ -98,12 +98,8 @@ export async function getNewsItemById(params: GetNewsItemByIdParams) {
 	return data;
 }
 
-interface CreateNewsItemParams extends Omit<
-	schema.NewsItemInput,
-	"id" | "createdAt" | "updatedAt"
-> {
-	slug: string;
-	resourceIds?: Array<string>;
+interface CreateNewsItemParams extends schema.NewsItemInput {
+	slug: schema.EntityInput["slug"];
 }
 
 export async function createNewsItem(params: CreateNewsItemParams) {

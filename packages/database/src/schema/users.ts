@@ -15,7 +15,7 @@ export const users = p.pgTable(
 		username: p.text("username").notNull(),
 		passwordHash: p.text("password_hash").notNull(),
 		role: p.text("role", { enum: userRoleEnum }).notNull().default("user"),
-		emailVerified: p.boolean("email_verified").notNull().default(false),
+		isEmailVerified: p.boolean("is_email_verified").notNull().default(false),
 		totpKey: p.bytea("totp_key"),
 		recoveryCode: p.bytea("recovery_code").notNull(),
 		...f.timestamps(),
@@ -47,7 +47,7 @@ export const sessions = p.pgTable("sessions", {
 			{ onDelete: "cascade" },
 		),
 	expiresAt: f.timestamp("expires_at").notNull(),
-	twoFactorVerified: p.boolean("two_factor_verified").notNull().default(false),
+	isTwoFactorVerified: p.boolean("is_two_factor_verified").notNull().default(false),
 });
 
 export type Session = typeof sessions.$inferSelect;
@@ -69,10 +69,10 @@ export const passwordResetSessions = p.pgTable("password_reset_sessions", {
 			{ onDelete: "cascade" },
 		),
 	email: p.text("email").notNull(),
-	emailVerified: p.boolean("email_verified").notNull().default(false),
+	isEmailVerified: p.boolean("is_email_verified").notNull().default(false),
 	code: p.text("code").notNull(),
 	expiresAt: f.timestamp("expires_at").notNull(),
-	twoFactorVerified: p.boolean("two_factor_verified").notNull().default(false),
+	isTwoFactorVerified: p.boolean("is_two_factor_verified").notNull().default(false),
 });
 
 export type PasswordResetSession = typeof passwordResetSessions.$inferSelect;

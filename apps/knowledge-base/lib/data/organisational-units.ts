@@ -100,12 +100,8 @@ export async function getOrganisationalUnitById(params: GetOrganisationalUnitByI
 	return data;
 }
 
-interface CreateOrganisationalUnitParams extends Omit<
-	schema.OrganisationalUnitInput,
-	"id" | "createdAt" | "updatedAt"
-> {
-	slug: string;
-	resourceIds?: Array<string>;
+interface CreateOrganisationalUnitParams extends schema.OrganisationalUnitInput {
+	slug: schema.EntityInput["slug"];
 }
 
 export async function createOrganisationalUnit(params: CreateOrganisationalUnitParams) {

@@ -1,5 +1,5 @@
 {
-	"name": "@dariah-eric/database",
+	"name": "@dariah-eric/auth",
 	"private": true,
 	"license": "MIT",
 	"type": "module",
@@ -7,11 +7,7 @@
 		"node": "24.x"
 	},
 	"exports": {
-		".": "./dist/index.mjs",
-		"./client": "./dist/client.mjs",
-		"./lib": "./src/lib/index.ts",
-		"./relations": "./dist/relations.mjs",
-		"./schema": "./dist/schema.mjs"
+		".": "./dist/index.mjs"
 	},
 	"files": [
 		"./dist/"
@@ -19,45 +15,34 @@
 	"sideEffects": false,
 	"scripts": {
 		"build": "tsdown",
-		"db:migrations:apply": "drizzle-kit migrate --config=./config/drizzle.config.ts",
-		"db:migrations:check": "drizzle-kit check --config=./config/drizzle.config.ts",
-		"db:migrations:generate": "drizzle-kit generate --config=./config/drizzle.config.ts",
-		"db:push": "drizzle-kit push --config=./config/drizzle.config.ts",
-		"db:reset": "tsx ./scripts/reset.ts",
-		"db:seed": "tsx ./scripts/seed.ts",
-		"db:studio": "drizzle-kit studio --config=./config/drizzle.config.ts",
 		"dev": "tsdown --watch",
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
 		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
-		"generate:dbml-schema": "tsx ./scripts/generate-dbml-schema.ts",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
 		"types:check": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
-		"@acdh-oeaw/validate-env": "catalog:",
-		"@dariah-eric/auth": "workspace:^",
-		"drizzle-orm": "catalog:",
-		"drizzle-valibot": "catalog:",
-		"pg": "catalog:",
-		"valibot": "catalog:"
+		"@node-rs/argon2": "catalog:",
+		"@oslojs/binary": "catalog:",
+		"@oslojs/crypto": "catalog:",
+		"@oslojs/encoding": "catalog:",
+		"@oslojs/otp": "catalog:",
+		"uqr": "catalog:"
+	},
+	"peerDependencies": {
+		"better-result": "catalog:"
 	},
 	"devDependencies": {
 		"@dariah-eric/configs": "workspace:^",
-		"@faker-js/faker": "catalog:",
-		"@sindresorhus/slugify": "catalog:",
 		"@types/node": "catalog:",
-		"@types/pg": "catalog:",
-		"concurrently": "catalog:",
-		"drizzle-dbml-generator": "catalog:",
-		"drizzle-kit": "catalog:",
-		"drizzle-seed": "catalog:",
+		"better-result": "catalog:",
 		"eslint": "catalog:",
 		"prettier": "catalog:",
 		"tsdown": "catalog:",
-		"tsx": "catalog:",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"valibot": "catalog:"
 	},
 	"browserslist": {
 		"development": [
