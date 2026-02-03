@@ -1,11 +1,14 @@
 import { createCipheriv, createDecipheriv, getRandomValues } from "node:crypto";
 
 import { DynamicBuffer } from "@oslojs/binary";
-import { decodeBase64 } from "@oslojs/encoding";
+import { decodeBase64, encodeBase64 } from "@oslojs/encoding";
+import { createTOTPKeyURI, verifyTOTP } from "@oslojs/otp";
 
 import { env } from "../config/env.config";
 
-const key = decodeBase64(env.ENCRYPTION_KEY);
+export { createTOTPKeyURI, decodeBase64, encodeBase64, verifyTOTP };
+
+const key = decodeBase64(env.APP_AUTH_ENCRYPTION_KEY);
 
 export function encrypt(data: Uint8Array): Uint8Array {
 	const iv = new Uint8Array(16);

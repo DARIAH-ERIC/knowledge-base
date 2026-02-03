@@ -1,5 +1,5 @@
-// export const passwordMinLength = 8;
-// export const passwordMaxLength = 255;
+export const passwordMinLength = 8;
+export const passwordMaxLength = 255;
 
 export const usernameMinLength = 4;
 export const usernameMaxLength = 31;
@@ -15,7 +15,7 @@ export const passwordResetCookieName = "password_reset_session";
 export const emailVerificationRequestCookieName = "email_verification";
 
 /** Two-factor app name. */
-export const issuer = "DARIAH Knowledge Base";
+export const issuer = "DARIAH";
 
 export const urls = {
 	"2fa": "/auth/2fa",

@@ -29,10 +29,11 @@
 		"@oslojs/crypto": "catalog:",
 		"@oslojs/encoding": "catalog:",
 		"@oslojs/otp": "catalog:",
-		"uqr": "catalog:"
+		"valibot": "catalog:"
 	},
 	"peerDependencies": {
-		"better-result": "catalog:"
+		"better-result": "catalog:",
+		"valibot": "catalog:"
 	},
 	"devDependencies": {
 		"@dariah-eric/configs": "workspace:^",

@@ -3,7 +3,7 @@
 import * as v from "valibot";
 
 const Schema = v.object({
-	ENCRYPTION_KEY: v.pipe(v.string(), v.minLength(16)),
+	APP_AUTH_ENCRYPTION_KEY: v.pipe(v.string(), v.length(24)),
 });
 
 export const env = v.parse(Schema, process.env);

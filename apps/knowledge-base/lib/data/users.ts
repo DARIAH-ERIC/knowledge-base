@@ -32,6 +32,7 @@ import {
 	sessionRefreshIntervalMs,
 } from "@/config/auth.config";
 import { env } from "@/config/env.config";
+import { sendEmail } from "@/lib/server/email/send-email";
 import { ExpiringTokenBucket } from "@/lib/server/rate-limit/rate-limiter";
 
 interface CreateUserParams extends Pick<schema.UserInput, "email" | "username"> {
@@ -487,16 +488,19 @@ export async function getUserEmailVerificationRequestFromRequest(): Promise<sche
 	return request;
 }
 
-export async function deleteUserEmailVerificationRequest(userId: string): Promise<void> {
+export async function deleteUserEmailVerificationRequest(userId: schema.User["id"]): Promise<void> {
 	await db
 		.delete(schema.emailVerificationRequests)
 		.where(eq(schema.emailVerificationRequests.userId, userId));
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await
 export async function sendVerificationEmail(email: string, code: string): Promise<void> {
-	// eslint-disable-next-line no-console
-	console.log(`To ${email}: Your verification code is ${code}`);
+	await sendEmail({
+		from: env.EMAIL_ADDRESS,
+		to: email,
+		subject: "Verification code",
+		text: `Your verification code is ${code}`,
+	});
 }
 
 export const sendVerificationEmailBucket = new ExpiringTokenBucket<string>(3, 60 * 10);
@@ -640,10 +644,13 @@ export async function validatePasswordResetSessionRequest(): Promise<PasswordRes
 	return result;
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await
 export async function sendPasswordResetEmail(email: string, code: string): Promise<void> {
-	// eslint-disable-next-line no-console
-	console.log(`To ${email}: Your reset code is ${code}`);
+	await sendEmail({
+		from: env.EMAIL_ADDRESS,
+		to: email,
+		subject: "Reset code",
+		text: `Your reset code is ${code}`,
+	});
 }
 
 export type PasswordResetSessionValidationResult =
