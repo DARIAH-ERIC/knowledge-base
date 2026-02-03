@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { PagesTable } from "@/components/ui/tables/pages-table";
-import { getPages } from "@/lib/data/pages";
+import { getPages } from "@/lib/data/cached/pages";
 import { createMetadata } from "@/lib/server/metadata";
 
 interface DashboardWebsitePagesPageProps extends PageProps<"/[locale]/dashboard/website/pages"> {}
