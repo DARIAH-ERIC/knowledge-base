@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { EventsTable } from "@/components/ui/tables/events-table";
-import { getEvents } from "@/lib/data/events";
+import { getEvents } from "@/lib/data/cached/events";
 import { createMetadata } from "@/lib/server/metadata";
 
 interface DashboardWebsiteEventsPageProps extends PageProps<"/[locale]/dashboard/website/events"> {}

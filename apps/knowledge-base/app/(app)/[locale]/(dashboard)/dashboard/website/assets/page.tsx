@@ -9,7 +9,7 @@ import { UploadImageForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/webs
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { Link } from "@/components/link";
 import { imageGridOptions } from "@/config/assets.config";
-import { getAssets } from "@/lib/data/queries/assets";
+import { getAssets } from "@/lib/data/cached/assets";
 import { createHref } from "@/lib/navigation/create-href";
 import { createMetadata } from "@/lib/server/metadata";
 

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { ImpactCaseStudiesTable } from "@/components/ui/tables/impact-case-studies-table";
-import { getImpactCaseStudies } from "@/lib/data/impact-case-studies";
+import { getImpactCaseStudies } from "@/lib/data/cached/impact-case-studies";
 import { createMetadata } from "@/lib/server/metadata";
 
 interface DashboardWebsiteImpactCaseStudiesPageProps extends PageProps<"/[locale]/dashboard/website/impact-case-studies"> {}
