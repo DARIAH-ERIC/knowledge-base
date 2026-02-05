@@ -26,6 +26,10 @@ export function createApp() {
 	const app = factory
 		.createApp()
 		.use(cors(corsConfig))
+		.get("/health", (c) => {
+			const status = 200;
+			return c.json({ message: STATUS_CODES[status] }, status);
+		})
 		.use(requestId())
 		.use(logger())
 		.use(rateLimiter(rateLimiterConfig))
