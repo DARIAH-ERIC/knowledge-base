@@ -5,10 +5,12 @@ import { cors } from "hono/cors";
 import { createFactory } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { requestId } from "hono/request-id";
+import { rateLimiter } from "hono-rate-limiter";
 
 import type { Database, Transaction } from "@/middlewares/db";
 import { type Logger, logger } from "@/middlewares/logger";
 import { config as corsConfig } from "~/config/cors.config";
+import { config as rateLimiterConfig } from "~/config/rate-limiter.config";
 
 interface Env {
 	Variables: {
@@ -29,6 +31,7 @@ export function createApp() {
 			const status = 200;
 			return c.json({ message: STATUS_CODES[status] }, status);
 		})
+		.use(rateLimiter(rateLimiterConfig))
 		.use(logger())
 
 		.notFound((c) => {
