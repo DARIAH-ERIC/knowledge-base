@@ -25,6 +25,7 @@ livenessProbe:
   path: /health
   initialDelaySeconds: 15
   timeoutSeconds: 15
+  periodSeconds: 30
   scheme: "HTTP"
   probeType: "httpGet"
 readinessProbe:
