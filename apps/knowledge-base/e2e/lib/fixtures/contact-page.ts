@@ -54,6 +54,7 @@ export class ContactPage {
 	fillPolling = async (locator: Locator, value: string) => {
 		await expect
 			.poll(async () => {
+				await locator.clear();
 				await locator.fill(value);
 				return await locator.inputValue();
 			})
