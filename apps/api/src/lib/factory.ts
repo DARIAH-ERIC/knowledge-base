@@ -25,14 +25,14 @@ const factory = createFactory<Env>({ defaultAppOptions: { strict: false } });
 export function createApp() {
 	const app = factory
 		.createApp()
+		.use(requestId())
 		.use(cors(corsConfig))
 		.get("/health", (c) => {
 			const status = 200;
 			return c.json({ message: STATUS_CODES[status] }, status);
 		})
-		.use(requestId())
-		.use(logger())
 		.use(rateLimiter(rateLimiterConfig))
+		.use(logger())
 
 		.notFound((c) => {
 			const status = 404;
