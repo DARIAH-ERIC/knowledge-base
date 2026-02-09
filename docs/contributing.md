@@ -129,3 +129,16 @@ docker run -it \
   -e SKIP_SSL_VERIFICATION=false \
   cloudlena/s3manager
 ```
+
+### rate limiting
+
+the api server has its [own rate limiting config](../apps/api/config/rate-limiter.config.ts).
+
+note that when deploying on acdh infrastructure, an exception for the domain of the api server
+needs to be added to the `haproxy` load balancer, which does its own rate limiting by default.
+also, a custom ingress class needs to be configured in
+[auto-deploy-values.yaml](../.github/auto-deploy-values.yaml#L23) to receive real ip addresses via
+`x-forwarded-for` header (by default, `x-forwarded-for` holds the ip address of the reverse proxy).
+
+note that when changing the domain of the api server, the `haproxy` config exception needs to be
+updated as well.
