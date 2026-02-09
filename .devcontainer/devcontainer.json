@@ -3,10 +3,9 @@
 	"dockerComposeFile": [
 		"docker-compose.postgres.yaml",
 		"docker-compose.apps.yaml",
-		"docker-compose.drizzle-gateway.yaml",
+		"docker-compose.minio.yaml",
 		"docker-compose.imgproxy.yaml",
 		"docker-compose.mailpit.yaml",
-		"docker-compose.pgadmin.yaml",
 		"docker-compose.typesense.yaml"
 	],
 	"service": "app",
@@ -17,14 +16,16 @@
 				"bradlc.vscode-tailwindcss",
 				"dbaeumer.vscode-eslint",
 				"editorconfig.editorconfig",
+				"esbenp.prettier-vscode",
 				"github.vscode-github-actions",
 				"lokalise.i18n-ally",
+				"matt-meyers.vscode-dbml",
 				"mikestead.dotenv",
 				"ms-playwright.playwright",
-				"prettier.prettier-vscode",
 				"stylelint.vscode-stylelint",
 				"unifiedjs.vscode-mdx",
-				"vercel.turbo-vsc"
+				"vercel.turbo-vsc",
+				"vitest.explorer"
 			]
 		}
 	},
@@ -32,13 +33,11 @@
 		3001,
 		3002,
 		3003,
-		"drizzle-gateway:4984",
 		"imgproxy:8080",
 		"mailpit:1025",
 		"mailpit:8025",
 		"minio:9000",
 		"minio:9001",
-		"pgadmin:5555",
 		"postgres:5432",
 		"typesense:8108",
 		"typesense-dashboard:5050"
@@ -52,9 +51,6 @@
 		},
 		"3003": {
 			"label": "DARIAH Knowledge Base API"
-		},
-		"drizzle-gateway:4984": {
-			"label": "Drizzle UI"
 		},
 		"imgproxy:8080": {
 			"label": "Imgproxy"
@@ -70,9 +66,6 @@
 		},
 		"minio:9001": {
 			"label": "MinIO Web UI"
-		},
-		"pgadmin:5555": {
-			"label": "pgAdmin"
 		},
 		"postgres:5432": {
 			"label": "PostgreSQL"

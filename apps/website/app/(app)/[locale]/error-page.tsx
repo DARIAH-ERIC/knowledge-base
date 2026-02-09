@@ -1,12 +1,11 @@
 "use client";
 
 import { log } from "@acdh-oeaw/lib";
+import * as Sentry from "@sentry/nextjs";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useEffect } from "react";
 
 import { Main } from "@/components/main";
-
-export { viewport } from "@/app/_lib/viewport.config";
 
 interface ErrorPageProps {
 	error: Error & { digest?: string };
@@ -19,8 +18,8 @@ export function ErrorPage(props: Readonly<ErrorPageProps>): ReactNode {
 	const t = useTranslations("ErrorPage");
 
 	useEffect(() => {
-		// TODO: Log the error to an error reporting service.
 		log.error(error);
+		Sentry.captureException(error);
 	}, [error]);
 
 	return (

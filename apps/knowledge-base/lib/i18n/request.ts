@@ -11,9 +11,18 @@ async function getLocale(params: GetRequestConfigParams): Promise<IntlLocale> {
 		return params.locale;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-	const locale = (await rootParams.locale()) as string;
-	return isValidLocale(locale) ? locale : routing.defaultLocale;
+	/**
+	 * FIXME:
+	 * Currently `next/root-params` are not supported in route handlers, so we fall back
+	 * to default locale.
+	 */
+	try {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+		const locale = (await rootParams.locale()) as string;
+		return isValidLocale(locale) ? locale : routing.defaultLocale;
+	} catch {
+		return routing.defaultLocale;
+	}
 }
 
 export default getRequestConfig(async (params) => {

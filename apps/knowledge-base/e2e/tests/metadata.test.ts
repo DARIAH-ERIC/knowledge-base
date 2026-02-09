@@ -58,16 +58,18 @@ test("should disallow indexing of not-found page", async ({ page }) => {
 	}
 });
 
-test("should set page metadata", async ({ createIndexPage }) => {
+test("should set page metadata", async ({ createImprintPage }) => {
 	for (const locale of locales) {
-		const { indexPage, i18n } = await createIndexPage(locale);
-		await indexPage.goto();
-		const { page } = indexPage;
+		const { imprintPage, i18n } = await createImprintPage(locale);
+		await imprintPage.goto();
+		const { page } = imprintPage;
 
 		const metadata = i18n.messages.metadata;
 
 		const title = metadata.title;
 		const description = metadata.description;
+		const pageTitle = i18n.t("ImprintPage.meta.title");
+		const documentTitle = [pageTitle, title].join(" | ");
 		// const twitter = metadata.social.twitter;
 
 		expect(title).toBeTruthy();
@@ -88,13 +90,13 @@ test("should set page metadata", async ({ createIndexPage }) => {
 		// const googleSiteVerification = page.locator('meta[name="google-site-verification"]');
 		// await expect(googleSiteVerification).toHaveAttribute("content", "");
 
-		await expect(page).toHaveTitle(title);
+		await expect(page).toHaveTitle(documentTitle);
 
 		const metaDescription = page.locator('meta[name="description"]');
 		await expect(metaDescription).toHaveAttribute("content", description);
 
 		const ogTitle = page.locator('meta[property="og:title"]');
-		await expect(ogTitle).toHaveAttribute("content", title);
+		await expect(ogTitle).toHaveAttribute("content", pageTitle);
 
 		const ogDescription = page.locator('meta[property="og:description"]');
 		await expect(ogDescription).toHaveAttribute("content", description);
@@ -105,13 +107,16 @@ test("should set page metadata", async ({ createIndexPage }) => {
 			String(
 				createUrl({
 					baseUrl: env.NEXT_PUBLIC_APP_BASE_URL,
-					pathname: removeTrailingSlash(getPathname({ href: { pathname: "/" }, locale })),
+					pathname: removeTrailingSlash(getPathname({ href: { pathname: "/imprint" }, locale })),
 				}),
 			),
 		);
 
 		const ogLocale = page.locator('meta[property="og:locale"]');
 		await expect(ogLocale).toHaveAttribute("content", locale);
+
+		const ogSiteName = page.locator('meta[property="og:site_name"]');
+		await expect(ogSiteName).toHaveAttribute("content", title);
 	}
 });
 

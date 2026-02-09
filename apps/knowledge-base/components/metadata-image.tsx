@@ -5,7 +5,7 @@ import { ImageResponse } from "next/og";
 
 import type { IntlLocale } from "@/lib/i18n/locales";
 
-interface MetadataImageProps {
+export interface MetadataImageProps {
 	locale: IntlLocale;
 	size: { width: number; height: number };
 	title: string;

@@ -1,18 +1,34 @@
 /* stylelint-disable custom-property-empty-line-before */
 
+/*
+ * Imports.
+ * ============================================================================
+ */
+
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@dariah-eric/ui/styles";
+
+/*
+ * Tailwind CSS.
+ * ============================================================================
+ */
 
 @plugin "tailwindcss-react-aria-components";
 
-@custom-variant base {
-	@layer base {
+@custom-variant ui {
+	@layer components {
 		@slot;
 	}
 }
 
 @custom-variant light (&:where([data-ui-color-scheme="light"], [data-ui-color-scheme="light"] *));
 @custom-variant dark (&:where([data-ui-color-scheme="dark"], [data-ui-color-scheme="dark"] *));
+
+/*
+ * Breakpoints.
+ * ============================================================================
+ */
 
 @theme {
 	--breakpoint-xs: 30rem;
@@ -24,11 +40,12 @@
 	--breakpoint-3xl: 120rem;
 }
 
-/**************************************************************************************************
+/*
  * Intent ui.
- *************************************************************************************************/
+ * ============================================================================
+ */
 
-@layer base {
+@layer theme {
 	:root,
 	[data-ui-color-scheme="light"] {
 		--bg: oklch(100% 0 0deg);
@@ -272,9 +289,10 @@
 	}
 }
 
-/**************************************************************************************************
+/*
  * Theme.
- *************************************************************************************************/
+ * ============================================================================
+ */
 
 @theme inline {
 	--font-body: var(--_font-body, var(--default-font-family));
@@ -298,7 +316,7 @@
 	--color-neutral-1000: var(--color-black);
 }
 
-@layer base {
+@layer theme {
 	:root,
 	[data-ui-color-scheme="light"] {
 		--_color-background-base: var(--color-bg);
@@ -332,9 +350,10 @@
 	--color-focus-outline: var(--_color-focus-outline);
 }
 
-/**************************************************************************************************
+/*
  * Global styles.
- *************************************************************************************************/
+ * ============================================================================
+ */
 
 @layer base {
 	:root {
@@ -405,17 +424,27 @@
 	}
 }
 
-/**************************************************************************************************
+/*
  * Utilities.
- *************************************************************************************************/
+ * ============================================================================
+ */
 
 @utility container {
 	width: 100%;
-	max-width: var(--breakpoint-2xl);
+	max-width: var(--breakpoint-3xl);
 	margin-inline: auto;
 }
 
-@utility touch-target {
+@utility focus-visible-outline {
+	outline: transparent none 2px;
+
+	&:is(:focus-visible, [data-focus-visible]) {
+		outline: 2px solid var(--color-focus-outline);
+		outline-offset: 2px;
+	}
+}
+
+@utility touch-area {
 	--touch-area: 44px;
 
 	position: relative;
@@ -436,15 +465,16 @@
 	}
 }
 
-/**************************************************************************************************
+/*
  * Rich text.
- *************************************************************************************************/
+ * ============================================================================
+ */
 
 /** @see {@link https://github.com/tailwindlabs/tailwindcss-typography/tree/css-only} */
 
 /* stylelint-disable number-max-precision */
 
-@layer base {
+@layer theme {
 	:root,
 	[data-ui-color-scheme="light"] {
 		--richtext-body: var(--color-neutral-700);

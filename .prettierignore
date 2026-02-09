@@ -16,4 +16,4 @@ pnpm-workspace.yaml
 /apps/*/e2e/snapshots
 
 # database migrations
-/packages/database-client/db/migrations/
+/packages/database/db/migrations/

@@ -1,19 +1,13 @@
 import { parseArgs } from "node:util";
 
 import { log } from "@acdh-oeaw/lib";
-import {
-	db as databaseClient,
-	seed as seedDatabase,
-} from "@dariah-eric/dariah-knowledge-base-database-client/lib";
+import { db as databaseClient, seed as seedDatabase } from "@dariah-eric/database/lib";
+import { adminClient as searchIndexClient, seed as seedSearchIndex } from "@dariah-eric/search/lib";
 import {
 	adminClient as objectStoreClient,
 	seed as seedObjectStore,
 	type SeedManifest,
-} from "@dariah-eric/dariah-knowledge-base-image-service/lib";
-import {
-	adminClient as searchIndexClient,
-	seed as seedSearchIndex,
-} from "@dariah-eric/dariah-knowledge-base-search-index/lib";
+} from "@dariah-eric/storage/lib";
 import * as v from "valibot";
 
 const _services = ["database", "object-store", "search-index"] as const;

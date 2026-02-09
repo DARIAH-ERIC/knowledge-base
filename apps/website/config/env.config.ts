@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 
-import { err, isErr, ok } from "@acdh-oeaw/lib";
+import { addTrailingSlash, err, isErr, ok, removeTrailingSlash } from "@acdh-oeaw/lib";
 import { createEnv, ValidationError } from "@acdh-oeaw/validate-env/next";
 import * as v from "valibot";
 
@@ -38,9 +38,13 @@ const result = createEnv({
 				EMAIL_SMTP_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 				EMAIL_SMTP_SERVER: v.pipe(v.string(), v.nonEmpty()),
 				EMAIL_SMTP_USERNAME: v.optional(v.pipe(v.string(), v.nonEmpty())),
+				EMAIL_SSL_CONNECTION: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 				IMGPROXY_BASE_URL: v.pipe(v.string(), v.url()),
 				IMGPROXY_KEY: v.pipe(v.string(), v.nonEmpty()),
 				IMGPROXY_SALT: v.pipe(v.string(), v.nonEmpty()),
+				MAILCHIMP_API_BASE_URL: v.pipe(v.string(), v.url()),
+				MAILCHIMP_API_KEY: v.pipe(v.string(), v.nonEmpty()),
+				MAILCHIMP_LIST_ID: v.pipe(v.string(), v.nonEmpty()),
 				MAILPIT_API_BASE_URL: v.optional(v.pipe(v.string(), v.url())),
 				NEXT_RUNTIME: v.optional(v.picklist(["edge", "nodejs"])),
 				S3_ACCESS_KEY: v.pipe(v.string(), v.nonEmpty()),
@@ -76,11 +80,21 @@ const result = createEnv({
 				 * a search-only api key for that collection.
 				 */
 				NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY: v.optional(v.pipe(v.string(), v.nonEmpty())),
-				NEXT_PUBLIC_WEBSITE_BASE_URL: v.pipe(v.string(), v.url()),
+				NEXT_PUBLIC_WEBSITE_BASE_URL: v.pipe(v.string(), v.url(), v.transform(removeTrailingSlash)),
 				NEXT_PUBLIC_WEBSITE_BOTS: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 				NEXT_PUBLIC_WEBSITE_GOOGLE_SITE_VERIFICATION: v.optional(v.pipe(v.string(), v.nonEmpty())),
-				NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL: v.pipe(v.string(), v.url()),
-				NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL: v.optional(v.pipe(v.string(), v.url())),
+				NEXT_PUBLIC_WEBSITE_IMPRINT_CUSTOM_CONFIG: v.optional(
+					v.picklist(["disabled", "enabled"]),
+					"enabled",
+				),
+				NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL: v.pipe(
+					v.string(),
+					v.url(),
+					v.transform(removeTrailingSlash),
+				),
+				NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL: v.optional(
+					v.pipe(v.string(), v.url(), v.transform(addTrailingSlash)),
+				),
 				NEXT_PUBLIC_WEBSITE_MATOMO_ID: v.optional(
 					v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 				),
@@ -123,14 +137,20 @@ const result = createEnv({
 		EMAIL_SMTP_PORT: process.env.EMAIL_SMTP_PORT,
 		EMAIL_SMTP_SERVER: process.env.EMAIL_SMTP_SERVER,
 		EMAIL_SMTP_USERNAME: process.env.EMAIL_SMTP_USERNAME,
+		EMAIL_SSL_CONNECTION: process.env.EMAIL_SSL_CONNECTION,
 		IMGPROXY_BASE_URL: process.env.IMGPROXY_BASE_URL,
 		IMGPROXY_KEY: process.env.IMGPROXY_KEY,
 		IMGPROXY_SALT: process.env.IMGPROXY_SALT,
+		MAILCHIMP_API_BASE_URL: process.env.MAILCHIMP_API_BASE_URL,
+		MAILCHIMP_API_KEY: process.env.MAILCHIMP_API_KEY,
+		MAILCHIMP_LIST_ID: process.env.MAILCHIMP_LIST_ID,
 		MAILPIT_API_BASE_URL: process.env.MAILPIT_API_BASE_URL,
 		NEXT_PUBLIC_WEBSITE_BASE_URL: process.env.NEXT_PUBLIC_WEBSITE_BASE_URL,
 		NEXT_PUBLIC_WEBSITE_BOTS: process.env.NEXT_PUBLIC_WEBSITE_BOTS,
 		NEXT_PUBLIC_WEBSITE_GOOGLE_SITE_VERIFICATION:
 			process.env.NEXT_PUBLIC_WEBSITE_GOOGLE_SITE_VERIFICATION,
+		NEXT_PUBLIC_WEBSITE_IMPRINT_CUSTOM_CONFIG:
+			process.env.NEXT_PUBLIC_WEBSITE_IMPRINT_CUSTOM_CONFIG,
 		NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL:
 			process.env.NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL,
 		NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL: process.env.NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL,

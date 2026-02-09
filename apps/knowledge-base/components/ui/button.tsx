@@ -60,22 +60,22 @@ export const buttonStyles = tv({
 				"*:data-[slot=loader]:size-5 sm:*:data-[slot=loader]:size-4.5",
 			],
 			"sq-xs": [
-				"touch-target size-8 sm:size-7",
+				"touch-area size-8 sm:size-7",
 				"*:data-[slot=icon]:size-3.5 sm:*:data-[slot=icon]:size-3",
 				"*:data-[slot=loader]:size-3.5 sm:*:data-[slot=loader]:size-3",
 			],
 			"sq-sm": [
-				"touch-target size-10 sm:size-8",
+				"touch-area size-10 sm:size-8",
 				"*:data-[slot=icon]:size-4.5 sm:*:data-[slot=icon]:size-4",
 				"*:data-[slot=loader]:size-4.5 sm:*:data-[slot=loader]:size-4",
 			],
 			"sq-md": [
-				"touch-target size-11 sm:size-9",
+				"touch-area size-11 sm:size-9",
 				"*:data-[slot=icon]:size-5 sm:*:data-[slot=icon]:size-4.5",
 				"*:data-[slot=loader]:size-5 sm:*:data-[slot=loader]:size-4.5",
 			],
 			"sq-lg": [
-				"touch-target size-12 sm:size-10",
+				"touch-area size-12 sm:size-10",
 				"*:data-[slot=icon]:size-6 sm:*:data-[slot=icon]:size-5",
 				"*:data-[slot=loader]:size-6 sm:*:data-[slot=loader]:size-5",
 			],

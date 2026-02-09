@@ -1,0 +1,176 @@
+{
+	"$schema": "https://turborepo.com/schema.v2.json",
+	"globalEnv": [
+		"API_ALLOWED_ORIGINS",
+		"API_BASE_URL",
+		"API_LOG_LEVEL",
+		"API_PORT",
+		"BUILD_MODE",
+		"DATABASE_HOST",
+		"DATABASE_NAME",
+		"DATABASE_PASSWORD",
+		"DATABASE_PORT",
+		"DATABASE_SSL_CONNECTION",
+		"DATABASE_USER",
+		"EMAIL_ADDRESS",
+		"EMAIL_SMTP_PASSWORD",
+		"EMAIL_SMTP_PORT",
+		"EMAIL_SMTP_SERVER",
+		"EMAIL_SMTP_USERNAME",
+		"EMAIL_SSL_CONNECTION",
+		"IMGPROXY_BASE_URL",
+		"IMGPROXY_KEY",
+		"IMGPROXY_PORT",
+		"IMGPROXY_SALT",
+		"MAILCHIMP_API_BASE_URL",
+		"MAILCHIMP_API_KEY",
+		"MAILCHIMP_LIST_ID",
+		"MAILPIT_API_BASE_URL",
+		"NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME",
+		"NEXT_PUBLIC_TYPESENSE_WEBSITE_COLLECTION_NAME",
+		"NEXT_PUBLIC_TYPESENSE_HOST",
+		"NEXT_PUBLIC_TYPESENSE_PORT",
+		"NEXT_PUBLIC_TYPESENSE_PROTOCOL",
+		"NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY",
+		"NODE_ENV",
+		"S3_BUCKET_NAME",
+		"S3_ACCESS_KEY",
+		"S3_HOST",
+		"S3_PORT",
+		"S3_PROTOCOL",
+		"S3_SECRET_KEY",
+		"TYPESENSE_ADMIN_API_KEY"
+	],
+	"globalPassThroughEnv": ["CI", "ENV_VALIDATION", "NEXT_RUNTIME", "MAILPIT_API_BASE_URL"],
+	"tasks": {
+		"build": {
+			"dependsOn": ["^build"],
+			"env": [
+				"API_SENTRY_DSN",
+				"API_SENTRY_ORG",
+				"API_SENTRY_PII",
+				"API_SENTRY_PROJECT",
+				"BUILD_MODE",
+				"NEXT_PUBLIC_APP_BASE_URL",
+				"NEXT_PUBLIC_APP_IMPRINT_CUSTOM_CONFIG",
+				"NEXT_PUBLIC_APP_IMPRINT_SERVICE_BASE_URL",
+				"NEXT_PUBLIC_APP_BOTS",
+				"NEXT_PUBLIC_APP_GOOGLE_SITE_VERIFICATION",
+				"NEXT_PUBLIC_APP_MATOMO_BASE_URL",
+				"NEXT_PUBLIC_APP_MATOMO_ID",
+				"NEXT_PUBLIC_APP_SENTRY_DSN",
+				"NEXT_PUBLIC_APP_SENTRY_ORG",
+				"NEXT_PUBLIC_APP_SENTRY_PII",
+				"NEXT_PUBLIC_APP_SENTRY_PROJECT",
+				"NEXT_PUBLIC_APP_SERVICE_ID",
+				"NEXT_PUBLIC_WEBSITE_BASE_URL",
+				"NEXT_PUBLIC_WEBSITE_IMPRINT_CUSTOM_CONFIG",
+				"NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL",
+				"NEXT_PUBLIC_WEBSITE_BOTS",
+				"NEXT_PUBLIC_WEBSITE_GOOGLE_SITE_VERIFICATION",
+				"NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL",
+				"NEXT_PUBLIC_WEBSITE_MATOMO_ID",
+				"NEXT_PUBLIC_WEBSITE_SENTRY_DSN",
+				"NEXT_PUBLIC_WEBSITE_SENTRY_ORG",
+				"NEXT_PUBLIC_WEBSITE_SENTRY_PII",
+				"NEXT_PUBLIC_WEBSITE_SENTRY_PROJECT",
+				"NEXT_PUBLIC_WEBSITE_SERVICE_ID"
+			],
+			"inputs": ["$TURBO_DEFAULT$", ".env", ".env.*"],
+			"outputs": [".next/**", "!.next/cache/**", "dist/**", "out/**", "tsconfig.tsbuildinfo"],
+			"passThroughEnv": [
+				"API_SENTRY_AUTH_TOKEN",
+				"APP_SENTRY_AUTH_TOKEN",
+				"WEBSITE_SENTRY_AUTH_TOKEN"
+			]
+		},
+		"db:migrations:apply": {
+			"cache": false
+		},
+		"db:migrations:check": {
+			"cache": false
+		},
+		"db:migrations:generate": {
+			"cache": false,
+			"interactive": true
+		},
+		"db:push": {
+			"cache": false,
+			"interactive": true
+		},
+		"db:reset": {
+			"cache": false,
+			"interactive": true
+		},
+		"db:seed": {
+			"cache": false,
+			"interactive": true
+		},
+		"db:studio": {
+			"cache": false,
+			"persistent": true
+		},
+		"dev": {
+			"cache": false,
+			"dependsOn": ["^dev"]
+		},
+		"//#format:check": {
+			"outputs": [".prettiercache"]
+		},
+		"//#format:fix": {
+			"outputs": [".prettiercache"]
+		},
+		"format:check": {
+			"outputs": [".prettiercache"]
+		},
+		"format:fix": {
+			"outputs": [".prettiercache"]
+		},
+		"lint:check": {
+			"dependsOn": ["^topo", "^build", "^lint:check"],
+			"outputs": [".stylelintcache"]
+		},
+		"lint:fix": {
+			"dependsOn": ["^topo", "^build", "^lint:fix"],
+			"outputs": [".stylelintcache"]
+		},
+		"search:api-keys:generate": {
+			"cache": false,
+			"passThroughEnv": ["TYPESENSE_ADMIN_API_KEY"]
+		},
+		"search:collections:create": {
+			"cache": false,
+			"passThroughEnv": ["TYPESENSE_ADMIN_API_KEY"]
+		},
+		"search:collections:ingest": {
+			"cache": false,
+			"passThroughEnv": ["TYPESENSE_ADMIN_API_KEY"]
+		},
+		"search:collections:seed": {
+			"cache": false,
+			"passThroughEnv": ["TYPESENSE_ADMIN_API_KEY"]
+		},
+		"start": {
+			"dependsOn": ["^build"]
+		},
+		"test": {},
+		"test:e2e": {
+			"dependsOn": ["^build"],
+			"env": ["PLAYWRIGHT_TEST_APP_BASE_URL"],
+			"passThroughEnv": ["PORT"]
+		},
+		"test:e2e:update-snapshots": {
+			"dependsOn": ["^build"],
+			"env": ["PLAYWRIGHT_TEST_APP_BASE_URL"],
+			"passThroughEnv": ["PORT"]
+		},
+		"topo": {
+			"dependsOn": ["^topo"]
+		},
+		"types:check": {
+			"dependsOn": ["^topo", "^build", "^types:check"],
+			"outputs": ["tsconfig.tsbuildinfo"]
+		}
+	},
+	"ui": "tui"
+}

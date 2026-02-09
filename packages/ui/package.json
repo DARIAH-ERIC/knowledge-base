@@ -1,0 +1,113 @@
+{
+	"name": "@dariah-eric/ui",
+	"private": true,
+	"license": "MIT",
+	"type": "module",
+	"engines": {
+		"node": "24.x"
+	},
+	"exports": {
+		".": "./dist/index.mjs",
+		"./i18n/en": "./dist/messages/en.json",
+		"./styles": "./dist/styles/index.css"
+	},
+	"files": [
+		"./dist/",
+		"./messages/",
+		"./styles/"
+	],
+	"sideEffects": false,
+	"scripts": {
+		"build": "tsdown",
+		"dev": "tsdown --watch",
+		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
+		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
+		"lint:check": "run-p --continue-on-error \"lint:*:check\"",
+		"lint:fix": "run-p --continue-on-error \"lint:*:fix\"",
+		"lint:code:check": "eslint . --flag unstable_native_nodejs_ts_config",
+		"lint:code:fix": "eslint . --flag unstable_native_nodejs_ts_config --fix",
+		"lint:styles:check": "stylelint \"./styles/**/*.css\" --cache --ignore-path ./../../.gitignore",
+		"lint:styles:fix": "stylelint \"./styles/**/*.css\" --cache --ignore-path ./../../.gitignore --fix",
+		"storybook:build": "storybook build",
+		"storybook:dev": "storybook dev --no-open --port 6006",
+		"storybook:docs:build": "storybook build --docs",
+		"storybook:docs:dev": "storybook dev --docs --no-open --port 6006",
+		"test": "vitest run --passWithNoTests --project=storybook",
+		"test:watch": "vitest watch --passWithNoTests --project=storybook",
+		"types:check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@acdh-oeaw/lib": "catalog:",
+		"@acdh-oeaw/style-variants": "catalog:",
+		"@react-aria/utils": "catalog:",
+		"clsx": "catalog:",
+		"lucide-react": "catalog:",
+		"next-intl": "catalog:",
+		"react": "catalog:",
+		"react-aria": "catalog:",
+		"react-aria-components": "catalog:",
+		"react-dom": "catalog:"
+	},
+	"devDependencies": {
+		"@acdh-oeaw/stylelint-config": "catalog:",
+		"@chromatic-com/storybook": "catalog:",
+		"@dariah-eric/configs": "workspace:^",
+		"@fontsource-variable/fira-code": "catalog:",
+		"@fontsource-variable/inter": "catalog:",
+		"@storybook/addon-a11y": "catalog:",
+		"@storybook/addon-docs": "catalog:",
+		"@storybook/addon-themes": "catalog:",
+		"@storybook/addon-vitest": "catalog:",
+		"@storybook/react-vite": "catalog:",
+		"@tailwindcss/vite": "catalog:",
+		"@types/node": "catalog:",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"@vitejs/plugin-react": "catalog:",
+		"@vitest/browser-playwright": "catalog:",
+		"@vitest/coverage-v8": "catalog:",
+		"eslint": "catalog:",
+		"npm-run-all2": "catalog:",
+		"playwright": "catalog:",
+		"prettier": "catalog:",
+		"storybook": "catalog:",
+		"storybook-next-intl": "catalog:",
+		"stylelint": "catalog:",
+		"tailwindcss": "catalog:",
+		"tailwindcss-react-aria-components": "catalog:",
+		"tsdown": "catalog:",
+		"tw-animate-css": "catalog:",
+		"typescript": "catalog:",
+		"vite": "catalog:",
+		"vite-tsconfig-paths": "catalog:",
+		"vitest": "catalog:"
+	},
+	"browserslist": {
+		"development": [
+			"baseline newly available"
+		],
+		"production": [
+			"baseline widely available"
+		]
+	},
+	"lint-staged": {
+		"*.@(js|ts|tsx)": [
+			"eslint --fix --flag unstable_native_nodejs_ts_config",
+			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write"
+		],
+		"*.@(css)": [
+			"stylelint --cache --fix",
+			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write"
+		],
+		"*.!(css|js|ts|tsx)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
+	},
+	"postcss": {
+		"plugins": {
+			"@tailwindcss/postcss": {}
+		}
+	},
+	"prettier": "@dariah-eric/configs/prettier",
+	"stylelint": {
+		"extends": "@acdh-oeaw/stylelint-config"
+	}
+}

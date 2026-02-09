@@ -1,19 +1,11 @@
 {
-	"name": "@dariah-eric/dariah-knowledge-base-scripts",
+	"name": "@dariah-eric/scripts",
 	"private": true,
 	"license": "MIT",
 	"type": "module",
 	"engines": {
-		"node": "^24"
+		"node": "24.x"
 	},
-	"devEngines": {
-		"runtime": {
-			"name": "node",
-			"version": "^24.12.0",
-			"onFail": "download"
-		}
-	},
-	"packageManager": "pnpm@10.27.0",
 	"sideEffects": false,
 	"scripts": {
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
@@ -25,22 +17,15 @@
 	},
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
-		"@dariah-eric/dariah-knowledge-base-database-client": "workspace:^",
-		"@dariah-eric/dariah-knowledge-base-image-service": "workspace:^",
-		"@dariah-eric/dariah-knowledge-base-search-index": "workspace:^",
+		"@dariah-eric/database": "workspace:^",
+		"@dariah-eric/storage": "workspace:^",
+		"@dariah-eric/search": "workspace:^",
 		"valibot": "catalog:"
 	},
 	"devDependencies": {
-		"@acdh-oeaw/eslint-config": "catalog:",
-		"@acdh-oeaw/eslint-config-node": "catalog:",
-		"@acdh-oeaw/prettier-config": "catalog:",
-		"@acdh-oeaw/tsconfig": "catalog:",
+		"@dariah-eric/configs": "workspace:^",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
-		"eslint-config-flat-gitignore": "catalog:",
-		"eslint-plugin-check-file": "catalog:",
-		"eslint-plugin-unicorn": "catalog:",
-		"globals": "catalog:",
 		"prettier": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:"
@@ -60,5 +45,5 @@
 		],
 		"*.!(js|ts)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
 	},
-	"prettier": "@acdh-oeaw/prettier-config"
+	"prettier": "@dariah-eric/configs/prettier"
 }

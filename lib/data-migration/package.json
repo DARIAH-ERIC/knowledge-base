@@ -1,0 +1,50 @@
+{
+	"name": "@dariah-eric/data-migration",
+	"private": true,
+	"license": "MIT",
+	"type": "module",
+	"engines": {
+		"node": "24.x"
+	},
+	"sideEffects": false,
+	"scripts": {
+		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
+		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
+		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
+		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
+		"migrate": "tsx ./scripts/migrate.ts",
+		"types:check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@acdh-oeaw/lib": "catalog:",
+		"@dariah-eric/database": "workspace:^",
+		"@dariah-eric/storage": "workspace:^",
+		"@sindresorhus/slugify": "catalog:",
+		"valibot": "catalog:"
+	},
+	"devDependencies": {
+		"@dariah-eric/configs": "workspace:^",
+		"@types/node": "catalog:",
+		"eslint": "catalog:",
+		"prettier": "catalog:",
+		"tsx": "catalog:",
+		"typescript": "catalog:",
+		"wp-types": "catalog:"
+	},
+	"browserslist": {
+		"development": [
+			"baseline newly available"
+		],
+		"production": [
+			"baseline widely available"
+		]
+	},
+	"lint-staged": {
+		"*.@(js|ts)": [
+			"eslint --fix --flag unstable_native_nodejs_ts_config",
+			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write"
+		],
+		"*.!(js|ts)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
+	},
+	"prettier": "@dariah-eric/configs/prettier"
+}

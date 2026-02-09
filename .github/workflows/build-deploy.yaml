@@ -1,0 +1,133 @@
+name: Build and deploy
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}-build-deploy"
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  changes:
+    name: Detect changed apps
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+          cache: "pnpm"
+
+      - name: Detect changed apps
+        id: changes
+        run: |
+          set -eux
+          CHANGED_APPS=$(
+            pnpm -r list --depth -1 --json --filter "./apps/*[origin/main]..." \
+            | jq -c '[.[] | select(.name != null) | .name | sub("^@dariah-eric/dariah-knowledge-base-"; "")]'
+          )
+          echo "CHANGED_APPS=${CHANGED_APPS}" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build and push docker images
+    needs: [changes]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      fail-fast: true
+      matrix:
+        target:
+          # - name: "knowledge-base"
+          #   environment: "production"
+          #   public_url: "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
+          - name: "api"
+            environment: "production"
+            public_url: "${{ vars.K8S_SECRET_API_BASE_URL }}"
+      max-parallel: 1
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Sign in to the container registry
+        uses: docker/login-action@v3
+        with:
+          registry: "ghcr.io"
+          username: "${{ github.actor }}"
+          password: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Extract metadata (tags, labels) for docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: "ghcr.io/${{ github.repository }}-${{ matrix.target.name }}"
+          tags: |
+            type=raw,value={{sha}}
+            type=ref,event=branch
+
+      - name: Build and push docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: "${{ matrix.target.name }}"
+          push: true
+          tags: "${{ steps.meta.outputs.tags }}"
+          labels: "${{ steps.meta.outputs.labels }}"
+          build-args: |
+            "NEXT_PUBLIC_APP_BASE_URL=${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
+            "NEXT_PUBLIC_APP_IMPRINT_CUSTOM_CONFIG=disabled"
+            "NEXT_PUBLIC_APP_IMPRINT_SERVICE_BASE_URL=${{ vars.NEXT_PUBLIC_IMPRINT_SERVICE_BASE_URL }}"
+            "NEXT_PUBLIC_APP_MATOMO_BASE_URL=${{ vars.NEXT_PUBLIC_MATOMO_BASE_URL }}"
+            "NEXT_PUBLIC_APP_MATOMO_ID=${{ vars.NEXT_PUBLIC_APP_MATOMO_ID }}"
+            "NEXT_PUBLIC_APP_SERVICE_ID=${{ vars.APP_SERVICE_ID }}"
+            "NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME=${{ vars.NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME }}"
+            "NEXT_PUBLIC_TYPESENSE_HOST=${{ vars.NEXT_PUBLIC_TYPESENSE_HOST }}"
+            "NEXT_PUBLIC_TYPESENSE_PORT=${{ vars.NEXT_PUBLIC_TYPESENSE_PORT }}"
+            "NEXT_PUBLIC_TYPESENSE_PROTOCOL=${{ vars.NEXT_PUBLIC_TYPESENSE_PROTOCOL }}"
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy docker images
+    needs: [changes, build]
+    uses: dariah-eric/gl-autodevops-minimal-port/.github/workflows/deploy.yml@main
+    secrets: inherit
+
+    strategy:
+      fail-fast: true
+      matrix:
+        target:
+          # - name: "knowledge-base"
+          #   environment: "production"
+          #   public_url: "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
+          #   service_id: "${{ vars.APP_SERVICE_ID }}"
+          - name: "api"
+            environment: "production"
+            public_url: "${{ vars.K8S_SECRET_API_BASE_URL }}"
+            service_id: "${{ vars.API_SERVICE_ID }}"
+      max-parallel: 1
+
+    with:
+      default_port: "3000"
+      environment: "${{ matrix.target.environment }}"
+      APP_NAME: "${{ matrix.target.name }}"
+      APP_ROOT: "/"
+      DOCKER_TAG: "ghcr.io/${{ github.repository }}-${{ matrix.target.name }}"
+      PUBLIC_URL: "${{ matrix.target.public_url }}"
+      SERVICE_ID: "${{ matrix.target.service_id }}"

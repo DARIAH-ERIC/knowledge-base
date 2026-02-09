@@ -1,21 +1,29 @@
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
+import { createMetadata } from "@/lib/server/metadata";
 
-export async function generateMetadata(): Promise<Metadata> {
+interface DashboardWebsiteNavigationPageProps extends PageProps<"/[locale]/dashboard/website/navigation"> {}
+
+export async function generateMetadata(
+	_props: Readonly<DashboardWebsiteNavigationPageProps>,
+	resolvingMetadata: ResolvingMetadata,
+): Promise<Metadata> {
 	const t = await getTranslations("DashboardWebsiteNavigationPage");
 
-	const metadata: Metadata = {
+	const metadata: Metadata = await createMetadata(resolvingMetadata, {
 		title: t("meta.title"),
-	};
+	});
 
 	return metadata;
 }
 
-export default function DashboardWebsiteNavigationPage(): ReactNode {
+export default function DashboardWebsiteNavigationPage(
+	_props: Readonly<DashboardWebsiteNavigationPageProps>,
+): ReactNode {
 	const t = useTranslations("DashboardWebsiteNavigationPage");
 
 	return (

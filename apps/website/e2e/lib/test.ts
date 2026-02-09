@@ -5,6 +5,8 @@ import { test as base } from "@playwright/test";
 
 import { env } from "@/config/env.config";
 import { type AccessibilityScanner, createAccessibilityScanner } from "@/e2e/lib/fixtures/a11y";
+import { ContactPage } from "@/e2e/lib/fixtures/contact-page";
+import { createEmailService, type EmailService } from "@/e2e/lib/fixtures/email-service";
 import { createI18n, type I18n, type WithI18n } from "@/e2e/lib/fixtures/i18n";
 import { ImprintPage } from "@/e2e/lib/fixtures/imprint-page";
 import { IndexPage } from "@/e2e/lib/fixtures/index-page";
@@ -15,7 +17,9 @@ interface Fixtures {
 	beforeEachTest: void;
 
 	createAccessibilityScanner: () => Promise<AccessibilityScanner>;
+	createEmailService: () => EmailService;
 	createI18n: (locale: IntlLocale) => Promise<I18n>;
+	createContactPage: (locale: IntlLocale) => Promise<WithI18n<{ contactPage: ContactPage }>>;
 	createImprintPage: (locale: IntlLocale) => Promise<WithI18n<{ imprintPage: ImprintPage }>>;
 	createIndexPage: (locale: IntlLocale) => Promise<WithI18n<{ indexPage: IndexPage }>>;
 }
@@ -61,10 +65,26 @@ export const test = base.extend<Fixtures>({
 		});
 	},
 
+	async createEmailService({ request }, use) {
+		await use(() => {
+			return createEmailService(request);
+		});
+	},
+
 	async createI18n({ page }, use) {
 		await use((locale) => {
 			return createI18n(page, locale);
 		});
+	},
+
+	async createContactPage({ page }, use) {
+		async function createContactPage(locale = defaultLocale) {
+			const i18n = await createI18n(page, locale);
+			const contactPage = new ContactPage(page, locale, i18n);
+			return { i18n, contactPage };
+		}
+
+		await use(createContactPage);
 	},
 
 	async createImprintPage({ page }, use) {
