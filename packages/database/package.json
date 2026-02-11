@@ -37,6 +37,7 @@
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/validate-env": "catalog:",
+		"@dariah-eric/auth": "workspace:^",
 		"drizzle-orm": "catalog:",
 		"drizzle-valibot": "catalog:",
 		"pg": "catalog:",

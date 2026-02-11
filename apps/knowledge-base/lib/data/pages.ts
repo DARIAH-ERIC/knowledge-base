@@ -102,9 +102,8 @@ export async function getPageById(params: GetPageByIdParams) {
 	return data;
 }
 
-interface CreatePageParams extends Omit<schema.PageInput, "id" | "createdAt" | "updatedAt"> {
-	slug: string;
-	resourceIds?: Array<string>;
+interface CreatePageParams extends schema.PageInput {
+	slug: schema.EntityInput["slug"];
 }
 
 export async function createPage(params: CreatePageParams) {

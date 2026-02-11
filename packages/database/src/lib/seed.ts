@@ -1,4 +1,5 @@
 import { groupBy, keyBy } from "@acdh-oeaw/lib";
+import { encryptString, generateRandomRecoveryCode, hashPassword } from "@dariah-eric/auth";
 import { faker as f } from "@faker-js/faker";
 import slugify from "@sindresorhus/slugify";
 import { eq } from "drizzle-orm";
@@ -30,14 +31,18 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 	f.setDefaultRefDate(defaultRefDate);
 
 	await db.transaction(async (db) => {
-		const users: Array<schema.UserInput> = f.helpers.multiple(
-			() => {
-				return {
-					username: f.internet.username(),
-					email: f.internet.email(),
-				};
-			},
-			{ count: 10 },
+		const users: Array<schema.UserInput> = await Promise.all(
+			f.helpers.multiple(
+				async () => {
+					return {
+						username: f.internet.username(),
+						email: f.internet.email(),
+						passwordHash: await hashPassword(f.internet.password()),
+						recoveryCode: Buffer.from(encryptString(generateRandomRecoveryCode())),
+					};
+				},
+				{ count: 10 },
+			),
 		);
 
 		await db.insert(schema.users).values(users);

@@ -28,6 +28,8 @@ jobs:
     env:
       API_ALLOWED_ORIGINS: "http://localhost:3001,http://localhost:3002"
       API_BASE_URL: "http://localhost:3003"
+      APP_AUTH_ENCRYPTION_KEY: "${{ secrets.TEST_APP_AUTH_ENCRYPTION_KEY }}"
+      APP_AUTH_SIGN_UP: "disabled"
       API_LOG_LEVEL: "info"
       API_PORT: "3003"
       DATABASE_HOST: "localhost"

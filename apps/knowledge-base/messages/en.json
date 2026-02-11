@@ -1,11 +1,61 @@
 {
 	"actions": {
+		"forgotPasswordAction": {
+			"invalid-account": "Account does not exist."
+		},
+		"resendEmailVerificationCodeAction": {
+			"new-code-sent": "A new code was sent to your inbox."
+		},
+		"reset2FAAction": {
+			"invalid-code": "Invalid recovery code."
+		},
+		"resetPasswordAction": {
+			"weak-password": "Weak password."
+		},
 		"sendContactFormEmailAction": {
 			"error": "Failed to send message.",
 			"success": "Successfully sent message."
 		},
+		"setup2FAAction": {
+			"invalid-code": "Invalid code.",
+			"invalid-key": "Invalid key."
+		},
+		"signInAction": {
+			"incorrect-password": "Incorrect password.",
+			"invalid-account": "Account does not exist."
+		},
+		"signUpAction": {
+			"email-in-use": "Email is already used.",
+			"sign-up-disabled": "Sign up is disabled.",
+			"weak-password": "Weak password."
+		},
+		"updateEmailAction": {
+			"email-in-use": "Email is already used."
+		},
+		"updatePasswordAction": {
+			"incorrect-password": "Incorrect password.",
+			"password-updated": "Updated password.",
+			"weak-password": "Weak password."
+		},
 		"uploadImageAction": {
 			"success": "Successfully uploaded image."
+		},
+		"verify2FAAction": {
+			"incorrect-code": "Incorrect code."
+		},
+		"verifyEmailAction": {
+			"code-expired": "The verification code was expired. We sent another code to your inbox.",
+			"incorrect-code": "Incorrect code."
+		},
+		"verifyPasswordResetEmailAction": {
+			"incorrect-code": "Falscher Code.",
+			"restart": "Please restart the process."
+		},
+		"verifyPasswordReset2FAWithRecoveryCodeAction": {
+			"incorrect-code": "Incorrect Code."
+		},
+		"verifyPasswordReset2FAWithTOTPAction": {
+			"incorrect-code": "Incorrect Code."
 		}
 	},
 	"errors": {
@@ -328,6 +378,10 @@
 	"DefaultLayout": {
 		"skip-link": "Skip to main content"
 	},
+	"EmailVerificationForm": {
+		"code": "Verification code",
+		"verify": "Verify"
+	},
 	"ErrorPage": {
 		"meta": {
 			"title": "Error"
@@ -340,6 +394,17 @@
 			"title": "Forbidden"
 		},
 		"title": "Forbidden"
+	},
+	"ForgotPasswordForm": {
+		"email": "Email",
+		"submit": "Send"
+	},
+	"ForgotPasswordPage": {
+		"meta": {
+			"title": "Forgot password"
+		},
+		"sign-in": "Sign in",
+		"title": "Forgot your password?"
 	},
 	"GlobalNotFoundPage": {
 		"meta": {
@@ -365,11 +430,109 @@
 		"change-locale-to": "Switch to {locale}",
 		"current-locale": "Current language: {locale}"
 	},
+	"PasswordResetEmailVerificationForm": {
+		"code": "Code",
+		"submit": "Verify"
+	},
+	"PasswordResetRecoveryCodeForm": {
+		"recovery-code": "Recovery code",
+		"submit": "Verify"
+	},
+	"PasswordResetTOTPForm": {
+		"code": "Code",
+		"submit": "Verify"
+	},
+	"PasswordResetTwoFactorPage": {
+		"enter-code": "Enter the code from your authenticator app.",
+		"meta": {
+			"title": "Two-factor authentication"
+		},
+		"title": "Two-factor authentication",
+		"use-recovery-code": "Use your recovery code instead"
+	},
+	"PasswordResetVerifyEmailPage": {
+		"message": "We sent an 8-digit code to {email}.",
+		"meta": {
+			"title": "Verify email address"
+		},
+		"title": "Verify your email address"
+	},
 	"PrivacyPolicyPage": {
 		"meta": {
 			"title": "Privacy policy"
 		},
 		"title": "Privacy policy"
+	},
+	"RecoveryCodeForm": {
+		"generate-new-code": "Generate new code",
+		"your-code": "Your recovery code is:"
+	},
+	"RecoveryCodePage": {
+		"message": "You can use this recovery code if you lose access to your second factors.",
+		"meta": {
+			"title": "Recovery code"
+		},
+		"next": "Next",
+		"title": "Recovery code",
+		"your-code": "Your recovery code is:"
+	},
+	"ResendEmailVerificationCodeForm": {
+		"resend-code": "Resend verification code"
+	},
+	"ResetPasswordForm": {
+		"confirm-password": "Confirm password",
+		"password": "Password",
+		"submit": "Reset password"
+	},
+	"ResetPasswordPage": {
+		"meta": {
+			"title": "Reset password"
+		},
+		"title": "Reset password"
+	},
+	"SettingsPage": {
+		"meta": {
+			"title": "Settings"
+		},
+		"recovery-code": "Recovery code",
+		"title": "Settings",
+		"update": "Update",
+		"update-email": "Update email",
+		"update-password": "Update password",
+		"update-2fa": "Update two-factor authentication",
+		"your-email": "Your email: {email}"
+	},
+	"SignInForm": {
+		"email": "Email",
+		"forgot-password": "Forgot password?",
+		"no-account": "Don't yet have an account?",
+		"password": "Password",
+		"submit": "Sign in",
+		"sign-up": "Sign up"
+	},
+	"SignInPage": {
+		"forgot-password": "Forgot password?",
+		"meta": {
+			"title": "Sign in"
+		},
+		"sign-up": "Create an account",
+		"title": "Sign in"
+	},
+	"SignUpForm": {
+		"confirm-password": "Confirm password",
+		"email": "Email",
+		"password": "Password",
+		"submit": "Continue",
+		"username": "Username"
+	},
+	"SignUpPage": {
+		"has-account": "Already have an account?",
+		"message": "Your username must be between {usernameMinLength,number} and {usernameMaxLength,number} characters long and your password must be at between {passwordMinLength,number} and {passwordMaxLength,number} characters long.",
+		"meta": {
+			"title": "Sign up"
+		},
+		"sign-in": "Sign in",
+		"title": "Create an account"
 	},
 	"TermsOfUsePage": {
 		"meta": {
@@ -377,14 +540,64 @@
 		},
 		"title": "Terms of use"
 	},
+	"TwoFactorPage": {
+		"message": "Enter the code from your authenticator app.",
+		"meta": {
+			"title": "Two-factor authentication"
+		},
+		"title": "Two-factor authentication",
+		"use-recovery-code": "Use recovery code"
+	},
+	"TwoFactorResetForm": {
+		"recovery-code": "Recovery code",
+		"submit": "Verify"
+	},
+	"TwoFactorResetPage": {
+		"meta": {
+			"title": "Account recovery"
+		},
+		"title": "Recover your account"
+	},
+	"TwoFactorSetUpForm": {
+		"submit": "Save",
+		"verify": "Verify the code from the app"
+	},
+	"TwoFactorSetupPage": {
+		"meta": {
+			"title": "Two-factor authentication setup"
+		},
+		"title": "Set up two-factor authentication"
+	},
+	"TwoFactorVerificationForm": {
+		"code": "Code",
+		"submit": "Verify"
+	},
 	"UnauthorizedPage": {
 		"meta": {
 			"title": "Unauthorized"
 		},
 		"title": "Unauthorized"
 	},
+	"UpdateEmailForm": {
+		"new-email": "New email",
+		"submit": "Update"
+	},
+	"UpdatePasswordForm": {
+		"confirm-new-password": "Confirm new password",
+		"current-password": "Current password",
+		"new-password": "New password",
+		"submit": "Update"
+	},
 	"UploadImageForm": {
 		"input": "Select an image to upload",
 		"submit": "Upload image"
+	},
+	"VerifyEmailPage": {
+		"change-email": "Change email address",
+		"message": "We sent an 8-digit verification code to {email}.",
+		"meta": {
+			"title": "Verify email address"
+		},
+		"title": "Verify email address"
 	}
 }

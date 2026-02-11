@@ -52,7 +52,7 @@ export async function getAssets(params: GetAssetsParams) {
 
 interface UploadAssetParams {
 	file: File;
-	licenseId?: string;
+	licenseId?: schema.AssetInput["licenseId"];
 	prefix: AssetPrefix;
 }
 

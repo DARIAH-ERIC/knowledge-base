@@ -7,7 +7,7 @@ import {
 	createActionStateError,
 	type ValidationErrors,
 } from "@/lib/server/actions";
-import { globalPOSTRateLimit } from "@/lib/server/rate-limit/global-rate-limit";
+import { globalPostRateLimit } from "@/lib/server/rate-limit/global-rate-limit";
 
 type ServerAction<
 	TData = unknown,
@@ -25,7 +25,7 @@ export function createServerAction<
 		const e = await getTranslations("errors");
 
 		try {
-			if (!(await globalPOSTRateLimit())) {
+			if (!(await globalPostRateLimit())) {
 				return createActionStateError({ message: e("too-many-requests") });
 			}
 
