@@ -562,7 +562,10 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 		await db.insert(schema.organisationalUnitsRelations).values(unitsToUnits);
 
 		const personsToOrganisationalUnitsAllowedRelations = await db
-			.select()
+			.select({
+				roleTypeId: schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.roleTypeId,
+				unitTypeId: schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.unitTypeId,
+			})
 			.from(schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations);
 
 		const personsToOrganisationalUnits = f.helpers.multiple(
@@ -579,11 +582,11 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 				const start = f.date.past({ years: 5 });
 				const end = f.helpers.maybe(
 					() => {
-						return f.date.soon({ refDate: start, days: 7 });
+						return f.date.between({ from: start, to: Date.now() });
 					},
 					{ probability: 0.25 },
 				);
-				const isFullDay = f.datatype.boolean({ probability: 0.5 });
+				const isFullDay = f.datatype.boolean({ probability: 0.75 });
 				if (isFullDay) {
 					start.setUTCHours(0, 0, 0, 0);
 					end?.setUTCHours(23, 59, 59, 999);
