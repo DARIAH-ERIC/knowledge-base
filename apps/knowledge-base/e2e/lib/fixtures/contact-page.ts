@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { expect, type Locator, type Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 import type { I18n } from "@/e2e/lib/fixtures/i18n";
 import { defaultLocale, type IntlLocale } from "@/lib/i18n/locales";
@@ -50,14 +50,4 @@ export class ContactPage {
 	goto() {
 		return this.page.goto(this.url);
 	}
-	/*https://github.com/microsoft/playwright/issues/36395#issuecomment-2995675184*/
-	fillPolling = async (locator: Locator, value: string) => {
-		await expect
-			.poll(async () => {
-				await locator.clear();
-				await locator.fill(value);
-				return await locator.inputValue();
-			})
-			.toEqual(value);
-	};
 }
