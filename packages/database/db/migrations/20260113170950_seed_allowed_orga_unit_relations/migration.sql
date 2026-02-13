@@ -5,7 +5,8 @@ VALUES
 	('consortium'),
 	('institution'),
 	('regional_hub'),
-	('umbrella_consortium');
+	('umbrella_consortium'),
+	('working_group');
 
 --> statement-breakpoint
 INSERT INTO

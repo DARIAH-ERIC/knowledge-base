@@ -560,5 +560,51 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			});
 
 		await db.insert(schema.organisationalUnitsRelations).values(unitsToUnits);
+
+		const personsToOrganisationalUnitsAllowedRelations = await db
+			.select({
+				roleTypeId: schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.roleTypeId,
+				unitTypeId: schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.unitTypeId,
+			})
+			.from(schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations);
+
+		const personsToOrganisationalUnits = f.helpers.multiple(
+			() => {
+				const { roleTypeId, unitTypeId } = f.helpers.arrayElement(
+					personsToOrganisationalUnitsAllowedRelations,
+				);
+				const organisationalUnit = f.helpers.arrayElement(
+					organisationalUnitsIds.filter((organisationalUnit) => {
+						return organisationalUnit.typeId === unitTypeId;
+					}),
+				);
+
+				const start = f.date.past({ years: 5 });
+				const end = f.helpers.maybe(
+					() => {
+						return f.date.between({ from: start, to: Date.now() });
+					},
+					{ probability: 0.25 },
+				);
+				const isFullDay = f.datatype.boolean({ probability: 0.75 });
+				if (isFullDay) {
+					start.setUTCHours(0, 0, 0, 0);
+					end?.setUTCHours(23, 59, 59, 999);
+				}
+
+				return {
+					personId: f.helpers.arrayElement(personIds).id,
+					roleTypeId,
+					organisationalUnitId: organisationalUnit.id,
+					duration: {
+						start,
+						end,
+					},
+				};
+			},
+			{ count: 10 },
+		);
+
+		await db.insert(schema.personsToOrganisationalUnits).values(personsToOrganisationalUnits);
 	});
 }
