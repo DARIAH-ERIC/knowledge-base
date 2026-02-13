@@ -20,4 +20,4 @@ GROUP BY
 	"units"."name",
 	"unit_types"."type",
 	"units"."image_id",
-	"unit_status"."status"
+	"unit_status"."status";

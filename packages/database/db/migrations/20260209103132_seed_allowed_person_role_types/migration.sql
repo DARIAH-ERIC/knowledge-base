@@ -15,14 +15,11 @@ VALUES
 	('wg_member'),
 	('national_consortium_contact'),
 	('cooperating_partner_contact'),
-	('ncc_chair')
+	('ncc_chair');
 
 --> statement-breakpoint
 INSERT INTO
-	"person_role_types_to_organisational_unit_types" (
-		"role_type_id",
-		"unit_type_id"
-	)
+	"person_role_types_to_organisational_unit_types" ("role_type_id", "unit_type_id")
 SELECT
 	"role_types"."id",
 	"unit_types"."id"
@@ -30,24 +27,21 @@ FROM
 	(
 		VALUES
 			('dco_member', 'body'),
-			('director','body'),
+			('director', 'body'),
 			('jrc_chair', 'body'),
 			('jrc_member', 'body'),
 			('scientific_board_member', 'body'),
 			('ncc_chair', 'body'),
 			('smt_member', 'body'),
-			('national_coordinator','consortium'),
-			('national_coordinator_deputy','consortium'),
-			('national_representative','consortium'),
+			('national_coordinator', 'consortium'),
+			('national_coordinator_deputy', 'consortium'),
+			('national_representative', 'consortium'),
 			('national_representative_deputy', 'consortium'),
-			('national_consortium_contact','consortium'),
+			('national_consortium_contact', 'consortium'),
 			('cooperating_partner_contact', 'consortium'),
 			('wg_chair', 'working_group'),
 			('wg_member', 'working_group')
 	) AS "tmp" ("role_type", "unit_type")
 	JOIN "person_role_types" "role_types" ON "role_types"."type" = "tmp"."role_type"
 	JOIN "organisational_unit_types" "unit_types" ON "unit_types"."type" = "tmp"."unit_type"
-ON CONFLICT (
-	"role_type_id",
-	"unit_type_id"
-) DO NOTHING;
+ON CONFLICT ("role_type_id", "unit_type_id") DO NOTHING;
