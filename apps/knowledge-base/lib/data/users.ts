@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+
 
 import { getRandomValues } from "node:crypto";
 
@@ -35,52 +35,6 @@ import { env } from "@/config/env.config";
 import { sendEmail } from "@/lib/server/email/send-email";
 import { ExpiringTokenBucket } from "@/lib/server/rate-limit/rate-limiter";
 
-interface CreateUserParams extends Pick<schema.UserInput, "email" | "username"> {
-	password: string;
-}
-
-export async function createUser(params: CreateUserParams) {
-	const { email, password, username } = params;
-
-	const passwordHash = await hashPassword(password);
-	const recoveryCode = generateRandomRecoveryCode();
-	const encryptedRecoveryCode = Buffer.from(encryptString(recoveryCode));
-
-	const [row] = await db
-		.insert(schema.users)
-		.values({ email, username, passwordHash, recoveryCode: encryptedRecoveryCode })
-		.returning({ id: schema.users.id, role: schema.users.role });
-
-	if (row == null) {
-		// FIXME: better error
-		throw new DatabaseError({ message: "Failed to create user." });
-	}
-
-	const user: User = {
-		id: row.id,
-		username,
-		email,
-		role: row.role,
-		isEmailVerified: false,
-		isTwoFactorRegistered: false,
-	};
-
-	return user;
-}
-
-export async function isUserEmailAvailable(email: string): Promise<boolean> {
-	const [row] = await db
-		.select({ count: count() })
-		.from(schema.users)
-		.where(eq(schema.users.email, email));
-
-	if (row == null) {
-		// FIXME: better error
-		throw new EmailInUseError({ message: "Email already in use" });
-	}
-
-	return row.count === 0;
-}
 
 export async function updateUserPassword(
 	userId: schema.User["id"],
@@ -111,19 +65,6 @@ export async function setUserAsEmailVerifiedIfEmailMatches(
 		.returning({ id: schema.users.id });
 
 	return rows.length > 0;
-}
-
-export async function getUserPasswordHash(userId: string): Promise<string> {
-	const [row] = await db
-		.select({ passwordHash: schema.users.passwordHash })
-		.from(schema.users)
-		.where(eq(schema.users.id, userId));
-
-	if (row == null) {
-		throw new InvalidUserIdError({ message: "Invalid user id" });
-	}
-
-	return row.passwordHash;
 }
 
 export async function getUserRecoverCode(userId: string): Promise<string> {
@@ -171,195 +112,6 @@ export async function resetUserRecoveryCode(userId: string): Promise<string> {
 	return recoveryCode;
 }
 
-export async function getUserFromEmail(email: string) {
-	const [row] = await db
-		.select({
-			id: schema.users.id,
-			email: schema.users.email,
-			username: schema.users.username,
-			role: schema.users.role,
-			isEmailVerified: schema.users.isEmailVerified,
-			totpKey: schema.users.totpKey,
-		})
-		.from(schema.users)
-		.where(eq(schema.users.email, email));
-
-	if (row == null) {
-		return null;
-	}
-
-	const user: User = {
-		id: row.id,
-		role: row.role,
-		email: row.email,
-		username: row.username,
-		isEmailVerified: row.isEmailVerified,
-		isTwoFactorRegistered: row.totpKey != null,
-	};
-
-	return user;
-}
-
-//
-
-function createSessionIdFromSessionToken(token: string): string {
-	return encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-}
-
-export async function validateSessionToken(token: string): Promise<SessionValidationResult> {
-	const sessionId = createSessionIdFromSessionToken(token);
-
-	const [row] = await db
-		.select({ user: schema.users, session: schema.sessions })
-		.from(schema.sessions)
-		.innerJoin(schema.users, eq(schema.sessions.userId, schema.users.id))
-		.where(eq(schema.sessions.id, sessionId));
-
-	if (row == null) {
-		return { session: null, user: null };
-	}
-
-	const session: Session = {
-		id: row.session.id,
-		userId: row.session.userId,
-		expiresAt: row.session.expiresAt,
-		isTwoFactorVerified: row.session.isTwoFactorVerified,
-	};
-
-	const user: User = {
-		id: row.user.id,
-		email: row.user.email,
-		username: row.user.username,
-		role: row.user.role,
-		isEmailVerified: row.user.isEmailVerified,
-		isTwoFactorRegistered: row.user.totpKey != null,
-	};
-
-	if (Date.now() >= session.expiresAt.getTime()) {
-		await db.delete(schema.sessions).where(eq(schema.sessions.id, session.id));
-		return { session: null, user: null };
-	}
-
-	if (Date.now() >= session.expiresAt.getTime() - sessionRefreshIntervalMs) {
-		session.expiresAt = new Date(Date.now() + sessionMaxDurationMs);
-
-		await db
-			.update(schema.sessions)
-			.set({ expiresAt: session.expiresAt })
-			.where(eq(schema.sessions.id, session.id));
-	}
-
-	return { session, user };
-}
-
-export const getCurrentSession = cache(async (): Promise<SessionValidationResult> => {
-	const token = await getSessionToken();
-
-	if (token == null) {
-		return { session: null, user: null };
-	}
-
-	const result = await validateSessionToken(token);
-
-	return result;
-});
-
-export async function invalidateSession(sessionId: Session["id"]): Promise<void> {
-	await db.delete(schema.sessions).where(eq(schema.sessions.id, sessionId));
-}
-
-export async function invalidateUserSessions(userId: string): Promise<void> {
-	await db.delete(schema.sessions).where(eq(schema.sessions.userId, userId));
-}
-
-/** Alternatively use uuid v4 from `crypto.randomUUID()`. */
-export function generateSessionToken(): string {
-	const tokenBytes = new Uint8Array(20);
-	getRandomValues(tokenBytes);
-	const token = encodeBase32LowerCaseNoPadding(tokenBytes).toLowerCase();
-
-	return token;
-}
-
-export async function createSession(
-	token: string,
-	userId: string,
-	flags: SessionFlags,
-): Promise<Session> {
-	const sessionId = createSessionIdFromSessionToken(token);
-
-	const session: Session = {
-		id: sessionId,
-		userId,
-		expiresAt: new Date(Date.now() + sessionMaxDurationMs),
-		isTwoFactorVerified: flags.isTwoFactorVerified,
-	};
-
-	await db.insert(schema.sessions).values({
-		id: session.id,
-		userId: session.userId,
-		expiresAt: session.expiresAt,
-		isTwoFactorVerified: session.isTwoFactorVerified,
-	});
-
-	return session;
-}
-
-export async function setSessionAs2FAVerified(sessionId: schema.Session["id"]): Promise<void> {
-	await db
-		.update(schema.sessions)
-		.set({ isTwoFactorVerified: true })
-		.where(eq(schema.sessions.id, sessionId));
-}
-
-//
-
-interface User extends Pick<schema.User, "id" | "email" | "username" | "role" | "isEmailVerified"> {
-	isTwoFactorRegistered: boolean;
-}
-
-interface Session extends schema.Session {}
-
-type SessionFlags = Pick<Session, "isTwoFactorVerified">;
-
-export interface AuthenticatedSession {
-	session: Session;
-	user: User;
-}
-
-export interface UnauthenticatedSession {
-	session: null;
-	user: null;
-}
-
-export type SessionValidationResult = AuthenticatedSession | UnauthenticatedSession;
-
-//
-
-export async function getSessionToken(): Promise<string | null> {
-	return (await cookies()).get(sessionCookieName)?.value ?? null;
-}
-
-export async function setSessionTokenCookie(token: string, expiresAt: Date): Promise<void> {
-	(await cookies()).set(sessionCookieName, token, {
-		httpOnly: true,
-		sameSite: "lax",
-		secure: env.NODE_ENV === "production",
-		expires: expiresAt,
-		path: "/",
-	});
-}
-
-export async function deleteSessionTokenCookie(): Promise<void> {
-	(await cookies()).set(sessionCookieName, "", {
-		httpOnly: true,
-		sameSite: "lax",
-		secure: env.NODE_ENV === "production",
-		maxAge: 0,
-		path: "/",
-	});
-}
-
 //
 
 // FIXME: config
@@ -405,8 +157,6 @@ export async function resetUser2FAWithRecoveryCode(
 
 	return result.length > 0;
 }
-
-//
 
 export async function getUserEmailVerificationRequest(
 	userId: schema.User["id"],

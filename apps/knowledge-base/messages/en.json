@@ -521,13 +521,13 @@
 	"SignUpForm": {
 		"confirm-password": "Confirm password",
 		"email": "Email",
+		"name": "Name",
 		"password": "Password",
-		"submit": "Continue",
-		"username": "Username"
+		"submit": "Continue"
 	},
 	"SignUpPage": {
 		"has-account": "Already have an account?",
-		"message": "Your username must be between {usernameMinLength,number} and {usernameMaxLength,number} characters long and your password must be at between {passwordMinLength,number} and {passwordMaxLength,number} characters long.",
+		"message": "Your password must be at between {passwordMinLength,number} and {passwordMaxLength,number} characters long.",
 		"meta": {
 			"title": "Sign up"
 		},

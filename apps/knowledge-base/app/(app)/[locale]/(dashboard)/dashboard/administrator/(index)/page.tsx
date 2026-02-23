@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/main";
 import { TableExample } from "@/components/ui/table-example";
-import { createMetadata } from "@/lib/server/metadata";
+import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorPageProps extends PageProps<"/[locale]/dashboard/administrator"> {}
 

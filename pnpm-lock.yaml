@@ -145,7 +145,7 @@ catalogs:
       specifier: ^24.10.9
       version: 24.10.9
     '@types/nodemailer':
-      specifier: ^7.0.5
+      specifier: ^7.0.9
       version: 7.0.9
     '@types/pg':
       specifier: ^8.16.0
@@ -271,7 +271,7 @@ catalogs:
       specifier: ^4.8.0
       version: 4.8.0
     nodemailer:
-      specifier: ^7.0.12
+      specifier: ^7.0.13
       version: 7.0.13
     npm-run-all2:
       specifier: ^8.0.4
@@ -376,7 +376,7 @@ catalogs:
       specifier: ^2.1.0
       version: 2.1.0
     uqr:
-      specifier: 'catalog:'
+      specifier: ^0.1.2
       version: 0.1.2
     uuid:
       specifier: ^13.0.0
@@ -560,12 +560,21 @@ importers:
       '@dariah-eric/database':
         specifier: workspace:^
         version: link:../../packages/database
+      '@dariah-eric/email':
+        specifier: workspace:^
+        version: link:../../packages/email
       '@dariah-eric/errors':
         specifier: workspace:^
         version: link:../../packages/errors
       '@dariah-eric/images':
         specifier: workspace:^
         version: link:../../packages/images
+      '@dariah-eric/next-lib':
+        specifier: workspace:^
+        version: link:../../packages/next-lib
+      '@dariah-eric/rate-limiter':
+        specifier: workspace:^
+        version: link:../../packages/rate-limiter
       '@dariah-eric/search':
         specifier: workspace:^
         version: link:../../packages/search
@@ -1005,6 +1014,19 @@ importers:
       '@acdh-oeaw/lib':
         specifier: 'catalog:'
         version: 1.0.5
+    devDependencies:
+      '@dariah-eric/configs':
+        specifier: workspace:^
+        version: link:../configs
+      '@dariah-eric/database':
+        specifier: workspace:^
+        version: link:../database
+      '@dariah-eric/email':
+        specifier: workspace:^
+        version: link:../email
+      '@dariah-eric/request':
+        specifier: workspace:^
+        version: link:../request
       '@node-rs/argon2':
         specifier: 'catalog:'
         version: 2.0.2
@@ -1020,13 +1042,6 @@ importers:
       '@oslojs/otp':
         specifier: 'catalog:'
         version: 1.1.0
-      valibot:
-        specifier: 'catalog:'
-        version: 1.2.0(typescript@5.9.3)
-    devDependencies:
-      '@dariah-eric/configs':
-        specifier: workspace:^
-        version: link:../configs
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.9
@@ -1045,6 +1060,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+      valibot:
+        specifier: 'catalog:'
+        version: 1.2.0(typescript@5.9.3)
 
   packages/configs:
     dependencies:
@@ -1127,9 +1145,9 @@ importers:
       '@acdh-oeaw/validate-env':
         specifier: 'catalog:'
         version: 0.3.0(typescript@5.9.3)
-      '@dariah-eric/auth':
-        specifier: workspace:^
-        version: link:../auth
+      better-result:
+        specifier: 'catalog:'
+        version: 2.7.0
       drizzle-orm:
         specifier: 'catalog:'
         version: 1.0.0-beta.9-e89174b(@opentelemetry/api@1.9.0)(@types/mssql@9.1.9)(@types/pg@8.16.0)(mssql@11.0.1)(pg@8.17.2)
@@ -1186,6 +1204,63 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
+  packages/email:
+    devDependencies:
+      '@dariah-eric/configs':
+        specifier: workspace:^
+        version: link:../configs
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.9
+      '@types/nodemailer':
+        specifier: 'catalog:'
+        version: 7.0.9
+      better-result:
+        specifier: 'catalog:'
+        version: 2.7.0
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      nodemailer:
+        specifier: 'catalog:'
+        version: 7.0.13
+      prettier:
+        specifier: 'catalog:'
+        version: 3.8.1
+      tsdown:
+        specifier: 'catalog:'
+        version: 0.20.1(synckit@0.11.12)(typescript@5.9.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  packages/env:
+    devDependencies:
+      '@dariah-eric/configs':
+        specifier: workspace:^
+        version: link:../configs
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.9
+      better-result:
+        specifier: 'catalog:'
+        version: 2.7.0
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      prettier:
+        specifier: 'catalog:'
+        version: 3.8.1
+      tsdown:
+        specifier: 'catalog:'
+        version: 0.20.1(synckit@0.11.12)(typescript@5.9.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      valibot:
+        specifier: 'catalog:'
+        version: 1.2.0(typescript@5.9.3)
+
   packages/errors:
     devDependencies:
       '@dariah-eric/configs':
@@ -1211,29 +1286,16 @@ importers:
         version: 5.9.3
 
   packages/images:
-    dependencies:
-      '@acdh-oeaw/lib':
-        specifier: 'catalog:'
-        version: 1.0.5
-      '@acdh-oeaw/validate-env':
-        specifier: 'catalog:'
-        version: 0.3.0(typescript@5.9.3)
-      '@dariah-eric/storage':
+    devDependencies:
+      '@dariah-eric/configs':
         specifier: workspace:^
-        version: link:../storage
+        version: link:../configs
       '@imgproxy/imgproxy-js-core':
         specifier: 'catalog:'
         version: 1.7.0
       '@imgproxy/imgproxy-node':
         specifier: 'catalog:'
         version: 1.1.0
-      valibot:
-        specifier: 'catalog:'
-        version: 1.2.0(typescript@5.9.3)
-    devDependencies:
-      '@dariah-eric/configs':
-        specifier: workspace:^
-        version: link:../configs
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.9
@@ -1246,9 +1308,120 @@ importers:
       tsdown:
         specifier: 'catalog:'
         version: 0.20.1(synckit@0.11.12)(typescript@5.9.3)
-      tsx:
+      typescript:
         specifier: 'catalog:'
-        version: 4.21.0
+        version: 5.9.3
+
+  packages/mailchimp:
+    devDependencies:
+      '@acdh-oeaw/lib':
+        specifier: 'catalog:'
+        version: 1.0.5
+      '@dariah-eric/configs':
+        specifier: workspace:^
+        version: link:../configs
+      '@dariah-eric/request':
+        specifier: workspace:^
+        version: link:../request
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.9
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      prettier:
+        specifier: 'catalog:'
+        version: 3.8.1
+      tsdown:
+        specifier: 'catalog:'
+        version: 0.20.1(synckit@0.11.12)(typescript@5.9.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  packages/next-lib:
+    devDependencies:
+      '@acdh-oeaw/lib':
+        specifier: 'catalog:'
+        version: 1.0.5
+      '@dariah-eric/configs':
+        specifier: workspace:^
+        version: link:../configs
+      '@dariah-eric/rate-limiter':
+        specifier: workspace:^
+        version: link:../rate-limiter
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.9
+      better-result:
+        specifier: 'catalog:'
+        version: 2.7.0
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      next:
+        specifier: 'catalog:'
+        version: 16.1.6(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      prettier:
+        specifier: 'catalog:'
+        version: 3.8.1
+      tsdown:
+        specifier: 'catalog:'
+        version: 0.20.1(synckit@0.11.12)(typescript@5.9.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      valibot:
+        specifier: 'catalog:'
+        version: 1.2.0(typescript@5.9.3)
+
+  packages/rate-limiter:
+    devDependencies:
+      '@dariah-eric/configs':
+        specifier: workspace:^
+        version: link:../configs
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.9
+      better-result:
+        specifier: 'catalog:'
+        version: 2.7.0
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      prettier:
+        specifier: 'catalog:'
+        version: 3.8.1
+      tsdown:
+        specifier: 'catalog:'
+        version: 0.20.1(synckit@0.11.12)(typescript@5.9.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  packages/request:
+    devDependencies:
+      '@dariah-eric/configs':
+        specifier: workspace:^
+        version: link:../configs
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.9
+      better-result:
+        specifier: 'catalog:'
+        version: 2.7.0
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      is-network-error:
+        specifier: 'catalog:'
+        version: 1.3.0
+      prettier:
+        specifier: 'catalog:'
+        version: 3.8.1
+      tsdown:
+        specifier: 'catalog:'
+        version: 0.20.1(synckit@0.11.12)(typescript@5.9.3)
       typescript:
         specifier: 'catalog:'
         version: 5.9.3

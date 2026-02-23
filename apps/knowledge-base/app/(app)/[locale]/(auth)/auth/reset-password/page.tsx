@@ -1,14 +1,13 @@
+import { globalGetRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { ResetPasswordForm } from "@/app/(app)/[locale]/(auth)/auth/reset-password/_components/reset-password-form";
 import { Main } from "@/components/main";
-import { urls } from "@/config/auth.config";
-import { validatePasswordResetSessionRequest } from "@/lib/data/users";
+import { auth } from "@/lib/auth";
 import { redirect } from "@/lib/navigation/navigation";
-import { createMetadata } from "@/lib/server/metadata";
-import { globalGetRateLimit } from "@/lib/server/rate-limit/global-rate-limit";
+import { createMetadata } from "@/lib/server/create-metadata";
 
 interface ResetPasswordPageProps extends PageProps<"/[locale]/auth/reset-password"> {}
 
@@ -33,22 +32,22 @@ export default async function ResetPasswordPage(
 	const t = await getTranslations("ResetPasswordPage");
 	const e = await getTranslations("errors");
 
-	if (!(await globalGetRateLimit())) {
+	if (!(await globalGetRequestRateLimit())) {
 		return e("too-many-requests");
 	}
 
-	const { session, user } = await validatePasswordResetSessionRequest();
+	const { session, user } = await auth.validatePasswordResetSessionRequest();
 
 	if (session == null) {
-		redirect({ href: urls.forgotPassword, locale });
+		redirect({ href: "/auth/forgot-password", locale });
 	}
 
 	if (!session.isEmailVerified) {
-		redirect({ href: urls.resetPasswordVerifyEmail, locale });
+		redirect({ href: "/auth/reset-password/verify-email", locale });
 	}
 
 	if (user.isTwoFactorRegistered && !session.isTwoFactorVerified) {
-		redirect({ href: urls.resetPassword2fa, locale });
+		redirect({ href: "/auth/reset-password/two-factor", locale });
 	}
 
 	return (

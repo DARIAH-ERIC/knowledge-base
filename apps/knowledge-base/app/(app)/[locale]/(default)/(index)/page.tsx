@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { createMetadata } from "@/lib/server/metadata";
+import { createMetadata } from "@/lib/server/create-metadata";
 
 interface IndexPageProps extends PageProps<"/[locale]"> {}
 

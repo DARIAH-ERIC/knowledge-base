@@ -11,7 +11,7 @@ import { Link } from "@/components/link";
 import { imageGridOptions } from "@/config/assets.config";
 import { getAssets } from "@/lib/data/cached/assets";
 import { createHref } from "@/lib/navigation/create-href";
-import { createMetadata } from "@/lib/server/metadata";
+import { createMetadata } from "@/lib/server/create-metadata";
 
 const SearchParamsSchema = v.object({
 	limit: v.optional(v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)), "10"),

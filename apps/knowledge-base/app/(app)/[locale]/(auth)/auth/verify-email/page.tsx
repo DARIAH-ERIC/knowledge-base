@@ -1,3 +1,4 @@
+import { globalGetRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -6,11 +7,10 @@ import { EmailVerificationForm } from "@/app/(app)/[locale]/(auth)/auth/verify-e
 import { ResendEmailVerificationCodeForm } from "@/app/(app)/[locale]/(auth)/auth/verify-email/_components/resend-email-verification-code-form";
 import { Link } from "@/components/link";
 import { Main } from "@/components/main";
-import { urls } from "@/config/auth.config";
-import { getCurrentSession, getUserEmailVerificationRequestFromRequest } from "@/lib/data/users";
+import { auth } from "@/lib/auth";
+import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";
-import { createMetadata } from "@/lib/server/metadata";
-import { globalGetRateLimit } from "@/lib/server/rate-limit/global-rate-limit";
+import { createMetadata } from "@/lib/server/create-metadata";
 
 interface VerifyEmailPageProps extends PageProps<"/[locale]/auth/verify-email"> {}
 
@@ -31,28 +31,27 @@ export default async function VerifyEmailPage(
 	_props: Readonly<VerifyEmailPageProps>,
 ): Promise<ReactNode> {
 	const locale = await getLocale();
-
 	const t = await getTranslations("VerifyEmailPage");
 	const e = await getTranslations("errors");
 
-	if (!(await globalGetRateLimit())) {
+	if (!(await globalGetRequestRateLimit())) {
 		return e("too-many-requests");
 	}
 
 	const { user } = await getCurrentSession();
 
 	if (user == null) {
-		redirect({ href: urls.signIn, locale });
+		redirect({ href: "/auth/sign-in", locale });
 	}
 
 	/**
-	 * Ideally we'd sent a new verification email automatically if the previous one is expired,
+	 * Ideally we'd send a new verification email automatically if the previous one is expired,
 	 * but we can't set cookies inside server components.
 	 */
-	const verificationRequest = await getUserEmailVerificationRequestFromRequest();
+	const emailVerificationRequest = await auth.getEmailVerificationRequestFromRequest();
 
-	if (verificationRequest == null && user.isEmailVerified) {
-		redirect({ href: urls.afterSignIn, locale });
+	if (emailVerificationRequest == null && user.isEmailVerified) {
+		redirect({ href: "/", locale });
 	}
 
 	return (
@@ -60,7 +59,7 @@ export default async function VerifyEmailPage(
 			<section>
 				<div>
 					<h1>{t("title")}</h1>
-					<p>{t("message", { email: verificationRequest?.email ?? user.email })}</p>
+					<p>{t("message", { email: emailVerificationRequest?.email ?? user.email })}</p>
 				</div>
 			</section>
 
@@ -70,7 +69,7 @@ export default async function VerifyEmailPage(
 				<ResendEmailVerificationCodeForm />
 
 				<div>
-					<Link href={urls.settings}>{t("change-email")}</Link>
+					<Link href="/auth/settings">{t("change-email")}</Link>
 				</div>
 			</section>
 		</Main>

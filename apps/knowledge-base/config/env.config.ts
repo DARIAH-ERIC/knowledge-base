@@ -26,7 +26,7 @@ const result = createEnv({
 		private(environment) {
 			const schema = v.object({
 				APP_AUTH_SIGN_UP: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
-				APP_AUTH_ENCRYPTION_KEY: v.pipe(v.string(), v.length(24)),
+				AUTH_ENCRYPTION_KEY: v.pipe(v.string(), v.length(24)),
 				APP_SENTRY_AUTH_TOKEN: v.optional(v.pipe(v.string(), v.nonEmpty())),
 				BUILD_MODE: v.optional(v.picklist(["export", "standalone"])),
 				CI: v.optional(v.pipe(v.unknown(), v.toBoolean())),
@@ -121,7 +121,7 @@ const result = createEnv({
 		},
 	},
 	environment: {
-		APP_AUTH_ENCRYPTION_KEY: process.env.APP_AUTH_ENCRYPTION_KEY,
+		AUTH_ENCRYPTION_KEY: process.env.AUTH_ENCRYPTION_KEY,
 		APP_AUTH_SIGN_UP: process.env.APP_AUTH_SIGN_UP,
 		APP_SENTRY_AUTH_TOKEN: process.env.APP_SENTRY_AUTH_TOKEN,
 		BUILD_MODE: process.env.BUILD_MODE,

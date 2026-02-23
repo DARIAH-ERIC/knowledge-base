@@ -9,7 +9,8 @@
 	"exports": {
 		".": "./dist/index.mjs",
 		"./client": "./dist/client.mjs",
-		"./lib": "./src/lib/index.ts",
+		"./errors": "./dist/errors.mjs",
+		"./lib": "./lib/lib/index.ts",
 		"./relations": "./dist/relations.mjs",
 		"./schema": "./dist/schema.mjs"
 	},
@@ -37,7 +38,7 @@
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/validate-env": "catalog:",
-		"@dariah-eric/auth": "workspace:^",
+		"better-result": "catalog:",
 		"drizzle-orm": "catalog:",
 		"drizzle-valibot": "catalog:",
 		"pg": "catalog:",

@@ -8,7 +8,7 @@
 	},
 	"exports": {
 		"./client": "./dist/client.mjs",
-		"./lib": "./src/lib/index.ts"
+		"./lib": "./lib/lib/index.ts"
 	},
 	"files": [
 		"./dist/"

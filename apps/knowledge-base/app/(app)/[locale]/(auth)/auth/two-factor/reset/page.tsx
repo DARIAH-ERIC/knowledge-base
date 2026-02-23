@@ -1,0 +1,70 @@
+import { globalGetRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
+import type { Metadata, ResolvingMetadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { ReactNode } from "react";
+
+import { TwoFactorResetForm } from "@/app/(app)/[locale]/(auth)/auth/two-factor/reset/_components/two-factor-reset-form";
+import { Main } from "@/components/main";
+import { getCurrentSession } from "@/lib/auth/session";
+import { redirect } from "@/lib/navigation/navigation";
+import { createMetadata } from "@/lib/server/create-metadata";
+
+interface TwoFactorResetPageProps extends PageProps<"/[locale]/auth/2fa/reset"> {}
+
+export async function generateMetadata(
+	_props: Readonly<TwoFactorResetPageProps>,
+	resolvingMetadata: ResolvingMetadata,
+): Promise<Metadata> {
+	const t = await getTranslations("TwoFactorResetPage");
+
+	const metadata: Metadata = await createMetadata(resolvingMetadata, {
+		title: t("meta.title"),
+	});
+
+	return metadata;
+}
+
+export default async function TwoFactorResetPage(
+	_props: Readonly<TwoFactorResetPageProps>,
+): Promise<ReactNode> {
+	const locale = await getLocale();
+
+	const t = await getTranslations("TwoFactorResetPage");
+	const e = await getTranslations("errors");
+
+	if (!(await globalGetRequestRateLimit())) {
+		return e("too-many-requests");
+	}
+
+	const { session, user } = await getCurrentSession();
+
+	if (session == null) {
+		redirect({ href: "/auth/sign-in", locale });
+	}
+
+	if (!user.isEmailVerified) {
+		redirect({ href: "/auth/verify-email", locale });
+	}
+
+	if (!user.isTwoFactorRegistered) {
+		redirect({ href: "/auth/two-factor/setup", locale });
+	}
+
+	if (session.isTwoFactorVerified) {
+		redirect({ href: "/", locale });
+	}
+
+	return (
+		<Main>
+			<section>
+				<div>
+					<h1>{t("title")}</h1>
+				</div>
+			</section>
+
+			<section>
+				<TwoFactorResetForm />
+			</section>
+		</Main>
+	);
+}

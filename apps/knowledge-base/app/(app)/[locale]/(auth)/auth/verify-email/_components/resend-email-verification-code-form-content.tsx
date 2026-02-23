@@ -1,21 +1,16 @@
 "use client";
 
+import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { useTranslations } from "next-intl";
 import { type ReactNode, useActionState } from "react";
 
-import { resendEmailVerificationCodeAction } from "@/app/(app)/[locale]/(auth)/auth/verify-email/_actions/resend-email-verification-code-action";
+import { resendEmailVerificationCodeAction } from "@/app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code-action";
 import { Form } from "@/components/form";
 import { FormStatus } from "@/components/form-status";
 import { SubmitButton } from "@/components/submit-button";
-import { createActionStateInitial } from "@/lib/server/actions";
 
-interface ResendEmailVerificationCodeFormContentProps {
-	resendCodeLabel: string;
-}
-
-export function ResendEmailVerificationCodeFormContent(
-	props: Readonly<ResendEmailVerificationCodeFormContentProps>,
-): ReactNode {
-	const { resendCodeLabel } = props;
+export function ResendEmailVerificationCodeForm(): ReactNode {
+	const t = useTranslations("ResendEmailVerificationCodeForm");
 
 	const [state, action] = useActionState(
 		resendEmailVerificationCodeAction,
@@ -26,10 +21,8 @@ export function ResendEmailVerificationCodeFormContent(
 		<Form action={action} className="grid gap-y-8" state={state}>
 			<FormStatus state={state} />
 
-			{/* <Honeypot /> */}
-
 			<div>
-				<SubmitButton>{resendCodeLabel}</SubmitButton>
+				<SubmitButton>{t("resend-code")}</SubmitButton>
 			</div>
 		</Form>
 	);

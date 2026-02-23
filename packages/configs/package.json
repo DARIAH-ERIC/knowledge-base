@@ -4,16 +4,16 @@
 	"license": "MIT",
 	"type": "module",
 	"exports": {
-		"./eslint/drizzle": "./src/eslint/drizzle.ts",
-		"./eslint/next": "./src/eslint/next.ts",
-		"./eslint/node": "./src/eslint/node.ts",
-		"./eslint/storybook": "./src/eslint/storybook.ts",
-		"./eslint/turbo": "./src/eslint/turbo.ts",
-		"./prettier": "./src/prettier/index.ts",
-		"./typescript/app": "./src/typescript/app.json",
-		"./typescript/app-build": "./src/typescript/app-build.json",
-		"./typescript/lib": "./src/typescript/lib.json",
-		"./typescript/lib-build": "./src/typescript/lib-build.json"
+		"./eslint/drizzle": "./lib/eslint/drizzle.ts",
+		"./eslint/next": "./lib/eslint/next.ts",
+		"./eslint/node": "./lib/eslint/node.ts",
+		"./eslint/storybook": "./lib/eslint/storybook.ts",
+		"./eslint/turbo": "./lib/eslint/turbo.ts",
+		"./prettier": "./lib/prettier/index.ts",
+		"./typescript/app": "./lib/typescript/app.json",
+		"./typescript/app-build": "./lib/typescript/app-build.json",
+		"./typescript/lib": "./lib/typescript/lib.json",
+		"./typescript/lib-build": "./lib/typescript/lib-build.json"
 	},
 	"sideEffects": false,
 	"scripts": {
@@ -70,5 +70,5 @@
 		],
 		"*.!(js|ts)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
 	},
-	"prettier": "./src/prettier/index.ts"
+	"prettier": "./lib/prettier/index.ts"
 }

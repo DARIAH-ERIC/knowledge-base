@@ -1,34 +1,68 @@
-export const passwordMinLength = 8;
-export const passwordMaxLength = 255;
+// export const sessionRefreshIntervalMs = 1000 * 60 * 60 * 24 * 15; /** 15 days. */
+// export const sessionMaxDurationMs = 1000 * 60 * 60 * 24 * 30; /** 30 days. */
 
-export const usernameMinLength = 4;
-export const usernameMaxLength = 31;
+// export const passwordResetSessionMaxDurationMs = 1000 * 60 * 10; /** 10 mins. */
+// export const emailVerificationRequestMaxDurationMs = 1000 * 60 * 10; /** 10 mins. */
 
-export const sessionRefreshIntervalMs = 1000 * 60 * 60 * 24 * 15; /** 15 days. */
-export const sessionMaxDurationMs = 1000 * 60 * 60 * 24 * 30; /** 30 days. */
+interface CookieConfig {
+	name: string;
+	options: {
+		httpOnly: true;
+		sameSite: "lax" | "strict";
+		secure: boolean;
+		path: string;
+	};
+	durationMs: number;
+}
 
-export const passwordResetSessionMaxDurationMs = 1000 * 60 * 10; /** 10 mins. */
-export const emailVerificationRequestMaxDurationMs = 1000 * 60 * 10; /** 10 mins. */
+export const passwords = {
+	length: {
+		min: 8,
+		max: 255,
+	},
+};
 
-export const sessionCookieName = "session";
-export const passwordResetCookieName = "password_reset_session";
-export const emailVerificationRequestCookieName = "email_verification";
+export const emailVerificationRequests: { cookie: CookieConfig } = {
+	cookie: {
+		name: "email_verification",
+		options: {
+			httpOnly: true,
+			sameSite: "lax" as const,
+			// eslint-disable-next-line no-restricted-syntax
+			secure: process.env.NODE_ENV === "production",
+			path: "/",
+		},
+		durationMs: 1000 * 60 * 10 /** 10 mins. */,
+	},
+};
+
+export const passwordResetSessions: { cookie: CookieConfig } = {
+	cookie: {
+		name: "password_reset_session",
+		options: {
+			httpOnly: true,
+			sameSite: "lax" as const,
+			// eslint-disable-next-line no-restricted-syntax
+			secure: process.env.NODE_ENV === "production",
+			path: "/",
+		},
+		durationMs: 1000 * 60 * 10 /** 10 mins. */,
+	},
+};
+
+export const sessions: { cookie: CookieConfig } = {
+	cookie: {
+		name: "session",
+		options: {
+			httpOnly: true,
+			sameSite: "lax" as const,
+			// eslint-disable-next-line no-restricted-syntax
+			secure: process.env.NODE_ENV === "production",
+			path: "/",
+		},
+		durationMs: 1000 * 60 * 60 * 24 * 30 /** 30 days. */,
+	},
+};
 
 /** Two-factor app name. */
 export const issuer = "DARIAH";
-
-export const urls = {
-	"2fa": "/auth/2fa",
-	"2faReset": "/auth/2fa/reset",
-	"2faSetup": "/auth/2fa/setup",
-	afterSignIn: "/",
-	forgotPassword: "/auth/forgot-password",
-	recoveryCode: "/auth/recovery-code",
-	resetPassword: "/auth/reset-password",
-	resetPassword2fa: "/auth/reset-password/2fa",
-	resetPasswordVerifyEmail: "/auth/reset-password/verify-email",
-	settings: "/auth/settings",
-	signIn: "/auth/sign-in",
-	signUp: "/auth/sign-up",
-	verifyEmail: "/auth/verify-email",
-} as const;

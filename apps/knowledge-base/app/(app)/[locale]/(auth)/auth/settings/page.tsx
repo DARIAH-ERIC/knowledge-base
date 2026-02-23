@@ -1,3 +1,4 @@
+import { globalGetRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -7,11 +8,10 @@ import { UpdateEmailForm } from "@/app/(app)/[locale]/(auth)/auth/settings/_comp
 import { UpdatePasswordForm } from "@/app/(app)/[locale]/(auth)/auth/settings/_components/update-password-form";
 import { Link } from "@/components/link";
 import { Main } from "@/components/main";
-import { urls } from "@/config/auth.config";
-import { getCurrentSession, getUserRecoverCode } from "@/lib/data/users";
+import { auth } from "@/lib/auth";
+import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";
-import { createMetadata } from "@/lib/server/metadata";
-import { globalGetRateLimit } from "@/lib/server/rate-limit/global-rate-limit";
+import { createMetadata } from "@/lib/server/create-metadata";
 
 interface SettingsPageProps extends PageProps<"/[locale]/auth/settings"> {}
 
@@ -36,24 +36,24 @@ export default async function SettingsPage(
 	const t = await getTranslations("SettingsPage");
 	const e = await getTranslations("errors");
 
-	if (!(await globalGetRateLimit())) {
+	if (!(await globalGetRequestRateLimit())) {
 		return e("too-many-requests");
 	}
 
 	const { session, user } = await getCurrentSession();
 
 	if (session == null) {
-		redirect({ href: urls.signIn, locale });
+		redirect({ href: "/auth/sign-in", locale });
 	}
 
 	if (user.isTwoFactorRegistered && !session.isTwoFactorVerified) {
-		redirect({ href: urls["2fa"], locale });
+		redirect({ href: "/auth/two-factor", locale });
 	}
 
 	let recoveryCode: string | null = null;
 
 	if (user.isTwoFactorRegistered) {
-		recoveryCode = await getUserRecoverCode(user.id);
+		recoveryCode = await auth.getRecoveryCode(user.id);
 	}
 
 	return (
@@ -88,7 +88,7 @@ export default async function SettingsPage(
 						<h2>{t("update-2fa")}</h2>
 
 						<div>
-							<Link href={urls["2faSetup"]}>{t("update")}</Link>
+							<Link href={"/auth/two-factor/setup"}>{t("update")}</Link>
 						</div>
 					</div>
 				</section>

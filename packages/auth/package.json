@@ -7,7 +7,8 @@
 		"node": "24.x"
 	},
 	"exports": {
-		".": "./dist/index.mjs"
+		".": "./dist/index.mjs",
+		"./errors": "./dist/errors.mjs"
 	},
 	"files": [
 		"./dist/"
@@ -22,21 +23,29 @@
 		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
 		"types:check": "tsc --noEmit"
 	},
-	"dependencies": {
+	"peerDependencies": {
 		"@acdh-oeaw/lib": "catalog:",
+		"@dariah-eric/database": "workspace:^",
+		"@dariah-eric/email": "workspace:^",
+		"@dariah-eric/request": "workspace:^",
 		"@node-rs/argon2": "catalog:",
 		"@oslojs/binary": "catalog:",
 		"@oslojs/crypto": "catalog:",
 		"@oslojs/encoding": "catalog:",
 		"@oslojs/otp": "catalog:",
-		"valibot": "catalog:"
-	},
-	"peerDependencies": {
 		"better-result": "catalog:",
 		"valibot": "catalog:"
 	},
 	"devDependencies": {
 		"@dariah-eric/configs": "workspace:^",
+		"@dariah-eric/database": "workspace:^",
+		"@dariah-eric/email": "workspace:^",
+		"@dariah-eric/request": "workspace:^",
+		"@node-rs/argon2": "catalog:",
+		"@oslojs/binary": "catalog:",
+		"@oslojs/crypto": "catalog:",
+		"@oslojs/encoding": "catalog:",
+		"@oslojs/otp": "catalog:",
 		"@types/node": "catalog:",
 		"better-result": "catalog:",
 		"eslint": "catalog:",

@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { AcdhImprint } from "@/app/(app)/[locale]/(default)/imprint/_components/acdh-imprint";
-import { createMetadata } from "@/lib/server/metadata";
+import { createMetadata } from "@/lib/server/create-metadata";
 
 interface ImprintPageProps extends PageProps<"/[locale]/imprint"> {}
 

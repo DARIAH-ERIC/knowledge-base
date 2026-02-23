@@ -1,14 +1,14 @@
+import { globalGetRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Link } from "@/components/link";
 import { Main } from "@/components/main";
-import { urls } from "@/config/auth.config";
-import { getCurrentSession, getUserRecoverCode } from "@/lib/data/users";
+import { auth } from "@/lib/auth";
+import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";
-import { createMetadata } from "@/lib/server/metadata";
-import { globalGetRateLimit } from "@/lib/server/rate-limit/global-rate-limit";
+import { createMetadata } from "@/lib/server/create-metadata";
 
 interface RecoveryCodePageProps extends PageProps<"/[locale]/auth/recovery-code"> {}
 
@@ -33,29 +33,29 @@ export default async function RecoveryCodePage(
 	const t = await getTranslations("RecoveryCodePage");
 	const e = await getTranslations("errors");
 
-	if (!(await globalGetRateLimit())) {
+	if (!(await globalGetRequestRateLimit())) {
 		return e("too-many-requests");
 	}
 
 	const { session, user } = await getCurrentSession();
 
 	if (session == null) {
-		redirect({ href: urls.signIn, locale });
+		redirect({ href: "/auth/sign-in", locale });
 	}
 
 	if (!user.isEmailVerified) {
-		redirect({ href: urls.verifyEmail, locale });
+		redirect({ href: "/auth/verify-email", locale });
 	}
 
 	if (!user.isTwoFactorRegistered) {
-		redirect({ href: urls["2faSetup"], locale });
+		redirect({ href: "/auth/two-factor/setup", locale });
 	}
 
 	if (!session.isTwoFactorVerified) {
-		redirect({ href: urls["2fa"], locale });
+		redirect({ href: "/auth/two-factor", locale });
 	}
 
-	const recoveryCode = await getUserRecoverCode(user.id);
+	const recoveryCode = await auth.getRecoveryCode(user.id);
 
 	return (
 		<Main>
@@ -74,7 +74,7 @@ export default async function RecoveryCodePage(
 					<p>{t("message")}</p>
 
 					<div>
-						<Link href={urls.afterSignIn}>{t("next")}</Link>
+						<Link href={"/"}>{t("next")}</Link>
 					</div>
 				</div>
 			</section>

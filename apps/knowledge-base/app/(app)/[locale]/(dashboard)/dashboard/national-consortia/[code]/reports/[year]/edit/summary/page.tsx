@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { createMetadata } from "@/lib/server/metadata";
+import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardNationalConsortiumReportEditStepSummaryPageProps extends PageProps<"/[locale]/dashboard/national-consortia/[code]/reports/[year]/edit/summary"> {}
 

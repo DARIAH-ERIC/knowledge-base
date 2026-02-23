@@ -1,3 +1,4 @@
+import { globalGetRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -5,11 +6,9 @@ import type { ReactNode } from "react";
 import { SignInForm } from "@/app/(app)/[locale]/(auth)/auth/sign-in/_components/sign-in-form";
 import { Link } from "@/components/link";
 import { Main } from "@/components/main";
-import { urls } from "@/config/auth.config";
-import { getCurrentSession } from "@/lib/data/users";
+import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";
-import { createMetadata } from "@/lib/server/metadata";
-import { globalGetRateLimit } from "@/lib/server/rate-limit/global-rate-limit";
+import { createMetadata } from "@/lib/server/create-metadata";
 
 interface SignInPageProps extends PageProps<"/[locale]/auth/sign-in"> {}
 
@@ -28,11 +27,10 @@ export async function generateMetadata(
 
 export default async function SignInPage(_props: Readonly<SignInPageProps>): Promise<ReactNode> {
 	const locale = await getLocale();
-
 	const t = await getTranslations("SignInPage");
 	const e = await getTranslations("errors");
 
-	if (!(await globalGetRateLimit())) {
+	if (!(await globalGetRequestRateLimit())) {
 		return e("too-many-requests");
 	}
 
@@ -40,18 +38,18 @@ export default async function SignInPage(_props: Readonly<SignInPageProps>): Pro
 
 	if (session != null) {
 		if (!user.isEmailVerified) {
-			redirect({ href: urls.verifyEmail, locale });
+			redirect({ href: "/auth/verify-email", locale });
 		}
 
 		if (!user.isTwoFactorRegistered) {
-			redirect({ href: urls["2faSetup"], locale });
+			redirect({ href: "/auth/two-factor/setup", locale });
 		}
 
 		if (!session.isTwoFactorVerified) {
-			redirect({ href: urls["2fa"], locale });
+			redirect({ href: "/auth/two-factor", locale });
 		}
 
-		redirect({ href: urls.afterSignIn, locale });
+		redirect({ href: "/", locale });
 	}
 
 	return (
@@ -64,8 +62,8 @@ export default async function SignInPage(_props: Readonly<SignInPageProps>): Pro
 				<SignInForm />
 
 				<div className="flex flex-wrap items-center gap-x-6">
-					<Link href={urls.signUp}>{t("sign-up")}</Link>
-					<Link href={urls.forgotPassword}>{t("forgot-password")}</Link>
+					<Link href="/auth/sign-up">{t("sign-up")}</Link>
+					<Link href="/auth/forgot-password">{t("forgot-password")}</Link>
 				</div>
 			</section>
 		</Main>
