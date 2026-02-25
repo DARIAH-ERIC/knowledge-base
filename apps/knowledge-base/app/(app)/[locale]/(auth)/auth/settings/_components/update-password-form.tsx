@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { type ReactNode, useActionState } from "react";
 import { FieldError, Input, Label, TextField } from "react-aria-components";
 
-import { updatePasswordAction } from "@/app/(app)/[locale]/(auth)/auth/settings/_actions/update-password-action";
+import { updatePasswordAction } from "@/app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action";
 import { Form } from "@/components/form";
 import { FormStatus } from "@/components/form-status";
 import { SubmitButton } from "@/components/submit-button";
@@ -18,8 +18,6 @@ export function UpdatePasswordForm(): ReactNode {
 	return (
 		<Form action={action} state={state}>
 			<FormStatus state={state} />
-
-			{/* <Honeypot /> */}
 
 			<TextField autoComplete="current-password" isRequired={true} name="password" type="password">
 				<Label>{t("current-password")}</Label>

@@ -768,9 +768,24 @@ importers:
       '@dariah-eric/database':
         specifier: workspace:^
         version: link:../../packages/database
+      '@dariah-eric/email':
+        specifier: workspace:^
+        version: link:../../packages/email
+      '@dariah-eric/env':
+        specifier: workspace:^
+        version: link:../../packages/env
       '@dariah-eric/images':
         specifier: workspace:^
         version: link:../../packages/images
+      '@dariah-eric/next-lib':
+        specifier: workspace:^
+        version: link:../../packages/next-lib
+      '@dariah-eric/rate-limiter':
+        specifier: workspace:^
+        version: link:../../packages/rate-limiter
+      '@dariah-eric/request':
+        specifier: workspace:^
+        version: link:../../packages/request
       '@dariah-eric/search':
         specifier: workspace:^
         version: link:../../packages/search
@@ -1024,6 +1039,9 @@ importers:
       '@dariah-eric/email':
         specifier: workspace:^
         version: link:../email
+      '@dariah-eric/rate-limiter':
+        specifier: workspace:^
+        version: link:../rate-limiter
       '@dariah-eric/request':
         specifier: workspace:^
         version: link:../request

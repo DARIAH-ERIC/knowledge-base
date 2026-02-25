@@ -9,7 +9,7 @@ import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface TwoFactorResetPageProps extends PageProps<"/[locale]/auth/2fa/reset"> {}
+interface TwoFactorResetPageProps extends PageProps<"/[locale]/auth/two-factor/reset"> {}
 
 export async function generateMetadata(
 	_props: Readonly<TwoFactorResetPageProps>,

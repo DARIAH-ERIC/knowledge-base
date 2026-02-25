@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { type ReactNode, useActionState } from "react";
 import { FieldError, Input, Label, TextField } from "react-aria-components";
 
-import { forgotPasswordAction } from "@/app/(app)/[locale]/(auth)/auth/forgot-password/_lib/forgot-password-action";
+import { forgotPasswordAction } from "@/app/(app)/[locale]/(auth)/auth/forgot-password/_lib/forgot-password.action";
 import { Form } from "@/components/form";
 import { FormErrorMessage } from "@/components/form-error-message";
 import { FormSuccessMessage } from "@/components/form-success-message";

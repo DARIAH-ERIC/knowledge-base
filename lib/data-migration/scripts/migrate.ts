@@ -6,7 +6,7 @@ import * as path from "node:path";
 import { assert, isNonEmptyString, keyBy, log } from "@acdh-oeaw/lib";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
-import { client } from "@dariah-eric/storage/client";
+import { client } from "@dariah-eric/storage";
 import { buffer } from "@dariah-eric/storage/lib";
 
 import {

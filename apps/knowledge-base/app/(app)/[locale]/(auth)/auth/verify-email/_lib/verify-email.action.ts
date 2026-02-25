@@ -64,7 +64,7 @@ export async function verifyEmailAction(
 		return createActionStateError({ message: e("too-many-requests") });
 	}
 
-	const now = Date.now()
+	const now = Date.now();
 	if (now >= verificationRequest.expiresAt.getTime()) {
 		verificationRequest = await auth.createEmailVerificationRequest(
 			verificationRequest.userId,

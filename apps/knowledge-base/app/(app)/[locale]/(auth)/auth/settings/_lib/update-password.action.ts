@@ -1,17 +1,18 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
-import { type ActionState, createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
+import {
+	type ActionState,
+	createActionStateError,
+	createActionStateSuccess,
+} from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { ExpiringTokenBucket } from "@dariah-eric/rate-limiter";
 import { getTranslations } from "next-intl/server";
 import * as v from "valibot";
 
-import { UpdatePasswordActionInputSchema } from "@/app/(app)/[locale]/(auth)/auth/settings/_actions/update-password.schema";
+import { UpdatePasswordActionInputSchema } from "@/app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.schema";
 import { auth } from "@/lib/auth";
 import { getCurrentSession } from "@/lib/auth/session";
-
-const passwordUpdateBucket = new ExpiringTokenBucket<string>(5, 60 * 30);
 
 export async function updatePasswordAction(
 	_prev: ActionState,
@@ -32,7 +33,7 @@ export async function updatePasswordAction(
 	if (user.isTwoFactorRegistered && !session.isTwoFactorVerified) {
 		return createActionStateError({ message: e("forbidden") });
 	}
-	if (!passwordUpdateBucket.check(session.id, 1)) {
+	if (!auth.passwordUpdateBucket.check(session.id, 1)) {
 		return createActionStateError({ message: e("too-many-requests") });
 	}
 
@@ -57,7 +58,7 @@ export async function updatePasswordAction(
 		return createActionStateError({ message: t("weak-password") });
 	}
 
-	if (!passwordUpdateBucket.consume(session.id, 1)) {
+	if (!auth.passwordUpdateBucket.consume(session.id, 1)) {
 		return createActionStateError({ message: e("too-many-requests") });
 	}
 
@@ -67,7 +68,7 @@ export async function updatePasswordAction(
 		return createActionStateError({ message: t("incorrect-password") });
 	}
 
-	passwordUpdateBucket.reset(session.id);
+	auth.passwordUpdateBucket.reset(session.id);
 
 	await auth.deleteUserSessions(user.id);
 	await auth.updatePassword(user.id, newPassword);

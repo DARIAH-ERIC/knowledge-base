@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { type ReactNode, useActionState } from "react";
 import { FieldError, Input, Label, TextField } from "react-aria-components";
 
-import { updateEmailAction } from "@/app/(app)/[locale]/(auth)/auth/settings/_actions/update-email-action";
+import { updateEmailAction } from "@/app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action";
 import { Form } from "@/components/form";
 import { FormStatus } from "@/components/form-status";
 import { SubmitButton } from "@/components/submit-button";

@@ -7,7 +7,7 @@
 		"node": "24.x"
 	},
 	"exports": {
-		"./client": "./dist/client.mjs",
+		".": "./dist/index.mjs",
 		"./lib": "./lib/lib/index.ts"
 	},
 	"files": [

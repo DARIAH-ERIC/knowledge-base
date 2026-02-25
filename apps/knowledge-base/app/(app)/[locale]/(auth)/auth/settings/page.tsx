@@ -85,7 +85,7 @@ export default async function SettingsPage(
 			{user.isTwoFactorRegistered ? (
 				<section>
 					<div>
-						<h2>{t("update-2fa")}</h2>
+						<h2>{t("update-two-factor")}</h2>
 
 						<div>
 							<Link href={"/auth/two-factor/setup"}>{t("update")}</Link>

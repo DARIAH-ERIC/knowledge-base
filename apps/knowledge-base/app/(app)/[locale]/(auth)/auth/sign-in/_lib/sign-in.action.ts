@@ -3,7 +3,6 @@
 import { getFormDataValues } from "@acdh-oeaw/lib";
 import { type ActionState, createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { RefillingTokenBucket, Throttler } from "@dariah-eric/rate-limiter";
 import { headers } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
 import * as v from "valibot";
@@ -11,9 +10,6 @@ import * as v from "valibot";
 import { SignInActionInputSchema } from "@/app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.schema";
 import { auth } from "@/lib/auth";
 import { redirect } from "@/lib/navigation/navigation";
-
-const throttler = new Throttler<string>([1, 2, 4, 8, 16, 30, 60, 180, 300]);
-const ipBucket = new RefillingTokenBucket<string>(20, 1);
 
 export async function signInAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
 	const locale = await getLocale();
@@ -25,7 +21,7 @@ export async function signInAction(_prev: ActionState, formData: FormData): Prom
 	}
 
 	const ip = (await headers()).get("x-forwarded-for");
-	if (ip != null && !ipBucket.check(ip, 1)) {
+	if (ip != null && !auth.signInIpBucket.check(ip, 1)) {
 		return createActionStateError({ message: e("too-many-requests") });
 	}
 
@@ -47,10 +43,10 @@ export async function signInAction(_prev: ActionState, formData: FormData): Prom
 		return createActionStateError({ message: t("invalid-account") });
 	}
 
-	if (ip != null && !ipBucket.consume(ip, 1)) {
+	if (ip != null && !auth.signInIpBucket.consume(ip, 1)) {
 		return createActionStateError({ message: e("too-many-requests") });
 	}
-	if (!throttler.consume(user.id)) {
+	if (!auth.signInTrottler.consume(user.id)) {
 		return createActionStateError({ message: e("too-many-requests") });
 	}
 
@@ -60,7 +56,7 @@ export async function signInAction(_prev: ActionState, formData: FormData): Prom
 		return createActionStateError({ message: t("incorrect-password") });
 	}
 
-	throttler.reset(user.id);
+	auth.signInTrottler.reset(user.id);
 
 	const session = await auth.createSession(user.id);
 	await auth.setSessionCookie(session.token, session.expiresAt);

@@ -36,7 +36,11 @@ const result = createEnv({
 			DATABASE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 			DATABASE_SSL_CONNECTION: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 			DATABASE_USER: v.pipe(v.string(), v.nonEmpty()),
+			IMGPROXY_BASE_URL: v.pipe(v.string(), v.url()),
+			IMGPROXY_KEY: v.pipe(v.string(), v.nonEmpty()),
+			IMGPROXY_SALT: v.pipe(v.string(), v.nonEmpty()),
 			NODE_ENV: v.optional(v.picklist(["development", "production", "test"]), "production"),
+			S3_BUCKET_NAME: v.pipe(v.string(), v.nonEmpty()),
 		});
 
 		const result = v.safeParse(schema, environment);
@@ -68,7 +72,11 @@ const result = createEnv({
 		DATABASE_PORT: process.env.DATABASE_PORT,
 		DATABASE_SSL_CONNECTION: process.env.DATABASE_SSL_CONNECTION,
 		DATABASE_USER: process.env.DATABASE_USER,
+		IMGPROXY_BASE_URL: process.env.IMGPROXY_BASE_URL,
+		IMGPROXY_KEY: process.env.IMGPROXY_KEY,
+		IMGPROXY_SALT: process.env.IMGPROXY_SALT,
 		NODE_ENV: process.env.NODE_ENV,
+		S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
 	},
 	validation: v.parse(
 		v.optional(v.picklist(["disabled", "enabled", "public"]), "enabled"),

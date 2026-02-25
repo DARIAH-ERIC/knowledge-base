@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { type ReactNode, useActionState } from "react";
 import { FieldError, Input, Label, TextField } from "react-aria-components";
 
-import { verifyPasswordReset2faWithRecoveryCodeAction } from "@/app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-2fa-with-recovery-code-action";
+import { verifyPasswordResetTwoFactorWithRecoveryCodeAction } from "@/app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-recovery-code.action";
 import { Form } from "@/components/form";
 import { FormStatus } from "@/components/form-status";
 import { SubmitButton } from "@/components/submit-button";
@@ -14,7 +14,7 @@ export function PasswordResetRecoveryCodeForm(): ReactNode {
 	const t = useTranslations("PasswordResetRecoveryCodeForm");
 
 	const [state, action] = useActionState(
-		verifyPasswordReset2faWithRecoveryCodeAction,
+		verifyPasswordResetTwoFactorWithRecoveryCodeAction,
 		createActionStateInitial(),
 	);
 

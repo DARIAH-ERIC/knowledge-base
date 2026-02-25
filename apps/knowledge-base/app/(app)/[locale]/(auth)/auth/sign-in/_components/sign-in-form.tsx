@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { type ReactNode, useActionState } from "react";
 import { FieldError, Input, Label, TextField } from "react-aria-components";
 
-import { signInAction } from "@/app/(app)/[locale]/(auth)/auth/sign-in/_actions/sign-in.action";
+import { signInAction } from "@/app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.action";
 import { Form } from "@/components/form";
 import { FormStatus } from "@/components/form-status";
 import { SubmitButton } from "@/components/submit-button";

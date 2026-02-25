@@ -10,7 +10,7 @@ import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface TwoFactorPageProps extends PageProps<"/[locale]/auth/2fa"> {}
+interface TwoFactorPageProps extends PageProps<"/[locale]/auth/two-factor"> {}
 
 export async function generateMetadata(
 	_props: Readonly<TwoFactorPageProps>,

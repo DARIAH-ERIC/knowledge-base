@@ -43,11 +43,17 @@ export async function resendEmailVerificationCodeAction(): Promise<ActionState> 
 			return createActionStateError({ message: e("too-many-requests") });
 		}
 
-		verificationRequest = await auth.createEmailVerificationRequest(user.id, verificationRequest.email);
+		verificationRequest = await auth.createEmailVerificationRequest(
+			user.id,
+			verificationRequest.email,
+		);
 	}
 
 	await auth.sendVerificationEmail(verificationRequest.email, verificationRequest.code);
-	await auth.setEmailVerificationRequestCookie(verificationRequest.token, verificationRequest.expiresAt);
+	await auth.setEmailVerificationRequestCookie(
+		verificationRequest.token,
+		verificationRequest.expiresAt,
+	);
 
 	return createActionStateSuccess({ message: t("new-code-sent") });
 }

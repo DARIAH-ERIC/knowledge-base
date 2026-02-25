@@ -3,7 +3,6 @@
 import { getFormDataValues } from "@acdh-oeaw/lib";
 import { type ActionState, createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { RefillingTokenBucket } from "@dariah-eric/rate-limiter";
 import { headers } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
 import * as v from "valibot";
@@ -13,7 +12,7 @@ import { env } from "@/config/env.config";
 import { auth } from "@/lib/auth";
 import { redirect } from "@/lib/navigation/navigation";
 
-const ipBucket = new RefillingTokenBucket<string>(3, 10);
+const signUpIpBucket = auth.signUpIpBucket;
 
 export async function signUpAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
 	const locale = await getLocale();
@@ -29,7 +28,7 @@ export async function signUpAction(_prev: ActionState, formData: FormData): Prom
 	}
 
 	const ip = (await headers()).get("x-forwarded-for");
-	if (ip != null && !ipBucket.check(ip, 1)) {
+	if (ip != null && !signUpIpBucket.check(ip, 1)) {
 		return createActionStateError({ message: e("too-many-requests") });
 	}
 
@@ -56,14 +55,17 @@ export async function signUpAction(_prev: ActionState, formData: FormData): Prom
 		return createActionStateError({ message: t("weak-password") });
 	}
 
-	if (ip != null && !ipBucket.consume(ip, 1)) {
+	if (ip != null && !signUpIpBucket.consume(ip, 1)) {
 		return createActionStateError({ message: e("too-many-requests") });
 	}
 
 	const user = await auth.createUser(email, name, password);
 	const emailVerificationRequest = await auth.createEmailVerificationRequest(user.id, user.email);
 	await auth.sendVerificationEmail(emailVerificationRequest.email, emailVerificationRequest.code);
-	await auth.setEmailVerificationRequestCookie(emailVerificationRequest.token, emailVerificationRequest.expiresAt);
+	await auth.setEmailVerificationRequestCookie(
+		emailVerificationRequest.token,
+		emailVerificationRequest.expiresAt,
+	);
 
 	const session = await auth.createSession(user.id);
 	await auth.setSessionCookie(session.token, session.expiresAt);

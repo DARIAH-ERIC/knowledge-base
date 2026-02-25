@@ -6,7 +6,7 @@
 		"resendEmailVerificationCodeAction": {
 			"new-code-sent": "A new code was sent to your inbox."
 		},
-		"reset2FAAction": {
+		"resetTwoFactorAction": {
 			"invalid-code": "Invalid recovery code."
 		},
 		"resetPasswordAction": {
@@ -16,7 +16,7 @@
 			"error": "Failed to send message.",
 			"success": "Successfully sent message."
 		},
-		"setup2FAAction": {
+		"setupTwoFactorAction": {
 			"invalid-code": "Invalid code.",
 			"invalid-key": "Invalid key."
 		},
@@ -40,7 +40,7 @@
 		"uploadImageAction": {
 			"success": "Successfully uploaded image."
 		},
-		"verify2FAAction": {
+		"verifyTwoFactorAction": {
 			"incorrect-code": "Incorrect code."
 		},
 		"verifyEmailAction": {
@@ -51,10 +51,10 @@
 			"incorrect-code": "Falscher Code.",
 			"restart": "Please restart the process."
 		},
-		"verifyPasswordReset2FAWithRecoveryCodeAction": {
+		"verifyPasswordResetTwoFactorWithRecoveryCodeAction": {
 			"incorrect-code": "Incorrect Code."
 		},
-		"verifyPasswordReset2FAWithTOTPAction": {
+		"verifyPasswordResetTwoFactorWithTotpAction": {
 			"incorrect-code": "Incorrect Code."
 		}
 	},
@@ -438,7 +438,7 @@
 		"recovery-code": "Recovery code",
 		"submit": "Verify"
 	},
-	"PasswordResetTOTPForm": {
+	"PasswordResetTotpForm": {
 		"code": "Code",
 		"submit": "Verify"
 	},
@@ -499,7 +499,7 @@
 		"update": "Update",
 		"update-email": "Update email",
 		"update-password": "Update password",
-		"update-2fa": "Update two-factor authentication",
+		"update-two-factor": "Update two-factor authentication",
 		"your-email": "Your email: {email}"
 	},
 	"SignInForm": {

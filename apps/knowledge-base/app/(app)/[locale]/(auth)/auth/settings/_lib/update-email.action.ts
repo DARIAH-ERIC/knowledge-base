@@ -3,7 +3,6 @@
 import { getFormDataValues } from "@acdh-oeaw/lib";
 import { type ActionState, createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { ExpiringTokenBucket } from "@dariah-eric/rate-limiter";
 import { getLocale, getTranslations } from "next-intl/server";
 import * as v from "valibot";
 
@@ -11,8 +10,6 @@ import { UpdateEmailActionInputSchema } from "@/app/(app)/[locale]/(auth)/auth/s
 import { auth } from "@/lib/auth";
 import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";
-
-export const sendVerificationEmailBucket = new ExpiringTokenBucket<string>(3, 60 * 10);
 
 export async function updateEmailAction(
 	_prev: ActionState,
@@ -34,7 +31,7 @@ export async function updateEmailAction(
 	if (user.isTwoFactorRegistered && !session.isTwoFactorVerified) {
 		return createActionStateError({ message: e("forbidden") });
 	}
-	if (!sendVerificationEmailBucket.check(user.id, 1)) {
+	if (!auth.sendVerificationEmailBucket.check(user.id, 1)) {
 		return createActionStateError({ message: e("too-many-requests") });
 	}
 
@@ -55,13 +52,16 @@ export async function updateEmailAction(
 	if (!emailAvailable) {
 		return createActionStateError({ message: t("email-in-use") });
 	}
-	if (!sendVerificationEmailBucket.consume(user.id, 1)) {
+	if (!auth.sendVerificationEmailBucket.consume(user.id, 1)) {
 		return createActionStateError({ message: e("too-many-requests") });
 	}
 
 	const verificationRequest = await auth.createEmailVerificationRequest(user.id, email);
 	await auth.sendVerificationEmail(verificationRequest.email, verificationRequest.code);
-	await auth.setEmailVerificationRequestCookie(verificationRequest.token, verificationRequest.expiresAt);
+	await auth.setEmailVerificationRequestCookie(
+		verificationRequest.token,
+		verificationRequest.expiresAt,
+	);
 
 	redirect({ href: "/auth/verify-email", locale });
 }

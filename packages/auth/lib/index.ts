@@ -1,5 +1,11 @@
 import assert from "node:assert";
-import { createCipheriv, createDecipheriv, createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import {
+	createCipheriv,
+	createDecipheriv,
+	createHash,
+	randomBytes,
+	timingSafeEqual,
+} from "node:crypto";
 
 import { createUrl } from "@acdh-oeaw/lib";
 import { and, eq, sql } from "@dariah-eric/database";
@@ -7,9 +13,11 @@ import type { Database } from "@dariah-eric/database/client";
 import { DatabaseError } from "@dariah-eric/database/errors";
 import * as schema from "@dariah-eric/database/schema";
 import type { EmailService } from "@dariah-eric/email";
-import { request } from "@dariah-eric/request"
-import { hash, verify } from "@node-rs/argon2"
+import { ExpiringTokenBucket, RefillingTokenBucket, Throttler } from "@dariah-eric/rate-limiter";
+import { request } from "@dariah-eric/request";
+import { hash, verify } from "@node-rs/argon2";
 import { encodeBase32UpperCaseNoPadding } from "@oslojs/encoding";
+import { verifyHOTP } from "@oslojs/otp";
 
 import { InvalidUserIdError } from "./errors";
 
@@ -25,7 +33,7 @@ interface CookieConfig {
 }
 
 interface AuthServiceConfig {
-	emailAddress: string
+	emailAddress: string;
 	passwords: {
 		length: {
 			min: number;
@@ -81,7 +89,7 @@ export interface User extends Pick<
 export interface Session extends Pick<
 	schema.Session,
 	"id" | "secretHash" | "expiresAt" | "isTwoFactorVerified"
-> { }
+> {}
 
 export interface AuthenticatedSession {
 	session: Session;
@@ -95,17 +103,15 @@ export interface UnauthenticatedSession {
 
 export type SessionValidationResult = AuthenticatedSession | UnauthenticatedSession;
 
-export interface EmailVerificationRequest extends Pick<schema.EmailVerificationRequest, "id" | "code" | "email" | "expiresAt" | "userId"> { }
+export interface EmailVerificationRequest extends Pick<
+	schema.EmailVerificationRequest,
+	"id" | "code" | "email" | "expiresAt" | "userId"
+> {}
 
-export interface PasswordResetSession extends Pick<schema.PasswordResetSession,
-	| "id"
-	| "userId"
-	| "email"
-	| "code"
-	| "expiresAt"
-	| "isEmailVerified"
-	| "isTwoFactorVerified"
-> { }
+export interface PasswordResetSession extends Pick<
+	schema.PasswordResetSession,
+	"id" | "userId" | "email" | "code" | "expiresAt" | "isEmailVerified" | "isTwoFactorVerified"
+> {}
 
 export interface AuthenticatedPasswordResetSession {
 	session: PasswordResetSession;
@@ -117,7 +123,9 @@ export interface UnauthenticatedPasswordResetSession {
 	user: null;
 }
 
-export type PasswordResetSessionValidationResult = AuthenticatedPasswordResetSession | UnauthenticatedPasswordResetSession;
+export type PasswordResetSessionValidationResult =
+	| AuthenticatedPasswordResetSession
+	| UnauthenticatedPasswordResetSession;
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createAuthService(params: CreateAuthServiceParams) {
@@ -175,11 +183,14 @@ export function createAuthService(params: CreateAuthServiceParams) {
 			memoryCost: 19_456,
 			timeCost: 2,
 			outputLen: 32,
-			parallelism: 1
-		})
+			parallelism: 1,
+		});
 	}
 
-	async function createSession(userId: string, isTwoFactorVerified = false): Promise<Session & { token: string }> {
+	async function createSession(
+		userId: string,
+		isTwoFactorVerified = false,
+	): Promise<Session & { token: string }> {
 		const now = Date.now();
 
 		const id = generateRandomString();
@@ -235,7 +246,7 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		const isValidSession = timingSafeEqual(secretHash, result.session.secretHash);
 
 		if (!isValidSession) {
-			await deleteSessionCookie()
+			await deleteSessionCookie();
 
 			return { session: null, user: null };
 		}
@@ -333,37 +344,42 @@ export function createAuthService(params: CreateAuthServiceParams) {
 	}
 
 	async function getUserByEmail(email: string): Promise<User | null> {
-		const [user] = await db.select({
-			id: schema.users.id,
-			email: schema.users.email,
-			name: schema.users.name,
-			role: schema.users.role,
-			isEmailVerified: schema.users.isEmailVerified,
-			isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
-		}).from(schema.users).where(eq(schema.users.email, email))
+		const [user] = await db
+			.select({
+				id: schema.users.id,
+				email: schema.users.email,
+				name: schema.users.name,
+				role: schema.users.role,
+				isEmailVerified: schema.users.isEmailVerified,
+				isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
+			})
+			.from(schema.users)
+			.where(eq(schema.users.email, email));
 
 		if (user == null) {
-			return null
+			return null;
 		}
 
-		return user
+		return user;
 	}
 
 	async function getUserPasswordHash(userId: string): Promise<string> {
-		const [user] = await db.select({
-			passwordHash: schema.users.passwordHash
-		}).from(schema.users)
-			.where(eq(schema.users.id, userId))
+		const [user] = await db
+			.select({
+				passwordHash: schema.users.passwordHash,
+			})
+			.from(schema.users)
+			.where(eq(schema.users.id, userId));
 
 		if (user?.passwordHash == null) {
-			throw new InvalidUserIdError({ id: userId, message: "Invalid user" })
+			throw new InvalidUserIdError({ id: userId, message: "Invalid user" });
 		}
 
-		return user.passwordHash
+		return user.passwordHash;
 	}
 
 	async function verifyPasswordHash(passwordHash: string, password: string): Promise<boolean> {
-		return verify(passwordHash, password)
+		return verify(passwordHash, password);
 	}
 
 	async function verifyPasswordStrength(password: string): Promise<boolean> {
@@ -397,22 +413,27 @@ export function createAuthService(params: CreateAuthServiceParams) {
 	}
 
 	async function isEmailAvailable(email: string): Promise<boolean> {
-		const count = await db.$count(schema.users, eq(sql`LOWER(${schema.users.email})`, email.toLowerCase()))
+		const count = await db.$count(
+			schema.users,
+			eq(sql`LOWER(${schema.users.email})`, email.toLowerCase()),
+		);
 
-		return count === 0
+		return count === 0;
 	}
 
 	async function createUser(email: string, name: string, password: string): Promise<User> {
-		const passwordHash = await generatePasswordHash(password)
+		const passwordHash = await generatePasswordHash(password);
 
-		const twoFactorRecoveryCode = encryptString(generateTwoFactorRecoveryCode())
+		const twoFactorRecoveryCode = encryptString(generateTwoFactorRecoveryCode());
 
-		const [user] = await db.insert(schema.users).values({
-			email,
-			passwordHash,
-			name,
-			twoFactorRecoveryCode,
-		})
+		const [user] = await db
+			.insert(schema.users)
+			.values({
+				email,
+				passwordHash,
+				name,
+				twoFactorRecoveryCode,
+			})
 			.returning({
 				id: schema.users.id,
 				email: schema.users.email,
@@ -420,46 +441,53 @@ export function createAuthService(params: CreateAuthServiceParams) {
 				role: schema.users.role,
 				isEmailVerified: schema.users.isEmailVerified,
 				isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
-			})
+			});
 
 		if (user == null) {
-			throw new DatabaseError({ message: "Failed to create user" })
+			throw new DatabaseError({ message: "Failed to create user" });
 		}
 
-		return user
+		return user;
 	}
 
 	async function deleteEmailVerificationRequest(userId: string): Promise<void> {
-		await db.delete(schema.emailVerificationRequests).where(eq(schema.emailVerificationRequests.userId, userId))
+		await db
+			.delete(schema.emailVerificationRequests)
+			.where(eq(schema.emailVerificationRequests.userId, userId));
 	}
 
-	async function createEmailVerificationRequest(userId: string, email: string): Promise<EmailVerificationRequest & { token: string }> {
+	async function createEmailVerificationRequest(
+		userId: string,
+		email: string,
+	): Promise<EmailVerificationRequest & { token: string }> {
 		await deleteEmailVerificationRequest(userId);
 
-		const id = generateRandomString()
-		const code = generateTwoFactorKey()
-		const expiresAt = new Date(Date.now() + config.emailVerificationRequests.cookie.durationMs)
+		const id = generateRandomString();
+		const code = generateTwoFactorKey();
+		const expiresAt = new Date(Date.now() + config.emailVerificationRequests.cookie.durationMs);
 
-		const [request] = await db.insert(schema.emailVerificationRequests).values({
-			id,
-			userId,
-			code,
-			email,
-			expiresAt,
-		})
+		const [request] = await db
+			.insert(schema.emailVerificationRequests)
+			.values({
+				id,
+				userId,
+				code,
+				email,
+				expiresAt,
+			})
 			.returning({
 				id: schema.emailVerificationRequests.id,
 				userId: schema.emailVerificationRequests.userId,
 				code: schema.emailVerificationRequests.code,
 				email: schema.emailVerificationRequests.email,
 				expiresAt: schema.emailVerificationRequests.expiresAt,
-			})
+			});
 
 		if (request == null) {
-			throw new DatabaseError({ message: "Could not create email verification request" })
+			throw new DatabaseError({ message: "Could not create email verification request" });
 		}
 
-		return { ...request, token: id }
+		return { ...request, token: id };
 	}
 
 	async function sendVerificationEmail(to: string, code: string): Promise<void> {
@@ -468,14 +496,14 @@ export function createAuthService(params: CreateAuthServiceParams) {
 			to,
 			subject: "Verification code",
 			text: `Your verification code is ${code}`,
-		})
+		});
 	}
 
 	async function setEmailVerificationRequestCookie(token: string, expiresAt: Date): Promise<void> {
 		await cookies.set(config.emailVerificationRequests.cookie.name, token, {
 			...config.emailVerificationRequests.cookie.options,
 			expires: expiresAt,
-		})
+		});
 	}
 
 	async function getEmailVerificationRequestFromRequest(): Promise<EmailVerificationRequest | null> {
@@ -496,112 +524,135 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		if (request == null) {
 			await deleteEmailVerificationRequestCookie();
 
-			return null
+			return null;
 		}
 
 		return request;
 	}
 
 	async function getEmailVerificationRequestToken(): Promise<string | null> {
-		return await cookies.get(config.emailVerificationRequests.cookie.name)
+		return await cookies.get(config.emailVerificationRequests.cookie.name);
 	}
 
 	async function deleteEmailVerificationRequestCookie(): Promise<void> {
-		await cookies.delete(config.emailVerificationRequests.cookie.name)
+		await cookies.delete(config.emailVerificationRequests.cookie.name);
 	}
 
-	async function getEmailVerificationRequest(userId: string, token: string): Promise<EmailVerificationRequest | null> {
-		const id = token
+	async function getEmailVerificationRequest(
+		userId: string,
+		token: string,
+	): Promise<EmailVerificationRequest | null> {
+		const id = token;
 
-		const [request] = await db.select({
-			id: schema.emailVerificationRequests.id,
-			userId: schema.emailVerificationRequests.userId,
-			code: schema.emailVerificationRequests.code,
-			email: schema.emailVerificationRequests.email,
-			expiresAt: schema.emailVerificationRequests.expiresAt,
-		}).from(schema.emailVerificationRequests)
-			.where(and(
-				eq(schema.emailVerificationRequests.id, id),
-				eq(schema.emailVerificationRequests.userId, userId),
-			))
+		const [request] = await db
+			.select({
+				id: schema.emailVerificationRequests.id,
+				userId: schema.emailVerificationRequests.userId,
+				code: schema.emailVerificationRequests.code,
+				email: schema.emailVerificationRequests.email,
+				expiresAt: schema.emailVerificationRequests.expiresAt,
+			})
+			.from(schema.emailVerificationRequests)
+			.where(
+				and(
+					eq(schema.emailVerificationRequests.id, id),
+					eq(schema.emailVerificationRequests.userId, userId),
+				),
+			);
 
 		if (request == null) {
-			return null
+			return null;
 		}
 
-		return request
+		return request;
 	}
 
 	async function deletePasswordResetSessions(userId: string): Promise<void> {
-		await db.delete(schema.passwordResetSessions).where(eq(schema.passwordResetSessions.userId, userId))
+		await db
+			.delete(schema.passwordResetSessions)
+			.where(eq(schema.passwordResetSessions.userId, userId));
 	}
 
 	async function updateEmailAndSetEmailAsVerified(userId: string, email: string): Promise<void> {
-		await db.update(schema.users).set({
-			email,
-			isEmailVerified: true
-		}).where(eq(schema.users.id, userId))
+		await db
+			.update(schema.users)
+			.set({
+				email,
+				isEmailVerified: true,
+			})
+			.where(eq(schema.users.id, userId));
 	}
 
 	async function getRecoveryCode(userId: string): Promise<string | null> {
-		const [user] = await db.select({
-			twoFactorRecoveryCode: schema.users.twoFactorRecoveryCode
-		}).from(schema.users).where(eq(schema.users.id, userId))
+		const [user] = await db
+			.select({
+				twoFactorRecoveryCode: schema.users.twoFactorRecoveryCode,
+			})
+			.from(schema.users)
+			.where(eq(schema.users.id, userId));
 
 		if (user == null) {
-			return null
+			return null;
 		}
 
-		return decryptToString(user.twoFactorRecoveryCode)
+		return decryptToString(user.twoFactorRecoveryCode);
 	}
 
 	async function updatePassword(userId: string, password: string): Promise<void> {
-		const passwordHash = await generatePasswordHash(password)
+		const passwordHash = await generatePasswordHash(password);
 
-		await db.update(schema.users).set({ passwordHash }).where(eq(schema.users.id, userId))
+		await db.update(schema.users).set({ passwordHash }).where(eq(schema.users.id, userId));
 	}
 
 	async function resetRecoveryCode(userId: string): Promise<string> {
-		const unencryptedRecoveryCode = generateTwoFactorRecoveryCode()
-		const twoFactorRecoveryCode = encryptString(unencryptedRecoveryCode)
+		const unencryptedRecoveryCode = generateTwoFactorRecoveryCode();
+		const twoFactorRecoveryCode = encryptString(unencryptedRecoveryCode);
 
-		await db.update(schema.users).set({ twoFactorRecoveryCode }).where(eq(schema.users.id, userId))
+		await db.update(schema.users).set({ twoFactorRecoveryCode }).where(eq(schema.users.id, userId));
 
-		return unencryptedRecoveryCode
+		return unencryptedRecoveryCode;
 	}
 
 	async function deleteUserPasswordResetSessions(userId: string): Promise<void> {
-		await db.delete(schema.passwordResetSessions).where(eq(schema.passwordResetSessions.userId, userId))
+		await db
+			.delete(schema.passwordResetSessions)
+			.where(eq(schema.passwordResetSessions.userId, userId));
 	}
 
-	async function createPasswordResetSession(userId: string, email: string): Promise<PasswordResetSession & { token: string }> {
-		await deleteUserPasswordResetSessions(userId)
+	async function createPasswordResetSession(
+		userId: string,
+		email: string,
+	): Promise<PasswordResetSession & { token: string }> {
+		await deleteUserPasswordResetSessions(userId);
 
-		const id = generateRandomString()
-		const sessionId = hashSessionSecret(id).toString("hex")
-		const code = generateTwoFactorKey()
+		const id = generateRandomString();
+		const sessionId = hashSessionSecret(id).toString("hex");
+		const code = generateTwoFactorKey();
 
-		const [session] = await db.insert(schema.passwordResetSessions).values({
-			id: sessionId,
-			userId,
-			email,
-			code,
-			expiresAt: new Date(Date.now() + config.passwordResetSessions.cookie.durationMs)
-		}).returning({
-			id: schema.passwordResetSessions.id,
-			userId: schema.passwordResetSessions.userId,
-			email: schema.passwordResetSessions.email,
-			code: schema.passwordResetSessions.code,
-			expiresAt: schema.passwordResetSessions.expiresAt,
-			isEmailVerified: schema.passwordResetSessions.isEmailVerified,
-			isTwoFactorVerified: schema.passwordResetSessions.isTwoFactorVerified,
-		})
+		const [session] = await db
+			.insert(schema.passwordResetSessions)
+			.values({
+				id: sessionId,
+				userId,
+				email,
+				code,
+				expiresAt: new Date(Date.now() + config.passwordResetSessions.cookie.durationMs),
+			})
+			.returning({
+				id: schema.passwordResetSessions.id,
+				userId: schema.passwordResetSessions.userId,
+				email: schema.passwordResetSessions.email,
+				code: schema.passwordResetSessions.code,
+				expiresAt: schema.passwordResetSessions.expiresAt,
+				isEmailVerified: schema.passwordResetSessions.isEmailVerified,
+				isTwoFactorVerified: schema.passwordResetSessions.isTwoFactorVerified,
+			});
 
 		if (session == null) {
-			throw new DatabaseError({ message: "Failed to create password reset session" })
+			throw new DatabaseError({ message: "Failed to create password reset session" });
 		}
 
-		return { ...session, token: id }
+		return { ...session, token: id };
 	}
 
 	async function sendPasswordResetEmail(to: string, code: string): Promise<void> {
@@ -610,73 +661,204 @@ export function createAuthService(params: CreateAuthServiceParams) {
 			to,
 			subject: "Reset code",
 			text: `Your reset code is ${code}`,
-		})
+		});
 	}
 
 	async function setPasswordResetSessionCookie(token: string, expiresAt: Date): Promise<void> {
 		await cookies.set(config.passwordResetSessions.cookie.name, token, {
 			...config.passwordResetSessions.cookie.options,
-			expires: expiresAt
-		})
+			expires: expiresAt,
+		});
 	}
 
 	async function deletePasswordResetSessionCookie(): Promise<void> {
-		await cookies.delete(config.passwordResetSessions.cookie.name)
+		await cookies.delete(config.passwordResetSessions.cookie.name);
 	}
 
 	async function getPasswordResetSessionCookie(): Promise<string | null> {
-		return await cookies.get(config.passwordResetSessions.cookie.name)
+		return await cookies.get(config.passwordResetSessions.cookie.name);
 	}
 
-	async function validatePasswordResetSessionRequestFromRequest(): Promise<PasswordResetSessionValidationResult> {
-		const token = await getPasswordResetSessionCookie()
+	async function validatePasswordResetSessionFromRequest(): Promise<PasswordResetSessionValidationResult> {
+		const token = await getPasswordResetSessionCookie();
 
 		if (token == null) {
-			return { session: null, user: null }
+			return { session: null, user: null };
 		}
 
-		const result = await getPasswordResetSession(token)
+		const result = await getPasswordResetSession(token);
 
 		if (result.session == null) {
 			await deletePasswordResetSessionCookie();
 
-			return { session: null, user: null }
+			return { session: null, user: null };
 		}
 
-		return result
+		return result;
 	}
 
-	async function getPasswordResetSession(token: string): Promise<PasswordResetSessionValidationResult> {
-		const id = hashSessionSecret(token).toString("hex")
+	async function getPasswordResetSession(
+		token: string,
+	): Promise<PasswordResetSessionValidationResult> {
+		const id = hashSessionSecret(token).toString("hex");
 
-		const [session] = await db.select({
-			session: {
-				id: schema.passwordResetSessions.id,
-				userId: schema.passwordResetSessions.userId,
-				email: schema.passwordResetSessions.email,
-				code: schema.passwordResetSessions.code,
-				expiresAt: schema.passwordResetSessions.expiresAt,
-				isEmailVerified: schema.passwordResetSessions.isEmailVerified,
-				isTwoFactorVerified: schema.passwordResetSessions.isTwoFactorVerified,
-			},
-			user: {
-				id: schema.users.id,
-				email: schema.users.email,
-				name: schema.users.name,
-				role: schema.users.role,
-				isEmailVerified: schema.users.isEmailVerified,
-				isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
-			}
-		}).from(schema.passwordResetSessions)
+		const [session] = await db
+			.select({
+				session: {
+					id: schema.passwordResetSessions.id,
+					userId: schema.passwordResetSessions.userId,
+					email: schema.passwordResetSessions.email,
+					code: schema.passwordResetSessions.code,
+					expiresAt: schema.passwordResetSessions.expiresAt,
+					isEmailVerified: schema.passwordResetSessions.isEmailVerified,
+					isTwoFactorVerified: schema.passwordResetSessions.isTwoFactorVerified,
+				},
+				user: {
+					id: schema.users.id,
+					email: schema.users.email,
+					name: schema.users.name,
+					role: schema.users.role,
+					isEmailVerified: schema.users.isEmailVerified,
+					isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
+				},
+			})
+			.from(schema.passwordResetSessions)
 			.innerJoin(schema.users, eq(schema.passwordResetSessions.userId, schema.users.id))
-			.where(eq(schema.passwordResetSessions.id, id))
+			.where(eq(schema.passwordResetSessions.id, id));
 
 		if (session == null) {
-			return { session: null, user: null }
+			return { session: null, user: null };
 		}
 
-		return session
+		return session;
 	}
+
+	async function getUserTotpKey(userId: string): Promise<Buffer | null> {
+		const [user] = await db
+			.select({
+				twoFactorTotpKey: schema.users.twoFactorTotpKey,
+			})
+			.from(schema.users)
+			.where(eq(schema.users.id, userId));
+
+		if (user?.twoFactorTotpKey == null) {
+			return null;
+		}
+
+		return decrypt(user.twoFactorTotpKey);
+	}
+
+	async function setPasswordResetSessionAsTwoFactorVerified(id: string): Promise<void> {
+		await db
+			.update(schema.passwordResetSessions)
+			.set({ isTwoFactorVerified: true })
+			.where(eq(schema.passwordResetSessions.id, id));
+	}
+
+	async function resetUserTwoFactorWithRecoveryCode(
+		userId: string,
+		code: string,
+	): Promise<boolean> {
+		return await db.transaction(async (tx) => {
+			const [user] = await tx
+				.select({
+					twoFactorRecoveryCode: schema.users.twoFactorRecoveryCode,
+				})
+				.from(schema.users)
+				.where(eq(schema.users.id, userId));
+
+			if (user == null) {
+				return false;
+			}
+
+			const currentRecoveryCode = decryptToString(user.twoFactorRecoveryCode);
+
+			if (code !== currentRecoveryCode) {
+				return false;
+			}
+
+			const newRecoveryCode = encryptString(generateTwoFactorRecoveryCode());
+
+			await tx
+				.update(schema.sessions)
+				.set({
+					isTwoFactorVerified: false,
+				})
+				.where(eq(schema.sessions.userId, userId));
+
+			const [result] = await tx
+				.update(schema.users)
+				.set({
+					twoFactorRecoveryCode: newRecoveryCode,
+					twoFactorTotpKey: null,
+				})
+				.where(
+					and(
+						eq(schema.users.id, userId),
+						eq(schema.users.twoFactorRecoveryCode, user.twoFactorRecoveryCode),
+					),
+				)
+				.returning({ id: schema.users.id });
+
+			return result != null;
+		});
+	}
+
+	async function setPasswordResetSessionAsEmailVerified(id: string): Promise<void> {
+		await db
+			.update(schema.passwordResetSessions)
+			.set({
+				isEmailVerified: true,
+			})
+			.where(eq(schema.passwordResetSessions.id, id));
+	}
+
+	async function setUserAsEmailVerifiedIfEmailMatches(
+		userId: string,
+		email: string,
+	): Promise<boolean> {
+		const [user] = await db
+			.update(schema.users)
+			.set({
+				isEmailVerified: true,
+			})
+			.where(and(eq(schema.users.id, userId), eq(schema.users.email, email)))
+			.returning({ id: schema.users.id });
+
+		return user != null;
+	}
+
+	async function setSessionAsTwoFactorVerified(id: string): Promise<void> {
+		await db
+			.update(schema.sessions)
+			.set({
+				isTwoFactorVerified: true,
+			})
+			.where(eq(schema.sessions.id, id));
+	}
+
+	async function updateUserTotpKey(userId: string, key: Buffer): Promise<void> {
+		const twoFactorTotpKey = encrypt(key);
+
+		await db
+			.update(schema.users)
+			.set({
+				twoFactorTotpKey,
+			})
+			.where(eq(schema.users.id, userId));
+	}
+
+	const passwordResetEmailIpBucket = new RefillingTokenBucket<string>(3, 60);
+	const passwordResetEmailUserBucket = new RefillingTokenBucket<string>(3, 60);
+	const signUpIpBucket = new RefillingTokenBucket<string>(3, 10);
+	const totpUpdateBucket = new RefillingTokenBucket<string>(3, 60 * 10);
+	const signInTrottler = new Throttler<string>([1, 2, 4, 8, 16, 30, 60, 180, 300]);
+	const signInIpBucket = new RefillingTokenBucket<string>(20, 1);
+	const totpBucket = new ExpiringTokenBucket<string>(5, 60 * 30);
+	const recoveryCodeBucket = new ExpiringTokenBucket<string>(3, 60 * 60);
+	const emailVerificationBucket = new ExpiringTokenBucket<string>(5, 60 * 30);
+	const passwordUpdateBucket = new ExpiringTokenBucket<string>(5, 60 * 30);
+	const sendVerificationEmailBucket = new ExpiringTokenBucket<string>(3, 60 * 10);
 
 	const service = {
 		createSession,
@@ -712,7 +894,27 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		sendPasswordResetEmail,
 		setPasswordResetSessionCookie,
 		deletePasswordResetSessionCookie,
-		validatePasswordResetSessionRequestFromRequest,
+		validatePasswordResetSessionFromRequest,
+		getUserTotpKey,
+		verifyTotp: verifyHOTP,
+		setPasswordResetSessionAsTwoFactorVerified,
+		resetUserTwoFactorWithRecoveryCode,
+		setPasswordResetSessionAsEmailVerified,
+		setUserAsEmailVerifiedIfEmailMatches,
+		setSessionAsTwoFactorVerified,
+		updateUserTotpKey,
+
+		passwordResetEmailIpBucket,
+		passwordResetEmailUserBucket,
+		signUpIpBucket,
+		totpUpdateBucket,
+		signInTrottler,
+		signInIpBucket,
+		totpBucket,
+		recoveryCodeBucket,
+		emailVerificationBucket,
+		passwordUpdateBucket,
+		sendVerificationEmailBucket,
 	};
 
 	return service;

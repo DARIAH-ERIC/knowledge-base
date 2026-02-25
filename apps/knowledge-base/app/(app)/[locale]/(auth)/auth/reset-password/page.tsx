@@ -36,7 +36,7 @@ export default async function ResetPasswordPage(
 		return e("too-many-requests");
 	}
 
-	const { session, user } = await auth.validatePasswordResetSessionRequest();
+	const { session, user } = await auth.validatePasswordResetSessionFromRequest();
 
 	if (session == null) {
 		redirect({ href: "/auth/forgot-password", locale });

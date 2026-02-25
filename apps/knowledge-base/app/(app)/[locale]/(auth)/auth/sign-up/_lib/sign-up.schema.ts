@@ -6,7 +6,11 @@ export const SignUpActionInputSchema = v.pipe(
 	v.object({
 		email: v.pipe(v.string(), v.email()),
 		name: v.pipe(v.string(), v.nonEmpty()),
-		password: v.pipe(v.string(), v.minLength(passwords.length.min), v.maxLength(passwords.length.max)),
+		password: v.pipe(
+			v.string(),
+			v.minLength(passwords.length.min),
+			v.maxLength(passwords.length.max),
+		),
 		"password-confirmation": v.pipe(v.string(), v.nonEmpty()),
 	}),
 	v.forward(

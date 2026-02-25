@@ -1,14 +1,13 @@
 "use client";
 
+import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { type ReactNode, useActionState } from "react";
 import { Input, Label, TextArea, TextField } from "react-aria-components";
 
 import { sendContactFormEmailAction } from "@/app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.action";
 import { Form } from "@/components/form";
 import { FormStatus } from "@/components/form-status";
-// import { HoneypotField } from "@/components/honeypot-field";
 import { SubmitButton } from "@/components/submit-button";
-import { createActionStateInitial } from "@/lib/server/actions";
 
 interface ContactFormProps {
 	emailLabel: string;
@@ -26,8 +25,6 @@ export function ContactForm(props: Readonly<ContactFormProps>): ReactNode {
 	return (
 		<Form action={action} className="flex flex-col gap-y-8" state={state}>
 			<FormStatus state={state} />
-
-			{/* <HoneypotField /> */}
 
 			<TextField
 				autoComplete="email"

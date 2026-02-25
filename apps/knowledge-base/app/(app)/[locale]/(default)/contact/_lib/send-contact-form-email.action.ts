@@ -1,21 +1,20 @@
 "use server";
 
-import { getFormDataValues, isErr, log } from "@acdh-oeaw/lib";
-import { getLocale, getTranslations } from "next-intl/server";
-import * as v from "valibot";
-
-import { SendContactFormInputSchema } from "@/app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.schema";
-import { env } from "@/config/env.config";
-import { getIntlLanguage } from "@/lib/i18n/locales";
+import { getFormDataValues, log } from "@acdh-oeaw/lib";
 import {
 	type ActionState,
 	createActionStateError,
 	createActionStateSuccess,
 	type GetValidationErrors,
-} from "@/lib/server/actions";
-import { createServerAction } from "@/lib/server/actions/create-server-action";
-import { sendEmail } from "@/lib/server/email/send-email";
-// import { assertValidFormSubmission } from "@/lib/server/honeypot";
+} from "@dariah-eric/next-lib/actions";
+import { getLocale, getTranslations } from "next-intl/server";
+import * as v from "valibot";
+
+import { SendContactFormInputSchema } from "@/app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.schema";
+import { env } from "@/config/env.config";
+import { email as emailService } from "@/lib/email";
+import { getIntlLanguage } from "@/lib/i18n/locales";
+import { createServerAction } from "@/lib/server/create-server-action";
 
 export const sendContactFormEmailAction = createServerAction<
 	unknown,
@@ -25,11 +24,6 @@ export const sendContactFormEmailAction = createServerAction<
 	formData: FormData,
 ): Promise<ActionState> {
 	const e = await getTranslations("errors");
-
-	// assertValidFormSubmission(formData);
-	// if (isHoneypotError(error)) {
-	// 	return createActionStateError({ message: e("invalid-form-fields"), formData });
-	// }
 
 	const locale = await getLocale();
 	const t = await getTranslations("actions.sendContactFormEmailAction");
@@ -52,14 +46,14 @@ export const sendContactFormEmailAction = createServerAction<
 
 	const { email, message, name, subject } = validation.output;
 
-	const result = await sendEmail({
+	const result = await emailService.sendEmail({
 		from: `${name} <${email}>`,
 		to: env.EMAIL_ADDRESS,
 		subject,
 		text: message,
 	});
 
-	if (isErr(result)) {
+	if (result.isErr()) {
 		return createActionStateError({
 			formData,
 			message: t("error"),

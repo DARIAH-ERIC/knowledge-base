@@ -1,18 +1,16 @@
-// eslint-disable-next-line check-file/folder-naming-convention
+import { globalGetRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
-import { PasswordResetRecoveryCodeForm } from "@/app/(app)/[locale]/(auth)/auth/reset-password/2fa/_components/password-reset-recovery-code-form";
-import { PasswordResetTOTPForm } from "@/app/(app)/[locale]/(auth)/auth/reset-password/2fa/_components/password-reset-totp-form";
+import { PasswordResetRecoveryCodeForm } from "@/app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_components/password-reset-recovery-code-form";
+import { PasswordResetTotpForm } from "@/app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_components/password-reset-totp-form";
 import { Main } from "@/components/main";
-import { urls } from "@/config/auth.config";
-import { validatePasswordResetSessionRequest } from "@/lib/data/users";
+import { auth } from "@/lib/auth";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
-import { globalGetRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 
-interface PasswordResetTwoFactorPageProps extends PageProps<"/[locale]/auth/reset-password/2fa"> {}
+interface PasswordResetTwoFactorPageProps extends PageProps<"/[locale]/auth/reset-password/two-factor"> {}
 
 export async function generateMetadata(
 	_props: Readonly<PasswordResetTwoFactorPageProps>,
@@ -39,22 +37,22 @@ export default async function PasswordResetTwoFactorPage(
 		return e("too-many-requests");
 	}
 
-	const { session, user } = await validatePasswordResetSessionRequest();
+	const { session, user } = await auth.validatePasswordResetSessionFromRequest();
 
 	if (session == null) {
 		redirect({ href: "/auth/forgot-password", locale });
 	}
 
 	if (!session.isEmailVerified) {
-		redirect({ href: urls.resetPasswordVerifyEmail, locale });
+		redirect({ href: "/auth/reset-password/verify-email", locale });
 	}
 
 	if (!user.isTwoFactorRegistered) {
-		redirect({ href: urls.resetPassword, locale });
+		redirect({ href: "/auth/reset-password", locale });
 	}
 
 	if (session.isTwoFactorVerified) {
-		redirect({ href: urls.resetPassword, locale });
+		redirect({ href: "/auth/reset-password", locale });
 	}
 
 	return (
@@ -69,7 +67,7 @@ export default async function PasswordResetTwoFactorPage(
 				<div>
 					<h2>{t("enter-code")}</h2>
 
-					<PasswordResetTOTPForm />
+					<PasswordResetTotpForm />
 				</div>
 			</section>
 

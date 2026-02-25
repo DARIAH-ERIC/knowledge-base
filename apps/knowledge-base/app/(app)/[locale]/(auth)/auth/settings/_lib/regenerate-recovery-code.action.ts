@@ -20,7 +20,6 @@ export async function regenerateRecoveryCodeAction(): Promise<ActionState> {
 
 	const { session, user } = await getCurrentSession();
 
-
 	if (session == null) {
 		return createActionStateError({ message: e("not-authenticated") });
 	}

@@ -13,7 +13,7 @@ import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface TwoFactorSetupPageProps extends PageProps<"/[locale]/auth/2fa/setup"> {}
+interface TwoFactorSetupPageProps extends PageProps<"/[locale]/auth/two-factor/setup"> {}
 
 export async function generateMetadata(
 	_props: Readonly<TwoFactorSetupPageProps>,
@@ -56,8 +56,8 @@ export default async function TwoFactorSetupPage(
 
 	const totpKey = new Uint8Array(20);
 	getRandomValues(totpKey);
-	const encodedTOTPKey = encodeBase64(totpKey);
-	const keyURI = createTOTPKeyURI(issuer, user.username, totpKey, 30, 6);
+	const encodedTotpKey = encodeBase64(totpKey);
+	const keyURI = createTotpKeyURI(issuer, user.username, totpKey, 30, 6);
 	const qrcode = renderSVG(keyURI);
 
 	return (
@@ -72,7 +72,7 @@ export default async function TwoFactorSetupPage(
 				<div>
 					<div className="size-48" dangerouslySetInnerHTML={{ __html: qrcode }} />
 
-					<TwoFactorSetUpForm encodedTOTPKey={encodedTOTPKey} />
+					<TwoFactorSetUpForm encodedTotpKey={encodedTotpKey} />
 				</div>
 			</section>
 		</Main>
