@@ -65,7 +65,7 @@ export async function verifyTwoFactorAction(
 		return createActionStateError({ message: e("forbidden") });
 	}
 
-	if (!auth.verifyTotp(totpKey, 30, 6, code)) {
+	if (!auth.verifyTotp(totpKey, code)) {
 		return createActionStateError({ message: t("incorrect-code") });
 	}
 

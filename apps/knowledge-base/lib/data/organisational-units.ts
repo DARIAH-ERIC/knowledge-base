@@ -3,9 +3,9 @@
 import { count, eq } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
-import { client } from "@dariah-eric/images/client";
 
 import { imageAssetWidth } from "@/config/assets.config";
+import { images } from "@/lib/images";
 
 interface GetOrganisationalUnitsParams {
 	/** @default 10 */
@@ -49,7 +49,7 @@ export async function getOrganisationalUnits(params: GetOrganisationalUnitsParam
 
 	const data = items.map((item) => {
 		if (!item.image) return;
-		const image = client.urls.generateSignedImageUrl({
+		const image = images.generateSignedImageUrl({
 			key: item.image.key,
 			options: { width: imageAssetWidth.preview },
 		});
@@ -90,7 +90,7 @@ export async function getOrganisationalUnitById(params: GetOrganisationalUnitByI
 	}
 
 	if (!item.image) return item;
-	const image = client.urls.generateSignedImageUrl({
+	const image = images.generateSignedImageUrl({
 		key: item.image.key,
 		options: { width: imageAssetWidth.featured },
 	});

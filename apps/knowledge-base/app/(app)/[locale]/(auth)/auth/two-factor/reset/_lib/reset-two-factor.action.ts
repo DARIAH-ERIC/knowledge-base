@@ -26,7 +26,7 @@ export async function resetTwoFactorAction(
 	if (!user.isEmailVerified || !user.isTwoFactorRegistered || session.isTwoFactorVerified) {
 		return createActionStateError({ message: e("forbidden") });
 	}
-	if (!recoveryCodeBucket.check(user.id, 1)) {
+	if (!auth.recoveryCodeBucket.check(user.id, 1)) {
 		return createActionStateError({ message: e("too-many-requests") });
 	}
 
@@ -46,7 +46,7 @@ export async function resetTwoFactorAction(
 
 	const { code } = result.output;
 
-	if (!recoveryCodeBucket.consume(user.id, 1)) {
+	if (!auth.recoveryCodeBucket.consume(user.id, 1)) {
 		return createActionStateError({ message: e("too-many-requests") });
 	}
 
@@ -55,7 +55,7 @@ export async function resetTwoFactorAction(
 		return createActionStateError({ message: t("invalid-code") });
 	}
 
-	recoveryCodeBucket.reset(user.id);
+	auth.recoveryCodeBucket.reset(user.id);
 
 	redirect({ href: "/auth/two-factor/setup", locale });
 }

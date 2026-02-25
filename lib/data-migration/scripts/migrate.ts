@@ -6,7 +6,7 @@ import * as path from "node:path";
 import { assert, isNonEmptyString, keyBy, log } from "@acdh-oeaw/lib";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
-import { client } from "@dariah-eric/storage";
+import { createStorageService } from "@dariah-eric/storage";
 import { buffer } from "@dariah-eric/storage/lib";
 
 import {
@@ -17,7 +17,19 @@ import {
 	cacheFolderPath,
 	placeholderImageUrl,
 } from "../config/data-migration.config";
+import { env } from "../config/env.config";
 import { getWordPressData, type WordPressData } from "../src/lib/get-wordpress-data";
+
+const storage = createStorageService({
+	config: {
+		accessKey: env.S3_ACCESS_KEY,
+		bucketName: env.S3_BUCKET_NAME,
+		endPoint: env.S3_HOST,
+		port: env.S3_PORT,
+		secretKey: env.S3_SECRET_KEY,
+		useSSL: env.S3_PROTOCOL === "https",
+	},
+});
 
 type AssetsCache = Map<string, string>;
 
@@ -46,7 +58,7 @@ async function readCached(assetsCache: AssetsCache, url: URL) {
 async function upload(assetsCache: AssetsCache, url: URL) {
 	const { input, metadata } = await readCached(assetsCache, url);
 
-	const { key } = await client.images.upload({ prefix: "images", input, metadata });
+	const { key } = await storage.images.upload({ prefix: "images", input, metadata });
 
 	const [asset] = await db
 		.insert(schema.assets)

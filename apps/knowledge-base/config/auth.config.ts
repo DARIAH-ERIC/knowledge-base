@@ -1,9 +1,3 @@
-// export const sessionRefreshIntervalMs = 1000 * 60 * 60 * 24 * 15; /** 15 days. */
-// export const sessionMaxDurationMs = 1000 * 60 * 60 * 24 * 30; /** 30 days. */
-
-// export const passwordResetSessionMaxDurationMs = 1000 * 60 * 10; /** 10 mins. */
-// export const emailVerificationRequestMaxDurationMs = 1000 * 60 * 10; /** 10 mins. */
-
 interface CookieConfig {
 	name: string;
 	options: {

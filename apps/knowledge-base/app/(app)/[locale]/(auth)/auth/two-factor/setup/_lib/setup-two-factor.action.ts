@@ -14,8 +14,6 @@ import { auth } from "@/lib/auth";
 import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";
 
-const totpUpdateBucket = auth.totpUpdateBucket;
-
 export async function setupTwoFactorAction(
 	_prev: ActionState,
 	formData: FormData,
@@ -39,7 +37,7 @@ export async function setupTwoFactorAction(
 	if (user.isTwoFactorRegistered && !session.isTwoFactorVerified) {
 		return createActionStateError({ message: e("forbidden") });
 	}
-	if (!totpUpdateBucket.check(user.id, 1)) {
+	if (!auth.totpUpdateBucket.check(user.id, 1)) {
 		return createActionStateError({ message: e("too-many-requests") });
 	}
 
@@ -67,14 +65,14 @@ export async function setupTwoFactorAction(
 
 	const key = keyResult.output;
 
-	if (!totpUpdateBucket.consume(user.id, 1)) {
+	if (!auth.totpUpdateBucket.consume(user.id, 1)) {
 		return createActionStateError({ message: e("too-many-requests") });
 	}
-	if (!auth.verifyTotp(key, 30, 6, code)) {
+	if (!auth.verifyTotp(key, code)) {
 		return createActionStateError({ message: t("invalid-code") });
 	}
 
-	await auth.updateUserTotpKey(session.userId, key);
+	await auth.updateUserTotpKey(user.id, key);
 	await auth.setSessionAsTwoFactorVerified(session.id);
 
 	redirect({ href: "/auth/recovery-code", locale });

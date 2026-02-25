@@ -3,9 +3,9 @@
 import { count, eq } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
-import { client } from "@dariah-eric/images/client";
 
 import { imageAssetWidth } from "@/config/assets.config";
+import { images } from "@/lib/images";
 
 interface GetImpactCaseStudiesParams {
 	/** @default 10 */
@@ -48,7 +48,7 @@ export async function getImpactCaseStudies(params: GetImpactCaseStudiesParams) {
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = client.urls.generateSignedImageUrl({
+		const image = images.generateSignedImageUrl({
 			key: item.image.key,
 			options: { width: imageAssetWidth.preview },
 		});
@@ -88,7 +88,7 @@ export async function getImpactCaseStudyById(params: GetImpactCaseStudyByIdParam
 		return null;
 	}
 
-	const image = client.urls.generateSignedImageUrl({
+	const image = images.generateSignedImageUrl({
 		key: item.image.key,
 		options: { width: imageAssetWidth.featured },
 	});

@@ -16,8 +16,8 @@ import type { EmailService } from "@dariah-eric/email";
 import { ExpiringTokenBucket, RefillingTokenBucket, Throttler } from "@dariah-eric/rate-limiter";
 import { request } from "@dariah-eric/request";
 import { hash, verify } from "@node-rs/argon2";
-import { encodeBase32UpperCaseNoPadding } from "@oslojs/encoding";
-import { verifyHOTP } from "@oslojs/otp";
+import { decodeBase64, encodeBase32UpperCaseNoPadding, encodeBase64 } from "@oslojs/encoding";
+import { createTOTPKeyURI, verifyTOTP } from "@oslojs/otp";
 
 import { InvalidUserIdError } from "./errors";
 
@@ -506,7 +506,9 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		});
 	}
 
-	async function getEmailVerificationRequestFromRequest(): Promise<EmailVerificationRequest | null> {
+	async function getEmailVerificationRequestFromRequest(): Promise<
+		(EmailVerificationRequest & { token: string }) | null
+	> {
 		const { user } = await getCurrentSession();
 
 		if (user == null) {
@@ -527,7 +529,7 @@ export function createAuthService(params: CreateAuthServiceParams) {
 			return null;
 		}
 
-		return request;
+		return { ...request, token: request.id };
 	}
 
 	async function getEmailVerificationRequestToken(): Promise<string | null> {
@@ -848,6 +850,18 @@ export function createAuthService(params: CreateAuthServiceParams) {
 			.where(eq(schema.users.id, userId));
 	}
 
+	function verifyTotp(key: Buffer, code: string): boolean {
+		return verifyTOTP(key, 30, 6, code);
+	}
+
+	function createTotpKeyUri(issuer: string, userName: string): { key: string; uri: string } {
+		const k = randomBytes(20);
+		const key = encodeBase64(k);
+		const uri = createTOTPKeyURI(issuer, userName, k, 30, 6);
+
+		return { key, uri };
+	}
+
 	const passwordResetEmailIpBucket = new RefillingTokenBucket<string>(3, 60);
 	const passwordResetEmailUserBucket = new RefillingTokenBucket<string>(3, 60);
 	const signUpIpBucket = new RefillingTokenBucket<string>(3, 10);
@@ -896,13 +910,15 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		deletePasswordResetSessionCookie,
 		validatePasswordResetSessionFromRequest,
 		getUserTotpKey,
-		verifyTotp: verifyHOTP,
+		verifyTotp,
+		createTotpKeyUri,
 		setPasswordResetSessionAsTwoFactorVerified,
 		resetUserTwoFactorWithRecoveryCode,
 		setPasswordResetSessionAsEmailVerified,
 		setUserAsEmailVerifiedIfEmailMatches,
 		setSessionAsTwoFactorVerified,
 		updateUserTotpKey,
+		decodeBase64,
 
 		passwordResetEmailIpBucket,
 		passwordResetEmailUserBucket,

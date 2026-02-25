@@ -7,7 +7,6 @@ import {
 } from "@dariah-eric/next-lib/actions";
 import { getTranslations } from "next-intl/server";
 
-import { sendVerificationEmailBucket } from "@/app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action";
 import { auth } from "@/lib/auth";
 import { getCurrentSession } from "@/lib/auth/session";
 
@@ -23,7 +22,7 @@ export async function resendEmailVerificationCodeAction(): Promise<ActionState> 
 	if (user.isTwoFactorRegistered && !session.isTwoFactorVerified) {
 		return createActionStateError({ message: e("forbidden") });
 	}
-	if (!sendVerificationEmailBucket.check(user.id, 1)) {
+	if (!auth.sendVerificationEmailBucket.check(user.id, 1)) {
 		return createActionStateError({ message: e("too-many-requests") });
 	}
 
@@ -33,13 +32,13 @@ export async function resendEmailVerificationCodeAction(): Promise<ActionState> 
 		if (user.isEmailVerified) {
 			return createActionStateError({ message: e("forbidden") });
 		}
-		if (!sendVerificationEmailBucket.consume(user.id, 1)) {
+		if (!auth.sendVerificationEmailBucket.consume(user.id, 1)) {
 			return createActionStateError({ message: e("too-many-requests") });
 		}
 
 		verificationRequest = await auth.createEmailVerificationRequest(user.id, user.email);
 	} else {
-		if (!sendVerificationEmailBucket.consume(user.id, 1)) {
+		if (!auth.sendVerificationEmailBucket.consume(user.id, 1)) {
 			return createActionStateError({ message: e("too-many-requests") });
 		}
 

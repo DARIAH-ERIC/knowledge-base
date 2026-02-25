@@ -777,6 +777,9 @@ importers:
       '@dariah-eric/images':
         specifier: workspace:^
         version: link:../../packages/images
+      '@dariah-eric/mailchimp':
+        specifier: workspace:^
+        version: link:../../packages/mailchimp
       '@dariah-eric/next-lib':
         specifier: workspace:^
         version: link:../../packages/next-lib
@@ -952,6 +955,9 @@ importers:
       '@acdh-oeaw/lib':
         specifier: 'catalog:'
         version: 1.0.5
+      '@acdh-oeaw/validate-env':
+        specifier: 'catalog:'
+        version: 0.3.0(typescript@5.9.3)
       '@dariah-eric/database':
         specifier: workspace:^
         version: link:../../packages/database

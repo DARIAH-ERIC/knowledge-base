@@ -27,11 +27,9 @@ export const middleware: Middleware = function middleware(request, response) {
 			const header = response.headers.get("link");
 
 			if (header != null) {
-				const links = header
-					.split(",")
-					.filter(
-						(link) => !(link.includes('rel="alternate"') && link.includes('hreflang="x-default"')),
-					);
+				const links = header.split(",").filter((link) => {
+					return !(link.includes('rel="alternate"') && link.includes('hreflang="x-default"'));
+				});
 
 				response.headers.set("link", links.join(","));
 			}

@@ -31,7 +31,7 @@ export async function verifyPasswordResetTwoFactorWithRecoveryCodeAction(
 		return createActionStateError({ message: "Forbidden" });
 	}
 
-	if (!recoveryCodeBucket.check(session.userId, 1)) {
+	if (!auth.recoveryCodeBucket.check(session.userId, 1)) {
 		return createActionStateError({ message: e("too-many-requests") });
 	}
 

@@ -5,8 +5,9 @@ import type { ReadableStream } from "node:stream/web";
 
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
-import { client, type ImageUrlOptions } from "@dariah-eric/images/client";
-import { type AssetPrefix, assetPrefixes, client as s3 } from "@dariah-eric/storage/client";
+
+import { images, type ImageUrlOptions } from "@/lib/images";
+import { type AssetPrefix, assetPrefixes, storage as s3 } from "@/lib/storage";
 
 export { assetPrefixes };
 
@@ -36,7 +37,7 @@ export async function getAssets(params: GetAssetsParams) {
 	]);
 
 	const urls = assets.map((asset) => {
-		const { url } = client.urls.generateSignedImageUrl({
+		const { url } = images.generateSignedImageUrl({
 			key: asset.key,
 			options: imageUrlOptions,
 		});

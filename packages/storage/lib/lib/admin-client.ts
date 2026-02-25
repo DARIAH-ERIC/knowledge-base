@@ -1,24 +1,37 @@
 import { assert } from "@acdh-oeaw/lib";
-import type { BucketItem } from "minio";
+import { type BucketItem, Client as MinioClient } from "minio";
 
 import { env } from "../../config/env.config";
-import { client as _client } from "..";
-import { client as minio } from "../minio-client";
+import { createStorageService } from "..";
 
-const bucketName = env.S3_BUCKET_NAME;
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function createClient() {
+	const accessKey = env.S3_ACCESS_KEY;
+	const bucketName = env.S3_BUCKET_NAME;
+	const endPoint = env.S3_HOST;
+	const port = env.S3_PORT;
+	const secretKey = env.S3_SECRET_KEY;
+	const useSSL = env.S3_PROTOCOL === "https";
 
-type _Client = typeof _client;
+	const minio = new MinioClient({
+		accessKey,
+		endPoint,
+		port,
+		secretKey,
+		useSSL,
+	});
 
-export interface Client extends Omit<_Client, "bucket"> {
-	bucket: {
-		create: () => Promise<void>;
-		exists: () => Promise<boolean>;
-		name: string;
-		reset: () => Promise<void>;
-	};
-}
+	const _client = createStorageService({
+		config: {
+			accessKey,
+			bucketName,
+			endPoint,
+			port,
+			secretKey,
+			useSSL,
+		},
+	});
 
-export function createClient(): Client {
 	const bucket = {
 		async create() {
 			return minio.makeBucket(bucketName);
@@ -51,3 +64,5 @@ export function createClient(): Client {
 }
 
 export const client = createClient();
+
+export type Client = ReturnType<typeof createClient>;

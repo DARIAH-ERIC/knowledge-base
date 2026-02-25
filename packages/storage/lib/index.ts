@@ -1,13 +1,9 @@
 import type { Readable } from "node:stream";
 
-import type { BucketItem, ItemBucketMetadata } from "minio";
+import { type BucketItem, Client, type ItemBucketMetadata } from "minio";
 
-import { env } from "../config/env.config";
 import { assetPrefixes, presignedUrlExpirySeconds } from "../config/images.config";
 import { generateObjectKey } from "./generate-object-key";
-import { client as minio } from "./minio-client";
-
-const bucketName = env.S3_BUCKET_NAME;
 
 export { assetPrefixes };
 
@@ -17,28 +13,29 @@ export interface AssetMetadata extends ItemBucketMetadata {
 	"content-type": string;
 }
 
-export interface Client {
-	bucket: {
-		name: string;
-	};
-	images: {
-		get: (prefix?: AssetPrefix) => Promise<{ images: Array<{ key: string }> }>;
-		remove: (params: { key: string }) => Promise<void>;
-		upload: (params: {
-			input: Readable | Buffer;
-			metadata: AssetMetadata;
-			prefix: AssetPrefix;
-			size?: number;
-		}) => Promise<{ key: string }>;
-	};
-	urls: {
-		generatePresignedUploadUrl: (params: {
-			prefix: AssetPrefix;
-		}) => Promise<{ key: string; url: string }>;
+export interface CreateStorageServiceParams {
+	config: {
+		accessKey: string;
+		bucketName: string;
+		endPoint: string;
+		port: number;
+		secretKey: string;
+		useSSL: boolean;
 	};
 }
 
-export function createClient(): Client {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function createStorageService(params: CreateStorageServiceParams) {
+	const { accessKey, bucketName, endPoint, port, secretKey, useSSL } = params.config;
+
+	const minio = new Client({
+		accessKey,
+		endPoint,
+		port,
+		secretKey,
+		useSSL,
+	});
+
 	const images = {
 		async get(prefix?: AssetPrefix) {
 			// TODO: `@aws-sdk/client-s3` has `max_keys` option and `listObjectsV2WithMetadata` method.
@@ -99,4 +96,4 @@ export function createClient(): Client {
 	};
 }
 
-export const client = createClient();
+export type StorageService = ReturnType<typeof createStorageService>;

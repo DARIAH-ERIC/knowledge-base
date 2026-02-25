@@ -59,7 +59,7 @@ export async function verifyPasswordResetTwoFactorWithTotpAction(
 	if (!auth.totpBucket.consume(session.userId, 1)) {
 		return createActionStateError({ message: e("too-many-requests") });
 	}
-	if (!auth.verifyTotp(totpKey, 30, 6, code)) {
+	if (!auth.verifyTotp(totpKey, code)) {
 		return createActionStateError({ message: t("incorrect-code") });
 	}
 

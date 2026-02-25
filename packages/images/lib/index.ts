@@ -1,6 +1,8 @@
 import type { Options } from "@imgproxy/imgproxy-js-core";
 import { generateImageUrl } from "@imgproxy/imgproxy-node";
 
+export type ImageUrlOptions = Options;
+
 export interface CreateImagesServiceParams {
 	config: {
 		baseUrl: string;

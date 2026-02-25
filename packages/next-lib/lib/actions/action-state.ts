@@ -1,6 +1,6 @@
 import type * as v from "valibot";
 
-export type ValidationErrors = Record<string, string | Array<string> | undefined>;
+export type ValidationErrors = Record<string, string | Array<string>>;
 
 interface ActionStateBase {
 	status: "initial" | "success" | "error";

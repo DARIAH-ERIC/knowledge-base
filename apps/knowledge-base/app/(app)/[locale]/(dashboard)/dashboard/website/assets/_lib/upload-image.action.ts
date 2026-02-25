@@ -1,6 +1,11 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
+import {
+	createActionStateError,
+	createActionStateSuccess,
+	type GetValidationErrors,
+} from "@dariah-eric/next-lib/actions";
 import { revalidatePath } from "next/cache";
 import { getLocale, getTranslations } from "next-intl/server";
 import * as v from "valibot";
@@ -8,12 +13,7 @@ import * as v from "valibot";
 import { UploadImageInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.schema";
 import { uploadAsset } from "@/lib/data/assets";
 import { getIntlLanguage } from "@/lib/i18n/locales";
-import {
-	createActionStateError,
-	createActionStateSuccess,
-	type GetValidationErrors,
-} from "@/lib/server/actions";
-import { createServerAction } from "@/lib/server/actions/create-server-action";
+import { createServerAction } from "@/lib/server/create-server-action";
 
 export const uploadImageAction = createServerAction<
 	{ key: string },

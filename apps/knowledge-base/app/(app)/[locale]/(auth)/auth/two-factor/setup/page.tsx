@@ -1,5 +1,3 @@
-import { getRandomValues } from "node:crypto";
-
 import { globalGetRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -9,6 +7,7 @@ import { renderSVG } from "uqr";
 import { TwoFactorSetUpForm } from "@/app/(app)/[locale]/(auth)/auth/two-factor/setup/_components/two-factor-set-up-form";
 import { Main } from "@/components/main";
 import { issuer } from "@/config/auth.config";
+import { auth } from "@/lib/auth";
 import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -54,11 +53,8 @@ export default async function TwoFactorSetupPage(
 		redirect({ href: "/auth/two-factor", locale });
 	}
 
-	const totpKey = new Uint8Array(20);
-	getRandomValues(totpKey);
-	const encodedTotpKey = encodeBase64(totpKey);
-	const keyURI = createTotpKeyURI(issuer, user.username, totpKey, 30, 6);
-	const qrcode = renderSVG(keyURI);
+	const { key, uri } = auth.createTotpKeyUri(issuer, user.name);
+	const qrcode = renderSVG(uri);
 
 	return (
 		<Main>
@@ -70,9 +66,10 @@ export default async function TwoFactorSetupPage(
 
 			<section>
 				<div>
+					{/* eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml */}
 					<div className="size-48" dangerouslySetInnerHTML={{ __html: qrcode }} />
 
-					<TwoFactorSetUpForm encodedTotpKey={encodedTotpKey} />
+					<TwoFactorSetUpForm encodedTotpKey={key} />
 				</div>
 			</section>
 		</Main>
