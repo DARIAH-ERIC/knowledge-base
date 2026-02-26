@@ -2,7 +2,6 @@
 
 import { getFormDataValues, log } from "@acdh-oeaw/lib";
 import {
-	type ActionState,
 	createActionStateError,
 	createActionStateSuccess,
 	type GetValidationErrors,
@@ -19,10 +18,7 @@ import { createServerAction } from "@/lib/server/create-server-action";
 export const sendContactFormEmailAction = createServerAction<
 	unknown,
 	GetValidationErrors<typeof SendContactFormInputSchema>
->(async function sendContactFormEmailAction(
-	state: ActionState,
-	formData: FormData,
-): Promise<ActionState> {
+>(async function sendContactFormEmailAction(state, formData) {
 	const e = await getTranslations("errors");
 
 	const locale = await getLocale();

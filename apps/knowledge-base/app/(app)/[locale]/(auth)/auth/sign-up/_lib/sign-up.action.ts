@@ -1,7 +1,7 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
-import { type ActionState, createActionStateError } from "@dariah-eric/next-lib/actions";
+import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { headers } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -10,11 +10,13 @@ import * as v from "valibot";
 import { SignUpActionInputSchema } from "@/app/(app)/[locale]/(auth)/auth/sign-up/_lib/sign-up.schema";
 import { env } from "@/config/env.config";
 import { auth } from "@/lib/auth";
+import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
+import { createServerAction } from "@/lib/server/create-server-action";
 
 const signUpIpBucket = auth.signUpIpBucket;
 
-export async function signUpAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+export const signUpAction = createServerAction(async function signUpAction(state, formData) {
 	const locale = await getLocale();
 	const t = await getTranslations("actions.signUpAction");
 	const e = await getTranslations("errors");
@@ -32,7 +34,9 @@ export async function signUpAction(_prev: ActionState, formData: FormData): Prom
 		return createActionStateError({ message: e("too-many-requests") });
 	}
 
-	const result = await v.safeParseAsync(SignUpActionInputSchema, getFormDataValues(formData));
+	const result = await v.safeParseAsync(SignUpActionInputSchema, getFormDataValues(formData), {
+		lang: getIntlLanguage(locale),
+	});
 
 	if (!result.success) {
 		const errors = v.flatten<typeof SignUpActionInputSchema>(result.issues);
@@ -71,4 +75,4 @@ export async function signUpAction(_prev: ActionState, formData: FormData): Prom
 	await auth.setSessionCookie(session.token, session.expiresAt);
 
 	redirect({ href: "/auth/two-factor/setup", locale });
-}
+});

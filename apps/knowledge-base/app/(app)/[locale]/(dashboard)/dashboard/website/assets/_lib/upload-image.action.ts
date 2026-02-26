@@ -19,14 +19,13 @@ export const uploadImageAction = createServerAction<
 	{ key: string },
 	GetValidationErrors<typeof UploadImageInputSchema>
 >(async function uploadImageAction(state, formData) {
+	const locale = await getLocale();
+	const t = await getTranslations("actions.uploadImageAction");
 	const e = await getTranslations("errors");
 
 	// FIXME:
 	// const user = await assertAuthenticated()
 	// await assertAuthorized(user)
-
-	const locale = await getLocale();
-	const t = await getTranslations("actions.uploadImageAction");
 
 	const validation = await v.safeParseAsync(UploadImageInputSchema, getFormDataValues(formData), {
 		lang: getIntlLanguage(locale),

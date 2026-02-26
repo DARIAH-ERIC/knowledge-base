@@ -873,6 +873,7 @@ export function createAuthService(params: CreateAuthServiceParams) {
 	const emailVerificationBucket = new ExpiringTokenBucket<string>(5, 60 * 30);
 	const passwordUpdateBucket = new ExpiringTokenBucket<string>(5, 60 * 30);
 	const sendVerificationEmailBucket = new ExpiringTokenBucket<string>(3, 60 * 10);
+	const verifyEmailBucket = new ExpiringTokenBucket<string>(5, 60 * 30);
 
 	const service = {
 		createSession,
@@ -931,6 +932,7 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		emailVerificationBucket,
 		passwordUpdateBucket,
 		sendVerificationEmailBucket,
+		verifyEmailBucket,
 	};
 
 	return service;

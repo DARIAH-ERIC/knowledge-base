@@ -1,7 +1,7 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
-import { type ActionState, createActionStateError } from "@dariah-eric/next-lib/actions";
+import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { headers } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -9,9 +9,11 @@ import * as v from "valibot";
 
 import { SignInActionInputSchema } from "@/app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.schema";
 import { auth } from "@/lib/auth";
+import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
+import { createServerAction } from "@/lib/server/create-server-action";
 
-export async function signInAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+export const signInAction = createServerAction(async function signInAction(state, formData) {
 	const locale = await getLocale();
 	const t = await getTranslations("actions.signInAction");
 	const e = await getTranslations("errors");
@@ -25,7 +27,9 @@ export async function signInAction(_prev: ActionState, formData: FormData): Prom
 		return createActionStateError({ message: e("too-many-requests") });
 	}
 
-	const result = await v.safeParseAsync(SignInActionInputSchema, getFormDataValues(formData));
+	const result = await v.safeParseAsync(SignInActionInputSchema, getFormDataValues(formData), {
+		lang: getIntlLanguage(locale),
+	});
 
 	if (!result.success) {
 		const errors = v.flatten<typeof SignInActionInputSchema>(result.issues);
@@ -70,4 +74,4 @@ export async function signInAction(_prev: ActionState, formData: FormData): Prom
 	}
 
 	redirect({ href: "/auth/two-factor", locale });
-}
+});

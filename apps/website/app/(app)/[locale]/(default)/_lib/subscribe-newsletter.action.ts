@@ -2,7 +2,6 @@
 
 import { getFormDataValues, HttpError, isErr } from "@acdh-oeaw/lib";
 import {
-	type ActionState,
 	createActionStateError,
 	createActionStateSuccess,
 	type GetValidationErrors,
@@ -18,10 +17,7 @@ import { createServerAction } from "@/lib/server/create-server-action";
 export const subscribeNewsletterAction = createServerAction<
 	unknown,
 	GetValidationErrors<typeof SubscribeNewsletterInputSchema>
->(async function subscribeNewsletterAction(
-	state: ActionState,
-	formData: FormData,
-): Promise<ActionState> {
+>(async function subscribeNewsletterAction(state, formData) {
 	const e = await getTranslations("errors");
 
 	const locale = await getLocale();

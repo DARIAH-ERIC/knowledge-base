@@ -1,68 +1,70 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
-import { type ActionState, createActionStateError } from "@dariah-eric/next-lib/actions";
+import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { getLocale, getTranslations } from "next-intl/server";
 import * as v from "valibot";
 
 import { VerifyPasswordResetTwoFactorWithRecoveryCodeActionInputSchema } from "@/app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-recovery-code.schema";
 import { auth } from "@/lib/auth";
+import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
+import { createServerAction } from "@/lib/server/create-server-action";
 
-export async function verifyPasswordResetTwoFactorWithRecoveryCodeAction(
-	_prev: ActionState,
-	formData: FormData,
-): Promise<ActionState> {
-	const locale = await getLocale();
-	const t = await getTranslations("actions.verifyPasswordResetTwoFactorWithRecoveryCodeAction");
-	const e = await getTranslations("errors");
+export const verifyPasswordResetTwoFactorWithRecoveryCodeAction = createServerAction(
+	async function verifyPasswordResetTwoFactorWithRecoveryCodeAction(state, formData) {
+		const locale = await getLocale();
+		const t = await getTranslations("actions.verifyPasswordResetTwoFactorWithRecoveryCodeAction");
+		const e = await getTranslations("errors");
 
-	if (!(await globalPostRequestRateLimit())) {
-		return createActionStateError({ message: e("too-many-requests") });
-	}
+		if (!(await globalPostRequestRateLimit())) {
+			return createActionStateError({ message: e("too-many-requests") });
+		}
 
-	const { session, user } = await auth.validatePasswordResetSessionFromRequest();
+		const { session, user } = await auth.validatePasswordResetSessionFromRequest();
 
-	if (session == null) {
-		return createActionStateError({ message: e("not-authenticated") });
-	}
-	if (!session.isEmailVerified || !user.isTwoFactorRegistered || session.isTwoFactorVerified) {
-		return createActionStateError({ message: "Forbidden" });
-	}
+		if (session == null) {
+			return createActionStateError({ message: e("not-authenticated") });
+		}
+		if (!session.isEmailVerified || !user.isTwoFactorRegistered || session.isTwoFactorVerified) {
+			return createActionStateError({ message: "Forbidden" });
+		}
 
-	if (!auth.recoveryCodeBucket.check(session.userId, 1)) {
-		return createActionStateError({ message: e("too-many-requests") });
-	}
+		if (!auth.recoveryCodeBucket.check(session.userId, 1)) {
+			return createActionStateError({ message: e("too-many-requests") });
+		}
 
-	const result = await v.safeParseAsync(
-		VerifyPasswordResetTwoFactorWithRecoveryCodeActionInputSchema,
-		getFormDataValues(formData),
-	);
-
-	if (!result.success) {
-		const errors = v.flatten<typeof VerifyPasswordResetTwoFactorWithRecoveryCodeActionInputSchema>(
-			result.issues,
+		const result = await v.safeParseAsync(
+			VerifyPasswordResetTwoFactorWithRecoveryCodeActionInputSchema,
+			getFormDataValues(formData),
+			{ lang: getIntlLanguage(locale) },
 		);
 
-		return createActionStateError({
-			message: errors.root ?? e("invalid-form-fields"),
-			validationErrors: errors.nested,
-		});
-	}
+		if (!result.success) {
+			const errors = v.flatten<
+				typeof VerifyPasswordResetTwoFactorWithRecoveryCodeActionInputSchema
+			>(result.issues);
 
-	const { code } = result.output;
+			return createActionStateError({
+				message: errors.root ?? e("invalid-form-fields"),
+				validationErrors: errors.nested,
+			});
+		}
 
-	if (!auth.recoveryCodeBucket.consume(session.userId, 1)) {
-		return createActionStateError({ message: e("too-many-requests") });
-	}
+		const { code } = result.output;
 
-	const valid = await auth.resetUserTwoFactorWithRecoveryCode(session.userId, code);
-	if (!valid) {
-		return createActionStateError({ message: t("incorrect-code") });
-	}
+		if (!auth.recoveryCodeBucket.consume(session.userId, 1)) {
+			return createActionStateError({ message: e("too-many-requests") });
+		}
 
-	auth.recoveryCodeBucket.reset(session.userId);
+		const valid = await auth.resetUserTwoFactorWithRecoveryCode(session.userId, code);
+		if (!valid) {
+			return createActionStateError({ message: t("incorrect-code") });
+		}
 
-	redirect({ href: "/auth/reset-password", locale });
-}
+		auth.recoveryCodeBucket.reset(session.userId);
+
+		redirect({ href: "/auth/reset-password", locale });
+	},
+);
