@@ -17,14 +17,13 @@
 	},
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
-		"@acdh-oeaw/validate-env": "catalog:",
 		"@dariah-eric/database": "workspace:^",
+		"@dariah-eric/env": "workspace:^",
 		"@dariah-eric/storage": "workspace:^",
 		"@sindresorhus/slugify": "catalog:",
 		"valibot": "catalog:"
 	},
 	"devDependencies": {
-		"@acdh-oeaw/validate-env": "catalog:",
 		"@dariah-eric/configs": "workspace:^",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",

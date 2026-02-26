@@ -21,8 +21,8 @@
 	},
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
-		"@acdh-oeaw/validate-env": "catalog:",
 		"@dariah-eric/database": "workspace:^",
+		"@dariah-eric/env": "workspace:^",
 		"@dariah-eric/images": "workspace:^",
 		"@hono/node-server": "catalog:",
 		"@hono/standard-validator": "catalog:",

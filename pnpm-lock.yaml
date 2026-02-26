@@ -48,9 +48,6 @@ catalogs:
     '@acdh-oeaw/tsconfig-lib':
       specifier: ^1.3.0
       version: 1.3.0
-    '@acdh-oeaw/validate-env':
-      specifier: ^0.3.0
-      version: 0.3.0
     '@chromatic-com/storybook':
       specifier: ^5.0.0
       version: 5.0.0
@@ -448,12 +445,12 @@ importers:
       '@acdh-oeaw/lib':
         specifier: 'catalog:'
         version: 1.0.5
-      '@acdh-oeaw/validate-env':
-        specifier: 'catalog:'
-        version: 0.3.0(typescript@5.9.3)
       '@dariah-eric/database':
         specifier: workspace:^
         version: link:../../packages/database
+      '@dariah-eric/env':
+        specifier: workspace:^
+        version: link:../../packages/env
       '@dariah-eric/images':
         specifier: workspace:^
         version: link:../../packages/images
@@ -551,9 +548,6 @@ importers:
       '@acdh-oeaw/style-variants':
         specifier: 'catalog:'
         version: 0.1.0
-      '@acdh-oeaw/validate-env':
-        specifier: 'catalog:'
-        version: 0.3.0(typescript@5.9.3)
       '@dariah-eric/auth':
         specifier: workspace:^
         version: link:../../packages/auth
@@ -563,6 +557,9 @@ importers:
       '@dariah-eric/email':
         specifier: workspace:^
         version: link:../../packages/email
+      '@dariah-eric/env':
+        specifier: workspace:^
+        version: link:../../packages/env
       '@dariah-eric/errors':
         specifier: workspace:^
         version: link:../../packages/errors
@@ -762,9 +759,6 @@ importers:
       '@acdh-oeaw/style-variants':
         specifier: 'catalog:'
         version: 0.1.0
-      '@acdh-oeaw/validate-env':
-        specifier: 'catalog:'
-        version: 0.3.0(typescript@5.9.3)
       '@dariah-eric/database':
         specifier: workspace:^
         version: link:../../packages/database
@@ -955,12 +949,12 @@ importers:
       '@acdh-oeaw/lib':
         specifier: 'catalog:'
         version: 1.0.5
-      '@acdh-oeaw/validate-env':
-        specifier: 'catalog:'
-        version: 0.3.0(typescript@5.9.3)
       '@dariah-eric/database':
         specifier: workspace:^
         version: link:../../packages/database
+      '@dariah-eric/env':
+        specifier: workspace:^
+        version: link:../../packages/env
       '@dariah-eric/storage':
         specifier: workspace:^
         version: link:../../packages/storage
@@ -1166,9 +1160,9 @@ importers:
       '@acdh-oeaw/lib':
         specifier: 'catalog:'
         version: 1.0.5
-      '@acdh-oeaw/validate-env':
-        specifier: 'catalog:'
-        version: 0.3.0(typescript@5.9.3)
+      '@dariah-eric/env':
+        specifier: workspace:^
+        version: link:../env
       better-result:
         specifier: 'catalog:'
         version: 2.7.0
@@ -1455,9 +1449,9 @@ importers:
       '@acdh-oeaw/lib':
         specifier: 'catalog:'
         version: 1.0.5
-      '@acdh-oeaw/validate-env':
-        specifier: 'catalog:'
-        version: 0.3.0(typescript@5.9.3)
+      '@dariah-eric/env':
+        specifier: workspace:^
+        version: link:../env
       is-network-error:
         specifier: 'catalog:'
         version: 1.3.0
@@ -1498,9 +1492,9 @@ importers:
       '@acdh-oeaw/lib':
         specifier: 'catalog:'
         version: 1.0.5
-      '@acdh-oeaw/validate-env':
-        specifier: 'catalog:'
-        version: 0.3.0(typescript@5.9.3)
+      '@dariah-eric/env':
+        specifier: workspace:^
+        version: link:../env
       minio:
         specifier: 'catalog:'
         version: 8.0.6
@@ -1721,10 +1715,6 @@ packages:
       globals: 16.x || 17.x
       typescript: 5.x
 
-  '@acdh-oeaw/lib@0.3.7':
-    resolution: {integrity: sha512-ayIAgoslwm60grK0H2g5D2rust5PS3+35gMqNILmQN3AT4Vr4MGepSTxu9nko8It8E8wcN+OG8DTkfiKz9vrPg==}
-    engines: {node: '>=22'}
-
   '@acdh-oeaw/lib@1.0.5':
     resolution: {integrity: sha512-TmXBjyP47+WhI49wSyOULgE0TNH7D2s7HiNL7mCS0d384xKoE62ZNdPPcTZN82wXL3voWtU3i/Ejz0YNrKI37Q==}
     engines: {node: '>=24'}
@@ -1752,12 +1742,6 @@ packages:
     resolution: {integrity: sha512-/tY4cU7Mq6YAxs5cG3ZaLYJfH3k8rmn4kEHw9Yn4lxdPUOQhVyAe1wrqr6+jakWCiZJRFKszcUSH1/M5BkzPeA==}
     peerDependencies:
       typescript: '>=5.8'
-
-  '@acdh-oeaw/validate-env@0.3.0':
-    resolution: {integrity: sha512-TVwG4PI9odQ18WJS3ClyjxcvGobYZAkxfSgfpavYTsuBMhkuhE+AAnKQ6DwYYHGmKDaHJ1+skZiTRseY2OvXKQ==}
-    engines: {node: ^22 || ^24}
-    peerDependencies:
-      typescript: '>=5.4'
 
   '@adobe/css-tools@4.4.4':
     resolution: {integrity: sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg==}
@@ -9164,8 +9148,6 @@ snapshots:
       - eslint-plugin-import
       - supports-color
 
-  '@acdh-oeaw/lib@0.3.7': {}
-
   '@acdh-oeaw/lib@1.0.5':
     dependencies:
       is-network-error: 1.3.0
@@ -9194,11 +9176,6 @@ snapshots:
 
   '@acdh-oeaw/tsconfig@1.5.1(typescript@5.9.3)':
     dependencies:
-      typescript: 5.9.3
-
-  '@acdh-oeaw/validate-env@0.3.0(typescript@5.9.3)':
-    dependencies:
-      '@acdh-oeaw/lib': 0.3.7
       typescript: 5.9.3
 
   '@adobe/css-tools@4.4.4': {}

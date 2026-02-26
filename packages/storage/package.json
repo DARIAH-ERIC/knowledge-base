@@ -28,7 +28,7 @@
 	},
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
-		"@acdh-oeaw/validate-env": "catalog:",
+		"@dariah-eric/env": "workspace:^",
 		"minio": "catalog:",
 		"uuid": "catalog:",
 		"valibot": "catalog:"

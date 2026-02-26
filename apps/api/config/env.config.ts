@@ -1,60 +1,46 @@
 /* eslint-disable no-restricted-syntax */
 
-import { err, isErr, ok } from "@acdh-oeaw/lib";
-import { ValidationError } from "@acdh-oeaw/validate-env";
-import { createEnv } from "@acdh-oeaw/validate-env/runtime";
+import { define } from "@dariah-eric/env";
 import * as v from "valibot";
 
-const result = createEnv({
-	schema(environment) {
-		const schema = v.object({
-			API_ALLOWED_ORIGINS: v.optional(
-				v.pipe(
-					v.string(),
-					v.nonEmpty(),
-					v.transform((value) => {
-						return value.split(",");
-					}),
-					v.array(v.pipe(v.string(), v.trim(), v.url())),
-				),
+const validate = define({
+	envVars: v.object({
+		API_ALLOWED_ORIGINS: v.optional(
+			v.pipe(
+				v.string(),
+				v.nonEmpty(),
+				v.transform((value) => {
+					return value.split(",");
+				}),
+				v.array(v.pipe(v.string(), v.trim(), v.url())),
 			),
-			API_BASE_URL: v.pipe(v.string(), v.url()),
-			API_LOG_LEVEL: v.optional(
-				v.picklist(["silent", "fatal", "error", "warn", "info", "debug", "trace"]),
-				"info",
-			),
-			API_PORT: v.optional(v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1))),
-			API_SENTRY_AUTH_TOKEN: v.optional(v.pipe(v.string(), v.nonEmpty())),
-			API_SENTRY_DSN: v.optional(v.pipe(v.string(), v.nonEmpty())),
-			API_SENTRY_ORG: v.optional(v.pipe(v.string(), v.nonEmpty())),
-			API_SENTRY_PII: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
-			API_SENTRY_PROJECT: v.optional(v.pipe(v.string(), v.nonEmpty())),
-			CI: v.optional(v.pipe(v.unknown(), v.toBoolean())),
-			DATABASE_HOST: v.pipe(v.string(), v.nonEmpty()),
-			DATABASE_NAME: v.pipe(v.string(), v.nonEmpty()),
-			DATABASE_PASSWORD: v.pipe(v.string(), v.minLength(8)),
-			DATABASE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
-			DATABASE_SSL_CONNECTION: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
-			DATABASE_USER: v.pipe(v.string(), v.nonEmpty()),
-			IMGPROXY_BASE_URL: v.pipe(v.string(), v.url()),
-			IMGPROXY_KEY: v.pipe(v.string(), v.nonEmpty()),
-			IMGPROXY_SALT: v.pipe(v.string(), v.nonEmpty()),
-			NODE_ENV: v.optional(v.picklist(["development", "production", "test"]), "production"),
-			S3_BUCKET_NAME: v.pipe(v.string(), v.nonEmpty()),
-		});
+		),
+		API_BASE_URL: v.pipe(v.string(), v.url()),
+		API_LOG_LEVEL: v.optional(
+			v.picklist(["silent", "fatal", "error", "warn", "info", "debug", "trace"]),
+			"info",
+		),
+		API_PORT: v.optional(v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1))),
+		API_SENTRY_AUTH_TOKEN: v.optional(v.pipe(v.string(), v.nonEmpty())),
+		API_SENTRY_DSN: v.optional(v.pipe(v.string(), v.nonEmpty())),
+		API_SENTRY_ORG: v.optional(v.pipe(v.string(), v.nonEmpty())),
+		API_SENTRY_PII: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
+		API_SENTRY_PROJECT: v.optional(v.pipe(v.string(), v.nonEmpty())),
+		CI: v.optional(v.pipe(v.unknown(), v.toBoolean())),
+		DATABASE_HOST: v.pipe(v.string(), v.nonEmpty()),
+		DATABASE_NAME: v.pipe(v.string(), v.nonEmpty()),
+		DATABASE_PASSWORD: v.pipe(v.string(), v.minLength(8)),
+		DATABASE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
+		DATABASE_SSL_CONNECTION: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
+		DATABASE_USER: v.pipe(v.string(), v.nonEmpty()),
+		IMGPROXY_BASE_URL: v.pipe(v.string(), v.url()),
+		IMGPROXY_KEY: v.pipe(v.string(), v.nonEmpty()),
+		IMGPROXY_SALT: v.pipe(v.string(), v.nonEmpty()),
+		S3_BUCKET_NAME: v.pipe(v.string(), v.nonEmpty()),
+	}),
+});
 
-		const result = v.safeParse(schema, environment);
-
-		if (!result.success) {
-			return err(
-				new ValidationError(
-					`Invalid or missing environment variables.\n${v.summarize(result.issues)}`,
-				),
-			);
-		}
-
-		return ok(result.output);
-	},
+export const env = validate({
 	environment: {
 		API_ALLOWED_ORIGINS: process.env.API_ALLOWED_ORIGINS,
 		API_BASE_URL: process.env.API_BASE_URL,
@@ -75,18 +61,6 @@ const result = createEnv({
 		IMGPROXY_BASE_URL: process.env.IMGPROXY_BASE_URL,
 		IMGPROXY_KEY: process.env.IMGPROXY_KEY,
 		IMGPROXY_SALT: process.env.IMGPROXY_SALT,
-		NODE_ENV: process.env.NODE_ENV,
 		S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
 	},
-	validation: v.parse(
-		v.optional(v.picklist(["disabled", "enabled", "public"]), "enabled"),
-		process.env.ENV_VALIDATION,
-	),
-});
-
-if (isErr(result)) {
-	delete result.error.stack;
-	throw result.error;
-}
-
-export const env = result.value;
+}).unwrap();

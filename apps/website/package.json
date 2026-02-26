@@ -32,7 +32,6 @@
 		"@acdh-oeaw/color-schemes": "catalog:",
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/style-variants": "catalog:",
-		"@acdh-oeaw/validate-env": "catalog:",
 		"@dariah-eric/database": "workspace:^",
 		"@dariah-eric/email": "workspace:^",
 		"@dariah-eric/env": "workspace:^",

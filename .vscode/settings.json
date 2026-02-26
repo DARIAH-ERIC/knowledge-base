@@ -1,12 +1,9 @@
 {
 	"css.validate": false,
 	"debug.toolBarLocation": "docked",
-	"editor.codeActionsOnSave": {
-		"source.fixAll.oxc": "explicit"
-	},
+	"editor.codeActionsOnSave": ["source.fixAll", "editor.formatOnSave"],
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"editor.detectIndentation": false,
-	"editor.formatOnSave": false,
 	"editor.inlayHints.enabled": "offUnlessPressed",
 	"editor.linkedEditing": true,
 	"editor.quickSuggestions": {

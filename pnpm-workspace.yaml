@@ -18,7 +18,6 @@ catalog:
   '@acdh-oeaw/stylelint-config': ^3.0.3
   '@acdh-oeaw/tsconfig': ^1.5.1
   '@acdh-oeaw/tsconfig-lib': ^1.3.0
-  '@acdh-oeaw/validate-env': ^0.3.0
   '@chromatic-com/storybook': ^5.0.0
   '@dotenvx/dotenvx': ^1.52.0
   '@faker-js/faker': ^10.2.0
