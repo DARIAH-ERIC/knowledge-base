@@ -14,7 +14,7 @@ const config = defineConfig({
 	},
 	dialect: "postgresql",
 	out: "./db/migrations/",
-	schema: "./src/schema.ts",
+	schema: "./lib/schema.ts",
 	schemaFilter: ["!pgbouncer"],
 	strict: true,
 	verbose: true,

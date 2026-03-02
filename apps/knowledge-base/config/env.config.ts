@@ -41,9 +41,9 @@ const validate = define({
 		NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY: v.optional(v.pipe(v.string(), v.nonEmpty())),
 	}),
 	envVars: v.object({
-		APP_AUTH_SIGN_UP: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
-		AUTH_ENCRYPTION_KEY: v.pipe(v.string(), v.length(24)),
 		APP_SENTRY_AUTH_TOKEN: v.optional(v.pipe(v.string(), v.nonEmpty())),
+		AUTH_ENCRYPTION_KEY: v.pipe(v.string(), v.length(32)),
+		AUTH_SIGN_UP: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 		BUILD_MODE: v.optional(v.picklist(["export", "standalone"])),
 		CI: v.optional(v.pipe(v.unknown(), v.toBoolean())),
 		DATABASE_HOST: v.pipe(v.string(), v.nonEmpty()),
@@ -78,9 +78,9 @@ const validate = define({
 
 export const env = validate({
 	environment: {
-		AUTH_ENCRYPTION_KEY: process.env.AUTH_ENCRYPTION_KEY,
-		APP_AUTH_SIGN_UP: process.env.APP_AUTH_SIGN_UP,
 		APP_SENTRY_AUTH_TOKEN: process.env.APP_SENTRY_AUTH_TOKEN,
+		AUTH_ENCRYPTION_KEY: process.env.AUTH_ENCRYPTION_KEY,
+		AUTH_SIGN_UP: process.env.AUTH_SIGN_UP,
 		BUILD_MODE: process.env.BUILD_MODE,
 		CI: process.env.CI,
 		DATABASE_HOST: process.env.DATABASE_HOST,

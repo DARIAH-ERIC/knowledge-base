@@ -21,7 +21,7 @@ export const signUpAction = createServerAction(async function signUpAction(state
 	const t = await getTranslations("actions.signUpAction");
 	const e = await getTranslations("errors");
 
-	if (env.APP_AUTH_SIGN_UP !== "enabled") {
+	if (env.AUTH_SIGN_UP !== "enabled") {
 		return createActionStateError({ message: t("sign-up-disabled") });
 	}
 

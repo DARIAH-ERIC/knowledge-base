@@ -10,6 +10,7 @@
 		"analyze": "next experimental-analyze",
 		"build": "next build --experimental-next-config-strip-types",
 		"dev": "PORT=3001 next dev --experimental-next-config-strip-types",
+		"dev:watch": "PORT=3001 next dev --experimental-next-config-strip-types",
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
 		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
 		"lint:check": "run-p --continue-on-error \"lint:*:check\"",
