@@ -1,35 +1,25 @@
 "use server";
 
-import { getFormDataValues, isErr, log } from "@acdh-oeaw/lib";
+import { getFormDataValues, log } from "@acdh-oeaw/lib";
+import {
+	createActionStateError,
+	createActionStateSuccess,
+	type GetValidationErrors,
+} from "@dariah-eric/next-lib/actions";
 import { getLocale, getTranslations } from "next-intl/server";
 import * as v from "valibot";
 
 import { SendContactFormInputSchema } from "@/app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.schema";
 import { env } from "@/config/env.config";
+import { email as emailService } from "@/lib/email";
 import { getIntlLanguage } from "@/lib/i18n/locales";
-import {
-	type ActionState,
-	createActionStateError,
-	createActionStateSuccess,
-	type GetValidationErrors,
-} from "@/lib/server/actions";
-import { createServerAction } from "@/lib/server/actions/create-server-action";
-import { sendEmail } from "@/lib/server/email/send-email";
-// import { assertValidFormSubmission } from "@/lib/server/honeypot";
+import { createServerAction } from "@/lib/server/create-server-action";
 
 export const sendContactFormEmailAction = createServerAction<
 	unknown,
 	GetValidationErrors<typeof SendContactFormInputSchema>
->(async function sendContactFormEmailAction(
-	state: ActionState,
-	formData: FormData,
-): Promise<ActionState> {
+>(async function sendContactFormEmailAction(state, formData) {
 	const e = await getTranslations("errors");
-
-	// assertValidFormSubmission(formData);
-	// if (isHoneypotError(error)) {
-	// 	return createActionStateError({ message: e("invalid-form-fields"), formData });
-	// }
 
 	const locale = await getLocale();
 	const t = await getTranslations("actions.sendContactFormEmailAction");
@@ -52,14 +42,14 @@ export const sendContactFormEmailAction = createServerAction<
 
 	const { email, message, name, subject } = validation.output;
 
-	const result = await sendEmail({
+	const result = await emailService.sendEmail({
 		from: `${name} <${email}>`,
 		to: env.EMAIL_ADDRESS,
 		subject,
 		text: message,
 	});
 
-	if (isErr(result)) {
+	if (result.isErr()) {
 		return createActionStateError({
 			formData,
 			message: t("error"),

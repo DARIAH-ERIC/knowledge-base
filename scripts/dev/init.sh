@@ -1,0 +1,68 @@
+#!/bin/sh
+
+set -eu
+
+AUTH_ENCRYPTION_KEY=$(openssl rand --hex 16)
+AUTH_SIGN_UP="enabled"
+DATABASE_PASSWORD=$(openssl rand --hex 32)
+IMGPROXY_KEY=$(openssl rand --hex 32)
+IMGPROXY_SALT=$(openssl rand --hex 16)
+S3_ACCESS_KEY=$(openssl rand --hex 16)
+S3_SECRET_KEY=$(openssl rand --hex 32)
+TYPESENSE_ADMIN_API_KEY=$(openssl rand --hex 32)
+
+ENV_FILE=./.devcontainer/.env
+
+if [ ! -f "$ENV_FILE" ]; then
+	cp $ENV_FILE.example $ENV_FILE
+
+	sed -i "s/AUTH_ENCRYPTION_KEY=.*/AUTH_ENCRYPTION_KEY=\"$AUTH_ENCRYPTION_KEY\"/" $ENV_FILE
+	sed -i "s/DATABASE_PASSWORD=.*/DATABASE_PASSWORD=\"$DATABASE_PASSWORD\"/" $ENV_FILE
+	sed -i "s/IMGPROXY_KEY=.*/IMGPROXY_KEY=\"$IMGPROXY_KEY\"/" $ENV_FILE
+	sed -i "s/IMGPROXY_SALT=.*/IMGPROXY_SALT=\"$IMGPROXY_SALT\"/" $ENV_FILE
+	sed -i "s/S3_ACCESS_KEY=.*/S3_ACCESS_KEY=\"$S3_ACCESS_KEY\"/" $ENV_FILE
+	sed -i "s/S3_SECRET_KEY=.*/S3_SECRET_KEY=\"$S3_SECRET_KEY\"/" $ENV_FILE
+	sed -i "s/TYPESENSE_ADMIN_API_KEY=.*/TYPESENSE_ADMIN_API_KEY=\"$TYPESENSE_ADMIN_API_KEY\"/" $ENV_FILE
+fi
+
+ENV_FILE=./apps/knowledge-base/.env.local
+
+if [ ! -f "$ENV_FILE" ]; then
+	cp $ENV_FILE.example $ENV_FILE
+
+	sed -i "s/AUTH_ENCRYPTION_KEY=.*/AUTH_ENCRYPTION_KEY=\"$AUTH_ENCRYPTION_KEY\"/" $ENV_FILE
+	sed -i "s/AUTH_SIGN_UP=.*/AUTH_SIGN_UP=\"$AUTH_SIGN_UP\"/" $ENV_FILE
+	sed -i "s/DATABASE_PASSWORD=.*/DATABASE_PASSWORD=\"$DATABASE_PASSWORD\"/" $ENV_FILE
+	sed -i "s/IMGPROXY_KEY=.*/IMGPROXY_KEY=\"$IMGPROXY_KEY\"/" $ENV_FILE
+	sed -i "s/IMGPROXY_SALT=.*/IMGPROXY_SALT=\"$IMGPROXY_SALT\"/" $ENV_FILE
+	sed -i "s/S3_ACCESS_KEY=.*/S3_ACCESS_KEY=\"$S3_ACCESS_KEY\"/" $ENV_FILE
+	sed -i "s/S3_SECRET_KEY=.*/S3_SECRET_KEY=\"$S3_SECRET_KEY\"/" $ENV_FILE
+	sed -i "s/TYPESENSE_ADMIN_API_KEY=.*/TYPESENSE_ADMIN_API_KEY=\"$TYPESENSE_ADMIN_API_KEY\"/" $ENV_FILE
+fi
+
+ENV_FILE=./apps/website/.env.local
+
+if [ ! -f "$ENV_FILE" ]; then
+	cp $ENV_FILE.example $ENV_FILE
+
+	sed -i "s/DATABASE_PASSWORD=.*/DATABASE_PASSWORD=\"$DATABASE_PASSWORD\"/" $ENV_FILE
+	sed -i "s/IMGPROXY_KEY=.*/IMGPROXY_KEY=\"$IMGPROXY_KEY\"/" $ENV_FILE
+	sed -i "s/IMGPROXY_SALT=.*/IMGPROXY_SALT=\"$IMGPROXY_SALT\"/" $ENV_FILE
+	sed -i "s/S3_ACCESS_KEY=.*/S3_ACCESS_KEY=\"$S3_ACCESS_KEY\"/" $ENV_FILE
+	sed -i "s/S3_SECRET_KEY=.*/S3_SECRET_KEY=\"$S3_SECRET_KEY\"/" $ENV_FILE
+	sed -i "s/TYPESENSE_ADMIN_API_KEY=.*/TYPESENSE_ADMIN_API_KEY=\"$TYPESENSE_ADMIN_API_KEY\"/" $ENV_FILE
+fi
+
+ENV_FILE=./apps/api/.env.local
+
+if [ ! -f "$ENV_FILE" ]; then
+	cp $ENV_FILE.example $ENV_FILE
+
+	sed -i "s/DATABASE_PASSWORD=.*/DATABASE_PASSWORD=\"$DATABASE_PASSWORD\"/" $ENV_FILE
+	sed -i "s/IMGPROXY_KEY=.*/IMGPROXY_KEY=\"$IMGPROXY_KEY\"/" $ENV_FILE
+	sed -i "s/IMGPROXY_SALT=.*/IMGPROXY_SALT=\"$IMGPROXY_SALT\"/" $ENV_FILE
+	sed -i "s/S3_ACCESS_KEY=.*/S3_ACCESS_KEY=\"$S3_ACCESS_KEY\"/" $ENV_FILE
+	sed -i "s/S3_SECRET_KEY=.*/S3_SECRET_KEY=\"$S3_SECRET_KEY\"/" $ENV_FILE
+fi
+
+echo "✓ Environment variables initialized."

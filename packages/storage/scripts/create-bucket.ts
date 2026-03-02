@@ -1,7 +1,7 @@
 import { log } from "@acdh-oeaw/lib";
 
-import { client } from "../src/lib/admin-client";
-import { createBucket } from "../src/lib/create-bucket";
+import { client } from "../lib/lib/admin-client";
+import { createBucket } from "../lib/lib/create-bucket";
 
 const bucketName = client.bucket.name;
 

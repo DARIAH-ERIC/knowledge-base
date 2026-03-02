@@ -1,0 +1,75 @@
+{
+	"name": "@dariah-eric/auth",
+	"private": true,
+	"license": "MIT",
+	"type": "module",
+	"engines": {
+		"node": "24.x"
+	},
+	"exports": {
+		".": "./dist/index.mjs",
+		"./errors": "./dist/errors.mjs"
+	},
+	"files": [
+		"./dist/"
+	],
+	"sideEffects": false,
+	"scripts": {
+		"build": "tsdown",
+		"dev": "tsdown --watch",
+		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
+		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
+		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
+		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
+		"types:check": "tsc --noEmit"
+	},
+	"peerDependencies": {
+		"@acdh-oeaw/lib": "catalog:",
+		"@dariah-eric/database": "workspace:^",
+		"@dariah-eric/email": "workspace:^",
+		"@dariah-eric/rate-limiter": "workspace:^",
+		"@dariah-eric/request": "workspace:^",
+		"@node-rs/argon2": "catalog:",
+		"@oslojs/binary": "catalog:",
+		"@oslojs/crypto": "catalog:",
+		"@oslojs/encoding": "catalog:",
+		"@oslojs/otp": "catalog:",
+		"better-result": "catalog:",
+		"valibot": "catalog:"
+	},
+	"devDependencies": {
+		"@dariah-eric/configs": "workspace:^",
+		"@dariah-eric/database": "workspace:^",
+		"@dariah-eric/email": "workspace:^",
+		"@dariah-eric/rate-limiter": "workspace:^",
+		"@dariah-eric/request": "workspace:^",
+		"@node-rs/argon2": "catalog:",
+		"@oslojs/binary": "catalog:",
+		"@oslojs/crypto": "catalog:",
+		"@oslojs/encoding": "catalog:",
+		"@oslojs/otp": "catalog:",
+		"@types/node": "catalog:",
+		"better-result": "catalog:",
+		"eslint": "catalog:",
+		"prettier": "catalog:",
+		"tsdown": "catalog:",
+		"typescript": "catalog:",
+		"valibot": "catalog:"
+	},
+	"browserslist": {
+		"development": [
+			"baseline newly available"
+		],
+		"production": [
+			"baseline widely available"
+		]
+	},
+	"lint-staged": {
+		"*.@(js|ts)": [
+			"eslint --fix --flag unstable_native_nodejs_ts_config",
+			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write"
+		],
+		"*.!(js|ts)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
+	},
+	"prettier": "@dariah-eric/configs/prettier"
+}

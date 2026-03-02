@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
 import { db } from "@dariah-eric/database/client";
-import type { ContentBlockInput, ContentBlockTypes } from "@dariah-eric/database/schema";
 import * as schema from "@dariah-eric/database/schema";
 
 export async function getContentBlockTypes() {
@@ -15,7 +14,7 @@ export async function getContentBlockTypes() {
 	return contentBlockTypes;
 }
 
-export async function getContentBlockByType(type: ContentBlockTypes["type"]) {
+export async function getContentBlockByType(type: schema.ContentBlockTypes["type"]) {
 	const contentBlockType = await db.query.contentBlockTypes.findFirst({
 		where: {
 			type,
@@ -26,11 +25,7 @@ export async function getContentBlockByType(type: ContentBlockTypes["type"]) {
 }
 
 interface CreateContentBlocksParams {
-	data: Array<{
-		fieldId: ContentBlockInput["fieldId"];
-		typeId: ContentBlockInput["typeId"];
-		position: ContentBlockInput["position"];
-	}>;
+	data: Array<schema.ContentBlockInput>;
 }
 
 export async function createContentBlocks(params: CreateContentBlocksParams) {

@@ -1,4 +1,4 @@
-import type { ImageUrlOptions } from "@dariah-eric/images/client";
+import type { ImageUrlOptions } from "@/lib/images";
 
 export const imageMimeTypes = ["image/jpeg", "image/png"] as const;
 

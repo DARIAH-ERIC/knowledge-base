@@ -1,0 +1,44 @@
+{
+	"name": "@dariah-eric/next-lib",
+	"private": true,
+	"license": "MIT",
+	"type": "module",
+	"sideEffects": false,
+	"engines": {
+		"node": "24.x"
+	},
+	"exports": {
+		"./actions": "./dist/actions/index.mjs",
+		"./middlewares": "./dist/middlewares/index.mjs",
+		"./rate-limiter": "./dist/rate-limiter/index.mjs"
+	},
+	"scripts": {
+		"build": "tsdown",
+		"dev": "tsdown --watch",
+		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
+		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
+		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
+		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
+		"types:check": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@acdh-oeaw/lib": "catalog:",
+		"@dariah-eric/configs": "workspace:^",
+		"@dariah-eric/rate-limiter": "workspace:^",
+		"@types/node": "catalog:",
+		"better-result": "catalog:",
+		"eslint": "catalog:",
+		"next": "catalog:",
+		"prettier": "catalog:",
+		"tsdown": "catalog:",
+		"typescript": "catalog:",
+		"valibot": "catalog:"
+	},
+	"peerDependencies": {
+		"@acdh-oeaw/lib": "catalog:",
+		"@dariah-eric/rate-limiter": "workspace:^",
+		"better-result": "catalog:",
+		"next": "catalog:",
+		"valibot": "catalog:"
+	}
+}

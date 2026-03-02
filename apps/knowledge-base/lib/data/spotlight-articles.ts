@@ -3,9 +3,9 @@
 import { count, eq } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
-import { client } from "@dariah-eric/images/client";
 
 import { imageAssetWidth } from "@/config/assets.config";
+import { images } from "@/lib/images";
 
 interface GetSpotlightArticlesParams {
 	/** @default 10 */
@@ -48,7 +48,7 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = client.urls.generateSignedImageUrl({
+		const image = images.generateSignedImageUrl({
 			key: item.image.key,
 			options: { width: imageAssetWidth.featured },
 		});
@@ -88,7 +88,7 @@ export async function getSpotlightArticleById(params: GetSpotlightArticleByIdPar
 		return null;
 	}
 
-	const image = client.urls.generateSignedImageUrl({
+	const image = images.generateSignedImageUrl({
 		key: item.image.key,
 		options: { width: imageAssetWidth.featured },
 	});
@@ -98,12 +98,8 @@ export async function getSpotlightArticleById(params: GetSpotlightArticleByIdPar
 	return data;
 }
 
-interface CreateSpotlightArticleParams extends Omit<
-	schema.SpotlightArticleInput,
-	"id" | "createdAt" | "updatedAt"
-> {
-	slug: string;
-	resourceIds?: Array<string>;
+interface CreateSpotlightArticleParams extends schema.SpotlightArticleInput {
+	slug: schema.EntityInput["slug"];
 }
 
 export async function createSpotlightArticle(params: CreateSpotlightArticleParams) {

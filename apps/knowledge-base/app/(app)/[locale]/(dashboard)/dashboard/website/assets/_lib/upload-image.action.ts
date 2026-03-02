@@ -1,6 +1,11 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
+import {
+	createActionStateError,
+	createActionStateSuccess,
+	type GetValidationErrors,
+} from "@dariah-eric/next-lib/actions";
 import { revalidatePath } from "next/cache";
 import { getLocale, getTranslations } from "next-intl/server";
 import * as v from "valibot";
@@ -8,25 +13,19 @@ import * as v from "valibot";
 import { UploadImageInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.schema";
 import { uploadAsset } from "@/lib/data/assets";
 import { getIntlLanguage } from "@/lib/i18n/locales";
-import {
-	createActionStateError,
-	createActionStateSuccess,
-	type GetValidationErrors,
-} from "@/lib/server/actions";
-import { createServerAction } from "@/lib/server/actions/create-server-action";
+import { createServerAction } from "@/lib/server/create-server-action";
 
 export const uploadImageAction = createServerAction<
 	{ key: string },
 	GetValidationErrors<typeof UploadImageInputSchema>
 >(async function uploadImageAction(state, formData) {
+	const locale = await getLocale();
+	const t = await getTranslations("actions.uploadImageAction");
 	const e = await getTranslations("errors");
 
 	// FIXME:
 	// const user = await assertAuthenticated()
 	// await assertAuthorized(user)
-
-	const locale = await getLocale();
-	const t = await getTranslations("actions.uploadImageAction");
 
 	const validation = await v.safeParseAsync(UploadImageInputSchema, getFormDataValues(formData), {
 		lang: getIntlLanguage(locale),

@@ -1,7 +1,7 @@
 import { log } from "@acdh-oeaw/lib";
 
-import { db } from "../src/lib/admin-client";
-import { reset } from "../src/lib/reset";
+import { db } from "../lib/lib/admin-client";
+import { reset } from "../lib/lib/reset";
 
 async function main() {
 	await reset(db);

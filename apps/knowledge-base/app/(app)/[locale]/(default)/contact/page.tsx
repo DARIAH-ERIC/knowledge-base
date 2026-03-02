@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { ContactForm } from "@/app/(app)/[locale]/(default)/contact/_components/contact-form";
-import { createMetadata } from "@/lib/server/metadata";
+import { createMetadata } from "@/lib/server/create-metadata";
 
 interface ContactPageProps extends PageProps<"/[locale]/contact"> {}
 

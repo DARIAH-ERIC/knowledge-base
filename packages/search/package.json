@@ -31,7 +31,7 @@
 	},
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
-		"@acdh-oeaw/validate-env": "catalog:",
+		"@dariah-eric/env": "workspace:^",
 		"is-network-error": "catalog:",
 		"typesense": "catalog:",
 		"valibot": "catalog:"

@@ -1,34 +1,24 @@
 "use server";
 
 import { getFormDataValues, HttpError, isErr } from "@acdh-oeaw/lib";
+import {
+	createActionStateError,
+	createActionStateSuccess,
+	type GetValidationErrors,
+} from "@dariah-eric/next-lib/actions";
 import { getLocale, getTranslations } from "next-intl/server";
 import * as v from "valibot";
 
 import { SubscribeNewsletterInputSchema } from "@/app/(app)/[locale]/(default)/_lib/subscribe-newsletter.schema";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { client } from "@/lib/mailchimp/client";
-import {
-	type ActionState,
-	createActionStateError,
-	createActionStateSuccess,
-	type GetValidationErrors,
-} from "@/lib/server/actions";
-import { createServerAction } from "@/lib/server/actions/create-server-action";
-// import { assertValidFormSubmission } from "@/lib/server/honeypot";
+import { createServerAction } from "@/lib/server/create-server-action";
 
 export const subscribeNewsletterAction = createServerAction<
 	unknown,
 	GetValidationErrors<typeof SubscribeNewsletterInputSchema>
->(async function subscribeNewsletterAction(
-	state: ActionState,
-	formData: FormData,
-): Promise<ActionState> {
+>(async function subscribeNewsletterAction(state, formData) {
 	const e = await getTranslations("errors");
-
-	// assertValidFormSubmission(formData);
-	// if (isHoneypotError(error)) {
-	// 	return createActionStateError({ message: e("invalid-form-fields"), formData });
-	// }
 
 	const locale = await getLocale();
 	const t = await getTranslations("actions.subscribeNewsletterAction");

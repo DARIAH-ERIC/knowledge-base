@@ -3,9 +3,9 @@
 import { count, eq } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
-import { client } from "@dariah-eric/images/client";
 
 import { imageAssetWidth } from "@/config/assets.config";
+import { images } from "@/lib/images";
 
 interface GetPagesParams {
 	/** @default 10 */
@@ -49,7 +49,7 @@ export async function getPages(params: GetPagesParams) {
 
 	const data = items.map((item) => {
 		const image = item.image
-			? client.urls.generateSignedImageUrl({
+			? images.generateSignedImageUrl({
 					key: item.image.key,
 					options: { width: imageAssetWidth.preview },
 				})
@@ -91,7 +91,7 @@ export async function getPageById(params: GetPageByIdParams) {
 	}
 
 	const image = item.image
-		? client.urls.generateSignedImageUrl({
+		? images.generateSignedImageUrl({
 				key: item.image.key,
 				options: { width: imageAssetWidth.featured },
 			})
@@ -102,9 +102,8 @@ export async function getPageById(params: GetPageByIdParams) {
 	return data;
 }
 
-interface CreatePageParams extends Omit<schema.PageInput, "id" | "createdAt" | "updatedAt"> {
-	slug: string;
-	resourceIds?: Array<string>;
+interface CreatePageParams extends schema.PageInput {
+	slug: schema.EntityInput["slug"];
 }
 
 export async function createPage(params: CreatePageParams) {

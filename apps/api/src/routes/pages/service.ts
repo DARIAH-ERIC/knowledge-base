@@ -2,9 +2,9 @@
 
 import { count, eq } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
-import { client } from "@dariah-eric/images/client";
 
 import type { Database, Transaction } from "@/middlewares/db";
+import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
 interface GetPagesParams {
@@ -63,7 +63,7 @@ export async function getPages(db: Database | Transaction, params: GetPagesParam
 	const data = items.map((item) => {
 		const image =
 			item.image != null
-				? client.urls.generateSignedImageUrl({
+				? images.generateSignedImageUrl({
 						key: item.image.key,
 						options: { width: imageWidth.preview },
 					})
@@ -118,7 +118,7 @@ export async function getPageById(db: Database | Transaction, params: GetPageByI
 
 	const image =
 		item.image != null
-			? client.urls.generateSignedImageUrl({
+			? images.generateSignedImageUrl({
 					key: item.image.key,
 					options: { width: imageWidth.featured },
 				})
@@ -230,7 +230,7 @@ export async function getPageBySlug(db: Database | Transaction, params: GetPageB
 
 	const image =
 		item.image != null
-			? client.urls.generateSignedImageUrl({
+			? images.generateSignedImageUrl({
 					key: item.image.key,
 					options: { width: imageWidth.featured },
 				})

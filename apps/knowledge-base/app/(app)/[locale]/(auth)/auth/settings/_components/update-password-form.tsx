@@ -1,0 +1,50 @@
+"use client";
+
+import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { useTranslations } from "next-intl";
+import { type ReactNode, useActionState } from "react";
+
+import { updatePasswordAction } from "@/app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action";
+import { Form } from "@/components/form";
+import { FieldError, Label } from "@/components/ui/field";
+import { FormStatus } from "@/components/ui/form-status";
+import { Input } from "@/components/ui/input";
+import { SubmitButton } from "@/components/ui/submit-button";
+import { TextField } from "@/components/ui/text-field";
+
+export function UpdatePasswordForm(): ReactNode {
+	const t = useTranslations("UpdatePasswordForm");
+
+	const [state, action] = useActionState(updatePasswordAction, createActionStateInitial());
+
+	return (
+		<Form action={action} className="flex flex-col gap-y-6" state={state}>
+			<FormStatus state={state} />
+
+			<TextField autoComplete="current-password" isRequired={true} name="password" type="password">
+				<Label>{t("current-password")}</Label>
+				<FieldError />
+				<Input />
+			</TextField>
+
+			<TextField autoComplete="new-password" isRequired={true} name="new-password" type="password">
+				<Label>{t("new-password")}</Label>
+				<FieldError />
+				<Input />
+			</TextField>
+
+			<TextField
+				autoComplete="new-password"
+				isRequired={true}
+				name="new-password-confirmation"
+				type="password"
+			>
+				<Label>{t("confirm-new-password")}</Label>
+				<FieldError />
+				<Input />
+			</TextField>
+
+			<SubmitButton className="mt-2">{t("submit")}</SubmitButton>
+		</Form>
+	);
+}

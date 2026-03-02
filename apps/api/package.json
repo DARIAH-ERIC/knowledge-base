@@ -9,6 +9,7 @@
 	"scripts": {
 		"build": "tsdown ./src/index.ts",
 		"dev": "dotenvx run -f ./.env.local --ignore MISSING_ENV_FILE -- tsx watch ./src/index.ts | pino-pretty",
+		"dev:watch": "dotenvx run -f ./.env.local --ignore MISSING_ENV_FILE -- tsx watch ./src/index.ts | pino-pretty",
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
 		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
@@ -21,8 +22,8 @@
 	},
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
-		"@acdh-oeaw/validate-env": "catalog:",
 		"@dariah-eric/database": "workspace:^",
+		"@dariah-eric/env": "workspace:^",
 		"@dariah-eric/images": "workspace:^",
 		"@hono/node-server": "catalog:",
 		"@hono/standard-validator": "catalog:",

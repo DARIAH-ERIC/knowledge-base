@@ -3,7 +3,7 @@ import { parseArgs } from "node:util";
 import { log } from "@acdh-oeaw/lib";
 import { pgGenerate } from "drizzle-dbml-generator";
 
-import * as schema from "../src/schema";
+import * as schema from "../lib/schema";
 
 // eslint-disable-next-line @typescript-eslint/require-await
 async function main() {

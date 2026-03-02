@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
 import { Link } from "@/components/link";
 import { client } from "@/lib/mailchimp/client";
-import { createMetadata } from "@/lib/server/metadata";
+import { createMetadata } from "@/lib/server/create-metadata";
 
 interface NewslettersPageProps extends PageProps<"/[locale]/imprint"> {}
 

@@ -28,8 +28,10 @@ jobs:
     env:
       API_ALLOWED_ORIGINS: "http://localhost:3001,http://localhost:3002"
       API_BASE_URL: "http://localhost:3003"
+      AUTH_ENCRYPTION_KEY: "${{ secrets.TEST_AUTH_ENCRYPTION_KEY }}"
       API_LOG_LEVEL: "info"
       API_PORT: "3003"
+      AUTH_SIGN_UP: "disabled"
       DATABASE_HOST: "localhost"
       DATABASE_NAME: "dariah-knowledge-base"
       DATABASE_PASSWORD: "${{ secrets.TEST_DATABASE_PASSWORD }}"

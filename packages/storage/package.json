@@ -7,8 +7,8 @@
 		"node": "24.x"
 	},
 	"exports": {
-		"./client": "./dist/client.mjs",
-		"./lib": "./src/lib/index.ts"
+		".": "./dist/index.mjs",
+		"./lib": "./lib/lib/index.ts"
 	},
 	"files": [
 		"./dist/"
@@ -28,7 +28,7 @@
 	},
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
-		"@acdh-oeaw/validate-env": "catalog:",
+		"@dariah-eric/env": "workspace:^",
 		"minio": "catalog:",
 		"uuid": "catalog:",
 		"valibot": "catalog:"

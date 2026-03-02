@@ -7,7 +7,7 @@
 		"node": "24.x"
 	},
 	"exports": {
-		"./client": "./dist/client.mjs"
+		".": "./dist/index.mjs"
 	},
 	"files": [
 		"./dist/"
@@ -22,21 +22,18 @@
 		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
 		"types:check": "tsc --noEmit"
 	},
-	"dependencies": {
-		"@acdh-oeaw/lib": "catalog:",
-		"@acdh-oeaw/validate-env": "catalog:",
-		"@dariah-eric/storage": "workspace:^",
+	"peerDependencies": {
 		"@imgproxy/imgproxy-js-core": "catalog:",
-		"@imgproxy/imgproxy-node": "catalog:",
-		"valibot": "catalog:"
+		"@imgproxy/imgproxy-node": "catalog:"
 	},
 	"devDependencies": {
 		"@dariah-eric/configs": "workspace:^",
+		"@imgproxy/imgproxy-js-core": "catalog:",
+		"@imgproxy/imgproxy-node": "catalog:",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
 		"prettier": "catalog:",
 		"tsdown": "catalog:",
-		"tsx": "catalog:",
 		"typescript": "catalog:"
 	},
 	"browserslist": {

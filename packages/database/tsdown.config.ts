@@ -3,7 +3,13 @@ import { defineConfig } from "tsdown";
 export default defineConfig({
 	clean: true,
 	dts: true,
-	entry: ["./src/index.ts", "./src/client.ts", "./src/relations.ts", "./src/schema.ts"],
+	entry: [
+		"./lib/index.ts",
+		"./lib/client.ts",
+		"./lib/errors.ts",
+		"./lib/relations.ts",
+		"./lib/schema.ts",
+	],
 	format: ["esm"],
 	minify: false,
 	sourcemap: true,

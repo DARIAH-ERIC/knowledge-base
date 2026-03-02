@@ -2,9 +2,9 @@
 
 import { count, eq } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
-import { client } from "@dariah-eric/images/client";
 
 import type { Database, Transaction } from "@/middlewares/db";
+import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
 interface GetImpactCaseStudiesParams {
@@ -64,7 +64,7 @@ export async function getImpactCaseStudies(
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = client.urls.generateSignedImageUrl({
+		const image = images.generateSignedImageUrl({
 			key: item.image.key,
 			options: { width: imageWidth.preview },
 		});
@@ -133,7 +133,7 @@ export async function getImpactCaseStudyById(
 	}
 
 	const contributors = item.contributors.map((contributor) => {
-		const image = client.urls.generateSignedImageUrl({
+		const image = images.generateSignedImageUrl({
 			key: contributor.image.key,
 			options: { width: imageWidth.avatar },
 		});
@@ -141,7 +141,7 @@ export async function getImpactCaseStudyById(
 		return { ...contributor, image };
 	});
 
-	const image = client.urls.generateSignedImageUrl({
+	const image = images.generateSignedImageUrl({
 		key: item.image.key,
 		options: { width: imageWidth.featured },
 	});
@@ -270,7 +270,7 @@ export async function getImpactCaseStudyBySlug(
 	}
 
 	const contributors = item.contributors.map((contributor) => {
-		const image = client.urls.generateSignedImageUrl({
+		const image = images.generateSignedImageUrl({
 			key: contributor.image.key,
 			options: { width: imageWidth.avatar },
 		});
@@ -278,7 +278,7 @@ export async function getImpactCaseStudyBySlug(
 		return { ...contributor, image };
 	});
 
-	const image = client.urls.generateSignedImageUrl({
+	const image = images.generateSignedImageUrl({
 		key: item.image.key,
 		options: { width: imageWidth.featured },
 	});
