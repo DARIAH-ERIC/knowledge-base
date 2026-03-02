@@ -31,7 +31,7 @@ jobs:
       AUTH_ENCRYPTION_KEY: "${{ secrets.TEST_AUTH_ENCRYPTION_KEY }}"
       API_LOG_LEVEL: "info"
       API_PORT: "3003"
-      AUTH_SIGN_UP: "disabled"
+      AUTH_SIGN_UP: "enabled"
       DATABASE_HOST: "localhost"
       DATABASE_NAME: "dariah-knowledge-base"
       DATABASE_PASSWORD: "${{ secrets.TEST_DATABASE_PASSWORD }}"

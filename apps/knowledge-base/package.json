@@ -37,7 +37,6 @@
 		"@dariah-eric/database": "workspace:^",
 		"@dariah-eric/email": "workspace:^",
 		"@dariah-eric/env": "workspace:^",
-		"@dariah-eric/errors": "workspace:^",
 		"@dariah-eric/images": "workspace:^",
 		"@dariah-eric/next-lib": "workspace:^",
 		"@dariah-eric/rate-limiter": "workspace:^",

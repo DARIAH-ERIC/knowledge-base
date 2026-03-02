@@ -560,9 +560,6 @@ importers:
       '@dariah-eric/env':
         specifier: workspace:^
         version: link:../../packages/env
-      '@dariah-eric/errors':
-        specifier: workspace:^
-        version: link:../../packages/errors
       '@dariah-eric/images':
         specifier: workspace:^
         version: link:../../packages/images
@@ -1278,30 +1275,6 @@ importers:
       valibot:
         specifier: 'catalog:'
         version: 1.2.0(typescript@5.9.3)
-
-  packages/errors:
-    devDependencies:
-      '@dariah-eric/configs':
-        specifier: workspace:^
-        version: link:../configs
-      '@types/node':
-        specifier: 'catalog:'
-        version: 24.10.9
-      better-result:
-        specifier: 'catalog:'
-        version: 2.7.0
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.2(jiti@2.6.1)
-      prettier:
-        specifier: 'catalog:'
-        version: 3.8.1
-      tsdown:
-        specifier: 'catalog:'
-        version: 0.20.1(synckit@0.11.12)(typescript@5.9.3)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
 
   packages/images:
     devDependencies:
