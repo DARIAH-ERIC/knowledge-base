@@ -1,0 +1,13 @@
+{
+	"$schema": "../../node_modules/turbo/schema.json",
+	"extends": ["//"],
+	"tasks": {
+		"lint:check": {
+			"dependsOn": ["$TURBO_EXTENDS$", "types:prepare"]
+		},
+		"types:check": {
+			"dependsOn": ["$TURBO_EXTENDS$", "types:prepare"]
+		},
+		"types:prepare": {}
+	}
+}
