@@ -4,8 +4,10 @@ import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { SignUpForm } from "@/app/(app)/[locale]/(auth)/auth/sign-up/_components/sign-up-form";
-import { Link } from "@/components/link";
 import { Main } from "@/components/main";
+import { Avatar } from "@/components/ui/avatar";
+import { Link } from "@/components/ui/link";
+import { Text, TextLink } from "@/components/ui/text";
 import { passwords } from "@/config/auth.config";
 import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";
@@ -54,27 +56,34 @@ export default async function SignUpPage(_props: Readonly<SignUpPageProps>): Pro
 	}
 
 	return (
-		<Main>
-			<section>
+		<Main className="min-h-full p-6 items-center justify-center flex flex-col">
+			<div className="w-full max-w-sm flex flex-col gap-y-4">
+				<Link aria-label="Home" className="mb-2 rounded-xs self-start inline-block" href="/">
+					<Avatar
+						className="dark:invert"
+						isSquare={true}
+						size="md"
+						src="/assets/images/logo-dariah.svg"
+					/>
+				</Link>
+
 				<div>
-					<h1>{t("title")}</h1>
-					<p>
+					<h1 className="text-xl/10 font-semibold">{t("title")}</h1>
+
+					<Text>
 						{t("message", {
 							passwordMinLength: passwords.length.min,
 							passwordMaxLength: passwords.length.max,
 						})}
-					</p>
+					</Text>
 				</div>
-			</section>
 
-			<section>
 				<SignUpForm />
 
-				<div>
-					<span>{t("has-account")}</span>
-					<Link href="/auth/sign-in">{t("sign-in")}</Link>
-				</div>
-			</section>
+				<Text className="mt-4">
+					{t("has-account")} <TextLink href="/auth/sign-in">{t("sign-in")}</TextLink>
+				</Text>
+			</div>
 		</Main>
 	);
 }

@@ -6,8 +6,10 @@ import type { ReactNode } from "react";
 import { RecoveryCodeForm } from "@/app/(app)/[locale]/(auth)/auth/settings/_components/recovery-code-form";
 import { UpdateEmailForm } from "@/app/(app)/[locale]/(auth)/auth/settings/_components/update-email-form";
 import { UpdatePasswordForm } from "@/app/(app)/[locale]/(auth)/auth/settings/_components/update-password-form";
-import { Link } from "@/components/link";
 import { Main } from "@/components/main";
+import { Avatar } from "@/components/ui/avatar";
+import { Link } from "@/components/ui/link";
+import { Text, TextLink } from "@/components/ui/text";
 import { auth } from "@/lib/auth";
 import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";
@@ -57,52 +59,65 @@ export default async function SettingsPage(
 	}
 
 	return (
-		<Main>
-			<section>
+		<Main className="min-h-full p-6 items-center justify-center flex flex-col">
+			<div className="w-full max-w-sm flex flex-col gap-y-4">
+				<Link aria-label="Home" className="mb-2 rounded-xs self-start inline-block" href="/">
+					<Avatar
+						className="dark:invert"
+						isSquare={true}
+						size="md"
+						src="/assets/images/logo-dariah.svg"
+					/>
+				</Link>
+
 				<div>
-					<h1>{t("title")}</h1>
+					<h1 className="text-xl/10 font-semibold">{t("title")}</h1>
+
+					{/* <Text>{t("message")}</Text> */}
 				</div>
-			</section>
 
-			<section>
-				<div>
-					<h2>{t("update-email")}</h2>
+				<section className="flex flex-col gap-y-4">
+					<div>
+						<h2 className="text-base/8 font-semibold">{t("update-email")}</h2>
 
-					<p>{t("your-email", { email: user.email })}</p>
+						<Text>
+							{t("your-email")} <span className="text-fg">{user.email}</span>
+						</Text>
+					</div>
 
 					<UpdateEmailForm />
-				</div>
-			</section>
+				</section>
 
-			<section>
-				<div>
-					<h2>{t("update-password")}</h2>
+				<section className="flex flex-col gap-y-4">
+					<div>
+						<h2 className="text-base/8 font-semibold">{t("update-password")}</h2>
+					</div>
 
 					<UpdatePasswordForm />
-				</div>
-			</section>
-
-			{user.isTwoFactorRegistered ? (
-				<section>
-					<div>
-						<h2>{t("update-two-factor")}</h2>
-
-						<div>
-							<Link href={"/auth/two-factor/setup"}>{t("update")}</Link>
-						</div>
-					</div>
 				</section>
-			) : null}
 
-			{recoveryCode != null && (
-				<section>
-					<div>
-						<h2>{t("recovery-code")}</h2>
+				{user.isTwoFactorRegistered ? (
+					<section className="flex flex-col gap-y-4">
+						<div>
+							<h2 className="text-base/8 font-semibold">{t("update-two-factor")}</h2>
+						</div>
+
+						<Text>
+							<TextLink href={"/auth/two-factor/setup"}>{t("update")}</TextLink>
+						</Text>
+					</section>
+				) : null}
+
+				{recoveryCode != null && (
+					<section className="flex flex-col gap-y-4">
+						<div>
+							<h2 className="text-base/8 font-semibold">{t("recovery-code")}</h2>
+						</div>
 
 						<RecoveryCodeForm recoveryCode={recoveryCode} />
-					</div>
-				</section>
-			)}
+					</section>
+				)}
+			</div>
 		</Main>
 	);
 }

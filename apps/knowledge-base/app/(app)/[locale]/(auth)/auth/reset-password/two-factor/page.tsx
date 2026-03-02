@@ -6,6 +6,9 @@ import type { ReactNode } from "react";
 import { PasswordResetRecoveryCodeForm } from "@/app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_components/password-reset-recovery-code-form";
 import { PasswordResetTotpForm } from "@/app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_components/password-reset-totp-form";
 import { Main } from "@/components/main";
+import { Avatar } from "@/components/ui/avatar";
+import { Link } from "@/components/ui/link";
+import { Text } from "@/components/ui/text";
 import { auth } from "@/lib/auth";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -56,28 +59,35 @@ export default async function PasswordResetTwoFactorPage(
 	}
 
 	return (
-		<Main>
-			<section>
+		<Main className="min-h-full p-6 items-center justify-center flex flex-col">
+			<div className="w-full max-w-sm flex flex-col gap-y-4">
+				<Link aria-label="Home" className="mb-2 rounded-xs self-start inline-block" href="/">
+					<Avatar
+						className="dark:invert"
+						isSquare={true}
+						size="md"
+						src="/assets/images/logo-dariah.svg"
+					/>
+				</Link>
+
 				<div>
-					<h1>{t("title")}</h1>
+					<h1 className="text-xl/10 font-semibold">{t("title")}</h1>
 				</div>
-			</section>
 
-			<section>
-				<div>
-					<h2>{t("enter-code")}</h2>
+				<div className="flex flex-col gap-y-8">
+					<section className="flex flex-col gap-y-2">
+						<Text>{t("enter-code")}</Text>
 
-					<PasswordResetTotpForm />
+						<PasswordResetTotpForm />
+					</section>
+
+					<section className="flex flex-col gap-y-2">
+						<Text>{t("use-recovery-code")}</Text>
+
+						<PasswordResetRecoveryCodeForm />
+					</section>
 				</div>
-			</section>
-
-			<section>
-				<div>
-					<h2>{t("use-recovery-code")}</h2>
-
-					<PasswordResetRecoveryCodeForm />
-				</div>
-			</section>
+			</div>
 		</Main>
 	);
 }

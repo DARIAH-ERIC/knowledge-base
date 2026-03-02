@@ -48,14 +48,14 @@
 			"incorrect-code": "Incorrect code."
 		},
 		"verifyPasswordResetEmailAction": {
-			"incorrect-code": "Falscher Code.",
+			"incorrect-code": "Incorrect code.",
 			"restart": "Please restart the process."
 		},
 		"verifyPasswordResetTwoFactorWithRecoveryCodeAction": {
-			"incorrect-code": "Incorrect Code."
+			"incorrect-code": "Incorrect code."
 		},
 		"verifyPasswordResetTwoFactorWithTotpAction": {
-			"incorrect-code": "Incorrect Code."
+			"incorrect-code": "Incorrect code."
 		}
 	},
 	"errors": {
@@ -403,6 +403,7 @@
 		"meta": {
 			"title": "Forgot password"
 		},
+		"message": "We will send a password reset code to your email address.",
 		"sign-in": "Sign in",
 		"title": "Forgot your password?"
 	},
@@ -472,7 +473,7 @@
 		"meta": {
 			"title": "Recovery code"
 		},
-		"next": "Next",
+		"next": "Continue",
 		"title": "Recovery code",
 		"your-code": "Your recovery code is:"
 	},
@@ -488,6 +489,7 @@
 		"meta": {
 			"title": "Reset password"
 		},
+		"message": "Please provide a new password for your account.",
 		"title": "Reset password"
 	},
 	"SettingsPage": {
@@ -500,7 +502,7 @@
 		"update-email": "Update email",
 		"update-password": "Update password",
 		"update-two-factor": "Update two-factor authentication",
-		"your-email": "Your email: {email}"
+		"your-email": "Your email:"
 	},
 	"SignInForm": {
 		"email": "Email",
@@ -512,6 +514,7 @@
 	},
 	"SignInPage": {
 		"forgot-password": "Forgot password?",
+		"message": "Sign in to the DARIAH Knowledge Base with your user account.",
 		"meta": {
 			"title": "Sign in"
 		},
@@ -527,7 +530,7 @@
 	},
 	"SignUpPage": {
 		"has-account": "Already have an account?",
-		"message": "Your password must be at between {passwordMinLength,number} and {passwordMaxLength,number} characters long.",
+		"message": "Your password must be between {passwordMinLength,number} and {passwordMaxLength,number} characters long.",
 		"meta": {
 			"title": "Sign up"
 		},
@@ -556,6 +559,7 @@
 		"meta": {
 			"title": "Account recovery"
 		},
+		"message": "Enter the recovery code you received when creating the account.",
 		"title": "Recover your account"
 	},
 	"TwoFactorSetUpForm": {

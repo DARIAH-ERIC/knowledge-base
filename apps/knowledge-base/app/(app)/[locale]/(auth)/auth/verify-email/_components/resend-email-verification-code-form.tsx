@@ -6,8 +6,8 @@ import { type ReactNode, useActionState } from "react";
 
 import { resendEmailVerificationCodeAction } from "@/app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action";
 import { Form } from "@/components/form";
-import { FormStatus } from "@/components/form-status";
-import { SubmitButton } from "@/components/submit-button";
+import { FormStatus } from "@/components/ui/form-status";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 export function ResendEmailVerificationCodeForm(): ReactNode {
 	const t = useTranslations("ResendEmailVerificationCodeForm");
@@ -18,12 +18,12 @@ export function ResendEmailVerificationCodeForm(): ReactNode {
 	);
 
 	return (
-		<Form action={action} className="grid gap-y-8" state={state}>
+		<Form action={action} className="flex flex-col gap-y-6" state={state}>
 			<FormStatus state={state} />
 
-			<div>
-				<SubmitButton>{t("resend-code")}</SubmitButton>
-			</div>
+			<SubmitButton className="mt-2" intent="secondary">
+				{t("resend-code")}
+			</SubmitButton>
 		</Form>
 	);
 }

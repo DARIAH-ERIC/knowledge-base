@@ -5,6 +5,9 @@ import type { ReactNode } from "react";
 
 import { TwoFactorResetForm } from "@/app/(app)/[locale]/(auth)/auth/two-factor/reset/_components/two-factor-reset-form";
 import { Main } from "@/components/main";
+import { Avatar } from "@/components/ui/avatar";
+import { Link } from "@/components/ui/link";
+import { Text } from "@/components/ui/text";
 import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -55,16 +58,25 @@ export default async function TwoFactorResetPage(
 	}
 
 	return (
-		<Main>
-			<section>
-				<div>
-					<h1>{t("title")}</h1>
-				</div>
-			</section>
+		<Main className="min-h-full p-6 items-center justify-center flex flex-col">
+			<div className="w-full max-w-sm flex flex-col gap-y-4">
+				<Link aria-label="Home" className="mb-2 rounded-xs self-start inline-block" href="/">
+					<Avatar
+						className="dark:invert"
+						isSquare={true}
+						size="md"
+						src="/assets/images/logo-dariah.svg"
+					/>
+				</Link>
 
-			<section>
+				<div>
+					<h1 className="text-xl/10 font-semibold">{t("title")}</h1>
+
+					<Text>{t("message")}</Text>
+				</div>
+
 				<TwoFactorResetForm />
-			</section>
+			</div>
 		</Main>
 	);
 }

@@ -3,12 +3,14 @@
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useActionState } from "react";
-import { FieldError, Input, Label, TextField } from "react-aria-components";
 
 import { signInAction } from "@/app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.action";
 import { Form } from "@/components/form";
-import { FormStatus } from "@/components/form-status";
-import { SubmitButton } from "@/components/submit-button";
+import { FieldError, Label } from "@/components/ui/field";
+import { FormStatus } from "@/components/ui/form-status";
+import { Input } from "@/components/ui/input";
+import { SubmitButton } from "@/components/ui/submit-button";
+import { TextField } from "@/components/ui/text-field";
 
 export function SignInForm(): ReactNode {
 	const t = useTranslations("SignInForm");
@@ -16,7 +18,7 @@ export function SignInForm(): ReactNode {
 	const [state, action] = useActionState(signInAction, createActionStateInitial());
 
 	return (
-		<Form action={action} state={state}>
+		<Form action={action} className="flex flex-col gap-y-6" state={state}>
 			<FormStatus state={state} />
 
 			<TextField autoComplete="email" isRequired={true} name="email" type="email">
@@ -31,9 +33,7 @@ export function SignInForm(): ReactNode {
 				<Input />
 			</TextField>
 
-			<div>
-				<SubmitButton>{t("submit")}</SubmitButton>
-			</div>
+			<SubmitButton className="mt-2">{t("submit")}</SubmitButton>
 		</Form>
 	);
 }

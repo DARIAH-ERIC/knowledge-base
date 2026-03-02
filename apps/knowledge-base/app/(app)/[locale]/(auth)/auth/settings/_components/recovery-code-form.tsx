@@ -6,8 +6,9 @@ import { type ReactNode, useActionState } from "react";
 
 import { regenerateRecoveryCodeAction } from "@/app/(app)/[locale]/(auth)/auth/settings/_lib/regenerate-recovery-code.action";
 import { Form } from "@/components/form";
-import { FormStatus } from "@/components/form-status";
-import { SubmitButton } from "@/components/submit-button";
+import { FormStatus } from "@/components/ui/form-status";
+import { SubmitButton } from "@/components/ui/submit-button";
+import { Text } from "@/components/ui/text";
 
 interface RecoveryCodeFormProps {
 	recoveryCode: string;
@@ -25,16 +26,14 @@ export function RecoveryCodeForm(props: Readonly<RecoveryCodeFormProps>): ReactN
 		: null;
 
 	return (
-		<Form action={action} state={state}>
+		<Form action={action} className="flex flex-col gap-y-6" state={state}>
 			<FormStatus state={state} />
 
-			<p>
-				{t("your-code")} {newRecoveryCode ?? recoveryCode}
-			</p>
+			<Text>
+				{t("your-code")} <span className="text-fg">{newRecoveryCode ?? recoveryCode}</span>
+			</Text>
 
-			<div>
-				<SubmitButton>{t("generate-new-code")}</SubmitButton>
-			</div>
+			<SubmitButton className="mt-2">{t("generate-new-code")}</SubmitButton>
 		</Form>
 	);
 }

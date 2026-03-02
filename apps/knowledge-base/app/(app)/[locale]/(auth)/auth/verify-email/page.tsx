@@ -5,8 +5,10 @@ import type { ReactNode } from "react";
 
 import { EmailVerificationForm } from "@/app/(app)/[locale]/(auth)/auth/verify-email/_components/email-verification-form";
 import { ResendEmailVerificationCodeForm } from "@/app/(app)/[locale]/(auth)/auth/verify-email/_components/resend-email-verification-code-form";
-import { Link } from "@/components/link";
 import { Main } from "@/components/main";
+import { Avatar } from "@/components/ui/avatar";
+import { Link } from "@/components/ui/link";
+import { Text, TextLink } from "@/components/ui/text";
 import { auth } from "@/lib/auth";
 import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";
@@ -55,23 +57,31 @@ export default async function VerifyEmailPage(
 	}
 
 	return (
-		<Main>
-			<section>
-				<div>
-					<h1>{t("title")}</h1>
-					<p>{t("message", { email: emailVerificationRequest?.email ?? user.email })}</p>
-				</div>
-			</section>
+		<Main className="min-h-full p-6 items-center justify-center flex flex-col">
+			<div className="w-full max-w-sm flex flex-col gap-y-4">
+				<Link aria-label="Home" className="mb-2 rounded-xs self-start inline-block" href="/">
+					<Avatar
+						className="dark:invert"
+						isSquare={true}
+						size="md"
+						src="/assets/images/logo-dariah.svg"
+					/>
+				</Link>
 
-			<section>
+				<div>
+					<h1 className="text-xl/10 font-semibold">{t("title")}</h1>
+
+					<Text>{t("message", { email: emailVerificationRequest?.email ?? user.email })}</Text>
+				</div>
+
 				<EmailVerificationForm />
 
 				<ResendEmailVerificationCodeForm />
 
-				<div>
-					<Link href="/auth/settings">{t("change-email")}</Link>
-				</div>
-			</section>
+				<Text className="mt-4">
+					<TextLink href="/auth/settings">{t("change-email")}</TextLink>
+				</Text>
+			</div>
 		</Main>
 	);
 }
