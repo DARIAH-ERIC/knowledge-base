@@ -1,5 +1,3 @@
-import { STATUS_CODES } from "node:http";
-
 import { serveStatic } from "@hono/node-server/serve-static";
 import { timing } from "hono/timing";
 
@@ -24,11 +22,6 @@ const api = createRouter()
 	.route("/news", news)
 	.route("/pages", pages)
 	.route("/spotlight-articles", spotlightArticles);
-
-app.get("/health", (c) => {
-	const status = 200;
-	return c.json({ message: STATUS_CODES[status] }, status);
-});
 
 app.use(database()).use(timing()).route("/api/v1", api);
 

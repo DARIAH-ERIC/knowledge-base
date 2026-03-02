@@ -20,11 +20,12 @@ ingress:
   enabled: true
   path: "/"
   annotations:
-    kubernetes.io/ingressClassName: "nginx"
+    kubernetes.io/ingressClassName: "nginx-proxy-protocol"
 livenessProbe:
   path: /health
   initialDelaySeconds: 15
   timeoutSeconds: 15
+  periodSeconds: 30
   scheme: "HTTP"
   probeType: "httpGet"
 readinessProbe:

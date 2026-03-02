@@ -63,7 +63,10 @@ test.describe("contact page", () => {
 			return env.MAILPIT_API_BASE_URL == null;
 		}, "Email service disabled.");
 
-		/** Run sequentially. */
+		/**
+		 * Run sequentially. Also requires setting `workers: 1` in `playwright.config.ts` to
+		 * avoid running test-suites concurrently.
+		 */
 		test.describe.configure({ mode: "default" });
 
 		const statusTimeoutMs = 5000;
@@ -91,7 +94,7 @@ test.describe("contact page", () => {
 			const subject = "Testing form submission";
 			const message = `The current time is ${new Date().toISOString()}.`;
 
-			await contactPage.form.name.fill(name);
+			await contactPage.fillPolling(contactPage.form.name, name);
 			await contactPage.form.email.fill(email);
 			await contactPage.form.subject.fill(subject);
 			await contactPage.form.message.fill(message);
@@ -152,7 +155,7 @@ test.describe("contact page", () => {
 				const subject = "Testing form submission";
 				const message = `The current time is ${new Date().toISOString()}.`;
 
-				await contactPage.form.name.fill(name);
+				await contactPage.fillPolling(contactPage.form.name, name);
 				await contactPage.form.email.fill(email);
 				await contactPage.form.subject.fill(subject);
 				await contactPage.form.message.fill(message);

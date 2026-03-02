@@ -13,6 +13,7 @@ export const organisationalUnitTypesEnum = [
 	"institution",
 	"regional_hub",
 	"umbrella_consortium",
+	"working_group",
 ] as const;
 
 export const organisationalUnitTypes = p.pgTable(
