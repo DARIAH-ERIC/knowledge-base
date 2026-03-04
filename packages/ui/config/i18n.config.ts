@@ -4,7 +4,6 @@ import { type Formats, hasLocale, type Timezone } from "next-intl";
 import en from "@/messages/en.json";
 
 export const locales = [
-	// "de-AT",
 	"en-GB",
 ] as const;
 
@@ -29,10 +28,10 @@ type GetIntlLanguages<TIntlLocales extends ReadonlyArray<IntlLocale>> = {
 
 type Unique<T extends ReadonlyArray<unknown>> =
 	T extends Readonly<[infer F, ...infer R]>
-		? F extends R[number]
-			? Unique<R>
-			: [F, ...Unique<R>]
-		: [];
+	? F extends R[number]
+	? Unique<R>
+	: [F, ...Unique<R>]
+	: [];
 
 export type IntlLanguage = IntlLocale extends `${infer Language}-${string}` ? Language : IntlLocale;
 

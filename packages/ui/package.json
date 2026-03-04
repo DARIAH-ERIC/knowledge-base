@@ -39,6 +39,7 @@
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/style-variants": "catalog:",
+		"@heroicons/react": "catalog:",
 		"@react-aria/utils": "catalog:",
 		"clsx": "catalog:",
 		"lucide-react": "catalog:",
@@ -46,7 +47,11 @@
 		"react": "catalog:",
 		"react-aria": "catalog:",
 		"react-aria-components": "catalog:",
-		"react-dom": "catalog:"
+		"react-dom": "catalog:",
+		"recharts": "catalog:",
+		"sonner": "catalog:",
+		"tailwind-merge": "catalog:",
+		"tailwind-variants": "catalog:"
 	},
 	"devDependencies": {
 		"@acdh-oeaw/stylelint-config": "catalog:",

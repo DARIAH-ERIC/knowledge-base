@@ -107,11 +107,13 @@ catalog:
   react-aria-components: ^1.13.0
   react-dom: ^19.2.1
   react-schemaorg: ^2.0.0
+  recharts: ^3.7.0
   schema-dts: ^1.1.5
   server-nodejs-only: ^0.0.1
   server-only: ^0.0.1
   sharp: ^0.34.5
   simple-git-hooks: ^2.13.1
+  sonner: ^2.0.7
   storybook: ^10.2.0
   storybook-next-intl: ^10.0.1
   stylelint: ^17.0.0
