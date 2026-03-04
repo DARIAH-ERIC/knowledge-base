@@ -1,6 +1,6 @@
 {
 	"$schema": "https://www.schemastore.org/tsconfig",
-	"extends": "@dariah-eric/configs/typescript/base",
+	"extends": "@dariah-eric/configs/typescript/lib",
 	"compilerOptions": {
 		"types": ["node"]
 	},

@@ -24,7 +24,7 @@
  */
 
 @custom-variant dark (&:where([data-ui-color-scheme="dark"], [data-ui-color-scheme="dark"] *));
-@custom-variant light (&:where([data-ui-color-scheme="light"], [data-ui-color-scheme="light"] *));
+@custom-variant light (:root, &:where([data-ui-color-scheme="light"], [data-ui-color-scheme="light"] *));
 
 @custom-variant ui {
 	@layer components {
@@ -94,8 +94,6 @@
 		color-scheme: dark;
 	}
 
-	:root,
-	/* stylelint-disable-next-line selector-type-no-unknown */
 	@variant light {
 		--_color-background-base: var(--color-bg);
 		--_color-text-strong: var(--color-fg);

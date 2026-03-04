@@ -1,18 +1,18 @@
 "use client"
 
-import type { TooltipProps as TooltipPrimitiveProps } from "react-aria-components"
+import type { ComponentProps, ReactNode } from "react"
 import {
-  Button,
-  composeRenderProps,
-  OverlayArrow,
-  Tooltip as TooltipPrimitive,
-  TooltipTrigger as TooltipTriggerPrimitive,
+	composeRenderProps,
+  OverlayArrow as AriaOverlayArrow,
+  Tooltip as AriaTooltip,
+	type TooltipProps as AriaTooltipProps,
+  TooltipTrigger as AriaTooltipTrigger,
 } from "react-aria-components"
 import { twJoin } from "tailwind-merge"
 import type { VariantProps } from "tailwind-variants"
 import { tv } from "tailwind-variants"
 
-const tooltipStyles = tv({
+export const tooltipStyles = tv({
   base: [
     "group max-w-sm origin-(--trigger-anchor-point) rounded-lg border border-(--tooltip-border) px-2.5 py-1.5 text-sm/6 will-change-transform [--tooltip-border:var(--color-muted-fg)]/30 dark:shadow-none *:[strong]:font-medium",
   ],
@@ -39,57 +39,47 @@ const tooltipStyles = tv({
   },
 })
 
-type TooltipProps = React.ComponentProps<typeof TooltipTriggerPrimitive>
-const Tooltip = (props: TooltipProps) => <TooltipTriggerPrimitive {...props} />
+export type TooltipProps = ComponentProps<typeof AriaTooltipTrigger>
 
-interface TooltipContentProps
-  extends Omit<TooltipPrimitiveProps, "children">,
+export { AriaTooltipTrigger as Tooltip }
+
+export interface TooltipContentProps
+  extends Omit<AriaTooltipProps, "children">,
     VariantProps<typeof tooltipStyles> {
   arrow?: boolean
-  children?: React.ReactNode
+  children?: ReactNode
 }
 
-const TooltipContent = ({
-  offset = 10,
-  arrow = true,
-  inverse,
-  children,
-  ...props
-}: TooltipContentProps) => {
-  return (
-    <TooltipPrimitive
-      {...props}
-      offset={offset}
-      className={composeRenderProps(props.className, (className, renderProps) =>
-        tooltipStyles({
-          ...renderProps,
-          inverse,
-          className,
-        }),
-      )}
-    >
-      {arrow && (
-        <OverlayArrow className="group">
-          <svg
-            width={12}
-            height={12}
-            viewBox="0 0 12 12"
-            // inverse
-            className={twJoin(
-              "block group-placement-bottom:rotate-180 group-placement-left:-rotate-90 group-placement-right:rotate-90 forced-colors:fill-[Canvas] forced-colors:stroke-[ButtonBorder]",
-              inverse ? "fill-fg stroke-transparent" : "fill-overlay stroke-(--tooltip-border)",
-            )}
-          >
-            <path d="M0 0 L6 6 L12 0" />
-          </svg>
-        </OverlayArrow>
-      )}
-      {children}
-    </TooltipPrimitive>
-  )
+export function TooltipContent(props: Readonly<TooltipContentProps>): ReactNode {
+	const { arrow = true, children, className, inverse, offset = 10, ...rest } = props
+
+	return (
+		<AriaTooltip
+			{...rest}
+			className={composeRenderProps(className, (className, renderProps) => tooltipStyles({
+				...renderProps,
+				inverse,
+				className,
+			})
+			)}
+			offset={offset}
+		>
+			{arrow ? (
+				<AriaOverlayArrow className="group">
+					<svg
+						width={12}
+						height={12}
+						viewBox="0 0 12 12"
+						className={twJoin(
+							"block group-placement-bottom:rotate-180 group-placement-left:-rotate-90 group-placement-right:rotate-90 forced-colors:fill-[Canvas] forced-colors:stroke-[ButtonBorder]",
+							inverse ? "fill-fg stroke-transparent" : "fill-overlay stroke-(--tooltip-border)"
+						)}
+					>
+						<path d="M0 0 L6 6 L12 0" />
+					</svg>
+				</AriaOverlayArrow>
+			) : null}
+			{children}
+		</AriaTooltip>
+	)
 }
-
-const TooltipTrigger = Button
-
-export type { TooltipProps, TooltipContentProps }
-export { Tooltip, TooltipTrigger, TooltipContent }
