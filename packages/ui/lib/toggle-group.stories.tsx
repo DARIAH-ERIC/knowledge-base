@@ -2,8 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { BoldIcon, ItalicIcon } from "lucide-react";
 
 import { Button } from "@/lib/button";
-
-import { ToggleGroup, ToggleGroupItem } from "./toggle-group";
+import { ToggleGroup, ToggleGroupItem } from "@/lib/toggle-group";
 
 const meta = {
 	title: "Components/ToggleGroup",

@@ -1,14 +1,18 @@
-"use client"
+"use client";
 
-import type { TextFieldProps } from "react-aria-components"
-import { TextField as TextFieldPrimitive } from "react-aria-components"
-import { cx } from "@/lib/primitive"
-import { fieldStyles } from "./field"
+import type { ReactNode } from "react";
+import {
+	TextField as AriaTextField,
+	type TextFieldProps as AriaTextFieldProps,
+} from "react-aria-components";
 
-const TextField = ({ className, ...props }: TextFieldProps) => {
-  return (
-    <TextFieldPrimitive data-slot="control" className={cx(fieldStyles(), className)} {...props} />
-  )
+import { fieldStyles } from "@/lib/field";
+import { cx } from "@/lib/primitive";
+
+export interface TextFieldProps extends AriaTextFieldProps {}
+
+export function TextField(props: Readonly<TextFieldProps>): ReactNode {
+	const { className, ...rest } = props;
+
+	return <AriaTextField {...rest} className={cx(fieldStyles(), className)} data-slot="control" />;
 }
-
-export { TextField }

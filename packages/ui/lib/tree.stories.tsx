@@ -19,24 +19,20 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
 	args: {
-		selectionMode: "none"
+		selectionMode: "none",
 	},
 	render(props) {
-		const { children, ...rest } = props
+		const { children, ...rest } = props;
 
 		return (
 			<Tree {...rest}>
 				<TreeItem textValue="One">
-					<TreeContent>
-						One
-					</TreeContent>
+					<TreeContent>One</TreeContent>
 				</TreeItem>
 				<TreeItem textValue="Two">
-					<TreeContent>
-						One
-					</TreeContent>
+					<TreeContent>One</TreeContent>
 				</TreeItem>
 			</Tree>
-		)
-	}
+		);
+	},
 };

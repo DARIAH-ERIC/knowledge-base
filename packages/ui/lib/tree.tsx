@@ -1,59 +1,63 @@
 "use client";
 
-import { cx } from "@/lib/primitive";
+import { ChevronRightIcon } from "@heroicons/react/20/solid";
 import type { ReactNode } from "react";
 import {
 	Button as AriaButton,
-	 Tree as AriaTree, type TreeProps as AriaTreeProps, TreeItem as AriaTreeItem, type TreeItemProps as  AriaTreeItemProps,
+	Tree as AriaTree,
+	TreeItem as AriaTreeItem,
 	TreeItemContent as AriaTreeItemContent,
 	type TreeItemContentProps as AriaTreeItemContentProps,
-	type TreeItemContentRenderProps as AriaTreeItemContentRenderProps
-	} from "react-aria-components"
-import { ChevronRightIcon } from "@heroicons/react/20/solid";
+	type TreeItemContentRenderProps as AriaTreeItemContentRenderProps,
+	type TreeItemProps as AriaTreeItemProps,
+	type TreeProps as AriaTreeProps,
+} from "react-aria-components";
 import { twJoin, twMerge } from "tailwind-merge";
+
 import { Checkbox } from "@/lib/checkbox";
+import { cx } from "@/lib/primitive";
 
 export interface TreeProps<T extends object> extends AriaTreeProps<T> {}
 
 export function Tree<T extends object>(props: Readonly<TreeProps<T>>): ReactNode {
-	const { className, ...rest } = props
+	const { className, ...rest } = props;
 
 	return (
 		<AriaTree
 			{...rest}
-      className={cx(
-        twJoin(
-          "flex cursor-default flex-col gap-y-2 overflow-auto outline-hidden forced-color-adjust-none",
-          "[--tree-active-bg:var(--color-primary-subtle)] [--tree-active-fg:var(--color-primary-subtle-fg)]",
-        ),
-        className,
-      )}
+			className={cx(
+				twJoin(
+					"flex cursor-default flex-col gap-y-2 overflow-auto outline-hidden forced-color-adjust-none",
+					"[--tree-active-bg:var(--color-primary-subtle)] [--tree-active-fg:var(--color-primary-subtle-fg)]",
+				),
+				className,
+			)}
 		/>
-	)
+	);
 }
 
 export interface TreeItemProps<T extends object> extends AriaTreeItemProps<T> {}
 
 export function TreeItem<T extends object>(props: Readonly<TreeItemProps<T>>): ReactNode {
-	const { className, ...rest } = props
+	const { className, ...rest } = props;
 
 	return (
 		<AriaTreeItem
 			{...rest}
-      className={cx(
-        [
-          "shrink-0 rounded-lg px-2 py-1.5 pe-2",
-          "group/tree-item relative flex select-none rounded-lg focus:outline-hidden",
-          "focus:bg-(--tree-active-bg) focus:text-(--tree-active-fg) focus:**:[.text-muted-fg]:text-(--tree-active-fg)",
-          "**:data-[slot=avatar]:*:size-6 **:data-[slot=avatar]:size-6 sm:**:data-[slot=avatar]:*:size-5 sm:**:data-[slot=avatar]:size-5",
-          "**:data-[slot=icon]:me-1 **:data-[slot=icon]:size-5 **:data-[slot=icon]:shrink-0 sm:**:data-[slot=icon]:size-4",
-          "disabled:opacity-50 forced-colors:[",
-          "href" in props ? "cursor-pointer" : "cursor-default",
-        ],
-        className,
-      )}
+			className={cx(
+				[
+					"shrink-0 rounded-lg px-2 py-1.5 pe-2",
+					"group/tree-item relative flex select-none rounded-lg focus:outline-hidden",
+					"focus:bg-(--tree-active-bg) focus:text-(--tree-active-fg) focus:**:[.text-muted-fg]:text-(--tree-active-fg)",
+					"**:data-[slot=avatar]:size-6 **:data-[slot=avatar]:*:size-6 sm:**:data-[slot=avatar]:size-5 sm:**:data-[slot=avatar]:*:size-5",
+					"**:data-[slot=icon]:me-1 **:data-[slot=icon]:size-5 **:data-[slot=icon]:shrink-0 sm:**:data-[slot=icon]:size-4",
+					"disabled:opacity-50",
+					"href" in props ? "cursor-pointer" : "cursor-default",
+				],
+				className,
+			)}
 		/>
-	)
+	);
 }
 
 export interface TreeContentProps extends AriaTreeItemContentProps {
@@ -61,7 +65,7 @@ export interface TreeContentProps extends AriaTreeItemContentProps {
 }
 
 export function TreeContent(props: Readonly<TreeContentProps>): ReactNode {
-	const { className, children, ...rest } = props
+	const { className, children, ...rest } = props;
 
 	return (
 		<AriaTreeItemContent {...rest}>
@@ -97,15 +101,15 @@ export function TreeContent(props: Readonly<TreeContentProps>): ReactNode {
 				);
 			}}
 		</AriaTreeItemContent>
-	)
+	);
 }
 
-interface TreeIndicatorProps {
-	values: Pick<AriaTreeItemContentRenderProps, "isDisabled" | "isExpanded">
+export interface TreeIndicatorProps {
+	values: Pick<AriaTreeItemContentRenderProps, "isDisabled" | "isExpanded">;
 }
 
-function TreeIndicator(props: Readonly<TreeIndicatorProps>): ReactNode {
-	const { values } = props
+export function TreeIndicator(props: Readonly<TreeIndicatorProps>): ReactNode {
+	const { values } = props;
 
 	return (
 		<AriaButton
@@ -124,5 +128,5 @@ function TreeIndicator(props: Readonly<TreeIndicatorProps>): ReactNode {
 				data-slot="chevron"
 			/>
 		</AriaButton>
-	)
+	);
 }

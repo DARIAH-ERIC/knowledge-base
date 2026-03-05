@@ -40,6 +40,7 @@
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/style-variants": "catalog:",
 		"@heroicons/react": "catalog:",
+		"@internationalized/date": "catalog:",
 		"@react-aria/utils": "catalog:",
 		"clsx": "catalog:",
 		"lucide-react": "catalog:",
