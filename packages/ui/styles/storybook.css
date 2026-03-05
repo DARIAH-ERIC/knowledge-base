@@ -1,6 +1,9 @@
-/*
+/* stylelint-disable custom-property-empty-line-before */
+
+/**
+ * ============================================================================================
  * Imports.
- * ============================================================================
+ * ============================================================================================
  */
 
 @import "tailwindcss";
@@ -9,21 +12,32 @@
 @import "@fontsource-variable/fira-code";
 @import "./index.css";
 
-/*
+/**
+ * ============================================================================================
  * Fonts.
- * ============================================================================
+ * ============================================================================================
  */
-:root {
-	--_font-body: "Inter Variable";
-	--_font-code: "Fira Code Variable";
+
+@layer base {
+	:root {
+		--_font-body: "Inter Variable";
+		--_font-code: "Fira Code Variable";
+
+		--font-body: var(--_font-body, var(--default-font-family));
+		--font-code: var(--_font-code, var(--default-mono-font-family));
+	}
 }
 
-/*
+/**
+ * ============================================================================================
  * Storybook.
- * ============================================================================
+ * ============================================================================================
  */
-.docs-story {
-	background-color: var(--color-background-base);
-	color: var(--color-text-strong);
-	font-family: var(--font-body);
+
+@layer base {
+	.docs-story {
+		background-color: var(--color-background-base);
+		color: var(--color-text-strong);
+		font-family: var(--font-body);
+	}
 }
