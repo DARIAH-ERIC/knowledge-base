@@ -184,7 +184,7 @@ export function MenuHeader(props: Readonly<MenuHeaderProps>): ReactNode {
 
 const { section, header } = dropdownSectionStyles();
 
-interface MenuSectionProps<T> extends AriaMenuSectionProps<T> {
+export interface MenuSectionProps<T> extends AriaMenuSectionProps<T> {
 	ref?: React.Ref<HTMLDivElement>;
 	label?: string;
 }

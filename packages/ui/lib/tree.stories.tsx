@@ -22,15 +22,15 @@ export const Default: Story = {
 		selectionMode: "none",
 	},
 	render(props) {
-		const { children, ...rest } = props;
+		const { ...rest } = props;
 
 		return (
 			<Tree {...rest}>
 				<TreeItem textValue="One">
-					<TreeContent>One</TreeContent>
+					<TreeContent>{"One"}</TreeContent>
 				</TreeItem>
 				<TreeItem textValue="Two">
-					<TreeContent>One</TreeContent>
+					<TreeContent>{"Two"}</TreeContent>
 				</TreeItem>
 			</Tree>
 		);

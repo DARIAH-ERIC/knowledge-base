@@ -1,9 +1,10 @@
 "use client";
 
-import { type ComponentProps, Fragment, useId } from "react";
+import { type ComponentProps, Fragment, type ReactNode, useId } from "react";
 import { Area, AreaChart as AreaChartPrimitive } from "recharts";
 import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import { twMerge } from "tailwind-merge";
+
 import {
 	type BaseChartProps,
 	CartesianGrid,
@@ -30,8 +31,8 @@ interface AreaChartProps<TValue extends ValueType, TName extends NameType> exten
 	fillType?: "gradient" | "solid" | "none";
 }
 
-export const AreaChart = <TValue extends ValueType, TName extends NameType>({
-	data = [],
+export function AreaChart<TValue extends ValueType, TName extends NameType>({
+	data,
 	dataKey,
 	colors = DEFAULT_COLORS,
 	connectNulls = false,
@@ -55,7 +56,9 @@ export const AreaChart = <TValue extends ValueType, TName extends NameType>({
 
 	intervalType = "equidistantPreserveStart",
 
-	valueFormatter = (value: number) => value.toString(),
+	valueFormatter = (value: number) => {
+		return value.toString();
+	},
 
 	// XAxis
 	displayEdgeLabelsOnly = false,
@@ -69,7 +72,7 @@ export const AreaChart = <TValue extends ValueType, TName extends NameType>({
 	hideGridLines = false,
 	chartProps,
 	...props
-}: AreaChartProps<TValue, TName>) => {
+}: Readonly<AreaChartProps<TValue, TName>>): ReactNode {
 	const categoryColors = constructCategoryColors(Object.keys(config), colors);
 	const stacked = type === "stacked" || type === "percent";
 	const areaId = useId();
@@ -82,20 +85,27 @@ export const AreaChart = <TValue extends ValueType, TName extends NameType>({
 		activeLegend: string | null;
 		category: string;
 	}) => {
+		// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 		const stopOpacity = activeLegend && activeLegend !== category ? 0.1 : 0.5;
 
+		// eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
 		switch (fillType) {
-			case "none":
+			case "none": {
 				return <stop stopColor="currentColor" stopOpacity={0} />;
-			case "gradient":
+			}
+
+			case "gradient": {
 				return (
-					<>
+					<Fragment>
 						<stop offset="5%" stopColor="currentColor" stopOpacity={stopOpacity} />
 						<stop offset="95%" stopColor="currentColor" stopOpacity={0} />
-					</>
+					</Fragment>
 				);
-			default:
+			}
+
+			default: {
 				return <stop stopColor="currentColor" stopOpacity={stopOpacity} />;
+			}
 		}
 	};
 
@@ -107,116 +117,120 @@ export const AreaChart = <TValue extends ValueType, TName extends NameType>({
 			dataKey={dataKey}
 			{...props}
 		>
-			{({ onLegendSelect, selectedLegend }) => (
-				<AreaChartPrimitive
-					onClick={() => {
-						onLegendSelect(null);
-					}}
-					data={data}
-					margin={{
-						bottom: 0,
-						left: 0,
-						right: 0,
-						top: 5,
-					}}
-					stackOffset={type === "percent" ? "expand" : undefined}
-					{...chartProps}
-				>
-					{!hideGridLines && <CartesianGrid {...cartesianGridProps} strokeDasharray="3 3" />}
-					<XAxis
-						className="**:[text]:fill-muted-fg"
-						hide={hideXAxis}
-						displayEdgeLabelsOnly={displayEdgeLabelsOnly}
-						intervalType={intervalType}
-						{...xAxisProps}
-					/>
-					<YAxis
-						className="**:[text]:fill-muted-fg"
-						hide={hideYAxis}
-						tickFormatter={type === "percent" ? valueToPercent : valueFormatter}
-						{...yAxisProps}
-					/>
-
-					{legend && (
-						<ChartLegend
-							content={typeof legend === "boolean" ? <ChartLegendContent /> : legend}
-							{...legendProps}
+			{({ onLegendSelect, selectedLegend }) => {
+				return (
+					<AreaChartPrimitive
+						data={data}
+						margin={{
+							bottom: 0,
+							left: 0,
+							right: 0,
+							top: 5,
+						}}
+						onClick={() => {
+							onLegendSelect(null);
+						}}
+						stackOffset={type === "percent" ? "expand" : undefined}
+						{...chartProps}
+					>
+						{!hideGridLines && <CartesianGrid {...cartesianGridProps} strokeDasharray="3 3" />}
+						<XAxis
+							className="**:[text]:fill-muted-fg"
+							displayEdgeLabelsOnly={displayEdgeLabelsOnly}
+							hide={hideXAxis}
+							intervalType={intervalType}
+							{...xAxisProps}
 						/>
-					)}
-
-					{tooltip && (
-						<ChartTooltip
-							content={
-								typeof tooltip === "boolean" ? (
-									<ChartTooltipContent
-										{...{
-											hideIndicator: tooltipProps?.hideIndicator,
-											hideLabel: tooltipProps?.hideLabel,
-											cursor: tooltipProps?.cursor,
-											indicator: tooltipProps?.indicator,
-											labelSeparator: tooltipProps?.labelSeparator,
-											formatter: tooltipProps?.formatter,
-											labelFormatter: tooltipProps?.labelFormatter,
-										}}
-										accessibilityLayer
-									/>
-								) : (
-									tooltip
-								)
-							}
-							{...tooltipProps}
+						<YAxis
+							className="**:[text]:fill-muted-fg"
+							hide={hideYAxis}
+							tickFormatter={type === "percent" ? valueToPercent : valueFormatter}
+							{...yAxisProps}
 						/>
-					)}
 
-					{!children
-						? Object.entries(config).map(([category, values]) => {
-								const categoryId = `${areaId}-${category.replace(/[^a-zA-Z0-9]/g, "")}`;
+						{/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
+						{legend != null && (
+							<ChartLegend
+								content={typeof legend === "boolean" ? <ChartLegendContent /> : legend}
+								{...legendProps}
+							/>
+						)}
 
+						{/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
+						{tooltip != null && (
+							<ChartTooltip
+								content={
+									typeof tooltip === "boolean" ? (
+										<ChartTooltipContent
+											{...{
+												hideIndicator: tooltipProps?.hideIndicator,
+												hideLabel: tooltipProps?.hideLabel,
+												cursor: tooltipProps?.cursor,
+												indicator: tooltipProps?.indicator,
+												labelSeparator: tooltipProps?.labelSeparator,
+												formatter: tooltipProps?.formatter,
+												labelFormatter: tooltipProps?.labelFormatter,
+											}}
+											accessibilityLayer={true}
+										/>
+									) : (
+										tooltip
+									)
+								}
+								{...tooltipProps}
+							/>
+						)}
+
+						{children ??
+							Object.entries(config).map(([category, values]) => {
+								const categoryId = `${areaId}-${category.replaceAll(/[^a-z0-9]/gi, "")}`;
+
+								// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 								const strokeOpacity = selectedLegend && selectedLegend !== category ? 0.1 : 1;
 
 								return (
 									<Fragment key={categoryId}>
 										<defs>
 											<linearGradient
-												style={{
-													color: getColorValue(values.color || categoryColors.get(category)),
-												}}
 												id={categoryId}
+												style={{
+													color: getColorValue(values.color ?? categoryColors.get(category)),
+												}}
 												x1="0"
-												y1="0"
 												x2="0"
+												y1="0"
 												y2="1"
 											>
 												{getFillContent({
 													fillType,
 													activeLegend: selectedLegend,
-													category: category,
+													category,
 												})}
 											</linearGradient>
 										</defs>
 										<Area
-											dot={false}
-											name={category}
+											connectNulls={connectNulls}
 											dataKey={category}
-											stroke={getColorValue(values.color || categoryColors.get(category))}
+											dot={false}
+											fill={`url(#${categoryId})`}
+											isAnimationActive={true}
+											name={category}
+											stackId={stacked ? "stack" : undefined}
+											stroke={getColorValue(values.color ?? categoryColors.get(category))}
+											strokeLinecap="round"
+											strokeLinejoin="round"
 											style={{
 												strokeWidth: 2,
 												strokeOpacity,
 											}}
-											strokeLinejoin="round"
-											strokeLinecap="round"
-											isAnimationActive={true}
-											connectNulls={connectNulls}
-											stackId={stacked ? "stack" : undefined}
-											fill={`url(#${categoryId})`}
 											{...areaProps}
 										/>
 									</Fragment>
 								);
-							})
-						: children}
-				</AreaChartPrimitive>
-			)}
+							})}
+					</AreaChartPrimitive>
+				);
+			}}
 		</Chart>
 	);
-};
+}

@@ -43,6 +43,7 @@
 		"@internationalized/date": "catalog:",
 		"@react-aria/utils": "catalog:",
 		"clsx": "catalog:",
+		"embla-carousel-react": "catalog:",
 		"lucide-react": "catalog:",
 		"next-intl": "catalog:",
 		"react": "catalog:",

@@ -2,12 +2,23 @@
 
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-react";
-import { createContext, use, useCallback, useEffect, useState } from "react";
+import {
+	type ComponentProps,
+	createContext,
+	type HTMLAttributes,
+	type KeyboardEvent,
+	type ReactNode,
+	use,
+	useCallback,
+	useEffect,
+	useState,
+} from "react";
 import { twMerge } from "tailwind-merge";
-import { cx } from "@/lib/primitive";
-import { Button, type ButtonProps } from "./button";
 
-type CarouselApi = UseEmblaCarouselType[1];
+import { Button, type ButtonProps } from "@/lib/button";
+import { cx } from "@/lib/primitive";
+
+export type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
 type CarouselOptions = UseCarouselParameters[0];
 type CarouselPlugin = UseCarouselParameters[1];
@@ -40,14 +51,14 @@ interface CarouselRootProps {
 	CarouselButton?: typeof CarouselButton;
 }
 
-interface CarouselProps extends React.HTMLAttributes<HTMLDivElement>, CarouselRootProps {
+interface CarouselProps extends HTMLAttributes<HTMLDivElement>, CarouselRootProps {
 	opts?: CarouselOptions;
 	plugins?: CarouselPlugin;
 	orientation?: "horizontal" | "vertical";
 	setApi?: (api: CarouselApi) => void;
 }
 
-const Carousel = ({
+export function Carousel({
 	orientation = "horizontal",
 	opts,
 	setApi,
@@ -55,7 +66,7 @@ const Carousel = ({
 	className,
 	children,
 	...props
-}: CarouselProps) => {
+}: Readonly<CarouselProps>): ReactNode {
 	const [carouselRef, api] = useEmblaCarousel(
 		{
 			...opts,
@@ -84,7 +95,7 @@ const Carousel = ({
 	}, [api]);
 
 	const handleKeyDown = useCallback(
-		(event: React.KeyboardEvent<HTMLDivElement>) => {
+		(event: KeyboardEvent<HTMLDivElement>) => {
 			if (event.key === "ArrowLeft") {
 				event.preventDefault();
 				scrollPrev();
@@ -109,22 +120,25 @@ const Carousel = ({
 			return;
 		}
 
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		onSelect(api);
 		api.on("reInit", onSelect);
 		api.on("select", onSelect);
 
 		return () => {
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			api?.off("select", onSelect);
 		};
 	}, [api, onSelect]);
 
 	return (
-		<CarouselContext.Provider
+		<CarouselContext
 			value={{
 				carouselRef,
-				api: api,
+				api,
 				opts,
-				orientation: orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
+				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+				orientation: orientation ?? (opts?.axis === "y" ? "vertical" : "horizontal"),
 				scrollPrev,
 				scrollNext,
 				canScrollPrev,
@@ -132,19 +146,22 @@ const Carousel = ({
 			}}
 		>
 			<div
-				onKeyDownCapture={handleKeyDown}
-				className={twMerge("relative", className)}
-				role="region"
 				aria-roledescription="carousel"
+				className={twMerge("relative", className)}
+				onKeyDownCapture={handleKeyDown}
+				role="region"
 				{...props}
 			>
 				{children}
 			</div>
-		</CarouselContext.Provider>
+		</CarouselContext>
 	);
-};
+}
 
-const CarouselContent = ({ className, ...props }: React.ComponentProps<"div">) => {
+export function CarouselContent({
+	className,
+	...props
+}: Readonly<ComponentProps<"div">>): ReactNode {
 	const { carouselRef, orientation } = useCarousel();
 
 	return (
@@ -159,9 +176,9 @@ const CarouselContent = ({ className, ...props }: React.ComponentProps<"div">) =
 			/>
 		</div>
 	);
-};
+}
 
-const CarouselItem = ({ className, ...props }: React.ComponentProps<"div">) => {
+export function CarouselItem({ className, ...props }: Readonly<ComponentProps<"div">>): ReactNode {
 	const { orientation } = useCarousel();
 
 	return (
@@ -174,25 +191,29 @@ const CarouselItem = ({ className, ...props }: React.ComponentProps<"div">) => {
 			{...props}
 		/>
 	);
-};
+}
 
-const CarouselHandler = ({ ref, className, ...props }: React.ComponentProps<"div">) => {
+export function CarouselHandler({
+	ref,
+	className,
+	...props
+}: Readonly<ComponentProps<"div">>): ReactNode {
 	const { orientation } = useCarousel();
 	return (
 		<div
-			data-slot="carousel-handler"
 			ref={ref}
 			className={twMerge(
 				"relative z-10 mt-6 flex items-center gap-x-2",
 				orientation === "horizontal" ? "justify-end" : "justify-center",
 				className,
 			)}
+			data-slot="carousel-handler"
 			{...props}
 		/>
 	);
-};
+}
 
-const CarouselButton = ({
+export function CarouselButton({
 	segment,
 	className,
 	intent = "outline",
@@ -200,7 +221,7 @@ const CarouselButton = ({
 	size = "sq-sm",
 	ref,
 	...props
-}: ButtonProps & { segment: "previous" | "next" }) => {
+}: Readonly<ButtonProps & { segment: "previous" | "next" }>): ReactNode {
 	const { orientation, scrollPrev, canScrollPrev, scrollNext, canScrollNext } = useCarousel();
 	const isNext = segment === "next";
 	const canScroll = isNext ? canScrollNext : canScrollPrev;
@@ -209,21 +230,18 @@ const CarouselButton = ({
 
 	return (
 		<Button
+			ref={ref}
 			aria-label={isNext ? "Next slide" : "Previous slide"}
+			className={cx([orientation === "vertical" ? "rotate-90" : "", "shrink-0"], className)}
 			data-handler={segment}
 			intent={intent}
-			ref={ref}
-			size={size}
 			isCircle={isCircle}
-			className={cx([orientation === "vertical" ? "rotate-90" : "", "shrink-0"], className)}
 			isDisabled={!canScroll}
 			onPress={scroll}
+			size={size}
 			{...props}
 		>
 			<Icon className="size-4" />
 		</Button>
 	);
-};
-
-export type { CarouselApi };
-export { Carousel, CarouselContent, CarouselHandler, CarouselItem, CarouselButton };
+}

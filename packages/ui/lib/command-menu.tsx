@@ -202,12 +202,10 @@ export function CommandMenuList<T extends object>({
 
 export function CommandMenuSection<T extends object>({
 	className,
-	ref,
 	...props
 }: Readonly<MenuSectionProps<T>>): ReactNode {
 	return (
 		<MenuSection
-			ref={ref}
 			className={twMerge(
 				"col-span-full grid grid-cols-[auto_1fr] content-start gap-y-0.25",
 				className,
