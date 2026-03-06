@@ -5,9 +5,9 @@ import type { ReactNode } from "react";
 
 import { SignUpForm } from "@/app/(app)/[locale]/(auth)/auth/sign-up/_components/sign-up-form";
 import { Main } from "@/components/main";
-import { Avatar } from "@/components/ui/avatar";
-import { Link } from "@/components/ui/link";
-import { Text, TextLink } from "@/components/ui/text";
+import { Avatar } from "@dariah-eric/ui/avatar";
+import { Link } from "@dariah-eric/ui/link";
+import { Text, TextLink } from "@dariah-eric/ui/text";
 import { passwords } from "@/config/auth.config";
 import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";

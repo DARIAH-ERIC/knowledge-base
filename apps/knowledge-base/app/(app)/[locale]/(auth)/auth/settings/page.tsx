@@ -7,9 +7,9 @@ import { RecoveryCodeForm } from "@/app/(app)/[locale]/(auth)/auth/settings/_com
 import { UpdateEmailForm } from "@/app/(app)/[locale]/(auth)/auth/settings/_components/update-email-form";
 import { UpdatePasswordForm } from "@/app/(app)/[locale]/(auth)/auth/settings/_components/update-password-form";
 import { Main } from "@/components/main";
-import { Avatar } from "@/components/ui/avatar";
-import { Link } from "@/components/ui/link";
-import { Text, TextLink } from "@/components/ui/text";
+import { Avatar } from "@dariah-eric/ui/avatar";
+import { Link } from "@dariah-eric/ui/link";
+import { Text, TextLink } from "@dariah-eric/ui/text";
 import { auth } from "@/lib/auth";
 import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";

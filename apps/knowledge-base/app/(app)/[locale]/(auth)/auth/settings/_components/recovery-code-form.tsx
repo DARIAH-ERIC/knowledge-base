@@ -6,9 +6,9 @@ import { type ReactNode, useActionState } from "react";
 
 import { regenerateRecoveryCodeAction } from "@/app/(app)/[locale]/(auth)/auth/settings/_lib/regenerate-recovery-code.action";
 import { Form } from "@/components/form";
-import { FormStatus } from "@/components/ui/form-status";
-import { SubmitButton } from "@/components/ui/submit-button";
-import { Text } from "@/components/ui/text";
+import { FormStatus } from "@dariah-eric/ui/form-status";
+import { SubmitButton } from "@dariah-eric/ui/submit-button";
+import { Text } from "@dariah-eric/ui/text";
 
 interface RecoveryCodeFormProps {
 	recoveryCode: string;

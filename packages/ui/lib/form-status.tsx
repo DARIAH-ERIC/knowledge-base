@@ -8,8 +8,8 @@ import {
 import { AlertTriangleIcon, CheckCircle2Icon } from "lucide-react";
 import { Fragment, type ReactNode } from "react";
 
-import { FormErrorMessage } from "@/components/form-error-message";
-import { FormSuccessMessage } from "@/components/form-success-message";
+import { FormErrorMessage } from "@/lib/form-error-message";
+import { FormSuccessMessage } from "@/lib/form-success-message";
 
 export interface FormStatusProps {
 	state: ActionState;
@@ -28,7 +28,7 @@ export function FormStatus(props: Readonly<FormStatusProps>): ReactNode {
 
 					return (
 						<span className="flex items-center gap-x-2">
-							<AlertTriangleIcon aria-hidden={true} />
+							<AlertTriangleIcon aria-hidden={true} className="size-5" />
 							{state.message}
 						</span>
 					);
@@ -42,7 +42,7 @@ export function FormStatus(props: Readonly<FormStatusProps>): ReactNode {
 
 					return (
 						<span className="flex items-center gap-x-2">
-							<CheckCircle2Icon aria-hidden={true} />
+							<CheckCircle2Icon aria-hidden={true} className="size-5" />
 							{state.message}
 						</span>
 					);

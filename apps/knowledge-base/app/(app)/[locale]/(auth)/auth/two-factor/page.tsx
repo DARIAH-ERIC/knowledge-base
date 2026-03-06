@@ -5,9 +5,9 @@ import type { ReactNode } from "react";
 
 import { TwoFactorVerificationForm } from "@/app/(app)/[locale]/(auth)/auth/two-factor/_components/two-factor-verification-form";
 import { Main } from "@/components/main";
-import { Avatar } from "@/components/ui/avatar";
-import { Link } from "@/components/ui/link";
-import { Text, TextLink } from "@/components/ui/text";
+import { Avatar } from "@dariah-eric/ui/avatar";
+import { Link } from "@dariah-eric/ui/link";
+import { Text, TextLink } from "@dariah-eric/ui/text";
 import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";

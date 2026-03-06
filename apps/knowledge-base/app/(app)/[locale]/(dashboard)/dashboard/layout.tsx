@@ -5,7 +5,7 @@ import { DashboardSidebar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_co
 import { DashboardSidebarNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav";
 import { mainContentId } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/main";
 import { SkipLink } from "@/components/skip-link";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@dariah-eric/ui/sidebar";
 
 interface DashbardLayoutProps extends LayoutProps<"/[locale]/dashboard"> {}
 

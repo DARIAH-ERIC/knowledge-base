@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { SpotlightArticlesTable } from "@/components/ui/tables/spotlight-articles-table";
+import { SpotlightArticlesTable } from "@dariah-eric/ui/tables/spotlight-articles-table";
 import { getSpotlightArticles } from "@/lib/data/cached/spotlight-articles";
 import { createMetadata } from "@/lib/server/create-metadata";
 

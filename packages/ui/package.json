@@ -25,6 +25,10 @@
 		"./description-list": "./dist/description-list.mjs",
 		"./dialog": "./dist/dialog.mjs",
 		"./field": "./dist/field.mjs",
+		"./form": "./dist/form.mjs",
+		"./form-error-message": "./dist/form-error-message.mjs",
+		"./form-status": "./dist/form-status.mjs",
+		"./form-success-message": "./dist/form-success-message.mjs",
 		"./grid-list": "./dist/grid-list.mjs",
 		"./heading": "./dist/heading.mjs",
 		"./index": "./dist/index.mjs",
@@ -48,10 +52,12 @@
 		"./sheet": "./dist/sheet.mjs",
 		"./sidebar": "./dist/sidebar.mjs",
 		"./spark-chart": "./dist/spark-chart.mjs",
+		"./submit-button": "./dist/submit-button.mjs",
 		"./switch": "./dist/switch.mjs",
 		"./table": "./dist/table.mjs",
 		"./tabs": "./dist/tabs.mjs",
 		"./tag-group": "./dist/tag-group.mjs",
+		"./text": "./dist/text.mjs",
 		"./textarea": "./dist/textarea.mjs",
 		"./text-field": "./dist/text-field.mjs",
 		"./time-field": "./dist/time-field.mjs",
@@ -106,10 +112,14 @@
 		"tailwind-merge": "catalog:",
 		"tailwind-variants": "catalog:"
 	},
+	"peerDependencies": {
+		"@dariah-eric/next-lib": "workspace:^"
+	},
 	"devDependencies": {
 		"@acdh-oeaw/stylelint-config": "catalog:",
 		"@chromatic-com/storybook": "catalog:",
 		"@dariah-eric/configs": "workspace:^",
+		"@dariah-eric/next-lib": "workspace:^",
 		"@fontsource-variable/fira-code": "catalog:",
 		"@fontsource-variable/inter": "catalog:",
 		"@storybook/addon-a11y": "catalog:",

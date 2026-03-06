@@ -6,11 +6,11 @@ import { type ReactNode, useActionState } from "react";
 
 import { forgotPasswordAction } from "@/app/(app)/[locale]/(auth)/auth/forgot-password/_lib/forgot-password.action";
 import { Form } from "@/components/form";
-import { FieldError, Label } from "@/components/ui/field";
-import { FormStatus } from "@/components/ui/form-status";
-import { Input } from "@/components/ui/input";
-import { SubmitButton } from "@/components/ui/submit-button";
-import { TextField } from "@/components/ui/text-field";
+import { FieldError, Label } from "@dariah-eric/ui/field";
+import { FormStatus } from "@dariah-eric/ui/form-status";
+import { Input } from "@dariah-eric/ui/input";
+import { SubmitButton } from "@dariah-eric/ui/submit-button";
+import { TextField } from "@dariah-eric/ui/text-field";
 
 export function ForgotPasswordForm(): ReactNode {
 	const t = useTranslations("ForgotPasswordForm");

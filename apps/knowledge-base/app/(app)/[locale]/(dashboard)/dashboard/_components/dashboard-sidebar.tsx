@@ -20,8 +20,8 @@ import {
 } from "@heroicons/react/24/solid";
 import type { ComponentProps, ReactNode } from "react";
 
-import { Avatar } from "@/components/ui/avatar";
-import { Link } from "@/components/ui/link";
+import { Avatar } from "@dariah-eric/ui/avatar";
+import { Link } from "@dariah-eric/ui/link";
 import {
 	Menu,
 	MenuContent,
@@ -31,7 +31,7 @@ import {
 	MenuSection,
 	MenuSeparator,
 	MenuTrigger,
-} from "@/components/ui/menu";
+} from "@dariah-eric/ui/menu";
 import {
 	Sidebar,
 	SidebarContent,
@@ -44,7 +44,7 @@ import {
 	SidebarItem,
 	SidebarLabel,
 	SidebarRail,
-} from "@/components/ui/sidebar";
+} from "@dariah-eric/ui/sidebar";
 
 export function DashboardSidebar(props: Readonly<ComponentProps<typeof Sidebar>>): ReactNode {
 	return (

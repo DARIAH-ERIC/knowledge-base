@@ -5,9 +5,9 @@ import type { ReactNode } from "react";
 
 import { ForgotPasswordForm } from "@/app/(app)/[locale]/(auth)/auth/forgot-password/_components/forgot-password-form";
 import { Main } from "@/components/main";
-import { Avatar } from "@/components/ui/avatar";
-import { Link } from "@/components/ui/link";
-import { Text, TextLink } from "@/components/ui/text";
+import { Avatar } from "@dariah-eric/ui/avatar";
+import { Link } from "@dariah-eric/ui/link";
+import { Text, TextLink } from "@dariah-eric/ui/text";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface ForgotPasswordPageProps extends PageProps<"/[locale]/auth/forgot-password"> {}

@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { EventsTable } from "@/components/ui/tables/events-table";
+import { EventsTable } from "@dariah-eric/ui/tables/events-table";
 import { getEvents } from "@/lib/data/cached/events";
 import { createMetadata } from "@/lib/server/create-metadata";
 

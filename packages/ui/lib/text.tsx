@@ -2,11 +2,10 @@
 
 "use client";
 
+import cn from "clsx/lite";
 import type { ReactNode } from "react";
+import { composeRenderProps } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
-import { tv } from "tailwind-variants";
-
-import { cx } from "@/components/ui/cx";
 
 import { Link } from "./link";
 
@@ -20,15 +19,21 @@ export function Text({ className, ...props }: React.ComponentPropsWithoutRef<"p"
 	);
 }
 
-export const textLinkStyles = tv({
-	base: "text-primary-subtle-fg decoration-primary-subtle-fg/50 hover:underline hover:decoration-primary-subtle-fg has-data-[slot=icon]:inline-flex has-data-[slot=icon]:items-center has-data-[slot=icon]:gap-x-1",
-});
-
 export function TextLink({
 	className,
 	...props
 }: React.ComponentPropsWithoutRef<typeof Link>): ReactNode {
-	return <Link {...props} className={cx(textLinkStyles(), className)} />;
+	return (
+		<Link
+			{...props}
+			className={composeRenderProps(className, (className) => {
+				return cn(
+					"text-primary-subtle-fg decoration-primary-subtle-fg/50 hover:underline hover:decoration-primary-subtle-fg has-data-[slot=icon]:inline-flex has-data-[slot=icon]:items-center has-data-[slot=icon]:gap-x-1",
+					className,
+				);
+			})}
+		/>
+	);
 }
 
 export function Strong({
