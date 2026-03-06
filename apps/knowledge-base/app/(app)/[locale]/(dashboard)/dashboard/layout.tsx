@@ -1,3 +1,4 @@
+import { SidebarInset, SidebarProvider } from "@dariah-eric/ui/sidebar";
 import { connection } from "next/server";
 import { getTranslations } from "next-intl/server";
 import { Fragment, type ReactNode } from "react";
@@ -6,7 +7,6 @@ import { DashboardSidebar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_co
 import { DashboardSidebarNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav";
 import { mainContentId } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/main";
 import { SkipLink } from "@/components/skip-link";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 interface DashbardLayoutProps extends LayoutProps<"/[locale]/dashboard"> {}
 

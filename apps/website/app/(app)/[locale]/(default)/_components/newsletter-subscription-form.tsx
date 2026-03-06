@@ -1,13 +1,13 @@
 "use client";
 
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { Form } from "@dariah-eric/ui/form";
+import { FormStatus } from "@dariah-eric/ui/form-status";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useActionState } from "react";
 import { Input, Label, TextField } from "react-aria-components";
 
 import { subscribeNewsletterAction } from "@/app/(app)/[locale]/(default)/_lib/subscribe-newsletter.action";
-import { Form } from "@/components/form";
-import { FormStatus } from "@/components/form-status";
 import { SubmitButton } from "@/components/submit-button";
 
 export function NewsletterSubscriptionForm(): ReactNode {

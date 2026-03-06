@@ -1,4 +1,6 @@
 import { globalGetRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
+import { Avatar } from "@dariah-eric/ui/avatar";
+import { Link } from "@dariah-eric/ui/link";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -6,8 +8,6 @@ import { renderSVG } from "uqr";
 
 import { TwoFactorSetUpForm } from "@/app/(app)/[locale]/(auth)/auth/two-factor/setup/_components/two-factor-set-up-form";
 import { Main } from "@/components/main";
-import { Avatar } from "@/components/ui/avatar";
-import { Link } from "@/components/ui/link";
 import { issuer } from "@/config/auth.config";
 import { auth } from "@/lib/auth";
 import { getCurrentSession } from "@/lib/auth/session";
