@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/strict-boolean-expressions */
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-/* eslint-disable @eslint-react/prefer-read-only-props */
 
-import type { ComponentProps, HTMLAttributes } from "react";
+import type { ComponentProps, HTMLAttributes, ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
 
-function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+export function Card({ className, ...props }: Readonly<HTMLAttributes<HTMLDivElement>>): ReactNode {
 	return (
 		<div
 			className={twMerge(
@@ -18,12 +16,18 @@ function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
 	);
 }
 
-interface HeaderProps extends HTMLAttributes<HTMLDivElement> {
+export interface HeaderProps extends HTMLAttributes<HTMLDivElement> {
 	title?: string;
 	description?: string;
 }
 
-function CardHeader({ className, title, description, children, ...props }: HeaderProps) {
+export function CardHeader({
+	className,
+	title,
+	description,
+	children,
+	...props
+}: Readonly<HeaderProps>): ReactNode {
 	return (
 		<div
 			className={twMerge(
@@ -40,7 +44,7 @@ function CardHeader({ className, title, description, children, ...props }: Heade
 	);
 }
 
-function CardTitle({ className, ...props }: ComponentProps<"div">) {
+export function CardTitle({ className, ...props }: Readonly<ComponentProps<"div">>): ReactNode {
 	return (
 		<div
 			className={twMerge("text-balance font-semibold text-base/6", className)}
@@ -50,7 +54,10 @@ function CardTitle({ className, ...props }: ComponentProps<"div">) {
 	);
 }
 
-function CardDescription({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+export function CardDescription({
+	className,
+	...props
+}: Readonly<HTMLAttributes<HTMLDivElement>>): ReactNode {
 	return (
 		<div
 			{...props}
@@ -61,7 +68,10 @@ function CardDescription({ className, ...props }: HTMLAttributes<HTMLDivElement>
 	);
 }
 
-function CardAction({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+export function CardAction({
+	className,
+	...props
+}: Readonly<HTMLAttributes<HTMLDivElement>>): ReactNode {
 	return (
 		<div
 			className={twMerge(
@@ -74,7 +84,10 @@ function CardAction({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
 	);
 }
 
-function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+export function CardContent({
+	className,
+	...props
+}: Readonly<HTMLAttributes<HTMLDivElement>>): ReactNode {
 	return (
 		<div
 			className={twMerge("px-(--gutter) has-[table]:border-t", className)}
@@ -84,7 +97,10 @@ function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
 	);
 }
 
-function CardFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+export function CardFooter({
+	className,
+	...props
+}: Readonly<HTMLAttributes<HTMLDivElement>>): ReactNode {
 	return (
 		<div
 			className={twMerge(
@@ -96,5 +112,3 @@ function CardFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
 		/>
 	);
 }
-
-export { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle };
