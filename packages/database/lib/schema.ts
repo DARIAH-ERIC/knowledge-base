@@ -8,5 +8,7 @@ export * from "./schema/news";
 export * from "./schema/organisational-units";
 export * from "./schema/pages";
 export * from "./schema/persons";
+export * from "./schema/projects";
+export * from "./schema/reports";
 export * from "./schema/spotlight-articles";
 export * from "./schema/users";
