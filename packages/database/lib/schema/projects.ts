@@ -88,6 +88,12 @@ export const projectsToOrganisationalUnitsRelations = p.pgTable(
 			.references(() => {
 				return organisationalUnits.id;
 			}),
+		projectRoleId: p
+			.uuid("role_id")
+			.notNull()
+			.references(() => {
+				return projectRoles.id;
+			}),
 		duration: f.timestampRange("duration"),
 	},
 );
