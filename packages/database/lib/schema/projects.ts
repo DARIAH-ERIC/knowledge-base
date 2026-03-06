@@ -48,7 +48,7 @@ export const projects = p.pgTable("projects", {
 	name: p.text("name").notNull(),
 	duration: f.timestampRange("duration").notNull(),
 	// amount may be derived from cordis
-	amount: p.numeric("amount"),
+	funding: p.numeric("funding"),
 	summary: p.text("summary").notNull(),
 	call: p.text("call").notNull(),
 	funders: p.text("funders").notNull(),
@@ -115,25 +115,11 @@ export const ProjectsToOrganisationalUnitsRelationUpdateSchema = createUpdateSch
 
 export const projectsContributions = p.pgTable("project_contributions", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
-	projectReportId: p.uuid("project_to_report_id").references(() => {
-		return projectsToReportsRelations.id;
-	}),
 	projectsToOrganisationalUnitsRelationsId: p
 		.uuid("project_to_organisational_unit_id")
 		.references(() => {
 			return projectsToOrganisationalUnitsRelations.id;
 		}),
-});
-
-export type ProjectsContribution = typeof projectsContributions.$inferSelect;
-export type ProjectsContributionInput = typeof projectsContributions.$inferInsert;
-
-export const ProjectsContributionSelectSchema = createSelectSchema(projectsContributions);
-export const ProjectsContributionInsertSchema = createInsertSchema(projectsContributions);
-export const ProjectsContributionUpdateSchema = createUpdateSchema(projectsContributions);
-
-export const projectsToReportsRelations = p.pgTable("projects_to_reports", {
-	id: p.uuid("id").primaryKey().default(uuidv7()),
 	reportId: p
 		.uuid("report_id")
 		.notNull()
@@ -143,9 +129,9 @@ export const projectsToReportsRelations = p.pgTable("projects_to_reports", {
 	budget: p.numeric(),
 });
 
-export type ProjectsToReportsRelation = typeof projectsToReportsRelations.$inferSelect;
-export type ProjectsToReportsRelationInput = typeof projectsToReportsRelations.$inferInsert;
+export type ProjectsContribution = typeof projectsContributions.$inferSelect;
+export type ProjectsContributionInput = typeof projectsContributions.$inferInsert;
 
-export const ProjectsToReportsRelationSelectSchema = createSelectSchema(projectsToReportsRelations);
-export const ProjectsToReportsRelationInsertSchema = createInsertSchema(projectsToReportsRelations);
-export const ProjectsToReportsRelationUpdateSchema = createUpdateSchema(projectsToReportsRelations);
+export const ProjectsContributionSelectSchema = createSelectSchema(projectsContributions);
+export const ProjectsContributionInsertSchema = createInsertSchema(projectsContributions);
+export const ProjectsContributionUpdateSchema = createUpdateSchema(projectsContributions);
