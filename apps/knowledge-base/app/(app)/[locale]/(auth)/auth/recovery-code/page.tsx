@@ -1,5 +1,6 @@
 import { globalGetRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import type { Metadata, ResolvingMetadata } from "next";
+import { connection } from "next/server";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
@@ -30,8 +31,9 @@ export async function generateMetadata(
 export default async function RecoveryCodePage(
 	_props: Readonly<RecoveryCodePageProps>,
 ): Promise<ReactNode> {
-	const locale = await getLocale();
+	await connection();
 
+	const locale = await getLocale();
 	const t = await getTranslations("RecoveryCodePage");
 	const e = await getTranslations("errors");
 
