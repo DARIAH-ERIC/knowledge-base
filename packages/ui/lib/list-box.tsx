@@ -1,39 +1,52 @@
 "use client";
 
 import { CheckIcon } from "@heroicons/react/20/solid";
-import type { ListBoxItemProps, ListBoxProps, ListBoxSectionProps } from "react-aria-components";
+import type { ReactNode } from "react";
 import {
 	composeRenderProps,
-	ListBoxItem as ListBoxItemPrimitive,
-	ListBox as ListBoxPrimitive,
+	ListBox as AriaListBox,
+	ListBoxItem as AriaListBoxItem,
+	type ListBoxItemProps as AriaListBoxItemProps,
+	type ListBoxProps as AriaListBoxProps,
 } from "react-aria-components";
 import { twJoin, twMerge } from "tailwind-merge";
-import { cx } from "@/lib/primitive";
+
 import {
 	DropdownDescription,
+	dropdownItemStyles,
 	DropdownLabel,
 	DropdownSection,
 	type DropdownSectionProps,
-	dropdownItemStyles,
 } from "@/lib/dropdown";
+import { cx } from "@/lib/primitive";
 
-const ListBox = <T extends object>({ className, ...props }: ListBoxProps<T>) => (
-	<ListBoxPrimitive
-		{...props}
-		className={cx(
-			"grid max-h-96 w-full min-w-56 scroll-py-1 grid-cols-[auto_1fr] flex-col gap-y-1 overflow-y-auto overscroll-contain rounded-xl border bg-bg p-1 outline-hidden [scrollbar-width:thin] has-data-[slot=drag-icon]:grid-cols-[auto_auto_1fr] [&::-webkit-scrollbar]:size-0.5 *:[[role='group']+[role=group]]:mt-4 *:[[role='group']+[role=separator]]:mt-1",
-			className,
-		)}
-	/>
-);
+export interface ListBoxProps<T extends object> extends AriaListBoxProps<T> {}
 
-const ListBoxItem = <T extends object>({ children, className, ...props }: ListBoxItemProps<T>) => {
-	const textValue = typeof children === "string" ? children : undefined;
+export function ListBox<T extends object>(props: Readonly<ListBoxProps<T>>): ReactNode {
+	const { className, ...rest } = props;
+
 	return (
-		<ListBoxItemPrimitive
-			textValue={textValue}
-			className={composeRenderProps(className, (className, renderProps) =>
-				dropdownItemStyles({
+		<AriaListBox
+			{...rest}
+			className={cx(
+				"grid max-h-96 w-full min-w-56 scroll-py-1 grid-cols-[auto_1fr] flex-col gap-y-1 overflow-y-auto overscroll-contain rounded-xl border bg-bg p-1 outline-hidden [scrollbar-width:thin] *:[[role='group']+[role=group]]:mt-4 *:[[role='group']+[role=separator]]:mt-1 has-data-[slot=drag-icon]:grid-cols-[auto_auto_1fr] [&::-webkit-scrollbar]:size-0.5",
+				className,
+			)}
+		/>
+	);
+}
+
+export interface ListBoxItemProps<T extends object> extends AriaListBoxItemProps<T> {}
+
+export function ListBoxItem<T extends object>(props: Readonly<ListBoxItemProps<T>>): ReactNode {
+	const { children, className, ...rest } = props;
+
+	const textValue = typeof children === "string" ? children : undefined;
+
+	return (
+		<AriaListBoxItem
+			className={composeRenderProps(className, (className, renderProps) => {
+				return dropdownItemStyles({
 					...renderProps,
 					className: twJoin(
 						"group not-has-[[slot=description]]:items-start",
@@ -43,23 +56,24 @@ const ListBoxItem = <T extends object>({ children, className, ...props }: ListBo
 						"href" in props ? "cursor-pointer" : "cursor-default",
 						className,
 					),
-				}),
-			)}
+				});
+			})}
 			data-slot="list-box-item"
-			{...props}
+			textValue={textValue}
+			{...rest}
 		>
 			{(renderProps) => {
 				const { allowsDragging, isSelected } = renderProps;
 
 				return (
 					<>
-						{allowsDragging && (
+						{allowsDragging === true ? (
 							<svg
+								className="mr-2 size-5 h-lh text-muted-fg sm:w-4"
 								data-slot="drag-icon"
-								className="mr-2 size-5 h-[1lh] text-muted-fg sm:w-4"
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 24 24"
 								fill="none"
+								viewBox="0 0 24 24"
+								xmlns="http://www.w3.org/2000/svg"
 							>
 								<path
 									d="M11 5.5C11 6.32843 10.3284 7 9.5 7C8.67157 7 8 6.32843 8 5.5C8 4.67157 8.67157 4 9.5 4C10.3284 4 11 4.67157 11 5.5Z"
@@ -86,13 +100,13 @@ const ListBoxItem = <T extends object>({ children, className, ...props }: ListBo
 									fill="currentColor"
 								/>
 							</svg>
-						)}
-						{isSelected && (
+						) : null}
+						{isSelected ? (
 							<CheckIcon
-								className="-mx-0.5 mr-2 h-[1lh] w-5 shrink-0 group-allows-dragging:col-start-2 sm:w-4"
+								className="-mx-0.5 mr-2 h-lh w-5 shrink-0 group-allows-dragging:col-start-2 sm:w-4"
 								data-slot="check-icon"
 							/>
-						)}
+						) : null}
 						{typeof children === "function" ? (
 							children(renderProps)
 						) : typeof children === "string" ? (
@@ -103,21 +117,24 @@ const ListBoxItem = <T extends object>({ children, className, ...props }: ListBo
 					</>
 				);
 			}}
-		</ListBoxItemPrimitive>
+		</AriaListBoxItem>
 	);
-};
+}
 
-const ListBoxSection = <T extends object>({ className, ...props }: DropdownSectionProps<T>) => {
+export interface ListBoxSectionProps<T extends object> extends DropdownSectionProps<T> {}
+
+export function ListBoxSection<T extends object>(
+	props: Readonly<ListBoxSectionProps<T>>,
+): ReactNode {
+	const { className, ...rest } = props;
+
 	return (
 		<DropdownSection
 			className={twMerge("gap-y-1 *:data-[slot=list-box-item]:last:-mb-1.5", className)}
-			{...props}
+			{...rest}
 		/>
 	);
-};
+}
 
-const ListBoxLabel = DropdownLabel;
-const ListBoxDescription = DropdownDescription;
-
-export type { ListBoxItemProps, ListBoxSectionProps };
-export { ListBox, ListBoxSection, ListBoxItem, ListBoxLabel, ListBoxDescription };
+export const ListBoxLabel = DropdownLabel;
+export const ListBoxDescription = DropdownDescription;

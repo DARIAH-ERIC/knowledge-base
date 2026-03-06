@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { useExtracted } from "next-intl";
 import { createContext, type ReactNode, type Ref, use } from "react";
 import {
 	Button as AriaButton,
@@ -28,7 +29,6 @@ import { twJoin, twMerge } from "tailwind-merge";
 import { CardDescription, CardTitle } from "@/lib/card";
 import { Checkbox } from "@/lib/checkbox";
 import { cx } from "@/lib/primitive";
-import { useExtracted } from "next-intl";
 
 export interface TableProps extends Omit<AriaTableProps, "className"> {
 	allowResize?: boolean;
@@ -390,10 +390,11 @@ export function TableHeader<T extends object>(props: Readonly<TableHeaderProps<T
 
 export interface TableRowProps<T extends object> extends AriaRowProps<T> {
 	ref?: Ref<HTMLTableRowElement>;
+	href?: string;
 }
 
 export function TableRow<T extends object>(props: Readonly<TableRowProps<T>>): ReactNode {
-	const { children, className, columns, id, ref, ...rest } = props;
+	const { children, className, columns, id, onAction, href, ref, ...rest } = props;
 
 	const { selectionBehavior, allowsDragging } = useTableOptions();
 	const { striped } = useTableContext();
@@ -422,9 +423,11 @@ export function TableRow<T extends object>(props: Readonly<TableRowProps<T>>): R
 						isDragging === true && "cursor-grabbing bg-primary/10 text-fg outline-primary",
 						isSelected && "bg-(--table-selected-bg) text-fg hover:bg-(--table-selected-bg)/50",
 						striped === true && "even:bg-muted",
-						(href || onAction || selectionMode === "multiple") &&
+						// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+						(href ?? onAction ?? selectionMode === "multiple") &&
 							"hover:bg-(--table-selected-bg) hover:text-fg",
-						(href || onAction || selectionMode === "multiple") &&
+						// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+						(href ?? onAction ?? selectionMode === "multiple") &&
 							isFocusVisibleWithin &&
 							"bg-(--table-selected-bg)/50 text-fg selected:bg-(--table-selected-bg)/50",
 						isDisabled && "opacity-50",
@@ -444,6 +447,7 @@ export function TableRow<T extends object>(props: Readonly<TableRowProps<T>>): R
 					>
 						<svg
 							aria-hidden={true}
+							// eslint-disable-next-line better-tailwindcss/no-unknown-classes
 							className="lucide lucide-grip-vertical-icon lucide-grip-vertical"
 							data-slot="icon"
 							fill="none"

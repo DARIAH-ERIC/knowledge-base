@@ -1,15 +1,16 @@
 "use client";
 
+import type { ReactNode } from "react";
 import {
 	type DialogProps as AriaDialogProps,
-	type DialogTriggerProps as AriaDialogTriggerProps,
-	type ModalOverlayProps as AriaModalOverlayProps,
 	DialogTrigger as AriaDialogTrigger,
-	ModalOverlay as AriaModalOverlay,
+	type DialogTriggerProps as AriaDialogTriggerProps,
 	Modal as AriaModal,
+	ModalOverlay as AriaModalOverlay,
+	type ModalOverlayProps as AriaModalOverlayProps,
 } from "react-aria-components";
 import { twJoin } from "tailwind-merge";
-import { cx } from "@/lib/primitive";
+
 import {
 	Dialog,
 	DialogBody,
@@ -21,8 +22,11 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/lib/dialog";
+import { cx } from "@/lib/primitive";
 
-export function Modal(props: AriaDialogTriggerProps) {
+export interface ModalProps extends AriaDialogTriggerProps {}
+
+export function Modal(props: Readonly<ModalProps>): ReactNode {
 	return <AriaDialogTrigger {...props} />;
 }
 
@@ -51,23 +55,23 @@ export interface ModalContentProps
 	overlay?: Omit<AriaModalOverlayProps, "children">;
 }
 
-export function ModalContent({
-	className,
-	isDismissable: isDismissableInternal,
-	isBlurred = false,
-	children,
-	overlay,
-	size = "lg",
-	role = "dialog",
-	closeButton = true,
-	...props
-}: ModalContentProps) {
+export function ModalContent(props: Readonly<ModalContentProps>): ReactNode {
+	const {
+		className,
+		isDismissable: isDismissableInternal,
+		isBlurred = false,
+		children,
+		overlay: _,
+		size = "lg",
+		role = "dialog",
+		closeButton = true,
+		...rest
+	} = props;
+
 	const isDismissable = isDismissableInternal ?? role !== "alertdialog";
 
 	return (
 		<AriaModalOverlay
-			data-slot="modal-overlay"
-			isDismissable={isDismissable}
 			className={twJoin(
 				"fixed inset-0 z-50 h-(--visual-viewport-height,100vh) bg-black/15",
 				"grid grid-rows-[1fr_auto] justify-items-center sm:grid-rows-[1fr_auto_3fr]",
@@ -76,10 +80,11 @@ export function ModalContent({
 				"exiting:fade-out exiting:animate-out exiting:ease-in",
 				isBlurred && "backdrop-blur-[1px]",
 			)}
-			{...props}
+			data-slot="modal-overlay"
+			isDismissable={isDismissable}
+			{...rest}
 		>
 			<AriaModal
-				data-slot="modal-content"
 				className={cx(
 					"row-start-2 w-full text-left align-middle",
 					"[--visual-viewport-vertical-padding:16px]",
@@ -90,39 +95,32 @@ export function ModalContent({
 					"rounded-t-2xl shadow-lg ring ring-fg/5 dark:ring-border",
 					sizes[size],
 
-					"entering:slide-in-from-bottom sm:entering:zoom-in-95 sm:entering:slide-in-from-bottom-0 entering:animate-in entering:duration-300 entering:ease-out",
-					"exiting:slide-out-to-bottom sm:exiting:zoom-out-95 sm:exiting:slide-out-to-bottom-0 exiting:animate-out exiting:ease-in",
+					"entering:slide-in-from-bottom entering:animate-in entering:duration-300 entering:ease-out sm:entering:zoom-in-95 sm:entering:slide-in-from-bottom-0",
+					"exiting:slide-out-to-bottom exiting:animate-out exiting:ease-in sm:exiting:zoom-out-95 sm:exiting:slide-out-to-bottom-0",
 					className,
 				)}
+				data-slot="modal-content"
 				{...props}
 			>
 				<Dialog role={role}>
-					{(values) => (
-						<>
-							{typeof children === "function" ? children(values) : children}
-							{closeButton && <DialogCloseIcon isDismissable={isDismissable} />}
-						</>
-					)}
+					{(values) => {
+						return (
+							<>
+								{typeof children === "function" ? children(values) : children}
+								{closeButton && <DialogCloseIcon isDismissable={isDismissable} />}
+							</>
+						);
+					}}
 				</Dialog>
 			</AriaModal>
 		</AriaModalOverlay>
 	);
 }
 
-const ModalTrigger = DialogTrigger;
-const ModalHeader = DialogHeader;
-const ModalTitle = DialogTitle;
-const ModalDescription = DialogDescription;
-const ModalFooter = DialogFooter;
-const ModalBody = DialogBody;
-const ModalClose = DialogClose;
-
-export {
-	ModalTrigger,
-	ModalHeader,
-	ModalTitle,
-	ModalDescription,
-	ModalFooter,
-	ModalBody,
-	ModalClose,
-};
+export const ModalTrigger = DialogTrigger;
+export const ModalHeader = DialogHeader;
+export const ModalTitle = DialogTitle;
+export const ModalDescription = DialogDescription;
+export const ModalFooter = DialogFooter;
+export const ModalBody = DialogBody;
+export const ModalClose = DialogClose;

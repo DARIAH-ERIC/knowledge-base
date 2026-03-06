@@ -1,60 +1,60 @@
 "use client";
 
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { useExtracted } from "next-intl";
 import {
+	type ComponentProps,
 	createContext,
 	Fragment,
+	type ReactNode,
+	type Ref,
 	use,
 	useCallback,
 	useEffect,
-	useInsertionEffect,
 	useMemo,
 	useRef,
 	useState,
-	type ComponentProps,
-	type ReactNode,
-	type Ref,
-	type RefObject,
 } from "react";
 import {
+	Button as AriaButton,
 	type ButtonProps as AriaButtonProps,
-	type DisclosureGroupProps as AriaDisclosureGroupProps,
-	type DisclosurePanelProps as AriaDisclosurePanelProps,
-	type DisclosureProps as AriaDisclosureProps,
-	type LinkProps as AriaLinkProps,
-	type LinkRenderProps as AriaLinkRenderProps,
-	type SeparatorProps as AriaSeparatorProps,
-	type TreeItemContentProps as AriaTreeItemContentProps,
-	type TreeItemProps as AriaTreeItemProps,
-	type TreeProps as AriaTreeProps,
 	composeRenderProps,
 	Disclosure as AriaDisclosure,
 	DisclosureGroup as AriaDisclosureGroup,
+	type DisclosureGroupProps as AriaDisclosureGroupProps,
 	DisclosurePanel as AriaDisclosurePanel,
+	type DisclosurePanelProps as AriaDisclosurePanelProps,
+	type DisclosureProps as AriaDisclosureProps,
 	Header as AriaHeader,
 	Heading as AriaHeading,
+	type LinkProps as AriaLinkProps,
+	type LinkRenderProps as AriaLinkRenderProps,
 	Separator as AriaSeparator,
+	type SeparatorProps as AriaSeparatorProps,
 	Text as AriaText,
 	Tree as AriaTree,
 	TreeItem as AriaTreeItem,
 	TreeItemContent as AriaTreeItemContent,
-	Button as AriaButton,
+	type TreeItemContentProps as AriaTreeItemContentProps,
+	type TreeItemProps as AriaTreeItemProps,
+	type TreeProps as AriaTreeProps,
 } from "react-aria-components";
 import { twJoin, twMerge } from "tailwind-merge";
-import { SheetContent } from "@/lib/sheet";
-import { TreeIndicator } from "@/lib/tree";
-import { useIsMobile } from "@/lib/use-mobile";
-import { cx } from "@/lib/primitive";
+
 import { Button } from "@/lib/button";
 import { Link } from "@/lib/link";
+import { cx } from "@/lib/primitive";
+import { SheetContent } from "@/lib/sheet";
 import { Tooltip, TooltipContent } from "@/lib/tooltip";
+import { TreeIndicator } from "@/lib/tree";
+import { useIsMobile } from "@/lib/use-mobile";
 
 const SIDEBAR_WIDTH = "17rem";
 const SIDEBAR_WIDTH_DOCK = "3.25rem";
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 
-type SidebarContextProps = {
+interface SidebarContextProps {
 	state: "expanded" | "collapsed";
 	open: boolean;
 	setOpen: (open: boolean) => void;
@@ -62,7 +62,7 @@ type SidebarContextProps = {
 	setIsOpenOnMobile: (open: boolean) => void;
 	isMobile: boolean;
 	toggleSidebar: () => void;
-};
+}
 
 const SidebarContext = createContext<SidebarContextProps | null>(null);
 
@@ -83,7 +83,7 @@ export interface SidebarProviderProps extends ComponentProps<"div"> {
 	onOpenChange?: (open: boolean) => void;
 }
 
-export function SidebarProvider(props: SidebarProviderProps): ReactNode {
+export function SidebarProvider(props: Readonly<SidebarProviderProps>): ReactNode {
 	const {
 		defaultOpen = true,
 		isOpen: openProp,
@@ -112,20 +112,26 @@ export function SidebarProvider(props: SidebarProviderProps): ReactNode {
 				setInternalOpenState(openState);
 			}
 
-			document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
+			// eslint-disable-next-line unicorn/no-document-cookie, @typescript-eslint/restrict-template-expressions
+			document.cookie = `${SIDEBAR_COOKIE_NAME}=${String(openState)}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
 		},
 		[setOpenProp, open],
 	);
 
 	const isMobile = useIsMobile();
 	const isMobileRef = useRef(isMobile);
+	// eslint-disable-next-line react-hooks/refs
 	isMobileRef.current = isMobile;
 
 	const toggleSidebar = useCallback(() => {
 		if (isMobileRef.current) {
-			setOpenMobile((prev) => !prev);
+			setOpenMobile((prev) => {
+				return !prev;
+			});
 		} else {
-			setOpen((prev) => !prev);
+			setOpen((prev) => {
+				return !prev;
+			});
 		}
 	}, [setOpen]);
 
@@ -148,43 +154,40 @@ export function SidebarProvider(props: SidebarProviderProps): ReactNode {
 		};
 
 		window.addEventListener("keydown", handleKeyDown);
-		return () => window.removeEventListener("keydown", handleKeyDown);
+		return () => {
+			window.removeEventListener("keydown", handleKeyDown);
+		};
 	}, [toggleSidebar, shortcut]);
 
 	const state = open ? "expanded" : "collapsed";
 
-	const contextValue = useMemo<SidebarContextProps>(
-		() => ({
+	const contextValue = useMemo<SidebarContextProps>(() => {
+		return {
 			state,
 			open,
 			setOpen,
-			isMobile: isMobile ?? false,
+			isMobile,
 			isOpenOnMobile: openMobile,
 			setIsOpenOnMobile: setOpenMobile,
 			toggleSidebar,
-		}),
-		[state, open, setOpen, isMobile, openMobile, toggleSidebar],
-	);
-
-	if (isMobile === undefined) {
-		return null;
-	}
+		};
+	}, [state, open, setOpen, isMobile, openMobile, toggleSidebar]);
 
 	return (
 		<SidebarContext value={contextValue}>
 			<div
+				ref={ref}
+				className={twMerge(
+					"@container **:data-[slot=icon]:shrink-0",
+					"flex w-full text-sidebar-fg",
+					"group/sidebar-root peer/sidebar-root dark:has-data-[intent=inset]:bg-bg has-data-[intent=inset]:bg-sidebar",
+					className,
+				)}
 				style={{
 					"--sidebar-width": SIDEBAR_WIDTH,
 					"--sidebar-width-dock": SIDEBAR_WIDTH_DOCK,
 					...style,
 				}}
-				className={twMerge(
-					"@container **:data-[slot=icon]:shrink-0",
-					"flex w-full text-sidebar-fg",
-					"group/sidebar-root peer/sidebar-root has-data-[intent=inset]:bg-sidebar dark:has-data-[intent=inset]:bg-bg",
-					className,
-				)}
-				ref={ref}
 				{...rest}
 			>
 				{children}
@@ -200,7 +203,7 @@ export interface SidebarProps extends ComponentProps<"div"> {
 	closeButton?: boolean;
 }
 
-export function Sidebar(props: SidebarProps): ReactNode {
+export function Sidebar(props: Readonly<SidebarProps>): ReactNode {
 	const {
 		children,
 		closeButton = true,
@@ -216,14 +219,14 @@ export function Sidebar(props: SidebarProps): ReactNode {
 	if (collapsible === "none") {
 		return (
 			<div
-				data-intent={intent}
-				data-collapsible="none"
-				data-slot="sidebar"
 				className={twMerge(
 					"flex h-full w-(--sidebar-width) flex-col bg-sidebar text-sidebar-fg",
 					className,
 				)}
-				{...props}
+				data-collapsible="none"
+				data-intent={intent}
+				data-slot="sidebar"
+				{...rest}
 			>
 				{children}
 			</div>
@@ -233,17 +236,17 @@ export function Sidebar(props: SidebarProps): ReactNode {
 	if (isMobile) {
 		return (
 			<>
-				<span className="sr-only" aria-hidden data-intent={intent} />
+				<span aria-hidden={true} className="sr-only" data-intent={intent} />
 				<SheetContent
+					aria-label="Sidebar"
+					className="w-(--sidebar-width) [--sidebar-width:18rem] entering:blur-in exiting:blur-out has-data-[slot=calendar]:[--sidebar-width:23rem]"
+					closeButton={closeButton}
+					data-intent="default"
+					data-slot="sidebar"
+					dir={side === "right" ? "rtl" : "ltr"}
 					isOpen={isOpenOnMobile}
 					onOpenChange={setIsOpenOnMobile}
-					closeButton={closeButton}
-					aria-label="Sidebar"
-					data-slot="sidebar"
-					data-intent="default"
-					className="w-(--sidebar-width) entering:blur-in exiting:blur-out [--sidebar-width:18rem] has-data-[slot=calendar]:[--sidebar-width:23rem]"
 					side={side}
-					dir={side === "right" ? "rtl" : "ltr"}
 				>
 					{children}
 				</SheetContent>
@@ -253,16 +256,15 @@ export function Sidebar(props: SidebarProps): ReactNode {
 
 	return (
 		<div
-			data-state={state}
+			className="group peer hidden text-sidebar-fg md:block"
 			data-collapsible={state === "collapsed" ? collapsible : ""}
 			data-intent={intent}
 			data-side={side}
 			data-slot="sidebar"
-			className="group peer hidden text-sidebar-fg md:block"
+			data-state={state}
 			{...props}
 		>
 			<div
-				data-slot="sidebar-gap"
 				aria-hidden="true"
 				className={twMerge([
 					"w-(--sidebar-width) group-data-[collapsible=hidden]:w-0",
@@ -274,11 +276,11 @@ export function Sidebar(props: SidebarProps): ReactNode {
 					intent === "inset" &&
 						"group-data-[collapsible=dock]:w-[calc(var(--sidebar-width-dock)+--spacing(2))]",
 				])}
+				data-slot="sidebar-gap"
 			/>
 			<div
-				data-slot="sidebar-container"
 				className={twMerge(
-					"fixed inset-y-0 z-10 hidden w-(--sidebar-width) bg-sidebar not-has-data-[slot=sidebar-footer]:pb-2 md:flex",
+					"fixed inset-y-0 z-10 hidden w-(--sidebar-width) bg-sidebar md:flex not-has-data-[slot=sidebar-footer]:pb-2",
 					"transition-[left,right,width] duration-200 ease-linear",
 					side === "left" &&
 						"left-0 group-data-[collapsible=hidden]:left-[calc(var(--sidebar-width)*-1)]",
@@ -287,22 +289,23 @@ export function Sidebar(props: SidebarProps): ReactNode {
 					intent === "float" &&
 						"bg-bg p-2 group-data-[collapsible=dock]:w-[calc(--spacing(4)+2px)]",
 					intent === "inset" &&
-						"group-data-[collapsible=dock]:w-[calc(var(--sidebar-width-dock)+--spacing(2)+2px)] dark:bg-bg",
+						"dark:bg-bg group-data-[collapsible=dock]:w-[calc(var(--sidebar-width-dock)+--spacing(2)+2px)]",
 					intent === "default" && [
 						"group-data-[collapsible=dock]:w-(--sidebar-width-dock)",
 						"border-sidebar-border group-data-[side=left]:border-r group-data-[side=right]:border-l",
 					],
 					className,
 				)}
+				data-slot="sidebar-container"
 				{...props}
 			>
 				<div
-					data-sidebar="default"
-					data-slot="sidebar-inner"
 					className={twJoin(
-						"flex h-full w-full flex-col text-sidebar-fg",
+						"flex size-full flex-col text-sidebar-fg",
 						"group-data-[intent=float]:rounded-lg group-data-[intent=float]:border group-data-[intent=float]:border-sidebar-border group-data-[intent=float]:bg-sidebar group-data-[intent=float]:shadow-xs",
 					)}
+					data-sidebar="default"
+					data-slot="sidebar-inner"
 				>
 					{children}
 				</div>
@@ -321,13 +324,13 @@ export function SidebarHeader(props: Readonly<SidebarHeaderProps>): ReactNode {
 	return (
 		<div
 			ref={ref}
-			data-slot="sidebar-header"
 			className={twMerge(
 				"flex flex-col gap-2 p-2.5 [.border-b]:border-sidebar-border",
 				"in-data-[intent=inset]:p-4",
 				state === "collapsed" ? "items-center p-2.5" : "p-4",
 				className,
 			)}
+			data-slot="sidebar-header"
 			{...rest}
 		/>
 	);
@@ -340,13 +343,13 @@ export function SidebarFooter(props: Readonly<SidebarFooterProps>): ReactNode {
 
 	return (
 		<div
-			data-slot="sidebar-footer"
 			className={twMerge([
 				"mt-auto flex shrink-0 items-center justify-center p-4 **:data-[slot=chevron]:text-muted-fg",
 				"in-data-[intent=inset]:px-6 in-data-[intent=inset]:py-4",
 				className,
 			])}
-			{...props}
+			data-slot="sidebar-footer"
+			{...rest}
 		/>
 	);
 }
@@ -384,13 +387,13 @@ export function SidebarContent(props: Readonly<SidebarContentProps>): ReactNode 
 	return (
 		<div
 			ref={ref}
-			data-slot="sidebar-content"
 			className={twMerge(
 				"flex min-h-0 flex-1 scroll-mb-96 flex-col overflow-auto *:data-[slot=sidebar-section]:border-l-0",
 				state === "collapsed" ? "items-center" : !isAtBottom && "mask-b-from-95%",
 				className,
 			)}
-			{...props}
+			data-slot="sidebar-content"
+			{...rest}
 		>
 			{props.children}
 		</div>
@@ -407,12 +410,12 @@ export function SidebarSectionGroup(props: Readonly<SidebarSectionGroupProps>): 
 
 	return (
 		<section
-			data-slot="sidebar-section-group"
 			className={twMerge(
 				"flex w-full min-w-0 flex-col gap-y-0.5",
 				collapsed && "items-center justify-center",
 				className,
 			)}
+			data-slot="sidebar-section-group"
 			{...rest}
 		/>
 	);
@@ -422,19 +425,19 @@ export interface SidebarSectionProps extends ComponentProps<"div"> {
 	label?: string;
 }
 
-export function SidebarSection(props: SidebarSectionProps): ReactNode {
+export function SidebarSection(props: Readonly<SidebarSectionProps>): ReactNode {
 	const { children, className, label, ...rest } = props;
 
 	const { state } = useSidebar();
 
 	return (
 		<div
-			data-slot="sidebar-section"
 			className={twMerge(
 				"col-span-full flex min-w-0 flex-col gap-y-0.5 **:data-[slot=sidebar-section]:**:gap-y-0",
-				"in-data-[state=collapsed]:p-2 p-4",
+				"p-4 in-data-[state=collapsed]:p-2",
 				className,
 			)}
+			data-slot="sidebar-section"
 			{...rest}
 		>
 			{state !== "collapsed" && label != null && (
@@ -443,8 +446,8 @@ export function SidebarSection(props: SidebarSectionProps): ReactNode {
 				</AriaHeader>
 			)}
 			<div
+				className="grid grid-cols-[auto_1fr] gap-y-0.5 *:data-[slot=control]:col-span-full in-data-[state=collapsed]:gap-y-1.5"
 				data-slot="sidebar-section-inner"
-				className="grid grid-cols-[auto_1fr] gap-y-0.5 in-data-[state=collapsed]:gap-y-1.5 *:data-[slot=control]:col-span-full"
 			>
 				{children}
 			</div>
@@ -463,26 +466,25 @@ export interface SidebarItemProps extends Omit<ComponentProps<typeof Link>, "chi
 	tooltip?: string | ComponentProps<typeof TooltipContent>;
 }
 
-export function SidebarItem(props: SidebarItemProps): ReactNode {
-	const { isCurrent, tooltip, children, badge, className, ref, ...rest } = props;
+export function SidebarItem(props: Readonly<SidebarItemProps>): ReactNode {
+	const { isCurrent, tooltip, children, badge, className, ...rest } = props;
 
 	const { state, isMobile } = useSidebar();
 	const isCollapsed = state === "collapsed" && !isMobile;
 
 	const link = (
 		<Link
-			ref={ref}
-			data-slot="sidebar-item"
-			aria-current={isCurrent ? "page" : undefined}
+			aria-current={isCurrent === true ? "page" : undefined}
 			className={composeRenderProps(
 				className,
-				(className, { isFocusVisible, isPressed, isHovered, isDisabled }) =>
-					twMerge(
+				(className, { isFocusVisible, isPressed, isHovered, isDisabled }) => {
+					return twMerge(
 						"w-full min-w-0 items-center rounded-lg p-2 text-start font-medium text-base/6 text-sidebar-fg has-[a]:p-0",
 						"group/sidebar-item relative col-span-full overflow-hidden focus-visible:outline-hidden",
-						"grid grid-cols-[auto_1fr_1.5rem_0.5rem_auto] **:last:data-[slot=icon]:ms-auto supports-[grid-template-columns:subgrid]:grid-cols-subgrid sm:text-sm/5",
+						"grid grid-cols-[auto_1fr_1.5rem_0.5rem_auto] sm:text-sm/5 **:last:data-[slot=icon]:ms-auto supports-[grid-template-columns:subgrid]:grid-cols-subgrid",
 						// icon
-						"**:data-[slot=icon]:shrink-0 [&_[data-slot='icon']:not([class*='size-'])]:size-5 sm:[&_[data-slot='icon']:not([class*='size-'])]:size-4 [&_[data-slot='icon']:not([class*='text-'])]:text-muted-fg",
+						// eslint-disable-next-line better-tailwindcss/enforce-consistent-class-order
+						"sm:[&_[data-slot='icon']:not([class*='size-'])]:size-4 [&_[data-slot='icon']:not([class*='size-'])]:size-5 [&_[data-slot='icon']:not([class*='text-'])]:text-muted-fg **:data-[slot=icon]:shrink-0",
 						"**:last:data-[slot=icon]:size-5 sm:**:last:data-[slot=icon]:size-4",
 						"[&:has([data-slot=icon]+[data-slot=sidebar-label])_[data-slot=icon]:has(+[data-slot=sidebar-label])]:me-2",
 
@@ -490,8 +492,8 @@ export function SidebarItem(props: SidebarItemProps): ReactNode {
 						"**:data-[slot=avatar]:[--avatar-size:--spacing(5)]",
 						"[&:has([data-slot=avatar]+[data-slot=sidebar-label])_[data-slot=avatar]:has(+[data-slot=sidebar-label])]:me-2",
 						"[--sidebar-current-bg:var(--color-sidebar-primary)] [--sidebar-current-fg:var(--color-sidebar-primary-fg)]",
-						isCurrent &&
-							"font-medium text-(--sidebar-current-fg) hover:bg-(--sidebar-current-bg) hover:text-(--sidebar-current-fg) [&_.text-muted-fg]:text-fg/80 [&_[data-slot='icon']:not([class*='text-'])]:text-(--sidebar-current-fg) hover:[&_[data-slot='icon']:not([class*='text-'])]:text-(--sidebar-current-fg)",
+						isCurrent === true &&
+							"font-medium text-(--sidebar-current-fg) hover:bg-(--sidebar-current-bg) hover:text-(--sidebar-current-fg) hover:[&_[data-slot='icon']:not([class*='text-'])]:text-(--sidebar-current-fg) [&_.text-muted-fg]:text-fg/80 [&_[data-slot='icon']:not([class*='text-'])]:text-(--sidebar-current-fg)",
 						isFocusVisible && "inset-ring inset-ring-sidebar-ring outline-hidden",
 						isPressed &&
 							"bg-sidebar-accent text-sidebar-accent-fg [&_[data-slot='icon']:not([class*='text-'])]:text-sidebar-accent-fg",
@@ -499,27 +501,34 @@ export function SidebarItem(props: SidebarItemProps): ReactNode {
 							"bg-sidebar-accent text-sidebar-accent-fg [&_[data-slot='icon']:not([class*='text-'])]:text-sidebar-accent-fg",
 						isDisabled && "opacity-50",
 						className,
-					),
+					);
+				},
 			)}
+			data-slot="sidebar-item"
 			{...rest}
 		>
-			{(values) => (
-				<>
-					{typeof children === "function" ? children({ ...values, isCollapsed }) : children}
+			{(values) => {
+				return (
+					<Fragment>
+						{typeof children === "function" ? children({ ...values, isCollapsed }) : children}
 
-					{badge &&
-						(state !== "collapsed" ? (
-							<span
-								data-slot="sidebar-badge"
-								className="absolute inset-ring-1 inset-ring-sidebar-border inset-y-1/2 end-1.5 h-5.5 w-auto -translate-y-1/2 rounded-full bg-fg/5 px-2 text-[10px]/5.5 group-hover/sidebar-item:inset-ring-muted-fg/30 group-current:inset-ring-transparent"
-							>
-								{badge}
-							</span>
-						) : (
-							<div aria-hidden className="absolute end-1 top-1 size-1.5 rounded-full bg-primary" />
-						))}
-				</>
-			)}
+						{badge != null &&
+							(state !== "collapsed" ? (
+								<span
+									className="absolute inset-ring-1 inset-ring-sidebar-border inset-y-1/2 end-1.5 h-5.5 w-auto -translate-y-1/2 rounded-full bg-fg/5 px-2 text-[10px]/5.5 group-hover/sidebar-item:inset-ring-muted-fg/30 group-current:inset-ring-transparent"
+									data-slot="sidebar-badge"
+								>
+									{badge}
+								</span>
+							) : (
+								<div
+									aria-hidden={true}
+									className="absolute end-1 top-1 size-1.5 rounded-full bg-primary"
+								/>
+							))}
+					</Fragment>
+				);
+			}}
 		</Link>
 	);
 
@@ -534,46 +543,41 @@ export function SidebarItem(props: SidebarItemProps): ReactNode {
 		<Tooltip delay={0}>
 			{link}
 			<TooltipContent
+				arrow={true}
 				className="**:data-[slot=icon]:hidden **:data-[slot=sidebar-label-mask]:hidden"
-				inverse
+				hidden={!isCollapsed || !_tooltip}
+				inverse={true}
 				placement="right"
-				arrow
-				hidden={!isCollapsed || isMobile || !_tooltip}
 				{..._tooltip}
 			/>
 		</Tooltip>
 	);
 }
 
-export interface SidebarLinkProps extends AriaLinkProps {
-	ref?: RefObject<HTMLAnchorElement>;
-}
+export interface SidebarLinkProps extends AriaLinkProps {}
 
-export function SidebarLink(props: SidebarLinkProps): ReactNode {
-	const { className, ref, ...rest } = props;
+export function SidebarLink(props: Readonly<SidebarLinkProps>): ReactNode {
+	const { className, ...rest } = props;
 
 	return (
 		<Link
-			ref={ref}
 			className={cx(
 				"col-span-full min-w-0 shrink-0 items-center p-2 focus:outline-hidden",
 				"grid grid-cols-[auto_1fr_1.5rem_0.5rem_auto] supports-[grid-template-columns:subgrid]:grid-cols-subgrid",
 				className,
 			)}
-			{...props}
+			{...rest}
 		/>
 	);
 }
 
 export interface SidebarInsetProps extends ComponentProps<"main"> {}
 
-export function SidebarInset(props: SidebarInsetProps): ReactNode {
-	const { className, ref, ...rest } = props;
+export function SidebarInset(props: Readonly<SidebarInsetProps>): ReactNode {
+	const { className, ...rest } = props;
 
 	return (
 		<main
-			data-slot="sidebar-inset"
-			ref={ref}
 			className={twMerge(
 				"relative flex w-full flex-1 flex-col bg-bg lg:min-w-0",
 				"group-has-data-[intent=inset]/sidebar-root:border group-has-data-[intent=inset]/sidebar-root:border-sidebar-border group-has-data-[intent=inset]/sidebar-root:bg-overlay",
@@ -584,6 +588,7 @@ export function SidebarInset(props: SidebarInsetProps): ReactNode {
 				"md:group-has-data-[intent=inset]/sidebar-root:peer-data-[state=collapsed]:ms-2",
 				className,
 			)}
+			data-slot="sidebar-inset"
 			{...rest}
 		/>
 	);
@@ -591,36 +596,33 @@ export function SidebarInset(props: SidebarInsetProps): ReactNode {
 
 export type SidebarDisclosureGroupProps = AriaDisclosureGroupProps;
 
-export function SidebarDisclosureGroup(props: SidebarDisclosureGroupProps) {
+export function SidebarDisclosureGroup(props: Readonly<SidebarDisclosureGroupProps>): ReactNode {
 	const { allowsMultipleExpanded = true, className, ...rest } = props;
 
 	return (
 		<AriaDisclosureGroup
-			data-slot="sidebar-disclosure-group"
 			allowsMultipleExpanded={allowsMultipleExpanded}
 			className={cx(
 				"col-span-full flex min-w-0 flex-col gap-y-0.5 in-data-[state=collapsed]:gap-y-1.5",
 				className,
 			)}
+			data-slot="sidebar-disclosure-group"
 			{...rest}
 		/>
 	);
 }
 
-export interface SidebarDisclosureProps extends AriaDisclosureProps {
-	ref?: Ref<HTMLDivElement>;
-}
+export interface SidebarDisclosureProps extends AriaDisclosureProps {}
 
-export function SidebarDisclosure(props: SidebarDisclosureProps): ReactNode {
-	const { className, ref, ...rest } = props;
+export function SidebarDisclosure(props: Readonly<SidebarDisclosureProps>): ReactNode {
+	const { className, ...rest } = props;
 
 	const { state } = useSidebar();
 
 	return (
 		<AriaDisclosure
-			ref={ref}
-			data-slot="sidebar-disclosure"
 			className={cx("col-span-full min-w-0", state === "collapsed" ? "px-2" : "px-4", className)}
+			data-slot="sidebar-disclosure"
 			{...rest}
 		/>
 	);
@@ -630,7 +632,9 @@ export interface SidebarDisclosureTriggerProps extends AriaButtonProps {
 	ref?: Ref<HTMLButtonElement>;
 }
 
-export function SidebarDisclosureTrigger(props: SidebarDisclosureTriggerProps): ReactNode {
+export function SidebarDisclosureTrigger(
+	props: Readonly<SidebarDisclosureTriggerProps>,
+): ReactNode {
 	const { className, ref, ...rest } = props;
 
 	const { state } = useSidebar();
@@ -639,38 +643,41 @@ export function SidebarDisclosureTrigger(props: SidebarDisclosureTriggerProps): 
 		<AriaHeading level={3}>
 			<AriaButton
 				ref={ref}
-				slot="trigger"
 				className={composeRenderProps(
 					className,
-					(className, { isPressed, isFocusVisible, isHovered, isDisabled }) =>
-						twMerge(
+					(className, { isPressed, isFocusVisible, isHovered, isDisabled }) => {
+						return twMerge(
 							"flex w-full min-w-0 items-center rounded-lg text-start font-medium text-base/6 text-sidebar-fg",
 							"group/sidebar-disclosure-trigger relative col-span-full overflow-hidden focus-visible:outline-hidden",
 							"**:data-[slot=icon]:size-5 **:data-[slot=icon]:shrink-0 **:data-[slot=icon]:text-muted-fg sm:**:data-[slot=icon]:size-4",
 							"**:last:data-[slot=icon]:size-5 sm:**:last:data-[slot=icon]:size-4",
 							"**:data-[slot=avatar]:size-6 sm:**:data-[slot=avatar]:size-5",
-							"col-span-full gap-3 p-2 **:data-[slot=chevron]:text-muted-fg **:last:data-[slot=icon]:ms-auto sm:gap-2 sm:text-sm/5",
+							"col-span-full gap-3 p-2 sm:gap-2 sm:text-sm/5 **:last:data-[slot=icon]:ms-auto **:data-[slot=chevron]:text-muted-fg",
 
 							isFocusVisible && "inset-ring inset-ring-ring/70",
 							(isPressed || isHovered) &&
-								"bg-sidebar-accent text-sidebar-accent-fg **:data-[slot=chevron]:text-sidebar-accent-fg **:data-[slot=icon]:text-sidebar-accent-fg **:last:data-[slot=icon]:text-sidebar-accent-fg",
+								"bg-sidebar-accent text-sidebar-accent-fg **:last:data-[slot=icon]:text-sidebar-accent-fg **:data-[slot=chevron]:text-sidebar-accent-fg **:data-[slot=icon]:text-sidebar-accent-fg",
 							isDisabled && "opacity-50",
 							className,
-						),
+						);
+					},
 				)}
+				slot="trigger"
 				{...rest}
 			>
-				{(values) => (
-					<Fragment>
-						{typeof props.children === "function" ? props.children(values) : props.children}
-						{state !== "collapsed" && (
-							<ChevronDownIcon
-								data-slot="chevron"
-								className="z-10 ms-auto size-3.5 transition-transform duration-200 group-aria-expanded/sidebar-disclosure-trigger:rotate-180"
-							/>
-						)}
-					</Fragment>
-				)}
+				{(values) => {
+					return (
+						<Fragment>
+							{typeof props.children === "function" ? props.children(values) : props.children}
+							{state !== "collapsed" && (
+								<ChevronDownIcon
+									className="z-10 ms-auto size-3.5 transition-transform duration-200 group-aria-expanded/sidebar-disclosure-trigger:rotate-180"
+									data-slot="chevron"
+								/>
+							)}
+						</Fragment>
+					);
+				}}
 			</AriaButton>
 		</AriaHeading>
 	);
@@ -683,16 +690,16 @@ export function SidebarDisclosurePanel(props: Readonly<SidebarDisclosurePanelPro
 
 	return (
 		<AriaDisclosurePanel
-			data-slot="sidebar-disclosure-panel"
 			className={cx(
 				"h-(--disclosure-panel-height) overflow-clip transition-[height] duration-200",
 				className,
 			)}
+			data-slot="sidebar-disclosure-panel"
 			{...rest}
 		>
 			<div
-				data-slot="sidebar-disclosure-panel-content"
 				className="col-span-full grid grid-cols-[auto_1fr] gap-y-0.5 in-data-[state=collapsed]:gap-y-1.5"
+				data-slot="sidebar-disclosure-panel-content"
 			>
 				{props.children}
 			</div>
@@ -707,12 +714,12 @@ export function SidebarSeparator(props: Readonly<SidebarSeparatorProps>): ReactN
 
 	return (
 		<AriaSeparator
-			data-slot="sidebar-separator"
-			orientation="horizontal"
 			className={twMerge(
 				"mx-auto h-px w-[calc(var(--sidebar-width)---spacing(10))] border-0 bg-sidebar-border forced-colors:bg-[ButtonBorder]",
 				className,
 			)}
+			data-slot="sidebar-separator"
+			orientation="horizontal"
 			{...rest}
 		/>
 	);
@@ -725,33 +732,35 @@ export function SidebarTrigger(props: Readonly<SidebarTriggerProps>): ReactNode 
 
 	const { toggleSidebar } = useSidebar();
 
+	const t = useExtracted("ui");
+
 	return (
 		<Button
-			aria-label={props["aria-label"] || "Toggle Sidebar"}
-			data-slot="sidebar-trigger"
-			intent={props.intent || "plain"}
-			size={props.size || "sq-sm"}
+			aria-label={props["aria-label"] ?? "Toggle Sidebar"}
 			className={cx("shrink-0", className)}
+			data-slot="sidebar-trigger"
+			intent={props.intent ?? "plain"}
 			onPress={(event) => {
 				onPress?.(event);
 				toggleSidebar();
 			}}
+			size={props.size ?? "sq-sm"}
 			{...rest}
 		>
-			{children || (
+			{children ?? (
 				<>
 					<svg
-						data-slot="icon"
 						className="size-4"
-						xmlns="http://www.w3.org/2000/svg"
+						data-slot="icon"
+						fill="currentcolor"
+						height={16}
 						viewBox="0 0 16 16"
 						width={16}
-						height={16}
-						fill="currentcolor"
+						xmlns="http://www.w3.org/2000/svg"
 					>
 						<path d="M13.25 2.5c.69 0 1.25.56 1.25 1.25v8.5c0 .69-.56 1.25-1.25 1.25H7.5V15h5.75A2.75 2.75 0 0 0 16 12.25v-8.5A2.75 2.75 0 0 0 13.25 1H7.5v1.5zM5.75 1a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-3A2.75 2.75 0 0 1 0 12.25v-8.5A2.75 2.75 0 0 1 2.75 1z" />
 					</svg>
-					<span className="sr-only">Toggle Sidebar</span>
+					<span className="sr-only">{t("Toggle Sidebar")}</span>
 				</>
 			)}
 		</Button>
@@ -765,45 +774,47 @@ export function SidebarRail(props: Readonly<SidebarRailProps>): ReactNode {
 
 	const { toggleSidebar } = useSidebar();
 
-	return !props.children ? (
-		<button
-			ref={ref}
-			data-slot="sidebar-rail"
-			aria-label="Toggle Sidebar"
-			title="Toggle Sidebar"
-			tabIndex={-1}
-			onClick={toggleSidebar}
-			className={twMerge(
-				"absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 outline-hidden transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-0.5 hover:after:bg-transparent group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex",
-				"in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
-				"[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
-				"group-data-[collapsible=hidden]:translate-x-0 group-data-[collapsible=hidden]:hover:bg-sidebar-accent group-data-[collapsible=hidden]:after:left-full",
-				"[[data-side=left][data-collapsible=hidden]_&]:-right-2 [[data-side=right][data-collapsible=hidden]_&]:-left-2",
-				className,
-			)}
-			{...rest}
-		/>
-	) : (
-		props.children
+	const t = useExtracted("ui");
+
+	return (
+		props.children ?? (
+			<button
+				ref={ref}
+				aria-label={t("Toggle Sidebar")}
+				className={twMerge(
+					"absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 outline-hidden transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-0.5 sm:flex hover:after:bg-transparent group-data-[side=left]:-right-4 group-data-[side=right]:left-0",
+					"in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
+					"[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
+					"group-data-[collapsible=hidden]:translate-x-0 group-data-[collapsible=hidden]:hover:bg-sidebar-accent group-data-[collapsible=hidden]:after:left-full",
+					"[[data-side=left][data-collapsible=hidden]_&]:-right-2 [[data-side=right][data-collapsible=hidden]_&]:-left-2",
+					className,
+				)}
+				data-slot="sidebar-rail"
+				onClick={toggleSidebar}
+				tabIndex={-1}
+				title={t("Toggle Sidebar")}
+				type="button"
+				{...rest}
+			/>
+		)
 	);
 }
 
-export function SidebarLabel({
-	className,
-	ref,
-	...props
-}: ComponentProps<typeof AriaText>): ReactNode {
+export interface SidebarLabelProps extends ComponentProps<typeof AriaText> {}
+
+export function SidebarLabel({ className, ref, ...props }: Readonly<SidebarLabelProps>): ReactNode {
 	const { state, isMobile } = useSidebar();
+
 	const collapsed = state === "collapsed" && !isMobile;
 
 	if (!collapsed) {
 		return (
 			<AriaText
-				data-slot="sidebar-label"
-				tabIndex={-1}
 				ref={ref}
-				slot="label"
 				className={twMerge("col-start-2 truncate pe-6 outline-hidden", className)}
+				data-slot="sidebar-label"
+				slot="label"
+				tabIndex={-1}
 				{...props}
 			>
 				{props.children}
@@ -817,15 +828,19 @@ export interface SidebarNavProps extends ComponentProps<"nav"> {
 	isSticky?: boolean;
 }
 
-export function SidebarNav({ isSticky = false, className, ...props }: SidebarNavProps): ReactNode {
+export function SidebarNav({
+	isSticky = false,
+	className,
+	...props
+}: Readonly<SidebarNavProps>): ReactNode {
 	return (
 		<nav
-			data-slot="sidebar-nav"
 			className={twMerge(
 				"isolate flex items-center justify-between gap-x-2 px-(--container-padding,--spacing(4)) py-2.5 text-navbar-fg sm:justify-start sm:px-(--gutter,--spacing(4)) md:w-full",
 				isSticky && "static top-0 z-40 group-has-data-[intent=default]/sidebar-root:sticky",
 				className,
 			)}
+			data-slot="sidebar-nav"
 			{...props}
 		/>
 	);
@@ -835,16 +850,17 @@ interface SidebarMenuTriggerProps extends AriaButtonProps {
 	alwaysVisible?: boolean;
 }
 
-export function SidebarMenuTrigger(props: SidebarMenuTriggerProps): ReactNode {
+export function SidebarMenuTrigger(props: Readonly<SidebarMenuTriggerProps>): ReactNode {
 	const { alwaysVisible = false, className, ...rest } = props;
 
 	return (
 		<AriaButton
 			className={cx(
 				!alwaysVisible &&
-					"pressed:text-fg text-muted-fg opacity-0 pressed:opacity-100 hover:text-fg",
+					"text-muted-fg opacity-0 pressed:text-fg pressed:opacity-100 hover:text-fg",
 				"absolute end-0 flex h-full w-[calc(var(--sidebar-width)-90%)] items-center justify-end pe-2.5 outline-hidden",
-				"**:data-[slot=icon]:shrink-0 [&_[data-slot='icon']:not([class*='size-'])]:size-5 sm:[&_[data-slot='icon']:not([class*='size-'])]:size-4 pressed:[&_[data-slot='icon']:not([class*='text-'])]:text-fg",
+				// eslint-disable-next-line better-tailwindcss/enforce-consistent-class-order
+				"sm:[&_[data-slot='icon']:not([class*='size-'])]:size-4 [&_[data-slot='icon']:not([class*='size-'])]:size-5 pressed:[&_[data-slot='icon']:not([class*='text-'])]:text-fg **:data-[slot=icon]:shrink-0",
 				"group-hover/sidebar-item:opacity-100 group-focus-visible/sidebar-item:opacity-100 group/sidebar-item:pressed:opacity-100",
 				"group-hover/tree-item:opacity-100 group-focus-visible/tree-item:opacity-100 group/tree-item:pressed:opacity-100",
 				className,
@@ -856,16 +872,16 @@ export function SidebarMenuTrigger(props: SidebarMenuTriggerProps): ReactNode {
 
 export interface SidebarTreeProps<T extends object> extends AriaTreeProps<T> {}
 
-export function SidebarTree<T extends object>(props: SidebarTreeProps<T>): ReactNode {
+export function SidebarTree<T extends object>(props: Readonly<SidebarTreeProps<T>>): ReactNode {
 	const { className, selectionMode = "none", ...rest } = props;
 
 	return (
 		<AriaTree
-			selectionMode={selectionMode}
 			className={cx(
-				"col-span-full flex w-full min-w-0 cursor-default flex-col gap-y-0.5 in-data-[state=collapsed]:p-2 p-4 outline-hidden forced-color-adjust-none",
+				"col-span-full flex w-full min-w-0 cursor-default flex-col gap-y-0.5 p-4 outline-hidden forced-color-adjust-none in-data-[state=collapsed]:p-2",
 				className,
 			)}
+			selectionMode={selectionMode}
 			{...rest}
 		/>
 	);
@@ -876,7 +892,7 @@ export interface SidebarTreeItemProps<T extends object> extends AriaTreeItemProp
 export function SidebarTreeItem<T extends object>({
 	className,
 	...props
-}: SidebarTreeItemProps<T>): ReactNode {
+}: Readonly<SidebarTreeItemProps<T>>): ReactNode {
 	return (
 		<AriaTreeItem
 			className={cx(
@@ -894,47 +910,50 @@ export interface SidebarTreeContentProps extends AriaTreeItemContentProps {
 	isCurrent?: boolean;
 }
 
-export function SidebarTreeContent(props: SidebarTreeContentProps): ReactNode {
+export function SidebarTreeContent(props: Readonly<SidebarTreeContentProps>): ReactNode {
 	const { className, isCurrent, children, ...rest } = props;
 
 	return (
 		<AriaTreeItemContent data-slot="sidebar-item-content" {...rest}>
-			{(values) => (
-				<div className="relative flex w-full min-w-0 items-center">
-					<div
-						aria-hidden
-						className="shrink-0"
-						style={{
-							width: `calc((var(--tree-item-level) - 1) * 1.25rem)`,
-						}}
-					/>
-					<div
-						className={twMerge(
-							"group/tree-item flex min-w-0 flex-1 items-center gap-x-2 rounded-lg p-2 font-medium text-base/6 text-sidebar-fg sm:text-sm/5",
-							"**:data-[slot=icon]:-mx-0.5 **:data-[slot=icon]:shrink-0 [&_[data-slot='icon']:not([class*='size-'])]:size-5 sm:[&_[data-slot='icon']:not([class*='size-'])]:size-4 [&_[data-slot='icon']:not([class*='text-'])]:text-muted-fg",
-							"hover:bg-sidebar-accent hover:text-sidebar-accent-fg hover:[&_[data-slot='icon']:not([class*='text-'])]:text-sidebar-accent-fg",
-							"[--sidebar-current-bg:var(--color-sidebar-primary)] [--sidebar-current-fg:var(--color-sidebar-primary-fg)]",
-							values.isFocusVisible && "inset-ring inset-ring-sidebar-ring",
-							values.isPressed &&
-								"bg-sidebar-accent text-sidebar-accent-fg [&_[data-slot='icon']:not([class*='text-'])]:text-sidebar-accent-fg",
-							isCurrent &&
-								"font-medium text-(--sidebar-current-fg) hover:bg-(--sidebar-current-bg) hover:text-(--sidebar-current-fg) [&_.text-muted-fg]:text-fg/80 [&_[data-slot='icon']:not([class*='text-'])]:text-(--sidebar-current-fg) hover:[&_[data-slot='icon']:not([class*='text-'])]:text-(--sidebar-current-fg)",
-							values.isDisabled && "opacity-50",
-							className,
-						)}
-					>
-						{values.hasChildItems && (
-							<TreeIndicator
-								values={{
-									isDisabled: values.isDisabled,
-									isExpanded: values.isExpanded,
-								}}
-							/>
-						)}
-						{typeof children === "function" ? children(values) : children}
+			{(values) => {
+				return (
+					<div className="relative flex w-full min-w-0 items-center">
+						<div
+							aria-hidden={true}
+							className="shrink-0"
+							style={{
+								width: `calc((var(--tree-item-level) - 1) * 1.25rem)`,
+							}}
+						/>
+						<div
+							className={twMerge(
+								"group/tree-item flex min-w-0 flex-1 items-center gap-x-2 rounded-lg p-2 font-medium text-base/6 text-sidebar-fg sm:text-sm/5",
+								// eslint-disable-next-line better-tailwindcss/enforce-consistent-class-order
+								"**:data-[slot=icon]:-mx-0.5 **:data-[slot=icon]:shrink-0 [&_[data-slot='icon']:not([class*='size-'])]:size-5 [&_[data-slot='icon']:not([class*='text-'])]:text-muted-fg sm:[&_[data-slot='icon']:not([class*='size-'])]:size-4",
+								"hover:bg-sidebar-accent hover:text-sidebar-accent-fg hover:[&_[data-slot='icon']:not([class*='text-'])]:text-sidebar-accent-fg",
+								"[--sidebar-current-bg:var(--color-sidebar-primary)] [--sidebar-current-fg:var(--color-sidebar-primary-fg)]",
+								values.isFocusVisible && "inset-ring inset-ring-sidebar-ring",
+								values.isPressed &&
+									"bg-sidebar-accent text-sidebar-accent-fg [&_[data-slot='icon']:not([class*='text-'])]:text-sidebar-accent-fg",
+								isCurrent === true &&
+									"font-medium text-(--sidebar-current-fg) hover:bg-(--sidebar-current-bg) hover:text-(--sidebar-current-fg) hover:[&_[data-slot='icon']:not([class*='text-'])]:text-(--sidebar-current-fg) [&_.text-muted-fg]:text-fg/80 [&_[data-slot='icon']:not([class*='text-'])]:text-(--sidebar-current-fg)",
+								values.isDisabled && "opacity-50",
+								className,
+							)}
+						>
+							{values.hasChildItems && (
+								<TreeIndicator
+									values={{
+										isDisabled: values.isDisabled,
+										isExpanded: values.isExpanded,
+									}}
+								/>
+							)}
+							{typeof children === "function" ? children(values) : children}
+						</div>
 					</div>
-				</div>
-			)}
+				);
+			}}
 		</AriaTreeItemContent>
 	);
 }

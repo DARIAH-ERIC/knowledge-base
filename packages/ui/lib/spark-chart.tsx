@@ -1,7 +1,6 @@
 "use client";
 
-import { useId, type ReactNode } from "react";
-
+import { type ReactNode, useId } from "react";
 import {
 	Area,
 	AreaChart as AreaChartPrimitive,
@@ -10,7 +9,11 @@ import {
 	Line,
 	LineChart as LineChartPrimitive,
 } from "recharts";
+import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
+import type { ContentType } from "recharts/types/component/Tooltip";
+import type { CurveType } from "recharts/types/shape/Curve";
 import type { AxisDomain } from "recharts/types/util/types";
+import { twMerge } from "tailwind-merge";
 
 import {
 	Chart,
@@ -18,17 +21,12 @@ import {
 	type ChartConfig,
 	ChartTooltip,
 	ChartTooltipContent,
+	constructCategoryColors,
 	DEFAULT_COLORS,
+	getColorValue,
 	XAxis,
 	YAxis,
-	constructCategoryColors,
-	getColorValue,
 } from "@/lib/chart";
-
-import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
-import type { ContentType } from "recharts/types/component/Tooltip";
-import type { CurveType } from "recharts/types/shape/Curve";
-import { twMerge } from "tailwind-merge";
 
 export type SparkChartType = "default" | "stacked" | "percent";
 
@@ -37,9 +35,10 @@ interface SparkBaseProps<
 	TName extends NameType,
 > extends React.HTMLAttributes<HTMLDivElement> {
 	config: ChartConfig;
-	data: Record<string, any>[];
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	data: Array<Record<string, any>>;
 	dataKey: string;
-	colors?: readonly ChartColorKeys[];
+	colors?: ReadonlyArray<ChartColorKeys>;
 	yAxisDomain?: AxisDomain;
 	type?: SparkChartType;
 	tooltip?: ContentType<TValue, TName> | boolean;
@@ -55,8 +54,8 @@ export interface SparkAreaChartProps<
 	tooltipLabelSeparator?: boolean;
 }
 
-function SparkAreaChart<TValue extends ValueType, TName extends NameType>({
-	data = [],
+export function SparkAreaChart<TValue extends ValueType, TName extends NameType>({
+	data,
 	dataKey,
 	colors = DEFAULT_COLORS,
 	yAxisDomain = ["auto", "auto"],
@@ -69,27 +68,35 @@ function SparkAreaChart<TValue extends ValueType, TName extends NameType>({
 	tooltip,
 	tooltipLabelSeparator = false,
 	...props
-}: SparkAreaChartProps<TValue, TName>): ReactNode {
+}: Readonly<SparkAreaChartProps<TValue, TName>>): ReactNode {
 	const categoryColors = constructCategoryColors(Object.keys(config), colors);
 
 	const stacked = type === "stacked" || type === "percent";
 	const areaId = useId();
 
 	const getFillContent = (fillType: SparkAreaChartProps<TValue, TName>["fillType"]) => {
+		// eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
 		switch (fillType) {
-			case "none":
+			case "none": {
 				return <stop stopColor="currentColor" stopOpacity={0} />;
-			case "gradient":
+			}
+
+			case "gradient": {
 				return (
 					<>
 						<stop offset="5%" stopColor="currentColor" stopOpacity={0.5} />
 						<stop offset="95%" stopColor="currentColor" stopOpacity={0.1} />
 					</>
 				);
-			case "solid":
+			}
+
+			case "solid": {
 				return <stop stopColor="currentColor" stopOpacity={0.3} />;
-			default:
+			}
+
+			default: {
 				return <stop stopColor="currentColor" stopOpacity={0.3} />;
+			}
 		}
 	};
 
@@ -111,38 +118,38 @@ function SparkAreaChart<TValue extends ValueType, TName extends NameType>({
 				}}
 				stackOffset={type === "percent" ? "expand" : undefined}
 			>
-				<XAxis hide dataKey={dataKey} />
-				<YAxis hide domain={yAxisDomain} />
-				{tooltip && (
+				<XAxis dataKey={dataKey} hide={true} />
+				<YAxis domain={yAxisDomain} hide={true} />
+				{tooltip != null && (
 					<ChartTooltip
-						cursor={false}
 						content={
 							typeof tooltip === "boolean" ? (
 								<ChartTooltipContent
+									accessibilityLayer={true}
+									hideLabel={true}
 									labelSeparator={tooltipLabelSeparator}
-									accessibilityLayer
-									hideLabel
 								/>
 							) : (
 								tooltip
 							)
 						}
+						cursor={false}
 					/>
 				)}
 
 				{Object.entries(config).map(([category, values]) => {
-					const categoryId = `${areaId}-${category.replace(/[^a-zA-Z0-9]/g, "")}`;
+					const categoryId = `${areaId}-${category.replaceAll(/[^a-z0-9]/gi, "")}`;
 					return (
 						<defs key={category}>
 							<linearGradient
 								key={category}
-								style={{
-									color: getColorValue(values.color || categoryColors.get(category)),
-								}}
 								id={categoryId}
+								style={{
+									color: getColorValue(values.color ?? categoryColors.get(category)),
+								}}
 								x1="0"
-								y1="0"
 								x2="0"
+								y1="0"
 								y2="1"
 							>
 								{getFillContent(fillType)}
@@ -152,23 +159,23 @@ function SparkAreaChart<TValue extends ValueType, TName extends NameType>({
 				})}
 
 				{Object.entries(config).map(([category, values]) => {
-					const categoryId = `${areaId}-${category.replace(/[^a-zA-Z0-9]/g, "")}`;
+					const categoryId = `${areaId}-${category.replaceAll(/[^a-z0-9]/gi, "")}`;
 					return (
 						<Area
 							key={category}
-							dot={false}
-							strokeOpacity={1}
-							name={category}
-							type={lineType}
-							dataKey={category}
-							stroke={getColorValue(values.color || categoryColors.get(category))}
-							strokeWidth={2}
-							strokeLinejoin="round"
-							strokeLinecap="round"
-							isAnimationActive={true}
 							connectNulls={connectNulls}
-							stackId={stacked ? "stack" : undefined}
+							dataKey={category}
+							dot={false}
 							fill={`url(#${categoryId})`}
+							isAnimationActive={true}
+							name={category}
+							stackId={stacked ? "stack" : undefined}
+							stroke={getColorValue(values.color ?? categoryColors.get(category))}
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							strokeOpacity={1}
+							strokeWidth={2}
+							type={lineType}
 						/>
 					);
 				})}
@@ -185,7 +192,7 @@ export interface SparkLineChartProps<
 }
 
 export function SparkLineChart<TValue extends ValueType, TName extends NameType>({
-	data = [],
+	data,
 	dataKey,
 	colors = DEFAULT_COLORS,
 	yAxisDomain = ["auto", "auto"],
@@ -195,15 +202,15 @@ export function SparkLineChart<TValue extends ValueType, TName extends NameType>
 	config,
 	tooltip,
 	...props
-}: SparkLineChartProps<TValue, TName>): ReactNode {
+}: Readonly<SparkLineChartProps<TValue, TName>>): ReactNode {
 	const categoryColors = constructCategoryColors(Object.keys(config), colors);
 
 	return (
 		<Chart
 			className={twMerge("h-12 w-28", className)}
-			dataKey={dataKey}
-			data={data}
 			config={config}
+			data={data}
+			dataKey={dataKey}
 			{...props}
 		>
 			<LineChartPrimitive
@@ -216,36 +223,36 @@ export function SparkLineChart<TValue extends ValueType, TName extends NameType>
 				}}
 				stackOffset={type === "percent" ? "expand" : undefined}
 			>
-				<XAxis hide />
-				<YAxis hide domain={yAxisDomain} />
-				{tooltip && (
+				<XAxis hide={true} />
+				<YAxis domain={yAxisDomain} hide={true} />
+				{tooltip != null && (
 					<ChartTooltip
-						cursor={false}
 						content={
 							typeof tooltip === "boolean" ? (
-								<ChartTooltipContent hideLabel accessibilityLayer />
+								<ChartTooltipContent accessibilityLayer={true} hideLabel={true} />
 							) : (
 								tooltip
 							)
 						}
+						cursor={false}
 					/>
 				)}
 
 				{Object.entries(config).map(([category, values]) => {
 					return (
 						<Line
-							stroke={getColorValue(values.color || categoryColors.get(category))}
-							dot={false}
-							strokeOpacity={1}
 							key={category}
-							name={category}
-							type="linear"
-							dataKey={category}
-							strokeWidth={2}
-							strokeLinejoin="round"
-							strokeLinecap="round"
-							isAnimationActive={false}
 							connectNulls={connectNulls}
+							dataKey={category}
+							dot={false}
+							isAnimationActive={false}
+							name={category}
+							stroke={getColorValue(values.color ?? categoryColors.get(category))}
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							strokeOpacity={1}
+							strokeWidth={2}
+							type="linear"
 						/>
 					);
 				})}
@@ -263,7 +270,7 @@ export interface SparkBarChartProps<
 }
 
 export function SparkBarChart<TValue extends ValueType, TName extends NameType>({
-	data = [],
+	data,
 	dataKey,
 	colors = DEFAULT_COLORS,
 	yAxisDomain = ["auto", "auto"],
@@ -274,7 +281,7 @@ export function SparkBarChart<TValue extends ValueType, TName extends NameType>(
 	config,
 	tooltip,
 	...props
-}: SparkBarChartProps<TValue, TName>): ReactNode {
+}: Readonly<SparkBarChartProps<TValue, TName>>): ReactNode {
 	const categoryColors = constructCategoryColors(Object.keys(config), colors);
 
 	const stacked = type === "stacked" || type === "percent";
@@ -282,12 +289,13 @@ export function SparkBarChart<TValue extends ValueType, TName extends NameType>(
 	return (
 		<Chart
 			className={twMerge("h-12 w-28", className)}
-			dataKey={dataKey}
-			data={data}
 			config={config}
+			data={data}
+			dataKey={dataKey}
 			{...props}
 		>
 			<BarChartPrimitive
+				barCategoryGap={barCategoryGap}
 				data={data}
 				margin={{
 					bottom: 0,
@@ -296,33 +304,32 @@ export function SparkBarChart<TValue extends ValueType, TName extends NameType>(
 					top: 0,
 				}}
 				stackOffset={type === "percent" ? "expand" : undefined}
-				barCategoryGap={barCategoryGap}
 			>
-				<XAxis hide dataKey={dataKey} />
-				<YAxis hide domain={yAxisDomain} />
-				{tooltip && (
+				<XAxis dataKey={dataKey} hide={true} />
+				<YAxis domain={yAxisDomain} hide={true} />
+				{tooltip != null && (
 					<ChartTooltip
-						cursor={false}
 						content={
 							typeof tooltip === "boolean" ? (
-								<ChartTooltipContent accessibilityLayer hideLabel />
+								<ChartTooltipContent accessibilityLayer={true} hideLabel={true} />
 							) : (
 								tooltip
 							)
 						}
+						cursor={false}
 					/>
 				)}
 
 				{Object.entries(config).map(([category, values]) => {
 					return (
 						<Bar
-							fill={getColorValue(values.color || categoryColors.get(category))}
 							key={category}
-							name={category}
-							type="linear"
-							radius={barRadius}
 							dataKey={category}
+							fill={getColorValue(values.color ?? categoryColors.get(category))}
+							name={category}
+							radius={barRadius}
 							stackId={stacked ? "stack" : undefined}
+							type="linear"
 						/>
 					);
 				})}

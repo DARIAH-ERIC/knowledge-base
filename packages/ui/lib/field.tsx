@@ -1,5 +1,6 @@
 "use client";
 
+import type { ComponentProps, ReactNode } from "react";
 import {
 	FieldError as FieldErrorPrimitive,
 	type FieldErrorProps,
@@ -39,15 +40,15 @@ export const fieldStyles = tv({
 	],
 });
 
-export function Label({ className, ...props }: LabelProps) {
+export function Label({ className, ...props }: Readonly<LabelProps>): ReactNode {
 	return <LabelPrimitive data-slot="label" {...props} className={labelStyles({ className })} />;
 }
 
-export function Description({ className, ...props }: TextProps) {
+export function Description({ className, ...props }: Readonly<TextProps>): ReactNode {
 	return <Text {...props} className={descriptionStyles({ className })} slot="description" />;
 }
 
-export function Fieldset({ className, ...props }: React.ComponentProps<"fieldset">) {
+export function Fieldset({ className, ...props }: Readonly<ComponentProps<"fieldset">>): ReactNode {
 	return (
 		<fieldset
 			className={twMerge("*:data-[slot=text]:mt-1 [&>*+[data-slot=control]]:mt-6", className)}
@@ -56,15 +57,15 @@ export function Fieldset({ className, ...props }: React.ComponentProps<"fieldset
 	);
 }
 
-export function FieldGroup({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
+export function FieldGroup({ className, ...props }: Readonly<ComponentProps<"div">>): ReactNode {
 	return <div className={twMerge("space-y-6", className)} data-slot="control" {...props} />;
 }
 
-export function FieldError({ className, ...props }: FieldErrorProps) {
+export function FieldError({ className, ...props }: Readonly<FieldErrorProps>): ReactNode {
 	return <FieldErrorPrimitive {...props} className={cx(fieldErrorStyles(), className)} />;
 }
 
-export function Legend({ className, ...props }: React.ComponentProps<"legend">) {
+export function Legend({ className, ...props }: Readonly<ComponentProps<"legend">>): ReactNode {
 	return (
 		<legend
 			data-slot="legend"

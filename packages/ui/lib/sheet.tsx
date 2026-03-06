@@ -1,12 +1,14 @@
 "use client";
 
-import type { DialogProps, ModalOverlayProps } from "react-aria-components";
+import type { ReactNode } from "react";
 import {
+	type DialogProps,
 	DialogTrigger as AriaDialogTrigger,
 	Modal as AriaModal,
 	ModalOverlay as AriaModalOverlay,
+	type ModalOverlayProps,
 } from "react-aria-components";
-import { cx } from "@/lib/primitive";
+
 import {
 	Dialog,
 	DialogBody,
@@ -18,7 +20,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/lib/dialog";
-import type { ReactNode } from "react";
+import { cx } from "@/lib/primitive";
 
 export const Sheet = AriaDialogTrigger;
 
@@ -48,59 +50,51 @@ export function SheetContent({
 	role = "dialog",
 	closeButton = true,
 	isFloat = true,
-	overlay,
+	overlay: _,
 	children,
 	...props
-}: SheetContentProps): ReactNode {
+}: Readonly<SheetContentProps>): ReactNode {
 	const isDismissable = isDismissableInternal ?? role !== "alertdialog";
 	return (
 		<AriaModalOverlay
+			className="fixed start-0 top-0 z-50 size-full overflow-hidden bg-black/15 entering:fade-in entering:animate-in entering:duration-500 exiting:fade-out exiting:animate-out exiting:duration-300"
 			isDismissable={isDismissable}
-			className="entering:fade-in exiting:fade-out fixed start-0 top-0 z-50 size-full entering:animate-in exiting:animate-out overflow-hidden bg-black/15 entering:duration-500 exiting:duration-300"
 			{...props}
 		>
 			<AriaModal
-				data-float={isFloat}
 				className={cx(
 					"fixed z-50 grid gap-4 border-muted-fg/20 bg-overlay text-overlay-fg shadow-lg dark:border-border",
 					"transform-gpu transition ease-in-out will-change-transform [--visual-viewport-vertical-padding:16px]",
-					"data-[float=true]:rounded-lg data-[float=true]:ring data-[float=true]:ring-fg/5 dark:data-[float=true]:ring-border",
+					"dark:data-[float=true]:ring-border data-[float=true]:rounded-lg data-[float=true]:ring data-[float=true]:ring-fg/5",
 					"border-fg/20 dark:border-border",
 					"entering:fade-in entering:animate-in entering:duration-500",
 					"exiting:fade-in exiting:animate-out exiting:duration-300",
 					sideVariants[side],
 					className,
 				)}
+				data-float={isFloat}
 			>
-				<Dialog className="sm:[--gutter:--spacing(6)]" aria-label={props["aria-label"]} role={role}>
-					{(values) => (
-						<>
-							{typeof children === "function" ? children(values) : children}
-							{closeButton && (
-								<DialogCloseIcon className="end-2.5 top-2.5" isDismissable={isDismissable} />
-							)}
-						</>
-					)}
+				<Dialog aria-label={props["aria-label"]} className="sm:[--gutter:--spacing(6)]" role={role}>
+					{(values) => {
+						return (
+							<>
+								{typeof children === "function" ? children(values) : children}
+								{closeButton && (
+									<DialogCloseIcon className="end-2.5 top-2.5" isDismissable={isDismissable} />
+								)}
+							</>
+						);
+					}}
 				</Dialog>
 			</AriaModal>
 		</AriaModalOverlay>
 	);
 }
 
-const SheetTrigger = DialogTrigger;
-const SheetFooter = DialogFooter;
-const SheetHeader = DialogHeader;
-const SheetTitle = DialogTitle;
-const SheetDescription = DialogDescription;
-const SheetBody = DialogBody;
-const SheetClose = DialogClose;
-
-export {
-	SheetTrigger,
-	SheetFooter,
-	SheetHeader,
-	SheetTitle,
-	SheetDescription,
-	SheetBody,
-	SheetClose,
-};
+export const SheetTrigger = DialogTrigger;
+export const SheetFooter = DialogFooter;
+export const SheetHeader = DialogHeader;
+export const SheetTitle = DialogTitle;
+export const SheetDescription = DialogDescription;
+export const SheetBody = DialogBody;
+export const SheetClose = DialogClose;

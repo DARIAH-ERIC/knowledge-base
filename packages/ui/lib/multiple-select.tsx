@@ -1,7 +1,7 @@
 "use client";
 
 import { PlusIcon } from "@heroicons/react/20/solid";
-import React, { useMemo, useRef } from "react";
+import React, { Children, isValidElement, type ReactNode, useMemo, useRef } from "react";
 import {
 	Autocomplete,
 	Select,
@@ -9,11 +9,12 @@ import {
 	SelectValue,
 	useFilter,
 } from "react-aria-components";
-import { cx } from "@/lib/primitive";
+
 import { Button } from "@/lib/button";
 import { fieldStyles } from "@/lib/field";
 import { ListBox, ListBoxItem } from "@/lib/list-box";
 import { PopoverContent } from "@/lib/popover";
+import { cx } from "@/lib/primitive";
 import { SearchField, SearchInput } from "@/lib/search-field";
 import { Tag, TagGroup, TagList } from "@/lib/tag-group";
 
@@ -37,25 +38,29 @@ interface MultipleSelectContentProps<T extends OptionBase> {
 	children: (item: T) => React.ReactNode;
 }
 
-export function MultipleSelectContent<T extends OptionBase>(_props: MultipleSelectContentProps<T>) {
+export function MultipleSelectContent<T extends OptionBase>(
+	_props: Readonly<MultipleSelectContentProps<T>>,
+): ReactNode {
 	return null;
 }
 
-export function MultipleSelect<T extends OptionBase>({
-	placeholder = "No selected items",
-	className,
-	children,
-	name,
-	...props
-}: MultipleSelectProps<T>) {
+export function MultipleSelect<T extends OptionBase>(
+	props: Readonly<MultipleSelectProps<T>>,
+): ReactNode {
+	const { placeholder = "No selected items", className, children, name, ...rest } = props;
+
 	const triggerRef = useRef<HTMLDivElement | null>(null);
+
+	// eslint-disable-next-line @typescript-eslint/unbound-method
 	const { contains } = useFilter({ sensitivity: "base" });
 
 	const { before, after, list } = useMemo(() => {
-		const arr = React.Children.toArray(children);
-		const idx = arr.findIndex(
-			(c) => React.isValidElement(c) && (c.type as any)?.displayName === "MultipleSelectContent",
-		);
+		// eslint-disable-next-line @eslint-react/no-children-to-array
+		const arr = Children.toArray(children);
+		const idx = arr.findIndex((c) => {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+			return isValidElement(c) && (c.type as any)?.displayName === "MultipleSelectContent";
+		});
 		if (idx === -1) {
 			return { before: arr, after: [], list: null as null | MultipleSelectContentProps<T> };
 		}
@@ -65,57 +70,67 @@ export function MultipleSelect<T extends OptionBase>({
 
 	return (
 		<Select
-			name={name}
-			data-slot="control"
 			className={cx(fieldStyles(), className)}
+			data-slot="control"
+			name={name}
 			selectionMode="multiple"
-			{...props}
+			{...rest}
 		>
 			{before}
 			{list && (
 				<>
 					<div
-						data-slot="control"
 						ref={triggerRef}
 						className="flex w-full items-center gap-2 rounded-lg border p-1"
+						data-slot="control"
 					>
 						<SelectValue<T> className="flex-1">
-							{({ selectedItems, state }) => (
-								<TagGroup
-									aria-label="Selected items"
-									onRemove={(keys) => {
-										if (Array.isArray(state.value)) {
-											state.setValue(state.value.filter((k) => !keys.has(k)));
-										}
-									}}
-								>
-									<TagList
-										items={selectedItems.filter((i) => i != null)}
-										renderEmptyState={() => (
-											<i className="pl-2 text-muted-fg text-sm">{placeholder}</i>
-										)}
+							{({ selectedItems, state }) => {
+								return (
+									<TagGroup
+										aria-label="Selected items"
+										onRemove={(keys) => {
+											if (Array.isArray(state.value)) {
+												state.setValue(
+													state.value.filter((k) => {
+														return !keys.has(k);
+													}),
+												);
+											}
+										}}
 									>
-										{(item) => <Tag className="rounded-md">{item.name}</Tag>}
-									</TagList>
-								</TagGroup>
-							)}
+										<TagList
+											items={selectedItems.filter((i) => {
+												return i != null;
+											})}
+											renderEmptyState={() => {
+												return <i className="pl-2 text-muted-fg text-sm">{placeholder}</i>;
+											}}
+										>
+											{(item) => {
+												return <Tag className="rounded-md">{item.name}</Tag>;
+											}}
+										</TagList>
+									</TagGroup>
+								);
+							}}
 						</SelectValue>
 						<Button
 							aria-label="Open options"
+							className="self-end rounded-[calc(var(--radius-lg)-(--spacing(1)))]"
 							intent="secondary"
 							size="sq-xs"
-							className="self-end rounded-[calc(var(--radius-lg)-(--spacing(1)))]"
 						>
 							<PlusIcon />
 						</Button>
 					</div>
 					<PopoverContent
-						triggerRef={triggerRef}
-						placement="bottom"
 						className="flex w-full flex-col"
+						placement="bottom"
+						triggerRef={triggerRef}
 					>
 						<Autocomplete filter={contains}>
-							<SearchField autoFocus className="rounded-none outline-hidden">
+							<SearchField autoFocus={true} className="rounded-none outline-hidden">
 								<SearchInput className="border-none outline-hidden focus:ring-0" />
 							</SearchField>
 							<ListBox

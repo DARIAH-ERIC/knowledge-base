@@ -1,18 +1,25 @@
 "use client";
 
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/20/solid";
-import type { InputProps, SearchFieldProps } from "react-aria-components";
-import { Button as AriaButton, SearchField as AriaSearchField } from "react-aria-components";
-import { twJoin } from "tailwind-merge";
-import { fieldStyles } from "@/lib/field";
-import { cx } from "@/lib/primitive";
-import { Input, InputGroup } from "@/lib/input";
 import type { ReactNode } from "react";
+import {
+	Button as AriaButton,
+	type InputProps,
+	SearchField as AriaSearchField,
+	type SearchFieldProps,
+} from "react-aria-components";
+import { twJoin } from "tailwind-merge";
 
-export function SearchField({ className, ...props }: SearchFieldProps): ReactNode {
+import { fieldStyles } from "@/lib/field";
+import { Input, InputGroup } from "@/lib/input";
+import { cx } from "@/lib/primitive";
+
+export function SearchField(props: Readonly<SearchFieldProps>): ReactNode {
+	const { className, ...rest } = props;
+
 	return (
 		<AriaSearchField
-			{...props}
+			{...rest}
 			aria-label={props["aria-label"] ?? "Search"}
 			className={cx(fieldStyles({ className: "group/search-field" }), className)}
 		/>
@@ -27,7 +34,7 @@ export function SearchInput(props: Readonly<InputProps>): ReactNode {
 			<AriaButton
 				aria-label="Clear search"
 				className={twJoin(
-					"touch-target grid place-content-center pressed:text-fg text-muted-fg hover:text-fg group-empty/search-field:invisible",
+					"touch-area grid place-content-center text-muted-fg pressed:text-fg hover:text-fg group-empty/search-field:invisible",
 					"px-3 py-2 sm:px-2.5 sm:py-1.5 sm:text-sm/5",
 				)}
 			>

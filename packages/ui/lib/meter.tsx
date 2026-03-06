@@ -1,12 +1,13 @@
 "use client";
 
-import { createContext, use } from "react";
+import { type ComponentProps, createContext, type ReactNode, use } from "react";
 import {
 	Meter as PrimitiveMeter,
 	type MeterProps as PrimitiveMeterProps,
 	type MeterRenderProps as PrimitiveMeterRenderProps,
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
+
 import { cx } from "@/lib/primitive";
 
 interface MeterRenderProps extends PrimitiveMeterRenderProps {
@@ -17,11 +18,13 @@ const MeterContext = createContext<MeterRenderProps | null>(null);
 
 interface MeterProps extends PrimitiveMeterProps, Pick<MeterRenderProps, "color"> {}
 
-export function Meter({ className, children, color, ...props }: MeterProps) {
+export function Meter(props: Readonly<MeterProps>): ReactNode {
+	const { className, children, color, ...rest } = props;
+
 	return (
 		<PrimitiveMeter
 			data-slot="meter"
-			{...props}
+			{...rest}
 			className={cx(
 				"w-full",
 				"[&>[data-slot=meter-header]+[data-slot=meter-track]]:mt-2",
@@ -34,58 +37,72 @@ export function Meter({ className, children, color, ...props }: MeterProps) {
 				className,
 			)}
 		>
-			{(values) => (
-				<MeterContext value={{ ...values, color }}>
-					{typeof children === "function" ? children(values) : children}
-				</MeterContext>
-			)}
+			{(values) => {
+				return (
+					<MeterContext value={{ ...values, color }}>
+						{typeof children === "function" ? children(values) : children}
+					</MeterContext>
+				);
+			}}
 		</PrimitiveMeter>
 	);
 }
 
-export function MeterTrack({ className, ...props }: React.ComponentProps<"div">) {
+export function MeterTrack(props: Readonly<ComponentProps<"div">>): ReactNode {
+	const { className, ...rest } = props;
+
 	const { percentage, color } = use(MeterContext)!;
+
 	return (
 		<div
-			data-slot="meter-track"
 			className={twMerge(
 				"[--meter-height:--spacing(1.5)]",
 				"relative h-(--meter-height) w-full overflow-hidden rounded-full bg-secondary outline outline-transparent -outline-offset-1",
 				className,
 			)}
-			{...props}
+			data-slot="meter-track"
+			{...rest}
 		>
 			<div
-				data-slot="meter-fill"
 				className="absolute top-0 left-0 h-full rounded-full transition-[width] duration-200 ease-linear will-change-[width] motion-reduce:transition-none forced-colors:bg-[Highlight]"
-				style={{ width: `${percentage}%`, backgroundColor: color ?? getMeterColor(percentage) }}
+				data-slot="meter-fill"
+				style={{
+					width: `${String(percentage)}%`,
+					backgroundColor: color ?? getMeterColor(percentage),
+				}}
 			/>
 		</div>
 	);
 }
 
-export function MeterValue({
-	className,
-	...props
-}: Omit<React.ComponentProps<"span">, "children">) {
+export interface MeterValueProps extends Omit<ComponentProps<"span">, "children"> {}
+
+export function MeterValue(props: Readonly<MeterValueProps>): ReactNode {
+	const { className, ...rest } = props;
+
 	const { valueText } = use(MeterContext)!;
+
 	return (
 		<span
-			data-slot="meter-value"
 			className={twMerge("text-base/6 sm:text-sm/6", className)}
-			{...props}
+			data-slot="meter-value"
+			{...rest}
 		>
 			{valueText}
 		</span>
 	);
 }
 
-export function MeterHeader({ className, ...props }: React.ComponentProps<"div">) {
+export interface MeterHeaderProps extends ComponentProps<"div"> {}
+
+export function MeterHeader(props: Readonly<MeterHeaderProps>): ReactNode {
+	const { className, ...rest } = props;
+
 	return (
 		<div
-			data-slot="meter-header"
 			className={twMerge("flex items-center justify-between", className)}
-			{...props}
+			data-slot="meter-header"
+			{...rest}
 		/>
 	);
 }

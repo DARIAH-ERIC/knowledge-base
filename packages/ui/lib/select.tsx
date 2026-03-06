@@ -1,19 +1,18 @@
 "use client";
 
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
-import type {
-	ListBoxProps as AriaListBoxProps,
-	PopoverProps as AriaPopoverProps,
-	SelectProps as AriaSelectProps,
-} from "react-aria-components";
+import { type ComponentProps, Fragment, type ReactNode } from "react";
 import {
 	Button as AriaButton,
 	ListBox as AriaListBox,
+	type ListBoxProps as AriaListBoxProps,
+	type PopoverProps as AriaPopoverProps,
 	Select as AriaSelect,
+	type SelectProps as AriaSelectProps,
 	SelectValue as AriaSelectValue,
 } from "react-aria-components";
 import { twJoin } from "tailwind-merge";
-import { cx } from "@/lib/primitive";
+
 import {
 	DropdownDescription,
 	DropdownItem,
@@ -23,7 +22,7 @@ import {
 } from "@/lib/dropdown";
 import { fieldStyles } from "@/lib/field";
 import { PopoverContent } from "@/lib/popover";
-import type { ReactNode } from "react";
+import { cx } from "@/lib/primitive";
 
 export interface SelectProps<
 	T extends object,
@@ -32,15 +31,16 @@ export interface SelectProps<
 	items?: Iterable<T, M>;
 }
 
-export function Select<T extends object, M extends "single" | "multiple" = "single">({
-	className,
-	...props
-}: SelectProps<T, M>): ReactNode {
+export function Select<T extends object, M extends "single" | "multiple" = "single">(
+	props: Readonly<SelectProps<T, M>>,
+): ReactNode {
+	const { className, ...rest } = props;
+
 	return (
 		<AriaSelect
-			data-slot="control"
 			className={cx(fieldStyles({ className: "group/select" }), className)}
-			{...props}
+			data-slot="control"
+			{...rest}
 		/>
 	);
 }
@@ -53,93 +53,93 @@ export interface SelectContentProps<T extends object> extends Omit<
 	popover?: Omit<AriaPopoverProps, "children">;
 }
 
-export function SelectContent<T extends object>({
-	items,
-	className,
-	popover,
-	...props
-}: SelectContentProps<T>): ReactNode {
+export function SelectContent<T extends object>(props: Readonly<SelectContentProps<T>>): ReactNode {
+	const { items, className, popover, ...rest } = props;
+
 	return (
 		<PopoverContent
-			placement={popover?.placement ?? "bottom"}
 			className={cx(
 				"min-w-(--trigger-width) scroll-py-1 overflow-y-auto overscroll-contain",
 				popover?.className,
 			)}
+			placement={popover?.placement ?? "bottom"}
 			{...popover}
 		>
 			<AriaListBox
-				layout="stack"
-				orientation="vertical"
 				className={cx(
 					"grid max-h-96 w-full grid-cols-[auto_1fr] flex-col gap-y-1 p-1 outline-hidden *:[[role='group']+[role=group]]:mt-4 *:[[role='group']+[role=separator]]:mt-1",
 					className,
 				)}
 				items={items}
-				{...props}
+				layout="stack"
+				orientation="vertical"
+				{...rest}
 			/>
 		</PopoverContent>
 	);
 }
 
-export interface SelectTriggerProps extends React.ComponentProps<typeof AriaButton> {
+export interface SelectTriggerProps extends ComponentProps<typeof AriaButton> {
 	prefix?: React.ReactNode;
 	className?: string;
 }
 
-export function SelectTrigger({ children, className, ...props }: SelectTriggerProps): ReactNode {
+export function SelectTrigger(props: Readonly<SelectTriggerProps>): ReactNode {
+	const { children, className, prefix, ...rest } = props;
+
 	return (
-		<span data-slot="control" className="relative block w-full">
+		<span className="relative block w-full" data-slot="control">
 			<AriaButton
 				className={cx(
 					[
 						"group/select-trigger flex w-full min-w-0 cursor-default items-center gap-x-2 rounded-lg border border-input px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] text-start text-fg outline-hidden transition duration-200 sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6 sm:*:text-sm/6 dark:shadow-none",
-						"group-disabled/select:opacity-50 forced-colors:group-disabled/select:border-[GrayText] forced-colors:group-disabled/select/select:text-[GrayText]",
+						"group-disabled/select:opacity-50 forced-colors:group-disabled/select:border-[GrayText] forced-colors:group-disabled/select:text-[GrayText]",
 						"focus:border-ring/70 focus:bg-primary-subtle/5 focus:ring-3 focus:ring-ring/20",
 						"hover:border-muted-fg/30 group-hover/select:invalid:border-danger-subtle-fg/70",
 						"group-open/select:border-ring/70 group-open/select:bg-primary-subtle/5 group-open/select:ring-3 group-open/select:ring-ring/20 group-open/select:hover:border-ring/70",
-						"group-open/select:invalid:border-danger-subtle-fg/70 group-open/select:invalid:bg-danger-subtle/5 group-open/select:invalid:ring-3 group-open/select:invalid:ring-danger-subtle-fg/20 group-invalid/select:border-danger-subtle-fg/70 group-invalid/select:bg-danger-subtle/5 group-invalid/select:ring-danger-subtle-fg/20 group-invalid/select:hover:border-danger-subtle-fg/70 group-focus/select:group-invalid/select:border-danger-subtle-fg/70 group-focus/select:group-invalid/select:ring-danger-subtle-fg/20",
-						"*:data-[slot=icon]:size-5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:self-center *:data-[slot=icon]:text-(--btn-icon) pressed:*:data-[slot=icon]:text-(--btn-icon-active) focus-visible:*:data-[slot=icon]:text-(--btn-icon-active)/80 hover:*:data-[slot=icon]:text-(--btn-icon-active)/90 sm:*:data-[slot=icon]:size-4 forced-colors:[--btn-icon:ButtonText] forced-colors:hover:[--btn-icon:ButtonText]",
+						"group-invalid/select:border-danger-subtle-fg/70 group-invalid/select:bg-danger-subtle/5 group-invalid/select:ring-danger-subtle-fg/20 group-invalid/select:hover:border-danger-subtle-fg/70 group-open/select:invalid:border-danger-subtle-fg/70 group-open/select:invalid:bg-danger-subtle/5 group-open/select:invalid:ring-3 group-open/select:invalid:ring-danger-subtle-fg/20 group-focus/select:group-invalid/select:border-danger-subtle-fg/70 group-focus/select:group-invalid/select:ring-danger-subtle-fg/20",
+						"forced-colors:[--btn-icon:ButtonText] forced-colors:hover:[--btn-icon:ButtonText] *:data-[slot=icon]:size-5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:self-center *:data-[slot=icon]:text-(--btn-icon) pressed:*:data-[slot=icon]:text-(--btn-icon-active) focus-visible:*:data-[slot=icon]:text-(--btn-icon-active)/80 hover:*:data-[slot=icon]:text-(--btn-icon-active)/90 sm:*:data-[slot=icon]:size-4",
 						"*:data-[slot=loader]:size-5 *:data-[slot=loader]:shrink-0 *:data-[slot=loader]:self-center *:data-[slot=loader]:text-(--btn-icon) sm:*:data-[slot=loader]:size-4",
-						"forced-colors:group-focus/select:border-[Highlight] forced-colors:group-invalid/select:border-[Mark] forced-colors:group-focus/select:group-invalid/select:border-[Mark]",
+						"forced-colors:group-focus/select:border-[Highlight] forced-colors:group-focus/select:group-invalid/select:border-[Mark] forced-colors:group-invalid/select:border-[Mark]",
 					],
 					className,
 				)}
+				{...rest}
 			>
-				{(values) => (
-					<>
-						{props.prefix && <span className="text-muted-fg">{props.prefix}</span>}
-						{typeof children === "function" ? children(values) : children}
+				{(values) => {
+					return (
+						<Fragment>
+							{prefix != null ? <span className="text-muted-fg">{prefix}</span> : null}
+							{typeof children === "function" ? children(values) : children}
 
-						{!children && (
-							<>
-								<AriaSelectValue
-									data-slot="select-value"
-									className={twJoin([
-										"truncate text-start data-placeholder:text-muted-fg sm:text-sm/6 [&_[slot=description]]:hidden",
-										"has-data-[slot=avatar]:grid has-data-[slot=avatar]:grid-cols-[1fr_auto] has-data-[slot=avatar]:items-center has-data-[slot=avatar]:gap-x-2",
-										"has-data-[slot=icon]:grid has-data-[slot=icon]:grid-cols-[1fr_auto] has-data-[slot=icon]:items-center has-data-[slot=icon]:gap-x-2",
-										"*:data-[slot=icon]:size-5 sm:*:data-[slot=icon]:size-4",
-										"*:data-[slot=avatar]:[--avatar-size:--spacing(5)] sm:*:data-[slot=avatar]:[--avatar-size:--spacing(4.5)]",
-									])}
-								/>
-								<ChevronUpDownIcon
-									data-slot="chevron"
-									className="-mr-1 ml-auto size-5 text-muted-fg sm:size-4"
-								/>
-							</>
-						)}
-					</>
-				)}
+							{children == null ? (
+								<Fragment>
+									<AriaSelectValue
+										className={twJoin([
+											"truncate text-start data-placeholder:text-muted-fg sm:text-sm/6 **:[[slot=description]]:hidden",
+											"has-data-[slot=avatar]:grid has-data-[slot=avatar]:grid-cols-[1fr_auto] has-data-[slot=avatar]:items-center has-data-[slot=avatar]:gap-x-2",
+											"has-data-[slot=icon]:grid has-data-[slot=icon]:grid-cols-[1fr_auto] has-data-[slot=icon]:items-center has-data-[slot=icon]:gap-x-2",
+											"*:data-[slot=icon]:size-5 sm:*:data-[slot=icon]:size-4",
+											"*:data-[slot=avatar]:[--avatar-size:--spacing(5)] sm:*:data-[slot=avatar]:[--avatar-size:--spacing(4.5)]",
+										])}
+										data-slot="select-value"
+									/>
+									<ChevronUpDownIcon
+										className="-mr-1 ml-auto size-5 text-muted-fg sm:size-4"
+										data-slot="chevron"
+									/>
+								</Fragment>
+							) : null}
+						</Fragment>
+					);
+				}}
 			</AriaButton>
 		</span>
 	);
 }
 
-const SelectSection = DropdownSection;
-const SelectSeparator = DropdownSeparator;
-const SelectLabel = DropdownLabel;
-const SelectDescription = DropdownDescription;
-const SelectItem = DropdownItem;
-
-export { SelectDescription, SelectItem, SelectLabel, SelectSeparator, SelectSection };
+export const SelectSection = DropdownSection;
+export const SelectSeparator = DropdownSeparator;
+export const SelectLabel = DropdownLabel;
+export const SelectDescription = DropdownDescription;
+export const SelectItem = DropdownItem;

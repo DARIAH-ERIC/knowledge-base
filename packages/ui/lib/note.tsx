@@ -3,6 +3,7 @@ import {
 	ExclamationCircleIcon,
 	InformationCircleIcon,
 } from "@heroicons/react/24/solid";
+import type { ReactNode } from "react";
 import { twJoin, twMerge } from "tailwind-merge";
 
 export interface NoteProps extends React.HtmlHTMLAttributes<HTMLDivElement> {
@@ -10,7 +11,9 @@ export interface NoteProps extends React.HtmlHTMLAttributes<HTMLDivElement> {
 	indicator?: boolean;
 }
 
-export function Note({ indicator = true, intent = "default", className, ...props }: NoteProps) {
+export function Note(props: Readonly<NoteProps>): ReactNode {
+	const { children, indicator = true, intent = "default", className, ...rest } = props;
+
 	const iconMap: Record<string, React.ElementType | null> = {
 		info: InformationCircleIcon,
 		warning: ExclamationCircleIcon,
@@ -19,11 +22,10 @@ export function Note({ indicator = true, intent = "default", className, ...props
 		default: null,
 	};
 
-	const IconComponent = iconMap[intent] || null;
+	const IconComponent = iconMap[intent] ?? null;
 
 	return (
 		<div
-			data-slot="note"
 			className={twMerge([
 				"grid w-full grid-cols-[auto_1fr] overflow-hidden rounded-lg border border-current/15 p-[calc(--spacing(4)-1px)] backdrop-blur-2xl sm:text-sm/6",
 				"*:[a]:hover:underline **:[strong]:font-medium",
@@ -38,9 +40,10 @@ export function Note({ indicator = true, intent = "default", className, ...props
 					"bg-success-subtle text-success-subtle-fg **:[.text-muted-fg]:text-success-subtle-fg/80",
 				className,
 			])}
-			{...props}
+			data-slot="note"
+			{...rest}
 		>
-			{IconComponent && indicator && (
+			{IconComponent != null && indicator && (
 				<div
 					className={twJoin(
 						"mr-3 grid size-8 place-content-center rounded-full border-2",
@@ -63,8 +66,8 @@ export function Note({ indicator = true, intent = "default", className, ...props
 					</div>
 				</div>
 			)}
-			<div className="text-pretty text-base/6 group-has-data-[slot=icon]:col-start-2 sm:text-sm/6">
-				{props.children}
+			<div className="text-pretty text-base/6 sm:text-sm/6 group-has-data-[slot=icon]:col-start-2">
+				{children}
 			</div>
 		</div>
 	);

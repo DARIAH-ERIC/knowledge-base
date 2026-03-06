@@ -1,16 +1,17 @@
 "use client";
 
-import { Link as LinkPrimitive, type LinkProps as LinkPrimitiveProps } from "react-aria-components";
+import type { ReactNode } from "react";
+import { Link as AriaLink, type LinkProps as AriaLinkProps } from "react-aria-components";
+
 import { cx } from "@/lib/primitive";
 
-export interface LinkProps extends LinkPrimitiveProps {
-	ref?: React.RefObject<HTMLAnchorElement>;
-}
+export interface LinkProps extends AriaLinkProps {}
 
-export function Link({ className, ref, ...props }: LinkProps) {
+export function Link(props: Readonly<LinkProps>): ReactNode {
+	const { children, className, ...rest } = props;
+
 	return (
-		<LinkPrimitive
-			ref={ref}
+		<AriaLink
 			className={cx(
 				[
 					"font-medium text-(--text)",
@@ -20,7 +21,9 @@ export function Link({ className, ref, ...props }: LinkProps) {
 				],
 				className,
 			)}
-			{...props}
-		/>
+			{...rest}
+		>
+			{children}
+		</AriaLink>
 	);
 }

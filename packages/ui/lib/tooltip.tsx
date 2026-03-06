@@ -9,8 +9,7 @@ import {
 	TooltipTrigger as AriaTooltipTrigger,
 } from "react-aria-components";
 import { twJoin } from "tailwind-merge";
-import type { VariantProps } from "tailwind-variants";
-import { tv } from "tailwind-variants";
+import { tv, type VariantProps } from "tailwind-variants";
 
 export const tooltipStyles = tv({
 	base: [
@@ -55,25 +54,27 @@ export function TooltipContent(props: Readonly<TooltipContentProps>): ReactNode 
 	return (
 		<AriaTooltip
 			{...rest}
-			className={composeRenderProps(className, (className, renderProps) =>
-				tooltipStyles({
+			className={composeRenderProps(className, (className, renderProps) => {
+				return tooltipStyles({
 					...renderProps,
 					inverse,
 					className,
-				}),
-			)}
+				});
+			})}
 			offset={offset}
 		>
 			{arrow ? (
 				<AriaOverlayArrow className="group">
 					<svg
-						width={12}
-						height={12}
-						viewBox="0 0 12 12"
 						className={twJoin(
 							"block group-placement-bottom:rotate-180 group-placement-left:-rotate-90 group-placement-right:rotate-90 forced-colors:fill-[Canvas] forced-colors:stroke-[ButtonBorder]",
-							inverse ? "fill-fg stroke-transparent" : "fill-overlay stroke-(--tooltip-border)",
+							inverse === true
+								? "fill-fg stroke-transparent"
+								: "fill-overlay stroke-(--tooltip-border)",
 						)}
+						height={12}
+						viewBox="0 0 12 12"
+						width={12}
 					>
 						<path d="M0 0 L6 6 L12 0" />
 					</svg>

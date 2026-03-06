@@ -1,20 +1,22 @@
-import { Keyboard as KeyboardPrimitive } from "react-aria-components";
+import type { ComponentProps, ReactNode } from "react";
+import { Keyboard as AriaKeyboard } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
-interface KeyboardProps extends React.ComponentProps<typeof KeyboardPrimitive> {}
+export interface KeyboardProps extends ComponentProps<typeof AriaKeyboard> {}
 
-const Keyboard = ({ className, ...props }: KeyboardProps) => {
+export function Keyboard(props: Readonly<KeyboardProps>): ReactNode {
+	const { children, className, ...rest } = props;
+
 	return (
-		<KeyboardPrimitive
-			data-slot="keyboard"
+		<AriaKeyboard
 			className={twMerge(
-				"hidden font-mono text-[0.80rem]/6 text-current/60 group-hover:text-fg group-focus:text-fg group-focus:opacity-90 group-disabled:opacity-50 lg:inline forced-colors:group-focus:text-[HighlightText",
+				"hidden font-mono text-[0.80rem]/6 text-current/60 group-hover:text-fg group-focus:text-fg group-focus:opacity-90 group-disabled:opacity-50 lg:inline forced-colors:group-focus:text-[HighlightText]",
 				className,
 			)}
-			{...props}
-		/>
+			data-slot="keyboard"
+			{...rest}
+		>
+			{children}
+		</AriaKeyboard>
 	);
-};
-
-export type { KeyboardProps };
-export { Keyboard };
+}
