@@ -1,13 +1,13 @@
 import { globalGetRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
+import { Avatar } from "@dariah-eric/ui/avatar";
+import { Link } from "@dariah-eric/ui/link";
+import { Text, TextLink } from "@dariah-eric/ui/text";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { ForgotPasswordForm } from "@/app/(app)/[locale]/(auth)/auth/forgot-password/_components/forgot-password-form";
 import { Main } from "@/components/main";
-import { Avatar } from "@dariah-eric/ui/avatar";
-import { Link } from "@dariah-eric/ui/link";
-import { Text, TextLink } from "@dariah-eric/ui/text";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface ForgotPasswordPageProps extends PageProps<"/[locale]/auth/forgot-password"> {}

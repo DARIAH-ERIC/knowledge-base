@@ -2,14 +2,6 @@
 
 "use client";
 
-import {
-	ArrowLeftStartOnRectangleIcon,
-	Cog6ToothIcon,
-	DocumentTextIcon,
-	Squares2X2Icon,
-} from "@heroicons/react/24/outline";
-import type { ReactNode } from "react";
-
 import { Avatar } from "@dariah-eric/ui/avatar";
 import {
 	Menu,
@@ -21,6 +13,13 @@ import {
 	MenuSeparator,
 	MenuTrigger,
 } from "@dariah-eric/ui/menu";
+import {
+	ArrowLeftStartOnRectangleIcon,
+	Cog6ToothIcon,
+	DocumentTextIcon,
+	Squares2X2Icon,
+} from "@heroicons/react/24/outline";
+import type { ReactNode } from "react";
 
 interface UserMenuProps {
 	user: {

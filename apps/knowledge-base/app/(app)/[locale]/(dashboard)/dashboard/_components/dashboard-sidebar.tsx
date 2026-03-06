@@ -2,24 +2,6 @@
 
 "use client";
 
-import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
-import { ChevronUpDownIcon } from "@heroicons/react/24/outline";
-import {
-	ArrowLeftStartOnRectangleIcon,
-	BriefcaseIcon,
-	BuildingOfficeIcon,
-	ChatBubbleLeftRightIcon,
-	Cog6ToothIcon,
-	DocumentTextIcon,
-	EnvelopeIcon,
-	HomeIcon,
-	QuestionMarkCircleIcon,
-	TicketIcon,
-	UserCircleIcon,
-	UserGroupIcon,
-} from "@heroicons/react/24/solid";
-import type { ComponentProps, ReactNode } from "react";
-
 import { Avatar } from "@dariah-eric/ui/avatar";
 import { Link } from "@dariah-eric/ui/link";
 import {
@@ -45,6 +27,23 @@ import {
 	SidebarLabel,
 	SidebarRail,
 } from "@dariah-eric/ui/sidebar";
+import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
+import { ChevronUpDownIcon } from "@heroicons/react/24/outline";
+import {
+	ArrowLeftStartOnRectangleIcon,
+	BriefcaseIcon,
+	BuildingOfficeIcon,
+	ChatBubbleLeftRightIcon,
+	Cog6ToothIcon,
+	DocumentTextIcon,
+	EnvelopeIcon,
+	HomeIcon,
+	QuestionMarkCircleIcon,
+	TicketIcon,
+	UserCircleIcon,
+	UserGroupIcon,
+} from "@heroicons/react/24/solid";
+import type { ComponentProps, ReactNode } from "react";
 
 export function DashboardSidebar(props: Readonly<ComponentProps<typeof Sidebar>>): ReactNode {
 	return (

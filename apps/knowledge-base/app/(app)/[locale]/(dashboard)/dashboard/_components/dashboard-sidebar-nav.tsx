@@ -1,10 +1,10 @@
 /* eslint-disable react/jsx-no-literals */
 
+import { Breadcrumbs, BreadcrumbsItem } from "@dariah-eric/ui/breadcrumbs";
+import { SidebarNav, SidebarTrigger } from "@dariah-eric/ui/sidebar";
 import type { ReactNode } from "react";
 
 import { UserMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/user-menu";
-import { Breadcrumbs, BreadcrumbsItem } from "@dariah-eric/ui/breadcrumbs";
-import { SidebarNav, SidebarTrigger } from "@dariah-eric/ui/sidebar";
 import { getCurrentSession } from "@/lib/auth/session";
 
 export async function DashboardSidebarNav(): Promise<ReactNode> {
