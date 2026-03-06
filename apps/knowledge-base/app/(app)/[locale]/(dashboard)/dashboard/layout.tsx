@@ -1,5 +1,6 @@
 import { SidebarInset, SidebarProvider } from "@dariah-eric/ui/sidebar";
-import { useTranslations } from "next-intl";
+import { connection } from "next/server";
+import { getTranslations } from "next-intl/server";
 import { Fragment, type ReactNode } from "react";
 
 import { DashboardSidebar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar";
@@ -9,10 +10,18 @@ import { SkipLink } from "@/components/skip-link";
 
 interface DashbardLayoutProps extends LayoutProps<"/[locale]/dashboard"> {}
 
-export default function DashbardLayout(props: Readonly<DashbardLayoutProps>): ReactNode {
+export default async function DashbardLayout(
+	props: Readonly<DashbardLayoutProps>,
+): Promise<ReactNode> {
 	const { children } = props;
 
-	const t = useTranslations("DashboardLayout");
+	const t = await getTranslations("DashboardLayout");
+
+	/**
+	 * We cannot access the database when building the app in github actions,
+	 * so we need to ensure that all database access happens at request time only.
+	 */
+	await connection();
 
 	return (
 		<Fragment>

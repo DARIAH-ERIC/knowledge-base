@@ -32,7 +32,7 @@ jobs:
           set -eux
           CHANGED_APPS=$(
             pnpm -r list --depth -1 --json --filter "./apps/*[origin/main]..." \
-            | jq -c '[.[] | select(.name != null) | .name | sub("^@dariah-eric/dariah-knowledge-base-"; "")]'
+            | jq -c '[.[] | select(.name != null) | .name | sub("^@dariah-eric/"; "")]'
           )
           echo "CHANGED_APPS=${CHANGED_APPS}" >> "$GITHUB_OUTPUT"
 
@@ -50,9 +50,9 @@ jobs:
       fail-fast: true
       matrix:
         target:
-          # - name: "knowledge-base"
-          #   environment: "production"
-          #   public_url: "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
+          - name: "knowledge-base"
+            environment: "production"
+            public_url: "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
           - name: "api"
             environment: "production"
             public_url: "${{ vars.K8S_SECRET_API_BASE_URL }}"
@@ -74,7 +74,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for docker
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: "ghcr.io/${{ github.repository }}-${{ matrix.target.name }}"
           tags: |
@@ -113,10 +113,10 @@ jobs:
       fail-fast: true
       matrix:
         target:
-          # - name: "knowledge-base"
-          #   environment: "production"
-          #   public_url: "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
-          #   service_id: "${{ vars.APP_SERVICE_ID }}"
+          - name: "knowledge-base"
+            environment: "production"
+            public_url: "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
+            service_id: "${{ vars.APP_SERVICE_ID }}"
           - name: "api"
             environment: "production"
             public_url: "${{ vars.K8S_SECRET_API_BASE_URL }}"
