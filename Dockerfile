@@ -1,35 +1,90 @@
 # syntax=docker/dockerfile:1
 
+# base
+# -------------------------------------------------------------------------------------------------
+
 FROM node:24-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 ENV CI=true
 ENV SKIP_INSTALL_SIMPLE_GIT_HOOKS=1
 RUN corepack enable
+RUN pnpm add --global turbo
 
-FROM base AS build
+# source
+# -------------------------------------------------------------------------------------------------
+
+FROM base AS source
 WORKDIR /app
 COPY . .
-RUN pnpm install --frozen-lockfile
-RUN pnpm run --filter "./packages/*" build
 
-FROM build AS api-build
-RUN pnpm run --filter api build
+# =================================================================================================
+# api
+# =================================================================================================
+
+# prune
+# -------------------------------------------------------------------------------------------------
+
+FROM source AS api-pruner
+RUN turbo prune @dariah-eric/api --docker
+
+# install
+# -------------------------------------------------------------------------------------------------
+
+FROM base AS api-installer
+WORKDIR /app
+COPY --from=api-pruner /app/out/json/ .
+COPY --from=api-pruner /app/patches/ ./patches/
+COPY --from=api-pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+RUN pnpm install --frozen-lockfile
+
+# build
+# -------------------------------------------------------------------------------------------------
+
+FROM api-installer AS api-builder
+COPY --from=api-pruner /app/out/full/ .
+RUN turbo run build --filter=@dariah-eric/api
 # We don't set `injectWorkspacePackages` directly in `pnpm-workspace.yaml` because it currently
 # produces lots of peer dependency warnings.
-RUN pnpm deploy --filter api --config.inject-workspace-packages=true --prod /out
+RUN pnpm deploy --filter @dariah-eric/api --config.inject-workspace-packages=true --prod /out
+
+# serve
+# -------------------------------------------------------------------------------------------------
 
 FROM base AS api
 USER node
 WORKDIR /app
-COPY --from=api-build /out/node_modules/ /app/node_modules/
-COPY --from=api-build /out/public/ /app/public/
-COPY --from=api-build /out/dist/ /app/dist/
+COPY --from=api-builder /out/node_modules/ /app/node_modules/
+COPY --from=api-builder /out/public/ /app/public/
+COPY --from=api-builder /out/dist/ /app/dist/
 ENV NODE_ENV=production
 EXPOSE 3000
 CMD [ "node", "./dist/index.mjs" ]
 
-FROM build AS knowledge-base-build
+# =================================================================================================
+# app
+# =================================================================================================
+
+# prune
+# -------------------------------------------------------------------------------------------------
+
+FROM source AS knowledge-base-pruner
+RUN turbo prune @dariah-eric/knowledge-base --docker
+
+# install
+# -------------------------------------------------------------------------------------------------
+
+FROM base AS knowledge-base-installer
+WORKDIR /app
+COPY --from=knowledge-base-pruner /app/out/json/ .
+COPY --from=knowledge-base-pruner /app/patches/ ./patches/
+COPY --from=knowledge-base-pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+RUN pnpm install --frozen-lockfile
+
+# build
+# -------------------------------------------------------------------------------------------------
+
+FROM knowledge-base-installer AS knowledge-base-builder
 ARG BUILD_MODE=standalone
 ARG NEXT_PUBLIC_APP_BASE_URL
 ARG NEXT_PUBLIC_APP_BOTS
@@ -47,6 +102,7 @@ ARG NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME
 ARG NEXT_PUBLIC_TYPESENSE_HOST
 ARG NEXT_PUBLIC_TYPESENSE_PORT
 ARG NEXT_PUBLIC_TYPESENSE_PROTOCOL
+COPY --from=knowledge-base-pruner /app/out/full/ .
 RUN --mount=type=secret,id=AUTH_ENCRYPTION_KEY,env=AUTH_ENCRYPTION_KEY \
     --mount=type=secret,id=AUTH_SIGN_UP,env=AUTH_SIGN_UP \
     --mount=type=secret,id=DATABASE_HOST,env=DATABASE_HOST \
@@ -71,22 +127,18 @@ RUN --mount=type=secret,id=AUTH_ENCRYPTION_KEY,env=AUTH_ENCRYPTION_KEY \
     --mount=type=secret,id=S3_PROTOCOL,env=S3_PROTOCOL \
     --mount=type=secret,id=S3_SECRET_KEY,env=S3_SECRET_KEY \
     --mount=type=secret,id=TYPESENSE_ADMIN_API_KEY,env=TYPESENSE_ADMIN_API_KEY \
-    pnpm run --filter knowledge-base build
-# We don't set `injectWorkspacePackages` directly in `pnpm-workspace.yaml` because it currently
-# produces lots of peer dependency warnings.
-RUN pnpm deploy --filter knowledge-base --config.inject-workspace-packages=true --prod /out
-# p`npm deploy` omits gitignored folders like `.next`.
-RUN cp -r /app/apps/knowledge-base/.next/standalone /out/.next/standalone && \
-    cp -r /app/apps/knowledge-base/.next/static /out/.next/static
+    turbo run build --filter=@dariah-eric/knowledge-base
+
+# serve
+# -------------------------------------------------------------------------------------------------
 
 FROM base AS knowledge-base
 USER node
 WORKDIR /app
-COPY --from=knowledge-base-build /out/node_modules/ /app/node_modules/
-COPY --from=knowledge-base-build /out/public/ /app/public/
-COPY --from=knowledge-base-build /out/next.config.ts /app/next.config.ts
-COPY --from=knowledge-base-build /out/.next/standalone/ /app/
-COPY --from=knowledge-base-build /out/.next/static/ /app/.next/static/
+# `.next/standalone` is self-contained (includes its own `node_modules`)
+COPY --from=knowledge-base-builder /app/apps/knowledge-base/.next/standalone/ /app/
+COPY --from=knowledge-base-builder /app/apps/knowledge-base/.next/static/ /app/apps/knowledge-base/.next/static/
+COPY --from=knowledge-base-builder /app/apps/knowledge-base/public/ /app/apps/knowledge-base/public/
 ENV NODE_ENV=production
 EXPOSE 3000
 CMD [ "node", "./apps/knowledge-base/server.js" ]

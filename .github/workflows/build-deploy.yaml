@@ -13,9 +13,16 @@ jobs:
     name: Detect changed apps
     runs-on: ubuntu-24.04
 
+    outputs:
+      affected_names: ${{ steps.changes.outputs.affected_names }}
+      has_changes: ${{ steps.changes.outputs.has_changes }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          filter: "blob:none"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -26,19 +33,28 @@ jobs:
           node-version: 24.x
           cache: "pnpm"
 
-      - name: Detect changed apps
+      - name: Detect affected apps
         id: changes
+        env:
+          TURBO_SCM_BASE: origin/main
         run: |
           set -eux
-          CHANGED_APPS=$(
-            pnpm -r list --depth -1 --json --filter "./apps/*[origin/main]..." \
-            | jq -c '[.[] | select(.name != null) | .name | sub("^@dariah-eric/"; "")]'
+          AFFECTED=$(
+            pnpm dlx turbo ls --affected --output json \
+            2>/dev/null || echo '{"packages":{"items":[]}}'
           )
-          echo "CHANGED_APPS=${CHANGED_APPS}" >> "$GITHUB_OUTPUT"
+          NAMES=$(echo "$AFFECTED" | jq -c '[.packages.items[] | select(.path | startswith("apps/")) | .name | sub("^@dariah-eric/"; "")]')
+          echo "affected_names=${NAMES}" >> "$GITHUB_OUTPUT"
+          if [ "$NAMES" = "[]" ]; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
 
   build:
     name: Build and push docker images
     needs: [changes]
+    if: contains(fromJSON(needs.changes.outputs.affected_names), matrix.target.name)
     runs-on: ubuntu-24.04
     timeout-minutes: 60
 
@@ -137,6 +153,7 @@ jobs:
   deploy:
     name: Deploy docker images
     needs: [changes, build]
+    if: contains(fromJSON(needs.changes.outputs.affected_names), matrix.target.name)
     uses: dariah-eric/gl-autodevops-minimal-port/.github/workflows/deploy.yml@main
     secrets: inherit
 
