@@ -13,9 +13,16 @@ jobs:
     name: Detect changed apps
     runs-on: ubuntu-24.04
 
+    outputs:
+      matrix: ${{ steps.changes.outputs.matrix }}
+      has_changes: ${{ steps.changes.outputs.has_changes }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          filter: "blob:none"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -26,19 +33,46 @@ jobs:
           node-version: 24.x
           cache: "pnpm"
 
-      - name: Detect changed apps
+      - name: Detect affected apps
         id: changes
+        env:
+          TURBO_SCM_BASE: origin/main
+          ALL_APPS: |
+            [
+              {
+                "name": "knowledge-base",
+                "image": "app",
+                "environment": "production",
+                "public_url": "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}",
+                "service_id": "${{ vars.APP_SERVICE_ID }}"
+              },
+              {
+                "name": "api",
+                "image": "api",
+                "environment": "production",
+                "public_url": "${{ vars.K8S_SECRET_API_BASE_URL }}",
+                "service_id": "${{ vars.API_SERVICE_ID }}"
+              }
+            ]
         run: |
           set -eux
-          CHANGED_APPS=$(
-            pnpm -r list --depth -1 --json --filter "./apps/*[origin/main]..." \
-            | jq -c '[.[] | select(.name != null) | .name | sub("^@dariah-eric/dariah-knowledge-base-"; "")]'
+          AFFECTED=$(
+            pnpm dlx turbo ls --affected --output json \
+            2>/dev/null || echo '{"packages":{"items":[]}}'
           )
-          echo "CHANGED_APPS=${CHANGED_APPS}" >> "$GITHUB_OUTPUT"
+          NAMES=$(echo "$AFFECTED" | jq -c '[.packages.items[] | select(.path | startswith("apps/")) | .name | sub("^@dariah-eric/"; "")]')
+          MATRIX=$(echo "$ALL_APPS" | jq -c --argjson names "$NAMES" '[.[] | select(.name as $n | $names | index($n))]')
+          echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
+          if [ "$MATRIX" = "[]" ]; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
 
   build:
     name: Build and push docker images
     needs: [changes]
+    if: needs.changes.outputs.has_changes == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 60
 
@@ -49,13 +83,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target:
-          # - name: "knowledge-base"
-          #   environment: "production"
-          #   public_url: "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
-          - name: "api"
-            environment: "production"
-            public_url: "${{ vars.K8S_SECRET_API_BASE_URL }}"
+        target: ${{ fromJSON(needs.changes.outputs.matrix) }}
       max-parallel: 1
 
     steps:
@@ -74,9 +102,9 @@ jobs:
 
       - name: Extract metadata (tags, labels) for docker
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
-          images: "ghcr.io/${{ github.repository }}-${{ matrix.target.name }}"
+          images: "ghcr.io/${{ github.repository }}-${{ matrix.target.image }}"
           tags: |
             type=raw,value={{sha}}
             type=ref,event=branch
@@ -85,49 +113,73 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          target: "${{ matrix.target.name }}"
+          target: "${{ matrix.target.image }}"
           push: true
           tags: "${{ steps.meta.outputs.tags }}"
           labels: "${{ steps.meta.outputs.labels }}"
           build-args: |
             "NEXT_PUBLIC_APP_BASE_URL=${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
+            "NEXT_PUBLIC_APP_BOTS=disabled"
+            "NEXT_PUBLIC_APP_GOOGLE_SITE_VERIFICATION=${{ vars.NEXT_PUBLIC_APP_GOOGLE_SITE_VERIFICATION }}"
             "NEXT_PUBLIC_APP_IMPRINT_CUSTOM_CONFIG=disabled"
             "NEXT_PUBLIC_APP_IMPRINT_SERVICE_BASE_URL=${{ vars.NEXT_PUBLIC_IMPRINT_SERVICE_BASE_URL }}"
             "NEXT_PUBLIC_APP_MATOMO_BASE_URL=${{ vars.NEXT_PUBLIC_MATOMO_BASE_URL }}"
             "NEXT_PUBLIC_APP_MATOMO_ID=${{ vars.NEXT_PUBLIC_APP_MATOMO_ID }}"
+            "NEXT_PUBLIC_APP_SENTRY_DSN=${{ vars.NEXT_PUBLIC_APP_SENTRY_DSN }}"
+            "NEXT_PUBLIC_APP_SENTRY_ORG=${{ vars.NEXT_PUBLIC_SENTRY_ORG }}"
+            "NEXT_PUBLIC_APP_SENTRY_PII=${{ vars.NEXT_PUBLIC_APP_SENTRY_PII }}"
+            "NEXT_PUBLIC_APP_SENTRY_PROJECT=${{ vars.NEXT_PUBLIC_APP_SENTRY_PROJECT }}"
             "NEXT_PUBLIC_APP_SERVICE_ID=${{ vars.APP_SERVICE_ID }}"
             "NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME=${{ vars.NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME }}"
             "NEXT_PUBLIC_TYPESENSE_HOST=${{ vars.NEXT_PUBLIC_TYPESENSE_HOST }}"
             "NEXT_PUBLIC_TYPESENSE_PORT=${{ vars.NEXT_PUBLIC_TYPESENSE_PORT }}"
             "NEXT_PUBLIC_TYPESENSE_PROTOCOL=${{ vars.NEXT_PUBLIC_TYPESENSE_PROTOCOL }}"
+          secrets: |
+            "AUTH_ENCRYPTION_KEY=${{ secrets.TEST_AUTH_ENCRYPTION_KEY }}"
+            "AUTH_SIGN_UP=${{ vars.K8S_SECRET_AUTH_SIGN_UP }}"
+            "DATABASE_HOST=${{ secrets.K8S_SECRET_DATABASE_HOST }}"
+            "DATABASE_NAME=${{ secrets.K8S_SECRET_DATABASE_NAME }}"
+            "DATABASE_PASSWORD=${{ secrets.TEST_DATABASE_PASSWORD }}"
+            "DATABASE_PORT=${{ secrets.K8S_SECRET_DATABASE_PORT }}"
+            "DATABASE_USER=${{ secrets.TEST_DATABASE_USER }}"
+            "EMAIL_ADDRESS=${{ secrets.K8S_SECRET_EMAIL_ADDRESS }}"
+            "EMAIL_SMTP_PORT=${{ secrets.K8S_SECRET_EMAIL_SMTP_PORT }}"
+            "EMAIL_SMTP_SERVER=${{ secrets.K8S_SECRET_EMAIL_SMTP_SERVER }}"
+            "IMGPROXY_BASE_URL=${{ vars.K8S_SECRET_IMGPROXY_BASE_URL }}"
+            "IMGPROXY_KEY=${{ secrets.TEST_IMGPROXY_KEY }}"
+            "IMGPROXY_PORT=${{ vars.K8S_SECRET_IMGPROXY_PORT }}"
+            "IMGPROXY_SALT=${{ secrets.TEST_IMGPROXY_SALT }}"
+            "MAILCHIMP_API_BASE_URL=${{ secrets.TEST_MAILCHIMP_API_BASE_URL }}"
+            "MAILCHIMP_API_KEY=${{ secrets.TEST_MAILCHIMP_API_KEY }}"
+            "MAILCHIMP_LIST_ID=${{ secrets.TEST_MAILCHIMP_LIST_ID }}"
+            "S3_ACCESS_KEY=${{ secrets.TEST_S3_ACCESS_KEY }}"
+            "S3_BUCKET_NAME=${{ vars.K8S_SECRET_S3_BUCKET_NAME }}"
+            "S3_HOST=${{ vars.K8S_SECRET_S3_HOST }}"
+            "S3_PORT=${{ vars.K8S_SECRET_S3_PORT }}"
+            "S3_PROTOCOL=${{ vars.K8S_SECRET_S3_PROTOCOL }}"
+            "S3_SECRET_KEY=${{ secrets.TEST_S3_SECRET_KEY }}"
+            "TYPESENSE_ADMIN_API_KEY=${{ secrets.TEST_TYPESENSE_ADMIN_API_KEY }}"
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   deploy:
     name: Deploy docker images
     needs: [changes, build]
+    if: needs.changes.outputs.has_changes == 'true'
     uses: dariah-eric/gl-autodevops-minimal-port/.github/workflows/deploy.yml@main
     secrets: inherit
 
     strategy:
       fail-fast: true
       matrix:
-        target:
-          # - name: "knowledge-base"
-          #   environment: "production"
-          #   public_url: "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
-          #   service_id: "${{ vars.APP_SERVICE_ID }}"
-          - name: "api"
-            environment: "production"
-            public_url: "${{ vars.K8S_SECRET_API_BASE_URL }}"
-            service_id: "${{ vars.API_SERVICE_ID }}"
+        target: ${{ fromJSON(needs.changes.outputs.matrix) }}
       max-parallel: 1
 
     with:
       default_port: "3000"
       environment: "${{ matrix.target.environment }}"
-      APP_NAME: "${{ matrix.target.name }}"
+      APP_NAME: "${{ matrix.target.image }}"
       APP_ROOT: "/"
-      DOCKER_TAG: "ghcr.io/${{ github.repository }}-${{ matrix.target.name }}"
+      DOCKER_TAG: "ghcr.io/${{ github.repository }}-${{ matrix.target.image }}"
       PUBLIC_URL: "${{ matrix.target.public_url }}"
       SERVICE_ID: "${{ matrix.target.service_id }}"

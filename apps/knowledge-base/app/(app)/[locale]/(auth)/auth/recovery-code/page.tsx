@@ -31,7 +31,6 @@ export default async function RecoveryCodePage(
 	_props: Readonly<RecoveryCodePageProps>,
 ): Promise<ReactNode> {
 	const locale = await getLocale();
-
 	const t = await getTranslations("RecoveryCodePage");
 	const e = await getTranslations("errors");
 
