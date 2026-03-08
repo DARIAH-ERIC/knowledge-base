@@ -25,24 +25,24 @@ COPY . .
 # prune
 # -------------------------------------------------------------------------------------------------
 
-FROM source AS api-pruner
+FROM source AS api-prune
 RUN turbo prune @dariah-eric/api --docker
 
 # install
 # -------------------------------------------------------------------------------------------------
 
-FROM base AS api-installer
+FROM base AS api-install
 WORKDIR /app
-COPY --from=api-pruner /app/out/json/ .
-COPY --from=api-pruner /app/patches/ ./patches/
-COPY --from=api-pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=api-prune /app/out/json/ .
+COPY --from=api-prune /app/patches/ ./patches/
+COPY --from=api-prune /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 RUN pnpm install --frozen-lockfile
 
 # build
 # -------------------------------------------------------------------------------------------------
 
-FROM api-installer AS api-builder
-COPY --from=api-pruner /app/out/full/ .
+FROM api-install AS api-build
+COPY --from=api-prune /app/out/full/ .
 RUN turbo run build --filter=@dariah-eric/api
 # We don't set `injectWorkspacePackages` directly in `pnpm-workspace.yaml` because it currently
 # produces lots of peer dependency warnings.
@@ -54,9 +54,9 @@ RUN pnpm deploy --filter @dariah-eric/api --config.inject-workspace-packages=tru
 FROM base AS api
 USER node
 WORKDIR /app
-COPY --from=api-builder /out/node_modules/ /app/node_modules/
-COPY --from=api-builder /out/public/ /app/public/
-COPY --from=api-builder /out/dist/ /app/dist/
+COPY --from=api-build /out/node_modules/ /app/node_modules/
+COPY --from=api-build /out/public/ /app/public/
+COPY --from=api-build /out/dist/ /app/dist/
 ENV NODE_ENV=production
 EXPOSE 3000
 CMD [ "node", "./dist/index.mjs" ]
@@ -68,23 +68,23 @@ CMD [ "node", "./dist/index.mjs" ]
 # prune
 # -------------------------------------------------------------------------------------------------
 
-FROM source AS knowledge-base-pruner
+FROM source AS app-prune
 RUN turbo prune @dariah-eric/knowledge-base --docker
 
 # install
 # -------------------------------------------------------------------------------------------------
 
-FROM base AS knowledge-base-installer
+FROM base AS app-install
 WORKDIR /app
-COPY --from=knowledge-base-pruner /app/out/json/ .
-COPY --from=knowledge-base-pruner /app/patches/ ./patches/
-COPY --from=knowledge-base-pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=app-prune /app/out/json/ .
+COPY --from=app-prune /app/patches/ ./patches/
+COPY --from=app-prune /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 RUN pnpm install --frozen-lockfile
 
 # build
 # -------------------------------------------------------------------------------------------------
 
-FROM knowledge-base-installer AS knowledge-base-builder
+FROM app-install AS app-build
 ARG BUILD_MODE=standalone
 ARG NEXT_PUBLIC_APP_BASE_URL
 ARG NEXT_PUBLIC_APP_BOTS
@@ -102,7 +102,7 @@ ARG NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME
 ARG NEXT_PUBLIC_TYPESENSE_HOST
 ARG NEXT_PUBLIC_TYPESENSE_PORT
 ARG NEXT_PUBLIC_TYPESENSE_PROTOCOL
-COPY --from=knowledge-base-pruner /app/out/full/ .
+COPY --from=app-prune /app/out/full/ .
 RUN --mount=type=secret,id=AUTH_ENCRYPTION_KEY,env=AUTH_ENCRYPTION_KEY \
     --mount=type=secret,id=AUTH_SIGN_UP,env=AUTH_SIGN_UP \
     --mount=type=secret,id=DATABASE_HOST,env=DATABASE_HOST \
@@ -132,13 +132,13 @@ RUN --mount=type=secret,id=AUTH_ENCRYPTION_KEY,env=AUTH_ENCRYPTION_KEY \
 # serve
 # -------------------------------------------------------------------------------------------------
 
-FROM base AS knowledge-base
+FROM base AS app
 USER node
 WORKDIR /app
 # `.next/standalone` is self-contained (includes its own `node_modules`)
-COPY --from=knowledge-base-builder /app/apps/knowledge-base/.next/standalone/ /app/
-COPY --from=knowledge-base-builder /app/apps/knowledge-base/.next/static/ /app/apps/knowledge-base/.next/static/
-COPY --from=knowledge-base-builder /app/apps/knowledge-base/public/ /app/apps/knowledge-base/public/
+COPY --from=app-build /app/apps/knowledge-base/.next/standalone/ /app/
+COPY --from=app-build /app/apps/knowledge-base/.next/static/ /app/apps/knowledge-base/.next/static/
+COPY --from=app-build /app/apps/knowledge-base/public/ /app/apps/knowledge-base/public/
 ENV NODE_ENV=production
 EXPOSE 3000
 CMD [ "node", "./apps/knowledge-base/server.js" ]
