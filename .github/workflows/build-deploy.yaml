@@ -39,8 +39,20 @@ jobs:
           TURBO_SCM_BASE: origin/main
           ALL_APPS: |
             [
-              {"name":"knowledge-base","environment":"production","public_url":"${{ vars.NEXT_PUBLIC_APP_BASE_URL }}","service_id":"${{ vars.APP_SERVICE_ID }}"},
-              {"name":"api","environment":"production","public_url":"${{ vars.K8S_SECRET_API_BASE_URL }}","service_id":"${{ vars.API_SERVICE_ID }}"}
+              {
+                "name": "knowledge-base",
+                "image": "app",
+                "environment": "production",
+                "public_url": "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}",
+                "service_id": "${{ vars.APP_SERVICE_ID }}"
+              },
+              {
+                "name": "api",
+                "image": "api",
+                "environment": "production",
+                "public_url": "${{ vars.K8S_SECRET_API_BASE_URL }}",
+                "service_id": "${{ vars.API_SERVICE_ID }}"
+              }
             ]
         run: |
           set -eux
@@ -92,7 +104,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v6
         with:
-          images: "ghcr.io/${{ github.repository }}-${{ matrix.target.name }}"
+          images: "ghcr.io/${{ github.repository }}-${{ matrix.target.image }}"
           tags: |
             type=raw,value={{sha}}
             type=ref,event=branch
@@ -101,7 +113,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          target: "${{ matrix.target.name }}"
+          target: "${{ matrix.target.image }}"
           push: true
           tags: "${{ steps.meta.outputs.tags }}"
           labels: "${{ steps.meta.outputs.labels }}"
@@ -166,8 +178,8 @@ jobs:
     with:
       default_port: "3000"
       environment: "${{ matrix.target.environment }}"
-      APP_NAME: "${{ matrix.target.name }}"
+      APP_NAME: "${{ matrix.target.image }}"
       APP_ROOT: "/"
-      DOCKER_TAG: "ghcr.io/${{ github.repository }}-${{ matrix.target.name }}"
+      DOCKER_TAG: "ghcr.io/${{ github.repository }}-${{ matrix.target.image }}"
       PUBLIC_URL: "${{ matrix.target.public_url }}"
       SERVICE_ID: "${{ matrix.target.service_id }}"
