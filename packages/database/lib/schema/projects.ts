@@ -47,7 +47,7 @@ export const projects = p.pgTable("projects", {
 	metadata: p.jsonb("metadata"),
 	name: p.text("name").notNull(),
 	duration: f.timestampRange("duration").notNull(),
-	// amount may be derived from cordis
+	/** Funding amount may be ingested from CORDIS. */
 	funding: p.numeric("funding"),
 	summary: p.text("summary").notNull(),
 	call: p.text("call").notNull(),
