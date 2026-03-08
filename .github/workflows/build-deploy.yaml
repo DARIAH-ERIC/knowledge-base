@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     outputs:
-      affected_names: ${{ steps.changes.outputs.affected_names }}
+      matrix: ${{ steps.changes.outputs.matrix }}
       has_changes: ${{ steps.changes.outputs.has_changes }}
 
     steps:
@@ -37,6 +37,11 @@ jobs:
         id: changes
         env:
           TURBO_SCM_BASE: origin/main
+          ALL_APPS: |
+            [
+              {"name":"knowledge-base","environment":"production","public_url":"${{ vars.NEXT_PUBLIC_APP_BASE_URL }}","service_id":"${{ vars.APP_SERVICE_ID }}"},
+              {"name":"api","environment":"production","public_url":"${{ vars.K8S_SECRET_API_BASE_URL }}","service_id":"${{ vars.API_SERVICE_ID }}"}
+            ]
         run: |
           set -eux
           AFFECTED=$(
@@ -44,8 +49,9 @@ jobs:
             2>/dev/null || echo '{"packages":{"items":[]}}'
           )
           NAMES=$(echo "$AFFECTED" | jq -c '[.packages.items[] | select(.path | startswith("apps/")) | .name | sub("^@dariah-eric/"; "")]')
-          echo "affected_names=${NAMES}" >> "$GITHUB_OUTPUT"
-          if [ "$NAMES" = "[]" ]; then
+          MATRIX=$(echo "$ALL_APPS" | jq -c --argjson names "$NAMES" '[.[] | select(.name as $n | $names | index($n))]')
+          echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
+          if [ "$MATRIX" = "[]" ]; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
           else
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
@@ -54,7 +60,7 @@ jobs:
   build:
     name: Build and push docker images
     needs: [changes]
-    if: contains(fromJSON(needs.changes.outputs.affected_names), matrix.target.name)
+    if: needs.changes.outputs.has_changes == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 60
 
@@ -65,13 +71,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        target:
-          - name: "knowledge-base"
-            environment: "production"
-            public_url: "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
-          - name: "api"
-            environment: "production"
-            public_url: "${{ vars.K8S_SECRET_API_BASE_URL }}"
+        target: ${{ fromJSON(needs.changes.outputs.matrix) }}
       max-parallel: 1
 
     steps:
@@ -153,22 +153,14 @@ jobs:
   deploy:
     name: Deploy docker images
     needs: [changes, build]
-    if: contains(fromJSON(needs.changes.outputs.affected_names), matrix.target.name)
+    if: needs.changes.outputs.has_changes == 'true'
     uses: dariah-eric/gl-autodevops-minimal-port/.github/workflows/deploy.yml@main
     secrets: inherit
 
     strategy:
       fail-fast: true
       matrix:
-        target:
-          - name: "knowledge-base"
-            environment: "production"
-            public_url: "${{ vars.NEXT_PUBLIC_APP_BASE_URL }}"
-            service_id: "${{ vars.APP_SERVICE_ID }}"
-          - name: "api"
-            environment: "production"
-            public_url: "${{ vars.K8S_SECRET_API_BASE_URL }}"
-            service_id: "${{ vars.API_SERVICE_ID }}"
+        target: ${{ fromJSON(needs.changes.outputs.matrix) }}
       max-parallel: 1
 
     with:
