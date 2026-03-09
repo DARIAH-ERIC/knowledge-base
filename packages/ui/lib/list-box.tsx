@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckIcon } from "@heroicons/react/20/solid";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import {
 	composeRenderProps,
 	ListBox as AriaListBox,
@@ -66,7 +66,7 @@ export function ListBoxItem<T extends object>(props: Readonly<ListBoxItemProps<T
 				const { allowsDragging, isSelected } = renderProps;
 
 				return (
-					<>
+					<Fragment>
 						{allowsDragging === true ? (
 							<svg
 								className="mr-2 size-5 h-lh text-muted-fg sm:w-4"
@@ -114,7 +114,7 @@ export function ListBoxItem<T extends object>(props: Readonly<ListBoxItemProps<T
 						) : (
 							children
 						)}
-					</>
+					</Fragment>
 				);
 			}}
 		</AriaListBoxItem>

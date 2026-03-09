@@ -5,7 +5,7 @@ import { Sheet, SheetBody, SheetContent, SheetFooter, SheetHeader, SheetTitle } 
 
 const meta = {
 	title: "Components/Sheet",
-	component: Sheet,
+	component: SheetContent,
 	parameters: {
 		layout: "centered",
 	},
@@ -24,11 +24,14 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-	render() {
+	args: {
+		children: null,
+	},
+	render(args) {
 		return (
 			<Sheet>
 				<Button intent="outline">{"Open Sheet"}</Button>
-				<SheetContent>
+				<SheetContent {...args}>
 					<SheetHeader>
 						<SheetTitle>{"Edit Profile"}</SheetTitle>
 					</SheetHeader>
@@ -47,11 +50,15 @@ export const Default: Story = {
 };
 
 export const Left: Story = {
-	render() {
+	args: {
+		children: null,
+		side: "left",
+	},
+	render(args) {
 		return (
 			<Sheet>
 				<Button intent="outline">{"Open Left Sheet"}</Button>
-				<SheetContent side="left">
+				<SheetContent {...args}>
 					<SheetHeader>
 						<SheetTitle>{"Navigation"}</SheetTitle>
 					</SheetHeader>
@@ -65,11 +72,15 @@ export const Left: Story = {
 };
 
 export const Bottom: Story = {
-	render() {
+	args: {
+		children: null,
+		side: "bottom",
+	},
+	render(args) {
 		return (
 			<Sheet>
 				<Button intent="outline">{"Open Bottom Sheet"}</Button>
-				<SheetContent side="bottom">
+				<SheetContent {...args}>
 					<SheetHeader>
 						<SheetTitle>{"More Options"}</SheetTitle>
 					</SheetHeader>

@@ -17,12 +17,14 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+	args: {},
 	render(props) {
 		return <RangeCalendar aria-label="Select date range" {...props} />;
 	},
 };
 
 export const TwoMonths: Story = {
+	args: {},
 	render(props) {
 		return (
 			<RangeCalendar aria-label="Select date range" visibleDuration={{ months: 2 }} {...props} />

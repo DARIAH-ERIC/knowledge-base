@@ -33,19 +33,34 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Area: Story = {
-	render() {
-		return <SparkAreaChart config={config} data={data} dataKey="month" />;
+	args: {
+		config,
+		data,
+		dataKey: "month",
+	},
+	render(args) {
+		return <SparkAreaChart {...args} />;
 	},
 };
 
 export const Line: Story = {
-	render() {
-		return <SparkLineChart config={config} data={data} dataKey="month" />;
+	args: {
+		config,
+		data,
+		dataKey: "month",
+	},
+	render(args) {
+		return <SparkLineChart {...args} />;
 	},
 };
 
 export const Bar: Story = {
-	render() {
-		return <SparkBarChart config={config} data={data} dataKey="month" />;
+	args: {
+		config,
+		data,
+		dataKey: "month",
+	},
+	render(args) {
+		return <SparkBarChart {...args} />;
 	},
 };

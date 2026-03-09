@@ -32,6 +32,7 @@ const members = [
 ];
 
 export const Default: Story = {
+	args: {},
 	render() {
 		return (
 			<div className="w-72">
@@ -56,6 +57,7 @@ export const Default: Story = {
 };
 
 export const Selectable: Story = {
+	args: {},
 	render() {
 		return (
 			<div className="w-72">
@@ -79,6 +81,7 @@ export const Selectable: Story = {
 };
 
 export const WithSections: Story = {
+	args: {},
 	render() {
 		return (
 			<div className="w-72">

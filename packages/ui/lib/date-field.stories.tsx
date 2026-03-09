@@ -18,6 +18,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+	args: {},
 	render(props) {
 		return (
 			<DateField {...props}>
@@ -29,6 +30,7 @@ export const Default: Story = {
 };
 
 export const WithValidation: Story = {
+	args: {},
 	render(props) {
 		return (
 			<DateField isRequired={true} {...props}>
@@ -41,6 +43,7 @@ export const WithValidation: Story = {
 };
 
 export const Disabled: Story = {
+	args: {},
 	render(props) {
 		return (
 			<DateField isDisabled={true} {...props}>

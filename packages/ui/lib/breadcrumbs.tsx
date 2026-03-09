@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronRightIcon } from "@heroicons/react/24/solid";
-import { createContext, type ReactNode, use } from "react";
+import { createContext, Fragment, type ReactNode, use } from "react";
 import {
 	Breadcrumb,
 	type BreadcrumbProps,
@@ -55,10 +55,10 @@ export function BreadcrumbsItem({
 		>
 			{({ isCurrent }) => {
 				return (
-					<>
+					<Fragment>
 						<Link href={String(href)} {...props} />
 						{!isCurrent && effectiveSeparator !== false && <Separator separator={separatorValue} />}
-					</>
+					</Fragment>
 				);
 			}}
 		</Breadcrumb>

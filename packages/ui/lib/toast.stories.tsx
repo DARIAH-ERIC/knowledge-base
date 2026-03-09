@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Fragment } from "react";
 
 import { Button } from "./button";
 import { queue, ToastRegion } from "./toast";
@@ -18,9 +19,10 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+	args: {},
 	render() {
 		return (
-			<>
+			<Fragment>
 				<Button
 					intent="outline"
 					onPress={() => {
@@ -30,15 +32,16 @@ export const Default: Story = {
 					{"Show toast"}
 				</Button>
 				<ToastRegion />
-			</>
+			</Fragment>
 		);
 	},
 };
 
 export const TitleOnly: Story = {
+	args: {},
 	render() {
 		return (
-			<>
+			<Fragment>
 				<Button
 					intent="outline"
 					onPress={() => {
@@ -48,12 +51,13 @@ export const TitleOnly: Story = {
 					{"Show toast"}
 				</Button>
 				<ToastRegion />
-			</>
+			</Fragment>
 		);
 	},
 };
 
 export const Multiple: Story = {
+	args: {},
 	render() {
 		return (
 			<div className="flex gap-2">

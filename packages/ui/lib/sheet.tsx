@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import {
 	type DialogProps,
 	DialogTrigger as AriaDialogTrigger,
@@ -77,12 +77,12 @@ export function SheetContent({
 				<Dialog aria-label={props["aria-label"]} className="sm:[--gutter:--spacing(6)]" role={role}>
 					{(values) => {
 						return (
-							<>
+							<Fragment>
 								{typeof children === "function" ? children(values) : children}
 								{closeButton && (
 									<DialogCloseIcon className="end-2.5 top-2.5" isDismissable={isDismissable} />
 								)}
-							</>
+							</Fragment>
 						);
 					}}
 				</Dialog>

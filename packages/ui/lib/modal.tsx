@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import {
 	type DialogProps as AriaDialogProps,
 	DialogTrigger as AriaDialogTrigger,
@@ -105,10 +105,10 @@ export function ModalContent(props: Readonly<ModalContentProps>): ReactNode {
 				<Dialog role={role}>
 					{(values) => {
 						return (
-							<>
+							<Fragment>
 								{typeof children === "function" ? children(values) : children}
 								{closeButton && <DialogCloseIcon isDismissable={isDismissable} />}
-							</>
+							</Fragment>
 						);
 					}}
 				</Dialog>

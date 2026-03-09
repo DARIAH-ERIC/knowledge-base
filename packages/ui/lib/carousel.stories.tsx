@@ -30,6 +30,7 @@ const slides = [
 ];
 
 export const Default: Story = {
+	args: {},
 	render() {
 		return (
 			<div className="w-80">
@@ -58,6 +59,7 @@ export const Default: Story = {
 };
 
 export const MultipleVisible: Story = {
+	args: {},
 	render() {
 		return (
 			<div className="w-96">

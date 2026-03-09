@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentProps, ReactNode } from "react";
+import { type ComponentProps, Fragment, type ReactNode } from "react";
 import { Switch as AriaSwitch, type SwitchProps as AriaSwitchProps } from "react-aria-components";
 import { twJoin, twMerge } from "tailwind-merge";
 
@@ -34,7 +34,7 @@ export function Switch(props: Readonly<SwitchProps>): ReactNode {
 		>
 			{(values) => {
 				return (
-					<>
+					<Fragment>
 						<span
 							className={twMerge(
 								"relative isolate inline-flex h-6 w-10 cursor-default rounded-full p-0.75 sm:h-5 sm:w-8",
@@ -67,7 +67,7 @@ export function Switch(props: Readonly<SwitchProps>): ReactNode {
 						) : (
 							children
 						)}
-					</>
+					</Fragment>
 				);
 			}}
 		</AriaSwitch>

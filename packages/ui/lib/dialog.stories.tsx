@@ -15,7 +15,7 @@ import {
 
 const meta = {
 	title: "Components/Dialog",
-	component: Modal,
+	component: ModalContent,
 	parameters: {
 		layout: "centered",
 	},
@@ -34,11 +34,14 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-	render() {
+	args: {
+		children: null,
+	},
+	render(args) {
 		return (
 			<Modal>
 				<Button intent="outline">{"Open Dialog"}</Button>
-				<ModalContent>
+				<ModalContent {...args}>
 					<ModalHeader>
 						<ModalTitle>{"Edit Profile"}</ModalTitle>
 					</ModalHeader>
@@ -58,11 +61,14 @@ export const Default: Story = {
 };
 
 export const AlertDialog: Story = {
-	render() {
+	args: {
+		children: null,
+	},
+	render(args) {
 		return (
 			<Modal>
 				<Button intent="danger">{"Delete account"}</Button>
-				<ModalContent role="alertdialog">
+				<ModalContent {...args} role="alertdialog">
 					<ModalHeader>
 						<ModalTitle>{"Are you sure?"}</ModalTitle>
 					</ModalHeader>
@@ -84,11 +90,15 @@ export const AlertDialog: Story = {
 };
 
 export const WithDescription: Story = {
-	render() {
+	args: {
+		children: null,
+		size: "sm",
+	},
+	render(args) {
 		return (
 			<Modal>
 				<Button intent="outline">{"Subscribe"}</Button>
-				<ModalContent size="sm">
+				<ModalContent {...args}>
 					<DialogHeader>
 						<DialogTitle>{"Subscribe to newsletter"}</DialogTitle>
 						<DialogDescription>
@@ -111,11 +121,15 @@ export const WithDescription: Story = {
 };
 
 export const WithTrigger: Story = {
-	render() {
+	args: {
+		children: null,
+		size: "xs",
+	},
+	render(args) {
 		return (
 			<Modal>
 				<ModalTrigger>{"Open with text trigger"}</ModalTrigger>
-				<ModalContent size="xs">
+				<ModalContent {...args}>
 					<ModalHeader>
 						<ModalTitle>{"Quick info"}</ModalTitle>
 					</ModalHeader>

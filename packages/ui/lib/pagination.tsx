@@ -106,7 +106,7 @@ export function PaginationFirst(props: Readonly<PaginationAttributesProps>): Rea
 				data-slot="pagination-item"
 				{...rest}
 			>
-				<>
+				<Fragment>
 					<svg
 						aria-hidden="true"
 						data-slot="icon"
@@ -125,7 +125,7 @@ export function PaginationFirst(props: Readonly<PaginationAttributesProps>): Rea
 						/>
 					</svg>
 					{children}
-				</>
+				</Fragment>
 			</Link>
 		</li>
 	);
@@ -153,7 +153,7 @@ export function PaginationPrevious(props: Readonly<PaginationAttributesProps>): 
 				data-slot="pagination-item"
 				{...rest}
 			>
-				<>
+				<Fragment>
 					<svg
 						aria-hidden="true"
 						data-slot="icon"
@@ -168,7 +168,7 @@ export function PaginationPrevious(props: Readonly<PaginationAttributesProps>): 
 						/>
 					</svg>
 					{children}
-				</>
+				</Fragment>
 			</Link>
 		</li>
 	);

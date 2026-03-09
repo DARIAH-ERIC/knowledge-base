@@ -23,6 +23,7 @@ export const Default: Story = {
 };
 
 export const WithInlineElements: Story = {
+	args: {},
 	render() {
 		return (
 			<Text>

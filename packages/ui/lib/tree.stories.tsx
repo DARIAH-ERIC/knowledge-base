@@ -1,5 +1,6 @@
 import { DocumentIcon, FolderIcon } from "@heroicons/react/20/solid";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Collection } from "react-aria-components";
 
 import { Tree, TreeContent, TreeItem } from "./tree";
 
@@ -52,13 +53,14 @@ const files: Array<FileItem> = [
 ];
 
 export const Default: Story = {
+	args: {},
 	render() {
 		return (
 			<div className="w-64">
 				<Tree aria-label="File system" items={files}>
-					{(item) => {
+					{function renderItem(item) {
 						return (
-							<TreeItem childItems={item.childItems} id={item.id} textValue={item.name}>
+							<TreeItem id={item.id} textValue={item.name}>
 								<TreeContent>
 									{item.childItems != null ? (
 										<FolderIcon className="text-muted-fg" />
@@ -67,6 +69,7 @@ export const Default: Story = {
 									)}
 									{item.name}
 								</TreeContent>
+								<Collection items={item.childItems}>{renderItem}</Collection>
 							</TreeItem>
 						);
 					}}
@@ -77,13 +80,14 @@ export const Default: Story = {
 };
 
 export const Selectable: Story = {
+	args: {},
 	render() {
 		return (
 			<div className="w-64">
 				<Tree aria-label="File system" items={files} selectionMode="single">
-					{(item) => {
+					{function renderItem(item) {
 						return (
-							<TreeItem childItems={item.childItems} id={item.id} textValue={item.name}>
+							<TreeItem id={item.id} textValue={item.name}>
 								<TreeContent>
 									{item.childItems != null ? (
 										<FolderIcon className="text-muted-fg" />
@@ -92,6 +96,7 @@ export const Selectable: Story = {
 									)}
 									{item.name}
 								</TreeContent>
+								<Collection items={item.childItems}>{renderItem}</Collection>
 							</TreeItem>
 						);
 					}}
@@ -102,13 +107,14 @@ export const Selectable: Story = {
 };
 
 export const MultiSelectable: Story = {
+	args: {},
 	render() {
 		return (
 			<div className="w-64">
 				<Tree aria-label="File system" items={files} selectionMode="multiple">
-					{(item) => {
+					{function renderItem(item) {
 						return (
-							<TreeItem childItems={item.childItems} id={item.id} textValue={item.name}>
+							<TreeItem id={item.id} textValue={item.name}>
 								<TreeContent>
 									{item.childItems != null ? (
 										<FolderIcon className="text-muted-fg" />
@@ -117,6 +123,7 @@ export const MultiSelectable: Story = {
 									)}
 									{item.name}
 								</TreeContent>
+								<Collection items={item.childItems}>{renderItem}</Collection>
 							</TreeItem>
 						);
 					}}

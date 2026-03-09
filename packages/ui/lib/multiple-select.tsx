@@ -1,7 +1,7 @@
 "use client";
 
 import { PlusIcon } from "@heroicons/react/20/solid";
-import React, { Children, isValidElement, type ReactNode, useMemo, useRef } from "react";
+import React, { Children, Fragment, isValidElement, type ReactNode, useMemo, useRef } from "react";
 import {
 	Autocomplete,
 	Select,
@@ -78,7 +78,7 @@ export function MultipleSelect<T extends OptionBase>(
 		>
 			{before}
 			{list && (
-				<>
+				<Fragment>
 					<div
 						ref={triggerRef}
 						className="flex w-full items-center gap-2 rounded-lg border p-1"
@@ -141,7 +141,7 @@ export function MultipleSelect<T extends OptionBase>(
 							</ListBox>
 						</Autocomplete>
 					</PopoverContent>
-				</>
+				</Fragment>
 			)}
 			{after}
 		</Select>

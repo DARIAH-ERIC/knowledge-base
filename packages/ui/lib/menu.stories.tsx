@@ -19,6 +19,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+	args: {
+		children: null,
+	},
 	render() {
 		return (
 			<Menu>
@@ -34,6 +37,9 @@ export const Default: Story = {
 };
 
 export const WithIcons: Story = {
+	args: {
+		children: null,
+	},
 	render() {
 		return (
 			<Menu>
@@ -63,6 +69,9 @@ export const WithIcons: Story = {
 };
 
 export const WithSections: Story = {
+	args: {
+		children: null,
+	},
 	render() {
 		return (
 			<Menu>

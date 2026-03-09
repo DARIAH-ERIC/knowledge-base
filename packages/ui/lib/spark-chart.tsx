@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useId } from "react";
+import { Fragment, type ReactNode, useId } from "react";
 import {
 	Area,
 	AreaChart as AreaChartPrimitive,
@@ -83,10 +83,10 @@ export function SparkAreaChart<TValue extends ValueType, TName extends NameType>
 
 			case "gradient": {
 				return (
-					<>
+					<Fragment>
 						<stop offset="5%" stopColor="currentColor" stopOpacity={0.5} />
 						<stop offset="95%" stopColor="currentColor" stopOpacity={0.1} />
-					</>
+					</Fragment>
 				);
 			}
 

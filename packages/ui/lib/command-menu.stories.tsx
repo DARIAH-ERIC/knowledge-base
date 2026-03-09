@@ -6,7 +6,7 @@ import {
 	UserGroupIcon,
 } from "@heroicons/react/20/solid";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 import { Button } from "./button";
 import {
@@ -34,11 +34,14 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+	args: {
+		children: null,
+	},
 	render() {
 		const [isOpen, setIsOpen] = useState(false);
 
 		return (
-			<>
+			<Fragment>
 				<Button
 					intent="outline"
 					onPress={() => {
@@ -87,17 +90,20 @@ export const Default: Story = {
 						</span>
 					</CommandMenuFooter>
 				</CommandMenu>
-			</>
+			</Fragment>
 		);
 	},
 };
 
 export const WithShortcut: Story = {
+	args: {
+		children: null,
+	},
 	render() {
 		const [isOpen, setIsOpen] = useState(false);
 
 		return (
-			<>
+			<Fragment>
 				<Button
 					intent="outline"
 					onPress={() => {
@@ -116,7 +122,7 @@ export const WithShortcut: Story = {
 						</CommandMenuSection>
 					</CommandMenuList>
 				</CommandMenu>
-			</>
+			</Fragment>
 		);
 	},
 };

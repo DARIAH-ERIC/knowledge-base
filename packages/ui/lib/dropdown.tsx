@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckIcon } from "@heroicons/react/16/solid";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import {
 	Collection,
 	composeRenderProps,
@@ -120,7 +120,7 @@ export function DropdownItem({
 		>
 			{composeRenderProps(children, (children, { isSelected }) => {
 				return (
-					<>
+					<Fragment>
 						{isSelected && (
 							<CheckIcon
 								className={twJoin(
@@ -132,7 +132,7 @@ export function DropdownItem({
 							/>
 						)}
 						{typeof children === "string" ? <DropdownLabel>{children}</DropdownLabel> : children}
-					</>
+					</Fragment>
 				);
 			})}
 		</ListBoxItemPrimitive>

@@ -235,7 +235,7 @@ export function Sidebar(props: Readonly<SidebarProps>): ReactNode {
 
 	if (isMobile) {
 		return (
-			<>
+			<Fragment>
 				<span aria-hidden={true} className="sr-only" data-intent={intent} />
 				<SheetContent
 					aria-label="Sidebar"
@@ -250,7 +250,7 @@ export function Sidebar(props: Readonly<SidebarProps>): ReactNode {
 				>
 					{children}
 				</SheetContent>
-			</>
+			</Fragment>
 		);
 	}
 
@@ -748,7 +748,7 @@ export function SidebarTrigger(props: Readonly<SidebarTriggerProps>): ReactNode 
 			{...rest}
 		>
 			{children ?? (
-				<>
+				<Fragment>
 					<svg
 						className="size-4"
 						data-slot="icon"
@@ -761,7 +761,7 @@ export function SidebarTrigger(props: Readonly<SidebarTriggerProps>): ReactNode 
 						<path d="M13.25 2.5c.69 0 1.25.56 1.25 1.25v8.5c0 .69-.56 1.25-1.25 1.25H7.5V15h5.75A2.75 2.75 0 0 0 16 12.25v-8.5A2.75 2.75 0 0 0 13.25 1H7.5v1.5zM5.75 1a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-3A2.75 2.75 0 0 1 0 12.25v-8.5A2.75 2.75 0 0 1 2.75 1z" />
 					</svg>
 					<span className="sr-only">{t("Toggle Sidebar")}</span>
-				</>
+				</Fragment>
 			)}
 		</Button>
 	);

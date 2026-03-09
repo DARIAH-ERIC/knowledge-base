@@ -2,7 +2,7 @@
 
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import type { DateDuration } from "@internationalized/date";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import {
 	Button,
 	DatePicker as DatePickerPrimitive,
@@ -38,10 +38,10 @@ export function DatePicker<T extends DateValue>({
 		<DatePickerPrimitive className={cx(fieldStyles(), className)} data-slot="control" {...props}>
 			{(values) => {
 				return (
-					<>
+					<Fragment>
 						{typeof children === "function" ? children(values) : children}
 						<DatePickerOverlay {...popover} />
-					</>
+					</Fragment>
 				);
 			}}
 		</DatePickerPrimitive>

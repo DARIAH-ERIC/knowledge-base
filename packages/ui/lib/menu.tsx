@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import {
 	Button as AriaButton,
 	type ButtonProps as AriaButtonProps,
@@ -134,7 +134,7 @@ export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 		>
 			{(values) => {
 				return (
-					<>
+					<Fragment>
 						{values.isSelected && (
 							<span
 								className={twJoin(
@@ -156,7 +156,7 @@ export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 						{values.hasSubmenu && (
 							<ChevronRightIcon className="absolute right-2 size-3.5" data-slot="chevron" />
 						)}
-					</>
+					</Fragment>
 				);
 			}}
 		</AriaMenuItem>

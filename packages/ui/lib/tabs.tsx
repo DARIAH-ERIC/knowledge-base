@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode, RefObject } from "react";
+import { Fragment, type ReactNode, type RefObject } from "react";
 import {
 	composeRenderProps,
 	SelectionIndicator,
@@ -99,7 +99,7 @@ export function Tab(props: Readonly<TabProps>): ReactNode {
 		>
 			{(values) => {
 				return (
-					<>
+					<Fragment>
 						{typeof children === "function" ? children(values) : children}
 						<SelectionIndicator
 							className={twMerge(
@@ -110,7 +110,7 @@ export function Tab(props: Readonly<TabProps>): ReactNode {
 							)}
 							data-slot="selected-indicator"
 						/>
-					</>
+					</Fragment>
 				);
 			}}
 		</TabPrimitive>

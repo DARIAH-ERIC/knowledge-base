@@ -19,6 +19,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+	args: {},
 	render(props) {
 		return (
 			<TimeField {...props}>
@@ -30,6 +31,7 @@ export const Default: Story = {
 };
 
 export const WithSeconds: Story = {
+	args: {},
 	render(props) {
 		return (
 			<TimeField granularity="second" {...props}>
@@ -41,6 +43,7 @@ export const WithSeconds: Story = {
 };
 
 export const Disabled: Story = {
+	args: {},
 	render(props) {
 		return (
 			<TimeField isDisabled={true} {...props}>

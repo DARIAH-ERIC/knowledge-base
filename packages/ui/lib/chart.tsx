@@ -2,6 +2,7 @@ import {
 	type ComponentProps,
 	type ComponentType,
 	createContext,
+	Fragment,
 	type HTMLAttributes,
 	type ReactElement,
 	type ReactNode,
@@ -473,12 +474,12 @@ export function ChartTooltipContent<TValue extends ValueType, TName extends Name
 			)}
 		>
 			{!hideLabel && (
-				<>
+				<Fragment>
 					{!nestLabel ? <span className="font-medium">{tooltipLabel}</span> : null}
 					{labelSeparator && (
 						<span aria-hidden={true} className="mt-2 mb-3 block h-px w-full bg-bg/10" />
 					)}
-				</>
+				</Fragment>
 			)}
 			<div className="grid gap-3">
 				{payload.map((item, index) => {
@@ -502,7 +503,7 @@ export function ChartTooltipContent<TValue extends ValueType, TName extends Name
 								// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 								formatter(item.value, item.name, item, index, item.payload)
 							) : (
-								<>
+								<Fragment>
 									{itemConfig?.icon ? (
 										<itemConfig.icon />
 									) : (
@@ -542,7 +543,7 @@ export function ChartTooltipContent<TValue extends ValueType, TName extends Name
 											</span>
 										)}
 									</div>
-								</>
+								</Fragment>
 							)}
 						</div>
 					);

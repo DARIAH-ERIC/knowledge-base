@@ -18,6 +18,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+	args: {
+		children: null,
+	},
 	render() {
 		return (
 			<Popover>
@@ -40,6 +43,9 @@ export const Default: Story = {
 };
 
 export const WithArrow: Story = {
+	args: {
+		children: null,
+	},
 	render() {
 		return (
 			<Popover>
@@ -60,6 +66,9 @@ export const WithArrow: Story = {
 };
 
 export const PlacementTop: Story = {
+	args: {
+		children: null,
+	},
 	render() {
 		return (
 			<Popover>

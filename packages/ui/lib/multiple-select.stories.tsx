@@ -26,6 +26,7 @@ const frameworks = [
 ];
 
 export const Default: Story = {
+	args: {},
 	render(props) {
 		return (
 			<div className="w-72">
@@ -50,6 +51,7 @@ const roles = [
 ];
 
 export const WithPlaceholder: Story = {
+	args: {},
 	render(props) {
 		return (
 			<div className="w-72">

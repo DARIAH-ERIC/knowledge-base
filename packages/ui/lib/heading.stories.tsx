@@ -28,6 +28,7 @@ export const Default: Story = {
 };
 
 export const AllLevels: Story = {
+	args: {},
 	render() {
 		return (
 			<div className="flex flex-col gap-4">

@@ -32,6 +32,7 @@ const rows = [
 ];
 
 export const Default: Story = {
+	args: {},
 	render(props) {
 		return (
 			<Table {...props}>
@@ -112,6 +113,7 @@ export const WithGrid: Story = {
 };
 
 export const Empty: Story = {
+	args: {},
 	render(props) {
 		return (
 			<Table {...props}>
