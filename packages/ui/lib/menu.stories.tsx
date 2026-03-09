@@ -1,20 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import {
-	ArchiveBoxIcon,
-	PencilSquareIcon,
-	TrashIcon,
-	UserIcon,
-} from "@heroicons/react/20/solid";
+import { ArchiveBoxIcon, PencilSquareIcon, TrashIcon, UserIcon } from "@heroicons/react/20/solid";
 
 import { Button } from "./button";
-import {
-	Menu,
-	MenuContent,
-	MenuHeader,
-	MenuItem,
-	MenuSection,
-	MenuSeparator,
-} from "./menu";
+import { Menu, MenuContent, MenuHeader, MenuItem, MenuSection, MenuSeparator } from "./menu";
 
 const meta = {
 	title: "Components/Menu",

@@ -53,11 +53,7 @@ export const WithPlaceholder: Story = {
 	render(props) {
 		return (
 			<div className="w-72">
-				<MultipleSelect
-					aria-label="Roles"
-					placeholder="Select roles..."
-					{...props}
-				>
+				<MultipleSelect aria-label="Roles" placeholder="Select roles..." {...props}>
 					<Label>{"Roles"}</Label>
 					<MultipleSelectContent items={roles}>
 						{(item) => {

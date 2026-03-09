@@ -1,13 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { Button } from "./button";
-import {
-	Popover,
-	PopoverBody,
-	PopoverContent,
-	PopoverHeader,
-	PopoverTitle,
-} from "./popover";
+import { Popover, PopoverBody, PopoverContent, PopoverHeader, PopoverTitle } from "./popover";
 
 const meta = {
 	title: "Components/Popover",
@@ -34,7 +28,9 @@ export const Default: Story = {
 					</PopoverHeader>
 					<PopoverBody>
 						<p className="text-sm/6 text-muted-fg">
-							{"This popover provides additional context or actions related to the trigger element."}
+							{
+								"This popover provides additional context or actions related to the trigger element."
+							}
 						</p>
 					</PopoverBody>
 				</PopoverContent>
