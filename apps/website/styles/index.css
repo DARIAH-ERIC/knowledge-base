@@ -181,7 +181,7 @@
 	}
 }
 
-@theme inline {
+@theme {
 	--font-sans: var(--font-body);
 	--font-mono: var(--font-code);
 
@@ -294,13 +294,13 @@
  * ============================================================================
  */
 
-@theme inline {
+@theme {
 	--font-body: var(--_font-body, var(--default-font-family));
 	--font-heading: var(--_font-heading, var(--font-body));
 	--font-code: var(--_font-code, var(--default-mono-font-family));
 }
 
-@theme inline {
+@theme {
 	--color-neutral-0: var(--color-white);
 	--color-neutral-50: var(--color-zinc-50);
 	--color-neutral-100: var(--color-zinc-100);
@@ -341,7 +341,7 @@
 	}
 }
 
-@theme inline {
+@theme {
 	--color-background-base: var(--_color-background-base);
 	--color-text-strong: var(--_color-text-strong);
 	--color-text-weak: var(--_color-text-weak);

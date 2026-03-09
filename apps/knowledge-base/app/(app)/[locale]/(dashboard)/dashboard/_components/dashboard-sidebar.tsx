@@ -2,6 +2,31 @@
 
 "use client";
 
+import { Avatar } from "@dariah-eric/ui/avatar";
+import { Link } from "@dariah-eric/ui/link";
+import {
+	Menu,
+	MenuContent,
+	MenuHeader,
+	MenuItem,
+	MenuLabel,
+	MenuSection,
+	MenuSeparator,
+	MenuTrigger,
+} from "@dariah-eric/ui/menu";
+import {
+	Sidebar,
+	SidebarContent,
+	SidebarDisclosure,
+	SidebarDisclosureGroup,
+	SidebarDisclosurePanel,
+	SidebarDisclosureTrigger,
+	SidebarFooter,
+	SidebarHeader,
+	SidebarItem,
+	SidebarLabel,
+	SidebarRail,
+} from "@dariah-eric/ui/sidebar";
 import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
 import { ChevronUpDownIcon } from "@heroicons/react/24/outline";
 import {
@@ -19,32 +44,6 @@ import {
 	UserGroupIcon,
 } from "@heroicons/react/24/solid";
 import type { ComponentProps, ReactNode } from "react";
-
-import { Avatar } from "@/components/ui/avatar";
-import { Link } from "@/components/ui/link";
-import {
-	Menu,
-	MenuContent,
-	MenuHeader,
-	MenuItem,
-	MenuLabel,
-	MenuSection,
-	MenuSeparator,
-	MenuTrigger,
-} from "@/components/ui/menu";
-import {
-	Sidebar,
-	SidebarContent,
-	SidebarDisclosure,
-	SidebarDisclosureGroup,
-	SidebarDisclosurePanel,
-	SidebarDisclosureTrigger,
-	SidebarFooter,
-	SidebarHeader,
-	SidebarItem,
-	SidebarLabel,
-	SidebarRail,
-} from "@/components/ui/sidebar";
 
 export function DashboardSidebar(props: Readonly<ComponentProps<typeof Sidebar>>): ReactNode {
 	return (

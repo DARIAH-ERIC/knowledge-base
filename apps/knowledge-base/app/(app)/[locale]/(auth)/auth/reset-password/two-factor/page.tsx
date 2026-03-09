@@ -1,4 +1,7 @@
 import { globalGetRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
+import { Avatar } from "@dariah-eric/ui/avatar";
+import { Link } from "@dariah-eric/ui/link";
+import { Text } from "@dariah-eric/ui/text";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -6,9 +9,6 @@ import type { ReactNode } from "react";
 import { PasswordResetRecoveryCodeForm } from "@/app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_components/password-reset-recovery-code-form";
 import { PasswordResetTotpForm } from "@/app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_components/password-reset-totp-form";
 import { Main } from "@/components/main";
-import { Avatar } from "@/components/ui/avatar";
-import { Link } from "@/components/ui/link";
-import { Text } from "@/components/ui/text";
 import { auth } from "@/lib/auth";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";

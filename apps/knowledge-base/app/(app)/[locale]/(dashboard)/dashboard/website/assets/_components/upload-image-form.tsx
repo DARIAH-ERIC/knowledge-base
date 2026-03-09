@@ -1,13 +1,13 @@
 "use client";
 
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { Form } from "@dariah-eric/ui/form";
+import { FormStatus } from "@dariah-eric/ui/form-status";
+import { SubmitButton } from "@dariah-eric/ui/submit-button";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useActionState } from "react";
 
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
-import { Form } from "@/components/form";
-import { FormStatus } from "@/components/form-status";
-import { SubmitButton } from "@/components/submit-button";
 
 /**
  * TODO: use getPresignedUploadUrl to upload directly from the client to the object store, and then

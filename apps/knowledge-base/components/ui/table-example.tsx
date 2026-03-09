@@ -1,6 +1,19 @@
 /* eslint-disable react/jsx-no-literals */
 "use client";
 
+import { Badge } from "@dariah-eric/ui/badge";
+import { Button } from "@dariah-eric/ui/button";
+import { CardAction, CardDescription, CardHeader, CardTitle } from "@dariah-eric/ui/card";
+import { Container } from "@dariah-eric/ui/container";
+import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableColumn,
+	TableHeader,
+	TableRow,
+} from "@dariah-eric/ui/table";
 import {
 	ClipboardIcon,
 	Cog6ToothIcon,
@@ -14,20 +27,6 @@ import {
 } from "@heroicons/react/16/solid";
 import { useFormatter } from "next-intl";
 import type { ReactNode } from "react";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { CardAction, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Container } from "@/components/ui/container";
-import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@/components/ui/menu";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableColumn,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
 
 const users = [
 	{

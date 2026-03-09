@@ -29,6 +29,7 @@ catalog:
   '@hono/swagger-ui': ^0.5.3
   '@imgproxy/imgproxy-js-core': ^1.7.0
   '@imgproxy/imgproxy-node': ^1.1.0
+  '@internationalized/date': ^3.12.0
   '@next/eslint-plugin-next': ^16.1.6
   '@node-rs/argon2': ^2.0.2
   '@oslojs/binary': ^1.0.0
@@ -70,6 +71,7 @@ catalog:
   drizzle-orm: ^1.0.0-beta.12-a5629fb
   drizzle-seed: ^1.0.0-beta.12-a5629fb
   drizzle-valibot: ^1.0.0-beta.12-a5629fb
+  embla-carousel-react: ^8.6.0
   eslint: ^9.39.1
   eslint-config-flat-gitignore: ^2.1.0
   eslint-config-turbo: ^2.8.0
@@ -107,11 +109,13 @@ catalog:
   react-aria-components: ^1.13.0
   react-dom: ^19.2.1
   react-schemaorg: ^2.0.0
+  recharts: ^3.7.0
   schema-dts: ^1.1.5
   server-nodejs-only: ^0.0.1
   server-only: ^0.0.1
   sharp: ^0.34.5
   simple-git-hooks: ^2.13.1
+  sonner: ^2.0.7
   storybook: ^10.2.0
   storybook-next-intl: ^10.0.1
   stylelint: ^17.0.0

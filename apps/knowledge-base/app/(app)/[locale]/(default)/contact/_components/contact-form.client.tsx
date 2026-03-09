@@ -1,13 +1,13 @@
 "use client";
 
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { Form } from "@dariah-eric/ui/form";
+import { FormStatus } from "@dariah-eric/ui/form-status";
+import { SubmitButton } from "@dariah-eric/ui/submit-button";
 import { type ReactNode, useActionState } from "react";
 import { Input, Label, TextArea, TextField } from "react-aria-components";
 
 import { sendContactFormEmailAction } from "@/app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.action";
-import { Form } from "@/components/form";
-import { FormStatus } from "@/components/form-status";
-import { SubmitButton } from "@/components/submit-button";
 
 interface ContactFormProps {
 	emailLabel: string;

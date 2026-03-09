@@ -5,11 +5,10 @@ import {
 	isActionStateError,
 	isActionStateSuccess,
 } from "@dariah-eric/next-lib/actions";
+import { FormErrorMessage } from "@dariah-eric/ui/form-error-message";
+import { FormSuccessMessage } from "@dariah-eric/ui/form-success-message";
 import { AlertTriangleIcon, CheckCircle2Icon } from "lucide-react";
 import { Fragment, type ReactNode } from "react";
-
-import { FormErrorMessage } from "@/components/form-error-message";
-import { FormSuccessMessage } from "@/components/form-success-message";
 
 export interface FormStatusProps {
 	state: ActionState;

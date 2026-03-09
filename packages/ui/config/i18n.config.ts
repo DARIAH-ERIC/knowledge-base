@@ -3,10 +3,7 @@ import { type Formats, hasLocale, type Timezone } from "next-intl";
 
 import en from "@/messages/en.json";
 
-export const locales = [
-	// "de-AT",
-	"en-GB",
-] as const;
+export const locales = ["en-GB"] as const;
 
 export type IntlLocale = (typeof locales)[number];
 
