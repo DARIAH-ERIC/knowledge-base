@@ -13,6 +13,18 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.licenses.id,
 			}),
 		},
+		documentsPolicies: {
+			entity: r.one.entities({
+				from: r.documentsPolicies.id,
+				to: r.entities.id,
+				optional: false,
+			}),
+			document: r.one.assets({
+				from: r.documentsPolicies.documentId,
+				to: r.assets.id,
+				optional: false,
+			}),
+		},
 		contentBlocks: {
 			field: r.one.fields({
 				from: r.contentBlocks.fieldId,
@@ -158,6 +170,54 @@ export const relations = defineRelations(schema, (r) => {
 			type: r.one.organisationalUnitTypes({
 				from: r.organisationalUnits.typeId,
 				to: r.organisationalUnitTypes.id,
+				optional: false,
+			}),
+		},
+		projects: {
+			entity: r.one.entities({
+				from: r.projects.id,
+				to: r.entities.id,
+				optional: false,
+			}),
+			image: r.one.assets({
+				from: r.projects.imageId,
+				to: r.assets.id,
+			}),
+			institutions: r.many.organisationalUnits({
+				from: r.projects.id.through(r.projectsToOrganisationalUnits.projectId),
+				to: r.organisationalUnits.id.through(r.projectsToOrganisationalUnits.unitId),
+			}),
+			scope: r.one.projectScopes({
+				from: r.projects.scopeId,
+				to: r.projectScopes.id,
+				optional: false,
+			}),
+		},
+		projectsToOrganisationalUnits: {
+			project: r.one.projects({
+				from: r.projectsToOrganisationalUnits.projectId,
+				to: r.projects.id,
+				optional: false,
+			}),
+			unit: r.one.organisationalUnits({
+				from: r.projectsToOrganisationalUnits.unitId,
+				to: r.organisationalUnits.id,
+				optional: false,
+			}),
+			role: r.one.projectRoles({
+				from: r.projectsToOrganisationalUnits.projectRoleId,
+				to: r.projectRoles.id,
+				optional: false,
+			}),
+		},
+		projectsContributions: {
+			projectToOrganisationalUnit: r.one.projectsToOrganisationalUnits({
+				from: r.projectsContributions.projectToOrganisationalUnitId,
+				to: r.projectsToOrganisationalUnits.id,
+			}),
+			report: r.one.reports({
+				from: r.projectsContributions.reportId,
+				to: r.reports.id,
 				optional: false,
 			}),
 		},

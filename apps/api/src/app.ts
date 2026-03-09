@@ -4,11 +4,13 @@ import { timing } from "hono/timing";
 import { createApp, createRouter } from "@/lib/factory";
 import { createOpenApi } from "@/lib/openapi/index";
 import { database } from "@/middlewares/db";
+import { router as documentsPolicies } from "@/routes/documents-policies";
 import { router as events } from "@/routes/events";
 import { router as impactCaseStudies } from "@/routes/impact-case-studies";
 import { router as membersAndPartners } from "@/routes/members-partners";
 import { router as news } from "@/routes/news";
 import { router as pages } from "@/routes/pages";
+import { router as projects } from "@/routes/projects";
 import { router as spotlightArticles } from "@/routes/spotlight-articles";
 
 const app = createApp();
@@ -16,11 +18,13 @@ const app = createApp();
 const openapi = createOpenApi(app);
 
 const api = createRouter()
+	.route("/documents-policies", documentsPolicies)
 	.route("/events", events)
 	.route("/impact-case-studies", impactCaseStudies)
 	.route("/members-partners", membersAndPartners)
 	.route("/news", news)
 	.route("/pages", pages)
+	.route("/projects", projects)
 	.route("/spotlight-articles", spotlightArticles);
 
 app.use(database()).use(timing()).route("/api/v1", api);
