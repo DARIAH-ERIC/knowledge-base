@@ -25,6 +25,8 @@
 
 		--font-body: var(--_font-body, var(--default-font-family));
 		--font-code: var(--_font-code, var(--default-mono-font-family));
+
+		font-family: var(--font-body);
 	}
 }
 

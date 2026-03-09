@@ -1,0 +1,52 @@
+import type { Meta, StoryObj } from "@storybook/react-vite";
+
+import { DateInput, DateField } from "./date-field";
+import { FieldError, Label } from "./field";
+
+const meta = {
+	title: "Components/DateField",
+	component: DateField,
+	parameters: {
+		layout: "centered",
+	},
+	tags: ["autodocs"],
+	args: {},
+} satisfies Meta<typeof DateField>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+	render(props) {
+		return (
+			<DateField {...props}>
+				<Label>{"Birth date"}</Label>
+				<DateInput />
+			</DateField>
+		);
+	},
+};
+
+export const WithValidation: Story = {
+	render(props) {
+		return (
+			<DateField isRequired {...props}>
+				<Label>{"Appointment date"}</Label>
+				<DateInput />
+				<FieldError />
+			</DateField>
+		);
+	},
+};
+
+export const Disabled: Story = {
+	render(props) {
+		return (
+			<DateField isDisabled {...props}>
+				<Label>{"Disabled date"}</Label>
+				<DateInput />
+			</DateField>
+		);
+	},
+};

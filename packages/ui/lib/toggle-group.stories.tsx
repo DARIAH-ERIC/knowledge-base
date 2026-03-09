@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { BoldIcon, ItalicIcon } from "lucide-react";
 
-import { Button } from "@/lib/button";
-import { ToggleGroup, ToggleGroupItem } from "@/lib/toggle-group";
+import { ToggleGroup, ToggleGroupItem } from "./toggle-group";
 
 const meta = {
 	title: "Components/ToggleGroup",
@@ -11,7 +9,16 @@ const meta = {
 		layout: "centered",
 	},
 	tags: ["autodocs"],
-	argTypes: {},
+	argTypes: {
+		size: {
+			control: "select",
+			options: ["xs", "sm", "md", "lg"],
+		},
+		selectionMode: {
+			control: "select",
+			options: ["single", "multiple"],
+		},
+	},
 	args: {},
 } satisfies Meta<typeof ToggleGroup>;
 
@@ -20,20 +27,26 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-	args: {},
+	args: { defaultSelectedKeys: ["week"] },
 	render(props) {
 		return (
 			<ToggleGroup {...props}>
-				<ToggleGroupItem>
-					<Button aria-label="Bold" intent="plain" size="sq-sm">
-						<BoldIcon aria-hidden={true} data-slot="icon" />
-					</Button>
-				</ToggleGroupItem>
-				<ToggleGroupItem>
-					<Button aria-label="Italic" intent="plain" size="sq-sm">
-						<ItalicIcon aria-hidden={true} data-slot="icon" />
-					</Button>
-				</ToggleGroupItem>
+				<ToggleGroupItem id="day">{"Day"}</ToggleGroupItem>
+				<ToggleGroupItem id="week">{"Week"}</ToggleGroupItem>
+				<ToggleGroupItem id="month">{"Month"}</ToggleGroupItem>
+			</ToggleGroup>
+		);
+	},
+};
+
+export const Multiple: Story = {
+	args: { selectionMode: "multiple", defaultSelectedKeys: ["bold", "italic"] },
+	render(props) {
+		return (
+			<ToggleGroup {...props}>
+				<ToggleGroupItem id="bold">{"Bold"}</ToggleGroupItem>
+				<ToggleGroupItem id="italic">{"Italic"}</ToggleGroupItem>
+				<ToggleGroupItem id="underline">{"Underline"}</ToggleGroupItem>
 			</ToggleGroup>
 		);
 	},
