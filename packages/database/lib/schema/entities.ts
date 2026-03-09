@@ -12,6 +12,7 @@ export const entityTypesEnum = [
 	"organisational_units",
 	"pages",
 	"persons",
+	"projects",
 	"spotlight_articles",
 ] as const;
 
