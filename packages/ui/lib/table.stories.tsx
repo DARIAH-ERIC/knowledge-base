@@ -120,7 +120,11 @@ export const Empty: Story = {
 						return <TableColumn id={column.id}>{column.name}</TableColumn>;
 					}}
 				</TableHeader>
-				<TableBody items={[]}>{() => <TableRow id="empty" />}</TableBody>
+				<TableBody items={[]}>
+					{() => {
+						return <TableRow id="empty" />;
+					}}
+				</TableBody>
 			</Table>
 		);
 	},

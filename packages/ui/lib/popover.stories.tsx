@@ -44,7 +44,7 @@ export const WithArrow: Story = {
 		return (
 			<Popover>
 				<Button intent="outline">{"Open Popover with Arrow"}</Button>
-				<PopoverContent arrow>
+				<PopoverContent arrow={true}>
 					<PopoverHeader>
 						<PopoverTitle>{"Tip"}</PopoverTitle>
 					</PopoverHeader>

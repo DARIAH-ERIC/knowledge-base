@@ -43,7 +43,7 @@ export const WithSeconds: Story = {
 export const Disabled: Story = {
 	render(props) {
 		return (
-			<TimeField isDisabled {...props}>
+			<TimeField isDisabled={true} {...props}>
 				<Label>{"Disabled time"}</Label>
 				<DateInput />
 			</TimeField>

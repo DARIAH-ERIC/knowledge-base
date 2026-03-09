@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { DateInput, DateField } from "./date-field";
+import { DateField, DateInput } from "./date-field";
 import { FieldError, Label } from "./field";
 
 const meta = {
@@ -31,7 +31,7 @@ export const Default: Story = {
 export const WithValidation: Story = {
 	render(props) {
 		return (
-			<DateField isRequired {...props}>
+			<DateField isRequired={true} {...props}>
 				<Label>{"Appointment date"}</Label>
 				<DateInput />
 				<FieldError />
@@ -43,7 +43,7 @@ export const WithValidation: Story = {
 export const Disabled: Story = {
 	render(props) {
 		return (
-			<DateField isDisabled {...props}>
+			<DateField isDisabled={true} {...props}>
 				<Label>{"Disabled date"}</Label>
 				<DateInput />
 			</DateField>

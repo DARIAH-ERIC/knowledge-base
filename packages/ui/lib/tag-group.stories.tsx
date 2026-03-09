@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { fn } from "storybook/test";
 
 import { Label } from "./field";
 import { Tag, TagGroup, TagList } from "./tag-group";
@@ -11,7 +12,9 @@ const meta = {
 	},
 	tags: ["autodocs"],
 	argTypes: {},
-	args: {},
+	args: {
+		onRemove: fn(),
+	},
 } satisfies Meta<typeof TagGroup>;
 
 export default meta;
@@ -36,7 +39,7 @@ export const Default: Story = {
 };
 
 export const Removable: Story = {
-	args: { onRemove: () => {} },
+	args: {},
 	render(props) {
 		return (
 			<TagGroup {...props}>

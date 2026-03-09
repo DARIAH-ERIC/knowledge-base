@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
 import { DocumentIcon, FolderIcon } from "@heroicons/react/20/solid";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { Tree, TreeContent, TreeItem } from "./tree";
 
@@ -20,10 +20,10 @@ type Story = StoryObj<typeof meta>;
 interface FileItem {
 	id: string;
 	name: string;
-	childItems?: FileItem[];
+	childItems?: Array<FileItem>;
 }
 
-const files: FileItem[] = [
+const files: Array<FileItem> = [
 	{
 		id: "documents",
 		name: "Documents",

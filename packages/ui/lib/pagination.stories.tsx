@@ -31,7 +31,7 @@ export const Default: Story = {
 					<PaginationPrevious href="#" />
 				</PaginationSection>
 				<PaginationList>
-					<PaginationItem href="#" isCurrent>
+					<PaginationItem href="#" isCurrent={true}>
 						{"1"}
 					</PaginationItem>
 					<PaginationItem href="#">{"2"}</PaginationItem>

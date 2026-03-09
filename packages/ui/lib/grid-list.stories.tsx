@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
 import { UserCircleIcon } from "@heroicons/react/20/solid";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import {
 	GridList,

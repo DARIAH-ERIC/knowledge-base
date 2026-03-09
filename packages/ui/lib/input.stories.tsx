@@ -1,9 +1,9 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
+import { Label } from "./field";
 import { Input, InputGroup } from "./input";
 import { TextField } from "./text-field";
-import { Label } from "./field";
 
 const meta = {
 	title: "Components/Input",

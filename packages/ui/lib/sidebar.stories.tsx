@@ -1,4 +1,3 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
 	ChartBarIcon,
 	Cog6ToothIcon,
@@ -6,6 +5,7 @@ import {
 	HomeIcon,
 	UserGroupIcon,
 } from "@heroicons/react/20/solid";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { Avatar } from "./avatar";
 import {

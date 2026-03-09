@@ -1,4 +1,3 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
 	ChartBarIcon,
 	Cog6ToothIcon,
@@ -6,6 +5,7 @@ import {
 	HomeIcon,
 	UserGroupIcon,
 } from "@heroicons/react/20/solid";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
 import { Button } from "./button";
@@ -39,7 +39,12 @@ export const Default: Story = {
 
 		return (
 			<>
-				<Button intent="outline" onPress={() => setIsOpen(true)}>
+				<Button
+					intent="outline"
+					onPress={() => {
+						setIsOpen(true);
+					}}
+				>
 					{"Open Command Menu"}
 				</Button>
 				<CommandMenu isOpen={isOpen} onOpenChange={setIsOpen}>
@@ -93,7 +98,12 @@ export const WithShortcut: Story = {
 
 		return (
 			<>
-				<Button intent="outline" onPress={() => setIsOpen(true)}>
+				<Button
+					intent="outline"
+					onPress={() => {
+						setIsOpen(true);
+					}}
+				>
 					{"Open (or press ⌘K)"}
 				</Button>
 				<CommandMenu isOpen={isOpen} onOpenChange={setIsOpen} shortcut="k">
