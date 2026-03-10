@@ -63,7 +63,7 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 				},
 				scope: {
 					columns: {
-						type: true,
+						scope: true,
 					},
 				},
 			},
@@ -156,7 +156,7 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 			},
 			scope: {
 				columns: {
-					type: true,
+					scope: true,
 				},
 			},
 		},
@@ -290,7 +290,7 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 			},
 			scope: {
 				columns: {
-					type: true,
+					scope: true,
 				},
 			},
 		},

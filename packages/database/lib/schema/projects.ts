@@ -122,3 +122,21 @@ export type ProjectContributionInput = typeof projectsContributions.$inferInsert
 export const ProjectContributionSelectSchema = createSelectSchema(projectsContributions);
 export const ProjectContributionInsertSchema = createInsertSchema(projectsContributions);
 export const ProjectContributionUpdateSchema = createUpdateSchema(projectsContributions);
+
+export const dariahProjectsUnitType = "umbrella_consortium";
+
+export const dariahProjects = p
+	.pgView("dariah_projects", {
+		id: p.uuid("id").notNull(),
+		metadata: p.jsonb("metadata"),
+		name: p.text("name").notNull(),
+		summary: p.text("summary").notNull(),
+		duration: f.timestampRange("duration").notNull(),
+		call: p.text("call").notNull(),
+		funders: p.text("funders").notNull(),
+		topic: p.text("topic").notNull(),
+		funding: p.numeric("funding"),
+		imageId: p.uuid("image_id"),
+		scopeId: p.uuid("scope_id").notNull(),
+	})
+	.existing();

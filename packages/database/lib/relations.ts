@@ -130,6 +130,26 @@ export const relations = defineRelations(schema, (r) => {
 				optional: false,
 			}),
 		},
+		dariahProjects: {
+			entity: r.one.entities({
+				from: r.dariahProjects.id,
+				to: r.entities.id,
+				optional: false,
+			}),
+			image: r.one.assets({
+				from: r.dariahProjects.imageId,
+				to: r.assets.id,
+			}),
+			partners: r.many.projectPartners({
+				from: r.dariahProjects.id,
+				to: r.projectPartners.projectId,
+			}),
+			scope: r.one.projectScopes({
+				from: r.dariahProjects.scopeId,
+				to: r.projectScopes.id,
+				optional: false,
+			}),
+		},
 		membersAndPartners: {
 			image: r.one.assets({
 				from: r.membersAndPartners.imageId,
