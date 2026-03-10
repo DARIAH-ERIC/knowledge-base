@@ -13,6 +13,7 @@ export const socialMediaTypesEnum = [
 	"mastodon",
 	"twitter",
 	"vimeo",
+	"website",
 	"youtube",
 ] as const;
 

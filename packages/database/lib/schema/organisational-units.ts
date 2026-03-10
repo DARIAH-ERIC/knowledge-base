@@ -185,8 +185,7 @@ export const organisationalUnitsToSocialMedia = p.pgTable("organisational_units_
 	...f.timestamps(),
 });
 
-export type OrganisationalUnitToSocialMedia =
-	typeof organisationalUnitsToSocialMedia.$inferSelect;
+export type OrganisationalUnitToSocialMedia = typeof organisationalUnitsToSocialMedia.$inferSelect;
 export type OrganisationalUnitToSocialMediaInput =
 	typeof organisationalUnitsToSocialMedia.$inferInsert;
 
