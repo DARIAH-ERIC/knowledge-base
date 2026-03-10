@@ -25,6 +25,7 @@
 		"@dariah-eric/database": "workspace:^",
 		"@dariah-eric/env": "workspace:^",
 		"@dariah-eric/images": "workspace:^",
+		"@dariah-eric/storage": "workspace:^",
 		"@hono/node-server": "catalog:",
 		"@hono/standard-validator": "catalog:",
 		"@hono/swagger-ui": "catalog:",

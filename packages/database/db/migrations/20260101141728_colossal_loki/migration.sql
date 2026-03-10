@@ -27,12 +27,15 @@ ON CONFLICT ("type") DO NOTHING;
 INSERT INTO
 	"entity_types" ("type")
 VALUES
+	('documents_policies'),
 	('events'),
+	('external_links'),
 	('impact_case_studies'),
 	('news'),
 	('organisational_units'),
 	('pages'),
 	('persons'),
+	('projects'),
 	('spotlight_articles')
 ON CONFLICT ("type") DO NOTHING;
 

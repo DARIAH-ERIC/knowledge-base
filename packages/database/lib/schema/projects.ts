@@ -72,54 +72,47 @@ export const ProjectInputSelectSchema = createSelectSchema(projects);
 export const ProjectInputInsertSchema = createInsertSchema(projects);
 export const ProjectInputUpdateSchema = createUpdateSchema(projects);
 
-export const projectsToOrganisationalUnitsRelations = p.pgTable(
-	"projects_to_organisational_units",
-	{
-		id: p.uuid("id").primaryKey().default(uuidv7()),
-		projectId: p
-			.uuid("project_id")
-			.notNull()
-			.references(() => {
-				return projects.id;
-			}),
-		unitId: p
-			.uuid("unit_id")
-			.notNull()
-			.references(() => {
-				return organisationalUnits.id;
-			}),
-		projectRoleId: p
-			.uuid("role_id")
-			.notNull()
-			.references(() => {
-				return projectRoles.id;
-			}),
-		duration: f.timestampRange("duration"),
-	},
-);
+export const projectsToOrganisationalUnits = p.pgTable("projects_to_organisational_units", {
+	id: p.uuid("id").primaryKey().default(uuidv7()),
+	projectId: p
+		.uuid("project_id")
+		.notNull()
+		.references(() => {
+			return projects.id;
+		}),
+	unitId: p
+		.uuid("unit_id")
+		.notNull()
+		.references(() => {
+			return organisationalUnits.id;
+		}),
+	projectRoleId: p
+		.uuid("role_id")
+		.notNull()
+		.references(() => {
+			return projectRoles.id;
+		}),
+	duration: f.timestampRange("duration"),
+});
 
-export type ProjectsToOrganisationalUnitsRelation =
-	typeof projectsToOrganisationalUnitsRelations.$inferSelect;
-export type ProjectsToOrganisationalUnitsRelationInput =
-	typeof projectsToOrganisationalUnitsRelations.$inferInsert;
+export type ProjectsToOrganisationalUnits = typeof projectsToOrganisationalUnits.$inferSelect;
+export type ProjectsToOrganisationalUnitsInput = typeof projectsToOrganisationalUnits.$inferInsert;
 
-export const ProjectsToOrganisationalUnitsRelationSelectSchema = createSelectSchema(
-	projectsToOrganisationalUnitsRelations,
+export const ProjectsToOrganisationalUnitsSelectSchema = createSelectSchema(
+	projectsToOrganisationalUnits,
 );
-export const ProjectsToOrganisationalUnitsRelationInsertSchema = createInsertSchema(
-	projectsToOrganisationalUnitsRelations,
+export const ProjectsToOrganisationalUnitsInsertSchema = createInsertSchema(
+	projectsToOrganisationalUnits,
 );
-export const ProjectsToOrganisationalUnitsRelationUpdateSchema = createUpdateSchema(
-	projectsToOrganisationalUnitsRelations,
+export const ProjectsToOrganisationalUnitsUpdateSchema = createUpdateSchema(
+	projectsToOrganisationalUnits,
 );
 
 export const projectsContributions = p.pgTable("project_contributions", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
-	projectsToOrganisationalUnitsRelationsId: p
-		.uuid("project_to_organisational_unit_id")
-		.references(() => {
-			return projectsToOrganisationalUnitsRelations.id;
-		}),
+	projectToOrganisationalUnitId: p.uuid("project_to_organisational_unit_id").references(() => {
+		return projectsToOrganisationalUnits.id;
+	}),
 	reportId: p
 		.uuid("report_id")
 		.notNull()

@@ -75,6 +75,12 @@ export function createStorageService(params: CreateStorageServiceParams) {
 		},
 	};
 
+	const objects = {
+		async get(params: { key: string }) {
+			return minio.getObject(bucketName, params.key);
+		},
+	};
+
 	const urls = {
 		async generatePresignedUploadUrl(params: { prefix: AssetPrefix }) {
 			const { prefix } = params;
@@ -92,6 +98,7 @@ export function createStorageService(params: CreateStorageServiceParams) {
 			name: bucketName,
 		},
 		images,
+		objects,
 		urls,
 	};
 }

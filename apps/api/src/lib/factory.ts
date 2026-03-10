@@ -1,5 +1,6 @@
 import { STATUS_CODES } from "node:http";
 
+import type { StorageService } from "@dariah-eric/storage";
 import * as Sentry from "@sentry/node";
 import { cors } from "hono/cors";
 import { createFactory } from "hono/factory";
@@ -16,6 +17,7 @@ interface Env {
 	Variables: {
 		db?: Database | Transaction;
 		logger: Logger;
+		storage?: StorageService;
 	};
 }
 
