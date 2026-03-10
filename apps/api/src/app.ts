@@ -4,6 +4,8 @@ import { timing } from "hono/timing";
 import { createApp, createRouter } from "@/lib/factory";
 import { createOpenApi } from "@/lib/openapi/index";
 import { database } from "@/middlewares/db";
+import { storage as storageMiddleware } from "@/middlewares/storage";
+import { router as dariahProjects } from "@/routes/dariah-projects";
 import { router as documentsPolicies } from "@/routes/documents-policies";
 import { router as events } from "@/routes/events";
 import { router as impactCaseStudies } from "@/routes/impact-case-studies";
@@ -18,6 +20,7 @@ const app = createApp();
 const openapi = createOpenApi(app);
 
 const api = createRouter()
+	.route("/dariah-projects", dariahProjects)
 	.route("/documents-policies", documentsPolicies)
 	.route("/events", events)
 	.route("/impact-case-studies", impactCaseStudies)
@@ -27,7 +30,7 @@ const api = createRouter()
 	.route("/projects", projects)
 	.route("/spotlight-articles", spotlightArticles);
 
-app.use(database()).use(timing()).route("/api/v1", api);
+app.use(database()).use(storageMiddleware()).use(timing()).route("/api/v1", api);
 
 app.route("/docs", openapi);
 

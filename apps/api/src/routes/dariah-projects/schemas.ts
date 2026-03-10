@@ -1,0 +1,135 @@
+import * as schema from "@dariah-eric/database/schema";
+import * as v from "valibot";
+
+import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
+
+export const DariahProjectInstitutionSchema = v.pipe(
+	v.object({
+		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name"]).entries,
+		type: v.picklist(schema.organisationalUnitTypesEnum),
+		projectRoleId: v.pipe(v.string(), v.uuid()),
+	}),
+	v.description("DARIAH project institution"),
+	v.metadata({ ref: "DariahProjectInstitution" }),
+);
+
+export type DariahProjectInstitution = v.InferOutput<typeof DariahProjectInstitutionSchema>;
+
+export const DariahProjectBaseSchema = v.pipe(
+	v.object({
+		...v.pick(schema.ProjectInputSelectSchema, [
+			"id",
+			"name",
+			"summary",
+			"duration",
+			"call",
+			"funders",
+			"topic",
+			"funding",
+		]).entries,
+		image: v.nullable(v.object({ url: v.string() })),
+		institutions: v.array(DariahProjectInstitutionSchema),
+		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+		scope: v.object({ type: v.picklist(schema.projectScopesEnum) }),
+	}),
+	v.description("DARIAH project"),
+	v.metadata({ ref: "DariahProjectBase" }),
+);
+
+export type DariahProjectBase = v.InferOutput<typeof DariahProjectBaseSchema>;
+
+export const DariahProjectListSchema = v.pipe(
+	v.array(DariahProjectBaseSchema),
+	v.description("List of DARIAH projects"),
+	v.metadata({ ref: "DariahProjectList" }),
+);
+
+export type DariahProjectList = v.InferOutput<typeof DariahProjectListSchema>;
+
+export const DariahProjectSchema = v.pipe(
+	v.object({
+		...v.pick(schema.ProjectInputSelectSchema, [
+			"id",
+			"name",
+			"summary",
+			"duration",
+			"call",
+			"funders",
+			"topic",
+			"funding",
+		]).entries,
+		image: v.nullable(v.object({ url: v.string() })),
+		institutions: v.array(DariahProjectInstitutionSchema),
+		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+		scope: v.object({ type: v.picklist(schema.projectScopesEnum) }),
+	}),
+	v.description("DARIAH project"),
+	v.metadata({ ref: "DariahProject" }),
+);
+
+export type DariahProject = v.InferOutput<typeof DariahProjectSchema>;
+
+export const DariahProjectSlugSchema = v.pipe(
+	v.object({
+		...v.pick(schema.ProjectInputSelectSchema, ["id"]).entries,
+		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+	}),
+	v.description("DARIAH project slug"),
+	v.metadata({ ref: "DariahProjectSlug" }),
+);
+
+export type DariahProjectSlug = v.InferOutput<typeof DariahProjectSlugSchema>;
+
+export const DariahProjectSlugListSchema = v.pipe(
+	v.array(DariahProjectSlugSchema),
+	v.description("List of DARIAH project slugs"),
+	v.metadata({ ref: "DariahProjectSlugList" }),
+);
+
+export type DariahProjectSlugList = v.InferOutput<typeof DariahProjectSlugListSchema>;
+
+export const GetDariahProjects = {
+	QuerySchema: PaginationQuerySchema,
+	ResponseSchema: v.pipe(
+		v.object({
+			...PaginatedResponseSchema.entries,
+			data: DariahProjectListSchema,
+		}),
+		v.description("Paginated list of DARIAH projects"),
+		v.metadata({ ref: "GetDariahProjectsResponse" }),
+	),
+};
+
+export const GetDariahProjectById = {
+	ParamsSchema: v.pipe(
+		v.object({
+			id: v.pipe(v.string(), v.uuid()),
+		}),
+		v.description("Get DARIAH project by id params"),
+		v.metadata({ ref: "GetDariahProjectByIdParams" }),
+	),
+	ResponseSchema: DariahProjectSchema,
+};
+
+export const GetDariahProjectSlugs = {
+	QuerySchema: PaginationQuerySchema,
+	ResponseSchema: v.pipe(
+		v.object({
+			...PaginatedResponseSchema.entries,
+			data: DariahProjectSlugListSchema,
+		}),
+		v.description("Paginated list of DARIAH project slugs"),
+		v.metadata({ ref: "GetDariahProjectSlugsResponse" }),
+	),
+};
+
+export const GetDariahProjectBySlug = {
+	ParamsSchema: v.pipe(
+		v.object({
+			slug: v.string(),
+		}),
+		v.description("Get DARIAH project by slug params"),
+		v.metadata({ ref: "GetDariahProjectBySlugParams" }),
+	),
+	ResponseSchema: DariahProjectSchema,
+};

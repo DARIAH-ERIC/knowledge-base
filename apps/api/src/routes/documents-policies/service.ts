@@ -155,10 +155,6 @@ export async function getDocumentOrPolicySlugs(
 
 //
 
-interface GetDocumentOrPolicyBySlugParams {
-	slug: schema.Entity["slug"];
-}
-
 interface GetDocumentOrPolicyDocumentParams {
 	id: schema.DocumentOrPolicy["id"];
 }
@@ -194,6 +190,10 @@ export async function getDocumentOrPolicyDocument(
 }
 
 //
+
+interface GetDocumentOrPolicyBySlugParams {
+	slug: schema.Entity["slug"];
+}
 
 export async function getDocumentOrPolicyBySlug(
 	db: Database | Transaction,

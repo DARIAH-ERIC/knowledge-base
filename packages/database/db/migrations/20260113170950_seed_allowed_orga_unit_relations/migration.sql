@@ -73,12 +73,15 @@ SELECT
 FROM
 	(
 		VALUES
+			('documents_policies', 'description'),
 			('events', 'content'),
+			('external_links', 'description'),
 			('impact_case_studies', 'content'),
 			('news', 'content'),
 			('organisational_units', 'description'),
 			('pages', 'content'),
 			('persons', 'biography'),
+			('projects', 'description'),
 			('spotlight_articles', 'content')
 	) AS "tmp" ("entity_type_name", "field_name")
 	JOIN "entity_types" ON "tmp"."entity_type_name" = "entity_types"."type"

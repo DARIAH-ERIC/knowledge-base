@@ -20,7 +20,6 @@ import {
 	getDocumentOrPolicySlugs,
 	getDocumentsPolicies,
 } from "@/routes/documents-policies/service";
-import { storage } from "@/services/storage";
 import { env } from "~/config/env.config";
 
 function documentUrl(id: string) {
@@ -188,6 +187,9 @@ export const router = createRouter()
 
 			const { key } = item.document;
 			const filename = key.split("/").pop() ?? "document";
+
+			const storage = c.get("storage");
+			assert(storage, "Storage must be provided via middleware.");
 
 			const nodeStream = await storage.objects.get({ key });
 			const webStream = Readable.toWeb(nodeStream) as ReadableStream;

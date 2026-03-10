@@ -1,10 +1,14 @@
+import type { StorageService } from "@dariah-eric/storage";
 import { testClient } from "hono/testing";
 
 import { api } from "@/app";
 import { createApp } from "@/lib/factory";
-import { type Database, database, type Transaction } from "@/middlewares/db";
+import { type Database, database as databaseMiddleware, type Transaction } from "@/middlewares/db";
+import { storage as storageMiddleware } from "@/middlewares/storage";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function createTestClient(db: Database | Transaction) {
-	return testClient(createApp().use(database(db)).route("/", api));
+export function createTestClient(db: Database | Transaction, storage?: StorageService) {
+	return testClient(
+		createApp().use(databaseMiddleware(db)).use(storageMiddleware(storage)).route("/", api),
+	);
 }
