@@ -1,0 +1,57 @@
+import { inArray } from "drizzle-orm";
+import * as p from "drizzle-orm/pg-core";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+
+import * as f from "../fields";
+import { uuidv7 } from "../functions";
+
+export const socialMediaTypesEnum = [
+	"bluesky",
+	"facebook",
+	"instagram",
+	"linkedin",
+	"mastodon",
+	"twitter",
+	"vimeo",
+	"youtube",
+] as const;
+
+export const socialMediaTypes = p.pgTable(
+	"social_media_types",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		type: p.text("type", { enum: socialMediaTypesEnum }).notNull().unique(),
+		...f.timestamps(),
+	},
+	(t) => {
+		return [p.check("social_media_types_type_enum_check", inArray(t.type, socialMediaTypesEnum))];
+	},
+);
+
+export type SocialMediaType = typeof socialMediaTypes.$inferSelect;
+export type SocialMediaTypeInput = typeof socialMediaTypes.$inferInsert;
+
+export const SocialMediaTypeSelectSchema = createSelectSchema(socialMediaTypes);
+export const SocialMediaTypeInsertSchema = createInsertSchema(socialMediaTypes);
+export const SocialMediaTypeUpdateSchema = createUpdateSchema(socialMediaTypes);
+
+export const socialMedia = p.pgTable("social_media", {
+	id: p.uuid("id").primaryKey().default(uuidv7()),
+	name: p.text("name").notNull(),
+	url: p.text("url").notNull(),
+	duration: f.timestampRange("duration").notNull(),
+	typeId: p
+		.uuid("type_id")
+		.notNull()
+		.references(() => {
+			return socialMediaTypes.id;
+		}),
+	...f.timestamps(),
+});
+
+export type SocialMedia = typeof socialMedia.$inferSelect;
+export type SocialMediaInput = typeof socialMedia.$inferInsert;
+
+export const SocialMediaSelectSchema = createSelectSchema(socialMedia);
+export const SocialMediaInsertSchema = createInsertSchema(socialMedia);
+export const SocialMediaUpdateSchema = createUpdateSchema(socialMedia);

@@ -286,6 +286,31 @@ export const relations = defineRelations(schema, (r) => {
 				optional: false,
 			}),
 		},
+		socialMedia: {
+			type: r.one.socialMediaTypes({
+				from: r.socialMedia.typeId,
+				to: r.socialMediaTypes.id,
+				optional: false,
+			}),
+			organisationalUnits: r.many.organisationalUnits({
+				from: r.socialMedia.id.through(r.organisationalUnitsToSocialMedia.socialMediaId),
+				to: r.organisationalUnits.id.through(
+					r.organisationalUnitsToSocialMedia.organisationalUnitId,
+				),
+			}),
+		},
+		organisationalUnitsToSocialMedia: {
+			organisationalUnit: r.one.organisationalUnits({
+				from: r.organisationalUnitsToSocialMedia.organisationalUnitId,
+				to: r.organisationalUnits.id,
+				optional: false,
+			}),
+			socialMedia: r.one.socialMedia({
+				from: r.organisationalUnitsToSocialMedia.socialMediaId,
+				to: r.socialMedia.id,
+				optional: false,
+			}),
+		},
 		spotlightArticles: {
 			entity: r.one.entities({
 				from: r.spotlightArticles.id,
