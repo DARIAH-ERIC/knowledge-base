@@ -19,8 +19,7 @@ service:
 ingress:
   enabled: true
   path: "/"
-  annotations:
-    kubernetes.io/ingressClassName: "nginx-proxy-protocol"
+  class: "nginx-proxy-protocol"
 livenessProbe:
   path: /health
   initialDelaySeconds: 15
