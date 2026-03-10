@@ -12,6 +12,7 @@ import { router as impactCaseStudies } from "@/routes/impact-case-studies";
 import { router as membersAndPartners } from "@/routes/members-partners";
 import { router as news } from "@/routes/news";
 import { router as pages } from "@/routes/pages";
+import { router as persons } from "@/routes/persons";
 import { router as projects } from "@/routes/projects";
 import { router as spotlightArticles } from "@/routes/spotlight-articles";
 
@@ -27,6 +28,7 @@ const api = createRouter()
 	.route("/members-partners", membersAndPartners)
 	.route("/news", news)
 	.route("/pages", pages)
+	.route("/persons", persons)
 	.route("/projects", projects)
 	.route("/spotlight-articles", spotlightArticles);
 

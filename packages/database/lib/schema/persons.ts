@@ -35,7 +35,8 @@ export const persons = p.pgTable("persons", {
 		}),
 	name: p.text("name").notNull(),
 	sortName: p.text("sort_name").notNull(),
-	description: p.text("description").notNull(),
+	email: p.text("email"),
+	orcid: p.text("orcid"),
 	imageId: p
 		.uuid("image_id")
 		.notNull()
