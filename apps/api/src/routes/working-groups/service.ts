@@ -7,21 +7,18 @@ import type { Database, Transaction } from "@/middlewares/db";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
-interface GetMembersAndPartnersParams {
+interface GetWorkingGroupsParams {
 	/** @default 10 */
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
 }
 
-export async function getMembersAndPartners(
-	db: Database | Transaction,
-	params: GetMembersAndPartnersParams,
-) {
+export async function getWorkingGroups(db: Database | Transaction, params: GetWorkingGroupsParams) {
 	const { limit = 10, offset = 0 } = params;
 
 	const [items, aggregate] = await Promise.all([
-		db.query.membersAndPartners.findMany({
+		db.query.workingGroups.findMany({
 			where: {
 				entity: {
 					status: {
@@ -34,8 +31,6 @@ export async function getMembersAndPartners(
 				metadata: true,
 				name: true,
 				summary: true,
-				status: true,
-				type: true,
 			},
 			with: {
 				entity: {
@@ -58,8 +53,8 @@ export async function getMembersAndPartners(
 		}),
 		db
 			.select({ total: count() })
-			.from(schema.membersAndPartners)
-			.innerJoin(schema.entities, eq(schema.membersAndPartners.id, schema.entities.id))
+			.from(schema.workingGroups)
+			.innerJoin(schema.entities, eq(schema.workingGroups.id, schema.entities.id))
 			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
@@ -83,17 +78,17 @@ export async function getMembersAndPartners(
 
 //
 
-interface GetMemberOrPartnerByIdParams {
+interface GetWorkingGroupByIdParams {
 	id: schema.OrganisationalUnit["id"];
 }
 
-export async function getMemberOrPartnerById(
+export async function getWorkingGroupById(
 	db: Database | Transaction,
-	params: GetMemberOrPartnerByIdParams,
+	params: GetWorkingGroupByIdParams,
 ) {
 	const { id } = params;
 
-	const item = await db.query.membersAndPartners.findFirst({
+	const item = await db.query.workingGroups.findFirst({
 		where: {
 			id,
 			entity: {
@@ -107,8 +102,6 @@ export async function getMemberOrPartnerById(
 			metadata: true,
 			name: true,
 			summary: true,
-			status: true,
-			type: true,
 		},
 		with: {
 			entity: {
@@ -143,21 +136,21 @@ export async function getMemberOrPartnerById(
 
 //
 
-interface GetMemberOrPartnerSlugsParams {
+interface GetWorkingGroupSlugsParams {
 	/** @default 10 */
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
 }
 
-export async function getMemberOrPartnerSlugs(
+export async function getWorkingGroupSlugs(
 	db: Database | Transaction,
-	params: GetMemberOrPartnerSlugsParams,
+	params: GetWorkingGroupSlugsParams,
 ) {
 	const { limit = 10, offset = 0 } = params;
 
 	const [items, aggregate] = await Promise.all([
-		db.query.membersAndPartners.findMany({
+		db.query.workingGroups.findMany({
 			where: {
 				entity: {
 					status: {
@@ -189,8 +182,8 @@ export async function getMemberOrPartnerSlugs(
 		}),
 		db
 			.select({ total: count() })
-			.from(schema.membersAndPartners)
-			.innerJoin(schema.entities, eq(schema.membersAndPartners.id, schema.entities.id))
+			.from(schema.workingGroups)
+			.innerJoin(schema.entities, eq(schema.workingGroups.id, schema.entities.id))
 			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
@@ -204,17 +197,17 @@ export async function getMemberOrPartnerSlugs(
 
 //
 
-interface GetMemberOrPartnerBySlugParams {
+interface GetWorkingGroupBySlugParams {
 	slug: schema.Entity["slug"];
 }
 
-export async function getMemberOrPartnerBySlug(
+export async function getWorkingGroupBySlug(
 	db: Database | Transaction,
-	params: GetMemberOrPartnerBySlugParams,
+	params: GetWorkingGroupBySlugParams,
 ) {
 	const { slug } = params;
 
-	const item = await db.query.membersAndPartners.findFirst({
+	const item = await db.query.workingGroups.findFirst({
 		where: {
 			entity: {
 				slug,
@@ -228,8 +221,6 @@ export async function getMemberOrPartnerBySlug(
 			metadata: true,
 			name: true,
 			summary: true,
-			status: true,
-			type: true,
 		},
 		with: {
 			entity: {

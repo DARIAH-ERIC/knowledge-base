@@ -67,6 +67,7 @@ export const organisationalUnits = p.pgTable("organisational_units", {
 		}),
 	metadata: p.jsonb("metadata"),
 	name: p.text("name").notNull(),
+	acronym: p.text("acronym"),
 	summary: p.text("summary").notNull(),
 	imageId: p.uuid("image_id").references(() => {
 		return assets.id;
@@ -179,6 +180,18 @@ export const membersAndPartners = p
 		type: p.text("type"),
 		status: p.text("status"),
 		slug: p.text("slug"),
+		imageId: p.uuid("image_id"),
+	})
+	.existing();
+
+export const workingGroupUnitType = "working_group";
+
+export const workingGroups = p
+	.pgView("working_groups", {
+		id: p.uuid("id").notNull(),
+		metadata: p.jsonb("metadata"),
+		name: p.text("name").notNull(),
+		summary: p.text("summary").notNull(),
 		imageId: p.uuid("image_id"),
 	})
 	.existing();

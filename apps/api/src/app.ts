@@ -15,6 +15,7 @@ import { router as pages } from "@/routes/pages";
 import { router as persons } from "@/routes/persons";
 import { router as projects } from "@/routes/projects";
 import { router as spotlightArticles } from "@/routes/spotlight-articles";
+import { router as workingGroups } from "@/routes/working-groups";
 
 const app = createApp();
 
@@ -30,7 +31,8 @@ const api = createRouter()
 	.route("/pages", pages)
 	.route("/persons", persons)
 	.route("/projects", projects)
-	.route("/spotlight-articles", spotlightArticles);
+	.route("/spotlight-articles", spotlightArticles)
+	.route("/working-groups", workingGroups);
 
 app.use(database()).use(storageMiddleware()).use(timing()).route("/api/v1", api);
 

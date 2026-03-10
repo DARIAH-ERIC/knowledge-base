@@ -161,6 +161,17 @@ export const relations = defineRelations(schema, (r) => {
 				optional: false,
 			}),
 		},
+		workingGroups: {
+			image: r.one.assets({
+				from: r.workingGroups.imageId,
+				to: r.assets.id,
+			}),
+			entity: r.one.entities({
+				from: r.workingGroups.id,
+				to: r.entities.id,
+				optional: false,
+			}),
+		},
 		news: {
 			entity: r.one.entities({
 				from: r.news.id,
