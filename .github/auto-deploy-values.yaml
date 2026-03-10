@@ -19,7 +19,7 @@ service:
 ingress:
   enabled: true
   path: "/"
-  class: "nginx-proxy-protocol"
+  className: "nginx-proxy-protocol"
 livenessProbe:
   path: /health
   initialDelaySeconds: 15
