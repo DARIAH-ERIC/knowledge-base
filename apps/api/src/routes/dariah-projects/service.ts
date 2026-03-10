@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { and, countDistinct, desc, eq } from "@dariah-eric/database";
+import { count, eq } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
 import type { Database, Transaction } from "@/middlewares/db";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
-
-const umbrellaConsortiumType = "umbrella_consortium" as const;
 
 const projectWithLinksQuery = {
 	columns: {
@@ -32,9 +30,9 @@ const projectWithLinksQuery = {
 				key: true,
 			},
 		},
-		projectLinks: {
+		partners: {
 			columns: {
-				projectRoleId: true,
+				roleId: true,
 			},
 			with: {
 				unit: {
@@ -54,16 +52,33 @@ const projectWithLinksQuery = {
 		},
 		scope: {
 			columns: {
-				type: true,
+				scope: true,
 			},
 		},
 	},
 } as const;
 
-function isDariahProject(item: { projectLinks: Array<{ unit: { type: { type: string } } }> }) {
-	return item.projectLinks.some((link) => {
-		return link.unit.type.type === umbrellaConsortiumType;
+function mapItem<
+	T extends {
+		image: { key: string } | null;
+		partners: Array<{ roleId: string; unit: { id: string; name: string; type: { type: string } } }>;
+	},
+>(item: T, width: number) {
+	const image =
+		item.image != null
+			? images.generateSignedImageUrl({
+					key: item.image.key,
+					options: { width },
+				})
+			: null;
+
+	const institutions = item.partners.map(({ roleId, unit }) => {
+		return { id: unit.id, name: unit.name, type: unit.type.type, roleId };
 	});
+
+	const { partners: _, ...rest } = item;
+
+	return { ...rest, image, institutions };
 }
 
 //
@@ -81,93 +96,34 @@ export async function getDariahProjects(
 ) {
 	const { limit = 10, offset = 0 } = params;
 
-	const [qualifyingRows, aggregate] = await Promise.all([
+	const [items, aggregate] = await Promise.all([
+		db.query.dariahProjects.findMany({
+			where: {
+				entity: {
+					status: {
+						type: "published",
+					},
+				},
+			},
+			...projectWithLinksQuery,
+			orderBy(t, { desc, sql }) {
+				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+			},
+			limit,
+			offset,
+		}),
 		db
-			.selectDistinct({
-				id: schema.projects.id,
-				updatedAt: schema.entities.updatedAt,
-			})
-			.from(schema.projects)
-			.innerJoin(schema.entities, eq(schema.projects.id, schema.entities.id))
+			.select({ total: count() })
+			.from(schema.dariahProjects)
+			.innerJoin(schema.entities, eq(schema.dariahProjects.id, schema.entities.id))
 			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
-			.innerJoin(
-				schema.projectsToOrganisationalUnits,
-				eq(schema.projectsToOrganisationalUnits.projectId, schema.projects.id),
-			)
-			.innerJoin(
-				schema.organisationalUnits,
-				eq(schema.projectsToOrganisationalUnits.unitId, schema.organisationalUnits.id),
-			)
-			.innerJoin(
-				schema.organisationalUnitTypes,
-				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
-			)
-			.where(
-				and(
-					eq(schema.entityStatus.type, "published"),
-					eq(schema.organisationalUnitTypes.type, umbrellaConsortiumType),
-				),
-			)
-			.orderBy(desc(schema.entities.updatedAt))
-			.limit(limit)
-			.offset(offset),
-		db
-			.select({ total: countDistinct(schema.projects.id) })
-			.from(schema.projects)
-			.innerJoin(schema.entities, eq(schema.projects.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
-			.innerJoin(
-				schema.projectsToOrganisationalUnits,
-				eq(schema.projectsToOrganisationalUnits.projectId, schema.projects.id),
-			)
-			.innerJoin(
-				schema.organisationalUnits,
-				eq(schema.projectsToOrganisationalUnits.unitId, schema.organisationalUnits.id),
-			)
-			.innerJoin(
-				schema.organisationalUnitTypes,
-				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
-			)
-			.where(
-				and(
-					eq(schema.entityStatus.type, "published"),
-					eq(schema.organisationalUnitTypes.type, umbrellaConsortiumType),
-				),
-			),
+			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
-	const ids = qualifyingRows.map((r) => {
-		return r.id;
-	});
-
-	if (ids.length === 0) {
-		return { data: [], limit, offset, total };
-	}
-
-	const items = await db.query.projects.findMany({
-		where: {
-			id: { in: ids },
-		},
-		...projectWithLinksQuery,
-		orderBy(t, { desc, sql }) {
-			return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
-		},
-	});
 
 	const data = items.map((item) => {
-		const image =
-			item.image != null
-				? images.generateSignedImageUrl({
-						key: item.image.key,
-						options: { width: imageWidth.preview },
-					})
-				: null;
-		const institutions = item.projectLinks.map(({ projectRoleId, unit }) => {
-			return { id: unit.id, name: unit.name, type: unit.type.type, projectRoleId };
-		});
-		const { projectLinks: _, ...rest } = item;
-		return { ...rest, image, institutions };
+		return mapItem(item, imageWidth.preview);
 	});
 
 	return { data, limit, offset, total };
@@ -185,7 +141,7 @@ export async function getDariahProjectById(
 ) {
 	const { id } = params;
 
-	const item = await db.query.projects.findFirst({
+	const item = await db.query.dariahProjects.findFirst({
 		where: {
 			id,
 			entity: {
@@ -197,26 +153,11 @@ export async function getDariahProjectById(
 		...projectWithLinksQuery,
 	});
 
-	if (item == null || !isDariahProject(item)) {
+	if (item == null) {
 		return null;
 	}
 
-	const { projectLinks: _, ...rest } = item;
-
-	const image =
-		item.image != null
-			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
-			: null;
-
-	// eslint-disable-next-line unicorn/consistent-destructuring
-	const institutions = item.projectLinks.map(({ projectRoleId, unit }) => {
-		return { id: unit.id, name: unit.name, type: unit.type.type, projectRoleId };
-	});
-
-	return { ...rest, image, institutions };
+	return mapItem(item, imageWidth.featured);
 }
 
 //
@@ -235,64 +176,42 @@ export async function getDariahProjectSlugs(
 	const { limit = 10, offset = 0 } = params;
 
 	const [items, aggregate] = await Promise.all([
+		db.query.dariahProjects.findMany({
+			where: {
+				entity: {
+					status: {
+						type: "published",
+					},
+				},
+			},
+			columns: {
+				id: true,
+			},
+			with: {
+				entity: {
+					columns: {
+						slug: true,
+						updatedAt: true,
+					},
+				},
+			},
+			orderBy(t, { desc, sql }) {
+				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+			},
+			limit,
+			offset,
+		}),
 		db
-			.selectDistinct({
-				id: schema.projects.id,
-				slug: schema.entities.slug,
-				updatedAt: schema.entities.updatedAt,
-			})
-			.from(schema.projects)
-			.innerJoin(schema.entities, eq(schema.projects.id, schema.entities.id))
+			.select({ total: count() })
+			.from(schema.dariahProjects)
+			.innerJoin(schema.entities, eq(schema.dariahProjects.id, schema.entities.id))
 			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
-			.innerJoin(
-				schema.projectsToOrganisationalUnits,
-				eq(schema.projectsToOrganisationalUnits.projectId, schema.projects.id),
-			)
-			.innerJoin(
-				schema.organisationalUnits,
-				eq(schema.projectsToOrganisationalUnits.unitId, schema.organisationalUnits.id),
-			)
-			.innerJoin(
-				schema.organisationalUnitTypes,
-				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
-			)
-			.where(
-				and(
-					eq(schema.entityStatus.type, "published"),
-					eq(schema.organisationalUnitTypes.type, umbrellaConsortiumType),
-				),
-			)
-			.orderBy(desc(schema.entities.updatedAt))
-			.limit(limit)
-			.offset(offset),
-		db
-			.select({ total: countDistinct(schema.projects.id) })
-			.from(schema.projects)
-			.innerJoin(schema.entities, eq(schema.projects.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
-			.innerJoin(
-				schema.projectsToOrganisationalUnits,
-				eq(schema.projectsToOrganisationalUnits.projectId, schema.projects.id),
-			)
-			.innerJoin(
-				schema.organisationalUnits,
-				eq(schema.projectsToOrganisationalUnits.unitId, schema.organisationalUnits.id),
-			)
-			.innerJoin(
-				schema.organisationalUnitTypes,
-				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
-			)
-			.where(
-				and(
-					eq(schema.entityStatus.type, "published"),
-					eq(schema.organisationalUnitTypes.type, umbrellaConsortiumType),
-				),
-			),
+			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
-	const data = items.map(({ id, slug }) => {
-		return { id, entity: { slug } };
+	const data = items.map(({ id, entity }) => {
+		return { id, entity: { slug: entity.slug } };
 	});
 
 	return { data, limit, offset, total };
@@ -310,7 +229,7 @@ export async function getDariahProjectBySlug(
 ) {
 	const { slug } = params;
 
-	const item = await db.query.projects.findFirst({
+	const item = await db.query.dariahProjects.findFirst({
 		where: {
 			entity: {
 				slug,
@@ -322,24 +241,9 @@ export async function getDariahProjectBySlug(
 		...projectWithLinksQuery,
 	});
 
-	if (item == null || !isDariahProject(item)) {
+	if (item == null) {
 		return null;
 	}
 
-	const { projectLinks: _, ...rest } = item;
-
-	const image =
-		item.image != null
-			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
-			: null;
-
-	// eslint-disable-next-line unicorn/consistent-destructuring
-	const institutions = item.projectLinks.map(({ projectRoleId, unit }) => {
-		return { id: unit.id, name: unit.name, type: unit.type.type, projectRoleId };
-	});
-
-	return { ...rest, image, institutions };
+	return mapItem(item, imageWidth.featured);
 }
