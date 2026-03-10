@@ -1,0 +1,230 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+
+import { count, eq } from "@dariah-eric/database";
+import * as schema from "@dariah-eric/database/schema";
+
+import type { Database, Transaction } from "@/middlewares/db";
+import { images } from "@/services/images";
+import { imageWidth } from "~/config/api.config";
+
+interface GetPersonsParams {
+	/** @default 10 */
+	limit?: number;
+	/** @default 0 */
+	offset?: number;
+}
+
+export async function getPersons(db: Database | Transaction, params: GetPersonsParams) {
+	const { limit = 10, offset = 0 } = params;
+
+	const [items, aggregate] = await Promise.all([
+		db.query.persons.findMany({
+			where: {
+				entity: {
+					status: {
+						type: "published",
+					},
+				},
+			},
+			columns: {
+				id: true,
+				name: true,
+				sortName: true,
+				email: true,
+				orcid: true,
+			},
+			with: {
+				entity: {
+					columns: {
+						slug: true,
+						updatedAt: true,
+					},
+				},
+				image: {
+					columns: {
+						key: true,
+					},
+				},
+			},
+			orderBy(t, { desc, sql }) {
+				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+			},
+			limit,
+			offset,
+		}),
+		db
+			.select({ total: count() })
+			.from(schema.persons)
+			.innerJoin(schema.entities, eq(schema.persons.id, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.where(eq(schema.entityStatus.type, "published")),
+	]);
+
+	const total = aggregate.at(0)?.total ?? 0;
+
+	const data = items.map((item) => {
+		const image = images.generateSignedImageUrl({
+			key: item.image.key,
+			options: { width: imageWidth.avatar },
+		});
+
+		return { ...item, image };
+	});
+
+	return { data, limit, offset, total };
+}
+
+//
+
+interface GetPersonByIdParams {
+	id: schema.Person["id"];
+}
+
+export async function getPersonById(db: Database | Transaction, params: GetPersonByIdParams) {
+	const { id } = params;
+
+	const item = await db.query.persons.findFirst({
+		where: {
+			id,
+			entity: {
+				status: {
+					type: "published",
+				},
+			},
+		},
+		columns: {
+			id: true,
+			name: true,
+			sortName: true,
+			email: true,
+			orcid: true,
+		},
+		with: {
+			entity: {
+				columns: {
+					slug: true,
+				},
+			},
+			image: {
+				columns: {
+					key: true,
+				},
+			},
+		},
+	});
+
+	if (item == null) {
+		return null;
+	}
+
+	const image = images.generateSignedImageUrl({
+		key: item.image.key,
+		options: { width: imageWidth.featured },
+	});
+
+	return { ...item, image };
+}
+
+//
+
+interface GetPersonSlugsParams {
+	/** @default 10 */
+	limit?: number;
+	/** @default 0 */
+	offset?: number;
+}
+
+export async function getPersonSlugs(db: Database | Transaction, params: GetPersonSlugsParams) {
+	const { limit = 10, offset = 0 } = params;
+
+	const [items, aggregate] = await Promise.all([
+		db.query.persons.findMany({
+			where: {
+				entity: {
+					status: {
+						type: "published",
+					},
+				},
+			},
+			columns: {
+				id: true,
+			},
+			with: {
+				entity: {
+					columns: {
+						slug: true,
+						updatedAt: true,
+					},
+				},
+			},
+			orderBy(t, { desc, sql }) {
+				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+			},
+			limit,
+			offset,
+		}),
+		db
+			.select({ total: count() })
+			.from(schema.persons)
+			.innerJoin(schema.entities, eq(schema.persons.id, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.where(eq(schema.entityStatus.type, "published")),
+	]);
+
+	const total = aggregate.at(0)?.total ?? 0;
+
+	const data = items;
+
+	return { data, limit, offset, total };
+}
+
+//
+
+interface GetPersonBySlugParams {
+	slug: schema.Entity["slug"];
+}
+
+export async function getPersonBySlug(db: Database | Transaction, params: GetPersonBySlugParams) {
+	const { slug } = params;
+
+	const item = await db.query.persons.findFirst({
+		where: {
+			entity: {
+				slug,
+				status: {
+					type: "published",
+				},
+			},
+		},
+		columns: {
+			id: true,
+			name: true,
+			sortName: true,
+			email: true,
+			orcid: true,
+		},
+		with: {
+			entity: {
+				columns: {
+					slug: true,
+				},
+			},
+			image: {
+				columns: {
+					key: true,
+				},
+			},
+		},
+	});
+
+	if (item == null) {
+		return null;
+	}
+
+	const image = images.generateSignedImageUrl({
+		key: item.image.key,
+		options: { width: imageWidth.featured },
+	});
+
+	return { ...item, image };
+}
