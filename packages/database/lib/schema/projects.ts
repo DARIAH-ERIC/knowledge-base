@@ -15,11 +15,11 @@ export const projectScopes = p.pgTable(
 	"project_scopes",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
-		type: p.text("scope", { enum: projectScopesEnum }).notNull().unique(),
+		scope: p.text("scope", { enum: projectScopesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
 	(t) => {
-		return [p.check("project_scopes_scope_enum_check", inArray(t.type, projectScopesEnum))];
+		return [p.check("project_scopes_scope_enum_check", inArray(t.scope, projectScopesEnum))];
 	},
 );
 
@@ -29,11 +29,11 @@ export const projectRoles = p.pgTable(
 	"project_roles",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
-		type: p.text("role", { enum: projectRolesEnum }).notNull().unique(),
+		role: p.text("role", { enum: projectRolesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
 	(t) => {
-		return [p.check("project_roles_role_enum_check", inArray(t.type, projectRolesEnum))];
+		return [p.check("project_roles_role_enum_check", inArray(t.role, projectRolesEnum))];
 	},
 );
 
@@ -72,7 +72,7 @@ export const ProjectInputSelectSchema = createSelectSchema(projects);
 export const ProjectInputInsertSchema = createInsertSchema(projects);
 export const ProjectInputUpdateSchema = createUpdateSchema(projects);
 
-export const projectsToOrganisationalUnits = p.pgTable("projects_to_organisational_units", {
+export const projectPartners = p.pgTable("project_partners", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	projectId: p
 		.uuid("project_id")
@@ -86,7 +86,7 @@ export const projectsToOrganisationalUnits = p.pgTable("projects_to_organisation
 		.references(() => {
 			return organisationalUnits.id;
 		}),
-	projectRoleId: p
+	roleId: p
 		.uuid("role_id")
 		.notNull()
 		.references(() => {
@@ -95,23 +95,17 @@ export const projectsToOrganisationalUnits = p.pgTable("projects_to_organisation
 	duration: f.timestampRange("duration"),
 });
 
-export type ProjectsToOrganisationalUnits = typeof projectsToOrganisationalUnits.$inferSelect;
-export type ProjectsToOrganisationalUnitsInput = typeof projectsToOrganisationalUnits.$inferInsert;
+export type ProjectPartner = typeof projectPartners.$inferSelect;
+export type ProjectPartnerInput = typeof projectPartners.$inferInsert;
 
-export const ProjectsToOrganisationalUnitsSelectSchema = createSelectSchema(
-	projectsToOrganisationalUnits,
-);
-export const ProjectsToOrganisationalUnitsInsertSchema = createInsertSchema(
-	projectsToOrganisationalUnits,
-);
-export const ProjectsToOrganisationalUnitsUpdateSchema = createUpdateSchema(
-	projectsToOrganisationalUnits,
-);
+export const ProjectPartnerSelectSchema = createSelectSchema(projectPartners);
+export const ProjectPartnerInsertSchema = createInsertSchema(projectPartners);
+export const ProjectPartnerUpdateSchema = createUpdateSchema(projectPartners);
 
 export const projectsContributions = p.pgTable("project_contributions", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
-	projectToOrganisationalUnitId: p.uuid("project_to_organisational_unit_id").references(() => {
-		return projectsToOrganisationalUnits.id;
+	projectPartnerId: p.uuid("project_partner_id").references(() => {
+		return projectPartners.id;
 	}),
 	reportId: p
 		.uuid("report_id")
@@ -122,9 +116,9 @@ export const projectsContributions = p.pgTable("project_contributions", {
 	budget: p.numeric(),
 });
 
-export type ProjectsContribution = typeof projectsContributions.$inferSelect;
-export type ProjectsContributionInput = typeof projectsContributions.$inferInsert;
+export type ProjectContribution = typeof projectsContributions.$inferSelect;
+export type ProjectContributionInput = typeof projectsContributions.$inferInsert;
 
-export const ProjectsContributionSelectSchema = createSelectSchema(projectsContributions);
-export const ProjectsContributionInsertSchema = createInsertSchema(projectsContributions);
-export const ProjectsContributionUpdateSchema = createUpdateSchema(projectsContributions);
+export const ProjectContributionSelectSchema = createSelectSchema(projectsContributions);
+export const ProjectContributionInsertSchema = createInsertSchema(projectsContributions);
+export const ProjectContributionUpdateSchema = createUpdateSchema(projectsContributions);

@@ -93,12 +93,12 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 		typeId: unitType.id,
 	});
 
-	await db.insert(schema.projectsToOrganisationalUnits).values(
+	await db.insert(schema.projectPartners).values(
 		items.map((item) => {
 			return {
 				projectId: item.project.id,
 				unitId,
-				projectRoleId: projectRole.id,
+				roleId: projectRole.id,
 			};
 		}),
 	);

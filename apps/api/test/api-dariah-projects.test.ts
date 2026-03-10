@@ -37,7 +37,7 @@ interface SeedResult {
 	dariahItems: Array<ReturnType<typeof createProjectData>>;
 	nonDariahItem: ReturnType<typeof createProjectData>;
 	umbrellaUnitId: string;
-	projectRoleId: string;
+	roleId: string;
 }
 
 async function seed(db: Database, count: number): Promise<SeedResult> {
@@ -127,24 +127,24 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 	});
 
 	// Link DARIAH projects to umbrella_consortium unit
-	await db.insert(schema.projectsToOrganisationalUnits).values(
+	await db.insert(schema.projectPartners).values(
 		dariahItems.map((item) => {
 			return {
 				projectId: item.project.id,
 				unitId: umbrellaUnitId,
-				projectRoleId: projectRole.id,
+				roleId: projectRole.id,
 			};
 		}),
 	);
 
 	// Link non-DARIAH project to a non-umbrella unit only
-	await db.insert(schema.projectsToOrganisationalUnits).values({
+	await db.insert(schema.projectPartners).values({
 		projectId: nonDariahItem.project.id,
 		unitId: otherUnitId,
-		projectRoleId: projectRole.id,
+		roleId: projectRole.id,
 	});
 
-	return { dariahItems, nonDariahItem, umbrellaUnitId, projectRoleId: projectRole.id };
+	return { dariahItems, nonDariahItem, umbrellaUnitId, roleId: projectRole.id };
 }
 
 describe("dariah-projects", () => {
@@ -181,11 +181,11 @@ describe("dariah-projects", () => {
 	});
 
 	describe("GET /api/dariah-projects/:id", () => {
-		it("should return single DARIAH project with institutions including projectRoleId", async () => {
+		it("should return single DARIAH project with institutions including roleId", async () => {
 			await withTransaction(async (db) => {
 				const client = createTestClient(db);
 
-				const { dariahItems, projectRoleId } = await seed(db, 3);
+				const { dariahItems, roleId } = await seed(db, 3);
 
 				const item = dariahItems.at(1)!;
 				const id = item.entity.id;
@@ -208,7 +208,7 @@ describe("dariah-projects", () => {
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 					name: expect.any(String),
 					type: "umbrella_consortium",
-					projectRoleId,
+					roleId,
 				});
 			});
 		});

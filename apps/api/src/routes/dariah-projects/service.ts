@@ -32,9 +32,9 @@ const projectWithLinksQuery = {
 				key: true,
 			},
 		},
-		projectLinks: {
+		partners: {
 			columns: {
-				projectRoleId: true,
+				roleId: true,
 			},
 			with: {
 				unit: {
@@ -54,14 +54,14 @@ const projectWithLinksQuery = {
 		},
 		scope: {
 			columns: {
-				type: true,
+				scope: true,
 			},
 		},
 	},
 } as const;
 
-function isDariahProject(item: { projectLinks: Array<{ unit: { type: { type: string } } }> }) {
-	return item.projectLinks.some((link) => {
+function isDariahProject(item: { partners: Array<{ unit: { type: { type: string } } }> }) {
+	return item.partners.some((link) => {
 		return link.unit.type.type === umbrellaConsortiumType;
 	});
 }
@@ -91,12 +91,12 @@ export async function getDariahProjects(
 			.innerJoin(schema.entities, eq(schema.projects.id, schema.entities.id))
 			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
 			.innerJoin(
-				schema.projectsToOrganisationalUnits,
-				eq(schema.projectsToOrganisationalUnits.projectId, schema.projects.id),
+				schema.projectPartners,
+				eq(schema.projectPartners.projectId, schema.projects.id),
 			)
 			.innerJoin(
 				schema.organisationalUnits,
-				eq(schema.projectsToOrganisationalUnits.unitId, schema.organisationalUnits.id),
+				eq(schema.projectPartners.unitId, schema.organisationalUnits.id),
 			)
 			.innerJoin(
 				schema.organisationalUnitTypes,
@@ -117,12 +117,12 @@ export async function getDariahProjects(
 			.innerJoin(schema.entities, eq(schema.projects.id, schema.entities.id))
 			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
 			.innerJoin(
-				schema.projectsToOrganisationalUnits,
-				eq(schema.projectsToOrganisationalUnits.projectId, schema.projects.id),
+				schema.projectPartners,
+				eq(schema.projectPartners.projectId, schema.projects.id),
 			)
 			.innerJoin(
 				schema.organisationalUnits,
-				eq(schema.projectsToOrganisationalUnits.unitId, schema.organisationalUnits.id),
+				eq(schema.projectPartners.unitId, schema.organisationalUnits.id),
 			)
 			.innerJoin(
 				schema.organisationalUnitTypes,
@@ -159,14 +159,17 @@ export async function getDariahProjects(
 		const image =
 			item.image != null
 				? images.generateSignedImageUrl({
-						key: item.image.key,
-						options: { width: imageWidth.preview },
-					})
+					key: item.image.key,
+					options: { width: imageWidth.preview },
+				})
 				: null;
-		const institutions = item.projectLinks.map(({ projectRoleId, unit }) => {
-			return { id: unit.id, name: unit.name, type: unit.type.type, projectRoleId };
+
+		const institutions = item.partners.map(({ roleId, unit }) => {
+			return { id: unit.id, name: unit.name, type: unit.type.type, roleId };
 		});
-		const { projectLinks: _, ...rest } = item;
+
+		const { partners: _, ...rest } = item;
+
 		return { ...rest, image, institutions };
 	});
 
@@ -201,19 +204,19 @@ export async function getDariahProjectById(
 		return null;
 	}
 
-	const { projectLinks: _, ...rest } = item;
+	const { partners: _, ...rest } = item;
 
 	const image =
 		item.image != null
 			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
+				key: item.image.key,
+				options: { width: imageWidth.featured },
+			})
 			: null;
 
 	// eslint-disable-next-line unicorn/consistent-destructuring
-	const institutions = item.projectLinks.map(({ projectRoleId, unit }) => {
-		return { id: unit.id, name: unit.name, type: unit.type.type, projectRoleId };
+	const institutions = item.partners.map(({ roleId, unit }) => {
+		return { id: unit.id, name: unit.name, type: unit.type.type, roleId };
 	});
 
 	return { ...rest, image, institutions };
@@ -245,12 +248,12 @@ export async function getDariahProjectSlugs(
 			.innerJoin(schema.entities, eq(schema.projects.id, schema.entities.id))
 			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
 			.innerJoin(
-				schema.projectsToOrganisationalUnits,
-				eq(schema.projectsToOrganisationalUnits.projectId, schema.projects.id),
+				schema.projectPartners,
+				eq(schema.projectPartners.projectId, schema.projects.id),
 			)
 			.innerJoin(
 				schema.organisationalUnits,
-				eq(schema.projectsToOrganisationalUnits.unitId, schema.organisationalUnits.id),
+				eq(schema.projectPartners.unitId, schema.organisationalUnits.id),
 			)
 			.innerJoin(
 				schema.organisationalUnitTypes,
@@ -271,12 +274,12 @@ export async function getDariahProjectSlugs(
 			.innerJoin(schema.entities, eq(schema.projects.id, schema.entities.id))
 			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
 			.innerJoin(
-				schema.projectsToOrganisationalUnits,
-				eq(schema.projectsToOrganisationalUnits.projectId, schema.projects.id),
+				schema.projectPartners,
+				eq(schema.projectPartners.projectId, schema.projects.id),
 			)
 			.innerJoin(
 				schema.organisationalUnits,
-				eq(schema.projectsToOrganisationalUnits.unitId, schema.organisationalUnits.id),
+				eq(schema.projectPartners.unitId, schema.organisationalUnits.id),
 			)
 			.innerJoin(
 				schema.organisationalUnitTypes,
@@ -326,19 +329,19 @@ export async function getDariahProjectBySlug(
 		return null;
 	}
 
-	const { projectLinks: _, ...rest } = item;
+	const { partners: _, ...rest } = item;
 
 	const image =
 		item.image != null
 			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
+				key: item.image.key,
+				options: { width: imageWidth.featured },
+			})
 			: null;
 
 	// eslint-disable-next-line unicorn/consistent-destructuring
-	const institutions = item.projectLinks.map(({ projectRoleId, unit }) => {
-		return { id: unit.id, name: unit.name, type: unit.type.type, projectRoleId };
+	const institutions = item.partners.map(({ roleId, unit }) => {
+		return { id: unit.id, name: unit.name, type: unit.type.type, roleId };
 	});
 
 	return { ...rest, image, institutions };
