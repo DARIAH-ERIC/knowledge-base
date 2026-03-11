@@ -8,4 +8,5 @@ VALUES
 	('mastodon'),
 	('twitter'),
 	('vimeo'),
+	('website'),
 	('youtube');
