@@ -4,6 +4,7 @@ import { v7 as uuidv7 } from "uuid";
 import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
+import type { SocialMedia } from "@/routes/social-media/schemas";
 import { createTestClient } from "~/test/lib/create-test-client";
 import { withTransaction } from "~/test/lib/with-transaction";
 
@@ -100,11 +101,22 @@ describe("social-media", () => {
 
 				expect(response.status).toBe(200);
 
-				const data = await response.json();
+				/** @see {@link https://github.com/honojs/hono/issues/2280} */
+				const data = (await response.json()) as SocialMedia;
 
 				expect(data).toMatchObject({ name });
-				expect(data.duration).toMatchObject({ start: expect.any(String) });
-				expect(data.type).toMatchObject({ type: "mastodon" });
+				expect(data).toMatchObject({
+					duration: {
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						start: expect.any(String),
+					},
+					type: "mastodon",
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+					organisationalUnits: expect.arrayContaining([
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						expect.objectContaining({ name: expect.any(String), type: expect.any(String) }),
+					]),
+				});
 			});
 		});
 

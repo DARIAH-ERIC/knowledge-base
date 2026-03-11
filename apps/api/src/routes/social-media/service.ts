@@ -5,6 +5,28 @@ import * as schema from "@dariah-eric/database/schema";
 
 import type { Database, Transaction } from "@/middlewares/db";
 
+function mapItem<
+	T extends {
+		type: { type: string };
+		duration: { start: Date; end?: Date | null };
+		organisationalUnits: Array<{ id: string; name: string; type: { type: string } }>;
+	},
+>(item: T) {
+	return {
+		...item,
+		type: item.type.type,
+		duration: {
+			start: item.duration.start.toISOString(),
+			end: item.duration.end?.toISOString() ?? null,
+		},
+		organisationalUnits: item.organisationalUnits.map((unit) => {
+			return { ...unit, type: unit.type.type };
+		}),
+	};
+}
+
+//
+
 interface GetSocialMediaListParams {
 	/** @default 10 */
 	limit?: number;
@@ -33,6 +55,22 @@ export async function getSocialMediaList(
 						type: true,
 					},
 				},
+				organisationalUnits: {
+					columns: {
+						id: true,
+						name: true,
+					},
+					with: {
+						type: {
+							columns: {
+								type: true,
+							},
+						},
+					},
+				},
+			},
+			orderBy: {
+				name: "asc",
 			},
 			limit,
 			offset,
@@ -43,13 +81,7 @@ export async function getSocialMediaList(
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		return {
-			...item,
-			duration: {
-				start: item.duration.start.toISOString(),
-				end: item.duration.end?.toISOString() ?? null,
-			},
-		};
+		return mapItem(item);
 	});
 
 	return { data, limit, offset, total };
@@ -80,6 +112,19 @@ export async function getSocialMediaById(
 					type: true,
 				},
 			},
+			organisationalUnits: {
+				columns: {
+					id: true,
+					name: true,
+				},
+				with: {
+					type: {
+						columns: {
+							type: true,
+						},
+					},
+				},
+			},
 		},
 	});
 
@@ -87,11 +132,5 @@ export async function getSocialMediaById(
 		return null;
 	}
 
-	return {
-		...item,
-		duration: {
-			start: item.duration.start.toISOString(),
-			end: item.duration.end?.toISOString() ?? null,
-		},
-	};
+	return mapItem(item);
 }

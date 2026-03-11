@@ -10,7 +10,13 @@ export const SocialMediaSchema = v.pipe(
 			start: v.string(),
 			end: v.nullable(v.string()),
 		}),
-		type: v.pick(schema.SocialMediaTypeSelectSchema, ["id", "type"]),
+		type: v.picklist(schema.socialMediaTypesEnum),
+		organisationalUnits: v.array(
+			v.object({
+				...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name"]).entries,
+				type: v.picklist(schema.organisationalUnitTypesEnum),
+			}),
+		),
 	}),
 	v.description("Social media"),
 	v.metadata({ ref: "SocialMedia" }),

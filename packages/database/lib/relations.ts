@@ -198,6 +198,12 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.organisationalUnits.id.through(r.organisationalUnitsRelations.unitId),
 				to: r.organisationalUnits.id.through(r.organisationalUnitsRelations.relatedUnitId),
 			}),
+			socialMedia: r.many.socialMedia({
+				from: r.organisationalUnits.id.through(
+					r.organisationalUnitsToSocialMedia.organisationalUnitId,
+				),
+				to: r.socialMedia.id.through(r.organisationalUnitsToSocialMedia.socialMediaId),
+			}),
 			type: r.one.organisationalUnitTypes({
 				from: r.organisationalUnits.typeId,
 				to: r.organisationalUnitTypes.id,
