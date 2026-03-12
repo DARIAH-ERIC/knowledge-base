@@ -198,6 +198,12 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.organisationalUnits.id.through(r.organisationalUnitsRelations.unitId),
 				to: r.organisationalUnits.id.through(r.organisationalUnitsRelations.relatedUnitId),
 			}),
+			socialMedia: r.many.socialMedia({
+				from: r.organisationalUnits.id.through(
+					r.organisationalUnitsToSocialMedia.organisationalUnitId,
+				),
+				to: r.socialMedia.id.through(r.organisationalUnitsToSocialMedia.socialMediaId),
+			}),
 			type: r.one.organisationalUnitTypes({
 				from: r.organisationalUnits.typeId,
 				to: r.organisationalUnitTypes.id,
@@ -283,6 +289,31 @@ export const relations = defineRelations(schema, (r) => {
 			contentBlock: r.one.contentBlocks({
 				from: r.richTextContentBlocks.id,
 				to: r.contentBlocks.id,
+				optional: false,
+			}),
+		},
+		socialMedia: {
+			type: r.one.socialMediaTypes({
+				from: r.socialMedia.typeId,
+				to: r.socialMediaTypes.id,
+				optional: false,
+			}),
+			organisationalUnits: r.many.organisationalUnits({
+				from: r.socialMedia.id.through(r.organisationalUnitsToSocialMedia.socialMediaId),
+				to: r.organisationalUnits.id.through(
+					r.organisationalUnitsToSocialMedia.organisationalUnitId,
+				),
+			}),
+		},
+		organisationalUnitsToSocialMedia: {
+			organisationalUnit: r.one.organisationalUnits({
+				from: r.organisationalUnitsToSocialMedia.organisationalUnitId,
+				to: r.organisationalUnits.id,
+				optional: false,
+			}),
+			socialMedia: r.one.socialMedia({
+				from: r.organisationalUnitsToSocialMedia.socialMediaId,
+				to: r.socialMedia.id,
 				optional: false,
 			}),
 		},

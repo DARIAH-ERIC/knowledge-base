@@ -6,6 +6,7 @@ import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { assets } from "./assets";
 import { entities } from "./entities";
+import { socialMedia } from "./social-media";
 
 export const organisationalUnitTypesEnum = [
 	"body",
@@ -165,6 +166,37 @@ export const OrganisationalUnitAllowedRelationInsertSchema = createInsertSchema(
 );
 export const OrganisationalUnitAllowedRelationUpdateSchema = createUpdateSchema(
 	organisationalUnitsAllowedRelations,
+);
+
+export const organisationalUnitsToSocialMedia = p.pgTable("organisational_units_to_social_media", {
+	id: p.uuid("id").primaryKey().default(uuidv7()),
+	organisationalUnitId: p
+		.uuid("organisational_unit_id")
+		.notNull()
+		.references(() => {
+			return organisationalUnits.id;
+		}),
+	socialMediaId: p
+		.uuid("social_media_id")
+		.notNull()
+		.references(() => {
+			return socialMedia.id;
+		}),
+	...f.timestamps(),
+});
+
+export type OrganisationalUnitToSocialMedia = typeof organisationalUnitsToSocialMedia.$inferSelect;
+export type OrganisationalUnitToSocialMediaInput =
+	typeof organisationalUnitsToSocialMedia.$inferInsert;
+
+export const OrganisationalUnitToSocialMediaSelectSchema = createSelectSchema(
+	organisationalUnitsToSocialMedia,
+);
+export const OrganisationalUnitToSocialMediaInsertSchema = createInsertSchema(
+	organisationalUnitsToSocialMedia,
+);
+export const OrganisationalUnitToSocialMediaUpdateSchema = createUpdateSchema(
+	organisationalUnitsToSocialMedia,
 );
 
 export const membersAndPartnersUnitType = "consortium";
