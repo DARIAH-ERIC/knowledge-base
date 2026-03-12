@@ -1,3 +1,4 @@
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { faker as f } from "@faker-js/faker";
 import { v7 as uuidv7 } from "uuid";
@@ -34,17 +35,61 @@ function createItems(count: number, typeId: string) {
 }
 
 async function seed(db: Database, items: ReturnType<typeof createItems>) {
+	const [entityStatus, entityType, unitType] = await Promise.all([
+		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+		db.query.entityTypes.findFirst({
+			columns: { id: true },
+			where: { type: "organisational_units" },
+		}),
+		db.query.organisationalUnitTypes.findFirst({ columns: { id: true } }),
+	]);
+
+	assert(entityStatus, "No entity status in database.");
+	assert(entityType, "No entity type in database.");
+	assert(unitType, "No organisational unit type in database.");
+
 	await db.insert(schema.socialMedia).values(
 		items.map((item) => {
 			return item.socialMedia;
 		}),
 	);
+
+	const unitId = uuidv7();
+
+	await db.insert(schema.entities).values({
+		id: unitId,
+		slug: `unit-${unitId}`,
+		documentId: uuidv7(),
+		statusId: entityStatus.id,
+		typeId: entityType.id,
+	});
+
+	await db.insert(schema.organisationalUnits).values({
+		id: unitId,
+		name: f.company.name(),
+		summary: f.lorem.paragraph(),
+		typeId: unitType.id,
+	});
+
+	await db.insert(schema.organisationalUnitsToSocialMedia).values(
+		items.map((item) => {
+			return {
+				organisationalUnitId: unitId,
+				socialMediaId: item.socialMedia.id,
+			};
+		}),
+	);
 }
 
 async function seedType(db: Database) {
-	const id = uuidv7();
-	await db.insert(schema.socialMediaTypes).values({ id, type: "mastodon" });
-	return id;
+	const type = await db.query.socialMediaTypes.findFirst({
+		columns: { id: true },
+		where: { type: "mastodon" },
+	});
+
+	assert(type, "No social media type in database.");
+
+	return type.id;
 }
 
 describe("social-media", () => {
