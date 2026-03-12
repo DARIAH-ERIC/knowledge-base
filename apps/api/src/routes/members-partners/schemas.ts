@@ -10,6 +10,16 @@ export const MemberOrPartnerBaseSchema = v.pipe(
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		type: v.literal(schema.membersAndPartnersUnitType),
 		status: v.picklist(schema.membersAndPartnersUnitStatusEnum),
+		socialMedia: v.array(
+			v.object({
+				...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,
+				duration: v.object({
+					start: v.string(),
+					end: v.nullable(v.string()),
+				}),
+				type: v.picklist(schema.socialMediaTypesEnum),
+			}),
+		),
 	}),
 	v.description("Member or partner"),
 	v.metadata({ ref: "MemberOrPartnerBase" }),
@@ -32,6 +42,16 @@ export const MemberOrPartnerSchema = v.pipe(
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		type: v.literal(schema.membersAndPartnersUnitType),
 		status: v.picklist(schema.membersAndPartnersUnitStatusEnum),
+		socialMedia: v.array(
+			v.object({
+				...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,
+				duration: v.object({
+					start: v.string(),
+					end: v.nullable(v.string()),
+				}),
+				type: v.picklist(schema.socialMediaTypesEnum),
+			}),
+		),
 	}),
 	v.description("Member or partner"),
 	v.metadata({ ref: "MemberOrPartner" }),

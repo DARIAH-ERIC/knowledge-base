@@ -160,6 +160,12 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.entities.id,
 				optional: false,
 			}),
+			socialMedia: r.many.socialMedia({
+				from: r.membersAndPartners.id.through(
+					r.organisationalUnitsToSocialMedia.organisationalUnitId,
+				),
+				to: r.socialMedia.id.through(r.organisationalUnitsToSocialMedia.socialMediaId),
+			}),
 		},
 		workingGroups: {
 			image: r.one.assets({
@@ -170,6 +176,10 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.workingGroups.id,
 				to: r.entities.id,
 				optional: false,
+			}),
+			socialMedia: r.many.socialMedia({
+				from: r.workingGroups.id.through(r.organisationalUnitsToSocialMedia.organisationalUnitId),
+				to: r.socialMedia.id.through(r.organisationalUnitsToSocialMedia.socialMediaId),
 			}),
 		},
 		news: {
