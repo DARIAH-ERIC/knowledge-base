@@ -44,6 +44,21 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 						key: true,
 					},
 				},
+				socialMedia: {
+					columns: {
+						id: true,
+						name: true,
+						url: true,
+						duration: true,
+					},
+					with: {
+						type: {
+							columns: {
+								type: true,
+							},
+						},
+					},
+				},
 			},
 			orderBy(t, { desc, sql }) {
 				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
@@ -70,7 +85,18 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 					})
 				: null;
 
-		return { ...item, image };
+		const socialMedia = item.socialMedia.map((sm) => {
+			return {
+				...sm,
+				type: sm.type.type,
+				duration: {
+					start: sm.duration.start.toISOString(),
+					end: sm.duration.end?.toISOString() ?? null,
+				},
+			};
+		});
+
+		return { ...item, image, socialMedia };
 	});
 
 	return { data, limit, offset, total };
@@ -114,6 +140,21 @@ export async function getWorkingGroupById(
 					key: true,
 				},
 			},
+			socialMedia: {
+				columns: {
+					id: true,
+					name: true,
+					url: true,
+					duration: true,
+				},
+				with: {
+					type: {
+						columns: {
+							type: true,
+						},
+					},
+				},
+			},
 		},
 	});
 
@@ -129,7 +170,18 @@ export async function getWorkingGroupById(
 				})
 			: null;
 
-	const data = { ...item, image };
+	const socialMedia = item.socialMedia.map((sm) => {
+		return {
+			...sm,
+			type: sm.type.type,
+			duration: {
+				start: sm.duration.start.toISOString(),
+				end: sm.duration.end?.toISOString() ?? null,
+			},
+		};
+	});
+
+	const data = { ...item, image, socialMedia };
 
 	return data;
 }
@@ -233,6 +285,21 @@ export async function getWorkingGroupBySlug(
 					key: true,
 				},
 			},
+			socialMedia: {
+				columns: {
+					id: true,
+					name: true,
+					url: true,
+					duration: true,
+				},
+				with: {
+					type: {
+						columns: {
+							type: true,
+						},
+					},
+				},
+			},
 		},
 	});
 
@@ -248,7 +315,18 @@ export async function getWorkingGroupBySlug(
 				})
 			: null;
 
-	const data = { ...item, image };
+	const socialMedia = item.socialMedia.map((sm) => {
+		return {
+			...sm,
+			type: sm.type.type,
+			duration: {
+				start: sm.duration.start.toISOString(),
+				end: sm.duration.end?.toISOString() ?? null,
+			},
+		};
+	});
+
+	const data = { ...item, image, socialMedia };
 
 	return data;
 }

@@ -8,6 +8,16 @@ export const WorkingGroupBaseSchema = v.pipe(
 		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name", "summary", "metadata"]).entries,
 		image: v.nullable(v.object({ url: v.string() })),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+		socialMedia: v.array(
+			v.object({
+				...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,
+				duration: v.object({
+					start: v.string(),
+					end: v.nullable(v.string()),
+				}),
+				type: v.picklist(schema.socialMediaTypesEnum),
+			}),
+		),
 	}),
 	v.description("Working group"),
 	v.metadata({ ref: "WorkingGroupBase" }),
@@ -28,6 +38,16 @@ export const WorkingGroupSchema = v.pipe(
 		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name", "summary", "metadata"]).entries,
 		image: v.nullable(v.object({ url: v.string() })),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+		socialMedia: v.array(
+			v.object({
+				...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,
+				duration: v.object({
+					start: v.string(),
+					end: v.nullable(v.string()),
+				}),
+				type: v.picklist(schema.socialMediaTypesEnum),
+			}),
+		),
 	}),
 	v.description("Working group"),
 	v.metadata({ ref: "WorkingGroup" }),
