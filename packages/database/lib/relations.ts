@@ -214,6 +214,18 @@ export const relations = defineRelations(schema, (r) => {
 				),
 				to: r.socialMedia.id.through(r.organisationalUnitsToSocialMedia.socialMediaId),
 			}),
+			services: r.many.services({
+				from: r.organisationalUnits.id.through(
+					r.servicesToOrganisationalUnits.organisationalUnitId,
+				),
+				to: r.services.id.through(r.servicesToOrganisationalUnits.serviceId),
+			}),
+			software: r.many.software({
+				from: r.organisationalUnits.id.through(
+					r.softwareToOrganisationalUnits.organisationalUnitId,
+				),
+				to: r.software.id.through(r.softwareToOrganisationalUnits.softwareId),
+			}),
 			type: r.one.organisationalUnitTypes({
 				from: r.organisationalUnits.typeId,
 				to: r.organisationalUnitTypes.id,
@@ -336,6 +348,57 @@ export const relations = defineRelations(schema, (r) => {
 			image: r.one.assets({
 				from: r.spotlightArticles.imageId,
 				to: r.assets.id,
+				optional: false,
+			}),
+		},
+		services: {
+			type: r.one.serviceTypes({
+				from: r.services.typeId,
+				to: r.serviceTypes.id,
+				optional: false,
+			}),
+			status: r.one.serviceStatuses({
+				from: r.services.statusId,
+				to: r.serviceStatuses.id,
+				optional: false,
+			}),
+			organisationalUnits: r.many.organisationalUnits({
+				from: r.services.id.through(r.servicesToOrganisationalUnits.serviceId),
+				to: r.organisationalUnits.id.through(r.servicesToOrganisationalUnits.organisationalUnitId),
+			}),
+		},
+		servicesToOrganisationalUnits: {
+			service: r.one.services({
+				from: r.servicesToOrganisationalUnits.serviceId,
+				to: r.services.id,
+				optional: false,
+			}),
+			organisationalUnit: r.one.organisationalUnits({
+				from: r.servicesToOrganisationalUnits.organisationalUnitId,
+				to: r.organisationalUnits.id,
+				optional: false,
+			}),
+		},
+		software: {
+			status: r.one.softwareStatuses({
+				from: r.software.statusId,
+				to: r.softwareStatuses.id,
+				optional: false,
+			}),
+			organisationalUnits: r.many.organisationalUnits({
+				from: r.software.id.through(r.softwareToOrganisationalUnits.softwareId),
+				to: r.organisationalUnits.id.through(r.softwareToOrganisationalUnits.organisationalUnitId),
+			}),
+		},
+		softwareToOrganisationalUnits: {
+			software: r.one.software({
+				from: r.softwareToOrganisationalUnits.softwareId,
+				to: r.software.id,
+				optional: false,
+			}),
+			organisationalUnit: r.one.organisationalUnits({
+				from: r.softwareToOrganisationalUnits.organisationalUnitId,
+				to: r.organisationalUnits.id,
 				optional: false,
 			}),
 		},
