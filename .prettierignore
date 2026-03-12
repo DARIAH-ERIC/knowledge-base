@@ -17,3 +17,6 @@ pnpm-workspace.yaml
 
 # database migrations
 /packages/database/db/migrations/
+
+# package template
+/turbo/**/*.hbs

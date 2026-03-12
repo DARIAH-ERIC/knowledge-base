@@ -66,6 +66,21 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 						scope: true,
 					},
 				},
+				socialMedia: {
+					columns: {
+						id: true,
+						name: true,
+						url: true,
+						duration: true,
+					},
+					with: {
+						type: {
+							columns: {
+								type: true,
+							},
+						},
+					},
+				},
 			},
 			orderBy(t, { desc, sql }) {
 				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
@@ -96,7 +111,18 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 			return { ...rest, type: type.type };
 		});
 
-		return { ...item, image, institutions };
+		const socialMedia = item.socialMedia.map((sm) => {
+			return {
+				...sm,
+				type: sm.type.type,
+				duration: {
+					start: sm.duration.start.toISOString(),
+					end: sm.duration.end?.toISOString() ?? null,
+				},
+			};
+		});
+
+		return { ...item, image, institutions, socialMedia };
 	});
 
 	return { data, limit, offset, total };
@@ -159,6 +185,21 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 					scope: true,
 				},
 			},
+			socialMedia: {
+				columns: {
+					id: true,
+					name: true,
+					url: true,
+					duration: true,
+				},
+				with: {
+					type: {
+						columns: {
+							type: true,
+						},
+					},
+				},
+			},
 		},
 	});
 
@@ -178,7 +219,18 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 		return { ...rest, type: type.type };
 	});
 
-	const data = { ...item, image, institutions };
+	const socialMedia = item.socialMedia.map((sm) => {
+		return {
+			...sm,
+			type: sm.type.type,
+			duration: {
+				start: sm.duration.start.toISOString(),
+				end: sm.duration.end?.toISOString() ?? null,
+			},
+		};
+	});
+
+	const data = { ...item, image, institutions, socialMedia };
 
 	return data;
 }
@@ -293,6 +345,21 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 					scope: true,
 				},
 			},
+			socialMedia: {
+				columns: {
+					id: true,
+					name: true,
+					url: true,
+					duration: true,
+				},
+				with: {
+					type: {
+						columns: {
+							type: true,
+						},
+					},
+				},
+			},
 		},
 	});
 
@@ -312,7 +379,18 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 		return { ...rest, type: type.type };
 	});
 
-	const data = { ...item, image, institutions };
+	const socialMedia = item.socialMedia.map((sm) => {
+		return {
+			...sm,
+			type: sm.type.type,
+			duration: {
+				start: sm.duration.start.toISOString(),
+				end: sm.duration.end?.toISOString() ?? null,
+			},
+		};
+	});
+
+	const data = { ...item, image, institutions, socialMedia };
 
 	return data;
 }

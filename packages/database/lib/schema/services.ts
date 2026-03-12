@@ -5,6 +5,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { organisationalUnits } from "./organisational-units";
+import { socialMedia } from "./social-media";
 
 export const serviceTypesEnum = ["community", "core", "internal"] as const;
 
@@ -71,6 +72,26 @@ export const services = p.pgTable("services", {
 			return serviceStatuses.id;
 		}),
 	...f.timestamps(),
+
+	// FIXME:
+	comment: p.text("comment"),
+	agreements: p.text("agreements"),
+	audience: p.text("audience", {
+		enum: ["dariah_team", "global", "national_local"],
+	}),
+	dariahBranding: p.boolean("dariah_branding"),
+	eoscOnboarding: p.boolean("eosc_onboarding"),
+	sshocMarketplaceStatus: p.text("sshoc_marketplace_status", {
+		enum: ["no", "not_applicable", "yes"],
+	}),
+	monitoring: p.boolean("monitoring"),
+	privateSupplier: p.boolean("private_supplier"),
+	status: p.text("status", {
+		enum: ["discontinued", "in_preparation", "live", "needs_review", "to_be_discontinued"],
+	}),
+	technicalContact: p.text("technical_contact"),
+	technicalReadinessLevel: p.integer("technical_readiness_level"),
+	valueProposition: p.text("value_proposition"),
 });
 
 export type Service = typeof services.$inferSelect;
@@ -109,3 +130,27 @@ export const ServiceToOrganisationalUnitInsertSchema = createInsertSchema(
 export const ServiceToOrganisationalUnitUpdateSchema = createUpdateSchema(
 	servicesToOrganisationalUnits,
 );
+
+export const servicesToSocialMedia = p.pgTable("services_to_social_media", {
+	id: p.uuid("id").primaryKey().default(uuidv7()),
+	serviceId: p
+		.uuid("service_id")
+		.notNull()
+		.references(() => {
+			return services.id;
+		}),
+	socialMediaId: p
+		.uuid("social_media_id")
+		.notNull()
+		.references(() => {
+			return socialMedia.id;
+		}),
+	...f.timestamps(),
+});
+
+export type ServiceToSocialMedia = typeof servicesToSocialMedia.$inferSelect;
+export type ServiceToSocialMediaInput = typeof servicesToSocialMedia.$inferInsert;
+
+export const ServiceToSocialMediaSelectSchema = createSelectSchema(servicesToSocialMedia);
+export const ServiceToSocialMediaInsertSchema = createInsertSchema(servicesToSocialMedia);
+export const ServiceToSocialMediaUpdateSchema = createUpdateSchema(servicesToSocialMedia);

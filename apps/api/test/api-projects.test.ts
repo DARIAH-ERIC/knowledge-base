@@ -44,6 +44,29 @@ function createItems(count: number) {
 	return items;
 }
 
+async function seedSocialMedia(db: Database, projectId: string) {
+	const type = await db.query.socialMediaTypes.findFirst({
+		columns: { id: true },
+		where: { type: "mastodon" },
+	});
+
+	assert(type, "No social media type in database.");
+
+	const socialMediaId = uuidv7();
+
+	await db.insert(schema.socialMedia).values({
+		id: socialMediaId,
+		name: f.internet.displayName(),
+		url: f.internet.url(),
+		duration: { start: f.date.past() },
+		typeId: type.id,
+	});
+
+	await db.insert(schema.projectsToSocialMedia).values({ projectId, socialMediaId });
+
+	return socialMediaId;
+}
+
 async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	const [status, entityType, scope, unitEntityType, unitType, projectRole] = await Promise.all([
 		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
@@ -168,6 +191,44 @@ describe("projects", () => {
 					name: expect.any(String),
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 					type: expect.any(String),
+				});
+			});
+		});
+
+		it("should return social media in response", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const items = createItems(1);
+				await seed(db, items);
+
+				const item = items.at(0)!;
+				const id = item.entity.id;
+
+				await seedSocialMedia(db, id);
+
+				const response = await client.projects[":id"].$get({
+					param: { id },
+				});
+
+				expect(response.status).toBe(200);
+
+				/** @see {@link https://github.com/honojs/hono/issues/2280} */
+				const data = (await response.json()) as Project;
+
+				expect(data.socialMedia).toHaveLength(1);
+				expect(data.socialMedia[0]).toMatchObject({
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+					id: expect.any(String),
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+					name: expect.any(String),
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+					url: expect.any(String),
+					type: "mastodon",
+					duration: {
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						start: expect.any(String),
+					},
 				});
 			});
 		});

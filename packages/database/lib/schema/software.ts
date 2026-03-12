@@ -5,6 +5,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { organisationalUnits } from "./organisational-units";
+import { socialMedia } from "./social-media";
 
 export const softwareStatusesEnum = ["maintained", "needs_review", "not_maintained"] as const;
 
@@ -40,6 +41,12 @@ export const software = p.pgTable("software", {
 			return softwareStatuses.id;
 		}),
 	...f.timestamps(),
+
+	// FIXME:
+	sshocMarketplaceStatus: p.text("sshoc_marketplace_status", {
+		enum: ["added_as_external_id", "added_as_item", "no", "not_applicable"],
+	}),
+	comment: p.text("comment"),
 });
 
 export type Software = typeof software.$inferSelect;
@@ -78,3 +85,27 @@ export const SoftwareToOrganisationalUnitInsertSchema = createInsertSchema(
 export const SoftwareToOrganisationalUnitUpdateSchema = createUpdateSchema(
 	softwareToOrganisationalUnits,
 );
+
+export const softwareToSocialMedia = p.pgTable("software_to_social_media", {
+	id: p.uuid("id").primaryKey().default(uuidv7()),
+	softwareId: p
+		.uuid("software_id")
+		.notNull()
+		.references(() => {
+			return software.id;
+		}),
+	socialMediaId: p
+		.uuid("social_media_id")
+		.notNull()
+		.references(() => {
+			return socialMedia.id;
+		}),
+	...f.timestamps(),
+});
+
+export type SoftwareToSocialMedia = typeof softwareToSocialMedia.$inferSelect;
+export type SoftwareToSocialMediaInput = typeof softwareToSocialMedia.$inferInsert;
+
+export const SoftwareToSocialMediaSelectSchema = createSelectSchema(softwareToSocialMedia);
+export const SoftwareToSocialMediaInsertSchema = createInsertSchema(softwareToSocialMedia);
+export const SoftwareToSocialMediaUpdateSchema = createUpdateSchema(softwareToSocialMedia);

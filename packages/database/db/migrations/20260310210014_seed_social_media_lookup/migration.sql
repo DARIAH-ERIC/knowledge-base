@@ -9,4 +9,5 @@ VALUES
 	('twitter'),
 	('vimeo'),
 	('website'),
-	('youtube');
+	('youtube')
+ON CONFLICT ("type") DO NOTHING;
