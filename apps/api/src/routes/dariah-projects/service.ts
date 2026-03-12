@@ -81,7 +81,7 @@ function mapItem<
 			id: string;
 			name: string;
 			url: string;
-			duration: { start: Date; end: Date | null };
+			duration: { start: Date; end?: Date | null };
 			type: { type: string };
 		}>;
 	},
@@ -89,9 +89,9 @@ function mapItem<
 	const image =
 		item.image != null
 			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width },
-				})
+				key: item.image.key,
+				options: { width },
+			})
 			: null;
 
 	const institutions = item.partners.map(({ roleId, unit }) => {

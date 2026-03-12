@@ -41,6 +41,11 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 			},
 			{
 				type: "add",
+				path: "{{ turbo.paths.root }}/packages/{{ name }}/eslint.config.ts",
+				templateFile: "templates/eslint.config.ts.hbs",
+			},
+			{
+				type: "add",
 				path: "{{ turbo.paths.root }}/packages/{{ name }}/lib/index.ts",
 				templateFile: "templates/index.ts.hbs",
 			},

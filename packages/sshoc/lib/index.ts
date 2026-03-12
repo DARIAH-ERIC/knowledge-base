@@ -1,6 +1,7 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
 import { request } from "@dariah-eric/request";
-import type { paths, components } from "./types";
+
+import type { components, paths } from "./types";
 
 export interface CreateSshocMarketplaceClientParams {
 	config: {
@@ -16,12 +17,14 @@ export function createSshocMarketplaceClient(params: CreateSshocMarketplaceClien
 
 	return {
 		async getTools() {
+			const filters: NonNullable<paths["/api/item-search"]["get"]["parameters"]["query"]> = {
+				categories: ["tool-or-service"],
+			};
+
 			const url = createUrl({
 				baseUrl,
 				pathname: "/api/item-search",
-				searchParams: createUrlSearchParams({
-					categories: ["tool-or-service"],
-				}),
+				searchParams: createUrlSearchParams(filters),
 			});
 
 			const result = await request<components["schemas"]["PaginatedSearchItems"]>(url, {

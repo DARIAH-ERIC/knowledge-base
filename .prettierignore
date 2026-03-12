@@ -20,3 +20,6 @@ pnpm-workspace.yaml
 
 # package template
 /turbo/**/*.hbs
+
+# generated api client
+/packages/sshoc/lib/types.ts
