@@ -86,9 +86,6 @@ export const services = p.pgTable("services", {
 	}),
 	monitoring: p.boolean("monitoring"),
 	privateSupplier: p.boolean("private_supplier"),
-	status: p.text("status", {
-		enum: ["discontinued", "in_preparation", "live", "needs_review", "to_be_discontinued"],
-	}),
 	technicalContact: p.text("technical_contact"),
 	technicalReadinessLevel: p.integer("technical_readiness_level"),
 	valueProposition: p.text("value_proposition"),
