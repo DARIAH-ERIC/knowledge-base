@@ -1,4 +1,5 @@
 import { assert } from "@acdh-oeaw/lib";
+import { inArray } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { faker as f } from "@faker-js/faker";
 import slugify from "@sindresorhus/slugify";
@@ -38,23 +39,34 @@ function createItems(count: number) {
 }
 
 async function seed(db: Database, items: ReturnType<typeof createItems>) {
-	const [status, entityType, asset, workingGroupType] = await Promise.all([
-		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
-		db.query.entityTypes.findFirst({
-			columns: { id: true },
-			where: { type: "organisational_units" },
-		}),
-		db.query.assets.findFirst({ columns: { id: true } }),
-		db.query.organisationalUnitTypes.findFirst({
-			columns: { id: true },
-			where: { type: "working_group" },
-		}),
-	]);
+	const [status, entityType, asset, workingGroupType, umbrellaConsortiumType, unitStatus] =
+		await Promise.all([
+			db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+			db.query.entityTypes.findFirst({
+				columns: { id: true },
+				where: { type: "organisational_units" },
+			}),
+			db.query.assets.findFirst({ columns: { id: true } }),
+			db.query.organisationalUnitTypes.findFirst({
+				columns: { id: true },
+				where: { type: "working_group" },
+			}),
+			db.query.organisationalUnitTypes.findFirst({
+				columns: { id: true },
+				where: { type: "umbrella_consortium" },
+			}),
+			db
+				.select()
+				.from(schema.organisationalUnitStatus)
+				.where(inArray(schema.organisationalUnitStatus.status, ["is_member"])),
+		]);
 
 	assert(status, "No entity status in database.");
 	assert(entityType, "No entity type in database.");
 	assert(asset, "No assets in database.");
 	assert(workingGroupType, "No working_group type in database.");
+	assert(umbrellaConsortiumType, "No umbrella_consortium type in database.");
+	assert(unitStatus?.length, "No unit status in database.");
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {
@@ -62,9 +74,30 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 		}),
 	);
 
+	await db.insert(schema.organisationalUnits).values({
+		...items[0]!.organisationalUnit,
+		typeId: umbrellaConsortiumType.id,
+		imageId: asset.id,
+	});
+
 	await db.insert(schema.organisationalUnits).values(
-		items.map((item) => {
+		items.slice(1).map((item) => {
 			return { ...item.organisationalUnit, typeId: workingGroupType.id, imageId: asset.id };
+		}),
+	);
+
+	const start = f.date.past({ years: 5 });
+
+	await db.insert(schema.organisationalUnitsRelations).values(
+		items.slice(1).map((item) => {
+			return {
+				unitId: item.organisationalUnit.id,
+				relatedUnitId: items[0]!.organisationalUnit.id,
+				status: f.helpers.arrayElement(unitStatus).id,
+				duration: {
+					start,
+				},
+			};
 		}),
 	);
 }
@@ -78,7 +111,7 @@ describe("working-groups", () => {
 
 				const client = createTestClient(db);
 
-				const items = createItems(3);
+				const items = createItems(4);
 				await seed(db, items);
 
 				const item = items.at(1)!;
@@ -95,7 +128,7 @@ describe("working-groups", () => {
 
 				const data = await response.json();
 
-				expect(data.total).toBeGreaterThanOrEqual(items.length);
+				expect(data.total).toBeGreaterThanOrEqual(items.length - 1);
 				expect(data.data).toEqual(expect.arrayContaining([expect.objectContaining({ name })]));
 				expect(data.limit).toBe(limit);
 				expect(data.offset).toBe(offset);
@@ -176,7 +209,7 @@ describe("working-groups", () => {
 
 				const client = createTestClient(db);
 
-				const items = createItems(3);
+				const items = createItems(4);
 				await seed(db, items);
 
 				const item = items.at(1)!;
@@ -193,7 +226,7 @@ describe("working-groups", () => {
 
 				const data = await response.json();
 
-				expect(data.total).toBeGreaterThanOrEqual(items.length);
+				expect(data.total).toBeGreaterThanOrEqual(items.length - 1);
 				expect(data.data).toEqual(
 					expect.arrayContaining([expect.objectContaining({ entity: { slug } })]),
 				);
