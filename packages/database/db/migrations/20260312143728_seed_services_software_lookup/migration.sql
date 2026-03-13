@@ -15,7 +15,7 @@ VALUES
 	('live'),
 	('needs_review'),
 	('to_be_discontinued')
-ON CONFLICT ("type") DO NOTHING;
+ON CONFLICT ("status") DO NOTHING;
 
 --> statement-breakpoint
 INSERT INTO
@@ -24,4 +24,4 @@ VALUES
 	('maintained'),
 	('needs_review'),
 	('not_maintained')
-ON CONFLICT ("type") DO NOTHING;
+ON CONFLICT ("status") DO NOTHING;
