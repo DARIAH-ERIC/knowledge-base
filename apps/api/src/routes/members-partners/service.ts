@@ -36,6 +36,7 @@ export async function getMembersAndPartners(
 				summary: true,
 				status: true,
 				type: true,
+				sshocMarketplaceId: true,
 			},
 			with: {
 				entity: {
