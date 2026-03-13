@@ -79,7 +79,7 @@ export const organisationalUnits = p.pgTable("organisational_units", {
 		.references(() => {
 			return organisationalUnitTypes.id;
 		}),
-	sshocMarketplaceId: p.text("sshoc_marketplace_id"),
+	sshocMarketplaceActorId: p.integer("sshoc_marketplace_actor_id"),
 	...f.timestamps(),
 });
 
@@ -214,7 +214,7 @@ export const membersAndPartners = p
 		status: p.text("status"),
 		slug: p.text("slug"),
 		imageId: p.uuid("image_id"),
-		sshocMarketplaceId: p.text("sshoc_marketplace_id"),
+		sshocMarketplaceActorId: p.integer("sshoc_marketplace_actor_id"),
 	})
 	.existing();
 
@@ -227,6 +227,6 @@ export const workingGroups = p
 		name: p.text("name").notNull(),
 		summary: p.text("summary").notNull(),
 		imageId: p.uuid("image_id"),
-		sshocMarketplaceId: p.text("sshoc_marketplace_id"),
+		sshocMarketplaceActorId: p.integer("sshoc_marketplace_actor_id"),
 	})
 	.existing();

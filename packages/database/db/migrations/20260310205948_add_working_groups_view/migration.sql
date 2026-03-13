@@ -5,7 +5,7 @@ SELECT
 	"units"."name",
 	"units"."summary",
 	"units"."image_id",
-	"units"."sshoc_marketplace_id",
+	"units"."sshoc_marketplace_actor_id",
 	"unit_types"."type",
 	"unit_status"."status"
 FROM
@@ -22,5 +22,5 @@ GROUP BY
 	"units"."summary",
 	"unit_types"."type",
 	"units"."image_id",
-	"units"."sshoc_marketplace_id",
+	"units"."sshoc_marketplace_actor_id",
 	"unit_status"."status";

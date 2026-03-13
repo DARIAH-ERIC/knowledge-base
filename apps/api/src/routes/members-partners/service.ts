@@ -36,7 +36,7 @@ export async function getMembersAndPartners(
 				summary: true,
 				status: true,
 				type: true,
-				sshocMarketplaceId: true,
+				sshocMarketplaceActorId: true,
 			},
 			with: {
 				entity: {
@@ -86,9 +86,9 @@ export async function getMembersAndPartners(
 		const image =
 			item.image != null
 				? images.generateSignedImageUrl({
-						key: item.image.key,
-						options: { width: imageWidth.preview },
-					})
+					key: item.image.key,
+					options: { width: imageWidth.preview },
+				})
 				: null;
 
 		const socialMedia = item.socialMedia.map((sm) => {
@@ -173,9 +173,9 @@ export async function getMemberOrPartnerById(
 	const image =
 		item.image != null
 			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
+				key: item.image.key,
+				options: { width: imageWidth.featured },
+			})
 			: null;
 
 	const socialMedia = item.socialMedia.map((sm) => {
@@ -320,9 +320,9 @@ export async function getMemberOrPartnerBySlug(
 	const image =
 		item.image != null
 			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
+				key: item.image.key,
+				options: { width: imageWidth.featured },
+			})
 			: null;
 
 	const socialMedia = item.socialMedia.map((sm) => {

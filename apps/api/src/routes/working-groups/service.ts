@@ -31,7 +31,7 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 				metadata: true,
 				name: true,
 				summary: true,
-				sshocMarketplaceId: true,
+				sshocMarketplaceActorId: true,
 			},
 			with: {
 				entity: {
@@ -81,9 +81,9 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 		const image =
 			item.image != null
 				? images.generateSignedImageUrl({
-						key: item.image.key,
-						options: { width: imageWidth.preview },
-					})
+					key: item.image.key,
+					options: { width: imageWidth.preview },
+				})
 				: null;
 
 		const socialMedia = item.socialMedia.map((sm) => {
@@ -166,9 +166,9 @@ export async function getWorkingGroupById(
 	const image =
 		item.image != null
 			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
+				key: item.image.key,
+				options: { width: imageWidth.featured },
+			})
 			: null;
 
 	const socialMedia = item.socialMedia.map((sm) => {
@@ -311,9 +311,9 @@ export async function getWorkingGroupBySlug(
 	const image =
 		item.image != null
 			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
+				key: item.image.key,
+				options: { width: imageWidth.featured },
+			})
 			: null;
 
 	const socialMedia = item.socialMedia.map((sm) => {
