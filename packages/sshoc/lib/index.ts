@@ -3,6 +3,19 @@ import { request } from "@dariah-eric/request";
 
 import type { components, paths } from "./types";
 
+type SearchItem = Required<GetDariahResources.Response["items"][number]>;
+type SearchItems = Array<SearchItem>;
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
+namespace GetDariahResources {
+	export type SearchParams = NonNullable<
+		paths["/api/item-search"]["get"]["parameters"]["query"]
+	> & {
+		"f.keyword"?: Array<string>;
+	};
+	export type Response = Required<components["schemas"]["PaginatedSearchItems"]>;
+}
+
 export interface CreateSshocMarketplaceClientParams {
 	config: {
 		baseUrl: string;
@@ -15,81 +28,88 @@ export function createSshocMarketplaceClient(params: CreateSshocMarketplaceClien
 
 	const { baseUrl } = config;
 
-	return {
-		async getDariahResources() {
-			type Filters = NonNullable<paths["/api/item-search"]["get"]["parameters"]["query"]> & {
-				"f.keyword"?: Array<string>;
-			};
+	async function getResources({
+		categories,
+		perPage = 50,
+	}: {
+		categories: Required<GetDariahResources.SearchParams["categories"]>;
+		perPage?: number;
+	}): Promise<SearchItems> {
+		let page = 1;
+		let pages = 0;
 
-			let page = 1;
-			let hasMorePages = false;
+		const filters: GetDariahResources.SearchParams = {
+			categories,
+			"f.keyword": ["DARIAH Resource"],
+			order: ["label"],
+			page,
+			perpage: perPage,
+		};
 
-			const filters: Filters = {
-				categories: ["tool-or-service"],
-				"f.keyword": ["DARIAH Resource"],
-				order: ["label"],
-				page,
-				perpage: 50,
-			};
+		const url = createUrl({
+			baseUrl,
+			pathname: "/api/item-search",
+			searchParams: createUrlSearchParams(filters),
+		});
 
-			const url = createUrl({
-				baseUrl,
-				pathname: "/api/item-search",
-				searchParams: createUrlSearchParams(filters),
+		const items: SearchItems = [];
+
+		do {
+			const result = await request<GetDariahResources.Response>(url, {
+				responseType: "json",
 			});
 
-			const items = [];
+			if (result.isErr()) {
+				throw result.error;
+			}
 
-			do {
-				const result = await request<components["schemas"]["PaginatedSearchItems"]>(url, {
-					responseType: "json",
-				});
+			const data = result.value.data;
+			items.push(...(data.items as SearchItems));
+			page++;
+			pages = data.pages;
+			url.searchParams.set("page", String(page));
+		} while (pages >= page);
 
-				if (result.isErr()) {
-					throw result.error;
-				}
+		return items;
+	}
 
-				const data = result.value.data;
-				items.push(...(data.items ?? []));
-				page++;
-				hasMorePages = (data.pages ?? 0) >= page;
-				url.searchParams.set("page", String(page));
-			} while (hasMorePages);
+	function hasActorId(item: SearchItem, actorId: number): boolean {
+		return item.contributors.some((contributor) => {
+			return contributor.actor!.id === actorId && contributor.role!.code === "reviewer";
+		});
+	}
 
+	function isCoreService(item: SearchItem): boolean {
+		return item.properties.some((property) => {
+			return property.type!.code === "keyword" && property.concept!.label === "DARIAH Core Service";
+		});
+	}
+
+	function getResourceType(item: SearchItem): "software" | "service" {
+		const resourceTypes = item.properties
+			.filter((property) => {
+				return property.type!.code === "resource-category";
+			})
+			.map((property) => {
+				return property.concept!.label;
+			});
+
+		return resourceTypes.includes("Software") ? "software" : "service";
+	}
+
+	return {
+		async getDariahResources() {
+			const items = await getResources({ categories: ["tool-or-service"] });
 			return items;
-
-			// const filtered = items.filter((item) => {
-			// 	return item.contributors.some((contributor) => {
-			// 		return contributor.actor?.id === marketplaceActorId && contributor.role.code === "reviewer";
-			// 	});
-			// });
-
-			// return filtered.map((item) => {
-			// 	const resourceTypes = item.properties
-			// 		.filter((property) => {
-			// 			return property.type.code === "resource-category";
-			// 		})
-			// 		.map((property) => {
-			// 			return property.concept!.label;
-			// 		});
-
-			// 	const isCoreService = item.properties.some((property) => {
-			// 		return property.type.code === "keyword" && property.concept!.label === "DARIAH Core Service";
-			// 	});
-
-			// 	const type = isCoreService
-			// 		? ("Core service" as const)
-			// 		: resourceTypes.includes("Software")
-			// 			? ("Software" as const)
-			// 			: ("Service" as const);
-
-			// 	return {
-			// 		id: item.persistentId,
-			// 		label: item.label,
-			// 		type,
-			// 		accessibleAt: item.accessibleAt ?? [],
-			// 	};
-			// });
 		},
+		async getDariahResourcesByActorId(actorId: number) {
+			const items = await getResources({ categories: ["tool-or-service"] });
+			return items.filter((item) => {
+				return hasActorId(item, actorId);
+			});
+		},
+		hasActorId,
+		isCoreService,
+		getResourceType,
 	};
 }

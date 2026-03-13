@@ -22,6 +22,7 @@
 		"@dariah-eric/configs": "workspace:^",
 		"@dariah-eric/request": "workspace:^",
 		"@types/node": "catalog:",
+		"better-result": "catalog:",
 		"eslint": "catalog:",
 		"openapi-typescript": "catalog:",
 		"prettier": "catalog:",
@@ -30,7 +31,8 @@
 	},
 	"peerDependencies": {
 		"@acdh-oeaw/lib": "catalog:",
-		"@dariah-eric/request": "workspace:^"
+		"@dariah-eric/request": "workspace:^",
+		"better-result": "catalog:"
 	},
 	"lint-staged": {
 		"*.@(js|ts)": [
