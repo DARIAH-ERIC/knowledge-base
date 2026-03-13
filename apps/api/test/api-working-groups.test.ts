@@ -66,7 +66,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	assert(asset, "No assets in database.");
 	assert(workingGroupType, "No working_group type in database.");
 	assert(umbrellaConsortiumType, "No umbrella_consortium type in database.");
-	assert(unitStatus?.length, "No unit status in database.");
+	assert(unitStatus.length, "No unit status in database.");
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {
