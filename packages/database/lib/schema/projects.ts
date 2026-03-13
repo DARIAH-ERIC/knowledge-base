@@ -46,13 +46,14 @@ export const projects = p.pgTable("projects", {
 		}),
 	metadata: p.jsonb("metadata"),
 	name: p.text("name").notNull(),
+	acronym: p.text("acronym"),
 	duration: f.timestampRange("duration").notNull(),
 	/** Funding amount may be ingested from CORDIS. */
 	funding: p.numeric("funding"),
 	summary: p.text("summary").notNull(),
-	call: p.text("call").notNull(),
-	funders: p.text("funders").notNull(),
-	topic: p.text("topic").notNull(),
+	call: p.text("call"),
+	funders: p.text("funders"),
+	topic: p.text("topic"),
 	imageId: p.uuid("image_id").references(() => {
 		return assets.id;
 	}),

@@ -142,6 +142,16 @@ async function main() {
 		return item.type;
 	});
 
+	const organisationalUnitTypes = await db.query.organisationalUnitTypes.findMany();
+	const organisationalUnitTypesByType = keyBy(organisationalUnitTypes, (item) => {
+		return item.type;
+	});
+
+	const projectScopes = await db.query.projectScopes.findMany();
+	const projectScopesByType = keyBy(projectScopes, (item) => {
+		return item.scope;
+	});
+
 	//
 
 	const placeholderImage = await upload(assetsCache, placeholderImageUrl);
@@ -348,201 +358,228 @@ async function main() {
 
 	//
 
-	// log.info("Migrating countries...");
+	log.info("Migrating countries...");
 
-	// for (const country of Object.values(data.countries)) {
-	// 	assert(country.status === "publish", "Country has not been published.");
+	for (const country of Object.values(data.countries)) {
+		assert(country.status === "publish", "Country has not been published.");
 
-	// 	await db.transaction(async (tx) => {
-	// 		const [entity] = await tx
-	// 			.insert(schema.entities)
-	// 			.values({
-	// 				slug: country.slug,
-	// 				statusId: statusByType.published.id,
-	// 				typeId: typesByType.countries.id,
-	// 				createdAt: new Date(country.date_gmt),
-	// 				updatedAt: new Date(country.modified_gmt),
-	// 			})
-	// 			.returning({ id: schema.entities.id });
+		await db.transaction(async (tx) => {
+			const [entity] = await tx
+				.insert(schema.entities)
+				.values({
+					slug: country.slug,
+					statusId: statusByType.published.id,
+					typeId: typesByType.organisational_units.id,
+					createdAt: new Date(country.date_gmt),
+					updatedAt: new Date(country.modified_gmt),
+				})
+				.returning({ id: schema.entities.id });
 
-	// 		const id = entity!.id;
+			const id = entity!.id;
 
-	// 		const imageId = await uploadFeaturedImage(assetsCache, data.media, country.featured_media, country.id);
+			const imageId = await uploadFeaturedImage(
+				assetsCache,
+				data.media,
+				country.featured_media,
+				country.id,
+			);
 
-	// 		if (imageId == null) {
-	// 			log.warn(`Missing image (country id ${String(country.id)}).`);
-	// 		}
+			if (imageId == null) {
+				log.warn(`Missing image (country id ${String(country.id)}).`);
+			}
 
-	// 		await tx.insert(schema.countries).values({
-	// 			id,
-	// 			title: country.title.rendered,
-	// 			summary: country.excerpt.rendered,
-	// 			imageId: imageId ?? placeholderImage.id,
-	// 			createdAt: new Date(country.date_gmt),
-	// 			updatedAt: new Date(country.modified_gmt),
-	// 		});
+			await tx.insert(schema.organisationalUnits).values({
+				id,
+				name: country.title.rendered,
+				summary: country.excerpt.rendered,
+				imageId: imageId ?? placeholderImage.id,
+				typeId: organisationalUnitTypesByType.consortium.id,
+				createdAt: new Date(country.date_gmt),
+				updatedAt: new Date(country.modified_gmt),
+			});
 
-	// 		// TODO: create content block for country.content
-	// 	});
-	// }
-
-	//
-
-	// log.info("Migrating people...");
-
-	// for (const person of Object.values(data.people)) {
-	// 	assert(person.status === "publish", "Person has not been published.");
-
-	// 	await db.transaction(async (tx) => {
-	// 		const [entity] = await tx
-	// 			.insert(schema.entities)
-	// 			.values({
-	// 				slug: person.slug,
-	// 				statusId: statusByType.published.id,
-	// 				typeId: typesByType.persons.id,
-	// 				createdAt: new Date(person.date_gmt),
-	// 				updatedAt: new Date(person.modified_gmt),
-	// 			})
-	// 			.returning({ id: schema.entities.id });
-
-	// 		const id = entity!.id;
-
-	// 		const imageId = await uploadFeaturedImage(assetsCache, data.media, person.featured_media, person.id);
-
-	// 		if (imageId == null) {
-	// 			log.warn(`Missing image (person id ${String(person.id)}).`);
-	// 		}
-
-	// 		await tx.insert(schema.persons).values({
-	// 			id,
-	// 			name: person.title.rendered,
-	// 			description: person.excerpt.rendered,
-	// 			imageId: imageId ?? placeholderImage.id,
-	// 			createdAt: new Date(person.date_gmt),
-	// 			updatedAt: new Date(person.modified_gmt),
-	// 		});
-
-	// 		// TODO: create content block for person.content
-	// 	});
-	// }
+			// TODO: create content block for country.content
+		});
+	}
 
 	//
 
-	// log.info("Migrating institutions...");
+	log.info("Migrating people...");
 
-	// for (const institution of Object.values(data.institutions)) {
-	// 	assert(institution.status === "publish", "Institution has not been published.");
+	for (const person of Object.values(data.people)) {
+		assert(person.status === "publish", "Person has not been published.");
 
-	// 	await db.transaction(async (tx) => {
-	// 		const [entity] = await tx
-	// 			.insert(schema.entities)
-	// 			.values({
-	// 				slug: institution.slug,
-	// 				statusId: statusByType.published.id,
-	// 				typeId: typesByType.institutions.id,
-	// 				createdAt: new Date(institution.date_gmt),
-	// 				updatedAt: new Date(institution.modified_gmt),
-	// 			})
-	// 			.returning({ id: schema.entities.id });
+		await db.transaction(async (tx) => {
+			const [entity] = await tx
+				.insert(schema.entities)
+				.values({
+					slug: person.slug,
+					statusId: statusByType.published.id,
+					typeId: typesByType.persons.id,
+					createdAt: new Date(person.date_gmt),
+					updatedAt: new Date(person.modified_gmt),
+				})
+				.returning({ id: schema.entities.id });
 
-	// 		const id = entity!.id;
+			const id = entity!.id;
 
-	// 		const imageId = await uploadFeaturedImage(
-	//      assetsCache,
-	// 			data.media,
-	// 			institution.featured_media,
-	// 			institution.id,
-	// 		);
+			const imageId = await uploadFeaturedImage(
+				assetsCache,
+				data.media,
+				person.featured_media,
+				person.id,
+			);
 
-	// 		await tx.insert(schema.institutions).values({
-	// 			id,
-	// 			title: institution.title.rendered,
-	// 			summary: institution.excerpt.rendered,
-	// 			imageId: imageId ?? placeholderImage.id,
-	// 			createdAt: new Date(institution.date_gmt),
-	// 			updatedAt: new Date(institution.modified_gmt),
-	// 		});
+			if (imageId == null) {
+				log.warn(`Missing image (person id ${String(person.id)}).`);
+			}
 
-	// 		// TODO: create content block for institution.content
-	// 	});
-	// }
+			await tx.insert(schema.persons).values({
+				id,
+				name: person.title.rendered,
+				sortName: person.title.rendered,
+				// description: person.excerpt.rendered,
+				// email,
+				// orcid,
+				imageId: imageId ?? placeholderImage.id,
+				createdAt: new Date(person.date_gmt),
+				updatedAt: new Date(person.modified_gmt),
+			});
 
-	//
-
-	// log.info("Migrating working groups...");
-
-	// for (const workingGroup of Object.values(data.workingGroups)) {
-	// 	assert(workingGroup.status === "publish", "Working group has not been published.");
-
-	// 	await db.transaction(async (tx) => {
-	// 		const [entity] = await tx
-	// 			.insert(schema.entities)
-	// 			.values({
-	// 				slug: workingGroup.slug,
-	// 				statusId: statusByType.published.id,
-	// 				typeId: typesByType.workingGroups.id,
-	// 				createdAt: new Date(workingGroup.date_gmt),
-	// 				updatedAt: new Date(workingGroup.modified_gmt),
-	// 			})
-	// 			.returning({ id: schema.entities.id });
-
-	// 		const id = entity!.id;
-
-	// 		const imageId = await uploadFeaturedImage(
-	//      assetsCache,
-	// 			data.media,
-	// 			workingGroup.featured_media,
-	// 			workingGroup.id,
-	// 		);
-
-	// 		await tx.insert(schema.workingGroups).values({
-	// 			id,
-	// 			title: workingGroup.title.rendered,
-	// 			summary: workingGroup.excerpt.rendered,
-	// 			imageId: imageId ?? placeholderImage.id,
-	// 			createdAt: new Date(workingGroup.date_gmt),
-	// 			updatedAt: new Date(workingGroup.modified_gmt),
-	// 		});
-
-	// 		// TODO: create content block for workingGroup.content
-	// 	});
-	// }
+			// TODO: create content block for person.content
+		});
+	}
 
 	//
 
-	// log.info("Migrating projects...");
+	log.info("Migrating institutions...");
 
-	// for (const project of Object.values(data.projects)) {
-	// 	assert(project.status === "publish", "Project has not been published.");
+	for (const institution of Object.values(data.institutions)) {
+		assert(institution.status === "publish", "Institution has not been published.");
 
-	// 	await db.transaction(async (tx) => {
-	// 		const [entity] = await tx
-	// 			.insert(schema.entities)
-	// 			.values({
-	// 				slug: project.slug,
-	// 				statusId: statusByType.published.id,
-	// 				typeId: typesByType.projects.id,
-	// 				createdAt: new Date(project.date_gmt),
-	// 				updatedAt: new Date(project.modified_gmt),
-	// 			})
-	// 			.returning({ id: schema.entities.id });
+		await db.transaction(async (tx) => {
+			const [entity] = await tx
+				.insert(schema.entities)
+				.values({
+					slug: institution.slug,
+					statusId: statusByType.published.id,
+					typeId: typesByType.organisational_units.id,
+					createdAt: new Date(institution.date_gmt),
+					updatedAt: new Date(institution.modified_gmt),
+				})
+				.returning({ id: schema.entities.id });
 
-	// 		const id = entity!.id;
+			const id = entity!.id;
 
-	// 		const imageId = await uploadFeaturedImage(assetsCache, data.media, project.featured_media, project.id);
+			const imageId = await uploadFeaturedImage(
+				assetsCache,
+				data.media,
+				institution.featured_media,
+				institution.id,
+			);
 
-	// 		await tx.insert(schema.projects).values({
-	// 			id,
-	// 			title: project.title.rendered,
-	// 			summary: project.excerpt.rendered,
-	// 			imageId: imageId ?? placeholderImage.id,
-	// 			createdAt: new Date(project.date_gmt),
-	// 			updatedAt: new Date(project.modified_gmt),
-	// 		});
+			await tx.insert(schema.organisationalUnits).values({
+				id,
+				name: institution.title.rendered,
+				summary: institution.excerpt.rendered,
+				typeId: organisationalUnitTypesByType.institution.id,
+				imageId: imageId ?? placeholderImage.id,
+				createdAt: new Date(institution.date_gmt),
+				updatedAt: new Date(institution.modified_gmt),
+			});
 
-	// 		// TODO: create content block for project.content
-	// 	});
-	// }
+			// TODO: create content block for institution.content
+		});
+	}
+
+	//
+
+	log.info("Migrating working groups...");
+
+	for (const workingGroup of Object.values(data.workingGroups)) {
+		assert(workingGroup.status === "publish", "Working group has not been published.");
+
+		await db.transaction(async (tx) => {
+			const [entity] = await tx
+				.insert(schema.entities)
+				.values({
+					slug: workingGroup.slug,
+					statusId: statusByType.published.id,
+					typeId: typesByType.organisational_units.id,
+					createdAt: new Date(workingGroup.date_gmt),
+					updatedAt: new Date(workingGroup.modified_gmt),
+				})
+				.returning({ id: schema.entities.id });
+
+			const id = entity!.id;
+
+			const imageId = await uploadFeaturedImage(
+				assetsCache,
+				data.media,
+				workingGroup.featured_media,
+				workingGroup.id,
+			);
+
+			await tx.insert(schema.organisationalUnits).values({
+				id,
+				name: workingGroup.title.rendered,
+				summary: workingGroup.excerpt.rendered,
+				typeId: organisationalUnitTypesByType.working_group.id,
+				imageId: imageId ?? placeholderImage.id,
+				createdAt: new Date(workingGroup.date_gmt),
+				updatedAt: new Date(workingGroup.modified_gmt),
+			});
+
+			// TODO: create content block for workingGroup.content
+		});
+	}
+
+	//
+
+	log.info("Migrating projects...");
+
+	for (const project of Object.values(data.projects)) {
+		assert(project.status === "publish", "Project has not been published.");
+
+		await db.transaction(async (tx) => {
+			const [entity] = await tx
+				.insert(schema.entities)
+				.values({
+					slug: project.slug,
+					statusId: statusByType.published.id,
+					typeId: typesByType.projects.id,
+					createdAt: new Date(project.date_gmt),
+					updatedAt: new Date(project.modified_gmt),
+				})
+				.returning({ id: schema.entities.id });
+
+			const id = entity!.id;
+
+			const imageId = await uploadFeaturedImage(
+				assetsCache,
+				data.media,
+				project.featured_media,
+				project.id,
+			);
+
+			await tx.insert(schema.projects).values({
+				id,
+				name: project.title.rendered,
+				duration: { start: new Date() }, // FIXME:
+				// funding: "0.0",
+				summary: project.excerpt.rendered,
+				// call: "",
+				// funders: "",
+				// topic: "",
+				imageId: imageId ?? placeholderImage.id,
+				scopeId: projectScopesByType.national.id,
+				createdAt: new Date(project.date_gmt),
+				updatedAt: new Date(project.modified_gmt),
+			});
+
+			// TODO: create content block for project.content
+		});
+	}
 
 	//
 
