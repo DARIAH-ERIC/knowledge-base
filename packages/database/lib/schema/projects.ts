@@ -49,7 +49,7 @@ export const projects = p.pgTable("projects", {
 	acronym: p.text("acronym"),
 	duration: f.timestampRange("duration").notNull(),
 	/** Funding amount may be ingested from CORDIS. */
-	funding: p.numeric("funding"),
+	funding: p.numeric("funding", { mode: "number" }),
 	summary: p.text("summary").notNull(),
 	call: p.text("call"),
 	funders: p.text("funders"),
@@ -114,7 +114,7 @@ export const projectsContributions = p.pgTable("project_contributions", {
 		.references(() => {
 			return reports.id;
 		}),
-	budget: p.numeric(),
+	budget: p.numeric("budget", { mode: "number" }),
 });
 
 export type ProjectContribution = typeof projectsContributions.$inferSelect;
@@ -136,7 +136,7 @@ export const dariahProjects = p
 		call: p.text("call").notNull(),
 		funders: p.text("funders").notNull(),
 		topic: p.text("topic").notNull(),
-		funding: p.numeric("funding"),
+		funding: p.numeric("funding", { mode: "number" }),
 		imageId: p.uuid("image_id"),
 		scopeId: p.uuid("scope_id").notNull(),
 	})

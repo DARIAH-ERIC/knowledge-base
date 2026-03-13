@@ -309,6 +309,7 @@ async function main() {
 
 	for (const event of Object.values(data.events)) {
 		assert(event.status === "publish", "Event has not been published.");
+		assert(event.utc_start_date, "Event has no start date");
 
 		await db.transaction(async (tx) => {
 			const [entity] = await tx
@@ -344,8 +345,8 @@ async function main() {
 						? ""
 						: [event.venue.venue, event.venue.country].filter(isNonEmptyString).join(", "),
 				duration: {
-					start: event.utc_start_date,
-					end: event.utc_end_date,
+					start: new Date(event.utc_start_date),
+					end: isNonEmptyString(event.utc_end_date) ? new Date(event.utc_end_date) : undefined,
 				},
 				isFullDay: event.all_day,
 				createdAt: new Date(event.date_utc),
@@ -391,7 +392,7 @@ async function main() {
 			await tx.insert(schema.organisationalUnits).values({
 				id,
 				name: country.title.rendered,
-				summary: country.excerpt.rendered,
+				summary: "",
 				imageId: imageId ?? placeholderImage.id,
 				typeId: organisationalUnitTypesByType.consortium.id,
 				createdAt: new Date(country.date_gmt),
@@ -434,11 +435,19 @@ async function main() {
 				log.warn(`Missing image (person id ${String(person.id)}).`);
 			}
 
+			function getSortName(name: string) {
+				const segments = name.split(" ");
+				if (segments.length < 2) {
+					return name;
+				}
+				const last = segments.pop();
+				return `${last!}, ${segments.join(" ")}`;
+			}
+
 			await tx.insert(schema.persons).values({
 				id,
 				name: person.title.rendered,
-				sortName: person.title.rendered,
-				// description: person.excerpt.rendered,
+				sortName: getSortName(person.title.rendered),
 				// email,
 				// orcid,
 				imageId: imageId ?? placeholderImage.id,
@@ -481,7 +490,7 @@ async function main() {
 			await tx.insert(schema.organisationalUnits).values({
 				id,
 				name: institution.title.rendered,
-				summary: institution.excerpt.rendered,
+				summary: "",
 				typeId: organisationalUnitTypesByType.institution.id,
 				imageId: imageId ?? placeholderImage.id,
 				createdAt: new Date(institution.date_gmt),
@@ -523,7 +532,7 @@ async function main() {
 			await tx.insert(schema.organisationalUnits).values({
 				id,
 				name: workingGroup.title.rendered,
-				summary: workingGroup.excerpt.rendered,
+				summary: "",
 				typeId: organisationalUnitTypesByType.working_group.id,
 				imageId: imageId ?? placeholderImage.id,
 				createdAt: new Date(workingGroup.date_gmt),
@@ -566,8 +575,8 @@ async function main() {
 				id,
 				name: project.title.rendered,
 				duration: { start: new Date() }, // FIXME:
-				// funding: "0.0",
-				summary: project.excerpt.rendered,
+				// funding: 0,
+				summary: "",
 				// call: "",
 				// funders: "",
 				// topic: "",
