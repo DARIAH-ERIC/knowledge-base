@@ -31,6 +31,7 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 				metadata: true,
 				name: true,
 				summary: true,
+				sshocMarketplaceActorId: true,
 			},
 			with: {
 				entity: {
@@ -128,6 +129,7 @@ export async function getWorkingGroupById(
 			metadata: true,
 			name: true,
 			summary: true,
+			sshocMarketplaceActorId: true,
 		},
 		with: {
 			entity: {
@@ -273,6 +275,7 @@ export async function getWorkingGroupBySlug(
 			metadata: true,
 			name: true,
 			summary: true,
+			sshocMarketplaceActorId: true,
 		},
 		with: {
 			entity: {

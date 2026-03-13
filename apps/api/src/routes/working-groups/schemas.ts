@@ -5,7 +5,13 @@ import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const WorkingGroupBaseSchema = v.pipe(
 	v.object({
-		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name", "summary", "metadata"]).entries,
+		...v.pick(schema.OrganisationalUnitSelectSchema, [
+			"id",
+			"name",
+			"summary",
+			"metadata",
+			"sshocMarketplaceActorId",
+		]).entries,
 		image: v.nullable(v.object({ url: v.string() })),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		socialMedia: v.array(
@@ -35,7 +41,13 @@ export type WorkingGroupList = v.InferOutput<typeof WorkingGroupListSchema>;
 
 export const WorkingGroupSchema = v.pipe(
 	v.object({
-		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name", "summary", "metadata"]).entries,
+		...v.pick(schema.OrganisationalUnitSelectSchema, [
+			"id",
+			"name",
+			"summary",
+			"metadata",
+			"sshocMarketplaceActorId",
+		]).entries,
 		image: v.nullable(v.object({ url: v.string() })),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		socialMedia: v.array(

@@ -74,7 +74,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	assert(asset, "No assets in database.");
 	assert(membersOrPartnersType, "No consortium type in database.");
 	assert(umbrellaConsortiumType, "No umbrella consortium type in database.");
-	assert(memberPartnerStatus, "No member or partner status in database.");
+	assert(memberPartnerStatus.length, "No member or partner status in database.");
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {

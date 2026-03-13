@@ -36,6 +36,7 @@ export async function getMembersAndPartners(
 				summary: true,
 				status: true,
 				type: true,
+				sshocMarketplaceActorId: true,
 			},
 			with: {
 				entity: {
@@ -135,6 +136,7 @@ export async function getMemberOrPartnerById(
 			summary: true,
 			status: true,
 			type: true,
+			sshocMarketplaceActorId: true,
 		},
 		with: {
 			entity: {
@@ -282,6 +284,7 @@ export async function getMemberOrPartnerBySlug(
 			summary: true,
 			status: true,
 			type: true,
+			sshocMarketplaceActorId: true,
 		},
 		with: {
 			entity: {

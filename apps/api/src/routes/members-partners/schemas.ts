@@ -5,7 +5,13 @@ import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const MemberOrPartnerBaseSchema = v.pipe(
 	v.object({
-		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name", "summary", "metadata"]).entries,
+		...v.pick(schema.OrganisationalUnitSelectSchema, [
+			"id",
+			"name",
+			"summary",
+			"metadata",
+			"sshocMarketplaceActorId",
+		]).entries,
 		image: v.nullable(v.object({ url: v.string() })),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		type: v.literal(schema.membersAndPartnersUnitType),
@@ -37,7 +43,13 @@ export type MemberOrPartnerList = v.InferOutput<typeof MemberOrPartnerListSchema
 
 export const MemberOrPartnerSchema = v.pipe(
 	v.object({
-		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name", "summary", "metadata"]).entries,
+		...v.pick(schema.OrganisationalUnitSelectSchema, [
+			"id",
+			"name",
+			"summary",
+			"metadata",
+			"sshocMarketplaceActorId",
+		]).entries,
 		image: v.nullable(v.object({ url: v.string() })),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		type: v.literal(schema.membersAndPartnersUnitType),
