@@ -55,6 +55,21 @@ const projectWithLinksQuery = {
 				scope: true,
 			},
 		},
+		socialMedia: {
+			columns: {
+				id: true,
+				name: true,
+				url: true,
+				duration: true,
+			},
+			with: {
+				type: {
+					columns: {
+						type: true,
+					},
+				},
+			},
+		},
 	},
 } as const;
 
@@ -62,6 +77,13 @@ function mapItem<
 	T extends {
 		image: { key: string } | null;
 		partners: Array<{ roleId: string; unit: { id: string; name: string; type: { type: string } } }>;
+		socialMedia: Array<{
+			id: string;
+			name: string;
+			url: string;
+			duration: { start: Date; end?: Date | null };
+			type: { type: string };
+		}>;
 	},
 >(item: T, width: number) {
 	const image =
@@ -76,9 +98,20 @@ function mapItem<
 		return { id: unit.id, name: unit.name, type: unit.type.type, roleId };
 	});
 
+	const socialMedia = item.socialMedia.map((sm) => {
+		return {
+			...sm,
+			type: sm.type.type,
+			duration: {
+				start: sm.duration.start.toISOString(),
+				end: sm.duration.end?.toISOString() ?? null,
+			},
+		};
+	});
+
 	const { partners: _, ...rest } = item;
 
-	return { ...rest, image, institutions };
+	return { ...rest, image, institutions, socialMedia };
 }
 
 //

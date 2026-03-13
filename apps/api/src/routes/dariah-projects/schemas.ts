@@ -15,6 +15,19 @@ export const DariahProjectInstitutionSchema = v.pipe(
 
 export type DariahProjectInstitution = v.InferOutput<typeof DariahProjectInstitutionSchema>;
 
+export const DariahProjectSocialMediaSchema = v.pipe(
+	v.object({
+		...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,
+		duration: v.object({
+			start: v.string(),
+			end: v.nullable(v.string()),
+		}),
+		type: v.picklist(schema.socialMediaTypesEnum),
+	}),
+	v.description("DARIAH project social media"),
+	v.metadata({ ref: "DariahProjectSocialMedia" }),
+);
+
 export const DariahProjectBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.ProjectInputSelectSchema, [
@@ -31,6 +44,7 @@ export const DariahProjectBaseSchema = v.pipe(
 		institutions: v.array(DariahProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
+		socialMedia: v.array(DariahProjectSocialMediaSchema),
 	}),
 	v.description("DARIAH project"),
 	v.metadata({ ref: "DariahProjectBase" }),
@@ -62,6 +76,7 @@ export const DariahProjectSchema = v.pipe(
 		institutions: v.array(DariahProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
+		socialMedia: v.array(DariahProjectSocialMediaSchema),
 	}),
 	v.description("DARIAH project"),
 	v.metadata({ ref: "DariahProject" }),

@@ -4,6 +4,7 @@
 	"type": "module",
 	"packageManager": "pnpm@10.30.3",
 	"scripts": {
+		"add:package": "turbo generate package",
 		"build": "turbo run build",
 		"db:migrations:apply": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"database\" run db:migrations:apply",
 		"db:migrations:check": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"database\" run db:migrations:check",
@@ -44,6 +45,7 @@
 		"@dariah-eric/configs": "workspace:^",
 		"@dotenvx/dotenvx": "catalog:",
 		"@playwright/test": "catalog:",
+		"@turbo/gen": "catalog:",
 		"is-in-ci": "catalog:",
 		"lint-staged": "catalog:",
 		"npm-run-all2": "catalog:",

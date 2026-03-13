@@ -17,3 +17,9 @@ pnpm-workspace.yaml
 
 # database migrations
 /packages/database/db/migrations/
+
+# package template
+/turbo/**/*.hbs
+
+# generated api client
+/packages/sshoc/lib/types.ts
