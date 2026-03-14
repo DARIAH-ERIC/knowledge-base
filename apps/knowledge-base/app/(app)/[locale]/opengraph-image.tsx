@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { ImageResponse } from "next/og";
-import { getTranslations } from "next-intl/server";
+import { getExtracted } from "next-intl/server";
 
 import { MetadataImage } from "@/components/metadata-image";
 import { isValidLocale } from "@/lib/i18n/locales";
@@ -34,8 +34,8 @@ export default async function openGraphImage(
 	// const locale = await getLocale();
 	// const meta = await getMetadata();
 	// const title = meta.title;
-	const t = await getTranslations({ locale, namespace: "metadata" });
-	const title = t("title");
+	const t = await getExtracted({ locale });
+	const title = t("DARIAH Knowledge Base");
 
 	return MetadataImage({ locale, size, title });
 }

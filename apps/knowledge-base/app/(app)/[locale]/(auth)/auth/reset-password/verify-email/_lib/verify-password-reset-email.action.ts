@@ -3,7 +3,7 @@
 import { getFormDataValues } from "@acdh-oeaw/lib";
 import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { VerifyPasswordResetEmailActionInputSchema } from "@/app/(app)/[locale]/(auth)/auth/reset-password/verify-email/_lib/verify-password-reset-email.schema";
@@ -15,23 +15,22 @@ import { createServerAction } from "@/lib/server/create-server-action";
 export const verifyPasswordResetEmailAction = createServerAction(
 	async function verifyPasswordResetEmailAction(state, formData) {
 		const locale = await getLocale();
-		const t = await getTranslations("actions.verifyPasswordResetEmailAction");
-		const e = await getTranslations("errors");
+		const t = await getExtracted();
 
 		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: e("too-many-requests") });
+			return createActionStateError({ message: t("Too many requests.") });
 		}
 
 		const { session } = await auth.validatePasswordResetSessionFromRequest();
 
 		if (session == null) {
-			return createActionStateError({ message: e("not-authenticated") });
+			return createActionStateError({ message: t("Not authenticated.") });
 		}
 		if (session.isEmailVerified) {
-			return createActionStateError({ message: e("forbidden") });
+			return createActionStateError({ message: t("Forbidden.") });
 		}
 		if (!auth.emailVerificationBucket.check(session.userId, 1)) {
-			return createActionStateError({ message: e("too-many-requests") });
+			return createActionStateError({ message: t("Too many requests.") });
 		}
 
 		const result = await v.safeParseAsync(
@@ -44,7 +43,7 @@ export const verifyPasswordResetEmailAction = createServerAction(
 			const errors = v.flatten<typeof VerifyPasswordResetEmailActionInputSchema>(result.issues);
 
 			return createActionStateError({
-				message: errors.root ?? e("invalid-form-fields"),
+				message: errors.root ?? t("Invalid or missing fields."),
 				validationErrors: errors.nested,
 			});
 		}
@@ -52,10 +51,10 @@ export const verifyPasswordResetEmailAction = createServerAction(
 		const { code } = result.output;
 
 		if (!auth.emailVerificationBucket.consume(session.userId, 1)) {
-			return createActionStateError({ message: e("too-many-requests") });
+			return createActionStateError({ message: t("Too many requests.") });
 		}
 		if (code !== session.code) {
-			return createActionStateError({ message: t("incorrect-code") });
+			return createActionStateError({ message: t("Incorrect code.") });
 		}
 
 		auth.emailVerificationBucket.reset(session.userId);
@@ -66,7 +65,7 @@ export const verifyPasswordResetEmailAction = createServerAction(
 			session.email,
 		);
 		if (!emailMatches) {
-			return createActionStateError({ message: t("restart") });
+			return createActionStateError({ message: t("Please restart the process.") });
 		}
 
 		redirect({ href: "/auth/reset-password/two-factor", locale });

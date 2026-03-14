@@ -14,7 +14,7 @@ export function Heading({ className, level = 1, ...props }: Readonly<HeadingProp
 	return (
 		<Element
 			className={twMerge(
-				"font-sans text-fg",
+				"text-fg",
 				level === 1 && "font-semibold text-xl sm:text-2xl",
 				level === 2 && "font-semibold text-lg sm:text-xl",
 				level === 3 && "font-semibold text-base sm:text-lg",

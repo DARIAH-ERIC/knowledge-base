@@ -2,7 +2,7 @@
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
 import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { ResetTwoFactorActionInputSchema } from "@/app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.schema";
@@ -15,19 +15,18 @@ import { createServerAction } from "@/lib/server/create-server-action";
 export const resetTwoFactorAction = createServerAction(
 	async function resetTwoFactorAction(state, formData) {
 		const locale = await getLocale();
-		const t = await getTranslations("actions.resetTwoFactorAction");
-		const e = await getTranslations("errors");
+		const t = await getExtracted();
 
 		const { session, user } = await getCurrentSession();
 
 		if (session == null) {
-			return createActionStateError({ message: e("not-authenticated") });
+			return createActionStateError({ message: t("Not authenticated.") });
 		}
 		if (!user.isEmailVerified || !user.isTwoFactorRegistered || session.isTwoFactorVerified) {
-			return createActionStateError({ message: e("forbidden") });
+			return createActionStateError({ message: t("Forbidden.") });
 		}
 		if (!auth.recoveryCodeBucket.check(user.id, 1)) {
-			return createActionStateError({ message: e("too-many-requests") });
+			return createActionStateError({ message: t("Too many requests.") });
 		}
 
 		const result = await v.safeParseAsync(
@@ -40,7 +39,7 @@ export const resetTwoFactorAction = createServerAction(
 			const errors = v.flatten<typeof ResetTwoFactorActionInputSchema>(result.issues);
 
 			return createActionStateError({
-				message: errors.root ?? e("invalid-form-fields"),
+				message: errors.root ?? t("Invalid or missing fields."),
 				validationErrors: errors.nested,
 			});
 		}
@@ -48,12 +47,12 @@ export const resetTwoFactorAction = createServerAction(
 		const { code } = result.output;
 
 		if (!auth.recoveryCodeBucket.consume(user.id, 1)) {
-			return createActionStateError({ message: e("too-many-requests") });
+			return createActionStateError({ message: t("Too many requests.") });
 		}
 
 		const valid = await auth.resetUserTwoFactorWithRecoveryCode(user.id, code);
 		if (!valid) {
-			return createActionStateError({ message: t("invalid-code") });
+			return createActionStateError({ message: t("Invalid recovery code.") });
 		}
 
 		auth.recoveryCodeBucket.reset(user.id);

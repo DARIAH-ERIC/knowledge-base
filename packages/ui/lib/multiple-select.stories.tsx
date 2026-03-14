@@ -30,7 +30,7 @@ export const Default: Story = {
 	render(props) {
 		return (
 			<div className="w-72">
-				<MultipleSelect aria-label="Frameworks" {...props}>
+				<MultipleSelect aria-label={"Frameworks"} {...props}>
 					<Label>{"Frameworks"}</Label>
 					<MultipleSelectContent items={frameworks}>
 						{(item) => {
@@ -55,7 +55,7 @@ export const WithPlaceholder: Story = {
 	render(props) {
 		return (
 			<div className="w-72">
-				<MultipleSelect aria-label="Roles" placeholder="Select roles..." {...props}>
+				<MultipleSelect aria-label={"Roles"} placeholder={"Select roles..."} {...props}>
 					<Label>{"Roles"}</Label>
 					<MultipleSelectContent items={roles}>
 						{(item) => {

@@ -17,6 +17,7 @@ import { twMerge } from "tailwind-merge";
 
 import { Button, type ButtonProps } from "@/lib/button";
 import { cx } from "@/lib/primitive";
+import { useExtracted } from "next-intl";
 
 export type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
@@ -222,6 +223,8 @@ export function CarouselButton({
 	ref,
 	...props
 }: Readonly<ButtonProps & { segment: "previous" | "next" }>): ReactNode {
+	const t = useExtracted("ui");
+
 	const { orientation, scrollPrev, canScrollPrev, scrollNext, canScrollNext } = useCarousel();
 	const isNext = segment === "next";
 	const canScroll = isNext ? canScrollNext : canScrollPrev;
@@ -231,7 +234,7 @@ export function CarouselButton({
 	return (
 		<Button
 			ref={ref}
-			aria-label={isNext ? "Next slide" : "Previous slide"}
+			aria-label={isNext ? t("Next slide") : t("Previous slide")}
 			className={cx([orientation === "vertical" ? "rotate-90" : "", "shrink-0"], className)}
 			data-handler={segment}
 			intent={intent}

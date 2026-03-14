@@ -44,7 +44,7 @@ export function ToastRegion(): ReactNode {
 		>
 			{({ toast }) => {
 				return (
-					<MyToast toast={toast}>
+					<Toast toast={toast}>
 						<AriaToastContent className="ui:flex ui:flex-col ui:flex-1 ui:min-w-0">
 							<AriaText className="ui:font-semibold ui:text-white ui:text-sm" slot="title">
 								{toast.content.title}
@@ -62,7 +62,7 @@ export function ToastRegion(): ReactNode {
 						>
 							<XIcon className="size-4" />
 						</AriaButton>
-					</MyToast>
+					</Toast>
 				);
 			}}
 		</AriaToastRegion>
@@ -71,7 +71,7 @@ export function ToastRegion(): ReactNode {
 
 export interface ToastProps extends AriaToastProps<ToastContent> {}
 
-export function MyToast(props: Readonly<ToastProps>): ReactNode {
+export function Toast(props: Readonly<ToastProps>): ReactNode {
 	const { className, toast, ...rest } = props;
 
 	return (

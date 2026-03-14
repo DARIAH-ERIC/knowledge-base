@@ -23,6 +23,7 @@ import { twMerge } from "tailwind-merge";
 
 import { Button } from "./button";
 import { Select, SelectContent, SelectItem, SelectLabel, SelectTrigger } from "./select";
+import { useExtracted } from "next-intl";
 
 export interface CalendarProps<T extends DateValue> extends Omit<
 	CalendarPrimitiveProps<T>,
@@ -75,6 +76,7 @@ export function CalendarHeader({
 	className,
 	...props
 }: Readonly<React.ComponentProps<"header"> & { isRange?: boolean }>): ReactNode {
+	const t = useExtracted("ui");
 	const { direction } = useLocale();
 	const state = use(CalendarStateContext)!;
 
@@ -102,7 +104,7 @@ export function CalendarHeader({
 			/>
 			<div className="flex items-center gap-1">
 				<Button
-					aria-label="Previous month"
+					aria-label={t("Previous month")}
 					className="size-8 sm:size-7 **:data-[slot=icon]:text-fg"
 					intent="plain"
 					isCircle={true}
@@ -112,7 +114,7 @@ export function CalendarHeader({
 					{direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
 				</Button>
 				<Button
-					aria-label="Next month"
+					aria-label={t("Next month")}
 					className="size-8 sm:size-7 **:data-[slot=icon]:text-fg"
 					intent="plain"
 					isCircle={true}
@@ -129,6 +131,8 @@ export function CalendarHeader({
 export function SelectMonth({ state }: Readonly<{ state: CalendarState }>): ReactNode {
 	const months = [];
 
+	const t = useExtracted("ui");
+
 	const formatter = useDateFormatter({
 		month: "long",
 		timeZone: state.timeZone,
@@ -141,7 +145,7 @@ export function SelectMonth({ state }: Readonly<{ state: CalendarState }>): Reac
 	}
 	return (
 		<Select
-			aria-label="Select month"
+			aria-label={t("Select month")}
 			className="[popover-width:8rem]"
 			onChange={(value) => {
 				state.setFocusedDate(state.focusedDate.set({ month: Number(value) }));
@@ -162,6 +166,7 @@ export function SelectMonth({ state }: Readonly<{ state: CalendarState }>): Reac
 }
 
 export function SelectYear({ state }: Readonly<{ state: CalendarState }>): ReactNode {
+	const t = useExtracted("ui");
 	const years: Array<{ value: CalendarDate; formatted: string }> = [];
 	const formatter = useDateFormatter({
 		year: "numeric",
@@ -177,7 +182,7 @@ export function SelectYear({ state }: Readonly<{ state: CalendarState }>): React
 	}
 	return (
 		<Select
-			aria-label="Select year"
+			aria-label={t("Select year")}
 			onChange={(value) => {
 				const date = years[Number(value)]?.value;
 				if (date) {

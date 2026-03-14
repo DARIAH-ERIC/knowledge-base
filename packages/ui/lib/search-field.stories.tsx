@@ -22,7 +22,7 @@ export const Default: Story = {
 			<div className="w-64">
 				<SearchField {...props}>
 					<Label>{"Search"}</Label>
-					<SearchInput placeholder="Search..." />
+					<SearchInput placeholder={"Search..."} />
 				</SearchField>
 			</div>
 		);

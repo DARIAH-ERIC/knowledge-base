@@ -7,13 +7,13 @@ import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { SubmitButton } from "@dariah-eric/ui/submit-button";
 import { TextField } from "@dariah-eric/ui/text-field";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { type ReactNode, useActionState } from "react";
 
 import { verifyTwoFactorAction } from "@/app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action";
 
 export function TwoFactorVerificationForm(): ReactNode {
-	const t = useTranslations("TwoFactorVerificationForm");
+	const t = useExtracted();
 
 	const [state, action] = useActionState(verifyTwoFactorAction, createActionStateInitial());
 
@@ -22,12 +22,12 @@ export function TwoFactorVerificationForm(): ReactNode {
 			<FormStatus state={state} />
 
 			<TextField autoComplete="one-time-code" autoFocus={true} isRequired={true} name="code">
-				<Label>{t("code")}</Label>
+				<Label>{t("Code")}</Label>
 				<FieldError />
 				<Input />
 			</TextField>
 
-			<SubmitButton className="mt-2">{t("submit")}</SubmitButton>
+			<SubmitButton className="mt-2">{t("Verify")}</SubmitButton>
 		</Form>
 	);
 }

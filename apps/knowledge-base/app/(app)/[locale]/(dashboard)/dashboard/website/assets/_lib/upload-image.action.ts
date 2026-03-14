@@ -7,10 +7,11 @@ import {
 	type GetValidationErrors,
 } from "@dariah-eric/next-lib/actions";
 import { revalidatePath } from "next/cache";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { UploadImageInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.schema";
+import { assertAuthenticated } from "@/lib/auth/session";
 import { uploadAsset } from "@/lib/data/assets";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -20,11 +21,10 @@ export const uploadImageAction = createServerAction<
 	GetValidationErrors<typeof UploadImageInputSchema>
 >(async function uploadImageAction(state, formData) {
 	const locale = await getLocale();
-	const t = await getTranslations("actions.uploadImageAction");
-	const e = await getTranslations("errors");
+	const t = await getExtracted();
 
 	// FIXME:
-	// const user = await assertAuthenticated()
+	const { user: _ } = await assertAuthenticated();
 	// await assertAuthorized(user)
 
 	const validation = await v.safeParseAsync(UploadImageInputSchema, getFormDataValues(formData), {
@@ -36,7 +36,7 @@ export const uploadImageAction = createServerAction<
 
 		return createActionStateError({
 			formData,
-			message: errors.root ?? e("invalid-form-fields"),
+			message: errors.root ?? t("Invalid or missing fields."),
 			validationErrors: errors.nested,
 		});
 	}
@@ -46,6 +46,7 @@ export const uploadImageAction = createServerAction<
 	const { key } = await uploadAsset({ file, licenseId, prefix });
 
 	revalidatePath("/dashboard/website/assets", "page");
+	revalidatePath("/dashboard/administrator/persons", "layout");
 
-	return createActionStateSuccess({ message: t("success"), data: { key } });
+	return createActionStateSuccess({ message: t("Successfully uploaded image."), data: { key } });
 });

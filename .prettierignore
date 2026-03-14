@@ -17,3 +17,7 @@ pnpm-workspace.yaml
 
 # database migrations
 /packages/database/db/migrations/
+
+# i18n messages
+/apps/*/messages/*.json
+/packages/*/messages/*.json

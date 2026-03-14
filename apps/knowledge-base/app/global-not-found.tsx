@@ -1,7 +1,7 @@
 import { pick } from "@acdh-oeaw/lib";
 import type { Metadata } from "next";
-import { useMessages, useTranslations } from "next-intl";
-import { getTranslations } from "next-intl/server";
+import { useExtracted, useMessages } from "next-intl";
+import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { DocumentBody } from "@/app/_components/document-body";
@@ -14,11 +14,11 @@ import { getMetadata } from "@/lib/i18n/metadata";
 export { viewport } from "@/app/_lib/viewport.config";
 
 export async function generateMetadata(): Promise<Metadata> {
-	const t = await getTranslations("GlobalNotFoundPage");
+	const t = await getExtracted();
 	const meta = await getMetadata();
 
 	const metadata: Metadata = {
-		title: [t("meta.title"), meta.title].join(" | "),
+		title: [t("Page not found"), meta.title].join(" | "),
 		/**
 		 * Automatically set by next.js.
 		 *
@@ -35,14 +35,14 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function GlobalNotFoundPage(): ReactNode {
 	const locale = defaultLocale;
 	const messages = useMessages();
-	const t = useTranslations("GlobalNotFoundPage");
+	const t = useExtracted();
 
 	return (
 		<HtmlDocument locale={locale}>
 			<DocumentBody>
 				<Providers locale={locale} messages={pick(messages, ["GlobalNotFoundPage"])}>
-					<Main>
-						<h1>{t("title")}</h1>
+					<Main className="grid place-content-center h-full">
+						<h1>{t("Page not found")}</h1>
 					</Main>
 				</Providers>
 			</DocumentBody>

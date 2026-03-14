@@ -216,6 +216,8 @@ export function Sidebar(props: Readonly<SidebarProps>): ReactNode {
 
 	const { isMobile, state, isOpenOnMobile, setIsOpenOnMobile } = useSidebar();
 
+	const t = useExtracted("ui");
+
 	if (collapsible === "none") {
 		return (
 			<div
@@ -238,7 +240,7 @@ export function Sidebar(props: Readonly<SidebarProps>): ReactNode {
 			<Fragment>
 				<span aria-hidden={true} className="sr-only" data-intent={intent} />
 				<SheetContent
-					aria-label="Sidebar"
+					aria-label={t("Sidebar")}
 					className="w-(--sidebar-width) [--sidebar-width:18rem] entering:blur-in exiting:blur-out has-data-[slot=calendar]:[--sidebar-width:23rem]"
 					closeButton={closeButton}
 					data-intent="default"
@@ -736,7 +738,7 @@ export function SidebarTrigger(props: Readonly<SidebarTriggerProps>): ReactNode 
 
 	return (
 		<Button
-			aria-label={props["aria-label"] ?? "Toggle Sidebar"}
+			aria-label={props["aria-label"] ?? t("Toggle sidebar")}
 			className={cx("shrink-0", className)}
 			data-slot="sidebar-trigger"
 			intent={props.intent ?? "plain"}
@@ -780,7 +782,7 @@ export function SidebarRail(props: Readonly<SidebarRailProps>): ReactNode {
 		props.children ?? (
 			<button
 				ref={ref}
-				aria-label={t("Toggle Sidebar")}
+				aria-label={t("Toggle sidebar")}
 				className={twMerge(
 					"absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 outline-hidden transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-0.5 sm:flex hover:after:bg-transparent group-data-[side=left]:-right-4 group-data-[side=right]:left-0",
 					"in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",

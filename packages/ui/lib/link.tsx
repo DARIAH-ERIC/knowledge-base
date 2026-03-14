@@ -1,14 +1,17 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { use, type ReactNode } from "react";
 import { Link as AriaLink, type LinkProps as AriaLinkProps } from "react-aria-components";
 
 import { cx } from "@/lib/primitive";
+import { UiContext } from "./ui-provider";
 
 export interface LinkProps extends AriaLinkProps {}
 
 export function Link(props: Readonly<LinkProps>): ReactNode {
 	const { children, className, ...rest } = props;
+
+	const { LinkComponent = "a" } = use(UiContext);
 
 	return (
 		<AriaLink
@@ -21,6 +24,19 @@ export function Link(props: Readonly<LinkProps>): ReactNode {
 				],
 				className,
 			)}
+			render={(domProps, renderProps) => {
+				if ("href" in domProps && domProps.href && !renderProps.isDisabled) {
+					return <LinkComponent {...domProps} />;
+				}
+
+				return (
+					<span
+						{...domProps}
+						// @ts-expect-error -- Link may be disabled but have `href`.
+						href={undefined}
+					/>
+				);
+			}}
 			{...rest}
 		>
 			{children}

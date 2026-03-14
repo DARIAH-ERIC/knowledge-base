@@ -1,7 +1,7 @@
 "use client";
 
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
-import { createContext, type ReactNode, use, useEffect } from "react";
+import { createContext, type ComponentProps, type ReactNode, use, useEffect } from "react";
 import {
 	Autocomplete,
 	type AutocompleteProps,
@@ -32,6 +32,7 @@ import { cx } from "@/lib/primitive";
 import { DropdownKeyboard } from "./dropdown";
 import { Loader } from "./loader";
 import { MenuDescription, MenuItem, MenuLabel, type MenuSectionProps, MenuSeparator } from "./menu";
+import { useExtracted } from "next-intl";
 
 export interface CommandMenuProviderProps {
 	isPending?: boolean;
@@ -81,6 +82,8 @@ export function CommandMenu({
 	shortcut,
 	...props
 }: Readonly<CommandMenuProps>): ReactNode {
+	const t = useExtracted("ui");
+
 	// eslint-disable-next-line @typescript-eslint/unbound-method
 	const { contains } = useFilter({ sensitivity: "base" });
 	const filter = (textValue: string, inputValue: string) => {
@@ -126,7 +129,7 @@ export function CommandMenu({
 						)}
 					>
 						<Dialog
-							aria-label={props["aria-label"] ?? "Command Menu"}
+							aria-label={props["aria-label"] ?? t("Command menu")}
 							className="flex max-h-[inherit] flex-col overflow-hidden outline-hidden"
 						>
 							<Autocomplete filter={filter} {...props} />
@@ -150,9 +153,11 @@ export function CommandMenuSearch({
 }: Readonly<CommandMenuSearchProps>): ReactNode {
 	const state = use(OverlayTriggerStateContext)!;
 	const { isPending, escapeButton } = useCommandMenu();
+	const t = useExtracted("ui");
+
 	return (
 		<SearchField
-			aria-label="Quick search"
+			aria-label={t("Quick search")}
 			autoFocus={true}
 			className={cx("flex w-full items-center px-2.5 py-1", className)}
 			{...props}
@@ -167,7 +172,7 @@ export function CommandMenuSearch({
 			)}
 			<Input
 				className="w-full min-w-0 bg-transparent px-2.5 py-2 text-base text-fg placeholder-muted-fg outline-hidden focus:outline-hidden sm:px-2 sm:py-1.5 sm:text-sm [&::-ms-reveal]:hidden [&::-webkit-search-cancel-button]:hidden"
-				placeholder={placeholder ?? "Search..."}
+				placeholder={placeholder ?? t("Search...")}
 			/>
 			{escapeButton === true && (
 				<Button
@@ -207,7 +212,7 @@ export function CommandMenuSection<T extends object>({
 	return (
 		<MenuSection
 			className={twMerge(
-				"col-span-full grid grid-cols-[auto_1fr] content-start gap-y-0.25",
+				"col-span-full grid grid-cols-[auto_1fr] content-start gap-y-px",
 				className,
 			)}
 			{...props}
@@ -225,7 +230,7 @@ export function CommandMenuSection<T extends object>({
 export function CommandMenuItem({
 	className,
 	...props
-}: Readonly<React.ComponentProps<typeof MenuItem>>): ReactNode {
+}: Readonly<ComponentProps<typeof MenuItem>>): ReactNode {
 	const textValue =
 		props.textValue ?? (typeof props.children === "string" ? props.children : undefined);
 	return (
@@ -237,7 +242,7 @@ export function CommandMenuItem({
 	);
 }
 
-export interface CommandMenuDescriptionProps extends React.ComponentProps<typeof MenuDescription> {}
+export interface CommandMenuDescriptionProps extends ComponentProps<typeof MenuDescription> {}
 
 export function CommandMenuDescription({
 	className,
@@ -249,7 +254,7 @@ export function CommandMenuDescription({
 }
 
 const renderer: CollectionRenderer = {
-	CollectionRoot(props: Readonly<React.ComponentProps<CollectionRenderer["CollectionRoot"]>>) {
+	CollectionRoot(props: Readonly<ComponentProps<CollectionRenderer["CollectionRoot"]>>) {
 		const { collection } = props;
 		if (collection.size === 0) {
 			return (
@@ -266,14 +271,14 @@ const renderer: CollectionRenderer = {
 export function CommandMenuSeparator({
 	className,
 	...props
-}: Readonly<React.ComponentProps<typeof MenuSeparator>>): ReactNode {
+}: Readonly<ComponentProps<typeof MenuSeparator>>): ReactNode {
 	return <MenuSeparator className={twMerge("-mx-2", className)} {...props} />;
 }
 
 export function CommandMenuFooter({
 	className,
 	...props
-}: Readonly<React.ComponentProps<"div">>): ReactNode {
+}: Readonly<ComponentProps<"div">>): ReactNode {
 	return (
 		<div
 			className={twMerge(
@@ -290,11 +295,11 @@ export const CommandMenuLabel = MenuLabel;
 export function CommandMenuShortcut({
 	className,
 	...props
-}: Readonly<React.ComponentProps<typeof DropdownKeyboard>>): ReactNode {
+}: Readonly<ComponentProps<typeof DropdownKeyboard>>): ReactNode {
 	return (
 		<DropdownKeyboard
 			className={twMerge(
-				"gap-0.5 font-sans text-[10.5px] uppercase *:inset-ring *:inset-ring-muted-fg/20 *:grid *:size-5.5 *:place-content-center *:rounded-xs *:bg-bg",
+				"gap-0.5 text-[10.5px] uppercase *:inset-ring *:inset-ring-muted-fg/20 *:grid *:size-5.5 *:place-content-center *:rounded-xs *:bg-bg",
 				className,
 			)}
 			{...props}

@@ -3,7 +3,7 @@ import { Avatar } from "@dariah-eric/ui/avatar";
 import { Link } from "@dariah-eric/ui/link";
 import { Text, TextLink } from "@dariah-eric/ui/text";
 import type { Metadata, ResolvingMetadata } from "next";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getExtracted, getLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { TwoFactorVerificationForm } from "@/app/(app)/[locale]/(auth)/auth/two-factor/_components/two-factor-verification-form";
@@ -18,10 +18,10 @@ export async function generateMetadata(
 	_props: Readonly<TwoFactorPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
-	const t = await getTranslations("TwoFactorPage");
+	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("meta.title"),
+		title: t("Two-factor authentication"),
 	});
 
 	return metadata;
@@ -32,11 +32,10 @@ export default async function TwoFactorPage(
 ): Promise<ReactNode> {
 	const locale = await getLocale();
 
-	const t = await getTranslations("TwoFactorPage");
-	const e = await getTranslations("errors");
+	const t = await getExtracted();
 
 	if (!(await globalGetRequestRateLimit())) {
-		return e("too-many-requests");
+		return t("Too many requests.");
 	}
 
 	const { session, user } = await getCurrentSession();
@@ -60,7 +59,7 @@ export default async function TwoFactorPage(
 	return (
 		<Main className="min-h-full p-6 items-center justify-center flex flex-col">
 			<div className="w-full max-w-sm flex flex-col gap-y-4">
-				<Link aria-label="Home" className="mb-2 rounded-xs self-start inline-block" href="/">
+				<Link aria-label={t("Home")} className="mb-2 rounded-xs self-start inline-block" href="/">
 					<Avatar
 						className="dark:invert"
 						isSquare={true}
@@ -70,15 +69,15 @@ export default async function TwoFactorPage(
 				</Link>
 
 				<div>
-					<h1 className="text-xl/10 font-semibold">{t("title")}</h1>
+					<h1 className="text-xl/10 font-semibold">{t("Two-factor authentication")}</h1>
 
-					<Text>{t("message")}</Text>
+					<Text>{t("Enter the code from your authenticator app.")}</Text>
 				</div>
 
 				<TwoFactorVerificationForm />
 
 				<Text className="mt-4">
-					<TextLink href="/auth/two-factor/reset">{t("use-recovery-code")}</TextLink>
+					<TextLink href="/auth/two-factor/reset">{t("Use recovery code")}</TextLink>
 				</Text>
 			</div>
 		</Main>

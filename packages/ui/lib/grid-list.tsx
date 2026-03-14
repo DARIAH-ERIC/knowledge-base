@@ -18,6 +18,7 @@ import { twMerge } from "tailwind-merge";
 import { cx } from "@/lib/primitive";
 
 import { Checkbox } from "./checkbox";
+import { useExtracted } from "next-intl";
 
 export function GridList<T extends object>({
 	className,
@@ -66,7 +67,10 @@ export function GridListItem({
 	children,
 	...props
 }: Readonly<GridListItemProps>): ReactNode {
+	const t = useExtracted("ui");
+
 	const textValue = typeof children === "string" ? children : undefined;
+
 	return (
 		<GridListItemPrimitive
 			textValue={textValue}
@@ -93,7 +97,7 @@ export function GridListItem({
 				return (
 					<Fragment>
 						{values.allowsDragging === true && (
-							<Button aria-label="Reorder item" slot="drag">
+							<Button aria-label={t("Reorder item")} slot="drag">
 								<svg
 									className="size-5 text-muted-fg sm:size-4"
 									data-slot="drag-icon"

@@ -7,13 +7,13 @@ import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { SubmitButton } from "@dariah-eric/ui/submit-button";
 import { TextField } from "@dariah-eric/ui/text-field";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { type ReactNode, useActionState } from "react";
 
 import { updatePasswordAction } from "@/app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action";
 
 export function UpdatePasswordForm(): ReactNode {
-	const t = useTranslations("UpdatePasswordForm");
+	const t = useExtracted();
 
 	const [state, action] = useActionState(updatePasswordAction, createActionStateInitial());
 
@@ -22,13 +22,13 @@ export function UpdatePasswordForm(): ReactNode {
 			<FormStatus state={state} />
 
 			<TextField autoComplete="current-password" isRequired={true} name="password" type="password">
-				<Label>{t("current-password")}</Label>
+				<Label>{t("Current password")}</Label>
 				<FieldError />
 				<Input />
 			</TextField>
 
 			<TextField autoComplete="new-password" isRequired={true} name="new-password" type="password">
-				<Label>{t("new-password")}</Label>
+				<Label>{t("New password")}</Label>
 				<FieldError />
 				<Input />
 			</TextField>
@@ -39,12 +39,12 @@ export function UpdatePasswordForm(): ReactNode {
 				name="new-password-confirmation"
 				type="password"
 			>
-				<Label>{t("confirm-new-password")}</Label>
+				<Label>{t("Confirm new password")}</Label>
 				<FieldError />
 				<Input />
 			</TextField>
 
-			<SubmitButton className="mt-2">{t("submit")}</SubmitButton>
+			<SubmitButton className="mt-2">{t("Update")}</SubmitButton>
 		</Form>
 	);
 }

@@ -4,13 +4,13 @@ import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { SubmitButton } from "@dariah-eric/ui/submit-button";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { type ReactNode, useActionState } from "react";
 
 import { resendEmailVerificationCodeAction } from "@/app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action";
 
 export function ResendEmailVerificationCodeForm(): ReactNode {
-	const t = useTranslations("ResendEmailVerificationCodeForm");
+	const t = useExtracted();
 
 	const [state, action] = useActionState(
 		resendEmailVerificationCodeAction,
@@ -22,7 +22,7 @@ export function ResendEmailVerificationCodeForm(): ReactNode {
 			<FormStatus state={state} />
 
 			<SubmitButton className="mt-2" intent="secondary">
-				{t("resend-code")}
+				{t("Resend verification code")}
 			</SubmitButton>
 		</Form>
 	);

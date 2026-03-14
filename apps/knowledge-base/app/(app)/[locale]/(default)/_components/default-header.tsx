@@ -1,5 +1,6 @@
 import cn from "clsx/lite";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
+import { getExtracted } from "next-intl/server";
 import type { ComponentProps, ReactNode } from "react";
 
 import { ColorSchemeSelect } from "@/app/(app)/[locale]/_components/color-scheme-select";
@@ -16,22 +17,20 @@ interface DefaultHeaderProps extends ComponentProps<"header"> {}
 export function DefaultHeader(props: Readonly<DefaultHeaderProps>): ReactNode {
 	const { className, ...rest } = props;
 
-	const t = useTranslations("DefaultHeader");
-
-	const label = t("navigation.label");
+	const t = useExtracted();
 
 	const navigation = {
 		home: {
 			type: "link",
 			href: createHref({ pathname: "/" }),
-			label: t("navigation.items.home"),
+			label: t("Home"),
 		},
 	} satisfies NavigationConfig;
 
 	return (
 		<header {...rest} className={cn("border-b border-stroke-weak", className)}>
 			<div className="container flex items-center justify-between gap-x-12 px-8 py-4 xs:px-16">
-				<Navigation label={label} navigation={navigation} />
+				<Navigation label={t("Main")} navigation={navigation} />
 
 				<div className="flex items-center gap-x-6 ml-auto">
 					<ColorSchemeSelect />
@@ -46,11 +45,12 @@ export function DefaultHeader(props: Readonly<DefaultHeaderProps>): ReactNode {
 async function User(): Promise<ReactNode> {
 	const { session, user } = await getCurrentSession();
 
+	const t = await getExtracted();
+
 	if (session == null) {
 		return (
 			<div>
-				{/* eslint-disable-next-line react/jsx-no-literals */}
-				<Link href="/auth/sign-in">Sign in</Link>
+				<Link href="/auth/sign-in">{t("Sign in")}</Link>
 			</div>
 		);
 	}

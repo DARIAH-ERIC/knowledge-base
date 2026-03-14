@@ -1,7 +1,6 @@
 import cn from "clsx/lite";
 import { connection } from "next/server";
-// import { connection } from "next/server";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import type { ComponentProps, ReactNode } from "react";
 
 import { NavLink } from "@/app/(app)/[locale]/(default)/_components/nav-link";
@@ -16,34 +15,34 @@ interface DefaultFooterProps extends ComponentProps<"footer"> {}
 export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 	const { className, ...rest } = props;
 
-	const t = useTranslations("DefaultFooter");
+	const t = useExtracted();
 	const meta = useMetadata();
 
 	const links = {
 		home: {
 			type: "link",
 			href: createHref({ pathname: "/" }),
-			label: t("navigation.items.home"),
+			label: t("Home"),
 		},
 		contact: {
 			type: "link",
 			href: createHref({ pathname: "/contact" }),
-			label: t("navigation.items.contact"),
+			label: t("Contact"),
 		},
 		"privacy-policy": {
 			type: "link",
 			href: createHref({ pathname: "/privacy-policy" }),
-			label: t("navigation.items.privacy-policy"),
+			label: t("Privacy policy"),
 		},
 		"terms-of-use": {
 			type: "link",
 			href: createHref({ pathname: "/terms-of-use" }),
-			label: t("navigation.items.terms-of-use"),
+			label: t("Terms of use"),
 		},
 		imprint: {
 			type: "link",
 			href: createHref({ pathname: "/imprint" }),
-			label: t("navigation.items.imprint"),
+			label: t("Imprint"),
 		},
 	} satisfies Record<string, NavigationLink>;
 
@@ -56,7 +55,7 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 						<Logo className="h-8 w-auto" />
 					</NavLink>
 
-					<nav aria-label={t("navigation-social-media.label")}>
+					<nav aria-label={t("Social media")}>
 						<ul className="flex flex-wrap items-center gap-x-4 gap-y-2" role="list">
 							{Object.entries(meta.social).map(([_kind, href]) => {
 								const kind = _kind as keyof typeof meta.social;
@@ -65,7 +64,23 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 									return null;
 								}
 
-								const label = t(`navigation-social-media.items.${kind}`);
+								const socialMediaLabels: Record<string, string> = {
+									bluesky: t("Bluesky"),
+									email: t("Email"),
+									facebook: t("Facebook"),
+									flickr: t("Flickr"),
+									github: t("GitHub"),
+									instagram: t("Instagram"),
+									linkedin: t("LinkedIn"),
+									mastodon: t("Mastodon"),
+									orcid: t("ORCID"),
+									rss: t("RSS feed"),
+									twitter: t("Twitter"),
+									website: t("Website"),
+									youtube: t("YouTube"),
+								};
+
+								const label = socialMediaLabels[kind] ?? kind;
 								const Icon = socialMediaConfig[kind].icon;
 
 								return (
@@ -82,7 +97,7 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 				</div>
 
 				<div className="flex flex-col gap-y-6">
-					<nav aria-label={t("navigation.label")}>
+					<nav aria-label={t("Secondary")}>
 						<ul className="-mx-2.5 flex flex-wrap items-center gap-x-4 gap-y-2" role="list">
 							{Object.entries(links).map(([id, link]) => {
 								if (id === "home") {

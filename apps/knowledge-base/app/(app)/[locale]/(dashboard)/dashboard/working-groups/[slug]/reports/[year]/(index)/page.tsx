@@ -1,6 +1,6 @@
 import type { Metadata, ResolvingMetadata } from "next";
-import { useTranslations } from "next-intl";
-import { getTranslations } from "next-intl/server";
+import { useExtracted } from "next-intl";
+import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
@@ -12,10 +12,10 @@ export async function generateMetadata(
 	_props: Readonly<DashboardWorkingGroupReportPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
-	const t = await getTranslations("DashboardWorkingGroupReportPage");
+	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("meta.title"),
+		title: t("Working group dashboard - Report"),
 	});
 
 	return metadata;
@@ -24,12 +24,12 @@ export async function generateMetadata(
 export default function DashboardWorkingGroupReportPage(
 	_props: Readonly<DashboardWorkingGroupReportPageProps>,
 ): ReactNode {
-	const t = useTranslations("DashboardWorkingGroupReportPage");
+	const t = useExtracted();
 
 	return (
 		<Main className="container flex-1 px-8 py-12 xs:px-16">
 			<section className="flex flex-col gap-y-8">
-				<h1 className="text-5xl font-extrabold tracking-tight text-text-strong">{t("title")}</h1>
+				<h1 className="text-5xl font-extrabold tracking-tight text-text-strong">{t("Report")}</h1>
 			</section>
 		</Main>
 	);

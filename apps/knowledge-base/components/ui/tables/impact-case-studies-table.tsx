@@ -1,4 +1,5 @@
 /* eslint-disable react/jsx-no-literals */
+
 "use client";
 
 import { Button } from "@dariah-eric/ui/button";
@@ -20,7 +21,7 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/16/solid";
-import { useFormatter } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import type { ReactNode } from "react";
 
 import type { ImpactCaseStudiesWithEntities } from "@/lib/data/impact-case-studies";
@@ -30,6 +31,7 @@ interface ImpactCaseStudiesTableProps {
 }
 
 export function ImpactCaseStudiesTable(props: Readonly<ImpactCaseStudiesTableProps>): ReactNode {
+	const t = useExtracted();
 	const formatter = useFormatter();
 
 	const { data: impactCaseStudies } = props;
@@ -47,7 +49,7 @@ export function ImpactCaseStudiesTable(props: Readonly<ImpactCaseStudiesTablePro
 				</CardAction>
 			</CardHeader>
 
-			<Table aria-label="Impact Case Studies">
+			<Table aria-label={t("Impact case studies")}>
 				<TableHeader>
 					<TableColumn isRowHeader={true}>Title</TableColumn>
 					<TableColumn>Summary</TableColumn>

@@ -6,9 +6,9 @@ import {
 } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { unstable_rethrow as rethrow } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getExtracted } from "next-intl/server";
 
-type ServerAction<
+export type ServerAction<
 	TData = unknown,
 	TValidationErrors extends ValidationErrors = ValidationErrors,
 > = (
@@ -21,11 +21,11 @@ export function createServerAction<
 	TValidationErrors extends ValidationErrors = ValidationErrors,
 >(fn: ServerAction<TData, TValidationErrors>): ServerAction<TData, TValidationErrors> {
 	return async (state: ActionState<TData, TValidationErrors>, formData: FormData) => {
-		const e = await getTranslations();
+		const t = await getExtracted();
 
 		try {
 			if (!(await globalPostRequestRateLimit())) {
-				return createActionStateError({ message: e("errors.too-many-requests") });
+				return createActionStateError({ message: t("Too many requests.") });
 			}
 
 			return await fn(state, formData);
@@ -36,7 +36,7 @@ export function createServerAction<
 
 			return createActionStateError({
 				formData,
-				message: e("errors.internal-server-error"),
+				message: t("Internal server error."),
 			});
 		}
 	};

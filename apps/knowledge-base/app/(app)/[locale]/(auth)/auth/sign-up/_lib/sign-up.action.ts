@@ -4,7 +4,7 @@ import { getFormDataValues } from "@acdh-oeaw/lib";
 import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { headers } from "next/headers";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { SignUpActionInputSchema } from "@/app/(app)/[locale]/(auth)/auth/sign-up/_lib/sign-up.schema";
@@ -18,20 +18,19 @@ const signUpIpBucket = auth.signUpIpBucket;
 
 export const signUpAction = createServerAction(async function signUpAction(state, formData) {
 	const locale = await getLocale();
-	const t = await getTranslations("actions.signUpAction");
-	const e = await getTranslations("errors");
+	const t = await getExtracted();
 
 	if (env.AUTH_SIGN_UP !== "enabled") {
-		return createActionStateError({ message: t("sign-up-disabled") });
+		return createActionStateError({ message: t("Sign up is disabled.") });
 	}
 
 	if (!(await globalPostRequestRateLimit())) {
-		return createActionStateError({ message: e("too-many-requests") });
+		return createActionStateError({ message: t("Too many requests.") });
 	}
 
 	const ip = (await headers()).get("x-forwarded-for");
 	if (ip != null && !signUpIpBucket.check(ip, 1)) {
-		return createActionStateError({ message: e("too-many-requests") });
+		return createActionStateError({ message: t("Too many requests.") });
 	}
 
 	const result = await v.safeParseAsync(SignUpActionInputSchema, getFormDataValues(formData), {
@@ -42,7 +41,7 @@ export const signUpAction = createServerAction(async function signUpAction(state
 		const errors = v.flatten<typeof SignUpActionInputSchema>(result.issues);
 
 		return createActionStateError({
-			message: errors.root ?? e("invalid-form-fields"),
+			message: errors.root ?? t("Invalid or missing fields."),
 			validationErrors: errors.nested,
 		});
 	}
@@ -51,16 +50,16 @@ export const signUpAction = createServerAction(async function signUpAction(state
 
 	const isEmailAvailable = await auth.isEmailAvailable(email);
 	if (!isEmailAvailable) {
-		return createActionStateError({ message: t("email-in-use") });
+		return createActionStateError({ message: t("Email is already used.") });
 	}
 
 	const isStrongPassword = await auth.verifyPasswordStrength(password);
 	if (!isStrongPassword) {
-		return createActionStateError({ message: t("weak-password") });
+		return createActionStateError({ message: t("Weak password.") });
 	}
 
 	if (ip != null && !signUpIpBucket.consume(ip, 1)) {
-		return createActionStateError({ message: e("too-many-requests") });
+		return createActionStateError({ message: t("Too many requests.") });
 	}
 
 	const user = await auth.createUser(email, name, password);

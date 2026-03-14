@@ -41,6 +41,16 @@
 	"i18n-ally.review.enabled": false,
 	"i18n-ally.sortKeys": true,
 	"i18n-ally.tabStyle": "tab",
+	"js/ts.inlayHints.parameterNames.enabled": "all",
+	"js/ts.preferences.autoImportFileExcludePatterns": [
+		"lucide-react",
+		"next/router.d.ts",
+		"next/dist/client/router.d.ts"
+	],
+	"js/ts.preferences.importModuleSpecifier": "non-relative",
+	"js/ts.preferences.preferTypeOnlyAutoImports": true,
+	"js/ts.tsdk.path": "node_modules/typescript/lib",
+	"js/ts.tsdk.promptToUseWorkspaceVersion": true,
 	"less.validate": false,
 	"mdx.server.enable": true,
 	"scss.validate": false,
@@ -55,16 +65,6 @@
 	"tailwindCSS.validate": true,
 	"terminal.integrated.enablePersistentSessions": false,
 	"turbo.useLocalTurbo": true,
-	"typescript.enablePromptUseWorkspaceTsdk": true,
-	"typescript.inlayHints.parameterNames.enabled": "all",
-	"typescript.preferences.autoImportFileExcludePatterns": [
-		"lucide-react",
-		"next/router.d.ts",
-		"next/dist/client/router.d.ts"
-	],
-	"typescript.preferences.importModuleSpecifier": "non-relative",
-	"typescript.preferences.preferTypeOnlyAutoImports": true,
-	"typescript.tsdk": "node_modules/typescript/lib",
 	"vitest.cliArguments": "--passWithNoTests",
 	"vitest.shellType": "terminal",
 	"workbench.editor.customLabels.patterns": {

@@ -1,7 +1,8 @@
 import { createUrl } from "@acdh-oeaw/lib";
+import { ToastRegion } from "@dariah-eric/ui/toast";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getExtracted, getLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 import { jsonLdScriptProps } from "react-schemaorg";
 import type { WebSite, WithContext } from "schema-dts";
@@ -27,7 +28,7 @@ export function generateStaticParams(): Array<Awaited<LocaleLayoutProps["params"
 
 export async function generateMetadata(): Promise<Promise<Metadata>> {
 	const locale = await getLocale();
-	const t = await getTranslations("LocaleLayout");
+	const t = await getExtracted();
 	const meta = await getMetadata();
 
 	const metadata: Metadata = {
@@ -42,7 +43,9 @@ export async function generateMetadata(): Promise<Promise<Metadata>> {
 			 */
 			canonical: "./",
 			types: {
-				"application/rss+xml": [{ title: t("rss-feed", { locale }), url: `/${locale}/rss.xml` }],
+				"application/rss+xml": [
+					{ title: t("RSS feed ({locale})", { locale }), url: `/${locale}/rss.xml` },
+				],
 			},
 		},
 		title: {
@@ -100,6 +103,8 @@ export default async function LocaleLayout(props: Readonly<LocaleLayoutProps>): 
 					// messages={pick(await getMessages(), "ErrorPage")}
 				>
 					{children}
+
+					<ToastRegion />
 
 					<AnalyticsScript
 						baseUrl={env.NEXT_PUBLIC_APP_MATOMO_BASE_URL}

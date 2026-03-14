@@ -20,7 +20,7 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/16/solid";
-import { useFormatter } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import type { ReactNode } from "react";
 
 import type { NewsWithEntities } from "@/lib/data/news";
@@ -30,6 +30,7 @@ interface NewsTableProps {
 }
 
 export function NewsTable(props: Readonly<NewsTableProps>): ReactNode {
+	const t = useExtracted();
 	const formatter = useFormatter();
 
 	const { data: news } = props;
@@ -47,7 +48,7 @@ export function NewsTable(props: Readonly<NewsTableProps>): ReactNode {
 				</CardAction>
 			</CardHeader>
 
-			<Table aria-label="News">
+			<Table aria-label={t("News")}>
 				<TableHeader>
 					<TableColumn isRowHeader={true}>Title</TableColumn>
 					<TableColumn>Summary</TableColumn>

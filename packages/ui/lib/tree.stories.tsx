@@ -57,7 +57,7 @@ export const Default: Story = {
 	render() {
 		return (
 			<div className="w-64">
-				<Tree aria-label="File system" items={files}>
+				<Tree aria-label={"File system"} items={files}>
 					{function renderItem(item) {
 						return (
 							<TreeItem id={item.id} textValue={item.name}>
@@ -84,7 +84,7 @@ export const Selectable: Story = {
 	render() {
 		return (
 			<div className="w-64">
-				<Tree aria-label="File system" items={files} selectionMode="single">
+				<Tree aria-label={"File system"} items={files} selectionMode="single">
 					{function renderItem(item) {
 						return (
 							<TreeItem id={item.id} textValue={item.name}>
@@ -111,7 +111,7 @@ export const MultiSelectable: Story = {
 	render() {
 		return (
 			<div className="w-64">
-				<Tree aria-label="File system" items={files} selectionMode="multiple">
+				<Tree aria-label={"File system"} items={files} selectionMode="multiple">
 					{function renderItem(item) {
 						return (
 							<TreeItem id={item.id} textValue={item.name}>

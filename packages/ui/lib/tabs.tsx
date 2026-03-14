@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, type ReactNode, type RefObject } from "react";
+import { Fragment, use, type ReactNode, type RefObject } from "react";
 import {
 	composeRenderProps,
 	SelectionIndicator,
@@ -18,6 +18,7 @@ import {
 import { twMerge } from "tailwind-merge";
 
 import { cx } from "@/lib/primitive";
+import { UiContext } from "./ui-provider";
 
 export interface TabsProps extends TabsPrimitiveProps {
 	ref?: React.RefObject<HTMLDivElement>;
@@ -77,6 +78,8 @@ export interface TabProps extends TabPrimitiveProps {
 export function Tab(props: Readonly<TabProps>): ReactNode {
 	const { children, className, ref, ...rest } = props;
 
+	const { LinkComponent = "a" } = use(UiContext);
+
 	const { orientation } = useSlottedContext(TabsContext)!;
 	return (
 		<TabPrimitive
@@ -96,6 +99,19 @@ export function Tab(props: Readonly<TabProps>): ReactNode {
 				className,
 			)}
 			data-slot="tab"
+			render={(domProps, renderProps) => {
+				if ("href" in domProps && domProps.href && !renderProps.isDisabled) {
+					return <LinkComponent {...domProps} />;
+				}
+
+				return (
+					<div
+						{...domProps}
+						// @ts-expect-error -- Link may be disabled but have `href`.
+						href={undefined}
+					/>
+				);
+			}}
 		>
 			{(values) => {
 				return (

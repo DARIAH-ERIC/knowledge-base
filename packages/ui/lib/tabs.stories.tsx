@@ -24,7 +24,7 @@ export const Default: Story = {
 	render(props) {
 		return (
 			<Tabs {...props}>
-				<TabList aria-label="History">
+				<TabList aria-label={"History"}>
 					<Tab id="overview">{"Overview"}</Tab>
 					<Tab id="activity">{"Activity"}</Tab>
 					<Tab id="settings">{"Settings"}</Tab>
@@ -42,7 +42,7 @@ export const Vertical: Story = {
 	render(props) {
 		return (
 			<Tabs {...props}>
-				<TabList aria-label="Settings">
+				<TabList aria-label={"Settings"}>
 					<Tab id="profile">{"Profile"}</Tab>
 					<Tab id="account">{"Account"}</Tab>
 					<Tab id="security">{"Security"}</Tab>

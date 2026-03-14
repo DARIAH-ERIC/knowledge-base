@@ -17,6 +17,7 @@ import { PopoverContent } from "@/lib/popover";
 import { cx } from "@/lib/primitive";
 import { SearchField, SearchInput } from "@/lib/search-field";
 import { Tag, TagGroup, TagList } from "@/lib/tag-group";
+import { useExtracted } from "next-intl";
 
 interface OptionBase {
 	id: string | number;
@@ -48,6 +49,8 @@ export function MultipleSelect<T extends OptionBase>(
 	props: Readonly<MultipleSelectProps<T>>,
 ): ReactNode {
 	const { placeholder = "No selected items", className, children, name, ...rest } = props;
+
+	const t = useExtracted("ui");
 
 	const triggerRef = useRef<HTMLDivElement | null>(null);
 
@@ -88,7 +91,7 @@ export function MultipleSelect<T extends OptionBase>(
 							{({ selectedItems, state }) => {
 								return (
 									<TagGroup
-										aria-label="Selected items"
+										aria-label={t("Selected items")}
 										onRemove={(keys) => {
 											if (Array.isArray(state.value)) {
 												state.setValue(
@@ -116,7 +119,7 @@ export function MultipleSelect<T extends OptionBase>(
 							}}
 						</SelectValue>
 						<Button
-							aria-label="Open options"
+							aria-label={t("Open options")}
 							className="self-end rounded-[calc(var(--radius-lg)-(--spacing(1)))]"
 							intent="secondary"
 							size="sq-xs"

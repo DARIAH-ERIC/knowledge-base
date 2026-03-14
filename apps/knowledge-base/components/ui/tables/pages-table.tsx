@@ -20,7 +20,7 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/16/solid";
-import { useFormatter } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import type { ReactNode } from "react";
 
 import type { PagesWithEntities } from "@/lib/data/pages";
@@ -30,6 +30,7 @@ interface PagesTableProps {
 }
 
 export function PagesTable(props: Readonly<PagesTableProps>): ReactNode {
+	const t = useExtracted();
 	const formatter = useFormatter();
 
 	const { data: pages } = props;
@@ -47,7 +48,7 @@ export function PagesTable(props: Readonly<PagesTableProps>): ReactNode {
 				</CardAction>
 			</CardHeader>
 
-			<Table aria-label="Pages">
+			<Table aria-label={t("Pages")}>
 				<TableHeader>
 					<TableColumn isRowHeader={true}>Title</TableColumn>
 					<TableColumn>Summary</TableColumn>

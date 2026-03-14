@@ -2,7 +2,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 import { LocalizedStringProvider } from "react-aria-components/i18n";
 
-import { AriaProviders } from "@/app/_components/aria-providers";
+import { ClientProviders } from "@/app/_components/client-providers";
 import { AnalyticsProvider } from "@/lib/analytics/analytics-provider";
 import { ColorSchemeProvider } from "@/lib/color-scheme/color-scheme-provider";
 import type { IntlLocale } from "@/lib/i18n/locales";
@@ -22,7 +22,7 @@ export function Providers(props: Readonly<ProvidersProps>): ReactNode {
 			{/* @see {@link https://react-spectrum.adobe.com/react-aria/ssr.html#advanced-optimization} */}
 			<LocalizedStringProvider locale={locale} />
 			<NextIntlClientProvider locale={locale} messages={messages}>
-				<AriaProviders locale={locale}>{children}</AriaProviders>
+				<ClientProviders locale={locale}>{children}</ClientProviders>
 				<AnalyticsProvider />
 			</NextIntlClientProvider>
 			<ColorSchemeProvider />

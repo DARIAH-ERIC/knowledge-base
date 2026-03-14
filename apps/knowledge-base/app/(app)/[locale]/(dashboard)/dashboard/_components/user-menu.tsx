@@ -1,5 +1,3 @@
-/* eslint-disable react/jsx-no-literals */
-
 "use client";
 
 import { Avatar } from "@dariah-eric/ui/avatar";
@@ -19,6 +17,7 @@ import {
 	DocumentTextIcon,
 	Squares2X2Icon,
 } from "@heroicons/react/24/outline";
+import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
 
 interface UserMenuProps {
@@ -31,9 +30,11 @@ interface UserMenuProps {
 export function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 	const { user } = props;
 
+	const t = useExtracted();
+
 	return (
 		<Menu>
-			<MenuTrigger aria-label="Open Menu" className="ml-auto md:hidden">
+			<MenuTrigger aria-label={t("Open menu")} className="ml-auto md:hidden">
 				<Avatar isSquare={true} src="https://avatars.githubusercontent.com/u/20753323" />
 			</MenuTrigger>
 
@@ -47,19 +48,19 @@ export function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 
 				<MenuItem href="/dashboard">
 					<Squares2X2Icon />
-					<MenuLabel>Dashboard</MenuLabel>
+					<MenuLabel>{t("Dashboard")}</MenuLabel>
 				</MenuItem>
 
 				<MenuItem href="/auth/settings">
 					<Cog6ToothIcon />
-					<MenuLabel>Settings</MenuLabel>
+					<MenuLabel>{t("Settings")}</MenuLabel>
 				</MenuItem>
 
 				<MenuSeparator />
 
 				<MenuItem href="/documentation">
 					<DocumentTextIcon />
-					<MenuLabel>Documentation</MenuLabel>
+					<MenuLabel>{t("Documentation")}</MenuLabel>
 				</MenuItem>
 
 				<MenuSeparator />
@@ -70,7 +71,7 @@ export function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 					}}
 				>
 					<ArrowLeftStartOnRectangleIcon />
-					<MenuLabel>Sign out</MenuLabel>
+					<MenuLabel>{t("Sign out")}</MenuLabel>
 				</MenuItem>
 			</MenuContent>
 		</Menu>

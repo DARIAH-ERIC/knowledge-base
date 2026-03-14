@@ -23,7 +23,7 @@ export const Default: Story = {
 			<div className="w-64">
 				<TextField {...props}>
 					<Label>{"Email"}</Label>
-					<Input placeholder="you@example.com" type="email" />
+					<Input placeholder={"you@example.com"} type="email" />
 				</TextField>
 			</div>
 		);
@@ -37,7 +37,7 @@ export const WithDescription: Story = {
 			<div className="w-64">
 				<TextField {...props}>
 					<Label>{"Email"}</Label>
-					<Input placeholder="you@example.com" type="email" />
+					<Input placeholder={"you@example.com"} type="email" />
 					<Description>{"We'll never share your email."}</Description>
 				</TextField>
 			</div>
@@ -52,7 +52,7 @@ export const Required: Story = {
 			<div className="w-64">
 				<TextField {...props}>
 					<Label>{"Username"}</Label>
-					<Input placeholder="Enter username" />
+					<Input placeholder={"Enter username"} />
 					<FieldError />
 				</TextField>
 			</div>

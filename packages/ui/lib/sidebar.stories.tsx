@@ -72,7 +72,7 @@ export const Default: Story = {
 
 					<SidebarContent>
 						<SidebarSectionGroup>
-							<SidebarSection label="Navigation">
+							<SidebarSection label={"Navigation"}>
 								{navItems.map((item) => {
 									return (
 										<SidebarItem
@@ -90,7 +90,7 @@ export const Default: Story = {
 
 							<SidebarSeparator />
 
-							<SidebarSection label="Account">
+							<SidebarSection label={"Account"}>
 								{settingsItems.map((item) => {
 									return (
 										<SidebarItem key={item.id} href={item.href} tooltip={item.label}>

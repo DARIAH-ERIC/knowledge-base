@@ -1,607 +1,230 @@
 {
-	"actions": {
-		"forgotPasswordAction": {
-			"invalid-account": "Account does not exist."
-		},
-		"resendEmailVerificationCodeAction": {
-			"new-code-sent": "A new code was sent to your inbox."
-		},
-		"resetTwoFactorAction": {
-			"invalid-code": "Invalid recovery code."
-		},
-		"resetPasswordAction": {
-			"weak-password": "Weak password."
-		},
-		"sendContactFormEmailAction": {
-			"error": "Failed to send message.",
-			"success": "Successfully sent message."
-		},
-		"setupTwoFactorAction": {
-			"invalid-code": "Invalid code.",
-			"invalid-key": "Invalid key."
-		},
-		"signInAction": {
-			"incorrect-password": "Incorrect password.",
-			"invalid-account": "Account does not exist."
-		},
-		"signUpAction": {
-			"email-in-use": "Email is already used.",
-			"sign-up-disabled": "Sign up is disabled.",
-			"weak-password": "Weak password."
-		},
-		"updateEmailAction": {
-			"email-in-use": "Email is already used."
-		},
-		"updatePasswordAction": {
-			"incorrect-password": "Incorrect password.",
-			"password-updated": "Updated password.",
-			"weak-password": "Weak password."
-		},
-		"uploadImageAction": {
-			"success": "Successfully uploaded image."
-		},
-		"verifyTwoFactorAction": {
-			"incorrect-code": "Incorrect code."
-		},
-		"verifyEmailAction": {
-			"code-expired": "The verification code was expired. We sent another code to your inbox.",
-			"incorrect-code": "Incorrect code."
-		},
-		"verifyPasswordResetEmailAction": {
-			"incorrect-code": "Incorrect code.",
-			"restart": "Please restart the process."
-		},
-		"verifyPasswordResetTwoFactorWithRecoveryCodeAction": {
-			"incorrect-code": "Incorrect code."
-		},
-		"verifyPasswordResetTwoFactorWithTotpAction": {
-			"incorrect-code": "Incorrect code."
-		}
-	},
-	"errors": {
-		"forbidden": "Forbidden.",
-		"internal-server-error": "Internal server error.",
-		"invalid-form-fields": "Invalid or missing fields.",
-		"not-authenticated": "Not authenticated.",
-		"too-many-requests": "Too many requests."
-	},
-	"ColorSchemeSelect": {
-		"change-color-scheme": "Change color scheme",
-		"color-schemes": {
-			"dark": "Dark",
-			"light": "Light",
-			"system": "System"
-		}
-	},
-	"ContactForm": {
-		"email": "Email",
-		"message": "Message",
-		"name": "Name",
-		"subject": "Subject",
-		"submit": "Send"
-	},
-	"ContactPage": {
-		"meta": {
-			"title": "Contact"
-		},
-		"title": "Contact"
-	},
-	"DashboardAdministratorPage": {
-		"meta": {
-			"title": "Administrator dashboard"
-		},
-		"title": "Administrator dashboard"
-	},
-	"DashboardAdministratorContributionsPage": {
-		"meta": {
-			"title": "Administrator dashboard - Contributions"
-		},
-		"title": "Contributions"
-	},
-	"DashboardAdministratorCountriesPage": {
-		"meta": {
-			"title": "Administrator dashboard - Countries"
-		},
-		"title": "Countries"
-	},
-	"DashboardAdministratorInstitutionsPage": {
-		"meta": {
-			"title": "Administrator dashboard - Institutions"
-		},
-		"title": "Institutions"
-	},
-	"DashboardAdministratorNewslettersPage": {
-		"meta": {
-			"title": "Administrator dashboard - Newsletters"
-		},
-		"title": "Newsletters"
-	},
-	"DashboardAdministratorOutreachPage": {
-		"meta": {
-			"title": "Administrator dashboard - Outreach"
-		},
-		"title": "Outreach"
-	},
-	"DashboardAdministratorPersonsPage": {
-		"meta": {
-			"title": "Administrator dashboard - Persons"
-		},
-		"title": "Persons"
-	},
-	"DashboardAdministratorProjectsPage": {
-		"meta": {
-			"title": "Administrator dashboard - Projects"
-		},
-		"title": "Projects"
-	},
-	"DashboardAdministratorReportsPage": {
-		"meta": {
-			"title": "Administrator dashboard - Reports"
-		},
-		"title": "Reports"
-	},
-	"DashboardAdministratorServicesPage": {
-		"meta": {
-			"title": "Administrator dashboard - Services"
-		},
-		"title": "Services"
-	},
-	"DashboardAdministratorSoftwarePage": {
-		"meta": {
-			"title": "Administrator dashboard - Software"
-		},
-		"title": "Software"
-	},
-	"DashboardAdministratorUsersPage": {
-		"meta": {
-			"title": "Administrator dashboard - Users"
-		},
-		"title": "Users"
-	},
-	"DashboardAdministratorWorkingGroupsPage": {
-		"meta": {
-			"title": "Administrator dashboard - Working groups"
-		},
-		"title": "Working groups"
-	},
-	"DashboardAdministratorWorkingGroupReportsPage": {
-		"meta": {
-			"title": "Administrator dashboard - Working group reports"
-		},
-		"title": "Working group reports"
-	},
-	"DashboardNationalConsortiumPage": {
-		"meta": {
-			"title": "National consortium dashboard"
-		},
-		"title": "National consortium dashboard"
-	},
-	"DashboardNationalConsortiumReportPage": {
-		"meta": {
-			"title": "National consortium dashboard - Report"
-		},
-		"title": "Report"
-	},
-	"DashboardNationalConsortiumReportEditPage": {
-		"meta": {
-			"title": "National consortium dashboard - Edit report"
-		},
-		"title": "Edit report"
-	},
-	"DashboardNationalConsortiumReportEditStepContributionsPage": {
-		"meta": {
-			"title": "National consortium dashboard - Edit contributions"
-		},
-		"title": "Edit contributions"
-	},
-	"DashboardNationalConsortiumReportEditStepEventsPage": {
-		"meta": {
-			"title": "National consortium dashboard - Edit events"
-		},
-		"title": "Edit events"
-	},
-	"DashboardNationalConsortiumReportEditStepInstitutionsPage": {
-		"meta": {
-			"title": "National consortium dashboard - Edit institutions"
-		},
-		"title": "Edit institutions"
-	},
-	"DashboardNationalConsortiumReportEditStepOutreachPage": {
-		"meta": {
-			"title": "National consortium dashboard - Edit outreach"
-		},
-		"title": "Edit outreach"
-	},
-	"DashboardNationalConsortiumReportEditStepProjectsPage": {
-		"meta": {
-			"title": "National consortium dashboard - Edit projects"
-		},
-		"title": "Edit projects"
-	},
-	"DashboardNationalConsortiumReportEditStepPublicationsPage": {
-		"meta": {
-			"title": "National consortium dashboard - Edit publications"
-		},
-		"title": "Edit publications"
-	},
-	"DashboardNationalConsortiumReportEditStepServicesPage": {
-		"meta": {
-			"title": "National consortium dashboard - Edit services"
-		},
-		"title": "Edit services"
-	},
-	"DashboardNationalConsortiumReportEditStepSoftwarePage": {
-		"meta": {
-			"title": "National consortium dashboard - Edit software"
-		},
-		"title": "Edit software"
-	},
-	"DashboardNationalConsortiumReportEditStepSummaryPage": {
-		"meta": {
-			"title": "National consortium dashboard - Edit summary"
-		},
-		"title": "Edit summary"
-	},
-	"DashboardNationalConsortiumReportsPage": {
-		"meta": {
-			"title": "National consortium dashboard - Reports"
-		},
-		"title": "Reports"
-	},
-	"DashboardWebsitePage": {
-		"meta": {
-			"title": "Website dashboard"
-		},
-		"title": "Website dashboard"
-	},
-	"DashboardWebsiteAssetsPage": {
-		"meta": {
-			"title": "Website dashboard - Assets"
-		},
-		"title": "Assets"
-	},
-	"DashboardWebsiteEventsPage": {
-		"meta": {
-			"title": "Website dashboard - Events"
-		},
-		"title": "Events"
-	},
-	"DashboardWebsiteImpactCaseStudiesPage": {
-		"meta": {
-			"title": "Website dashboard - Impact case studies"
-		},
-		"title": "Impact case studies"
-	},
-	"DashboardWebsiteMetadataPage": {
-		"meta": {
-			"title": "Website dashboard - Metadata"
-		},
-		"title": "Metadata"
-	},
-	"DashboardWebsiteNavigationPage": {
-		"meta": {
-			"title": "Website dashboard - Navigation"
-		},
-		"title": "Navigation"
-	},
-	"DashboardWebsiteNewsPage": {
-		"meta": {
-			"title": "Website dashboard - News"
-		},
-		"title": "News"
-	},
-	"DashboardWebsitePagesPage": {
-		"meta": {
-			"title": "Website dashboard - Pages"
-		},
-		"title": "Pages"
-	},
-	"DashboardWebsiteSpotlightArticlesPage": {
-		"meta": {
-			"title": "Website dashboard - Spotlight articles"
-		},
-		"title": "Spotlight articles"
-	},
-	"DashboardWorkingGroupPage": {
-		"meta": {
-			"title": "Working group dashboard"
-		},
-		"title": "Working group dashboard"
-	},
-	"DashboardWorkingGroupReportPage": {
-		"meta": {
-			"title": "Working group dashboard - Report"
-		},
-		"title": "Report"
-	},
-	"DashboardWorkingGroupReportEditPage": {
-		"meta": {
-			"title": "Working group dashboard - Edit report"
-		},
-		"title": "Edit report"
-	},
-	"DashboardWorkingGroupReportsPage": {
-		"meta": {
-			"title": "Working group dashboard - Reports"
-		},
-		"title": "Reports"
-	},
-	"DashboardLayout": {
-		"skip-link": "Skip to main content"
-	},
-	"DefaultFooter": {
-		"navigation": {
-			"items": {
-				"contact": "Contact",
-				"home": "Home",
-				"imprint": "Imprint",
-				"privacy-policy": "Privacy policy",
-				"terms-of-use": "Terms of use"
-			},
-			"label": "Secondary"
-		},
-		"navigation-social-media": {
-			"items": {
-				"bluesky": "Bluesky",
-				"email": "Email",
-				"facebook": "Facebook",
-				"flickr": "Flickr",
-				"github": "GitHub",
-				"instagram": "Instagram",
-				"linkedin": "LinkedIn",
-				"mastodon": "Mastodon",
-				"orcid": "ORCID",
-				"rss": "RSS feed",
-				"twitter": "Twitter",
-				"website": "Website",
-				"youtube": "YouTube"
-			},
-			"label": "Social media"
-		}
-	},
-	"DefaultHeader": {
-		"navigation": {
-			"drawer": {
-				"close": "Close navigation menu",
-				"label": "Navigation menu",
-				"open": "Open navigation menu"
-			},
-			"items": {
-				"about": "About the project",
-				"documentation": "Documentation",
-				"home": "Home",
-				"search": "Search"
-			},
-			"label": "Main"
-		}
-	},
-	"DefaultLayout": {
-		"skip-link": "Skip to main content"
-	},
-	"EmailVerificationForm": {
-		"code": "Verification code",
-		"verify": "Verify"
-	},
-	"ErrorPage": {
-		"meta": {
-			"title": "Error"
-		},
-		"reset": "Try again",
-		"title": "Something went wrong"
-	},
-	"ForbiddenPage": {
-		"meta": {
-			"title": "Forbidden"
-		},
-		"title": "Forbidden"
-	},
-	"ForgotPasswordForm": {
-		"email": "Email",
-		"submit": "Send"
-	},
-	"ForgotPasswordPage": {
-		"meta": {
-			"title": "Forgot password"
-		},
-		"message": "We will send a password reset code to your email address.",
-		"sign-in": "Sign in",
-		"title": "Forgot your password?"
-	},
-	"GlobalNotFoundPage": {
-		"meta": {
-			"title": "Page not found"
-		},
-		"title": "Page not found"
-	},
-	"ImprintPage": {
-		"meta": {
-			"title": "Imprint"
-		},
-		"title": "Imprint"
-	},
-	"IndexPage": {
-		"lead": "Your central hub for everything DARIAH-related.",
-		"title": "DARIAH Knowledge Base"
-	},
-	"LocaleLayout": {
-		"rss-feed": "RSS feed ({locale})"
-	},
-	"LocaleSelect": {
-		"change-locale": "Switch locale",
-		"change-locale-to": "Switch to {locale}",
-		"current-locale": "Current language: {locale}"
-	},
-	"PasswordResetEmailVerificationForm": {
-		"code": "Code",
-		"submit": "Verify"
-	},
-	"PasswordResetRecoveryCodeForm": {
-		"recovery-code": "Recovery code",
-		"submit": "Verify"
-	},
-	"PasswordResetTotpForm": {
-		"code": "Code",
-		"submit": "Verify"
-	},
-	"PasswordResetTwoFactorPage": {
-		"enter-code": "Enter the code from your authenticator app.",
-		"meta": {
-			"title": "Two-factor authentication"
-		},
-		"title": "Two-factor authentication",
-		"use-recovery-code": "Use your recovery code instead"
-	},
-	"PasswordResetVerifyEmailPage": {
-		"message": "We sent an 8-digit code to {email}.",
-		"meta": {
-			"title": "Verify email address"
-		},
-		"title": "Verify your email address"
-	},
-	"PrivacyPolicyPage": {
-		"meta": {
-			"title": "Privacy policy"
-		},
-		"title": "Privacy policy"
-	},
-	"RecoveryCodeForm": {
-		"generate-new-code": "Generate new code",
-		"your-code": "Your recovery code is:"
-	},
-	"RecoveryCodePage": {
-		"message": "You can use this recovery code if you lose access to your second factors.",
-		"meta": {
-			"title": "Recovery code"
-		},
-		"next": "Continue",
-		"title": "Recovery code",
-		"your-code": "Your recovery code is:"
-	},
-	"ResendEmailVerificationCodeForm": {
-		"resend-code": "Resend verification code"
-	},
-	"ResetPasswordForm": {
-		"confirm-password": "Confirm password",
-		"password": "Password",
-		"submit": "Reset password"
-	},
-	"ResetPasswordPage": {
-		"meta": {
-			"title": "Reset password"
-		},
-		"message": "Please provide a new password for your account.",
-		"title": "Reset password"
-	},
-	"SettingsPage": {
-		"meta": {
-			"title": "Settings"
-		},
-		"recovery-code": "Recovery code",
-		"title": "Settings",
-		"update": "Update",
-		"update-email": "Update email",
-		"update-password": "Update password",
-		"update-two-factor": "Update two-factor authentication",
-		"your-email": "Your email:"
-	},
-	"SignInForm": {
-		"email": "Email",
-		"forgot-password": "Forgot password?",
-		"no-account": "Don't yet have an account?",
-		"password": "Password",
-		"submit": "Sign in",
-		"sign-up": "Sign up"
-	},
-	"SignInPage": {
-		"forgot-password": "Forgot password?",
-		"message": "Sign in to the DARIAH Knowledge Base with your user account.",
-		"meta": {
-			"title": "Sign in"
-		},
-		"sign-up": "Create an account",
-		"title": "Sign in"
-	},
-	"SignUpForm": {
-		"confirm-password": "Confirm password",
-		"email": "Email",
-		"name": "Name",
-		"password": "Password",
-		"submit": "Continue"
-	},
-	"SignUpPage": {
-		"has-account": "Already have an account?",
-		"message": "Your password must be between {passwordMinLength,number} and {passwordMaxLength,number} characters long.",
-		"meta": {
-			"title": "Sign up"
-		},
-		"sign-in": "Sign in",
-		"title": "Create an account"
-	},
-	"TermsOfUsePage": {
-		"meta": {
-			"title": "Terms of use"
-		},
-		"title": "Terms of use"
-	},
-	"TwoFactorPage": {
-		"message": "Enter the code from your authenticator app.",
-		"meta": {
-			"title": "Two-factor authentication"
-		},
-		"title": "Two-factor authentication",
-		"use-recovery-code": "Use recovery code"
-	},
-	"TwoFactorResetForm": {
-		"recovery-code": "Recovery code",
-		"submit": "Verify"
-	},
-	"TwoFactorResetPage": {
-		"meta": {
-			"title": "Account recovery"
-		},
-		"message": "Enter the recovery code you received when creating the account.",
-		"title": "Recover your account"
-	},
-	"TwoFactorSetUpForm": {
-		"submit": "Save",
-		"verify": "Verify the code from the app"
-	},
-	"TwoFactorSetupPage": {
-		"meta": {
-			"title": "Two-factor authentication setup"
-		},
-		"title": "Set up two-factor authentication"
-	},
-	"TwoFactorVerificationForm": {
-		"code": "Code",
-		"submit": "Verify"
-	},
-	"UnauthorizedPage": {
-		"meta": {
-			"title": "Unauthorized"
-		},
-		"title": "Unauthorized"
-	},
-	"UpdateEmailForm": {
-		"new-email": "New email",
-		"submit": "Update"
-	},
-	"UpdatePasswordForm": {
-		"confirm-new-password": "Confirm new password",
-		"current-password": "Current password",
-		"new-password": "New password",
-		"submit": "Update"
-	},
-	"UploadImageForm": {
-		"input": "Select an image to upload",
-		"submit": "Upload image"
-	},
-	"VerifyEmailPage": {
-		"change-email": "Change email address",
-		"message": "We sent an 8-digit verification code to {email}.",
-		"meta": {
-			"title": "Verify email address"
-		},
-		"title": "Verify email address"
-	}
+  "+CwN9C": "System",
+  "3cc4Ct": "Light",
+  "tOdNiY": "Dark",
+  "o9rZ47": "Change color scheme",
+  "sy+pv5": "Email",
+  "9WRlF4": "Send",
+  "CDu063": "Too many requests.",
+  "z9RwCc": "Invalid or missing fields.",
+  "aEdOxR": "Account does not exist.",
+  "9H3bhD": "Forgot password",
+  "ejEGdx": "Home",
+  "cyRU1N": "Forgot your password?",
+  "htvY7x": "We will send a password reset code to your email address.",
+  "SQJto2": "Sign in",
+  "e4C1p0": "Recovery code",
+  "UMtcey": "Your recovery code is:",
+  "7pMJd1": "You can use this recovery code if you lose access to your second factors.",
+  "acrOoz": "Continue",
+  "5sg7KC": "Password",
+  "8HimVK": "Confirm password",
+  "Yy/yDL": "Reset password",
+  "FA2cpe": "Not authenticated.",
+  "z6socI": "Forbidden.",
+  "aZPBJm": "Weak password.",
+  "iq0hNc": "Please provide a new password for your account.",
+  "q5Xl0M": "Verify",
+  "h2vipu": "Code",
+  "UkurAm": "Incorrect code.",
+  "Zmrie7": "Two-factor authentication",
+  "PsYaj1": "Enter the code from your authenticator app.",
+  "M1Jvwh": "Use your recovery code instead",
+  "cW3pgL": "Please restart the process.",
+  "tlKrHG": "Verify email address",
+  "rEdUqQ": "Verify your email address",
+  "HK4xLQ": "We sent an 8-digit code to {email}.",
+  "4lc6jy": "Generate new code",
+  "ugLdkh": "New email",
+  "BWpuKl": "Update",
+  "NIynnB": "Current password",
+  "fTHhSB": "New password",
+  "fe7Y2Z": "Confirm new password",
+  "Qs87l8": "Email is already used.",
+  "fHT0Co": "Incorrect password.",
+  "Whl44A": "Updated password.",
+  "D3idYv": "Settings",
+  "ivZVky": "Update email",
+  "Og/LVJ": "Your email:",
+  "KkT/Fh": "Update password",
+  "dVE1PE": "Update two-factor authentication",
+  "0VMkDa": "Sign in to the DARIAH Knowledge Base with your user account.",
+  "0vL5u1": "Create an account",
+  "V/JHlm": "Forgot password?",
+  "HAlOn1": "Name",
+  "4FfVR6": "Sign up is disabled.",
+  "8HJxXG": "Sign up",
+  "IG6alv": "Your password must be between {passwordMinLength,number} and {passwordMaxLength,number} characters long.",
+  "uCk8r+": "Already have an account?",
+  "VF/mcI": "Use recovery code",
+  "mG1WL7": "Invalid recovery code.",
+  "ZRAJ8j": "Account recovery",
+  "yIK3vt": "Recover your account",
+  "WPcDtZ": "Enter the recovery code you received when creating the account.",
+  "+5d9Hf": "Verify the code from the app",
+  "jvo0vs": "Save",
+  "gFFn6i": "Invalid key.",
+  "htnvWj": "Invalid code.",
+  "VsxNaY": "Two-factor authentication setup",
+  "io+wG/": "Set up two-factor authentication",
+  "/6gLBc": "Verification code",
+  "62beOi": "Resend verification code",
+  "Lvibqr": "A new code was sent to your inbox.",
+  "Rlr6vl": "The verification code was expired. We sent another code to your inbox.",
+  "1Cuvc8": "We sent an 8-digit verification code to {email}.",
+  "EI6y9l": "Change email address",
+  "1QGkRH": "Quick search...",
+  "h7ympN": "Open command menu",
+  "bdcMGy": "Open menu",
+  "hzSNj4": "Dashboard",
+  "tCOYpl": "Command menu",
+  "DxgBSX": "Color scheme",
+  "rru3FW": "Toggle color scheme",
+  "isGKnz": "Documentation",
+  "xXbJso": "Sign out",
+  "ShOrju": "Open quick search",
+  "9uOFF3": "Overview",
+  "47FYwb": "Cancel",
+  "K3r6DQ": "Delete",
+  "iFsDVR": "Loading",
+  "gjBiyj": "Loading...",
+  "6nAe2O": "Select image",
+  "ciJ33H": "Select an existing image or upload a new one.",
+  "BFLVwB": "Media library",
+  "vC8XBw": "No images found. Upload one to get started.",
+  "JEsxDw": "Uploading...",
+  "vMUomP": "Upload image",
+  "kQAf2d": "Select",
+  "msSyC/": "Welcome, {name}",
+  "4unN3g": "Lorem ipsum",
+  "T8onXc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+  "vL/A3j": "Administrator dashboard",
+  "VqEMv5": "Administrator dashboard - Contributions",
+  "oVDe1D": "Contributions",
+  "94gpbH": "Administrator dashboard - Institutions",
+  "/XO6LE": "Institutions",
+  "6GYvgO": "Administrator dashboard - National consortia",
+  "16OAWv": "Consortia",
+  "nR3uiW": "Administrator dashboard - Newsletters",
+  "4BU/eo": "Newsletters",
+  "qESp6V": "New person",
+  "IoDlcd": "Slug",
+  "rpKRre": "Sort name",
+  "Pl/c87": "ORCID",
+  "+0zv6g": "Image",
+  "4ia6St": "Edit person",
+  "kYvEZZ": "Enter the personal and contact details related to the person.",
+  "Lv0zJu": "Details",
+  "sMRK+J": "Select or upload an image.",
+  "T7w3zq": "Selected image",
+  "DixDH+": "Add a short biography.",
+  "5ez1Yf": "Biography",
+  "TiR/Hq": "Saving...",
+  "JZnNTW": "Persons",
+  "ArVBPN": "Manage all persons in the DARIAH knowledge base.",
+  "xmcVZ0": "Search",
+  "bW7B87": "New",
+  "CYbwwJ": "Open actions menu",
+  "FgydNe": "View",
+  "wEQDC6": "Edit",
+  "ADU4H2": "person",
+  "4mbkk4": "Administrator dashboard - Person details",
+  "P5I1ji": "Administrator dashboard - Edit person",
+  "cFvtc7": "Administrator dashboard - Create person",
+  "SMXbAk": "Administrator dashboard - Persons",
+  "cK0moa": "Administrator dashboard - Projects",
+  "UxTJRa": "Projects",
+  "2/vfVV": "Administrator dashboard - Reports",
+  "Ppx673": "Reports",
+  "b3OLH3": "Administrator dashboard - Services",
+  "sZFybj": "Services",
+  "U85wVR": "Administrator dashboard - SocialMedia",
+  "ZqausK": "SocialMedia",
+  "mEPxFi": "Administrator dashboard - Software",
+  "r3C4x/": "Software",
+  "DKSN8Q": "Administrator dashboard - Users",
+  "YDMrKK": "Users",
+  "kAusnY": "Administrator dashboard - Working group reports",
+  "2k5El8": "Working group reports",
+  "8Yb+bu": "Administrator dashboard - Working groups",
+  "S+6JuP": "Working groups",
+  "2sRCsy": "Skip to main content",
+  "flr1GA": "National consortium dashboard",
+  "TIRV8x": "National consortium dashboard - Reports",
+  "/kfYDC": "National consortium dashboard - Report",
+  "x5Tz6M": "Report",
+  "IM2ock": "National consortium dashboard - Edit report",
+  "8BGtJK": "Edit report",
+  "q46BGO": "National consortium dashboard - Edit contributions",
+  "w3CJg4": "Edit contributions",
+  "om0vmo": "National consortium dashboard - Edit events",
+  "S3+AuB": "Edit events",
+  "1boAc7": "National consortium dashboard - Edit institutions",
+  "xwAWzb": "Edit institutions",
+  "SI5LID": "National consortium dashboard - Edit outreach",
+  "Qrw4Ke": "Edit outreach",
+  "JU64PF": "National consortium dashboard - Edit projects",
+  "Ea88lu": "Edit projects",
+  "T5+5tP": "National consortium dashboard - Edit publications",
+  "Nc+2UK": "Edit publications",
+  "2U5LrE": "National consortium dashboard - Edit services",
+  "T0s6Q1": "Edit services",
+  "xi7lZh": "National consortium dashboard - Edit software",
+  "NEF3Pi": "Edit software",
+  "bDj74E": "National consortium dashboard - Edit summary",
+  "JLjqom": "Edit summary",
+  "CWbizX": "Website dashboard",
+  "FKUPrI": "Select an image to upload",
+  "KY78v9": "Successfully uploaded image.",
+  "TBCsZj": "Website dashboard - Assets",
+  "d1uESJ": "Assets",
+  "hp+IWH": "Website dashboard - Events",
+  "ZvKSfJ": "Events",
+  "ZbJtUu": "Website dashboard - Impact case studies",
+  "99bd1b": "Impact case studies",
+  "Ke2wLG": "Website dashboard - Metadata",
+  "8Q504V": "Metadata",
+  "Eg6PBS": "Website dashboard - Navigation",
+  "fBg+7V": "Navigation",
+  "IgSa6m": "Website dashboard - News",
+  "NZyhSX": "News",
+  "0HmFbH": "Website dashboard - Pages",
+  "CxfKLC": "Pages",
+  "5F2F7Z": "Website dashboard - Spotlight articles",
+  "FZzBJD": "Spotlight articles",
+  "lpdHRU": "Working group dashboard",
+  "abjInS": "Working group dashboard - Reports",
+  "OhSrNq": "Working group dashboard - Report",
+  "oHXjsF": "Working group dashboard - Edit report",
+  "zFegDD": "Contact",
+  "cPwv2c": "Privacy policy",
+  "EBDrtq": "Terms of use",
+  "xYJkOZ": "Imprint",
+  "ZEEVQX": "Social media",
+  "rfXweF": "Bluesky",
+  "EmpHyB": "Facebook",
+  "5OwPbz": "Flickr",
+  "wO9wb5": "GitHub",
+  "39PtLD": "Instagram",
+  "Rb/hb9": "LinkedIn",
+  "aRFkJ/": "Mastodon",
+  "x/zuFu": "RSS feed",
+  "8ywLSf": "Twitter",
+  "JkLHGw": "Website",
+  "zuA3Bg": "YouTube",
+  "6FQuCT": "Secondary",
+  "EFTSMc": "Main",
+  "3umvLQ": "DARIAH Knowledge Base",
+  "yd+0BL": "Your central hub for everything DARIAH-related.",
+  "LLtKhp": "Subject",
+  "T7Ry38": "Message",
+  "KlhlQn": "Failed to send message.",
+  "hrWbQB": "Successfully sent message.",
+  "JqiqNj": "Something went wrong",
+  "FazwRl": "Try again",
+  "VLK0WW": "Forbidden",
+  "cSmcVJ": "RSS feed ({locale})",
+  "WlyxAh": "Unauthorized",
+  "QRccCM": "Page not found",
+  "lkI8/e": "Internal server error."
 }

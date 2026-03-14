@@ -78,12 +78,12 @@ export const WithSections: Story = {
 				<Button intent="outline">{"Open Menu"}</Button>
 				<MenuContent>
 					<MenuHeader>{"My Account"}</MenuHeader>
-					<MenuSection label="Profile">
+					<MenuSection label={"Profile"}>
 						<MenuItem>{"View profile"}</MenuItem>
 						<MenuItem>{"Edit profile"}</MenuItem>
 					</MenuSection>
 					<MenuSeparator />
-					<MenuSection label="Settings">
+					<MenuSection label={"Settings"}>
 						<MenuItem>{"Preferences"}</MenuItem>
 						<MenuItem>{"Notifications"}</MenuItem>
 					</MenuSection>

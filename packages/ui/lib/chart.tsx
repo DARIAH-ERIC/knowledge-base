@@ -41,6 +41,7 @@ import type { ContentType as TooltipContentType } from "recharts/types/component
 import { twJoin, twMerge } from "tailwind-merge";
 
 import { cx } from "@/lib/primitive";
+import { useExtracted } from "next-intl";
 
 type ChartType = "default" | "stacked" | "percent";
 type ChartLayout = "horizontal" | "vertical" | "radial";
@@ -569,6 +570,7 @@ export function ChartLegendContent({
 	nameKey,
 }: Readonly<ChartLegendContentProps>): ReactNode {
 	const { config, selectedLegend, onLegendSelect } = useChart();
+	const t = useExtracted("ui");
 
 	if (payload?.length == null) {
 		return null;
@@ -599,7 +601,7 @@ export function ChartLegendContent({
 				return (
 					<ToggleButton
 						key={key}
-						aria-label={"Legend Item"}
+						aria-label={t("Legend item")}
 						className={twMerge(
 							"flex items-center gap-2 rounded-sm px-2 py-1 text-muted-fg *:data-[slot=icon]:-mx-0.5 *:data-[slot=icon]:size-2.5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:text-muted-fg",
 							"selected:bg-secondary/70 selected:text-secondary-fg",

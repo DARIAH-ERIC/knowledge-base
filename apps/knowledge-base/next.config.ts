@@ -65,6 +65,16 @@ const plugins: Array<(config: Config) => Config> = [
 		experimental: {
 			/** @see {@link https://next-intl.dev/docs/workflows/typescript#messages-arguments} */
 			createMessagesDeclaration: ["./content/en/metadata/index.json", "./messages/en.json"],
+			/** @see {@link https://next-intl.dev/docs/usage/extraction} */
+			srcPath: ["./app", "./lib"],
+			messages: {
+				path: "./messages",
+				format: "json",
+				locales: "infer",
+			},
+			extract: {
+				sourceLocale: "en",
+			},
 		},
 		requestConfig: "./lib/i18n/request.ts",
 	}),

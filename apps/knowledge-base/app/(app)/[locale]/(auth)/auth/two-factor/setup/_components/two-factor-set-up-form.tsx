@@ -7,7 +7,7 @@ import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { SubmitButton } from "@dariah-eric/ui/submit-button";
 import { TextField } from "@dariah-eric/ui/text-field";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { type ReactNode, useActionState } from "react";
 
 import { setupTwoFactorAction } from "@/app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action";
@@ -19,7 +19,7 @@ interface TwoFactorSetUpFormProps {
 export function TwoFactorSetUpForm(props: Readonly<TwoFactorSetUpFormProps>): ReactNode {
 	const { encodedTotpKey } = props;
 
-	const t = useTranslations("TwoFactorSetUpForm");
+	const t = useExtracted();
 
 	const [state, action] = useActionState(setupTwoFactorAction, createActionStateInitial());
 
@@ -30,12 +30,12 @@ export function TwoFactorSetUpForm(props: Readonly<TwoFactorSetUpFormProps>): Re
 			<input hidden={true} name="key" readOnly={true} required={true} value={encodedTotpKey} />
 
 			<TextField isRequired={true} name="code">
-				<Label>{t("verify")}</Label>
+				<Label>{t("Verify the code from the app")}</Label>
 				<FieldError />
 				<Input />
 			</TextField>
 
-			<SubmitButton className="mt-2">{t("submit")}</SubmitButton>
+			<SubmitButton className="mt-2">{t("Save")}</SubmitButton>
 		</Form>
 	);
 }

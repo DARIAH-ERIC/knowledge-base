@@ -1,5 +1,6 @@
 "use client";
 
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import type { ReactNode } from "react";
 
 import type { ColorScheme } from "@/lib/color-scheme/color-scheme-script";
@@ -22,23 +23,24 @@ export function ColorSchemeSelect(props: Readonly<ColorSchemeSelectProps>): Reac
 	const value = kind === "system" ? "system" : colorScheme;
 
 	return (
-		<label>
-			<span className="sr-only">{label}</span>
-			<select
-				onChange={(event) => {
-					const value = event.currentTarget.value as keyof typeof items;
-					setColorScheme(value === "system" ? null : value);
-				}}
-				value={value}
-			>
+		<Select
+			aria-label={label}
+			onChange={(value) => {
+				const colorScheme = value as keyof typeof items;
+				setColorScheme(colorScheme === "system" ? null : colorScheme);
+			}}
+			value={value}
+		>
+			<SelectTrigger />
+			<SelectContent>
 				{Object.entries(items).map(([value, label]) => {
 					return (
-						<option key={value} value={value}>
+						<SelectItem key={value} id={value}>
 							{label}
-						</option>
+						</SelectItem>
 					);
 				})}
-			</select>
-		</label>
+			</SelectContent>
+		</Select>
 	);
 }

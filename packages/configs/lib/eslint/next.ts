@@ -57,6 +57,7 @@ const config = defineConfig(
 			],
 			"object-shorthand": ["error", "always", { avoidExplicitReturnArrows: true }],
 			"preserve-caught-error": "error",
+			"import-x/no-unresolved": "off",
 		},
 	},
 	{
