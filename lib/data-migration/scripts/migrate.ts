@@ -410,6 +410,11 @@ async function main() {
 	for (const person of Object.values(data.people)) {
 		assert(person.status === "publish", "Person has not been published.");
 
+		if (person.title.rendered.trim().length === 0) {
+			log.warn("Skipping person with no name.", person.slug);
+			continue;
+		}
+
 		await db.transaction(async (tx) => {
 			const [entity] = await tx
 				.insert(schema.entities)
