@@ -48,6 +48,7 @@
 		"@react-aria/utils": "catalog:",
 		"@sentry/nextjs": "catalog:",
 		"@sindresorhus/slugify": "catalog:",
+		"@tiptap/core": "catalog:",
 		"@valibot/i18n": "catalog:",
 		"client-only": "catalog:",
 		"clsx": "catalog:",

@@ -1,6 +1,5 @@
-import { pick } from "@acdh-oeaw/lib";
 import type { Metadata } from "next";
-import { useExtracted, useMessages } from "next-intl";
+import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
@@ -34,13 +33,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function GlobalNotFoundPage(): ReactNode {
 	const locale = defaultLocale;
-	const messages = useMessages();
 	const t = useExtracted();
 
 	return (
 		<HtmlDocument locale={locale}>
 			<DocumentBody>
-				<Providers locale={locale} messages={pick(messages, ["GlobalNotFoundPage"])}>
+				<Providers locale={locale}>
 					<Main className="grid place-content-center h-full">
 						<h1>{t("Page not found")}</h1>
 					</Main>

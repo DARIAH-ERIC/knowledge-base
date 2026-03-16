@@ -36,14 +36,14 @@ export class ContactPage {
 		this.url = getPathname({ href: { pathname: "/contact" }, locale });
 		this.mainContent = page.getByRole("main");
 		this.title = page.getByRole("heading", { level: 1 });
-		this.skipLink = page.getByRole("link", { name: i18n.t("DefaultLayout.skip-link") });
+		this.skipLink = page.getByRole("link", { name: "Skip to main content" });
 
 		this.form = {
-			email: page.getByRole("textbox", { name: i18n.t("ContactForm.email") }),
-			message: page.getByRole("textbox", { name: i18n.t("ContactForm.message") }),
-			name: page.getByRole("textbox", { name: i18n.t("ContactForm.name") }),
-			subject: page.getByRole("textbox", { name: i18n.t("ContactForm.subject") }),
-			submit: page.getByRole("button", { name: i18n.t("ContactForm.submit") }),
+			email: page.getByRole("textbox", { name: "Email" }),
+			message: page.getByRole("textbox", { name: "Message" }),
+			name: page.getByRole("textbox", { name: "Name" }),
+			subject: page.getByRole("textbox", { name: "Subject" }),
+			submit: page.getByRole("button", { name: "Submit" }),
 		};
 	}
 

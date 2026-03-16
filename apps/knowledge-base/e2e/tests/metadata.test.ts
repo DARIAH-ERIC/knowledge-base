@@ -34,18 +34,14 @@ test("should set a canonical url", async ({ createIndexPage }) => {
 test.fixme("should set document title on not-found page", async ({ createI18n, page }) => {
 	const i18n = await createI18n(defaultLocale);
 	await page.goto("/unknown");
-	await expect(page).toHaveTitle(
-		[i18n.t("GlobalNotFoundPage.meta.title"), i18n.messages.metadata.title].join(" | "),
-	);
+	await expect(page).toHaveTitle(["Page not found", i18n.messages.metadata.title].join(" | "));
 	await page.goto("/en/unknown");
-	await expect(page).toHaveTitle(
-		[i18n.t("GlobalNotFoundPage.meta.title"), i18n.messages.metadata.title].join(" | "),
-	);
+	await expect(page).toHaveTitle(["Page not found", i18n.messages.metadata.title].join(" | "));
 
 	// const de = await createI18n("de-AT");
 	// await page.goto("/de/unknown");
 	// await expect(page).toHaveTitle(
-	// 	[de.t("GlobalNotFoundPage.meta.title"), de.messages.metadata.title].join(" | "),
+	// 	["Page not found", de.messages.metadata.title].join(" | "),
 	// );
 });
 
@@ -68,7 +64,7 @@ test("should set page metadata", async ({ createImprintPage }) => {
 
 		const title = metadata.title;
 		const description = metadata.description;
-		const pageTitle = i18n.t("ImprintPage.meta.title");
+		const pageTitle = "Imprint";
 		const documentTitle = [pageTitle, title].join(" | ");
 
 		expect(title).toBeTruthy();

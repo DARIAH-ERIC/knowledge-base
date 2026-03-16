@@ -28,7 +28,7 @@ export class ImprintPage {
 		this.url = getPathname({ href: { pathname: "/imprint" }, locale });
 		this.mainContent = page.getByRole("main");
 		this.title = page.getByRole("heading", { level: 1 });
-		this.skipLink = page.getByRole("link", { name: i18n.t("DefaultLayout.skip-link") });
+		this.skipLink = page.getByRole("link", { name: "Skip to main content" });
 	}
 
 	goto() {

@@ -4,12 +4,7 @@ import { twMerge } from "tailwind-merge";
 
 export function Header({ className, ...props }: Readonly<ComponentProps<"div">>): ReactNode {
 	return (
-		<div
-			className={twMerge(
-				"-mx-(--layout-padding) -mt-(--layout-padding) -mb-(--layout-padding) bg-muted",
-				className,
-			)}
-		>
+		<div className={twMerge("-m-(--layout-padding) bg-muted", className)}>
 			<div
 				className="flex min-w-0 flex-col items-start justify-between gap-4 border-b p-(--layout-padding) md:flex-row md:items-end **:data-[slot=card-header]:max-w-lg"
 				{...props}

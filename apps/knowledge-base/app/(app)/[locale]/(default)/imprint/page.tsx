@@ -1,5 +1,5 @@
 import type { Metadata, ResolvingMetadata } from "next";
-import { useLocale, useExtracted } from "next-intl";
+import { useExtracted, useLocale } from "next-intl";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 

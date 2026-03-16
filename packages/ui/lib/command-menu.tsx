@@ -84,7 +84,6 @@ export function CommandMenu({
 }: Readonly<CommandMenuProps>): ReactNode {
 	const t = useExtracted("ui");
 
-	 
 	const { contains } = useFilter({ sensitivity: "base" });
 	const filter = (textValue: string, inputValue: string) => {
 		return contains(textValue, inputValue);

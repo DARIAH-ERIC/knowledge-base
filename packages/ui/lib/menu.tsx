@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
-import { Fragment, type ReactNode,use } from "react";
+import { Fragment, type ReactNode, use } from "react";
 import {
 	Button as AriaButton,
 	type ButtonProps as AriaButtonProps,

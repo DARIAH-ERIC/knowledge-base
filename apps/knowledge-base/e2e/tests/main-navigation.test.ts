@@ -18,17 +18,17 @@ test.describe.skip("main navigation", () => {
 		test.use({ viewport: { width: 1440, height: 1024 } });
 
 		test("on desktop", async ({ createIndexPage, page }) => {
-			const { indexPage, i18n } = await createIndexPage(defaultLocale);
+			const { indexPage } = await createIndexPage(defaultLocale);
 			await indexPage.goto();
 
 			const homeLink = indexPage.page
 				.getByRole("navigation")
 				.getByRole("link", {
-					name: i18n.t("DefaultHeader.navigation.items.home"),
+					name: "Home",
 				})
 				.first();
 			const aboutLink = indexPage.page.getByRole("navigation").getByRole("link", {
-				name: i18n.t("DefaultHeader.navigation.items.about"),
+				name: "About",
 			});
 
 			await expect(homeLink).toHaveAttribute("aria-current", "page");
@@ -46,7 +46,7 @@ test.describe.skip("main navigation", () => {
 		test.use({ viewport: { width: 393, height: 852 } });
 
 		test("on mobile", async ({ createIndexPage, page }) => {
-			const { indexPage, i18n } = await createIndexPage(defaultLocale);
+			const { indexPage } = await createIndexPage(defaultLocale);
 			await indexPage.goto();
 
 			await indexPage.page.getByRole("navigation").getByRole("button").click();
@@ -54,11 +54,11 @@ test.describe.skip("main navigation", () => {
 			const homeLink = indexPage.page
 				.getByRole("dialog")
 				.getByRole("link", {
-					name: i18n.t("DefaultHeader.navigation.items.home"),
+					name: "Home",
 				})
 				.first();
 			const aboutLink = indexPage.page.getByRole("dialog").getByRole("link", {
-				name: i18n.t("DefaultHeader.navigation.items.about"),
+				name: "About",
 			});
 
 			await expect(homeLink).toHaveAttribute("aria-current", "page");
