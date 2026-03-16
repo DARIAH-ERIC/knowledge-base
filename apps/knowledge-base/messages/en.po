@@ -536,6 +536,11 @@ msgstr "Cancel"
 msgid "K3r6DQ"
 msgstr "Delete"
 
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/edit-action.tsx:17
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:132
+msgid "wEQDC6"
+msgstr "Edit"
+
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/loading-dots.tsx:34
 msgid "iFsDVR"
 msgstr "Loading"
@@ -573,6 +578,10 @@ msgstr "Upload image"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:147
 msgid "kQAf2d"
 msgstr "Select"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/paginate.tsx:55
+msgid "iS7BYy"
+msgstr "Showing <strong>{start, number}</strong> to <strong>{end, number}</strong> of <strong>{total, number}</strong> results"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/(index)/page.tsx:20
 msgid "msSyC/"
@@ -615,13 +624,50 @@ msgstr "Administrator dashboard - National consortia"
 msgid "16OAWv"
 msgstr "Consortia"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/page.tsx:18
-msgid "nR3uiW"
-msgstr "Administrator dashboard - Newsletters"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/page.tsx:34
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:66
 msgid "4BU/eo"
 msgstr "Newsletters"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:68
+msgid "XVbSPj"
+msgstr "View all newsletters in the DARIAH knowledge base."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:79
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:84
+msgid "xmcVZ0"
+msgstr "Search"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:89
+msgid "9a9+ww"
+msgstr "Title"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:90
+msgid "Q6ELqm"
+msgstr "Send time"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:91
+msgid "4p12ep"
+msgstr "Emails sent"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:92
+msgid "bWjdfa"
+msgstr "URL"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:93
+msgid "tzMNF3"
+msgstr "Status"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:94
+msgid "mBXwAK"
+msgstr "Opens"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:95
+msgid "VLKK35"
+msgstr "Clicks"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/page.tsx:17
+msgid "nR3uiW"
+msgstr "Administrator dashboard - Newsletters"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-create-form.tsx:21
 msgid "qESp6V"
@@ -690,10 +736,6 @@ msgstr "Persons"
 msgid "ArVBPN"
 msgstr "Manage all persons in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:84
-msgid "xmcVZ0"
-msgstr "Search"
-
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:91
 msgid "bW7B87"
 msgstr "New"
@@ -705,10 +747,6 @@ msgstr "Open actions menu"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:128
 msgid "FgydNe"
 msgstr "View"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:132
-msgid "wEQDC6"
-msgstr "Edit"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:157
 msgid "ADU4H2"

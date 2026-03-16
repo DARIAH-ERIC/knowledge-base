@@ -126,7 +126,7 @@ export interface GetCampaignsResponse {
 				description: string;
 				title: string;
 			};
-			report_summary: {
+			report_summary?: {
 				opens: number;
 				unique_opens: number;
 				open_rate: number;

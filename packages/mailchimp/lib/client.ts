@@ -24,12 +24,15 @@ export function createMailchimpClient(params: CreateMailchimpClientParams) {
 	};
 
 	const client = {
-		async get() {
+		async get(params?: { count?: number; offset?: number }) {
 			const url = createUrl({
 				baseUrl,
 				pathname: "/3.0/campaigns",
 				searchParams: createUrlSearchParams({
-					count: 1000,
+					// eslint-disable-next-line unicorn/consistent-destructuring
+					count: params?.count ?? 10,
+					// eslint-disable-next-line unicorn/consistent-destructuring
+					offset: params?.offset ?? 0,
 					list_id: listId,
 					sort_dir: "DESC",
 					sort_field: "send_time",

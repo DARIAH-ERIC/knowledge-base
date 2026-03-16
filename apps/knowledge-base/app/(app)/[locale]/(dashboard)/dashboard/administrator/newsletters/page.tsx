@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 
-import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { TableExample } from "@/components/ui/table-example";
-import { client } from "@/lib/mailchimp/client";
+import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
+import { NewslettersPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page";
+import { mailchimp } from "@/lib/mailchimp";
 
 interface DashboardAdministratorNewslettersPageProps extends PageProps<"/[locale]/dashboard/administrator/institutions"> {}
 
@@ -24,16 +23,11 @@ export async function generateMetadata(
 export default function DashboardAdministratorNewslettersPage(
 	_props: Readonly<DashboardAdministratorNewslettersPageProps>,
 ): ReactNode {
-	const t = useExtracted();
-
-	const _newsletters = client.get();
+	const newsletters = mailchimp.get({ count: 1000 });
 
 	return (
-		<Main className="flex-1">
-			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">
-				{t("Newsletters")}
-			</h1>
-			<TableExample />
-		</Main>
+		<Suspense fallback={<LoadingScreen />}>
+			<NewslettersPage newsletters={newsletters} />
+		</Suspense>
 	);
 }
