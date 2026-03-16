@@ -1,7 +1,8 @@
 "use client";
 
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
-import { createContext, type ComponentProps, type ReactNode, use, useEffect } from "react";
+import { useExtracted } from "next-intl";
+import { type ComponentProps, createContext, type ReactNode, use, useEffect } from "react";
 import {
 	Autocomplete,
 	type AutocompleteProps,
@@ -32,7 +33,6 @@ import { cx } from "@/lib/primitive";
 import { DropdownKeyboard } from "./dropdown";
 import { Loader } from "./loader";
 import { MenuDescription, MenuItem, MenuLabel, type MenuSectionProps, MenuSeparator } from "./menu";
-import { useExtracted } from "next-intl";
 
 export interface CommandMenuProviderProps {
 	isPending?: boolean;
@@ -84,7 +84,7 @@ export function CommandMenu({
 }: Readonly<CommandMenuProps>): ReactNode {
 	const t = useExtracted("ui");
 
-	// eslint-disable-next-line @typescript-eslint/unbound-method
+	 
 	const { contains } = useFilter({ sensitivity: "base" });
 	const filter = (textValue: string, inputValue: string) => {
 		return contains(textValue, inputValue);

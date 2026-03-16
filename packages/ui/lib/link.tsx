@@ -1,9 +1,10 @@
 "use client";
 
-import { use, type ReactNode } from "react";
+import { type ReactNode,use } from "react";
 import { Link as AriaLink, type LinkProps as AriaLinkProps } from "react-aria-components";
 
 import { cx } from "@/lib/primitive";
+
 import { UiContext } from "./ui-provider";
 
 export interface LinkProps extends AriaLinkProps {}

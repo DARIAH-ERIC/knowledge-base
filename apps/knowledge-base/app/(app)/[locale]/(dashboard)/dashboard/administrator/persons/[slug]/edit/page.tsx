@@ -1,7 +1,7 @@
-import { eq, and } from "@dariah-eric/database";
+import { and, eq } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
-import type { JSONContent } from "@tiptap/react";
+import type { JSONContent } from "@tiptap/core";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";

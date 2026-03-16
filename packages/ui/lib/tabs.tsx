@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, use, type ReactNode, type RefObject } from "react";
+import { Fragment, type ReactNode, type RefObject,use } from "react";
 import {
 	composeRenderProps,
 	SelectionIndicator,
@@ -18,6 +18,7 @@ import {
 import { twMerge } from "tailwind-merge";
 
 import { cx } from "@/lib/primitive";
+
 import { UiContext } from "./ui-provider";
 
 export interface TabsProps extends TabsPrimitiveProps {

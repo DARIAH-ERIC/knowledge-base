@@ -2,6 +2,7 @@
 
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import type { DateDuration } from "@internationalized/date";
+import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 import {
 	Button,
@@ -23,7 +24,6 @@ import { Calendar } from "./calendar";
 import { ModalContent } from "./modal";
 import { PopoverContent } from "./popover";
 import { RangeCalendar } from "./range-calendar";
-import { useExtracted } from "next-intl";
 
 export interface DatePickerProps<T extends DateValue> extends DatePickerPrimitiveProps<T> {
 	popover?: Omit<PopoverProps, "children">;

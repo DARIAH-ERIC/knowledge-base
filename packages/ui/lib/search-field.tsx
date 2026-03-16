@@ -1,6 +1,7 @@
 "use client";
 
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/20/solid";
+import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
 import {
 	Button as AriaButton,
@@ -13,7 +14,6 @@ import { twJoin } from "tailwind-merge";
 import { fieldStyles } from "@/lib/field";
 import { Input, InputGroup } from "@/lib/input";
 import { cx } from "@/lib/primitive";
-import { useExtracted } from "next-intl";
 
 export function SearchField(props: Readonly<SearchFieldProps>): ReactNode {
 	const { className, ...rest } = props;

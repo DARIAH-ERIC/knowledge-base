@@ -21,7 +21,7 @@ export const restrictedImports = {
 		},
 		{
 			allowImportNames: ["useLinkStatus"],
-			message: "Please use `@/components/link` instead.",
+			message: "Please use `@dariah-eric/ui/link` instead.",
 			name: "next/link",
 		},
 		{

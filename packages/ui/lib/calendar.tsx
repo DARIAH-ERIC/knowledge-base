@@ -2,6 +2,7 @@
 
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { type CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
+import { useExtracted } from "next-intl";
 import { type ReactNode, use } from "react";
 import { useDateFormatter } from "react-aria";
 import {
@@ -23,7 +24,6 @@ import { twMerge } from "tailwind-merge";
 
 import { Button } from "./button";
 import { Select, SelectContent, SelectItem, SelectLabel, SelectTrigger } from "./select";
-import { useExtracted } from "next-intl";
 
 export interface CalendarProps<T extends DateValue> extends Omit<
 	CalendarPrimitiveProps<T>,
@@ -56,7 +56,7 @@ export function Calendar<T extends DateValue>({
 												"bg-primary text-primary-fg pressed:bg-primary hover:bg-primary/90 data-invalid:bg-danger data-invalid:text-danger-fg forced-colors:bg-[Highlight] forced-colors:text-[Highlight] forced-colors:data-invalid:bg-[Mark]",
 											isDisabled && "text-muted-fg forced-colors:text-[GrayText]",
 											date.compare(now) === 0 &&
-												"after:pointer-events-none after:absolute after:start-1/2 after:bottom-1 after:z-10 after:size-[3px] after:-translate-x-1/2 after:rounded-full after:bg-primary selected:after:bg-primary-fg focus-visible:after:bg-primary-fg",
+												"after:pointer-events-none after:absolute after:inset-s-1/2 after:bottom-1 after:z-10 after:size-[3px] after:-translate-x-1/2 after:rounded-full after:bg-primary selected:after:bg-primary-fg focus-visible:after:bg-primary-fg",
 											className,
 										);
 									},

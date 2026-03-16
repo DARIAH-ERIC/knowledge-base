@@ -1,7 +1,8 @@
 "use client";
 
 import { XMarkIcon } from "@heroicons/react/24/solid";
-import type { ReactNode, ComponentProps, Ref } from "react";
+import { useExtracted } from "next-intl";
+import type { ComponentProps, ReactNode, Ref } from "react";
 import {
 	Button as AriaButton,
 	Dialog as AriaDialog,
@@ -14,7 +15,6 @@ import { twMerge } from "tailwind-merge";
 import { cx } from "@/lib/primitive";
 
 import { Button, type ButtonProps } from "./button";
-import { useExtracted } from "next-intl";
 
 export function Dialog({
 	role = "dialog",
@@ -148,7 +148,7 @@ export function DialogCloseIcon({
 		<AriaButton
 			aria-label={t("Close")}
 			className={cx(
-				"absolute end-1 top-1 z-50 grid size-8 place-content-center rounded-xl hover:bg-secondary focus:bg-secondary focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary sm:top-2 sm:size-7 sm:rounded-md",
+				"absolute inset-e-1 top-1 z-50 grid size-8 place-content-center rounded-xl hover:bg-secondary focus:bg-secondary focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary sm:top-2 sm:size-7 sm:rounded-md",
 				className,
 			)}
 			slot="close"

@@ -1,6 +1,7 @@
 "use client";
 
 import { PlusIcon } from "@heroicons/react/20/solid";
+import { useExtracted } from "next-intl";
 import React, { Children, Fragment, isValidElement, type ReactNode, useMemo, useRef } from "react";
 import {
 	Autocomplete,
@@ -17,7 +18,6 @@ import { PopoverContent } from "@/lib/popover";
 import { cx } from "@/lib/primitive";
 import { SearchField, SearchInput } from "@/lib/search-field";
 import { Tag, TagGroup, TagList } from "@/lib/tag-group";
-import { useExtracted } from "next-intl";
 
 interface OptionBase {
 	id: string | number;
@@ -54,7 +54,6 @@ export function MultipleSelect<T extends OptionBase>(
 
 	const triggerRef = useRef<HTMLDivElement | null>(null);
 
-	// eslint-disable-next-line @typescript-eslint/unbound-method
 	const { contains } = useFilter({ sensitivity: "base" });
 
 	const { before, after, list } = useMemo(() => {
@@ -96,6 +95,7 @@ export function MultipleSelect<T extends OptionBase>(
 											if (Array.isArray(state.value)) {
 												state.setValue(
 													state.value.filter((k) => {
+														// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 														return !keys.has(k);
 													}),
 												);

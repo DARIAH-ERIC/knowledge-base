@@ -101,7 +101,7 @@ function ColumnResizer(props: Readonly<AriaColumnResizerProps>): ReactNode {
 		<AriaColumnResizer
 			{...rest}
 			className={cx(
-				"absolute top-0 right-0 bottom-0 grid w-px touch-none place-content-center px-1 resizable-both:cursor-ew-resize [data-resizable-direction=left]:cursor-e-resize [data-resizable-direction=right]:cursor-w-resize [&[data-resizing]>div]:bg-primary",
+				"absolute inset-y-0 right-0 grid w-px touch-none place-content-center px-1 resizable-both:cursor-ew-resize [data-resizable-direction=left]:cursor-e-resize [data-resizable-direction=right]:cursor-w-resize [&[data-resizing]>div]:bg-primary",
 				className,
 			)}
 		>

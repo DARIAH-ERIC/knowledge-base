@@ -2,6 +2,7 @@
 
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-react";
+import { useExtracted } from "next-intl";
 import {
 	type ComponentProps,
 	createContext,
@@ -17,7 +18,6 @@ import { twMerge } from "tailwind-merge";
 
 import { Button, type ButtonProps } from "@/lib/button";
 import { cx } from "@/lib/primitive";
-import { useExtracted } from "next-intl";
 
 export type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;

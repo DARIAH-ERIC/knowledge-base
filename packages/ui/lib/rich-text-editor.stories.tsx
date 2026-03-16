@@ -1,5 +1,5 @@
-import type { JSONContent } from "@tiptap/react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { JSONContent } from "@tiptap/core";
 import { fn } from "storybook/test";
 
 import { RichTextEditor, RichTextRenderer } from "./rich-text-editor";

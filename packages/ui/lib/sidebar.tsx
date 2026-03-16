@@ -517,7 +517,7 @@ export function SidebarItem(props: Readonly<SidebarItemProps>): ReactNode {
 						{badge != null &&
 							(state !== "collapsed" ? (
 								<span
-									className="absolute inset-ring-1 inset-ring-sidebar-border inset-y-1/2 end-1.5 h-5.5 w-auto -translate-y-1/2 rounded-full bg-fg/5 px-2 text-[10px]/5.5 group-hover/sidebar-item:inset-ring-muted-fg/30 group-current:inset-ring-transparent"
+									className="absolute inset-ring-1 inset-ring-sidebar-border inset-y-1/2 inset-e-1.5 h-5.5 w-auto -translate-y-1/2 rounded-full bg-fg/5 px-2 text-[10px]/5.5 group-hover/sidebar-item:inset-ring-muted-fg/30 group-current:inset-ring-transparent"
 									data-slot="sidebar-badge"
 								>
 									{badge}
@@ -525,7 +525,7 @@ export function SidebarItem(props: Readonly<SidebarItemProps>): ReactNode {
 							) : (
 								<div
 									aria-hidden={true}
-									className="absolute end-1 top-1 size-1.5 rounded-full bg-primary"
+									className="absolute inset-e-1 top-1 size-1.5 rounded-full bg-primary"
 								/>
 							))}
 					</Fragment>
@@ -860,7 +860,7 @@ export function SidebarMenuTrigger(props: Readonly<SidebarMenuTriggerProps>): Re
 			className={cx(
 				!alwaysVisible &&
 					"text-muted-fg opacity-0 pressed:text-fg pressed:opacity-100 hover:text-fg",
-				"absolute end-0 flex h-full w-[calc(var(--sidebar-width)-90%)] items-center justify-end pe-2.5 outline-hidden",
+				"absolute inset-e-0 flex h-full w-[calc(var(--sidebar-width)-90%)] items-center justify-end pe-2.5 outline-hidden",
 				// eslint-disable-next-line better-tailwindcss/enforce-consistent-class-order
 				"sm:[&_[data-slot='icon']:not([class*='size-'])]:size-4 [&_[data-slot='icon']:not([class*='size-'])]:size-5 pressed:[&_[data-slot='icon']:not([class*='text-'])]:text-fg **:data-[slot=icon]:shrink-0",
 				"group-hover/sidebar-item:opacity-100 group-focus-visible/sidebar-item:opacity-100 group/sidebar-item:pressed:opacity-100",

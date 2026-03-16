@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
-import { Fragment, use, type ReactNode } from "react";
+import { Fragment, type ReactNode,use } from "react";
 import {
 	Button as AriaButton,
 	type ButtonProps as AriaButtonProps,
@@ -32,6 +32,7 @@ import {
 } from "@/lib/dropdown";
 import { PopoverContent, type PopoverContentProps } from "@/lib/popover";
 import { cx } from "@/lib/primitive";
+
 import { UiContext } from "./ui-provider";
 
 export interface MenuProps extends AriaMenuTriggerProps {}

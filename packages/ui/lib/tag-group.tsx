@@ -1,6 +1,7 @@
 "use client";
 
 import { XCircleIcon } from "@heroicons/react/16/solid";
+import { useExtracted } from "next-intl";
 import type React from "react";
 import { Fragment, type ReactNode } from "react";
 import {
@@ -16,7 +17,6 @@ import {
 import { twMerge } from "tailwind-merge";
 
 import { cx } from "@/lib/primitive";
-import { useExtracted } from "next-intl";
 
 export interface TagGroupProps extends AriaTagGroupProps {}
 

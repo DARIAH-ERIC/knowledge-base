@@ -1,4 +1,5 @@
 import { createUrlSearchParams } from "@acdh-oeaw/lib";
+import { Link } from "@dariah-eric/ui/link";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { type ReactNode, Suspense } from "react";
@@ -7,7 +8,6 @@ import * as v from "valibot";
 import { ImageGrid } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/image-grid";
 import { UploadImageForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form";
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { Link } from "@/components/link";
 import { imageGridOptions } from "@/config/assets.config";
 import { getAssets } from "@/lib/data/cached/assets";
 import { createHref } from "@/lib/navigation/create-href";

@@ -1,8 +1,8 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import type { JSONContent } from "@tiptap/react";
 import { Heading } from "@dariah-eric/ui/heading";
+import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 

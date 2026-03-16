@@ -1,5 +1,6 @@
 "use client";
 
+import { useExtracted } from "next-intl";
 import { type ComponentProps, Fragment, type ReactNode } from "react";
 import {
 	Button,
@@ -18,7 +19,6 @@ import { twMerge } from "tailwind-merge";
 import { cx } from "@/lib/primitive";
 
 import { Checkbox } from "./checkbox";
-import { useExtracted } from "next-intl";
 
 export function GridList<T extends object>({
 	className,
