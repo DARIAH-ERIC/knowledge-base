@@ -57,30 +57,13 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 
 					<nav aria-label={t("Social media")}>
 						<ul className="flex flex-wrap items-center gap-x-4 gap-y-2" role="list">
-							{Object.entries(meta.social).map(([_kind, href]) => {
-								const kind = _kind as keyof typeof meta.social;
+							{Object.values(meta.social).map((social) => {
+								const { href, kind, label } = social;
 
 								if (kind === "email" || kind === "website") {
 									return null;
 								}
 
-								const socialMediaLabels: Record<string, string> = {
-									bluesky: t("Bluesky"),
-									email: t("Email"),
-									facebook: t("Facebook"),
-									flickr: t("Flickr"),
-									github: t("GitHub"),
-									instagram: t("Instagram"),
-									linkedin: t("LinkedIn"),
-									mastodon: t("Mastodon"),
-									orcid: t("ORCID"),
-									rss: t("RSS feed"),
-									twitter: t("Twitter"),
-									website: t("Website"),
-									youtube: t("YouTube"),
-								};
-
-								const label = socialMediaLabels[kind] ?? kind;
 								const Icon = socialMediaConfig[kind].icon;
 
 								return (
@@ -117,8 +100,9 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 
 					<small className="text-xs text-text-weak">
 						&copy; <CurrentYear />{" "}
+						{/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
 						{meta.social.website != null ? (
-							<NavLink href={meta.social.website} size="sm">
+							<NavLink href={meta.social.website.href} size="sm">
 								{meta.creator}
 							</NavLink>
 						) : (

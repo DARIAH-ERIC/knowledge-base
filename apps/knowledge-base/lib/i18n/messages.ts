@@ -1,27 +1,31 @@
-import type ui from "@dariah-eric/ui/i18n/en";
+import { keyBy } from "@acdh-oeaw/lib";
 
-import type metadata from "@/content/en/metadata/index.json";
 import { getIntlLanguage, type IntlLocale } from "@/lib/i18n/locales";
-import type { SocialMediaKind } from "@/lib/social-media/social-media.config";
-import type messages from "@/messages/en.json";
+import type metadataMessages from "@/messages/metadata/en/index.json";
 
-type Messages = typeof messages;
-type Metadata = typeof metadata;
-type UiMessages = typeof ui;
+type Metadata = typeof metadataMessages;
+type SocialMedia = Metadata["social"];
+type SocialMediaMetadata = {
+	[Kind in SocialMedia[number]["kind"]]: Extract<SocialMedia[number], { kind: Kind }>;
+};
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function getIntlMessages(locale: IntlLocale) {
+export interface IntlMessages {
+	metadata: Omit<Metadata, "social"> & { social: SocialMediaMetadata };
+}
+
+export async function getIntlMessages(locale: IntlLocale): Promise<IntlMessages> {
 	const language = getIntlLanguage(locale);
 
-	const _messages = (await import(`@/messages/${language}.json`)) as Messages;
-	const _metadata = (await import(`@/content/${language}/metadata/index.json`)) as Metadata;
-	const _ui = (await import(`@dariah-eric/ui/i18n/${language}`)) as UiMessages;
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+	const [{ default: extracted }, { default: metadata }, { default: ui }] = await Promise.all([
+		import(`@/messages/${language}.po`),
+		import(`@/messages/metadata/${language}/index.json`) as Promise<{ default: Metadata }>,
+		import(`@dariah-eric/ui/i18n/${language}`),
+	]);
 
-	const _social: Record<string, string> = {};
-
-	for (const entry of _metadata.social) {
-		_social[entry.kind] = entry.href;
-	}
+	const social = keyBy(metadata.social, (item) => {
+		return item.kind;
+	});
 
 	switch (language) {
 		// case "de": {
@@ -37,15 +41,13 @@ export async function getIntlMessages(locale: IntlLocale) {
 	}
 
 	const messages = {
-		// ..._ui,
-		..._messages,
+		...extracted,
+		...ui,
 		metadata: {
-			..._metadata,
-			social: _social as Record<SocialMediaKind, string | undefined>,
+			...metadata,
+			social,
 		},
-	};
+	} as IntlMessages;
 
 	return messages;
 }
-
-export type IntlMessages = Awaited<ReturnType<typeof getIntlMessages>>;

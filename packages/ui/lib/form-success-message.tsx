@@ -23,7 +23,6 @@ export function FormSuccessMessage(props: Readonly<FormSuccessMessageProps>): Re
 			className={cn(className, !isSuccessState ? "sr-only" : "text-success-subtle-fg text-sm/6")}
 			role="status"
 		>
-			{/* eslint-disable-next-line @eslint-react/no-unnecessary-key */}
 			<div key={state.id}>
 				{isSuccessState
 					? children != null

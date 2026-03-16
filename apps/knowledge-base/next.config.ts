@@ -64,17 +64,17 @@ const plugins: Array<(config: Config) => Config> = [
 	createNextIntlPlugin({
 		experimental: {
 			/** @see {@link https://next-intl.dev/docs/workflows/typescript#messages-arguments} */
-			createMessagesDeclaration: ["./content/en/metadata/index.json", "./messages/en.json"],
-			/** @see {@link https://next-intl.dev/docs/usage/extraction} */
-			srcPath: ["./app", "./components", "./lib", "../../packages/ui"],
-			messages: {
-				path: "./messages",
-				format: "json",
-				locales: "infer",
-			},
+			createMessagesDeclaration: ["./messages/metadata/en/index.json"],
 			extract: {
 				sourceLocale: "en",
 			},
+			messages: {
+				format: "po",
+				locales: "infer",
+				path: "./messages",
+				precompile: true,
+			},
+			srcPath: ["./app", "./components", "./lib"],
 		},
 		requestConfig: "./lib/i18n/request.ts",
 	}),

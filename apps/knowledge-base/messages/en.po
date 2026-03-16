@@ -1,0 +1,1093 @@
+msgid ""
+msgstr ""
+"Language: en\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: next-intl\n"
+"X-Crowdin-SourceKey: msgstr\n"
+
+#: app/(app)/[locale]/_components/color-scheme-select.tsx:11
+msgid "+CwN9C"
+msgstr "System"
+
+#: app/(app)/[locale]/_components/color-scheme-select.tsx:12
+msgid "3cc4Ct"
+msgstr "Light"
+
+#: app/(app)/[locale]/_components/color-scheme-select.tsx:13
+msgid "tOdNiY"
+msgstr "Dark"
+
+#: app/(app)/[locale]/_components/color-scheme-select.tsx:16
+msgid "o9rZ47"
+msgstr "Change color scheme"
+
+#: app/(app)/[locale]/(auth)/auth/forgot-password/_components/forgot-password-form.tsx:25
+#: app/(app)/[locale]/(auth)/auth/sign-in/_components/sign-in-form.tsx:25
+#: app/(app)/[locale]/(auth)/auth/sign-up/_components/sign-up-form.tsx:31
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:34
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:62
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:63
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:102
+#: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx:29
+msgid "sy+pv5"
+msgstr "Email"
+
+#: app/(app)/[locale]/(auth)/auth/forgot-password/_components/forgot-password-form.tsx:30
+#: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx:61
+msgid "9WRlF4"
+msgstr "Send"
+
+#: app/(app)/[locale]/(auth)/auth/forgot-password/_lib/forgot-password.action.ts:22
+#: app/(app)/[locale]/(auth)/auth/forgot-password/_lib/forgot-password.action.ts:27
+#: app/(app)/[locale]/(auth)/auth/forgot-password/_lib/forgot-password.action.ts:53
+#: app/(app)/[locale]/(auth)/auth/forgot-password/_lib/forgot-password.action.ts:56
+#: app/(app)/[locale]/(auth)/auth/forgot-password/page.tsx:34
+#: app/(app)/[locale]/(auth)/auth/recovery-code/page.tsx:37
+#: app/(app)/[locale]/(auth)/auth/reset-password/_lib/reset-password.action.ts:21
+#: app/(app)/[locale]/(auth)/auth/reset-password/page.tsx:38
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-recovery-code.action.ts:21
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-recovery-code.action.ts:34
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-recovery-code.action.ts:57
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-totp.action.ts:21
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-totp.action.ts:33
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-totp.action.ts:60
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/page.tsx:39
+#: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/_lib/verify-password-reset-email.action.ts:21
+#: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/_lib/verify-password-reset-email.action.ts:33
+#: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/_lib/verify-password-reset-email.action.ts:54
+#: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/page.tsx:38
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/regenerate-recovery-code.action.ts:16
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:22
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:34
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:59
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:21
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:33
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:59
+#: app/(app)/[locale]/(auth)/auth/settings/page.tsx:41
+#: app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.action.ts:21
+#: app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.action.ts:26
+#: app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.action.ts:50
+#: app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.action.ts:53
+#: app/(app)/[locale]/(auth)/auth/sign-in/page.tsx:35
+#: app/(app)/[locale]/(auth)/auth/sign-up/_lib/sign-up.action.ts:28
+#: app/(app)/[locale]/(auth)/auth/sign-up/_lib/sign-up.action.ts:33
+#: app/(app)/[locale]/(auth)/auth/sign-up/_lib/sign-up.action.ts:62
+#: app/(app)/[locale]/(auth)/auth/sign-up/page.tsx:36
+#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:24
+#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:38
+#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:59
+#: app/(app)/[locale]/(auth)/auth/two-factor/page.tsx:38
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.action.ts:29
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.action.ts:50
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/page.tsx:38
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:25
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:40
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:71
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/page.tsx:40
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:23
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:33
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:39
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:22
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:34
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:61
+#: app/(app)/[locale]/(auth)/auth/verify-email/page.tsx:39
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/create-person.action.ts:25
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.action.ts:25
+#: lib/server/create-server-action.ts:28
+msgid "CDu063"
+msgstr "Too many requests."
+
+#: app/(app)/[locale]/(auth)/auth/forgot-password/_lib/forgot-password.action.ts:40
+#: app/(app)/[locale]/(auth)/auth/reset-password/_lib/reset-password.action.ts:47
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-recovery-code.action.ts:49
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-totp.action.ts:48
+#: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/_lib/verify-password-reset-email.action.ts:46
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:47
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:46
+#: app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.action.ts:37
+#: app/(app)/[locale]/(auth)/auth/sign-up/_lib/sign-up.action.ts:44
+#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:51
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.action.ts:42
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:53
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:53
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/create-person.action.ts:40
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.action.ts:40
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action.ts:39
+#: app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.action.ts:36
+msgid "z9RwCc"
+msgstr "Invalid or missing fields."
+
+#: app/(app)/[locale]/(auth)/auth/forgot-password/_lib/forgot-password.action.ts:49
+#: app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.action.ts:46
+msgid "aEdOxR"
+msgstr "Account does not exist."
+
+#: app/(app)/[locale]/(auth)/auth/forgot-password/page.tsx:22
+msgid "9H3bhD"
+msgstr "Forgot password"
+
+#: app/(app)/[locale]/(auth)/auth/forgot-password/page.tsx:40
+#: app/(app)/[locale]/(auth)/auth/recovery-code/page.tsx:63
+#: app/(app)/[locale]/(auth)/auth/reset-password/page.tsx:58
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/page.tsx:63
+#: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/page.tsx:58
+#: app/(app)/[locale]/(auth)/auth/settings/page.tsx:63
+#: app/(app)/[locale]/(auth)/auth/sign-in/page.tsx:59
+#: app/(app)/[locale]/(auth)/auth/sign-up/page.tsx:60
+#: app/(app)/[locale]/(auth)/auth/two-factor/page.tsx:62
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/page.tsx:62
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/page.tsx:63
+#: app/(app)/[locale]/(auth)/auth/verify-email/page.tsx:61
+#: app/(app)/[locale]/(default)/_components/default-footer.tsx:25
+#: app/(app)/[locale]/(default)/_components/default-header.tsx:26
+msgid "ejEGdx"
+msgstr "Home"
+
+#: app/(app)/[locale]/(auth)/auth/forgot-password/page.tsx:50
+msgid "cyRU1N"
+msgstr "Forgot your password?"
+
+#: app/(app)/[locale]/(auth)/auth/forgot-password/page.tsx:52
+msgid "htvY7x"
+msgstr "We will send a password reset code to your email address."
+
+#: app/(app)/[locale]/(auth)/auth/forgot-password/page.tsx:58
+#: app/(app)/[locale]/(auth)/auth/sign-in/_components/sign-in-form.tsx:36
+#: app/(app)/[locale]/(auth)/auth/sign-in/page.tsx:24
+#: app/(app)/[locale]/(auth)/auth/sign-in/page.tsx:69
+#: app/(app)/[locale]/(auth)/auth/sign-up/page.tsx:86
+#: app/(app)/[locale]/(default)/_components/default-header.tsx:53
+msgid "SQJto2"
+msgstr "Sign in"
+
+#: app/(app)/[locale]/(auth)/auth/recovery-code/page.tsx:24
+#: app/(app)/[locale]/(auth)/auth/recovery-code/page.tsx:73
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_components/password-reset-recovery-code-form.tsx:28
+#: app/(app)/[locale]/(auth)/auth/settings/page.tsx:113
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_components/two-factor-reset-form.tsx:25
+msgid "e4C1p0"
+msgstr "Recovery code"
+
+#: app/(app)/[locale]/(auth)/auth/recovery-code/page.tsx:76
+#: app/(app)/[locale]/(auth)/auth/settings/_components/recovery-code-form.tsx:33
+msgid "UMtcey"
+msgstr "Your recovery code is:"
+
+#: app/(app)/[locale]/(auth)/auth/recovery-code/page.tsx:79
+msgid "7pMJd1"
+msgstr "You can use this recovery code if you lose access to your second factors."
+
+#: app/(app)/[locale]/(auth)/auth/recovery-code/page.tsx:84
+#: app/(app)/[locale]/(auth)/auth/sign-up/_components/sign-up-form.tsx:53
+msgid "acrOoz"
+msgstr "Continue"
+
+#: app/(app)/[locale]/(auth)/auth/reset-password/_components/reset-password-form.tsx:25
+#: app/(app)/[locale]/(auth)/auth/sign-in/_components/sign-in-form.tsx:31
+#: app/(app)/[locale]/(auth)/auth/sign-up/_components/sign-up-form.tsx:37
+msgid "5sg7KC"
+msgstr "Password"
+
+#: app/(app)/[locale]/(auth)/auth/reset-password/_components/reset-password-form.tsx:36
+#: app/(app)/[locale]/(auth)/auth/sign-up/_components/sign-up-form.tsx:48
+msgid "8HimVK"
+msgstr "Confirm password"
+
+#: app/(app)/[locale]/(auth)/auth/reset-password/_components/reset-password-form.tsx:41
+#: app/(app)/[locale]/(auth)/auth/reset-password/page.tsx:24
+#: app/(app)/[locale]/(auth)/auth/reset-password/page.tsx:68
+msgid "Yy/yDL"
+msgstr "Reset password"
+
+#: app/(app)/[locale]/(auth)/auth/reset-password/_lib/reset-password.action.ts:28
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-recovery-code.action.ts:27
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-totp.action.ts:27
+#: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/_lib/verify-password-reset-email.action.ts:27
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/regenerate-recovery-code.action.ts:22
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:28
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:27
+#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:30
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.action.ts:23
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:31
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:17
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:28
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:40
+msgid "FA2cpe"
+msgstr "Not authenticated."
+
+#: app/(app)/[locale]/(auth)/auth/reset-password/_lib/reset-password.action.ts:31
+#: app/(app)/[locale]/(auth)/auth/reset-password/_lib/reset-password.action.ts:34
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-totp.action.ts:30
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-totp.action.ts:57
+#: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/_lib/verify-password-reset-email.action.ts:30
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/regenerate-recovery-code.action.ts:25
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/regenerate-recovery-code.action.ts:28
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:31
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:30
+#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:34
+#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:65
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.action.ts:26
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:34
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:37
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:20
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:30
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:31
+msgid "z6socI"
+msgstr "Forbidden."
+
+#: app/(app)/[locale]/(auth)/auth/reset-password/_lib/reset-password.action.ts:56
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:55
+#: app/(app)/[locale]/(auth)/auth/sign-up/_lib/sign-up.action.ts:58
+msgid "aZPBJm"
+msgstr "Weak password."
+
+#: app/(app)/[locale]/(auth)/auth/reset-password/page.tsx:70
+msgid "iq0hNc"
+msgstr "Please provide a new password for your account."
+
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_components/password-reset-recovery-code-form.tsx:33
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_components/password-reset-totp-form.tsx:33
+#: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/_components/password-reset-email-verification-form.tsx:33
+#: app/(app)/[locale]/(auth)/auth/two-factor/_components/two-factor-verification-form.tsx:30
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_components/two-factor-reset-form.tsx:30
+#: app/(app)/[locale]/(auth)/auth/verify-email/_components/email-verification-form.tsx:30
+msgid "q5Xl0M"
+msgstr "Verify"
+
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_components/password-reset-totp-form.tsx:28
+#: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/_components/password-reset-email-verification-form.tsx:28
+#: app/(app)/[locale]/(auth)/auth/two-factor/_components/two-factor-verification-form.tsx:25
+msgid "h2vipu"
+msgstr "Code"
+
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-recovery-code.action.ts:62
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/_lib/verify-password-reset-two-factor-with-totp.action.ts:63
+#: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/_lib/verify-password-reset-email.action.ts:57
+#: app/(app)/[locale]/(auth)/auth/two-factor/_lib/verify-two-factor.action.ts:69
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:79
+msgid "UkurAm"
+msgstr "Incorrect code."
+
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/page.tsx:25
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/page.tsx:73
+#: app/(app)/[locale]/(auth)/auth/two-factor/page.tsx:24
+#: app/(app)/[locale]/(auth)/auth/two-factor/page.tsx:72
+msgid "Zmrie7"
+msgstr "Two-factor authentication"
+
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/page.tsx:78
+#: app/(app)/[locale]/(auth)/auth/two-factor/page.tsx:74
+msgid "PsYaj1"
+msgstr "Enter the code from your authenticator app."
+
+#: app/(app)/[locale]/(auth)/auth/reset-password/two-factor/page.tsx:84
+msgid "M1Jvwh"
+msgstr "Use your recovery code instead"
+
+#: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/_lib/verify-password-reset-email.action.ts:68
+msgid "cW3pgL"
+msgstr "Please restart the process."
+
+#: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/page.tsx:24
+#: app/(app)/[locale]/(auth)/auth/verify-email/page.tsx:26
+#: app/(app)/[locale]/(auth)/auth/verify-email/page.tsx:71
+msgid "tlKrHG"
+msgstr "Verify email address"
+
+#: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/page.tsx:68
+msgid "rEdUqQ"
+msgstr "Verify your email address"
+
+#: app/(app)/[locale]/(auth)/auth/reset-password/verify-email/page.tsx:70
+msgid "HK4xLQ"
+msgstr "We sent an 8-digit code to {email}."
+
+#: app/(app)/[locale]/(auth)/auth/settings/_components/recovery-code-form.tsx:37
+msgid "4lc6jy"
+msgstr "Generate new code"
+
+#: app/(app)/[locale]/(auth)/auth/settings/_components/update-email-form.tsx:25
+msgid "ugLdkh"
+msgstr "New email"
+
+#: app/(app)/[locale]/(auth)/auth/settings/_components/update-email-form.tsx:30
+#: app/(app)/[locale]/(auth)/auth/settings/_components/update-password-form.tsx:47
+#: app/(app)/[locale]/(auth)/auth/settings/page.tsx:105
+msgid "BWpuKl"
+msgstr "Update"
+
+#: app/(app)/[locale]/(auth)/auth/settings/_components/update-password-form.tsx:25
+msgid "NIynnB"
+msgstr "Current password"
+
+#: app/(app)/[locale]/(auth)/auth/settings/_components/update-password-form.tsx:31
+msgid "fTHhSB"
+msgstr "New password"
+
+#: app/(app)/[locale]/(auth)/auth/settings/_components/update-password-form.tsx:42
+msgid "fe7Y2Z"
+msgstr "Confirm new password"
+
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-email.action.ts:56
+#: app/(app)/[locale]/(auth)/auth/sign-up/_lib/sign-up.action.ts:53
+msgid "Qs87l8"
+msgstr "Email is already used."
+
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:65
+#: app/(app)/[locale]/(auth)/auth/sign-in/_lib/sign-in.action.ts:59
+msgid "fHT0Co"
+msgstr "Incorrect password."
+
+#: app/(app)/[locale]/(auth)/auth/settings/_lib/update-password.action.ts:76
+msgid "Whl44A"
+msgstr "Updated password."
+
+#: app/(app)/[locale]/(auth)/auth/settings/page.tsx:27
+#: app/(app)/[locale]/(auth)/auth/settings/page.tsx:73
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:106
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/user-menu.tsx:56
+msgid "D3idYv"
+msgstr "Settings"
+
+#: app/(app)/[locale]/(auth)/auth/settings/page.tsx:80
+msgid "ivZVky"
+msgstr "Update email"
+
+#: app/(app)/[locale]/(auth)/auth/settings/page.tsx:83
+msgid "Og/LVJ"
+msgstr "Your email:"
+
+#: app/(app)/[locale]/(auth)/auth/settings/page.tsx:92
+msgid "KkT/Fh"
+msgstr "Update password"
+
+#: app/(app)/[locale]/(auth)/auth/settings/page.tsx:101
+msgid "dVE1PE"
+msgstr "Update two-factor authentication"
+
+#: app/(app)/[locale]/(auth)/auth/sign-in/page.tsx:71
+msgid "0VMkDa"
+msgstr "Sign in to the DARIAH Knowledge Base with your user account."
+
+#: app/(app)/[locale]/(auth)/auth/sign-in/page.tsx:77
+#: app/(app)/[locale]/(auth)/auth/sign-up/page.tsx:70
+msgid "0vL5u1"
+msgstr "Create an account"
+
+#: app/(app)/[locale]/(auth)/auth/sign-in/page.tsx:78
+msgid "V/JHlm"
+msgstr "Forgot password?"
+
+#: app/(app)/[locale]/(auth)/auth/sign-up/_components/sign-up-form.tsx:25
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:25
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:47
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:48
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:101
+#: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx:38
+msgid "HAlOn1"
+msgstr "Name"
+
+#: app/(app)/[locale]/(auth)/auth/sign-up/_lib/sign-up.action.ts:24
+msgid "4FfVR6"
+msgstr "Sign up is disabled."
+
+#: app/(app)/[locale]/(auth)/auth/sign-up/page.tsx:25
+msgid "8HJxXG"
+msgstr "Sign up"
+
+#: app/(app)/[locale]/(auth)/auth/sign-up/page.tsx:73
+msgid "IG6alv"
+msgstr "Your password must be between {passwordMinLength,number} and {passwordMaxLength,number} characters long."
+
+#: app/(app)/[locale]/(auth)/auth/sign-up/page.tsx:86
+msgid "uCk8r+"
+msgstr "Already have an account?"
+
+#: app/(app)/[locale]/(auth)/auth/two-factor/page.tsx:80
+msgid "VF/mcI"
+msgstr "Use recovery code"
+
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/_lib/reset-two-factor.action.ts:55
+msgid "mG1WL7"
+msgstr "Invalid recovery code."
+
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/page.tsx:24
+msgid "ZRAJ8j"
+msgstr "Account recovery"
+
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/page.tsx:72
+msgid "yIK3vt"
+msgstr "Recover your account"
+
+#: app/(app)/[locale]/(auth)/auth/two-factor/reset/page.tsx:74
+msgid "WPcDtZ"
+msgstr "Enter the recovery code you received when creating the account."
+
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_components/two-factor-set-up-form.tsx:33
+msgid "+5d9Hf"
+msgstr "Verify the code from the app"
+
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_components/two-factor-set-up-form.tsx:38
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:120
+msgid "jvo0vs"
+msgstr "Save"
+
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:65
+msgid "gFFn6i"
+msgstr "Invalid key."
+
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/_lib/setup-two-factor.action.ts:74
+msgid "htnvWj"
+msgstr "Invalid code."
+
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/page.tsx:26
+msgid "VsxNaY"
+msgstr "Two-factor authentication setup"
+
+#: app/(app)/[locale]/(auth)/auth/two-factor/setup/page.tsx:73
+msgid "io+wG/"
+msgstr "Set up two-factor authentication"
+
+#: app/(app)/[locale]/(auth)/auth/verify-email/_components/email-verification-form.tsx:25
+msgid "/6gLBc"
+msgstr "Verification code"
+
+#: app/(app)/[locale]/(auth)/auth/verify-email/_components/resend-email-verification-code-form.tsx:25
+msgid "62beOi"
+msgstr "Resend verification code"
+
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/resend-email-verification-code.action.ts:54
+msgid "Lvibqr"
+msgstr "A new code was sent to your inbox."
+
+#: app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action.ts:74
+msgid "Rlr6vl"
+msgstr "The verification code was expired. We sent another code to your inbox."
+
+#: app/(app)/[locale]/(auth)/auth/verify-email/page.tsx:74
+msgid "1Cuvc8"
+msgstr "We sent an 8-digit verification code to {email}."
+
+#: app/(app)/[locale]/(auth)/auth/verify-email/page.tsx:85
+msgid "EI6y9l"
+msgstr "Change email address"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/command-palette.tsx:45
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:238
+msgid "1QGkRH"
+msgstr "Quick search..."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:58
+msgid "h7ympN"
+msgstr "Open command menu"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:90
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/user-menu.tsx:37
+#: app/(app)/[locale]/(default)/_components/user-menu.tsx:41
+msgid "bdcMGy"
+msgstr "Open menu"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:102
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:253
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/user-menu.tsx:51
+#: app/(app)/[locale]/(dashboard)/dashboard/@breadcrumbs/[...segments]/page.tsx:19
+#: app/(app)/[locale]/(dashboard)/dashboard/@breadcrumbs/page.tsx:10
+msgid "hzSNj4"
+msgstr "Dashboard"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:111
+msgid "tCOYpl"
+msgstr "Command menu"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:115
+msgid "DxgBSX"
+msgstr "Color scheme"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:118
+msgid "rru3FW"
+msgstr "Toggle color scheme"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:129
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/user-menu.tsx:63
+msgid "isGKnz"
+msgstr "Documentation"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:134
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/user-menu.tsx:74
+msgid "xXbJso"
+msgstr "Sign out"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:221
+msgid "ShOrju"
+msgstr "Open quick search"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:250
+msgid "9uOFF3"
+msgstr "Overview"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal.tsx:26
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:131
+msgid "47FYwb"
+msgstr "Cancel"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal.tsx:34
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:142
+msgid "K3r6DQ"
+msgstr "Delete"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/loading-dots.tsx:34
+msgid "iFsDVR"
+msgstr "Loading"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/loading-dots.tsx:49
+msgid "gjBiyj"
+msgstr "Loading..."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:77
+msgid "6nAe2O"
+msgstr "Select image"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:82
+msgid "ciJ33H"
+msgstr "Select an existing image or upload a new one."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:83
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:96
+msgid "BFLVwB"
+msgstr "Media library"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:90
+msgid "vC8XBw"
+msgstr "No images found. Upload one to get started."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:138
+msgid "JEsxDw"
+msgstr "Uploading..."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:141
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx:32
+msgid "vMUomP"
+msgstr "Upload image"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:147
+msgid "kQAf2d"
+msgstr "Select"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/(index)/page.tsx:20
+msgid "msSyC/"
+msgstr "Welcome, {name}"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/(index)/page.tsx:23
+msgid "4unN3g"
+msgstr "Lorem ipsum"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/(index)/page.tsx:25
+msgid "T8onXc"
+msgstr "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/(index)/page.tsx:19
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/(index)/page.tsx:33
+msgid "vL/A3j"
+msgstr "Administrator dashboard"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/page.tsx:19
+msgid "VqEMv5"
+msgstr "Administrator dashboard - Contributions"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/page.tsx:33
+msgid "oVDe1D"
+msgstr "Contributions"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/page.tsx:19
+msgid "94gpbH"
+msgstr "Administrator dashboard - Institutions"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/page.tsx:33
+msgid "/XO6LE"
+msgstr "Institutions"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/page.tsx:19
+msgid "6GYvgO"
+msgstr "Administrator dashboard - National consortia"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/page.tsx:33
+msgid "16OAWv"
+msgstr "Consortia"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/page.tsx:18
+msgid "nR3uiW"
+msgstr "Administrator dashboard - Newsletters"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/page.tsx:34
+msgid "4BU/eo"
+msgstr "Newsletters"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-create-form.tsx:21
+msgid "qESp6V"
+msgstr "New person"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:28
+msgid "IoDlcd"
+msgstr "Slug"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:31
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:53
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:58
+msgid "rpKRre"
+msgstr "Sort name"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:37
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:67
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:68
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:103
+msgid "Pl/c87"
+msgstr "ORCID"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:40
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:75
+msgid "+0zv6g"
+msgstr "Image"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-edit-form.tsx:27
+msgid "4ia6St"
+msgstr "Edit person"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:44
+msgid "kYvEZZ"
+msgstr "Enter the personal and contact details related to the person."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:45
+msgid "Lv0zJu"
+msgstr "Details"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:75
+msgid "sMRK+J"
+msgstr "Select or upload an image."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:78
+msgid "T7w3zq"
+msgstr "Selected image"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:93
+msgid "DixDH+"
+msgstr "Add a short biography."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:93
+msgid "5ez1Yf"
+msgstr "Biography"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:116
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:117
+msgid "TiR/Hq"
+msgstr "Saving..."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:71
+msgid "JZnNTW"
+msgstr "Persons"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:73
+msgid "ArVBPN"
+msgstr "Manage all persons in the DARIAH knowledge base."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:84
+msgid "xmcVZ0"
+msgstr "Search"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:91
+msgid "bW7B87"
+msgstr "New"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:116
+msgid "CYbwwJ"
+msgstr "Open actions menu"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:128
+msgid "FgydNe"
+msgstr "View"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:132
+msgid "wEQDC6"
+msgstr "Edit"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:157
+msgid "ADU4H2"
+msgstr "person"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/[slug]/details/page.tsx:21
+msgid "4mbkk4"
+msgstr "Administrator dashboard - Person details"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/[slug]/edit/page.tsx:25
+msgid "P5I1ji"
+msgstr "Administrator dashboard - Edit person"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/create/page.tsx:19
+msgid "cFvtc7"
+msgstr "Administrator dashboard - Create person"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/page.tsx:19
+msgid "SMXbAk"
+msgstr "Administrator dashboard - Persons"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/page.tsx:19
+msgid "cK0moa"
+msgstr "Administrator dashboard - Projects"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/page.tsx:33
+msgid "UxTJRa"
+msgstr "Projects"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reports/page.tsx:19
+msgid "2/vfVV"
+msgstr "Administrator dashboard - Reports"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reports/page.tsx:33
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/(index)/page.tsx:33
+#: app/(app)/[locale]/(dashboard)/dashboard/working-groups/[slug]/reports/(index)/page.tsx:33
+msgid "Ppx673"
+msgstr "Reports"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/services/page.tsx:19
+msgid "b3OLH3"
+msgstr "Administrator dashboard - Services"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/services/page.tsx:33
+msgid "sZFybj"
+msgstr "Services"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/page.tsx:19
+msgid "U85wVR"
+msgstr "Administrator dashboard - SocialMedia"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/page.tsx:33
+msgid "ZqausK"
+msgstr "SocialMedia"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/software/page.tsx:19
+msgid "mEPxFi"
+msgstr "Administrator dashboard - Software"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/software/page.tsx:33
+msgid "r3C4x/"
+msgstr "Software"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/page.tsx:19
+msgid "DKSN8Q"
+msgstr "Administrator dashboard - Users"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/page.tsx:32
+#: components/ui/table-example.tsx:213
+msgid "YDMrKK"
+msgstr "Users"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/page.tsx:19
+msgid "kAusnY"
+msgstr "Administrator dashboard - Working group reports"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/page.tsx:33
+msgid "2k5El8"
+msgstr "Working group reports"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/page.tsx:19
+msgid "8Yb+bu"
+msgstr "Administrator dashboard - Working groups"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/page.tsx:33
+msgid "S+6JuP"
+msgstr "Working groups"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/layout.tsx:38
+#: app/(app)/[locale]/(default)/layout.tsx:18
+msgid "2sRCsy"
+msgstr "Skip to main content"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/(index)/page.tsx:19
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/(index)/page.tsx:33
+msgid "flr1GA"
+msgstr "National consortium dashboard"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/(index)/page.tsx:19
+msgid "TIRV8x"
+msgstr "National consortium dashboard - Reports"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/(index)/page.tsx:18
+msgid "/kfYDC"
+msgstr "National consortium dashboard - Report"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/(index)/page.tsx:32
+#: app/(app)/[locale]/(dashboard)/dashboard/working-groups/[slug]/reports/[year]/(index)/page.tsx:32
+msgid "x5Tz6M"
+msgstr "Report"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/(index)/page.tsx:18
+msgid "IM2ock"
+msgstr "National consortium dashboard - Edit report"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/(index)/page.tsx:33
+#: app/(app)/[locale]/(dashboard)/dashboard/working-groups/[slug]/reports/[year]/edit/(index)/page.tsx:33
+msgid "8BGtJK"
+msgstr "Edit report"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/contributions/page.tsx:18
+msgid "q46BGO"
+msgstr "National consortium dashboard - Edit contributions"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/contributions/page.tsx:33
+msgid "w3CJg4"
+msgstr "Edit contributions"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/events/page.tsx:18
+msgid "om0vmo"
+msgstr "National consortium dashboard - Edit events"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/events/page.tsx:33
+msgid "S3+AuB"
+msgstr "Edit events"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/institutions/page.tsx:18
+msgid "1boAc7"
+msgstr "National consortium dashboard - Edit institutions"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/institutions/page.tsx:33
+msgid "xwAWzb"
+msgstr "Edit institutions"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/outreach/page.tsx:18
+msgid "SI5LID"
+msgstr "National consortium dashboard - Edit outreach"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/outreach/page.tsx:33
+msgid "Qrw4Ke"
+msgstr "Edit outreach"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/projects/page.tsx:18
+msgid "JU64PF"
+msgstr "National consortium dashboard - Edit projects"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/projects/page.tsx:33
+msgid "Ea88lu"
+msgstr "Edit projects"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/publications/page.tsx:18
+msgid "T5+5tP"
+msgstr "National consortium dashboard - Edit publications"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/publications/page.tsx:33
+msgid "Nc+2UK"
+msgstr "Edit publications"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/services/page.tsx:18
+msgid "2U5LrE"
+msgstr "National consortium dashboard - Edit services"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/services/page.tsx:33
+msgid "T0s6Q1"
+msgstr "Edit services"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/software/page.tsx:18
+msgid "xi7lZh"
+msgstr "National consortium dashboard - Edit software"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/software/page.tsx:33
+msgid "NEF3Pi"
+msgstr "Edit software"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/summary/page.tsx:18
+msgid "bDj74E"
+msgstr "National consortium dashboard - Edit summary"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/national-consortia/[code]/reports/[year]/edit/summary/page.tsx:33
+msgid "JLjqom"
+msgstr "Edit summary"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/(index)/page.tsx:19
+#: app/(app)/[locale]/(dashboard)/dashboard/website/(index)/page.tsx:33
+msgid "CWbizX"
+msgstr "Website dashboard"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx:27
+msgid "FKUPrI"
+msgstr "Select an image to upload"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action.ts:51
+msgid "KY78v9"
+msgstr "Successfully uploaded image."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/page.tsx:30
+msgid "TBCsZj"
+msgstr "Website dashboard - Assets"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/page.tsx:49
+msgid "d1uESJ"
+msgstr "Assets"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/page.tsx:19
+msgid "hp+IWH"
+msgstr "Website dashboard - Events"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/page.tsx:34
+#: components/ui/tables/events-table.tsx:52
+msgid "ZvKSfJ"
+msgstr "Events"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/page.tsx:19
+msgid "ZbJtUu"
+msgstr "Website dashboard - Impact case studies"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/page.tsx:35
+#: components/ui/tables/impact-case-studies-table.tsx:52
+msgid "99bd1b"
+msgstr "Impact case studies"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/page.tsx:19
+msgid "Ke2wLG"
+msgstr "Website dashboard - Metadata"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/page.tsx:33
+msgid "8Q504V"
+msgstr "Metadata"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/page.tsx:18
+msgid "Eg6PBS"
+msgstr "Website dashboard - Navigation"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/page.tsx:32
+msgid "fBg+7V"
+msgstr "Navigation"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/page.tsx:19
+msgid "IgSa6m"
+msgstr "Website dashboard - News"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/page.tsx:34
+#: components/ui/tables/news-table.tsx:51
+msgid "NZyhSX"
+msgstr "News"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/page.tsx:19
+msgid "0HmFbH"
+msgstr "Website dashboard - Pages"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/page.tsx:34
+#: components/ui/tables/pages-table.tsx:51
+msgid "CxfKLC"
+msgstr "Pages"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/page.tsx:19
+msgid "5F2F7Z"
+msgstr "Website dashboard - Spotlight articles"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/page.tsx:35
+#: components/ui/tables/spotlight-articles-table.tsx:51
+msgid "FZzBJD"
+msgstr "Spotlight articles"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/working-groups/[slug]/(index)/page.tsx:19
+#: app/(app)/[locale]/(dashboard)/dashboard/working-groups/[slug]/(index)/page.tsx:33
+msgid "lpdHRU"
+msgstr "Working group dashboard"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/working-groups/[slug]/reports/(index)/page.tsx:19
+msgid "abjInS"
+msgstr "Working group dashboard - Reports"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/working-groups/[slug]/reports/[year]/(index)/page.tsx:18
+msgid "OhSrNq"
+msgstr "Working group dashboard - Report"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/working-groups/[slug]/reports/[year]/edit/(index)/page.tsx:18
+msgid "oHXjsF"
+msgstr "Working group dashboard - Edit report"
+
+#: app/(app)/[locale]/(default)/_components/default-footer.tsx:30
+#: app/(app)/[locale]/(default)/contact/page.tsx:19
+#: app/(app)/[locale]/(default)/contact/page.tsx:31
+msgid "zFegDD"
+msgstr "Contact"
+
+#: app/(app)/[locale]/(default)/_components/default-footer.tsx:35
+#: app/(app)/[locale]/(default)/privacy-policy/page.tsx:18
+#: app/(app)/[locale]/(default)/privacy-policy/page.tsx:31
+msgid "cPwv2c"
+msgstr "Privacy policy"
+
+#: app/(app)/[locale]/(default)/_components/default-footer.tsx:40
+#: app/(app)/[locale]/(default)/terms-of-use/page.tsx:18
+#: app/(app)/[locale]/(default)/terms-of-use/page.tsx:31
+msgid "EBDrtq"
+msgstr "Terms of use"
+
+#: app/(app)/[locale]/(default)/_components/default-footer.tsx:45
+#: app/(app)/[locale]/(default)/imprint/page.tsx:19
+#: app/(app)/[locale]/(default)/imprint/page.tsx:32
+msgid "xYJkOZ"
+msgstr "Imprint"
+
+#: app/(app)/[locale]/(default)/_components/default-footer.tsx:58
+msgid "ZEEVQX"
+msgstr "Social media"
+
+#: app/(app)/[locale]/(default)/_components/default-footer.tsx:83
+msgid "6FQuCT"
+msgstr "Secondary"
+
+#: app/(app)/[locale]/(default)/_components/default-header.tsx:33
+msgid "EFTSMc"
+msgstr "Main"
+
+#: app/(app)/[locale]/(default)/(index)/page.tsx:32
+#: app/(app)/[locale]/opengraph-image.tsx:38
+msgid "3umvLQ"
+msgstr "DARIAH Knowledge Base"
+
+#: app/(app)/[locale]/(default)/(index)/page.tsx:35
+msgid "yd+0BL"
+msgstr "Your central hub for everything DARIAH-related."
+
+#: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx:47
+msgid "LLtKhp"
+msgstr "Subject"
+
+#: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx:56
+msgid "T7Ry38"
+msgstr "Message"
+
+#: app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.action.ts:53
+msgid "KlhlQn"
+msgstr "Failed to send message."
+
+#: app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.action.ts:59
+msgid "hrWbQB"
+msgstr "Successfully sent message."
+
+#: app/(app)/[locale]/error-page.tsx:27
+msgid "JqiqNj"
+msgstr "Something went wrong"
+
+#: app/(app)/[locale]/error-page.tsx:34
+msgid "FazwRl"
+msgstr "Try again"
+
+#: app/(app)/[locale]/forbidden.tsx:12
+#: app/(app)/[locale]/forbidden.tsx:32
+msgid "VLK0WW"
+msgstr "Forbidden"
+
+#: app/(app)/[locale]/layout.tsx:47
+msgid "cSmcVJ"
+msgstr "RSS feed ({locale})"
+
+#: app/(app)/[locale]/unauthorized.tsx:12
+#: app/(app)/[locale]/unauthorized.tsx:32
+msgid "WlyxAh"
+msgstr "Unauthorized"
+
+#: app/global-not-found.tsx:20
+#: app/global-not-found.tsx:43
+msgid "QRccCM"
+msgstr "Page not found"
+
+#: lib/server/create-server-action.ts:39
+msgid "lkI8/e"
+msgstr "Internal server error."
