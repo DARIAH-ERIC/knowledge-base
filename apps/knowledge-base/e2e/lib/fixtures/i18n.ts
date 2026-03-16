@@ -1,12 +1,9 @@
-import type ui from "@dariah-eric/ui/i18n/en";
+import { keyBy } from "@acdh-oeaw/lib";
 import type { Page } from "@playwright/test";
 import { createFormatter, createTranslator } from "next-intl";
 
-import type metadata from "@/content/en/metadata/index.json";
 import { defaultLocale, getIntlLanguage, type IntlLocale } from "@/lib/i18n/locales";
-import type { IntlMessages } from "@/lib/i18n/messages";
-import type { SocialMediaKind } from "@/lib/social-media/social-media.config";
-import type messages from "@/messages/en.json";
+import type metadataMessages from "@/messages/metadata/en/index.json";
 
 export interface I18n {
 	t: ReturnType<typeof createTranslator<IntlMessages>>;
@@ -31,37 +28,58 @@ export type WithI18n<T> = T & { i18n: I18n };
  * for json imports.
  */
 
-type Messages = typeof messages;
-type Metadata = typeof metadata;
-type UiMessages = typeof ui;
+type Metadata = typeof metadataMessages;
+type SocialMedia = Metadata["social"];
+type SocialMediaMetadata = {
+	[Kind in SocialMedia[number]["kind"]]: Extract<SocialMedia[number], { kind: Kind }>;
+};
 
-async function getIntlMessages(locale: IntlLocale) {
+export interface IntlMessages {
+	metadata: Omit<Metadata, "social"> & { social: SocialMediaMetadata };
+}
+
+async function getIntlMessages(locale: IntlLocale): Promise<IntlMessages> {
 	const language = getIntlLanguage(locale);
 
-	const { default: _messages } = (await import(`@/messages/${language}.json`, {
-		with: { type: "json" },
-	})) as { default: Messages };
-	const { default: _metadata } = (await import(`@/content/${language}/metadata/index.json`, {
-		with: { type: "json" },
-	})) as { default: Metadata };
-	const { default: _ui } = (await import(`@dariah-eric/ui/i18n/${language}`, {
-		with: { type: "json" },
-	})) as { default: UiMessages };
+	const [
+		// { default: extracted },
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+		{ default: metadata },
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+		{ default: ui },
+	] = await Promise.all([
+		// import(`@/messages/${language}.json`, { with: { type: "json" } }),
+		import(`@/messages/metadata/${language}/index.json`, { with: { type: "json" } }),
+		import(`@dariah-eric/ui/i18n/${language}`, { with: { type: "json" } }),
+	]);
 
-	const _social: Record<string, string> = {};
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+	const social = keyBy(metadata.social as SocialMedia, (item) => {
+		return item.kind;
+	});
 
-	for (const entry of _metadata.social) {
-		_social[entry.kind] = entry.href;
+	switch (language) {
+		// case "de": {
+		// 	await import("@valibot/i18n/de");
+		// 	break;
+		// }
+
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		case "en": {
+			/** Default messages. */
+			break;
+		}
 	}
 
 	const messages = {
-		..._messages,
-		..._ui,
+		// ...extracted,
+		...ui,
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		metadata: {
-			..._metadata,
-			social: _social as Record<SocialMediaKind, string | undefined>,
+			...metadata,
+			social,
 		},
-	};
+	} as IntlMessages;
 
 	return messages;
 }

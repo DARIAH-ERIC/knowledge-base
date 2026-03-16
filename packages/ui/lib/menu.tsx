@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
-import { Fragment, type ReactNode } from "react";
+import { Fragment, type ReactNode, use } from "react";
 import {
 	Button as AriaButton,
 	type ButtonProps as AriaButtonProps,
@@ -32,6 +32,8 @@ import {
 } from "@/lib/dropdown";
 import { PopoverContent, type PopoverContentProps } from "@/lib/popover";
 import { cx } from "@/lib/primitive";
+
+import { UiContext } from "./ui-provider";
 
 export interface MenuProps extends AriaMenuTriggerProps {}
 
@@ -108,6 +110,8 @@ interface MenuItemProps extends AriaMenuItemProps, VariantProps<typeof dropdownI
 export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 	const { className, intent, children, ...rest } = props;
 
+	const { LinkComponent = "a" } = use(UiContext);
+
 	// eslint-disable-next-line @eslint-react/prefer-destructuring-assignment
 	const textValue = props.textValue ?? (typeof children === "string" ? children : undefined);
 
@@ -129,6 +133,19 @@ export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 				});
 			})}
 			data-slot="menu-item"
+			render={(domProps, renderProps) => {
+				if ("href" in domProps && domProps.href && !renderProps.isDisabled) {
+					return <LinkComponent {...domProps} />;
+				}
+
+				return (
+					<div
+						{...domProps}
+						// @ts-expect-error -- Link may be disabled but have `href`.
+						href={undefined}
+					/>
+				);
+			}}
 			textValue={textValue}
 			{...rest}
 		>

@@ -29,7 +29,7 @@ export const Default: Story = {
 
 		return (
 			<Tooltip {...rest}>
-				<Button aria-label="Edit" intent="plain" size="sq-sm">
+				<Button aria-label={"Edit"} intent="plain" size="sq-sm">
 					<PencilIcon aria-hidden={true} data-slot="icon" />
 				</Button>
 				<TooltipContent arrow={false} inverse={true} placement="top">

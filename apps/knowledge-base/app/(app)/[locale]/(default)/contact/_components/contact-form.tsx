@@ -1,18 +1,65 @@
-import { useTranslations } from "next-intl";
-import type { ReactNode } from "react";
+"use client";
 
-import { ContactForm as ContactFormContent } from "@/app/(app)/[locale]/(default)/contact/_components/contact-form.client";
+import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { Form } from "@dariah-eric/ui/form";
+import { FormStatus } from "@dariah-eric/ui/form-status";
+import { SubmitButton } from "@dariah-eric/ui/submit-button";
+import { useExtracted } from "next-intl";
+import { type ReactNode, useActionState } from "react";
+import { Input, Label, TextArea, TextField } from "react-aria-components";
+
+import { sendContactFormEmailAction } from "@/app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.action";
 
 export function ContactForm(): ReactNode {
-	const t = useTranslations("ContactForm");
+	const t = useExtracted();
+
+	const [state, action] = useActionState(sendContactFormEmailAction, createActionStateInitial());
 
 	return (
-		<ContactFormContent
-			emailLabel={t("email")}
-			messageLabel={t("message")}
-			nameLabel={t("name")}
-			subjectLabel={t("subject")}
-			submitLabel={t("submit")}
-		/>
+		<Form action={action} className="flex flex-col gap-y-8" state={state}>
+			<FormStatus state={state} />
+
+			<TextField
+				autoComplete="email"
+				defaultValue={(state.formData?.get("email") ?? "") as string}
+				isRequired={true}
+				name="email"
+				type="email"
+			>
+				<Label>{t("Email")}</Label>
+				<Input />
+			</TextField>
+
+			<TextField
+				defaultValue={(state.formData?.get("name") ?? "") as string}
+				isRequired={true}
+				name="name"
+			>
+				<Label>{t("Name")}</Label>
+				<Input />
+			</TextField>
+
+			<TextField
+				defaultValue={(state.formData?.get("subject") ?? "") as string}
+				isRequired={true}
+				name="subject"
+			>
+				<Label>{t("Subject")}</Label>
+				<Input />
+			</TextField>
+
+			<TextField
+				defaultValue={(state.formData?.get("message") ?? "") as string}
+				isRequired={true}
+				name="message"
+			>
+				<Label>{t("Message")}</Label>
+				<TextArea rows={5} />
+			</TextField>
+
+			<div>
+				<SubmitButton>{t("Send")}</SubmitButton>
+			</div>
+		</Form>
 	);
 }

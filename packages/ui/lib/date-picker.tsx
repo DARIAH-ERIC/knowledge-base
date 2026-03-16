@@ -2,6 +2,7 @@
 
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import type { DateDuration } from "@internationalized/date";
+import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 import {
 	Button,
@@ -61,10 +62,11 @@ export function DatePickerOverlay({
 	range,
 	...props
 }: Readonly<DatePickerOverlayProps>): ReactNode {
+	const t = useExtracted("ui");
 	const isMobile = useIsMobile();
 
 	return isMobile ? (
-		<ModalContent aria-label="Date picker" closeButton={false}>
+		<ModalContent aria-label={t("Date picker")} closeButton={false}>
 			<div className="flex justify-center p-6">
 				{range != null ? (
 					<RangeCalendar pageBehavior={pageBehavior} visibleDuration={visibleDuration} />
@@ -93,11 +95,13 @@ export function DatePickerOverlay({
 }
 
 export function DatePickerTrigger({ className, ...props }: Readonly<GroupProps>): ReactNode {
+	const t = useExtracted("ui");
+
 	return (
 		<InputGroup className={cx("*:data-[slot=control]:w-full", className)} {...props}>
 			<DateInput />
 			<Button
-				aria-label="Open calendar"
+				aria-label={t("Open calendar")}
 				className={twJoin(
 					"touch-area grid place-content-center outline-hidden",
 					"text-muted-fg pressed:text-fg hover:text-fg focus-visible:text-fg",

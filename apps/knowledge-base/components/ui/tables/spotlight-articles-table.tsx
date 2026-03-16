@@ -20,7 +20,7 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/16/solid";
-import { useFormatter } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import type { ReactNode } from "react";
 
 import type { SpotlightArticlesWithEntities } from "@/lib/data/spotlight-articles";
@@ -30,6 +30,7 @@ interface SpotlightArticlesTableProps {
 }
 
 export function SpotlightArticlesTable(props: Readonly<SpotlightArticlesTableProps>): ReactNode {
+	const t = useExtracted();
 	const formatter = useFormatter();
 
 	const { data: spotlightArticles } = props;
@@ -47,7 +48,7 @@ export function SpotlightArticlesTable(props: Readonly<SpotlightArticlesTablePro
 				</CardAction>
 			</CardHeader>
 
-			<Table aria-label="Spotlight Articles">
+			<Table aria-label={t("Spotlight articles")}>
 				<TableHeader>
 					<TableColumn isRowHeader={true}>Title</TableColumn>
 					<TableColumn>Summary</TableColumn>

@@ -36,7 +36,7 @@ export const Default: Story = {
 	render() {
 		return (
 			<div className="w-72">
-				<GridList aria-label="Team members">
+				<GridList aria-label={"Team members"}>
 					{members.map((member) => {
 						return (
 							<GridListItem key={member.id} id={member.id} textValue={member.name}>
@@ -61,7 +61,7 @@ export const Selectable: Story = {
 	render() {
 		return (
 			<div className="w-72">
-				<GridList aria-label="Team members" selectionMode="multiple">
+				<GridList aria-label={"Team members"} selectionMode="multiple">
 					{members.map((member) => {
 						return (
 							<GridListItem key={member.id} id={member.id} textValue={member.name}>
@@ -85,7 +85,7 @@ export const WithSections: Story = {
 	render() {
 		return (
 			<div className="w-72">
-				<GridList aria-label="Team">
+				<GridList aria-label={"Team"}>
 					<GridListSection>
 						<GridListHeader>{"Administrators"}</GridListHeader>
 						<GridListItem id="1" textValue="Jane Smith">

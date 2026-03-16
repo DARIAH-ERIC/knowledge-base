@@ -57,7 +57,7 @@ export function SheetContent({
 	const isDismissable = isDismissableInternal ?? role !== "alertdialog";
 	return (
 		<AriaModalOverlay
-			className="fixed start-0 top-0 z-50 size-full overflow-hidden bg-black/15 entering:fade-in entering:animate-in entering:duration-500 exiting:fade-out exiting:animate-out exiting:duration-300"
+			className="fixed inset-s-0 top-0 z-50 size-full overflow-hidden bg-black/15 entering:fade-in entering:animate-in entering:duration-500 exiting:fade-out exiting:animate-out exiting:duration-300"
 			isDismissable={isDismissable}
 			{...props}
 		>
@@ -80,7 +80,7 @@ export function SheetContent({
 							<Fragment>
 								{typeof children === "function" ? children(values) : children}
 								{closeButton && (
-									<DialogCloseIcon className="end-2.5 top-2.5" isDismissable={isDismissable} />
+									<DialogCloseIcon className="inset-e-2.5 top-2.5" isDismissable={isDismissable} />
 								)}
 							</Fragment>
 						);

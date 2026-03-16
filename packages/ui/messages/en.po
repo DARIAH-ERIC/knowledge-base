@@ -1,0 +1,221 @@
+msgid ""
+msgstr ""
+"Language: en\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: next-intl\n"
+"X-Crowdin-SourceKey: msgstr\n"
+
+#: lib/calendar.tsx:107
+msgctxt "ui"
+msgid "8mRNBD"
+msgstr "Previous month"
+
+#: lib/calendar.tsx:117
+msgctxt "ui"
+msgid "PqmLVn"
+msgstr "Next month"
+
+#: lib/calendar.tsx:148
+msgctxt "ui"
+msgid "pig+2F"
+msgstr "Select month"
+
+#: lib/calendar.tsx:185
+msgctxt "ui"
+msgid "HppWvq"
+msgstr "Select year"
+
+#: lib/carousel.tsx:237
+msgctxt "ui"
+msgid "Y9bYKH"
+msgstr "Next slide"
+
+#: lib/carousel.tsx:237
+msgctxt "ui"
+msgid "MH3koz"
+msgstr "Previous slide"
+
+#: lib/command-menu.tsx:131
+msgctxt "ui"
+msgid "tCOYpl"
+msgstr "Command menu"
+
+#: lib/command-menu.tsx:159
+msgctxt "ui"
+msgid "49vo8t"
+msgstr "Quick search"
+
+#: lib/command-menu.tsx:174
+msgctxt "ui"
+msgid "0BUTMv"
+msgstr "Search..."
+
+#: lib/date-picker.tsx:69
+msgctxt "ui"
+msgid "WZXD9N"
+msgstr "Date picker"
+
+#: lib/date-picker.tsx:104
+msgctxt "ui"
+msgid "OHAWov"
+msgstr "Open calendar"
+
+#: lib/dialog.tsx:149
+#: lib/toast.tsx:59
+msgctxt "ui"
+msgid "rbrahO"
+msgstr "Close"
+
+#: lib/grid-list.tsx:100
+msgctxt "ui"
+msgid "4ZUjCU"
+msgstr "Reorder item"
+
+#: lib/loader.tsx:95
+msgctxt "ui"
+msgid "99OtWT"
+msgstr "Pending..."
+
+#: lib/multiple-select.tsx:93
+msgctxt "ui"
+msgid "ch1L7M"
+msgstr "Selected items"
+
+#: lib/multiple-select.tsx:122
+msgctxt "ui"
+msgid "hBhV8k"
+msgstr "Open options"
+
+#: lib/pagination.tsx:19
+#: lib/pagination.tsx:52
+msgctxt "ui"
+msgid "ZATT08"
+msgstr "Pagination"
+
+#: lib/pagination.tsx:103
+msgctxt "ui"
+msgid "A64Z+T"
+msgstr "First page"
+
+#: lib/pagination.tsx:152
+msgctxt "ui"
+msgid "k9hDFZ"
+msgstr "Previous page"
+
+#: lib/pagination.tsx:198
+msgctxt "ui"
+msgid "rBj9Ib"
+msgstr "Next page"
+
+#: lib/pagination.tsx:244
+msgctxt "ui"
+msgid "N8BBfe"
+msgstr "Last page"
+
+#: lib/rich-text-editor.tsx:176
+msgctxt "ui"
+msgid "Dkkmwm"
+msgstr "Bold"
+
+#: lib/rich-text-editor.tsx:184
+msgctxt "ui"
+msgid "g2V+es"
+msgstr "Italic"
+
+#: lib/rich-text-editor.tsx:192
+msgctxt "ui"
+msgid "h2vipu"
+msgstr "Code"
+
+#: lib/rich-text-editor.tsx:201
+msgctxt "ui"
+msgid "/7maNQ"
+msgstr "Heading 1"
+
+#: lib/rich-text-editor.tsx:209
+msgctxt "ui"
+msgid "Zqekct"
+msgstr "Heading 2"
+
+#: lib/rich-text-editor.tsx:217
+msgctxt "ui"
+msgid "BDbgCL"
+msgstr "Heading 3"
+
+#: lib/rich-text-editor.tsx:226
+msgctxt "ui"
+msgid "6sdKFe"
+msgstr "Bullet List"
+
+#: lib/rich-text-editor.tsx:234
+msgctxt "ui"
+msgid "rU4xig"
+msgstr "Ordered List"
+
+#: lib/rich-text-editor.tsx:242
+msgctxt "ui"
+msgid "+RDJVD"
+msgstr "Blockquote"
+
+#: lib/rich-text-editor.tsx:252
+msgctxt "ui"
+msgid "JBWS0c"
+msgstr "Link"
+
+#: lib/rich-text-editor.tsx:280
+msgctxt "ui"
+msgid "EWw/tK"
+msgstr "Apply"
+
+#: lib/rich-text-editor.tsx:284
+msgctxt "ui"
+msgid "G/yZLu"
+msgstr "Remove"
+
+#: lib/search-field.tsx:26
+msgctxt "ui"
+msgid "xmcVZ0"
+msgstr "Search"
+
+#: lib/search-field.tsx:40
+msgctxt "ui"
+msgid "4YJHut"
+msgstr "Clear search"
+
+#: lib/sidebar.tsx:243
+msgctxt "ui"
+msgid "JZy6jo"
+msgstr "Sidebar"
+
+#: lib/sidebar.tsx:741
+#: lib/sidebar.tsx:785
+msgctxt "ui"
+msgid "6D4Ghb"
+msgstr "Toggle sidebar"
+
+#: lib/sidebar.tsx:765
+#: lib/sidebar.tsx:797
+msgctxt "ui"
+msgid "kh4wt0"
+msgstr "Toggle Sidebar"
+
+#: lib/table.tsx:286
+msgctxt "ui"
+msgid "u4jsnc"
+msgstr "No data found"
+
+#: lib/table.tsx:288
+msgctxt "ui"
+msgid "2I546+"
+msgstr "No information is currently available in this section."
+
+#: lib/table.tsx:446
+msgctxt "ui"
+msgid "8epGWu"
+msgstr "Reorder row"
+
+#: lib/tag-group.tsx:73
+msgctxt "ui"
+msgid "NNbHjg"
+msgstr "Remove tag"

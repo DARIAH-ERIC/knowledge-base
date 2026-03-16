@@ -216,6 +216,8 @@ export function Sidebar(props: Readonly<SidebarProps>): ReactNode {
 
 	const { isMobile, state, isOpenOnMobile, setIsOpenOnMobile } = useSidebar();
 
+	const t = useExtracted("ui");
+
 	if (collapsible === "none") {
 		return (
 			<div
@@ -238,7 +240,7 @@ export function Sidebar(props: Readonly<SidebarProps>): ReactNode {
 			<Fragment>
 				<span aria-hidden={true} className="sr-only" data-intent={intent} />
 				<SheetContent
-					aria-label="Sidebar"
+					aria-label={t("Sidebar")}
 					className="w-(--sidebar-width) [--sidebar-width:18rem] entering:blur-in exiting:blur-out has-data-[slot=calendar]:[--sidebar-width:23rem]"
 					closeButton={closeButton}
 					data-intent="default"
@@ -515,7 +517,7 @@ export function SidebarItem(props: Readonly<SidebarItemProps>): ReactNode {
 						{badge != null &&
 							(state !== "collapsed" ? (
 								<span
-									className="absolute inset-ring-1 inset-ring-sidebar-border inset-y-1/2 end-1.5 h-5.5 w-auto -translate-y-1/2 rounded-full bg-fg/5 px-2 text-[10px]/5.5 group-hover/sidebar-item:inset-ring-muted-fg/30 group-current:inset-ring-transparent"
+									className="absolute inset-ring-1 inset-ring-sidebar-border inset-y-1/2 inset-e-1.5 h-5.5 w-auto -translate-y-1/2 rounded-full bg-fg/5 px-2 text-[10px]/5.5 group-hover/sidebar-item:inset-ring-muted-fg/30 group-current:inset-ring-transparent"
 									data-slot="sidebar-badge"
 								>
 									{badge}
@@ -523,7 +525,7 @@ export function SidebarItem(props: Readonly<SidebarItemProps>): ReactNode {
 							) : (
 								<div
 									aria-hidden={true}
-									className="absolute end-1 top-1 size-1.5 rounded-full bg-primary"
+									className="absolute inset-e-1 top-1 size-1.5 rounded-full bg-primary"
 								/>
 							))}
 					</Fragment>
@@ -736,7 +738,7 @@ export function SidebarTrigger(props: Readonly<SidebarTriggerProps>): ReactNode 
 
 	return (
 		<Button
-			aria-label={props["aria-label"] ?? "Toggle Sidebar"}
+			aria-label={props["aria-label"] ?? t("Toggle sidebar")}
 			className={cx("shrink-0", className)}
 			data-slot="sidebar-trigger"
 			intent={props.intent ?? "plain"}
@@ -780,7 +782,7 @@ export function SidebarRail(props: Readonly<SidebarRailProps>): ReactNode {
 		props.children ?? (
 			<button
 				ref={ref}
-				aria-label={t("Toggle Sidebar")}
+				aria-label={t("Toggle sidebar")}
 				className={twMerge(
 					"absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 outline-hidden transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-0.5 sm:flex hover:after:bg-transparent group-data-[side=left]:-right-4 group-data-[side=right]:left-0",
 					"in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
@@ -858,7 +860,7 @@ export function SidebarMenuTrigger(props: Readonly<SidebarMenuTriggerProps>): Re
 			className={cx(
 				!alwaysVisible &&
 					"text-muted-fg opacity-0 pressed:text-fg pressed:opacity-100 hover:text-fg",
-				"absolute end-0 flex h-full w-[calc(var(--sidebar-width)-90%)] items-center justify-end pe-2.5 outline-hidden",
+				"absolute inset-e-0 flex h-full w-[calc(var(--sidebar-width)-90%)] items-center justify-end pe-2.5 outline-hidden",
 				// eslint-disable-next-line better-tailwindcss/enforce-consistent-class-order
 				"sm:[&_[data-slot='icon']:not([class*='size-'])]:size-4 [&_[data-slot='icon']:not([class*='size-'])]:size-5 pressed:[&_[data-slot='icon']:not([class*='text-'])]:text-fg **:data-[slot=icon]:shrink-0",
 				"group-hover/sidebar-item:opacity-100 group-focus-visible/sidebar-item:opacity-100 group/sidebar-item:pressed:opacity-100",

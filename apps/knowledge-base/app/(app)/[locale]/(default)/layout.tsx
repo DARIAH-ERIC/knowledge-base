@@ -1,4 +1,4 @@
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { DefaultFooter } from "@/app/(app)/[locale]/(default)/_components/default-footer";
@@ -11,11 +11,11 @@ interface DefaultLayoutProps extends LayoutProps<"/[locale]"> {}
 export default function DefaultLayout(props: Readonly<DefaultLayoutProps>): ReactNode {
 	const { children } = props;
 
-	const t = useTranslations("DefaultLayout");
+	const t = useExtracted();
 
 	return (
 		<Fragment>
-			<SkipLink href={`#${mainContentId}`}>{t("skip-link")}</SkipLink>
+			<SkipLink href={`#${mainContentId}`}>{t("Skip to main content")}</SkipLink>
 
 			<div className="relative isolate flex min-h-full flex-col">
 				<DefaultHeader />

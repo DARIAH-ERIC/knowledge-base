@@ -21,7 +21,7 @@ export const restrictedImports = {
 		},
 		{
 			allowImportNames: ["useLinkStatus"],
-			message: "Please use `@/components/link` instead.",
+			message: "Please use `@dariah-eric/ui/link` instead.",
 			name: "next/link",
 		},
 		{
@@ -57,6 +57,7 @@ const config = defineConfig(
 			],
 			"object-shorthand": ["error", "always", { avoidExplicitReturnArrows: true }],
 			"preserve-caught-error": "error",
+			"import-x/no-unresolved": "off",
 		},
 	},
 	{

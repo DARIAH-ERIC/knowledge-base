@@ -11,7 +11,7 @@ test.describe("contact page", () => {
 			await contactPage.goto();
 
 			await expect(contactPage.page).toHaveTitle(
-				[i18n.t("ContactPage.meta.title"), i18n.messages.metadata.title].join(" | "),
+				["Contact", i18n.messages.metadata.title].join(" | "),
 			);
 		}
 	});
@@ -86,7 +86,7 @@ test.describe("contact page", () => {
 
 			const emailService = createEmailService();
 
-			const { contactPage, i18n } = await createContactPage(locale);
+			const { contactPage } = await createContactPage(locale);
 			await contactPage.goto();
 
 			const name = "Firstname Lastname";
@@ -102,7 +102,7 @@ test.describe("contact page", () => {
 
 			await expect(contactPage.page.getByRole("main").getByRole("alert")).toBeEmpty();
 			await expect(contactPage.page.getByRole("main").getByRole("status")).toContainText(
-				i18n.t("actions.sendContactFormEmailAction.success"),
+				"Successfully sent message.",
 				{ timeout: statusTimeoutMs },
 			);
 
@@ -143,7 +143,7 @@ test.describe("contact page", () => {
 
 			const emailService = createEmailService();
 
-			const { contactPage, i18n } = await createContactPage(locale);
+			const { contactPage } = await createContactPage(locale);
 			await contactPage.goto();
 
 			const chaosResponse = await emailService.enableChaos();
@@ -163,7 +163,7 @@ test.describe("contact page", () => {
 
 				await expect(contactPage.page.getByRole("main").getByRole("status")).toBeEmpty();
 				await expect(contactPage.page.getByRole("main").getByRole("alert")).toContainText(
-					i18n.t("actions.sendContactFormEmailAction.error"),
+					"Failed to send message.",
 					{ timeout: statusTimeoutMs },
 				);
 

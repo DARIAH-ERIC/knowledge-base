@@ -8,7 +8,7 @@ import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { unstable_rethrow as rethrow } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
-type ServerAction<
+export type ServerAction<
 	TData = unknown,
 	TValidationErrors extends ValidationErrors = ValidationErrors,
 > = (

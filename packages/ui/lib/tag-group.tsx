@@ -1,6 +1,7 @@
 "use client";
 
 import { XCircleIcon } from "@heroicons/react/16/solid";
+import { useExtracted } from "next-intl";
 import type React from "react";
 import { Fragment, type ReactNode } from "react";
 import {
@@ -44,6 +45,8 @@ export interface TagProps extends AriaTagProps {}
 export function Tag(props: Readonly<TagProps>): ReactNode {
 	const { children, className, ...rest } = props;
 
+	const t = useExtracted("ui");
+
 	const textValue = typeof children === "string" ? children : undefined;
 
 	return (
@@ -67,7 +70,7 @@ export function Tag(props: Readonly<TagProps>): ReactNode {
 					<Fragment>
 						{children}
 						{allowsRemoving && (
-							<Button aria-label="Remove tag" className="" slot="remove">
+							<Button aria-label={t("Remove tag")} className="" slot="remove">
 								<XCircleIcon className="-mr-1 size-4" />
 							</Button>
 						)}

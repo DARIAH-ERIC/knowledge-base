@@ -51,29 +51,29 @@ export const Default: Story = {
 					{"Open Command Menu"}
 				</Button>
 				<CommandMenu isOpen={isOpen} onOpenChange={setIsOpen}>
-					<CommandMenuSearch placeholder="Search..." />
+					<CommandMenuSearch placeholder={"Search..."} />
 					<CommandMenuList>
-						<CommandMenuSection label="Navigation">
-							<CommandMenuItem textValue="Home">
+						<CommandMenuSection label={"Navigation"}>
+							<CommandMenuItem textValue={"Home"}>
 								<HomeIcon />
 								{"Home"}
 							</CommandMenuItem>
-							<CommandMenuItem textValue="Dashboard">
+							<CommandMenuItem textValue={"Dashboard"}>
 								<ChartBarIcon />
 								{"Dashboard"}
 							</CommandMenuItem>
-							<CommandMenuItem textValue="Team">
+							<CommandMenuItem textValue={"Team"}>
 								<UserGroupIcon />
 								{"Team"}
 							</CommandMenuItem>
 						</CommandMenuSection>
 						<CommandMenuSeparator />
-						<CommandMenuSection label="Resources">
-							<CommandMenuItem textValue="Documents">
+						<CommandMenuSection label={"Resources"}>
+							<CommandMenuItem textValue={"Documents"}>
 								<DocumentIcon />
 								{"Documents"}
 							</CommandMenuItem>
-							<CommandMenuItem textValue="Settings">
+							<CommandMenuItem textValue={"Settings"}>
 								<Cog6ToothIcon />
 								{"Settings"}
 							</CommandMenuItem>
@@ -113,12 +113,12 @@ export const WithShortcut: Story = {
 					{"Open (or press ⌘K)"}
 				</Button>
 				<CommandMenu isOpen={isOpen} onOpenChange={setIsOpen} shortcut="k">
-					<CommandMenuSearch placeholder="Type a command..." />
+					<CommandMenuSearch placeholder={"Type a command..."} />
 					<CommandMenuList>
-						<CommandMenuSection label="Actions">
-							<CommandMenuItem textValue="New document">{"New document"}</CommandMenuItem>
-							<CommandMenuItem textValue="Open file">{"Open file"}</CommandMenuItem>
-							<CommandMenuItem textValue="Save">{"Save"}</CommandMenuItem>
+						<CommandMenuSection label={"Actions"}>
+							<CommandMenuItem textValue={"New document"}>{"New document"}</CommandMenuItem>
+							<CommandMenuItem textValue={"Open file"}>{"Open file"}</CommandMenuItem>
+							<CommandMenuItem textValue={"Save"}>{"Save"}</CommandMenuItem>
 						</CommandMenuSection>
 					</CommandMenuList>
 				</CommandMenu>

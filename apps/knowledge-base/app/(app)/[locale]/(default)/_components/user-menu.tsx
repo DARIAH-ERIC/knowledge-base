@@ -19,6 +19,7 @@ import {
 	DocumentTextIcon,
 	Squares2X2Icon,
 } from "@heroicons/react/24/outline";
+import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
 
 import { signOutAction } from "@/lib/auth/sign-out.action";
@@ -33,9 +34,11 @@ interface UserMenuProps {
 export function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 	const { user } = props;
 
+	const t = useExtracted();
+
 	return (
 		<Menu>
-			<MenuTrigger aria-label="Open Menu">
+			<MenuTrigger aria-label={t("Open menu")}>
 				<Avatar initials={user.name.at(0)} isSquare={true} />
 			</MenuTrigger>
 

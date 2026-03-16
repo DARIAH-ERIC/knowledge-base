@@ -7,13 +7,13 @@ import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { SubmitButton } from "@dariah-eric/ui/submit-button";
 import { TextField } from "@dariah-eric/ui/text-field";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { type ReactNode, useActionState } from "react";
 
 import { verifyEmailAction } from "@/app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.action";
 
 export function EmailVerificationForm(): ReactNode {
-	const t = useTranslations("EmailVerificationForm");
+	const t = useExtracted();
 
 	const [state, action] = useActionState(verifyEmailAction, createActionStateInitial());
 
@@ -22,12 +22,12 @@ export function EmailVerificationForm(): ReactNode {
 			<FormStatus state={state} />
 
 			<TextField isRequired={true} name="code">
-				<Label>{t("code")}</Label>
+				<Label>{t("Verification code")}</Label>
 				<FieldError />
 				<Input />
 			</TextField>
 
-			<SubmitButton className="mt-2">{t("verify")}</SubmitButton>
+			<SubmitButton className="mt-2">{t("Verify")}</SubmitButton>
 		</Form>
 	);
 }

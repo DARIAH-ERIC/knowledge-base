@@ -1,13 +1,13 @@
 import { createUrlSearchParams } from "@acdh-oeaw/lib";
+import { Link } from "@dariah-eric/ui/link";
 import type { Metadata, ResolvingMetadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getExtracted } from "next-intl/server";
 import { type ReactNode, Suspense } from "react";
 import * as v from "valibot";
 
 import { ImageGrid } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/image-grid";
 import { UploadImageForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form";
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { Link } from "@/components/link";
 import { imageGridOptions } from "@/config/assets.config";
 import { getAssets } from "@/lib/data/cached/assets";
 import { createHref } from "@/lib/navigation/create-href";
@@ -24,10 +24,10 @@ export async function generateMetadata(
 	_props: Readonly<DashboardWebsiteAssetsPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
-	const t = await getTranslations("DashboardWebsiteAssetsPage");
+	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("meta.title"),
+		title: t("Website dashboard - Assets"),
 	});
 
 	return metadata;
@@ -38,7 +38,7 @@ export default async function DashboardWebsiteAssetsPage(
 ): Promise<ReactNode> {
 	const { searchParams } = props;
 
-	const t = await getTranslations("DashboardWebsiteAssetsPage");
+	const t = await getExtracted();
 
 	const { limit, offset } = await v.parseAsync(SearchParamsSchema, await searchParams);
 
@@ -46,7 +46,7 @@ export default async function DashboardWebsiteAssetsPage(
 
 	return (
 		<Main className="flex-1">
-			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">{t("title")}</h1>
+			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">{t("Assets")}</h1>
 
 			<UploadImageForm />
 

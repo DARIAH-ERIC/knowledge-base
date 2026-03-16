@@ -1,21 +1,25 @@
 import { SidebarInset, SidebarProvider } from "@dariah-eric/ui/sidebar";
+import { cookies } from "next/headers";
 import { connection } from "next/server";
-import { getTranslations } from "next-intl/server";
+import { getExtracted } from "next-intl/server";
 import { Fragment, type ReactNode } from "react";
 
 import { DashboardSidebar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar";
 import { DashboardSidebarNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav";
 import { mainContentId } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/main";
 import { SkipLink } from "@/components/skip-link";
+import { assertAuthenticated } from "@/lib/auth/session";
 
-interface DashbardLayoutProps extends LayoutProps<"/[locale]/dashboard"> {}
+interface DashbardLayoutProps extends LayoutProps<"/[locale]/dashboard"> {
+	breadcrumbs: ReactNode;
+}
 
 export default async function DashbardLayout(
 	props: Readonly<DashbardLayoutProps>,
 ): Promise<ReactNode> {
-	const { children } = props;
+	const { breadcrumbs, children } = props;
 
-	const t = await getTranslations("DashboardLayout");
+	const t = await getExtracted();
 
 	/**
 	 * We cannot access the database when building the app in github actions,
@@ -23,20 +27,27 @@ export default async function DashbardLayout(
 	 */
 	await connection();
 
+	const store = await cookies();
+	const sidebarState = store.get("sidebar_state");
+	const defaultOpen = sidebarState ? sidebarState.value === "true" : true;
+
+	const { user } = await assertAuthenticated();
+
 	return (
 		<Fragment>
-			<SkipLink href={`#${mainContentId}`}>{t("skip-link")}</SkipLink>
+			<SkipLink href={`#${mainContentId}`}>{t("Skip to main content")}</SkipLink>
 
-			<div className="relative isolate flex h-full flex-col">
-				<SidebarProvider>
-					<DashboardSidebar intent="float" />
+			<SidebarProvider defaultOpen={defaultOpen}>
+				<DashboardSidebar collapsible="dock" />
 
-					<SidebarInset>
-						<DashboardSidebarNav />
-						<div className="p-4 lg:p-6">{children}</div>
-					</SidebarInset>
-				</SidebarProvider>
-			</div>
+				<SidebarInset>
+					<DashboardSidebarNav breadcrumbs={breadcrumbs} user={user} />
+
+					<div className="flex flex-col gap-y-(--layout-padding) p-(--layout-padding) [--layout-padding:--spacing(4)] sm:[--layout-padding:--spacing(6)]">
+						{children}
+					</div>
+				</SidebarInset>
+			</SidebarProvider>
 		</Fragment>
 	);
 }

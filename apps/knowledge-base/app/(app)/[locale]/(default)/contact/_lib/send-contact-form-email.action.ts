@@ -6,7 +6,7 @@ import {
 	createActionStateSuccess,
 	type GetValidationErrors,
 } from "@dariah-eric/next-lib/actions";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { SendContactFormInputSchema } from "@/app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.schema";
@@ -20,8 +20,7 @@ export const sendContactFormEmailAction = createServerAction<
 	GetValidationErrors<typeof SendContactFormInputSchema>
 >(async function sendContactFormEmailAction(state, formData) {
 	const locale = await getLocale();
-	const t = await getTranslations("actions.sendContactFormEmailAction");
-	const e = await getTranslations("errors");
+	const t = await getExtracted();
 
 	const validation = await v.safeParseAsync(
 		SendContactFormInputSchema,
@@ -34,7 +33,7 @@ export const sendContactFormEmailAction = createServerAction<
 
 		return createActionStateError({
 			formData,
-			message: errors.root ?? e("invalid-form-fields"),
+			message: errors.root ?? t("Invalid or missing fields."),
 			validationErrors: errors.nested,
 		});
 	}
@@ -51,11 +50,11 @@ export const sendContactFormEmailAction = createServerAction<
 	if (result.isErr()) {
 		return createActionStateError({
 			formData,
-			message: t("error"),
+			message: t("Failed to send message."),
 		});
 	}
 
 	log.info(result.value);
 
-	return createActionStateSuccess({ message: t("success") });
+	return createActionStateSuccess({ message: t("Successfully sent message.") });
 });

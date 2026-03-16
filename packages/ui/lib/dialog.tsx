@@ -1,11 +1,12 @@
 "use client";
 
 import { XMarkIcon } from "@heroicons/react/24/solid";
-import type { ReactNode } from "react";
+import { useExtracted } from "next-intl";
+import type { ComponentProps, ReactNode, Ref } from "react";
 import {
-	Button as PrimitiveButton,
-	Dialog as PrimitiveDialog,
-	Heading,
+	Button as AriaButton,
+	Dialog as AriaDialog,
+	Heading as AriaHeading,
 	type HeadingProps,
 	type TextProps,
 } from "react-aria-components";
@@ -19,9 +20,9 @@ export function Dialog({
 	role = "dialog",
 	className,
 	...props
-}: Readonly<React.ComponentProps<typeof PrimitiveDialog>>): ReactNode {
+}: Readonly<ComponentProps<typeof AriaDialog>>): ReactNode {
 	return (
-		<PrimitiveDialog
+		<AriaDialog
 			className={twMerge(
 				"peer/dialog group/dialog relative flex max-h-[calc(var(--visual-viewport-height)-var(--visual-viewport-vertical-padding))] flex-col overflow-hidden outline-hidden [--gutter:--spacing(6)] sm:[--gutter:--spacing(8)]",
 				className,
@@ -34,10 +35,10 @@ export function Dialog({
 }
 
 export function DialogTrigger({ className, ...props }: Readonly<ButtonProps>): ReactNode {
-	return <PrimitiveButton className={cx("cursor-pointer", className)} {...props} />;
+	return <AriaButton className={cx("cursor-pointer", className)} {...props} />;
 }
 
-export interface DialogHeaderProps extends Omit<React.ComponentProps<"div">, "title"> {
+export interface DialogHeaderProps extends Omit<ComponentProps<"div">, "title"> {
 	title?: string;
 	description?: string;
 }
@@ -65,11 +66,11 @@ export function DialogHeader({ className, ...props }: Readonly<DialogHeaderProps
 }
 
 export interface DialogTitleProps extends HeadingProps {
-	ref?: React.Ref<HTMLHeadingElement>;
+	ref?: Ref<HTMLHeadingElement>;
 }
 export function DialogTitle({ className, ref, ...props }: Readonly<DialogTitleProps>): ReactNode {
 	return (
-		<Heading
+		<AriaHeading
 			ref={ref}
 			className={twMerge("text-balance font-semibold text-fg text-lg/6 sm:text-base/6", className)}
 			slot="title"
@@ -79,7 +80,7 @@ export function DialogTitle({ className, ref, ...props }: Readonly<DialogTitlePr
 }
 
 export interface DialogDescriptionProps extends TextProps {
-	ref?: React.Ref<HTMLDivElement>;
+	ref?: Ref<HTMLDivElement>;
 }
 export function DialogDescription({
 	className,
@@ -99,7 +100,7 @@ export function DialogDescription({
 	);
 }
 
-export interface DialogBodyProps extends React.ComponentProps<"div"> {}
+export interface DialogBodyProps extends ComponentProps<"div"> {}
 export function DialogBody({ className, ...props }: Readonly<DialogBodyProps>): ReactNode {
 	return (
 		<div
@@ -114,7 +115,7 @@ export function DialogBody({ className, ...props }: Readonly<DialogBodyProps>): 
 	);
 }
 
-export interface DialogFooterProps extends React.ComponentProps<"div"> {}
+export interface DialogFooterProps extends ComponentProps<"div"> {}
 export function DialogFooter({ className, ...props }: Readonly<DialogFooterProps>): ReactNode {
 	return (
 		<div
@@ -141,16 +142,18 @@ export function DialogCloseIcon({
 	className,
 	...props
 }: Readonly<CloseButtonIndicatorProps>): ReactNode {
+	const t = useExtracted("ui");
+
 	return props.isDismissable != null ? (
-		<PrimitiveButton
-			aria-label="Close"
+		<AriaButton
+			aria-label={t("Close")}
 			className={cx(
-				"absolute end-1 top-1 z-50 grid size-8 place-content-center rounded-xl hover:bg-secondary focus:bg-secondary focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary sm:top-2 sm:size-7 sm:rounded-md",
+				"absolute inset-e-1 top-1 z-50 grid size-8 place-content-center rounded-xl hover:bg-secondary focus:bg-secondary focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary sm:top-2 sm:size-7 sm:rounded-md",
 				className,
 			)}
 			slot="close"
 		>
 			<XMarkIcon className="size-4" />
-		</PrimitiveButton>
+		</AriaButton>
 	) : null;
 }

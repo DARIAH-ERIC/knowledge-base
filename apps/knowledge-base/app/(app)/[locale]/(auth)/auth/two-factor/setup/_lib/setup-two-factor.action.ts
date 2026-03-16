@@ -3,7 +3,7 @@
 import { getFormDataValues } from "@acdh-oeaw/lib";
 import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import {
@@ -19,26 +19,25 @@ import { createServerAction } from "@/lib/server/create-server-action";
 export const setupTwoFactorAction = createServerAction(
 	async function setupTwoFactorAction(state, formData) {
 		const locale = await getLocale();
-		const t = await getTranslations("actions.setupTwoFactorAction");
-		const e = await getTranslations("errors");
+		const t = await getExtracted();
 
 		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: e("too-many-requests") });
+			return createActionStateError({ message: t("Too many requests.") });
 		}
 
 		const { session, user } = await getCurrentSession();
 
 		if (session == null) {
-			return createActionStateError({ message: e("not-authenticated") });
+			return createActionStateError({ message: t("Not authenticated.") });
 		}
 		if (!user.isEmailVerified) {
-			return createActionStateError({ message: e("forbidden") });
+			return createActionStateError({ message: t("Forbidden.") });
 		}
 		if (user.isTwoFactorRegistered && !session.isTwoFactorVerified) {
-			return createActionStateError({ message: e("forbidden") });
+			return createActionStateError({ message: t("Forbidden.") });
 		}
 		if (!auth.totpUpdateBucket.check(user.id, 1)) {
-			return createActionStateError({ message: e("too-many-requests") });
+			return createActionStateError({ message: t("Too many requests.") });
 		}
 
 		const result = await v.safeParseAsync(
@@ -51,7 +50,7 @@ export const setupTwoFactorAction = createServerAction(
 			const errors = v.flatten<typeof SetupTwoFactorActionInputSchema>(result.issues);
 
 			return createActionStateError({
-				message: errors.root ?? e("invalid-form-fields"),
+				message: errors.root ?? t("Invalid or missing fields."),
 				validationErrors: errors.nested,
 			});
 		}
@@ -63,16 +62,16 @@ export const setupTwoFactorAction = createServerAction(
 		});
 
 		if (!keyResult.success) {
-			return createActionStateError({ message: t("invalid-key") });
+			return createActionStateError({ message: t("Invalid key.") });
 		}
 
 		const key = keyResult.output;
 
 		if (!auth.totpUpdateBucket.consume(user.id, 1)) {
-			return createActionStateError({ message: e("too-many-requests") });
+			return createActionStateError({ message: t("Too many requests.") });
 		}
 		if (!auth.verifyTotp(key, code)) {
-			return createActionStateError({ message: t("invalid-code") });
+			return createActionStateError({ message: t("Invalid code.") });
 		}
 
 		await auth.updateUserTotpKey(user.id, key);

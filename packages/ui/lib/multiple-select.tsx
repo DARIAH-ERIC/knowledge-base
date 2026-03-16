@@ -1,6 +1,7 @@
 "use client";
 
 import { PlusIcon } from "@heroicons/react/20/solid";
+import { useExtracted } from "next-intl";
 import React, { Children, Fragment, isValidElement, type ReactNode, useMemo, useRef } from "react";
 import {
 	Autocomplete,
@@ -49,9 +50,10 @@ export function MultipleSelect<T extends OptionBase>(
 ): ReactNode {
 	const { placeholder = "No selected items", className, children, name, ...rest } = props;
 
+	const t = useExtracted("ui");
+
 	const triggerRef = useRef<HTMLDivElement | null>(null);
 
-	// eslint-disable-next-line @typescript-eslint/unbound-method
 	const { contains } = useFilter({ sensitivity: "base" });
 
 	const { before, after, list } = useMemo(() => {
@@ -88,11 +90,12 @@ export function MultipleSelect<T extends OptionBase>(
 							{({ selectedItems, state }) => {
 								return (
 									<TagGroup
-										aria-label="Selected items"
+										aria-label={t("Selected items")}
 										onRemove={(keys) => {
 											if (Array.isArray(state.value)) {
 												state.setValue(
 													state.value.filter((k) => {
+														// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 														return !keys.has(k);
 													}),
 												);
@@ -116,7 +119,7 @@ export function MultipleSelect<T extends OptionBase>(
 							}}
 						</SelectValue>
 						<Button
-							aria-label="Open options"
+							aria-label={t("Open options")}
 							className="self-end rounded-[calc(var(--radius-lg)-(--spacing(1)))]"
 							intent="secondary"
 							size="sq-xs"

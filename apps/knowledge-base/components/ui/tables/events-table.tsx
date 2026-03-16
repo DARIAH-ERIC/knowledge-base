@@ -1,4 +1,5 @@
 /* eslint-disable react/jsx-no-literals */
+
 "use client";
 
 import { Button } from "@dariah-eric/ui/button";
@@ -20,7 +21,7 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/16/solid";
-import { useFormatter } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import type { ReactNode } from "react";
 
 import type { EventsWithEntities } from "@/lib/data/events";
@@ -30,6 +31,7 @@ interface EventsTableProps {
 }
 
 export function EventsTable(props: Readonly<EventsTableProps>): ReactNode {
+	const t = useExtracted();
 	const formatter = useFormatter();
 
 	const { data: events } = props;
@@ -47,7 +49,7 @@ export function EventsTable(props: Readonly<EventsTableProps>): ReactNode {
 				</CardAction>
 			</CardHeader>
 
-			<Table aria-label="Events">
+			<Table aria-label={t("Events")}>
 				<TableHeader>
 					<TableColumn isRowHeader={true}>Title</TableColumn>
 					<TableColumn>Summary</TableColumn>

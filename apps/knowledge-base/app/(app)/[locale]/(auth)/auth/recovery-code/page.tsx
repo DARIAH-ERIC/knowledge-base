@@ -3,7 +3,7 @@ import { Avatar } from "@dariah-eric/ui/avatar";
 import { Link } from "@dariah-eric/ui/link";
 import { Text, TextLink } from "@dariah-eric/ui/text";
 import type { Metadata, ResolvingMetadata } from "next";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getExtracted, getLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/components/main";
@@ -18,10 +18,10 @@ export async function generateMetadata(
 	_props: Readonly<RecoveryCodePageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
-	const t = await getTranslations("RecoveryCodePage");
+	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("meta.title"),
+		title: t("Recovery code"),
 	});
 
 	return metadata;
@@ -31,11 +31,10 @@ export default async function RecoveryCodePage(
 	_props: Readonly<RecoveryCodePageProps>,
 ): Promise<ReactNode> {
 	const locale = await getLocale();
-	const t = await getTranslations("RecoveryCodePage");
-	const e = await getTranslations("errors");
+	const t = await getExtracted();
 
 	if (!(await globalGetRequestRateLimit())) {
-		return e("too-many-requests");
+		return t("Too many requests.");
 	}
 
 	const { session, user } = await getCurrentSession();
@@ -61,7 +60,7 @@ export default async function RecoveryCodePage(
 	return (
 		<Main className="min-h-full p-6 items-center justify-center flex flex-col">
 			<div className="w-full max-w-sm flex flex-col gap-y-4">
-				<Link aria-label="Home" className="mb-2 rounded-xs self-start inline-block" href="/">
+				<Link aria-label={t("Home")} className="mb-2 rounded-xs self-start inline-block" href="/">
 					<Avatar
 						className="dark:invert"
 						isSquare={true}
@@ -71,16 +70,18 @@ export default async function RecoveryCodePage(
 				</Link>
 
 				<div>
-					<h1 className="text-xl/10 font-semibold">{t("title")}</h1>
+					<h1 className="text-xl/10 font-semibold">{t("Recovery code")}</h1>
 
 					<Text>
-						{t("your-code")} <span className="text-fg">{recoveryCode}</span>.
+						{t("Your recovery code is:")} <span className="text-fg">{recoveryCode}</span>.
 					</Text>
-					<Text>{t("message")}</Text>
+					<Text>
+						{t("You can use this recovery code if you lose access to your second factors.")}
+					</Text>
 				</div>
 
 				<Text className="mt-4">
-					<TextLink href="/">{t("next")}</TextLink>
+					<TextLink href="/">{t("Continue")}</TextLink>
 				</Text>
 			</div>
 		</Main>

@@ -51,6 +51,43 @@ export async function getAssets(params: GetAssetsParams) {
 	};
 }
 
+interface GetMediaLibraryAssetsParams {
+	imageUrlOptions: ImageUrlOptions;
+	/** @default 50 */
+	limit?: number;
+	/** @default 0 */
+	offset?: number;
+}
+
+export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams) {
+	const { imageUrlOptions, limit = 50, offset = 0 } = params;
+
+	const [assets, total] = await Promise.all([
+		db.query.assets.findMany({
+			columns: {
+				key: true,
+			},
+			limit,
+			offset,
+			orderBy: {
+				updatedAt: "desc",
+			},
+		}),
+		db.$count(schema.assets),
+	]);
+
+	const items = assets.map((asset) => {
+		const { url } = images.generateSignedImageUrl({
+			key: asset.key,
+			options: imageUrlOptions,
+		});
+
+		return { key: asset.key, url };
+	});
+
+	return { items, total };
+}
+
 interface UploadAssetParams {
 	file: File;
 	licenseId?: schema.AssetInput["licenseId"];

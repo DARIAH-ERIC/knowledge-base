@@ -23,7 +23,7 @@ export function FormErrorMessage(props: Readonly<FormErrorMessageProps>): ReactN
 			className={cn(className, !isErrorState ? "sr-only" : null)}
 			role="alert"
 		>
-			{/* eslint-disable-next-line @eslint-react/no-unnecessary-key */}
+			{}
 			<div key={state.id}>
 				{isErrorState
 					? children != null

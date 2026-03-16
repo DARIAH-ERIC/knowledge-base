@@ -1,6 +1,6 @@
 import type { Metadata, ResolvingMetadata } from "next";
-import { useTranslations } from "next-intl";
-import { getTranslations } from "next-intl/server";
+import { useExtracted } from "next-intl";
+import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
@@ -12,10 +12,10 @@ export async function generateMetadata(
 	_props: Readonly<DashboardWebsiteNavigationPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
-	const t = await getTranslations("DashboardWebsiteNavigationPage");
+	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("meta.title"),
+		title: t("Website dashboard - Navigation"),
 	});
 
 	return metadata;
@@ -24,11 +24,13 @@ export async function generateMetadata(
 export default function DashboardWebsiteNavigationPage(
 	_props: Readonly<DashboardWebsiteNavigationPageProps>,
 ): ReactNode {
-	const t = useTranslations("DashboardWebsiteNavigationPage");
+	const t = useExtracted();
 
 	return (
 		<Main className="flex-1">
-			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">{t("title")}</h1>
+			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">
+				{t("Navigation")}
+			</h1>
 		</Main>
 	);
 }

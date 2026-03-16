@@ -3,7 +3,7 @@
 import { getFormDataValues } from "@acdh-oeaw/lib";
 import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { VerifyEmailActionInputSchema } from "@/app/(app)/[locale]/(auth)/auth/verify-email/_lib/verify-email.schema";
@@ -16,29 +16,28 @@ import { createServerAction } from "@/lib/server/create-server-action";
 export const verifyEmailAction = createServerAction(
 	async function verifyEmailAction(state, formData) {
 		const locale = await getLocale();
-		const t = await getTranslations("actions.verifyEmailAction");
-		const e = await getTranslations("errors");
+		const t = await getExtracted();
 
 		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: e("too-many-requests") });
+			return createActionStateError({ message: t("Too many requests.") });
 		}
 
 		const { session, user } = await getCurrentSession();
 
 		if (session == null) {
-			return createActionStateError({ message: e("not-authenticated") });
+			return createActionStateError({ message: t("Not authenticated.") });
 		}
 		if (user.isTwoFactorRegistered && !session.isTwoFactorVerified) {
-			return createActionStateError({ message: e("forbidden") });
+			return createActionStateError({ message: t("Forbidden.") });
 		}
 		if (!auth.verifyEmailBucket.check(user.id, 1)) {
-			return createActionStateError({ message: e("too-many-requests") });
+			return createActionStateError({ message: t("Too many requests.") });
 		}
 
 		let verificationRequest = await auth.getEmailVerificationRequestFromRequest();
 
 		if (verificationRequest == null) {
-			return createActionStateError({ message: e("not-authenticated") });
+			return createActionStateError({ message: t("Not authenticated.") });
 		}
 
 		const result = await v.safeParseAsync(
@@ -51,7 +50,7 @@ export const verifyEmailAction = createServerAction(
 			const errors = v.flatten<typeof VerifyEmailActionInputSchema>(result.issues);
 
 			return createActionStateError({
-				message: errors.root ?? e("invalid-form-fields"),
+				message: errors.root ?? t("Invalid or missing fields."),
 				validationErrors: errors.nested,
 			});
 		}
@@ -59,7 +58,7 @@ export const verifyEmailAction = createServerAction(
 		const { code } = result.output;
 
 		if (!auth.verifyEmailBucket.consume(user.id, 1)) {
-			return createActionStateError({ message: e("too-many-requests") });
+			return createActionStateError({ message: t("Too many requests.") });
 		}
 
 		const now = Date.now();
@@ -72,12 +71,12 @@ export const verifyEmailAction = createServerAction(
 			await auth.sendVerificationEmail(verificationRequest.email, verificationRequest.code);
 
 			return createActionStateError({
-				message: t("code-expired"),
+				message: t("The verification code was expired. We sent another code to your inbox."),
 			});
 		}
 
 		if (verificationRequest.code !== code) {
-			return createActionStateError({ message: t("incorrect-code") });
+			return createActionStateError({ message: t("Incorrect code.") });
 		}
 
 		await auth.deleteEmailVerificationRequest(user.id);

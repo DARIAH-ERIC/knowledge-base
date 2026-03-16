@@ -15,7 +15,7 @@ test.describe("analytics service", () => {
 	);
 
 	test("should track page views", async ({ createIndexPage }) => {
-		const { indexPage, i18n } = await createIndexPage(defaultLocale);
+		const { indexPage } = await createIndexPage(defaultLocale);
 		const { page } = indexPage;
 
 		const initialResponsePromise = page.waitForResponse(baseUrl);
@@ -24,9 +24,7 @@ test.describe("analytics service", () => {
 		expect(initialResponse.status()).toBe(204);
 
 		const responsePromise = page.waitForResponse(baseUrl);
-		await page
-			.getByRole("link", { name: i18n.t("DefaultFooter.navigation.items.imprint") })
-			.click();
+		await page.getByRole("link", { name: "Imprint" }).click();
 		const response = await responsePromise;
 		expect(response.status()).toBe(204);
 	});

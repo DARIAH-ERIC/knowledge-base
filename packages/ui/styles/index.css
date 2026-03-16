@@ -1,4 +1,5 @@
 /* stylelint-disable custom-property-empty-line-before */
+/* stylelint-disable declaration-block-no-duplicate-custom-properties */
 
 /**
  * ============================================================================================
@@ -244,8 +245,146 @@
 			min-width: var(--touch-area);
 			height: 100%;
 			min-height: var(--touch-area);
+			pointer-events: inherit;
 			transform: translate(-50%, -50%);
 		}
+	}
+}
+
+@utility hit-area-debug {
+	position: relative;
+
+	&::before {
+		@apply border border-dashed border-blue-500 bg-blue-500/10;
+
+		content: "";
+		position: absolute;
+		inset: var(--hit-area-t, 0) var(--hit-area-r, 0) var(--hit-area-b, 0) var(--hit-area-l, 0);
+		pointer-events: inherit;
+	}
+
+	&:hover::before {
+		border: 1px dashed var(--color-green-500);
+		background-color: color-mix(in oklab, var(--color-green-500) 10%, transparent);
+	}
+}
+
+@utility hit-area {
+	position: relative;
+
+	&::before {
+		content: "";
+		position: absolute;
+		inset: var(--hit-area-t, 0) var(--hit-area-r, 0) var(--hit-area-b, 0) var(--hit-area-l, 0);
+		pointer-events: inherit;
+	}
+}
+
+@utility hit-area-* {
+	--hit-area-t: --spacing(--value(number) * -1);
+	--hit-area-t: calc(--value([*]) * -1);
+	--hit-area-b: --spacing(--value(number) * -1);
+	--hit-area-b: calc(--value([*]) * -1);
+	--hit-area-l: --spacing(--value(number) * -1);
+	--hit-area-l: calc(--value([*]) * -1);
+	--hit-area-r: --spacing(--value(number) * -1);
+	--hit-area-r: calc(--value([*]) * -1);
+
+	position: relative;
+
+	&::before {
+		content: "";
+		position: absolute;
+		inset: var(--hit-area-t, 0) var(--hit-area-r, 0) var(--hit-area-b, 0) var(--hit-area-l, 0);
+		pointer-events: inherit;
+	}
+}
+
+@utility hit-area-l-* {
+	--hit-area-l: --spacing(--value(number) * -1);
+	--hit-area-l: calc(--value([*]) * -1);
+
+	position: relative;
+
+	&::before {
+		content: "";
+		position: absolute;
+		inset: var(--hit-area-t, 0) var(--hit-area-r, 0) var(--hit-area-b, 0) var(--hit-area-l, 0);
+		pointer-events: inherit;
+	}
+}
+
+@utility hit-area-r-* {
+	--hit-area-r: --spacing(--value(number) * -1);
+	--hit-area-r: calc(--value([*]) * -1);
+
+	position: relative;
+
+	&::before {
+		content: "";
+		position: absolute;
+		inset: var(--hit-area-t, 0) var(--hit-area-r, 0) var(--hit-area-b, 0) var(--hit-area-l, 0);
+		pointer-events: inherit;
+	}
+}
+
+@utility hit-area-t-* {
+	--hit-area-t: --spacing(--value(number) * -1);
+	--hit-area-t: calc(--value([*]) * -1);
+
+	position: relative;
+
+	&::before {
+		content: "";
+		position: absolute;
+		inset: var(--hit-area-t, 0) var(--hit-area-r, 0) var(--hit-area-b, 0) var(--hit-area-l, 0);
+		pointer-events: inherit;
+	}
+}
+
+@utility hit-area-b-* {
+	--hit-area-b: --spacing(--value(number) * -1);
+	--hit-area-b: calc(--value([*]) * -1);
+
+	position: relative;
+
+	&::before {
+		content: "";
+		position: absolute;
+		inset: var(--hit-area-t, 0) var(--hit-area-r, 0) var(--hit-area-b, 0) var(--hit-area-l, 0);
+		pointer-events: inherit;
+	}
+}
+
+@utility hit-area-x-* {
+	--hit-area-l: --spacing(--value(number) * -1);
+	--hit-area-l: calc(--value([*]) * -1);
+	--hit-area-r: --spacing(--value(number) * -1);
+	--hit-area-r: calc(--value([*]) * -1);
+
+	position: relative;
+
+	&::before {
+		content: "";
+		position: absolute;
+		inset: var(--hit-area-t, 0) var(--hit-area-r, 0) var(--hit-area-b, 0) var(--hit-area-l, 0);
+		pointer-events: inherit;
+	}
+}
+
+@utility hit-area-y-* {
+	--hit-area-t: --spacing(--value(number) * -1);
+	--hit-area-t: calc(--value([*]) * -1);
+	--hit-area-b: --spacing(--value(number) * -1);
+	--hit-area-b: calc(--value([*]) * -1);
+
+	position: relative;
+
+	&::before {
+		content: "";
+		position: absolute;
+		inset: var(--hit-area-t, 0) var(--hit-area-r, 0) var(--hit-area-b, 0) var(--hit-area-l, 0);
+		pointer-events: inherit;
 	}
 }
 
@@ -260,8 +399,7 @@
 /* stylelint-disable number-max-precision */
 
 @layer theme {
-	:root,
-	[data-ui-color-scheme="light"] {
+	@variant light {
 		--richtext-body: var(--color-neutral-700);
 		--richtext-headings: var(--color-neutral-900);
 		--richtext-lead: var(--color-neutral-600);
@@ -282,7 +420,7 @@
 		--richtext-td-borders: var(--color-neutral-200);
 	}
 
-	[data-ui-color-scheme="dark"] {
+	@variant dark {
 		--richtext-body: var(--color-neutral-300);
 		--richtext-headings: var(--color-white);
 		--richtext-lead: var(--color-neutral-400);
@@ -304,13 +442,15 @@
 	}
 
 	/** @see https://shiki.matsu.io/guide/dual-themes#class-based-dark-mode */
-	[data-ui-color-scheme="dark"] .shiki,
-	[data-ui-color-scheme="dark"] .shiki span {
-		background-color: var(--shiki-dark-bg) !important;
-		color: var(--shiki-dark) !important;
-		font-weight: var(--shiki-dark-font-weight) !important;
-		font-style: var(--shiki-dark-font-style) !important;
-		text-decoration: var(--shiki-dark-text-decoration) !important;
+	@variant dark {
+		.shiki,
+		.shiki span {
+			background-color: var(--shiki-dark-bg) !important;
+			color: var(--shiki-dark) !important;
+			font-weight: var(--shiki-dark-font-weight) !important;
+			font-style: var(--shiki-dark-font-style) !important;
+			text-decoration: var(--shiki-dark-text-decoration) !important;
+		}
 	}
 }
 
@@ -1578,8 +1718,7 @@
  */
 
 @layer theme {
-	:root,
-	[data-ui-color-scheme="light"] {
+	@variant light {
 		--bg: oklch(100% 0 0deg);
 		--fg: oklch(21% 0.034 264.665deg);
 
@@ -1655,7 +1794,7 @@
 		--radius-4xl: calc(var(--radius-lg) * 4);
 	}
 
-	[data-ui-color-scheme="dark"] {
+	@variant dark {
 		--bg: oklch(17% 0.028 261.692deg);
 		--fg: oklch(98.5% 0.002 247.839deg);
 
@@ -1724,11 +1863,8 @@
 }
 
 @theme {
-	--font-sans: var(--font-body);
-	--font-mono: var(--font-code);
-
-	--font-sans--font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-	--font-mono--font-feature-settings: "ss02", "zero";
+	--font-body--font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+	--font-code--font-feature-settings: "ss02", "zero";
 
 	--color-bg: var(--bg);
 	--color-fg: var(--fg);

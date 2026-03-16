@@ -25,7 +25,7 @@ import {
 	ShieldCheckIcon,
 	TrashIcon,
 } from "@heroicons/react/16/solid";
-import { useFormatter } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import type { ReactNode } from "react";
 
 const users = [
@@ -192,6 +192,7 @@ const users = [
 ];
 
 export function TableExample(): ReactNode {
+	const t = useExtracted();
 	const formatter = useFormatter();
 
 	return (
@@ -209,7 +210,7 @@ export function TableExample(): ReactNode {
 				</CardAction>
 			</CardHeader>
 
-			<Table aria-label="Users">
+			<Table aria-label={t("Users")}>
 				<TableHeader>
 					<TableColumn className="w-0">#</TableColumn>
 					<TableColumn isRowHeader={true}>Name</TableColumn>

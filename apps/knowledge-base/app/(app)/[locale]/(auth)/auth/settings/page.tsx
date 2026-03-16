@@ -3,7 +3,7 @@ import { Avatar } from "@dariah-eric/ui/avatar";
 import { Link } from "@dariah-eric/ui/link";
 import { Text, TextLink } from "@dariah-eric/ui/text";
 import type { Metadata, ResolvingMetadata } from "next";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getExtracted, getLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { RecoveryCodeForm } from "@/app/(app)/[locale]/(auth)/auth/settings/_components/recovery-code-form";
@@ -21,10 +21,10 @@ export async function generateMetadata(
 	_props: Readonly<SettingsPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
-	const t = await getTranslations("SettingsPage");
+	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("meta.title"),
+		title: t("Settings"),
 	});
 
 	return metadata;
@@ -35,11 +35,10 @@ export default async function SettingsPage(
 ): Promise<ReactNode> {
 	const locale = await getLocale();
 
-	const t = await getTranslations("SettingsPage");
-	const e = await getTranslations("errors");
+	const t = await getExtracted();
 
 	if (!(await globalGetRequestRateLimit())) {
-		return e("too-many-requests");
+		return t("Too many requests.");
 	}
 
 	const { session, user } = await getCurrentSession();
@@ -61,7 +60,7 @@ export default async function SettingsPage(
 	return (
 		<Main className="min-h-full p-6 items-center justify-center flex flex-col">
 			<div className="w-full max-w-sm flex flex-col gap-y-4">
-				<Link aria-label="Home" className="mb-2 rounded-xs self-start inline-block" href="/">
+				<Link aria-label={t("Home")} className="mb-2 rounded-xs self-start inline-block" href="/">
 					<Avatar
 						className="dark:invert"
 						isSquare={true}
@@ -71,17 +70,17 @@ export default async function SettingsPage(
 				</Link>
 
 				<div>
-					<h1 className="text-xl/10 font-semibold">{t("title")}</h1>
+					<h1 className="text-xl/10 font-semibold">{t("Settings")}</h1>
 
 					{/* <Text>{t("message")}</Text> */}
 				</div>
 
 				<section className="flex flex-col gap-y-4">
 					<div>
-						<h2 className="text-base/8 font-semibold">{t("update-email")}</h2>
+						<h2 className="text-base/8 font-semibold">{t("Update email")}</h2>
 
 						<Text>
-							{t("your-email")} <span className="text-fg">{user.email}</span>
+							{t("Your email:")} <span className="text-fg">{user.email}</span>
 						</Text>
 					</div>
 
@@ -90,7 +89,7 @@ export default async function SettingsPage(
 
 				<section className="flex flex-col gap-y-4">
 					<div>
-						<h2 className="text-base/8 font-semibold">{t("update-password")}</h2>
+						<h2 className="text-base/8 font-semibold">{t("Update password")}</h2>
 					</div>
 
 					<UpdatePasswordForm />
@@ -99,11 +98,11 @@ export default async function SettingsPage(
 				{user.isTwoFactorRegistered ? (
 					<section className="flex flex-col gap-y-4">
 						<div>
-							<h2 className="text-base/8 font-semibold">{t("update-two-factor")}</h2>
+							<h2 className="text-base/8 font-semibold">{t("Update two-factor authentication")}</h2>
 						</div>
 
 						<Text>
-							<TextLink href={"/auth/two-factor/setup"}>{t("update")}</TextLink>
+							<TextLink href={"/auth/two-factor/setup"}>{t("Update")}</TextLink>
 						</Text>
 					</section>
 				) : null}
@@ -111,7 +110,7 @@ export default async function SettingsPage(
 				{recoveryCode != null && (
 					<section className="flex flex-col gap-y-4">
 						<div>
-							<h2 className="text-base/8 font-semibold">{t("recovery-code")}</h2>
+							<h2 className="text-base/8 font-semibold">{t("Recovery code")}</h2>
 						</div>
 
 						<RecoveryCodeForm recoveryCode={recoveryCode} />

@@ -101,7 +101,7 @@ function ColumnResizer(props: Readonly<AriaColumnResizerProps>): ReactNode {
 		<AriaColumnResizer
 			{...rest}
 			className={cx(
-				"absolute top-0 right-0 bottom-0 grid w-px touch-none place-content-center px-1 resizable-both:cursor-ew-resize [data-resizable-direction=left]:cursor-e-resize [data-resizable-direction=right]:cursor-w-resize [&[data-resizing]>div]:bg-primary",
+				"absolute inset-y-0 right-0 grid w-px touch-none place-content-center px-1 resizable-both:cursor-ew-resize [data-resizable-direction=left]:cursor-e-resize [data-resizable-direction=right]:cursor-w-resize [&[data-resizing]>div]:bg-primary",
 				className,
 			)}
 		>
@@ -396,6 +396,8 @@ export interface TableRowProps<T extends object> extends AriaRowProps<T> {
 export function TableRow<T extends object>(props: Readonly<TableRowProps<T>>): ReactNode {
 	const { children, className, columns, id, onAction, href, ref, ...rest } = props;
 
+	const t = useExtracted("ui");
+
 	const { selectionBehavior, allowsDragging } = useTableOptions();
 	const { striped } = useTableContext();
 
@@ -441,7 +443,7 @@ export function TableRow<T extends object>(props: Readonly<TableRowProps<T>>): R
 			{allowsDragging && (
 				<TableCell className="px-0">
 					<AriaButton
-						aria-label="Reorder row"
+						aria-label={t("Reorder row")}
 						className="grid place-content-center rounded-xs px-[calc(var(--gutter)/2)] outline-hidden focus-visible:ring focus-visible:ring-ring"
 						slot="drag"
 					>

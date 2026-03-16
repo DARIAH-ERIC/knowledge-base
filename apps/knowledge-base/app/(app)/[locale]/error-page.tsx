@@ -2,7 +2,7 @@
 
 import { log } from "@acdh-oeaw/lib";
 import * as Sentry from "@sentry/nextjs";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { type ReactNode, useEffect } from "react";
 
 import { Main } from "@/components/main";
@@ -15,7 +15,7 @@ interface ErrorPageProps {
 export function ErrorPage(props: Readonly<ErrorPageProps>): ReactNode {
 	const { error, reset } = props;
 
-	const t = useTranslations("ErrorPage");
+	const t = useExtracted();
 
 	useEffect(() => {
 		log.error(error);
@@ -24,14 +24,14 @@ export function ErrorPage(props: Readonly<ErrorPageProps>): ReactNode {
 
 	return (
 		<Main>
-			<h1>{t("title")}</h1>
+			<h1>{t("Something went wrong")}</h1>
 			<button
 				onClick={() => {
 					reset();
 				}}
 				type="button"
 			>
-				{t("reset")}
+				{t("Try again")}
 			</button>
 		</Main>
 	);

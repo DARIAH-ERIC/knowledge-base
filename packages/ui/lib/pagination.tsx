@@ -12,9 +12,11 @@ export interface PaginationProps extends ComponentProps<"nav"> {}
 export function Pagination(props: Readonly<PaginationProps>): ReactNode {
 	const { className, ...rest } = props;
 
+	const t = useExtracted("ui");
+
 	return (
 		<nav
-			aria-label="pagination"
+			aria-label={t("Pagination")}
 			className={twMerge(
 				"mx-auto flex w-full items-center justify-center gap-(--pagination-gap) [--pagination-gap:--spacing(2)] [--section-radius:calc(var(--radius-lg)-1px)] **:data-[slot=control]:w-auto",
 				"**:data-[slot=pagination-item]:cursor-default",
@@ -93,10 +95,12 @@ interface PaginationAttributesProps
 export function PaginationFirst(props: Readonly<PaginationAttributesProps>): ReactNode {
 	const { className, children, size = "sq-sm", intent = "outline", isCircle, ...rest } = props;
 
+	const t = useExtracted("ui");
+
 	return (
 		<li>
 			<Link
-				aria-label="First page"
+				aria-label={t("First page")}
 				className={buttonStyles({
 					size: children != null ? "sm" : size,
 					isCircle,
@@ -140,10 +144,12 @@ export function PaginationPrevious(props: Readonly<PaginationAttributesProps>): 
 		...rest
 	} = props;
 
+	const t = useExtracted("ui");
+
 	return (
 		<li>
 			<Link
-				aria-label="Previous page"
+				aria-label={t("Previous page")}
 				className={buttonStyles({
 					size: children != null ? "sm" : size,
 					isCircle,
@@ -184,10 +190,12 @@ export function PaginationNext(props: Readonly<PaginationAttributesProps>): Reac
 		...rest
 	} = props;
 
+	const t = useExtracted("ui");
+
 	return (
 		<li>
 			<Link
-				aria-label="Next page"
+				aria-label={t("Next page")}
 				className={buttonStyles({
 					size: children != null ? "sm" : size,
 					isCircle,
@@ -228,10 +236,12 @@ export function PaginationLast(props: Readonly<PaginationAttributesProps>): Reac
 		...rest
 	} = props;
 
+	const t = useExtracted("ui");
+
 	return (
 		<li>
 			<Link
-				aria-label="Last page"
+				aria-label={t("Last page")}
 				className={buttonStyles({
 					size: children != null ? "sm" : size,
 					isCircle,

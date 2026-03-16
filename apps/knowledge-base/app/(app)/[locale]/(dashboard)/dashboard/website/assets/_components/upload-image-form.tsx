@@ -4,7 +4,7 @@ import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { SubmitButton } from "@dariah-eric/ui/submit-button";
-import { useTranslations } from "next-intl";
+import { useExtracted } from "next-intl";
 import { type ReactNode, useActionState } from "react";
 
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
@@ -15,7 +15,7 @@ import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/we
  */
 
 export function UploadImageForm(): ReactNode {
-	const t = useTranslations("UploadImageForm");
+	const t = useExtracted();
 
 	const [state, action] = useActionState(uploadImageAction, createActionStateInitial());
 
@@ -24,12 +24,12 @@ export function UploadImageForm(): ReactNode {
 			<FormStatus state={state} />
 
 			<label>
-				<div>{t("input")}</div>
+				<div>{t("Select an image to upload")}</div>
 				<input accept="image/png, image/jpeg" name="file" required={true} type="file" />
 			</label>
 
 			<div>
-				<SubmitButton>{t("submit")}</SubmitButton>
+				<SubmitButton>{t("Upload image")}</SubmitButton>
 			</div>
 		</Form>
 	);
