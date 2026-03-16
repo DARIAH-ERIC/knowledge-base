@@ -1725,9 +1725,9 @@
 		--border: oklch(91.2% 0.01 258.338deg);
 		--input: oklch(87.2% 0.01 258.338deg);
 
-		--ring: oklch(58.8% 0.158 241.966deg);
+		--ring: oklch(55.8% 0.158 241.966deg);
 
-		--primary: oklch(68.5% 0.169 237.323deg);
+		--primary: oklch(55.8% 0.158 241.966deg);
 		--primary-fg: oklch(100% 0 0deg);
 
 		--primary-subtle: oklch(68.5% 0.169 237.323deg / 15%);
@@ -1801,9 +1801,9 @@
 		--border: oklch(27.3% 0.034 259.733deg);
 		--input: oklch(31.3% 0.034 259.733deg);
 
-		--ring: oklch(58.8% 0.158 241.966deg);
+		--ring: oklch(55.8% 0.158 241.966deg);
 
-		--primary: oklch(68.5% 0.169 237.323deg);
+		--primary: oklch(55.8% 0.158 241.966deg);
 		--primary-fg: oklch(100% 0 0deg);
 
 		--primary-subtle: oklch(68.5% 0.169 237.323deg / 10%);

@@ -43,7 +43,7 @@ export class ContactPage {
 			message: page.getByRole("textbox", { name: "Message" }),
 			name: page.getByRole("textbox", { name: "Name" }),
 			subject: page.getByRole("textbox", { name: "Subject" }),
-			submit: page.getByRole("button", { name: "Submit" }),
+			submit: page.getByRole("button", { name: "Send" }),
 		};
 	}
 
