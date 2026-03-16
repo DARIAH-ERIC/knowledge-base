@@ -2,7 +2,7 @@ import { createUrl, createUrlSearchParams, request } from "@acdh-oeaw/lib";
 
 import { env } from "@/config/env.config";
 
-interface GetCampaignsResponse {
+export interface GetCampaignsResponse {
 	campaigns: [
 		{
 			id: string;
@@ -130,7 +130,7 @@ interface GetCampaignsResponse {
 				description: string;
 				title: string;
 			};
-			report_summary: {
+			report_summary?: {
 				opens: number;
 				unique_opens: number;
 				open_rate: number;
@@ -208,7 +208,7 @@ interface GetCampaignsResponse {
 	];
 }
 
-interface CreateListMemberResponse {
+export interface CreateListMemberResponse {
 	id: string;
 	email_address: string;
 	unique_email_id: string;

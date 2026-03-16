@@ -1,5 +1,3 @@
-/* eslint-disable react/jsx-no-literals */
-
 "use client";
 
 import {
@@ -16,6 +14,7 @@ import {
 	PaginationSection,
 	PaginationSpacer,
 } from "@dariah-eric/ui/pagination";
+import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
 
 function getPaginationRange(current: number, total: number, delta = 2) {
@@ -43,6 +42,8 @@ export function Paginate({
 	setPage,
 	perPage = 10,
 }: Readonly<PaginateProps>): ReactNode {
+	const t = useExtracted();
+
 	const pages = getPaginationRange(page, total);
 	const start = (page - 1) * perPage + 1;
 	const end = Math.min(page * perPage, total * perPage);
@@ -51,8 +52,17 @@ export function Paginate({
 	return (
 		<Pagination className="flex-col md:flex-row">
 			<PaginationInfo>
-				Showing <strong>{start}</strong> to <strong>{end}</strong> of{" "}
-				<strong>{totalResults}</strong> results
+				{t.rich(
+					"Showing <strong>{start, number}</strong> to <strong>{end, number}</strong> of <strong>{total, number}</strong> results",
+					{
+						start,
+						end,
+						total: totalResults,
+						strong(chunks) {
+							return <strong>{chunks}</strong>;
+						},
+					},
+				)}
 			</PaginationInfo>
 			<PaginationSpacer />
 			<PaginationList className="hidden md:flex">
