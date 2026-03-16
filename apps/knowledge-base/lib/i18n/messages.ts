@@ -37,7 +37,7 @@ export async function getIntlMessages(locale: IntlLocale) {
 	}
 
 	const messages = {
-		..._ui,
+		// ..._ui,
 		..._messages,
 		metadata: {
 			..._metadata,
