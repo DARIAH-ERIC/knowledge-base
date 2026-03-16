@@ -66,7 +66,7 @@ const plugins: Array<(config: Config) => Config> = [
 			/** @see {@link https://next-intl.dev/docs/workflows/typescript#messages-arguments} */
 			createMessagesDeclaration: ["./content/en/metadata/index.json", "./messages/en.json"],
 			/** @see {@link https://next-intl.dev/docs/usage/extraction} */
-			srcPath: ["./app", "./lib"],
+			srcPath: ["./app", "./components", "./lib", '../../packages/ui'],
 			messages: {
 				path: "./messages",
 				format: "json",

@@ -37,8 +37,8 @@ export async function getIntlMessages(locale: IntlLocale) {
 	}
 
 	const messages = {
-		..._messages,
 		..._ui,
+		..._messages,
 		metadata: {
 			..._metadata,
 			social: _social as Record<SocialMediaKind, string | undefined>,
