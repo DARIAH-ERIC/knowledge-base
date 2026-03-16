@@ -8,6 +8,8 @@ import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { createStorageService } from "@dariah-eric/storage";
 import { buffer } from "@dariah-eric/storage/lib";
+import { generateJSON } from "@tiptap/html"
+import { StarterKit } from '@tiptap/starter-kit'
 
 import {
 	apiBaseUrl,
@@ -152,6 +154,16 @@ async function main() {
 		return item.scope;
 	});
 
+	const contentBlockTypes = await db.query.contentBlockTypes.findMany()
+	const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => {
+		return item.type;
+	});
+
+	const entityTypes = await db.query.entityTypes.findMany()
+	const entityTypesByType = keyBy(entityTypes, (item) => {
+		return item.type;
+	});
+
 	//
 
 	const placeholderImage = await upload(assetsCache, placeholderImageUrl);
@@ -176,7 +188,9 @@ async function main() {
 				})
 				.returning({ id: schema.entities.id });
 
-			const id = entity!.id;
+			assert(entity)
+
+			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
 				assetsCache,
@@ -198,7 +212,42 @@ async function main() {
 				updatedAt: new Date(page.modified_gmt),
 			});
 
-			// TODO: create content block for page.content
+			if (page.content.rendered.trim().length === 0) {
+				return
+			}
+
+			const content = generateJSON(page.content.rendered, [
+				StarterKit
+			])
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.pages.id,
+					fieldName: "content"
+				}
+			})
+
+			assert(fieldName)
+
+			const [field] = await tx.insert(schema.fields).values({
+				entityId: entity.id,
+				fieldNameId: fieldName.id
+			}).returning({ id: schema.fields.id })
+
+			assert(field)
+
+			const [contentBlock] = await tx.insert(schema.contentBlocks).values({
+				position: 0,
+				fieldId: field.id,
+				typeId: contentBlockTypesByType.rich_text.id
+			}).returning({ id: schema.contentBlocks.id })
+
+			assert(contentBlock)
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id
+			})
 		});
 	}
 
@@ -221,7 +270,9 @@ async function main() {
 				})
 				.returning({ id: schema.entities.id });
 
-			const id = entity!.id;
+			assert(entity)
+
+			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
 				assetsCache,
@@ -244,7 +295,42 @@ async function main() {
 				updatedAt: new Date(page.modified_gmt),
 			});
 
-			// TODO: create content block for page.content
+			if (page.content.rendered.trim().length === 0) {
+				return
+			}
+
+			const content = generateJSON(page.content.rendered, [
+				StarterKit
+			])
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.pages.id,
+					fieldName: "content"
+				}
+			})
+
+			assert(fieldName)
+
+			const [field] = await tx.insert(schema.fields).values({
+				entityId: entity.id,
+				fieldNameId: fieldName.id
+			}).returning({ id: schema.fields.id })
+
+			assert(field)
+
+			const [contentBlock] = await tx.insert(schema.contentBlocks).values({
+				position: 0,
+				fieldId: field.id,
+				typeId: contentBlockTypesByType.rich_text.id
+			}).returning({ id: schema.contentBlocks.id })
+
+			assert(contentBlock)
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id
+			})
 		});
 	}
 
@@ -277,7 +363,9 @@ async function main() {
 				})
 				.returning({ id: schema.entities.id });
 
-			const id = entity!.id;
+			assert(entity)
+
+			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
 				assetsCache,
@@ -299,7 +387,42 @@ async function main() {
 				updatedAt: new Date(post.modified_gmt),
 			});
 
-			// TODO: create content block for page.content
+			if (post.content.rendered.trim().length === 0) {
+				return
+			}
+
+			const content = generateJSON(post.content.rendered, [
+				StarterKit
+			])
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.news.id,
+					fieldName: "content"
+				}
+			})
+
+			assert(fieldName)
+
+			const [field] = await tx.insert(schema.fields).values({
+				entityId: entity.id,
+				fieldNameId: fieldName.id
+			}).returning({ id: schema.fields.id })
+
+			assert(field)
+
+			const [contentBlock] = await tx.insert(schema.contentBlocks).values({
+				position: 0,
+				fieldId: field.id,
+				typeId: contentBlockTypesByType.rich_text.id
+			}).returning({ id: schema.contentBlocks.id })
+
+			assert(contentBlock)
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id
+			})
 		});
 	}
 
@@ -323,7 +446,9 @@ async function main() {
 				})
 				.returning({ id: schema.entities.id });
 
-			const id = entity!.id;
+			assert(entity)
+
+			const id = entity.id;
 
 			const imageId =
 				event.image !== false
@@ -337,7 +462,7 @@ async function main() {
 			await tx.insert(schema.events).values({
 				id,
 				title: event.title,
-				summary: event.description,
+				summary: event.description, // FIXME: plain text not html
 				imageId: imageId ?? placeholderImage.id,
 				website: event.website,
 				location:
@@ -353,7 +478,42 @@ async function main() {
 				updatedAt: new Date(event.modified_utc),
 			});
 
-			// TODO: create content block for page.content
+			if (event.description.trim().length === 0) {
+				return
+			}
+
+			const content = generateJSON(event.description, [
+				StarterKit
+			])
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.events.id,
+					fieldName: "content"
+				}
+			})
+
+			assert(fieldName)
+
+			const [field] = await tx.insert(schema.fields).values({
+				entityId: entity.id,
+				fieldNameId: fieldName.id
+			}).returning({ id: schema.fields.id })
+
+			assert(field)
+
+			const [contentBlock] = await tx.insert(schema.contentBlocks).values({
+				position: 0,
+				fieldId: field.id,
+				typeId: contentBlockTypesByType.rich_text.id
+			}).returning({ id: schema.contentBlocks.id })
+
+			assert(contentBlock)
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id
+			})
 		});
 	}
 
@@ -376,7 +536,9 @@ async function main() {
 				})
 				.returning({ id: schema.entities.id });
 
-			const id = entity!.id;
+			assert(entity)
+
+			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
 				assetsCache,
@@ -399,7 +561,42 @@ async function main() {
 				updatedAt: new Date(country.modified_gmt),
 			});
 
-			// TODO: create content block for country.content
+			if (country.content.rendered.trim().length === 0) {
+				return
+			}
+
+			const content = generateJSON(country.content.rendered, [
+				StarterKit
+			])
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.organisational_units.id,
+					fieldName: "description"
+				}
+			})
+
+			assert(fieldName)
+
+			const [field] = await tx.insert(schema.fields).values({
+				entityId: entity.id,
+				fieldNameId: fieldName.id
+			}).returning({ id: schema.fields.id })
+
+			assert(field)
+
+			const [contentBlock] = await tx.insert(schema.contentBlocks).values({
+				position: 0,
+				fieldId: field.id,
+				typeId: contentBlockTypesByType.rich_text.id
+			}).returning({ id: schema.contentBlocks.id })
+
+			assert(contentBlock)
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id
+			})
 		});
 	}
 
@@ -427,7 +624,9 @@ async function main() {
 				})
 				.returning({ id: schema.entities.id });
 
-			const id = entity!.id;
+			assert(entity)
+
+			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
 				assetsCache,
@@ -460,7 +659,42 @@ async function main() {
 				updatedAt: new Date(person.modified_gmt),
 			});
 
-			// TODO: create content block for person.content
+			if (person.content.rendered.trim().length === 0) {
+				return
+			}
+
+			const content = generateJSON(person.content.rendered, [
+				StarterKit
+			])
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.persons.id,
+					fieldName: "biography"
+				}
+			})
+
+			assert(fieldName)
+
+			const [field] = await tx.insert(schema.fields).values({
+				entityId: entity.id,
+				fieldNameId: fieldName.id
+			}).returning({ id: schema.fields.id })
+
+			assert(field)
+
+			const [contentBlock] = await tx.insert(schema.contentBlocks).values({
+				position: 0,
+				fieldId: field.id,
+				typeId: contentBlockTypesByType.rich_text.id
+			}).returning({ id: schema.contentBlocks.id })
+
+			assert(contentBlock)
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id
+			})
 		});
 	}
 
@@ -483,7 +717,9 @@ async function main() {
 				})
 				.returning({ id: schema.entities.id });
 
-			const id = entity!.id;
+			assert(entity)
+
+			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
 				assetsCache,
@@ -502,7 +738,42 @@ async function main() {
 				updatedAt: new Date(institution.modified_gmt),
 			});
 
-			// TODO: create content block for institution.content
+			if (institution.content.rendered.trim().length === 0) {
+				return
+			}
+
+			const content = generateJSON(institution.content.rendered, [
+				StarterKit
+			])
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.organisational_units.id,
+					fieldName: "description"
+				}
+			})
+
+			assert(fieldName)
+
+			const [field] = await tx.insert(schema.fields).values({
+				entityId: entity.id,
+				fieldNameId: fieldName.id
+			}).returning({ id: schema.fields.id })
+
+			assert(field)
+
+			const [contentBlock] = await tx.insert(schema.contentBlocks).values({
+				position: 0,
+				fieldId: field.id,
+				typeId: contentBlockTypesByType.rich_text.id
+			}).returning({ id: schema.contentBlocks.id })
+
+			assert(contentBlock)
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id
+			})
 		});
 	}
 
@@ -525,7 +796,9 @@ async function main() {
 				})
 				.returning({ id: schema.entities.id });
 
-			const id = entity!.id;
+			assert(entity)
+
+			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
 				assetsCache,
@@ -544,7 +817,42 @@ async function main() {
 				updatedAt: new Date(workingGroup.modified_gmt),
 			});
 
-			// TODO: create content block for workingGroup.content
+			if (workingGroup.content.rendered.trim().length === 0) {
+				return
+			}
+
+			const content = generateJSON(workingGroup.content.rendered, [
+				StarterKit
+			])
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.organisational_units.id,
+					fieldName: "description"
+				}
+			})
+
+			assert(fieldName)
+
+			const [field] = await tx.insert(schema.fields).values({
+				entityId: entity.id,
+				fieldNameId: fieldName.id
+			}).returning({ id: schema.fields.id })
+
+			assert(field)
+
+			const [contentBlock] = await tx.insert(schema.contentBlocks).values({
+				position: 0,
+				fieldId: field.id,
+				typeId: contentBlockTypesByType.rich_text.id
+			}).returning({ id: schema.contentBlocks.id })
+
+			assert(contentBlock)
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id
+			})
 		});
 	}
 
@@ -567,7 +875,9 @@ async function main() {
 				})
 				.returning({ id: schema.entities.id });
 
-			const id = entity!.id;
+			assert(entity)
+
+			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
 				assetsCache,
@@ -591,7 +901,42 @@ async function main() {
 				updatedAt: new Date(project.modified_gmt),
 			});
 
-			// TODO: create content block for project.content
+			if (project.content.rendered.trim().length === 0) {
+				return
+			}
+
+			const content = generateJSON(project.content.rendered, [
+				StarterKit
+			])
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.projects.id,
+					fieldName: "description"
+				}
+			})
+
+			assert(fieldName)
+
+			const [field] = await tx.insert(schema.fields).values({
+				entityId: entity.id,
+				fieldNameId: fieldName.id
+			}).returning({ id: schema.fields.id })
+
+			assert(field)
+
+			const [contentBlock] = await tx.insert(schema.contentBlocks).values({
+				position: 0,
+				fieldId: field.id,
+				typeId: contentBlockTypesByType.rich_text.id
+			}).returning({ id: schema.contentBlocks.id })
+
+			assert(contentBlock)
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id
+			})
 		});
 	}
 

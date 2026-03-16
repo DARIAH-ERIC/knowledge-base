@@ -144,6 +144,9 @@ catalogs:
     '@tiptap/core':
       specifier: ^3.20.2
       version: 3.20.2
+    '@tiptap/html':
+      specifier: ^3.20.2
+      version: 3.20.2
     '@tiptap/pm':
       specifier: ^3.20.1
       version: 3.20.2
@@ -151,7 +154,7 @@ catalogs:
       specifier: ^3.20.1
       version: 3.20.2
     '@tiptap/starter-kit':
-      specifier: ^3.20.1
+      specifier: ^3.20.2
       version: 3.20.2
     '@types/node':
       specifier: ^24.12.0
@@ -574,7 +577,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(@vitest/browser-playwright@4.1.0)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+        version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(@vitest/browser-playwright@4.1.0)(happy-dom@20.8.4)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
 
   apps/knowledge-base:
     dependencies:
@@ -1015,6 +1018,12 @@ importers:
       '@sindresorhus/slugify':
         specifier: 'catalog:'
         version: 3.0.0
+      '@tiptap/html':
+        specifier: 'catalog:'
+        version: 3.20.2(@tiptap/core@3.20.2(@tiptap/pm@3.20.2))(@tiptap/pm@3.20.2)(happy-dom@20.8.4)
+      '@tiptap/starter-kit':
+        specifier: 'catalog:'
+        version: 3.20.2
       valibot:
         specifier: 'catalog:'
         version: 1.2.0(typescript@5.9.3)
@@ -1730,7 +1739,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
       vitest:
         specifier: 'catalog:'
-        version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(@vitest/browser-playwright@4.1.0)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+        version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(@vitest/browser-playwright@4.1.0)(happy-dom@20.8.4)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
 
 packages:
 
@@ -4948,6 +4957,13 @@ packages:
       '@tiptap/core': ^3.20.2
       '@tiptap/pm': ^3.20.2
 
+  '@tiptap/html@3.20.2':
+    resolution: {integrity: sha512-h9WpWthGVAFYeBRwrZqsxQGSuYAGg9Fw39OTYdEHLyMFQn8+b+ePPG2elw36qTZlP91L9VuoBYwSFzfVH01RZA==}
+    peerDependencies:
+      '@tiptap/core': ^3.20.2
+      '@tiptap/pm': ^3.20.2
+      happy-dom: ^20.0.2
+
   '@tiptap/pm@3.20.2':
     resolution: {integrity: sha512-tEMZlLy/6ms41PQtyjmniZ3tTd8elavd8htjYzHLPSHtz11zaYV9YjnmnwHK8gynhcSES1orO9z1U4nT4ZLpqg==}
 
@@ -5100,6 +5116,12 @@ packages:
 
   '@types/use-sync-external-store@0.0.6':
     resolution: {integrity: sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg==}
+
+  '@types/whatwg-mimetype@3.0.2':
+    resolution: {integrity: sha512-c2AKvDT8ToxLIOUlN51gTiHXflsfIFisS4pO7pDPoKouJCESkhZnEy623gwP9laCy5lnLDAw1vAzu2vM2YLOrA==}
+
+  '@types/ws@8.18.1':
+    resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
 
   '@types/xast@2.0.4':
     resolution: {integrity: sha512-6Q6HWhHXR5EEKcxgF5YBW5XPAAtCi/GgyCWHx6wR7dZTXF5rv2B2fm0hgpSscJqaVDVm6n1DAVbsM8RSM5PlMw==}
@@ -6278,6 +6300,10 @@ packages:
     resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
     engines: {node: '>=0.12'}
 
+  entities@7.0.1:
+    resolution: {integrity: sha512-TWrgLOFUQTH994YUyl1yT4uyavY5nNB5muff+RtWaqNVCAK408b5ZnnbNAUEWLTCpum9w6arT70i1XdQ4UeOPA==}
+    engines: {node: '>=0.12'}
+
   env-paths@2.2.1:
     resolution: {integrity: sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A==}
     engines: {node: '>=6'}
@@ -6926,6 +6952,10 @@ packages:
 
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
+
+  happy-dom@20.8.4:
+    resolution: {integrity: sha512-GKhjq4OQCYB4VLFBzv8mmccUadwlAusOZOI7hC1D9xDIT5HhzkJK17c4el2f6R6C715P9xB4uiMxeKUa2nHMwQ==}
+    engines: {node: '>=20.0.0'}
 
   has-bigints@1.1.0:
     resolution: {integrity: sha512-R3pbpkcIqv2Pm3dUwgjclDRVmWpTJW2DcMzcIhEXEx1oh/CEMObMm3KLmRJOdvhM7o4uQBnwr8pzRK2sJWIqfg==}
@@ -9466,6 +9496,10 @@ packages:
     peerDependenciesMeta:
       webpack-cli:
         optional: true
+
+  whatwg-mimetype@3.0.0:
+    resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
+    engines: {node: '>=12'}
 
   whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
@@ -12725,7 +12759,7 @@ snapshots:
       '@vitest/browser': 4.1.0(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))(vitest@4.1.0)
       '@vitest/browser-playwright': 4.1.0(playwright@1.58.2)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))(vitest@4.1.0)
       '@vitest/runner': 4.1.0
-      vitest: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(@vitest/browser-playwright@4.1.0)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+      vitest: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(@vitest/browser-playwright@4.1.0)(happy-dom@20.8.4)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
     transitivePeerDependencies:
       - react
       - react-dom
@@ -13074,6 +13108,12 @@ snapshots:
       '@tiptap/core': 3.20.2(@tiptap/pm@3.20.2)
       '@tiptap/pm': 3.20.2
 
+  '@tiptap/html@3.20.2(@tiptap/core@3.20.2(@tiptap/pm@3.20.2))(@tiptap/pm@3.20.2)(happy-dom@20.8.4)':
+    dependencies:
+      '@tiptap/core': 3.20.2(@tiptap/pm@3.20.2)
+      '@tiptap/pm': 3.20.2
+      happy-dom: 20.8.4
+
   '@tiptap/pm@3.20.2':
     dependencies:
       prosemirror-changeset: 2.4.0
@@ -13298,6 +13338,12 @@ snapshots:
 
   '@types/use-sync-external-store@0.0.6': {}
 
+  '@types/whatwg-mimetype@3.0.2': {}
+
+  '@types/ws@8.18.1':
+    dependencies:
+      '@types/node': 25.5.0
+
   '@types/xast@2.0.4':
     dependencies:
       '@types/unist': 3.0.3
@@ -13486,7 +13532,7 @@ snapshots:
       '@vitest/mocker': 4.1.0(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
       playwright: 1.58.2
       tinyrainbow: 3.1.0
-      vitest: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(@vitest/browser-playwright@4.1.0)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+      vitest: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(@vitest/browser-playwright@4.1.0)(happy-dom@20.8.4)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
     transitivePeerDependencies:
       - bufferutil
       - msw
@@ -13502,7 +13548,7 @@ snapshots:
       pngjs: 7.0.0
       sirv: 3.0.2
       tinyrainbow: 3.1.0
-      vitest: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(@vitest/browser-playwright@4.1.0)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+      vitest: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(@vitest/browser-playwright@4.1.0)(happy-dom@20.8.4)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
       ws: 8.19.0
     transitivePeerDependencies:
       - bufferutil
@@ -13522,7 +13568,7 @@ snapshots:
       obug: 2.1.1
       std-env: 4.0.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(@vitest/browser-playwright@4.1.0)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
+      vitest: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(@vitest/browser-playwright@4.1.0)(happy-dom@20.8.4)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
     optionalDependencies:
       '@vitest/browser': 4.1.0(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))(vitest@4.1.0)
 
@@ -14385,6 +14431,8 @@ snapshots:
       tapable: 2.3.0
 
   entities@4.5.0: {}
+
+  entities@7.0.1: {}
 
   env-paths@2.2.1: {}
 
@@ -15317,6 +15365,18 @@ snapshots:
   gopd@1.2.0: {}
 
   graceful-fs@4.2.11: {}
+
+  happy-dom@20.8.4:
+    dependencies:
+      '@types/node': 25.5.0
+      '@types/whatwg-mimetype': 3.0.2
+      '@types/ws': 8.18.1
+      entities: 7.0.1
+      whatwg-mimetype: 3.0.0
+      ws: 8.19.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   has-bigints@1.1.0: {}
 
@@ -18067,7 +18127,7 @@ snapshots:
       tsx: 4.21.0
       yaml: 2.8.2
 
-  vitest@4.1.0(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(@vitest/browser-playwright@4.1.0)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2)):
+  vitest@4.1.0(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(@vitest/browser-playwright@4.1.0)(happy-dom@20.8.4)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
       '@vitest/expect': 4.1.0
       '@vitest/mocker': 4.1.0(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -18093,6 +18153,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@types/node': 24.12.0
       '@vitest/browser-playwright': 4.1.0(playwright@1.58.2)(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))(vitest@4.1.0)
+      happy-dom: 20.8.4
     transitivePeerDependencies:
       - msw
 
@@ -18173,6 +18234,8 @@ snapshots:
       - esbuild
       - uglify-js
     optional: true
+
+  whatwg-mimetype@3.0.0: {}
 
   whatwg-url@5.0.0:
     dependencies:
