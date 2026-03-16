@@ -45,6 +45,7 @@ async function getIntlMessages(locale: IntlLocale): Promise<IntlMessages> {
 		// { default: extracted },
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		{ default: metadata },
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		{ default: ui },
 	] = await Promise.all([
 		// import(`@/messages/${language}.json`, { with: { type: "json" } }),
