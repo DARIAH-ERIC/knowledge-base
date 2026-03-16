@@ -4,7 +4,7 @@ import { type ReactNode, Suspense } from "react";
 
 import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
 import { NewslettersPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page";
-import { client } from "@/lib/mailchimp/client";
+import { mailchimp } from "@/lib/mailchimp";
 
 interface DashboardAdministratorNewslettersPageProps extends PageProps<"/[locale]/dashboard/administrator/institutions"> {}
 
@@ -23,7 +23,7 @@ export async function generateMetadata(
 export default function DashboardAdministratorNewslettersPage(
 	_props: Readonly<DashboardAdministratorNewslettersPageProps>,
 ): ReactNode {
-	const newsletters = client.get();
+	const newsletters = mailchimp.get({ count: 1000 });
 
 	return (
 		<Suspense fallback={<LoadingScreen />}>

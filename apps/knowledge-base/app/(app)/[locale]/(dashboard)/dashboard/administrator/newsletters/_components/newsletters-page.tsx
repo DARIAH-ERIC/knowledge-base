@@ -1,6 +1,6 @@
 "use client";
 
-import type { RequestResult } from "@acdh-oeaw/lib";
+import type { RequestResult } from "@dariah-eric/request";
 import { Badge } from "@dariah-eric/ui/badge";
 import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import {
@@ -23,7 +23,7 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
-import type { GetCampaignsResponse } from "@/lib/mailchimp/client";
+import type { GetCampaignsResponse } from "@/lib/mailchimp";
 
 interface NewslettersPageProps {
 	newsletters: Promise<RequestResult<GetCampaignsResponse>>;
@@ -33,10 +33,7 @@ export function NewslettersPage(props: Readonly<NewslettersPageProps>): ReactNod
 	const { newsletters: newslettersPromise } = props;
 
 	const result = use(newslettersPromise);
-	if (result.error) {
-		throw result.error;
-	}
-	const newsletters = result.value.data.campaigns;
+	const newsletters = result.unwrap().data.campaigns;
 
 	const t = useExtracted();
 	const format = useFormatter();
