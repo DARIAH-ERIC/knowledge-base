@@ -7,48 +7,53 @@ import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
-import { PersonEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-edit-form";
+import { ProjectEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-edit-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorEditPersonPageProps extends PageProps<"/[locale]/dashboard/administrator/persons/[slug]/edit"> {}
+interface DashboardAdministratorEditProjectPageProps extends PageProps<"/[locale]/dashboard/administrator/projects/[slug]/edit"> {}
 
 export async function generateMetadata(
-	_props: Readonly<DashboardAdministratorEditPersonPageProps>,
+	_props: Readonly<DashboardAdministratorEditProjectPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Administrator dashboard - Edit person"),
+		title: t("Administrator dashboard - Edit project"),
 	});
 
 	return metadata;
 }
 
-export default async function DashboardAdministratorEditPersonPage(
-	props: Readonly<DashboardAdministratorEditPersonPageProps>,
+export default async function DashboardAdministratorEditProjectPage(
+	props: Readonly<DashboardAdministratorEditProjectPageProps>,
 ): Promise<ReactNode> {
 	const { params } = props;
 
 	const { slug } = await params;
 
-	const [{ items: assets }, person] = await Promise.all([
+	const [{ items: assets }, project] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions }),
-		db.query.persons.findFirst({
+		db.query.projects.findFirst({
 			where: {
 				entity: {
 					slug,
 				},
 			},
 			columns: {
+				acronym: true,
+				call: true,
+				duration: true,
+				funders: true,
+				funding: true,
 				id: true,
-				email: true,
 				name: true,
-				orcid: true,
-				sortName: true,
+				// metadata: true,
+				summary: true,
+				topic: true,
 			},
 			with: {
 				entity: {
@@ -70,23 +75,32 @@ export default async function DashboardAdministratorEditPersonPage(
 						key: true,
 					},
 				},
+				scope: {
+					columns: {
+						id: true,
+						scope: true,
+					},
+				},
 			},
 		}),
 	]);
 
-	if (person == null) {
+	if (project == null) {
 		notFound();
 	}
 
-	const image = {
-		key: person.image.key,
-		url: images.generateSignedImageUrl({
-			key: person.image.key,
-			options: imageGridOptions,
-		}).url,
-	};
+	const image =
+		project.image != null
+			? {
+					key: project.image.key,
+					url: images.generateSignedImageUrl({
+						key: project.image.key,
+						options: imageGridOptions,
+					}).url,
+				}
+			: null;
 
-	const biographyRows = await db
+	const descriptionRows = await db
 		.select({ content: schema.richTextContentBlocks.content })
 		.from(schema.richTextContentBlocks)
 		.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
@@ -97,13 +111,25 @@ export default async function DashboardAdministratorEditPersonPage(
 		)
 		.where(
 			and(
-				eq(schema.fields.entityId, person.id),
-				eq(schema.entityTypesFieldsNames.fieldName, "biography"),
+				eq(schema.fields.entityId, project.id),
+				eq(schema.entityTypesFieldsNames.fieldName, "description"),
 			),
 		)
 		.limit(1);
 
-	const biography = biographyRows.at(0)?.content as JSONContent | undefined;
+	const description = descriptionRows.at(0)?.content as JSONContent | undefined;
 
-	return <PersonEditForm assets={assets} person={{ ...person, biography, image }} />;
+	const scopes = await db.query.projectScopes.findMany({
+		orderBy: {
+			scope: "asc",
+		},
+		columns: {
+			id: true,
+			scope: true,
+		},
+	});
+
+	return (
+		<ProjectEditForm assets={assets} project={{ ...project, description, image }} scopes={scopes} />
+	);
 }

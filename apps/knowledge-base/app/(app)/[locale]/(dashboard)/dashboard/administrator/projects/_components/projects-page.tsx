@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Badge } from "@dariah-eric/ui/badge";
 import { Button, buttonStyles } from "@dariah-eric/ui/button";
 import { Link } from "@dariah-eric/ui/link";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
@@ -20,7 +21,7 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, use, useState } from "react";
 import { useFilter, useListData } from "react-aria-components";
 
@@ -34,24 +35,26 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 
-interface PersonsPageProps {
-	persons: Promise<
+interface ProjectsPageProps {
+	projects: Promise<
 		Array<
-			Pick<schema.Person, "email" | "id" | "name" | "orcid"> & {
+			Pick<schema.Project, "acronym" | "duration" | "funding" | "id" | "name"> & {
 				entity: Pick<schema.Entity, "documentId" | "slug"> & {
 					status: Pick<schema.EntityStatus, "id" | "type">;
 				};
+				scope: Pick<schema.ProjectScope, "id" | "scope">;
 			}
 		>
 	>;
 }
 
-export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
-	const { persons: personsPromise } = props;
+export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
+	const { projects: projectsPromise } = props;
 
-	const persons = use(personsPromise);
+	const projects = use(projectsPromise);
 
 	const t = useExtracted();
+	const format = useFormatter();
 
 	const { contains } = useFilter();
 
@@ -59,7 +62,7 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 		filter(item, filterText) {
 			return contains(item.name, filterText);
 		},
-		initialItems: persons,
+		initialItems: projects,
 	});
 
 	const [page, setPage] = useState(1);
@@ -74,9 +77,9 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 		<Fragment>
 			<Header>
 				<HeaderContent>
-					<HeaderTitle>{t("Persons")}</HeaderTitle>
+					<HeaderTitle>{t("Projects")}</HeaderTitle>
 					<HeaderDescription>
-						{t("Manage all persons in the DARIAH knowledge base.")}
+						{t("Manage all projects in the DARIAH knowledge base.")}
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
@@ -91,7 +94,7 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 					</SearchField>
 					<Link
 						className={buttonStyles({ intent: "secondary" })}
-						href="/dashboard/administrator/persons/create"
+						href="/dashboard/administrator/projects/create"
 					>
 						<PlusIcon className="mr-2 size-4" />
 						{t("New")}
@@ -105,17 +108,37 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 			>
 				<TableHeader>
 					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
-					<TableColumn>{t("Email")}</TableColumn>
-					<TableColumn>{t("ORCID")}</TableColumn>
+					<TableColumn>{t("Acronym")}</TableColumn>
+					<TableColumn>{t("Duration")}</TableColumn>
+					<TableColumn>{t("Funding")}</TableColumn>
+					<TableColumn>{t("Scope")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => {
 						return (
-							<TableRow href={`/dashboard/administrator/persons/${item.entity.slug}/details`}>
+							<TableRow href={`/dashboard/administrator/projects/${item.entity.slug}/details`}>
 								<TableCell>{item.name}</TableCell>
-								<TableCell>{item.email}</TableCell>
-								<TableCell>{item.orcid}</TableCell>
+								<TableCell>{item.acronym}</TableCell>
+								<TableCell>
+									{item.duration.end
+										? format.dateTimeRange(item.duration.start, item.duration.end)
+										: format.dateTime(item.duration.start)}
+								</TableCell>
+								<TableCell>{item.funding}</TableCell>
+								<TableCell>
+									<Badge
+										intent={
+											item.scope.scope === "eu"
+												? "danger"
+												: item.scope.scope === "national"
+													? "info"
+													: "warning"
+										}
+									>
+										{item.scope.scope}
+									</Badge>
+								</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button
@@ -128,12 +151,12 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 										</Button>
 										<MenuContent placement="left top">
 											<MenuItem
-												href={`/dashboard/administrator/persons/${item.entity.slug}/details`}
+												href={`/dashboard/administrator/projects/${item.entity.slug}/details`}
 											>
 												<EyeIcon className="mr-2 size-4" />
 												<MenuLabel>{t("View")}</MenuLabel>
 											</MenuItem>
-											<MenuItem href={`/dashboard/administrator/persons/${item.entity.slug}/edit`}>
+											<MenuItem href={`/dashboard/administrator/projects/${item.entity.slug}/edit`}>
 												<PencilSquareIcon className="mr-2 size-4" />
 												<MenuLabel>{t("Edit")}</MenuLabel>
 											</MenuItem>
@@ -160,7 +183,7 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 
 			<DeleteModal
 				isOpen={isDeleteDialogOpen}
-				model={t("person")}
+				model={t("project")}
 				onOpenChange={setIsDeleteDialogOpen}
 			/>
 		</Fragment>

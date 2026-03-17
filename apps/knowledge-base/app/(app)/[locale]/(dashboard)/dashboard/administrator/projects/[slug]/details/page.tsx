@@ -4,45 +4,50 @@ import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
-import { PersonDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details";
+import { ProjectDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details";
 import { imageGridOptions } from "@/config/assets.config";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorPersonDetailsPageProps extends PageProps<"/[locale]/dashboard/administrator/persons/[slug]/details"> {}
+interface DashboardAdministratorProjectDetailsPageProps extends PageProps<"/[locale]/dashboard/administrator/projects/[slug]/details"> {}
 
 export async function generateMetadata(
-	_props: Readonly<DashboardAdministratorPersonDetailsPageProps>,
+	_props: Readonly<DashboardAdministratorProjectDetailsPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Administrator dashboard - Person details"),
+		title: t("Administrator dashboard - Project details"),
 	});
 
 	return metadata;
 }
 
-export default async function DashboardAdministratorPersonDetailsPage(
-	props: Readonly<DashboardAdministratorPersonDetailsPageProps>,
+export default async function DashboardAdministratorProjectDetailsPage(
+	props: Readonly<DashboardAdministratorProjectDetailsPageProps>,
 ): Promise<ReactNode> {
 	const { params } = props;
 
 	const { slug } = await params;
 
-	const person = await db.query.persons.findFirst({
+	const project = await db.query.projects.findFirst({
 		where: {
 			entity: {
 				slug,
 			},
 		},
 		columns: {
+			acronym: true,
+			call: true,
+			duration: true,
+			funders: true,
+			funding: true,
 			id: true,
-			email: true,
 			name: true,
-			orcid: true,
-			sortName: true,
+			// metadata: true,
+			summary: true,
+			topic: true,
 		},
 		with: {
 			entity: {
@@ -64,20 +69,29 @@ export default async function DashboardAdministratorPersonDetailsPage(
 					key: true,
 				},
 			},
+			scope: {
+				columns: {
+					id: true,
+					scope: true,
+				},
+			},
 		},
 	});
 
-	if (person == null) {
+	if (project == null) {
 		notFound();
 	}
 
-	const image = {
-		key: person.image.key,
-		url: images.generateSignedImageUrl({
-			key: person.image.key,
-			options: imageGridOptions,
-		}).url,
-	};
+	const image =
+		project.image != null
+			? {
+					key: project.image.key,
+					url: images.generateSignedImageUrl({
+						key: project.image.key,
+						options: imageGridOptions,
+					}).url,
+				}
+			: null;
 
-	return <PersonDetails person={{ ...person, image }} />;
+	return <ProjectDetails project={{ ...project, image }} />;
 }
