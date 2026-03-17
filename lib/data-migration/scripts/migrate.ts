@@ -8,6 +8,11 @@ import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { createStorageService } from "@dariah-eric/storage";
 import { buffer } from "@dariah-eric/storage/lib";
+import { generateJSON } from "@tiptap/html";
+import { StarterKit } from "@tiptap/starter-kit";
+import { toText } from "hast-util-to-text";
+import fromHtml from "rehype-parse";
+import { unified } from "unified";
 
 import {
 	apiBaseUrl,
@@ -19,6 +24,8 @@ import {
 } from "../config/data-migration.config";
 import { env } from "../config/env.config";
 import { getWordPressData, type WordPressData } from "../src/lib/get-wordpress-data";
+
+const processor = unified().use(fromHtml);
 
 const storage = createStorageService({
 	config: {
@@ -152,12 +159,35 @@ async function main() {
 		return item.scope;
 	});
 
+	const contentBlockTypes = await db.query.contentBlockTypes.findMany();
+	const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => {
+		return item.type;
+	});
+
+	const entityTypes = await db.query.entityTypes.findMany();
+	const entityTypesByType = keyBy(entityTypes, (item) => {
+		return item.type;
+	});
+
+	//
+
+	function toPlaintext(html: string): string {
+		const ast = processor.parse(html);
+		return toText(ast);
+	}
+
 	//
 
 	const placeholderImage = await upload(assetsCache, placeholderImageUrl);
 	assert(placeholderImage, "Missing placeholder image.");
 
 	//
+
+	/**
+	 * ============================================================================================
+	 * Pages.
+	 * ============================================================================================
+	 */
 
 	log.info("Migrating pages...");
 
@@ -176,7 +206,9 @@ async function main() {
 				})
 				.returning({ id: schema.entities.id });
 
-			const id = entity!.id;
+			assert(entity);
+
+			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
 				assetsCache,
@@ -191,18 +223,63 @@ async function main() {
 
 			await tx.insert(schema.pages).values({
 				id,
-				title: page.title.rendered,
-				summary: page.excerpt.rendered,
+				title: toPlaintext(page.title.rendered),
+				summary: toPlaintext(page.excerpt.rendered),
 				imageId,
 				createdAt: new Date(page.date_gmt),
 				updatedAt: new Date(page.modified_gmt),
 			});
 
-			// TODO: create content block for page.content
+			if (page.content.rendered.trim().length === 0) {
+				return;
+			}
+
+			const content = generateJSON(page.content.rendered, [StarterKit]);
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.pages.id,
+					fieldName: "content",
+				},
+			});
+
+			assert(fieldName);
+
+			const [field] = await tx
+				.insert(schema.fields)
+				.values({
+					entityId: entity.id,
+					fieldNameId: fieldName.id,
+				})
+				.returning({ id: schema.fields.id });
+
+			assert(field);
+
+			const [contentBlock] = await tx
+				.insert(schema.contentBlocks)
+				.values({
+					position: 0,
+					fieldId: field.id,
+					typeId: contentBlockTypesByType.rich_text.id,
+				})
+				.returning({ id: schema.contentBlocks.id });
+
+			assert(contentBlock);
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id,
+			});
 		});
 	}
 
 	//
+
+	/**
+	 * ============================================================================================
+	 * Initiatives.
+	 * ============================================================================================
+	 */
 
 	log.info("Migrating initiatives...");
 
@@ -221,7 +298,9 @@ async function main() {
 				})
 				.returning({ id: schema.entities.id });
 
-			const id = entity!.id;
+			assert(entity);
+
+			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
 				assetsCache,
@@ -236,19 +315,64 @@ async function main() {
 
 			await tx.insert(schema.pages).values({
 				id,
-				title: page.title.rendered,
+				title: toPlaintext(page.title.rendered),
 				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-				summary: page.excerpt?.rendered ?? "",
+				summary: toPlaintext(page.excerpt?.rendered ?? ""),
 				imageId,
 				createdAt: new Date(page.date_gmt),
 				updatedAt: new Date(page.modified_gmt),
 			});
 
-			// TODO: create content block for page.content
+			if (page.content.rendered.trim().length === 0) {
+				return;
+			}
+
+			const content = generateJSON(page.content.rendered, [StarterKit]);
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.pages.id,
+					fieldName: "content",
+				},
+			});
+
+			assert(fieldName);
+
+			const [field] = await tx
+				.insert(schema.fields)
+				.values({
+					entityId: entity.id,
+					fieldNameId: fieldName.id,
+				})
+				.returning({ id: schema.fields.id });
+
+			assert(field);
+
+			const [contentBlock] = await tx
+				.insert(schema.contentBlocks)
+				.values({
+					position: 0,
+					fieldId: field.id,
+					typeId: contentBlockTypesByType.rich_text.id,
+				})
+				.returning({ id: schema.contentBlocks.id });
+
+			assert(contentBlock);
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id,
+			});
 		});
 	}
 
 	//
+
+	/**
+	 * ============================================================================================
+	 * News.
+	 * ============================================================================================
+	 */
 
 	log.info("Migrating news...");
 
@@ -277,7 +401,9 @@ async function main() {
 				})
 				.returning({ id: schema.entities.id });
 
-			const id = entity!.id;
+			assert(entity);
+
+			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
 				assetsCache,
@@ -292,18 +418,63 @@ async function main() {
 
 			await tx.insert(schema.news).values({
 				id,
-				title: post.title.rendered,
-				summary: post.excerpt.rendered,
+				title: toPlaintext(post.title.rendered),
+				summary: toPlaintext(post.excerpt.rendered),
 				imageId: imageId ?? placeholderImage.id,
 				createdAt: new Date(post.date_gmt),
 				updatedAt: new Date(post.modified_gmt),
 			});
 
-			// TODO: create content block for page.content
+			if (post.content.rendered.trim().length === 0) {
+				return;
+			}
+
+			const content = generateJSON(post.content.rendered, [StarterKit]);
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.news.id,
+					fieldName: "content",
+				},
+			});
+
+			assert(fieldName);
+
+			const [field] = await tx
+				.insert(schema.fields)
+				.values({
+					entityId: entity.id,
+					fieldNameId: fieldName.id,
+				})
+				.returning({ id: schema.fields.id });
+
+			assert(field);
+
+			const [contentBlock] = await tx
+				.insert(schema.contentBlocks)
+				.values({
+					position: 0,
+					fieldId: field.id,
+					typeId: contentBlockTypesByType.rich_text.id,
+				})
+				.returning({ id: schema.contentBlocks.id });
+
+			assert(contentBlock);
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id,
+			});
 		});
 	}
 
 	//
+
+	/**
+	 * ============================================================================================
+	 * Events.
+	 * ============================================================================================
+	 */
 
 	log.info("Migrating events...");
 
@@ -323,7 +494,9 @@ async function main() {
 				})
 				.returning({ id: schema.entities.id });
 
-			const id = entity!.id;
+			assert(entity);
+
+			const id = entity.id;
 
 			const imageId =
 				event.image !== false
@@ -336,8 +509,8 @@ async function main() {
 
 			await tx.insert(schema.events).values({
 				id,
-				title: event.title,
-				summary: event.description,
+				title: toPlaintext(event.title),
+				summary: toPlaintext(event.description),
 				imageId: imageId ?? placeholderImage.id,
 				website: event.website,
 				location:
@@ -353,11 +526,56 @@ async function main() {
 				updatedAt: new Date(event.modified_utc),
 			});
 
-			// TODO: create content block for page.content
+			if (event.description.trim().length === 0) {
+				return;
+			}
+
+			const content = generateJSON(event.description, [StarterKit]);
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.events.id,
+					fieldName: "content",
+				},
+			});
+
+			assert(fieldName);
+
+			const [field] = await tx
+				.insert(schema.fields)
+				.values({
+					entityId: entity.id,
+					fieldNameId: fieldName.id,
+				})
+				.returning({ id: schema.fields.id });
+
+			assert(field);
+
+			const [contentBlock] = await tx
+				.insert(schema.contentBlocks)
+				.values({
+					position: 0,
+					fieldId: field.id,
+					typeId: contentBlockTypesByType.rich_text.id,
+				})
+				.returning({ id: schema.contentBlocks.id });
+
+			assert(contentBlock);
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id,
+			});
 		});
 	}
 
 	//
+
+	/**
+	 * ============================================================================================
+	 * Countries.
+	 * ============================================================================================
+	 */
 
 	log.info("Migrating countries...");
 
@@ -376,7 +594,9 @@ async function main() {
 				})
 				.returning({ id: schema.entities.id });
 
-			const id = entity!.id;
+			assert(entity);
+
+			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
 				assetsCache,
@@ -391,7 +611,7 @@ async function main() {
 
 			await tx.insert(schema.organisationalUnits).values({
 				id,
-				name: country.title.rendered,
+				name: toPlaintext(country.title.rendered),
 				summary: "",
 				imageId: imageId ?? placeholderImage.id,
 				typeId: organisationalUnitTypesByType.consortium.id,
@@ -399,15 +619,351 @@ async function main() {
 				updatedAt: new Date(country.modified_gmt),
 			});
 
-			// TODO: create content block for country.content
+			// TODO: website => social_media/outreach
+			// TODO: repPersons_data
+			// TODO: coordinators_data
+			// TODO: repInstitutions_data
+
+			if (country.content.rendered.trim().length === 0) {
+				return;
+			}
+
+			const content = generateJSON(country.content.rendered, [StarterKit]);
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.organisational_units.id,
+					fieldName: "description",
+				},
+			});
+
+			assert(fieldName);
+
+			const [field] = await tx
+				.insert(schema.fields)
+				.values({
+					entityId: entity.id,
+					fieldNameId: fieldName.id,
+				})
+				.returning({ id: schema.fields.id });
+
+			assert(field);
+
+			const [contentBlock] = await tx
+				.insert(schema.contentBlocks)
+				.values({
+					position: 0,
+					fieldId: field.id,
+					typeId: contentBlockTypesByType.rich_text.id,
+				})
+				.returning({ id: schema.contentBlocks.id });
+
+			assert(contentBlock);
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id,
+			});
 		});
 	}
 
 	//
 
+	/**
+	 * ============================================================================================
+	 * Institution.
+	 * ============================================================================================
+	 */
+
+	log.info("Migrating institutions...");
+
+	for (const institution of Object.values(data.institutions)) {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		assert(institution.status === "publish", "Institution has not been published.");
+
+		await db.transaction(async (tx) => {
+			const [entity] = await tx
+				.insert(schema.entities)
+				.values({
+					slug: institution.slug,
+					statusId: statusByType.published.id,
+					typeId: typesByType.organisational_units.id,
+					createdAt: new Date(institution.date_gmt),
+					updatedAt: new Date(institution.modified_gmt),
+				})
+				.returning({ id: schema.entities.id });
+
+			assert(entity);
+
+			const id = entity.id;
+
+			const imageId = await uploadFeaturedImage(
+				assetsCache,
+				data.media,
+				institution.featured_media,
+				institution.id,
+			);
+
+			await tx.insert(schema.organisationalUnits).values({
+				id,
+				name: toPlaintext(institution.title.rendered),
+				summary: "",
+				typeId: organisationalUnitTypesByType.institution.id,
+				imageId: imageId ?? placeholderImage.id,
+				createdAt: new Date(institution.date_gmt),
+				updatedAt: new Date(institution.modified_gmt),
+			});
+
+			// TODO: website => social_media/outreach
+
+			if (institution.content.rendered.trim().length === 0) {
+				return;
+			}
+
+			const content = generateJSON(institution.content.rendered, [StarterKit]);
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.organisational_units.id,
+					fieldName: "description",
+				},
+			});
+
+			assert(fieldName);
+
+			const [field] = await tx
+				.insert(schema.fields)
+				.values({
+					entityId: entity.id,
+					fieldNameId: fieldName.id,
+				})
+				.returning({ id: schema.fields.id });
+
+			assert(field);
+
+			const [contentBlock] = await tx
+				.insert(schema.contentBlocks)
+				.values({
+					position: 0,
+					fieldId: field.id,
+					typeId: contentBlockTypesByType.rich_text.id,
+				})
+				.returning({ id: schema.contentBlocks.id });
+
+			assert(contentBlock);
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id,
+			});
+		});
+	}
+
+	//
+
+	/**
+	 * ============================================================================================
+	 * Working group.
+	 * ============================================================================================
+	 */
+
+	log.info("Migrating working groups...");
+
+	for (const workingGroup of Object.values(data.workingGroups)) {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		assert(workingGroup.status === "publish", "Working group has not been published.");
+
+		await db.transaction(async (tx) => {
+			const [entity] = await tx
+				.insert(schema.entities)
+				.values({
+					slug: workingGroup.slug,
+					statusId: statusByType.published.id,
+					typeId: typesByType.organisational_units.id,
+					createdAt: new Date(workingGroup.date_gmt),
+					updatedAt: new Date(workingGroup.modified_gmt),
+				})
+				.returning({ id: schema.entities.id });
+
+			assert(entity);
+
+			const id = entity.id;
+
+			const imageId = await uploadFeaturedImage(
+				assetsCache,
+				data.media,
+				workingGroup.featured_media,
+				workingGroup.id,
+			);
+
+			await tx.insert(schema.organisationalUnits).values({
+				id,
+				name: toPlaintext(workingGroup.title.rendered),
+				summary: "",
+				typeId: organisationalUnitTypesByType.working_group.id,
+				imageId: imageId ?? placeholderImage.id,
+				createdAt: new Date(workingGroup.date_gmt),
+				updatedAt: new Date(workingGroup.modified_gmt),
+			});
+
+			// TODO: leaders_data => chairs
+			// TODO: country_data => country
+
+			if (workingGroup.content.rendered.trim().length === 0) {
+				return;
+			}
+
+			const content = generateJSON(workingGroup.content.rendered, [StarterKit]);
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.organisational_units.id,
+					fieldName: "description",
+				},
+			});
+
+			assert(fieldName);
+
+			const [field] = await tx
+				.insert(schema.fields)
+				.values({
+					entityId: entity.id,
+					fieldNameId: fieldName.id,
+				})
+				.returning({ id: schema.fields.id });
+
+			assert(field);
+
+			const [contentBlock] = await tx
+				.insert(schema.contentBlocks)
+				.values({
+					position: 0,
+					fieldId: field.id,
+					typeId: contentBlockTypesByType.rich_text.id,
+				})
+				.returning({ id: schema.contentBlocks.id });
+
+			assert(contentBlock);
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id,
+			});
+		});
+	}
+
+	//
+
+	/**
+	 * ============================================================================================
+	 * Projects.
+	 * ============================================================================================
+	 */
+
+	log.info("Migrating projects...");
+
+	for (const project of Object.values(data.projects)) {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		assert(project.status === "publish", "Project has not been published.");
+
+		await db.transaction(async (tx) => {
+			const [entity] = await tx
+				.insert(schema.entities)
+				.values({
+					slug: project.slug,
+					statusId: statusByType.published.id,
+					typeId: typesByType.projects.id,
+					createdAt: new Date(project.date_gmt),
+					updatedAt: new Date(project.modified_gmt),
+				})
+				.returning({ id: schema.entities.id });
+
+			assert(entity);
+
+			const id = entity.id;
+
+			const imageId = await uploadFeaturedImage(
+				assetsCache,
+				data.media,
+				project.featured_media,
+				project.id,
+			);
+
+			await tx.insert(schema.projects).values({
+				id,
+				// name: toPlaintext(project.title.rendered),
+				name: project.fullname,
+				duration: { start: new Date() }, // FIXME: need to extract from richtext
+				// funding: 0,
+				summary: toPlaintext(project.excerpt.rendered),
+				// call: "",
+				// funders: "",
+				// topic: "",
+				imageId: imageId ?? placeholderImage.id,
+				scopeId: projectScopesByType.national.id,
+				createdAt: new Date(project.date_gmt),
+				updatedAt: new Date(project.modified_gmt),
+			});
+
+			// TODO: website => social_media/outreach
+			// TODO: relations.coordinator
+			// TODO: relations.institutions
+
+			if (project.content.rendered.trim().length === 0) {
+				return;
+			}
+
+			const content = generateJSON(project.content.rendered, [StarterKit]);
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.projects.id,
+					fieldName: "description",
+				},
+			});
+
+			assert(fieldName);
+
+			const [field] = await tx
+				.insert(schema.fields)
+				.values({
+					entityId: entity.id,
+					fieldNameId: fieldName.id,
+				})
+				.returning({ id: schema.fields.id });
+
+			assert(field);
+
+			const [contentBlock] = await tx
+				.insert(schema.contentBlocks)
+				.values({
+					position: 0,
+					fieldId: field.id,
+					typeId: contentBlockTypesByType.rich_text.id,
+				})
+				.returning({ id: schema.contentBlocks.id });
+
+			assert(contentBlock);
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id,
+			});
+		});
+	}
+
+	//
+
+	/**
+	 * ============================================================================================
+	 * Person.
+	 * ============================================================================================
+	 */
+
 	log.info("Migrating people...");
 
 	for (const person of Object.values(data.people)) {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		assert(person.status === "publish", "Person has not been published.");
 
 		if (person.title.rendered.trim().length === 0) {
@@ -427,7 +983,9 @@ async function main() {
 				})
 				.returning({ id: schema.entities.id });
 
-			const id = entity!.id;
+			assert(entity);
+
+			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
 				assetsCache,
@@ -440,158 +998,65 @@ async function main() {
 				log.warn(`Missing image (person id ${String(person.id)}).`);
 			}
 
-			function getSortName(name: string) {
-				const segments = name.split(" ");
-				if (segments.length < 2) {
-					return name;
-				}
-				const last = segments.pop();
-				return `${last!}, ${segments.join(" ")}`;
-			}
-
 			await tx.insert(schema.persons).values({
 				id,
-				name: person.title.rendered,
-				sortName: getSortName(person.title.rendered),
-				// email,
+				name: [person.firstname, person.lastname].filter(Boolean).join(" "),
+				sortName: [person.lastname, person.firstname].filter(Boolean).join(", "),
+				email: person.email,
 				// orcid,
 				imageId: imageId ?? placeholderImage.id,
 				createdAt: new Date(person.date_gmt),
 				updatedAt: new Date(person.modified_gmt),
 			});
 
-			// TODO: create content block for person.content
-		});
-	}
+			// TODO: website
+			// TODO: identifiant
+			// TODO: position
+			// TODO: twitter
+			// TODO: skills
+			// TODO: research
+			// TODO: institution_data
 
-	//
+			if (person.content.rendered.trim().length === 0) {
+				return;
+			}
 
-	log.info("Migrating institutions...");
+			const content = generateJSON(person.content.rendered, [StarterKit]);
 
-	for (const institution of Object.values(data.institutions)) {
-		assert(institution.status === "publish", "Institution has not been published.");
-
-		await db.transaction(async (tx) => {
-			const [entity] = await tx
-				.insert(schema.entities)
-				.values({
-					slug: institution.slug,
-					statusId: statusByType.published.id,
-					typeId: typesByType.organisational_units.id,
-					createdAt: new Date(institution.date_gmt),
-					updatedAt: new Date(institution.modified_gmt),
-				})
-				.returning({ id: schema.entities.id });
-
-			const id = entity!.id;
-
-			const imageId = await uploadFeaturedImage(
-				assetsCache,
-				data.media,
-				institution.featured_media,
-				institution.id,
-			);
-
-			await tx.insert(schema.organisationalUnits).values({
-				id,
-				name: institution.title.rendered,
-				summary: "",
-				typeId: organisationalUnitTypesByType.institution.id,
-				imageId: imageId ?? placeholderImage.id,
-				createdAt: new Date(institution.date_gmt),
-				updatedAt: new Date(institution.modified_gmt),
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.persons.id,
+					fieldName: "biography",
+				},
 			});
 
-			// TODO: create content block for institution.content
-		});
-	}
+			assert(fieldName);
 
-	//
-
-	log.info("Migrating working groups...");
-
-	for (const workingGroup of Object.values(data.workingGroups)) {
-		assert(workingGroup.status === "publish", "Working group has not been published.");
-
-		await db.transaction(async (tx) => {
-			const [entity] = await tx
-				.insert(schema.entities)
+			const [field] = await tx
+				.insert(schema.fields)
 				.values({
-					slug: workingGroup.slug,
-					statusId: statusByType.published.id,
-					typeId: typesByType.organisational_units.id,
-					createdAt: new Date(workingGroup.date_gmt),
-					updatedAt: new Date(workingGroup.modified_gmt),
+					entityId: entity.id,
+					fieldNameId: fieldName.id,
 				})
-				.returning({ id: schema.entities.id });
+				.returning({ id: schema.fields.id });
 
-			const id = entity!.id;
+			assert(field);
 
-			const imageId = await uploadFeaturedImage(
-				assetsCache,
-				data.media,
-				workingGroup.featured_media,
-				workingGroup.id,
-			);
-
-			await tx.insert(schema.organisationalUnits).values({
-				id,
-				name: workingGroup.title.rendered,
-				summary: "",
-				typeId: organisationalUnitTypesByType.working_group.id,
-				imageId: imageId ?? placeholderImage.id,
-				createdAt: new Date(workingGroup.date_gmt),
-				updatedAt: new Date(workingGroup.modified_gmt),
-			});
-
-			// TODO: create content block for workingGroup.content
-		});
-	}
-
-	//
-
-	log.info("Migrating projects...");
-
-	for (const project of Object.values(data.projects)) {
-		assert(project.status === "publish", "Project has not been published.");
-
-		await db.transaction(async (tx) => {
-			const [entity] = await tx
-				.insert(schema.entities)
+			const [contentBlock] = await tx
+				.insert(schema.contentBlocks)
 				.values({
-					slug: project.slug,
-					statusId: statusByType.published.id,
-					typeId: typesByType.projects.id,
-					createdAt: new Date(project.date_gmt),
-					updatedAt: new Date(project.modified_gmt),
+					position: 0,
+					fieldId: field.id,
+					typeId: contentBlockTypesByType.rich_text.id,
 				})
-				.returning({ id: schema.entities.id });
+				.returning({ id: schema.contentBlocks.id });
 
-			const id = entity!.id;
+			assert(contentBlock);
 
-			const imageId = await uploadFeaturedImage(
-				assetsCache,
-				data.media,
-				project.featured_media,
-				project.id,
-			);
-
-			await tx.insert(schema.projects).values({
-				id,
-				name: project.title.rendered,
-				duration: { start: new Date() }, // FIXME:
-				// funding: 0,
-				summary: "",
-				// call: "",
-				// funders: "",
-				// topic: "",
-				imageId: imageId ?? placeholderImage.id,
-				scopeId: projectScopesByType.national.id,
-				createdAt: new Date(project.date_gmt),
-				updatedAt: new Date(project.modified_gmt),
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id,
 			});
-
-			// TODO: create content block for project.content
 		});
 	}
 
