@@ -118,19 +118,341 @@ export interface Venue {
 	global_id_lineage: Array<string>;
 }
 
+interface Person {
+	id: number;
+	date: Date;
+	date_gmt: Date;
+	guid: { rendered: string };
+	modified: Date;
+	modified_gmt: Date;
+	slug: string;
+	status: "publish";
+	type: "dariah_person";
+	link: string;
+	title: { rendered: string };
+	content: { rendered: string };
+	featured_media: number;
+	template: string;
+	website: string;
+	firstname: string;
+	lastname: string;
+	identifiant: string;
+	email: string;
+	position: string;
+	twitter: string;
+	skills: string;
+	research: string;
+	projects: Array<unknown>;
+	institution_data: {
+		id: number;
+		title: string;
+		slug: string;
+		link: string;
+		type: string;
+		website: string;
+		longitude: string;
+		latitude: string;
+		country: { id: number; title: string; slug: string; link: string; type: string };
+	} | null;
+}
+
+interface Country {
+	id: number;
+	date: Date;
+	date_gmt: Date;
+	guid: { rendered: string };
+	modified: Date;
+	modified_gmt: Date;
+	slug: string;
+	status: string;
+	type: string;
+	link: string;
+	title: { rendered: string };
+	content: { rendered: string };
+	featured_media: number;
+	template: string;
+	website: string;
+	websitename: string;
+	longitude: string;
+	latitude: string;
+	repPersons_data: Array<{
+		id: number;
+		title: string;
+		slug: string;
+		link: string;
+		type: string;
+		firstname: string;
+		lastname: string;
+		identifiant: string;
+		email: string;
+		position: string;
+		twitter: string;
+		skills: string;
+		research: string;
+		institution: number;
+		institution_data: {
+			id: number;
+			title: string;
+			slug: string;
+			link: string;
+			type: string;
+			website: string;
+			longitude: string;
+			latitude: string;
+			country: {
+				id: number;
+				title: string;
+				slug: string;
+				link: string;
+				type: string;
+			};
+		};
+	}>;
+	coordinators_data: Array<{
+		id: number;
+		title: string;
+		slug: string;
+		link: string;
+		type: string;
+		firstname: string;
+		lastname: string;
+		identifiant: string;
+		email: string;
+		position: string;
+		twitter: string;
+		skills: string;
+		research: string;
+		institution: number;
+		institution_data: {
+			id: number;
+			title: string;
+			slug: string;
+			link: string;
+			type: string;
+			website: string;
+			longitude: string;
+			latitude: string;
+			country: {
+				id: number;
+				title: string;
+				slug: string;
+				link: string;
+				type: string;
+			};
+		};
+	}>;
+	coordinator_data: null;
+	repInstitutions_data: Array<unknown>;
+	country_full_data: {
+		id: number;
+		title: string;
+		slug: string;
+		link: string;
+		type: string;
+		website: string;
+		websitename: string;
+		longitude: string;
+		latitude: string;
+		repPersons: Array<{
+			id: number;
+			title: string;
+			slug: string;
+			link: string;
+			type: string;
+			firstname: string;
+			lastname: string;
+			identifiant: string;
+			email: string;
+			position: string;
+			twitter: string;
+			skills: string;
+			research: string;
+			institution: number;
+			institution_data: {
+				id: number;
+				title: string;
+				slug: string;
+				link: string;
+				type: string;
+				website: string;
+				longitude: string;
+				latitude: string;
+				country: {
+					id: number;
+					title: string;
+					slug: string;
+					link: string;
+					type: string;
+				};
+			};
+		}>;
+		coordinators: Array<{
+			id: number;
+			title: string;
+			slug: string;
+			link: string;
+			type: string;
+			firstname: string;
+			lastname: string;
+			identifiant: string;
+			email: string;
+			position: string;
+			twitter: string;
+			skills: string;
+			research: string;
+			institution: number;
+			institution_data: {
+				id: number;
+				title: string;
+				slug: string;
+				link: string;
+				type: string;
+				website: string;
+				longitude: string;
+				latitude: string;
+				country: {
+					id: number;
+					title: string;
+					slug: string;
+					link: string;
+					type: string;
+				};
+			};
+		}>;
+		coordinator: null;
+		repInstitutions: Array<unknown>;
+	};
+}
+
+interface Project {
+	id: number;
+	date: Date;
+	date_gmt: Date;
+	guid: { rendered: string };
+	modified: Date;
+	modified_gmt: Date;
+	slug: string;
+	status: "publish";
+	type: "dariah_project";
+	link: string;
+	title: { rendered: string };
+	content: { rendered: string };
+	excerpt: { rendered: string };
+	featured_media: number;
+	parent: number;
+	template: string;
+	website: string;
+	fullname: string;
+	relations: {
+		coordinator: {
+			id: number;
+			title: string;
+			slug: string;
+			link: string;
+			type: "dariah_institution";
+		};
+		contacts: Array<unknown>;
+		institutions: Array<{
+			id: number;
+			title: string;
+			slug: string;
+			link: string;
+			type: "dariah_institution";
+		}>;
+	};
+}
+
+interface WorkingGroup {
+	id: number;
+	date: Date;
+	date_gmt: Date;
+	guid: { rendered: string };
+	modified: Date;
+	modified_gmt: Date;
+	slug: string;
+	status: "publish";
+	type: "dariah_wg";
+	link: string;
+	title: { rendered: string };
+	content: { rendered: string };
+	featured_media: number;
+	parent: number;
+	template: string;
+	leaders_data: Array<{
+		id: number;
+		title: string;
+		slug: string;
+		link: string;
+		type: "dariah_person";
+		firstname: string;
+		lastname: string;
+		identifiant: string;
+		email: string;
+		position: string;
+		twitter: string;
+		skills: string;
+		research: string;
+		institution: number;
+		institution_data: {
+			id: number;
+			title: string;
+			slug: string;
+			link: string;
+			type: "dariah_institution";
+			website: string;
+			longitude: string;
+			latitude: string;
+			country: {
+				id: number;
+				title: string;
+				slug: string;
+				link: string;
+				type: "dariah_country";
+			};
+		} | null;
+	}>;
+}
+
+interface Institution {
+	id: number;
+	date: Date;
+	date_gmt: Date;
+	guid: { rendered: string };
+	modified: Date;
+	modified_gmt: Date;
+	slug: string;
+	status: "publish";
+	type: "dariah_institution";
+	link: string;
+	title: { rendered: string };
+	content: { rendered: string };
+	featured_media: number;
+	template: string;
+	website: string;
+	longitude: string;
+	latitude: string;
+	country_data: {
+		id: number;
+		title: string;
+		slug: string;
+		link: string;
+		type: "dariah_country";
+	};
+}
+
 export interface WordPressData {
 	categories: Record<WP_REST_API_Category["id"], WP_REST_API_Category>;
-	countries: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
+	countries: Record<Country["id"], Country>;
 	events: Record<WP_Event["id"], WP_Event>;
 	initiatives: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
-	institutions: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
+	institutions: Record<Institution["id"], Institution>;
 	pages: Record<WP_REST_API_Page["id"], WP_REST_API_Page>;
-	people: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
+	people: Record<Person["id"], Person>;
 	posts: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
-	projects: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
+	projects: Record<Project["id"], Project>;
 	media: Record<WP_REST_API_Attachment["id"], WP_REST_API_Attachment>;
 	tags: Record<WP_REST_API_Tag["id"], WP_REST_API_Tag>;
-	workingGroups: Record<WP_REST_API_Post["id"], WP_REST_API_Post>;
+	workingGroups: Record<WorkingGroup["id"], WorkingGroup>;
 }
 
 export async function getWordPressData(apiBaseUrl: string): Promise<WordPressData> {
@@ -190,7 +512,7 @@ function getCategories(baseUrl: string): Promise<WP_REST_API_Categories> {
 	return getAll(url);
 }
 
-function getCountries(baseUrl: string): Promise<WP_REST_API_Posts> {
+function getCountries(baseUrl: string): Promise<Array<Country>> {
 	const url = createUrl({
 		baseUrl,
 		pathname: "/wp-json/wp/v2/dariah_country",
@@ -223,7 +545,7 @@ function getInitiatives(baseUrl: string): Promise<WP_REST_API_Posts> {
 	return getAll(url);
 }
 
-function getInstitutions(baseUrl: string): Promise<WP_REST_API_Posts> {
+function getInstitutions(baseUrl: string): Promise<Array<Institution>> {
 	const url = createUrl({
 		baseUrl,
 		pathname: "/wp-json/wp/v2/dariah_institution",
@@ -253,7 +575,7 @@ function getPages(baseUrl: string): Promise<WP_REST_API_Pages> {
 	return getAll(url);
 }
 
-function getPeople(baseUrl: string): Promise<WP_REST_API_Posts> {
+function getPeople(baseUrl: string): Promise<Array<Person>> {
 	const url = createUrl({
 		baseUrl,
 		pathname: "/wp-json/wp/v2/dariah_person",
@@ -273,7 +595,7 @@ function getPosts(baseUrl: string): Promise<WP_REST_API_Posts> {
 	return getAll(url);
 }
 
-function getProjects(baseUrl: string): Promise<WP_REST_API_Posts> {
+function getProjects(baseUrl: string): Promise<Array<Project>> {
 	const url = createUrl({
 		baseUrl,
 		pathname: "/wp-json/wp/v2/dariah_project",
@@ -293,7 +615,7 @@ function getTags(baseUrl: string): Promise<WP_REST_API_Tags> {
 	return getAll(url);
 }
 
-function getWorkingGroups(baseUrl: string): Promise<WP_REST_API_Posts> {
+function getWorkingGroups(baseUrl: string): Promise<Array<WorkingGroup>> {
 	const url = createUrl({
 		baseUrl,
 		pathname: "/wp-json/wp/v2/dariah_wg",

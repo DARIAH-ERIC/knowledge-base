@@ -183,6 +183,12 @@ async function main() {
 
 	//
 
+	/**
+	 * ============================================================================================
+	 * Pages.
+	 * ============================================================================================
+	 */
+
 	log.info("Migrating pages...");
 
 	for (const page of Object.values(data.pages)) {
@@ -268,6 +274,12 @@ async function main() {
 	}
 
 	//
+
+	/**
+	 * ============================================================================================
+	 * Initiatives.
+	 * ============================================================================================
+	 */
 
 	log.info("Migrating initiatives...");
 
@@ -355,6 +367,12 @@ async function main() {
 	}
 
 	//
+
+	/**
+	 * ============================================================================================
+	 * News.
+	 * ============================================================================================
+	 */
 
 	log.info("Migrating news...");
 
@@ -452,6 +470,12 @@ async function main() {
 
 	//
 
+	/**
+	 * ============================================================================================
+	 * Events.
+	 * ============================================================================================
+	 */
+
 	log.info("Migrating events...");
 
 	for (const event of Object.values(data.events)) {
@@ -547,6 +571,12 @@ async function main() {
 
 	//
 
+	/**
+	 * ============================================================================================
+	 * Countries.
+	 * ============================================================================================
+	 */
+
 	log.info("Migrating countries...");
 
 	for (const country of Object.values(data.countries)) {
@@ -588,6 +618,11 @@ async function main() {
 				createdAt: new Date(country.date_gmt),
 				updatedAt: new Date(country.modified_gmt),
 			});
+
+			// TODO: website => social_media/outreach
+			// TODO: repPersons_data
+			// TODO: coordinators_data
+			// TODO: repInstitutions_data
 
 			if (country.content.rendered.trim().length === 0) {
 				return;
@@ -634,111 +669,16 @@ async function main() {
 
 	//
 
-	log.info("Migrating people...");
-
-	for (const person of Object.values(data.people)) {
-		assert(person.status === "publish", "Person has not been published.");
-
-		if (person.title.rendered.trim().length === 0) {
-			log.warn("Skipping person with no name.", person.slug);
-			continue;
-		}
-
-		await db.transaction(async (tx) => {
-			const [entity] = await tx
-				.insert(schema.entities)
-				.values({
-					slug: person.slug,
-					statusId: statusByType.published.id,
-					typeId: typesByType.persons.id,
-					createdAt: new Date(person.date_gmt),
-					updatedAt: new Date(person.modified_gmt),
-				})
-				.returning({ id: schema.entities.id });
-
-			assert(entity);
-
-			const id = entity.id;
-
-			const imageId = await uploadFeaturedImage(
-				assetsCache,
-				data.media,
-				person.featured_media,
-				person.id,
-			);
-
-			if (imageId == null) {
-				log.warn(`Missing image (person id ${String(person.id)}).`);
-			}
-
-			function getSortName(name: string) {
-				const segments = name.split(" ");
-				if (segments.length < 2) {
-					return name;
-				}
-				const last = segments.pop();
-				return `${last!}, ${segments.join(" ")}`;
-			}
-
-			await tx.insert(schema.persons).values({
-				id,
-				name: toPlaintext(person.title.rendered),
-				sortName: getSortName(toPlaintext(person.title.rendered)),
-				// email,
-				// orcid,
-				imageId: imageId ?? placeholderImage.id,
-				createdAt: new Date(person.date_gmt),
-				updatedAt: new Date(person.modified_gmt),
-			});
-
-			if (person.content.rendered.trim().length === 0) {
-				return;
-			}
-
-			const content = generateJSON(person.content.rendered, [StarterKit]);
-
-			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
-				where: {
-					entityTypeId: entityTypesByType.persons.id,
-					fieldName: "biography",
-				},
-			});
-
-			assert(fieldName);
-
-			const [field] = await tx
-				.insert(schema.fields)
-				.values({
-					entityId: entity.id,
-					fieldNameId: fieldName.id,
-				})
-				.returning({ id: schema.fields.id });
-
-			assert(field);
-
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
-		});
-	}
-
-	//
+	/**
+	 * ============================================================================================
+	 * Institution.
+	 * ============================================================================================
+	 */
 
 	log.info("Migrating institutions...");
 
 	for (const institution of Object.values(data.institutions)) {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		assert(institution.status === "publish", "Institution has not been published.");
 
 		await db.transaction(async (tx) => {
@@ -773,6 +713,8 @@ async function main() {
 				createdAt: new Date(institution.date_gmt),
 				updatedAt: new Date(institution.modified_gmt),
 			});
+
+			// TODO: website => social_media/outreach
 
 			if (institution.content.rendered.trim().length === 0) {
 				return;
@@ -819,9 +761,16 @@ async function main() {
 
 	//
 
+	/**
+	 * ============================================================================================
+	 * Working group.
+	 * ============================================================================================
+	 */
+
 	log.info("Migrating working groups...");
 
 	for (const workingGroup of Object.values(data.workingGroups)) {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		assert(workingGroup.status === "publish", "Working group has not been published.");
 
 		await db.transaction(async (tx) => {
@@ -856,6 +805,9 @@ async function main() {
 				createdAt: new Date(workingGroup.date_gmt),
 				updatedAt: new Date(workingGroup.modified_gmt),
 			});
+
+			// TODO: leaders_data => chairs
+			// TODO: country_data => country
 
 			if (workingGroup.content.rendered.trim().length === 0) {
 				return;
@@ -902,9 +854,16 @@ async function main() {
 
 	//
 
+	/**
+	 * ============================================================================================
+	 * Projects.
+	 * ============================================================================================
+	 */
+
 	log.info("Migrating projects...");
 
 	for (const project of Object.values(data.projects)) {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		assert(project.status === "publish", "Project has not been published.");
 
 		await db.transaction(async (tx) => {
@@ -932,10 +891,11 @@ async function main() {
 
 			await tx.insert(schema.projects).values({
 				id,
-				name: toPlaintext(project.title.rendered),
+				// name: toPlaintext(project.title.rendered),
+				name: project.fullname,
 				duration: { start: new Date() }, // FIXME: need to extract from richtext
 				// funding: 0,
-				summary: "",
+				summary: toPlaintext(project.excerpt.rendered),
 				// call: "",
 				// funders: "",
 				// topic: "",
@@ -944,6 +904,10 @@ async function main() {
 				createdAt: new Date(project.date_gmt),
 				updatedAt: new Date(project.modified_gmt),
 			});
+
+			// TODO: website => social_media/outreach
+			// TODO: relations.coordinator
+			// TODO: relations.institutions
 
 			if (project.content.rendered.trim().length === 0) {
 				return;
@@ -955,6 +919,114 @@ async function main() {
 				where: {
 					entityTypeId: entityTypesByType.projects.id,
 					fieldName: "description",
+				},
+			});
+
+			assert(fieldName);
+
+			const [field] = await tx
+				.insert(schema.fields)
+				.values({
+					entityId: entity.id,
+					fieldNameId: fieldName.id,
+				})
+				.returning({ id: schema.fields.id });
+
+			assert(field);
+
+			const [contentBlock] = await tx
+				.insert(schema.contentBlocks)
+				.values({
+					position: 0,
+					fieldId: field.id,
+					typeId: contentBlockTypesByType.rich_text.id,
+				})
+				.returning({ id: schema.contentBlocks.id });
+
+			assert(contentBlock);
+
+			await tx.insert(schema.richTextContentBlocks).values({
+				content,
+				id: contentBlock.id,
+			});
+		});
+	}
+
+	//
+
+	/**
+	 * ============================================================================================
+	 * Person.
+	 * ============================================================================================
+	 */
+
+	log.info("Migrating people...");
+
+	for (const person of Object.values(data.people)) {
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		assert(person.status === "publish", "Person has not been published.");
+
+		if (person.title.rendered.trim().length === 0) {
+			log.warn("Skipping person with no name.", person.slug);
+			continue;
+		}
+
+		await db.transaction(async (tx) => {
+			const [entity] = await tx
+				.insert(schema.entities)
+				.values({
+					slug: person.slug,
+					statusId: statusByType.published.id,
+					typeId: typesByType.persons.id,
+					createdAt: new Date(person.date_gmt),
+					updatedAt: new Date(person.modified_gmt),
+				})
+				.returning({ id: schema.entities.id });
+
+			assert(entity);
+
+			const id = entity.id;
+
+			const imageId = await uploadFeaturedImage(
+				assetsCache,
+				data.media,
+				person.featured_media,
+				person.id,
+			);
+
+			if (imageId == null) {
+				log.warn(`Missing image (person id ${String(person.id)}).`);
+			}
+
+			await tx.insert(schema.persons).values({
+				id,
+				name: [person.firstname, person.lastname].filter(Boolean).join(" "),
+				sortName: [person.lastname, person.firstname].filter(Boolean).join(", "),
+				email: person.email,
+				// orcid,
+				imageId: imageId ?? placeholderImage.id,
+				createdAt: new Date(person.date_gmt),
+				updatedAt: new Date(person.modified_gmt),
+			});
+
+			// TODO: website
+			// TODO: identifiant
+			// TODO: position
+			// TODO: twitter
+			// TODO: skills
+			// TODO: research
+			// TODO: institution_data
+
+			if (person.content.rendered.trim().length === 0) {
+				return;
+			}
+
+			const content = generateJSON(person.content.rendered, [StarterKit]);
+
+			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: entityTypesByType.persons.id,
+					fieldName: "biography",
 				},
 			});
 
