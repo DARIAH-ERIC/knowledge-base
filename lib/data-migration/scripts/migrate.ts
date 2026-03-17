@@ -10,6 +10,9 @@ import { createStorageService } from "@dariah-eric/storage";
 import { buffer } from "@dariah-eric/storage/lib";
 import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
+import { toText } from "hast-util-to-text"
+import fromHtml from "rehype-parse"
+import { unified } from "unified"
 
 import {
 	apiBaseUrl,
@@ -21,6 +24,8 @@ import {
 } from "../config/data-migration.config";
 import { env } from "../config/env.config";
 import { getWordPressData, type WordPressData } from "../src/lib/get-wordpress-data";
+
+const processor = unified().use(fromHtml)
 
 const storage = createStorageService({
 	config: {
@@ -166,6 +171,13 @@ async function main() {
 
 	//
 
+	function toPlaintext(html: string): string {
+		const ast = processor.parse(html)
+		return toText(ast)
+	}
+
+	//
+
 	const placeholderImage = await upload(assetsCache, placeholderImageUrl);
 	assert(placeholderImage, "Missing placeholder image.");
 
@@ -205,8 +217,8 @@ async function main() {
 
 			await tx.insert(schema.pages).values({
 				id,
-				title: page.title.rendered,
-				summary: page.excerpt.rendered,
+				title: toPlaintext(page.title.rendered),
+				summary: toPlaintext(page.excerpt.rendered),
 				imageId,
 				createdAt: new Date(page.date_gmt),
 				updatedAt: new Date(page.modified_gmt),
@@ -291,9 +303,9 @@ async function main() {
 
 			await tx.insert(schema.pages).values({
 				id,
-				title: page.title.rendered,
+				title: toPlaintext(page.title.rendered),
 				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-				summary: page.excerpt?.rendered ?? "",
+				summary: toPlaintext(page.excerpt?.rendered ?? ""),
 				imageId,
 				createdAt: new Date(page.date_gmt),
 				updatedAt: new Date(page.modified_gmt),
@@ -388,8 +400,8 @@ async function main() {
 
 			await tx.insert(schema.news).values({
 				id,
-				title: post.title.rendered,
-				summary: post.excerpt.rendered,
+				title: toPlaintext(post.title.rendered),
+				summary: toPlaintext(post.excerpt.rendered),
 				imageId: imageId ?? placeholderImage.id,
 				createdAt: new Date(post.date_gmt),
 				updatedAt: new Date(post.modified_gmt),
@@ -473,8 +485,8 @@ async function main() {
 
 			await tx.insert(schema.events).values({
 				id,
-				title: event.title,
-				summary: event.description, // FIXME: plain text not html
+				title: toPlaintext(event.title),
+				summary: toPlaintext(event.description),
 				imageId: imageId ?? placeholderImage.id,
 				website: event.website,
 				location:
@@ -569,7 +581,7 @@ async function main() {
 
 			await tx.insert(schema.organisationalUnits).values({
 				id,
-				name: country.title.rendered,
+				name: toPlaintext(country.title.rendered),
 				summary: "",
 				imageId: imageId ?? placeholderImage.id,
 				typeId: organisationalUnitTypesByType.consortium.id,
@@ -670,8 +682,8 @@ async function main() {
 
 			await tx.insert(schema.persons).values({
 				id,
-				name: person.title.rendered,
-				sortName: getSortName(person.title.rendered),
+				name: toPlaintext(person.title.rendered),
+				sortName: getSortName(toPlaintext(person.title.rendered)),
 				// email,
 				// orcid,
 				imageId: imageId ?? placeholderImage.id,
@@ -754,7 +766,7 @@ async function main() {
 
 			await tx.insert(schema.organisationalUnits).values({
 				id,
-				name: institution.title.rendered,
+				name: toPlaintext(institution.title.rendered),
 				summary: "",
 				typeId: organisationalUnitTypesByType.institution.id,
 				imageId: imageId ?? placeholderImage.id,
@@ -837,7 +849,7 @@ async function main() {
 
 			await tx.insert(schema.organisationalUnits).values({
 				id,
-				name: workingGroup.title.rendered,
+				name: toPlaintext(workingGroup.title.rendered),
 				summary: "",
 				typeId: organisationalUnitTypesByType.working_group.id,
 				imageId: imageId ?? placeholderImage.id,
@@ -920,8 +932,8 @@ async function main() {
 
 			await tx.insert(schema.projects).values({
 				id,
-				name: project.title.rendered,
-				duration: { start: new Date() }, // FIXME:
+				name: toPlaintext(project.title.rendered),
+				duration: { start: new Date() }, // FIXME: need to extract from richtext
 				// funding: 0,
 				summary: "",
 				// call: "",

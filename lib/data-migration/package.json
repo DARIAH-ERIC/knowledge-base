@@ -23,6 +23,9 @@
 		"@sindresorhus/slugify": "catalog:",
 		"@tiptap/html": "catalog:",
 		"@tiptap/starter-kit": "catalog:",
+		"hast-util-to-text": "catalog:",
+		"rehype-parse": "catalog:",
+		"unified": "catalog:",
 		"valibot": "catalog:"
 	},
 	"devDependencies": {
