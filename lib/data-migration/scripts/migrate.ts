@@ -10,9 +10,9 @@ import { createStorageService } from "@dariah-eric/storage";
 import { buffer } from "@dariah-eric/storage/lib";
 import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
-import { toText } from "hast-util-to-text"
-import fromHtml from "rehype-parse"
-import { unified } from "unified"
+import { toText } from "hast-util-to-text";
+import fromHtml from "rehype-parse";
+import { unified } from "unified";
 
 import {
 	apiBaseUrl,
@@ -25,7 +25,7 @@ import {
 import { env } from "../config/env.config";
 import { getWordPressData, type WordPressData } from "../src/lib/get-wordpress-data";
 
-const processor = unified().use(fromHtml)
+const processor = unified().use(fromHtml);
 
 const storage = createStorageService({
 	config: {
@@ -172,8 +172,8 @@ async function main() {
 	//
 
 	function toPlaintext(html: string): string {
-		const ast = processor.parse(html)
-		return toText(ast)
+		const ast = processor.parse(html);
+		return toText(ast);
 	}
 
 	//
