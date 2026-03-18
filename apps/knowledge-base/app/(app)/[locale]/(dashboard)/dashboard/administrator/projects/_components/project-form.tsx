@@ -74,7 +74,11 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 					<FieldError />
 				</TextField>
 
-				<NumberField defaultValue={project?.funding ?? undefined} name="funding">
+				<NumberField
+					defaultValue={project?.funding ?? undefined}
+					formatOptions={{ currency: "EUR", style: "currency" }}
+					name="funding"
+				>
 					<Label>{t("Funding")}</Label>
 					<Input placeholder={t("Funding")} />
 					<FieldError />
