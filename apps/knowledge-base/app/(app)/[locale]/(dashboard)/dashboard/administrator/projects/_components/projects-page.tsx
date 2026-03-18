@@ -22,7 +22,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, use, useState } from "react";
+import { Fragment, type ReactNode, startTransition, use, useState } from "react";
 import { useFilter, useListData } from "react-aria-components";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
@@ -34,6 +34,7 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { deleteProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/delete-project.action";
 
 interface ProjectsPageProps {
 	projects: Promise<
@@ -71,7 +72,7 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 	const pages = Math.ceil(list.items.length / pageSize);
 	const items = list.items.slice((page - 1) * pageSize, page * pageSize);
 
-	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 
 	return (
 		<Fragment>
@@ -164,7 +165,7 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 											<MenuItem
 												intent="danger"
 												onAction={() => {
-													setIsDeleteDialogOpen(true);
+													setItemToDelete({ id: item.id });
 												}}
 											>
 												<TrashIcon className="mr-2 size-4" />
@@ -182,9 +183,23 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 			<Paginate page={page} setPage={setPage} total={pages} />
 
 			<DeleteModal
-				isOpen={isDeleteDialogOpen}
+				isOpen={itemToDelete != null}
 				model={t("project")}
-				onOpenChange={setIsDeleteDialogOpen}
+				onAction={() => {
+					if (itemToDelete == null) {
+						return;
+					}
+
+					startTransition(async () => {
+						await deleteProjectAction(itemToDelete.id);
+						setItemToDelete(null);
+					});
+				}}
+				onOpenChange={(open) => {
+					if (!open) {
+						setItemToDelete(null);
+					}
+				}}
 			/>
 		</Fragment>
 	);

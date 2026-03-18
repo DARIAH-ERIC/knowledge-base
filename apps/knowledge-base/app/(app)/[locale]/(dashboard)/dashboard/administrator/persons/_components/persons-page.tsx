@@ -21,7 +21,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, use, useState } from "react";
+import { Fragment, type ReactNode, startTransition, use, useState } from "react";
 import { useFilter, useListData } from "react-aria-components";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
@@ -33,6 +33,7 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { deletePersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/delete-person.action";
 
 interface PersonsPageProps {
 	persons: Promise<
@@ -68,7 +69,7 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 	const pages = Math.ceil(list.items.length / pageSize);
 	const items = list.items.slice((page - 1) * pageSize, page * pageSize);
 
-	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 
 	return (
 		<Fragment>
@@ -141,7 +142,7 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 											<MenuItem
 												intent="danger"
 												onAction={() => {
-													setIsDeleteDialogOpen(true);
+													setItemToDelete({ id: item.id });
 												}}
 											>
 												<TrashIcon className="mr-2 size-4" />
@@ -159,9 +160,23 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 			<Paginate page={page} setPage={setPage} total={pages} />
 
 			<DeleteModal
-				isOpen={isDeleteDialogOpen}
+				isOpen={itemToDelete != null}
 				model={t("person")}
-				onOpenChange={setIsDeleteDialogOpen}
+				onAction={() => {
+					if (itemToDelete == null) {
+						return;
+					}
+
+					startTransition(async () => {
+						await deletePersonAction(itemToDelete.id);
+						setItemToDelete(null);
+					});
+				}}
+				onOpenChange={(open) => {
+					if (!open) {
+						setItemToDelete(null);
+					}
+				}}
 			/>
 		</Fragment>
 	);

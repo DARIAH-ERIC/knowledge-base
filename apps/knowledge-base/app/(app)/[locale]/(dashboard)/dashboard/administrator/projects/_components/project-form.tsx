@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/u
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
+import { CalendarDate } from "@internationalized/date";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
@@ -73,11 +74,11 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 					<FieldError />
 				</TextField>
 
-				<TextField defaultValue={project?.funding ?? undefined} name="funding">
+				<NumberField defaultValue={project?.funding ?? undefined} name="funding">
 					<Label>{t("Funding")}</Label>
 					<Input placeholder={t("Funding")} />
 					<FieldError />
-				</TextField>
+				</NumberField>
 
 				<TextField defaultValue={project?.topic ?? undefined} name="topic">
 					<Label>{t("Topic")}</Label>
@@ -92,7 +93,15 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 				</TextField>
 
 				<DatePicker
-					// defaultValue={project?.duration.start} // FIXME:
+					defaultValue={
+						project != null
+							? new CalendarDate(
+									project.duration.start.getUTCFullYear(),
+									project.duration.start.getUTCMonth() + 1,
+									project.duration.start.getUTCDate(),
+								)
+							: undefined
+					}
 					granularity="day"
 					isRequired={true}
 					name="duration.start"
@@ -102,7 +111,15 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 				</DatePicker>
 
 				<DatePicker
-					// defaultValue={project?.duration.end} // FIXME:
+					defaultValue={
+						project?.duration.end != null
+							? new CalendarDate(
+									project.duration.end.getUTCFullYear(),
+									project.duration.end.getUTCMonth() + 1,
+									project.duration.end.getUTCDate(),
+								)
+							: undefined
+					}
 					granularity="day"
 					name="duration.end"
 				>

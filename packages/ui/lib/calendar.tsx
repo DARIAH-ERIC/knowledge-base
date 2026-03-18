@@ -40,7 +40,7 @@ export function Calendar<T extends DateValue>({
 
 	return (
 		<CalendarPrimitive data-slot="calendar" {...props}>
-			<CalendarHeader />
+			<CalendarHeader isRange={false} />
 			<CalendarGrid>
 				<CalendarGridHeader />
 				<CalendarGridBody>
@@ -147,6 +147,7 @@ export function SelectMonth({ state }: Readonly<{ state: CalendarState }>): Reac
 		<Select
 			aria-label={t("Select month")}
 			className="[popover-width:8rem]"
+			value={state.focusedDate.month.toString()}
 			onChange={(value) => {
 				state.setFocusedDate(state.focusedDate.set({ month: Number(value) }));
 			}}
