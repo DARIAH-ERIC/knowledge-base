@@ -4,6 +4,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 import { lower, uuidv7 } from "../functions";
+import { persons } from "./persons";
 
 export const userRoleEnum = ["admin", "user"] as const;
 
@@ -17,7 +18,11 @@ export const users = p.pgTable(
 		twoFactorTotpKey: p.bytea("two_factor_totp_key"),
 		twoFactorRecoveryCode: p.bytea("two_factor_recovery_code").notNull(),
 		name: p.text("name").notNull(),
+		personId: p.uuid("person_id").references(() => {
+			return persons.id;
+		}),
 		role: p.text("role", { enum: userRoleEnum }).notNull().default("user"),
+
 		...f.timestamps(),
 	},
 	(t) => {
