@@ -105,7 +105,6 @@ export const createProjectAction = createServerAction(
 				id: entity.id,
 				acronym,
 				call,
-				description,
 				duration,
 				funders,
 				funding,

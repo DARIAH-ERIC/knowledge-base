@@ -8,7 +8,7 @@ export const UpdateProjectActionInputSchema = v.object({
 	call: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	duration: v.object({
 		start: v.pipe(v.string(), v.isoDate(), v.toDate()),
-		end: v.nullish(v.pipe(v.string(), v.isoDate(), v.toDate()), null),
+		end: v.optional(v.pipe(v.string(), v.isoDate(), v.toDate())),
 	}),
 	funders: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	funding: v.nullish(v.pipe(v.string(), v.toNumber(), v.minValue(0)), null),

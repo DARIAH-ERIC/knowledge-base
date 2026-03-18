@@ -147,10 +147,10 @@ export function SelectMonth({ state }: Readonly<{ state: CalendarState }>): Reac
 		<Select
 			aria-label={t("Select month")}
 			className="[popover-width:8rem]"
-			value={state.focusedDate.month.toString()}
 			onChange={(value) => {
 				state.setFocusedDate(state.focusedDate.set({ month: Number(value) }));
 			}}
+			value={state.focusedDate.month.toString()}
 		>
 			<SelectTrigger className="w-22 text-sm/5 sm:px-2.5 sm:py-1.5 sm:*:text-sm/5 **:data-[slot=select-value]:inline-block **:data-[slot=select-value]:truncate" />
 			<SelectContent className="min-w-0">

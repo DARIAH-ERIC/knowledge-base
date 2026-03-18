@@ -46,13 +46,13 @@ export function NumberInput({ className, ...props }: Readonly<NumberInputProps>)
 			data-slot="control"
 		>
 			<AriaButton
-				slot="decrement"
 				className={twJoin(
 					"grid shrink-0 place-content-center border-r border-input",
 					"px-3 py-2.5 sm:px-2.5 sm:py-1.5",
 					"text-muted-fg pressed:text-fg hover:text-fg",
 					"forced-colors:border-[ButtonBorder]",
 				)}
+				slot="decrement"
 			>
 				<MinusIcon className="size-5 sm:size-4" />
 			</AriaButton>
@@ -63,18 +63,18 @@ export function NumberInput({ className, ...props }: Readonly<NumberInputProps>)
 					"px-3 py-[calc(--spacing(2.5)-1px)] sm:py-[calc(--spacing(1.5)-1px)]",
 					"text-center text-base/6 text-fg placeholder:text-muted-fg sm:text-sm/6",
 					"focus:outline-hidden",
-					"[&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]",
+					"[-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
 					className,
 				)}
 			/>
 			<AriaButton
-				slot="increment"
 				className={twJoin(
 					"grid shrink-0 place-content-center border-l border-input",
 					"px-3 py-2.5 sm:px-2.5 sm:py-1.5",
 					"text-muted-fg pressed:text-fg hover:text-fg",
 					"forced-colors:border-[ButtonBorder]",
 				)}
+				slot="increment"
 			>
 				<PlusIcon className="size-5 sm:size-4" />
 			</AriaButton>
