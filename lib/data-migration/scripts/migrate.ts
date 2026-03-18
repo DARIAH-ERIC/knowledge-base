@@ -966,11 +966,6 @@ async function main() {
 		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		assert(person.status === "publish", "Person has not been published.");
 
-		if (person.title.rendered.trim().length === 0) {
-			log.warn("Skipping person with no name.", person.slug);
-			continue;
-		}
-
 		await db.transaction(async (tx) => {
 			const [entity] = await tx
 				.insert(schema.entities)
