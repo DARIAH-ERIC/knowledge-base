@@ -17,7 +17,7 @@ export type DariahProjectInstitution = v.InferOutput<typeof DariahProjectInstitu
 
 export const DariahProjectBaseSchema = v.pipe(
 	v.object({
-		...v.pick(schema.ProjectInputSelectSchema, [
+		...v.pick(schema.ProjectSelectSchema, [
 			"id",
 			"name",
 			"summary",
@@ -48,7 +48,7 @@ export type DariahProjectList = v.InferOutput<typeof DariahProjectListSchema>;
 
 export const DariahProjectSchema = v.pipe(
 	v.object({
-		...v.pick(schema.ProjectInputSelectSchema, [
+		...v.pick(schema.ProjectSelectSchema, [
 			"id",
 			"name",
 			"summary",
@@ -71,7 +71,7 @@ export type DariahProject = v.InferOutput<typeof DariahProjectSchema>;
 
 export const DariahProjectSlugSchema = v.pipe(
 	v.object({
-		...v.pick(schema.ProjectInputSelectSchema, ["id"]).entries,
+		...v.pick(schema.ProjectSelectSchema, ["id"]).entries,
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
 	v.description("DARIAH project slug"),

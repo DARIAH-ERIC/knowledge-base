@@ -14,7 +14,7 @@ export const ProjectInstitutionSchema = v.pipe(
 
 export const ProjectBaseSchema = v.pipe(
 	v.object({
-		...v.pick(schema.ProjectInputSelectSchema, [
+		...v.pick(schema.ProjectSelectSchema, [
 			"id",
 			"name",
 			"summary",
@@ -45,7 +45,7 @@ export type ProjectList = v.InferOutput<typeof ProjectListSchema>;
 
 export const ProjectSchema = v.pipe(
 	v.object({
-		...v.pick(schema.ProjectInputSelectSchema, [
+		...v.pick(schema.ProjectSelectSchema, [
 			"id",
 			"name",
 			"summary",
@@ -68,7 +68,7 @@ export type Project = v.InferOutput<typeof ProjectSchema>;
 
 export const ProjectSlugSchema = v.pipe(
 	v.object({
-		...v.pick(schema.ProjectInputSelectSchema, ["id"]).entries,
+		...v.pick(schema.ProjectSelectSchema, ["id"]).entries,
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	}),
 	v.description("Project slug"),

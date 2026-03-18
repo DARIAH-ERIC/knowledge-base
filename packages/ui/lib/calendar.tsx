@@ -40,7 +40,7 @@ export function Calendar<T extends DateValue>({
 
 	return (
 		<CalendarPrimitive data-slot="calendar" {...props}>
-			<CalendarHeader />
+			<CalendarHeader isRange={false} />
 			<CalendarGrid>
 				<CalendarGridHeader />
 				<CalendarGridBody>
@@ -150,6 +150,7 @@ export function SelectMonth({ state }: Readonly<{ state: CalendarState }>): Reac
 			onChange={(value) => {
 				state.setFocusedDate(state.focusedDate.set({ month: Number(value) }));
 			}}
+			value={state.focusedDate.month.toString()}
 		>
 			<SelectTrigger className="w-22 text-sm/5 sm:px-2.5 sm:py-1.5 sm:*:text-sm/5 **:data-[slot=select-value]:inline-block **:data-[slot=select-value]:truncate" />
 			<SelectContent className="min-w-0">

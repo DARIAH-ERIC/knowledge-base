@@ -23,6 +23,9 @@ export const projectScopes = p.pgTable(
 	},
 );
 
+export type ProjectScope = typeof projectScopes.$inferSelect;
+export type ProjectScopeInput = typeof projectScopes.$inferInsert;
+
 export const projectRolesEnum = ["participant", "coordinator"] as const;
 
 export const projectRoles = p.pgTable(
@@ -36,6 +39,9 @@ export const projectRoles = p.pgTable(
 		return [p.check("project_roles_role_enum_check", inArray(t.role, projectRolesEnum))];
 	},
 );
+
+export type ProjectRole = typeof projectRoles.$inferSelect;
+export type ProjectRoleInput = typeof projectRoles.$inferInsert;
 
 export const projects = p.pgTable("projects", {
 	id: p
@@ -69,9 +75,9 @@ export const projects = p.pgTable("projects", {
 export type Project = typeof projects.$inferSelect;
 export type ProjectInput = typeof projects.$inferInsert;
 
-export const ProjectInputSelectSchema = createSelectSchema(projects);
-export const ProjectInputInsertSchema = createInsertSchema(projects);
-export const ProjectInputUpdateSchema = createUpdateSchema(projects);
+export const ProjectSelectSchema = createSelectSchema(projects);
+export const ProjectInsertSchema = createInsertSchema(projects);
+export const ProjectUpdateSchema = createUpdateSchema(projects);
 
 export const projectPartners = p.pgTable("project_partners", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),

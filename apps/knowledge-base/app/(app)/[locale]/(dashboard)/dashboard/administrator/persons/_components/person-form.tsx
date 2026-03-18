@@ -3,7 +3,7 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
-import { FieldError } from "@dariah-eric/ui/field";
+import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
@@ -20,15 +20,15 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface PersonFormProps {
 	assets: Array<{ key: string; url: string }>;
-	biography?: JSONContent;
 	person?: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
+		biography?: JSONContent;
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; url: string } };
 	formAction: ServerAction;
 }
 
 export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
-	const { assets, biography, formAction, person } = props;
+	const { assets, formAction, person } = props;
 
 	const t = useExtracted();
 
@@ -44,27 +44,26 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 				description={t("Enter the personal and contact details related to the person.")}
 				title={t("Details")}
 			>
-				<TextField aria-label={t("Name")} defaultValue={person?.name} isRequired={true} name="name">
+				<TextField defaultValue={person?.name} isRequired={true} name="name">
+					<Label>{t("Name")}</Label>
 					<Input placeholder={t("Name")} />
 					<FieldError />
 				</TextField>
 
-				<TextField
-					aria-label={t("Sort name")}
-					defaultValue={person?.sortName}
-					isRequired={true}
-					name="sortName"
-				>
+				<TextField defaultValue={person?.sortName} isRequired={true} name="sortName">
+					<Label>{t("Sort name")}</Label>
 					<Input placeholder={t("Sort name")} />
 					<FieldError />
 				</TextField>
 
-				<TextField aria-label={t("Email")} defaultValue={person?.email ?? undefined} name="email">
-					<Input placeholder={t("Email")} type="email" />
+				<TextField defaultValue={person?.email ?? undefined} name="email" type="email">
+					<Label>{t("Email")}</Label>
+					<Input placeholder={t("Email")} />
 					<FieldError />
 				</TextField>
 
-				<TextField aria-label={t("ORCID")} defaultValue={person?.orcid ?? undefined} name="orcid">
+				<TextField defaultValue={person?.orcid ?? undefined} name="orcid">
+					<Label>{t("ORCID")}</Label>
 					<Input placeholder={t("ORCID")} />
 					<FieldError />
 				</TextField>
@@ -91,7 +90,7 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 			<Separator className="my-6" />
 
 			<FormSection description={t("Add a short biography.")} title={t("Biography")}>
-				<RichTextEditor content={biography} name="biography" />
+				<RichTextEditor content={person?.biography} name="biography" />
 			</FormSection>
 
 			{selectedImage != null ? (

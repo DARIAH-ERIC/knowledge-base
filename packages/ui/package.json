@@ -39,6 +39,7 @@
 		"./modal": "./dist/modal.mjs",
 		"./multiple-select": "./dist/multiple-select.mjs",
 		"./note": "./dist/note.mjs",
+		"./number-field": "./dist/number-field.mjs",
 		"./pagination": "./dist/pagination.mjs",
 		"./popover": "./dist/popover.mjs",
 		"./progress-circle": "./dist/progress-circle.mjs",

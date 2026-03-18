@@ -9,10 +9,11 @@ interface DeleteModalProps {
 	model: string;
 	isOpen: boolean;
 	onOpenChange: (isOpen: boolean) => void;
+	onAction: () => void;
 }
 
 export function DeleteModal(props: Readonly<DeleteModalProps>): ReactNode {
-	const { model, onOpenChange, isOpen } = props;
+	const { model, onAction, onOpenChange, isOpen } = props;
 
 	const t = useExtracted();
 
@@ -27,9 +28,9 @@ export function DeleteModal(props: Readonly<DeleteModalProps>): ReactNode {
 				<Button
 					intent="danger"
 					onPress={() => {
+						onAction();
 						onOpenChange(false);
 					}}
-					type="submit"
 				>
 					{t("Delete")}
 				</Button>
