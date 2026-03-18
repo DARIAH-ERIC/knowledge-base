@@ -39,6 +39,7 @@ export const organisationalUnitStatusEnum = [
 	"is_member",
 	"is_national_coordinating_institution",
 	"is_national_representative_institution",
+	"is_part",
 	"is_partner_institution",
 ] as const;
 
