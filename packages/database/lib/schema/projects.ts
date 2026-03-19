@@ -8,6 +8,7 @@ import { assets } from "./assets";
 import { entities } from "./entities";
 import { organisationalUnits } from "./organisational-units";
 import { reports } from "./reports";
+import { socialMedia } from "./social-media";
 
 export const projectScopesEnum = ["eu", "national", "regional"] as const;
 
@@ -129,6 +130,30 @@ export type ProjectContributionInput = typeof projectsContributions.$inferInsert
 export const ProjectContributionSelectSchema = createSelectSchema(projectsContributions);
 export const ProjectContributionInsertSchema = createInsertSchema(projectsContributions);
 export const ProjectContributionUpdateSchema = createUpdateSchema(projectsContributions);
+
+export const projectsToSocialMedia = p.pgTable("projects_to_social_media", {
+	id: p.uuid("id").primaryKey().default(uuidv7()),
+	projectId: p
+		.uuid("project_id")
+		.notNull()
+		.references(() => {
+			return projects.id;
+		}),
+	socialMediaId: p
+		.uuid("social_media_id")
+		.notNull()
+		.references(() => {
+			return socialMedia.id;
+		}),
+	...f.timestamps(),
+});
+
+export type ProjectToSocialMedia = typeof projectsToSocialMedia.$inferSelect;
+export type ProjectToSocialMediaInput = typeof projectsToSocialMedia.$inferInsert;
+
+export const ProjectToSocialMediaSelectSchema = createSelectSchema(projectsToSocialMedia);
+export const ProjectToSocialMediaInsertSchema = createInsertSchema(projectsToSocialMedia);
+export const ProjectToSocialMediaUpdateSchema = createUpdateSchema(projectsToSocialMedia);
 
 export const dariahProjectsUnitType = "umbrella_consortium";
 

@@ -26,7 +26,7 @@ interface OptionBase {
 
 interface MultipleSelectProps<T extends OptionBase> extends Omit<
 	SelectProps<T, "multiple">,
-	"selectionMode" | "children"
+	"onSelectionChange" | "selectionMode" | "children"
 > {
 	placeholder?: string;
 	className?: string;

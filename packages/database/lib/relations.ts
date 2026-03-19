@@ -243,6 +243,10 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.projectScopes.id,
 				optional: false,
 			}),
+			socialMedia: r.many.socialMedia({
+				from: r.projects.id.through(r.projectsToSocialMedia.projectId),
+				to: r.socialMedia.id.through(r.projectsToSocialMedia.socialMediaId),
+			}),
 		},
 		projectPartners: {
 			project: r.one.projects({
@@ -313,6 +317,22 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.organisationalUnits.id.through(
 					r.organisationalUnitsToSocialMedia.organisationalUnitId,
 				),
+			}),
+			projects: r.many.projects({
+				from: r.socialMedia.id.through(r.projectsToSocialMedia.socialMediaId),
+				to: r.projects.id.through(r.projectsToSocialMedia.projectId),
+			}),
+		},
+		projectsToSocialMedia: {
+			project: r.one.projects({
+				from: r.projectsToSocialMedia.projectId,
+				to: r.projects.id,
+				optional: false,
+			}),
+			socialMedia: r.one.socialMedia({
+				from: r.projectsToSocialMedia.socialMediaId,
+				to: r.socialMedia.id,
+				optional: false,
 			}),
 		},
 		organisationalUnitsToSocialMedia: {

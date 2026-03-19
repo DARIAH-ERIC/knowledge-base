@@ -1,10 +1,10 @@
 "use server";
 
 import { assert, getFormDataValues } from "@acdh-oeaw/lib";
-import { eq } from "@dariah-eric/database";
+import { and, eq, inArray, notInArray } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
+import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { revalidatePath } from "next/cache";
 import { getExtracted, getLocale } from "next-intl/server";
@@ -38,7 +38,7 @@ export const updateProjectAction = createServerAction(
 
 			return createActionStateError({
 				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
+				validationErrors: errors.nested as ValidationErrors | undefined,
 			});
 		}
 
@@ -52,7 +52,9 @@ export const updateProjectAction = createServerAction(
 			id,
 			imageKey,
 			name,
+			partners,
 			scopeId,
+			socialMediaIds,
 			summary,
 			topic,
 		} = result.output;
@@ -128,6 +130,85 @@ export const updateProjectAction = createServerAction(
 						content: parsedContent,
 					});
 				}
+			}
+
+			// Sync partners: delete removed, update existing, insert new.
+			const submittedPartnerIds = partners
+				.map((p) => {
+					return p.id;
+				})
+				.filter((pid): pid is string => {
+					return pid != null;
+				});
+
+			if (submittedPartnerIds.length > 0) {
+				await tx
+					.delete(schema.projectPartners)
+					.where(
+						and(
+							eq(schema.projectPartners.projectId, id),
+							notInArray(schema.projectPartners.id, submittedPartnerIds),
+						),
+					);
+			} else {
+				await tx.delete(schema.projectPartners).where(eq(schema.projectPartners.projectId, id));
+			}
+
+			for (const p of partners) {
+				const duration =
+					p.durationStart != null
+						? { start: p.durationStart, end: p.durationEnd ?? undefined }
+						: undefined;
+
+				if (p.id != null) {
+					await tx
+						.update(schema.projectPartners)
+						.set({ unitId: p.unitId, roleId: p.roleId, duration: duration ?? null })
+						.where(eq(schema.projectPartners.id, p.id));
+				} else {
+					await tx
+						.insert(schema.projectPartners)
+						.values({ projectId: id, unitId: p.unitId, roleId: p.roleId, duration });
+				}
+			}
+
+			// Sync social media: delete removed, insert new — preserve existing junction rows.
+			const existingSocialMedia = await tx.query.projectsToSocialMedia.findMany({
+				where: { projectId: id },
+				columns: { id: true, socialMediaId: true },
+			});
+
+			const existingSocialMediaIds = new Set(
+				existingSocialMedia.map((r) => {
+					return r.socialMediaId;
+				}),
+			);
+			const submittedSocialMediaIds = new Set(socialMediaIds);
+
+			const socialMediaToDelete = existingSocialMedia
+				.filter((r) => {
+					return !submittedSocialMediaIds.has(r.socialMediaId);
+				})
+				.map((r) => {
+					return r.id;
+				});
+
+			if (socialMediaToDelete.length > 0) {
+				await tx
+					.delete(schema.projectsToSocialMedia)
+					.where(inArray(schema.projectsToSocialMedia.id, socialMediaToDelete));
+			}
+
+			const socialMediaToInsert = socialMediaIds.filter((smId) => {
+				return !existingSocialMediaIds.has(smId);
+			});
+
+			if (socialMediaToInsert.length > 0) {
+				await tx.insert(schema.projectsToSocialMedia).values(
+					socialMediaToInsert.map((socialMediaId) => {
+						return { projectId: id, socialMediaId };
+					}),
+				);
 			}
 		});
 
