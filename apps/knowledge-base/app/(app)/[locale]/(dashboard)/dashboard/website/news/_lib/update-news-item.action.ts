@@ -85,7 +85,7 @@ export const updateNewsItemAction = createServerAction(
 							await tx
 								.update(schema.richTextContentBlocks)
 								.set({ content })
-								.where(eq(schema.dataContentBlocks.id, blockId));
+								.where(eq(schema.richTextContentBlocks.id, blockId));
 						}
 					}
 				}

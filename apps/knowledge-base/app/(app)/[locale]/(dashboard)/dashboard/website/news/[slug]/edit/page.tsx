@@ -82,9 +82,10 @@ export default async function DashboardWebsiteEditNewsItemPage(
 	});
 	const richTextContentBlocks = await db
 		.select({
-			type: schema.contentBlockTypes.type,
 			id: schema.richTextContentBlocks.id,
 			content: sql<JSONContent | undefined>`${schema.richTextContentBlocks.content}`,
+			position: schema.contentBlocks.position,
+			type: schema.contentBlockTypes.type,
 		})
 		.from(schema.richTextContentBlocks)
 		.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))

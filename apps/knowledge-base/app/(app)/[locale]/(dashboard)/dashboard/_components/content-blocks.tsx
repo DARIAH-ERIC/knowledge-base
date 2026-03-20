@@ -64,58 +64,26 @@ export function ContentBlocks({ items: initialItems }: Readonly<ContentBlocksPro
 	return (
 		<>
 			<GridList dragAndDropHooks={dragAndDropHooks} items={list.items}>
-				{list.items.map((item, idx) => {
+				{(item) => {
 					switch (item.type) {
 						case "data": {
-							return (
-								<GridListItem key={item.id} id={item.id}>
-									data
-									<input
-										name={`contentBlocks.${String(idx)}`}
-										type="hidden"
-										value={JSON.stringify(item)}
-									/>
-								</GridListItem>
-							);
+							return <GridListItem id={item.id}>data</GridListItem>;
+						}
+						case "embed": {
+							return <GridListItem id={item.id}>embed</GridListItem>;
+						}
+						case "image": {
+							return <GridListItem id={item.id}>image</GridListItem>;
 						}
 						case "rich_text": {
 							return (
-								<GridListItem key={item.id} id={item.id} textValue={item.type}>
+								<GridListItem id={item.id} textValue={item.type}>
 									<RichTextEditor
 										className="w-full"
 										content={item.content}
 										onChange={(content) => {
 											list.update(item.id, { ...item, content });
 										}}
-									/>
-									<input
-										name={`contentBlocks.${String(idx)}`}
-										type="hidden"
-										value={JSON.stringify(item)}
-									/>
-								</GridListItem>
-							);
-						}
-						case "embed": {
-							return (
-								<GridListItem key={item.id} id={item.id}>
-									embed
-									<input
-										name={`contentBlocks.${String(idx)}`}
-										type="hidden"
-										value={JSON.stringify(item)}
-									/>
-								</GridListItem>
-							);
-						}
-						case "image": {
-							return (
-								<GridListItem key={item.id} id={item.id}>
-									image
-									<input
-										name={`contentBlocks.${String(idx)}`}
-										type="hidden"
-										value={JSON.stringify(item)}
 									/>
 								</GridListItem>
 							);
@@ -124,8 +92,11 @@ export function ContentBlocks({ items: initialItems }: Readonly<ContentBlocksPro
 							return null;
 						}
 					}
-				})}
+				}}
 			</GridList>
+			{list.items.map((item, idx) => {
+				<input name={`contentBlocks.${String(idx)}`} type="hidden" value={JSON.stringify(item)} />;
+			})}
 			<ContentBlockMenu onAdd={addItem} />
 		</>
 	);
