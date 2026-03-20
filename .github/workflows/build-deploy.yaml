@@ -165,6 +165,16 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Build and push migrate docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: migrate
+          push: true
+          tags: "ghcr.io/${{ github.repository }}-migrate:${{ github.sha }}"
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   deploy:
     name: Deploy docker images
     needs: [changes, build]

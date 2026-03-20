@@ -19,6 +19,34 @@ WORKDIR /app
 COPY . .
 
 # =================================================================================================
+# migrate
+# =================================================================================================
+
+# prune
+# -------------------------------------------------------------------------------------------------
+
+FROM source AS migrate-prune
+RUN turbo prune @dariah-eric/database --docker
+
+# install
+# -------------------------------------------------------------------------------------------------
+
+FROM base AS migrate-install
+WORKDIR /app
+COPY --from=migrate-prune /app/out/json/ .
+COPY --from=migrate-prune /app/patches/ ./patches/
+COPY --from=migrate-prune /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+RUN pnpm install --frozen-lockfile
+
+# serve
+# -------------------------------------------------------------------------------------------------
+
+FROM migrate-install AS migrate
+USER node
+COPY --from=migrate-prune /app/out/full/ .
+CMD [ "pnpm", "--filter", "@dariah-eric/database", "run", "db:migrations:apply" ]
+
+# =================================================================================================
 # api
 # =================================================================================================
 
