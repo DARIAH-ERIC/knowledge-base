@@ -33,3 +33,10 @@ readinessProbe:
   timeoutSeconds: 3
   scheme: "HTTP"
   probeType: "httpGet"
+initContainers:
+  - name: migrate
+    image: "ghcr.io/dariah-eric/knowledge-base-migrate:$tag"
+    imagePullPolicy: Always
+    envFrom:
+      - secretRef:
+          name: "$app_name"
