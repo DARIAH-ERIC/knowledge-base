@@ -2,11 +2,13 @@ import { Fira_Code, Inter } from "next/font/google";
 
 export const body = Inter({
 	subsets: ["latin"],
+	style: ["normal", "italic"],
 	variable: "--_font-body",
 });
 
 export const heading = Inter({
 	subsets: ["latin"],
+	style: ["normal", "italic"],
 	variable: "--_font-heading",
 });
 

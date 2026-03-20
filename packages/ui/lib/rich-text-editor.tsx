@@ -49,7 +49,7 @@ function RichTextEditorIconButton({
 		<button
 			aria-label={ariaLabel}
 			className={twMerge(
-				"relative inline-flex size-8 items-center justify-center rounded-md transition-colors text-muted-fg hover:text-fg focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+				"relative inline-flex size-8 items-center justify-center rounded-md transition-colors text-muted-fg hover:text-fg focus:outline-none focus:ring-2 focus:ring-ring",
 				isActive === true && "bg-primary-subtle/50 text-fg",
 			)}
 			onClick={onClick}

@@ -11,7 +11,7 @@ import * as v from "valibot";
 
 import { SubscribeNewsletterInputSchema } from "@/app/(app)/[locale]/(default)/_lib/subscribe-newsletter.schema";
 import { getIntlLanguage } from "@/lib/i18n/locales";
-import { client } from "@/lib/mailchimp/client";
+import { client } from "@/lib/mailchimp";
 import { createServerAction } from "@/lib/server/create-server-action";
 
 export const subscribeNewsletterAction = createServerAction<

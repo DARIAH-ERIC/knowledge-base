@@ -45,6 +45,8 @@ export function MultipleSelectContent<T extends OptionBase>(
 	return null;
 }
 
+MultipleSelectContent.displayName = "MultipleSelectContent";
+
 export function MultipleSelect<T extends OptionBase>(
 	props: Readonly<MultipleSelectProps<T>>,
 ): ReactNode {

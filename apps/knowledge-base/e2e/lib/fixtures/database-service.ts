@@ -120,7 +120,7 @@ export class DatabaseService {
 		const projects = await this.db
 			.select({ id: schema.projects.id })
 			.from(schema.projects)
-			.where(sql`${schema.projects.name} LIKE ${`${prefix  }%`}`);
+			.where(sql`${schema.projects.name} LIKE ${`${prefix}%`}`);
 
 		for (const project of projects) {
 			await this.deleteProject(project.id);

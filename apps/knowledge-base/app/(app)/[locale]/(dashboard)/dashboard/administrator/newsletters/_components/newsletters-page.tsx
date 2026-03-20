@@ -1,6 +1,5 @@
 "use client";
 
-import type { RequestResult } from "@dariah-eric/request";
 import { Badge } from "@dariah-eric/ui/badge";
 import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import {
@@ -26,14 +25,13 @@ import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components
 import type { GetCampaignsResponse } from "@/lib/mailchimp";
 
 interface NewslettersPageProps {
-	newsletters: Promise<RequestResult<GetCampaignsResponse>>;
+	newsletters: Promise<GetCampaignsResponse>;
 }
 
 export function NewslettersPage(props: Readonly<NewslettersPageProps>): ReactNode {
 	const { newsletters: newslettersPromise } = props;
 
-	const result = use(newslettersPromise);
-	const newsletters = result.unwrap().data.campaigns;
+	const { campaigns: newsletters } = use(newslettersPromise);
 
 	const t = useExtracted();
 	const format = useFormatter();

@@ -5,6 +5,7 @@ import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
+import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { RichTextEditor } from "@dariah-eric/ui/rich-text-editor";
@@ -119,6 +120,8 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 					t("Save")
 				)}
 			</Button>
+
+			<FormStatus className="self-end" state={state} />
 		</Form>
 	);
 }

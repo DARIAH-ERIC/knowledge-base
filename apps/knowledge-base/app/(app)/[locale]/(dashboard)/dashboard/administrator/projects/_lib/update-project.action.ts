@@ -60,14 +60,18 @@ export const updateProjectAction = createServerAction(
 		} = result.output;
 
 		await db.transaction(async (tx) => {
-			const asset = await tx.query.assets.findFirst({
-				where: { key: imageKey },
-				columns: { id: true },
-			});
+			let imageId = null;
 
-			assert(asset);
+			if (imageKey != null) {
+				const asset = await tx.query.assets.findFirst({
+					where: { key: imageKey },
+					columns: { id: true },
+				});
 
-			const imageId = asset.id;
+				assert(asset);
+
+				imageId = asset.id;
+			}
 
 			await tx
 				.update(schema.projects)

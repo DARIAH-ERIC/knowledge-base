@@ -139,7 +139,7 @@ export default async function DashboardAdministratorEditProjectPage(
 		}),
 		db.query.socialMedia.findMany({
 			orderBy: { name: "asc" },
-			columns: { id: true, name: true },
+			columns: { id: true, name: true, url: true },
 			with: {
 				type: { columns: { type: true } },
 			},

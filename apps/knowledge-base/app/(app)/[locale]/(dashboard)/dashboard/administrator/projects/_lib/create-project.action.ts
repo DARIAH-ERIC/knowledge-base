@@ -92,14 +92,18 @@ export const createProjectAction = createServerAction(
 
 			assert(entity);
 
-			const asset = await tx.query.assets.findFirst({
-				where: { key: imageKey },
-				columns: { id: true },
-			});
+			let imageId = null;
 
-			assert(asset);
+			if (imageKey != null) {
+				const asset = await tx.query.assets.findFirst({
+					where: { key: imageKey },
+					columns: { id: true },
+				});
 
-			const imageId = asset.id;
+				assert(asset);
+
+				imageId = asset.id;
+			}
 
 			await tx.insert(schema.projects).values({
 				id: entity.id,

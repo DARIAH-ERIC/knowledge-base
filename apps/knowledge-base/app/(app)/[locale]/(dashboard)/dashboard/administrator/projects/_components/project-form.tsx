@@ -1,11 +1,13 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { socialMediaTypesEnum } from "@dariah-eric/database/schema";
+import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
-import { FieldError, Label } from "@dariah-eric/ui/field";
+import { FieldError, fieldErrorStyles, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
+import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import {
 	ModalBody,
@@ -30,10 +32,15 @@ import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/20/solid
 import { CalendarDate, parseDate } from "@internationalized/date";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useActionState, useState } from "react";
+import { Fragment, type ReactNode, useActionState, useState, useTransition } from "react";
+import { Text } from "react-aria-components";
 
 import { FormSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import {
+	type CreatedSocialMedia,
+	createSocialMediaAction,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-social-media.action";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface PartnerEntry {
@@ -85,6 +92,7 @@ interface ProjectFormProps {
 		id: string;
 		name: string;
 		type: Pick<schema.SocialMediaType, "type">;
+		url: string;
 	}>;
 	initialPartners?: Array<{
 		id: string;
@@ -118,6 +126,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
 		project?.image ?? null,
 	);
+	const [imageKeyError, setImageKeyError] = useState(false);
 
 	const [partners, setPartners] = useState<Array<PartnerEntry>>(() => {
 		return (
@@ -131,6 +140,39 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 		initialSocialMediaIds ?? [],
 	);
 
+	const [localSocialMediaItems, setLocalSocialMediaItems] = useState<
+		Array<{ id: string; name: string; url: string; type: { type: string } }>
+	>(() => {
+		return socialMediaItems ?? [];
+	});
+
+	const [isCreateSocialMediaOpen, setIsCreateSocialMediaOpen] = useState(false);
+	const [createSocialMediaFormKey, setCreateSocialMediaFormKey] = useState(0);
+
+	const [createSocialMediaState, setCreateSocialMediaState] = useState<
+		ActionState<CreatedSocialMedia>
+	>(createActionStateInitial());
+	const [isCreateSocialMediaPending, startCreateSocialMediaTransition] = useTransition();
+
+	function handleCreateSocialMedia(formData: FormData) {
+		startCreateSocialMediaTransition(async () => {
+			const result = await createSocialMediaAction(createSocialMediaState, formData);
+			setCreateSocialMediaState(result);
+			if (result.status === "success") {
+				setLocalSocialMediaItems((prev) => {
+					return [...prev, result.data];
+				});
+				setSelectedSocialMediaIds((prev) => {
+					return [...prev, result.data.id];
+				});
+				setIsCreateSocialMediaOpen(false);
+				setCreateSocialMediaFormKey((prev) => {
+					return prev + 1;
+				});
+			}
+		});
+	}
+
 	const [dialog, setDialog] = useState<DialogState>(emptyDialog);
 
 	function openAddDialog() {
@@ -139,7 +181,11 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 
 	function openEditDialog(index: number) {
 		const p = partners[index];
-		if (p == null) return;
+
+		if (p == null) {
+			return;
+		}
+
 		setDialog({
 			isOpen: true,
 			editingIndex: index,
@@ -151,7 +197,9 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 	}
 
 	function handleConfirmDialog() {
-		if (!dialog.unitId || !dialog.roleId) return;
+		if (!dialog.unitId || !dialog.roleId) {
+			return;
+		}
 
 		const unit = orgUnits?.find((u) => {
 			return u.id === dialog.unitId;
@@ -202,10 +250,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 
 	return (
 		<Form action={action} className="flex flex-col gap-y-6" state={state}>
-			<FormSection
-				description={t("Enter the projectal and contact details related to the project.")}
-				title={t("Details")}
-			>
+			<FormSection description={t("Enter the project details.")} title={t("Details")}>
 				<TextField defaultValue={project?.name} isRequired={true} name="name">
 					<Label>{t("Name")}</Label>
 					<Input placeholder={t("Name")} />
@@ -262,6 +307,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 				>
 					<Label>{t("Start date")}</Label>
 					<DatePickerTrigger />
+					<FieldError />
 				</DatePicker>
 
 				<DatePicker
@@ -279,11 +325,13 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 				>
 					<Label>{t("End date")}</Label>
 					<DatePickerTrigger />
+					<FieldError />
 				</DatePicker>
 
 				<Select defaultValue={project?.scope.id ?? undefined} isRequired={true} name="scopeId">
 					<Label>{t("Scope")}</Label>
 					<SelectTrigger />
+					<FieldError />
 					<SelectContent>
 						{scopes.map((item) => {
 							return (
@@ -316,8 +364,26 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 					assets={assets}
 					onSelect={(key, url) => {
 						setSelectedImage({ key, url });
+						setImageKeyError(false);
 					}}
 				/>
+
+				<input
+					aria-hidden={true}
+					className="sr-only"
+					name="imageKey"
+					onInvalid={(e) => {
+						e.preventDefault();
+						setImageKeyError(true);
+					}}
+					readOnly={true}
+					// required={true}
+					tabIndex={-1}
+					value={selectedImage?.key ?? ""}
+				/>
+				{imageKeyError ? (
+					<div className={fieldErrorStyles()}>{t("Please select an image.")}</div>
+				) : null}
 			</FormSection>
 
 			<Separator className="my-6" />
@@ -334,26 +400,45 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 						description={t("Link social media accounts to this project.")}
 						title={t("Social media")}
 					>
-						<MultipleSelect
-							onChange={(keys) => {
-								setSelectedSocialMediaIds(keys.map(String));
-							}}
-							placeholder={t("No social media linked")}
-							value={selectedSocialMediaIds}
-						>
-							<Label>{t("Social media")}</Label>
-							<MultipleSelectContent items={socialMediaItems}>
-								{(item) => {
-									return (
-										<MultipleSelectItem id={item.id} textValue={item.name}>
-											{"["}
-											{item.type.type}
-											{"]"} {item.name}
-										</MultipleSelectItem>
-									);
+						{localSocialMediaItems.length > 0 ? (
+							<MultipleSelect
+								aria-label={t("Social media")}
+								onChange={(keys) => {
+									setSelectedSocialMediaIds(keys.map(String));
 								}}
-							</MultipleSelectContent>
-						</MultipleSelect>
+								placeholder={t("No social media linked")}
+								value={selectedSocialMediaIds}
+							>
+								<MultipleSelectContent items={localSocialMediaItems}>
+									{(item) => {
+										return (
+											<MultipleSelectItem id={item.id} textValue={item.name}>
+												<div className="col-start-2">
+													<Text slot="label">{item.name}</Text>
+													<Text className="block text-xs text-muted-fg" slot="description">
+														{item.type.type}
+														{" · "}
+														{item.url}
+													</Text>
+												</div>
+											</MultipleSelectItem>
+										);
+									}}
+								</MultipleSelectContent>
+							</MultipleSelect>
+						) : (
+							<p>{t("No social media entries available.")}</p>
+						)}
+						<Button
+							className="self-start"
+							intent="outline"
+							onPress={() => {
+								setIsCreateSocialMediaOpen(true);
+							}}
+						>
+							<PlusIcon />
+							{t("Create social media")}
+						</Button>
 						{selectedSocialMediaIds.map((id, index) => {
 							return (
 								<input key={id} name={`socialMediaIds.${String(index)}`} type="hidden" value={id} />
@@ -527,12 +612,83 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 							</Button>
 						</ModalFooter>
 					</ModalContent>
+
+					<ModalContent
+						isOpen={isCreateSocialMediaOpen}
+						onOpenChange={(open) => {
+							setIsCreateSocialMediaOpen(open);
+							if (!open) {
+								setCreateSocialMediaFormKey((prev) => {
+									return prev + 1;
+								});
+							}
+						}}
+					>
+						<Form
+							key={createSocialMediaFormKey}
+							action={handleCreateSocialMedia}
+							state={createSocialMediaState}
+						>
+							<ModalHeader
+								description={t("Fill in the details for the new social media entry.")}
+								title={t("Create social media")}
+							/>
+							<ModalBody className="flex flex-col gap-y-4">
+								<TextField isRequired={true} name="name">
+									<Label>{t("Name")}</Label>
+									<Input placeholder={t("Name")} />
+									<FieldError />
+								</TextField>
+
+								<TextField isRequired={true} name="url">
+									<Label>{t("URL")}</Label>
+									<Input placeholder="https://" />
+									<FieldError />
+								</TextField>
+
+								<Select isRequired={true} name="type">
+									<Label>{t("Type")}</Label>
+									<SelectTrigger />
+									<FieldError />
+									<SelectContent>
+										{socialMediaTypesEnum.map((type) => {
+											return (
+												<SelectItem key={type} id={type}>
+													{type}
+												</SelectItem>
+											);
+										})}
+									</SelectContent>
+								</Select>
+
+								<DatePicker granularity="day" name="duration.start">
+									<Label>{t("Start date (optional)")}</Label>
+									<DatePickerTrigger />
+								</DatePicker>
+
+								<DatePicker granularity="day" name="duration.end">
+									<Label>{t("End date (optional)")}</Label>
+									<DatePickerTrigger />
+								</DatePicker>
+							</ModalBody>
+							<ModalFooter>
+								<ModalClose>{t("Cancel")}</ModalClose>
+								<Button isPending={isCreateSocialMediaPending} type="submit">
+									{isCreateSocialMediaPending ? (
+										<Fragment>
+											<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
+											<span aria-hidden={true}>{t("Saving...")}</span>
+										</Fragment>
+									) : (
+										t("Create")
+									)}
+								</Button>
+							</ModalFooter>
+							<FormStatus className="px-6 pb-4" state={createSocialMediaState} />
+						</Form>
+					</ModalContent>
 				</Fragment>
 			)}
-
-			{selectedImage != null ? (
-				<input name="imageKey" type="hidden" value={selectedImage.key} />
-			) : null}
 
 			{project != null ? (
 				<Fragment>
@@ -541,12 +697,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 				</Fragment>
 			) : null}
 
-			<Button
-				className="self-end"
-				isDisabled={selectedImage == null}
-				isPending={isPending}
-				type="submit"
-			>
+			<Button className="self-end" isPending={isPending} type="submit">
 				{isPending ? (
 					<Fragment>
 						<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
@@ -556,6 +707,8 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 					t("Save")
 				)}
 			</Button>
+
+			<FormStatus className="self-end" state={state} />
 		</Form>
 	);
 }

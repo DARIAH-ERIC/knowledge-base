@@ -6,7 +6,7 @@ import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { client } from "@/lib/mailchimp/client";
+import { client } from "@/lib/mailchimp";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface NewslettersPageProps extends PageProps<"/[locale]/imprint"> {}

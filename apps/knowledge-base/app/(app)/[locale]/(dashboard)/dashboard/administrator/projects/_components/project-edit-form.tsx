@@ -24,7 +24,12 @@ interface ProjectEditFormProps {
 	scopes: Array<Pick<schema.ProjectScope, "id" | "scope">>;
 	orgUnits: Array<{ id: string; name: string }>;
 	roles: Array<Pick<schema.ProjectRole, "id" | "role">>;
-	socialMediaItems: Array<{ id: string; name: string; type: Pick<schema.SocialMediaType, "type"> }>;
+	socialMediaItems: Array<{
+		id: string;
+		name: string;
+		type: Pick<schema.SocialMediaType, "type">;
+		url: string;
+	}>;
 	initialPartners: Array<{
 		id: string;
 		unitId: string;

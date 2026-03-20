@@ -23,7 +23,9 @@ export async function generateMetadata(
 export default function DashboardAdministratorNewslettersPage(
 	_props: Readonly<DashboardAdministratorNewslettersPageProps>,
 ): ReactNode {
-	const newsletters = mailchimp.get({ count: 1000 });
+	const newsletters = mailchimp.get({ count: 1000 }).then((result) => {
+		return result.unwrap().data;
+	});
 
 	return (
 		<Suspense fallback={<LoadingScreen />}>

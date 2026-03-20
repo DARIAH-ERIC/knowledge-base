@@ -52,8 +52,12 @@ export interface RequestOptions<TResponseType extends ResponseType = ResponseTyp
 	timeout?: number | false;
 }
 
+export interface RequestInfo<TData = unknown> {
+	data: TData; headers: Headers
+}
+
 export type RequestResult<TData = unknown> = Result<
-	{ data: TData; headers: Headers },
+	RequestInfo<TData>,
 	RequestError
 >;
 

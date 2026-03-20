@@ -28,15 +28,40 @@ export default async function DashboardAdministratorCreateProjectPage(
 ): Promise<ReactNode> {
 	const { items: assets } = await getMediaLibraryAssets({ imageUrlOptions: imageGridOptions });
 
-	const scopes = await db.query.projectScopes.findMany({
-		orderBy: {
-			scope: "asc",
-		},
-		columns: {
-			id: true,
-			scope: true,
-		},
-	});
+	const [scopes, orgUnits, roles, allSocialMedia] = await Promise.all([
+		db.query.projectScopes.findMany({
+			orderBy: {
+				scope: "asc",
+			},
+			columns: {
+				id: true,
+				scope: true,
+			},
+		}),
+		db.query.organisationalUnits.findMany({
+			orderBy: { name: "asc" },
+			columns: { id: true, name: true },
+		}),
+		db.query.projectRoles.findMany({
+			orderBy: { role: "asc" },
+			columns: { id: true, role: true },
+		}),
+		db.query.socialMedia.findMany({
+			orderBy: { name: "asc" },
+			columns: { id: true, name: true, url: true },
+			with: {
+				type: { columns: { type: true } },
+			},
+		}),
+	]);
 
-	return <ProjectCreateForm assets={assets} scopes={scopes} />;
+	return (
+		<ProjectCreateForm
+			assets={assets}
+			orgUnits={orgUnits}
+			roles={roles}
+			scopes={scopes}
+			socialMediaItems={allSocialMedia}
+		/>
+	);
 }
