@@ -5,14 +5,16 @@ import { test as base } from "@playwright/test";
 
 import { env } from "@/config/env.config";
 import { type AccessibilityScanner, createAccessibilityScanner } from "@/e2e/lib/fixtures/a11y";
+import { AdminProjectsPage } from "@/e2e/lib/fixtures/admin-projects-page";
 import { ContactPage } from "@/e2e/lib/fixtures/contact-page";
+import { DatabaseService } from "@/e2e/lib/fixtures/database-service";
 import { createEmailService, type EmailService } from "@/e2e/lib/fixtures/email-service";
 import { createI18n, type I18n, type WithI18n } from "@/e2e/lib/fixtures/i18n";
 import { ImprintPage } from "@/e2e/lib/fixtures/imprint-page";
 import { IndexPage } from "@/e2e/lib/fixtures/index-page";
 import { defaultLocale, type IntlLocale } from "@/lib/i18n/locales";
 
-interface Fixtures {
+interface TestFixtures {
 	// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
 	beforeEachTest: void;
 
@@ -22,9 +24,14 @@ interface Fixtures {
 	createContactPage: (locale: IntlLocale) => Promise<WithI18n<{ contactPage: ContactPage }>>;
 	createImprintPage: (locale: IntlLocale) => Promise<WithI18n<{ imprintPage: ImprintPage }>>;
 	createIndexPage: (locale: IntlLocale) => Promise<WithI18n<{ indexPage: IndexPage }>>;
+	createAdminProjectsPage: (workerIndex: number) => AdminProjectsPage;
 }
 
-export const test = base.extend<Fixtures>({
+interface WorkerFixtures {
+	db: DatabaseService;
+}
+
+export const test = base.extend<TestFixtures, WorkerFixtures>({
 	/** @see {@link https://playwright.dev/docs/test-fixtures#adding-global-beforeeachaftereach-hooks} */
 	beforeEachTest: [
 		async ({ context }, use) => {
@@ -106,6 +113,22 @@ export const test = base.extend<Fixtures>({
 
 		await use(createIndexPage);
 	},
+
+	async createAdminProjectsPage({ page }, use) {
+		await use((workerIndex: number) => {
+			return new AdminProjectsPage(page, workerIndex);
+		});
+	},
+
+	db: [
+		// eslint-disable-next-line no-empty-pattern
+		async ({}, use) => {
+			const db = new DatabaseService();
+			await use(db);
+			await db.close();
+		},
+		{ scope: "worker" },
+	],
 });
 
 export { expect } from "@playwright/test";
