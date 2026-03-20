@@ -22,8 +22,17 @@ export async function getEvents(params: GetEventsParams) {
 			with: {
 				entity: {
 					columns: {
+						documentId: true,
 						slug: true,
 						updatedAt: true,
+					},
+					with: {
+						status: {
+							columns: {
+								id: true,
+								type: true,
+							},
+						},
 					},
 				},
 				image: {
