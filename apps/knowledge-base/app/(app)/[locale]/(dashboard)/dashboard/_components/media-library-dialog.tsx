@@ -112,7 +112,11 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 											id={asset.key}
 											textValue={asset.key}
 										>
-											<img alt={asset.key} className="size-24 rounded-sm object-cover" src={asset.url} />
+											<img
+												alt={asset.key}
+												className="size-24 rounded-sm object-cover"
+												src={asset.url}
+											/>
 										</GridListItem>
 									);
 								}}
