@@ -3,16 +3,19 @@ import { randomUUID } from "node:crypto";
 import { expect, test } from "@/e2e/lib/test";
 
 test.describe("projects admin", () => {
+	/**
+	 * Run sequentially. Also requires setting `workers: 1` in `playwright.config.ts` to
+	 * avoid running test-suites concurrently.
+	 */
 	test.describe.configure({ mode: "default" });
 
 	test.beforeAll(async ({ db }) => {
-		// Verify that global prerequisites exist.
+		/** Verify that global prerequisites exist. */
 		await db.getTestAsset();
 		await db.getProjectScope();
 	});
 
 	test.afterAll(async ({ db }, testInfo) => {
-		// Clean up any projects created by this worker (handles failures mid-test).
 		await db.cleanupWorkerProjects(testInfo.workerIndex);
 	});
 
@@ -29,14 +32,12 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.fillDatePicker("Start date", 2024, 1, 15);
 		await adminProjectsPage.fillSummary("E2E test project summary");
 
-		// Open the media library and select the test asset.
 		await adminProjectsPage.selectImageFromMediaLibrary("e2e-test-asset");
 
 		await adminProjectsPage.fillDescription("E2E test project description.");
 
 		await adminProjectsPage.submitForm();
 
-		// After redirect to the list, the new project name should be visible.
 		await expect(adminProjectsPage.projectRowByName(projectName)).toBeVisible();
 	});
 
@@ -44,7 +45,6 @@ test.describe("projects admin", () => {
 		const workerIndex = test.info().workerIndex;
 		const adminProjectsPage = createAdminProjectsPage(workerIndex);
 
-		// Create a project via the UI first (avoids DB insert complexity for slug derivation).
 		const originalName = `${adminProjectsPage.workerPrefix} Edit Me ${randomUUID()}`;
 		await adminProjectsPage.gotoCreate();
 		await adminProjectsPage.fillName(originalName);

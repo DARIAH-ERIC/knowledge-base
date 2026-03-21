@@ -389,7 +389,11 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 			<Separator className="my-6" />
 
 			<FormSection description={t("Add a short description.")} title={t("Description")}>
-				<RichTextEditor content={project?.description} name="description" />
+				<RichTextEditor
+					aria-label={t("Description")}
+					content={project?.description}
+					name="description"
+				/>
 			</FormSection>
 
 			{hasRelationsData && (

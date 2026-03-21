@@ -194,6 +194,7 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 
 					startTransition(async () => {
 						await deleteProjectAction(itemToDelete.id);
+						list.remove(itemToDelete.id);
 						setItemToDelete(null);
 					});
 				}}
