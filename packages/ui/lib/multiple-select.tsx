@@ -26,7 +26,7 @@ interface OptionBase {
 
 interface MultipleSelectProps<T extends OptionBase> extends Omit<
 	SelectProps<T, "multiple">,
-	"selectionMode" | "children"
+	"onSelectionChange" | "selectionMode" | "children"
 > {
 	placeholder?: string;
 	className?: string;
@@ -44,6 +44,8 @@ export function MultipleSelectContent<T extends OptionBase>(
 ): ReactNode {
 	return null;
 }
+
+MultipleSelectContent.displayName = "MultipleSelectContent";
 
 export function MultipleSelect<T extends OptionBase>(
 	props: Readonly<MultipleSelectProps<T>>,

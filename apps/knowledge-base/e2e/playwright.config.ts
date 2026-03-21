@@ -57,6 +57,7 @@ export default defineConfig({
 	maxFailures: 10,
 	workers: isCI ? 1 : undefined,
 	reporter: isCI ? [["github"], ["html", { open: "never" }]] : [["html"]],
+	globalSetup: "./lib/global-setup.ts",
 	use: {
 		baseURL: config.baseUrl,
 		screenshot: "on-first-failure",
@@ -65,15 +66,26 @@ export default defineConfig({
 	projects: [
 		{
 			name: "chromium",
+			testIgnore: "**/admin/**/*.test.ts",
 			use: { ...devices["Desktop Chrome"], channel: "chromium" },
 		},
 		{
 			name: "firefox",
+			testIgnore: "**/admin/**/*.test.ts",
 			use: { ...devices["Desktop Firefox"] },
 		},
 		{
 			name: "webkit",
+			testIgnore: "**/admin/**/*.test.ts",
 			use: { ...devices["Desktop Safari"] },
+		},
+		{
+			name: "admin",
+			testMatch: "**/admin/**/*.test.ts",
+			use: {
+				...devices["Desktop Chrome"],
+				storageState: join(import.meta.dirname, ".auth/admin.json"),
+			},
 		},
 		/** Test against mobile viewports. */
 		// {

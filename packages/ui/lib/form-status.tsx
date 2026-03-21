@@ -12,15 +12,16 @@ import { FormErrorMessage } from "@/lib/form-error-message";
 import { FormSuccessMessage } from "@/lib/form-success-message";
 
 export interface FormStatusProps {
+	className?: string;
 	state: ActionState;
 }
 
 export function FormStatus(props: Readonly<FormStatusProps>): ReactNode {
-	const { state } = props;
+	const { className, state } = props;
 
 	return (
 		<Fragment>
-			<FormErrorMessage state={state}>
+			<FormErrorMessage className={className} state={state}>
 				{(state) => {
 					if (!isActionStateError(state)) {
 						return null;
@@ -34,7 +35,7 @@ export function FormStatus(props: Readonly<FormStatusProps>): ReactNode {
 					);
 				}}
 			</FormErrorMessage>
-			<FormSuccessMessage state={state}>
+			<FormSuccessMessage className={className} state={state}>
 				{(state) => {
 					if (!isActionStateSuccess(state)) {
 						return null;

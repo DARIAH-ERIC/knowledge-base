@@ -52,10 +52,12 @@ export interface RequestOptions<TResponseType extends ResponseType = ResponseTyp
 	timeout?: number | false;
 }
 
-export type RequestResult<TData = unknown> = Result<
-	{ data: TData; headers: Headers },
-	RequestError
->;
+export interface RequestInfo<TData = unknown> {
+	data: TData;
+	headers: Headers;
+}
+
+export type RequestResult<TData = unknown> = Result<RequestInfo<TData>, RequestError>;
 
 export async function request<TJsonData, TResponseType extends "json" = "json">(
 	url: URL | string,

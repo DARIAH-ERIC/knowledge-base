@@ -30,7 +30,7 @@ export const Default: Story = {
 	render(props) {
 		return (
 			<div className="w-72">
-				<MultipleSelect aria-label={"Frameworks"} {...props}>
+				<MultipleSelect {...props}>
 					<Label>{"Frameworks"}</Label>
 					<MultipleSelectContent items={frameworks}>
 						{(item) => {

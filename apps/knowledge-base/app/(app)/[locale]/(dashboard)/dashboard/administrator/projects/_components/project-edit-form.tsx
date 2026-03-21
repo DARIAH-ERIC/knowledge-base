@@ -22,10 +22,37 @@ interface ProjectEditFormProps {
 		scope: Pick<schema.ProjectScope, "id" | "scope">;
 	} & { image: { key: string; url: string } | null };
 	scopes: Array<Pick<schema.ProjectScope, "id" | "scope">>;
+	orgUnits: Array<{ id: string; name: string }>;
+	roles: Array<Pick<schema.ProjectRole, "id" | "role">>;
+	socialMediaItems: Array<{
+		id: string;
+		name: string;
+		type: Pick<schema.SocialMediaType, "type">;
+		url: string;
+	}>;
+	initialPartners: Array<{
+		id: string;
+		unitId: string;
+		unitName: string;
+		roleId: string;
+		roleName: string;
+		durationStart: string | null;
+		durationEnd: string | null;
+	}>;
+	initialSocialMediaIds: Array<string>;
 }
 
 export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNode {
-	const { assets, project, scopes } = props;
+	const {
+		assets,
+		project,
+		scopes,
+		orgUnits,
+		roles,
+		socialMediaItems,
+		initialPartners,
+		initialSocialMediaIds,
+	} = props;
 
 	const t = useExtracted();
 
@@ -36,8 +63,13 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 			<ProjectForm
 				assets={assets}
 				formAction={updateProjectAction}
+				initialPartners={initialPartners}
+				initialSocialMediaIds={initialSocialMediaIds}
+				orgUnits={orgUnits}
 				project={project}
+				roles={roles}
 				scopes={scopes}
+				socialMediaItems={socialMediaItems}
 			/>
 		</Fragment>
 	);

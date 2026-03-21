@@ -58,6 +58,7 @@ blob-report/
 playwright/.cache/
 playwright-report/
 test-results/
+.auth/
 
 # storybook
 storybook-static/

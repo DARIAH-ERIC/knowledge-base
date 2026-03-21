@@ -11,10 +11,18 @@ import { createProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/
 interface ProjectCreateFormProps {
 	assets: Array<{ key: string; url: string }>;
 	scopes: Array<Pick<schema.ProjectScope, "id" | "scope">>;
+	orgUnits: Array<{ id: string; name: string }>;
+	roles: Array<Pick<schema.ProjectRole, "id" | "role">>;
+	socialMediaItems: Array<{
+		id: string;
+		name: string;
+		type: Pick<schema.SocialMediaType, "type">;
+		url: string;
+	}>;
 }
 
 export function ProjectCreateForm(props: Readonly<ProjectCreateFormProps>): ReactNode {
-	const { assets, scopes } = props;
+	const { assets, orgUnits, roles, scopes, socialMediaItems } = props;
 
 	const t = useExtracted();
 
@@ -22,7 +30,14 @@ export function ProjectCreateForm(props: Readonly<ProjectCreateFormProps>): Reac
 		<Fragment>
 			<Heading>{t("New project")}</Heading>
 
-			<ProjectForm assets={assets} formAction={createProjectAction} scopes={scopes} />
+			<ProjectForm
+				assets={assets}
+				formAction={createProjectAction}
+				orgUnits={orgUnits}
+				roles={roles}
+				scopes={scopes}
+				socialMediaItems={socialMediaItems}
+			/>
 		</Fragment>
 	);
 }

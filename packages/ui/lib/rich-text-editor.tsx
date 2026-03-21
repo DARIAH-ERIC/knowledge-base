@@ -25,6 +25,7 @@ import { Input } from "@/lib/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
 
 interface RichTextEditorProps {
+	"aria-label"?: string;
 	className?: string;
 	content?: JSONContent;
 	isEditable?: boolean;
@@ -49,7 +50,7 @@ function RichTextEditorIconButton({
 		<button
 			aria-label={ariaLabel}
 			className={twMerge(
-				"relative inline-flex size-8 items-center justify-center rounded-md transition-colors text-muted-fg hover:text-fg focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+				"relative inline-flex size-8 items-center justify-center rounded-md transition-colors text-muted-fg hover:text-fg focus:outline-none focus:ring-2 focus:ring-ring",
 				isActive === true && "bg-primary-subtle/50 text-fg",
 			)}
 			onClick={onClick}
@@ -61,7 +62,7 @@ function RichTextEditorIconButton({
 }
 
 export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode {
-	const { content, onChange, isEditable = true, name, className } = props;
+	const { "aria-label": ariaLabel, content, onChange, isEditable = true, name, className } = props;
 
 	const t = useExtracted("ui");
 
@@ -87,6 +88,9 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		editorProps: {
 			attributes: {
 				class: "richtext max-w-none focus:outline-none px-4 py-3 min-h-37.5",
+				role: "textbox",
+				"aria-multiline": "true",
+				...(ariaLabel != null ? { "aria-label": ariaLabel } : {}),
 			},
 		},
 	});

@@ -40,7 +40,7 @@ export const socialMedia = p.pgTable("social_media", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	name: p.text("name").notNull(),
 	url: p.text("url").notNull(),
-	duration: f.timestampRange("duration").notNull(),
+	duration: f.timestampRange("duration"),
 	typeId: p
 		.uuid("type_id")
 		.notNull()

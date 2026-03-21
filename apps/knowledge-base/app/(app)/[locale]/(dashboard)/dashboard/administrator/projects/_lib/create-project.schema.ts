@@ -6,16 +6,16 @@ export const CreateProjectActionInputSchema = v.object({
 		"acronym",
 		"call",
 		"funders",
-		"funding",
 		"name",
 		"scopeId",
 		"summary",
 		"topic",
 	]).entries,
+	funding: v.optional(v.pipe(v.string(), v.toNumber(), v.minValue(0))),
 	duration: v.object({
 		start: v.pipe(v.string(), v.isoDate(), v.toDate()),
 		end: v.optional(v.pipe(v.string(), v.isoDate(), v.toDate())),
 	}),
-	imageKey: v.pipe(v.string(), v.nonEmpty()),
+	imageKey: v.optional(v.pipe(v.string(), v.nonEmpty())),
 	description: v.pipe(v.string(), v.nonEmpty()),
 });

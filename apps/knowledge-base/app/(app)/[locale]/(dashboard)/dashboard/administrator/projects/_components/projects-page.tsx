@@ -126,7 +126,11 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 										? format.dateTimeRange(item.duration.start, item.duration.end)
 										: format.dateTime(item.duration.start)}
 								</TableCell>
-								<TableCell>{item.funding}</TableCell>
+								<TableCell>
+									{item.funding != null
+										? format.number(item.funding, { style: "currency", currency: "EUR" })
+										: null}
+								</TableCell>
 								<TableCell>
 									<Badge
 										intent={
@@ -192,6 +196,7 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 
 					startTransition(async () => {
 						await deleteProjectAction(itemToDelete.id);
+						list.remove(itemToDelete.id);
 						setItemToDelete(null);
 					});
 				}}
