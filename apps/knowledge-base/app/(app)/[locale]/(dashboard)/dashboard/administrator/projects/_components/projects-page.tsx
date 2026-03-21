@@ -127,7 +127,9 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 										: format.dateTime(item.duration.start)}
 								</TableCell>
 								<TableCell>
-									{format.number(item.funding ?? 0, { style: "currency", currency: "EUR" })}
+									{item.funding != null
+										? format.number(item.funding, { style: "currency", currency: "EUR" })
+										: null}
 								</TableCell>
 								<TableCell>
 									<Badge

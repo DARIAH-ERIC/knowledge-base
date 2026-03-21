@@ -86,9 +86,9 @@ interface ProjectFormProps {
 	} & { image: { key: string; url: string } | null };
 	formAction: ServerAction;
 	scopes: Array<Pick<schema.ProjectScope, "id" | "scope">>;
-	orgUnits?: Array<{ id: string; name: string }>;
-	roles?: Array<Pick<schema.ProjectRole, "id" | "role">>;
-	socialMediaItems?: Array<{
+	orgUnits: Array<{ id: string; name: string }>;
+	roles: Array<Pick<schema.ProjectRole, "id" | "role">>;
+	socialMediaItems: Array<{
 		id: string;
 		name: string;
 		type: Pick<schema.SocialMediaType, "type">;
@@ -143,7 +143,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 	const [localSocialMediaItems, setLocalSocialMediaItems] = useState<
 		Array<{ id: string; name: string; url: string; type: { type: string } }>
 	>(() => {
-		return socialMediaItems ?? [];
+		return socialMediaItems;
 	});
 
 	const [isCreateSocialMediaOpen, setIsCreateSocialMediaOpen] = useState(false);
@@ -151,7 +151,9 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 
 	const [createSocialMediaState, setCreateSocialMediaState] = useState<
 		ActionState<CreatedSocialMedia>
-	>(createActionStateInitial());
+	>(() => {
+		return createActionStateInitial();
+	});
 	const [isCreateSocialMediaPending, startCreateSocialMediaTransition] = useTransition();
 
 	function handleCreateSocialMedia(formData: FormData) {
@@ -201,10 +203,10 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 			return;
 		}
 
-		const unit = orgUnits?.find((u) => {
+		const unit = orgUnits.find((u) => {
 			return u.id === dialog.unitId;
 		});
-		const role = roles?.find((r) => {
+		const role = roles.find((r) => {
 			return r.id === dialog.roleId;
 		});
 
@@ -245,8 +247,6 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 			});
 		});
 	}
-
-	const hasRelationsData = orgUnits != null && roles != null && socialMediaItems != null;
 
 	return (
 		<Form action={action} className="flex flex-col gap-y-6" state={state}>
@@ -396,303 +396,293 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 				/>
 			</FormSection>
 
-			{hasRelationsData && (
-				<Fragment>
-					<Separator className="my-6" />
+			<Separator className="my-6" />
 
-					<FormSection
-						description={t("Link social media accounts to this project.")}
-						title={t("Social media")}
+			<FormSection
+				description={t("Link social media accounts to this project.")}
+				title={t("Social media")}
+			>
+				{localSocialMediaItems.length > 0 ? (
+					<MultipleSelect
+						aria-label={t("Social media")}
+						onChange={(keys) => {
+							setSelectedSocialMediaIds(keys.map(String));
+						}}
+						placeholder={t("No social media linked")}
+						value={selectedSocialMediaIds}
 					>
-						{localSocialMediaItems.length > 0 ? (
-							<MultipleSelect
-								aria-label={t("Social media")}
-								onChange={(keys) => {
-									setSelectedSocialMediaIds(keys.map(String));
-								}}
-								placeholder={t("No social media linked")}
-								value={selectedSocialMediaIds}
-							>
-								<MultipleSelectContent items={localSocialMediaItems}>
-									{(item) => {
-										return (
-											<MultipleSelectItem id={item.id} textValue={item.name}>
-												<div className="col-start-2">
-													<Text slot="label">{item.name}</Text>
-													<Text className="block text-xs text-muted-fg" slot="description">
-														{item.type.type}
-														{" · "}
-														{item.url}
-													</Text>
-												</div>
-											</MultipleSelectItem>
-										);
-									}}
-								</MultipleSelectContent>
-							</MultipleSelect>
-						) : (
-							<p>{t("No social media entries available.")}</p>
-						)}
-						<Button
-							className="self-start"
-							intent="outline"
-							onPress={() => {
-								setIsCreateSocialMediaOpen(true);
-							}}
-						>
-							<PlusIcon />
-							{t("Create social media")}
-						</Button>
-						{selectedSocialMediaIds.map((id, index) => {
-							return (
-								<input key={id} name={`socialMediaIds.${String(index)}`} type="hidden" value={id} />
-							);
-						})}
-					</FormSection>
-
-					<Separator className="my-6" />
-
-					<FormSection
-						description={t("Add partner organisations and their roles in this project.")}
-						title={t("Partners")}
-					>
-						<div className="flex flex-col gap-3">
-							{partners.map((partner, index) => {
+						<MultipleSelectContent items={localSocialMediaItems}>
+							{(item) => {
 								return (
-									<div
-										key={partner._tempId}
-										className="flex items-center gap-3 rounded-lg border px-4 py-3"
-									>
-										<div className="min-w-0 flex-1">
-											<p className="truncate text-sm font-medium">{partner.unitName}</p>
-											<p className="text-xs text-muted-fg">
-												{partner.roleName}
-												{partner.durationStart != null ? ` · ${partner.durationStart}` : null}
-												{partner.durationEnd != null ? ` – ${partner.durationEnd}` : null}
-											</p>
+									<MultipleSelectItem id={item.id} textValue={item.name}>
+										<div className="col-start-2">
+											<Text slot="label">{item.name}</Text>
+											<Text className="block text-xs text-muted-fg" slot="description">
+												{item.type.type}
+												{" · "}
+												{item.url}
+											</Text>
 										</div>
-										<Button
-											aria-label={t("Edit partner")}
-											intent="plain"
-											onPress={() => {
-												openEditDialog(index);
-											}}
-											size="sq-xs"
-										>
-											<PencilSquareIcon />
-										</Button>
-										<Button
-											aria-label={t("Remove partner")}
-											intent="plain"
-											onPress={() => {
-												removePartner(index);
-											}}
-											size="sq-xs"
-										>
-											<TrashIcon />
-										</Button>
-									</div>
+									</MultipleSelectItem>
 								);
-							})}
-							<Button className="self-start" intent="outline" onPress={openAddDialog}>
-								<PlusIcon />
-								{t("Add partner")}
-							</Button>
-						</div>
-						{partners.map(
-							({ _tempId, existingId, unitId, roleId, durationStart, durationEnd }, index) => {
-								return (
-									<Fragment key={_tempId}>
-										{existingId != null && (
-											<input
-												name={`partners.${String(index)}.id`}
-												type="hidden"
-												value={existingId}
-											/>
-										)}
-										<input name={`partners.${String(index)}.unitId`} type="hidden" value={unitId} />
-										<input name={`partners.${String(index)}.roleId`} type="hidden" value={roleId} />
-										{durationStart != null && (
-											<input
-												name={`partners.${String(index)}.durationStart`}
-												type="hidden"
-												value={durationStart}
-											/>
-										)}
-										{durationEnd != null && (
-											<input
-												name={`partners.${String(index)}.durationEnd`}
-												type="hidden"
-												value={durationEnd}
-											/>
-										)}
-									</Fragment>
-								);
-							},
-						)}
-					</FormSection>
+							}}
+						</MultipleSelectContent>
+					</MultipleSelect>
+				) : (
+					<p>{t("No social media entries available.")}</p>
+				)}
+				<Button
+					className="self-start"
+					intent="outline"
+					onPress={() => {
+						setIsCreateSocialMediaOpen(true);
+					}}
+				>
+					<PlusIcon />
+					{t("Create social media")}
+				</Button>
+				{selectedSocialMediaIds.map((id, index) => {
+					return (
+						<input key={id} name={`socialMediaIds.${String(index)}`} type="hidden" value={id} />
+					);
+				})}
+			</FormSection>
 
-					<ModalContent
-						isOpen={dialog.isOpen}
-						onOpenChange={(open) => {
+			<Separator className="my-6" />
+
+			<FormSection
+				description={t("Add partner organisations and their roles in this project.")}
+				title={t("Partners")}
+			>
+				<div className="flex flex-col gap-3">
+					{partners.map((partner, index) => {
+						return (
+							<div
+								key={partner._tempId}
+								className="flex items-center gap-3 rounded-lg border px-4 py-3"
+							>
+								<div className="min-w-0 flex-1">
+									<p className="truncate text-sm font-medium">{partner.unitName}</p>
+									<p className="text-xs text-muted-fg">
+										{partner.roleName}
+										{partner.durationStart != null ? ` · ${partner.durationStart}` : null}
+										{partner.durationEnd != null ? ` – ${partner.durationEnd}` : null}
+									</p>
+								</div>
+								<Button
+									aria-label={t("Edit partner")}
+									intent="plain"
+									onPress={() => {
+										openEditDialog(index);
+									}}
+									size="sq-xs"
+								>
+									<PencilSquareIcon />
+								</Button>
+								<Button
+									aria-label={t("Remove partner")}
+									intent="plain"
+									onPress={() => {
+										removePartner(index);
+									}}
+									size="sq-xs"
+								>
+									<TrashIcon />
+								</Button>
+							</div>
+						);
+					})}
+					<Button className="self-start" intent="outline" onPress={openAddDialog}>
+						<PlusIcon />
+						{t("Add partner")}
+					</Button>
+				</div>
+				{partners.map(
+					({ _tempId, existingId, unitId, roleId, durationStart, durationEnd }, index) => {
+						return (
+							<Fragment key={_tempId}>
+								{existingId != null && (
+									<input name={`partners.${String(index)}.id`} type="hidden" value={existingId} />
+								)}
+								<input name={`partners.${String(index)}.unitId`} type="hidden" value={unitId} />
+								<input name={`partners.${String(index)}.roleId`} type="hidden" value={roleId} />
+								{durationStart != null && (
+									<input
+										name={`partners.${String(index)}.durationStart`}
+										type="hidden"
+										value={durationStart}
+									/>
+								)}
+								{durationEnd != null && (
+									<input
+										name={`partners.${String(index)}.durationEnd`}
+										type="hidden"
+										value={durationEnd}
+									/>
+								)}
+							</Fragment>
+						);
+					},
+				)}
+			</FormSection>
+
+			<ModalContent
+				isOpen={dialog.isOpen}
+				onOpenChange={(open) => {
+					setDialog((prev) => {
+						return { ...prev, isOpen: open };
+					});
+				}}
+			>
+				<ModalHeader
+					description={t("Select an organisation, its role, and an optional involvement period.")}
+					title={dialog.editingIndex !== null ? t("Edit partner") : t("Add partner")}
+				/>
+				<ModalBody className="flex flex-col gap-y-4">
+					<Select
+						isRequired={true}
+						onChange={(key) => {
 							setDialog((prev) => {
-								return { ...prev, isOpen: open };
+								return { ...prev, unitId: String(key) };
 							});
 						}}
+						value={dialog.unitId || null}
 					>
-						<ModalHeader
-							description={t(
-								"Select an organisation, its role, and an optional involvement period.",
-							)}
-							title={dialog.editingIndex !== null ? t("Edit partner") : t("Add partner")}
-						/>
-						<ModalBody className="flex flex-col gap-y-4">
-							<Select
-								isRequired={true}
-								onChange={(key) => {
-									setDialog((prev) => {
-										return { ...prev, unitId: String(key) };
-									});
-								}}
-								value={dialog.unitId || null}
-							>
-								<Label>{t("Organisation")}</Label>
-								<SelectTrigger />
-								<SelectContent items={orgUnits}>
-									{(unit) => {
-										return <SelectItem id={unit.id}>{unit.name}</SelectItem>;
-									}}
-								</SelectContent>
-							</Select>
+						<Label>{t("Organisation")}</Label>
+						<SelectTrigger />
+						<SelectContent items={orgUnits}>
+							{(unit) => {
+								return <SelectItem id={unit.id}>{unit.name}</SelectItem>;
+							}}
+						</SelectContent>
+					</Select>
 
-							<Select
-								isRequired={true}
-								onChange={(key) => {
-									setDialog((prev) => {
-										return { ...prev, roleId: String(key) };
-									});
-								}}
-								value={dialog.roleId || null}
-							>
-								<Label>{t("Role")}</Label>
-								<SelectTrigger />
-								<SelectContent items={roles}>
-									{(role) => {
-										return <SelectItem id={role.id}>{role.role}</SelectItem>;
-									}}
-								</SelectContent>
-							</Select>
-
-							<DatePicker
-								granularity="day"
-								onChange={(date) => {
-									setDialog((prev) => {
-										return { ...prev, durationStart: date };
-									});
-								}}
-								value={dialog.durationStart}
-							>
-								<Label>{t("Start date (optional)")}</Label>
-								<DatePickerTrigger />
-							</DatePicker>
-
-							<DatePicker
-								granularity="day"
-								onChange={(date) => {
-									setDialog((prev) => {
-										return { ...prev, durationEnd: date };
-									});
-								}}
-								value={dialog.durationEnd}
-							>
-								<Label>{t("End date (optional)")}</Label>
-								<DatePickerTrigger />
-							</DatePicker>
-						</ModalBody>
-						<ModalFooter>
-							<ModalClose>{t("Cancel")}</ModalClose>
-							<Button isDisabled={!dialog.unitId || !dialog.roleId} onPress={handleConfirmDialog}>
-								{dialog.editingIndex !== null ? t("Update") : t("Add")}
-							</Button>
-						</ModalFooter>
-					</ModalContent>
-
-					<ModalContent
-						isOpen={isCreateSocialMediaOpen}
-						onOpenChange={(open) => {
-							setIsCreateSocialMediaOpen(open);
-							if (!open) {
-								setCreateSocialMediaFormKey((prev) => {
-									return prev + 1;
-								});
-							}
+					<Select
+						isRequired={true}
+						onChange={(key) => {
+							setDialog((prev) => {
+								return { ...prev, roleId: String(key) };
+							});
 						}}
+						value={dialog.roleId || null}
 					>
-						<Form
-							key={createSocialMediaFormKey}
-							action={handleCreateSocialMedia}
-							state={createSocialMediaState}
-						>
-							<ModalHeader
-								description={t("Fill in the details for the new social media entry.")}
-								title={t("Create social media")}
-							/>
-							<ModalBody className="flex flex-col gap-y-4">
-								<TextField isRequired={true} name="name">
-									<Label>{t("Name")}</Label>
-									<Input placeholder={t("Name")} />
-									<FieldError />
-								</TextField>
+						<Label>{t("Role")}</Label>
+						<SelectTrigger />
+						<SelectContent items={roles}>
+							{(role) => {
+								return <SelectItem id={role.id}>{role.role}</SelectItem>;
+							}}
+						</SelectContent>
+					</Select>
 
-								<TextField isRequired={true} name="url">
-									<Label>{t("URL")}</Label>
-									<Input placeholder="https://" />
-									<FieldError />
-								</TextField>
+					<DatePicker
+						granularity="day"
+						onChange={(date) => {
+							setDialog((prev) => {
+								return { ...prev, durationStart: date };
+							});
+						}}
+						value={dialog.durationStart}
+					>
+						<Label>{t("Start date (optional)")}</Label>
+						<DatePickerTrigger />
+					</DatePicker>
 
-								<Select isRequired={true} name="type">
-									<Label>{t("Type")}</Label>
-									<SelectTrigger />
-									<FieldError />
-									<SelectContent>
-										{socialMediaTypesEnum.map((type) => {
-											return (
-												<SelectItem key={type} id={type}>
-													{type}
-												</SelectItem>
-											);
-										})}
-									</SelectContent>
-								</Select>
+					<DatePicker
+						granularity="day"
+						onChange={(date) => {
+							setDialog((prev) => {
+								return { ...prev, durationEnd: date };
+							});
+						}}
+						value={dialog.durationEnd}
+					>
+						<Label>{t("End date (optional)")}</Label>
+						<DatePickerTrigger />
+					</DatePicker>
+				</ModalBody>
+				<ModalFooter>
+					<ModalClose>{t("Cancel")}</ModalClose>
+					<Button isDisabled={!dialog.unitId || !dialog.roleId} onPress={handleConfirmDialog}>
+						{dialog.editingIndex !== null ? t("Update") : t("Add")}
+					</Button>
+				</ModalFooter>
+			</ModalContent>
 
-								<DatePicker granularity="day" name="duration.start">
-									<Label>{t("Start date (optional)")}</Label>
-									<DatePickerTrigger />
-								</DatePicker>
+			<ModalContent
+				isOpen={isCreateSocialMediaOpen}
+				onOpenChange={(open) => {
+					setIsCreateSocialMediaOpen(open);
+					if (!open) {
+						setCreateSocialMediaFormKey((prev) => {
+							return prev + 1;
+						});
+					}
+				}}
+			>
+				<Form
+					key={createSocialMediaFormKey}
+					action={handleCreateSocialMedia}
+					state={createSocialMediaState}
+				>
+					<ModalHeader
+						description={t("Fill in the details for the new social media entry.")}
+						title={t("Create social media")}
+					/>
+					<ModalBody className="flex flex-col gap-y-4">
+						<TextField isRequired={true} name="name">
+							<Label>{t("Name")}</Label>
+							<Input placeholder={t("Name")} />
+							<FieldError />
+						</TextField>
 
-								<DatePicker granularity="day" name="duration.end">
-									<Label>{t("End date (optional)")}</Label>
-									<DatePickerTrigger />
-								</DatePicker>
-							</ModalBody>
-							<ModalFooter>
-								<ModalClose>{t("Cancel")}</ModalClose>
-								<Button isPending={isCreateSocialMediaPending} type="submit">
-									{isCreateSocialMediaPending ? (
-										<Fragment>
-											<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
-											<span aria-hidden={true}>{t("Saving...")}</span>
-										</Fragment>
-									) : (
-										t("Create")
-									)}
-								</Button>
-							</ModalFooter>
-							<FormStatus className="px-6 pb-4" state={createSocialMediaState} />
-						</Form>
-					</ModalContent>
-				</Fragment>
-			)}
+						<TextField isRequired={true} name="url">
+							<Label>{t("URL")}</Label>
+							<Input placeholder="https://" />
+							<FieldError />
+						</TextField>
+
+						<Select isRequired={true} name="type">
+							<Label>{t("Type")}</Label>
+							<SelectTrigger />
+							<FieldError />
+							<SelectContent>
+								{socialMediaTypesEnum.map((type) => {
+									return (
+										<SelectItem key={type} id={type}>
+											{type}
+										</SelectItem>
+									);
+								})}
+							</SelectContent>
+						</Select>
+
+						<DatePicker granularity="day" name="duration.start">
+							<Label>{t("Start date (optional)")}</Label>
+							<DatePickerTrigger />
+						</DatePicker>
+
+						<DatePicker granularity="day" name="duration.end">
+							<Label>{t("End date (optional)")}</Label>
+							<DatePickerTrigger />
+						</DatePicker>
+					</ModalBody>
+					<ModalFooter>
+						<ModalClose>{t("Cancel")}</ModalClose>
+						<Button isPending={isCreateSocialMediaPending} type="submit">
+							{isCreateSocialMediaPending ? (
+								<Fragment>
+									<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
+									<span aria-hidden={true}>{t("Saving...")}</span>
+								</Fragment>
+							) : (
+								t("Create")
+							)}
+						</Button>
+					</ModalFooter>
+					<FormStatus className="px-6 pb-4" state={createSocialMediaState} />
+				</Form>
+			</ModalContent>
 
 			{project != null ? (
 				<Fragment>
