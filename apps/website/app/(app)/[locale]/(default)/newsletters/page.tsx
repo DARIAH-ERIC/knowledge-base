@@ -1,4 +1,3 @@
-import { isErr } from "@acdh-oeaw/lib";
 import { Link } from "@dariah-eric/ui/link";
 import type { Metadata, ResolvingMetadata } from "next";
 import { useTranslations } from "next-intl";
@@ -6,7 +5,7 @@ import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { client } from "@/lib/mailchimp";
+import { mailchimp } from "@/lib/mailchimp";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface NewslettersPageProps extends PageProps<"/[locale]/imprint"> {}
@@ -38,22 +37,16 @@ export default function NewslettersPage(_props: Readonly<NewslettersPageProps>):
 }
 
 async function NewslettersList(): Promise<ReactNode> {
-	const result = await client.get();
-
-	if (isErr(result)) {
-		throw result.error;
-	}
-
-	const data = result.value.data;
+	const newsletters = (await mailchimp.get()).unwrap().data.campaigns;
 
 	return (
 		<ul role="list">
-			{data.campaigns.map((campaign) => {
+			{newsletters.map((newsletter) => {
 				return (
-					<li key={campaign.id}>
+					<li key={newsletter.id}>
 						<article>
 							<h2>
-								<Link href={campaign.archive_url}>{campaign.settings.title}</Link>
+								<Link href={newsletter.archive_url}>{newsletter.settings.title}</Link>
 							</h2>
 						</article>
 					</li>

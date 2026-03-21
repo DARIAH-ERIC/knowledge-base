@@ -1,17 +1,18 @@
 "use server";
 
-import { getFormDataValues, HttpError, isErr } from "@acdh-oeaw/lib";
+import { getFormDataValues } from "@acdh-oeaw/lib";
 import {
 	createActionStateError,
 	createActionStateSuccess,
 	type GetValidationErrors,
 } from "@dariah-eric/next-lib/actions";
+import { HttpError } from "@dariah-eric/request/errors";
 import { getLocale, getTranslations } from "next-intl/server";
 import * as v from "valibot";
 
 import { SubscribeNewsletterInputSchema } from "@/app/(app)/[locale]/(default)/_lib/subscribe-newsletter.schema";
 import { getIntlLanguage } from "@/lib/i18n/locales";
-import { client } from "@/lib/mailchimp";
+import { mailchimp } from "@/lib/mailchimp";
 import { createServerAction } from "@/lib/server/create-server-action";
 
 export const subscribeNewsletterAction = createServerAction<
@@ -41,9 +42,9 @@ export const subscribeNewsletterAction = createServerAction<
 
 	const { email } = validation.output;
 
-	const result = await client.subscribe({ email });
+	const result = await mailchimp.subscribe({ email });
 
-	if (isErr(result)) {
+	if (result.isErr()) {
 		if (HttpError.is(result.error) && result.error.response.status === 400) {
 			try {
 				const message = (await result.error.response.json()) as { title?: string };
