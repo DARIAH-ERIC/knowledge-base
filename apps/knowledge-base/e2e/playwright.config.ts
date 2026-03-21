@@ -66,14 +66,17 @@ export default defineConfig({
 	projects: [
 		{
 			name: "chromium",
+			testIgnore: "**/admin/**/*.test.ts",
 			use: { ...devices["Desktop Chrome"], channel: "chromium" },
 		},
 		{
 			name: "firefox",
+			testIgnore: "**/admin/**/*.test.ts",
 			use: { ...devices["Desktop Firefox"] },
 		},
 		{
 			name: "webkit",
+			testIgnore: "**/admin/**/*.test.ts",
 			use: { ...devices["Desktop Safari"] },
 		},
 		{
