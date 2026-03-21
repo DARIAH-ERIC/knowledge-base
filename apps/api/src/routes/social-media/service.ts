@@ -8,17 +8,19 @@ import type { Database, Transaction } from "@/middlewares/db";
 function mapItem<
 	T extends {
 		type: { type: string };
-		duration: { start: Date; end?: Date | null };
+		duration: { start: Date; end?: Date | null } | null;
 		organisationalUnits: Array<{ id: string; name: string; type: { type: string } }>;
 	},
 >(item: T) {
 	return {
 		...item,
 		type: item.type.type,
-		duration: {
-			start: item.duration.start.toISOString(),
-			end: item.duration.end?.toISOString() ?? null,
-		},
+		duration: item.duration
+			? {
+					start: item.duration.start.toISOString(),
+					end: item.duration.end?.toISOString() ?? null,
+				}
+			: null,
 		organisationalUnits: item.organisationalUnits.map((unit) => {
 			return { ...unit, type: unit.type.type };
 		}),

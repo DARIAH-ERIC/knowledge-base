@@ -2,16 +2,9 @@ import { createCipheriv, createHash, randomBytes } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import { log } from "@acdh-oeaw/lib";
 import { config as dotenv } from "@dotenvx/dotenvx";
 
-/**
- * Load env files at module-init time — BEFORE globalSetup() is called and
- * before any env-dependent modules are imported.
- *
- * We only statically import modules that have no env-validation side effects
- * (node builtins, dotenvx). Everything DB-related is dynamically imported
- * INSIDE globalSetup() after env vars are set.
- */
 dotenv({
 	path: [".env.test.local", ".env.local", ".env.test", ".env"].map((filePath) => {
 		return join(import.meta.dirname, "../..", filePath);
@@ -23,7 +16,7 @@ dotenv({
 const E2E_ADMIN_EMAIL = "e2e-admin@example.com";
 const E2E_ADMIN_NAME = "E2E Admin";
 const E2E_TEST_ASSET_KEY = "e2e-test-asset";
-const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
+const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 30;
 
 function encrypt(data: Buffer, key: Buffer): Buffer {
 	const iv = randomBytes(16);
@@ -44,8 +37,6 @@ export default async function globalSetup(): Promise<void> {
 	}
 	const encryptionKey = Buffer.from(authEncryptionKeyHex, "hex");
 
-	// Dynamic imports so that env validation in @dariah-eric/database/client
-	// runs AFTER dotenv() has populated process.env above.
 	const [{ eq }, { createClient }, schema] = await Promise.all([
 		import("@dariah-eric/database"),
 		import("@dariah-eric/database/client"),
@@ -55,9 +46,11 @@ export default async function globalSetup(): Promise<void> {
 	const db = createClient();
 
 	try {
-		// 1. Create/upsert test admin user.
-		// The passwordHash is a placeholder — we bypass password auth in E2E tests
-		// by injecting a pre-authenticated session directly into the database.
+		/**
+		 * Upsert test admin user.
+		 * The `passwordHash` is a placeholder — we bypass password auth in e2etests by injecting a
+		 * pre-authenticated session directly into the database.
+		 */
 		const passwordHash = `e2e-placeholder-${randomBytes(16).toString("hex")}`;
 		const twoFactorTotpKey = encrypt(randomBytes(20), encryptionKey);
 		const twoFactorRecoveryCode = encrypt(
@@ -97,7 +90,6 @@ export default async function globalSetup(): Promise<void> {
 
 		const userId = existingUser.id;
 
-		// 2. Upsert the test asset (no licenseId needed).
 		const existingAsset = await db.query.assets.findFirst({
 			where: { key: E2E_TEST_ASSET_KEY },
 			columns: { id: true },
@@ -107,7 +99,6 @@ export default async function globalSetup(): Promise<void> {
 			await db.insert(schema.assets).values({ key: E2E_TEST_ASSET_KEY });
 		}
 
-		// 3. Replace existing sessions with a new pre-authenticated session.
 		await db.delete(schema.sessions).where(eq(schema.sessions.userId, userId));
 
 		const sessionId = randomBytes(32).toString("hex");
@@ -124,7 +115,6 @@ export default async function globalSetup(): Promise<void> {
 			isTwoFactorVerified: true,
 		});
 
-		// 4. Write Playwright storageState to e2e/.auth/admin.json.
 		const baseUrl =
 			// eslint-disable-next-line no-restricted-syntax
 			process.env.NEXT_PUBLIC_APP_BASE_URL ?? `http://localhost:${process.env.PORT ?? "3001"}`;
@@ -150,10 +140,8 @@ export default async function globalSetup(): Promise<void> {
 		await mkdir(authDir, { recursive: true });
 		await writeFile(join(authDir, "admin.json"), JSON.stringify(storageState, null, 2), "utf-8");
 
-		console.log(`[globalSetup] Admin session written for ${E2E_ADMIN_EMAIL}`);
+		log.info(`[globalSetup] Admin session written for ${E2E_ADMIN_EMAIL}`);
 	} finally {
-		// Close the underlying pg pool so Node.js can exit cleanly.
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-		await (db as any).$client?.end?.();
+		await db.$client.end();
 	}
 }

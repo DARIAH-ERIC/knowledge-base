@@ -95,10 +95,12 @@ export async function getMembersAndPartners(
 			return {
 				...sm,
 				type: sm.type.type,
-				duration: {
-					start: sm.duration.start.toISOString(),
-					end: sm.duration.end?.toISOString() ?? null,
-				},
+				duration: sm.duration
+					? {
+							start: sm.duration.start.toISOString(),
+							end: sm.duration.end?.toISOString() ?? null,
+						}
+					: null,
 			};
 		});
 
@@ -183,10 +185,12 @@ export async function getMemberOrPartnerById(
 		return {
 			...sm,
 			type: sm.type.type,
-			duration: {
-				start: sm.duration.start.toISOString(),
-				end: sm.duration.end?.toISOString() ?? null,
-			},
+			duration: sm.duration
+				? {
+						start: sm.duration.start.toISOString(),
+						end: sm.duration.end?.toISOString() ?? null,
+					}
+				: null,
 		};
 	});
 
@@ -331,10 +335,12 @@ export async function getMemberOrPartnerBySlug(
 		return {
 			...sm,
 			type: sm.type.type,
-			duration: {
-				start: sm.duration.start.toISOString(),
-				end: sm.duration.end?.toISOString() ?? null,
-			},
+			duration: sm.duration
+				? {
+						start: sm.duration.start.toISOString(),
+						end: sm.duration.end?.toISOString() ?? null,
+					}
+				: null,
 		};
 	});
 

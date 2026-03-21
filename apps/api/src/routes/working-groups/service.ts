@@ -90,10 +90,12 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 			return {
 				...sm,
 				type: sm.type.type,
-				duration: {
-					start: sm.duration.start.toISOString(),
-					end: sm.duration.end?.toISOString() ?? null,
-				},
+				duration: sm.duration
+					? {
+							start: sm.duration.start.toISOString(),
+							end: sm.duration.end?.toISOString() ?? null,
+						}
+					: null,
 			};
 		});
 
@@ -176,10 +178,12 @@ export async function getWorkingGroupById(
 		return {
 			...sm,
 			type: sm.type.type,
-			duration: {
-				start: sm.duration.start.toISOString(),
-				end: sm.duration.end?.toISOString() ?? null,
-			},
+			duration: sm.duration
+				? {
+						start: sm.duration.start.toISOString(),
+						end: sm.duration.end?.toISOString() ?? null,
+					}
+				: null,
 		};
 	});
 
@@ -322,10 +326,12 @@ export async function getWorkingGroupBySlug(
 		return {
 			...sm,
 			type: sm.type.type,
-			duration: {
-				start: sm.duration.start.toISOString(),
-				end: sm.duration.end?.toISOString() ?? null,
-			},
+			duration: sm.duration
+				? {
+						start: sm.duration.start.toISOString(),
+						end: sm.duration.end?.toISOString() ?? null,
+					}
+				: null,
 		};
 	});
 

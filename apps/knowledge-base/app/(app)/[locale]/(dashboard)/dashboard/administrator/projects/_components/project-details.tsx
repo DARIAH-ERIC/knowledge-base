@@ -25,7 +25,7 @@ interface ProjectDetailsProps {
 			id: string;
 			unitName: string;
 			roleName: string;
-			duration: { start: Date; end: Date | null } | null;
+			duration: { start: Date; end?: Date | null | undefined } | null;
 		}>;
 		socialMedia: Array<{
 			id: string;
