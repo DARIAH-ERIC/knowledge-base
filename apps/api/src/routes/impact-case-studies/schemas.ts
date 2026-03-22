@@ -1,6 +1,7 @@
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
+import { ContentBlockSchema } from "@/lib/content-blocks";
 import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const ImpactCaseStudyBaseSchema = v.pipe(
@@ -34,6 +35,7 @@ export const ImpactCaseStudySchema = v.pipe(
 			}),
 		),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+		content: v.array(ContentBlockSchema),
 	}),
 	v.description("Impact case study"),
 	v.metadata({ ref: "ImpactCaseStudy" }),

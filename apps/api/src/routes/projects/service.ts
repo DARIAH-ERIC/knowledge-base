@@ -3,6 +3,7 @@
 import { count, eq } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
+import { getContentBlocks } from "@/lib/content-blocks";
 import type { Database, Transaction } from "@/middlewares/db";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
@@ -111,7 +112,7 @@ interface GetProjectByIdParams {
 export async function getProjectById(db: Database | Transaction, params: GetProjectByIdParams) {
 	const { id } = params;
 
-	const item = await db.query.projects.findFirst({
+	const [item, fields] = await Promise.all([db.query.projects.findFirst({
 		where: {
 			id,
 			entity: {
@@ -160,7 +161,7 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 				},
 			},
 		},
-	});
+	}), getContentBlocks(db, id)]);
 
 	if (item == null) {
 		return null;
@@ -178,9 +179,7 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 		return { ...rest, type: type.type };
 	});
 
-	const data = { ...item, image, institutions };
-
-	return data;
+	return { ...item, image, institutions, ...fields };
 }
 
 //
@@ -312,7 +311,7 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 		return { ...rest, type: type.type };
 	});
 
-	const data = { ...item, image, institutions };
+	const fields = await getContentBlocks(db, item.id);
 
-	return data;
+	return { ...item, image, institutions, ...fields };
 }

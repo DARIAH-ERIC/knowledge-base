@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 import type { Database } from "@/middlewares/db";
 import type { Project } from "@/routes/projects/schemas";
 import { createTestClient } from "~/test/lib/create-test-client";
+import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";
 
 function createItems(count: number) {
@@ -102,6 +103,12 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 			};
 		}),
 	);
+
+	await Promise.all(
+		items.map((item) => {
+			return seedContentBlock(db, item.entity.id, entityType.id, "description");
+		}),
+	);
 }
 
 describe("projects", () => {
@@ -169,6 +176,8 @@ describe("projects", () => {
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 					type: expect.any(String),
 				});
+				expect(data.description).toHaveLength(1);
+				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});
 		});
 
@@ -253,6 +262,8 @@ describe("projects", () => {
 				const data = await response.json();
 
 				expect(data).toMatchObject({ name });
+				expect(data.description).toHaveLength(1);
+				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});
 		});
 

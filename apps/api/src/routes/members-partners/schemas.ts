@@ -1,6 +1,7 @@
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
+import { ContentBlockSchema } from "@/lib/content-blocks";
 import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const MemberOrPartnerBaseSchema = v.pipe(
@@ -64,6 +65,7 @@ export const MemberOrPartnerSchema = v.pipe(
 				type: v.picklist(schema.socialMediaTypesEnum),
 			}),
 		),
+		description: v.array(ContentBlockSchema),
 	}),
 	v.description("Member or partner"),
 	v.metadata({ ref: "MemberOrPartner" }),

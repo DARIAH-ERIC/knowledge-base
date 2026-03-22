@@ -3,6 +3,7 @@
 import { count, eq } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
+import { getContentBlocks } from "@/lib/content-blocks";
 import type { Database, Transaction } from "@/middlewares/db";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
@@ -81,33 +82,36 @@ interface GetNewsItemByIdParams {
 export async function getNewsItemById(db: Database | Transaction, params: GetNewsItemByIdParams) {
 	const { id } = params;
 
-	const item = await db.query.news.findFirst({
-		where: {
-			id,
-			entity: {
-				status: {
-					type: "published",
+	const [item, fields] = await Promise.all([
+		db.query.news.findFirst({
+			where: {
+				id,
+				entity: {
+					status: {
+						type: "published",
+					},
 				},
 			},
-		},
-		columns: {
-			id: true,
-			title: true,
-			summary: true,
-		},
-		with: {
-			entity: {
-				columns: {
-					slug: true,
+			columns: {
+				id: true,
+				title: true,
+				summary: true,
+			},
+			with: {
+				entity: {
+					columns: {
+						slug: true,
+					},
+				},
+				image: {
+					columns: {
+						key: true,
+					},
 				},
 			},
-			image: {
-				columns: {
-					key: true,
-				},
-			},
-		},
-	});
+		}),
+		getContentBlocks(db, id),
+	]);
 
 	if (item == null) {
 		return null;
@@ -118,9 +122,7 @@ export async function getNewsItemById(db: Database | Transaction, params: GetNew
 		options: { width: imageWidth.featured },
 	});
 
-	const data = { ...item, image };
-
-	return data;
+	return { ...item, image, ...fields };
 }
 
 //
@@ -230,7 +232,7 @@ export async function getNewsItemBySlug(
 		options: { width: imageWidth.featured },
 	});
 
-	const data = { ...item, image };
+	const fields = await getContentBlocks(db, item.id);
 
-	return data;
+	return { ...item, image, ...fields };
 }

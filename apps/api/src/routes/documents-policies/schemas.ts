@@ -1,6 +1,7 @@
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
+import { ContentBlockSchema } from "@/lib/content-blocks";
 import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const DocumentOrPolicyBaseSchema = v.pipe(
@@ -28,6 +29,7 @@ export const DocumentOrPolicySchema = v.pipe(
 		...v.pick(schema.DocumentOrPolicySelectSchema, ["id", "title", "summary", "url"]).entries,
 		document: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+		description: v.array(ContentBlockSchema),
 	}),
 	v.description("Document or policy"),
 	v.metadata({ ref: "DocumentOrPolicy" }),

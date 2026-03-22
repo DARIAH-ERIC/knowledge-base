@@ -3,6 +3,7 @@
 import { count, eq } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
+import { getContentBlocks } from "@/lib/content-blocks";
 import type { Database, Transaction } from "@/middlewares/db";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
@@ -83,35 +84,38 @@ interface GetPersonByIdParams {
 export async function getPersonById(db: Database | Transaction, params: GetPersonByIdParams) {
 	const { id } = params;
 
-	const item = await db.query.persons.findFirst({
-		where: {
-			id,
-			entity: {
-				status: {
-					type: "published",
+	const [item, fields] = await Promise.all([
+		db.query.persons.findFirst({
+			where: {
+				id,
+				entity: {
+					status: {
+						type: "published",
+					},
 				},
 			},
-		},
-		columns: {
-			id: true,
-			name: true,
-			sortName: true,
-			email: true,
-			orcid: true,
-		},
-		with: {
-			entity: {
-				columns: {
-					slug: true,
+			columns: {
+				id: true,
+				name: true,
+				sortName: true,
+				email: true,
+				orcid: true,
+			},
+			with: {
+				entity: {
+					columns: {
+						slug: true,
+					},
+				},
+				image: {
+					columns: {
+						key: true,
+					},
 				},
 			},
-			image: {
-				columns: {
-					key: true,
-				},
-			},
-		},
-	});
+		}),
+		getContentBlocks(db, id),
+	]);
 
 	if (item == null) {
 		return null;
@@ -122,7 +126,7 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 		options: { width: imageWidth.featured },
 	});
 
-	return { ...item, image };
+	return { ...item, image, ...fields };
 }
 
 //
@@ -226,5 +230,7 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 		options: { width: imageWidth.featured },
 	});
 
-	return { ...item, image };
+	const fields = await getContentBlocks(db, item.id);
+
+	return { ...item, image, ...fields };
 }

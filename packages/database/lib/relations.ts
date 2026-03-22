@@ -36,6 +36,26 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.contentBlockTypes.id,
 				optional: false,
 			}),
+			dataContentBlock: r.one.dataContentBlocks({
+				from: r.contentBlocks.id,
+				to: r.dataContentBlocks.id,
+				optional: true,
+			}),
+			embedContentBlock: r.one.embedContentBlocks({
+				from: r.contentBlocks.id,
+				to: r.embedContentBlocks.id,
+				optional: true,
+			}),
+			imageContentBlock: r.one.imageContentBlocks({
+				from: r.contentBlocks.id,
+				to: r.imageContentBlocks.id,
+				optional: true,
+			}),
+			richTextContentBlock: r.one.richTextContentBlocks({
+				from: r.contentBlocks.id,
+				to: r.richTextContentBlocks.id,
+				optional: true,
+			}),
 		},
 		dataContentBlocks: {
 			contentBlock: r.one.contentBlocks({
@@ -60,6 +80,10 @@ export const relations = defineRelations(schema, (r) => {
 			entities: r.many.entities({
 				from: r.entities.id.through(r.entitiesToEntities.entityId),
 				to: r.entities.id.through(r.entitiesToEntities.relatedEntityId),
+			}),
+			fields: r.many.fields({
+				from: r.entities.id,
+				to: r.fields.entityId,
 			}),
 			status: r.one.entityStatus({
 				from: r.entities.statusId,
@@ -100,6 +124,10 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.fields.fieldNameId,
 				to: r.entityTypesFieldsNames.id,
 				optional: false,
+			}),
+			contentBlocks: r.many.contentBlocks({
+				from: r.fields.id,
+				to: r.contentBlocks.fieldId,
 			}),
 		},
 		imageContentBlocks: {

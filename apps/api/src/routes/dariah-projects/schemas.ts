@@ -1,6 +1,7 @@
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
+import { ContentBlockSchema } from "@/lib/content-blocks";
 import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const DariahProjectInstitutionSchema = v.pipe(
@@ -62,6 +63,7 @@ export const DariahProjectSchema = v.pipe(
 		institutions: v.array(DariahProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
+		description: v.array(ContentBlockSchema),
 	}),
 	v.description("DARIAH project"),
 	v.metadata({ ref: "DariahProject" }),

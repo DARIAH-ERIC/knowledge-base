@@ -1,0 +1,38 @@
+import { assert } from "@acdh-oeaw/lib";
+import * as schema from "@dariah-eric/database/schema";
+import { v7 as uuidv7 } from "uuid";
+
+import type { Database } from "@/middlewares/db";
+
+export async function seedContentBlock(
+	db: Database,
+	entityId: string,
+	entityTypeId: string,
+	fieldName: string,
+	content: unknown = { type: "doc", content: [] },
+) {
+	const [blockType, fieldNameRecord] = await Promise.all([
+		db.query.contentBlockTypes.findFirst({
+			columns: { id: true },
+			where: { type: "rich_text" },
+		}),
+		db.query.entityTypesFieldsNames.findFirst({
+			columns: { id: true },
+			where: { entityTypeId, fieldName },
+		}),
+	]);
+
+	assert(blockType, "No rich_text content block type in database.");
+	assert(fieldNameRecord, `No field name '${fieldName}' for entity type in database.`);
+
+	const fieldId = uuidv7();
+	const blockId = uuidv7();
+
+	await db.insert(schema.fields).values({ id: fieldId, entityId, fieldNameId: fieldNameRecord.id });
+	await db
+		.insert(schema.contentBlocks)
+		.values({ id: blockId, fieldId, typeId: blockType.id, position: 0 });
+	await db.insert(schema.richTextContentBlocks).values({ id: blockId, content });
+
+	return { content };
+}

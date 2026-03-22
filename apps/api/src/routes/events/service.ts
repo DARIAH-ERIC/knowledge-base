@@ -3,6 +3,7 @@
 import { count, eq } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
+import { getContentBlocks } from "@/lib/content-blocks";
 import type { Database, Transaction } from "@/middlewares/db";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
@@ -84,36 +85,39 @@ interface GetEventByIdParams {
 export async function getEventById(db: Database | Transaction, params: GetEventByIdParams) {
 	const { id } = params;
 
-	const item = await db.query.events.findFirst({
-		where: {
-			id,
-			entity: {
-				status: {
-					type: "published",
+	const [item, fields] = await Promise.all([
+		db.query.events.findFirst({
+			where: {
+				id,
+				entity: {
+					status: {
+						type: "published",
+					},
 				},
 			},
-		},
-		columns: {
-			id: true,
-			title: true,
-			summary: true,
-			location: true,
-			duration: true,
-			isFullDay: true,
-		},
-		with: {
-			entity: {
-				columns: {
-					slug: true,
+			columns: {
+				id: true,
+				title: true,
+				summary: true,
+				location: true,
+				duration: true,
+				isFullDay: true,
+			},
+			with: {
+				entity: {
+					columns: {
+						slug: true,
+					},
+				},
+				image: {
+					columns: {
+						key: true,
+					},
 				},
 			},
-			image: {
-				columns: {
-					key: true,
-				},
-			},
-		},
-	});
+		}),
+		getContentBlocks(db, id),
+	]);
 
 	if (item == null) {
 		return null;
@@ -124,9 +128,7 @@ export async function getEventById(db: Database | Transaction, params: GetEventB
 		options: { width: imageWidth.featured },
 	});
 
-	const data = { ...item, image };
-
-	return data;
+	return { ...item, image, ...fields };
 }
 
 //
@@ -236,7 +238,7 @@ export async function getEventBySlug(db: Database | Transaction, params: GetEven
 		options: { width: imageWidth.featured },
 	});
 
-	const data = { ...item, image };
+	const fields = await getContentBlocks(db, item.id);
 
-	return data;
+	return { ...item, image, ...fields };
 }

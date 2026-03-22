@@ -10,6 +10,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
 import { createTestClient } from "~/test/lib/create-test-client";
+import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";
 
 function createItems(count: number) {
@@ -64,6 +65,12 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	await db.insert(schema.documentsPolicies).values(
 		items.map((item) => {
 			return { ...item.documentOrPolicy, documentId: asset.id };
+		}),
+	);
+
+	await Promise.all(
+		items.map((item) => {
+			return seedContentBlock(db, item.entity.id, type.id, "description");
 		}),
 	);
 }
@@ -155,6 +162,8 @@ describe("documents-policies", () => {
 
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 				expect(data).toMatchObject({ title, document: { url: expect.stringContaining(id) } });
+				expect(data.description).toHaveLength(1);
+				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});
 		});
 
@@ -239,6 +248,8 @@ describe("documents-policies", () => {
 				const data = await response.json();
 
 				expect(data).toMatchObject({ title });
+				expect(data.description).toHaveLength(1);
+				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});
 		});
 
