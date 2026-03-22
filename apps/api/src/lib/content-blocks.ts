@@ -61,16 +61,16 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
 		)
 		.innerJoin(schema.contentBlocks, eq(schema.contentBlocks.fieldId, schema.fields.id))
-		.innerJoin(schema.contentBlockTypes, eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id))
+		.innerJoin(
+			schema.contentBlockTypes,
+			eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
+		)
 		.leftJoin(
 			schema.richTextContentBlocks,
 			eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
 		)
 		.leftJoin(schema.embedContentBlocks, eq(schema.embedContentBlocks.id, schema.contentBlocks.id))
-		.leftJoin(
-			schema.imageContentBlocks,
-			eq(schema.imageContentBlocks.id, schema.contentBlocks.id),
-		)
+		.leftJoin(schema.imageContentBlocks, eq(schema.imageContentBlocks.id, schema.contentBlocks.id))
 		.leftJoin(schema.assets, eq(schema.assets.id, schema.imageContentBlocks.imageId))
 		.leftJoin(schema.dataContentBlocks, eq(schema.dataContentBlocks.id, schema.contentBlocks.id))
 		.leftJoin(
@@ -94,18 +94,16 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 	return Object.fromEntries([...fieldMap.values()].map(({ name, blocks }) => [name, blocks]));
 }
 
-function normalizeRow(
-	row: {
-		blockType: string;
-		richTextContent: unknown;
-		embedUrl: string | null;
-		embedCaption: string | null;
-		imageCaption: string | null;
-		imageKey: string | null;
-		dataLimit: number | null;
-		dataType: string | null;
-	},
-): ContentBlock {
+function normalizeRow(row: {
+	blockType: string;
+	richTextContent: unknown;
+	embedUrl: string | null;
+	embedCaption: string | null;
+	imageCaption: string | null;
+	imageKey: string | null;
+	dataLimit: number | null;
+	dataType: string | null;
+}): ContentBlock {
 	switch (row.blockType) {
 		case "rich_text":
 			return { type: "rich_text", content: row.richTextContent };

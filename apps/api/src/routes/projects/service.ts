@@ -112,56 +112,59 @@ interface GetProjectByIdParams {
 export async function getProjectById(db: Database | Transaction, params: GetProjectByIdParams) {
 	const { id } = params;
 
-	const [item, fields] = await Promise.all([db.query.projects.findFirst({
-		where: {
-			id,
-			entity: {
-				status: {
-					type: "published",
-				},
-			},
-		},
-		columns: {
-			id: true,
-			name: true,
-			summary: true,
-			duration: true,
-			call: true,
-			funders: true,
-			topic: true,
-			funding: true,
-		},
-		with: {
-			entity: {
-				columns: {
-					slug: true,
-				},
-			},
-			image: {
-				columns: {
-					key: true,
-				},
-			},
-			institutions: {
-				columns: {
-					id: true,
-					name: true,
-				},
-				with: {
-					type: {
-						columns: {
-							type: true,
-						},
+	const [item, fields] = await Promise.all([
+		db.query.projects.findFirst({
+			where: {
+				id,
+				entity: {
+					status: {
+						type: "published",
 					},
 				},
 			},
-			scope: {
-				columns: {
-					scope: true,
+			columns: {
+				id: true,
+				name: true,
+				summary: true,
+				duration: true,
+				call: true,
+				funders: true,
+				topic: true,
+				funding: true,
+			},
+			with: {
+				entity: {
+					columns: {
+						slug: true,
+					},
+				},
+				image: {
+					columns: {
+						key: true,
+					},
+				},
+				institutions: {
+					columns: {
+						id: true,
+						name: true,
+					},
+					with: {
+						type: {
+							columns: {
+								type: true,
+							},
+						},
+					},
+				},
+				scope: {
+					columns: {
+						scope: true,
+					},
 				},
 			},
-		},
-	}), getContentBlocks(db, id)]);
+		}),
+		getContentBlocks(db, id),
+	]);
 
 	if (item == null) {
 		return null;
