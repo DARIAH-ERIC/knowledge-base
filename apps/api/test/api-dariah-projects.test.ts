@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 import type { Database } from "@/middlewares/db";
 import type { DariahProject } from "@/routes/dariah-projects/schemas";
 import { createTestClient } from "~/test/lib/create-test-client";
+import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";
 
 function createProjectData() {
@@ -144,6 +145,12 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 		roleId: projectRole.id,
 	});
 
+	await Promise.all(
+		allItems.map((item) => {
+			return seedContentBlock(db, item.entity.id, entityType.id, "description");
+		}),
+	);
+
 	return { dariahItems, nonDariahItem, umbrellaUnitId, roleId: projectRole.id };
 }
 
@@ -210,6 +217,8 @@ describe("dariah-projects", () => {
 					type: "umbrella_consortium",
 					roleId,
 				});
+				expect(data.description).toHaveLength(1);
+				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});
 		});
 
@@ -305,7 +314,10 @@ describe("dariah-projects", () => {
 
 				const data = await response.json();
 
+				assert("description" in data);
 				expect(data).toMatchObject({ name });
+				expect(data.description).toHaveLength(1);
+				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});
 		});
 

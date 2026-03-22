@@ -3,6 +3,7 @@
 import { count, eq } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
+import { getContentBlocks } from "@/lib/content-blocks";
 import type { Database, Transaction } from "@/middlewares/db";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
@@ -117,50 +118,53 @@ export async function getWorkingGroupById(
 ) {
 	const { id } = params;
 
-	const item = await db.query.workingGroups.findFirst({
-		where: {
-			id,
-			entity: {
-				status: {
-					type: "published",
+	const [item, fields] = await Promise.all([
+		db.query.workingGroups.findFirst({
+			where: {
+				id,
+				entity: {
+					status: {
+						type: "published",
+					},
 				},
 			},
-		},
-		columns: {
-			id: true,
-			metadata: true,
-			name: true,
-			summary: true,
-			sshocMarketplaceActorId: true,
-		},
-		with: {
-			entity: {
-				columns: {
-					slug: true,
-				},
+			columns: {
+				id: true,
+				metadata: true,
+				name: true,
+				summary: true,
+				sshocMarketplaceActorId: true,
 			},
-			image: {
-				columns: {
-					key: true,
+			with: {
+				entity: {
+					columns: {
+						slug: true,
+					},
 				},
-			},
-			socialMedia: {
-				columns: {
-					id: true,
-					name: true,
-					url: true,
-					duration: true,
+				image: {
+					columns: {
+						key: true,
+					},
 				},
-				with: {
-					type: {
-						columns: {
-							type: true,
+				socialMedia: {
+					columns: {
+						id: true,
+						name: true,
+						url: true,
+						duration: true,
+					},
+					with: {
+						type: {
+							columns: {
+								type: true,
+							},
 						},
 					},
 				},
 			},
-		},
-	});
+		}),
+		getContentBlocks(db, id),
+	]);
 
 	if (item == null) {
 		return null;
@@ -187,9 +191,7 @@ export async function getWorkingGroupById(
 		};
 	});
 
-	const data = { ...item, image, socialMedia };
-
-	return data;
+	return { ...item, image, socialMedia, ...fields };
 }
 
 //
@@ -335,7 +337,7 @@ export async function getWorkingGroupBySlug(
 		};
 	});
 
-	const data = { ...item, image, socialMedia };
+	const fields = await getContentBlocks(db, item.id);
 
-	return data;
+	return { ...item, image, socialMedia, ...fields };
 }

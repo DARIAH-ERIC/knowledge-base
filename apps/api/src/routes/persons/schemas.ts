@@ -1,6 +1,7 @@
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
+import { ContentBlockSchema } from "@/lib/content-blocks";
 import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const PersonBaseSchema = v.pipe(
@@ -28,6 +29,7 @@ export const PersonSchema = v.pipe(
 		...v.pick(schema.PersonSelectSchema, ["id", "name", "sortName", "email", "orcid"]).entries,
 		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+		biography: v.array(ContentBlockSchema),
 	}),
 	v.description("Person"),
 	v.metadata({ ref: "Person" }),

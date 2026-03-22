@@ -2,6 +2,7 @@ import { STATUS_CODES } from "node:http";
 
 import type { StorageService } from "@dariah-eric/storage";
 import * as Sentry from "@sentry/node";
+import type { TypedResponse } from "hono";
 import { cors } from "hono/cors";
 import { createFactory } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
@@ -12,6 +13,11 @@ import type { Database, Transaction } from "@/middlewares/db";
 import { type Logger, logger } from "@/middlewares/logger";
 import { config as corsConfig } from "~/config/cors.config";
 import { config as rateLimiterConfig } from "~/config/rate-limiter.config";
+
+/** @see {@link https://hono.dev/docs/guides/rpc#not-found} */
+declare module "hono" {
+	interface NotFoundResponse extends Response, TypedResponse<{ message: string }, 404, "json"> {}
+}
 
 interface Env {
 	Variables: {
@@ -31,14 +37,14 @@ export function createApp() {
 		.use(cors(corsConfig))
 		.get("/health", (c) => {
 			const status = 200;
-			return c.json({ message: STATUS_CODES[status] }, status);
+			return c.json({ message: STATUS_CODES[status]! }, status);
 		})
 		.use(rateLimiter(rateLimiterConfig))
 		.use(logger())
 
 		.notFound((c) => {
 			const status = 404;
-			return c.json({ message: STATUS_CODES[status] }, status);
+			return c.json({ message: STATUS_CODES[status]! }, status);
 		})
 
 		.onError((error, c) => {
@@ -53,7 +59,7 @@ export function createApp() {
 			}
 
 			const status = 500;
-			return c.json({ message: STATUS_CODES[status] }, status);
+			return c.json({ message: STATUS_CODES[status]! }, status);
 		});
 
 	return app;

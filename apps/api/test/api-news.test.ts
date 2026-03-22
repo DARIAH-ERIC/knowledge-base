@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
 import { createTestClient } from "~/test/lib/create-test-client";
+import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";
 
 function createItems(count: number) {
@@ -57,6 +58,12 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	await db.insert(schema.news).values(
 		items.map((item) => {
 			return { ...item.newsItem, imageId: asset.id };
+		}),
+	);
+
+	await Promise.all(
+		items.map((item) => {
+			return seedContentBlock(db, item.entity.id, type.id, "content");
 		}),
 	);
 }
@@ -117,7 +124,10 @@ describe("news", () => {
 
 				const data = await response.json();
 
+				assert("content" in data);
 				expect(data).toMatchObject({ title });
+				expect(data.content).toHaveLength(1);
+				expect(data.content[0]).toMatchObject({ type: "rich_text" });
 			});
 		});
 
@@ -217,7 +227,10 @@ describe("news", () => {
 
 				const data = await response.json();
 
+				assert("content" in data);
 				expect(data).toMatchObject({ title });
+				expect(data.content).toHaveLength(1);
+				expect(data.content[0]).toMatchObject({ type: "rich_text" });
 			});
 		});
 

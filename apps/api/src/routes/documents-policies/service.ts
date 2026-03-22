@@ -3,6 +3,7 @@
 import { count, eq } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
+import { getContentBlocks } from "@/lib/content-blocks";
 import type { Database, Transaction } from "@/middlewares/db";
 
 interface GetDocumentsPoliciesParams {
@@ -72,31 +73,38 @@ export async function getDocumentOrPolicyById(
 ) {
 	const { id } = params;
 
-	const item = await db.query.documentsPolicies.findFirst({
-		where: {
-			id,
-			entity: {
-				status: {
-					type: "published",
+	const [item, fields] = await Promise.all([
+		db.query.documentsPolicies.findFirst({
+			where: {
+				id,
+				entity: {
+					status: {
+						type: "published",
+					},
 				},
 			},
-		},
-		columns: {
-			id: true,
-			title: true,
-			summary: true,
-			url: true,
-		},
-		with: {
-			entity: {
-				columns: {
-					slug: true,
+			columns: {
+				id: true,
+				title: true,
+				summary: true,
+				url: true,
+			},
+			with: {
+				entity: {
+					columns: {
+						slug: true,
+					},
 				},
 			},
-		},
-	});
+		}),
+		getContentBlocks(db, id),
+	]);
 
-	return item ?? null;
+	if (item == null) {
+		return null;
+	}
+
+	return { ...item, ...fields };
 }
 
 //
@@ -225,5 +233,11 @@ export async function getDocumentOrPolicyBySlug(
 		},
 	});
 
-	return item ?? null;
+	if (item == null) {
+		return null;
+	}
+
+	const fields = await getContentBlocks(db, item.id);
+
+	return { ...item, ...fields };
 }
