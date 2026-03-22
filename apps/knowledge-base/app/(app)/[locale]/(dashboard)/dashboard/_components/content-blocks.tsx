@@ -95,7 +95,14 @@ export function ContentBlocks({ items: initialItems }: Readonly<ContentBlocksPro
 				}}
 			</GridList>
 			{list.items.map((item, idx) => {
-				<input name={`contentBlocks.${String(idx)}`} type="hidden" value={JSON.stringify(item)} />;
+				return (
+					<input
+						key={item.id}
+						name={`contentBlocks.${String(idx)}`}
+						type="hidden"
+						value={JSON.stringify(item)}
+					/>
+				);
 			})}
 			<ContentBlockMenu onAdd={addItem} />
 		</>

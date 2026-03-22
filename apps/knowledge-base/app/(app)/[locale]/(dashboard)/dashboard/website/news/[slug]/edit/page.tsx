@@ -103,7 +103,8 @@ export default async function DashboardWebsiteEditNewsItemPage(
 				eq(schema.fields.entityId, newsItem.id),
 				eq(schema.entityTypesFieldsNames.fieldName, "content"),
 			),
-		);
+		)
+		.orderBy(schema.contentBlocks.position);
 
 	return (
 		<NewsItemEditForm

@@ -3,12 +3,14 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
-import { FieldError } from "@dariah-eric/ui/field";
+import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
+import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
+import { CalendarDate } from "@internationalized/date";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
@@ -23,7 +25,7 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface EventFormProps {
 	assets: Array<{ key: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
-	event?: Pick<schema.Event, "id" | "title" | "summary"> & {
+	event?: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; url: string } };
 	formAction: ServerAction;
@@ -59,6 +61,56 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 					name="summary"
 				>
 					<Input placeholder={t("Summary")} />
+					<FieldError />
+				</TextField>
+				<DatePicker
+					defaultValue={
+						event != null
+							? new CalendarDate(
+									event.duration.start.getUTCFullYear(),
+									event.duration.start.getUTCMonth() + 1,
+									event.duration.start.getUTCDate(),
+								)
+							: undefined
+					}
+					granularity="day"
+					isRequired={true}
+					name="duration.start"
+				>
+					<Label>{t("Start date")}</Label>
+					<DatePickerTrigger />
+				</DatePicker>
+
+				<DatePicker
+					defaultValue={
+						event?.duration.end != null
+							? new CalendarDate(
+									event.duration.end.getUTCFullYear(),
+									event.duration.end.getUTCMonth() + 1,
+									event.duration.end.getUTCDate(),
+								)
+							: undefined
+					}
+					granularity="day"
+					name="duration.end"
+				>
+					<Label>{t("End date")}</Label>
+					<DatePickerTrigger />
+				</DatePicker>
+				<TextField
+					aria-label={t("Location")}
+					defaultValue={event?.location ?? undefined}
+					name="location"
+				>
+					<Input placeholder={t("Location")} />
+					<FieldError />
+				</TextField>
+				<TextField
+					aria-label={t("Website")}
+					defaultValue={event?.website ?? undefined}
+					name="website"
+				>
+					<Input placeholder={t("Website")} />
 					<FieldError />
 				</TextField>
 			</FormSection>

@@ -38,7 +38,7 @@ import { deleteEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/we
 interface EventsPageProps {
 	events: Promise<{
 		data: Array<
-			Pick<schema.Event, "id" | "title" | "summary"> & {
+			Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
 				entity: Pick<schema.Entity, "documentId" | "slug"> & {
 					status: Pick<schema.EntityStatus, "id" | "type">;
 				};

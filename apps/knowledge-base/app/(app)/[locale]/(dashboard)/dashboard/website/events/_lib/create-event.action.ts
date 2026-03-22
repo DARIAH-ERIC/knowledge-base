@@ -42,7 +42,7 @@ export const createEventAction = createServerAction(
 			});
 		}
 
-		const { content, title, imageKey, summary } = result.output;
+		const { content, duration, location, title, imageKey, summary, website } = result.output;
 
 		const slug = slugify(title);
 
@@ -89,9 +89,12 @@ export const createEventAction = createServerAction(
 
 			await tx.insert(schema.events).values({
 				id: entity.id,
+				duration,
+				location,
 				imageId: asset.id,
 				title,
 				summary,
+				website,
 			});
 
 			const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({

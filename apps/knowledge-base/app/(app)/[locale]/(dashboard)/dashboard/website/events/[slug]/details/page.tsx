@@ -39,8 +39,11 @@ export default async function DashboardWebsiteEventDetailsPage(
 		},
 		columns: {
 			id: true,
+			duration: true,
+			location: true,
 			title: true,
 			summary: true,
+			website: true,
 		},
 		with: {
 			entity: {

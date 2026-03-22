@@ -10,7 +10,7 @@ import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
 
 interface EventDetailsProps {
-	event: Pick<schema.Event, "id" | "title" | "summary"> & {
+	event: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; url: string } };
 }

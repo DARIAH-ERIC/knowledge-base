@@ -45,8 +45,11 @@ export default async function DashboardWebsiteEditEventPage(
 			},
 			columns: {
 				id: true,
+				duration: true,
+				location: true,
 				title: true,
 				summary: true,
+				website: true,
 			},
 			with: {
 				entity: {
@@ -103,7 +106,8 @@ export default async function DashboardWebsiteEditEventPage(
 				eq(schema.fields.entityId, event.id),
 				eq(schema.entityTypesFieldsNames.fieldName, "content"),
 			),
-		);
+		)
+		.orderBy(schema.contentBlocks.position);
 
 	return (
 		<EventEditForm

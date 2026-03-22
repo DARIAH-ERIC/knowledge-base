@@ -12,7 +12,7 @@ import { updateEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/we
 interface EventEditFormProps {
 	assets: Array<{ key: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
-	event: Pick<schema.Event, "id" | "title" | "summary"> & {
+	event: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; url: string } };
 }
