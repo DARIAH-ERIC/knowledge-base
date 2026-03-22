@@ -93,6 +93,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Set lowercase repository name
+        run:
+          echo "REPO_LOWERCASE=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >>
+          $GITHUB_ENV
+
       - name: Set up docker buildx
         uses: docker/setup-buildx-action@v3
 
@@ -171,7 +176,7 @@ jobs:
           context: .
           target: migrate
           push: true
-          tags: "ghcr.io/${{ github.repository }}-migrate:${{ github.sha }}"
+          tags: "ghcr.io/${{ env.REPO_LOWERCASE }}-migrate:${{ github.sha }}"
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
