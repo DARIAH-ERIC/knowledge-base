@@ -173,6 +173,7 @@ describe("members-partners", () => {
 
 				const data = await response.json();
 
+				assert("description" in data);
 				expect(data).toMatchObject({ name });
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
@@ -275,6 +276,7 @@ describe("members-partners", () => {
 
 				const data = await response.json();
 
+				assert("description" in data);
 				expect(data).toMatchObject({ name });
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });

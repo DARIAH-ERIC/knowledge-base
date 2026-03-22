@@ -160,6 +160,7 @@ describe("documents-policies", () => {
 
 				const data = await response.json();
 
+				assert("description" in data);
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 				expect(data).toMatchObject({ title, document: { url: expect.stringContaining(id) } });
 				expect(data.description).toHaveLength(1);
@@ -247,6 +248,7 @@ describe("documents-policies", () => {
 
 				const data = await response.json();
 
+				assert("description" in data);
 				expect(data).toMatchObject({ title });
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });

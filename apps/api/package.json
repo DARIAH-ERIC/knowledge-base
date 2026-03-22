@@ -48,6 +48,7 @@
 		"@dotenvx/dotenvx": "catalog:",
 		"@faker-js/faker": "catalog:",
 		"@sindresorhus/slugify": "catalog:",
+		"@tiptap/core": "catalog:",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
 		"openapi-types": "catalog:",

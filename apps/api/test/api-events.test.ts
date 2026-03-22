@@ -128,6 +128,7 @@ describe("events", () => {
 
 				const data = await response.json();
 
+				assert("content" in data);
 				expect(data).toMatchObject({ title });
 				expect(data.content).toHaveLength(1);
 				expect(data.content[0]).toMatchObject({ type: "rich_text" });
@@ -230,6 +231,7 @@ describe("events", () => {
 
 				const data = await response.json();
 
+				assert("content" in data);
 				expect(data).toMatchObject({ title });
 				expect(data.content).toHaveLength(1);
 				expect(data.content[0]).toMatchObject({ type: "rich_text" });

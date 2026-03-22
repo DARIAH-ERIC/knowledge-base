@@ -1,4 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { eq } from "@dariah-eric/database";
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
@@ -38,8 +40,7 @@ export const ContentBlockSchema = v.union([
 
 export type ContentBlock = v.InferOutput<typeof ContentBlockSchema>;
 
-//
-
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getContentBlocks(db: Database | Transaction, entityId: string) {
 	const rows = await db
 		.select({
@@ -91,7 +92,11 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 		fieldMap.get(row.fieldId)!.blocks.push(normalizeRow(row));
 	}
 
-	return Object.fromEntries([...fieldMap.values()].map(({ name, blocks }) => [name, blocks]));
+	return Object.fromEntries(
+		[...fieldMap.values()].map(({ name, blocks }) => {
+			return [name, blocks];
+		}),
+	);
 }
 
 function normalizeRow(row: {
@@ -105,11 +110,13 @@ function normalizeRow(row: {
 	dataType: string | null;
 }): ContentBlock {
 	switch (row.blockType) {
-		case "rich_text":
+		case "rich_text": {
 			return { type: "rich_text", content: row.richTextContent };
-		case "embed":
+		}
+		case "embed": {
 			return { type: "embed", url: row.embedUrl!, caption: row.embedCaption };
-		case "image":
+		}
+		case "image": {
 			return {
 				type: "image",
 				image: images.generateSignedImageUrl({
@@ -118,13 +125,16 @@ function normalizeRow(row: {
 				}),
 				caption: row.imageCaption,
 			};
-		case "data":
+		}
+		case "data": {
 			return {
 				type: "data",
 				dataType: row.dataType as (typeof schema.dataContentBlockTypesEnum)[number],
 				limit: row.dataLimit,
 			};
-		default:
+		}
+		default: {
 			throw new Error(`Unknown content block type: ${row.blockType}`);
+		}
 	}
 }

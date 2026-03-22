@@ -1,15 +1,18 @@
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
+import type { JSONContent } from "@tiptap/core";
 import { v7 as uuidv7 } from "uuid";
 
 import type { Database } from "@/middlewares/db";
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function seedContentBlock(
 	db: Database,
 	entityId: string,
 	entityTypeId: string,
 	fieldName: string,
-	content: unknown = { type: "doc", content: [] },
+	// eslint-disable-next-line unicorn/no-object-as-default-parameter
+	content: JSONContent = { type: "doc", content: [] },
 ) {
 	const [blockType, fieldNameRecord] = await Promise.all([
 		db.query.contentBlockTypes.findFirst({

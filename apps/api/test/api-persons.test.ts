@@ -226,6 +226,7 @@ describe("persons", () => {
 
 				const data = await response.json();
 
+				assert("biography" in data);
 				expect(data).toMatchObject({ name });
 				expect(data.biography).toHaveLength(1);
 				expect(data.biography[0]).toMatchObject({ type: "rich_text" });
