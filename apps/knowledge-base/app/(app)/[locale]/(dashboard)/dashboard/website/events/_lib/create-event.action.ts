@@ -1,9 +1,9 @@
 "use server";
 
-import { assert, getFormDataValues } from "@acdh-oeaw/lib";
-import { db } from "@dariah-eric/database/client";
+import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
+import { db, type Transaction } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
+import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import slugify from "@sindresorhus/slugify";
 import { revalidatePath } from "next/cache";
@@ -38,11 +38,11 @@ export const createEventAction = createServerAction(
 
 			return createActionStateError({
 				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
+				validationErrors: errors.nested as unknown as ValidationErrors,
 			});
 		}
 
-		const { content, duration, location, title, imageKey, summary, website } = result.output;
+		const { contentBlocks, duration, location, title, imageKey, summary, website } = result.output;
 
 		const slug = slugify(title);
 
@@ -114,24 +114,43 @@ export const createEventAction = createServerAction(
 
 			assert(contentField);
 
-			const richTextType = await tx.query.contentBlockTypes.findFirst({
-				where: { type: "rich_text" },
-				columns: { id: true },
+			const contentBlockTypes = await db.query.contentBlockTypes.findMany();
+			const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => {
+				return item.type;
 			});
 
-			assert(richTextType);
+			async function insertTypeBlock(
+				tx: Transaction,
+				type: schema.ContentBlockTypes["type"],
+				content: object,
+				blockId: string,
+			) {
+				// eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+				switch (type) {
+					case "rich_text": {
+						await tx.insert(schema.richTextContentBlocks).values({ id: blockId, content });
+					}
+				}
+			}
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({ fieldId: contentField.id, typeId: richTextType.id, position: 0 })
-				.returning({ id: schema.contentBlocks.id });
+			await Promise.all(
+				contentBlocks.map(async (contentBlock, index) => {
+					const { type, content } = contentBlock;
 
-			assert(contentBlock);
+					const [added] = await tx
+						.insert(schema.contentBlocks)
+						.values({
+							fieldId: contentField.id,
+							typeId: contentBlockTypesByType[type].id,
+							position: index,
+						})
+						.returning({ id: schema.contentBlocks.id });
 
-			await tx.insert(schema.richTextContentBlocks).values({
-				id: contentBlock.id,
-				content: JSON.parse(content) as schema.RichTextContentBlock["content"],
-			});
+					assert(added);
+
+					await insertTypeBlock(tx, type, content, added.id);
+				}),
+			);
 		});
 
 		revalidatePath("/dashboard/website/events", "layout");
