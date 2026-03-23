@@ -27,12 +27,12 @@ export const ProjectBaseSchema = v.pipe(
 		image: v.nullable(v.object({ url: v.string() })),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoDateTime()),
-			env: v.optional(v.pipe(v.string(), v.isoDateTime()))
+			env: v.optional(v.pipe(v.string(), v.isoDateTime())),
 		}),
 		institutions: v.array(ProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
-		publishedAt: v.string(),
+		publishedAt: v.pipe(v.string(), v.isoDateTime()),
 	}),
 	v.description("Project"),
 	v.metadata({ ref: "ProjectBase" }),
@@ -62,12 +62,12 @@ export const ProjectSchema = v.pipe(
 		image: v.nullable(v.object({ url: v.string() })),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoDateTime()),
-			env: v.optional(v.pipe(v.string(), v.isoDateTime()))
+			env: v.optional(v.pipe(v.string(), v.isoDateTime())),
 		}),
 		institutions: v.array(ProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
-		publishedAt: v.string(),
+		publishedAt: v.pipe(v.string(), v.isoDateTime()),
 		description: v.array(ContentBlockSchema),
 	}),
 	v.description("Project"),

@@ -6,20 +6,15 @@ import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const EventBaseSchema = v.pipe(
 	v.object({
-		...v.pick(schema.EventSelectSchema, [
-			"id",
-			"title",
-			"summary",
-			"location",
-			"isFullDay",
-		]).entries,
+		...v.pick(schema.EventSelectSchema, ["id", "title", "summary", "location", "isFullDay"])
+			.entries,
 		image: v.object({ url: v.string() }),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoDateTime()),
-			env: v.optional(v.pipe(v.string(), v.isoDateTime()))
+			env: v.optional(v.pipe(v.string(), v.isoDateTime())),
 		}),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
-		publishedAt: v.string(),
+		publishedAt: v.pipe(v.string(), v.isoDateTime()),
 	}),
 	v.description("Event"),
 	v.metadata({ ref: "EventBase" }),
@@ -37,20 +32,15 @@ export type EventList = v.InferOutput<typeof EventListSchema>;
 
 export const EventSchema = v.pipe(
 	v.object({
-		...v.pick(schema.EventSelectSchema, [
-			"id",
-			"title",
-			"summary",
-			"location",
-			"isFullDay",
-		]).entries,
+		...v.pick(schema.EventSelectSchema, ["id", "title", "summary", "location", "isFullDay"])
+			.entries,
 		image: v.object({ url: v.string() }),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoDateTime()),
-			env: v.optional(v.pipe(v.string(), v.isoDateTime()))
+			env: v.optional(v.pipe(v.string(), v.isoDateTime())),
 		}),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
-		publishedAt: v.string(),
+		publishedAt: v.pipe(v.string(), v.isoDateTime()),
 		content: v.array(ContentBlockSchema),
 	}),
 	v.description("Event"),

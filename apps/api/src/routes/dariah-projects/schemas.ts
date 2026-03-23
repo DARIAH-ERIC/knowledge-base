@@ -29,13 +29,13 @@ export const DariahProjectBaseSchema = v.pipe(
 		]).entries,
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoDateTime()),
-			env: v.optional(v.pipe(v.string(), v.isoDateTime()))
+			env: v.optional(v.pipe(v.string(), v.isoDateTime())),
 		}),
 		image: v.nullable(v.object({ url: v.string() })),
 		institutions: v.array(DariahProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
-		publishedAt: v.string(),
+		publishedAt: v.pipe(v.string(), v.isoDateTime()),
 	}),
 	v.description("DARIAH project"),
 	v.metadata({ ref: "DariahProjectBase" }),
@@ -65,12 +65,12 @@ export const DariahProjectSchema = v.pipe(
 		image: v.nullable(v.object({ url: v.string() })),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoDateTime()),
-			env: v.optional(v.pipe(v.string(), v.isoDateTime()))
+			env: v.optional(v.pipe(v.string(), v.isoDateTime())),
 		}),
 		institutions: v.array(DariahProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
-		publishedAt: v.string(),
+		publishedAt: v.pipe(v.string(), v.isoDateTime()),
 		description: v.array(ContentBlockSchema),
 	}),
 	v.description("DARIAH project"),
