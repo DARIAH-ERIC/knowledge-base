@@ -38,12 +38,18 @@ COPY --from=migrate-prune /app/patches/ ./patches/
 COPY --from=migrate-prune /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 RUN pnpm install --frozen-lockfile
 
+# build
+# -------------------------------------------------------------------------------------------------
+
+FROM migrate-install AS migrate-build
+COPY --from=migrate-prune /app/out/full/ .
+RUN turbo run build --filter=@dariah-eric/database^...
+
 # serve
 # -------------------------------------------------------------------------------------------------
 
-FROM migrate-install AS migrate
+FROM migrate-build AS migrate
 USER node
-COPY --from=migrate-prune /app/out/full/ .
 CMD [ "pnpm", "--filter", "@dariah-eric/database", "run", "db:migrations:apply" ]
 
 # =================================================================================================
