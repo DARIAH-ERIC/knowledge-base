@@ -101,6 +101,7 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 				<TextField
 					aria-label={t("Location")}
 					defaultValue={event?.location ?? undefined}
+					isRequired={true}
 					name="location"
 				>
 					<Input placeholder={t("Location")} />
