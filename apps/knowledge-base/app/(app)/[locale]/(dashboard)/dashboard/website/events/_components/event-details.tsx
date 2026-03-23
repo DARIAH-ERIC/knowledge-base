@@ -6,17 +6,22 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
+import { generateHTML } from "@tiptap/core";
+import { StarterKit } from "@tiptap/starter-kit";
 import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+
 interface EventDetailsProps {
+	contentBlocks: Array<ContentBlock>;
 	event: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; url: string } };
 }
 
 export function EventDetails(props: Readonly<EventDetailsProps>): ReactNode {
-	const { event } = props;
+	const { contentBlocks, event } = props;
 
 	const t = useExtracted();
 
@@ -34,6 +39,23 @@ export function EventDetails(props: Readonly<EventDetailsProps>): ReactNode {
 			<DescriptionTerm>{t("Image")}</DescriptionTerm>
 			<DescriptionDetails>
 				<img alt="" src={event.image.url} />
+			</DescriptionDetails>
+
+			<DescriptionTerm>{t("Content")}</DescriptionTerm>
+			<DescriptionDetails>
+				{contentBlocks.map((contentBlock) => {
+					if (!contentBlock.content) return null;
+					return (
+						<div
+							key={contentBlock.id}
+							dangerouslySetInnerHTML={{
+								__html: contentBlocks.map((contentBlock) => {
+									return generateHTML(contentBlock.content!, [StarterKit]);
+								}),
+							}}
+						/>
+					);
+				})}
 			</DescriptionDetails>
 		</DescriptionList>
 	);

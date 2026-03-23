@@ -1,4 +1,7 @@
+import { and, eq, sql } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
+import * as schema from "@dariah-eric/database/schema";
+import type { JSONContent } from "@tiptap/core";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
@@ -74,8 +77,35 @@ export default async function DashboardWebsiteNewsItemDetailsPage(
 		options: imageGridOptions,
 	});
 
+	const richTextContentBlocks = await db
+		.select({
+			id: schema.richTextContentBlocks.id,
+			content: sql<JSONContent | undefined>`${schema.richTextContentBlocks.content}`,
+			position: schema.contentBlocks.position,
+			type: schema.contentBlockTypes.type,
+		})
+		.from(schema.richTextContentBlocks)
+		.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
+		.innerJoin(
+			schema.contentBlockTypes,
+			eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
+		)
+		.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+		.innerJoin(
+			schema.entityTypesFieldsNames,
+			eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+		)
+		.where(
+			and(
+				eq(schema.fields.entityId, newsItem.id),
+				eq(schema.entityTypesFieldsNames.fieldName, "content"),
+			),
+		)
+		.orderBy(schema.contentBlocks.position);
+
 	return (
 		<NewsItemDetails
+			contentBlocks={richTextContentBlocks}
 			newsItem={{ ...newsItem, image: { key: newsItem.image.key, url: image.url } }}
 		/>
 	);

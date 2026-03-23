@@ -404,8 +404,8 @@ msgstr "Forgot password?"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:634
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:635
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:111
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:25
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:25
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:30
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:30
 #: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx:38
 msgid "HAlOn1"
 msgstr "Name"
@@ -453,8 +453,8 @@ msgstr "Verify the code from the app"
 #: app/(app)/[locale]/(auth)/auth/two-factor/setup/_components/two-factor-set-up-form.tsx:38
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:120
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:701
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:165
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:113
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:168
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:114
 msgid "jvo0vs"
 msgstr "Save"
 
@@ -516,10 +516,10 @@ msgstr "Embed"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:75
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:78
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:355
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:34
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:120
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:34
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:68
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:39
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:123
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:39
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:69
 msgid "+0zv6g"
 msgstr "Image"
 
@@ -742,8 +742,8 @@ msgstr "New person"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:28
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:50
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:28
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:28
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:33
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:33
 msgid "IoDlcd"
 msgstr "Slug"
 
@@ -777,15 +777,15 @@ msgstr "Details"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:75
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:355
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:120
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:68
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:123
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:69
 msgid "sMRK+J"
 msgstr "Select or upload an image."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:78
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:358
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:123
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:71
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:72
 msgid "T7w3zq"
 msgstr "Selected image"
 
@@ -803,10 +803,10 @@ msgstr "Biography"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:676
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:697
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:698
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:161
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:162
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:109
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:164
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:165
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:110
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:111
 msgid "TiR/Hq"
 msgstr "Saving..."
 
@@ -909,13 +909,13 @@ msgstr "Topic"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:85
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:347
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:348
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:31
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:36
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:59
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:63
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:64
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:110
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:31
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:36
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:57
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:61
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:62
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:110
 msgid "RrCui3"
 msgstr "Summary"
@@ -947,12 +947,12 @@ msgid "RonZTI"
 msgstr "Enter the project details."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:308
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:80
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:81
 msgid "n5QvJy"
 msgstr "Start date"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:326
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:97
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:98
 msgid "Humfno"
 msgstr "End date"
 
@@ -1257,6 +1257,13 @@ msgstr "Assets"
 msgid "C+Npdp"
 msgstr "New event"
 
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:44
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:141
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:44
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:87
+msgid "Jq3FDz"
+msgstr "Content"
+
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-edit.tsx:27
 msgid "j0OO6t"
 msgstr "Edit event"
@@ -1265,25 +1272,20 @@ msgstr "Edit event"
 msgid "uEcyd6"
 msgstr "Enter the event details."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:101
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:105
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:102
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:107
 msgid "rvirM2"
 msgstr "Location"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:109
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:113
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:111
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:116
 msgid "JkLHGw"
 msgstr "Website"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:138
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:86
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:141
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:87
 msgid "ClikfP"
 msgstr "Add the content."
-
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:138
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:86
-msgid "Jq3FDz"
-msgstr "Content"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:79
 #: components/ui/tables/events-table.tsx:52
@@ -1298,7 +1300,7 @@ msgstr "Manage all events in the DARIAH knowledge base."
 msgid "bHpXg4"
 msgstr "event"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/[slug]/details/page.tsx:21
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/[slug]/details/page.tsx:24
 msgid "jvNajc"
 msgstr "Website dashboard - Event details"
 
@@ -1364,7 +1366,7 @@ msgstr "Manage all news items in the DARIAH knowledge base."
 msgid "X8ZDGI"
 msgstr "news item"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/[slug]/details/page.tsx:21
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/[slug]/details/page.tsx:24
 msgid "QbqoEI"
 msgstr "Website dashboard - News Item details"
 

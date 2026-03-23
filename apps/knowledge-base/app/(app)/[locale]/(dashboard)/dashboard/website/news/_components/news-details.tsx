@@ -6,17 +6,22 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
+import { generateHTML } from "@tiptap/core";
+import { StarterKit } from "@tiptap/starter-kit";
 import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
 
+import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+
 interface NewsItemDetailsProps {
+	contentBlocks: Array<ContentBlock>;
 	newsItem: Pick<schema.NewsItem, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; url: string } };
 }
 
 export function NewsItemDetails(props: Readonly<NewsItemDetailsProps>): ReactNode {
-	const { newsItem } = props;
+	const { contentBlocks, newsItem } = props;
 
 	const t = useExtracted();
 
@@ -34,6 +39,23 @@ export function NewsItemDetails(props: Readonly<NewsItemDetailsProps>): ReactNod
 			<DescriptionTerm>{t("Image")}</DescriptionTerm>
 			<DescriptionDetails>
 				<img alt="" src={newsItem.image.url} />
+			</DescriptionDetails>
+
+			<DescriptionTerm>{t("Content")}</DescriptionTerm>
+			<DescriptionDetails>
+				{contentBlocks.map((contentBlock) => {
+					if (!contentBlock.content) return null;
+					return (
+						<div
+							key={contentBlock.id}
+							dangerouslySetInnerHTML={{
+								__html: contentBlocks.map((contentBlock) => {
+									return generateHTML(contentBlock.content!, [StarterKit]);
+								}),
+							}}
+						/>
+					);
+				})}
 			</DescriptionDetails>
 		</DescriptionList>
 	);

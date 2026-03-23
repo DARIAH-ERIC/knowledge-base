@@ -53,6 +53,7 @@
 		"@sentry/nextjs": "catalog:",
 		"@sindresorhus/slugify": "catalog:",
 		"@tiptap/core": "catalog:",
+		"@tiptap/starter-kit": "catalog:",
 		"@valibot/i18n": "catalog:",
 		"client-only": "catalog:",
 		"clsx": "catalog:",
