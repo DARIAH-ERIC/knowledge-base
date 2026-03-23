@@ -94,9 +94,10 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Set lowercase repository name
+        id: repository
         run:
-          echo "REPO_LOWERCASE=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >>
-          $GITHUB_ENV
+          echo "repository=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >>
+          $GITHUB_OUTPUT
 
       - name: Set up docker buildx
         uses: docker/setup-buildx-action@v3
@@ -108,11 +109,11 @@ jobs:
           username: "${{ github.actor }}"
           password: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: Extract metadata (tags, labels) for docker
+      - name: Extract metadata (tags, labels) for docker image
         id: meta
         uses: docker/metadata-action@v6
         with:
-          images: "ghcr.io/${{ github.repository }}-${{ matrix.target.image }}"
+          images: "ghcr.io/${{ steps.repository.outputs.repository }}-${{ matrix.target.image }}"
           tags: |
             type=raw,value={{sha}}
             type=ref,event=branch
@@ -170,13 +171,23 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Extract metadata (tags, labels) for migrate docker image
+        id: meta-migrate
+        uses: docker/metadata-action@v6
+        with:
+          images: "ghcr.io/${{ steps.repository.outputs.repository }}-migrate"
+          tags: |
+            type=raw,value={{sha}}
+            type=ref,event=branch
+
       - name: Build and push migrate docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           target: migrate
           push: true
-          tags: "ghcr.io/${{ env.REPO_LOWERCASE }}-migrate:${{ github.sha }}"
+          tags: "${{ steps.meta-migrate.outputs.tags }}"
+          labels: "${{ steps.meta-migrate.outputs.labels }}"
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
