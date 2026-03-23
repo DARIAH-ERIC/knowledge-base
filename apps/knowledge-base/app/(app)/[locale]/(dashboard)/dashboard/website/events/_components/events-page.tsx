@@ -166,6 +166,7 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 
 					startTransition(async () => {
 						await deleteEventAction(itemToDelete.id);
+						list.remove(itemToDelete.id);
 						setItemToDelete(null);
 					});
 				}}
