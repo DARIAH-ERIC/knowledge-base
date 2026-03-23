@@ -70,7 +70,12 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 			options: { width: imageWidth.preview },
 		});
 
-		return { ...item, image, publishedAt: item.entity.updatedAt.toISOString() };
+		const duration = {
+			start: item.duration.start.toISOString(),
+			end: item.duration.end?.toISOString(),
+		};
+
+		return { ...item, duration, image, publishedAt: item.entity.updatedAt.toISOString() };
 	});
 
 	return { data, limit, offset, total };
@@ -129,7 +134,12 @@ export async function getEventById(db: Database | Transaction, params: GetEventB
 		options: { width: imageWidth.featured },
 	});
 
-	return { ...item, image, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
+	const duration = {
+		start: item.duration.start.toISOString(),
+		end: item.duration.end?.toISOString(),
+	};
+
+	return { ...item, duration, image, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
 }
 
 //
@@ -240,7 +250,12 @@ export async function getEventBySlug(db: Database | Transaction, params: GetEven
 		options: { width: imageWidth.featured },
 	});
 
+	const duration = {
+		start: item.duration.start.toISOString(),
+		end: item.duration.end?.toISOString(),
+	};
+
 	const fields = await getContentBlocks(db, item.id);
 
-	return { ...item, image, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
+	return { ...item, duration, image, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
 }

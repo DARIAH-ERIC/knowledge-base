@@ -64,6 +64,7 @@ function mapItem<
 		image: { key: string } | null;
 		partners: Array<{ roleId: string; unit: { id: string; name: string; type: { type: string } } }>;
 		entity: { updatedAt: Date };
+		duration: { start: Date; end?: Date };
 	},
 >(item: T, width: number) {
 	const image =
@@ -78,9 +79,20 @@ function mapItem<
 		return { id: unit.id, name: unit.name, type: unit.type.type, roleId };
 	});
 
+	const duration = {
+		start: item.duration.start.toISOString(),
+		end: item.duration.end?.toISOString(),
+	};
+
 	const { partners: _, ...rest } = item;
 
-	return { ...rest, image, institutions, publishedAt: item.entity.updatedAt.toISOString() };
+	return {
+		...rest,
+		duration,
+		image,
+		institutions,
+		publishedAt: item.entity.updatedAt.toISOString(),
+	};
 }
 
 //

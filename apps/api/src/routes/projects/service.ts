@@ -97,7 +97,18 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 			return { ...rest, type: type.type };
 		});
 
-		return { ...item, image, institutions, publishedAt: item.entity.updatedAt.toISOString() };
+		const duration = {
+			start: item.duration.start.toISOString(),
+			end: item.duration.end?.toISOString(),
+		};
+
+		return {
+			...item,
+			duration,
+			image,
+			institutions,
+			publishedAt: item.entity.updatedAt.toISOString(),
+		};
 	});
 
 	return { data, limit, offset, total };
@@ -179,12 +190,18 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 				})
 			: null;
 
+	const duration = {
+		start: item.duration.start.toISOString(),
+		end: item.duration.end?.toISOString(),
+	};
+
 	const institutions = item.institutions.map(({ type, ...rest }) => {
 		return { ...rest, type: type.type };
 	});
 
 	return {
 		...item,
+		duration,
 		image,
 		institutions,
 		publishedAt: item.entity.updatedAt.toISOString(),
@@ -322,10 +339,16 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 		return { ...rest, type: type.type };
 	});
 
+	const duration = {
+		start: item.duration.start.toISOString(),
+		end: item.duration.end?.toISOString(),
+	};
+
 	const fields = await getContentBlocks(db, item.id);
 
 	return {
 		...item,
+		duration,
 		image,
 		institutions,
 		publishedAt: item.entity.updatedAt.toISOString(),
