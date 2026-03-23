@@ -119,12 +119,15 @@ export type OrganisationalUnitRelationInput = typeof organisationalUnitsRelation
 
 export const OrganisationalUnitRelationSelectSchema = createSelectSchema(
 	organisationalUnitsRelations,
+	{ duration: f.TimestampRange },
 );
 export const OrganisationalUnitRelationInsertSchema = createInsertSchema(
 	organisationalUnitsRelations,
+	{ duration: f.TimestampRange },
 );
 export const OrganisationalUnitRelationUpdateSchema = createUpdateSchema(
 	organisationalUnitsRelations,
+	{ duration: f.TimestampRange },
 );
 
 export const organisationalUnitsAllowedRelations = p.pgTable(

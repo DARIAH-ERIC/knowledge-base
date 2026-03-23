@@ -36,7 +36,7 @@ export const router = createRouter()
 
 			const data = await getNewsletters({ limit, offset });
 
-			const payload = await validate(GetNewsletters.ResponseSchema, data);
+			const payload = await validate(GetNewsletters.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},

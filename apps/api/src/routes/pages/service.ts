@@ -70,7 +70,7 @@ export async function getPages(db: Database | Transaction, params: GetPagesParam
 					})
 				: null;
 
-		return { ...item, image };
+		return { ...item, image, publishedAt: item.entity.updatedAt.toISOString() };
 	});
 
 	return { data, limit, offset, total };
@@ -104,6 +104,7 @@ export async function getPageById(db: Database | Transaction, params: GetPageByI
 				entity: {
 					columns: {
 						slug: true,
+						updatedAt: true,
 					},
 				},
 				image: {
@@ -128,7 +129,7 @@ export async function getPageById(db: Database | Transaction, params: GetPageByI
 				})
 			: null;
 
-	return { ...item, image, ...fields };
+	return { ...item, image, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
 }
 
 //
@@ -216,6 +217,7 @@ export async function getPageBySlug(db: Database | Transaction, params: GetPageB
 			entity: {
 				columns: {
 					slug: true,
+					updatedAt: true,
 				},
 			},
 			image: {
@@ -240,5 +242,5 @@ export async function getPageBySlug(db: Database | Transaction, params: GetPageB
 
 	const fields = await getContentBlocks(db, item.id);
 
-	return { ...item, image, ...fields };
+	return { ...item, image, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
 }

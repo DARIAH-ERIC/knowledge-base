@@ -40,7 +40,7 @@ export const router = createRouter()
 
 			const data = await getEvents(db, { limit, offset });
 
-			const payload = await validate(GetEvents.ResponseSchema, data);
+			const payload = await validate(GetEvents.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -77,7 +77,7 @@ export const router = createRouter()
 
 			const data = await getEventSlugs(db, { limit, offset });
 
-			const payload = await validate(GetEventSlugs.ResponseSchema, data);
+			const payload = await validate(GetEventSlugs.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -119,7 +119,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const payload = await validate(GetEventById.ResponseSchema, data);
+			const payload = await validate(GetEventById.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -161,7 +161,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const payload = await validate(GetEventBySlug.ResponseSchema, data);
+			const payload = await validate(GetEventBySlug.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},

@@ -65,7 +65,7 @@ export const router = createRouter()
 				}),
 			};
 
-			const payload = await validate(GetDocumentsPolicies.ResponseSchema, data);
+			const payload = await validate(GetDocumentsPolicies.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -102,7 +102,7 @@ export const router = createRouter()
 
 			const data = await getDocumentOrPolicySlugs(db, { limit, offset });
 
-			const payload = await validate(GetDocumentOrPolicySlugs.ResponseSchema, data);
+			const payload = await validate(GetDocumentOrPolicySlugs.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -146,7 +146,7 @@ export const router = createRouter()
 
 			const data = { ...result, document: { url: documentUrl(result.id) } };
 
-			const payload = await validate(GetDocumentOrPolicyById.ResponseSchema, data);
+			const payload = await validate(GetDocumentOrPolicyById.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -239,7 +239,7 @@ export const router = createRouter()
 
 			const data = { ...result, document: { url: documentUrl(result.id) } };
 
-			const payload = await validate(GetDocumentOrPolicyBySlug.ResponseSchema, data);
+			const payload = await validate(GetDocumentOrPolicyBySlug.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},

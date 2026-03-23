@@ -76,9 +76,9 @@ export const projects = p.pgTable("projects", {
 export type Project = typeof projects.$inferSelect;
 export type ProjectInput = typeof projects.$inferInsert;
 
-export const ProjectSelectSchema = createSelectSchema(projects);
-export const ProjectInsertSchema = createInsertSchema(projects);
-export const ProjectUpdateSchema = createUpdateSchema(projects);
+export const ProjectSelectSchema = createSelectSchema(projects, { duration: f.TimestampRange });
+export const ProjectInsertSchema = createInsertSchema(projects, { duration: f.TimestampRange });
+export const ProjectUpdateSchema = createUpdateSchema(projects, { duration: f.TimestampRange });
 
 export const projectPartners = p.pgTable("project_partners", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -106,9 +106,15 @@ export const projectPartners = p.pgTable("project_partners", {
 export type ProjectPartner = typeof projectPartners.$inferSelect;
 export type ProjectPartnerInput = typeof projectPartners.$inferInsert;
 
-export const ProjectPartnerSelectSchema = createSelectSchema(projectPartners);
-export const ProjectPartnerInsertSchema = createInsertSchema(projectPartners);
-export const ProjectPartnerUpdateSchema = createUpdateSchema(projectPartners);
+export const ProjectPartnerSelectSchema = createSelectSchema(projectPartners, {
+	duration: f.NullableTimestampRange,
+});
+export const ProjectPartnerInsertSchema = createInsertSchema(projectPartners, {
+	duration: f.NullableTimestampRange,
+});
+export const ProjectPartnerUpdateSchema = createUpdateSchema(projectPartners, {
+	duration: f.NullableTimestampRange,
+});
 
 export const projectsContributions = p.pgTable("project_contributions", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),

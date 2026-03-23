@@ -40,7 +40,7 @@ export const router = createRouter()
 
 			const data = await getSocialMediaList(db, { limit, offset });
 
-			const payload = await validate(GetSocialMediaList.ResponseSchema, data);
+			const payload = await validate(GetSocialMediaList.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -82,7 +82,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const payload = await validate(GetSocialMediaById.ResponseSchema, data);
+			const payload = await validate(GetSocialMediaById.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},

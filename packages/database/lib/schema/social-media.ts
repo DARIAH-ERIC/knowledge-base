@@ -53,6 +53,12 @@ export const socialMedia = p.pgTable("social_media", {
 export type SocialMedia = typeof socialMedia.$inferSelect;
 export type SocialMediaInput = typeof socialMedia.$inferInsert;
 
-export const SocialMediaSelectSchema = createSelectSchema(socialMedia);
-export const SocialMediaInsertSchema = createInsertSchema(socialMedia);
-export const SocialMediaUpdateSchema = createUpdateSchema(socialMedia);
+export const SocialMediaSelectSchema = createSelectSchema(socialMedia, {
+	duration: f.NullableTimestampRange,
+});
+export const SocialMediaInsertSchema = createInsertSchema(socialMedia, {
+	duration: f.NullableTimestampRange,
+});
+export const SocialMediaUpdateSchema = createUpdateSchema(socialMedia, {
+	duration: f.NullableTimestampRange,
+});

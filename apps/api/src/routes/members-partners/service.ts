@@ -105,7 +105,7 @@ export async function getMembersAndPartners(
 			};
 		});
 
-		return { ...item, image, socialMedia };
+		return { ...item, image, socialMedia, publishedAt: item.entity.updatedAt.toISOString() };
 	});
 
 	return { data, limit, offset, total };
@@ -146,6 +146,7 @@ export async function getMemberOrPartnerById(
 				entity: {
 					columns: {
 						slug: true,
+						updatedAt: true,
 					},
 				},
 				image: {
@@ -198,7 +199,13 @@ export async function getMemberOrPartnerById(
 		};
 	});
 
-	return { ...item, image, socialMedia, ...fields };
+	return {
+		...item,
+		image,
+		socialMedia,
+		publishedAt: item.entity.updatedAt.toISOString(),
+		...fields,
+	};
 }
 
 //
@@ -296,6 +303,7 @@ export async function getMemberOrPartnerBySlug(
 			entity: {
 				columns: {
 					slug: true,
+					updatedAt: true,
 				},
 			},
 			image: {
@@ -348,5 +356,11 @@ export async function getMemberOrPartnerBySlug(
 
 	const fields = await getContentBlocks(db, item.id);
 
-	return { ...item, image, socialMedia, ...fields };
+	return {
+		...item,
+		image,
+		socialMedia,
+		publishedAt: item.entity.updatedAt.toISOString(),
+		...fields,
+	};
 }
