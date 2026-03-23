@@ -110,6 +110,7 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 					aria-label={t("Website")}
 					defaultValue={event?.website ?? undefined}
 					name="website"
+					type="url"
 				>
 					<Input placeholder={t("Website")} />
 					<FieldError />
