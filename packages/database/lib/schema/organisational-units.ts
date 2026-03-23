@@ -67,7 +67,7 @@ export const organisationalUnits = p.pgTable("organisational_units", {
 		.references(() => {
 			return entities.id;
 		}),
-	metadata: p.jsonb("metadata"),
+	metadata: p.jsonb("metadata"), // country: code, countryname; instutition: ror, wg: contact email, mailing list, membertracking
 	name: p.text("name").notNull(),
 	acronym: p.text("acronym"),
 	summary: p.text("summary").notNull(),
@@ -184,6 +184,7 @@ export const organisationalUnitsToSocialMedia = p.pgTable("organisational_units_
 		.references(() => {
 			return socialMedia.id;
 		}),
+	// maybe status necessary (primary or not)
 	...f.timestamps(),
 });
 

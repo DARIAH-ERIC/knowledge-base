@@ -24,6 +24,7 @@ export const personRoleTypesEnum = [
 	"national_consortium_contact",
 	"cooperating_partner_contact",
 	"ncc_chair",
+	"affiliation", // person_to_institution
 ] as const;
 
 export const persons = p.pgTable("persons", {
