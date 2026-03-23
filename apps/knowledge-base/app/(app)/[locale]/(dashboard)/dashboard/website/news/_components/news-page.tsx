@@ -166,6 +166,7 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 
 					startTransition(async () => {
 						await deleteNewsItemAction(itemToDelete.id);
+						list.remove(itemToDelete.id);
 						setItemToDelete(null);
 					});
 				}}
