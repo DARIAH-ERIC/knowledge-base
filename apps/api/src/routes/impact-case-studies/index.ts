@@ -50,7 +50,7 @@ export const router = createRouter()
 
 			const data = await getImpactCaseStudies(db, { limit, offset });
 
-			const payload = await validate(GetImpactCaseStudies.ResponseSchema, data);
+			const payload = await validate(GetImpactCaseStudies.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -87,7 +87,7 @@ export const router = createRouter()
 
 			const data = await getImpactCaseStudySlugs(db, { limit, offset });
 
-			const payload = await validate(GetImpactCaseStudySlugs.ResponseSchema, data);
+			const payload = await validate(GetImpactCaseStudySlugs.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -129,7 +129,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const payload = await validate(GetImpactCaseStudyById.ResponseSchema, data);
+			const payload = await validate(GetImpactCaseStudyById.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -171,7 +171,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const payload = await validate(GetImpactCaseStudyBySlug.ResponseSchema, data);
+			const payload = await validate(GetImpactCaseStudyBySlug.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},

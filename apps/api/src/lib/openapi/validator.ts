@@ -21,11 +21,11 @@ export function validator<
 export async function validate<TValidationSchema extends v.GenericSchema | v.GenericSchemaAsync>(
 	schema: TValidationSchema,
 	value: unknown,
+	status: 400 | 500 = 400,
 ): Promise<v.InferOutput<TValidationSchema>> {
 	try {
 		return await v.parseAsync(schema, value);
 	} catch (error) {
-		const status = 400;
 		throw new HTTPException(status, { cause: error, message: STATUS_CODES[status] });
 	}
 }

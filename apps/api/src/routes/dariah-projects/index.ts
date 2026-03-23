@@ -50,7 +50,7 @@ export const router = createRouter()
 
 			const data = await getDariahProjects(db, { limit, offset });
 
-			const payload = await validate(GetDariahProjects.ResponseSchema, data);
+			const payload = await validate(GetDariahProjects.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -87,7 +87,7 @@ export const router = createRouter()
 
 			const data = await getDariahProjectSlugs(db, { limit, offset });
 
-			const payload = await validate(GetDariahProjectSlugs.ResponseSchema, data);
+			const payload = await validate(GetDariahProjectSlugs.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -129,7 +129,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const payload = await validate(GetDariahProjectById.ResponseSchema, data);
+			const payload = await validate(GetDariahProjectById.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -171,7 +171,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const payload = await validate(GetDariahProjectBySlug.ResponseSchema, data);
+			const payload = await validate(GetDariahProjectBySlug.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},

@@ -40,7 +40,7 @@ export const router = createRouter()
 
 			const data = await getPages(db, { limit, offset });
 
-			const payload = await validate(GetPages.ResponseSchema, data);
+			const payload = await validate(GetPages.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -77,7 +77,7 @@ export const router = createRouter()
 
 			const data = await getPageSlugs(db, { limit, offset });
 
-			const payload = await validate(GetPageSlugs.ResponseSchema, data);
+			const payload = await validate(GetPageSlugs.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -119,7 +119,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const payload = await validate(GetPageById.ResponseSchema, data);
+			const payload = await validate(GetPageById.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -161,7 +161,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const payload = await validate(GetPageBySlug.ResponseSchema, data);
+			const payload = await validate(GetPageBySlug.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},

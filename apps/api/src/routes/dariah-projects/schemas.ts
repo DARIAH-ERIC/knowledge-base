@@ -29,7 +29,7 @@ export const DariahProjectBaseSchema = v.pipe(
 		]).entries,
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
-			env: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
 		image: v.nullable(v.object({ url: v.string() })),
 		institutions: v.array(DariahProjectInstitutionSchema),
@@ -65,7 +65,7 @@ export const DariahProjectSchema = v.pipe(
 		image: v.nullable(v.object({ url: v.string() })),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
-			env: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
 		institutions: v.array(DariahProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),

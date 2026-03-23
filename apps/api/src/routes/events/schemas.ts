@@ -11,7 +11,7 @@ export const EventBaseSchema = v.pipe(
 		image: v.object({ url: v.string() }),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
-			env: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
@@ -37,7 +37,7 @@ export const EventSchema = v.pipe(
 		image: v.object({ url: v.string() }),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
-			env: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),

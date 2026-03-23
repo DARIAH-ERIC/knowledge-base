@@ -50,7 +50,7 @@ export const router = createRouter()
 
 			const data = await getSpotlightArticles(db, { limit, offset });
 
-			const payload = await validate(GetSpotlightArticles.ResponseSchema, data);
+			const payload = await validate(GetSpotlightArticles.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -87,7 +87,7 @@ export const router = createRouter()
 
 			const data = await getSpotlightArticleSlugs(db, { limit, offset });
 
-			const payload = await validate(GetSpotlightArticleSlugs.ResponseSchema, data);
+			const payload = await validate(GetSpotlightArticleSlugs.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -129,7 +129,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const payload = await validate(GetSpotlightArticleById.ResponseSchema, data);
+			const payload = await validate(GetSpotlightArticleById.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -171,7 +171,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const payload = await validate(GetSpotlightArticleBySlug.ResponseSchema, data);
+			const payload = await validate(GetSpotlightArticleBySlug.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},

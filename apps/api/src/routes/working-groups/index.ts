@@ -50,7 +50,7 @@ export const router = createRouter()
 
 			const data = await getWorkingGroups(db, { limit, offset });
 
-			const payload = await validate(GetWorkingGroups.ResponseSchema, data);
+			const payload = await validate(GetWorkingGroups.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -87,7 +87,7 @@ export const router = createRouter()
 
 			const data = await getWorkingGroupSlugs(db, { limit, offset });
 
-			const payload = await validate(GetWorkingGroupSlugs.ResponseSchema, data);
+			const payload = await validate(GetWorkingGroupSlugs.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -129,7 +129,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const payload = await validate(GetWorkingGroupById.ResponseSchema, data);
+			const payload = await validate(GetWorkingGroupById.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -171,7 +171,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const payload = await validate(GetWorkingGroupBySlug.ResponseSchema, data);
+			const payload = await validate(GetWorkingGroupBySlug.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},

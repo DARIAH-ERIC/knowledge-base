@@ -55,7 +55,7 @@ export const timestampRange = p.customType<{
 
 		return {
 			start: new Date(String(start)),
-			end: end != null ? new Date(end) : undefined,
+			end: end != null && end !== "" ? new Date(end) : undefined,
 		};
 	},
 });

@@ -50,7 +50,7 @@ export const router = createRouter()
 
 			const data = await getNews(db, { limit, offset });
 
-			const payload = await validate(GetNews.ResponseSchema, data);
+			const payload = await validate(GetNews.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -87,7 +87,7 @@ export const router = createRouter()
 
 			const data = await getNewsItemSlugs(db, { limit, offset });
 
-			const payload = await validate(GetNewsItemSlugs.ResponseSchema, data);
+			const payload = await validate(GetNewsItemSlugs.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -129,7 +129,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const payload = await validate(GetNewsItemById.ResponseSchema, data);
+			const payload = await validate(GetNewsItemById.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},
@@ -171,7 +171,7 @@ export const router = createRouter()
 				return c.notFound();
 			}
 
-			const payload = await validate(GetNewsItemBySlug.ResponseSchema, data);
+			const payload = await validate(GetNewsItemBySlug.ResponseSchema, data, 500);
 
 			return c.json(payload);
 		},

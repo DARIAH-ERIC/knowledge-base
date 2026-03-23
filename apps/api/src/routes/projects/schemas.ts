@@ -27,7 +27,7 @@ export const ProjectBaseSchema = v.pipe(
 		image: v.nullable(v.object({ url: v.string() })),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
-			env: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
 		institutions: v.array(ProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
@@ -62,7 +62,7 @@ export const ProjectSchema = v.pipe(
 		image: v.nullable(v.object({ url: v.string() })),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
-			env: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
 		institutions: v.array(ProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
