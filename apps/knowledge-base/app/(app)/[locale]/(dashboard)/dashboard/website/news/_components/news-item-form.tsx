@@ -56,6 +56,7 @@ export function NewsItemForm(props: Readonly<NewsItemFormProps>): ReactNode {
 				<TextField
 					aria-label={t("Summary")}
 					defaultValue={newsItem?.summary ?? undefined}
+					isRequired={true}
 					name="summary"
 				>
 					<Input placeholder={t("Summary")} />
