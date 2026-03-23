@@ -58,6 +58,7 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 				<TextField
 					aria-label={t("Summary")}
 					defaultValue={event?.summary ?? undefined}
+					isRequired={true}
 					name="summary"
 				>
 					<Input placeholder={t("Summary")} />
