@@ -15,6 +15,7 @@ export const WorkingGroupBaseSchema = v.pipe(
 		]).entries,
 		image: v.nullable(v.object({ url: v.string() })),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+		publishedAt: v.string(),
 		socialMedia: v.array(
 			v.object({
 				...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,
@@ -51,6 +52,7 @@ export const WorkingGroupSchema = v.pipe(
 		]).entries,
 		image: v.nullable(v.object({ url: v.string() })),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+		publishedAt: v.string(),
 		socialMedia: v.array(
 			v.object({
 				...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,

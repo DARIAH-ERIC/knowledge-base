@@ -36,6 +36,8 @@ export const TimestampRange = v.pipe(
 	}),
 );
 
+export const NullableTimestampRange = v.nullable(TimestampRange);
+
 type TimestampRange = v.InferInput<typeof TimestampRange>;
 
 export const timestampRange = p.customType<{

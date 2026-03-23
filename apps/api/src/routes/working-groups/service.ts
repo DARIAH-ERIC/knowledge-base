@@ -100,7 +100,7 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 			};
 		});
 
-		return { ...item, image, socialMedia };
+		return { ...item, image, socialMedia, publishedAt: item.entity.updatedAt.toISOString() };
 	});
 
 	return { data, limit, offset, total };
@@ -139,6 +139,7 @@ export async function getWorkingGroupById(
 				entity: {
 					columns: {
 						slug: true,
+						updatedAt: true,
 					},
 				},
 				image: {
@@ -191,7 +192,13 @@ export async function getWorkingGroupById(
 		};
 	});
 
-	return { ...item, image, socialMedia, ...fields };
+	return {
+		...item,
+		image,
+		socialMedia,
+		publishedAt: item.entity.updatedAt.toISOString(),
+		...fields,
+	};
 }
 
 //
@@ -287,6 +294,7 @@ export async function getWorkingGroupBySlug(
 			entity: {
 				columns: {
 					slug: true,
+					updatedAt: true,
 				},
 			},
 			image: {
@@ -339,5 +347,11 @@ export async function getWorkingGroupBySlug(
 
 	const fields = await getContentBlocks(db, item.id);
 
-	return { ...item, image, socialMedia, ...fields };
+	return {
+		...item,
+		image,
+		socialMedia,
+		publishedAt: item.entity.updatedAt.toISOString(),
+		...fields,
+	};
 }

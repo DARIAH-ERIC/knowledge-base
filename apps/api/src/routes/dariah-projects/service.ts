@@ -63,6 +63,7 @@ function mapItem<
 	T extends {
 		image: { key: string } | null;
 		partners: Array<{ roleId: string; unit: { id: string; name: string; type: { type: string } } }>;
+		entity: { updatedAt: Date };
 	},
 >(item: T, width: number) {
 	const image =
@@ -79,7 +80,7 @@ function mapItem<
 
 	const { partners: _, ...rest } = item;
 
-	return { ...rest, image, institutions };
+	return { ...rest, image, institutions, publishedAt: item.entity.updatedAt.toISOString() };
 }
 
 //

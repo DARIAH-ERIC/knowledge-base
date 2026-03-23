@@ -58,7 +58,11 @@ export async function getDocumentsPolicies(
 
 	const total = aggregate.at(0)?.total ?? 0;
 
-	return { data: items, limit, offset, total };
+	const data = items.map((item) => {
+		return { ...item, publishedAt: item.entity.updatedAt.toISOString() };
+	});
+
+	return { data, limit, offset, total };
 }
 
 //
@@ -93,6 +97,7 @@ export async function getDocumentOrPolicyById(
 				entity: {
 					columns: {
 						slug: true,
+						updatedAt: true,
 					},
 				},
 			},
@@ -104,7 +109,7 @@ export async function getDocumentOrPolicyById(
 		return null;
 	}
 
-	return { ...item, ...fields };
+	return { ...item, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
 }
 
 //
@@ -228,6 +233,7 @@ export async function getDocumentOrPolicyBySlug(
 			entity: {
 				columns: {
 					slug: true,
+					updatedAt: true,
 				},
 			},
 		},
@@ -239,5 +245,5 @@ export async function getDocumentOrPolicyBySlug(
 
 	const fields = await getContentBlocks(db, item.id);
 
-	return { ...item, ...fields };
+	return { ...item, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
 }

@@ -30,6 +30,6 @@ export const events = p.pgTable("events", {
 export type Event = typeof events.$inferSelect;
 export type EventInput = typeof events.$inferInsert;
 
-export const EventSelectSchema = createSelectSchema(events);
-export const EventInsertSchema = createInsertSchema(events);
-export const EventUpdateSchema = createUpdateSchema(events);
+export const EventSelectSchema = createSelectSchema(events, { duration: f.TimestampRange });
+export const EventInsertSchema = createInsertSchema(events, { duration: f.TimestampRange });
+export const EventUpdateSchema = createUpdateSchema(events, { duration: f.TimestampRange });

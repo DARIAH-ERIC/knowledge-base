@@ -11,11 +11,15 @@ export const EventBaseSchema = v.pipe(
 			"title",
 			"summary",
 			"location",
-			"duration",
 			"isFullDay",
 		]).entries,
 		image: v.object({ url: v.string() }),
+		duration: v.object({
+			start: v.pipe(v.string(), v.isoDateTime()),
+			env: v.optional(v.pipe(v.string(), v.isoDateTime()))
+		}),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+		publishedAt: v.string(),
 	}),
 	v.description("Event"),
 	v.metadata({ ref: "EventBase" }),
@@ -38,11 +42,15 @@ export const EventSchema = v.pipe(
 			"title",
 			"summary",
 			"location",
-			"duration",
 			"isFullDay",
 		]).entries,
 		image: v.object({ url: v.string() }),
+		duration: v.object({
+			start: v.pipe(v.string(), v.isoDateTime()),
+			env: v.optional(v.pipe(v.string(), v.isoDateTime()))
+		}),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+		publishedAt: v.string(),
 		content: v.array(ContentBlockSchema),
 	}),
 	v.description("Event"),

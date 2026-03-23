@@ -70,7 +70,7 @@ export async function getSpotlightArticles(
 			options: { width: imageWidth.preview },
 		});
 
-		return { ...item, image };
+		return { ...item, image, publishedAt: item.entity.updatedAt.toISOString() };
 	});
 
 	return { data, limit, offset, total };
@@ -107,6 +107,7 @@ export async function getSpotlightArticleById(
 				entity: {
 					columns: {
 						slug: true,
+						updatedAt: true,
 					},
 				},
 				image: {
@@ -128,7 +129,7 @@ export async function getSpotlightArticleById(
 		options: { width: imageWidth.featured },
 	});
 
-	return { ...item, image, ...fields };
+	return { ...item, image, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
 }
 
 //
@@ -222,6 +223,7 @@ export async function getSpotlightArticleBySlug(
 			entity: {
 				columns: {
 					slug: true,
+					updatedAt: true,
 				},
 			},
 			image: {
@@ -243,5 +245,5 @@ export async function getSpotlightArticleBySlug(
 
 	const fields = await getContentBlocks(db, item.id);
 
-	return { ...item, image, ...fields };
+	return { ...item, image, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
 }

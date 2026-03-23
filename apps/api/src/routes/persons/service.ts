@@ -69,7 +69,7 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 			options: { width: imageWidth.avatar },
 		});
 
-		return { ...item, image };
+		return { ...item, image, publishedAt: item.entity.updatedAt.toISOString() };
 	});
 
 	return { data, limit, offset, total };
@@ -105,6 +105,7 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 				entity: {
 					columns: {
 						slug: true,
+						updatedAt: true,
 					},
 				},
 				image: {
@@ -126,7 +127,7 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 		options: { width: imageWidth.featured },
 	});
 
-	return { ...item, image, ...fields };
+	return { ...item, image, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
 }
 
 //
@@ -211,6 +212,7 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 			entity: {
 				columns: {
 					slug: true,
+					updatedAt: true,
 				},
 			},
 			image: {
@@ -232,5 +234,5 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 
 	const fields = await getContentBlocks(db, item.id);
 
-	return { ...item, image, ...fields };
+	return { ...item, image, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
 }

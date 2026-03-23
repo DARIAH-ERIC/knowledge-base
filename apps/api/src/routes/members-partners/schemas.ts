@@ -15,6 +15,7 @@ export const MemberOrPartnerBaseSchema = v.pipe(
 		]).entries,
 		image: v.nullable(v.object({ url: v.string() })),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+		publishedAt: v.string(),
 		type: v.literal(schema.membersAndPartnersUnitType),
 		status: v.picklist(schema.membersAndPartnersUnitStatusEnum),
 		socialMedia: v.array(
@@ -53,6 +54,7 @@ export const MemberOrPartnerSchema = v.pipe(
 		]).entries,
 		image: v.nullable(v.object({ url: v.string() })),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+		publishedAt: v.string(),
 		type: v.literal(schema.membersAndPartnersUnitType),
 		status: v.picklist(schema.membersAndPartnersUnitStatusEnum),
 		socialMedia: v.array(

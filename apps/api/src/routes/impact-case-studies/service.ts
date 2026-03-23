@@ -70,7 +70,7 @@ export async function getImpactCaseStudies(
 			options: { width: imageWidth.preview },
 		});
 
-		return { ...item, image };
+		return { ...item, image, publishedAt: item.entity.updatedAt.toISOString() };
 	});
 
 	return { data, limit, offset, total };
@@ -120,6 +120,7 @@ export async function getImpactCaseStudyById(
 				entity: {
 					columns: {
 						slug: true,
+						updatedAt: true,
 					},
 				},
 				image: {
@@ -150,7 +151,13 @@ export async function getImpactCaseStudyById(
 		options: { width: imageWidth.featured },
 	});
 
-	return { ...item, contributors, image, ...fields };
+	return {
+		...item,
+		contributors,
+		image,
+		publishedAt: item.entity.updatedAt.toISOString(),
+		...fields,
+	};
 }
 
 //
@@ -257,6 +264,7 @@ export async function getImpactCaseStudyBySlug(
 			entity: {
 				columns: {
 					slug: true,
+					updatedAt: true,
 				},
 			},
 			image: {
@@ -287,5 +295,11 @@ export async function getImpactCaseStudyBySlug(
 
 	const fields = await getContentBlocks(db, item.id);
 
-	return { ...item, contributors, image, ...fields };
+	return {
+		...item,
+		contributors,
+		image,
+		publishedAt: item.entity.updatedAt.toISOString(),
+		...fields,
+	};
 }

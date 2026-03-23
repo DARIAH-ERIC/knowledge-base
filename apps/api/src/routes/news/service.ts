@@ -67,7 +67,7 @@ export async function getNews(db: Database | Transaction, params: GetNewsParams)
 			options: { width: imageWidth.preview },
 		});
 
-		return { ...item, image };
+		return { ...item, image, publishedAt: item.entity.updatedAt.toISOString() };
 	});
 
 	return { data, limit, offset, total };
@@ -101,6 +101,7 @@ export async function getNewsItemById(db: Database | Transaction, params: GetNew
 				entity: {
 					columns: {
 						slug: true,
+						updatedAt: true,
 					},
 				},
 				image: {
@@ -122,7 +123,7 @@ export async function getNewsItemById(db: Database | Transaction, params: GetNew
 		options: { width: imageWidth.featured },
 	});
 
-	return { ...item, image, ...fields };
+	return { ...item, image, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
 }
 
 //
@@ -213,6 +214,7 @@ export async function getNewsItemBySlug(
 			entity: {
 				columns: {
 					slug: true,
+					updatedAt: true,
 				},
 			},
 			image: {
@@ -234,5 +236,5 @@ export async function getNewsItemBySlug(
 
 	const fields = await getContentBlocks(db, item.id);
 
-	return { ...item, image, ...fields };
+	return { ...item, image, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
 }

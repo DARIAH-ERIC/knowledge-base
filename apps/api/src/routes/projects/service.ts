@@ -97,7 +97,7 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 			return { ...rest, type: type.type };
 		});
 
-		return { ...item, image, institutions };
+		return { ...item, image, institutions, publishedAt: item.entity.updatedAt.toISOString() };
 	});
 
 	return { data, limit, offset, total };
@@ -136,6 +136,7 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 				entity: {
 					columns: {
 						slug: true,
+						updatedAt: true,
 					},
 				},
 				image: {
@@ -182,7 +183,13 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 		return { ...rest, type: type.type };
 	});
 
-	return { ...item, image, institutions, ...fields };
+	return {
+		...item,
+		image,
+		institutions,
+		publishedAt: item.entity.updatedAt.toISOString(),
+		...fields,
+	};
 }
 
 //
@@ -270,6 +277,7 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 			entity: {
 				columns: {
 					slug: true,
+					updatedAt: true,
 				},
 			},
 			image: {
@@ -316,5 +324,11 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 
 	const fields = await getContentBlocks(db, item.id);
 
-	return { ...item, image, institutions, ...fields };
+	return {
+		...item,
+		image,
+		institutions,
+		publishedAt: item.entity.updatedAt.toISOString(),
+		...fields,
+	};
 }
