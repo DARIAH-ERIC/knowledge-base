@@ -1,9 +1,9 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 
-import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { EventsTable } from "@/components/ui/tables/events-table";
+import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
+import { EventsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page";
 import { getEvents } from "@/lib/data/cached/events";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -22,17 +22,14 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default async function DashboardWebsiteEventsPage(
+export default function DashboardWebsiteEventsPage(
 	_props: Readonly<DashboardWebsiteEventsPageProps>,
-): Promise<ReactNode> {
-	const t = await getExtracted();
-
-	const events = await getEvents({});
+): ReactNode {
+	const events = getEvents({ limit: 500 });
 
 	return (
-		<Main className="flex-1">
-			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">{t("Events")}</h1>
-			<EventsTable data={events} />
-		</Main>
+		<Suspense fallback={<LoadingScreen />}>
+			<EventsPage events={events} />
+		</Suspense>
 	);
 }
