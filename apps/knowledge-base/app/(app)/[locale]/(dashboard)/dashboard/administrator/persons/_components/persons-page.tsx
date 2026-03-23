@@ -169,6 +169,7 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 
 					startTransition(async () => {
 						await deletePersonAction(itemToDelete.id);
+						list.remove(itemToDelete.id);
 						setItemToDelete(null);
 					});
 				}}
