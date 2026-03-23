@@ -283,15 +283,18 @@ describe("documents-policies", () => {
 
 			const id = uuidv7();
 			const assetId = uuidv7();
+			const title = "Test Policy";
+			const summary = "Test summary";
+			const mimeType = "text/plain";
 
-			await db.insert(schema.assets).values({ id: assetId, key });
+			await db.insert(schema.assets).values({ id: assetId, key, label: title, mimeType });
 			await db
 				.insert(schema.entities)
 				.values({ id, slug: `doc-${id}`, statusId: status.id, typeId: type.id });
 			await db.insert(schema.documentsPolicies).values({
 				id,
-				title: "Test Policy",
-				summary: "Test summary",
+				title,
+				summary,
 				url: "https://example.com",
 				documentId: assetId,
 			});

@@ -1,6 +1,8 @@
 import { v7 as uuidv7 } from "uuid";
 
-export function generateObjectKey(prefix: "avatars" | "images"): string {
+import type { AssetPrefix } from ".";
+
+export function generateObjectKey(prefix: AssetPrefix): string {
 	const objectName = `${prefix}/${uuidv7()}`;
 
 	return objectName;

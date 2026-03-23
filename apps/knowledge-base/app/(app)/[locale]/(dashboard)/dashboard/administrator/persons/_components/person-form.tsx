@@ -85,6 +85,7 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 					onSelect={(key, url) => {
 						setSelectedImage({ key, url });
 					}}
+					prefix="avatars"
 				/>
 			</FormSection>
 

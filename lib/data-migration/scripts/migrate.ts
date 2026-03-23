@@ -6,7 +6,7 @@ import * as path from "node:path";
 import { assert, isNonEmptyString, keyBy, log } from "@acdh-oeaw/lib";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
-import { createStorageService } from "@dariah-eric/storage";
+import { type AssetPrefix, createStorageService } from "@dariah-eric/storage";
 import { buffer } from "@dariah-eric/storage/lib";
 import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
@@ -68,6 +68,7 @@ async function readCached(assetsCache: AssetsCache, url: URL) {
 }
 
 async function upload(
+	prefix: AssetPrefix,
 	assetsCache: AssetsCache,
 	url: URL,
 	label: string,
@@ -76,7 +77,7 @@ async function upload(
 ) {
 	const { input, metadata } = await readCached(assetsCache, url);
 
-	const { key } = await storage.images.upload({ prefix: "images", input, metadata });
+	const { key } = await storage.images.upload({ prefix, input, metadata });
 
 	const [asset] = await db
 		.insert(schema.assets)
@@ -93,6 +94,7 @@ async function upload(
 }
 
 async function uploadFeaturedImage(
+	prefix: AssetPrefix,
 	assetsCache: AssetsCache,
 	media: WordPressData["media"],
 	mediaId: number | undefined,
@@ -109,7 +111,7 @@ async function uploadFeaturedImage(
 	const label = toPlaintext(image.title.rendered).trim();
 	const caption = toPlaintext(image.caption.rendered).trim();
 	const alt = image.alt_text;
-	const asset = await upload(assetsCache, url, label, caption, alt);
+	const asset = await upload(prefix, assetsCache, url, label, caption, alt);
 
 	assert(asset, `Missing asset (entity id ${String(id)}).`);
 
@@ -205,7 +207,7 @@ async function main() {
 		},
 	});
 
-	const placeholderImage = await upload(assetsCache, placeholderImageUrl, "Placeholder");
+	const placeholderImage = await upload("images", assetsCache, placeholderImageUrl, "Placeholder");
 	assert(placeholderImage, "Missing placeholder image.");
 
 	/**
@@ -236,6 +238,7 @@ async function main() {
 			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
+				"images",
 				assetsCache,
 				data.media,
 				page.featured_media,
@@ -326,6 +329,7 @@ async function main() {
 			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
+				"images",
 				assetsCache,
 				data.media,
 				page.featured_media,
@@ -427,6 +431,7 @@ async function main() {
 			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
+				"images",
 				assetsCache,
 				data.media,
 				post.featured_media,
@@ -519,7 +524,7 @@ async function main() {
 
 			const imageId =
 				event.image !== false
-					? await uploadFeaturedImage(assetsCache, data.media, event.image.id, event.id)
+					? await uploadFeaturedImage("images", assetsCache, data.media, event.image.id, event.id)
 					: null;
 
 			if (imageId == null) {
@@ -616,6 +621,7 @@ async function main() {
 			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
+				"logos",
 				assetsCache,
 				data.media,
 				country.featured_media,
@@ -746,6 +752,7 @@ async function main() {
 			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
+				"logos",
 				assetsCache,
 				data.media,
 				institution.featured_media,
@@ -859,6 +866,7 @@ async function main() {
 			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
+				"logos",
 				assetsCache,
 				data.media,
 				workingGroup.featured_media,
@@ -950,6 +958,7 @@ async function main() {
 			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
+				"logos",
 				assetsCache,
 				data.media,
 				project.featured_media,
@@ -1070,6 +1079,7 @@ async function main() {
 			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
+				"avatars",
 				assetsCache,
 				data.media,
 				person.featured_media,

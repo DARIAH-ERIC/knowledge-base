@@ -1,6 +1,7 @@
 "use client";
 
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import type { AssetPrefix } from "@dariah-eric/storage";
 import { Button } from "@dariah-eric/ui/button";
 import { GridList, GridListItem } from "@dariah-eric/ui/grid-list";
 import {
@@ -21,10 +22,11 @@ import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/we
 interface MediaLibraryDialogProps {
 	assets: Array<{ key: string; url: string }>;
 	onSelect: (key: string, url: string) => void;
+	prefix?: AssetPrefix;
 }
 
 export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): ReactNode {
-	const { assets, onSelect } = props;
+	const { assets, onSelect, prefix = "images" } = props;
 
 	const t = useExtracted();
 
@@ -40,7 +42,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 
 		const formData = new FormData();
 		formData.append("file", file);
-		formData.append("prefix", "avatars");
+		formData.append("prefix", prefix);
 
 		startUploading(async () => {
 			const result = await uploadImageAction(createActionStateInitial(), formData);

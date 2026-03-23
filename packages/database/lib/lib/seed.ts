@@ -9,9 +9,13 @@ import type { Client } from "./admin-client";
 interface SeedManifest {
 	avatars: Array<{
 		key: string;
+		mimeType: string;
+		label: string;
 	}>;
 	images: Array<{
 		key: string;
+		mimeType: string;
+		label: string;
 	}>;
 }
 
@@ -50,13 +54,15 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 
 		const images: Array<schema.AssetInput> = f.helpers.multiple(
 			() => {
-				const key =
+				const img =
 					seedManifest?.images != null
-						? f.helpers.arrayElement(seedManifest.images).key
-						: f.string.uuid();
+						? f.helpers.arrayElement(seedManifest.images)
+						: { key: f.string.uuid(), mimeType: "image/png", label: f.lorem.word() };
 
 				return {
-					key,
+					key: img.key,
+					label: img.label,
+					mimeType: img.mimeType,
 					licenseId: f.helpers.arrayElement(licenseIds).id,
 				};
 			},
@@ -70,13 +76,15 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 
 		const avatars: Array<schema.AssetInput> = f.helpers.multiple(
 			() => {
-				const key =
+				const img =
 					seedManifest?.avatars != null
-						? f.helpers.arrayElement(seedManifest.avatars).key
-						: f.string.uuid();
+						? f.helpers.arrayElement(seedManifest.avatars)
+						: { key: f.string.uuid(), mimeType: "image/png", label: f.lorem.word() };
 
 				return {
-					key,
+					key: img.key,
+					label: img.label,
+					mimeType: img.mimeType,
 					licenseId: f.helpers.arrayElement(licenseIds).id,
 				};
 			},
