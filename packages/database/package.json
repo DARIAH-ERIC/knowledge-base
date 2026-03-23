@@ -15,6 +15,8 @@
 		"./schema": "./dist/schema.mjs"
 	},
 	"files": [
+		"./config/",
+		"./db/",
 		"./dist/"
 	],
 	"sideEffects": false,
