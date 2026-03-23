@@ -366,6 +366,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 						setSelectedImage({ key, url });
 						setImageKeyError(false);
 					}}
+					prefix="logos"
 				/>
 
 				<input

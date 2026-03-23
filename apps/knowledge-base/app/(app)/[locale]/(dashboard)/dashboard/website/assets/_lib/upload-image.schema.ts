@@ -13,4 +13,7 @@ export const UploadImageInputSchema = v.object({
 	),
 	licenseId: v.optional(v.pipe(v.string(), v.nonEmpty())),
 	prefix: v.picklist(assetPrefixes),
+	label: v.optional(v.pipe(v.string(), v.nonEmpty())),
+	caption: v.optional(v.pipe(v.string(), v.nonEmpty())),
+	alt: v.optional(v.pipe(v.string(), v.nonEmpty())),
 });

@@ -13,9 +13,13 @@ export interface SeedConfig {
 export interface SeedManifest {
 	avatars: Array<{
 		key: string;
+		mimeType: string;
+		label: string;
 	}>;
 	images: Array<{
 		key: string;
+		mimeType: string;
+		label: string;
 	}>;
 }
 
@@ -57,7 +61,7 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<See
 			size: metadata.size,
 		});
 
-		seedManifest.avatars.push({ key });
+		seedManifest.avatars.push({ key, mimeType: metadata["content-type"], label: f.lorem.word() });
 	}
 
 	for (const { url } of images) {
@@ -71,7 +75,7 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<See
 			size: metadata.size,
 		});
 
-		seedManifest.images.push({ key });
+		seedManifest.images.push({ key, mimeType: metadata["content-type"], label: f.lorem.word() });
 	}
 
 	return seedManifest;

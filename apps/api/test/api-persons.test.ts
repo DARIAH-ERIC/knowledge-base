@@ -29,6 +29,8 @@ function createItems(count: number) {
 			const asset = {
 				id: assetId,
 				key: `persons/${assetId}.jpg`,
+				label: name,
+				mimeType: "image/jpeg",
 			};
 
 			const person = {

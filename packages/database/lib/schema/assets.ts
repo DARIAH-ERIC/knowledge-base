@@ -8,6 +8,10 @@ import { licenses } from "./licenses";
 export const assets = p.pgTable("assets", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	key: p.text("key").notNull(),
+	label: p.text("label").notNull(),
+	mimeType: p.text("mime_type").notNull(),
+	caption: p.text("caption"),
+	alt: p.text("alt"),
 	licenseId: p.uuid("license_id").references(() => {
 		return licenses.id;
 	}),

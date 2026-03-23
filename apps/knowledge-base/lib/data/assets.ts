@@ -92,10 +92,13 @@ interface UploadAssetParams {
 	file: File;
 	licenseId?: schema.AssetInput["licenseId"];
 	prefix: AssetPrefix;
+	label?: string;
+	caption?: string;
+	alt?: string;
 }
 
 export async function uploadAsset(params: UploadAssetParams) {
-	const { file, licenseId, prefix } = params;
+	const { file, licenseId, prefix, label, alt, caption } = params;
 
 	const input = Readable.fromWeb(file.stream() as ReadableStream);
 	const size = file.size;
@@ -103,7 +106,14 @@ export async function uploadAsset(params: UploadAssetParams) {
 
 	const { key } = await s3.images.upload({ input, prefix, metadata, size });
 
-	await db.insert(schema.assets).values({ key, licenseId });
+	await db.insert(schema.assets).values({
+		key,
+		licenseId,
+		mimeType: metadata["content-type"],
+		label: label ?? file.name,
+		alt,
+		caption,
+	});
 
 	return {
 		key,

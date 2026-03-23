@@ -6,7 +6,7 @@ import * as path from "node:path";
 import { assert, isNonEmptyString, keyBy, log } from "@acdh-oeaw/lib";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
-import { createStorageService } from "@dariah-eric/storage";
+import { type AssetPrefix, createStorageService } from "@dariah-eric/storage";
 import { buffer } from "@dariah-eric/storage/lib";
 import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
@@ -26,6 +26,11 @@ import { env } from "../config/env.config";
 import { getWordPressData, type WordPressData } from "../src/lib/get-wordpress-data";
 
 const processor = unified().use(fromHtml);
+
+function toPlaintext(html: string): string {
+	const ast = processor.parse(html);
+	return toText(ast);
+}
 
 const storage = createStorageService({
 	config: {
@@ -62,15 +67,26 @@ async function readCached(assetsCache: AssetsCache, url: URL) {
 	return { input, metadata };
 }
 
-async function upload(assetsCache: AssetsCache, url: URL) {
+async function upload(
+	prefix: AssetPrefix,
+	assetsCache: AssetsCache,
+	url: URL,
+	label: string,
+	caption?: string,
+	alt?: string,
+) {
 	const { input, metadata } = await readCached(assetsCache, url);
 
-	const { key } = await storage.images.upload({ prefix: "images", input, metadata });
+	const { key } = await storage.images.upload({ prefix, input, metadata });
 
 	const [asset] = await db
 		.insert(schema.assets)
 		.values({
 			key,
+			label,
+			mimeType: metadata["content-type"],
+			caption: caption === "Read more" ? null : caption,
+			alt,
 		})
 		.returning({ id: schema.assets.id });
 
@@ -78,6 +94,7 @@ async function upload(assetsCache: AssetsCache, url: URL) {
 }
 
 async function uploadFeaturedImage(
+	prefix: AssetPrefix,
 	assetsCache: AssetsCache,
 	media: WordPressData["media"],
 	mediaId: number | undefined,
@@ -91,7 +108,10 @@ async function uploadFeaturedImage(
 	assert(image != null, `Missing featured image (entity id ${String(id)}).`);
 
 	const url = new URL(image.source_url);
-	const asset = await upload(assetsCache, url);
+	const label = toPlaintext(image.title.rendered).trim();
+	const caption = toPlaintext(image.caption.rendered).trim();
+	const alt = image.alt_text;
+	const asset = await upload(prefix, assetsCache, url, label, caption, alt);
 
 	assert(asset, `Missing asset (entity id ${String(id)}).`);
 
@@ -154,6 +174,11 @@ async function main() {
 		return item.type;
 	});
 
+	const organisationalUnitStatus = await db.query.organisationalUnitStatus.findMany();
+	const organisationalUnitStatusByType = keyBy(organisationalUnitStatus, (item) => {
+		return item.status;
+	});
+
 	const projectScopes = await db.query.projectScopes.findMany();
 	const projectScopesByType = keyBy(projectScopes, (item) => {
 		return item.scope;
@@ -169,19 +194,21 @@ async function main() {
 		return item.type;
 	});
 
-	//
+	const socialMediaTypes = await db.query.socialMediaTypes.findMany();
+	const socialMediaTypesByType = keyBy(socialMediaTypes, (item) => {
+		return item.type;
+	});
 
-	function toPlaintext(html: string): string {
-		const ast = processor.parse(html);
-		return toText(ast);
-	}
+	const umbrellaUnit = await db.query.organisationalUnits.findFirst({
+		where: {
+			type: {
+				type: "umbrella_consortium",
+			},
+		},
+	});
 
-	//
-
-	const placeholderImage = await upload(assetsCache, placeholderImageUrl);
+	const placeholderImage = await upload("images", assetsCache, placeholderImageUrl, "Placeholder");
 	assert(placeholderImage, "Missing placeholder image.");
-
-	//
 
 	/**
 	 * ============================================================================================
@@ -211,6 +238,7 @@ async function main() {
 			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
+				"images",
 				assetsCache,
 				data.media,
 				page.featured_media,
@@ -236,7 +264,7 @@ async function main() {
 
 			const content = generateJSON(page.content.rendered, [StarterKit]);
 
-			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.pages.id,
 					fieldName: "content",
@@ -272,8 +300,6 @@ async function main() {
 			});
 		});
 	}
-
-	//
 
 	/**
 	 * ============================================================================================
@@ -303,6 +329,7 @@ async function main() {
 			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
+				"images",
 				assetsCache,
 				data.media,
 				page.featured_media,
@@ -329,7 +356,7 @@ async function main() {
 
 			const content = generateJSON(page.content.rendered, [StarterKit]);
 
-			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.pages.id,
 					fieldName: "content",
@@ -365,8 +392,6 @@ async function main() {
 			});
 		});
 	}
-
-	//
 
 	/**
 	 * ============================================================================================
@@ -406,6 +431,7 @@ async function main() {
 			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
+				"images",
 				assetsCache,
 				data.media,
 				post.featured_media,
@@ -431,7 +457,7 @@ async function main() {
 
 			const content = generateJSON(post.content.rendered, [StarterKit]);
 
-			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.news.id,
 					fieldName: "content",
@@ -468,8 +494,6 @@ async function main() {
 		});
 	}
 
-	//
-
 	/**
 	 * ============================================================================================
 	 * Events.
@@ -500,7 +524,7 @@ async function main() {
 
 			const imageId =
 				event.image !== false
-					? await uploadFeaturedImage(assetsCache, data.media, event.image.id, event.id)
+					? await uploadFeaturedImage("images", assetsCache, data.media, event.image.id, event.id)
 					: null;
 
 			if (imageId == null) {
@@ -532,7 +556,7 @@ async function main() {
 
 			const content = generateJSON(event.description, [StarterKit]);
 
-			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.events.id,
 					fieldName: "content",
@@ -569,8 +593,6 @@ async function main() {
 		});
 	}
 
-	//
-
 	/**
 	 * ============================================================================================
 	 * Countries.
@@ -599,6 +621,7 @@ async function main() {
 			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
+				"logos",
 				assetsCache,
 				data.media,
 				country.featured_media,
@@ -609,17 +632,50 @@ async function main() {
 				log.warn(`Missing image (country id ${String(country.id)}).`);
 			}
 
-			await tx.insert(schema.organisationalUnits).values({
-				id,
-				name: toPlaintext(country.title.rendered),
-				summary: "",
-				imageId: imageId ?? placeholderImage.id,
-				typeId: organisationalUnitTypesByType.consortium.id,
-				createdAt: new Date(country.date_gmt),
-				updatedAt: new Date(country.modified_gmt),
-			});
+			const name = toPlaintext(country.title.rendered);
 
-			// TODO: website => social_media/outreach
+			const [orgUnit] = await tx
+				.insert(schema.organisationalUnits)
+				.values({
+					id,
+					name,
+					summary: "",
+					imageId: imageId ?? placeholderImage.id,
+					typeId: organisationalUnitTypesByType.consortium.id,
+					createdAt: new Date(country.date_gmt),
+					updatedAt: new Date(country.modified_gmt),
+				})
+				.returning({ id: schema.organisationalUnits.id });
+
+			assert(orgUnit);
+
+			if (umbrellaUnit) {
+				await tx.insert(schema.organisationalUnitsRelations).values({
+					unitId: orgUnit.id,
+					relatedUnitId: umbrellaUnit.id,
+					duration: { start: new Date() }, // FIXME:
+					status: organisationalUnitStatusByType.is_member.id,
+				});
+			}
+
+			if (isNonEmptyString(country.website)) {
+				const [sm] = await tx
+					.insert(schema.socialMedia)
+					.values({
+						name: `${name} website`,
+						typeId: socialMediaTypesByType.website.id,
+						url: country.website,
+					})
+					.returning({ id: schema.socialMedia.id });
+
+				assert(sm);
+
+				await tx.insert(schema.organisationalUnitsToSocialMedia).values({
+					organisationalUnitId: orgUnit.id,
+					socialMediaId: sm.id,
+				});
+			}
+
 			// TODO: repPersons_data
 			// TODO: coordinators_data
 			// TODO: repInstitutions_data
@@ -630,7 +686,7 @@ async function main() {
 
 			const content = generateJSON(country.content.rendered, [StarterKit]);
 
-			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.organisational_units.id,
 					fieldName: "description",
@@ -666,8 +722,6 @@ async function main() {
 			});
 		});
 	}
-
-	//
 
 	/**
 	 * ============================================================================================
@@ -698,23 +752,47 @@ async function main() {
 			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
+				"logos",
 				assetsCache,
 				data.media,
 				institution.featured_media,
 				institution.id,
 			);
 
-			await tx.insert(schema.organisationalUnits).values({
-				id,
-				name: toPlaintext(institution.title.rendered),
-				summary: "",
-				typeId: organisationalUnitTypesByType.institution.id,
-				imageId: imageId ?? placeholderImage.id,
-				createdAt: new Date(institution.date_gmt),
-				updatedAt: new Date(institution.modified_gmt),
-			});
+			const name = toPlaintext(institution.title.rendered);
 
-			// TODO: website => social_media/outreach
+			const [orgUnit] = await tx
+				.insert(schema.organisationalUnits)
+				.values({
+					id,
+					name,
+					summary: "",
+					typeId: organisationalUnitTypesByType.institution.id,
+					imageId: imageId ?? placeholderImage.id,
+					createdAt: new Date(institution.date_gmt),
+					updatedAt: new Date(institution.modified_gmt),
+				})
+				.returning({ id: schema.organisationalUnits.id });
+
+			assert(orgUnit);
+
+			if (isNonEmptyString(institution.website)) {
+				const [sm] = await tx
+					.insert(schema.socialMedia)
+					.values({
+						name: `${name} website`,
+						typeId: socialMediaTypesByType.website.id,
+						url: institution.website,
+					})
+					.returning({ id: schema.socialMedia.id });
+
+				assert(sm);
+
+				await tx.insert(schema.organisationalUnitsToSocialMedia).values({
+					organisationalUnitId: orgUnit.id,
+					socialMediaId: sm.id,
+				});
+			}
 
 			if (institution.content.rendered.trim().length === 0) {
 				return;
@@ -722,7 +800,7 @@ async function main() {
 
 			const content = generateJSON(institution.content.rendered, [StarterKit]);
 
-			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.organisational_units.id,
 					fieldName: "description",
@@ -758,8 +836,6 @@ async function main() {
 			});
 		});
 	}
-
-	//
 
 	/**
 	 * ============================================================================================
@@ -790,6 +866,7 @@ async function main() {
 			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
+				"logos",
 				assetsCache,
 				data.media,
 				workingGroup.featured_media,
@@ -815,7 +892,7 @@ async function main() {
 
 			const content = generateJSON(workingGroup.content.rendered, [StarterKit]);
 
-			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.organisational_units.id,
 					fieldName: "description",
@@ -852,8 +929,6 @@ async function main() {
 		});
 	}
 
-	//
-
 	/**
 	 * ============================================================================================
 	 * Projects.
@@ -883,29 +958,52 @@ async function main() {
 			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
+				"logos",
 				assetsCache,
 				data.media,
 				project.featured_media,
 				project.id,
 			);
 
-			await tx.insert(schema.projects).values({
-				id,
-				// name: toPlaintext(project.title.rendered),
-				name: project.fullname,
-				duration: { start: new Date() }, // FIXME: need to extract from richtext
-				// funding: 0,
-				summary: toPlaintext(project.excerpt.rendered),
-				// call: "",
-				// funders: "",
-				// topic: "",
-				imageId: imageId ?? placeholderImage.id,
-				scopeId: projectScopesByType.national.id,
-				createdAt: new Date(project.date_gmt),
-				updatedAt: new Date(project.modified_gmt),
-			});
+			const [p] = await tx
+				.insert(schema.projects)
+				.values({
+					id,
+					// name: toPlaintext(project.title.rendered),
+					name: project.fullname,
+					duration: { start: new Date() }, // FIXME: need to extract from richtext
+					// funding: 0,
+					summary: toPlaintext(project.excerpt.rendered),
+					// call: "",
+					// funders: "",
+					// topic: "",
+					imageId: imageId ?? placeholderImage.id,
+					scopeId: projectScopesByType.national.id,
+					createdAt: new Date(project.date_gmt),
+					updatedAt: new Date(project.modified_gmt),
+				})
+				.returning({ id: schema.projects.id });
 
-			// TODO: website => social_media/outreach
+			assert(p);
+
+			if (isNonEmptyString(project.website)) {
+				const [sm] = await tx
+					.insert(schema.socialMedia)
+					.values({
+						name: `${project.fullname} website`,
+						typeId: socialMediaTypesByType.website.id,
+						url: project.website,
+					})
+					.returning({ id: schema.socialMedia.id });
+
+				assert(sm);
+
+				await tx.insert(schema.projectsToSocialMedia).values({
+					projectId: p.id,
+					socialMediaId: sm.id,
+				});
+			}
+
 			// TODO: relations.coordinator
 			// TODO: relations.institutions
 
@@ -915,7 +1013,7 @@ async function main() {
 
 			const content = generateJSON(project.content.rendered, [StarterKit]);
 
-			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.projects.id,
 					fieldName: "description",
@@ -952,8 +1050,6 @@ async function main() {
 		});
 	}
 
-	//
-
 	/**
 	 * ============================================================================================
 	 * Person.
@@ -983,6 +1079,7 @@ async function main() {
 			const id = entity.id;
 
 			const imageId = await uploadFeaturedImage(
+				"avatars",
 				assetsCache,
 				data.media,
 				person.featured_media,
@@ -1018,7 +1115,7 @@ async function main() {
 
 			const content = generateJSON(person.content.rendered, [StarterKit]);
 
-			const fieldName = await db.query.entityTypesFieldsNames.findFirst({
+			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.persons.id,
 					fieldName: "biography",

@@ -96,7 +96,11 @@ export default async function globalSetup(): Promise<void> {
 		});
 
 		if (existingAsset == null) {
-			await db.insert(schema.assets).values({ key: E2E_TEST_ASSET_KEY });
+			await db.insert(schema.assets).values({
+				key: E2E_TEST_ASSET_KEY,
+				label: "E2E Test Asset",
+				mimeType: "image/jpeg",
+			});
 		}
 
 		await db.delete(schema.sessions).where(eq(schema.sessions.userId, userId));

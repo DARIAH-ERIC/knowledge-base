@@ -41,9 +41,9 @@ export const uploadImageAction = createServerAction<
 		});
 	}
 
-	const { file, licenseId, prefix } = validation.output;
+	const { file, licenseId, prefix, label, alt, caption } = validation.output;
 
-	const { key } = await uploadAsset({ file, licenseId, prefix });
+	const { key } = await uploadAsset({ file, licenseId, prefix, label, alt, caption });
 
 	revalidatePath("/dashboard/website/assets", "page");
 	revalidatePath("/dashboard/administrator/persons", "layout");
