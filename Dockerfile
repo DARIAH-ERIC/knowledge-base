@@ -44,13 +44,18 @@ RUN pnpm install --frozen-lockfile
 FROM migrate-install AS migrate-build
 COPY --from=migrate-prune /app/out/full/ .
 RUN turbo run build --filter=@dariah-eric/database^...
+# We don't set `injectWorkspacePackages` directly in `pnpm-workspace.yaml` because it currently
+# produces lots of peer dependency warnings.
+RUN pnpm deploy --filter @dariah-eric/database --config.inject-workspace-packages=true /out
 
 # serve
 # -------------------------------------------------------------------------------------------------
 
-FROM migrate-build AS migrate
+FROM base AS migrate
 USER node
-CMD [ "pnpm", "--filter", "@dariah-eric/database", "run", "db:migrations:apply" ]
+WORKDIR /app
+COPY --from=migrate-build /out/ .
+CMD [ "pnpm", "run", "db:migrations:apply" ]
 
 # =================================================================================================
 # api
