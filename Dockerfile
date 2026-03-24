@@ -144,6 +144,8 @@ ARG NEXT_PUBLIC_TYPESENSE_PROTOCOL
 COPY --from=app-prune /app/out/full/ .
 RUN --mount=type=secret,id=AUTH_ENCRYPTION_KEY,env=AUTH_ENCRYPTION_KEY \
     --mount=type=secret,id=AUTH_SIGN_UP,env=AUTH_SIGN_UP \
+    --mount=type=secret,id=CORDIS_API_KEY,env=CORDIS_API_KEY \
+    --mount=type=secret,id=CORDIS_API_BASE_URL,env=CORDIS_API_BASE_URL \
     --mount=type=secret,id=DATABASE_HOST,env=DATABASE_HOST \
     --mount=type=secret,id=DATABASE_NAME,env=DATABASE_NAME \
     --mount=type=secret,id=DATABASE_PASSWORD,env=DATABASE_PASSWORD \
@@ -159,13 +161,20 @@ RUN --mount=type=secret,id=AUTH_ENCRYPTION_KEY,env=AUTH_ENCRYPTION_KEY \
     --mount=type=secret,id=MAILCHIMP_API_BASE_URL,env=MAILCHIMP_API_BASE_URL \
     --mount=type=secret,id=MAILCHIMP_API_KEY,env=MAILCHIMP_API_KEY \
     --mount=type=secret,id=MAILCHIMP_LIST_ID,env=MAILCHIMP_LIST_ID \
+    --mount=type=secret,id=OPENAIRE_API_BASE_URL,env=OPENAIRE_API_BASE_URL \
     --mount=type=secret,id=S3_ACCESS_KEY,env=S3_ACCESS_KEY \
     --mount=type=secret,id=S3_BUCKET_NAME,env=S3_BUCKET_NAME \
     --mount=type=secret,id=S3_HOST,env=S3_HOST \
     --mount=type=secret,id=S3_PORT,env=S3_PORT \
     --mount=type=secret,id=S3_PROTOCOL,env=S3_PROTOCOL \
     --mount=type=secret,id=S3_SECRET_KEY,env=S3_SECRET_KEY \
+    --mount=type=secret,id=SSHOC_MARKETPLACE_API_BASE_URL,env=SSHOC_MARKETPLACE_API_BASE_URL \
+    --mount=type=secret,id=SSHOC_MARKETPLACE_BASE_URL,env=SSHOC_MARKETPLACE_BASE_URL \
+    --mount=type=secret,id=SSHOC_MARKETPLACE_PASSWORD,env=SSHOC_MARKETPLACE_PASSWORD \
+    --mount=type=secret,id=SSHOC_MARKETPLACE_USER,env=SSHOC_MARKETPLACE_USER \
     --mount=type=secret,id=TYPESENSE_ADMIN_API_KEY,env=TYPESENSE_ADMIN_API_KEY \
+    --mount=type=secret,id=ZOTERO_API_KEY,env=ZOTERO_API_KEY \
+    --mount=type=secret,id=ZOTERO_API_BASE_URL,env=ZOTERO_API_BASE_URL \
     turbo run build --filter=@dariah-eric/knowledge-base
 
 # serve
