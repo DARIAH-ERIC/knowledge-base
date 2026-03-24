@@ -1,9 +1,10 @@
 /* eslint-disable react/jsx-no-literals */
+
 "use client";
 
 import type { ContentBlockTypes } from "@dariah-eric/database/schema";
 import { Button } from "@dariah-eric/ui/button";
-import { GridList, GridListItem } from "@dariah-eric/ui/grid-list";
+import { GridList, GridListItem, type GridListItemProps } from "@dariah-eric/ui/grid-list";
 import { Menu, MenuContent, MenuItem, MenuLabel } from "@dariah-eric/ui/menu";
 import { RichTextEditor } from "@dariah-eric/ui/rich-text-editor";
 import {
@@ -15,7 +16,7 @@ import {
 } from "@heroicons/react/24/outline";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode, useEffect, useRef } from "react";
 import type { Key } from "react-aria";
 import { useDragAndDrop, useListData } from "react-aria-components";
 
@@ -62,22 +63,22 @@ export function ContentBlocks({ items: initialItems }: Readonly<ContentBlocksPro
 	});
 
 	return (
-		<>
+		<Fragment>
 			<GridList dragAndDropHooks={dragAndDropHooks} items={list.items}>
 				{(item) => {
 					switch (item.type) {
 						case "data": {
-							return <GridListItem id={item.id}>data</GridListItem>;
+							return <EditableGridListItem id={item.id}>data</EditableGridListItem>;
 						}
 						case "embed": {
-							return <GridListItem id={item.id}>embed</GridListItem>;
+							return <EditableGridListItem id={item.id}>embed</EditableGridListItem>;
 						}
 						case "image": {
-							return <GridListItem id={item.id}>image</GridListItem>;
+							return <EditableGridListItem id={item.id}>image</EditableGridListItem>;
 						}
 						case "rich_text": {
 							return (
-								<GridListItem id={item.id} textValue={item.type}>
+								<EditableGridListItem id={item.id} textValue={item.type}>
 									<RichTextEditor
 										className="w-full"
 										content={item.content}
@@ -85,7 +86,7 @@ export function ContentBlocks({ items: initialItems }: Readonly<ContentBlocksPro
 											list.update(item.id, { ...item, content });
 										}}
 									/>
-								</GridListItem>
+								</EditableGridListItem>
 							);
 						}
 						default: {
@@ -105,7 +106,7 @@ export function ContentBlocks({ items: initialItems }: Readonly<ContentBlocksPro
 				);
 			})}
 			<ContentBlockMenu onAdd={addItem} />
-		</>
+		</Fragment>
 	);
 }
 
@@ -153,4 +154,63 @@ export function ContentBlockMenu({ onAdd }: Readonly<ContentBlockMenuProps>): Re
 			</MenuContent>
 		</Menu>
 	);
+}
+
+interface EditableGridListItemProps extends GridListItemProps {}
+
+function EditableGridListItem(props: Readonly<EditableGridListItemProps>): ReactNode {
+	const { children, ...rest } = props;
+
+	const cellProps = useCellEditMode();
+
+	return (
+		<GridListItem {...rest} {...cellProps}>
+			{children}
+		</GridListItem>
+	);
+}
+
+/** @see {@link https://github.com/adobe/react-spectrum/issues/4674#issuecomment-1970599091} */
+function useCellEditMode() {
+	const isFocusedRef = useRef(false);
+	const isEditModeRef = useRef(false);
+
+	useEffect(() => {
+		function handler(event: KeyboardEvent) {
+			if (isFocusedRef.current) {
+				if (event.code === "Enter") {
+					isEditModeRef.current = true;
+				} else if (event.code === "Escape" || event.code === "Tab") {
+					isEditModeRef.current = false;
+				}
+				if (isEditModeRef.current) {
+					event.stopPropagation();
+				}
+			}
+		}
+
+		window.addEventListener("keydown", handler, true);
+
+		return () => {
+			window.removeEventListener("keydown", handler, true);
+		};
+	}, []);
+
+	function setFocus(should: boolean) {
+		isFocusedRef.current = should;
+	}
+
+	const preventProps = {
+		onFocus() {
+			setFocus(true);
+		},
+		onBlur() {
+			setFocus(false);
+		},
+		onClick() {
+			isEditModeRef.current = true;
+		},
+	};
+
+	return preventProps;
 }
