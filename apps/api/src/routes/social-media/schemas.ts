@@ -6,10 +6,12 @@ import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 export const SocialMediaSchema = v.pipe(
 	v.object({
 		...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,
-		duration: v.object({
-			start: v.string(),
-			end: v.nullable(v.string()),
-		}),
+		duration: v.nullable(
+			v.object({
+				start: v.string(),
+				end: v.nullable(v.string()),
+			}),
+		),
 		type: v.picklist(schema.socialMediaTypesEnum),
 		organisationalUnits: v.array(
 			v.object({

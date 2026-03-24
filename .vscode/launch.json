@@ -37,7 +37,7 @@
 			"runtimeExecutable": "pnpm",
 			"skipFiles": ["<node_internals>/**"],
 			"type": "node",
-			"cwd": "${workspaceFolder}/apps/api-server"
+			"cwd": "${workspaceFolder}/apps/api"
 		}
 	],
 	"compounds": [
