@@ -224,6 +224,10 @@ async function main() {
 	log.info("Migrating pages...");
 
 	for (const page of Object.values(data.pages)) {
+		if (page.link === "https://www.dariah.eu/about/documents-list/") {
+			continue;
+		}
+
 		assert(page.status === "publish", "Page has not been published.");
 
 		await db.transaction(async (tx) => {
@@ -254,14 +258,34 @@ async function main() {
 				log.warn(`Missing image (page id ${String(page.id)}).`);
 			}
 
-			await tx.insert(schema.pages).values({
-				id,
-				title: toPlaintext(page.title.rendered),
-				summary: toPlaintext(page.excerpt.rendered),
-				imageId,
-				createdAt: new Date(page.date_gmt),
-				updatedAt: new Date(page.modified_gmt),
-			});
+			if (page.link.startsWith("https://www.dariah.eu/activities/impact-case-studies/")) {
+				await tx.insert(schema.impactCaseStudies).values({
+					id,
+					title: toPlaintext(page.title.rendered),
+					summary: toPlaintext(page.excerpt.rendered),
+					imageId: imageId ?? placeholderImage.id,
+					createdAt: new Date(page.date_gmt),
+					updatedAt: new Date(page.modified_gmt),
+				});
+			} else if (page.link.startsWith("https://www.dariah.eu/activities/spotlight/")) {
+				await tx.insert(schema.spotlightArticles).values({
+					id,
+					title: toPlaintext(page.title.rendered),
+					summary: toPlaintext(page.excerpt.rendered),
+					imageId: imageId ?? placeholderImage.id,
+					createdAt: new Date(page.date_gmt),
+					updatedAt: new Date(page.modified_gmt),
+				});
+			} else {
+				await tx.insert(schema.pages).values({
+					id,
+					title: toPlaintext(page.title.rendered),
+					summary: toPlaintext(page.excerpt.rendered),
+					imageId,
+					createdAt: new Date(page.date_gmt),
+					updatedAt: new Date(page.modified_gmt),
+				});
+			}
 
 			if (page.content.rendered.trim().length === 0) {
 				return;
