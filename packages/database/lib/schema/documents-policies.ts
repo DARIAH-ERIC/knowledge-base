@@ -14,7 +14,7 @@ export const documentsPolicies = p.pgTable("documents_policies", {
 		}),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
-	url: p.text("url").notNull(),
+	url: p.text("url"),
 	documentId: p
 		.uuid("document_id")
 		.notNull()

@@ -8,6 +8,7 @@ import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { type AssetPrefix, createStorageService } from "@dariah-eric/storage";
 import { buffer } from "@dariah-eric/storage/lib";
+import slugify from "@sindresorhus/slugify";
 import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
 import { toText } from "hast-util-to-text";
@@ -328,6 +329,389 @@ async function main() {
 				id: contentBlock.id,
 			});
 		});
+	}
+
+	/**
+	 * ============================================================================================
+	 * Documents and policies.
+	 * ============================================================================================
+	 */
+
+	const documents = [
+		{
+			group: "DARIAH ERIC Statutes",
+			items: [
+				{
+					title: "DARIAH ERIC Statutes February 2026",
+					href: "https://www.dariah.eu/wp-content/uploads/2026/02/DARIAH-ERIC-Statutes-Version-February-2026.pdf",
+					image: null,
+					description: null,
+					doi: null,
+				},
+				{
+					title: "Internal Rules of Procedure and Policies December 2024",
+					href: "https://www.dariah.eu/wp-content/uploads/2024/12/IRP-Version-December-2024.pdf",
+					image: null,
+					description: null,
+					doi: null,
+				},
+			],
+		},
+		{
+			group: "DARIAH Strategic Plan and DARIAH Strategic Action Plans",
+			items: [
+				{
+					title: "DARIAH Strategic Plan 2019-2026",
+					href: "https://www.dariah.eu/wp-content/uploads/2019/08/Strategic-Plan_2019-2026.pdf",
+					image:
+						"https://www.dariah.eu/wp-content/uploads/2019/09/Strategic-Plan-1-e1568200777643.png",
+					description: null,
+					doi: null,
+				},
+				{
+					title: "DARIAH Strategic Action Plan II 2019-2022",
+					href: "https://www.dariah.eu/wp-content/uploads/2020/05/DARIAH-Strategic-Action-Plan-II-2019-2022.pdf",
+					image: null,
+					description: null,
+					doi: null,
+				},
+				{
+					title: "DARIAH Strategic Action Plan III 2022-2025",
+					href: "https://www.dariah.eu/wp-content/uploads/2022/07/DARIAH-Strategic-Action-Plan-III-2022-2025-final.pdf",
+					image: null,
+					description: null,
+					doi: null,
+				},
+			],
+		},
+		{
+			group: "DARIAH goes Green: Internal Environmental Guidelines",
+			items: [
+				{
+					title: "DARIAH goes Green: Internal Environmental Guidelines",
+					href: "https://www.dariah.eu/wp-content/uploads/2025/09/DARIAH-Goes-Green_-Internal-Environmental-Guidelines_01.pdf",
+					image: null,
+					description: null,
+					doi: null,
+				},
+			],
+		},
+		{
+			group: "DARIAH Gender Equality Plan",
+			items: [
+				{
+					title: "DARIAH Gender Equality Plan 2022",
+					href: "https://www.dariah.eu/wp-content/uploads/2022/06/Gender-Equality-Plan_final.pdf",
+					image: null,
+					description: null,
+					doi: null,
+				},
+			],
+		},
+		{
+			group: "DARIAH Annual Event Code of Conduct",
+			items: [
+				{
+					title: "DARIAH Annual Event Code of Conduct 2025",
+					href: "https://www.dariah.eu/wp-content/uploads/2025/04/DARIAH-Annual-Event-Code-of-Conduct.pdf",
+					image: null,
+					description: null,
+					doi: null,
+				},
+			],
+		},
+		{
+			group: "Selected DARIAH ERIC reports",
+			items: [
+				{
+					title: "Annual Report 2024",
+					href: "https://www.dariah.eu/wp-content/uploads/2026/03/DARIAH-Annual-Report-2024.pdf",
+					image: "https://www.dariah.eu/wp-content/uploads/2026/03/AR2024_Cover_1.png",
+					description:
+						"Cite as: Digital Research Infrastructure for the Arts and Humanities. (2025). DARIAH-EU Annual Report 2024. Zenodo.",
+					doi: "https://doi.org/10.5281/zenodo.18846153",
+				},
+				{
+					title: "Annual Report 2023",
+					href: "https://www.dariah.eu/wp-content/uploads/2024/10/TCD-DARIAH-Annual-Report-2023.pdf",
+					image: "https://www.dariah.eu/wp-content/uploads/2024/10/Annual-Report-2023_cover.png",
+					description:
+						"Cite as: Digital Research Infrastructure for the Arts and Humanities. (2024). DARIAH-EU Annual Report 2023. Zenodo.",
+					doi: "https://doi.org/10.5281/zenodo.14007767",
+				},
+				{
+					title: "Annual Report 2022",
+					href: "https://www.dariah.eu/wp-content/uploads/2023/12/DARIAH-Annual-Report-2022.pdf",
+					description:
+						"Cite as: Digital Research Infrastructure for the Arts and Humanities. (2023). DARIAH-EU Annual Report 2022. Zenodo.",
+					doi: "https://doi.org/10.5281/zenodo.13740997",
+					image:
+						"https://www.dariah.eu/wp-content/uploads/2023/12/DARIAH-AR-2022-e1702306350513.png",
+				},
+				{
+					title: "Annual Report 2021",
+					href: "https://www.dariah.eu/wp-content/uploads/2022/08/DARIAH-AR-2021-FINAL_2.pdf",
+					description:
+						"Cite as: Digital Research Infrastructure for the Arts and Humanities. (2022). DARIAH-EU Annual Report 2021. Zenodo.",
+					doi: "https://doi.org/10.5281/zenodo.13740981",
+					image: "https://www.dariah.eu/wp-content/uploads/2022/07/Annual-Report-2021_cover.jpg",
+				},
+				{
+					title: "Annual Report 2020",
+					href: "https://www.dariah.eu/wp-content/uploads/2021/06/DARIAH-EU-AnnualReport-2020.pdf",
+					description:
+						"Cite as: Digital Research Infrastructure for the Arts and Humanities. (2021). DARIAH-EU Annual Report 2020. Zenodo.",
+					doi: "https://doi.org/10.5281/zenodo.13740975",
+					image: "https://www.dariah.eu/wp-content/uploads/2021/06/AR2020_cover.png",
+				},
+				{
+					title: "Annual Report 2019",
+					href: "https://www.dariah.eu/wp-content/uploads/2020/07/DARIAH-annual-report-2019_v2.pdf",
+					description:
+						"Cite as: Digital Research Infrastructure for the Arts and Humanities. (2020). DARIAH-EU Annual Report 2019. Zenodo.",
+					doi: "https://doi.org/10.5281/zenodo.13740965",
+					image: "https://www.dariah.eu/wp-content/uploads/2020/05/Annual-Report-2019_cover.png",
+				},
+				{
+					title: "Annual Report 2018",
+					href: "https://www.dariah.eu/wp-content/uploads/2019/07/DARIAH_Annual_Report_2018.pdf",
+					description:
+						"Cite as: Digital Research Infrastructure for the Arts and Humanities. (2019). DARIAH-EU Annual Report 2018. Zenodo",
+					doi: "https://doi.org/10.5281/zenodo.13740958",
+					image:
+						"https://www.dariah.eu/wp-content/uploads/2019/07/DARIAH_Annual_Report_2018-1_thumbail-1.jpg",
+				},
+				{
+					title: "Annual Report 2017",
+					href: "https://www.dariah.eu/wp-content/uploads/2018/12/DARIAH-Annual-Report-2017.pdf",
+					description:
+						"Cite as: Digital Research Infrastructure for the Arts and Humanities. (2018). DARIAH-EU Annual Report 2017. Zenodo.",
+					doi: "https://doi.org/10.5281/zenodo.13740942",
+					image:
+						"https://www.dariah.eu/wp-content/uploads/2019/07/DARIAH-Annual-Report-2017_thumbnail.jpg",
+				},
+				{
+					title: "Annual Report 2016",
+					href: "https://www.dariah.eu/wp-content/uploads/2018/02/Dariah_Annual_Report_2016.pdf",
+					description:
+						"Cite as: Digital Research Infrastructure for the Arts and Humanities. (2017). DARIAH-EU Annual Report 2016. Zenodo.",
+					doi: "https://doi.org/10.5281/zenodo.13740933",
+					image:
+						"https://www.dariah.eu/wp-content/uploads/2019/07/Dariah_Annual_Report_2016_thumbnail.jpg",
+				},
+				{
+					title: "Annual Report 2015",
+					href: "https://www.dariah.eu/wp-content/uploads/2017/02/2015_DARIAH_annual_report1.pdf",
+					description:
+						"Cite as: Digital Research Infrastructure for the Arts and Humanities. (2016). DARIAH-EU Annual Report 2015. Zenodo.",
+					doi: "https://doi.org/10.5281/zenodo.13740902",
+					image:
+						"https://www.dariah.eu/wp-content/uploads/2019/07/2015_DARIAH_annual_report1_thumbnail.jpg",
+				},
+				{
+					title: "Annual Report 2013",
+					href: "https://www.dariah.eu/wp-content/uploads/2017/02/DARIAH-EU_Annual_report_2013.pdf",
+					description:
+						"Cite as: Digital Research Infrastructure for the Arts and Humanities. (2014). DARIAH-EU Annual Report 2013. Zenodo.",
+					doi: "https://doi.org/10.5281/zenodo.13740884",
+					image: null,
+				},
+				{
+					title: "Annual Report 2012",
+					href: "https://www.dariah.eu/wp-content/uploads/2017/02/DARIAH-EU_Annual_report_2012.pdf",
+					description:
+						"Cite as: Digital Research Infrastructure for the Arts and Humanities. (2013). DARIAH-EU Annual Report 2012. Zenodo.",
+					doi: "https://doi.org/10.5281/zenodo.13736791",
+					image: null,
+				},
+				{
+					title: "Annual Report 2011",
+					href: "https://www.dariah.eu/wp-content/uploads/2017/02/DARIAH-EU_Annual_report_2011.pdf",
+					description:
+						"Cite as: Digital Research Infrastructure for the Arts and Humanities. (2012). DARIAH-EU Annual Report 2011. Zenodo.",
+					doi: "https://doi.org/10.5281/zenodo.13736811",
+					image: null,
+				},
+			],
+		},
+		{
+			group: "DARIAH Working Groups Policy Statement",
+			items: [
+				{
+					title: "Working Groups Policy Statement",
+					href: "https://www.dariah.eu/wp-content/uploads/2019/09/DARIAH-Working-Groups-Policy-Statement_v5.pdf",
+					image:
+						"https://www.dariah.eu/wp-content/uploads/2019/09/WG-Policy-Doc-e1568885895474.jpg",
+					description: null,
+					doi: null,
+				},
+				{
+					title: "Introduction to the DARIAH Working Groups",
+					href: "https://www.dariah.eu/wp-content/uploads/2019/09/DARIAH-Working-Groups-2.pdf",
+					image:
+						"https://www.dariah.eu/wp-content/uploads/2019/09/DARIAH-Working-Groups_intro-e1568887589582.png",
+					description: null,
+					doi: null,
+				},
+			],
+		},
+		{
+			group: "Cooperating Partners documents",
+			items: [
+				{
+					title: "Template application form for European Cooperating Partner",
+					href: "https://www.dariah.eu/wp-content/uploads/2021/01/EU-CP-Template-application-letter-DARIAH.pdf",
+					description: null,
+					image: null,
+					doi: null,
+				},
+				{
+					title: "Template application form for non-European Cooperating Partner",
+					href: "https://www.dariah.eu/wp-content/uploads/2021/01/NON-EU-CP-Template-application-letter-DARIAH.pdf",
+					description: null,
+					image: null,
+					doi: null,
+				},
+				{
+					title: "Template European Cooperating Partner agreement",
+					href: "https://www.dariah.eu/wp-content/uploads/2020/12/EU-CP-Binding-Agreement_MASTER-COPY.pdf",
+					description: null,
+					image: null,
+					doi: null,
+				},
+				{
+					title: "Template non-European Cooperating Partner agreement",
+					href: "https://www.dariah.eu/wp-content/uploads/2020/12/NON-EU-CP-Binding-Agreement_MASTER-COPY.pdf",
+					description: null,
+					image: null,
+					doi: null,
+				},
+				{
+					title: "Benefits and requirements for becoming a DARIAH Cooperating Partner",
+					href: "https://www.dariah.eu/wp-content/uploads/2020/12/DARIAH-CP-Factsheet.pdf",
+					image: "https://www.dariah.eu/wp-content/uploads/2020/12/DARIAH-Infographics_2-.png",
+					description: null,
+					doi: null,
+				},
+			],
+		},
+		{
+			group: "European Commission documents",
+			items: [
+				{
+					title: "Riding the wave. How Europe can gain from the rising tide of scientific data",
+					href: "https://www.dariah.eu/wp-content/uploads/2017/02/hlg-sdi-report.pdf",
+					description: null,
+					image: null,
+					doi: null,
+				},
+				{
+					title:
+						"European Research Infrastructures with Global Impact (Description of DARIAH, p.9)",
+					href: "https://www.dariah.eu/wp-content/uploads/2017/02/ESFRI_Brochure_210912_lowres.pdf",
+					description: null,
+					image: null,
+					doi: null,
+				},
+			],
+		},
+		{
+			group: "DARIAH Logos",
+			items: [
+				{
+					title: "DARIAH-EU Logos",
+					href: "https://www.dariah.eu/wp-content/uploads/2018/02/dariah-eu_logos.zip",
+					description: null,
+					image: null,
+					doi: null,
+				},
+				{
+					title: "DARIAH Open Science Logos",
+					href: "https://www.dariah.eu/wp-content/uploads/2018/02/DARIAH_OpenScience_logos.zip",
+					description: null,
+					image: null,
+					doi: null,
+				},
+			],
+		},
+		{
+			group: "DARIAH Style Guide",
+			items: [
+				{
+					title: "DARIAH-EU Style guide",
+					href: "https://www.dariah.eu/wp-content/uploads/2018/02/styleguide_dariaheu.pdf",
+					description: null,
+					image: null,
+					doi: null,
+				},
+			],
+		},
+		{
+			group: "Reimbursement of travel costs",
+			items: [
+				{
+					title: "Guidelines for the reimbursement of travel costs",
+					href: "https://www.dariah.eu/wp-content/uploads/2023/06/Guidelines-travel-claim_DARIAH_20230401-final.pdf",
+					description: null,
+					image: null,
+					doi: null,
+				},
+				{
+					title: "Travel claim form",
+					href: "https://www.dariah.eu/wp-content/uploads/2023/06/DARIAH-travel-claim-form-2023.xlsx",
+					description: null,
+					image: null,
+					doi: null,
+				},
+			],
+		},
+	];
+
+	for (const { group: _, items } of documents) {
+		for (const item of items) {
+			await db.transaction(async (tx) => {
+				const [entity] = await tx
+					.insert(schema.entities)
+					.values({
+						slug: slugify(item.title),
+						statusId: statusByType.published.id,
+						typeId: typesByType.documents_policies.id,
+					})
+					.returning({ id: schema.entities.id });
+
+				assert(entity);
+
+				const id = entity.id;
+
+				const response = await fetch(item.href);
+				const mimeType = response.headers.get("content-type") ?? "application/octet-stream";
+				const input = await response.arrayBuffer();
+				const { key } = await storage.images.upload({
+					prefix: "documents",
+					input: Buffer.from(input),
+					metadata: { "content-type": mimeType },
+				});
+
+				const [asset] = await tx
+					.insert(schema.assets)
+					.values({
+						label: item.title,
+						mimeType,
+						key,
+					})
+					.returning({ id: schema.assets.id });
+
+				assert(asset);
+
+				await tx.insert(schema.documentsPolicies).values({
+					title: item.title,
+					summary: item.description ?? "",
+					url: item.doi ?? "",
+					documentId: asset.id,
+					id,
+				});
+			});
+		}
 	}
 
 	/**
@@ -682,7 +1066,7 @@ async function main() {
 				await tx.insert(schema.organisationalUnitsRelations).values({
 					unitId: orgUnit.id,
 					relatedUnitId: umbrellaUnit.id,
-					duration: { start: new Date(2025, 0, 1) }, // FIXME:
+					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
 					status: organisationalUnitStatusByType.is_member.id,
 				});
 			}
@@ -921,7 +1305,7 @@ async function main() {
 				await tx.insert(schema.organisationalUnitsRelations).values({
 					unitId: orgUnit.id,
 					relatedUnitId: umbrellaUnit.id,
-					duration: { start: new Date(2025, 0, 1) }, // FIXME:
+					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
 					status: organisationalUnitStatusByType.is_part.id,
 				});
 			}
@@ -1014,7 +1398,7 @@ async function main() {
 					id,
 					name: project.fullname || project.title.rendered,
 					acronym: project.title.rendered,
-					duration: { start: new Date(2025, 0, 1) }, // FIXME: need to extract from richtext
+					duration: { start: new Date(Date.UTC(2025, 0, 1)), end: new Date(Date.UTC(2028, 0, 1)) }, // FIXME: need to extract from richtext
 					// funding: 0,
 					summary: toPlaintext(project.excerpt.rendered),
 					// call: "",
