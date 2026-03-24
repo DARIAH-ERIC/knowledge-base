@@ -1,4 +1,4 @@
-export const assetPrefixes = ["avatars", "images", "logos"] as const;
+export const assetPrefixes = ["avatars", "documents", "images", "logos"] as const;
 
 export const imageMimeTypes = ["image/jpeg", "image/png"] as const;
 
