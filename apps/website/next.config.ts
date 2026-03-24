@@ -29,6 +29,9 @@ const config: Config = {
 
 		return headers;
 	},
+	images: {
+		domains: ["imgproxy.acdh.oeaw.ac.at"],
+	},
 	logging: {
 		fetches: {
 			fullUrl: true,

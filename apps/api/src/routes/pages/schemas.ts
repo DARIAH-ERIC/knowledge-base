@@ -7,7 +7,7 @@ import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 export const PageBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.PageSelectSchema, ["id", "title", "summary"]).entries,
-		image: v.object({ url: v.string() }),
+		image: v.nullable(v.object({ url: v.string() })),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 	}),
@@ -28,7 +28,7 @@ export type PageList = v.InferOutput<typeof PageListSchema>;
 export const PageSchema = v.pipe(
 	v.object({
 		...v.pick(schema.PageSelectSchema, ["id", "title", "summary"]).entries,
-		image: v.object({ url: v.string() }),
+		image: v.nullable(v.object({ url: v.string() })),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		content: v.array(ContentBlockSchema),
