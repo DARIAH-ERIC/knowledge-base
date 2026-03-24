@@ -1,5 +1,5 @@
 import { assert } from "@acdh-oeaw/lib";
-import { type BucketItem, Client as MinioClient } from "minio";
+import { Client as MinioClient } from "minio";
 
 import { env } from "../../config/env.config";
 import { createStorageService } from "..";
@@ -43,16 +43,27 @@ export function createClient() {
 		async reset() {
 			const items: Array<string> = [];
 
-			const stream = minio.listObjectsV2(bucketName, "", true);
+			let continuationToken = "";
+			do {
+				const result = await minio.listObjectsV2Query(
+					bucketName,
+					"",
+					continuationToken,
+					"",
+					100,
+					"",
+				);
+				for (const item of result.objects) {
+					const { name } = item;
+					assert(name, "Bucket item is missing name.");
+					items.push(name);
+				}
+				continuationToken = result.isTruncated ? result.nextContinuationToken : "";
+			} while (continuationToken);
 
-			for await (const item of stream) {
-				const { name } = item as BucketItem;
-				assert(name, "Bucket item is missing name.");
-				items.push(name);
-			}
-
-			if (items.length > 0) {
-				await minio.removeObjects(bucketName, items);
+			const chunkSize = 1000;
+			for (let i = 0; i < items.length; i += chunkSize) {
+				await minio.removeObjects(bucketName, items.slice(i, i + chunkSize));
 			}
 		},
 	};
