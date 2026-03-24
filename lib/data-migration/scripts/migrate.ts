@@ -184,6 +184,11 @@ async function main() {
 		return item.scope;
 	});
 
+	const projectRoles = await db.query.projectRoles.findMany();
+	const projectRolesByType = keyBy(projectRoles, (item) => {
+		return item.role;
+	});
+
 	const contentBlockTypes = await db.query.contentBlockTypes.findMany();
 	const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => {
 		return item.type;
@@ -653,7 +658,7 @@ async function main() {
 				await tx.insert(schema.organisationalUnitsRelations).values({
 					unitId: orgUnit.id,
 					relatedUnitId: umbrellaUnit.id,
-					duration: { start: new Date() }, // FIXME:
+					duration: { start: new Date(2025, 0, 1) }, // FIXME:
 					status: organisationalUnitStatusByType.is_member.id,
 				});
 			}
@@ -873,15 +878,29 @@ async function main() {
 				workingGroup.id,
 			);
 
-			await tx.insert(schema.organisationalUnits).values({
-				id,
-				name: toPlaintext(workingGroup.title.rendered),
-				summary: "",
-				typeId: organisationalUnitTypesByType.working_group.id,
-				imageId: imageId ?? placeholderImage.id,
-				createdAt: new Date(workingGroup.date_gmt),
-				updatedAt: new Date(workingGroup.modified_gmt),
-			});
+			const [orgUnit] = await tx
+				.insert(schema.organisationalUnits)
+				.values({
+					id,
+					name: toPlaintext(workingGroup.title.rendered),
+					summary: "",
+					typeId: organisationalUnitTypesByType.working_group.id,
+					imageId: imageId ?? placeholderImage.id,
+					createdAt: new Date(workingGroup.date_gmt),
+					updatedAt: new Date(workingGroup.modified_gmt),
+				})
+				.returning({ id: schema.organisationalUnits.id });
+
+			assert(orgUnit);
+
+			if (umbrellaUnit) {
+				await tx.insert(schema.organisationalUnitsRelations).values({
+					unitId: orgUnit.id,
+					relatedUnitId: umbrellaUnit.id,
+					duration: { start: new Date(2025, 0, 1) }, // FIXME:
+					status: organisationalUnitStatusByType.is_part.id,
+				});
+			}
 
 			// TODO: leaders_data => chairs
 			// TODO: country_data => country
@@ -969,9 +988,9 @@ async function main() {
 				.insert(schema.projects)
 				.values({
 					id,
-					// name: toPlaintext(project.title.rendered),
-					name: project.fullname,
-					duration: { start: new Date() }, // FIXME: need to extract from richtext
+					name: project.fullname || project.title.rendered,
+					acronym: project.title.rendered,
+					duration: { start: new Date(2025, 0, 1) }, // FIXME: need to extract from richtext
 					// funding: 0,
 					summary: toPlaintext(project.excerpt.rendered),
 					// call: "",
@@ -985,6 +1004,14 @@ async function main() {
 				.returning({ id: schema.projects.id });
 
 			assert(p);
+
+			if (umbrellaUnit) {
+				await tx.insert(schema.projectPartners).values({
+					projectId: p.id,
+					unitId: umbrellaUnit.id,
+					roleId: projectRolesByType.participant.id,
+				});
+			}
 
 			if (isNonEmptyString(project.website)) {
 				const [sm] = await tx
