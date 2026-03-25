@@ -29,7 +29,7 @@ export class AdminPersonsPage {
 	// ---------------------------------------------------------------------------
 
 	async fillName(name: string): Promise<void> {
-		await this.page.getByLabel("Name").fill(name);
+		await this.page.getByRole("main").getByLabel("Name").fill(name);
 	}
 
 	async fillSortName(sortName: string): Promise<void> {
