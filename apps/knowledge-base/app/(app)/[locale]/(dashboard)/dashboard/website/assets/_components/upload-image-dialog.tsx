@@ -23,7 +23,7 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
-import { assetPrefixes } from "@/lib/data/assets";
+import { assetPrefixes } from "@dariah-eric/storage/config";
 
 interface UploadImageDialogProps {
 	onSuccess: () => void;

@@ -603,29 +603,29 @@ msgstr "Overview"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:140
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:606
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:672
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:141
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:144
 msgid "47FYwb"
 msgstr "Cancel"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal.tsx:35
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:149
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:176
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:146
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:148
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:146
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:144
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:148
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:150
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:152
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:150
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:148
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:152
 msgid "K3r6DQ"
 msgstr "Delete"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/edit-action.tsx:17
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:139
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:166
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:136
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:138
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:136
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:134
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:138
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:140
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:142
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:140
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:138
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:142
 msgid "wEQDC6"
 msgstr "Edit"
 
@@ -656,14 +656,14 @@ msgid "vC8XBw"
 msgstr "No images found. Upload one to get started."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:147
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:146
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:147
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:149
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:150
 msgid "JEsxDw"
 msgstr "Uploading..."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:150
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:59
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:66
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:62
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:69
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx:32
 msgid "vMUomP"
 msgstr "Upload image"
@@ -896,21 +896,21 @@ msgstr "New"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:123
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:150
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:122
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:120
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:122
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:120
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:120
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:124
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:124
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:124
 msgid "CYbwwJ"
 msgstr "Open actions menu"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:135
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:162
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:132
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:132
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:132
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:130
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:132
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:136
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:136
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:136
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:134
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:136
 msgid "FgydNe"
 msgstr "View"
 
@@ -1348,50 +1348,50 @@ msgstr "All prefixes"
 msgid "0GuJv0"
 msgstr "No images match your filters."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:65
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:68
 msgid "EQZvEB"
 msgstr "Upload a new image to the media library."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:74
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:77
 msgid "gyrIEl"
 msgstr "File"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:97
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:100
 msgid "TJo5E6"
 msgstr "Preview"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:105
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:108
 msgid "ci7V7t"
 msgstr "Prefix"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:121
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:122
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:124
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:125
 msgid "753yX5"
 msgstr "Label"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:123
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:126
 msgid "vHHtee"
 msgstr "Defaults to file name"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:127
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:128
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:130
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:131
 msgid "VGwyxc"
 msgstr "Alt text"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:129
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:132
 msgid "DAQ44c"
 msgstr "Describe the image for accessibility"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:133
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:134
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:136
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:137
 msgid "sq1btl"
 msgstr "Caption"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:135
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:138
 msgid "TvrY88"
 msgstr "Optional caption displayed below the image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:150
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:153
 msgid "p4N05H"
 msgstr "Upload"
 
@@ -1459,7 +1459,7 @@ msgstr "Events"
 msgid "tH9Pij"
 msgstr "Manage all events in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:161
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:165
 msgid "bHpXg4"
 msgstr "event"
 
@@ -1488,7 +1488,7 @@ msgstr "Impact case studies"
 msgid "W+LEBA"
 msgstr "Manage all impact case studies in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:163
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:167
 msgid "z43Arm"
 msgstr "impact case study"
 
@@ -1557,7 +1557,7 @@ msgstr "News"
 msgid "kJL6hf"
 msgstr "Manage all news items in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:161
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:165
 msgid "X8ZDGI"
 msgstr "news item"
 
@@ -1598,7 +1598,7 @@ msgstr "Pages"
 msgid "loGVlL"
 msgstr "Manage all pages in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:159
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:163
 msgid "ovCNnF"
 msgstr "page"
 
@@ -1639,7 +1639,7 @@ msgstr "Spotlight articles"
 msgid "I7w61/"
 msgstr "Manage all spotlight articles in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:163
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:167
 msgid "gA/+tS"
 msgstr "spotlight article"
 

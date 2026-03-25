@@ -15,7 +15,7 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { UploadImageDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog";
-import { assetPrefixes } from "@/lib/data/assets";
+import { assetPrefixes } from "@dariah-eric/storage/config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface AssetItem {
