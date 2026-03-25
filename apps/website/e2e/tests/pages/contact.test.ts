@@ -94,6 +94,8 @@ test.describe("contact page", () => {
 			const subject = "Testing form submission";
 			const message = `The current time is ${new Date().toISOString()}.`;
 
+			/** Focusing before filling in text, to avoid flaky test. */
+			await contactPage.form.name.focus();
 			await contactPage.form.name.fill(name);
 			await contactPage.form.email.fill(email);
 			await contactPage.form.subject.fill(subject);
@@ -155,6 +157,8 @@ test.describe("contact page", () => {
 				const subject = "Testing form submission";
 				const message = `The current time is ${new Date().toISOString()}.`;
 
+				/** Focusing before filling in text, to avoid flaky test. */
+				await contactPage.form.name.focus();
 				await contactPage.form.name.fill(name);
 				await contactPage.form.email.fill(email);
 				await contactPage.form.subject.fill(subject);
