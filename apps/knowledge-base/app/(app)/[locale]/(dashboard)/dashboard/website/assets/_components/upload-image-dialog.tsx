@@ -1,6 +1,7 @@
 "use client";
 
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { assetPrefixes } from "@dariah-eric/storage/config";
 import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
@@ -23,7 +24,6 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
-import { assetPrefixes } from "@dariah-eric/storage/config";
 
 interface UploadImageDialogProps {
 	onSuccess: () => void;
