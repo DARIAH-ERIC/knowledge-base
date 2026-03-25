@@ -67,7 +67,7 @@ test.describe("projects admin", () => {
 
 		// Update the project name.
 		const updatedName = `${adminProjectsPage.workerPrefix} Updated ${randomUUID()}`;
-		const nameField = page.getByLabel("Name");
+		const nameField = page.getByRole("main").getByLabel("Name");
 		await nameField.clear();
 		await nameField.fill(updatedName);
 
