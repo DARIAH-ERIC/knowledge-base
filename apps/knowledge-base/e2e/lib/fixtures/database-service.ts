@@ -3,6 +3,7 @@ import { createClient } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
 export const E2E_TEST_ASSET_KEY = "e2e-test-asset";
+export const E2E_TEST_ASSET_LABEL = "E2E Test Asset";
 
 type Database = ReturnType<typeof createClient>;
 

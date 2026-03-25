@@ -57,10 +57,10 @@ export class WebsiteEventsPage {
 		await this.page.keyboard.type(String(year));
 	}
 
-	async selectImageFromMediaLibrary(assetKey: string): Promise<void> {
+	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Select image" }).click();
 		await this.page.waitForSelector('[role="dialog"]');
-		await this.page.getByRole("gridcell", { name: assetKey }).click();
+		await this.page.getByRole("gridcell", { name: assetLabel }).click();
 		await this.page.getByRole("dialog").getByRole("button", { name: "Select" }).click();
 	}
 

@@ -28,7 +28,7 @@ test.describe("website news admin", () => {
 
 		await newsPage.fillTitle(title);
 		await newsPage.fillSummary("E2E test news item summary");
-		await newsPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
 
 		await newsPage.submitForm();
 
@@ -43,7 +43,7 @@ test.describe("website news admin", () => {
 		await newsPage.gotoCreate();
 		await newsPage.fillTitle(originalTitle);
 		await newsPage.fillSummary("E2E test news item to be edited");
-		await newsPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await newsPage.submitForm();
 
 		const row = newsPage.rowByTitle(originalTitle);
@@ -72,7 +72,7 @@ test.describe("website news admin", () => {
 		await newsPage.gotoCreate();
 		await newsPage.fillTitle(title);
 		await newsPage.fillSummary("E2E test news item to be deleted");
-		await newsPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await newsPage.submitForm();
 
 		await expect(newsPage.rowByTitle(title)).toBeVisible();

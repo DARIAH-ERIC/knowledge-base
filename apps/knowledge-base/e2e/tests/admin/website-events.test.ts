@@ -30,7 +30,7 @@ test.describe("website events admin", () => {
 		await eventsPage.fillSummary("E2E test event summary");
 		await eventsPage.fillDatePicker("Start date", 2025, 6, 15);
 		await eventsPage.fillLocation("Vienna, Austria");
-		await eventsPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await eventsPage.selectImageFromMediaLibrary("E2E Test Asset");
 
 		await eventsPage.submitForm();
 
@@ -47,7 +47,7 @@ test.describe("website events admin", () => {
 		await eventsPage.fillSummary("E2E test event to be edited");
 		await eventsPage.fillDatePicker("Start date", 2025, 6, 15);
 		await eventsPage.fillLocation("Vienna, Austria");
-		await eventsPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await eventsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await eventsPage.submitForm();
 
 		const row = eventsPage.rowByTitle(originalTitle);
@@ -78,7 +78,7 @@ test.describe("website events admin", () => {
 		await eventsPage.fillSummary("E2E test event to be deleted");
 		await eventsPage.fillDatePicker("Start date", 2025, 6, 15);
 		await eventsPage.fillLocation("Vienna, Austria");
-		await eventsPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await eventsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await eventsPage.submitForm();
 
 		await expect(eventsPage.rowByTitle(title)).toBeVisible();

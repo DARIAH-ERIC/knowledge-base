@@ -28,7 +28,7 @@ test.describe("persons admin", () => {
 
 		await personsPage.fillName(name);
 		await personsPage.fillSortName("Person, Test");
-		await personsPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
 
 		await personsPage.submitForm();
 
@@ -43,7 +43,7 @@ test.describe("persons admin", () => {
 		await personsPage.gotoCreate();
 		await personsPage.fillName(originalName);
 		await personsPage.fillSortName("Me, Edit");
-		await personsPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await personsPage.submitForm();
 
 		const row = personsPage.rowByName(originalName);
@@ -72,7 +72,7 @@ test.describe("persons admin", () => {
 		await personsPage.gotoCreate();
 		await personsPage.fillName(name);
 		await personsPage.fillSortName("Me, Delete");
-		await personsPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await personsPage.submitForm();
 
 		await expect(personsPage.rowByName(name)).toBeVisible();

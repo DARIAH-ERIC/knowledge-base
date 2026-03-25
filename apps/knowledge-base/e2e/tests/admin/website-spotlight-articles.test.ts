@@ -28,7 +28,7 @@ test.describe("website spotlight articles admin", () => {
 
 		await spotlightArticlesPage.fillTitle(title);
 		await spotlightArticlesPage.fillSummary("E2E test spotlight article summary");
-		await spotlightArticlesPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await spotlightArticlesPage.selectImageFromMediaLibrary("E2E Test Asset");
 
 		await spotlightArticlesPage.submitForm();
 
@@ -46,7 +46,7 @@ test.describe("website spotlight articles admin", () => {
 		await spotlightArticlesPage.gotoCreate();
 		await spotlightArticlesPage.fillTitle(originalTitle);
 		await spotlightArticlesPage.fillSummary("E2E test spotlight article to be edited");
-		await spotlightArticlesPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await spotlightArticlesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await spotlightArticlesPage.submitForm();
 
 		const row = spotlightArticlesPage.rowByTitle(originalTitle);
@@ -75,7 +75,7 @@ test.describe("website spotlight articles admin", () => {
 		await spotlightArticlesPage.gotoCreate();
 		await spotlightArticlesPage.fillTitle(title);
 		await spotlightArticlesPage.fillSummary("E2E test spotlight article to be deleted");
-		await spotlightArticlesPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await spotlightArticlesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await spotlightArticlesPage.submitForm();
 
 		await expect(spotlightArticlesPage.rowByTitle(title)).toBeVisible();

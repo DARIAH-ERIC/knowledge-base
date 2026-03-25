@@ -28,7 +28,7 @@ test.describe("website impact case studies admin", () => {
 
 		await impactCaseStudiesPage.fillTitle(title);
 		await impactCaseStudiesPage.fillSummary("E2E test impact case study summary");
-		await impactCaseStudiesPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await impactCaseStudiesPage.selectImageFromMediaLibrary("E2E Test Asset");
 
 		await impactCaseStudiesPage.submitForm();
 
@@ -46,7 +46,7 @@ test.describe("website impact case studies admin", () => {
 		await impactCaseStudiesPage.gotoCreate();
 		await impactCaseStudiesPage.fillTitle(originalTitle);
 		await impactCaseStudiesPage.fillSummary("E2E test impact case study to be edited");
-		await impactCaseStudiesPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await impactCaseStudiesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await impactCaseStudiesPage.submitForm();
 
 		const row = impactCaseStudiesPage.rowByTitle(originalTitle);
@@ -75,7 +75,7 @@ test.describe("website impact case studies admin", () => {
 		await impactCaseStudiesPage.gotoCreate();
 		await impactCaseStudiesPage.fillTitle(title);
 		await impactCaseStudiesPage.fillSummary("E2E test impact case study to be deleted");
-		await impactCaseStudiesPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await impactCaseStudiesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await impactCaseStudiesPage.submitForm();
 
 		await expect(impactCaseStudiesPage.rowByTitle(title)).toBeVisible();

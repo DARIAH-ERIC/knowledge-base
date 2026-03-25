@@ -32,7 +32,7 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.fillDatePicker("Start date", 2024, 1, 15);
 		await adminProjectsPage.fillSummary("E2E test project summary");
 
-		await adminProjectsPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
 
 		await adminProjectsPage.fillDescription("E2E test project description.");
 
@@ -51,7 +51,7 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.selectFirstScope();
 		await adminProjectsPage.fillDatePicker("Start date", 2024, 1, 15);
 		await adminProjectsPage.fillSummary("E2E test project to be edited");
-		await adminProjectsPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await adminProjectsPage.fillDescription("Description for edit test.");
 		await adminProjectsPage.submitForm();
 
@@ -89,7 +89,7 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.selectFirstScope();
 		await adminProjectsPage.fillDatePicker("Start date", 2024, 1, 15);
 		await adminProjectsPage.fillSummary("E2E test project to be deleted");
-		await adminProjectsPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await adminProjectsPage.fillDescription("Description for delete test.");
 		await adminProjectsPage.submitForm();
 
