@@ -17,6 +17,7 @@ import { router as persons } from "@/routes/persons";
 import { router as projects } from "@/routes/projects";
 import { router as socialMedia } from "@/routes/social-media";
 import { router as spotlightArticles } from "@/routes/spotlight-articles";
+import { router as statistics } from "@/routes/statistics";
 import { router as workingGroups } from "@/routes/working-groups";
 
 const app = createApp();
@@ -36,6 +37,7 @@ const api = createRouter()
 	.route("/projects", projects)
 	.route("/social-media", socialMedia)
 	.route("/spotlight-articles", spotlightArticles)
+	.route("/statistics", statistics)
 	.route("/working-groups", workingGroups);
 
 app.use(database()).use(storageMiddleware()).use(timing()).route("/api/v1", api);
