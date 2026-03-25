@@ -12,7 +12,7 @@ import type { ReactNode } from "react";
 interface PersonDetailsProps {
 	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
 		entity: { documentId: string; slug: string };
-	} & { image: { key: string; url: string } };
+	} & { image: { key: string; label: string; url: string } };
 }
 
 export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {

@@ -69,6 +69,7 @@ export default async function DashboardWebsiteEditEventPage(
 				image: {
 					columns: {
 						key: true,
+						label: true,
 					},
 				},
 			},
@@ -114,7 +115,7 @@ export default async function DashboardWebsiteEditEventPage(
 		<EventEditForm
 			assets={assets}
 			contentBlocks={richTextContentBlocks}
-			event={{ ...event, image: { key: event.image.key, url: image.url } }}
+			event={{ ...event, image: { ...event.image, url: image.url } }}
 		/>
 	);
 }

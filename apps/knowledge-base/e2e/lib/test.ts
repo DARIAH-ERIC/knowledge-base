@@ -5,6 +5,7 @@ import { test as base } from "@playwright/test";
 
 import { env } from "@/config/env.config";
 import { type AccessibilityScanner, createAccessibilityScanner } from "@/e2e/lib/fixtures/a11y";
+import { AdminPersonsPage } from "@/e2e/lib/fixtures/admin-persons-page";
 import { AdminProjectsPage } from "@/e2e/lib/fixtures/admin-projects-page";
 import { ContactPage } from "@/e2e/lib/fixtures/contact-page";
 import { DatabaseService } from "@/e2e/lib/fixtures/database-service";
@@ -12,6 +13,11 @@ import { createEmailService, type EmailService } from "@/e2e/lib/fixtures/email-
 import { createI18n, type I18n, type WithI18n } from "@/e2e/lib/fixtures/i18n";
 import { ImprintPage } from "@/e2e/lib/fixtures/imprint-page";
 import { IndexPage } from "@/e2e/lib/fixtures/index-page";
+import { WebsiteEventsPage } from "@/e2e/lib/fixtures/website-events-page";
+import { WebsiteImpactCaseStudiesPage } from "@/e2e/lib/fixtures/website-impact-case-studies-page";
+import { WebsiteNewsPage } from "@/e2e/lib/fixtures/website-news-page";
+import { WebsitePagesPage } from "@/e2e/lib/fixtures/website-pages-page";
+import { WebsiteSpotlightArticlesPage } from "@/e2e/lib/fixtures/website-spotlight-articles-page";
 import { defaultLocale, type IntlLocale } from "@/lib/i18n/locales";
 
 interface TestFixtures {
@@ -24,7 +30,13 @@ interface TestFixtures {
 	createContactPage: (locale: IntlLocale) => Promise<WithI18n<{ contactPage: ContactPage }>>;
 	createImprintPage: (locale: IntlLocale) => Promise<WithI18n<{ imprintPage: ImprintPage }>>;
 	createIndexPage: (locale: IntlLocale) => Promise<WithI18n<{ indexPage: IndexPage }>>;
+	createAdminPersonsPage: (workerIndex: number) => AdminPersonsPage;
 	createAdminProjectsPage: (workerIndex: number) => AdminProjectsPage;
+	createWebsiteEventsPage: (workerIndex: number) => WebsiteEventsPage;
+	createWebsiteImpactCaseStudiesPage: (workerIndex: number) => WebsiteImpactCaseStudiesPage;
+	createWebsiteNewsPage: (workerIndex: number) => WebsiteNewsPage;
+	createWebsitePagesPage: (workerIndex: number) => WebsitePagesPage;
+	createWebsiteSpotlightArticlesPage: (workerIndex: number) => WebsiteSpotlightArticlesPage;
 }
 
 interface WorkerFixtures {
@@ -117,6 +129,42 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 	async createAdminProjectsPage({ page }, use) {
 		await use((workerIndex: number) => {
 			return new AdminProjectsPage(page, workerIndex);
+		});
+	},
+
+	async createAdminPersonsPage({ page }, use) {
+		await use((workerIndex: number) => {
+			return new AdminPersonsPage(page, workerIndex);
+		});
+	},
+
+	async createWebsiteEventsPage({ page }, use) {
+		await use((workerIndex: number) => {
+			return new WebsiteEventsPage(page, workerIndex);
+		});
+	},
+
+	async createWebsiteImpactCaseStudiesPage({ page }, use) {
+		await use((workerIndex: number) => {
+			return new WebsiteImpactCaseStudiesPage(page, workerIndex);
+		});
+	},
+
+	async createWebsiteNewsPage({ page }, use) {
+		await use((workerIndex: number) => {
+			return new WebsiteNewsPage(page, workerIndex);
+		});
+	},
+
+	async createWebsitePagesPage({ page }, use) {
+		await use((workerIndex: number) => {
+			return new WebsitePagesPage(page, workerIndex);
+		});
+	},
+
+	async createWebsiteSpotlightArticlesPage({ page }, use) {
+		await use((workerIndex: number) => {
+			return new WebsiteSpotlightArticlesPage(page, workerIndex);
 		});
 	},
 

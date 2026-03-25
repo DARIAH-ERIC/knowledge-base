@@ -10,11 +10,11 @@ import { EventForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/ev
 import { updateEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/update-event.action";
 
 interface EventEditFormProps {
-	assets: Array<{ key: string; url: string }>;
+	assets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
 	event: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
 		entity: { documentId: string; slug: string };
-	} & { image: { key: string; url: string } };
+	} & { image: { key: string; label: string; url: string } };
 }
 
 export function EventEditForm(props: Readonly<EventEditFormProps>): ReactNode {

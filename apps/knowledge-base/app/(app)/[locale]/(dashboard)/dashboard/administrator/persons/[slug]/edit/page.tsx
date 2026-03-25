@@ -68,6 +68,7 @@ export default async function DashboardAdministratorEditPersonPage(
 				image: {
 					columns: {
 						key: true,
+						label: true,
 					},
 				},
 			},
@@ -79,7 +80,7 @@ export default async function DashboardAdministratorEditPersonPage(
 	}
 
 	const image = {
-		key: person.image.key,
+		...person.image,
 		url: images.generateSignedImageUrl({
 			key: person.image.key,
 			options: imageGridOptions,

@@ -21,11 +21,11 @@ import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface NewsItemFormProps {
-	assets: Array<{ key: string; url: string }>;
+	assets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
 	newsItem?: Pick<schema.NewsItem, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
-	} & { image: { key: string; url: string } };
+	} & { image: { key: string; label: string; url: string } };
 	formAction: ServerAction;
 }
 

@@ -33,7 +33,7 @@ interface ProjectDetailsProps {
 			url: string;
 			type: { type: string };
 		}>;
-	} & { image: { key: string; url: string } | null };
+	} & { image: { key: string; label: string; url: string } | null };
 }
 
 export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode {

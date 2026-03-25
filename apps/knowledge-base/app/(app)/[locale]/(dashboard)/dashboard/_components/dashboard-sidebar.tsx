@@ -17,16 +17,7 @@ import {
 	SidebarSectionGroup,
 	useSidebar,
 } from "@dariah-eric/ui/sidebar";
-import {
-	BuildingOfficeIcon,
-	CalendarDaysIcon,
-	CalendarIcon,
-	ListBulletIcon,
-	MagnifyingGlassIcon,
-	Squares2X2Icon,
-	UserCircleIcon,
-	UsersIcon,
-} from "@heroicons/react/24/outline";
+import { ListBulletIcon, MagnifyingGlassIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import cn from "clsx/lite";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useEffect, useState } from "react";
@@ -44,13 +35,13 @@ export const sidebarMenu = [
 				href: "/dashboard/administrator",
 				tooltip: "Overview",
 				label: "Overview",
-				icon: <UsersIcon />,
+				icon: <ListBulletIcon />,
 			},
 			{
 				href: "/dashboard/administrator/contributions",
 				tooltip: "Contributions",
 				label: "Contributions",
-				icon: <CalendarDaysIcon />,
+				icon: <ListBulletIcon />,
 			},
 			{
 				href: "/dashboard/administrator/institutions",
@@ -62,7 +53,7 @@ export const sidebarMenu = [
 				href: "/dashboard/administrator/national-consortia",
 				tooltip: "National consortia",
 				label: "National consortia",
-				icon: <CalendarDaysIcon />,
+				icon: <ListBulletIcon />,
 			},
 			{
 				href: "/dashboard/administrator/newsletters",
@@ -133,19 +124,19 @@ export const sidebarMenu = [
 				href: "/dashboard/website",
 				tooltip: "Overview",
 				label: "Overview",
-				icon: <UserCircleIcon />,
+				icon: <ListBulletIcon />,
 			},
 			{
 				href: "/dashboard/website/assets",
 				tooltip: "Assets",
 				label: "Assets",
-				icon: <CalendarIcon />,
+				icon: <ListBulletIcon />,
 			},
 			{
 				href: "/dashboard/website/events",
 				tooltip: "Events",
 				label: "Events",
-				icon: <BuildingOfficeIcon />,
+				icon: <ListBulletIcon />,
 			},
 			{
 				href: "/dashboard/website/impact-case-studies",

@@ -23,11 +23,11 @@ import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface EventFormProps {
-	assets: Array<{ key: string; url: string }>;
+	assets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
 	event?: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
 		entity: { documentId: string; slug: string };
-	} & { image: { key: string; url: string } };
+	} & { image: { key: string; label: string; url: string } };
 	formAction: ServerAction;
 }
 

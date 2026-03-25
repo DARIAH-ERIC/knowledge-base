@@ -54,7 +54,7 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 
 	const t = useExtracted();
 
-	const { contains } = useFilter();
+	const { contains } = useFilter({ sensitivity: "base" });
 
 	const list = useListData({
 		filter(item, filterText) {

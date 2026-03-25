@@ -20,7 +20,7 @@ import { FileTrigger, type Selection } from "react-aria-components";
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
 
 interface MediaLibraryDialogProps {
-	assets: Array<{ key: string; url: string }>;
+	assets: Array<{ key: string; label: string; url: string }>;
 	onSelect: (key: string, url: string) => void;
 	prefix?: AssetPrefix;
 }
@@ -110,15 +110,18 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 								{(asset) => {
 									return (
 										<GridListItem
-											className="p-1 place-content-center"
+											className="p-1 place-content-center flex flex-col gap-1"
 											id={asset.key}
-											textValue={asset.key}
+											textValue={asset.label}
 										>
 											<img
-												alt={asset.key}
+												alt={asset.label}
 												className="size-24 rounded-sm object-cover"
 												src={asset.url}
 											/>
+											<span className="w-24 truncate text-center text-xs text-muted-fg">
+												{asset.label}
+											</span>
 										</GridListItem>
 									);
 								}}

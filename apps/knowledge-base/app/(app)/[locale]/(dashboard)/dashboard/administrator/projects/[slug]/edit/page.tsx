@@ -73,6 +73,7 @@ export default async function DashboardAdministratorEditProjectPage(
 				image: {
 					columns: {
 						key: true,
+						label: true,
 					},
 				},
 				scope: {
@@ -92,7 +93,7 @@ export default async function DashboardAdministratorEditProjectPage(
 	const image =
 		project.image != null
 			? {
-					key: project.image.key,
+					...project.image,
 					url: images.generateSignedImageUrl({
 						key: project.image.key,
 						options: imageGridOptions,

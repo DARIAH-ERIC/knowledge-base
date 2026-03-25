@@ -36,7 +36,7 @@ export function NewslettersPage(props: Readonly<NewslettersPageProps>): ReactNod
 	const t = useExtracted();
 	const format = useFormatter();
 
-	const { contains } = useFilter();
+	const { contains } = useFilter({ sensitivity: "base" });
 
 	const list = useListData({
 		filter(item, filterText) {

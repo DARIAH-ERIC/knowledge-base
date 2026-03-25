@@ -10,11 +10,11 @@ import { PersonForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administr
 import { updatePersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.action";
 
 interface PersonEditFormProps {
-	assets: Array<{ key: string; url: string }>;
+	assets: Array<{ key: string; label: string; url: string }>;
 	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
 		biography?: JSONContent;
 		entity: { documentId: string; slug: string };
-	} & { image: { key: string; url: string } };
+	} & { image: { key: string; label: string; url: string } };
 }
 
 export function PersonEditForm(props: Readonly<PersonEditFormProps>): ReactNode {

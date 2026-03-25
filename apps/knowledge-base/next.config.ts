@@ -30,7 +30,7 @@ const config: Config = {
 		return headers;
 	},
 	images: {
-		domains: ["imgproxy.acdh.oeaw.ac.at"],
+		remotePatterns: [{ hostname: "imgproxy.acdh.oeaw.ac.at" }],
 	},
 	logging: {
 		fetches: {
