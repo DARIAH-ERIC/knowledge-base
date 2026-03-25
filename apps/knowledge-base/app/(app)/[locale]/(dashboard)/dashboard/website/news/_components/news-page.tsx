@@ -107,7 +107,6 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 			>
 				<TableHeader>
 					<TableColumn isRowHeader={true}>{t("Title")}</TableColumn>
-					<TableColumn>{t("Summary")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -115,7 +114,6 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 						return (
 							<TableRow href={`/dashboard/website/news/${item.entity.slug}/details`}>
 								<TableCell>{item.title}</TableCell>
-								<TableCell>{item.summary}</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button
