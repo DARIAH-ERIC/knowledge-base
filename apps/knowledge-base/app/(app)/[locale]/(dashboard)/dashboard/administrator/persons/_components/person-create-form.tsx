@@ -8,7 +8,7 @@ import { PersonForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administr
 import { createPersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/create-person.action";
 
 interface PersonCreateFormProps {
-	assets: Array<{ key: string; url: string }>;
+	assets: Array<{ key: string; label: string; url: string }>;
 }
 
 export function PersonCreateForm(props: Readonly<PersonCreateFormProps>): ReactNode {

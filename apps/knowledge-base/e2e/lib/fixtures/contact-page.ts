@@ -50,7 +50,8 @@ export class ContactPage {
 	goto() {
 		return this.page.goto(this.url);
 	}
-	/*https://github.com/microsoft/playwright/issues/36395#issuecomment-2995675184*/
+
+	/** @see {@link https://github.com/microsoft/playwright/issues/36395#issuecomment-2995675184} */
 	fillPolling = async (locator: Locator, value: string) => {
 		await expect
 			.poll(async () => {

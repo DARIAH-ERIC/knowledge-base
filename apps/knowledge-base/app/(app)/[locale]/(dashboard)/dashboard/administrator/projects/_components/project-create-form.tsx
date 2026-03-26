@@ -9,7 +9,7 @@ import { ProjectForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administ
 import { createProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-project.action";
 
 interface ProjectCreateFormProps {
-	assets: Array<{ key: string; url: string }>;
+	assets: Array<{ key: string; label: string; url: string }>;
 	scopes: Array<Pick<schema.ProjectScope, "id" | "scope">>;
 	orgUnits: Array<{ id: string; name: string }>;
 	roles: Array<Pick<schema.ProjectRole, "id" | "role">>;

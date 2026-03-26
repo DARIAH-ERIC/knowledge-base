@@ -66,6 +66,7 @@ export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams)
 		db.query.assets.findMany({
 			columns: {
 				key: true,
+				label: true,
 			},
 			limit,
 			offset,
@@ -82,7 +83,7 @@ export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams)
 			options: imageUrlOptions,
 		});
 
-		return { key: asset.key, url };
+		return { key: asset.key, label: asset.label, url };
 	});
 
 	return { items, total };
@@ -118,6 +119,42 @@ export async function uploadAsset(params: UploadAssetParams) {
 	return {
 		key,
 	};
+}
+
+interface GetAssetsForDashboardParams {
+	imageUrlOptions: ImageUrlOptions;
+	/** @default 500 */
+	limit?: number;
+}
+
+export async function getAssetsForDashboard(params: GetAssetsForDashboardParams) {
+	const { imageUrlOptions, limit = 500 } = params;
+
+	const [assets, total] = await Promise.all([
+		db.query.assets.findMany({
+			columns: {
+				id: true,
+				key: true,
+				label: true,
+			},
+			limit,
+			orderBy: {
+				updatedAt: "desc",
+			},
+		}),
+		db.$count(schema.assets),
+	]);
+
+	const items = assets.map((asset) => {
+		const { url } = images.generateSignedImageUrl({
+			key: asset.key,
+			options: imageUrlOptions,
+		});
+
+		return { id: asset.id, key: asset.key, label: asset.label, url };
+	});
+
+	return { items, total };
 }
 
 interface GetPresignedUploadUrlParams {

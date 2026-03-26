@@ -1,9 +1,9 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 
-import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { ImpactCaseStudiesTable } from "@/components/ui/tables/impact-case-studies-table";
+import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
+import { ImpactCaseStudiesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page";
 import { getImpactCaseStudies } from "@/lib/data/cached/impact-case-studies";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -22,19 +22,14 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default async function DashboardWebsiteImpactCaseStudiesPage(
+export default function DashboardWebsiteImpactCaseStudiesPage(
 	_props: Readonly<DashboardWebsiteImpactCaseStudiesPageProps>,
-): Promise<ReactNode> {
-	const t = await getExtracted();
-
-	const impactCaseStudies = await getImpactCaseStudies({});
+): ReactNode {
+	const impactCaseStudies = getImpactCaseStudies({ limit: 500 });
 
 	return (
-		<Main className="flex-1">
-			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">
-				{t("Impact case studies")}
-			</h1>
-			<ImpactCaseStudiesTable data={impactCaseStudies} />
-		</Main>
+		<Suspense fallback={<LoadingScreen />}>
+			<ImpactCaseStudiesPage impactCaseStudies={impactCaseStudies} />
+		</Suspense>
 	);
 }

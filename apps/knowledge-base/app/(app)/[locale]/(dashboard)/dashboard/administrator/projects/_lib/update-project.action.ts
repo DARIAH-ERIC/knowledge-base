@@ -216,7 +216,7 @@ export const updateProjectAction = createServerAction(
 			}
 		});
 
-		revalidatePath("/dashboard/administrator/projects", "layout");
+		revalidatePath("/[locale]/dashboard/administrator/projects", "layout");
 
 		redirect({ href: "/dashboard/administrator/projects", locale });
 	},

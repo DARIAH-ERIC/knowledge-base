@@ -45,5 +45,5 @@ export async function deletePersonAction(id: string): Promise<void> {
 		await tx.delete(schema.entities).where(eq(schema.entities.id, id));
 	});
 
-	revalidatePath("/dashboard/administrator/persons", "layout");
+	revalidatePath("/[locale]/dashboard/administrator/persons", "layout");
 }

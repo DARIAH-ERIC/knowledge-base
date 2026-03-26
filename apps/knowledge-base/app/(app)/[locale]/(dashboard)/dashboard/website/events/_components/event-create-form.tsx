@@ -8,7 +8,7 @@ import { EventForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/ev
 import { createEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/create-event.action";
 
 interface EventCreateFormProps {
-	assets: Array<{ key: string; url: string }>;
+	assets: Array<{ key: string; label: string; url: string }>;
 }
 
 export function EventCreateForm(props: Readonly<EventCreateFormProps>): ReactNode {

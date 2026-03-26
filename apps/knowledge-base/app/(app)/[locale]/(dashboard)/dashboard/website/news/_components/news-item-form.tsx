@@ -3,8 +3,9 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
-import { FieldError } from "@dariah-eric/ui/field";
+import { FieldError, fieldErrorStyles } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
+import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Separator } from "@dariah-eric/ui/separator";
@@ -21,11 +22,11 @@ import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface NewsItemFormProps {
-	assets: Array<{ key: string; url: string }>;
+	assets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
 	newsItem?: Pick<schema.NewsItem, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
-	} & { image: { key: string; url: string } };
+	} & { image: { key: string; label: string; url: string } };
 	formAction: ServerAction;
 }
 
@@ -39,6 +40,8 @@ export function NewsItemForm(props: Readonly<NewsItemFormProps>): ReactNode {
 	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
 		newsItem?.image ?? null,
 	);
+
+	const [imageKeyError, setImageKeyError] = useState(false);
 
 	return (
 		<Form action={action} className="flex flex-col gap-y-6" state={state}>
@@ -80,6 +83,23 @@ export function NewsItemForm(props: Readonly<NewsItemFormProps>): ReactNode {
 						setSelectedImage({ key, url });
 					}}
 				/>
+
+				<input
+					aria-hidden={true}
+					className="sr-only"
+					name="imageKey"
+					onInvalid={(e) => {
+						e.preventDefault();
+						setImageKeyError(true);
+					}}
+					readOnly={true}
+					// required={true}
+					tabIndex={-1}
+					value={selectedImage?.key ?? ""}
+				/>
+				{imageKeyError ? (
+					<div className={fieldErrorStyles()}>{t("Please select an image.")}</div>
+				) : null}
 			</FormSection>
 
 			<Separator className="my-6" />
@@ -87,10 +107,6 @@ export function NewsItemForm(props: Readonly<NewsItemFormProps>): ReactNode {
 			<FormSection description={t("Add the content.")} title={t("Content")}>
 				<ContentBlocks items={contentBlocks ?? []} />
 			</FormSection>
-
-			{selectedImage != null ? (
-				<input name="imageKey" type="hidden" value={selectedImage.key} />
-			) : null}
 
 			{newsItem != null ? (
 				<Fragment>
@@ -114,6 +130,8 @@ export function NewsItemForm(props: Readonly<NewsItemFormProps>): ReactNode {
 					t("Save")
 				)}
 			</Button>
+
+			<FormStatus className="self-end" state={state} />
 		</Form>
 	);
 }

@@ -32,12 +32,13 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.fillDatePicker("Start date", 2024, 1, 15);
 		await adminProjectsPage.fillSummary("E2E test project summary");
 
-		await adminProjectsPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
 
 		await adminProjectsPage.fillDescription("E2E test project description.");
 
 		await adminProjectsPage.submitForm();
 
+		await adminProjectsPage.searchByName(projectName);
 		await expect(adminProjectsPage.projectRowByName(projectName)).toBeVisible();
 	});
 
@@ -51,12 +52,13 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.selectFirstScope();
 		await adminProjectsPage.fillDatePicker("Start date", 2024, 1, 15);
 		await adminProjectsPage.fillSummary("E2E test project to be edited");
-		await adminProjectsPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await adminProjectsPage.fillDescription("Description for edit test.");
 		await adminProjectsPage.submitForm();
 
 		// Find the project row and navigate to its edit page via the slug.
 		// The slug is derived from the name; we navigate via the actions menu.
+		await adminProjectsPage.searchByName(originalName);
 		const row = adminProjectsPage.projectRowByName(originalName);
 		await expect(row).toBeVisible();
 
@@ -67,14 +69,16 @@ test.describe("projects admin", () => {
 
 		// Update the project name.
 		const updatedName = `${adminProjectsPage.workerPrefix} Updated ${randomUUID()}`;
-		const nameField = page.getByLabel("Name");
+		const nameField = page.getByRole("main").getByLabel("Name");
 		await nameField.clear();
 		await nameField.fill(updatedName);
 
 		await adminProjectsPage.submitForm();
 
 		// The updated name should appear in the list.
+		await adminProjectsPage.searchByName(updatedName);
 		await expect(adminProjectsPage.projectRowByName(updatedName)).toBeVisible();
+		await adminProjectsPage.searchByName(originalName);
 		await expect(adminProjectsPage.projectRowByName(originalName)).toBeHidden();
 	});
 
@@ -89,10 +93,11 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.selectFirstScope();
 		await adminProjectsPage.fillDatePicker("Start date", 2024, 1, 15);
 		await adminProjectsPage.fillSummary("E2E test project to be deleted");
-		await adminProjectsPage.selectImageFromMediaLibrary("e2e-test-asset");
+		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await adminProjectsPage.fillDescription("Description for delete test.");
 		await adminProjectsPage.submitForm();
 
+		await adminProjectsPage.searchByName(projectName);
 		await expect(adminProjectsPage.projectRowByName(projectName)).toBeVisible();
 
 		// Open the delete dialog and confirm.

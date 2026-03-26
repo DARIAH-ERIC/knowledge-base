@@ -1,9 +1,9 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 
-import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { SpotlightArticlesTable } from "@/components/ui/tables/spotlight-articles-table";
+import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
+import { SpotlightArticlesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page";
 import { getSpotlightArticles } from "@/lib/data/cached/spotlight-articles";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -22,19 +22,14 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default async function DashboardWebsiteSpotlightArticlesPage(
+export default function DashboardWebsiteSpotlightArticlesPage(
 	_props: Readonly<DashboardWebsiteSpotlightArticlesPageProps>,
-): Promise<ReactNode> {
-	const t = await getExtracted();
-
-	const spotlightArticles = await getSpotlightArticles({});
+): ReactNode {
+	const spotlightArticles = getSpotlightArticles({ limit: 500 });
 
 	return (
-		<Main className="flex-1">
-			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">
-				{t("Spotlight articles")}
-			</h1>
-			<SpotlightArticlesTable data={spotlightArticles} />
-		</Main>
+		<Suspense fallback={<LoadingScreen />}>
+			<SpotlightArticlesPage spotlightArticles={spotlightArticles} />
+		</Suspense>
 	);
 }
