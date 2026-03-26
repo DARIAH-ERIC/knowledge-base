@@ -585,16 +585,16 @@ msgstr "Cancel"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal.tsx:35
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:149
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:176
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:146
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:146
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:153
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:144
 msgid "K3r6DQ"
 msgstr "Delete"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/edit-action.tsx:17
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:139
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:166
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:136
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:136
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:143
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:134
 msgid "wEQDC6"
 msgstr "Edit"
 
@@ -692,7 +692,7 @@ msgstr "View all newsletters in the DARIAH knowledge base."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:75
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:91
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:94
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:92
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:93
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:92
 msgid "xmcVZ0"
 msgstr "Search"
@@ -700,7 +700,7 @@ msgstr "Search"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:85
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:49
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:54
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:109
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:110
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:47
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:52
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:109
@@ -820,22 +820,22 @@ msgstr "Manage all persons in the DARIAH knowledge base."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:98
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:101
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:99
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:100
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:99
 msgid "bW7B87"
 msgstr "New"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:123
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:150
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:122
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:122
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:129
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:120
 msgid "CYbwwJ"
 msgstr "Open actions menu"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:135
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:162
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:132
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:132
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:139
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:130
 msgid "FgydNe"
 msgstr "View"
 
@@ -872,6 +872,7 @@ msgstr "Acronym"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:56
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:113
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:111
 msgid "IuFETn"
 msgstr "Duration"
 
@@ -912,11 +913,9 @@ msgstr "Topic"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:36
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:59
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:64
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:110
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:36
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:57
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:62
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:110
 msgid "RrCui3"
 msgstr "Summary"
 
@@ -1274,6 +1273,7 @@ msgstr "Enter the event details."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:102
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:107
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:112
 msgid "rvirM2"
 msgstr "Location"
 
@@ -1287,16 +1287,16 @@ msgstr "Website"
 msgid "ClikfP"
 msgstr "Add the content."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:79
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:80
 #: components/ui/tables/events-table.tsx:52
 msgid "ZvKSfJ"
 msgstr "Events"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:81
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:82
 msgid "tH9Pij"
 msgstr "Manage all events in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:161
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:168
 msgid "bHpXg4"
 msgstr "event"
 
@@ -1362,7 +1362,7 @@ msgstr "News"
 msgid "kJL6hf"
 msgstr "Manage all news items in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:161
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:159
 msgid "X8ZDGI"
 msgstr "news item"
 
