@@ -4,8 +4,9 @@ import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
-import { FieldError, Label } from "@dariah-eric/ui/field";
+import { FieldError, fieldErrorStyles, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
+import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Separator } from "@dariah-eric/ui/separator";
@@ -41,6 +42,8 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
 		event?.image ?? null,
 	);
+
+	const [imageKeyError, setImageKeyError] = useState(false);
 
 	return (
 		<Form action={action} className="flex flex-col gap-y-6" state={state}>
@@ -134,6 +137,23 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 						setSelectedImage({ key, url });
 					}}
 				/>
+
+				<input
+					aria-hidden={true}
+					className="sr-only"
+					name="imageKey"
+					onInvalid={(e) => {
+						e.preventDefault();
+						setImageKeyError(true);
+					}}
+					readOnly={true}
+					// required={true}
+					tabIndex={-1}
+					value={selectedImage?.key ?? ""}
+				/>
+				{imageKeyError ? (
+					<div className={fieldErrorStyles()}>{t("Please select an image.")}</div>
+				) : null}
 			</FormSection>
 
 			<Separator className="my-6" />
@@ -141,10 +161,6 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 			<FormSection description={t("Add the content.")} title={t("Content")}>
 				<ContentBlocks items={contentBlocks ?? []} />
 			</FormSection>
-
-			{selectedImage != null ? (
-				<input name="imageKey" type="hidden" value={selectedImage.key} />
-			) : null}
 
 			{event != null ? (
 				<Fragment>
@@ -168,6 +184,8 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 					t("Save")
 				)}
 			</Button>
+
+			<FormStatus className="self-end" state={state} />
 		</Form>
 	);
 }

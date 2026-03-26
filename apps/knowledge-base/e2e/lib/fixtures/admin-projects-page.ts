@@ -23,7 +23,7 @@ export class AdminProjectsPage {
 	/** Navigate to the projects list page. */
 	async goto(): Promise<void> {
 		await this.page.goto(BASE_PATH);
-		await this.page.waitForURL(`**${BASE_PATH}**`);
+		await this.page.waitForURL(`**${BASE_PATH}`);
 	}
 
 	/** Navigate to the create project form. */
@@ -91,7 +91,7 @@ export class AdminProjectsPage {
 	async submitForm(): Promise<void> {
 		await this.page.getByRole("button", { name: "Save" }).click();
 		/** After a successful create/edit, the server action redirects back to the list. */
-		await this.page.waitForURL(`**${BASE_PATH}**`);
+		await this.page.waitForURL(`**${BASE_PATH}`);
 	}
 
 	// ---------------------------------------------------------------------------

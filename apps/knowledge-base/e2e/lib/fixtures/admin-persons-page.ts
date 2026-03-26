@@ -29,7 +29,7 @@ export class AdminPersonsPage {
 	// ---------------------------------------------------------------------------
 
 	async fillName(name: string): Promise<void> {
-		await this.page.getByRole("main").getByLabel("Name").fill(name);
+		await this.page.getByLabel("Name", { exact: true }).fill(name);
 	}
 
 	async fillSortName(sortName: string): Promise<void> {
@@ -52,6 +52,10 @@ export class AdminPersonsPage {
 	// ---------------------------------------------------------------------------
 	// List page helpers
 	// ---------------------------------------------------------------------------
+
+	async searchByName(name: string): Promise<void> {
+		await this.page.getByRole("searchbox").fill(name);
+	}
 
 	rowByName(name: string): Locator {
 		return this.page.getByRole("row").filter({ hasText: name });

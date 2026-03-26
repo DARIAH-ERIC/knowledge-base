@@ -3,7 +3,7 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
-import { FieldError, Label } from "@dariah-eric/ui/field";
+import { FieldError, fieldErrorStyles, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
@@ -38,6 +38,8 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
 		person?.image ?? null,
 	);
+
+	const [imageKeyError, setImageKeyError] = useState(false);
 
 	return (
 		<Form action={action} className="flex flex-col gap-y-6" state={state}>
@@ -87,6 +89,23 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 					}}
 					prefix="avatars"
 				/>
+
+				<input
+					aria-hidden={true}
+					className="sr-only"
+					name="imageKey"
+					onInvalid={(e) => {
+						e.preventDefault();
+						setImageKeyError(true);
+					}}
+					readOnly={true}
+					// required={true}
+					tabIndex={-1}
+					value={selectedImage?.key ?? ""}
+				/>
+				{imageKeyError ? (
+					<div className={fieldErrorStyles()}>{t("Please select an image.")}</div>
+				) : null}
 			</FormSection>
 
 			<Separator className="my-6" />
@@ -94,10 +113,6 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 			<FormSection description={t("Add a short biography.")} title={t("Biography")}>
 				<RichTextEditor content={person?.biography} name="biography" />
 			</FormSection>
-
-			{selectedImage != null ? (
-				<input name="imageKey" type="hidden" value={selectedImage.key} />
-			) : null}
 
 			{person != null ? (
 				<Fragment>

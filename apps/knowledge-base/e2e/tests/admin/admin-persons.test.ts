@@ -54,7 +54,7 @@ test.describe("persons admin", () => {
 		await page.waitForURL("**/edit");
 
 		const updatedName = `${personsPage.workerPrefix} Updated ${randomUUID()}`;
-		const nameField = page.getByRole("main").getByLabel("Name");
+		const nameField = page.getByLabel("Name", { exact: true });
 		await nameField.clear();
 		await nameField.fill(updatedName);
 

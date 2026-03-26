@@ -10,16 +10,19 @@ export const UpdateImpactCaseStudyActionInputSchema = v.object({
 	...v.pick(ImpactCaseStudyUpdateSchema, ["title"]).entries,
 	...v.pick(ImpactCaseStudyUpdateSchema, ["summary"]).entries,
 	imageKey: v.pipe(v.string(), v.nonEmpty()),
-	contentBlocks: v.array(
-		v.pipe(
-			v.string(),
-			v.parseJson(),
-			v.object({
-				id: v.string(),
-				type: v.picklist(contentBlockTypesEnum),
-				position: v.optional(v.number()),
-				content: v.looseObject({}),
-			}),
+	contentBlocks: v.optional(
+		v.array(
+			v.pipe(
+				v.string(),
+				v.parseJson(),
+				v.object({
+					id: v.string(),
+					type: v.picklist(contentBlockTypesEnum),
+					position: v.optional(v.number()),
+					content: v.looseObject({}),
+				}),
+			),
 		),
+		[],
 	),
 });
