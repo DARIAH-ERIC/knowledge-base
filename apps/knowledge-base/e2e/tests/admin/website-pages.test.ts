@@ -31,6 +31,7 @@ test.describe("website pages admin", () => {
 
 		await pagesPage.submitForm();
 
+		await pagesPage.searchByTitle(title);
 		await expect(pagesPage.pageRowByTitle(title)).toBeVisible();
 	});
 
@@ -44,6 +45,7 @@ test.describe("website pages admin", () => {
 		await pagesPage.fillSummary("E2E test page to be edited");
 		await pagesPage.submitForm();
 
+		await pagesPage.searchByTitle(originalTitle);
 		const row = pagesPage.pageRowByTitle(originalTitle);
 		await expect(row).toBeVisible();
 
@@ -58,7 +60,9 @@ test.describe("website pages admin", () => {
 
 		await pagesPage.submitForm();
 
+		await pagesPage.searchByTitle(updatedTitle);
 		await expect(pagesPage.pageRowByTitle(updatedTitle)).toBeVisible();
+		await pagesPage.searchByTitle(originalTitle);
 		await expect(pagesPage.pageRowByTitle(originalTitle)).toBeHidden();
 	});
 
@@ -72,6 +76,7 @@ test.describe("website pages admin", () => {
 		await pagesPage.fillSummary("E2E test page to be deleted");
 		await pagesPage.submitForm();
 
+		await pagesPage.searchByTitle(title);
 		await expect(pagesPage.pageRowByTitle(title)).toBeVisible();
 
 		const deleteDialog = await pagesPage.openDeleteDialog(title);

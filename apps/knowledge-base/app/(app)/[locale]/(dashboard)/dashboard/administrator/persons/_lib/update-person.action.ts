@@ -106,7 +106,7 @@ export const updatePersonAction = createServerAction(
 			}
 		});
 
-		revalidatePath("/dashboard/administrator/persons", "layout");
+		revalidatePath("/[locale]/dashboard/administrator/persons", "layout");
 
 		redirect({ href: "/dashboard/administrator/persons", locale });
 	},

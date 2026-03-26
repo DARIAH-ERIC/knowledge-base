@@ -41,5 +41,5 @@ export async function deletePageItemAction(id: string): Promise<void> {
 		await tx.delete(schema.entities).where(eq(schema.entities.id, id));
 	});
 
-	revalidatePath("/dashboard/website/pages", "layout");
+	revalidatePath("/[locale]/dashboard/website/pages", "layout");
 }

@@ -41,5 +41,5 @@ export async function deleteNewsItemAction(id: string): Promise<void> {
 		await tx.delete(schema.entities).where(eq(schema.entities.id, id));
 	});
 
-	revalidatePath("/dashboard/website/news", "layout");
+	revalidatePath("/[locale]/dashboard/website/news", "layout");
 }

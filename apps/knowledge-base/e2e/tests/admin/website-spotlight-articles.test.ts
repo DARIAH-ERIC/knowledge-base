@@ -32,6 +32,7 @@ test.describe("website spotlight articles admin", () => {
 
 		await spotlightArticlesPage.submitForm();
 
+		await spotlightArticlesPage.searchByTitle(title);
 		await expect(spotlightArticlesPage.rowByTitle(title)).toBeVisible();
 	});
 
@@ -49,6 +50,7 @@ test.describe("website spotlight articles admin", () => {
 		await spotlightArticlesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await spotlightArticlesPage.submitForm();
 
+		await spotlightArticlesPage.searchByTitle(originalTitle);
 		const row = spotlightArticlesPage.rowByTitle(originalTitle);
 		await expect(row).toBeVisible();
 
@@ -63,7 +65,9 @@ test.describe("website spotlight articles admin", () => {
 
 		await spotlightArticlesPage.submitForm();
 
+		await spotlightArticlesPage.searchByTitle(updatedTitle);
 		await expect(spotlightArticlesPage.rowByTitle(updatedTitle)).toBeVisible();
+		await spotlightArticlesPage.searchByTitle(originalTitle);
 		await expect(spotlightArticlesPage.rowByTitle(originalTitle)).toBeHidden();
 	});
 
@@ -78,6 +82,7 @@ test.describe("website spotlight articles admin", () => {
 		await spotlightArticlesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await spotlightArticlesPage.submitForm();
 
+		await spotlightArticlesPage.searchByTitle(title);
 		await expect(spotlightArticlesPage.rowByTitle(title)).toBeVisible();
 
 		const deleteDialog = await spotlightArticlesPage.openDeleteDialog(title);

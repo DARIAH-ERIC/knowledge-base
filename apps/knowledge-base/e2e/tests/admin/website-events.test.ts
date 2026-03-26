@@ -34,6 +34,7 @@ test.describe("website events admin", () => {
 
 		await eventsPage.submitForm();
 
+		await eventsPage.searchByTitle(title);
 		await expect(eventsPage.rowByTitle(title)).toBeVisible();
 	});
 
@@ -50,6 +51,7 @@ test.describe("website events admin", () => {
 		await eventsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await eventsPage.submitForm();
 
+		await eventsPage.searchByTitle(originalTitle);
 		const row = eventsPage.rowByTitle(originalTitle);
 		await expect(row).toBeVisible();
 
@@ -64,7 +66,9 @@ test.describe("website events admin", () => {
 
 		await eventsPage.submitForm();
 
+		await eventsPage.searchByTitle(updatedTitle);
 		await expect(eventsPage.rowByTitle(updatedTitle)).toBeVisible();
+		await eventsPage.searchByTitle(originalTitle);
 		await expect(eventsPage.rowByTitle(originalTitle)).toBeHidden();
 	});
 
@@ -81,6 +85,7 @@ test.describe("website events admin", () => {
 		await eventsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await eventsPage.submitForm();
 
+		await eventsPage.searchByTitle(title);
 		await expect(eventsPage.rowByTitle(title)).toBeVisible();
 
 		const deleteDialog = await eventsPage.openDeleteDialog(title);

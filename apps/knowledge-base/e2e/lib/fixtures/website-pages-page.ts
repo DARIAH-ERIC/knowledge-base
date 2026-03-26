@@ -53,6 +53,10 @@ export class WebsitePagesPage {
 	// List page helpers
 	// ---------------------------------------------------------------------------
 
+	async searchByTitle(title: string): Promise<void> {
+		await this.page.getByRole("searchbox").fill(title);
+	}
+
 	pageRowByTitle(title: string): Locator {
 		return this.page.getByRole("row").filter({ hasText: title });
 	}

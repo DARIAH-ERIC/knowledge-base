@@ -45,5 +45,5 @@ export async function deleteImpactCaseStudyAction(id: string): Promise<void> {
 		await tx.delete(schema.entities).where(eq(schema.entities.id, id));
 	});
 
-	revalidatePath("/dashboard/website/impact-case-studies", "layout");
+	revalidatePath("/[locale]/dashboard/website/impact-case-studies", "layout");
 }

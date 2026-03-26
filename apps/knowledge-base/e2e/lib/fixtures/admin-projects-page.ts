@@ -98,6 +98,10 @@ export class AdminProjectsPage {
 	// List page helpers
 	// ---------------------------------------------------------------------------
 
+	async searchByName(name: string): Promise<void> {
+		await this.page.getByRole("searchbox").fill(name);
+	}
+
 	projectRowByName(name: string): Locator {
 		return this.page.getByRole("row").filter({ hasText: name });
 	}

@@ -156,7 +156,7 @@ export const createPageItemAction = createServerAction(
 			);
 		});
 
-		revalidatePath("/dashboard/website/pages", "layout");
+		revalidatePath("/[locale]/dashboard/website/pages", "layout");
 
 		redirect({ href: "/dashboard/website/pages", locale });
 	},

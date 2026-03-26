@@ -150,7 +150,7 @@ export const createNewsItemAction = createServerAction(
 			);
 		});
 
-		revalidatePath("/dashboard/website/news", "layout");
+		revalidatePath("/[locale]/dashboard/website/news", "layout");
 
 		redirect({ href: "/dashboard/website/news", locale });
 	},

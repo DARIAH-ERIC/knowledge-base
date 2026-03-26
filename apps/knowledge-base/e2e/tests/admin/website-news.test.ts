@@ -32,6 +32,7 @@ test.describe("website news admin", () => {
 
 		await newsPage.submitForm();
 
+		await newsPage.searchByTitle(title);
 		await expect(newsPage.rowByTitle(title)).toBeVisible();
 	});
 
@@ -46,6 +47,7 @@ test.describe("website news admin", () => {
 		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await newsPage.submitForm();
 
+		await newsPage.searchByTitle(originalTitle);
 		const row = newsPage.rowByTitle(originalTitle);
 		await expect(row).toBeVisible();
 
@@ -60,7 +62,9 @@ test.describe("website news admin", () => {
 
 		await newsPage.submitForm();
 
+		await newsPage.searchByTitle(updatedTitle);
 		await expect(newsPage.rowByTitle(updatedTitle)).toBeVisible();
+		await newsPage.searchByTitle(originalTitle);
 		await expect(newsPage.rowByTitle(originalTitle)).toBeHidden();
 	});
 
@@ -75,6 +79,7 @@ test.describe("website news admin", () => {
 		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await newsPage.submitForm();
 
+		await newsPage.searchByTitle(title);
 		await expect(newsPage.rowByTitle(title)).toBeVisible();
 
 		const deleteDialog = await newsPage.openDeleteDialog(title);

@@ -41,5 +41,5 @@ export async function deleteSpotlightArticleAction(id: string): Promise<void> {
 		await tx.delete(schema.entities).where(eq(schema.entities.id, id));
 	});
 
-	revalidatePath("/dashboard/website/spotlight-articles", "layout");
+	revalidatePath("/[locale]/dashboard/website/spotlight-articles", "layout");
 }

@@ -38,6 +38,7 @@ test.describe("projects admin", () => {
 
 		await adminProjectsPage.submitForm();
 
+		await adminProjectsPage.searchByName(projectName);
 		await expect(adminProjectsPage.projectRowByName(projectName)).toBeVisible();
 	});
 
@@ -57,6 +58,7 @@ test.describe("projects admin", () => {
 
 		// Find the project row and navigate to its edit page via the slug.
 		// The slug is derived from the name; we navigate via the actions menu.
+		await adminProjectsPage.searchByName(originalName);
 		const row = adminProjectsPage.projectRowByName(originalName);
 		await expect(row).toBeVisible();
 
@@ -74,7 +76,9 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.submitForm();
 
 		// The updated name should appear in the list.
+		await adminProjectsPage.searchByName(updatedName);
 		await expect(adminProjectsPage.projectRowByName(updatedName)).toBeVisible();
+		await adminProjectsPage.searchByName(originalName);
 		await expect(adminProjectsPage.projectRowByName(originalName)).toBeHidden();
 	});
 
@@ -93,6 +97,7 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.fillDescription("Description for delete test.");
 		await adminProjectsPage.submitForm();
 
+		await adminProjectsPage.searchByName(projectName);
 		await expect(adminProjectsPage.projectRowByName(projectName)).toBeVisible();
 
 		// Open the delete dialog and confirm.

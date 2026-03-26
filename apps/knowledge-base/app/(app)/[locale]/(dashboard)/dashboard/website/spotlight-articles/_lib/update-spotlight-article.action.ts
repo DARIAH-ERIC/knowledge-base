@@ -129,7 +129,7 @@ export const updateSpotlightArticleAction = createServerAction(
 			}
 		});
 
-		revalidatePath("/dashboard/website/spotlight-articles", "layout");
+		revalidatePath("/[locale]/dashboard/website/spotlight-articles", "layout");
 
 		redirect({ href: "/dashboard/website/spotlight-articles", locale });
 	},

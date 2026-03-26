@@ -129,7 +129,7 @@ export const updateEventAction = createServerAction(
 			}
 		});
 
-		revalidatePath("/dashboard/website/events", "layout");
+		revalidatePath("/[locale]/dashboard/website/events", "layout");
 
 		redirect({ href: "/dashboard/website/events", locale });
 	},

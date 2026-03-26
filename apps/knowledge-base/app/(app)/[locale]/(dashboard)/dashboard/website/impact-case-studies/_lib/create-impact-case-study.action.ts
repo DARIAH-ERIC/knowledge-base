@@ -150,7 +150,7 @@ export const createImpactCaseStudyAction = createServerAction(
 			);
 		});
 
-		revalidatePath("/dashboard/website/impact-case-studies", "layout");
+		revalidatePath("/[locale]/dashboard/website/impact-case-studies", "layout");
 
 		redirect({ href: "/dashboard/website/impact-case-studies", locale });
 	},

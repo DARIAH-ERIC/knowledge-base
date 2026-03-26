@@ -32,6 +32,7 @@ test.describe("persons admin", () => {
 
 		await personsPage.submitForm();
 
+		await personsPage.searchByName(name);
 		await expect(personsPage.rowByName(name)).toBeVisible();
 	});
 
@@ -46,6 +47,7 @@ test.describe("persons admin", () => {
 		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await personsPage.submitForm();
 
+		await personsPage.searchByName(originalName);
 		const row = personsPage.rowByName(originalName);
 		await expect(row).toBeVisible();
 
@@ -60,7 +62,9 @@ test.describe("persons admin", () => {
 
 		await personsPage.submitForm();
 
+		await personsPage.searchByName(updatedName);
 		await expect(personsPage.rowByName(updatedName)).toBeVisible();
+		await personsPage.searchByName(originalName);
 		await expect(personsPage.rowByName(originalName)).toBeHidden();
 	});
 
@@ -75,6 +79,7 @@ test.describe("persons admin", () => {
 		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await personsPage.submitForm();
 
+		await personsPage.searchByName(name);
 		await expect(personsPage.rowByName(name)).toBeVisible();
 
 		const deleteDialog = await personsPage.openDeleteDialog(name);

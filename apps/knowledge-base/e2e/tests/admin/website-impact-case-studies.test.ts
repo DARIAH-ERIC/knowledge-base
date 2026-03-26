@@ -32,6 +32,7 @@ test.describe("website impact case studies admin", () => {
 
 		await impactCaseStudiesPage.submitForm();
 
+		await impactCaseStudiesPage.searchByTitle(title);
 		await expect(impactCaseStudiesPage.rowByTitle(title)).toBeVisible();
 	});
 
@@ -49,6 +50,7 @@ test.describe("website impact case studies admin", () => {
 		await impactCaseStudiesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await impactCaseStudiesPage.submitForm();
 
+		await impactCaseStudiesPage.searchByTitle(originalTitle);
 		const row = impactCaseStudiesPage.rowByTitle(originalTitle);
 		await expect(row).toBeVisible();
 
@@ -63,7 +65,9 @@ test.describe("website impact case studies admin", () => {
 
 		await impactCaseStudiesPage.submitForm();
 
+		await impactCaseStudiesPage.searchByTitle(updatedTitle);
 		await expect(impactCaseStudiesPage.rowByTitle(updatedTitle)).toBeVisible();
+		await impactCaseStudiesPage.searchByTitle(originalTitle);
 		await expect(impactCaseStudiesPage.rowByTitle(originalTitle)).toBeHidden();
 	});
 
@@ -78,6 +82,7 @@ test.describe("website impact case studies admin", () => {
 		await impactCaseStudiesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await impactCaseStudiesPage.submitForm();
 
+		await impactCaseStudiesPage.searchByTitle(title);
 		await expect(impactCaseStudiesPage.rowByTitle(title)).toBeVisible();
 
 		const deleteDialog = await impactCaseStudiesPage.openDeleteDialog(title);
