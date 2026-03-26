@@ -101,7 +101,7 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 			</Header>
 
 			<Table
-				aria-label="doctors"
+				aria-label="persons"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
 			>
 				<TableHeader>

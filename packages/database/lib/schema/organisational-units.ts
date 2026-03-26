@@ -234,3 +234,13 @@ export const workingGroups = p
 		sshocMarketplaceActorId: p.integer("sshoc_marketplace_actor_id"),
 	})
 	.existing();
+
+export const statistics = p
+	.pgView("statistics", {
+		type: p.text("type"),
+		status: p.text("status"),
+		total: p.numeric("total"),
+	})
+	.existing();
+
+export const StatisticSelectSchema = createSelectSchema(statistics);
