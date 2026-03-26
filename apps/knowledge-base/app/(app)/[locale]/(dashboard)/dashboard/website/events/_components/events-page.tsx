@@ -20,7 +20,7 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, use, useState } from "react";
 import { useFilter, useListData } from "react-aria-components";
 
@@ -54,6 +54,7 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 	const events = use(eventsPromise);
 
 	const t = useExtracted();
+	const format = useFormatter();
 
 	const { contains } = useFilter();
 
@@ -107,7 +108,8 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 			>
 				<TableHeader>
 					<TableColumn isRowHeader={true}>{t("Title")}</TableColumn>
-					<TableColumn>{t("Summary")}</TableColumn>
+					<TableColumn>{t("Duration")}</TableColumn>
+					<TableColumn>{t("Location")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -115,7 +117,12 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 						return (
 							<TableRow href={`/dashboard/website/events/${item.entity.slug}/details`}>
 								<TableCell>{item.title}</TableCell>
-								<TableCell>{item.summary}</TableCell>
+								<TableCell>
+									{item.duration.end
+										? format.dateTimeRange(item.duration.start, item.duration.end)
+										: format.dateTime(item.duration.start)}
+								</TableCell>
+								<TableCell>{item.location}</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button

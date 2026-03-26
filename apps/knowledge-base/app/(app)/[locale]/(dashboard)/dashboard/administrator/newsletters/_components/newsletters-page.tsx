@@ -78,7 +78,7 @@ export function NewslettersPage(props: Readonly<NewslettersPageProps>): ReactNod
 			</Header>
 
 			<Table
-				aria-label="doctors"
+				aria-label="newsletters"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
 			>
 				<TableHeader>
