@@ -68,8 +68,23 @@ export const EventSlugListSchema = v.pipe(
 
 export type EventSlugList = v.InferOutput<typeof EventSlugListSchema>;
 
+export type EventDurationFilter = "ongoing" | "past" | "upcoming";
+
+export const EventFilterQuerySchema = v.object({
+	filter: v.pipe(
+		v.optional(v.picklist(["ongoing", "past", "upcoming"] satisfies Array<EventDurationFilter>)),
+		v.description("Filter in list result"),
+		v.metadata({ ref: "FilterParam" }),
+	),
+});
+
+export const EventsQuerySchema = v.object({
+	...PaginationQuerySchema.entries,
+	...EventFilterQuerySchema.entries,
+});
+
 export const GetEvents = {
-	QuerySchema: PaginationQuerySchema,
+	QuerySchema: EventsQuerySchema,
 	ResponseSchema: v.pipe(
 		v.object({
 			...PaginatedResponseSchema.entries,
