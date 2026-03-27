@@ -1,9 +1,17 @@
 "use client";
 
-import type { JSONContent } from "@tiptap/core";
-import Image from "@tiptap/extension-image";
-import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
+import { type JSONContent, Node } from "@tiptap/core";
+import { Image } from "@tiptap/extension-image";
+import {
+	EditorContent,
+	NodeViewContent,
+	type NodeViewProps,
+	NodeViewWrapper,
+	ReactNodeViewRenderer,
+	useEditor,
+	useEditorState,
+} from "@tiptap/react";
+import { StarterKit } from "@tiptap/starter-kit";
 import cn from "clsx/lite";
 import {
 	BoldIcon,
@@ -26,6 +34,7 @@ import { Button } from "@/lib/button";
 import { Input } from "@/lib/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
 
+/** Kept for backward-compat rendering of `{ type: "image" }` nodes already stored in the DB. */
 const ImageWithAsset = Image.extend({
 	addAttributes() {
 		return {
@@ -36,6 +45,68 @@ const ImageWithAsset = Image.extend({
 	},
 });
 
+function FigureView({ node }: Readonly<NodeViewProps>): ReactNode {
+	return (
+		<NodeViewWrapper as="figure">
+			<img alt={(node.attrs.alt as string | null) ?? ""} src={node.attrs.src as string} />
+			<NodeViewContent<"figcaption"> as="figcaption" />
+		</NodeViewWrapper>
+	);
+}
+
+const Figure = Node.create({
+	name: "figure",
+	group: "block",
+	content: "inline*",
+	draggable: true,
+	isolating: true,
+
+	addAttributes() {
+		return {
+			src: { default: null },
+			alt: { default: null },
+			assetKey: { default: null },
+			assetId: { default: null },
+		};
+	},
+
+	parseHTML() {
+		return [
+			{
+				tag: "figure",
+				getAttrs(element) {
+					if (typeof element === "string") return false;
+					const img = element.querySelector("img");
+					if (img == null) return false;
+					return {
+						src: img.getAttribute("src"),
+						alt: img.getAttribute("alt"),
+						assetKey: element.dataset.assetKey,
+						assetId: element.dataset.assetId,
+					};
+				},
+			},
+		];
+	},
+
+	renderHTML({ HTMLAttributes }) {
+		const { src, alt, assetKey, assetId } = HTMLAttributes as Record<string, string | null>;
+		return [
+			"figure",
+			{
+				...(assetKey != null ? { "data-asset-key": assetKey } : {}),
+				...(assetId != null ? { "data-asset-id": assetId } : {}),
+			},
+			["img", { src: src ?? "", alt: alt ?? "" }],
+			["figcaption", 0],
+		];
+	},
+
+	addNodeView() {
+		return ReactNodeViewRenderer(FigureView);
+	},
+});
+
 interface RichTextEditorProps {
 	"aria-label"?: string;
 	className?: string;
@@ -43,7 +114,12 @@ interface RichTextEditorProps {
 	isEditable?: boolean;
 	name?: string;
 	onChange?: (content: JSONContent) => void;
-	onPickImage?: () => Promise<{ src: string; assetKey: string; assetId: string } | null>;
+	onPickImage?: () => Promise<{
+		src: string;
+		assetKey: string;
+		assetId: string;
+		caption?: string;
+	} | null>;
 }
 
 interface RichTextEditorIconButtonProps {
@@ -96,6 +172,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 				},
 			}),
 			ImageWithAsset,
+			Figure,
 		],
 		content,
 		editable: isEditable,
@@ -140,12 +217,12 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	const [isLinkPopoverOpen, setIsLinkPopoverOpen] = useState(false);
 	const [linkHrefInput, setLinkHrefInput] = useState("");
-	const savedSelection = useRef<{ from: number; to: number } | null>(null);
+	const savedSelectionRef = useRef<{ from: number; to: number } | null>(null);
 
 	const handleLinkPopoverOpenChange = useCallback(
 		(open: boolean) => {
 			if (open && editor) {
-				savedSelection.current = {
+				savedSelectionRef.current = {
 					from: editor.state.selection.from,
 					to: editor.state.selection.to,
 				};
@@ -161,7 +238,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		const href = linkHrefInput.trim();
 		if (!href) return;
 
-		const sel = savedSelection.current;
+		const sel = savedSelectionRef.current;
 		const chain = editor.chain().focus();
 		if (sel) chain.setTextSelection(sel);
 
@@ -178,7 +255,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	const removeLink = useCallback(() => {
 		if (!editor) return;
-		const sel = savedSelection.current;
+		const sel = savedSelectionRef.current;
 		const chain = editor.chain().focus();
 		if (sel) chain.setTextSelection(sel);
 		chain.unsetLink().run();
@@ -327,12 +404,16 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 												.chain()
 												.focus()
 												.insertContent({
-													type: "image",
+													type: "figure",
 													attrs: {
 														src: result.src,
 														assetKey: result.assetKey,
 														assetId: result.assetId,
 													},
+													content:
+														result.caption != null && result.caption !== ""
+															? [{ type: "text", text: result.caption }]
+															: [],
 												})
 												.run();
 										}

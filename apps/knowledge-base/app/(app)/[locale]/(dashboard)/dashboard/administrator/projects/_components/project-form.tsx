@@ -134,15 +134,18 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
 	const resolvePickImage = useRef<
-		((v: { src: string; assetKey: string; assetId: string } | null) => void) | null
+		| ((v: { src: string; assetKey: string; assetId: string; caption?: string } | null) => void)
+		| null
 	>(null);
 	const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
 
 	const handlePickImage = useCallback(() => {
-		return new Promise<{ src: string; assetKey: string; assetId: string } | null>((resolve) => {
-			resolvePickImage.current = resolve;
-			setIsImagePickerOpen(true);
-		});
+		return new Promise<{ src: string; assetKey: string; assetId: string; caption?: string } | null>(
+			(resolve) => {
+				resolvePickImage.current = resolve;
+				setIsImagePickerOpen(true);
+			},
+		);
 	}, []);
 
 	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(

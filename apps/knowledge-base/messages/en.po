@@ -26,8 +26,8 @@ msgstr "Change color scheme"
 #: app/(app)/[locale]/(auth)/auth/sign-in/_components/sign-in-form.tsx:25
 #: app/(app)/[locale]/(auth)/auth/sign-up/_components/sign-up-form.tsx:31
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:34
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:64
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:65
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:80
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:81
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:109
 #: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx:29
 msgid "sy+pv5"
@@ -128,6 +128,7 @@ msgstr "Too many requests."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-project.action.ts:40
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-social-media.action.ts:41
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/update-project.action.ts:40
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image-for-editor.action.ts:52
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action.ts:39
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/create-event.action.ts:40
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/update-event.action.ts:40
@@ -339,7 +340,7 @@ msgstr "New email"
 #: app/(app)/[locale]/(auth)/auth/settings/_components/update-email-form.tsx:30
 #: app/(app)/[locale]/(auth)/auth/settings/_components/update-password-form.tsx:47
 #: app/(app)/[locale]/(auth)/auth/settings/page.tsx:105
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:609
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:634
 msgid "BWpuKl"
 msgstr "Update"
 
@@ -407,14 +408,14 @@ msgstr "Forgot password?"
 
 #: app/(app)/[locale]/(auth)/auth/sign-up/_components/sign-up-form.tsx:25
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:25
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:52
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:53
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:68
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:69
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:108
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:47
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:256
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:257
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:636
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:637
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:280
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:281
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:661
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:662
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:111
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:30
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:30
@@ -466,8 +467,8 @@ msgid "+5d9Hf"
 msgstr "Verify the code from the app"
 
 #: app/(app)/[locale]/(auth)/auth/two-factor/setup/_components/two-factor-set-up-form.tsx:38
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:133
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:703
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:169
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:744
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:186
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:132
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:132
@@ -521,19 +522,19 @@ msgstr "Change email address"
 msgid "1QGkRH"
 msgstr "Quick search..."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:121
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:154
 msgid "XHHR08"
 msgstr "Data"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:122
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:155
 msgid "bp3HuS"
 msgstr "Embed"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:123
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:156
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:40
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:78
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:94
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:78
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:356
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:380
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:39
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:127
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:39
@@ -547,7 +548,7 @@ msgstr "Embed"
 msgid "+0zv6g"
 msgstr "Image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:124
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:157
 msgid "0tCfi4"
 msgstr "Rich text"
 
@@ -601,8 +602,10 @@ msgstr "Overview"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal.tsx:27
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:140
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:607
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:673
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker.tsx:154
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker.tsx:277
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:632
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:698
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:145
 msgid "47FYwb"
 msgstr "Cancel"
@@ -647,15 +650,19 @@ msgstr "Select an existing image or upload a new one."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:85
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:98
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker.tsx:240
 msgid "BFLVwB"
 msgstr "Media library"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:92
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker.tsx:235
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:113
 msgid "vC8XBw"
 msgstr "No images found. Upload one to get started."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:147
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker.tsx:158
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker.tsx:159
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:150
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:151
 msgid "JEsxDw"
@@ -669,12 +676,56 @@ msgid "vMUomP"
 msgstr "Upload image"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:156
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker.tsx:279
 msgid "kQAf2d"
 msgstr "Select"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/paginate.tsx:55
 msgid "iS7BYy"
 msgstr "Showing <strong>{start, number}</strong> to <strong>{end, number}</strong> of <strong>{total, number}</strong> results"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker.tsx:51
+msgid "xqYCIo"
+msgstr "Upload a new image or select one from the media library."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker.tsx:52
+msgid "Pv2PlK"
+msgstr "Insert image"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker.tsx:55
+msgid "Arxbsm"
+msgstr "Image source"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker.tsx:56
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker.tsx:162
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:154
+msgid "p4N05H"
+msgstr "Upload"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker.tsx:57
+msgid "StcK67"
+msgstr "Library"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker.tsx:111
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:78
+msgid "gyrIEl"
+msgstr "File"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker.tsx:134
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:101
+msgid "TJo5E6"
+msgstr "Preview"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker.tsx:142
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:137
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:138
+msgid "sq1btl"
+msgstr "Caption"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker.tsx:148
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:139
+msgid "TvrY88"
+msgstr "Optional caption displayed below the image"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/(index)/page.tsx:20
 msgid "msSyC/"
@@ -764,7 +815,7 @@ msgid "4p12ep"
 msgstr "Emails sent"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:88
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:642
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:667
 msgid "bWjdfa"
 msgstr "URL"
 
@@ -799,14 +850,14 @@ msgid "IoDlcd"
 msgstr "Slug"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:31
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:58
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:59
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:74
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:75
 msgid "rpKRre"
 msgstr "Sort name"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:37
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:70
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:71
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:86
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:87
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:110
 msgid "Pl/c87"
 msgstr "ORCID"
@@ -815,12 +866,12 @@ msgstr "ORCID"
 msgid "4ia6St"
 msgstr "Edit person"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:48
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:64
 msgid "kYvEZZ"
 msgstr "Enter the personal and contact details related to the person."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:49
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:254
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:65
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:278
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:51
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:49
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:49
@@ -829,8 +880,8 @@ msgstr "Enter the personal and contact details related to the person."
 msgid "Lv0zJu"
 msgstr "Details"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:78
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:356
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:94
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:380
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:127
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:73
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:73
@@ -839,8 +890,8 @@ msgstr "Details"
 msgid "sMRK+J"
 msgstr "Select or upload an image."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:81
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:359
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:97
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:383
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:130
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:76
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:76
@@ -849,8 +900,8 @@ msgstr "Select or upload an image."
 msgid "T7w3zq"
 msgstr "Selected image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:109
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:387
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:125
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:411
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:157
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:103
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:103
@@ -859,20 +910,20 @@ msgstr "Selected image"
 msgid "zoLKpc"
 msgstr "Please select an image."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:115
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:131
 msgid "DixDH+"
 msgstr "Add a short biography."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:115
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:131
 msgid "5ez1Yf"
 msgstr "Biography"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:129
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:130
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:677
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:678
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:699
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:700
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:165
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:166
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:702
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:703
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:740
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:741
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:182
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:183
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:128
@@ -950,8 +1001,8 @@ msgid "lJMkin"
 msgstr "New project"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:53
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:262
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:263
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:286
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:287
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:112
 msgid "w4pX4t"
 msgstr "Acronym"
@@ -963,39 +1014,39 @@ msgid "IuFETn"
 msgstr "Duration"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:63
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:333
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:357
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:115
 msgid "nso3Mj"
 msgstr "Scope"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:66
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:278
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:279
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:302
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:303
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:114
 msgid "fZb224"
 msgstr "Funding"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:69
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:268
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:269
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:292
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:293
 msgid "9fBoKZ"
 msgstr "Funders"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:72
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:290
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:291
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:314
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:315
 msgid "f+GKc4"
 msgstr "Call"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:75
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:284
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:285
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:308
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:309
 msgid "UdtpV7"
 msgstr "Topic"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:85
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:348
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:349
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:372
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:373
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:36
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:63
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:68
@@ -1018,20 +1069,20 @@ msgid "RrCui3"
 msgstr "Summary"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:88
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:393
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:395
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:417
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:419
 msgid "Q8Qw5B"
 msgstr "Description"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:93
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:405
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:409
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:430
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:434
 #: app/(app)/[locale]/(default)/_components/default-footer.tsx:58
 msgid "ZEEVQX"
 msgstr "Social media"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:114
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:457
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:482
 msgid "Uu3DS2"
 msgstr "Partners"
 
@@ -1039,94 +1090,94 @@ msgstr "Partners"
 msgid "qwCflo"
 msgstr "Edit project"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:254
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:278
 msgid "RonZTI"
 msgstr "Enter the project details."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:309
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:333
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:85
 msgid "n5QvJy"
 msgstr "Start date"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:327
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:351
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:102
 msgid "Humfno"
 msgstr "End date"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:393
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:417
 msgid "85T2Oj"
 msgstr "Add a short description."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:404
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:429
 msgid "s/cah8"
 msgstr "Link social media accounts to this project."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:413
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:438
 msgid "Umb/UT"
 msgstr "No social media linked"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:434
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:459
 msgid "5KgZGN"
 msgstr "No social media entries available."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:444
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:632
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:469
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:657
 msgid "/IN/vq"
 msgstr "Create social media"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:456
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:481
 msgid "0gIMUD"
 msgstr "Add partner organisations and their roles in this project."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:475
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:541
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:500
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:566
 msgid "Ro4w6B"
 msgstr "Edit partner"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:485
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:510
 msgid "6AH2Ky"
 msgstr "Remove partner"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:499
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:541
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:524
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:566
 msgid "C+fVpu"
 msgstr "Add partner"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:540
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:565
 msgid "mc5Aij"
 msgstr "Select an organisation, its role, and an optional involvement period."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:553
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:578
 msgid "ZA6cIU"
 msgstr "Organisation"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:571
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:596
 msgid "1ZgrhW"
 msgstr "Role"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:589
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:663
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:614
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:688
 msgid "QsHamg"
 msgstr "Start date (optional)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:602
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:668
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:627
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:693
 msgid "ZKneN8"
 msgstr "End date (optional)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:609
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:634
 msgid "2/2yg+"
 msgstr "Add"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:631
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:656
 msgid "JhDUsu"
 msgstr "Fill in the details for the new social media entry."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:648
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:673
 msgid "+U6ozc"
 msgstr "Type"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:681
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:706
 msgid "VzzYJk"
 msgstr "Create"
 
@@ -1359,14 +1410,6 @@ msgstr "No images match your filters."
 msgid "EQZvEB"
 msgstr "Upload a new image to the media library."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:78
-msgid "gyrIEl"
-msgstr "File"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:101
-msgid "TJo5E6"
-msgstr "Preview"
-
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:109
 msgid "ci7V7t"
 msgstr "Prefix"
@@ -1389,23 +1432,11 @@ msgstr "Alt text"
 msgid "DAQ44c"
 msgstr "Describe the image for accessibility"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:137
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:138
-msgid "sq1btl"
-msgstr "Caption"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:139
-msgid "TvrY88"
-msgstr "Optional caption displayed below the image"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:154
-msgid "p4N05H"
-msgstr "Upload"
-
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx:27
 msgid "FKUPrI"
 msgstr "Select an image to upload"
 
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image-for-editor.action.ts:64
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action.ts:51
 msgid "KY78v9"
 msgstr "Successfully uploaded image."

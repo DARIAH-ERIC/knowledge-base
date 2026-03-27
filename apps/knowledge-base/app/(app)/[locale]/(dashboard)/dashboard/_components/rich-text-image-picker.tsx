@@ -1,6 +1,9 @@
 "use client";
 
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { Button } from "@dariah-eric/ui/button";
+import { Form } from "@dariah-eric/ui/form";
+import { FormStatus } from "@dariah-eric/ui/form-status";
 import { GridList, GridListItem } from "@dariah-eric/ui/grid-list";
 import {
 	ModalBody,
@@ -11,9 +14,6 @@ import {
 } from "@dariah-eric/ui/modal";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
-import { Button } from "@dariah-eric/ui/button";
-import { Form } from "@dariah-eric/ui/form";
-import { FormStatus } from "@dariah-eric/ui/form-status";
 import cn from "clsx/lite";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useEffect, useState } from "react";
@@ -27,10 +27,17 @@ interface ImageAsset {
 	url: string;
 }
 
+export interface PickedImage {
+	src: string;
+	assetKey: string;
+	assetId: string;
+	caption?: string;
+}
+
 interface RichTextImagePickerProps {
 	isOpen: boolean;
 	onOpenChange: (open: boolean) => void;
-	onSelect: (image: { src: string; assetKey: string; assetId: string }) => void;
+	onSelect: (image: PickedImage) => void;
 }
 
 export function RichTextImagePicker(props: Readonly<RichTextImagePickerProps>): ReactNode {
@@ -50,10 +57,10 @@ export function RichTextImagePicker(props: Readonly<RichTextImagePickerProps>): 
 					<Tab id="library">{t("Library")}</Tab>
 				</TabList>
 				<TabPanel id="upload">
-					<UploadTab onSelect={onSelect} onOpenChange={onOpenChange} />
+					<UploadTab onOpenChange={onOpenChange} onSelect={onSelect} />
 				</TabPanel>
 				<TabPanel id="library">
-					<LibraryTab isOpen={isOpen} onSelect={onSelect} onOpenChange={onOpenChange} />
+					<LibraryTab isOpen={isOpen} onOpenChange={onOpenChange} onSelect={onSelect} />
 				</TabPanel>
 			</Tabs>
 		</ModalContent>
@@ -61,7 +68,7 @@ export function RichTextImagePicker(props: Readonly<RichTextImagePickerProps>): 
 }
 
 interface UploadTabProps {
-	onSelect: (image: { src: string; assetKey: string; assetId: string }) => void;
+	onSelect: (image: PickedImage) => void;
 	onOpenChange: (open: boolean) => void;
 }
 
@@ -71,12 +78,22 @@ function UploadTab({ onSelect, onOpenChange }: Readonly<UploadTabProps>): ReactN
 
 	const [state, formAction, isPending] = useActionState(
 		async (
-			prevState: ActionState<{ src: string; assetKey: string; assetId: string }>,
+			prevState: ActionState<{
+				src: string;
+				assetKey: string;
+				assetId: string;
+				caption: string | null;
+			}>,
 			formData: FormData,
 		) => {
 			const result = await uploadImageForEditorAction(prevState, formData);
 			if (result.status === "success") {
-				onSelect(result.data);
+				onSelect({
+					src: result.data.src,
+					assetKey: result.data.assetKey,
+					assetId: result.data.assetId,
+					caption: result.data.caption ?? undefined,
+				});
 				onOpenChange(false);
 				setFilePreview(null);
 			}
@@ -120,6 +137,18 @@ function UploadTab({ onSelect, onOpenChange }: Readonly<UploadTabProps>): ReactN
 						/>
 					)}
 				</div>
+				<div className="flex flex-col gap-y-2">
+					<label className="text-sm font-medium" htmlFor="editor-upload-caption">
+						{t("Caption")}
+					</label>
+					<input
+						className="flex h-9 w-full rounded-md border border-input bg-bg px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-fg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+						id="editor-upload-caption"
+						name="caption"
+						placeholder={t("Optional caption displayed below the image")}
+						type="text"
+					/>
+				</div>
 			</ModalBody>
 			<ModalFooter>
 				<ModalClose>{t("Cancel")}</ModalClose>
@@ -140,7 +169,7 @@ function UploadTab({ onSelect, onOpenChange }: Readonly<UploadTabProps>): ReactN
 
 interface LibraryTabProps {
 	isOpen: boolean;
-	onSelect: (image: { src: string; assetKey: string; assetId: string }) => void;
+	onSelect: (image: PickedImage) => void;
 	onOpenChange: (open: boolean) => void;
 }
 
@@ -153,20 +182,34 @@ function LibraryTab({ isOpen, onSelect, onOpenChange }: Readonly<LibraryTabProps
 	useEffect(() => {
 		if (!isOpen) return;
 
+		let isCanceled = false;
+
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setIsLoading(true);
+
 		fetch("/api/assets?limit=50")
 			.then((res) => {
 				return res.json() as Promise<{ items: Array<ImageAsset>; total: number }>;
 			})
 			.then(({ items }) => {
-				setAssets(items);
+				if (!isCanceled) {
+					setAssets(items);
+				}
 			})
 			.catch(() => {
-				setAssets([]);
+				if (!isCanceled) {
+					setAssets([]);
+				}
 			})
 			.finally(() => {
-				setIsLoading(false);
+				if (!isCanceled) {
+					setIsLoading(false);
+				}
 			});
+
+		return () => {
+			isCanceled = true;
+		};
 	}, [isOpen]);
 
 	function handleConfirm() {

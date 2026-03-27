@@ -1,11 +1,10 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
+import { imageGridOptions } from "@/config/assets.config";
 import { getCurrentSession } from "@/lib/auth/session";
 import { getAssetsForDashboard } from "@/lib/data/assets";
-import { imageGridOptions } from "@/config/assets.config";
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
 	const { session } = await getCurrentSession();
 
 	if (session == null) {

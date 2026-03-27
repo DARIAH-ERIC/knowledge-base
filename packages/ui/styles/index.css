@@ -650,8 +650,12 @@
 		}
 
 		&:where(img) {
+			display: block;
+			max-width: 100%;
+			height: auto;
 			margin-top: 2em;
 			margin-bottom: 2em;
+			border-radius: var(--radius);
 		}
 
 		&:where(picture) {
@@ -792,6 +796,11 @@
 			vertical-align: top;
 		}
 
+		&:where(figure) {
+			margin-top: 2em;
+			margin-bottom: 2em;
+		}
+
 		&:where(figure > *) {
 			margin-top: 0;
 			margin-bottom: 0;
@@ -905,19 +914,6 @@
 
 		&:where(tbody td:last-child, tfoot td:last-child) {
 			padding-right: 0;
-		}
-
-		&:where(figure) {
-			margin-top: 2em;
-			margin-bottom: 2em;
-		}
-
-		&:where(img) {
-			max-width: 100%;
-			height: auto;
-			border-radius: var(--radius);
-			display: block;
-			margin-block: 1rem;
 		}
 
 		&:where(.richtext > :first-child) {

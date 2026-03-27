@@ -24,12 +24,11 @@ const UploadImageForEditorInputSchema = v.object({
 			return input.size <= imageSizeLimit;
 		}),
 	),
+	caption: v.optional(v.pipe(v.string(), v.nonEmpty())),
 });
 
-type UploadImageForEditorInput = v.InferOutput<typeof UploadImageForEditorInputSchema>;
-
 export const uploadImageForEditorAction = createServerAction<
-	{ src: string; assetKey: string; assetId: string },
+	{ src: string; assetKey: string; assetId: string; caption: string | null },
 	GetValidationErrors<typeof UploadImageForEditorInputSchema>
 >(async function uploadImageForEditorAction(state, formData) {
 	const locale = await getLocale();
@@ -55,14 +54,14 @@ export const uploadImageForEditorAction = createServerAction<
 		});
 	}
 
-	const { file } = validation.output;
+	const { file, caption } = validation.output;
 
-	const { key, id } = await uploadAsset({ file, prefix: "images" });
+	const { key, id } = await uploadAsset({ file, prefix: "images", caption });
 
 	const { url } = images.generateSignedImageUrl({ key, options: { width: 1200 } });
 
 	return createActionStateSuccess({
 		message: t("Successfully uploaded image."),
-		data: { src: url, assetKey: key, assetId: id },
+		data: { src: url, assetKey: key, assetId: id, caption: caption ?? null },
 	});
 });
