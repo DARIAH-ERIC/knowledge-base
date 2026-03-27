@@ -1,5 +1,6 @@
 "use client";
 
+import { noop } from "@acdh-oeaw/lib";
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
@@ -86,6 +87,7 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 					assets={assets}
 					onSelect={(key, url) => {
 						setSelectedImage({ key, url });
+						setImageKeyError(false);
 					}}
 					prefix="avatars"
 				/>
@@ -94,12 +96,12 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 					aria-hidden={true}
 					className="sr-only"
 					name="imageKey"
+					onChange={noop}
 					onInvalid={(e) => {
 						e.preventDefault();
 						setImageKeyError(true);
 					}}
-					readOnly={true}
-					// required={true}
+					required={true}
 					tabIndex={-1}
 					value={selectedImage?.key ?? ""}
 				/>
@@ -121,12 +123,7 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 				</Fragment>
 			) : null}
 
-			<Button
-				className="self-end"
-				isDisabled={selectedImage == null}
-				isPending={isPending}
-				type="submit"
-			>
+			<Button className="self-end" isPending={isPending} type="submit">
 				{isPending ? (
 					<Fragment>
 						<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />

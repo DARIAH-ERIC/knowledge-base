@@ -1,5 +1,6 @@
 "use client";
 
+import { noop } from "@acdh-oeaw/lib";
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
@@ -135,6 +136,7 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 					assets={assets}
 					onSelect={(key, url) => {
 						setSelectedImage({ key, url });
+						setImageKeyError(false);
 					}}
 				/>
 
@@ -142,11 +144,11 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 					aria-hidden={true}
 					className="sr-only"
 					name="imageKey"
+					onChange={noop}
 					onInvalid={(e) => {
 						e.preventDefault();
 						setImageKeyError(true);
 					}}
-					readOnly={true}
 					// required={true}
 					tabIndex={-1}
 					value={selectedImage?.key ?? ""}
