@@ -16,9 +16,11 @@ import {
 } from "@heroicons/react/24/outline";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useEffect, useRef } from "react";
+import { Fragment, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import type { Key } from "react-aria";
 import { useDragAndDrop, useListData } from "react-aria-components";
+
+import { RichTextImagePicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker";
 
 export interface ContentBlock {
 	id: Key;
@@ -38,6 +40,18 @@ export function ContentBlocks({ items: initialItems }: Readonly<ContentBlocksPro
 			return item.id;
 		},
 	});
+
+	const resolvePickImage = useRef<
+		((v: { src: string; assetKey: string; assetId: string } | null) => void) | null
+	>(null);
+	const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
+
+	const handlePickImage = useCallback(() => {
+		return new Promise<{ src: string; assetKey: string; assetId: string } | null>((resolve) => {
+			resolvePickImage.current = resolve;
+			setIsImagePickerOpen(true);
+		});
+	}, []);
 
 	const addItem = (type: ContentBlock["type"]) => {
 		const newItem: ContentBlock = {
@@ -85,6 +99,7 @@ export function ContentBlocks({ items: initialItems }: Readonly<ContentBlocksPro
 										onChange={(content) => {
 											list.update(item.id, { ...item, content });
 										}}
+										onPickImage={handlePickImage}
 									/>
 								</EditableGridListItem>
 							);
@@ -106,6 +121,21 @@ export function ContentBlocks({ items: initialItems }: Readonly<ContentBlocksPro
 				);
 			})}
 			<ContentBlockMenu onAdd={addItem} />
+			<RichTextImagePicker
+				isOpen={isImagePickerOpen}
+				onOpenChange={(open) => {
+					if (!open) {
+						resolvePickImage.current?.(null);
+						resolvePickImage.current = null;
+					}
+					setIsImagePickerOpen(open);
+				}}
+				onSelect={(image) => {
+					resolvePickImage.current?.(image);
+					resolvePickImage.current = null;
+					setIsImagePickerOpen(false);
+				}}
+			/>
 		</Fragment>
 	);
 }

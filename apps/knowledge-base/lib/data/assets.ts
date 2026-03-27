@@ -107,17 +107,21 @@ export async function uploadAsset(params: UploadAssetParams) {
 
 	const { key } = await s3.images.upload({ input, prefix, metadata, size });
 
-	await db.insert(schema.assets).values({
-		key,
-		licenseId,
-		mimeType: metadata["content-type"],
-		label: label ?? file.name,
-		alt,
-		caption,
-	});
+	const [inserted] = await db
+		.insert(schema.assets)
+		.values({
+			key,
+			licenseId,
+			mimeType: metadata["content-type"],
+			label: label ?? file.name,
+			alt,
+			caption,
+		})
+		.returning({ id: schema.assets.id });
 
 	return {
 		key,
+		id: inserted!.id,
 	};
 }
 

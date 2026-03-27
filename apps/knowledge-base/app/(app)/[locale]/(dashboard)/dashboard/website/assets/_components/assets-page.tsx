@@ -115,11 +115,12 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 				</div>
 			) : (
 				<ul
-					className="grid grid-cols-[repeat(auto-fill,minmax(min(12rem,100%),1fr))] gap-4 content-start"
+					className="py-6 grid grid-cols-[repeat(auto-fill,minmax(min(12rem,100%),1fr))] gap-4 content-start"
 					role="list"
 				>
 					{paginatedItems.map((asset) => {
 						const prefix = asset.key.split("/")[0] ?? "";
+
 						return (
 							<li key={asset.id}>
 								<figure className="flex flex-col gap-y-2">

@@ -33,11 +33,20 @@ import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/20/solid
 import { CalendarDate, parseDate } from "@internationalized/date";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useActionState, useState, useTransition } from "react";
+import {
+	Fragment,
+	type ReactNode,
+	useActionState,
+	useCallback,
+	useRef,
+	useState,
+	useTransition,
+} from "react";
 import { Text } from "react-aria-components";
 
 import { FormSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import { RichTextImagePicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker";
 import {
 	type CreatedSocialMedia,
 	createSocialMediaAction,
@@ -123,6 +132,18 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 	const t = useExtracted();
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
+
+	const resolvePickImage = useRef<
+		((v: { src: string; assetKey: string; assetId: string } | null) => void) | null
+	>(null);
+	const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
+
+	const handlePickImage = useCallback(() => {
+		return new Promise<{ src: string; assetKey: string; assetId: string } | null>((resolve) => {
+			resolvePickImage.current = resolve;
+			setIsImagePickerOpen(true);
+		});
+	}, []);
 
 	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
 		project?.image ?? null,
@@ -395,6 +416,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 					aria-label={t("Description")}
 					content={project?.description}
 					name="description"
+					onPickImage={handlePickImage}
 				/>
 			</FormSection>
 
@@ -685,6 +707,22 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 					<FormStatus className="px-6 pb-4" state={createSocialMediaState} />
 				</Form>
 			</ModalContent>
+
+			<RichTextImagePicker
+				isOpen={isImagePickerOpen}
+				onOpenChange={(open) => {
+					if (!open) {
+						resolvePickImage.current?.(null);
+						resolvePickImage.current = null;
+					}
+					setIsImagePickerOpen(open);
+				}}
+				onSelect={(image) => {
+					resolvePickImage.current?.(image);
+					resolvePickImage.current = null;
+					setIsImagePickerOpen(false);
+				}}
+			/>
 
 			{project != null ? (
 				<Fragment>

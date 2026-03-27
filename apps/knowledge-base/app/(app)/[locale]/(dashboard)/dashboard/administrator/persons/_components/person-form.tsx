@@ -14,10 +14,11 @@ import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useActionState, useState } from "react";
+import { Fragment, type ReactNode, useActionState, useCallback, useRef, useState } from "react";
 
 import { FormSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import { RichTextImagePicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/rich-text-image-picker";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface PersonFormProps {
@@ -35,6 +36,18 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 	const t = useExtracted();
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
+
+	const resolvePickImage = useRef<
+		((v: { src: string; assetKey: string; assetId: string } | null) => void) | null
+	>(null);
+	const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
+
+	const handlePickImage = useCallback(() => {
+		return new Promise<{ src: string; assetKey: string; assetId: string } | null>((resolve) => {
+			resolvePickImage.current = resolve;
+			setIsImagePickerOpen(true);
+		});
+	}, []);
 
 	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
 		person?.image ?? null,
@@ -113,8 +126,28 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 			<Separator className="my-6" />
 
 			<FormSection description={t("Add a short biography.")} title={t("Biography")}>
-				<RichTextEditor content={person?.biography} name="biography" />
+				<RichTextEditor
+					content={person?.biography}
+					name="biography"
+					onPickImage={handlePickImage}
+				/>
 			</FormSection>
+
+			<RichTextImagePicker
+				isOpen={isImagePickerOpen}
+				onOpenChange={(open) => {
+					if (!open) {
+						resolvePickImage.current?.(null);
+						resolvePickImage.current = null;
+					}
+					setIsImagePickerOpen(open);
+				}}
+				onSelect={(image) => {
+					resolvePickImage.current?.(image);
+					resolvePickImage.current = null;
+					setIsImagePickerOpen(false);
+				}}
+			/>
 
 			{person != null ? (
 				<Fragment>

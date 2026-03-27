@@ -21,7 +21,7 @@ msgctxt "ui"
 msgid "pig+2F"
 msgstr "Select month"
 
-#: lib/calendar.tsx:185
+#: lib/calendar.tsx:186
 msgctxt "ui"
 msgid "HppWvq"
 msgstr "Select year"
@@ -77,12 +77,12 @@ msgctxt "ui"
 msgid "99OtWT"
 msgstr "Pending..."
 
-#: lib/multiple-select.tsx:93
+#: lib/multiple-select.tsx:95
 msgctxt "ui"
 msgid "ch1L7M"
 msgstr "Selected items"
 
-#: lib/multiple-select.tsx:122
+#: lib/multiple-select.tsx:124
 msgctxt "ui"
 msgid "hBhV8k"
 msgstr "Open options"
@@ -113,65 +113,70 @@ msgctxt "ui"
 msgid "N8BBfe"
 msgstr "Last page"
 
-#: lib/rich-text-editor.tsx:176
+#: lib/rich-text-editor.tsx:202
 msgctxt "ui"
 msgid "Dkkmwm"
 msgstr "Bold"
 
-#: lib/rich-text-editor.tsx:184
+#: lib/rich-text-editor.tsx:210
 msgctxt "ui"
 msgid "g2V+es"
 msgstr "Italic"
 
-#: lib/rich-text-editor.tsx:192
+#: lib/rich-text-editor.tsx:218
 msgctxt "ui"
 msgid "h2vipu"
 msgstr "Code"
 
-#: lib/rich-text-editor.tsx:201
+#: lib/rich-text-editor.tsx:227
 msgctxt "ui"
 msgid "/7maNQ"
 msgstr "Heading 1"
 
-#: lib/rich-text-editor.tsx:209
+#: lib/rich-text-editor.tsx:235
 msgctxt "ui"
 msgid "Zqekct"
 msgstr "Heading 2"
 
-#: lib/rich-text-editor.tsx:217
+#: lib/rich-text-editor.tsx:243
 msgctxt "ui"
 msgid "BDbgCL"
 msgstr "Heading 3"
 
-#: lib/rich-text-editor.tsx:226
+#: lib/rich-text-editor.tsx:252
 msgctxt "ui"
 msgid "6sdKFe"
 msgstr "Bullet List"
 
-#: lib/rich-text-editor.tsx:234
+#: lib/rich-text-editor.tsx:260
 msgctxt "ui"
 msgid "rU4xig"
 msgstr "Ordered List"
 
-#: lib/rich-text-editor.tsx:242
+#: lib/rich-text-editor.tsx:268
 msgctxt "ui"
 msgid "+RDJVD"
 msgstr "Blockquote"
 
-#: lib/rich-text-editor.tsx:252
+#: lib/rich-text-editor.tsx:278
 msgctxt "ui"
 msgid "JBWS0c"
 msgstr "Link"
 
-#: lib/rich-text-editor.tsx:280
+#: lib/rich-text-editor.tsx:306
 msgctxt "ui"
 msgid "EWw/tK"
 msgstr "Apply"
 
-#: lib/rich-text-editor.tsx:284
+#: lib/rich-text-editor.tsx:310
 msgctxt "ui"
 msgid "G/yZLu"
 msgstr "Remove"
+
+#: lib/rich-text-editor.tsx:321
+msgctxt "ui"
+msgid "Pv2PlK"
+msgstr "Insert image"
 
 #: lib/search-field.tsx:26
 msgctxt "ui"

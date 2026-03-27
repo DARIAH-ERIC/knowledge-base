@@ -53,6 +53,7 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 	return (
 		<Fragment>
 			<Button
+				className="whitespace-nowrap"
 				intent="secondary"
 				onPress={() => {
 					setIsOpen(true);

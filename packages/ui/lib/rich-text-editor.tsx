@@ -1,6 +1,7 @@
 "use client";
 
 import type { JSONContent } from "@tiptap/core";
+import Image from "@tiptap/extension-image";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import cn from "clsx/lite";
@@ -10,6 +11,7 @@ import {
 	Heading1Icon,
 	Heading2Icon,
 	Heading3Icon,
+	ImageIcon,
 	ItalicIcon,
 	LinkIcon,
 	ListIcon,
@@ -24,6 +26,16 @@ import { Button } from "@/lib/button";
 import { Input } from "@/lib/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
 
+const ImageWithAsset = Image.extend({
+	addAttributes() {
+		return {
+			...this.parent?.(),
+			assetKey: { default: null },
+			assetId: { default: null },
+		};
+	},
+});
+
 interface RichTextEditorProps {
 	"aria-label"?: string;
 	className?: string;
@@ -31,6 +43,7 @@ interface RichTextEditorProps {
 	isEditable?: boolean;
 	name?: string;
 	onChange?: (content: JSONContent) => void;
+	onPickImage?: () => Promise<{ src: string; assetKey: string; assetId: string } | null>;
 }
 
 interface RichTextEditorIconButtonProps {
@@ -62,7 +75,15 @@ function RichTextEditorIconButton({
 }
 
 export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode {
-	const { "aria-label": ariaLabel, content, onChange, isEditable = true, name, className } = props;
+	const {
+		"aria-label": ariaLabel,
+		content,
+		onChange,
+		isEditable = true,
+		name,
+		className,
+		onPickImage,
+	} = props;
 
 	const t = useExtracted("ui");
 
@@ -74,6 +95,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 					defaultProtocol: "https",
 				},
 			}),
+			ImageWithAsset,
 		],
 		content,
 		editable: isEditable,
@@ -292,6 +314,33 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							</form>
 						</PopoverContent>
 					</Popover>
+					{onPickImage != null ? (
+						<>
+							<span className="mx-1 h-4 w-px bg-border" />
+							<RichTextEditorIconButton
+								aria-label={t("Insert image")}
+								icon={ImageIcon}
+								onClick={() => {
+									void onPickImage().then((result) => {
+										if (result != null) {
+											editor
+												.chain()
+												.focus()
+												.insertContent({
+													type: "image",
+													attrs: {
+														src: result.src,
+														assetKey: result.assetKey,
+														assetId: result.assetId,
+													},
+												})
+												.run();
+										}
+									});
+								}}
+							/>
+						</>
+					) : null}
 				</div>
 			) : null}
 			{name != null && (
