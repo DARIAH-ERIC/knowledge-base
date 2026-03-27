@@ -66,6 +66,7 @@ export default async function DashboardWebsiteEditNewsItemPage(
 				image: {
 					columns: {
 						key: true,
+						label: true,
 					},
 				},
 			},
@@ -110,7 +111,7 @@ export default async function DashboardWebsiteEditNewsItemPage(
 		<NewsItemEditForm
 			assets={assets}
 			contentBlocks={richTextContentBlocks}
-			newsItem={{ ...newsItem, image: { key: newsItem.image.key, url: image.url } }}
+			newsItem={{ ...newsItem, image: { ...newsItem.image, url: image.url } }}
 		/>
 	);
 }

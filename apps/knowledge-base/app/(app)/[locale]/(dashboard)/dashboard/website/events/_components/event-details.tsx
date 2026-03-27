@@ -17,7 +17,7 @@ interface EventDetailsProps {
 	contentBlocks: Array<ContentBlock>;
 	event: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
 		entity: { documentId: string; slug: string };
-	} & { image: { key: string; url: string } };
+	} & { image: { key: string; label: string; url: string } };
 }
 
 export function EventDetails(props: Readonly<EventDetailsProps>): ReactNode {

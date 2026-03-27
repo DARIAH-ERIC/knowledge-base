@@ -8,6 +8,7 @@
 	},
 	"exports": {
 		".": "./dist/index.mjs",
+		"./config": "./config/images.config.ts",
 		"./lib": "./lib/lib/index.ts"
 	},
 	"files": [

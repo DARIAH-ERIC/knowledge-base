@@ -17,7 +17,7 @@ interface NewsItemDetailsProps {
 	contentBlocks: Array<ContentBlock>;
 	newsItem: Pick<schema.NewsItem, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
-	} & { image: { key: string; url: string } };
+	} & { image: { key: string; label: string; url: string } };
 }
 
 export function NewsItemDetails(props: Readonly<NewsItemDetailsProps>): ReactNode {

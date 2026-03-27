@@ -10,7 +10,7 @@ import { ProjectForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administ
 import { updateProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/update-project.action";
 
 interface ProjectEditFormProps {
-	assets: Array<{ key: string; url: string }>;
+	assets: Array<{ key: string; label: string; url: string }>;
 	project: Pick<
 		schema.Project,
 		"acronym" | "call" | "duration" | "funders" | "funding" | "id" | "name" | "summary" | "topic"
@@ -20,7 +20,7 @@ interface ProjectEditFormProps {
 			status: Pick<schema.EntityStatus, "id" | "type">;
 		};
 		scope: Pick<schema.ProjectScope, "id" | "scope">;
-	} & { image: { key: string; url: string } | null };
+	} & { image: { key: string; label: string; url: string } | null };
 	scopes: Array<Pick<schema.ProjectScope, "id" | "scope">>;
 	orgUnits: Array<{ id: string; name: string }>;
 	roles: Array<Pick<schema.ProjectRole, "id" | "role">>;

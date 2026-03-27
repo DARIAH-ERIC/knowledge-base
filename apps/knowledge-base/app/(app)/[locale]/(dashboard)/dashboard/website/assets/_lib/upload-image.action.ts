@@ -45,8 +45,8 @@ export const uploadImageAction = createServerAction<
 
 	const { key } = await uploadAsset({ file, licenseId, prefix, label, alt, caption });
 
-	revalidatePath("/dashboard/website/assets", "page");
-	revalidatePath("/dashboard/administrator/persons", "layout");
+	revalidatePath("/[locale]/dashboard/website/assets", "page");
+	revalidatePath("/[locale]/dashboard/administrator/persons", "layout");
 
 	return createActionStateSuccess({ message: t("Successfully uploaded image."), data: { key } });
 });

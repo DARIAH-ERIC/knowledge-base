@@ -66,6 +66,7 @@ export default async function DashboardWebsiteEventDetailsPage(
 			image: {
 				columns: {
 					key: true,
+					label: true,
 				},
 			},
 		},
@@ -109,7 +110,7 @@ export default async function DashboardWebsiteEventDetailsPage(
 	return (
 		<EventDetails
 			contentBlocks={richTextContentBlocks}
-			event={{ ...event, image: { key: event.image.key, url: image.url } }}
+			event={{ ...event, image: { ...event.image, url: image.url } }}
 		/>
 	);
 }

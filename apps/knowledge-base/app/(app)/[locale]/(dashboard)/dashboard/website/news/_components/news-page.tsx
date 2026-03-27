@@ -55,7 +55,7 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 
 	const t = useExtracted();
 
-	const { contains } = useFilter();
+	const { contains } = useFilter({ sensitivity: "base" });
 
 	const list = useListData({
 		filter(item, filterText) {
@@ -113,7 +113,9 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 					{(item) => {
 						return (
 							<TableRow href={`/dashboard/website/news/${item.entity.slug}/details`}>
-								<TableCell>{item.title}</TableCell>
+								<TableCell>
+									<div className="max-w-64 truncate">{item.title}</div>
+								</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button

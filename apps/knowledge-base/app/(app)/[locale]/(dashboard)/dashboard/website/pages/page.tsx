@@ -1,9 +1,9 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 
-import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { PagesTable } from "@/components/ui/tables/pages-table";
+import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
+import { PagesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page";
 import { getPages } from "@/lib/data/cached/pages";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -22,17 +22,14 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default async function DashboardWebsitePagesPage(
+export default function DashboardWebsitePagesPage(
 	_props: Readonly<DashboardWebsitePagesPageProps>,
-): Promise<ReactNode> {
-	const t = await getExtracted();
-
-	const pages = await getPages({});
+): ReactNode {
+	const pages = getPages({ limit: 500 });
 
 	return (
-		<Main className="flex-1">
-			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">{t("Pages")}</h1>
-			<PagesTable data={pages} />
-		</Main>
+		<Suspense fallback={<LoadingScreen />}>
+			<PagesPage pages={pages} />
+		</Suspense>
 	);
 }

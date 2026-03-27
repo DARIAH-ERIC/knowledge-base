@@ -58,5 +58,5 @@ export async function deleteProjectAction(id: string): Promise<void> {
 		await tx.delete(schema.entities).where(eq(schema.entities.id, id));
 	});
 
-	revalidatePath("/dashboard/administrator/projects", "layout");
+	revalidatePath("/[locale]/dashboard/administrator/projects", "layout");
 }

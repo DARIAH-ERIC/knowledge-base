@@ -57,7 +57,7 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 	const t = useExtracted();
 	const format = useFormatter();
 
-	const { contains } = useFilter();
+	const { contains } = useFilter({ sensitivity: "base" });
 
 	const list = useListData({
 		filter(item, filterText) {

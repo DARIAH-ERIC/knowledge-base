@@ -23,7 +23,7 @@ export class AdminProjectsPage {
 	/** Navigate to the projects list page. */
 	async goto(): Promise<void> {
 		await this.page.goto(BASE_PATH);
-		await this.page.waitForURL(`**${BASE_PATH}**`);
+		await this.page.waitForURL(`**${BASE_PATH}`);
 	}
 
 	/** Navigate to the create project form. */
@@ -41,7 +41,7 @@ export class AdminProjectsPage {
 	// ---------------------------------------------------------------------------
 
 	async fillName(name: string): Promise<void> {
-		await this.page.getByLabel("Name").fill(name);
+		await this.page.getByRole("main").getByLabel("Name").fill(name);
 	}
 
 	async fillSummary(text: string): Promise<void> {
@@ -73,11 +73,11 @@ export class AdminProjectsPage {
 		await this.page.keyboard.type(String(year));
 	}
 
-	async selectImageFromMediaLibrary(assetKey: string): Promise<void> {
+	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Select image" }).click();
 		await this.page.waitForSelector('[role="dialog"]');
 
-		await this.page.getByRole("gridcell", { name: assetKey }).click();
+		await this.page.getByRole("gridcell", { name: assetLabel }).click();
 
 		await this.page.getByRole("dialog").getByRole("button", { name: "Select" }).click();
 	}
@@ -91,12 +91,16 @@ export class AdminProjectsPage {
 	async submitForm(): Promise<void> {
 		await this.page.getByRole("button", { name: "Save" }).click();
 		/** After a successful create/edit, the server action redirects back to the list. */
-		await this.page.waitForURL(`**${BASE_PATH}**`);
+		await this.page.waitForURL(`**${BASE_PATH}`);
 	}
 
 	// ---------------------------------------------------------------------------
 	// List page helpers
 	// ---------------------------------------------------------------------------
+
+	async searchByName(name: string): Promise<void> {
+		await this.page.getByRole("searchbox").fill(name);
+	}
 
 	projectRowByName(name: string): Locator {
 		return this.page.getByRole("row").filter({ hasText: name });

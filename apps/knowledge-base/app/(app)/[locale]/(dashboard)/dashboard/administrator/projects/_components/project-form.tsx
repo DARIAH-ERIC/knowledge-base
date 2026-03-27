@@ -73,7 +73,7 @@ const emptyDialog: DialogState = {
 };
 
 interface ProjectFormProps {
-	assets: Array<{ key: string; url: string }>;
+	assets: Array<{ key: string; label: string; url: string }>;
 	project?: Pick<
 		schema.Project,
 		"acronym" | "call" | "duration" | "funders" | "funding" | "id" | "name" | "summary" | "topic"
@@ -83,7 +83,7 @@ interface ProjectFormProps {
 			status: Pick<schema.EntityStatus, "id" | "type">;
 		};
 		scope: Pick<schema.ProjectScope, "id" | "scope">;
-	} & { image: { key: string; url: string } | null };
+	} & { image: { key: string; label: string; url: string } | null };
 	formAction: ServerAction;
 	scopes: Array<Pick<schema.ProjectScope, "id" | "scope">>;
 	orgUnits: Array<{ id: string; name: string }>;
