@@ -103,7 +103,7 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 			</Header>
 
 			<Table
-				aria-label="events"
+				aria-label={t("Events")}
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
 			>
 				<TableHeader>

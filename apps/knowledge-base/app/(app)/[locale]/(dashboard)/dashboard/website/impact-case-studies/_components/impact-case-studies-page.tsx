@@ -100,7 +100,7 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 			</Header>
 
 			<Table
-				aria-label="impact case studies"
+				aria-label={t("Impact case studies")}
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
 			>
 				<TableHeader>

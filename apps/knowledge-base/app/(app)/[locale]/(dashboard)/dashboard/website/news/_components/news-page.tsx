@@ -102,7 +102,7 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 			</Header>
 
 			<Table
-				aria-label="news"
+				aria-label={t("News")}
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
 			>
 				<TableHeader>

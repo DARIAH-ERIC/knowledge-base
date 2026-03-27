@@ -100,7 +100,7 @@ export function PagesPage(props: Readonly<PagesPageProps>): ReactNode {
 			</Header>
 
 			<Table
-				aria-label="pages"
+				aria-label={t("Pages")}
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
 			>
 				<TableHeader>

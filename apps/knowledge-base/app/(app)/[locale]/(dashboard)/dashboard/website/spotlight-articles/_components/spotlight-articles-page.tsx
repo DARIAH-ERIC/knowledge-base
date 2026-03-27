@@ -100,7 +100,7 @@ export function SpotlightArticlesPage(props: Readonly<SpotlightArticlesPageProps
 			</Header>
 
 			<Table
-				aria-label="spotlight articles"
+				aria-label={t("Spotlight articles")}
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
 			>
 				<TableHeader>
