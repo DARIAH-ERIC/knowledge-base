@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq } from "@dariah-eric/database";
+import { and, count, desc, eq, type SQL, sql } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import type { Database, Transaction } from "@/middlewares/db";
+import type { EventDurationFilter } from "@/routes/events/schemas";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
@@ -13,62 +14,89 @@ interface GetEventsParams {
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
+	filter?: EventDurationFilter;
 }
 
 export async function getEvents(db: Database | Transaction, params: GetEventsParams) {
-	const { limit = 10, offset = 0 } = params;
+	const { limit = 10, offset = 0, filter } = params;
+
+	const now = new Date();
+	const lower = sql`LOWER(${schema.events.duration})`;
+	const upper = sql`UPPER(${schema.events.duration})`;
+
+	let timeFilter: SQL | undefined;
+
+	switch (filter) {
+		case "upcoming": {
+			timeFilter = sql`${lower} > ${now}`;
+			break;
+		}
+
+		case "ongoing": {
+			timeFilter = and(
+				sql`${lower} <= ${now}`,
+				sql`
+					(
+						${upper} IS NULL
+						OR ${upper} > ${now}
+					)
+				`,
+			);
+			break;
+		}
+
+		case "past": {
+			timeFilter = and(sql`${upper} IS NOT NULL`, sql`${upper} <= ${now}`);
+			break;
+		}
+
+		case undefined: {
+			timeFilter = undefined;
+		}
+	}
 
 	const [items, aggregate] = await Promise.all([
-		db.query.events.findMany({
-			where: {
+		db
+			.select({
+				id: schema.events.id,
+				title: schema.events.title,
+				summary: schema.events.summary,
+				location: schema.events.location,
+				duration: schema.events.duration,
+				isFullDay: schema.events.isFullDay,
 				entity: {
-					status: {
-						type: "published",
-					},
-				},
-			},
-			columns: {
-				id: true,
-				title: true,
-				summary: true,
-				location: true,
-				duration: true,
-				isFullDay: true,
-			},
-			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
-					},
+					slug: schema.entities.slug,
+					updatedAt: schema.entities.updatedAt,
 				},
 				image: {
-					columns: {
-						key: true,
-					},
+					key: schema.assets.key,
 				},
-			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
-			},
-			limit,
-			offset,
-		}),
+			})
+			.from(schema.events)
+			.innerJoin(schema.entities, eq(schema.events.id, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.leftJoin(schema.assets, eq(schema.assets.id, schema.events.imageId))
+			.where(and(timeFilter, eq(schema.entityStatus.type, "published")))
+			.orderBy(desc(lower))
+			.limit(limit)
+			.offset(offset),
 		db
 			.select({ total: count() })
 			.from(schema.events)
 			.innerJoin(schema.entities, eq(schema.events.id, schema.entities.id))
 			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.where(and(timeFilter, eq(schema.entityStatus.type, "published"))),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = images.generateSignedImageUrl({
-			key: item.image.key,
-			options: { width: imageWidth.preview },
-		});
+		const image = item.image
+			? images.generateSignedImageUrl({
+					key: item.image.key,
+					options: { width: imageWidth.preview },
+				})
+			: null;
 
 		const duration = {
 			start: item.duration.start.toISOString(),

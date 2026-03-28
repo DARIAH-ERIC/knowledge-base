@@ -30,7 +30,7 @@ function createItems(count: number) {
 				summary: f.lorem.paragraph(),
 				location: f.location.city(),
 				duration: {
-					start: f.date.past({ years: 5 }),
+					start: f.date.future({ years: 2 }),
 				},
 			};
 
