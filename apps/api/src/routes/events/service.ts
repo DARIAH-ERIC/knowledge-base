@@ -14,7 +14,6 @@ interface GetEventsParams {
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
-	/** @default undefined */
 	filter?: EventDurationFilter;
 }
 
@@ -24,12 +23,15 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 	const now = new Date();
 	const lower = sql`LOWER(${schema.events.duration})`;
 	const upper = sql`UPPER(${schema.events.duration})`;
+
 	let timeFilter: SQL | undefined;
+
 	switch (filter) {
 		case "upcoming": {
 			timeFilter = sql`${lower} > ${now}`;
 			break;
 		}
+
 		case "ongoing": {
 			timeFilter = and(
 				sql`${lower} <= ${now}`,
@@ -42,10 +44,12 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 			);
 			break;
 		}
+
 		case "past": {
 			timeFilter = and(sql`${upper} IS NOT NULL`, sql`${upper} <= ${now}`);
 			break;
 		}
+
 		case undefined: {
 			timeFilter = undefined;
 		}

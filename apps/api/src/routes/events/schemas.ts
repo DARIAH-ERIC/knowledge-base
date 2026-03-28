@@ -68,11 +68,13 @@ export const EventSlugListSchema = v.pipe(
 
 export type EventSlugList = v.InferOutput<typeof EventSlugListSchema>;
 
-export type EventDurationFilter = "ongoing" | "past" | "upcoming";
+export const eventDurationFilters = ["ongoing", "past", "upcoming"] as const;
+
+export type EventDurationFilter = (typeof eventDurationFilters)[number];
 
 export const EventFilterQuerySchema = v.object({
 	filter: v.pipe(
-		v.optional(v.picklist(["ongoing", "past", "upcoming"] satisfies Array<EventDurationFilter>)),
+		v.optional(v.picklist(eventDurationFilters)),
 		v.description("Filter in list result"),
 		v.metadata({ ref: "FilterParam" }),
 	),
