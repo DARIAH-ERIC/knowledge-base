@@ -48,37 +48,6 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 						key: true,
 					},
 				},
-				funders: {
-					where: {
-						RAW() {
-							return sql`
-								${schema.projectsToOrganisationalUnits.roleId} IN (
-									SELECT
-										id
-									FROM
-										project_roles
-									WHERE
-										role = 'funder'
-								)
-							`;
-						},
-					},
-					with: {
-						unit: {
-							columns: {
-								id: true,
-								name: true,
-							},
-							with: {
-								type: {
-									columns: {
-										type: true,
-									},
-								},
-							},
-						},
-					},
-				},
 				institutions: {
 					columns: {
 						id: true,
@@ -136,10 +105,6 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 					})
 				: null;
 
-		const funders = item.funders.map(({ unit }) => {
-			return { id: unit.id, name: unit.name, type: unit.type.type };
-		});
-
 		const institutions = item.institutions.map(({ type, ...rest }) => {
 			return { ...rest, type: type.type };
 		});
@@ -160,7 +125,6 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 			...item,
 			duration,
 			image,
-			funders,
 			institutions,
 			socialMedia,
 			publishedAt: item.entity.updatedAt.toISOString(),

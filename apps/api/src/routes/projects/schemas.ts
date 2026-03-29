@@ -31,7 +31,6 @@ export const ProjectBaseSchema = v.pipe(
 			start: v.pipe(v.string(), v.isoTimestamp()),
 			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
-		funders: v.array(ProjectInstitutionSchema),
 		institutions: v.array(ProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
