@@ -177,6 +177,10 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.projectScopes.id,
 				optional: false,
 			}),
+			socialMedia: r.many.socialMedia({
+				from: r.dariahProjects.id.through(r.projectsToSocialMedia.projectId),
+				to: r.socialMedia.id.through(r.projectsToSocialMedia.socialMediaId),
+			}),
 		},
 		membersAndPartners: {
 			image: r.one.assets({

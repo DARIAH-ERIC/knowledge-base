@@ -154,6 +154,36 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 	return { dariahItems, nonDariahItem, umbrellaUnitId, roleId: projectRole.id };
 }
 
+async function seedSocialMedia(db: Database, projectId: string) {
+	const type = await db.query.socialMediaTypes.findFirst({
+		columns: { id: true },
+		where: { type: "mastodon" },
+	});
+
+	assert(type, "No social media type in database.");
+
+	const [socialMedia] = await db
+		.insert(schema.socialMedia)
+		.values({
+			name: f.internet.displayName(),
+			url: f.internet.url(),
+			duration: { start: f.date.past() },
+			typeId: type.id,
+		})
+		.returning({
+			id: schema.socialMedia.id,
+			url: schema.socialMedia.url,
+		});
+
+	assert(socialMedia);
+
+	await db
+		.insert(schema.projectsToSocialMedia)
+		.values({ projectId, socialMediaId: socialMedia.id });
+
+	return socialMedia;
+}
+
 describe("dariah-projects", () => {
 	describe("GET /api/dariah-projects", () => {
 		it("should return paginated list of DARIAH projects", async () => {
@@ -183,6 +213,38 @@ describe("dariah-projects", () => {
 				expect(data.data).toEqual(expect.arrayContaining([expect.objectContaining({ name })]));
 				expect(data.limit).toBe(limit);
 				expect(data.offset).toBe(offset);
+			});
+		});
+
+		it("should return social media in response", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const { dariahItems } = await seed(db, 1);
+
+				const item = dariahItems.at(0)!;
+				const id = item.entity.id;
+
+				const sm = await seedSocialMedia(db, id);
+
+				const response = await client["dariah-projects"][":id"].$get({
+					param: { id },
+				});
+
+				expect(response.status).toBe(200);
+
+				/** @see {@link https://github.com/honojs/hono/issues/2280} */
+				const data = (await response.json()) as DariahProject;
+
+				expect(data.socialMedia).toHaveLength(1);
+				expect(data.socialMedia).toEqual(
+					expect.arrayContaining([
+						expect.objectContaining({
+							url: sm.url,
+							type: "mastodon",
+						}),
+					]),
+				);
 			});
 		});
 	});

@@ -13,6 +13,15 @@ export const ProjectInstitutionSchema = v.pipe(
 	v.metadata({ ref: "ProjectInstitution" }),
 );
 
+export const ProjectSocialMediaSchema = v.pipe(
+	v.object({
+		...v.pick(schema.SocialMediaSelectSchema, ["id", "url"]).entries,
+		type: v.picklist(schema.socialMediaTypesEnum),
+	}),
+	v.description("Project social media"),
+	v.metadata({ ref: "ProjectSocialMedia" }),
+);
+
 export const ProjectBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.ProjectSelectSchema, [
@@ -32,6 +41,7 @@ export const ProjectBaseSchema = v.pipe(
 		institutions: v.array(ProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
+		socialMedia: v.array(ProjectSocialMediaSchema),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 	}),
 	v.description("Project"),
@@ -67,6 +77,7 @@ export const ProjectSchema = v.pipe(
 		institutions: v.array(ProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
+		socialMedia: v.array(ProjectSocialMediaSchema),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		description: v.array(ContentBlockSchema),
 	}),
