@@ -98,7 +98,11 @@ export const ServiceUpdateSchema = createUpdateSchema(services);
 
 /**
  * These are derived from the contributor role (of the actor/organisational unit) in sshoc
- * marketplace.
+ * marketplace:
+ *
+ * "reviewer" => "service_owner"
+ * "provider" => "service_provider"
+ * "curator" is always DARIAH-EU but this is not reflected in our data model
  */
 export const organisationalUnitServiceRolesEnum = ["service_owner", "service_provider"] as const;
 
