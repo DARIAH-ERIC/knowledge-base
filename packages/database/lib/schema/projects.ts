@@ -103,7 +103,9 @@ export const projectsToOrganisationalUnits = p.pgTable(
 			}),
 		duration: f.timestampRange("duration"),
 	},
-	(t) => [p.unique().on(t.projectId, t.roleId, t.unitId)],
+	(t) => {
+		return [p.unique().on(t.projectId, t.roleId, t.unitId)];
+	},
 );
 
 export type ProjectToOrganisationalUnit = typeof projectsToOrganisationalUnits.$inferSelect;

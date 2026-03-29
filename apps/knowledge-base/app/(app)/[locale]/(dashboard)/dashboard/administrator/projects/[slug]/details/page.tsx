@@ -44,7 +44,6 @@ export default async function DashboardAdministratorProjectDetailsPage(
 			acronym: true,
 			call: true,
 			duration: true,
-			funders: true,
 			funding: true,
 			id: true,
 			name: true,

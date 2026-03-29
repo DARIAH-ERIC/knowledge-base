@@ -175,11 +175,6 @@ export const relations = defineRelations(schema, (r) => {
 			funders: r.many.projectsToOrganisationalUnits({
 				from: r.dariahProjects.id,
 				to: r.projectsToOrganisationalUnits.projectId,
-				where: {
-					role: {
-						role: "funder",
-					},
-				},
 			}),
 			scope: r.one.projectScopes({
 				from: r.dariahProjects.scopeId,
@@ -282,11 +277,6 @@ export const relations = defineRelations(schema, (r) => {
 			funders: r.many.projectsToOrganisationalUnits({
 				from: r.projects.id,
 				to: r.projectsToOrganisationalUnits.projectId,
-				where: {
-					role: {
-						role: "funder",
-					},
-				},
 			}),
 			scope: r.one.projectScopes({
 				from: r.projects.scopeId,

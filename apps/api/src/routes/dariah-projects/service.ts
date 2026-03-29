@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq } from "@dariah-eric/database";
+import { count, eq, sql } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
@@ -31,6 +31,20 @@ const projectWithLinksQuery = {
 			},
 		},
 		funders: {
+			where: {
+				RAW() {
+					return sql`
+						${schema.projectsToOrganisationalUnits.roleId} IN (
+							SELECT
+								id
+							FROM
+								project_roles
+							WHERE
+								role = 'funder'
+						)
+					`;
+				},
+			},
 			columns: {
 				roleId: true,
 			},

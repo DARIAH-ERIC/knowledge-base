@@ -10,7 +10,6 @@ export const UpdateProjectActionInputSchema = v.object({
 		start: v.pipe(v.string(), v.isoDate(), v.toDate()),
 		end: v.optional(v.pipe(v.string(), v.isoDate(), v.toDate())),
 	}),
-	funders: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	funding: v.nullish(v.pipe(v.string(), v.toNumber(), v.minValue(0)), null),
 	topic: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	imageKey: v.optional(v.pipe(v.string(), v.nonEmpty())),
