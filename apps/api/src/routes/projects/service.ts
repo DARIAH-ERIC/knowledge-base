@@ -67,6 +67,19 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 						scope: true,
 					},
 				},
+				socialMedia: {
+					columns: {
+						id: true,
+						url: true,
+					},
+					with: {
+						type: {
+							columns: {
+								type: true,
+							},
+						},
+					},
+				},
 			},
 			orderBy(t, { desc, sql }) {
 				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
@@ -102,11 +115,19 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 			end: item.duration.end?.toISOString(),
 		};
 
+		const socialMedia = item.socialMedia.map((sm) => {
+			return {
+				...sm,
+				type: sm.type.type,
+			};
+		});
+
 		return {
 			...item,
 			duration,
 			image,
 			institutions,
+			socialMedia,
 			publishedAt: item.entity.updatedAt.toISOString(),
 		};
 	});
@@ -173,6 +194,19 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 						scope: true,
 					},
 				},
+				socialMedia: {
+					columns: {
+						id: true,
+						url: true,
+					},
+					with: {
+						type: {
+							columns: {
+								type: true,
+							},
+						},
+					},
+				},
 			},
 		}),
 		getContentBlocks(db, id),
@@ -199,11 +233,19 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 		return { ...rest, type: type.type };
 	});
 
+	const socialMedia = item.socialMedia.map((sm) => {
+		return {
+			...sm,
+			type: sm.type.type,
+		};
+	});
+
 	return {
 		...item,
 		duration,
 		image,
 		institutions,
+		socialMedia,
 		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
 	};
@@ -320,6 +362,19 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 					scope: true,
 				},
 			},
+			socialMedia: {
+				columns: {
+					id: true,
+					url: true,
+				},
+				with: {
+					type: {
+						columns: {
+							type: true,
+						},
+					},
+				},
+			},
 		},
 	});
 
@@ -339,6 +394,13 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 		return { ...rest, type: type.type };
 	});
 
+	const socialMedia = item.socialMedia.map((sm) => {
+		return {
+			...sm,
+			type: sm.type.type,
+		};
+	});
+
 	const duration = {
 		start: item.duration.start.toISOString(),
 		end: item.duration.end?.toISOString(),
@@ -351,6 +413,7 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 		duration,
 		image,
 		institutions,
+		socialMedia,
 		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
 	};
