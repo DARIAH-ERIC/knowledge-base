@@ -24,7 +24,6 @@ function createProjectData() {
 		name,
 		summary: f.lorem.paragraph(),
 		call: f.lorem.word(),
-		funders: f.company.name(),
 		topic: f.lorem.word(),
 		duration: {
 			start: f.date.past({ years: 5 }),
@@ -128,7 +127,7 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 	});
 
 	// Link DARIAH projects to umbrella_consortium unit
-	await db.insert(schema.projectPartners).values(
+	await db.insert(schema.projectsToOrganisationalUnits).values(
 		dariahItems.map((item) => {
 			return {
 				projectId: item.project.id,
@@ -139,7 +138,7 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 	);
 
 	// Link non-DARIAH project to a non-umbrella unit only
-	await db.insert(schema.projectPartners).values({
+	await db.insert(schema.projectsToOrganisationalUnits).values({
 		projectId: nonDariahItem.project.id,
 		unitId: otherUnitId,
 		roleId: projectRole.id,

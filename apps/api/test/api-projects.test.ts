@@ -30,7 +30,6 @@ function createItems(count: number) {
 				name,
 				summary: f.lorem.paragraph(),
 				call: f.lorem.word(),
-				funders: f.company.name(),
 				topic: f.lorem.word(),
 				duration: {
 					start: f.date.past({ years: 5 }),
@@ -94,7 +93,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 		typeId: unitType.id,
 	});
 
-	await db.insert(schema.projectPartners).values(
+	await db.insert(schema.projectsToOrganisationalUnits).values(
 		items.map((item) => {
 			return {
 				projectId: item.project.id,

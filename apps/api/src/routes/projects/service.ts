@@ -33,7 +33,6 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 				summary: true,
 				duration: true,
 				call: true,
-				funders: true,
 				topic: true,
 				funding: true,
 			},
@@ -47,6 +46,23 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 				image: {
 					columns: {
 						key: true,
+					},
+				},
+				funders: {
+					with: {
+						unit: {
+							columns: {
+								id: true,
+								name: true,
+							},
+							with: {
+								type: {
+									columns: {
+										type: true,
+									},
+								},
+							},
+						},
 					},
 				},
 				institutions: {
@@ -106,6 +122,10 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 					})
 				: null;
 
+		const funders = item.funders.map(({ unit }) => {
+			return { id: unit.id, name: unit.name, type: unit.type.type };
+		});
+
 		const institutions = item.institutions.map(({ type, ...rest }) => {
 			return { ...rest, type: type.type };
 		});
@@ -126,6 +146,7 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 			...item,
 			duration,
 			image,
+			funders,
 			institutions,
 			socialMedia,
 			publishedAt: item.entity.updatedAt.toISOString(),
@@ -160,7 +181,6 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 				summary: true,
 				duration: true,
 				call: true,
-				funders: true,
 				topic: true,
 				funding: true,
 			},
@@ -174,6 +194,23 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 				image: {
 					columns: {
 						key: true,
+					},
+				},
+				funders: {
+					with: {
+						unit: {
+							columns: {
+								id: true,
+								name: true,
+							},
+							with: {
+								type: {
+									columns: {
+										type: true,
+									},
+								},
+							},
+						},
 					},
 				},
 				institutions: {
@@ -229,6 +266,10 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 		end: item.duration.end?.toISOString(),
 	};
 
+	const funders = item.funders.map(({ unit }) => {
+		return { id: unit.id, name: unit.name, type: unit.type.type };
+	});
+
 	const institutions = item.institutions.map(({ type, ...rest }) => {
 		return { ...rest, type: type.type };
 	});
@@ -244,6 +285,7 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 		...item,
 		duration,
 		image,
+		funders,
 		institutions,
 		socialMedia,
 		publishedAt: item.entity.updatedAt.toISOString(),
@@ -328,7 +370,6 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 			summary: true,
 			duration: true,
 			call: true,
-			funders: true,
 			topic: true,
 			funding: true,
 		},
@@ -342,6 +383,23 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 			image: {
 				columns: {
 					key: true,
+				},
+			},
+			funders: {
+				with: {
+					unit: {
+						columns: {
+							id: true,
+							name: true,
+						},
+						with: {
+							type: {
+								columns: {
+									type: true,
+								},
+							},
+						},
+					},
 				},
 			},
 			institutions: {
@@ -390,6 +448,10 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 				})
 			: null;
 
+	const funders = item.funders.map(({ unit }) => {
+		return { id: unit.id, name: unit.name, type: unit.type.type };
+	});
+
 	const institutions = item.institutions.map(({ type, ...rest }) => {
 		return { ...rest, type: type.type };
 	});
@@ -412,6 +474,7 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 		...item,
 		duration,
 		image,
+		funders,
 		institutions,
 		socialMedia,
 		publishedAt: item.entity.updatedAt.toISOString(),

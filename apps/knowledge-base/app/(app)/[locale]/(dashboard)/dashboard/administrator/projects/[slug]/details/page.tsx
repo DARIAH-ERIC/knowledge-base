@@ -103,7 +103,7 @@ export default async function DashboardAdministratorProjectDetailsPage(
 				),
 			)
 			.limit(1),
-		db.query.projectPartners.findMany({
+		db.query.projectsToOrganisationalUnits.findMany({
 			where: { projectId: project.id },
 			columns: { id: true, duration: true },
 			with: {

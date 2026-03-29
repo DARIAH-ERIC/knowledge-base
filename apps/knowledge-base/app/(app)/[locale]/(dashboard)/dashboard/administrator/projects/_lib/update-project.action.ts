@@ -147,15 +147,17 @@ export const updateProjectAction = createServerAction(
 
 			if (submittedPartnerIds.length > 0) {
 				await tx
-					.delete(schema.projectPartners)
+					.delete(schema.projectsToOrganisationalUnits)
 					.where(
 						and(
-							eq(schema.projectPartners.projectId, id),
-							notInArray(schema.projectPartners.id, submittedPartnerIds),
+							eq(schema.projectsToOrganisationalUnits.projectId, id),
+							notInArray(schema.projectsToOrganisationalUnits.id, submittedPartnerIds),
 						),
 					);
 			} else {
-				await tx.delete(schema.projectPartners).where(eq(schema.projectPartners.projectId, id));
+				await tx
+					.delete(schema.projectsToOrganisationalUnits)
+					.where(eq(schema.projectsToOrganisationalUnits.projectId, id));
 			}
 
 			for (const p of partners) {
@@ -166,12 +168,12 @@ export const updateProjectAction = createServerAction(
 
 				if (p.id != null) {
 					await tx
-						.update(schema.projectPartners)
+						.update(schema.projectsToOrganisationalUnits)
 						.set({ unitId: p.unitId, roleId: p.roleId, duration: duration ?? null })
-						.where(eq(schema.projectPartners.id, p.id));
+						.where(eq(schema.projectsToOrganisationalUnits.id, p.id));
 				} else {
 					await tx
-						.insert(schema.projectPartners)
+						.insert(schema.projectsToOrganisationalUnits)
 						.values({ projectId: id, unitId: p.unitId, roleId: p.roleId, duration });
 				}
 			}

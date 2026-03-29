@@ -9,5 +9,6 @@ VALUES
 INSERT INTO
 	"project_roles" ("role")
 VALUES
-	('participant'),
-	('coordinator');
+	('coordinator'),
+	('funder'),
+	('participant');

@@ -145,7 +145,7 @@ export default async function DashboardAdministratorEditProjectPage(
 				type: { columns: { type: true } },
 			},
 		}),
-		db.query.projectPartners.findMany({
+		db.query.projectsToOrganisationalUnits.findMany({
 			where: { projectId: project.id },
 			columns: { id: true, unitId: true, roleId: true, duration: true },
 			with: {

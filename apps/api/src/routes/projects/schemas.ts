@@ -24,20 +24,14 @@ export const ProjectSocialMediaSchema = v.pipe(
 
 export const ProjectBaseSchema = v.pipe(
 	v.object({
-		...v.pick(schema.ProjectSelectSchema, [
-			"id",
-			"name",
-			"summary",
-			"call",
-			"funders",
-			"topic",
-			"funding",
-		]).entries,
+		...v.pick(schema.ProjectSelectSchema, ["id", "name", "summary", "call", "topic", "funding"])
+			.entries,
 		image: v.nullable(v.object({ url: v.string() })),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
 			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
+		funders: v.array(ProjectInstitutionSchema),
 		institutions: v.array(ProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
@@ -60,20 +54,14 @@ export type ProjectList = v.InferOutput<typeof ProjectListSchema>;
 
 export const ProjectSchema = v.pipe(
 	v.object({
-		...v.pick(schema.ProjectSelectSchema, [
-			"id",
-			"name",
-			"summary",
-			"call",
-			"funders",
-			"topic",
-			"funding",
-		]).entries,
+		...v.pick(schema.ProjectSelectSchema, ["id", "name", "summary", "call", "topic", "funding"])
+			.entries,
 		image: v.nullable(v.object({ url: v.string() })),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
 			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
+		funders: v.array(ProjectInstitutionSchema),
 		institutions: v.array(ProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),

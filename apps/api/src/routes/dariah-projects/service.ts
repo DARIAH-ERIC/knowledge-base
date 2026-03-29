@@ -15,7 +15,6 @@ const projectWithLinksQuery = {
 		summary: true,
 		duration: true,
 		call: true,
-		funders: true,
 		topic: true,
 		funding: true,
 	},
@@ -29,6 +28,26 @@ const projectWithLinksQuery = {
 		image: {
 			columns: {
 				key: true,
+			},
+		},
+		funders: {
+			columns: {
+				roleId: true,
+			},
+			with: {
+				unit: {
+					columns: {
+						id: true,
+						name: true,
+					},
+					with: {
+						type: {
+							columns: {
+								type: true,
+							},
+						},
+					},
+				},
 			},
 		},
 		partners: {
@@ -75,6 +94,7 @@ const projectWithLinksQuery = {
 function mapItem<
 	T extends {
 		image: { key: string } | null;
+		funders: Array<{ roleId: string; unit: { id: string; name: string; type: { type: string } } }>;
 		partners: Array<{ roleId: string; unit: { id: string; name: string; type: { type: string } } }>;
 		socialMedia: Array<{
 			id: string;
@@ -93,6 +113,10 @@ function mapItem<
 				})
 			: null;
 
+	const funders = item.funders.map(({ roleId, unit }) => {
+		return { id: unit.id, name: unit.name, type: unit.type.type, roleId };
+	});
+
 	const institutions = item.partners.map(({ roleId, unit }) => {
 		return { id: unit.id, name: unit.name, type: unit.type.type, roleId };
 	});
@@ -109,12 +133,13 @@ function mapItem<
 		};
 	});
 
-	const { partners: _, ...rest } = item;
+	const { funders: _, partners: __, ...rest } = item;
 
 	return {
 		...rest,
 		duration,
 		image,
+		funders,
 		institutions,
 		socialMedia,
 		publishedAt: item.entity.updatedAt.toISOString(),

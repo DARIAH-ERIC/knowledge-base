@@ -27,20 +27,14 @@ export const DariahProjectSocialMediaSchema = v.pipe(
 
 export const DariahProjectBaseSchema = v.pipe(
 	v.object({
-		...v.pick(schema.ProjectSelectSchema, [
-			"id",
-			"name",
-			"summary",
-			"call",
-			"funders",
-			"topic",
-			"funding",
-		]).entries,
+		...v.pick(schema.ProjectSelectSchema, ["id", "name", "summary", "call", "topic", "funding"])
+			.entries,
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
 			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
 		image: v.nullable(v.object({ url: v.string() })),
+		funders: v.array(DariahProjectInstitutionSchema),
 		institutions: v.array(DariahProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
@@ -63,20 +57,14 @@ export type DariahProjectList = v.InferOutput<typeof DariahProjectListSchema>;
 
 export const DariahProjectSchema = v.pipe(
 	v.object({
-		...v.pick(schema.ProjectSelectSchema, [
-			"id",
-			"name",
-			"summary",
-			"call",
-			"funders",
-			"topic",
-			"funding",
-		]).entries,
+		...v.pick(schema.ProjectSelectSchema, ["id", "name", "summary", "call", "topic", "funding"])
+			.entries,
 		image: v.nullable(v.object({ url: v.string() })),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
 			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
+		funders: v.array(DariahProjectInstitutionSchema),
 		institutions: v.array(DariahProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
