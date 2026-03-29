@@ -354,6 +354,10 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.socialMedia.id.through(r.projectsToSocialMedia.socialMediaId),
 				to: r.projects.id.through(r.projectsToSocialMedia.projectId),
 			}),
+			software: r.many.software({
+				from: r.socialMedia.id.through(r.softwareToSocialMedia.socialMediaId),
+				to: r.software.id.through(r.softwareToSocialMedia.softwareId),
+			}),
 		},
 		projectsToSocialMedia: {
 			project: r.one.projects({
@@ -388,6 +392,45 @@ export const relations = defineRelations(schema, (r) => {
 			image: r.one.assets({
 				from: r.spotlightArticles.imageId,
 				to: r.assets.id,
+				optional: false,
+			}),
+		},
+		software: {
+			status: r.one.softwareStatuses({
+				from: r.software.statusId,
+				to: r.softwareStatuses.id,
+				optional: false,
+			}),
+			organisationalUnits: r.many.organisationalUnits({
+				from: r.software.id.through(r.softwareToOrganisationalUnits.softwareId),
+				to: r.organisationalUnits.id.through(r.softwareToOrganisationalUnits.organisationalUnitId),
+			}),
+			socialMedia: r.many.socialMedia({
+				from: r.software.id.through(r.softwareToSocialMedia.softwareId),
+				to: r.socialMedia.id.through(r.softwareToSocialMedia.socialMediaId),
+			}),
+		},
+		softwareToOrganisationalUnits: {
+			software: r.one.software({
+				from: r.softwareToOrganisationalUnits.softwareId,
+				to: r.software.id,
+				optional: false,
+			}),
+			organisationalUnit: r.one.organisationalUnits({
+				from: r.softwareToOrganisationalUnits.organisationalUnitId,
+				to: r.organisationalUnits.id,
+				optional: false,
+			}),
+		},
+		softwareToSocialMedia: {
+			software: r.one.software({
+				from: r.softwareToSocialMedia.softwareId,
+				to: r.software.id,
+				optional: false,
+			}),
+			socialMedia: r.one.socialMedia({
+				from: r.softwareToSocialMedia.socialMediaId,
+				to: r.socialMedia.id,
 				optional: false,
 			}),
 		},
