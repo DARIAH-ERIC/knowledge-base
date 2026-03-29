@@ -12,5 +12,6 @@ export * from "./schema/persons";
 export * from "./schema/projects";
 export * from "./schema/reports";
 export * from "./schema/social-media";
+export * from "./schema/software";
 export * from "./schema/spotlight-articles";
 export * from "./schema/users";
