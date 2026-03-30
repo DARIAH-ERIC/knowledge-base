@@ -78,15 +78,11 @@ export const services = p.pgTable("services", {
 		.references(() => {
 			return serviceStatuses.id;
 		}),
-	...f.timestamps(),
-
-	// FIXME: TBD
-	agreements: p.text("agreements"),
 	comment: p.text("comment"),
 	dariahBranding: p.boolean("dariah_branding"),
-	eoscOnboarding: p.boolean("eosc_onboarding"),
 	monitoring: p.boolean("monitoring"),
 	privateSupplier: p.boolean("private_supplier"),
+	...f.timestamps(),
 });
 
 export type Service = typeof services.$inferSelect;
