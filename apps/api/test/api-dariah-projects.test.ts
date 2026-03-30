@@ -209,7 +209,9 @@ describe("dariah-projects", () => {
 				const data = await response.json();
 
 				expect(data.total).toBeGreaterThanOrEqual(dariahItems.length);
-				expect(data.data).toEqual(expect.arrayContaining([expect.objectContaining({ name, role: "participant" })]));
+				expect(data.data).toEqual(
+					expect.arrayContaining([expect.objectContaining({ name, role: "participant" })]),
+				);
 				expect(data.limit).toBe(limit);
 				expect(data.offset).toBe(offset);
 			});
