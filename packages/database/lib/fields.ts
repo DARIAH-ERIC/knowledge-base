@@ -54,7 +54,7 @@ export const timestampRange = p.customType<{
 		const [start, end] = value.slice(1, -1).split(",");
 
 		return {
-			start: new Date(String(start)),
+			start: new Date(start!),
 			end: end != null && end !== "" ? new Date(end) : undefined,
 		};
 	},

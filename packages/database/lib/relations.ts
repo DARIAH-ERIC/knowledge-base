@@ -251,6 +251,12 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.organisationalUnitTypes.id,
 				optional: false,
 			}),
+			services: r.many.services({
+				from: r.organisationalUnits.id.through(
+					r.servicesToOrganisationalUnits.organisationalUnitId,
+				),
+				to: r.services.id.through(r.servicesToOrganisationalUnits.serviceId),
+			}),
 		},
 		projects: {
 			entity: r.one.entities({
@@ -338,6 +344,55 @@ export const relations = defineRelations(schema, (r) => {
 				optional: false,
 			}),
 		},
+		services: {
+			type: r.one.serviceTypes({
+				from: r.services.typeId,
+				to: r.serviceTypes.id,
+				optional: false,
+			}),
+			status: r.one.serviceStatuses({
+				from: r.services.statusId,
+				to: r.serviceStatuses.id,
+				optional: false,
+			}),
+			organisationalUnits: r.many.organisationalUnits({
+				from: r.services.id.through(r.servicesToOrganisationalUnits.serviceId),
+				to: r.organisationalUnits.id.through(r.servicesToOrganisationalUnits.organisationalUnitId),
+			}),
+			socialMedia: r.many.socialMedia({
+				from: r.services.id.through(r.servicesToSocialMedia.serviceId),
+				to: r.socialMedia.id.through(r.servicesToSocialMedia.socialMediaId),
+			}),
+		},
+		servicesToOrganisationalUnits: {
+			service: r.one.services({
+				from: r.servicesToOrganisationalUnits.serviceId,
+				to: r.services.id,
+				optional: false,
+			}),
+			organisationalUnit: r.one.organisationalUnits({
+				from: r.servicesToOrganisationalUnits.organisationalUnitId,
+				to: r.organisationalUnits.id,
+				optional: false,
+			}),
+			role: r.one.organisationalUnitServiceRoles({
+				from: r.servicesToOrganisationalUnits.roleId,
+				to: r.organisationalUnitServiceRoles.id,
+				optional: false,
+			}),
+		},
+		servicesToSocialMedia: {
+			service: r.one.services({
+				from: r.servicesToSocialMedia.serviceId,
+				to: r.services.id,
+				optional: false,
+			}),
+			socialMedia: r.one.socialMedia({
+				from: r.servicesToSocialMedia.socialMediaId,
+				to: r.socialMedia.id,
+				optional: false,
+			}),
+		},
 		socialMedia: {
 			type: r.one.socialMediaTypes({
 				from: r.socialMedia.typeId,
@@ -353,6 +408,10 @@ export const relations = defineRelations(schema, (r) => {
 			projects: r.many.projects({
 				from: r.socialMedia.id.through(r.projectsToSocialMedia.socialMediaId),
 				to: r.projects.id.through(r.projectsToSocialMedia.projectId),
+			}),
+			services: r.many.services({
+				from: r.socialMedia.id.through(r.servicesToSocialMedia.socialMediaId),
+				to: r.services.id.through(r.servicesToSocialMedia.serviceId),
 			}),
 		},
 		projectsToSocialMedia: {
