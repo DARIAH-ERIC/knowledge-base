@@ -168,11 +168,7 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.dariahProjects.imageId,
 				to: r.assets.id,
 			}),
-			partners: r.many.projectsToOrganisationalUnits({
-				from: r.dariahProjects.id,
-				to: r.projectsToOrganisationalUnits.projectId,
-			}),
-			funders: r.many.projectsToOrganisationalUnits({
+			projectsToOrganisationalUnits: r.many.projectsToOrganisationalUnits({
 				from: r.dariahProjects.id,
 				to: r.projectsToOrganisationalUnits.projectId,
 			}),
@@ -278,6 +274,10 @@ export const relations = defineRelations(schema, (r) => {
 			socialMedia: r.many.socialMedia({
 				from: r.projects.id.through(r.projectsToSocialMedia.projectId),
 				to: r.socialMedia.id.through(r.projectsToSocialMedia.socialMediaId),
+			}),
+			projectsToOrganisationalUnits: r.many.projectsToOrganisationalUnits({
+				from: r.projects.id,
+				to: r.projectsToOrganisationalUnits.projectId,
 			}),
 		},
 		projectsToOrganisationalUnits: {

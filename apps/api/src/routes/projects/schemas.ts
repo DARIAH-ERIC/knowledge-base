@@ -6,8 +6,15 @@ import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const ProjectOrganisationalUnitSchema = v.pipe(
 	v.object({
-		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name"]).entries,
+		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "acronym", "name"]).entries,
 		type: v.picklist(schema.organisationalUnitTypesEnum),
+		socialMedia: v.array(
+			v.object({
+				url: v.string(),
+				type: v.picklist(schema.socialMediaTypesEnum),
+			}),
+		),
+		role: v.picklist(schema.projectRolesEnum),
 	}),
 	v.description("Project institution"),
 	v.metadata({ ref: "ProjectInstitution" }),
@@ -62,6 +69,8 @@ export const ProjectSchema = v.pipe(
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
 		socialMedia: v.array(ProjectSocialMediaSchema),
+		funders: v.array(ProjectOrganisationalUnitSchema),
+		partners: v.array(ProjectOrganisationalUnitSchema),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		description: v.array(ContentBlockSchema),
 	}),

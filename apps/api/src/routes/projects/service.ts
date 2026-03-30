@@ -174,6 +174,43 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 						},
 					},
 				},
+				projectsToOrganisationalUnits: {
+					columns: {},
+					with: {
+						role: {
+							columns: {
+								id: true,
+								role: true,
+							},
+						},
+						unit: {
+							columns: {
+								id: true,
+								acronym: true,
+								name: true,
+							},
+							with: {
+								socialMedia: {
+									columns: {
+										url: true,
+									},
+									with: {
+										type: {
+											columns: {
+												type: true,
+											},
+										},
+									},
+								},
+								type: {
+									columns: {
+										type: true,
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 		}),
 		getContentBlocks(db, id),
@@ -203,11 +240,38 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 		};
 	});
 
+	const { projectsToOrganisationalUnits, ...rest } = item;
+
+	const funders = projectsToOrganisationalUnits
+		.filter((r) => {
+			return r.role.role === "funder";
+		})
+		.map((r) => {
+			return {
+				...r.unit,
+				type: r.unit.type.type,
+				role: r.role.role,
+			};
+		});
+	const partners = projectsToOrganisationalUnits
+		.filter((r) => {
+			return r.role.role !== "funder";
+		})
+		.map((r) => {
+			return {
+				...r.unit,
+				type: r.unit.type.type,
+				role: r.role.role,
+			};
+		});
+
 	return {
-		...item,
+		...rest,
 		duration,
 		image,
 		socialMedia,
+		funders,
+		partners,
 		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
 	};
@@ -323,6 +387,43 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 					},
 				},
 			},
+			projectsToOrganisationalUnits: {
+				columns: {},
+				with: {
+					role: {
+						columns: {
+							id: true,
+							role: true,
+						},
+					},
+					unit: {
+						columns: {
+							id: true,
+							acronym: true,
+							name: true,
+						},
+						with: {
+							socialMedia: {
+								columns: {
+									url: true,
+								},
+								with: {
+									type: {
+										columns: {
+											type: true,
+										},
+									},
+								},
+							},
+							type: {
+								columns: {
+									type: true,
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	});
 
@@ -352,11 +453,38 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 
 	const fields = await getContentBlocks(db, item.id);
 
+	const { projectsToOrganisationalUnits, ...rest } = item;
+
+	const funders = projectsToOrganisationalUnits
+		.filter((r) => {
+			return r.role.role === "funder";
+		})
+		.map((r) => {
+			return {
+				...r.unit,
+				type: r.unit.type.type,
+				role: r.role.role,
+			};
+		});
+	const partners = projectsToOrganisationalUnits
+		.filter((r) => {
+			return r.role.role !== "funder";
+		})
+		.map((r) => {
+			return {
+				...r.unit,
+				type: r.unit.type.type,
+				role: r.role.role,
+			};
+		});
+
 	return {
-		...item,
+		...rest,
 		duration,
 		image,
 		socialMedia,
+		funders,
+		partners,
 		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
 	};

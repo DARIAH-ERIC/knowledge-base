@@ -6,9 +6,14 @@ import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const DariahProjectOrganisationalUnitsSchema = v.pipe(
 	v.object({
-		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name"]).entries,
+		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "acronym", "name"]).entries,
+		socialMedia: v.array(
+			v.object({
+				url: v.string(),
+				type: v.picklist(schema.socialMediaTypesEnum),
+			}),
+		),
 		type: v.picklist(schema.organisationalUnitTypesEnum),
-		roleId: v.pipe(v.string(), v.uuid()),
 	}),
 	v.description("DARIAH project institution"),
 	v.metadata({ ref: "DariahProjectInstitution" }),
@@ -35,6 +40,7 @@ export const DariahProjectBaseSchema = v.pipe(
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
 		socialMedia: v.array(DariahProjectSocialMediaSchema),
+		role: v.nullable(v.picklist(schema.projectRolesEnum)),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 	}),
 	v.description("DARIAH project"),
@@ -63,6 +69,8 @@ export const DariahProjectSchema = v.pipe(
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
 		socialMedia: v.array(DariahProjectSocialMediaSchema),
+		participants: v.array(DariahProjectOrganisationalUnitsSchema),
+		coordinators: v.array(DariahProjectOrganisationalUnitsSchema),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		description: v.array(ContentBlockSchema),
 	}),

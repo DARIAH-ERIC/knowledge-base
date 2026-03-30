@@ -58,7 +58,7 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 				columns: { id: true },
 				where: { type: "consortium" },
 			}),
-			db.query.projectRoles.findFirst({ columns: { id: true } }),
+			db.query.projectRoles.findFirst({ where: { role: "participant" }, columns: { id: true } }),
 		]);
 
 	assert(status, "No entity status in database.");
@@ -209,7 +209,7 @@ describe("dariah-projects", () => {
 				const data = await response.json();
 
 				expect(data.total).toBeGreaterThanOrEqual(dariahItems.length);
-				expect(data.data).toEqual(expect.arrayContaining([expect.objectContaining({ name })]));
+				expect(data.data).toEqual(expect.arrayContaining([expect.objectContaining({ name, role: "participant" })]));
 				expect(data.limit).toBe(limit);
 				expect(data.offset).toBe(offset);
 			});
@@ -269,15 +269,8 @@ describe("dariah-projects", () => {
 				const data = (await response.json()) as DariahProject;
 
 				expect(data).toMatchObject({ name });
-				// expect(data.institutions).toHaveLength(1);
-				// expect(data.institutions[0]).toMatchObject({
-				// 	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-				// 	id: expect.any(String),
-				// 	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-				// 	name: expect.any(String),
-				// 	type: "umbrella_consortium",
-				// 	roleId,
-				// });
+				expect(data.participants).toHaveLength(1);
+				expect(data.coordinators).toHaveLength(0);
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});

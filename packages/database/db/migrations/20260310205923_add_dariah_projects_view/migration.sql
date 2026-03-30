@@ -17,4 +17,6 @@ FROM
 	JOIN "projects_to_organisational_units" ON "projects_to_organisational_units"."project_id" = "projects"."id"
 	JOIN "organisational_units" ON "organisational_units"."id" = "projects_to_organisational_units"."unit_id"
 	JOIN "organisational_unit_types" ON "organisational_unit_types"."id" = "organisational_units"."type_id"
-	AND "organisational_unit_types"."type" = 'umbrella_consortium';
+	AND "organisational_unit_types"."type" = 'umbrella_consortium'
+	JOIN "project_roles" ON "project_roles"."id" = "projects_to_organisational_units"."role_id"
+	AND "project_roles"."role" IN ('coordinator', 'participant');
