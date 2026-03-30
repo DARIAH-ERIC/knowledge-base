@@ -266,17 +266,9 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.projects.imageId,
 				to: r.assets.id,
 			}),
-			institutions: r.many.organisationalUnits({
+			organisationalUnits: r.many.organisationalUnits({
 				from: r.projects.id.through(r.projectsToOrganisationalUnits.projectId),
 				to: r.organisationalUnits.id.through(r.projectsToOrganisationalUnits.unitId),
-			}),
-			partners: r.many.projectsToOrganisationalUnits({
-				from: r.projects.id,
-				to: r.projectsToOrganisationalUnits.projectId,
-			}),
-			funders: r.many.projectsToOrganisationalUnits({
-				from: r.projects.id,
-				to: r.projectsToOrganisationalUnits.projectId,
 			}),
 			scope: r.one.projectScopes({
 				from: r.projects.scopeId,

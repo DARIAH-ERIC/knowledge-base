@@ -4,7 +4,7 @@ import * as v from "valibot";
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
-export const DariahProjectInstitutionSchema = v.pipe(
+export const DariahProjectOrganisationalUnitsSchema = v.pipe(
 	v.object({
 		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name"]).entries,
 		type: v.picklist(schema.organisationalUnitTypesEnum),
@@ -13,8 +13,6 @@ export const DariahProjectInstitutionSchema = v.pipe(
 	v.description("DARIAH project institution"),
 	v.metadata({ ref: "DariahProjectInstitution" }),
 );
-
-export type DariahProjectInstitution = v.InferOutput<typeof DariahProjectInstitutionSchema>;
 
 export const DariahProjectSocialMediaSchema = v.pipe(
 	v.object({
@@ -34,8 +32,6 @@ export const DariahProjectBaseSchema = v.pipe(
 			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
 		image: v.nullable(v.object({ url: v.string() })),
-		funders: v.array(DariahProjectInstitutionSchema),
-		institutions: v.array(DariahProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
 		socialMedia: v.array(DariahProjectSocialMediaSchema),
@@ -64,8 +60,6 @@ export const DariahProjectSchema = v.pipe(
 			start: v.pipe(v.string(), v.isoTimestamp()),
 			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
-		funders: v.array(DariahProjectInstitutionSchema),
-		institutions: v.array(DariahProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
 		socialMedia: v.array(DariahProjectSocialMediaSchema),

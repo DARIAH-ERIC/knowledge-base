@@ -229,15 +229,6 @@ describe("projects", () => {
 				const data = (await response.json()) as Project;
 
 				expect(data).toMatchObject({ name });
-				expect(data.institutions).toHaveLength(1);
-				expect(data.institutions[0]).toMatchObject({
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					id: expect.any(String),
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					name: expect.any(String),
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					type: expect.any(String),
-				});
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});

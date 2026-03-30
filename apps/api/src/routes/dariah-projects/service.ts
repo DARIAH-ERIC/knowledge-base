@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq, sql } from "@dariah-eric/database";
+import { count, eq } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
@@ -30,60 +30,6 @@ const projectWithLinksQuery = {
 				key: true,
 			},
 		},
-		funders: {
-			where: {
-				RAW() {
-					return sql`
-						${schema.projectsToOrganisationalUnits.roleId} IN (
-							SELECT
-								id
-							FROM
-								project_roles
-							WHERE
-								role = 'funder'
-						)
-					`;
-				},
-			},
-			columns: {
-				roleId: true,
-			},
-			with: {
-				unit: {
-					columns: {
-						id: true,
-						name: true,
-					},
-					with: {
-						type: {
-							columns: {
-								type: true,
-							},
-						},
-					},
-				},
-			},
-		},
-		partners: {
-			columns: {
-				roleId: true,
-			},
-			with: {
-				unit: {
-					columns: {
-						id: true,
-						name: true,
-					},
-					with: {
-						type: {
-							columns: {
-								type: true,
-							},
-						},
-					},
-				},
-			},
-		},
 		scope: {
 			columns: {
 				scope: true,
@@ -108,8 +54,10 @@ const projectWithLinksQuery = {
 function mapItem<
 	T extends {
 		image: { key: string } | null;
-		funders: Array<{ roleId: string; unit: { id: string; name: string; type: { type: string } } }>;
-		partners: Array<{ roleId: string; unit: { id: string; name: string; type: { type: string } } }>;
+		// organisationalUnits: Array<{
+		// 	roleId: string;
+		// 	unit: { id: string; name: string; type: { type: string } };
+		// }>;
 		socialMedia: Array<{
 			id: string;
 			url: string;
@@ -127,14 +75,6 @@ function mapItem<
 				})
 			: null;
 
-	const funders = item.funders.map(({ roleId, unit }) => {
-		return { id: unit.id, name: unit.name, type: unit.type.type, roleId };
-	});
-
-	const institutions = item.partners.map(({ roleId, unit }) => {
-		return { id: unit.id, name: unit.name, type: unit.type.type, roleId };
-	});
-
 	const duration = {
 		start: item.duration.start.toISOString(),
 		end: item.duration.end?.toISOString(),
@@ -147,14 +87,10 @@ function mapItem<
 		};
 	});
 
-	const { funders: _, partners: __, ...rest } = item;
-
 	return {
-		...rest,
+		...item,
 		duration,
 		image,
-		funders,
-		institutions,
 		socialMedia,
 		publishedAt: item.entity.updatedAt.toISOString(),
 	};

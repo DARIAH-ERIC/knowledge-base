@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq, sql } from "@dariah-eric/database";
+import { count, eq } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
@@ -48,19 +48,6 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 						key: true,
 					},
 				},
-				institutions: {
-					columns: {
-						id: true,
-						name: true,
-					},
-					with: {
-						type: {
-							columns: {
-								type: true,
-							},
-						},
-					},
-				},
 				scope: {
 					columns: {
 						scope: true,
@@ -105,10 +92,6 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 					})
 				: null;
 
-		const institutions = item.institutions.map(({ type, ...rest }) => {
-			return { ...rest, type: type.type };
-		});
-
 		const duration = {
 			start: item.duration.start.toISOString(),
 			end: item.duration.end?.toISOString(),
@@ -125,7 +108,6 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 			...item,
 			duration,
 			image,
-			institutions,
 			socialMedia,
 			publishedAt: item.entity.updatedAt.toISOString(),
 		};
@@ -174,50 +156,6 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 						key: true,
 					},
 				},
-				funders: {
-					where: {
-						RAW() {
-							return sql`
-								${schema.projectsToOrganisationalUnits.roleId} IN (
-									SELECT
-										id
-									FROM
-										project_roles
-									WHERE
-										role = 'funder'
-								)
-							`;
-						},
-					},
-					with: {
-						unit: {
-							columns: {
-								id: true,
-								name: true,
-							},
-							with: {
-								type: {
-									columns: {
-										type: true,
-									},
-								},
-							},
-						},
-					},
-				},
-				institutions: {
-					columns: {
-						id: true,
-						name: true,
-					},
-					with: {
-						type: {
-							columns: {
-								type: true,
-							},
-						},
-					},
-				},
 				scope: {
 					columns: {
 						scope: true,
@@ -258,14 +196,6 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 		end: item.duration.end?.toISOString(),
 	};
 
-	const funders = item.funders.map(({ unit }) => {
-		return { id: unit.id, name: unit.name, type: unit.type.type };
-	});
-
-	const institutions = item.institutions.map(({ type, ...rest }) => {
-		return { ...rest, type: type.type };
-	});
-
 	const socialMedia = item.socialMedia.map((sm) => {
 		return {
 			...sm,
@@ -277,8 +207,6 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 		...item,
 		duration,
 		image,
-		funders,
-		institutions,
 		socialMedia,
 		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
@@ -377,50 +305,6 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 					key: true,
 				},
 			},
-			funders: {
-				where: {
-					RAW() {
-						return sql`
-							${schema.projectsToOrganisationalUnits.roleId} IN (
-								SELECT
-									id
-								FROM
-									project_roles
-								WHERE
-									role = 'funder'
-							)
-						`;
-					},
-				},
-				with: {
-					unit: {
-						columns: {
-							id: true,
-							name: true,
-						},
-						with: {
-							type: {
-								columns: {
-									type: true,
-								},
-							},
-						},
-					},
-				},
-			},
-			institutions: {
-				columns: {
-					id: true,
-					name: true,
-				},
-				with: {
-					type: {
-						columns: {
-							type: true,
-						},
-					},
-				},
-			},
 			scope: {
 				columns: {
 					scope: true,
@@ -454,14 +338,6 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 				})
 			: null;
 
-	const funders = item.funders.map(({ unit }) => {
-		return { id: unit.id, name: unit.name, type: unit.type.type };
-	});
-
-	const institutions = item.institutions.map(({ type, ...rest }) => {
-		return { ...rest, type: type.type };
-	});
-
 	const socialMedia = item.socialMedia.map((sm) => {
 		return {
 			...sm,
@@ -480,8 +356,6 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 		...item,
 		duration,
 		image,
-		funders,
-		institutions,
 		socialMedia,
 		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,

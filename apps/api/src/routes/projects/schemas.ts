@@ -4,7 +4,7 @@ import * as v from "valibot";
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
-export const ProjectInstitutionSchema = v.pipe(
+export const ProjectOrganisationalUnitSchema = v.pipe(
 	v.object({
 		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name"]).entries,
 		type: v.picklist(schema.organisationalUnitTypesEnum),
@@ -31,7 +31,6 @@ export const ProjectBaseSchema = v.pipe(
 			start: v.pipe(v.string(), v.isoTimestamp()),
 			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
-		institutions: v.array(ProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
 		socialMedia: v.array(ProjectSocialMediaSchema),
@@ -60,8 +59,6 @@ export const ProjectSchema = v.pipe(
 			start: v.pipe(v.string(), v.isoTimestamp()),
 			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
-		funders: v.array(ProjectInstitutionSchema),
-		institutions: v.array(ProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
 		socialMedia: v.array(ProjectSocialMediaSchema),
