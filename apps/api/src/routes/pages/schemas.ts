@@ -31,7 +31,7 @@ export const PageSchema = v.pipe(
 		image: v.nullable(v.object({ url: v.string() })),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
-		content: v.array(ContentBlockSchema),
+		content: v.optional(v.array(ContentBlockSchema), []),
 	}),
 	v.description("Page"),
 	v.metadata({ ref: "Page" }),

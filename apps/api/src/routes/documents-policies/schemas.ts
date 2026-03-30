@@ -31,7 +31,7 @@ export const DocumentOrPolicySchema = v.pipe(
 		document: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
-		description: v.array(ContentBlockSchema),
+		description: v.optional(v.array(ContentBlockSchema), []),
 	}),
 	v.description("Document or policy"),
 	v.metadata({ ref: "DocumentOrPolicy" }),

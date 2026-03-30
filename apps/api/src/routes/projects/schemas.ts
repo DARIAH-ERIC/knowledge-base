@@ -72,7 +72,7 @@ export const ProjectSchema = v.pipe(
 		funders: v.array(ProjectOrganisationalUnitSchema),
 		partners: v.array(ProjectOrganisationalUnitSchema),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
-		description: v.array(ContentBlockSchema),
+		description: v.optional(v.array(ContentBlockSchema), []),
 	}),
 	v.description("Project"),
 	v.metadata({ ref: "Project" }),

@@ -71,7 +71,7 @@ export const MemberOrPartnerSchema = v.pipe(
 				type: v.picklist(schema.socialMediaTypesEnum),
 			}),
 		),
-		description: v.array(ContentBlockSchema),
+		description: v.optional(v.array(ContentBlockSchema), []),
 	}),
 	v.description("Member or partner"),
 	v.metadata({ ref: "MemberOrPartner" }),
