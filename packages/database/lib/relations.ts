@@ -168,9 +168,13 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.dariahProjects.imageId,
 				to: r.assets.id,
 			}),
-			partners: r.many.projectPartners({
+			partners: r.many.projectsToOrganisationalUnits({
 				from: r.dariahProjects.id,
-				to: r.projectPartners.projectId,
+				to: r.projectsToOrganisationalUnits.projectId,
+			}),
+			funders: r.many.projectsToOrganisationalUnits({
+				from: r.dariahProjects.id,
+				to: r.projectsToOrganisationalUnits.projectId,
 			}),
 			scope: r.one.projectScopes({
 				from: r.dariahProjects.scopeId,
@@ -262,13 +266,9 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.projects.imageId,
 				to: r.assets.id,
 			}),
-			institutions: r.many.organisationalUnits({
-				from: r.projects.id.through(r.projectPartners.projectId),
-				to: r.organisationalUnits.id.through(r.projectPartners.unitId),
-			}),
-			partners: r.many.projectPartners({
-				from: r.projects.id,
-				to: r.projectPartners.projectId,
+			organisationalUnits: r.many.organisationalUnits({
+				from: r.projects.id.through(r.projectsToOrganisationalUnits.projectId),
+				to: r.organisationalUnits.id.through(r.projectsToOrganisationalUnits.unitId),
 			}),
 			scope: r.one.projectScopes({
 				from: r.projects.scopeId,
@@ -280,27 +280,27 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.socialMedia.id.through(r.projectsToSocialMedia.socialMediaId),
 			}),
 		},
-		projectPartners: {
+		projectsToOrganisationalUnits: {
 			project: r.one.projects({
-				from: r.projectPartners.projectId,
+				from: r.projectsToOrganisationalUnits.projectId,
 				to: r.projects.id,
 				optional: false,
 			}),
 			unit: r.one.organisationalUnits({
-				from: r.projectPartners.unitId,
+				from: r.projectsToOrganisationalUnits.unitId,
 				to: r.organisationalUnits.id,
 				optional: false,
 			}),
 			role: r.one.projectRoles({
-				from: r.projectPartners.roleId,
+				from: r.projectsToOrganisationalUnits.roleId,
 				to: r.projectRoles.id,
 				optional: false,
 			}),
 		},
 		projectsContributions: {
-			projectPartner: r.one.projectPartners({
+			projectPartner: r.one.projectsToOrganisationalUnits({
 				from: r.projectsContributions.projectPartnerId,
-				to: r.projectPartners.id,
+				to: r.projectsToOrganisationalUnits.id,
 			}),
 			report: r.one.reports({
 				from: r.projectsContributions.reportId,

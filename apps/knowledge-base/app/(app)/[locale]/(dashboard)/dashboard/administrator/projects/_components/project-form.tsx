@@ -76,7 +76,7 @@ interface ProjectFormProps {
 	assets: Array<{ key: string; label: string; url: string }>;
 	project?: Pick<
 		schema.Project,
-		"acronym" | "call" | "duration" | "funders" | "funding" | "id" | "name" | "summary" | "topic"
+		"acronym" | "call" | "duration" | "funding" | "id" | "name" | "summary" | "topic"
 	> & {
 		description?: JSONContent;
 		entity: Pick<schema.Entity, "documentId" | "slug"> & {
@@ -260,12 +260,6 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 				<TextField defaultValue={project?.acronym ?? undefined} name="acronym">
 					<Label>{t("Acronym")}</Label>
 					<Input placeholder={t("Acronym")} />
-					<FieldError />
-				</TextField>
-
-				<TextField defaultValue={project?.funders ?? undefined} name="funders">
-					<Label>{t("Funders")}</Label>
-					<Input placeholder={t("Funders")} />
 					<FieldError />
 				</TextField>
 

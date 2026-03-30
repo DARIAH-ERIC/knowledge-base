@@ -15,7 +15,6 @@ const projectWithLinksQuery = {
 		summary: true,
 		duration: true,
 		call: true,
-		funders: true,
 		topic: true,
 		funding: true,
 	},
@@ -29,26 +28,6 @@ const projectWithLinksQuery = {
 		image: {
 			columns: {
 				key: true,
-			},
-		},
-		partners: {
-			columns: {
-				roleId: true,
-			},
-			with: {
-				unit: {
-					columns: {
-						id: true,
-						name: true,
-					},
-					with: {
-						type: {
-							columns: {
-								type: true,
-							},
-						},
-					},
-				},
 			},
 		},
 		scope: {
@@ -75,7 +54,10 @@ const projectWithLinksQuery = {
 function mapItem<
 	T extends {
 		image: { key: string } | null;
-		partners: Array<{ roleId: string; unit: { id: string; name: string; type: { type: string } } }>;
+		// organisationalUnits: Array<{
+		// 	roleId: string;
+		// 	unit: { id: string; name: string; type: { type: string } };
+		// }>;
 		socialMedia: Array<{
 			id: string;
 			url: string;
@@ -93,10 +75,6 @@ function mapItem<
 				})
 			: null;
 
-	const institutions = item.partners.map(({ roleId, unit }) => {
-		return { id: unit.id, name: unit.name, type: unit.type.type, roleId };
-	});
-
 	const duration = {
 		start: item.duration.start.toISOString(),
 		end: item.duration.end?.toISOString(),
@@ -109,13 +87,10 @@ function mapItem<
 		};
 	});
 
-	const { partners: _, ...rest } = item;
-
 	return {
-		...rest,
+		...item,
 		duration,
 		image,
-		institutions,
 		socialMedia,
 		publishedAt: item.entity.updatedAt.toISOString(),
 	};

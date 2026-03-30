@@ -2,15 +2,8 @@ import { ProjectInsertSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 export const CreateProjectActionInputSchema = v.object({
-	...v.pick(ProjectInsertSchema, [
-		"acronym",
-		"call",
-		"funders",
-		"name",
-		"scopeId",
-		"summary",
-		"topic",
-	]).entries,
+	...v.pick(ProjectInsertSchema, ["acronym", "call", "name", "scopeId", "summary", "topic"])
+		.entries,
 	funding: v.optional(v.pipe(v.string(), v.toNumber(), v.minValue(0))),
 	duration: v.object({
 		start: v.pipe(v.string(), v.isoDate(), v.toDate()),

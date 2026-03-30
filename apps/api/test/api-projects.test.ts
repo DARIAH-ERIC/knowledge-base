@@ -30,7 +30,6 @@ function createItems(count: number) {
 				name,
 				summary: f.lorem.paragraph(),
 				call: f.lorem.word(),
-				funders: f.company.name(),
 				topic: f.lorem.word(),
 				duration: {
 					start: f.date.past({ years: 5 }),
@@ -94,7 +93,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 		typeId: unitType.id,
 	});
 
-	await db.insert(schema.projectPartners).values(
+	await db.insert(schema.projectsToOrganisationalUnits).values(
 		items.map((item) => {
 			return {
 				projectId: item.project.id,
@@ -230,15 +229,6 @@ describe("projects", () => {
 				const data = (await response.json()) as Project;
 
 				expect(data).toMatchObject({ name });
-				expect(data.institutions).toHaveLength(1);
-				expect(data.institutions[0]).toMatchObject({
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					id: expect.any(String),
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					name: expect.any(String),
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					type: expect.any(String),
-				});
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});
