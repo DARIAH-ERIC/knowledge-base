@@ -1414,7 +1414,7 @@ async function main() {
 			assert(p);
 
 			if (umbrellaUnit) {
-				await tx.insert(schema.projectPartners).values({
+				await tx.insert(schema.projectsToOrganisationalUnits).values({
 					projectId: p.id,
 					unitId: umbrellaUnit.id,
 					roleId: projectRolesByType.participant.id,

@@ -14,7 +14,7 @@ import type { ReactNode } from "react";
 interface ProjectDetailsProps {
 	project: Pick<
 		schema.Project,
-		"acronym" | "call" | "duration" | "funders" | "funding" | "id" | "name" | "summary" | "topic"
+		"acronym" | "call" | "duration" | "funding" | "id" | "name" | "summary" | "topic"
 	> & {
 		description: JSONContent | null;
 		entity: Pick<schema.Entity, "documentId" | "slug"> & {
@@ -65,9 +65,6 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 
 			<DescriptionTerm>{t("Funding")}</DescriptionTerm>
 			<DescriptionDetails>{project.funding}</DescriptionDetails>
-
-			<DescriptionTerm>{t("Funders")}</DescriptionTerm>
-			<DescriptionDetails>{project.funders}</DescriptionDetails>
 
 			<DescriptionTerm>{t("Call")}</DescriptionTerm>
 			<DescriptionDetails>{project.call}</DescriptionDetails>

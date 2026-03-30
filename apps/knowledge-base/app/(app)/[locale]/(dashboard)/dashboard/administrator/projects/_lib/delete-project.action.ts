@@ -12,9 +12,9 @@ export async function deleteProjectAction(id: string): Promise<void> {
 
 	await db.transaction(async (tx) => {
 		const partners = await tx
-			.select({ id: schema.projectPartners.id })
-			.from(schema.projectPartners)
-			.where(eq(schema.projectPartners.projectId, id));
+			.select({ id: schema.projectsToOrganisationalUnits.id })
+			.from(schema.projectsToOrganisationalUnits)
+			.where(eq(schema.projectsToOrganisationalUnits.projectId, id));
 
 		if (partners.length > 0) {
 			const partnerIds = partners.map((p) => {
@@ -25,7 +25,9 @@ export async function deleteProjectAction(id: string): Promise<void> {
 				.delete(schema.projectsContributions)
 				.where(inArray(schema.projectsContributions.projectPartnerId, partnerIds));
 
-			await tx.delete(schema.projectPartners).where(inArray(schema.projectPartners.id, partnerIds));
+			await tx
+				.delete(schema.projectsToOrganisationalUnits)
+				.where(inArray(schema.projectsToOrganisationalUnits.id, partnerIds));
 		}
 
 		const entityFields = await tx

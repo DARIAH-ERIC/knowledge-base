@@ -24,7 +24,6 @@ function createProjectData() {
 		name,
 		summary: f.lorem.paragraph(),
 		call: f.lorem.word(),
-		funders: f.company.name(),
 		topic: f.lorem.word(),
 		duration: {
 			start: f.date.past({ years: 5 }),
@@ -59,7 +58,7 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 				columns: { id: true },
 				where: { type: "consortium" },
 			}),
-			db.query.projectRoles.findFirst({ columns: { id: true } }),
+			db.query.projectRoles.findFirst({ where: { role: "participant" }, columns: { id: true } }),
 		]);
 
 	assert(status, "No entity status in database.");
@@ -128,7 +127,7 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 	});
 
 	// Link DARIAH projects to umbrella_consortium unit
-	await db.insert(schema.projectPartners).values(
+	await db.insert(schema.projectsToOrganisationalUnits).values(
 		dariahItems.map((item) => {
 			return {
 				projectId: item.project.id,
@@ -139,7 +138,7 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 	);
 
 	// Link non-DARIAH project to a non-umbrella unit only
-	await db.insert(schema.projectPartners).values({
+	await db.insert(schema.projectsToOrganisationalUnits).values({
 		projectId: nonDariahItem.project.id,
 		unitId: otherUnitId,
 		roleId: projectRole.id,
@@ -210,7 +209,9 @@ describe("dariah-projects", () => {
 				const data = await response.json();
 
 				expect(data.total).toBeGreaterThanOrEqual(dariahItems.length);
-				expect(data.data).toEqual(expect.arrayContaining([expect.objectContaining({ name })]));
+				expect(data.data).toEqual(
+					expect.arrayContaining([expect.objectContaining({ name, role: "participant" })]),
+				);
 				expect(data.limit).toBe(limit);
 				expect(data.offset).toBe(offset);
 			});
@@ -254,7 +255,7 @@ describe("dariah-projects", () => {
 			await withTransaction(async (db) => {
 				const client = createTestClient(db);
 
-				const { dariahItems, roleId } = await seed(db, 3);
+				const { dariahItems, roleId: _ } = await seed(db, 3);
 
 				const item = dariahItems.at(1)!;
 				const id = item.entity.id;
@@ -270,15 +271,8 @@ describe("dariah-projects", () => {
 				const data = (await response.json()) as DariahProject;
 
 				expect(data).toMatchObject({ name });
-				expect(data.institutions).toHaveLength(1);
-				expect(data.institutions[0]).toMatchObject({
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					id: expect.any(String),
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					name: expect.any(String),
-					type: "umbrella_consortium",
-					roleId,
-				});
+				expect(data.participants).toHaveLength(1);
+				expect(data.coordinators).toHaveLength(0);
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});

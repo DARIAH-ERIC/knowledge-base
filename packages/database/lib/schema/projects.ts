@@ -27,7 +27,7 @@ export const projectScopes = p.pgTable(
 export type ProjectScope = typeof projectScopes.$inferSelect;
 export type ProjectScopeInput = typeof projectScopes.$inferInsert;
 
-export const projectRolesEnum = ["participant", "coordinator"] as const;
+export const projectRolesEnum = ["coordinator", "funder", "participant"] as const;
 
 export const projectRoles = p.pgTable(
 	"project_roles",
@@ -59,7 +59,6 @@ export const projects = p.pgTable("projects", {
 	funding: p.numeric("funding", { mode: "number", precision: 12, scale: 2 }),
 	summary: p.text("summary").notNull(),
 	call: p.text("call"),
-	funders: p.text("funders"),
 	topic: p.text("topic"),
 	imageId: p.uuid("image_id").references(() => {
 		return assets.id;
@@ -80,46 +79,61 @@ export const ProjectSelectSchema = createSelectSchema(projects, { duration: f.Ti
 export const ProjectInsertSchema = createInsertSchema(projects, { duration: f.TimestampRange });
 export const ProjectUpdateSchema = createUpdateSchema(projects, { duration: f.TimestampRange });
 
-export const projectPartners = p.pgTable("project_partners", {
-	id: p.uuid("id").primaryKey().default(uuidv7()),
-	projectId: p
-		.uuid("project_id")
-		.notNull()
-		.references(() => {
-			return projects.id;
-		}),
-	unitId: p
-		.uuid("unit_id")
-		.notNull()
-		.references(() => {
-			return organisationalUnits.id;
-		}),
-	roleId: p
-		.uuid("role_id")
-		.notNull()
-		.references(() => {
-			return projectRoles.id;
-		}),
-	duration: f.timestampRange("duration"),
-});
+export const projectsToOrganisationalUnits = p.pgTable(
+	"projects_to_organisational_units",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		projectId: p
+			.uuid("project_id")
+			.notNull()
+			.references(() => {
+				return projects.id;
+			}),
+		unitId: p
+			.uuid("unit_id")
+			.notNull()
+			.references(() => {
+				return organisationalUnits.id;
+			}),
+		roleId: p
+			.uuid("role_id")
+			.notNull()
+			.references(() => {
+				return projectRoles.id;
+			}),
+		duration: f.timestampRange("duration"),
+	},
+	(t) => {
+		return [p.unique().on(t.projectId, t.roleId, t.unitId)];
+	},
+);
 
-export type ProjectPartner = typeof projectPartners.$inferSelect;
-export type ProjectPartnerInput = typeof projectPartners.$inferInsert;
+export type ProjectToOrganisationalUnit = typeof projectsToOrganisationalUnits.$inferSelect;
+export type ProjectToOrganisationalUnitInput = typeof projectsToOrganisationalUnits.$inferInsert;
 
-export const ProjectPartnerSelectSchema = createSelectSchema(projectPartners, {
-	duration: f.NullableTimestampRange,
-});
-export const ProjectPartnerInsertSchema = createInsertSchema(projectPartners, {
-	duration: f.NullableTimestampRange,
-});
-export const ProjectPartnerUpdateSchema = createUpdateSchema(projectPartners, {
-	duration: f.NullableTimestampRange,
-});
+export const ProjectToOrganisationalUnitSelectSchema = createSelectSchema(
+	projectsToOrganisationalUnits,
+	{
+		duration: f.NullableTimestampRange,
+	},
+);
+export const ProjectToOrganisationalUnitInsertSchema = createInsertSchema(
+	projectsToOrganisationalUnits,
+	{
+		duration: f.NullableTimestampRange,
+	},
+);
+export const ProjectToOrganisationalUnitUpdateSchema = createUpdateSchema(
+	projectsToOrganisationalUnits,
+	{
+		duration: f.NullableTimestampRange,
+	},
+);
 
 export const projectsContributions = p.pgTable("project_contributions", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	projectPartnerId: p.uuid("project_partner_id").references(() => {
-		return projectPartners.id;
+		return projectsToOrganisationalUnits.id;
 	}),
 	reportId: p
 		.uuid("report_id")
@@ -171,7 +185,6 @@ export const dariahProjects = p
 		summary: p.text("summary").notNull(),
 		duration: f.timestampRange("duration").notNull(),
 		call: p.text("call").notNull(),
-		funders: p.text("funders").notNull(),
 		topic: p.text("topic").notNull(),
 		funding: p.numeric("funding", { mode: "number", precision: 12, scale: 2 }),
 		imageId: p.uuid("image_id"),
