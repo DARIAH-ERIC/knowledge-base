@@ -72,7 +72,7 @@ export const DariahProjectSchema = v.pipe(
 		participants: v.array(DariahProjectOrganisationalUnitsSchema),
 		coordinators: v.array(DariahProjectOrganisationalUnitsSchema),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
-		description: v.array(ContentBlockSchema),
+		description: v.optional(v.array(ContentBlockSchema), []),
 	}),
 	v.description("DARIAH project"),
 	v.metadata({ ref: "DariahProject" }),

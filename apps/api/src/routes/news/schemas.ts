@@ -31,7 +31,7 @@ export const NewsItemSchema = v.pipe(
 		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
-		content: v.array(ContentBlockSchema),
+		content: v.optional(v.array(ContentBlockSchema), []),
 	}),
 	v.description("News item"),
 	v.metadata({ ref: "NewsItem" }),
