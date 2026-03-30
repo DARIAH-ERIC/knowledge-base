@@ -55,7 +55,7 @@ FROM base AS migrate
 USER node
 WORKDIR /app
 COPY --from=migrate-build /out/ .
-CMD [ "pnpm", "run", "db:migrations:apply" ]
+CMD pnpm run db:push && pnpm run db:migrations:apply
 
 # =================================================================================================
 # api
