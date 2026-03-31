@@ -22,7 +22,7 @@ import { Fragment, type ReactNode, useRef, useState, useTransition } from "react
 import { FileTrigger, type Selection } from "react-aria-components";
 
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
-import { mediaLibraryPageSize } from "@/config/assets.config";
+import { imageMimeTypes, mediaLibraryPageSize } from "@/config/assets.config";
 
 interface Asset {
 	key: string;
@@ -31,15 +31,23 @@ interface Asset {
 }
 
 interface MediaLibraryDialogProps {
+	acceptedFileTypes?: ReadonlyArray<string>;
 	assets: Array<Asset>;
 	onSelect: (key: string, url: string) => void;
 	prefix?: AssetPrefix;
+	prefixes?: ReadonlyArray<AssetPrefix>;
 }
 
 type ActiveTab = "select" | "upload";
 
 export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): ReactNode {
-	const { assets: initialAssets, onSelect, prefix = "images" } = props;
+	const {
+		acceptedFileTypes = imageMimeTypes,
+		assets: initialAssets,
+		onSelect,
+		prefix = "images",
+		prefixes = assetPrefixes,
+	} = props;
 
 	const t = useExtracted();
 
@@ -243,7 +251,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 
 						<TabPanel className="flex flex-1 flex-col gap-3 min-h-0" id="select">
 							<div className="flex gap-2">
-								{assetPrefixes.map((p) => {
+								{prefixes.map((p) => {
 									return (
 										<Button
 											key={p}
@@ -339,7 +347,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 								<div className="flex flex-col gap-4">
 									<div className="flex items-start gap-4">
 										<FileTrigger
-											acceptedFileTypes={["image/jpeg", "image/png"]}
+											acceptedFileTypes={acceptedFileTypes as Array<string>}
 											onSelect={handleFileChoose}
 										>
 											<Button intent="outline" type="button">
