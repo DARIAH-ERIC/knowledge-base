@@ -42,7 +42,8 @@ export const updateEventAction = createServerAction(
 			});
 		}
 
-		const { contentBlocks, title, id, imageKey, summary } = result.output;
+		const { contentBlocks, title, id, imageKey, summary, duration, location, website } =
+			result.output;
 
 		await db.transaction(async (tx) => {
 			const asset = await tx.query.assets.findFirst({
@@ -56,7 +57,7 @@ export const updateEventAction = createServerAction(
 
 			await tx
 				.update(schema.events)
-				.set({ imageId, title, summary })
+				.set({ imageId, title, summary, location, website, duration })
 				.where(eq(schema.events.id, id));
 
 			const contentField = await tx.query.fields.findFirst({

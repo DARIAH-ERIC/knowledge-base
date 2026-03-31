@@ -60,12 +60,10 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 	// Upload tab state
 	const [pendingFile, setPendingFile] = useState<File | null>(null);
 	const [pendingFileUrl, setPendingFileUrl] = useState<string | null>(null);
-	const [uploadLabel, setUploadLabel] = useState("");
-	const [uploadAlt, setUploadAlt] = useState("");
-	const [uploadCaption, setUploadCaption] = useState("");
 	const [isUploading, startUploading] = useTransition();
 
 	const searchInputRef = useRef<HTMLInputElement>(null);
+	const uploadFormRef = useRef<HTMLFormElement>(null);
 
 	const hasPrev = offset > 0;
 	const hasNext = displayedAssets.length === mediaLibraryPageSize;
@@ -93,9 +91,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 		}
 		setPendingFile(null);
 		setPendingFileUrl(null);
-		setUploadLabel("");
-		setUploadAlt("");
-		setUploadCaption("");
+		uploadFormRef.current?.reset();
 	}
 
 	function handleOpen() {
@@ -109,7 +105,6 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 		if (searchInputRef.current) {
 			searchInputRef.current.value = "";
 		}
-		resetUploadTab();
 		startFetching(async () => {
 			const items = await fetchPage(0, "", prefix);
 			setDisplayedAssets(items);
@@ -197,16 +192,9 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 		setPendingFileUrl(file != null ? URL.createObjectURL(file) : null);
 	}
 
-	function handleUpload() {
+	function handleUploadAction(formData: FormData) {
 		if (pendingFile == null) return;
-
-		const formData = new FormData();
 		formData.append("file", pendingFile);
-		formData.append("prefix", selectedPrefix);
-		if (uploadLabel) formData.append("label", uploadLabel);
-		if (uploadAlt) formData.append("alt", uploadAlt);
-		if (uploadCaption) formData.append("caption", uploadCaption);
-
 		startUploading(async () => {
 			const result = await uploadImageAction(createActionStateInitial(), formData);
 
@@ -237,10 +225,13 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 					title={t("Media library")}
 				/>
 
-				<ModalBody className="flex h-128 flex-col overflow-hidden">
+				<ModalBody className="flex h-128 flex-col">
 					<Tabs
-						className="flex flex-1 flex-col overflow-hidden"
+						className="flex flex-1 flex-col min-h-0"
 						onSelectionChange={(key) => {
+							if (activeTab === "upload" && key !== "upload") {
+								resetUploadTab();
+							}
 							setActiveTab(key as ActiveTab);
 						}}
 						selectedKey={activeTab}
@@ -250,7 +241,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 							<Tab id="upload">{t("Upload")}</Tab>
 						</TabList>
 
-						<TabPanel className="flex flex-1 flex-col gap-3 overflow-hidden" id="select">
+						<TabPanel className="flex flex-1 flex-col gap-3 min-h-0" id="select">
 							<div className="flex gap-2">
 								{assetPrefixes.map((p) => {
 									return (
@@ -341,42 +332,50 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 							</div>
 						</TabPanel>
 
-						<TabPanel className="flex flex-1 flex-col gap-4 overflow-y-auto" id="upload">
-							<div className="flex items-start gap-4">
-								<FileTrigger
-									acceptedFileTypes={["image/jpeg", "image/png"]}
-									onSelect={handleFileChoose}
-								>
-									<Button intent="outline">{t("Choose file...")}</Button>
-								</FileTrigger>
+						<TabPanel className="flex flex-1 flex-col gap-4 overflow-y-auto p-1" id="upload">
+							<form ref={uploadFormRef} action={handleUploadAction} id="upload-form">
+								<input name="prefix" type="hidden" value={selectedPrefix} />
 
-								{pendingFileUrl != null ? (
-									<img
-										alt={t("Preview")}
-										className="size-24 rounded-sm object-cover"
-										src={pendingFileUrl}
-									/>
-								) : null}
-							</div>
+								<div className="flex flex-col gap-4">
+									<div className="flex items-start gap-4">
+										<FileTrigger
+											acceptedFileTypes={["image/jpeg", "image/png"]}
+											onSelect={handleFileChoose}
+										>
+											<Button intent="outline" type="button">
+												{t("Choose file...")}
+											</Button>
+										</FileTrigger>
 
-							{pendingFile != null ? (
-								<p className="text-muted-fg text-sm">{pendingFile.name}</p>
-							) : null}
+										{pendingFileUrl != null ? (
+											<img
+												alt={t("Preview")}
+												className="size-24 rounded-sm object-cover"
+												src={pendingFileUrl}
+											/>
+										) : null}
+									</div>
 
-							<TextField onChange={setUploadLabel} value={uploadLabel}>
-								<Label>{t("Label")}</Label>
-								<Input placeholder={pendingFile?.name ?? ""} />
-							</TextField>
+									{pendingFile != null ? (
+										<p className="text-muted-fg text-sm">{pendingFile.name}</p>
+									) : null}
 
-							<TextField onChange={setUploadAlt} value={uploadAlt}>
-								<Label>{t("Alt text")}</Label>
-								<Input />
-							</TextField>
+									<TextField name="label">
+										<Label>{t("Label")}</Label>
+										<Input placeholder={pendingFile?.name ?? ""} />
+									</TextField>
 
-							<TextField onChange={setUploadCaption} value={uploadCaption}>
-								<Label>{t("Caption")}</Label>
-								<Input />
-							</TextField>
+									<TextField name="alt">
+										<Label>{t("Alt text")}</Label>
+										<Input />
+									</TextField>
+
+									<TextField name="caption">
+										<Label>{t("Caption")}</Label>
+										<Input />
+									</TextField>
+								</div>
+							</form>
 						</TabPanel>
 					</Tabs>
 				</ModalBody>
@@ -389,7 +388,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 							{t("Select")}
 						</Button>
 					) : (
-						<Button isDisabled={pendingFile == null} isPending={isUploading} onPress={handleUpload}>
+						<Button form="upload-form" isPending={isUploading} type="submit">
 							{isUploading ? (
 								<Fragment>
 									<ProgressCircle isIndeterminate={true} />
