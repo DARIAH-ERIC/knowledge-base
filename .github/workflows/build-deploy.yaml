@@ -67,12 +67,16 @@ jobs:
             ]
         run: |
           set -eux
-          AFFECTED=$(
-            pnpm dlx turbo ls --affected --output json \
-            2>/dev/null || echo '{"packages":{"items":[]}}'
-          )
-          NAMES=$(echo "$AFFECTED" | jq -c '[.packages.items[] | select(.path | startswith("apps/")) | .name | sub("^@dariah-eric/"; "")]')
-          MATRIX=$(echo "$ALL_APPS" | jq -c --argjson names "$NAMES" '[.[] | select(.name as $n | $names | index($n))]')
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            MATRIX=$(echo "$ALL_APPS" | jq -c '.')
+          else
+            AFFECTED=$(
+              pnpm dlx turbo ls --affected --output json \
+              2>/dev/null || echo '{"packages":{"items":[]}}'
+            )
+            NAMES=$(echo "$AFFECTED" | jq -c '[.packages.items[] | select(.path | startswith("apps/")) | .name | sub("^@dariah-eric/"; "")]')
+            MATRIX=$(echo "$ALL_APPS" | jq -c --argjson names "$NAMES" '[.[] | select(.name as $n | $names | index($n))]')
+          fi
           echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
           if [ "$MATRIX" = "[]" ]; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
