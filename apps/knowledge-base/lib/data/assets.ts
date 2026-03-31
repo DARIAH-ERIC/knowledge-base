@@ -3,13 +3,16 @@
 import { Readable } from "node:stream";
 import type { ReadableStream } from "node:stream/web";
 
+import { isNonEmptyString } from "@acdh-oeaw/lib";
 import { db } from "@dariah-eric/database/client";
+import { relationsFilterToSQL } from "@dariah-eric/database/relations";
 import * as schema from "@dariah-eric/database/schema";
 
 import { images, type ImageUrlOptions } from "@/lib/images";
 import { type AssetPrefix, assetPrefixes, storage as s3 } from "@/lib/storage";
 
 export { assetPrefixes };
+export type { AssetPrefix };
 
 interface GetAssetsParams {
 	imageUrlOptions: ImageUrlOptions;
@@ -53,14 +56,24 @@ export async function getAssets(params: GetAssetsParams) {
 
 interface GetMediaLibraryAssetsParams {
 	imageUrlOptions: ImageUrlOptions;
-	/** @default 50 */
+	/** @default 20 */
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
+	prefix?: AssetPrefix;
+	q?: string;
 }
 
 export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams) {
-	const { imageUrlOptions, limit = 50, offset = 0 } = params;
+	const { imageUrlOptions, limit = 20, offset = 0, prefix, q } = params;
+
+	const prefixFilter = prefix != null ? { key: { like: `${prefix}/%` } } : undefined;
+	const searchFilter = isNonEmptyString(q) ? { label: { ilike: `%${q}%` } } : undefined;
+
+	const filter =
+		prefixFilter != null || searchFilter != null ? { ...prefixFilter, ...searchFilter } : undefined;
+
+	const sqlFilter = filter != null ? relationsFilterToSQL(schema.assets, filter) : undefined;
 
 	const [assets, total] = await Promise.all([
 		db.query.assets.findMany({
@@ -73,8 +86,9 @@ export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams)
 			orderBy: {
 				updatedAt: "desc",
 			},
+			where: filter,
 		}),
-		db.$count(schema.assets),
+		db.$count(schema.assets, sqlFilter),
 	]);
 
 	const items = assets.map((asset) => {

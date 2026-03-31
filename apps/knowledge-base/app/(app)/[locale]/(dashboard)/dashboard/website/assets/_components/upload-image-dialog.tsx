@@ -38,7 +38,7 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 	const [filePreview, setFilePreview] = useState<string | null>(null);
 
 	const [state, formAction, isPending] = useActionState(
-		async (prevState: ActionState<{ key: string }>, formData: FormData) => {
+		async (prevState: ActionState<{ key: string; url: string }>, formData: FormData) => {
 			const result = await uploadImageAction(prevState, formData);
 			if (result.status === "success") {
 				setIsOpen(false);
