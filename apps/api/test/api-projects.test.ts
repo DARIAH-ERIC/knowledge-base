@@ -30,7 +30,6 @@ function createItems(count: number) {
 				name,
 				summary: f.lorem.paragraph(),
 				call: f.lorem.word(),
-				funders: f.company.name(),
 				topic: f.lorem.word(),
 				duration: {
 					start: f.date.past({ years: 5 }),
@@ -46,24 +45,15 @@ function createItems(count: number) {
 }
 
 async function seed(db: Database, items: ReturnType<typeof createItems>) {
-	const [status, entityType, scope, unitEntityType, unitType, projectRole] = await Promise.all([
+	const [status, entityType, scope] = await Promise.all([
 		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
 		db.query.entityTypes.findFirst({ columns: { id: true }, where: { type: "projects" } }),
 		db.query.projectScopes.findFirst({ columns: { id: true } }),
-		db.query.entityTypes.findFirst({
-			columns: { id: true },
-			where: { type: "organisational_units" },
-		}),
-		db.query.organisationalUnitTypes.findFirst({ columns: { id: true } }),
-		db.query.projectRoles.findFirst({ columns: { id: true } }),
 	]);
 
 	assert(status, "No entity status in database.");
 	assert(entityType, "No entity type in database.");
 	assert(scope, "No project scope in database.");
-	assert(unitEntityType, "No organisational unit entity type in database.");
-	assert(unitType, "No organisational unit type in database.");
-	assert(projectRole, "No project role in database.");
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {
@@ -74,33 +64,6 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	await db.insert(schema.projects).values(
 		items.map((item) => {
 			return { ...item.project, scopeId: scope.id };
-		}),
-	);
-
-	const unitId = uuidv7();
-
-	await db.insert(schema.entities).values({
-		id: unitId,
-		slug: `unit-${unitId}`,
-		documentId: uuidv7(),
-		statusId: status.id,
-		typeId: unitEntityType.id,
-	});
-
-	await db.insert(schema.organisationalUnits).values({
-		id: unitId,
-		name: f.company.name(),
-		summary: f.lorem.paragraph(),
-		typeId: unitType.id,
-	});
-
-	await db.insert(schema.projectPartners).values(
-		items.map((item) => {
-			return {
-				projectId: item.project.id,
-				unitId,
-				roleId: projectRole.id,
-			};
 		}),
 	);
 
@@ -139,6 +102,62 @@ async function seedSocialMedia(db: Database, projectId: string) {
 		.values({ projectId, socialMediaId: socialMedia.id });
 
 	return socialMedia;
+}
+
+async function seedOrganisationalUnit(
+	db: Database,
+	projectId: string,
+	roleName: "coordinator" | "participant" | "funder",
+) {
+	const [status, unitEntityType, unitType, role] = await Promise.all([
+		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+		db.query.entityTypes.findFirst({
+			columns: { id: true },
+			where: { type: "organisational_units" },
+		}),
+		db.query.organisationalUnitTypes.findFirst({ columns: { id: true } }),
+		db.query.projectRoles.findFirst({
+			columns: { id: true },
+			where: { role: roleName },
+		}),
+	]);
+
+	assert(status, "No entity status in database.");
+	assert(unitEntityType, "No organisational unit entity type in database.");
+	assert(unitType, "No organisational unit type in database.");
+	assert(role, "No project role in database.");
+
+	const unitId = uuidv7();
+
+	await db.insert(schema.entities).values({
+		id: unitId,
+		slug: `unit-${unitId}`,
+		documentId: uuidv7(),
+		statusId: status.id,
+		typeId: unitEntityType.id,
+	});
+
+	const [organisationalUnit] = await db
+		.insert(schema.organisationalUnits)
+		.values({
+			id: unitId,
+			name: f.company.name(),
+			summary: f.lorem.paragraph(),
+			typeId: unitType.id,
+		})
+		.returning({
+			id: schema.organisationalUnits.id,
+		});
+
+	assert(organisationalUnit);
+
+	await db.insert(schema.projectsToOrganisationalUnits).values({
+		projectId,
+		unitId: organisationalUnit.id,
+		roleId: role.id,
+	});
+
+	return organisationalUnit;
 }
 
 describe("projects", () => {
@@ -209,7 +228,7 @@ describe("projects", () => {
 	});
 
 	describe("GET /api/projects/:id", () => {
-		it("should return single project with institutions", async () => {
+		it("should return single project with partner institutions", async () => {
 			await withTransaction(async (db) => {
 				const client = createTestClient(db);
 
@@ -219,6 +238,10 @@ describe("projects", () => {
 				const item = items.at(1)!;
 				const id = item.entity.id;
 				const name = item.project.name;
+
+				await seedOrganisationalUnit(db, id, "coordinator");
+				await seedOrganisationalUnit(db, id, "participant");
+				await seedOrganisationalUnit(db, id, "funder");
 
 				const response = await client.projects[":id"].$get({
 					param: { id },
@@ -230,15 +253,8 @@ describe("projects", () => {
 				const data = (await response.json()) as Project;
 
 				expect(data).toMatchObject({ name });
-				expect(data.institutions).toHaveLength(1);
-				expect(data.institutions[0]).toMatchObject({
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					id: expect.any(String),
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					name: expect.any(String),
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					type: expect.any(String),
-				});
+				expect(data.partners).toHaveLength(2);
+				expect(data.funders).toHaveLength(1);
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});

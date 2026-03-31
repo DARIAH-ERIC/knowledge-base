@@ -37,7 +37,7 @@ export const ImpactCaseStudySchema = v.pipe(
 		),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
-		content: v.array(ContentBlockSchema),
+		content: v.optional(v.array(ContentBlockSchema), []),
 	}),
 	v.description("Impact case study"),
 	v.metadata({ ref: "ImpactCaseStudy" }),

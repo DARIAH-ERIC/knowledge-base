@@ -8,74 +8,9 @@ import type { Database, Transaction } from "@/middlewares/db";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
-const projectWithLinksQuery = {
-	columns: {
-		id: true,
-		name: true,
-		summary: true,
-		duration: true,
-		call: true,
-		funders: true,
-		topic: true,
-		funding: true,
-	},
-	with: {
-		entity: {
-			columns: {
-				slug: true,
-				updatedAt: true,
-			},
-		},
-		image: {
-			columns: {
-				key: true,
-			},
-		},
-		partners: {
-			columns: {
-				roleId: true,
-			},
-			with: {
-				unit: {
-					columns: {
-						id: true,
-						name: true,
-					},
-					with: {
-						type: {
-							columns: {
-								type: true,
-							},
-						},
-					},
-				},
-			},
-		},
-		scope: {
-			columns: {
-				scope: true,
-			},
-		},
-		socialMedia: {
-			columns: {
-				id: true,
-				url: true,
-			},
-			with: {
-				type: {
-					columns: {
-						type: true,
-					},
-				},
-			},
-		},
-	},
-} as const;
-
 function mapItem<
 	T extends {
 		image: { key: string } | null;
-		partners: Array<{ roleId: string; unit: { id: string; name: string; type: { type: string } } }>;
 		socialMedia: Array<{
 			id: string;
 			url: string;
@@ -93,10 +28,6 @@ function mapItem<
 				})
 			: null;
 
-	const institutions = item.partners.map(({ roleId, unit }) => {
-		return { id: unit.id, name: unit.name, type: unit.type.type, roleId };
-	});
-
 	const duration = {
 		start: item.duration.start.toISOString(),
 		end: item.duration.end?.toISOString(),
@@ -109,13 +40,10 @@ function mapItem<
 		};
 	});
 
-	const { partners: _, ...rest } = item;
-
 	return {
-		...rest,
+		...item,
 		duration,
 		image,
-		institutions,
 		socialMedia,
 		publishedAt: item.entity.updatedAt.toISOString(),
 	};
@@ -145,7 +73,73 @@ export async function getDariahProjects(
 					},
 				},
 			},
-			...projectWithLinksQuery,
+			columns: {
+				id: true,
+				name: true,
+				summary: true,
+				duration: true,
+				call: true,
+				topic: true,
+				funding: true,
+			},
+			with: {
+				entity: {
+					columns: {
+						slug: true,
+						updatedAt: true,
+					},
+				},
+				image: {
+					columns: {
+						key: true,
+					},
+				},
+				scope: {
+					columns: {
+						scope: true,
+					},
+				},
+				socialMedia: {
+					columns: {
+						id: true,
+						url: true,
+					},
+					with: {
+						type: {
+							columns: {
+								type: true,
+							},
+						},
+					},
+				},
+				projectsToOrganisationalUnits: {
+					where: {
+						role: {
+							role: {
+								in: ["coordinator", "participant"],
+							},
+						},
+					},
+					columns: {},
+					with: {
+						unit: {
+							columns: {},
+							with: {
+								type: {
+									columns: {
+										type: true,
+									},
+								},
+							},
+						},
+						role: {
+							columns: {
+								role: true,
+							},
+						},
+					},
+				},
+			},
 			orderBy(t, { desc, sql }) {
 				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
 			},
@@ -163,7 +157,17 @@ export async function getDariahProjects(
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		return mapItem(item, imageWidth.preview);
+		const { projectsToOrganisationalUnits, ...rest } = item;
+
+		const role =
+			projectsToOrganisationalUnits.find((r) => {
+				return r.unit.type.type === "umbrella_consortium";
+			})?.role.role ?? null;
+
+		return {
+			...mapItem(rest, imageWidth.preview),
+			role,
+		};
 	});
 
 	return { data, limit, offset, total };
@@ -191,7 +195,89 @@ export async function getDariahProjectById(
 					},
 				},
 			},
-			...projectWithLinksQuery,
+			columns: {
+				id: true,
+				name: true,
+				summary: true,
+				duration: true,
+				call: true,
+				topic: true,
+				funding: true,
+			},
+			with: {
+				entity: {
+					columns: {
+						slug: true,
+						updatedAt: true,
+					},
+				},
+				image: {
+					columns: {
+						key: true,
+					},
+				},
+				scope: {
+					columns: {
+						scope: true,
+					},
+				},
+				socialMedia: {
+					columns: {
+						id: true,
+						url: true,
+					},
+					with: {
+						type: {
+							columns: {
+								type: true,
+							},
+						},
+					},
+				},
+				projectsToOrganisationalUnits: {
+					where: {
+						role: {
+							role: {
+								in: ["coordinator", "participant"],
+							},
+						},
+					},
+					columns: {},
+					with: {
+						unit: {
+							columns: {
+								id: true,
+								acronym: true,
+								name: true,
+							},
+							with: {
+								socialMedia: {
+									columns: {
+										url: true,
+									},
+									with: {
+										type: {
+											columns: {
+												type: true,
+											},
+										},
+									},
+								},
+								type: {
+									columns: {
+										type: true,
+									},
+								},
+							},
+						},
+						role: {
+							columns: {
+								role: true,
+							},
+						},
+					},
+				},
+			},
 		}),
 		getContentBlocks(db, id),
 	]);
@@ -200,7 +286,36 @@ export async function getDariahProjectById(
 		return null;
 	}
 
-	return { ...mapItem(item, imageWidth.featured), ...fields };
+	const { projectsToOrganisationalUnits, ...rest } = item;
+
+	const participants = projectsToOrganisationalUnits
+		.filter((r) => {
+			return r.role.role === "participant";
+		})
+		.map((r) => {
+			return {
+				...r.unit,
+				type: r.unit.type.type,
+			};
+		});
+
+	const coordinators = projectsToOrganisationalUnits
+		.filter((r) => {
+			return r.role.role === "coordinator";
+		})
+		.map((r) => {
+			return {
+				...r.unit,
+				type: r.unit.type.type,
+			};
+		});
+
+	return {
+		...mapItem(rest, imageWidth.featured),
+		...fields,
+		participants,
+		coordinators,
+	};
 }
 
 //
@@ -281,7 +396,89 @@ export async function getDariahProjectBySlug(
 				},
 			},
 		},
-		...projectWithLinksQuery,
+		columns: {
+			id: true,
+			name: true,
+			summary: true,
+			duration: true,
+			call: true,
+			topic: true,
+			funding: true,
+		},
+		with: {
+			entity: {
+				columns: {
+					slug: true,
+					updatedAt: true,
+				},
+			},
+			image: {
+				columns: {
+					key: true,
+				},
+			},
+			scope: {
+				columns: {
+					scope: true,
+				},
+			},
+			socialMedia: {
+				columns: {
+					id: true,
+					url: true,
+				},
+				with: {
+					type: {
+						columns: {
+							type: true,
+						},
+					},
+				},
+			},
+			projectsToOrganisationalUnits: {
+				where: {
+					role: {
+						role: {
+							in: ["coordinator", "participant"],
+						},
+					},
+				},
+				columns: {},
+				with: {
+					unit: {
+						columns: {
+							id: true,
+							acronym: true,
+							name: true,
+						},
+						with: {
+							socialMedia: {
+								columns: {
+									url: true,
+								},
+								with: {
+									type: {
+										columns: {
+											type: true,
+										},
+									},
+								},
+							},
+							type: {
+								columns: {
+									type: true,
+								},
+							},
+						},
+					},
+					role: {
+						columns: {
+							role: true,
+						},
+					},
+				},
+			},
+		},
 	});
 
 	if (item == null) {
@@ -290,5 +487,34 @@ export async function getDariahProjectBySlug(
 
 	const fields = await getContentBlocks(db, item.id);
 
-	return { ...mapItem(item, imageWidth.featured), ...fields };
+	const { projectsToOrganisationalUnits, ...rest } = item;
+
+	const participants = projectsToOrganisationalUnits
+		.filter((r) => {
+			return r.role.role === "participant";
+		})
+		.map((r) => {
+			return {
+				...r.unit,
+				type: r.unit.type.type,
+			};
+		});
+
+	const coordinators = projectsToOrganisationalUnits
+		.filter((r) => {
+			return r.role.role === "coordinator";
+		})
+		.map((r) => {
+			return {
+				...r.unit,
+				type: r.unit.type.type,
+			};
+		});
+
+	return {
+		...mapItem(rest, imageWidth.featured),
+		...fields,
+		participants,
+		coordinators,
+	};
 }

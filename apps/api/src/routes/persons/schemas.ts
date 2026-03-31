@@ -31,7 +31,7 @@ export const PersonSchema = v.pipe(
 		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
-		biography: v.array(ContentBlockSchema),
+		biography: v.optional(v.array(ContentBlockSchema), []),
 	}),
 	v.description("Person"),
 	v.metadata({ ref: "Person" }),

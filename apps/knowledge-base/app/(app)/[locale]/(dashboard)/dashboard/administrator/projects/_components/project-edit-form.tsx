@@ -13,7 +13,7 @@ interface ProjectEditFormProps {
 	assets: Array<{ key: string; label: string; url: string }>;
 	project: Pick<
 		schema.Project,
-		"acronym" | "call" | "duration" | "funders" | "funding" | "id" | "name" | "summary" | "topic"
+		"acronym" | "call" | "duration" | "funding" | "id" | "name" | "summary" | "topic"
 	> & {
 		description?: JSONContent;
 		entity: Pick<schema.Entity, "documentId" | "slug"> & {

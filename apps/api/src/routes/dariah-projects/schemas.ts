@@ -4,17 +4,20 @@ import * as v from "valibot";
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
-export const DariahProjectInstitutionSchema = v.pipe(
+export const DariahProjectOrganisationalUnitsSchema = v.pipe(
 	v.object({
-		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name"]).entries,
+		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "acronym", "name"]).entries,
+		socialMedia: v.array(
+			v.object({
+				url: v.string(),
+				type: v.picklist(schema.socialMediaTypesEnum),
+			}),
+		),
 		type: v.picklist(schema.organisationalUnitTypesEnum),
-		roleId: v.pipe(v.string(), v.uuid()),
 	}),
 	v.description("DARIAH project institution"),
 	v.metadata({ ref: "DariahProjectInstitution" }),
 );
-
-export type DariahProjectInstitution = v.InferOutput<typeof DariahProjectInstitutionSchema>;
 
 export const DariahProjectSocialMediaSchema = v.pipe(
 	v.object({
@@ -27,24 +30,17 @@ export const DariahProjectSocialMediaSchema = v.pipe(
 
 export const DariahProjectBaseSchema = v.pipe(
 	v.object({
-		...v.pick(schema.ProjectSelectSchema, [
-			"id",
-			"name",
-			"summary",
-			"call",
-			"funders",
-			"topic",
-			"funding",
-		]).entries,
+		...v.pick(schema.ProjectSelectSchema, ["id", "name", "summary", "call", "topic", "funding"])
+			.entries,
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
 			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
 		image: v.nullable(v.object({ url: v.string() })),
-		institutions: v.array(DariahProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
 		socialMedia: v.array(DariahProjectSocialMediaSchema),
+		role: v.nullable(v.picklist(schema.projectRolesEnum)),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 	}),
 	v.description("DARIAH project"),
@@ -63,26 +59,20 @@ export type DariahProjectList = v.InferOutput<typeof DariahProjectListSchema>;
 
 export const DariahProjectSchema = v.pipe(
 	v.object({
-		...v.pick(schema.ProjectSelectSchema, [
-			"id",
-			"name",
-			"summary",
-			"call",
-			"funders",
-			"topic",
-			"funding",
-		]).entries,
+		...v.pick(schema.ProjectSelectSchema, ["id", "name", "summary", "call", "topic", "funding"])
+			.entries,
 		image: v.nullable(v.object({ url: v.string() })),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
 			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 		}),
-		institutions: v.array(DariahProjectInstitutionSchema),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		scope: v.object({ scope: v.picklist(schema.projectScopesEnum) }),
 		socialMedia: v.array(DariahProjectSocialMediaSchema),
+		participants: v.array(DariahProjectOrganisationalUnitsSchema),
+		coordinators: v.array(DariahProjectOrganisationalUnitsSchema),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
-		description: v.array(ContentBlockSchema),
+		description: v.optional(v.array(ContentBlockSchema), []),
 	}),
 	v.description("DARIAH project"),
 	v.metadata({ ref: "DariahProject" }),

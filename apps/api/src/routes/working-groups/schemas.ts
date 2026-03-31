@@ -63,7 +63,7 @@ export const WorkingGroupSchema = v.pipe(
 				type: v.picklist(schema.socialMediaTypesEnum),
 			}),
 		),
-		description: v.array(ContentBlockSchema),
+		description: v.optional(v.array(ContentBlockSchema), []),
 	}),
 	v.description("Working group"),
 	v.metadata({ ref: "WorkingGroup" }),
