@@ -2,6 +2,8 @@ import type { ImageUrlOptions } from "@/lib/images";
 
 export const imageMimeTypes = ["image/jpeg", "image/png"] as const;
 
+export const mediaLibraryPageSize = 20;
+
 export const imageSizeLimit = 4 * 1024 * 1024; /** 4 MB */
 
 export const imageGridOptions: ImageUrlOptions = {

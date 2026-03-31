@@ -39,6 +39,7 @@ export class WebsiteImpactCaseStudiesPage {
 	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Select image" }).click();
 		await this.page.waitForSelector('[role="dialog"]');
+		await this.page.waitForSelector('[role="gridcell"]');
 		await this.page.getByRole("gridcell", { name: assetLabel }).click();
 		await this.page.getByRole("dialog").getByRole("button", { name: "Select" }).click();
 	}

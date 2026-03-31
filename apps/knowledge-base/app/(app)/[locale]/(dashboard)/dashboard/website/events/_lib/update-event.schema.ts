@@ -7,8 +7,11 @@ import * as v from "valibot";
 
 export const UpdateEventActionInputSchema = v.object({
 	...v.pick(EventSelectSchema, ["id"]).entries,
-	...v.pick(EventUpdateSchema, ["title"]).entries,
-	...v.pick(EventUpdateSchema, ["summary"]).entries,
+	...v.pick(EventUpdateSchema, ["title", "summary", "location", "website"]).entries,
+	duration: v.object({
+		start: v.pipe(v.string(), v.isoDate(), v.toDate()),
+		end: v.optional(v.pipe(v.string(), v.isoDate(), v.toDate())),
+	}),
 	imageKey: v.pipe(v.string(), v.nonEmpty()),
 	contentBlocks: v.optional(
 		v.array(

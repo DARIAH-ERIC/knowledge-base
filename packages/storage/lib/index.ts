@@ -2,12 +2,8 @@ import type { Readable } from "node:stream";
 
 import { type BucketItem, Client, type ItemBucketMetadata } from "minio";
 
-import { assetPrefixes, presignedUrlExpirySeconds } from "../config/images.config";
+import { type AssetPrefix, presignedUrlExpirySeconds } from "../config/images.config";
 import { generateObjectKey } from "./generate-object-key";
-
-export { assetPrefixes };
-
-export type AssetPrefix = (typeof assetPrefixes)[number];
 
 export interface AssetMetadata extends ItemBucketMetadata {
 	"content-type": string;

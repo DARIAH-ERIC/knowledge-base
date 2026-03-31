@@ -15,7 +15,11 @@ dotenv({
 
 const E2E_ADMIN_EMAIL = "e2e-admin@example.com";
 const E2E_ADMIN_NAME = "E2E Admin";
-const E2E_TEST_ASSET_KEY = "e2e-test-asset";
+const E2E_TEST_ASSET_KEYS: Array<{ key: string; label: string }> = [
+	{ key: "avatars/e2e-test-asset", label: "E2E Test Asset" },
+	{ key: "images/e2e-test-asset", label: "E2E Test Asset" },
+	{ key: "logos/e2e-test-asset", label: "E2E Test Asset" },
+];
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 30;
 
 function encrypt(data: Buffer, key: Buffer): Buffer {
@@ -90,17 +94,19 @@ export default async function globalSetup(): Promise<void> {
 
 		const userId = existingUser.id;
 
-		const existingAsset = await db.query.assets.findFirst({
-			where: { key: E2E_TEST_ASSET_KEY },
-			columns: { id: true },
-		});
-
-		if (existingAsset == null) {
-			await db.insert(schema.assets).values({
-				key: E2E_TEST_ASSET_KEY,
-				label: "E2E Test Asset",
-				mimeType: "image/jpeg",
+		for (const { key, label } of E2E_TEST_ASSET_KEYS) {
+			const existingAsset = await db.query.assets.findFirst({
+				where: { key },
+				columns: { id: true },
 			});
+
+			if (existingAsset == null) {
+				await db.insert(schema.assets).values({
+					key,
+					label,
+					mimeType: "image/jpeg",
+				});
+			}
 		}
 
 		await db.delete(schema.sessions).where(eq(schema.sessions.userId, userId));

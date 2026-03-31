@@ -11,13 +11,15 @@ import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { UploadImageInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.schema";
+import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { uploadAsset } from "@/lib/data/assets";
 import { getIntlLanguage } from "@/lib/i18n/locales";
+import { images } from "@/lib/images";
 import { createServerAction } from "@/lib/server/create-server-action";
 
 export const uploadImageAction = createServerAction<
-	{ key: string },
+	{ key: string; url: string },
 	GetValidationErrors<typeof UploadImageInputSchema>
 >(async function uploadImageAction(state, formData) {
 	const locale = await getLocale();
@@ -44,9 +46,13 @@ export const uploadImageAction = createServerAction<
 	const { file, licenseId, prefix, label, alt, caption } = validation.output;
 
 	const { key } = await uploadAsset({ file, licenseId, prefix, label, alt, caption });
+	const { url } = images.generateSignedImageUrl({ key, options: imageGridOptions });
 
 	revalidatePath("/[locale]/dashboard/website/assets", "page");
 	revalidatePath("/[locale]/dashboard/administrator/persons", "layout");
 
-	return createActionStateSuccess({ message: t("Successfully uploaded image."), data: { key } });
+	return createActionStateSuccess({
+		message: t("Successfully uploaded image."),
+		data: { key, url },
+	});
 });
