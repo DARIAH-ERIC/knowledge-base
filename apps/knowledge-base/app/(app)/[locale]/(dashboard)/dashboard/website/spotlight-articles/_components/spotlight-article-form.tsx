@@ -110,7 +110,7 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 
 				<Separator className="my-6" />
 
-				<FormSection description={t("Add the content.")} title={t("Content")} variant="centered">
+				<FormSection description={t("Add the content.")} title={t("Content")} variant="stacked">
 					<ContentBlocks items={contentBlocks ?? []} />
 				</FormSection>
 

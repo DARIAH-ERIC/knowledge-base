@@ -118,7 +118,7 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 				<FormSection
 					description={t("Add a short biography.")}
 					title={t("Biography")}
-					variant="centered"
+					variant="stacked"
 				>
 					<RichTextEditor content={person?.biography} name="biography" />
 				</FormSection>

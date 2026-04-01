@@ -110,7 +110,7 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 
 				<Separator className="my-6" />
 
-				<FormSection description={t("Add the content.")} title={t("Content")} variant="centered">
+				<FormSection description={t("Add the content.")} title={t("Content")} variant="stacked">
 					<ContentBlocks items={contentBlocks ?? []} />
 				</FormSection>
 

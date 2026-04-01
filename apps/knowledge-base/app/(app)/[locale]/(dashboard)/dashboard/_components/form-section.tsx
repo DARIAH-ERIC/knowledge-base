@@ -2,7 +2,7 @@ import { Description } from "@dariah-eric/ui/field";
 import { createContext, Fragment, type ReactNode, use } from "react";
 import { twMerge } from "tailwind-merge";
 
-type FormLayoutVariant = "two-column" | "centered";
+type FormLayoutVariant = "two-column" | "stacked";
 
 const FormLayoutContext = createContext<FormLayoutVariant>("two-column");
 
@@ -42,9 +42,9 @@ export function FormSection({
 	const contextVariant = use(FormLayoutContext);
 	const variant = variantProp ?? contextVariant;
 
-	if (variant === "centered") {
+	if (variant === "stacked") {
 		return (
-			<section className={twMerge("flex flex-col gap-y-6", className)} {...props}>
+			<section className={twMerge("flex flex-col gap-y-6 max-w-3xl", className)} {...props}>
 				{title != null || description != null ? (
 					<div className="space-y-1">
 						{title != null ? <FormSectionTitle title={title} /> : null}

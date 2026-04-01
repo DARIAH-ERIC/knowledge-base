@@ -391,7 +391,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 				<FormSection
 					description={t("Add a short description.")}
 					title={t("Description")}
-					variant="centered"
+					variant="stacked"
 				>
 					<RichTextEditor
 						aria-label={t("Description")}
