@@ -356,11 +356,12 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 				)}
 				<MediaLibraryDialog
 					assets={assets}
+					defaultPrefix="logos"
 					onSelect={(key, url) => {
 						setSelectedImage({ key, url });
 						setImageKeyError(false);
 					}}
-					prefix="logos"
+					prefixes={["logos"]}
 				/>
 
 				<input

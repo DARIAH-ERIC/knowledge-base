@@ -79,9 +79,11 @@ export function ImpactCaseStudyForm(props: Readonly<ImpactCaseStudyFormProps>): 
 				)}
 				<MediaLibraryDialog
 					assets={assets}
+					defaultPrefix="images"
 					onSelect={(key, url) => {
 						setSelectedImage({ key, url });
 					}}
+					prefixes={["avatars", "images", "logos"]}
 				/>
 
 				<input

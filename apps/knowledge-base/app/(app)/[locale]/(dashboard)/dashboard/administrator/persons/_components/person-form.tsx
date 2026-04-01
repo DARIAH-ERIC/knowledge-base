@@ -84,10 +84,11 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 				)}
 				<MediaLibraryDialog
 					assets={assets}
+					defaultPrefix="avatars"
 					onSelect={(key, url) => {
 						setSelectedImage({ key, url });
 					}}
-					prefix="avatars"
+					prefixes={["avatars"]}
 				/>
 
 				<input

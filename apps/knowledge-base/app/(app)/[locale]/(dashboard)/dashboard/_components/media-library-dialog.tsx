@@ -1,7 +1,7 @@
 "use client";
 
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { type AssetPrefix, assetPrefixes } from "@dariah-eric/storage/config";
+import type { AssetPrefix } from "@dariah-eric/storage/config";
 import { Button } from "@dariah-eric/ui/button";
 import { Label } from "@dariah-eric/ui/field";
 import { GridList, GridListItem } from "@dariah-eric/ui/grid-list";
@@ -22,7 +22,7 @@ import { Fragment, type ReactNode, useRef, useState, useTransition } from "react
 import { FileTrigger, type Selection } from "react-aria-components";
 
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
-import { mediaLibraryPageSize } from "@/config/assets.config";
+import { imageMimeTypes, mediaLibraryPageSize } from "@/config/assets.config";
 
 interface Asset {
 	key: string;
@@ -30,16 +30,26 @@ interface Asset {
 	url: string;
 }
 
-interface MediaLibraryDialogProps {
+interface MediaLibraryDialogProps<T extends AssetPrefix> {
+	acceptedFileTypes?: ReadonlyArray<string>;
 	assets: Array<Asset>;
 	onSelect: (key: string, url: string) => void;
-	prefix?: AssetPrefix;
+	defaultPrefix: T;
+	prefixes: ReadonlyArray<T>;
 }
 
 type ActiveTab = "select" | "upload";
 
-export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): ReactNode {
-	const { assets: initialAssets, onSelect, prefix = "images" } = props;
+export function MediaLibraryDialog<T extends AssetPrefix>(
+	props: Readonly<MediaLibraryDialogProps<T>>,
+): ReactNode {
+	const {
+		acceptedFileTypes = imageMimeTypes,
+		assets: initialAssets,
+		defaultPrefix,
+		onSelect,
+		prefixes,
+	} = props;
 
 	const t = useExtracted();
 
@@ -52,7 +62,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 	});
 	const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
 	const [displayedAssets, setDisplayedAssets] = useState<Array<Asset>>(initialAssets);
-	const [selectedPrefix, setSelectedPrefix] = useState<AssetPrefix>(prefix);
+	const [selectedPrefix, setSelectedPrefix] = useState<T>(defaultPrefix);
 	const [offset, setOffset] = useState<number>(0);
 	const [appliedQ, setAppliedQ] = useState("");
 	const [isFetching, startFetching] = useTransition();
@@ -68,11 +78,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 	const hasPrev = offset > 0;
 	const hasNext = displayedAssets.length === mediaLibraryPageSize;
 
-	async function fetchPage(
-		newOffset: number,
-		q: string,
-		fetchPrefix: AssetPrefix,
-	): Promise<Array<Asset>> {
+	async function fetchPage(newOffset: number, q: string, fetchPrefix: T): Promise<Array<Asset>> {
 		const params = new URLSearchParams({ prefix: fetchPrefix });
 		if (q) {
 			params.set("q", q);
@@ -97,7 +103,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 	function handleOpen() {
 		setIsOpen(true);
 		setActiveTab("select");
-		setSelectedPrefix(prefix);
+		setSelectedPrefix(defaultPrefix);
 		setOffset(0);
 		setAppliedQ("");
 		setSelectedKeys(new Set());
@@ -106,7 +112,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 			searchInputRef.current.value = "";
 		}
 		startFetching(async () => {
-			const items = await fetchPage(0, "", prefix);
+			const items = await fetchPage(0, "", defaultPrefix);
 			setDisplayedAssets(items);
 		});
 	}
@@ -118,7 +124,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 		}
 	}
 
-	function handlePrefixChange(newPrefix: AssetPrefix) {
+	function handlePrefixChange(newPrefix: T) {
 		setSelectedPrefix(newPrefix);
 		setOffset(0);
 		setAppliedQ("");
@@ -243,7 +249,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 
 						<TabPanel className="flex flex-1 flex-col gap-3 min-h-0" id="select">
 							<div className="flex gap-2">
-								{assetPrefixes.map((p) => {
+								{prefixes.map((p) => {
 									return (
 										<Button
 											key={p}
@@ -339,7 +345,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 								<div className="flex flex-col gap-4">
 									<div className="flex items-start gap-4">
 										<FileTrigger
-											acceptedFileTypes={["image/jpeg", "image/png"]}
+											acceptedFileTypes={acceptedFileTypes as Array<string>}
 											onSelect={handleFileChoose}
 										>
 											<Button intent="outline" type="button">
