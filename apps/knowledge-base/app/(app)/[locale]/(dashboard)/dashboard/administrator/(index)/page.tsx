@@ -1,10 +1,15 @@
+import { Heading } from "@dariah-eric/ui/heading";
 import type { Metadata, ResolvingMetadata } from "next";
 import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
-import { Main } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/main";
-import { TableExample } from "@/components/ui/table-example";
+import {
+	Header,
+	HeaderContent,
+	HeaderDescription,
+	HeaderTitle,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorPageProps extends PageProps<"/[locale]/dashboard/administrator"> {}
@@ -28,11 +33,19 @@ export default function DashboardAdministratorPage(
 	const t = useExtracted();
 
 	return (
-		<Main className="flex-1">
-			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">
-				{t("Administrator dashboard")}
-			</h1>
-			<TableExample />
-		</Main>
+		<Fragment>
+			<Heading>{t("Administrator dashboard")}</Heading>
+			<Header className="my-(--layout-gutter) border-t">
+				<HeaderContent>
+					<HeaderTitle>{t("Lorem ipsum")}</HeaderTitle>
+					<HeaderDescription>
+						{t(
+							"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+						)}
+					</HeaderDescription>
+				</HeaderContent>
+			</Header>
+			<div className="grid grid-cols-1 gap-2 md:grid-cols-2"></div>
+		</Fragment>
 	);
 }

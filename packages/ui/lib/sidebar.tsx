@@ -49,7 +49,7 @@ import { Tooltip, TooltipContent } from "@/lib/tooltip";
 import { TreeIndicator } from "@/lib/tree";
 import { useIsMobile } from "@/lib/use-mobile";
 
-const SIDEBAR_WIDTH = "17rem";
+const SIDEBAR_WIDTH = "18rem";
 const SIDEBAR_WIDTH_DOCK = "3.25rem";
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;

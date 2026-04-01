@@ -53,6 +53,7 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 	return (
 		<Fragment>
 			<Button
+				className="min-w-max"
 				intent="secondary"
 				onPress={() => {
 					setIsOpen(true);
