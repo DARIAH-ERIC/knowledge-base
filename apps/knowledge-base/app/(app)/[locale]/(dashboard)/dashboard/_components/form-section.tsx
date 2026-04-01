@@ -1,10 +1,34 @@
 import { Description } from "@dariah-eric/ui/field";
-import { Fragment, type ReactNode } from "react";
+import { createContext, Fragment, type ReactNode, use } from "react";
 import { twMerge } from "tailwind-merge";
+
+type FormLayoutVariant = "two-column" | "stacked";
+
+const FormLayoutContext = createContext<FormLayoutVariant>("two-column");
+
+interface FormLayoutProps extends React.ComponentProps<"div"> {
+	variant?: FormLayoutVariant;
+}
+
+export function FormLayout({
+	variant = "two-column",
+	children,
+	className,
+	...props
+}: Readonly<FormLayoutProps>): ReactNode {
+	return (
+		<FormLayoutContext value={variant}>
+			<div className={className} {...props}>
+				{children}
+			</div>
+		</FormLayoutContext>
+	);
+}
 
 interface FormSectionProps extends React.ComponentProps<"section"> {
 	title?: string;
 	description?: string;
+	variant?: FormLayoutVariant;
 }
 
 export function FormSection({
@@ -12,8 +36,26 @@ export function FormSection({
 	description,
 	children,
 	className,
+	variant: variantProp,
 	...props
 }: Readonly<FormSectionProps>): ReactNode {
+	const contextVariant = use(FormLayoutContext);
+	const variant = variantProp ?? contextVariant;
+
+	if (variant === "stacked") {
+		return (
+			<section className={twMerge("flex flex-col gap-y-6 max-w-3xl", className)} {...props}>
+				{title != null || description != null ? (
+					<div className="space-y-1">
+						{title != null ? <FormSectionTitle title={title} /> : null}
+						{description != null ? <Description>{description}</Description> : null}
+					</div>
+				) : null}
+				{children}
+			</section>
+		);
+	}
+
 	return (
 		<section className={twMerge("grid gap-x-8 gap-y-6 sm:grid-cols-2", className)} {...props}>
 			{title != null || description != null ? (
