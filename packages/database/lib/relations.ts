@@ -412,7 +412,7 @@ export const relations = defineRelations(schema, (r) => {
 			software: r.many.software({
 				from: r.socialMedia.id.through(r.softwareToSocialMedia.socialMediaId),
 				to: r.software.id.through(r.softwareToSocialMedia.softwareId),
-      }),
+			}),
 			services: r.many.services({
 				from: r.socialMedia.id.through(r.servicesToSocialMedia.socialMediaId),
 				to: r.services.id.through(r.servicesToSocialMedia.serviceId),

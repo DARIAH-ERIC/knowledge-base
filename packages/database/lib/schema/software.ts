@@ -40,10 +40,8 @@ export const software = p.pgTable("software", {
 		.references(() => {
 			return softwareStatuses.id;
 		}),
-	...f.timestamps(),
-
-	// FIXME: TBD
 	comment: p.text("comment"),
+	...f.timestamps(),
 });
 
 export type Software = typeof software.$inferSelect;
