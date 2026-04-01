@@ -1,7 +1,7 @@
 "use client";
 
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { type AssetPrefix, assetPrefixes } from "@dariah-eric/storage/config";
+import type { AssetPrefix } from "@dariah-eric/storage/config";
 import { Button } from "@dariah-eric/ui/button";
 import { Label } from "@dariah-eric/ui/field";
 import { GridList, GridListItem } from "@dariah-eric/ui/grid-list";
@@ -30,23 +30,25 @@ interface Asset {
 	url: string;
 }
 
-interface MediaLibraryDialogProps {
+interface MediaLibraryDialogProps<T extends AssetPrefix> {
 	acceptedFileTypes?: ReadonlyArray<string>;
 	assets: Array<Asset>;
 	onSelect: (key: string, url: string) => void;
-	prefix?: AssetPrefix;
-	prefixes?: ReadonlyArray<AssetPrefix>;
+	defaultPrefix: T;
+	prefixes: ReadonlyArray<T>;
 }
 
 type ActiveTab = "select" | "upload";
 
-export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): ReactNode {
+export function MediaLibraryDialog<T extends AssetPrefix>(
+	props: Readonly<MediaLibraryDialogProps<T>>,
+): ReactNode {
 	const {
 		acceptedFileTypes = imageMimeTypes,
 		assets: initialAssets,
+		defaultPrefix,
 		onSelect,
-		prefix = "images",
-		prefixes = assetPrefixes,
+		prefixes,
 	} = props;
 
 	const t = useExtracted();
@@ -60,7 +62,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 	});
 	const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
 	const [displayedAssets, setDisplayedAssets] = useState<Array<Asset>>(initialAssets);
-	const [selectedPrefix, setSelectedPrefix] = useState<AssetPrefix>(prefix);
+	const [selectedPrefix, setSelectedPrefix] = useState<T>(defaultPrefix);
 	const [offset, setOffset] = useState<number>(0);
 	const [appliedQ, setAppliedQ] = useState("");
 	const [isFetching, startFetching] = useTransition();
@@ -76,11 +78,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 	const hasPrev = offset > 0;
 	const hasNext = displayedAssets.length === mediaLibraryPageSize;
 
-	async function fetchPage(
-		newOffset: number,
-		q: string,
-		fetchPrefix: AssetPrefix,
-	): Promise<Array<Asset>> {
+	async function fetchPage(newOffset: number, q: string, fetchPrefix: T): Promise<Array<Asset>> {
 		const params = new URLSearchParams({ prefix: fetchPrefix });
 		if (q) {
 			params.set("q", q);
@@ -105,7 +103,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 	function handleOpen() {
 		setIsOpen(true);
 		setActiveTab("select");
-		setSelectedPrefix(prefix);
+		setSelectedPrefix(defaultPrefix);
 		setOffset(0);
 		setAppliedQ("");
 		setSelectedKeys(new Set());
@@ -114,7 +112,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 			searchInputRef.current.value = "";
 		}
 		startFetching(async () => {
-			const items = await fetchPage(0, "", prefix);
+			const items = await fetchPage(0, "", defaultPrefix);
 			setDisplayedAssets(items);
 		});
 	}
@@ -126,7 +124,7 @@ export function MediaLibraryDialog(props: Readonly<MediaLibraryDialogProps>): Re
 		}
 	}
 
-	function handlePrefixChange(newPrefix: AssetPrefix) {
+	function handlePrefixChange(newPrefix: T) {
 		setSelectedPrefix(newPrefix);
 		setOffset(0);
 		setAppliedQ("");

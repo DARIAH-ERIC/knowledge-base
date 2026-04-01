@@ -79,9 +79,11 @@ export function NewsItemForm(props: Readonly<NewsItemFormProps>): ReactNode {
 				)}
 				<MediaLibraryDialog
 					assets={assets}
+					defaultPrefix="images"
 					onSelect={(key, url) => {
 						setSelectedImage({ key, url });
 					}}
+					prefixes={["avatars", "images", "logos"]}
 				/>
 
 				<input

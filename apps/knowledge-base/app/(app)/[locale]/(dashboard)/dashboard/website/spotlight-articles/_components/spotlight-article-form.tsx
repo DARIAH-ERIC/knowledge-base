@@ -79,9 +79,11 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 				)}
 				<MediaLibraryDialog
 					assets={assets}
+					defaultPrefix="images"
 					onSelect={(key, url) => {
 						setSelectedImage({ key, url });
 					}}
+					prefixes={["avatars", "images", "logos"]}
 				/>
 
 				<input

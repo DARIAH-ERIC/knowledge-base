@@ -133,9 +133,11 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 				)}
 				<MediaLibraryDialog
 					assets={assets}
+					defaultPrefix="images"
 					onSelect={(key, url) => {
 						setSelectedImage({ key, url });
 					}}
+					prefixes={["avatars", "images", "logos"]}
 				/>
 
 				<input
