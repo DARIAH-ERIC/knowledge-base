@@ -31,8 +31,8 @@ export function DocumentOrPolicyEditForm(
 			<DocumentOrPolicyForm
 				assets={assets}
 				contentBlocks={contentBlocks}
-				formAction={updateDocumentOrPolicyAction}
 				documentOrPolicy={documentOrPolicy}
+				formAction={updateDocumentOrPolicyAction}
 			/>
 		</Fragment>
 	);

@@ -92,7 +92,7 @@ export const createDocumentOrPolicyAction = createServerAction(
 				documentId: asset.id,
 				title,
 				summary,
-				url: url && url.length > 0 ? url : null,
+				url: url != null && url.length > 0 ? url : null,
 			});
 
 			const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({

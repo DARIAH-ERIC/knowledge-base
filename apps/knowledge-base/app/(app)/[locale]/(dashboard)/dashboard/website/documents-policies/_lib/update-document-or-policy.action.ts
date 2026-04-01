@@ -56,7 +56,7 @@ export const updateDocumentOrPolicyAction = createServerAction(
 
 			await tx
 				.update(schema.documentsPolicies)
-				.set({ documentId, title, summary, url: url && url.length > 0 ? url : null })
+				.set({ documentId, title, summary, url: url != null && url.length > 0 ? url : null })
 				.where(eq(schema.documentsPolicies.id, id));
 
 			const contentField = await tx.query.fields.findFirst({
