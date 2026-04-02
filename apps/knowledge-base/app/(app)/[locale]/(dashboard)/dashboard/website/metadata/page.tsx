@@ -3,8 +3,12 @@ import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
-import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { TableExample } from "@/components/ui/table-example";
+import {
+	Header,
+	HeaderContent,
+	HeaderDescription,
+	HeaderTitle,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteMetadataPageProps extends PageProps<"/[locale]/dashboard/website/metadata"> {}
@@ -28,11 +32,11 @@ export default function DashboardWebsiteMetadataPage(
 	const t = useExtracted();
 
 	return (
-		<Main className="flex-1">
-			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">
-				{t("Metadata")}
-			</h1>
-			<TableExample />
-		</Main>
+		<Header>
+			<HeaderContent>
+				<HeaderTitle>{t("Website metadata")}</HeaderTitle>
+				<HeaderDescription>{t("Manage website metadata.")}</HeaderDescription>
+			</HeaderContent>
+		</Header>
 	);
 }

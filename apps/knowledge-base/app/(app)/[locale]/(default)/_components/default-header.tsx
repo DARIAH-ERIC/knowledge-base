@@ -50,7 +50,9 @@ async function User(): Promise<ReactNode> {
 	if (session == null) {
 		return (
 			<div>
-				<Link href="/auth/sign-in">{t("Sign in")}</Link>
+				<Link className="inline-block" href="/auth/sign-in">
+					{t("Sign in")}
+				</Link>
 			</div>
 		);
 	}

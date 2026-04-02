@@ -3,8 +3,12 @@ import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
-import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
-import { TableExample } from "@/components/ui/table-example";
+import {
+	Header,
+	HeaderContent,
+	HeaderDescription,
+	HeaderTitle,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorNationalConsortiaPageProps extends PageProps<"/[locale]/dashboard/administrator/national-consortia"> {}
@@ -28,11 +32,13 @@ export default function DashboardAdministratorNationalConsortiaPage(
 	const t = useExtracted();
 
 	return (
-		<Main className="flex-1">
-			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">
-				{t("Consortia")}
-			</h1>
-			<TableExample />
-		</Main>
+		<Header>
+			<HeaderContent>
+				<HeaderTitle>{t("National consortia")}</HeaderTitle>
+				<HeaderDescription>
+					{t("Manage all national consortia in the DARIAH knowledge base.")}
+				</HeaderDescription>
+			</HeaderContent>
+		</Header>
 	);
 }

@@ -74,12 +74,6 @@ export const sidebarMenu = [
 				icon: <ListBulletIcon />,
 			},
 			{
-				href: "/dashboard/administrator/reports",
-				tooltip: "Reports",
-				label: "Reports",
-				icon: <ListBulletIcon />,
-			},
-			{
 				href: "/dashboard/administrator/services",
 				tooltip: "Services",
 				label: "Services",
@@ -109,6 +103,17 @@ export const sidebarMenu = [
 				label: "Working groups",
 				icon: <ListBulletIcon />,
 			},
+		],
+	},
+	{
+		title: "Reports",
+		items: [
+			{
+				href: "/dashboard/administrator/reports",
+				tooltip: "National consortia reports",
+				label: "National consortia reports",
+				icon: <ListBulletIcon />,
+			},
 			{
 				href: "/dashboard/administrator/working-group-reports",
 				tooltip: "Working groups reports",
@@ -130,6 +135,12 @@ export const sidebarMenu = [
 				href: "/dashboard/website/assets",
 				tooltip: "Assets",
 				label: "Assets",
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/website/documents-policies",
+				tooltip: "Documents and policies",
+				label: "Documents and policies",
 				icon: <ListBulletIcon />,
 			},
 			{

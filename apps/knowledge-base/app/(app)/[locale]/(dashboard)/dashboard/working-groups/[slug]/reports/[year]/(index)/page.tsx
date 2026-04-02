@@ -3,7 +3,12 @@ import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
-import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
+import {
+	Header,
+	HeaderContent,
+	HeaderDescription,
+	HeaderTitle,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWorkingGroupReportPageProps extends PageProps<"/[locale]/dashboard/working-groups/[slug]/reports/[year]"> {}
@@ -27,10 +32,11 @@ export default function DashboardWorkingGroupReportPage(
 	const t = useExtracted();
 
 	return (
-		<Main className="container flex-1 px-8 py-12 xs:px-16">
-			<section className="flex flex-col gap-y-8">
-				<h1 className="text-5xl font-extrabold tracking-tight text-text-strong">{t("Report")}</h1>
-			</section>
-		</Main>
+		<Header>
+			<HeaderContent>
+				<HeaderTitle>{t("Report")}</HeaderTitle>
+				<HeaderDescription>{t("Manage working group report.")}</HeaderDescription>
+			</HeaderContent>
+		</Header>
 	);
 }
