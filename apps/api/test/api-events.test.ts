@@ -613,8 +613,8 @@ describe("events", () => {
 
 				// Sort IDs the same way the (lower, id::text) tuple cursor does,
 				// so we can assert that adjacency within the same-timestamp group is correct.
-				const [firstId, middleId, lastId] = [a.entity.id, b.entity.id, c.entity.id].sort(
-					(x, y) => x.localeCompare(y),
+				const [firstId, middleId, lastId] = [a.entity.id, b.entity.id, c.entity.id].sort((x, y) =>
+					x.localeCompare(y),
 				);
 
 				assert(firstId != null && middleId != null && lastId != null);
