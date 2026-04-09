@@ -30,6 +30,19 @@ export const EventListSchema = v.pipe(
 
 export type EventList = v.InferOutput<typeof EventListSchema>;
 
+export const EventLinkSchema = v.pipe(
+	v.nullable(
+		v.object({
+			id: v.pick(schema.EventSelectSchema, ["id"]).entries.id,
+			entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+		}),
+	),
+	v.description("Link to adjacent event"),
+	v.metadata({ ref: "EventLink" }),
+);
+
+export type EventLink = v.InferOutput<typeof EventLinkSchema>;
+
 export const EventSchema = v.pipe(
 	v.object({
 		...v.pick(schema.EventSelectSchema, ["id", "title", "summary", "location", "isFullDay"])
@@ -42,6 +55,10 @@ export const EventSchema = v.pipe(
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		content: v.optional(v.array(ContentBlockSchema), []),
+		links: v.object({
+			prev: EventLinkSchema,
+			next: EventLinkSchema,
+		}),
 	}),
 	v.description("Event"),
 	v.metadata({ ref: "Event" }),
@@ -68,21 +85,22 @@ export const EventSlugListSchema = v.pipe(
 
 export type EventSlugList = v.InferOutput<typeof EventSlugListSchema>;
 
-export const eventDurationFilters = ["ongoing", "past", "upcoming"] as const;
-
-export type EventDurationFilter = (typeof eventDurationFilters)[number];
-
-export const EventFilterQuerySchema = v.object({
-	filter: v.pipe(
-		v.optional(v.picklist(eventDurationFilters)),
-		v.description("Filter in list result"),
-		v.metadata({ ref: "FilterParam" }),
-	),
-});
-
 export const EventsQuerySchema = v.object({
 	...PaginationQuerySchema.entries,
-	...EventFilterQuerySchema.entries,
+	from: v.pipe(
+		v.optional(v.pipe(v.string(), v.isoDate())),
+		v.description(
+			"Return only events whose duration overlaps with or extends beyond this date (YYYY-MM-DD). Combined with `until`, defines a window: events starting before `until` and ending after `from`.",
+		),
+		v.metadata({ ref: "FromParam" }),
+	),
+	until: v.pipe(
+		v.optional(v.pipe(v.string(), v.isoDate())),
+		v.description(
+			"Return only events whose duration overlaps with or starts before this date (YYYY-MM-DD). Combined with `from`, defines a window: events starting before `until` and ending after `from`.",
+		),
+		v.metadata({ ref: "UntilParam" }),
+	),
 });
 
 export const GetEvents = {
