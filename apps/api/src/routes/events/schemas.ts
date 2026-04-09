@@ -4,18 +4,19 @@ import * as v from "valibot";
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
-export const EventBaseSchema = v.pipe(
-	v.object({
-		...v.pick(schema.EventSelectSchema, ["id", "title", "summary", "location", "isFullDay"])
-			.entries,
-		image: v.object({ url: v.string() }),
-		duration: v.object({
-			start: v.pipe(v.string(), v.isoTimestamp()),
-			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
-		}),
-		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
-		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
+const eventBaseObject = v.object({
+	...v.pick(schema.EventSelectSchema, ["id", "title", "summary", "location", "isFullDay"]).entries,
+	image: v.object({ url: v.string() }),
+	duration: v.object({
+		start: v.pipe(v.string(), v.isoTimestamp()),
+		end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
 	}),
+	entity: v.pick(schema.EntitySelectSchema, ["slug"]),
+	publishedAt: v.pipe(v.string(), v.isoTimestamp()),
+});
+
+export const EventBaseSchema = v.pipe(
+	eventBaseObject,
 	v.description("Event"),
 	v.metadata({ ref: "EventBase" }),
 );
@@ -31,12 +32,7 @@ export const EventListSchema = v.pipe(
 export type EventList = v.InferOutput<typeof EventListSchema>;
 
 export const EventLinkSchema = v.pipe(
-	v.nullable(
-		v.object({
-			id: v.pick(schema.EventSelectSchema, ["id"]).entries.id,
-			entity: v.pick(schema.EntitySelectSchema, ["slug"]),
-		}),
-	),
+	v.pick(eventBaseObject, ["id", "entity"]),
 	v.description("Link to adjacent event"),
 	v.metadata({ ref: "EventLink" }),
 );
@@ -56,8 +52,8 @@ export const EventSchema = v.pipe(
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		content: v.optional(v.array(ContentBlockSchema), []),
 		links: v.object({
-			prev: EventLinkSchema,
-			next: EventLinkSchema,
+			prev: v.nullable(EventLinkSchema),
+			next: v.nullable(EventLinkSchema),
 		}),
 	}),
 	v.description("Event"),
@@ -90,16 +86,16 @@ export const EventsQuerySchema = v.object({
 	from: v.pipe(
 		v.optional(v.pipe(v.string(), v.isoDate())),
 		v.description(
-			"Return only events whose duration overlaps with or extends beyond this date (YYYY-MM-DD). Combined with `until`, defines a window: events starting before `until` and ending after `from`.",
+			"Return only events whose duration overlaps with or extends beyond this date (YYYY-MM-DD). Combined with `until`, defines a window: events starting before `until` and ending after `from`. Pass today's date to retrieve the first page of upcoming and ongoing events.",
 		),
-		v.metadata({ ref: "FromParam" }),
+		v.metadata({ ref: "EventFromParam" }),
 	),
 	until: v.pipe(
 		v.optional(v.pipe(v.string(), v.isoDate())),
 		v.description(
 			"Return only events whose duration overlaps with or starts before this date (YYYY-MM-DD). Combined with `from`, defines a window: events starting before `until` and ending after `from`.",
 		),
-		v.metadata({ ref: "UntilParam" }),
+		v.metadata({ ref: "EventUntilParam" }),
 	),
 });
 

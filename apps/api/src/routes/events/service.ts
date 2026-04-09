@@ -19,37 +19,38 @@ interface GetEventsParams {
 	until?: string;
 }
 
+// Overlap condition: event overlaps [from, until] when
+//   upper IS NULL OR upper >= from  (event ends on or after the window start, or is open-ended)
+//   AND lower < start-of-next-day(until)  (event starts before the window end day is over)
+//
+// `until` is treated as inclusive of the full day: an event starting on `until` at any time is included.
+// To achieve this we use `lower < until + 1 day` rather than `lower <= until` (which would only match midnight).
+
+function durationOverlapsFrom(upper: SQL, from: string): SQL {
+	return sql`
+		(
+			${upper} IS NULL
+			OR ${upper} >= ${new Date(from)}
+		)
+	`;
+}
+
+function durationOverlapsUntil(lower: SQL, until: string): SQL {
+	const exclusive = new Date(until);
+	exclusive.setUTCDate(exclusive.getUTCDate() + 1);
+	return sql`${lower} < ${exclusive}`;
+}
+
 export async function getEvents(db: Database | Transaction, params: GetEventsParams) {
 	const { limit = 10, offset = 0, from, until } = params;
 
 	const lower = sql`LOWER(${schema.events.duration})`;
 	const upper = sql`UPPER(${schema.events.duration})`;
 
-	// Overlap condition: event overlaps [from, until] when
-	//   lower < start-of-next-day(until)  (event starts before the window end day is over)
-	//   AND (upper IS NULL OR upper >= from)  (event ends on or after the window start, or is open-ended)
-	//
-	// `until` is treated as inclusive of the full day: an event starting on `until` at any time is included.
-	// To achieve this we use `lower < until + 1 day` rather than `lower <= until` (which would only match midnight).
-	const fromFilter: SQL | undefined =
-		from != null
-			? sql`
-					(
-						${upper} IS NULL
-						OR ${upper} >= ${new Date(from)}
-					)
-				`
-			: undefined;
-	const untilFilter: SQL | undefined =
-		until != null
-			? (() => {
-					const exclusive = new Date(until);
-					exclusive.setUTCDate(exclusive.getUTCDate() + 1);
-					return sql`${lower} < ${exclusive}`;
-				})()
-			: undefined;
-
-	const rangeFilter = and(fromFilter, untilFilter);
+	const rangeFilter = and(
+		from != null ? durationOverlapsFrom(upper, from) : undefined,
+		until != null ? durationOverlapsUntil(lower, until) : undefined,
+	);
 
 	const [items, aggregate] = await Promise.all([
 		db

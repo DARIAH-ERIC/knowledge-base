@@ -609,18 +609,25 @@ describe("events", () => {
 					client.events[":id"].$get({ param: { id: c.entity.id } }),
 				]);
 
-				const payloads = await Promise.all(responses.map((r) => r.json()));
+				const payloads = await Promise.all(
+					responses.map((r) => {
+						return r.json();
+					}),
+				);
 
 				// Sort IDs the same way the (lower, id::text) tuple cursor does,
 				// so we can assert that adjacency within the same-timestamp group is correct.
-				const [firstId, middleId, lastId] = [a.entity.id, b.entity.id, c.entity.id].sort((x, y) =>
-					x.localeCompare(y),
-				);
+				// eslint-disable-next-line unicorn/no-array-sort
+				const [firstId, middleId, lastId] = [a.entity.id, b.entity.id, c.entity.id].sort((x, y) => {
+					return x.localeCompare(y);
+				});
 
 				assert(firstId != null && middleId != null && lastId != null);
 
 				const findPayload = (id: string) => {
-					const p = payloads.find((payload) => "id" in payload && payload.id === id);
+					const p = payloads.find((payload) => {
+						return "id" in payload && payload.id === id;
+					});
 					assert(p != null && "links" in p);
 					return p;
 				};
