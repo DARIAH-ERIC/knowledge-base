@@ -109,11 +109,12 @@ async function seedWithMixedStatuses(db: Database) {
 	);
 
 	// Inactive: end date in the past
+	const inactiveEnd = f.date.between({ from: pastStart, to: new Date() });
 	await db.insert(schema.organisationalUnitsRelations).values({
 		unitId: items[3]!.organisationalUnit.id,
 		relatedUnitId: items[0]!.organisationalUnit.id,
 		status: memberStatusId,
-		duration: { start: pastStart, end: f.date.past({ years: 1 }) },
+		duration: { start: pastStart, end: inactiveEnd },
 	});
 
 	return {

@@ -92,6 +92,7 @@ async function seedWithMixedStatuses(db: Database) {
 		const name = f.lorem.sentence();
 		const slug = slugify(name);
 		const start = f.date.past({ years: 5 });
+		const end = f.date.between({ from: start, to: new Date() });
 		return {
 			entity: { id, slug, documentId },
 			project: {
@@ -100,7 +101,7 @@ async function seedWithMixedStatuses(db: Database) {
 				summary: f.lorem.paragraph(),
 				call: f.lorem.word(),
 				topic: f.lorem.word(),
-				duration: { start, end: f.date.past({ years: 1 }) },
+				duration: { start, end },
 			},
 		};
 	})();
