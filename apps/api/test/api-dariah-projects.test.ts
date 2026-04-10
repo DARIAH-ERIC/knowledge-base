@@ -153,6 +153,97 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 	return { dariahItems, nonDariahItem, umbrellaUnitId, roleId: projectRole.id };
 }
 
+async function seedWithMixedStatuses(db: Database): Promise<{
+	activeItem: ReturnType<typeof createProjectData>;
+	inactiveItem: ReturnType<typeof createProjectData>;
+}> {
+	const [status, entityType, scope, unitEntityType, umbrellaType, projectRole] = await Promise.all([
+		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+		db.query.entityTypes.findFirst({ columns: { id: true }, where: { type: "projects" } }),
+		db.query.projectScopes.findFirst({ columns: { id: true } }),
+		db.query.entityTypes.findFirst({
+			columns: { id: true },
+			where: { type: "organisational_units" },
+		}),
+		db.query.organisationalUnitTypes.findFirst({
+			columns: { id: true },
+			where: { type: "umbrella_consortium" },
+		}),
+		db.query.projectRoles.findFirst({ where: { role: "participant" }, columns: { id: true } }),
+	]);
+
+	assert(status, "No entity status in database.");
+	assert(entityType, "No entity type in database.");
+	assert(scope, "No project scope in database.");
+	assert(unitEntityType, "No organisational unit entity type in database.");
+	assert(umbrellaType, "No umbrella_consortium type in database.");
+	assert(projectRole, "No project role in database.");
+
+	const activeItem = createProjectData();
+	const inactiveItem = (() => {
+		const id = uuidv7();
+		const documentId = uuidv7();
+		const name = f.lorem.sentence();
+		const slug = slugify(name);
+		const start = f.date.past({ years: 5 });
+		const end = f.date.between({ from: start, to: new Date() });
+		return {
+			entity: { id, slug, documentId },
+			project: {
+				id,
+				name,
+				summary: f.lorem.paragraph(),
+				call: f.lorem.word(),
+				topic: f.lorem.word(),
+				duration: { start, end },
+			},
+		};
+	})();
+
+	const allItems = [activeItem, inactiveItem];
+
+	await db.insert(schema.entities).values(
+		allItems.map((item) => {
+			return { ...item.entity, statusId: status.id, typeId: entityType.id };
+		}),
+	);
+
+	await db.insert(schema.projects).values(
+		allItems.map((item) => {
+			return { ...item.project, scopeId: scope.id };
+		}),
+	);
+
+	const umbrellaUnitId = uuidv7();
+
+	await db.insert(schema.entities).values({
+		id: umbrellaUnitId,
+		slug: `umbrella-${umbrellaUnitId}`,
+		documentId: uuidv7(),
+		statusId: status.id,
+		typeId: unitEntityType.id,
+	});
+
+	await db.insert(schema.organisationalUnits).values({
+		id: umbrellaUnitId,
+		name: f.company.name(),
+		summary: f.lorem.paragraph(),
+		typeId: umbrellaType.id,
+	});
+
+	await db.insert(schema.projectsToOrganisationalUnits).values(
+		allItems.map((item) => {
+			return {
+				projectId: item.project.id,
+				unitId: umbrellaUnitId,
+				roleId: projectRole.id,
+			};
+		}),
+	);
+
+	return { activeItem, inactiveItem };
+}
+
 async function seedSocialMedia(db: Database, projectId: string) {
 	const type = await db.query.socialMediaTypes.findFirst({
 		columns: { id: true },
@@ -214,6 +305,48 @@ describe("dariah-projects", () => {
 				);
 				expect(data.limit).toBe(limit);
 				expect(data.offset).toBe(offset);
+			});
+		});
+
+		it("should return only active projects when status=active", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const { activeItem, inactiveItem } = await seedWithMixedStatuses(db);
+
+				const response = await client["dariah-projects"].$get({
+					query: { status: "active" },
+				});
+
+				expect(response.status).toBe(200);
+				const data = await response.json();
+
+				expect(data.data).toEqual(
+					expect.arrayContaining([expect.objectContaining({ name: activeItem.project.name })]),
+				);
+				expect(data.data).not.toEqual(
+					expect.arrayContaining([expect.objectContaining({ name: inactiveItem.project.name })]),
+				);
+			});
+		});
+
+		it("should return only inactive projects when status=inactive", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const { activeItem, inactiveItem } = await seedWithMixedStatuses(db);
+
+				const response = await client["dariah-projects"].$get({
+					query: { status: "inactive" },
+				});
+
+				expect(response.status).toBe(200);
+				const data = await response.json();
+
+				expect(data.data).toEqual(
+					expect.arrayContaining([expect.objectContaining({ name: inactiveItem.project.name })]),
+				);
+				expect(data.data).not.toEqual(
+					expect.arrayContaining([expect.objectContaining({ name: activeItem.project.name })]),
+				);
 			});
 		});
 
