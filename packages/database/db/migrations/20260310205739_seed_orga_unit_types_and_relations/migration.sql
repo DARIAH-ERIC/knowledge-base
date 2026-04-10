@@ -55,6 +55,7 @@ FROM
 				'is_partner_institution'
 			),
 			('body', 'umbrella_consortium', 'is_part'),
+			('working_group', 'umbrella_consortium', 'is_part'),
 			('consortium', 'regional_hub', 'is_member')
 	) AS "tmp" ("unit_type", "related_unit_type", "relation_type")
 	JOIN "organisational_unit_types" "unit_types" ON "unit_types"."type" = "tmp"."unit_type"
