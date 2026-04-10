@@ -90,8 +90,19 @@ export const WorkingGroupSlugListSchema = v.pipe(
 
 export type WorkingGroupSlugList = v.InferOutput<typeof WorkingGroupSlugListSchema>;
 
+export const WorkingGroupQuerySchema = v.object({
+	...PaginationQuerySchema.entries,
+	status: v.pipe(
+		v.optional(v.picklist(["active", "inactive"] as const)),
+		v.description(
+			"Filter by active (membership duration contains current time) or inactive (membership duration has ended)",
+		),
+		v.metadata({ ref: "WorkingGroupStatusParam" }),
+	),
+});
+
 export const GetWorkingGroups = {
-	QuerySchema: PaginationQuerySchema,
+	QuerySchema: WorkingGroupQuerySchema,
 	ResponseSchema: v.pipe(
 		v.object({
 			...PaginatedResponseSchema.entries,

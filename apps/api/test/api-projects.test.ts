@@ -74,6 +74,54 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	);
 }
 
+async function seedWithMixedStatuses(db: Database) {
+	const [status, entityType, scope] = await Promise.all([
+		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+		db.query.entityTypes.findFirst({ columns: { id: true }, where: { type: "projects" } }),
+		db.query.projectScopes.findFirst({ columns: { id: true } }),
+	]);
+
+	assert(status, "No entity status in database.");
+	assert(entityType, "No entity type in database.");
+	assert(scope, "No project scope in database.");
+
+	const activeItem = createItems(1)[0]!;
+	const inactiveItem = (() => {
+		const id = uuidv7();
+		const documentId = uuidv7();
+		const name = f.lorem.sentence();
+		const slug = slugify(name);
+		const start = f.date.past({ years: 5 });
+		return {
+			entity: { id, slug, documentId },
+			project: {
+				id,
+				name,
+				summary: f.lorem.paragraph(),
+				call: f.lorem.word(),
+				topic: f.lorem.word(),
+				duration: { start, end: f.date.past({ years: 1 }) },
+			},
+		};
+	})();
+
+	const allItems = [activeItem, inactiveItem];
+
+	await db.insert(schema.entities).values(
+		allItems.map((item) => {
+			return { ...item.entity, statusId: status.id, typeId: entityType.id };
+		}),
+	);
+
+	await db.insert(schema.projects).values(
+		allItems.map((item) => {
+			return { ...item.project, scopeId: scope.id };
+		}),
+	);
+
+	return { activeItem, inactiveItem };
+}
+
 async function seedSocialMedia(db: Database, projectId: string) {
 	const type = await db.query.socialMediaTypes.findFirst({
 		columns: { id: true },
@@ -222,6 +270,48 @@ describe("projects", () => {
 							type: "mastodon",
 						}),
 					]),
+				);
+			});
+		});
+
+		it("should return only active projects when status=active", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const { activeItem, inactiveItem } = await seedWithMixedStatuses(db);
+
+				const response = await client.projects.$get({
+					query: { status: "active" },
+				});
+
+				expect(response.status).toBe(200);
+				const data = await response.json();
+
+				expect(data.data).toEqual(
+					expect.arrayContaining([expect.objectContaining({ name: activeItem.project.name })]),
+				);
+				expect(data.data).not.toEqual(
+					expect.arrayContaining([expect.objectContaining({ name: inactiveItem.project.name })]),
+				);
+			});
+		});
+
+		it("should return only inactive projects when status=inactive", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const { activeItem, inactiveItem } = await seedWithMixedStatuses(db);
+
+				const response = await client.projects.$get({
+					query: { status: "inactive" },
+				});
+
+				expect(response.status).toBe(200);
+				const data = await response.json();
+
+				expect(data.data).toEqual(
+					expect.arrayContaining([expect.objectContaining({ name: inactiveItem.project.name })]),
+				);
+				expect(data.data).not.toEqual(
+					expect.arrayContaining([expect.objectContaining({ name: activeItem.project.name })]),
 				);
 			});
 		});

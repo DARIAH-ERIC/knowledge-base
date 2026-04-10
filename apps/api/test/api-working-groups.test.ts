@@ -39,6 +39,89 @@ function createItems(count: number) {
 	return items;
 }
 
+async function seedWithMixedStatuses(db: Database) {
+	const [status, entityType, asset, workingGroupType, umbrellaConsortiumType, unitStatus] =
+		await Promise.all([
+			db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+			db.query.entityTypes.findFirst({
+				columns: { id: true },
+				where: { type: "organisational_units" },
+			}),
+			db.query.assets.findFirst({ columns: { id: true } }),
+			db.query.organisationalUnitTypes.findFirst({
+				columns: { id: true },
+				where: { type: "working_group" },
+			}),
+			db.query.organisationalUnitTypes.findFirst({
+				columns: { id: true },
+				where: { type: "umbrella_consortium" },
+			}),
+			db
+				.select()
+				.from(schema.organisationalUnitStatus)
+				.where(inArray(schema.organisationalUnitStatus.status, ["is_part"])),
+		]);
+
+	assert(status, "No entity status in database.");
+	assert(entityType, "No entity type in database.");
+	assert(asset, "No assets in database.");
+	assert(workingGroupType, "No working_group type in database.");
+	assert(umbrellaConsortiumType, "No umbrella_consortium type in database.");
+	assert(unitStatus.length, "No unit status in database.");
+
+	// [0] = umbrella consortium, [1][2] = active working groups, [3] = inactive working group
+	const items = createItems(4);
+	const memberStatusId = unitStatus[0]!.id;
+	const pastStart = f.date.past({ years: 5 });
+
+	await db.insert(schema.entities).values(
+		items.map((item) => {
+			return { ...item.entity, statusId: status.id, typeId: entityType.id };
+		}),
+	);
+
+	await db.insert(schema.organisationalUnits).values({
+		...items[0]!.organisationalUnit,
+		typeId: umbrellaConsortiumType.id,
+		imageId: asset.id,
+	});
+
+	await db.insert(schema.organisationalUnits).values(
+		items.slice(1).map((item) => {
+			return {
+				...item.organisationalUnit,
+				typeId: workingGroupType.id,
+				imageId: asset.id,
+			};
+		}),
+	);
+
+	// Active: open-ended duration (no end date)
+	await db.insert(schema.organisationalUnitsRelations).values(
+		items.slice(1, 3).map((item) => {
+			return {
+				unitId: item.organisationalUnit.id,
+				relatedUnitId: items[0]!.organisationalUnit.id,
+				status: memberStatusId,
+				duration: { start: pastStart },
+			};
+		}),
+	);
+
+	// Inactive: end date in the past
+	await db.insert(schema.organisationalUnitsRelations).values({
+		unitId: items[3]!.organisationalUnit.id,
+		relatedUnitId: items[0]!.organisationalUnit.id,
+		status: memberStatusId,
+		duration: { start: pastStart, end: f.date.past({ years: 1 }) },
+	});
+
+	return {
+		activeItems: items.slice(1, 3),
+		inactiveItem: items[3]!,
+	};
+}
+
 async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	const [status, entityType, asset, workingGroupType, umbrellaConsortiumType, unitStatus] =
 		await Promise.all([
@@ -59,7 +142,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 			db
 				.select()
 				.from(schema.organisationalUnitStatus)
-				.where(inArray(schema.organisationalUnitStatus.status, ["is_member"])),
+				.where(inArray(schema.organisationalUnitStatus.status, ["is_part"])),
 		]);
 
 	assert(status, "No entity status in database.");
@@ -140,6 +223,56 @@ describe("working-groups", () => {
 				expect(data.limit).toBe(limit);
 				expect(data.offset).toBe(offset);
 			});
+		});
+	});
+
+	it("should return only active working groups when status=active", async () => {
+		await withTransaction(async (db) => {
+			const client = createTestClient(db);
+			const { activeItems, inactiveItem } = await seedWithMixedStatuses(db);
+
+			const response = await client["working-groups"].$get({
+				query: { status: "active" },
+			});
+
+			expect(response.status).toBe(200);
+			const data = await response.json();
+
+			expect(data.data).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({ name: activeItems[0]!.organisationalUnit.name }),
+				]),
+			);
+			expect(data.data).not.toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({ name: inactiveItem.organisationalUnit.name }),
+				]),
+			);
+		});
+	});
+
+	it("should return only inactive working groups when status=inactive", async () => {
+		await withTransaction(async (db) => {
+			const client = createTestClient(db);
+			const { activeItems, inactiveItem } = await seedWithMixedStatuses(db);
+
+			const response = await client["working-groups"].$get({
+				query: { status: "inactive" },
+			});
+
+			expect(response.status).toBe(200);
+			const data = await response.json();
+
+			expect(data.data).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({ name: inactiveItem.organisationalUnit.name }),
+				]),
+			);
+			expect(data.data).not.toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({ name: activeItems[0]!.organisationalUnit.name }),
+				]),
+			);
 		});
 	});
 

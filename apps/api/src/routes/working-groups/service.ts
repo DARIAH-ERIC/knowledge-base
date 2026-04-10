@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq } from "@dariah-eric/database";
+import { and, count, eq, exists, not, sql, type SQLWrapper } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
@@ -13,10 +13,48 @@ interface GetWorkingGroupsParams {
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
+	status?: "active" | "inactive";
+}
+
+function buildStatusFilter(
+	db: Database | Transaction,
+	idRef: SQLWrapper,
+	status: "active" | "inactive",
+) {
+	const durationContainsNow = sql`
+		${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ
+	`;
+	const durationCondition = status === "active" ? durationContainsNow : not(durationContainsNow);
+
+	return exists(
+		db
+			.select({ one: sql<number>`1` })
+			.from(schema.organisationalUnitsRelations)
+			.innerJoin(
+				schema.organisationalUnitStatus,
+				eq(schema.organisationalUnitsRelations.status, schema.organisationalUnitStatus.id),
+			)
+			.innerJoin(
+				schema.organisationalUnits,
+				eq(schema.organisationalUnitsRelations.relatedUnitId, schema.organisationalUnits.id),
+			)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					eq(schema.organisationalUnitsRelations.unitId, idRef),
+					eq(schema.organisationalUnitStatus.status, "is_part"),
+					eq(schema.organisationalUnitTypes.type, "umbrella_consortium"),
+					durationCondition,
+				),
+			),
+	);
 }
 
 export async function getWorkingGroups(db: Database | Transaction, params: GetWorkingGroupsParams) {
-	const { limit = 10, offset = 0 } = params;
+	const { limit = 10, offset = 0, status } = params;
 
 	const [items, aggregate] = await Promise.all([
 		db.query.workingGroups.findMany({
@@ -26,6 +64,12 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 						type: "published",
 					},
 				},
+				RAW:
+					status != null
+						? (t) => {
+								return buildStatusFilter(db, t.id, status);
+							}
+						: undefined,
 			},
 			columns: {
 				id: true,
@@ -73,7 +117,12 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 			.from(schema.workingGroups)
 			.innerJoin(schema.entities, eq(schema.workingGroups.id, schema.entities.id))
 			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.where(
+				and(
+					eq(schema.entityStatus.type, "published"),
+					status != null ? buildStatusFilter(db, schema.workingGroups.id, status) : undefined,
+				),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;

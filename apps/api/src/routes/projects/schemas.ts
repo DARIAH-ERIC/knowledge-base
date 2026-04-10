@@ -99,8 +99,19 @@ export const ProjectSlugListSchema = v.pipe(
 
 export type ProjectSlugList = v.InferOutput<typeof ProjectSlugListSchema>;
 
+export const ProjectQuerySchema = v.object({
+	...PaginationQuerySchema.entries,
+	status: v.pipe(
+		v.optional(v.picklist(["active", "inactive"] as const)),
+		v.description(
+			"Filter by active (project duration contains current time) or inactive (project duration has ended)",
+		),
+		v.metadata({ ref: "ProjectStatusParam" }),
+	),
+});
+
 export const GetProjects = {
-	QuerySchema: PaginationQuerySchema,
+	QuerySchema: ProjectQuerySchema,
 	ResponseSchema: v.pipe(
 		v.object({
 			...PaginatedResponseSchema.entries,
