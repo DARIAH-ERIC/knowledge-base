@@ -33,12 +33,12 @@ export const router = createRouter()
 		}),
 		validator("query", GetEvents.QuerySchema),
 		async (c) => {
-			const { filter, limit, offset } = c.req.valid("query");
+			const { from, until, limit, offset } = c.req.valid("query");
 
 			const db = c.get("db");
 			assert(db, "Database must be provided via middleware.");
 
-			const data = await getEvents(db, { limit, offset, filter });
+			const data = await getEvents(db, { limit, offset, from, until });
 
 			const payload = await validate(GetEvents.ResponseSchema, data, 500);
 
