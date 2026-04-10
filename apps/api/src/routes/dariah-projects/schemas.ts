@@ -99,8 +99,19 @@ export const DariahProjectSlugListSchema = v.pipe(
 
 export type DariahProjectSlugList = v.InferOutput<typeof DariahProjectSlugListSchema>;
 
+export const DariahProjectQuerySchema = v.object({
+	...PaginationQuerySchema.entries,
+	status: v.pipe(
+		v.optional(v.picklist(["active", "inactive"] as const)),
+		v.description(
+			"Filter by active (project duration contains current time) or inactive (project duration has ended)",
+		),
+		v.metadata({ ref: "DariahProjectStatusParam" }),
+	),
+});
+
 export const GetDariahProjects = {
-	QuerySchema: PaginationQuerySchema,
+	QuerySchema: DariahProjectQuerySchema,
 	ResponseSchema: v.pipe(
 		v.object({
 			...PaginatedResponseSchema.entries,

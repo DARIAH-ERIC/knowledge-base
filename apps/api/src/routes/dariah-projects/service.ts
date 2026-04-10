@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq } from "@dariah-eric/database";
+import { and, count, eq, not, sql } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
@@ -56,13 +56,14 @@ interface GetDariahProjectsParams {
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
+	status?: "active" | "inactive";
 }
 
 export async function getDariahProjects(
 	db: Database | Transaction,
 	params: GetDariahProjectsParams,
 ) {
-	const { limit = 10, offset = 0 } = params;
+	const { limit = 10, offset = 0, status } = params;
 
 	const [items, aggregate] = await Promise.all([
 		db.query.dariahProjects.findMany({
@@ -72,6 +73,13 @@ export async function getDariahProjects(
 						type: "published",
 					},
 				},
+				RAW:
+					status != null
+						? (t) => {
+								const durationContainsNow = sql`${t.duration} @> NOW()::TIMESTAMPTZ`;
+								return status === "active" ? durationContainsNow : not(durationContainsNow);
+							}
+						: undefined,
 			},
 			columns: {
 				id: true,
@@ -151,7 +159,16 @@ export async function getDariahProjects(
 			.from(schema.dariahProjects)
 			.innerJoin(schema.entities, eq(schema.dariahProjects.id, schema.entities.id))
 			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.where(
+				and(
+					eq(schema.entityStatus.type, "published"),
+					status != null
+						? status === "active"
+							? sql`${schema.dariahProjects.duration} @> NOW()::TIMESTAMPTZ`
+							: not(sql`${schema.dariahProjects.duration} @> NOW()::TIMESTAMPTZ`)
+						: undefined,
+				),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
