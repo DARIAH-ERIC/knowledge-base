@@ -59,7 +59,7 @@ async function seedWithMixedStatuses(db: Database) {
 			db
 				.select()
 				.from(schema.organisationalUnitStatus)
-				.where(inArray(schema.organisationalUnitStatus.status, ["is_part"])),
+				.where(inArray(schema.organisationalUnitStatus.status, ["is_part_of"])),
 		]);
 
 	assert(status, "No entity status in database.");
@@ -143,7 +143,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 			db
 				.select()
 				.from(schema.organisationalUnitStatus)
-				.where(inArray(schema.organisationalUnitStatus.status, ["is_part"])),
+				.where(inArray(schema.organisationalUnitStatus.status, ["is_part_of"])),
 		]);
 
 	assert(status, "No entity status in database.");

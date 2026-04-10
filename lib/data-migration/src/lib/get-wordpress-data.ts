@@ -175,6 +175,13 @@ interface Country {
 	websitename: string;
 	longitude: string;
 	latitude: string;
+	dariah_country_status: Array<number>;
+	status_terms: Array<{
+		id: number;
+		name: string;
+		slug: "cooperating-partners" | "members" | "observers";
+		taxonomy: string;
+	}>;
 	repPersons_data: Array<{
 		id: number;
 		title: string;
@@ -438,6 +445,8 @@ interface Institution {
 		link: string;
 		type: "dariah_country";
 	};
+	// see https://www.dariah.eu/wp-json/wp/v2/dariah_institution_country_role
+	dariah_institution_country_role: Array<number>;
 }
 
 export interface WordPressData {

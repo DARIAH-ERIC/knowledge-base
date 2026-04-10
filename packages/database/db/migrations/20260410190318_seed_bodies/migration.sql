@@ -1,4 +1,3 @@
---> statement-breakpoint
 WITH
 	"entity" AS (
 		INSERT INTO
@@ -72,28 +71,12 @@ WITH
 			(
 				VALUES
 					('board-of-directors', 'Board of directors', 'bod'),
-					(
-						'dariah-coordination-office',
-						'DARIAH coordination office',
-						'dco'
-					),
+					('dariah-coordination-office', 'DARIAH coordination office', 'dco'),
 					('general-assembly', 'General assembly', 'ga'),
-					(
-						'joint-research-committee',
-						'Joint research committee',
-						'jrc'
-					),
-					(
-						'national-coordinators-committee',
-						'National coordinators committee',
-						'ncc'
-					),
+					('joint-research-committee', 'Joint research committee', 'jrc'),
+					('national-coordinators-committee', 'National coordinators committee', 'ncc'),
 					('scientific-board', 'Scientific board', 'sb'),
-					(
-						'senior-management-team',
-						'Senior management team',
-						'smt'
-					)
+					('senior-management-team', 'Senior management team', 'smt')
 			) AS "tmp" ("slug", "name", "acronym")
 			JOIN "body_entities" ON "body_entities"."slug" = "tmp"."slug"
 			CROSS JOIN "organisational_unit_types"
@@ -128,5 +111,5 @@ FROM
 			"entities"."slug" = 'dariah-eu'
 	) AS "dariah_eu"
 WHERE
-	"organisational_unit_status"."status" = 'is_part'
+	"organisational_unit_status"."status" = 'is_part_of'
 ON CONFLICT DO NOTHING;

@@ -45,7 +45,7 @@ function buildStatusFilter(
 			.where(
 				and(
 					eq(schema.organisationalUnitsRelations.unitId, idRef),
-					eq(schema.organisationalUnitStatus.status, "is_part"),
+					eq(schema.organisationalUnitStatus.status, "is_part_of"),
 					eq(schema.organisationalUnitTypes.type, "umbrella_consortium"),
 					durationCondition,
 				),

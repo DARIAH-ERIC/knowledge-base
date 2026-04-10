@@ -1,0 +1,265 @@
+INSERT INTO
+	"content_blocks_types" ("type")
+VALUES
+	('data'),
+	('embed'),
+	('image'),
+	('rich_text')
+ON CONFLICT ("type") DO NOTHING;
+
+--> statement-breakpoint
+INSERT INTO
+	"content_blocks_type_data_types" ("type")
+VALUES
+	('events'),
+	('news')
+ON CONFLICT ("type") DO NOTHING;
+
+--> statement-breakpoint
+INSERT INTO
+	"entity_status" ("type")
+VALUES
+	('draft'),
+	('published')
+ON CONFLICT ("type") DO NOTHING;
+
+--> statement-breakpoint
+INSERT INTO
+	"entity_types" ("type")
+VALUES
+	('documents_policies'),
+	('events'),
+	('external_links'),
+	('impact_case_studies'),
+	('news'),
+	('organisational_units'),
+	('pages'),
+	('persons'),
+	('projects'),
+	('spotlight_articles')
+ON CONFLICT ("type") DO NOTHING;
+
+--> statement-breakpoint
+INSERT INTO
+	"licenses" ("code", "name", "url")
+VALUES
+	(
+		'CC0-1.0',
+		'Creative Commons Zero v1.0 Universal',
+		'https://creativecommons.org/publicdomain/zero/1.0/'
+	),
+	(
+		'CC-BY-4.0',
+		'Creative Commons Attribution 4.0 International',
+		'https://creativecommons.org/licenses/by/4.0/'
+	),
+	(
+		'CC-BY-NC-4.0',
+		'Creative Commons Attribution Non Commercial 4.0 International',
+		'https://creativecommons.org/licenses/by-nc/4.0/'
+	),
+	(
+		'CC-BY-NC-ND-4.0',
+		'Creative Commons Attribution Non Commercial No Derivatives 4.0 International',
+		'https://creativecommons.org/licenses/by-nc-nd/4.0/'
+	),
+	(
+		'CC-BY-NC-SA-4.0',
+		'Creative Commons Attribution Non Commercial Share Alike 4.0 International',
+		'https://creativecommons.org/licenses/by-nc-sa/4.0/'
+	),
+	(
+		'CC-BY-ND-4.0',
+		'Creative Commons Attribution No Derivatives 4.0 International',
+		'https://creativecommons.org/licenses/by-nd/4.0/'
+	),
+	(
+		'CC-BY-SA-4.0',
+		'Creative Commons Attribution Share Alike 4.0 International',
+		'https://creativecommons.org/licenses/by-sa/4.0/'
+	)
+ON CONFLICT ("code") DO NOTHING;
+
+--> statement-breakpoint
+INSERT INTO
+	"organisational_unit_types" ("type")
+VALUES
+	('body'),
+	('consortium'),
+	('country'),
+	('institution'),
+	('regional_hub'),
+	('umbrella_consortium'),
+	('working_group');
+
+--> statement-breakpoint
+INSERT INTO
+	"organisational_unit_status" ("status")
+VALUES
+	('is_located_in'),
+	('is_member_of'),
+	('is_national_consortium_of'),
+	('is_national_coordinating_institution_in'),
+	('is_national_representative_institution_in'),
+	('is_observer_of'),
+	('is_part_of'),
+	('is_partner_of');
+
+--> statement-breakpoint
+INSERT INTO
+	"organisational_units_allowed_relations" (
+		"unit_type_id",
+		"related_unit_type_id",
+		"relation_type_id"
+	)
+SELECT
+	"unit_types"."id",
+	"related_unit_types"."id",
+	"relation_types"."id"
+FROM
+	(
+		VALUES
+			('body', 'umbrella_consortium', 'is_part_of'),
+			('country', 'umbrella_consortium', 'is_member_of'),
+			('country', 'umbrella_consortium', 'is_observer_of'),
+			('consortium', 'country', 'is_national_consortium_of'),
+			('institution', 'country', 'is_located_in'),
+			('institution', 'regional_hub', 'is_member_of'),
+			('institution', 'consortium', 'is_member_of'),
+			('institution', 'umbrella_consortium', 'is_partner_of'),
+			('institution', 'country', 'is_national_coordinating_institution_in'),
+			('institution', 'country', 'is_national_representative_institution_in'),
+			('working_group', 'umbrella_consortium', 'is_part_of')
+	) AS "tmp" ("unit_type", "related_unit_type", "relation_type")
+	JOIN "organisational_unit_types" "unit_types" ON "unit_types"."type" = "tmp"."unit_type"
+	JOIN "organisational_unit_types" "related_unit_types" ON "related_unit_types"."type" = "tmp"."related_unit_type"
+	JOIN "organisational_unit_status" "relation_types" ON "relation_types"."status" = "tmp"."relation_type";
+
+--> statement-breakpoint
+INSERT INTO
+	"entity_types_fields_names" ("entity_type_id", "field_name")
+SELECT
+	"entity_types"."id",
+	"tmp"."field_name"
+FROM
+	(
+		VALUES
+			('documents_policies', 'description'),
+			('events', 'content'),
+			('external_links', 'description'),
+			('impact_case_studies', 'content'),
+			('news', 'content'),
+			('organisational_units', 'description'),
+			('pages', 'content'),
+			('persons', 'biography'),
+			('projects', 'description'),
+			('spotlight_articles', 'content')
+	) AS "tmp" ("entity_type_name", "field_name")
+	JOIN "entity_types" ON "tmp"."entity_type_name" = "entity_types"."type"
+ON CONFLICT ("entity_type_id", "field_name") DO NOTHING;
+
+--> statement-breakpoint
+INSERT INTO
+	"person_role_types" ("type")
+VALUES
+	('dco_member'),
+	('director'),
+	('national_coordinator'),
+	('national_coordinator_deputy'),
+	('national_representative'),
+	('national_representative_deputy'),
+	('jrc_chair'),
+	('jrc_member'),
+	('scientific_board_member'),
+	('smt_member'),
+	('wg_chair'),
+	('wg_member'),
+	('national_consortium_contact'),
+	('cooperating_partner_contact'),
+	('ncc_chair');
+
+--> statement-breakpoint
+INSERT INTO
+	"person_role_types_to_organisational_unit_types" ("role_type_id", "unit_type_id")
+SELECT
+	"role_types"."id",
+	"unit_types"."id"
+FROM
+	(
+		VALUES
+			('dco_member', 'body'),
+			('director', 'body'),
+			('jrc_chair', 'body'),
+			('jrc_member', 'body'),
+			('scientific_board_member', 'body'),
+			('ncc_chair', 'body'),
+			('smt_member', 'body'),
+			('national_coordinator', 'institution'),
+			('national_coordinator_deputy', 'institution'),
+			('national_representative', 'institution'),
+			('national_representative_deputy', 'institution'),
+			('national_consortium_contact', 'institution'),
+			('cooperating_partner_contact', 'institution'),
+			('wg_chair', 'working_group'),
+			('wg_member', 'working_group')
+	) AS "tmp" ("role_type", "unit_type")
+	JOIN "person_role_types" "role_types" ON "role_types"."type" = "tmp"."role_type"
+	JOIN "organisational_unit_types" "unit_types" ON "unit_types"."type" = "tmp"."unit_type"
+ON CONFLICT ("role_type_id", "unit_type_id") DO NOTHING;
+
+--> statement-breakpoint
+INSERT INTO
+	"project_scopes" ("scope")
+VALUES
+	('eu'),
+	('national'),
+	('regional');
+
+--> statement-breakpoint
+INSERT INTO
+	"project_roles" ("role")
+VALUES
+	('coordinator'),
+	('funder'),
+	('participant');
+
+--> statement-breakpoint
+INSERT INTO
+	"social_media_types" ("type")
+VALUES
+	('bluesky'),
+	('facebook'),
+	('instagram'),
+	('linkedin'),
+	('mastodon'),
+	('twitter'),
+	('vimeo'),
+	('website'),
+	('youtube');
+
+--> statement-breakpoint
+INSERT INTO
+	"service_types" ("type")
+VALUES
+	('community'),
+	('core'),
+	('internal')
+ON CONFLICT ("type") DO NOTHING;
+
+--> statement-breakpoint
+INSERT INTO
+	"service_statuses" ("status")
+VALUES
+	('discontinued'),
+	('live'),
+	('needs_review'),
+	('to_be_discontinued')
+ON CONFLICT ("status") DO NOTHING;
+
+--> statement-breakpoint
+INSERT INTO
+	"organisational_unit_service_roles" ("role")
+VALUES
+	('service_owner'),
+	('service_provider')
+ON CONFLICT ("role") DO NOTHING;
