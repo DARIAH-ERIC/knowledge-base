@@ -5,6 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import type { Database, Transaction } from "@/middlewares/db";
+import type { EventOrder } from "@/routes/events/schemas";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
@@ -17,6 +18,8 @@ interface GetEventsParams {
 	from?: string;
 	/** ISO date string (YYYY-MM-DD). Only events whose duration overlaps on or before this date are returned. */
 	until?: string;
+	/** Sort order by event start date. Defaults to "asc" when `from` is set, "desc" otherwise. */
+	order?: EventOrder;
 }
 
 // Overlap condition: event overlaps [from, until] when
@@ -42,7 +45,7 @@ function durationOverlapsUntil(lower: SQL, until: string): SQL {
 }
 
 export async function getEvents(db: Database | Transaction, params: GetEventsParams) {
-	const { limit = 10, offset = 0, from, until } = params;
+	const { limit = 10, offset = 0, from, until, order = from != null ? "asc" : "desc" } = params;
 
 	const lower = sql`LOWER(${schema.events.duration})`;
 	const upper = sql`UPPER(${schema.events.duration})`;
@@ -51,6 +54,8 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 		from != null ? durationOverlapsFrom(upper, from) : undefined,
 		until != null ? durationOverlapsUntil(lower, until) : undefined,
 	);
+
+	const orderBy = order === "asc" ? asc(lower) : desc(lower);
 
 	const [items, aggregate] = await Promise.all([
 		db
@@ -74,7 +79,7 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
 			.leftJoin(schema.assets, eq(schema.assets.id, schema.events.imageId))
 			.where(and(rangeFilter, eq(schema.entityStatus.type, "published")))
-			.orderBy(desc(lower))
+			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
 		db
