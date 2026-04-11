@@ -39,6 +39,63 @@ function createItems(count: number) {
 	return items;
 }
 
+async function seedCooperatingPartner(
+	db: Database,
+	ericUnitId: string,
+	items: ReturnType<typeof createItems>,
+) {
+	const [institutionType, countryType, locatedInStatus, cooperatingPartnerStatus] =
+		await Promise.all([
+			db.query.organisationalUnitTypes.findFirst({
+				columns: { id: true },
+				where: { type: "institution" },
+			}),
+			db.query.organisationalUnitTypes.findFirst({
+				columns: { id: true },
+				where: { type: "country" },
+			}),
+			db.query.organisationalUnitStatus.findFirst({
+				columns: { id: true },
+				where: { status: "is_located_in" },
+			}),
+			db.query.organisationalUnitStatus.findFirst({
+				columns: { id: true },
+				where: { status: "is_cooperating_partner_of" },
+			}),
+		]);
+
+	assert(institutionType, "No institution type in database.");
+	assert(countryType, "No country type in database.");
+	assert(locatedInStatus, "No is_located_in status in database.");
+	assert(cooperatingPartnerStatus, "No is_cooperating_partner_of status in database.");
+
+	const [country, institution] = items;
+	assert(country);
+	assert(institution);
+
+	const start = f.date.past({ years: 5 });
+
+	await db.insert(schema.organisationalUnits).values([
+		{ ...country.organisationalUnit, typeId: countryType.id },
+		{ ...institution.organisationalUnit, typeId: institutionType.id },
+	]);
+
+	await db.insert(schema.organisationalUnitsRelations).values([
+		{
+			unitId: institution.organisationalUnit.id,
+			relatedUnitId: country.organisationalUnit.id,
+			status: locatedInStatus.id,
+			duration: { start },
+		},
+		{
+			unitId: institution.organisationalUnit.id,
+			relatedUnitId: ericUnitId,
+			status: cooperatingPartnerStatus.id,
+			duration: { start },
+		},
+	]);
+}
+
 async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	const [status, entityType, asset, countryType, umbrellaConsortiumType, memberObserverStatus] =
 		await Promise.all([
@@ -111,6 +168,84 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 describe("members-partners", () => {
 	describe("GET /api/members-partners", () => {
+		it("should return country with cooperating partner institution", async () => {
+			await withTransaction(async (db) => {
+				const limit = 10;
+				const offset = 0;
+
+				const client = createTestClient(db);
+
+				const [status, entityType, ericType] = await Promise.all([
+					db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+					db.query.entityTypes.findFirst({
+						columns: { id: true },
+						where: { type: "organisational_units" },
+					}),
+					db.query.organisationalUnitTypes.findFirst({
+						columns: { id: true },
+						where: { type: "eric" },
+					}),
+				]);
+
+				assert(status);
+				assert(entityType);
+				assert(ericType);
+
+				// eric unit (not exposed, used as relation target)
+				const ericItems = createItems(1);
+				const [ericItem] = ericItems;
+				assert(ericItem);
+
+				await db.insert(schema.entities).values(
+					ericItems.map((item) => {
+						return {
+							...item.entity,
+							statusId: status.id,
+							typeId: entityType.id,
+						};
+					}),
+				);
+				await db
+					.insert(schema.organisationalUnits)
+					.values({ ...ericItem.organisationalUnit, typeId: ericType.id });
+
+				// country + institution as cooperating partner
+				const partnerItems = createItems(2);
+				await db.insert(schema.entities).values(
+					partnerItems.map((item) => {
+						return {
+							...item.entity,
+							statusId: status.id,
+							typeId: entityType.id,
+						};
+					}),
+				);
+				await seedCooperatingPartner(db, ericItem.organisationalUnit.id, partnerItems);
+
+				const country = partnerItems[0]!;
+
+				const response = await client["members-partners"].$get({
+					query: {
+						limit: String(limit),
+						offset: String(offset),
+					},
+				});
+
+				expect(response.status).toBe(200);
+
+				const data = await response.json();
+
+				expect(data.data).toEqual(
+					expect.arrayContaining([
+						expect.objectContaining({
+							name: country.organisationalUnit.name,
+							status: "is_cooperating_partner_of",
+						}),
+					]),
+				);
+			});
+		});
+
 		it("should return paginated list of members and partners", async () => {
 			await withTransaction(async (db) => {
 				const limit = 10;

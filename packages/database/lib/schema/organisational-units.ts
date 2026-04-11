@@ -210,7 +210,11 @@ export const OrganisationalUnitToSocialMediaUpdateSchema = createUpdateSchema(
 
 export const membersAndPartnersUnitType = "country";
 
-export const membersAndPartnersUnitStatusEnum = ["is_member_of", "is_observer_of"] as const;
+export const membersAndPartnersUnitStatusEnum = [
+	"is_member_of",
+	"is_observer_of",
+	"is_cooperating_partner_of",
+] as const;
 
 export const membersAndPartners = p
 	.pgView("members_and_partners", {
