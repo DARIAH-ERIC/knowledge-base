@@ -40,42 +40,34 @@ function createItems(count: number) {
 }
 
 async function seed(db: Database, items: ReturnType<typeof createItems>) {
-	const [
-		status,
-		entityType,
-		asset,
-		membersOrPartnersType,
-		umbrellaConsortiumType,
-		memberPartnerStatus,
-	] = await Promise.all([
-		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
-		db.query.entityTypes.findFirst({
-			columns: { id: true },
-			where: { type: "organisational_units" },
-		}),
-		db.query.assets.findFirst({ columns: { id: true } }),
-		db.query.organisationalUnitTypes.findFirst({
-			columns: { id: true },
-			where: { type: "consortium" },
-		}),
-		db.query.organisationalUnitTypes.findFirst({
-			columns: { id: true },
-			where: { type: "umbrella_consortium" },
-		}),
-		db
-			.select()
-			.from(schema.organisationalUnitStatus)
-			.where(
-				inArray(schema.organisationalUnitStatus.status, ["is_member", "is_cooperating_partner"]),
-			),
-	]);
+	const [status, entityType, asset, countryType, umbrellaConsortiumType, memberObserverStatus] =
+		await Promise.all([
+			db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+			db.query.entityTypes.findFirst({
+				columns: { id: true },
+				where: { type: "organisational_units" },
+			}),
+			db.query.assets.findFirst({ columns: { id: true } }),
+			db.query.organisationalUnitTypes.findFirst({
+				columns: { id: true },
+				where: { type: "country" },
+			}),
+			db.query.organisationalUnitTypes.findFirst({
+				columns: { id: true },
+				where: { type: "eric" },
+			}),
+			db
+				.select()
+				.from(schema.organisationalUnitStatus)
+				.where(inArray(schema.organisationalUnitStatus.status, ["is_member_of", "is_observer_of"])),
+		]);
 
 	assert(status, "No entity status in database.");
 	assert(entityType, "No entity type in database.");
 	assert(asset, "No assets in database.");
-	assert(membersOrPartnersType, "No consortium type in database.");
+	assert(countryType, "No country type in database.");
 	assert(umbrellaConsortiumType, "No umbrella consortium type in database.");
-	assert(memberPartnerStatus.length, "No member or partner status in database.");
+	assert(memberObserverStatus.length, "No member or observer status in database.");
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {
@@ -91,7 +83,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 	await db.insert(schema.organisationalUnits).values(
 		items.slice(1).map((item) => {
-			return { ...item.organisationalUnit, typeId: membersOrPartnersType.id, imageId: asset.id };
+			return { ...item.organisationalUnit, typeId: countryType.id, imageId: asset.id };
 		}),
 	);
 
@@ -102,7 +94,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 			return {
 				unitId: item.organisationalUnit.id,
 				relatedUnitId: items[0]!.organisationalUnit.id,
-				status: f.helpers.arrayElement(memberPartnerStatus).id,
+				status: f.helpers.arrayElement(memberObserverStatus).id,
 				duration: {
 					start,
 				},

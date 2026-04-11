@@ -1,4 +1,3 @@
---> statement-breakpoint
 WITH
 	"entity" AS (
 		INSERT INTO
@@ -27,7 +26,7 @@ FROM
 	"entity",
 	"organisational_unit_types"
 WHERE
-	"organisational_unit_types"."type" = 'umbrella_consortium'
+	"organisational_unit_types"."type" = 'eric'
 ON CONFLICT ("id") DO NOTHING;
 
 --> statement-breakpoint
@@ -72,33 +71,17 @@ WITH
 			(
 				VALUES
 					('board-of-directors', 'Board of directors', 'bod'),
-					(
-						'dariah-coordination-office',
-						'DARIAH coordination office',
-						'dco'
-					),
+					('dariah-coordination-office', 'DARIAH coordination office', 'dco'),
 					('general-assembly', 'General assembly', 'ga'),
-					(
-						'joint-research-committee',
-						'Joint research committee',
-						'jrc'
-					),
-					(
-						'national-coordinators-committee',
-						'National coordinators committee',
-						'ncc'
-					),
+					('joint-research-committee', 'Joint research committee', 'jrc'),
+					('national-coordinators-committee', 'National coordinators committee', 'ncc'),
 					('scientific-board', 'Scientific board', 'sb'),
-					(
-						'senior-management-team',
-						'Senior management team',
-						'smt'
-					)
+					('senior-management-team', 'Senior management team', 'smt')
 			) AS "tmp" ("slug", "name", "acronym")
 			JOIN "body_entities" ON "body_entities"."slug" = "tmp"."slug"
 			CROSS JOIN "organisational_unit_types"
 		WHERE
-			"organisational_unit_types"."type" = 'body'
+			"organisational_unit_types"."type" = 'governance_body'
 		ON CONFLICT ("id") DO NOTHING
 		RETURNING
 			"id"
@@ -114,7 +97,8 @@ SELECT
 	"body_units"."id",
 	"dariah_eu"."id",
 	"organisational_unit_status"."id",
-	'[2014-08-19,)'::tstzrange
+	-- @see {@link https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32014D0526}
+	'[2014-08-06,)'::tstzrange
 FROM
 	"body_units"
 	CROSS JOIN "organisational_unit_status"
@@ -128,5 +112,5 @@ FROM
 			"entities"."slug" = 'dariah-eu'
 	) AS "dariah_eu"
 WHERE
-	"organisational_unit_status"."status" = 'is_part'
+	"organisational_unit_status"."status" = 'is_part_of'
 ON CONFLICT DO NOTHING;

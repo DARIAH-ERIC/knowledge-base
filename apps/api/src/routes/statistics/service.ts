@@ -3,13 +3,21 @@
 import type { Database, Transaction } from "@/middlewares/db";
 
 export async function getStatistics(db: Database | Transaction) {
-	const items = await db.query.statistics.findMany({
+	const item = await db.query.statistics.findFirst({
 		columns: {
-			status: true,
-			type: true,
-			total: true,
+			memberCountries: true,
+			partnerInstitutions: true,
+			cooperatingPartners: true,
+			workingGroups: true,
 		},
 	});
 
-	return items;
+	return (
+		item ?? {
+			memberCountries: 0,
+			partnerInstitutions: 0,
+			cooperatingPartners: 0,
+			workingGroups: 0,
+		}
+	);
 }

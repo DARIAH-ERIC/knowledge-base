@@ -9,11 +9,12 @@ import { entities } from "./entities";
 import { socialMedia } from "./social-media";
 
 export const organisationalUnitTypesEnum = [
-	"body",
-	"consortium",
+	"governance_body",
+	"national_consortium",
+	"country",
 	"institution",
 	"regional_hub",
-	"umbrella_consortium",
+	"eric",
 	"working_group",
 ] as const;
 
@@ -35,12 +36,15 @@ export const organisationalUnitTypes = p.pgTable(
 );
 
 export const organisationalUnitStatusEnum = [
-	"is_cooperating_partner",
-	"is_member",
-	"is_national_coordinating_institution",
-	"is_national_representative_institution",
-	"is_part",
-	"is_partner_institution",
+	"is_located_in",
+	"is_member_of",
+	"is_national_consortium_of",
+	"is_national_coordinating_institution_in",
+	"is_national_representative_institution_in",
+	"is_observer_of",
+	"is_cooperating_partner_of",
+	"is_part_of",
+	"is_partner_institution_of",
 ] as const;
 
 export const organisationalUnitStatus = p.pgTable(
@@ -204,9 +208,9 @@ export const OrganisationalUnitToSocialMediaUpdateSchema = createUpdateSchema(
 	organisationalUnitsToSocialMedia,
 );
 
-export const membersAndPartnersUnitType = "consortium";
+export const membersAndPartnersUnitType = "country";
 
-export const membersAndPartnersUnitStatusEnum = ["is_cooperating_partner", "is_member"] as const;
+export const membersAndPartnersUnitStatusEnum = ["is_member_of", "is_observer_of"] as const;
 
 export const membersAndPartners = p
 	.pgView("members_and_partners", {
@@ -237,9 +241,10 @@ export const workingGroups = p
 
 export const statistics = p
 	.pgView("statistics", {
-		type: p.text("type"),
-		status: p.text("status"),
-		total: p.numeric("total"),
+		memberCountries: p.integer("member_countries"),
+		partnerInstitutions: p.integer("partner_institutions"),
+		cooperatingPartners: p.integer("cooperating_partners"),
+		workingGroups: p.integer("working_groups"),
 	})
 	.existing();
 

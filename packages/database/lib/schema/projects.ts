@@ -175,7 +175,7 @@ export const ProjectToSocialMediaSelectSchema = createSelectSchema(projectsToSoc
 export const ProjectToSocialMediaInsertSchema = createInsertSchema(projectsToSocialMedia);
 export const ProjectToSocialMediaUpdateSchema = createUpdateSchema(projectsToSocialMedia);
 
-export const dariahProjectsUnitType = "umbrella_consortium";
+export const dariahProjectsUnitType = "eric";
 
 export const dariahProjects = p
 	.pgView("dariah_projects", {

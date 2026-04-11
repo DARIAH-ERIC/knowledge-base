@@ -9,21 +9,16 @@ import { entities } from "./entities";
 import { organisationalUnits, organisationalUnitTypes } from "./organisational-units";
 
 export const personRoleTypesEnum = [
-	"dco_member",
-	"director",
+	"is_chair_of",
+	"is_vice_chair_of",
+	"is_member_of",
+	"is_director_of",
+	"is_president_of",
+	"is_contact_for",
 	"national_coordinator",
 	"national_coordinator_deputy",
 	"national_representative",
 	"national_representative_deputy",
-	"jrc_chair",
-	"jrc_member",
-	"scientific_board_member",
-	"smt_member",
-	"wg_chair",
-	"wg_member",
-	"national_consortium_contact",
-	"cooperating_partner_contact",
-	"ncc_chair",
 ] as const;
 
 export const persons = p.pgTable("persons", {

@@ -150,6 +150,33 @@ async function getData(): Promise<WordPressData> {
 	return data;
 }
 
+type PersonRoleType =
+	| "national_coordinator"
+	| "national_coordinator_deputy"
+	| "national_representative";
+
+function parsePositionRoles(position: string): Array<PersonRoleType> {
+	const pos = position.trim();
+
+	if (/national representative and national coordinator/i.test(pos)) {
+		return ["national_representative", "national_coordinator"];
+	}
+	if (/^deputy national (?:co-)?coordinator/i.test(pos)) {
+		return ["national_coordinator_deputy"];
+	}
+	if (/^national coordinator/i.test(pos)) {
+		return ["national_coordinator"];
+	}
+	if (
+		/^national representative/i.test(pos) ||
+		/chair of general assembly \/ national representative/i.test(pos)
+	) {
+		return ["national_representative"];
+	}
+
+	return [];
+}
+
 async function main() {
 	log.info("Retrieving data from wordpress...");
 
@@ -181,6 +208,16 @@ async function main() {
 		return item.status;
 	});
 
+	const personRoleTypes = await db.query.personRoleTypes.findMany();
+	const personRoleTypesByType = keyBy(personRoleTypes, (item) => {
+		return item.type;
+	});
+
+	const wpCountryIdToOrgUnitId = new Map<number, string>();
+	const wpInstitutionIdToOrgUnitId = new Map<number, string>();
+	const wpWorkingGroupIdToOrgUnitId = new Map<number, string>();
+	const wpPersonIdToDbId = new Map<number, string>();
+
 	const projectScopes = await db.query.projectScopes.findMany();
 	const projectScopesByType = keyBy(projectScopes, (item) => {
 		return item.scope;
@@ -209,7 +246,7 @@ async function main() {
 	const umbrellaUnit = await db.query.organisationalUnits.findFirst({
 		where: {
 			type: {
-				type: "umbrella_consortium",
+				type: "eric",
 			},
 		},
 	});
@@ -1055,7 +1092,7 @@ async function main() {
 					name,
 					summary: "",
 					imageId: imageId ?? placeholderImage.id,
-					typeId: organisationalUnitTypesByType.consortium.id,
+					typeId: organisationalUnitTypesByType.country.id,
 					createdAt: new Date(country.date_gmt),
 					updatedAt: new Date(country.modified_gmt),
 				})
@@ -1063,13 +1100,21 @@ async function main() {
 
 			assert(orgUnit);
 
+			wpCountryIdToOrgUnitId.set(country.id, orgUnit.id);
+
 			if (umbrellaUnit) {
-				await tx.insert(schema.organisationalUnitsRelations).values({
-					unitId: orgUnit.id,
-					relatedUnitId: umbrellaUnit.id,
-					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
-					status: organisationalUnitStatusByType.is_member.id,
+				const isMember = country.status_terms.some((term) => {
+					return term.slug === "members";
 				});
+
+				if (isMember) {
+					await tx.insert(schema.organisationalUnitsRelations).values({
+						unitId: orgUnit.id,
+						relatedUnitId: umbrellaUnit.id,
+						duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+						status: organisationalUnitStatusByType.is_member_of.id,
+					});
+				}
 			}
 
 			if (isNonEmptyString(country.website)) {
@@ -1175,6 +1220,15 @@ async function main() {
 
 			const name = toPlaintext(institution.title.rendered);
 
+			// Role IDs from https://www.dariah.eu/wp-json/wp/v2/dariah_institution_country_role:
+			// 14 = national-coordinating-institution
+			// 15 = partner-institutions
+			// 20 = cooperating-partners
+			// 112 = other
+			const isNationalCoordinator = institution.dariah_institution_country_role.includes(14);
+			const isPartnerInstitution = institution.dariah_institution_country_role.includes(15);
+			const isCooperatingPartner = institution.dariah_institution_country_role.includes(20);
+
 			const [orgUnit] = await tx
 				.insert(schema.organisationalUnits)
 				.values({
@@ -1189,6 +1243,60 @@ async function main() {
 				.returning({ id: schema.organisationalUnits.id });
 
 			assert(orgUnit);
+
+			wpInstitutionIdToOrgUnitId.set(institution.id, orgUnit.id);
+
+			// WP institutions with missing country_data, manually assigned:
+			// 392 = Gottfried Wilhelm Leibniz University of Hannover → Germany (287)
+			// 574 = Max Planck Institute for Social Law and Social Policy → Germany (287)
+			const countryWpId =
+				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+				institution.country_data?.id ??
+				(institution.id === 392 || institution.id === 574 ? 287 : undefined);
+
+			const countryOrgUnitId =
+				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+				countryWpId != null ? wpCountryIdToOrgUnitId.get(countryWpId) : undefined;
+
+			if (countryOrgUnitId != null) {
+				await tx.insert(schema.organisationalUnitsRelations).values({
+					unitId: orgUnit.id,
+					relatedUnitId: countryOrgUnitId,
+					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+
+					status: organisationalUnitStatusByType.is_located_in.id,
+				});
+			}
+
+			if (isNationalCoordinator && umbrellaUnit != null) {
+				await tx.insert(schema.organisationalUnitsRelations).values({
+					unitId: orgUnit.id,
+					relatedUnitId: umbrellaUnit.id,
+					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+
+					status: organisationalUnitStatusByType.is_national_coordinating_institution_in.id,
+				});
+			}
+
+			if (isPartnerInstitution && countryOrgUnitId != null && umbrellaUnit != null) {
+				await tx.insert(schema.organisationalUnitsRelations).values({
+					unitId: orgUnit.id,
+					relatedUnitId: umbrellaUnit.id,
+					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+
+					status: organisationalUnitStatusByType.is_partner_institution_of.id,
+				});
+			}
+
+			if (isCooperatingPartner && countryOrgUnitId != null && umbrellaUnit != null) {
+				await tx.insert(schema.organisationalUnitsRelations).values({
+					unitId: orgUnit.id,
+					relatedUnitId: umbrellaUnit.id,
+					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+
+					status: organisationalUnitStatusByType.is_cooperating_partner_of.id,
+				});
+			}
 
 			if (isNonEmptyString(institution.website)) {
 				const [sm] = await tx
@@ -1253,6 +1361,46 @@ async function main() {
 
 	/**
 	 * ============================================================================================
+	 * National representative institution relations.
+	 * ============================================================================================
+	 */
+
+	log.info("Creating national representative institution relations...");
+
+	for (const country of Object.values(data.countries)) {
+		const countryOrgUnitId = wpCountryIdToOrgUnitId.get(country.id);
+		if (countryOrgUnitId == null) {
+			continue;
+		}
+
+		// Deduplicate: multiple persons from the same institution may be listed
+		const repInstitutionWpIds = new Set(
+			country.repPersons_data.map((p) => {
+				return p.institution;
+			}),
+		);
+
+		for (const wpInstId of repInstitutionWpIds) {
+			const institutionOrgUnitId = wpInstitutionIdToOrgUnitId.get(wpInstId);
+			if (institutionOrgUnitId == null) {
+				continue;
+			}
+
+			if (umbrellaUnit == null) {
+				continue;
+			}
+
+			await db.insert(schema.organisationalUnitsRelations).values({
+				unitId: institutionOrgUnitId,
+				relatedUnitId: umbrellaUnit.id,
+				duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+				status: organisationalUnitStatusByType.is_national_representative_institution_in.id,
+			});
+		}
+	}
+
+	/**
+	 * ============================================================================================
 	 * Working group.
 	 * ============================================================================================
 	 */
@@ -1302,17 +1450,16 @@ async function main() {
 
 			assert(orgUnit);
 
+			wpWorkingGroupIdToOrgUnitId.set(workingGroup.id, orgUnit.id);
+
 			if (umbrellaUnit) {
 				await tx.insert(schema.organisationalUnitsRelations).values({
 					unitId: orgUnit.id,
 					relatedUnitId: umbrellaUnit.id,
 					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
-					status: organisationalUnitStatusByType.is_part.id,
+					status: organisationalUnitStatusByType.is_part_of.id,
 				});
 			}
-
-			// TODO: leaders_data => chairs
-			// TODO: country_data => country
 
 			if (workingGroup.content.rendered.trim().length === 0) {
 				return;
@@ -1440,8 +1587,41 @@ async function main() {
 				});
 			}
 
-			// TODO: relations.coordinator
-			// TODO: relations.institutions
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+			if (project.relations.coordinator != null) {
+				const coordinatorOrgUnitId = wpInstitutionIdToOrgUnitId.get(
+					project.relations.coordinator.id,
+				);
+				if (coordinatorOrgUnitId != null) {
+					await tx.insert(schema.projectsToOrganisationalUnits).values({
+						projectId: p.id,
+						unitId: coordinatorOrgUnitId,
+						roleId: projectRolesByType.coordinator.id,
+					});
+				}
+			}
+
+			const participantWpIds = new Set(
+				project.relations.institutions
+					.map((i) => {
+						return i.id;
+					})
+					.filter((id) => {
+						// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+						return id !== project.relations.coordinator?.id;
+					}),
+			);
+
+			for (const wpInstId of participantWpIds) {
+				const unitId = wpInstitutionIdToOrgUnitId.get(wpInstId);
+				if (unitId != null) {
+					await tx.insert(schema.projectsToOrganisationalUnits).values({
+						projectId: p.id,
+						unitId,
+						roleId: projectRolesByType.participant.id,
+					});
+				}
+			}
 
 			if (project.content.rendered.trim().length === 0) {
 				return;
@@ -1537,13 +1717,44 @@ async function main() {
 				updatedAt: new Date(person.modified_gmt),
 			});
 
+			wpPersonIdToDbId.set(person.id, id);
+
 			// TODO: website
 			// TODO: identifiant
-			// TODO: position
 			// TODO: twitter
 			// TODO: skills
 			// TODO: research
-			// TODO: institution_data
+
+			const roles = parsePositionRoles(person.position);
+
+			if (roles.length > 0) {
+				if (person.institution_data != null) {
+					const institution = data.institutions[person.institution_data.id];
+					// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+					const countryWpId = institution?.country_data?.id;
+					const countryOrgUnitId =
+						countryWpId != null ? wpCountryIdToOrgUnitId.get(countryWpId) : undefined;
+
+					if (countryOrgUnitId != null) {
+						for (const role of roles) {
+							await tx.insert(schema.personsToOrganisationalUnits).values({
+								personId: id,
+								organisationalUnitId: countryOrgUnitId,
+								roleTypeId: personRoleTypesByType[role].id,
+								duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+							});
+						}
+					} else {
+						log.warn(
+							`Person ${String(person.id)} ("${person.position}"): could not resolve country for institution ${String(person.institution_data.id)}.`,
+						);
+					}
+				} else {
+					log.warn(
+						`Person ${String(person.id)} ("${person.position}"): no institution_data, skipping role relation.`,
+					);
+				}
+			}
 
 			if (person.content.rendered.trim().length === 0) {
 				return;
@@ -1586,6 +1797,44 @@ async function main() {
 				id: contentBlock.id,
 			});
 		});
+	}
+
+	/**
+	 * ============================================================================================
+	 * Working group chair relations.
+	 * ============================================================================================
+	 */
+
+	log.info("Creating working group chair relations...");
+
+	for (const workingGroup of Object.values(data.workingGroups)) {
+		const workingGroupOrgUnitId = wpWorkingGroupIdToOrgUnitId.get(workingGroup.id);
+		if (workingGroupOrgUnitId == null) {
+			continue;
+		}
+
+		const leaderWpIds = new Set(
+			workingGroup.leaders_data.map((l) => {
+				return l.id;
+			}),
+		);
+
+		for (const wpPersonId of leaderWpIds) {
+			const personDbId = wpPersonIdToDbId.get(wpPersonId);
+			if (personDbId == null) {
+				log.warn(
+					`Working group ${String(workingGroup.id)}: leader person ${String(wpPersonId)} not found.`,
+				);
+				continue;
+			}
+
+			await db.insert(schema.personsToOrganisationalUnits).values({
+				personId: personDbId,
+				organisationalUnitId: workingGroupOrgUnitId,
+				roleTypeId: personRoleTypesByType.is_chair_of.id,
+				duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+			});
+		}
 	}
 
 	//

@@ -471,7 +471,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			})
 			.from(schema.organisationalUnitsAllowedRelations);
 
-		const { umbrella_consortium, ...rest } = organisationalUnitsTypesByType;
+		const { eric, ...rest } = organisationalUnitsTypesByType;
 
 		const organisationalUnits: Array<Omit<schema.OrganisationalUnitInput, "id">> =
 			f.helpers.multiple(
@@ -490,7 +490,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 						),
 						typeId:
 							i === 0
-								? umbrella_consortium.id
+								? eric.id
 								: Object.values(rest).map((type) => {
 										return type.id;
 									})[i % Object.values(rest).length]!,
