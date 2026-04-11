@@ -312,6 +312,9 @@ export async function getDariahProjectById(
 		.map((r) => {
 			return {
 				...r.unit,
+				socialMedia: r.unit.socialMedia.map((sm) => {
+					return { url: sm.url, type: sm.type.type };
+				}),
 				type: r.unit.type.type,
 			};
 		});
@@ -323,6 +326,9 @@ export async function getDariahProjectById(
 		.map((r) => {
 			return {
 				...r.unit,
+				socialMedia: r.unit.socialMedia.map((sm) => {
+					return { url: sm.url, type: sm.type.type };
+				}),
 				type: r.unit.type.type,
 			};
 		});
@@ -513,6 +519,9 @@ export async function getDariahProjectBySlug(
 		.map((r) => {
 			return {
 				...r.unit,
+				socialMedia: r.unit.socialMedia.map((sm) => {
+					return { url: sm.url, type: sm.type.type };
+				}),
 				type: r.unit.type.type,
 			};
 		});
@@ -524,6 +533,9 @@ export async function getDariahProjectBySlug(
 		.map((r) => {
 			return {
 				...r.unit,
+				socialMedia: r.unit.socialMedia.map((sm) => {
+					return { url: sm.url, type: sm.type.type };
+				}),
 				type: r.unit.type.type,
 			};
 		});

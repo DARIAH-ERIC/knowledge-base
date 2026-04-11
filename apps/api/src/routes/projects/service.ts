@@ -266,6 +266,9 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 		.map((r) => {
 			return {
 				...r.unit,
+				socialMedia: r.unit.socialMedia.map((sm) => {
+					return { url: sm.url, type: sm.type.type };
+				}),
 				type: r.unit.type.type,
 				role: r.role.role,
 			};
@@ -277,6 +280,9 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 		.map((r) => {
 			return {
 				...r.unit,
+				socialMedia: r.unit.socialMedia.map((sm) => {
+					return { url: sm.url, type: sm.type.type };
+				}),
 				type: r.unit.type.type,
 				role: r.role.role,
 			};
@@ -479,6 +485,9 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 		.map((r) => {
 			return {
 				...r.unit,
+				socialMedia: r.unit.socialMedia.map((sm) => {
+					return { url: sm.url, type: sm.type.type };
+				}),
 				type: r.unit.type.type,
 				role: r.role.role,
 			};
@@ -490,6 +499,9 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 		.map((r) => {
 			return {
 				...r.unit,
+				socialMedia: r.unit.socialMedia.map((sm) => {
+					return { url: sm.url, type: sm.type.type };
+				}),
 				type: r.unit.type.type,
 				role: r.role.role,
 			};
