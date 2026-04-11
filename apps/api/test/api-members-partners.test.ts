@@ -54,7 +54,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 			}),
 			db.query.organisationalUnitTypes.findFirst({
 				columns: { id: true },
-				where: { type: "umbrella_consortium" },
+				where: { type: "eric" },
 			}),
 			db
 				.select()

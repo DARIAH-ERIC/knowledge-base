@@ -246,7 +246,7 @@ async function main() {
 	const umbrellaUnit = await db.query.organisationalUnits.findFirst({
 		where: {
 			type: {
-				type: "umbrella_consortium",
+				type: "eric",
 			},
 		},
 	});
@@ -1226,9 +1226,8 @@ async function main() {
 			// 20 = cooperating-partners
 			// 112 = other
 			const isNationalCoordinator = institution.dariah_institution_country_role.includes(14);
-			const isPartnerOrCooperating =
-				institution.dariah_institution_country_role.includes(15) ||
-				institution.dariah_institution_country_role.includes(20);
+			const isPartnerInstitution = institution.dariah_institution_country_role.includes(15);
+			const isCooperatingPartner = institution.dariah_institution_country_role.includes(20);
 
 			const [orgUnit] = await tx
 				.insert(schema.organisationalUnits)
@@ -1264,28 +1263,38 @@ async function main() {
 					unitId: orgUnit.id,
 					relatedUnitId: countryOrgUnitId,
 					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 					status: organisationalUnitStatusByType.is_located_in.id,
 				});
-
-				if (isNationalCoordinator) {
-					await tx.insert(schema.organisationalUnitsRelations).values({
-						unitId: orgUnit.id,
-						relatedUnitId: countryOrgUnitId,
-						duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
-						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-						status: organisationalUnitStatusByType.is_national_coordinating_institution_in.id,
-					});
-				}
 			}
 
-			if (isPartnerOrCooperating && countryOrgUnitId != null && umbrellaUnit != null) {
+			if (isNationalCoordinator && umbrellaUnit != null) {
 				await tx.insert(schema.organisationalUnitsRelations).values({
 					unitId: orgUnit.id,
 					relatedUnitId: umbrellaUnit.id,
 					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					status: organisationalUnitStatusByType.is_partner_of.id,
+
+					status: organisationalUnitStatusByType.is_national_coordinating_institution_of.id,
+				});
+			}
+
+			if (isPartnerInstitution && countryOrgUnitId != null && umbrellaUnit != null) {
+				await tx.insert(schema.organisationalUnitsRelations).values({
+					unitId: orgUnit.id,
+					relatedUnitId: umbrellaUnit.id,
+					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+
+					status: organisationalUnitStatusByType.is_partner_institution_of.id,
+				});
+			}
+
+			if (isCooperatingPartner && countryOrgUnitId != null && umbrellaUnit != null) {
+				await tx.insert(schema.organisationalUnitsRelations).values({
+					unitId: orgUnit.id,
+					relatedUnitId: umbrellaUnit.id,
+					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+
+					status: organisationalUnitStatusByType.is_cooperating_partner_of.id,
 				});
 			}
 
@@ -1377,11 +1386,15 @@ async function main() {
 				continue;
 			}
 
+			if (umbrellaUnit == null) {
+				continue;
+			}
+
 			await db.insert(schema.organisationalUnitsRelations).values({
 				unitId: institutionOrgUnitId,
-				relatedUnitId: countryOrgUnitId,
+				relatedUnitId: umbrellaUnit.id,
 				duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
-				status: organisationalUnitStatusByType.is_national_representative_institution_in.id,
+				status: organisationalUnitStatusByType.is_national_representative_institution_of.id,
 			});
 		}
 	}

@@ -9,12 +9,12 @@ import { entities } from "./entities";
 import { socialMedia } from "./social-media";
 
 export const organisationalUnitTypesEnum = [
-	"body",
-	"consortium",
+	"governance_body",
+	"national_consortium",
 	"country",
 	"institution",
 	"regional_hub",
-	"umbrella_consortium",
+	"eric",
 	"working_group",
 ] as const;
 
@@ -39,11 +39,12 @@ export const organisationalUnitStatusEnum = [
 	"is_located_in",
 	"is_member_of",
 	"is_national_consortium_of",
-	"is_national_coordinating_institution_in",
-	"is_national_representative_institution_in",
+	"is_national_coordinating_institution_of",
+	"is_national_representative_institution_of",
 	"is_observer_of",
+	"is_cooperating_partner_of",
 	"is_part_of",
-	"is_partner_of",
+	"is_partner_institution_of",
 ] as const;
 
 export const organisationalUnitStatus = p.pgTable(

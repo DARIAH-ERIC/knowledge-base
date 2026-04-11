@@ -178,7 +178,7 @@ export async function getDariahProjects(
 
 		const role =
 			projectsToOrganisationalUnits.find((r) => {
-				return r.unit.type.type === "umbrella_consortium";
+				return r.unit.type.type === "eric";
 			})?.role.role ?? null;
 
 		return {

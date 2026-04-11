@@ -54,7 +54,7 @@ async function seedWithMixedStatuses(db: Database) {
 			}),
 			db.query.organisationalUnitTypes.findFirst({
 				columns: { id: true },
-				where: { type: "umbrella_consortium" },
+				where: { type: "eric" },
 			}),
 			db
 				.select()
@@ -66,7 +66,7 @@ async function seedWithMixedStatuses(db: Database) {
 	assert(entityType, "No entity type in database.");
 	assert(asset, "No assets in database.");
 	assert(workingGroupType, "No working_group type in database.");
-	assert(umbrellaConsortiumType, "No umbrella_consortium type in database.");
+	assert(umbrellaConsortiumType, "No eric type in database.");
 	assert(unitStatus.length, "No unit status in database.");
 
 	// [0] = umbrella consortium, [1][2] = active working groups, [3] = inactive working group
@@ -138,7 +138,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 			}),
 			db.query.organisationalUnitTypes.findFirst({
 				columns: { id: true },
-				where: { type: "umbrella_consortium" },
+				where: { type: "eric" },
 			}),
 			db
 				.select()
@@ -150,7 +150,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	assert(entityType, "No entity type in database.");
 	assert(asset, "No assets in database.");
 	assert(workingGroupType, "No working_group type in database.");
-	assert(umbrellaConsortiumType, "No umbrella_consortium type in database.");
+	assert(umbrellaConsortiumType, "No eric type in database.");
 	assert(unitStatus.length, "No unit status in database.");
 
 	await db.insert(schema.entities).values(

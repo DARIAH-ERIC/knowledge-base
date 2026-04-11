@@ -52,11 +52,11 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 			}),
 			db.query.organisationalUnitTypes.findFirst({
 				columns: { id: true },
-				where: { type: "umbrella_consortium" },
+				where: { type: "eric" },
 			}),
 			db.query.organisationalUnitTypes.findFirst({
 				columns: { id: true },
-				where: { type: "consortium" },
+				where: { type: "national_consortium" },
 			}),
 			db.query.projectRoles.findFirst({ where: { role: "participant" }, columns: { id: true } }),
 		]);
@@ -65,7 +65,7 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 	assert(entityType, "No entity type in database.");
 	assert(scope, "No project scope in database.");
 	assert(unitEntityType, "No organisational unit entity type in database.");
-	assert(umbrellaType, "No umbrella_consortium type in database.");
+	assert(umbrellaType, "No eric type in database.");
 	assert(otherType, "No consortium type in database.");
 	assert(projectRole, "No project role in database.");
 
@@ -90,7 +90,7 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 		}),
 	);
 
-	// Create umbrella_consortium unit (linked to DARIAH projects)
+	// Create eric unit (linked to DARIAH projects)
 	const umbrellaUnitId = uuidv7();
 
 	await db.insert(schema.entities).values({
@@ -126,7 +126,7 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 		typeId: otherType.id,
 	});
 
-	// Link DARIAH projects to umbrella_consortium unit
+	// Link DARIAH projects to eric unit
 	await db.insert(schema.projectsToOrganisationalUnits).values(
 		dariahItems.map((item) => {
 			return {
@@ -167,7 +167,7 @@ async function seedWithMixedStatuses(db: Database): Promise<{
 		}),
 		db.query.organisationalUnitTypes.findFirst({
 			columns: { id: true },
-			where: { type: "umbrella_consortium" },
+			where: { type: "eric" },
 		}),
 		db.query.projectRoles.findFirst({ where: { role: "participant" }, columns: { id: true } }),
 	]);
@@ -176,7 +176,7 @@ async function seedWithMixedStatuses(db: Database): Promise<{
 	assert(entityType, "No entity type in database.");
 	assert(scope, "No project scope in database.");
 	assert(unitEntityType, "No organisational unit entity type in database.");
-	assert(umbrellaType, "No umbrella_consortium type in database.");
+	assert(umbrellaType, "No eric type in database.");
 	assert(projectRole, "No project role in database.");
 
 	const activeItem = createProjectData();
@@ -411,7 +411,7 @@ describe("dariah-projects", () => {
 			});
 		});
 
-		it("should return 404 for a project not linked to umbrella_consortium", async () => {
+		it("should return 404 for a project not linked to eric", async () => {
 			await withTransaction(async (db) => {
 				const client = createTestClient(db);
 
@@ -510,7 +510,7 @@ describe("dariah-projects", () => {
 			});
 		});
 
-		it("should return 404 for a project not linked to umbrella_consortium", async () => {
+		it("should return 404 for a project not linked to eric", async () => {
 			await withTransaction(async (db) => {
 				const client = createTestClient(db);
 

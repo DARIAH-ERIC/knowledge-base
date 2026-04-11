@@ -84,12 +84,12 @@ ON CONFLICT ("code") DO NOTHING;
 INSERT INTO
 	"organisational_unit_types" ("type")
 VALUES
-	('body'),
-	('consortium'),
+	('governance_body'),
+	('national_consortium'),
 	('country'),
 	('institution'),
 	('regional_hub'),
-	('umbrella_consortium'),
+	('eric'),
 	('working_group');
 
 --> statement-breakpoint
@@ -99,11 +99,12 @@ VALUES
 	('is_located_in'),
 	('is_member_of'),
 	('is_national_consortium_of'),
-	('is_national_coordinating_institution_in'),
-	('is_national_representative_institution_in'),
+	('is_national_coordinating_institution_of'),
+	('is_national_representative_institution_of'),
 	('is_observer_of'),
+	('is_cooperating_partner_of'),
 	('is_part_of'),
-	('is_partner_of');
+	('is_partner_institution_of');
 
 --> statement-breakpoint
 INSERT INTO
@@ -119,17 +120,18 @@ SELECT
 FROM
 	(
 		VALUES
-			('body', 'umbrella_consortium', 'is_part_of'),
-			('country', 'umbrella_consortium', 'is_member_of'),
-			('country', 'umbrella_consortium', 'is_observer_of'),
-			('consortium', 'country', 'is_national_consortium_of'),
+			('governance_body', 'eric', 'is_part_of'),
+			('country', 'eric', 'is_member_of'),
+			('country', 'eric', 'is_observer_of'),
+			('national_consortium', 'country', 'is_national_consortium_of'),
 			('institution', 'country', 'is_located_in'),
 			('institution', 'regional_hub', 'is_member_of'),
-			('institution', 'consortium', 'is_member_of'),
-			('institution', 'umbrella_consortium', 'is_partner_of'),
-			('institution', 'country', 'is_national_coordinating_institution_in'),
-			('institution', 'country', 'is_national_representative_institution_in'),
-			('working_group', 'umbrella_consortium', 'is_part_of')
+			('institution', 'national_consortium', 'is_member_of'),
+			('institution', 'eric', 'is_partner_institution_of'),
+			('institution', 'eric', 'is_cooperating_partner_of'),
+			('institution', 'eric', 'is_national_coordinating_institution_of'),
+			('institution', 'eric', 'is_national_representative_institution_of'),
+			('working_group', 'eric', 'is_part_of')
 	) AS "tmp" ("unit_type", "related_unit_type", "relation_type")
 	JOIN "organisational_unit_types" "unit_types" ON "unit_types"."type" = "tmp"."unit_type"
 	JOIN "organisational_unit_types" "related_unit_types" ON "related_unit_types"."type" = "tmp"."related_unit_type"
@@ -187,13 +189,13 @@ SELECT
 FROM
 	(
 		VALUES
-			('dco_member', 'body'),
-			('director', 'body'),
-			('jrc_chair', 'body'),
-			('jrc_member', 'body'),
-			('scientific_board_member', 'body'),
-			('ncc_chair', 'body'),
-			('smt_member', 'body'),
+			('dco_member', 'governance_body'),
+			('director', 'governance_body'),
+			('jrc_chair', 'governance_body'),
+			('jrc_member', 'governance_body'),
+			('scientific_board_member', 'governance_body'),
+			('ncc_chair', 'governance_body'),
+			('smt_member', 'governance_body'),
 			('national_coordinator', 'institution'),
 			('national_coordinator_deputy', 'institution'),
 			('national_representative', 'institution'),

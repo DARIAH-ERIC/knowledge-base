@@ -26,7 +26,7 @@ FROM
 	"entity",
 	"organisational_unit_types"
 WHERE
-	"organisational_unit_types"."type" = 'umbrella_consortium'
+	"organisational_unit_types"."type" = 'eric'
 ON CONFLICT ("id") DO NOTHING;
 
 --> statement-breakpoint
@@ -81,7 +81,7 @@ WITH
 			JOIN "body_entities" ON "body_entities"."slug" = "tmp"."slug"
 			CROSS JOIN "organisational_unit_types"
 		WHERE
-			"organisational_unit_types"."type" = 'body'
+			"organisational_unit_types"."type" = 'governance_body'
 		ON CONFLICT ("id") DO NOTHING
 		RETURNING
 			"id"
@@ -97,7 +97,8 @@ SELECT
 	"body_units"."id",
 	"dariah_eu"."id",
 	"organisational_unit_status"."id",
-	'[2014-08-19,)'::tstzrange
+	-- @see {@link https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32014D0526}
+	'[2014-08-06,)'::tstzrange
 FROM
 	"body_units"
 	CROSS JOIN "organisational_unit_status"
