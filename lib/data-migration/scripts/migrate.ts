@@ -1274,7 +1274,7 @@ async function main() {
 					relatedUnitId: umbrellaUnit.id,
 					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
 
-					status: organisationalUnitStatusByType.is_national_coordinating_institution_of.id,
+					status: organisationalUnitStatusByType.is_national_coordinating_institution_in.id,
 				});
 			}
 
@@ -1394,7 +1394,7 @@ async function main() {
 				unitId: institutionOrgUnitId,
 				relatedUnitId: umbrellaUnit.id,
 				duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
-				status: organisationalUnitStatusByType.is_national_representative_institution_of.id,
+				status: organisationalUnitStatusByType.is_national_representative_institution_in.id,
 			});
 		}
 	}

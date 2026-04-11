@@ -99,8 +99,8 @@ VALUES
 	('is_located_in'),
 	('is_member_of'),
 	('is_national_consortium_of'),
-	('is_national_coordinating_institution_of'),
-	('is_national_representative_institution_of'),
+	('is_national_coordinating_institution_in'),
+	('is_national_representative_institution_in'),
 	('is_observer_of'),
 	('is_cooperating_partner_of'),
 	('is_part_of'),
@@ -129,8 +129,8 @@ FROM
 			('institution', 'national_consortium', 'is_member_of'),
 			('institution', 'eric', 'is_partner_institution_of'),
 			('institution', 'eric', 'is_cooperating_partner_of'),
-			('institution', 'eric', 'is_national_coordinating_institution_of'),
-			('institution', 'eric', 'is_national_representative_institution_of'),
+			('institution', 'eric', 'is_national_coordinating_institution_in'),
+			('institution', 'eric', 'is_national_representative_institution_in'),
 			('working_group', 'eric', 'is_part_of')
 	) AS "tmp" ("unit_type", "related_unit_type", "relation_type")
 	JOIN "organisational_unit_types" "unit_types" ON "unit_types"."type" = "tmp"."unit_type"
