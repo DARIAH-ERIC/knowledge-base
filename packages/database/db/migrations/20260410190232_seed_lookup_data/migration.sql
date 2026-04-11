@@ -164,21 +164,16 @@ ON CONFLICT ("entity_type_id", "field_name") DO NOTHING;
 INSERT INTO
 	"person_role_types" ("type")
 VALUES
-	('dco_member'),
-	('director'),
+	('is_chair_of'),
+	('is_vice_chair_of'),
+	('is_member_of'),
+	('is_director_of'),
+	('is_president_of'),
+	('is_contact_for'),
 	('national_coordinator'),
 	('national_coordinator_deputy'),
 	('national_representative'),
-	('national_representative_deputy'),
-	('jrc_chair'),
-	('jrc_member'),
-	('scientific_board_member'),
-	('smt_member'),
-	('wg_chair'),
-	('wg_member'),
-	('national_consortium_contact'),
-	('cooperating_partner_contact'),
-	('ncc_chair');
+	('national_representative_deputy');
 
 --> statement-breakpoint
 INSERT INTO
@@ -189,21 +184,25 @@ SELECT
 FROM
 	(
 		VALUES
-			('dco_member', 'governance_body'),
-			('director', 'governance_body'),
-			('jrc_chair', 'governance_body'),
-			('jrc_member', 'governance_body'),
-			('scientific_board_member', 'governance_body'),
-			('ncc_chair', 'governance_body'),
-			('smt_member', 'governance_body'),
-			('national_coordinator', 'institution'),
-			('national_coordinator_deputy', 'institution'),
-			('national_representative', 'institution'),
-			('national_representative_deputy', 'institution'),
-			('national_consortium_contact', 'institution'),
-			('cooperating_partner_contact', 'institution'),
-			('wg_chair', 'working_group'),
-			('wg_member', 'working_group')
+			('is_chair_of', 'governance_body'),
+			('is_chair_of', 'working_group'),
+			('is_vice_chair_of', 'governance_body'),
+			('is_member_of', 'governance_body'),
+			('is_member_of', 'working_group'),
+			('is_member_of', 'institution'),
+			('is_director_of', 'governance_body'),
+			('is_president_of', 'governance_body'),
+			('is_contact_for', 'governance_body'),
+			('is_contact_for', 'working_group'),
+			('is_contact_for', 'institution'),
+			('is_contact_for', 'national_consortium'),
+			('is_contact_for', 'eric'),
+			('is_contact_for', 'country'),
+			('is_contact_for', 'regional_hub'),
+			('national_coordinator', 'country'),
+			('national_coordinator_deputy', 'country'),
+			('national_representative', 'country'),
+			('national_representative_deputy', 'country')
 	) AS "tmp" ("role_type", "unit_type")
 	JOIN "person_role_types" "role_types" ON "role_types"."type" = "tmp"."role_type"
 	JOIN "organisational_unit_types" "unit_types" ON "unit_types"."type" = "tmp"."unit_type"

@@ -1729,20 +1729,24 @@ async function main() {
 
 			if (roles.length > 0) {
 				if (person.institution_data != null) {
-					const institutionOrgUnitId = wpInstitutionIdToOrgUnitId.get(person.institution_data.id);
+					const institution = data.institutions[person.institution_data.id];
+					// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+					const countryWpId = institution?.country_data?.id;
+					const countryOrgUnitId =
+						countryWpId != null ? wpCountryIdToOrgUnitId.get(countryWpId) : undefined;
 
-					if (institutionOrgUnitId != null) {
+					if (countryOrgUnitId != null) {
 						for (const role of roles) {
 							await tx.insert(schema.personsToOrganisationalUnits).values({
 								personId: id,
-								organisationalUnitId: institutionOrgUnitId,
+								organisationalUnitId: countryOrgUnitId,
 								roleTypeId: personRoleTypesByType[role].id,
 								duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
 							});
 						}
 					} else {
 						log.warn(
-							`Person ${String(person.id)} ("${person.position}"): institution ${String(person.institution_data.id)} not found in org units.`,
+							`Person ${String(person.id)} ("${person.position}"): could not resolve country for institution ${String(person.institution_data.id)}.`,
 						);
 					}
 				} else {
@@ -1827,7 +1831,7 @@ async function main() {
 			await db.insert(schema.personsToOrganisationalUnits).values({
 				personId: personDbId,
 				organisationalUnitId: workingGroupOrgUnitId,
-				roleTypeId: personRoleTypesByType.wg_chair.id,
+				roleTypeId: personRoleTypesByType.is_chair_of.id,
 				duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
 			});
 		}
