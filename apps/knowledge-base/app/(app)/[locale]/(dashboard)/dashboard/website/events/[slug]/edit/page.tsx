@@ -36,7 +36,7 @@ export default async function DashboardWebsiteEditEventPage(
 	const { slug } = await params;
 
 	const [{ items: initialAssets }, event] = await Promise.all([
-		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions }),
+		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 		db.query.events.findFirst({
 			where: {
 				entity: {
@@ -196,7 +196,7 @@ export default async function DashboardWebsiteEditEventPage(
 		return {
 			id: row.id,
 			position: row.position,
-			type: row.type,
+			type: "image" as const,
 			content: { imageKey: row.imageKey, imageUrl, caption: row.caption ?? undefined },
 		};
 	});
@@ -205,7 +205,7 @@ export default async function DashboardWebsiteEditEventPage(
 		return {
 			id: row.id,
 			position: row.position,
-			type: row.type,
+			type: "embed" as const,
 			content: { url: row.url, title: row.title, caption: row.caption ?? undefined },
 		};
 	});
@@ -214,7 +214,7 @@ export default async function DashboardWebsiteEditEventPage(
 		return {
 			id: row.id,
 			position: row.position,
-			type: row.type,
+			type: "data" as const,
 			content: {
 				dataType: row.dataType,
 				limit: row.limit ?? undefined,
@@ -224,7 +224,9 @@ export default async function DashboardWebsiteEditEventPage(
 	});
 
 	const contentBlocks = [
-		...richTextContentBlocks,
+		...richTextContentBlocks.map((row) => {
+			return { ...row, type: "rich_text" as const };
+		}),
 		...imageContentBlocks,
 		...embedContentBlocks,
 		...dataContentBlocks,

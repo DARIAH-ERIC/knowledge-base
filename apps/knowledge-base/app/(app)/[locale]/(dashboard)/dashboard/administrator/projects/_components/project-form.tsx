@@ -257,13 +257,13 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 				<FormSection description={t("Enter the project details.")} title={t("Details")}>
 					<TextField defaultValue={project?.name} isRequired={true} name="name">
 						<Label>{t("Name")}</Label>
-						<Input placeholder={t("Name")} />
+						<Input />
 						<FieldError />
 					</TextField>
 
 					<TextField defaultValue={project?.acronym ?? undefined} name="acronym">
 						<Label>{t("Acronym")}</Label>
-						<Input placeholder={t("Acronym")} />
+						<Input />
 						<FieldError />
 					</TextField>
 
@@ -273,19 +273,19 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 						name="funding"
 					>
 						<Label>{t("Funding")}</Label>
-						<Input placeholder={t("Funding")} />
+						<Input />
 						<FieldError />
 					</NumberField>
 
 					<TextField defaultValue={project?.topic ?? undefined} name="topic">
 						<Label>{t("Topic")}</Label>
-						<Input placeholder={t("Topic")} />
+						<Input />
 						<FieldError />
 					</TextField>
 
 					<TextField defaultValue={project?.call ?? undefined} name="call">
 						<Label>{t("Call")}</Label>
-						<Input placeholder={t("Call")} />
+						<Input />
 						<FieldError />
 					</TextField>
 
@@ -343,7 +343,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 
 					<TextField defaultValue={project?.summary} isRequired={true} name="summary">
 						<Label>{t("Summary")}</Label>
-						<TextArea placeholder={t("Summary")} />
+						<TextArea />
 						<FieldError />
 					</TextField>
 				</FormSection>
@@ -636,7 +636,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 						<ModalBody className="flex flex-col gap-y-4">
 							<TextField isRequired={true} name="name">
 								<Label>{t("Name")}</Label>
-								<Input placeholder={t("Name")} />
+								<Input />
 								<FieldError />
 							</TextField>
 

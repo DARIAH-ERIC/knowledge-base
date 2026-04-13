@@ -36,7 +36,7 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 	const { slug } = await params;
 
 	const [{ items: initialAssets }, impactCaseStudy] = await Promise.all([
-		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions }),
+		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 		db.query.impactCaseStudies.findFirst({
 			where: {
 				entity: {
@@ -185,7 +185,7 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 		return {
 			id: row.id,
 			position: row.position,
-			type: row.type,
+			type: "image" as const,
 			content: { imageKey: row.imageKey, imageUrl, caption: row.caption ?? undefined },
 		};
 	});
@@ -194,7 +194,7 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 		return {
 			id: row.id,
 			position: row.position,
-			type: row.type,
+			type: "embed" as const,
 			content: { url: row.url, title: row.title, caption: row.caption ?? undefined },
 		};
 	});
@@ -203,7 +203,7 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 		return {
 			id: row.id,
 			position: row.position,
-			type: row.type,
+			type: "data" as const,
 			content: {
 				dataType: row.dataType,
 				limit: row.limit ?? undefined,
@@ -213,7 +213,9 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 	});
 
 	const contentBlocks = [
-		...richTextContentBlocks,
+		...richTextContentBlocks.map((row) => {
+			return { ...row, type: "rich_text" as const };
+		}),
 		...imageContentBlocks,
 		...embedContentBlocks,
 		...dataContentBlocks,

@@ -3,7 +3,7 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
-import { FieldError, fieldErrorStyles } from "@dariah-eric/ui/field";
+import { FieldError, fieldErrorStyles, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
@@ -50,23 +50,19 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
 				<FormSection description={t("Enter the spotlight article details.")} title={t("Details")}>
-					<TextField
-						aria-label={t("Title")}
-						defaultValue={spotlightArticle?.title}
-						isRequired={true}
-						name="title"
-					>
-						<Input placeholder={t("Title")} />
+					<TextField defaultValue={spotlightArticle?.title} isRequired={true} name="title">
+						<Label>{t("Title")}</Label>
+						<Input />
 						<FieldError />
 					</TextField>
 
 					<TextField
-						aria-label={t("Summary")}
 						defaultValue={spotlightArticle?.summary ?? undefined}
 						isRequired={true}
 						name="summary"
 					>
-						<Input placeholder={t("Summary")} />
+						<Label>{t("Summary")}</Label>
+						<Input />
 						<FieldError />
 					</TextField>
 				</FormSection>

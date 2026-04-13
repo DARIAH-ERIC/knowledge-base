@@ -5,6 +5,7 @@
 import type { ContentBlockTypes } from "@dariah-eric/database/schema";
 import { Button } from "@dariah-eric/ui/button";
 import { Checkbox } from "@dariah-eric/ui/checkbox";
+import { Label } from "@dariah-eric/ui/field";
 import { Input } from "@dariah-eric/ui/input";
 import { Menu, MenuContent, MenuItem, MenuLabel } from "@dariah-eric/ui/menu";
 import { NumberField, NumberInput } from "@dariah-eric/ui/number-field";
@@ -22,9 +23,11 @@ import { ToggleGroup, ToggleGroupItem } from "@dariah-eric/ui/toggle-group";
 import {
 	ChevronDownIcon,
 	CodeBracketSquareIcon,
+	ListBulletIcon,
 	PencilSquareIcon,
 	PhotoIcon,
 	PlusIcon,
+	RectangleGroupIcon,
 	Square3Stack3DIcon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
@@ -43,6 +46,16 @@ import {
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
+import {
+	Modal,
+	ModalBody,
+	ModalClose,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+	ModalTitle,
+} from "@dariah-eric/ui/modal";
+
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
 
 interface Asset {
@@ -51,12 +64,63 @@ interface Asset {
 	url: string;
 }
 
-export interface ContentBlock {
+interface RichTextContentBlockItem {
 	id: Key;
-	type: ContentBlockTypes["type"];
+	type: "rich_text";
 	position?: number;
 	content?: JSONContent;
 }
+
+interface ImageContentBlockItem {
+	id: Key;
+	type: "image";
+	position?: number;
+	content?: { imageKey?: string; imageUrl?: string; caption?: string };
+}
+
+interface EmbedContentBlockItem {
+	id: Key;
+	type: "embed";
+	position?: number;
+	content?: { url?: string; title?: string; caption?: string };
+}
+
+interface DataContentBlockItem {
+	id: Key;
+	type: "data";
+	position?: number;
+	content?: { dataType?: "events" | "news"; limit?: number; selectedIds?: Array<string> };
+}
+
+interface HeroContentBlockItem {
+	id: Key;
+	type: "hero";
+	position?: number;
+	content?: {
+		title?: string;
+		eyebrow?: string;
+		imageKey?: string;
+		imageUrl?: string;
+		ctas?: Array<{ label: string; url: string }>;
+	};
+}
+
+interface AccordionContentBlockItem {
+	id: Key;
+	type: "accordion";
+	position?: number;
+	content?: {
+		items?: Array<{ title: string; content?: JSONContent }>;
+	};
+}
+
+export type ContentBlock =
+	| RichTextContentBlockItem
+	| ImageContentBlockItem
+	| EmbedContentBlockItem
+	| DataContentBlockItem
+	| HeroContentBlockItem
+	| AccordionContentBlockItem;
 
 export interface ContentBlocksProps {
 	initialAssets?: Array<Asset>;
@@ -154,7 +218,7 @@ export function ContentBlocks({
 							onKeyboardReorder={handleKeyboardReorder}
 							onReorder={handleReorder}
 							onUpdate={(content) => {
-								list.update(item.id, { ...item, content });
+								list.update(item.id, { ...item, content } as ContentBlock);
 							}}
 						/>
 					);
@@ -180,7 +244,7 @@ interface ContentBlockItemProps {
 	item: ContentBlock;
 	onDelete: () => void;
 	onReorder: (sourceIdStr: string, targetId: Key, position: "before" | "after") => void;
-	onUpdate: (content: JSONContent) => void;
+	onUpdate: (content: NonNullable<ContentBlock["content"]>) => void;
 	onKeyboardReorder: (e: KeyboardEvent<HTMLButtonElement>, id: Key) => void;
 }
 
@@ -250,15 +314,19 @@ function ContentBlockItem({
 	});
 
 	const contentBlockTypeNames: Record<ContentBlockTypes["type"], string> = {
+		accordion: t("Accordion"),
 		data: t("Data"),
 		embed: t("Embed"),
+		hero: t("Hero"),
 		image: t("Image"),
 		rich_text: t("Rich text"),
 	};
 
 	const contentBlockTypeIcons: Record<ContentBlockTypes["type"], ReactNode> = {
+		accordion: <ListBulletIcon className="size-4 shrink-0" />,
 		data: <Square3Stack3DIcon className="size-4 shrink-0" />,
 		embed: <CodeBracketSquareIcon className="size-4 shrink-0" />,
+		hero: <RectangleGroupIcon className="size-4 shrink-0" />,
 		image: <PhotoIcon className="size-4 shrink-0" />,
 		rich_text: <PencilSquareIcon className="size-4 shrink-0" />,
 	};
@@ -334,13 +402,32 @@ function ContentBlockItem({
 								<ChevronDownIcon className="size-4 shrink-0 transition-transform group-data-expanded:rotate-180" />
 							</AriaButton>
 						</Heading>
-						<AriaButton
-							aria-label={t("Remove block")}
-							className="shrink-0 text-muted-fg rounded-sm hover:text-danger focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
-							onPress={onDelete}
-						>
-							<TrashIcon className="size-4" />
-						</AriaButton>
+						<Modal>
+							<AriaButton
+								aria-label={t("Remove block")}
+								className="shrink-0 text-muted-fg rounded-sm hover:text-danger focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+							>
+								<TrashIcon className="size-4" />
+							</AriaButton>
+							<ModalContent role="alertdialog" size="sm">
+								<ModalHeader>
+									<ModalTitle>{t("Remove block")}</ModalTitle>
+								</ModalHeader>
+								<ModalBody>
+									<p className="text-sm/6 text-muted-fg">
+										{t(
+											"Are you sure you want to remove this content block? This action cannot be undone.",
+										)}
+									</p>
+								</ModalBody>
+								<ModalFooter>
+									<ModalClose>{t("Cancel")}</ModalClose>
+									<Button intent="danger" slot="close" onPress={onDelete}>
+										{t("Remove")}
+									</Button>
+								</ModalFooter>
+							</ModalContent>
+						</Modal>
 					</div>
 					<DisclosurePanel className="px-3 pb-3">
 						<ContentBlockPanel initialAssets={initialAssets} item={item} onChange={onUpdate} />
@@ -357,7 +444,7 @@ function ContentBlockItem({
 interface ContentBlockPanelProps {
 	initialAssets?: Array<Asset>;
 	item: ContentBlock;
-	onChange: (content: JSONContent) => void;
+	onChange: (content: NonNullable<ContentBlock["content"]>) => void;
 }
 
 function ContentBlockPanel({
@@ -366,23 +453,40 @@ function ContentBlockPanel({
 	onChange,
 }: Readonly<ContentBlockPanelProps>): ReactNode {
 	switch (item.type) {
+		case "accordion": {
+			return (
+				<AccordionContentBlockPanel initialAssets={initialAssets} item={item} onChange={onChange} />
+			);
+		}
+
 		case "data": {
 			return <DataContentBlockPanel item={item} onChange={onChange} />;
 		}
+
 		case "embed": {
 			return <EmbedContentBlockPanel item={item} onChange={onChange} />;
 		}
+
+		case "hero": {
+			return (
+				<HeroContentBlockPanel initialAssets={initialAssets} item={item} onChange={onChange} />
+			);
+		}
+
 		case "image": {
 			return (
 				<ImageContentBlockPanel initialAssets={initialAssets} item={item} onChange={onChange} />
 			);
 		}
+
 		case "rich_text": {
 			return (
 				<RichTextEditor
 					className="w-full"
 					content={item.content}
-					onChange={onChange}
+					onChange={(content: JSONContent) => {
+						onChange(content);
+					}}
 					renderImagePicker={
 						initialAssets != null
 							? (insert: (src: string) => void) => {
@@ -411,6 +515,7 @@ function ContentBlockPanel({
 				/>
 			);
 		}
+
 		default: {
 			return null;
 		}
@@ -423,8 +528,8 @@ interface ContentBlockEntry {
 }
 
 interface DataContentBlockPanelProps {
-	item: ContentBlock;
-	onChange: (content: JSONContent) => void;
+	item: DataContentBlockItem;
+	onChange: (content: NonNullable<DataContentBlockItem["content"]>) => void;
 }
 
 function DataContentBlockPanel({
@@ -433,11 +538,11 @@ function DataContentBlockPanel({
 }: Readonly<DataContentBlockPanelProps>): ReactNode {
 	const t = useExtracted();
 
-	const dataType = item.content?.dataType as "events" | "news" | undefined;
+	const dataType = item.content?.dataType;
 	// selectedIds === undefined → recent mode; selectedIds is an array → explicit mode
-	const selectedIds = item.content?.selectedIds as Array<string> | undefined;
+	const selectedIds = item.content?.selectedIds;
 	const isExplicit = selectedIds !== undefined;
-	const limit = item.content?.limit as number | undefined;
+	const limit = item.content?.limit;
 
 	const [query, setQuery] = useState("");
 	const [entries, setEntries] = useState<Array<ContentBlockEntry>>([]);
@@ -453,7 +558,6 @@ function DataContentBlockPanel({
 	return (
 		<div className="flex flex-col gap-y-4">
 			<Select
-				aria-label={t("Data type")}
 				onChange={(key) => {
 					onChange({ ...item.content, dataType: key as "events" | "news", selectedIds: undefined });
 					setQuery("");
@@ -461,6 +565,7 @@ function DataContentBlockPanel({
 				}}
 				value={dataType ?? null}
 			>
+				<Label>{t("Data type")}</Label>
 				<SelectTrigger />
 				<SelectContent
 					items={[
@@ -504,7 +609,6 @@ function DataContentBlockPanel({
 
 			{dataType != null && !isExplicit && (
 				<NumberField
-					aria-label={t("Number of entries")}
 					maxValue={50}
 					minValue={1}
 					onChange={(value) => {
@@ -512,6 +616,7 @@ function DataContentBlockPanel({
 					}}
 					value={limit ?? 5}
 				>
+					<Label>{t("Number of entries")}</Label>
 					<NumberInput />
 				</NumberField>
 			)}
@@ -572,17 +677,21 @@ function DataContentBlockPanel({
 // Normalises watch/share URLs to embed format and uses youtube-nocookie for privacy.
 function getEmbedUrl(url: string): string {
 	const watchMatch = /youtube\.com\/watch\?.*?v=([\w-]+)/.exec(url);
-	if (watchMatch != null) return `https://www.youtube-nocookie.com/embed/${watchMatch[1]!}`;
+	if (watchMatch != null) {
+		return `https://www.youtube-nocookie.com/embed/${watchMatch[1]!}`;
+	}
 
 	const shortMatch = /youtu\.be\/([\w-]+)/.exec(url);
-	if (shortMatch != null) return `https://www.youtube-nocookie.com/embed/${shortMatch[1]!}`;
+	if (shortMatch != null) {
+		return `https://www.youtube-nocookie.com/embed/${shortMatch[1]!}`;
+	}
 
 	return url;
 }
 
 interface EmbedContentBlockPanelProps {
-	item: ContentBlock;
-	onChange: (content: JSONContent) => void;
+	item: EmbedContentBlockItem;
+	onChange: (content: NonNullable<EmbedContentBlockItem["content"]>) => void;
 }
 
 function EmbedContentBlockPanel({
@@ -591,42 +700,42 @@ function EmbedContentBlockPanel({
 }: Readonly<EmbedContentBlockPanelProps>): ReactNode {
 	const t = useExtracted();
 
-	const url = item.content?.url as string | undefined;
-	const title = item.content?.title as string | undefined;
-	const caption = item.content?.caption as string | undefined;
+	const url = item.content?.url;
+	const title = item.content?.title;
+	const caption = item.content?.caption;
 
 	const embedUrl = url != null && url.trim() !== "" ? getEmbedUrl(url.trim()) : null;
 
 	return (
 		<div className="flex flex-col gap-y-4">
 			<TextField
-				aria-label={t("URL")}
 				isRequired={true}
 				onChange={(value) => {
 					onChange({ ...item.content, url: value });
 				}}
 				value={url ?? ""}
 			>
+				<Label>{t("URL")}</Label>
 				<Input placeholder="https://" />
 			</TextField>
 			<TextField
-				aria-label={t("Title")}
 				isRequired={true}
 				onChange={(value) => {
 					onChange({ ...item.content, title: value });
 				}}
 				value={title ?? ""}
 			>
+				<Label>{t("Title")}</Label>
 				<Input placeholder={t("Descriptive title for screen readers")} />
 			</TextField>
 			<TextField
-				aria-label={t("Caption")}
 				onChange={(value) => {
 					onChange({ ...item.content, caption: value });
 				}}
 				value={caption ?? ""}
 			>
-				<Input placeholder={t("Caption (optional)")} />
+				<Label>{t("Caption")}</Label>
+				<Input />
 			</TextField>
 			{embedUrl != null && (
 				<div className="aspect-video w-full overflow-hidden rounded-lg border border-border">
@@ -634,7 +743,7 @@ function EmbedContentBlockPanel({
 						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 						allowFullScreen={true}
 						className="size-full"
-						sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
+						sandbox="allow-scripts allow-same-origin allow-presentation"
 						src={embedUrl}
 						title={title ?? embedUrl}
 					/>
@@ -646,8 +755,8 @@ function EmbedContentBlockPanel({
 
 interface ImageContentBlockPanelProps {
 	initialAssets?: Array<Asset>;
-	item: ContentBlock;
-	onChange: (content: JSONContent) => void;
+	item: ImageContentBlockItem;
+	onChange: (content: NonNullable<ImageContentBlockItem["content"]>) => void;
 }
 
 function ImageContentBlockPanel({
@@ -657,9 +766,9 @@ function ImageContentBlockPanel({
 }: Readonly<ImageContentBlockPanelProps>): ReactNode {
 	const t = useExtracted();
 
-	const imageKey = item.content?.imageKey as string | undefined;
-	const imageUrl = item.content?.imageUrl as string | undefined;
-	const caption = item.content?.caption as string | undefined;
+	const imageKey = item.content?.imageKey;
+	const imageUrl = item.content?.imageUrl;
+	const caption = item.content?.caption;
 
 	return (
 		<div className="flex flex-col gap-y-4">
@@ -684,14 +793,248 @@ function ImageContentBlockPanel({
 				)}
 			</div>
 			<TextField
-				aria-label={t("Caption")}
 				onChange={(value) => {
 					onChange({ ...item.content, caption: value });
 				}}
 				value={caption ?? ""}
 			>
-				<Input placeholder={t("Caption (optional)")} />
+				<Label>{t("Caption")}</Label>
+				<Input />
 			</TextField>
+		</div>
+	);
+}
+
+interface HeroContentBlockPanelProps {
+	initialAssets?: Array<Asset>;
+	item: HeroContentBlockItem;
+	onChange: (content: NonNullable<HeroContentBlockItem["content"]>) => void;
+}
+
+function HeroContentBlockPanel({
+	initialAssets,
+	item,
+	onChange,
+}: Readonly<HeroContentBlockPanelProps>): ReactNode {
+	const t = useExtracted();
+
+	const title = item.content?.title;
+	const eyebrow = item.content?.eyebrow;
+	const imageKey = item.content?.imageKey;
+	const imageUrl = item.content?.imageUrl;
+	const ctas = item.content?.ctas ?? [];
+
+	return (
+		<div className="flex flex-col gap-y-4">
+			<TextField
+				isRequired={true}
+				onChange={(value) => {
+					onChange({ ...item.content, title: value });
+				}}
+				value={title ?? ""}
+			>
+				<Label>{t("Title")}</Label>
+				<Input />
+			</TextField>
+			<TextField
+				onChange={(value) => {
+					onChange({ ...item.content, eyebrow: value });
+				}}
+				value={eyebrow ?? ""}
+			>
+				<Label>{t("Eyebrow")}</Label>
+				<Input />
+			</TextField>
+			<div className="flex flex-col gap-y-2">
+				<Label>{t("Image")}</Label>
+				<div className="flex items-center gap-x-4">
+					{imageUrl != null && (
+						<img
+							alt={t("Selected image")}
+							className="size-24 rounded-lg object-cover shrink-0"
+							src={imageUrl}
+						/>
+					)}
+					<MediaLibraryDialog
+						defaultPrefix="images"
+						initialAssets={initialAssets ?? []}
+						onSelect={(key, url) => {
+							onChange({ ...item.content, imageKey: key, imageUrl: url });
+						}}
+						prefixes={["avatars", "images", "logos"]}
+					/>
+					{imageKey != null && (
+						<input name="heroContentBlock.imageKey" type="hidden" value={imageKey} />
+					)}
+				</div>
+			</div>
+			<div className="flex flex-col gap-y-3">
+				<Label>{t("CTAs")}</Label>
+				{ctas.map((cta, idx) => {
+					return (
+						<div key={idx} className="flex items-end gap-x-2">
+							<TextField
+								className="flex-1"
+								isRequired={true}
+								onChange={(value) => {
+									const next = ctas.map((c, i) => {
+										return i === idx ? { ...c, label: value } : c;
+									});
+									onChange({ ...item.content, ctas: next });
+								}}
+								value={cta.label}
+							>
+								<Label>{t("Label")}</Label>
+								<Input />
+							</TextField>
+							<TextField
+								className="flex-1"
+								isRequired={true}
+								onChange={(value) => {
+									const next = ctas.map((c, i) => {
+										return i === idx ? { ...c, url: value } : c;
+									});
+									onChange({ ...item.content, ctas: next });
+								}}
+								value={cta.url}
+							>
+								<Label>{t("URL")}</Label>
+								<Input placeholder="https://" />
+							</TextField>
+							<Button
+								intent="outline"
+								size="sm"
+								onPress={() => {
+									const next = ctas.filter((_, i) => {
+										return i !== idx;
+									});
+									onChange({ ...item.content, ctas: next });
+								}}
+							>
+								<TrashIcon className="size-4" />
+							</Button>
+						</div>
+					);
+				})}
+				<Button
+					intent="secondary"
+					size="sm"
+					onPress={() => {
+						onChange({ ...item.content, ctas: [...ctas, { label: "", url: "" }] });
+					}}
+				>
+					<PlusIcon className="size-4" />
+					{t("Add CTA")}
+				</Button>
+			</div>
+		</div>
+	);
+}
+
+interface AccordionContentBlockPanelProps {
+	initialAssets?: Array<Asset>;
+	item: AccordionContentBlockItem;
+	onChange: (content: NonNullable<AccordionContentBlockItem["content"]>) => void;
+}
+
+function AccordionContentBlockPanel({
+	initialAssets,
+	item,
+	onChange,
+}: Readonly<AccordionContentBlockPanelProps>): ReactNode {
+	const t = useExtracted();
+
+	const items = item.content?.items ?? [];
+
+	return (
+		<div className="flex flex-col gap-y-4">
+			{items.map((accordionItem, idx) => {
+				return (
+					<div key={idx} className="flex flex-col gap-y-3 rounded-lg border border-border p-3">
+						<div className="flex items-center justify-between">
+							<span className="text-sm font-medium">
+								{t("Item")} {idx + 1}
+							</span>
+							<Button
+								intent="outline"
+								size="sm"
+								onPress={() => {
+									const next = items.filter((_, i) => {
+										return i !== idx;
+									});
+									onChange({ ...item.content, items: next });
+								}}
+							>
+								<TrashIcon className="size-4" />
+							</Button>
+						</div>
+						<TextField
+							isRequired={true}
+							onChange={(value) => {
+								const next = items.map((it, i) => {
+									return i === idx ? { ...it, title: value } : it;
+								});
+								onChange({ ...item.content, items: next });
+							}}
+							value={accordionItem.title}
+						>
+							<Label>{t("Title")}</Label>
+							<Input />
+						</TextField>
+						<div className="flex flex-col gap-y-1">
+							<Label>{t("Content")}</Label>
+							<RichTextEditor
+								className="w-full"
+								content={accordionItem.content}
+								onChange={(content: JSONContent) => {
+									const next = items.map((it, i) => {
+										return i === idx ? { ...it, content } : it;
+									});
+									onChange({ ...item.content, items: next });
+								}}
+								renderImagePicker={
+									initialAssets != null
+										? (insert: (src: string) => void) => {
+												return (
+													<MediaLibraryDialog
+														defaultPrefix="images"
+														initialAssets={initialAssets}
+														onSelect={(_key, url) => {
+															insert(url);
+														}}
+														prefixes={["avatars", "images", "logos"]}
+														trigger={({ open }) => {
+															return (
+																<RichTextEditorToolbarButton
+																	aria-label="Insert image"
+																	icon={ImageIcon}
+																	onClick={open}
+																/>
+															);
+														}}
+													/>
+												);
+											}
+										: undefined
+								}
+							/>
+						</div>
+					</div>
+				);
+			})}
+			<Button
+				intent="secondary"
+				size="sm"
+				onPress={() => {
+					onChange({
+						...item.content,
+						items: [...items, { title: "", content: undefined }],
+					});
+				}}
+			>
+				<PlusIcon className="size-4" />
+				{t("Add item")}
+			</Button>
 		</div>
 	);
 }
@@ -704,8 +1047,10 @@ export function ContentBlockMenu({ onAdd }: Readonly<ContentBlockMenuProps>): Re
 	const t = useExtracted();
 
 	const contentBlockTypeNames: Record<ContentBlockTypes["type"], string> = {
+		accordion: t("Accordion"),
 		data: t("Data"),
 		embed: t("Embed"),
+		hero: t("Hero"),
 		image: t("Image"),
 		rich_text: t("Rich text"),
 	};
@@ -727,8 +1072,10 @@ export function ContentBlockMenu({ onAdd }: Readonly<ContentBlockMenuProps>): Re
 						>
 							{
 								{
+									accordion: <ListBulletIcon />,
 									data: <Square3Stack3DIcon />,
 									embed: <CodeBracketSquareIcon />,
+									hero: <RectangleGroupIcon />,
 									image: <PhotoIcon />,
 									rich_text: <PencilSquareIcon />,
 								}[key]

@@ -125,6 +125,7 @@ export async function uploadAsset(params: UploadAssetParams) {
 		key,
 		licenseId,
 		mimeType: metadata["content-type"],
+		filename: file.name,
 		label: label ?? file.name,
 		alt,
 		caption,

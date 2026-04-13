@@ -27,6 +27,7 @@ export default async function DashboardWebsiteCreateSpotlightArticlePage(
 ): Promise<ReactNode> {
 	const { items: initialAssets } = await getMediaLibraryAssets({
 		imageUrlOptions: imageGridOptions,
+		prefix: "images",
 	});
 
 	return <SpotlightArticleCreateForm initialAssets={initialAssets} />;

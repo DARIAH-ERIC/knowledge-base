@@ -27,6 +27,7 @@ export default async function DashboardAdministratorCreatePersonPage(
 ): Promise<ReactNode> {
 	const { items: initialAssets } = await getMediaLibraryAssets({
 		imageUrlOptions: imageGridOptions,
+		prefix: "avatars",
 	});
 
 	return <PersonCreateForm initialAssets={initialAssets} />;

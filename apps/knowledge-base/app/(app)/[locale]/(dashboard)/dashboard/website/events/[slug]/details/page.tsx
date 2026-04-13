@@ -109,7 +109,9 @@ export default async function DashboardWebsiteEventDetailsPage(
 
 	return (
 		<EventDetails
-			contentBlocks={richTextContentBlocks}
+			contentBlocks={richTextContentBlocks.map((row) => {
+				return { ...row, type: "rich_text" as const };
+			})}
 			event={{ ...event, image: { ...event.image, url: image.url } }}
 		/>
 	);

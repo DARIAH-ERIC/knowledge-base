@@ -7,7 +7,14 @@ import { uuidv7 } from "../functions";
 import { assets } from "./assets";
 import { fields } from "./entities";
 
-export const contentBlockTypesEnum = ["data", "embed", "image", "rich_text"] as const;
+export const contentBlockTypesEnum = [
+	"accordion",
+	"data",
+	"embed",
+	"hero",
+	"image",
+	"rich_text",
+] as const;
 
 export const contentBlockTypes = p.pgTable(
 	"content_blocks_types",
@@ -159,6 +166,53 @@ export type ImageContentBlockInput = typeof imageContentBlocks.$inferInsert;
 export const ImageContentBlockSelectSchema = createSelectSchema(imageContentBlocks);
 export const ImageContentBlockInsertSchema = createInsertSchema(imageContentBlocks);
 export const ImageContentBlockUpdateSchema = createUpdateSchema(imageContentBlocks);
+
+export const heroContentBlocks = p.pgTable("content_blocks_type_hero", {
+	id: p
+		.uuid("id")
+		.primaryKey()
+		.references(
+			() => {
+				return contentBlocks.id;
+			},
+			{ onDelete: "cascade" },
+		),
+	title: p.text("title").notNull(),
+	eyebrow: p.text("eyebrow"),
+	imageId: p.uuid("image_id").references(() => {
+		return assets.id;
+	}),
+	ctas: p.jsonb("ctas"),
+	...f.timestamps(),
+});
+
+export type HeroContentBlock = typeof heroContentBlocks.$inferSelect;
+export type HeroContentBlockInput = typeof heroContentBlocks.$inferInsert;
+
+export const HeroContentBlockSelectSchema = createSelectSchema(heroContentBlocks);
+export const HeroContentBlockInsertSchema = createInsertSchema(heroContentBlocks);
+export const HeroContentBlockUpdateSchema = createUpdateSchema(heroContentBlocks);
+
+export const accordionContentBlocks = p.pgTable("content_blocks_type_accordion", {
+	id: p
+		.uuid("id")
+		.primaryKey()
+		.references(
+			() => {
+				return contentBlocks.id;
+			},
+			{ onDelete: "cascade" },
+		),
+	items: p.jsonb("items").notNull(),
+	...f.timestamps(),
+});
+
+export type AccordionContentBlock = typeof accordionContentBlocks.$inferSelect;
+export type AccordionContentBlockInput = typeof accordionContentBlocks.$inferInsert;
+
+export const AccordionContentBlockSelectSchema = createSelectSchema(accordionContentBlocks);
+export const AccordionContentBlockInsertSchema = createInsertSchema(accordionContentBlocks);
+export const AccordionContentBlockUpdateSchema = createUpdateSchema(accordionContentBlocks);
 
 export const richTextContentBlocks = p.pgTable("content_blocks_type_rich_text", {
 	id: p

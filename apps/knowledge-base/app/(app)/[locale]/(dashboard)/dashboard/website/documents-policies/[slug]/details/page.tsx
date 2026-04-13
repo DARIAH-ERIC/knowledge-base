@@ -71,6 +71,8 @@ export default async function DashboardWebsiteDocumentOrPolicyDetailsPage(
 		options: imageGridOptions,
 	});
 
+	const downloadUrl = `/api/assets/download?key=${encodeURIComponent(documentOrPolicy.document.key)}`;
+
 	const richTextContentBlocks = await db
 		.select({
 			id: schema.richTextContentBlocks.id,
@@ -99,10 +101,12 @@ export default async function DashboardWebsiteDocumentOrPolicyDetailsPage(
 
 	return (
 		<DocumentOrPolicyDetails
-			contentBlocks={richTextContentBlocks}
+			contentBlocks={richTextContentBlocks.map((row) => {
+				return { ...row, type: "rich_text" as const };
+			})}
 			documentOrPolicy={{
 				...documentOrPolicy,
-				document: { ...documentOrPolicy.document, url: document.url },
+				document: { ...documentOrPolicy.document, url: document.url, downloadUrl },
 			}}
 		/>
 	);

@@ -27,6 +27,7 @@ export default async function DashboardWebsiteCreateNewsItemPage(
 ): Promise<ReactNode> {
 	const { items: initialAssets } = await getMediaLibraryAssets({
 		imageUrlOptions: imageGridOptions,
+		prefix: "images",
 	});
 
 	return <NewsItemCreateForm initialAssets={initialAssets} />;

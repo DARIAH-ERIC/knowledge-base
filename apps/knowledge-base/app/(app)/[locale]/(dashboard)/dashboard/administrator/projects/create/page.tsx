@@ -28,6 +28,7 @@ export default async function DashboardAdministratorCreateProjectPage(
 ): Promise<ReactNode> {
 	const { items: initialAssets } = await getMediaLibraryAssets({
 		imageUrlOptions: imageGridOptions,
+		prefix: "logos",
 	});
 
 	const [scopes, orgUnits, roles, allSocialMedia] = await Promise.all([

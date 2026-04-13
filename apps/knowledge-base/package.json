@@ -54,6 +54,7 @@
 		"@sindresorhus/slugify": "catalog:",
 		"@tiptap/core": "catalog:",
 		"@tiptap/starter-kit": "catalog:",
+		"@tiptap/static-renderer": "catalog:",
 		"@valibot/i18n": "catalog:",
 		"client-only": "catalog:",
 		"clsx": "catalog:",

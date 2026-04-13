@@ -36,7 +36,7 @@ export default async function DashboardAdministratorEditProjectPage(
 	const { slug } = await params;
 
 	const [{ items: initialAssets }, project] = await Promise.all([
-		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions }),
+		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
 		db.query.projects.findFirst({
 			where: {
 				entity: {

@@ -98,7 +98,9 @@ export default async function DashboardWebsiteSpotlightArticleDetailsPage(
 
 	return (
 		<SpotlightArticleDetails
-			contentBlocks={richTextContentBlocks}
+			contentBlocks={richTextContentBlocks.map((row) => {
+				return { ...row, type: "rich_text" as const };
+			})}
 			spotlightArticle={{
 				...spotlightArticle,
 				image: { ...spotlightArticle.image, url: image.url },

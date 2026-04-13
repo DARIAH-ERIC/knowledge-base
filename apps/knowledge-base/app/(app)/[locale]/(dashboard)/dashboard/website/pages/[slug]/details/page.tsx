@@ -100,7 +100,9 @@ export default async function DashboardWebsitePageItemDetailsPage(
 
 	return (
 		<PageItemDetails
-			contentBlocks={richTextContentBlocks}
+			contentBlocks={richTextContentBlocks.map((row) => {
+				return { ...row, type: "rich_text" as const };
+			})}
 			pageItem={{
 				...pageItem,
 				image: pageItem.image ? { ...pageItem.image, url: image!.url } : null,

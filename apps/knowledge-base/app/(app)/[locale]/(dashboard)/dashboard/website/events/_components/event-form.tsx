@@ -52,23 +52,15 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
 				<FormSection description={t("Enter the event details.")} title={t("Details")}>
-					<TextField
-						aria-label={t("Title")}
-						defaultValue={event?.title}
-						isRequired={true}
-						name="title"
-					>
-						<Input placeholder={t("Title")} />
+					<TextField defaultValue={event?.title} isRequired={true} name="title">
+						<Label>{t("Title")}</Label>
+						<Input />
 						<FieldError />
 					</TextField>
 
-					<TextField
-						aria-label={t("Summary")}
-						defaultValue={event?.summary ?? undefined}
-						isRequired={true}
-						name="summary"
-					>
-						<Input placeholder={t("Summary")} />
+					<TextField defaultValue={event?.summary ?? undefined} isRequired={true} name="summary">
+						<Label>{t("Summary")}</Label>
+						<Input />
 						<FieldError />
 					</TextField>
 					<DatePicker
@@ -105,22 +97,14 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 						<Label>{t("End date")}</Label>
 						<DatePickerTrigger />
 					</DatePicker>
-					<TextField
-						aria-label={t("Location")}
-						defaultValue={event?.location ?? undefined}
-						isRequired={true}
-						name="location"
-					>
-						<Input placeholder={t("Location")} />
+					<TextField defaultValue={event?.location ?? undefined} isRequired={true} name="location">
+						<Label>{t("Location")}</Label>
+						<Input />
 						<FieldError />
 					</TextField>
-					<TextField
-						aria-label={t("Website")}
-						defaultValue={event?.website ?? undefined}
-						name="website"
-						type="url"
-					>
-						<Input placeholder={t("Website")} />
+					<TextField defaultValue={event?.website ?? undefined} name="website" type="url">
+						<Label>{t("Website")}</Label>
+						<Input placeholder="https://" />
 						<FieldError />
 					</TextField>
 				</FormSection>

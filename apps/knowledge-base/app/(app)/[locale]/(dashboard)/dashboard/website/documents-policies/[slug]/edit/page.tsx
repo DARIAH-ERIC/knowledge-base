@@ -186,7 +186,7 @@ export default async function DashboardWebsiteEditDocumentOrPolicyPage(
 		return {
 			id: row.id,
 			position: row.position,
-			type: row.type,
+			type: "image" as const,
 			content: { imageKey: row.imageKey, imageUrl, caption: row.caption ?? undefined },
 		};
 	});
@@ -195,7 +195,7 @@ export default async function DashboardWebsiteEditDocumentOrPolicyPage(
 		return {
 			id: row.id,
 			position: row.position,
-			type: row.type,
+			type: "embed" as const,
 			content: { url: row.url, title: row.title, caption: row.caption ?? undefined },
 		};
 	});
@@ -204,7 +204,7 @@ export default async function DashboardWebsiteEditDocumentOrPolicyPage(
 		return {
 			id: row.id,
 			position: row.position,
-			type: row.type,
+			type: "data" as const,
 			content: {
 				dataType: row.dataType,
 				limit: row.limit ?? undefined,
@@ -214,7 +214,9 @@ export default async function DashboardWebsiteEditDocumentOrPolicyPage(
 	});
 
 	const contentBlocks = [
-		...richTextContentBlocks,
+		...richTextContentBlocks.map((row) => {
+			return { ...row, type: "rich_text" as const };
+		}),
 		...imageContentBlocks,
 		...embedContentBlocks,
 		...dataContentBlocks,

@@ -53,25 +53,25 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 				>
 					<TextField defaultValue={person?.name} isRequired={true} name="name">
 						<Label>{t("Name")}</Label>
-						<Input placeholder={t("Name")} />
+						<Input />
 						<FieldError />
 					</TextField>
 
 					<TextField defaultValue={person?.sortName} isRequired={true} name="sortName">
 						<Label>{t("Sort name")}</Label>
-						<Input placeholder={t("Sort name")} />
+						<Input />
 						<FieldError />
 					</TextField>
 
 					<TextField defaultValue={person?.email ?? undefined} name="email" type="email">
 						<Label>{t("Email")}</Label>
-						<Input placeholder={t("Email")} />
+						<Input />
 						<FieldError />
 					</TextField>
 
 					<TextField defaultValue={person?.orcid ?? undefined} name="orcid">
 						<Label>{t("ORCID")}</Label>
-						<Input placeholder={t("ORCID")} />
+						<Input />
 						<FieldError />
 					</TextField>
 				</FormSection>

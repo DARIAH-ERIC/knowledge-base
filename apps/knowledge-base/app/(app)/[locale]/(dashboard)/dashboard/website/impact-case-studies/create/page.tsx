@@ -27,6 +27,7 @@ export default async function DashboardWebsiteCreateImpactCaseStudyPage(
 ): Promise<ReactNode> {
 	const { items: initialAssets } = await getMediaLibraryAssets({
 		imageUrlOptions: imageGridOptions,
+		prefix: "images",
 	});
 
 	return <ImpactCaseStudyCreateForm initialAssets={initialAssets} />;
