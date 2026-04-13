@@ -32,7 +32,7 @@ export const EventListSchema = v.pipe(
 export type EventList = v.InferOutput<typeof EventListSchema>;
 
 export const EventLinkSchema = v.pipe(
-	v.pick(eventBaseObject, ["id", "entity"]),
+	v.pick(eventBaseObject, ["id", "title", "location", "duration", "entity"]),
 	v.description("Link to adjacent event"),
 	v.metadata({ ref: "EventLink" }),
 );

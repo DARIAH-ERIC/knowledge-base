@@ -140,10 +140,31 @@ async function getAdjacentEvents(db: Database | Transaction, params: GetAdjacent
 
 	const adjacentColumns = {
 		id: schema.events.id,
+		title: schema.events.title,
+		location: schema.events.location,
+		duration: schema.events.duration,
 		entity: {
 			slug: schema.entities.slug,
 		},
 	} as const;
+
+	function serializeAdjacentEvent(item: {
+		id: schema.Event["id"];
+		title: schema.Event["title"];
+		location: schema.Event["location"];
+		duration: schema.Event["duration"];
+		entity: {
+			slug: schema.Entity["slug"];
+		};
+	}) {
+		return {
+			...item,
+			duration: {
+				start: item.duration.start.toISOString(),
+				end: item.duration.end?.toISOString(),
+			},
+		};
+	}
 
 	const [prevRows, nextRows] = await Promise.all([
 		db
@@ -164,9 +185,12 @@ async function getAdjacentEvents(db: Database | Transaction, params: GetAdjacent
 			.limit(1),
 	]);
 
+	const prev = prevRows.at(0);
+	const next = nextRows.at(0);
+
 	return {
-		prev: prevRows.at(0) ?? null,
-		next: nextRows.at(0) ?? null,
+		prev: prev ? serializeAdjacentEvent(prev) : null,
+		next: next ? serializeAdjacentEvent(next) : null,
 	};
 }
 
