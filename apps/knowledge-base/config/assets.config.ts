@@ -10,11 +10,11 @@ export const imageGridOptions: ImageUrlOptions = {
 	enlarge: 1,
 	gravity: { type: "no" },
 	resizing_type: "fit",
-	width: 400,
+	width: 600,
 };
 
 export const imageAssetWidth = {
-	avatar: 200,
-	featured: 800,
-	preview: 400,
+	avatar: 400,
+	featured: 1600,
+	preview: 800,
 };
