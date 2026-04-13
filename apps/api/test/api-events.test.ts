@@ -60,6 +60,20 @@ function createItemWithDuration(duration: { start: Date; end?: Date }) {
 	};
 }
 
+function expectAdjacentEventLink(actual: unknown, item: ReturnType<typeof createItemWithDuration>) {
+	expect(actual).toMatchObject({
+		id: item.entity.id,
+		title: item.event.title,
+		location: item.event.location,
+		duration: {
+			start: item.event.duration.start.toISOString(),
+		},
+		entity: {
+			slug: item.entity.slug,
+		},
+	});
+}
+
 async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	const [status, type, asset] = await Promise.all([
 		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
@@ -779,8 +793,8 @@ describe("events", () => {
 				const data = await response.json();
 
 				assert("links" in data);
-				expect(data.links.prev).toMatchObject({ id: early.entity.id });
-				expect(data.links.next).toMatchObject({ id: late.entity.id });
+				expectAdjacentEventLink(data.links.prev, early);
+				expectAdjacentEventLink(data.links.next, late);
 			});
 		});
 
@@ -804,7 +818,7 @@ describe("events", () => {
 				// We don't assert `prev === null` because the pre-seeded database may contain
 				// events with earlier start dates.
 				assert("links" in data);
-				expect(data.links.next).toMatchObject({ id: late.entity.id });
+				expectAdjacentEventLink(data.links.next, late);
 			});
 		});
 
@@ -825,7 +839,7 @@ describe("events", () => {
 				const data = await response.json();
 
 				assert("links" in data);
-				expect(data.links.prev).toMatchObject({ id: early.entity.id });
+				expectAdjacentEventLink(data.links.prev, early);
 				expect(data.links.next).toBeNull();
 			});
 		});
@@ -877,14 +891,14 @@ describe("events", () => {
 				const last = findPayload(lastId);
 
 				// Middle event must link to its two immediate same-timestamp neighbours.
-				expect(middle.links.prev).toMatchObject({ id: firstId });
-				expect(middle.links.next).toMatchObject({ id: lastId });
+				expectAdjacentEventLink(middle.links.prev, a);
+				expectAdjacentEventLink(middle.links.next, c);
 
 				// Last event (highest id) must link back to middle.
-				expect(last.links.prev).toMatchObject({ id: middleId });
+				expectAdjacentEventLink(last.links.prev, b);
 
 				// First event (lowest id) must link forward to middle.
-				expect(first.links.next).toMatchObject({ id: middleId });
+				expectAdjacentEventLink(first.links.next, b);
 
 				// No event points to itself.
 				for (const payload of payloads) {
