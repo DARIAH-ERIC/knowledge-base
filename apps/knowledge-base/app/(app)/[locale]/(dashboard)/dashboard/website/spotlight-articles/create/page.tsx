@@ -25,7 +25,9 @@ export async function generateMetadata(
 export default async function DashboardWebsiteCreateSpotlightArticlePage(
 	_props: Readonly<DashboardWebsiteCreateSpotlightArticlePageProps>,
 ): Promise<ReactNode> {
-	const { items: assets } = await getMediaLibraryAssets({ imageUrlOptions: imageGridOptions });
+	const { items: initialAssets } = await getMediaLibraryAssets({
+		imageUrlOptions: imageGridOptions,
+	});
 
-	return <SpotlightArticleCreateForm assets={assets} />;
+	return <SpotlightArticleCreateForm initialAssets={initialAssets} />;
 }

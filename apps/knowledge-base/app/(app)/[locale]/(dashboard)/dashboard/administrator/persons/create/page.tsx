@@ -25,7 +25,9 @@ export async function generateMetadata(
 export default async function DashboardAdministratorCreatePersonPage(
 	_props: Readonly<DashboardAdministratorCreatePersonPageProps>,
 ): Promise<ReactNode> {
-	const { items: assets } = await getMediaLibraryAssets({ imageUrlOptions: imageGridOptions });
+	const { items: initialAssets } = await getMediaLibraryAssets({
+		imageUrlOptions: imageGridOptions,
+	});
 
-	return <PersonCreateForm assets={assets} />;
+	return <PersonCreateForm initialAssets={initialAssets} />;
 }

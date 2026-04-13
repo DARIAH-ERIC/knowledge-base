@@ -8,13 +8,13 @@ import { SpotlightArticleForm } from "@/app/(app)/[locale]/(dashboard)/dashboard
 import { createSpotlightArticleAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article.action";
 
 interface SpotlightArticleCreateFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 }
 
 export function SpotlightArticleCreateForm(
 	props: Readonly<SpotlightArticleCreateFormProps>,
 ): ReactNode {
-	const { assets } = props;
+	const { initialAssets } = props;
 
 	const t = useExtracted();
 
@@ -22,7 +22,10 @@ export function SpotlightArticleCreateForm(
 		<Fragment>
 			<Heading>{t("New spotlight article")}</Heading>
 
-			<SpotlightArticleForm assets={assets} formAction={createSpotlightArticleAction} />
+			<SpotlightArticleForm
+				formAction={createSpotlightArticleAction}
+				initialAssets={initialAssets}
+			/>
 		</Fragment>
 	);
 }

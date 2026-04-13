@@ -44,7 +44,7 @@ export function FormSection({
 
 	if (variant === "stacked") {
 		return (
-			<section className={twMerge("flex flex-col gap-y-6 max-w-3xl", className)} {...props}>
+			<section className={twMerge("flex flex-col gap-y-6", className)} {...props}>
 				{title != null || description != null ? (
 					<div className="space-y-1">
 						{title != null ? <FormSectionTitle title={title} /> : null}

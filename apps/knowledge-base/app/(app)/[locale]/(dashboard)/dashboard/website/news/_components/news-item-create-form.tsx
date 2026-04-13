@@ -8,11 +8,11 @@ import { NewsItemForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website
 import { createNewsItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/create-news-item.action";
 
 interface NewsItemCreateFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 }
 
 export function NewsItemCreateForm(props: Readonly<NewsItemCreateFormProps>): ReactNode {
-	const { assets } = props;
+	const { initialAssets } = props;
 
 	const t = useExtracted();
 
@@ -20,7 +20,7 @@ export function NewsItemCreateForm(props: Readonly<NewsItemCreateFormProps>): Re
 		<Fragment>
 			<Heading>{t("New news item")}</Heading>
 
-			<NewsItemForm assets={assets} formAction={createNewsItemAction} />
+			<NewsItemForm formAction={createNewsItemAction} initialAssets={initialAssets} />
 		</Fragment>
 	);
 }

@@ -10,7 +10,7 @@ import { NewsItemForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website
 import { updateNewsItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/update-news-item.action";
 
 interface NewsItemEditFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
 	newsItem: Pick<schema.NewsItem, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
@@ -18,7 +18,7 @@ interface NewsItemEditFormProps {
 }
 
 export function NewsItemEditForm(props: Readonly<NewsItemEditFormProps>): ReactNode {
-	const { assets, contentBlocks, newsItem } = props;
+	const { initialAssets, contentBlocks, newsItem } = props;
 
 	const t = useExtracted();
 
@@ -27,9 +27,9 @@ export function NewsItemEditForm(props: Readonly<NewsItemEditFormProps>): ReactN
 			<Heading>{t("Edit news item")}</Heading>
 
 			<NewsItemForm
-				assets={assets}
 				contentBlocks={contentBlocks}
 				formAction={updateNewsItemAction}
+				initialAssets={initialAssets}
 				newsItem={newsItem}
 			/>
 		</Fragment>

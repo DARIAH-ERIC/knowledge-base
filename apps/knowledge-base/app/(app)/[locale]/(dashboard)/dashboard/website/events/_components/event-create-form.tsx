@@ -8,11 +8,11 @@ import { EventForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/ev
 import { createEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/create-event.action";
 
 interface EventCreateFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 }
 
 export function EventCreateForm(props: Readonly<EventCreateFormProps>): ReactNode {
-	const { assets } = props;
+	const { initialAssets } = props;
 
 	const t = useExtracted();
 
@@ -20,7 +20,7 @@ export function EventCreateForm(props: Readonly<EventCreateFormProps>): ReactNod
 		<Fragment>
 			<Heading>{t("New event")}</Heading>
 
-			<EventForm assets={assets} formAction={createEventAction} />
+			<EventForm formAction={createEventAction} initialAssets={initialAssets} />
 		</Fragment>
 	);
 }

@@ -8,13 +8,13 @@ import { ImpactCaseStudyForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/
 import { createImpactCaseStudyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/create-impact-case-study.action";
 
 interface ImpactCaseStudyCreateFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 }
 
 export function ImpactCaseStudyCreateForm(
 	props: Readonly<ImpactCaseStudyCreateFormProps>,
 ): ReactNode {
-	const { assets } = props;
+	const { initialAssets } = props;
 
 	const t = useExtracted();
 
@@ -22,7 +22,7 @@ export function ImpactCaseStudyCreateForm(
 		<Fragment>
 			<Heading>{t("New impact case study")}</Heading>
 
-			<ImpactCaseStudyForm assets={assets} formAction={createImpactCaseStudyAction} />
+			<ImpactCaseStudyForm formAction={createImpactCaseStudyAction} initialAssets={initialAssets} />
 		</Fragment>
 	);
 }

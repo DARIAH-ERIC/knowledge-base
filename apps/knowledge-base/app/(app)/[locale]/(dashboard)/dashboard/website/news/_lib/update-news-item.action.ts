@@ -1,11 +1,12 @@
 "use server";
 
 import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
-import { eq } from "@dariah-eric/database";
+import { eq, inArray } from "@dariah-eric/database";
 import { db, type Transaction } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
+import type { JSONContent } from "@tiptap/core";
 import { revalidatePath } from "next/cache";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
@@ -72,26 +73,118 @@ export const updateNewsItemAction = createServerAction(
 			async function upsertTypeBlock(
 				tx: Transaction,
 				type: schema.ContentBlockTypes["type"],
-				content: object,
+				content: JSONContent | undefined,
 				blockId: string,
 				isNew: boolean,
 			) {
-				// eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
 				switch (type) {
 					case "rich_text": {
 						if (isNew) {
-							await tx.insert(schema.richTextContentBlocks).values({ id: blockId, content });
+							await tx
+								.insert(schema.richTextContentBlocks)
+								.values({ id: blockId, content: content ?? {} });
 						} else {
 							await tx
 								.update(schema.richTextContentBlocks)
-								.set({ content })
+								.set({ content: content ?? {} })
 								.where(eq(schema.richTextContentBlocks.id, blockId));
 						}
+						break;
+					}
+					case "image": {
+						const imageKey = content?.imageKey as string | undefined;
+						if (imageKey == null) break;
+						const asset = await tx.query.assets.findFirst({
+							where: { key: imageKey },
+							columns: { id: true },
+						});
+						if (asset == null) break;
+						const caption = (content?.caption as string | undefined) ?? null;
+						if (isNew) {
+							await tx
+								.insert(schema.imageContentBlocks)
+								.values({ id: blockId, imageId: asset.id, caption });
+						} else {
+							await tx
+								.update(schema.imageContentBlocks)
+								.set({ imageId: asset.id, caption })
+								.where(eq(schema.imageContentBlocks.id, blockId));
+						}
+						break;
+					}
+					case "embed": {
+						const url = content?.url as string | undefined;
+						const title = content?.title as string | undefined;
+						if (url == null || title == null) break;
+						const caption = (content?.caption as string | undefined) ?? null;
+						if (isNew) {
+							await tx
+								.insert(schema.embedContentBlocks)
+								.values({ id: blockId, url, title, caption });
+						} else {
+							await tx
+								.update(schema.embedContentBlocks)
+								.set({ url, title, caption })
+								.where(eq(schema.embedContentBlocks.id, blockId));
+						}
+						break;
+					}
+					case "data": {
+						const dataType = content?.dataType as "events" | "news" | undefined;
+						if (dataType == null) break;
+						const dataContentBlockType = await tx.query.dataContentBlockTypes.findFirst({
+							where: { type: dataType },
+							columns: { id: true },
+						});
+						if (dataContentBlockType == null) break;
+						const limit = (content?.limit as number | undefined) ?? null;
+						const selectedIds = (content?.selectedIds as Array<string> | undefined) ?? null;
+						if (isNew) {
+							await tx.insert(schema.dataContentBlocks).values({
+								id: blockId,
+								typeId: dataContentBlockType.id,
+								limit,
+								selectedIds,
+							});
+						} else {
+							await tx
+								.update(schema.dataContentBlocks)
+								.set({ typeId: dataContentBlockType.id, limit, selectedIds })
+								.where(eq(schema.dataContentBlocks.id, blockId));
+						}
+						break;
 					}
 				}
 			}
 
 			if (contentField != null) {
+				const keptIds = new Set(
+					contentBlocks
+						.filter((cb) => {
+							return cb.position !== undefined;
+						})
+						.map((cb) => {
+							return cb.id;
+						}),
+				);
+
+				const existingBlocks = await tx.query.contentBlocks.findMany({
+					where: { fieldId: contentField.id },
+					columns: { id: true },
+				});
+
+				const toDelete = existingBlocks
+					.filter((b) => {
+						return !keptIds.has(b.id);
+					})
+					.map((b) => {
+						return b.id;
+					});
+
+				if (toDelete.length > 0) {
+					await tx.delete(schema.contentBlocks).where(inArray(schema.contentBlocks.id, toDelete));
+				}
+
 				await Promise.all(
 					contentBlocks.map(async (contentBlock, index) => {
 						const { id, type, content, position } = contentBlock;

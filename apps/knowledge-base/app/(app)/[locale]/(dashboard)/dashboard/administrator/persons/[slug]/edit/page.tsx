@@ -35,7 +35,7 @@ export default async function DashboardAdministratorEditPersonPage(
 
 	const { slug } = await params;
 
-	const [{ items: assets }, person] = await Promise.all([
+	const [{ items: initialAssets }, person] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions }),
 		db.query.persons.findFirst({
 			where: {
@@ -106,5 +106,5 @@ export default async function DashboardAdministratorEditPersonPage(
 
 	const biography = biographyRows.at(0)?.content as JSONContent | undefined;
 
-	return <PersonEditForm assets={assets} person={{ ...person, biography, image }} />;
+	return <PersonEditForm initialAssets={initialAssets} person={{ ...person, biography, image }} />;
 }

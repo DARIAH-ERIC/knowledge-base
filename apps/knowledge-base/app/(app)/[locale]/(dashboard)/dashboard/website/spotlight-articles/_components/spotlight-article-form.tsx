@@ -25,7 +25,7 @@ import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface SpotlightArticleFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
 	spotlightArticle?: Pick<schema.SpotlightArticle, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
@@ -34,7 +34,7 @@ interface SpotlightArticleFormProps {
 }
 
 export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>): ReactNode {
-	const { assets, contentBlocks, formAction, spotlightArticle } = props;
+	const { initialAssets, contentBlocks, formAction, spotlightArticle } = props;
 
 	const t = useExtracted();
 
@@ -82,8 +82,8 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 						/>
 					)}
 					<MediaLibraryDialog
-						assets={assets}
 						defaultPrefix="images"
+						initialAssets={initialAssets}
 						onSelect={(key, url) => {
 							setSelectedImage({ key, url });
 						}}
@@ -111,7 +111,7 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 				<Separator className="my-6" />
 
 				<FormSection description={t("Add the content.")} title={t("Content")} variant="stacked">
-					<ContentBlocks items={contentBlocks ?? []} />
+					<ContentBlocks initialAssets={initialAssets} items={contentBlocks ?? []} />
 				</FormSection>
 
 				{spotlightArticle != null ? (

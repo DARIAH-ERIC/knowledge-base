@@ -8,13 +8,13 @@ import { DocumentOrPolicyForm } from "@/app/(app)/[locale]/(dashboard)/dashboard
 import { createDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy.action";
 
 interface DocumentOrPolicyCreateFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 }
 
 export function DocumentOrPolicyCreateForm(
 	props: Readonly<DocumentOrPolicyCreateFormProps>,
 ): ReactNode {
-	const { assets } = props;
+	const { initialAssets } = props;
 
 	const t = useExtracted();
 
@@ -22,7 +22,10 @@ export function DocumentOrPolicyCreateForm(
 		<Fragment>
 			<Heading>{t("New document or policy")}</Heading>
 
-			<DocumentOrPolicyForm assets={assets} formAction={createDocumentOrPolicyAction} />
+			<DocumentOrPolicyForm
+				formAction={createDocumentOrPolicyAction}
+				initialAssets={initialAssets}
+			/>
 		</Fragment>
 	);
 }

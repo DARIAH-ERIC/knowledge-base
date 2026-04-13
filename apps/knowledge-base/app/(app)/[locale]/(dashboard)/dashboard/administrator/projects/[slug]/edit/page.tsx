@@ -35,7 +35,7 @@ export default async function DashboardAdministratorEditProjectPage(
 
 	const { slug } = await params;
 
-	const [{ items: assets }, project] = await Promise.all([
+	const [{ items: initialAssets }, project] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions }),
 		db.query.projects.findFirst({
 			where: {
@@ -178,7 +178,7 @@ export default async function DashboardAdministratorEditProjectPage(
 
 	return (
 		<ProjectEditForm
-			assets={assets}
+			initialAssets={initialAssets}
 			initialPartners={initialPartners}
 			initialSocialMediaIds={initialSocialMediaIds}
 			orgUnits={orgUnits}

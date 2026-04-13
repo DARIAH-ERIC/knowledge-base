@@ -10,7 +10,7 @@ import { PageItemForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website
 import { updatePageItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/update-page-item.action";
 
 interface PageItemEditFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
 	pageItem: Pick<schema.Page, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
@@ -18,7 +18,7 @@ interface PageItemEditFormProps {
 }
 
 export function PageItemEditForm(props: Readonly<PageItemEditFormProps>): ReactNode {
-	const { assets, contentBlocks, pageItem } = props;
+	const { initialAssets, contentBlocks, pageItem } = props;
 
 	const t = useExtracted();
 
@@ -27,9 +27,9 @@ export function PageItemEditForm(props: Readonly<PageItemEditFormProps>): ReactN
 			<Heading>{t("Edit page")}</Heading>
 
 			<PageItemForm
-				assets={assets}
 				contentBlocks={contentBlocks}
 				formAction={updatePageItemAction}
+				initialAssets={initialAssets}
 				pageItem={pageItem}
 			/>
 		</Fragment>

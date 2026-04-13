@@ -23,7 +23,7 @@ import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface PersonFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	person?: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
 		biography?: JSONContent;
 		entity: { documentId: string; slug: string };
@@ -32,7 +32,7 @@ interface PersonFormProps {
 }
 
 export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
-	const { assets, formAction, person } = props;
+	const { initialAssets, formAction, person } = props;
 
 	const t = useExtracted();
 
@@ -87,8 +87,8 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 						/>
 					)}
 					<MediaLibraryDialog
-						assets={assets}
 						defaultPrefix="avatars"
+						initialAssets={initialAssets}
 						onSelect={(key, url) => {
 							setSelectedImage({ key, url });
 						}}

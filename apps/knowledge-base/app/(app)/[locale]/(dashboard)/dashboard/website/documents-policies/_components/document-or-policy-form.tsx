@@ -22,7 +22,7 @@ import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface DocumentOrPolicyFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
 	documentOrPolicy?: Pick<schema.DocumentOrPolicy, "id" | "title" | "summary" | "url"> & {
 		entity: { documentId: string; slug: string };
@@ -31,7 +31,7 @@ interface DocumentOrPolicyFormProps {
 }
 
 export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>): ReactNode {
-	const { assets, contentBlocks, formAction, documentOrPolicy } = props;
+	const { initialAssets, contentBlocks, formAction, documentOrPolicy } = props;
 
 	const t = useExtracted();
 
@@ -85,10 +85,10 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 					<p className="text-sm text-muted-fg">{selectedDocument.label}</p>
 				)}
 				<MediaLibraryDialog
-					assets={assets}
 					defaultPrefix="documents"
+					initialAssets={initialAssets}
 					onSelect={(key, _url) => {
-						const asset = assets.find((a) => {
+						const asset = initialAssets.find((a) => {
 							return a.key === key;
 						});
 						setSelectedDocument({ key, label: asset?.label ?? key });
@@ -117,7 +117,7 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 			<Separator className="my-6" />
 
 			<FormSection description={t("Add the content.")} title={t("Content")}>
-				<ContentBlocks items={contentBlocks ?? []} />
+				<ContentBlocks initialAssets={initialAssets} items={contentBlocks ?? []} />
 			</FormSection>
 
 			{documentOrPolicy != null ? (

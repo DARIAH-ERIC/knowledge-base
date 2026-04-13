@@ -1,8 +1,9 @@
 "use client";
 
 import type { JSONContent } from "@tiptap/core";
+import { Image } from "@tiptap/extension-image";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
+import { StarterKit } from "@tiptap/starter-kit";
 import cn from "clsx/lite";
 import {
 	BoldIcon,
@@ -31,21 +32,22 @@ interface RichTextEditorProps {
 	isEditable?: boolean;
 	name?: string;
 	onChange?: (content: JSONContent) => void;
+	renderImagePicker?: (insert: (src: string) => void) => ReactNode;
 }
 
-interface RichTextEditorIconButtonProps {
+export interface RichTextEditorToolbarButtonProps {
 	"aria-label": string;
 	icon: React.ComponentType<{ className?: string }>;
 	isActive?: boolean;
 	onClick: () => void;
 }
 
-function RichTextEditorIconButton({
+export function RichTextEditorToolbarButton({
 	"aria-label": ariaLabel,
 	icon: Icon,
 	isActive,
 	onClick,
-}: Readonly<RichTextEditorIconButtonProps>): ReactNode {
+}: Readonly<RichTextEditorToolbarButtonProps>): ReactNode {
 	return (
 		<button
 			aria-label={ariaLabel}
@@ -61,8 +63,19 @@ function RichTextEditorIconButton({
 	);
 }
 
+// Keep the internal alias for backward-compat within this file.
+const RichTextEditorIconButton = RichTextEditorToolbarButton;
+
 export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode {
-	const { "aria-label": ariaLabel, content, onChange, isEditable = true, name, className } = props;
+	const {
+		"aria-label": ariaLabel,
+		content,
+		onChange,
+		isEditable = true,
+		name,
+		className,
+		renderImagePicker,
+	} = props;
 
 	const t = useExtracted("ui");
 
@@ -74,6 +87,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 					defaultProtocol: "https",
 				},
 			}),
+			Image,
 		],
 		content,
 		editable: isEditable,
@@ -118,12 +132,12 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	const [isLinkPopoverOpen, setIsLinkPopoverOpen] = useState(false);
 	const [linkHrefInput, setLinkHrefInput] = useState("");
-	const savedSelection = useRef<{ from: number; to: number } | null>(null);
+	const savedSelectionRef = useRef<{ from: number; to: number } | null>(null);
 
 	const handleLinkPopoverOpenChange = useCallback(
 		(open: boolean) => {
 			if (open && editor) {
-				savedSelection.current = {
+				savedSelectionRef.current = {
 					from: editor.state.selection.from,
 					to: editor.state.selection.to,
 				};
@@ -139,7 +153,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		const href = linkHrefInput.trim();
 		if (!href) return;
 
-		const sel = savedSelection.current;
+		const sel = savedSelectionRef.current;
 		const chain = editor.chain().focus();
 		if (sel) chain.setTextSelection(sel);
 
@@ -156,12 +170,20 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	const removeLink = useCallback(() => {
 		if (!editor) return;
-		const sel = savedSelection.current;
+		const sel = savedSelectionRef.current;
 		const chain = editor.chain().focus();
 		if (sel) chain.setTextSelection(sel);
 		chain.unsetLink().run();
 		setIsLinkPopoverOpen(false);
 	}, [editor]);
+
+	const insertImage = useCallback(
+		(src: string) => {
+			if (!editor) return;
+			editor.chain().focus().setImage({ src }).run();
+		},
+		[editor],
+	);
 
 	if (editor == null) {
 		return null;
@@ -292,6 +314,12 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							</form>
 						</PopoverContent>
 					</Popover>
+					{renderImagePicker != null ? (
+						<>
+							<span className="mx-1 h-4 w-px bg-border" />
+							{renderImagePicker(insertImage)}
+						</>
+					) : null}
 				</div>
 			) : null}
 			{name != null && (

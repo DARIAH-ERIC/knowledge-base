@@ -10,7 +10,7 @@ import { DocumentOrPolicyForm } from "@/app/(app)/[locale]/(dashboard)/dashboard
 import { updateDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy.action";
 
 interface DocumentOrPolicyEditFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
 	documentOrPolicy: Pick<schema.DocumentOrPolicy, "id" | "title" | "summary" | "url"> & {
 		entity: { documentId: string; slug: string };
@@ -20,7 +20,7 @@ interface DocumentOrPolicyEditFormProps {
 export function DocumentOrPolicyEditForm(
 	props: Readonly<DocumentOrPolicyEditFormProps>,
 ): ReactNode {
-	const { assets, contentBlocks, documentOrPolicy } = props;
+	const { initialAssets, contentBlocks, documentOrPolicy } = props;
 
 	const t = useExtracted();
 
@@ -29,10 +29,10 @@ export function DocumentOrPolicyEditForm(
 			<Heading>{t("Edit document or policy")}</Heading>
 
 			<DocumentOrPolicyForm
-				assets={assets}
 				contentBlocks={contentBlocks}
 				documentOrPolicy={documentOrPolicy}
 				formAction={updateDocumentOrPolicyAction}
+				initialAssets={initialAssets}
 			/>
 		</Fragment>
 	);

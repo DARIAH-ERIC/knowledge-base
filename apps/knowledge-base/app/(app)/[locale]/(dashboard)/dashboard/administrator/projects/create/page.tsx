@@ -26,7 +26,9 @@ export async function generateMetadata(
 export default async function DashboardAdministratorCreateProjectPage(
 	_props: Readonly<DashboardAdministratorCreateProjectPageProps>,
 ): Promise<ReactNode> {
-	const { items: assets } = await getMediaLibraryAssets({ imageUrlOptions: imageGridOptions });
+	const { items: initialAssets } = await getMediaLibraryAssets({
+		imageUrlOptions: imageGridOptions,
+	});
 
 	const [scopes, orgUnits, roles, allSocialMedia] = await Promise.all([
 		db.query.projectScopes.findMany({
@@ -57,7 +59,7 @@ export default async function DashboardAdministratorCreateProjectPage(
 
 	return (
 		<ProjectCreateForm
-			assets={assets}
+			initialAssets={initialAssets}
 			orgUnits={orgUnits}
 			roles={roles}
 			scopes={scopes}

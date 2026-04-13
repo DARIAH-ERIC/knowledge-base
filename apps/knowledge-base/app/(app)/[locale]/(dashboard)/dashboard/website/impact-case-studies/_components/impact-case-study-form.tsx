@@ -25,7 +25,7 @@ import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface ImpactCaseStudyFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
 	impactCaseStudy?: Pick<schema.ImpactCaseStudy, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
@@ -34,7 +34,7 @@ interface ImpactCaseStudyFormProps {
 }
 
 export function ImpactCaseStudyForm(props: Readonly<ImpactCaseStudyFormProps>): ReactNode {
-	const { assets, contentBlocks, formAction, impactCaseStudy } = props;
+	const { initialAssets, contentBlocks, formAction, impactCaseStudy } = props;
 
 	const t = useExtracted();
 
@@ -82,8 +82,8 @@ export function ImpactCaseStudyForm(props: Readonly<ImpactCaseStudyFormProps>): 
 						/>
 					)}
 					<MediaLibraryDialog
-						assets={assets}
 						defaultPrefix="images"
+						initialAssets={initialAssets}
 						onSelect={(key, url) => {
 							setSelectedImage({ key, url });
 						}}
@@ -111,7 +111,7 @@ export function ImpactCaseStudyForm(props: Readonly<ImpactCaseStudyFormProps>): 
 				<Separator className="my-6" />
 
 				<FormSection description={t("Add the content.")} title={t("Content")} variant="stacked">
-					<ContentBlocks items={contentBlocks ?? []} />
+					<ContentBlocks initialAssets={initialAssets} items={contentBlocks ?? []} />
 				</FormSection>
 
 				{impactCaseStudy != null ? (

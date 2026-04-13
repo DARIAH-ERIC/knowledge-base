@@ -25,7 +25,7 @@ import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface PageItemFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
 	pageItem?: Pick<schema.Page, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
@@ -34,7 +34,7 @@ interface PageItemFormProps {
 }
 
 export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
-	const { assets, contentBlocks, formAction, pageItem } = props;
+	const { initialAssets, contentBlocks, formAction, pageItem } = props;
 
 	const t = useExtracted();
 
@@ -82,8 +82,8 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 						/>
 					)}
 					<MediaLibraryDialog
-						assets={assets}
 						defaultPrefix="images"
+						initialAssets={initialAssets}
 						onSelect={(key, url) => {
 							setSelectedImage({ key, url });
 						}}
@@ -111,7 +111,7 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 				<Separator className="my-6" />
 
 				<FormSection description={t("Add the content.")} title={t("Content")} variant="stacked">
-					<ContentBlocks items={contentBlocks ?? []} />
+					<ContentBlocks initialAssets={initialAssets} items={contentBlocks ?? []} />
 				</FormSection>
 
 				{pageItem != null ? (

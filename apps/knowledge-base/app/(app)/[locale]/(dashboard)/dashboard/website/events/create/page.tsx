@@ -25,7 +25,9 @@ export async function generateMetadata(
 export default async function DashboardWebsiteCreateEventPage(
 	_props: Readonly<DashboardWebsiteCreateEventPageProps>,
 ): Promise<ReactNode> {
-	const { items: assets } = await getMediaLibraryAssets({ imageUrlOptions: imageGridOptions });
+	const { items: initialAssets } = await getMediaLibraryAssets({
+		imageUrlOptions: imageGridOptions,
+	});
 
-	return <EventCreateForm assets={assets} />;
+	return <EventCreateForm initialAssets={initialAssets} />;
 }

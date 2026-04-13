@@ -27,7 +27,7 @@ import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface EventFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
 	event?: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
 		entity: { documentId: string; slug: string };
@@ -36,7 +36,7 @@ interface EventFormProps {
 }
 
 export function EventForm(props: Readonly<EventFormProps>): ReactNode {
-	const { assets, contentBlocks, formAction, event } = props;
+	const { initialAssets, contentBlocks, formAction, event } = props;
 
 	const t = useExtracted();
 
@@ -136,8 +136,8 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 						/>
 					)}
 					<MediaLibraryDialog
-						assets={assets}
 						defaultPrefix="images"
+						initialAssets={initialAssets}
 						onSelect={(key, url) => {
 							setSelectedImage({ key, url });
 						}}
@@ -165,7 +165,7 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 				<Separator className="my-6" />
 
 				<FormSection description={t("Add the content.")} title={t("Content")} variant="stacked">
-					<ContentBlocks items={contentBlocks ?? []} />
+					<ContentBlocks initialAssets={initialAssets} items={contentBlocks ?? []} />
 				</FormSection>
 
 				{event != null ? (

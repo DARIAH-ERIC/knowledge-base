@@ -76,7 +76,7 @@ const emptyDialog: DialogState = {
 };
 
 interface ProjectFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	project?: Pick<
 		schema.Project,
 		"acronym" | "call" | "duration" | "funding" | "id" | "name" | "summary" | "topic"
@@ -111,7 +111,7 @@ interface ProjectFormProps {
 
 export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 	const {
-		assets,
+		initialAssets,
 		formAction,
 		project,
 		scopes,
@@ -359,8 +359,8 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 						/>
 					)}
 					<MediaLibraryDialog
-						assets={assets}
 						defaultPrefix="logos"
+						initialAssets={initialAssets}
 						onSelect={(key, url) => {
 							setSelectedImage({ key, url });
 							setImageKeyError(false);

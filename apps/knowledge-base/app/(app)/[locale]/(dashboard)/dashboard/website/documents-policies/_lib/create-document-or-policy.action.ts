@@ -6,6 +6,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import slugify from "@sindresorhus/slugify";
+import type { JSONContent } from "@tiptap/core";
 import { revalidatePath } from "next/cache";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
@@ -120,13 +121,55 @@ export const createDocumentOrPolicyAction = createServerAction(
 			async function insertTypeBlock(
 				tx: Transaction,
 				type: schema.ContentBlockTypes["type"],
-				content: object,
+				content: JSONContent | undefined,
 				blockId: string,
 			) {
-				// eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
 				switch (type) {
 					case "rich_text": {
-						await tx.insert(schema.richTextContentBlocks).values({ id: blockId, content });
+						await tx
+							.insert(schema.richTextContentBlocks)
+							.values({ id: blockId, content: content ?? {} });
+						break;
+					}
+					case "image": {
+						const imageKey = content?.imageKey as string | undefined;
+						if (imageKey == null) break;
+						const asset = await tx.query.assets.findFirst({
+							where: { key: imageKey },
+							columns: { id: true },
+						});
+						if (asset == null) break;
+						const caption = (content?.caption as string | undefined) ?? null;
+						await tx
+							.insert(schema.imageContentBlocks)
+							.values({ id: blockId, imageId: asset.id, caption });
+						break;
+					}
+					case "embed": {
+						const url = content?.url as string | undefined;
+						const title = content?.title as string | undefined;
+						if (url == null || title == null) break;
+						const caption = (content?.caption as string | undefined) ?? null;
+						await tx.insert(schema.embedContentBlocks).values({ id: blockId, url, title, caption });
+						break;
+					}
+					case "data": {
+						const dataType = content?.dataType as "events" | "news" | undefined;
+						if (dataType == null) break;
+						const dataContentBlockType = await tx.query.dataContentBlockTypes.findFirst({
+							where: { type: dataType },
+							columns: { id: true },
+						});
+						if (dataContentBlockType == null) break;
+						const limit = (content?.limit as number | undefined) ?? null;
+						const selectedIds = (content?.selectedIds as Array<string> | undefined) ?? null;
+						await tx.insert(schema.dataContentBlocks).values({
+							id: blockId,
+							typeId: dataContentBlockType.id,
+							limit,
+							selectedIds,
+						});
+						break;
 					}
 				}
 			}

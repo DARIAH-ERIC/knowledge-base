@@ -99,6 +99,7 @@ export const dataContentBlocks = p.pgTable("content_blocks_type_data", {
 			return dataContentBlockTypes.id;
 		}),
 	limit: p.integer("limit"),
+	selectedIds: p.jsonb("selected_ids"),
 	...f.timestamps(),
 });
 
@@ -120,6 +121,7 @@ export const embedContentBlocks = p.pgTable("content_blocks_type_embed", {
 			{ onDelete: "cascade" },
 		),
 	url: p.text("url").notNull(),
+	title: p.text("title").notNull(),
 	caption: p.text("caption"),
 	...f.timestamps(),
 });

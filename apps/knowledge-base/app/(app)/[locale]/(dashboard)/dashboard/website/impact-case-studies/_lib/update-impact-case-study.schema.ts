@@ -19,7 +19,7 @@ export const UpdateImpactCaseStudyActionInputSchema = v.object({
 					id: v.string(),
 					type: v.picklist(contentBlockTypesEnum),
 					position: v.optional(v.number()),
-					content: v.looseObject({}),
+					content: v.optional(v.looseObject({})),
 				}),
 			),
 		),

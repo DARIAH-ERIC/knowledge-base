@@ -9,7 +9,7 @@ import { ProjectForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administ
 import { createProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-project.action";
 
 interface ProjectCreateFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	scopes: Array<Pick<schema.ProjectScope, "id" | "scope">>;
 	orgUnits: Array<{ id: string; name: string }>;
 	roles: Array<Pick<schema.ProjectRole, "id" | "role">>;
@@ -22,7 +22,7 @@ interface ProjectCreateFormProps {
 }
 
 export function ProjectCreateForm(props: Readonly<ProjectCreateFormProps>): ReactNode {
-	const { assets, orgUnits, roles, scopes, socialMediaItems } = props;
+	const { initialAssets, orgUnits, roles, scopes, socialMediaItems } = props;
 
 	const t = useExtracted();
 
@@ -31,8 +31,8 @@ export function ProjectCreateForm(props: Readonly<ProjectCreateFormProps>): Reac
 			<Heading>{t("New project")}</Heading>
 
 			<ProjectForm
-				assets={assets}
 				formAction={createProjectAction}
+				initialAssets={initialAssets}
 				orgUnits={orgUnits}
 				roles={roles}
 				scopes={scopes}

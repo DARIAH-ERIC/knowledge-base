@@ -35,7 +35,7 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 
 	const { slug } = await params;
 
-	const [{ items: assets }, impactCaseStudy] = await Promise.all([
+	const [{ items: initialAssets }, impactCaseStudy] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions }),
 		db.query.impactCaseStudies.findFirst({
 			where: {
@@ -74,40 +74,161 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 		options: imageGridOptions,
 	});
 
-	const richTextContentBlocks = await db
-		.select({
-			id: schema.richTextContentBlocks.id,
-			content: sql<JSONContent | undefined>`${schema.richTextContentBlocks.content}`,
-			position: schema.contentBlocks.position,
-			type: schema.contentBlockTypes.type,
-		})
-		.from(schema.richTextContentBlocks)
-		.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
-		.innerJoin(
-			schema.contentBlockTypes,
-			eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
-		)
-		.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
-		.innerJoin(
-			schema.entityTypesFieldsNames,
-			eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
-		)
-		.where(
-			and(
-				eq(schema.fields.entityId, impactCaseStudy.id),
-				eq(schema.entityTypesFieldsNames.fieldName, "content"),
-			),
-		)
-		.orderBy(schema.contentBlocks.position);
+	const contentBlocksWhere = and(
+		eq(schema.fields.entityId, impactCaseStudy.id),
+		eq(schema.entityTypesFieldsNames.fieldName, "content"),
+	);
+
+	const [
+		richTextContentBlocks,
+		imageContentBlockRows,
+		embedContentBlockRows,
+		dataContentBlockRows,
+	] = await Promise.all([
+		db
+			.select({
+				id: schema.richTextContentBlocks.id,
+				content: sql<JSONContent | undefined>`${schema.richTextContentBlocks.content}`,
+				position: schema.contentBlocks.position,
+				type: schema.contentBlockTypes.type,
+			})
+			.from(schema.richTextContentBlocks)
+			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
+			.innerJoin(
+				schema.contentBlockTypes,
+				eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
+			)
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.where(contentBlocksWhere)
+			.orderBy(schema.contentBlocks.position),
+		db
+			.select({
+				id: schema.imageContentBlocks.id,
+				position: schema.contentBlocks.position,
+				type: schema.contentBlockTypes.type,
+				imageKey: schema.assets.key,
+				caption: schema.imageContentBlocks.caption,
+			})
+			.from(schema.imageContentBlocks)
+			.innerJoin(schema.contentBlocks, eq(schema.imageContentBlocks.id, schema.contentBlocks.id))
+			.innerJoin(
+				schema.contentBlockTypes,
+				eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
+			)
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.innerJoin(schema.assets, eq(schema.imageContentBlocks.imageId, schema.assets.id))
+			.where(contentBlocksWhere)
+			.orderBy(schema.contentBlocks.position),
+		db
+			.select({
+				id: schema.embedContentBlocks.id,
+				position: schema.contentBlocks.position,
+				type: schema.contentBlockTypes.type,
+				url: schema.embedContentBlocks.url,
+				title: schema.embedContentBlocks.title,
+				caption: schema.embedContentBlocks.caption,
+			})
+			.from(schema.embedContentBlocks)
+			.innerJoin(schema.contentBlocks, eq(schema.embedContentBlocks.id, schema.contentBlocks.id))
+			.innerJoin(
+				schema.contentBlockTypes,
+				eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
+			)
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.where(contentBlocksWhere)
+			.orderBy(schema.contentBlocks.position),
+		db
+			.select({
+				id: schema.dataContentBlocks.id,
+				position: schema.contentBlocks.position,
+				type: schema.contentBlockTypes.type,
+				dataType: schema.dataContentBlockTypes.type,
+				limit: schema.dataContentBlocks.limit,
+				selectedIds: schema.dataContentBlocks.selectedIds,
+			})
+			.from(schema.dataContentBlocks)
+			.innerJoin(schema.contentBlocks, eq(schema.dataContentBlocks.id, schema.contentBlocks.id))
+			.innerJoin(
+				schema.contentBlockTypes,
+				eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
+			)
+			.innerJoin(
+				schema.dataContentBlockTypes,
+				eq(schema.dataContentBlocks.typeId, schema.dataContentBlockTypes.id),
+			)
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.where(contentBlocksWhere)
+			.orderBy(schema.contentBlocks.position),
+	]);
+
+	const imageContentBlocks = imageContentBlockRows.map((row) => {
+		const { url: imageUrl } = images.generateSignedImageUrl({
+			key: row.imageKey,
+			options: imageGridOptions,
+		});
+		return {
+			id: row.id,
+			position: row.position,
+			type: row.type,
+			content: { imageKey: row.imageKey, imageUrl, caption: row.caption ?? undefined },
+		};
+	});
+
+	const embedContentBlocks = embedContentBlockRows.map((row) => {
+		return {
+			id: row.id,
+			position: row.position,
+			type: row.type,
+			content: { url: row.url, title: row.title, caption: row.caption ?? undefined },
+		};
+	});
+
+	const dataContentBlocks = dataContentBlockRows.map((row) => {
+		return {
+			id: row.id,
+			position: row.position,
+			type: row.type,
+			content: {
+				dataType: row.dataType,
+				limit: row.limit ?? undefined,
+				selectedIds: (row.selectedIds as Array<string> | undefined) ?? undefined,
+			},
+		};
+	});
+
+	const contentBlocks = [
+		...richTextContentBlocks,
+		...imageContentBlocks,
+		...embedContentBlocks,
+		...dataContentBlocks,
+	].sort((a, b) => {
+		return a.position - b.position;
+	});
 
 	return (
 		<ImpactCaseStudyEditForm
-			assets={assets}
-			contentBlocks={richTextContentBlocks}
+			contentBlocks={contentBlocks}
 			impactCaseStudy={{
 				...impactCaseStudy,
 				image: { ...impactCaseStudy.image, url: image.url },
 			}}
+			initialAssets={initialAssets}
 		/>
 	);
 }
