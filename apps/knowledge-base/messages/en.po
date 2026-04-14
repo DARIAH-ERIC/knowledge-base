@@ -136,10 +136,10 @@ msgstr "Too many requests."
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/update-event.action.ts:41
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/create-impact-case-study.action.ts:41
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/update-impact-case-study.action.ts:41
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_lib/update-site-metadata.action.ts:34
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/create-navigation-item.action.ts:34
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/create-navigation-menu.action.ts:33
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/update-navigation-item.action.ts:34
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_lib/update-site-metadata.action.ts:38
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/create-navigation-item.action.ts:38
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/create-navigation-menu.action.ts:37
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/update-navigation-item.action.ts:38
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/create-news-item.action.ts:41
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/update-news-item.action.ts:41
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/create-page-item.action.ts:41
@@ -476,7 +476,7 @@ msgstr "Verify the code from the app"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:135
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:174
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:132
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:113
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:129
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx:234
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:128
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-form.tsx:123
@@ -683,7 +683,7 @@ msgstr "URL"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:110
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:107
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:54
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:47
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:54
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:54
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:109
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-form.tsx:54
@@ -759,7 +759,7 @@ msgstr "Content"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1035
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx:95
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:251
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:252
 msgid "KDO3hW"
 msgstr "Add item"
 
@@ -817,7 +817,7 @@ msgstr "Overview"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:152
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:155
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:152
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:153
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:151
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:146
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:148
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:152
@@ -835,7 +835,7 @@ msgstr "Delete"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:145
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:142
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:38
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:143
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:141
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:38
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:136
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:38
@@ -1051,7 +1051,7 @@ msgstr "Enter the personal and contact details related to the person."
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:50
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:54
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:52
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:51
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:52
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-form.tsx:52
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form.tsx:52
@@ -1098,7 +1098,7 @@ msgstr "Biography"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:171
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:128
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:129
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:111
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:129
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx:230
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx:231
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:124
@@ -1233,7 +1233,7 @@ msgstr "Summary"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:98
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:393
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:397
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:53
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:64
 msgid "Q8Qw5B"
 msgstr "Description"
 
@@ -1797,47 +1797,47 @@ msgstr "Website dashboard - Create impact case study"
 msgid "ZbJtUu"
 msgstr "Website dashboard - Impact case studies"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:50
 msgid "JteUB5"
 msgstr "Default title and description for the website."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:62
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:73
 msgid "sDfPR+"
 msgstr "Override title and description for social media previews. Leave blank to use the values above."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:63
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:76
 msgid "eCCS/f"
 msgstr "Open Graph"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:66
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:79
 msgid "/FemPk"
 msgstr "OG title"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:67
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:80
 msgid "akvaaI"
 msgstr "Defaults to title"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:72
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:85
 msgid "iU44zV"
 msgstr "OG description"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:73
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:87
 msgid "zdNruP"
 msgstr "Defaults to description"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:80
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:97
 msgid "zCZqZk"
 msgstr "Image used when the website is shared on social media."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:80
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:98
 msgid "rQEqih"
 msgstr "Open Graph image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:83
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:102
 msgid "y9gtjR"
 msgstr "Selected OG image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_lib/update-site-metadata.action.ts:66
+#: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_lib/update-site-metadata.action.ts:70
 msgid "ruCt5l"
 msgstr "Metadata saved."
 
@@ -1890,7 +1890,7 @@ msgid "mW9H8V"
 msgstr "Create a new navigation menu."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-menu-create-dialog.tsx:46
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-menu-create-dialog.tsx:93
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-menu-create-dialog.tsx:98
 msgid "cX1zZA"
 msgstr "New menu"
 
@@ -1903,52 +1903,52 @@ msgstr "e.g. main, footer"
 msgid "mRL9Vh"
 msgstr "Creating..."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:111
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:109
 msgid "wmFdws"
 msgstr "Move up"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:122
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:120
 msgid "H/r5m6"
 msgstr "Move down"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:140
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:138
 msgid "sgZe4K"
 msgstr "Add child"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:210
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:211
 msgid "38c380"
 msgstr "No items yet."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:270
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:271
 msgid "MX/Eme"
 msgstr "navigation item"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:297
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:298
 msgid "pCy4pn"
 msgstr "Website navigation"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:298
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:299
 msgid "EIgonF"
 msgstr "Manage website navigation."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:308
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:309
 msgid "SoEYbh"
 msgstr "No menus yet. Create your first menu to get started."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:328
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:329
 msgid "Pum9Et"
 msgstr "1 item"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:329
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:330
 msgid "5rh4Wi"
 msgstr "items"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:332
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:340
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:333
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:341
 msgid "28v9pj"
 msgstr "Delete menu"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:354
+#: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:355
 msgid "PYLaXO"
 msgstr "navigation menu"
 
