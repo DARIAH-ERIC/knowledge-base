@@ -53,22 +53,20 @@ function buildTree(
 	items: Array<NavigationItemWithChildren>,
 	parentId: string | null,
 ): Array<TreeNode> {
-	return (
-		items
-			.filter((item) => {
-				return item.parentId === parentId;
-			})
-			// eslint-disable-next-line unicorn/no-array-sort
-			.sort((a, b) => {
-				return a.position - b.position;
-			})
-			.map((item) => {
-				return {
-					...item,
-					children: buildTree(items, item.id),
-				};
-			})
-	);
+	return items
+		.filter((item) => {
+			return item.parentId === parentId;
+		})
+
+		.sort((a, b) => {
+			return a.position - b.position;
+		})
+		.map((item) => {
+			return {
+				...item,
+				children: buildTree(items, item.id),
+			};
+		});
 }
 
 interface ItemRowProps {

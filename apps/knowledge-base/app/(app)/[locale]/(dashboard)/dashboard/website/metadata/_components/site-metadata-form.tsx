@@ -11,7 +11,7 @@ import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useActionState, useState } from "react";
+import { type ReactNode, useActionState, useState } from "react";
 
 import {
 	FormLayout,
