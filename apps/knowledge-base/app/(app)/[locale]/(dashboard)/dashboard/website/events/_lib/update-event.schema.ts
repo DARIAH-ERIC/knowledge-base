@@ -1,9 +1,7 @@
-import {
-	contentBlockTypesEnum,
-	EventSelectSchema,
-	EventUpdateSchema,
-} from "@dariah-eric/database/schema";
+import { EventSelectSchema, EventUpdateSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
+
+import { ContentBlockInputSchema } from "@/lib/content-block-input";
 
 export const UpdateEventActionInputSchema = v.object({
 	...v.pick(EventSelectSchema, ["id"]).entries,
@@ -14,18 +12,7 @@ export const UpdateEventActionInputSchema = v.object({
 	}),
 	imageKey: v.pipe(v.string(), v.nonEmpty()),
 	contentBlocks: v.optional(
-		v.array(
-			v.pipe(
-				v.string(),
-				v.parseJson(),
-				v.object({
-					id: v.string(),
-					type: v.picklist(contentBlockTypesEnum),
-					position: v.optional(v.number()),
-					content: v.optional(v.looseObject({})),
-				}),
-			),
-		),
+		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),
 		[],
 	),
 });

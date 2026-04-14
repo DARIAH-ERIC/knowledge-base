@@ -95,6 +95,8 @@ export default async function DashboardWebsiteEditEventPage(
 		imageContentBlockRows,
 		embedContentBlockRows,
 		dataContentBlockRows,
+		heroContentBlockRows,
+		accordionContentBlockRows,
 	] = await Promise.all([
 		db
 			.select({
@@ -186,6 +188,53 @@ export default async function DashboardWebsiteEditEventPage(
 			)
 			.where(contentBlocksWhere)
 			.orderBy(schema.contentBlocks.position),
+		db
+			.select({
+				id: schema.heroContentBlocks.id,
+				position: schema.contentBlocks.position,
+				type: schema.contentBlockTypes.type,
+				title: schema.heroContentBlocks.title,
+				eyebrow: schema.heroContentBlocks.eyebrow,
+				imageKey: schema.assets.key,
+				ctas: schema.heroContentBlocks.ctas,
+			})
+			.from(schema.heroContentBlocks)
+			.innerJoin(schema.contentBlocks, eq(schema.heroContentBlocks.id, schema.contentBlocks.id))
+			.innerJoin(
+				schema.contentBlockTypes,
+				eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
+			)
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.leftJoin(schema.assets, eq(schema.heroContentBlocks.imageId, schema.assets.id))
+			.where(contentBlocksWhere)
+			.orderBy(schema.contentBlocks.position),
+		db
+			.select({
+				id: schema.accordionContentBlocks.id,
+				position: schema.contentBlocks.position,
+				type: schema.contentBlockTypes.type,
+				items: schema.accordionContentBlocks.items,
+			})
+			.from(schema.accordionContentBlocks)
+			.innerJoin(
+				schema.contentBlocks,
+				eq(schema.accordionContentBlocks.id, schema.contentBlocks.id),
+			)
+			.innerJoin(
+				schema.contentBlockTypes,
+				eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
+			)
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.where(contentBlocksWhere)
+			.orderBy(schema.contentBlocks.position),
 	]);
 
 	const imageContentBlocks = imageContentBlockRows.map((row) => {
@@ -223,6 +272,36 @@ export default async function DashboardWebsiteEditEventPage(
 		};
 	});
 
+	const heroContentBlocks = heroContentBlockRows.map((row) => {
+		const imageUrl =
+			row.imageKey != null
+				? images.generateSignedImageUrl({ key: row.imageKey, options: imageGridOptions }).url
+				: undefined;
+		return {
+			id: row.id,
+			position: row.position,
+			type: "hero" as const,
+			content: {
+				title: row.title,
+				eyebrow: row.eyebrow ?? undefined,
+				imageKey: row.imageKey ?? undefined,
+				imageUrl,
+				ctas: (row.ctas as Array<{ label: string; url: string }> | undefined) ?? undefined,
+			},
+		};
+	});
+
+	const accordionContentBlocks = accordionContentBlockRows.map((row) => {
+		return {
+			id: row.id,
+			position: row.position,
+			type: "accordion" as const,
+			content: {
+				items: row.items as Array<{ title: string; content?: JSONContent }> | undefined,
+			},
+		};
+	});
+
 	const contentBlocks = [
 		...richTextContentBlocks.map((row) => {
 			return { ...row, type: "rich_text" as const };
@@ -230,6 +309,8 @@ export default async function DashboardWebsiteEditEventPage(
 		...imageContentBlocks,
 		...embedContentBlocks,
 		...dataContentBlocks,
+		...heroContentBlocks,
+		...accordionContentBlocks,
 	].sort((a, b) => {
 		return a.position - b.position;
 	});

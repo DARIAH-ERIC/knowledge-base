@@ -117,7 +117,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			const imageUrl = contentBlock.content?.imageUrl;
 			const ctas = contentBlock.content?.ctas;
 
-			if (!title) {
+			if (title == null || !title) {
 				return null;
 			}
 

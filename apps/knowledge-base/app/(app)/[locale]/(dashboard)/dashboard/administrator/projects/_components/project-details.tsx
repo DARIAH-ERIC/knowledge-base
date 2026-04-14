@@ -9,8 +9,8 @@ import {
 } from "@dariah-eric/ui/description-list";
 import { Link } from "@dariah-eric/ui/link";
 import { RichTextRenderer } from "@dariah-eric/ui/rich-text-editor";
-import type { JSONContent } from "@tiptap/core";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
+import type { JSONContent } from "@tiptap/core";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 

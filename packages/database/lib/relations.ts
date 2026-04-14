@@ -56,6 +56,16 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.richTextContentBlocks.id,
 				optional: true,
 			}),
+			heroContentBlock: r.one.heroContentBlocks({
+				from: r.contentBlocks.id,
+				to: r.heroContentBlocks.id,
+				optional: true,
+			}),
+			accordionContentBlock: r.one.accordionContentBlocks({
+				from: r.contentBlocks.id,
+				to: r.accordionContentBlocks.id,
+				optional: true,
+			}),
 		},
 		dataContentBlocks: {
 			contentBlock: r.one.contentBlocks({
@@ -340,6 +350,25 @@ export const relations = defineRelations(schema, (r) => {
 		richTextContentBlocks: {
 			contentBlock: r.one.contentBlocks({
 				from: r.richTextContentBlocks.id,
+				to: r.contentBlocks.id,
+				optional: false,
+			}),
+		},
+		heroContentBlocks: {
+			contentBlock: r.one.contentBlocks({
+				from: r.heroContentBlocks.id,
+				to: r.contentBlocks.id,
+				optional: false,
+			}),
+			image: r.one.assets({
+				from: r.heroContentBlocks.imageId,
+				to: r.assets.id,
+				optional: true,
+			}),
+		},
+		accordionContentBlocks: {
+			contentBlock: r.one.contentBlocks({
+				from: r.accordionContentBlocks.id,
 				to: r.contentBlocks.id,
 				optional: false,
 			}),

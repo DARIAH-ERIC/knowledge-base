@@ -6,13 +6,13 @@ import { db, type Transaction } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import type { JSONContent } from "@tiptap/core";
 import { revalidatePath } from "next/cache";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { UpdateNewsItemActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/update-news-item.schema";
 import { assertAuthenticated } from "@/lib/auth/session";
+import type { ContentBlockInput } from "@/lib/content-block-input";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -72,34 +72,33 @@ export const updateNewsItemAction = createServerAction(
 
 			async function upsertTypeBlock(
 				tx: Transaction,
-				type: schema.ContentBlockTypes["type"],
-				content: JSONContent | undefined,
+				block: ContentBlockInput,
 				blockId: string,
 				isNew: boolean,
 			) {
-				switch (type) {
+				switch (block.type) {
 					case "rich_text": {
 						if (isNew) {
 							await tx
 								.insert(schema.richTextContentBlocks)
-								.values({ id: blockId, content: content ?? {} });
+								.values({ id: blockId, content: block.content ?? {} });
 						} else {
 							await tx
 								.update(schema.richTextContentBlocks)
-								.set({ content: content ?? {} })
+								.set({ content: block.content ?? {} })
 								.where(eq(schema.richTextContentBlocks.id, blockId));
 						}
 						break;
 					}
 					case "image": {
-						const imageKey = content?.imageKey as string | undefined;
+						const imageKey = block.content?.imageKey;
 						if (imageKey == null) break;
 						const asset = await tx.query.assets.findFirst({
 							where: { key: imageKey },
 							columns: { id: true },
 						});
 						if (asset == null) break;
-						const caption = (content?.caption as string | undefined) ?? null;
+						const caption = block.content?.caption ?? null;
 						if (isNew) {
 							await tx
 								.insert(schema.imageContentBlocks)
@@ -113,10 +112,10 @@ export const updateNewsItemAction = createServerAction(
 						break;
 					}
 					case "embed": {
-						const url = content?.url as string | undefined;
-						const title = content?.title as string | undefined;
+						const url = block.content?.url;
+						const title = block.content?.title;
 						if (url == null || title == null) break;
-						const caption = (content?.caption as string | undefined) ?? null;
+						const caption = block.content?.caption ?? null;
 						if (isNew) {
 							await tx
 								.insert(schema.embedContentBlocks)
@@ -130,15 +129,15 @@ export const updateNewsItemAction = createServerAction(
 						break;
 					}
 					case "data": {
-						const dataType = content?.dataType as "events" | "news" | undefined;
+						const dataType = block.content?.dataType;
 						if (dataType == null) break;
 						const dataContentBlockType = await tx.query.dataContentBlockTypes.findFirst({
 							where: { type: dataType },
 							columns: { id: true },
 						});
 						if (dataContentBlockType == null) break;
-						const limit = (content?.limit as number | undefined) ?? null;
-						const selectedIds = (content?.selectedIds as Array<string> | undefined) ?? null;
+						const limit = block.content?.limit ?? null;
+						const selectedIds = block.content?.selectedIds ?? null;
 						if (isNew) {
 							await tx.insert(schema.dataContentBlocks).values({
 								id: blockId,
@@ -151,6 +150,48 @@ export const updateNewsItemAction = createServerAction(
 								.update(schema.dataContentBlocks)
 								.set({ typeId: dataContentBlockType.id, limit, selectedIds })
 								.where(eq(schema.dataContentBlocks.id, blockId));
+						}
+						break;
+					}
+					case "hero": {
+						const heroTitle = block.content?.title;
+						if (heroTitle == null) break;
+						const heroImageKey = block.content?.imageKey;
+						let heroImageId: string | null = null;
+						if (heroImageKey != null) {
+							const heroAsset = await tx.query.assets.findFirst({
+								where: { key: heroImageKey },
+								columns: { id: true },
+							});
+							heroImageId = heroAsset?.id ?? null;
+						}
+						const eyebrow = block.content?.eyebrow ?? null;
+						const ctas = block.content?.ctas ?? null;
+						if (isNew) {
+							await tx.insert(schema.heroContentBlocks).values({
+								id: blockId,
+								title: heroTitle,
+								eyebrow,
+								imageId: heroImageId,
+								ctas,
+							});
+						} else {
+							await tx
+								.update(schema.heroContentBlocks)
+								.set({ title: heroTitle, eyebrow, imageId: heroImageId, ctas })
+								.where(eq(schema.heroContentBlocks.id, blockId));
+						}
+						break;
+					}
+					case "accordion": {
+						const items = block.content?.items ?? [];
+						if (isNew) {
+							await tx.insert(schema.accordionContentBlocks).values({ id: blockId, items });
+						} else {
+							await tx
+								.update(schema.accordionContentBlocks)
+								.set({ items })
+								.where(eq(schema.accordionContentBlocks.id, blockId));
 						}
 						break;
 					}
@@ -187,32 +228,32 @@ export const updateNewsItemAction = createServerAction(
 
 				await Promise.all(
 					contentBlocks.map(async (contentBlock, index) => {
-						const { id, type, content, position } = contentBlock;
+						const { id, position } = contentBlock;
 
 						if (position !== undefined) {
 							await tx
 								.update(schema.contentBlocks)
 								.set({
 									fieldId: contentField.id,
-									typeId: contentBlockTypesByType[type].id,
+									typeId: contentBlockTypesByType[contentBlock.type].id,
 									position: index,
 								})
 								.where(eq(schema.contentBlocks.id, id));
 
-							await upsertTypeBlock(tx, type, content, id, false);
+							await upsertTypeBlock(tx, contentBlock, id, false);
 						} else {
 							const [added] = await tx
 								.insert(schema.contentBlocks)
 								.values({
 									fieldId: contentField.id,
-									typeId: contentBlockTypesByType[type].id,
+									typeId: contentBlockTypesByType[contentBlock.type].id,
 									position: index,
 								})
 								.returning({ id: schema.contentBlocks.id });
 
 							assert(added);
 
-							await upsertTypeBlock(tx, type, content, added.id, true);
+							await upsertTypeBlock(tx, contentBlock, added.id, true);
 						}
 					}),
 				);

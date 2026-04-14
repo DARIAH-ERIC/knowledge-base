@@ -6,13 +6,13 @@ import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import slugify from "@sindresorhus/slugify";
-import type { JSONContent } from "@tiptap/core";
 import { revalidatePath } from "next/cache";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { CreateSpotlightArticleActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article.schema";
 import { assertAuthenticated } from "@/lib/auth/session";
+import type { ContentBlockInput } from "@/lib/content-block-input";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -117,51 +117,46 @@ export const createSpotlightArticleAction = createServerAction(
 				return item.type;
 			});
 
-			async function insertTypeBlock(
-				tx: Transaction,
-				type: schema.ContentBlockTypes["type"],
-				content: JSONContent | undefined,
-				blockId: string,
-			) {
-				switch (type) {
+			async function insertTypeBlock(tx: Transaction, block: ContentBlockInput, blockId: string) {
+				switch (block.type) {
 					case "rich_text": {
 						await tx
 							.insert(schema.richTextContentBlocks)
-							.values({ id: blockId, content: content ?? {} });
+							.values({ id: blockId, content: block.content ?? {} });
 						break;
 					}
 					case "image": {
-						const imageKey = content?.imageKey as string | undefined;
+						const imageKey = block.content?.imageKey;
 						if (imageKey == null) break;
 						const asset = await tx.query.assets.findFirst({
 							where: { key: imageKey },
 							columns: { id: true },
 						});
 						if (asset == null) break;
-						const caption = (content?.caption as string | undefined) ?? null;
+						const caption = block.content?.caption ?? null;
 						await tx
 							.insert(schema.imageContentBlocks)
 							.values({ id: blockId, imageId: asset.id, caption });
 						break;
 					}
 					case "embed": {
-						const url = content?.url as string | undefined;
-						const title = content?.title as string | undefined;
+						const url = block.content?.url;
+						const title = block.content?.title;
 						if (url == null || title == null) break;
-						const caption = (content?.caption as string | undefined) ?? null;
+						const caption = block.content?.caption ?? null;
 						await tx.insert(schema.embedContentBlocks).values({ id: blockId, url, title, caption });
 						break;
 					}
 					case "data": {
-						const dataType = content?.dataType as "events" | "news" | undefined;
+						const dataType = block.content?.dataType;
 						if (dataType == null) break;
 						const dataContentBlockType = await tx.query.dataContentBlockTypes.findFirst({
 							where: { type: dataType },
 							columns: { id: true },
 						});
 						if (dataContentBlockType == null) break;
-						const limit = (content?.limit as number | undefined) ?? null;
-						const selectedIds = (content?.selectedIds as Array<string> | undefined) ?? null;
+						const limit = block.content?.limit ?? null;
+						const selectedIds = block.content?.selectedIds ?? null;
 						await tx.insert(schema.dataContentBlocks).values({
 							id: blockId,
 							typeId: dataContentBlockType.id,
@@ -170,25 +165,51 @@ export const createSpotlightArticleAction = createServerAction(
 						});
 						break;
 					}
+					case "hero": {
+						const heroTitle = block.content?.title;
+						if (heroTitle == null) break;
+						const heroImageKey = block.content?.imageKey;
+						let heroImageId: string | null = null;
+						if (heroImageKey != null) {
+							const heroAsset = await tx.query.assets.findFirst({
+								where: { key: heroImageKey },
+								columns: { id: true },
+							});
+							heroImageId = heroAsset?.id ?? null;
+						}
+						const eyebrow = block.content?.eyebrow ?? null;
+						const ctas = block.content?.ctas ?? null;
+						await tx.insert(schema.heroContentBlocks).values({
+							id: blockId,
+							title: heroTitle,
+							eyebrow,
+							imageId: heroImageId,
+							ctas,
+						});
+						break;
+					}
+					case "accordion": {
+						const items = block.content?.items ?? [];
+						await tx.insert(schema.accordionContentBlocks).values({ id: blockId, items });
+						break;
+					}
 				}
 			}
 
 			await Promise.all(
 				contentBlocks.map(async (contentBlock, index) => {
-					const { type, content } = contentBlock;
-
 					const [added] = await tx
 						.insert(schema.contentBlocks)
 						.values({
 							fieldId: contentField.id,
-							typeId: contentBlockTypesByType[type].id,
+							typeId: contentBlockTypesByType[contentBlock.type].id,
 							position: index,
 						})
 						.returning({ id: schema.contentBlocks.id });
 
 					assert(added);
 
-					await insertTypeBlock(tx, type, content, added.id);
+					await insertTypeBlock(tx, contentBlock, added.id);
 				}),
 			);
 		});

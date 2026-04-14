@@ -8,6 +8,15 @@ import { Checkbox } from "@dariah-eric/ui/checkbox";
 import { Label } from "@dariah-eric/ui/field";
 import { Input } from "@dariah-eric/ui/input";
 import { Menu, MenuContent, MenuItem, MenuLabel } from "@dariah-eric/ui/menu";
+import {
+	Modal,
+	ModalBody,
+	ModalClose,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+	ModalTitle,
+} from "@dariah-eric/ui/modal";
 import { NumberField, NumberInput } from "@dariah-eric/ui/number-field";
 import { RichTextEditor, RichTextEditorToolbarButton } from "@dariah-eric/ui/rich-text-editor";
 import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
@@ -45,16 +54,6 @@ import {
 	useListData,
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
-
-import {
-	Modal,
-	ModalBody,
-	ModalClose,
-	ModalContent,
-	ModalFooter,
-	ModalHeader,
-	ModalTitle,
-} from "@dariah-eric/ui/modal";
 
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
 
@@ -422,7 +421,7 @@ function ContentBlockItem({
 								</ModalBody>
 								<ModalFooter>
 									<ModalClose>{t("Cancel")}</ModalClose>
-									<Button intent="danger" slot="close" onPress={onDelete}>
+									<Button intent="danger" onPress={onDelete} slot="close">
 										{t("Remove")}
 									</Button>
 								</ModalFooter>
@@ -903,13 +902,13 @@ function HeroContentBlockPanel({
 							</TextField>
 							<Button
 								intent="outline"
-								size="sm"
 								onPress={() => {
 									const next = ctas.filter((_, i) => {
 										return i !== idx;
 									});
 									onChange({ ...item.content, ctas: next });
 								}}
+								size="sm"
 							>
 								<TrashIcon className="size-4" />
 							</Button>
@@ -918,10 +917,10 @@ function HeroContentBlockPanel({
 				})}
 				<Button
 					intent="secondary"
-					size="sm"
 					onPress={() => {
 						onChange({ ...item.content, ctas: [...ctas, { label: "", url: "" }] });
 					}}
+					size="sm"
 				>
 					<PlusIcon className="size-4" />
 					{t("Add CTA")}
@@ -957,13 +956,13 @@ function AccordionContentBlockPanel({
 							</span>
 							<Button
 								intent="outline"
-								size="sm"
 								onPress={() => {
 									const next = items.filter((_, i) => {
 										return i !== idx;
 									});
 									onChange({ ...item.content, items: next });
 								}}
+								size="sm"
 							>
 								<TrashIcon className="size-4" />
 							</Button>
@@ -1024,13 +1023,13 @@ function AccordionContentBlockPanel({
 			})}
 			<Button
 				intent="secondary"
-				size="sm"
 				onPress={() => {
 					onChange({
 						...item.content,
 						items: [...items, { title: "", content: undefined }],
 					});
 				}}
+				size="sm"
 			>
 				<PlusIcon className="size-4" />
 				{t("Add item")}
