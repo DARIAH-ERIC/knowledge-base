@@ -467,6 +467,40 @@ export const relations = defineRelations(schema, (r) => {
 				optional: false,
 			}),
 		},
+		siteMetadata: {
+			ogImage: r.one.assets({
+				from: r.siteMetadata.ogImageId,
+				to: r.assets.id,
+				optional: true,
+			}),
+		},
+		navigationMenus: {
+			items: r.many.navigationItems({
+				from: r.navigationMenus.id,
+				to: r.navigationItems.menuId,
+			}),
+		},
+		navigationItems: {
+			menu: r.one.navigationMenus({
+				from: r.navigationItems.menuId,
+				to: r.navigationMenus.id,
+				optional: false,
+			}),
+			parent: r.one.navigationItems({
+				from: r.navigationItems.parentId,
+				to: r.navigationItems.id,
+				optional: true,
+			}),
+			children: r.many.navigationItems({
+				from: r.navigationItems.id,
+				to: r.navigationItems.parentId,
+			}),
+			entity: r.one.entities({
+				from: r.navigationItems.entityId,
+				to: r.entities.id,
+				optional: true,
+			}),
+		},
 		spotlightArticles: {
 			entity: r.one.entities({
 				from: r.spotlightArticles.id,

@@ -1,0 +1,59 @@
+"use server";
+
+import { and, eq, isNull } from "@dariah-eric/database";
+import { db } from "@dariah-eric/database/client";
+import * as schema from "@dariah-eric/database/schema";
+import { revalidatePath } from "next/cache";
+
+import { assertAuthenticated } from "@/lib/auth/session";
+
+export async function moveNavigationItemAction(
+	id: string,
+	direction: "up" | "down",
+): Promise<void> {
+	await assertAuthenticated();
+
+	await db.transaction(async (tx) => {
+		const item = await tx.query.navigationItems.findFirst({
+			where: { id },
+			columns: { id: true, position: true, menuId: true, parentId: true },
+		});
+
+		if (item == null) return;
+
+		const siblings = await tx
+			.select({ id: schema.navigationItems.id, position: schema.navigationItems.position })
+			.from(schema.navigationItems)
+			.where(
+				item.parentId != null
+					? eq(schema.navigationItems.parentId, item.parentId)
+					: and(
+							eq(schema.navigationItems.menuId, item.menuId),
+							isNull(schema.navigationItems.parentId),
+						),
+			)
+			.orderBy(schema.navigationItems.position);
+
+		const currentIndex = siblings.findIndex((s) => {
+			return s.id === id;
+		});
+		const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
+		if (targetIndex < 0 || targetIndex >= siblings.length) return;
+
+		const target = siblings[targetIndex];
+		if (target == null) return;
+
+		await tx
+			.update(schema.navigationItems)
+			.set({ position: target.position })
+			.where(eq(schema.navigationItems.id, id));
+
+		await tx
+			.update(schema.navigationItems)
+			.set({ position: item.position })
+			.where(eq(schema.navigationItems.id, target.id));
+	});
+
+	revalidatePath("/[locale]/dashboard/website/navigation", "layout");
+}
