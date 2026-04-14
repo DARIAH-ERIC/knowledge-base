@@ -1,4 +1,5 @@
 CREATE VIEW members_and_partners AS
+-- Countries with a direct member or observer relation to eric
 SELECT
 	"units"."id",
 	"units"."metadata",
@@ -27,7 +28,48 @@ GROUP BY
 	"unit_types"."type",
 	"units"."image_id",
 	"units"."sshoc_marketplace_actor_id",
-	"unit_status"."status";
+	"unit_status"."status"
+
+UNION
+
+-- Countries that have at least one cooperating partner institution located in them
+SELECT
+	"countries"."id",
+	"countries"."metadata",
+	"countries"."name",
+	"countries"."summary",
+	"countries"."image_id",
+	"countries"."sshoc_marketplace_actor_id",
+	"country_types"."type",
+	"coop_status"."status"
+FROM
+	"organisational_units" "countries"
+	JOIN "organisational_unit_types" "country_types" ON "countries"."type_id" = "country_types"."id"
+	AND "country_types"."type" = 'country'
+	JOIN "organisational_units_to_units" "located_in" ON "countries"."id" = "located_in"."related_unit_id"
+	AND "located_in"."duration" @> NOW()
+	JOIN "organisational_unit_status" "located_in_status" ON "located_in_status"."id" = "located_in"."status"
+	AND "located_in_status"."status" = 'is_located_in'
+	JOIN "organisational_units" "institutions" ON "institutions"."id" = "located_in"."unit_id"
+	JOIN "organisational_unit_types" "institution_types" ON "institutions"."type_id" = "institution_types"."id"
+	AND "institution_types"."type" = 'institution'
+	JOIN "organisational_units_to_units" "coop_rel" ON "institutions"."id" = "coop_rel"."unit_id"
+	AND "coop_rel"."duration" @> NOW()
+	JOIN "organisational_unit_status" "coop_status" ON "coop_status"."id" = "coop_rel"."status"
+	AND "coop_status"."status" = 'is_cooperating_partner_of'
+	JOIN "organisational_units" "eric_units" ON "coop_rel"."related_unit_id" = "eric_units"."id"
+	JOIN "organisational_unit_types" "eric_types" ON "eric_units"."type_id" = "eric_types"."id"
+	AND "eric_types"."type" = 'eric'
+GROUP BY
+	"countries"."id",
+	"countries"."metadata",
+	"countries"."name",
+	"countries"."summary",
+	"country_types"."type",
+	"countries"."image_id",
+	"countries"."sshoc_marketplace_actor_id",
+	"coop_status"."status";
+
 
 --> statement-breakpoint
 CREATE VIEW working_groups AS
