@@ -10,7 +10,7 @@ import { ImpactCaseStudyForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/
 import { updateImpactCaseStudyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/update-impact-case-study.action";
 
 interface ImpactCaseStudyEditFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
 	impactCaseStudy: Pick<schema.ImpactCaseStudy, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
@@ -18,7 +18,7 @@ interface ImpactCaseStudyEditFormProps {
 }
 
 export function ImpactCaseStudyEditForm(props: Readonly<ImpactCaseStudyEditFormProps>): ReactNode {
-	const { assets, contentBlocks, impactCaseStudy } = props;
+	const { initialAssets, contentBlocks, impactCaseStudy } = props;
 
 	const t = useExtracted();
 
@@ -27,10 +27,10 @@ export function ImpactCaseStudyEditForm(props: Readonly<ImpactCaseStudyEditFormP
 			<Heading>{t("Edit impact case study")}</Heading>
 
 			<ImpactCaseStudyForm
-				assets={assets}
 				contentBlocks={contentBlocks}
 				formAction={updateImpactCaseStudyAction}
 				impactCaseStudy={impactCaseStudy}
+				initialAssets={initialAssets}
 			/>
 		</Fragment>
 	);

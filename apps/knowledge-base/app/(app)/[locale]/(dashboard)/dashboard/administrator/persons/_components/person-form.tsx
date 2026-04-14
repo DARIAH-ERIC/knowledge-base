@@ -23,7 +23,7 @@ import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface PersonFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	person?: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
 		biography?: JSONContent;
 		entity: { documentId: string; slug: string };
@@ -32,7 +32,7 @@ interface PersonFormProps {
 }
 
 export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
-	const { assets, formAction, person } = props;
+	const { initialAssets, formAction, person } = props;
 
 	const t = useExtracted();
 
@@ -53,25 +53,25 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 				>
 					<TextField defaultValue={person?.name} isRequired={true} name="name">
 						<Label>{t("Name")}</Label>
-						<Input placeholder={t("Name")} />
+						<Input />
 						<FieldError />
 					</TextField>
 
 					<TextField defaultValue={person?.sortName} isRequired={true} name="sortName">
 						<Label>{t("Sort name")}</Label>
-						<Input placeholder={t("Sort name")} />
+						<Input />
 						<FieldError />
 					</TextField>
 
 					<TextField defaultValue={person?.email ?? undefined} name="email" type="email">
 						<Label>{t("Email")}</Label>
-						<Input placeholder={t("Email")} />
+						<Input />
 						<FieldError />
 					</TextField>
 
 					<TextField defaultValue={person?.orcid ?? undefined} name="orcid">
 						<Label>{t("ORCID")}</Label>
-						<Input placeholder={t("ORCID")} />
+						<Input />
 						<FieldError />
 					</TextField>
 				</FormSection>
@@ -87,8 +87,8 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 						/>
 					)}
 					<MediaLibraryDialog
-						assets={assets}
 						defaultPrefix="avatars"
+						initialAssets={initialAssets}
 						onSelect={(key, url) => {
 							setSelectedImage({ key, url });
 						}}

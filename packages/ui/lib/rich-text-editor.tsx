@@ -1,15 +1,16 @@
 "use client";
 
 import type { JSONContent } from "@tiptap/core";
+import { Image } from "@tiptap/extension-image";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
+import { StarterKit } from "@tiptap/starter-kit";
 import cn from "clsx/lite";
 import {
 	BoldIcon,
 	CodeIcon,
-	Heading1Icon,
 	Heading2Icon,
 	Heading3Icon,
+	Heading4Icon,
 	ItalicIcon,
 	LinkIcon,
 	ListIcon,
@@ -18,11 +19,13 @@ import {
 } from "lucide-react";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useCallback, useRef, useState } from "react";
+import { Button as ButtonPrimitive } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
 import { Button } from "@/lib/button";
 import { Input } from "@/lib/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/lib/popover";
+import { Tooltip, TooltipContent } from "@/lib/tooltip";
 
 interface RichTextEditorProps {
 	"aria-label"?: string;
@@ -31,49 +34,68 @@ interface RichTextEditorProps {
 	isEditable?: boolean;
 	name?: string;
 	onChange?: (content: JSONContent) => void;
+	renderImagePicker?: (insert: (src: string) => void) => ReactNode;
 }
 
-interface RichTextEditorIconButtonProps {
+export interface RichTextEditorToolbarButtonProps {
 	"aria-label": string;
 	icon: React.ComponentType<{ className?: string }>;
 	isActive?: boolean;
 	onClick: () => void;
 }
 
-function RichTextEditorIconButton({
+export function RichTextEditorToolbarButton({
 	"aria-label": ariaLabel,
 	icon: Icon,
 	isActive,
 	onClick,
-}: Readonly<RichTextEditorIconButtonProps>): ReactNode {
+}: Readonly<RichTextEditorToolbarButtonProps>): ReactNode {
 	return (
-		<button
-			aria-label={ariaLabel}
-			className={twMerge(
-				"relative inline-flex size-8 items-center justify-center rounded-md transition-colors text-muted-fg hover:text-fg focus:outline-none focus:ring-2 focus:ring-ring",
-				isActive === true && "bg-primary-subtle/50 text-fg",
-			)}
-			onClick={onClick}
-			type="button"
-		>
-			<Icon className="size-4" />
-		</button>
+		<Tooltip>
+			<ButtonPrimitive
+				aria-label={ariaLabel}
+				className={twMerge(
+					"relative inline-flex size-8 items-center justify-center rounded-md transition-colors text-muted-fg hover:text-fg focus:outline-none focus:ring-2 focus:ring-ring",
+					isActive === true && "bg-primary-subtle/50 text-fg",
+				)}
+				onPress={() => {
+					onClick();
+				}}
+				type="button"
+			>
+				<Icon className="size-4" />
+			</ButtonPrimitive>
+			<TooltipContent inverse={true}>{ariaLabel}</TooltipContent>
+		</Tooltip>
 	);
 }
 
+// Keep the internal alias for backward-compat within this file.
+const RichTextEditorIconButton = RichTextEditorToolbarButton;
+
 export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode {
-	const { "aria-label": ariaLabel, content, onChange, isEditable = true, name, className } = props;
+	const {
+		"aria-label": ariaLabel,
+		content,
+		onChange,
+		isEditable = true,
+		name,
+		className,
+		renderImagePicker,
+	} = props;
 
 	const t = useExtracted("ui");
 
 	const editor = useEditor({
 		extensions: [
 			StarterKit.configure({
+				heading: { levels: [2, 3, 4] },
 				link: {
 					openOnClick: false,
 					defaultProtocol: "https",
 				},
 			}),
+			Image,
 		],
 		content,
 		editable: isEditable,
@@ -102,9 +124,9 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 				isBold: ctx.editor?.isActive("bold"),
 				isItalic: ctx.editor?.isActive("italic"),
 				isCode: ctx.editor?.isActive("code"),
-				isHeading1: ctx.editor?.isActive("heading", { level: 1 }),
 				isHeading2: ctx.editor?.isActive("heading", { level: 2 }),
 				isHeading3: ctx.editor?.isActive("heading", { level: 3 }),
+				isHeading4: ctx.editor?.isActive("heading", { level: 4 }),
 				isBulletList: ctx.editor?.isActive("bulletList"),
 				isOrderedList: ctx.editor?.isActive("orderedList"),
 				isBlockquote: ctx.editor?.isActive("blockquote"),
@@ -118,12 +140,12 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	const [isLinkPopoverOpen, setIsLinkPopoverOpen] = useState(false);
 	const [linkHrefInput, setLinkHrefInput] = useState("");
-	const savedSelection = useRef<{ from: number; to: number } | null>(null);
+	const savedSelectionRef = useRef<{ from: number; to: number } | null>(null);
 
 	const handleLinkPopoverOpenChange = useCallback(
 		(open: boolean) => {
 			if (open && editor) {
-				savedSelection.current = {
+				savedSelectionRef.current = {
 					from: editor.state.selection.from,
 					to: editor.state.selection.to,
 				};
@@ -139,7 +161,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		const href = linkHrefInput.trim();
 		if (!href) return;
 
-		const sel = savedSelection.current;
+		const sel = savedSelectionRef.current;
 		const chain = editor.chain().focus();
 		if (sel) chain.setTextSelection(sel);
 
@@ -156,12 +178,20 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	const removeLink = useCallback(() => {
 		if (!editor) return;
-		const sel = savedSelection.current;
+		const sel = savedSelectionRef.current;
 		const chain = editor.chain().focus();
 		if (sel) chain.setTextSelection(sel);
 		chain.unsetLink().run();
 		setIsLinkPopoverOpen(false);
 	}, [editor]);
+
+	const insertImage = useCallback(
+		(src: string) => {
+			if (!editor) return;
+			editor.chain().focus().setImage({ src }).run();
+		},
+		[editor],
+	);
 
 	if (editor == null) {
 		return null;
@@ -169,13 +199,10 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	return (
 		<div
-			className={twMerge(
-				"relative overflow-hidden rounded-lg border border-input bg-bg",
-				className,
-			)}
+			className={twMerge("relative overflow-clip rounded-lg border border-input bg-bg", className)}
 		>
 			{isEditable ? (
-				<div className="flex flex-wrap items-center gap-0.5 border-b border-border bg-muted/30 px-2 py-1.5">
+				<div className="sticky top-0 z-10 flex flex-wrap items-center gap-0.5 border-b border-border bg-muted px-2 py-1.5">
 					<RichTextEditorIconButton
 						aria-label={t("Bold")}
 						icon={BoldIcon}
@@ -202,14 +229,6 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 					/>
 					<span className="mx-1 h-4 w-px bg-border" />
 					<RichTextEditorIconButton
-						aria-label={t("Heading 1")}
-						icon={Heading1Icon}
-						isActive={activeState?.isHeading1}
-						onClick={() => {
-							return editor.chain().focus().toggleHeading({ level: 1 }).run();
-						}}
-					/>
-					<RichTextEditorIconButton
 						aria-label={t("Heading 2")}
 						icon={Heading2Icon}
 						isActive={activeState?.isHeading2}
@@ -223,6 +242,14 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 						isActive={activeState?.isHeading3}
 						onClick={() => {
 							return editor.chain().focus().toggleHeading({ level: 3 }).run();
+						}}
+					/>
+					<RichTextEditorIconButton
+						aria-label={t("Heading 4")}
+						icon={Heading4Icon}
+						isActive={activeState?.isHeading4}
+						onClick={() => {
+							return editor.chain().focus().toggleHeading({ level: 4 }).run();
 						}}
 					/>
 					<span className="mx-1 h-4 w-px bg-border" />
@@ -252,15 +279,18 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 					/>
 					<span className="mx-1 h-4 w-px bg-border" />
 					<Popover isOpen={isLinkPopoverOpen} onOpenChange={handleLinkPopoverOpenChange}>
-						<PopoverTrigger
-							aria-label={t("Link")}
-							className={twMerge(
-								"relative inline-flex size-8 cursor-pointer items-center justify-center rounded-md border-transparent bg-transparent transition-colors text-muted-fg hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-								activeState?.isLink === true && "bg-primary-subtle/50 text-fg",
-							)}
-						>
-							<LinkIcon className="size-4" />
-						</PopoverTrigger>
+						<Tooltip>
+							<PopoverTrigger
+								aria-label={t("Link")}
+								className={twMerge(
+									"relative inline-flex size-8 cursor-pointer items-center justify-center rounded-md border-transparent bg-transparent transition-colors text-muted-fg hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+									activeState?.isLink === true && "bg-primary-subtle/50 text-fg",
+								)}
+							>
+								<LinkIcon className="size-4" />
+							</PopoverTrigger>
+							<TooltipContent inverse={true}>{t("Link")}</TooltipContent>
+						</Tooltip>
 						<PopoverContent className="p-3">
 							<form
 								className="flex w-56 flex-col gap-2"
@@ -292,6 +322,12 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 							</form>
 						</PopoverContent>
 					</Popover>
+					{renderImagePicker != null ? (
+						<>
+							<span className="mx-1 h-4 w-px bg-border" />
+							{renderImagePicker(insertImage)}
+						</>
+					) : null}
 				</div>
 			) : null}
 			{name != null && (

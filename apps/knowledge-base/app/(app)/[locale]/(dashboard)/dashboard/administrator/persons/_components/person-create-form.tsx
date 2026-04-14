@@ -8,11 +8,11 @@ import { PersonForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administr
 import { createPersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/create-person.action";
 
 interface PersonCreateFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 }
 
 export function PersonCreateForm(props: Readonly<PersonCreateFormProps>): ReactNode {
-	const { assets } = props;
+	const { initialAssets } = props;
 
 	const t = useExtracted();
 
@@ -20,7 +20,7 @@ export function PersonCreateForm(props: Readonly<PersonCreateFormProps>): ReactN
 		<Fragment>
 			<Heading>{t("New person")}</Heading>
 
-			<PersonForm assets={assets} formAction={createPersonAction} />
+			<PersonForm formAction={createPersonAction} initialAssets={initialAssets} />
 		</Fragment>
 	);
 }

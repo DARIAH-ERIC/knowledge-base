@@ -10,7 +10,7 @@ import { EventForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/ev
 import { updateEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/update-event.action";
 
 interface EventEditFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
 	event: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
 		entity: { documentId: string; slug: string };
@@ -18,7 +18,7 @@ interface EventEditFormProps {
 }
 
 export function EventEditForm(props: Readonly<EventEditFormProps>): ReactNode {
-	const { assets, contentBlocks, event } = props;
+	const { initialAssets, contentBlocks, event } = props;
 
 	const t = useExtracted();
 
@@ -27,10 +27,10 @@ export function EventEditForm(props: Readonly<EventEditFormProps>): ReactNode {
 			<Heading>{t("Edit event")}</Heading>
 
 			<EventForm
-				assets={assets}
 				contentBlocks={contentBlocks}
 				event={event}
 				formAction={updateEventAction}
+				initialAssets={initialAssets}
 			/>
 		</Fragment>
 	);

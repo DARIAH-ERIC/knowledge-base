@@ -81,7 +81,7 @@ const config = defineConfig(
 			],
 			"unicorn/no-array-for-each": "error",
 			// "unicorn/no-array-reverse": "off",
-			// "unicorn/no-array-sort": "off",
+			"unicorn/no-array-sort": "off",
 			"unicorn/no-negated-condition": "off",
 			"unicorn/no-useless-undefined": "off",
 			"unicorn/prefer-global-this": "off",

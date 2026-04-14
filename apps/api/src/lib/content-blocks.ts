@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { eq } from "@dariah-eric/database";
+import { alias, eq } from "@dariah-eric/database";
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
@@ -31,14 +31,31 @@ export const DataContentBlockSchema = v.object({
 	limit: v.nullable(v.number()),
 });
 
+export const HeroContentBlockSchema = v.object({
+	type: v.literal("hero"),
+	title: v.string(),
+	eyebrow: v.nullable(v.string()),
+	image: v.nullable(v.object({ url: v.string() })),
+	ctas: v.nullable(v.array(v.object({ label: v.string(), url: v.string() }))),
+});
+
+export const AccordionContentBlockSchema = v.object({
+	type: v.literal("accordion"),
+	items: v.array(v.object({ title: v.string(), content: v.optional(v.any()) })),
+});
+
 export const ContentBlockSchema = v.union([
 	RichTextContentBlockSchema,
 	EmbedContentBlockSchema,
 	ImageContentBlockSchema,
 	DataContentBlockSchema,
+	HeroContentBlockSchema,
+	AccordionContentBlockSchema,
 ]);
 
 export type ContentBlock = v.InferOutput<typeof ContentBlockSchema>;
+
+const heroAssets = alias(schema.assets, "hero_assets");
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getContentBlocks(db: Database | Transaction, entityId: string) {
@@ -55,6 +72,11 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			imageKey: schema.assets.key,
 			dataLimit: schema.dataContentBlocks.limit,
 			dataType: schema.dataContentBlockTypes.type,
+			heroTitle: schema.heroContentBlocks.title,
+			heroEyebrow: schema.heroContentBlocks.eyebrow,
+			heroImageKey: heroAssets.key,
+			heroCtas: schema.heroContentBlocks.ctas,
+			accordionItems: schema.accordionContentBlocks.items,
 		})
 		.from(schema.fields)
 		.innerJoin(
@@ -77,6 +99,12 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 		.leftJoin(
 			schema.dataContentBlockTypes,
 			eq(schema.dataContentBlockTypes.id, schema.dataContentBlocks.typeId),
+		)
+		.leftJoin(schema.heroContentBlocks, eq(schema.heroContentBlocks.id, schema.contentBlocks.id))
+		.leftJoin(heroAssets, eq(heroAssets.id, schema.heroContentBlocks.imageId))
+		.leftJoin(
+			schema.accordionContentBlocks,
+			eq(schema.accordionContentBlocks.id, schema.contentBlocks.id),
 		)
 		.where(eq(schema.fields.entityId, entityId))
 		.orderBy(schema.contentBlocks.position);
@@ -108,6 +136,11 @@ function normalizeRow(row: {
 	imageKey: string | null;
 	dataLimit: number | null;
 	dataType: string | null;
+	heroTitle: string | null;
+	heroEyebrow: string | null;
+	heroImageKey: string | null;
+	heroCtas: unknown;
+	accordionItems: unknown;
 }): ContentBlock {
 	switch (row.blockType) {
 		case "rich_text": {
@@ -131,6 +164,27 @@ function normalizeRow(row: {
 				type: "data",
 				dataType: row.dataType as (typeof schema.dataContentBlockTypesEnum)[number],
 				limit: row.dataLimit,
+			};
+		}
+		case "hero": {
+			return {
+				type: "hero",
+				title: row.heroTitle!,
+				eyebrow: row.heroEyebrow,
+				image:
+					row.heroImageKey != null
+						? images.generateSignedImageUrl({
+								key: row.heroImageKey,
+								options: { width: imageWidth.featured },
+							})
+						: null,
+				ctas: row.heroCtas as Array<{ label: string; url: string }> | null,
+			};
+		}
+		case "accordion": {
+			return {
+				type: "accordion",
+				items: (row.accordionItems as Array<{ title: string; content?: unknown }> | null) ?? [],
 			};
 		}
 		default: {

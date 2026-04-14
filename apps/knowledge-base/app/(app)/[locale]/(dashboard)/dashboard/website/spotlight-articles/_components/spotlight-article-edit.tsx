@@ -10,7 +10,7 @@ import { SpotlightArticleForm } from "@/app/(app)/[locale]/(dashboard)/dashboard
 import { updateSpotlightArticleAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/update-spotlight-article.action";
 
 interface SpotlightArticleEditFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
 	spotlightArticle: Pick<schema.SpotlightArticle, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
@@ -20,7 +20,7 @@ interface SpotlightArticleEditFormProps {
 export function SpotlightArticleEditForm(
 	props: Readonly<SpotlightArticleEditFormProps>,
 ): ReactNode {
-	const { assets, contentBlocks, spotlightArticle } = props;
+	const { initialAssets, contentBlocks, spotlightArticle } = props;
 
 	const t = useExtracted();
 
@@ -29,9 +29,9 @@ export function SpotlightArticleEditForm(
 			<Heading>{t("Edit spotlight article")}</Heading>
 
 			<SpotlightArticleForm
-				assets={assets}
 				contentBlocks={contentBlocks}
 				formAction={updateSpotlightArticleAction}
+				initialAssets={initialAssets}
 				spotlightArticle={spotlightArticle}
 			/>
 		</Fragment>

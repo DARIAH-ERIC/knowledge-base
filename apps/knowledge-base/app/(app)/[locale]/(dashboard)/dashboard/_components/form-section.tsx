@@ -57,7 +57,10 @@ export function FormSection({
 	}
 
 	return (
-		<section className={twMerge("grid gap-x-8 gap-y-6 sm:grid-cols-2", className)} {...props}>
+		<section
+			className={twMerge("grid gap-x-8 gap-y-6 max-w-3xl sm:grid-cols-2", className)}
+			{...props}
+		>
 			{title != null || description != null ? (
 				<Fragment>
 					<div className="space-y-1">

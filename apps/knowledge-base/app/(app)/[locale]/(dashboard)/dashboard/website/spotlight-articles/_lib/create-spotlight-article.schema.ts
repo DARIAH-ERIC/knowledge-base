@@ -1,22 +1,13 @@
-import { contentBlockTypesEnum, SpotlightArticleInsertSchema } from "@dariah-eric/database/schema";
+import { SpotlightArticleInsertSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
+
+import { ContentBlockInputSchema } from "@/lib/content-block-input";
 
 export const CreateSpotlightArticleActionInputSchema = v.object({
 	...v.pick(SpotlightArticleInsertSchema, ["title", "summary"]).entries,
 	imageKey: v.pipe(v.string(), v.nonEmpty()),
 	contentBlocks: v.optional(
-		v.array(
-			v.pipe(
-				v.string(),
-				v.parseJson(),
-				v.object({
-					id: v.string(),
-					type: v.picklist(contentBlockTypesEnum),
-					position: v.optional(v.number()),
-					content: v.looseObject({}),
-				}),
-			),
-		),
+		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),
 		[],
 	),
 });

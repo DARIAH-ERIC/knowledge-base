@@ -25,10 +25,10 @@ export async function generateMetadata(
 export default async function DashboardWebsiteCreateDocumentOrPolicyPage(
 	_props: Readonly<DashboardWebsiteCreateDocumentOrPolicyPageProps>,
 ): Promise<ReactNode> {
-	const { items: assets } = await getMediaLibraryAssets({
+	const { items: initialAssets } = await getMediaLibraryAssets({
 		imageUrlOptions: imageGridOptions,
 		prefix: "documents",
 	});
 
-	return <DocumentOrPolicyCreateForm assets={assets} />;
+	return <DocumentOrPolicyCreateForm initialAssets={initialAssets} />;
 }

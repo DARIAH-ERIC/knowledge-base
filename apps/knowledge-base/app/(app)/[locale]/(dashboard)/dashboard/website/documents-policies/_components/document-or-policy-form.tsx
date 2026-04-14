@@ -3,7 +3,7 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
-import { FieldError, fieldErrorStyles } from "@dariah-eric/ui/field";
+import { FieldError, fieldErrorStyles, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
@@ -22,7 +22,7 @@ import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface DocumentOrPolicyFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
 	documentOrPolicy?: Pick<schema.DocumentOrPolicy, "id" | "title" | "summary" | "url"> & {
 		entity: { documentId: string; slug: string };
@@ -31,7 +31,7 @@ interface DocumentOrPolicyFormProps {
 }
 
 export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>): ReactNode {
-	const { assets, contentBlocks, formAction, documentOrPolicy } = props;
+	const { initialAssets, contentBlocks, formAction, documentOrPolicy } = props;
 
 	const t = useExtracted();
 
@@ -48,32 +48,25 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 	return (
 		<Form action={action} className="flex flex-col gap-y-6" state={state}>
 			<FormSection description={t("Enter the document or policy details.")} title={t("Details")}>
-				<TextField
-					aria-label={t("Title")}
-					defaultValue={documentOrPolicy?.title}
-					isRequired={true}
-					name="title"
-				>
-					<Input placeholder={t("Title")} />
+				<TextField defaultValue={documentOrPolicy?.title} isRequired={true} name="title">
+					<Label>{t("Title")}</Label>
+					<Input />
 					<FieldError />
 				</TextField>
 
 				<TextField
-					aria-label={t("Summary")}
 					defaultValue={documentOrPolicy?.summary ?? undefined}
 					isRequired={true}
 					name="summary"
 				>
-					<Input placeholder={t("Summary")} />
+					<Label>{t("Summary")}</Label>
+					<Input />
 					<FieldError />
 				</TextField>
 
-				<TextField
-					aria-label={t("URL")}
-					defaultValue={documentOrPolicy?.url ?? undefined}
-					name="url"
-				>
-					<Input placeholder={t("https://...")} />
+				<TextField defaultValue={documentOrPolicy?.url ?? undefined} name="url">
+					<Label>{t("URL")}</Label>
+					<Input placeholder="https://" />
 					<FieldError />
 				</TextField>
 			</FormSection>
@@ -85,10 +78,10 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 					<p className="text-sm text-muted-fg">{selectedDocument.label}</p>
 				)}
 				<MediaLibraryDialog
-					assets={assets}
 					defaultPrefix="documents"
+					initialAssets={initialAssets}
 					onSelect={(key, _url) => {
-						const asset = assets.find((a) => {
+						const asset = initialAssets.find((a) => {
 							return a.key === key;
 						});
 						setSelectedDocument({ key, label: asset?.label ?? key });
@@ -116,8 +109,8 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 
 			<Separator className="my-6" />
 
-			<FormSection description={t("Add the content.")} title={t("Content")}>
-				<ContentBlocks items={contentBlocks ?? []} />
+			<FormSection description={t("Add the content.")} title={t("Content")} variant="stacked">
+				<ContentBlocks initialAssets={initialAssets} items={contentBlocks ?? []} />
 			</FormSection>
 
 			{documentOrPolicy != null ? (

@@ -98,7 +98,9 @@ export default async function DashboardWebsiteImpactCaseStudyDetailsPage(
 
 	return (
 		<ImpactCaseStudyDetails
-			contentBlocks={richTextContentBlocks}
+			contentBlocks={richTextContentBlocks.map((row) => {
+				return { ...row, type: "rich_text" as const };
+			})}
 			impactCaseStudy={{
 				...impactCaseStudy,
 				image: { ...impactCaseStudy.image, url: image.url },

@@ -25,7 +25,10 @@ export async function generateMetadata(
 export default async function DashboardWebsiteCreateNewsItemPage(
 	_props: Readonly<DashboardWebsiteCreateNewsPageProps>,
 ): Promise<ReactNode> {
-	const { items: assets } = await getMediaLibraryAssets({ imageUrlOptions: imageGridOptions });
+	const { items: initialAssets } = await getMediaLibraryAssets({
+		imageUrlOptions: imageGridOptions,
+		prefix: "images",
+	});
 
-	return <NewsItemCreateForm assets={assets} />;
+	return <NewsItemCreateForm initialAssets={initialAssets} />;
 }

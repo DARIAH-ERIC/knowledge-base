@@ -18,7 +18,14 @@ import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
 import { TextField } from "@dariah-eric/ui/text-field";
 import cn from "clsx/lite";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useRef, useState, useTransition } from "react";
+import {
+	type ComponentType,
+	Fragment,
+	type ReactNode,
+	useRef,
+	useState,
+	useTransition,
+} from "react";
 import { FileTrigger, type Selection } from "react-aria-components";
 
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
@@ -32,10 +39,11 @@ interface Asset {
 
 interface MediaLibraryDialogProps<T extends AssetPrefix> {
 	acceptedFileTypes?: ReadonlyArray<string>;
-	assets: Array<Asset>;
+	initialAssets: Array<Asset>;
 	onSelect: (key: string, url: string) => void;
 	defaultPrefix: T;
 	prefixes: ReadonlyArray<T>;
+	trigger?: ComponentType<{ open: () => void }>;
 }
 
 type ActiveTab = "select" | "upload";
@@ -45,10 +53,11 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 ): ReactNode {
 	const {
 		acceptedFileTypes = imageMimeTypes,
-		assets: initialAssets,
+		initialAssets,
 		defaultPrefix,
 		onSelect,
 		prefixes,
+		trigger,
 	} = props;
 
 	const t = useExtracted();
@@ -218,12 +227,17 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 	}
 
 	const isPending = isUploading || isFetching;
+	const Trigger = trigger;
 
 	return (
 		<Fragment>
-			<Button intent="outline" onPress={handleOpen}>
-				{t("Select image")}
-			</Button>
+			{Trigger != null ? (
+				<Trigger open={handleOpen} />
+			) : (
+				<Button intent="outline" onPress={handleOpen}>
+					{t("Select image")}
+				</Button>
+			)}
 
 			<ModalContent isOpen={isOpen} onOpenChange={handleOpenChange} size="3xl">
 				<ModalHeader

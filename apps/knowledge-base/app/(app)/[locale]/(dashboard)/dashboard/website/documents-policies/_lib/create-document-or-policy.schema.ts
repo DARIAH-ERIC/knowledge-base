@@ -1,23 +1,14 @@
-import { contentBlockTypesEnum, DocumentOrPolicyInsertSchema } from "@dariah-eric/database/schema";
+import { DocumentOrPolicyInsertSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
+
+import { ContentBlockInputSchema } from "@/lib/content-block-input";
 
 export const CreateDocumentOrPolicyActionInputSchema = v.object({
 	...v.pick(DocumentOrPolicyInsertSchema, ["title", "summary"]).entries,
 	url: v.optional(v.string()),
 	documentKey: v.pipe(v.string(), v.nonEmpty()),
 	contentBlocks: v.optional(
-		v.array(
-			v.pipe(
-				v.string(),
-				v.parseJson(),
-				v.object({
-					id: v.string(),
-					type: v.picklist(contentBlockTypesEnum),
-					position: v.optional(v.number()),
-					content: v.looseObject({}),
-				}),
-			),
-		),
+		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),
 		[],
 	),
 });

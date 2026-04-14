@@ -23,14 +23,14 @@ export default async function BreadcrumbsSlot(
 
 				if (index === segments.length - 1) {
 					return (
-						<BreadcrumbsItem key={href} className="capitalize">
+						<BreadcrumbsItem key={[index, href].join("-")} className="capitalize">
 							{route.replaceAll("-", " ")}
 						</BreadcrumbsItem>
 					);
 				}
 
 				return (
-					<Fragment key={href}>
+					<Fragment key={[index, href].join("-")}>
 						<BreadcrumbsItem className="capitalize" href={href}>
 							{route}
 						</BreadcrumbsItem>

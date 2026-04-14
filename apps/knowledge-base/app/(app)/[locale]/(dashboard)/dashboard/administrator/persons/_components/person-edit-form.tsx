@@ -10,7 +10,7 @@ import { PersonForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administr
 import { updatePersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.action";
 
 interface PersonEditFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
 		biography?: JSONContent;
 		entity: { documentId: string; slug: string };
@@ -18,7 +18,7 @@ interface PersonEditFormProps {
 }
 
 export function PersonEditForm(props: Readonly<PersonEditFormProps>): ReactNode {
-	const { assets, person } = props;
+	const { initialAssets, person } = props;
 
 	const t = useExtracted();
 
@@ -26,7 +26,7 @@ export function PersonEditForm(props: Readonly<PersonEditFormProps>): ReactNode 
 		<Fragment>
 			<Heading>{t("Edit person")}</Heading>
 
-			<PersonForm assets={assets} formAction={updatePersonAction} person={person} />
+			<PersonForm formAction={updatePersonAction} initialAssets={initialAssets} person={person} />
 		</Fragment>
 	);
 }

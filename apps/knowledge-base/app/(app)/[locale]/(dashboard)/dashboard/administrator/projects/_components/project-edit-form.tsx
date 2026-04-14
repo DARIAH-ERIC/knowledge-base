@@ -10,7 +10,7 @@ import { ProjectForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administ
 import { updateProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/update-project.action";
 
 interface ProjectEditFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	project: Pick<
 		schema.Project,
 		"acronym" | "call" | "duration" | "funding" | "id" | "name" | "summary" | "topic"
@@ -44,7 +44,7 @@ interface ProjectEditFormProps {
 
 export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNode {
 	const {
-		assets,
+		initialAssets,
 		project,
 		scopes,
 		orgUnits,
@@ -61,8 +61,8 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 			<Heading>{t("Edit project")}</Heading>
 
 			<ProjectForm
-				assets={assets}
 				formAction={updateProjectAction}
+				initialAssets={initialAssets}
 				initialPartners={initialPartners}
 				initialSocialMediaIds={initialSocialMediaIds}
 				orgUnits={orgUnits}

@@ -3,7 +3,7 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
-import { FieldError, fieldErrorStyles } from "@dariah-eric/ui/field";
+import { FieldError, fieldErrorStyles, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
@@ -25,7 +25,7 @@ import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface SpotlightArticleFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
 	spotlightArticle?: Pick<schema.SpotlightArticle, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
@@ -34,7 +34,7 @@ interface SpotlightArticleFormProps {
 }
 
 export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>): ReactNode {
-	const { assets, contentBlocks, formAction, spotlightArticle } = props;
+	const { initialAssets, contentBlocks, formAction, spotlightArticle } = props;
 
 	const t = useExtracted();
 
@@ -50,23 +50,19 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
 				<FormSection description={t("Enter the spotlight article details.")} title={t("Details")}>
-					<TextField
-						aria-label={t("Title")}
-						defaultValue={spotlightArticle?.title}
-						isRequired={true}
-						name="title"
-					>
-						<Input placeholder={t("Title")} />
+					<TextField defaultValue={spotlightArticle?.title} isRequired={true} name="title">
+						<Label>{t("Title")}</Label>
+						<Input />
 						<FieldError />
 					</TextField>
 
 					<TextField
-						aria-label={t("Summary")}
 						defaultValue={spotlightArticle?.summary ?? undefined}
 						isRequired={true}
 						name="summary"
 					>
-						<Input placeholder={t("Summary")} />
+						<Label>{t("Summary")}</Label>
+						<Input />
 						<FieldError />
 					</TextField>
 				</FormSection>
@@ -82,8 +78,8 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 						/>
 					)}
 					<MediaLibraryDialog
-						assets={assets}
 						defaultPrefix="images"
+						initialAssets={initialAssets}
 						onSelect={(key, url) => {
 							setSelectedImage({ key, url });
 						}}
@@ -111,7 +107,7 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 				<Separator className="my-6" />
 
 				<FormSection description={t("Add the content.")} title={t("Content")} variant="stacked">
-					<ContentBlocks items={contentBlocks ?? []} />
+					<ContentBlocks initialAssets={initialAssets} items={contentBlocks ?? []} />
 				</FormSection>
 
 				{spotlightArticle != null ? (

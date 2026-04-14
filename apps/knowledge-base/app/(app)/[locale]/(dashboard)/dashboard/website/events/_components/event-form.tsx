@@ -27,7 +27,7 @@ import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface EventFormProps {
-	assets: Array<{ key: string; label: string; url: string }>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
 	event?: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
 		entity: { documentId: string; slug: string };
@@ -36,7 +36,7 @@ interface EventFormProps {
 }
 
 export function EventForm(props: Readonly<EventFormProps>): ReactNode {
-	const { assets, contentBlocks, formAction, event } = props;
+	const { initialAssets, contentBlocks, formAction, event } = props;
 
 	const t = useExtracted();
 
@@ -52,23 +52,15 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
 				<FormSection description={t("Enter the event details.")} title={t("Details")}>
-					<TextField
-						aria-label={t("Title")}
-						defaultValue={event?.title}
-						isRequired={true}
-						name="title"
-					>
-						<Input placeholder={t("Title")} />
+					<TextField defaultValue={event?.title} isRequired={true} name="title">
+						<Label>{t("Title")}</Label>
+						<Input />
 						<FieldError />
 					</TextField>
 
-					<TextField
-						aria-label={t("Summary")}
-						defaultValue={event?.summary ?? undefined}
-						isRequired={true}
-						name="summary"
-					>
-						<Input placeholder={t("Summary")} />
+					<TextField defaultValue={event?.summary ?? undefined} isRequired={true} name="summary">
+						<Label>{t("Summary")}</Label>
+						<Input />
 						<FieldError />
 					</TextField>
 					<DatePicker
@@ -105,22 +97,14 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 						<Label>{t("End date")}</Label>
 						<DatePickerTrigger />
 					</DatePicker>
-					<TextField
-						aria-label={t("Location")}
-						defaultValue={event?.location ?? undefined}
-						isRequired={true}
-						name="location"
-					>
-						<Input placeholder={t("Location")} />
+					<TextField defaultValue={event?.location ?? undefined} isRequired={true} name="location">
+						<Label>{t("Location")}</Label>
+						<Input />
 						<FieldError />
 					</TextField>
-					<TextField
-						aria-label={t("Website")}
-						defaultValue={event?.website ?? undefined}
-						name="website"
-						type="url"
-					>
-						<Input placeholder={t("Website")} />
+					<TextField defaultValue={event?.website ?? undefined} name="website" type="url">
+						<Label>{t("Website")}</Label>
+						<Input placeholder="https://" />
 						<FieldError />
 					</TextField>
 				</FormSection>
@@ -136,8 +120,8 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 						/>
 					)}
 					<MediaLibraryDialog
-						assets={assets}
 						defaultPrefix="images"
+						initialAssets={initialAssets}
 						onSelect={(key, url) => {
 							setSelectedImage({ key, url });
 						}}
@@ -165,7 +149,7 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 				<Separator className="my-6" />
 
 				<FormSection description={t("Add the content.")} title={t("Content")} variant="stacked">
-					<ContentBlocks items={contentBlocks ?? []} />
+					<ContentBlocks initialAssets={initialAssets} items={contentBlocks ?? []} />
 				</FormSection>
 
 				{event != null ? (

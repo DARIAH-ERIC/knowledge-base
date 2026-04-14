@@ -101,6 +101,7 @@
 		"@internationalized/date": "catalog:",
 		"@react-aria/utils": "catalog:",
 		"@tiptap/core": "catalog:",
+		"@tiptap/extension-image": "catalog:",
 		"@tiptap/pm": "catalog:",
 		"@tiptap/react": "catalog:",
 		"@tiptap/starter-kit": "catalog:",
