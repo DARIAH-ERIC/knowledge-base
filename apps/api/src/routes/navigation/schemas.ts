@@ -1,15 +1,17 @@
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
+const EntityRefSchema = v.nullable(
+	v.object({
+		type: v.picklist(schema.entityTypesEnum),
+		slug: v.string(),
+	}),
+);
+
 const NavigationItemBaseSchema = v.object({
-	...v.pick(schema.NavigationItemSelectSchema, [
-		"id",
-		"label",
-		"href",
-		"entityId",
-		"isExternal",
-		"position",
-	]).entries,
+	...v.pick(schema.NavigationItemSelectSchema, ["id", "label", "href", "isExternal", "position"])
+		.entries,
+	entity: EntityRefSchema,
 });
 
 const NavigationItemSchema = v.pipe(
