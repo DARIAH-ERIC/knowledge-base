@@ -452,6 +452,9 @@ patchedDependencies:
   next:
     hash: de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624
     path: patches/next.patch
+  react-aria-components@1.16.0:
+    hash: 2d14419b303d041fac9330e8b0ba5f7ed9bc8a713227f33caacd928110de9068
+    path: patches/react-aria-components@1.16.0.patch
 
 importers:
 
@@ -709,7 +712,7 @@ importers:
         version: 3.47.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react-aria-components:
         specifier: 'catalog:'
-        version: 1.16.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 1.16.0(patch_hash=2d14419b303d041fac9330e8b0ba5f7ed9bc8a713227f33caacd928110de9068)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react-dom:
         specifier: 'catalog:'
         version: 19.2.4(react@19.2.4)
@@ -920,7 +923,7 @@ importers:
         version: 3.47.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react-aria-components:
         specifier: 'catalog:'
-        version: 1.16.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 1.16.0(patch_hash=2d14419b303d041fac9330e8b0ba5f7ed9bc8a713227f33caacd928110de9068)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react-dom:
         specifier: 'catalog:'
         version: 19.2.4(react@19.2.4)
@@ -1669,7 +1672,7 @@ importers:
         version: 3.47.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react-aria-components:
         specifier: 'catalog:'
-        version: 1.16.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 1.16.0(patch_hash=2d14419b303d041fac9330e8b0ba5f7ed9bc8a713227f33caacd928110de9068)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react-dom:
         specifier: 'catalog:'
         version: 19.2.4(react@19.2.4)
@@ -16973,7 +16976,7 @@ snapshots:
       iconv-lite: 0.7.2
       unpipe: 1.0.0
 
-  react-aria-components@1.16.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+  react-aria-components@1.16.0(patch_hash=2d14419b303d041fac9330e8b0ba5f7ed9bc8a713227f33caacd928110de9068)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       '@internationalized/date': 3.12.0
       '@internationalized/string': 3.2.7

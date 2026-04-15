@@ -10,11 +10,13 @@ import { router as documentsPolicies } from "@/routes/documents-policies";
 import { router as events } from "@/routes/events";
 import { router as impactCaseStudies } from "@/routes/impact-case-studies";
 import { router as membersAndPartners } from "@/routes/members-partners";
+import { router as navigation } from "@/routes/navigation";
 import { router as news } from "@/routes/news";
 import { router as newsletters } from "@/routes/newsletters";
 import { router as pages } from "@/routes/pages";
 import { router as persons } from "@/routes/persons";
 import { router as projects } from "@/routes/projects";
+import { router as siteMetadata } from "@/routes/site-metadata";
 import { router as socialMedia } from "@/routes/social-media";
 import { router as spotlightArticles } from "@/routes/spotlight-articles";
 import { router as statistics } from "@/routes/statistics";
@@ -27,6 +29,7 @@ const openapi = createOpenApi(app);
 const api = createRouter()
 	.route("/dariah-projects", dariahProjects)
 	.route("/documents-policies", documentsPolicies)
+	.route("/navigation", navigation)
 	.route("/events", events)
 	.route("/impact-case-studies", impactCaseStudies)
 	.route("/members-partners", membersAndPartners)
@@ -35,6 +38,7 @@ const api = createRouter()
 	.route("/pages", pages)
 	.route("/persons", persons)
 	.route("/projects", projects)
+	.route("/site-metadata", siteMetadata)
 	.route("/social-media", socialMedia)
 	.route("/spotlight-articles", spotlightArticles)
 	.route("/statistics", statistics)
