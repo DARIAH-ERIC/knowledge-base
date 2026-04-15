@@ -167,6 +167,7 @@ onlyBuiltDependencies:
 
 patchedDependencies:
   next: patches/next.patch
+  react-aria-components@1.16.0: patches/react-aria-components@1.16.0.patch
 
 shellEmulator: true
 

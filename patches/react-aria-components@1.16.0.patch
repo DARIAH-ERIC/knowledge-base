@@ -1,0 +1,42 @@
+diff --git a/dist/Dialog.mjs b/dist/Dialog.mjs
+index 52ff01117b1734651b0dfedae9efa0589ed003c5..bfb79ff0ffee1e8939f4fda38ab361e3af0229b7 100644
+--- a/dist/Dialog.mjs
++++ b/dist/Dialog.mjs
+@@ -1,7 +1,7 @@
+ import {ButtonContext as $d2b4bc8c273e7be6$export$24d547caef80ccd1} from "./Button.mjs";
+ import {DEFAULT_SLOT as $64fa3d84918910a7$export$c62b8e45d58ddad9, dom as $64fa3d84918910a7$export$df3a06d6289f983e, Provider as $64fa3d84918910a7$export$2881499e37b75b9a, useContextProps as $64fa3d84918910a7$export$29f1550f4b0d4415, useRenderProps as $64fa3d84918910a7$export$4d86445c2cf5e3} from "./utils.mjs";
+ import {HeadingContext as $4e85f108e88277b8$export$d688439359537581} from "./RSPContexts.mjs";
+-import {PopoverContext as $07b14b47974efb58$export$9b9a0cd73afb7ca4} from "./Popover.mjs";
++import {PopoverContext as $07b14b47974efb58$export$9b9a0cd73afb7ca4, OverlayTriggerStateContext as $de32f1b87079253c$export$d2f961adcb0afbe} from "./Popover.mjs";
+ import {RootMenuTriggerStateContext as $3674c52c6b3c5bce$export$795aec4671cbae19} from "./Menu.mjs";
+ import {useOverlayTrigger as $6IYYA$useOverlayTrigger, useId as $6IYYA$useId, useDialog as $6IYYA$useDialog} from "react-aria";
+ import {useResizeObserver as $6IYYA$useResizeObserver, filterDOMProps as $6IYYA$filterDOMProps, mergeProps as $6IYYA$mergeProps} from "@react-aria/utils";
+@@ -30,7 +30,7 @@ import $6IYYA$react, {createContext as $6IYYA$createContext, useRef as $6IYYA$us
+ 
+ 
+ const $de32f1b87079253c$export$8b93a07348a7730c = /*#__PURE__*/ (0, $6IYYA$createContext)(null);
+-const $de32f1b87079253c$export$d2f961adcb0afbe = /*#__PURE__*/ (0, $6IYYA$createContext)(null);
++// OverlayTriggerStateContext is now imported from Popover.mjs to break circular dependency
+ function $de32f1b87079253c$export$2e1e1122cf0cba88(props) {
+     // Use useMenuTriggerState instead of useOverlayTriggerState in case a menu is embedded in the dialog.
+     // This is needed to handle submenus.
+diff --git a/dist/Popover.mjs b/dist/Popover.mjs
+index 9df29d4b4a5ceb8a68ddd0501b5314454fce1e45..4dc70ab7eace96090053abb23ef0c328e7ea3693 100644
+--- a/dist/Popover.mjs
++++ b/dist/Popover.mjs
+@@ -1,6 +1,7 @@
+ import {dom as $64fa3d84918910a7$export$df3a06d6289f983e, useContextProps as $64fa3d84918910a7$export$29f1550f4b0d4415, useRenderProps as $64fa3d84918910a7$export$4d86445c2cf5e3} from "./utils.mjs";
+ import {OverlayArrowContext as $44f671af83e7d9e0$export$2de4954e8ae13b9f} from "./OverlayArrow.mjs";
+-import {OverlayTriggerStateContext as $de32f1b87079253c$export$d2f961adcb0afbe} from "./Dialog.mjs";
++// OverlayTriggerStateContext moved here from Dialog.mjs to break circular dependency
++const $de32f1b87079253c$export$d2f961adcb0afbe = /*#__PURE__*/ (0, $ehFet$createContext)(null);
+ import {useLocale as $ehFet$useLocale, usePopover as $ehFet$usePopover, DismissButton as $ehFet$DismissButton, Overlay as $ehFet$Overlay} from "react-aria";
+ import {useExitAnimation as $ehFet$useExitAnimation, useEnterAnimation as $ehFet$useEnterAnimation, useLayoutEffect as $ehFet$useLayoutEffect, isFocusWithin as $ehFet$isFocusWithin, mergeProps as $ehFet$mergeProps, filterDOMProps as $ehFet$filterDOMProps} from "@react-aria/utils";
+ import {getInteractionModality as $ehFet$getInteractionModality, focusSafely as $ehFet$focusSafely} from "@react-aria/interactions";
+@@ -182,5 +183,5 @@ function $07b14b47974efb58$var$PopoverInner({ state: state, isExiting: isExiting
+ }
+ 
+ 
+-export {$07b14b47974efb58$export$9b9a0cd73afb7ca4 as PopoverContext, $07b14b47974efb58$export$5b6b19405a83ff9d as Popover};
++export {$07b14b47974efb58$export$9b9a0cd73afb7ca4 as PopoverContext, $07b14b47974efb58$export$5b6b19405a83ff9d as Popover, $de32f1b87079253c$export$d2f961adcb0afbe as OverlayTriggerStateContext};
+ //# sourceMappingURL=Popover.module.js.map
