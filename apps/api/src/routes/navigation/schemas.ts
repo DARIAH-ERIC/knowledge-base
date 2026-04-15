@@ -12,18 +12,10 @@ const NavigationItemBaseSchema = v.object({
 	]).entries,
 });
 
-type NavigationItemWithChildren = v.InferOutput<typeof NavigationItemBaseSchema> & {
-	children: Array<NavigationItemWithChildren>;
-};
-
-const NavigationItemSchema: v.GenericSchema<NavigationItemWithChildren> = v.pipe(
+const NavigationItemSchema = v.pipe(
 	v.object({
 		...NavigationItemBaseSchema.entries,
-		children: v.array(
-			v.lazy(() => {
-				return NavigationItemSchema;
-			}),
-		),
+		children: v.array(NavigationItemBaseSchema),
 	}),
 	v.description("Navigation item"),
 	v.metadata({ ref: "NavigationItem" }),
