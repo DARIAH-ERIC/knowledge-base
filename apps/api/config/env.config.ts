@@ -5,6 +5,7 @@ import * as v from "valibot";
 
 const validate = define({
 	envVars: v.object({
+		API_ACCESS_TOKEN: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		API_ALLOWED_ORIGINS: v.optional(
 			v.pipe(
 				v.string(),
@@ -50,6 +51,7 @@ const validate = define({
 
 export const env = validate({
 	environment: {
+		API_ACCESS_TOKEN: process.env.API_ACCESS_TOKEN,
 		API_ALLOWED_ORIGINS: process.env.API_ALLOWED_ORIGINS,
 		API_BASE_URL: process.env.API_BASE_URL,
 		API_LOG_LEVEL: process.env.API_LOG_LEVEL,
