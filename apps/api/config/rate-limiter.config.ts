@@ -9,7 +9,10 @@ export const config: RateLimiterConfig = {
 		return c.req.header("x-forwarded-for") ?? "";
 	},
 	skip(c) {
-		if (env.API_ACCESS_TOKEN == null) return false;
+		if (env.API_ACCESS_TOKEN == null) {
+			return false;
+		}
+
 		return c.req.header("x-api-access-token") === env.API_ACCESS_TOKEN;
 	},
 };

@@ -142,7 +142,8 @@ ARG NEXT_PUBLIC_TYPESENSE_HOST
 ARG NEXT_PUBLIC_TYPESENSE_PORT
 ARG NEXT_PUBLIC_TYPESENSE_PROTOCOL
 COPY --from=app-prune /app/out/full/ .
-RUN --mount=type=secret,id=AUTH_ENCRYPTION_KEY,env=AUTH_ENCRYPTION_KEY \
+RUN --mount=type=secret,id=API_ACCESS_TOKEN,env=API_ACCESS_TOKEN \
+    --mount=type=secret,id=AUTH_ENCRYPTION_KEY,env=AUTH_ENCRYPTION_KEY \
     --mount=type=secret,id=AUTH_SIGN_UP,env=AUTH_SIGN_UP \
     --mount=type=secret,id=CORDIS_API_KEY,env=CORDIS_API_KEY \
     --mount=type=secret,id=CORDIS_API_BASE_URL,env=CORDIS_API_BASE_URL \

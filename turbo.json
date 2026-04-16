@@ -2,6 +2,7 @@
 	"$schema": "./node_modules/turbo/schema.json",
 	"globalDependencies": [".env.keys"],
 	"globalEnv": [
+		"API_ACCESS_TOKEN",
 		"API_ALLOWED_ORIGINS",
 		"API_BASE_URL",
 		"API_LOG_LEVEL",

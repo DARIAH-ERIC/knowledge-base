@@ -2,6 +2,7 @@
 
 set -eu
 
+API_ACCESS_TOKEN=$(openssl rand --hex 32)
 AUTH_ENCRYPTION_KEY=$(openssl rand --hex 16)
 AUTH_SIGN_UP="enabled"
 DATABASE_PASSWORD=$(openssl rand --hex 32)
@@ -58,6 +59,7 @@ ENV_FILE=./apps/api/.env.local
 if [ ! -f "$ENV_FILE" ]; then
 	cp $ENV_FILE.example $ENV_FILE
 
+	sed -i "s/API_ACCESS_TOKEN=.*/API_ACCESS_TOKEN=\"$API_ACCESS_TOKEN\"/" $ENV_FILE
 	sed -i "s/DATABASE_PASSWORD=.*/DATABASE_PASSWORD=\"$DATABASE_PASSWORD\"/" $ENV_FILE
 	sed -i "s/IMGPROXY_KEY=.*/IMGPROXY_KEY=\"$IMGPROXY_KEY\"/" $ENV_FILE
 	sed -i "s/IMGPROXY_SALT=.*/IMGPROXY_SALT=\"$IMGPROXY_SALT\"/" $ENV_FILE
