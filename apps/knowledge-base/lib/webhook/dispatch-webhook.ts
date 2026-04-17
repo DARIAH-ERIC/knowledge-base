@@ -7,10 +7,10 @@ export type WebhookEntityType =
 	| "documents-policies"
 	| "events"
 	| "impact-case-studies"
-	| "metadata"
 	| "navigation"
 	| "news"
 	| "pages"
+	| "site-metadata"
 	| "spotlight-articles";
 
 export async function dispatchWebhook(payload: { type: WebhookEntityType }): Promise<void> {

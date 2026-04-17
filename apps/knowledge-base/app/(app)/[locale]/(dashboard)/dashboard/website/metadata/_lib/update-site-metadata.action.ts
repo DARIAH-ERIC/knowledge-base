@@ -68,7 +68,7 @@ export const updateSiteMetadataAction = createServerAction(
 		});
 
 		after(async () => {
-			await dispatchWebhook({ type: "metadata" });
+			await dispatchWebhook({ type: "site-metadata" });
 		});
 
 		revalidatePath("/[locale]/dashboard/website/metadata", "layout");
