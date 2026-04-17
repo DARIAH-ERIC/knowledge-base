@@ -171,6 +171,8 @@ jobs:
             "MAILCHIMP_API_KEY=${{ secrets.TEST_MAILCHIMP_API_KEY }}"
             "MAILCHIMP_LIST_ID=${{ secrets.TEST_MAILCHIMP_LIST_ID }}"
             "OPENAIRE_API_BASE_URL=${{ secrets.TEST_OPENAIRE_API_BASE_URL }}"
+            "REVALIDATION_WEBHOOK_SECRET=${{ secrets.K8S_SECRET_REVALIDATION_WEBHOOK_SECRET }}"
+            "REVALIDATION_WEBHOOK_URL=${{ secrets.K8S_SECRET_REVALIDATION_WEBHOOK_URL }}"
             "S3_ACCESS_KEY=${{ secrets.TEST_S3_ACCESS_KEY }}"
             "S3_BUCKET_NAME=${{ vars.K8S_SECRET_S3_BUCKET_NAME }}"
             "S3_HOST=${{ vars.K8S_SECRET_S3_HOST }}"

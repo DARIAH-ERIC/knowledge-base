@@ -7,6 +7,7 @@ import { createActionStateError, type ValidationErrors } from "@dariah-eric/next
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import slugify from "@sindresorhus/slugify";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
@@ -16,6 +17,7 @@ import type { ContentBlockInput } from "@/lib/content-block-input";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const createPageItemAction = createServerAction(
 	async function createPageItemAction(state, formData) {
@@ -218,6 +220,10 @@ export const createPageItemAction = createServerAction(
 					await insertTypeBlock(tx, contentBlock, added.id);
 				}),
 			);
+		});
+
+		after(async () => {
+			await dispatchWebhook({ type: "pages" });
 		});
 
 		revalidatePath("/[locale]/dashboard/website/pages", "layout");
