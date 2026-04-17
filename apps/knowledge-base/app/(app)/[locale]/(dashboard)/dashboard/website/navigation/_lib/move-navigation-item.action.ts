@@ -4,8 +4,10 @@ import { and, eq, isNull } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 
 import { assertAuthenticated } from "@/lib/auth/session";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function moveNavigationItemAction(
 	id: string,
@@ -53,6 +55,10 @@ export async function moveNavigationItemAction(
 			.update(schema.navigationItems)
 			.set({ position: item.position })
 			.where(eq(schema.navigationItems.id, target.id));
+	});
+
+	after(async () => {
+		await dispatchWebhook({ type: "navigation" });
 	});
 
 	revalidatePath("/[locale]/dashboard/website/navigation", "layout");

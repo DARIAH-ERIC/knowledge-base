@@ -10,6 +10,7 @@ import {
 	type ValidationErrors,
 } from "@dariah-eric/next-lib/actions";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
@@ -17,6 +18,7 @@ import { UpdateSiteMetadataActionInputSchema } from "@/app/(app)/[locale]/(dashb
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateSiteMetadataAction = createServerAction(
 	async function updateSiteMetadataAction(state, formData) {
@@ -63,6 +65,10 @@ export const updateSiteMetadataAction = createServerAction(
 					target: schema.siteMetadata.id,
 					set: { title, description, ogTitle, ogDescription, ogImageId, updatedAt: sql`NOW()` },
 				});
+		});
+
+		after(async () => {
+			await dispatchWebhook({ type: "site-metadata" });
 		});
 
 		revalidatePath("/[locale]/dashboard/website/metadata", "layout");

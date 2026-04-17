@@ -7,6 +7,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
@@ -16,6 +17,7 @@ import type { ContentBlockInput } from "@/lib/content-block-input";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateDocumentOrPolicyAction = createServerAction(
 	async function updateDocumentOrPolicyAction(state, formData) {
@@ -261,6 +263,10 @@ export const updateDocumentOrPolicyAction = createServerAction(
 					}),
 				);
 			}
+		});
+
+		after(async () => {
+			await dispatchWebhook({ type: "documents-policies" });
 		});
 
 		revalidatePath("/[locale]/dashboard/website/documents-policies", "layout");

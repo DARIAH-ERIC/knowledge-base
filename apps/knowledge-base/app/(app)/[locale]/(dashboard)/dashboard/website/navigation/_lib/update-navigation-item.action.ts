@@ -10,6 +10,7 @@ import {
 	type ValidationErrors,
 } from "@dariah-eric/next-lib/actions";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
@@ -17,6 +18,7 @@ import { UpdateNavigationItemActionInputSchema } from "@/app/(app)/[locale]/(das
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateNavigationItemAction = createServerAction(
 	async function updateNavigationItemAction(state, formData) {
@@ -51,6 +53,10 @@ export const updateNavigationItemAction = createServerAction(
 				isExternal: isExternal ?? false,
 			})
 			.where(eq(schema.navigationItems.id, id));
+
+		after(async () => {
+			await dispatchWebhook({ type: "navigation" });
+		});
 
 		revalidatePath("/[locale]/dashboard/website/navigation", "layout");
 
