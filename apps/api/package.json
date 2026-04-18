@@ -24,6 +24,7 @@
 		"@acdh-oeaw/lib": "catalog:",
 		"@dariah-eric/database": "workspace:^",
 		"@dariah-eric/env": "workspace:^",
+		"@dariah-eric/search": "workspace:^",
 		"@dariah-eric/images": "workspace:^",
 		"@dariah-eric/mailchimp": "workspace:^",
 		"@dariah-eric/request": "workspace:^",
