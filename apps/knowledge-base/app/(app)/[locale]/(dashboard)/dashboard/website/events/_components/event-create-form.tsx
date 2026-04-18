@@ -9,10 +9,12 @@ import { createEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/we
 
 interface EventCreateFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
+	relatedEntities: Array<{ id: string; name: string }>;
+	relatedResources: Array<{ id: string; label: string }>;
 }
 
 export function EventCreateForm(props: Readonly<EventCreateFormProps>): ReactNode {
-	const { initialAssets } = props;
+	const { initialAssets, relatedEntities, relatedResources } = props;
 
 	const t = useExtracted();
 
@@ -20,7 +22,12 @@ export function EventCreateForm(props: Readonly<EventCreateFormProps>): ReactNod
 		<Fragment>
 			<Heading>{t("New event")}</Heading>
 
-			<EventForm formAction={createEventAction} initialAssets={initialAssets} />
+			<EventForm
+				formAction={createEventAction}
+				initialAssets={initialAssets}
+				relatedEntities={relatedEntities}
+				relatedResources={relatedResources}
+			/>
 		</Fragment>
 	);
 }

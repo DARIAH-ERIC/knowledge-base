@@ -7,6 +7,7 @@ import { env } from "@/config/env.config";
 import { type AccessibilityScanner, createAccessibilityScanner } from "@/e2e/lib/fixtures/a11y";
 import { AdminPersonsPage } from "@/e2e/lib/fixtures/admin-persons-page";
 import { AdminProjectsPage } from "@/e2e/lib/fixtures/admin-projects-page";
+import { AdminWorkingGroupsPage } from "@/e2e/lib/fixtures/admin-working-groups-page";
 import { ContactPage } from "@/e2e/lib/fixtures/contact-page";
 import { DatabaseService } from "@/e2e/lib/fixtures/database-service";
 import { createEmailService, type EmailService } from "@/e2e/lib/fixtures/email-service";
@@ -32,6 +33,7 @@ interface TestFixtures {
 	createIndexPage: (locale: IntlLocale) => Promise<WithI18n<{ indexPage: IndexPage }>>;
 	createAdminPersonsPage: (workerIndex: number) => AdminPersonsPage;
 	createAdminProjectsPage: (workerIndex: number) => AdminProjectsPage;
+	createAdminWorkingGroupsPage: (workerIndex: number) => AdminWorkingGroupsPage;
 	createWebsiteEventsPage: (workerIndex: number) => WebsiteEventsPage;
 	createWebsiteImpactCaseStudiesPage: (workerIndex: number) => WebsiteImpactCaseStudiesPage;
 	createWebsiteNewsPage: (workerIndex: number) => WebsiteNewsPage;
@@ -135,6 +137,12 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 	async createAdminPersonsPage({ page }, use) {
 		await use((workerIndex: number) => {
 			return new AdminPersonsPage(page, workerIndex);
+		});
+	},
+
+	async createAdminWorkingGroupsPage({ page }, use) {
+		await use((workerIndex: number) => {
+			return new AdminWorkingGroupsPage(page, workerIndex);
 		});
 	},
 

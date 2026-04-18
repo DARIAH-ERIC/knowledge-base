@@ -4,6 +4,7 @@ import { count, eq } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
@@ -118,12 +119,24 @@ export async function getNewsItemById(db: Database | Transaction, params: GetNew
 		return null;
 	}
 
+	const [relatedEntities, relatedResources] = await Promise.all([
+		getRelatedEntities(db, id),
+		getRelatedResources(db, id),
+	]);
+
 	const image = images.generateSignedImageUrl({
 		key: item.image.key,
 		options: { width: imageWidth.featured },
 	});
 
-	return { ...item, image, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
+	return {
+		...item,
+		image,
+		publishedAt: item.entity.updatedAt.toISOString(),
+		...fields,
+		relatedEntities,
+		relatedResources,
+	};
 }
 
 //
@@ -234,7 +247,18 @@ export async function getNewsItemBySlug(
 		options: { width: imageWidth.featured },
 	});
 
-	const fields = await getContentBlocks(db, item.id);
+	const [fields, relatedEntities, relatedResources] = await Promise.all([
+		getContentBlocks(db, item.id),
+		getRelatedEntities(db, item.id),
+		getRelatedResources(db, item.id),
+	]);
 
-	return { ...item, image, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
+	return {
+		...item,
+		image,
+		publishedAt: item.entity.updatedAt.toISOString(),
+		...fields,
+		relatedEntities,
+		relatedResources,
+	};
 }

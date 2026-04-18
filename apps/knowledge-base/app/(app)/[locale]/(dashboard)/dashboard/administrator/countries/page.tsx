@@ -11,32 +11,32 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorSoftwarePageProps extends PageProps<"/[locale]/dashboard/administrator/software"> {}
+interface DashboardAdministratorCountriesPageProps extends PageProps<"/[locale]/dashboard/administrator/countries"> {}
 
 export async function generateMetadata(
-	_props: Readonly<DashboardAdministratorSoftwarePageProps>,
+	_props: Readonly<DashboardAdministratorCountriesPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Administrator dashboard - Software"),
+		title: t("Administrator dashboard - Countries"),
 	});
 
 	return metadata;
 }
 
-export default function DashboardAdministratorSoftwarePage(
-	_props: Readonly<DashboardAdministratorSoftwarePageProps>,
+export default function DashboardAdministratorCountriesPage(
+	_props: Readonly<DashboardAdministratorCountriesPageProps>,
 ): ReactNode {
 	const t = useExtracted();
 
 	return (
 		<Header>
 			<HeaderContent>
-				<HeaderTitle>{t("Software")}</HeaderTitle>
+				<HeaderTitle>{t("Countries")}</HeaderTitle>
 				<HeaderDescription>
-					{t("Manage all software in the DARIAH knowledge base.")}
+					{t("Manage all countries in the DARIAH knowledge base.")}
 				</HeaderDescription>
 			</HeaderContent>
 		</Header>

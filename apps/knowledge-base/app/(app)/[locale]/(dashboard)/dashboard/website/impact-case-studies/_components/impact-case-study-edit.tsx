@@ -15,10 +15,22 @@ interface ImpactCaseStudyEditFormProps {
 	impactCaseStudy: Pick<schema.ImpactCaseStudy, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; label: string; url: string } };
+	relatedEntities: Array<{ id: string; name: string }>;
+	relatedResources: Array<{ id: string; label: string }>;
+	initialRelatedEntityIds: Array<string>;
+	initialRelatedResourceIds: Array<string>;
 }
 
 export function ImpactCaseStudyEditForm(props: Readonly<ImpactCaseStudyEditFormProps>): ReactNode {
-	const { initialAssets, contentBlocks, impactCaseStudy } = props;
+	const {
+		initialAssets,
+		contentBlocks,
+		impactCaseStudy,
+		relatedEntities,
+		relatedResources,
+		initialRelatedEntityIds,
+		initialRelatedResourceIds,
+	} = props;
 
 	const t = useExtracted();
 
@@ -31,6 +43,10 @@ export function ImpactCaseStudyEditForm(props: Readonly<ImpactCaseStudyEditFormP
 				formAction={updateImpactCaseStudyAction}
 				impactCaseStudy={impactCaseStudy}
 				initialAssets={initialAssets}
+				initialRelatedEntityIds={initialRelatedEntityIds}
+				initialRelatedResourceIds={initialRelatedResourceIds}
+				relatedEntities={relatedEntities}
+				relatedResources={relatedResources}
 			/>
 		</Fragment>
 	);

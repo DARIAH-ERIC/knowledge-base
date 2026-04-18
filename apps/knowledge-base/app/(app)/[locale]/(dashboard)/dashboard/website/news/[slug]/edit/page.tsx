@@ -10,6 +10,11 @@ import type { ReactNode } from "react";
 import { NewsItemEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-edit";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import {
+	getAvailableEntities,
+	getAvailableResources,
+	getEntityRelations,
+} from "@/lib/data/relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -35,43 +40,47 @@ export default async function DashboardWebsiteEditNewsItemPage(
 
 	const { slug } = await params;
 
-	const [{ items: initialAssets }, newsItem] = await Promise.all([
-		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
-		db.query.news.findFirst({
-			where: {
-				entity: {
-					slug,
-				},
-			},
-			columns: {
-				id: true,
-				title: true,
-				summary: true,
-			},
-			with: {
-				entity: {
-					columns: {
-						documentId: true,
-						slug: true,
+	const [{ items: initialAssets }, newsItem, relatedEntities, relatedResources] = await Promise.all(
+		[
+			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
+			db.query.news.findFirst({
+				where: {
+					entity: {
+						slug,
 					},
-					with: {
-						status: {
-							columns: {
-								id: true,
-								type: true,
+				},
+				columns: {
+					id: true,
+					title: true,
+					summary: true,
+				},
+				with: {
+					entity: {
+						columns: {
+							documentId: true,
+							slug: true,
+						},
+						with: {
+							status: {
+								columns: {
+									id: true,
+									type: true,
+								},
 							},
 						},
 					},
-				},
-				image: {
-					columns: {
-						key: true,
-						label: true,
+					image: {
+						columns: {
+							key: true,
+							label: true,
+						},
 					},
 				},
-			},
-		}),
-	]);
+			}),
+			getAvailableEntities(),
+			getAvailableResources(),
+		],
+	);
 
 	if (newsItem == null) {
 		notFound();
@@ -311,11 +320,17 @@ export default async function DashboardWebsiteEditNewsItemPage(
 		return a.position - b.position;
 	});
 
+	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(newsItem.id);
+
 	return (
 		<NewsItemEditForm
 			contentBlocks={contentBlocks}
 			initialAssets={initialAssets}
+			initialRelatedEntityIds={relatedEntityIds}
+			initialRelatedResourceIds={relatedResourceIds}
 			newsItem={{ ...newsItem, image: { ...newsItem.image, url: image.url } }}
+			relatedEntities={relatedEntities}
+			relatedResources={relatedResources}
 		/>
 	);
 }

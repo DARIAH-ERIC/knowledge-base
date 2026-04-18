@@ -15,12 +15,24 @@ interface SpotlightArticleEditFormProps {
 	spotlightArticle: Pick<schema.SpotlightArticle, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; label: string; url: string } };
+	relatedEntities: Array<{ id: string; name: string }>;
+	relatedResources: Array<{ id: string; label: string }>;
+	initialRelatedEntityIds: Array<string>;
+	initialRelatedResourceIds: Array<string>;
 }
 
 export function SpotlightArticleEditForm(
 	props: Readonly<SpotlightArticleEditFormProps>,
 ): ReactNode {
-	const { initialAssets, contentBlocks, spotlightArticle } = props;
+	const {
+		initialAssets,
+		contentBlocks,
+		spotlightArticle,
+		relatedEntities,
+		relatedResources,
+		initialRelatedEntityIds,
+		initialRelatedResourceIds,
+	} = props;
 
 	const t = useExtracted();
 
@@ -32,6 +44,10 @@ export function SpotlightArticleEditForm(
 				contentBlocks={contentBlocks}
 				formAction={updateSpotlightArticleAction}
 				initialAssets={initialAssets}
+				initialRelatedEntityIds={initialRelatedEntityIds}
+				initialRelatedResourceIds={initialRelatedResourceIds}
+				relatedEntities={relatedEntities}
+				relatedResources={relatedResources}
 				spotlightArticle={spotlightArticle}
 			/>
 		</Fragment>

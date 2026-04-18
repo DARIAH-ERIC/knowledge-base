@@ -9,10 +9,12 @@ import { createPageItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard
 
 interface PageItemCreateFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
+	relatedEntities: Array<{ id: string; name: string }>;
+	relatedResources: Array<{ id: string; label: string }>;
 }
 
 export function PageItemCreateForm(props: Readonly<PageItemCreateFormProps>): ReactNode {
-	const { initialAssets } = props;
+	const { initialAssets, relatedEntities, relatedResources } = props;
 
 	const t = useExtracted();
 
@@ -20,7 +22,12 @@ export function PageItemCreateForm(props: Readonly<PageItemCreateFormProps>): Re
 		<Fragment>
 			<Heading>{t("New page")}</Heading>
 
-			<PageItemForm formAction={createPageItemAction} initialAssets={initialAssets} />
+			<PageItemForm
+				formAction={createPageItemAction}
+				initialAssets={initialAssets}
+				relatedEntities={relatedEntities}
+				relatedResources={relatedResources}
+			/>
 		</Fragment>
 	);
 }

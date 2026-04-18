@@ -45,7 +45,8 @@ export const createPageItemAction = createServerAction(
 			});
 		}
 
-		const { contentBlocks, title, imageKey, summary } = result.output;
+		const { contentBlocks, title, imageKey, summary, relatedEntityIds, relatedResourceIds } =
+			result.output;
 
 		const slug = slugify(title);
 
@@ -102,6 +103,22 @@ export const createPageItemAction = createServerAction(
 				title,
 				summary,
 			});
+
+			if (relatedEntityIds.length > 0) {
+				await tx.insert(schema.entitiesToEntities).values(
+					relatedEntityIds.map((relatedEntityId) => {
+						return { entityId: entity.id, relatedEntityId };
+					}),
+				);
+			}
+
+			if (relatedResourceIds.length > 0) {
+				await tx.insert(schema.entitiesToResources).values(
+					relatedResourceIds.map((resourceId) => {
+						return { entityId: entity.id, resourceId };
+					}),
+				);
+			}
 
 			const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
