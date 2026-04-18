@@ -553,6 +553,84 @@ export class DatabaseService {
 		}
 	}
 
+	/**
+	 * Cascade-deletes a working group and all its related records.
+	 * Replicates the logic in `delete-working-group.action.ts`.
+	 */
+	async deleteWorkingGroup(entityId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			await tx
+				.delete(schema.organisationalUnitsRelations)
+				.where(
+					or(
+						eq(schema.organisationalUnitsRelations.unitId, entityId),
+						eq(schema.organisationalUnitsRelations.relatedUnitId, entityId),
+					),
+				);
+
+			const entityFields = await tx
+				.select({ id: schema.fields.id })
+				.from(schema.fields)
+				.where(eq(schema.fields.entityId, entityId));
+
+			if (entityFields.length > 0) {
+				const fieldIds = entityFields.map((f) => {
+					return f.id;
+				});
+
+				await tx
+					.delete(schema.contentBlocks)
+					.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+				await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+			}
+
+			await tx
+				.delete(schema.entitiesToResources)
+				.where(eq(schema.entitiesToResources.entityId, entityId));
+
+			await tx
+				.delete(schema.entitiesToEntities)
+				.where(
+					or(
+						eq(schema.entitiesToEntities.entityId, entityId),
+						eq(schema.entitiesToEntities.relatedEntityId, entityId),
+					),
+				);
+
+			await tx
+				.delete(schema.organisationalUnits)
+				.where(eq(schema.organisationalUnits.id, entityId));
+
+			await tx.delete(schema.entities).where(eq(schema.entities.id, entityId));
+		});
+	}
+
+	/**
+	 * Finds all working groups whose name starts with `[e2e-worker-{workerIndex}]`
+	 * and deletes them. Called in afterAll to ensure a clean state.
+	 */
+	async cleanupWorkerWorkingGroups(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const items = await this.db
+			.select({ id: schema.organisationalUnits.id })
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					sql`${schema.organisationalUnits.name} LIKE ${`${prefix}%`}`,
+					eq(schema.organisationalUnitTypes.type, "working_group"),
+				),
+			);
+
+		for (const item of items) {
+			await this.deleteWorkingGroup(item.id);
+		}
+	}
+
 	/** Closes the underlying pg pool. Called in worker teardown. */
 	async close(): Promise<void> {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
