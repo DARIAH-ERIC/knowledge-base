@@ -61,10 +61,10 @@ jobs:
       NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL: "${{ vars.NEXT_PUBLIC_MATOMO_BASE_URL }}"
       NEXT_PUBLIC_WEBSITE_MATOMO_ID: "${{ vars.NEXT_PUBLIC_WEBSITE_MATOMO_ID }}"
       NEXT_PUBLIC_WEBSITE_SERVICE_ID: "${{ vars.WEBSITE_SERVICE_ID }}"
-      NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME: "dariah-resources"
       NEXT_PUBLIC_TYPESENSE_HOST: "localhost"
       NEXT_PUBLIC_TYPESENSE_PORT: "8108"
       NEXT_PUBLIC_TYPESENSE_PROTOCOL: "http"
+      NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME: "dariah-resources"
       S3_ACCESS_KEY: "${{ secrets.TEST_S3_ACCESS_KEY }}"
       S3_BUCKET_NAME: "dariah-knowledge-base"
       S3_HOST: "localhost"
@@ -72,6 +72,10 @@ jobs:
       S3_PROTOCOL: "http"
       S3_SECRET_KEY: "${{ secrets.TEST_S3_SECRET_KEY }}"
       TYPESENSE_ADMIN_API_KEY: "${{ secrets.TEST_TYPESENSE_ADMIN_API_KEY }}"
+      TYPESENSE_HOST: "localhost"
+      TYPESENSE_PORT: "8108"
+      TYPESENSE_PROTOCOL: "http"
+      TYPESENSE_RESOURCE_COLLECTION_NAME: "dariah-resources"
 
     steps:
       - name: Checkout repository
@@ -118,6 +122,23 @@ jobs:
 
       - name: Seed storage
         run: pnpm run storage:buckets:seed
+
+      - name: Generate search api key
+        run: |
+          set -euo pipefail
+          SEARCH_API_KEY="$(
+            pnpm run search:api-keys:generate \
+              | tee /dev/stderr \
+              | sed -n 's/.*Successfully generated api key "\([^"]*\)" for collection.*/\1/p'
+          )"
+          if [ -z "$SEARCH_API_KEY" ]; then
+            echo "Failed to extract search api key from generator output." >&2
+            exit 1
+          fi
+          {
+            echo "NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY=$SEARCH_API_KEY"
+            echo "TYPESENSE_SEARCH_API_KEY=$SEARCH_API_KEY"
+          } >> "$GITHUB_ENV"
 
       - name: Test
         run: turbo run test
