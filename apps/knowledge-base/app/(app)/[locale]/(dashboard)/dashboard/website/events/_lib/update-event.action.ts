@@ -14,6 +14,7 @@ import * as v from "valibot";
 import { UpdateEventActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/update-event.schema";
 import { assertAuthenticated } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
+import { syncEntityRelations } from "@/lib/data/relations";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -45,8 +46,18 @@ export const updateEventAction = createServerAction(
 			});
 		}
 
-		const { contentBlocks, title, id, imageKey, summary, duration, location, website } =
-			result.output;
+		const {
+			contentBlocks,
+			title,
+			id,
+			imageKey,
+			summary,
+			duration,
+			location,
+			website,
+			relatedEntityIds,
+			relatedResourceIds,
+		} = result.output;
 
 		await db.transaction(async (tx) => {
 			const asset = await tx.query.assets.findFirst({
@@ -264,6 +275,8 @@ export const updateEventAction = createServerAction(
 					}),
 				);
 			}
+
+			await syncEntityRelations(tx, id, relatedEntityIds, relatedResourceIds);
 		});
 
 		after(async () => {

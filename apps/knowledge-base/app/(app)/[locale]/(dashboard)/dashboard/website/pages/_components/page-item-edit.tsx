@@ -15,10 +15,22 @@ interface PageItemEditFormProps {
 	pageItem: Pick<schema.Page, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; label: string; url: string } | null };
+	relatedEntities: Array<{ id: string; name: string }>;
+	relatedResources: Array<{ id: string; label: string }>;
+	initialRelatedEntityIds: Array<string>;
+	initialRelatedResourceIds: Array<string>;
 }
 
 export function PageItemEditForm(props: Readonly<PageItemEditFormProps>): ReactNode {
-	const { initialAssets, contentBlocks, pageItem } = props;
+	const {
+		initialAssets,
+		contentBlocks,
+		pageItem,
+		relatedEntities,
+		relatedResources,
+		initialRelatedEntityIds,
+		initialRelatedResourceIds,
+	} = props;
 
 	const t = useExtracted();
 
@@ -30,7 +42,11 @@ export function PageItemEditForm(props: Readonly<PageItemEditFormProps>): ReactN
 				contentBlocks={contentBlocks}
 				formAction={updatePageItemAction}
 				initialAssets={initialAssets}
+				initialRelatedEntityIds={initialRelatedEntityIds}
+				initialRelatedResourceIds={initialRelatedResourceIds}
 				pageItem={pageItem}
+				relatedEntities={relatedEntities}
+				relatedResources={relatedResources}
 			/>
 		</Fragment>
 	);

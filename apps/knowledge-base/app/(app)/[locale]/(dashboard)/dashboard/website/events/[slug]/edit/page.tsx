@@ -10,6 +10,11 @@ import type { ReactNode } from "react";
 import { EventEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-edit";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import {
+	getAvailableEntities,
+	getAvailableResources,
+	getEntityRelations,
+} from "@/lib/data/relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -35,7 +40,7 @@ export default async function DashboardWebsiteEditEventPage(
 
 	const { slug } = await params;
 
-	const [{ items: initialAssets }, event] = await Promise.all([
+	const [{ items: initialAssets }, event, relatedEntities, relatedResources] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 		db.query.events.findFirst({
 			where: {
@@ -74,6 +79,8 @@ export default async function DashboardWebsiteEditEventPage(
 				},
 			},
 		}),
+		getAvailableEntities(),
+		getAvailableResources(),
 	]);
 
 	if (event == null) {
@@ -315,11 +322,17 @@ export default async function DashboardWebsiteEditEventPage(
 		return a.position - b.position;
 	});
 
+	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(event.id);
+
 	return (
 		<EventEditForm
 			contentBlocks={contentBlocks}
 			event={{ ...event, image: { ...event.image, url: image.url } }}
 			initialAssets={initialAssets}
+			initialRelatedEntityIds={relatedEntityIds}
+			initialRelatedResourceIds={relatedResourceIds}
+			relatedEntities={relatedEntities}
+			relatedResources={relatedResources}
 		/>
 	);
 }

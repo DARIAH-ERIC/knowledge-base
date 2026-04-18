@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { ImpactCaseStudyCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-create-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { getAvailableEntities, getAvailableResources } from "@/lib/data/relations";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteCreateImpactCaseStudyPageProps extends PageProps<"/[locale]/dashboard/website/impact-case-studies/create"> {}
@@ -25,10 +26,17 @@ export async function generateMetadata(
 export default async function DashboardWebsiteCreateImpactCaseStudyPage(
 	_props: Readonly<DashboardWebsiteCreateImpactCaseStudyPageProps>,
 ): Promise<ReactNode> {
-	const { items: initialAssets } = await getMediaLibraryAssets({
-		imageUrlOptions: imageGridOptions,
-		prefix: "images",
-	});
+	const [{ items: initialAssets }, relatedEntities, relatedResources] = await Promise.all([
+		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
+		getAvailableEntities(),
+		getAvailableResources(),
+	]);
 
-	return <ImpactCaseStudyCreateForm initialAssets={initialAssets} />;
+	return (
+		<ImpactCaseStudyCreateForm
+			initialAssets={initialAssets}
+			relatedEntities={relatedEntities}
+			relatedResources={relatedResources}
+		/>
+	);
 }

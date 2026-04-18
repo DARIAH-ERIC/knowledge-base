@@ -15,10 +15,22 @@ interface NewsItemEditFormProps {
 	newsItem: Pick<schema.NewsItem, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; label: string; url: string } };
+	relatedEntities: Array<{ id: string; name: string }>;
+	relatedResources: Array<{ id: string; label: string }>;
+	initialRelatedEntityIds: Array<string>;
+	initialRelatedResourceIds: Array<string>;
 }
 
 export function NewsItemEditForm(props: Readonly<NewsItemEditFormProps>): ReactNode {
-	const { initialAssets, contentBlocks, newsItem } = props;
+	const {
+		initialAssets,
+		contentBlocks,
+		newsItem,
+		relatedEntities,
+		relatedResources,
+		initialRelatedEntityIds,
+		initialRelatedResourceIds,
+	} = props;
 
 	const t = useExtracted();
 
@@ -30,7 +42,11 @@ export function NewsItemEditForm(props: Readonly<NewsItemEditFormProps>): ReactN
 				contentBlocks={contentBlocks}
 				formAction={updateNewsItemAction}
 				initialAssets={initialAssets}
+				initialRelatedEntityIds={initialRelatedEntityIds}
+				initialRelatedResourceIds={initialRelatedResourceIds}
 				newsItem={newsItem}
+				relatedEntities={relatedEntities}
+				relatedResources={relatedResources}
 			/>
 		</Fragment>
 	);

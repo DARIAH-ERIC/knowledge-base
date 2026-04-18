@@ -9,12 +9,14 @@ import { createImpactCaseStudyAction } from "@/app/(app)/[locale]/(dashboard)/da
 
 interface ImpactCaseStudyCreateFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
+	relatedEntities: Array<{ id: string; name: string }>;
+	relatedResources: Array<{ id: string; label: string }>;
 }
 
 export function ImpactCaseStudyCreateForm(
 	props: Readonly<ImpactCaseStudyCreateFormProps>,
 ): ReactNode {
-	const { initialAssets } = props;
+	const { initialAssets, relatedEntities, relatedResources } = props;
 
 	const t = useExtracted();
 
@@ -22,7 +24,12 @@ export function ImpactCaseStudyCreateForm(
 		<Fragment>
 			<Heading>{t("New impact case study")}</Heading>
 
-			<ImpactCaseStudyForm formAction={createImpactCaseStudyAction} initialAssets={initialAssets} />
+			<ImpactCaseStudyForm
+				formAction={createImpactCaseStudyAction}
+				initialAssets={initialAssets}
+				relatedEntities={relatedEntities}
+				relatedResources={relatedResources}
+			/>
 		</Fragment>
 	);
 }

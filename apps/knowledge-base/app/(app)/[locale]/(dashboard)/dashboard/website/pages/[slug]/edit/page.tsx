@@ -10,6 +10,11 @@ import type { ReactNode } from "react";
 import { PageItemEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-edit";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import {
+	getAvailableEntities,
+	getAvailableResources,
+	getEntityRelations,
+} from "@/lib/data/relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -35,39 +40,45 @@ export default async function DashboardWebsiteEditPageItemPage(
 
 	const { slug } = await params;
 
-	const [{ items: initialAssets }, pageItem] = await Promise.all([
-		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
-		db.query.pages.findFirst({
-			where: {
-				entity: {
-					slug,
-				},
-			},
-			columns: {
-				id: true,
-				title: true,
-				summary: true,
-			},
-			with: {
-				entity: {
-					columns: {
-						documentId: true,
-						slug: true,
+	const [{ items: initialAssets }, pageItem, relatedEntities, relatedResources] = await Promise.all(
+		[
+			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
+			db.query.pages.findFirst({
+				where: {
+					entity: {
+						slug,
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						label: true,
+				columns: {
+					id: true,
+					title: true,
+					summary: true,
+				},
+				with: {
+					entity: {
+						columns: {
+							documentId: true,
+							slug: true,
+						},
+					},
+					image: {
+						columns: {
+							key: true,
+							label: true,
+						},
 					},
 				},
-			},
-		}),
-	]);
+			}),
+			getAvailableEntities(),
+			getAvailableResources(),
+		],
+	);
 
 	if (pageItem == null) {
 		notFound();
 	}
+
+	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(pageItem.id);
 
 	const image = pageItem.image
 		? images.generateSignedImageUrl({
@@ -310,10 +321,14 @@ export default async function DashboardWebsiteEditPageItemPage(
 		<PageItemEditForm
 			contentBlocks={contentBlocks}
 			initialAssets={initialAssets}
+			initialRelatedEntityIds={relatedEntityIds}
+			initialRelatedResourceIds={relatedResourceIds}
 			pageItem={{
 				...pageItem,
 				image: pageItem.image ? { ...pageItem.image, url: image!.url } : null,
 			}}
+			relatedEntities={relatedEntities}
+			relatedResources={relatedResources}
 		/>
 	);
 }

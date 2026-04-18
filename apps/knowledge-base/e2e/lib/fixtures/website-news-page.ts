@@ -44,6 +44,23 @@ export class WebsiteNewsPage {
 		await this.page.getByRole("dialog").getByRole("button", { name: "Select" }).click();
 	}
 
+	async selectRelatedEntity(entityName: string): Promise<void> {
+		const section = this.page
+			.locator("section")
+			.filter({ has: this.page.getByRole("heading", { name: "Related entities", level: 2 }) });
+		await section.getByRole("button", { name: "Open options" }).click();
+		await this.page.getByRole("searchbox").fill(entityName);
+		await this.page.getByRole("option", { name: entityName }).click();
+		await this.page.keyboard.press("Escape");
+	}
+
+	async removeRelatedEntity(entityName: string): Promise<void> {
+		await this.page
+			.getByRole("row", { name: entityName })
+			.getByRole("button", { name: "Remove tag" })
+			.click();
+	}
+
 	async submitForm(): Promise<void> {
 		await this.page.getByRole("button", { name: "Save" }).click();
 		/** After a successful create/edit, the server action redirects back to the list. */

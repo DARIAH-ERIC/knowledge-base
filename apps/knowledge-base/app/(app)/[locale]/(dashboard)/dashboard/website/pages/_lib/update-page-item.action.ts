@@ -14,6 +14,7 @@ import * as v from "valibot";
 import { UpdatePageItemActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/update-page-item.schema";
 import { assertAuthenticated } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
+import { syncEntityRelations } from "@/lib/data/relations";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -45,7 +46,8 @@ export const updatePageItemAction = createServerAction(
 			});
 		}
 
-		const { contentBlocks, title, id, imageKey, summary } = result.output;
+		const { contentBlocks, title, id, imageKey, summary, relatedEntityIds, relatedResourceIds } =
+			result.output;
 
 		await db.transaction(async (tx) => {
 			let imageId: string | null = null;
@@ -272,6 +274,8 @@ export const updatePageItemAction = createServerAction(
 					}),
 				);
 			}
+
+			await syncEntityRelations(tx, id, relatedEntityIds, relatedResourceIds);
 		});
 
 		after(async () => {

@@ -10,6 +10,11 @@ import type { ReactNode } from "react";
 import { SpotlightArticleEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-edit";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import {
+	getAvailableEntities,
+	getAvailableResources,
+	getEntityRelations,
+} from "@/lib/data/relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -35,39 +40,44 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 
 	const { slug } = await params;
 
-	const [{ items: initialAssets }, spotlightArticle] = await Promise.all([
-		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
-		db.query.spotlightArticles.findFirst({
-			where: {
-				entity: {
-					slug,
-				},
-			},
-			columns: {
-				id: true,
-				title: true,
-				summary: true,
-			},
-			with: {
-				entity: {
-					columns: {
-						documentId: true,
-						slug: true,
+	const [{ items: initialAssets }, spotlightArticle, relatedEntities, relatedResources] =
+		await Promise.all([
+			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
+			db.query.spotlightArticles.findFirst({
+				where: {
+					entity: {
+						slug,
 					},
 				},
-				image: {
-					columns: {
-						key: true,
-						label: true,
+				columns: {
+					id: true,
+					title: true,
+					summary: true,
+				},
+				with: {
+					entity: {
+						columns: {
+							documentId: true,
+							slug: true,
+						},
+					},
+					image: {
+						columns: {
+							key: true,
+							label: true,
+						},
 					},
 				},
-			},
-		}),
-	]);
+			}),
+			getAvailableEntities(),
+			getAvailableResources(),
+		]);
 
 	if (spotlightArticle == null) {
 		notFound();
 	}
+
+	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(spotlightArticle.id);
 
 	const image = images.generateSignedImageUrl({
 		key: spotlightArticle.image.key,
@@ -308,6 +318,10 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 		<SpotlightArticleEditForm
 			contentBlocks={contentBlocks}
 			initialAssets={initialAssets}
+			initialRelatedEntityIds={relatedEntityIds}
+			initialRelatedResourceIds={relatedResourceIds}
+			relatedEntities={relatedEntities}
+			relatedResources={relatedResources}
 			spotlightArticle={{
 				...spotlightArticle,
 				image: { ...spotlightArticle.image, url: image.url },
