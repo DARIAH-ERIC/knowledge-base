@@ -62,6 +62,24 @@ export const createWorkingGroupAction = createServerAction(
 
 			assert(orgUnitType);
 
+			const umbrellaUnit = await tx.query.organisationalUnits.findFirst({
+				where: {
+					type: {
+						type: "eric",
+					},
+				},
+				columns: { id: true },
+			});
+
+			assert(umbrellaUnit);
+
+			const unitStatus = await tx.query.organisationalUnitStatus.findFirst({
+				where: { status: "is_part_of" },
+				columns: { id: true },
+			});
+
+			assert(unitStatus);
+
 			const entityStatus = await tx.query.entityStatus.findFirst({
 				where: { type: "draft" },
 				columns: { id: true },
@@ -96,6 +114,13 @@ export const createWorkingGroupAction = createServerAction(
 				name,
 				summary,
 				typeId: orgUnitType.id,
+			});
+
+			await tx.insert(schema.organisationalUnitsRelations).values({
+				unitId: entity.id,
+				relatedUnitId: umbrellaUnit.id,
+				duration: { start: new Date() },
+				status: unitStatus.id,
 			});
 
 			if (relatedEntityIds.length > 0) {
