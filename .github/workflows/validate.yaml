@@ -109,7 +109,7 @@ jobs:
         run: turbo run types:check
 
       - name: Start services
-        run: pnpm run dev:services:up postgres minio imgproxy mailpit
+        run: pnpm run dev:services:up
 
       - name: Apply database migrations
         run: pnpm run db:push && pnpm run db:migrations:apply
