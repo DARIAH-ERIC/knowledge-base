@@ -15,6 +15,7 @@ import {
 	getAvailableResources,
 	getEntityRelations,
 } from "@/lib/data/relations";
+import { getUnitRelationOptions, getUnitRelations } from "@/lib/data/unit-relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -40,36 +41,43 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 
 	const { slug } = await params;
 
-	const [{ items: initialAssets }, relatedEntities, relatedResources, workingGroup] =
-		await Promise.all([
-			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
-			getAvailableEntities(),
-			getAvailableResources(),
-			db.query.workingGroups.findFirst({
-				where: {
-					entity: { slug },
-				},
-				columns: {
-					id: true,
-					name: true,
-					summary: true,
-				},
-				with: {
-					entity: {
-						columns: {
-							documentId: true,
-							slug: true,
-						},
+	const [
+		{ items: initialAssets },
+		relatedEntities,
+		relatedResources,
+		allowedRelationOptions,
+		workingGroup,
+	] = await Promise.all([
+		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
+		getAvailableEntities(),
+		getAvailableResources(),
+		getUnitRelationOptions("working_group"),
+		db.query.organisationalUnits.findFirst({
+			where: {
+				type: { type: "working_group" },
+				entity: { slug },
+			},
+			columns: {
+				id: true,
+				name: true,
+				summary: true,
+			},
+			with: {
+				entity: {
+					columns: {
+						documentId: true,
+						slug: true,
 					},
-					image: {
-						columns: {
-							key: true,
-							label: true,
-						},
+				},
+				image: {
+					columns: {
+						key: true,
+						label: true,
 					},
 				},
-			}),
-		]);
+			},
+		}),
+	]);
 
 	if (workingGroup == null) {
 		notFound();
@@ -113,15 +121,20 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 
 	const description = descriptionRows.at(0)?.content as JSONContent | undefined;
 
-	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(workingGroup.id);
+	const [{ relatedEntityIds, relatedResourceIds }, relations] = await Promise.all([
+		getEntityRelations(workingGroup.id),
+		getUnitRelations(workingGroup.id),
+	]);
 
 	return (
 		<WorkingGroupEditForm
+			allowedRelationOptions={allowedRelationOptions}
 			initialAssets={initialAssets}
 			initialRelatedEntityIds={relatedEntityIds}
 			initialRelatedResourceIds={relatedResourceIds}
 			relatedEntities={relatedEntities}
 			relatedResources={relatedResources}
+			relations={relations}
 			workingGroup={{ ...workingGroup, acronym, description, image }}
 		/>
 	);

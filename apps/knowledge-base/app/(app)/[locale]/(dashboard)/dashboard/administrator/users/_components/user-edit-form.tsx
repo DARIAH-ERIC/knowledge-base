@@ -1,0 +1,27 @@
+"use client";
+
+import type * as schema from "@dariah-eric/database/schema";
+import { Heading } from "@dariah-eric/ui/heading";
+import { useExtracted } from "next-intl";
+import { Fragment, type ReactNode } from "react";
+
+import { UserForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form";
+import { updateUserAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/update-user.action";
+
+interface UserEditFormProps {
+	user: Pick<schema.User, "id" | "name" | "email" | "role">;
+}
+
+export function UserEditForm(props: Readonly<UserEditFormProps>): ReactNode {
+	const { user } = props;
+
+	const t = useExtracted();
+
+	return (
+		<Fragment>
+			<Heading>{t("Edit user")}</Heading>
+
+			<UserForm formAction={updateUserAction} user={user} />
+		</Fragment>
+	);
+}

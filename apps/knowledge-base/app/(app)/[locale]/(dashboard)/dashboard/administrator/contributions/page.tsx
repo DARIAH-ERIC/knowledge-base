@@ -1,14 +1,12 @@
+import { eq } from "@dariah-eric/database";
+import { db } from "@dariah-eric/database/client";
+import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
-import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 
-import {
-	Header,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
+import { ContributionsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorContributionsPageProps extends PageProps<"/[locale]/dashboard/administrator/contributions"> {}
@@ -29,16 +27,41 @@ export async function generateMetadata(
 export default function DashboardAdministratorContributionsPage(
 	_props: Readonly<DashboardAdministratorContributionsPageProps>,
 ): ReactNode {
-	const t = useExtracted();
+	const contributions = db
+		.select({
+			id: schema.personsToOrganisationalUnits.id,
+			personName: schema.persons.name,
+			roleType: schema.personRoleTypes.type,
+			organisationalUnitName: schema.organisationalUnits.name,
+			durationStart: schema.personsToOrganisationalUnits.duration,
+		})
+		.from(schema.personsToOrganisationalUnits)
+		.innerJoin(schema.persons, eq(schema.persons.id, schema.personsToOrganisationalUnits.personId))
+		.innerJoin(
+			schema.personRoleTypes,
+			eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
+		)
+		.innerJoin(
+			schema.organisationalUnits,
+			eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
+		)
+		.orderBy(schema.persons.name)
+		.then((rows) => {
+			return rows.map((row) => {
+				return {
+					id: row.id,
+					personName: row.personName,
+					roleType: row.roleType,
+					organisationalUnitName: row.organisationalUnitName,
+					durationStart: row.durationStart.start,
+					durationEnd: row.durationStart.end,
+				};
+			});
+		});
 
 	return (
-		<Header>
-			<HeaderContent>
-				<HeaderTitle>{t("Contributions")}</HeaderTitle>
-				<HeaderDescription>
-					{t("Manage all contributions in the DARIAH knowledge base.")}
-				</HeaderDescription>
-			</HeaderContent>
-		</Header>
+		<Suspense fallback={<LoadingScreen />}>
+			<ContributionsPage contributions={contributions} />
+		</Suspense>
 	);
 }
