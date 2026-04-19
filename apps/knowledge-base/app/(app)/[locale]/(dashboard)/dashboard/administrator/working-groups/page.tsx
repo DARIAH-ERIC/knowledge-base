@@ -25,7 +25,8 @@ export async function generateMetadata(
 export default function DashboardAdministratorWorkingGroupsPage(
 	_props: Readonly<DashboardAdministratorWorkingGroupsPageProps>,
 ): ReactNode {
-	const workingGroups = db.query.workingGroups.findMany({
+	const workingGroups = db.query.organisationalUnits.findMany({
+		where: { type: { type: "working_group" } },
 		orderBy: { name: "asc" },
 		columns: {
 			id: true,

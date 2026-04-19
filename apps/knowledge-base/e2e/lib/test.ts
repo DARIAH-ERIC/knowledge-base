@@ -7,6 +7,9 @@ import { env } from "@/config/env.config";
 import { type AccessibilityScanner, createAccessibilityScanner } from "@/e2e/lib/fixtures/a11y";
 import { AdminPersonsPage } from "@/e2e/lib/fixtures/admin-persons-page";
 import { AdminProjectsPage } from "@/e2e/lib/fixtures/admin-projects-page";
+import { AdminServicesPage } from "@/e2e/lib/fixtures/admin-services-page";
+import { AdminSocialMediaPage } from "@/e2e/lib/fixtures/admin-social-media-page";
+import { AdminUsersPage } from "@/e2e/lib/fixtures/admin-users-page";
 import { AdminWorkingGroupsPage } from "@/e2e/lib/fixtures/admin-working-groups-page";
 import { ContactPage } from "@/e2e/lib/fixtures/contact-page";
 import { DatabaseService } from "@/e2e/lib/fixtures/database-service";
@@ -33,6 +36,9 @@ interface TestFixtures {
 	createIndexPage: (locale: IntlLocale) => Promise<WithI18n<{ indexPage: IndexPage }>>;
 	createAdminPersonsPage: (workerIndex: number) => AdminPersonsPage;
 	createAdminProjectsPage: (workerIndex: number) => AdminProjectsPage;
+	createAdminServicesPage: (workerIndex: number) => AdminServicesPage;
+	createAdminSocialMediaPage: (workerIndex: number) => AdminSocialMediaPage;
+	createAdminUsersPage: (workerIndex: number) => AdminUsersPage;
 	createAdminWorkingGroupsPage: (workerIndex: number) => AdminWorkingGroupsPage;
 	createWebsiteEventsPage: (workerIndex: number) => WebsiteEventsPage;
 	createWebsiteImpactCaseStudiesPage: (workerIndex: number) => WebsiteImpactCaseStudiesPage;
@@ -137,6 +143,24 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 	async createAdminPersonsPage({ page }, use) {
 		await use((workerIndex: number) => {
 			return new AdminPersonsPage(page, workerIndex);
+		});
+	},
+
+	async createAdminServicesPage({ page }, use) {
+		await use((workerIndex: number) => {
+			return new AdminServicesPage(page, workerIndex);
+		});
+	},
+
+	async createAdminSocialMediaPage({ page }, use) {
+		await use((workerIndex: number) => {
+			return new AdminSocialMediaPage(page, workerIndex);
+		});
+	},
+
+	async createAdminUsersPage({ page }, use) {
+		await use((workerIndex: number) => {
+			return new AdminUsersPage(page, workerIndex);
 		});
 	},
 

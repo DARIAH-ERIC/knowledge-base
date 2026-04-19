@@ -631,6 +631,94 @@ export class DatabaseService {
 		}
 	}
 
+	/**
+	 * Deletes a user. Sessions, password reset sessions, and email verification
+	 * requests cascade on user delete.
+	 */
+	async deleteUser(userId: string): Promise<void> {
+		await this.db.delete(schema.users).where(eq(schema.users.id, userId));
+	}
+
+	/**
+	 * Finds all users whose name starts with `[e2e-worker-{workerIndex}]`
+	 * and deletes them. Called in afterAll to ensure a clean state.
+	 */
+	async cleanupWorkerUsers(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const items = await this.db
+			.select({ id: schema.users.id })
+			.from(schema.users)
+			.where(sql`${schema.users.name} LIKE ${`${prefix}%`}`);
+
+		for (const item of items) {
+			await this.deleteUser(item.id);
+		}
+	}
+
+	/**
+	 * Cascade-deletes a service and all its related records.
+	 * Replicates the logic in `delete-service.action.ts`.
+	 */
+	async deleteService(serviceId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			await tx
+				.delete(schema.servicesToSocialMedia)
+				.where(eq(schema.servicesToSocialMedia.serviceId, serviceId));
+			await tx
+				.delete(schema.servicesToOrganisationalUnits)
+				.where(eq(schema.servicesToOrganisationalUnits.serviceId, serviceId));
+			await tx.delete(schema.services).where(eq(schema.services.id, serviceId));
+		});
+	}
+
+	/**
+	 * Finds all services whose name starts with `[e2e-worker-{workerIndex}]`
+	 * and deletes them. Called in afterAll to ensure a clean state.
+	 */
+	async cleanupWorkerServices(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const items = await this.db
+			.select({ id: schema.services.id })
+			.from(schema.services)
+			.where(sql`${schema.services.name} LIKE ${`${prefix}%`}`);
+
+		for (const item of items) {
+			await this.deleteService(item.id);
+		}
+	}
+
+	/**
+	 * Cascade-deletes a social media entry and all its related records.
+	 * Replicates the logic in `delete-social-media.action.ts`.
+	 */
+	async deleteSocialMedia(socialMediaId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			await tx
+				.delete(schema.servicesToSocialMedia)
+				.where(eq(schema.servicesToSocialMedia.socialMediaId, socialMediaId));
+			await tx.delete(schema.socialMedia).where(eq(schema.socialMedia.id, socialMediaId));
+		});
+	}
+
+	/**
+	 * Finds all social media entries whose name starts with `[e2e-worker-{workerIndex}]`
+	 * and deletes them. Called in afterAll to ensure a clean state.
+	 */
+	async cleanupWorkerSocialMedia(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const items = await this.db
+			.select({ id: schema.socialMedia.id })
+			.from(schema.socialMedia)
+			.where(sql`${schema.socialMedia.name} LIKE ${`${prefix}%`}`);
+
+		for (const item of items) {
+			await this.deleteSocialMedia(item.id);
+		}
+	}
+
 	/** Closes the underlying pg pool. Called in worker teardown. */
 	async close(): Promise<void> {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
