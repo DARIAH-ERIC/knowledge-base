@@ -42,6 +42,131 @@ function toSummary(html: string): string {
 		.trim();
 }
 
+function extractAuthorsFromHtml(html: string): Array<string> {
+	const lines = toPlaintext(html)
+		.split(/\r?\n+/)
+		.map((line) => {
+			return line.trim();
+		})
+		.filter((line) => {
+			return line.length > 0;
+		})
+		.slice(0, 20);
+
+	const affiliations = [
+		"university",
+		"college",
+		"institute",
+		"institut",
+		"dariah",
+		"clariah",
+		"professor",
+		"assistant",
+		"associate",
+		"scientific",
+		"lecturer",
+		"research",
+		"department",
+		"school",
+		"faculty",
+		"centre",
+		"center",
+		"library",
+		"museum",
+		"archive",
+		"editor",
+		"editors",
+		"course editors",
+		"one of the course editors",
+		"followed by",
+	];
+
+	const isLikelyName = (value: string): boolean => {
+		const parts = value.trim().split(/\s+/);
+
+		if (parts.length < 2 || parts.length > 5) {
+			return false;
+		}
+
+		return parts.every((part, index) => {
+			if (/^[A-Z]\.$/u.test(part)) {
+				return true;
+			}
+
+			if (index > 0 && /^(?:de|del|van|von|da|di|du|la|le|der|den)$/i.test(part)) {
+				return true;
+			}
+
+			return /^[A-Z][\p{L}'’.-]*$/u.test(part);
+		});
+	};
+
+	const cleanCandidate = (value: string): Array<string> => {
+		let candidate = value.trim().replaceAll(/\s+/g, " ");
+
+		if (candidate.length === 0) {
+			return [];
+		}
+
+		candidate = candidate.replace(/\s*\([^)]*\)\s*$/, "");
+		candidate = candidate.replace(/\s*\[[^\]]*\]\s*$/, "");
+		candidate = candidate.split(",")[0] ?? candidate;
+		candidate = candidate.split(" - ")[0] ?? candidate;
+		candidate = candidate.split(" – ")[0] ?? candidate;
+		candidate = candidate.split(" — ")[0] ?? candidate;
+		candidate = candidate.trim();
+
+		if (candidate.length === 0) {
+			return [];
+		}
+
+		const pieces = candidate.split(/[,;/&]|\sand\s/i);
+
+		return pieces
+			.map((piece) => {
+				return piece.trim();
+			})
+			.filter((piece) => {
+				return piece.length > 0;
+			})
+			.filter((piece) => {
+				const lower = piece.toLowerCase();
+
+				if (
+					affiliations.some((marker) => {
+						return lower.includes(marker);
+					})
+				) {
+					return false;
+				}
+
+				return isLikelyName(piece);
+			});
+	};
+
+	for (let index = 0; index < lines.length; index += 1) {
+		const line = lines[index]!;
+		const bylineMatch = /^(?:written by|lead author|by)\s*:?\s*/i.exec(line);
+
+		if (bylineMatch != null) {
+			const authors = cleanCandidate(line.slice(bylineMatch[0].length));
+
+			if (authors.length > 0) {
+				return authors;
+			}
+
+			const continuation = lines.slice(index + 1, index + 4).join(" ");
+			const continuationAuthors = cleanCandidate(continuation);
+
+			if (continuationAuthors.length > 0) {
+				return continuationAuthors;
+			}
+		}
+	}
+
+	return [];
+}
+
 const deniedPageLinks = new Set([
 	"https://www.dariah.eu/about/documents-list/", // documents-policies
 	"https://www.dariah.eu/", // landing page uses visual composer shortcodes
@@ -429,32 +554,6 @@ function parsePositionRoles(position: string): Array<PersonRoleType> {
 		/chair of general assembly \/ national representative/i.test(pos)
 	) {
 		return ["national_representative"];
-	}
-
-	return [];
-}
-
-function extractAuthorsFromHtml(html: string): Array<string> {
-	const patterns = [
-		// eslint-disable-next-line regexp/no-super-linear-backtracking
-		/[Ww]ritten by ([^<]+?)(?=\s*(?:,\s*(?:University|Professor|Assistant|Institut|DARIAH|Associate|Scientific|La )|<))/,
-		// eslint-disable-next-line regexp/no-super-linear-backtracking
-		/<h[1-6][^>]*>[Bb]y ([^<(]+?)(?=\s*(?:\(|<\/h))/,
-		/[Ll]ead [Aa]uthor:\s*<\/strong>([^<\n]+)/,
-	];
-
-	for (const pattern of patterns) {
-		const match = pattern.exec(html);
-		if (match?.[1] != null) {
-			return match[1]
-				.split(/\s+and\s+/i)
-				.map((name) => {
-					return name.trim();
-				})
-				.filter((name) => {
-					return name.length > 0;
-				});
-		}
 	}
 
 	return [];
