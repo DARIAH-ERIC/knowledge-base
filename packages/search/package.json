@@ -27,6 +27,7 @@
 		"search:collections:ingest": "tsx ./scripts/ingest.ts",
 		"search:collections:reset": "tsx ./scripts/reset.ts",
 		"search:collections:seed": "tsx ./scripts/seed.ts",
+		"search:website:ingest": "tsx ./scripts/ingest-website.ts",
 		"types:check": "tsc --noEmit"
 	},
 	"dependencies": {

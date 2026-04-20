@@ -2,5 +2,6 @@ export { client as adminClient, createClient as createAdminClient } from "./admi
 export { createCollection } from "./create-collection";
 export { generateSearchApiKey } from "./generate-search-api-key";
 export { ingest } from "./ingest";
+export { ingestWebsite } from "./ingest-website";
 export { reset } from "./reset";
 export { seed, type SeedConfig } from "./seed";
