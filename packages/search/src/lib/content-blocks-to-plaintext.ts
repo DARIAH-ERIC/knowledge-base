@@ -13,9 +13,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function pushText(parts: Array<string>, value: unknown): void {
-	if (typeof value !== "string") return;
+	if (typeof value !== "string") {
+		return;
+	}
 
-	const normalized = value.replace(/\s+/g, " ").trim();
+	const normalized = value.replaceAll(/\s+/g, " ").trim();
 
 	if (normalized.length > 0) {
 		parts.push(normalized);
@@ -65,7 +67,9 @@ function extractText(value: unknown): Array<string> {
 
 	if ("items" in value && Array.isArray(value.items)) {
 		for (const item of value.items) {
-			if (!isRecord(item)) continue;
+			if (!isRecord(item)) {
+				continue;
+			}
 
 			pushText(parts, item.title);
 			if ("content" in item) {
@@ -80,9 +84,9 @@ function extractText(value: unknown): Array<string> {
 function toPlaintext(value: unknown): string {
 	return extractText(value)
 		.join(" ")
-		.replace(/\s+\n/g, "\n")
-		.replace(/\n\s+/g, "\n")
-		.replace(/\n{3,}/g, "\n\n")
+		.replaceAll(/\s+\n/g, "\n")
+		.replaceAll(/\n\s+/g, "\n")
+		.replaceAll(/\n{3,}/g, "\n\n")
 		.trim();
 }
 
@@ -143,6 +147,6 @@ export function contentBlocksToPlaintext(blocks: Array<ContentBlockLike>): strin
 
 	return parts
 		.join("\n\n")
-		.replace(/\n{3,}/g, "\n\n")
+		.replaceAll(/\n{3,}/g, "\n\n")
 		.trim();
 }

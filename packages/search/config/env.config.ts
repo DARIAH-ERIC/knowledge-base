@@ -5,6 +5,7 @@ import * as v from "valibot";
 
 const validate = define({
 	envVars: v.object({
+		API_BASE_URL: v.pipe(v.string(), v.url()),
 		NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME: v.pipe(v.string(), v.nonEmpty()),
 		NEXT_PUBLIC_TYPESENSE_HOST: v.pipe(v.string(), v.nonEmpty()),
 		NEXT_PUBLIC_TYPESENSE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
@@ -20,6 +21,7 @@ const validate = define({
 
 export const env = validate({
 	environment: {
+		API_BASE_URL: process.env.API_BASE_URL,
 		NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME:
 			process.env.NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME,
 		NEXT_PUBLIC_TYPESENSE_HOST: process.env.NEXT_PUBLIC_TYPESENSE_HOST,

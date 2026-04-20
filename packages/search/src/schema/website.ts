@@ -7,7 +7,7 @@ export const website = createCollection({
 		{ name: "label", type: "string" },
 		{ name: "description", type: "string" },
 		{ name: "publication_date", type: "int64", optional: true },
-		/** Database entity slug for internal website pages. */
+		/** Slug of the page this entity links to. */
 		{ name: "slug", type: "string", optional: true },
 		/** Upstream resource URL, not the URL in the ingest source. */
 		{ name: "url", type: "string", optional: true },
@@ -65,16 +65,24 @@ export function createWebsiteDocumentId(type: WebsiteType, identifier: string): 
 	return [type, identifier].join(":");
 }
 
-export interface WebsiteCollectionDocument {
+interface WebsiteCollectionDocumentBase {
 	id: string;
-	type: WebsiteType;
 	label: string;
 	description: string;
+	/** Only populated for news. */
 	publication_date?: number | null;
-	/** Database entity slug for internal website pages. */
-	slug?: string;
-	/** Slug of a related country page for institutions and national consortia. */
-	country_slug?: string;
-	/** Upstream resource URL, not the URL in the ingest source. */
-	url?: string;
 }
+
+export interface WebsiteResourceDocument extends WebsiteCollectionDocumentBase {
+	type: WebsiteResourceType;
+	/** Upstream resource URL, not the URL in the ingest source. */
+	url: string;
+}
+
+export interface WebsiteEntityDocument extends WebsiteCollectionDocumentBase {
+	type: WebsiteEntityType;
+	/** Slug of the page this entity links to. For most entities this is their own page; for institutions and national consortia it is the parent country page. */
+	slug: string;
+}
+
+export type WebsiteCollectionDocument = WebsiteResourceDocument | WebsiteEntityDocument;

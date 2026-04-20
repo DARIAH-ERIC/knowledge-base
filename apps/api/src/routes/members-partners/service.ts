@@ -417,6 +417,11 @@ async function getNationalConsortium(db: Database | Transaction, countryId: stri
 			name: true,
 		},
 		with: {
+			entity: {
+				columns: {
+					slug: true,
+				},
+			},
 			image: {
 				columns: {
 					key: true,
@@ -431,6 +436,7 @@ async function getNationalConsortium(db: Database | Transaction, countryId: stri
 
 	return {
 		name: item.name,
+		slug: item.entity.slug,
 		image:
 			item.image != null
 				? images.generateSignedImageUrl({

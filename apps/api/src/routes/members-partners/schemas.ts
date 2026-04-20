@@ -71,6 +71,7 @@ export type PartnerInstitution = v.InferOutput<typeof PartnerInstitutionSchema>;
 export const NationalConsortiumSchema = v.pipe(
 	v.object({
 		name: v.string(),
+		slug: v.string(),
 		image: v.nullable(v.object({ url: v.string() })),
 	}),
 	v.description("National consortium"),
