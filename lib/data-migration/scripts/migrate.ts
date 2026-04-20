@@ -532,6 +532,69 @@ async function getData(): Promise<WordPressData> {
 	return data;
 }
 
+interface ProjectMetadata {
+	fullName: string | null;
+	duration: { start: Date; end?: Date } | null;
+	funding: number | null;
+	topic: string | null;
+	summary: string | null;
+}
+
+function parseProjectDate(s: string): Date | null {
+	const m = /(\d{2})[-/](\d{2})[-/](\d{4})/.exec(s.trim());
+	if (!m) {
+		return null;
+	}
+	return new Date(Date.UTC(Number(m[3]!), Number(m[2]!) - 1, Number(m[1]!)));
+}
+
+function parseEuContribution(raw: string): number | null {
+	const cleaned = raw.trim().replaceAll(/\s/g, "").replace(",", ".");
+	const n = Number.parseFloat(cleaned);
+	return Number.isNaN(n) || n === 0 ? null : n;
+}
+
+function extractProjectMetadata(html: string): ProjectMetadata {
+	// <!--more--> can appear inside <strong> tags (e.g. IPERION CH)
+	const normalized = html.replaceAll("<!--more-->", "");
+
+	const fullNameMatch = /<strong>\s*Full project name[^<]*<\/strong>\s*(?::\s*)?([^<\n]+)/i.exec(
+		normalized,
+	);
+	const durationMatch =
+		/<strong>\s*Duration[^<]*<\/strong>\s*(?::\s*)?from\s+([\d/-]+)\s+to\s+([\d/-]+)/i.exec(
+			normalized,
+		);
+	// eslint-disable-next-line regexp/no-super-linear-backtracking
+	const euMatch = /<strong>EU Contribution<\/strong>\s*(?::\s*)?EUR\s*([\d\s,.']*\d)/i.exec(
+		normalized,
+	);
+	const topicMatch = /<strong>Topic<\/strong>[^<]*<a[^>]+href="([^"]+)"/i.exec(normalized);
+	// eslint-disable-next-line regexp/no-super-linear-backtracking
+	const summaryMatch = /<strong>Summary<\/strong>\s*:\s*([\s\S]*?)(?=<\/p>)/i.exec(normalized);
+
+	const startDate = durationMatch ? parseProjectDate(durationMatch[1]!) : null;
+	const endDate = durationMatch ? parseProjectDate(durationMatch[2]!) : null;
+
+	return {
+		fullName: fullNameMatch ? fullNameMatch[1]!.trim() : null,
+		duration: startDate ? { start: startDate, end: endDate ?? undefined } : null,
+		funding: euMatch ? parseEuContribution(euMatch[1]!) : null,
+		topic: topicMatch ? topicMatch[1]! : null,
+		summary: summaryMatch ? summaryMatch[1]!.replaceAll(/<[^>]+>/g, "").trim() : null,
+	};
+}
+
+function stripProjectMetaBlock(html: string): string {
+	return html
+		.replaceAll("<!--more-->", "")
+		.replaceAll(
+			/<p>\s*<strong>\s*(?:Full project name|Duration|EU Contribution|Topic|Summary|Website|Funding scheme)[^<]*<\/strong>[\s\S]*?<\/p>/gi,
+			"",
+		)
+		.trim();
+}
+
 type PersonRoleType =
 	| "national_coordinator"
 	| "national_coordinator_deputy"
@@ -1839,6 +1902,14 @@ async function main() {
 		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		assert(project.status === "publish", "Project has not been published.");
 
+		const meta = extractProjectMetadata(project.content.rendered);
+
+		if (meta.duration == null) {
+			log.warn(
+				`Project ${String(project.id)} ("${project.title.rendered}"): could not extract duration from HTML.`,
+			);
+		}
+
 		await db.transaction(async (tx) => {
 			const [entity] = await tx
 				.insert(schema.entities)
@@ -1863,20 +1934,27 @@ async function main() {
 				project.id,
 			);
 
+			// Prefer HTML-extracted full name over WP fullname field (WP data has known
+			// corruptions, e.g. HIRMEOS has PARTHENOS's fullname). Fall back to title.
+			const name = meta.fullName ?? (project.fullname || project.title.rendered);
+			const summary =
+				(meta.summary ?? toSummary(project.excerpt.rendered)) || project.title.rendered;
+
 			const [p] = await tx
 				.insert(schema.projects)
 				.values({
 					id,
-					name: project.fullname || project.title.rendered,
+					name,
 					acronym: project.title.rendered,
-					duration: { start: new Date(Date.UTC(2025, 0, 1)), end: new Date(Date.UTC(2028, 0, 1)) }, // FIXME: need to extract from richtext
-					// funding: 0,
-					summary: toSummary(project.excerpt.rendered),
-					// call: "",
-					// funders: "",
-					// topic: "",
+					duration: meta.duration ?? {
+						start: new Date(Date.UTC(1900, 0, 1)),
+						end: new Date(Date.UTC(1900, 0, 1)),
+					}, // FIXME: manual fix needed
+					funding: meta.funding,
+					summary,
+					topic: meta.topic,
 					imageId: imageId ?? placeholderImage.id,
-					scopeId: projectScopesByType.national.id,
+					scopeId: projectScopesByType.national.id, // FIXME: manual fix needed
 					createdAt: new Date(project.date_gmt),
 					updatedAt: new Date(project.modified_gmt),
 				})
@@ -1896,7 +1974,7 @@ async function main() {
 				const [sm] = await tx
 					.insert(schema.socialMedia)
 					.values({
-						name: `${project.fullname} website`,
+						name: `${name} website`,
 						typeId: socialMediaTypesByType.website.id,
 						url: project.website,
 					})
@@ -1946,7 +2024,9 @@ async function main() {
 				}
 			}
 
-			if (project.content.rendered.trim().length === 0) {
+			const contentHtml = stripProjectMetaBlock(project.content.rendered);
+
+			if (contentHtml.length === 0) {
 				return;
 			}
 
@@ -1969,13 +2049,7 @@ async function main() {
 
 			assert(field);
 
-			await migrateHtmlContent(
-				tx,
-				project.content.rendered,
-				assetsCache,
-				field.id,
-				contentBlockTypesByType,
-			);
+			await migrateHtmlContent(tx, contentHtml, assetsCache, field.id, contentBlockTypesByType);
 		});
 	}
 
