@@ -171,7 +171,7 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 					id,
 					source: ingestSource,
 					source_id: ingestSourceId,
-					upstream_sources: item.collectedFrom.map((s) => s.value),
+					upstream_sources: item.collectedFrom.map((s) => {return s.value}),
 					imported_at: Date.now(),
 					updated_at: item.lastUpdateTimeStamp,
 					type: "publication",

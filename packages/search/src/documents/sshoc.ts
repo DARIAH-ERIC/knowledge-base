@@ -169,7 +169,7 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 					id,
 					source: ingestSource,
 					source_id: ingestSourceId,
-					upstream_source: item.sources?.map((s) => s.label) ?? null,
+					upstream_source: item.sources?.map((s) => {return s.label}) ?? null,
 					imported_at: Date.now(),
 					updated_at: updatedAt,
 					label: item.label,

@@ -2014,8 +2014,8 @@ async function main() {
 					slug,
 					statusId: statusByType.published.id,
 					typeId: typesByType.persons.id,
-					createdAt: new Date(person.date_gmt),
-					updatedAt: new Date(person.modified_gmt),
+					createdAt: new Date(),
+					updatedAt: new Date(),
 				})
 				.returning({ id: schema.entities.id });
 
@@ -2031,8 +2031,8 @@ async function main() {
 				// position: person.position,
 				// orcid,
 				// imageId: placeholderImage.id,
-				createdAt: new Date(person.date_gmt),
-				updatedAt: new Date(person.modified_gmt),
+				createdAt: new Date(),
+				updatedAt: new Date(),
 			});
 		});
 	}
