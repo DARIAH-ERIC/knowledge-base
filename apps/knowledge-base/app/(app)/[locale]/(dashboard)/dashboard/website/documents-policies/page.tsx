@@ -10,8 +10,7 @@ import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardWebsiteDocumentsPoliciesPageProps
-	extends PageProps<"/[locale]/dashboard/website/documents-policies"> {}
+interface DashboardWebsiteDocumentsPoliciesPageProps extends PageProps<"/[locale]/dashboard/website/documents-policies"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardWebsiteDocumentsPoliciesPageProps>,
@@ -73,5 +72,7 @@ export default async function DashboardWebsiteDocumentsPoliciesPage(
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "documents" }),
 	]);
 
-	return <DocumentsPoliciesPage groups={groups} initialAssets={initialAssets} ungrouped={ungrouped} />;
+	return (
+		<DocumentsPoliciesPage groups={groups} initialAssets={initialAssets} ungrouped={ungrouped} />
+	);
 }

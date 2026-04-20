@@ -12,7 +12,10 @@ import { updateDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/d
 interface DocumentOrPolicyEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
-	documentOrPolicy: Pick<schema.DocumentOrPolicy, "id" | "title" | "summary" | "url" | "groupId"> & {
+	documentOrPolicy: Pick<
+		schema.DocumentOrPolicy,
+		"id" | "title" | "summary" | "url" | "groupId"
+	> & {
 		entity: { documentId: string; slug: string };
 	} & { document: { key: string; label: string; url: string } };
 	groups: Array<Pick<schema.DocumentPolicyGroup, "id" | "label">>;

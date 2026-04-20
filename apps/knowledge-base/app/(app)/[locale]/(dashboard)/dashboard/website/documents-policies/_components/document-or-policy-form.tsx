@@ -25,7 +25,10 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface DocumentOrPolicyFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
-	documentOrPolicy?: Pick<schema.DocumentOrPolicy, "id" | "title" | "summary" | "url" | "groupId"> & {
+	documentOrPolicy?: Pick<
+		schema.DocumentOrPolicy,
+		"id" | "title" | "summary" | "url" | "groupId"
+	> & {
 		entity: { documentId: string; slug: string };
 	} & { document: { key: string; label: string; url: string } };
 	groups: Array<Pick<schema.DocumentPolicyGroup, "id" | "label">>;
@@ -45,9 +48,7 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 			: null,
 	);
 
-	const [selectedGroupId, setSelectedGroupId] = useState<string>(
-		documentOrPolicy?.groupId ?? "",
-	);
+	const [selectedGroupId, setSelectedGroupId] = useState<string>(documentOrPolicy?.groupId ?? "");
 
 	const [documentKeyError, setDocumentKeyError] = useState(false);
 
@@ -96,9 +97,7 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 						})}
 					</SelectContent>
 				</Select>
-				{selectedGroupId ? (
-					<input name="groupId" type="hidden" value={selectedGroupId} />
-				) : null}
+				{selectedGroupId ? <input name="groupId" type="hidden" value={selectedGroupId} /> : null}
 			</FormSection>
 
 			<Separator className="my-6" />
