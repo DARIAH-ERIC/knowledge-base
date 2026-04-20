@@ -1464,7 +1464,7 @@ async function main() {
 					await tx.insert(schema.organisationalUnitsRelations).values({
 						unitId: orgUnit.id,
 						relatedUnitId: umbrellaUnit.id,
-						duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+						duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
 						status: organisationalUnitStatusByType.is_member_of.id,
 					});
 				}
@@ -1605,7 +1605,7 @@ async function main() {
 				await tx.insert(schema.organisationalUnitsRelations).values({
 					unitId: orgUnit.id,
 					relatedUnitId: countryOrgUnitId,
-					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+					duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
 
 					status: organisationalUnitStatusByType.is_located_in.id,
 				});
@@ -1615,7 +1615,7 @@ async function main() {
 				await tx.insert(schema.organisationalUnitsRelations).values({
 					unitId: orgUnit.id,
 					relatedUnitId: umbrellaUnit.id,
-					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+					duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
 
 					status: organisationalUnitStatusByType.is_national_coordinating_institution_in.id,
 				});
@@ -1625,7 +1625,7 @@ async function main() {
 				await tx.insert(schema.organisationalUnitsRelations).values({
 					unitId: orgUnit.id,
 					relatedUnitId: umbrellaUnit.id,
-					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+					duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
 
 					status: organisationalUnitStatusByType.is_partner_institution_of.id,
 				});
@@ -1635,7 +1635,7 @@ async function main() {
 				await tx.insert(schema.organisationalUnitsRelations).values({
 					unitId: orgUnit.id,
 					relatedUnitId: umbrellaUnit.id,
-					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+					duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
 
 					status: organisationalUnitStatusByType.is_cooperating_partner_of.id,
 				});
@@ -1726,7 +1726,7 @@ async function main() {
 			await db.insert(schema.organisationalUnitsRelations).values({
 				unitId: institutionOrgUnitId,
 				relatedUnitId: umbrellaUnit.id,
-				duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+				duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
 				status: organisationalUnitStatusByType.is_national_representative_institution_in.id,
 			});
 		}
@@ -1789,7 +1789,7 @@ async function main() {
 				await tx.insert(schema.organisationalUnitsRelations).values({
 					unitId: orgUnit.id,
 					relatedUnitId: umbrellaUnit.id,
-					duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+					duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
 					status: organisationalUnitStatusByType.is_part_of.id,
 				});
 			}
@@ -2055,7 +2055,7 @@ async function main() {
 								personId: id,
 								organisationalUnitId: countryOrgUnitId,
 								roleTypeId: personRoleTypesByType[role].id,
-								duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+								duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
 							});
 						}
 					} else {
@@ -2136,7 +2136,7 @@ async function main() {
 				personId: personDbId,
 				organisationalUnitId: workingGroupOrgUnitId,
 				roleTypeId: personRoleTypesByType.is_chair_of.id,
-				duration: { start: new Date(Date.UTC(2025, 0, 1)) }, // FIXME:
+				duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
 			});
 		}
 	}
