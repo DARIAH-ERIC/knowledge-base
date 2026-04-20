@@ -3,13 +3,15 @@ import { existsSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
-import { assert, isNonEmptyString, keyBy, log } from "@acdh-oeaw/lib";
-import { db } from "@dariah-eric/database/client";
+import { assert, isNonEmptyString, keyBy, log, unreachable } from "@acdh-oeaw/lib";
+import { db, type Transaction } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { createStorageService } from "@dariah-eric/storage";
 import type { AssetPrefix } from "@dariah-eric/storage/config";
 import { buffer } from "@dariah-eric/storage/lib";
 import slugify from "@sindresorhus/slugify";
+import type { JSONContent } from "@tiptap/core";
+import { Image } from "@tiptap/extension-image";
 import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
 import { toText } from "hast-util-to-text";
@@ -118,6 +120,250 @@ async function uploadFeaturedImage(
 	assert(asset, `Missing asset (entity id ${String(id)}).`);
 
 	return asset.id;
+}
+
+/** Returns the index just after the `</div>` that closes the div opened at `afterOpenTag`. */
+function findClosingDiv(html: string, afterOpenTag: number): number {
+	let depth = 1;
+	let i = afterOpenTag;
+	while (i < html.length && depth > 0) {
+		const nextOpen = html.indexOf("<div", i);
+		const nextClose = html.indexOf("</div>", i);
+		if (nextClose === -1) {
+			break;
+		}
+		if (nextOpen !== -1 && nextOpen < nextClose) {
+			depth++;
+			i = nextOpen + 4;
+		} else {
+			depth--;
+			i = nextClose + 6;
+		}
+	}
+	return i;
+}
+
+/** Extracts accordion items from an Easy Accordion (`sp-easy-accordion`) div. */
+function extractAccordionItems(html: string): Array<{ title: string; bodyHtml: string }> {
+	const items: Array<{ title: string; bodyHtml: string }> = [];
+	const singleRe = /<div[^>]+class="[^"]*sp-ea-single[^"]*"[^>]*>/gi;
+	let m: RegExpExecArray | null;
+
+	while ((m = singleRe.exec(html)) !== null) {
+		const itemEnd = findClosingDiv(html, m.index + m[0].length);
+		const itemHtml = html.slice(m.index, itemEnd);
+
+		const headerMatch = /<div[^>]+class="[^"]*ea-header[^"]*"[^>]*>([\s\S]*?)<\/div>/i.exec(
+			itemHtml,
+		);
+		const title = (headerMatch?.[1] ?? "").replaceAll(/<[^>]+>/g, "").trim();
+
+		const bodyOpenMatch = /<div[^>]+class="[^"]*ea-body[^"]*"[^>]*>/i.exec(itemHtml);
+		let bodyHtml = "";
+		if (bodyOpenMatch) {
+			const bodyContentStart = bodyOpenMatch.index + bodyOpenMatch[0].length;
+			const bodyEnd = findClosingDiv(itemHtml, bodyContentStart);
+			bodyHtml = itemHtml.slice(bodyContentStart, bodyEnd - 6);
+		}
+
+		if (title || bodyHtml) {
+			items.push({ title, bodyHtml });
+		}
+	}
+
+	return items;
+}
+
+/**
+ * Parses WordPress HTML into content blocks, handling inline images (uploaded as
+ * assets and stored as image content blocks), iframe embeds, and Easy Accordion
+ * widgets. Text segments between specials become rich_text blocks. Blocks are
+ * inserted in order into the given field.
+ */
+async function migrateHtmlContent(
+	tx: Transaction,
+	html: string,
+	assetsCache: AssetsCache,
+	fieldId: string,
+	contentBlockTypes: Record<string, { id: string }>,
+): Promise<void> {
+	type BlockSpec =
+		| { type: "rich_text"; content: JSONContent }
+		| { type: "image"; assetId: string }
+		| { type: "embed"; url: string; title: string }
+		| { type: "accordion"; items: Array<{ title: string; content: JSONContent }> };
+
+	const blocks: Array<BlockSpec> = [];
+
+	// Collect all special positions (iframes + accordions) sorted by index.
+	interface SpecialMatch {
+		index: number;
+		end: number;
+		segment:
+			| { kind: "iframe"; src: string; title: string }
+			| { kind: "accordion"; items: Array<{ title: string; bodyHtml: string }> };
+	}
+	const specials: Array<SpecialMatch> = [];
+
+	const iframeRe = /<iframe(?:\s[^>]*)?\ssrc="([^"]*)"[^>]*>[\s\S]*?<\/iframe>/gi;
+	let m: RegExpExecArray | null;
+
+	while ((m = iframeRe.exec(html)) !== null) {
+		const titleMatch = /title="([^"]*)"/.exec(m[0]);
+		specials.push({
+			index: m.index,
+			end: m.index + m[0].length,
+			segment: { kind: "iframe", src: m[1]!, title: titleMatch?.[1] ?? m[1]! },
+		});
+	}
+
+	const accordionRe = /<div[^>]+class="[^"]*sp-easy-accordion[^"]*"[^>]*>/gi;
+
+	while ((m = accordionRe.exec(html)) !== null) {
+		const end = findClosingDiv(html, m.index + m[0].length);
+		specials.push({
+			index: m.index,
+			end,
+			segment: { kind: "accordion", items: extractAccordionItems(html.slice(m.index, end)) },
+		});
+	}
+
+	specials.sort((a, b) => {
+		return a.index - b.index;
+	});
+
+	type Segment =
+		| { kind: "html"; content: string }
+		| { kind: "iframe"; src: string; title: string }
+		| { kind: "accordion"; items: Array<{ title: string; bodyHtml: string }> };
+
+	const segments: Array<Segment> = [];
+	let lastIndex = 0;
+	for (const special of specials) {
+		if (special.index > lastIndex) {
+			segments.push({ kind: "html", content: html.slice(lastIndex, special.index) });
+		}
+		segments.push(special.segment);
+		lastIndex = special.end;
+	}
+	if (lastIndex < html.length) {
+		segments.push({ kind: "html", content: html.slice(lastIndex) });
+	}
+
+	for (const segment of segments) {
+		if (segment.kind === "iframe") {
+			blocks.push({ type: "embed", url: segment.src, title: segment.title });
+			continue;
+		}
+
+		if (segment.kind === "accordion") {
+			blocks.push({
+				type: "accordion",
+				items: segment.items.map(({ title, bodyHtml }) => {
+					return {
+						title,
+						content: generateJSON(bodyHtml, [StarterKit, Image]),
+					};
+				}),
+			});
+			continue;
+		}
+
+		const doc = generateJSON(segment.content, [StarterKit, Image]);
+		let richTextRun: Array<JSONContent> = [];
+
+		for (const node of doc.content ?? []) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+			if (node.type === "image" && typeof node.attrs?.src === "string") {
+				if (richTextRun.length > 0) {
+					blocks.push({
+						type: "rich_text",
+						content: { type: "doc", content: richTextRun },
+					});
+					richTextRun = [];
+				}
+				try {
+					const asset = await upload(
+						"images",
+						assetsCache,
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+						new URL(node.attrs.src),
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+						node.attrs.src,
+						undefined,
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+						typeof node.attrs.alt === "string" && node.attrs.alt !== ""
+							? // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+								node.attrs.alt
+							: undefined,
+					);
+					if (asset != null) {
+						blocks.push({ type: "image", assetId: asset.id });
+					}
+				} catch {
+					// eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access
+					log.warn(`Failed to migrate inline image: ${node.attrs.src}`);
+				}
+			} else {
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+				richTextRun.push(node);
+			}
+		}
+
+		if (richTextRun.length > 0) {
+			blocks.push({ type: "rich_text", content: { type: "doc", content: richTextRun } });
+		}
+	}
+
+	for (const [position, block] of blocks.entries()) {
+		const [contentBlock] = await tx
+			.insert(schema.contentBlocks)
+			.values({
+				position,
+				fieldId,
+				typeId: contentBlockTypes[block.type]!.id,
+			})
+			.returning({ id: schema.contentBlocks.id });
+
+		assert(contentBlock);
+
+		switch (block.type) {
+			case "rich_text": {
+				await tx
+					.insert(schema.richTextContentBlocks)
+					.values({ id: contentBlock.id, content: block.content });
+
+				break;
+			}
+
+			case "image": {
+				await tx
+					.insert(schema.imageContentBlocks)
+					.values({ id: contentBlock.id, imageId: block.assetId, caption: null });
+
+				break;
+			}
+
+			case "embed": {
+				await tx
+					.insert(schema.embedContentBlocks)
+					.values({ id: contentBlock.id, url: block.url, title: block.title, caption: null });
+
+				break;
+			}
+
+			case "accordion": {
+				await tx
+					.insert(schema.accordionContentBlocks)
+					.values({ id: contentBlock.id, items: block.items });
+				break;
+			}
+
+			default: {
+				unreachable();
+			}
+		}
+	}
 }
 
 async function readAssetsCacheData(): Promise<AssetsCache> {
@@ -330,8 +576,6 @@ async function main() {
 				return;
 			}
 
-			const content = generateJSON(page.content.rendered, [StarterKit]);
-
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.pages.id,
@@ -351,21 +595,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				page.content.rendered,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 
@@ -805,8 +1041,6 @@ async function main() {
 				return;
 			}
 
-			const content = generateJSON(page.content.rendered, [StarterKit]);
-
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.pages.id,
@@ -826,21 +1060,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				page.content.rendered,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 
@@ -906,8 +1132,6 @@ async function main() {
 				return;
 			}
 
-			const content = generateJSON(post.content.rendered, [StarterKit]);
-
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.news.id,
@@ -927,21 +1151,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				post.content.rendered,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 
@@ -1005,8 +1221,6 @@ async function main() {
 				return;
 			}
 
-			const content = generateJSON(event.description, [StarterKit]);
-
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.events.id,
@@ -1026,21 +1240,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				event.description,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 
@@ -1143,8 +1349,6 @@ async function main() {
 				return;
 			}
 
-			const content = generateJSON(country.content.rendered, [StarterKit]);
-
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.organisational_units.id,
@@ -1164,21 +1368,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				country.content.rendered,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 
@@ -1320,8 +1516,6 @@ async function main() {
 				return;
 			}
 
-			const content = generateJSON(institution.content.rendered, [StarterKit]);
-
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.organisational_units.id,
@@ -1341,21 +1535,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				institution.content.rendered,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 
@@ -1465,8 +1651,6 @@ async function main() {
 				return;
 			}
 
-			const content = generateJSON(workingGroup.content.rendered, [StarterKit]);
-
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.organisational_units.id,
@@ -1486,21 +1670,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				workingGroup.content.rendered,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 
@@ -1627,8 +1803,6 @@ async function main() {
 				return;
 			}
 
-			const content = generateJSON(project.content.rendered, [StarterKit]);
-
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.projects.id,
@@ -1648,21 +1822,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				project.content.rendered,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 
@@ -1760,8 +1926,6 @@ async function main() {
 				return;
 			}
 
-			const content = generateJSON(person.content.rendered, [StarterKit]);
-
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.persons.id,
@@ -1781,21 +1945,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				person.content.rendered,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 

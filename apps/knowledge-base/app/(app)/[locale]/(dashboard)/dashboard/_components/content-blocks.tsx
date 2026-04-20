@@ -56,6 +56,11 @@ import {
 import { twMerge } from "tailwind-merge";
 
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import {
+	type MergeableBlock,
+	mergeBlocksToDocument,
+	splitDocumentToBlocks,
+} from "@/lib/content-blocks-document";
 
 interface Asset {
 	key: string;
@@ -121,6 +126,40 @@ export type ContentBlock =
 	| HeroContentBlockItem
 	| AccordionContentBlockItem;
 
+interface UnifiedContentBlockItem {
+	id: Key;
+	type: "unified_content";
+	content?: JSONContent;
+}
+
+type ContentBlockListItem = ContentBlock | UnifiedContentBlockItem;
+
+const UNIFIED_BLOCK_TYPES = new Set<ContentBlock["type"]>(["rich_text", "image", "embed"]);
+
+function mergeInitialItems(items: Array<ContentBlock>): Array<ContentBlockListItem> {
+	const result: Array<ContentBlockListItem> = [];
+	let i = 0;
+	while (i < items.length) {
+		const item = items[i]!;
+		if (UNIFIED_BLOCK_TYPES.has(item.type)) {
+			const run: Array<MergeableBlock> = [];
+			while (i < items.length && UNIFIED_BLOCK_TYPES.has(items[i]!.type)) {
+				run.push(items[i] as MergeableBlock);
+				i++;
+			}
+			result.push({
+				id: crypto.randomUUID(),
+				type: "unified_content",
+				content: mergeBlocksToDocument(run),
+			});
+		} else {
+			result.push(item);
+			i++;
+		}
+	}
+	return result;
+}
+
 export interface ContentBlocksProps {
 	initialAssets?: Array<Asset>;
 	items: Array<ContentBlock>;
@@ -135,8 +174,12 @@ export function ContentBlocks({
 }: Readonly<ContentBlocksProps>): ReactNode {
 	const t = useExtracted();
 
-	const list = useListData<ContentBlock>({
-		initialItems,
+	const [mergedInitialItems] = useState(() => {
+		return mergeInitialItems(initialItems);
+	});
+
+	const list = useListData<ContentBlockListItem>({
+		initialItems: mergedInitialItems,
 		getKey(item) {
 			return item.id;
 		},
@@ -144,17 +187,17 @@ export function ContentBlocks({
 
 	const [expandedKeys, setExpandedKeys] = useState<Set<Key>>(() => {
 		return new Set(
-			initialItems.map((item) => {
+			mergedInitialItems.map((item) => {
 				return String(item.id);
 			}),
 		);
 	});
 
-	const addItem = (type: ContentBlock["type"]) => {
-		const newItem: ContentBlock = {
-			id: crypto.randomUUID(),
-			type,
-		};
+	const addItem = (type: ContentBlockListItem["type"]) => {
+		const newItem: ContentBlockListItem =
+			type === "unified_content"
+				? { id: crypto.randomUUID(), type: "unified_content" }
+				: { id: crypto.randomUUID(), type };
 		list.append(newItem);
 		setExpandedKeys((prev) => {
 			return new Set([...prev, String(newItem.id)]);
@@ -217,22 +260,32 @@ export function ContentBlocks({
 							onKeyboardReorder={handleKeyboardReorder}
 							onReorder={handleReorder}
 							onUpdate={(content) => {
-								list.update(item.id, { ...item, content } as ContentBlock);
+								list.update(item.id, {
+									...item,
+									content,
+								} as ContentBlockListItem);
 							}}
 						/>
 					);
 				})}
 			</DisclosureGroup>
-			{list.items.map((item, idx) => {
-				return (
-					<input
-						key={item.id}
-						name={`contentBlocks.${String(idx)}`}
-						type="hidden"
-						value={JSON.stringify(item)}
-					/>
-				);
-			})}
+			{list.items
+				.flatMap((item): Array<object> => {
+					if (item.type === "unified_content") {
+						return splitDocumentToBlocks(item.content ?? { type: "doc", content: [] });
+					}
+					return [item];
+				})
+				.map((block, idx) => {
+					return (
+						<input
+							key={`block-${String(idx)}`}
+							name={`contentBlocks.${String(idx)}`}
+							type="hidden"
+							value={JSON.stringify(block)}
+						/>
+					);
+				})}
 			<ContentBlockMenu onAdd={addItem} />
 		</Fragment>
 	);
@@ -240,10 +293,10 @@ export function ContentBlocks({
 
 interface ContentBlockItemProps {
 	initialAssets?: Array<Asset>;
-	item: ContentBlock;
+	item: ContentBlockListItem;
 	onDelete: () => void;
 	onReorder: (sourceIdStr: string, targetId: Key, position: "before" | "after") => void;
-	onUpdate: (content: NonNullable<ContentBlock["content"]>) => void;
+	onUpdate: (content: NonNullable<ContentBlockListItem["content"]>) => void;
 	onKeyboardReorder: (e: KeyboardEvent<HTMLButtonElement>, id: Key) => void;
 }
 
@@ -312,22 +365,24 @@ function ContentBlockItem({
 		},
 	});
 
-	const contentBlockTypeNames: Record<ContentBlockTypes["type"], string> = {
+	const contentBlockTypeNames: Record<ContentBlockTypes["type"] | "unified_content", string> = {
 		accordion: t("Accordion"),
 		data: t("Data"),
 		embed: t("Embed"),
 		hero: t("Hero"),
 		image: t("Image"),
 		rich_text: t("Rich text"),
+		unified_content: t("Content"),
 	};
 
-	const contentBlockTypeIcons: Record<ContentBlockTypes["type"], ReactNode> = {
+	const contentBlockTypeIcons: Record<ContentBlockTypes["type"] | "unified_content", ReactNode> = {
 		accordion: <ListBulletIcon className="size-4 shrink-0" />,
 		data: <Square3Stack3DIcon className="size-4 shrink-0" />,
 		embed: <CodeBracketSquareIcon className="size-4 shrink-0" />,
 		hero: <RectangleGroupIcon className="size-4 shrink-0" />,
 		image: <PhotoIcon className="size-4 shrink-0" />,
 		rich_text: <PencilSquareIcon className="size-4 shrink-0" />,
+		unified_content: <PencilSquareIcon className="size-4 shrink-0" />,
 	};
 
 	return (
@@ -442,8 +497,8 @@ function ContentBlockItem({
 
 interface ContentBlockPanelProps {
 	initialAssets?: Array<Asset>;
-	item: ContentBlock;
-	onChange: (content: NonNullable<ContentBlock["content"]>) => void;
+	item: ContentBlockListItem;
+	onChange: (content: NonNullable<ContentBlockListItem["content"]>) => void;
 }
 
 function ContentBlockPanel({
@@ -478,7 +533,8 @@ function ContentBlockPanel({
 			);
 		}
 
-		case "rich_text": {
+		case "rich_text":
+		case "unified_content": {
 			return (
 				<RichTextEditor
 					className="w-full"
@@ -486,15 +542,24 @@ function ContentBlockPanel({
 					onChange={(content: JSONContent) => {
 						onChange(content);
 					}}
+					renderEmbedInsert={(insertEmbed) => {
+						return (
+							<RichTextEditorToolbarButton
+								aria-label="Insert embed"
+								icon={CodeBracketSquareIcon}
+								onClick={insertEmbed}
+							/>
+						);
+					}}
 					renderImagePicker={
 						initialAssets != null
-							? (insert: (src: string) => void) => {
+							? (insert) => {
 									return (
 										<MediaLibraryDialog
 											defaultPrefix="images"
 											initialAssets={initialAssets}
-											onSelect={(_key, url) => {
-												insert(url);
+											onSelect={(key, url) => {
+												insert(key, url);
 											}}
 											prefixes={["avatars", "images", "logos"]}
 											trigger={({ open }) => {
@@ -993,13 +1058,13 @@ function AccordionContentBlockPanel({
 								}}
 								renderImagePicker={
 									initialAssets != null
-										? (insert: (src: string) => void) => {
+										? (insert) => {
 												return (
 													<MediaLibraryDialog
 														defaultPrefix="images"
 														initialAssets={initialAssets}
 														onSelect={(_key, url) => {
-															insert(url);
+															insert("", url);
 														}}
 														prefixes={["avatars", "images", "logos"]}
 														trigger={({ open }) => {
@@ -1039,19 +1104,30 @@ function AccordionContentBlockPanel({
 }
 
 interface ContentBlockMenuProps {
-	onAdd: (type: ContentBlock["type"]) => void;
+	onAdd: (type: ContentBlockListItem["type"]) => void;
 }
+
+const MENU_BLOCK_TYPES: Array<{
+	type: ContentBlockListItem["type"];
+	icon: ReactNode;
+}> = [
+	{ type: "unified_content", icon: <PencilSquareIcon /> },
+	{ type: "data", icon: <Square3Stack3DIcon /> },
+	{ type: "hero", icon: <RectangleGroupIcon /> },
+	{ type: "accordion", icon: <ListBulletIcon /> },
+];
 
 export function ContentBlockMenu({ onAdd }: Readonly<ContentBlockMenuProps>): ReactNode {
 	const t = useExtracted();
 
-	const contentBlockTypeNames: Record<ContentBlockTypes["type"], string> = {
+	const contentBlockTypeNames: Record<ContentBlockListItem["type"], string> = {
 		accordion: t("Accordion"),
 		data: t("Data"),
 		embed: t("Embed"),
 		hero: t("Hero"),
 		image: t("Image"),
 		rich_text: t("Rich text"),
+		unified_content: t("Content"),
 	};
 
 	return (
@@ -1061,25 +1137,16 @@ export function ContentBlockMenu({ onAdd }: Readonly<ContentBlockMenuProps>): Re
 				Add block
 			</Button>
 			<MenuContent className="min-w-60" placement="bottom">
-				{Object.entries(contentBlockTypeNames).map(([key, value]) => {
+				{MENU_BLOCK_TYPES.map(({ type, icon }) => {
 					return (
 						<MenuItem
-							key={key}
+							key={type}
 							onAction={() => {
-								onAdd(key as ContentBlock["type"]);
+								onAdd(type);
 							}}
 						>
-							{
-								{
-									accordion: <ListBulletIcon />,
-									data: <Square3Stack3DIcon />,
-									embed: <CodeBracketSquareIcon />,
-									hero: <RectangleGroupIcon />,
-									image: <PhotoIcon />,
-									rich_text: <PencilSquareIcon />,
-								}[key]
-							}
-							<MenuLabel>{value}</MenuLabel>
+							{icon}
+							<MenuLabel>{contentBlockTypeNames[type]}</MenuLabel>
 						</MenuItem>
 					);
 				})}
