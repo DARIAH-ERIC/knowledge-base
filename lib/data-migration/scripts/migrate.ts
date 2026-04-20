@@ -36,6 +36,17 @@ function toPlaintext(html: string): string {
 	return toText(ast);
 }
 
+function toSummary(html: string): string {
+	return toPlaintext(html)
+		.replace(/\s*read more\s*$/i, "")
+		.trim();
+}
+
+const deniedPageLinks = new Set([
+	"https://www.dariah.eu/about/documents-list/",
+	"https://www.dariah.eu/", // landing page uses visual composer shortcodes
+]);
+
 const storage = createStorageService({
 	config: {
 		accessKey: env.S3_ACCESS_KEY,
@@ -509,7 +520,7 @@ async function main() {
 	log.info("Migrating pages...");
 
 	for (const page of Object.values(data.pages)) {
-		if (page.link === "https://www.dariah.eu/about/documents-list/") {
+		if (deniedPageLinks.has(page.link)) {
 			continue;
 		}
 
@@ -547,7 +558,7 @@ async function main() {
 				await tx.insert(schema.impactCaseStudies).values({
 					id,
 					title: toPlaintext(page.title.rendered),
-					summary: toPlaintext(page.excerpt.rendered),
+					summary: toSummary(page.excerpt.rendered),
 					imageId: imageId ?? placeholderImage.id,
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),
@@ -556,7 +567,7 @@ async function main() {
 				await tx.insert(schema.spotlightArticles).values({
 					id,
 					title: toPlaintext(page.title.rendered),
-					summary: toPlaintext(page.excerpt.rendered),
+					summary: toSummary(page.excerpt.rendered),
 					imageId: imageId ?? placeholderImage.id,
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),
@@ -565,7 +576,7 @@ async function main() {
 				await tx.insert(schema.pages).values({
 					id,
 					title: toPlaintext(page.title.rendered),
-					summary: toPlaintext(page.excerpt.rendered),
+					summary: toSummary(page.excerpt.rendered),
 					imageId,
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),
@@ -1031,7 +1042,7 @@ async function main() {
 				id,
 				title: toPlaintext(page.title.rendered),
 				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-				summary: toPlaintext(page.excerpt?.rendered ?? ""),
+				summary: toSummary(page.excerpt?.rendered ?? ""),
 				imageId,
 				createdAt: new Date(page.date_gmt),
 				updatedAt: new Date(page.modified_gmt),
@@ -1122,7 +1133,7 @@ async function main() {
 			await tx.insert(schema.news).values({
 				id,
 				title: toPlaintext(post.title.rendered),
-				summary: toPlaintext(post.excerpt.rendered),
+				summary: toSummary(post.excerpt.rendered),
 				imageId: imageId ?? placeholderImage.id,
 				createdAt: new Date(post.date_gmt),
 				updatedAt: new Date(post.modified_gmt),
@@ -1201,7 +1212,7 @@ async function main() {
 			await tx.insert(schema.events).values({
 				id,
 				title: toPlaintext(event.title),
-				summary: toPlaintext(event.description),
+				summary: toSummary(event.description),
 				imageId: imageId ?? placeholderImage.id,
 				website: event.website,
 				location:
@@ -1724,7 +1735,7 @@ async function main() {
 					acronym: project.title.rendered,
 					duration: { start: new Date(Date.UTC(2025, 0, 1)), end: new Date(Date.UTC(2028, 0, 1)) }, // FIXME: need to extract from richtext
 					// funding: 0,
-					summary: toPlaintext(project.excerpt.rendered),
+					summary: toSummary(project.excerpt.rendered),
 					// call: "",
 					// funders: "",
 					// topic: "",
