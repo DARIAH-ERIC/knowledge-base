@@ -36,6 +36,10 @@ export class AdminPersonsPage {
 		await this.page.getByLabel("Sort name").fill(sortName);
 	}
 
+	async fillPosition(position: string): Promise<void> {
+		await this.page.getByLabel("Position").fill(position);
+	}
+
 	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Select image" }).click();
 		await this.page.waitForSelector('[role="dialog"]');

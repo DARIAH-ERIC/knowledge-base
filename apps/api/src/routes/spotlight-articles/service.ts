@@ -88,6 +88,7 @@ async function getContributors(db: Database | Transaction, spotlightArticleId: s
 		.select({
 			id: schema.persons.id,
 			name: schema.persons.name,
+			position: schema.persons.position,
 			slug: schema.entities.slug,
 			imageKey: schema.assets.key,
 			role: schema.spotlightArticlesToPersons.role,

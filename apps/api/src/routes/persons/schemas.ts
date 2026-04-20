@@ -6,7 +6,8 @@ import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const PersonBaseSchema = v.pipe(
 	v.object({
-		...v.pick(schema.PersonSelectSchema, ["id", "name", "sortName", "email", "orcid"]).entries,
+		...v.pick(schema.PersonSelectSchema, ["id", "name", "position", "sortName", "email", "orcid"])
+			.entries,
 		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
@@ -27,7 +28,8 @@ export type PersonList = v.InferOutput<typeof PersonListSchema>;
 
 export const PersonSchema = v.pipe(
 	v.object({
-		...v.pick(schema.PersonSelectSchema, ["id", "name", "sortName", "email", "orcid"]).entries,
+		...v.pick(schema.PersonSelectSchema, ["id", "name", "position", "sortName", "email", "orcid"])
+			.entries,
 		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),

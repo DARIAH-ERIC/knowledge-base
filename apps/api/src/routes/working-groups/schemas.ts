@@ -63,6 +63,14 @@ export const WorkingGroupSchema = v.pipe(
 				type: v.picklist(schema.socialMediaTypesEnum),
 			}),
 		),
+		chairs: v.array(
+			v.object({
+				...v.pick(schema.PersonSelectSchema, ["id", "name", "position"]).entries,
+				image: v.object({ url: v.string() }),
+				slug: v.string(),
+				role: v.picklist(schema.personRoleTypesEnum),
+			}),
+		),
 		description: v.optional(v.array(ContentBlockSchema), []),
 		relatedEntities: v.optional(
 			v.array(

@@ -38,18 +38,58 @@ function createItems(count: number) {
 	return items;
 }
 
-async function seed(db: Database, items: ReturnType<typeof createItems>) {
-	const [status, type, asset] = await Promise.all([
+function createContributor() {
+	const id = uuidv7();
+	const documentId = uuidv7();
+	const assetId = uuidv7();
+	const name = f.person.fullName();
+	const slug = slugify(name);
+
+	return {
+		entity: {
+			id,
+			slug,
+			documentId,
+		},
+		asset: {
+			id: assetId,
+			key: `persons/${assetId}.jpg`,
+			label: name,
+			mimeType: "image/jpeg",
+		},
+		person: {
+			id,
+			name,
+			position: f.person.jobTitle(),
+			sortName: f.person.lastName(),
+			email: f.internet.email(),
+			orcid: `0000-000${String(f.number.int({ min: 1, max: 9 }))}-${String(f.number.int({ min: 1000, max: 9999 }))}-${String(f.number.int({ min: 1000, max: 9999 }))}`,
+			imageId: assetId,
+		},
+	};
+}
+
+async function seed(
+	db: Database,
+	items: ReturnType<typeof createItems>,
+	contributor = createContributor(),
+) {
+	const [status, type, personType, asset] = await Promise.all([
 		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
 		db.query.entityTypes.findFirst({
 			columns: { id: true },
 			where: { type: "impact_case_studies" },
+		}),
+		db.query.entityTypes.findFirst({
+			columns: { id: true },
+			where: { type: "persons" },
 		}),
 		db.query.assets.findFirst({ columns: { id: true } }),
 	]);
 
 	assert(status, "No entity status in database.");
 	assert(type, "No entity type in database.");
+	assert(personType, "No person entity type in database.");
 	assert(asset, "No assets in database.");
 
 	await db.insert(schema.entities).values(
@@ -67,6 +107,25 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	await Promise.all(
 		items.map((item) => {
 			return seedContentBlock(db, item.entity.id, type.id, "content");
+		}),
+	);
+
+	await db.insert(schema.assets).values(contributor.asset);
+
+	await db.insert(schema.entities).values({
+		...contributor.entity,
+		statusId: status.id,
+		typeId: personType.id,
+	});
+
+	await db.insert(schema.persons).values(contributor.person);
+
+	await db.insert(schema.impactCaseStudiesToPersons).values(
+		items.map((item) => {
+			return {
+				impactCaseStudyId: item.entity.id,
+				personId: contributor.person.id,
+			};
 		}),
 	);
 }
@@ -111,11 +170,14 @@ describe("impact-case-studies", () => {
 				const client = createTestClient(db);
 
 				const items = createItems(3);
-				await seed(db, items);
+				const contributor = createContributor();
+				await seed(db, items, contributor);
 
 				const item = items.at(1)!;
 				const id = item.entity.id;
 				const title = item.impactCaseStudy.title;
+				const contributorName = contributor.person.name;
+				const contributorPosition = contributor.person.position;
 
 				const response = await client["impact-case-studies"][":id"].$get({
 					param: {
@@ -128,7 +190,16 @@ describe("impact-case-studies", () => {
 				const data = await response.json();
 
 				assert("content" in data);
-				expect(data).toMatchObject({ title });
+				expect(data).toMatchObject({
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+					contributors: expect.arrayContaining([
+						expect.objectContaining({
+							name: contributorName,
+							position: contributorPosition,
+						}),
+					]),
+					title,
+				});
 				expect(data.content).toHaveLength(1);
 				expect(data.content[0]).toMatchObject({ type: "rich_text" });
 			});
@@ -214,11 +285,14 @@ describe("impact-case-studies", () => {
 				const client = createTestClient(db);
 
 				const items = createItems(3);
-				await seed(db, items);
+				const contributor = createContributor();
+				await seed(db, items, contributor);
 
 				const item = items.at(1)!;
 				const slug = item.entity.slug;
 				const title = item.impactCaseStudy.title;
+				const contributorName = contributor.person.name;
+				const contributorPosition = contributor.person.position;
 
 				const response = await client["impact-case-studies"].slugs[":slug"].$get({
 					param: {
@@ -231,7 +305,16 @@ describe("impact-case-studies", () => {
 				const data = await response.json();
 
 				assert("content" in data);
-				expect(data).toMatchObject({ title });
+				expect(data).toMatchObject({
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+					contributors: expect.arrayContaining([
+						expect.objectContaining({
+							name: contributorName,
+							position: contributorPosition,
+						}),
+					]),
+					title,
+				});
 				expect(data.content).toHaveLength(1);
 				expect(data.content[0]).toMatchObject({ type: "rich_text" });
 			});

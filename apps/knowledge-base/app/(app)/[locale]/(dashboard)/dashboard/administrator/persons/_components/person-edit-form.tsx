@@ -13,7 +13,7 @@ import type { ContributionOption, PersonContribution } from "@/lib/data/contribu
 
 interface PersonEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
-	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
+	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "position" | "sortName"> & {
 		biography?: JSONContent;
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; label: string; url: string } };

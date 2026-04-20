@@ -167,6 +167,7 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 		.select({
 			id: schema.persons.id,
 			name: schema.persons.name,
+			position: schema.persons.position,
 			slug: schema.entities.slug,
 			imageKey: schema.assets.key,
 			roleType: schema.personRoleTypes.type,

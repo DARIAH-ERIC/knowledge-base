@@ -142,10 +142,6 @@ export class DatabaseService {
 				});
 
 				await tx
-					.delete(schema.projectsContributions)
-					.where(inArray(schema.projectsContributions.projectPartnerId, partnerIds));
-
-				await tx
 					.delete(schema.projectsToOrganisationalUnits)
 					.where(inArray(schema.projectsToOrganisationalUnits.id, partnerIds));
 			}
