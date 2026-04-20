@@ -31,6 +31,9 @@ export const ImpactCaseStudySelectSchema = createSelectSchema(impactCaseStudies)
 export const ImpactCaseStudyInsertSchema = createInsertSchema(impactCaseStudies);
 export const ImpactCaseStudyUpdateSchema = createUpdateSchema(impactCaseStudies);
 
+export const articleContributorRolesEnum = ["author", "editor", "contributor"] as const;
+export type ArticleContributorRole = (typeof articleContributorRolesEnum)[number];
+
 export const impactCaseStudiesToPersons = p.pgTable(
 	"impact_case_studies_to_persons",
 	{
@@ -46,6 +49,7 @@ export const impactCaseStudiesToPersons = p.pgTable(
 			.references(() => {
 				return persons.id;
 			}),
+		role: p.text("role", { enum: articleContributorRolesEnum }).notNull().default("author"),
 		...f.timestamps(),
 	},
 	(t) => {

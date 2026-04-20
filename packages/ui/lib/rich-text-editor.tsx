@@ -1,8 +1,15 @@
 "use client";
 
-import type { JSONContent } from "@tiptap/core";
+import { type JSONContent, mergeAttributes, Node } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
-import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
+import {
+	EditorContent,
+	type NodeViewProps,
+	NodeViewWrapper,
+	ReactNodeViewRenderer,
+	useEditor,
+	useEditorState,
+} from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import cn from "clsx/lite";
 import {
@@ -15,10 +22,12 @@ import {
 	LinkIcon,
 	ListIcon,
 	ListOrderedIcon,
+	PencilIcon,
 	QuoteIcon,
+	Trash2Icon,
 } from "lucide-react";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useCallback, useRef, useState } from "react";
+import { type ReactNode, useCallback, useId, useRef, useState } from "react";
 import { Button as ButtonPrimitive } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
@@ -34,7 +43,8 @@ interface RichTextEditorProps {
 	isEditable?: boolean;
 	name?: string;
 	onChange?: (content: JSONContent) => void;
-	renderImagePicker?: (insert: (src: string) => void) => ReactNode;
+	renderEmbedInsert?: (insertEmbed: () => void) => ReactNode;
+	renderImagePicker?: (insert: (imageKey: string, imageUrl: string) => void) => ReactNode;
 }
 
 export interface RichTextEditorToolbarButtonProps {
@@ -73,6 +83,268 @@ export function RichTextEditorToolbarButton({
 // Keep the internal alias for backward-compat within this file.
 const RichTextEditorIconButton = RichTextEditorToolbarButton;
 
+function getEmbedUrl(url: string): string {
+	const watchMatch = /youtube\.com\/watch\?.*?v=([\w-]+)/.exec(url);
+	if (watchMatch != null) return `https://www.youtube-nocookie.com/embed/${watchMatch[1]!}`;
+	const shortMatch = /youtu\.be\/([\w-]+)/.exec(url);
+	if (shortMatch != null) return `https://www.youtube-nocookie.com/embed/${shortMatch[1]!}`;
+	return url;
+}
+
+function EmbedNodeView({ node, updateAttributes, deleteNode }: Readonly<NodeViewProps>): ReactNode {
+	const url = node.attrs.url as string | null;
+	const title = node.attrs.title as string | null;
+	const caption = node.attrs.caption as string | null;
+
+	const [isEditing, setIsEditing] = useState(url == null);
+	const [urlInput, setUrlInput] = useState(url ?? "");
+	const [titleInput, setTitleInput] = useState(title ?? "");
+	const [captionInput, setCaptionInput] = useState(caption ?? "");
+
+	function handleApply() {
+		if (!urlInput.trim() || !titleInput.trim()) return;
+		updateAttributes({
+			url: urlInput.trim(),
+			title: titleInput.trim(),
+			caption: captionInput.trim() || null,
+		});
+		setIsEditing(false);
+	}
+
+	const embedUrl = url != null ? getEmbedUrl(url) : null;
+
+	const urlInputId = useId();
+	const titleInputId = useId();
+	const captionInputId = useId();
+
+	return (
+		<NodeViewWrapper>
+			<div
+				className="my-2 overflow-clip rounded-lg border border-input bg-bg"
+				contentEditable={false}
+			>
+				{isEditing ? (
+					<div className="flex flex-col gap-y-3 p-4">
+						<div className="flex flex-col gap-y-1">
+							<label className="text-sm/6 font-medium" htmlFor={urlInputId}>
+								{"URL"}
+							</label>
+							<Input
+								id={urlInputId}
+								onChange={(e) => {
+									setUrlInput(e.target.value);
+								}}
+								placeholder="https://"
+								type="url"
+								value={urlInput}
+							/>
+						</div>
+						<div className="flex flex-col gap-y-1">
+							<label className="text-sm/6 font-medium" htmlFor={titleInputId}>
+								{"Title"}
+							</label>
+							<Input
+								id={titleInputId}
+								onChange={(e) => {
+									setTitleInput(e.target.value);
+								}}
+								placeholder="Descriptive title for screen readers"
+								type="text"
+								value={titleInput}
+							/>
+						</div>
+						<div className="flex flex-col gap-y-1">
+							<label className="text-sm/6 font-medium" htmlFor={captionInputId}>
+								{"Caption"}
+							</label>
+							<Input
+								id={captionInputId}
+								onChange={(e) => {
+									setCaptionInput(e.target.value);
+								}}
+								type="text"
+								value={captionInput}
+							/>
+						</div>
+						<div className="flex items-center gap-x-2">
+							<Button
+								intent="primary"
+								isDisabled={!urlInput.trim() || !titleInput.trim()}
+								onPress={handleApply}
+								size="sm"
+								type="button"
+							>
+								{"Apply"}
+							</Button>
+							{url != null ? (
+								<Button
+									intent="outline"
+									onPress={() => {
+										setIsEditing(false);
+									}}
+									size="sm"
+									type="button"
+								>
+									{"Cancel"}
+								</Button>
+							) : (
+								<Button intent="outline" onPress={deleteNode} size="sm" type="button">
+									{"Remove"}
+								</Button>
+							)}
+						</div>
+					</div>
+				) : (
+					<div>
+						{embedUrl != null && (
+							<div className="aspect-video w-full">
+								<iframe
+									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+									allowFullScreen={true}
+									className="size-full"
+									referrerPolicy="strict-origin-when-cross-origin"
+									sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
+									src={embedUrl}
+									title={title ?? embedUrl}
+								/>
+							</div>
+						)}
+						<div className="flex items-center justify-between gap-x-2 border-t border-border px-4 py-2">
+							<span className="min-w-0 truncate text-xs text-muted-fg">{url}</span>
+							<div className="flex shrink-0 gap-x-1">
+								<button
+									aria-label="Edit embed"
+									className="rounded-sm p-1 text-muted-fg hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+									onClick={() => {
+										setUrlInput(url ?? "");
+										setTitleInput(title ?? "");
+										setCaptionInput(caption ?? "");
+										setIsEditing(true);
+									}}
+									type="button"
+								>
+									<PencilIcon className="size-3.5" />
+								</button>
+								<button
+									aria-label="Remove embed"
+									className="rounded-sm p-1 text-muted-fg hover:text-danger focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+									onClick={deleteNode}
+									type="button"
+								>
+									<Trash2Icon className="size-3.5" />
+								</button>
+							</div>
+						</div>
+						{caption != null && caption !== "" && (
+							<p className="border-t border-border px-4 py-2 text-sm text-muted-fg">{caption}</p>
+						)}
+					</div>
+				)}
+			</div>
+		</NodeViewWrapper>
+	);
+}
+
+/**
+ * Block-level embed node (YouTube, iframes). Stores url/title/caption and
+ * renders an inline editing UI via a React NodeView.
+ */
+export const EmbedNode = Node.create({
+	name: "embedBlock",
+	group: "block",
+	atom: true,
+	selectable: true,
+
+	addAttributes() {
+		return {
+			url: { default: null },
+			title: { default: null },
+			caption: { default: null },
+		};
+	},
+
+	parseHTML() {
+		return [
+			{
+				tag: "div[data-embed-block]",
+				getAttrs(dom) {
+					const el = dom;
+					return {
+						url: el.dataset.url,
+						title: el.dataset.title,
+						caption: el.dataset.caption,
+					};
+				},
+			},
+		];
+	},
+
+	renderHTML({ node }) {
+		return [
+			"div",
+			{
+				"data-embed-block": "",
+				"data-url": node.attrs.url as string | null,
+				"data-title": node.attrs.title as string | null,
+				"data-caption": node.attrs.caption as string | null,
+			},
+		];
+	},
+
+	addNodeView() {
+		return ReactNodeViewRenderer(EmbedNodeView);
+	},
+});
+
+/**
+ * Block-level image node that stores an asset key for referential integrity.
+ * Used in the unified content editor; distinct from the plain `Image` extension
+ * which is used for images embedded directly in rich text (e.g. accordion items).
+ */
+export const AssetImage = Node.create({
+	name: "assetImage",
+	group: "block",
+	atom: true,
+
+	addAttributes() {
+		return {
+			imageKey: { default: null },
+			imageUrl: { default: null },
+			caption: { default: null },
+		};
+	},
+
+	parseHTML() {
+		return [
+			{
+				tag: "img[data-asset-image]",
+				getAttrs(dom) {
+					const el = dom;
+					return {
+						imageKey: el.dataset.imageKey,
+						imageUrl: el.getAttribute("src"),
+						caption: el.dataset.caption,
+					};
+				},
+			},
+		];
+	},
+
+	renderHTML({ node }) {
+		return [
+			"img",
+			mergeAttributes(
+				{
+					src: node.attrs.imageUrl as string | null,
+					"data-asset-image": "",
+					"data-image-key": node.attrs.imageKey as string | null,
+				},
+				node.attrs.caption != null ? { "data-caption": node.attrs.caption as string } : {},
+			),
+		];
+	},
+});
+
 export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode {
 	const {
 		"aria-label": ariaLabel,
@@ -81,6 +353,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		isEditable = true,
 		name,
 		className,
+		renderEmbedInsert,
 		renderImagePicker,
 	} = props;
 
@@ -96,6 +369,8 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 				},
 			}),
 			Image,
+			AssetImage,
+			EmbedNode,
 		],
 		content,
 		editable: isEditable,
@@ -185,10 +460,27 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		setIsLinkPopoverOpen(false);
 	}, [editor]);
 
+	const insertEmbed = useCallback(() => {
+		if (!editor) return;
+		editor
+			.chain()
+			.focus()
+			.insertContent({ type: "embedBlock", attrs: { url: null, title: null, caption: null } })
+			.run();
+	}, [editor]);
+
 	const insertImage = useCallback(
-		(src: string) => {
+		(imageKey: string, imageUrl: string) => {
 			if (!editor) return;
-			editor.chain().focus().setImage({ src }).run();
+			if (imageKey) {
+				editor
+					.chain()
+					.focus()
+					.insertContent({ type: "assetImage", attrs: { imageKey, imageUrl } })
+					.run();
+			} else {
+				editor.chain().focus().setImage({ src: imageUrl }).run();
+			}
 		},
 		[editor],
 	);
@@ -326,6 +618,12 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 						<>
 							<span className="mx-1 h-4 w-px bg-border" />
 							{renderImagePicker(insertImage)}
+						</>
+					) : null}
+					{renderEmbedInsert != null ? (
+						<>
+							{renderImagePicker == null ? <span className="mx-1 h-4 w-px bg-border" /> : null}
+							{renderEmbedInsert(insertEmbed)}
 						</>
 					) : null}
 				</div>

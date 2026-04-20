@@ -162,13 +162,54 @@ interface GetWorkingGroupByIdParams {
 	id: schema.OrganisationalUnit["id"];
 }
 
+async function getChairs(db: Database | Transaction, workingGroupId: string) {
+	const rows = await db
+		.select({
+			id: schema.persons.id,
+			name: schema.persons.name,
+			slug: schema.entities.slug,
+			imageKey: schema.assets.key,
+			roleType: schema.personRoleTypes.type,
+		})
+		.from(schema.personsToOrganisationalUnits)
+		.innerJoin(
+			schema.personRoleTypes,
+			eq(schema.personsToOrganisationalUnits.roleTypeId, schema.personRoleTypes.id),
+		)
+		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
+		.innerJoin(schema.entities, eq(schema.persons.id, schema.entities.id))
+		.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
+		.where(
+			and(
+				eq(schema.personsToOrganisationalUnits.organisationalUnitId, workingGroupId),
+				eq(schema.personRoleTypes.type, "is_chair_of"),
+				eq(schema.entityStatus.type, "published"),
+				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
+			),
+		);
+
+	return rows.map(({ imageKey, roleType, ...row }) => {
+		return {
+			...row,
+			role: roleType,
+			image: images.generateSignedImageUrl({
+				key: imageKey,
+				options: { width: imageWidth.avatar },
+			}),
+		};
+	});
+}
+
+//
+
 export async function getWorkingGroupById(
 	db: Database | Transaction,
 	params: GetWorkingGroupByIdParams,
 ) {
 	const { id } = params;
 
-	const [item, fields] = await Promise.all([
+	const [item, fields, chairs] = await Promise.all([
 		db.query.workingGroups.findFirst({
 			where: {
 				id,
@@ -215,6 +256,7 @@ export async function getWorkingGroupById(
 			},
 		}),
 		getContentBlocks(db, id),
+		getChairs(db, id),
 	]);
 
 	if (item == null) {
@@ -253,6 +295,7 @@ export async function getWorkingGroupById(
 		socialMedia,
 		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
+		chairs,
 		relatedEntities,
 		relatedResources,
 	};
@@ -402,8 +445,9 @@ export async function getWorkingGroupBySlug(
 		};
 	});
 
-	const [fields, relatedEntities, relatedResources] = await Promise.all([
+	const [fields, chairs, relatedEntities, relatedResources] = await Promise.all([
 		getContentBlocks(db, item.id),
+		getChairs(db, item.id),
 		getRelatedEntities(db, item.id),
 		getRelatedResources(db, item.id),
 	]);
@@ -414,6 +458,7 @@ export async function getWorkingGroupBySlug(
 		socialMedia,
 		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
+		chairs,
 		relatedEntities,
 		relatedResources,
 	};

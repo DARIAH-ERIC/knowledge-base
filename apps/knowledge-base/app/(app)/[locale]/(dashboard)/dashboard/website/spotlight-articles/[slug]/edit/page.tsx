@@ -9,6 +9,10 @@ import type { ReactNode } from "react";
 
 import { SpotlightArticleEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-edit";
 import { imageGridOptions } from "@/config/assets.config";
+import {
+	getAvailablePersons,
+	getSpotlightArticleContributors,
+} from "@/lib/data/article-contributors";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import {
 	getAvailableEntities,
@@ -40,44 +44,53 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 
 	const { slug } = await params;
 
-	const [{ items: initialAssets }, spotlightArticle, relatedEntities, relatedResources] =
-		await Promise.all([
-			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
-			db.query.spotlightArticles.findFirst({
-				where: {
-					entity: {
-						slug,
+	const [
+		{ items: initialAssets },
+		spotlightArticle,
+		relatedEntities,
+		relatedResources,
+		availablePersons,
+	] = await Promise.all([
+		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
+		db.query.spotlightArticles.findFirst({
+			where: {
+				entity: {
+					slug,
+				},
+			},
+			columns: {
+				id: true,
+				title: true,
+				summary: true,
+			},
+			with: {
+				entity: {
+					columns: {
+						documentId: true,
+						slug: true,
 					},
 				},
-				columns: {
-					id: true,
-					title: true,
-					summary: true,
-				},
-				with: {
-					entity: {
-						columns: {
-							documentId: true,
-							slug: true,
-						},
-					},
-					image: {
-						columns: {
-							key: true,
-							label: true,
-						},
+				image: {
+					columns: {
+						key: true,
+						label: true,
 					},
 				},
-			}),
-			getAvailableEntities(),
-			getAvailableResources(),
-		]);
+			},
+		}),
+		getAvailableEntities(),
+		getAvailableResources(),
+		getAvailablePersons(),
+	]);
 
 	if (spotlightArticle == null) {
 		notFound();
 	}
 
-	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(spotlightArticle.id);
+	const [{ relatedEntityIds, relatedResourceIds }, contributors] = await Promise.all([
+		getEntityRelations(spotlightArticle.id),
+		getSpotlightArticleContributors(spotlightArticle.id),
+	]);
 
 	const image = images.generateSignedImageUrl({
 		key: spotlightArticle.image.key,
@@ -316,7 +329,9 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 
 	return (
 		<SpotlightArticleEditForm
+			availablePersons={availablePersons}
 			contentBlocks={contentBlocks}
+			contributors={contributors}
 			initialAssets={initialAssets}
 			initialRelatedEntityIds={relatedEntityIds}
 			initialRelatedResourceIds={relatedResourceIds}

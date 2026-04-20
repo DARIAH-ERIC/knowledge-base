@@ -3,13 +3,15 @@ import { existsSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
-import { assert, isNonEmptyString, keyBy, log } from "@acdh-oeaw/lib";
-import { db } from "@dariah-eric/database/client";
+import { assert, isNonEmptyString, keyBy, log, unreachable } from "@acdh-oeaw/lib";
+import { db, type Transaction } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { createStorageService } from "@dariah-eric/storage";
 import type { AssetPrefix } from "@dariah-eric/storage/config";
 import { buffer } from "@dariah-eric/storage/lib";
 import slugify from "@sindresorhus/slugify";
+import type { JSONContent } from "@tiptap/core";
+import { Image } from "@tiptap/extension-image";
 import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
 import { toText } from "hast-util-to-text";
@@ -33,6 +35,142 @@ function toPlaintext(html: string): string {
 	const ast = processor.parse(html);
 	return toText(ast);
 }
+
+function toSummary(html: string): string {
+	return toPlaintext(html)
+		.replace(/\s*read more\s*$/i, "")
+		.trim();
+}
+
+function extractAuthorsFromHtml(html: string): Array<string> {
+	const lines = toPlaintext(html)
+		.split(/\r?\n+/)
+		.map((line) => {
+			return line.trim();
+		})
+		.filter((line) => {
+			return line.length > 0;
+		})
+		.slice(0, 20);
+
+	const affiliations = [
+		"university",
+		"college",
+		"institute",
+		"institut",
+		"dariah",
+		"clariah",
+		"professor",
+		"assistant",
+		"associate",
+		"scientific",
+		"lecturer",
+		"research",
+		"department",
+		"school",
+		"faculty",
+		"centre",
+		"center",
+		"library",
+		"museum",
+		"archive",
+		"editor",
+		"editors",
+		"course editors",
+		"one of the course editors",
+		"followed by",
+	];
+
+	const isLikelyName = (value: string): boolean => {
+		const parts = value.trim().split(/\s+/);
+
+		if (parts.length < 2 || parts.length > 5) {
+			return false;
+		}
+
+		return parts.every((part, index) => {
+			if (/^[A-Z]\.$/u.test(part)) {
+				return true;
+			}
+
+			if (index > 0 && /^(?:de|del|van|von|da|di|du|la|le|der|den)$/i.test(part)) {
+				return true;
+			}
+
+			return /^[A-Z][\p{L}'’.-]*$/u.test(part);
+		});
+	};
+
+	const cleanCandidate = (value: string): Array<string> => {
+		let candidate = value.trim().replaceAll(/\s+/g, " ");
+
+		if (candidate.length === 0) {
+			return [];
+		}
+
+		candidate = candidate.replace(/\s*\([^)]*\)\s*$/, "");
+		candidate = candidate.replace(/\s*\[[^\]]*\]\s*$/, "");
+		candidate = candidate.split(",")[0] ?? candidate;
+		candidate = candidate.split(" - ")[0] ?? candidate;
+		candidate = candidate.split(" – ")[0] ?? candidate;
+		candidate = candidate.split(" — ")[0] ?? candidate;
+		candidate = candidate.trim();
+
+		if (candidate.length === 0) {
+			return [];
+		}
+
+		const pieces = candidate.split(/[,;/&]|\sand\s/i);
+
+		return pieces
+			.map((piece) => {
+				return piece.trim();
+			})
+			.filter((piece) => {
+				return piece.length > 0;
+			})
+			.filter((piece) => {
+				const lower = piece.toLowerCase();
+
+				if (
+					affiliations.some((marker) => {
+						return lower.includes(marker);
+					})
+				) {
+					return false;
+				}
+
+				return isLikelyName(piece);
+			});
+	};
+
+	for (let index = 0; index < lines.length; index += 1) {
+		const line = lines[index]!;
+		const bylineMatch = /^(?:written by|lead author|by)\s*:?\s*/i.exec(line);
+
+		if (bylineMatch != null) {
+			const authors = cleanCandidate(line.slice(bylineMatch[0].length));
+
+			if (authors.length > 0) {
+				return authors;
+			}
+
+			const continuation = lines.slice(index + 1, index + 4).join(" ");
+			const continuationAuthors = cleanCandidate(continuation);
+
+			if (continuationAuthors.length > 0) {
+				return continuationAuthors;
+			}
+		}
+	}
+
+	return [];
+}
+
+const deniedPageLinks = new Set([
+	"https://www.dariah.eu/about/documents-list/", // documents-policies
+	"https://www.dariah.eu/", // landing page uses visual composer shortcodes
+]);
 
 const storage = createStorageService({
 	config: {
@@ -118,6 +256,250 @@ async function uploadFeaturedImage(
 	assert(asset, `Missing asset (entity id ${String(id)}).`);
 
 	return asset.id;
+}
+
+/** Returns the index just after the `</div>` that closes the div opened at `afterOpenTag`. */
+function findClosingDiv(html: string, afterOpenTag: number): number {
+	let depth = 1;
+	let i = afterOpenTag;
+	while (i < html.length && depth > 0) {
+		const nextOpen = html.indexOf("<div", i);
+		const nextClose = html.indexOf("</div>", i);
+		if (nextClose === -1) {
+			break;
+		}
+		if (nextOpen !== -1 && nextOpen < nextClose) {
+			depth++;
+			i = nextOpen + 4;
+		} else {
+			depth--;
+			i = nextClose + 6;
+		}
+	}
+	return i;
+}
+
+/** Extracts accordion items from an Easy Accordion (`sp-easy-accordion`) div. */
+function extractAccordionItems(html: string): Array<{ title: string; bodyHtml: string }> {
+	const items: Array<{ title: string; bodyHtml: string }> = [];
+	const singleRe = /<div[^>]+class="[^"]*sp-ea-single[^"]*"[^>]*>/gi;
+	let m: RegExpExecArray | null;
+
+	while ((m = singleRe.exec(html)) !== null) {
+		const itemEnd = findClosingDiv(html, m.index + m[0].length);
+		const itemHtml = html.slice(m.index, itemEnd);
+
+		const headerMatch = /<div[^>]+class="[^"]*ea-header[^"]*"[^>]*>([\s\S]*?)<\/div>/i.exec(
+			itemHtml,
+		);
+		const title = (headerMatch?.[1] ?? "").replaceAll(/<[^>]+>/g, "").trim();
+
+		const bodyOpenMatch = /<div[^>]+class="[^"]*ea-body[^"]*"[^>]*>/i.exec(itemHtml);
+		let bodyHtml = "";
+		if (bodyOpenMatch) {
+			const bodyContentStart = bodyOpenMatch.index + bodyOpenMatch[0].length;
+			const bodyEnd = findClosingDiv(itemHtml, bodyContentStart);
+			bodyHtml = itemHtml.slice(bodyContentStart, bodyEnd - 6);
+		}
+
+		if (title || bodyHtml) {
+			items.push({ title, bodyHtml });
+		}
+	}
+
+	return items;
+}
+
+/**
+ * Parses WordPress HTML into content blocks, handling inline images (uploaded as
+ * assets and stored as image content blocks), iframe embeds, and Easy Accordion
+ * widgets. Text segments between specials become rich_text blocks. Blocks are
+ * inserted in order into the given field.
+ */
+async function migrateHtmlContent(
+	tx: Transaction,
+	html: string,
+	assetsCache: AssetsCache,
+	fieldId: string,
+	contentBlockTypes: Record<string, { id: string }>,
+): Promise<void> {
+	type BlockSpec =
+		| { type: "rich_text"; content: JSONContent }
+		| { type: "image"; assetId: string }
+		| { type: "embed"; url: string; title: string }
+		| { type: "accordion"; items: Array<{ title: string; content: JSONContent }> };
+
+	const blocks: Array<BlockSpec> = [];
+
+	// Collect all special positions (iframes + accordions) sorted by index.
+	interface SpecialMatch {
+		index: number;
+		end: number;
+		segment:
+			| { kind: "iframe"; src: string; title: string }
+			| { kind: "accordion"; items: Array<{ title: string; bodyHtml: string }> };
+	}
+	const specials: Array<SpecialMatch> = [];
+
+	const iframeRe = /<iframe(?:\s[^>]*)?\ssrc="([^"]*)"[^>]*>[\s\S]*?<\/iframe>/gi;
+	let m: RegExpExecArray | null;
+
+	while ((m = iframeRe.exec(html)) !== null) {
+		const titleMatch = /title="([^"]*)"/.exec(m[0]);
+		specials.push({
+			index: m.index,
+			end: m.index + m[0].length,
+			segment: { kind: "iframe", src: m[1]!, title: titleMatch?.[1] ?? m[1]! },
+		});
+	}
+
+	const accordionRe = /<div[^>]+class="[^"]*sp-easy-accordion[^"]*"[^>]*>/gi;
+
+	while ((m = accordionRe.exec(html)) !== null) {
+		const end = findClosingDiv(html, m.index + m[0].length);
+		specials.push({
+			index: m.index,
+			end,
+			segment: { kind: "accordion", items: extractAccordionItems(html.slice(m.index, end)) },
+		});
+	}
+
+	specials.sort((a, b) => {
+		return a.index - b.index;
+	});
+
+	type Segment =
+		| { kind: "html"; content: string }
+		| { kind: "iframe"; src: string; title: string }
+		| { kind: "accordion"; items: Array<{ title: string; bodyHtml: string }> };
+
+	const segments: Array<Segment> = [];
+	let lastIndex = 0;
+	for (const special of specials) {
+		if (special.index > lastIndex) {
+			segments.push({ kind: "html", content: html.slice(lastIndex, special.index) });
+		}
+		segments.push(special.segment);
+		lastIndex = special.end;
+	}
+	if (lastIndex < html.length) {
+		segments.push({ kind: "html", content: html.slice(lastIndex) });
+	}
+
+	for (const segment of segments) {
+		if (segment.kind === "iframe") {
+			blocks.push({ type: "embed", url: segment.src, title: segment.title });
+			continue;
+		}
+
+		if (segment.kind === "accordion") {
+			blocks.push({
+				type: "accordion",
+				items: segment.items.map(({ title, bodyHtml }) => {
+					return {
+						title,
+						content: generateJSON(bodyHtml, [StarterKit, Image]),
+					};
+				}),
+			});
+			continue;
+		}
+
+		const doc = generateJSON(segment.content, [StarterKit, Image]);
+		let richTextRun: Array<JSONContent> = [];
+
+		for (const node of doc.content ?? []) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+			if (node.type === "image" && typeof node.attrs?.src === "string") {
+				if (richTextRun.length > 0) {
+					blocks.push({
+						type: "rich_text",
+						content: { type: "doc", content: richTextRun },
+					});
+					richTextRun = [];
+				}
+				try {
+					const asset = await upload(
+						"images",
+						assetsCache,
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+						new URL(node.attrs.src),
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+						node.attrs.src,
+						undefined,
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+						typeof node.attrs.alt === "string" && node.attrs.alt !== ""
+							? // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+								node.attrs.alt
+							: undefined,
+					);
+					if (asset != null) {
+						blocks.push({ type: "image", assetId: asset.id });
+					}
+				} catch {
+					// eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access
+					log.warn(`Failed to migrate inline image: ${node.attrs.src}`);
+				}
+			} else {
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+				richTextRun.push(node);
+			}
+		}
+
+		if (richTextRun.length > 0) {
+			blocks.push({ type: "rich_text", content: { type: "doc", content: richTextRun } });
+		}
+	}
+
+	for (const [position, block] of blocks.entries()) {
+		const [contentBlock] = await tx
+			.insert(schema.contentBlocks)
+			.values({
+				position,
+				fieldId,
+				typeId: contentBlockTypes[block.type]!.id,
+			})
+			.returning({ id: schema.contentBlocks.id });
+
+		assert(contentBlock);
+
+		switch (block.type) {
+			case "rich_text": {
+				await tx
+					.insert(schema.richTextContentBlocks)
+					.values({ id: contentBlock.id, content: block.content });
+
+				break;
+			}
+
+			case "image": {
+				await tx
+					.insert(schema.imageContentBlocks)
+					.values({ id: contentBlock.id, imageId: block.assetId, caption: null });
+
+				break;
+			}
+
+			case "embed": {
+				await tx
+					.insert(schema.embedContentBlocks)
+					.values({ id: contentBlock.id, url: block.url, title: block.title, caption: null });
+
+				break;
+			}
+
+			case "accordion": {
+				await tx
+					.insert(schema.accordionContentBlocks)
+					.values({ id: contentBlock.id, items: block.items });
+				break;
+			}
+
+			default: {
+				unreachable();
+			}
+		}
+	}
 }
 
 async function readAssetsCacheData(): Promise<AssetsCache> {
@@ -218,6 +600,9 @@ async function main() {
 	const wpWorkingGroupIdToOrgUnitId = new Map<number, string>();
 	const wpPersonIdToDbId = new Map<number, string>();
 
+	const spotlightArticleIdToAuthorNames = new Map<string, Array<string>>();
+	const impactCaseStudyIdToAuthorNames = new Map<string, Array<string>>();
+
 	const projectScopes = await db.query.projectScopes.findMany();
 	const projectScopesByType = keyBy(projectScopes, (item) => {
 		return item.scope;
@@ -263,7 +648,7 @@ async function main() {
 	log.info("Migrating pages...");
 
 	for (const page of Object.values(data.pages)) {
-		if (page.link === "https://www.dariah.eu/about/documents-list/") {
+		if (deniedPageLinks.has(page.link)) {
 			continue;
 		}
 
@@ -301,25 +686,33 @@ async function main() {
 				await tx.insert(schema.impactCaseStudies).values({
 					id,
 					title: toPlaintext(page.title.rendered),
-					summary: toPlaintext(page.excerpt.rendered),
+					summary: toSummary(page.excerpt.rendered),
 					imageId: imageId ?? placeholderImage.id,
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),
 				});
+				const authorNames = extractAuthorsFromHtml(page.content.rendered);
+				if (authorNames.length > 0) {
+					impactCaseStudyIdToAuthorNames.set(id, authorNames);
+				}
 			} else if (page.link.startsWith("https://www.dariah.eu/activities/spotlight/")) {
 				await tx.insert(schema.spotlightArticles).values({
 					id,
 					title: toPlaintext(page.title.rendered),
-					summary: toPlaintext(page.excerpt.rendered),
+					summary: toSummary(page.excerpt.rendered),
 					imageId: imageId ?? placeholderImage.id,
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),
 				});
+				const authorNames = extractAuthorsFromHtml(page.content.rendered);
+				if (authorNames.length > 0) {
+					spotlightArticleIdToAuthorNames.set(id, authorNames);
+				}
 			} else {
 				await tx.insert(schema.pages).values({
 					id,
 					title: toPlaintext(page.title.rendered),
-					summary: toPlaintext(page.excerpt.rendered),
+					summary: toSummary(page.excerpt.rendered),
 					imageId,
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),
@@ -329,8 +722,6 @@ async function main() {
 			if (page.content.rendered.trim().length === 0) {
 				return;
 			}
-
-			const content = generateJSON(page.content.rendered, [StarterKit]);
 
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
@@ -351,21 +742,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				page.content.rendered,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 
@@ -795,7 +1178,7 @@ async function main() {
 				id,
 				title: toPlaintext(page.title.rendered),
 				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-				summary: toPlaintext(page.excerpt?.rendered ?? ""),
+				summary: toSummary(page.excerpt?.rendered ?? ""),
 				imageId,
 				createdAt: new Date(page.date_gmt),
 				updatedAt: new Date(page.modified_gmt),
@@ -804,8 +1187,6 @@ async function main() {
 			if (page.content.rendered.trim().length === 0) {
 				return;
 			}
-
-			const content = generateJSON(page.content.rendered, [StarterKit]);
 
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
@@ -826,21 +1207,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				page.content.rendered,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 
@@ -896,7 +1269,7 @@ async function main() {
 			await tx.insert(schema.news).values({
 				id,
 				title: toPlaintext(post.title.rendered),
-				summary: toPlaintext(post.excerpt.rendered),
+				summary: toSummary(post.excerpt.rendered),
 				imageId: imageId ?? placeholderImage.id,
 				createdAt: new Date(post.date_gmt),
 				updatedAt: new Date(post.modified_gmt),
@@ -905,8 +1278,6 @@ async function main() {
 			if (post.content.rendered.trim().length === 0) {
 				return;
 			}
-
-			const content = generateJSON(post.content.rendered, [StarterKit]);
 
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
@@ -927,21 +1298,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				post.content.rendered,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 
@@ -985,7 +1348,7 @@ async function main() {
 			await tx.insert(schema.events).values({
 				id,
 				title: toPlaintext(event.title),
-				summary: toPlaintext(event.description),
+				summary: toSummary(event.description),
 				imageId: imageId ?? placeholderImage.id,
 				website: event.website,
 				location:
@@ -1004,8 +1367,6 @@ async function main() {
 			if (event.description.trim().length === 0) {
 				return;
 			}
-
-			const content = generateJSON(event.description, [StarterKit]);
 
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
@@ -1026,21 +1387,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				event.description,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 
@@ -1143,8 +1496,6 @@ async function main() {
 				return;
 			}
 
-			const content = generateJSON(country.content.rendered, [StarterKit]);
-
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.organisational_units.id,
@@ -1164,21 +1515,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				country.content.rendered,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 
@@ -1320,8 +1663,6 @@ async function main() {
 				return;
 			}
 
-			const content = generateJSON(institution.content.rendered, [StarterKit]);
-
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.organisational_units.id,
@@ -1341,21 +1682,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				institution.content.rendered,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 
@@ -1465,8 +1798,6 @@ async function main() {
 				return;
 			}
 
-			const content = generateJSON(workingGroup.content.rendered, [StarterKit]);
-
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.organisational_units.id,
@@ -1486,21 +1817,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				workingGroup.content.rendered,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 
@@ -1548,7 +1871,7 @@ async function main() {
 					acronym: project.title.rendered,
 					duration: { start: new Date(Date.UTC(2025, 0, 1)), end: new Date(Date.UTC(2028, 0, 1)) }, // FIXME: need to extract from richtext
 					// funding: 0,
-					summary: toPlaintext(project.excerpt.rendered),
+					summary: toSummary(project.excerpt.rendered),
 					// call: "",
 					// funders: "",
 					// topic: "",
@@ -1627,8 +1950,6 @@ async function main() {
 				return;
 			}
 
-			const content = generateJSON(project.content.rendered, [StarterKit]);
-
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.projects.id,
@@ -1648,21 +1969,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				project.content.rendered,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 
@@ -1760,8 +2073,6 @@ async function main() {
 				return;
 			}
 
-			const content = generateJSON(person.content.rendered, [StarterKit]);
-
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
 					entityTypeId: entityTypesByType.persons.id,
@@ -1781,21 +2092,13 @@ async function main() {
 
 			assert(field);
 
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({
-					position: 0,
-					fieldId: field.id,
-					typeId: contentBlockTypesByType.rich_text.id,
-				})
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				content,
-				id: contentBlock.id,
-			});
+			await migrateHtmlContent(
+				tx,
+				person.content.rendered,
+				assetsCache,
+				field.id,
+				contentBlockTypesByType,
+			);
 		});
 	}
 
@@ -1838,6 +2141,67 @@ async function main() {
 	}
 
 	//
+
+	/**
+	 * ============================================================================================
+	 * Author relations for spotlight articles and impact case studies.
+	 * ============================================================================================
+	 */
+
+	log.info("Creating author relations for spotlight articles and impact case studies...");
+
+	const personsByName = new Map<string, string>();
+	for (const person of Object.values(data.people)) {
+		const fullName = [person.firstname, person.lastname].filter(Boolean).join(" ");
+		const dbId = wpPersonIdToDbId.get(person.id);
+		// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+		if (fullName && dbId) {
+			personsByName.set(fullName, dbId);
+		}
+	}
+
+	function resolvePersonByName(authorName: string): string | undefined {
+		const exact = personsByName.get(authorName);
+		if (exact != null) {
+			return exact;
+		}
+		for (const [name, dbId] of personsByName) {
+			if (authorName.includes(name)) {
+				return dbId;
+			}
+		}
+		return undefined;
+	}
+
+	for (const [articleId, authorNames] of spotlightArticleIdToAuthorNames) {
+		for (const authorName of authorNames) {
+			const personDbId = resolvePersonByName(authorName);
+			if (personDbId == null) {
+				log.warn(`Spotlight article ${articleId}: author "${authorName}" not matched to a person.`);
+				continue;
+			}
+			await db.insert(schema.spotlightArticlesToPersons).values({
+				spotlightArticleId: articleId,
+				personId: personDbId,
+				role: "author",
+			});
+		}
+	}
+
+	for (const [articleId, authorNames] of impactCaseStudyIdToAuthorNames) {
+		for (const authorName of authorNames) {
+			const personDbId = resolvePersonByName(authorName);
+			if (personDbId == null) {
+				log.warn(`Impact case study ${articleId}: author "${authorName}" not matched to a person.`);
+				continue;
+			}
+			await db.insert(schema.impactCaseStudiesToPersons).values({
+				impactCaseStudyId: articleId,
+				personId: personDbId,
+				role: "author",
+			});
+		}
+	}
 
 	log.info("Writing assets cache manifest...");
 
