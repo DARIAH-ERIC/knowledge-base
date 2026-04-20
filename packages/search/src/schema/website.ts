@@ -81,7 +81,7 @@ export interface WebsiteResourceDocument extends WebsiteCollectionDocumentBase {
 
 export interface WebsiteEntityDocument extends WebsiteCollectionDocumentBase {
 	type: WebsiteEntityType;
-	/** Slug of the page this entity links to. For most entities this is their own page; for institutions and national consortia it is the parent country page. */
+	/** Slug of the page this entity links to. For most entities this is their own page; for institutions and national consortia it is the parent country page. For entities without dedicated pages (e.g. documents and policies), consumers may use this as a fragment identifier. */
 	slug: string;
 }
 
