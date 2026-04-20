@@ -1,3 +1,5 @@
+import { asc } from "@dariah-eric/database";
+import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -25,10 +27,15 @@ export async function generateMetadata(
 export default async function DashboardWebsiteCreateDocumentOrPolicyPage(
 	_props: Readonly<DashboardWebsiteCreateDocumentOrPolicyPageProps>,
 ): Promise<ReactNode> {
-	const { items: initialAssets } = await getMediaLibraryAssets({
-		imageUrlOptions: imageGridOptions,
-		prefix: "documents",
-	});
+	const [{ items: initialAssets }, groups] = await Promise.all([
+		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "documents" }),
+		db.query.documentPolicyGroups.findMany({
+			columns: { id: true, label: true },
+			orderBy(t) {
+				return [asc(t.position), asc(t.label)];
+			},
+		}),
+	]);
 
-	return <DocumentOrPolicyCreateForm initialAssets={initialAssets} />;
+	return <DocumentOrPolicyCreateForm groups={groups} initialAssets={initialAssets} />;
 }

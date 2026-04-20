@@ -1,4 +1,4 @@
-import { and, eq, sql } from "@dariah-eric/database";
+import { and, asc, eq, sql } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
@@ -35,7 +35,7 @@ export default async function DashboardWebsiteEditDocumentOrPolicyPage(
 
 	const { slug } = await params;
 
-	const [{ items: initialAssets }, documentOrPolicy] = await Promise.all([
+	const [{ items: initialAssets }, documentOrPolicy, groups] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "documents" }),
 		db.query.documentsPolicies.findFirst({
 			where: {
@@ -48,6 +48,7 @@ export default async function DashboardWebsiteEditDocumentOrPolicyPage(
 				title: true,
 				summary: true,
 				url: true,
+				groupId: true,
 			},
 			with: {
 				entity: {
@@ -62,6 +63,12 @@ export default async function DashboardWebsiteEditDocumentOrPolicyPage(
 						label: true,
 					},
 				},
+			},
+		}),
+		db.query.documentPolicyGroups.findMany({
+			columns: { id: true, label: true },
+			orderBy(t) {
+				return [asc(t.position), asc(t.label)];
 			},
 		}),
 	]);
@@ -312,6 +319,7 @@ export default async function DashboardWebsiteEditDocumentOrPolicyPage(
 				...documentOrPolicy,
 				document: { ...documentOrPolicy.document, url: document.url },
 			}}
+			groups={groups}
 			initialAssets={initialAssets}
 		/>
 	);

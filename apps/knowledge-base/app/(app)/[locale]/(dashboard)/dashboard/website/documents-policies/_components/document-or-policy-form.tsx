@@ -8,6 +8,7 @@ import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
@@ -24,14 +25,15 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface DocumentOrPolicyFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
-	documentOrPolicy?: Pick<schema.DocumentOrPolicy, "id" | "title" | "summary" | "url"> & {
+	documentOrPolicy?: Pick<schema.DocumentOrPolicy, "id" | "title" | "summary" | "url" | "groupId"> & {
 		entity: { documentId: string; slug: string };
 	} & { document: { key: string; label: string; url: string } };
+	groups: Array<Pick<schema.DocumentPolicyGroup, "id" | "label">>;
 	formAction: ServerAction;
 }
 
 export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>): ReactNode {
-	const { initialAssets, contentBlocks, formAction, documentOrPolicy } = props;
+	const { initialAssets, contentBlocks, formAction, documentOrPolicy, groups } = props;
 
 	const t = useExtracted();
 
@@ -41,6 +43,10 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 		documentOrPolicy?.document
 			? { key: documentOrPolicy.document.key, label: documentOrPolicy.document.label }
 			: null,
+	);
+
+	const [selectedGroupId, setSelectedGroupId] = useState<string>(
+		documentOrPolicy?.groupId ?? "",
 	);
 
 	const [documentKeyError, setDocumentKeyError] = useState(false);
@@ -69,6 +75,30 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 					<Input placeholder="https://" />
 					<FieldError />
 				</TextField>
+
+				<Select
+					onChange={(key) => {
+						setSelectedGroupId(String(key === "none" ? "" : key));
+					}}
+					value={selectedGroupId || "none"}
+				>
+					<Label>{t("Group")}</Label>
+					<SelectTrigger />
+					<FieldError />
+					<SelectContent>
+						<SelectItem id="none">{t("None")}</SelectItem>
+						{groups.map((group) => {
+							return (
+								<SelectItem key={group.id} id={group.id}>
+									{group.label}
+								</SelectItem>
+							);
+						})}
+					</SelectContent>
+				</Select>
+				{selectedGroupId ? (
+					<input name="groupId" type="hidden" value={selectedGroupId} />
+				) : null}
 			</FormSection>
 
 			<Separator className="my-6" />

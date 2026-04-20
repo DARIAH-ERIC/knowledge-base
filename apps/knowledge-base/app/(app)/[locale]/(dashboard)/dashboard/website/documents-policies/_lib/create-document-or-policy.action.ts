@@ -1,6 +1,7 @@
 "use server";
 
 import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
+import { eq, isNull } from "@dariah-eric/database";
 import { db, type Transaction } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
@@ -45,7 +46,7 @@ export const createDocumentOrPolicyAction = createServerAction(
 			});
 		}
 
-		const { contentBlocks, title, documentKey, summary, url } = result.output;
+		const { contentBlocks, title, documentKey, summary, url, groupId } = result.output;
 
 		const slug = slugify(title);
 
@@ -90,12 +91,23 @@ export const createDocumentOrPolicyAction = createServerAction(
 
 			assert(asset);
 
+			const siblings = await tx
+				.select({ id: schema.documentsPolicies.id })
+				.from(schema.documentsPolicies)
+				.where(
+					groupId != null
+						? eq(schema.documentsPolicies.groupId, groupId)
+						: isNull(schema.documentsPolicies.groupId),
+				);
+
 			await tx.insert(schema.documentsPolicies).values({
 				id: entity.id,
 				documentId: asset.id,
 				title,
 				summary,
 				url: url != null && url.length > 0 ? url : null,
+				groupId: groupId ?? null,
+				position: siblings.length,
 			});
 
 			const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({

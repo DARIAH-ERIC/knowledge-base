@@ -12,15 +12,16 @@ import { updateDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/d
 interface DocumentOrPolicyEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
-	documentOrPolicy: Pick<schema.DocumentOrPolicy, "id" | "title" | "summary" | "url"> & {
+	documentOrPolicy: Pick<schema.DocumentOrPolicy, "id" | "title" | "summary" | "url" | "groupId"> & {
 		entity: { documentId: string; slug: string };
 	} & { document: { key: string; label: string; url: string } };
+	groups: Array<Pick<schema.DocumentPolicyGroup, "id" | "label">>;
 }
 
 export function DocumentOrPolicyEditForm(
 	props: Readonly<DocumentOrPolicyEditFormProps>,
 ): ReactNode {
-	const { initialAssets, contentBlocks, documentOrPolicy } = props;
+	const { initialAssets, contentBlocks, documentOrPolicy, groups } = props;
 
 	const t = useExtracted();
 
@@ -32,6 +33,7 @@ export function DocumentOrPolicyEditForm(
 				contentBlocks={contentBlocks}
 				documentOrPolicy={documentOrPolicy}
 				formAction={updateDocumentOrPolicyAction}
+				groups={groups}
 				initialAssets={initialAssets}
 			/>
 		</Fragment>
