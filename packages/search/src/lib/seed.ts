@@ -39,6 +39,7 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 					) ?? null,
 				label: f.lorem.sentence(),
 				description: f.lorem.paragraphs(2, "\n\n"),
+				upstream_sources: null,
 				keywords: f.helpers.multiple(
 					() => {
 						return f.lorem.word();
@@ -85,7 +86,7 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 						source: "ssh-open-marketplace",
 						source_id: f.string.alphanumeric(12),
 						kind: f.helpers.arrayElement(toolOrServiceKinds),
-						actor_ids: f.helpers.multiple(
+						source_actor_ids: f.helpers.multiple(
 							() => {
 								return f.string.alphanumeric(12);
 							},
@@ -100,7 +101,7 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 						type,
 						source: "ssh-open-marketplace",
 						source_id: f.string.alphanumeric(12),
-						actor_ids: f.helpers.multiple(
+						source_actor_ids: f.helpers.multiple(
 							() => {
 								return f.string.alphanumeric(12);
 							},
@@ -115,7 +116,7 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 						type,
 						source: "ssh-open-marketplace",
 						source_id: f.string.alphanumeric(12),
-						actor_ids: f.helpers.multiple(
+						source_actor_ids: f.helpers.multiple(
 							() => {
 								return f.string.alphanumeric(12);
 							},

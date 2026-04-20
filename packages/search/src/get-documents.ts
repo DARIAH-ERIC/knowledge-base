@@ -1,5 +1,6 @@
 import { err, isErr, log, ok, type Result } from "@acdh-oeaw/lib";
 
+import { getDocuments as getDariahCampusDocuments } from "./documents/dariah-campus";
 import { getDocuments as getOpenAireDocuments } from "./documents/open-aire";
 import { getDocuments as getSshOpenMarketplaceDocuments } from "./documents/sshoc";
 import { getDocuments as getZoteroDocuments } from "./documents/zotero";
@@ -68,6 +69,30 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 	count = formatters.items(sshOpenMarketplaceResponse.value.length);
 
 	log.success(`Retrieved ${count} documents from SSH Open Marketplace in ${duration}.`);
+
+	/** ========================================================================================== */
+
+	log.info("Retrieving data from DARIAH Campus.");
+
+	start = performance.now();
+
+	const dariahCampusResponse = await getDariahCampusDocuments();
+
+	if (isErr(dariahCampusResponse)) {
+		return err(
+			new Error("Failed to retrieve data from DARIAH Campus.", {
+				cause: dariahCampusResponse.error,
+			}),
+		);
+	}
+
+	documents.push(...dariahCampusResponse.value);
+
+	end = performance.now();
+	duration = formatters.duration(end - start);
+	count = formatters.items(dariahCampusResponse.value.length);
+
+	log.success(`Retrieved ${count} documents from DARIAH Campus in ${duration}.`);
 
 	/** ========================================================================================== */
 
