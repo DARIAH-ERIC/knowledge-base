@@ -3,6 +3,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 import { assets } from "./assets";
+import { documentPolicyGroups } from "./document-policy-groups";
 import { entities } from "./entities";
 
 export const documentsPolicies = p.pgTable("documents_policies", {
@@ -21,6 +22,10 @@ export const documentsPolicies = p.pgTable("documents_policies", {
 		.references(() => {
 			return assets.id;
 		}),
+	groupId: p.uuid("group_id").references(() => {
+		return documentPolicyGroups.id;
+	}),
+	position: p.integer("position").notNull().default(0),
 	...f.timestamps(),
 });
 

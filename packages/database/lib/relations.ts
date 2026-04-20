@@ -13,6 +13,12 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.licenses.id,
 			}),
 		},
+		documentPolicyGroups: {
+			documentsPolicies: r.many.documentsPolicies({
+				from: r.documentPolicyGroups.id,
+				to: r.documentsPolicies.groupId,
+			}),
+		},
 		documentsPolicies: {
 			entity: r.one.entities({
 				from: r.documentsPolicies.id,
@@ -23,6 +29,11 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.documentsPolicies.documentId,
 				to: r.assets.id,
 				optional: false,
+			}),
+			group: r.one.documentPolicyGroups({
+				from: r.documentsPolicies.groupId,
+				to: r.documentPolicyGroups.id,
+				optional: true,
 			}),
 		},
 		contentBlocks: {

@@ -41,6 +41,13 @@ export async function getDocumentsPolicies(
 						updatedAt: true,
 					},
 				},
+				group: {
+					columns: {
+						id: true,
+						label: true,
+						position: true,
+					},
+				},
 			},
 			orderBy(t, { desc, sql }) {
 				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
@@ -98,6 +105,13 @@ export async function getDocumentOrPolicyById(
 					columns: {
 						slug: true,
 						updatedAt: true,
+					},
+				},
+				group: {
+					columns: {
+						id: true,
+						label: true,
+						position: true,
 					},
 				},
 			},
@@ -234,6 +248,13 @@ export async function getDocumentOrPolicyBySlug(
 				columns: {
 					slug: true,
 					updatedAt: true,
+				},
+			},
+			group: {
+				columns: {
+					id: true,
+					label: true,
+					position: true,
 				},
 			},
 		},
