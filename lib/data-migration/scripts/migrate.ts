@@ -2024,6 +2024,7 @@ async function main() {
 				name: [person.firstname, person.lastname].filter(Boolean).join(" "),
 				sortName: [person.lastname, person.firstname].filter(Boolean).join(", "),
 				email: person.email,
+				position: person.position,
 				// orcid,
 				imageId: imageId ?? placeholderImage.id,
 				createdAt: new Date(person.date_gmt),
