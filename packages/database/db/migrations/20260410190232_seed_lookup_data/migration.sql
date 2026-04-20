@@ -1,8 +1,10 @@
 INSERT INTO
 	"content_blocks_types" ("type")
 VALUES
+	('accordion'),
 	('data'),
 	('embed'),
+	('hero'),
 	('image'),
 	('rich_text')
 ON CONFLICT ("type") DO NOTHING;
