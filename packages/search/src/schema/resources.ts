@@ -46,7 +46,7 @@ interface ResourceCollectionDocumentBase {
 	 * The sources where the ingest source harvested the resource form, e.g. when sshoc marketplace
 	 * harvested items from dariah-campus.
 	 */
-	upstream_sources: Array<string>;
+	upstream_sources: Array<string> | null;
 	imported_at: number;
 	updated_at: number | null;
 	label: string;

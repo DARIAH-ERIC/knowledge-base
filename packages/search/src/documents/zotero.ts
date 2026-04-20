@@ -105,6 +105,7 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 					id,
 					source: ingestSource,
 					source_id: ingestSourceId,
+					upstream_sources: null,
 					imported_at: Date.now(),
 					updated_at: new Date(item.data.dateModified).getTime(),
 					type: "publication",

@@ -39,6 +39,7 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 					) ?? null,
 				label: f.lorem.sentence(),
 				description: f.lorem.paragraphs(2, "\n\n"),
+				upstream_sources: null,
 				keywords: f.helpers.multiple(
 					() => {
 						return f.lorem.word();

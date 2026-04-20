@@ -169,7 +169,7 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 					id,
 					source: ingestSource,
 					source_id: ingestSourceId,
-					upstream_source:
+					upstream_sources:
 						item.sources?.map((s) => {
 							return s.label;
 						}) ?? null,

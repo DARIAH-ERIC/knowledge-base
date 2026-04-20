@@ -2030,7 +2030,7 @@ async function main() {
 				// email: person.email,
 				// position: person.position,
 				// orcid,
-				// imageId: placeholderImage.id,
+				imageId: placeholderImage.id,
 				createdAt: new Date(),
 				updatedAt: new Date(),
 			});
