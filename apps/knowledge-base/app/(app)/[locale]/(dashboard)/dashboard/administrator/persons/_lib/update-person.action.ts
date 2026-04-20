@@ -42,7 +42,7 @@ export const updatePersonAction = createServerAction(
 			});
 		}
 
-		const { biography, email, id, imageKey, name, orcid, sortName } = result.output;
+		const { biography, email, id, imageKey, name, orcid, position, sortName } = result.output;
 
 		await db.transaction(async (tx) => {
 			const asset = await tx.query.assets.findFirst({
@@ -56,7 +56,7 @@ export const updatePersonAction = createServerAction(
 
 			await tx
 				.update(schema.persons)
-				.set({ email, imageId, name, orcid, sortName })
+				.set({ email, imageId, name, orcid, position, sortName })
 				.where(eq(schema.persons.id, id));
 
 			const biographyField = await tx.query.fields.findFirst({

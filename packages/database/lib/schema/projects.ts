@@ -27,7 +27,12 @@ export const projectScopes = p.pgTable(
 export type ProjectScope = typeof projectScopes.$inferSelect;
 export type ProjectScopeInput = typeof projectScopes.$inferInsert;
 
-export const projectRolesEnum = ["coordinator", "funder", "participant"] as const;
+export const projectRolesEnum = [
+	"coordinator",
+	"funder",
+	"participant",
+	/** "third_party" */ "affiliated",
+] as const;
 
 export const projectRoles = p.pgTable(
 	"project_roles",
@@ -55,7 +60,6 @@ export const projects = p.pgTable("projects", {
 	name: p.text("name").notNull(),
 	acronym: p.text("acronym"),
 	duration: f.timestampRange("duration").notNull(),
-	/** Funding amount may be ingested from CORDIS. */
 	funding: p.numeric("funding", { mode: "number", precision: 12, scale: 2 }),
 	summary: p.text("summary").notNull(),
 	call: p.text("call"),
@@ -132,8 +136,8 @@ export const ProjectToOrganisationalUnitUpdateSchema = createUpdateSchema(
 
 export const projectsContributions = p.pgTable("project_contributions", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
-	projectPartnerId: p.uuid("project_partner_id").references(() => {
-		return projectsToOrganisationalUnits.id;
+	projectId: p.uuid("project_id").references(() => {
+		return projects.id;
 	}),
 	reportId: p
 		.uuid("report_id")

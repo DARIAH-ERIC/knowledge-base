@@ -23,17 +23,20 @@ test.describe("persons admin", () => {
 		const personsPage = createAdminPersonsPage(workerIndex);
 
 		const name = `${personsPage.workerPrefix} Test Person ${randomUUID()}`;
+		const position = "Research fellow";
 
 		await personsPage.gotoCreate();
 
 		await personsPage.fillName(name);
 		await personsPage.fillSortName("Person, Test");
+		await personsPage.fillPosition(position);
 		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
 
 		await personsPage.submitForm();
 
 		await personsPage.searchByName(name);
 		await expect(personsPage.rowByName(name)).toBeVisible();
+		await expect(personsPage.rowByName(name)).toContainText(position);
 	});
 
 	test("should edit a person name", async ({ page, createAdminPersonsPage }) => {
@@ -44,6 +47,7 @@ test.describe("persons admin", () => {
 		await personsPage.gotoCreate();
 		await personsPage.fillName(originalName);
 		await personsPage.fillSortName("Me, Edit");
+		await personsPage.fillPosition("Officer");
 		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await personsPage.submitForm();
 
@@ -59,6 +63,7 @@ test.describe("persons admin", () => {
 		const nameField = page.getByLabel("Name", { exact: true });
 		await nameField.clear();
 		await nameField.fill(updatedName);
+		await personsPage.fillPosition("Senior officer");
 
 		await personsPage.submitForm();
 
@@ -76,6 +81,7 @@ test.describe("persons admin", () => {
 		await personsPage.gotoCreate();
 		await personsPage.fillName(name);
 		await personsPage.fillSortName("Me, Delete");
+		await personsPage.fillPosition("Coordinator");
 		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await personsPage.submitForm();
 

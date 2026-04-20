@@ -31,8 +31,10 @@ export const ImpactCaseStudySchema = v.pipe(
 		image: v.object({ url: v.string() }),
 		contributors: v.array(
 			v.object({
-				...v.pick(schema.PersonSelectSchema, ["id", "name"]).entries,
+				...v.pick(schema.PersonSelectSchema, ["id", "name", "position"]).entries,
 				image: v.object({ url: v.string() }),
+				slug: v.string(),
+				role: v.picklist(schema.articleContributorRolesEnum),
 			}),
 		),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),

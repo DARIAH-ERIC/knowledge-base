@@ -314,9 +314,10 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 		},
 		projectsContributions: {
-			projectPartner: r.one.projectsToOrganisationalUnits({
-				from: r.projectsContributions.projectPartnerId,
-				to: r.projectsToOrganisationalUnits.id,
+			project: r.one.projects({
+				from: r.projectsContributions.projectId,
+				to: r.projects.id,
+				optional: false,
 			}),
 			report: r.one.reports({
 				from: r.projectsContributions.reportId,

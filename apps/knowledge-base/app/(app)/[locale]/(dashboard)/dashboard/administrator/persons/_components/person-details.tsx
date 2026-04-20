@@ -13,7 +13,7 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 interface PersonDetailsProps {
-	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
+	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "position" | "sortName"> & {
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; label: string; url: string } };
 }
@@ -49,6 +49,9 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 
 				<DescriptionTerm>{t("ORCID")}</DescriptionTerm>
 				<DescriptionDetails>{person.orcid}</DescriptionDetails>
+
+				<DescriptionTerm>{t("Position")}</DescriptionTerm>
+				<DescriptionDetails>{person.position ?? "-"}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
