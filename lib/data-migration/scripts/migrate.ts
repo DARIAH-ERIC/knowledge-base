@@ -1987,6 +1987,56 @@ async function main() {
 
 	log.info("Migrating people...");
 
+  // Hardcoded persons which dont exist in dariah_person collection, but are referenced as authors
+  // in spotlights or impact-case-studies.
+  const authors = [
+    { name: "Mengdi Zhang", sortName: "Zhang, Mengdi" }
+    { name: "Canan Hastik", sortName: "Hastik, Canan" },
+    { name: "Christof Schöch", sortName: "Schöch, Christof" },
+    { name: "Colter Wehmeier", sortName: "Wehmeier, Colter" },
+    { name: "Gaia Redaelli", sortName: "Redaelli, Gaia" },
+    { name: "Inés Matres", sortName: "Matres, Inés" },
+    { name: "Jouni Tuominen", sortName: "Tuominen, Jouni" },
+    { name: "Loup Bernard", sortName: "Bernard, Loup" },
+    { name: "Luise Borek", sortName: "Borek, Luise" },
+    { name: "Maciej Eder", sortName: "Eder, Maciej" },
+    { name: "Mikko Tolonen", sortName: "Tolonen, Mikko" },
+    { name: "Natalia Ermolaev", sortName: "Ermolaev, Natalia" },
+  ]
+
+  for (const person of authors) {
+    await db.transaction(async (tx) => {
+      const slug = slugify(person.name)
+
+      const [entity] = await tx
+				.insert(schema.entities)
+				.values({
+					slug,
+					statusId: statusByType.published.id,
+					typeId: typesByType.persons.id,
+					createdAt: new Date(person.date_gmt),
+					updatedAt: new Date(person.modified_gmt),
+				})
+				.returning({ id: schema.entities.id });
+
+			assert(entity);
+
+			const id = entity.id;
+
+      await tx.insert(schema.persons).values({
+				id,
+				name: person.name,
+				sortName: person.sortName,
+				// email: person.email,
+				// position: person.position,
+				// orcid,
+				// imageId: placeholderImage.id,
+				createdAt: new Date(person.date_gmt),
+				updatedAt: new Date(person.modified_gmt),
+			});
+    })
+  }
+
 	for (const person of Object.values(data.people)) {
 		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		assert(person.status === "publish", "Person has not been published.");
