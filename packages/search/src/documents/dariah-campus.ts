@@ -99,7 +99,9 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 				const sourceActorIds = [
 					...item["dariah-national-consortia"],
 					...item["dariah-working-groups"],
-				].map((item) => {return item["sshoc-marketplace-id"]});
+				].map((item) => {
+					return item["sshoc-marketplace-id"];
+				});
 
 				return {
 					id,
@@ -111,7 +113,9 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 					type: "training-material",
 					label: item.title,
 					description: item.summary.content,
-					keywords: item.tags.map((tag) => {return tag.name}),
+					keywords: item.tags.map((tag) => {
+						return tag.name;
+					}),
 					links,
 					source_actor_ids: sourceActorIds,
 				};
