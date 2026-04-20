@@ -7,9 +7,12 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
+import { WorkingGroupChairsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-chairs-section";
 import { WorkingGroupForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form";
 import { updateWorkingGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/update-working-group.action";
+import type { AvailablePerson } from "@/lib/data/article-contributors";
 import type { UnitRelation, UnitRelationOption } from "@/lib/data/unit-relations";
+import type { WorkingGroupChair } from "@/lib/data/working-group-chairs";
 
 interface WorkingGroupEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
@@ -23,6 +26,8 @@ interface WorkingGroupEditFormProps {
 	initialRelatedResourceIds: Array<string>;
 	relations: Array<UnitRelation>;
 	allowedRelationOptions: Array<UnitRelationOption>;
+	chairs: Array<WorkingGroupChair>;
+	availablePersons: Array<AvailablePerson>;
 }
 
 export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>): ReactNode {
@@ -35,6 +40,8 @@ export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>)
 		initialRelatedResourceIds,
 		relations,
 		allowedRelationOptions,
+		chairs,
+		availablePersons,
 	} = props;
 
 	const t = useExtracted();
@@ -51,6 +58,12 @@ export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>)
 				relatedEntities={relatedEntities}
 				relatedResources={relatedResources}
 				workingGroup={workingGroup}
+			/>
+
+			<WorkingGroupChairsSection
+				availablePersons={availablePersons}
+				chairs={chairs}
+				unitId={workingGroup.id}
 			/>
 
 			<UnitRelationsSection

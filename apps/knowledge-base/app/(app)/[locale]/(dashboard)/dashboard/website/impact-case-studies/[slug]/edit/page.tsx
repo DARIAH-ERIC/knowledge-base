@@ -9,6 +9,10 @@ import type { ReactNode } from "react";
 
 import { ImpactCaseStudyEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-edit";
 import { imageGridOptions } from "@/config/assets.config";
+import {
+	getAvailablePersons,
+	getImpactCaseStudyContributors,
+} from "@/lib/data/article-contributors";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import {
 	getAvailableEntities,
@@ -40,44 +44,53 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 
 	const { slug } = await params;
 
-	const [{ items: initialAssets }, impactCaseStudy, relatedEntities, relatedResources] =
-		await Promise.all([
-			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
-			db.query.impactCaseStudies.findFirst({
-				where: {
-					entity: {
-						slug,
+	const [
+		{ items: initialAssets },
+		impactCaseStudy,
+		relatedEntities,
+		relatedResources,
+		availablePersons,
+	] = await Promise.all([
+		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
+		db.query.impactCaseStudies.findFirst({
+			where: {
+				entity: {
+					slug,
+				},
+			},
+			columns: {
+				id: true,
+				title: true,
+				summary: true,
+			},
+			with: {
+				entity: {
+					columns: {
+						documentId: true,
+						slug: true,
 					},
 				},
-				columns: {
-					id: true,
-					title: true,
-					summary: true,
-				},
-				with: {
-					entity: {
-						columns: {
-							documentId: true,
-							slug: true,
-						},
-					},
-					image: {
-						columns: {
-							key: true,
-							label: true,
-						},
+				image: {
+					columns: {
+						key: true,
+						label: true,
 					},
 				},
-			}),
-			getAvailableEntities(),
-			getAvailableResources(),
-		]);
+			},
+		}),
+		getAvailableEntities(),
+		getAvailableResources(),
+		getAvailablePersons(),
+	]);
 
 	if (impactCaseStudy == null) {
 		notFound();
 	}
 
-	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(impactCaseStudy.id);
+	const [{ relatedEntityIds, relatedResourceIds }, contributors] = await Promise.all([
+		getEntityRelations(impactCaseStudy.id),
+		getImpactCaseStudyContributors(impactCaseStudy.id),
+	]);
 
 	const image = images.generateSignedImageUrl({
 		key: impactCaseStudy.image.key,
@@ -316,7 +329,9 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 
 	return (
 		<ImpactCaseStudyEditForm
+			availablePersons={availablePersons}
 			contentBlocks={contentBlocks}
+			contributors={contributors}
 			impactCaseStudy={{
 				...impactCaseStudy,
 				image: { ...impactCaseStudy.image, url: image.url },

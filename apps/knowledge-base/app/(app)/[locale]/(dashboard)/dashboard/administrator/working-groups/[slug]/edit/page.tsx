@@ -9,6 +9,7 @@ import type { ReactNode } from "react";
 
 import { WorkingGroupEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-edit-form";
 import { imageGridOptions } from "@/config/assets.config";
+import { getAvailablePersons } from "@/lib/data/article-contributors";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import {
 	getAvailableEntities,
@@ -16,6 +17,7 @@ import {
 	getEntityRelations,
 } from "@/lib/data/relations";
 import { getUnitRelationOptions, getUnitRelations } from "@/lib/data/unit-relations";
+import { getWorkingGroupChairs } from "@/lib/data/working-group-chairs";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -46,12 +48,14 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 		relatedEntities,
 		relatedResources,
 		allowedRelationOptions,
+		availablePersons,
 		workingGroup,
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
 		getAvailableEntities(),
 		getAvailableResources(),
 		getUnitRelationOptions("working_group"),
+		getAvailablePersons(),
 		db.query.organisationalUnits.findFirst({
 			where: {
 				type: { type: "working_group" },
@@ -121,14 +125,17 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 
 	const description = descriptionRows.at(0)?.content as JSONContent | undefined;
 
-	const [{ relatedEntityIds, relatedResourceIds }, relations] = await Promise.all([
+	const [{ relatedEntityIds, relatedResourceIds }, relations, chairs] = await Promise.all([
 		getEntityRelations(workingGroup.id),
 		getUnitRelations(workingGroup.id),
+		getWorkingGroupChairs(workingGroup.id),
 	]);
 
 	return (
 		<WorkingGroupEditForm
 			allowedRelationOptions={allowedRelationOptions}
+			availablePersons={availablePersons}
+			chairs={chairs}
 			initialAssets={initialAssets}
 			initialRelatedEntityIds={relatedEntityIds}
 			initialRelatedResourceIds={relatedResourceIds}

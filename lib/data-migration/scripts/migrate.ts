@@ -43,7 +43,7 @@ function toSummary(html: string): string {
 }
 
 const deniedPageLinks = new Set([
-	"https://www.dariah.eu/about/documents-list/",
+	"https://www.dariah.eu/about/documents-list/", // documents-policies
 	"https://www.dariah.eu/", // landing page uses visual composer shortcodes
 ]);
 
@@ -434,6 +434,32 @@ function parsePositionRoles(position: string): Array<PersonRoleType> {
 	return [];
 }
 
+function extractAuthorsFromHtml(html: string): Array<string> {
+	const patterns = [
+		// eslint-disable-next-line regexp/no-super-linear-backtracking
+		/[Ww]ritten by ([^<]+?)(?=\s*(?:,\s*(?:University|Professor|Assistant|Institut|DARIAH|Associate|Scientific|La )|<))/,
+		// eslint-disable-next-line regexp/no-super-linear-backtracking
+		/<h[1-6][^>]*>[Bb]y ([^<(]+?)(?=\s*(?:\(|<\/h))/,
+		/[Ll]ead [Aa]uthor:\s*<\/strong>([^<\n]+)/,
+	];
+
+	for (const pattern of patterns) {
+		const match = pattern.exec(html);
+		if (match?.[1] != null) {
+			return match[1]
+				.split(/\s+and\s+/i)
+				.map((name) => {
+					return name.trim();
+				})
+				.filter((name) => {
+					return name.length > 0;
+				});
+		}
+	}
+
+	return [];
+}
+
 async function main() {
 	log.info("Retrieving data from wordpress...");
 
@@ -474,6 +500,9 @@ async function main() {
 	const wpInstitutionIdToOrgUnitId = new Map<number, string>();
 	const wpWorkingGroupIdToOrgUnitId = new Map<number, string>();
 	const wpPersonIdToDbId = new Map<number, string>();
+
+	const spotlightArticleIdToAuthorNames = new Map<string, Array<string>>();
+	const impactCaseStudyIdToAuthorNames = new Map<string, Array<string>>();
 
 	const projectScopes = await db.query.projectScopes.findMany();
 	const projectScopesByType = keyBy(projectScopes, (item) => {
@@ -563,6 +592,10 @@ async function main() {
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),
 				});
+				const authorNames = extractAuthorsFromHtml(page.content.rendered);
+				if (authorNames.length > 0) {
+					impactCaseStudyIdToAuthorNames.set(id, authorNames);
+				}
 			} else if (page.link.startsWith("https://www.dariah.eu/activities/spotlight/")) {
 				await tx.insert(schema.spotlightArticles).values({
 					id,
@@ -572,6 +605,10 @@ async function main() {
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),
 				});
+				const authorNames = extractAuthorsFromHtml(page.content.rendered);
+				if (authorNames.length > 0) {
+					spotlightArticleIdToAuthorNames.set(id, authorNames);
+				}
 			} else {
 				await tx.insert(schema.pages).values({
 					id,
@@ -2005,6 +2042,67 @@ async function main() {
 	}
 
 	//
+
+	/**
+	 * ============================================================================================
+	 * Author relations for spotlight articles and impact case studies.
+	 * ============================================================================================
+	 */
+
+	log.info("Creating author relations for spotlight articles and impact case studies...");
+
+	const personsByName = new Map<string, string>();
+	for (const person of Object.values(data.people)) {
+		const fullName = [person.firstname, person.lastname].filter(Boolean).join(" ");
+		const dbId = wpPersonIdToDbId.get(person.id);
+		// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+		if (fullName && dbId) {
+			personsByName.set(fullName, dbId);
+		}
+	}
+
+	function resolvePersonByName(authorName: string): string | undefined {
+		const exact = personsByName.get(authorName);
+		if (exact != null) {
+			return exact;
+		}
+		for (const [name, dbId] of personsByName) {
+			if (authorName.includes(name)) {
+				return dbId;
+			}
+		}
+		return undefined;
+	}
+
+	for (const [articleId, authorNames] of spotlightArticleIdToAuthorNames) {
+		for (const authorName of authorNames) {
+			const personDbId = resolvePersonByName(authorName);
+			if (personDbId == null) {
+				log.warn(`Spotlight article ${articleId}: author "${authorName}" not matched to a person.`);
+				continue;
+			}
+			await db.insert(schema.spotlightArticlesToPersons).values({
+				spotlightArticleId: articleId,
+				personId: personDbId,
+				role: "author",
+			});
+		}
+	}
+
+	for (const [articleId, authorNames] of impactCaseStudyIdToAuthorNames) {
+		for (const authorName of authorNames) {
+			const personDbId = resolvePersonByName(authorName);
+			if (personDbId == null) {
+				log.warn(`Impact case study ${articleId}: author "${authorName}" not matched to a person.`);
+				continue;
+			}
+			await db.insert(schema.impactCaseStudiesToPersons).values({
+				impactCaseStudyId: articleId,
+				personId: personDbId,
+				role: "author",
+			});
+		}
+	}
 
 	log.info("Writing assets cache manifest...");
 

@@ -502,6 +502,10 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 		},
 		spotlightArticles: {
+			contributors: r.many.persons({
+				from: r.spotlightArticles.id.through(r.spotlightArticlesToPersons.spotlightArticleId),
+				to: r.persons.id.through(r.spotlightArticlesToPersons.personId),
+			}),
 			entity: r.one.entities({
 				from: r.spotlightArticles.id,
 				to: r.entities.id,
