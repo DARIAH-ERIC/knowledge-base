@@ -97,14 +97,14 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 
 				const year = new Date(item.meta.parsedDate).getUTCFullYear();
 
-				const source = "zotero";
-				const sourceId = item.key;
-				const id = [source, sourceId].join(":");
+				const ingestSource = "zotero";
+				const ingestSourceId = item.key;
+				const id = [ingestSource, ingestSourceId].join(":");
 
 				const document: ResourceCollectionDocument = {
 					id,
-					source,
-					source_id: sourceId,
+					source: ingestSource,
+					source_id: ingestSourceId,
 					imported_at: Date.now(),
 					updated_at: new Date(item.data.dateModified).getTime(),
 					type: "publication",

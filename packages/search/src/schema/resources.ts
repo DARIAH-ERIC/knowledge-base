@@ -9,11 +9,14 @@ export const resources = createCollection({
 		{ name: "description", type: "string" },
 		{ name: "keywords", type: "string[]" },
 		{ name: "links", type: "string[]" },
-		{ name: "actor_ids", type: "string[]", optional: true },
+		{ name: "source", type: "string" },
+		{ name: "source_actor_ids", type: "string[]", optional: true },
+		{ name: "upstream_sources", type: "string[]", optional: true },
+		{ name: "updated_at", type: "int64", optional: true },
 	],
-	queryableFields: ["label", "description", "actor_ids"],
-	facetableFields: ["type", "keywords", "actor_ids"],
-	sortableFields: ["label"],
+	queryableFields: ["label", "description", "source_actor_ids"],
+	facetableFields: ["type", "keywords", "source", "source_actor_ids", "upstream_sources"],
+	sortableFields: ["label", "updated_at"],
 });
 
 export type ResourceCollectionField = (typeof resources)["fields"][number];
@@ -35,8 +38,15 @@ export type ToolOrServiceKind = (typeof toolOrServiceKinds)[number];
 interface ResourceCollectionDocumentBase {
 	id: string;
 	type: ResourceType;
+	/** Where the resource was ingested from. */
 	source: "open-aire" | "ssh-open-marketplace" | "zotero";
+	/** The identifier in the ingest source, e.g. sshoc marketplace item persistentId. */
 	source_id: string;
+	/**
+	 * The sources where the ingest source harvested the resource form, e.g. when sshoc marketplace
+	 * harvested items from dariah-campus.
+	 */
+	upstream_sources: Array<string>;
 	imported_at: number;
 	updated_at: number | null;
 	label: string;
@@ -58,19 +68,19 @@ interface ToolOrServiceResourceDocument extends ResourceCollectionDocumentBase {
 	type: "tool-or-service";
 	source: "ssh-open-marketplace";
 	kind: ToolOrServiceKind;
-	actor_ids: Array<string>;
+	source_actor_ids: Array<string>;
 }
 
 interface TrainingMaterialResourceDocument extends ResourceCollectionDocumentBase {
 	type: "training-material";
 	source: "ssh-open-marketplace";
-	actor_ids: Array<string>;
+	source_actor_ids: Array<string>;
 }
 
 interface WorkflowResourceDocument extends ResourceCollectionDocumentBase {
 	type: "workflow";
 	source: "ssh-open-marketplace";
-	actor_ids: Array<string>;
+	source_actor_ids: Array<string>;
 }
 
 export type ResourceCollectionDocument =

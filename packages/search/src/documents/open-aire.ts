@@ -163,14 +163,15 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 					}
 				}
 
-				const source = "open-aire";
-				const sourceId = item.id;
-				const id = [source, sourceId].join(":");
+				const ingestSource = "open-aire";
+				const ingestSourceId = item.id;
+				const id = [ingestSource, ingestSourceId].join(":");
 
 				const document: ResourceCollectionDocument = {
 					id,
-					source,
-					source_id: sourceId,
+					source: ingestSource,
+					source_id: ingestSourceId,
+					upstream_sources: item.collectedFrom.map((s) => s.value),
 					imported_at: Date.now(),
 					updated_at: item.lastUpdateTimeStamp,
 					type: "publication",

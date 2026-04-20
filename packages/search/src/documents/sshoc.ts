@@ -58,6 +58,13 @@ interface Response {
 		persistentId: string;
 		lastInfoUpdate: string;
 		accessibleAt?: Array<string>;
+		sources?: Array<{
+			id: number;
+			label: string;
+			url: string;
+			urlTemplate: string;
+			lastHarvestedDate: string;
+		}>;
 		contributors: Array<{
 			actor: {
 				affiliations: Array<unknown>;
@@ -148,30 +155,28 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 					}
 				}
 
-				const source = "ssh-open-marketplace";
-				const sourceId = item.persistentId;
-				const id = [source, sourceId].join(":");
+				const ingestSource = "ssh-open-marketplace";
+				const ingestSourceId = item.persistentId;
+				const id = [ingestSource, ingestSourceId].join(":");
 
 				const updatedAt = new Date(item.lastInfoUpdate).getTime();
 
-				const sourceActorIds = item.contributors.flatMap((contributor) => {
-					return contributor.actor.id;
-				});
-				const actorIds = sourceActorIds.map((sourceActorId) => {
-					return [source, sourceActorId].join(":");
+				const actorIds = item.contributors.map((contributor) => {
+					return String(contributor.actor.id);
 				});
 
 				const document = {
 					id,
-					source,
-					source_id: sourceId,
+					source: ingestSource,
+					source_id: ingestSourceId,
+					upstream_source: item.sources?.map((s) => s.label) ?? null,
 					imported_at: Date.now(),
 					updated_at: updatedAt,
 					label: item.label,
 					description: item.description,
 					keywords,
 					links,
-					actor_ids: actorIds,
+					source_actor_ids: actorIds,
 				} satisfies Partial<ResourceCollectionDocument>;
 
 				switch (item.category) {
