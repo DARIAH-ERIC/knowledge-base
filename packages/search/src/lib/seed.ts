@@ -30,6 +30,13 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 			const document = {
 				id: f.string.uuid(),
 				imported_at: f.date.past().getTime(),
+				updated_at:
+					f.helpers.maybe(
+						() => {
+							return f.date.past().getTime();
+						},
+						{ probability: 0.6 },
+					) ?? null,
 				label: f.lorem.sentence(),
 				description: f.lorem.paragraphs(2, "\n\n"),
 				keywords: f.helpers.multiple(
