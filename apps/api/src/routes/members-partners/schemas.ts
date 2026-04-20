@@ -37,6 +37,48 @@ export const MemberOrPartnerBaseSchema = v.pipe(
 
 export type MemberOrPartnerBase = v.InferOutput<typeof MemberOrPartnerBaseSchema>;
 
+export const ContributorSchema = v.pipe(
+	v.object({
+		...v.pick(schema.PersonSelectSchema, ["name"]).entries,
+		position: v.nullable(v.string()),
+		image: v.object({ url: v.string() }),
+		slug: v.string(),
+		role: v.picklist([
+			"national_coordinator",
+			"national_coordinator_deputy",
+			"national_representative",
+			"national_representative_deputy",
+		] as const),
+	}),
+	v.description("Contributor"),
+	v.metadata({ ref: "Contributor" }),
+);
+
+export type Contributor = v.InferOutput<typeof ContributorSchema>;
+
+export const PartnerInstitutionSchema = v.pipe(
+	v.object({
+		name: v.string(),
+		slug: v.string(),
+		website: v.nullable(v.string()),
+	}),
+	v.description("Partner institution"),
+	v.metadata({ ref: "PartnerInstitution" }),
+);
+
+export type PartnerInstitution = v.InferOutput<typeof PartnerInstitutionSchema>;
+
+export const NationalConsortiumSchema = v.pipe(
+	v.object({
+		name: v.string(),
+		image: v.nullable(v.object({ url: v.string() })),
+	}),
+	v.description("National consortium"),
+	v.metadata({ ref: "NationalConsortium" }),
+);
+
+export type NationalConsortium = v.InferOutput<typeof NationalConsortiumSchema>;
+
 export const MemberOrPartnerListSchema = v.pipe(
 	v.array(MemberOrPartnerBaseSchema),
 	v.description("List of members and partners"),
@@ -59,6 +101,9 @@ export const MemberOrPartnerSchema = v.pipe(
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		type: v.literal(schema.membersAndPartnersUnitType),
 		status: v.picklist(schema.membersAndPartnersUnitStatusEnum),
+		contributors: v.array(ContributorSchema),
+		institutions: v.array(PartnerInstitutionSchema),
+		nationalConsortium: v.nullable(NationalConsortiumSchema),
 		socialMedia: v.array(
 			v.object({
 				...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,
