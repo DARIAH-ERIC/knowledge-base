@@ -24,6 +24,7 @@ function mapResource(d: ResourceCollectionDocument): WebsiteCollectionDocument {
 		label: d.label,
 		type: d.type,
 		publication_date: null,
+		url: d.links.at(0) ?? null,
 	};
 }
 
@@ -346,7 +347,7 @@ export async function ingest(client: Client): Promise<void> {
 		return mapResource(d);
 	});
 
-	const entities = await Promise.all([
+	const entities =( await Promise.all([
 		getCountryEntities(),
 		getDocumentPolicyEntities(),
 		getEventEntities(),
@@ -357,7 +358,7 @@ export async function ingest(client: Client): Promise<void> {
 		getProjectEntities(),
 		getSpotlightEntities(),
 		getWorkingGroupEntities(),
-	]);
+	])).flat();
 
 	const documents = [...resources, ...entities];
 

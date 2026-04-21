@@ -23,7 +23,7 @@
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
 		"search:api-keys:generate": "tsx ./scripts/generate-search-api-key.ts",
-		"search:collections:create": "tsx ./scripts/create-collection.ts",
+		"search:collections:create": "tsx ./scripts/create-collections.ts",
 		"search:collections:ingest:resources": "tsx ./scripts/ingest-resources.ts",
 		"search:collections:ingest:website": "tsx ./scripts/ingest-website.ts",
 		"search:collections:ingest": "tsx ./scripts/ingest.ts",

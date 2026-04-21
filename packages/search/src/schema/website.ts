@@ -12,7 +12,7 @@ export const website = createCollection({
 		 * For resources: upstream URL, not the URL in the ingest source.
 		 * For entities: relative paths.
 		 */
-		{ name: "url", type: "string" },
+		{ name: "url", type: "string", optional: true },
 	],
 	queryableFields: ["label", "description"],
 	facetableFields: ["type"],
@@ -68,6 +68,7 @@ interface WebsiteCollectionDocumentBase {
 	description: string;
 	/** Only populated for news. */
 	publication_date?: number | null;
+	url: string | null;
 }
 
 export interface WebsiteResourceDocument extends WebsiteCollectionDocumentBase {

@@ -8,7 +8,7 @@ import type { ResourceCollectionDocument } from "./schema";
 
 const formatters = {
 	duration(ms: number) {
-		const value = Math.abs(ms);
+		const value = Math.trunc(ms);
 		return new Intl.DurationFormat("en-GB").format({
 			hours: Math.floor(value / 3_600_000),
 			minutes: Math.floor((value % 3_600_000) / 60_000),

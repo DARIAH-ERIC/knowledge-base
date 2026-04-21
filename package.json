@@ -28,6 +28,8 @@
 		"search:api-keys:generate": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"search\" run search:api-keys:generate",
 		"search:collections:create": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"search\" run search:collections:create",
 		"search:collections:ingest": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"search\" run search:collections:ingest",
+		"search:collections:ingest:resources": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"search\" run search:collections:ingest:resources",
+		"search:collections:ingest:website": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"search\" run search:collections:ingest:website",
 		"search:collections:reset": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"search\" run search:collections:reset",
 		"search:collections:seed": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"search\" run search:collections:seed",
 		"setup": "simple-git-hooks",
