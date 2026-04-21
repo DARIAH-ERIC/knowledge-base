@@ -97,7 +97,7 @@ async function getCountryEntities(): Promise<Array<WebsiteCollectionDocument>> {
 		const type = "country";
 
 		return {
-			id: [type, item.id].join(":"),
+			id: [type, item.entity.slug].join(":"),
 			type,
 			label: item.name,
 			description: item.summary,
@@ -110,7 +110,7 @@ async function getCountryEntities(): Promise<Array<WebsiteCollectionDocument>> {
 			const type = "institution";
 
 			return {
-				id: [type, institution.id].join(":"),
+				id: [type, institution.slug].join(":"),
 				type,
 				label: institution.name,
 				description: "",
@@ -129,7 +129,7 @@ async function getCountryEntities(): Promise<Array<WebsiteCollectionDocument>> {
 
 		return [
 			{
-				id: [type, detail.id].join(":"),
+				id: [type, detail.nationalConsortium.slug].join(":"),
 				type,
 				label: detail.nationalConsortium.name,
 				description: "",
@@ -154,7 +154,7 @@ async function getDocumentPolicyEntities(): Promise<Array<WebsiteCollectionDocum
 		const type = "document-or-policy";
 
 		return {
-			id: [type, item.id].join(":"),
+			id: [type, item.entity.slug].join(":"),
 			type,
 			label: item.title,
 			description: item.summary,
@@ -176,7 +176,7 @@ async function getEventEntities(): Promise<Array<WebsiteCollectionDocument>> {
 		const type = "event";
 
 		return {
-			id: [type, item.id].join(":"),
+			id: [type, item.entity.slug].join(":"),
 			type,
 			label: item.title,
 			description: item.summary,
@@ -198,7 +198,7 @@ async function getNewsEntities(): Promise<Array<WebsiteCollectionDocument>> {
 		const type = "news-item";
 
 		return {
-			id: [type, item.id].join(":"),
+			id: [type, item.entity.slug].join(":"),
 			type,
 			label: item.title,
 			description: item.summary,
@@ -220,7 +220,7 @@ async function getImpactCaseStudyEntities(): Promise<Array<WebsiteCollectionDocu
 		const type = "impact-case-study";
 
 		return {
-			id: [type, item.id].join(":"),
+			id: [type, item.entity.slug].join(":"),
 			type,
 			label: item.title,
 			description: item.summary,
@@ -241,7 +241,7 @@ async function getPageEntities(): Promise<Array<WebsiteCollectionDocument>> {
 		const type = "page";
 
 		return {
-			id: [type, item.id].join(":"),
+			id: [type, item.entity.slug].join(":"),
 			type,
 			label: item.title,
 			description: item.summary,
@@ -262,7 +262,7 @@ async function getProjectEntities(): Promise<Array<WebsiteCollectionDocument>> {
 		const type = "project";
 
 		return {
-			id: [type, item.id].join(":"),
+			id: [type, item.entity.slug].join(":"),
 			type,
 			label: item.name,
 			description: item.summary,
@@ -283,7 +283,7 @@ async function getPersonEntities(): Promise<Array<WebsiteCollectionDocument>> {
 		const type = "person";
 
 		return {
-			id: [type, item.id].join(":"),
+			id: [type, item.entity.slug].join(":"),
 			type,
 			label: item.name,
 			description: item.position ?? "",
@@ -305,7 +305,7 @@ async function getSpotlightEntities(): Promise<Array<WebsiteCollectionDocument>>
 		const type = "spotlight-article";
 
 		return {
-			id: [type, item.id].join(":"),
+			id: [type, item.entity.slug].join(":"),
 			type,
 			label: item.title,
 			description: item.summary,
@@ -326,7 +326,7 @@ async function getWorkingGroupEntities(): Promise<Array<WebsiteCollectionDocumen
 		const type = "working-group";
 
 		return {
-			id: [type, item.id].join(":"),
+			id: [type, item.entity.slug].join(":"),
 			type,
 			label: item.name,
 			description: item.summary,
