@@ -1,16 +1,18 @@
+import { env } from "../../config/env.config";
 import { createCollection } from "../create-collection";
 
 export const website = createCollection({
-	name: "website",
+	name: env.NEXT_PUBLIC_TYPESENSE_WEBSITE_COLLECTION_NAME,
 	fields: [
 		{ name: "type", type: "string" },
 		{ name: "label", type: "string" },
 		{ name: "description", type: "string" },
 		{ name: "publication_date", type: "int64", optional: true },
-		/** Slug of the page this entity links to. */
-		{ name: "slug", type: "string", optional: true },
-		/** Upstream resource URL, not the URL in the ingest source. */
-		{ name: "url", type: "string", optional: true },
+		/**
+		 * For resources: upstream URL, not the URL in the ingest source.
+		 * For entities: relative paths.
+		 */
+		{ name: "url", type: "string" },
 	],
 	queryableFields: ["label", "description"],
 	facetableFields: ["type"],
@@ -32,19 +34,18 @@ export const websiteResourceTypes = [
 export type WebsiteResourceType = (typeof websiteResourceTypes)[number];
 
 export const websiteEntityTypes = [
-	/** Website routes for database-backed entity pages. */
-	"documents-policies",
-	"events",
-	"countries",
-	"national-consortia",
-	"impact-case-studies",
-	"institutions",
-	"news",
-	"pages",
-	"persons",
-	"projects",
-	"spotlights",
-	"working-groups",
+	"country",
+	"document-or-policy",
+	"event",
+	"impact-case-study",
+	"institution",
+	"national-consortium",
+	"news-item",
+	"page",
+	"person",
+	"project",
+	"spotlight-article",
+	"working-group",
 ] as const;
 
 export type WebsiteEntityType = (typeof websiteEntityTypes)[number];
@@ -61,10 +62,6 @@ export function isWebsiteEntityType(type: WebsiteType): type is WebsiteEntityTyp
 	return websiteEntityTypes.includes(type as WebsiteEntityType);
 }
 
-export function createWebsiteDocumentId(type: WebsiteType, identifier: string): string {
-	return [type, identifier].join(":");
-}
-
 interface WebsiteCollectionDocumentBase {
 	id: string;
 	label: string;
@@ -75,14 +72,10 @@ interface WebsiteCollectionDocumentBase {
 
 export interface WebsiteResourceDocument extends WebsiteCollectionDocumentBase {
 	type: WebsiteResourceType;
-	/** Upstream resource URL, not the URL in the ingest source. */
-	url: string;
 }
 
 export interface WebsiteEntityDocument extends WebsiteCollectionDocumentBase {
 	type: WebsiteEntityType;
-	/** Slug of the page this entity links to. For most entities this is their own page; for institutions and national consortia it is the parent country page. For entities without dedicated pages (e.g. documents and policies), consumers may use this as a fragment identifier. */
-	slug: string;
 }
 
 export type WebsiteCollectionDocument = WebsiteResourceDocument | WebsiteEntityDocument;

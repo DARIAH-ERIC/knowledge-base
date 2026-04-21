@@ -1,10 +1,17 @@
 import { log } from "@acdh-oeaw/lib";
 
 import { client } from "../src/lib/admin-client";
-import { ingest } from "../src/lib/ingest";
+import { ingest as ingestResources } from "../src/lib/ingest-resources";
+import { ingest as ingestWebsite } from "../src/lib/ingest-website";
 
 async function main() {
-	await ingest(client);
+	log.info("Ingesting resources into typesense search index...");
+
+	await ingestResources(client);
+
+	log.info("Ingesting website into typesense search index...");
+
+	await ingestWebsite(client);
 
 	log.success("Successfully ingested documents into typesense search index.");
 }

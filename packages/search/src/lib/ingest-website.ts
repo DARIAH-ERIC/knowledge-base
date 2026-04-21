@@ -1,133 +1,31 @@
-import { createUrl, createUrlSearchParams, isErr, request } from "@acdh-oeaw/lib";
+import { assert, createUrl, createUrlSearchParams, isErr, request } from "@acdh-oeaw/lib";
 
 import { env } from "../../config/env.config";
+import { getDocuments } from "../get-documents";
 import {
-	createWebsiteDocumentId,
+	type ResourceCollectionDocument,
 	website,
-	type WebsiteEntityDocument,
-	type WebsiteEntityType,
-	type WebsiteResourceDocument,
-	type WebsiteResourceType,
+	type WebsiteCollectionDocument,
 } from "../schema";
 import type { Client } from "./admin-client";
-import { type ContentBlockLike, contentBlocksToPlaintext } from "./content-blocks-to-plaintext";
+// import { contentBlocksToPlaintext } from "./content-blocks-to-plaintext";
 
-export interface WebsiteResourceSourceDocument {
-	type: WebsiteResourceType;
-	identifier: string;
-	label: string;
-	description?: string | null;
-	url: string;
-}
+// TODO: fetch content blocks from details endpoints and convert to plain text
+//       probably easier to fetch directly from db? but then how would it work in github action.
+// TODO: use navigation table to construct paths for entities?
 
-export interface WebsiteEntitySourceDocument {
-	type: WebsiteEntityType;
-	identifier: string;
-	label: string;
-	description?: string | null;
-	contentBlocks?: Array<ContentBlockLike> | null;
-	/** Only populated for news. */
-	publication_date?: number | null;
-	/** Slug of the page this entity links to. */
-	slug: string;
-}
+assert(env.API_BASE_URL != null, "Missing api base url.");
+const baseUrl = env.API_BASE_URL;
 
-function mapResourceDocument(source: WebsiteResourceSourceDocument): WebsiteResourceDocument {
+function mapResource(d: ResourceCollectionDocument): WebsiteCollectionDocument {
 	return {
-		id: createWebsiteDocumentId(source.type, source.identifier),
-		type: source.type,
-		label: source.label,
-		description: source.description?.trim() ?? "",
-		url: source.url,
+		id: d.id,
+		description: d.description,
+		label: d.label,
+		type: d.type,
+		publication_date: null,
 	};
 }
-
-function mapEntityDocument(source: WebsiteEntitySourceDocument): WebsiteEntityDocument {
-	const description = source.description?.trim();
-
-	return {
-		id: createWebsiteDocumentId(source.type, source.identifier),
-		type: source.type,
-		label: source.label,
-		description:
-			description != null && description.length > 0
-				? description
-				: source.contentBlocks != null
-					? contentBlocksToPlaintext(source.contentBlocks)
-					: "",
-		publication_date: source.publication_date ?? null,
-		slug: source.slug,
-	};
-}
-
-//
-
-interface SshocResponse {
-	pages: number;
-	items: Array<{
-		category: "tool-or-service" | "training-material" | "workflow";
-		persistentId: string;
-		label: string;
-		description: string;
-		accessibleAt?: Array<string>;
-	}>;
-}
-
-async function getSshocResources(): Promise<Array<WebsiteResourceSourceDocument>> {
-	const sources: Array<WebsiteResourceSourceDocument> = [];
-
-	const url = createUrl({
-		baseUrl: "https://marketplace-api.sshopencloud.eu",
-		pathname: "/api/item-search",
-		searchParams: createUrlSearchParams({
-			"f.keyword": "DARIAH Resource",
-			categories: ["tool-or-service", "training-material", "workflow"],
-			perpage: 100,
-		}),
-	});
-
-	let page = 1;
-	let pages = 0;
-
-	do {
-		url.searchParams.set("page", String(page));
-
-		const response = await request(url, {
-			headers: { Accept: "application/json" },
-			responseType: "json",
-		});
-
-		if (isErr(response)) {
-			throw new Error("Failed to fetch SSHOC resources.", { cause: response.error });
-		}
-
-		const data = response.value.data as SshocResponse;
-		pages = data.pages;
-
-		for (const item of data.items) {
-			const url =
-				item.accessibleAt?.[0] ??
-				String(
-					createUrl({
-						baseUrl: "https://marketplace.sshopencloud.eu",
-						pathname: `/${item.category}/${item.persistentId}`,
-					}),
-				);
-
-			sources.push({
-				type: item.category,
-				identifier: item.persistentId,
-				label: item.label,
-				description: item.description,
-				url,
-			});
-		}
-	} while (page++ < pages);
-
-	return sources;
-}
-
-//
 
 interface PaginatedApiResponse<T> {
 	data: Array<T>;
@@ -135,12 +33,9 @@ interface PaginatedApiResponse<T> {
 }
 
 async function fetchOne<T>(pathname: string): Promise<T> {
-	const url = createUrl({ baseUrl: env.API_BASE_URL, pathname });
+	const url = createUrl({ baseUrl, pathname });
 
-	const response = await request(url, {
-		headers: { Accept: "application/json" },
-		responseType: "json",
-	});
+	const response = await request(url, { responseType: "json" });
 
 	if (isErr(response)) {
 		throw new Error(`Failed to fetch ${pathname}.`, { cause: response.error });
@@ -157,15 +52,12 @@ async function fetchAll<T>(pathname: string, params?: Record<string, string>): P
 
 	do {
 		const url = createUrl({
-			baseUrl: env.API_BASE_URL,
+			baseUrl,
 			pathname,
 			searchParams: createUrlSearchParams({ limit, offset, ...params }),
 		});
 
-		const response = await request(url, {
-			headers: { Accept: "application/json" },
-			responseType: "json",
-		});
+		const response = await request(url, { responseType: "json" });
 
 		if (isErr(response)) {
 			throw new Error(`Failed to fetch ${pathname}.`, { cause: response.error });
@@ -180,100 +72,6 @@ async function fetchAll<T>(pathname: string, params?: Record<string, string>): P
 	return items;
 }
 
-//
-
-async function getNewsEntities(): Promise<Array<WebsiteEntitySourceDocument>> {
-	const items = await fetchAll<{
-		title: string;
-		summary: string;
-		entity: { slug: string };
-		publishedAt: string;
-	}>("/api/v1/news");
-
-	return items.map((item) => {
-		return {
-			type: "news",
-			identifier: item.entity.slug,
-			label: item.title,
-			description: item.summary,
-			publication_date: new Date(item.publishedAt).getTime(),
-			slug: item.entity.slug,
-		};
-	});
-}
-
-async function getEventEntities(): Promise<Array<WebsiteEntitySourceDocument>> {
-	const items = await fetchAll<{
-		title: string;
-		summary: string;
-		entity: { slug: string };
-	}>("/api/v1/events");
-
-	return items.map((item) => {
-		return {
-			type: "events",
-			identifier: item.entity.slug,
-			label: item.title,
-			description: item.summary,
-			slug: item.entity.slug,
-		};
-	});
-}
-
-async function getPageEntities(): Promise<Array<WebsiteEntitySourceDocument>> {
-	const items = await fetchAll<{
-		title: string;
-		summary: string;
-		entity: { slug: string };
-	}>("/api/v1/pages");
-
-	return items.map((item) => {
-		return {
-			type: "pages",
-			identifier: item.entity.slug,
-			label: item.title,
-			description: item.summary,
-			slug: item.entity.slug,
-		};
-	});
-}
-
-async function getSpotlightEntities(): Promise<Array<WebsiteEntitySourceDocument>> {
-	const items = await fetchAll<{
-		title: string;
-		summary: string;
-		entity: { slug: string };
-	}>("/api/v1/spotlight-articles");
-
-	return items.map((item) => {
-		return {
-			type: "spotlights",
-			identifier: item.entity.slug,
-			label: item.title,
-			description: item.summary,
-			slug: item.entity.slug,
-		};
-	});
-}
-
-async function getImpactCaseStudyEntities(): Promise<Array<WebsiteEntitySourceDocument>> {
-	const items = await fetchAll<{
-		title: string;
-		summary: string;
-		entity: { slug: string };
-	}>("/api/v1/impact-case-studies");
-
-	return items.map((item) => {
-		return {
-			type: "impact-case-studies",
-			identifier: item.entity.slug,
-			label: item.title,
-			description: item.summary,
-			slug: item.entity.slug,
-		};
-	});
-}
-
 interface CountryListItem {
 	id: string;
 	name: string;
@@ -282,11 +80,11 @@ interface CountryListItem {
 }
 
 interface CountryDetail extends CountryListItem {
-	institutions: Array<{ name: string; slug: string }>;
-	nationalConsortium: { name: string; slug: string } | null;
+	institutions: Array<{ id: string; name: string; slug: string }>;
+	nationalConsortium: { id: string; name: string; slug: string } | null;
 }
 
-async function getCountryEntities(): Promise<Array<WebsiteEntitySourceDocument>> {
+async function getCountryEntities(): Promise<Array<WebsiteCollectionDocument>> {
 	const countries = await fetchAll<CountryListItem>("/api/v1/members-partners");
 
 	const details = await Promise.all(
@@ -295,148 +93,273 @@ async function getCountryEntities(): Promise<Array<WebsiteEntitySourceDocument>>
 		}),
 	);
 
-	const countryEntities: Array<WebsiteEntitySourceDocument> = countries.map((item) => {
+	const countryEntities: Array<WebsiteCollectionDocument> = countries.map((item) => {
+		const type = "country";
+
 		return {
-			type: "countries",
-			identifier: item.entity.slug,
+			id: [type, item.id].join(":"),
+			type,
 			label: item.name,
 			description: item.summary,
-			slug: item.entity.slug,
+			url: `/network/members-and-partners/${item.entity.slug}`,
 		};
 	});
 
-	const institutionEntities: Array<WebsiteEntitySourceDocument> = details.flatMap((detail) => {
+	const institutionEntities: Array<WebsiteCollectionDocument> = details.flatMap((detail) => {
 		return detail.institutions.map((institution) => {
+			const type = "institution";
+
 			return {
-				type: "institutions" as const,
-				identifier: institution.slug,
+				id: [type, institution.id].join(":"),
+				type,
 				label: institution.name,
 				description: "",
-				slug: detail.entity.slug,
+				/** Partner institutions and cooperating partners are listed on the country page. */
+				url: `/network/members-and-partners/${detail.entity.slug}`,
 			};
 		});
 	});
 
-	const nationalConsortiumEntities: Array<WebsiteEntitySourceDocument> = details.flatMap(
-		(detail) => {
-			if (detail.nationalConsortium == null) {
-				return [];
-			}
-			return [
-				{
-					type: "national-consortia" as const,
-					identifier: detail.nationalConsortium.slug,
-					label: detail.nationalConsortium.name,
-					description: "",
-					slug: detail.entity.slug,
-				},
-			];
-		},
-	);
+	const nationalConsortiumEntities: Array<WebsiteCollectionDocument> = details.flatMap((detail) => {
+		if (detail.nationalConsortium == null) {
+			return [];
+		}
+
+		const type = "national-consortium";
+
+		return [
+			{
+				id: [type, detail.id].join(":"),
+				type,
+				label: detail.nationalConsortium.name,
+				description: "",
+				/** National consortia are listed on the country page. */
+				url: `/network/members-and-partners/${detail.entity.slug}`,
+			},
+		];
+	});
 
 	return [...countryEntities, ...institutionEntities, ...nationalConsortiumEntities];
 }
 
-async function getPersonEntities(): Promise<Array<WebsiteEntitySourceDocument>> {
+async function getDocumentPolicyEntities(): Promise<Array<WebsiteCollectionDocument>> {
 	const items = await fetchAll<{
-		name: string;
-		position: string | null;
-		entity: { slug: string };
-	}>("/api/v1/persons");
-
-	return items.map((item) => {
-		return {
-			type: "persons",
-			identifier: item.entity.slug,
-			label: item.name,
-			description: item.position ?? "",
-			slug: item.entity.slug,
-		};
-	});
-}
-
-async function getWorkingGroupEntities(): Promise<Array<WebsiteEntitySourceDocument>> {
-	const items = await fetchAll<{
-		name: string;
-		summary: string;
-		entity: { slug: string };
-	}>("/api/v1/working-groups");
-
-	return items.map((item) => {
-		return {
-			type: "working-groups",
-			identifier: item.entity.slug,
-			label: item.name,
-			description: item.summary,
-			slug: item.entity.slug,
-		};
-	});
-}
-
-async function getDariahProjectEntities(): Promise<Array<WebsiteEntitySourceDocument>> {
-	const items = await fetchAll<{
-		name: string;
-		summary: string;
-		entity: { slug: string };
-	}>("/api/v1/dariah-projects");
-
-	return items.map((item) => {
-		return {
-			type: "projects",
-			identifier: item.entity.slug,
-			label: item.name,
-			description: item.summary,
-			slug: item.entity.slug,
-		};
-	});
-}
-
-async function getDocumentPolicyEntities(): Promise<Array<WebsiteEntitySourceDocument>> {
-	const items = await fetchAll<{
+		id: string;
 		title: string;
 		summary: string;
 		entity: { slug: string };
 	}>("/api/v1/documents-policies");
 
 	return items.map((item) => {
+		const type = "document-or-policy";
+
 		return {
-			type: "documents-policies",
-			identifier: item.entity.slug,
+			id: [type, item.id].join(":"),
+			type,
 			label: item.title,
 			description: item.summary,
-			slug: item.entity.slug,
+			/** All documents are listed on the same page. */
+			url: `/about/documents`,
 		};
 	});
 }
 
-//
+async function getEventEntities(): Promise<Array<WebsiteCollectionDocument>> {
+	const items = await fetchAll<{
+		id: string;
+		title: string;
+		summary: string;
+		entity: { slug: string };
+	}>("/api/v1/events");
 
-export async function ingestWebsite(client: Client): Promise<void> {
-	const resourceSources = await getSshocResources();
+	return items.map((item) => {
+		const type = "event";
 
-	const entitySources = (
-		await Promise.all([
-			getNewsEntities(),
-			getEventEntities(),
-			getPageEntities(),
-			getSpotlightEntities(),
-			getImpactCaseStudyEntities(),
-			getCountryEntities(),
-			getPersonEntities(),
-			getWorkingGroupEntities(),
-			getDariahProjectEntities(),
-			getDocumentPolicyEntities(),
-		])
-	).flat();
+		return {
+			id: [type, item.id].join(":"),
+			type,
+			label: item.title,
+			description: item.summary,
+			url: `/events/${item.entity.slug}`,
+		};
+	});
+}
 
-	const documents = [
-		...resourceSources.map(mapResourceDocument),
-		...entitySources.map(mapEntityDocument),
-	];
+async function getNewsEntities(): Promise<Array<WebsiteCollectionDocument>> {
+	const items = await fetchAll<{
+		id: string;
+		title: string;
+		summary: string;
+		entity: { slug: string };
+		publishedAt: string;
+	}>("/api/v1/news");
 
-	if (documents.length === 0) {
-		return;
+	return items.map((item) => {
+		const type = "news-item";
+
+		return {
+			id: [type, item.id].join(":"),
+			type,
+			label: item.title,
+			description: item.summary,
+			publication_date: new Date(item.publishedAt).getTime(),
+			url: `/news/${item.entity.slug}`,
+		};
+	});
+}
+
+async function getImpactCaseStudyEntities(): Promise<Array<WebsiteCollectionDocument>> {
+	const items = await fetchAll<{
+		id: string;
+		title: string;
+		summary: string;
+		entity: { slug: string };
+	}>("/api/v1/impact-case-studies");
+
+	return items.map((item) => {
+		const type = "impact-case-study";
+
+		return {
+			id: [type, item.id].join(":"),
+			type,
+			label: item.title,
+			description: item.summary,
+			url: `/about/impact-case-studies/${item.entity.slug}`,
+		};
+	});
+}
+
+async function getPageEntities(): Promise<Array<WebsiteCollectionDocument>> {
+	const items = await fetchAll<{
+		id: string;
+		title: string;
+		summary: string;
+		entity: { slug: string };
+	}>("/api/v1/pages");
+
+	return items.map((item) => {
+		const type = "page";
+
+		return {
+			id: [type, item.id].join(":"),
+			type,
+			label: item.title,
+			description: item.summary,
+			url: `/${item.entity.slug}`,
+		};
+	});
+}
+
+async function getProjectEntities(): Promise<Array<WebsiteCollectionDocument>> {
+	const items = await fetchAll<{
+		id: string;
+		name: string;
+		summary: string;
+		entity: { slug: string };
+	}>("/api/v1/dariah-projects");
+
+	return items.map((item) => {
+		const type = "project";
+
+		return {
+			id: [type, item.id].join(":"),
+			type,
+			label: item.name,
+			description: item.summary,
+			url: `/projects/${item.entity.slug}`,
+		};
+	});
+}
+
+async function getPersonEntities(): Promise<Array<WebsiteCollectionDocument>> {
+	const items = await fetchAll<{
+		id: string;
+		name: string;
+		position: string | null;
+		entity: { slug: string };
+	}>("/api/v1/persons");
+
+	return items.map((item) => {
+		const type = "person";
+
+		return {
+			id: [type, item.id].join(":"),
+			type,
+			label: item.name,
+			description: item.position ?? "",
+			/** TODO: unclear where this should link to. */
+			url: `/persons/${item.entity.slug}`,
+		};
+	});
+}
+
+async function getSpotlightEntities(): Promise<Array<WebsiteCollectionDocument>> {
+	const items = await fetchAll<{
+		id: string;
+		title: string;
+		summary: string;
+		entity: { slug: string };
+	}>("/api/v1/spotlight-articles");
+
+	return items.map((item) => {
+		const type = "spotlight-article";
+
+		return {
+			id: [type, item.id].join(":"),
+			type,
+			label: item.title,
+			description: item.summary,
+			url: `/spotlights/${item.entity.slug}`,
+		};
+	});
+}
+
+async function getWorkingGroupEntities(): Promise<Array<WebsiteCollectionDocument>> {
+	const items = await fetchAll<{
+		id: string;
+		name: string;
+		summary: string;
+		entity: { slug: string };
+	}>("/api/v1/working-groups");
+
+	return items.map((item) => {
+		const type = "working-group";
+
+		return {
+			id: [type, item.id].join(":"),
+			type,
+			label: item.name,
+			description: item.summary,
+			url: `/network/working-groups/${item.entity.slug}`,
+		};
+	});
+}
+
+export async function ingest(client: Client): Promise<void> {
+	const result = await getDocuments();
+
+	if (isErr(result)) {
+		throw result.error;
 	}
+
+	const resources = result.value.map((d) => {
+		return mapResource(d);
+	});
+
+	const entities = await Promise.all([
+		getCountryEntities(),
+		getDocumentPolicyEntities(),
+		getEventEntities(),
+		getNewsEntities(),
+		getImpactCaseStudyEntities(),
+		getPageEntities(),
+		getPersonEntities(),
+		getProjectEntities(),
+		getSpotlightEntities(),
+		getWorkingGroupEntities(),
+	]);
+
+	const documents = [...resources, ...entities];
 
 	await client.collections(website.name).documents().import(documents);
 }

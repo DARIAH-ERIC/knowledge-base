@@ -5,8 +5,9 @@ import * as v from "valibot";
 
 const validate = define({
 	envVars: v.object({
-		API_BASE_URL: v.pipe(v.string(), v.url()),
+		API_BASE_URL: v.optional(v.pipe(v.string(), v.url())),
 		NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME: v.pipe(v.string(), v.nonEmpty()),
+		NEXT_PUBLIC_TYPESENSE_WEBSITE_COLLECTION_NAME: v.pipe(v.string(), v.nonEmpty()),
 		NEXT_PUBLIC_TYPESENSE_HOST: v.pipe(v.string(), v.nonEmpty()),
 		NEXT_PUBLIC_TYPESENSE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 		NEXT_PUBLIC_TYPESENSE_PROTOCOL: v.optional(v.picklist(["http", "https"]), "https"),
@@ -24,6 +25,8 @@ export const env = validate({
 		API_BASE_URL: process.env.API_BASE_URL,
 		NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME:
 			process.env.NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME,
+		NEXT_PUBLIC_TYPESENSE_WEBSITE_COLLECTION_NAME:
+			process.env.NEXT_PUBLIC_TYPESENSE_WEBSITE_COLLECTION_NAME,
 		NEXT_PUBLIC_TYPESENSE_HOST: process.env.NEXT_PUBLIC_TYPESENSE_HOST,
 		NEXT_PUBLIC_TYPESENSE_PORT: process.env.NEXT_PUBLIC_TYPESENSE_PORT,
 		NEXT_PUBLIC_TYPESENSE_PROTOCOL: process.env.NEXT_PUBLIC_TYPESENSE_PROTOCOL,
