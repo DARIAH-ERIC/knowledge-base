@@ -27,6 +27,7 @@
 		"@tiptap/extension-image": "catalog:",
 		"@tiptap/html": "catalog:",
 		"@tiptap/starter-kit": "catalog:",
+		"drizzle-orm": "catalog:",
 		"hast-util-to-text": "catalog:",
 		"rehype-parse": "catalog:",
 		"unified": "catalog:",
@@ -35,6 +36,7 @@
 	"devDependencies": {
 		"@dariah-eric/configs": "workspace:^",
 		"@types/node": "catalog:",
+		"drizzle-kit": "catalog:",
 		"eslint": "catalog:",
 		"prettier": "catalog:",
 		"tsx": "catalog:",
