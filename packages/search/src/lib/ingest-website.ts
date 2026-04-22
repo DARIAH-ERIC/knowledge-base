@@ -347,18 +347,20 @@ export async function ingest(client: Client): Promise<void> {
 		return mapResource(d);
 	});
 
-	const entities =( await Promise.all([
-		getCountryEntities(),
-		getDocumentPolicyEntities(),
-		getEventEntities(),
-		getNewsEntities(),
-		getImpactCaseStudyEntities(),
-		getPageEntities(),
-		getPersonEntities(),
-		getProjectEntities(),
-		getSpotlightEntities(),
-		getWorkingGroupEntities(),
-	])).flat();
+	const entities = (
+		await Promise.all([
+			getCountryEntities(),
+			getDocumentPolicyEntities(),
+			getEventEntities(),
+			getNewsEntities(),
+			getImpactCaseStudyEntities(),
+			getPageEntities(),
+			getPersonEntities(),
+			getProjectEntities(),
+			getSpotlightEntities(),
+			getWorkingGroupEntities(),
+		])
+	).flat();
 
 	const documents = [...resources, ...entities];
 
