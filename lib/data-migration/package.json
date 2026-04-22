@@ -12,7 +12,9 @@
 		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
+		"get-unr-schema": "drizzle-kit introspect --config=./config/unr-db.config.ts",
 		"migrate": "tsx ./scripts/migrate.ts",
+		"migrate-unr-data": "tsx ./scripts/migrate-unr-data.ts",
 		"types:check": "tsc --noEmit"
 	},
 	"dependencies": {
