@@ -1,7 +1,5 @@
 import type { CollectionCreateSchema, CollectionFieldSchema } from "typesense";
 
-// Typesense rejects fields that are non-indexable but marked as facetable or sortable.
-// This type enforces that constraint at compile time.
 type StrictFieldSchema = CollectionFieldSchema &
 	({ index?: true | undefined } | { index: false; facet?: never; sort?: never });
 
@@ -26,6 +24,8 @@ interface FieldTypeMap {
 	geopolygon: unknown;
 }
 
+type SearchableFieldType = "string" | "string[]" | "string*";
+
 type RequiredFieldNames<T extends CollectionFieldSchema> = T extends { optional: true }
 	? never
 	: T["name"];
@@ -33,6 +33,14 @@ type OptionalFieldNames<T extends CollectionFieldSchema> = T extends { optional:
 	? T["name"]
 	: never;
 type QueryableFieldNames<T extends CollectionFieldSchema> = T extends { index: false }
+	? never
+	: T["name"];
+type SearchableFieldNames<T extends CollectionFieldSchema> = T extends { index: false }
+	? never
+	: T["type"] extends SearchableFieldType
+		? T["name"]
+		: never;
+type FilterableFieldNames<T extends CollectionFieldSchema> = T extends { index: false }
 	? never
 	: T["name"];
 type SortableFieldNames<T extends CollectionFieldSchema> = T extends { sort: true }
@@ -53,6 +61,7 @@ type DocumentFromFields<F extends ReadonlyArray<CollectionFieldSchema>> = {
 function getQueryableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 	fields: F,
 ): Array<QueryableFieldNames<F[number]>> {
+	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
 	return fields
 		.filter((f) => {
 			return f.index !== false;
@@ -62,9 +71,36 @@ function getQueryableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 		}) as Array<QueryableFieldNames<F[number]>>;
 }
 
+function getSearchableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
+	fields: F,
+): Array<SearchableFieldNames<F[number]>> {
+	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
+	return fields
+		.filter((f) => {
+			return f.index !== false && ["string", "string[]", "string*"].includes(f.type);
+		})
+		.map((f) => {
+			return f.name;
+		}) as Array<SearchableFieldNames<F[number]>>;
+}
+
+function getFilterableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
+	fields: F,
+): Array<FilterableFieldNames<F[number]>> {
+	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
+	return fields
+		.filter((f) => {
+			return f.index !== false;
+		})
+		.map((f) => {
+			return f.name;
+		}) as Array<FilterableFieldNames<F[number]>>;
+}
+
 function getSortableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 	fields: F,
 ): Array<SortableFieldNames<F[number]>> {
+	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
 	return fields
 		.filter((f) => {
 			return f.sort === true;
@@ -77,6 +113,7 @@ function getSortableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 function getFacetableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 	fields: F,
 ): Array<FacetableFieldNames<F[number]>> {
+	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
 	return fields
 		.filter((f) => {
 			return f.facet === true;
@@ -88,12 +125,29 @@ function getFacetableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 
 export type CollectionDocument<C extends { fields: ReadonlyArray<CollectionFieldSchema> }> =
 	DocumentFromFields<C["fields"]>;
+export type CollectionQueryableFieldName<
+	C extends { fields: ReadonlyArray<CollectionFieldSchema> },
+> = QueryableFieldNames<C["fields"][number]>;
+export type CollectionSearchableFieldName<
+	C extends { fields: ReadonlyArray<CollectionFieldSchema> },
+> = SearchableFieldNames<C["fields"][number]>;
+export type CollectionFilterableFieldName<
+	C extends { fields: ReadonlyArray<CollectionFieldSchema> },
+> = FilterableFieldNames<C["fields"][number]>;
+export type CollectionSortableFieldName<
+	C extends { fields: ReadonlyArray<CollectionFieldSchema> },
+> = SortableFieldNames<C["fields"][number]>;
+export type CollectionFacetableFieldName<
+	C extends { fields: ReadonlyArray<CollectionFieldSchema> },
+> = FacetableFieldNames<C["fields"][number]>;
 
 export interface Collection<F extends ReadonlyArray<CollectionFieldSchema>> {
 	fields: F;
-	queryableFields: ReadonlyArray<string>;
-	sortableFields: ReadonlyArray<string>;
-	facetableFields: ReadonlyArray<string>;
+	queryableFields: ReadonlyArray<QueryableFieldNames<F[number]>>;
+	searchableFields: ReadonlyArray<SearchableFieldNames<F[number]>>;
+	filterableFields: ReadonlyArray<FilterableFieldNames<F[number]>>;
+	sortableFields: ReadonlyArray<SortableFieldNames<F[number]>>;
+	facetableFields: ReadonlyArray<FacetableFieldNames<F[number]>>;
 	schema(name: string): CollectionCreateSchema;
 }
 
@@ -103,6 +157,8 @@ export function defineCollection<F extends ReadonlyArray<StrictFieldSchema>>(con
 	return {
 		fields: config.fields,
 		queryableFields: getQueryableFields(config.fields),
+		searchableFields: getSearchableFields(config.fields),
+		filterableFields: getFilterableFields(config.fields),
 		sortableFields: getSortableFields(config.fields),
 		facetableFields: getFacetableFields(config.fields),
 		schema(name: string): CollectionCreateSchema {

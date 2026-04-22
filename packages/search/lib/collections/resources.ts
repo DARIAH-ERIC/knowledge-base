@@ -1,4 +1,12 @@
-import { type CollectionDocument, defineCollection } from "../schema";
+import {
+	type CollectionDocument,
+	type CollectionFacetableFieldName,
+	type CollectionFilterableFieldName,
+	type CollectionSearchableFieldName,
+	type CollectionSortableFieldName,
+	defineCollection,
+} from "../schema";
+import type { SearchCollectionParams, SearchFacet, SearchItem, SearchResult } from "../search";
 
 export const resourcesCollection = defineCollection({
 	fields: [
@@ -109,19 +117,12 @@ export type ResourceDocument =
 	| TrainingMaterialResourceDocument
 	| WorkflowResourceDocument;
 
-export interface SearchResourcesParams {
-	query: string;
-	page?: number;
-	perPage?: number;
-}
+export type ResourceSearchField = CollectionSearchableFieldName<typeof resourcesCollection>;
+export type ResourceFilterField = CollectionFilterableFieldName<typeof resourcesCollection>;
+export type ResourceSortField = CollectionSortableFieldName<typeof resourcesCollection>;
+export type ResourceFacetField = CollectionFacetableFieldName<typeof resourcesCollection>;
 
-export interface ResourceHit {
-	document: ResourceDocument;
-	highlight: Partial<Record<keyof ResourceDocument, string>>;
-}
-
-export interface ResourceSearchResult {
-	hits: Array<ResourceHit>;
-	found: number;
-	page: number;
-}
+export type SearchResourcesParams = SearchCollectionParams<typeof resourcesCollection>;
+export type ResourceItem = SearchItem<ResourceDocument>;
+export type ResourceFacet = SearchFacet;
+export type ResourceSearchResult = SearchResult<ResourceDocument, ResourceFacetField>;

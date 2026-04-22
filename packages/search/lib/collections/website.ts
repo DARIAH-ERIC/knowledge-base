@@ -1,4 +1,12 @@
-import { type CollectionDocument, defineCollection } from "../schema";
+import {
+	type CollectionDocument,
+	type CollectionFacetableFieldName,
+	type CollectionFilterableFieldName,
+	type CollectionSearchableFieldName,
+	type CollectionSortableFieldName,
+	defineCollection,
+} from "../schema";
+import type { SearchCollectionParams, SearchFacet, SearchItem, SearchResult } from "../search";
 
 export const websiteCollection = defineCollection({
 	fields: [
@@ -56,19 +64,12 @@ export interface WebsiteDocument extends CollectionDocument<typeof websiteCollec
 	type: WebsiteDocumentType;
 }
 
-export interface SearchWebsiteParams {
-	query: string;
-	page?: number;
-	perPage?: number;
-}
+export type WebsiteSearchField = CollectionSearchableFieldName<typeof websiteCollection>;
+export type WebsiteFilterField = CollectionFilterableFieldName<typeof websiteCollection>;
+export type WebsiteSortField = CollectionSortableFieldName<typeof websiteCollection>;
+export type WebsiteFacetField = CollectionFacetableFieldName<typeof websiteCollection>;
 
-export interface WebsiteHit {
-	document: WebsiteDocument;
-	highlight: Partial<Record<keyof WebsiteDocument, string>>;
-}
-
-export interface WebsiteSearchResult {
-	hits: Array<WebsiteHit>;
-	found: number;
-	page: number;
-}
+export type SearchWebsiteParams = SearchCollectionParams<typeof websiteCollection>;
+export type WebsiteItem = SearchItem<WebsiteDocument>;
+export type WebsiteFacet = SearchFacet;
+export type WebsiteSearchResult = SearchResult<WebsiteDocument, WebsiteFacetField>;

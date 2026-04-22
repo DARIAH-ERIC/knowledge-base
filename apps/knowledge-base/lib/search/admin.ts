@@ -2,7 +2,6 @@ import { assert } from "@acdh-oeaw/lib";
 import { createSearchAdminService } from "@dariah-eric/search/admin";
 
 import { env } from "@/config/env.config";
-import { config } from "@/config/search.config";
 
 assert(env.TYPESENSE_ADMIN_API_KEY, "Missing environment variable: `TYPESENSE_ADMIN_API_KEY`.");
 
@@ -19,5 +18,4 @@ export const search = createSearchAdminService({
 			protocol: env.NEXT_PUBLIC_TYPESENSE_PROTOCOL,
 		},
 	],
-	config,
 });

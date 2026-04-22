@@ -40,8 +40,6 @@ export function createSearchAdminService(params: CreateSearchAdminServiceParams)
 	}
 
 	return {
-		client,
-
 		apiKeys: {
 			create(): Promise<Result<string, SearchApiKeyError>> {
 				return Result.tryPromise({
@@ -63,8 +61,6 @@ export function createSearchAdminService(params: CreateSearchAdminServiceParams)
 
 		collections: {
 			resources: {
-				name: collections.resources,
-
 				create(): Promise<Result<void, SearchCollectionError>> {
 					return Result.tryPromise({
 						async try() {
@@ -139,8 +135,6 @@ export function createSearchAdminService(params: CreateSearchAdminServiceParams)
 			},
 
 			website: {
-				name: collections.website,
-
 				create(): Promise<Result<void, SearchCollectionError>> {
 					return Result.tryPromise({
 						async try() {
