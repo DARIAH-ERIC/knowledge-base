@@ -25,6 +25,7 @@ export const UpdateServiceActionInputSchema = v.object({
 			return s === "true";
 		}),
 	),
+	metadata: v.pipe(v.looseObject({})),
 	ownerUnitIds: v.optional(v.array(v.pipe(v.string(), v.uuid())), []),
 	providerUnitIds: v.optional(v.array(v.pipe(v.string(), v.uuid())), []),
 });

@@ -52,6 +52,7 @@ export const updateServiceAction = createServerAction(
 			dariahBranding,
 			monitoring,
 			privateSupplier,
+			metadata,
 			ownerUnitIds,
 			providerUnitIds,
 		} = result.output;
@@ -67,6 +68,7 @@ export const updateServiceAction = createServerAction(
 					comment,
 					dariahBranding,
 					monitoring,
+					metadata,
 					privateSupplier,
 				})
 				.where(eq(schema.services.id, id));

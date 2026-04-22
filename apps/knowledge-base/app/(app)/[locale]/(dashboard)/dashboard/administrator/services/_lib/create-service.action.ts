@@ -50,6 +50,7 @@ export const createServiceAction = createServerAction(
 			dariahBranding,
 			monitoring,
 			privateSupplier,
+			metadata,
 			ownerUnitIds,
 			providerUnitIds,
 		} = result.output;
@@ -65,6 +66,7 @@ export const createServiceAction = createServerAction(
 					comment,
 					dariahBranding,
 					monitoring,
+					metadata,
 					privateSupplier,
 				})
 				.returning({ id: schema.services.id });
