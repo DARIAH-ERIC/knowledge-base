@@ -11,6 +11,9 @@ import {
 	SearchImportError,
 } from "./errors";
 
+export type { ResourceDocument } from "./collections/resources";
+export type { WebsiteDocument } from "./collections/website";
+
 export interface CreateSearchAdminServiceParams {
 	apiKey: string;
 	nodes: Array<{ host: string; port: number; protocol: "http" | "https" }>;
