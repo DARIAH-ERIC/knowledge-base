@@ -1,12 +1,6 @@
+import { type ResourceDocument, resourceServiceKinds, resourceTypes } from "@dariah-eric/search";
+import type { SearchAdminService as Client } from "@dariah-eric/search/admin";
 import { faker as f } from "@faker-js/faker";
-
-import {
-	type ResourceCollectionDocument,
-	resources,
-	resourceTypes,
-	toolOrServiceKinds,
-} from "../schema";
-import type { Client } from "./admin-client";
 
 export interface SeedConfig {
 	/** @default "2025-01-01" */
@@ -23,14 +17,14 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 
 	const types = resourceTypes;
 
-	const documents = f.helpers.multiple<ResourceCollectionDocument>(
+	const documents = f.helpers.multiple<ResourceDocument>(
 		() => {
 			const type = f.helpers.arrayElement(types);
 
 			const document = {
 				id: f.string.uuid(),
 				imported_at: f.date.past().getTime(),
-				updated_at:
+				source_updated_at:
 					f.helpers.maybe(
 						() => {
 							return f.date.past().getTime();
@@ -39,7 +33,6 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 					) ?? null,
 				label: f.lorem.sentence(),
 				description: f.lorem.paragraphs(2, "\n\n"),
-				upstream_sources: null,
 				keywords: f.helpers.multiple(
 					() => {
 						return f.lorem.word();
@@ -52,7 +45,7 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 					},
 					{ count: { min: 1, max: 3 } },
 				),
-			} satisfies Partial<ResourceCollectionDocument>;
+			} satisfies Partial<ResourceDocument>;
 
 			switch (type) {
 				case "publication": {
@@ -61,6 +54,8 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 						type,
 						source: f.helpers.arrayElement(["open-aire", "zotero"]),
 						source_id: f.string.alphanumeric(12),
+						source_actor_ids: null,
+						upstream_sources: null,
 						kind: f.helpers.arrayElement(["article", "book", "conference", "thesis", null]),
 						authors: f.helpers.multiple(
 							() => {
@@ -79,19 +74,43 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 					};
 				}
 
-				case "tool-or-service": {
+				case "service": {
 					return {
 						...document,
 						type,
 						source: "ssh-open-marketplace",
 						source_id: f.string.alphanumeric(12),
-						kind: f.helpers.arrayElement(toolOrServiceKinds),
+						upstream_sources: null,
+						kind: f.helpers.arrayElement(resourceServiceKinds),
 						source_actor_ids: f.helpers.multiple(
 							() => {
 								return f.string.alphanumeric(12);
 							},
 							{ count: { min: 1, max: 3 } },
 						),
+						authors: null,
+						year: null,
+						pid: null,
+					};
+				}
+
+				case "software": {
+					return {
+						...document,
+						type,
+						source: "ssh-open-marketplace",
+						source_id: f.string.alphanumeric(12),
+						upstream_sources: null,
+						kind: null,
+						source_actor_ids: f.helpers.multiple(
+							() => {
+								return f.string.alphanumeric(12);
+							},
+							{ count: { min: 1, max: 3 } },
+						),
+						authors: null,
+						year: null,
+						pid: null,
 					};
 				}
 
@@ -107,6 +126,11 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 							},
 							{ count: { min: 1, max: 3 } },
 						),
+						upstream_sources: [],
+						kind: null,
+						authors: null,
+						year: null,
+						pid: null,
 					};
 				}
 
@@ -122,6 +146,11 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 							},
 							{ count: { min: 1, max: 3 } },
 						),
+						upstream_sources: null,
+						kind: null,
+						authors: null,
+						year: null,
+						pid: null,
 					};
 				}
 			}
@@ -129,5 +158,5 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 		{ count: 100 },
 	);
 
-	await client.collections(resources.name).documents().import(documents);
+	await client.collections.resources.ingest(documents);
 }

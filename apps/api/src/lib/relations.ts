@@ -2,11 +2,9 @@
 import { eq, sql } from "@dariah-eric/database";
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as schema from "@dariah-eric/database/schema";
-import type { ResourceCollectionDocument } from "@dariah-eric/search/schema";
 
 import type { Database, Transaction } from "@/middlewares/db";
-import { searchClient } from "@/services/search";
-import { env } from "~/config/env.config";
+import { search } from "@/services/search";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getRelatedEntities(db: Database | Transaction, entityId: string) {
@@ -61,17 +59,18 @@ export async function getRelatedResources(db: Database | Transaction, entityId: 
 		return r.resourceId;
 	});
 
-	const result = await searchClient
-		.collections<ResourceCollectionDocument>(env.TYPESENSE_RESOURCE_COLLECTION_NAME)
-		.documents()
-		.search({
-			q: "*",
-			query_by: "label",
-			filter_by: `id:[${ids.join(",")}]`,
-			per_page: ids.length,
-		});
+	const result = await search.collections.resources.search({
+		query: "*",
+		queryBy: ["label"],
+		filterBy: `id:[${ids.join(",")}]`,
+		perPage: ids.length,
+	});
 
-	return (result.hits ?? []).map((hit) => {
+	if (result.isErr()) {
+		throw result.error;
+	}
+
+	return result.value.items.map((hit) => {
 		return {
 			id: hit.document.id,
 			label: hit.document.label,

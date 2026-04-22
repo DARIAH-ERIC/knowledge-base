@@ -19,14 +19,17 @@ const admin = createSearchAdminService({
 });
 
 async function main() {
-	(await admin.collections.resources.create()).unwrap();
-	log.success(`Successfully created collection "${env.TYPESENSE_RESOURCE_COLLECTION_NAME}".`);
+	const key = (await admin.apiKeys.create()).unwrap();
 
-	(await admin.collections.website.create()).unwrap();
-	log.success(`Successfully created collection "${env.TYPESENSE_WEBSITE_COLLECTION_NAME}".`);
+	if (process.argv.includes("--raw")) {
+		console.log(key);
+		return;
+	}
+
+	log.success(`Successfully generated search API key: ${key}`);
 }
 
 main().catch((error: unknown) => {
-	log.error("Failed to create collections.\n", error);
+	log.error("Failed to generate search API key.\n", error);
 	process.exitCode = 1;
 });

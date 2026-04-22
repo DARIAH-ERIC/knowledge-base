@@ -18,12 +18,14 @@
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
 		"@dariah-eric/database": "workspace:^",
-		"@dariah-eric/storage": "workspace:^",
 		"@dariah-eric/search": "workspace:^",
+		"@dariah-eric/storage": "workspace:^",
+		"@faker-js/faker": "catalog:",
 		"valibot": "catalog:"
 	},
 	"devDependencies": {
 		"@dariah-eric/configs": "workspace:^",
+		"@dariah-eric/env": "workspace:^",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
 		"prettier": "catalog:",

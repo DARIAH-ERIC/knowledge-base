@@ -19,14 +19,14 @@ const admin = createSearchAdminService({
 });
 
 async function main() {
-	(await admin.collections.resources.create()).unwrap();
-	log.success(`Successfully created collection "${env.TYPESENSE_RESOURCE_COLLECTION_NAME}".`);
+	(await admin.collections.resources.reset()).unwrap();
+	log.success(`Successfully reset collection "${env.TYPESENSE_RESOURCE_COLLECTION_NAME}".`);
 
-	(await admin.collections.website.create()).unwrap();
-	log.success(`Successfully created collection "${env.TYPESENSE_WEBSITE_COLLECTION_NAME}".`);
+	(await admin.collections.website.reset()).unwrap();
+	log.success(`Successfully reset collection "${env.TYPESENSE_WEBSITE_COLLECTION_NAME}".`);
 }
 
 main().catch((error: unknown) => {
-	log.error("Failed to create collections.\n", error);
+	log.error("Failed to reset collections.\n", error);
 	process.exitCode = 1;
 });

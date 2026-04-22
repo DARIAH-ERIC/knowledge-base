@@ -1,6 +1,6 @@
 import type { PlopTypes } from "@turbo/gen";
 
-// oxlint-disable-next-line import/no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
 	plop.setGenerator("package", {
 		description: "Generate a new package",
@@ -28,6 +28,11 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 				type: "add",
 				path: "{{ turbo.paths.root }}/packages/{{ name }}/package.json",
 				templateFile: "templates/package.json.hbs",
+			},
+			{
+				type: "add",
+				path: "{{ turbo.paths.root }}/packages/{{ name }}/eslint.config.ts",
+				templateFile: "templates/eslint.config.ts.hbs",
 			},
 			{
 				type: "add",

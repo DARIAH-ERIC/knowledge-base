@@ -77,6 +77,7 @@ jobs:
       TYPESENSE_PORT: "8108"
       TYPESENSE_PROTOCOL: "http"
       TYPESENSE_RESOURCE_COLLECTION_NAME: "dariah-resources"
+      TYPESENSE_WEBSITE_COLLECTION_NAME: "dariah-website"
 
     steps:
       - name: Checkout repository
@@ -127,13 +128,9 @@ jobs:
       - name: Generate search api key
         run: |
           set -euo pipefail
-          SEARCH_API_KEY="$(
-            pnpm run search:api-keys:generate \
-              | tee /dev/stderr \
-              | sed -n 's/.*Successfully generated api key "\([^"]*\)" for collection.*/\1/p'
-          )"
+          SEARCH_API_KEY="$(pnpm --silent run search:api-keys:generate --raw)"
           if [ -z "$SEARCH_API_KEY" ]; then
-            echo "Failed to extract search api key from generator output." >&2
+            echo "Failed to generate search api key." >&2
             exit 1
           fi
           {

@@ -8,7 +8,7 @@
 		"#/*": "./*"
 	},
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.mjs"
 	},
 	"scripts": {
 		"build": "tsdown",
@@ -22,6 +22,8 @@
 	"devDependencies": {
 		"@dariah-eric/configs": "workspace:^",
 		"@types/node": "catalog:",
+		"eslint": "catalog:",
+		"prettier": "catalog:",
 		"tsdown": "catalog:",
 		"typescript": "catalog:"
 	}
