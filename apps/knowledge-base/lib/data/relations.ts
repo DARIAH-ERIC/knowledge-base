@@ -3,8 +3,8 @@
 import { and, eq, inArray } from "@dariah-eric/database";
 import { db, type Transaction } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
-import { adminClient } from "@dariah-eric/search/lib";
-import { type ResourceCollectionDocument, resources } from "@dariah-eric/search/schema";
+
+import { search } from "@/lib/search";
 
 export async function getAvailableEntities() {
 	const entities = await db.query.entities.findMany({
@@ -22,12 +22,18 @@ export async function getAvailableEntities() {
 
 export async function getAvailableResources() {
 	try {
-		const result = await adminClient
-			.collections<ResourceCollectionDocument>(resources.name)
-			.documents()
-			.search({ q: "*", query_by: "label", per_page: 250, sort_by: "label:asc" });
+		const result = await search.collections.resources.search({
+			query: "*",
+			queryBy: ["label"],
+			perPage: 250,
+			sortBy: [{ field: "label", direction: "asc" }],
+		});
 
-		return (result.hits ?? []).map((hit) => {
+		if (result.isErr()) {
+			throw result.error;
+		}
+
+		return result.value.items.map((hit) => {
 			return { id: hit.document.id, label: hit.document.label };
 		});
 	} catch {

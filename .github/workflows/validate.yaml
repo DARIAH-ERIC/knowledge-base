@@ -65,6 +65,7 @@ jobs:
       NEXT_PUBLIC_TYPESENSE_PORT: "8108"
       NEXT_PUBLIC_TYPESENSE_PROTOCOL: "http"
       NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME: "dariah-resources"
+      NEXT_PUBLIC_TYPESENSE_WEBSITE_COLLECTION_NAME: "dariah-website"
       S3_ACCESS_KEY: "${{ secrets.TEST_S3_ACCESS_KEY }}"
       S3_BUCKET_NAME: "dariah-knowledge-base"
       S3_HOST: "localhost"
@@ -76,6 +77,7 @@ jobs:
       TYPESENSE_PORT: "8108"
       TYPESENSE_PROTOCOL: "http"
       TYPESENSE_RESOURCE_COLLECTION_NAME: "dariah-resources"
+      TYPESENSE_WEBSITE_COLLECTION_NAME: "dariah-website"
       UNR_DATABASE_DIRECT_URL: "postgresql://dariah-unr:dariah-unr@localhost:5432/dariah-unr"
       UNR_S3_BUCKET_NAME: "dariah-unr"
 
@@ -128,13 +130,9 @@ jobs:
       - name: Generate search api key
         run: |
           set -euo pipefail
-          SEARCH_API_KEY="$(
-            pnpm run search:api-keys:generate \
-              | tee /dev/stderr \
-              | sed -n 's/.*Successfully generated api key "\([^"]*\)" for collection.*/\1/p'
-          )"
+          SEARCH_API_KEY="$(pnpm --silent run search:api-keys:generate --raw)"
           if [ -z "$SEARCH_API_KEY" ]; then
-            echo "Failed to extract search api key from generator output." >&2
+            echo "Failed to generate search api key." >&2
             exit 1
           fi
           {

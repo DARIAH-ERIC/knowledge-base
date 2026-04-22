@@ -1,1 +1,1 @@
-# dariah knowledge base search index
+# @dariah-eric/search
