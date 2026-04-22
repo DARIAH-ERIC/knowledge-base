@@ -3,8 +3,9 @@
 import { and, eq, inArray } from "@dariah-eric/database";
 import { db, type Transaction } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
-import { adminClient } from "@dariah-eric/search/lib";
-import { type ResourceCollectionDocument, resources } from "@dariah-eric/search/schema";
+import type { ResourceDocument } from "@dariah-eric/search";
+
+import { search } from "@/lib/search/admin";
 
 export async function getAvailableEntities() {
 	const entities = await db.query.entities.findMany({
@@ -22,8 +23,8 @@ export async function getAvailableEntities() {
 
 export async function getAvailableResources() {
 	try {
-		const result = await adminClient
-			.collections<ResourceCollectionDocument>(resources.name)
+		const result = await search.client
+			.collections<ResourceDocument>(search.collections.resources.name)
 			.documents()
 			.search({ q: "*", query_by: "label", per_page: 250, sort_by: "label:asc" });
 

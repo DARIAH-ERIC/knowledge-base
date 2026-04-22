@@ -17,7 +17,6 @@ async function main() {
 		);
 	}
 
-	// oxlint-disable-next-line prefer-template
 	await writeFile("./messages/en.json", `${JSON.stringify(json, null, 2)}\n`);
 
 	log.success("Successfully converted i18n messages.");

@@ -50,6 +50,7 @@ const validate = define({
 		TYPESENSE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 		TYPESENSE_PROTOCOL: v.optional(v.picklist(["http", "https"]), "https"),
 		TYPESENSE_RESOURCE_COLLECTION_NAME: v.pipe(v.string(), v.nonEmpty()),
+		TYPESENSE_WEBSITE_COLLECTION_NAME: v.pipe(v.string(), v.nonEmpty()),
 		TYPESENSE_SEARCH_API_KEY: v.pipe(v.string(), v.nonEmpty()),
 	}),
 });
@@ -89,6 +90,7 @@ export const env = validate({
 		TYPESENSE_PORT: process.env.TYPESENSE_PORT,
 		TYPESENSE_PROTOCOL: process.env.TYPESENSE_PROTOCOL,
 		TYPESENSE_RESOURCE_COLLECTION_NAME: process.env.TYPESENSE_RESOURCE_COLLECTION_NAME,
+		TYPESENSE_WEBSITE_COLLECTION_NAME: process.env.TYPESENSE_WEBSITE_COLLECTION_NAME,
 		TYPESENSE_SEARCH_API_KEY: process.env.TYPESENSE_SEARCH_API_KEY,
 	},
 }).unwrap();

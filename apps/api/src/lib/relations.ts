@@ -2,10 +2,10 @@
 import { eq, sql } from "@dariah-eric/database";
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as schema from "@dariah-eric/database/schema";
-import type { ResourceCollectionDocument } from "@dariah-eric/search/schema";
+import type { ResourceDocument } from "@dariah-eric/search";
 
 import type { Database, Transaction } from "@/middlewares/db";
-import { searchClient } from "@/services/search";
+import { search } from "@/services/search";
 import { env } from "~/config/env.config";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -61,8 +61,8 @@ export async function getRelatedResources(db: Database | Transaction, entityId: 
 		return r.resourceId;
 	});
 
-	const result = await searchClient
-		.collections<ResourceCollectionDocument>(env.TYPESENSE_RESOURCE_COLLECTION_NAME)
+	const result = await search.client
+		.collections<ResourceDocument>(env.TYPESENSE_RESOURCE_COLLECTION_NAME)
 		.documents()
 		.search({
 			q: "*",
