@@ -1,0 +1,28 @@
+{
+	"name": "@dariah-eric/ingest",
+	"private": true,
+	"license": "MIT",
+	"type": "module",
+	"sideEffects": false,
+	"imports": {
+		"#/*": "./*"
+	},
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"scripts": {
+		"build": "tsdown",
+		"dev": "tsdown --watch",
+		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
+		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
+		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
+		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
+		"types:check": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@dariah-eric/configs": "workspace:^",
+		"@types/node": "catalog:",
+		"tsdown": "catalog:",
+		"typescript": "catalog:"
+	}
+}
