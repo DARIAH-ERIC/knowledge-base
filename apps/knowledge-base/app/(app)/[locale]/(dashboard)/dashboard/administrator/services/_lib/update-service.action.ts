@@ -52,7 +52,7 @@ export const updateServiceAction = createServerAction(
 			dariahBranding,
 			monitoring,
 			privateSupplier,
-			metadata,
+			metadata = {},
 			ownerUnitIds,
 			providerUnitIds,
 		} = result.output;
