@@ -9,6 +9,7 @@ import { entities } from "./entities";
 import { organisationalUnits, organisationalUnitTypes } from "./organisational-units";
 
 export const personRoleTypesEnum = [
+	"is_affiliated_with",
 	"is_chair_of",
 	"is_vice_chair_of",
 	"is_member_of",

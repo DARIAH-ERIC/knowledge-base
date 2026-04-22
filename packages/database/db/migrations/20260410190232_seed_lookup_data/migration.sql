@@ -166,6 +166,7 @@ ON CONFLICT ("entity_type_id", "field_name") DO NOTHING;
 INSERT INTO
 	"person_role_types" ("type")
 VALUES
+	('is_affiliated_with'),
 	('is_chair_of'),
 	('is_vice_chair_of'),
 	('is_member_of'),
@@ -186,6 +187,7 @@ SELECT
 FROM
 	(
 		VALUES
+			('is_affiliated_with', 'institution'),
 			('is_chair_of', 'governance_body'),
 			('is_chair_of', 'working_group'),
 			('is_vice_chair_of', 'governance_body'),
