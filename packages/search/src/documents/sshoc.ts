@@ -120,7 +120,12 @@ export async function getDocuments(): Promise<Result<Array<ResourceCollectionDoc
 	do {
 		url.searchParams.set("page", String(page));
 
-		const response = await request(url, { headers, responseType: "json" });
+		const response = await request(url, {
+			headers,
+			responseType: "json",
+			timeout: 60_000,
+			retries: 3,
+		});
 
 		if (isErr(response)) {
 			return err(new Error("Failed to fetch data.", { cause: response.error }));
