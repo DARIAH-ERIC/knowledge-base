@@ -76,7 +76,7 @@ jobs:
       TYPESENSE_PORT: "8108"
       TYPESENSE_PROTOCOL: "http"
       TYPESENSE_RESOURCE_COLLECTION_NAME: "dariah-resources"
-      UNR_DATABASE_DIRECT_URL: "${{ secrets.TEST_UNR_DATABASE_DIRECT_URL }}"
+      UNR_DATABASE_DIRECT_URL: "postgresql://dariah-unr:dariah-unr@localhost:5432/dariah-unr"
       UNR_S3_BUCKET_NAME: "dariah-unr"
 
     steps:
