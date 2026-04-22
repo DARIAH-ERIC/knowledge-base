@@ -128,13 +128,9 @@ jobs:
       - name: Generate search api key
         run: |
           set -euo pipefail
-          SEARCH_API_KEY="$(
-            pnpm run search:api-keys:generate \
-              | tee /dev/stderr \
-              | sed -n 's/.*Successfully generated api key "\([^"]*\)" for collection.*/\1/p'
-          )"
+          SEARCH_API_KEY="$(pnpm run search:api-keys:generate --raw)"
           if [ -z "$SEARCH_API_KEY" ]; then
-            echo "Failed to extract search api key from generator output." >&2
+            echo "Failed to generate search api key." >&2
             exit 1
           fi
           {
