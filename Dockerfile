@@ -177,6 +177,8 @@ RUN --mount=type=secret,id=API_ACCESS_TOKEN,env=API_ACCESS_TOKEN \
     --mount=type=secret,id=SSHOC_MARKETPLACE_PASSWORD,env=SSHOC_MARKETPLACE_PASSWORD \
     --mount=type=secret,id=SSHOC_MARKETPLACE_USER,env=SSHOC_MARKETPLACE_USER \
     --mount=type=secret,id=TYPESENSE_ADMIN_API_KEY,env=TYPESENSE_ADMIN_API_KEY \
+		--mount=type=secret,id=UNR_DATABASE_DIRECT_URL,env=UNR_DATABASE_DIRECT_URL \
+		--mount=type=secret,id=UNR_S3_BUCKET_NAME,env=UNR_S3_BUCKET_NAME \
     --mount=type=secret,id=ZOTERO_API_KEY,env=ZOTERO_API_KEY \
     --mount=type=secret,id=ZOTERO_API_BASE_URL,env=ZOTERO_API_BASE_URL \
     turbo run build --filter=@dariah-eric/knowledge-base

@@ -2,7 +2,7 @@ import { Readable } from "node:stream";
 
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import type { StorageService } from "@dariah-eric/storage";
+import type { AssetMetadata, StorageService } from "@dariah-eric/storage";
 import { faker as f } from "@faker-js/faker";
 import slugify from "@sindresorhus/slugify";
 import { v7 as uuidv7 } from "uuid";
@@ -95,6 +95,12 @@ function createMockStorage(content = "test file content"): StorageService {
 			// eslint-disable-next-line @typescript-eslint/require-await
 			async get() {
 				return Readable.from([Buffer.from(content)]);
+			},
+			copy(_params: {
+				source: { bucket: string; key: string };
+				prefix: string;
+			}): Promise<{ key: string; metadata: AssetMetadata }> {
+				throw new Error("Function not implemented.");
 			},
 		},
 		urls: {
@@ -349,6 +355,12 @@ describe("documents-policies", () => {
 						async get(params) {
 							storageCalled = true;
 							return createMockStorage().objects.get(params);
+						},
+						copy(_params: {
+							source: { bucket: string; key: string };
+							prefix: string;
+						}): Promise<{ key: string; metadata: AssetMetadata }> {
+							throw new Error("Function not implemented.");
 						},
 					},
 				};
