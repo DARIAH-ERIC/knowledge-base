@@ -1,4 +1,4 @@
-import { and, eq, inArray, sql } from "@dariah-eric/database";
+import { and, eq, inArray } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
@@ -90,7 +90,6 @@ async function getCountriesForDashboard(): Promise<
 				inArray(schema.organisationalUnitsRelations.unitId, countryIds),
 				inArray(schema.organisationalUnitsRelations.relatedUnitId, ericIds),
 				inArray(schema.organisationalUnitStatus.status, ["is_member_of", "is_observer_of"]),
-				sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
 			),
 		);
 
@@ -104,12 +103,23 @@ async function getCountriesForDashboard(): Promise<
 	>();
 
 	for (const relation of relations) {
-		if (!relationByCountryId.has(relation.unitId)) {
-			relationByCountryId.set(relation.unitId, {
-				from: relation.duration.start,
-				status: relation.status as Exclude<CountryMemberObserverStatus, null>,
-				until: relation.duration.end ?? null,
-			});
+		const existing = relationByCountryId.get(relation.unitId);
+		const nextRelation = {
+			from: relation.duration.start,
+			status: relation.status as Exclude<CountryMemberObserverStatus, null>,
+			until: relation.duration.end ?? null,
+		};
+
+		if (existing == null) {
+			relationByCountryId.set(relation.unitId, nextRelation);
+			continue;
+		}
+
+		const shouldReplace =
+			(existing.until != null && nextRelation.until == null) || nextRelation.from > existing.from;
+
+		if (shouldReplace) {
+			relationByCountryId.set(relation.unitId, nextRelation);
 		}
 	}
 

@@ -1,4 +1,4 @@
-import { and, eq, inArray, sql } from "@dariah-eric/database";
+import { and, eq, inArray } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
@@ -85,18 +85,28 @@ async function getWorkingGroupsForDashboard(): Promise<
 				inArray(schema.organisationalUnitsRelations.unitId, workingGroupIds),
 				inArray(schema.organisationalUnitsRelations.relatedUnitId, ericIds),
 				eq(schema.organisationalUnitStatus.status, "is_part_of"),
-				sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
 			),
 		);
 
 	const relationByWorkingGroupId = new Map<string, { from: Date; until: Date | null }>();
 
 	for (const relation of relations) {
-		if (!relationByWorkingGroupId.has(relation.unitId)) {
-			relationByWorkingGroupId.set(relation.unitId, {
-				from: relation.duration.start,
-				until: relation.duration.end ?? null,
-			});
+		const existing = relationByWorkingGroupId.get(relation.unitId);
+		const nextRelation = {
+			from: relation.duration.start,
+			until: relation.duration.end ?? null,
+		};
+
+		if (existing == null) {
+			relationByWorkingGroupId.set(relation.unitId, nextRelation);
+			continue;
+		}
+
+		const shouldReplace =
+			(existing.until != null && nextRelation.until == null) || nextRelation.from > existing.from;
+
+		if (shouldReplace) {
+			relationByWorkingGroupId.set(relation.unitId, nextRelation);
 		}
 	}
 

@@ -1,4 +1,4 @@
-import { and, eq, inArray, sql } from "@dariah-eric/database";
+import { and, eq, inArray } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
@@ -62,6 +62,7 @@ async function getNationalConsortiaForDashboard(): Promise<
 	const relatedCountries = await db
 		.select({
 			countryName: schema.organisationalUnits.name,
+			duration: schema.organisationalUnitsRelations.duration,
 			unitId: schema.organisationalUnitsRelations.unitId,
 		})
 		.from(schema.organisationalUnitsRelations)
@@ -82,22 +83,36 @@ async function getNationalConsortiaForDashboard(): Promise<
 				inArray(schema.organisationalUnitsRelations.unitId, nationalConsortiumIds),
 				eq(schema.organisationalUnitStatus.status, "is_national_consortium_of"),
 				eq(schema.organisationalUnitTypes.type, "country"),
-				sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
 			),
 		);
 
-	const countryNameByUnitId = new Map<string, string>();
+	const countryByUnitId = new Map<string, { from: Date; name: string; until: Date | null }>();
 
 	for (const relation of relatedCountries) {
-		if (!countryNameByUnitId.has(relation.unitId)) {
-			countryNameByUnitId.set(relation.unitId, relation.countryName);
+		const existing = countryByUnitId.get(relation.unitId);
+		const nextRelation = {
+			from: relation.duration.start,
+			name: relation.countryName,
+			until: relation.duration.end ?? null,
+		};
+
+		if (existing == null) {
+			countryByUnitId.set(relation.unitId, nextRelation);
+			continue;
+		}
+
+		const shouldReplace =
+			(existing.until != null && nextRelation.until == null) || nextRelation.from > existing.from;
+
+		if (shouldReplace) {
+			countryByUnitId.set(relation.unitId, nextRelation);
 		}
 	}
 
 	return nationalConsortia.map((unit) => {
 		return {
 			...unit,
-			countryName: countryNameByUnitId.get(unit.id) ?? null,
+			countryName: countryByUnitId.get(unit.id)?.name ?? null,
 		};
 	});
 }

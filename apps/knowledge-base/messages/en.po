@@ -1702,7 +1702,7 @@ msgstr "Administrator dashboard - Edit country"
 msgid "uFmoeG"
 msgstr "Administrator dashboard - Create country"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/page.tsx:135
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/page.tsx:145
 msgid "1T8e0z"
 msgstr "Administrator dashboard - Countries"
 
@@ -1811,7 +1811,7 @@ msgstr "Administrator dashboard - Edit national consortium"
 msgid "E1GOx2"
 msgstr "Administrator dashboard - Create national consortium"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/page.tsx:112
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/page.tsx:127
 msgid "6GYvgO"
 msgstr "Administrator dashboard - National consortia"
 
@@ -2325,7 +2325,7 @@ msgstr "Administrator dashboard - Edit working group"
 msgid "1fQjzd"
 msgstr "Administrator dashboard - Create working group"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/page.tsx:121
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/page.tsx:131
 msgid "8Yb+bu"
 msgstr "Administrator dashboard - Working groups"
 
