@@ -137,8 +137,8 @@ export function useSidebarMenu(): Array<SidebarMenuSection> {
 				},
 				{
 					href: "/dashboard/administrator/working-group-reports",
-					tooltip: t("Working groups reports"),
-					label: t("Working groups reports"),
+					tooltip: t("Working group reports"),
+					label: t("Working group reports"),
 					icon: <ListBulletIcon />,
 				},
 			],

@@ -20,6 +20,7 @@ type InstitutionEricRelationStatus =
 async function getInstitutionsForDashboard(): Promise<
 	Array<
 		Pick<schema.OrganisationalUnit, "id" | "name"> & {
+			countryName: string | null;
 			ericRelationStatuses: Array<InstitutionEricRelationStatus>;
 			entity: Pick<schema.Entity, "documentId" | "slug"> & {
 				status: Pick<schema.EntityStatus, "id" | "type">;
@@ -65,40 +66,72 @@ async function getInstitutionsForDashboard(): Promise<
 		return eric.id;
 	});
 
-	if (institutionIds.length === 0 || ericIds.length === 0) {
+	if (institutionIds.length === 0) {
 		return institutions.map((institution) => {
 			return {
 				...institution,
+				countryName: null,
 				ericRelationStatuses: [],
 			};
 		});
 	}
 
-	const relations = await db
-		.select({
-			status: schema.organisationalUnitStatus.status,
-			unitId: schema.organisationalUnitsRelations.unitId,
-		})
-		.from(schema.organisationalUnitsRelations)
-		.innerJoin(
-			schema.organisationalUnitStatus,
-			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
-		)
-		.where(
-			and(
-				inArray(schema.organisationalUnitsRelations.unitId, institutionIds),
-				inArray(schema.organisationalUnitsRelations.relatedUnitId, ericIds),
-				inArray(schema.organisationalUnitStatus.status, [
-					"is_partner_institution_of",
-					"is_cooperating_partner_of",
-					"is_national_coordinating_institution_in",
-					"is_national_representative_institution_in",
-				]),
-				sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
+	const [relations, countries] = await Promise.all([
+		ericIds.length > 0
+			? db
+					.select({
+						status: schema.organisationalUnitStatus.status,
+						unitId: schema.organisationalUnitsRelations.unitId,
+					})
+					.from(schema.organisationalUnitsRelations)
+					.innerJoin(
+						schema.organisationalUnitStatus,
+						eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+					)
+					.where(
+						and(
+							inArray(schema.organisationalUnitsRelations.unitId, institutionIds),
+							inArray(schema.organisationalUnitsRelations.relatedUnitId, ericIds),
+							inArray(schema.organisationalUnitStatus.status, [
+								"is_partner_institution_of",
+								"is_cooperating_partner_of",
+								"is_national_coordinating_institution_in",
+								"is_national_representative_institution_in",
+							]),
+							sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
+						),
+					)
+			: Promise.resolve([]),
+		db
+			.select({
+				countryName: schema.organisationalUnits.name,
+				unitId: schema.organisationalUnitsRelations.unitId,
+			})
+			.from(schema.organisationalUnitsRelations)
+			.innerJoin(
+				schema.organisationalUnitStatus,
+				eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+			)
+			.innerJoin(
+				schema.organisationalUnits,
+				eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.relatedUnitId),
+			)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
+			.where(
+				and(
+					inArray(schema.organisationalUnitsRelations.unitId, institutionIds),
+					eq(schema.organisationalUnitStatus.status, "is_located_in"),
+					eq(schema.organisationalUnitTypes.type, "country"),
+					sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
+				),
 			),
-		);
+	]);
 
 	const statusesByInstitutionId = new Map<string, Array<InstitutionEricRelationStatus>>();
+	const countryNameByInstitutionId = new Map<string, string>();
 
 	for (const relation of relations) {
 		const status = relation.status as InstitutionEricRelationStatus;
@@ -110,9 +143,16 @@ async function getInstitutionsForDashboard(): Promise<
 		}
 	}
 
+	for (const country of countries) {
+		if (!countryNameByInstitutionId.has(country.unitId)) {
+			countryNameByInstitutionId.set(country.unitId, country.countryName);
+		}
+	}
+
 	return institutions.map((institution) => {
 		return {
 			...institution,
+			countryName: countryNameByInstitutionId.get(institution.id) ?? null,
 			ericRelationStatuses: statusesByInstitutionId.get(institution.id) ?? [],
 		};
 	});

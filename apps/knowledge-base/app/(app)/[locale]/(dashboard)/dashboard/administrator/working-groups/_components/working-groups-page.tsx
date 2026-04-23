@@ -19,7 +19,7 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, use, useState } from "react";
 import { useFilter, useListData } from "react-aria-components";
 
@@ -38,6 +38,8 @@ interface WorkingGroupsPageProps {
 	workingGroups: Promise<
 		Array<
 			Pick<schema.OrganisationalUnit, "id" | "name"> & {
+				durationFrom: Date | null;
+				durationUntil: Date | null;
 				entity: Pick<schema.Entity, "documentId" | "slug"> & {
 					status: Pick<schema.EntityStatus, "id" | "type">;
 				};
@@ -52,6 +54,7 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 	const workingGroups = use(workingGroupsPromise);
 
 	const t = useExtracted();
+	const format = useFormatter();
 
 	const { contains } = useFilter({ sensitivity: "base" });
 
@@ -105,6 +108,8 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 			>
 				<TableHeader>
 					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
+					<TableColumn>{t("From")}</TableColumn>
+					<TableColumn>{t("Until")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -112,6 +117,18 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 						return (
 							<TableRow>
 								<TableCell>{item.name}</TableCell>
+								<TableCell>
+									{item.durationFrom != null
+										? format.dateTime(item.durationFrom, { dateStyle: "short" })
+										: "—"}
+								</TableCell>
+								<TableCell>
+									{item.durationFrom == null
+										? "—"
+										: item.durationUntil != null
+											? format.dateTime(item.durationUntil, { dateStyle: "short" })
+											: t("present")}
+								</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button

@@ -45,6 +45,7 @@ interface InstitutionsPageProps {
 	institutions: Promise<
 		Array<
 			Pick<schema.OrganisationalUnit, "id" | "name"> & {
+				countryName: string | null;
 				ericRelationStatuses: Array<InstitutionEricRelationStatus>;
 				entity: Pick<schema.Entity, "documentId" | "slug"> & {
 					status: Pick<schema.EntityStatus, "id" | "type">;
@@ -106,6 +107,7 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 		filter(item, filterText) {
 			return (
 				contains(item.name, filterText) ||
+				contains(item.countryName ?? "", filterText) ||
 				item.ericRelationStatuses.some((status) => {
 					return contains(formatInstitutionStatus(status, t), filterText);
 				})
@@ -157,6 +159,7 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 			>
 				<TableHeader>
 					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
+					<TableColumn>{t("Country")}</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
@@ -165,6 +168,7 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 						return (
 							<TableRow>
 								<TableCell>{item.name}</TableCell>
+								<TableCell>{item.countryName ?? "—"}</TableCell>
 								<TableCell>
 									{item.ericRelationStatuses.length > 0 ? (
 										<div className="flex flex-wrap gap-2">
