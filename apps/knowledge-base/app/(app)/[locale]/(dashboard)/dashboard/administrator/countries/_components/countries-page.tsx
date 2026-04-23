@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Badge } from "@dariah-eric/ui/badge";
 import { Button, buttonStyles } from "@dariah-eric/ui/button";
 import { Link } from "@dariah-eric/ui/link";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
@@ -19,7 +20,7 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, use, useState } from "react";
 import { useFilter, useListData } from "react-aria-components";
 
@@ -34,10 +35,15 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { deleteCountryAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/delete-country.action";
 
+type CountryMemberObserverStatus = "is_member_of" | "is_observer_of" | null;
+
 interface CountriesPageProps {
 	countries: Promise<
 		Array<
 			Pick<schema.OrganisationalUnit, "id" | "name"> & {
+				memberObserverFrom: Date | null;
+				memberObserverStatus: CountryMemberObserverStatus;
+				memberObserverUntil: Date | null;
 				entity: Pick<schema.Entity, "documentId" | "slug"> & {
 					status: Pick<schema.EntityStatus, "id" | "type">;
 				};
@@ -46,12 +52,19 @@ interface CountriesPageProps {
 	>;
 }
 
+function memberObserverStatusIntent(
+	status: Exclude<CountryMemberObserverStatus, null>,
+): "success" | "warning" {
+	return status === "is_member_of" ? "success" : "warning";
+}
+
 export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 	const { countries: countriesPromise } = props;
 
 	const countries = use(countriesPromise);
 
 	const t = useExtracted();
+	const format = useFormatter();
 
 	const { contains } = useFilter({ sensitivity: "base" });
 
@@ -105,6 +118,9 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 			>
 				<TableHeader>
 					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
+					<TableColumn>{t("Status")}</TableColumn>
+					<TableColumn>{t("From")}</TableColumn>
+					<TableColumn>{t("Until")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -112,6 +128,29 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 						return (
 							<TableRow>
 								<TableCell>{item.name}</TableCell>
+								<TableCell>
+									{item.memberObserverStatus != null ? (
+										<Badge intent={memberObserverStatusIntent(item.memberObserverStatus)}>
+											{item.memberObserverStatus === "is_member_of"
+												? t("Member")
+												: t("Observer")}
+										</Badge>
+									) : (
+										"—"
+									)}
+								</TableCell>
+								<TableCell>
+									{item.memberObserverFrom != null
+										? format.dateTime(item.memberObserverFrom, { dateStyle: "short" })
+										: "—"}
+								</TableCell>
+								<TableCell>
+									{item.memberObserverStatus == null
+										? "—"
+										: item.memberObserverUntil != null
+											? format.dateTime(item.memberObserverUntil, { dateStyle: "short" })
+											: t("present")}
+								</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button
