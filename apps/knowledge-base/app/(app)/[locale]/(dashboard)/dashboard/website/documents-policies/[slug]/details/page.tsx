@@ -1,7 +1,4 @@
-import { and, eq, sql } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
-import * as schema from "@dariah-eric/database/schema";
-import type { JSONContent } from "@tiptap/core";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
@@ -9,6 +6,7 @@ import type { ReactNode } from "react";
 
 import { DocumentOrPolicyDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details";
 import { imageGridOptions } from "@/config/assets.config";
+import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -73,37 +71,11 @@ export default async function DashboardWebsiteDocumentOrPolicyDetailsPage(
 
 	const downloadUrl = `/api/assets/download?key=${encodeURIComponent(documentOrPolicy.document.key)}`;
 
-	const richTextContentBlocks = await db
-		.select({
-			id: schema.richTextContentBlocks.id,
-			content: sql<JSONContent | undefined>`${schema.richTextContentBlocks.content}`,
-			position: schema.contentBlocks.position,
-			type: schema.contentBlockTypes.type,
-		})
-		.from(schema.richTextContentBlocks)
-		.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
-		.innerJoin(
-			schema.contentBlockTypes,
-			eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
-		)
-		.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
-		.innerJoin(
-			schema.entityTypesFieldsNames,
-			eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
-		)
-		.where(
-			and(
-				eq(schema.fields.entityId, documentOrPolicy.id),
-				eq(schema.entityTypesFieldsNames.fieldName, "content"),
-			),
-		)
-		.orderBy(schema.contentBlocks.position);
+	const contentBlocks = await getEntityContentBlocks(documentOrPolicy.id);
 
 	return (
 		<DocumentOrPolicyDetails
-			contentBlocks={richTextContentBlocks.map((row) => {
-				return { ...row, type: "rich_text" as const };
-			})}
+			contentBlocks={contentBlocks}
 			documentOrPolicy={{
 				...documentOrPolicy,
 				document: { ...documentOrPolicy.document, url: document.url, downloadUrl },

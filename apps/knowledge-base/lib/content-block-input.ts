@@ -45,6 +45,25 @@ export const ContentBlockInputSchema = v.union([
 	}),
 	v.object({
 		id: v.string(),
+		type: v.literal("gallery"),
+		position: v.optional(v.number()),
+		content: v.optional(
+			v.object({
+				layout: v.optional(v.picklist(["carousel", "grid"] as const)),
+				items: v.optional(
+					v.array(
+						v.object({
+							imageKey: v.optional(v.string()),
+							imageUrl: v.optional(v.string()),
+							caption: v.optional(v.string()),
+						}),
+					),
+				),
+			}),
+		),
+	}),
+	v.object({
+		id: v.string(),
 		type: v.literal("hero"),
 		position: v.optional(v.number()),
 		content: v.optional(

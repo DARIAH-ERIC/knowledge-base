@@ -38,6 +38,7 @@ import {
 	PlusIcon,
 	RectangleGroupIcon,
 	Square3Stack3DIcon,
+	Squares2X2Icon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import type { JSONContent } from "@tiptap/core";
@@ -109,6 +110,16 @@ interface HeroContentBlockItem {
 	};
 }
 
+interface GalleryContentBlockItem {
+	id: Key;
+	type: "gallery";
+	position?: number;
+	content?: {
+		layout?: "carousel" | "grid";
+		items?: Array<{ imageKey?: string; imageUrl?: string; caption?: string }>;
+	};
+}
+
 interface AccordionContentBlockItem {
 	id: Key;
 	type: "accordion";
@@ -123,6 +134,7 @@ export type ContentBlock =
 	| ImageContentBlockItem
 	| EmbedContentBlockItem
 	| DataContentBlockItem
+	| GalleryContentBlockItem
 	| HeroContentBlockItem
 	| AccordionContentBlockItem;
 
@@ -369,6 +381,7 @@ function ContentBlockItem({
 		accordion: t("Accordion"),
 		data: t("Data"),
 		embed: t("Embed"),
+		gallery: t("Gallery"),
 		hero: t("Hero"),
 		image: t("Image"),
 		rich_text: t("Rich text"),
@@ -379,6 +392,7 @@ function ContentBlockItem({
 		accordion: <ListBulletIcon className="size-4 shrink-0" />,
 		data: <Square3Stack3DIcon className="size-4 shrink-0" />,
 		embed: <CodeBracketSquareIcon className="size-4 shrink-0" />,
+		gallery: <Squares2X2Icon className="size-4 shrink-0" />,
 		hero: <RectangleGroupIcon className="size-4 shrink-0" />,
 		image: <PhotoIcon className="size-4 shrink-0" />,
 		rich_text: <PencilSquareIcon className="size-4 shrink-0" />,
@@ -521,6 +535,12 @@ function ContentBlockPanel({
 			return <EmbedContentBlockPanel item={item} onChange={onChange} />;
 		}
 
+		case "gallery": {
+			return (
+				<GalleryContentBlockPanel initialAssets={initialAssets} item={item} onChange={onChange} />
+			);
+		}
+
 		case "hero": {
 			return (
 				<HeroContentBlockPanel initialAssets={initialAssets} item={item} onChange={onChange} />
@@ -589,6 +609,160 @@ function ContentBlockPanel({
 interface ContentBlockEntry {
 	id: string;
 	title: string;
+}
+
+interface GalleryContentBlockPanelProps {
+	initialAssets?: Array<Asset>;
+	item: GalleryContentBlockItem;
+	onChange: (content: NonNullable<GalleryContentBlockItem["content"]>) => void;
+}
+
+function GalleryContentBlockPanel({
+	initialAssets,
+	item,
+	onChange,
+}: Readonly<GalleryContentBlockPanelProps>): ReactNode {
+	const t = useExtracted();
+
+	const layout = item.content?.layout ?? "grid";
+	const items = item.content?.items ?? [];
+
+	function moveItem(index: number, direction: -1 | 1) {
+		const nextIndex = index + direction;
+		if (nextIndex < 0 || nextIndex >= items.length) return;
+
+		const next = [...items];
+		const [moved] = next.splice(index, 1);
+		if (moved == null) return;
+		next.splice(nextIndex, 0, moved);
+		onChange({ ...item.content, layout, items: next });
+	}
+
+	return (
+		<div className="flex flex-col gap-y-4">
+			<ToggleGroup
+				aria-label={t("Gallery layout")}
+				disallowEmptySelection={true}
+				onSelectionChange={(keys) => {
+					const [selectedLayout] = [...keys] as Array<"carousel" | "grid">;
+					onChange({ ...item.content, layout: selectedLayout ?? "grid", items });
+				}}
+				selectedKeys={new Set([layout])}
+				selectionMode="single"
+			>
+				<ToggleGroupItem id="grid">{t("Grid")}</ToggleGroupItem>
+				<ToggleGroupItem id="carousel">{t("Carousel")}</ToggleGroupItem>
+			</ToggleGroup>
+
+			<div className="flex flex-col gap-y-3">
+				{items.map((galleryItem, idx) => {
+					return (
+						<div key={idx} className="flex flex-col gap-y-3 rounded-lg border border-border p-3">
+							<div className="flex items-center justify-between">
+								<span className="text-sm font-medium">
+									{t("Image")} {idx + 1}
+								</span>
+								<div className="flex items-center gap-x-2">
+									<Button
+										intent="outline"
+										isDisabled={idx === 0}
+										onPress={() => {
+											moveItem(idx, -1);
+										}}
+										size="sm"
+									>
+										{t("Up")}
+									</Button>
+									<Button
+										intent="outline"
+										isDisabled={idx === items.length - 1}
+										onPress={() => {
+											moveItem(idx, 1);
+										}}
+										size="sm"
+									>
+										{t("Down")}
+									</Button>
+									<Button
+										intent="outline"
+										onPress={() => {
+											onChange({
+												...item.content,
+												layout,
+												items: items.filter((_, itemIndex) => {
+													return itemIndex !== idx;
+												}),
+											});
+										}}
+										size="sm"
+									>
+										<TrashIcon className="size-4" />
+									</Button>
+								</div>
+							</div>
+
+							<div className="flex items-start gap-x-4">
+								{galleryItem.imageUrl != null && (
+									<img
+										alt={galleryItem.caption ?? t("Selected image")}
+										className="size-24 shrink-0 rounded-lg object-cover"
+										src={galleryItem.imageUrl}
+									/>
+								)}
+								<MediaLibraryDialog
+									defaultPrefix="images"
+									initialAssets={initialAssets ?? []}
+									onSelect={(imageKey, imageUrl) => {
+										onChange({
+											...item.content,
+											layout,
+											items: items.map((existingItem, itemIndex) => {
+												return itemIndex === idx
+													? { ...existingItem, imageKey, imageUrl }
+													: existingItem;
+											}),
+										});
+									}}
+									prefixes={["avatars", "images", "logos"]}
+								/>
+							</div>
+
+							<TextField
+								onChange={(value) => {
+									onChange({
+										...item.content,
+										layout,
+										items: items.map((existingItem, itemIndex) => {
+											return itemIndex === idx ? { ...existingItem, caption: value } : existingItem;
+										}),
+									});
+								}}
+								value={galleryItem.caption ?? ""}
+							>
+								<Label>{t("Caption")}</Label>
+								<Input />
+							</TextField>
+						</div>
+					);
+				})}
+			</div>
+
+			<Button
+				intent="secondary"
+				onPress={() => {
+					onChange({
+						...item.content,
+						layout,
+						items: [...items, { imageKey: undefined, imageUrl: undefined, caption: undefined }],
+					});
+				}}
+				size="sm"
+			>
+				<PlusIcon className="size-4" />
+				{t("Add image")}
+			</Button>
+		</div>
+	);
 }
 
 interface DataContentBlockPanelProps {
@@ -1112,6 +1286,7 @@ const MENU_BLOCK_TYPES: Array<{
 	icon: ReactNode;
 }> = [
 	{ type: "unified_content", icon: <PencilSquareIcon /> },
+	{ type: "gallery", icon: <Squares2X2Icon /> },
 	{ type: "data", icon: <Square3Stack3DIcon /> },
 	{ type: "hero", icon: <RectangleGroupIcon /> },
 	{ type: "accordion", icon: <ListBulletIcon /> },
@@ -1124,6 +1299,7 @@ export function ContentBlockMenu({ onAdd }: Readonly<ContentBlockMenuProps>): Re
 		accordion: t("Accordion"),
 		data: t("Data"),
 		embed: t("Embed"),
+		gallery: t("Gallery"),
 		hero: t("Hero"),
 		image: t("Image"),
 		rich_text: t("Rich text"),
