@@ -37,7 +37,7 @@ import { deleteGovernanceBodyAction } from "@/app/(app)/[locale]/(dashboard)/das
 interface GovernanceBodiesPageProps {
 	governanceBodies: Promise<
 		Array<
-			Pick<schema.OrganisationalUnit, "id" | "name"> & {
+			Pick<schema.OrganisationalUnit, "acronym" | "id" | "name"> & {
 				entity: Pick<schema.Entity, "documentId" | "slug"> & {
 					status: Pick<schema.EntityStatus, "id" | "type">;
 				};
@@ -57,7 +57,7 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 
 	const list = useListData({
 		filter(item, filterText) {
-			return contains(item.name, filterText);
+			return contains(item.acronym ?? "", filterText) || contains(item.name, filterText);
 		},
 		initialItems: governanceBodies,
 	});
@@ -104,13 +104,15 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
+					<TableColumn isRowHeader={true}>{t("Acronym")}</TableColumn>
+					<TableColumn>{t("Name")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => {
 						return (
 							<TableRow>
+								<TableCell className="uppercase">{item.acronym}</TableCell>
 								<TableCell>{item.name}</TableCell>
 								<TableCell className="text-end">
 									<Menu>

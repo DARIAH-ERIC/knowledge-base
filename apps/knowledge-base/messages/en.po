@@ -463,7 +463,7 @@ msgstr "Forgot password?"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:140
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:120
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:76
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:107
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:108
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:76
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:76
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:107
@@ -1207,7 +1207,7 @@ msgstr "Open quick search"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal.tsx:35
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:177
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:140
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:142
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:140
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:140
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:151
@@ -1228,7 +1228,7 @@ msgstr "Delete"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/edit-action.tsx:17
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:167
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:130
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:132
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:130
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:130
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:34
@@ -1461,7 +1461,7 @@ msgid "TLrvIO"
 msgstr "Observer"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:155
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:118
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:120
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:118
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:118
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:125
@@ -1514,6 +1514,7 @@ msgid "Lv0zJu"
 msgstr "Details"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:82
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:107
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:82
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:82
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:82
@@ -1712,7 +1713,7 @@ msgstr "Manage all country reports in the DARIAH knowledge base."
 msgid "MF6b++"
 msgstr "Manage all governance bodies in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:155
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:157
 msgid "J54tNL"
 msgstr "governance body"
 
