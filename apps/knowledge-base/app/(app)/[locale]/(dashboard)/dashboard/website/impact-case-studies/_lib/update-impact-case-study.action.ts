@@ -14,6 +14,7 @@ import * as v from "valibot";
 import { UpdateImpactCaseStudyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/update-impact-case-study.schema";
 import { assertAuthenticated } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
+import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { syncEntityRelations } from "@/lib/data/relations";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -83,126 +84,7 @@ export const updateImpactCaseStudyAction = createServerAction(
 				blockId: string,
 				isNew: boolean,
 			) {
-				switch (block.type) {
-					case "rich_text": {
-						if (isNew) {
-							await tx
-								.insert(schema.richTextContentBlocks)
-								.values({ id: blockId, content: block.content ?? {} });
-						} else {
-							await tx
-								.update(schema.richTextContentBlocks)
-								.set({ content: block.content ?? {} })
-								.where(eq(schema.richTextContentBlocks.id, blockId));
-						}
-						break;
-					}
-					case "image": {
-						const imageKey = block.content?.imageKey;
-						if (imageKey == null) break;
-						const asset = await tx.query.assets.findFirst({
-							where: { key: imageKey },
-							columns: { id: true },
-						});
-						if (asset == null) break;
-						const caption = block.content?.caption ?? null;
-						if (isNew) {
-							await tx
-								.insert(schema.imageContentBlocks)
-								.values({ id: blockId, imageId: asset.id, caption });
-						} else {
-							await tx
-								.update(schema.imageContentBlocks)
-								.set({ imageId: asset.id, caption })
-								.where(eq(schema.imageContentBlocks.id, blockId));
-						}
-						break;
-					}
-					case "embed": {
-						const url = block.content?.url;
-						const title = block.content?.title;
-						if (url == null || title == null) break;
-						const caption = block.content?.caption ?? null;
-						if (isNew) {
-							await tx
-								.insert(schema.embedContentBlocks)
-								.values({ id: blockId, url, title, caption });
-						} else {
-							await tx
-								.update(schema.embedContentBlocks)
-								.set({ url, title, caption })
-								.where(eq(schema.embedContentBlocks.id, blockId));
-						}
-						break;
-					}
-					case "data": {
-						const dataType = block.content?.dataType;
-						if (dataType == null) break;
-						const dataContentBlockType = await tx.query.dataContentBlockTypes.findFirst({
-							where: { type: dataType },
-							columns: { id: true },
-						});
-						if (dataContentBlockType == null) break;
-						const limit = block.content?.limit ?? null;
-						const selectedIds = block.content?.selectedIds ?? null;
-						if (isNew) {
-							await tx.insert(schema.dataContentBlocks).values({
-								id: blockId,
-								typeId: dataContentBlockType.id,
-								limit,
-								selectedIds,
-							});
-						} else {
-							await tx
-								.update(schema.dataContentBlocks)
-								.set({ typeId: dataContentBlockType.id, limit, selectedIds })
-								.where(eq(schema.dataContentBlocks.id, blockId));
-						}
-						break;
-					}
-					case "hero": {
-						const heroTitle = block.content?.title;
-						if (heroTitle == null) break;
-						const heroImageKey = block.content?.imageKey;
-						let heroImageId: string | null = null;
-						if (heroImageKey != null) {
-							const heroAsset = await tx.query.assets.findFirst({
-								where: { key: heroImageKey },
-								columns: { id: true },
-							});
-							heroImageId = heroAsset?.id ?? null;
-						}
-						const eyebrow = block.content?.eyebrow ?? null;
-						const ctas = block.content?.ctas ?? null;
-						if (isNew) {
-							await tx.insert(schema.heroContentBlocks).values({
-								id: blockId,
-								title: heroTitle,
-								eyebrow,
-								imageId: heroImageId,
-								ctas,
-							});
-						} else {
-							await tx
-								.update(schema.heroContentBlocks)
-								.set({ title: heroTitle, eyebrow, imageId: heroImageId, ctas })
-								.where(eq(schema.heroContentBlocks.id, blockId));
-						}
-						break;
-					}
-					case "accordion": {
-						const items = block.content?.items ?? [];
-						if (isNew) {
-							await tx.insert(schema.accordionContentBlocks).values({ id: blockId, items });
-						} else {
-							await tx
-								.update(schema.accordionContentBlocks)
-								.set({ items })
-								.where(eq(schema.accordionContentBlocks.id, blockId));
-						}
-						break;
-					}
-				}
+				await upsertTypedContentBlock(tx, block, blockId, isNew);
 			}
 
 			if (contentField != null) {

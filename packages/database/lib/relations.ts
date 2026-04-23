@@ -57,6 +57,11 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.embedContentBlocks.id,
 				optional: true,
 			}),
+			galleryContentBlock: r.one.galleryContentBlocks({
+				from: r.contentBlocks.id,
+				to: r.galleryContentBlocks.id,
+				optional: true,
+			}),
 			imageContentBlock: r.one.imageContentBlocks({
 				from: r.contentBlocks.id,
 				to: r.imageContentBlocks.id,
@@ -94,6 +99,29 @@ export const relations = defineRelations(schema, (r) => {
 			contentBlock: r.one.contentBlocks({
 				from: r.embedContentBlocks.id,
 				to: r.contentBlocks.id,
+				optional: false,
+			}),
+		},
+		galleryContentBlocks: {
+			contentBlock: r.one.contentBlocks({
+				from: r.galleryContentBlocks.id,
+				to: r.contentBlocks.id,
+				optional: false,
+			}),
+			items: r.many.galleryContentBlockItems({
+				from: r.galleryContentBlocks.id,
+				to: r.galleryContentBlockItems.galleryContentBlockId,
+			}),
+		},
+		galleryContentBlockItems: {
+			galleryContentBlock: r.one.galleryContentBlocks({
+				from: r.galleryContentBlockItems.galleryContentBlockId,
+				to: r.galleryContentBlocks.id,
+				optional: false,
+			}),
+			image: r.one.assets({
+				from: r.galleryContentBlockItems.imageId,
+				to: r.assets.id,
 				optional: false,
 			}),
 		},

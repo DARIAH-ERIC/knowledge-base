@@ -11,6 +11,7 @@ export const contentBlockTypesEnum = [
 	"accordion",
 	"data",
 	"embed",
+	"gallery",
 	"hero",
 	"image",
 	"rich_text",
@@ -139,6 +140,59 @@ export type EmbedContentBlockInput = typeof embedContentBlocks.$inferInsert;
 export const EmbedContentBlockSelectSchema = createSelectSchema(embedContentBlocks);
 export const EmbedContentBlockInsertSchema = createInsertSchema(embedContentBlocks);
 export const EmbedContentBlockUpdateSchema = createUpdateSchema(embedContentBlocks);
+
+export const galleryContentBlocks = p.pgTable("content_blocks_type_gallery", {
+	id: p
+		.uuid("id")
+		.primaryKey()
+		.references(
+			() => {
+				return contentBlocks.id;
+			},
+			{ onDelete: "cascade" },
+		),
+	layout: p
+		.text("layout", { enum: ["carousel", "grid"] })
+		.notNull()
+		.default("grid"),
+	...f.timestamps(),
+});
+
+export type GalleryContentBlock = typeof galleryContentBlocks.$inferSelect;
+export type GalleryContentBlockInput = typeof galleryContentBlocks.$inferInsert;
+
+export const GalleryContentBlockSelectSchema = createSelectSchema(galleryContentBlocks);
+export const GalleryContentBlockInsertSchema = createInsertSchema(galleryContentBlocks);
+export const GalleryContentBlockUpdateSchema = createUpdateSchema(galleryContentBlocks);
+
+export const galleryContentBlockItems = p.pgTable("content_blocks_type_gallery_items", {
+	id: p.uuid("id").primaryKey().default(uuidv7()),
+	galleryContentBlockId: p
+		.uuid("gallery_content_block_id")
+		.notNull()
+		.references(
+			() => {
+				return galleryContentBlocks.id;
+			},
+			{ onDelete: "cascade" },
+		),
+	imageId: p
+		.uuid("image_id")
+		.notNull()
+		.references(() => {
+			return assets.id;
+		}),
+	position: p.integer("position").notNull(),
+	caption: p.text("caption"),
+	...f.timestamps(),
+});
+
+export type GalleryContentBlockItem = typeof galleryContentBlockItems.$inferSelect;
+export type GalleryContentBlockItemInput = typeof galleryContentBlockItems.$inferInsert;
+
+export const GalleryContentBlockItemSelectSchema = createSelectSchema(galleryContentBlockItems);
+export const GalleryContentBlockItemInsertSchema = createInsertSchema(galleryContentBlockItems);
+export const GalleryContentBlockItemUpdateSchema = createUpdateSchema(galleryContentBlockItems);
 
 export const imageContentBlocks = p.pgTable("content_blocks_type_image", {
 	id: p

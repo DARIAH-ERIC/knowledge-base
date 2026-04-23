@@ -23,6 +23,8 @@ async function main() {
 			entitiesToResources: schema.entitiesToResources,
 			events: schema.events,
 			fields: schema.fields,
+			galleryContentBlockItems: schema.galleryContentBlockItems,
+			galleryContentBlocks: schema.galleryContentBlocks,
 			imageContentBlocks: schema.imageContentBlocks,
 			impactCaseStudies: schema.impactCaseStudies,
 			impactCaseStudiesToPersons: schema.impactCaseStudiesToPersons,

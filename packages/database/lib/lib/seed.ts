@@ -382,6 +382,11 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			.values(fields)
 			.returning({ id: schema.fields.id });
 
+		await db
+			.insert(schema.contentBlockTypes)
+			.values([{ type: "gallery" }])
+			.onConflictDoNothing();
+
 		const contentBlockTypeIds = await db
 			.select({ id: schema.contentBlockTypes.id, type: schema.contentBlockTypes.type })
 			.from(schema.contentBlockTypes);
@@ -396,7 +401,8 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 		const contentBlocks: Array<schema.ContentBlockInput> = fieldIds.flatMap(({ id: fieldId }) => {
 			return [
 				{ fieldId, typeId: contentBlockTypesByType.image.id, position: 1 },
-				{ fieldId, typeId: contentBlockTypesByType.rich_text.id, position: 2 },
+				{ fieldId, typeId: contentBlockTypesByType.gallery.id, position: 2 },
+				{ fieldId, typeId: contentBlockTypesByType.rich_text.id, position: 3 },
 			];
 		});
 
@@ -424,6 +430,37 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			});
 
 		await db.insert(schema.imageContentBlocks).values(imageContentBlocks);
+
+		const galleryContentBlocks: Array<schema.GalleryContentBlockInput> =
+			contentBlockIdsByType.gallery.map(({ id }) => {
+				return {
+					id,
+					layout: "carousel",
+				};
+			});
+
+		await db.insert(schema.galleryContentBlocks).values(galleryContentBlocks);
+
+		const galleryContentBlockItems: Array<schema.GalleryContentBlockItemInput> =
+			contentBlockIdsByType.gallery.flatMap(({ id: galleryContentBlockId }) => {
+				return f.helpers
+					.arrayElements(imageIds, { min: 3, max: 5 })
+					.map(({ id: imageId }, position) => {
+						return {
+							galleryContentBlockId,
+							imageId,
+							position,
+							caption: f.helpers.maybe(
+								() => {
+									return f.lorem.sentence();
+								},
+								{ probability: 0.5 },
+							),
+						};
+					});
+			});
+
+		await db.insert(schema.galleryContentBlockItems).values(galleryContentBlockItems);
 
 		const richTextContentBlocks = contentBlockIdsByType.rich_text.map(({ id }) => {
 			return {

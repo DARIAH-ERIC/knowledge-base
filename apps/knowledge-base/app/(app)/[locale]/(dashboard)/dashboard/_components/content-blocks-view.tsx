@@ -111,6 +111,55 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			);
 		}
 
+		case "gallery": {
+			const layout = contentBlock.content?.layout ?? "grid";
+			const items = contentBlock.content?.items ?? [];
+
+			if (items.length === 0) {
+				return null;
+			}
+
+			if (layout === "carousel") {
+				return (
+					<div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2">
+						{items.map((item, idx) => {
+							if (item.imageUrl == null || item.imageUrl === "") return null;
+
+							return (
+								<figure key={idx} className="w-[min(20rem,80vw)] shrink-0 snap-start">
+									<img
+										alt={item.caption ?? ""}
+										className="aspect-4/3 w-full rounded-lg object-cover"
+										src={item.imageUrl}
+									/>
+									{item.caption != null ? <figcaption>{item.caption}</figcaption> : null}
+								</figure>
+							);
+						})}
+					</div>
+				);
+			}
+
+			return (
+				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+					{items.map((item, idx) => {
+						if (item.imageUrl == null || item.imageUrl === "") return null;
+
+						return (
+							<figure key={idx}>
+								<img
+									alt={item.caption ?? ""}
+									className="aspect-4/3 w-full rounded-lg object-cover"
+									src={item.imageUrl}
+								/>
+								{item.caption != null ? <figcaption>{item.caption}</figcaption> : null}
+							</figure>
+						);
+					})}
+				</div>
+			);
+		}
+
 		case "hero": {
 			const title = contentBlock.content?.title;
 			const eyebrow = contentBlock.content?.eyebrow;

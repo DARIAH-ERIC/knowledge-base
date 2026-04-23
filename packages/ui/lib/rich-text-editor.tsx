@@ -27,7 +27,7 @@ import {
 	Trash2Icon,
 } from "lucide-react";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useCallback, useId, useRef, useState } from "react";
+import { type ReactNode, useCallback, useId, useMemo, useRef, useState } from "react";
 import { Button as ButtonPrimitive } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
@@ -46,6 +46,8 @@ interface RichTextEditorProps {
 	renderEmbedInsert?: (insertEmbed: () => void) => ReactNode;
 	renderImagePicker?: (insert: (imageKey: string, imageUrl: string) => void) => ReactNode;
 }
+
+type ImagePickerRenderer = NonNullable<RichTextEditorProps["renderImagePicker"]>;
 
 export interface RichTextEditorToolbarButtonProps {
 	"aria-label": string;
@@ -83,6 +85,46 @@ export function RichTextEditorToolbarButton({
 // Keep the internal alias for backward-compat within this file.
 const RichTextEditorIconButton = RichTextEditorToolbarButton;
 
+interface BlockNodeSurfaceProps {
+	children: ReactNode;
+	className?: string;
+	isEditable: boolean;
+	isSelected?: boolean;
+	label: string;
+	onDoubleClick?: () => void;
+}
+
+function BlockNodeSurface({
+	children,
+	className,
+	isEditable,
+	isSelected = false,
+	label,
+	onDoubleClick,
+}: Readonly<BlockNodeSurfaceProps>): ReactNode {
+	return (
+		<NodeViewWrapper>
+			<div
+				aria-label={label}
+				className={twMerge(
+					"my-2 overflow-clip rounded-lg border border-input bg-bg transition-shadow",
+					isEditable && "cursor-default",
+					isSelected && "border-primary ring-2 ring-primary/20",
+					className,
+				)}
+				contentEditable={false}
+				onDoubleClick={(e) => {
+					if (!isEditable || onDoubleClick == null) return;
+					e.preventDefault();
+					onDoubleClick();
+				}}
+			>
+				{children}
+			</div>
+		</NodeViewWrapper>
+	);
+}
+
 function getEmbedUrl(url: string): string {
 	const watchMatch = /youtube\.com\/watch\?.*?v=([\w-]+)/.exec(url);
 	if (watchMatch != null) return `https://www.youtube-nocookie.com/embed/${watchMatch[1]!}`;
@@ -91,12 +133,19 @@ function getEmbedUrl(url: string): string {
 	return url;
 }
 
-function EmbedNodeView({ node, updateAttributes, deleteNode }: Readonly<NodeViewProps>): ReactNode {
+function EmbedNodeView({
+	editor,
+	getPos,
+	node,
+	selected,
+	updateAttributes,
+	deleteNode,
+}: Readonly<NodeViewProps>): ReactNode {
 	const url = node.attrs.url as string | null;
 	const title = node.attrs.title as string | null;
 	const caption = node.attrs.caption as string | null;
 
-	const [isEditing, setIsEditing] = useState(url == null);
+	const [isEditing, setIsEditing] = useState(url == null && editor.isEditable);
 	const [urlInput, setUrlInput] = useState(url ?? "");
 	const [titleInput, setTitleInput] = useState(title ?? "");
 	const [captionInput, setCaptionInput] = useState(caption ?? "");
@@ -117,12 +166,30 @@ function EmbedNodeView({ node, updateAttributes, deleteNode }: Readonly<NodeView
 	const titleInputId = useId();
 	const captionInputId = useId();
 
+	function resetInputs() {
+		setUrlInput(url ?? "");
+		setTitleInput(title ?? "");
+		setCaptionInput(caption ?? "");
+	}
+
+	function selectNode() {
+		const pos = getPos();
+		if (typeof pos !== "number") return;
+		editor.commands.setNodeSelection(pos);
+	}
+
 	return (
-		<NodeViewWrapper>
-			<div
-				className="my-2 overflow-clip rounded-lg border border-input bg-bg"
-				contentEditable={false}
-			>
+		<BlockNodeSurface
+			isEditable={editor.isEditable}
+			isSelected={selected}
+			label="Embed block"
+			onDoubleClick={() => {
+				selectNode();
+				resetInputs();
+				setIsEditing(true);
+			}}
+		>
+			<div className={twMerge("transition-opacity", selected && "bg-primary-subtle/10")}>
 				{isEditing ? (
 					<div className="flex flex-col gap-y-3 p-4">
 						<div className="flex flex-col gap-y-1">
@@ -209,39 +276,46 @@ function EmbedNodeView({ node, updateAttributes, deleteNode }: Readonly<NodeView
 								/>
 							</div>
 						)}
-						<div className="flex items-center justify-between gap-x-2 border-t border-border px-4 py-2">
-							<span className="min-w-0 truncate text-xs text-muted-fg">{url}</span>
-							<div className="flex shrink-0 gap-x-1">
-								<button
-									aria-label="Edit embed"
-									className="rounded-sm p-1 text-muted-fg hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-									onClick={() => {
-										setUrlInput(url ?? "");
-										setTitleInput(title ?? "");
-										setCaptionInput(caption ?? "");
-										setIsEditing(true);
-									}}
-									type="button"
-								>
-									<PencilIcon className="size-3.5" />
-								</button>
-								<button
-									aria-label="Remove embed"
-									className="rounded-sm p-1 text-muted-fg hover:text-danger focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-									onClick={deleteNode}
-									type="button"
-								>
-									<Trash2Icon className="size-3.5" />
-								</button>
+						{editor.isEditable ? (
+							<div className="flex items-center justify-between gap-x-2 border-t border-border px-4 py-2">
+								<span className="min-w-0 truncate text-xs text-muted-fg">{url}</span>
+								<div className="flex shrink-0 gap-x-1">
+									<button
+										aria-label="Edit embed"
+										className="rounded-sm p-1 text-muted-fg hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+										onClick={() => {
+											selectNode();
+											setUrlInput(url ?? "");
+											setTitleInput(title ?? "");
+											setCaptionInput(caption ?? "");
+											setIsEditing(true);
+										}}
+										type="button"
+									>
+										<PencilIcon className="size-3.5" />
+									</button>
+									<button
+										aria-label="Remove embed"
+										className="rounded-sm p-1 text-muted-fg hover:text-danger focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+										onClick={deleteNode}
+										type="button"
+									>
+										<Trash2Icon className="size-3.5" />
+									</button>
+								</div>
 							</div>
-						</div>
+						) : (
+							<div className="border-t border-border px-4 py-2">
+								<span className="min-w-0 truncate text-xs text-muted-fg">{url}</span>
+							</div>
+						)}
 						{caption != null && caption !== "" && (
 							<p className="border-t border-border px-4 py-2 text-sm text-muted-fg">{caption}</p>
 						)}
 					</div>
 				)}
 			</div>
-		</NodeViewWrapper>
+		</BlockNodeSurface>
 	);
 }
 
@@ -296,54 +370,254 @@ export const EmbedNode = Node.create({
 	},
 });
 
-/**
- * Block-level image node that stores an asset key for referential integrity.
- * Used in the unified content editor; distinct from the plain `Image` extension
- * which is used for images embedded directly in rich text (e.g. accordion items).
- */
-export const AssetImage = Node.create({
-	name: "assetImage",
-	group: "block",
-	atom: true,
+interface AssetImageNodeViewProps extends NodeViewProps {
+	renderImagePicker?: ImagePickerRenderer;
+}
 
-	addAttributes() {
-		return {
-			imageKey: { default: null },
-			imageUrl: { default: null },
-			caption: { default: null },
-		};
-	},
+function AssetImageNodeView({
+	editor,
+	getPos,
+	node,
+	selected,
+	updateAttributes,
+	deleteNode,
+	renderImagePicker,
+}: Readonly<AssetImageNodeViewProps>): ReactNode {
+	const imageKey = node.attrs.imageKey as string | null;
+	const imageUrl = node.attrs.imageUrl as string | null;
+	const caption = node.attrs.caption as string | null;
 
-	parseHTML() {
-		return [
-			{
-				tag: "img[data-asset-image]",
-				getAttrs(dom) {
-					const el = dom;
-					return {
-						imageKey: el.dataset.imageKey,
-						imageUrl: el.getAttribute("src"),
-						caption: el.dataset.caption,
-					};
-				},
-			},
-		];
-	},
+	const [isEditing, setIsEditing] = useState(
+		(editor.isEditable && (imageKey == null || imageUrl == null)) || false,
+	);
+	const [imageKeyInput, setImageKeyInput] = useState(imageKey ?? "");
+	const [imageUrlInput, setImageUrlInput] = useState(imageUrl ?? "");
+	const [captionInput, setCaptionInput] = useState(caption ?? "");
 
-	renderHTML({ node }) {
-		return [
-			"img",
-			mergeAttributes(
+	const imageKeyInputId = useId();
+	const imageUrlInputId = useId();
+	const captionInputId = useId();
+
+	function resetInputs() {
+		setImageKeyInput(imageKey ?? "");
+		setImageUrlInput(imageUrl ?? "");
+		setCaptionInput(caption ?? "");
+	}
+
+	function selectNode() {
+		const pos = getPos();
+		if (typeof pos !== "number") return;
+		editor.commands.setNodeSelection(pos);
+	}
+
+	function handleApply() {
+		const nextImageUrl = imageUrlInput.trim();
+		if (!nextImageUrl) return;
+
+		updateAttributes({
+			imageKey: imageKeyInput.trim() || null,
+			imageUrl: nextImageUrl,
+			caption: captionInput.trim() || null,
+		});
+		setIsEditing(false);
+	}
+
+	return (
+		<BlockNodeSurface
+			isEditable={editor.isEditable}
+			isSelected={selected}
+			label="Image block"
+			onDoubleClick={() => {
+				selectNode();
+				resetInputs();
+				setIsEditing(true);
+			}}
+		>
+			{isEditing ? (
+				<div className="flex flex-col gap-y-3 p-4">
+					{renderImagePicker != null ? (
+						<div className="flex flex-col gap-y-2">
+							<div className="text-sm/6 font-medium">{"Pick image"}</div>
+							{renderImagePicker((nextImageKey, nextImageUrl) => {
+								updateAttributes({
+									imageKey: nextImageKey,
+									imageUrl: nextImageUrl,
+									caption: captionInput.trim() || null,
+								});
+								setImageKeyInput(nextImageKey);
+								setImageUrlInput(nextImageUrl);
+							})}
+						</div>
+					) : null}
+					{renderImagePicker == null ? (
+						<>
+							<div className="flex flex-col gap-y-1">
+								<label className="text-sm/6 font-medium" htmlFor={imageKeyInputId}>
+									{"Asset key"}
+								</label>
+								<Input
+									id={imageKeyInputId}
+									onChange={(e) => {
+										setImageKeyInput(e.target.value);
+									}}
+									placeholder="Asset key"
+									type="text"
+									value={imageKeyInput}
+								/>
+							</div>
+							<div className="flex flex-col gap-y-1">
+								<label className="text-sm/6 font-medium" htmlFor={imageUrlInputId}>
+									{"Image URL"}
+								</label>
+								<Input
+									id={imageUrlInputId}
+									onChange={(e) => {
+										setImageUrlInput(e.target.value);
+									}}
+									placeholder="https://"
+									type="url"
+									value={imageUrlInput}
+								/>
+							</div>
+						</>
+					) : null}
+					<div className="flex flex-col gap-y-1">
+						<label className="text-sm/6 font-medium" htmlFor={captionInputId}>
+							{"Caption"}
+						</label>
+						<Input
+							id={captionInputId}
+							onChange={(e) => {
+								setCaptionInput(e.target.value);
+							}}
+							type="text"
+							value={captionInput}
+						/>
+					</div>
+					<div className="flex items-center gap-x-2">
+						<Button
+							intent="primary"
+							isDisabled={imageUrlInput.trim() === ""}
+							onPress={handleApply}
+							size="sm"
+							type="button"
+						>
+							{"Apply"}
+						</Button>
+						{imageKey != null || imageUrl != null ? (
+							<Button
+								intent="outline"
+								onPress={() => {
+									resetInputs();
+									setIsEditing(false);
+								}}
+								size="sm"
+								type="button"
+							>
+								{"Cancel"}
+							</Button>
+						) : null}
+						{(imageKey != null || imageUrl != null) && editor.isEditable ? (
+							<Button intent="outline" onPress={deleteNode} size="sm" type="button">
+								{"Remove"}
+							</Button>
+						) : null}
+					</div>
+				</div>
+			) : (
+				<div className="group">
+					<div className="relative">
+						<img
+							alt={caption ?? ""}
+							className="block w-full object-cover"
+							data-asset-image=""
+							data-image-key={imageKey ?? undefined}
+							src={imageUrl ?? ""}
+						/>
+						<div className="absolute inset-x-0 top-0 flex justify-end gap-x-1 p-2 opacity-0 transition-opacity group-hover:opacity-100">
+							<button
+								aria-label="Edit image"
+								className="rounded-sm bg-bg/90 p-1 text-muted-fg shadow-sm hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+								onClick={() => {
+									selectNode();
+									resetInputs();
+									setIsEditing(true);
+								}}
+								type="button"
+							>
+								<PencilIcon className="size-3.5" />
+							</button>
+							<button
+								aria-label="Remove image"
+								className="rounded-sm bg-bg/90 p-1 text-muted-fg shadow-sm hover:text-danger focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+								onClick={deleteNode}
+								type="button"
+							>
+								<Trash2Icon className="size-3.5" />
+							</button>
+						</div>
+					</div>
+					{caption != null && caption !== "" ? (
+						<p className="border-t border-border px-4 py-2 text-sm text-muted-fg">{caption}</p>
+					) : null}
+				</div>
+			)}
+		</BlockNodeSurface>
+	);
+}
+
+function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
+	return Node.create({
+		name: "assetImage",
+		group: "block",
+		atom: true,
+		selectable: true,
+
+		addAttributes() {
+			return {
+				imageKey: { default: null },
+				imageUrl: { default: null },
+				caption: { default: null },
+			};
+		},
+
+		parseHTML() {
+			return [
 				{
-					src: node.attrs.imageUrl as string | null,
-					"data-asset-image": "",
-					"data-image-key": node.attrs.imageKey as string | null,
+					tag: "img[data-asset-image]",
+					getAttrs(dom) {
+						const el = dom;
+						return {
+							imageKey: el.dataset.imageKey,
+							imageUrl: el.getAttribute("src"),
+							caption: el.dataset.caption,
+						};
+					},
 				},
-				node.attrs.caption != null ? { "data-caption": node.attrs.caption as string } : {},
-			),
-		];
-	},
-});
+			];
+		},
+
+		renderHTML({ node }) {
+			return [
+				"img",
+				mergeAttributes(
+					{
+						src: node.attrs.imageUrl as string | null,
+						"data-asset-image": "",
+						"data-image-key": node.attrs.imageKey as string | null,
+					},
+					node.attrs.caption != null ? { "data-caption": node.attrs.caption as string } : {},
+				),
+			];
+		},
+
+		addNodeView() {
+			return ReactNodeViewRenderer((props) => {
+				return <AssetImageNodeView {...props} renderImagePicker={renderImagePicker} />;
+			});
+		},
+	});
+}
 
 export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode {
 	const {
@@ -359,6 +633,10 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	const t = useExtracted("ui");
 
+	const assetImageNode = useMemo(() => {
+		return createAssetImageNode(renderImagePicker);
+	}, [renderImagePicker]);
+
 	const editor = useEditor({
 		extensions: [
 			StarterKit.configure({
@@ -369,7 +647,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 				},
 			}),
 			Image,
-			AssetImage,
+			assetImageNode,
 			EmbedNode,
 		],
 		content,
