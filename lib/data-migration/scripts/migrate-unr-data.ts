@@ -6,14 +6,14 @@ import { buffer } from "@dariah-eric/storage/lib";
 import slugify from "@sindresorhus/slugify";
 import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
-import { eq } from "drizzle-orm";
+import { eq, ilike } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 
 import type { AssetMetadata } from "../../../packages/storage/lib";
 import { placeholderImageUrl } from "../config/data-migration.config";
 import { env } from "../config/env.config";
 import {
-	contributions,
+	bodies as unrBodies,
 	contributions as unrContributions,
 	countries as unrCountries,
 	countryToInstitution,
@@ -345,46 +345,44 @@ async function main() {
 					}
 				}
 
-				if (country.description === null) {
-					return;
+				if (country.description !== null) {
+					const content = generateJSON(country.description, [StarterKit]);
+
+					const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
+						where: {
+							entityTypeId: entityTypesByType.organisational_units.id,
+							fieldName: "description",
+						},
+					});
+
+					assert(fieldName);
+
+					const [field] = await tx
+						.insert(schema.fields)
+						.values({
+							entityId: consortiumEntitiy.id,
+							fieldNameId: fieldName.id,
+						})
+						.returning({ id: schema.fields.id });
+
+					assert(field);
+
+					const [contentBlock] = await tx
+						.insert(schema.contentBlocks)
+						.values({
+							position: 0,
+							fieldId: field.id,
+							typeId: contentBlockTypesByType.rich_text.id,
+						})
+						.returning({ id: schema.contentBlocks.id });
+
+					assert(contentBlock);
+
+					await tx.insert(schema.richTextContentBlocks).values({
+						content,
+						id: contentBlock.id,
+					});
 				}
-
-				const content = generateJSON(country.description, [StarterKit]);
-
-				const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
-					where: {
-						entityTypeId: entityTypesByType.organisational_units.id,
-						fieldName: "description",
-					},
-				});
-
-				assert(fieldName);
-
-				const [field] = await tx
-					.insert(schema.fields)
-					.values({
-						entityId: consortiumEntitiy.id,
-						fieldNameId: fieldName.id,
-					})
-					.returning({ id: schema.fields.id });
-
-				assert(field);
-
-				const [contentBlock] = await tx
-					.insert(schema.contentBlocks)
-					.values({
-						position: 0,
-						fieldId: field.id,
-						typeId: contentBlockTypesByType.rich_text.id,
-					})
-					.returning({ id: schema.contentBlocks.id });
-
-				assert(contentBlock);
-
-				await tx.insert(schema.richTextContentBlocks).values({
-					content,
-					id: contentBlock.id,
-				});
 
 				// create an org unit for each national consortium
 
@@ -409,7 +407,7 @@ async function main() {
 					unitId: consortiumOrgUnit.id,
 					relatedUnitId: countryOrgUnit.id,
 					duration: { start: new Date(Date.UTC(1900, 0, 1)) },
-					status: organisationalUnitStatusByType.is_located_in.id,
+					status: organisationalUnitStatusByType.is_national_consortium_of.id,
 				});
 			}
 
@@ -805,11 +803,11 @@ async function main() {
 
 			const contributionsByPerson = await client
 				.select({
-					countryId: contributions.countryId,
-					personId: contributions.personId,
-					workingGroupId: contributions.workingGroupId,
-					startDate: contributions.startDate,
-					endDate: contributions.endDate,
+					countryId: unrContributions.countryId,
+					personId: unrContributions.personId,
+					workingGroupId: unrContributions.workingGroupId,
+					startDate: unrContributions.startDate,
+					endDate: unrContributions.endDate,
 					role: roles.type,
 				})
 				.from(unrContributions)
@@ -910,6 +908,67 @@ async function main() {
 						end: endDate ?? undefined,
 					},
 					roleTypeId: roleId,
+				});
+			}
+		});
+	}
+
+	/**
+	 * ============================================================================================
+	 * Bodies.
+	 * ============================================================================================
+	 */
+
+	log.info("Migrating bodies...");
+
+	for (const body of bodies) {
+		await db.transaction(async (tx) => {
+			//  sb from unr changed to sab in kb
+			const unrAcronym = body.acronym === "sab" ? "sb" : body.acronym;
+			assert(unrAcronym);
+			const [unrBody] = await client
+				.select()
+				.from(unrBodies)
+				.where(ilike(unrBodies.acronym, unrAcronym));
+
+			assert(unrBody);
+
+			if (unrBody.description !== null) {
+				const content = generateJSON(unrBody.description, [StarterKit]);
+
+				const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
+					where: {
+						entityTypeId: entityTypesByType.organisational_units.id,
+						fieldName: "description",
+					},
+				});
+
+				assert(fieldName);
+
+				const [field] = await tx
+					.insert(schema.fields)
+					.values({
+						entityId: body.id,
+						fieldNameId: fieldName.id,
+					})
+					.returning({ id: schema.fields.id });
+
+				assert(field);
+
+				const [contentBlock] = await tx
+					.insert(schema.contentBlocks)
+					.values({
+						position: 0,
+						fieldId: field.id,
+						typeId: contentBlockTypesByType.rich_text.id,
+					})
+					.returning({ id: schema.contentBlocks.id });
+
+				assert(contentBlock);
+
+				await tx.insert(schema.richTextContentBlocks).values({
+					content,
+					id: contentBlock.id,
 				});
 			}
 		});
