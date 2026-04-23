@@ -21,7 +21,7 @@ msgctxt "ui"
 msgid "pig+2F"
 msgstr "Select month"
 
-#: lib/calendar.tsx:185
+#: lib/calendar.tsx:186
 msgctxt "ui"
 msgid "HppWvq"
 msgstr "Select year"
@@ -77,12 +77,12 @@ msgctxt "ui"
 msgid "99OtWT"
 msgstr "Pending..."
 
-#: lib/multiple-select.tsx:93
+#: lib/multiple-select.tsx:95
 msgctxt "ui"
 msgid "ch1L7M"
 msgstr "Selected items"
 
-#: lib/multiple-select.tsx:122
+#: lib/multiple-select.tsx:124
 msgctxt "ui"
 msgid "hBhV8k"
 msgstr "Open options"
@@ -113,62 +113,63 @@ msgctxt "ui"
 msgid "N8BBfe"
 msgstr "Last page"
 
-#: lib/rich-text-editor.tsx:176
+#: lib/rich-text-editor.tsx:499
 msgctxt "ui"
 msgid "Dkkmwm"
 msgstr "Bold"
 
-#: lib/rich-text-editor.tsx:184
+#: lib/rich-text-editor.tsx:507
 msgctxt "ui"
 msgid "g2V+es"
 msgstr "Italic"
 
-#: lib/rich-text-editor.tsx:192
+#: lib/rich-text-editor.tsx:515
 msgctxt "ui"
 msgid "h2vipu"
 msgstr "Code"
 
-#: lib/rich-text-editor.tsx:201
-msgctxt "ui"
-msgid "/7maNQ"
-msgstr "Heading 1"
-
-#: lib/rich-text-editor.tsx:209
+#: lib/rich-text-editor.tsx:524
 msgctxt "ui"
 msgid "Zqekct"
 msgstr "Heading 2"
 
-#: lib/rich-text-editor.tsx:217
+#: lib/rich-text-editor.tsx:532
 msgctxt "ui"
 msgid "BDbgCL"
 msgstr "Heading 3"
 
-#: lib/rich-text-editor.tsx:226
+#: lib/rich-text-editor.tsx:540
+msgctxt "ui"
+msgid "BKF2fN"
+msgstr "Heading 4"
+
+#: lib/rich-text-editor.tsx:549
 msgctxt "ui"
 msgid "6sdKFe"
 msgstr "Bullet List"
 
-#: lib/rich-text-editor.tsx:234
+#: lib/rich-text-editor.tsx:557
 msgctxt "ui"
 msgid "rU4xig"
 msgstr "Ordered List"
 
-#: lib/rich-text-editor.tsx:242
+#: lib/rich-text-editor.tsx:565
 msgctxt "ui"
 msgid "+RDJVD"
 msgstr "Blockquote"
 
-#: lib/rich-text-editor.tsx:252
+#: lib/rich-text-editor.tsx:576
+#: lib/rich-text-editor.tsx:584
 msgctxt "ui"
 msgid "JBWS0c"
 msgstr "Link"
 
-#: lib/rich-text-editor.tsx:280
+#: lib/rich-text-editor.tsx:606
 msgctxt "ui"
 msgid "EWw/tK"
 msgstr "Apply"
 
-#: lib/rich-text-editor.tsx:284
+#: lib/rich-text-editor.tsx:610
 msgctxt "ui"
 msgid "G/yZLu"
 msgstr "Remove"
