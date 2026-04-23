@@ -4,6 +4,7 @@ VALUES
 	('accordion'),
 	('data'),
 	('embed'),
+	('gallery'),
 	('hero'),
 	('image'),
 	('rich_text')
