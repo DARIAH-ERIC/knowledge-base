@@ -46,7 +46,7 @@ WITH
 					('general-assembly'),
 					('joint-research-committee'),
 					('national-coordinators-committee'),
-					('scientific-board'),
+					('scientific-advisory-board'),
 					('senior-management-team')
 			) AS "tmp" ("slug"),
 			"entity_types",
@@ -75,7 +75,7 @@ WITH
 					('general-assembly', 'General assembly', 'ga'),
 					('joint-research-committee', 'Joint research committee', 'jrc'),
 					('national-coordinators-committee', 'National coordinators committee', 'ncc'),
-					('scientific-board', 'Scientific board', 'sb'),
+					('scientific-advisory-board', 'Scientific advisory board', 'sab'),
 					('senior-management-team', 'Senior management team', 'smt')
 			) AS "tmp" ("slug", "name", "acronym")
 			JOIN "body_entities" ON "body_entities"."slug" = "tmp"."slug"
