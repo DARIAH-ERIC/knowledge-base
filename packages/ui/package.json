@@ -74,7 +74,8 @@
 	],
 	"sideEffects": false,
 	"scripts": {
-		"build": "tsdown",
+		"build": "run-s i18n:extract-messages i18n:convert-messages build:lib",
+		"build:lib": "tsdown",
 		"dev": "tsdown --watch",
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
 		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
