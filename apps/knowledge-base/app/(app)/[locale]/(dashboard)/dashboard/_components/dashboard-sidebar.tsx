@@ -27,167 +27,217 @@ import { Logo } from "@/components/logo";
 import { useMetadata } from "@/lib/i18n/metadata";
 import { usePathname } from "@/lib/navigation/navigation";
 
-export const sidebarMenu = [
-	{
-		title: "Administrator",
-		items: [
-			{
-				href: "/dashboard/administrator",
-				tooltip: "Overview",
-				label: "Overview",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/administrator/contributions",
-				tooltip: "Contributions",
-				label: "Contributions",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/administrator/institutions",
-				tooltip: "Institutions",
-				label: "Institutions",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/administrator/national-consortia",
-				tooltip: "National consortia",
-				label: "National consortia",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/administrator/newsletters",
-				tooltip: "Newsletters",
-				label: "Newsletters",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/administrator/persons",
-				tooltip: "Persons",
-				label: "Persons",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/administrator/projects",
-				tooltip: "Projects",
-				label: "Projects",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/administrator/services",
-				tooltip: "Services",
-				label: "Services",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/administrator/social-media",
-				tooltip: "Social media",
-				label: "Social media",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/administrator/software",
-				tooltip: "Software",
-				label: "Software",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/administrator/users",
-				tooltip: "Users",
-				label: "Users",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/administrator/working-groups",
-				tooltip: "Working groups",
-				label: "Working groups",
-				icon: <ListBulletIcon />,
-			},
-		],
-	},
-	{
-		title: "Reports",
-		items: [
-			{
-				href: "/dashboard/administrator/reports",
-				tooltip: "National consortia reports",
-				label: "National consortia reports",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/administrator/working-group-reports",
-				tooltip: "Working groups reports",
-				label: "Working groups reports",
-				icon: <ListBulletIcon />,
-			},
-		],
-	},
-	{
-		title: "Website",
-		items: [
-			{
-				href: "/dashboard/website",
-				tooltip: "Overview",
-				label: "Overview",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/website/assets",
-				tooltip: "Assets",
-				label: "Assets",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/website/documents-policies",
-				tooltip: "Documents and policies",
-				label: "Documents and policies",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/website/events",
-				tooltip: "Events",
-				label: "Events",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/website/impact-case-studies",
-				tooltip: "Impact case studies",
-				label: "Impact case studies",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/website/metadata",
-				tooltip: "Metadata",
-				label: "Metadata",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/website/navigation",
-				tooltip: "Navigation",
-				label: "Navigation",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/website/news",
-				tooltip: "News",
-				label: "News",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/website/pages",
-				tooltip: "Pages",
-				label: "Pages",
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/website/spotlight-articles",
-				tooltip: "Spotlight articles",
-				label: "Spotlight articles",
-				icon: <ListBulletIcon />,
-			},
-		],
-	},
-];
+interface SidebarMenuItem {
+	href: string;
+	tooltip: string;
+	label: string;
+	icon: ReactNode;
+}
+
+interface SidebarMenuSection {
+	title: string;
+	items: Array<SidebarMenuItem>;
+}
+
+export function useSidebarMenu(): Array<SidebarMenuSection> {
+	const t = useExtracted();
+
+	return [
+		{
+			title: t("Administrator"),
+			items: [
+				{
+					href: "/dashboard/administrator",
+					tooltip: t("Overview"),
+					label: t("Overview"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/administrator/contributions",
+					tooltip: t("Contributions"),
+					label: t("Contributions"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/administrator/countries",
+					tooltip: t("Countries"),
+					label: t("Countries"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/administrator/governance-bodies",
+					tooltip: t("Governance bodies"),
+					label: t("Governance bodies"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/administrator/institutions",
+					tooltip: t("Institutions"),
+					label: t("Institutions"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/administrator/national-consortia",
+					tooltip: t("National consortia"),
+					label: t("National consortia"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/administrator/newsletters",
+					tooltip: t("Newsletters"),
+					label: t("Newsletters"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/administrator/persons",
+					tooltip: t("Persons"),
+					label: t("Persons"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/administrator/projects",
+					tooltip: t("Projects"),
+					label: t("Projects"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/administrator/services",
+					tooltip: t("Services"),
+					label: t("Services"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/administrator/social-media",
+					tooltip: t("Social media"),
+					label: t("Social media"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/administrator/users",
+					tooltip: t("Users"),
+					label: t("Users"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/administrator/working-groups",
+					tooltip: t("Working groups"),
+					label: t("Working groups"),
+					icon: <ListBulletIcon />,
+				},
+			],
+		},
+		{
+			title: t("Reports"),
+			items: [
+				{
+					href: "/dashboard/administrator/country-reports",
+					tooltip: t("Country reports"),
+					label: t("Country reports"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/administrator/working-group-reports",
+					tooltip: t("Working groups reports"),
+					label: t("Working groups reports"),
+					icon: <ListBulletIcon />,
+				},
+			],
+		},
+		{
+			title: t("Website"),
+			items: [
+				{
+					href: "/dashboard/website",
+					tooltip: t("Overview"),
+					label: t("Overview"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/website/assets",
+					tooltip: t("Assets"),
+					label: t("Assets"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/website/documents-policies",
+					tooltip: t("Documents and policies"),
+					label: t("Documents and policies"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/website/events",
+					tooltip: t("Events"),
+					label: t("Events"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/website/impact-case-studies",
+					tooltip: t("Impact case studies"),
+					label: t("Impact case studies"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/website/metadata",
+					tooltip: t("Metadata"),
+					label: t("Metadata"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/website/navigation",
+					tooltip: t("Navigation"),
+					label: t("Navigation"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/website/news",
+					tooltip: t("News"),
+					label: t("News"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/website/pages",
+					tooltip: t("Pages"),
+					label: t("Pages"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/website/spotlight-articles",
+					tooltip: t("Spotlight articles"),
+					label: t("Spotlight articles"),
+					icon: <ListBulletIcon />,
+				},
+			],
+		},
+	] satisfies Array<SidebarMenuSection>;
+}
+
+function getCurrentSidebarHref(
+	pathname: string,
+	sidebarMenu: Array<SidebarMenuSection>,
+): string | undefined {
+	const hrefs = [
+		"/dashboard",
+		...sidebarMenu.flatMap((section) => {
+			return section.items.map((item) => {
+				return item.href;
+			});
+		}),
+	];
+
+	return hrefs.reduce<string | undefined>((currentHref, href) => {
+		const isMatch = pathname === href || pathname.startsWith(`${href}/`);
+
+		if (!isMatch) {
+			return currentHref;
+		}
+
+		if (currentHref == null || href.length > currentHref.length) {
+			return href;
+		}
+
+		return currentHref;
+	}, undefined);
+}
 
 interface DashboardSidebarProps extends SidebarProps {}
 
@@ -195,6 +245,8 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 	const { state, isMobile, setIsOpenOnMobile } = useSidebar();
 	const [isCmdOpen, setIsCmdOpen] = useState(false);
 	const pathname = usePathname();
+	const sidebarMenu = useSidebarMenu();
+	const currentHref = getCurrentSidebarHref(pathname, sidebarMenu);
 	const meta = useMetadata();
 	const t = useExtracted();
 
@@ -250,7 +302,11 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 						</Fragment>
 					) : null}
 					<SidebarSection label={t("Overview")}>
-						<SidebarItem href="/dashboard" tooltip="Dashboard">
+						<SidebarItem
+							href="/dashboard"
+							isCurrent={currentHref === "/dashboard"}
+							tooltip={t("Dashboard")}
+						>
 							<Squares2X2Icon />
 							<SidebarLabel>{t("Dashboard")}</SidebarLabel>
 						</SidebarItem>
@@ -262,8 +318,13 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 							<SidebarSection key={index} label={section.title}>
 								{section.items.map((item, index) => {
 									return (
-										// eslint-disable-next-line @eslint-react/no-array-index-key
-										<SidebarItem key={index} href={item.href} tooltip={item.tooltip}>
+										<SidebarItem
+											// eslint-disable-next-line @eslint-react/no-array-index-key
+											key={index}
+											href={item.href}
+											isCurrent={currentHref === item.href}
+											tooltip={item.tooltip}
+										>
 											{item.icon}
 											<SidebarLabel>{item.label}</SidebarLabel>
 										</SidebarItem>
@@ -293,7 +354,7 @@ function SidebarItem(props: Readonly<SidebarItemProps>): ReactNode {
 
 	const pathname = usePathname();
 
-	const current = isCurrent === true || pathname === href || pathname.startsWith(`${href}/`);
+	const current = isCurrent ?? pathname === href;
 
 	return <SidebarItemBase {...rest} href={href} isCurrent={current} />;
 }
