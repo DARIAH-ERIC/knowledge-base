@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Badge } from "@dariah-eric/ui/badge";
 import { Button, buttonStyles } from "@dariah-eric/ui/button";
 import { Link } from "@dariah-eric/ui/link";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
@@ -34,16 +35,62 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { deleteInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/delete-institution.action";
 
+type InstitutionEricRelationStatus =
+	| "is_cooperating_partner_of"
+	| "is_national_coordinating_institution_in"
+	| "is_national_representative_institution_in"
+	| "is_partner_institution_of";
+
 interface InstitutionsPageProps {
 	institutions: Promise<
 		Array<
 			Pick<schema.OrganisationalUnit, "id" | "name"> & {
+				ericRelationStatuses: Array<InstitutionEricRelationStatus>;
 				entity: Pick<schema.Entity, "documentId" | "slug"> & {
 					status: Pick<schema.EntityStatus, "id" | "type">;
 				};
 			}
 		>
 	>;
+}
+
+function formatInstitutionStatus(
+	status: InstitutionEricRelationStatus,
+	t: ReturnType<typeof useExtracted>,
+): string {
+	switch (status) {
+		case "is_partner_institution_of": {
+			return t("Partner institution");
+		}
+		case "is_cooperating_partner_of": {
+			return t("Cooperating partner");
+		}
+		case "is_national_coordinating_institution_in": {
+			return t("National coordinating institution");
+		}
+		case "is_national_representative_institution_in": {
+			return t("National representative institution");
+		}
+	}
+}
+
+function institutionStatusIntent(
+	status: InstitutionEricRelationStatus,
+): "danger" | "info" | "primary" | "success" {
+	switch (status) {
+		case "is_partner_institution_of": {
+			return "primary";
+		}
+		case "is_cooperating_partner_of": {
+			return "danger";
+		}
+		case "is_national_coordinating_institution_in": {
+			return "info";
+		}
+		case "is_national_representative_institution_in": {
+			return "success";
+		}
+	}
 }
 
 export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactNode {
@@ -57,7 +104,12 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 
 	const list = useListData({
 		filter(item, filterText) {
-			return contains(item.name, filterText);
+			return (
+				contains(item.name, filterText) ||
+				item.ericRelationStatuses.some((status) => {
+					return contains(formatInstitutionStatus(status, t), filterText);
+				})
+			);
 		},
 		initialItems: institutions,
 	});
@@ -105,6 +157,7 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 			>
 				<TableHeader>
 					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
+					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -112,6 +165,21 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 						return (
 							<TableRow>
 								<TableCell>{item.name}</TableCell>
+								<TableCell>
+									{item.ericRelationStatuses.length > 0 ? (
+										<div className="flex flex-wrap gap-2">
+											{item.ericRelationStatuses.map((status) => {
+												return (
+													<Badge key={status} intent={institutionStatusIntent(status)}>
+														{formatInstitutionStatus(status, t)}
+													</Badge>
+												);
+											})}
+										</div>
+									) : (
+										"—"
+									)}
+								</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button
