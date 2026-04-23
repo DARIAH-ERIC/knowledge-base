@@ -123,8 +123,10 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 								<TableCell>{item.acronym}</TableCell>
 								<TableCell>
 									{item.duration.end
-										? format.dateTimeRange(item.duration.start, item.duration.end)
-										: format.dateTime(item.duration.start)}
+										? format.dateTimeRange(item.duration.start, item.duration.end, {
+												dateStyle: "short",
+											})
+										: format.dateTime(item.duration.start, { dateStyle: "short" })}
 								</TableCell>
 								<TableCell>
 									{item.funding != null

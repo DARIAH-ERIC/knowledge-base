@@ -26,7 +26,7 @@ import {
 } from "@dariah-eric/ui/table";
 import { ArchiveBoxXMarkIcon } from "@heroicons/react/24/outline";
 import { type CalendarDate, getLocalTimeZone } from "@internationalized/date";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
 import {
@@ -44,10 +44,6 @@ interface UnitRelationsSectionProps {
 	allowedOptions: Array<UnitRelationOption>;
 }
 
-function formatDate(date: Date): string {
-	return date.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "numeric" });
-}
-
 function formatStatus(type: string): string {
 	return type.replaceAll("_", " ");
 }
@@ -56,6 +52,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 	const { unitId, allowedOptions, relations } = props;
 
 	const t = useExtracted();
+	const format = useFormatter();
 
 	const [localRelations, setLocalRelations] = useState(relations);
 	const [itemToEnd, setItemToEnd] = useState<{ id: string } | null>(null);
@@ -140,10 +137,12 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									<TableRow id={relation.id}>
 										<TableCell>{formatStatus(relation.statusType)}</TableCell>
 										<TableCell>{relation.relatedUnitName}</TableCell>
-										<TableCell>{formatDate(relation.duration.start)}</TableCell>
+										<TableCell>
+											{format.dateTime(relation.duration.start, { dateStyle: "short" })}
+										</TableCell>
 										<TableCell>
 											{relation.duration.end != null
-												? formatDate(relation.duration.end)
+												? format.dateTime(relation.duration.end, { dateStyle: "short" })
 												: t("present")}
 										</TableCell>
 										<TableCell className="text-end">

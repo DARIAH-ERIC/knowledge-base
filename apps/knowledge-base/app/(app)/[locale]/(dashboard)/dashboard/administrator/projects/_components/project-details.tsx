@@ -69,8 +69,10 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 				<DescriptionTerm>{t("Duration")}</DescriptionTerm>
 				<DescriptionDetails>
 					{project.duration.end
-						? format.dateTimeRange(project.duration.start, project.duration.end)
-						: format.dateTime(project.duration.start)}
+						? format.dateTimeRange(project.duration.start, project.duration.end, {
+								dateStyle: "short",
+							})
+						: format.dateTime(project.duration.start, { dateStyle: "short" })}
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Scope")}</DescriptionTerm>
@@ -135,8 +137,10 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 											<span className="text-muted-fg">
 												{" · "}
 												{partner.duration.end
-													? format.dateTimeRange(partner.duration.start, partner.duration.end)
-													: format.dateTime(partner.duration.start)}
+													? format.dateTimeRange(partner.duration.start, partner.duration.end, {
+															dateStyle: "short",
+														})
+													: format.dateTime(partner.duration.start, { dateStyle: "short" })}
 											</span>
 										) : null}
 									</li>

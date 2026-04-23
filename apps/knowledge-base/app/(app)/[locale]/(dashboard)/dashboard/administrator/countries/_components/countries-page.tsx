@@ -131,9 +131,7 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 								<TableCell>
 									{item.memberObserverStatus != null ? (
 										<Badge intent={memberObserverStatusIntent(item.memberObserverStatus)}>
-											{item.memberObserverStatus === "is_member_of"
-												? t("Member")
-												: t("Observer")}
+											{item.memberObserverStatus === "is_member_of" ? t("Member") : t("Observer")}
 										</Badge>
 									) : (
 										"—"

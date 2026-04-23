@@ -26,7 +26,7 @@ import {
 } from "@dariah-eric/ui/table";
 import { ArchiveBoxXMarkIcon } from "@heroicons/react/24/outline";
 import { type CalendarDate, getLocalTimeZone } from "@internationalized/date";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
 import {
@@ -45,16 +45,13 @@ interface WorkingGroupChairsSectionProps {
 	availablePersons: Array<AvailablePerson>;
 }
 
-function formatDate(date: Date): string {
-	return date.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "numeric" });
-}
-
 export function WorkingGroupChairsSection(
 	props: Readonly<WorkingGroupChairsSectionProps>,
 ): ReactNode {
 	const { unitId, availablePersons } = props;
 
 	const t = useExtracted();
+	const format = useFormatter();
 
 	const [localChairs, setLocalChairs] = useState(props.chairs);
 	const [itemToEnd, setItemToEnd] = useState<{ id: string } | null>(null);
@@ -124,9 +121,13 @@ export function WorkingGroupChairsSection(
 								return (
 									<TableRow id={chair.id}>
 										<TableCell>{chair.personName}</TableCell>
-										<TableCell>{formatDate(chair.duration.start)}</TableCell>
 										<TableCell>
-											{chair.duration.end != null ? formatDate(chair.duration.end) : t("present")}
+											{format.dateTime(chair.duration.start, { dateStyle: "short" })}
+										</TableCell>
+										<TableCell>
+											{chair.duration.end != null
+												? format.dateTime(chair.duration.end, { dateStyle: "short" })
+												: t("present")}
 										</TableCell>
 										<TableCell className="text-end">
 											{chair.duration.end == null && (

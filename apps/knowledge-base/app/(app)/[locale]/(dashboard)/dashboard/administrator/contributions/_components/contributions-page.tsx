@@ -9,7 +9,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, use, useState } from "react";
 import { useFilter, useListData } from "react-aria-components";
 
@@ -35,10 +35,6 @@ interface ContributionsPageProps {
 	contributions: Promise<Array<Contribution>>;
 }
 
-function formatDate(date: Date): string {
-	return date.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "numeric" });
-}
-
 function formatRoleType(type: string): string {
 	return type.replaceAll("_", " ");
 }
@@ -49,6 +45,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 	const contributions = use(contributionsPromise);
 
 	const t = useExtracted();
+	const format = useFormatter();
 
 	const { contains } = useFilter({ sensitivity: "base" });
 
@@ -112,9 +109,11 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 								<TableCell>{item.personName}</TableCell>
 								<TableCell>{formatRoleType(item.roleType)}</TableCell>
 								<TableCell>{item.organisationalUnitName}</TableCell>
-								<TableCell>{formatDate(item.durationStart)}</TableCell>
+								<TableCell>{format.dateTime(item.durationStart, { dateStyle: "short" })}</TableCell>
 								<TableCell>
-									{item.durationEnd != null ? formatDate(item.durationEnd) : t("present")}
+									{item.durationEnd != null
+										? format.dateTime(item.durationEnd, { dateStyle: "short" })
+										: t("present")}
 								</TableCell>
 							</TableRow>
 						);

@@ -121,8 +121,10 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 								</TableCell>
 								<TableCell>
 									{item.duration.end
-										? format.dateTimeRange(item.duration.start, item.duration.end)
-										: format.dateTime(item.duration.start)}
+										? format.dateTimeRange(item.duration.start, item.duration.end, {
+												dateStyle: "short",
+											})
+										: format.dateTime(item.duration.start, { dateStyle: "short" })}
 								</TableCell>
 								<TableCell>{item.location}</TableCell>
 								<TableCell className="text-end">

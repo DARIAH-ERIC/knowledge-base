@@ -26,7 +26,7 @@ import {
 } from "@dariah-eric/ui/table";
 import { ArchiveBoxXMarkIcon } from "@heroicons/react/24/outline";
 import { type CalendarDate, getLocalTimeZone } from "@internationalized/date";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
 import {
@@ -44,10 +44,6 @@ interface ContributionsSectionProps {
 	allowedOptions: Array<ContributionOption>;
 }
 
-function formatDate(date: Date): string {
-	return date.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "numeric" });
-}
-
 function formatRoleType(type: string): string {
 	return type.replaceAll("_", " ");
 }
@@ -56,6 +52,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 	const { personId, allowedOptions, contributions } = props;
 
 	const t = useExtracted();
+	const format = useFormatter();
 
 	const [localContributions, setLocalContributions] = useState(contributions);
 	const [itemToEnd, setItemToEnd] = useState<{ id: string } | null>(null);
@@ -140,10 +137,12 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 									<TableRow id={contribution.id}>
 										<TableCell>{formatRoleType(contribution.roleType)}</TableCell>
 										<TableCell>{contribution.organisationalUnitName}</TableCell>
-										<TableCell>{formatDate(contribution.duration.start)}</TableCell>
+										<TableCell>
+											{format.dateTime(contribution.duration.start, { dateStyle: "short" })}
+										</TableCell>
 										<TableCell>
 											{contribution.duration.end != null
-												? formatDate(contribution.duration.end)
+												? format.dateTime(contribution.duration.end, { dateStyle: "short" })
 												: t("present")}
 										</TableCell>
 										<TableCell className="text-end">
