@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/lib/auth/session";
+import { contributionOptionsPageSize } from "@/lib/constants/contributions";
 import {
-	contributionOptionsPageSize,
 	getContributionOrganisationalUnitOptions,
 	getContributionPersonOptions,
 } from "@/lib/data/contributions";

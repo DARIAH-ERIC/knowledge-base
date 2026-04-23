@@ -10,7 +10,7 @@ import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useState, useTransition } from "react";
 
-import { contributionOptionsPageSize } from "@/lib/data/contributions";
+import { contributionOptionsPageSize } from "@/lib/constants/contributions";
 
 interface ContributionOptionPickerItem {
 	id: string;

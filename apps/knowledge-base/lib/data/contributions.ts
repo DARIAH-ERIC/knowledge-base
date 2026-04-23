@@ -2,6 +2,8 @@ import { and, count, eq, ilike, inArray, or } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
+import { contributionOptionsPageSize } from "@/lib/constants/contributions";
+
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getPersonContributions(personId: string) {
 	return db
@@ -26,8 +28,6 @@ export async function getPersonContributions(personId: string) {
 }
 
 export type PersonContribution = Awaited<ReturnType<typeof getPersonContributions>>[number];
-
-export const contributionOptionsPageSize = 20;
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getContributionRoleOptions() {
