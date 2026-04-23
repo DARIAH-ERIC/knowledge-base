@@ -97,7 +97,7 @@ export function NewslettersPage(props: Readonly<NewslettersPageProps>): ReactNod
 								<TableCell>{item.settings.subject_line}</TableCell>
 								<TableCell>
 									{item.send_time
-										? format.dateTime(new Date(item.send_time), { dateStyle: "long" })
+										? format.dateTime(new Date(item.send_time), { dateStyle: "short" })
 										: null}
 								</TableCell>
 								<TableCell>{format.number(item.emails_sent)}</TableCell>

@@ -38,6 +38,7 @@ interface NationalConsortiaPageProps {
 	nationalConsortia: Promise<
 		Array<
 			Pick<schema.OrganisationalUnit, "id" | "name"> & {
+				countryName: string | null;
 				entity: Pick<schema.Entity, "documentId" | "slug"> & {
 					status: Pick<schema.EntityStatus, "id" | "type">;
 				};
@@ -57,7 +58,7 @@ export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps
 
 	const list = useListData({
 		filter(item, filterText) {
-			return contains(item.name, filterText);
+			return contains(item.name, filterText) || contains(item.countryName ?? "", filterText);
 		},
 		initialItems: nationalConsortia,
 	});
@@ -105,6 +106,7 @@ export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps
 			>
 				<TableHeader>
 					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
+					<TableColumn>{t("Country")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -112,6 +114,7 @@ export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps
 						return (
 							<TableRow>
 								<TableCell>{item.name}</TableCell>
+								<TableCell>{item.countryName ?? "—"}</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button

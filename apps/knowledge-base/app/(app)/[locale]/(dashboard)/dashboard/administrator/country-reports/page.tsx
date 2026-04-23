@@ -11,10 +11,10 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorReportsPageProps extends PageProps<"/[locale]/dashboard/administrator/reports"> {}
+interface DashboardAdministratorCountryReportsPageProps extends PageProps<"/[locale]/dashboard/administrator/country-reports"> {}
 
 export async function generateMetadata(
-	_props: Readonly<DashboardAdministratorReportsPageProps>,
+	_props: Readonly<DashboardAdministratorCountryReportsPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
 	const t = await getExtracted();
@@ -26,17 +26,17 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardAdministratorReportsPage(
-	_props: Readonly<DashboardAdministratorReportsPageProps>,
+export default function DashboardAdministratorCountryReportsPage(
+	_props: Readonly<DashboardAdministratorCountryReportsPageProps>,
 ): ReactNode {
 	const t = useExtracted();
 
 	return (
 		<Header>
 			<HeaderContent>
-				<HeaderTitle>{t("National consortia reports")}</HeaderTitle>
+				<HeaderTitle>{t("Country reports")}</HeaderTitle>
 				<HeaderDescription>
-					{t("Manage all National consortia reports in the DARIAH knowledge base.")}
+					{t("Manage all country reports in the DARIAH knowledge base.")}
 				</HeaderDescription>
 			</HeaderContent>
 		</Header>

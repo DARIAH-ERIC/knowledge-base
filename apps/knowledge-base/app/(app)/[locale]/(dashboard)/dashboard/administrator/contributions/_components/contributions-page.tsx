@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@dariah-eric/ui/badge";
 import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import {
 	Table,
@@ -9,7 +10,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, use, useState } from "react";
 import { useFilter, useListData } from "react-aria-components";
 
@@ -27,6 +28,7 @@ interface Contribution {
 	personName: string;
 	roleType: string;
 	organisationalUnitName: string;
+	organisationalUnitType: string;
 	durationStart: Date;
 	durationEnd: Date | undefined;
 }
@@ -35,12 +37,43 @@ interface ContributionsPageProps {
 	contributions: Promise<Array<Contribution>>;
 }
 
-function formatDate(date: Date): string {
-	return date.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "numeric" });
-}
-
 function formatRoleType(type: string): string {
 	return type.replaceAll("_", " ");
+}
+
+function formatOrganisationalUnitType(type: string): string {
+	return type.replaceAll("_", " ");
+}
+
+function organisationalUnitTypeIntent(
+	type: string,
+): "danger" | "info" | "primary" | "secondary" | "success" | "warning" {
+	switch (type) {
+		case "country": {
+			return "info";
+		}
+		case "eric": {
+			return "danger";
+		}
+		case "governance_body": {
+			return "secondary";
+		}
+		case "institution": {
+			return "primary";
+		}
+		case "national_consortium": {
+			return "warning";
+		}
+		case "regional_hub": {
+			return "success";
+		}
+		case "working_group": {
+			return "success";
+		}
+		default: {
+			return "secondary";
+		}
+	}
 }
 
 export function ContributionsPage(props: Readonly<ContributionsPageProps>): ReactNode {
@@ -49,6 +82,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 	const contributions = use(contributionsPromise);
 
 	const t = useExtracted();
+	const format = useFormatter();
 
 	const { contains } = useFilter({ sensitivity: "base" });
 
@@ -57,6 +91,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 			return (
 				contains(item.personName, filterText) ||
 				contains(item.organisationalUnitName, filterText) ||
+				contains(item.organisationalUnitType, filterText) ||
 				contains(item.roleType, filterText)
 			);
 		},
@@ -78,7 +113,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 				<HeaderContent>
 					<HeaderTitle>{t("Contributions")}</HeaderTitle>
 					<HeaderDescription>
-						{t("All person-to-organisation contributions in the DARIAH knowledge base.")}
+						{t("All person-to-organisation relations in the DARIAH knowledge base.")}
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
@@ -101,7 +136,8 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 				<TableHeader>
 					<TableColumn isRowHeader={true}>{t("Person")}</TableColumn>
 					<TableColumn>{t("Role")}</TableColumn>
-					<TableColumn>{t("Organisation")}</TableColumn>
+					<TableColumn>{t("Type")}</TableColumn>
+					<TableColumn>{t("Name")}</TableColumn>
 					<TableColumn>{t("From")}</TableColumn>
 					<TableColumn>{t("Until")}</TableColumn>
 				</TableHeader>
@@ -111,10 +147,17 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 							<TableRow id={item.id}>
 								<TableCell>{item.personName}</TableCell>
 								<TableCell>{formatRoleType(item.roleType)}</TableCell>
-								<TableCell>{item.organisationalUnitName}</TableCell>
-								<TableCell>{formatDate(item.durationStart)}</TableCell>
 								<TableCell>
-									{item.durationEnd != null ? formatDate(item.durationEnd) : t("present")}
+									<Badge intent={organisationalUnitTypeIntent(item.organisationalUnitType)}>
+										{formatOrganisationalUnitType(item.organisationalUnitType)}
+									</Badge>
+								</TableCell>
+								<TableCell>{item.organisationalUnitName}</TableCell>
+								<TableCell>{format.dateTime(item.durationStart, { dateStyle: "short" })}</TableCell>
+								<TableCell>
+									{item.durationEnd != null
+										? format.dateTime(item.durationEnd, { dateStyle: "short" })
+										: t("present")}
 								</TableCell>
 							</TableRow>
 						);

@@ -11,7 +11,7 @@ import {
 import { useExtracted } from "next-intl";
 import { type ReactNode, useState } from "react";
 
-import { sidebarMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar";
+import { useSidebarMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface CommandPaletteProps {
@@ -23,6 +23,7 @@ export function CommandPalette(props: Readonly<CommandPaletteProps>): ReactNode 
 	const { isOpen, setIsOpen } = props;
 
 	const t = useExtracted();
+	const sidebarMenu = useSidebarMenu();
 
 	const [searchInput, setSearchInput] = useState("");
 

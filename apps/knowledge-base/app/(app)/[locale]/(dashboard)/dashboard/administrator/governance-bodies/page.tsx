@@ -25,6 +25,7 @@ export default function DashboardAdministratorGovernanceBodiesPage(): ReactNode 
 		where: { type: { type: "governance_body" } },
 		orderBy: { name: "asc" },
 		columns: {
+			acronym: true,
 			id: true,
 			name: true,
 		},
