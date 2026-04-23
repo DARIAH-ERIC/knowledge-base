@@ -1,6 +1,9 @@
 "use client";
 
 import { Badge } from "@dariah-eric/ui/badge";
+import { Button, buttonStyles } from "@dariah-eric/ui/button";
+import { Link } from "@dariah-eric/ui/link";
+import { Menu, MenuContent, MenuItem, MenuLabel } from "@dariah-eric/ui/menu";
 import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import {
 	Table,
@@ -10,6 +13,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
+import { EllipsisHorizontalIcon, PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, use, useState } from "react";
 import { useFilter, useListData } from "react-aria-components";
@@ -126,6 +130,13 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 					>
 						<SearchInput placeholder={t("Search")} />
 					</SearchField>
+					<Link
+						className={buttonStyles({ intent: "secondary" })}
+						href="/dashboard/administrator/contributions/create"
+					>
+						<PlusIcon className="mr-2 size-4" />
+						{t("New")}
+					</Link>
 				</HeaderAction>
 			</Header>
 
@@ -140,6 +151,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 					<TableColumn>{t("Name")}</TableColumn>
 					<TableColumn>{t("From")}</TableColumn>
 					<TableColumn>{t("Until")}</TableColumn>
+					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => {
@@ -158,6 +170,24 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 									{item.durationEnd != null
 										? format.dateTime(item.durationEnd, { dateStyle: "short" })
 										: t("present")}
+								</TableCell>
+								<TableCell className="text-end">
+									<Menu>
+										<Button
+											aria-label={t("Open actions menu")}
+											className="h-7 sm:h-7"
+											intent="plain"
+											size="sq-sm"
+										>
+											<EllipsisHorizontalIcon className="size-5" />
+										</Button>
+										<MenuContent placement="left top">
+											<MenuItem href={`/dashboard/administrator/contributions/${item.id}/edit`}>
+												<PencilSquareIcon className="mr-2 size-4" />
+												<MenuLabel>{t("Edit")}</MenuLabel>
+											</MenuItem>
+										</MenuContent>
+									</Menu>
 								</TableCell>
 							</TableRow>
 						);

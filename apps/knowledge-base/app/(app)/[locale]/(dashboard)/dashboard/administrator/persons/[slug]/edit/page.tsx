@@ -10,7 +10,7 @@ import type { ReactNode } from "react";
 import { PersonEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-edit-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
-import { getContributionOptions, getPersonContributions } from "@/lib/data/contributions";
+import { getContributionRoleOptions, getPersonContributions } from "@/lib/data/contributions";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -81,9 +81,9 @@ export default async function DashboardAdministratorEditPersonPage(
 		notFound();
 	}
 
-	const [contributions, contributionOptions] = await Promise.all([
+	const [contributions, contributionRoleOptions] = await Promise.all([
 		getPersonContributions(person.id),
-		getContributionOptions(),
+		getContributionRoleOptions(),
 	]);
 
 	const image = {
@@ -115,7 +115,7 @@ export default async function DashboardAdministratorEditPersonPage(
 
 	return (
 		<PersonEditForm
-			contributionOptions={contributionOptions}
+			contributionRoleOptions={contributionRoleOptions}
 			contributions={contributions}
 			initialAssets={initialAssets}
 			person={{ ...person, biography, image }}

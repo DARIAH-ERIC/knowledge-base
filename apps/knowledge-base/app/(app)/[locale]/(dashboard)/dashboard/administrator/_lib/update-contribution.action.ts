@@ -14,13 +14,13 @@ import { revalidatePath } from "next/cache";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
-import { CreateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.schema";
+import { UpdateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.schema";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 
-export const createContributionAction = createServerAction(
-	async function createContributionAction(state, formData) {
+export const updateContributionAction = createServerAction(
+	async function updateContributionAction(state, formData) {
 		const locale = await getLocale();
 		const t = await getExtracted();
 
@@ -31,13 +31,13 @@ export const createContributionAction = createServerAction(
 		await assertAuthenticated();
 
 		const result = await v.safeParseAsync(
-			CreateContributionActionInputSchema,
+			UpdateContributionActionInputSchema,
 			getFormDataValues(formData),
 			{ lang: getIntlLanguage(locale) },
 		);
 
 		if (!result.success) {
-			const errors = v.flatten<typeof CreateContributionActionInputSchema>(result.issues);
+			const errors = v.flatten<typeof UpdateContributionActionInputSchema>(result.issues);
 
 			return createActionStateError({
 				message: errors.root ?? t("Invalid or missing fields."),
@@ -45,7 +45,16 @@ export const createContributionAction = createServerAction(
 			});
 		}
 
-		const { personId, roleTypeId, organisationalUnitId, duration } = result.output;
+		const { id, personId, roleTypeId, organisationalUnitId, duration } = result.output;
+
+		const contribution = await db.query.personsToOrganisationalUnits.findFirst({
+			where: { id },
+			columns: { id: true },
+		});
+
+		if (contribution == null) {
+			return createActionStateError({ message: t("Contribution not found.") });
+		}
 
 		const allowedRelation = await db
 			.select({ id: schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.id })
@@ -81,7 +90,9 @@ export const createContributionAction = createServerAction(
 		}
 
 		const existing = await db.query.personsToOrganisationalUnits.findFirst({
-			where: { personId, organisationalUnitId, roleTypeId },
+			where: {
+				AND: [{ personId }, { organisationalUnitId }, { roleTypeId }, { id: { ne: id } }],
+			},
 			columns: { id: true },
 		});
 
@@ -89,22 +100,13 @@ export const createContributionAction = createServerAction(
 			return createActionStateError({ message: t("This contribution already exists.") });
 		}
 
-		const returned = await db
-			.insert(schema.personsToOrganisationalUnits)
-			.values({ personId, organisationalUnitId, roleTypeId, duration })
-			.returning({ id: schema.personsToOrganisationalUnits.id })
-			.then((rows) => {
-				return rows[0]!;
-			});
+		await db
+			.update(schema.personsToOrganisationalUnits)
+			.set({ duration, organisationalUnitId, personId, roleTypeId })
+			.where(eq(schema.personsToOrganisationalUnits.id, id));
 
 		revalidatePath("/[locale]/dashboard/administrator", "layout");
 
-		return createActionStateSuccess({
-			data: {
-				id: returned.id,
-				durationStart: duration.start.toISOString(),
-				durationEnd: duration.end?.toISOString() ?? null,
-			},
-		});
+		return createActionStateSuccess({ data: { id } });
 	},
 );

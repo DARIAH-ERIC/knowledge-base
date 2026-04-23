@@ -1,6 +1,10 @@
 "use client";
 
-import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import {
+	type ActionState,
+	createActionStateInitial,
+	type GetValidationErrors,
+} from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
@@ -35,21 +39,31 @@ import {
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action";
+import type { CreateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.schema";
 import { endContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-contribution.action";
-import type { ContributionOption, PersonContribution } from "@/lib/data/contributions";
+import { ContributionOptionPicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contribution-option-picker";
+import type { ContributionRoleOption, PersonContribution } from "@/lib/data/contributions";
 
 interface ContributionsSectionProps {
 	personId: string;
 	contributions: Array<PersonContribution>;
-	allowedOptions: Array<ContributionOption>;
+	roleOptions: Array<ContributionRoleOption>;
 }
+
+interface CreateContributionActionData {
+	id: string;
+	durationStart: string;
+	durationEnd: string | null;
+}
+
+type ContributionValidationErrors = GetValidationErrors<typeof CreateContributionActionInputSchema>;
 
 function formatRoleType(type: string): string {
 	return type.replaceAll("_", " ");
 }
 
 export function ContributionsSection(props: Readonly<ContributionsSectionProps>): ReactNode {
-	const { personId, allowedOptions, contributions } = props;
+	const { personId, roleOptions, contributions } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -59,56 +73,50 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
 
 	const [selectedRoleTypeId, setSelectedRoleTypeId] = useState<string | null>(null);
-	const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
+	const [selectedUnit, setSelectedUnit] = useState<{ id: string; name: string } | null>(null);
 
 	const [state, setState] = useState<ActionState>(createActionStateInitial());
 	const [isPending, startFormTransition] = useTransition();
 
-	const availableUnits =
-		allowedOptions.find((o) => {
-			return o.roleTypeId === selectedRoleTypeId;
-		})?.availableUnits ?? [];
+	const validationErrors =
+		state.status === "error"
+			? (state.validationErrors as ContributionValidationErrors | undefined)
+			: undefined;
+	const selectedRoleOption = roleOptions.find((option) => {
+		return option.roleTypeId === selectedRoleTypeId;
+	});
 
 	function formAction(formData: FormData) {
 		const roleTypeId = selectedRoleTypeId;
-		const unitId = selectedUnitId;
-		const option = allowedOptions.find((o) => {
-			return o.roleTypeId === roleTypeId;
-		});
-		const unit = option?.availableUnits.find((u) => {
-			return u.id === unitId;
-		});
+		const unit = selectedUnit;
+		const option = selectedRoleOption;
 
 		startFormTransition(async () => {
 			const newState = await createContributionAction(state, formData);
 			setState(newState);
 
 			if (newState.status === "success" && option != null && unit != null) {
-				const data = newState.data as
-					| { id: string; durationStart: string; durationEnd: string | null }
-					| undefined;
+				const data = newState.data as CreateContributionActionData;
 
-				if (data != null) {
-					setLocalContributions((prev) => {
-						return [
-							...prev,
-							{
-								id: data.id,
-								roleTypeId: roleTypeId!,
-								roleType: option.roleType as PersonContribution["roleType"],
-								organisationalUnitId: unitId!,
-								organisationalUnitName: unit.name,
-								duration: {
-									start: new Date(data.durationStart),
-									...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
-								},
+				setLocalContributions((prev) => {
+					return [
+						...prev,
+						{
+							id: data.id,
+							roleTypeId: roleTypeId!,
+							roleType: option.roleType as PersonContribution["roleType"],
+							organisationalUnitId: unit.id,
+							organisationalUnitName: unit.name,
+							duration: {
+								start: new Date(data.durationStart),
+								...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
 							},
-						];
-					});
-				}
+						},
+					];
+				});
 
 				setSelectedRoleTypeId(null);
-				setSelectedUnitId(null);
+				setSelectedUnit(null);
 			}
 		});
 	}
@@ -170,7 +178,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 					<p className="text-sm text-neutral-500">{t("No contributions.")}</p>
 				)}
 
-				{allowedOptions.length > 0 && (
+				{roleOptions.length > 0 && (
 					<FormLayout variant="stacked">
 						<Form action={formAction} className="flex flex-col gap-y-6" state={state}>
 							<FormSection
@@ -182,7 +190,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 									isRequired={true}
 									onChange={(key) => {
 										setSelectedRoleTypeId(String(key));
-										setSelectedUnitId(null);
+										setSelectedUnit(null);
 									}}
 									value={selectedRoleTypeId}
 								>
@@ -190,7 +198,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 									<SelectTrigger />
 									<FieldError />
 									<SelectContent>
-										{allowedOptions.map((option) => {
+										{roleOptions.map((option) => {
 											return (
 												<SelectItem key={option.roleTypeId} id={option.roleTypeId}>
 													{formatRoleType(option.roleType)}
@@ -201,28 +209,31 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 								</Select>
 								<input name="roleTypeId" type="hidden" value={selectedRoleTypeId ?? ""} />
 
-								<Select
-									isDisabled={selectedRoleTypeId == null}
-									isRequired={true}
-									onChange={(key) => {
-										setSelectedUnitId(String(key));
-									}}
-									value={selectedUnitId}
-								>
-									<Label>{t("Organisation")}</Label>
-									<SelectTrigger />
-									<FieldError />
-									<SelectContent>
-										{availableUnits.map((unit) => {
-											return (
-												<SelectItem key={unit.id} id={unit.id}>
-													{unit.name}
-												</SelectItem>
-											);
-										})}
-									</SelectContent>
-								</Select>
-								<input name="organisationalUnitId" type="hidden" value={selectedUnitId ?? ""} />
+								<ContributionOptionPicker
+									key={`organisational-units:${selectedRoleTypeId ?? ""}`}
+									emptyMessage={
+										selectedRoleOption != null
+											? t("No organisations found.")
+											: t("Select a role first.")
+									}
+									errorMessage={
+										typeof validationErrors?.organisationalUnitId === "string"
+											? validationErrors.organisationalUnitId
+											: undefined
+									}
+									isDisabled={selectedRoleOption == null}
+									label={t("Organisation")}
+									onSelect={setSelectedUnit}
+									placeholder={
+										selectedRoleOption != null
+											? t("Select an organisation")
+											: t("Select a role first")
+									}
+									resource="organisational-units"
+									roleTypeId={selectedRoleTypeId}
+									selectedItem={selectedUnit}
+								/>
+								<input name="organisationalUnitId" type="hidden" value={selectedUnit?.id ?? ""} />
 
 								<DatePicker granularity="day" isRequired={true} name="duration.start">
 									<Label>{t("Start date")}</Label>
