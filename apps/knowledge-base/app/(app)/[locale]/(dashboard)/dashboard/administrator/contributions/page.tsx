@@ -33,6 +33,7 @@ export default function DashboardAdministratorContributionsPage(
 			personName: schema.persons.name,
 			roleType: schema.personRoleTypes.type,
 			organisationalUnitName: schema.organisationalUnits.name,
+			organisationalUnitType: schema.organisationalUnitTypes.type,
 			durationStart: schema.personsToOrganisationalUnits.duration,
 		})
 		.from(schema.personsToOrganisationalUnits)
@@ -45,6 +46,10 @@ export default function DashboardAdministratorContributionsPage(
 			schema.organisationalUnits,
 			eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
 		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
 		.orderBy(schema.persons.name)
 		.then((rows) => {
 			return rows.map((row) => {
@@ -53,6 +58,7 @@ export default function DashboardAdministratorContributionsPage(
 					personName: row.personName,
 					roleType: row.roleType,
 					organisationalUnitName: row.organisationalUnitName,
+					organisationalUnitType: row.organisationalUnitType,
 					durationStart: row.durationStart.start,
 					durationEnd: row.durationStart.end,
 				};
