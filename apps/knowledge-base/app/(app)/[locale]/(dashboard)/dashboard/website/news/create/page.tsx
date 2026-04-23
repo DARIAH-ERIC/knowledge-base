@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { NewsItemCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-create-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { getAvailableEntities, getAvailableResources } from "@/lib/data/relations";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteCreateNewsPageProps extends PageProps<"/[locale]/dashboard/website/news/create"> {}
@@ -25,10 +26,17 @@ export async function generateMetadata(
 export default async function DashboardWebsiteCreateNewsItemPage(
 	_props: Readonly<DashboardWebsiteCreateNewsPageProps>,
 ): Promise<ReactNode> {
-	const { items: initialAssets } = await getMediaLibraryAssets({
-		imageUrlOptions: imageGridOptions,
-		prefix: "images",
-	});
+	const [{ items: initialAssets }, relatedEntities, relatedResources] = await Promise.all([
+		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
+		getAvailableEntities(),
+		getAvailableResources(),
+	]);
 
-	return <NewsItemCreateForm initialAssets={initialAssets} />;
+	return (
+		<NewsItemCreateForm
+			initialAssets={initialAssets}
+			relatedEntities={relatedEntities}
+			relatedResources={relatedResources}
+		/>
+	);
 }

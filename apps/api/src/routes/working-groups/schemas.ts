@@ -63,7 +63,37 @@ export const WorkingGroupSchema = v.pipe(
 				type: v.picklist(schema.socialMediaTypesEnum),
 			}),
 		),
+		chairs: v.array(
+			v.object({
+				...v.pick(schema.PersonSelectSchema, ["id", "name", "position"]).entries,
+				image: v.object({ url: v.string() }),
+				slug: v.string(),
+				role: v.picklist(schema.personRoleTypesEnum),
+			}),
+		),
 		description: v.optional(v.array(ContentBlockSchema), []),
+		relatedEntities: v.optional(
+			v.array(
+				v.object({
+					id: v.pipe(v.string(), v.uuid()),
+					slug: v.string(),
+					entityType: v.string(),
+					label: v.nullable(v.string()),
+				}),
+			),
+			[],
+		),
+		relatedResources: v.optional(
+			v.array(
+				v.object({
+					id: v.string(),
+					label: v.string(),
+					type: v.nullable(v.string()),
+					links: v.array(v.string()),
+				}),
+			),
+			[],
+		),
 	}),
 	v.description("Working group"),
 	v.metadata({ ref: "WorkingGroup" }),

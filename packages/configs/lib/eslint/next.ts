@@ -65,7 +65,7 @@ const config = defineConfig(
 		extends: [unicornPlugin.configs.unopinionated],
 		rules: {
 			"unicorn/catch-error-name": "error",
-			"unicorn/consistent-destructuring": "error",
+			"unicorn/consistent-destructuring": "off",
 			/** @see {@link https://github.com/vercel/next.js/issues/60879} */
 			// "unicorn/prefer-import-meta-properties": "error",
 			"unicorn/explicit-length-check": "error",

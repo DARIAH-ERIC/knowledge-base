@@ -21,3 +21,6 @@ pnpm-workspace.yaml
 # i18n messages
 /apps/*/messages/*.json
 /packages/*/messages/*.json
+
+# turborepo template
+/turbo/generators/**/*.hbs

@@ -75,6 +75,24 @@ export function createStorageService(params: CreateStorageServiceParams) {
 		async get(params: { key: string }) {
 			return minio.getObject(bucketName, params.key);
 		},
+		async copy(params: {
+			source: {
+				bucket: string;
+				key: string;
+			};
+			prefix: string;
+		}) {
+			const { source, prefix } = params;
+			const key = `${prefix}/${source.key}`;
+			await minio.copyObject(bucketName, key, `/${source.bucket}/${source.key}`);
+			const stat = await minio.statObject(bucketName, key);
+			const meta = stat.metaData as Record<string, string>;
+			const metadata: AssetMetadata = {
+				...stat.metaData,
+				"content-type": meta["content-type"] ?? "application/octet-stream",
+			};
+			return { key, metadata };
+		},
 	};
 
 	const urls = {

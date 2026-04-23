@@ -36,6 +36,7 @@ function createItems(count: number) {
 			const person = {
 				id,
 				name,
+				position: f.person.jobTitle(),
 				sortName: f.person.lastName(),
 				email: f.internet.email(),
 				orcid: `0000-000${String(f.number.int({ min: 1, max: 9 }))}-${String(f.number.int({ min: 1000, max: 9999 }))}-${String(f.number.int({ min: 1000, max: 9999 }))}`,
@@ -98,6 +99,7 @@ describe("persons", () => {
 
 				const item = items.at(1)!;
 				const name = item.person.name;
+				const position = item.person.position;
 
 				const response = await client.persons.$get({
 					query: {
@@ -111,7 +113,9 @@ describe("persons", () => {
 				const data = await response.json();
 
 				expect(data.total).toBeGreaterThanOrEqual(items.length);
-				expect(data.data).toEqual(expect.arrayContaining([expect.objectContaining({ name })]));
+				expect(data.data).toEqual(
+					expect.arrayContaining([expect.objectContaining({ name, position })]),
+				);
 				expect(data.limit).toBe(limit);
 				expect(data.offset).toBe(offset);
 			});
@@ -129,6 +133,7 @@ describe("persons", () => {
 				const item = items.at(1)!;
 				const id = item.entity.id;
 				const name = item.person.name;
+				const position = item.person.position;
 
 				const response = await client.persons[":id"].$get({
 					param: { id },
@@ -139,7 +144,7 @@ describe("persons", () => {
 				/** @see {@link https://github.com/honojs/hono/issues/2280} */
 				const data = (await response.json()) as Person;
 
-				expect(data).toMatchObject({ name });
+				expect(data).toMatchObject({ name, position });
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 				expect(data.image).toMatchObject({ url: expect.any(String) });
 				expect(data.entity).toMatchObject({ slug: item.entity.slug });
@@ -219,6 +224,7 @@ describe("persons", () => {
 				const item = items.at(1)!;
 				const slug = item.entity.slug;
 				const name = item.person.name;
+				const position = item.person.position;
 
 				const response = await client.persons.slugs[":slug"].$get({
 					param: { slug },
@@ -229,7 +235,7 @@ describe("persons", () => {
 				const data = await response.json();
 
 				assert("biography" in data);
-				expect(data).toMatchObject({ name });
+				expect(data).toMatchObject({ name, position });
 				expect(data.biography).toHaveLength(1);
 				expect(data.biography[0]).toMatchObject({ type: "rich_text" });
 			});

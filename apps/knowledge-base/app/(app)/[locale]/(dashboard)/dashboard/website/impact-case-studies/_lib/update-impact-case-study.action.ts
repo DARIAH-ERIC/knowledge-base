@@ -7,15 +7,18 @@ import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { UpdateImpactCaseStudyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/update-impact-case-study.schema";
 import { assertAuthenticated } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
+import { syncEntityRelations } from "@/lib/data/relations";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateImpactCaseStudyAction = createServerAction(
 	async function updateImpactCaseStudyAction(state, formData) {
@@ -43,7 +46,8 @@ export const updateImpactCaseStudyAction = createServerAction(
 			});
 		}
 
-		const { contentBlocks, title, id, imageKey, summary } = result.output;
+		const { contentBlocks, title, id, imageKey, summary, relatedEntityIds, relatedResourceIds } =
+			result.output;
 
 		await db.transaction(async (tx) => {
 			const asset = await tx.query.assets.findFirst({
@@ -261,6 +265,12 @@ export const updateImpactCaseStudyAction = createServerAction(
 					}),
 				);
 			}
+
+			await syncEntityRelations(tx, id, relatedEntityIds, relatedResourceIds);
+		});
+
+		after(async () => {
+			await dispatchWebhook({ type: "impact-case-studies" });
 		});
 
 		revalidatePath("/[locale]/dashboard/website/impact-case-studies", "layout");

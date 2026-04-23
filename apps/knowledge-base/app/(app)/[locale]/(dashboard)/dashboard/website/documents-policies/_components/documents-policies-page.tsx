@@ -3,26 +3,15 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { Button, buttonStyles } from "@dariah-eric/ui/button";
 import { Link } from "@dariah-eric/ui/link";
-import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
-import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import {
-	Table,
-	TableBody,
-	TableCell,
-	TableColumn,
-	TableHeader,
-	TableRow,
-} from "@dariah-eric/ui/table";
-import {
-	EllipsisHorizontalIcon,
-	EyeIcon,
+	ChevronDownIcon,
+	ChevronUpIcon,
 	PencilSquareIcon,
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useState } from "react";
-import { useFilter, useListData } from "react-aria-components";
+import { Fragment, type ReactNode, startTransition, useState } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -32,43 +21,239 @@ import {
 	HeaderDescription,
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
-import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import {
+	type DocumentOrPolicyDialogItem,
+	DocumentOrPolicyFormDialog,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog";
+import { DocumentPolicyGroupCreateDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-create-dialog";
 import { deleteDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/delete-document-or-policy.action";
+import { deleteDocumentPolicyGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/delete-document-policy-group.action";
+import { moveDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/move-document-or-policy.action";
+import { moveDocumentPolicyGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/move-document-policy-group.action";
 
-interface DocumentsPoliciesPageProps {
-	documentsPolicies: Promise<{
-		data: Array<
-			Pick<schema.DocumentOrPolicy, "id" | "title" | "summary"> & {
-				entity: Pick<schema.Entity, "slug">;
-			}
-		>;
-		total: number;
-	}>;
+type DocumentItem = Pick<
+	schema.DocumentOrPolicy,
+	"id" | "title" | "summary" | "url" | "groupId" | "position"
+> & {
+	entity: Pick<schema.Entity, "slug">;
+	document: Pick<schema.Asset, "key" | "label">;
+};
+
+interface GroupWithDocuments extends Pick<schema.DocumentPolicyGroup, "id" | "label" | "position"> {
+	documentsPolicies: Array<DocumentItem>;
 }
 
-export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps>): ReactNode {
-	const { documentsPolicies: documentsPoliciesPromise } = props;
+interface DocumentsPoliciesPageProps {
+	groups: Array<GroupWithDocuments>;
+	ungrouped: Array<DocumentItem>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
+}
 
-	const documentsPolicies = use(documentsPoliciesPromise);
+interface DocumentRowProps {
+	item: DocumentItem;
+	isFirst: boolean;
+	isLast: boolean;
+	onEdit: (item: DocumentOrPolicyDialogItem) => void;
+	onDelete: (id: string) => void;
+	onMove: (id: string, direction: "up" | "down") => void;
+}
+
+function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
+	const { item, isFirst, isLast, onEdit, onDelete, onMove } = props;
 
 	const t = useExtracted();
 
-	const { contains } = useFilter({ sensitivity: "base" });
+	return (
+		<div className="flex items-center gap-x-2 rounded-md p-2 hover:bg-muted/50">
+			<div className="min-w-0 flex-1">
+				<span className="text-sm font-medium">{item.title}</span>
+				{item.summary ? (
+					<span className="text-muted-fg ml-2 truncate text-xs">{item.summary}</span>
+				) : null}
+			</div>
 
-	const list = useListData({
-		filter(item, filterText) {
-			return contains(item.title, filterText);
-		},
-		initialItems: documentsPolicies.data,
+			<div className="flex shrink-0 items-center gap-x-1">
+				<Button
+					aria-label={t("Move up")}
+					intent="plain"
+					isDisabled={isFirst}
+					onPress={() => {
+						onMove(item.id, "up");
+					}}
+					size="sq-sm"
+				>
+					<ChevronUpIcon className="size-4" />
+				</Button>
+				<Button
+					aria-label={t("Move down")}
+					intent="plain"
+					isDisabled={isLast}
+					onPress={() => {
+						onMove(item.id, "down");
+					}}
+					size="sq-sm"
+				>
+					<ChevronDownIcon className="size-4" />
+				</Button>
+				<Button
+					aria-label={t("Edit")}
+					intent="plain"
+					onPress={() => {
+						onEdit(item);
+					}}
+					size="sq-sm"
+				>
+					<PencilSquareIcon className="size-4" />
+				</Button>
+				<Link
+					className={buttonStyles({ intent: "plain", size: "sq-sm" })}
+					href={`/dashboard/website/documents-policies/${item.entity.slug}/edit`}
+				>
+					<span className="text-xs">{t("Content")}</span>
+				</Link>
+				<Button
+					aria-label={t("Delete")}
+					intent="plain"
+					onPress={() => {
+						onDelete(item.id);
+					}}
+					size="sq-sm"
+				>
+					<TrashIcon className="size-4 text-danger" />
+				</Button>
+			</div>
+		</div>
+	);
+}
+
+interface DocumentSectionProps {
+	label: string;
+	groupId: string | null;
+	items: Array<DocumentItem>;
+	isFirstGroup?: boolean;
+	isLastGroup?: boolean;
+	groups: Array<Pick<schema.DocumentPolicyGroup, "id" | "label">>;
+	initialAssets: Array<{ key: string; label: string; url: string }>;
+	onAddDocument: (groupId: string | null) => void;
+	onEditDocument: (item: DocumentOrPolicyDialogItem) => void;
+	onDeleteDocument: (id: string) => void;
+	onMoveDocument: (id: string, direction: "up" | "down") => void;
+	onMoveGroup?: (id: string, direction: "up" | "down") => void;
+	onDeleteGroup?: (id: string) => void;
+}
+
+function DocumentSection(props: Readonly<DocumentSectionProps>): ReactNode {
+	const {
+		label,
+		groupId,
+		items,
+		isFirstGroup,
+		isLastGroup,
+		onAddDocument,
+		onEditDocument,
+		onDeleteDocument,
+		onMoveDocument,
+		onMoveGroup,
+		onDeleteGroup,
+	} = props;
+
+	const t = useExtracted();
+
+	return (
+		<div className="mb-6">
+			<div className="mb-2 flex items-center gap-x-2 border-b pb-2">
+				<h2 className="flex-1 text-sm font-semibold">{label}</h2>
+				{groupId != null && onMoveGroup != null && onDeleteGroup != null && (
+					<div className="flex shrink-0 items-center gap-x-1">
+						<Button
+							aria-label={t("Move group up")}
+							intent="plain"
+							isDisabled={isFirstGroup}
+							onPress={() => {
+								onMoveGroup(groupId, "up");
+							}}
+							size="sq-sm"
+						>
+							<ChevronUpIcon className="size-4" />
+						</Button>
+						<Button
+							aria-label={t("Move group down")}
+							intent="plain"
+							isDisabled={isLastGroup}
+							onPress={() => {
+								onMoveGroup(groupId, "down");
+							}}
+							size="sq-sm"
+						>
+							<ChevronDownIcon className="size-4" />
+						</Button>
+						<Button
+							aria-label={t("Delete group")}
+							intent="plain"
+							onPress={() => {
+								onDeleteGroup(groupId);
+							}}
+							size="sq-sm"
+						>
+							<TrashIcon className="size-4 text-danger" />
+						</Button>
+					</div>
+				)}
+			</div>
+
+			{items.length === 0 ? (
+				<p className="text-muted-fg p-2 text-xs">{t("No documents yet.")}</p>
+			) : (
+				<div className="flex flex-col gap-y-0.5">
+					{items.map((item, index) => {
+						return (
+							<DocumentRow
+								key={item.id}
+								isFirst={index === 0}
+								isLast={index === items.length - 1}
+								item={item}
+								onDelete={onDeleteDocument}
+								onEdit={onEditDocument}
+								onMove={onMoveDocument}
+							/>
+						);
+					})}
+				</div>
+			)}
+
+			<div className="mt-2">
+				<Button
+					intent="plain"
+					onPress={() => {
+						onAddDocument(groupId);
+					}}
+					size="sm"
+				>
+					<PlusIcon className="mr-1 size-3.5" />
+					{t("Add document")}
+				</Button>
+			</div>
+		</div>
+	);
+}
+
+export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps>): ReactNode {
+	const { groups, ungrouped, initialAssets } = props;
+
+	const t = useExtracted();
+
+	const allGroups = groups.map(({ id, label }) => {
+		return { id, label };
 	});
 
-	const [page, setPage] = useState(1);
+	const [dialogState, setDialogState] = useState<{
+		isOpen: boolean;
+		item?: DocumentOrPolicyDialogItem | null;
+		initialGroupId?: string | null;
+	}>({ isOpen: false });
 
-	const pageSize = 10;
-	const totalPages = Math.ceil(list.items.length / pageSize);
-	const items = list.items.slice((page - 1) * pageSize, page * pageSize);
-
-	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
+	const [groupToDelete, setGroupToDelete] = useState<string | null>(null);
 
 	return (
 		<Fragment>
@@ -80,106 +265,120 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
-					<SearchField
-						onChange={(value) => {
-							list.setFilterText(value);
-							setPage(1);
+					<DocumentPolicyGroupCreateDialog />
+					<Button
+						intent="secondary"
+						onPress={() => {
+							setDialogState({ isOpen: true, item: null, initialGroupId: null });
 						}}
-						value={list.filterText}
-					>
-						<SearchInput placeholder={t("Search")} />
-					</SearchField>
-					<Link
-						className={buttonStyles({ intent: "secondary" })}
-						href="/dashboard/website/documents-policies/create"
 					>
 						<PlusIcon className="mr-2 size-4" />
-						{t("New")}
-					</Link>
+						{t("New document")}
+					</Button>
 				</HeaderAction>
 			</Header>
 
-			<Table
-				aria-label="documents and policies"
-				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
-			>
-				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Title")}</TableColumn>
-					<TableColumn>{t("Summary")}</TableColumn>
-					<TableColumn />
-				</TableHeader>
-				<TableBody items={items}>
-					{(item) => {
-						return (
-							<TableRow href={`/dashboard/website/documents-policies/${item.entity.slug}/details`}>
-								<TableCell>
-									<div className="max-w-64 truncate">{item.title}</div>
-								</TableCell>
-								<TableCell>
-									<div className="max-w-xs truncate">{item.summary}</div>
-								</TableCell>
-								<TableCell className="text-end">
-									<Menu>
-										<Button
-											aria-label={t("Open actions menu")}
-											className="h-7 sm:h-7"
-											intent="plain"
-											size="sq-sm"
-										>
-											<EllipsisHorizontalIcon className="size-5" />
-										</Button>
-										<MenuContent placement="left top">
-											<MenuItem
-												href={`/dashboard/website/documents-policies/${item.entity.slug}/details`}
-											>
-												<EyeIcon className="mr-2 size-4" />
-												<MenuLabel>{t("View")}</MenuLabel>
-											</MenuItem>
-											<MenuItem
-												href={`/dashboard/website/documents-policies/${item.entity.slug}/edit`}
-											>
-												<PencilSquareIcon className="mr-2 size-4" />
-												<MenuLabel>{t("Edit")}</MenuLabel>
-											</MenuItem>
-											<MenuSeparator />
-											<MenuItem
-												intent="danger"
-												onAction={() => {
-													setItemToDelete({ id: item.id });
-												}}
-											>
-												<TrashIcon className="mr-2 size-4" />
-												<MenuLabel>{t("Delete")}</MenuLabel>
-											</MenuItem>
-										</MenuContent>
-									</Menu>
-								</TableCell>
-							</TableRow>
-						);
-					}}
-				</TableBody>
-			</Table>
+			<div className="p-(--layout-padding)">
+				{groups.map((group, groupIndex) => {
+					return (
+						<DocumentSection
+							key={group.id}
+							groupId={group.id}
+							groups={allGroups}
+							initialAssets={initialAssets}
+							isFirstGroup={groupIndex === 0}
+							isLastGroup={groupIndex === groups.length - 1}
+							items={group.documentsPolicies}
+							label={group.label}
+							onAddDocument={(gid) => {
+								setDialogState({ isOpen: true, item: null, initialGroupId: gid });
+							}}
+							onDeleteDocument={(id) => {
+								setDocumentToDelete(id);
+							}}
+							onDeleteGroup={(id) => {
+								setGroupToDelete(id);
+							}}
+							onEditDocument={(item) => {
+								setDialogState({ isOpen: true, item });
+							}}
+							onMoveDocument={(id, direction) => {
+								startTransition(async () => {
+									await moveDocumentOrPolicyAction(id, direction);
+								});
+							}}
+							onMoveGroup={(id, direction) => {
+								startTransition(async () => {
+									await moveDocumentPolicyGroupAction(id, direction);
+								});
+							}}
+						/>
+					);
+				})}
 
-			<Paginate page={page} setPage={setPage} total={totalPages} />
+				<DocumentSection
+					groupId={null}
+					groups={allGroups}
+					initialAssets={initialAssets}
+					items={ungrouped}
+					label={t("Ungrouped")}
+					onAddDocument={(gid) => {
+						setDialogState({ isOpen: true, item: null, initialGroupId: gid });
+					}}
+					onDeleteDocument={(id) => {
+						setDocumentToDelete(id);
+					}}
+					onEditDocument={(item) => {
+						setDialogState({ isOpen: true, item });
+					}}
+					onMoveDocument={(id, direction) => {
+						startTransition(async () => {
+							await moveDocumentOrPolicyAction(id, direction);
+						});
+					}}
+				/>
+			</div>
+
+			<DocumentOrPolicyFormDialog
+				groups={allGroups}
+				initialAssets={initialAssets}
+				initialGroupId={dialogState.initialGroupId}
+				isOpen={dialogState.isOpen}
+				item={dialogState.item}
+				onOpenChange={(open) => {
+					setDialogState((prev) => {
+						return { ...prev, isOpen: open };
+					});
+				}}
+			/>
 
 			<DeleteModal
-				isOpen={itemToDelete != null}
+				isOpen={documentToDelete != null}
 				model={t("document or policy")}
 				onAction={() => {
-					if (itemToDelete == null) {
-						return;
-					}
-
+					if (documentToDelete == null) return;
 					startTransition(async () => {
-						await deleteDocumentOrPolicyAction(itemToDelete.id);
-						list.remove(itemToDelete.id);
-						setItemToDelete(null);
+						await deleteDocumentOrPolicyAction(documentToDelete);
+						setDocumentToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) {
-						setItemToDelete(null);
-					}
+					if (!open) setDocumentToDelete(null);
+				}}
+			/>
+
+			<DeleteModal
+				isOpen={groupToDelete != null}
+				model={t("group")}
+				onAction={() => {
+					if (groupToDelete == null) return;
+					startTransition(async () => {
+						await deleteDocumentPolicyGroupAction(groupToDelete);
+						setGroupToDelete(null);
+					});
+				}}
+				onOpenChange={(open) => {
+					if (!open) setGroupToDelete(null);
 				}}
 			/>
 		</Fragment>

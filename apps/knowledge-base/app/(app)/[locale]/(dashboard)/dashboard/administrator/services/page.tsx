@@ -1,14 +1,10 @@
+import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
-import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 
-import {
-	Header,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
+import { ServicesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_components/services-page";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorServicesPageProps extends PageProps<"/[locale]/dashboard/administrator/services"> {}
@@ -29,16 +25,22 @@ export async function generateMetadata(
 export default function DashboardAdministratorServicesPage(
 	_props: Readonly<DashboardAdministratorServicesPageProps>,
 ): ReactNode {
-	const t = useExtracted();
+	const services = db.query.services.findMany({
+		orderBy: { name: "asc" },
+		columns: {
+			id: true,
+			name: true,
+			sshocMarketplaceId: true,
+		},
+		with: {
+			type: { columns: { type: true } },
+			status: { columns: { status: true } },
+		},
+	});
 
 	return (
-		<Header>
-			<HeaderContent>
-				<HeaderTitle>{t("Services")}</HeaderTitle>
-				<HeaderDescription>
-					{t("Manage all services in the DARIAH knowledge base.")}
-				</HeaderDescription>
-			</HeaderContent>
-		</Header>
+		<Suspense fallback={<LoadingScreen />}>
+			<ServicesPage services={services} />
+		</Suspense>
 	);
 }

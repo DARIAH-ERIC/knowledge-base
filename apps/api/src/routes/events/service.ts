@@ -4,6 +4,7 @@ import { and, asc, count, desc, eq, type SQL, sql } from "@dariah-eric/database"
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { EventOrder } from "@/routes/events/schemas";
 import { images } from "@/services/images";
@@ -252,7 +253,11 @@ export async function getEventById(db: Database | Transaction, params: GetEventB
 		end: item.duration.end?.toISOString(),
 	};
 
-	const links = await getAdjacentEvents(db, { id, startDate: item.duration.start });
+	const [links, relatedEntities, relatedResources] = await Promise.all([
+		getAdjacentEvents(db, { id, startDate: item.duration.start }),
+		getRelatedEntities(db, id),
+		getRelatedResources(db, id),
+	]);
 
 	return {
 		...item,
@@ -261,6 +266,8 @@ export async function getEventById(db: Database | Transaction, params: GetEventB
 		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
 		links,
+		relatedEntities,
+		relatedResources,
 	};
 }
 
@@ -377,9 +384,11 @@ export async function getEventBySlug(db: Database | Transaction, params: GetEven
 		end: item.duration.end?.toISOString(),
 	};
 
-	const [fields, links] = await Promise.all([
+	const [fields, links, relatedEntities, relatedResources] = await Promise.all([
 		getContentBlocks(db, item.id),
 		getAdjacentEvents(db, { id: item.id, startDate: item.duration.start }),
+		getRelatedEntities(db, item.id),
+		getRelatedResources(db, item.id),
 	]);
 
 	return {
@@ -389,5 +398,7 @@ export async function getEventBySlug(db: Database | Transaction, params: GetEven
 		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
 		links,
+		relatedEntities,
+		relatedResources,
 	};
 }

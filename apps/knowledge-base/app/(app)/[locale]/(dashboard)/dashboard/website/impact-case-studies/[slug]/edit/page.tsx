@@ -9,7 +9,16 @@ import type { ReactNode } from "react";
 
 import { ImpactCaseStudyEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-edit";
 import { imageGridOptions } from "@/config/assets.config";
+import {
+	getAvailablePersons,
+	getImpactCaseStudyContributors,
+} from "@/lib/data/article-contributors";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import {
+	getAvailableEntities,
+	getAvailableResources,
+	getEntityRelations,
+} from "@/lib/data/relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -35,7 +44,13 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 
 	const { slug } = await params;
 
-	const [{ items: initialAssets }, impactCaseStudy] = await Promise.all([
+	const [
+		{ items: initialAssets },
+		impactCaseStudy,
+		relatedEntities,
+		relatedResources,
+		availablePersons,
+	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 		db.query.impactCaseStudies.findFirst({
 			where: {
@@ -63,11 +78,19 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 				},
 			},
 		}),
+		getAvailableEntities(),
+		getAvailableResources(),
+		getAvailablePersons(),
 	]);
 
 	if (impactCaseStudy == null) {
 		notFound();
 	}
+
+	const [{ relatedEntityIds, relatedResourceIds }, contributors] = await Promise.all([
+		getEntityRelations(impactCaseStudy.id),
+		getImpactCaseStudyContributors(impactCaseStudy.id),
+	]);
 
 	const image = images.generateSignedImageUrl({
 		key: impactCaseStudy.image.key,
@@ -306,12 +329,18 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 
 	return (
 		<ImpactCaseStudyEditForm
+			availablePersons={availablePersons}
 			contentBlocks={contentBlocks}
+			contributors={contributors}
 			impactCaseStudy={{
 				...impactCaseStudy,
 				image: { ...impactCaseStudy.image, url: image.url },
 			}}
 			initialAssets={initialAssets}
+			initialRelatedEntityIds={relatedEntityIds}
+			initialRelatedResourceIds={relatedResourceIds}
+			relatedEntities={relatedEntities}
+			relatedResources={relatedResources}
 		/>
 	);
 }

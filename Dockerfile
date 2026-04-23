@@ -138,11 +138,14 @@ ARG NEXT_PUBLIC_APP_SENTRY_PII
 ARG NEXT_PUBLIC_APP_SENTRY_PROJECT
 ARG NEXT_PUBLIC_APP_SERVICE_ID
 ARG NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME
+ARG NEXT_PUBLIC_TYPESENSE_WEBSITE_COLLECTION_NAME
 ARG NEXT_PUBLIC_TYPESENSE_HOST
 ARG NEXT_PUBLIC_TYPESENSE_PORT
 ARG NEXT_PUBLIC_TYPESENSE_PROTOCOL
+ARG NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY
 COPY --from=app-prune /app/out/full/ .
-RUN --mount=type=secret,id=AUTH_ENCRYPTION_KEY,env=AUTH_ENCRYPTION_KEY \
+RUN --mount=type=secret,id=API_ACCESS_TOKEN,env=API_ACCESS_TOKEN \
+    --mount=type=secret,id=AUTH_ENCRYPTION_KEY,env=AUTH_ENCRYPTION_KEY \
     --mount=type=secret,id=AUTH_SIGN_UP,env=AUTH_SIGN_UP \
     --mount=type=secret,id=CORDIS_API_KEY,env=CORDIS_API_KEY \
     --mount=type=secret,id=CORDIS_API_BASE_URL,env=CORDIS_API_BASE_URL \
@@ -162,6 +165,8 @@ RUN --mount=type=secret,id=AUTH_ENCRYPTION_KEY,env=AUTH_ENCRYPTION_KEY \
     --mount=type=secret,id=MAILCHIMP_API_KEY,env=MAILCHIMP_API_KEY \
     --mount=type=secret,id=MAILCHIMP_LIST_ID,env=MAILCHIMP_LIST_ID \
     --mount=type=secret,id=OPENAIRE_API_BASE_URL,env=OPENAIRE_API_BASE_URL \
+    --mount=type=secret,id=REVALIDATION_WEBHOOK_SECRET,env=REVALIDATION_WEBHOOK_SECRET \
+    --mount=type=secret,id=REVALIDATION_WEBHOOK_URL,env=REVALIDATION_WEBHOOK_URL \
     --mount=type=secret,id=S3_ACCESS_KEY,env=S3_ACCESS_KEY \
     --mount=type=secret,id=S3_BUCKET_NAME,env=S3_BUCKET_NAME \
     --mount=type=secret,id=S3_HOST,env=S3_HOST \
@@ -173,6 +178,8 @@ RUN --mount=type=secret,id=AUTH_ENCRYPTION_KEY,env=AUTH_ENCRYPTION_KEY \
     --mount=type=secret,id=SSHOC_MARKETPLACE_PASSWORD,env=SSHOC_MARKETPLACE_PASSWORD \
     --mount=type=secret,id=SSHOC_MARKETPLACE_USER,env=SSHOC_MARKETPLACE_USER \
     --mount=type=secret,id=TYPESENSE_ADMIN_API_KEY,env=TYPESENSE_ADMIN_API_KEY \
+		--mount=type=secret,id=UNR_DATABASE_DIRECT_URL,env=UNR_DATABASE_DIRECT_URL \
+		--mount=type=secret,id=UNR_S3_BUCKET_NAME,env=UNR_S3_BUCKET_NAME \
     --mount=type=secret,id=ZOTERO_API_KEY,env=ZOTERO_API_KEY \
     --mount=type=secret,id=ZOTERO_API_BASE_URL,env=ZOTERO_API_BASE_URL \
     turbo run build --filter=@dariah-eric/knowledge-base

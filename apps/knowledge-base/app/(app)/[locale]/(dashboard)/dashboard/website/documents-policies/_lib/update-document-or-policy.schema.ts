@@ -10,6 +10,7 @@ export const UpdateDocumentOrPolicyActionInputSchema = v.object({
 	...v.pick(DocumentOrPolicySelectSchema, ["id"]).entries,
 	...v.pick(DocumentOrPolicyUpdateSchema, ["title", "summary"]).entries,
 	url: v.optional(v.string()),
+	groupId: v.optional(v.pipe(v.string(), v.uuid())),
 	documentKey: v.pipe(v.string(), v.nonEmpty()),
 	contentBlocks: v.optional(
 		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),

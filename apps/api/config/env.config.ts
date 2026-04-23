@@ -5,6 +5,7 @@ import * as v from "valibot";
 
 const validate = define({
 	envVars: v.object({
+		API_ACCESS_TOKEN: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		API_ALLOWED_ORIGINS: v.optional(
 			v.pipe(
 				v.string(),
@@ -45,11 +46,18 @@ const validate = define({
 		S3_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 		S3_PROTOCOL: v.optional(v.picklist(["http", "https"]), "https"),
 		S3_SECRET_KEY: v.pipe(v.string(), v.nonEmpty()),
+		TYPESENSE_HOST: v.pipe(v.string(), v.nonEmpty()),
+		TYPESENSE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
+		TYPESENSE_PROTOCOL: v.optional(v.picklist(["http", "https"]), "https"),
+		TYPESENSE_RESOURCE_COLLECTION_NAME: v.pipe(v.string(), v.nonEmpty()),
+		TYPESENSE_WEBSITE_COLLECTION_NAME: v.pipe(v.string(), v.nonEmpty()),
+		TYPESENSE_SEARCH_API_KEY: v.pipe(v.string(), v.nonEmpty()),
 	}),
 });
 
 export const env = validate({
 	environment: {
+		API_ACCESS_TOKEN: process.env.API_ACCESS_TOKEN,
 		API_ALLOWED_ORIGINS: process.env.API_ALLOWED_ORIGINS,
 		API_BASE_URL: process.env.API_BASE_URL,
 		API_LOG_LEVEL: process.env.API_LOG_LEVEL,
@@ -78,5 +86,11 @@ export const env = validate({
 		S3_PORT: process.env.S3_PORT,
 		S3_PROTOCOL: process.env.S3_PROTOCOL,
 		S3_SECRET_KEY: process.env.S3_SECRET_KEY,
+		TYPESENSE_HOST: process.env.TYPESENSE_HOST,
+		TYPESENSE_PORT: process.env.TYPESENSE_PORT,
+		TYPESENSE_PROTOCOL: process.env.TYPESENSE_PROTOCOL,
+		TYPESENSE_RESOURCE_COLLECTION_NAME: process.env.TYPESENSE_RESOURCE_COLLECTION_NAME,
+		TYPESENSE_WEBSITE_COLLECTION_NAME: process.env.TYPESENSE_WEBSITE_COLLECTION_NAME,
+		TYPESENSE_SEARCH_API_KEY: process.env.TYPESENSE_SEARCH_API_KEY,
 	},
 }).unwrap();

@@ -1,14 +1,10 @@
+import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
-import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 
-import {
-	Header,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
+import { WorkingGroupsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorWorkingGroupsPageProps extends PageProps<"/[locale]/dashboard/administrator/working-groups"> {}
@@ -29,16 +25,34 @@ export async function generateMetadata(
 export default function DashboardAdministratorWorkingGroupsPage(
 	_props: Readonly<DashboardAdministratorWorkingGroupsPageProps>,
 ): ReactNode {
-	const t = useExtracted();
+	const workingGroups = db.query.organisationalUnits.findMany({
+		where: { type: { type: "working_group" } },
+		orderBy: { name: "asc" },
+		columns: {
+			id: true,
+			name: true,
+		},
+		with: {
+			entity: {
+				columns: {
+					documentId: true,
+					slug: true,
+				},
+				with: {
+					status: {
+						columns: {
+							id: true,
+							type: true,
+						},
+					},
+				},
+			},
+		},
+	});
 
 	return (
-		<Header>
-			<HeaderContent>
-				<HeaderTitle>{t("Working groups")}</HeaderTitle>
-				<HeaderDescription>
-					{t("Manage all working groups in the DARIAH knowledge base.")}
-				</HeaderDescription>
-			</HeaderContent>
-		</Header>
+		<Suspense fallback={<LoadingScreen />}>
+			<WorkingGroupsPage workingGroups={workingGroups} />
+		</Suspense>
 	);
 }

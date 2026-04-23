@@ -24,7 +24,7 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface PersonFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
-	person?: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
+	person?: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "position" | "sortName"> & {
 		biography?: JSONContent;
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; label: string; url: string } };
@@ -71,6 +71,12 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 
 					<TextField defaultValue={person?.orcid ?? undefined} name="orcid">
 						<Label>{t("ORCID")}</Label>
+						<Input />
+						<FieldError />
+					</TextField>
+
+					<TextField defaultValue={person?.position ?? undefined} name="position">
+						<Label>{t("Position")}</Label>
 						<Input />
 						<FieldError />
 					</TextField>

@@ -30,6 +30,7 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 			columns: {
 				id: true,
 				name: true,
+				position: true,
 				sortName: true,
 				email: true,
 				orcid: true,
@@ -97,6 +98,7 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 			columns: {
 				id: true,
 				name: true,
+				position: true,
 				sortName: true,
 				email: true,
 				orcid: true,
@@ -204,6 +206,7 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 		columns: {
 			id: true,
 			name: true,
+			position: true,
 			sortName: true,
 			email: true,
 			orcid: true,

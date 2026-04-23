@@ -4,12 +4,19 @@ import * as v from "valibot";
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
+const DocumentPolicyGroupSchema = v.nullable(
+	v.object({
+		...v.pick(schema.DocumentPolicyGroupSelectSchema, ["id", "label", "position"]).entries,
+	}),
+);
+
 export const DocumentOrPolicyBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.DocumentOrPolicySelectSchema, ["id", "title", "summary", "url"]).entries,
 		document: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
+		group: DocumentPolicyGroupSchema,
 	}),
 	v.description("Document or policy"),
 	v.metadata({ ref: "DocumentOrPolicyBase" }),
@@ -32,6 +39,7 @@ export const DocumentOrPolicySchema = v.pipe(
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		description: v.optional(v.array(ContentBlockSchema), []),
+		group: DocumentPolicyGroupSchema,
 	}),
 	v.description("Document or policy"),
 	v.metadata({ ref: "DocumentOrPolicy" }),

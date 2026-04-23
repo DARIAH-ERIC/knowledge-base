@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { SpotlightArticleCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-create-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { getAvailableEntities, getAvailableResources } from "@/lib/data/relations";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteCreateSpotlightArticlePageProps extends PageProps<"/[locale]/dashboard/website/spotlight-articles/create"> {}
@@ -25,10 +26,17 @@ export async function generateMetadata(
 export default async function DashboardWebsiteCreateSpotlightArticlePage(
 	_props: Readonly<DashboardWebsiteCreateSpotlightArticlePageProps>,
 ): Promise<ReactNode> {
-	const { items: initialAssets } = await getMediaLibraryAssets({
-		imageUrlOptions: imageGridOptions,
-		prefix: "images",
-	});
+	const [{ items: initialAssets }, relatedEntities, relatedResources] = await Promise.all([
+		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
+		getAvailableEntities(),
+		getAvailableResources(),
+	]);
 
-	return <SpotlightArticleCreateForm initialAssets={initialAssets} />;
+	return (
+		<SpotlightArticleCreateForm
+			initialAssets={initialAssets}
+			relatedEntities={relatedEntities}
+			relatedResources={relatedResources}
+		/>
+	);
 }

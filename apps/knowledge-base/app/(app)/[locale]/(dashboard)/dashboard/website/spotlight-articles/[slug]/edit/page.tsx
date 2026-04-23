@@ -9,7 +9,16 @@ import type { ReactNode } from "react";
 
 import { SpotlightArticleEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-edit";
 import { imageGridOptions } from "@/config/assets.config";
+import {
+	getAvailablePersons,
+	getSpotlightArticleContributors,
+} from "@/lib/data/article-contributors";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import {
+	getAvailableEntities,
+	getAvailableResources,
+	getEntityRelations,
+} from "@/lib/data/relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -35,7 +44,13 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 
 	const { slug } = await params;
 
-	const [{ items: initialAssets }, spotlightArticle] = await Promise.all([
+	const [
+		{ items: initialAssets },
+		spotlightArticle,
+		relatedEntities,
+		relatedResources,
+		availablePersons,
+	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 		db.query.spotlightArticles.findFirst({
 			where: {
@@ -63,11 +78,19 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 				},
 			},
 		}),
+		getAvailableEntities(),
+		getAvailableResources(),
+		getAvailablePersons(),
 	]);
 
 	if (spotlightArticle == null) {
 		notFound();
 	}
+
+	const [{ relatedEntityIds, relatedResourceIds }, contributors] = await Promise.all([
+		getEntityRelations(spotlightArticle.id),
+		getSpotlightArticleContributors(spotlightArticle.id),
+	]);
 
 	const image = images.generateSignedImageUrl({
 		key: spotlightArticle.image.key,
@@ -306,8 +329,14 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 
 	return (
 		<SpotlightArticleEditForm
+			availablePersons={availablePersons}
 			contentBlocks={contentBlocks}
+			contributors={contributors}
 			initialAssets={initialAssets}
+			initialRelatedEntityIds={relatedEntityIds}
+			initialRelatedResourceIds={relatedResourceIds}
+			relatedEntities={relatedEntities}
+			relatedResources={relatedResources}
 			spotlightArticle={{
 				...spotlightArticle,
 				image: { ...spotlightArticle.image, url: image.url },

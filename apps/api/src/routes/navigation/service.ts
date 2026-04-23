@@ -6,7 +6,7 @@ interface NavigationItem {
 	id: string;
 	label: string;
 	href: string | null;
-	entityId: string | null;
+	entity: { type: string; slug: string } | null;
 	isExternal: boolean;
 	position: number;
 	parentId: string | null;
@@ -57,10 +57,23 @@ export async function getNavigation(db: Database | Transaction, params: GetNavig
 					id: true,
 					label: true,
 					href: true,
-					entityId: true,
 					isExternal: true,
 					position: true,
 					parentId: true,
+				},
+				with: {
+					entity: {
+						columns: {
+							slug: true,
+						},
+						with: {
+							type: {
+								columns: {
+									type: true,
+								},
+							},
+						},
+					},
 				},
 			},
 		},
@@ -70,7 +83,19 @@ export async function getNavigation(db: Database | Transaction, params: GetNavig
 	});
 
 	return menus.map((m) => {
-		const tree = buildTree(m.items, null);
+		const items: Array<NavigationItem> = m.items.map((item) => {
+			return {
+				id: item.id,
+				label: item.label,
+				href: item.href ?? null,
+				entity:
+					item.entity != null ? { type: item.entity.type.type, slug: item.entity.slug } : null,
+				isExternal: item.isExternal,
+				position: item.position,
+				parentId: item.parentId ?? null,
+			};
+		});
+		const tree = buildTree(items, null);
 		return { id: m.id, name: m.name, items: tree };
 	});
 }

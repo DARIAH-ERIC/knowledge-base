@@ -39,6 +39,37 @@ function createItems(count: number) {
 	return items;
 }
 
+function createChair() {
+	const id = uuidv7();
+	const documentId = uuidv7();
+	const assetId = uuidv7();
+	const name = f.person.fullName();
+	const slug = slugify(name);
+
+	return {
+		entity: {
+			id,
+			slug,
+			documentId,
+		},
+		asset: {
+			id: assetId,
+			key: `persons/${assetId}.jpg`,
+			label: name,
+			mimeType: "image/jpeg",
+		},
+		person: {
+			id,
+			name,
+			position: f.person.jobTitle(),
+			sortName: f.person.lastName(),
+			email: f.internet.email(),
+			orcid: `0000-000${String(f.number.int({ min: 1, max: 9 }))}-${String(f.number.int({ min: 1000, max: 9999 }))}-${String(f.number.int({ min: 1000, max: 9999 }))}`,
+			imageId: assetId,
+		},
+	};
+}
+
 async function seedWithMixedStatuses(db: Database) {
 	const [status, entityType, asset, workingGroupType, umbrellaConsortiumType, unitStatus] =
 		await Promise.all([
@@ -123,31 +154,49 @@ async function seedWithMixedStatuses(db: Database) {
 	};
 }
 
-async function seed(db: Database, items: ReturnType<typeof createItems>) {
-	const [status, entityType, asset, workingGroupType, umbrellaConsortiumType, unitStatus] =
-		await Promise.all([
-			db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
-			db.query.entityTypes.findFirst({
-				columns: { id: true },
-				where: { type: "organisational_units" },
-			}),
-			db.query.assets.findFirst({ columns: { id: true } }),
-			db.query.organisationalUnitTypes.findFirst({
-				columns: { id: true },
-				where: { type: "working_group" },
-			}),
-			db.query.organisationalUnitTypes.findFirst({
-				columns: { id: true },
-				where: { type: "eric" },
-			}),
-			db
-				.select()
-				.from(schema.organisationalUnitStatus)
-				.where(inArray(schema.organisationalUnitStatus.status, ["is_part_of"])),
-		]);
+async function seed(db: Database, items: ReturnType<typeof createItems>, chair = createChair()) {
+	const [
+		status,
+		entityType,
+		personType,
+		chairRoleType,
+		asset,
+		workingGroupType,
+		umbrellaConsortiumType,
+		unitStatus,
+	] = await Promise.all([
+		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+		db.query.entityTypes.findFirst({
+			columns: { id: true },
+			where: { type: "organisational_units" },
+		}),
+		db.query.entityTypes.findFirst({
+			columns: { id: true },
+			where: { type: "persons" },
+		}),
+		db.query.personRoleTypes.findFirst({
+			columns: { id: true },
+			where: { type: "is_chair_of" },
+		}),
+		db.query.assets.findFirst({ columns: { id: true } }),
+		db.query.organisationalUnitTypes.findFirst({
+			columns: { id: true },
+			where: { type: "working_group" },
+		}),
+		db.query.organisationalUnitTypes.findFirst({
+			columns: { id: true },
+			where: { type: "eric" },
+		}),
+		db
+			.select()
+			.from(schema.organisationalUnitStatus)
+			.where(inArray(schema.organisationalUnitStatus.status, ["is_part_of"])),
+	]);
 
 	assert(status, "No entity status in database.");
 	assert(entityType, "No entity type in database.");
+	assert(personType, "No person entity type in database.");
+	assert(chairRoleType, "No chair role type in database.");
 	assert(asset, "No assets in database.");
 	assert(workingGroupType, "No working_group type in database.");
 	assert(umbrellaConsortiumType, "No eric type in database.");
@@ -189,6 +238,27 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	await Promise.all(
 		items.map((item) => {
 			return seedContentBlock(db, item.entity.id, entityType.id, "description");
+		}),
+	);
+
+	await db.insert(schema.assets).values(chair.asset);
+
+	await db.insert(schema.entities).values({
+		...chair.entity,
+		statusId: status.id,
+		typeId: personType.id,
+	});
+
+	await db.insert(schema.persons).values(chair.person);
+
+	await db.insert(schema.personsToOrganisationalUnits).values(
+		items.slice(1).map((item) => {
+			return {
+				personId: chair.person.id,
+				organisationalUnitId: item.organisationalUnit.id,
+				roleTypeId: chairRoleType.id,
+				duration: { start },
+			};
 		}),
 	);
 }
@@ -283,7 +353,8 @@ describe("working-groups", () => {
 				const client = createTestClient(db);
 
 				const items = createItems(3);
-				await seed(db, items);
+				const chair = createChair();
+				await seed(db, items, chair);
 
 				const item = items.at(1)!;
 				const id = item.entity.id;
@@ -300,7 +371,16 @@ describe("working-groups", () => {
 				const data = await response.json();
 
 				assert("description" in data);
-				expect(data).toMatchObject({ name });
+				expect(data).toMatchObject({
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+					chairs: expect.arrayContaining([
+						expect.objectContaining({
+							name: chair.person.name,
+							position: chair.person.position,
+						}),
+					]),
+					name,
+				});
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});
@@ -386,7 +466,8 @@ describe("working-groups", () => {
 				const client = createTestClient(db);
 
 				const items = createItems(3);
-				await seed(db, items);
+				const chair = createChair();
+				await seed(db, items, chair);
 
 				const item = items.at(1)!;
 				const slug = item.entity.slug;
@@ -403,7 +484,16 @@ describe("working-groups", () => {
 				const data = await response.json();
 
 				assert("description" in data);
-				expect(data).toMatchObject({ name });
+				expect(data).toMatchObject({
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+					chairs: expect.arrayContaining([
+						expect.objectContaining({
+							name: chair.person.name,
+							position: chair.person.position,
+						}),
+					]),
+					name,
+				});
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});

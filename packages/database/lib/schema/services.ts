@@ -82,6 +82,7 @@ export const services = p.pgTable("services", {
 	dariahBranding: p.boolean("dariah_branding"),
 	monitoring: p.boolean("monitoring"),
 	privateSupplier: p.boolean("private_supplier"),
+	metadata: p.jsonb("metadata"),
 	...f.timestamps(),
 });
 

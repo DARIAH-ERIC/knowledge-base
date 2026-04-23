@@ -2,13 +2,31 @@ import { parseArgs } from "node:util";
 
 import { log } from "@acdh-oeaw/lib";
 import { db as databaseClient, seed as seedDatabase } from "@dariah-eric/database/lib";
-import { adminClient as searchIndexClient, seed as seedSearchIndex } from "@dariah-eric/search/lib";
+import { createSearchAdminService } from "@dariah-eric/search/admin";
 import {
 	adminClient as objectStoreClient,
 	seed as seedObjectStore,
 	type SeedManifest,
 } from "@dariah-eric/storage/lib";
 import * as v from "valibot";
+
+import { env } from "../config/env.config";
+import { seed as seedSearchIndex } from "../lib/seed-search-index";
+
+const searchIndexClient = createSearchAdminService({
+	apiKey: env.TYPESENSE_ADMIN_API_KEY,
+	collections: {
+		resources: env.TYPESENSE_RESOURCE_COLLECTION_NAME,
+		website: env.TYPESENSE_WEBSITE_COLLECTION_NAME,
+	},
+	nodes: [
+		{
+			host: env.TYPESENSE_HOST,
+			port: env.TYPESENSE_PORT,
+			protocol: env.TYPESENSE_PROTOCOL,
+		},
+	],
+});
 
 const _services = ["database", "object-store", "search-index"] as const;
 

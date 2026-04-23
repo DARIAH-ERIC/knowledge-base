@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq } from "@dariah-eric/database";
+import { and, count, eq } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
@@ -82,13 +83,48 @@ interface GetImpactCaseStudyByIdParams {
 	id: schema.ImpactCaseStudy["id"];
 }
 
+async function getContributors(db: Database | Transaction, impactCaseStudyId: string) {
+	const rows = await db
+		.select({
+			id: schema.persons.id,
+			name: schema.persons.name,
+			position: schema.persons.position,
+			slug: schema.entities.slug,
+			imageKey: schema.assets.key,
+			role: schema.impactCaseStudiesToPersons.role,
+		})
+		.from(schema.impactCaseStudiesToPersons)
+		.innerJoin(schema.persons, eq(schema.impactCaseStudiesToPersons.personId, schema.persons.id))
+		.innerJoin(schema.entities, eq(schema.persons.id, schema.entities.id))
+		.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
+		.where(
+			and(
+				eq(schema.impactCaseStudiesToPersons.impactCaseStudyId, impactCaseStudyId),
+				eq(schema.entityStatus.type, "published"),
+			),
+		);
+
+	return rows.map(({ imageKey, ...row }) => {
+		return {
+			...row,
+			image: images.generateSignedImageUrl({
+				key: imageKey,
+				options: { width: imageWidth.avatar },
+			}),
+		};
+	});
+}
+
+//
+
 export async function getImpactCaseStudyById(
 	db: Database | Transaction,
 	params: GetImpactCaseStudyByIdParams,
 ) {
 	const { id } = params;
 
-	const [item, fields] = await Promise.all([
+	const [item, fields, contributors] = await Promise.all([
 		db.query.impactCaseStudies.findFirst({
 			where: {
 				id,
@@ -104,19 +140,6 @@ export async function getImpactCaseStudyById(
 				summary: true,
 			},
 			with: {
-				contributors: {
-					columns: {
-						id: true,
-						name: true,
-					},
-					with: {
-						image: {
-							columns: {
-								key: true,
-							},
-						},
-					},
-				},
 				entity: {
 					columns: {
 						slug: true,
@@ -131,20 +154,17 @@ export async function getImpactCaseStudyById(
 			},
 		}),
 		getContentBlocks(db, id),
+		getContributors(db, id),
 	]);
 
 	if (item == null) {
 		return null;
 	}
 
-	const contributors = item.contributors.map((contributor) => {
-		const image = images.generateSignedImageUrl({
-			key: contributor.image.key,
-			options: { width: imageWidth.avatar },
-		});
-
-		return { ...contributor, image };
-	});
+	const [relatedEntities, relatedResources] = await Promise.all([
+		getRelatedEntities(db, id),
+		getRelatedResources(db, id),
+	]);
 
 	const image = images.generateSignedImageUrl({
 		key: item.image.key,
@@ -157,6 +177,8 @@ export async function getImpactCaseStudyById(
 		image,
 		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
+		relatedEntities,
+		relatedResources,
 	};
 }
 
@@ -248,19 +270,6 @@ export async function getImpactCaseStudyBySlug(
 			summary: true,
 		},
 		with: {
-			contributors: {
-				columns: {
-					id: true,
-					name: true,
-				},
-				with: {
-					image: {
-						columns: {
-							key: true,
-						},
-					},
-				},
-			},
 			entity: {
 				columns: {
 					slug: true,
@@ -279,21 +288,18 @@ export async function getImpactCaseStudyBySlug(
 		return null;
 	}
 
-	const contributors = item.contributors.map((contributor) => {
-		const image = images.generateSignedImageUrl({
-			key: contributor.image.key,
-			options: { width: imageWidth.avatar },
-		});
-
-		return { ...contributor, image };
-	});
+	const contributors = await getContributors(db, item.id);
 
 	const image = images.generateSignedImageUrl({
 		key: item.image.key,
 		options: { width: imageWidth.featured },
 	});
 
-	const fields = await getContentBlocks(db, item.id);
+	const [fields, relatedEntities, relatedResources] = await Promise.all([
+		getContentBlocks(db, item.id),
+		getRelatedEntities(db, item.id),
+		getRelatedResources(db, item.id),
+	]);
 
 	return {
 		...item,
@@ -301,5 +307,7 @@ export async function getImpactCaseStudyBySlug(
 		image,
 		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
+		relatedEntities,
+		relatedResources,
 	};
 }

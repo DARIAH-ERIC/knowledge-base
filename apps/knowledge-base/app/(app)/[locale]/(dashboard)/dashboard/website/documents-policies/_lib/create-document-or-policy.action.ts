@@ -1,12 +1,14 @@
 "use server";
 
 import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
+import { eq, isNull } from "@dariah-eric/database";
 import { db, type Transaction } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import slugify from "@sindresorhus/slugify";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
@@ -16,6 +18,7 @@ import type { ContentBlockInput } from "@/lib/content-block-input";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const createDocumentOrPolicyAction = createServerAction(
 	async function createDocumentOrPolicyAction(state, formData) {
@@ -43,7 +46,7 @@ export const createDocumentOrPolicyAction = createServerAction(
 			});
 		}
 
-		const { contentBlocks, title, documentKey, summary, url } = result.output;
+		const { contentBlocks, title, documentKey, summary, url, groupId } = result.output;
 
 		const slug = slugify(title);
 
@@ -88,12 +91,23 @@ export const createDocumentOrPolicyAction = createServerAction(
 
 			assert(asset);
 
+			const siblings = await tx
+				.select({ id: schema.documentsPolicies.id })
+				.from(schema.documentsPolicies)
+				.where(
+					groupId != null
+						? eq(schema.documentsPolicies.groupId, groupId)
+						: isNull(schema.documentsPolicies.groupId),
+				);
+
 			await tx.insert(schema.documentsPolicies).values({
 				id: entity.id,
 				documentId: asset.id,
 				title,
 				summary,
 				url: url != null && url.length > 0 ? url : null,
+				groupId: groupId ?? null,
+				position: siblings.length,
 			});
 
 			const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({
@@ -213,6 +227,10 @@ export const createDocumentOrPolicyAction = createServerAction(
 					await insertTypeBlock(tx, contentBlock, added.id);
 				}),
 			);
+		});
+
+		after(async () => {
+			await dispatchWebhook({ type: "documents-policies" });
 		});
 
 		revalidatePath("/[locale]/dashboard/website/documents-policies", "layout");

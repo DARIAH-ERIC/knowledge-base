@@ -10,6 +10,7 @@ import type { ReactNode } from "react";
 import { PersonEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-edit-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { getContributionOptions, getPersonContributions } from "@/lib/data/contributions";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -48,6 +49,7 @@ export default async function DashboardAdministratorEditPersonPage(
 				email: true,
 				name: true,
 				orcid: true,
+				position: true,
 				sortName: true,
 			},
 			with: {
@@ -79,6 +81,11 @@ export default async function DashboardAdministratorEditPersonPage(
 		notFound();
 	}
 
+	const [contributions, contributionOptions] = await Promise.all([
+		getPersonContributions(person.id),
+		getContributionOptions(),
+	]);
+
 	const image = {
 		...person.image,
 		url: images.generateSignedImageUrl({
@@ -106,5 +113,12 @@ export default async function DashboardAdministratorEditPersonPage(
 
 	const biography = biographyRows.at(0)?.content as JSONContent | undefined;
 
-	return <PersonEditForm initialAssets={initialAssets} person={{ ...person, biography, image }} />;
+	return (
+		<PersonEditForm
+			contributionOptions={contributionOptions}
+			contributions={contributions}
+			initialAssets={initialAssets}
+			person={{ ...person, biography, image }}
+		/>
+	);
 }

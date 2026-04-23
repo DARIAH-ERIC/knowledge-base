@@ -1,14 +1,11 @@
+import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
-import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 
-import {
-	Header,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
+import { UsersPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page";
+import { assertAuthenticated } from "@/lib/auth/session";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorUsersPageProps extends PageProps<"/[locale]/dashboard/administrator/users"> {}
@@ -26,17 +23,25 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardAdministratorUsersPage(
+export default async function DashboardAdministratorUsersPage(
 	_props: Readonly<DashboardAdministratorUsersPageProps>,
-): ReactNode {
-	const t = useExtracted();
+): Promise<ReactNode> {
+	const { user: currentUser } = await assertAuthenticated();
+
+	const users = db.query.users.findMany({
+		orderBy: { name: "asc" },
+		columns: {
+			id: true,
+			name: true,
+			email: true,
+			role: true,
+			isEmailVerified: true,
+		},
+	});
 
 	return (
-		<Header>
-			<HeaderContent>
-				<HeaderTitle>{t("Users")}</HeaderTitle>
-				<HeaderDescription>{t("Manage all users in the DARIAH knowledge base.")}</HeaderDescription>
-			</HeaderContent>
-		</Header>
+		<Suspense fallback={<LoadingScreen />}>
+			<UsersPage currentUserId={currentUser.id} users={users} />
+		</Suspense>
 	);
 }

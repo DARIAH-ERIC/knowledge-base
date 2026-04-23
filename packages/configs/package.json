@@ -12,6 +12,7 @@
 		"./prettier": "./lib/prettier/index.ts",
 		"./typescript/app": "./lib/typescript/app.json",
 		"./typescript/app-build": "./lib/typescript/app-build.json",
+		"./typescript/base": "./lib/typescript/lib.json",
 		"./typescript/lib": "./lib/typescript/lib.json",
 		"./typescript/lib-build": "./lib/typescript/lib-build.json"
 	},

@@ -13,6 +13,12 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.licenses.id,
 			}),
 		},
+		documentPolicyGroups: {
+			documentsPolicies: r.many.documentsPolicies({
+				from: r.documentPolicyGroups.id,
+				to: r.documentsPolicies.groupId,
+			}),
+		},
 		documentsPolicies: {
 			entity: r.one.entities({
 				from: r.documentsPolicies.id,
@@ -23,6 +29,11 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.documentsPolicies.documentId,
 				to: r.assets.id,
 				optional: false,
+			}),
+			group: r.one.documentPolicyGroups({
+				from: r.documentsPolicies.groupId,
+				to: r.documentPolicyGroups.id,
+				optional: true,
 			}),
 		},
 		contentBlocks: {
@@ -314,9 +325,10 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 		},
 		projectsContributions: {
-			projectPartner: r.one.projectsToOrganisationalUnits({
-				from: r.projectsContributions.projectPartnerId,
-				to: r.projectsToOrganisationalUnits.id,
+			project: r.one.projects({
+				from: r.projectsContributions.projectId,
+				to: r.projects.id,
+				optional: false,
 			}),
 			report: r.one.reports({
 				from: r.projectsContributions.reportId,
@@ -502,6 +514,10 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 		},
 		spotlightArticles: {
+			contributors: r.many.persons({
+				from: r.spotlightArticles.id.through(r.spotlightArticlesToPersons.spotlightArticleId),
+				to: r.persons.id.through(r.spotlightArticlesToPersons.personId),
+			}),
 			entity: r.one.entities({
 				from: r.spotlightArticles.id,
 				to: r.entities.id,

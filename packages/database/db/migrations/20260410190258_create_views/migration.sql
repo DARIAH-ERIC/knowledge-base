@@ -136,12 +136,15 @@ SELECT
     JOIN "organisational_unit_types" related_t ON related."type_id" = related_t."id" AND related_t."type" = 'eric'
   ) AS "member_countries",
   (
-    -- Institutions with an active is_partner_institution_of relation to eric
+    -- Institutions with an active partner or national-coordinating relation to eric
     SELECT COUNT(*)::integer
     FROM "organisational_units" u
     JOIN "organisational_unit_types" t ON u."type_id" = t."id" AND t."type" = 'institution'
     JOIN "organisational_units_to_units" r ON u."id" = r."unit_id" AND r."duration" @> NOW()
-    JOIN "organisational_unit_status" s ON r."status" = s."id" AND s."status" = 'is_partner_institution_of'
+    JOIN "organisational_unit_status" s ON r."status" = s."id" AND s."status" IN (
+      'is_partner_institution_of',
+      'is_national_coordinating_institution_in'
+    )
     JOIN "organisational_units" umb ON r."related_unit_id" = umb."id"
     JOIN "organisational_unit_types" umb_t ON umb."type_id" = umb_t."id" AND umb_t."type" = 'eric'
   ) AS "partner_institutions",

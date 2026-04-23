@@ -1,5 +1,6 @@
 "use client";
 
+import type * as schema from "@dariah-eric/database/schema";
 import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
@@ -9,12 +10,13 @@ import { createDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/d
 
 interface DocumentOrPolicyCreateFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
+	groups: Array<Pick<schema.DocumentPolicyGroup, "id" | "label">>;
 }
 
 export function DocumentOrPolicyCreateForm(
 	props: Readonly<DocumentOrPolicyCreateFormProps>,
 ): ReactNode {
-	const { initialAssets } = props;
+	const { initialAssets, groups } = props;
 
 	const t = useExtracted();
 
@@ -24,6 +26,7 @@ export function DocumentOrPolicyCreateForm(
 
 			<DocumentOrPolicyForm
 				formAction={createDocumentOrPolicyAction}
+				groups={groups}
 				initialAssets={initialAssets}
 			/>
 		</Fragment>
