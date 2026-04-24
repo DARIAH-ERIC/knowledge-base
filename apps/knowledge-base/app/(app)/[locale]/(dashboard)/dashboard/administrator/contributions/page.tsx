@@ -1,15 +1,33 @@
-import { eq } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
-import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import { type ReactNode, Suspense } from "react";
+import type { ReactNode } from "react";
 
-import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
 import { ContributionsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page";
+import { getContributions } from "@/lib/data/contributions";
+import type { IntlLocale } from "@/lib/i18n/locales";
+import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { getListSearchParams } from "@/lib/server/list-search-params";
 
 interface DashboardAdministratorContributionsPageProps extends PageProps<"/[locale]/dashboard/administrator/contributions"> {}
+
+const pageSize = 20;
+
+function createListHref(q: string, page: number): string {
+	const searchParams = new URLSearchParams();
+
+	if (q !== "") {
+		searchParams.set("q", q);
+	}
+
+	if (page > 1) {
+		searchParams.set("page", String(page));
+	}
+
+	const query = searchParams.toString();
+
+	return `/dashboard/administrator/contributions${query !== "" ? `?${query}` : ""}`;
+}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorContributionsPageProps>,
@@ -24,50 +42,29 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardAdministratorContributionsPage(
-	_props: Readonly<DashboardAdministratorContributionsPageProps>,
-): ReactNode {
-	const contributions = db
-		.select({
-			id: schema.personsToOrganisationalUnits.id,
-			personName: schema.persons.name,
-			roleType: schema.personRoleTypes.type,
-			organisationalUnitName: schema.organisationalUnits.name,
-			organisationalUnitType: schema.organisationalUnitTypes.type,
-			durationStart: schema.personsToOrganisationalUnits.duration,
-		})
-		.from(schema.personsToOrganisationalUnits)
-		.innerJoin(schema.persons, eq(schema.persons.id, schema.personsToOrganisationalUnits.personId))
-		.innerJoin(
-			schema.personRoleTypes,
-			eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
-		)
-		.innerJoin(
-			schema.organisationalUnits,
-			eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
-		)
-		.innerJoin(
-			schema.organisationalUnitTypes,
-			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
-		)
-		.orderBy(schema.persons.name)
-		.then((rows) => {
-			return rows.map((row) => {
-				return {
-					id: row.id,
-					personName: row.personName,
-					roleType: row.roleType,
-					organisationalUnitName: row.organisationalUnitName,
-					organisationalUnitType: row.organisationalUnitType,
-					durationStart: row.durationStart.start,
-					durationEnd: row.durationStart.end,
-				};
-			});
-		});
+export default async function DashboardAdministratorContributionsPage(
+	props: Readonly<DashboardAdministratorContributionsPageProps>,
+): Promise<ReactNode> {
+	const { params, searchParams } = props;
+	const [{ locale }, rawSearchParams] = await Promise.all([params, searchParams]);
+	const { page, q } = getListSearchParams(rawSearchParams);
+	const contributions = await getContributions({
+		limit: pageSize,
+		offset: (page - 1) * pageSize,
+		q,
+	});
+	const totalPages = Math.max(Math.ceil(contributions.total / pageSize), 1);
+
+	if (page > totalPages) {
+		redirect({ href: createListHref(q, totalPages), locale: locale as IntlLocale });
+	}
 
 	return (
-		<Suspense fallback={<LoadingScreen />}>
-			<ContributionsPage contributions={contributions} />
-		</Suspense>
+		<ContributionsPage
+			key={`${q}:${String(page)}`}
+			contributions={contributions}
+			page={page}
+			q={q}
+		/>
 	);
 }

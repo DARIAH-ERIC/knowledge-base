@@ -21,8 +21,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useState } from "react";
-import { useFilter, useListData } from "react-aria-components";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -33,42 +32,41 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteImpactCaseStudyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/delete-impact-case-study.action";
+import { useRouter } from "@/lib/navigation/navigation";
 
 interface ImpactCaseStudiesPageProps {
-	impactCaseStudies: Promise<{
+	impactCaseStudies: {
 		data: Array<
 			Pick<schema.ImpactCaseStudy, "id" | "title" | "summary"> & {
 				entity: Pick<schema.Entity, "slug">;
 			}
 		>;
 		total: number;
-	}>;
+	};
+	page: number;
+	q: string;
 }
 
-export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps>): ReactNode {
-	const { impactCaseStudies: impactCaseStudiesPromise } = props;
+const pageSize = 10;
 
-	const impactCaseStudies = use(impactCaseStudiesPromise);
+export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps>): ReactNode {
+	const { impactCaseStudies, page: initialPage, q: initialQ } = props;
 
 	const t = useExtracted();
-
-	const { contains } = useFilter({ sensitivity: "base" });
-
-	const list = useListData({
-		filter(item, filterText) {
-			return contains(item.title, filterText);
-		},
-		initialItems: impactCaseStudies.data,
+	const router = useRouter();
+	const [items, setItems] = useState(() => {
+		return impactCaseStudies.data;
 	});
-
-	const [page, setPage] = useState(1);
-
-	const pageSize = 10;
-	const totalPages = Math.ceil(list.items.length / pageSize);
-	const items = list.items.slice((page - 1) * pageSize, page * pageSize);
-
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
+		page: initialPage,
+		q: initialQ,
+	});
+	const [isDeletePending, startDeleteTransition] = useTransition();
+
+	const totalPages = Math.max(Math.ceil(impactCaseStudies.total / pageSize), 1);
 
 	return (
 		<Fragment>
@@ -80,13 +78,7 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
-					<SearchField
-						onChange={(value) => {
-							list.setFilterText(value);
-							setPage(1);
-						}}
-						value={list.filterText}
-					>
+					<SearchField onChange={setInputValue} value={inputValue}>
 						<SearchInput placeholder={t("Search")} />
 					</SearchField>
 					<Link
@@ -160,7 +152,13 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 				</TableBody>
 			</Table>
 
-			<Paginate page={page} setPage={setPage} total={totalPages} />
+			<Paginate
+				isPending={isPending}
+				page={page}
+				setPage={setPage}
+				total={totalPages}
+				totalItems={impactCaseStudies.total}
+			/>
 
 			<DeleteModal
 				isOpen={itemToDelete != null}
@@ -170,14 +168,21 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 						return;
 					}
 
-					startTransition(async () => {
-						await deleteImpactCaseStudyAction(itemToDelete.id);
-						list.remove(itemToDelete.id);
+					const id = itemToDelete.id;
+
+					startDeleteTransition(async () => {
+						setItems((prev) => {
+							return prev.filter((item) => {
+								return item.id !== id;
+							});
+						});
+						await deleteImpactCaseStudyAction(id);
+						router.refresh();
 						setItemToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isDeletePending) {
 						setItemToDelete(null);
 					}
 				}}

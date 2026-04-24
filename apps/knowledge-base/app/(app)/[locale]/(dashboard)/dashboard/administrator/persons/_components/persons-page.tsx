@@ -21,8 +21,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useState } from "react";
-import { useFilter, useListData } from "react-aria-components";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -33,43 +32,41 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deletePersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/delete-person.action";
+import { useRouter } from "@/lib/navigation/navigation";
 
 interface PersonsPageProps {
-	persons: Promise<
-		Array<
+	page: number;
+	persons: {
+		data: Array<
 			Pick<schema.Person, "email" | "id" | "name" | "orcid"> & {
-				entity: Pick<schema.Entity, "documentId" | "slug"> & {
-					status: Pick<schema.EntityStatus, "id" | "type">;
-				};
+				entity: Pick<schema.Entity, "slug">;
 			}
-		>
-	>;
+		>;
+		total: number;
+	};
+	q: string;
 }
 
-export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
-	const { persons: personsPromise } = props;
+const pageSize = 10;
 
-	const persons = use(personsPromise);
+export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
+	const { page: initialPage, persons, q: initialQ } = props;
 
 	const t = useExtracted();
-
-	const { contains } = useFilter({ sensitivity: "base" });
-
-	const list = useListData({
-		filter(item, filterText) {
-			return contains(item.name, filterText);
-		},
-		initialItems: persons,
+	const router = useRouter();
+	const [items, setItems] = useState(() => {
+		return persons.data;
 	});
-
-	const [page, setPage] = useState(1);
-
-	const pageSize = 10;
-	const pages = Math.ceil(list.items.length / pageSize);
-	const items = list.items.slice((page - 1) * pageSize, page * pageSize);
-
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
+		page: initialPage,
+		q: initialQ,
+	});
+	const [isDeletePending, startDeleteTransition] = useTransition();
+
+	const totalPages = Math.max(Math.ceil(persons.total / pageSize), 1);
 
 	return (
 		<Fragment>
@@ -81,13 +78,7 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
-					<SearchField
-						onChange={(value) => {
-							list.setFilterText(value);
-							setPage(1);
-						}}
-						value={list.filterText}
-					>
+					<SearchField onChange={setInputValue} value={inputValue}>
 						<SearchInput placeholder={t("Search")} />
 					</SearchField>
 					<Link
@@ -157,7 +148,13 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 				</TableBody>
 			</Table>
 
-			<Paginate page={page} setPage={setPage} total={pages} />
+			<Paginate
+				isPending={isPending}
+				page={page}
+				setPage={setPage}
+				total={totalPages}
+				totalItems={persons.total}
+			/>
 
 			<DeleteModal
 				isOpen={itemToDelete != null}
@@ -167,14 +164,21 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 						return;
 					}
 
-					startTransition(async () => {
-						await deletePersonAction(itemToDelete.id);
-						list.remove(itemToDelete.id);
+					const id = itemToDelete.id;
+
+					startDeleteTransition(async () => {
+						setItems((prev) => {
+							return prev.filter((item) => {
+								return item.id !== id;
+							});
+						});
+						await deletePersonAction(id);
+						router.refresh();
 						setItemToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isDeletePending) {
 						setItemToDelete(null);
 					}
 				}}

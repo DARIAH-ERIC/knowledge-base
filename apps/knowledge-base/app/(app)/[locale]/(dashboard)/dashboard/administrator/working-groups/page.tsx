@@ -1,124 +1,32 @@
-import { and, eq, inArray } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
-import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import { type ReactNode, Suspense } from "react";
+import type { ReactNode } from "react";
 
-import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
 import { WorkingGroupsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page";
+import { getWorkingGroups } from "@/lib/data/working-groups";
+import type { IntlLocale } from "@/lib/i18n/locales";
+import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { getListSearchParams } from "@/lib/server/list-search-params";
 
 interface DashboardAdministratorWorkingGroupsPageProps extends PageProps<"/[locale]/dashboard/administrator/working-groups"> {}
 
-async function getWorkingGroupsForDashboard(): Promise<
-	Array<
-		Pick<schema.OrganisationalUnit, "id" | "name"> & {
-			durationFrom: Date | null;
-			durationUntil: Date | null;
-			entity: Pick<schema.Entity, "documentId" | "slug"> & {
-				status: Pick<schema.EntityStatus, "id" | "type">;
-			};
-		}
-	>
-> {
-	const [workingGroups, erics] = await Promise.all([
-		db.query.organisationalUnits.findMany({
-			where: { type: { type: "working_group" } },
-			orderBy: { name: "asc" },
-			columns: {
-				id: true,
-				name: true,
-			},
-			with: {
-				entity: {
-					columns: {
-						documentId: true,
-						slug: true,
-					},
-					with: {
-						status: {
-							columns: {
-								id: true,
-								type: true,
-							},
-						},
-					},
-				},
-			},
-		}),
-		db.query.organisationalUnits.findMany({
-			where: { type: { type: "eric" } },
-			columns: { id: true },
-		}),
-	]);
+const pageSize = 10;
 
-	const workingGroupIds = workingGroups.map((workingGroup) => {
-		return workingGroup.id;
-	});
-	const ericIds = erics.map((eric) => {
-		return eric.id;
-	});
+function createListHref(q: string, page: number): string {
+	const searchParams = new URLSearchParams();
 
-	if (workingGroupIds.length === 0 || ericIds.length === 0) {
-		return workingGroups.map((workingGroup) => {
-			return {
-				...workingGroup,
-				durationFrom: null,
-				durationUntil: null,
-			};
-		});
+	if (q !== "") {
+		searchParams.set("q", q);
 	}
 
-	const relations = await db
-		.select({
-			duration: schema.organisationalUnitsRelations.duration,
-			unitId: schema.organisationalUnitsRelations.unitId,
-		})
-		.from(schema.organisationalUnitsRelations)
-		.innerJoin(
-			schema.organisationalUnitStatus,
-			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
-		)
-		.where(
-			and(
-				inArray(schema.organisationalUnitsRelations.unitId, workingGroupIds),
-				inArray(schema.organisationalUnitsRelations.relatedUnitId, ericIds),
-				eq(schema.organisationalUnitStatus.status, "is_part_of"),
-			),
-		);
-
-	const relationByWorkingGroupId = new Map<string, { from: Date; until: Date | null }>();
-
-	for (const relation of relations) {
-		const existing = relationByWorkingGroupId.get(relation.unitId);
-		const nextRelation = {
-			from: relation.duration.start,
-			until: relation.duration.end ?? null,
-		};
-
-		if (existing == null) {
-			relationByWorkingGroupId.set(relation.unitId, nextRelation);
-			continue;
-		}
-
-		const shouldReplace =
-			(existing.until != null && nextRelation.until == null) || nextRelation.from > existing.from;
-
-		if (shouldReplace) {
-			relationByWorkingGroupId.set(relation.unitId, nextRelation);
-		}
+	if (page > 1) {
+		searchParams.set("page", String(page));
 	}
 
-	return workingGroups.map((workingGroup) => {
-		const relation = relationByWorkingGroupId.get(workingGroup.id);
+	const query = searchParams.toString();
 
-		return {
-			...workingGroup,
-			durationFrom: relation?.from ?? null,
-			durationUntil: relation?.until ?? null,
-		};
-	});
+	return `/dashboard/administrator/working-groups${query !== "" ? `?${query}` : ""}`;
 }
 
 export async function generateMetadata(
@@ -134,14 +42,29 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardAdministratorWorkingGroupsPage(
-	_props: Readonly<DashboardAdministratorWorkingGroupsPageProps>,
-): ReactNode {
-	const workingGroups = getWorkingGroupsForDashboard();
+export default async function DashboardAdministratorWorkingGroupsPage(
+	props: Readonly<DashboardAdministratorWorkingGroupsPageProps>,
+): Promise<ReactNode> {
+	const { params, searchParams } = props;
+	const [{ locale }, rawSearchParams] = await Promise.all([params, searchParams]);
+	const { page, q } = getListSearchParams(rawSearchParams);
+	const workingGroups = await getWorkingGroups({
+		limit: pageSize,
+		offset: (page - 1) * pageSize,
+		q,
+	});
+	const totalPages = Math.max(Math.ceil(workingGroups.total / pageSize), 1);
+
+	if (page > totalPages) {
+		redirect({ href: createListHref(q, totalPages), locale: locale as IntlLocale });
+	}
 
 	return (
-		<Suspense fallback={<LoadingScreen />}>
-			<WorkingGroupsPage workingGroups={workingGroups} />
-		</Suspense>
+		<WorkingGroupsPage
+			key={`${q}:${String(page)}`}
+			page={page}
+			q={q}
+			workingGroups={workingGroups}
+		/>
 	);
 }

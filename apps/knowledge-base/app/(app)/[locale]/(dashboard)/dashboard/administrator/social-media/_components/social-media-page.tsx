@@ -20,8 +20,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useState } from "react";
-import { useFilter, useListData } from "react-aria-components";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -32,44 +31,41 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteSocialMediaAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_lib/delete-social-media.action";
+import { useRouter } from "@/lib/navigation/navigation";
 
 interface SocialMediaPageProps {
-	socialMediaItems: Promise<
-		Array<
+	page: number;
+	q: string;
+	socialMediaItems: {
+		data: Array<
 			Pick<schema.SocialMedia, "id" | "name" | "url"> & {
 				type: Pick<schema.SocialMediaType, "type">;
 			}
-		>
-	>;
+		>;
+		total: number;
+	};
 }
 
-export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNode {
-	const { socialMediaItems: socialMediaPromise } = props;
+const pageSize = 10;
 
-	const socialMediaItems = use(socialMediaPromise);
+export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNode {
+	const { page: initialPage, q: initialQ, socialMediaItems } = props;
 
 	const t = useExtracted();
-
-	const { contains } = useFilter({ sensitivity: "base" });
-
-	const list = useListData({
-		filter(item, filterText) {
-			return contains(item.name, filterText) || contains(item.url, filterText);
-		},
-		initialItems: socialMediaItems,
-		getKey(item) {
-			return item.id;
-		},
+	const router = useRouter();
+	const [items, setItems] = useState(() => {
+		return socialMediaItems.data;
 	});
-
-	const [page, setPage] = useState(1);
-
-	const pageSize = 10;
-	const pages = Math.ceil(list.items.length / pageSize);
-	const items = list.items.slice((page - 1) * pageSize, page * pageSize);
-
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
+		page: initialPage,
+		q: initialQ,
+	});
+	const [isDeletePending, startDeleteTransition] = useTransition();
+
+	const totalPages = Math.max(Math.ceil(socialMediaItems.total / pageSize), 1);
 
 	return (
 		<Fragment>
@@ -81,13 +77,7 @@ export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNod
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
-					<SearchField
-						onChange={(value) => {
-							list.setFilterText(value);
-							setPage(1);
-						}}
-						value={list.filterText}
-					>
+					<SearchField onChange={setInputValue} value={inputValue}>
 						<SearchInput placeholder={t("Search")} />
 					</SearchField>
 					<Link
@@ -155,22 +145,39 @@ export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNod
 				</TableBody>
 			</Table>
 
-			<Paginate page={page} setPage={setPage} total={pages} />
+			<Paginate
+				isPending={isPending}
+				page={page}
+				setPage={setPage}
+				total={totalPages}
+				totalItems={socialMediaItems.total}
+			/>
 
 			<DeleteModal
 				isOpen={itemToDelete != null}
 				model={t("social media")}
 				onAction={() => {
-					if (itemToDelete == null) return;
+					if (itemToDelete == null) {
+						return;
+					}
 
-					startTransition(async () => {
-						await deleteSocialMediaAction(itemToDelete.id);
-						list.remove(itemToDelete.id);
+					const id = itemToDelete.id;
+
+					startDeleteTransition(async () => {
+						setItems((prev) => {
+							return prev.filter((item) => {
+								return item.id !== id;
+							});
+						});
+						await deleteSocialMediaAction(id);
+						router.refresh();
 						setItemToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) setItemToDelete(null);
+					if (!open && !isDeletePending) {
+						setItemToDelete(null);
+					}
 				}}
 			/>
 		</Fragment>

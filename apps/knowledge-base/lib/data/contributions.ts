@@ -4,6 +4,113 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { contributionOptionsPageSize } from "@/lib/constants/contributions";
 
+interface GetContributionsParams {
+	limit: number;
+	offset: number;
+	q?: string;
+}
+
+export interface ContributionsResult {
+	data: Array<{
+		id: string;
+		personName: string;
+		roleType: string;
+		organisationalUnitName: string;
+		organisationalUnitType: string;
+		durationStart: Date;
+		durationEnd: Date | undefined;
+	}>;
+	limit: number;
+	offset: number;
+	total: number;
+}
+
+export async function getContributions(
+	params: Readonly<GetContributionsParams>,
+): Promise<ContributionsResult> {
+	const { limit, offset, q } = params;
+	const query = q?.trim();
+	const where =
+		query != null && query !== ""
+			? or(
+					ilike(schema.persons.name, `%${query}%`),
+					ilike(schema.organisationalUnits.name, `%${query}%`),
+					ilike(schema.organisationalUnitTypes.type, `%${query}%`),
+					ilike(schema.personRoleTypes.type, `%${query}%`),
+				)
+			: undefined;
+
+	const [rows, aggregate] = await Promise.all([
+		db
+			.select({
+				id: schema.personsToOrganisationalUnits.id,
+				personName: schema.persons.name,
+				roleType: schema.personRoleTypes.type,
+				organisationalUnitName: schema.organisationalUnits.name,
+				organisationalUnitType: schema.organisationalUnitTypes.type,
+				duration: schema.personsToOrganisationalUnits.duration,
+			})
+			.from(schema.personsToOrganisationalUnits)
+			.innerJoin(
+				schema.persons,
+				eq(schema.persons.id, schema.personsToOrganisationalUnits.personId),
+			)
+			.innerJoin(
+				schema.personRoleTypes,
+				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
+			)
+			.innerJoin(
+				schema.organisationalUnits,
+				eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
+			)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
+			.where(where)
+			.orderBy(schema.persons.name)
+			.limit(limit)
+			.offset(offset),
+		db
+			.select({ total: count() })
+			.from(schema.personsToOrganisationalUnits)
+			.innerJoin(
+				schema.persons,
+				eq(schema.persons.id, schema.personsToOrganisationalUnits.personId),
+			)
+			.innerJoin(
+				schema.personRoleTypes,
+				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
+			)
+			.innerJoin(
+				schema.organisationalUnits,
+				eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
+			)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
+			.where(where),
+	]);
+
+	return {
+		data: rows.map((row) => {
+			return {
+				id: row.id,
+				personName: row.personName,
+				roleType: row.roleType,
+				organisationalUnitName: row.organisationalUnitName,
+				organisationalUnitType: row.organisationalUnitType,
+				durationStart: row.duration.start,
+				durationEnd: row.duration.end,
+			};
+		}),
+		limit,
+		offset,
+		total: aggregate.at(0)?.total ?? 0,
+	};
+}
+
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getPersonContributions(personId: string) {
 	return db

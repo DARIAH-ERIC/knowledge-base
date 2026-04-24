@@ -20,8 +20,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useState } from "react";
-import { useFilter, useListData } from "react-aria-components";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -32,44 +31,42 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteNationalConsortiumAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/delete-national-consortium.action";
+import { useRouter } from "@/lib/navigation/navigation";
 
 interface NationalConsortiaPageProps {
-	nationalConsortia: Promise<
-		Array<
+	nationalConsortia: {
+		data: Array<
 			Pick<schema.OrganisationalUnit, "id" | "name"> & {
 				countryName: string | null;
-				entity: Pick<schema.Entity, "documentId" | "slug"> & {
-					status: Pick<schema.EntityStatus, "id" | "type">;
-				};
+				entity: Pick<schema.Entity, "slug">;
 			}
-		>
-	>;
+		>;
+		total: number;
+	};
+	page: number;
+	q: string;
 }
 
-export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps>): ReactNode {
-	const { nationalConsortia: nationalConsortiaPromise } = props;
+const pageSize = 10;
 
-	const nationalConsortia = use(nationalConsortiaPromise);
+export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps>): ReactNode {
+	const { nationalConsortia, page: initialPage, q: initialQ } = props;
 
 	const t = useExtracted();
-
-	const { contains } = useFilter({ sensitivity: "base" });
-
-	const list = useListData({
-		filter(item, filterText) {
-			return contains(item.name, filterText) || contains(item.countryName ?? "", filterText);
-		},
-		initialItems: nationalConsortia,
+	const router = useRouter();
+	const [items, setItems] = useState(() => {
+		return nationalConsortia.data;
 	});
-
-	const [page, setPage] = useState(1);
-
-	const pageSize = 10;
-	const pages = Math.ceil(list.items.length / pageSize);
-	const items = list.items.slice((page - 1) * pageSize, page * pageSize);
-
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
+		page: initialPage,
+		q: initialQ,
+	});
+	const [isDeletePending, startDeleteTransition] = useTransition();
+
+	const totalPages = Math.max(Math.ceil(nationalConsortia.total / pageSize), 1);
 
 	return (
 		<Fragment>
@@ -81,13 +78,7 @@ export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
-					<SearchField
-						onChange={(value) => {
-							list.setFilterText(value);
-							setPage(1);
-						}}
-						value={list.filterText}
-					>
+					<SearchField onChange={setInputValue} value={inputValue}>
 						<SearchInput placeholder={t("Search")} />
 					</SearchField>
 					<Link
@@ -151,7 +142,13 @@ export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps
 				</TableBody>
 			</Table>
 
-			<Paginate page={page} setPage={setPage} total={pages} />
+			<Paginate
+				isPending={isPending}
+				page={page}
+				setPage={setPage}
+				total={totalPages}
+				totalItems={nationalConsortia.total}
+			/>
 
 			<DeleteModal
 				isOpen={itemToDelete != null}
@@ -161,14 +158,21 @@ export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps
 						return;
 					}
 
-					startTransition(async () => {
-						await deleteNationalConsortiumAction(itemToDelete.id);
-						list.remove(itemToDelete.id);
+					const id = itemToDelete.id;
+
+					startDeleteTransition(async () => {
+						setItems((prev) => {
+							return prev.filter((item) => {
+								return item.id !== id;
+							});
+						});
+						await deleteNationalConsortiumAction(id);
+						router.refresh();
 						setItemToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isDeletePending) {
 						setItemToDelete(null);
 					}
 				}}

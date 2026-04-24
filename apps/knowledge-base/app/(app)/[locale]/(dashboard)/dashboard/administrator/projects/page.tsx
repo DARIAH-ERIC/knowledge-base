@@ -1,13 +1,33 @@
-import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import { type ReactNode, Suspense } from "react";
+import type { ReactNode } from "react";
 
-import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
 import { ProjectsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page";
+import { getProjects } from "@/lib/data/projects";
+import type { IntlLocale } from "@/lib/i18n/locales";
+import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { getListSearchParams } from "@/lib/server/list-search-params";
 
 interface DashboardAdministratorProjectsPageProps extends PageProps<"/[locale]/dashboard/administrator/projects"> {}
+
+const pageSize = 10;
+
+function createListHref(q: string, page: number): string {
+	const searchParams = new URLSearchParams();
+
+	if (q !== "") {
+		searchParams.set("q", q);
+	}
+
+	if (page > 1) {
+		searchParams.set("page", String(page));
+	}
+
+	const query = searchParams.toString();
+
+	return `/dashboard/administrator/projects${query !== "" ? `?${query}` : ""}`;
+}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorProjectsPageProps>,
@@ -22,47 +42,18 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardAdministratorProjectsPage(
-	_props: Readonly<DashboardAdministratorProjectsPageProps>,
-): ReactNode {
-	const projects = db.query.projects.findMany({
-		orderBy: {
-			name: "asc",
-		},
-		columns: {
-			acronym: true,
-			duration: true,
-			funding: true,
-			id: true,
-			name: true,
-		},
-		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
-				},
-				with: {
-					status: {
-						columns: {
-							id: true,
-							type: true,
-						},
-					},
-				},
-			},
-			scope: {
-				columns: {
-					id: true,
-					scope: true,
-				},
-			},
-		},
-	});
+export default async function DashboardAdministratorProjectsPage(
+	props: Readonly<DashboardAdministratorProjectsPageProps>,
+): Promise<ReactNode> {
+	const { params, searchParams } = props;
+	const [{ locale }, rawSearchParams] = await Promise.all([params, searchParams]);
+	const { page, q } = getListSearchParams(rawSearchParams);
+	const projects = await getProjects({ limit: pageSize, offset: (page - 1) * pageSize, q });
+	const totalPages = Math.max(Math.ceil(projects.total / pageSize), 1);
 
-	return (
-		<Suspense fallback={<LoadingScreen />}>
-			<ProjectsPage projects={projects} />
-		</Suspense>
-	);
+	if (page > totalPages) {
+		redirect({ href: createListHref(q, totalPages), locale: locale as IntlLocale });
+	}
+
+	return <ProjectsPage key={`${q}:${String(page)}`} page={page} projects={projects} q={q} />;
 }

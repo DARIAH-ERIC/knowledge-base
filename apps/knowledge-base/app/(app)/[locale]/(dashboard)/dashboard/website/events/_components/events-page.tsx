@@ -21,8 +21,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useState } from "react";
-import { useFilter, useListData } from "react-aria-components";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -33,45 +32,42 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/delete-event.action";
+import { useRouter } from "@/lib/navigation/navigation";
 
 interface EventsPageProps {
-	events: Promise<{
+	events: {
 		data: Array<
 			Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
-				entity: Pick<schema.Entity, "documentId" | "slug"> & {
-					status: Pick<schema.EntityStatus, "id" | "type">;
-				};
+				entity: Pick<schema.Entity, "slug">;
 			}
 		>;
 		total: number;
-	}>;
+	};
+	page: number;
+	q: string;
 }
 
-export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
-	const { events: eventsPromise } = props;
+const pageSize = 10;
 
-	const events = use(eventsPromise);
+export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
+	const { events, page: initialPage, q: initialQ } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
-
-	const { contains } = useFilter({ sensitivity: "base" });
-
-	const list = useListData({
-		filter(item, filterText) {
-			return contains(item.title, filterText);
-		},
-		initialItems: events.data,
+	const router = useRouter();
+	const [items, setItems] = useState(() => {
+		return events.data;
 	});
-
-	const [page, setPage] = useState(1);
-
-	const pageSize = 10;
-	const pages = Math.ceil(list.items.length / pageSize);
-	const items = list.items.slice((page - 1) * pageSize, page * pageSize);
-
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
+		page: initialPage,
+		q: initialQ,
+	});
+	const [isDeletePending, startDeleteTransition] = useTransition();
+
+	const totalPages = Math.max(Math.ceil(events.total / pageSize), 1);
 
 	return (
 		<Fragment>
@@ -83,13 +79,7 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
-					<SearchField
-						onChange={(value) => {
-							list.setFilterText(value);
-							setPage(1);
-						}}
-						value={list.filterText}
-					>
+					<SearchField onChange={setInputValue} value={inputValue}>
 						<SearchInput placeholder={t("Search")} />
 					</SearchField>
 					<Link
@@ -120,7 +110,7 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 									<div className="max-w-64 truncate">{item.title}</div>
 								</TableCell>
 								<TableCell>
-									{item.duration.end
+									{item.duration.end != null
 										? format.dateTimeRange(item.duration.start, item.duration.end, {
 												dateStyle: "short",
 											})
@@ -165,7 +155,13 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 				</TableBody>
 			</Table>
 
-			<Paginate page={page} setPage={setPage} total={pages} />
+			<Paginate
+				isPending={isPending}
+				page={page}
+				setPage={setPage}
+				total={totalPages}
+				totalItems={events.total}
+			/>
 
 			<DeleteModal
 				isOpen={itemToDelete != null}
@@ -175,14 +171,21 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 						return;
 					}
 
-					startTransition(async () => {
-						await deleteEventAction(itemToDelete.id);
-						list.remove(itemToDelete.id);
+					const id = itemToDelete.id;
+
+					startDeleteTransition(async () => {
+						setItems((prev) => {
+							return prev.filter((item) => {
+								return item.id !== id;
+							});
+						});
+						await deleteEventAction(id);
+						router.refresh();
 						setItemToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isDeletePending) {
 						setItemToDelete(null);
 					}
 				}}

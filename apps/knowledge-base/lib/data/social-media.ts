@@ -10,10 +10,72 @@ export interface SocialMediaOption {
 	description: string;
 }
 
+interface GetSocialMediaParams {
+	limit: number;
+	offset: number;
+	q?: string;
+}
+
+export interface SocialMediaResult {
+	data: Array<
+		Pick<schema.SocialMedia, "id" | "name" | "url"> & {
+			type: Pick<schema.SocialMediaType, "type">;
+		}
+	>;
+	limit: number;
+	offset: number;
+	total: number;
+}
+
 interface GetSocialMediaOptionsParams {
 	limit?: number;
 	offset?: number;
 	q?: string;
+}
+
+export async function getSocialMedia(
+	params: Readonly<GetSocialMediaParams>,
+): Promise<SocialMediaResult> {
+	const { limit, offset, q } = params;
+	const query = q?.trim();
+	const where =
+		query != null && query !== ""
+			? or(
+					ilike(schema.socialMedia.name, `%${query}%`),
+					ilike(schema.socialMedia.url, `%${query}%`),
+				)
+			: undefined;
+
+	const [rows, aggregate] = await Promise.all([
+		db
+			.select({
+				id: schema.socialMedia.id,
+				name: schema.socialMedia.name,
+				type: schema.socialMediaTypes.type,
+				url: schema.socialMedia.url,
+			})
+			.from(schema.socialMedia)
+			.innerJoin(schema.socialMediaTypes, eq(schema.socialMedia.typeId, schema.socialMediaTypes.id))
+			.where(where)
+			.orderBy(schema.socialMedia.name)
+			.limit(limit)
+			.offset(offset),
+		db.select({ total: count() }).from(schema.socialMedia).where(where),
+	]);
+
+	return {
+		data: rows.map((row) => {
+			return {
+				id: row.id,
+				name: row.name,
+				type: { type: row.type },
+				url: row.url,
+			};
+		}),
+		limit,
+		offset,
+		total: aggregate.at(0)?.total ?? 0,
+	};
 }
 
 export async function getSocialMediaOptions(

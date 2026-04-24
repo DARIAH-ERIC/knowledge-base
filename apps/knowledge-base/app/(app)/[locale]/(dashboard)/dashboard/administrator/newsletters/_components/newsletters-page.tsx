@@ -11,8 +11,7 @@ import {
 	TableRow,
 } from "@dariah-eric/ui/table";
 import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, use, useState } from "react";
-import { useFilter, useListData } from "react-aria-components";
+import { Fragment, type ReactNode } from "react";
 
 import {
 	Header,
@@ -22,38 +21,28 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
-import type { GetCampaignsResponse } from "@/lib/mailchimp";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
+import type { NewslettersResult } from "@/lib/data/newsletters";
 
 interface NewslettersPageProps {
-	newsletters: Promise<GetCampaignsResponse>;
+	newsletters: NewslettersResult;
+	page: number;
+	q: string;
 }
 
-export function NewslettersPage(props: Readonly<NewslettersPageProps>): ReactNode {
-	const { newsletters: newslettersPromise } = props;
+const pageSize = 10;
 
-	const { campaigns: newsletters } = use(newslettersPromise);
+export function NewslettersPage(props: Readonly<NewslettersPageProps>): ReactNode {
+	const { newsletters, page: initialPage, q: initialQ } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
-
-	const { contains } = useFilter({ sensitivity: "base" });
-
-	const list = useListData({
-		filter(item, filterText) {
-			return contains(item.settings.subject_line, filterText);
-		},
-		initialItems: newsletters,
+	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
+		page: initialPage,
+		q: initialQ,
 	});
 
-	const sorted = list.items.toSorted((a, z) => {
-		return z.send_time.localeCompare(a.send_time);
-	});
-
-	const [page, setPage] = useState(1);
-
-	const pageSize = 10;
-	const pages = Math.ceil(sorted.length / pageSize);
-	const items = sorted.slice((page - 1) * pageSize, page * pageSize);
+	const totalPages = Math.max(Math.ceil(newsletters.total / pageSize), 1);
 
 	return (
 		<Fragment>
@@ -65,13 +54,7 @@ export function NewslettersPage(props: Readonly<NewslettersPageProps>): ReactNod
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
-					<SearchField
-						onChange={(value) => {
-							list.setFilterText(value);
-							setPage(1);
-						}}
-						value={list.filterText}
-					>
+					<SearchField onChange={setInputValue} value={inputValue}>
 						<SearchInput placeholder={t("Search")} />
 					</SearchField>
 				</HeaderAction>
@@ -90,7 +73,7 @@ export function NewslettersPage(props: Readonly<NewslettersPageProps>): ReactNod
 					<TableColumn>{t("Opens")}</TableColumn>
 					<TableColumn>{t("Clicks")}</TableColumn>
 				</TableHeader>
-				<TableBody items={items}>
+				<TableBody items={newsletters.data}>
 					{(item) => {
 						return (
 							<TableRow>
@@ -131,7 +114,13 @@ export function NewslettersPage(props: Readonly<NewslettersPageProps>): ReactNod
 				</TableBody>
 			</Table>
 
-			<Paginate page={page} setPage={setPage} total={pages} />
+			<Paginate
+				isPending={isPending}
+				page={page}
+				setPage={setPage}
+				total={totalPages}
+				totalItems={newsletters.total}
+			/>
 		</Fragment>
 	);
 }

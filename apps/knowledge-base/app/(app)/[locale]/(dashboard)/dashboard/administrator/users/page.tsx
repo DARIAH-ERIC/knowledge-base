@@ -1,14 +1,34 @@
-import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import { type ReactNode, Suspense } from "react";
+import type { ReactNode } from "react";
 
-import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
 import { UsersPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { getUsers } from "@/lib/data/users";
+import type { IntlLocale } from "@/lib/i18n/locales";
+import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { getListSearchParams } from "@/lib/server/list-search-params";
 
 interface DashboardAdministratorUsersPageProps extends PageProps<"/[locale]/dashboard/administrator/users"> {}
+
+const pageSize = 10;
+
+function createListHref(q: string, page: number): string {
+	const searchParams = new URLSearchParams();
+
+	if (q !== "") {
+		searchParams.set("q", q);
+	}
+
+	if (page > 1) {
+		searchParams.set("page", String(page));
+	}
+
+	const query = searchParams.toString();
+
+	return `/dashboard/administrator/users${query !== "" ? `?${query}` : ""}`;
+}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorUsersPageProps>,
@@ -24,24 +44,29 @@ export async function generateMetadata(
 }
 
 export default async function DashboardAdministratorUsersPage(
-	_props: Readonly<DashboardAdministratorUsersPageProps>,
+	props: Readonly<DashboardAdministratorUsersPageProps>,
 ): Promise<ReactNode> {
-	const { user: currentUser } = await assertAuthenticated();
+	const { params, searchParams } = props;
+	const [{ locale }, rawSearchParams, { user: currentUser }] = await Promise.all([
+		params,
+		searchParams,
+		assertAuthenticated(),
+	]);
+	const { page, q } = getListSearchParams(rawSearchParams);
+	const users = await getUsers({ limit: pageSize, offset: (page - 1) * pageSize, q });
+	const totalPages = Math.max(Math.ceil(users.total / pageSize), 1);
 
-	const users = db.query.users.findMany({
-		orderBy: { name: "asc" },
-		columns: {
-			id: true,
-			name: true,
-			email: true,
-			role: true,
-			isEmailVerified: true,
-		},
-	});
+	if (page > totalPages) {
+		redirect({ href: createListHref(q, totalPages), locale: locale as IntlLocale });
+	}
 
 	return (
-		<Suspense fallback={<LoadingScreen />}>
-			<UsersPage currentUserId={currentUser.id} users={users} />
-		</Suspense>
+		<UsersPage
+			key={`${q}:${String(page)}`}
+			currentUserId={currentUser.id}
+			page={page}
+			q={q}
+			users={users}
+		/>
 	);
 }

@@ -21,8 +21,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useState } from "react";
-import { useFilter, useListData } from "react-aria-components";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -33,17 +32,22 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteServiceAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_lib/delete-service.action";
+import { useRouter } from "@/lib/navigation/navigation";
 
 interface ServicesPageProps {
-	services: Promise<
-		Array<
+	page: number;
+	q: string;
+	services: {
+		data: Array<
 			Pick<schema.Service, "id" | "name" | "sshocMarketplaceId"> & {
-				type: Pick<schema.ServiceType, "type">;
 				status: Pick<schema.ServiceStatus, "status">;
+				type: Pick<schema.ServiceType, "type">;
 			}
-		>
-	>;
+		>;
+		total: number;
+	};
 }
 
 function formatServiceStatus(status: string): string {
@@ -72,32 +76,24 @@ function statusIntent(status: string): "success" | "warning" | "danger" | "info"
 	}
 }
 
-export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
-	const { services: servicesPromise } = props;
+const pageSize = 10;
 
-	const services = use(servicesPromise);
+export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
+	const { page: initialPage, q: initialQ, services } = props;
 
 	const t = useExtracted();
-
-	const { contains } = useFilter({ sensitivity: "base" });
-
-	const list = useListData({
-		filter(item, filterText) {
-			return contains(item.name, filterText);
-		},
-		initialItems: services,
-		getKey(item) {
-			return item.id;
-		},
+	const router = useRouter();
+	const [items, setItems] = useState(() => {
+		return services.data;
 	});
-
-	const [page, setPage] = useState(1);
-
-	const pageSize = 10;
-	const pages = Math.ceil(list.items.length / pageSize);
-	const items = list.items.slice((page - 1) * pageSize, page * pageSize);
-
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
+		page: initialPage,
+		q: initialQ,
+	});
+	const [isDeletePending, startDeleteTransition] = useTransition();
+
+	const totalPages = Math.max(Math.ceil(services.total / pageSize), 1);
 
 	return (
 		<Fragment>
@@ -109,13 +105,7 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
-					<SearchField
-						onChange={(value) => {
-							list.setFilterText(value);
-							setPage(1);
-						}}
-						value={list.filterText}
-					>
+					<SearchField onChange={setInputValue} value={inputValue}>
 						<SearchInput placeholder={t("Search")} />
 					</SearchField>
 					<Link
@@ -185,22 +175,39 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 				</TableBody>
 			</Table>
 
-			<Paginate page={page} setPage={setPage} total={pages} />
+			<Paginate
+				isPending={isPending}
+				page={page}
+				setPage={setPage}
+				total={totalPages}
+				totalItems={services.total}
+			/>
 
 			<DeleteModal
 				isOpen={itemToDelete != null}
 				model={t("service")}
 				onAction={() => {
-					if (itemToDelete == null) return;
+					if (itemToDelete == null) {
+						return;
+					}
 
-					startTransition(async () => {
-						await deleteServiceAction(itemToDelete.id);
-						list.remove(itemToDelete.id);
+					const id = itemToDelete.id;
+
+					startDeleteTransition(async () => {
+						setItems((prev) => {
+							return prev.filter((item) => {
+								return item.id !== id;
+							});
+						});
+						await deleteServiceAction(id);
+						router.refresh();
 						setItemToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) setItemToDelete(null);
+					if (!open && !isDeletePending) {
+						setItemToDelete(null);
+					}
 				}}
 			/>
 		</Fragment>
