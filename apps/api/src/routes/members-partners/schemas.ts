@@ -39,7 +39,7 @@ export type MemberOrPartnerBase = v.InferOutput<typeof MemberOrPartnerBaseSchema
 
 export const ContributorSchema = v.pipe(
 	v.object({
-		...v.pick(schema.PersonSelectSchema, ["name"]).entries,
+		...v.pick(schema.PersonSelectSchema, ["id", "name"]).entries,
 		position: v.nullable(v.string()),
 		image: v.object({ url: v.string() }),
 		slug: v.string(),

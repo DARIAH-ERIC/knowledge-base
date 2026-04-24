@@ -45,6 +45,8 @@ function createChair() {
 	const assetId = uuidv7();
 	const name = f.person.fullName();
 	const slug = slugify(name);
+	const affiliationId = uuidv7();
+	const affiliationName = f.company.name();
 
 	return {
 		entity: {
@@ -66,6 +68,18 @@ function createChair() {
 			email: f.internet.email(),
 			orcid: `0000-000${String(f.number.int({ min: 1, max: 9 }))}-${String(f.number.int({ min: 1000, max: 9999 }))}-${String(f.number.int({ min: 1000, max: 9999 }))}`,
 			imageId: assetId,
+		},
+		affiliation: {
+			entity: {
+				id: affiliationId,
+				slug: slugify(affiliationName),
+				documentId: uuidv7(),
+			},
+			organisationalUnit: {
+				id: affiliationId,
+				name: affiliationName,
+				summary: f.lorem.paragraph(),
+			},
 		},
 	};
 }
@@ -159,9 +173,12 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 		status,
 		entityType,
 		personType,
+		organisationalUnitEntityType,
 		chairRoleType,
+		affiliatedRoleType,
 		asset,
 		workingGroupType,
+		institutionType,
 		umbrellaConsortiumType,
 		unitStatus,
 	] = await Promise.all([
@@ -174,14 +191,26 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 			columns: { id: true },
 			where: { type: "persons" },
 		}),
+		db.query.entityTypes.findFirst({
+			columns: { id: true },
+			where: { type: "organisational_units" },
+		}),
 		db.query.personRoleTypes.findFirst({
 			columns: { id: true },
 			where: { type: "is_chair_of" },
+		}),
+		db.query.personRoleTypes.findFirst({
+			columns: { id: true },
+			where: { type: "is_affiliated_with" },
 		}),
 		db.query.assets.findFirst({ columns: { id: true } }),
 		db.query.organisationalUnitTypes.findFirst({
 			columns: { id: true },
 			where: { type: "working_group" },
+		}),
+		db.query.organisationalUnitTypes.findFirst({
+			columns: { id: true },
+			where: { type: "institution" },
 		}),
 		db.query.organisationalUnitTypes.findFirst({
 			columns: { id: true },
@@ -196,9 +225,12 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 	assert(status, "No entity status in database.");
 	assert(entityType, "No entity type in database.");
 	assert(personType, "No person entity type in database.");
+	assert(organisationalUnitEntityType, "No organisational unit entity type in database.");
 	assert(chairRoleType, "No chair role type in database.");
+	assert(affiliatedRoleType, "No affiliated role type in database.");
 	assert(asset, "No assets in database.");
 	assert(workingGroupType, "No working_group type in database.");
+	assert(institutionType, "No institution type in database.");
 	assert(umbrellaConsortiumType, "No eric type in database.");
 	assert(unitStatus.length, "No unit status in database.");
 
@@ -250,6 +282,24 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 	});
 
 	await db.insert(schema.persons).values(chair.person);
+
+	await db.insert(schema.entities).values({
+		...chair.affiliation.entity,
+		statusId: status.id,
+		typeId: organisationalUnitEntityType.id,
+	});
+
+	await db.insert(schema.organisationalUnits).values({
+		...chair.affiliation.organisationalUnit,
+		typeId: institutionType.id,
+	});
+
+	await db.insert(schema.personsToOrganisationalUnits).values({
+		personId: chair.person.id,
+		organisationalUnitId: chair.affiliation.organisationalUnit.id,
+		roleTypeId: affiliatedRoleType.id,
+		duration: { start },
+	});
 
 	await db.insert(schema.personsToOrganisationalUnits).values(
 		items.slice(1).map((item) => {
@@ -376,7 +426,7 @@ describe("working-groups", () => {
 					chairs: expect.arrayContaining([
 						expect.objectContaining({
 							name: chair.person.name,
-							position: chair.person.position,
+							position: chair.affiliation.organisationalUnit.name,
 						}),
 					]),
 					name,
@@ -489,7 +539,7 @@ describe("working-groups", () => {
 					chairs: expect.arrayContaining([
 						expect.objectContaining({
 							name: chair.person.name,
-							position: chair.person.position,
+							position: chair.affiliation.organisationalUnit.name,
 						}),
 					]),
 					name,

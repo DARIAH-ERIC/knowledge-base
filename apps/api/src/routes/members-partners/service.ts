@@ -4,6 +4,7 @@ import { and, count, eq, exists, sql, type SQLWrapper } from "@dariah-eric/datab
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { getPersonPositions } from "@/lib/persons";
 import type { Database, Transaction } from "@/middlewares/db";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
@@ -138,16 +139,18 @@ function mapSocialMedia(
 
 function mapPersonContributors(
 	rows: Array<{
+		id: string;
 		name: string;
-		position: string | null;
 		slug: string;
 		imageKey: string;
 		role: string;
 	}>,
+	positions: Map<string, string | null>,
 ) {
 	return rows.map(({ imageKey, role, ...row }) => {
 		return {
 			...row,
+			position: positions.get(row.id) ?? null,
 			role,
 			slug: row.slug,
 			image: images.generateSignedImageUrl({
@@ -450,8 +453,8 @@ async function getNationalConsortium(db: Database | Transaction, countryId: stri
 async function getContributors(db: Database | Transaction, countryId: string) {
 	const rows = await db
 		.select({
+			id: schema.persons.id,
 			name: schema.persons.name,
-			position: schema.persons.position,
 			slug: schema.entities.slug,
 			imageKey: schema.assets.key,
 			role: schema.personRoleTypes.type,
@@ -481,7 +484,14 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 			),
 		);
 
-	return mapPersonContributors(rows);
+	const positions = await getPersonPositions(
+		db,
+		rows.map((row) => {
+			return row.id;
+		}),
+	);
+
+	return mapPersonContributors(rows, positions);
 }
 
 interface GetMemberOrPartnerByIdParams {

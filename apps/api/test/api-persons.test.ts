@@ -19,6 +19,9 @@ function createItems(count: number) {
 			const assetId = uuidv7();
 			const name = f.person.fullName();
 			const slug = slugify(name);
+			const affiliationId = uuidv7();
+			const affiliationName = f.company.name();
+			const affiliationSlug = slugify(affiliationName);
 
 			const entity = {
 				id,
@@ -43,7 +46,20 @@ function createItems(count: number) {
 				imageId: assetId,
 			};
 
-			return { entity, asset, person };
+			const affiliation = {
+				entity: {
+					id: affiliationId,
+					slug: affiliationSlug,
+					documentId: uuidv7(),
+				},
+				organisationalUnit: {
+					id: affiliationId,
+					name: affiliationName,
+					summary: f.lorem.paragraph(),
+				},
+			};
+
+			return { entity, asset, person, affiliation };
 		},
 		{ count },
 	);
@@ -52,13 +68,29 @@ function createItems(count: number) {
 }
 
 async function seed(db: Database, items: ReturnType<typeof createItems>) {
-	const [status, entityType] = await Promise.all([
-		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
-		db.query.entityTypes.findFirst({ columns: { id: true }, where: { type: "persons" } }),
-	]);
+	const [status, entityType, organisationalUnitType, institutionType, affiliatedRoleType] =
+		await Promise.all([
+			db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+			db.query.entityTypes.findFirst({ columns: { id: true }, where: { type: "persons" } }),
+			db.query.entityTypes.findFirst({
+				columns: { id: true },
+				where: { type: "organisational_units" },
+			}),
+			db.query.organisationalUnitTypes.findFirst({
+				columns: { id: true },
+				where: { type: "institution" },
+			}),
+			db.query.personRoleTypes.findFirst({
+				columns: { id: true },
+				where: { type: "is_affiliated_with" },
+			}),
+		]);
 
 	assert(status, "No entity status in database.");
 	assert(entityType, "No entity type in database.");
+	assert(organisationalUnitType, "No organisational unit entity type in database.");
+	assert(institutionType, "No institution type in database.");
+	assert(affiliatedRoleType, "No affiliated role type in database.");
 
 	await db.insert(schema.assets).values(
 		items.map((item) => {
@@ -75,6 +107,36 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	await db.insert(schema.persons).values(
 		items.map((item) => {
 			return item.person;
+		}),
+	);
+
+	await db.insert(schema.entities).values(
+		items.map((item) => {
+			return {
+				...item.affiliation.entity,
+				statusId: status.id,
+				typeId: organisationalUnitType.id,
+			};
+		}),
+	);
+
+	await db.insert(schema.organisationalUnits).values(
+		items.map((item) => {
+			return {
+				...item.affiliation.organisationalUnit,
+				typeId: institutionType.id,
+			};
+		}),
+	);
+
+	await db.insert(schema.personsToOrganisationalUnits).values(
+		items.map((item) => {
+			return {
+				personId: item.person.id,
+				organisationalUnitId: item.affiliation.organisationalUnit.id,
+				roleTypeId: affiliatedRoleType.id,
+				duration: { start: f.date.past({ years: 5 }) },
+			};
 		}),
 	);
 
@@ -99,7 +161,7 @@ describe("persons", () => {
 
 				const item = items.at(1)!;
 				const name = item.person.name;
-				const position = item.person.position;
+				const position = item.affiliation.organisationalUnit.name;
 
 				const response = await client.persons.$get({
 					query: {
@@ -133,7 +195,7 @@ describe("persons", () => {
 				const item = items.at(1)!;
 				const id = item.entity.id;
 				const name = item.person.name;
-				const position = item.person.position;
+				const position = item.affiliation.organisationalUnit.name;
 
 				const response = await client.persons[":id"].$get({
 					param: { id },
@@ -224,7 +286,7 @@ describe("persons", () => {
 				const item = items.at(1)!;
 				const slug = item.entity.slug;
 				const name = item.person.name;
-				const position = item.person.position;
+				const position = item.affiliation.organisationalUnit.name;
 
 				const response = await client.persons.slugs[":slug"].$get({
 					param: { slug },

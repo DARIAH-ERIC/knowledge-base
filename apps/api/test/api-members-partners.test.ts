@@ -47,6 +47,8 @@ function createPersonItems(count: number) {
 			const assetId = uuidv7();
 			const name = f.person.fullName();
 			const slug = slugify(name);
+			const affiliationId = uuidv7();
+			const affiliationName = f.company.name();
 
 			return {
 				entity: {
@@ -68,6 +70,18 @@ function createPersonItems(count: number) {
 					email: f.internet.email(),
 					orcid: `0000-000${String(f.number.int({ min: 1, max: 9 }))}-${String(f.number.int({ min: 1000, max: 9999 }))}-${String(f.number.int({ min: 1000, max: 9999 }))}`,
 					imageId: assetId,
+				},
+				affiliation: {
+					entity: {
+						id: affiliationId,
+						slug: slugify(affiliationName),
+						documentId: uuidv7(),
+					},
+					organisationalUnit: {
+						id: affiliationId,
+						name: affiliationName,
+						summary: f.lorem.paragraph(),
+					},
 				},
 			};
 		},
@@ -202,21 +216,43 @@ async function seedContributor(
 	countryId: string,
 	items: ReturnType<typeof createPersonItems>,
 ) {
-	const [status, entityType, personRoleType] = await Promise.all([
+	const [
+		status,
+		entityType,
+		organisationalUnitEntityType,
+		personRoleType,
+		affiliatedRoleType,
+		institutionType,
+	] = await Promise.all([
 		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
 		db.query.entityTypes.findFirst({
 			columns: { id: true },
 			where: { type: "persons" },
 		}),
+		db.query.entityTypes.findFirst({
+			columns: { id: true },
+			where: { type: "organisational_units" },
+		}),
 		db.query.personRoleTypes.findFirst({
 			columns: { id: true },
 			where: { type: "national_coordinator" },
+		}),
+		db.query.personRoleTypes.findFirst({
+			columns: { id: true },
+			where: { type: "is_affiliated_with" },
+		}),
+		db.query.organisationalUnitTypes.findFirst({
+			columns: { id: true },
+			where: { type: "institution" },
 		}),
 	]);
 
 	assert(status, "No entity status in database.");
 	assert(entityType, "No entity type in database.");
+	assert(organisationalUnitEntityType, "No organisational unit entity type in database.");
 	assert(personRoleType, "No person role type in database.");
+	assert(affiliatedRoleType, "No affiliated role type in database.");
+	assert(institutionType, "No institution type in database.");
 
 	const [person] = items;
 	assert(person);
@@ -230,10 +266,25 @@ async function seedContributor(
 		typeId: entityType.id,
 	});
 	await db.insert(schema.persons).values(person.person);
+	await db.insert(schema.entities).values({
+		...person.affiliation.entity,
+		statusId: status.id,
+		typeId: organisationalUnitEntityType.id,
+	});
+	await db.insert(schema.organisationalUnits).values({
+		...person.affiliation.organisationalUnit,
+		typeId: institutionType.id,
+	});
 	await db.insert(schema.personsToOrganisationalUnits).values({
 		personId: person.person.id,
 		organisationalUnitId: countryId,
 		roleTypeId: personRoleType.id,
+		duration: { start },
+	});
+	await db.insert(schema.personsToOrganisationalUnits).values({
+		personId: person.person.id,
+		organisationalUnitId: person.affiliation.organisationalUnit.id,
+		roleTypeId: affiliatedRoleType.id,
 		duration: { start },
 	});
 
@@ -591,8 +642,9 @@ describe("members-partners", () => {
 				});
 				expect(data.contributors).toHaveLength(1);
 				expect(data.contributors[0]).toMatchObject({
+					id: contributor.person.id,
 					name: contributor.person.name,
-					position: contributor.person.position,
+					position: contributor.affiliation.organisationalUnit.name,
 					role: "national_coordinator",
 				});
 				expect(data.nationalConsortium).toMatchObject({
@@ -838,8 +890,9 @@ describe("members-partners", () => {
 				});
 				expect(data.contributors).toHaveLength(1);
 				expect(data.contributors[0]).toMatchObject({
+					id: contributor.person.id,
 					name: contributor.person.name,
-					position: contributor.person.position,
+					position: contributor.affiliation.organisationalUnit.name,
 					role: "national_coordinator",
 				});
 				expect(data.nationalConsortium).toMatchObject({

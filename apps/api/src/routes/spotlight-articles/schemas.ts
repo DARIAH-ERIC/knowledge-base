@@ -45,7 +45,8 @@ export const SpotlightArticleSchema = v.pipe(
 		),
 		contributors: v.array(
 			v.object({
-				...v.pick(schema.PersonSelectSchema, ["id", "name", "position"]).entries,
+				...v.pick(schema.PersonSelectSchema, ["id", "name"]).entries,
+				position: v.nullable(v.string()),
 				image: v.object({ url: v.string() }),
 				slug: v.string(),
 				role: v.picklist(schema.articleContributorRolesEnum),

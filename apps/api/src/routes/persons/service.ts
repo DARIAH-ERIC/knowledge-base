@@ -4,6 +4,7 @@ import { count, eq } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { getPersonPositions } from "@/lib/persons";
 import type { Database, Transaction } from "@/middlewares/db";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
@@ -30,7 +31,6 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 			columns: {
 				id: true,
 				name: true,
-				position: true,
 				sortName: true,
 				email: true,
 				orcid: true,
@@ -63,6 +63,12 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
+	const positions = await getPersonPositions(
+		db,
+		items.map((item) => {
+			return item.id;
+		}),
+	);
 
 	const data = items.map((item) => {
 		const image = images.generateSignedImageUrl({
@@ -70,7 +76,12 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 			options: { width: imageWidth.avatar },
 		});
 
-		return { ...item, image, publishedAt: item.entity.updatedAt.toISOString() };
+		return {
+			...item,
+			position: positions.get(item.id) ?? null,
+			image,
+			publishedAt: item.entity.updatedAt.toISOString(),
+		};
 	});
 
 	return { data, limit, offset, total };
@@ -98,7 +109,6 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 			columns: {
 				id: true,
 				name: true,
-				position: true,
 				sortName: true,
 				email: true,
 				orcid: true,
@@ -124,12 +134,20 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 		return null;
 	}
 
+	const positions = await getPersonPositions(db, [item.id]);
+
 	const image = images.generateSignedImageUrl({
 		key: item.image.key,
 		options: { width: imageWidth.featured },
 	});
 
-	return { ...item, image, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
+	return {
+		...item,
+		position: positions.get(item.id) ?? null,
+		image,
+		publishedAt: item.entity.updatedAt.toISOString(),
+		...fields,
+	};
 }
 
 //
@@ -206,7 +224,6 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 		columns: {
 			id: true,
 			name: true,
-			position: true,
 			sortName: true,
 			email: true,
 			orcid: true,
@@ -230,6 +247,8 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 		return null;
 	}
 
+	const positions = await getPersonPositions(db, [item.id]);
+
 	const image = images.generateSignedImageUrl({
 		key: item.image.key,
 		options: { width: imageWidth.featured },
@@ -237,5 +256,11 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 
 	const fields = await getContentBlocks(db, item.id);
 
-	return { ...item, image, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
+	return {
+		...item,
+		position: positions.get(item.id) ?? null,
+		image,
+		publishedAt: item.entity.updatedAt.toISOString(),
+		...fields,
+	};
 }
