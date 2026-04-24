@@ -6,6 +6,7 @@ import { v7 as uuidv7 } from "uuid";
 import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
+import type { ImpactCaseStudy } from "@/routes/impact-case-studies/schemas";
 import { createTestClient } from "~/test/lib/create-test-client";
 import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";
@@ -44,6 +45,8 @@ function createContributor() {
 	const assetId = uuidv7();
 	const name = f.person.fullName();
 	const slug = slugify(name);
+	const affiliationId = uuidv7();
+	const affiliationName = f.company.name();
 
 	return {
 		entity: {
@@ -66,6 +69,18 @@ function createContributor() {
 			orcid: `0000-000${String(f.number.int({ min: 1, max: 9 }))}-${String(f.number.int({ min: 1000, max: 9999 }))}-${String(f.number.int({ min: 1000, max: 9999 }))}`,
 			imageId: assetId,
 		},
+		affiliation: {
+			entity: {
+				id: affiliationId,
+				slug: slugify(affiliationName),
+				documentId: uuidv7(),
+			},
+			organisationalUnit: {
+				id: affiliationId,
+				name: affiliationName,
+				summary: f.lorem.paragraph(),
+			},
+		},
 	};
 }
 
@@ -74,7 +89,15 @@ async function seed(
 	items: ReturnType<typeof createItems>,
 	contributor = createContributor(),
 ) {
-	const [status, type, personType, asset] = await Promise.all([
+	const [
+		status,
+		type,
+		personType,
+		organisationalUnitType,
+		institutionType,
+		affiliatedRoleType,
+		asset,
+	] = await Promise.all([
 		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
 		db.query.entityTypes.findFirst({
 			columns: { id: true },
@@ -84,12 +107,27 @@ async function seed(
 			columns: { id: true },
 			where: { type: "persons" },
 		}),
+		db.query.entityTypes.findFirst({
+			columns: { id: true },
+			where: { type: "organisational_units" },
+		}),
+		db.query.organisationalUnitTypes.findFirst({
+			columns: { id: true },
+			where: { type: "institution" },
+		}),
+		db.query.personRoleTypes.findFirst({
+			columns: { id: true },
+			where: { type: "is_affiliated_with" },
+		}),
 		db.query.assets.findFirst({ columns: { id: true } }),
 	]);
 
 	assert(status, "No entity status in database.");
 	assert(type, "No entity type in database.");
 	assert(personType, "No person entity type in database.");
+	assert(organisationalUnitType, "No organisational unit entity type in database.");
+	assert(institutionType, "No institution type in database.");
+	assert(affiliatedRoleType, "No affiliated role type in database.");
 	assert(asset, "No assets in database.");
 
 	await db.insert(schema.entities).values(
@@ -119,6 +157,24 @@ async function seed(
 	});
 
 	await db.insert(schema.persons).values(contributor.person);
+
+	await db.insert(schema.entities).values({
+		...contributor.affiliation.entity,
+		statusId: status.id,
+		typeId: organisationalUnitType.id,
+	});
+
+	await db.insert(schema.organisationalUnits).values({
+		...contributor.affiliation.organisationalUnit,
+		typeId: institutionType.id,
+	});
+
+	await db.insert(schema.personsToOrganisationalUnits).values({
+		personId: contributor.person.id,
+		organisationalUnitId: contributor.affiliation.organisationalUnit.id,
+		roleTypeId: affiliatedRoleType.id,
+		duration: { start: f.date.past({ years: 5 }) },
+	});
 
 	await db.insert(schema.impactCaseStudiesToPersons).values(
 		items.map((item) => {
@@ -177,7 +233,13 @@ describe("impact-case-studies", () => {
 				const id = item.entity.id;
 				const title = item.impactCaseStudy.title;
 				const contributorName = contributor.person.name;
-				const contributorPosition = contributor.person.position;
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+				const contributorPosition = expect.arrayContaining([
+					expect.objectContaining({
+						role: "is_affiliated_with",
+						name: contributor.affiliation.organisationalUnit.name,
+					}),
+				]);
 
 				const response = await client["impact-case-studies"][":id"].$get({
 					param: {
@@ -187,7 +249,8 @@ describe("impact-case-studies", () => {
 
 				expect(response.status).toBe(200);
 
-				const data = await response.json();
+				/** @see {@link https://github.com/honojs/hono/issues/2280} */
+				const data = (await response.json()) as ImpactCaseStudy;
 
 				assert("content" in data);
 				expect(data).toMatchObject({
@@ -195,6 +258,7 @@ describe("impact-case-studies", () => {
 					contributors: expect.arrayContaining([
 						expect.objectContaining({
 							name: contributorName,
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 							position: contributorPosition,
 						}),
 					]),
@@ -292,7 +356,13 @@ describe("impact-case-studies", () => {
 				const slug = item.entity.slug;
 				const title = item.impactCaseStudy.title;
 				const contributorName = contributor.person.name;
-				const contributorPosition = contributor.person.position;
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+				const contributorPosition = expect.arrayContaining([
+					expect.objectContaining({
+						role: "is_affiliated_with",
+						name: contributor.affiliation.organisationalUnit.name,
+					}),
+				]);
 
 				const response = await client["impact-case-studies"].slugs[":slug"].$get({
 					param: {
@@ -302,7 +372,8 @@ describe("impact-case-studies", () => {
 
 				expect(response.status).toBe(200);
 
-				const data = await response.json();
+				/** @see {@link https://github.com/honojs/hono/issues/2280} */
+				const data = (await response.json()) as ImpactCaseStudy;
 
 				assert("content" in data);
 				expect(data).toMatchObject({
@@ -310,6 +381,7 @@ describe("impact-case-studies", () => {
 					contributors: expect.arrayContaining([
 						expect.objectContaining({
 							name: contributorName,
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 							position: contributorPosition,
 						}),
 					]),

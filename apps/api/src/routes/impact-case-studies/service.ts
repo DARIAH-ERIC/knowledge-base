@@ -4,6 +4,7 @@ import { and, count, eq } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import { images } from "@/services/images";
@@ -88,7 +89,6 @@ async function getContributors(db: Database | Transaction, impactCaseStudyId: st
 		.select({
 			id: schema.persons.id,
 			name: schema.persons.name,
-			position: schema.persons.position,
 			slug: schema.entities.slug,
 			imageKey: schema.assets.key,
 			role: schema.impactCaseStudiesToPersons.role,
@@ -105,9 +105,17 @@ async function getContributors(db: Database | Transaction, impactCaseStudyId: st
 			),
 		);
 
+	const positions = await getPersonPositions(
+		db,
+		rows.map((row) => {
+			return row.id;
+		}),
+	);
+
 	return rows.map(({ imageKey, ...row }) => {
 		return {
 			...row,
+			position: positions.get(row.id) ?? null,
 			image: images.generateSignedImageUrl({
 				key: imageKey,
 				options: { width: imageWidth.avatar },

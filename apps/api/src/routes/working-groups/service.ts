@@ -4,6 +4,7 @@ import { and, count, eq, exists, not, sql, type SQLWrapper } from "@dariah-eric/
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import { images } from "@/services/images";
@@ -167,7 +168,6 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 		.select({
 			id: schema.persons.id,
 			name: schema.persons.name,
-			position: schema.persons.position,
 			slug: schema.entities.slug,
 			imageKey: schema.assets.key,
 			roleType: schema.personRoleTypes.type,
@@ -190,9 +190,17 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 			),
 		);
 
+	const positions = await getPersonPositions(
+		db,
+		rows.map((row) => {
+			return row.id;
+		}),
+	);
+
 	return rows.map(({ imageKey, roleType, ...row }) => {
 		return {
 			...row,
+			position: positions.get(row.id) ?? null,
 			role: roleType,
 			image: images.generateSignedImageUrl({
 				key: imageKey,

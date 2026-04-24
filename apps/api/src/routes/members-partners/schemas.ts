@@ -39,8 +39,10 @@ export type MemberOrPartnerBase = v.InferOutput<typeof MemberOrPartnerBaseSchema
 
 export const ContributorSchema = v.pipe(
 	v.object({
-		...v.pick(schema.PersonSelectSchema, ["name"]).entries,
-		position: v.nullable(v.string()),
+		...v.pick(schema.PersonSelectSchema, ["id", "name"]).entries,
+		position: v.nullable(
+			v.array(v.object({ role: v.picklist(schema.personRoleTypesEnum), name: v.string() })),
+		),
 		image: v.object({ url: v.string() }),
 		slug: v.string(),
 		role: v.picklist([

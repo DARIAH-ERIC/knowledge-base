@@ -113,63 +113,63 @@ msgctxt "ui"
 msgid "N8BBfe"
 msgstr "Last page"
 
-#: lib/rich-text-editor.tsx:499
+#: lib/rich-text-editor.tsx:777
 msgctxt "ui"
 msgid "Dkkmwm"
 msgstr "Bold"
 
-#: lib/rich-text-editor.tsx:507
+#: lib/rich-text-editor.tsx:785
 msgctxt "ui"
 msgid "g2V+es"
 msgstr "Italic"
 
-#: lib/rich-text-editor.tsx:515
+#: lib/rich-text-editor.tsx:793
 msgctxt "ui"
 msgid "h2vipu"
 msgstr "Code"
 
-#: lib/rich-text-editor.tsx:524
+#: lib/rich-text-editor.tsx:802
 msgctxt "ui"
 msgid "Zqekct"
 msgstr "Heading 2"
 
-#: lib/rich-text-editor.tsx:532
+#: lib/rich-text-editor.tsx:810
 msgctxt "ui"
 msgid "BDbgCL"
 msgstr "Heading 3"
 
-#: lib/rich-text-editor.tsx:540
+#: lib/rich-text-editor.tsx:818
 msgctxt "ui"
 msgid "BKF2fN"
 msgstr "Heading 4"
 
-#: lib/rich-text-editor.tsx:549
+#: lib/rich-text-editor.tsx:827
 msgctxt "ui"
 msgid "6sdKFe"
 msgstr "Bullet List"
 
-#: lib/rich-text-editor.tsx:557
+#: lib/rich-text-editor.tsx:835
 msgctxt "ui"
 msgid "rU4xig"
 msgstr "Ordered List"
 
-#: lib/rich-text-editor.tsx:565
+#: lib/rich-text-editor.tsx:843
 msgctxt "ui"
 msgid "+RDJVD"
 msgstr "Blockquote"
 
-#: lib/rich-text-editor.tsx:576
-#: lib/rich-text-editor.tsx:584
+#: lib/rich-text-editor.tsx:854
+#: lib/rich-text-editor.tsx:862
 msgctxt "ui"
 msgid "JBWS0c"
 msgstr "Link"
 
-#: lib/rich-text-editor.tsx:606
+#: lib/rich-text-editor.tsx:884
 msgctxt "ui"
 msgid "EWw/tK"
 msgstr "Apply"
 
-#: lib/rich-text-editor.tsx:610
+#: lib/rich-text-editor.tsx:888
 msgctxt "ui"
 msgid "G/yZLu"
 msgstr "Remove"
