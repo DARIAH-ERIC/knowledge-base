@@ -514,6 +514,52 @@ export const relations = defineRelations(schema, (r) => {
 				optional: true,
 			}),
 		},
+		users: {
+			person: r.one.persons({
+				from: r.users.personId,
+				to: r.persons.id,
+				optional: true,
+			}),
+			organisationalUnit: r.one.organisationalUnits({
+				from: r.users.organisationalUnitId,
+				to: r.organisationalUnits.id,
+				optional: true,
+			}),
+		},
+		reportingCampaigns: {
+			countryReports: r.many.countryReports({
+				from: r.reportingCampaigns.id,
+				to: r.countryReports.campaignId,
+			}),
+			workingGroupReports: r.many.workingGroupReports({
+				from: r.reportingCampaigns.id,
+				to: r.workingGroupReports.campaignId,
+			}),
+		},
+		countryReports: {
+			campaign: r.one.reportingCampaigns({
+				from: r.countryReports.campaignId,
+				to: r.reportingCampaigns.id,
+				optional: false,
+			}),
+			country: r.one.organisationalUnits({
+				from: r.countryReports.countryId,
+				to: r.organisationalUnits.id,
+				optional: false,
+			}),
+		},
+		workingGroupReports: {
+			campaign: r.one.reportingCampaigns({
+				from: r.workingGroupReports.campaignId,
+				to: r.reportingCampaigns.id,
+				optional: false,
+			}),
+			workingGroup: r.one.organisationalUnits({
+				from: r.workingGroupReports.workingGroupId,
+				to: r.organisationalUnits.id,
+				optional: false,
+			}),
+		},
 		navigationMenus: {
 			items: r.many.navigationItems({
 				from: r.navigationMenus.id,

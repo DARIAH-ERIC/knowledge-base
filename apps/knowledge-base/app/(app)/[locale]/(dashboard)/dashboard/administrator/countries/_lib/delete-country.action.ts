@@ -5,10 +5,10 @@ import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 
-import { assertAuthenticated } from "@/lib/auth/session";
+import { assertAdmin } from "@/lib/auth/session";
 
 export async function deleteCountryAction(id: string): Promise<void> {
-	await assertAuthenticated();
+	await assertAdmin();
 
 	await db.transaction(async (tx) => {
 		await tx

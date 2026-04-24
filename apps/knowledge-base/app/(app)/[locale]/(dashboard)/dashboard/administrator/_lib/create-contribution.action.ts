@@ -15,7 +15,7 @@ import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { CreateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.schema";
-import { assertAuthenticated } from "@/lib/auth/session";
+import { assertAdmin } from "@/lib/auth/session";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 
@@ -28,7 +28,7 @@ export const createContributionAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAuthenticated();
+		await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			CreateContributionActionInputSchema,

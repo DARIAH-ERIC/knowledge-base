@@ -1,9 +1,11 @@
-import { inArray } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
 
 import * as f from "../fields";
 import { lower, uuidv7 } from "../functions";
+import { organisationalUnits } from "./organisational-units";
+import { persons } from "./persons";
 
 export const userRoleEnum = ["admin", "user"] as const;
 
@@ -18,12 +20,22 @@ export const users = p.pgTable(
 		twoFactorRecoveryCode: p.bytea("two_factor_recovery_code").notNull(),
 		name: p.text("name").notNull(),
 		role: p.text("role", { enum: userRoleEnum }).notNull().default("user"),
+		personId: p.uuid("person_id").references(() => {
+			return persons.id;
+		}),
+		organisationalUnitId: p.uuid("organisational_unit_id").references(() => {
+			return organisationalUnits.id;
+		}),
 		...f.timestamps(),
 	},
 	(t) => {
 		return [
 			p.uniqueIndex("users_email_unique").on(lower(t.email)),
 			p.check("users_role_enum_check", inArray(t.role, userRoleEnum)),
+			p.check(
+				"users_actor_xor_check",
+				sql`NOT (${t.personId} IS NOT NULL AND ${t.organisationalUnitId} IS NOT NULL)`,
+			),
 		];
 	},
 );

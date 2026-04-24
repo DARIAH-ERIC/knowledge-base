@@ -30,3 +30,16 @@ export async function assertAuthenticated() {
 
 	return result;
 }
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export async function assertAdmin() {
+	const result = await assertAuthenticated();
+
+	const locale = await getLocale();
+
+	if (result.user.role !== "admin") {
+		redirect({ href: "/dashboard", locale });
+	}
+
+	return result;
+}
