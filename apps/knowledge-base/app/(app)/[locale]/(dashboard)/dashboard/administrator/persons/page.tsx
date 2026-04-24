@@ -34,7 +34,6 @@ export default function DashboardAdministratorPersonsPage(
 			id: true,
 			name: true,
 			orcid: true,
-			position: true,
 		},
 		with: {
 			entity: {

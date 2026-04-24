@@ -38,7 +38,7 @@ import { deletePersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/a
 interface PersonsPageProps {
 	persons: Promise<
 		Array<
-			Pick<schema.Person, "email" | "id" | "name" | "orcid" | "position"> & {
+			Pick<schema.Person, "email" | "id" | "name" | "orcid"> & {
 				entity: Pick<schema.Entity, "documentId" | "slug"> & {
 					status: Pick<schema.EntityStatus, "id" | "type">;
 				};
@@ -106,7 +106,6 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 			>
 				<TableHeader>
 					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
-					<TableColumn>{t("Position")}</TableColumn>
 					<TableColumn>{t("Email")}</TableColumn>
 					<TableColumn>{t("ORCID")}</TableColumn>
 					<TableColumn />
@@ -116,7 +115,6 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 						return (
 							<TableRow href={`/dashboard/administrator/persons/${item.entity.slug}/details`}>
 								<TableCell>{item.name}</TableCell>
-								<TableCell>{item.position ?? "-"}</TableCell>
 								<TableCell>{item.email}</TableCell>
 								<TableCell>{item.orcid}</TableCell>
 								<TableCell className="text-end">
