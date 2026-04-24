@@ -285,10 +285,10 @@ async function main() {
 				.insert(schema.organisationalUnits)
 				.values({
 					id,
+					acronym: country.code,
 					name: country.name,
 					summary: "",
 					typeId: organisationalUnitTypesByType.country.id,
-					metadata: { code: country.code },
 					imageId: placeholderAsset.id,
 					createdAt: new Date(country.createdAt),
 					updatedAt: new Date(country.createdAt),
@@ -851,7 +851,7 @@ async function main() {
 					case "scientific_board_member": {
 						roleId = personRoleTypesByType.is_member_of.id;
 						relatedOrgaUnitId = bodies.find((b) => {
-							return b.acronym === "sb";
+							return b.acronym === "sab";
 						})?.id;
 						break;
 					}
