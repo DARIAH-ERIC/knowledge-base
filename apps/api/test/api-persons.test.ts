@@ -161,7 +161,13 @@ describe("persons", () => {
 
 				const item = items.at(1)!;
 				const name = item.person.name;
-				const position = item.affiliation.organisationalUnit.name;
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+				const position = expect.arrayContaining([
+					expect.objectContaining({
+						role: "is_affiliated_with",
+						name: item.affiliation.organisationalUnit.name,
+					}),
+				]);
 
 				const response = await client.persons.$get({
 					query: {
@@ -176,6 +182,7 @@ describe("persons", () => {
 
 				expect(data.total).toBeGreaterThanOrEqual(items.length);
 				expect(data.data).toEqual(
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 					expect.arrayContaining([expect.objectContaining({ name, position })]),
 				);
 				expect(data.limit).toBe(limit);
@@ -195,7 +202,13 @@ describe("persons", () => {
 				const item = items.at(1)!;
 				const id = item.entity.id;
 				const name = item.person.name;
-				const position = item.affiliation.organisationalUnit.name;
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+				const position = expect.arrayContaining([
+					expect.objectContaining({
+						role: "is_affiliated_with",
+						name: item.affiliation.organisationalUnit.name,
+					}),
+				]);
 
 				const response = await client.persons[":id"].$get({
 					param: { id },
@@ -206,6 +219,7 @@ describe("persons", () => {
 				/** @see {@link https://github.com/honojs/hono/issues/2280} */
 				const data = (await response.json()) as Person;
 
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 				expect(data).toMatchObject({ name, position });
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 				expect(data.image).toMatchObject({ url: expect.any(String) });
@@ -286,7 +300,13 @@ describe("persons", () => {
 				const item = items.at(1)!;
 				const slug = item.entity.slug;
 				const name = item.person.name;
-				const position = item.affiliation.organisationalUnit.name;
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+				const position = expect.arrayContaining([
+					expect.objectContaining({
+						role: "is_affiliated_with",
+						name: item.affiliation.organisationalUnit.name,
+					}),
+				]);
 
 				const response = await client.persons.slugs[":slug"].$get({
 					param: { slug },
@@ -297,6 +317,7 @@ describe("persons", () => {
 				const data = await response.json();
 
 				assert("biography" in data);
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 				expect(data).toMatchObject({ name, position });
 				expect(data.biography).toHaveLength(1);
 				expect(data.biography[0]).toMatchObject({ type: "rich_text" });

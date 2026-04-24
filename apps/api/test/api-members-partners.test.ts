@@ -7,6 +7,7 @@ import { v7 as uuidv7 } from "uuid";
 import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
+import type { MemberOrPartner } from "@/routes/members-partners/schemas";
 import { createTestClient } from "~/test/lib/create-test-client";
 import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";
@@ -615,22 +616,8 @@ describe("members-partners", () => {
 
 				expect(response.status).toBe(200);
 
-				const data = (await response.json()) as unknown as {
-					status: string;
-					institutions: Array<{
-						name: string;
-						slug: string;
-						website: string | null;
-					}>;
-					contributors: Array<{
-						name: string;
-						position: string | null;
-						role: string;
-					}>;
-					nationalConsortium: { name: string; image: { url: string } | null } | null;
-					description: Array<{ type: string }>;
-					name: string;
-				};
+				/** @see {@link https://github.com/honojs/hono/issues/2280} */
+				const data = (await response.json()) as MemberOrPartner;
 
 				assert("description" in data);
 				expect(data).toMatchObject({ name });
@@ -644,12 +631,17 @@ describe("members-partners", () => {
 				expect(data.contributors[0]).toMatchObject({
 					id: contributor.person.id,
 					name: contributor.person.name,
-					position: [contributor.affiliation.organisationalUnit.name, item.organisationalUnit.name]
-						// eslint-disable-next-line unicorn/no-array-sort
-						.sort((a, b) => {
-							return a.localeCompare(b);
-						})
-						.join(", "),
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+					position: expect.arrayContaining([
+						expect.objectContaining({
+							role: "is_affiliated_with",
+							name: contributor.affiliation.organisationalUnit.name,
+						}),
+						expect.objectContaining({
+							role: "national_coordinator",
+							name: item.organisationalUnit.name,
+						}),
+					]),
 					role: "national_coordinator",
 				});
 				expect(data.nationalConsortium).toMatchObject({
@@ -883,7 +875,8 @@ describe("members-partners", () => {
 
 				expect(response.status).toBe(200);
 
-				const data = await response.json();
+				/** @see {@link https://github.com/honojs/hono/issues/2280} */
+				const data = (await response.json()) as MemberOrPartner;
 
 				assert("description" in data);
 				expect(data).toMatchObject({ name });
@@ -897,12 +890,17 @@ describe("members-partners", () => {
 				expect(data.contributors[0]).toMatchObject({
 					id: contributor.person.id,
 					name: contributor.person.name,
-					position: [contributor.affiliation.organisationalUnit.name, item.organisationalUnit.name]
-						// eslint-disable-next-line unicorn/no-array-sort
-						.sort((a, b) => {
-							return a.localeCompare(b);
-						})
-						.join(", "),
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+					position: expect.arrayContaining([
+						expect.objectContaining({
+							role: "is_affiliated_with",
+							name: contributor.affiliation.organisationalUnit.name,
+						}),
+						expect.objectContaining({
+							role: "national_coordinator",
+							name: item.organisationalUnit.name,
+						}),
+					]),
 					role: "national_coordinator",
 				});
 				expect(data.nationalConsortium).toMatchObject({

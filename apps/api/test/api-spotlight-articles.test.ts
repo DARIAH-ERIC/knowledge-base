@@ -6,6 +6,7 @@ import { v7 as uuidv7 } from "uuid";
 import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
+import type { SpotlightArticle } from "@/routes/spotlight-articles/schemas";
 import { createTestClient } from "~/test/lib/create-test-client";
 import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";
@@ -232,7 +233,13 @@ describe("spotlight-articles", () => {
 				const id = item.entity.id;
 				const title = item.spotlightArticle.title;
 				const contributorName = contributor.person.name;
-				const contributorPosition = contributor.affiliation.organisationalUnit.name;
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+				const contributorPosition = expect.arrayContaining([
+					expect.objectContaining({
+						role: "is_affiliated_with",
+						name: contributor.affiliation.organisationalUnit.name,
+					}),
+				]);
 
 				const response = await client["spotlight-articles"][":id"].$get({
 					param: {
@@ -242,7 +249,8 @@ describe("spotlight-articles", () => {
 
 				expect(response.status).toBe(200);
 
-				const data = await response.json();
+				/** @see {@link https://github.com/honojs/hono/issues/2280} */
+				const data = (await response.json()) as SpotlightArticle;
 
 				assert("content" in data);
 				expect(data).toMatchObject({
@@ -250,6 +258,7 @@ describe("spotlight-articles", () => {
 					contributors: expect.arrayContaining([
 						expect.objectContaining({
 							name: contributorName,
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 							position: contributorPosition,
 						}),
 					]),
@@ -347,7 +356,13 @@ describe("spotlight-articles", () => {
 				const slug = item.entity.slug;
 				const title = item.spotlightArticle.title;
 				const contributorName = contributor.person.name;
-				const contributorPosition = contributor.affiliation.organisationalUnit.name;
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+				const contributorPosition = expect.arrayContaining([
+					expect.objectContaining({
+						role: "is_affiliated_with",
+						name: contributor.affiliation.organisationalUnit.name,
+					}),
+				]);
 
 				const response = await client["spotlight-articles"].slugs[":slug"].$get({
 					param: {
@@ -357,7 +372,8 @@ describe("spotlight-articles", () => {
 
 				expect(response.status).toBe(200);
 
-				const data = await response.json();
+				/** @see {@link https://github.com/honojs/hono/issues/2280} */
+				const data = (await response.json()) as SpotlightArticle;
 
 				assert("content" in data);
 				expect(data).toMatchObject({
@@ -365,6 +381,7 @@ describe("spotlight-articles", () => {
 					contributors: expect.arrayContaining([
 						expect.objectContaining({
 							name: contributorName,
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 							position: contributorPosition,
 						}),
 					]),

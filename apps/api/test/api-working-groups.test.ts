@@ -7,6 +7,7 @@ import { v7 as uuidv7 } from "uuid";
 import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
+import type { WorkingGroup } from "@/routes/working-groups/schemas";
 import { createTestClient } from "~/test/lib/create-test-client";
 import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";
@@ -418,24 +419,32 @@ describe("working-groups", () => {
 
 				expect(response.status).toBe(200);
 
-				const data = await response.json();
+				/** @see {@link https://github.com/honojs/hono/issues/2280} */
+				const data = (await response.json()) as WorkingGroup;
 
 				assert("description" in data);
+				/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
 				expect(data).toMatchObject({
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 					chairs: expect.arrayContaining([
 						expect.objectContaining({
 							name: chair.person.name,
-							position: [chair.affiliation.organisationalUnit.name, item.organisationalUnit.name]
-								// eslint-disable-next-line unicorn/no-array-sort
-								.sort((a, b) => {
-									return a.localeCompare(b);
-								})
-								.join(", "),
+							position: expect.arrayContaining([
+								expect.objectContaining({
+									role: "is_affiliated_with",
+									name: chair.affiliation.organisationalUnit.name,
+								}),
+								...items.slice(1).map((i) => {
+									return expect.objectContaining({
+										role: "is_chair_of",
+										name: i.organisationalUnit.name,
+									});
+								}),
+							]),
 						}),
 					]),
 					name,
 				});
+				/* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});
@@ -536,24 +545,32 @@ describe("working-groups", () => {
 
 				expect(response.status).toBe(200);
 
-				const data = await response.json();
+				/** @see {@link https://github.com/honojs/hono/issues/2280} */
+				const data = (await response.json()) as WorkingGroup;
 
 				assert("description" in data);
+				/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
 				expect(data).toMatchObject({
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 					chairs: expect.arrayContaining([
 						expect.objectContaining({
 							name: chair.person.name,
-							position: [chair.affiliation.organisationalUnit.name, item.organisationalUnit.name]
-								// eslint-disable-next-line unicorn/no-array-sort
-								.sort((a, b) => {
-									return a.localeCompare(b);
-								})
-								.join(", "),
+							position: expect.arrayContaining([
+								expect.objectContaining({
+									role: "is_affiliated_with",
+									name: chair.affiliation.organisationalUnit.name,
+								}),
+								...items.slice(1).map((i) => {
+									return expect.objectContaining({
+										role: "is_chair_of",
+										name: i.organisationalUnit.name,
+									});
+								}),
+							]),
 						}),
 					]),
 					name,
 				});
+				/* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});

@@ -5,17 +5,16 @@ import * as schema from "@dariah-eric/database/schema";
 
 import type { Database, Transaction } from "@/middlewares/db";
 
-interface PersonPositionRow {
-	personId: string;
-	roleType: (typeof schema.personRoleTypesEnum)[number];
-	unitName: string;
+export interface PersonPosition {
+	role: (typeof schema.personRoleTypesEnum)[number];
+	name: string;
 }
 
 export async function getPersonPositions(
 	db: Database | Transaction,
 	personIds: Array<string>,
-): Promise<Map<string, string | null>> {
-	const positions = new Map<string, string | null>();
+): Promise<Map<string, Array<PersonPosition> | null>> {
+	const positions = new Map<string, Array<PersonPosition> | null>();
 
 	for (const personId of personIds) {
 		positions.set(personId, null);
@@ -28,8 +27,8 @@ export async function getPersonPositions(
 	const rows = await db
 		.select({
 			personId: schema.personsToOrganisationalUnits.personId,
-			roleType: schema.personRoleTypes.type,
-			unitName: schema.organisationalUnits.name,
+			role: schema.personRoleTypes.type,
+			name: schema.organisationalUnits.name,
 		})
 		.from(schema.personsToOrganisationalUnits)
 		.innerJoin(
@@ -47,30 +46,22 @@ export async function getPersonPositions(
 			),
 		);
 
-	const rowsByPerson = new Map<string, Array<PersonPositionRow>>();
+	const rowsByPerson = new Map<string, Array<PersonPosition>>();
 
 	for (const row of rows) {
 		const items = rowsByPerson.get(row.personId) ?? [];
-		items.push(row);
+		items.push({ role: row.role, name: row.name });
 		rowsByPerson.set(row.personId, items);
 	}
 
 	for (const personId of personIds) {
 		const personRows = rowsByPerson.get(personId) ?? [];
-		const unitNames = Array.from(
-			new Set(
-				personRows
-					.map((row) => {
-						return row.unitName;
-					})
-					// eslint-disable-next-line unicorn/no-array-sort
-					.sort((a, b) => {
-						return a.localeCompare(b);
-					}),
-			),
-		);
+		// eslint-disable-next-line unicorn/no-array-sort
+		const sorted = personRows.sort((a, b) => {
+			return a.name.localeCompare(b.name);
+		});
 
-		positions.set(personId, unitNames.length > 0 ? unitNames.join(", ") : null);
+		positions.set(personId, sorted.length > 0 ? sorted : null);
 	}
 
 	return positions;
