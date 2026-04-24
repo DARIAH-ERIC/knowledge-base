@@ -541,7 +541,7 @@ function AssetImageNodeView({
 					<div className="relative">
 						<img
 							alt={caption ?? ""}
-							className="block w-full max-h-[24rem] object-contain"
+							className="block w-full max-h-96 object-contain"
 							data-asset-image=""
 							data-image-key={imageKey ?? undefined}
 							src={imageUrl ?? ""}
