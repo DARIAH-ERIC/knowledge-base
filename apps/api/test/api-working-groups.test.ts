@@ -426,7 +426,12 @@ describe("working-groups", () => {
 					chairs: expect.arrayContaining([
 						expect.objectContaining({
 							name: chair.person.name,
-							position: chair.affiliation.organisationalUnit.name,
+							position: [chair.affiliation.organisationalUnit.name, item.organisationalUnit.name]
+								// eslint-disable-next-line unicorn/no-array-sort
+								.sort((a, b) => {
+									return a.localeCompare(b);
+								})
+								.join(", "),
 						}),
 					]),
 					name,
@@ -539,7 +544,12 @@ describe("working-groups", () => {
 					chairs: expect.arrayContaining([
 						expect.objectContaining({
 							name: chair.person.name,
-							position: chair.affiliation.organisationalUnit.name,
+							position: [chair.affiliation.organisationalUnit.name, item.organisationalUnit.name]
+								// eslint-disable-next-line unicorn/no-array-sort
+								.sort((a, b) => {
+									return a.localeCompare(b);
+								})
+								.join(", "),
 						}),
 					]),
 					name,

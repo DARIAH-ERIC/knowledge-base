@@ -644,7 +644,12 @@ describe("members-partners", () => {
 				expect(data.contributors[0]).toMatchObject({
 					id: contributor.person.id,
 					name: contributor.person.name,
-					position: contributor.affiliation.organisationalUnit.name,
+					position: [contributor.affiliation.organisationalUnit.name, item.organisationalUnit.name]
+						// eslint-disable-next-line unicorn/no-array-sort
+						.sort((a, b) => {
+							return a.localeCompare(b);
+						})
+						.join(", "),
 					role: "national_coordinator",
 				});
 				expect(data.nationalConsortium).toMatchObject({
@@ -892,7 +897,12 @@ describe("members-partners", () => {
 				expect(data.contributors[0]).toMatchObject({
 					id: contributor.person.id,
 					name: contributor.person.name,
-					position: contributor.affiliation.organisationalUnit.name,
+					position: [contributor.affiliation.organisationalUnit.name, item.organisationalUnit.name]
+						// eslint-disable-next-line unicorn/no-array-sort
+						.sort((a, b) => {
+							return a.localeCompare(b);
+						})
+						.join(", "),
 					role: "national_coordinator",
 				});
 				expect(data.nationalConsortium).toMatchObject({
