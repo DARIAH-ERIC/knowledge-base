@@ -465,7 +465,15 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 		const richTextContentBlocks = contentBlockIdsByType.rich_text.map(({ id }) => {
 			return {
 				id,
-				content: JSON.stringify({ hello: "world" }),
+				content: JSON.stringify({
+					type: "doc",
+					content: [
+						{
+							type: "paragraph",
+							content: [{ type: "text", text: f.lorem.paragraph() }],
+						},
+					],
+				}),
 			};
 		}) satisfies Array<schema.RichTextContentBlockInput>; // FIXME: type regression
 

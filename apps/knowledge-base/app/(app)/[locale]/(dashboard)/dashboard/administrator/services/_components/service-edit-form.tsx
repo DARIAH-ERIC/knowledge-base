@@ -26,11 +26,20 @@ interface ServiceEditFormProps {
 	};
 	serviceTypes: Array<Pick<schema.ServiceType, "id" | "type">>;
 	serviceStatuses: Array<Pick<schema.ServiceStatus, "id" | "status">>;
-	organisationalUnits: Array<Pick<schema.OrganisationalUnit, "id" | "name">>;
+	initialOrganisationalUnitItems: Array<{ id: string; name: string }>;
+	initialOrganisationalUnitTotal: number;
+	selectedOrganisationalUnits: Array<{ id: string; name: string }>;
 }
 
 export function ServiceEditForm(props: Readonly<ServiceEditFormProps>): ReactNode {
-	const { service, serviceTypes, serviceStatuses, organisationalUnits } = props;
+	const {
+		service,
+		serviceTypes,
+		serviceStatuses,
+		initialOrganisationalUnitItems,
+		initialOrganisationalUnitTotal,
+		selectedOrganisationalUnits,
+	} = props;
 
 	const t = useExtracted();
 
@@ -40,7 +49,9 @@ export function ServiceEditForm(props: Readonly<ServiceEditFormProps>): ReactNod
 
 			<ServiceForm
 				formAction={updateServiceAction}
-				organisationalUnits={organisationalUnits}
+				initialOrganisationalUnitItems={initialOrganisationalUnitItems}
+				initialOrganisationalUnitTotal={initialOrganisationalUnitTotal}
+				selectedOrganisationalUnits={selectedOrganisationalUnits}
 				service={service}
 				serviceStatuses={serviceStatuses}
 				serviceTypes={serviceTypes}

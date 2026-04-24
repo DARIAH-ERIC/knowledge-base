@@ -4,14 +4,11 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { ServiceCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_components/service-create-form";
+import { getOrganisationalUnitOptions } from "@/lib/data/organisational-units";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorCreateServicePageProps {
-	params: Promise<{ locale: string }>;
-}
-
 export async function generateMetadata(
-	_props: Readonly<DashboardAdministratorCreateServicePageProps>,
+	_props: unknown,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
 	const t = await getExtracted();
@@ -24,23 +21,21 @@ export async function generateMetadata(
 }
 
 export default async function DashboardAdministratorCreateServicePage(
-	_props: Readonly<DashboardAdministratorCreateServicePageProps>,
+	_props: unknown,
 ): Promise<ReactNode> {
-	const [serviceTypes, serviceStatuses, organisationalUnits] = await Promise.all([
+	const [serviceTypes, serviceStatuses, initialOrganisationalUnits] = await Promise.all([
 		db.query.serviceTypes.findMany({ orderBy: { type: "asc" }, columns: { id: true, type: true } }),
 		db.query.serviceStatuses.findMany({
 			orderBy: { status: "asc" },
 			columns: { id: true, status: true },
 		}),
-		db.query.organisationalUnits.findMany({
-			orderBy: { name: "asc" },
-			columns: { id: true, name: true },
-		}),
+		getOrganisationalUnitOptions(),
 	]);
 
 	return (
 		<ServiceCreateForm
-			organisationalUnits={organisationalUnits}
+			initialOrganisationalUnitItems={initialOrganisationalUnits.items}
+			initialOrganisationalUnitTotal={initialOrganisationalUnits.total}
 			serviceStatuses={serviceStatuses}
 			serviceTypes={serviceTypes}
 		/>

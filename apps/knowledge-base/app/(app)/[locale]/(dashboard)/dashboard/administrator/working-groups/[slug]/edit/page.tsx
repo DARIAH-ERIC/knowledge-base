@@ -9,14 +9,16 @@ import type { ReactNode } from "react";
 
 import { WorkingGroupEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-edit-form";
 import { imageGridOptions } from "@/config/assets.config";
-import { getAvailablePersons } from "@/lib/data/article-contributors";
+import { getPersonOptions } from "@/lib/data/article-contributors";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import {
-	getAvailableEntities,
-	getAvailableResources,
+	getEntityRelationOptions,
+	getEntityRelationOptionsByIds,
 	getEntityRelations,
+	getResourceRelationOptions,
+	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
-import { getUnitRelationOptions, getUnitRelations } from "@/lib/data/unit-relations";
+import { getUnitRelations, getUnitRelationStatusOptions } from "@/lib/data/unit-relations";
 import { getWorkingGroupChairs } from "@/lib/data/working-group-chairs";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -45,17 +47,17 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 
 	const [
 		{ items: initialAssets },
-		relatedEntities,
-		relatedResources,
-		allowedRelationOptions,
-		availablePersons,
+		initialRelatedEntities,
+		initialRelatedResources,
+		unitRelationStatusOptions,
+		initialPersons,
 		workingGroup,
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
-		getAvailableEntities(),
-		getAvailableResources(),
-		getUnitRelationOptions("working_group"),
-		getAvailablePersons(),
+		getEntityRelationOptions(),
+		getResourceRelationOptions(),
+		getUnitRelationStatusOptions("working_group"),
+		getPersonOptions(),
 		db.query.organisationalUnits.findFirst({
 			where: {
 				type: { type: "working_group" },
@@ -131,17 +133,27 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 		getWorkingGroupChairs(workingGroup.id),
 	]);
 
+	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
+		getEntityRelationOptionsByIds(relatedEntityIds),
+		getResourceRelationOptionsByIds(relatedResourceIds),
+	]);
+
 	return (
 		<WorkingGroupEditForm
-			allowedRelationOptions={allowedRelationOptions}
-			availablePersons={availablePersons}
 			chairs={chairs}
 			initialAssets={initialAssets}
+			initialPersonItems={initialPersons.items}
+			initialPersonTotal={initialPersons.total}
 			initialRelatedEntityIds={relatedEntityIds}
+			initialRelatedEntityItems={initialRelatedEntities.items}
+			initialRelatedEntityTotal={initialRelatedEntities.total}
 			initialRelatedResourceIds={relatedResourceIds}
-			relatedEntities={relatedEntities}
-			relatedResources={relatedResources}
+			initialRelatedResourceItems={initialRelatedResources.items}
+			initialRelatedResourceTotal={initialRelatedResources.total}
 			relations={relations}
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
+			unitRelationStatusOptions={unitRelationStatusOptions}
 			workingGroup={{ ...workingGroup, acronym, description, image }}
 		/>
 	);

@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { WorkingGroupCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-create-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
-import { getAvailableEntities, getAvailableResources } from "@/lib/data/relations";
+import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorCreateWorkingGroupPageProps extends PageProps<"/[locale]/dashboard/administrator/working-groups/create"> {}
@@ -26,17 +26,20 @@ export async function generateMetadata(
 export default async function DashboardAdministratorCreateWorkingGroupPage(
 	_props: Readonly<DashboardAdministratorCreateWorkingGroupPageProps>,
 ): Promise<ReactNode> {
-	const [{ items: initialAssets }, relatedEntities, relatedResources] = await Promise.all([
-		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
-		getAvailableEntities(),
-		getAvailableResources(),
-	]);
+	const [{ items: initialAssets }, initialRelatedEntities, initialRelatedResources] =
+		await Promise.all([
+			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
+			getEntityRelationOptions(),
+			getResourceRelationOptions(),
+		]);
 
 	return (
 		<WorkingGroupCreateForm
 			initialAssets={initialAssets}
-			relatedEntities={relatedEntities}
-			relatedResources={relatedResources}
+			initialRelatedEntityItems={initialRelatedEntities.items}
+			initialRelatedEntityTotal={initialRelatedEntities.total}
+			initialRelatedResourceItems={initialRelatedResources.items}
+			initialRelatedResourceTotal={initialRelatedResources.total}
 		/>
 	);
 }

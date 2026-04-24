@@ -7,15 +7,14 @@ import type { ReactNode } from "react";
 import { SpotlightArticleEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-edit";
 import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
-import {
-	getAvailablePersons,
-	getSpotlightArticleContributors,
-} from "@/lib/data/article-contributors";
+import { getPersonOptions, getSpotlightArticleContributors } from "@/lib/data/article-contributors";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import {
-	getAvailableEntities,
-	getAvailableResources,
+	getEntityRelationOptions,
+	getEntityRelationOptionsByIds,
 	getEntityRelations,
+	getResourceRelationOptions,
+	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -45,9 +44,9 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 	const [
 		{ items: initialAssets },
 		spotlightArticle,
-		relatedEntities,
-		relatedResources,
-		availablePersons,
+		initialRelatedEntities,
+		initialRelatedResources,
+		initialPersons,
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 		db.query.spotlightArticles.findFirst({
@@ -76,9 +75,9 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 				},
 			},
 		}),
-		getAvailableEntities(),
-		getAvailableResources(),
-		getAvailablePersons(),
+		getEntityRelationOptions(),
+		getResourceRelationOptions(),
+		getPersonOptions(),
 	]);
 
 	if (spotlightArticle == null) {
@@ -97,16 +96,26 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 		],
 	);
 
+	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
+		getEntityRelationOptionsByIds(relatedEntityIds),
+		getResourceRelationOptionsByIds(relatedResourceIds),
+	]);
+
 	return (
 		<SpotlightArticleEditForm
-			availablePersons={availablePersons}
 			contentBlocks={contentBlocks}
 			contributors={contributors}
 			initialAssets={initialAssets}
+			initialPersonItems={initialPersons.items}
+			initialPersonTotal={initialPersons.total}
 			initialRelatedEntityIds={relatedEntityIds}
+			initialRelatedEntityItems={initialRelatedEntities.items}
+			initialRelatedEntityTotal={initialRelatedEntities.total}
 			initialRelatedResourceIds={relatedResourceIds}
-			relatedEntities={relatedEntities}
-			relatedResources={relatedResources}
+			initialRelatedResourceItems={initialRelatedResources.items}
+			initialRelatedResourceTotal={initialRelatedResources.total}
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
 			spotlightArticle={{
 				...spotlightArticle,
 				image: { ...spotlightArticle.image, url: image.url },

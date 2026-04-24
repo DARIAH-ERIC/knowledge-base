@@ -10,6 +10,11 @@ import type { ReactNode } from "react";
 import { ProjectEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-edit-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import {
+	getOrganisationalUnitOptions,
+	getOrganisationalUnitOptionsByIds,
+} from "@/lib/data/organisational-units";
+import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -103,9 +108,9 @@ export default async function DashboardAdministratorEditProjectPage(
 	const [
 		descriptionRows,
 		scopes,
-		orgUnits,
+		initialOrgUnits,
 		roles,
-		allSocialMedia,
+		initialSocialMedia,
 		existingPartners,
 		existingSocialMedia,
 	] = await Promise.all([
@@ -129,21 +134,12 @@ export default async function DashboardAdministratorEditProjectPage(
 			orderBy: { scope: "asc" },
 			columns: { id: true, scope: true },
 		}),
-		db.query.organisationalUnits.findMany({
-			orderBy: { name: "asc" },
-			columns: { id: true, name: true },
-		}),
+		getOrganisationalUnitOptions(),
 		db.query.projectRoles.findMany({
 			orderBy: { role: "asc" },
 			columns: { id: true, role: true },
 		}),
-		db.query.socialMedia.findMany({
-			orderBy: { name: "asc" },
-			columns: { id: true, name: true, url: true },
-			with: {
-				type: { columns: { type: true } },
-			},
-		}),
+		getSocialMediaOptions(),
 		db.query.projectsToOrganisationalUnits.findMany({
 			where: { projectId: project.id },
 			columns: { id: true, unitId: true, roleId: true, duration: true },
@@ -176,16 +172,32 @@ export default async function DashboardAdministratorEditProjectPage(
 		return row.socialMediaId;
 	});
 
+	const selectedSocialMediaItems = await getSocialMediaOptionsByIds(initialSocialMediaIds);
+	const selectedPartnerUnits = await getOrganisationalUnitOptionsByIds(
+		initialPartners.map((partner) => {
+			return partner.unitId;
+		}),
+	);
+
 	return (
 		<ProjectEditForm
 			initialAssets={initialAssets}
-			initialPartners={initialPartners}
+			initialOrgUnitItems={initialOrgUnits.items}
+			initialOrgUnitTotal={initialOrgUnits.total}
+			initialPartners={initialPartners.map((partner) => {
+				const matchedUnit = selectedPartnerUnits.find((unit) => {
+					return unit.id === partner.unitId;
+				});
+
+				return { ...partner, unitName: matchedUnit?.name ?? partner.unitName };
+			})}
 			initialSocialMediaIds={initialSocialMediaIds}
-			orgUnits={orgUnits}
+			initialSocialMediaItems={initialSocialMedia.items}
+			initialSocialMediaTotal={initialSocialMedia.total}
 			project={{ ...project, description, image }}
 			roles={roles}
 			scopes={scopes}
-			socialMediaItems={allSocialMedia}
+			selectedSocialMediaItems={selectedSocialMediaItems}
 		/>
 	);
 }

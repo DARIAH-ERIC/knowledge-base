@@ -47,6 +47,18 @@ interface RichTextEditorProps {
 	renderImagePicker?: (insert: (imageKey: string, imageUrl: string) => void) => ReactNode;
 }
 
+function normalizeInitialContent(content: JSONContent | undefined): JSONContent | undefined {
+	if (content == null) {
+		return undefined;
+	}
+
+	if (typeof content !== "object" || typeof content.type !== "string") {
+		return undefined;
+	}
+
+	return content;
+}
+
 type ImagePickerRenderer = NonNullable<RichTextEditorProps["renderImagePicker"]>;
 
 export interface RichTextEditorToolbarButtonProps {
@@ -633,6 +645,10 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	const t = useExtracted("ui");
 
+	const initialContent = useMemo(() => {
+		return normalizeInitialContent(content);
+	}, [content]);
+
 	const assetImageNode = useMemo(() => {
 		return createAssetImageNode(renderImagePicker);
 	}, [renderImagePicker]);
@@ -650,7 +666,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 			assetImageNode,
 			EmbedNode,
 		],
-		content,
+		content: initialContent,
 		editable: isEditable,
 		immediatelyRender: false,
 		onUpdate() {
@@ -689,7 +705,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		},
 	});
 
-	const [editorJson, setEditorJson] = useState<JSONContent | undefined>(content);
+	const [editorJson, setEditorJson] = useState<JSONContent | undefined>(initialContent);
 
 	const [isLinkPopoverOpen, setIsLinkPopoverOpen] = useState(false);
 	const [linkHrefInput, setLinkHrefInput] = useState("");

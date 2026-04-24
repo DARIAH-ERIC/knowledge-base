@@ -11,11 +11,17 @@ import { createServiceAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/
 interface ServiceCreateFormProps {
 	serviceTypes: Array<Pick<schema.ServiceType, "id" | "type">>;
 	serviceStatuses: Array<Pick<schema.ServiceStatus, "id" | "status">>;
-	organisationalUnits: Array<Pick<schema.OrganisationalUnit, "id" | "name">>;
+	initialOrganisationalUnitItems: Array<{ id: string; name: string }>;
+	initialOrganisationalUnitTotal: number;
 }
 
 export function ServiceCreateForm(props: Readonly<ServiceCreateFormProps>): ReactNode {
-	const { serviceTypes, serviceStatuses, organisationalUnits } = props;
+	const {
+		serviceTypes,
+		serviceStatuses,
+		initialOrganisationalUnitItems,
+		initialOrganisationalUnitTotal,
+	} = props;
 
 	const t = useExtracted();
 
@@ -25,7 +31,8 @@ export function ServiceCreateForm(props: Readonly<ServiceCreateFormProps>): Reac
 
 			<ServiceForm
 				formAction={createServiceAction}
-				organisationalUnits={organisationalUnits}
+				initialOrganisationalUnitItems={initialOrganisationalUnitItems}
+				initialOrganisationalUnitTotal={initialOrganisationalUnitTotal}
 				serviceStatuses={serviceStatuses}
 				serviceTypes={serviceTypes}
 			/>

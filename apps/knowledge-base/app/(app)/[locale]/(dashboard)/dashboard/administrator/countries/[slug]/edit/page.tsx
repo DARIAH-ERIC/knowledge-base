@@ -11,11 +11,13 @@ import { CountryEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/admi
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import {
-	getAvailableEntities,
-	getAvailableResources,
+	getEntityRelationOptions,
+	getEntityRelationOptionsByIds,
 	getEntityRelations,
+	getResourceRelationOptions,
+	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
-import { getUnitRelationOptions, getUnitRelations } from "@/lib/data/unit-relations";
+import { getUnitRelations, getUnitRelationStatusOptions } from "@/lib/data/unit-relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -45,15 +47,15 @@ export default async function DashboardAdministratorEditCountryPage(
 
 	const [
 		{ items: initialAssets },
-		relatedEntities,
-		relatedResources,
-		allowedRelationOptions,
+		initialRelatedEntities,
+		initialRelatedResources,
+		unitRelationStatusOptions,
 		country,
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
-		getAvailableEntities(),
-		getAvailableResources(),
-		getUnitRelationOptions("country"),
+		getEntityRelationOptions(),
+		getResourceRelationOptions(),
+		getUnitRelationStatusOptions("country"),
 		db.query.organisationalUnits.findFirst({
 			where: {
 				type: { type: "country" },
@@ -128,16 +130,25 @@ export default async function DashboardAdministratorEditCountryPage(
 		getUnitRelations(country.id),
 	]);
 
+	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
+		getEntityRelationOptionsByIds(relatedEntityIds),
+		getResourceRelationOptionsByIds(relatedResourceIds),
+	]);
+
 	return (
 		<CountryEditForm
-			allowedRelationOptions={allowedRelationOptions}
 			country={{ ...country, acronym, description, image }}
 			initialAssets={initialAssets}
 			initialRelatedEntityIds={relatedEntityIds}
+			initialRelatedEntityItems={initialRelatedEntities.items}
+			initialRelatedEntityTotal={initialRelatedEntities.total}
 			initialRelatedResourceIds={relatedResourceIds}
-			relatedEntities={relatedEntities}
-			relatedResources={relatedResources}
+			initialRelatedResourceItems={initialRelatedResources.items}
+			initialRelatedResourceTotal={initialRelatedResources.total}
 			relations={relations}
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
+			unitRelationStatusOptions={unitRelationStatusOptions}
 		/>
 	);
 }

@@ -11,11 +11,13 @@ import { InstitutionEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import {
-	getAvailableEntities,
-	getAvailableResources,
+	getEntityRelationOptions,
+	getEntityRelationOptionsByIds,
 	getEntityRelations,
+	getResourceRelationOptions,
+	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
-import { getUnitRelationOptions, getUnitRelations } from "@/lib/data/unit-relations";
+import { getUnitRelations, getUnitRelationStatusOptions } from "@/lib/data/unit-relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -45,15 +47,15 @@ export default async function DashboardAdministratorEditInstitutionPage(
 
 	const [
 		{ items: initialAssets },
-		relatedEntities,
-		relatedResources,
-		allowedRelationOptions,
+		initialRelatedEntities,
+		initialRelatedResources,
+		unitRelationStatusOptions,
 		institution,
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
-		getAvailableEntities(),
-		getAvailableResources(),
-		getUnitRelationOptions("institution"),
+		getEntityRelationOptions(),
+		getResourceRelationOptions(),
+		getUnitRelationStatusOptions("institution"),
 		db.query.organisationalUnits.findFirst({
 			where: {
 				type: { type: "institution" },
@@ -128,16 +130,25 @@ export default async function DashboardAdministratorEditInstitutionPage(
 		getUnitRelations(institution.id),
 	]);
 
+	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
+		getEntityRelationOptionsByIds(relatedEntityIds),
+		getResourceRelationOptionsByIds(relatedResourceIds),
+	]);
+
 	return (
 		<InstitutionEditForm
-			allowedRelationOptions={allowedRelationOptions}
 			initialAssets={initialAssets}
 			initialRelatedEntityIds={relatedEntityIds}
+			initialRelatedEntityItems={initialRelatedEntities.items}
+			initialRelatedEntityTotal={initialRelatedEntities.total}
 			initialRelatedResourceIds={relatedResourceIds}
+			initialRelatedResourceItems={initialRelatedResources.items}
+			initialRelatedResourceTotal={initialRelatedResources.total}
 			institution={{ ...institution, acronym, description, image }}
-			relatedEntities={relatedEntities}
-			relatedResources={relatedResources}
 			relations={relations}
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
+			unitRelationStatusOptions={unitRelationStatusOptions}
 		/>
 	);
 }

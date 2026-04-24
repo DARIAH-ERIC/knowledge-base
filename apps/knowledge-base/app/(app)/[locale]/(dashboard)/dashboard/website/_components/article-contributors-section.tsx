@@ -21,11 +21,13 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
+import { AsyncOptionPicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/async-option-picker";
 import {
 	FormLayout,
 	FormSection,
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import type { AsyncOptionsFetchPageParams } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-async-options";
 import type { AvailablePerson } from "@/lib/data/article-contributors";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
@@ -38,9 +40,33 @@ interface Contributor {
 interface ArticleContributorsSectionProps {
 	articleId: string;
 	contributors: Array<Contributor>;
-	availablePersons: Array<AvailablePerson>;
+	initialPersonItems: Array<AvailablePerson>;
+	initialPersonTotal: number;
 	createAction: ServerAction;
 	deleteAction: (articleId: string, personId: string) => Promise<void>;
+}
+
+async function fetchPersonOptionsPage(
+	params: Readonly<AsyncOptionsFetchPageParams>,
+): Promise<{ items: Array<AvailablePerson>; total: number }> {
+	const searchParams = new URLSearchParams({
+		limit: String(params.limit),
+		offset: String(params.offset),
+	});
+
+	if (params.q !== "") {
+		searchParams.set("q", params.q);
+	}
+
+	const response = await fetch(`/api/persons/options?${searchParams.toString()}`, {
+		signal: params.signal,
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to load persons.");
+	}
+
+	return (await response.json()) as { items: Array<AvailablePerson>; total: number };
 }
 
 function formatRole(role: string): string {
@@ -50,23 +76,31 @@ function formatRole(role: string): string {
 export function ArticleContributorsSection(
 	props: Readonly<ArticleContributorsSectionProps>,
 ): ReactNode {
-	const { articleId, availablePersons, createAction, deleteAction } = props;
+	const {
+		articleId,
+		contributors,
+		initialPersonItems,
+		initialPersonTotal,
+		createAction,
+		deleteAction,
+	} = props;
 
 	const t = useExtracted();
 
-	const [localContributors, setLocalContributors] = useState(props.contributors);
-	const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
+	const [localContributors, setLocalContributors] = useState(() => {
+		return contributors;
+	});
+	const [selectedPerson, setSelectedPerson] = useState<AvailablePerson | null>(null);
 	const [selectedRole, setSelectedRole] = useState<string | null>(null);
 
-	const [state, setState] = useState<ActionState>(createActionStateInitial());
+	const [state, setState] = useState<ActionState>(() => {
+		return createActionStateInitial();
+	});
 	const [isPending, startFormTransition] = useTransition();
 
 	function formAction(formData: FormData) {
-		const personId = selectedPersonId;
 		const role = selectedRole;
-		const person = availablePersons.find((p) => {
-			return p.id === personId;
-		});
+		const person = selectedPerson;
 
 		startFormTransition(async () => {
 			const newState = await createAction(state, formData);
@@ -76,7 +110,7 @@ export function ArticleContributorsSection(
 				setLocalContributors((prev) => {
 					return [...prev, { personId: person.id, personName: person.name, role }];
 				});
-				setSelectedPersonId(null);
+				setSelectedPerson(null);
 				setSelectedRole(null);
 			}
 		});
@@ -140,27 +174,20 @@ export function ArticleContributorsSection(
 							title={t("Add contributor")}
 							variant="stacked"
 						>
-							<Select
-								isRequired={true}
-								onChange={(key) => {
-									setSelectedPersonId(String(key));
+							<AsyncOptionPicker
+								aria-label={t("Person")}
+								emptyMessage={t("No persons found.")}
+								fetchPage={fetchPersonOptionsPage}
+								initialItems={initialPersonItems}
+								initialTotal={initialPersonTotal}
+								label={t("Person")}
+								onSelect={(item) => {
+									setSelectedPerson(item);
 								}}
-								value={selectedPersonId}
-							>
-								<Label>{t("Person")}</Label>
-								<SelectTrigger />
-								<FieldError />
-								<SelectContent>
-									{availablePersons.map((person) => {
-										return (
-											<SelectItem key={person.id} id={person.id}>
-												{person.name}
-											</SelectItem>
-										);
-									})}
-								</SelectContent>
-							</Select>
-							<input name="personId" type="hidden" value={selectedPersonId ?? ""} />
+								placeholder={t("No person selected")}
+								selectedItem={selectedPerson}
+							/>
+							<input name="personId" type="hidden" value={selectedPerson?.id ?? ""} />
 
 							<Select
 								isRequired={true}

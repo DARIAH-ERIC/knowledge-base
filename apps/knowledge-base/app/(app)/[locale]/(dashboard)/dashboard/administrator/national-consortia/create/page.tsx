@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { NationalConsortiumCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-create-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
-import { getAvailableEntities, getAvailableResources } from "@/lib/data/relations";
+import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 export async function generateMetadata(
@@ -22,17 +22,20 @@ export async function generateMetadata(
 }
 
 export default async function DashboardAdministratorCreateNationalConsortiumPage(): Promise<ReactNode> {
-	const [{ items: initialAssets }, relatedEntities, relatedResources] = await Promise.all([
-		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
-		getAvailableEntities(),
-		getAvailableResources(),
-	]);
+	const [{ items: initialAssets }, initialRelatedEntities, initialRelatedResources] =
+		await Promise.all([
+			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
+			getEntityRelationOptions(),
+			getResourceRelationOptions(),
+		]);
 
 	return (
 		<NationalConsortiumCreateForm
 			initialAssets={initialAssets}
-			relatedEntities={relatedEntities}
-			relatedResources={relatedResources}
+			initialRelatedEntityItems={initialRelatedEntities.items}
+			initialRelatedEntityTotal={initialRelatedEntities.total}
+			initialRelatedResourceItems={initialRelatedResources.items}
+			initialRelatedResourceTotal={initialRelatedResources.total}
 		/>
 	);
 }
