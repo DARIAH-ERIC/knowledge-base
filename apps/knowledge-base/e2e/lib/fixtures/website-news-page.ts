@@ -58,7 +58,15 @@ export class WebsiteNewsPage {
 	}
 
 	async removeRelatedEntity(entityName: string): Promise<void> {
-		await this.page.getByRole("row", { name: entityName }).getByRole("button").click();
+		const section = this.page
+			.locator("section")
+			.filter({ has: this.page.getByRole("heading", { name: "Related entities", level: 2 }) });
+		const dialog = this.page.getByRole("dialog");
+
+		await section.getByRole("button").last().click();
+		await dialog.getByRole("row", { name: entityName }).getByRole("button").click();
+		await section.getByRole("button").last().click({ force: true });
+		await dialog.waitFor({ state: "hidden" });
 	}
 
 	async submitForm(): Promise<void> {
