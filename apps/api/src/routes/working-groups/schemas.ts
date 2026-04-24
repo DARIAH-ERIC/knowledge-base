@@ -65,7 +65,10 @@ export const WorkingGroupSchema = v.pipe(
 		),
 		chairs: v.array(
 			v.object({
-				...v.pick(schema.PersonSelectSchema, ["id", "name", "position"]).entries,
+				...v.pick(schema.PersonSelectSchema, ["id", "name"]).entries,
+				position: v.nullable(
+					v.array(v.object({ role: v.picklist(schema.personRoleTypesEnum), name: v.string() })),
+				),
 				image: v.object({ url: v.string() }),
 				slug: v.string(),
 				role: v.picklist(schema.personRoleTypesEnum),
