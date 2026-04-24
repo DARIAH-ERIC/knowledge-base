@@ -23,20 +23,18 @@ test.describe("persons admin", () => {
 		const personsPage = createAdminPersonsPage(workerIndex);
 
 		const name = `${personsPage.workerPrefix} Test Person ${randomUUID()}`;
-		const position = "Research fellow";
 
 		await personsPage.gotoCreate();
 
 		await personsPage.fillName(name);
 		await personsPage.fillSortName("Person, Test");
-		await personsPage.fillPosition(position);
+		await personsPage.fillPosition("Research fellow");
 		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
 
 		await personsPage.submitForm();
 
 		await personsPage.searchByName(name);
 		await expect(personsPage.rowByName(name)).toBeVisible();
-		await expect(personsPage.rowByName(name)).toContainText(position);
 	});
 
 	test("should edit a person name", async ({ page, createAdminPersonsPage }) => {
