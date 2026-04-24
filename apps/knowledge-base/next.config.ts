@@ -77,7 +77,8 @@ const plugins: Array<(config: Config) => Config> = [
 				path: "./messages",
 				precompile: true,
 			},
-			srcPath: ["./app", "./components", "./lib"],
+			// The app imports the published ui bundle, so the extractor needs to scan it too.
+			srcPath: ["./app", "./components", "./lib", "../../packages/ui/dist"],
 		},
 		requestConfig: "./lib/i18n/request.ts",
 	}),
