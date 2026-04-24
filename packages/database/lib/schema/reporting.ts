@@ -13,10 +13,7 @@ export const reportingCampaigns = p.pgTable(
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
 		year: p.integer("year").notNull().unique(),
-		status: p
-			.text("status", { enum: reportingCampaignStatusEnum })
-			.notNull()
-			.default("open"),
+		status: p.text("status", { enum: reportingCampaignStatusEnum }).notNull().default("open"),
 		...f.timestamps(),
 	},
 	(t) => {

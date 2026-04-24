@@ -43,7 +43,7 @@ export const updateUserAction = createServerAction(
 			});
 		}
 
-		const { id, name, email, role } = result.output;
+		const { id, name, email, role, personId, organisationalUnitId } = result.output;
 
 		const existing = await db.query.users.findFirst({
 			where: { id },
@@ -61,7 +61,16 @@ export const updateUserAction = createServerAction(
 			return createActionStateError({ message: t("This email address is already in use.") });
 		}
 
-		await db.update(schema.users).set({ name, email, role }).where(eq(schema.users.id, id));
+		await db
+			.update(schema.users)
+			.set({
+				name,
+				email,
+				role,
+				personId: personId ?? null,
+				organisationalUnitId: organisationalUnitId ?? null,
+			})
+			.where(eq(schema.users.id, id));
 
 		revalidatePath("/[locale]/dashboard/administrator/users", "layout");
 

@@ -17,10 +17,16 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { ContributionOptionPicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contribution-option-picker";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
+type ActorType = "none" | "person" | "country";
+
 interface UserFormProps {
-	user?: Pick<schema.User, "id" | "name" | "email" | "role">;
+	user?: Pick<schema.User, "id" | "name" | "email" | "role"> & {
+		person: { id: string; name: string } | null;
+		organisationalUnit: { id: string; name: string } | null;
+	};
 	formAction: ServerAction;
 }
 
@@ -32,6 +38,17 @@ export function UserForm(props: Readonly<UserFormProps>): ReactNode {
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
 	const [selectedRole, setSelectedRole] = useState<string>(user?.role ?? "user");
+
+	const initialActorType: ActorType =
+		user?.person != null ? "person" : user?.organisationalUnit != null ? "country" : "none";
+
+	const [actorType, setActorType] = useState<ActorType>(initialActorType);
+	const [selectedPerson, setSelectedPerson] = useState<{ id: string; name: string } | null>(
+		user?.person ?? null,
+	);
+	const [selectedCountry, setSelectedCountry] = useState<{ id: string; name: string } | null>(
+		user?.organisationalUnit ?? null,
+	);
 
 	return (
 		<FormLayout>
@@ -75,6 +92,58 @@ export function UserForm(props: Readonly<UserFormProps>): ReactNode {
 					)}
 
 					{user != null && <input name="id" type="hidden" value={user.id} />}
+				</FormSection>
+
+				<FormSection title={t("Actor link")}>
+					<Select
+						onChange={(key) => {
+							setActorType(key as ActorType);
+							setSelectedPerson(null);
+							setSelectedCountry(null);
+						}}
+						value={actorType}
+					>
+						<Label>{t("Link to")}</Label>
+						<SelectTrigger />
+						<SelectContent>
+							<SelectItem id="none">{t("None")}</SelectItem>
+							<SelectItem id="person">{t("Person")}</SelectItem>
+							<SelectItem id="country">{t("Country")}</SelectItem>
+						</SelectContent>
+					</Select>
+
+					{actorType === "person" && (
+						<ContributionOptionPicker
+							emptyMessage={t("No persons found.")}
+							label={t("Person")}
+							onSelect={setSelectedPerson}
+							placeholder={t("Select a person")}
+							resource="persons"
+							selectedItem={selectedPerson}
+						/>
+					)}
+
+					{actorType === "country" && (
+						<ContributionOptionPicker
+							emptyMessage={t("No countries found.")}
+							label={t("Country")}
+							onSelect={setSelectedCountry}
+							placeholder={t("Select a country")}
+							resource="countries"
+							selectedItem={selectedCountry}
+						/>
+					)}
+
+					<input
+						name="personId"
+						type="hidden"
+						value={actorType === "person" ? (selectedPerson?.id ?? "") : ""}
+					/>
+					<input
+						name="organisationalUnitId"
+						type="hidden"
+						value={actorType === "country" ? (selectedCountry?.id ?? "") : ""}
+					/>
 				</FormSection>
 
 				<Button className="self-start" isPending={isPending} type="submit">

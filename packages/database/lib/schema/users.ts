@@ -34,7 +34,12 @@ export const users = p.pgTable(
 			p.check("users_role_enum_check", inArray(t.role, userRoleEnum)),
 			p.check(
 				"users_actor_xor_check",
-				sql`NOT (${t.personId} IS NOT NULL AND ${t.organisationalUnitId} IS NOT NULL)`,
+				sql`
+					NOT (
+						${t.personId} IS NOT NULL
+						AND ${t.organisationalUnitId} IS NOT NULL
+					)
+				`,
 			),
 		];
 	},

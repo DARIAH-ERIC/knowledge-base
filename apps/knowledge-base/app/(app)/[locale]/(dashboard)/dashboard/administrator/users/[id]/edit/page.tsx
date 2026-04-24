@@ -1,4 +1,6 @@
+import { eq } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
+import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
@@ -38,6 +40,8 @@ export default async function DashboardAdministratorEditUserPage(
 			name: true,
 			email: true,
 			role: true,
+			personId: true,
+			organisationalUnitId: true,
 		},
 	});
 
@@ -45,5 +49,30 @@ export default async function DashboardAdministratorEditUserPage(
 		notFound();
 	}
 
-	return <UserEditForm user={user} />;
+	const [person, organisationalUnit] = await Promise.all([
+		user.personId != null
+			? db
+					.select({ id: schema.persons.id, name: schema.persons.name })
+					.from(schema.persons)
+					.where(eq(schema.persons.id, user.personId))
+					.then((rows) => {return rows[0] ?? null})
+			: null,
+		user.organisationalUnitId != null
+			? db
+					.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+					.from(schema.organisationalUnits)
+					.where(eq(schema.organisationalUnits.id, user.organisationalUnitId))
+					.then((rows) => {return rows[0] ?? null})
+			: null,
+	]);
+
+	return (
+		<UserEditForm
+			user={{
+				...user,
+				person: person ?? null,
+				organisationalUnit: organisationalUnit ?? null,
+			}}
+		/>
+	);
 }

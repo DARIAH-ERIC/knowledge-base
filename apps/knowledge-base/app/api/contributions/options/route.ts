@@ -5,6 +5,7 @@ import { contributionOptionsPageSize } from "@/lib/constants/contributions";
 import {
 	getContributionOrganisationalUnitOptions,
 	getContributionPersonOptions,
+	getCountryOptions,
 } from "@/lib/data/contributions";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -38,6 +39,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 			roleTypeId,
 		});
 
+		return NextResponse.json(result);
+	}
+
+	if (resource === "countries") {
+		const result = await getCountryOptions({ limit, offset, q });
 		return NextResponse.json(result);
 	}
 
