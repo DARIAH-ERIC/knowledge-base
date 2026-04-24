@@ -9,9 +9,11 @@ import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import {
-	getAvailableEntities,
-	getAvailableResources,
+	getEntityRelationOptions,
+	getEntityRelationOptionsByIds,
 	getEntityRelations,
+	getResourceRelationOptions,
+	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -38,8 +40,8 @@ export default async function DashboardWebsiteEditPageItemPage(
 
 	const { slug } = await params;
 
-	const [{ items: initialAssets }, pageItem, relatedEntities, relatedResources] = await Promise.all(
-		[
+	const [{ items: initialAssets }, pageItem, initialRelatedEntities, initialRelatedResources] =
+		await Promise.all([
 			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 			db.query.pages.findFirst({
 				where: {
@@ -67,16 +69,20 @@ export default async function DashboardWebsiteEditPageItemPage(
 					},
 				},
 			}),
-			getAvailableEntities(),
-			getAvailableResources(),
-		],
-	);
+			getEntityRelationOptions(),
+			getResourceRelationOptions(),
+		]);
 
 	if (pageItem == null) {
 		notFound();
 	}
 
 	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(pageItem.id);
+
+	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
+		getEntityRelationOptionsByIds(relatedEntityIds),
+		getResourceRelationOptionsByIds(relatedResourceIds),
+	]);
 
 	const image = pageItem.image
 		? images.generateSignedImageUrl({
@@ -92,13 +98,17 @@ export default async function DashboardWebsiteEditPageItemPage(
 			contentBlocks={contentBlocks}
 			initialAssets={initialAssets}
 			initialRelatedEntityIds={relatedEntityIds}
+			initialRelatedEntityItems={initialRelatedEntities.items}
+			initialRelatedEntityTotal={initialRelatedEntities.total}
 			initialRelatedResourceIds={relatedResourceIds}
+			initialRelatedResourceItems={initialRelatedResources.items}
+			initialRelatedResourceTotal={initialRelatedResources.total}
 			pageItem={{
 				...pageItem,
 				image: pageItem.image ? { ...pageItem.image, url: image!.url } : null,
 			}}
-			relatedEntities={relatedEntities}
-			relatedResources={relatedResources}
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
 		/>
 	);
 }

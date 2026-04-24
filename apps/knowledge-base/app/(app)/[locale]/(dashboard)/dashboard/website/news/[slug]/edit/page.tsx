@@ -9,9 +9,11 @@ import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import {
-	getAvailableEntities,
-	getAvailableResources,
+	getEntityRelationOptions,
+	getEntityRelationOptionsByIds,
 	getEntityRelations,
+	getResourceRelationOptions,
+	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -38,8 +40,8 @@ export default async function DashboardWebsiteEditNewsItemPage(
 
 	const { slug } = await params;
 
-	const [{ items: initialAssets }, newsItem, relatedEntities, relatedResources] = await Promise.all(
-		[
+	const [{ items: initialAssets }, newsItem, initialRelatedEntities, initialRelatedResources] =
+		await Promise.all([
 			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 			db.query.news.findFirst({
 				where: {
@@ -75,10 +77,9 @@ export default async function DashboardWebsiteEditNewsItemPage(
 					},
 				},
 			}),
-			getAvailableEntities(),
-			getAvailableResources(),
-		],
-	);
+			getEntityRelationOptions(),
+			getResourceRelationOptions(),
+		]);
 
 	if (newsItem == null) {
 		notFound();
@@ -92,15 +93,24 @@ export default async function DashboardWebsiteEditNewsItemPage(
 
 	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(newsItem.id);
 
+	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
+		getEntityRelationOptionsByIds(relatedEntityIds),
+		getResourceRelationOptionsByIds(relatedResourceIds),
+	]);
+
 	return (
 		<NewsItemEditForm
 			contentBlocks={contentBlocks}
 			initialAssets={initialAssets}
 			initialRelatedEntityIds={relatedEntityIds}
+			initialRelatedEntityItems={initialRelatedEntities.items}
+			initialRelatedEntityTotal={initialRelatedEntities.total}
 			initialRelatedResourceIds={relatedResourceIds}
+			initialRelatedResourceItems={initialRelatedResources.items}
+			initialRelatedResourceTotal={initialRelatedResources.total}
 			newsItem={{ ...newsItem, image: { ...newsItem.image, url: image.url } }}
-			relatedEntities={relatedEntities}
-			relatedResources={relatedResources}
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
 		/>
 	);
 }

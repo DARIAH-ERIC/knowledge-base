@@ -55,26 +55,6 @@ interface InstitutionsPageProps {
 	>;
 }
 
-function formatInstitutionStatus(
-	status: InstitutionEricRelationStatus,
-	t: ReturnType<typeof useExtracted>,
-): string {
-	switch (status) {
-		case "is_partner_institution_of": {
-			return t("Partner institution");
-		}
-		case "is_cooperating_partner_of": {
-			return t("Cooperating partner");
-		}
-		case "is_national_coordinating_institution_in": {
-			return t("National coordinating institution");
-		}
-		case "is_national_representative_institution_in": {
-			return t("National representative institution");
-		}
-	}
-}
-
 function institutionStatusIntent(
 	status: InstitutionEricRelationStatus,
 ): "danger" | "info" | "primary" | "success" {
@@ -101,6 +81,13 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 
 	const t = useExtracted();
 
+	const institutionStatusLabels: Record<InstitutionEricRelationStatus, string> = {
+		is_cooperating_partner_of: t("Cooperating partner"),
+		is_national_coordinating_institution_in: t("National coordinating institution"),
+		is_national_representative_institution_in: t("National representative institution"),
+		is_partner_institution_of: t("Partner institution"),
+	};
+
 	const { contains } = useFilter({ sensitivity: "base" });
 
 	const list = useListData({
@@ -109,7 +96,7 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 				contains(item.name, filterText) ||
 				contains(item.countryName ?? "", filterText) ||
 				item.ericRelationStatuses.some((status) => {
-					return contains(formatInstitutionStatus(status, t), filterText);
+					return contains(institutionStatusLabels[status], filterText);
 				})
 			);
 		},
@@ -175,7 +162,7 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 											{item.ericRelationStatuses.map((status) => {
 												return (
 													<Badge key={status} intent={institutionStatusIntent(status)}>
-														{formatInstitutionStatus(status, t)}
+														{institutionStatusLabels[status]}
 													</Badge>
 												);
 											})}

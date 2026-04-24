@@ -11,11 +11,13 @@ import { GovernanceBodyEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboa
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import {
-	getAvailableEntities,
-	getAvailableResources,
+	getEntityRelationOptions,
+	getEntityRelationOptionsByIds,
 	getEntityRelations,
+	getResourceRelationOptions,
+	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
-import { getUnitRelationOptions, getUnitRelations } from "@/lib/data/unit-relations";
+import { getUnitRelations, getUnitRelationStatusOptions } from "@/lib/data/unit-relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -45,15 +47,15 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 
 	const [
 		{ items: initialAssets },
-		relatedEntities,
-		relatedResources,
-		allowedRelationOptions,
+		initialRelatedEntities,
+		initialRelatedResources,
+		unitRelationStatusOptions,
 		governanceBody,
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
-		getAvailableEntities(),
-		getAvailableResources(),
-		getUnitRelationOptions("governance_body"),
+		getEntityRelationOptions(),
+		getResourceRelationOptions(),
+		getUnitRelationStatusOptions("governance_body"),
 		db.query.organisationalUnits.findFirst({
 			where: {
 				type: { type: "governance_body" },
@@ -128,16 +130,25 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 		getUnitRelations(governanceBody.id),
 	]);
 
+	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
+		getEntityRelationOptionsByIds(relatedEntityIds),
+		getResourceRelationOptionsByIds(relatedResourceIds),
+	]);
+
 	return (
 		<GovernanceBodyEditForm
-			allowedRelationOptions={allowedRelationOptions}
 			governanceBody={{ ...governanceBody, acronym, description, image }}
 			initialAssets={initialAssets}
 			initialRelatedEntityIds={relatedEntityIds}
+			initialRelatedEntityItems={initialRelatedEntities.items}
+			initialRelatedEntityTotal={initialRelatedEntities.total}
 			initialRelatedResourceIds={relatedResourceIds}
-			relatedEntities={relatedEntities}
-			relatedResources={relatedResources}
+			initialRelatedResourceItems={initialRelatedResources.items}
+			initialRelatedResourceTotal={initialRelatedResources.total}
 			relations={relations}
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
+			unitRelationStatusOptions={unitRelationStatusOptions}
 		/>
 	);
 }

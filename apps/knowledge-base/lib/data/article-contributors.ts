@@ -1,19 +1,73 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { eq } from "@dariah-eric/database";
+import { count, eq, ilike, inArray } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
-export async function getAvailablePersons() {
-	const persons = await db
-		.select({ id: schema.persons.id, name: schema.persons.name })
-		.from(schema.persons)
-		.orderBy(schema.persons.sortName);
+import { relationOptionsPageSize } from "@/lib/constants/relations";
 
-	return persons;
+export interface PersonOption {
+	id: string;
+	name: string;
 }
 
-export type AvailablePerson = Awaited<ReturnType<typeof getAvailablePersons>>[number];
+interface GetPersonOptionsParams {
+	limit?: number;
+	offset?: number;
+	q?: string;
+}
+
+export async function getPersonOptions(
+	params: GetPersonOptionsParams = {},
+): Promise<{ items: Array<PersonOption>; total: number }> {
+	const { limit = relationOptionsPageSize, offset = 0, q } = params;
+	const query = q?.trim();
+	const where =
+		query != null && query !== "" ? ilike(schema.persons.name, `%${query}%`) : undefined;
+
+	const [items, aggregate] = await Promise.all([
+		db
+			.select({ id: schema.persons.id, name: schema.persons.name })
+			.from(schema.persons)
+			.where(where)
+			.orderBy(schema.persons.sortName)
+			.limit(limit)
+			.offset(offset),
+		db.select({ total: count() }).from(schema.persons).where(where),
+	]);
+
+	return { items, total: aggregate.at(0)?.total ?? 0 };
+}
+
+export async function getPersonOptionsByIds(ids: ReadonlyArray<string>) {
+	if (ids.length === 0) {
+		return [];
+	}
+
+	const rows = await db
+		.select({ id: schema.persons.id, name: schema.persons.name })
+		.from(schema.persons)
+		.where(inArray(schema.persons.id, [...ids]))
+		.orderBy(schema.persons.sortName);
+
+	const itemById = new Map(
+		rows.map((row) => {
+			return [row.id, row] as const;
+		}),
+	);
+
+	return ids.flatMap((id) => {
+		const item = itemById.get(id);
+		return item != null ? [item] : [];
+	});
+}
+
+export async function getAvailablePersons() {
+	const { items } = await getPersonOptions({ limit: 250 });
+	return items;
+}
+
+export type AvailablePerson = PersonOption;
 
 export async function getImpactCaseStudyContributors(articleId: string) {
 	return db

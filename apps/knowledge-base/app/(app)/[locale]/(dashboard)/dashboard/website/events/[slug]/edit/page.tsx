@@ -9,9 +9,11 @@ import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import {
-	getAvailableEntities,
-	getAvailableResources,
+	getEntityRelationOptions,
+	getEntityRelationOptionsByIds,
 	getEntityRelations,
+	getResourceRelationOptions,
+	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -38,48 +40,49 @@ export default async function DashboardWebsiteEditEventPage(
 
 	const { slug } = await params;
 
-	const [{ items: initialAssets }, event, relatedEntities, relatedResources] = await Promise.all([
-		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
-		db.query.events.findFirst({
-			where: {
-				entity: {
-					slug,
-				},
-			},
-			columns: {
-				id: true,
-				duration: true,
-				location: true,
-				title: true,
-				summary: true,
-				website: true,
-			},
-			with: {
-				entity: {
-					columns: {
-						documentId: true,
-						slug: true,
+	const [{ items: initialAssets }, event, initialRelatedEntities, initialRelatedResources] =
+		await Promise.all([
+			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
+			db.query.events.findFirst({
+				where: {
+					entity: {
+						slug,
 					},
-					with: {
-						status: {
-							columns: {
-								id: true,
-								type: true,
+				},
+				columns: {
+					id: true,
+					duration: true,
+					location: true,
+					title: true,
+					summary: true,
+					website: true,
+				},
+				with: {
+					entity: {
+						columns: {
+							documentId: true,
+							slug: true,
+						},
+						with: {
+							status: {
+								columns: {
+									id: true,
+									type: true,
+								},
 							},
 						},
 					},
-				},
-				image: {
-					columns: {
-						key: true,
-						label: true,
+					image: {
+						columns: {
+							key: true,
+							label: true,
+						},
 					},
 				},
-			},
-		}),
-		getAvailableEntities(),
-		getAvailableResources(),
-	]);
+			}),
+			getEntityRelationOptions(),
+			getResourceRelationOptions(),
+		]);
 
 	if (event == null) {
 		notFound();
@@ -94,15 +97,24 @@ export default async function DashboardWebsiteEditEventPage(
 
 	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(event.id);
 
+	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
+		getEntityRelationOptionsByIds(relatedEntityIds),
+		getResourceRelationOptionsByIds(relatedResourceIds),
+	]);
+
 	return (
 		<EventEditForm
 			contentBlocks={contentBlocks}
 			event={{ ...event, image: { ...event.image, url: image.url } }}
 			initialAssets={initialAssets}
 			initialRelatedEntityIds={relatedEntityIds}
+			initialRelatedEntityItems={initialRelatedEntities.items}
+			initialRelatedEntityTotal={initialRelatedEntities.total}
 			initialRelatedResourceIds={relatedResourceIds}
-			relatedEntities={relatedEntities}
-			relatedResources={relatedResources}
+			initialRelatedResourceItems={initialRelatedResources.items}
+			initialRelatedResourceTotal={initialRelatedResources.total}
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
 		/>
 	);
 }

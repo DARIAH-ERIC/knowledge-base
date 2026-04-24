@@ -1,31 +1,108 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { and, eq, inArray } from "@dariah-eric/database";
+import { and, count, eq, ilike, inArray, or } from "@dariah-eric/database";
 import { db, type Transaction } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
+import { relationOptionsPageSize } from "@/lib/constants/relations";
 import { search } from "@/lib/search";
 
-export async function getAvailableEntities() {
-	const entities = await db.query.entities.findMany({
-		columns: { id: true, slug: true },
-		with: {
-			type: { columns: { type: true } },
-		},
-		orderBy: { slug: "asc" },
-	});
+export interface RelationOptionItem {
+	id: string;
+	name: string;
+	description?: string;
+}
 
-	return entities.map((entity) => {
-		return { id: entity.id, name: `${entity.type.type} / ${entity.slug}` };
+interface GetRelationOptionsParams {
+	limit?: number;
+	offset?: number;
+	q?: string;
+}
+
+export async function getEntityRelationOptions(
+	params: GetRelationOptionsParams = {},
+): Promise<{ items: Array<RelationOptionItem>; total: number }> {
+	const { limit = relationOptionsPageSize, offset = 0, q } = params;
+	const query = q?.trim();
+	const where =
+		query != null && query !== ""
+			? or(ilike(schema.entities.slug, `%${query}%`), ilike(schema.entityTypes.type, `%${query}%`))
+			: undefined;
+
+	const [rows, aggregate] = await Promise.all([
+		db
+			.select({
+				entityType: schema.entityTypes.type,
+				id: schema.entities.id,
+				slug: schema.entities.slug,
+			})
+			.from(schema.entities)
+			.innerJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
+			.where(where)
+			.orderBy(schema.entities.slug)
+			.limit(limit)
+			.offset(offset),
+		db
+			.select({ total: count() })
+			.from(schema.entities)
+			.innerJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
+			.where(where),
+	]);
+
+	return {
+		items: rows.map((row) => {
+			return { id: row.id, name: `${row.entityType} / ${row.slug}` };
+		}),
+		total: aggregate.at(0)?.total ?? 0,
+	};
+}
+
+export async function getEntityRelationOptionsByIds(ids: ReadonlyArray<string>) {
+	if (ids.length === 0) {
+		return [];
+	}
+
+	const rows = await db
+		.select({
+			entityType: schema.entityTypes.type,
+			id: schema.entities.id,
+			slug: schema.entities.slug,
+		})
+		.from(schema.entities)
+		.innerJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
+		.where(inArray(schema.entities.id, [...ids]))
+		.orderBy(schema.entities.slug);
+
+	const itemById = new Map(
+		rows.map((row) => {
+			return [row.id, { id: row.id, name: `${row.entityType} / ${row.slug}` }] as const;
+		}),
+	);
+
+	return ids.flatMap((id) => {
+		const item = itemById.get(id);
+		return item != null ? [item] : [];
 	});
 }
 
-export async function getAvailableResources() {
+export async function getAvailableEntities() {
+	const { items } = await getEntityRelationOptions({ limit: 250 });
+	return items;
+}
+
+export async function getResourceRelationOptions(
+	params: GetRelationOptionsParams = {},
+): Promise<{ items: Array<RelationOptionItem>; total: number }> {
+	const { limit = relationOptionsPageSize, offset = 0, q } = params;
+	const query = q?.trim();
+
 	try {
+		const page = Math.floor(offset / limit) + 1;
 		const result = await search.collections.resources.search({
-			query: "*",
+			page,
+			perPage: limit,
+			query: query != null && query !== "" ? query : "*",
 			queryBy: ["label"],
-			perPage: 250,
 			sortBy: [{ field: "label", direction: "asc" }],
 		});
 
@@ -33,12 +110,67 @@ export async function getAvailableResources() {
 			throw result.error;
 		}
 
-		return result.value.items.map((hit) => {
-			return { id: hit.document.id, label: hit.document.label };
+		return {
+			items: result.value.items.map((hit) => {
+				return {
+					description: hit.document.type,
+					id: hit.document.id,
+					name: hit.document.label,
+				};
+			}),
+			total: result.value.pagination.total,
+		};
+	} catch {
+		return { items: [], total: 0 };
+	}
+}
+
+export async function getResourceRelationOptionsByIds(ids: ReadonlyArray<string>) {
+	if (ids.length === 0) {
+		return [];
+	}
+
+	try {
+		const result = await search.collections.resources.search({
+			filterBy: `id:[${ids.join(",")}]`,
+			perPage: ids.length,
+			query: "*",
+			queryBy: ["label"],
+			sortBy: [{ field: "label", direction: "asc" }],
+		});
+
+		if (result.isErr()) {
+			throw result.error;
+		}
+
+		const itemById = new Map(
+			result.value.items.map((hit) => {
+				return [
+					hit.document.id,
+					{
+						description: hit.document.type,
+						id: hit.document.id,
+						name: hit.document.label,
+					},
+				] as const;
+			}),
+		);
+
+		return ids.flatMap((id) => {
+			const item = itemById.get(id);
+			return item != null ? [item] : [];
 		});
 	} catch {
 		return [];
 	}
+}
+
+export async function getAvailableResources() {
+	const { items } = await getResourceRelationOptions({ limit: 250 });
+
+	return items.map((item) => {
+		return { id: item.id, label: item.name };
+	});
 }
 
 export async function syncEntityRelations(

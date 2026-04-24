@@ -22,14 +22,12 @@ interface ProjectEditFormProps {
 		scope: Pick<schema.ProjectScope, "id" | "scope">;
 	} & { image: { key: string; label: string; url: string } | null };
 	scopes: Array<Pick<schema.ProjectScope, "id" | "scope">>;
-	orgUnits: Array<{ id: string; name: string }>;
+	initialOrgUnitItems: Array<{ id: string; name: string }>;
+	initialOrgUnitTotal: number;
 	roles: Array<Pick<schema.ProjectRole, "id" | "role">>;
-	socialMediaItems: Array<{
-		id: string;
-		name: string;
-		type: Pick<schema.SocialMediaType, "type">;
-		url: string;
-	}>;
+	initialSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
+	initialSocialMediaTotal: number;
+	selectedSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
 	initialPartners: Array<{
 		id: string;
 		unitId: string;
@@ -47,9 +45,12 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 		initialAssets,
 		project,
 		scopes,
-		orgUnits,
+		initialOrgUnitItems,
+		initialOrgUnitTotal,
 		roles,
-		socialMediaItems,
+		initialSocialMediaItems,
+		initialSocialMediaTotal,
+		selectedSocialMediaItems,
 		initialPartners,
 		initialSocialMediaIds,
 	} = props;
@@ -63,13 +64,16 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 			<ProjectForm
 				formAction={updateProjectAction}
 				initialAssets={initialAssets}
+				initialOrgUnitItems={initialOrgUnitItems}
+				initialOrgUnitTotal={initialOrgUnitTotal}
 				initialPartners={initialPartners}
 				initialSocialMediaIds={initialSocialMediaIds}
-				orgUnits={orgUnits}
+				initialSocialMediaItems={initialSocialMediaItems}
+				initialSocialMediaTotal={initialSocialMediaTotal}
 				project={project}
 				roles={roles}
 				scopes={scopes}
-				socialMediaItems={socialMediaItems}
+				selectedSocialMediaItems={selectedSocialMediaItems}
 			/>
 		</Fragment>
 	);

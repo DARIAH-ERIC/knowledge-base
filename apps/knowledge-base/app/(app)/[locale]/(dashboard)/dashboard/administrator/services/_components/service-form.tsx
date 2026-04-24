@@ -8,11 +8,6 @@ import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
-import {
-	MultipleSelect,
-	MultipleSelectContent,
-	MultipleSelectItem,
-} from "@dariah-eric/ui/multiple-select";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { Separator } from "@dariah-eric/ui/separator";
@@ -21,10 +16,15 @@ import { TextArea } from "@dariah-eric/ui/textarea";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
+import { AsyncMultipleSelect } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/async-multiple-select";
 import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import type {
+	AsyncOption,
+	AsyncOptionsFetchPageParams,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-async-options";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface ServiceFormProps {
@@ -45,8 +45,33 @@ interface ServiceFormProps {
 	};
 	serviceTypes: Array<Pick<schema.ServiceType, "id" | "type">>;
 	serviceStatuses: Array<Pick<schema.ServiceStatus, "id" | "status">>;
-	organisationalUnits: Array<Pick<schema.OrganisationalUnit, "id" | "name">>;
+	initialOrganisationalUnitItems: Array<AsyncOption>;
+	initialOrganisationalUnitTotal: number;
+	selectedOrganisationalUnits?: Array<AsyncOption>;
 	formAction: ServerAction;
+}
+
+async function fetchOrganisationalUnitOptionsPage(
+	params: Readonly<AsyncOptionsFetchPageParams>,
+): Promise<{ items: Array<AsyncOption>; total: number }> {
+	const searchParams = new URLSearchParams({
+		limit: String(params.limit),
+		offset: String(params.offset),
+	});
+
+	if (params.q !== "") {
+		searchParams.set("q", params.q);
+	}
+
+	const response = await fetch(`/api/organisational-units/options?${searchParams.toString()}`, {
+		signal: params.signal,
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to load organisational units.");
+	}
+
+	return (await response.json()) as { items: Array<AsyncOption>; total: number };
 }
 
 function formatServiceType(type: string): string {
@@ -60,7 +85,15 @@ function formatServiceStatus(status: string): string {
 }
 
 export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
-	const { service, serviceTypes, serviceStatuses, organisationalUnits, formAction } = props;
+	const {
+		service,
+		serviceTypes,
+		serviceStatuses,
+		initialOrganisationalUnitItems,
+		initialOrganisationalUnitTotal,
+		selectedOrganisationalUnits,
+		formAction,
+	} = props;
 
 	const t = useExtracted();
 
@@ -175,48 +208,32 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 					description={t("Link organisational units as service owners or providers.")}
 					title={t("Organisational units")}
 				>
-					<MultipleSelect
+					<AsyncMultipleSelect
 						aria-label={t("Service owners")}
-						onChange={(keys) => {
-							setSelectedOwnerUnitIds(keys.map(String));
-						}}
+						fetchPage={fetchOrganisationalUnitOptionsPage}
+						initialItems={initialOrganisationalUnitItems}
+						initialTotal={initialOrganisationalUnitTotal}
+						label={t("Service owners")}
+						onChange={setSelectedOwnerUnitIds}
 						placeholder={t("No service owners")}
+						selectedItems={selectedOrganisationalUnits}
 						value={selectedOwnerUnitIds}
-					>
-						<Label>{t("Service owners")}</Label>
-						<MultipleSelectContent items={organisationalUnits}>
-							{(item) => {
-								return (
-									<MultipleSelectItem key={item.id} id={item.id}>
-										{item.name}
-									</MultipleSelectItem>
-								);
-							}}
-						</MultipleSelectContent>
-					</MultipleSelect>
+					/>
 					{selectedOwnerUnitIds.map((id) => {
 						return <input key={id} name="ownerUnitIds" type="hidden" value={id} />;
 					})}
 
-					<MultipleSelect
+					<AsyncMultipleSelect
 						aria-label={t("Service providers")}
-						onChange={(keys) => {
-							setSelectedProviderUnitIds(keys.map(String));
-						}}
+						fetchPage={fetchOrganisationalUnitOptionsPage}
+						initialItems={initialOrganisationalUnitItems}
+						initialTotal={initialOrganisationalUnitTotal}
+						label={t("Service providers")}
+						onChange={setSelectedProviderUnitIds}
 						placeholder={t("No service providers")}
+						selectedItems={selectedOrganisationalUnits}
 						value={selectedProviderUnitIds}
-					>
-						<Label>{t("Service providers")}</Label>
-						<MultipleSelectContent items={organisationalUnits}>
-							{(item) => {
-								return (
-									<MultipleSelectItem key={item.id} id={item.id}>
-										{item.name}
-									</MultipleSelectItem>
-								);
-							}}
-						</MultipleSelectContent>
-					</MultipleSelect>
+					/>
 					{selectedProviderUnitIds.map((id) => {
 						return <input key={id} name="providerUnitIds" type="hidden" value={id} />;
 					})}

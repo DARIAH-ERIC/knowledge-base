@@ -14,7 +14,6 @@ import {
 	ModalHeader,
 } from "@dariah-eric/ui/modal";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { Separator } from "@dariah-eric/ui/separator";
 import {
 	Table,
@@ -29,11 +28,13 @@ import { type CalendarDate, getLocalTimeZone } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
+import { AsyncOptionPicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/async-option-picker";
 import {
 	FormLayout,
 	FormSection,
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import type { AsyncOptionsFetchPageParams } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-async-options";
 import { createWorkingGroupChairAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/create-working-group-chair.action";
 import { endWorkingGroupChairAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/end-working-group-chair.action";
 import type { AvailablePerson } from "@/lib/data/article-contributors";
@@ -42,31 +43,56 @@ import type { WorkingGroupChair } from "@/lib/data/working-group-chairs";
 interface WorkingGroupChairsSectionProps {
 	unitId: string;
 	chairs: Array<WorkingGroupChair>;
-	availablePersons: Array<AvailablePerson>;
+	initialPersonItems: Array<AvailablePerson>;
+	initialPersonTotal: number;
+}
+
+async function fetchPersonOptionsPage(
+	params: Readonly<AsyncOptionsFetchPageParams>,
+): Promise<{ items: Array<AvailablePerson>; total: number }> {
+	const searchParams = new URLSearchParams({
+		limit: String(params.limit),
+		offset: String(params.offset),
+	});
+
+	if (params.q !== "") {
+		searchParams.set("q", params.q);
+	}
+
+	const response = await fetch(`/api/persons/options?${searchParams.toString()}`, {
+		signal: params.signal,
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to load persons.");
+	}
+
+	return (await response.json()) as { items: Array<AvailablePerson>; total: number };
 }
 
 export function WorkingGroupChairsSection(
 	props: Readonly<WorkingGroupChairsSectionProps>,
 ): ReactNode {
-	const { unitId, availablePersons } = props;
+	const { unitId, chairs, initialPersonItems, initialPersonTotal } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
 
-	const [localChairs, setLocalChairs] = useState(props.chairs);
+	const [localChairs, setLocalChairs] = useState(() => {
+		return chairs;
+	});
 	const [itemToEnd, setItemToEnd] = useState<{ id: string } | null>(null);
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
 
-	const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
+	const [selectedPerson, setSelectedPerson] = useState<AvailablePerson | null>(null);
 
-	const [state, setState] = useState<ActionState>(createActionStateInitial());
+	const [state, setState] = useState<ActionState>(() => {
+		return createActionStateInitial();
+	});
 	const [isPending, startFormTransition] = useTransition();
 
 	function formAction(formData: FormData) {
-		const personId = selectedPersonId;
-		const person = availablePersons.find((p) => {
-			return p.id === personId;
-		});
+		const person = selectedPerson;
 
 		startFormTransition(async () => {
 			const newState = await createWorkingGroupChairAction(state, formData);
@@ -94,7 +120,7 @@ export function WorkingGroupChairsSection(
 					});
 				}
 
-				setSelectedPersonId(null);
+				setSelectedPerson(null);
 			}
 		});
 	}
@@ -161,27 +187,20 @@ export function WorkingGroupChairsSection(
 							title={t("Add chair")}
 							variant="stacked"
 						>
-							<Select
-								isRequired={true}
-								onChange={(key) => {
-									setSelectedPersonId(String(key));
+							<AsyncOptionPicker
+								aria-label={t("Person")}
+								emptyMessage={t("No persons found.")}
+								fetchPage={fetchPersonOptionsPage}
+								initialItems={initialPersonItems}
+								initialTotal={initialPersonTotal}
+								label={t("Person")}
+								onSelect={(item) => {
+									setSelectedPerson(item);
 								}}
-								value={selectedPersonId}
-							>
-								<Label>{t("Person")}</Label>
-								<SelectTrigger />
-								<FieldError />
-								<SelectContent>
-									{availablePersons.map((person) => {
-										return (
-											<SelectItem key={person.id} id={person.id}>
-												{person.name}
-											</SelectItem>
-										);
-									})}
-								</SelectContent>
-							</Select>
-							<input name="personId" type="hidden" value={selectedPersonId ?? ""} />
+								placeholder={t("No person selected")}
+								selectedItem={selectedPerson}
+							/>
+							<input name="personId" type="hidden" value={selectedPerson?.id ?? ""} />
 
 							<DatePicker granularity="day" isRequired={true} name="duration.start">
 								<Label>{t("Start date")}</Label>

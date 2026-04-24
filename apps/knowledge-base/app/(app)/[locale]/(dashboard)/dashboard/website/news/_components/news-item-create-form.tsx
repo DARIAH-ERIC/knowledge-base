@@ -9,12 +9,20 @@ import { createNewsItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard
 
 interface NewsItemCreateFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
-	relatedEntities: Array<{ id: string; name: string }>;
-	relatedResources: Array<{ id: string; label: string }>;
+	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedEntityTotal: number;
+	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedResourceTotal: number;
 }
 
 export function NewsItemCreateForm(props: Readonly<NewsItemCreateFormProps>): ReactNode {
-	const { initialAssets, relatedEntities, relatedResources } = props;
+	const {
+		initialAssets,
+		initialRelatedEntityItems,
+		initialRelatedEntityTotal,
+		initialRelatedResourceItems,
+		initialRelatedResourceTotal,
+	} = props;
 
 	const t = useExtracted();
 
@@ -25,8 +33,10 @@ export function NewsItemCreateForm(props: Readonly<NewsItemCreateFormProps>): Re
 			<NewsItemForm
 				formAction={createNewsItemAction}
 				initialAssets={initialAssets}
-				relatedEntities={relatedEntities}
-				relatedResources={relatedResources}
+				initialRelatedEntityItems={initialRelatedEntityItems}
+				initialRelatedEntityTotal={initialRelatedEntityTotal}
+				initialRelatedResourceItems={initialRelatedResourceItems}
+				initialRelatedResourceTotal={initialRelatedResourceTotal}
 			/>
 		</Fragment>
 	);

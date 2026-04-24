@@ -16,11 +16,6 @@ import {
 	ModalFooter,
 	ModalHeader,
 } from "@dariah-eric/ui/modal";
-import {
-	MultipleSelect,
-	MultipleSelectContent,
-	MultipleSelectItem,
-} from "@dariah-eric/ui/multiple-select";
 import { NumberField } from "@dariah-eric/ui/number-field";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { RichTextEditor } from "@dariah-eric/ui/rich-text-editor";
@@ -33,13 +28,18 @@ import { CalendarDate, parseDate } from "@internationalized/date";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState, useTransition } from "react";
-import { Text } from "react-aria-components";
 
+import { AsyncMultipleSelect } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/async-multiple-select";
+import { AsyncOptionPicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/async-option-picker";
 import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import type {
+	AsyncOption,
+	AsyncOptionsFetchPageParams,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-async-options";
 import {
 	type CreatedSocialMedia,
 	createSocialMediaAction,
@@ -61,6 +61,7 @@ interface DialogState {
 	isOpen: boolean;
 	editingIndex: number | null;
 	unitId: string;
+	unitItem: AsyncOption | null;
 	roleId: string;
 	durationStart: CalendarDate | null;
 	durationEnd: CalendarDate | null;
@@ -70,10 +71,57 @@ const emptyDialog: DialogState = {
 	isOpen: false,
 	editingIndex: null,
 	unitId: "",
+	unitItem: null,
 	roleId: "",
 	durationStart: null,
 	durationEnd: null,
 };
+
+async function fetchOrganisationalUnitOptionsPage(
+	params: Readonly<AsyncOptionsFetchPageParams>,
+): Promise<{ items: Array<AsyncOption>; total: number }> {
+	const searchParams = new URLSearchParams({
+		limit: String(params.limit),
+		offset: String(params.offset),
+	});
+
+	if (params.q !== "") {
+		searchParams.set("q", params.q);
+	}
+
+	const response = await fetch(`/api/organisational-units/options?${searchParams.toString()}`, {
+		signal: params.signal,
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to load organisational units.");
+	}
+
+	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+}
+
+async function fetchSocialMediaOptionsPage(
+	params: Readonly<AsyncOptionsFetchPageParams>,
+): Promise<{ items: Array<AsyncOption>; total: number }> {
+	const searchParams = new URLSearchParams({
+		limit: String(params.limit),
+		offset: String(params.offset),
+	});
+
+	if (params.q !== "") {
+		searchParams.set("q", params.q);
+	}
+
+	const response = await fetch(`/api/social-media/options?${searchParams.toString()}`, {
+		signal: params.signal,
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to load social media options.");
+	}
+
+	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+}
 
 interface ProjectFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
@@ -89,14 +137,12 @@ interface ProjectFormProps {
 	} & { image: { key: string; label: string; url: string } | null };
 	formAction: ServerAction;
 	scopes: Array<Pick<schema.ProjectScope, "id" | "scope">>;
-	orgUnits: Array<{ id: string; name: string }>;
+	initialOrgUnitItems: Array<AsyncOption>;
+	initialOrgUnitTotal: number;
 	roles: Array<Pick<schema.ProjectRole, "id" | "role">>;
-	socialMediaItems: Array<{
-		id: string;
-		name: string;
-		type: Pick<schema.SocialMediaType, "type">;
-		url: string;
-	}>;
+	initialSocialMediaItems: Array<AsyncOption>;
+	initialSocialMediaTotal: number;
+	selectedSocialMediaItems?: Array<AsyncOption>;
 	initialPartners?: Array<{
 		id: string;
 		unitId: string;
@@ -115,9 +161,12 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 		formAction,
 		project,
 		scopes,
-		orgUnits,
+		initialOrgUnitItems,
+		initialOrgUnitTotal,
 		roles,
-		socialMediaItems,
+		initialSocialMediaItems,
+		initialSocialMediaTotal,
+		selectedSocialMediaItems,
 		initialPartners,
 		initialSocialMediaIds,
 	} = props;
@@ -143,10 +192,8 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 		initialSocialMediaIds ?? [],
 	);
 
-	const [localSocialMediaItems, setLocalSocialMediaItems] = useState<
-		Array<{ id: string; name: string; url: string; type: { type: string } }>
-	>(() => {
-		return socialMediaItems;
+	const [localSocialMediaItems, setLocalSocialMediaItems] = useState<Array<AsyncOption>>(() => {
+		return selectedSocialMediaItems ?? [];
 	});
 
 	const [isCreateSocialMediaOpen, setIsCreateSocialMediaOpen] = useState(false);
@@ -165,7 +212,14 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 			setCreateSocialMediaState(result);
 			if (result.status === "success") {
 				setLocalSocialMediaItems((prev) => {
-					return [...prev, result.data];
+					return [
+						...prev,
+						{
+							description: `${result.data.type.type} · ${result.data.url}`,
+							id: result.data.id,
+							name: result.data.name,
+						},
+					];
 				});
 				setSelectedSocialMediaIds((prev) => {
 					return [...prev, result.data.id];
@@ -195,6 +249,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 			isOpen: true,
 			editingIndex: index,
 			unitId: p.unitId,
+			unitItem: { id: p.unitId, name: p.unitName },
 			roleId: p.roleId,
 			durationStart: p.durationStart != null ? parseDate(p.durationStart) : null,
 			durationEnd: p.durationEnd != null ? parseDate(p.durationEnd) : null,
@@ -206,9 +261,6 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 			return;
 		}
 
-		const unit = orgUnits.find((u) => {
-			return u.id === dialog.unitId;
-		});
 		const role = roles.find((r) => {
 			return r.id === dialog.roleId;
 		});
@@ -221,7 +273,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 			existingId:
 				dialog.editingIndex !== null ? (partners[dialog.editingIndex]?.existingId ?? null) : null,
 			unitId: dialog.unitId,
-			unitName: unit?.name ?? "",
+			unitName: dialog.unitItem?.name ?? "",
 			roleId: dialog.roleId,
 			roleName: role?.role ?? "",
 			durationStart: dialog.durationStart?.toString() ?? null,
@@ -406,35 +458,16 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 					description={t("Link social media accounts to this project.")}
 					title={t("Social media")}
 				>
-					{localSocialMediaItems.length > 0 ? (
-						<MultipleSelect
-							aria-label={t("Social media")}
-							onChange={(keys) => {
-								setSelectedSocialMediaIds(keys.map(String));
-							}}
-							placeholder={t("No social media linked")}
-							value={selectedSocialMediaIds}
-						>
-							<MultipleSelectContent items={localSocialMediaItems}>
-								{(item) => {
-									return (
-										<MultipleSelectItem id={item.id} textValue={item.name}>
-											<div className="col-start-2">
-												<Text slot="label">{item.name}</Text>
-												<Text className="block text-xs text-muted-fg" slot="description">
-													{item.type.type}
-													{" · "}
-													{item.url}
-												</Text>
-											</div>
-										</MultipleSelectItem>
-									);
-								}}
-							</MultipleSelectContent>
-						</MultipleSelect>
-					) : (
-						<p>{t("No social media entries available.")}</p>
-					)}
+					<AsyncMultipleSelect
+						aria-label={t("Social media")}
+						fetchPage={fetchSocialMediaOptionsPage}
+						initialItems={initialSocialMediaItems}
+						initialTotal={initialSocialMediaTotal}
+						onChange={setSelectedSocialMediaIds}
+						placeholder={t("No social media linked")}
+						selectedItems={localSocialMediaItems}
+						value={selectedSocialMediaIds}
+					/>
 					<Button
 						className="self-start"
 						intent="outline"
@@ -543,23 +576,20 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 						title={dialog.editingIndex !== null ? t("Edit partner") : t("Add partner")}
 					/>
 					<ModalBody className="flex flex-col gap-y-4">
-						<Select
-							isRequired={true}
-							onChange={(key) => {
+						<AsyncOptionPicker
+							aria-label={t("Organisation")}
+							fetchPage={fetchOrganisationalUnitOptionsPage}
+							initialItems={initialOrgUnitItems}
+							initialTotal={initialOrgUnitTotal}
+							label={t("Organisation")}
+							onSelect={(item) => {
 								setDialog((prev) => {
-									return { ...prev, unitId: String(key) };
+									return { ...prev, unitId: item.id, unitItem: item };
 								});
 							}}
-							value={dialog.unitId || null}
-						>
-							<Label>{t("Organisation")}</Label>
-							<SelectTrigger />
-							<SelectContent items={orgUnits}>
-								{(unit) => {
-									return <SelectItem id={unit.id}>{unit.name}</SelectItem>;
-								}}
-							</SelectContent>
-						</Select>
+							placeholder={t("No organisation selected")}
+							selectedItem={dialog.unitItem}
+						/>
 
 						<Select
 							isRequired={true}

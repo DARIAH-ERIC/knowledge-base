@@ -15,10 +15,14 @@ interface PageItemEditFormProps {
 	pageItem: Pick<schema.Page, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; label: string; url: string } | null };
-	relatedEntities: Array<{ id: string; name: string }>;
-	relatedResources: Array<{ id: string; label: string }>;
 	initialRelatedEntityIds: Array<string>;
+	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedEntityTotal: number;
 	initialRelatedResourceIds: Array<string>;
+	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedResourceTotal: number;
+	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 }
 
 export function PageItemEditForm(props: Readonly<PageItemEditFormProps>): ReactNode {
@@ -26,10 +30,14 @@ export function PageItemEditForm(props: Readonly<PageItemEditFormProps>): ReactN
 		initialAssets,
 		contentBlocks,
 		pageItem,
-		relatedEntities,
-		relatedResources,
 		initialRelatedEntityIds,
+		initialRelatedEntityItems,
+		initialRelatedEntityTotal,
 		initialRelatedResourceIds,
+		initialRelatedResourceItems,
+		initialRelatedResourceTotal,
+		selectedRelatedEntities,
+		selectedRelatedResources,
 	} = props;
 
 	const t = useExtracted();
@@ -43,10 +51,14 @@ export function PageItemEditForm(props: Readonly<PageItemEditFormProps>): ReactN
 				formAction={updatePageItemAction}
 				initialAssets={initialAssets}
 				initialRelatedEntityIds={initialRelatedEntityIds}
+				initialRelatedEntityItems={initialRelatedEntityItems}
+				initialRelatedEntityTotal={initialRelatedEntityTotal}
 				initialRelatedResourceIds={initialRelatedResourceIds}
+				initialRelatedResourceItems={initialRelatedResourceItems}
+				initialRelatedResourceTotal={initialRelatedResourceTotal}
 				pageItem={pageItem}
-				relatedEntities={relatedEntities}
-				relatedResources={relatedResources}
+				selectedRelatedEntities={selectedRelatedEntities}
+				selectedRelatedResources={selectedRelatedResources}
 			/>
 		</Fragment>
 	);

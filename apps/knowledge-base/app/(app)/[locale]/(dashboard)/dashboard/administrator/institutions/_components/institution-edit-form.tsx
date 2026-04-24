@@ -9,7 +9,7 @@ import { Fragment, type ReactNode } from "react";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { InstitutionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form";
 import { updateInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/update-institution.action";
-import type { UnitRelation, UnitRelationOption } from "@/lib/data/unit-relations";
+import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
 
 interface InstitutionEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
@@ -17,24 +17,32 @@ interface InstitutionEditFormProps {
 		description?: JSONContent;
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; label: string; url: string } | null };
-	relatedEntities: Array<{ id: string; name: string }>;
-	relatedResources: Array<{ id: string; label: string }>;
 	initialRelatedEntityIds: Array<string>;
+	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedEntityTotal: number;
 	initialRelatedResourceIds: Array<string>;
+	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedResourceTotal: number;
+	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	relations: Array<UnitRelation>;
-	allowedRelationOptions: Array<UnitRelationOption>;
+	unitRelationStatusOptions: Array<UnitRelationStatusOption>;
 }
 
 export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): ReactNode {
 	const {
 		initialAssets,
 		institution,
-		relatedEntities,
-		relatedResources,
 		initialRelatedEntityIds,
+		initialRelatedEntityItems,
+		initialRelatedEntityTotal,
 		initialRelatedResourceIds,
+		initialRelatedResourceItems,
+		initialRelatedResourceTotal,
+		selectedRelatedEntities,
+		selectedRelatedResources,
 		relations,
-		allowedRelationOptions,
+		unitRelationStatusOptions,
 	} = props;
 
 	const t = useExtracted();
@@ -47,15 +55,19 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 				formAction={updateInstitutionAction}
 				initialAssets={initialAssets}
 				initialRelatedEntityIds={initialRelatedEntityIds}
+				initialRelatedEntityItems={initialRelatedEntityItems}
+				initialRelatedEntityTotal={initialRelatedEntityTotal}
 				initialRelatedResourceIds={initialRelatedResourceIds}
+				initialRelatedResourceItems={initialRelatedResourceItems}
+				initialRelatedResourceTotal={initialRelatedResourceTotal}
 				institution={institution}
-				relatedEntities={relatedEntities}
-				relatedResources={relatedResources}
+				selectedRelatedEntities={selectedRelatedEntities}
+				selectedRelatedResources={selectedRelatedResources}
 			/>
 
 			<UnitRelationsSection
-				allowedOptions={allowedRelationOptions}
 				relations={relations}
+				statusOptions={unitRelationStatusOptions}
 				unitId={institution.id}
 			/>
 		</Fragment>
