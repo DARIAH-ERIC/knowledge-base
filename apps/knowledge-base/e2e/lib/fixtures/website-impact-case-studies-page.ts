@@ -1,5 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
+import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
+
 const BASE_PATH = "/en/dashboard/website/impact-case-studies";
 
 export class WebsiteImpactCaseStudiesPage {
@@ -55,7 +57,7 @@ export class WebsiteImpactCaseStudiesPage {
 	// ---------------------------------------------------------------------------
 
 	async searchByTitle(title: string): Promise<void> {
-		await this.page.getByRole("searchbox").fill(title);
+		await fillSearchAndWaitForUrl(this.page, BASE_PATH, title);
 	}
 
 	rowByTitle(title: string): Locator {
