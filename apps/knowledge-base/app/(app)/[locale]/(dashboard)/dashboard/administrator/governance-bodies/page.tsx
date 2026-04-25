@@ -7,13 +7,24 @@ import { getGovernanceBodies } from "@/lib/data/governance-bodies";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
-import { getListSearchParams } from "@/lib/server/list-search-params";
+import {
+	getListSearchParams,
+	getListSortSearchParams,
+	type ListSortDirection,
+} from "@/lib/server/list-search-params";
 
 interface DashboardAdministratorGovernanceBodiesPageProps extends PageProps<"/[locale]/dashboard/administrator/governance-bodies"> {}
 
 const pageSize = 10;
+const defaultSort = "name" as const;
+const validSorts = ["acronym", "name"] as const;
 
-function createListHref(q: string, page: number): string {
+function createListHref(
+	q: string,
+	page: number,
+	sort: (typeof validSorts)[number],
+	dir: ListSortDirection,
+): string {
 	const searchParams = new URLSearchParams();
 
 	if (q !== "") {
@@ -22,6 +33,11 @@ function createListHref(q: string, page: number): string {
 
 	if (page > 1) {
 		searchParams.set("page", String(page));
+	}
+
+	if (sort !== defaultSort || dir !== "asc") {
+		searchParams.set("sort", sort);
+		searchParams.set("dir", dir);
 	}
 
 	const query = searchParams.toString();
@@ -48,23 +64,32 @@ export default async function DashboardAdministratorGovernanceBodiesPage(
 	const { params, searchParams } = props;
 	const [{ locale }, rawSearchParams] = await Promise.all([params, searchParams]);
 	const { page, q } = getListSearchParams(rawSearchParams);
+	const { dir, sort } = getListSortSearchParams(rawSearchParams, {
+		defaultDir: "asc",
+		defaultSort,
+		validSorts,
+	});
 	const governanceBodies = await getGovernanceBodies({
 		limit: pageSize,
 		offset: (page - 1) * pageSize,
 		q,
+		sort,
+		dir,
 	});
 	const totalPages = Math.max(Math.ceil(governanceBodies.total / pageSize), 1);
 
 	if (page > totalPages) {
-		redirect({ href: createListHref(q, totalPages), locale: locale as IntlLocale });
+		redirect({ href: createListHref(q, totalPages, sort, dir), locale: locale as IntlLocale });
 	}
 
 	return (
 		<GovernanceBodiesPage
-			key={`${q}:${String(page)}`}
+			key={`${q}:${sort}:${dir}:${String(page)}`}
+			dir={dir}
 			governanceBodies={governanceBodies}
 			page={page}
 			q={q}
+			sort={sort}
 		/>
 	);
 }

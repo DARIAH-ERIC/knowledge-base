@@ -20,7 +20,7 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
@@ -37,33 +37,40 @@ import { deletePageItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface PagesPageProps {
+	dir: "asc" | "desc";
 	page: number;
 	pages: {
 		data: Array<
 			Pick<schema.Page, "id" | "title" | "summary"> & {
 				entity: Pick<schema.Entity, "slug">;
+				updatedAt: schema.Entity["updatedAt"];
 			}
 		>;
 		total: number;
 	};
 	q: string;
+	sort: "title" | "updatedAt";
 }
 
 const pageSize = 10;
 
 export function PagesPage(props: Readonly<PagesPageProps>): ReactNode {
-	const { page: initialPage, pages, q: initialQ } = props;
+	const { dir: initialDir, page: initialPage, pages, q: initialQ, sort: initialSort } = props;
 
 	const t = useExtracted();
+	const format = useFormatter();
 	const router = useRouter();
 	const [items, setItems] = useState(() => {
 		return pages.data;
 	});
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
-	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
-		page: initialPage,
-		q: initialQ,
-	});
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
 	const [isDeletePending, startDeleteTransition] = useTransition();
 
 	const totalPages = Math.max(Math.ceil(pages.total / pageSize), 1);
@@ -94,10 +101,17 @@ export function PagesPage(props: Readonly<PagesPageProps>): ReactNode {
 			<Table
 				aria-label="pages"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Title")}</TableColumn>
+					<TableColumn allowsSorting={true} id="title" isRowHeader={true}>
+						{t("Title")}
+					</TableColumn>
 					<TableColumn>{t("Summary")}</TableColumn>
+					<TableColumn allowsSorting={true} id="updatedAt">
+						{t("Updated")}
+					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -110,6 +124,7 @@ export function PagesPage(props: Readonly<PagesPageProps>): ReactNode {
 								<TableCell>
 									<div className="max-w-xs truncate">{item.summary}</div>
 								</TableCell>
+								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button

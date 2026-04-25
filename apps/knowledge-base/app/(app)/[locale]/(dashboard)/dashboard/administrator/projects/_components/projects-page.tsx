@@ -38,6 +38,7 @@ import { deleteProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface ProjectsPageProps {
+	dir: "asc" | "desc";
 	page: number;
 	projects: {
 		data: Array<
@@ -49,12 +50,13 @@ interface ProjectsPageProps {
 		total: number;
 	};
 	q: string;
+	sort: "name" | "acronym" | "funding" | "scope";
 }
 
 const pageSize = 10;
 
 export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
-	const { page: initialPage, projects, q: initialQ } = props;
+	const { dir: initialDir, page: initialPage, projects, q: initialQ, sort: initialSort } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -63,10 +65,13 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 		return projects.data;
 	});
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
-	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
-		page: initialPage,
-		q: initialQ,
-	});
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
 	const [isDeletePending, startDeleteTransition] = useTransition();
 
 	const totalPages = Math.max(Math.ceil(projects.total / pageSize), 1);
@@ -97,13 +102,23 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 			<Table
 				aria-label="projects"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
-					<TableColumn>{t("Acronym")}</TableColumn>
+					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
+						{t("Name")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="acronym">
+						{t("Acronym")}
+					</TableColumn>
 					<TableColumn>{t("Duration")}</TableColumn>
-					<TableColumn>{t("Funding")}</TableColumn>
-					<TableColumn>{t("Scope")}</TableColumn>
+					<TableColumn allowsSorting={true} id="funding">
+						{t("Funding")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="scope">
+						{t("Scope")}
+					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>

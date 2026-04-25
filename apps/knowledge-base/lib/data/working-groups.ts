@@ -1,11 +1,15 @@
-import { and, asc, count, eq, ilike, inArray } from "@dariah-eric/database";
+import { and, count, desc, eq, ilike, inArray } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
+
+export type WorkingGroupsSort = "name";
 
 interface GetWorkingGroupsParams {
 	limit: number;
 	offset: number;
 	q?: string;
+	sort?: WorkingGroupsSort;
+	dir?: "asc" | "desc";
 }
 
 export interface WorkingGroupsResult {
@@ -24,7 +28,7 @@ export interface WorkingGroupsResult {
 export async function getWorkingGroups(
 	params: Readonly<GetWorkingGroupsParams>,
 ): Promise<WorkingGroupsResult> {
-	const { limit, offset, q } = params;
+	const { limit, offset, q, dir = "asc" } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""
@@ -40,6 +44,9 @@ export async function getWorkingGroups(
 					"working_group" as typeof schema.organisationalUnitTypes.$inferSelect.type,
 				);
 
+	const orderBy =
+		dir === "desc" ? desc(schema.organisationalUnits.name) : schema.organisationalUnits.name;
+
 	const [items, aggregate, erics] = await Promise.all([
 		db
 			.select({
@@ -54,7 +61,7 @@ export async function getWorkingGroups(
 			)
 			.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
 			.where(where)
-			.orderBy(asc(schema.organisationalUnits.name))
+			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
 		db

@@ -37,6 +37,7 @@ import { deletePersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/a
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface PersonsPageProps {
+	dir: "asc" | "desc";
 	page: number;
 	persons: {
 		data: Array<
@@ -47,12 +48,13 @@ interface PersonsPageProps {
 		total: number;
 	};
 	q: string;
+	sort: "name" | "email" | "orcid";
 }
 
 const pageSize = 10;
 
 export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
-	const { page: initialPage, persons, q: initialQ } = props;
+	const { dir: initialDir, page: initialPage, persons, q: initialQ, sort: initialSort } = props;
 
 	const t = useExtracted();
 	const router = useRouter();
@@ -60,10 +62,13 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 		return persons.data;
 	});
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
-	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
-		page: initialPage,
-		q: initialQ,
-	});
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
 	const [isDeletePending, startDeleteTransition] = useTransition();
 
 	const totalPages = Math.max(Math.ceil(persons.total / pageSize), 1);
@@ -94,11 +99,19 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 			<Table
 				aria-label="persons"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
-					<TableColumn>{t("Email")}</TableColumn>
-					<TableColumn>{t("ORCID")}</TableColumn>
+					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
+						{t("Name")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="email">
+						{t("Email")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="orcid">
+						{t("ORCID")}
+					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>

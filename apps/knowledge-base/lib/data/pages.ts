@@ -7,18 +7,30 @@ import * as schema from "@dariah-eric/database/schema";
 import { imageAssetWidth } from "@/config/assets.config";
 import { images } from "@/lib/images";
 
+export type PagesSort = "title" | "updatedAt";
+
 interface GetPagesParams {
 	/** @default 10 */
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
 	q?: string;
+	sort?: PagesSort;
+	dir?: "asc" | "desc";
 }
 
 export async function getPages(params: GetPagesParams) {
-	const { limit = 10, offset = 0, q } = params;
+	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
 	const query = q?.trim();
 	const where = query != null && query !== "" ? ilike(schema.pages.title, `%${query}%`) : undefined;
+	const orderBy =
+		sort === "title"
+			? dir === "asc"
+				? schema.pages.title
+				: desc(schema.pages.title)
+			: dir === "asc"
+				? schema.entities.updatedAt
+				: desc(schema.entities.updatedAt);
 
 	const [items, aggregate] = await Promise.all([
 		db
@@ -27,11 +39,12 @@ export async function getPages(params: GetPagesParams) {
 				slug: schema.entities.slug,
 				summary: schema.pages.summary,
 				title: schema.pages.title,
+				updatedAt: schema.entities.updatedAt,
 			})
 			.from(schema.pages)
 			.innerJoin(schema.entities, eq(schema.pages.id, schema.entities.id))
 			.where(where)
-			.orderBy(desc(schema.entities.updatedAt))
+			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
 		db
@@ -50,6 +63,7 @@ export async function getPages(params: GetPagesParams) {
 			entity: { slug: item.slug },
 			summary: item.summary,
 			title: item.title,
+			updatedAt: item.updatedAt,
 		};
 	});
 

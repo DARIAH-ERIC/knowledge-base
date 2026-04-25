@@ -7,19 +7,31 @@ import * as schema from "@dariah-eric/database/schema";
 import { imageAssetWidth } from "@/config/assets.config";
 import { images } from "@/lib/images";
 
+export type SpotlightArticlesSort = "title" | "updatedAt";
+
 interface GetSpotlightArticlesParams {
 	/** @default 10 */
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
 	q?: string;
+	sort?: SpotlightArticlesSort;
+	dir?: "asc" | "desc";
 }
 
 export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
-	const { limit = 10, offset = 0, q } = params;
+	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== "" ? ilike(schema.spotlightArticles.title, `%${query}%`) : undefined;
+	const orderBy =
+		sort === "title"
+			? dir === "asc"
+				? schema.spotlightArticles.title
+				: desc(schema.spotlightArticles.title)
+			: dir === "asc"
+				? schema.entities.updatedAt
+				: desc(schema.entities.updatedAt);
 
 	const [items, aggregate] = await Promise.all([
 		db
@@ -28,11 +40,12 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 				slug: schema.entities.slug,
 				summary: schema.spotlightArticles.summary,
 				title: schema.spotlightArticles.title,
+				updatedAt: schema.entities.updatedAt,
 			})
 			.from(schema.spotlightArticles)
 			.innerJoin(schema.entities, eq(schema.spotlightArticles.id, schema.entities.id))
 			.where(where)
-			.orderBy(desc(schema.entities.updatedAt))
+			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
 		db
@@ -51,6 +64,7 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 			entity: { slug: item.slug },
 			summary: item.summary,
 			title: item.title,
+			updatedAt: item.updatedAt,
 		};
 	});
 

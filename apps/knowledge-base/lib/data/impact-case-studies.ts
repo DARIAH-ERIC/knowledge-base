@@ -7,19 +7,31 @@ import * as schema from "@dariah-eric/database/schema";
 import { imageAssetWidth } from "@/config/assets.config";
 import { images } from "@/lib/images";
 
+export type ImpactCaseStudiesSort = "title" | "updatedAt";
+
 interface GetImpactCaseStudiesParams {
 	/** @default 10 */
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
 	q?: string;
+	sort?: ImpactCaseStudiesSort;
+	dir?: "asc" | "desc";
 }
 
 export async function getImpactCaseStudies(params: GetImpactCaseStudiesParams) {
-	const { limit = 10, offset = 0, q } = params;
+	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== "" ? ilike(schema.impactCaseStudies.title, `%${query}%`) : undefined;
+	const orderBy =
+		sort === "title"
+			? dir === "asc"
+				? schema.impactCaseStudies.title
+				: desc(schema.impactCaseStudies.title)
+			: dir === "asc"
+				? schema.entities.updatedAt
+				: desc(schema.entities.updatedAt);
 
 	const [items, aggregate] = await Promise.all([
 		db
@@ -28,11 +40,12 @@ export async function getImpactCaseStudies(params: GetImpactCaseStudiesParams) {
 				slug: schema.entities.slug,
 				summary: schema.impactCaseStudies.summary,
 				title: schema.impactCaseStudies.title,
+				updatedAt: schema.entities.updatedAt,
 			})
 			.from(schema.impactCaseStudies)
 			.innerJoin(schema.entities, eq(schema.impactCaseStudies.id, schema.entities.id))
 			.where(where)
-			.orderBy(desc(schema.entities.updatedAt))
+			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
 		db
@@ -51,6 +64,7 @@ export async function getImpactCaseStudies(params: GetImpactCaseStudiesParams) {
 			entity: { slug: item.slug },
 			summary: item.summary,
 			title: item.title,
+			updatedAt: item.updatedAt,
 		};
 	});
 

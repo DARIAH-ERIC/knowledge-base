@@ -48,8 +48,10 @@ interface InstitutionsPageProps {
 		>;
 		total: number;
 	};
+	dir: "asc" | "desc";
 	page: number;
 	q: string;
+	sort: "name" | "country" | "status";
 }
 
 function institutionStatusIntent(
@@ -74,7 +76,13 @@ function institutionStatusIntent(
 const pageSize = 10;
 
 export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactNode {
-	const { institutions, page: initialPage, q: initialQ } = props;
+	const {
+		dir: initialDir,
+		institutions,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+	} = props;
 
 	const t = useExtracted();
 	const router = useRouter();
@@ -88,10 +96,13 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 		return institutions.data;
 	});
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
-	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
-		page: initialPage,
-		q: initialQ,
-	});
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
 	const [isDeletePending, startDeleteTransition] = useTransition();
 
 	const totalPages = Math.max(Math.ceil(institutions.total / pageSize), 1);
@@ -122,11 +133,19 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 			<Table
 				aria-label="institutions"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
-					<TableColumn>{t("Country")}</TableColumn>
-					<TableColumn>{t("Status")}</TableColumn>
+					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
+						{t("Name")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="country">
+						{t("Country")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="status">
+						{t("Status")}
+					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>

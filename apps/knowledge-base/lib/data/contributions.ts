@@ -1,13 +1,23 @@
-import { and, count, eq, ilike, inArray, or } from "@dariah-eric/database";
+import { and, count, desc, eq, ilike, inArray, or, sql } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
 import { contributionOptionsPageSize } from "@/lib/constants/contributions";
 
+export type ContributionsSort =
+	| "personName"
+	| "roleType"
+	| "organisationalUnitType"
+	| "organisationalUnitName"
+	| "durationStart"
+	| "durationEnd";
+
 interface GetContributionsParams {
 	limit: number;
 	offset: number;
 	q?: string;
+	sort?: ContributionsSort;
+	dir?: "asc" | "desc";
 }
 
 export interface ContributionsResult {
@@ -28,17 +38,42 @@ export interface ContributionsResult {
 export async function getContributions(
 	params: Readonly<GetContributionsParams>,
 ): Promise<ContributionsResult> {
-	const { limit, offset, q } = params;
+	const { limit, offset, q, sort = "personName", dir = "asc" } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""
 			? or(
 					ilike(schema.persons.name, `%${query}%`),
+					ilike(schema.persons.sortName, `%${query}%`),
 					ilike(schema.organisationalUnits.name, `%${query}%`),
 					ilike(schema.organisationalUnitTypes.type, `%${query}%`),
 					ilike(schema.personRoleTypes.type, `%${query}%`),
 				)
 			: undefined;
+	const orderBy =
+		sort === "roleType"
+			? dir === "asc"
+				? schema.personRoleTypes.type
+				: desc(schema.personRoleTypes.type)
+			: sort === "organisationalUnitType"
+				? dir === "asc"
+					? schema.organisationalUnitTypes.type
+					: desc(schema.organisationalUnitTypes.type)
+				: sort === "organisationalUnitName"
+					? dir === "asc"
+						? schema.organisationalUnits.name
+						: desc(schema.organisationalUnits.name)
+					: sort === "durationStart"
+						? dir === "asc"
+							? sql`LOWER(${schema.personsToOrganisationalUnits.duration}) ASC`
+							: sql`LOWER(${schema.personsToOrganisationalUnits.duration}) DESC`
+						: sort === "durationEnd"
+							? dir === "asc"
+								? sql`UPPER(${schema.personsToOrganisationalUnits.duration}) ASC NULLS LAST`
+								: sql`UPPER(${schema.personsToOrganisationalUnits.duration}) DESC NULLS LAST`
+							: dir === "asc"
+								? schema.persons.sortName
+								: desc(schema.persons.sortName);
 
 	const [rows, aggregate] = await Promise.all([
 		db
@@ -68,7 +103,7 @@ export async function getContributions(
 				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 			)
 			.where(where)
-			.orderBy(schema.persons.name)
+			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
 		db

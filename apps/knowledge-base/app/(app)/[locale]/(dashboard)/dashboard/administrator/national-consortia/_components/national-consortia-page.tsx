@@ -45,14 +45,22 @@ interface NationalConsortiaPageProps {
 		>;
 		total: number;
 	};
+	dir: "asc" | "desc";
 	page: number;
 	q: string;
+	sort: "name" | "country";
 }
 
 const pageSize = 10;
 
 export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps>): ReactNode {
-	const { nationalConsortia, page: initialPage, q: initialQ } = props;
+	const {
+		dir: initialDir,
+		nationalConsortia,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+	} = props;
 
 	const t = useExtracted();
 	const router = useRouter();
@@ -60,10 +68,13 @@ export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps
 		return nationalConsortia.data;
 	});
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
-	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
-		page: initialPage,
-		q: initialQ,
-	});
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
 	const [isDeletePending, startDeleteTransition] = useTransition();
 
 	const totalPages = Math.max(Math.ceil(nationalConsortia.total / pageSize), 1);
@@ -94,10 +105,16 @@ export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps
 			<Table
 				aria-label="national consortia"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
-					<TableColumn>{t("Country")}</TableColumn>
+					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
+						{t("Name")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="country">
+						{t("Country")}
+					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>

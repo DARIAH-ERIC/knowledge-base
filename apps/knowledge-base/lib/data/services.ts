@@ -1,11 +1,15 @@
-import { asc, count, eq, ilike } from "@dariah-eric/database";
+import { count, desc, eq, ilike, sql } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
+
+export type ServicesSort = "name" | "type" | "status" | "sshocMarketplaceId";
 
 interface GetServicesParams {
 	limit: number;
 	offset: number;
 	q?: string;
+	sort?: ServicesSort;
+	dir?: "asc" | "desc";
 }
 
 export interface ServicesResult {
@@ -21,10 +25,26 @@ export interface ServicesResult {
 }
 
 export async function getServices(params: Readonly<GetServicesParams>): Promise<ServicesResult> {
-	const { limit, offset, q } = params;
+	const { limit, offset, q, sort = "name", dir = "asc" } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== "" ? ilike(schema.services.name, `%${query}%`) : undefined;
+	const orderBy =
+		sort === "type"
+			? dir === "asc"
+				? schema.serviceTypes.type
+				: desc(schema.serviceTypes.type)
+			: sort === "status"
+				? dir === "asc"
+					? schema.serviceStatuses.status
+					: desc(schema.serviceStatuses.status)
+				: sort === "sshocMarketplaceId"
+					? dir === "asc"
+						? sql`${schema.services.sshocMarketplaceId} ASC NULLS LAST`
+						: sql`${schema.services.sshocMarketplaceId} DESC NULLS LAST`
+					: dir === "asc"
+						? schema.services.name
+						: desc(schema.services.name);
 
 	const [data, aggregate] = await Promise.all([
 		db
@@ -39,7 +59,7 @@ export async function getServices(params: Readonly<GetServicesParams>): Promise<
 			.innerJoin(schema.serviceTypes, eq(schema.services.typeId, schema.serviceTypes.id))
 			.innerJoin(schema.serviceStatuses, eq(schema.services.statusId, schema.serviceStatuses.id))
 			.where(where)
-			.orderBy(asc(schema.services.name))
+			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
 		db

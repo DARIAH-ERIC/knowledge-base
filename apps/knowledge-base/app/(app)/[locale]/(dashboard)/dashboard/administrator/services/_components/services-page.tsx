@@ -37,6 +37,7 @@ import { deleteServiceAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface ServicesPageProps {
+	dir: "asc" | "desc";
 	page: number;
 	q: string;
 	services: {
@@ -48,6 +49,7 @@ interface ServicesPageProps {
 		>;
 		total: number;
 	};
+	sort: "name" | "type" | "status" | "sshocMarketplaceId";
 }
 
 function formatServiceStatus(status: string): string {
@@ -79,7 +81,7 @@ function statusIntent(status: string): "success" | "warning" | "danger" | "info"
 const pageSize = 10;
 
 export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
-	const { page: initialPage, q: initialQ, services } = props;
+	const { dir: initialDir, page: initialPage, q: initialQ, services, sort: initialSort } = props;
 
 	const t = useExtracted();
 	const router = useRouter();
@@ -87,10 +89,13 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 		return services.data;
 	});
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
-	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
-		page: initialPage,
-		q: initialQ,
-	});
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
 	const [isDeletePending, startDeleteTransition] = useTransition();
 
 	const totalPages = Math.max(Math.ceil(services.total / pageSize), 1);
@@ -121,12 +126,22 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 			<Table
 				aria-label="services"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
-					<TableColumn>{t("Type")}</TableColumn>
-					<TableColumn>{t("Status")}</TableColumn>
-					<TableColumn>{t("SSHOC ID")}</TableColumn>
+					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
+						{t("Name")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="type">
+						{t("Type")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="status">
+						{t("Status")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="sshocMarketplaceId">
+						{t("SSHOC ID")}
+					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>

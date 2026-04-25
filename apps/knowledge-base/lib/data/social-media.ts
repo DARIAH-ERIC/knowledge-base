@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq, ilike, inArray, or } from "@dariah-eric/database";
+import { count, desc, eq, ilike, inArray, or } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
@@ -10,10 +10,14 @@ export interface SocialMediaOption {
 	description: string;
 }
 
+export type SocialMediaSort = "name" | "type";
+
 interface GetSocialMediaParams {
 	limit: number;
 	offset: number;
 	q?: string;
+	sort?: SocialMediaSort;
+	dir?: "asc" | "desc";
 }
 
 export interface SocialMediaResult {
@@ -36,7 +40,7 @@ interface GetSocialMediaOptionsParams {
 export async function getSocialMedia(
 	params: Readonly<GetSocialMediaParams>,
 ): Promise<SocialMediaResult> {
-	const { limit, offset, q } = params;
+	const { limit, offset, q, sort = "name", dir = "asc" } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""
@@ -45,6 +49,14 @@ export async function getSocialMedia(
 					ilike(schema.socialMedia.url, `%${query}%`),
 				)
 			: undefined;
+	const orderBy =
+		sort === "type"
+			? dir === "asc"
+				? schema.socialMediaTypes.type
+				: desc(schema.socialMediaTypes.type)
+			: dir === "asc"
+				? schema.socialMedia.name
+				: desc(schema.socialMedia.name);
 
 	const [rows, aggregate] = await Promise.all([
 		db
@@ -57,7 +69,7 @@ export async function getSocialMedia(
 			.from(schema.socialMedia)
 			.innerJoin(schema.socialMediaTypes, eq(schema.socialMedia.typeId, schema.socialMediaTypes.id))
 			.where(where)
-			.orderBy(schema.socialMedia.name)
+			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
 		db.select({ total: count() }).from(schema.socialMedia).where(where),

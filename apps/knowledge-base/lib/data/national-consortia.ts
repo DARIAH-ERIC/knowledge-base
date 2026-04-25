@@ -1,11 +1,15 @@
-import { and, asc, count, eq, ilike, inArray } from "@dariah-eric/database";
+import { and, count, desc, eq, ilike, inArray } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
+
+export type NationalConsortiaSort = "name" | "country";
 
 interface GetNationalConsortiaParams {
 	limit: number;
 	offset: number;
 	q?: string;
+	sort?: NationalConsortiaSort;
+	dir?: "asc" | "desc";
 }
 
 export interface NationalConsortiaResult {
@@ -18,6 +22,17 @@ export interface NationalConsortiaResult {
 	limit: number;
 	offset: number;
 	total: number;
+}
+
+function compareStrings(a: string, b: string, dir: "asc" | "desc"): number {
+	return dir === "asc" ? a.localeCompare(b) : b.localeCompare(a);
+}
+
+function compareNullableStrings(a: string | null, b: string | null, dir: "asc" | "desc"): number {
+	if (a == null && b == null) return 0;
+	if (a == null) return 1;
+	if (b == null) return -1;
+	return compareStrings(a, b, dir);
 }
 
 async function getCountryNamesByUnitIds(
@@ -90,30 +105,47 @@ async function getCountryNamesByUnitIds(
 export async function getNationalConsortia(
 	params: Readonly<GetNationalConsortiaParams>,
 ): Promise<NationalConsortiaResult> {
-	const { limit, offset, q } = params;
+	const { limit, offset, q, sort = "name", dir = "asc" } = params;
 	const query = q?.trim();
 	const consortiumType =
 		"national_consortium" as typeof schema.organisationalUnitTypes.$inferSelect.type;
+	const nameOrderBy =
+		dir === "desc" ? desc(schema.organisationalUnits.name) : schema.organisationalUnits.name;
 
 	if (query == null || query === "") {
 		const where = eq(schema.organisationalUnitTypes.type, consortiumType);
 		const [items, aggregate] = await Promise.all([
-			db
-				.select({
-					id: schema.organisationalUnits.id,
-					name: schema.organisationalUnits.name,
-					slug: schema.entities.slug,
-				})
-				.from(schema.organisationalUnits)
-				.innerJoin(
-					schema.organisationalUnitTypes,
-					eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
-				)
-				.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
-				.where(where)
-				.orderBy(asc(schema.organisationalUnits.name))
-				.limit(limit)
-				.offset(offset),
+			sort === "country"
+				? db
+						.select({
+							id: schema.organisationalUnits.id,
+							name: schema.organisationalUnits.name,
+							slug: schema.entities.slug,
+						})
+						.from(schema.organisationalUnits)
+						.innerJoin(
+							schema.organisationalUnitTypes,
+							eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+						)
+						.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
+						.where(where)
+						.orderBy(nameOrderBy)
+				: db
+						.select({
+							id: schema.organisationalUnits.id,
+							name: schema.organisationalUnits.name,
+							slug: schema.entities.slug,
+						})
+						.from(schema.organisationalUnits)
+						.innerJoin(
+							schema.organisationalUnitTypes,
+							eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+						)
+						.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
+						.where(where)
+						.orderBy(nameOrderBy)
+						.limit(limit)
+						.offset(offset),
 			db
 				.select({ total: count() })
 				.from(schema.organisationalUnits)
@@ -124,21 +156,52 @@ export async function getNationalConsortia(
 				.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
 				.where(where),
 		]);
+
+		if (sort !== "country") {
+			const countryNames = await getCountryNamesByUnitIds(
+				items.map((item) => {
+					return item.id;
+				}),
+			);
+
+			return {
+				data: items.map((item) => {
+					return {
+						countryName: countryNames.get(item.id) ?? null,
+						entity: { slug: item.slug },
+						id: item.id,
+						name: item.name,
+					};
+				}),
+				limit,
+				offset,
+				total: aggregate.at(0)?.total ?? 0,
+			};
+		}
+
 		const countryNames = await getCountryNamesByUnitIds(
 			items.map((item) => {
 				return item.id;
 			}),
 		);
-
-		return {
-			data: items.map((item) => {
+		const sortedItems = items
+			.map((item) => {
 				return {
 					countryName: countryNames.get(item.id) ?? null,
 					entity: { slug: item.slug },
 					id: item.id,
 					name: item.name,
 				};
-			}),
+			})
+			.sort((a, b) => {
+				return (
+					compareNullableStrings(a.countryName, b.countryName, dir) ||
+					compareStrings(a.name, b.name, dir)
+				);
+			});
+
+		return {
+			data: sortedItems.slice(offset, offset + limit),
 			limit,
 			offset,
 			total: aggregate.at(0)?.total ?? 0,
@@ -219,24 +282,54 @@ export async function getNationalConsortia(
 				inArray(schema.organisationalUnits.id, matchedIds),
 			),
 		)
-		.orderBy(asc(schema.organisationalUnits.name));
+		.orderBy(nameOrderBy);
 
-	const pagedItems = orderedItems.slice(offset, offset + limit);
+	if (sort !== "country") {
+		const pagedItems = orderedItems.slice(offset, offset + limit);
+		const countryNames = await getCountryNamesByUnitIds(
+			pagedItems.map((item) => {
+				return item.id;
+			}),
+		);
+
+		return {
+			data: pagedItems.map((item) => {
+				return {
+					countryName: countryNames.get(item.id) ?? null,
+					entity: { slug: item.slug },
+					id: item.id,
+					name: item.name,
+				};
+			}),
+			limit,
+			offset,
+			total: orderedItems.length,
+		};
+	}
+
 	const countryNames = await getCountryNamesByUnitIds(
-		pagedItems.map((item) => {
+		orderedItems.map((item) => {
 			return item.id;
 		}),
 	);
-
-	return {
-		data: pagedItems.map((item) => {
+	const sortedItems = orderedItems
+		.map((item) => {
 			return {
 				countryName: countryNames.get(item.id) ?? null,
 				entity: { slug: item.slug },
 				id: item.id,
 				name: item.name,
 			};
-		}),
+		})
+		.sort((a, b) => {
+			return (
+				compareNullableStrings(a.countryName, b.countryName, dir) ||
+				compareStrings(a.name, b.name, dir)
+			);
+		});
+
+	return {
+		data: sortedItems.slice(offset, offset + limit),
 		limit,
 		offset,
 		total: orderedItems.length,

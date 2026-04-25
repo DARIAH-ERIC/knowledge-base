@@ -36,6 +36,7 @@ import { deleteSocialMediaAction } from "@/app/(app)/[locale]/(dashboard)/dashbo
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface SocialMediaPageProps {
+	dir: "asc" | "desc";
 	page: number;
 	q: string;
 	socialMediaItems: {
@@ -46,12 +47,19 @@ interface SocialMediaPageProps {
 		>;
 		total: number;
 	};
+	sort: "name" | "type";
 }
 
 const pageSize = 10;
 
 export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNode {
-	const { page: initialPage, q: initialQ, socialMediaItems } = props;
+	const {
+		dir: initialDir,
+		page: initialPage,
+		q: initialQ,
+		socialMediaItems,
+		sort: initialSort,
+	} = props;
 
 	const t = useExtracted();
 	const router = useRouter();
@@ -59,10 +67,13 @@ export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNod
 		return socialMediaItems.data;
 	});
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
-	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
-		page: initialPage,
-		q: initialQ,
-	});
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
 	const [isDeletePending, startDeleteTransition] = useTransition();
 
 	const totalPages = Math.max(Math.ceil(socialMediaItems.total / pageSize), 1);
@@ -93,10 +104,16 @@ export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNod
 			<Table
 				aria-label="social media"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
-					<TableColumn>{t("Type")}</TableColumn>
+					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
+						{t("Name")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="type">
+						{t("Type")}
+					</TableColumn>
 					<TableColumn>{t("URL")}</TableColumn>
 					<TableColumn />
 				</TableHeader>

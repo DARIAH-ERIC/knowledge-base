@@ -138,12 +138,24 @@ export async function uploadAsset(params: UploadAssetParams) {
 
 interface GetAssetsForDashboardParams {
 	imageUrlOptions: ImageUrlOptions;
-	/** @default 500 */
+	/** @default 24 */
 	limit?: number;
+	/** @default 0 */
+	offset?: number;
+	prefix?: AssetPrefix;
+	q?: string;
 }
 
 export async function getAssetsForDashboard(params: GetAssetsForDashboardParams) {
-	const { imageUrlOptions, limit = 500 } = params;
+	const { imageUrlOptions, limit = 24, offset = 0, prefix, q } = params;
+
+	const prefixFilter = prefix != null ? { key: { like: `${prefix}/%` } } : undefined;
+	const searchFilter = isNonEmptyString(q) ? { label: { ilike: `%${q}%` } } : undefined;
+
+	const filter =
+		prefixFilter != null || searchFilter != null ? { ...prefixFilter, ...searchFilter } : undefined;
+
+	const sqlFilter = filter != null ? relationsFilterToSQL(schema.assets, filter) : undefined;
 
 	const [assets, total] = await Promise.all([
 		db.query.assets.findMany({
@@ -153,11 +165,13 @@ export async function getAssetsForDashboard(params: GetAssetsForDashboardParams)
 				label: true,
 			},
 			limit,
+			offset,
 			orderBy: {
 				updatedAt: "desc",
 			},
+			where: filter,
 		}),
-		db.$count(schema.assets),
+		db.$count(schema.assets, sqlFilter),
 	]);
 
 	const items = assets.map((asset) => {

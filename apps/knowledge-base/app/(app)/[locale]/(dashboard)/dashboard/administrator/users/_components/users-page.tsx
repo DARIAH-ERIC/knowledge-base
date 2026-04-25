@@ -37,8 +37,10 @@ import { useRouter } from "@/lib/navigation/navigation";
 
 interface UsersPageProps {
 	currentUserId: string;
+	dir: "asc" | "desc";
 	page: number;
 	q: string;
+	sort: "name" | "email" | "role" | "isEmailVerified";
 	users: {
 		data: Array<Pick<schema.User, "id" | "name" | "email" | "role" | "isEmailVerified">>;
 		total: number;
@@ -48,7 +50,14 @@ interface UsersPageProps {
 const pageSize = 10;
 
 export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
-	const { currentUserId, page: initialPage, q: initialQ, users } = props;
+	const {
+		currentUserId,
+		dir: initialDir,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+		users,
+	} = props;
 
 	const t = useExtracted();
 	const router = useRouter();
@@ -56,10 +65,13 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 		return users.data;
 	});
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
-	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
-		page: initialPage,
-		q: initialQ,
-	});
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
 	const [isDeletePending, startDeleteTransition] = useTransition();
 
 	const totalPages = Math.max(Math.ceil(users.total / pageSize), 1);
@@ -90,12 +102,22 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 			<Table
 				aria-label="users"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
-					<TableColumn>{t("Email")}</TableColumn>
-					<TableColumn>{t("Role")}</TableColumn>
-					<TableColumn>{t("Email verified")}</TableColumn>
+					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
+						{t("Name")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="email">
+						{t("Email")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="role">
+						{t("Role")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="isEmailVerified">
+						{t("Email verified")}
+					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>

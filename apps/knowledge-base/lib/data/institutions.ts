@@ -1,4 +1,4 @@
-import { and, asc, count, eq, ilike, inArray, sql } from "@dariah-eric/database";
+import { and, count, desc, eq, ilike, inArray, sql } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
@@ -8,10 +8,14 @@ export type InstitutionEricRelationStatus =
 	| "is_national_representative_institution_in"
 	| "is_partner_institution_of";
 
+export type InstitutionsSort = "name" | "country" | "status";
+
 interface GetInstitutionsParams {
 	limit: number;
 	offset: number;
 	q?: string;
+	sort?: InstitutionsSort;
+	dir?: "asc" | "desc";
 }
 
 export interface InstitutionsResult {
@@ -40,6 +44,41 @@ const institutionStatusLabels: Record<InstitutionEricRelationStatus, string> = {
 	is_national_representative_institution_in: "National representative institution",
 	is_partner_institution_of: "Partner institution",
 };
+
+function compareStrings(a: string, b: string, dir: "asc" | "desc"): number {
+	return dir === "asc" ? a.localeCompare(b) : b.localeCompare(a);
+}
+
+function compareNullableStrings(a: string | null, b: string | null, dir: "asc" | "desc"): number {
+	if (a == null && b == null) return 0;
+	if (a == null) return 1;
+	if (b == null) return -1;
+	return compareStrings(a, b, dir);
+}
+
+function normalizeInstitutionStatuses(
+	statuses: ReadonlyArray<InstitutionEricRelationStatus>,
+): Array<InstitutionEricRelationStatus> {
+	return institutionStatuses.filter((status) => {
+		return statuses.includes(status);
+	});
+}
+
+function getInstitutionStatusSortValue(
+	statuses: ReadonlyArray<InstitutionEricRelationStatus>,
+): string | null {
+	const normalizedStatuses = normalizeInstitutionStatuses(statuses);
+
+	if (normalizedStatuses.length === 0) {
+		return null;
+	}
+
+	return normalizedStatuses
+		.map((status) => {
+			return institutionStatusLabels[status];
+		})
+		.join(" | ");
+}
 
 async function getInstitutionRelationData(ids: ReadonlyArray<string>) {
 	if (ids.length === 0) {
@@ -122,6 +161,10 @@ async function getInstitutionRelationData(ids: ReadonlyArray<string>) {
 		}
 	}
 
+	for (const [institutionId, statuses] of statusesByInstitutionId.entries()) {
+		statusesByInstitutionId.set(institutionId, normalizeInstitutionStatuses(statuses));
+	}
+
 	for (const country of countries) {
 		if (!countryNameByInstitutionId.has(country.unitId)) {
 			countryNameByInstitutionId.set(country.unitId, country.countryName);
@@ -134,15 +177,15 @@ async function getInstitutionRelationData(ids: ReadonlyArray<string>) {
 export async function getInstitutions(
 	params: Readonly<GetInstitutionsParams>,
 ): Promise<InstitutionsResult> {
-	const { limit, offset, q } = params;
+	const { limit, offset, q, sort = "name", dir = "asc" } = params;
 	const query = q?.trim();
+	const nameOrderBy =
+		dir === "desc" ? desc(schema.organisationalUnits.name) : schema.organisationalUnits.name;
+	const needsDerivedSort = sort === "country" || sort === "status";
 
-	let items: Array<{ id: string; name: string; slug: string }> = [];
-	let total = 0;
-
-	if (query == null || query === "") {
+	if ((query == null || query === "") && !needsDerivedSort) {
 		const where = eq(schema.organisationalUnitTypes.type, institutionType);
-		const [rows, aggregate] = await Promise.all([
+		const [items, aggregate] = await Promise.all([
 			db
 				.select({
 					id: schema.organisationalUnits.id,
@@ -156,7 +199,7 @@ export async function getInstitutions(
 				)
 				.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
 				.where(where)
-				.orderBy(asc(schema.organisationalUnits.name))
+				.orderBy(nameOrderBy)
 				.limit(limit)
 				.offset(offset),
 			db
@@ -169,9 +212,48 @@ export async function getInstitutions(
 				.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
 				.where(where),
 		]);
+		const institutionIds = items.map((item) => {
+			return item.id;
+		});
+		const { countryNameByInstitutionId, statusesByInstitutionId } =
+			await getInstitutionRelationData(institutionIds);
 
-		items = rows;
-		total = aggregate.at(0)?.total ?? 0;
+		return {
+			data: items.map((institution) => {
+				return {
+					countryName: countryNameByInstitutionId.get(institution.id) ?? null,
+					entity: { slug: institution.slug },
+					ericRelationStatuses: statusesByInstitutionId.get(institution.id) ?? [],
+					id: institution.id,
+					name: institution.name,
+				};
+			}),
+			limit,
+			offset,
+			total: aggregate.at(0)?.total ?? 0,
+		};
+	}
+
+	let items: Array<{ id: string; name: string; slug: string }> = [];
+	let total = 0;
+
+	if (query == null || query === "") {
+		const where = eq(schema.organisationalUnitTypes.type, institutionType);
+		items = await db
+			.select({
+				id: schema.organisationalUnits.id,
+				name: schema.organisationalUnits.name,
+				slug: schema.entities.slug,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
+			.where(where)
+			.orderBy(nameOrderBy);
+		total = items.length;
 	} else {
 		const matchingStatuses = institutionStatuses.filter((status) => {
 			return institutionStatusLabels[status].toLowerCase().includes(query.toLowerCase());
@@ -252,7 +334,7 @@ export async function getInstitutions(
 			return { data: [], limit, offset, total: 0 };
 		}
 
-		const orderedItems = await db
+		items = await db
 			.select({
 				id: schema.organisationalUnits.id,
 				name: schema.organisationalUnits.name,
@@ -270,20 +352,42 @@ export async function getInstitutions(
 					inArray(schema.organisationalUnits.id, matchedIds),
 				),
 			)
-			.orderBy(asc(schema.organisationalUnits.name));
-
-		items = orderedItems.slice(offset, offset + limit);
-		total = orderedItems.length;
+			.orderBy(nameOrderBy);
+		total = items.length;
 	}
 
-	const institutionIds = items.map((item) => {
-		return item.id;
-	});
-	const { countryNameByInstitutionId, statusesByInstitutionId } =
-		await getInstitutionRelationData(institutionIds);
+	if (!needsDerivedSort) {
+		const pagedItems = items.slice(offset, offset + limit);
+		const { countryNameByInstitutionId, statusesByInstitutionId } =
+			await getInstitutionRelationData(
+				pagedItems.map((item) => {
+					return item.id;
+				}),
+			);
 
-	return {
-		data: items.map((institution) => {
+		return {
+			data: pagedItems.map((institution) => {
+				return {
+					countryName: countryNameByInstitutionId.get(institution.id) ?? null,
+					entity: { slug: institution.slug },
+					ericRelationStatuses: statusesByInstitutionId.get(institution.id) ?? [],
+					id: institution.id,
+					name: institution.name,
+				};
+			}),
+			limit,
+			offset,
+			total,
+		};
+	}
+
+	const { countryNameByInstitutionId, statusesByInstitutionId } = await getInstitutionRelationData(
+		items.map((item) => {
+			return item.id;
+		}),
+	);
+	const sortedItems = items
+		.map((institution) => {
 			return {
 				countryName: countryNameByInstitutionId.get(institution.id) ?? null,
 				entity: { slug: institution.slug },
@@ -291,7 +395,26 @@ export async function getInstitutions(
 				id: institution.id,
 				name: institution.name,
 			};
-		}),
+		})
+		.sort((a, b) => {
+			if (sort === "country") {
+				return (
+					compareNullableStrings(a.countryName, b.countryName, dir) ||
+					compareStrings(a.name, b.name, dir)
+				);
+			}
+
+			return (
+				compareNullableStrings(
+					getInstitutionStatusSortValue(a.ericRelationStatuses),
+					getInstitutionStatusSortValue(b.ericRelationStatuses),
+					dir,
+				) || compareStrings(a.name, b.name, dir)
+			);
+		});
+
+	return {
+		data: sortedItems.slice(offset, offset + limit),
 		limit,
 		offset,
 		total,

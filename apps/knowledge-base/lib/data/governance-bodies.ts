@@ -1,11 +1,15 @@
-import { and, asc, count, eq, ilike, or } from "@dariah-eric/database";
+import { and, count, desc, eq, ilike, or, sql } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
+
+export type GovernanceBodiesSort = "acronym" | "name";
 
 interface GetGovernanceBodiesParams {
 	limit: number;
 	offset: number;
 	q?: string;
+	sort?: GovernanceBodiesSort;
+	dir?: "asc" | "desc";
 }
 
 export interface GovernanceBodiesResult {
@@ -22,7 +26,7 @@ export interface GovernanceBodiesResult {
 export async function getGovernanceBodies(
 	params: Readonly<GetGovernanceBodiesParams>,
 ): Promise<GovernanceBodiesResult> {
-	const { limit, offset, q } = params;
+	const { limit, offset, q, sort = "name", dir = "asc" } = params;
 	const query = q?.trim();
 	const governanceBodyType =
 		"governance_body" as typeof schema.organisationalUnitTypes.$inferSelect.type;
@@ -36,6 +40,15 @@ export async function getGovernanceBodies(
 					),
 				)
 			: eq(schema.organisationalUnitTypes.type, governanceBodyType);
+
+	const orderBy =
+		sort === "acronym"
+			? dir === "asc"
+				? sql`${schema.organisationalUnits.acronym} ASC NULLS LAST`
+				: sql`${schema.organisationalUnits.acronym} DESC NULLS LAST`
+			: dir === "asc"
+				? schema.organisationalUnits.name
+				: desc(schema.organisationalUnits.name);
 
 	const [items, aggregate] = await Promise.all([
 		db
@@ -52,7 +65,7 @@ export async function getGovernanceBodies(
 			)
 			.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
 			.where(where)
-			.orderBy(asc(schema.organisationalUnits.name))
+			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
 		db

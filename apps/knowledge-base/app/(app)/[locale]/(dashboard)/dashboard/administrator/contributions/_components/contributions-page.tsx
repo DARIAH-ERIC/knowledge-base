@@ -30,8 +30,16 @@ import type { ContributionsResult } from "@/lib/data/contributions";
 
 interface ContributionsPageProps {
 	contributions: ContributionsResult;
+	dir: "asc" | "desc";
 	page: number;
 	q: string;
+	sort:
+		| "personName"
+		| "roleType"
+		| "organisationalUnitType"
+		| "organisationalUnitName"
+		| "durationStart"
+		| "durationEnd";
 }
 
 function formatRoleType(type: string): string {
@@ -76,14 +84,23 @@ function organisationalUnitTypeIntent(
 const pageSize = 20;
 
 export function ContributionsPage(props: Readonly<ContributionsPageProps>): ReactNode {
-	const { contributions, page: initialPage, q: initialQ } = props;
+	const {
+		contributions,
+		dir: initialDir,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+	} = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
-	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
-		page: initialPage,
-		q: initialQ,
-	});
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
 
 	const totalPages = Math.max(Math.ceil(contributions.total / pageSize), 1);
 
@@ -113,14 +130,28 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 			<Table
 				aria-label="contributions"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Person")}</TableColumn>
-					<TableColumn>{t("Role")}</TableColumn>
-					<TableColumn>{t("Type")}</TableColumn>
-					<TableColumn>{t("Name")}</TableColumn>
-					<TableColumn>{t("From")}</TableColumn>
-					<TableColumn>{t("Until")}</TableColumn>
+					<TableColumn allowsSorting={true} id="personName" isRowHeader={true}>
+						{t("Person")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="roleType">
+						{t("Role")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="organisationalUnitType">
+						{t("Type")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="organisationalUnitName">
+						{t("Name")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="durationStart">
+						{t("From")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="durationEnd">
+						{t("Until")}
+					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={contributions.data}>

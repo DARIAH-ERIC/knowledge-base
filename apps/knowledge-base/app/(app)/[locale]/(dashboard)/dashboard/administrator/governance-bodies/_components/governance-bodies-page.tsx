@@ -36,6 +36,7 @@ import { deleteGovernanceBodyAction } from "@/app/(app)/[locale]/(dashboard)/das
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface GovernanceBodiesPageProps {
+	dir: "asc" | "desc";
 	governanceBodies: {
 		data: Array<
 			Pick<schema.OrganisationalUnit, "acronym" | "id" | "name"> & {
@@ -46,12 +47,19 @@ interface GovernanceBodiesPageProps {
 	};
 	page: number;
 	q: string;
+	sort: "acronym" | "name";
 }
 
 const pageSize = 10;
 
 export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>): ReactNode {
-	const { governanceBodies, page: initialPage, q: initialQ } = props;
+	const {
+		dir: initialDir,
+		governanceBodies,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+	} = props;
 
 	const t = useExtracted();
 	const router = useRouter();
@@ -59,10 +67,13 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 		return governanceBodies.data;
 	});
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
-	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
-		page: initialPage,
-		q: initialQ,
-	});
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
 	const [isDeletePending, startDeleteTransition] = useTransition();
 
 	const totalPages = Math.max(Math.ceil(governanceBodies.total / pageSize), 1);
@@ -93,10 +104,16 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 			<Table
 				aria-label="governance bodies"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Acronym")}</TableColumn>
-					<TableColumn>{t("Name")}</TableColumn>
+					<TableColumn allowsSorting={true} id="acronym" isRowHeader={true}>
+						{t("Acronym")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="name">
+						{t("Name")}
+					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>

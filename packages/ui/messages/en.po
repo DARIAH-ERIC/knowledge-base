@@ -211,7 +211,7 @@ msgctxt "ui"
 msgid "2I546+"
 msgstr "No information is currently available in this section."
 
-#: lib/table.tsx:446
+#: lib/table.tsx:463
 msgctxt "ui"
 msgid "8epGWu"
 msgstr "Reorder row"

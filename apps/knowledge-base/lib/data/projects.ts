@@ -1,11 +1,15 @@
-import { asc, count, eq, ilike } from "@dariah-eric/database";
+import { count, desc, eq, ilike, sql } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
+
+export type ProjectsSort = "name" | "acronym" | "funding" | "scope";
 
 interface GetProjectsParams {
 	limit: number;
 	offset: number;
 	q?: string;
+	sort?: ProjectsSort;
+	dir?: "asc" | "desc";
 }
 
 export interface ProjectsResult {
@@ -21,10 +25,26 @@ export interface ProjectsResult {
 }
 
 export async function getProjects(params: Readonly<GetProjectsParams>): Promise<ProjectsResult> {
-	const { limit, offset, q } = params;
+	const { limit, offset, q, sort = "name", dir = "asc" } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== "" ? ilike(schema.projects.name, `%${query}%`) : undefined;
+	const orderBy =
+		sort === "acronym"
+			? dir === "asc"
+				? sql`${schema.projects.acronym} ASC NULLS LAST`
+				: sql`${schema.projects.acronym} DESC NULLS LAST`
+			: sort === "funding"
+				? dir === "asc"
+					? sql`${schema.projects.funding} ASC NULLS LAST`
+					: sql`${schema.projects.funding} DESC NULLS LAST`
+				: sort === "scope"
+					? dir === "asc"
+						? schema.projectScopes.scope
+						: desc(schema.projectScopes.scope)
+					: dir === "asc"
+						? schema.projects.name
+						: desc(schema.projects.name);
 
 	const [data, aggregate] = await Promise.all([
 		db
@@ -42,7 +62,7 @@ export async function getProjects(params: Readonly<GetProjectsParams>): Promise<
 			.innerJoin(schema.entities, eq(schema.projects.id, schema.entities.id))
 			.innerJoin(schema.projectScopes, eq(schema.projects.scopeId, schema.projectScopes.id))
 			.where(where)
-			.orderBy(asc(schema.projects.name))
+			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
 		db

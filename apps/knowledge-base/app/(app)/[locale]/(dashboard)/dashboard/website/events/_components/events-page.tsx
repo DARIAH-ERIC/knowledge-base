@@ -37,22 +37,25 @@ import { deleteEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/we
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface EventsPageProps {
+	dir: "asc" | "desc";
 	events: {
 		data: Array<
 			Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
 				entity: Pick<schema.Entity, "slug">;
+				updatedAt: schema.Entity["updatedAt"];
 			}
 		>;
 		total: number;
 	};
 	page: number;
 	q: string;
+	sort: "title" | "updatedAt";
 }
 
 const pageSize = 10;
 
 export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
-	const { events, page: initialPage, q: initialQ } = props;
+	const { dir: initialDir, events, page: initialPage, q: initialQ, sort: initialSort } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -61,10 +64,13 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 		return events.data;
 	});
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
-	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
-		page: initialPage,
-		q: initialQ,
-	});
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
 	const [isDeletePending, startDeleteTransition] = useTransition();
 
 	const totalPages = Math.max(Math.ceil(events.total / pageSize), 1);
@@ -95,11 +101,18 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 			<Table
 				aria-label="events"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Title")}</TableColumn>
+					<TableColumn allowsSorting={true} id="title" isRowHeader={true}>
+						{t("Title")}
+					</TableColumn>
 					<TableColumn>{t("Duration")}</TableColumn>
 					<TableColumn>{t("Location")}</TableColumn>
+					<TableColumn allowsSorting={true} id="updatedAt">
+						{t("Updated")}
+					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -117,6 +130,7 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 										: format.dateTime(item.duration.start, { dateStyle: "short" })}
 								</TableCell>
 								<TableCell>{item.location}</TableCell>
+								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button

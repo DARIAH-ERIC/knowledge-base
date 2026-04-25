@@ -49,8 +49,10 @@ interface CountriesPageProps {
 		>;
 		total: number;
 	};
+	dir: "asc" | "desc";
 	page: number;
 	q: string;
+	sort: "name" | "status";
 }
 
 function memberObserverStatusIntent(
@@ -62,7 +64,7 @@ function memberObserverStatusIntent(
 const pageSize = 10;
 
 export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
-	const { countries, page: initialPage, q: initialQ } = props;
+	const { countries, dir: initialDir, page: initialPage, q: initialQ, sort: initialSort } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -71,10 +73,13 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 		return countries.data;
 	});
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
-	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
-		page: initialPage,
-		q: initialQ,
-	});
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
 	const [isDeletePending, startDeleteTransition] = useTransition();
 
 	const totalPages = Math.max(Math.ceil(countries.total / pageSize), 1);
@@ -105,10 +110,16 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 			<Table
 				aria-label="countries"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
-					<TableColumn>{t("Status")}</TableColumn>
+					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
+						{t("Name")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="status">
+						{t("Status")}
+					</TableColumn>
 					<TableColumn>{t("From")}</TableColumn>
 					<TableColumn>{t("Until")}</TableColumn>
 					<TableColumn />

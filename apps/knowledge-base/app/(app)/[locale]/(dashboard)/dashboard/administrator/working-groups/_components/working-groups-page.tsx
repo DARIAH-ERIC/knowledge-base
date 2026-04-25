@@ -36,8 +36,10 @@ import { deleteWorkingGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface WorkingGroupsPageProps {
+	dir: "asc" | "desc";
 	page: number;
 	q: string;
+	sort: "name";
 	workingGroups: {
 		data: Array<
 			Pick<schema.OrganisationalUnit, "id" | "name"> & {
@@ -53,7 +55,13 @@ interface WorkingGroupsPageProps {
 const pageSize = 10;
 
 export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): ReactNode {
-	const { page: initialPage, q: initialQ, workingGroups } = props;
+	const {
+		dir: initialDir,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+		workingGroups,
+	} = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -62,10 +70,13 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 		return workingGroups.data;
 	});
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
-	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
-		page: initialPage,
-		q: initialQ,
-	});
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
 	const [isDeletePending, startDeleteTransition] = useTransition();
 
 	const totalPages = Math.max(Math.ceil(workingGroups.total / pageSize), 1);
@@ -96,9 +107,13 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 			<Table
 				aria-label="working groups"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
+					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
+						{t("Name")}
+					</TableColumn>
 					<TableColumn>{t("From")}</TableColumn>
 					<TableColumn>{t("Until")}</TableColumn>
 					<TableColumn />

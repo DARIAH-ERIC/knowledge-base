@@ -7,19 +7,31 @@ import * as schema from "@dariah-eric/database/schema";
 import { imageAssetWidth } from "@/config/assets.config";
 import { images } from "@/lib/images";
 
+export type EventsSort = "title" | "updatedAt";
+
 interface GetEventsParams {
 	/** @default 10 */
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
 	q?: string;
+	sort?: EventsSort;
+	dir?: "asc" | "desc";
 }
 
 export async function getEvents(params: GetEventsParams) {
-	const { limit = 10, offset = 0, q } = params;
+	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== "" ? ilike(schema.events.title, `%${query}%`) : undefined;
+	const orderBy =
+		sort === "title"
+			? dir === "asc"
+				? schema.events.title
+				: desc(schema.events.title)
+			: dir === "asc"
+				? schema.entities.updatedAt
+				: desc(schema.entities.updatedAt);
 
 	const [items, aggregate] = await Promise.all([
 		db
@@ -30,12 +42,13 @@ export async function getEvents(params: GetEventsParams) {
 				slug: schema.entities.slug,
 				summary: schema.events.summary,
 				title: schema.events.title,
+				updatedAt: schema.entities.updatedAt,
 				website: schema.events.website,
 			})
 			.from(schema.events)
 			.innerJoin(schema.entities, eq(schema.events.id, schema.entities.id))
 			.where(where)
-			.orderBy(desc(schema.entities.updatedAt))
+			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
 		db
@@ -56,6 +69,7 @@ export async function getEvents(params: GetEventsParams) {
 			entity: { slug: item.slug },
 			summary: item.summary,
 			title: item.title,
+			updatedAt: item.updatedAt,
 			website: item.website,
 		};
 	});
