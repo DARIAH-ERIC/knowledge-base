@@ -55,14 +55,18 @@ export default async function DashboardAdministratorEditUserPage(
 					.select({ id: schema.persons.id, name: schema.persons.name })
 					.from(schema.persons)
 					.where(eq(schema.persons.id, user.personId))
-					.then((rows) => {return rows[0] ?? null})
+					.then((rows) => {
+						return rows[0] ?? null;
+					})
 			: null,
 		user.organisationalUnitId != null
 			? db
 					.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
 					.from(schema.organisationalUnits)
 					.where(eq(schema.organisationalUnits.id, user.organisationalUnitId))
-					.then((rows) => {return rows[0] ?? null})
+					.then((rows) => {
+						return rows[0] ?? null;
+					})
 			: null,
 	]);
 

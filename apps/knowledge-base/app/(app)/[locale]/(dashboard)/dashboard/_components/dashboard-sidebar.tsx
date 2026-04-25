@@ -130,6 +130,18 @@ export function useSidebarMenu(): Array<SidebarMenuSection> {
 			title: t("Reports"),
 			items: [
 				{
+					href: "/dashboard/reporting",
+					tooltip: t("Reports"),
+					label: t("Reports"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/administrator/reporting-campaigns",
+					tooltip: t("Reporting campaigns"),
+					label: t("Reporting campaigns"),
+					icon: <ListBulletIcon />,
+				},
+				{
 					href: "/dashboard/administrator/country-reports",
 					tooltip: t("Country reports"),
 					label: t("Country reports"),

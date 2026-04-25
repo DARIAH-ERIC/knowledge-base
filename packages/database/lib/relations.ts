@@ -547,6 +547,70 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.organisationalUnits.id,
 				optional: false,
 			}),
+			contributions: r.many.countryReportContributions({
+				from: r.countryReports.id,
+				to: r.countryReportContributions.countryReportId,
+			}),
+			socialMediaKpis: r.many.countryReportSocialMediaKpis({
+				from: r.countryReports.id,
+				to: r.countryReportSocialMediaKpis.countryReportId,
+			}),
+			serviceKpis: r.many.countryReportServiceKpis({
+				from: r.countryReports.id,
+				to: r.countryReportServiceKpis.countryReportId,
+			}),
+			projectContributions: r.many.countryReportProjectContributions({
+				from: r.countryReports.id,
+				to: r.countryReportProjectContributions.countryReportId,
+			}),
+		},
+		countryReportContributions: {
+			countryReport: r.one.countryReports({
+				from: r.countryReportContributions.countryReportId,
+				to: r.countryReports.id,
+				optional: false,
+			}),
+			personToOrgUnit: r.one.personsToOrganisationalUnits({
+				from: r.countryReportContributions.personToOrgUnitId,
+				to: r.personsToOrganisationalUnits.id,
+				optional: false,
+			}),
+		},
+		countryReportSocialMediaKpis: {
+			countryReport: r.one.countryReports({
+				from: r.countryReportSocialMediaKpis.countryReportId,
+				to: r.countryReports.id,
+				optional: false,
+			}),
+			socialMedia: r.one.socialMedia({
+				from: r.countryReportSocialMediaKpis.socialMediaId,
+				to: r.socialMedia.id,
+				optional: false,
+			}),
+		},
+		countryReportServiceKpis: {
+			countryReport: r.one.countryReports({
+				from: r.countryReportServiceKpis.countryReportId,
+				to: r.countryReports.id,
+				optional: false,
+			}),
+			service: r.one.services({
+				from: r.countryReportServiceKpis.serviceId,
+				to: r.services.id,
+				optional: false,
+			}),
+		},
+		countryReportProjectContributions: {
+			countryReport: r.one.countryReports({
+				from: r.countryReportProjectContributions.countryReportId,
+				to: r.countryReports.id,
+				optional: false,
+			}),
+			project: r.one.projects({
+				from: r.countryReportProjectContributions.projectId,
+				to: r.projects.id,
+				optional: false,
+			}),
 		},
 		workingGroupReports: {
 			campaign: r.one.reportingCampaigns({

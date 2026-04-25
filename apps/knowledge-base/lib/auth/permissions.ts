@@ -21,7 +21,7 @@ const representativeRoles = ["national_representative", "national_representative
 async function hasActiveRelation(
 	personId: string,
 	orgUnitId: string,
-	roleTypes: ReadonlyArray<string>,
+	roleTypes: ReadonlyArray<(typeof schema.personRoleTypesEnum)[number]>,
 ): Promise<boolean> {
 	const rows = await db
 		.select({ id: schema.personsToOrganisationalUnits.id })
@@ -34,7 +34,7 @@ async function hasActiveRelation(
 			and(
 				eq(schema.personsToOrganisationalUnits.personId, personId),
 				eq(schema.personsToOrganisationalUnits.organisationalUnitId, orgUnitId),
-				inArray(schema.personRoleTypes.type, roleTypes as Array<string>),
+				inArray(schema.personRoleTypes.type, roleTypes),
 				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
 			),
 		)
