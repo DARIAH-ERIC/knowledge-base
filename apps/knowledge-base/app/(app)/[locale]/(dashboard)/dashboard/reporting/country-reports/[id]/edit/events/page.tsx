@@ -39,6 +39,7 @@ export default async function DashboardReportingCountryReportEventsPage(
 				smallEvents: true,
 				mediumEvents: true,
 				largeEvents: true,
+				veryLargeEvents: true,
 				dariahCommissionedEvent: true,
 				reusableOutcomes: true,
 			},

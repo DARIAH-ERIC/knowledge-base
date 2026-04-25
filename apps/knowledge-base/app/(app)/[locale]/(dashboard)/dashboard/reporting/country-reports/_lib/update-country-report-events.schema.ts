@@ -7,6 +7,7 @@ export const UpdateCountryReportEventsActionInputSchema = v.object({
 	smallEvents: nullableInteger,
 	mediumEvents: nullableInteger,
 	largeEvents: nullableInteger,
+	veryLargeEvents: nullableInteger,
 	dariahCommissionedEvent: v.optional(v.string()),
 	reusableOutcomes: v.optional(v.string()),
 });

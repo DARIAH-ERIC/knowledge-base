@@ -51,6 +51,7 @@ export const updateCountryReportEventsAction = createServerAction(
 			smallEvents,
 			mediumEvents,
 			largeEvents,
+			veryLargeEvents,
 			dariahCommissionedEvent,
 			reusableOutcomes,
 		} = result.output;
@@ -63,6 +64,7 @@ export const updateCountryReportEventsAction = createServerAction(
 				smallEvents: smallEvents ?? null,
 				mediumEvents: mediumEvents ?? null,
 				largeEvents: largeEvents ?? null,
+				veryLargeEvents: veryLargeEvents ?? null,
 				dariahCommissionedEvent: dariahCommissionedEvent ?? null,
 				reusableOutcomes: reusableOutcomes ?? null,
 			})

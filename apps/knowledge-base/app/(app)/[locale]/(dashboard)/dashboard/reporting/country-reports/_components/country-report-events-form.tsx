@@ -26,6 +26,7 @@ interface CountryReportEventsFormProps {
 		| "smallEvents"
 		| "mediumEvents"
 		| "largeEvents"
+		| "veryLargeEvents"
 		| "dariahCommissionedEvent"
 		| "reusableOutcomes"
 	>;
@@ -70,6 +71,18 @@ export function CountryReportEventsForm(props: Readonly<CountryReportEventsFormP
 						type="number"
 					>
 						<Label>{t("Large events")}</Label>
+						<Input min={0} />
+						<FieldError />
+					</TextField>
+
+					<TextField
+						defaultValue={
+							report.veryLargeEvents != null ? String(report.veryLargeEvents) : undefined
+						}
+						name="veryLargeEvents"
+						type="number"
+					>
+						<Label>{t("Very large events")}</Label>
 						<Input min={0} />
 						<FieldError />
 					</TextField>

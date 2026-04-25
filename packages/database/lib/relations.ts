@@ -560,6 +560,22 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.reportingCampaigns.id,
 				to: r.workingGroupReportQuestions.campaignId,
 			}),
+			eventAmounts: r.many.reportingCampaignEventAmounts({
+				from: r.reportingCampaigns.id,
+				to: r.reportingCampaignEventAmounts.campaignId,
+			}),
+			socialMediaAmounts: r.many.reportingCampaignSocialMediaAmounts({
+				from: r.reportingCampaigns.id,
+				to: r.reportingCampaignSocialMediaAmounts.campaignId,
+			}),
+			contributionAmounts: r.many.reportingCampaignContributionAmounts({
+				from: r.reportingCampaigns.id,
+				to: r.reportingCampaignContributionAmounts.campaignId,
+			}),
+			serviceSizes: r.many.reportingCampaignServiceSizes({
+				from: r.reportingCampaigns.id,
+				to: r.reportingCampaignServiceSizes.campaignId,
+			}),
 		},
 		countryReports: {
 			campaign: r.one.reportingCampaigns({
@@ -716,6 +732,34 @@ export const relations = defineRelations(schema, (r) => {
 			question: r.one.workingGroupReportQuestions({
 				from: r.workingGroupReportAnswers.questionId,
 				to: r.workingGroupReportQuestions.id,
+				optional: false,
+			}),
+		},
+		reportingCampaignEventAmounts: {
+			campaign: r.one.reportingCampaigns({
+				from: r.reportingCampaignEventAmounts.campaignId,
+				to: r.reportingCampaigns.id,
+				optional: false,
+			}),
+		},
+		reportingCampaignSocialMediaAmounts: {
+			campaign: r.one.reportingCampaigns({
+				from: r.reportingCampaignSocialMediaAmounts.campaignId,
+				to: r.reportingCampaigns.id,
+				optional: false,
+			}),
+		},
+		reportingCampaignContributionAmounts: {
+			campaign: r.one.reportingCampaigns({
+				from: r.reportingCampaignContributionAmounts.campaignId,
+				to: r.reportingCampaigns.id,
+				optional: false,
+			}),
+		},
+		reportingCampaignServiceSizes: {
+			campaign: r.one.reportingCampaigns({
+				from: r.reportingCampaignServiceSizes.campaignId,
+				to: r.reportingCampaigns.id,
 				optional: false,
 			}),
 		},

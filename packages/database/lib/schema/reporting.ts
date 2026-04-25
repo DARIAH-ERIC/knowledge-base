@@ -10,14 +10,14 @@ import { projects } from "./projects";
 import { services } from "./services";
 import { socialMedia } from "./social-media";
 
-export const reportingCampaignStatusEnum = ["open", "closed"] as const;
+export const reportingCampaignStatusEnum = ["draft", "open", "closed"] as const;
 
 export const reportingCampaigns = p.pgTable(
 	"reporting_campaigns",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
 		year: p.integer("year").notNull().unique(),
-		status: p.text("status", { enum: reportingCampaignStatusEnum }).notNull().default("open"),
+		status: p.text("status", { enum: reportingCampaignStatusEnum }).notNull().default("draft"),
 		...f.timestamps(),
 	},
 	(t) => {
@@ -60,6 +60,7 @@ export const countryReports = p.pgTable(
 		smallEvents: p.integer("small_events"),
 		mediumEvents: p.integer("medium_events"),
 		largeEvents: p.integer("large_events"),
+		veryLargeEvents: p.integer("very_large_events"),
 		dariahCommissionedEvent: p.text("dariah_commissioned_event"),
 		reusableOutcomes: p.text("reusable_outcomes"),
 		...f.timestamps(),
@@ -436,4 +437,167 @@ export type WorkingGroupReportAnswerInput = typeof workingGroupReportAnswers.$in
 
 export const WorkingGroupReportAnswerSelectSchema = createSelectSchema(workingGroupReportAnswers);
 export const WorkingGroupReportAnswerInsertSchema = createInsertSchema(workingGroupReportAnswers);
+
+export const reportingCampaignEventTypeEnum = [
+	"small",
+	"medium",
+	"large",
+	"very_large",
+	"dariah_commissioned",
+] as const;
+
+export const reportingCampaignEventAmounts = p.pgTable(
+	"reporting_campaign_event_amounts",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		campaignId: p
+			.uuid("campaign_id")
+			.notNull()
+			.references(() => {
+				return reportingCampaigns.id;
+			}),
+		eventType: p.text("event_type", { enum: reportingCampaignEventTypeEnum }).notNull(),
+		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
+	},
+	(t) => {
+		return [
+			p.unique().on(t.campaignId, t.eventType),
+			p.check(
+				"reporting_campaign_event_amounts_event_type_enum_check",
+				inArray(t.eventType, reportingCampaignEventTypeEnum),
+			),
+		];
+	},
+);
+
+export type ReportingCampaignEventAmount = typeof reportingCampaignEventAmounts.$inferSelect;
+export type ReportingCampaignEventAmountInput = typeof reportingCampaignEventAmounts.$inferInsert;
+
+export const ReportingCampaignEventAmountSelectSchema = createSelectSchema(
+	reportingCampaignEventAmounts,
+);
+export const ReportingCampaignEventAmountInsertSchema = createInsertSchema(
+	reportingCampaignEventAmounts,
+);
+
+export const reportingCampaignSocialMediaCategoryEnum = ["website", "other"] as const;
+
+export const reportingCampaignSocialMediaAmounts = p.pgTable(
+	"reporting_campaign_social_media_amounts",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		campaignId: p
+			.uuid("campaign_id")
+			.notNull()
+			.references(() => {
+				return reportingCampaigns.id;
+			}),
+		category: p.text("category", { enum: reportingCampaignSocialMediaCategoryEnum }).notNull(),
+		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
+	},
+	(t) => {
+		return [
+			p.unique().on(t.campaignId, t.category),
+			p.check(
+				"reporting_campaign_social_media_amounts_category_enum_check",
+				inArray(t.category, reportingCampaignSocialMediaCategoryEnum),
+			),
+		];
+	},
+);
+
+export type ReportingCampaignSocialMediaAmount =
+	typeof reportingCampaignSocialMediaAmounts.$inferSelect;
+export type ReportingCampaignSocialMediaAmountInput =
+	typeof reportingCampaignSocialMediaAmounts.$inferInsert;
+
+export const ReportingCampaignSocialMediaAmountSelectSchema = createSelectSchema(
+	reportingCampaignSocialMediaAmounts,
+);
+export const ReportingCampaignSocialMediaAmountInsertSchema = createInsertSchema(
+	reportingCampaignSocialMediaAmounts,
+);
+
+export const reportingCampaignContributionRoleEnum = [
+	"national_coordinator",
+	"national_coordinator_deputy",
+	"national_representative",
+	"national_representative_deputy",
+	"is_chair_of",
+	"is_vice_chair_of",
+	"is_member_of",
+] as const;
+
+export const reportingCampaignContributionAmounts = p.pgTable(
+	"reporting_campaign_contribution_amounts",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		campaignId: p
+			.uuid("campaign_id")
+			.notNull()
+			.references(() => {
+				return reportingCampaigns.id;
+			}),
+		roleType: p.text("role_type", { enum: reportingCampaignContributionRoleEnum }).notNull(),
+		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
+	},
+	(t) => {
+		return [
+			p.unique().on(t.campaignId, t.roleType),
+			p.check(
+				"reporting_campaign_contribution_amounts_role_type_enum_check",
+				inArray(t.roleType, reportingCampaignContributionRoleEnum),
+			),
+		];
+	},
+);
+
+export type ReportingCampaignContributionAmount =
+	typeof reportingCampaignContributionAmounts.$inferSelect;
+export type ReportingCampaignContributionAmountInput =
+	typeof reportingCampaignContributionAmounts.$inferInsert;
+
+export const ReportingCampaignContributionAmountSelectSchema = createSelectSchema(
+	reportingCampaignContributionAmounts,
+);
+export const ReportingCampaignContributionAmountInsertSchema = createInsertSchema(
+	reportingCampaignContributionAmounts,
+);
+
+export const serviceSizeEnum = ["small", "medium", "large", "very_large", "core"] as const;
+
+export const reportingCampaignServiceSizes = p.pgTable(
+	"reporting_campaign_service_sizes",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		campaignId: p
+			.uuid("campaign_id")
+			.notNull()
+			.references(() => {
+				return reportingCampaigns.id;
+			}),
+		serviceSize: p.text("service_size", { enum: serviceSizeEnum }).notNull(),
+		visitsThreshold: p.integer("visits_threshold"),
+		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
+	},
+	(t) => {
+		return [
+			p.unique().on(t.campaignId, t.serviceSize),
+			p.check(
+				"reporting_campaign_service_sizes_service_size_enum_check",
+				inArray(t.serviceSize, serviceSizeEnum),
+			),
+		];
+	},
+);
+
+export type ReportingCampaignServiceSize = typeof reportingCampaignServiceSizes.$inferSelect;
+export type ReportingCampaignServiceSizeInput = typeof reportingCampaignServiceSizes.$inferInsert;
+
+export const ReportingCampaignServiceSizeSelectSchema = createSelectSchema(
+	reportingCampaignServiceSizes,
+);
+export const ReportingCampaignServiceSizeInsertSchema = createInsertSchema(
+	reportingCampaignServiceSizes,
+);
 export const WorkingGroupReportAnswerUpdateSchema = createUpdateSchema(workingGroupReportAnswers);
