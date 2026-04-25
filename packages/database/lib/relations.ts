@@ -556,6 +556,10 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.reportingCampaigns.id,
 				to: r.workingGroupReports.campaignId,
 			}),
+			workingGroupReportQuestions: r.many.workingGroupReportQuestions({
+				from: r.reportingCampaigns.id,
+				to: r.workingGroupReportQuestions.campaignId,
+			}),
 		},
 		countryReports: {
 			campaign: r.one.reportingCampaigns({
@@ -658,6 +662,60 @@ export const relations = defineRelations(schema, (r) => {
 			workingGroup: r.one.organisationalUnits({
 				from: r.workingGroupReports.workingGroupId,
 				to: r.organisationalUnits.id,
+				optional: false,
+			}),
+			socialMedia: r.many.workingGroupReportSocialMedia({
+				from: r.workingGroupReports.id,
+				to: r.workingGroupReportSocialMedia.workingGroupReportId,
+			}),
+			events: r.many.workingGroupReportEvents({
+				from: r.workingGroupReports.id,
+				to: r.workingGroupReportEvents.workingGroupReportId,
+			}),
+			answers: r.many.workingGroupReportAnswers({
+				from: r.workingGroupReports.id,
+				to: r.workingGroupReportAnswers.workingGroupReportId,
+			}),
+		},
+		workingGroupReportSocialMedia: {
+			workingGroupReport: r.one.workingGroupReports({
+				from: r.workingGroupReportSocialMedia.workingGroupReportId,
+				to: r.workingGroupReports.id,
+				optional: false,
+			}),
+			socialMedia: r.one.socialMedia({
+				from: r.workingGroupReportSocialMedia.socialMediaId,
+				to: r.socialMedia.id,
+				optional: false,
+			}),
+		},
+		workingGroupReportEvents: {
+			workingGroupReport: r.one.workingGroupReports({
+				from: r.workingGroupReportEvents.workingGroupReportId,
+				to: r.workingGroupReports.id,
+				optional: false,
+			}),
+		},
+		workingGroupReportQuestions: {
+			campaign: r.one.reportingCampaigns({
+				from: r.workingGroupReportQuestions.campaignId,
+				to: r.reportingCampaigns.id,
+				optional: false,
+			}),
+			answers: r.many.workingGroupReportAnswers({
+				from: r.workingGroupReportQuestions.id,
+				to: r.workingGroupReportAnswers.questionId,
+			}),
+		},
+		workingGroupReportAnswers: {
+			workingGroupReport: r.one.workingGroupReports({
+				from: r.workingGroupReportAnswers.workingGroupReportId,
+				to: r.workingGroupReports.id,
+				optional: false,
+			}),
+			question: r.one.workingGroupReportQuestions({
+				from: r.workingGroupReportAnswers.questionId,
+				to: r.workingGroupReportQuestions.id,
 				optional: false,
 			}),
 		},

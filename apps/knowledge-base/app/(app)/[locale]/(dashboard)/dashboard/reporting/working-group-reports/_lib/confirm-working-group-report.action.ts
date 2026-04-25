@@ -25,5 +25,5 @@ export async function confirmWorkingGroupReportAction(formData: FormData): Promi
 
 	revalidatePath("/[locale]/dashboard/reporting", "layout");
 
-	redirect({ href: `/dashboard/reporting/working-group-reports/${id}/edit`, locale });
+	redirect({ href: `/dashboard/reporting/working-group-reports/${id}/edit/confirm`, locale });
 }

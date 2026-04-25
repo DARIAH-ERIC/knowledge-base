@@ -25,5 +25,5 @@ export async function submitWorkingGroupReportAction(formData: FormData): Promis
 
 	revalidatePath("/[locale]/dashboard/reporting", "layout");
 
-	redirect({ href: `/dashboard/reporting/working-group-reports/${id}/edit`, locale });
+	redirect({ href: `/dashboard/reporting/working-group-reports/${id}/edit/confirm`, locale });
 }

@@ -96,6 +96,8 @@ export const workingGroupReports = p.pgTable(
 				return organisationalUnits.id;
 			}),
 		status: p.text("status", { enum: reportStatusEnum }).notNull().default("draft"),
+		numberOfMembers: p.integer("number_of_members"),
+		mailingList: p.text("mailing_list"),
 		...f.timestamps(),
 	},
 	(t) => {
@@ -316,3 +318,122 @@ export type CountryReportInstitutionInput = typeof countryReportInstitutions.$in
 export const CountryReportInstitutionSelectSchema = createSelectSchema(countryReportInstitutions);
 export const CountryReportInstitutionInsertSchema = createInsertSchema(countryReportInstitutions);
 export const CountryReportInstitutionUpdateSchema = createUpdateSchema(countryReportInstitutions);
+
+export const workingGroupReportSocialMedia = p.pgTable(
+	"working_group_report_social_media",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		workingGroupReportId: p
+			.uuid("working_group_report_id")
+			.notNull()
+			.references(() => {
+				return workingGroupReports.id;
+			}),
+		socialMediaId: p
+			.uuid("social_media_id")
+			.notNull()
+			.references(() => {
+				return socialMedia.id;
+			}),
+	},
+	(t) => {
+		return [p.unique().on(t.workingGroupReportId, t.socialMediaId)];
+	},
+);
+
+export type WorkingGroupReportSocialMedia = typeof workingGroupReportSocialMedia.$inferSelect;
+export type WorkingGroupReportSocialMediaInput = typeof workingGroupReportSocialMedia.$inferInsert;
+
+export const WorkingGroupReportSocialMediaSelectSchema = createSelectSchema(
+	workingGroupReportSocialMedia,
+);
+export const WorkingGroupReportSocialMediaInsertSchema = createInsertSchema(
+	workingGroupReportSocialMedia,
+);
+export const WorkingGroupReportSocialMediaUpdateSchema = createUpdateSchema(
+	workingGroupReportSocialMedia,
+);
+
+export const workingGroupEventRoleEnum = ["organiser", "presenter"] as const;
+
+export const workingGroupReportEvents = p.pgTable("working_group_report_events", {
+	id: p.uuid("id").primaryKey().default(uuidv7()),
+	workingGroupReportId: p
+		.uuid("working_group_report_id")
+		.notNull()
+		.references(() => {
+			return workingGroupReports.id;
+		}),
+	title: p.text("title").notNull(),
+	date: p.date("date", { mode: "string" }).notNull(),
+	url: p.text("url"),
+	role: p.text("role", { enum: workingGroupEventRoleEnum }).notNull(),
+});
+
+export type WorkingGroupReportEvent = typeof workingGroupReportEvents.$inferSelect;
+export type WorkingGroupReportEventInput = typeof workingGroupReportEvents.$inferInsert;
+
+export const WorkingGroupReportEventSelectSchema = createSelectSchema(workingGroupReportEvents);
+export const WorkingGroupReportEventInsertSchema = createInsertSchema(workingGroupReportEvents);
+export const WorkingGroupReportEventUpdateSchema = createUpdateSchema(workingGroupReportEvents);
+
+export const workingGroupReportQuestions = p.pgTable(
+	"working_group_report_questions",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		campaignId: p
+			.uuid("campaign_id")
+			.notNull()
+			.references(() => {
+				return reportingCampaigns.id;
+			}),
+		question: p.jsonb("question").notNull(),
+		position: p.integer("position").notNull(),
+	},
+	(t) => {
+		return [p.unique().on(t.campaignId, t.position)];
+	},
+);
+
+export type WorkingGroupReportQuestion = typeof workingGroupReportQuestions.$inferSelect;
+export type WorkingGroupReportQuestionInput = typeof workingGroupReportQuestions.$inferInsert;
+
+export const WorkingGroupReportQuestionSelectSchema = createSelectSchema(
+	workingGroupReportQuestions,
+);
+export const WorkingGroupReportQuestionInsertSchema = createInsertSchema(
+	workingGroupReportQuestions,
+);
+export const WorkingGroupReportQuestionUpdateSchema = createUpdateSchema(
+	workingGroupReportQuestions,
+);
+
+export const workingGroupReportAnswers = p.pgTable(
+	"working_group_report_answers",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		workingGroupReportId: p
+			.uuid("working_group_report_id")
+			.notNull()
+			.references(() => {
+				return workingGroupReports.id;
+			}),
+		questionId: p
+			.uuid("question_id")
+			.notNull()
+			.references(() => {
+				return workingGroupReportQuestions.id;
+			}),
+		answer: p.jsonb("answer").notNull(),
+	},
+	(t) => {
+		return [p.unique().on(t.workingGroupReportId, t.questionId)];
+	},
+);
+
+export type WorkingGroupReportAnswer = typeof workingGroupReportAnswers.$inferSelect;
+export type WorkingGroupReportAnswerInput = typeof workingGroupReportAnswers.$inferInsert;
+
+export const WorkingGroupReportAnswerSelectSchema = createSelectSchema(workingGroupReportAnswers);
+export const WorkingGroupReportAnswerInsertSchema = createInsertSchema(workingGroupReportAnswers);
+export const WorkingGroupReportAnswerUpdateSchema = createUpdateSchema(workingGroupReportAnswers);
