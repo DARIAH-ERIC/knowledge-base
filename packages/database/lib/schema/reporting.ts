@@ -287,3 +287,32 @@ export const CountryReportProjectContributionInsertSchema = createInsertSchema(
 export const CountryReportProjectContributionUpdateSchema = createUpdateSchema(
 	countryReportProjectContributions,
 );
+
+export const countryReportInstitutions = p.pgTable(
+	"country_report_institutions",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		countryReportId: p
+			.uuid("country_report_id")
+			.notNull()
+			.references(() => {
+				return countryReports.id;
+			}),
+		organisationalUnitId: p
+			.uuid("organisational_unit_id")
+			.notNull()
+			.references(() => {
+				return organisationalUnits.id;
+			}),
+	},
+	(t) => {
+		return [p.unique().on(t.countryReportId, t.organisationalUnitId)];
+	},
+);
+
+export type CountryReportInstitution = typeof countryReportInstitutions.$inferSelect;
+export type CountryReportInstitutionInput = typeof countryReportInstitutions.$inferInsert;
+
+export const CountryReportInstitutionSelectSchema = createSelectSchema(countryReportInstitutions);
+export const CountryReportInstitutionInsertSchema = createInsertSchema(countryReportInstitutions);
+export const CountryReportInstitutionUpdateSchema = createUpdateSchema(countryReportInstitutions);

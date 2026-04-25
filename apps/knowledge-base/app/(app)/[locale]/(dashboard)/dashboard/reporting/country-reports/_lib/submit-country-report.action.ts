@@ -25,5 +25,5 @@ export async function submitCountryReportAction(formData: FormData): Promise<voi
 
 	revalidatePath("/[locale]/dashboard/reporting", "layout");
 
-	redirect({ href: `/dashboard/reporting/country-reports/${id}/edit`, locale });
+	redirect({ href: `/dashboard/reporting/country-reports/${id}/edit/confirm`, locale });
 }

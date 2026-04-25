@@ -387,6 +387,27 @@ export const relations = defineRelations(schema, (r) => {
 				optional: false,
 			}),
 		},
+		personsToOrganisationalUnits: {
+			person: r.one.persons({
+				from: r.personsToOrganisationalUnits.personId,
+				to: r.persons.id,
+				optional: false,
+			}),
+			organisationalUnit: r.one.organisationalUnits({
+				from: r.personsToOrganisationalUnits.organisationalUnitId,
+				to: r.organisationalUnits.id,
+				optional: false,
+			}),
+			roleType: r.one.personRoleTypes({
+				from: r.personsToOrganisationalUnits.roleTypeId,
+				to: r.personRoleTypes.id,
+				optional: false,
+			}),
+			contributions: r.many.countryReportContributions({
+				from: r.personsToOrganisationalUnits.id,
+				to: r.countryReportContributions.personToOrgUnitId,
+			}),
+		},
 		richTextContentBlocks: {
 			contentBlock: r.one.contentBlocks({
 				from: r.richTextContentBlocks.id,
@@ -563,6 +584,10 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.countryReports.id,
 				to: r.countryReportProjectContributions.countryReportId,
 			}),
+			institutions: r.many.countryReportInstitutions({
+				from: r.countryReports.id,
+				to: r.countryReportInstitutions.countryReportId,
+			}),
 		},
 		countryReportContributions: {
 			countryReport: r.one.countryReports({
@@ -609,6 +634,18 @@ export const relations = defineRelations(schema, (r) => {
 			project: r.one.projects({
 				from: r.countryReportProjectContributions.projectId,
 				to: r.projects.id,
+				optional: false,
+			}),
+		},
+		countryReportInstitutions: {
+			countryReport: r.one.countryReports({
+				from: r.countryReportInstitutions.countryReportId,
+				to: r.countryReports.id,
+				optional: false,
+			}),
+			organisationalUnit: r.one.organisationalUnits({
+				from: r.countryReportInstitutions.organisationalUnitId,
+				to: r.organisationalUnits.id,
 				optional: false,
 			}),
 		},

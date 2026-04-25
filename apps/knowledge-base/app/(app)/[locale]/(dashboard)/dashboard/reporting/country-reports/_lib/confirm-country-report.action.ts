@@ -25,5 +25,5 @@ export async function confirmCountryReportAction(formData: FormData): Promise<vo
 
 	revalidatePath("/[locale]/dashboard/reporting", "layout");
 
-	redirect({ href: `/dashboard/reporting/country-reports/${id}/edit`, locale });
+	redirect({ href: `/dashboard/reporting/country-reports/${id}/edit/confirm`, locale });
 }
