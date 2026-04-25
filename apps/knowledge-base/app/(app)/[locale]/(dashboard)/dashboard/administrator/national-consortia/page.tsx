@@ -1,120 +1,48 @@
-import { and, eq, inArray } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
-import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import { type ReactNode, Suspense } from "react";
+import type { ReactNode } from "react";
 
-import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
 import { NationalConsortiaPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page";
+import { getNationalConsortia } from "@/lib/data/national-consortia";
+import type { IntlLocale } from "@/lib/i18n/locales";
+import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
+import {
+	getListSearchParams,
+	getListSortSearchParams,
+	type ListSortDirection,
+} from "@/lib/server/list-search-params";
 
 interface DashboardAdministratorNationalConsortiaPageProps extends PageProps<"/[locale]/dashboard/administrator/national-consortia"> {}
 
-async function getNationalConsortiaForDashboard(): Promise<
-	Array<
-		Pick<schema.OrganisationalUnit, "id" | "name"> & {
-			countryName: string | null;
-			entity: Pick<schema.Entity, "documentId" | "slug"> & {
-				status: Pick<schema.EntityStatus, "id" | "type">;
-			};
-		}
-	>
-> {
-	const nationalConsortia = await db.query.organisationalUnits.findMany({
-		where: { type: { type: "national_consortium" } },
-		orderBy: { name: "asc" },
-		columns: {
-			id: true,
-			name: true,
-		},
-		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
-				},
-				with: {
-					status: {
-						columns: {
-							id: true,
-							type: true,
-						},
-					},
-				},
-			},
-		},
-	});
+const pageSize = 10;
+const defaultSort = "name" as const;
+const validSorts = ["name", "country"] as const;
 
-	const nationalConsortiumIds = nationalConsortia.map((unit) => {
-		return unit.id;
-	});
+function createListHref(
+	q: string,
+	page: number,
+	sort: (typeof validSorts)[number],
+	dir: ListSortDirection,
+): string {
+	const searchParams = new URLSearchParams();
 
-	if (nationalConsortiumIds.length === 0) {
-		return nationalConsortia.map((unit) => {
-			return {
-				...unit,
-				countryName: null,
-			};
-		});
+	if (q !== "") {
+		searchParams.set("q", q);
 	}
 
-	const relatedCountries = await db
-		.select({
-			countryName: schema.organisationalUnits.name,
-			duration: schema.organisationalUnitsRelations.duration,
-			unitId: schema.organisationalUnitsRelations.unitId,
-		})
-		.from(schema.organisationalUnitsRelations)
-		.innerJoin(
-			schema.organisationalUnitStatus,
-			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
-		)
-		.innerJoin(
-			schema.organisationalUnits,
-			eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.relatedUnitId),
-		)
-		.innerJoin(
-			schema.organisationalUnitTypes,
-			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
-		)
-		.where(
-			and(
-				inArray(schema.organisationalUnitsRelations.unitId, nationalConsortiumIds),
-				eq(schema.organisationalUnitStatus.status, "is_national_consortium_of"),
-				eq(schema.organisationalUnitTypes.type, "country"),
-			),
-		);
-
-	const countryByUnitId = new Map<string, { from: Date; name: string; until: Date | null }>();
-
-	for (const relation of relatedCountries) {
-		const existing = countryByUnitId.get(relation.unitId);
-		const nextRelation = {
-			from: relation.duration.start,
-			name: relation.countryName,
-			until: relation.duration.end ?? null,
-		};
-
-		if (existing == null) {
-			countryByUnitId.set(relation.unitId, nextRelation);
-			continue;
-		}
-
-		const shouldReplace =
-			(existing.until != null && nextRelation.until == null) || nextRelation.from > existing.from;
-
-		if (shouldReplace) {
-			countryByUnitId.set(relation.unitId, nextRelation);
-		}
+	if (page > 1) {
+		searchParams.set("page", String(page));
 	}
 
-	return nationalConsortia.map((unit) => {
-		return {
-			...unit,
-			countryName: countryByUnitId.get(unit.id)?.name ?? null,
-		};
-	});
+	if (sort !== defaultSort || dir !== "asc") {
+		searchParams.set("sort", sort);
+		searchParams.set("dir", dir);
+	}
+
+	const query = searchParams.toString();
+
+	return `/dashboard/administrator/national-consortia${query !== "" ? `?${query}` : ""}`;
 }
 
 export async function generateMetadata(
@@ -130,14 +58,38 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardAdministratorNationalConsortiaPage(
-	_props: Readonly<DashboardAdministratorNationalConsortiaPageProps>,
-): ReactNode {
-	const nationalConsortia = getNationalConsortiaForDashboard();
+export default async function DashboardAdministratorNationalConsortiaPage(
+	props: Readonly<DashboardAdministratorNationalConsortiaPageProps>,
+): Promise<ReactNode> {
+	const { params, searchParams } = props;
+	const [{ locale }, rawSearchParams] = await Promise.all([params, searchParams]);
+	const { page, q } = getListSearchParams(rawSearchParams);
+	const { dir, sort } = getListSortSearchParams(rawSearchParams, {
+		defaultDir: "asc",
+		defaultSort,
+		validSorts,
+	});
+	const nationalConsortia = await getNationalConsortia({
+		limit: pageSize,
+		offset: (page - 1) * pageSize,
+		q,
+		sort,
+		dir,
+	});
+	const totalPages = Math.max(Math.ceil(nationalConsortia.total / pageSize), 1);
+
+	if (page > totalPages) {
+		redirect({ href: createListHref(q, totalPages, sort, dir), locale: locale as IntlLocale });
+	}
 
 	return (
-		<Suspense fallback={<LoadingScreen />}>
-			<NationalConsortiaPage nationalConsortia={nationalConsortia} />
-		</Suspense>
+		<NationalConsortiaPage
+			key={`${q}:${sort}:${dir}:${String(page)}`}
+			dir={dir}
+			nationalConsortia={nationalConsortia}
+			page={page}
+			q={q}
+			sort={sort}
+		/>
 	);
 }

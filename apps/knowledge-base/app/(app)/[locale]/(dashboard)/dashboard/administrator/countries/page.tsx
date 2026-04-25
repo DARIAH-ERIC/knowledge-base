@@ -1,138 +1,48 @@
-import { and, eq, inArray } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
-import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import { type ReactNode, Suspense } from "react";
+import type { ReactNode } from "react";
 
-import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
 import { CountriesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page";
+import { getCountries } from "@/lib/data/countries";
+import type { IntlLocale } from "@/lib/i18n/locales";
+import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
+import {
+	getListSearchParams,
+	getListSortSearchParams,
+	type ListSortDirection,
+} from "@/lib/server/list-search-params";
 
 interface DashboardAdministratorCountriesPageProps extends PageProps<"/[locale]/dashboard/administrator/countries"> {}
 
-type CountryMemberObserverStatus = "is_member_of" | "is_observer_of" | null;
+const pageSize = 10;
+const defaultSort = "name" as const;
+const validSorts = ["name", "status"] as const;
 
-async function getCountriesForDashboard(): Promise<
-	Array<
-		Pick<schema.OrganisationalUnit, "id" | "name"> & {
-			memberObserverFrom: Date | null;
-			memberObserverStatus: CountryMemberObserverStatus;
-			memberObserverUntil: Date | null;
-			entity: Pick<schema.Entity, "documentId" | "slug"> & {
-				status: Pick<schema.EntityStatus, "id" | "type">;
-			};
-		}
-	>
-> {
-	const [countries, erics] = await Promise.all([
-		db.query.organisationalUnits.findMany({
-			where: { type: { type: "country" } },
-			orderBy: { name: "asc" },
-			columns: {
-				id: true,
-				name: true,
-			},
-			with: {
-				entity: {
-					columns: {
-						documentId: true,
-						slug: true,
-					},
-					with: {
-						status: {
-							columns: {
-								id: true,
-								type: true,
-							},
-						},
-					},
-				},
-			},
-		}),
-		db.query.organisationalUnits.findMany({
-			where: { type: { type: "eric" } },
-			columns: { id: true },
-		}),
-	]);
+function createListHref(
+	q: string,
+	page: number,
+	sort: (typeof validSorts)[number],
+	dir: ListSortDirection,
+): string {
+	const searchParams = new URLSearchParams();
 
-	const countryIds = countries.map((country) => {
-		return country.id;
-	});
-	const ericIds = erics.map((eric) => {
-		return eric.id;
-	});
-
-	if (countryIds.length === 0 || ericIds.length === 0) {
-		return countries.map((country) => {
-			return {
-				...country,
-				memberObserverFrom: null,
-				memberObserverStatus: null,
-				memberObserverUntil: null,
-			};
-		});
+	if (q !== "") {
+		searchParams.set("q", q);
 	}
 
-	const relations = await db
-		.select({
-			duration: schema.organisationalUnitsRelations.duration,
-			unitId: schema.organisationalUnitsRelations.unitId,
-			status: schema.organisationalUnitStatus.status,
-		})
-		.from(schema.organisationalUnitsRelations)
-		.innerJoin(
-			schema.organisationalUnitStatus,
-			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
-		)
-		.where(
-			and(
-				inArray(schema.organisationalUnitsRelations.unitId, countryIds),
-				inArray(schema.organisationalUnitsRelations.relatedUnitId, ericIds),
-				inArray(schema.organisationalUnitStatus.status, ["is_member_of", "is_observer_of"]),
-			),
-		);
-
-	const relationByCountryId = new Map<
-		string,
-		{
-			from: Date;
-			status: Exclude<CountryMemberObserverStatus, null>;
-			until: Date | null;
-		}
-	>();
-
-	for (const relation of relations) {
-		const existing = relationByCountryId.get(relation.unitId);
-		const nextRelation = {
-			from: relation.duration.start,
-			status: relation.status as Exclude<CountryMemberObserverStatus, null>,
-			until: relation.duration.end ?? null,
-		};
-
-		if (existing == null) {
-			relationByCountryId.set(relation.unitId, nextRelation);
-			continue;
-		}
-
-		const shouldReplace =
-			(existing.until != null && nextRelation.until == null) || nextRelation.from > existing.from;
-
-		if (shouldReplace) {
-			relationByCountryId.set(relation.unitId, nextRelation);
-		}
+	if (page > 1) {
+		searchParams.set("page", String(page));
 	}
 
-	return countries.map((country) => {
-		const relation = relationByCountryId.get(country.id);
+	if (sort !== defaultSort || dir !== "asc") {
+		searchParams.set("sort", sort);
+		searchParams.set("dir", dir);
+	}
 
-		return {
-			...country,
-			memberObserverFrom: relation?.from ?? null,
-			memberObserverStatus: relation?.status ?? null,
-			memberObserverUntil: relation?.until ?? null,
-		};
-	});
+	const query = searchParams.toString();
+
+	return `/dashboard/administrator/countries${query !== "" ? `?${query}` : ""}`;
 }
 
 export async function generateMetadata(
@@ -148,14 +58,38 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardAdministratorCountriesPage(
-	_props: Readonly<DashboardAdministratorCountriesPageProps>,
-): ReactNode {
-	const countries = getCountriesForDashboard();
+export default async function DashboardAdministratorCountriesPage(
+	props: Readonly<DashboardAdministratorCountriesPageProps>,
+): Promise<ReactNode> {
+	const { params, searchParams } = props;
+	const [{ locale }, rawSearchParams] = await Promise.all([params, searchParams]);
+	const { page, q } = getListSearchParams(rawSearchParams);
+	const { dir, sort } = getListSortSearchParams(rawSearchParams, {
+		defaultDir: "asc",
+		defaultSort,
+		validSorts,
+	});
+	const countries = await getCountries({
+		limit: pageSize,
+		offset: (page - 1) * pageSize,
+		q,
+		sort,
+		dir,
+	});
+	const totalPages = Math.max(Math.ceil(countries.total / pageSize), 1);
+
+	if (page > totalPages) {
+		redirect({ href: createListHref(q, totalPages, sort, dir), locale: locale as IntlLocale });
+	}
 
 	return (
-		<Suspense fallback={<LoadingScreen />}>
-			<CountriesPage countries={countries} />
-		</Suspense>
+		<CountriesPage
+			key={`${q}:${sort}:${dir}:${String(page)}`}
+			countries={countries}
+			dir={dir}
+			page={page}
+			q={q}
+			sort={sort}
+		/>
 	);
 }

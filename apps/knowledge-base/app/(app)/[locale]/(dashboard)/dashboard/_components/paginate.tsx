@@ -21,7 +21,9 @@ function getPaginationRange(current: number, total: number, delta = 2) {
 	const range: Array<number> = [];
 	const left = Math.max(2, current - delta);
 	const right = Math.min(total - 1, current + delta);
-	range.push(1);
+	if (total >= 1) {
+		range.push(1);
+	}
 	if (left > 2) range.push(-1);
 	for (let i = left; i <= right; i++) range.push(i);
 	if (right < total - 1) range.push(-2);
@@ -30,24 +32,29 @@ function getPaginationRange(current: number, total: number, delta = 2) {
 }
 
 interface PaginateProps {
+	isPending?: boolean;
 	page: number;
-	total: number;
-	setPage: (page: number) => void;
 	perPage?: number;
+	setPage: (page: number) => void;
+	total: number;
+	totalItems?: number;
 }
 
 export function Paginate({
+	isPending = false,
 	page,
-	total,
-	setPage,
 	perPage = 10,
+	setPage,
+	total,
+	totalItems,
 }: Readonly<PaginateProps>): ReactNode {
 	const t = useExtracted();
 
-	const pages = getPaginationRange(page, total);
-	const start = (page - 1) * perPage + 1;
-	const end = Math.min(page * perPage, total * perPage);
-	const totalResults = total * perPage;
+	const safeTotal = Math.max(total, 1);
+	const pages = getPaginationRange(page, safeTotal);
+	const totalResults = totalItems ?? safeTotal * perPage;
+	const start = totalResults === 0 ? 0 : (page - 1) * perPage + 1;
+	const end = totalResults === 0 ? 0 : Math.min(page * perPage, totalResults);
 
 	return (
 		<Pagination className="flex-col md:flex-row">
@@ -67,13 +74,13 @@ export function Paginate({
 			<PaginationSpacer />
 			<PaginationList className="hidden md:flex">
 				<PaginationFirst
-					isDisabled={page === 1}
+					isDisabled={isPending || page === 1}
 					onPress={() => {
 						setPage(1);
 					}}
 				/>
 				<PaginationPrevious
-					isDisabled={page === 1}
+					isDisabled={isPending || page === 1}
 					onPress={() => {
 						setPage(page - 1);
 					}}
@@ -86,6 +93,7 @@ export function Paginate({
 							<PaginationItem
 								key={n}
 								isCurrent={n === page}
+								isDisabled={isPending}
 								onPress={() => {
 									setPage(n);
 								}}
@@ -96,28 +104,28 @@ export function Paginate({
 					})}
 				</PaginationSection>
 				<PaginationNext
-					isDisabled={page === total}
+					isDisabled={isPending || page === safeTotal}
 					onPress={() => {
 						setPage(page + 1);
 					}}
 				/>
 				<PaginationLast
-					isDisabled={page === total}
+					isDisabled={isPending || page === safeTotal}
 					onPress={() => {
-						setPage(total);
+						setPage(safeTotal);
 					}}
 				/>
 			</PaginationList>
 
 			<PaginationList className="md:hidden">
 				<PaginationFirst
-					isDisabled={page === 1}
+					isDisabled={isPending || page === 1}
 					onPress={() => {
 						setPage(1);
 					}}
 				/>
 				<PaginationPrevious
-					isDisabled={page === 1}
+					isDisabled={isPending || page === 1}
 					onPress={() => {
 						setPage(page - 1);
 					}}
@@ -125,18 +133,18 @@ export function Paginate({
 				<PaginationSection className="rounded-(--section-radius) border px-3 *:min-w-4">
 					<PaginationLabel>{page}</PaginationLabel>
 					<PaginationLabel className="text-muted-fg">/</PaginationLabel>
-					<PaginationLabel>{total}</PaginationLabel>
+					<PaginationLabel>{safeTotal}</PaginationLabel>
 				</PaginationSection>
 				<PaginationNext
-					isDisabled={page === total}
+					isDisabled={isPending || page === safeTotal}
 					onPress={() => {
 						setPage(page + 1);
 					}}
 				/>
 				<PaginationLast
-					isDisabled={page === total}
+					isDisabled={isPending || page === safeTotal}
 					onPress={() => {
-						setPage(total);
+						setPage(safeTotal);
 					}}
 				/>
 			</PaginationList>

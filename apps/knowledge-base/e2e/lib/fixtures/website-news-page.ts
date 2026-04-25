@@ -1,5 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
+import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
+
 const BASE_PATH = "/en/dashboard/website/news";
 
 export class WebsiteNewsPage {
@@ -44,28 +46,58 @@ export class WebsiteNewsPage {
 		await this.page.getByRole("dialog").getByRole("button", { name: "Select" }).click();
 	}
 
-	async selectRelatedEntity(entityName: string): Promise<void> {
-		const section = this.page
+	private relatedEntitiesSection(): Locator {
+		return this.page
 			.locator("section")
 			.filter({ has: this.page.getByRole("heading", { name: "Related entities", level: 2 }) });
-		const dialog = this.page.getByRole("dialog");
+	}
 
-		await section.getByRole("button").last().click();
-		await dialog.getByRole("searchbox").fill(entityName);
-		await dialog.getByRole("option", { name: entityName }).click();
-		await section.getByRole("button").last().click({ force: true });
+	private relatedEntitiesDialog(): Locator {
+		return this.page
+			.getByRole("dialog")
+			.filter({ has: this.page.getByRole("listbox", { name: "Related entities" }) });
+	}
+
+	async selectRelatedEntity(entityName: string): Promise<void> {
+		const section = this.relatedEntitiesSection();
+		const trigger = section.getByRole("button").first();
+		const dialog = this.relatedEntitiesDialog();
+
+		await trigger.click();
+		await dialog.waitFor({ state: "visible" });
+
+		const option = dialog.getByRole("option", { name: entityName, exact: true });
+		const isOptionVisible = await option.isVisible().catch(() => {
+			return false;
+		});
+
+		if (!isOptionVisible) {
+			await dialog.getByRole("searchbox").fill(entityName);
+			await dialog.getByRole("button", { name: "Search" }).click();
+		}
+
+		await dialog.getByRole("option", { name: entityName, exact: true }).click();
+		await trigger.evaluate((element) => {
+			(element as HTMLButtonElement).click();
+		});
 		await dialog.waitFor({ state: "hidden" });
 	}
 
 	async removeRelatedEntity(entityName: string): Promise<void> {
-		const section = this.page
-			.locator("section")
-			.filter({ has: this.page.getByRole("heading", { name: "Related entities", level: 2 }) });
-		const dialog = this.page.getByRole("dialog");
+		const section = this.relatedEntitiesSection();
+		const trigger = section.getByRole("button").first();
+		const dialog = this.relatedEntitiesDialog();
 
-		await section.getByRole("button").last().click();
-		await dialog.getByRole("row", { name: entityName }).getByRole("button").click();
-		await section.getByRole("button").last().click({ force: true });
+		await trigger.click();
+		await dialog.waitFor({ state: "visible" });
+		await dialog
+			.getByRole("grid", { name: "Selected items" })
+			.getByRole("row", { name: entityName, exact: true })
+			.getByRole("button")
+			.click();
+		await trigger.evaluate((element) => {
+			(element as HTMLButtonElement).click();
+		});
 		await dialog.waitFor({ state: "hidden" });
 	}
 
@@ -80,7 +112,7 @@ export class WebsiteNewsPage {
 	// ---------------------------------------------------------------------------
 
 	async searchByTitle(title: string): Promise<void> {
-		await this.page.getByRole("searchbox").fill(title);
+		await fillSearchAndWaitForUrl(this.page, BASE_PATH, title);
 	}
 
 	rowByTitle(title: string): Locator {

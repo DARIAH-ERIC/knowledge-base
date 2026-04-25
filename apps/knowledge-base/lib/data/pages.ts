@@ -1,61 +1,70 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq } from "@dariah-eric/database";
+import { count, desc, eq, ilike } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
 import { images } from "@/lib/images";
 
+export type PagesSort = "title" | "updatedAt";
+
 interface GetPagesParams {
 	/** @default 10 */
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
+	q?: string;
+	sort?: PagesSort;
+	dir?: "asc" | "desc";
 }
 
 export async function getPages(params: GetPagesParams) {
-	const { limit = 10, offset = 0 } = params;
+	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
+	const query = q?.trim();
+	const where = query != null && query !== "" ? ilike(schema.pages.title, `%${query}%`) : undefined;
+	const orderBy =
+		sort === "title"
+			? dir === "asc"
+				? schema.pages.title
+				: desc(schema.pages.title)
+			: dir === "asc"
+				? schema.entities.updatedAt
+				: desc(schema.entities.updatedAt);
 
 	const [items, aggregate] = await Promise.all([
-		db.query.pages.findMany({
-			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
-					},
-				},
-				image: {
-					columns: {
-						key: true,
-					},
-				},
-			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
-			},
-			limit,
-			offset,
-		}),
+		db
+			.select({
+				id: schema.pages.id,
+				slug: schema.entities.slug,
+				summary: schema.pages.summary,
+				title: schema.pages.title,
+				updatedAt: schema.entities.updatedAt,
+			})
+			.from(schema.pages)
+			.innerJoin(schema.entities, eq(schema.pages.id, schema.entities.id))
+			.where(where)
+			.orderBy(orderBy)
+			.limit(limit)
+			.offset(offset),
 		db
 			.select({ total: count() })
 			.from(schema.pages)
 			.innerJoin(schema.entities, eq(schema.pages.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id)),
+			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.where(where),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = item.image
-			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageAssetWidth.preview },
-				})
-			: null;
-
-		return { ...item, image };
+		return {
+			id: item.id,
+			entity: { slug: item.slug },
+			summary: item.summary,
+			title: item.title,
+			updatedAt: item.updatedAt,
+		};
 	});
 
 	return { data, limit, offset, total };

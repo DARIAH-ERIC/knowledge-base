@@ -20,8 +20,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useState } from "react";
-import { useFilter, useListData } from "react-aria-components";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -32,46 +31,55 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteWorkingGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/delete-working-group.action";
+import { useRouter } from "@/lib/navigation/navigation";
 
 interface WorkingGroupsPageProps {
-	workingGroups: Promise<
-		Array<
+	dir: "asc" | "desc";
+	page: number;
+	q: string;
+	sort: "name";
+	workingGroups: {
+		data: Array<
 			Pick<schema.OrganisationalUnit, "id" | "name"> & {
 				durationFrom: Date | null;
 				durationUntil: Date | null;
-				entity: Pick<schema.Entity, "documentId" | "slug"> & {
-					status: Pick<schema.EntityStatus, "id" | "type">;
-				};
+				entity: Pick<schema.Entity, "slug">;
 			}
-		>
-	>;
+		>;
+		total: number;
+	};
 }
 
-export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): ReactNode {
-	const { workingGroups: workingGroupsPromise } = props;
+const pageSize = 10;
 
-	const workingGroups = use(workingGroupsPromise);
+export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): ReactNode {
+	const {
+		dir: initialDir,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+		workingGroups,
+	} = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
-
-	const { contains } = useFilter({ sensitivity: "base" });
-
-	const list = useListData({
-		filter(item, filterText) {
-			return contains(item.name, filterText);
-		},
-		initialItems: workingGroups,
+	const router = useRouter();
+	const [items, setItems] = useState(() => {
+		return workingGroups.data;
 	});
-
-	const [page, setPage] = useState(1);
-
-	const pageSize = 10;
-	const pages = Math.ceil(list.items.length / pageSize);
-	const items = list.items.slice((page - 1) * pageSize, page * pageSize);
-
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
+	const [isDeletePending, startDeleteTransition] = useTransition();
+
+	const totalPages = Math.max(Math.ceil(workingGroups.total / pageSize), 1);
 
 	return (
 		<Fragment>
@@ -83,13 +91,7 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
-					<SearchField
-						onChange={(value) => {
-							list.setFilterText(value);
-							setPage(1);
-						}}
-						value={list.filterText}
-					>
+					<SearchField onChange={setInputValue} value={inputValue}>
 						<SearchInput placeholder={t("Search")} />
 					</SearchField>
 					<Link
@@ -105,9 +107,13 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 			<Table
 				aria-label="working groups"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
+					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
+						{t("Name")}
+					</TableColumn>
 					<TableColumn>{t("From")}</TableColumn>
 					<TableColumn>{t("Until")}</TableColumn>
 					<TableColumn />
@@ -165,7 +171,13 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 				</TableBody>
 			</Table>
 
-			<Paginate page={page} setPage={setPage} total={pages} />
+			<Paginate
+				isPending={isPending}
+				page={page}
+				setPage={setPage}
+				total={totalPages}
+				totalItems={workingGroups.total}
+			/>
 
 			<DeleteModal
 				isOpen={itemToDelete != null}
@@ -175,14 +187,21 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 						return;
 					}
 
-					startTransition(async () => {
-						await deleteWorkingGroupAction(itemToDelete.id);
-						list.remove(itemToDelete.id);
+					const id = itemToDelete.id;
+
+					startDeleteTransition(async () => {
+						setItems((prev) => {
+							return prev.filter((item) => {
+								return item.id !== id;
+							});
+						});
+						await deleteWorkingGroupAction(id);
+						router.refresh();
 						setItemToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isDeletePending) {
 						setItemToDelete(null);
 					}
 				}}

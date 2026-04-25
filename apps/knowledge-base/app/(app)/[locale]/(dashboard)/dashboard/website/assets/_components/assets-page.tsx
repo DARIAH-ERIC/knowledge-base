@@ -4,8 +4,7 @@ import { assetPrefixes } from "@dariah-eric/storage/config";
 import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, use, useState } from "react";
-import { useFilter } from "react-aria-components";
+import { Fragment, type ReactNode } from "react";
 
 import {
 	Header,
@@ -15,6 +14,7 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { UploadImageDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog";
 import { useRouter } from "@/lib/navigation/navigation";
 
@@ -26,37 +26,30 @@ interface AssetItem {
 }
 
 interface AssetsPageProps {
-	assets: Promise<{
+	assets: {
 		items: Array<AssetItem>;
 		total: number;
-	}>;
+	};
+	page: number;
+	prefix: string;
+	q: string;
 }
 
 const pageSize = 24;
 
 export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
-	const { assets: assetsPromise } = props;
-
-	const { items } = use(assetsPromise);
+	const { assets, page: initialPage, prefix: initialPrefix, q: initialQ } = props;
 
 	const t = useExtracted();
 	const router = useRouter();
-	const { contains } = useFilter({ sensitivity: "base" });
-
-	const [searchText, setSearchText] = useState("");
-	const [selectedPrefix, setSelectedPrefix] = useState<string>("all");
-	const [page, setPage] = useState(1);
-
-	const filteredItems = items.filter((item) => {
-		const matchesSearch = searchText === "" || contains(item.label, searchText);
-		const itemPrefix = item.key.split("/")[0] ?? "";
-		const matchesPrefix = selectedPrefix === "all" || itemPrefix === selectedPrefix;
-		return matchesSearch && matchesPrefix;
-	});
-
-	const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
-	const currentPage = Math.min(page, totalPages);
-	const paginatedItems = filteredItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+	const { filters, inputValue, isPending, page, setFilter, setInputValue, setPage } =
+		useUrlPaginatedSearch({
+			filters: { prefix: initialPrefix },
+			page: initialPage,
+			q: initialQ,
+		});
+	const selectedPrefix = filters.prefix !== "" ? filters.prefix : "all";
+	const totalPages = Math.max(1, Math.ceil(assets.total / pageSize));
 
 	return (
 		<Fragment>
@@ -66,21 +59,15 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 					<HeaderDescription>{t("Manage all images in the media library.")}</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
-					<SearchField
-						onChange={(value) => {
-							setSearchText(value);
-							setPage(1);
-						}}
-						value={searchText}
-					>
+					<SearchField onChange={setInputValue} value={inputValue}>
 						<SearchInput placeholder={t("Search by label")} />
 					</SearchField>
 
 					<Select
 						aria-label={t("Filter by prefix")}
 						onChange={(key) => {
-							setSelectedPrefix(String(key));
-							setPage(1);
+							const value = String(key);
+							setFilter("prefix", value === "all" ? "" : value);
 						}}
 						value={selectedPrefix}
 					>
@@ -105,10 +92,10 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 				</HeaderAction>
 			</Header>
 
-			{paginatedItems.length === 0 ? (
+			{assets.items.length === 0 ? (
 				<div className="flex flex-1 items-center justify-center py-16">
 					<p className="text-center text-muted-fg text-sm">
-						{searchText !== "" || selectedPrefix !== "all"
+						{inputValue !== "" || selectedPrefix !== "all"
 							? t("No images match your filters.")
 							: t("No images found. Upload one to get started.")}
 					</p>
@@ -118,7 +105,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 					className="grid grid-cols-[repeat(auto-fill,minmax(min(12rem,100%),1fr))] gap-4 content-start"
 					role="list"
 				>
-					{paginatedItems.map((asset) => {
+					{assets.items.map((asset) => {
 						const prefix = asset.key.split("/")[0] ?? "";
 						return (
 							<li key={asset.id}>
@@ -137,9 +124,16 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 				</ul>
 			)}
 
-			{totalPages > 1 && (
-				<Paginate page={currentPage} perPage={pageSize} setPage={setPage} total={totalPages} />
-			)}
+			{totalPages > 1 ? (
+				<Paginate
+					isPending={isPending}
+					page={page}
+					perPage={pageSize}
+					setPage={setPage}
+					total={totalPages}
+					totalItems={assets.total}
+				/>
+			) : null}
 		</Fragment>
 	);
 }

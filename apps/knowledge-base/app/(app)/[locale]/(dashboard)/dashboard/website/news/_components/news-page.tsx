@@ -20,9 +20,8 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useState } from "react";
-import { useFilter, useListData } from "react-aria-components";
+import { useExtracted, useFormatter } from "next-intl";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -33,44 +32,48 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteNewsItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/delete-news-item.action";
+import { useRouter } from "@/lib/navigation/navigation";
 
 interface NewsPageProps {
-	news: Promise<{
+	dir: "asc" | "desc";
+	news: {
 		data: Array<
 			Pick<schema.NewsItem, "id" | "title" | "summary"> & {
-				entity: Pick<schema.Entity, "documentId" | "slug"> & {
-					status: Pick<schema.EntityStatus, "id" | "type">;
-				};
+				entity: Pick<schema.Entity, "slug">;
+				updatedAt: schema.Entity["updatedAt"];
 			}
 		>;
 		total: number;
-	}>;
+	};
+	page: number;
+	q: string;
+	sort: "title" | "updatedAt";
 }
 
-export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
-	const { news: newsPromise } = props;
+const pageSize = 10;
 
-	const news = use(newsPromise);
+export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
+	const { dir: initialDir, news, page: initialPage, q: initialQ, sort: initialSort } = props;
 
 	const t = useExtracted();
-
-	const { contains } = useFilter({ sensitivity: "base" });
-
-	const list = useListData({
-		filter(item, filterText) {
-			return contains(item.title, filterText);
-		},
-		initialItems: news.data,
+	const format = useFormatter();
+	const router = useRouter();
+	const [items, setItems] = useState(() => {
+		return news.data;
 	});
-
-	const [page, setPage] = useState(1);
-
-	const pageSize = 10;
-	const pages = Math.ceil(list.items.length / pageSize);
-	const items = list.items.slice((page - 1) * pageSize, page * pageSize);
-
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
+	const [isDeletePending, startDeleteTransition] = useTransition();
+
+	const totalPages = Math.max(Math.ceil(news.total / pageSize), 1);
 
 	return (
 		<Fragment>
@@ -82,13 +85,7 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
-					<SearchField
-						onChange={(value) => {
-							list.setFilterText(value);
-							setPage(1);
-						}}
-						value={list.filterText}
-					>
+					<SearchField onChange={setInputValue} value={inputValue}>
 						<SearchInput placeholder={t("Search")} />
 					</SearchField>
 					<Link
@@ -104,9 +101,16 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 			<Table
 				aria-label="news"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Title")}</TableColumn>
+					<TableColumn allowsSorting={true} id="title" isRowHeader={true}>
+						{t("Title")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="updatedAt">
+						{t("Updated")}
+					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -116,6 +120,7 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 								<TableCell>
 									<div className="max-w-64 truncate">{item.title}</div>
 								</TableCell>
+								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button
@@ -154,7 +159,13 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 				</TableBody>
 			</Table>
 
-			<Paginate page={page} setPage={setPage} total={pages} />
+			<Paginate
+				isPending={isPending}
+				page={page}
+				setPage={setPage}
+				total={totalPages}
+				totalItems={news.total}
+			/>
 
 			<DeleteModal
 				isOpen={itemToDelete != null}
@@ -164,14 +175,21 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 						return;
 					}
 
-					startTransition(async () => {
-						await deleteNewsItemAction(itemToDelete.id);
-						list.remove(itemToDelete.id);
+					const id = itemToDelete.id;
+
+					startDeleteTransition(async () => {
+						setItems((prev) => {
+							return prev.filter((item) => {
+								return item.id !== id;
+							});
+						});
+						await deleteNewsItemAction(id);
+						router.refresh();
 						setItemToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isDeletePending) {
 						setItemToDelete(null);
 					}
 				}}

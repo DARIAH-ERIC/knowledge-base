@@ -1,13 +1,49 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import { type ReactNode, Suspense } from "react";
+import type { ReactNode } from "react";
 
-import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
 import { PagesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page";
 import { getPages } from "@/lib/data/cached/pages";
+import type { IntlLocale } from "@/lib/i18n/locales";
+import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
+import {
+	getListSearchParams,
+	getListSortSearchParams,
+	type ListSortDirection,
+} from "@/lib/server/list-search-params";
 
 interface DashboardWebsitePagesPageProps extends PageProps<"/[locale]/dashboard/website/pages"> {}
+
+const pageSize = 10;
+const defaultSort = "updatedAt" as const;
+const validSorts = ["title", "updatedAt"] as const;
+
+function createListHref(
+	q: string,
+	page: number,
+	sort: (typeof validSorts)[number],
+	dir: ListSortDirection,
+): string {
+	const searchParams = new URLSearchParams();
+
+	if (q !== "") {
+		searchParams.set("q", q);
+	}
+
+	if (page > 1) {
+		searchParams.set("page", String(page));
+	}
+
+	if (sort !== defaultSort || dir !== "desc") {
+		searchParams.set("sort", sort);
+		searchParams.set("dir", dir);
+	}
+
+	const query = searchParams.toString();
+
+	return `/dashboard/website/pages${query !== "" ? `?${query}` : ""}`;
+}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardWebsitePagesPageProps>,
@@ -22,14 +58,32 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardWebsitePagesPage(
-	_props: Readonly<DashboardWebsitePagesPageProps>,
-): ReactNode {
-	const pages = getPages({ limit: 500 });
+export default async function DashboardWebsitePagesPage(
+	props: Readonly<DashboardWebsitePagesPageProps>,
+): Promise<ReactNode> {
+	const { params, searchParams } = props;
+	const [{ locale }, rawSearchParams] = await Promise.all([params, searchParams]);
+	const { page, q } = getListSearchParams(rawSearchParams);
+	const { dir, sort } = getListSortSearchParams(rawSearchParams, {
+		defaultDir: "desc",
+		defaultSort,
+		validSorts,
+	});
+	const pages = await getPages({ limit: pageSize, offset: (page - 1) * pageSize, q, sort, dir });
+	const totalPages = Math.max(Math.ceil(pages.total / pageSize), 1);
+
+	if (page > totalPages) {
+		redirect({ href: createListHref(q, totalPages, sort, dir), locale: locale as IntlLocale });
+	}
 
 	return (
-		<Suspense fallback={<LoadingScreen />}>
-			<PagesPage pages={pages} />
-		</Suspense>
+		<PagesPage
+			key={`${q}:${sort}:${dir}:${String(page)}`}
+			dir={dir}
+			page={page}
+			pages={pages}
+			q={q}
+			sort={sort}
+		/>
 	);
 }

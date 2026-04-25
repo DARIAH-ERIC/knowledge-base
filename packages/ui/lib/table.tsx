@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { ChevronDownIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useExtracted } from "next-intl";
 import { createContext, type ReactNode, type Ref, use } from "react";
 import {
@@ -323,19 +323,36 @@ export function TableColumn(props: Readonly<TableColumnProps>): ReactNode {
 			)}
 		>
 			{(values) => {
+				const isSorted = values.sortDirection != null;
+
 				return (
-					<div className={twJoin(["inline-flex items-center gap-2 **:data-[slot=icon]:shrink-0"])}>
-						{typeof children === "function" ? children(values) : children}
+					<div
+						className={twJoin([
+							"inline-flex items-center gap-2 **:data-[slot=icon]:shrink-0",
+							isSorted ? "text-fg" : values.isHovered ? "text-fg/90" : "",
+						])}
+					>
+						<span className={twJoin([isSorted ? "text-fg" : ""])}>
+							{typeof children === "function" ? children(values) : children}
+						</span>
 						{values.allowsSorting && (
 							<span
 								className={twJoin(
-									"grid size-[1.15rem] flex-none shrink-0 place-content-center rounded-sm bg-secondary text-fg *:data-[slot=icon]:size-3.5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:transition-transform *:data-[slot=icon]:duration-200",
-									values.isHovered ? "bg-secondary-fg/10" : "",
+									"grid size-[1.15rem] flex-none shrink-0 place-content-center rounded-sm ring-1 ring-transparent *:data-[slot=icon]:size-3.5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:transition-transform *:data-[slot=icon]:duration-200",
+									isSorted
+										? "bg-primary/10 text-primary ring-primary/15"
+										: values.isHovered
+											? "bg-secondary-fg/10 text-fg/70"
+											: "bg-transparent text-muted-fg/60",
 								)}
 							>
-								<ChevronDownIcon
-									className={values.sortDirection === "ascending" ? "rotate-180" : ""}
-								/>
+								{isSorted ? (
+									<ChevronDownIcon
+										className={values.sortDirection === "ascending" ? "rotate-180" : ""}
+									/>
+								) : (
+									<ChevronUpDownIcon />
+								)}
 							</span>
 						)}
 						{isResizable && <ColumnResizer />}

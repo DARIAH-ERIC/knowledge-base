@@ -1,5 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
+import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
+
 const BASE_PATH = "/en/dashboard/administrator/persons";
 
 export class AdminPersonsPage {
@@ -59,7 +61,7 @@ export class AdminPersonsPage {
 	// ---------------------------------------------------------------------------
 
 	async searchByName(name: string): Promise<void> {
-		await this.page.getByRole("searchbox").fill(name);
+		await fillSearchAndWaitForUrl(this.page, BASE_PATH, name);
 	}
 
 	rowByName(name: string): Locator {

@@ -21,8 +21,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useState } from "react";
-import { useFilter, useListData } from "react-aria-components";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -33,26 +32,26 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/delete-institution.action";
-
-type InstitutionEricRelationStatus =
-	| "is_cooperating_partner_of"
-	| "is_national_coordinating_institution_in"
-	| "is_national_representative_institution_in"
-	| "is_partner_institution_of";
+import type { InstitutionEricRelationStatus } from "@/lib/data/institutions";
+import { useRouter } from "@/lib/navigation/navigation";
 
 interface InstitutionsPageProps {
-	institutions: Promise<
-		Array<
+	institutions: {
+		data: Array<
 			Pick<schema.OrganisationalUnit, "id" | "name"> & {
 				countryName: string | null;
 				ericRelationStatuses: Array<InstitutionEricRelationStatus>;
-				entity: Pick<schema.Entity, "documentId" | "slug"> & {
-					status: Pick<schema.EntityStatus, "id" | "type">;
-				};
+				entity: Pick<schema.Entity, "slug">;
 			}
-		>
-	>;
+		>;
+		total: number;
+	};
+	dir: "asc" | "desc";
+	page: number;
+	q: string;
+	sort: "name" | "country" | "status";
 }
 
 function institutionStatusIntent(
@@ -74,42 +73,39 @@ function institutionStatusIntent(
 	}
 }
 
-export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactNode {
-	const { institutions: institutionsPromise } = props;
+const pageSize = 10;
 
-	const institutions = use(institutionsPromise);
+export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactNode {
+	const {
+		dir: initialDir,
+		institutions,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+	} = props;
 
 	const t = useExtracted();
-
+	const router = useRouter();
 	const institutionStatusLabels: Record<InstitutionEricRelationStatus, string> = {
 		is_cooperating_partner_of: t("Cooperating partner"),
 		is_national_coordinating_institution_in: t("National coordinating institution"),
 		is_national_representative_institution_in: t("National representative institution"),
 		is_partner_institution_of: t("Partner institution"),
 	};
-
-	const { contains } = useFilter({ sensitivity: "base" });
-
-	const list = useListData({
-		filter(item, filterText) {
-			return (
-				contains(item.name, filterText) ||
-				contains(item.countryName ?? "", filterText) ||
-				item.ericRelationStatuses.some((status) => {
-					return contains(institutionStatusLabels[status], filterText);
-				})
-			);
-		},
-		initialItems: institutions,
+	const [items, setItems] = useState(() => {
+		return institutions.data;
 	});
-
-	const [page, setPage] = useState(1);
-
-	const pageSize = 10;
-	const pages = Math.ceil(list.items.length / pageSize);
-	const items = list.items.slice((page - 1) * pageSize, page * pageSize);
-
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
+	const [isDeletePending, startDeleteTransition] = useTransition();
+
+	const totalPages = Math.max(Math.ceil(institutions.total / pageSize), 1);
 
 	return (
 		<Fragment>
@@ -121,13 +117,7 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
-					<SearchField
-						onChange={(value) => {
-							list.setFilterText(value);
-							setPage(1);
-						}}
-						value={list.filterText}
-					>
+					<SearchField onChange={setInputValue} value={inputValue}>
 						<SearchInput placeholder={t("Search")} />
 					</SearchField>
 					<Link
@@ -143,11 +133,19 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 			<Table
 				aria-label="institutions"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
-					<TableColumn>{t("Country")}</TableColumn>
-					<TableColumn>{t("Status")}</TableColumn>
+					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
+						{t("Name")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="country">
+						{t("Country")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="status">
+						{t("Status")}
+					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -207,7 +205,13 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 				</TableBody>
 			</Table>
 
-			<Paginate page={page} setPage={setPage} total={pages} />
+			<Paginate
+				isPending={isPending}
+				page={page}
+				setPage={setPage}
+				total={totalPages}
+				totalItems={institutions.total}
+			/>
 
 			<DeleteModal
 				isOpen={itemToDelete != null}
@@ -217,14 +221,21 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 						return;
 					}
 
-					startTransition(async () => {
-						await deleteInstitutionAction(itemToDelete.id);
-						list.remove(itemToDelete.id);
+					const id = itemToDelete.id;
+
+					startDeleteTransition(async () => {
+						setItems((prev) => {
+							return prev.filter((item) => {
+								return item.id !== id;
+							});
+						});
+						await deleteInstitutionAction(id);
+						router.refresh();
 						setItemToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isDeletePending) {
 						setItemToDelete(null);
 					}
 				}}

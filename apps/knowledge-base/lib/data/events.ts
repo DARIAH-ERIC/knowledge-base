@@ -1,68 +1,77 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq } from "@dariah-eric/database";
+import { count, desc, eq, ilike } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
 import { images } from "@/lib/images";
 
+export type EventsSort = "title" | "updatedAt";
+
 interface GetEventsParams {
 	/** @default 10 */
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
+	q?: string;
+	sort?: EventsSort;
+	dir?: "asc" | "desc";
 }
 
 export async function getEvents(params: GetEventsParams) {
-	const { limit = 10, offset = 0 } = params;
+	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
+	const query = q?.trim();
+	const where =
+		query != null && query !== "" ? ilike(schema.events.title, `%${query}%`) : undefined;
+	const orderBy =
+		sort === "title"
+			? dir === "asc"
+				? schema.events.title
+				: desc(schema.events.title)
+			: dir === "asc"
+				? schema.entities.updatedAt
+				: desc(schema.entities.updatedAt);
 
 	const [items, aggregate] = await Promise.all([
-		db.query.events.findMany({
-			with: {
-				entity: {
-					columns: {
-						documentId: true,
-						slug: true,
-						updatedAt: true,
-					},
-					with: {
-						status: {
-							columns: {
-								id: true,
-								type: true,
-							},
-						},
-					},
-				},
-				image: {
-					columns: {
-						key: true,
-					},
-				},
-			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
-			},
-			limit,
-			offset,
-		}),
+		db
+			.select({
+				duration: schema.events.duration,
+				id: schema.events.id,
+				location: schema.events.location,
+				slug: schema.entities.slug,
+				summary: schema.events.summary,
+				title: schema.events.title,
+				updatedAt: schema.entities.updatedAt,
+				website: schema.events.website,
+			})
+			.from(schema.events)
+			.innerJoin(schema.entities, eq(schema.events.id, schema.entities.id))
+			.where(where)
+			.orderBy(orderBy)
+			.limit(limit)
+			.offset(offset),
 		db
 			.select({ total: count() })
 			.from(schema.events)
 			.innerJoin(schema.entities, eq(schema.events.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id)),
+			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.where(where),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = images.generateSignedImageUrl({
-			key: item.image.key,
-			options: { width: imageAssetWidth.preview },
-		});
-
-		return { ...item, image };
+		return {
+			duration: item.duration,
+			id: item.id,
+			location: item.location,
+			entity: { slug: item.slug },
+			summary: item.summary,
+			title: item.title,
+			updatedAt: item.updatedAt,
+			website: item.website,
+		};
 	});
 
 	return { data, limit, offset, total };

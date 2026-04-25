@@ -20,9 +20,8 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useState } from "react";
-import { useFilter, useListData } from "react-aria-components";
+import { useExtracted, useFormatter } from "next-intl";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -33,42 +32,54 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteSpotlightArticleAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/delete-spotlight-article.action";
+import { useRouter } from "@/lib/navigation/navigation";
 
 interface SpotlightArticlesPageProps {
-	spotlightArticles: Promise<{
+	dir: "asc" | "desc";
+	page: number;
+	q: string;
+	sort: "title" | "updatedAt";
+	spotlightArticles: {
 		data: Array<
 			Pick<schema.SpotlightArticle, "id" | "title" | "summary"> & {
 				entity: Pick<schema.Entity, "slug">;
+				updatedAt: schema.Entity["updatedAt"];
 			}
 		>;
 		total: number;
-	}>;
+	};
 }
 
-export function SpotlightArticlesPage(props: Readonly<SpotlightArticlesPageProps>): ReactNode {
-	const { spotlightArticles: spotlightArticlesPromise } = props;
+const pageSize = 10;
 
-	const spotlightArticles = use(spotlightArticlesPromise);
+export function SpotlightArticlesPage(props: Readonly<SpotlightArticlesPageProps>): ReactNode {
+	const {
+		dir: initialDir,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+		spotlightArticles,
+	} = props;
 
 	const t = useExtracted();
-
-	const { contains } = useFilter({ sensitivity: "base" });
-
-	const list = useListData({
-		filter(item, filterText) {
-			return contains(item.title, filterText);
-		},
-		initialItems: spotlightArticles.data,
+	const format = useFormatter();
+	const router = useRouter();
+	const [items, setItems] = useState(() => {
+		return spotlightArticles.data;
 	});
-
-	const [page, setPage] = useState(1);
-
-	const pageSize = 10;
-	const totalPages = Math.ceil(list.items.length / pageSize);
-	const items = list.items.slice((page - 1) * pageSize, page * pageSize);
-
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
+	const [isDeletePending, startDeleteTransition] = useTransition();
+
+	const totalPages = Math.max(Math.ceil(spotlightArticles.total / pageSize), 1);
 
 	return (
 		<Fragment>
@@ -80,13 +91,7 @@ export function SpotlightArticlesPage(props: Readonly<SpotlightArticlesPageProps
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
-					<SearchField
-						onChange={(value) => {
-							list.setFilterText(value);
-							setPage(1);
-						}}
-						value={list.filterText}
-					>
+					<SearchField onChange={setInputValue} value={inputValue}>
 						<SearchInput placeholder={t("Search")} />
 					</SearchField>
 					<Link
@@ -102,10 +107,17 @@ export function SpotlightArticlesPage(props: Readonly<SpotlightArticlesPageProps
 			<Table
 				aria-label="spotlight articles"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Title")}</TableColumn>
+					<TableColumn allowsSorting={true} id="title" isRowHeader={true}>
+						{t("Title")}
+					</TableColumn>
 					<TableColumn>{t("Summary")}</TableColumn>
+					<TableColumn allowsSorting={true} id="updatedAt">
+						{t("Updated")}
+					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -118,6 +130,7 @@ export function SpotlightArticlesPage(props: Readonly<SpotlightArticlesPageProps
 								<TableCell>
 									<div className="max-w-xs truncate">{item.summary}</div>
 								</TableCell>
+								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button
@@ -160,7 +173,13 @@ export function SpotlightArticlesPage(props: Readonly<SpotlightArticlesPageProps
 				</TableBody>
 			</Table>
 
-			<Paginate page={page} setPage={setPage} total={totalPages} />
+			<Paginate
+				isPending={isPending}
+				page={page}
+				setPage={setPage}
+				total={totalPages}
+				totalItems={spotlightArticles.total}
+			/>
 
 			<DeleteModal
 				isOpen={itemToDelete != null}
@@ -170,14 +189,21 @@ export function SpotlightArticlesPage(props: Readonly<SpotlightArticlesPageProps
 						return;
 					}
 
-					startTransition(async () => {
-						await deleteSpotlightArticleAction(itemToDelete.id);
-						list.remove(itemToDelete.id);
+					const id = itemToDelete.id;
+
+					startDeleteTransition(async () => {
+						setItems((prev) => {
+							return prev.filter((item) => {
+								return item.id !== id;
+							});
+						});
+						await deleteSpotlightArticleAction(id);
+						router.refresh();
 						setItemToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isDeletePending) {
 						setItemToDelete(null);
 					}
 				}}

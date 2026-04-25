@@ -1,8 +1,150 @@
-import { and, count, eq, ilike, inArray, or } from "@dariah-eric/database";
+import { and, count, desc, eq, ilike, inArray, or, sql } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
 import { contributionOptionsPageSize } from "@/lib/constants/contributions";
+
+export type ContributionsSort =
+	| "personName"
+	| "roleType"
+	| "organisationalUnitType"
+	| "organisationalUnitName"
+	| "durationStart"
+	| "durationEnd";
+
+interface GetContributionsParams {
+	limit: number;
+	offset: number;
+	q?: string;
+	sort?: ContributionsSort;
+	dir?: "asc" | "desc";
+}
+
+export interface ContributionsResult {
+	data: Array<{
+		id: string;
+		personName: string;
+		roleType: string;
+		organisationalUnitName: string;
+		organisationalUnitType: string;
+		durationStart: Date;
+		durationEnd: Date | undefined;
+	}>;
+	limit: number;
+	offset: number;
+	total: number;
+}
+
+export async function getContributions(
+	params: Readonly<GetContributionsParams>,
+): Promise<ContributionsResult> {
+	const { limit, offset, q, sort = "personName", dir = "asc" } = params;
+	const query = q?.trim();
+	const where =
+		query != null && query !== ""
+			? or(
+					ilike(schema.persons.name, `%${query}%`),
+					ilike(schema.persons.sortName, `%${query}%`),
+					ilike(schema.organisationalUnits.name, `%${query}%`),
+					ilike(schema.organisationalUnitTypes.type, `%${query}%`),
+					ilike(schema.personRoleTypes.type, `%${query}%`),
+				)
+			: undefined;
+	const orderBy =
+		sort === "roleType"
+			? dir === "asc"
+				? schema.personRoleTypes.type
+				: desc(schema.personRoleTypes.type)
+			: sort === "organisationalUnitType"
+				? dir === "asc"
+					? schema.organisationalUnitTypes.type
+					: desc(schema.organisationalUnitTypes.type)
+				: sort === "organisationalUnitName"
+					? dir === "asc"
+						? schema.organisationalUnits.name
+						: desc(schema.organisationalUnits.name)
+					: sort === "durationStart"
+						? dir === "asc"
+							? sql`LOWER(${schema.personsToOrganisationalUnits.duration}) ASC`
+							: sql`LOWER(${schema.personsToOrganisationalUnits.duration}) DESC`
+						: sort === "durationEnd"
+							? dir === "asc"
+								? sql`UPPER(${schema.personsToOrganisationalUnits.duration}) ASC NULLS LAST`
+								: sql`UPPER(${schema.personsToOrganisationalUnits.duration}) DESC NULLS LAST`
+							: dir === "asc"
+								? schema.persons.sortName
+								: desc(schema.persons.sortName);
+
+	const [rows, aggregate] = await Promise.all([
+		db
+			.select({
+				id: schema.personsToOrganisationalUnits.id,
+				personName: schema.persons.name,
+				roleType: schema.personRoleTypes.type,
+				organisationalUnitName: schema.organisationalUnits.name,
+				organisationalUnitType: schema.organisationalUnitTypes.type,
+				duration: schema.personsToOrganisationalUnits.duration,
+			})
+			.from(schema.personsToOrganisationalUnits)
+			.innerJoin(
+				schema.persons,
+				eq(schema.persons.id, schema.personsToOrganisationalUnits.personId),
+			)
+			.innerJoin(
+				schema.personRoleTypes,
+				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
+			)
+			.innerJoin(
+				schema.organisationalUnits,
+				eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
+			)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
+			.where(where)
+			.orderBy(orderBy)
+			.limit(limit)
+			.offset(offset),
+		db
+			.select({ total: count() })
+			.from(schema.personsToOrganisationalUnits)
+			.innerJoin(
+				schema.persons,
+				eq(schema.persons.id, schema.personsToOrganisationalUnits.personId),
+			)
+			.innerJoin(
+				schema.personRoleTypes,
+				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
+			)
+			.innerJoin(
+				schema.organisationalUnits,
+				eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
+			)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
+			.where(where),
+	]);
+
+	return {
+		data: rows.map((row) => {
+			return {
+				id: row.id,
+				personName: row.personName,
+				roleType: row.roleType,
+				organisationalUnitName: row.organisationalUnitName,
+				organisationalUnitType: row.organisationalUnitType,
+				durationStart: row.duration.start,
+				durationEnd: row.duration.end,
+			};
+		}),
+		limit,
+		offset,
+		total: aggregate.at(0)?.total ?? 0,
+	};
+}
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getPersonContributions(personId: string) {
