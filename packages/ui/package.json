@@ -21,6 +21,7 @@
 		"./date-picker": "./dist/date-picker.mjs",
 		"./description-list": "./dist/description-list.mjs",
 		"./dialog": "./dist/dialog.mjs",
+		"./empty-state": "./dist/empty-state.mjs",
 		"./field": "./dist/field.mjs",
 		"./form": "./dist/form.mjs",
 		"./form-error-message": "./dist/form-error-message.mjs",

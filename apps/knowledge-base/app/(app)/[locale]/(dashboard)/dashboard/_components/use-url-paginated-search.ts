@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useOptimistic, useState, useTransition } from "react";
+import { useCallback, useEffect, useOptimistic, useRef, useState, useTransition } from "react";
 import type { SortDescriptor } from "react-aria-components";
 
 import { usePathname, useRouter, useSearchParams } from "@/lib/navigation/navigation";
@@ -68,6 +68,7 @@ export function useUrlPaginatedSearch<TFilters extends UrlPaginatedFilters = Rec
 		return nextState;
 	});
 	const [inputValue, setInputValue] = useState(q);
+	const committedQ = useRef(q);
 
 	const replaceState = useCallback(
 		(nextState: Readonly<UrlPaginatedSearchState<TFilters>>) => {
@@ -112,7 +113,11 @@ export function useUrlPaginatedSearch<TFilters extends UrlPaginatedFilters = Rec
 	);
 
 	useEffect(() => {
-		setInputValue(q);
+		if (q !== committedQ.current) {
+			// eslint-disable-next-line react-hooks/set-state-in-effect
+			setInputValue(q);
+		}
+		committedQ.current = q;
 	}, [q]);
 
 	useEffect(() => {
@@ -123,6 +128,7 @@ export function useUrlPaginatedSearch<TFilters extends UrlPaginatedFilters = Rec
 				return;
 			}
 
+			committedQ.current = nextQ;
 			replaceState({
 				dir: optimisticState.dir,
 				filters: optimisticState.filters,

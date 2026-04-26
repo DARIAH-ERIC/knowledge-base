@@ -19,7 +19,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useState } from "react";
+import { Fragment, type ReactNode, startTransition, use, useOptimistic, useState } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -30,6 +30,7 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { deleteReportingCampaignAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/delete-reporting-campaign.action";
+import { useRouter } from "@/lib/navigation/navigation";
 
 interface ReportingCampaignsPageProps {
 	campaigns: Promise<Array<Pick<schema.ReportingCampaign, "id" | "year" | "status">>>;
@@ -41,9 +42,15 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 	const resolvedCampaigns = use(campaignsPromise);
 
 	const t = useExtracted();
-
-	const [campaigns, setCampaigns] = useState(resolvedCampaigns);
-
+	const router = useRouter();
+	const [campaigns, optimisticallyRemoveCampaign] = useOptimistic(
+		resolvedCampaigns,
+		(state, id: string) => {
+			return state.filter((c) => {
+				return c.id !== id;
+			});
+		},
+	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 
 	return (
@@ -124,12 +131,9 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 					if (itemToDelete == null) return;
 
 					startTransition(async () => {
+						optimisticallyRemoveCampaign(itemToDelete.id);
 						await deleteReportingCampaignAction(itemToDelete.id);
-						setCampaigns((prev) => {
-							return prev.filter((c) => {
-								return c.id !== itemToDelete.id;
-							});
-						});
+						router.refresh();
 						setItemToDelete(null);
 					});
 				}}

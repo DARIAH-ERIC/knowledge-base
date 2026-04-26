@@ -2,12 +2,12 @@ import type { ReactNode } from "react";
 
 import { assertAdmin } from "@/lib/auth/session";
 
-interface AdministratorLayoutProps {
+interface DashboardAdministratorLayoutProps {
 	children: ReactNode;
 }
 
-export default async function AdministratorLayout(
-	props: Readonly<AdministratorLayoutProps>,
+export default async function DashboardAdministratorLayout(
+	props: Readonly<DashboardAdministratorLayoutProps>,
 ): Promise<ReactNode> {
 	const { children } = props;
 

@@ -84,7 +84,6 @@ export default async function DashboardWebsiteImpactCaseStudiesPage(
 
 	return (
 		<ImpactCaseStudiesPage
-			key={`${q}:${sort}:${dir}:${String(page)}`}
 			dir={dir}
 			impactCaseStudies={impactCaseStudies}
 			page={page}

@@ -82,14 +82,5 @@ export default async function DashboardAdministratorPersonsPage(
 		redirect({ href: createListHref(q, totalPages, sort, dir), locale: locale as IntlLocale });
 	}
 
-	return (
-		<PersonsPage
-			key={`${q}:${sort}:${dir}:${String(page)}`}
-			dir={dir}
-			page={page}
-			persons={persons}
-			q={q}
-			sort={sort}
-		/>
-	);
+	return <PersonsPage dir={dir} page={page} persons={persons} q={q} sort={sort} />;
 }

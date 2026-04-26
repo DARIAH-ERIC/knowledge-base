@@ -20,7 +20,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useState, useTransition } from "react";
+import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -64,9 +64,14 @@ export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps
 
 	const t = useExtracted();
 	const router = useRouter();
-	const [items, setItems] = useState(() => {
-		return nationalConsortia.data;
-	});
+	const [items, optimisticallyRemoveItem] = useOptimistic(
+		nationalConsortia.data,
+		(state, id: string) => {
+			return state.filter((item) => {
+				return item.id !== id;
+			});
+		},
+	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
 		useUrlPaginatedSearch({
@@ -178,11 +183,7 @@ export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps
 					const id = itemToDelete.id;
 
 					startDeleteTransition(async () => {
-						setItems((prev) => {
-							return prev.filter((item) => {
-								return item.id !== id;
-							});
-						});
+						optimisticallyRemoveItem(id);
 						await deleteNationalConsortiumAction(id);
 						router.refresh();
 						setItemToDelete(null);

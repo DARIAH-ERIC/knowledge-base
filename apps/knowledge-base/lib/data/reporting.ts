@@ -9,8 +9,6 @@ const coordinatorRoles = ["national_coordinator", "national_coordinator_deputy"]
 const relevantRoles = [
 	"is_chair_of",
 	"is_vice_chair_of",
-	"is_director_of",
-	"is_member_of",
 	"national_coordinator",
 	"national_coordinator_deputy",
 	"national_representative",

@@ -83,13 +83,6 @@ export default async function DashboardAdministratorWorkingGroupsPage(
 	}
 
 	return (
-		<WorkingGroupsPage
-			key={`${q}:${sort}:${dir}:${String(page)}`}
-			dir={dir}
-			page={page}
-			q={q}
-			sort={sort}
-			workingGroups={workingGroups}
-		/>
+		<WorkingGroupsPage dir={dir} page={page} q={q} sort={sort} workingGroups={workingGroups} />
 	);
 }

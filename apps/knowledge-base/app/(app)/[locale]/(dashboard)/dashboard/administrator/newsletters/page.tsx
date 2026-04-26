@@ -51,7 +51,5 @@ export default async function DashboardAdministratorNewslettersPage(
 		redirect({ href: createListHref(q, totalPages), locale: locale as IntlLocale });
 	}
 
-	return (
-		<NewslettersPage key={`${q}:${String(page)}`} newsletters={newsletters} page={page} q={q} />
-	);
+	return <NewslettersPage newsletters={newsletters} page={page} q={q} />;
 }

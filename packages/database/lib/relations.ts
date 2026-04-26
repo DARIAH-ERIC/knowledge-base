@@ -576,6 +576,10 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.reportingCampaigns.id,
 				to: r.reportingCampaignServiceSizes.campaignId,
 			}),
+			countryThresholds: r.many.reportingCampaignCountryThresholds({
+				from: r.reportingCampaigns.id,
+				to: r.reportingCampaignCountryThresholds.campaignId,
+			}),
 		},
 		countryReports: {
 			campaign: r.one.reportingCampaigns({
@@ -760,6 +764,18 @@ export const relations = defineRelations(schema, (r) => {
 			campaign: r.one.reportingCampaigns({
 				from: r.reportingCampaignServiceSizes.campaignId,
 				to: r.reportingCampaigns.id,
+				optional: false,
+			}),
+		},
+		reportingCampaignCountryThresholds: {
+			campaign: r.one.reportingCampaigns({
+				from: r.reportingCampaignCountryThresholds.campaignId,
+				to: r.reportingCampaigns.id,
+				optional: false,
+			}),
+			country: r.one.organisationalUnits({
+				from: r.reportingCampaignCountryThresholds.countryId,
+				to: r.organisationalUnits.id,
 				optional: false,
 			}),
 		},

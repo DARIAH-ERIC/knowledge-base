@@ -19,7 +19,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useState } from "react";
+import { Fragment, type ReactNode, startTransition, use, useOptimistic, useState } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -30,6 +30,7 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { deleteCountryReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/delete-country-report.action";
+import { useRouter } from "@/lib/navigation/navigation";
 
 type CountryReportRow = Pick<schema.CountryReport, "id" | "status"> & {
 	campaign: Pick<schema.ReportingCampaign, "id" | "year">;
@@ -50,9 +51,15 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 	const resolvedReports = use(reportsPromise);
 
 	const t = useExtracted();
-
-	const [reports, setReports] = useState(resolvedReports);
-
+	const router = useRouter();
+	const [reports, optimisticallyRemoveReport] = useOptimistic(
+		resolvedReports,
+		(state, id: string) => {
+			return state.filter((r) => {
+				return r.id !== id;
+			});
+		},
+	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 
 	return (
@@ -133,12 +140,9 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 					if (itemToDelete == null) return;
 
 					startTransition(async () => {
+						optimisticallyRemoveReport(itemToDelete.id);
 						await deleteCountryReportAction(itemToDelete.id);
-						setReports((prev) => {
-							return prev.filter((r) => {
-								return r.id !== itemToDelete.id;
-							});
-						});
+						router.refresh();
 						setItemToDelete(null);
 					});
 				}}

@@ -90,13 +90,6 @@ export default async function DashboardAdministratorContributionsPage(
 	}
 
 	return (
-		<ContributionsPage
-			key={`${q}:${sort}:${dir}:${String(page)}`}
-			contributions={contributions}
-			dir={dir}
-			page={page}
-			q={q}
-			sort={sort}
-		/>
+		<ContributionsPage contributions={contributions} dir={dir} page={page} q={q} sort={sort} />
 	);
 }

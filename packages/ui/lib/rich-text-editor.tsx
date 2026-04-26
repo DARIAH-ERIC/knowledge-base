@@ -115,7 +115,7 @@ function BlockNodeSurface({
 	onDoubleClick,
 }: Readonly<BlockNodeSurfaceProps>): ReactNode {
 	return (
-		<NodeViewWrapper>
+		<NodeViewWrapper data-drag-handle="">
 			<div
 				aria-label={label}
 				className={twMerge(
@@ -339,6 +339,7 @@ export const EmbedNode = Node.create({
 	name: "embedBlock",
 	group: "block",
 	atom: true,
+	draggable: true,
 	selectable: true,
 
 	addAttributes() {
@@ -544,6 +545,7 @@ function AssetImageNodeView({
 							className="block w-full max-h-96 object-contain"
 							data-asset-image=""
 							data-image-key={imageKey ?? undefined}
+							draggable={false}
 							src={imageUrl ?? ""}
 						/>
 						<div className="absolute inset-x-0 top-0 flex justify-end gap-x-1 p-2 opacity-0 transition-opacity group-hover:opacity-100">
@@ -583,6 +585,7 @@ function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
 		name: "assetImage",
 		group: "block",
 		atom: true,
+		draggable: true,
 		selectable: true,
 
 		addAttributes() {

@@ -1,0 +1,62 @@
+import { db } from "@dariah-eric/database/client";
+import type { Metadata, ResolvingMetadata } from "next";
+import { notFound } from "next/navigation";
+import { getExtracted } from "next-intl/server";
+import type { ReactNode } from "react";
+
+import { CampaignCountryThresholdsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-country-thresholds-form";
+import { upsertCampaignCountryThresholdsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-country-thresholds.action";
+import { createMetadata } from "@/lib/server/create-metadata";
+
+interface DashboardAdministratorCampaignCountriesPageProps {
+	params: Promise<{ locale: string; id: string }>;
+}
+
+export async function generateMetadata(
+	_props: Readonly<DashboardAdministratorCampaignCountriesPageProps>,
+	resolvingMetadata: ResolvingMetadata,
+): Promise<Metadata> {
+	const t = await getExtracted();
+
+	return createMetadata(resolvingMetadata, {
+		title: t("Administrator dashboard - Campaign country thresholds"),
+	});
+}
+
+export default async function DashboardAdministratorCampaignCountriesPage(
+	props: Readonly<DashboardAdministratorCampaignCountriesPageProps>,
+): Promise<ReactNode> {
+	const { params } = props;
+
+	const { id } = await params;
+
+	const [campaign, countries] = await Promise.all([
+		db.query.reportingCampaigns.findFirst({
+			where: { id },
+			columns: { id: true },
+			with: {
+				countryThresholds: {
+					columns: { countryId: true, amount: true },
+				},
+			},
+		}),
+		db.query.organisationalUnits.findMany({
+			where: { type: { type: "country" } },
+			columns: { id: true, name: true },
+			orderBy: { name: "asc" },
+		}),
+	]);
+
+	if (campaign == null) {
+		notFound();
+	}
+
+	return (
+		<CampaignCountryThresholdsForm
+			campaignId={id}
+			countries={countries}
+			formAction={upsertCampaignCountryThresholdsAction}
+			thresholds={campaign.countryThresholds}
+		/>
+	);
+}

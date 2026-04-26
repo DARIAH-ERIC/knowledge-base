@@ -19,7 +19,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useState } from "react";
+import { Fragment, type ReactNode, startTransition, use, useOptimistic, useState } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -30,6 +30,7 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { deleteWorkingGroupReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_lib/delete-working-group-report.action";
+import { useRouter } from "@/lib/navigation/navigation";
 
 type WorkingGroupReportRow = Pick<schema.WorkingGroupReport, "id" | "status"> & {
 	campaign: Pick<schema.ReportingCampaign, "id" | "year">;
@@ -50,9 +51,15 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 	const resolvedReports = use(reportsPromise);
 
 	const t = useExtracted();
-
-	const [reports, setReports] = useState(resolvedReports);
-
+	const router = useRouter();
+	const [reports, optimisticallyRemoveReport] = useOptimistic(
+		resolvedReports,
+		(state, id: string) => {
+			return state.filter((r) => {
+				return r.id !== id;
+			});
+		},
+	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 
 	return (
@@ -135,12 +142,9 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 					if (itemToDelete == null) return;
 
 					startTransition(async () => {
+						optimisticallyRemoveReport(itemToDelete.id);
 						await deleteWorkingGroupReportAction(itemToDelete.id);
-						setReports((prev) => {
-							return prev.filter((r) => {
-								return r.id !== itemToDelete.id;
-							});
-						});
+						router.refresh();
 						setItemToDelete(null);
 					});
 				}}

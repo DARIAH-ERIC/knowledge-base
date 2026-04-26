@@ -102,3 +102,20 @@ export function FormSectionDescription({
 }: Readonly<FormSectionDescription>): ReactNode {
 	return <Description {...props}>{description ?? children}</Description>;
 }
+
+interface FormActionsProps extends React.ComponentProps<"div"> {}
+
+export function FormActions({
+	children,
+	className,
+	...props
+}: Readonly<FormActionsProps>): ReactNode {
+	return (
+		<div
+			className={twMerge("flex w-full max-w-3xl items-center justify-end gap-x-4", className)}
+			{...props}
+		>
+			{children}
+		</div>
+	);
+}

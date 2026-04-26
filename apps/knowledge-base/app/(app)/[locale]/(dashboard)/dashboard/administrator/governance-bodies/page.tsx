@@ -84,7 +84,6 @@ export default async function DashboardAdministratorGovernanceBodiesPage(
 
 	return (
 		<GovernanceBodiesPage
-			key={`${q}:${sort}:${dir}:${String(page)}`}
 			dir={dir}
 			governanceBodies={governanceBodies}
 			page={page}

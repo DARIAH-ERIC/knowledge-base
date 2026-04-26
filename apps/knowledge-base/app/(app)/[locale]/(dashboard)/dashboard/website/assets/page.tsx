@@ -74,13 +74,5 @@ export default async function DashboardWebsiteAssetsPage(
 		});
 	}
 
-	return (
-		<AssetsPage
-			key={`${q}:${prefix ?? ""}:${String(page)}`}
-			assets={assets}
-			page={page}
-			prefix={prefix ?? ""}
-			q={q}
-		/>
-	);
+	return <AssetsPage assets={assets} page={page} prefix={prefix ?? ""} q={q} />;
 }

@@ -84,7 +84,6 @@ export default async function DashboardWebsiteSpotlightArticlesPage(
 
 	return (
 		<SpotlightArticlesPage
-			key={`${q}:${sort}:${dir}:${String(page)}`}
 			dir={dir}
 			page={page}
 			q={q}

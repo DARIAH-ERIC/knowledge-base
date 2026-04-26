@@ -600,4 +600,39 @@ export const ReportingCampaignServiceSizeSelectSchema = createSelectSchema(
 export const ReportingCampaignServiceSizeInsertSchema = createInsertSchema(
 	reportingCampaignServiceSizes,
 );
+
+export const reportingCampaignCountryThresholds = p.pgTable(
+	"reporting_campaign_country_thresholds",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		campaignId: p
+			.uuid("campaign_id")
+			.notNull()
+			.references(() => {
+				return reportingCampaigns.id;
+			}),
+		countryId: p
+			.uuid("country_id")
+			.notNull()
+			.references(() => {
+				return organisationalUnits.id;
+			}),
+		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
+	},
+	(t) => {
+		return [p.unique().on(t.campaignId, t.countryId)];
+	},
+);
+
+export type ReportingCampaignCountryThreshold =
+	typeof reportingCampaignCountryThresholds.$inferSelect;
+export type ReportingCampaignCountryThresholdInput =
+	typeof reportingCampaignCountryThresholds.$inferInsert;
+
+export const ReportingCampaignCountryThresholdSelectSchema = createSelectSchema(
+	reportingCampaignCountryThresholds,
+);
+export const ReportingCampaignCountryThresholdInsertSchema = createInsertSchema(
+	reportingCampaignCountryThresholds,
+);
 export const WorkingGroupReportAnswerUpdateSchema = createUpdateSchema(workingGroupReportAnswers);

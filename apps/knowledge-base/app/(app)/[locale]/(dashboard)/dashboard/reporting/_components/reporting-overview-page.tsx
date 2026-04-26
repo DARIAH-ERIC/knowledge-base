@@ -1,7 +1,8 @@
 import { buttonStyles } from "@dariah-eric/ui/button";
+import { EmptyState } from "@dariah-eric/ui/empty-state";
 import { Link } from "@dariah-eric/ui/link";
 import { getExtracted } from "next-intl/server";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 import {
 	Header,
@@ -32,18 +33,19 @@ export async function ReportingOverviewPage(
 	const hasReports = scope.workingGroupReports.length > 0 || scope.countryReports.length > 0;
 
 	return (
-		<div>
+		<Fragment>
 			<Header>
 				<HeaderContent>
 					<HeaderTitle>{t("Reporting")}</HeaderTitle>
-					<HeaderDescription>{t("View and manage your assigned reports.")}</HeaderDescription>
+					<HeaderDescription>{t("View and manage reports.")}</HeaderDescription>
 				</HeaderContent>
 			</Header>
 
 			{!hasReports ? (
-				<p className="px-(--layout-padding) text-sm text-muted-fg">
-					{t("No reports are currently assigned to you.")}
-				</p>
+				<EmptyState
+					description={t("No country or working group reports are available.")}
+					title={t("No reports found")}
+				/>
 			) : (
 				<div className="flex flex-col gap-y-10 px-(--layout-padding)">
 					{scope.workingGroupReports.length > 0 && (
@@ -101,6 +103,6 @@ export async function ReportingOverviewPage(
 					)}
 				</div>
 			)}
-		</div>
+		</Fragment>
 	);
 }

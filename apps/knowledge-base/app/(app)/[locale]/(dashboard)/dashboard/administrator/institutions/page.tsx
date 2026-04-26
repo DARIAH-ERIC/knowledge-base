@@ -82,14 +82,5 @@ export default async function DashboardAdministratorInstitutionsPage(
 		redirect({ href: createListHref(q, totalPages, sort, dir), locale: locale as IntlLocale });
 	}
 
-	return (
-		<InstitutionsPage
-			key={`${q}:${sort}:${dir}:${String(page)}`}
-			dir={dir}
-			institutions={institutions}
-			page={page}
-			q={q}
-			sort={sort}
-		/>
-	);
+	return <InstitutionsPage dir={dir} institutions={institutions} page={page} q={q} sort={sort} />;
 }

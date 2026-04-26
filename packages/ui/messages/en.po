@@ -67,6 +67,16 @@ msgctxt "ui"
 msgid "rbrahO"
 msgstr "Close"
 
+#: lib/empty-state.tsx:177
+msgctxt "ui"
+msgid "u4jsnc"
+msgstr "No data found"
+
+#: lib/empty-state.tsx:179
+msgctxt "ui"
+msgid "2I546+"
+msgstr "No information is currently available in this section."
+
 #: lib/grid-list.tsx:100
 msgctxt "ui"
 msgid "4ZUjCU"
@@ -113,63 +123,63 @@ msgctxt "ui"
 msgid "N8BBfe"
 msgstr "Last page"
 
-#: lib/rich-text-editor.tsx:793
+#: lib/rich-text-editor.tsx:796
 msgctxt "ui"
 msgid "Dkkmwm"
 msgstr "Bold"
 
-#: lib/rich-text-editor.tsx:801
+#: lib/rich-text-editor.tsx:804
 msgctxt "ui"
 msgid "g2V+es"
 msgstr "Italic"
 
-#: lib/rich-text-editor.tsx:809
+#: lib/rich-text-editor.tsx:812
 msgctxt "ui"
 msgid "h2vipu"
 msgstr "Code"
 
-#: lib/rich-text-editor.tsx:818
+#: lib/rich-text-editor.tsx:821
 msgctxt "ui"
 msgid "Zqekct"
 msgstr "Heading 2"
 
-#: lib/rich-text-editor.tsx:826
+#: lib/rich-text-editor.tsx:829
 msgctxt "ui"
 msgid "BDbgCL"
 msgstr "Heading 3"
 
-#: lib/rich-text-editor.tsx:834
+#: lib/rich-text-editor.tsx:837
 msgctxt "ui"
 msgid "BKF2fN"
 msgstr "Heading 4"
 
-#: lib/rich-text-editor.tsx:843
+#: lib/rich-text-editor.tsx:846
 msgctxt "ui"
 msgid "6sdKFe"
 msgstr "Bullet List"
 
-#: lib/rich-text-editor.tsx:851
+#: lib/rich-text-editor.tsx:854
 msgctxt "ui"
 msgid "rU4xig"
 msgstr "Ordered List"
 
-#: lib/rich-text-editor.tsx:859
+#: lib/rich-text-editor.tsx:862
 msgctxt "ui"
 msgid "+RDJVD"
 msgstr "Blockquote"
 
-#: lib/rich-text-editor.tsx:870
-#: lib/rich-text-editor.tsx:878
+#: lib/rich-text-editor.tsx:873
+#: lib/rich-text-editor.tsx:881
 msgctxt "ui"
 msgid "JBWS0c"
 msgstr "Link"
 
-#: lib/rich-text-editor.tsx:900
+#: lib/rich-text-editor.tsx:903
 msgctxt "ui"
 msgid "EWw/tK"
 msgstr "Apply"
 
-#: lib/rich-text-editor.tsx:904
+#: lib/rich-text-editor.tsx:907
 msgctxt "ui"
 msgid "G/yZLu"
 msgstr "Remove"
@@ -201,17 +211,7 @@ msgctxt "ui"
 msgid "kh4wt0"
 msgstr "Toggle Sidebar"
 
-#: lib/table.tsx:286
-msgctxt "ui"
-msgid "u4jsnc"
-msgstr "No data found"
-
-#: lib/table.tsx:288
-msgctxt "ui"
-msgid "2I546+"
-msgstr "No information is currently available in this section."
-
-#: lib/table.tsx:463
+#: lib/table.tsx:291
 msgctxt "ui"
 msgid "8epGWu"
 msgstr "Reorder row"

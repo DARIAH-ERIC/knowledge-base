@@ -140,20 +140,19 @@ function AsyncOptionPickerInner<T extends AsyncOption>(
 
 				<PopoverContent className="w-(--trigger-width) p-3">
 					<div className="flex flex-col gap-3">
-						<form
-							className="flex gap-2"
-							onSubmit={(event) => {
-								event.preventDefault();
-								handleSearch();
-							}}
-						>
-							<SearchField className="flex-1" onChange={setSearchText} value={searchText}>
+						<div className="flex gap-2">
+							<SearchField
+								className="flex-1"
+								onChange={setSearchText}
+								onSubmit={handleSearch}
+								value={searchText}
+							>
 								<SearchInput autoFocus={true} placeholder={inputPlaceholder ?? t("Search")} />
 							</SearchField>
-							<Button intent="outline" isDisabled={isPending} type="submit">
+							<Button intent="outline" isDisabled={isPending} onPress={handleSearch} type="button">
 								{t("Search")}
 							</Button>
-						</form>
+						</div>
 
 						{loadError != null ? (
 							<p className="py-3 text-center text-danger-subtle-fg text-sm">{loadErrorMessage}</p>

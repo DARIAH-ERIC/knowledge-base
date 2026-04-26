@@ -30,6 +30,7 @@ export function CampaignStepNav(props: Readonly<CampaignStepNavProps>): ReactNod
 		{ href: `${base}/social-media`, label: t("Social media") },
 		{ href: `${base}/contributions`, label: t("Contributions") },
 		{ href: `${base}/services`, label: t("Services") },
+		{ href: `${base}/countries`, label: t("Countries") },
 		{ href: `${base}/questions`, label: t("Questions") },
 	];
 

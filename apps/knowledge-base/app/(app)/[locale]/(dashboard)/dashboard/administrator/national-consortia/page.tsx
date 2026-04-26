@@ -84,7 +84,6 @@ export default async function DashboardAdministratorNationalConsortiaPage(
 
 	return (
 		<NationalConsortiaPage
-			key={`${q}:${sort}:${dir}:${String(page)}`}
 			dir={dir}
 			nationalConsortia={nationalConsortia}
 			page={page}

@@ -76,14 +76,5 @@ export default async function DashboardWebsiteNewsPage(
 		redirect({ href: createListHref(q, totalPages, sort, dir), locale: locale as IntlLocale });
 	}
 
-	return (
-		<NewsPage
-			key={`${q}:${sort}:${dir}:${String(page)}`}
-			dir={dir}
-			news={news}
-			page={page}
-			q={q}
-			sort={sort}
-		/>
-	);
+	return <NewsPage dir={dir} news={news} page={page} q={q} sort={sort} />;
 }

@@ -21,7 +21,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, useState, useTransition } from "react";
+import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -60,8 +60,10 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 	const t = useExtracted();
 	const format = useFormatter();
 	const router = useRouter();
-	const [items, setItems] = useState(() => {
-		return news.data;
+	const [items, optimisticallyRemoveItem] = useOptimistic(news.data, (state, id: string) => {
+		return state.filter((item) => {
+			return item.id !== id;
+		});
 	});
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
@@ -178,11 +180,7 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 					const id = itemToDelete.id;
 
 					startDeleteTransition(async () => {
-						setItems((prev) => {
-							return prev.filter((item) => {
-								return item.id !== id;
-							});
-						});
+						optimisticallyRemoveItem(id);
 						await deleteNewsItemAction(id);
 						router.refresh();
 						setItemToDelete(null);
