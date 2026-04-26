@@ -11,8 +11,7 @@
 		".": "./dist/index.mjs"
 	},
 	"scripts": {
-		"build": "tsdown",
-		"dev": "tsdown --watch",
+		"data:ingest": "tsx ./scripts/ingest.ts",
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
 		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
@@ -20,11 +19,28 @@
 		"types:check": "tsc --noEmit"
 	},
 	"devDependencies": {
+		"@acdh-oeaw/lib": "catalog:",
+		"@dariah-eric/client-hal": "workspace:^",
+		"@dariah-eric/client-openaire": "workspace:^",
+		"@dariah-eric/client-sshoc": "workspace:^",
+		"@dariah-eric/client-zenodo": "workspace:^",
+		"@dariah-eric/client-zotero": "workspace:^",
 		"@dariah-eric/configs": "workspace:^",
+		"@dariah-eric/db": "workspace:^",
+		"@dariah-eric/env": "workspace:^",
+		"@dariah-eric/request": "workspace:^",
+		"@dariah-eric/search": "workspace:^",
+		"@dariah-eric/storage": "workspace:^",
 		"@types/node": "catalog:",
+		"better-result": "catalog:",
 		"eslint": "catalog:",
 		"prettier": "catalog:",
-		"tsdown": "catalog:",
-		"typescript": "catalog:"
+		"remark-parse": "catalog:",
+		"remark-stringify": "catalog:",
+		"strip-markdown": "catalog:",
+		"tsx": "catalog:",
+		"typescript": "catalog:",
+		"unified": "catalog:",
+		"valibot": "catalog:"
 	}
 }
