@@ -20,8 +20,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useState } from "react";
-import { useFilter, useListData } from "react-aria-components";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -32,39 +31,50 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteUserAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/delete-user.action";
+import { useRouter } from "@/lib/navigation/navigation";
 
 interface UsersPageProps {
-	users: Promise<Array<Pick<schema.User, "id" | "name" | "email" | "role" | "isEmailVerified">>>;
 	currentUserId: string;
+	dir: "asc" | "desc";
+	page: number;
+	q: string;
+	sort: "name" | "email" | "role" | "isEmailVerified";
+	users: {
+		data: Array<Pick<schema.User, "id" | "name" | "email" | "role" | "isEmailVerified">>;
+		total: number;
+	};
 }
 
-export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
-	const { users: usersPromise, currentUserId } = props;
+const pageSize = 10;
 
-	const users = use(usersPromise);
+export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
+	const {
+		currentUserId,
+		dir: initialDir,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+		users,
+	} = props;
 
 	const t = useExtracted();
-
-	const { contains } = useFilter({ sensitivity: "base" });
-
-	const list = useListData({
-		filter(item, filterText) {
-			return contains(item.name, filterText) || contains(item.email, filterText);
-		},
-		initialItems: users,
-		getKey(item) {
-			return item.id;
-		},
+	const router = useRouter();
+	const [items, setItems] = useState(() => {
+		return users.data;
 	});
-
-	const [page, setPage] = useState(1);
-
-	const pageSize = 10;
-	const pages = Math.ceil(list.items.length / pageSize);
-	const items = list.items.slice((page - 1) * pageSize, page * pageSize);
-
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
+	const [isDeletePending, startDeleteTransition] = useTransition();
+
+	const totalPages = Math.max(Math.ceil(users.total / pageSize), 1);
 
 	return (
 		<Fragment>
@@ -76,13 +86,7 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
-					<SearchField
-						onChange={(value) => {
-							list.setFilterText(value);
-							setPage(1);
-						}}
-						value={list.filterText}
-					>
+					<SearchField onChange={setInputValue} value={inputValue}>
 						<SearchInput placeholder={t("Search")} />
 					</SearchField>
 					<Link
@@ -98,12 +102,22 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 			<Table
 				aria-label="users"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Name")}</TableColumn>
-					<TableColumn>{t("Email")}</TableColumn>
-					<TableColumn>{t("Role")}</TableColumn>
-					<TableColumn>{t("Email verified")}</TableColumn>
+					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
+						{t("Name")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="email">
+						{t("Email")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="role">
+						{t("Role")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="isEmailVerified">
+						{t("Email verified")}
+					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -149,22 +163,39 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 				</TableBody>
 			</Table>
 
-			<Paginate page={page} setPage={setPage} total={pages} />
+			<Paginate
+				isPending={isPending}
+				page={page}
+				setPage={setPage}
+				total={totalPages}
+				totalItems={users.total}
+			/>
 
 			<DeleteModal
 				isOpen={itemToDelete != null}
 				model={t("user")}
 				onAction={() => {
-					if (itemToDelete == null) return;
+					if (itemToDelete == null) {
+						return;
+					}
 
-					startTransition(async () => {
-						await deleteUserAction(itemToDelete.id);
-						list.remove(itemToDelete.id);
+					const id = itemToDelete.id;
+
+					startDeleteTransition(async () => {
+						setItems((prev) => {
+							return prev.filter((item) => {
+								return item.id !== id;
+							});
+						});
+						await deleteUserAction(id);
+						router.refresh();
 						setItemToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) setItemToDelete(null);
+					if (!open && !isDeletePending) {
+						setItemToDelete(null);
+					}
 				}}
 			/>
 		</Fragment>

@@ -6,6 +6,8 @@ import type { ReactNode } from "react";
 import { ProjectCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-create-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { getOrganisationalUnitOptions } from "@/lib/data/organisational-units";
+import { getSocialMediaOptions } from "@/lib/data/social-media";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorCreateProjectPageProps extends PageProps<"/[locale]/dashboard/administrator/projects/create"> {}
@@ -31,7 +33,7 @@ export default async function DashboardAdministratorCreateProjectPage(
 		prefix: "logos",
 	});
 
-	const [scopes, orgUnits, roles, allSocialMedia] = await Promise.all([
+	const [scopes, initialOrgUnits, roles, initialSocialMedia] = await Promise.all([
 		db.query.projectScopes.findMany({
 			orderBy: {
 				scope: "asc",
@@ -41,30 +43,23 @@ export default async function DashboardAdministratorCreateProjectPage(
 				scope: true,
 			},
 		}),
-		db.query.organisationalUnits.findMany({
-			orderBy: { name: "asc" },
-			columns: { id: true, name: true },
-		}),
+		getOrganisationalUnitOptions(),
 		db.query.projectRoles.findMany({
 			orderBy: { role: "asc" },
 			columns: { id: true, role: true },
 		}),
-		db.query.socialMedia.findMany({
-			orderBy: { name: "asc" },
-			columns: { id: true, name: true, url: true },
-			with: {
-				type: { columns: { type: true } },
-			},
-		}),
+		getSocialMediaOptions(),
 	]);
 
 	return (
 		<ProjectCreateForm
 			initialAssets={initialAssets}
-			orgUnits={orgUnits}
+			initialOrgUnitItems={initialOrgUnits.items}
+			initialOrgUnitTotal={initialOrgUnits.total}
+			initialSocialMediaItems={initialSocialMedia.items}
+			initialSocialMediaTotal={initialSocialMedia.total}
 			roles={roles}
 			scopes={scopes}
-			socialMediaItems={allSocialMedia}
 		/>
 	);
 }

@@ -11,7 +11,7 @@ import { WorkingGroupChairsSection } from "@/app/(app)/[locale]/(dashboard)/dash
 import { WorkingGroupForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form";
 import { updateWorkingGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/update-working-group.action";
 import type { AvailablePerson } from "@/lib/data/article-contributors";
-import type { UnitRelation, UnitRelationOption } from "@/lib/data/unit-relations";
+import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
 import type { WorkingGroupChair } from "@/lib/data/working-group-chairs";
 
 interface WorkingGroupEditFormProps {
@@ -20,28 +20,38 @@ interface WorkingGroupEditFormProps {
 		description?: JSONContent;
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; label: string; url: string } | null };
-	relatedEntities: Array<{ id: string; name: string }>;
-	relatedResources: Array<{ id: string; label: string }>;
 	initialRelatedEntityIds: Array<string>;
+	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedEntityTotal: number;
 	initialRelatedResourceIds: Array<string>;
+	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedResourceTotal: number;
+	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	relations: Array<UnitRelation>;
-	allowedRelationOptions: Array<UnitRelationOption>;
+	unitRelationStatusOptions: Array<UnitRelationStatusOption>;
 	chairs: Array<WorkingGroupChair>;
-	availablePersons: Array<AvailablePerson>;
+	initialPersonItems: Array<AvailablePerson>;
+	initialPersonTotal: number;
 }
 
 export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>): ReactNode {
 	const {
 		initialAssets,
 		workingGroup,
-		relatedEntities,
-		relatedResources,
 		initialRelatedEntityIds,
+		initialRelatedEntityItems,
+		initialRelatedEntityTotal,
 		initialRelatedResourceIds,
+		initialRelatedResourceItems,
+		initialRelatedResourceTotal,
+		selectedRelatedEntities,
+		selectedRelatedResources,
 		relations,
-		allowedRelationOptions,
+		unitRelationStatusOptions,
 		chairs,
-		availablePersons,
+		initialPersonItems,
+		initialPersonTotal,
 	} = props;
 
 	const t = useExtracted();
@@ -54,21 +64,26 @@ export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>)
 				formAction={updateWorkingGroupAction}
 				initialAssets={initialAssets}
 				initialRelatedEntityIds={initialRelatedEntityIds}
+				initialRelatedEntityItems={initialRelatedEntityItems}
+				initialRelatedEntityTotal={initialRelatedEntityTotal}
 				initialRelatedResourceIds={initialRelatedResourceIds}
-				relatedEntities={relatedEntities}
-				relatedResources={relatedResources}
+				initialRelatedResourceItems={initialRelatedResourceItems}
+				initialRelatedResourceTotal={initialRelatedResourceTotal}
+				selectedRelatedEntities={selectedRelatedEntities}
+				selectedRelatedResources={selectedRelatedResources}
 				workingGroup={workingGroup}
 			/>
 
 			<WorkingGroupChairsSection
-				availablePersons={availablePersons}
 				chairs={chairs}
+				initialPersonItems={initialPersonItems}
+				initialPersonTotal={initialPersonTotal}
 				unitId={workingGroup.id}
 			/>
 
 			<UnitRelationsSection
-				allowedOptions={allowedRelationOptions}
 				relations={relations}
+				statusOptions={unitRelationStatusOptions}
 				unitId={workingGroup.id}
 			/>
 		</Fragment>

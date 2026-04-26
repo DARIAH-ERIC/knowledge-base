@@ -7,11 +7,6 @@ import { FieldError, fieldErrorStyles, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
-import {
-	MultipleSelect,
-	MultipleSelectContent,
-	MultipleSelectItem,
-} from "@dariah-eric/ui/multiple-select";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
@@ -22,6 +17,7 @@ import {
 	type ContentBlock,
 	ContentBlocks,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import {
 	FormLayout,
 	FormSection,
@@ -36,10 +32,14 @@ interface PageItemFormProps {
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; label: string; url: string } | null };
 	formAction: ServerAction;
-	relatedEntities: Array<{ id: string; name: string }>;
-	relatedResources: Array<{ id: string; label: string }>;
 	initialRelatedEntityIds?: Array<string>;
+	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedEntityTotal: number;
 	initialRelatedResourceIds?: Array<string>;
+	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedResourceTotal: number;
+	selectedRelatedEntities?: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedResources?: Array<{ id: string; name: string; description?: string }>;
 }
 
 export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
@@ -48,10 +48,14 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 		contentBlocks,
 		formAction,
 		pageItem,
-		relatedEntities,
-		relatedResources,
 		initialRelatedEntityIds,
+		initialRelatedEntityItems,
+		initialRelatedEntityTotal,
 		initialRelatedResourceIds,
+		initialRelatedResourceItems,
+		initialRelatedResourceTotal,
+		selectedRelatedEntities,
+		selectedRelatedResources,
 	} = props;
 
 	const t = useExtracted();
@@ -63,14 +67,6 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 	);
 
 	const [imageKeyError, setImageKeyError] = useState(false);
-
-	const [selectedEntityIds, setSelectedEntityIds] = useState<Array<string>>(
-		initialRelatedEntityIds ?? [],
-	);
-
-	const [selectedResourceIds, setSelectedResourceIds] = useState<Array<string>>(
-		initialRelatedResourceIds ?? [],
-	);
 
 	return (
 		<FormLayout>
@@ -128,65 +124,16 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 
 				<Separator className="my-6" />
 
-				<FormSection description={t("Link related entities.")} title={t("Related entities")}>
-					<MultipleSelect
-						aria-label={t("Related entities")}
-						onChange={(keys) => {
-							setSelectedEntityIds(keys.map(String));
-						}}
-						placeholder={t("No related entities")}
-						value={selectedEntityIds}
-					>
-						<MultipleSelectContent items={relatedEntities}>
-							{(item) => {
-								return <MultipleSelectItem id={item.id}>{item.name}</MultipleSelectItem>;
-							}}
-						</MultipleSelectContent>
-					</MultipleSelect>
-					{selectedEntityIds.map((entityId, index) => {
-						return (
-							<input
-								key={entityId}
-								name={`relatedEntityIds.${String(index)}`}
-								type="hidden"
-								value={entityId}
-							/>
-						);
-					})}
-				</FormSection>
-
-				<Separator className="my-6" />
-
-				<FormSection description={t("Link related resources.")} title={t("Related resources")}>
-					<MultipleSelect
-						aria-label={t("Related resources")}
-						onChange={(keys) => {
-							setSelectedResourceIds(keys.map(String));
-						}}
-						placeholder={t("No related resources")}
-						value={selectedResourceIds}
-					>
-						<MultipleSelectContent
-							items={relatedResources.map((r) => {
-								return { id: r.id, name: r.label };
-							})}
-						>
-							{(item) => {
-								return <MultipleSelectItem id={item.id}>{item.name}</MultipleSelectItem>;
-							}}
-						</MultipleSelectContent>
-					</MultipleSelect>
-					{selectedResourceIds.map((resourceId, index) => {
-						return (
-							<input
-								key={resourceId}
-								name={`relatedResourceIds.${String(index)}`}
-								type="hidden"
-								value={resourceId}
-							/>
-						);
-					})}
-				</FormSection>
+				<EntityRelationsFields
+					initialRelatedEntityIds={initialRelatedEntityIds}
+					initialRelatedEntityItems={initialRelatedEntityItems}
+					initialRelatedEntityTotal={initialRelatedEntityTotal}
+					initialRelatedResourceIds={initialRelatedResourceIds}
+					initialRelatedResourceItems={initialRelatedResourceItems}
+					initialRelatedResourceTotal={initialRelatedResourceTotal}
+					selectedRelatedEntities={selectedRelatedEntities}
+					selectedRelatedResources={selectedRelatedResources}
+				/>
 
 				<Separator className="my-6" />
 

@@ -41,8 +41,8 @@ export async function getIntlMessages(locale: IntlLocale): Promise<IntlMessages>
 	}
 
 	const messages = {
-		...extracted,
 		...ui,
+		...extracted,
 		metadata: {
 			...metadata,
 			social,

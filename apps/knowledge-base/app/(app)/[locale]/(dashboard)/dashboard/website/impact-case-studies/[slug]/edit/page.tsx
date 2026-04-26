@@ -7,15 +7,14 @@ import type { ReactNode } from "react";
 import { ImpactCaseStudyEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-edit";
 import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
-import {
-	getAvailablePersons,
-	getImpactCaseStudyContributors,
-} from "@/lib/data/article-contributors";
+import { getImpactCaseStudyContributors, getPersonOptions } from "@/lib/data/article-contributors";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import {
-	getAvailableEntities,
-	getAvailableResources,
+	getEntityRelationOptions,
+	getEntityRelationOptionsByIds,
 	getEntityRelations,
+	getResourceRelationOptions,
+	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -45,9 +44,9 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 	const [
 		{ items: initialAssets },
 		impactCaseStudy,
-		relatedEntities,
-		relatedResources,
-		availablePersons,
+		initialRelatedEntities,
+		initialRelatedResources,
+		initialPersons,
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 		db.query.impactCaseStudies.findFirst({
@@ -76,9 +75,9 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 				},
 			},
 		}),
-		getAvailableEntities(),
-		getAvailableResources(),
-		getAvailablePersons(),
+		getEntityRelationOptions(),
+		getResourceRelationOptions(),
+		getPersonOptions(),
 	]);
 
 	if (impactCaseStudy == null) {
@@ -97,9 +96,13 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 		],
 	);
 
+	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
+		getEntityRelationOptionsByIds(relatedEntityIds),
+		getResourceRelationOptionsByIds(relatedResourceIds),
+	]);
+
 	return (
 		<ImpactCaseStudyEditForm
-			availablePersons={availablePersons}
 			contentBlocks={contentBlocks}
 			contributors={contributors}
 			impactCaseStudy={{
@@ -107,10 +110,16 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 				image: { ...impactCaseStudy.image, url: image.url },
 			}}
 			initialAssets={initialAssets}
+			initialPersonItems={initialPersons.items}
+			initialPersonTotal={initialPersons.total}
 			initialRelatedEntityIds={relatedEntityIds}
+			initialRelatedEntityItems={initialRelatedEntities.items}
+			initialRelatedEntityTotal={initialRelatedEntities.total}
 			initialRelatedResourceIds={relatedResourceIds}
-			relatedEntities={relatedEntities}
-			relatedResources={relatedResources}
+			initialRelatedResourceItems={initialRelatedResources.items}
+			initialRelatedResourceTotal={initialRelatedResources.total}
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
 		/>
 	);
 }

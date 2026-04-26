@@ -9,12 +9,20 @@ import { createWorkingGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 
 interface WorkingGroupCreateFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
-	relatedEntities: Array<{ id: string; name: string }>;
-	relatedResources: Array<{ id: string; label: string }>;
+	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedEntityTotal: number;
+	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedResourceTotal: number;
 }
 
 export function WorkingGroupCreateForm(props: Readonly<WorkingGroupCreateFormProps>): ReactNode {
-	const { initialAssets, relatedEntities, relatedResources } = props;
+	const {
+		initialAssets,
+		initialRelatedEntityItems,
+		initialRelatedEntityTotal,
+		initialRelatedResourceItems,
+		initialRelatedResourceTotal,
+	} = props;
 
 	const t = useExtracted();
 
@@ -25,8 +33,10 @@ export function WorkingGroupCreateForm(props: Readonly<WorkingGroupCreateFormPro
 			<WorkingGroupForm
 				formAction={createWorkingGroupAction}
 				initialAssets={initialAssets}
-				relatedEntities={relatedEntities}
-				relatedResources={relatedResources}
+				initialRelatedEntityItems={initialRelatedEntityItems}
+				initialRelatedEntityTotal={initialRelatedEntityTotal}
+				initialRelatedResourceItems={initialRelatedResourceItems}
+				initialRelatedResourceTotal={initialRelatedResourceTotal}
 			/>
 		</Fragment>
 	);

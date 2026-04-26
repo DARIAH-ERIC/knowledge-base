@@ -15,8 +15,7 @@ import {
 } from "@dariah-eric/ui/table";
 import { EllipsisHorizontalIcon, PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, use, useState } from "react";
-import { useFilter, useListData } from "react-aria-components";
+import { Fragment, type ReactNode } from "react";
 
 import {
 	Header,
@@ -26,19 +25,21 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
-
-interface Contribution {
-	id: string;
-	personName: string;
-	roleType: string;
-	organisationalUnitName: string;
-	organisationalUnitType: string;
-	durationStart: Date;
-	durationEnd: Date | undefined;
-}
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
+import type { ContributionsResult } from "@/lib/data/contributions";
 
 interface ContributionsPageProps {
-	contributions: Promise<Array<Contribution>>;
+	contributions: ContributionsResult;
+	dir: "asc" | "desc";
+	page: number;
+	q: string;
+	sort:
+		| "personName"
+		| "roleType"
+		| "organisationalUnitType"
+		| "organisationalUnitName"
+		| "durationStart"
+		| "durationEnd";
 }
 
 function formatRoleType(type: string): string {
@@ -80,36 +81,28 @@ function organisationalUnitTypeIntent(
 	}
 }
 
-export function ContributionsPage(props: Readonly<ContributionsPageProps>): ReactNode {
-	const { contributions: contributionsPromise } = props;
+const pageSize = 20;
 
-	const contributions = use(contributionsPromise);
+export function ContributionsPage(props: Readonly<ContributionsPageProps>): ReactNode {
+	const {
+		contributions,
+		dir: initialDir,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+	} = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
 
-	const { contains } = useFilter({ sensitivity: "base" });
-
-	const list = useListData({
-		filter(item, filterText) {
-			return (
-				contains(item.personName, filterText) ||
-				contains(item.organisationalUnitName, filterText) ||
-				contains(item.organisationalUnitType, filterText) ||
-				contains(item.roleType, filterText)
-			);
-		},
-		initialItems: contributions,
-		getKey(item) {
-			return item.id;
-		},
-	});
-
-	const [page, setPage] = useState(1);
-
-	const pageSize = 20;
-	const pages = Math.ceil(list.items.length / pageSize);
-	const items = list.items.slice((page - 1) * pageSize, page * pageSize);
+	const totalPages = Math.max(Math.ceil(contributions.total / pageSize), 1);
 
 	return (
 		<Fragment>
@@ -121,13 +114,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
-					<SearchField
-						onChange={(value) => {
-							list.setFilterText(value);
-							setPage(1);
-						}}
-						value={list.filterText}
-					>
+					<SearchField onChange={setInputValue} value={inputValue}>
 						<SearchInput placeholder={t("Search")} />
 					</SearchField>
 					<Link
@@ -143,17 +130,31 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 			<Table
 				aria-label="contributions"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Person")}</TableColumn>
-					<TableColumn>{t("Role")}</TableColumn>
-					<TableColumn>{t("Type")}</TableColumn>
-					<TableColumn>{t("Name")}</TableColumn>
-					<TableColumn>{t("From")}</TableColumn>
-					<TableColumn>{t("Until")}</TableColumn>
+					<TableColumn allowsSorting={true} id="personName" isRowHeader={true}>
+						{t("Person")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="roleType">
+						{t("Role")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="organisationalUnitType">
+						{t("Type")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="organisationalUnitName">
+						{t("Name")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="durationStart">
+						{t("From")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="durationEnd">
+						{t("Until")}
+					</TableColumn>
 					<TableColumn />
 				</TableHeader>
-				<TableBody items={items}>
+				<TableBody items={contributions.data}>
 					{(item) => {
 						return (
 							<TableRow id={item.id}>
@@ -195,7 +196,13 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 				</TableBody>
 			</Table>
 
-			<Paginate page={page} setPage={setPage} total={pages} />
+			<Paginate
+				isPending={isPending}
+				page={page}
+				setPage={setPage}
+				total={totalPages}
+				totalItems={contributions.total}
+			/>
 		</Fragment>
 	);
 }

@@ -7,6 +7,10 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { ServiceEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_components/service-edit-form";
+import {
+	getOrganisationalUnitOptions,
+	getOrganisationalUnitOptionsByIds,
+} from "@/lib/data/organisational-units";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorEditServicePageProps {
@@ -33,7 +37,7 @@ export default async function DashboardAdministratorEditServicePage(
 
 	const { id } = await params;
 
-	const [service, serviceTypes, serviceStatuses, organisationalUnits, serviceRoles] =
+	const [service, serviceTypes, serviceStatuses, initialOrganisationalUnits, serviceRoles] =
 		await Promise.all([
 			db.query.services.findFirst({
 				where: { id },
@@ -57,10 +61,7 @@ export default async function DashboardAdministratorEditServicePage(
 				orderBy: { status: "asc" },
 				columns: { id: true, status: true },
 			}),
-			db.query.organisationalUnits.findMany({
-				orderBy: { name: "asc" },
-				columns: { id: true, name: true },
-			}),
+			getOrganisationalUnitOptions(),
 			db.query.organisationalUnitServiceRoles.findMany({ columns: { id: true, role: true } }),
 		]);
 
@@ -99,9 +100,15 @@ export default async function DashboardAdministratorEditServicePage(
 			return r.organisationalUnitId;
 		});
 
+	const selectedOrganisationalUnits = await getOrganisationalUnitOptionsByIds([
+		...new Set([...ownerUnitIds, ...providerUnitIds]),
+	]);
+
 	return (
 		<ServiceEditForm
-			organisationalUnits={organisationalUnits}
+			initialOrganisationalUnitItems={initialOrganisationalUnits.items}
+			initialOrganisationalUnitTotal={initialOrganisationalUnits.total}
+			selectedOrganisationalUnits={selectedOrganisationalUnits}
 			service={{ ...service, ownerUnitIds, providerUnitIds }}
 			serviceStatuses={serviceStatuses}
 			serviceTypes={serviceTypes}

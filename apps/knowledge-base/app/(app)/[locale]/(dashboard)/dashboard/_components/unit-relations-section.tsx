@@ -29,19 +29,51 @@ import { type CalendarDate, getLocalTimeZone } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
+import { AsyncOptionPicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/async-option-picker";
 import {
 	FormLayout,
 	FormSection,
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import type {
+	AsyncOption,
+	AsyncOptionsFetchPageParams,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-async-options";
 import { createUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-unit-relation.action";
 import { endUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-unit-relation.action";
-import type { UnitRelation, UnitRelationOption } from "@/lib/data/unit-relations";
+import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
 
 interface UnitRelationsSectionProps {
 	unitId: string;
 	relations: Array<UnitRelation>;
-	allowedOptions: Array<UnitRelationOption>;
+	statusOptions: Array<UnitRelationStatusOption>;
+}
+
+async function fetchRelatedUnitOptionsPage(
+	unitId: string,
+	statusId: string,
+	params: Readonly<AsyncOptionsFetchPageParams>,
+): Promise<{ items: Array<AsyncOption>; total: number }> {
+	const searchParams = new URLSearchParams({
+		limit: String(params.limit),
+		offset: String(params.offset),
+		statusId,
+		unitId,
+	});
+
+	if (params.q !== "") {
+		searchParams.set("q", params.q);
+	}
+
+	const response = await fetch(`/api/unit-relations/options?${searchParams.toString()}`, {
+		signal: params.signal,
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to load related units.");
+	}
+
+	return (await response.json()) as { items: Array<AsyncOption>; total: number };
 }
 
 function formatStatus(type: string): string {
@@ -49,7 +81,7 @@ function formatStatus(type: string): string {
 }
 
 export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>): ReactNode {
-	const { unitId, allowedOptions, relations } = props;
+	const { unitId, relations, statusOptions } = props;
 
 	const t = useExtracted();
 	const format = useFormatter();
@@ -59,31 +91,25 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
 
 	const [selectedStatusId, setSelectedStatusId] = useState<string | null>(null);
-	const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
+	const [selectedUnitItem, setSelectedUnitItem] = useState<AsyncOption | null>(null);
 
-	const [state, setState] = useState<ActionState>(createActionStateInitial());
+	const [state, setState] = useState<ActionState>(() => {
+		return createActionStateInitial();
+	});
 	const [isPending, startFormTransition] = useTransition();
-
-	const availableUnits =
-		allowedOptions.find((o) => {
-			return o.statusId === selectedStatusId;
-		})?.availableUnits ?? [];
 
 	function formAction(formData: FormData) {
 		const statusId = selectedStatusId;
-		const relatedUnitId = selectedUnitId;
-		const option = allowedOptions.find((o) => {
-			return o.statusId === statusId;
-		});
-		const unit = option?.availableUnits.find((u) => {
-			return u.id === relatedUnitId;
+		const relatedUnit = selectedUnitItem;
+		const option = statusOptions.find((entry) => {
+			return entry.statusId === statusId;
 		});
 
 		startFormTransition(async () => {
 			const newState = await createUnitRelationAction(state, formData);
 			setState(newState);
 
-			if (newState.status === "success" && option != null && unit != null) {
+			if (newState.status === "success" && option != null && relatedUnit != null) {
 				const data = newState.data as
 					| { id: string; durationStart: string; durationEnd: string | null }
 					| undefined;
@@ -94,10 +120,10 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 							...prev,
 							{
 								id: data.id,
-								statusId: statusId!,
+								statusId: option.statusId,
 								statusType: option.statusType as UnitRelation["statusType"],
-								relatedUnitId: relatedUnitId!,
-								relatedUnitName: unit.name,
+								relatedUnitId: relatedUnit.id,
+								relatedUnitName: relatedUnit.name,
 								duration: {
 									start: new Date(data.durationStart),
 									...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
@@ -108,7 +134,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 				}
 
 				setSelectedStatusId(null);
-				setSelectedUnitId(null);
+				setSelectedUnitItem(null);
 			}
 		});
 	}
@@ -170,7 +196,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 					<p className="text-sm text-neutral-500">{t("No relations.")}</p>
 				)}
 
-				{allowedOptions.length > 0 && (
+				{statusOptions.length > 0 && (
 					<FormLayout variant="stacked">
 						<Form action={formAction} className="flex flex-col gap-y-6" state={state}>
 							<FormSection
@@ -182,7 +208,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									isRequired={true}
 									onChange={(key) => {
 										setSelectedStatusId(String(key));
-										setSelectedUnitId(null);
+										setSelectedUnitItem(null);
 									}}
 									value={selectedStatusId}
 								>
@@ -190,7 +216,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									<SelectTrigger />
 									<FieldError />
 									<SelectContent>
-										{allowedOptions.map((option) => {
+										{statusOptions.map((option) => {
 											return (
 												<SelectItem key={option.statusId} id={option.statusId}>
 													{formatStatus(option.statusType)}
@@ -201,28 +227,29 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 								</Select>
 								<input name="statusId" type="hidden" value={selectedStatusId ?? ""} />
 
-								<Select
-									isDisabled={selectedStatusId == null}
-									isRequired={true}
-									onChange={(key) => {
-										setSelectedUnitId(String(key));
+								<AsyncOptionPicker
+									aria-label={t("Related unit")}
+									cacheKey={selectedStatusId ?? "none"}
+									emptyMessage={t("No related units found.")}
+									fetchPage={(params) => {
+										if (selectedStatusId == null) {
+											return Promise.resolve({ items: [], total: 0 });
+										}
+
+										return fetchRelatedUnitOptionsPage(unitId, selectedStatusId, params);
 									}}
-									value={selectedUnitId}
-								>
-									<Label>{t("Related unit")}</Label>
-									<SelectTrigger />
-									<FieldError />
-									<SelectContent>
-										{availableUnits.map((unit) => {
-											return (
-												<SelectItem key={unit.id} id={unit.id}>
-													{unit.name}
-												</SelectItem>
-											);
-										})}
-									</SelectContent>
-								</Select>
-								<input name="relatedUnitId" type="hidden" value={selectedUnitId ?? ""} />
+									initialItems={[]}
+									initialTotal={0}
+									isDisabled={selectedStatusId == null}
+									label={t("Related unit")}
+									loadOnMount={selectedStatusId != null}
+									onSelect={(item) => {
+										setSelectedUnitItem(item);
+									}}
+									placeholder={t("No related unit selected")}
+									selectedItem={selectedUnitItem}
+								/>
+								<input name="relatedUnitId" type="hidden" value={selectedUnitItem?.id ?? ""} />
 
 								<DatePicker granularity="day" isRequired={true} name="duration.start">
 									<Label>{t("Start date")}</Label>
@@ -292,8 +319,10 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 							startTransition(async () => {
 								await endUnitRelationAction(itemToEnd.id, end);
 								setLocalRelations((prev) => {
-									return prev.map((r) => {
-										return r.id === itemToEnd.id ? { ...r, duration: { ...r.duration, end } } : r;
+									return prev.map((relation) => {
+										return relation.id === itemToEnd.id
+											? { ...relation, duration: { ...relation.duration, end } }
+											: relation;
 									});
 								});
 								setItemToEnd(null);

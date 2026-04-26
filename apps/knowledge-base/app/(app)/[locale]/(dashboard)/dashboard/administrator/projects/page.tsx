@@ -1,13 +1,49 @@
-import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import { type ReactNode, Suspense } from "react";
+import type { ReactNode } from "react";
 
-import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
 import { ProjectsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page";
+import { getProjects } from "@/lib/data/projects";
+import type { IntlLocale } from "@/lib/i18n/locales";
+import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
+import {
+	getListSearchParams,
+	getListSortSearchParams,
+	type ListSortDirection,
+} from "@/lib/server/list-search-params";
 
 interface DashboardAdministratorProjectsPageProps extends PageProps<"/[locale]/dashboard/administrator/projects"> {}
+
+const pageSize = 10;
+const defaultSort = "name" as const;
+const validSorts = ["name", "acronym", "funding", "scope"] as const;
+
+function createListHref(
+	q: string,
+	page: number,
+	sort: (typeof validSorts)[number],
+	dir: ListSortDirection,
+): string {
+	const searchParams = new URLSearchParams();
+
+	if (q !== "") {
+		searchParams.set("q", q);
+	}
+
+	if (page > 1) {
+		searchParams.set("page", String(page));
+	}
+
+	if (sort !== defaultSort || dir !== "asc") {
+		searchParams.set("sort", sort);
+		searchParams.set("dir", dir);
+	}
+
+	const query = searchParams.toString();
+
+	return `/dashboard/administrator/projects${query !== "" ? `?${query}` : ""}`;
+}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorProjectsPageProps>,
@@ -22,47 +58,38 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardAdministratorProjectsPage(
-	_props: Readonly<DashboardAdministratorProjectsPageProps>,
-): ReactNode {
-	const projects = db.query.projects.findMany({
-		orderBy: {
-			name: "asc",
-		},
-		columns: {
-			acronym: true,
-			duration: true,
-			funding: true,
-			id: true,
-			name: true,
-		},
-		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
-				},
-				with: {
-					status: {
-						columns: {
-							id: true,
-							type: true,
-						},
-					},
-				},
-			},
-			scope: {
-				columns: {
-					id: true,
-					scope: true,
-				},
-			},
-		},
+export default async function DashboardAdministratorProjectsPage(
+	props: Readonly<DashboardAdministratorProjectsPageProps>,
+): Promise<ReactNode> {
+	const { params, searchParams } = props;
+	const [{ locale }, rawSearchParams] = await Promise.all([params, searchParams]);
+	const { page, q } = getListSearchParams(rawSearchParams);
+	const { dir, sort } = getListSortSearchParams(rawSearchParams, {
+		defaultDir: "asc",
+		defaultSort,
+		validSorts,
 	});
+	const projects = await getProjects({
+		limit: pageSize,
+		offset: (page - 1) * pageSize,
+		q,
+		sort,
+		dir,
+	});
+	const totalPages = Math.max(Math.ceil(projects.total / pageSize), 1);
+
+	if (page > totalPages) {
+		redirect({ href: createListHref(q, totalPages, sort, dir), locale: locale as IntlLocale });
+	}
 
 	return (
-		<Suspense fallback={<LoadingScreen />}>
-			<ProjectsPage projects={projects} />
-		</Suspense>
+		<ProjectsPage
+			key={`${q}:${sort}:${dir}:${String(page)}`}
+			dir={dir}
+			page={page}
+			projects={projects}
+			q={q}
+			sort={sort}
+		/>
 	);
 }

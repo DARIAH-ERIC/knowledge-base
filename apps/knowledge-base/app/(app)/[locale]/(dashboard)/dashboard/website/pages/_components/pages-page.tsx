@@ -20,9 +20,8 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useState } from "react";
-import { useFilter, useListData } from "react-aria-components";
+import { useExtracted, useFormatter } from "next-intl";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -33,42 +32,48 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deletePageItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/delete-page-item.action";
+import { useRouter } from "@/lib/navigation/navigation";
 
 interface PagesPageProps {
-	pages: Promise<{
+	dir: "asc" | "desc";
+	page: number;
+	pages: {
 		data: Array<
 			Pick<schema.Page, "id" | "title" | "summary"> & {
 				entity: Pick<schema.Entity, "slug">;
+				updatedAt: schema.Entity["updatedAt"];
 			}
 		>;
 		total: number;
-	}>;
+	};
+	q: string;
+	sort: "title" | "updatedAt";
 }
 
-export function PagesPage(props: Readonly<PagesPageProps>): ReactNode {
-	const { pages: pagesPromise } = props;
+const pageSize = 10;
 
-	const pages = use(pagesPromise);
+export function PagesPage(props: Readonly<PagesPageProps>): ReactNode {
+	const { dir: initialDir, page: initialPage, pages, q: initialQ, sort: initialSort } = props;
 
 	const t = useExtracted();
-
-	const { contains } = useFilter({ sensitivity: "base" });
-
-	const list = useListData({
-		filter(item, filterText) {
-			return contains(item.title, filterText);
-		},
-		initialItems: pages.data,
+	const format = useFormatter();
+	const router = useRouter();
+	const [items, setItems] = useState(() => {
+		return pages.data;
 	});
-
-	const [page, setPage] = useState(1);
-
-	const pageSize = 10;
-	const totalPages = Math.ceil(list.items.length / pageSize);
-	const items = list.items.slice((page - 1) * pageSize, page * pageSize);
-
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
+		useUrlPaginatedSearch({
+			dir: initialDir,
+			page: initialPage,
+			q: initialQ,
+			sort: initialSort,
+		});
+	const [isDeletePending, startDeleteTransition] = useTransition();
+
+	const totalPages = Math.max(Math.ceil(pages.total / pageSize), 1);
 
 	return (
 		<Fragment>
@@ -80,13 +85,7 @@ export function PagesPage(props: Readonly<PagesPageProps>): ReactNode {
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
-					<SearchField
-						onChange={(value) => {
-							list.setFilterText(value);
-							setPage(1);
-						}}
-						value={list.filterText}
-					>
+					<SearchField onChange={setInputValue} value={inputValue}>
 						<SearchInput placeholder={t("Search")} />
 					</SearchField>
 					<Link
@@ -102,10 +101,17 @@ export function PagesPage(props: Readonly<PagesPageProps>): ReactNode {
 			<Table
 				aria-label="pages"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={setSortDescriptor}
+				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Title")}</TableColumn>
+					<TableColumn allowsSorting={true} id="title" isRowHeader={true}>
+						{t("Title")}
+					</TableColumn>
 					<TableColumn>{t("Summary")}</TableColumn>
+					<TableColumn allowsSorting={true} id="updatedAt">
+						{t("Updated")}
+					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -118,6 +124,7 @@ export function PagesPage(props: Readonly<PagesPageProps>): ReactNode {
 								<TableCell>
 									<div className="max-w-xs truncate">{item.summary}</div>
 								</TableCell>
+								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button
@@ -156,7 +163,13 @@ export function PagesPage(props: Readonly<PagesPageProps>): ReactNode {
 				</TableBody>
 			</Table>
 
-			<Paginate page={page} setPage={setPage} total={totalPages} />
+			<Paginate
+				isPending={isPending}
+				page={page}
+				setPage={setPage}
+				total={totalPages}
+				totalItems={pages.total}
+			/>
 
 			<DeleteModal
 				isOpen={itemToDelete != null}
@@ -166,14 +179,21 @@ export function PagesPage(props: Readonly<PagesPageProps>): ReactNode {
 						return;
 					}
 
-					startTransition(async () => {
-						await deletePageItemAction(itemToDelete.id);
-						list.remove(itemToDelete.id);
+					const id = itemToDelete.id;
+
+					startDeleteTransition(async () => {
+						setItems((prev) => {
+							return prev.filter((item) => {
+								return item.id !== id;
+							});
+						});
+						await deletePageItemAction(id);
+						router.refresh();
 						setItemToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isDeletePending) {
 						setItemToDelete(null);
 					}
 				}}

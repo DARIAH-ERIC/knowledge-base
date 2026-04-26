@@ -1,15 +1,56 @@
-import { eq } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
-import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import { type ReactNode, Suspense } from "react";
+import type { ReactNode } from "react";
 
-import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
 import { ContributionsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page";
+import { getContributions } from "@/lib/data/contributions";
+import type { IntlLocale } from "@/lib/i18n/locales";
+import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
+import {
+	getListSearchParams,
+	getListSortSearchParams,
+	type ListSortDirection,
+} from "@/lib/server/list-search-params";
 
 interface DashboardAdministratorContributionsPageProps extends PageProps<"/[locale]/dashboard/administrator/contributions"> {}
+
+const pageSize = 20;
+const defaultSort = "personName" as const;
+const validSorts = [
+	"personName",
+	"roleType",
+	"organisationalUnitType",
+	"organisationalUnitName",
+	"durationStart",
+	"durationEnd",
+] as const;
+
+function createListHref(
+	q: string,
+	page: number,
+	sort: (typeof validSorts)[number],
+	dir: ListSortDirection,
+): string {
+	const searchParams = new URLSearchParams();
+
+	if (q !== "") {
+		searchParams.set("q", q);
+	}
+
+	if (page > 1) {
+		searchParams.set("page", String(page));
+	}
+
+	if (sort !== defaultSort || dir !== "asc") {
+		searchParams.set("sort", sort);
+		searchParams.set("dir", dir);
+	}
+
+	const query = searchParams.toString();
+
+	return `/dashboard/administrator/contributions${query !== "" ? `?${query}` : ""}`;
+}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorContributionsPageProps>,
@@ -24,50 +65,38 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardAdministratorContributionsPage(
-	_props: Readonly<DashboardAdministratorContributionsPageProps>,
-): ReactNode {
-	const contributions = db
-		.select({
-			id: schema.personsToOrganisationalUnits.id,
-			personName: schema.persons.name,
-			roleType: schema.personRoleTypes.type,
-			organisationalUnitName: schema.organisationalUnits.name,
-			organisationalUnitType: schema.organisationalUnitTypes.type,
-			durationStart: schema.personsToOrganisationalUnits.duration,
-		})
-		.from(schema.personsToOrganisationalUnits)
-		.innerJoin(schema.persons, eq(schema.persons.id, schema.personsToOrganisationalUnits.personId))
-		.innerJoin(
-			schema.personRoleTypes,
-			eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
-		)
-		.innerJoin(
-			schema.organisationalUnits,
-			eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
-		)
-		.innerJoin(
-			schema.organisationalUnitTypes,
-			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
-		)
-		.orderBy(schema.persons.name)
-		.then((rows) => {
-			return rows.map((row) => {
-				return {
-					id: row.id,
-					personName: row.personName,
-					roleType: row.roleType,
-					organisationalUnitName: row.organisationalUnitName,
-					organisationalUnitType: row.organisationalUnitType,
-					durationStart: row.durationStart.start,
-					durationEnd: row.durationStart.end,
-				};
-			});
-		});
+export default async function DashboardAdministratorContributionsPage(
+	props: Readonly<DashboardAdministratorContributionsPageProps>,
+): Promise<ReactNode> {
+	const { params, searchParams } = props;
+	const [{ locale }, rawSearchParams] = await Promise.all([params, searchParams]);
+	const { page, q } = getListSearchParams(rawSearchParams);
+	const { dir, sort } = getListSortSearchParams(rawSearchParams, {
+		defaultDir: "asc",
+		defaultSort,
+		validSorts,
+	});
+	const contributions = await getContributions({
+		limit: pageSize,
+		offset: (page - 1) * pageSize,
+		q,
+		sort,
+		dir,
+	});
+	const totalPages = Math.max(Math.ceil(contributions.total / pageSize), 1);
+
+	if (page > totalPages) {
+		redirect({ href: createListHref(q, totalPages, sort, dir), locale: locale as IntlLocale });
+	}
 
 	return (
-		<Suspense fallback={<LoadingScreen />}>
-			<ContributionsPage contributions={contributions} />
-		</Suspense>
+		<ContributionsPage
+			key={`${q}:${sort}:${dir}:${String(page)}`}
+			contributions={contributions}
+			dir={dir}
+			page={page}
+			q={q}
+			sort={sort}
+		/>
 	);
 }

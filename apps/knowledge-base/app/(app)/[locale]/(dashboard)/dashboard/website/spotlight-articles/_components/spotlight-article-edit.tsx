@@ -19,12 +19,17 @@ interface SpotlightArticleEditFormProps {
 	spotlightArticle: Pick<schema.SpotlightArticle, "id" | "title" | "summary"> & {
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; label: string; url: string } };
-	relatedEntities: Array<{ id: string; name: string }>;
-	relatedResources: Array<{ id: string; label: string }>;
 	initialRelatedEntityIds: Array<string>;
+	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedEntityTotal: number;
 	initialRelatedResourceIds: Array<string>;
+	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedResourceTotal: number;
+	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	contributors: Array<SpotlightArticleContributor>;
-	availablePersons: Array<AvailablePerson>;
+	initialPersonItems: Array<AvailablePerson>;
+	initialPersonTotal: number;
 }
 
 export function SpotlightArticleEditForm(
@@ -34,12 +39,17 @@ export function SpotlightArticleEditForm(
 		initialAssets,
 		contentBlocks,
 		spotlightArticle,
-		relatedEntities,
-		relatedResources,
 		initialRelatedEntityIds,
+		initialRelatedEntityItems,
+		initialRelatedEntityTotal,
 		initialRelatedResourceIds,
+		initialRelatedResourceItems,
+		initialRelatedResourceTotal,
+		selectedRelatedEntities,
+		selectedRelatedResources,
 		contributors,
-		availablePersons,
+		initialPersonItems,
+		initialPersonTotal,
 	} = props;
 
 	const t = useExtracted();
@@ -53,18 +63,23 @@ export function SpotlightArticleEditForm(
 				formAction={updateSpotlightArticleAction}
 				initialAssets={initialAssets}
 				initialRelatedEntityIds={initialRelatedEntityIds}
+				initialRelatedEntityItems={initialRelatedEntityItems}
+				initialRelatedEntityTotal={initialRelatedEntityTotal}
 				initialRelatedResourceIds={initialRelatedResourceIds}
-				relatedEntities={relatedEntities}
-				relatedResources={relatedResources}
+				initialRelatedResourceItems={initialRelatedResourceItems}
+				initialRelatedResourceTotal={initialRelatedResourceTotal}
+				selectedRelatedEntities={selectedRelatedEntities}
+				selectedRelatedResources={selectedRelatedResources}
 				spotlightArticle={spotlightArticle}
 			/>
 
 			<ArticleContributorsSection
 				articleId={spotlightArticle.id}
-				availablePersons={availablePersons}
 				contributors={contributors}
 				createAction={createSpotlightArticleContributorAction}
 				deleteAction={deleteSpotlightArticleContributorAction}
+				initialPersonItems={initialPersonItems}
+				initialPersonTotal={initialPersonTotal}
 			/>
 		</Fragment>
 	);

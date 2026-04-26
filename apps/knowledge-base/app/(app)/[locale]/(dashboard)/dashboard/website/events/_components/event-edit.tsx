@@ -15,10 +15,14 @@ interface EventEditFormProps {
 	event: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
 		entity: { documentId: string; slug: string };
 	} & { image: { key: string; label: string; url: string } };
-	relatedEntities: Array<{ id: string; name: string }>;
-	relatedResources: Array<{ id: string; label: string }>;
 	initialRelatedEntityIds: Array<string>;
+	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedEntityTotal: number;
 	initialRelatedResourceIds: Array<string>;
+	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
+	initialRelatedResourceTotal: number;
+	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 }
 
 export function EventEditForm(props: Readonly<EventEditFormProps>): ReactNode {
@@ -26,10 +30,14 @@ export function EventEditForm(props: Readonly<EventEditFormProps>): ReactNode {
 		initialAssets,
 		contentBlocks,
 		event,
-		relatedEntities,
-		relatedResources,
 		initialRelatedEntityIds,
+		initialRelatedEntityItems,
+		initialRelatedEntityTotal,
 		initialRelatedResourceIds,
+		initialRelatedResourceItems,
+		initialRelatedResourceTotal,
+		selectedRelatedEntities,
+		selectedRelatedResources,
 	} = props;
 
 	const t = useExtracted();
@@ -44,9 +52,13 @@ export function EventEditForm(props: Readonly<EventEditFormProps>): ReactNode {
 				formAction={updateEventAction}
 				initialAssets={initialAssets}
 				initialRelatedEntityIds={initialRelatedEntityIds}
+				initialRelatedEntityItems={initialRelatedEntityItems}
+				initialRelatedEntityTotal={initialRelatedEntityTotal}
 				initialRelatedResourceIds={initialRelatedResourceIds}
-				relatedEntities={relatedEntities}
-				relatedResources={relatedResources}
+				initialRelatedResourceItems={initialRelatedResourceItems}
+				initialRelatedResourceTotal={initialRelatedResourceTotal}
+				selectedRelatedEntities={selectedRelatedEntities}
+				selectedRelatedResources={selectedRelatedResources}
 			/>
 		</Fragment>
 	);

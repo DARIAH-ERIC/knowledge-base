@@ -11,18 +11,23 @@ import { createProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/
 interface ProjectCreateFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	scopes: Array<Pick<schema.ProjectScope, "id" | "scope">>;
-	orgUnits: Array<{ id: string; name: string }>;
+	initialOrgUnitItems: Array<{ id: string; name: string }>;
+	initialOrgUnitTotal: number;
 	roles: Array<Pick<schema.ProjectRole, "id" | "role">>;
-	socialMediaItems: Array<{
-		id: string;
-		name: string;
-		type: Pick<schema.SocialMediaType, "type">;
-		url: string;
-	}>;
+	initialSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
+	initialSocialMediaTotal: number;
 }
 
 export function ProjectCreateForm(props: Readonly<ProjectCreateFormProps>): ReactNode {
-	const { initialAssets, orgUnits, roles, scopes, socialMediaItems } = props;
+	const {
+		initialAssets,
+		initialOrgUnitItems,
+		initialOrgUnitTotal,
+		roles,
+		scopes,
+		initialSocialMediaItems,
+		initialSocialMediaTotal,
+	} = props;
 
 	const t = useExtracted();
 
@@ -33,10 +38,12 @@ export function ProjectCreateForm(props: Readonly<ProjectCreateFormProps>): Reac
 			<ProjectForm
 				formAction={createProjectAction}
 				initialAssets={initialAssets}
-				orgUnits={orgUnits}
+				initialOrgUnitItems={initialOrgUnitItems}
+				initialOrgUnitTotal={initialOrgUnitTotal}
+				initialSocialMediaItems={initialSocialMediaItems}
+				initialSocialMediaTotal={initialSocialMediaTotal}
 				roles={roles}
 				scopes={scopes}
-				socialMediaItems={socialMediaItems}
 			/>
 		</Fragment>
 	);

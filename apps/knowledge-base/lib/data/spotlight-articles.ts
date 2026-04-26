@@ -1,59 +1,71 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq } from "@dariah-eric/database";
+import { count, desc, eq, ilike } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
 import { images } from "@/lib/images";
 
+export type SpotlightArticlesSort = "title" | "updatedAt";
+
 interface GetSpotlightArticlesParams {
 	/** @default 10 */
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
+	q?: string;
+	sort?: SpotlightArticlesSort;
+	dir?: "asc" | "desc";
 }
 
 export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
-	const { limit = 10, offset = 0 } = params;
+	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
+	const query = q?.trim();
+	const where =
+		query != null && query !== "" ? ilike(schema.spotlightArticles.title, `%${query}%`) : undefined;
+	const orderBy =
+		sort === "title"
+			? dir === "asc"
+				? schema.spotlightArticles.title
+				: desc(schema.spotlightArticles.title)
+			: dir === "asc"
+				? schema.entities.updatedAt
+				: desc(schema.entities.updatedAt);
 
 	const [items, aggregate] = await Promise.all([
-		db.query.spotlightArticles.findMany({
-			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
-					},
-				},
-				image: {
-					columns: {
-						key: true,
-					},
-				},
-			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
-			},
-			limit,
-			offset,
-		}),
+		db
+			.select({
+				id: schema.spotlightArticles.id,
+				slug: schema.entities.slug,
+				summary: schema.spotlightArticles.summary,
+				title: schema.spotlightArticles.title,
+				updatedAt: schema.entities.updatedAt,
+			})
+			.from(schema.spotlightArticles)
+			.innerJoin(schema.entities, eq(schema.spotlightArticles.id, schema.entities.id))
+			.where(where)
+			.orderBy(orderBy)
+			.limit(limit)
+			.offset(offset),
 		db
 			.select({ total: count() })
 			.from(schema.spotlightArticles)
 			.innerJoin(schema.entities, eq(schema.spotlightArticles.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id)),
+			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.where(where),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = images.generateSignedImageUrl({
-			key: item.image.key,
-			options: { width: imageAssetWidth.featured },
-		});
-
-		return { ...item, image };
+		return {
+			id: item.id,
+			entity: { slug: item.slug },
+			summary: item.summary,
+			title: item.title,
+			updatedAt: item.updatedAt,
+		};
 	});
 
 	return { data, limit, offset, total };

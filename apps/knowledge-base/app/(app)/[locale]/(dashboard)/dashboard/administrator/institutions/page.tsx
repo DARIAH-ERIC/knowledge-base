@@ -1,161 +1,48 @@
-import { and, eq, inArray, sql } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
-import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import { type ReactNode, Suspense } from "react";
+import type { ReactNode } from "react";
 
-import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
 import { InstitutionsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page";
+import { getInstitutions } from "@/lib/data/institutions";
+import type { IntlLocale } from "@/lib/i18n/locales";
+import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
+import {
+	getListSearchParams,
+	getListSortSearchParams,
+	type ListSortDirection,
+} from "@/lib/server/list-search-params";
 
 interface DashboardAdministratorInstitutionsPageProps extends PageProps<"/[locale]/dashboard/administrator/institutions"> {}
 
-type InstitutionEricRelationStatus =
-	| "is_cooperating_partner_of"
-	| "is_national_coordinating_institution_in"
-	| "is_national_representative_institution_in"
-	| "is_partner_institution_of";
+const pageSize = 10;
+const defaultSort = "name" as const;
+const validSorts = ["name", "country", "status"] as const;
 
-async function getInstitutionsForDashboard(): Promise<
-	Array<
-		Pick<schema.OrganisationalUnit, "id" | "name"> & {
-			countryName: string | null;
-			ericRelationStatuses: Array<InstitutionEricRelationStatus>;
-			entity: Pick<schema.Entity, "documentId" | "slug"> & {
-				status: Pick<schema.EntityStatus, "id" | "type">;
-			};
-		}
-	>
-> {
-	const [institutions, erics] = await Promise.all([
-		db.query.organisationalUnits.findMany({
-			where: { type: { type: "institution" } },
-			orderBy: { name: "asc" },
-			columns: {
-				id: true,
-				name: true,
-			},
-			with: {
-				entity: {
-					columns: {
-						documentId: true,
-						slug: true,
-					},
-					with: {
-						status: {
-							columns: {
-								id: true,
-								type: true,
-							},
-						},
-					},
-				},
-			},
-		}),
-		db.query.organisationalUnits.findMany({
-			where: { type: { type: "eric" } },
-			columns: { id: true },
-		}),
-	]);
+function createListHref(
+	q: string,
+	page: number,
+	sort: (typeof validSorts)[number],
+	dir: ListSortDirection,
+): string {
+	const searchParams = new URLSearchParams();
 
-	const institutionIds = institutions.map((institution) => {
-		return institution.id;
-	});
-	const ericIds = erics.map((eric) => {
-		return eric.id;
-	});
-
-	if (institutionIds.length === 0) {
-		return institutions.map((institution) => {
-			return {
-				...institution,
-				countryName: null,
-				ericRelationStatuses: [],
-			};
-		});
+	if (q !== "") {
+		searchParams.set("q", q);
 	}
 
-	const [relations, countries] = await Promise.all([
-		ericIds.length > 0
-			? db
-					.select({
-						status: schema.organisationalUnitStatus.status,
-						unitId: schema.organisationalUnitsRelations.unitId,
-					})
-					.from(schema.organisationalUnitsRelations)
-					.innerJoin(
-						schema.organisationalUnitStatus,
-						eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
-					)
-					.where(
-						and(
-							inArray(schema.organisationalUnitsRelations.unitId, institutionIds),
-							inArray(schema.organisationalUnitsRelations.relatedUnitId, ericIds),
-							inArray(schema.organisationalUnitStatus.status, [
-								"is_partner_institution_of",
-								"is_cooperating_partner_of",
-								"is_national_coordinating_institution_in",
-								"is_national_representative_institution_in",
-							]),
-							sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
-						),
-					)
-			: Promise.resolve([]),
-		db
-			.select({
-				countryName: schema.organisationalUnits.name,
-				unitId: schema.organisationalUnitsRelations.unitId,
-			})
-			.from(schema.organisationalUnitsRelations)
-			.innerJoin(
-				schema.organisationalUnitStatus,
-				eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
-			)
-			.innerJoin(
-				schema.organisationalUnits,
-				eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.relatedUnitId),
-			)
-			.innerJoin(
-				schema.organisationalUnitTypes,
-				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
-			)
-			.where(
-				and(
-					inArray(schema.organisationalUnitsRelations.unitId, institutionIds),
-					eq(schema.organisationalUnitStatus.status, "is_located_in"),
-					eq(schema.organisationalUnitTypes.type, "country"),
-					sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
-				),
-			),
-	]);
-
-	const statusesByInstitutionId = new Map<string, Array<InstitutionEricRelationStatus>>();
-	const countryNameByInstitutionId = new Map<string, string>();
-
-	for (const relation of relations) {
-		const status = relation.status as InstitutionEricRelationStatus;
-		const existing = statusesByInstitutionId.get(relation.unitId) ?? [];
-
-		if (!existing.includes(status)) {
-			existing.push(status);
-			statusesByInstitutionId.set(relation.unitId, existing);
-		}
+	if (page > 1) {
+		searchParams.set("page", String(page));
 	}
 
-	for (const country of countries) {
-		if (!countryNameByInstitutionId.has(country.unitId)) {
-			countryNameByInstitutionId.set(country.unitId, country.countryName);
-		}
+	if (sort !== defaultSort || dir !== "asc") {
+		searchParams.set("sort", sort);
+		searchParams.set("dir", dir);
 	}
 
-	return institutions.map((institution) => {
-		return {
-			...institution,
-			countryName: countryNameByInstitutionId.get(institution.id) ?? null,
-			ericRelationStatuses: statusesByInstitutionId.get(institution.id) ?? [],
-		};
-	});
+	const query = searchParams.toString();
+
+	return `/dashboard/administrator/institutions${query !== "" ? `?${query}` : ""}`;
 }
 
 export async function generateMetadata(
@@ -171,14 +58,38 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardAdministratorInstitutionsPage(
-	_props: Readonly<DashboardAdministratorInstitutionsPageProps>,
-): ReactNode {
-	const institutions = getInstitutionsForDashboard();
+export default async function DashboardAdministratorInstitutionsPage(
+	props: Readonly<DashboardAdministratorInstitutionsPageProps>,
+): Promise<ReactNode> {
+	const { params, searchParams } = props;
+	const [{ locale }, rawSearchParams] = await Promise.all([params, searchParams]);
+	const { page, q } = getListSearchParams(rawSearchParams);
+	const { dir, sort } = getListSortSearchParams(rawSearchParams, {
+		defaultDir: "asc",
+		defaultSort,
+		validSorts,
+	});
+	const institutions = await getInstitutions({
+		limit: pageSize,
+		offset: (page - 1) * pageSize,
+		q,
+		sort,
+		dir,
+	});
+	const totalPages = Math.max(Math.ceil(institutions.total / pageSize), 1);
+
+	if (page > totalPages) {
+		redirect({ href: createListHref(q, totalPages, sort, dir), locale: locale as IntlLocale });
+	}
 
 	return (
-		<Suspense fallback={<LoadingScreen />}>
-			<InstitutionsPage institutions={institutions} />
-		</Suspense>
+		<InstitutionsPage
+			key={`${q}:${sort}:${dir}:${String(page)}`}
+			dir={dir}
+			institutions={institutions}
+			page={page}
+			q={q}
+			sort={sort}
+		/>
 	);
 }

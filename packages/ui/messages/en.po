@@ -113,63 +113,63 @@ msgctxt "ui"
 msgid "N8BBfe"
 msgstr "Last page"
 
-#: lib/rich-text-editor.tsx:777
+#: lib/rich-text-editor.tsx:793
 msgctxt "ui"
 msgid "Dkkmwm"
 msgstr "Bold"
 
-#: lib/rich-text-editor.tsx:785
+#: lib/rich-text-editor.tsx:801
 msgctxt "ui"
 msgid "g2V+es"
 msgstr "Italic"
 
-#: lib/rich-text-editor.tsx:793
+#: lib/rich-text-editor.tsx:809
 msgctxt "ui"
 msgid "h2vipu"
 msgstr "Code"
 
-#: lib/rich-text-editor.tsx:802
+#: lib/rich-text-editor.tsx:818
 msgctxt "ui"
 msgid "Zqekct"
 msgstr "Heading 2"
 
-#: lib/rich-text-editor.tsx:810
+#: lib/rich-text-editor.tsx:826
 msgctxt "ui"
 msgid "BDbgCL"
 msgstr "Heading 3"
 
-#: lib/rich-text-editor.tsx:818
+#: lib/rich-text-editor.tsx:834
 msgctxt "ui"
 msgid "BKF2fN"
 msgstr "Heading 4"
 
-#: lib/rich-text-editor.tsx:827
+#: lib/rich-text-editor.tsx:843
 msgctxt "ui"
 msgid "6sdKFe"
 msgstr "Bullet List"
 
-#: lib/rich-text-editor.tsx:835
+#: lib/rich-text-editor.tsx:851
 msgctxt "ui"
 msgid "rU4xig"
 msgstr "Ordered List"
 
-#: lib/rich-text-editor.tsx:843
+#: lib/rich-text-editor.tsx:859
 msgctxt "ui"
 msgid "+RDJVD"
 msgstr "Blockquote"
 
-#: lib/rich-text-editor.tsx:854
-#: lib/rich-text-editor.tsx:862
+#: lib/rich-text-editor.tsx:870
+#: lib/rich-text-editor.tsx:878
 msgctxt "ui"
 msgid "JBWS0c"
 msgstr "Link"
 
-#: lib/rich-text-editor.tsx:884
+#: lib/rich-text-editor.tsx:900
 msgctxt "ui"
 msgid "EWw/tK"
 msgstr "Apply"
 
-#: lib/rich-text-editor.tsx:888
+#: lib/rich-text-editor.tsx:904
 msgctxt "ui"
 msgid "G/yZLu"
 msgstr "Remove"
@@ -211,7 +211,7 @@ msgctxt "ui"
 msgid "2I546+"
 msgstr "No information is currently available in this section."
 
-#: lib/table.tsx:446
+#: lib/table.tsx:463
 msgctxt "ui"
 msgid "8epGWu"
 msgstr "Reorder row"

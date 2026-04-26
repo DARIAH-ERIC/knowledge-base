@@ -1,17 +1,75 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq } from "@dariah-eric/database";
+import { count, eq, ilike, inArray } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
 import { images } from "@/lib/images";
 
+export interface OrganisationalUnitOption {
+	id: string;
+	name: string;
+}
+
 interface GetOrganisationalUnitsParams {
 	/** @default 10 */
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
+}
+
+interface GetOrganisationalUnitOptionsParams {
+	limit?: number;
+	offset?: number;
+	q?: string;
+}
+
+export async function getOrganisationalUnitOptions(
+	params: GetOrganisationalUnitOptionsParams = {},
+): Promise<{ items: Array<OrganisationalUnitOption>; total: number }> {
+	const { limit = 20, offset = 0, q } = params;
+	const query = q?.trim();
+	const where =
+		query != null && query !== ""
+			? ilike(schema.organisationalUnits.name, `%${query}%`)
+			: undefined;
+
+	const [items, aggregate] = await Promise.all([
+		db
+			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+			.from(schema.organisationalUnits)
+			.where(where)
+			.orderBy(schema.organisationalUnits.name)
+			.limit(limit)
+			.offset(offset),
+		db.select({ total: count() }).from(schema.organisationalUnits).where(where),
+	]);
+
+	return { items, total: aggregate.at(0)?.total ?? 0 };
+}
+
+export async function getOrganisationalUnitOptionsByIds(ids: ReadonlyArray<string>) {
+	if (ids.length === 0) {
+		return [];
+	}
+
+	const rows = await db
+		.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+		.from(schema.organisationalUnits)
+		.where(inArray(schema.organisationalUnits.id, [...ids]))
+		.orderBy(schema.organisationalUnits.name);
+
+	const itemById = new Map(
+		rows.map((row) => {
+			return [row.id, row] as const;
+		}),
+	);
+
+	return ids.flatMap((id) => {
+		const item = itemById.get(id);
+		return item != null ? [item] : [];
+	});
 }
 
 export async function getOrganisationalUnits(params: GetOrganisationalUnitsParams) {
