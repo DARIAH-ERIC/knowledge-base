@@ -1,5 +1,5 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
-import { type RequestResult, request } from "@dariah-eric/request";
+import { request, type RequestResult } from "@dariah-eric/request";
 import type { RequestError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
 
@@ -24,7 +24,6 @@ export interface HalDocument {
 	[key: string]: unknown;
 }
 
-// oxlint-disable-next-line typescript/ban-types
 export type HalDocumentSort = "docid asc" | "docid desc" | (string & {});
 
 export interface GetHalDocumentsParams {
@@ -56,7 +55,15 @@ function normalizeSearchParams(
 	params: GetHalDocumentsParams,
 	defaults?: { cursorMark?: string },
 ): Record<string, string | number | boolean | Array<string>> {
-	const { q = "*:*", fq, fl = "*", sort = defaultSort, rows = pageSize, start, cursorMark } = params;
+	const {
+		q = "*:*",
+		fq,
+		fl = "*",
+		sort = defaultSort,
+		rows = pageSize,
+		start,
+		cursorMark,
+	} = params;
 	const searchParams: Record<string, string | number | boolean | Array<string>> = {
 		q,
 		fl,
@@ -87,12 +94,12 @@ function createListAll<TParams extends object, TItem extends HalDocument>(
 		params: TParams & { cursorMark?: string; rows: number; sort?: HalDocumentSort },
 	) => Promise<RequestResult<HalSearchResponse<TItem>>>,
 ): (params: TParams & { sort?: HalDocumentSort }) => Promise<Result<Array<TItem>, RequestError>> {
-	return (params) =>
-		Result.gen(async function* () {
+	return (params) => {
+		return Result.gen(async function* () {
 			const items: Array<TItem> = [];
 			let cursorMark = "*";
 
-			// oxlint-disable-next-line typescript/no-unnecessary-condition
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			while (true) {
 				const { data } = yield* Result.await(
 					getPage({ ...params, cursorMark, rows: pageSize, sort: params.sort ?? defaultSort }),
@@ -108,14 +115,17 @@ function createListAll<TParams extends object, TItem extends HalDocument>(
 
 			return Result.ok(items);
 		});
+	};
 }
 
-// oxlint-disable-next-line typescript/explicit-module-boundary-types
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createHalClient(params: CreateHalClientParams) {
 	const { baseUrl, collectionCode = defaultCollectionCode } = params;
 
 	/** @see {@link https://api.archives-ouvertes.fr/docs/search} */
-	function listDocuments(params: GetHalDocumentsParams = {}): Promise<RequestResult<HalSearchResponse>> {
+	function listDocuments(
+		params: GetHalDocumentsParams = {},
+	): Promise<RequestResult<HalSearchResponse>> {
 		return request<HalSearchResponse>(
 			createUrl({
 				baseUrl,
@@ -133,9 +143,13 @@ export function createHalClient(params: CreateHalClientParams) {
 			},
 
 			listAll(
-				params: Omit<GetHalDocumentsParams, "cursorMark" | "rows" | "start"> & { sort?: HalDocumentSort } = {},
+				params: Omit<GetHalDocumentsParams, "cursorMark" | "rows" | "start"> & {
+					sort?: HalDocumentSort;
+				} = {},
 			): Promise<Result<Array<HalDocument>, RequestError>> {
-				return createListAll((pageParams) => listDocuments(pageParams))(params);
+				return createListAll((pageParams) => {
+					return listDocuments(pageParams);
+				})(params);
 			},
 		},
 	};

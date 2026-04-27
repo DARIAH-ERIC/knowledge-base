@@ -1,7 +1,9 @@
 import type { EpisciencesSearchDocument } from "@dariah-eric/client-episciences";
-import type { PublicationResourceDocument } from "@dariah-eric/search";
+import type { ResourceDocument } from "@dariah-eric/search";
 
-export function createEpisciencesDocument(item: EpisciencesSearchDocument): PublicationResourceDocument {
+export function createEpisciencesDocument(
+	item: EpisciencesSearchDocument,
+): ResourceDocument {
 	const source = "episciences" as const;
 	const sourceId = String(item.docid ?? item.paperid);
 	const id = [source, sourceId].join(":");
@@ -15,7 +17,9 @@ export function createEpisciencesDocument(item: EpisciencesSearchDocument): Publ
 			: (item.en_paper_title_t ?? "");
 
 	const description =
-		Array.isArray(item.abstract_t) && item.abstract_t.length > 0 ? item.abstract_t[0]! : (item.en_abstract_t ?? "");
+		Array.isArray(item.abstract_t) && item.abstract_t.length > 0
+			? item.abstract_t[0]!
+			: (item.en_abstract_t ?? "");
 
 	const year =
 		item.publication_date_year_fs != null
@@ -39,7 +43,9 @@ export function createEpisciencesDocument(item: EpisciencesSearchDocument): Publ
 		source,
 		source_id: sourceId,
 		source_updated_at:
-			item.es_publication_date_tdate != null ? new Date(item.es_publication_date_tdate).getTime() : null,
+			item.es_publication_date_tdate != null
+				? new Date(item.es_publication_date_tdate).getTime()
+				: null,
 		imported_at: Date.now(),
 		type: "publication",
 		label: title,

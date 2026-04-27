@@ -1,5 +1,5 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
-import { type RequestResult, request } from "@dariah-eric/request";
+import { request, type RequestResult } from "@dariah-eric/request";
 import type { RequestError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
 
@@ -135,8 +135,8 @@ function createListAll<TParams extends object, TItem>(
 		},
 	) => Promise<RequestResult<DariahCampusPaginatedResponse<TItem>>>,
 ): (params: TParams) => Promise<Result<Array<TItem>, RequestError>> {
-	return (params) =>
-		Result.gen(async function* () {
+	return (params) => {
+		return Result.gen(async function* () {
 			const items: Array<TItem> = [];
 			let offset = 0;
 			let total = Infinity;
@@ -157,9 +157,10 @@ function createListAll<TParams extends object, TItem>(
 
 			return Result.ok(items);
 		});
+	};
 }
 
-// oxlint-disable-next-line typescript/explicit-module-boundary-types
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createDariahCampusClient(params: CreateDariahCampusClientParams) {
 	const { baseUrl } = params.config;
 
@@ -213,7 +214,9 @@ export function createDariahCampusClient(params: CreateDariahCampusClientParams)
 			listAll(
 				params: Omit<ListDariahCampusCurriculaParams, "limit" | "offset"> = {},
 			): Promise<Result<Array<DariahCampusCurriculum>, RequestError>> {
-				return createListAll((pageParams) => listCurricula(pageParams))(params);
+				return createListAll((pageParams) => {
+					return listCurricula(pageParams);
+				})(params);
 			},
 		},
 
@@ -227,7 +230,9 @@ export function createDariahCampusClient(params: CreateDariahCampusClientParams)
 			listAll(
 				params: Omit<ListDariahCampusResourcesParams, "limit" | "offset"> = {},
 			): Promise<Result<Array<DariahCampusResource>, RequestError>> {
-				return createListAll((pageParams) => listResources(pageParams))(params);
+				return createListAll((pageParams) => {
+					return listResources(pageParams);
+				})(params);
 			},
 		},
 	};

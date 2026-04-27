@@ -1,5 +1,5 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
-import { type RequestResult, request } from "@dariah-eric/request";
+import { request, type RequestResult } from "@dariah-eric/request";
 import type { RequestError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
 
@@ -67,7 +67,7 @@ export interface CreateMailchimpClientParams {
 
 const pageSize = 1000;
 
-// oxlint-disable-next-line typescript/explicit-module-boundary-types
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createMailchimpClient(params: CreateMailchimpClientParams) {
 	const { config } = params;
 
@@ -79,7 +79,9 @@ export function createMailchimpClient(params: CreateMailchimpClientParams) {
 		Authorization: `Basic ${Buffer.from(credentials, "utf-8").toString("base64")}`,
 	};
 
-	function getCampaigns(params: ListCampaignsParams): Promise<RequestResult<ListCampaignsResponse>> {
+	function getCampaigns(
+		params: ListCampaignsParams,
+	): Promise<RequestResult<ListCampaignsResponse>> {
 		const {
 			count,
 			offset,
@@ -131,7 +133,9 @@ export function createMailchimpClient(params: CreateMailchimpClientParams) {
 					let totalItems = Infinity;
 
 					do {
-						const { data } = yield* Result.await(getCampaigns({ ...params, count: pageSize, offset }));
+						const { data } = yield* Result.await(
+							getCampaigns({ ...params, count: pageSize, offset }),
+						);
 						items.push(...data.campaigns);
 						totalItems = data.total_items;
 						offset += pageSize;

@@ -1,5 +1,5 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
-import { type RequestResult, request } from "@dariah-eric/request";
+import { request, type RequestResult } from "@dariah-eric/request";
 import type { RequestError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
 
@@ -26,9 +26,7 @@ export interface EpisciencesJournal {
 	subtitle: string | null;
 }
 
-export interface EpisciencesAssignedSection {
-	[key: string]: unknown;
-}
+export type EpisciencesAssignedSection = Record<string, unknown>;
 
 export interface EpisciencesAffiliation {
 	label?: string;
@@ -136,7 +134,7 @@ export interface EpisciencesSearchDocument {
 
 export interface EpisciencesHydraCollection<TItem> {
 	"hydra:totalItems": number;
-	"hydra:member": Array<TItem>;
+	"hydra:member"?: Array<TItem>;
 	"hydra:view"?: {
 		"@id"?: string;
 		"@type"?: string;
@@ -144,6 +142,12 @@ export interface EpisciencesHydraCollection<TItem> {
 		"hydra:last"?: string;
 		"hydra:previous"?: string;
 		"hydra:next"?: string;
+	};
+	"hydra:search"?: {
+		"@type"?: string;
+		"hydra:template"?: string;
+		"hydra:variableRepresentation"?: string;
+		"hydra:mapping"?: Array<Record<string, unknown>>;
 	};
 }
 
@@ -208,12 +212,21 @@ const defaultJournalCode = "transformations";
 const pageSize = 30;
 
 function createHeaders(token?: string): RequestInit["headers"] | undefined {
+	/**
+	 * Api defaults to `application/ld+json`, but our request helper assumes `application/json`
+	 * for `responseType: "json"`, which produces a different response shape.
+	 */
+	const headers = {
+		accept: "application/ld+json"
+	}
+
 	if (token == null) {
-		return undefined;
+		return headers;
 	}
 
 	return {
-		Authorization: `Bearer ${token}`,
+		...headers,
+		authorization: `Bearer ${token}`,
 	};
 }
 
@@ -222,20 +235,19 @@ function createListAll<TParams extends object, TItem>(
 		params: TParams & { page: number; itemsPerPage: number },
 	) => Promise<RequestResult<EpisciencesHydraCollection<TItem>>>,
 ): (params: TParams) => Promise<Result<Array<TItem>, RequestError>> {
-	return (params) =>
-		Result.gen(async function* () {
+	return (params) => {
+		return Result.gen(async function* () {
 			const items: Array<TItem> = [];
 			let page = 1;
 			let totalItems = Infinity;
 
-			// oxlint-disable-next-line typescript/no-unnecessary-condition
 			while (items.length < totalItems) {
-				// oxlint-disable-next-line no-await-in-loop
 				const { data } = yield* Result.await(getPage({ ...params, page, itemsPerPage: pageSize }));
-				items.push(...data["hydra:member"]);
+				const members = data["hydra:member"] ?? [];
+				items.push(...members);
 				totalItems = data["hydra:totalItems"];
 
-				if (data["hydra:member"].length === 0) {
+				if (members.length === 0) {
 					break;
 				}
 
@@ -244,14 +256,17 @@ function createListAll<TParams extends object, TItem>(
 
 			return Result.ok(items);
 		});
+	};
 }
 
-// oxlint-disable-next-line typescript/explicit-module-boundary-types
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createEpisciencesClient(params: CreateEpisciencesClientParams) {
 	const { baseUrl, journalCode = defaultJournalCode, token } = params.config;
 	const headers = createHeaders(token);
 
-	function getJournals(params: GetEpisciencesJournalsParams = {}): Promise<RequestResult<Array<EpisciencesJournal>>> {
+	function getJournals(
+		params: GetEpisciencesJournalsParams = {},
+	): Promise<RequestResult<Array<EpisciencesJournal>>> {
 		const { page, itemsPerPage, pagination } = params;
 
 		return request<Array<EpisciencesJournal>>(
@@ -339,7 +354,9 @@ export function createEpisciencesClient(params: CreateEpisciencesClientParams) {
 		);
 	}
 
-	function getNews(params: GetEpisciencesNewsParams = {}): Promise<RequestResult<Array<EpisciencesNewsItem>>> {
+	function getNews(
+		params: GetEpisciencesNewsParams = {},
+	): Promise<RequestResult<Array<EpisciencesNewsItem>>> {
 		const { year, code = journalCode, page, itemsPerPage, pagination } = params;
 
 		return request<Array<EpisciencesNewsItem>>(
@@ -369,7 +386,9 @@ export function createEpisciencesClient(params: CreateEpisciencesClientParams) {
 		);
 	}
 
-	function getPages(params: GetEpisciencesPagesParams = {}): Promise<RequestResult<Array<EpisciencesPage>>> {
+	function getPages(
+		params: GetEpisciencesPagesParams = {},
+	): Promise<RequestResult<Array<EpisciencesPage>>> {
 		const { code = journalCode, page, itemsPerPage, pagination } = params;
 
 		return request<Array<EpisciencesPage>>(
@@ -418,7 +437,9 @@ export function createEpisciencesClient(params: CreateEpisciencesClientParams) {
 			listAll(
 				params: Omit<GetEpisciencesBoardParams, "page" | "itemsPerPage"> = {},
 			): Promise<Result<Array<EpisciencesUser>, RequestError>> {
-				return createListAll((pageParams) => getBoardMembers(pageParams))(params);
+				return createListAll((pageParams) => {
+					return getBoardMembers(pageParams);
+				})(params);
 			},
 		},
 
@@ -437,11 +458,15 @@ export function createEpisciencesClient(params: CreateEpisciencesClientParams) {
 				return getJournal(code);
 			},
 
-			list(params: GetEpisciencesJournalsParams = {}): Promise<RequestResult<Array<EpisciencesJournal>>> {
+			list(
+				params: GetEpisciencesJournalsParams = {},
+			): Promise<RequestResult<Array<EpisciencesJournal>>> {
 				return getJournals(params);
 			},
 
-			listAll(params: GetEpisciencesJournalsParams = {}): Promise<Result<Array<EpisciencesJournal>, RequestError>> {
+			listAll(
+				params: GetEpisciencesJournalsParams = {},
+			): Promise<Result<Array<EpisciencesJournal>, RequestError>> {
 				return Result.gen(async function* () {
 					const { data } = yield* Result.await(getJournals(params));
 					return Result.ok(data);
@@ -454,11 +479,15 @@ export function createEpisciencesClient(params: CreateEpisciencesClientParams) {
 				return getNewsItem(id);
 			},
 
-			list(params: GetEpisciencesNewsParams = {}): Promise<RequestResult<Array<EpisciencesNewsItem>>> {
+			list(
+				params: GetEpisciencesNewsParams = {},
+			): Promise<RequestResult<Array<EpisciencesNewsItem>>> {
 				return getNews(params);
 			},
 
-			listAll(params: GetEpisciencesNewsParams = {}): Promise<Result<Array<EpisciencesNewsItem>, RequestError>> {
+			listAll(
+				params: GetEpisciencesNewsParams = {},
+			): Promise<Result<Array<EpisciencesNewsItem>, RequestError>> {
 				return Result.gen(async function* () {
 					const { data } = yield* Result.await(getNews(params));
 					return Result.ok(data);
@@ -471,7 +500,9 @@ export function createEpisciencesClient(params: CreateEpisciencesClientParams) {
 				return getPages(params);
 			},
 
-			listAll(params: GetEpisciencesPagesParams = {}): Promise<Result<Array<EpisciencesPage>, RequestError>> {
+			listAll(
+				params: GetEpisciencesPagesParams = {},
+			): Promise<Result<Array<EpisciencesPage>, RequestError>> {
 				return Result.gen(async function* () {
 					const { data } = yield* Result.await(getPages(params));
 					return Result.ok(data);
@@ -489,7 +520,9 @@ export function createEpisciencesClient(params: CreateEpisciencesClientParams) {
 			listAll(
 				params: Omit<GetEpisciencesSearchParams, "page" | "itemsPerPage"> = {},
 			): Promise<Result<Array<EpisciencesSearchDocument>, RequestError>> {
-				return createListAll((pageParams) => searchDocuments(pageParams))(params);
+				return createListAll((pageParams) => {
+					return searchDocuments(pageParams);
+				})(params);
 			},
 		},
 	};

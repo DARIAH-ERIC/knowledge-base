@@ -1,5 +1,5 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
-import { type RequestResult, request } from "@dariah-eric/request";
+import { request, type RequestResult } from "@dariah-eric/request";
 import type { RequestError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
 
@@ -121,10 +121,12 @@ const pageSize = 100;
  * @see {@link https://zenodo.org/communities/dariah}
  */
 function createListAll<TParams extends object>(
-	getPage: (params: TParams & { page: number; size: number }) => Promise<RequestResult<ZenodoRecordsResponse>>,
+	getPage: (
+		params: TParams & { page: number; size: number },
+	) => Promise<RequestResult<ZenodoRecordsResponse>>,
 ): (params: TParams) => Promise<Result<Array<ZenodoRecord>, RequestError>> {
-	return (params) =>
-		Result.gen(async function* () {
+	return (params) => {
+		return Result.gen(async function* () {
 			const items: Array<ZenodoRecord> = [];
 			let page = 1;
 			let totalItems = Infinity;
@@ -147,14 +149,17 @@ function createListAll<TParams extends object>(
 
 			return Result.ok(items);
 		});
+	};
 }
 
-// oxlint-disable-next-line typescript/explicit-module-boundary-types
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createZenodoClient(params: CreateZenodoClientParams) {
 	const { baseUrl, communityId = defaultCommunityId } = params;
 
 	/** @see {@link https://developers.zenodo.org/} */
-	function listRecords(params: GetZenodoRecordsParams = {}): Promise<RequestResult<ZenodoRecordsResponse>> {
+	function listRecords(
+		params: GetZenodoRecordsParams = {},
+	): Promise<RequestResult<ZenodoRecordsResponse>> {
 		const { communities, ...searchParams } = params;
 
 		return request<ZenodoRecordsResponse>(
@@ -177,7 +182,7 @@ export function createZenodoClient(params: CreateZenodoClientParams) {
 		return request<ZenodoRecord>(
 			createUrl({
 				baseUrl,
-				pathname: `/api/records/${id}`,
+				pathname: `/api/records/${String(id)}`,
 			}),
 			{ responseType: "json" },
 		);
@@ -196,7 +201,9 @@ export function createZenodoClient(params: CreateZenodoClientParams) {
 			listAll(
 				params: Omit<GetZenodoRecordsParams, "page" | "size"> = {},
 			): Promise<Result<Array<ZenodoRecord>, RequestError>> {
-				return createListAll((pageParams) => listRecords(pageParams))(params);
+				return createListAll((pageParams) => {
+					return listRecords(pageParams);
+				})(params);
 			},
 		},
 	};

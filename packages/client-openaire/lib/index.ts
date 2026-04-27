@@ -1,5 +1,5 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
-import { type RequestResult, request } from "@dariah-eric/request";
+import { request, type RequestResult } from "@dariah-eric/request";
 import type { RequestError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
 
@@ -207,12 +207,14 @@ export interface CreateOpenAireClientParams {
 
 const pageSize = 100;
 
-// oxlint-disable-next-line typescript/explicit-module-boundary-types
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createOpenAireClient(params: CreateOpenAireClientParams) {
 	const { baseUrl } = params.config;
 
 	/** @see {@link https://graph.openaire.eu/docs/apis/graph-api/} */
-	function getResearchProducts(params: GetResearchProductsParams): Promise<RequestResult<ResearchProductsResponse>> {
+	function getResearchProducts(
+		params: GetResearchProductsParams,
+	): Promise<RequestResult<ResearchProductsResponse>> {
 		const {
 			search,
 			mainTitle,
@@ -297,7 +299,9 @@ export function createOpenAireClient(params: CreateOpenAireClientParams) {
 
 	return {
 		researchProducts: {
-			list(params: GetResearchProductsParams = {}): Promise<RequestResult<ResearchProductsResponse>> {
+			list(
+				params: GetResearchProductsParams = {},
+			): Promise<RequestResult<ResearchProductsResponse>> {
 				return getResearchProducts(params);
 			},
 
@@ -310,7 +314,9 @@ export function createOpenAireClient(params: CreateOpenAireClientParams) {
 
 					while (cursor != null) {
 						const pageCursor: string = cursor;
-						const { data } = yield* Result.await(getResearchProducts({ ...params, cursor: pageCursor, pageSize }));
+						const { data } = yield* Result.await(
+							getResearchProducts({ ...params, cursor: pageCursor, pageSize }),
+						);
 						items.push(...data.results);
 						cursor = data.header.nextCursor;
 					}

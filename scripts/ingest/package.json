@@ -28,7 +28,7 @@
 		"@dariah-eric/client-zenodo": "workspace:^",
 		"@dariah-eric/client-zotero": "workspace:^",
 		"@dariah-eric/configs": "workspace:^",
-		"@dariah-eric/db": "workspace:^",
+		"@dariah-eric/database": "workspace:^",
 		"@dariah-eric/env": "workspace:^",
 		"@dariah-eric/request": "workspace:^",
 		"@dariah-eric/search": "workspace:^",

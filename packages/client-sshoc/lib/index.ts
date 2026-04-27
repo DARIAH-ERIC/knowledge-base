@@ -1,11 +1,23 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
-import { type RequestResult, request } from "@dariah-eric/request";
+import { request, type RequestResult } from "@dariah-eric/request";
 import type { RequestError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
 
-export type ItemCategory = "tool-or-service" | "training-material" | "publication" | "dataset" | "workflow" | "step";
+export type ItemCategory =
+	| "tool-or-service"
+	| "training-material"
+	| "publication"
+	| "dataset"
+	| "workflow"
+	| "step";
 
-export type ItemStatus = "draft" | "ingested" | "suggested" | "approved" | "disapproved" | "deprecated";
+export type ItemStatus =
+	| "draft"
+	| "ingested"
+	| "suggested"
+	| "approved"
+	| "disapproved"
+	| "deprecated";
 
 export type ItemFacet = "activity" | "keyword" | "language";
 
@@ -111,7 +123,11 @@ export interface PropertyTypeDto {
 
 export type PropertyDto =
 	| { type: PropertyTypeDto & { type: "concept" }; concept: ConceptBasicDto; value?: never }
-	| { type: PropertyTypeDto & { type: Exclude<PropertyValueType, "concept"> }; value: string; concept?: never };
+	| {
+			type: PropertyTypeDto & { type: Exclude<PropertyValueType, "concept"> };
+			value: string;
+			concept?: never;
+	  };
 
 export interface ActorRoleDto {
 	code: string;
@@ -211,19 +227,20 @@ export interface ItemSearchResponse {
 export interface CreateSshocClientParams {
 	config: {
 		baseUrl: string;
-		password: string;
-		user: string;
+		password?: string;
+		user?: string;
 	};
 }
 
 const perpage = 50;
 
-// oxlint-disable-next-line typescript/explicit-module-boundary-types
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createSshocClient(params: CreateSshocClientParams) {
 	const { baseUrl } = params.config;
 
 	function searchItems(params: ItemSearchParams): Promise<RequestResult<ItemSearchResponse>> {
-		const { q, categories, order, page, perpage, advanced, includeSteps, ...prefixedParams } = params;
+		const { q, categories, order, page, perpage, advanced, includeSteps, ...prefixedParams } =
+			params;
 
 		return request<ItemSearchResponse>(
 			createUrl({

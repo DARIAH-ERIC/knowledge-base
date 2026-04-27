@@ -43,14 +43,14 @@ function formatNumber(n: number) {
 const search = createSearchAdminService({
 	apiKey: env.TYPESENSE_ADMIN_API_KEY,
 	collections: {
-		resources: env.NEXT_PUBLIC_TYPESENSE_COLLECTION_NAME_RESOURCES,
-		website: env.NEXT_PUBLIC_TYPESENSE_COLLECTION_NAME_WEBSITE,
+		resources: env.TYPESENSE_RESOURCE_COLLECTION_NAME,
+		website: env.TYPESENSE_WEBSITE_COLLECTION_NAME,
 	},
 	nodes: [
 		{
-			host: env.NEXT_PUBLIC_TYPESENSE_HOST,
-			port: env.NEXT_PUBLIC_TYPESENSE_PORT,
-			protocol: env.NEXT_PUBLIC_TYPESENSE_PROTOCOL,
+			host: env.TYPESENSE_HOST,
+			port: env.TYPESENSE_PORT,
+			protocol: env.TYPESENSE_PROTOCOL,
 		},
 	],
 });
@@ -102,17 +102,10 @@ assert(
 	env.SSHOC_MARKETPLACE_BASE_URL,
 	"Missing environment variable: `SSHOC_MARKETPLACE_BASE_URL`.",
 );
-assert(env.SSHOC_MARKETPLACE_USER, "Missing environment variable: `SSHOC_MARKETPLACE_USER`.");
-assert(
-	env.SSHOC_MARKETPLACE_PASSWORD,
-	"Missing environment variable: `SSHOC_MARKETPLACE_PASSWORD`.",
-);
 
 const sshoc = createSshocClient({
 	config: {
 		baseUrl: env.SSHOC_MARKETPLACE_API_BASE_URL,
-		password: env.SSHOC_MARKETPLACE_PASSWORD,
-		user: env.SSHOC_MARKETPLACE_USER,
 	},
 });
 
@@ -123,7 +116,7 @@ const sshoc = createSshocClient({
 // });
 
 assert(env.ZOTERO_API_BASE_URL, "Missing environment variable: `ZOTERO_API_BASE_URL`.");
-assert(env.ZOTERO_API_KEY, "Missing environment variable: `ZOTERO_API_KEY`.");
+// assert(env.ZOTERO_API_KEY, "Missing environment variable: `ZOTERO_API_KEY`.");
 assert(env.ZOTERO_GROUP_ID, "Missing environment variable: `ZOTERO_GROUP_ID`.");
 
 const zotero = createZoteroClient({
@@ -134,7 +127,7 @@ const zotero = createZoteroClient({
 });
 
 const cache = createCacheService({
-	cacheDir: path.join(import.meta.dirname, "../.cache"),
+	cacheDir: path.join(process.cwd(), ".cache"),
 });
 
 async function main() {
@@ -164,13 +157,13 @@ async function main() {
 		log.info("Fetching SSHOC Marketplace items...");
 
 		const sshocItems = yield* Result.await(
-			cache.getOrFetch("sshoc/items", () =>
-				sshoc.items.searchAll({
+			cache.getOrFetch("sshoc/items", () => {
+				return sshoc.items.searchAll({
 					"f.keyword": ["DARIAH Resource"],
 					categories: ["tool-or-service", "training-material", "workflow"],
 					order: ["label"],
-				}),
-			),
+				});
+			}),
 		);
 
 		log.success(`Fetched ${formatNumber(sshocItems.length)} SSHOC Marketplace items.`);
@@ -184,7 +177,9 @@ async function main() {
 		log.info("Fetching DARIAH-Campus resources...");
 
 		const campusResources = yield* Result.await(
-			cache.getOrFetch("campus/resources", () => campus.resources.listAll()),
+			cache.getOrFetch("campus/resources", () => {
+				return campus.resources.listAll();
+			}),
 		);
 
 		log.success(`Fetched ${formatNumber(campusResources.length)} DARIAH-Campus resources.`);
@@ -192,7 +187,9 @@ async function main() {
 		log.info("Fetching DARIAH-Campus curricula...");
 
 		const campusCurricula = yield* Result.await(
-			cache.getOrFetch("campus/curricula", () => campus.curricula.listAll()),
+			cache.getOrFetch("campus/curricula", () => {
+				return campus.curricula.listAll();
+			}),
 		);
 
 		log.success(`Fetched ${formatNumber(campusCurricula.length)} DARIAH-Campus curricula.`);
@@ -206,7 +203,9 @@ async function main() {
 		log.info("Fetching Episciences (Transformations) documents...");
 
 		const episciencesDocuments = yield* Result.await(
-			cache.getOrFetch("episciences/documents", () => episciences.search.listAll()),
+			cache.getOrFetch("episciences/documents", () => {
+				return episciences.search.listAll();
+			}),
 		);
 
 		log.success(
@@ -250,9 +249,9 @@ async function main() {
 		log.info("Fetching Zotero items...");
 
 		const zoteroItems = yield* Result.await(
-			cache.getOrFetch("zotero/items", () =>
-				zotero.items.csljson.listAll({ groupId: env.ZOTERO_GROUP_ID! }),
-			),
+			cache.getOrFetch("zotero/items", () => {
+				return zotero.items.csljson.listAll({ groupId: env.ZOTERO_GROUP_ID! });
+			}),
 		);
 
 		log.success(`Fetched ${formatNumber(zoteroItems.length)} Zotero items.`);
@@ -264,14 +263,24 @@ async function main() {
 		 */
 
 		const resources: Array<ResourceDocument> = [
-			...campusResources.map((item) => createCampusResource(item)),
-			...campusCurricula.map((item) => createCampusCurriculum(item)),
-			...episciencesDocuments.map((item) => createEpisciencesDocument(item)),
+			...campusResources.map((item) => {
+				return createCampusResource(item);
+			}),
+			...campusCurricula.map((item) => {
+				return createCampusCurriculum(item);
+			}),
+			...episciencesDocuments.map((item) => {
+				return createEpisciencesDocument(item);
+			}),
 			// ...halDocuments.map((item) => createHalItem(item)),
 			// ...openaireProducts.map((item) => createOpenAirePublication(item)),
-			...sshocItems.map((item) => createSshocItem(item, env.SSHOC_MARKETPLACE_BASE_URL!)),
+			...sshocItems.map((item) => {
+				return createSshocItem(item, env.SSHOC_MARKETPLACE_BASE_URL!);
+			}),
 			// ...zenodoRecords.map((item) => createZenodoItem(item)),
-			...zoteroItems.map((item) => createZoteroItem(item)),
+			...zoteroItems.map((item) => {
+				return createZoteroItem(item);
+			}),
 		];
 
 		log.info(`Ingesting ${formatNumber(resources.length)} resources into search index...`);
@@ -280,8 +289,8 @@ async function main() {
 
 		log.success(`Ingested ${formatNumber(resources.length)} resources into search index.`);
 
-		const website: Array<WebsiteDocument> = resources.map((resource) =>
-			Object.assign(
+		const website: Array<WebsiteDocument> = resources.map((resource) => {
+			return Object.assign(
 				{ kind: `resource` as const },
 				pick(resource, [
 					`id`,
@@ -293,8 +302,8 @@ async function main() {
 					`description`,
 				]),
 				{ link: resource.links[0] },
-			),
-		);
+			);
+		});
 
 		log.info(`Ingesting ${formatNumber(website.length)} resources into website search index...`);
 
