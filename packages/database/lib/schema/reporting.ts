@@ -1,3 +1,4 @@
+import type { JSONContent } from "@tiptap/core";
 import { inArray } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
@@ -388,7 +389,7 @@ export const workingGroupReportQuestions = p.pgTable(
 			.references(() => {
 				return reportingCampaigns.id;
 			}),
-		question: p.jsonb("question").notNull(),
+		question: p.jsonb("question").$type<JSONContent>().notNull(),
 		position: p.integer("position").notNull(),
 	},
 	(t) => {
@@ -425,7 +426,7 @@ export const workingGroupReportAnswers = p.pgTable(
 			.references(() => {
 				return workingGroupReportQuestions.id;
 			}),
-		answer: p.jsonb("answer").notNull(),
+		answer: p.jsonb("answer").$type<JSONContent>().notNull(),
 	},
 	(t) => {
 		return [p.unique().on(t.workingGroupReportId, t.questionId)];

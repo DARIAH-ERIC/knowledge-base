@@ -6,6 +6,10 @@ import type { ReactNode } from "react";
 
 import { usePathname } from "@/lib/navigation/navigation";
 
+// Dynamic param segments (e.g. slugs/ids) never have their own page — they
+// only serve as parents for "edit" or "details" sub-routes.
+const ACTION_SEGMENTS = new Set(["edit", "details"]);
+
 function getBreadcrumbSegments(pathname: string): Array<{ href?: string; label: string }> {
 	const dashboardPrefix = "/dashboard";
 
@@ -17,10 +21,12 @@ function getBreadcrumbSegments(pathname: string): Array<{ href?: string; label: 
 
 	return segments.map((segment, index) => {
 		const label = decodeURIComponent(segment).replaceAll("-", " ");
+		const isLast = index === segments.length - 1;
+		const nextSegment = segments[index + 1];
+		const isDynamicParam = nextSegment != null && ACTION_SEGMENTS.has(nextSegment);
+
 		const href =
-			index === segments.length - 1
-				? undefined
-				: `/dashboard/${segments.slice(0, index + 1).join("/")}`;
+			isLast || isDynamicParam ? undefined : `/dashboard/${segments.slice(0, index + 1).join("/")}`;
 
 		return { href, label };
 	});

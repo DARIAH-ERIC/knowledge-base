@@ -1,3 +1,4 @@
+import type { JSONContent } from "@tiptap/core";
 import { inArray } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
@@ -278,7 +279,7 @@ export const richTextContentBlocks = p.pgTable("content_blocks_type_rich_text", 
 			},
 			{ onDelete: "cascade" },
 		),
-	content: p.jsonb("content").notNull(),
+	content: p.jsonb("content").$type<JSONContent>().notNull(),
 	...f.timestamps(),
 });
 

@@ -1,5 +1,5 @@
 import type { User } from "@dariah-eric/auth";
-import { and, eq, inArray, sql } from "@dariah-eric/database";
+import { and, desc, eq, inArray, sql } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
@@ -193,4 +193,164 @@ export async function getUserReportingScope(user: User): Promise<{
 		workingGroupReports: wgReportItems,
 		countryReports: countryReportItems,
 	};
+}
+
+export interface CountryReportHistoryItem {
+	reportId: string;
+	countryName: string;
+	reportStatus: string;
+	campaignYear: number;
+	campaignStatus: string;
+}
+
+export async function getUserAllCountryReports(
+	user: User,
+): Promise<Array<CountryReportHistoryItem>> {
+	const countryOrgUnitIds: Array<string> = [];
+
+	if (user.personId != null) {
+		const relations = await db
+			.select({ orgUnitId: schema.personsToOrganisationalUnits.organisationalUnitId })
+			.from(schema.personsToOrganisationalUnits)
+			.innerJoin(
+				schema.organisationalUnits,
+				eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
+			)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
+			.innerJoin(
+				schema.personRoleTypes,
+				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
+			)
+			.where(
+				and(
+					eq(schema.personsToOrganisationalUnits.personId, user.personId),
+					eq(schema.organisationalUnitTypes.type, "country"),
+					inArray(schema.personRoleTypes.type, [...relevantRoles]),
+				),
+			);
+
+		countryOrgUnitIds.push(
+			...relations.map((r) => {
+				return r.orgUnitId;
+			}),
+		);
+	}
+
+	if (user.organisationalUnitId != null) {
+		countryOrgUnitIds.push(user.organisationalUnitId);
+	}
+
+	if (countryOrgUnitIds.length === 0) return [];
+
+	const uniqueIds = [...new Set(countryOrgUnitIds)];
+
+	const rows = await db
+		.select({
+			id: schema.countryReports.id,
+			reportStatus: schema.countryReports.status,
+			countryName: schema.organisationalUnits.name,
+			campaignYear: schema.reportingCampaigns.year,
+			campaignStatus: schema.reportingCampaigns.status,
+		})
+		.from(schema.countryReports)
+		.innerJoin(
+			schema.reportingCampaigns,
+			eq(schema.reportingCampaigns.id, schema.countryReports.campaignId),
+		)
+		.innerJoin(
+			schema.organisationalUnits,
+			eq(schema.organisationalUnits.id, schema.countryReports.countryId),
+		)
+		.where(inArray(schema.countryReports.countryId, uniqueIds))
+		.orderBy(desc(schema.reportingCampaigns.year));
+
+	return rows.map((r) => {
+		return {
+			reportId: r.id,
+			countryName: r.countryName,
+			reportStatus: r.reportStatus,
+			campaignYear: r.campaignYear,
+			campaignStatus: r.campaignStatus,
+		};
+	});
+}
+
+export interface WorkingGroupReportHistoryItem {
+	reportId: string;
+	workingGroupName: string;
+	reportStatus: string;
+	campaignYear: number;
+	campaignStatus: string;
+}
+
+export async function getUserAllWorkingGroupReports(
+	user: User,
+): Promise<Array<WorkingGroupReportHistoryItem>> {
+	if (user.personId == null) return [];
+
+	const relations = await db
+		.select({ orgUnitId: schema.personsToOrganisationalUnits.organisationalUnitId })
+		.from(schema.personsToOrganisationalUnits)
+		.innerJoin(
+			schema.organisationalUnits,
+			eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
+		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
+		.innerJoin(
+			schema.personRoleTypes,
+			eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
+		)
+		.where(
+			and(
+				eq(schema.personsToOrganisationalUnits.personId, user.personId),
+				eq(schema.organisationalUnitTypes.type, "working_group"),
+				inArray(schema.personRoleTypes.type, [...relevantRoles]),
+			),
+		);
+
+	const wgOrgUnitIds = [
+		...new Set(
+			relations.map((r) => {
+				return r.orgUnitId;
+			}),
+		),
+	];
+
+	if (wgOrgUnitIds.length === 0) return [];
+
+	const rows = await db
+		.select({
+			id: schema.workingGroupReports.id,
+			reportStatus: schema.workingGroupReports.status,
+			workingGroupName: schema.organisationalUnits.name,
+			campaignYear: schema.reportingCampaigns.year,
+			campaignStatus: schema.reportingCampaigns.status,
+		})
+		.from(schema.workingGroupReports)
+		.innerJoin(
+			schema.reportingCampaigns,
+			eq(schema.reportingCampaigns.id, schema.workingGroupReports.campaignId),
+		)
+		.innerJoin(
+			schema.organisationalUnits,
+			eq(schema.organisationalUnits.id, schema.workingGroupReports.workingGroupId),
+		)
+		.where(inArray(schema.workingGroupReports.workingGroupId, wgOrgUnitIds))
+		.orderBy(desc(schema.reportingCampaigns.year));
+
+	return rows.map((r) => {
+		return {
+			reportId: r.id,
+			workingGroupName: r.workingGroupName,
+			reportStatus: r.reportStatus,
+			campaignYear: r.campaignYear,
+			campaignStatus: r.campaignStatus,
+		};
+	});
 }

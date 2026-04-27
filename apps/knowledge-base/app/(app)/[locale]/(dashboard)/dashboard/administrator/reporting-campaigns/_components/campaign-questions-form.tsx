@@ -7,7 +7,6 @@ import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { RichTextEditor } from "@dariah-eric/ui/rich-text-editor";
-import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState } from "react";
 
@@ -49,7 +48,7 @@ export function CampaignQuestionsForm(props: Readonly<CampaignQuestionsFormProps
 									<div className="richtext richtext-sm">
 										<RichTextEditor
 											aria-label={t("Question")}
-											content={q.question as JSONContent}
+											content={q.question}
 											isEditable={false}
 										/>
 									</div>

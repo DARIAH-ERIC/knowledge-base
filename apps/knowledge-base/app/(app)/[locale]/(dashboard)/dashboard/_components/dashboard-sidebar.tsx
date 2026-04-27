@@ -39,116 +39,130 @@ interface SidebarMenuSection {
 	items: Array<SidebarMenuItem>;
 }
 
-export function useSidebarMenu(): Array<SidebarMenuSection> {
+export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 	const t = useExtracted();
 
+	const adminSection: SidebarMenuSection = {
+		title: t("Administrator"),
+		items: [
+			{
+				href: "/dashboard/administrator",
+				tooltip: t("Overview"),
+				label: t("Overview"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/contributions",
+				tooltip: t("Contributions"),
+				label: t("Contributions"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/countries",
+				tooltip: t("Countries"),
+				label: t("Countries"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/governance-bodies",
+				tooltip: t("Governance bodies"),
+				label: t("Governance bodies"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/institutions",
+				tooltip: t("Institutions"),
+				label: t("Institutions"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/national-consortia",
+				tooltip: t("National consortia"),
+				label: t("National consortia"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/newsletters",
+				tooltip: t("Newsletters"),
+				label: t("Newsletters"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/persons",
+				tooltip: t("Persons"),
+				label: t("Persons"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/projects",
+				tooltip: t("Projects"),
+				label: t("Projects"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/reporting-campaigns",
+				tooltip: t("Reporting campaigns"),
+				label: t("Reporting campaigns"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/country-reports",
+				tooltip: t("Country reports"),
+				label: t("Country reports"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/working-group-reports",
+				tooltip: t("Working group reports"),
+				label: t("Working group reports"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/services",
+				tooltip: t("Services"),
+				label: t("Services"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/social-media",
+				tooltip: t("Social media"),
+				label: t("Social media"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/users",
+				tooltip: t("Users"),
+				label: t("Users"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/working-groups",
+				tooltip: t("Working groups"),
+				label: t("Working groups"),
+				icon: <ListBulletIcon />,
+			},
+		],
+	};
+
 	return [
-		{
-			title: t("Administrator"),
-			items: [
-				{
-					href: "/dashboard/administrator",
-					tooltip: t("Overview"),
-					label: t("Overview"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/administrator/contributions",
-					tooltip: t("Contributions"),
-					label: t("Contributions"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/administrator/countries",
-					tooltip: t("Countries"),
-					label: t("Countries"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/administrator/governance-bodies",
-					tooltip: t("Governance bodies"),
-					label: t("Governance bodies"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/administrator/institutions",
-					tooltip: t("Institutions"),
-					label: t("Institutions"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/administrator/national-consortia",
-					tooltip: t("National consortia"),
-					label: t("National consortia"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/administrator/newsletters",
-					tooltip: t("Newsletters"),
-					label: t("Newsletters"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/administrator/persons",
-					tooltip: t("Persons"),
-					label: t("Persons"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/administrator/projects",
-					tooltip: t("Projects"),
-					label: t("Projects"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/administrator/services",
-					tooltip: t("Services"),
-					label: t("Services"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/administrator/social-media",
-					tooltip: t("Social media"),
-					label: t("Social media"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/administrator/users",
-					tooltip: t("Users"),
-					label: t("Users"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/administrator/working-groups",
-					tooltip: t("Working groups"),
-					label: t("Working groups"),
-					icon: <ListBulletIcon />,
-				},
-			],
-		},
+		...(isAdmin ? [adminSection] : []),
 		{
 			title: t("Reports"),
 			items: [
 				{
 					href: "/dashboard/reporting",
-					tooltip: t("Reports"),
-					label: t("Reports"),
+					tooltip: t("Overview"),
+					label: t("Overview"),
 					icon: <ListBulletIcon />,
 				},
 				{
-					href: "/dashboard/administrator/reporting-campaigns",
-					tooltip: t("Reporting campaigns"),
-					label: t("Reporting campaigns"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/administrator/country-reports",
+					href: "/dashboard/reporting/country-reports",
 					tooltip: t("Country reports"),
 					label: t("Country reports"),
 					icon: <ListBulletIcon />,
 				},
 				{
-					href: "/dashboard/administrator/working-group-reports",
+					href: "/dashboard/reporting/working-group-reports",
 					tooltip: t("Working group reports"),
 					label: t("Working group reports"),
 					icon: <ListBulletIcon />,
@@ -251,13 +265,16 @@ function getCurrentSidebarHref(
 	}, undefined);
 }
 
-interface DashboardSidebarProps extends SidebarProps {}
+interface DashboardSidebarProps extends SidebarProps {
+	isAdmin: boolean;
+}
 
 export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactNode {
+	const { isAdmin, ...sidebarProps } = props;
 	const { state, isMobile, setIsOpenOnMobile } = useSidebar();
 	const [isCmdOpen, setIsCmdOpen] = useState(false);
 	const pathname = usePathname();
-	const sidebarMenu = useSidebarMenu();
+	const sidebarMenu = useSidebarMenu(isAdmin);
 	const currentHref = getCurrentSidebarHref(pathname, sidebarMenu);
 	const meta = useMetadata();
 	const t = useExtracted();
@@ -267,7 +284,7 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 	}, [pathname, setIsOpenOnMobile]);
 
 	return (
-		<Sidebar {...props}>
+		<Sidebar {...sidebarProps}>
 			<SidebarHeader>
 				<Link
 					className="flex items-center gap-x-2 group-data-[collapsible=dock]:size-8 group-data-[collapsible=dock]:items-center group-data-[collapsible=dock]:justify-center"
@@ -281,7 +298,7 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 				<SidebarSectionGroup className="pb-4">
 					{!isMobile ? (
 						<Fragment>
-							<CommandPalette isOpen={isCmdOpen} setIsOpen={setIsCmdOpen} />
+							<CommandPalette isAdmin={isAdmin} isOpen={isCmdOpen} setIsOpen={setIsCmdOpen} />
 							<div className="px-4 pt-2">
 								<Button
 									aria-label={t("Open quick search")}

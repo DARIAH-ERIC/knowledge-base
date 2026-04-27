@@ -39,6 +39,7 @@ export function CampaignServiceSizesForm(
 			return [
 				s.serviceSize,
 				{
+					// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 					amount: s.amount != null ? String(s.amount) : undefined,
 					threshold: s.visitsThreshold != null ? String(s.visitsThreshold) : undefined,
 				},

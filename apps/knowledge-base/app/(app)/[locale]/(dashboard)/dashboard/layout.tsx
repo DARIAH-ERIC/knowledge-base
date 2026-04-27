@@ -38,10 +38,14 @@ export default async function DashbardLayout(
 			<SkipLink href={`#${mainContentId}`}>{t("Skip to main content")}</SkipLink>
 
 			<SidebarProvider defaultOpen={defaultOpen}>
-				<DashboardSidebar collapsible="dock" />
+				<DashboardSidebar collapsible="dock" isAdmin={user.role === "admin"} />
 
 				<SidebarInset>
-					<DashboardSidebarNav breadcrumbs={breadcrumbs} user={user} />
+					<DashboardSidebarNav
+						breadcrumbs={breadcrumbs}
+						isAdmin={user.role === "admin"}
+						user={user}
+					/>
 
 					<div className="flex flex-col gap-y-(--layout-padding) p-(--layout-padding) [--layout-padding:--spacing(4)] sm:[--layout-padding:--spacing(6)]">
 						{children}

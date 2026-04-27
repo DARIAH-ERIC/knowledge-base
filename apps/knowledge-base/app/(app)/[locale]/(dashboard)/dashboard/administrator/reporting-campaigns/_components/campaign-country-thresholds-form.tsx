@@ -40,6 +40,7 @@ export function CampaignCountryThresholdsForm(
 
 	const thresholdMap = Object.fromEntries(
 		thresholds.map((th) => {
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			return [th.countryId, th.amount != null ? String(th.amount) : undefined];
 		}),
 	);

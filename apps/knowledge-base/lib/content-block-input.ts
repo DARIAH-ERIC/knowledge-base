@@ -1,3 +1,4 @@
+import type { JSONContent } from "@tiptap/core";
 import * as v from "valibot";
 
 export const ContentBlockInputSchema = v.union([
@@ -5,7 +6,11 @@ export const ContentBlockInputSchema = v.union([
 		id: v.string(),
 		type: v.literal("rich_text"),
 		position: v.optional(v.number()),
-		content: v.optional(v.any()),
+		content: v.optional(
+			v.custom<JSONContent>(() => {
+				return true;
+			}),
+		),
 	}),
 	v.object({
 		id: v.string(),

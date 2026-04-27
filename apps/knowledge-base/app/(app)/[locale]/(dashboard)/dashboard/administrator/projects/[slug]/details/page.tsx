@@ -1,7 +1,6 @@
 import { and, eq } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
-import type { JSONContent } from "@tiptap/core";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
@@ -122,7 +121,7 @@ export default async function DashboardAdministratorProjectDetailsPage(
 		}),
 	]);
 
-	const description = descriptionRows.at(0)?.content as JSONContent | undefined;
+	const description = descriptionRows.at(0)?.content;
 
 	const image =
 		project.image != null

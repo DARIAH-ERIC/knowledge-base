@@ -5,6 +5,7 @@ import { eq } from "@dariah-eric/database";
 import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
+import type { JSONContent } from "@tiptap/core";
 import { revalidatePath } from "next/cache";
 import { getLocale } from "next-intl/server";
 import * as v from "valibot";
@@ -32,9 +33,9 @@ export async function upsertWorkingGroupReportAnswersAction(formData: FormData):
 
 	await db.transaction(async (tx) => {
 		for (const [questionId, answerJson] of Object.entries(answers ?? {})) {
-			let answer: unknown;
+			let answer: JSONContent;
 			try {
-				answer = JSON.parse(answerJson);
+				answer = JSON.parse(answerJson) as JSONContent;
 			} catch {
 				continue;
 			}

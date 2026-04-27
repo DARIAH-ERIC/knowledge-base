@@ -81,7 +81,7 @@ export function NationalConsortiumForm(props: Readonly<NationalConsortiumFormPro
 						<FieldError />
 					</TextField>
 
-					<TextField defaultValue={nationalConsortium?.summary} name="summary">
+					<TextField defaultValue={nationalConsortium?.summary ?? undefined} name="summary">
 						<Label>{t("Summary")}</Label>
 						<TextArea />
 						<FieldError />

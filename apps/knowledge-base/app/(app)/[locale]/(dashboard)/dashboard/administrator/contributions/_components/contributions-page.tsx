@@ -3,7 +3,7 @@
 import { Badge } from "@dariah-eric/ui/badge";
 import { Button, buttonStyles } from "@dariah-eric/ui/button";
 import { Link } from "@dariah-eric/ui/link";
-import { Menu, MenuContent, MenuItem, MenuLabel } from "@dariah-eric/ui/menu";
+import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
 import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import {
 	Table,
@@ -13,10 +13,16 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { EllipsisHorizontalIcon, PencilSquareIcon, PlusIcon } from "@heroicons/react/24/outline";
+import {
+	EllipsisHorizontalIcon,
+	PencilSquareIcon,
+	PlusIcon,
+	TrashIcon,
+} from "@heroicons/react/24/outline";
 import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode } from "react";
+import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
+import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
 	Header,
 	HeaderAction,
@@ -26,7 +32,9 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
+import { deleteContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_lib/delete-contribution.action";
 import type { ContributionsResult } from "@/lib/data/contributions";
+import { useRouter } from "@/lib/navigation/navigation";
 
 interface ContributionsPageProps {
 	contributions: ContributionsResult;
@@ -94,6 +102,16 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 
 	const t = useExtracted();
 	const format = useFormatter();
+	const router = useRouter();
+	const [items, optimisticallyRemoveItem] = useOptimistic(
+		contributions.data,
+		(state, id: string) => {
+			return state.filter((item) => {
+				return item.id !== id;
+			});
+		},
+	);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
 		useUrlPaginatedSearch({
 			dir: initialDir,
@@ -101,6 +119,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 			q: initialQ,
 			sort: initialSort,
 		});
+	const [isDeletePending, startDeleteTransition] = useTransition();
 
 	const totalPages = Math.max(Math.ceil(contributions.total / pageSize), 1);
 
@@ -154,7 +173,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 					</TableColumn>
 					<TableColumn />
 				</TableHeader>
-				<TableBody items={contributions.data}>
+				<TableBody items={items}>
 					{(item) => {
 						return (
 							<TableRow id={item.id}>
@@ -187,6 +206,16 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 												<PencilSquareIcon className="mr-2 size-4" />
 												<MenuLabel>{t("Edit")}</MenuLabel>
 											</MenuItem>
+											<MenuSeparator />
+											<MenuItem
+												intent="danger"
+												onAction={() => {
+													setItemToDelete({ id: item.id });
+												}}
+											>
+												<TrashIcon className="mr-2 size-4" />
+												<MenuLabel>{t("Delete")}</MenuLabel>
+											</MenuItem>
 										</MenuContent>
 									</Menu>
 								</TableCell>
@@ -202,6 +231,30 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 				setPage={setPage}
 				total={totalPages}
 				totalItems={contributions.total}
+			/>
+
+			<DeleteModal
+				isOpen={itemToDelete != null}
+				model={t("contribution")}
+				onAction={() => {
+					if (itemToDelete == null) {
+						return;
+					}
+
+					const id = itemToDelete.id;
+
+					startDeleteTransition(async () => {
+						optimisticallyRemoveItem(id);
+						await deleteContributionAction(id);
+						router.refresh();
+						setItemToDelete(null);
+					});
+				}}
+				onOpenChange={(open) => {
+					if (!open && !isDeletePending) {
+						setItemToDelete(null);
+					}
+				}}
 			/>
 		</Fragment>
 	);

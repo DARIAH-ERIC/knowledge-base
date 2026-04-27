@@ -35,7 +35,7 @@ export function FormStatus(props: Readonly<FormStatusProps>): ReactNode {
 			</FormErrorMessage>
 			<FormSuccessMessage state={state}>
 				{(state) => {
-					if (!isActionStateSuccess(state)) {
+					if (!isActionStateSuccess(state) || state.message == null) {
 						return null;
 					}
 

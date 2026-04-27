@@ -34,6 +34,7 @@ export function CampaignSocialMediaAmountsForm(
 
 	const amountMap = Object.fromEntries(
 		amounts.map((a) => {
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			return [a.category, a.amount != null ? String(a.amount) : undefined];
 		}),
 	);

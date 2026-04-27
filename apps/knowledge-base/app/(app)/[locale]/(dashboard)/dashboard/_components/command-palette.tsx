@@ -15,15 +15,16 @@ import { useSidebarMenu } from "@/app/(app)/[locale]/(dashboard)/dashboard/_comp
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface CommandPaletteProps {
+	isAdmin: boolean;
 	isOpen: boolean;
 	setIsOpen: (isOpen: boolean) => void;
 }
 
 export function CommandPalette(props: Readonly<CommandPaletteProps>): ReactNode {
-	const { isOpen, setIsOpen } = props;
+	const { isAdmin, isOpen, setIsOpen } = props;
 
 	const t = useExtracted();
-	const sidebarMenu = useSidebarMenu();
+	const sidebarMenu = useSidebarMenu(isAdmin);
 
 	const [searchInput, setSearchInput] = useState("");
 

@@ -9,6 +9,7 @@ import {
 	type ValidationErrors,
 } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
+import type { JSONContent } from "@tiptap/core";
 import { revalidatePath } from "next/cache";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
@@ -58,9 +59,9 @@ export const createWorkingGroupReportQuestionAction = createServerAction(
 
 		const nextPosition = existing.length > 0 ? existing[0]!.position + 1 : 1;
 
-		let question: unknown;
+		let question: JSONContent;
 		try {
-			question = JSON.parse(questionJson);
+			question = JSON.parse(questionJson) as JSONContent;
 		} catch {
 			return createActionStateError({ message: t("Invalid question content.") });
 		}
