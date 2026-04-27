@@ -13,6 +13,7 @@ export * from "./schema/organisational-units";
 export * from "./schema/pages";
 export * from "./schema/persons";
 export * from "./schema/projects";
+export * from "./schema/reporting";
 export * from "./schema/reports";
 export * from "./schema/services";
 export * from "./schema/site-metadata";

@@ -1,17 +1,15 @@
+import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
-import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 
-import {
-	Header,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
+import { WorkingGroupReportsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorWorkingGroupReportsPageProps extends PageProps<"/[locale]/dashboard/administrator/working-group-reports"> {}
+interface DashboardAdministratorWorkingGroupReportsPageProps {
+	params: Promise<{ locale: string }>;
+}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorWorkingGroupReportsPageProps>,
@@ -29,16 +27,17 @@ export async function generateMetadata(
 export default function DashboardAdministratorWorkingGroupReportsPage(
 	_props: Readonly<DashboardAdministratorWorkingGroupReportsPageProps>,
 ): ReactNode {
-	const t = useExtracted();
+	const reports = db.query.workingGroupReports.findMany({
+		columns: { id: true, status: true },
+		with: {
+			campaign: { columns: { id: true, year: true } },
+			workingGroup: { columns: { id: true, name: true } },
+		},
+	});
 
 	return (
-		<Header>
-			<HeaderContent>
-				<HeaderTitle>{t("Working group reports")}</HeaderTitle>
-				<HeaderDescription>
-					{t("Manage all working group reports in the DARIAH knowledge base.")}
-				</HeaderDescription>
-			</HeaderContent>
-		</Header>
+		<Suspense fallback={<LoadingScreen />}>
+			<WorkingGroupReportsPage reports={reports} />
+		</Suspense>
 	);
 }

@@ -76,14 +76,5 @@ export default async function DashboardWebsiteEventsPage(
 		redirect({ href: createListHref(q, totalPages, sort, dir), locale: locale as IntlLocale });
 	}
 
-	return (
-		<EventsPage
-			key={`${q}:${sort}:${dir}:${String(page)}`}
-			dir={dir}
-			events={events}
-			page={page}
-			q={q}
-			sort={sort}
-		/>
-	);
+	return <EventsPage dir={dir} events={events} page={page} q={q} sort={sort} />;
 }

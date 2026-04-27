@@ -83,7 +83,6 @@ export default async function DashboardAdministratorUsersPage(
 
 	return (
 		<UsersPage
-			key={`${q}:${sort}:${dir}:${String(page)}`}
 			currentUserId={currentUser.id}
 			dir={dir}
 			page={page}

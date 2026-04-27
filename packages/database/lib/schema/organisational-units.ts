@@ -74,7 +74,7 @@ export const organisationalUnits = p.pgTable("organisational_units", {
 	metadata: p.jsonb("metadata"),
 	name: p.text("name").notNull(),
 	acronym: p.text("acronym"),
-	summary: p.text("summary").notNull(),
+	summary: p.text("summary"),
 	imageId: p.uuid("image_id").references(() => {
 		return assets.id;
 	}),
@@ -221,7 +221,7 @@ export const membersAndPartners = p
 		id: p.uuid("id").notNull(),
 		metadata: p.jsonb("metadata"),
 		name: p.text("name").notNull(),
-		summary: p.text("summary").notNull(),
+		summary: p.text("summary"),
 		type: p.text("type"),
 		status: p.text("status"),
 		slug: p.text("slug"),
@@ -237,7 +237,7 @@ export const workingGroups = p
 		id: p.uuid("id").notNull(),
 		metadata: p.jsonb("metadata"),
 		name: p.text("name").notNull(),
-		summary: p.text("summary").notNull(),
+		summary: p.text("summary"),
 		imageId: p.uuid("image_id"),
 		sshocMarketplaceActorId: p.integer("sshoc_marketplace_actor_id"),
 	})

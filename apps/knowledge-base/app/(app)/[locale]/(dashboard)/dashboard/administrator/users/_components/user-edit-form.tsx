@@ -9,7 +9,10 @@ import { UserForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrat
 import { updateUserAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/update-user.action";
 
 interface UserEditFormProps {
-	user: Pick<schema.User, "id" | "name" | "email" | "role">;
+	user: Pick<schema.User, "id" | "name" | "email" | "role"> & {
+		person: { id: string; name: string } | null;
+		organisationalUnit: { id: string; name: string } | null;
+	};
 }
 
 export function UserEditForm(props: Readonly<UserEditFormProps>): ReactNode {

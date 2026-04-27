@@ -18,7 +18,10 @@ import {
 	type ContentBlock,
 	ContentBlocks,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
-import { FormSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import {
+	FormActions,
+	FormSection,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
@@ -149,23 +152,19 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 				</Fragment>
 			) : null}
 
-			<Button
-				className="self-end"
-				isDisabled={selectedDocument == null}
-				isPending={isPending}
-				type="submit"
-			>
-				{isPending ? (
-					<Fragment>
-						<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
-						<span aria-hidden={true}>{t("Saving...")}</span>
-					</Fragment>
-				) : (
-					t("Save")
-				)}
-			</Button>
-
-			<FormStatus className="self-end" state={state} />
+			<FormActions>
+				<FormStatus state={state} />
+				<Button isDisabled={selectedDocument == null} isPending={isPending} type="submit">
+					{isPending ? (
+						<Fragment>
+							<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
+							<span aria-hidden={true}>{t("Saving...")}</span>
+						</Fragment>
+					) : (
+						t("Save")
+					)}
+				</Button>
+			</FormActions>
 		</Form>
 	);
 }

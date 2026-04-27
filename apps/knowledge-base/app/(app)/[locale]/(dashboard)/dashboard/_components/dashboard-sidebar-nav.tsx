@@ -32,12 +32,13 @@ import { CommandPalette } from "@/app/(app)/[locale]/(dashboard)/dashboard/_comp
 import { useColorScheme } from "@/lib/color-scheme/use-color-scheme";
 
 interface DashboardSidebarNavProps {
+	isAdmin: boolean;
 	breadcrumbs: ReactNode;
 	user: User;
 }
 
 export function DashboardSidebarNav(props: Readonly<DashboardSidebarNavProps>): ReactNode {
-	const { breadcrumbs, user } = props;
+	const { isAdmin, breadcrumbs, user } = props;
 
 	const { isMobile } = useSidebar();
 	const [isCmdOpen, setIsCmdOpen] = useState(false);
@@ -65,7 +66,7 @@ export function DashboardSidebarNav(props: Readonly<DashboardSidebarNavProps>): 
 						>
 							<IconSearch />
 						</Button>
-						<CommandPalette isOpen={isCmdOpen} setIsOpen={setIsCmdOpen} />
+						<CommandPalette isAdmin={isAdmin} isOpen={isCmdOpen} setIsOpen={setIsCmdOpen} />
 					</Fragment>
 				) : null}
 				<UserMenu user={user} />

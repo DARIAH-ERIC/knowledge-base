@@ -83,13 +83,6 @@ export default async function DashboardAdministratorSocialMediaPage(
 	}
 
 	return (
-		<SocialMediaPage
-			key={`${q}:${sort}:${dir}:${String(page)}`}
-			dir={dir}
-			page={page}
-			q={q}
-			socialMediaItems={socialMediaItems}
-			sort={sort}
-		/>
+		<SocialMediaPage dir={dir} page={page} q={q} socialMediaItems={socialMediaItems} sort={sort} />
 	);
 }

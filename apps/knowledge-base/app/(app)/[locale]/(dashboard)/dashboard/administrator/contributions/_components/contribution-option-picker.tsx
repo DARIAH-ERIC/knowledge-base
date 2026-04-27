@@ -21,7 +21,7 @@ interface ContributionOptionPickerProps {
 	label: string;
 	placeholder: string;
 	emptyMessage: string;
-	resource: "organisational-units" | "persons";
+	resource: "organisational-units" | "persons" | "countries";
 	selectedItem: ContributionOptionPickerItem | null;
 	onSelect: (item: ContributionOptionPickerItem) => void;
 	initialItems?: Array<ContributionOptionPickerItem>;

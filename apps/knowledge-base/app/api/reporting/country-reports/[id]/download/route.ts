@@ -1,0 +1,95 @@
+import type { NextRequest } from "next/server";
+
+import { getCountryReportData } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
+import { getCurrentSession } from "@/lib/auth/session";
+import { getUserAllCountryReports } from "@/lib/data/reporting";
+
+export async function GET(
+	_request: NextRequest,
+	{ params }: { params: Promise<{ id: string }> },
+): Promise<Response> {
+	const { session, user } = await getCurrentSession();
+
+	if (session == null) {
+		return new Response(null, { status: 401 });
+	}
+
+	const { id } = await params;
+
+	if (user.role !== "admin") {
+		const userReports = await getUserAllCountryReports(user);
+		const hasAccess = userReports.some((r) => {
+			return r.reportId === id;
+		});
+		if (!hasAccess) {
+			return new Response(null, { status: 403 });
+		}
+	}
+
+	const report = await getCountryReportData(id);
+
+	if (report == null) {
+		return new Response(null, { status: 404 });
+	}
+
+	const payload = {
+		id: report.id,
+		status: report.status,
+		country: report.country.name,
+		campaign: report.campaign.year,
+		totalContributors: report.summary.totalContributors,
+		institutions: report.summary.institutions.map((i) => {
+			return { name: i.name, acronym: i.acronym };
+		}),
+		contributors: report.summary.contributions.map((c) => {
+			return { name: c.personName, role: c.roleType, orgUnit: c.orgUnitName };
+		}),
+		events: {
+			small: report.summary.smallEvents,
+			medium: report.summary.mediumEvents,
+			large: report.summary.largeEvents,
+			veryLarge: report.summary.veryLargeEvents,
+			dariahCommissionedEvent: report.summary.dariahCommissionedEvent,
+			reusableOutcomes: report.summary.reusableOutcomes,
+		},
+		socialMedia: report.summary.socialMediaAccounts.map((a) => {
+			return {
+				name: a.name,
+				url: a.url,
+				kpis: Object.fromEntries(
+					a.kpis
+						.filter((k) => {
+							return k.value > 0;
+						})
+						.map((k) => {
+							return [k.kpi, k.value];
+						}),
+				),
+			};
+		}),
+		services: report.summary.services.map((s) => {
+			return {
+				name: s.name,
+				kpis: Object.fromEntries(
+					s.kpis
+						.filter((k) => {
+							return k.value > 0;
+						})
+						.map((k) => {
+							return [k.kpi, k.value];
+						}),
+				),
+			};
+		}),
+		projectContributions: report.summary.projectContributions.map((p) => {
+			return { project: p.projectName, amountEuros: p.amountEuros };
+		}),
+	};
+
+	return new Response(JSON.stringify(payload, null, 2), {
+		headers: {
+			"Content-Disposition": `attachment; filename="country-report-${id}.json"`,
+			"Content-Type": "application/json",
+		},
+	});
+}

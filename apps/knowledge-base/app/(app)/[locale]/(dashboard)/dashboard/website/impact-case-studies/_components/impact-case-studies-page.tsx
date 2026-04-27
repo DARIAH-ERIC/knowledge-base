@@ -21,7 +21,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, useState, useTransition } from "react";
+import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -66,9 +66,14 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 	const t = useExtracted();
 	const format = useFormatter();
 	const router = useRouter();
-	const [items, setItems] = useState(() => {
-		return impactCaseStudies.data;
-	});
+	const [items, optimisticallyRemoveItem] = useOptimistic(
+		impactCaseStudies.data,
+		(state, id: string) => {
+			return state.filter((item) => {
+				return item.id !== id;
+			});
+		},
+	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
 		useUrlPaginatedSearch({
@@ -192,11 +197,7 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 					const id = itemToDelete.id;
 
 					startDeleteTransition(async () => {
-						setItems((prev) => {
-							return prev.filter((item) => {
-								return item.id !== id;
-							});
-						});
+						optimisticallyRemoveItem(id);
 						await deleteImpactCaseStudyAction(id);
 						router.refresh();
 						setItemToDelete(null);

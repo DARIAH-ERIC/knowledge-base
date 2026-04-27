@@ -18,6 +18,7 @@ import { Fragment, type ReactNode, useActionState, useState } from "react";
 
 import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import {
+	FormActions,
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
@@ -80,7 +81,7 @@ export function CountryForm(props: Readonly<CountryFormProps>): ReactNode {
 						<FieldError />
 					</TextField>
 
-					<TextField defaultValue={country?.summary} isRequired={true} name="summary">
+					<TextField defaultValue={country?.summary ?? undefined} name="summary">
 						<Label>{t("Summary")}</Label>
 						<TextArea />
 						<FieldError />
@@ -150,18 +151,19 @@ export function CountryForm(props: Readonly<CountryFormProps>): ReactNode {
 					</Fragment>
 				) : null}
 
-				<Button className="self-end" isPending={isPending} type="submit">
-					{isPending ? (
-						<Fragment>
-							<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
-							<span aria-hidden={true}>{t("Saving...")}</span>
-						</Fragment>
-					) : (
-						t("Save")
-					)}
-				</Button>
-
-				<FormStatus className="self-end" state={state} />
+				<FormActions>
+					<FormStatus state={state} />
+					<Button isPending={isPending} type="submit">
+						{isPending ? (
+							<Fragment>
+								<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
+								<span aria-hidden={true}>{t("Saving...")}</span>
+							</Fragment>
+						) : (
+							t("Save")
+						)}
+					</Button>
+				</FormActions>
 			</Form>
 		</FormLayout>
 	);

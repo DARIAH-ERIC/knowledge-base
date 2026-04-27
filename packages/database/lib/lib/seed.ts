@@ -465,7 +465,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 		const richTextContentBlocks = contentBlockIdsByType.rich_text.map(({ id }) => {
 			return {
 				id,
-				content: JSON.stringify({
+				content: {
 					type: "doc",
 					content: [
 						{
@@ -473,9 +473,9 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 							content: [{ type: "text", text: f.lorem.paragraph() }],
 						},
 					],
-				}),
+				},
 			};
-		}) satisfies Array<schema.RichTextContentBlockInput>; // FIXME: type regression
+		});
 
 		await db.insert(schema.richTextContentBlocks).values(richTextContentBlocks);
 

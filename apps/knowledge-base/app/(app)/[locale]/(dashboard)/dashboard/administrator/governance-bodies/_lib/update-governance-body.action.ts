@@ -11,7 +11,7 @@ import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { UpdateGovernanceBodyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/update-governance-body.schema";
-import { assertAuthenticated } from "@/lib/auth/session";
+import { assertAdmin } from "@/lib/auth/session";
 import { syncEntityRelations } from "@/lib/data/relations";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -26,7 +26,7 @@ export const updateGovernanceBodyAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAuthenticated();
+		await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			UpdateGovernanceBodyActionInputSchema,

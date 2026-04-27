@@ -387,6 +387,27 @@ export const relations = defineRelations(schema, (r) => {
 				optional: false,
 			}),
 		},
+		personsToOrganisationalUnits: {
+			person: r.one.persons({
+				from: r.personsToOrganisationalUnits.personId,
+				to: r.persons.id,
+				optional: false,
+			}),
+			organisationalUnit: r.one.organisationalUnits({
+				from: r.personsToOrganisationalUnits.organisationalUnitId,
+				to: r.organisationalUnits.id,
+				optional: false,
+			}),
+			roleType: r.one.personRoleTypes({
+				from: r.personsToOrganisationalUnits.roleTypeId,
+				to: r.personRoleTypes.id,
+				optional: false,
+			}),
+			contributions: r.many.countryReportContributions({
+				from: r.personsToOrganisationalUnits.id,
+				to: r.countryReportContributions.personToOrgUnitId,
+			}),
+		},
 		richTextContentBlocks: {
 			contentBlock: r.one.contentBlocks({
 				from: r.richTextContentBlocks.id,
@@ -512,6 +533,250 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.siteMetadata.ogImageId,
 				to: r.assets.id,
 				optional: true,
+			}),
+		},
+		users: {
+			person: r.one.persons({
+				from: r.users.personId,
+				to: r.persons.id,
+				optional: true,
+			}),
+			organisationalUnit: r.one.organisationalUnits({
+				from: r.users.organisationalUnitId,
+				to: r.organisationalUnits.id,
+				optional: true,
+			}),
+		},
+		reportingCampaigns: {
+			countryReports: r.many.countryReports({
+				from: r.reportingCampaigns.id,
+				to: r.countryReports.campaignId,
+			}),
+			workingGroupReports: r.many.workingGroupReports({
+				from: r.reportingCampaigns.id,
+				to: r.workingGroupReports.campaignId,
+			}),
+			workingGroupReportQuestions: r.many.workingGroupReportQuestions({
+				from: r.reportingCampaigns.id,
+				to: r.workingGroupReportQuestions.campaignId,
+			}),
+			eventAmounts: r.many.reportingCampaignEventAmounts({
+				from: r.reportingCampaigns.id,
+				to: r.reportingCampaignEventAmounts.campaignId,
+			}),
+			socialMediaAmounts: r.many.reportingCampaignSocialMediaAmounts({
+				from: r.reportingCampaigns.id,
+				to: r.reportingCampaignSocialMediaAmounts.campaignId,
+			}),
+			contributionAmounts: r.many.reportingCampaignContributionAmounts({
+				from: r.reportingCampaigns.id,
+				to: r.reportingCampaignContributionAmounts.campaignId,
+			}),
+			serviceSizes: r.many.reportingCampaignServiceSizes({
+				from: r.reportingCampaigns.id,
+				to: r.reportingCampaignServiceSizes.campaignId,
+			}),
+			countryThresholds: r.many.reportingCampaignCountryThresholds({
+				from: r.reportingCampaigns.id,
+				to: r.reportingCampaignCountryThresholds.campaignId,
+			}),
+		},
+		countryReports: {
+			campaign: r.one.reportingCampaigns({
+				from: r.countryReports.campaignId,
+				to: r.reportingCampaigns.id,
+				optional: false,
+			}),
+			country: r.one.organisationalUnits({
+				from: r.countryReports.countryId,
+				to: r.organisationalUnits.id,
+				optional: false,
+			}),
+			contributions: r.many.countryReportContributions({
+				from: r.countryReports.id,
+				to: r.countryReportContributions.countryReportId,
+			}),
+			socialMediaKpis: r.many.countryReportSocialMediaKpis({
+				from: r.countryReports.id,
+				to: r.countryReportSocialMediaKpis.countryReportId,
+			}),
+			serviceKpis: r.many.countryReportServiceKpis({
+				from: r.countryReports.id,
+				to: r.countryReportServiceKpis.countryReportId,
+			}),
+			projectContributions: r.many.countryReportProjectContributions({
+				from: r.countryReports.id,
+				to: r.countryReportProjectContributions.countryReportId,
+			}),
+			institutions: r.many.countryReportInstitutions({
+				from: r.countryReports.id,
+				to: r.countryReportInstitutions.countryReportId,
+			}),
+		},
+		countryReportContributions: {
+			countryReport: r.one.countryReports({
+				from: r.countryReportContributions.countryReportId,
+				to: r.countryReports.id,
+				optional: false,
+			}),
+			personToOrgUnit: r.one.personsToOrganisationalUnits({
+				from: r.countryReportContributions.personToOrgUnitId,
+				to: r.personsToOrganisationalUnits.id,
+				optional: false,
+			}),
+		},
+		countryReportSocialMediaKpis: {
+			countryReport: r.one.countryReports({
+				from: r.countryReportSocialMediaKpis.countryReportId,
+				to: r.countryReports.id,
+				optional: false,
+			}),
+			socialMedia: r.one.socialMedia({
+				from: r.countryReportSocialMediaKpis.socialMediaId,
+				to: r.socialMedia.id,
+				optional: false,
+			}),
+		},
+		countryReportServiceKpis: {
+			countryReport: r.one.countryReports({
+				from: r.countryReportServiceKpis.countryReportId,
+				to: r.countryReports.id,
+				optional: false,
+			}),
+			service: r.one.services({
+				from: r.countryReportServiceKpis.serviceId,
+				to: r.services.id,
+				optional: false,
+			}),
+		},
+		countryReportProjectContributions: {
+			countryReport: r.one.countryReports({
+				from: r.countryReportProjectContributions.countryReportId,
+				to: r.countryReports.id,
+				optional: false,
+			}),
+			project: r.one.projects({
+				from: r.countryReportProjectContributions.projectId,
+				to: r.projects.id,
+				optional: false,
+			}),
+		},
+		countryReportInstitutions: {
+			countryReport: r.one.countryReports({
+				from: r.countryReportInstitutions.countryReportId,
+				to: r.countryReports.id,
+				optional: false,
+			}),
+			organisationalUnit: r.one.organisationalUnits({
+				from: r.countryReportInstitutions.organisationalUnitId,
+				to: r.organisationalUnits.id,
+				optional: false,
+			}),
+		},
+		workingGroupReports: {
+			campaign: r.one.reportingCampaigns({
+				from: r.workingGroupReports.campaignId,
+				to: r.reportingCampaigns.id,
+				optional: false,
+			}),
+			workingGroup: r.one.organisationalUnits({
+				from: r.workingGroupReports.workingGroupId,
+				to: r.organisationalUnits.id,
+				optional: false,
+			}),
+			socialMedia: r.many.workingGroupReportSocialMedia({
+				from: r.workingGroupReports.id,
+				to: r.workingGroupReportSocialMedia.workingGroupReportId,
+			}),
+			events: r.many.workingGroupReportEvents({
+				from: r.workingGroupReports.id,
+				to: r.workingGroupReportEvents.workingGroupReportId,
+			}),
+			answers: r.many.workingGroupReportAnswers({
+				from: r.workingGroupReports.id,
+				to: r.workingGroupReportAnswers.workingGroupReportId,
+			}),
+		},
+		workingGroupReportSocialMedia: {
+			workingGroupReport: r.one.workingGroupReports({
+				from: r.workingGroupReportSocialMedia.workingGroupReportId,
+				to: r.workingGroupReports.id,
+				optional: false,
+			}),
+			socialMedia: r.one.socialMedia({
+				from: r.workingGroupReportSocialMedia.socialMediaId,
+				to: r.socialMedia.id,
+				optional: false,
+			}),
+		},
+		workingGroupReportEvents: {
+			workingGroupReport: r.one.workingGroupReports({
+				from: r.workingGroupReportEvents.workingGroupReportId,
+				to: r.workingGroupReports.id,
+				optional: false,
+			}),
+		},
+		workingGroupReportQuestions: {
+			campaign: r.one.reportingCampaigns({
+				from: r.workingGroupReportQuestions.campaignId,
+				to: r.reportingCampaigns.id,
+				optional: false,
+			}),
+			answers: r.many.workingGroupReportAnswers({
+				from: r.workingGroupReportQuestions.id,
+				to: r.workingGroupReportAnswers.questionId,
+			}),
+		},
+		workingGroupReportAnswers: {
+			workingGroupReport: r.one.workingGroupReports({
+				from: r.workingGroupReportAnswers.workingGroupReportId,
+				to: r.workingGroupReports.id,
+				optional: false,
+			}),
+			question: r.one.workingGroupReportQuestions({
+				from: r.workingGroupReportAnswers.questionId,
+				to: r.workingGroupReportQuestions.id,
+				optional: false,
+			}),
+		},
+		reportingCampaignEventAmounts: {
+			campaign: r.one.reportingCampaigns({
+				from: r.reportingCampaignEventAmounts.campaignId,
+				to: r.reportingCampaigns.id,
+				optional: false,
+			}),
+		},
+		reportingCampaignSocialMediaAmounts: {
+			campaign: r.one.reportingCampaigns({
+				from: r.reportingCampaignSocialMediaAmounts.campaignId,
+				to: r.reportingCampaigns.id,
+				optional: false,
+			}),
+		},
+		reportingCampaignContributionAmounts: {
+			campaign: r.one.reportingCampaigns({
+				from: r.reportingCampaignContributionAmounts.campaignId,
+				to: r.reportingCampaigns.id,
+				optional: false,
+			}),
+		},
+		reportingCampaignServiceSizes: {
+			campaign: r.one.reportingCampaigns({
+				from: r.reportingCampaignServiceSizes.campaignId,
+				to: r.reportingCampaigns.id,
+				optional: false,
+			}),
+		},
+		reportingCampaignCountryThresholds: {
+			campaign: r.one.reportingCampaigns({
+				from: r.reportingCampaignCountryThresholds.campaignId,
+				to: r.reportingCampaigns.id,
+				optional: false,
+			}),
+			country: r.one.organisationalUnits({
+				from: r.reportingCampaignCountryThresholds.countryId,
+				to: r.organisationalUnits.id,
+				optional: false,
 			}),
 		},
 		navigationMenus: {

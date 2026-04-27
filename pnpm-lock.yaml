@@ -1307,6 +1307,9 @@ importers:
       '@dariah-eric/env':
         specifier: workspace:^
         version: link:../env
+      '@tiptap/core':
+        specifier: 'catalog:'
+        version: 3.22.3(@tiptap/pm@3.22.3)
       better-result:
         specifier: 'catalog:'
         version: 2.7.0

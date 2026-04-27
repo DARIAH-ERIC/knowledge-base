@@ -76,14 +76,5 @@ export default async function DashboardWebsitePagesPage(
 		redirect({ href: createListHref(q, totalPages, sort, dir), locale: locale as IntlLocale });
 	}
 
-	return (
-		<PagesPage
-			key={`${q}:${sort}:${dir}:${String(page)}`}
-			dir={dir}
-			page={page}
-			pages={pages}
-			q={q}
-			sort={sort}
-		/>
-	);
+	return <PagesPage dir={dir} page={page} pages={pages} q={q} sort={sort} />;
 }

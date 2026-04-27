@@ -81,7 +81,7 @@ interface CreateAuthServiceParams {
 
 export interface User extends Pick<
 	schema.User,
-	"id" | "email" | "name" | "role" | "isEmailVerified"
+	"id" | "email" | "name" | "role" | "isEmailVerified" | "personId" | "organisationalUnitId"
 > {
 	isTwoFactorRegistered: boolean;
 }
@@ -265,6 +265,8 @@ export function createAuthService(params: CreateAuthServiceParams) {
 					name: schema.users.name,
 					role: schema.users.role,
 					isEmailVerified: schema.users.isEmailVerified,
+					personId: schema.users.personId,
+					organisationalUnitId: schema.users.organisationalUnitId,
 					isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
 				},
 				session: {
@@ -351,6 +353,8 @@ export function createAuthService(params: CreateAuthServiceParams) {
 				name: schema.users.name,
 				role: schema.users.role,
 				isEmailVerified: schema.users.isEmailVerified,
+				personId: schema.users.personId,
+				organisationalUnitId: schema.users.organisationalUnitId,
 				isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
 			})
 			.from(schema.users)
@@ -440,6 +444,8 @@ export function createAuthService(params: CreateAuthServiceParams) {
 				name: schema.users.name,
 				role: schema.users.role,
 				isEmailVerified: schema.users.isEmailVerified,
+				personId: schema.users.personId,
+				organisationalUnitId: schema.users.organisationalUnitId,
 				isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
 			});
 
@@ -721,6 +727,8 @@ export function createAuthService(params: CreateAuthServiceParams) {
 					name: schema.users.name,
 					role: schema.users.role,
 					isEmailVerified: schema.users.isEmailVerified,
+					personId: schema.users.personId,
+					organisationalUnitId: schema.users.organisationalUnitId,
 					isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
 				},
 			})

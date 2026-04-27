@@ -16,6 +16,7 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
 import {
+	FormActions,
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
@@ -136,23 +137,19 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 					</Fragment>
 				) : null}
 
-				<Button
-					className="self-end"
-					isDisabled={selectedImage == null}
-					isPending={isPending}
-					type="submit"
-				>
-					{isPending ? (
-						<Fragment>
-							<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
-							<span aria-hidden={true}>{t("Saving...")}</span>
-						</Fragment>
-					) : (
-						t("Save")
-					)}
-				</Button>
-
-				<FormStatus className="self-end" state={state} />
+				<FormActions>
+					<FormStatus state={state} />
+					<Button isDisabled={selectedImage == null} isPending={isPending} type="submit">
+						{isPending ? (
+							<Fragment>
+								<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
+								<span aria-hidden={true}>{t("Saving...")}</span>
+							</Fragment>
+						) : (
+							t("Save")
+						)}
+					</Button>
+				</FormActions>
 			</Form>
 		</FormLayout>
 	);

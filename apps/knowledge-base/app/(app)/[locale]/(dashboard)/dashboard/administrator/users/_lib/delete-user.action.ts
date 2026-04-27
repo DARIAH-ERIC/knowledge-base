@@ -5,10 +5,10 @@ import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 
-import { assertAuthenticated } from "@/lib/auth/session";
+import { assertAdmin } from "@/lib/auth/session";
 
 export async function deleteUserAction(id: string): Promise<void> {
-	const { user: currentUser } = await assertAuthenticated();
+	const { user: currentUser } = await assertAdmin();
 
 	if (currentUser.id === id) {
 		throw new Error("Cannot delete your own account.");

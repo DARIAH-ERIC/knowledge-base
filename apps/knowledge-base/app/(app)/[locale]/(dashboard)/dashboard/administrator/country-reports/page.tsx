@@ -1,17 +1,15 @@
+import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
-import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 
-import {
-	Header,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
+import { CountryReportsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorCountryReportsPageProps extends PageProps<"/[locale]/dashboard/administrator/country-reports"> {}
+interface DashboardAdministratorCountryReportsPageProps {
+	params: Promise<{ locale: string }>;
+}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorCountryReportsPageProps>,
@@ -20,7 +18,7 @@ export async function generateMetadata(
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Administrator dashboard - Reports"),
+		title: t("Administrator dashboard - Country reports"),
 	});
 
 	return metadata;
@@ -29,16 +27,17 @@ export async function generateMetadata(
 export default function DashboardAdministratorCountryReportsPage(
 	_props: Readonly<DashboardAdministratorCountryReportsPageProps>,
 ): ReactNode {
-	const t = useExtracted();
+	const reports = db.query.countryReports.findMany({
+		columns: { id: true, status: true },
+		with: {
+			campaign: { columns: { id: true, year: true } },
+			country: { columns: { id: true, name: true } },
+		},
+	});
 
 	return (
-		<Header>
-			<HeaderContent>
-				<HeaderTitle>{t("Country reports")}</HeaderTitle>
-				<HeaderDescription>
-					{t("Manage all country reports in the DARIAH knowledge base.")}
-				</HeaderDescription>
-			</HeaderContent>
-		</Header>
+		<Suspense fallback={<LoadingScreen />}>
+			<CountryReportsPage reports={reports} />
+		</Suspense>
 	);
 }

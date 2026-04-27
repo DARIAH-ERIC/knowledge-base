@@ -39,6 +39,7 @@
 	},
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
+		"@tiptap/core": "catalog:",
 		"@dariah-eric/env": "workspace:^",
 		"better-result": "catalog:",
 		"drizzle-orm": "catalog:",

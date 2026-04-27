@@ -369,3 +369,42 @@ export async function getContributionOptions() {
 }
 
 export type ContributionOption = Awaited<ReturnType<typeof getContributionOptions>>[number];
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export async function getCountryOptions(params: GetContributionOptionsParams = {}) {
+	const { limit = contributionOptionsPageSize, offset = 0, q } = params;
+	const query = q?.trim();
+
+	const where = and(
+		eq(schema.organisationalUnitTypes.type, "country"),
+		query != null && query !== ""
+			? ilike(schema.organisationalUnits.name, `%${query}%`)
+			: undefined,
+	);
+
+	const [items, aggregate] = await Promise.all([
+		db
+			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
+			.where(where)
+			.orderBy(schema.organisationalUnits.name)
+			.limit(limit)
+			.offset(offset),
+		db
+			.select({ total: count() })
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
+			.where(where),
+	]);
+
+	return { items, total: aggregate.at(0)?.total ?? 0 };
+}
+
+export type CountryOption = Awaited<ReturnType<typeof getCountryOptions>>["items"][number];

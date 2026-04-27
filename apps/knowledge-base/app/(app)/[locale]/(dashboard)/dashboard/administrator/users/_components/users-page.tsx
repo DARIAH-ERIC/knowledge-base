@@ -20,7 +20,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useState, useTransition } from "react";
+import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
@@ -61,8 +61,10 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 
 	const t = useExtracted();
 	const router = useRouter();
-	const [items, setItems] = useState(() => {
-		return users.data;
+	const [items, optimisticallyRemoveItem] = useOptimistic(users.data, (state, id: string) => {
+		return state.filter((item) => {
+			return item.id !== id;
+		});
 	});
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
@@ -182,11 +184,7 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 					const id = itemToDelete.id;
 
 					startDeleteTransition(async () => {
-						setItems((prev) => {
-							return prev.filter((item) => {
-								return item.id !== id;
-							});
-						});
+						optimisticallyRemoveItem(id);
 						await deleteUserAction(id);
 						router.refresh();
 						setItemToDelete(null);
