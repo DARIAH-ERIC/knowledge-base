@@ -3,12 +3,14 @@ import * as v from "valibot";
 
 const validate = define({
 	envVars: v.object({
+		CAMPUS_API_BASE_URL: v.optional(v.pipe(v.string(), v.url())),
 		DATABASE_HOST: v.pipe(v.string(), v.nonEmpty()),
 		DATABASE_NAME: v.pipe(v.string(), v.nonEmpty()),
 		DATABASE_PASSWORD: v.pipe(v.string(), v.minLength(32)),
 		DATABASE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 		DATABASE_SSL_CONNECTION: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 		DATABASE_USER: v.pipe(v.string(), v.nonEmpty()),
+		EPISCIENCES_API_BASE_URL: v.optional(v.pipe(v.string(), v.url())),
 		HAL_API_BASE_URL: v.optional(v.pipe(v.string(), v.url())),
 		NEXT_PUBLIC_TYPESENSE_COLLECTION_NAME_RESOURCES: v.pipe(v.string(), v.nonEmpty()),
 		NEXT_PUBLIC_TYPESENSE_COLLECTION_NAME_WEBSITE: v.pipe(v.string(), v.nonEmpty()),
@@ -36,12 +38,14 @@ const validate = define({
 
 export const env = validate({
 	environment: {
+		CAMPUS_API_BASE_URL: process.env.CAMPUS_API_BASE_URL,
 		DATABASE_HOST: process.env.DATABASE_HOST,
 		DATABASE_NAME: process.env.DATABASE_NAME,
 		DATABASE_PASSWORD: process.env.DATABASE_PASSWORD,
 		DATABASE_PORT: process.env.DATABASE_PORT,
 		DATABASE_SSL_CONNECTION: process.env.DATABASE_SSL_CONNECTION,
 		DATABASE_USER: process.env.DATABASE_USER,
+		EPISCIENCES_API_BASE_URL: process.env.EPISCIENCES_API_BASE_URL,
 		HAL_API_BASE_URL: process.env.HAL_API_BASE_URL,
 		NEXT_PUBLIC_TYPESENSE_HOST: process.env.NEXT_PUBLIC_TYPESENSE_HOST,
 		NEXT_PUBLIC_TYPESENSE_PORT: process.env.NEXT_PUBLIC_TYPESENSE_PORT,

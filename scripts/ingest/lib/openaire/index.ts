@@ -29,6 +29,7 @@ export function createOpenAirePublication(item: ResearchProduct): ResourceDocume
 		keywords,
 		kind: null,
 		source_actor_ids: null,
+		upstream_sources: null,
 		authors: [],
 		year: null,
 		pid: null,

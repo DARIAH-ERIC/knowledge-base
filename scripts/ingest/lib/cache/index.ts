@@ -18,10 +18,7 @@ export function createCacheService(params: CreateCacheServiceParams) {
 	const { cacheDir } = params;
 
 	return {
-		async getOrFetch<T, E>(
-			key: string,
-			fetcher: () => Promise<Result<T, E>>,
-		): Promise<Result<T, CacheFileError | E>> {
+		async getOrFetch<T, E>(key: string, fetcher: () => Promise<Result<T, E>>): Promise<Result<T, CacheFileError | E>> {
 			const file = Bun.file(path.join(cacheDir, `${key}.json`));
 
 			if (await file.exists()) {

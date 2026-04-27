@@ -62,6 +62,7 @@ export function createHalItem(item: HalIngestDocument): ResourceDocument {
 		keywords,
 		kind: item.docType_s ?? null,
 		source_actor_ids: null,
+		upstream_sources: null,
 		authors,
 		year,
 		pid: null,

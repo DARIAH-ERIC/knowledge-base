@@ -37,6 +37,7 @@ export function createZoteroItem(item: ZoteroCslItem): ResourceDocument {
 				.filter((keyword) => isNonEmptyString(keyword)) ?? [],
 		kind: item.type,
 		source_actor_ids: null,
+		upstream_sources: null,
 		authors,
 		year,
 		pid: item.DOI ?? null,

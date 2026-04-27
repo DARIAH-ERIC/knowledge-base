@@ -1,11 +1,13 @@
 import * as path from "node:path";
 
 import { assert, log, pick } from "@acdh-oeaw/lib";
-// import { createHalClient } from "@dariah-eric/client-hal";
+import { createDariahCampusClient } from "@dariah-eric/client-campus";
+import { createEpisciencesClient } from "@dariah-eric/client-episciences";
+import { createHalClient } from "@dariah-eric/client-hal";
 import { createOpenAireClient } from "@dariah-eric/client-openaire";
 import { createSshocClient } from "@dariah-eric/client-sshoc";
 // import { createStorageAdminService } from "@dariah-eric/storage/admin";
-// import { createZenodoClient } from "@dariah-eric/client-zenodo";
+import { createZenodoClient } from "@dariah-eric/client-zenodo";
 import { createZoteroClient } from "@dariah-eric/client-zotero";
 // import { createDatabaseService } from "@dariah-eric/db";
 import type { ResourceDocument, WebsiteDocument } from "@dariah-eric/search";
@@ -14,10 +16,12 @@ import { Result } from "better-result";
 
 import { env } from "../config/env.config";
 import { createCacheService } from "../lib/cache";
-// import { createHalItem } from "../lib/hal";
+import { createCampusCurriculum, createCampusResource } from "../lib/campus";
+import { createEpisciencesDocument } from "../lib/episciences";
+import { createHalItem } from "../lib/hal";
 import { createOpenAirePublication } from "../lib/openaire";
 import { createSshocItem } from "../lib/sshoc";
-// import { createZenodoItem } from "../lib/zenodo";
+import { createZenodoItem } from "../lib/zenodo";
 import { createZoteroItem } from "../lib/zotero";
 
 function formatNumber(n: number) {
@@ -60,6 +64,22 @@ const search = createSearchAdminService({
 // 	},
 // });
 
+assert(env.CAMPUS_API_BASE_URL, "Missing environment variable: `CAMPUS_API_BASE_URL`.");
+
+const campus = createDariahCampusClient({
+	config: {
+		baseUrl: env.CAMPUS_API_BASE_URL,
+	},
+});
+
+assert(env.EPISCIENCES_API_BASE_URL, "Missing environment variable: `EPISCIENCES_API_BASE_URL`.");
+
+const episciences = createEpisciencesClient({
+	config: {
+		baseUrl: env.EPISCIENCES_API_BASE_URL,
+	},
+});
+
 assert(env.OPENAIRE_API_BASE_URL, "Missing environment variable: `OPENAIRE_API_BASE_URL`.");
 
 const openaire = createOpenAireClient({
@@ -68,11 +88,11 @@ const openaire = createOpenAireClient({
 	},
 });
 
-// assert(env.HAL_API_BASE_URL, "Missing environment variable: `HAL_API_BASE_URL`.");
+assert(env.HAL_API_BASE_URL, "Missing environment variable: `HAL_API_BASE_URL`.");
 
-// const hal = createHalClient({
-// 	baseUrl: env.HAL_API_BASE_URL,
-// });
+const hal = createHalClient({
+	baseUrl: env.HAL_API_BASE_URL,
+});
 
 assert(
 	env.SSHOC_MARKETPLACE_API_BASE_URL,
@@ -96,11 +116,11 @@ const sshoc = createSshocClient({
 	},
 });
 
-// assert(env.ZENODO_API_BASE_URL, "Missing environment variable: `ZENODO_API_BASE_URL`.");
+assert(env.ZENODO_API_BASE_URL, "Missing environment variable: `ZENODO_API_BASE_URL`.");
 
-// const zenodo = createZenodoClient({
-// 	baseUrl: env.ZENODO_API_BASE_URL,
-// });
+const zenodo = createZenodoClient({
+	baseUrl: env.ZENODO_API_BASE_URL,
+});
 
 assert(env.ZOTERO_API_BASE_URL, "Missing environment variable: `ZOTERO_API_BASE_URL`.");
 assert(env.ZOTERO_API_KEY, "Missing environment variable: `ZOTERO_API_KEY`.");
@@ -157,15 +177,55 @@ async function main() {
 
 		/**
 		 * ============================================================================================
+		 * DARIAH-Campus.
+		 * ============================================================================================
+		 */
+
+		log.info("Fetching DARIAH-Campus resources...");
+
+		const campusResources = yield* Result.await(
+			cache.getOrFetch("campus/resources", () => campus.resources.listAll()),
+		);
+
+		log.success(`Fetched ${formatNumber(campusResources.length)} DARIAH-Campus resources.`);
+
+		log.info("Fetching DARIAH-Campus curricula...");
+
+		const campusCurricula = yield* Result.await(
+			cache.getOrFetch("campus/curricula", () => campus.curricula.listAll()),
+		);
+
+		log.success(`Fetched ${formatNumber(campusCurricula.length)} DARIAH-Campus curricula.`);
+
+		/**
+		 * ============================================================================================
+		 * Episciences (Transformations).
+		 * ============================================================================================
+		 */
+
+		log.info("Fetching Episciences (Transformations) documents...");
+
+		const episciencesDocuments = yield* Result.await(
+			cache.getOrFetch("episciences/documents", () => episciences.search.listAll()),
+		);
+
+		log.success(
+			`Fetched ${formatNumber(episciencesDocuments.length)} Episciences (Transformations) documents.`,
+		);
+
+		/**
+		 * ============================================================================================
 		 * HAL.
 		 * ============================================================================================
 		 */
 
-		// log.info("Fetching HAL documents...");
+		log.info("Fetching HAL documents...");
 
-		// const halDocuments = yield* Result.await(cache.getOrFetch("hal/documents", () => hal.documents.listAll()));
+		const halDocuments = yield* Result.await(
+			cache.getOrFetch("hal/documents", () => hal.documents.listAll()),
+		);
 
-		// log.success(`Fetched ${formatNumber(halDocuments.length)} HAL documents.`);
+		log.success(`Fetched ${formatNumber(halDocuments.length)} HAL documents.`);
 
 		/**
 		 * ============================================================================================
@@ -173,11 +233,13 @@ async function main() {
 		 * ============================================================================================
 		 */
 
-		// log.info("Fetching Zenodo records...");
+		log.info("Fetching Zenodo records...");
 
-		// const zenodoRecords = yield* Result.await(cache.getOrFetch("zenodo/records", () => zenodo.records.listAll()));
+		const zenodoRecords = yield* Result.await(
+			cache.getOrFetch("zenodo/records", () => zenodo.records.listAll()),
+		);
 
-		// log.success(`Fetched ${formatNumber(zenodoRecords.length)} Zenodo records.`);
+		log.success(`Fetched ${formatNumber(zenodoRecords.length)} Zenodo records.`);
 
 		/**
 		 * ============================================================================================
@@ -202,10 +264,13 @@ async function main() {
 		 */
 
 		const resources: Array<ResourceDocument> = [
-			// ...halDocuments.map((item) => createHalItem(item)),
+			...campusResources.map((item) => createCampusResource(item)),
+			...campusCurricula.map((item) => createCampusCurriculum(item)),
+			...episciencesDocuments.map((item) => createEpisciencesDocument(item)),
+			...halDocuments.map((item) => createHalItem(item)),
 			...openaireProducts.map((item) => createOpenAirePublication(item)),
 			...sshocItems.map((item) => createSshocItem(item, env.SSHOC_MARKETPLACE_BASE_URL!)),
-			// ...zenodoRecords.map((item) => createZenodoItem(item)),
+			...zenodoRecords.map((item) => createZenodoItem(item)),
 			...zoteroItems.map((item) => createZoteroItem(item)),
 		];
 
@@ -216,7 +281,19 @@ async function main() {
 		log.success(`Ingested ${formatNumber(resources.length)} resources into search index.`);
 
 		const website: Array<WebsiteDocument> = resources.map((resource) =>
-			pick(resource, ["id", "source", "source_id", "imported_at", "type", "label", "description"]),
+			Object.assign(
+				{ kind: `resource` as const },
+				pick(resource, [
+					`id`,
+					`source`,
+					`source_id`,
+					`imported_at`,
+					`type`,
+					`label`,
+					`description`,
+				]),
+				{ link: resource.links[0] },
+			),
 		);
 
 		log.info(`Ingesting ${formatNumber(website.length)} resources into website search index...`);

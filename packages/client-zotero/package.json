@@ -1,0 +1,38 @@
+{
+	"name": "@dariah-eric/client-zotero",
+	"private": true,
+	"license": "MIT",
+	"type": "module",
+	"sideEffects": false,
+	"imports": {
+		"#/*": "./*"
+	},
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"scripts": {
+		"build": "bunup --dts.infer-types --dts.tsgo --sourcemap --target bun ./lib/index.ts",
+		"dev": "bunup --dts.infer-types --dts.tsgo --target bun --watch ./lib/index.ts",
+		"format:check": "oxfmt --check",
+		"format:fix": "oxfmt --write",
+		"lint:check": "oxlint --report-unused-disable-directives --type-aware --type-check",
+		"lint:fix": "oxlint --fix --report-unused-disable-directives --type-aware --type-check",
+		"test:unit": "bun test",
+		"test:unit:watch": "bun test --watch",
+		"types:check": "tsgo --noEmit"
+	},
+	"devDependencies": {
+		"@acdh-oeaw/lib": "catalog:",
+		"@dariah-eric/configs": "workspace:^",
+		"@dariah-eric/request": "workspace:^",
+		"@types/bun": "catalog:",
+		"@typescript/native-preview": "catalog:",
+		"better-result": "catalog:",
+		"bunup": "catalog:"
+	},
+	"peerDependencies": {
+		"@acdh-oeaw/lib": "catalog:",
+		"@dariah-eric/request": "workspace:^",
+		"better-result": "catalog:"
+	}
+}
