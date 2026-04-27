@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-syntax */
+
 import { define } from "@dariah-eric/env";
 import * as v from "valibot";
 

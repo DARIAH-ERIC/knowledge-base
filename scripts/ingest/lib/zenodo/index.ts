@@ -6,21 +6,29 @@ import type { ResourceDocument } from "@dariah-eric/search";
 /** @see {@link https://zenodo.org/communities/dariah} */
 export function createZenodoItem(item: ZenodoRecord): ResourceDocument {
 	const authors = item.metadata.creators
-		.map((creator) => creator.name.trim())
-		.filter((name) => isNonEmptyString(name));
+		.map((creator) => {
+			return creator.name.trim();
+		})
+		.filter((name) => {
+			return isNonEmptyString(name);
+		});
 
 	const keywords =
-		[item.metadata.keywords, item.metadata.keyword].find((value) => isNonEmptyArray(value)) ?? [];
+		[item.metadata.keywords, item.metadata.keyword].find((value) => {
+			return isNonEmptyArray(value);
+		}) ?? [];
 
 	function resolveLink(link: string | Record<string, string> | undefined): string | undefined {
-		if (link == null) return undefined;
-		return typeof link === "string" ? link : link["href"];
+		if (link == null) {
+			return undefined;
+		}
+		return typeof link === "string" ? link : link.href;
 	}
 
 	const links = [
-		resolveLink(item.links["html"]) ??
-			resolveLink(item.links["self"]) ??
-			`https://zenodo.org/records/${item.id}`,
+		resolveLink(item.links.html) ??
+			resolveLink(item.links.self) ??
+			`https://zenodo.org/records/${String(item.id)}`,
 	];
 	const sourceId = item.conceptrecid ?? String(item.id);
 	const id = ["zenodo", sourceId].join(":");

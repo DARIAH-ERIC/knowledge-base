@@ -39,8 +39,12 @@ export function createSshocItem(item: SearchItem, marketplaceBaseUrl: string): R
 	/** Description supports markdown. */
 	const description = toPlainText(item.description);
 
-	const sourceActorIds = item.contributors.flatMap((contributor) => contributor.actor.id);
-	const actorIds = sourceActorIds.map((sourceActorId) => [source, sourceActorId].join(":"));
+	const sourceActorIds = item.contributors.flatMap((contributor) => {
+		return contributor.actor.id;
+	});
+	const actorIds = sourceActorIds.map((sourceActorId) => {
+		return [source, sourceActorId].join(":");
+	});
 
 	const sourceUpdatedAt = new Date(item.lastInfoUpdate).getTime();
 
@@ -48,12 +52,13 @@ export function createSshocItem(item: SearchItem, marketplaceBaseUrl: string): R
 		case "tool-or-service": {
 			/** @see {@link https://marketplace-api.sshopencloud.eu/api/property-types/resource-category} */
 			/** @see {@link https://marketplace-api.sshopencloud.eu/api/vocabularies/eosc-resource-category/concepts/category-sharing_and_discovery-software} */
-			const isSoftware = item.properties.some(
-				(property) =>
+			const isSoftware = item.properties.some((property) => {
+				return (
 					property.type.code === "resource-category" &&
 					property.concept?.vocabulary.code === "eosc-resource-category" &&
-					property.concept.code === "category-sharing_and_discovery-software",
-			);
+					property.concept.code === "category-sharing_and_discovery-software"
+				);
+			});
 
 			if (isSoftware) {
 				return {
@@ -78,12 +83,13 @@ export function createSshocItem(item: SearchItem, marketplaceBaseUrl: string): R
 
 			/** @see {@link https://marketplace-api.sshopencloud.eu/api/property-types/keyword} */
 			/** @see {@link https://marketplace-api.sshopencloud.eu/api/vocabularies/sshoc-keyword/concepts/dariahCoreService} */
-			const isCoreService = item.properties.some(
-				(property) =>
+			const isCoreService = item.properties.some((property) => {
+				return (
 					property.type.code === "keyword" &&
 					property.concept?.vocabulary.code === "sshoc-keyword" &&
-					property.concept.code === "dariahCoreService",
-			);
+					property.concept.code === "dariahCoreService"
+				);
+			});
 
 			return {
 				id,

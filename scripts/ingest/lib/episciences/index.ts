@@ -1,9 +1,7 @@
 import type { EpisciencesSearchDocument } from "@dariah-eric/client-episciences";
 import type { ResourceDocument } from "@dariah-eric/search";
 
-export function createEpisciencesDocument(
-	item: EpisciencesSearchDocument,
-): ResourceDocument {
+export function createEpisciencesDocument(item: EpisciencesSearchDocument): ResourceDocument {
 	const source = "episciences" as const;
 	const sourceId = String(item.docid ?? item.paperid);
 	const id = [source, sourceId].join(":");

@@ -25,9 +25,15 @@ function toArray(value: Array<string> | string | undefined): Array<string> {
 
 /** @see {@link https://api.archives-ouvertes.fr/docs/search} */
 export function createHalItem(item: HalIngestDocument): ResourceDocument {
-	const authors = toArray(item.authFullName_s).filter((value) => isNonEmptyString(value));
-	const keywords = toArray(item.keyword_s).filter((value) => isNonEmptyString(value));
-	const links = toArray(item.uri_s).filter((value) => isNonEmptyString(value));
+	const authors = toArray(item.authFullName_s).filter((value) => {
+		return isNonEmptyString(value);
+	});
+	const keywords = toArray(item.keyword_s).filter((value) => {
+		return isNonEmptyString(value);
+	});
+	const links = toArray(item.uri_s).filter((value) => {
+		return isNonEmptyString(value);
+	});
 	const year =
 		(typeof item.producedDateY_i === "number"
 			? item.producedDateY_i

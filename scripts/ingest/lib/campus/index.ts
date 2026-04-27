@@ -8,10 +8,15 @@ export function createCampusResource(item: DariahCampusResource): ResourceDocume
 	const source = "dariah-campus" as const;
 	const sourceId = item.id;
 	const id = [source, sourceId].join(":");
-	const authors = [...item.authors, ...item.editors].map((person) => { return person.name });
-	const keywords = item.tags.map((tag) => { return tag.name });
-	const year =
-		isNonEmptyString(item["publication-date"]) ? new Date(item["publication-date"]).getFullYear() : null;
+	const authors = [...item.authors, ...item.editors].map((person) => {
+		return person.name;
+	});
+	const keywords = item.tags.map((tag) => {
+		return tag.name;
+	});
+	const year = isNonEmptyString(item["publication-date"])
+		? new Date(item["publication-date"]).getFullYear()
+		: null;
 	const links = isNonEmptyString(item.pid) ? [item.pid] : [];
 
 	return {
@@ -38,10 +43,15 @@ export function createCampusCurriculum(item: DariahCampusCurriculum): ResourceDo
 	const source = "dariah-campus" as const;
 	const sourceId = item.id;
 	const id = [source, sourceId].join(":");
-	const authors = item.editors.map((person) => { return person.name });
-	const keywords = item.tags.map((tag) => { return tag.name });
-	const year =
-		isNonEmptyString(item["publication-date"]) ? new Date(item["publication-date"]).getFullYear() : null;
+	const authors = item.editors.map((person) => {
+		return person.name;
+	});
+	const keywords = item.tags.map((tag) => {
+		return tag.name;
+	});
+	const year = isNonEmptyString(item["publication-date"])
+		? new Date(item["publication-date"]).getFullYear()
+		: null;
 	const links = isNonEmptyString(item.pid) ? [item.pid] : [];
 
 	return {
@@ -56,7 +66,7 @@ export function createCampusCurriculum(item: DariahCampusCurriculum): ResourceDo
 		links,
 		keywords,
 		kind: null,
-		source_actor_ids: [], // FIXME: dariah-campus
+		source_actor_ids: [],
 		upstream_sources: [],
 		authors,
 		year,

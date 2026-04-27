@@ -8,7 +8,7 @@ import { Result, TaggedError } from "better-result";
 export class CacheFileError extends TaggedError("CacheFileError")<{
 	readonly cause?: unknown;
 	readonly message?: string;
-}>() { }
+}>() {}
 
 export interface CreateCacheServiceParams {
 	cacheDir: string;
@@ -31,11 +31,13 @@ export function createCacheService(params: CreateCacheServiceParams) {
 				return Result.tryPromise({
 					// oxlint-disable-next-line typescript/no-unsafe-type-assertion
 					try() {
-						return readFile(file, { encoding: "utf-8" }).then(content => {
-							return JSON.parse(content) as T
-						})
+						return readFile(file, { encoding: "utf-8" }).then((content) => {
+							return JSON.parse(content) as T;
+						});
 					},
-					catch(cause) { return new CacheFileError({ cause }) },
+					catch(cause) {
+						return new CacheFileError({ cause });
+					},
 				});
 			}
 

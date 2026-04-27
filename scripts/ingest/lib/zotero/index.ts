@@ -6,14 +6,18 @@ export function createZoteroItem(item: ZoteroCslItem): ResourceDocument {
 	const authors = [];
 
 	for (const creator of item.author ?? []) {
-		const name = [creator.given, creator.family].filter((name) => isNonEmptyString(name)).join(" ");
+		const name = [creator.given, creator.family]
+			.filter((name) => {
+				return isNonEmptyString(name);
+			})
+			.join(" ");
 
 		if (isNonEmptyString(name)) {
 			authors.push(name);
 		}
 	}
 
-	const yearRaw = item.issued?.["date-parts"]?.[0]?.[0];
+	const yearRaw = item.issued?.["date-parts"]?.[0]?.[0] as string | number | undefined;
 	const year = yearRaw != null ? Number(yearRaw) : null;
 
 	const source = "zotero";
@@ -33,8 +37,12 @@ export function createZoteroItem(item: ZoteroCslItem): ResourceDocument {
 		keywords:
 			item.keyword
 				?.split(",")
-				.map((keyword) => keyword.trim())
-				.filter((keyword) => isNonEmptyString(keyword)) ?? [],
+				.map((keyword) => {
+					return keyword.trim();
+				})
+				.filter((keyword) => {
+					return isNonEmptyString(keyword);
+				}) ?? [],
 		kind: item.type,
 		source_actor_ids: null,
 		upstream_sources: null,

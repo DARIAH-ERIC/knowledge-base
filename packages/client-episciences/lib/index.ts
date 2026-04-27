@@ -217,8 +217,8 @@ function createHeaders(token?: string): RequestInit["headers"] | undefined {
 	 * for `responseType: "json"`, which produces a different response shape.
 	 */
 	const headers = {
-		accept: "application/ld+json"
-	}
+		accept: "application/ld+json",
+	};
 
 	if (token == null) {
 		return headers;
