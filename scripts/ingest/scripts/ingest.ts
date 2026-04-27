@@ -250,7 +250,7 @@ async function main() {
 
 		const zoteroItems = yield* Result.await(
 			cache.getOrFetch("zotero/items", () => {
-				return zotero.items.csljson.listAll({ groupId: env.ZOTERO_GROUP_ID! });
+				return zotero.items.listAll({ groupId: env.ZOTERO_GROUP_ID! });
 			}),
 		);
 

@@ -18,12 +18,15 @@ export function createCampusResource(item: DariahCampusResource): ResourceDocume
 		? new Date(item["publication-date"]).getFullYear()
 		: null;
 	const links = isNonEmptyString(item.pid) ? [item.pid] : [];
+	const sourceUpdatedAt = isNonEmptyString(item["publication-date"])
+		? new Date(item["publication-date"]).getTime()
+		: null;
 
 	return {
 		id,
 		source,
 		source_id: sourceId,
-		source_updated_at: null,
+		source_updated_at: sourceUpdatedAt,
 		imported_at: Date.now(),
 		type: "training-material",
 		label: item.title,
@@ -53,12 +56,15 @@ export function createCampusCurriculum(item: DariahCampusCurriculum): ResourceDo
 		? new Date(item["publication-date"]).getFullYear()
 		: null;
 	const links = isNonEmptyString(item.pid) ? [item.pid] : [];
+	const sourceUpdatedAt = isNonEmptyString(item["publication-date"])
+		? new Date(item["publication-date"]).getTime()
+		: null;
 
 	return {
 		id,
 		source,
 		source_id: sourceId,
-		source_updated_at: null,
+		source_updated_at: sourceUpdatedAt,
 		imported_at: Date.now(),
 		type: "training-material",
 		label: item.title,

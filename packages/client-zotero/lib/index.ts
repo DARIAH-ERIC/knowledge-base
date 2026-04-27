@@ -127,6 +127,8 @@ export interface ZoteroJsonItemsResponse<TItem extends ZoteroJsonItem = ZoteroJs
 	items: Array<TItem>;
 }
 
+export type ZoteroJsonItemsListResponse = Array<ZoteroJsonItem>;
+
 export interface ZoteroCollectionData {
 	key: string;
 	version: number;
@@ -271,10 +273,10 @@ export function createZoteroClient(params: CreateZoteroClientParams) {
 	/** @see {@link https://www.zotero.org/support/dev/web_api/v3/basics#read_requests} */
 	function getGroupItemsJson(
 		params: GetGroupItemsParams,
-	): Promise<RequestResult<ZoteroJsonItemsResponse>> {
+	): Promise<RequestResult<Array<ZoteroJsonItem>>> {
 		const { groupId, limit, start } = params;
 
-		return request<ZoteroJsonItemsResponse>(
+		return request<Array<ZoteroJsonItem>>(
 			createUrl({
 				baseUrl,
 				pathname: `/groups/${groupId}/items`,
@@ -328,10 +330,10 @@ export function createZoteroClient(params: CreateZoteroClientParams) {
 	/** @see {@link https://www.zotero.org/support/dev/web_api/v3/basics#read_requests} */
 	function getCollectionItemsJson(
 		params: GetCollectionItemsParams,
-	): Promise<RequestResult<ZoteroJsonItemsResponse>> {
+	): Promise<RequestResult<Array<ZoteroJsonItem>>> {
 		const { collectionId, groupId, limit, start } = params;
 
-		return request<ZoteroJsonItemsResponse>(
+		return request<Array<ZoteroJsonItem>>(
 			createUrl({
 				baseUrl,
 				pathname: `/groups/${groupId}/collections/${collectionId}/items`,
@@ -368,7 +370,7 @@ export function createZoteroClient(params: CreateZoteroClientParams) {
 
 	return {
 		items: {
-			list(params: GetGroupItemsParams): Promise<RequestResult<ZoteroJsonItemsResponse>> {
+			list(params: GetGroupItemsParams): Promise<RequestResult<Array<ZoteroJsonItem>>> {
 				return getGroupItemsJson(params);
 			},
 
@@ -376,7 +378,7 @@ export function createZoteroClient(params: CreateZoteroClientParams) {
 				params: Omit<GetGroupItemsParams, "limit" | "start">,
 			): Promise<Result<Array<ZoteroJsonItem>, RequestError>> {
 				return createListAll(getGroupItemsJson, (response) => {
-					return response.items;
+					return response;
 				})(params);
 			},
 
@@ -409,7 +411,7 @@ export function createZoteroClient(params: CreateZoteroClientParams) {
 			},
 
 			items: {
-				list(params: GetCollectionItemsParams): Promise<RequestResult<ZoteroJsonItemsResponse>> {
+				list(params: GetCollectionItemsParams): Promise<RequestResult<Array<ZoteroJsonItem>>> {
 					return getCollectionItemsJson(params);
 				},
 
@@ -417,7 +419,7 @@ export function createZoteroClient(params: CreateZoteroClientParams) {
 					params: Omit<GetCollectionItemsParams, "limit" | "start">,
 				): Promise<Result<Array<ZoteroJsonItem>, RequestError>> {
 					return createListAll(getCollectionItemsJson, (response) => {
-						return response.items;
+						return response;
 					})(params);
 				},
 

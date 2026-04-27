@@ -1,12 +1,30 @@
 import { isNonEmptyString } from "@acdh-oeaw/lib";
-import type { ZoteroCslItem } from "@dariah-eric/client-zotero";
+import type { ZoteroJsonItem } from "@dariah-eric/client-zotero";
 import type { ResourceDocument } from "@dariah-eric/search";
 
-export function createZoteroItem(item: ZoteroCslItem): ResourceDocument {
+interface ZoteroJsonItemData {
+	title?: string;
+	abstractNote?: string;
+	creators?: Array<{
+		firstName?: string;
+		lastName?: string;
+		creatorType?: string;
+	}>;
+	date?: string;
+	tags?: Array<{ tag: string }>;
+	url?: string;
+	DOI?: string;
+	itemType?: string;
+	dateModified?: string;
+	[key: string]: unknown;
+}
+
+export function createZoteroItem(item: ZoteroJsonItem<ZoteroJsonItemData>): ResourceDocument {
+	const data = item.data;
 	const authors = [];
 
-	for (const creator of item.author ?? []) {
-		const name = [creator.given, creator.family]
+	for (const creator of data.creators ?? []) {
+		const name = [creator.firstName, creator.lastName]
 			.filter((name) => {
 				return isNonEmptyString(name);
 			})
@@ -17,37 +35,37 @@ export function createZoteroItem(item: ZoteroCslItem): ResourceDocument {
 		}
 	}
 
-	const yearRaw = item.issued?.["date-parts"]?.[0]?.[0] as string | number | undefined;
+	const yearRaw = data.date != null ? /\d{4}/.exec(data.date)?.[0] : null;
 	const year = yearRaw != null ? Number(yearRaw) : null;
 
 	const source = "zotero";
-	const sourceId = item.id;
+	const sourceId = item.key;
 	const id = [source, sourceId].join(":");
+	const sourceUpdatedAt = data.dateModified != null ? new Date(data.dateModified).getTime() : null;
 
 	return {
 		id,
 		source,
 		source_id: sourceId,
-		source_updated_at: null,
+		source_updated_at: sourceUpdatedAt,
 		imported_at: Date.now(),
 		type: "publication",
-		label: item.title ?? "",
-		description: item.abstract ?? "",
-		links: item.URL != null ? [item.URL] : [],
+		label: data.title ?? "",
+		description: data.abstractNote ?? "",
+		links: data.url != null ? [data.url] : [],
 		keywords:
-			item.keyword
-				?.split(",")
-				.map((keyword) => {
-					return keyword.trim();
+			data.tags
+				?.map((tag) => {
+					return tag.tag;
 				})
 				.filter((keyword) => {
 					return isNonEmptyString(keyword);
 				}) ?? [],
-		kind: item.type,
+		kind: data.itemType ?? null,
 		source_actor_ids: null,
 		upstream_sources: null,
 		authors,
 		year,
-		pid: item.DOI ?? null,
+		pid: data.DOI ?? null,
 	};
 }
