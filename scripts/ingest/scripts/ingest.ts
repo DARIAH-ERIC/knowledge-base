@@ -3,11 +3,11 @@ import * as path from "node:path";
 import { assert, log, pick } from "@acdh-oeaw/lib";
 import { createDariahCampusClient } from "@dariah-eric/client-campus";
 import { createEpisciencesClient } from "@dariah-eric/client-episciences";
-import { createHalClient } from "@dariah-eric/client-hal";
-import { createOpenAireClient } from "@dariah-eric/client-openaire";
+// import { createHalClient } from "@dariah-eric/client-hal";
+// import { createOpenAireClient } from "@dariah-eric/client-openaire";
 import { createSshocClient } from "@dariah-eric/client-sshoc";
 // import { createStorageAdminService } from "@dariah-eric/storage/admin";
-import { createZenodoClient } from "@dariah-eric/client-zenodo";
+// import { createZenodoClient } from "@dariah-eric/client-zenodo";
 import { createZoteroClient } from "@dariah-eric/client-zotero";
 // import { createDatabaseService } from "@dariah-eric/db";
 import type { ResourceDocument, WebsiteDocument } from "@dariah-eric/search";
@@ -18,10 +18,10 @@ import { env } from "../config/env.config";
 import { createCacheService } from "../lib/cache";
 import { createCampusCurriculum, createCampusResource } from "../lib/campus";
 import { createEpisciencesDocument } from "../lib/episciences";
-import { createHalItem } from "../lib/hal";
-import { createOpenAirePublication } from "../lib/openaire";
+// import { createHalItem } from "../lib/hal";
+// import { createOpenAirePublication } from "../lib/openaire";
 import { createSshocItem } from "../lib/sshoc";
-import { createZenodoItem } from "../lib/zenodo";
+// import { createZenodoItem } from "../lib/zenodo";
 import { createZoteroItem } from "../lib/zotero";
 
 function formatNumber(n: number) {
@@ -80,19 +80,19 @@ const episciences = createEpisciencesClient({
 	},
 });
 
-assert(env.OPENAIRE_API_BASE_URL, "Missing environment variable: `OPENAIRE_API_BASE_URL`.");
+// assert(env.OPENAIRE_API_BASE_URL, "Missing environment variable: `OPENAIRE_API_BASE_URL`.");
 
-const openaire = createOpenAireClient({
-	config: {
-		baseUrl: env.OPENAIRE_API_BASE_URL,
-	},
-});
+// const openaire = createOpenAireClient({
+// 	config: {
+// 		baseUrl: env.OPENAIRE_API_BASE_URL,
+// 	},
+// });
 
-assert(env.HAL_API_BASE_URL, "Missing environment variable: `HAL_API_BASE_URL`.");
+// assert(env.HAL_API_BASE_URL, "Missing environment variable: `HAL_API_BASE_URL`.");
 
-const hal = createHalClient({
-	baseUrl: env.HAL_API_BASE_URL,
-});
+// const hal = createHalClient({
+// 	baseUrl: env.HAL_API_BASE_URL,
+// });
 
 assert(
 	env.SSHOC_MARKETPLACE_API_BASE_URL,
@@ -116,11 +116,11 @@ const sshoc = createSshocClient({
 	},
 });
 
-assert(env.ZENODO_API_BASE_URL, "Missing environment variable: `ZENODO_API_BASE_URL`.");
+// assert(env.ZENODO_API_BASE_URL, "Missing environment variable: `ZENODO_API_BASE_URL`.");
 
-const zenodo = createZenodoClient({
-	baseUrl: env.ZENODO_API_BASE_URL,
-});
+// const zenodo = createZenodoClient({
+// 	baseUrl: env.ZENODO_API_BASE_URL,
+// });
 
 assert(env.ZOTERO_API_BASE_URL, "Missing environment variable: `ZOTERO_API_BASE_URL`.");
 assert(env.ZOTERO_API_KEY, "Missing environment variable: `ZOTERO_API_KEY`.");
@@ -145,15 +145,15 @@ async function main() {
 		 * ============================================================================================
 		 */
 
-		log.info("Fetching OpenAIRE research products...");
+		// log.info("Fetching OpenAIRE research products...");
 
-		const openaireProducts = yield* Result.await(
-			cache.getOrFetch("openaire/research-products", () =>
-				openaire.researchProducts.listAll({ relCommunityId: "dariah", type: "publication" }),
-			),
-		);
+		// const openaireProducts = yield* Result.await(
+		// 	cache.getOrFetch("openaire/research-products", () =>
+		// 		openaire.researchProducts.listAll({ relCommunityId: "dariah", type: "publication" }),
+		// 	),
+		// );
 
-		log.success(`Fetched ${formatNumber(openaireProducts.length)} OpenAIRE research products.`);
+		// log.success(`Fetched ${formatNumber(openaireProducts.length)} OpenAIRE research products.`);
 
 		/**
 		 * ============================================================================================
@@ -219,13 +219,13 @@ async function main() {
 		 * ============================================================================================
 		 */
 
-		log.info("Fetching HAL documents...");
+		// log.info("Fetching HAL documents...");
 
-		const halDocuments = yield* Result.await(
-			cache.getOrFetch("hal/documents", () => hal.documents.listAll()),
-		);
+		// const halDocuments = yield* Result.await(
+		// 	cache.getOrFetch("hal/documents", () => hal.documents.listAll()),
+		// );
 
-		log.success(`Fetched ${formatNumber(halDocuments.length)} HAL documents.`);
+		// log.success(`Fetched ${formatNumber(halDocuments.length)} HAL documents.`);
 
 		/**
 		 * ============================================================================================
@@ -233,13 +233,13 @@ async function main() {
 		 * ============================================================================================
 		 */
 
-		log.info("Fetching Zenodo records...");
+		// log.info("Fetching Zenodo records...");
 
-		const zenodoRecords = yield* Result.await(
-			cache.getOrFetch("zenodo/records", () => zenodo.records.listAll()),
-		);
+		// const zenodoRecords = yield* Result.await(
+		// 	cache.getOrFetch("zenodo/records", () => zenodo.records.listAll()),
+		// );
 
-		log.success(`Fetched ${formatNumber(zenodoRecords.length)} Zenodo records.`);
+		// log.success(`Fetched ${formatNumber(zenodoRecords.length)} Zenodo records.`);
 
 		/**
 		 * ============================================================================================
@@ -267,10 +267,10 @@ async function main() {
 			...campusResources.map((item) => createCampusResource(item)),
 			...campusCurricula.map((item) => createCampusCurriculum(item)),
 			...episciencesDocuments.map((item) => createEpisciencesDocument(item)),
-			...halDocuments.map((item) => createHalItem(item)),
-			...openaireProducts.map((item) => createOpenAirePublication(item)),
+			// ...halDocuments.map((item) => createHalItem(item)),
+			// ...openaireProducts.map((item) => createOpenAirePublication(item)),
 			...sshocItems.map((item) => createSshocItem(item, env.SSHOC_MARKETPLACE_BASE_URL!)),
-			...zenodoRecords.map((item) => createZenodoItem(item)),
+			// ...zenodoRecords.map((item) => createZenodoItem(item)),
 			...zoteroItems.map((item) => createZoteroItem(item)),
 		];
 
