@@ -17,6 +17,7 @@ import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
+import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createServerAction } from "@/lib/server/create-server-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
@@ -49,6 +50,7 @@ export const createOpportunityAction = createServerAction(
 		const { contentBlocks, duration, sourceId, title, summary, website } = result.output;
 
 		const slug = slugify(title);
+		let entityId: string | null = null;
 
 		await db.transaction(async (tx) => {
 			const type = await tx.query.entityTypes.findFirst({
@@ -83,6 +85,7 @@ export const createOpportunityAction = createServerAction(
 				.returning({ id: schema.entities.id });
 
 			assert(entity);
+			entityId = entity.id;
 
 			await tx.insert(schema.opportunities).values({
 				id: entity.id,
@@ -138,6 +141,10 @@ export const createOpportunityAction = createServerAction(
 		});
 
 		after(async () => {
+			if (entityId != null) {
+				await syncWebsiteDocumentForEntity(entityId);
+			}
+
 			await dispatchWebhook({ type: "opportunities" });
 		});
 

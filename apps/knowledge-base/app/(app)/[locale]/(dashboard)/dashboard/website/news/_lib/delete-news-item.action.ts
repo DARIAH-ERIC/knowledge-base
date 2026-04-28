@@ -11,6 +11,7 @@ import {
 	deleteWebsiteDocument,
 	getWebsiteDocumentDescriptorByEntityId,
 } from "@/lib/search/website-index";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function deleteNewsItemAction(id: string): Promise<void> {
 	await assertAuthenticated();
@@ -51,6 +52,8 @@ export async function deleteNewsItemAction(id: string): Promise<void> {
 		if (descriptor != null) {
 			await deleteWebsiteDocument(descriptor);
 		}
+
+		await dispatchWebhook({ type: "news" });
 	});
 
 	revalidatePath("/[locale]/dashboard/website/news", "layout");

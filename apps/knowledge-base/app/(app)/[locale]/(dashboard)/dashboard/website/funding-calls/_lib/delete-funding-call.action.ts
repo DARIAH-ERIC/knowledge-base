@@ -2,13 +2,20 @@
 
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 
 import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq, inArray, or } from "@/lib/db/sql";
+import {
+	deleteWebsiteDocument,
+	getWebsiteDocumentDescriptorByEntityId,
+} from "@/lib/search/website-index";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function deleteFundingCallAction(id: string): Promise<void> {
 	await assertAuthenticated();
+	const descriptor = await getWebsiteDocumentDescriptorByEntityId(id);
 
 	await db.transaction(async (tx) => {
 		const entityFields = await tx
@@ -39,6 +46,14 @@ export async function deleteFundingCallAction(id: string): Promise<void> {
 		await tx.delete(schema.fundingCalls).where(eq(schema.fundingCalls.id, id));
 
 		await tx.delete(schema.entities).where(eq(schema.entities.id, id));
+	});
+
+	after(async () => {
+		if (descriptor != null) {
+			await deleteWebsiteDocument(descriptor);
+		}
+
+		await dispatchWebhook({ type: "funding-calls" });
 	});
 
 	revalidatePath("/[locale]/dashboard/website/funding-calls", "layout");

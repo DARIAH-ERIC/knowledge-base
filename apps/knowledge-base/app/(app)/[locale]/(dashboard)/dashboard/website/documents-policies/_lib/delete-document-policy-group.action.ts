@@ -2,10 +2,12 @@
 
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 
 import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq, isNull } from "@/lib/db/sql";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function deleteDocumentPolicyGroupAction(id: string): Promise<void> {
 	await assertAuthenticated();
@@ -32,6 +34,10 @@ export async function deleteDocumentPolicyGroupAction(id: string): Promise<void>
 		);
 
 		await tx.delete(schema.documentPolicyGroups).where(eq(schema.documentPolicyGroups.id, id));
+	});
+
+	after(async () => {
+		await dispatchWebhook({ type: "documents-policies" });
 	});
 
 	revalidatePath("/[locale]/dashboard/website/documents-policies", "layout");

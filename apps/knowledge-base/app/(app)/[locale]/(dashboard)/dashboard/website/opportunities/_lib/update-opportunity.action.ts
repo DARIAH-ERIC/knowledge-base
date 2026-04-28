@@ -17,6 +17,7 @@ import { db, type Transaction } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
+import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createServerAction } from "@/lib/server/create-server-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
@@ -139,6 +140,7 @@ export const updateOpportunityAction = createServerAction(
 		});
 
 		after(async () => {
+			await syncWebsiteDocumentForEntity(id);
 			await dispatchWebhook({ type: "opportunities" });
 		});
 
