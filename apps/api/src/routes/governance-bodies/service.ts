@@ -37,7 +37,7 @@ function mapSocialMedia(
 		url: string;
 		duration: {
 			start: Date;
-			end: Date | undefined;
+			end?: Date | undefined;
 		} | null;
 		type: { type: (typeof schema.socialMediaTypesEnum)[number] };
 	}>,
@@ -128,7 +128,7 @@ async function getActiveGovernanceBodyPersons(
 	}
 
 	for (const [governanceBodyId, items] of personsByGovernanceBody) {
-		const sorted = (items as Array<{ role: string; sortName: string }>).sort((a, b) => {
+		const sorted = [...items].sort((a, b) => {
 			const byName = a.sortName.localeCompare(b.sortName);
 			if (byName !== 0) return byName;
 			return a.role.localeCompare(b.role);

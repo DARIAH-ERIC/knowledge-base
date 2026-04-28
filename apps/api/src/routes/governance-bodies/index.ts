@@ -6,15 +6,15 @@ import { resolver } from "@/lib/openapi/resolver";
 import { BAD_REQUEST, NOT_FOUND } from "@/lib/openapi/responses";
 import { validate, validator } from "@/lib/openapi/validator";
 import {
+	GetGovernanceBodies,
 	GetGovernanceBodyById,
 	GetGovernanceBodyBySlug,
-	GetGovernanceBodies,
 	GetGovernanceBodySlugs,
 } from "@/routes/governance-bodies/schemas";
 import {
+	getGovernanceBodies,
 	getGovernanceBodyById,
 	getGovernanceBodyBySlug,
-	getGovernanceBodies,
 	getGovernanceBodySlugs,
 } from "@/routes/governance-bodies/service";
 
