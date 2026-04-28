@@ -197,6 +197,12 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 					icon: <ListBulletIcon />,
 				},
 				{
+					href: "/dashboard/website/funding-calls",
+					tooltip: t("Funding Calls"),
+					label: t("Funding Calls"),
+					icon: <ListBulletIcon />,
+				},
+				{
 					href: "/dashboard/website/impact-case-studies",
 					tooltip: t("Impact case studies"),
 					label: t("Impact case studies"),
@@ -218,6 +224,12 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 					href: "/dashboard/website/news",
 					tooltip: t("News"),
 					label: t("News"),
+					icon: <ListBulletIcon />,
+				},
+				{
+					href: "/dashboard/website/opportunities",
+					tooltip: t("Opportunities"),
+					label: t("Opportunities"),
 					icon: <ListBulletIcon />,
 				},
 				{

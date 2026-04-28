@@ -231,6 +231,13 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.socialMedia.id.through(r.projectsToSocialMedia.socialMediaId),
 			}),
 		},
+		fundingCalls: {
+			entity: r.one.entities({
+				from: r.fundingCalls.id,
+				to: r.entities.id,
+				optional: false,
+			}),
+		},
 		membersAndPartners: {
 			image: r.one.assets({
 				from: r.membersAndPartners.imageId,
@@ -246,6 +253,18 @@ export const relations = defineRelations(schema, (r) => {
 					r.organisationalUnitsToSocialMedia.organisationalUnitId,
 				),
 				to: r.socialMedia.id.through(r.organisationalUnitsToSocialMedia.socialMediaId),
+			}),
+		},
+		opportunities: {
+			entity: r.one.entities({
+				from: r.opportunities.id,
+				to: r.entities.id,
+				optional: false,
+			}),
+			source: r.one.opportunitySources({
+				from: r.opportunities.sourceId,
+				to: r.opportunitySources.id,
+				optional: false,
 			}),
 		},
 		workingGroups: {
