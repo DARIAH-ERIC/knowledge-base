@@ -1,7 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { alias, eq } from "@dariah-eric/database";
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as schema from "@dariah-eric/database/schema";
+import { alias, eq } from "@dariah-eric/database/sql";
 import * as v from "valibot";
 
 import type { Database, Transaction } from "@/middlewares/db";

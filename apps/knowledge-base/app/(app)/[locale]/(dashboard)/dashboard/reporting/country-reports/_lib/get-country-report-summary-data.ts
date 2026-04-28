@@ -1,4 +1,4 @@
-import { db } from "@dariah-eric/database/client";
+import { db } from "@dariah-eric/database";
 
 export interface CountryReportSummaryData {
 	totalContributors: number | null;

@@ -4,7 +4,7 @@ import { Readable } from "node:stream";
 import type { ReadableStream } from "node:stream/web";
 
 import { isNonEmptyString } from "@acdh-oeaw/lib";
-import { db } from "@dariah-eric/database/client";
+import { db } from "@dariah-eric/database";
 import { relationsFilterToSQL } from "@dariah-eric/database/relations";
 import * as schema from "@dariah-eric/database/schema";
 

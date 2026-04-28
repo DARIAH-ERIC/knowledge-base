@@ -1,6 +1,6 @@
 import { Readable } from "node:stream";
 
-import { db } from "@dariah-eric/database/client";
+import { db } from "@dariah-eric/database";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/lib/auth/session";

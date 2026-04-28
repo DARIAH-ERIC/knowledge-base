@@ -1,4 +1,4 @@
-import { db } from "@dariah-eric/database/client";
+import { db } from "@dariah-eric/database";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 

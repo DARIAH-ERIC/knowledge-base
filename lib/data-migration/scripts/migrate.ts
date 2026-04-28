@@ -4,7 +4,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
 import { assert, isNonEmptyString, keyBy, log, unreachable } from "@acdh-oeaw/lib";
-import { db, type Transaction } from "@dariah-eric/database/client";
+import { db, type Transaction } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { createStorageService } from "@dariah-eric/storage";
 import type { AssetPrefix } from "@dariah-eric/storage/config";

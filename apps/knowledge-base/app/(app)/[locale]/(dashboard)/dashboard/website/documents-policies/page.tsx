@@ -1,5 +1,5 @@
-import { asc, eq, isNull } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
+import { asc, eq, isNull } from "@dariah-eric/database/sql";
+import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";

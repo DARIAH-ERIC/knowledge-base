@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
+import { count, eq } from "@dariah-eric/database/sql";
+import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
 import { imageGridOptions } from "@/config/assets.config";

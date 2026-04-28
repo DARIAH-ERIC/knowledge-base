@@ -1,5 +1,5 @@
 import { assert, keyBy, log } from "@acdh-oeaw/lib";
-import { db } from "@dariah-eric/database/client";
+import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { createStorageService } from "@dariah-eric/storage";
 import { buffer } from "@dariah-eric/storage/lib";

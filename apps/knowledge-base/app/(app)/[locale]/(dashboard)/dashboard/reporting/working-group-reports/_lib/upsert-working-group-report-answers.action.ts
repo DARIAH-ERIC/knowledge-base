@@ -1,8 +1,8 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
-import { eq } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
+import { eq } from "@dariah-eric/database/sql";
+import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import type { JSONContent } from "@tiptap/core";

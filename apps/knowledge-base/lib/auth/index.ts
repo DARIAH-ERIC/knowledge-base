@@ -1,5 +1,5 @@
 import { createAuthService } from "@dariah-eric/auth";
-import { db } from "@dariah-eric/database/client";
+import { db } from "@dariah-eric/database";
 import { cookies } from "next/headers";
 
 import {

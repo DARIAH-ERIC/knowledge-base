@@ -1,5 +1,5 @@
-import { count, desc, eq, ilike, sql } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
+import { count, desc, eq, ilike, sql } from "@dariah-eric/database/sql";
+import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
 export type ProjectsSort = "name" | "acronym" | "funding" | "scope";

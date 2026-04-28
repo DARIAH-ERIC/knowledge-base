@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq, ilike, inArray } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
+import { count, eq, ilike, inArray } from "@dariah-eric/database/sql";
+import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
 import { relationOptionsPageSize } from "@/lib/constants/relations";

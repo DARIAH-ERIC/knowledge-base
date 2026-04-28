@@ -49,18 +49,37 @@ export type WebsiteResourceType = (typeof websiteResourceTypes)[number];
 
 export type WebsiteDocumentType = WebsiteEntityType | WebsiteResourceType;
 
+export const websiteEntitySources = ["dariah-knowledge-base"] as const;
+export type WebsiteEntitySource = (typeof websiteEntitySources)[number];
+
+export const websiteResourceSources = [
+	"dariah-campus",
+	"episciences",
+	"hal",
+	"open-aire",
+	"ssh-open-marketplace",
+	"zenodo",
+	"zotero",
+] as const;
+export type WebsiteResourceSource = (typeof websiteResourceSources)[number];
+
+export type WebsiteDocumentSource = WebsiteEntitySource | WebsiteResourceSource;
+
 export interface WebsiteEntityDocument extends CollectionDocument<typeof websiteCollection> {
 	kind: "entity";
+	source: WebsiteEntitySource;
 	type: WebsiteEntityType;
 }
 
 export interface WebsiteResourceDocument extends CollectionDocument<typeof websiteCollection> {
 	kind: "resource";
+	source: WebsiteResourceSource;
 	type: WebsiteResourceType;
 }
 
 export interface WebsiteDocument extends CollectionDocument<typeof websiteCollection> {
 	kind: "entity" | "resource";
+	source: WebsiteDocumentSource;
 	type: WebsiteDocumentType;
 }
 

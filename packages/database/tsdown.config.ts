@@ -9,6 +9,7 @@ export default defineConfig({
 		"./lib/errors.ts",
 		"./lib/relations.ts",
 		"./lib/schema.ts",
+		"./lib/sql.ts",
 	],
 	format: ["esm"],
 	minify: false,

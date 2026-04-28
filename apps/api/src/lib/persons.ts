@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { and, eq, inArray, sql } from "@dariah-eric/database";
+import { and, eq, inArray, sql } from "@dariah-eric/database/sql";
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as schema from "@dariah-eric/database/schema";
 

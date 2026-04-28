@@ -1,6 +1,6 @@
 import type { User } from "@dariah-eric/auth";
-import { and, eq, inArray, sql } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
+import { and, eq, inArray, sql } from "@dariah-eric/database/sql";
+import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { getLocale } from "next-intl/server";
 

@@ -1,4 +1,4 @@
-import { db } from "@dariah-eric/database/client";
+import { db } from "@dariah-eric/database";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";

@@ -1,7 +1,7 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
-import { db } from "@dariah-eric/database/client";
+import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { reportingCampaignSocialMediaCategoryEnum } from "@dariah-eric/database/schema";
 import {

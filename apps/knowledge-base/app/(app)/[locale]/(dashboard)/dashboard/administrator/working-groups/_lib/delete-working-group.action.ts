@@ -1,7 +1,7 @@
 "use server";
 
-import { eq, inArray, or } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
+import { eq, inArray, or } from "@dariah-eric/database/sql";
+import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 

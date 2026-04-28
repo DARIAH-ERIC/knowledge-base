@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count } from "@dariah-eric/database";
+import { count } from "@dariah-eric/database/sql";
 import * as schema from "@dariah-eric/database/schema";
 
 import type { Database, Transaction } from "@/middlewares/db";

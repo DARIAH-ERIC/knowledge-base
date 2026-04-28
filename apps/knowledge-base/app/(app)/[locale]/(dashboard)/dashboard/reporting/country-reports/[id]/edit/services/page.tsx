@@ -1,4 +1,4 @@
-import { db } from "@dariah-eric/database/client";
+import { db } from "@dariah-eric/database";
 import { serviceKpiCategoryEnum } from "@dariah-eric/database/schema";
 import { Button } from "@dariah-eric/ui/button";
 import { Label } from "@dariah-eric/ui/field";

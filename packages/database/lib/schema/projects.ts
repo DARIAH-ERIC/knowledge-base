@@ -187,6 +187,7 @@ export const dariahProjects = p
 		metadata: p.jsonb("metadata"),
 		name: p.text("name").notNull(),
 		summary: p.text("summary").notNull(),
+		updatedAt: f.timestamp("updated_at").notNull(),
 		duration: f.timestampRange("duration").notNull(),
 		call: p.text("call").notNull(),
 		topic: p.text("topic").notNull(),

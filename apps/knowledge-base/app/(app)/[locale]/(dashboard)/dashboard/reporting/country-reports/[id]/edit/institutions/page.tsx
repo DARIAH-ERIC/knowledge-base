@@ -1,5 +1,5 @@
-import { and, eq, inArray, notInArray, sql } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
+import { and, eq, inArray, notInArray, sql } from "@dariah-eric/database/sql";
+import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";

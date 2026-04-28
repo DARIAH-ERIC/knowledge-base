@@ -1,8 +1,8 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
-import { sql } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
+import { sql } from "@dariah-eric/database/sql";
+import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import {
 	createActionStateError,

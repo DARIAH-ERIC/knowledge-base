@@ -1,5 +1,5 @@
-import { ilike, inArray } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
+import { ilike, inArray } from "@dariah-eric/database/sql";
+import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { type NextRequest, NextResponse } from "next/server";
 

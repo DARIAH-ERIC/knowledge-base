@@ -41,13 +41,27 @@ export default async function globalSetup(): Promise<void> {
 	}
 	const encryptionKey = Buffer.from(authEncryptionKeyHex, "hex");
 
-	const [{ eq }, { createClient }, schema] = await Promise.all([
+	const [{ eq }, { createDatabaseService }, schema] = await Promise.all([
+		import("@dariah-eric/database/sql"),
 		import("@dariah-eric/database"),
-		import("@dariah-eric/database/client"),
 		import("@dariah-eric/database/schema"),
 	]);
 
-	const db = createClient();
+	const db = createDatabaseService({
+		connection: {
+			// eslint-disable-next-line no-restricted-syntax
+			database: process.env.DATABASE_NAME,
+			// eslint-disable-next-line no-restricted-syntax
+			host: process.env.DATABASE_HOST,
+			// eslint-disable-next-line no-restricted-syntax
+			password: process.env.DATABASE_PASSWORD,
+			// eslint-disable-next-line no-restricted-syntax
+			port: Number(process.env.DATABASE_PORT),
+			// eslint-disable-next-line no-restricted-syntax
+			user: process.env.DATABASE_USER,
+		},
+		logger: false,
+	}).unwrap();
 
 	try {
 		/**

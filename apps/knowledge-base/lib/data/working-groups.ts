@@ -1,5 +1,5 @@
-import { and, count, desc, eq, ilike, inArray } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
+import { and, count, desc, eq, ilike, inArray } from "@dariah-eric/database/sql";
+import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
 export type WorkingGroupsSort = "name";

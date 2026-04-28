@@ -1,25 +1,36 @@
-import { and, eq, inArray, or, sql } from "@dariah-eric/database";
-import { createClient } from "@dariah-eric/database/client";
+import { createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
+import { and, eq, inArray, or, sql } from "@dariah-eric/database/sql";
+import type { InferOk } from "better-result";
+
+import { env } from "../../../config/env.config";
 
 export const E2E_TEST_ASSET_KEY = "images/e2e-test-asset";
 export const E2E_TEST_ASSET_LABEL = "E2E Test Asset";
 
-type Database = ReturnType<typeof createClient>;
+type Database = InferOk<ReturnType<typeof createDatabaseService>>;
 
 /**
  * Worker-scoped service that provides DB access and test-data helpers.
  *
  * Each test worker gets its own `DatabaseService` instance (and therefore its
  * own pg pool). Workers inherit env vars from the main Playwright process
- * (which called dotenvx in playwright.config.ts), so the env validation inside
- * @dariah-eric/database/client passes at import time.
+ * (which called dotenvx in playwright.config.ts).
  */
 export class DatabaseService {
 	private readonly db: Database;
 
 	constructor() {
-		this.db = createClient();
+		this.db = createDatabaseService({
+			connection: {
+				database: env.DATABASE_NAME,
+				host: env.DATABASE_HOST,
+				password: env.DATABASE_PASSWORD,
+				port: env.DATABASE_PORT,
+				user: env.DATABASE_USER,
+			},
+			logger: false,
+		}).unwrap();
 	}
 
 	/** Returns the asset inserted by globalSetup. */

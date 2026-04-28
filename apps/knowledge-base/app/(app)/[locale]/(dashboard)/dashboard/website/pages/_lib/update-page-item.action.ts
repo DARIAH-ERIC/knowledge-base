@@ -1,8 +1,8 @@
 "use server";
 
 import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
-import { eq, inArray } from "@dariah-eric/database";
-import { db, type Transaction } from "@dariah-eric/database/client";
+import { eq, inArray } from "@dariah-eric/database/sql";
+import { db, type Transaction } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";

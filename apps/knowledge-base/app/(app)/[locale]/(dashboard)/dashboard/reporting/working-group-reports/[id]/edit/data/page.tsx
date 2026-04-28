@@ -1,5 +1,5 @@
-import { and, eq, inArray, sql } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
+import { and, eq, inArray, sql } from "@dariah-eric/database/sql";
+import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { Button } from "@dariah-eric/ui/button";
 import { Label } from "@dariah-eric/ui/field";
