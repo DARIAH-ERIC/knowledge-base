@@ -6,8 +6,10 @@ import { env } from "@/config/env.config";
 export type WebhookEntityType =
 	| "documents-policies"
 	| "events"
+	| "funding-calls"
 	| "impact-case-studies"
 	| "navigation"
+	| "opportunities"
 	| "news"
 	| "pages"
 	| "site-metadata"

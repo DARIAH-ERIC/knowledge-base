@@ -1,0 +1,153 @@
+"use client";
+
+import type * as schema from "@dariah-eric/database/schema";
+import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { Button } from "@dariah-eric/ui/button";
+import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
+import { FieldError, Label } from "@dariah-eric/ui/field";
+import { Form } from "@dariah-eric/ui/form";
+import { FormStatus } from "@dariah-eric/ui/form-status";
+import { Input } from "@dariah-eric/ui/input";
+import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
+import { Separator } from "@dariah-eric/ui/separator";
+import { TextField } from "@dariah-eric/ui/text-field";
+import { CalendarDate } from "@internationalized/date";
+import { useExtracted } from "next-intl";
+import { Fragment, type ReactNode, useActionState } from "react";
+
+import {
+	type ContentBlock,
+	ContentBlocks,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import {
+	FormActions,
+	FormLayout,
+	FormSection,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import type { ServerAction } from "@/lib/server/create-server-action";
+
+interface OpportunityFormProps {
+	contentBlocks?: Array<ContentBlock>;
+	opportunity?: Pick<schema.Opportunity, "id" | "duration" | "title" | "summary" | "website"> & {
+		entity: Pick<schema.Entity, "documentId" | "slug"> & {
+			status: Pick<schema.EntityStatus, "id" | "type">;
+		};
+		source: Pick<schema.OpportunitySource, "id" | "source">;
+	};
+	formAction: ServerAction;
+	sources: Array<Pick<schema.OpportunitySource, "id" | "source">>;
+}
+
+export function OpportunityForm(props: Readonly<OpportunityFormProps>): ReactNode {
+	const { contentBlocks, formAction, opportunity, sources } = props;
+
+	const t = useExtracted();
+
+	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
+
+	return (
+		<FormLayout>
+			<Form action={action} className="flex flex-col gap-y-6" state={state}>
+				<FormSection description={t("Enter the opportunity details.")} title={t("Details")}>
+					<TextField defaultValue={opportunity?.title} isRequired={true} name="title">
+						<Label>{t("Title")}</Label>
+						<Input />
+						<FieldError />
+					</TextField>
+
+					<Select
+						defaultValue={opportunity?.source.id ?? undefined}
+						isRequired={true}
+						name="sourceId"
+					>
+						<Label>{t("Source")}</Label>
+						<SelectTrigger />
+						<FieldError />
+						<SelectContent>
+							{sources.map((item) => {
+								return (
+									<SelectItem key={item.id} id={item.id}>
+										{item.source}
+									</SelectItem>
+								);
+							})}
+						</SelectContent>
+					</Select>
+
+					<TextField defaultValue={opportunity?.summary ?? undefined} name="summary">
+						<Label>{t("Summary")}</Label>
+						<Input />
+						<FieldError />
+					</TextField>
+					<DatePicker
+						defaultValue={
+							opportunity != null
+								? new CalendarDate(
+										opportunity.duration.start.getUTCFullYear(),
+										opportunity.duration.start.getUTCMonth() + 1,
+										opportunity.duration.start.getUTCDate(),
+									)
+								: undefined
+						}
+						granularity="day"
+						isRequired={true}
+						name="duration.start"
+					>
+						<Label>{t("Start date")}</Label>
+						<DatePickerTrigger />
+					</DatePicker>
+
+					<DatePicker
+						defaultValue={
+							opportunity?.duration.end != null
+								? new CalendarDate(
+										opportunity.duration.end.getUTCFullYear(),
+										opportunity.duration.end.getUTCMonth() + 1,
+										opportunity.duration.end.getUTCDate(),
+									)
+								: undefined
+						}
+						granularity="day"
+						name="duration.end"
+					>
+						<Label>{t("End date")}</Label>
+						<DatePickerTrigger />
+					</DatePicker>
+					<TextField defaultValue={opportunity?.website ?? undefined} name="website" type="url">
+						<Label>{t("Website")}</Label>
+						<Input placeholder="https://" />
+						<FieldError />
+					</TextField>
+				</FormSection>
+
+				<Separator className="my-6" />
+
+				<FormSection description={t("Add the content.")} title={t("Content")} variant="stacked">
+					<ContentBlocks items={contentBlocks ?? []} />
+				</FormSection>
+
+				{opportunity != null ? (
+					<Fragment>
+						<input name="id" type="hidden" value={opportunity.id} />
+						<input name="documentId" type="hidden" value={opportunity.entity.documentId} />
+					</Fragment>
+				) : null}
+
+				<FormActions>
+					<FormStatus state={state} />
+					<Button isPending={isPending} type="submit">
+						{isPending ? (
+							<Fragment>
+								<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
+								<span aria-hidden={true}>{t("Saving...")}</span>
+							</Fragment>
+						) : (
+							t("Save")
+						)}
+					</Button>
+				</FormActions>
+			</Form>
+		</FormLayout>
+	);
+}
