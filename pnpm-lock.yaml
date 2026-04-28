@@ -644,6 +644,18 @@ importers:
       '@dariah-eric/auth':
         specifier: workspace:^
         version: link:../../packages/auth
+      '@dariah-eric/client-campus':
+        specifier: workspace:^
+        version: link:../../packages/client-campus
+      '@dariah-eric/client-episciences':
+        specifier: workspace:^
+        version: link:../../packages/client-episciences
+      '@dariah-eric/client-sshoc':
+        specifier: workspace:^
+        version: link:../../packages/client-sshoc
+      '@dariah-eric/client-zotero':
+        specifier: workspace:^
+        version: link:../../packages/client-zotero
       '@dariah-eric/database':
         specifier: workspace:^
         version: link:../../packages/database
