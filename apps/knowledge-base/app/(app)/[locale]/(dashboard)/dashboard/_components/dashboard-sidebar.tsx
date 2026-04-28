@@ -100,24 +100,6 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 				icon: <ListBulletIcon />,
 			},
 			{
-				href: "/dashboard/administrator/reporting-campaigns",
-				tooltip: t("Reporting campaigns"),
-				label: t("Reporting campaigns"),
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/administrator/country-reports",
-				tooltip: t("Country reports"),
-				label: t("Country reports"),
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/administrator/working-group-reports",
-				tooltip: t("Working group reports"),
-				label: t("Working group reports"),
-				icon: <ListBulletIcon />,
-			},
-			{
 				href: "/dashboard/administrator/services",
 				tooltip: t("Services"),
 				label: t("Services"),
@@ -144,108 +126,139 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 		],
 	};
 
+	const websiteSection: SidebarMenuSection = {
+		title: t("Website"),
+		items: [
+			{
+				href: "/dashboard/website",
+				tooltip: t("Overview"),
+				label: t("Overview"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/website/assets",
+				tooltip: t("Assets"),
+				label: t("Assets"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/website/documents-policies",
+				tooltip: t("Documents and policies"),
+				label: t("Documents and policies"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/website/events",
+				tooltip: t("Events"),
+				label: t("Events"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/website/funding-calls",
+				tooltip: t("Funding Calls"),
+				label: t("Funding Calls"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/website/impact-case-studies",
+				tooltip: t("Impact case studies"),
+				label: t("Impact case studies"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/website/metadata",
+				tooltip: t("Metadata"),
+				label: t("Metadata"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/website/navigation",
+				tooltip: t("Navigation"),
+				label: t("Navigation"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/website/news",
+				tooltip: t("News"),
+				label: t("News"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/website/opportunities",
+				tooltip: t("Opportunities"),
+				label: t("Opportunities"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/website/pages",
+				tooltip: t("Pages"),
+				label: t("Pages"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/website/spotlight-articles",
+				tooltip: t("Spotlight articles"),
+				label: t("Spotlight articles"),
+				icon: <ListBulletIcon />,
+			},
+		],
+	};
+
+	const reportingSection: SidebarMenuSection = {
+		title: t("Reporting"),
+		items: isAdmin
+			? [
+					{
+						href: "/dashboard/reporting/administrator",
+						tooltip: t("Overview"),
+						label: t("Overview"),
+						icon: <ListBulletIcon />,
+					},
+					{
+						href: "/dashboard/administrator/country-reports",
+						tooltip: t("Country reports"),
+						label: t("Country reports"),
+						icon: <ListBulletIcon />,
+					},
+					{
+						href: "/dashboard/administrator/working-group-reports",
+						tooltip: t("Working group reports"),
+						label: t("Working group reports"),
+						icon: <ListBulletIcon />,
+					},
+					{
+						href: "/dashboard/administrator/reporting-campaigns",
+						tooltip: t("Reporting campaigns"),
+						label: t("Reporting campaigns"),
+						icon: <ListBulletIcon />,
+					},
+				]
+			: [
+					{
+						href: "/dashboard/reporting",
+						tooltip: t("Overview"),
+						label: t("Overview"),
+						icon: <ListBulletIcon />,
+					},
+					{
+						href: "/dashboard/reporting/country-reports",
+						tooltip: t("Country reports"),
+						label: t("Country reports"),
+						icon: <ListBulletIcon />,
+					},
+					{
+						href: "/dashboard/reporting/working-group-reports",
+						tooltip: t("Working group reports"),
+						label: t("Working group reports"),
+						icon: <ListBulletIcon />,
+					},
+				],
+	};
+
 	return [
 		...(isAdmin ? [adminSection] : []),
-		{
-			title: t("Reports"),
-			items: [
-				{
-					href: "/dashboard/reporting",
-					tooltip: t("Overview"),
-					label: t("Overview"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/reporting/country-reports",
-					tooltip: t("Country reports"),
-					label: t("Country reports"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/reporting/working-group-reports",
-					tooltip: t("Working group reports"),
-					label: t("Working group reports"),
-					icon: <ListBulletIcon />,
-				},
-			],
-		},
-		{
-			title: t("Website"),
-			items: [
-				{
-					href: "/dashboard/website",
-					tooltip: t("Overview"),
-					label: t("Overview"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/website/assets",
-					tooltip: t("Assets"),
-					label: t("Assets"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/website/documents-policies",
-					tooltip: t("Documents and policies"),
-					label: t("Documents and policies"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/website/events",
-					tooltip: t("Events"),
-					label: t("Events"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/website/funding-calls",
-					tooltip: t("Funding Calls"),
-					label: t("Funding Calls"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/website/impact-case-studies",
-					tooltip: t("Impact case studies"),
-					label: t("Impact case studies"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/website/metadata",
-					tooltip: t("Metadata"),
-					label: t("Metadata"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/website/navigation",
-					tooltip: t("Navigation"),
-					label: t("Navigation"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/website/news",
-					tooltip: t("News"),
-					label: t("News"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/website/opportunities",
-					tooltip: t("Opportunities"),
-					label: t("Opportunities"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/website/pages",
-					tooltip: t("Pages"),
-					label: t("Pages"),
-					icon: <ListBulletIcon />,
-				},
-				{
-					href: "/dashboard/website/spotlight-articles",
-					tooltip: t("Spotlight articles"),
-					label: t("Spotlight articles"),
-					icon: <ListBulletIcon />,
-				},
-			],
-		},
+		reportingSection,
+		...(isAdmin ? [websiteSection] : []),
 	] satisfies Array<SidebarMenuSection>;
 }
 
