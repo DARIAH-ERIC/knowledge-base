@@ -43,6 +43,7 @@ export const EventSchema = v.pipe(
 	v.object({
 		...v.pick(schema.EventSelectSchema, ["id", "title", "summary", "location", "isFullDay"])
 			.entries,
+		website: v.nullable(v.string()),
 		image: v.object({ url: v.string() }),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),

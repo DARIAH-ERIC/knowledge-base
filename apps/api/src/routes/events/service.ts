@@ -221,6 +221,7 @@ export async function getEventById(db: Database | Transaction, params: GetEventB
 				location: true,
 				duration: true,
 				isFullDay: true,
+				website: true,
 			},
 			with: {
 				entity: {
@@ -354,6 +355,7 @@ export async function getEventBySlug(db: Database | Transaction, params: GetEven
 			location: true,
 			duration: true,
 			isFullDay: true,
+			website: true,
 		},
 		with: {
 			entity: {

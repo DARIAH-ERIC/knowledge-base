@@ -120,6 +120,28 @@ export const MemberOrPartnerSchema = v.pipe(
 			}),
 		),
 		description: v.optional(v.array(ContentBlockSchema), []),
+		relatedEntities: v.optional(
+			v.array(
+				v.object({
+					id: v.pipe(v.string(), v.uuid()),
+					slug: v.string(),
+					entityType: v.string(),
+					label: v.nullable(v.string()),
+				}),
+			),
+			[],
+		),
+		relatedResources: v.optional(
+			v.array(
+				v.object({
+					id: v.string(),
+					label: v.string(),
+					type: v.nullable(v.string()),
+					links: v.array(v.string()),
+				}),
+			),
+			[],
+		),
 	}),
 	v.description("Member or partner"),
 	v.metadata({ ref: "MemberOrPartner" }),

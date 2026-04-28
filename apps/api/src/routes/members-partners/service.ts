@@ -5,6 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { getPersonPositions } from "@/lib/persons";
+import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
@@ -504,7 +505,7 @@ export async function getMemberOrPartnerById(
 ) {
 	const { id } = params;
 
-	const [item, fields] = await Promise.all([
+	const [item, fields, relatedEntities, relatedResources] = await Promise.all([
 		db.query.membersAndPartners.findFirst({
 			where: {
 				id,
@@ -553,6 +554,8 @@ export async function getMemberOrPartnerById(
 			},
 		}),
 		getContentBlocks(db, id),
+		getRelatedEntities(db, id),
+		getRelatedResources(db, id),
 	]);
 
 	if (item == null) {
@@ -592,6 +595,8 @@ export async function getMemberOrPartnerById(
 		nationalConsortium,
 		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
+		relatedEntities,
+		relatedResources,
 	};
 }
 
@@ -736,11 +741,20 @@ export async function getMemberOrPartnerBySlug(
 		item.status === "is_cooperating_partner_of"
 			? getCooperatingPartnerInstitutions(db, item.id)
 			: getMemberObserverInstitutions(db, item.id);
-	const [fields, institutions, contributors, nationalConsortium] = await Promise.all([
+	const [
+		fields,
+		institutions,
+		contributors,
+		nationalConsortium,
+		relatedEntities,
+		relatedResources,
+	] = await Promise.all([
 		getContentBlocks(db, item.id),
 		includeInstitutions ? institutionsPromise : Promise.resolve([]),
 		includeCountryRelations ? getContributors(db, item.id) : Promise.resolve([]),
 		includeCountryRelations ? getNationalConsortium(db, item.id) : Promise.resolve(null),
+		getRelatedEntities(db, item.id),
+		getRelatedResources(db, item.id),
 	]);
 
 	return {
@@ -752,5 +766,7 @@ export async function getMemberOrPartnerBySlug(
 		nationalConsortium,
 		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
+		relatedEntities,
+		relatedResources,
 	};
 }
