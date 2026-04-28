@@ -5,7 +5,8 @@ import type { ReactNode } from "react";
 
 import { PersonDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details";
 import { imageGridOptions } from "@/config/assets.config";
-import { db } from "@/lib/db";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getPersonBySlugForAdmin } from "@/lib/data/persons";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -31,43 +32,8 @@ export default async function DashboardAdministratorPersonDetailsPage(
 
 	const { slug } = await params;
 
-	const person = await db.query.persons.findFirst({
-		where: {
-			entity: {
-				slug,
-			},
-		},
-		columns: {
-			id: true,
-			email: true,
-			name: true,
-			orcid: true,
-			position: true,
-			sortName: true,
-		},
-		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
-				},
-				with: {
-					status: {
-						columns: {
-							id: true,
-							type: true,
-						},
-					},
-				},
-			},
-			image: {
-				columns: {
-					key: true,
-					label: true,
-				},
-			},
-		},
-	});
+	const { user } = await assertAuthenticated();
+	const person = await getPersonBySlugForAdmin(user, slug);
 
 	if (person == null) {
 		notFound();

@@ -20,6 +20,8 @@ import {
 import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
 
+import { signOutAction } from "@/lib/auth/sign-out.action";
+
 interface UserMenuProps {
 	user: {
 		name: string;
@@ -67,7 +69,7 @@ export function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 
 				<MenuItem
 					onAction={() => {
-						// TODO:
+						void signOutAction();
 					}}
 				>
 					<ArrowLeftStartOnRectangleIcon />

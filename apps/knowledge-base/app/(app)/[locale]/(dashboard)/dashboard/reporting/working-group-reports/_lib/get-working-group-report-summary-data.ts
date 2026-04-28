@@ -1,6 +1,8 @@
+import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
 
 import type { WorkingGroupReportSummaryData } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary";
+import { type Action, can } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
 import { and, eq, inArray, sql } from "@/lib/db/sql";
 
@@ -12,9 +14,17 @@ export interface WorkingGroupReportData {
 	summary: WorkingGroupReportSummaryData;
 }
 
-export async function getWorkingGroupReportData(
-	id: string,
-): Promise<WorkingGroupReportData | null> {
+export interface WorkingGroupReportHeaderData {
+	id: string;
+	workingGroup: { name: string };
+	campaign: { year: number };
+}
+
+export type AuthorizedWorkingGroupReportResult<T> =
+	| { status: "forbidden" | "not-found" }
+	| { status: "ok"; data: T };
+
+async function getWorkingGroupReportData(id: string): Promise<WorkingGroupReportData | null> {
 	const report = await db.query.workingGroupReports.findFirst({
 		where: { id },
 		columns: {
@@ -106,4 +116,68 @@ export async function getWorkingGroupReportData(
 			}),
 		},
 	};
+}
+
+async function getWorkingGroupReportHeader(
+	id: string,
+): Promise<WorkingGroupReportHeaderData | null> {
+	const report = await db.query.workingGroupReports.findFirst({
+		where: { id },
+		columns: { id: true },
+		with: {
+			campaign: { columns: { year: true } },
+			workingGroup: { columns: { name: true } },
+		},
+	});
+
+	if (report == null) return null;
+
+	return {
+		id: report.id,
+		workingGroup: report.workingGroup,
+		campaign: report.campaign,
+	};
+}
+
+export async function getWorkingGroupReportDataForUser(
+	user: User,
+	id: string,
+	action: Extract<Action, "read" | "update"> = "read",
+): Promise<AuthorizedWorkingGroupReportResult<WorkingGroupReportData>> {
+	return getAuthorizedWorkingGroupReportForUser(user, id, getWorkingGroupReportData, action);
+}
+
+export async function getWorkingGroupReportHeaderForUser(
+	user: User,
+	id: string,
+	action: Extract<Action, "read" | "update"> = "read",
+): Promise<AuthorizedWorkingGroupReportResult<WorkingGroupReportHeaderData>> {
+	return getAuthorizedWorkingGroupReportForUser(user, id, getWorkingGroupReportHeader, action);
+}
+
+export async function getAuthorizedWorkingGroupReportForUser<T>(
+	user: User,
+	id: string,
+	load: (id: string) => Promise<T | null>,
+	action: Extract<Action, "read" | "update"> = "read",
+): Promise<AuthorizedWorkingGroupReportResult<T>> {
+	const header = await getWorkingGroupReportHeader(id);
+
+	if (header == null) {
+		return { status: "not-found" };
+	}
+
+	const allowed = await can(user, action, { type: "working_group_report", id });
+
+	if (!allowed) {
+		return { status: "forbidden" };
+	}
+
+	const report = await load(id);
+
+	if (report == null) {
+		return { status: "not-found" };
+	}
+
+	return { status: "ok", data: report };
 }

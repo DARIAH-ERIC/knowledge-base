@@ -13,7 +13,7 @@ import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { UpdateNavigationItemActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/update-navigation-item.schema";
-import { assertAuthenticated } from "@/lib/auth/session";
+import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -25,7 +25,7 @@ export const updateNavigationItemAction = createServerAction(
 		const locale = await getLocale();
 		const t = await getExtracted();
 
-		await assertAuthenticated();
+		await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			UpdateNavigationItemActionInputSchema,

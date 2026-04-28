@@ -4,7 +4,8 @@ import { type ReactNode, Suspense } from "react";
 
 import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
 import { CountryReportsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page";
-import { db } from "@/lib/db";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getCountryReportsForAdmin } from "@/lib/data/admin-reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorCountryReportsPageProps {
@@ -27,12 +28,8 @@ export async function generateMetadata(
 export default function DashboardAdministratorCountryReportsPage(
 	_props: Readonly<DashboardAdministratorCountryReportsPageProps>,
 ): ReactNode {
-	const reports = db.query.countryReports.findMany({
-		columns: { id: true, status: true },
-		with: {
-			campaign: { columns: { id: true, year: true } },
-			country: { columns: { id: true, name: true } },
-		},
+	const reports = assertAuthenticated().then(({ user }) => {
+		return getCountryReportsForAdmin(user);
 	});
 
 	return (

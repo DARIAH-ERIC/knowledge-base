@@ -13,9 +13,8 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { WorkingGroupReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary";
-import { getWorkingGroupReportData } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
+import { getWorkingGroupReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getUserAllWorkingGroupReports } from "@/lib/data/reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardReportingWorkingGroupReportPageProps {
@@ -23,25 +22,13 @@ interface DashboardReportingWorkingGroupReportPageProps {
 }
 
 export async function generateMetadata(
-	props: Readonly<DashboardReportingWorkingGroupReportPageProps>,
+	_props: Readonly<DashboardReportingWorkingGroupReportPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
-	const { params } = props;
-
-	const { id } = await params;
-
 	const t = await getExtracted();
 
-	const report = await getWorkingGroupReportData(id);
-
 	return createMetadata(resolvingMetadata, {
-		title:
-			report != null
-				? t("Dashboard - {name} working group report {year}", {
-						name: report.workingGroup.name,
-						year: String(report.campaign.year),
-					})
-				: t("Dashboard - Working group report"),
+		title: t("Dashboard - Working group report"),
 	});
 }
 
@@ -56,22 +43,13 @@ export default async function DashboardReportingWorkingGroupReportPage(
 
 	const { id } = await params;
 
-	const [report, { user }] = await Promise.all([
-		getWorkingGroupReportData(id),
-		assertAuthenticated(),
-	]);
+	const { user } = await assertAuthenticated();
+	const result = await getWorkingGroupReportDataForUser(user, id);
 
-	if (report == null) {
+	if (result.status !== "ok") {
 		notFound();
 	}
-
-	if (user.role !== "admin") {
-		const userReports = await getUserAllWorkingGroupReports(user);
-		const hasAccess = userReports.some((r) => {
-			return r.reportId === id;
-		});
-		if (!hasAccess) notFound();
-	}
+	const report = result.data;
 
 	const t = await getExtracted();
 

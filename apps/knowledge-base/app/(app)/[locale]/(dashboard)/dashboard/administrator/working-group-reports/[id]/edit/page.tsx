@@ -4,7 +4,8 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { WorkingGroupReportEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-edit-form";
-import { db } from "@/lib/db";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getWorkingGroupReportForAdmin } from "@/lib/data/admin-reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorEditWorkingGroupReportPageProps {
@@ -31,14 +32,8 @@ export default async function DashboardAdministratorEditWorkingGroupReportPage(
 
 	const { id } = await params;
 
-	const report = await db.query.workingGroupReports.findFirst({
-		where: { id },
-		columns: { id: true, status: true },
-		with: {
-			campaign: { columns: { year: true } },
-			workingGroup: { columns: { name: true } },
-		},
-	});
+	const { user } = await assertAuthenticated();
+	const report = await getWorkingGroupReportForAdmin(user, id);
 
 	if (report == null) {
 		notFound();

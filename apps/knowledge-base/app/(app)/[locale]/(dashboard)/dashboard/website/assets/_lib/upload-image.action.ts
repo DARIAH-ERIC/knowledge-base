@@ -12,7 +12,7 @@ import * as v from "valibot";
 
 import { UploadImageInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.schema";
 import { imageGridOptions } from "@/config/assets.config";
-import { assertAuthenticated } from "@/lib/auth/session";
+import { assertAdmin } from "@/lib/auth/session";
 import { uploadAsset } from "@/lib/data/assets";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { images } from "@/lib/images";
@@ -26,7 +26,7 @@ export const uploadImageAction = createServerAction<
 	const t = await getExtracted();
 
 	// FIXME:
-	const { user: _ } = await assertAuthenticated();
+	const { user: _ } = await assertAdmin();
 	// await assertAuthorized(user)
 
 	const validation = await v.safeParseAsync(UploadImageInputSchema, getFormDataValues(formData), {

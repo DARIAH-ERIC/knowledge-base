@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
+import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { count, desc, eq, ilike, sql } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike, sql } from "@/lib/db/sql";
 
 export type PersonsSort = "name" | "email" | "orcid";
 
@@ -22,6 +25,12 @@ export interface PersonsResult {
 	limit: number;
 	offset: number;
 	total: number;
+}
+
+function assertAdminUser(user: Pick<User, "role">): void {
+	if (user.role !== "admin") {
+		forbidden();
+	}
 }
 
 export async function getPersons(params: Readonly<GetPersonsParams>): Promise<PersonsResult> {
@@ -77,5 +86,88 @@ export async function getPersons(params: Readonly<GetPersonsParams>): Promise<Pe
 		limit,
 		offset,
 		total: aggregate.at(0)?.total ?? 0,
+	};
+}
+
+export async function getPersonsForAdmin(
+	currentUser: Pick<User, "role">,
+	params: Readonly<GetPersonsParams>,
+): Promise<PersonsResult> {
+	assertAdminUser(currentUser);
+
+	return getPersons(params);
+}
+
+export async function getPersonBySlugForAdmin(currentUser: Pick<User, "role">, slug: string) {
+	assertAdminUser(currentUser);
+
+	return db.query.persons.findFirst({
+		where: {
+			entity: {
+				slug,
+			},
+		},
+		columns: {
+			id: true,
+			email: true,
+			name: true,
+			orcid: true,
+			position: true,
+			sortName: true,
+		},
+		with: {
+			entity: {
+				columns: {
+					documentId: true,
+					slug: true,
+				},
+				with: {
+					status: {
+						columns: {
+							id: true,
+							type: true,
+						},
+					},
+				},
+			},
+			image: {
+				columns: {
+					key: true,
+					label: true,
+				},
+			},
+		},
+	});
+}
+
+export async function getPersonEditDataForAdmin(currentUser: Pick<User, "role">, slug: string) {
+	assertAdminUser(currentUser);
+
+	const person = await getPersonBySlugForAdmin(currentUser, slug);
+
+	if (person == null) {
+		return null;
+	}
+
+	const biographyRows = await db
+		.select({ content: schema.richTextContentBlocks.content })
+		.from(schema.richTextContentBlocks)
+		.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
+		.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+		.innerJoin(
+			schema.entityTypesFieldsNames,
+			eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+		)
+		.where(
+			and(
+				eq(schema.fields.entityId, person.id),
+				eq(schema.entityTypesFieldsNames.fieldName, "biography"),
+			),
+		)
+		.limit(1);
+
+	return {
+		biography: biographyRows.at(0)?.content,
+		person,
 	};
 }

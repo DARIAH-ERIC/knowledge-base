@@ -5,7 +5,8 @@ import type { ReactNode } from "react";
 
 import { CampaignServiceSizesForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-service-sizes-form";
 import { upsertCampaignServiceSizesAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-service-sizes.action";
-import { db } from "@/lib/db";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getReportingCampaignServiceSizesForAdmin } from "@/lib/data/admin-reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorCampaignServicesPageProps {
@@ -30,15 +31,8 @@ export default async function DashboardAdministratorCampaignServicesPage(
 
 	const { id } = await params;
 
-	const campaign = await db.query.reportingCampaigns.findFirst({
-		where: { id },
-		columns: { id: true },
-		with: {
-			serviceSizes: {
-				columns: { serviceSize: true, visitsThreshold: true, amount: true },
-			},
-		},
-	});
+	const { user } = await assertAuthenticated();
+	const campaign = await getReportingCampaignServiceSizesForAdmin(user, id);
 
 	if (campaign == null) {
 		notFound();

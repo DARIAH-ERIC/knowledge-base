@@ -1,4 +1,3 @@
-import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
@@ -6,17 +5,10 @@ import type { ReactNode } from "react";
 
 import { NationalConsortiumEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-edit-form";
 import { imageGridOptions } from "@/config/assets.config";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getOrganisationalUnitEditDataForAdmin } from "@/lib/data/admin-organisational-units";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
-import {
-	getEntityRelationOptions,
-	getEntityRelationOptionsByIds,
-	getEntityRelations,
-	getResourceRelationOptions,
-	getResourceRelationOptionsByIds,
-} from "@/lib/data/relations";
-import { getUnitRelations, getUnitRelationStatusOptions } from "@/lib/data/unit-relations";
-import { db } from "@/lib/db";
-import { and, eq } from "@/lib/db/sql";
+import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -43,56 +35,36 @@ export default async function DashboardAdministratorEditNationalConsortiumPage(
 	const { params } = props;
 
 	const { slug } = await params;
+	const { user } = await assertAuthenticated();
 
 	const [
 		{ items: initialAssets },
 		initialRelatedEntities,
 		initialRelatedResources,
-		unitRelationStatusOptions,
-		nationalConsortium,
+		nationalConsortiumData,
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
 		getEntityRelationOptions(),
 		getResourceRelationOptions(),
-		getUnitRelationStatusOptions("national_consortium"),
-		db.query.organisationalUnits.findFirst({
-			where: {
-				type: { type: "national_consortium" },
-				entity: { slug },
-			},
-			columns: {
-				id: true,
-				name: true,
-				summary: true,
-			},
-			with: {
-				entity: {
-					columns: {
-						documentId: true,
-						slug: true,
-					},
-				},
-				image: {
-					columns: {
-						key: true,
-						label: true,
-					},
-				},
-			},
+		getOrganisationalUnitEditDataForAdmin(user, {
+			slug,
+			unitType: "national_consortium",
 		}),
 	]);
 
-	if (nationalConsortium == null) {
+	if (nationalConsortiumData == null) {
 		notFound();
 	}
 
-	const acronymRow = await db
-		.select({ acronym: schema.organisationalUnits.acronym })
-		.from(schema.organisationalUnits)
-		.where(eq(schema.organisationalUnits.id, nationalConsortium.id))
-		.limit(1);
-
-	const acronym = acronymRow.at(0)?.acronym ?? null;
+	const {
+		relations,
+		relatedEntityIds,
+		relatedResourceIds,
+		selectedRelatedEntities,
+		selectedRelatedResources,
+		unit: nationalConsortium,
+		unitRelationStatusOptions,
+	} = nationalConsortiumData;
 
 	const image =
 		nationalConsortium.image != null
@@ -105,35 +77,6 @@ export default async function DashboardAdministratorEditNationalConsortiumPage(
 				}
 			: null;
 
-	const descriptionRows = await db
-		.select({ content: schema.richTextContentBlocks.content })
-		.from(schema.richTextContentBlocks)
-		.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
-		.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
-		.innerJoin(
-			schema.entityTypesFieldsNames,
-			eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
-		)
-		.where(
-			and(
-				eq(schema.fields.entityId, nationalConsortium.id),
-				eq(schema.entityTypesFieldsNames.fieldName, "description"),
-			),
-		)
-		.limit(1);
-
-	const description = descriptionRows.at(0)?.content;
-
-	const [{ relatedEntityIds, relatedResourceIds }, relations] = await Promise.all([
-		getEntityRelations(nationalConsortium.id),
-		getUnitRelations(nationalConsortium.id),
-	]);
-
-	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
-		getEntityRelationOptionsByIds(relatedEntityIds),
-		getResourceRelationOptionsByIds(relatedResourceIds),
-	]);
-
 	return (
 		<NationalConsortiumEditForm
 			initialAssets={initialAssets}
@@ -143,7 +86,7 @@ export default async function DashboardAdministratorEditNationalConsortiumPage(
 			initialRelatedResourceIds={relatedResourceIds}
 			initialRelatedResourceItems={initialRelatedResources.items}
 			initialRelatedResourceTotal={initialRelatedResources.total}
-			nationalConsortium={{ ...nationalConsortium, acronym, description, image }}
+			nationalConsortium={{ ...nationalConsortium, image }}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}

@@ -7,7 +7,8 @@ import type { ReactNode } from "react";
 import { ReportingCampaignEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaign-edit-form";
 import { closeReportingCampaignAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/close-reporting-campaign.action";
 import { launchReportingCampaignAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/launch-reporting-campaign.action";
-import { db } from "@/lib/db";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getReportingCampaignSettingsForAdmin } from "@/lib/data/admin-reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorCampaignSettingsPageProps {
@@ -36,10 +37,8 @@ export default async function DashboardAdministratorCampaignSettingsPage(
 
 	const { id } = await params;
 
-	const campaign = await db.query.reportingCampaigns.findFirst({
-		where: { id },
-		columns: { id: true, year: true, status: true },
-	});
+	const { user } = await assertAuthenticated();
+	const campaign = await getReportingCampaignSettingsForAdmin(user, id);
 
 	if (campaign == null) {
 		notFound();

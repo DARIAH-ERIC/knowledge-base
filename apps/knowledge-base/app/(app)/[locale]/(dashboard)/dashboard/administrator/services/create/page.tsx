@@ -3,8 +3,8 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { ServiceCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_components/service-create-form";
-import { getOrganisationalUnitOptions } from "@/lib/data/organisational-units";
-import { db } from "@/lib/db";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getServiceCreateDataForAdmin } from "@/lib/data/services";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 export async function generateMetadata(
@@ -23,14 +23,9 @@ export async function generateMetadata(
 export default async function DashboardAdministratorCreateServicePage(
 	_props: unknown,
 ): Promise<ReactNode> {
-	const [serviceTypes, serviceStatuses, initialOrganisationalUnits] = await Promise.all([
-		db.query.serviceTypes.findMany({ orderBy: { type: "asc" }, columns: { id: true, type: true } }),
-		db.query.serviceStatuses.findMany({
-			orderBy: { status: "asc" },
-			columns: { id: true, status: true },
-		}),
-		getOrganisationalUnitOptions(),
-	]);
+	const { user } = await assertAuthenticated();
+	const { initialOrganisationalUnits, serviceStatuses, serviceTypes } =
+		await getServiceCreateDataForAdmin(user);
 
 	return (
 		<ServiceCreateForm

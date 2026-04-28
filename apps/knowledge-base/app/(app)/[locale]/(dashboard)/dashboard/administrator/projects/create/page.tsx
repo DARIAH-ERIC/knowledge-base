@@ -4,10 +4,9 @@ import type { ReactNode } from "react";
 
 import { ProjectCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-create-form";
 import { imageGridOptions } from "@/config/assets.config";
+import { assertAuthenticated } from "@/lib/auth/session";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
-import { getOrganisationalUnitOptions } from "@/lib/data/organisational-units";
-import { getSocialMediaOptions } from "@/lib/data/social-media";
-import { db } from "@/lib/db";
+import { getProjectCreateDataForAdmin } from "@/lib/data/projects";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorCreateProjectPageProps extends PageProps<"/[locale]/dashboard/administrator/projects/create"> {}
@@ -33,23 +32,9 @@ export default async function DashboardAdministratorCreateProjectPage(
 		prefix: "logos",
 	});
 
-	const [scopes, initialOrgUnits, roles, initialSocialMedia] = await Promise.all([
-		db.query.projectScopes.findMany({
-			orderBy: {
-				scope: "asc",
-			},
-			columns: {
-				id: true,
-				scope: true,
-			},
-		}),
-		getOrganisationalUnitOptions(),
-		db.query.projectRoles.findMany({
-			orderBy: { role: "asc" },
-			columns: { id: true, role: true },
-		}),
-		getSocialMediaOptions(),
-	]);
+	const { user } = await assertAuthenticated();
+	const { initialOrgUnits, initialSocialMedia, roles, scopes } =
+		await getProjectCreateDataForAdmin(user);
 
 	return (
 		<ProjectCreateForm

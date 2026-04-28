@@ -3,7 +3,8 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { NationalConsortiaPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page";
-import { getNationalConsortia } from "@/lib/data/national-consortia";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getNationalConsortiaForAdmin } from "@/lib/data/national-consortia";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -69,7 +70,8 @@ export default async function DashboardAdministratorNationalConsortiaPage(
 		defaultSort,
 		validSorts,
 	});
-	const nationalConsortia = await getNationalConsortia({
+	const { user } = await assertAuthenticated();
+	const nationalConsortia = await getNationalConsortiaForAdmin(user, {
 		limit: pageSize,
 		offset: (page - 1) * pageSize,
 		q,

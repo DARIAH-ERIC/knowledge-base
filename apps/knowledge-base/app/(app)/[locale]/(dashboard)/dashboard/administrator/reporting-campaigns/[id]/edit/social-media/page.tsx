@@ -5,7 +5,8 @@ import type { ReactNode } from "react";
 
 import { CampaignSocialMediaAmountsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-social-media-amounts-form";
 import { upsertCampaignSocialMediaAmountsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-social-media-amounts.action";
-import { db } from "@/lib/db";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getReportingCampaignSocialMediaAmountsForAdmin } from "@/lib/data/admin-reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorCampaignSocialMediaPageProps {
@@ -30,15 +31,8 @@ export default async function DashboardAdministratorCampaignSocialMediaPage(
 
 	const { id } = await params;
 
-	const campaign = await db.query.reportingCampaigns.findFirst({
-		where: { id },
-		columns: { id: true },
-		with: {
-			socialMediaAmounts: {
-				columns: { category: true, amount: true },
-			},
-		},
-	});
+	const { user } = await assertAuthenticated();
+	const campaign = await getReportingCampaignSocialMediaAmountsForAdmin(user, id);
 
 	if (campaign == null) {
 		notFound();

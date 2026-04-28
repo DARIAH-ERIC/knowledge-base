@@ -1,4 +1,3 @@
-import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
@@ -6,10 +5,10 @@ import type { ReactNode } from "react";
 
 import { PersonEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-edit-form";
 import { imageGridOptions } from "@/config/assets.config";
+import { assertAuthenticated } from "@/lib/auth/session";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { getContributionRoleOptions, getPersonContributions } from "@/lib/data/contributions";
-import { db } from "@/lib/db";
-import { and, eq } from "@/lib/db/sql";
+import { getPersonEditDataForAdmin } from "@/lib/data/persons";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -35,50 +34,17 @@ export default async function DashboardAdministratorEditPersonPage(
 
 	const { slug } = await params;
 
-	const [{ items: initialAssets }, person] = await Promise.all([
+	const { user } = await assertAuthenticated();
+	const [{ items: initialAssets }, personData] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "avatars" }),
-		db.query.persons.findFirst({
-			where: {
-				entity: {
-					slug,
-				},
-			},
-			columns: {
-				id: true,
-				email: true,
-				name: true,
-				orcid: true,
-				position: true,
-				sortName: true,
-			},
-			with: {
-				entity: {
-					columns: {
-						documentId: true,
-						slug: true,
-					},
-					with: {
-						status: {
-							columns: {
-								id: true,
-								type: true,
-							},
-						},
-					},
-				},
-				image: {
-					columns: {
-						key: true,
-						label: true,
-					},
-				},
-			},
-		}),
+		getPersonEditDataForAdmin(user, slug),
 	]);
 
-	if (person == null) {
+	if (personData == null) {
 		notFound();
 	}
+
+	const { biography, person } = personData;
 
 	const [contributions, contributionRoleOptions] = await Promise.all([
 		getPersonContributions(person.id),
@@ -92,25 +58,6 @@ export default async function DashboardAdministratorEditPersonPage(
 			options: imageGridOptions,
 		}).url,
 	};
-
-	const biographyRows = await db
-		.select({ content: schema.richTextContentBlocks.content })
-		.from(schema.richTextContentBlocks)
-		.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
-		.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
-		.innerJoin(
-			schema.entityTypesFieldsNames,
-			eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
-		)
-		.where(
-			and(
-				eq(schema.fields.entityId, person.id),
-				eq(schema.entityTypesFieldsNames.fieldName, "biography"),
-			),
-		)
-		.limit(1);
-
-	const biography = biographyRows.at(0)?.content;
 
 	return (
 		<PersonEditForm

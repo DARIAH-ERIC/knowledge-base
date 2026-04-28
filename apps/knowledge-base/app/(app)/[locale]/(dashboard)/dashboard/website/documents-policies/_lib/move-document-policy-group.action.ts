@@ -3,7 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 
-import { assertAuthenticated } from "@/lib/auth/session";
+import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 
@@ -11,7 +11,7 @@ export async function moveDocumentPolicyGroupAction(
 	id: string,
 	direction: "up" | "down",
 ): Promise<void> {
-	await assertAuthenticated();
+	await assertAdmin();
 
 	await db.transaction(async (tx) => {
 		const group = await tx.query.documentPolicyGroups.findFirst({

@@ -1,4 +1,3 @@
-import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
@@ -6,19 +5,11 @@ import type { ReactNode } from "react";
 
 import { WorkingGroupEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-edit-form";
 import { imageGridOptions } from "@/config/assets.config";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getWorkingGroupEditDataForAdmin } from "@/lib/data/admin-organisational-units";
 import { getPersonOptions } from "@/lib/data/article-contributors";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
-import {
-	getEntityRelationOptions,
-	getEntityRelationOptionsByIds,
-	getEntityRelations,
-	getResourceRelationOptions,
-	getResourceRelationOptionsByIds,
-} from "@/lib/data/relations";
-import { getUnitRelations, getUnitRelationStatusOptions } from "@/lib/data/unit-relations";
-import { getWorkingGroupChairs } from "@/lib/data/working-group-chairs";
-import { db } from "@/lib/db";
-import { and, eq } from "@/lib/db/sql";
+import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -43,58 +34,36 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 	const { params } = props;
 
 	const { slug } = await params;
+	const { user } = await assertAuthenticated();
 
 	const [
 		{ items: initialAssets },
 		initialRelatedEntities,
 		initialRelatedResources,
-		unitRelationStatusOptions,
 		initialPersons,
-		workingGroup,
+		workingGroupData,
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
 		getEntityRelationOptions(),
 		getResourceRelationOptions(),
-		getUnitRelationStatusOptions("working_group"),
 		getPersonOptions(),
-		db.query.organisationalUnits.findFirst({
-			where: {
-				type: { type: "working_group" },
-				entity: { slug },
-			},
-			columns: {
-				id: true,
-				name: true,
-				summary: true,
-			},
-			with: {
-				entity: {
-					columns: {
-						documentId: true,
-						slug: true,
-					},
-				},
-				image: {
-					columns: {
-						key: true,
-						label: true,
-					},
-				},
-			},
-		}),
+		getWorkingGroupEditDataForAdmin(user, slug),
 	]);
 
-	if (workingGroup == null) {
+	if (workingGroupData == null) {
 		notFound();
 	}
 
-	const acronymRow = await db
-		.select({ acronym: schema.organisationalUnits.acronym })
-		.from(schema.organisationalUnits)
-		.where(eq(schema.organisationalUnits.id, workingGroup.id))
-		.limit(1);
-
-	const acronym = acronymRow.at(0)?.acronym ?? null;
+	const {
+		chairs,
+		relations,
+		relatedEntityIds,
+		relatedResourceIds,
+		selectedRelatedEntities,
+		selectedRelatedResources,
+		unit: workingGroup,
+		unitRelationStatusOptions,
+	} = workingGroupData;
 
 	const image =
 		workingGroup.image != null
@@ -106,36 +75,6 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 					}).url,
 				}
 			: null;
-
-	const descriptionRows = await db
-		.select({ content: schema.richTextContentBlocks.content })
-		.from(schema.richTextContentBlocks)
-		.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
-		.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
-		.innerJoin(
-			schema.entityTypesFieldsNames,
-			eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
-		)
-		.where(
-			and(
-				eq(schema.fields.entityId, workingGroup.id),
-				eq(schema.entityTypesFieldsNames.fieldName, "description"),
-			),
-		)
-		.limit(1);
-
-	const description = descriptionRows.at(0)?.content;
-
-	const [{ relatedEntityIds, relatedResourceIds }, relations, chairs] = await Promise.all([
-		getEntityRelations(workingGroup.id),
-		getUnitRelations(workingGroup.id),
-		getWorkingGroupChairs(workingGroup.id),
-	]);
-
-	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
-		getEntityRelationOptionsByIds(relatedEntityIds),
-		getResourceRelationOptionsByIds(relatedResourceIds),
-	]);
 
 	return (
 		<WorkingGroupEditForm
@@ -153,7 +92,7 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}
 			unitRelationStatusOptions={unitRelationStatusOptions}
-			workingGroup={{ ...workingGroup, acronym, description, image }}
+			workingGroup={{ ...workingGroup, image }}
 		/>
 	);
 }

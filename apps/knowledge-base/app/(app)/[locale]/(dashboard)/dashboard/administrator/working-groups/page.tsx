@@ -3,7 +3,8 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { WorkingGroupsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page";
-import { getWorkingGroups } from "@/lib/data/working-groups";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getWorkingGroupsForAdmin } from "@/lib/data/working-groups";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -69,7 +70,8 @@ export default async function DashboardAdministratorWorkingGroupsPage(
 		defaultSort,
 		validSorts,
 	});
-	const workingGroups = await getWorkingGroups({
+	const { user } = await assertAuthenticated();
+	const workingGroups = await getWorkingGroupsForAdmin(user, {
 		limit: pageSize,
 		offset: (page - 1) * pageSize,
 		q,

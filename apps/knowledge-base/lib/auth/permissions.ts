@@ -53,7 +53,7 @@ export async function can(user: User, action: Action, resource: Resource): Promi
 	}
 
 	if (resource.type === "working_group_report") {
-		if (action !== "update" && action !== "confirm") return false;
+		if (action !== "read" && action !== "update" && action !== "confirm") return false;
 		if (user.personId == null) return false;
 
 		const report = await db.query.workingGroupReports.findFirst({
@@ -74,7 +74,7 @@ export async function can(user: User, action: Action, resource: Resource): Promi
 
 	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 	if (resource.type === "country_report") {
-		if (action !== "update" && action !== "confirm") return false;
+		if (action !== "read" && action !== "update" && action !== "confirm") return false;
 
 		const report = await db.query.countryReports.findFirst({
 			where: { id: resource.id },
@@ -82,7 +82,12 @@ export async function can(user: User, action: Action, resource: Resource): Promi
 		});
 		if (report == null) return false;
 
-		if (action === "update" && user.organisationalUnitId === report.countryId) return true;
+		if (
+			(action === "read" || action === "update") &&
+			user.organisationalUnitId === report.countryId
+		) {
+			return true;
+		}
 
 		if (user.personId == null) return false;
 

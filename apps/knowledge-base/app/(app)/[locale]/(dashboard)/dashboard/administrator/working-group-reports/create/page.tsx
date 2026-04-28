@@ -3,7 +3,8 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { WorkingGroupReportCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-create-form";
-import { db } from "@/lib/db";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getWorkingGroupReportCreateDataForAdmin } from "@/lib/data/admin-reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorCreateWorkingGroupReportPageProps {
@@ -26,17 +27,8 @@ export async function generateMetadata(
 export default async function DashboardAdministratorCreateWorkingGroupReportPage(
 	_props: Readonly<DashboardAdministratorCreateWorkingGroupReportPageProps>,
 ): Promise<ReactNode> {
-	const [campaigns, workingGroups] = await Promise.all([
-		db.query.reportingCampaigns.findMany({
-			orderBy: { year: "desc" },
-			columns: { id: true, year: true },
-		}),
-		db.query.organisationalUnits.findMany({
-			where: { type: { type: "working_group" } },
-			orderBy: { name: "asc" },
-			columns: { id: true, name: true },
-		}),
-	]);
+	const { user } = await assertAuthenticated();
+	const { campaigns, workingGroups } = await getWorkingGroupReportCreateDataForAdmin(user);
 
 	return <WorkingGroupReportCreateForm campaigns={campaigns} workingGroups={workingGroups} />;
 }

@@ -1,3 +1,4 @@
+import { forbidden } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { cache } from "react";
 
@@ -39,6 +40,17 @@ export async function assertAdmin() {
 
 	if (result.user.role !== "admin") {
 		redirect({ href: "/dashboard", locale });
+	}
+
+	return result;
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export async function assertAdminPageAccess() {
+	const result = await assertAuthenticated();
+
+	if (result.user.role !== "admin") {
+		forbidden();
 	}
 
 	return result;

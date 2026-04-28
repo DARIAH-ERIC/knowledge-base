@@ -4,7 +4,8 @@ import { type ReactNode, Suspense } from "react";
 
 import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
 import { ReportingCampaignsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page";
-import { db } from "@/lib/db";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getReportingCampaignsForAdmin } from "@/lib/data/admin-reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorReportingCampaignsPageProps {
@@ -27,9 +28,8 @@ export async function generateMetadata(
 export default function DashboardAdministratorReportingCampaignsPage(
 	_props: Readonly<DashboardAdministratorReportingCampaignsPageProps>,
 ): ReactNode {
-	const campaigns = db.query.reportingCampaigns.findMany({
-		orderBy: { year: "desc" },
-		columns: { id: true, year: true, status: true },
+	const campaigns = assertAuthenticated().then(({ user }) => {
+		return getReportingCampaignsForAdmin(user);
 	});
 
 	return (

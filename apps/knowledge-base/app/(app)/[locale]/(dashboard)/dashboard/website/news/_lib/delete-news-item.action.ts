@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
-import { assertAuthenticated } from "@/lib/auth/session";
+import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq, inArray, or } from "@/lib/db/sql";
 import {
@@ -14,7 +14,7 @@ import {
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function deleteNewsItemAction(id: string): Promise<void> {
-	await assertAuthenticated();
+	await assertAdmin();
 	const descriptor = await getWebsiteDocumentDescriptorByEntityId(id);
 
 	await db.transaction(async (tx) => {

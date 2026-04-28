@@ -1,4 +1,6 @@
+import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
+import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
 import { and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
@@ -30,6 +32,12 @@ export interface InstitutionsResult {
 	limit: number;
 	offset: number;
 	total: number;
+}
+
+function assertAdminUser(user: Pick<User, "role">): void {
+	if (user.role !== "admin") {
+		forbidden();
+	}
 }
 
 const institutionType = "institution" as typeof schema.organisationalUnitTypes.$inferSelect.type;
@@ -420,4 +428,13 @@ export async function getInstitutions(
 		offset,
 		total,
 	};
+}
+
+export async function getInstitutionsForAdmin(
+	currentUser: Pick<User, "role">,
+	params: Readonly<GetInstitutionsParams>,
+): Promise<InstitutionsResult> {
+	assertAdminUser(currentUser);
+
+	return getInstitutions(params);
 }

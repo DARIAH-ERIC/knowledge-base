@@ -1,4 +1,3 @@
-import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
@@ -6,8 +5,8 @@ import type { ReactNode } from "react";
 
 import { ProjectDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details";
 import { imageGridOptions } from "@/config/assets.config";
-import { db } from "@/lib/db";
-import { and, eq } from "@/lib/db/sql";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getProjectDetailsForAdmin } from "@/lib/data/projects";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -33,95 +32,14 @@ export default async function DashboardAdministratorProjectDetailsPage(
 
 	const { slug } = await params;
 
-	const project = await db.query.projects.findFirst({
-		where: {
-			entity: {
-				slug,
-			},
-		},
-		columns: {
-			acronym: true,
-			call: true,
-			duration: true,
-			funding: true,
-			id: true,
-			name: true,
-			// metadata: true,
-			summary: true,
-			topic: true,
-		},
-		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
-				},
-				with: {
-					status: {
-						columns: {
-							id: true,
-							type: true,
-						},
-					},
-				},
-			},
-			image: {
-				columns: {
-					key: true,
-					label: true,
-				},
-			},
-			scope: {
-				columns: {
-					id: true,
-					scope: true,
-				},
-			},
-		},
-	});
+	const { user } = await assertAuthenticated();
+	const projectData = await getProjectDetailsForAdmin(user, slug);
 
-	if (project == null) {
+	if (projectData == null) {
 		notFound();
 	}
 
-	const [descriptionRows, partners, socialMediaLinks] = await Promise.all([
-		db
-			.select({ content: schema.richTextContentBlocks.content })
-			.from(schema.richTextContentBlocks)
-			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
-			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
-			.innerJoin(
-				schema.entityTypesFieldsNames,
-				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
-			)
-			.where(
-				and(
-					eq(schema.fields.entityId, project.id),
-					eq(schema.entityTypesFieldsNames.fieldName, "description"),
-				),
-			)
-			.limit(1),
-		db.query.projectsToOrganisationalUnits.findMany({
-			where: { projectId: project.id },
-			columns: { id: true, duration: true },
-			with: {
-				unit: { columns: { name: true } },
-				role: { columns: { role: true } },
-			},
-		}),
-		db.query.projectsToSocialMedia.findMany({
-			where: { projectId: project.id },
-			columns: {},
-			with: {
-				socialMedia: {
-					columns: { id: true, name: true, url: true },
-					with: { type: { columns: { type: true } } },
-				},
-			},
-		}),
-	]);
-
-	const description = descriptionRows.at(0)?.content;
+	const { description, partners, project, socialMedia } = projectData;
 
 	const image =
 		project.image != null
@@ -138,19 +56,10 @@ export default async function DashboardAdministratorProjectDetailsPage(
 		<ProjectDetails
 			project={{
 				...project,
-				description: description ?? null,
+				description,
 				image,
-				partners: partners.map((p) => {
-					return {
-						id: p.id,
-						unitName: p.unit.name,
-						roleName: p.role.role,
-						duration: p.duration ?? null,
-					};
-				}),
-				socialMedia: socialMediaLinks.map((link) => {
-					return link.socialMedia;
-				}),
+				partners,
+				socialMedia,
 			}}
 		/>
 	);

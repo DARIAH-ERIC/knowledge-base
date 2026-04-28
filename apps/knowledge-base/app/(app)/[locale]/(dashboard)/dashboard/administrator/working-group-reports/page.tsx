@@ -4,7 +4,8 @@ import { type ReactNode, Suspense } from "react";
 
 import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
 import { WorkingGroupReportsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page";
-import { db } from "@/lib/db";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getWorkingGroupReportsForAdmin } from "@/lib/data/admin-reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorWorkingGroupReportsPageProps {
@@ -27,12 +28,8 @@ export async function generateMetadata(
 export default function DashboardAdministratorWorkingGroupReportsPage(
 	_props: Readonly<DashboardAdministratorWorkingGroupReportsPageProps>,
 ): ReactNode {
-	const reports = db.query.workingGroupReports.findMany({
-		columns: { id: true, status: true },
-		with: {
-			campaign: { columns: { id: true, year: true } },
-			workingGroup: { columns: { id: true, name: true } },
-		},
+	const reports = assertAuthenticated().then(({ user }) => {
+		return getWorkingGroupReportsForAdmin(user);
 	});
 
 	return (

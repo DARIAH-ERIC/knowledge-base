@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 
 import { WorkingGroupReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary";
 import { confirmWorkingGroupReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/confirm-working-group-report.action";
-import { getWorkingGroupReportData } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
+import { getWorkingGroupReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
 import { submitWorkingGroupReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/submit-working-group-report.action";
 import { can } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
@@ -39,14 +39,13 @@ export default async function DashboardReportingWorkingGroupReportConfirmPage(
 
 	const { id } = await params;
 
-	const [report, { user }] = await Promise.all([
-		getWorkingGroupReportData(id),
-		assertAuthenticated(),
-	]);
+	const { user } = await assertAuthenticated();
+	const result = await getWorkingGroupReportDataForUser(user, id, "update");
 
-	if (report == null) {
+	if (result.status !== "ok") {
 		notFound();
 	}
+	const report = result.data;
 
 	const t = await getExtracted();
 	const canConfirm = await can(user, "confirm", { type: "working_group_report", id });

@@ -4,7 +4,8 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { CountryReportEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-edit-form";
-import { db } from "@/lib/db";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getCountryReportForAdmin } from "@/lib/data/admin-reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorEditCountryReportPageProps {
@@ -31,14 +32,8 @@ export default async function DashboardAdministratorEditCountryReportPage(
 
 	const { id } = await params;
 
-	const report = await db.query.countryReports.findFirst({
-		where: { id },
-		columns: { id: true, status: true },
-		with: {
-			campaign: { columns: { year: true } },
-			country: { columns: { name: true } },
-		},
-	});
+	const { user } = await assertAuthenticated();
+	const report = await getCountryReportForAdmin(user, id);
 
 	if (report == null) {
 		notFound();

@@ -8,6 +8,7 @@ import { CountryReportClaimedContributorsForm } from "@/app/(app)/[locale]/(dash
 import { CountryReportContributorsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-contributors-form";
 import { createCountryReportContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-contribution.action";
 import { deleteCountryReportContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/delete-country-report-contribution.action";
+import { getAuthorizedCountryReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { updateCountryReportContributorsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/update-country-report-contributors.action";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -36,31 +37,40 @@ export default async function DashboardReportingCountryReportContributorsPage(
 
 	const { id } = await params;
 
-	const [report] = await Promise.all([
-		db.query.countryReports.findFirst({
-			where: { id },
-			columns: { id: true, totalContributors: true },
-			with: {
-				campaign: { columns: { year: true } },
-				country: { columns: { id: true } },
-				contributions: {
-					columns: { id: true },
-					with: {
-						personToOrgUnit: {
-							columns: { id: true },
-							with: {
-								person: { columns: { name: true } },
-								organisationalUnit: { columns: { name: true } },
-								roleType: { columns: { type: true } },
+	const { user } = await assertAuthenticated();
+	const result = await getAuthorizedCountryReportForUser(
+		user,
+		id,
+		(id) => {
+			return db.query.countryReports.findFirst({
+				where: { id },
+				columns: { id: true, totalContributors: true },
+				with: {
+					campaign: { columns: { year: true } },
+					country: { columns: { id: true } },
+					contributions: {
+						columns: { id: true },
+						with: {
+							personToOrgUnit: {
+								columns: { id: true },
+								with: {
+									person: { columns: { name: true } },
+									organisationalUnit: { columns: { name: true } },
+									roleType: { columns: { type: true } },
+								},
 							},
 						},
 					},
 				},
-			},
-		}),
-		assertAuthenticated(),
-	]);
+			});
+		},
+		"update",
+	);
 
+	if (result.status !== "ok") {
+		notFound();
+	}
+	const report = result.data;
 	if (report == null) {
 		notFound();
 	}
