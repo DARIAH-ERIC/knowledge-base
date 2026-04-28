@@ -54,7 +54,9 @@ const entityTypeByKind: Record<SupportedEntityKind, SupportedEntityType> = {
 	spotlight_articles: "spotlight-article",
 };
 
-export const supportedWebsiteEntityTypes = Object.keys(entityKindByType) as Array<SupportedEntityType>;
+export const supportedWebsiteEntityTypes = Object.keys(
+	entityKindByType,
+) as Array<SupportedEntityType>;
 
 function getWebsiteDocumentDescriptor(params: {
 	entityKind: string;
@@ -177,7 +179,9 @@ export async function getSyncableWebsiteEntityIdsByType(
 	});
 }
 
-export async function getWebsiteDocumentForEntity(entityId: string): Promise<WebsiteDocument | null> {
+export async function getWebsiteDocumentForEntity(
+	entityId: string,
+): Promise<WebsiteDocument | null> {
 	const entity = await db.query.entities.findFirst({
 		where: {
 			id: entityId,

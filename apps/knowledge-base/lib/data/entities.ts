@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
+
+import { db } from "@/lib/db";
 
 interface CreateEntitiesParams {
 	data: Array<schema.EntityInput>;

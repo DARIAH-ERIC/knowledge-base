@@ -1,9 +1,9 @@
-import { db } from "@dariah-eric/database";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { WorkingGroupReportCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-create-form";
+import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorCreateWorkingGroupReportPageProps {

@@ -1,4 +1,3 @@
-import { db } from "@dariah-eric/database";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
@@ -7,6 +6,7 @@ import type { ReactNode } from "react";
 import { NewsItemDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details";
 import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 

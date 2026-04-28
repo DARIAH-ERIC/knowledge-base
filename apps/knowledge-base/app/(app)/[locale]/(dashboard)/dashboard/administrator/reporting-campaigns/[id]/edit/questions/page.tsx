@@ -1,4 +1,3 @@
-import { db } from "@dariah-eric/database";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
@@ -6,6 +5,7 @@ import type { ReactNode } from "react";
 
 import { CampaignQuestionsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-questions-form";
 import { createWorkingGroupReportQuestionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/create-working-group-report-question.action";
+import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorCampaignQuestionsPageProps {

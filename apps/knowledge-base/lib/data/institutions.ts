@@ -1,6 +1,7 @@
-import { and, count, desc, eq, ilike, inArray, sql } from "@dariah-eric/database/sql";
-import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
+
+import { db } from "@/lib/db";
+import { and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
 
 export type InstitutionEricRelationStatus =
 	| "is_cooperating_partner_of"

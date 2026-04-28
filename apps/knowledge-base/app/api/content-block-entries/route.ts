@@ -1,9 +1,9 @@
-import { ilike, inArray } from "@dariah-eric/database/sql";
-import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { ilike, inArray } from "@/lib/db/sql";
 
 const defaultLimit = 20;
 

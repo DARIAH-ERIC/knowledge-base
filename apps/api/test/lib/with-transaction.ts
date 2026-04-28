@@ -1,4 +1,4 @@
-import { db } from "@dariah-eric/database";
+import { db } from "@/services/db";
 
 import type { Database } from "@/middlewares/db";
 

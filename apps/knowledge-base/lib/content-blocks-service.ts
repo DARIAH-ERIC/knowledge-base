@@ -1,11 +1,11 @@
-import { and, eq, sql } from "@dariah-eric/database/sql";
-import { db, type Transaction } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import type { JSONContent } from "@tiptap/core";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
 import { imageGridOptions } from "@/config/assets.config";
 import type { ContentBlockInput } from "@/lib/content-block-input";
+import { db, type Transaction } from "@/lib/db";
+import { and, eq, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
 async function getAssetIdByKey(tx: Transaction, key: string): Promise<string | null> {

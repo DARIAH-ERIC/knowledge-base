@@ -1,10 +1,10 @@
-import { db } from "@dariah-eric/database";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { SocialMediaEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-edit-form";
+import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorEditSocialMediaPageProps {

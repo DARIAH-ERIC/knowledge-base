@@ -1,7 +1,6 @@
 "use server";
 
 import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
-import { db, type Transaction } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
@@ -15,6 +14,7 @@ import { CreateEventActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/d
 import { assertAuthenticated } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
+import { db, type Transaction } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";

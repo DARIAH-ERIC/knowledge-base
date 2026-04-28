@@ -1,4 +1,3 @@
-import { db } from "@dariah-eric/database";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -8,6 +7,7 @@ import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { getOrganisationalUnitOptions } from "@/lib/data/organisational-units";
 import { getSocialMediaOptions } from "@/lib/data/social-media";
+import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorCreateProjectPageProps extends PageProps<"/[locale]/dashboard/administrator/projects/create"> {}

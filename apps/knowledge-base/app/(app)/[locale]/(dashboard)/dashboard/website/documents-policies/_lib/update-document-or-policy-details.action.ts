@@ -1,9 +1,7 @@
 "use server";
 
 import { assert, getFormDataValues } from "@acdh-oeaw/lib";
-import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
-import { eq, isNull } from "@dariah-eric/database/sql";
 import {
 	createActionStateError,
 	createActionStateSuccess,
@@ -17,6 +15,8 @@ import * as v from "valibot";
 
 import { UpdateDocumentOrPolicyDetailsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.schema";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { eq, isNull } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createServerAction } from "@/lib/server/create-server-action";

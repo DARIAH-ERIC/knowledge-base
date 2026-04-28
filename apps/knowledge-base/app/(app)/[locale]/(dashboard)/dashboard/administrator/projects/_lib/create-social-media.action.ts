@@ -1,7 +1,6 @@
 "use server";
 
 import { assert, getFormDataValues } from "@acdh-oeaw/lib";
-import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import {
 	createActionStateError,
@@ -13,6 +12,7 @@ import * as v from "valibot";
 
 import { CreateSocialMediaSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-social-media.schema";
 import { assertAdmin } from "@/lib/auth/session";
+import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 

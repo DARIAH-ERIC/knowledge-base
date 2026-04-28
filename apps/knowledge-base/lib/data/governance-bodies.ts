@@ -1,6 +1,7 @@
-import { and, count, desc, eq, ilike, or, sql } from "@dariah-eric/database/sql";
-import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
+
+import { db } from "@/lib/db";
+import { and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
 
 export type GovernanceBodiesSort = "acronym" | "name";
 

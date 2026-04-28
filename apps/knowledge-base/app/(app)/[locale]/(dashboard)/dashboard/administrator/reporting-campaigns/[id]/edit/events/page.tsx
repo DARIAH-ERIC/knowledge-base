@@ -1,4 +1,3 @@
-import { db } from "@dariah-eric/database";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
@@ -6,6 +5,7 @@ import type { ReactNode } from "react";
 
 import { CampaignEventAmountsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-event-amounts-form";
 import { upsertCampaignEventAmountsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-event-amounts.action";
+import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorCampaignEventsPageProps {

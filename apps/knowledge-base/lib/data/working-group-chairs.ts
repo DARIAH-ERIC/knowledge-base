@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { and, eq } from "@dariah-eric/database/sql";
-import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
+
+import { db } from "@/lib/db";
+import { and, eq } from "@/lib/db/sql";
 
 export async function getWorkingGroupChairs(unitId: string) {
 	return db

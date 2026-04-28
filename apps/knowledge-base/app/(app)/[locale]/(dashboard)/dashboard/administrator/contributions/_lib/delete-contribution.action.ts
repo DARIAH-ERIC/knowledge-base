@@ -1,11 +1,11 @@
 "use server";
 
-import { eq } from "@dariah-eric/database/sql";
-import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 
 import { assertAdmin } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { eq } from "@/lib/db/sql";
 
 export async function deleteContributionAction(id: string): Promise<void> {
 	await assertAdmin();

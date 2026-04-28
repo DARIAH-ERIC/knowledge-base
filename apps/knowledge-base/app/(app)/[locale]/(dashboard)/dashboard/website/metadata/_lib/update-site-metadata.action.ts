@@ -1,8 +1,6 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
-import { sql } from "@dariah-eric/database/sql";
-import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import {
 	createActionStateError,
@@ -16,6 +14,8 @@ import * as v from "valibot";
 
 import { UpdateSiteMetadataActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_lib/update-site-metadata.schema";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { sql } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";

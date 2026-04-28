@@ -1,8 +1,8 @@
 import * as schema from "@dariah-eric/database/schema";
-import { alias, eq } from "@dariah-eric/database/sql";
 import * as v from "valibot";
 
 import type { Database, Transaction } from "@/middlewares/db";
+import { alias, eq } from "@/services/db/sql";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 

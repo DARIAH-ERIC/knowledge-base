@@ -30,7 +30,7 @@ const { values } = parseArgs({
 });
 
 function createRequestBody(): SyncRequestBody {
-	if (values.all) {
+	if (values.all === true) {
 		return { mode: "all" };
 	}
 

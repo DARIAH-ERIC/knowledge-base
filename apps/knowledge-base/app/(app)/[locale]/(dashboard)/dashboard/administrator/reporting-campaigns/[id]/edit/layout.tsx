@@ -1,4 +1,3 @@
-import { db } from "@dariah-eric/database";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -10,6 +9,7 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { CampaignStepNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-step-nav";
 import { assertAdmin } from "@/lib/auth/session";
+import { db } from "@/lib/db";
 
 interface CampaignEditLayoutProps {
 	children: ReactNode;

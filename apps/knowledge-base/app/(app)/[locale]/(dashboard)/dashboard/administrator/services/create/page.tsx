@@ -1,10 +1,10 @@
-import { db } from "@dariah-eric/database";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { ServiceCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_components/service-create-form";
 import { getOrganisationalUnitOptions } from "@/lib/data/organisational-units";
+import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 export async function generateMetadata(

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { and, count, eq, exists, not, sql, type SQLWrapper } from "@dariah-eric/database/sql";
+import { and, count, eq, exists, not, sql, type SQLWrapper } from "@/services/db/sql";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";

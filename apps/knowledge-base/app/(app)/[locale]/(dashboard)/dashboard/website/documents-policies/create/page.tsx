@@ -1,5 +1,3 @@
-import { asc } from "@dariah-eric/database/sql";
-import { db } from "@dariah-eric/database";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -7,6 +5,8 @@ import type { ReactNode } from "react";
 import { DocumentOrPolicyCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-create-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { db } from "@/lib/db";
+import { asc } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteCreateDocumentOrPolicyPageProps extends PageProps<"/[locale]/dashboard/website/documents-policies/create"> {}

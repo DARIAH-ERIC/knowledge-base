@@ -1,4 +1,3 @@
-import { db } from "@dariah-eric/database";
 import { socialMediaKpiCategoryEnum } from "@dariah-eric/database/schema";
 import { Button } from "@dariah-eric/ui/button";
 import { Label } from "@dariah-eric/ui/field";
@@ -11,6 +10,7 @@ import type { ReactNode } from "react";
 
 import { upsertCountryReportSocialMediaKpisAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/upsert-country-report-social-media-kpis.action";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardReportingCountryReportSocialMediaPageProps {

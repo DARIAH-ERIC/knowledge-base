@@ -1,5 +1,5 @@
 import { assert, keyBy, log } from "@acdh-oeaw/lib";
-import { db } from "@dariah-eric/database";
+import { createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { createStorageService } from "@dariah-eric/storage";
 import { buffer } from "@dariah-eric/storage/lib";
@@ -26,6 +26,17 @@ import {
 	services as unrServices,
 	workingGroups as unrWorkingGroups,
 } from "../unr-schema/schema";
+
+const db = createDatabaseService({
+	connection: {
+		database: env.DATABASE_NAME,
+		host: env.DATABASE_HOST,
+		password: env.DATABASE_PASSWORD,
+		port: env.DATABASE_PORT,
+		user: env.DATABASE_USER,
+	},
+	logger: false,
+}).unwrap();
 
 const storage = createStorageService({
 	config: {

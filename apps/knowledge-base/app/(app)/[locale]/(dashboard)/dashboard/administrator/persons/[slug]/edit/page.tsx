@@ -1,5 +1,3 @@
-import { and, eq } from "@dariah-eric/database/sql";
-import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
@@ -10,6 +8,8 @@ import { PersonEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/admin
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { getContributionRoleOptions, getPersonContributions } from "@/lib/data/contributions";
+import { db } from "@/lib/db";
+import { and, eq } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 

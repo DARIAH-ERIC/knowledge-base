@@ -1,7 +1,6 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
-import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import {
 	createActionStateError,
@@ -14,6 +13,7 @@ import * as v from "valibot";
 
 import { CreateSpotlightArticleContributorActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article-contributor.schema";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 

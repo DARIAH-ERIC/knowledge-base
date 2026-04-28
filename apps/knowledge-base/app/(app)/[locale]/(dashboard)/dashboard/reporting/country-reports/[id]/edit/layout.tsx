@@ -1,4 +1,3 @@
-import { db } from "@dariah-eric/database";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -10,6 +9,7 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { CountryReportStepNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/_components/country-report-step-nav";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
 
 interface CountryReportEditLayoutProps {
 	children: ReactNode;

@@ -1,8 +1,6 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
-import { eq } from "@dariah-eric/database/sql";
-import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
@@ -13,6 +11,8 @@ import * as v from "valibot";
 import { CreateUserActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/create-user.schema";
 import { auth } from "@/lib/auth";
 import { assertAdmin } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { eq } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";

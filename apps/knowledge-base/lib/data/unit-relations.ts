@@ -1,8 +1,8 @@
-import { and, count, eq, ilike, inArray } from "@dariah-eric/database/sql";
-import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 
 import { relationOptionsPageSize } from "@/lib/constants/relations";
+import { db } from "@/lib/db";
+import { and, count, eq, ilike, inArray } from "@/lib/db/sql";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getUnitRelations(unitId: string) {

@@ -1,6 +1,7 @@
-import { count, desc, eq, ilike, sql } from "@dariah-eric/database/sql";
-import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
+
+import { db } from "@/lib/db";
+import { count, desc, eq, ilike, sql } from "@/lib/db/sql";
 
 export type ServicesSort = "name" | "type" | "status" | "sshocMarketplaceId";
 

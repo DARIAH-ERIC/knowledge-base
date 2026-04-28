@@ -1,7 +1,8 @@
 import { createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
-import { and, eq, inArray, or, sql } from "@dariah-eric/database/sql";
 import type { InferOk } from "better-result";
+
+import { and, eq, inArray, or, sql } from "@/lib/db/sql";
 
 import { env } from "../../../config/env.config";
 

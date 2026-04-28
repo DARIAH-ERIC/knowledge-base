@@ -9,6 +9,8 @@ import { createSshocClient } from "@dariah-eric/client-sshoc";
 // import { createZenodoClient } from "@dariah-eric/client-zenodo";
 import { createZoteroClient } from "@dariah-eric/client-zotero";
 import { createDatabaseService } from "@dariah-eric/database";
+import * as schema from "@dariah-eric/database/schema";
+import { alias, and, eq, inArray, sql } from "@dariah-eric/database/sql";
 import type { ResourceDocument, WebsiteDocument } from "@dariah-eric/search";
 import { createSearchAdminService } from "@dariah-eric/search/admin";
 import { Result } from "better-result";
@@ -419,6 +421,55 @@ async function main() {
 
 		/**
 		 * --------------------------------------------------------------------------------------------
+		 * Funding calls.
+		 * --------------------------------------------------------------------------------------------
+		 */
+
+		const fundingCalls = await db.query.fundingCalls.findMany({
+			columns: {
+				id: true,
+				summary: true,
+				title: true,
+				updatedAt: true,
+			},
+			where: {
+				entity: {
+					status: {
+						type: "published",
+					},
+				},
+			},
+			with: {
+				entity: {
+					columns: {
+						slug: true,
+					},
+				},
+			},
+		});
+
+		website.push(
+			...fundingCalls.map((item): WebsiteDocument => {
+				const type = "funding-call";
+				const id = item.entity.slug;
+
+				return {
+					kind: "entity",
+					source: "dariah-knowledge-base",
+					source_id: id,
+					source_updated_at: item.updatedAt.getTime(),
+					imported_at: importedAt,
+					type,
+					id: [type, id].join(":"),
+					label: item.title,
+					description: item.summary ?? "",
+					link: `/funding-calls/${id}`,
+				};
+			}),
+		);
+
+		/**
+		 * --------------------------------------------------------------------------------------------
 		 * Impact case studies.
 		 * --------------------------------------------------------------------------------------------
 		 */
@@ -468,7 +519,7 @@ async function main() {
 
 		/**
 		 * --------------------------------------------------------------------------------------------
-		 * Members and partners.
+		 * Member and partner countries.
 		 * --------------------------------------------------------------------------------------------
 		 */
 
@@ -514,8 +565,286 @@ async function main() {
 				};
 			}),
 		);
-		// TODO: partner institutions / cooperating partners
-		// TODO: national consortia
+
+		const countryEntities = alias(schema.entities, "country_entities");
+		const itemEntities = alias(schema.entities, "item_entities");
+		const organisationalRelationStatus = alias(
+			schema.organisationalUnitStatus,
+			"organisational_relation_status",
+		);
+		const organisationalUnitType = alias(
+			schema.organisationalUnitTypes,
+			"organisational_unit_type",
+		);
+		const publishedEntityStatus = alias(schema.entityStatus, "published_entity_status");
+
+		const nationalConsortia = await db
+			.select({
+				countrySlug: countryEntities.slug,
+				itemSlug: itemEntities.slug,
+				label: schema.organisationalUnits.name,
+				description: schema.organisationalUnits.summary,
+				sourceUpdatedAt: schema.organisationalUnits.updatedAt,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(itemEntities, eq(schema.organisationalUnits.id, itemEntities.id))
+			.innerJoin(publishedEntityStatus, eq(itemEntities.statusId, publishedEntityStatus.id))
+			.innerJoin(
+				organisationalUnitType,
+				eq(schema.organisationalUnits.typeId, organisationalUnitType.id),
+			)
+			.innerJoin(
+				schema.organisationalUnitsRelations,
+				eq(schema.organisationalUnitsRelations.unitId, schema.organisationalUnits.id),
+			)
+			.innerJoin(
+				organisationalRelationStatus,
+				eq(schema.organisationalUnitsRelations.status, organisationalRelationStatus.id),
+			)
+			.innerJoin(
+				schema.membersAndPartners,
+				eq(schema.organisationalUnitsRelations.relatedUnitId, schema.membersAndPartners.id),
+			)
+			.innerJoin(countryEntities, eq(schema.membersAndPartners.id, countryEntities.id))
+			.where(
+				and(
+					eq(publishedEntityStatus.type, "published"),
+					eq(organisationalUnitType.type, "national_consortium"),
+					eq(organisationalRelationStatus.status, "is_national_consortium_of"),
+					sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
+				),
+			);
+
+		website.push(
+			...nationalConsortia.map((item): WebsiteDocument => {
+				const type = "national-consortium";
+				const id = `${item.countrySlug}:${item.itemSlug}`;
+
+				return {
+					kind: "entity",
+					source: "dariah-knowledge-base",
+					source_id: item.itemSlug,
+					source_updated_at: item.sourceUpdatedAt.getTime(),
+					imported_at: importedAt,
+					type,
+					id: [type, id].join(":"),
+					label: item.label,
+					description: item.description ?? "",
+					link: `/network/members-and-partners/${item.countrySlug}`,
+				};
+			}),
+		);
+
+		const partnerInstitutions = await db
+			.select({
+				countrySlug: countryEntities.slug,
+				itemSlug: itemEntities.slug,
+				label: schema.organisationalUnits.name,
+				description: schema.organisationalUnits.summary,
+				sourceUpdatedAt: schema.organisationalUnits.updatedAt,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(itemEntities, eq(schema.organisationalUnits.id, itemEntities.id))
+			.innerJoin(publishedEntityStatus, eq(itemEntities.statusId, publishedEntityStatus.id))
+			.innerJoin(
+				organisationalUnitType,
+				eq(schema.organisationalUnits.typeId, organisationalUnitType.id),
+			)
+			.innerJoin(
+				schema.organisationalUnitsRelations,
+				eq(schema.organisationalUnitsRelations.unitId, schema.organisationalUnits.id),
+			)
+			.innerJoin(
+				organisationalRelationStatus,
+				eq(schema.organisationalUnitsRelations.status, organisationalRelationStatus.id),
+			)
+			.innerJoin(
+				schema.membersAndPartners,
+				eq(schema.organisationalUnitsRelations.relatedUnitId, schema.membersAndPartners.id),
+			)
+			.innerJoin(countryEntities, eq(schema.membersAndPartners.id, countryEntities.id))
+			.where(
+				and(
+					eq(publishedEntityStatus.type, "published"),
+					eq(organisationalUnitType.type, "institution"),
+					eq(organisationalRelationStatus.status, "is_located_in"),
+					sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
+					sql`
+						EXISTS (
+							SELECT
+								1
+							FROM
+								${schema.organisationalUnitsRelations} partner_relations
+								INNER JOIN ${schema.organisationalUnitStatus} partner_relation_status ON partner_relations.status = partner_relation_status.id
+								INNER JOIN ${schema.organisationalUnits} related_units ON partner_relations.related_unit_id = related_units.id
+								INNER JOIN ${schema.organisationalUnitTypes} related_unit_types ON related_units.type_id = related_unit_types.id
+							WHERE
+								partner_relations.unit_id = ${schema.organisationalUnits.id}
+								AND partner_relation_status.status = 'is_partner_institution_of'
+								AND related_unit_types.type = 'eric'
+								AND partner_relations.duration @> NOW()::TIMESTAMPTZ
+						)
+					`,
+				),
+			);
+
+		website.push(
+			...partnerInstitutions.map((item): WebsiteDocument => {
+				const type = "institution";
+				const id = `${item.countrySlug}:${item.itemSlug}`;
+
+				return {
+					kind: "entity",
+					source: "dariah-knowledge-base",
+					source_id: item.itemSlug,
+					source_updated_at: item.sourceUpdatedAt.getTime(),
+					imported_at: importedAt,
+					type,
+					id: [type, id].join(":"),
+					label: item.label,
+					description: item.description ?? "",
+					link: `/network/members-and-partners/${item.countrySlug}`,
+				};
+			}),
+		);
+
+		const cooperatingPartnerInstitutions = await db
+			.select({
+				countrySlug: countryEntities.slug,
+				itemSlug: itemEntities.slug,
+				label: schema.organisationalUnits.name,
+				description: schema.organisationalUnits.summary,
+				sourceUpdatedAt: schema.organisationalUnits.updatedAt,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(itemEntities, eq(schema.organisationalUnits.id, itemEntities.id))
+			.innerJoin(publishedEntityStatus, eq(itemEntities.statusId, publishedEntityStatus.id))
+			.innerJoin(
+				organisationalUnitType,
+				eq(schema.organisationalUnits.typeId, organisationalUnitType.id),
+			)
+			.innerJoin(
+				schema.organisationalUnitsRelations,
+				eq(schema.organisationalUnitsRelations.unitId, schema.organisationalUnits.id),
+			)
+			.innerJoin(
+				organisationalRelationStatus,
+				eq(schema.organisationalUnitsRelations.status, organisationalRelationStatus.id),
+			)
+			.innerJoin(
+				schema.membersAndPartners,
+				eq(schema.organisationalUnitsRelations.relatedUnitId, schema.membersAndPartners.id),
+			)
+			.innerJoin(countryEntities, eq(schema.membersAndPartners.id, countryEntities.id))
+			.where(
+				and(
+					eq(publishedEntityStatus.type, "published"),
+					eq(organisationalUnitType.type, "institution"),
+					eq(organisationalRelationStatus.status, "is_located_in"),
+					sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
+					sql`
+						EXISTS (
+							SELECT
+								1
+							FROM
+								${schema.organisationalUnitsRelations} cooperating_relations
+								INNER JOIN ${schema.organisationalUnitStatus} cooperating_relation_status ON cooperating_relations.status = cooperating_relation_status.id
+								INNER JOIN ${schema.organisationalUnits} related_units ON cooperating_relations.related_unit_id = related_units.id
+								INNER JOIN ${schema.organisationalUnitTypes} related_unit_types ON related_units.type_id = related_unit_types.id
+							WHERE
+								cooperating_relations.unit_id = ${schema.organisationalUnits.id}
+								AND cooperating_relation_status.status = 'is_cooperating_partner_of'
+								AND related_unit_types.type = 'eric'
+								AND cooperating_relations.duration @> NOW()::TIMESTAMPTZ
+						)
+					`,
+				),
+			);
+
+		website.push(
+			...cooperatingPartnerInstitutions.map((item): WebsiteDocument => {
+				const type = "institution";
+				const id = `${item.countrySlug}:${item.itemSlug}`;
+
+				return {
+					kind: "entity",
+					source: "dariah-knowledge-base",
+					source_id: item.itemSlug,
+					source_updated_at: item.sourceUpdatedAt.getTime(),
+					imported_at: importedAt,
+					type,
+					id: [type, id].join(":"),
+					label: item.label,
+					description: item.description ?? "",
+					link: `/network/members-and-partners/${item.countrySlug}`,
+				};
+			}),
+		);
+
+		const personRoleType = alias(schema.personRoleTypes, "person_role_type");
+
+		const countryContributors = await db
+			.select({
+				countrySlug: countryEntities.slug,
+				itemSlug: itemEntities.slug,
+				label: schema.persons.name,
+				sourceUpdatedAt: schema.persons.updatedAt,
+			})
+			.from(schema.personsToOrganisationalUnits)
+			.innerJoin(
+				schema.persons,
+				eq(schema.personsToOrganisationalUnits.personId, schema.persons.id),
+			)
+			.innerJoin(itemEntities, eq(schema.persons.id, itemEntities.id))
+			.innerJoin(publishedEntityStatus, eq(itemEntities.statusId, publishedEntityStatus.id))
+			.innerJoin(
+				personRoleType,
+				eq(schema.personsToOrganisationalUnits.roleTypeId, personRoleType.id),
+			)
+			.innerJoin(
+				schema.membersAndPartners,
+				eq(schema.personsToOrganisationalUnits.organisationalUnitId, schema.membersAndPartners.id),
+			)
+			.innerJoin(countryEntities, eq(schema.membersAndPartners.id, countryEntities.id))
+			.where(
+				and(
+					eq(publishedEntityStatus.type, "published"),
+					inArray(personRoleType.type, [
+						"national_coordinator",
+						"national_coordinator_deputy",
+						"national_representative",
+						"national_representative_deputy",
+					]),
+					sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
+				),
+			);
+
+		const contributorDocumentsById = new Map<string, WebsiteDocument>();
+
+		for (const item of countryContributors) {
+			const type = "person";
+			const id = `${item.countrySlug}:${item.itemSlug}`;
+
+			/**
+			 * FIXME: These persons are also ingested from the persons table below.
+			 * We still need to decide whether person search matches should link to the country page,
+			 * the person page, or both.
+			 */
+			contributorDocumentsById.set(id, {
+				kind: "entity",
+				source: "dariah-knowledge-base",
+				source_id: item.itemSlug,
+				source_updated_at: item.sourceUpdatedAt.getTime(),
+				imported_at: importedAt,
+				type,
+				id: [type, id].join(":"),
+				label: item.label,
+				description: "",
+				link: `/network/members-and-partners/${item.countrySlug}`,
+			});
+		}
+
+		website.push(...contributorDocumentsById.values());
 
 		/**
 		 * --------------------------------------------------------------------------------------------
@@ -562,6 +891,55 @@ async function main() {
 					label: item.title,
 					description: item.summary,
 					link: `/news/${id}`,
+				};
+			}),
+		);
+
+		/**
+		 * --------------------------------------------------------------------------------------------
+		 * Opportunities.
+		 * --------------------------------------------------------------------------------------------
+		 */
+
+		const opportunities = await db.query.opportunities.findMany({
+			columns: {
+				id: true,
+				summary: true,
+				title: true,
+				updatedAt: true,
+			},
+			where: {
+				entity: {
+					status: {
+						type: "published",
+					},
+				},
+			},
+			with: {
+				entity: {
+					columns: {
+						slug: true,
+					},
+				},
+			},
+		});
+
+		website.push(
+			...opportunities.map((item): WebsiteDocument => {
+				const type = "opportunity";
+				const id = item.entity.slug;
+
+				return {
+					kind: "entity",
+					source: "dariah-knowledge-base",
+					source_id: id,
+					source_updated_at: item.updatedAt.getTime(),
+					imported_at: importedAt,
+					type,
+					id: [type, id].join(":"),
+					label: item.title,
+					description: item.summary ?? "",
+					link: `/opportunities/${id}`,
 				};
 			}),
 		);
@@ -658,7 +1036,7 @@ async function main() {
 					id: [type, id].join(":"),
 					label: item.name,
 					description: "",
-					/** TODO: unclear where this should link to. */
+					/** FIXME: unclear where this should link to. */
 					link: `/persons/${id}`,
 				};
 			}),
@@ -666,7 +1044,7 @@ async function main() {
 
 		/**
 		 * --------------------------------------------------------------------------------------------
-		 * Projects.
+		 * Projects (DARIAH).
 		 * --------------------------------------------------------------------------------------------
 		 */
 

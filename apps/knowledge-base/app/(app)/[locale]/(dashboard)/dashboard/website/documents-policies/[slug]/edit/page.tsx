@@ -1,5 +1,3 @@
-import { asc } from "@dariah-eric/database/sql";
-import { db } from "@dariah-eric/database";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
@@ -9,6 +7,8 @@ import { DocumentOrPolicyEditForm } from "@/app/(app)/[locale]/(dashboard)/dashb
 import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { db } from "@/lib/db";
+import { asc } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 

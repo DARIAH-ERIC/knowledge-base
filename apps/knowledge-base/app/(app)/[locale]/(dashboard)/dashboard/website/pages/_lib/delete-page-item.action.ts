@@ -1,12 +1,12 @@
 "use server";
 
-import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
-import { eq, inArray, or } from "@dariah-eric/database/sql";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { eq, inArray, or } from "@/lib/db/sql";
 import {
 	deleteWebsiteDocument,
 	getWebsiteDocumentDescriptorByEntityId,
