@@ -1,5 +1,5 @@
 import type { Metadata, ResolvingMetadata } from "next";
-import { getExtracted,getLocale  } from "next-intl/server";
+import { getExtracted, getLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { ReportingOverviewPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/reporting-overview-page";
