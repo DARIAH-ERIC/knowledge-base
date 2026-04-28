@@ -17,7 +17,7 @@ export async function generateMetadata(
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Website dashboard - Opportunities details"),
+		title: t("Website dashboard - Opportunity details"),
 	});
 
 	return metadata;
