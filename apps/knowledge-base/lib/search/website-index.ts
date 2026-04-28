@@ -3,7 +3,15 @@ import type { WebsiteDocument } from "@dariah-eric/search";
 import { db } from "@/lib/db";
 import { search } from "@/lib/search/admin";
 
-type SupportedEntityType =
+type SupportedEntityKind =
+	| "documents_policies"
+	| "events"
+	| "impact_case_studies"
+	| "news"
+	| "pages"
+	| "spotlight_articles";
+
+export type SupportedEntityType =
 	| "document-or-policy"
 	| "event"
 	| "impact-case-study"
@@ -16,45 +24,52 @@ interface WebsiteDocumentDescriptor {
 	type: SupportedEntityType;
 }
 
+export interface SyncWebsiteDocumentResult {
+	entityId?: string;
+	documentId?: string;
+	error?: unknown;
+	ok: boolean;
+	operation: "deleted" | "skipped" | "upserted";
+}
+
 function createWebsiteDocumentId(descriptor: WebsiteDocumentDescriptor): string {
 	return [descriptor.type, descriptor.slug].join(":");
 }
 
+const entityKindByType: Record<SupportedEntityType, SupportedEntityKind> = {
+	"document-or-policy": "documents_policies",
+	event: "events",
+	"impact-case-study": "impact_case_studies",
+	"news-item": "news",
+	page: "pages",
+	"spotlight-article": "spotlight_articles",
+};
+
+const entityTypeByKind: Record<SupportedEntityKind, SupportedEntityType> = {
+	documents_policies: "document-or-policy",
+	events: "event",
+	impact_case_studies: "impact-case-study",
+	news: "news-item",
+	pages: "page",
+	spotlight_articles: "spotlight-article",
+};
+
+export const supportedWebsiteEntityTypes = Object.keys(entityKindByType) as Array<SupportedEntityType>;
+
 function getWebsiteDocumentDescriptor(params: {
-	entityType: string;
+	entityKind: string;
 	slug: string;
 }): WebsiteDocumentDescriptor | null {
-	const { entityType, slug } = params;
+	const { entityKind, slug } = params;
 
-	switch (entityType) {
-		case "documents_policies": {
-			return { type: "document-or-policy", slug };
-		}
-
-		case "events": {
-			return { type: "event", slug };
-		}
-
-		case "impact_case_studies": {
-			return { type: "impact-case-study", slug };
-		}
-
-		case "news": {
-			return { type: "news-item", slug };
-		}
-
-		case "pages": {
-			return { type: "page", slug };
-		}
-
-		case "spotlight_articles": {
-			return { type: "spotlight-article", slug };
-		}
-
-		default: {
-			return null;
-		}
+	if (!(entityKind in entityTypeByKind)) {
+		return null;
 	}
+
+	return {
+		slug,
+		type: entityTypeByKind[entityKind as SupportedEntityKind],
+	};
 }
 
 function createWebsiteDocument(params: {
@@ -126,8 +141,39 @@ export async function getWebsiteDocumentDescriptorByEntityId(
 	}
 
 	return getWebsiteDocumentDescriptor({
-		entityType: entity.type.type,
+		entityKind: entity.type.type,
 		slug: entity.slug,
+	});
+}
+
+export async function getSyncableWebsiteEntityIds(): Promise<Array<string>> {
+	return getSyncableWebsiteEntityIdsByType();
+}
+
+export async function getSyncableWebsiteEntityIdsByType(
+	entityType?: SupportedEntityType,
+): Promise<Array<string>> {
+	const entities = await db.query.entities.findMany({
+		columns: {
+			id: true,
+		},
+		with: {
+			type: {
+				columns: {
+					type: true,
+				},
+			},
+		},
+	});
+
+	const kind = entityType != null ? entityKindByType[entityType] : null;
+
+	return entities.flatMap((entity) => {
+		if (kind != null) {
+			return entity.type.type === kind ? [entity.id] : [];
+		}
+
+		return entity.type.type in entityTypeByKind ? [entity.id] : [];
 	});
 }
 
@@ -158,7 +204,7 @@ export async function getWebsiteDocumentForEntity(entityId: string): Promise<Web
 	}
 
 	const descriptor = getWebsiteDocumentDescriptor({
-		entityType: entity.type.type,
+		entityKind: entity.type.type,
 		slug: entity.slug,
 	});
 
@@ -320,17 +366,24 @@ export async function getWebsiteDocumentForEntity(entityId: string): Promise<Web
 }
 
 export async function syncWebsiteDocumentForEntity(entityId: string): Promise<void> {
+	await syncWebsiteDocumentForEntityWithResult(entityId);
+}
+
+export async function syncWebsiteDocumentForEntityWithResult(
+	entityId: string,
+): Promise<SyncWebsiteDocumentResult> {
 	const descriptor = await getWebsiteDocumentDescriptorByEntityId(entityId);
 
 	if (descriptor == null) {
-		return;
+		return { entityId, ok: true, operation: "skipped" };
 	}
 
 	const document = await getWebsiteDocumentForEntity(entityId);
 
 	if (document == null) {
-		await deleteWebsiteDocument(descriptor);
-		return;
+		const result = await deleteWebsiteDocument(descriptor);
+
+		return { ...result, entityId };
 	}
 
 	const result = await search.collections.website.upsert(document);
@@ -341,16 +394,47 @@ export async function syncWebsiteDocumentForEntity(entityId: string): Promise<vo
 			documentId: document.id,
 			error: result.error,
 		});
+
+		return {
+			entityId,
+			documentId: document.id,
+			error: result.error,
+			ok: false,
+			operation: "upserted",
+		};
 	}
+
+	return {
+		entityId,
+		documentId: document.id,
+		ok: true,
+		operation: "upserted",
+	};
 }
 
-export async function deleteWebsiteDocument(descriptor: WebsiteDocumentDescriptor): Promise<void> {
+export async function deleteWebsiteDocument(
+	descriptor: WebsiteDocumentDescriptor,
+): Promise<SyncWebsiteDocumentResult> {
+	const documentId = createWebsiteDocumentId(descriptor);
 	const result = await search.collections.website.delete(createWebsiteDocumentId(descriptor));
 
 	if (result.isErr() && !isMissingSearchDocumentError(result.error)) {
 		console.error("Failed to delete website search document.", {
-			documentId: createWebsiteDocumentId(descriptor),
+			documentId,
 			error: result.error,
 		});
+
+		return {
+			documentId,
+			error: result.error,
+			ok: false,
+			operation: "deleted",
+		};
 	}
+
+	return {
+		documentId,
+		ok: true,
+		operation: "deleted",
+	};
 }
