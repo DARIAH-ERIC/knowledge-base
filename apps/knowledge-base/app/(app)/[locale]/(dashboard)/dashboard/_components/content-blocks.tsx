@@ -94,7 +94,11 @@ interface DataContentBlockItem {
 	id: Key;
 	type: "data";
 	position?: number;
-	content?: { dataType?: "events" | "news"; limit?: number; selectedIds?: Array<string> };
+	content?: {
+		dataType?: "events" | "news" | "opportunities" | "funding_calls";
+		limit?: number;
+		selectedIds?: Array<string>;
+	};
 }
 
 interface HeroContentBlockItem {
@@ -147,6 +151,8 @@ interface UnifiedContentBlockItem {
 type ContentBlockListItem = ContentBlock | UnifiedContentBlockItem;
 
 const UNIFIED_BLOCK_TYPES = new Set<ContentBlock["type"]>(["rich_text", "image", "embed"]);
+const DATA_CONTENT_BLOCK_TYPES = ["events", "news", "opportunities", "funding_calls"] as const;
+type DataContentBlockType = (typeof DATA_CONTENT_BLOCK_TYPES)[number];
 
 function mergeInitialItems(items: Array<ContentBlock>): Array<ContentBlockListItem> {
 	const result: Array<ContentBlockListItem> = [];
@@ -785,7 +791,7 @@ function DataContentBlockPanel({
 	const [query, setQuery] = useState("");
 	const [entries, setEntries] = useState<Array<ContentBlockEntry>>([]);
 
-	async function fetchEntries(type: "events" | "news", q: string) {
+	async function fetchEntries(type: DataContentBlockType, q: string) {
 		const params = new URLSearchParams({ type, limit: "20" });
 		if (q.trim() !== "") params.set("q", q.trim());
 		const res = await fetch(`/api/content-block-entries?${params.toString()}`);
@@ -797,7 +803,11 @@ function DataContentBlockPanel({
 		<div className="flex flex-col gap-y-4">
 			<Select
 				onChange={(key) => {
-					onChange({ ...item.content, dataType: key as "events" | "news", selectedIds: undefined });
+					onChange({
+						...item.content,
+						dataType: key as DataContentBlockType,
+						selectedIds: undefined,
+					});
 					setQuery("");
 					setEntries([]);
 				}}
@@ -806,10 +816,16 @@ function DataContentBlockPanel({
 				<Label>{t("Data type")}</Label>
 				<SelectTrigger />
 				<SelectContent
-					items={[
-						{ id: "events", name: t("Events") },
-						{ id: "news", name: t("News") },
-					]}
+					items={DATA_CONTENT_BLOCK_TYPES.map((id) => {
+						const labels: Record<(typeof DATA_CONTENT_BLOCK_TYPES)[number], string> = {
+							events: t("Events"),
+							news: t("News"),
+							opportunities: t("Opportunities"),
+							funding_calls: t("Funding calls"),
+						};
+
+						return { id, name: labels[id] };
+					})}
 				>
 					{(entry) => {
 						return (
