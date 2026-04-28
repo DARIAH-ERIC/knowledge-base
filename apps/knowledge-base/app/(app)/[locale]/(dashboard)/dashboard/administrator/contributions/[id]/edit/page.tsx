@@ -1,5 +1,3 @@
-import { eq } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
@@ -8,6 +6,8 @@ import type { ReactNode } from "react";
 
 import { ContributionEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contribution-edit-form";
 import { getContributionRoleOptions } from "@/lib/data/contributions";
+import { db } from "@/lib/db";
+import { eq } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorEditContributionPageProps {

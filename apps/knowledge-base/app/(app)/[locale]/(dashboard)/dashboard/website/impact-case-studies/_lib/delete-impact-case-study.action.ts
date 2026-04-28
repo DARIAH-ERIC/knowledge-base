@@ -1,14 +1,20 @@
 "use server";
 
-import { eq, inArray, or } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { eq, inArray, or } from "@/lib/db/sql";
+import {
+	deleteWebsiteDocument,
+	getWebsiteDocumentDescriptorByEntityId,
+} from "@/lib/search/website-index";
 
 export async function deleteImpactCaseStudyAction(id: string): Promise<void> {
 	await assertAuthenticated();
+	const descriptor = await getWebsiteDocumentDescriptorByEntityId(id);
 
 	await db.transaction(async (tx) => {
 		const entityFields = await tx
@@ -43,6 +49,12 @@ export async function deleteImpactCaseStudyAction(id: string): Promise<void> {
 		await tx.delete(schema.impactCaseStudies).where(eq(schema.impactCaseStudies.id, id));
 
 		await tx.delete(schema.entities).where(eq(schema.entities.id, id));
+	});
+
+	after(async () => {
+		if (descriptor != null) {
+			await deleteWebsiteDocument(descriptor);
+		}
 	});
 
 	revalidatePath("/[locale]/dashboard/website/impact-case-studies", "layout");

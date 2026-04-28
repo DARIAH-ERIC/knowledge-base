@@ -1,4 +1,3 @@
-import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
@@ -7,6 +6,7 @@ import type { ReactNode } from "react";
 import { CountryReportEventsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-events-form";
 import { updateCountryReportEventsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/update-country-report-events.action";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardReportingCountryReportEventsPageProps {

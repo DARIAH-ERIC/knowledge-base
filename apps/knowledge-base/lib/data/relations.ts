@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { and, count, eq, ilike, inArray, or } from "@dariah-eric/database";
-import { db, type Transaction } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
 import { relationOptionsPageSize } from "@/lib/constants/relations";
+import { db, type Transaction } from "@/lib/db";
+import { and, count, eq, ilike, inArray, or } from "@/lib/db/sql";
 import { search } from "@/lib/search";
 
 export interface RelationOptionItem {

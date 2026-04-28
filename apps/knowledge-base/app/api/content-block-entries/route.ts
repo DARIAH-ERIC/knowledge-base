@@ -1,11 +1,18 @@
-import { ilike, inArray } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { ilike, inArray } from "@/lib/db/sql";
 
 const defaultLimit = 20;
+const allowedTypes = ["events", "news", "opportunities", "funding_calls"] as const;
+
+type ContentBlockEntryType = (typeof allowedTypes)[number];
+
+function isContentBlockEntryType(value: string | null): value is ContentBlockEntryType {
+	return value != null && allowedTypes.includes(value as ContentBlockEntryType);
+}
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
 	const { session } = await getCurrentSession();
@@ -17,7 +24,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 	const { searchParams } = request.nextUrl;
 
 	const type = searchParams.get("type");
-	if (type !== "events" && type !== "news") {
+	if (!isContentBlockEntryType(type)) {
 		return NextResponse.json({ items: [], total: 0 });
 	}
 
@@ -50,23 +57,66 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 		return NextResponse.json({ items, total: countResult });
 	}
 
-	// type === "news"
+	if (type === "news") {
+		const where =
+			q != null && q.trim() !== ""
+				? ilike(schema.news.title, `%${q}%`)
+				: ids != null
+					? inArray(schema.news.id, ids)
+					: undefined;
+
+		const [items, countResult] = await Promise.all([
+			db
+				.select({ id: schema.news.id, title: schema.news.title })
+				.from(schema.news)
+				.where(where)
+				.orderBy(schema.news.title)
+				.limit(limit)
+				.offset(offset),
+			db.$count(schema.news, where),
+		]);
+
+		return NextResponse.json({ items, total: countResult });
+	}
+
+	if (type === "opportunities") {
+		const where =
+			q != null && q.trim() !== ""
+				? ilike(schema.opportunities.title, `%${q}%`)
+				: ids != null
+					? inArray(schema.opportunities.id, ids)
+					: undefined;
+
+		const [items, countResult] = await Promise.all([
+			db
+				.select({ id: schema.opportunities.id, title: schema.opportunities.title })
+				.from(schema.opportunities)
+				.where(where)
+				.orderBy(schema.opportunities.title)
+				.limit(limit)
+				.offset(offset),
+			db.$count(schema.opportunities, where),
+		]);
+
+		return NextResponse.json({ items, total: countResult });
+	}
+
 	const where =
 		q != null && q.trim() !== ""
-			? ilike(schema.news.title, `%${q}%`)
+			? ilike(schema.fundingCalls.title, `%${q}%`)
 			: ids != null
-				? inArray(schema.news.id, ids)
+				? inArray(schema.fundingCalls.id, ids)
 				: undefined;
 
 	const [items, countResult] = await Promise.all([
 		db
-			.select({ id: schema.news.id, title: schema.news.title })
-			.from(schema.news)
+			.select({ id: schema.fundingCalls.id, title: schema.fundingCalls.title })
+			.from(schema.fundingCalls)
 			.where(where)
-			.orderBy(schema.news.title)
+			.orderBy(schema.fundingCalls.title)
 			.limit(limit)
 			.offset(offset),
-		db.$count(schema.news, where),
+		db.$count(schema.fundingCalls, where),
 	]);
 
 	return NextResponse.json({ items, total: countResult });

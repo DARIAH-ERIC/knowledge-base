@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { and, asc, count, desc, eq, type SQL, sql } from "@dariah-eric/database";
+import { and, asc, count, desc, eq, type SQL, sql } from "@/services/db/sql";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";

@@ -20,7 +20,7 @@ export function createOpenAirePublication(item: ResearchProduct): ResourceDocume
 		id,
 		source,
 		source_id: sourceId,
-		source_updated_at: null,
+		source_updated_at: item.lastUpdateTimeStamp,
 		imported_at: Date.now(),
 		type: "publication",
 		label: item.mainTitle,

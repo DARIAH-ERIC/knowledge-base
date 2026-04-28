@@ -1,12 +1,12 @@
 "use server";
 
-import { and, eq, isNull } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { and, eq, isNull } from "@/lib/db/sql";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function moveNavigationItemAction(

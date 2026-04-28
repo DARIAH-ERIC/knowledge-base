@@ -1,5 +1,3 @@
-import { eq } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
@@ -7,6 +5,8 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { UserEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-edit-form";
+import { db } from "@/lib/db";
+import { eq } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorEditUserPageProps {

@@ -1,4 +1,3 @@
-import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
@@ -7,6 +6,7 @@ import type { ReactNode } from "react";
 import { WorkingGroupReportQuestionsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-questions-form";
 import { upsertWorkingGroupReportAnswersAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/upsert-working-group-report-answers.action";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardReportingWorkingGroupReportQuestionsPageProps {

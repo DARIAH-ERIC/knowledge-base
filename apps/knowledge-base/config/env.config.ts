@@ -75,6 +75,7 @@ const validate = define({
 		S3_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 		S3_PROTOCOL: v.optional(v.picklist(["http", "https"]), "https"),
 		S3_SECRET_KEY: v.pipe(v.string(), v.nonEmpty()),
+		SEARCH_SYNC_API_SECRET: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		TYPESENSE_ADMIN_API_KEY: v.pipe(v.string(), v.nonEmpty()),
 	}),
 });
@@ -134,6 +135,7 @@ export const env = validate({
 		S3_PORT: process.env.S3_PORT,
 		S3_PROTOCOL: process.env.S3_PROTOCOL,
 		S3_SECRET_KEY: process.env.S3_SECRET_KEY,
+		SEARCH_SYNC_API_SECRET: process.env.SEARCH_SYNC_API_SECRET,
 		TYPESENSE_ADMIN_API_KEY: process.env.TYPESENSE_ADMIN_API_KEY,
 	},
 }).unwrap();

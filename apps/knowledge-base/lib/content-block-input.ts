@@ -42,7 +42,9 @@ export const ContentBlockInputSchema = v.union([
 		position: v.optional(v.number()),
 		content: v.optional(
 			v.object({
-				dataType: v.optional(v.picklist(["events", "news"] as const)),
+				dataType: v.optional(
+					v.picklist(["events", "news", "opportunities", "funding_calls"] as const),
+				),
 				limit: v.optional(v.number()),
 				selectedIds: v.optional(v.array(v.string())),
 			}),

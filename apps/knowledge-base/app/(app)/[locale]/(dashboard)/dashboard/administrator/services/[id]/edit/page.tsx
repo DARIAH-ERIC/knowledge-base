@@ -1,5 +1,3 @@
-import { eq } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
@@ -11,6 +9,8 @@ import {
 	getOrganisationalUnitOptions,
 	getOrganisationalUnitOptionsByIds,
 } from "@/lib/data/organisational-units";
+import { db } from "@/lib/db";
+import { eq } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorEditServicePageProps {

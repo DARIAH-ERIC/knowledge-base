@@ -124,7 +124,7 @@ export function createSshocItem(item: SearchItem, marketplaceBaseUrl: string): R
 				keywords,
 				links,
 				source_actor_ids: actorIds,
-				upstream_sources: item.accessibleAt ?? [],
+				upstream_sources: [],
 				kind: null,
 				authors: null,
 				year: null,

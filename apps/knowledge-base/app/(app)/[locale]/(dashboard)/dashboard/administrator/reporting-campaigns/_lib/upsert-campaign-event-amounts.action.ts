@@ -1,7 +1,6 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { reportingCampaignEventTypeEnum } from "@dariah-eric/database/schema";
 import {
@@ -16,6 +15,7 @@ import * as v from "valibot";
 
 import { UpsertCampaignEventAmountsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-event-amounts.schema";
 import { assertAdmin } from "@/lib/auth/session";
+import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 

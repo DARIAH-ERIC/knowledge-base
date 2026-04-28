@@ -1,9 +1,9 @@
 import { Readable } from "node:stream";
 
-import { db } from "@dariah-eric/database/client";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/lib/auth/session";
+import { db } from "@/lib/db";
 import { storage } from "@/lib/storage";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {

@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { eq } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
+
+import { db } from "@/lib/db";
+import { eq } from "@/lib/db/sql";
 
 export async function getContentBlockTypes() {
 	const contentBlockTypes = await db.query.contentBlockTypes.findMany({

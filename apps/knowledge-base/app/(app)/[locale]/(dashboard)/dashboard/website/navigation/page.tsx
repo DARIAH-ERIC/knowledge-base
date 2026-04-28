@@ -1,10 +1,10 @@
-import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import type { EntityOption } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog";
 import { NavigationPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page";
+import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteNavigationPageProps extends PageProps<"/[locale]/dashboard/website/navigation"> {}

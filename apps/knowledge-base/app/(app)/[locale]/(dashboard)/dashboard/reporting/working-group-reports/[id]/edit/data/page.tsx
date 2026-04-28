@@ -1,5 +1,3 @@
-import { and, eq, inArray, sql } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { Button } from "@dariah-eric/ui/button";
 import { Label } from "@dariah-eric/ui/field";
@@ -15,6 +13,8 @@ import { createWorkingGroupReportSocialMediaAction } from "@/app/(app)/[locale]/
 import { deleteWorkingGroupReportSocialMediaAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/delete-working-group-report-social-media.action";
 import { updateWorkingGroupReportDataAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/update-working-group-report-data.action";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { and, eq, inArray, sql } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardReportingWorkingGroupReportDataPageProps {

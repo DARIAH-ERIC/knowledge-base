@@ -64,7 +64,12 @@ export const ContentBlockSelectSchema = createSelectSchema(contentBlocks);
 export const ContentBlockInsertSchema = createInsertSchema(contentBlocks);
 export const ContentBlockUpdateSchema = createUpdateSchema(contentBlocks);
 
-export const dataContentBlockTypesEnum = ["events", "news"] as const;
+export const dataContentBlockTypesEnum = [
+	"events",
+	"funding_calls",
+	"news",
+	"opportunities",
+] as const;
 
 export const dataContentBlockTypes = p.pgTable(
 	"content_blocks_type_data_types",
@@ -73,7 +78,6 @@ export const dataContentBlockTypes = p.pgTable(
 		type: p.text("type", { enum: dataContentBlockTypesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
-
 	(t) => {
 		return [
 			p.check(

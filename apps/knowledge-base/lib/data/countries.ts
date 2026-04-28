@@ -1,6 +1,7 @@
-import { and, count, desc, eq, ilike, inArray } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
+
+import { db } from "@/lib/db";
+import { and, count, desc, eq, ilike, inArray } from "@/lib/db/sql";
 
 export type CountryMemberObserverStatus = "is_member_of" | "is_observer_of" | null;
 

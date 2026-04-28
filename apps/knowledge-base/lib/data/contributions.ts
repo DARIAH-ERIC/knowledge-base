@@ -1,8 +1,8 @@
-import { and, count, desc, eq, ilike, inArray, or, sql } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
 import { contributionOptionsPageSize } from "@/lib/constants/contributions";
+import { db } from "@/lib/db";
+import { and, count, desc, eq, ilike, inArray, or, sql } from "@/lib/db/sql";
 
 export type ContributionsSort =
 	| "personName"

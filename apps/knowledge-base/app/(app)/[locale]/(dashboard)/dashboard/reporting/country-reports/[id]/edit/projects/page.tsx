@@ -1,4 +1,3 @@
-import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
@@ -8,6 +7,7 @@ import { CountryReportProjectsForm } from "@/app/(app)/[locale]/(dashboard)/dash
 import { createCountryReportProjectContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-project-contribution.action";
 import { deleteCountryReportProjectContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/delete-country-report-project-contribution.action";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardReportingCountryReportProjectsPageProps {

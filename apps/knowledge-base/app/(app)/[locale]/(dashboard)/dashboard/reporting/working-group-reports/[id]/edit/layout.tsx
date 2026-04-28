@@ -1,4 +1,3 @@
-import { db } from "@dariah-eric/database/client";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -10,6 +9,7 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { WorkingGroupReportStepNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/_components/working-group-report-step-nav";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
 
 interface WorkingGroupReportEditLayoutProps {
 	children: ReactNode;

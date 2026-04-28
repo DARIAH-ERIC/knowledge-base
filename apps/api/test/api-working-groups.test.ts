@@ -1,5 +1,5 @@
 import { assert } from "@acdh-oeaw/lib";
-import { inArray } from "@dariah-eric/database";
+import { inArray } from "@/services/db/sql";
 import * as schema from "@dariah-eric/database/schema";
 import { faker as f } from "@faker-js/faker";
 import slugify from "@sindresorhus/slugify";

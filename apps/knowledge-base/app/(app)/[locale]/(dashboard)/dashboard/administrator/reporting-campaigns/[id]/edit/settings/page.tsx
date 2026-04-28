@@ -1,4 +1,3 @@
-import { db } from "@dariah-eric/database/client";
 import { Button } from "@dariah-eric/ui/button";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
@@ -8,6 +7,7 @@ import type { ReactNode } from "react";
 import { ReportingCampaignEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaign-edit-form";
 import { closeReportingCampaignAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/close-reporting-campaign.action";
 import { launchReportingCampaignAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/launch-reporting-campaign.action";
+import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorCampaignSettingsPageProps {

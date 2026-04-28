@@ -1,10 +1,8 @@
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { alias, eq } from "@dariah-eric/database";
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import type { Database, Transaction } from "@/middlewares/db";
+import { alias, eq } from "@/services/db/sql";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 

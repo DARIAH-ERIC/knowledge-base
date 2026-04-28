@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
 import { imageGridOptions } from "@/config/assets.config";
+import { db } from "@/lib/db";
+import { count, eq } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
 interface GetDocumentsPoliciesParams {

@@ -704,6 +704,9 @@ importers:
       '@valibot/i18n':
         specifier: 'catalog:'
         version: 1.0.0(valibot@1.2.0(typescript@5.9.3))
+      better-result:
+        specifier: 'catalog:'
+        version: 2.7.0
       client-only:
         specifier: 'catalog:'
         version: 0.0.1

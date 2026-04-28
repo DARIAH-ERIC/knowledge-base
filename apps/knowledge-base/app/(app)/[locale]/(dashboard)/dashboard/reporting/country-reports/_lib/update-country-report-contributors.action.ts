@@ -1,8 +1,6 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
-import { eq } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import {
 	createActionStateError,
@@ -17,6 +15,8 @@ import * as v from "valibot";
 import { UpdateCountryReportContributorsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/update-country-report-contributors.schema";
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { eq } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 

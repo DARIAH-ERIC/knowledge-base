@@ -1,9 +1,9 @@
 import type { User } from "@dariah-eric/auth";
-import { and, eq, inArray, sql } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { getLocale } from "next-intl/server";
 
+import { db } from "@/lib/db";
+import { and, eq, inArray, sql } from "@/lib/db/sql";
 import { redirect } from "@/lib/navigation/navigation";
 
 export type Action = "read" | "create" | "update" | "delete" | "confirm";

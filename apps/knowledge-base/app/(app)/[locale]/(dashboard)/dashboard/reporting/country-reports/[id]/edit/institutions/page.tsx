@@ -1,5 +1,3 @@
-import { and, eq, inArray, notInArray, sql } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
@@ -10,6 +8,8 @@ import { CountryReportInstitutionsForm } from "@/app/(app)/[locale]/(dashboard)/
 import { createCountryReportInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-institution.action";
 import { deleteCountryReportInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/delete-country-report-institution.action";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { and, eq, inArray, notInArray, sql } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardReportingCountryReportInstitutionsPageProps {

@@ -1,4 +1,3 @@
-import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -12,6 +11,7 @@ import {
 import { SiteMetadataForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 

@@ -1,8 +1,6 @@
 "use server";
 
 import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
-import { eq, inArray, isNull } from "@dariah-eric/database";
-import { db, type Transaction } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
@@ -15,8 +13,11 @@ import { UpdateDocumentOrPolicyActionInputSchema } from "@/app/(app)/[locale]/(d
 import { assertAuthenticated } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
+import { db, type Transaction } from "@/lib/db";
+import { eq, inArray, isNull } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
+import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createServerAction } from "@/lib/server/create-server-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
@@ -176,6 +177,7 @@ export const updateDocumentOrPolicyAction = createServerAction(
 		});
 
 		after(async () => {
+			await syncWebsiteDocumentForEntity(id);
 			await dispatchWebhook({ type: "documents-policies" });
 		});
 

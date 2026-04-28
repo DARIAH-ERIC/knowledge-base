@@ -12,7 +12,8 @@
 		"./errors": "./dist/errors.mjs",
 		"./lib": "./lib/lib/index.ts",
 		"./relations": "./dist/relations.mjs",
-		"./schema": "./dist/schema.mjs"
+		"./schema": "./dist/schema.mjs",
+		"./sql": "./dist/sql.mjs"
 	},
 	"files": [
 		"./config/",

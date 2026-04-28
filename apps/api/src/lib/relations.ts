@@ -1,9 +1,7 @@
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { eq, sql } from "@dariah-eric/database";
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as schema from "@dariah-eric/database/schema";
 
 import type { Database, Transaction } from "@/middlewares/db";
+import { eq, sql } from "@/services/db/sql";
 import { search } from "@/services/search";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types

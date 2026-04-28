@@ -1,11 +1,11 @@
 "use server";
 
-import { eq, inArray, or } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { eq, inArray, or } from "@/lib/db/sql";
 
 export async function deleteFundingCallAction(id: string): Promise<void> {
 	await assertAuthenticated();

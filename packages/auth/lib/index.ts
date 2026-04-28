@@ -8,10 +8,10 @@ import {
 } from "node:crypto";
 
 import { createUrl } from "@acdh-oeaw/lib";
-import { and, eq, sql } from "@dariah-eric/database";
-import type { Database } from "@dariah-eric/database/client";
+import type { Database } from "@dariah-eric/database";
 import { DatabaseError } from "@dariah-eric/database/errors";
 import * as schema from "@dariah-eric/database/schema";
+import { and, eq, sql } from "@dariah-eric/database/sql";
 import type { EmailService } from "@dariah-eric/email";
 import { ExpiringTokenBucket, RefillingTokenBucket, Throttler } from "@dariah-eric/rate-limiter";
 import { request } from "@dariah-eric/request";

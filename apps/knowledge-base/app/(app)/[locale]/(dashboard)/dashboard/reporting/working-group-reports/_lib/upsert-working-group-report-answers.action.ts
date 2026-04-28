@@ -1,8 +1,6 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
-import { eq } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import type { JSONContent } from "@tiptap/core";
@@ -12,6 +10,8 @@ import * as v from "valibot";
 
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { eq } from "@/lib/db/sql";
 import { redirect } from "@/lib/navigation/navigation";
 
 const UpsertWorkingGroupReportAnswersSchema = v.object({

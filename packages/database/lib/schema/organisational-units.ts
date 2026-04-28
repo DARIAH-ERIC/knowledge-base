@@ -222,6 +222,7 @@ export const membersAndPartners = p
 		metadata: p.jsonb("metadata"),
 		name: p.text("name").notNull(),
 		summary: p.text("summary"),
+		updatedAt: f.timestamp("updated_at").notNull(),
 		type: p.text("type"),
 		status: p.text("status"),
 		slug: p.text("slug"),
@@ -238,6 +239,7 @@ export const workingGroups = p
 		metadata: p.jsonb("metadata"),
 		name: p.text("name").notNull(),
 		summary: p.text("summary"),
+		updatedAt: f.timestamp("updated_at").notNull(),
 		imageId: p.uuid("image_id"),
 		sshocMarketplaceActorId: p.integer("sshoc_marketplace_actor_id"),
 	})

@@ -1,5 +1,3 @@
-import { and, eq } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
@@ -14,6 +12,8 @@ import {
 	getOrganisationalUnitOptionsByIds,
 } from "@/lib/data/organisational-units";
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
+import { db } from "@/lib/db";
+import { and, eq } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 

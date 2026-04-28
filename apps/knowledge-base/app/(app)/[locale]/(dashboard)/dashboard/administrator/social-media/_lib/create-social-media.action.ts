@@ -1,7 +1,6 @@
 "use server";
 
 import { assert, getFormDataValues } from "@acdh-oeaw/lib";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
@@ -11,6 +10,7 @@ import * as v from "valibot";
 
 import { CreateSocialMediaActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_lib/create-social-media.schema";
 import { assertAdmin } from "@/lib/auth/session";
+import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";

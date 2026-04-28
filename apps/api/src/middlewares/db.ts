@@ -1,4 +1,4 @@
-import { type Database, db as client, type Transaction } from "@dariah-eric/database/client";
+import { type Database, db as client, type Transaction } from "@/services/db";
 
 import { createMiddleware } from "@/lib/factory";
 

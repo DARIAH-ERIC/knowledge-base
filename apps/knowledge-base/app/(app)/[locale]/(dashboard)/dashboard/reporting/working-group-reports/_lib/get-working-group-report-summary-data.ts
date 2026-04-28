@@ -1,8 +1,8 @@
-import { and, eq, inArray, sql } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
 import type { WorkingGroupReportSummaryData } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary";
+import { db } from "@/lib/db";
+import { and, eq, inArray, sql } from "@/lib/db/sql";
 
 export interface WorkingGroupReportData {
 	id: string;

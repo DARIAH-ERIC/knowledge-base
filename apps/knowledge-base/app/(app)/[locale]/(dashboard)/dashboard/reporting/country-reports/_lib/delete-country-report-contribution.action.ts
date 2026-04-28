@@ -1,13 +1,13 @@
 "use server";
 
-import { eq } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { revalidatePath } from "next/cache";
 
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { eq } from "@/lib/db/sql";
 
 export async function deleteCountryReportContributionAction(formData: FormData): Promise<void> {
 	if (!(await globalPostRequestRateLimit())) return;

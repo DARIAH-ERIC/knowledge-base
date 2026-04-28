@@ -1,8 +1,6 @@
 "use server";
 
 import { assert, getFormDataValues } from "@acdh-oeaw/lib";
-import { eq, isNull } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import {
 	createActionStateError,
@@ -17,7 +15,10 @@ import * as v from "valibot";
 
 import { UpdateDocumentOrPolicyDetailsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.schema";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { eq, isNull } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
+import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createServerAction } from "@/lib/server/create-server-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
@@ -94,6 +95,7 @@ export const updateDocumentOrPolicyDetailsAction = createServerAction(
 		});
 
 		after(async () => {
+			await syncWebsiteDocumentForEntity(id);
 			await dispatchWebhook({ type: "documents-policies" });
 		});
 

@@ -4,7 +4,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
 import { assert, isNonEmptyString, keyBy, log, unreachable } from "@acdh-oeaw/lib";
-import { db, type Transaction } from "@dariah-eric/database/client";
+import { createDatabaseService, type Transaction } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { createStorageService } from "@dariah-eric/storage";
 import type { AssetPrefix } from "@dariah-eric/storage/config";
@@ -28,6 +28,17 @@ import {
 } from "../config/data-migration.config";
 import { env } from "../config/env.config";
 import { getWordPressData, type WordPressData } from "../src/lib/get-wordpress-data";
+
+const db = createDatabaseService({
+	connection: {
+		database: env.DATABASE_NAME,
+		host: env.DATABASE_HOST,
+		password: env.DATABASE_PASSWORD,
+		port: env.DATABASE_PORT,
+		user: env.DATABASE_USER,
+	},
+	logger: false,
+}).unwrap();
 
 const processor = unified().use(fromHtml);
 

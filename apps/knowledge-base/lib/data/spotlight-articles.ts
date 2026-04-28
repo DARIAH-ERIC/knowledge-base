@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, desc, eq, ilike } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
+import { db } from "@/lib/db";
+import { count, desc, eq, ilike } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
 export type SpotlightArticlesSort = "title" | "updatedAt";

@@ -1,14 +1,14 @@
 "use server";
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
-import { eq } from "@dariah-eric/database";
-import { db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { revalidatePath } from "next/cache";
 import { getExtracted, getLocale } from "next-intl/server";
 
 import { assertAdmin } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { eq } from "@/lib/db/sql";
 import { redirect } from "@/lib/navigation/navigation";
 
 export async function closeReportingCampaignAction(formData: FormData): Promise<void> {

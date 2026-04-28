@@ -11,20 +11,6 @@ const config = defineConfig(node, turbo, drizzle, {
 		"src/routes/**/service.ts",
 		"test/**/*.ts",
 	],
-	rules: {
-		"@typescript-eslint/no-restricted-imports": [
-			"error",
-			{
-				patterns: [
-					{
-						allowTypeImports: true,
-						group: ["@dariah-eric/database"],
-						message: "Please use the data access layer in `lib/data/`.",
-					},
-				],
-			},
-		],
-	},
 });
 
 export default config;

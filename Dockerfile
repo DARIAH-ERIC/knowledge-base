@@ -173,6 +173,7 @@ RUN --mount=type=secret,id=API_ACCESS_TOKEN,env=API_ACCESS_TOKEN \
     --mount=type=secret,id=S3_PORT,env=S3_PORT \
     --mount=type=secret,id=S3_PROTOCOL,env=S3_PROTOCOL \
     --mount=type=secret,id=S3_SECRET_KEY,env=S3_SECRET_KEY \
+    --mount=type=secret,id=SEARCH_SYNC_API_SECRET,env=SEARCH_SYNC_API_SECRET \
     --mount=type=secret,id=SSHOC_MARKETPLACE_API_BASE_URL,env=SSHOC_MARKETPLACE_API_BASE_URL \
     --mount=type=secret,id=SSHOC_MARKETPLACE_BASE_URL,env=SSHOC_MARKETPLACE_BASE_URL \
     --mount=type=secret,id=SSHOC_MARKETPLACE_PASSWORD,env=SSHOC_MARKETPLACE_PASSWORD \
