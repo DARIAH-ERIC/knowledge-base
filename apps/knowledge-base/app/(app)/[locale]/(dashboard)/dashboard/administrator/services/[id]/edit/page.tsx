@@ -1,16 +1,11 @@
-import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { ServiceEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_components/service-edit-form";
-import {
-	getOrganisationalUnitOptions,
-	getOrganisationalUnitOptionsByIds,
-} from "@/lib/data/organisational-units";
-import { db } from "@/lib/db";
-import { eq } from "@/lib/db/sql";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getServiceForAdmin } from "@/lib/data/services";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorEditServicePageProps {
@@ -37,81 +32,21 @@ export default async function DashboardAdministratorEditServicePage(
 
 	const { id } = await params;
 
-	const [service, serviceTypes, serviceStatuses, initialOrganisationalUnits, serviceRoles] =
-		await Promise.all([
-			db.query.services.findFirst({
-				where: { id },
-				columns: {
-					id: true,
-					name: true,
-					sshocMarketplaceId: true,
-					typeId: true,
-					statusId: true,
-					comment: true,
-					dariahBranding: true,
-					monitoring: true,
-					privateSupplier: true,
-				},
-			}),
-			db.query.serviceTypes.findMany({
-				orderBy: { type: "asc" },
-				columns: { id: true, type: true },
-			}),
-			db.query.serviceStatuses.findMany({
-				orderBy: { status: "asc" },
-				columns: { id: true, status: true },
-			}),
-			getOrganisationalUnitOptions(),
-			db.query.organisationalUnitServiceRoles.findMany({ columns: { id: true, role: true } }),
-		]);
+	const { user } = await assertAuthenticated();
+	const serviceData = await getServiceForAdmin(user, id);
 
-	if (service == null) {
+	if (serviceData == null) {
 		notFound();
 	}
 
-	const unitRoleRows = await db
-		.select({
-			organisationalUnitId: schema.servicesToOrganisationalUnits.organisationalUnitId,
-			roleId: schema.servicesToOrganisationalUnits.roleId,
-		})
-		.from(schema.servicesToOrganisationalUnits)
-		.where(eq(schema.servicesToOrganisationalUnits.serviceId, id));
-
-	const ownerRoleId = serviceRoles.find((r) => {
-		return r.role === "service_owner";
-	})?.id;
-	const providerRoleId = serviceRoles.find((r) => {
-		return r.role === "service_provider";
-	})?.id;
-
-	const ownerUnitIds = unitRoleRows
-		.filter((r) => {
-			return r.roleId === ownerRoleId;
-		})
-		.map((r) => {
-			return r.organisationalUnitId;
-		});
-
-	const providerUnitIds = unitRoleRows
-		.filter((r) => {
-			return r.roleId === providerRoleId;
-		})
-		.map((r) => {
-			return r.organisationalUnitId;
-		});
-
-	const selectedOrganisationalUnits = await getOrganisationalUnitOptionsByIds([
-		...new Set([...ownerUnitIds, ...providerUnitIds]),
-	]);
-
 	return (
 		<ServiceEditForm
-			initialOrganisationalUnitItems={initialOrganisationalUnits.items}
-			initialOrganisationalUnitTotal={initialOrganisationalUnits.total}
-			selectedOrganisationalUnits={selectedOrganisationalUnits}
-			service={{ ...service, ownerUnitIds, providerUnitIds }}
-			serviceStatuses={serviceStatuses}
-			serviceTypes={serviceTypes}
+			initialOrganisationalUnitItems={serviceData.initialOrganisationalUnits.items}
+			initialOrganisationalUnitTotal={serviceData.initialOrganisationalUnits.total}
+			selectedOrganisationalUnits={serviceData.selectedOrganisationalUnits}
+			service={serviceData.service}
+			serviceStatuses={serviceData.serviceStatuses}
+			serviceTypes={serviceData.serviceTypes}
 		/>
 	);
 }

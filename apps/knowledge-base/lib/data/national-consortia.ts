@@ -1,4 +1,6 @@
+import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
+import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
 import { and, count, desc, eq, ilike, inArray } from "@/lib/db/sql";
@@ -23,6 +25,12 @@ export interface NationalConsortiaResult {
 	limit: number;
 	offset: number;
 	total: number;
+}
+
+function assertAdminUser(user: Pick<User, "role">): void {
+	if (user.role !== "admin") {
+		forbidden();
+	}
 }
 
 function compareStrings(a: string, b: string, dir: "asc" | "desc"): number {
@@ -335,4 +343,13 @@ export async function getNationalConsortia(
 		offset,
 		total: orderedItems.length,
 	};
+}
+
+export async function getNationalConsortiaForAdmin(
+	currentUser: Pick<User, "role">,
+	params: Readonly<GetNationalConsortiaParams>,
+): Promise<NationalConsortiaResult> {
+	assertAdminUser(currentUser);
+
+	return getNationalConsortia(params);
 }

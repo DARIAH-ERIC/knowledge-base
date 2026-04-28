@@ -1,3 +1,6 @@
+import type { User } from "@dariah-eric/auth";
+import { forbidden } from "next/navigation";
+
 import { type GetCampaignsResponse, mailchimp } from "@/lib/mailchimp";
 
 export type Newsletter = GetCampaignsResponse["campaigns"][number];
@@ -13,6 +16,12 @@ export interface NewslettersResult {
 	limit: number;
 	offset: number;
 	total: number;
+}
+
+function assertAdminUser(user: Pick<User, "role">): void {
+	if (user.role !== "admin") {
+		forbidden();
+	}
 }
 
 export async function getNewsletters(
@@ -45,4 +54,13 @@ export async function getNewsletters(
 		offset,
 		total: filtered.length,
 	};
+}
+
+export async function getNewslettersForAdmin(
+	currentUser: Pick<User, "role">,
+	params: Readonly<GetNewslettersParams>,
+): Promise<NewslettersResult> {
+	assertAdminUser(currentUser);
+
+	return getNewsletters(params);
 }

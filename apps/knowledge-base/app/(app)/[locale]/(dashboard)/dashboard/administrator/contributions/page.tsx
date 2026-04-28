@@ -3,7 +3,8 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { ContributionsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page";
-import { getContributions } from "@/lib/data/contributions";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getContributionsForAdmin } from "@/lib/data/contributions";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -76,7 +77,8 @@ export default async function DashboardAdministratorContributionsPage(
 		defaultSort,
 		validSorts,
 	});
-	const contributions = await getContributions({
+	const { user } = await assertAuthenticated();
+	const contributions = await getContributionsForAdmin(user, {
 		limit: pageSize,
 		offset: (page - 1) * pageSize,
 		q,

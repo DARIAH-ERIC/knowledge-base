@@ -1,4 +1,6 @@
+import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
+import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
 import { and, count, desc, eq, ilike, inArray } from "@/lib/db/sql";
@@ -24,6 +26,12 @@ export interface WorkingGroupsResult {
 	limit: number;
 	offset: number;
 	total: number;
+}
+
+function assertAdminUser(user: Pick<User, "role">): void {
+	if (user.role !== "admin") {
+		forbidden();
+	}
 }
 
 export async function getWorkingGroups(
@@ -147,4 +155,13 @@ export async function getWorkingGroups(
 		offset,
 		total: aggregate.at(0)?.total ?? 0,
 	};
+}
+
+export async function getWorkingGroupsForAdmin(
+	currentUser: Pick<User, "role">,
+	params: Readonly<GetWorkingGroupsParams>,
+): Promise<WorkingGroupsResult> {
+	assertAdminUser(currentUser);
+
+	return getWorkingGroups(params);
 }

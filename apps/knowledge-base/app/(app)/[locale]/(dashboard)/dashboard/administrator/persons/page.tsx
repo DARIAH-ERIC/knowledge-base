@@ -3,7 +3,8 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { PersonsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page";
-import { getPersons } from "@/lib/data/persons";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getPersonsForAdmin } from "@/lib/data/persons";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -69,7 +70,8 @@ export default async function DashboardAdministratorPersonsPage(
 		defaultSort,
 		validSorts,
 	});
-	const persons = await getPersons({
+	const { user } = await assertAuthenticated();
+	const persons = await getPersonsForAdmin(user, {
 		limit: pageSize,
 		offset: (page - 1) * pageSize,
 		q,

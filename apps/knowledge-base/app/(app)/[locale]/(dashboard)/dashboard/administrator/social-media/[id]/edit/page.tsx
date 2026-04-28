@@ -4,7 +4,8 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { SocialMediaEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-edit-form";
-import { db } from "@/lib/db";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getSocialMediaByIdForAdmin } from "@/lib/data/social-media";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorEditSocialMediaPageProps {
@@ -31,11 +32,8 @@ export default async function DashboardAdministratorEditSocialMediaPage(
 
 	const { id } = await params;
 
-	const socialMedia = await db.query.socialMedia.findFirst({
-		where: { id },
-		columns: { id: true, name: true, url: true, duration: true },
-		with: { type: { columns: { type: true } } },
-	});
+	const { user } = await assertAuthenticated();
+	const socialMedia = await getSocialMediaByIdForAdmin(user, id);
 
 	if (socialMedia == null) {
 		notFound();

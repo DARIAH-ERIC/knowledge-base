@@ -1,4 +1,6 @@
+import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
+import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
 import { and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
@@ -22,6 +24,12 @@ export interface GovernanceBodiesResult {
 	limit: number;
 	offset: number;
 	total: number;
+}
+
+function assertAdminUser(user: Pick<User, "role">): void {
+	if (user.role !== "admin") {
+		forbidden();
+	}
 }
 
 export async function getGovernanceBodies(
@@ -93,4 +101,13 @@ export async function getGovernanceBodies(
 		offset,
 		total: aggregate.at(0)?.total ?? 0,
 	};
+}
+
+export async function getGovernanceBodiesForAdmin(
+	currentUser: Pick<User, "role">,
+	params: Readonly<GetGovernanceBodiesParams>,
+): Promise<GovernanceBodiesResult> {
+	assertAdminUser(currentUser);
+
+	return getGovernanceBodies(params);
 }

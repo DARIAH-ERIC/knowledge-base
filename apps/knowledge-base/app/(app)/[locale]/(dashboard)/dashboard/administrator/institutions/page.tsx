@@ -3,7 +3,8 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { InstitutionsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page";
-import { getInstitutions } from "@/lib/data/institutions";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getInstitutionsForAdmin } from "@/lib/data/institutions";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -69,7 +70,8 @@ export default async function DashboardAdministratorInstitutionsPage(
 		defaultSort,
 		validSorts,
 	});
-	const institutions = await getInstitutions({
+	const { user } = await assertAuthenticated();
+	const institutions = await getInstitutionsForAdmin(user, {
 		limit: pageSize,
 		offset: (page - 1) * pageSize,
 		q,

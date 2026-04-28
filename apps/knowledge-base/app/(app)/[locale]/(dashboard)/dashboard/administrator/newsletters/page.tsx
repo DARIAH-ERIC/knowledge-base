@@ -3,7 +3,8 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { NewslettersPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page";
-import { getNewsletters } from "@/lib/data/newsletters";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getNewslettersForAdmin } from "@/lib/data/newsletters";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { getListSearchParams } from "@/lib/server/list-search-params";
@@ -44,7 +45,12 @@ export default async function DashboardAdministratorNewslettersPage(
 	const { params, searchParams } = props;
 	const [{ locale }, rawSearchParams] = await Promise.all([params, searchParams]);
 	const { page, q } = getListSearchParams(rawSearchParams);
-	const newsletters = await getNewsletters({ limit: pageSize, offset: (page - 1) * pageSize, q });
+	const { user } = await assertAuthenticated();
+	const newsletters = await getNewslettersForAdmin(user, {
+		limit: pageSize,
+		offset: (page - 1) * pageSize,
+		q,
+	});
 	const totalPages = Math.max(Math.ceil(newsletters.total / pageSize), 1);
 
 	if (page > totalPages) {

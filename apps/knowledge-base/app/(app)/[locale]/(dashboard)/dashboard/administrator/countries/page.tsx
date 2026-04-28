@@ -3,7 +3,8 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { CountriesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page";
-import { getCountries } from "@/lib/data/countries";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getCountriesForAdmin } from "@/lib/data/countries";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -69,7 +70,8 @@ export default async function DashboardAdministratorCountriesPage(
 		defaultSort,
 		validSorts,
 	});
-	const countries = await getCountries({
+	const { user } = await assertAuthenticated();
+	const countries = await getCountriesForAdmin(user, {
 		limit: pageSize,
 		offset: (page - 1) * pageSize,
 		q,

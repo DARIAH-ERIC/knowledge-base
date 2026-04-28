@@ -3,7 +3,8 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { GovernanceBodiesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page";
-import { getGovernanceBodies } from "@/lib/data/governance-bodies";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getGovernanceBodiesForAdmin } from "@/lib/data/governance-bodies";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -69,7 +70,8 @@ export default async function DashboardAdministratorGovernanceBodiesPage(
 		defaultSort,
 		validSorts,
 	});
-	const governanceBodies = await getGovernanceBodies({
+	const { user } = await assertAuthenticated();
+	const governanceBodies = await getGovernanceBodiesForAdmin(user, {
 		limit: pageSize,
 		offset: (page - 1) * pageSize,
 		q,

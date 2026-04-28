@@ -1,4 +1,6 @@
+import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
+import { forbidden } from "next/navigation";
 
 import { contributionOptionsPageSize } from "@/lib/constants/contributions";
 import { db } from "@/lib/db";
@@ -33,6 +35,12 @@ export interface ContributionsResult {
 	limit: number;
 	offset: number;
 	total: number;
+}
+
+function assertAdminUser(user: Pick<User, "role">): void {
+	if (user.role !== "admin") {
+		forbidden();
+	}
 }
 
 export async function getContributions(
@@ -144,6 +152,15 @@ export async function getContributions(
 		offset,
 		total: aggregate.at(0)?.total ?? 0,
 	};
+}
+
+export async function getContributionsForAdmin(
+	currentUser: Pick<User, "role">,
+	params: Readonly<GetContributionsParams>,
+): Promise<ContributionsResult> {
+	assertAdminUser(currentUser);
+
+	return getContributions(params);
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types

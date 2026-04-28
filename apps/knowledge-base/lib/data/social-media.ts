@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
+import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
+import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
 import { count, desc, eq, ilike, inArray, or } from "@/lib/db/sql";
@@ -36,6 +38,12 @@ interface GetSocialMediaOptionsParams {
 	limit?: number;
 	offset?: number;
 	q?: string;
+}
+
+function assertAdminUser(user: Pick<User, "role">): void {
+	if (user.role !== "admin") {
+		forbidden();
+	}
 }
 
 export async function getSocialMedia(
@@ -89,6 +97,25 @@ export async function getSocialMedia(
 		offset,
 		total: aggregate.at(0)?.total ?? 0,
 	};
+}
+
+export async function getSocialMediaForAdmin(
+	currentUser: Pick<User, "role">,
+	params: Readonly<GetSocialMediaParams>,
+): Promise<SocialMediaResult> {
+	assertAdminUser(currentUser);
+
+	return getSocialMedia(params);
+}
+
+export async function getSocialMediaByIdForAdmin(currentUser: Pick<User, "role">, id: string) {
+	assertAdminUser(currentUser);
+
+	return db.query.socialMedia.findFirst({
+		where: { id },
+		columns: { id: true, name: true, url: true, duration: true },
+		with: { type: { columns: { type: true } } },
+	});
 }
 
 export async function getSocialMediaOptions(
