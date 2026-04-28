@@ -1,14 +1,20 @@
 "use server";
 
-import { eq, inArray, or } from "@dariah-eric/database/sql";
 import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
+import { eq, inArray, or } from "@dariah-eric/database/sql";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 
 import { assertAuthenticated } from "@/lib/auth/session";
+import {
+	deleteWebsiteDocument,
+	getWebsiteDocumentDescriptorByEntityId,
+} from "@/lib/search/website-index";
 
 export async function deletePageItemAction(id: string): Promise<void> {
 	await assertAuthenticated();
+	const descriptor = await getWebsiteDocumentDescriptorByEntityId(id);
 
 	await db.transaction(async (tx) => {
 		const entityFields = await tx
@@ -39,6 +45,12 @@ export async function deletePageItemAction(id: string): Promise<void> {
 		await tx.delete(schema.pages).where(eq(schema.pages.id, id));
 
 		await tx.delete(schema.entities).where(eq(schema.entities.id, id));
+	});
+
+	after(async () => {
+		if (descriptor != null) {
+			await deleteWebsiteDocument(descriptor);
+		}
 	});
 
 	revalidatePath("/[locale]/dashboard/website/pages", "layout");

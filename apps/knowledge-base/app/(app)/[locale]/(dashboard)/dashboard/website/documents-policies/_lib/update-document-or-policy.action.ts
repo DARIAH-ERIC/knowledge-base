@@ -1,9 +1,9 @@
 "use server";
 
 import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
-import { eq, inArray, isNull } from "@dariah-eric/database/sql";
 import { db, type Transaction } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
+import { eq, inArray, isNull } from "@dariah-eric/database/sql";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { revalidatePath } from "next/cache";
@@ -17,6 +17,7 @@ import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
+import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createServerAction } from "@/lib/server/create-server-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
@@ -176,6 +177,7 @@ export const updateDocumentOrPolicyAction = createServerAction(
 		});
 
 		after(async () => {
+			await syncWebsiteDocumentForEntity(id);
 			await dispatchWebhook({ type: "documents-policies" });
 		});
 

@@ -1,9 +1,9 @@
 "use server";
 
 import { assert, getFormDataValues } from "@acdh-oeaw/lib";
-import { eq, isNull } from "@dariah-eric/database/sql";
 import { db } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
+import { eq, isNull } from "@dariah-eric/database/sql";
 import {
 	createActionStateError,
 	createActionStateSuccess,
@@ -19,6 +19,7 @@ import * as v from "valibot";
 import { CreateDocumentOrPolicyFromDialogActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy-from-dialog.schema";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getIntlLanguage } from "@/lib/i18n/locales";
+import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createServerAction } from "@/lib/server/create-server-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
@@ -53,6 +54,7 @@ export const createDocumentOrPolicyFromDialogAction = createServerAction(
 		const { title, documentKey, summary, url, groupId } = result.output;
 
 		const slug = slugify(title);
+		let entityId: string | null = null;
 
 		await db.transaction(async (tx) => {
 			const type = await tx.query.entityTypes.findFirst({
@@ -75,6 +77,7 @@ export const createDocumentOrPolicyFromDialogAction = createServerAction(
 				.returning({ id: schema.entities.id });
 
 			assert(entity);
+			entityId = entity.id;
 
 			const asset = await tx.query.assets.findFirst({
 				where: { key: documentKey },
@@ -115,6 +118,10 @@ export const createDocumentOrPolicyFromDialogAction = createServerAction(
 		});
 
 		after(async () => {
+			if (entityId != null) {
+				await syncWebsiteDocumentForEntity(entityId);
+			}
+
 			await dispatchWebhook({ type: "documents-policies" });
 		});
 

@@ -17,6 +17,7 @@ import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
+import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createServerAction } from "@/lib/server/create-server-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
@@ -50,6 +51,7 @@ export const createPageItemAction = createServerAction(
 			result.output;
 
 		const slug = slugify(title);
+		let entityId: string | null = null;
 
 		await db.transaction(async (tx) => {
 			const type = await tx.query.entityTypes.findFirst({
@@ -84,6 +86,7 @@ export const createPageItemAction = createServerAction(
 				.returning({ id: schema.entities.id });
 
 			assert(entity);
+			entityId = entity.id;
 
 			let imageId: string | undefined;
 
@@ -166,6 +169,10 @@ export const createPageItemAction = createServerAction(
 		});
 
 		after(async () => {
+			if (entityId != null) {
+				await syncWebsiteDocumentForEntity(entityId);
+			}
+
 			await dispatchWebhook({ type: "pages" });
 		});
 
