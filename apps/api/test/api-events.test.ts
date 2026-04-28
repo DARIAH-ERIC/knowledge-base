@@ -29,6 +29,7 @@ function createItems(count: number) {
 				title,
 				summary: f.lorem.paragraph(),
 				location: f.location.city(),
+				website: f.internet.url(),
 				duration: {
 					start: f.date.future({ years: 2 }),
 				},
@@ -55,6 +56,7 @@ function createItemWithDuration(duration: { start: Date; end?: Date }) {
 			title,
 			summary: f.lorem.paragraph(),
 			location: f.location.city(),
+			website: f.internet.url(),
 			duration,
 		},
 	};
@@ -149,6 +151,7 @@ describe("events", () => {
 				const item = items.at(1)!;
 				const id = item.entity.id;
 				const title = item.event.title;
+				const website = item.event.website;
 
 				const response = await client.events[":id"].$get({
 					param: {
@@ -161,7 +164,7 @@ describe("events", () => {
 				const data = await response.json();
 
 				assert("content" in data);
-				expect(data).toMatchObject({ title });
+				expect(data).toMatchObject({ title, website });
 				expect(data.content).toHaveLength(1);
 				expect(data.content[0]).toMatchObject({ type: "rich_text" });
 			});
@@ -252,6 +255,7 @@ describe("events", () => {
 				const item = items.at(1)!;
 				const slug = item.entity.slug;
 				const title = item.event.title;
+				const website = item.event.website;
 
 				const response = await client.events.slugs[":slug"].$get({
 					param: {
@@ -264,7 +268,7 @@ describe("events", () => {
 				const data = await response.json();
 
 				assert("content" in data);
-				expect(data).toMatchObject({ title });
+				expect(data).toMatchObject({ title, website });
 				expect(data.content).toHaveLength(1);
 				expect(data.content[0]).toMatchObject({ type: "rich_text" });
 			});
