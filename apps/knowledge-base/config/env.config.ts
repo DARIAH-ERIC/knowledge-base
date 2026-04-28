@@ -67,7 +67,6 @@ const validate = define({
 		MAILCHIMP_LIST_ID: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		MAILPIT_API_BASE_URL: v.optional(v.pipe(v.string(), v.url())),
 		NEXT_RUNTIME: v.optional(v.picklist(["edge", "nodejs"])),
-		SEARCH_SYNC_API_SECRET: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		REVALIDATION_WEBHOOK_SECRET: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		REVALIDATION_WEBHOOK_URL: v.optional(v.pipe(v.string(), v.url())),
 		S3_ACCESS_KEY: v.pipe(v.string(), v.nonEmpty()),
@@ -76,6 +75,7 @@ const validate = define({
 		S3_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 		S3_PROTOCOL: v.optional(v.picklist(["http", "https"]), "https"),
 		S3_SECRET_KEY: v.pipe(v.string(), v.nonEmpty()),
+		SEARCH_SYNC_API_SECRET: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		TYPESENSE_ADMIN_API_KEY: v.pipe(v.string(), v.nonEmpty()),
 	}),
 });
@@ -127,7 +127,6 @@ export const env = validate({
 		NEXT_PUBLIC_TYPESENSE_PROTOCOL: process.env.NEXT_PUBLIC_TYPESENSE_PROTOCOL,
 		NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY: process.env.NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY,
 		NEXT_RUNTIME: process.env.NEXT_RUNTIME,
-		SEARCH_SYNC_API_SECRET: process.env.SEARCH_SYNC_API_SECRET,
 		REVALIDATION_WEBHOOK_SECRET: process.env.REVALIDATION_WEBHOOK_SECRET,
 		REVALIDATION_WEBHOOK_URL: process.env.REVALIDATION_WEBHOOK_URL,
 		S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
@@ -136,6 +135,7 @@ export const env = validate({
 		S3_PORT: process.env.S3_PORT,
 		S3_PROTOCOL: process.env.S3_PROTOCOL,
 		S3_SECRET_KEY: process.env.S3_SECRET_KEY,
+		SEARCH_SYNC_API_SECRET: process.env.SEARCH_SYNC_API_SECRET,
 		TYPESENSE_ADMIN_API_KEY: process.env.TYPESENSE_ADMIN_API_KEY,
 	},
 }).unwrap();
