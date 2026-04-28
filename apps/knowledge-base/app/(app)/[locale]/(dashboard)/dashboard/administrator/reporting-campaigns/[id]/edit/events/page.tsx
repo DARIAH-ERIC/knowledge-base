@@ -5,7 +5,8 @@ import type { ReactNode } from "react";
 
 import { CampaignEventAmountsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-event-amounts-form";
 import { upsertCampaignEventAmountsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-event-amounts.action";
-import { db } from "@/lib/db";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getReportingCampaignEventAmountsForAdmin } from "@/lib/data/admin-reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorCampaignEventsPageProps {
@@ -30,15 +31,8 @@ export default async function DashboardAdministratorCampaignEventsPage(
 
 	const { id } = await params;
 
-	const campaign = await db.query.reportingCampaigns.findFirst({
-		where: { id },
-		columns: { id: true },
-		with: {
-			eventAmounts: {
-				columns: { eventType: true, amount: true },
-			},
-		},
-	});
+	const { user } = await assertAuthenticated();
+	const campaign = await getReportingCampaignEventAmountsForAdmin(user, id);
 
 	if (campaign == null) {
 		notFound();

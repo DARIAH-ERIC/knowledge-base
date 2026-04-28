@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { assertAdmin } from "@/lib/auth/session";
+import { assertAdminPageAccess } from "@/lib/auth/session";
 
 interface DashboardWebsiteLayoutProps {
 	children: ReactNode;
@@ -11,7 +11,7 @@ export default async function DashboardWebsiteLayout(
 ): Promise<ReactNode> {
 	const { children } = props;
 
-	await assertAdmin();
+	await assertAdminPageAccess();
 
 	return children;
 }

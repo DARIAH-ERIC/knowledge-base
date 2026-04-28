@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { CountryReportProjectsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form";
 import { createCountryReportProjectContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-project-contribution.action";
 import { deleteCountryReportProjectContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/delete-country-report-project-contribution.action";
+import { getAuthorizedCountryReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -32,29 +33,37 @@ export default async function DashboardReportingCountryReportProjectsPage(
 
 	const { id } = await params;
 
-	const [report, allProjects] = await Promise.all([
-		db.query.countryReports.findFirst({
-			where: { id },
-			columns: { id: true },
-			with: {
-				projectContributions: {
-					columns: { id: true, amountEuros: true },
+	const { user } = await assertAuthenticated();
+	const [result, allProjects] = await Promise.all([
+		getAuthorizedCountryReportForUser(
+			user,
+			id,
+			(id) => {
+				return db.query.countryReports.findFirst({
+					where: { id },
+					columns: { id: true },
 					with: {
-						project: { columns: { id: true, name: true } },
+						projectContributions: {
+							columns: { id: true, amountEuros: true },
+							with: {
+								project: { columns: { id: true, name: true } },
+							},
+						},
 					},
-				},
+				});
 			},
-		}),
+			"update",
+		),
 		db.query.projects.findMany({
 			columns: { id: true, name: true },
 			orderBy: { name: "asc" },
 		}),
-		assertAuthenticated(),
 	]);
 
-	if (report == null) {
+	if (result.status !== "ok") {
 		notFound();
 	}
+	const report = result.data;
 
 	return (
 		<CountryReportProjectsForm

@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { CountryReportInstitutionsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form";
 import { createCountryReportInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-institution.action";
 import { deleteCountryReportInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/delete-country-report-institution.action";
+import { getAuthorizedCountryReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { and, eq, inArray, notInArray, sql } from "@/lib/db/sql";
@@ -34,27 +35,33 @@ export default async function DashboardReportingCountryReportInstitutionsPage(
 
 	const { id } = await params;
 
-	const [report] = await Promise.all([
-		db.query.countryReports.findFirst({
-			where: { id },
-			columns: { id: true },
-			with: {
-				campaign: { columns: { year: true } },
-				country: { columns: { id: true } },
-				institutions: {
-					columns: { id: true, organisationalUnitId: true },
-					with: {
-						organisationalUnit: { columns: { name: true, acronym: true } },
+	const { user } = await assertAuthenticated();
+	const result = await getAuthorizedCountryReportForUser(
+		user,
+		id,
+		(id) => {
+			return db.query.countryReports.findFirst({
+				where: { id },
+				columns: { id: true },
+				with: {
+					campaign: { columns: { year: true } },
+					country: { columns: { id: true } },
+					institutions: {
+						columns: { id: true, organisationalUnitId: true },
+						with: {
+							organisationalUnit: { columns: { name: true, acronym: true } },
+						},
 					},
 				},
-			},
-		}),
-		assertAuthenticated(),
-	]);
+			});
+		},
+		"update",
+	);
 
-	if (report == null) {
+	if (result.status !== "ok") {
 		notFound();
 	}
+	const report = result.data;
 
 	const { year } = report.campaign;
 	const claimedOrgUnitIds = report.institutions.map((i) => {

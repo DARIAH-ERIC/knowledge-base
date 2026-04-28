@@ -11,6 +11,7 @@ import type { ReactNode } from "react";
 import { WorkingGroupReportSocialMediaForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form";
 import { createWorkingGroupReportSocialMediaAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/create-working-group-report-social-media.action";
 import { deleteWorkingGroupReportSocialMediaAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/delete-working-group-report-social-media.action";
+import { getAuthorizedWorkingGroupReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
 import { updateWorkingGroupReportDataAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/update-working-group-report-data.action";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -39,38 +40,44 @@ export default async function DashboardReportingWorkingGroupReportDataPage(
 
 	const { id } = await params;
 
-	const [report] = await Promise.all([
-		db.query.workingGroupReports.findFirst({
-			where: { id },
-			columns: {
-				id: true,
-				numberOfMembers: true,
-				mailingList: true,
-				workingGroupId: true,
-				campaignId: true,
-			},
-			with: {
-				campaign: { columns: { year: true } },
-				socialMedia: {
-					columns: { id: true, socialMediaId: true },
-					with: {
-						socialMedia: { columns: { id: true, name: true, url: true } },
+	const { user } = await assertAuthenticated();
+	const result = await getAuthorizedWorkingGroupReportForUser(
+		user,
+		id,
+		(id) => {
+			return db.query.workingGroupReports.findFirst({
+				where: { id },
+				columns: {
+					id: true,
+					numberOfMembers: true,
+					mailingList: true,
+					workingGroupId: true,
+					campaignId: true,
+				},
+				with: {
+					campaign: { columns: { year: true } },
+					socialMedia: {
+						columns: { id: true, socialMediaId: true },
+						with: {
+							socialMedia: { columns: { id: true, name: true, url: true } },
+						},
+					},
+					workingGroup: {
+						columns: { id: true },
+						with: {
+							socialMedia: { columns: { id: true, name: true, url: true } },
+						},
 					},
 				},
-				workingGroup: {
-					columns: { id: true },
-					with: {
-						socialMedia: { columns: { id: true, name: true, url: true } },
-					},
-				},
-			},
-		}),
-		assertAuthenticated(),
-	]);
+			});
+		},
+		"update",
+	);
 
-	if (report == null) {
+	if (result.status !== "ok") {
 		notFound();
 	}
+	const report = result.data;
 
 	const { year } = report.campaign;
 

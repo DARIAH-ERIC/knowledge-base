@@ -10,7 +10,7 @@ import {
 	HeaderDescription,
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
-import { assertAdmin } from "@/lib/auth/session";
+import { assertAdminPageAccess } from "@/lib/auth/session";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardReportingAdministratorPageProps extends PageProps<"/[locale]/dashboard/reporting/administrator"> {}
@@ -31,7 +31,7 @@ export async function generateMetadata(
 export default async function DashboardReportingAdministratorPage(
 	_props: Readonly<DashboardReportingAdministratorPageProps>,
 ): Promise<ReactNode> {
-	await assertAdmin();
+	await assertAdminPageAccess();
 
 	const t = await getExtracted();
 

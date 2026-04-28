@@ -7,9 +7,9 @@ import {
 	HeaderDescription,
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+import { getWorkingGroupReportHeaderForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
 import { WorkingGroupReportStepNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/_components/working-group-report-step-nav";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { db } from "@/lib/db";
 
 interface WorkingGroupReportEditLayoutProps {
 	children: ReactNode;
@@ -23,21 +23,13 @@ export default async function WorkingGroupReportEditLayout(
 
 	const { id } = await params;
 
-	const [report] = await Promise.all([
-		db.query.workingGroupReports.findFirst({
-			where: { id },
-			columns: { id: true },
-			with: {
-				campaign: { columns: { year: true } },
-				workingGroup: { columns: { name: true } },
-			},
-		}),
-		assertAuthenticated(),
-	]);
+	const { user } = await assertAuthenticated();
+	const result = await getWorkingGroupReportHeaderForUser(user, id, "update");
 
-	if (report == null) {
+	if (result.status !== "ok") {
 		notFound();
 	}
+	const report = result.data;
 
 	return (
 		<div>

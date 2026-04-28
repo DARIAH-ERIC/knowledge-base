@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { UsersPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getUsers } from "@/lib/data/users";
+import { getUsersForAdmin } from "@/lib/data/users";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -74,7 +74,13 @@ export default async function DashboardAdministratorUsersPage(
 		defaultSort,
 		validSorts,
 	});
-	const users = await getUsers({ limit: pageSize, offset: (page - 1) * pageSize, q, sort, dir });
+	const users = await getUsersForAdmin(currentUser, {
+		limit: pageSize,
+		offset: (page - 1) * pageSize,
+		q,
+		sort,
+		dir,
+	});
 	const totalPages = Math.max(Math.ceil(users.total / pageSize), 1);
 
 	if (page > totalPages) {

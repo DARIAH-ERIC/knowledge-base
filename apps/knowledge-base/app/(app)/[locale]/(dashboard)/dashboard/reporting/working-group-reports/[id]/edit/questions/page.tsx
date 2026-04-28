@@ -4,6 +4,7 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { WorkingGroupReportQuestionsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-questions-form";
+import { getAuthorizedWorkingGroupReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
 import { upsertWorkingGroupReportAnswersAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/upsert-working-group-report-answers.action";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -31,22 +32,28 @@ export default async function DashboardReportingWorkingGroupReportQuestionsPage(
 
 	const { id } = await params;
 
-	const [report] = await Promise.all([
-		db.query.workingGroupReports.findFirst({
-			where: { id },
-			columns: { id: true, campaignId: true },
-			with: {
-				answers: {
-					columns: { id: true, questionId: true, answer: true },
+	const { user } = await assertAuthenticated();
+	const result = await getAuthorizedWorkingGroupReportForUser(
+		user,
+		id,
+		(id) => {
+			return db.query.workingGroupReports.findFirst({
+				where: { id },
+				columns: { id: true, campaignId: true },
+				with: {
+					answers: {
+						columns: { id: true, questionId: true, answer: true },
+					},
 				},
-			},
-		}),
-		assertAuthenticated(),
-	]);
+			});
+		},
+		"update",
+	);
 
-	if (report == null) {
+	if (result.status !== "ok") {
 		notFound();
 	}
+	const report = result.data;
 
 	const questions = await db.query.workingGroupReportQuestions.findMany({
 		where: { campaignId: report.campaignId },

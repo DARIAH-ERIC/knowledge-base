@@ -29,6 +29,7 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useState } from "react";
 
 import { CommandPalette } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/command-palette";
+import { signOutAction } from "@/lib/auth/sign-out.action";
 import { useColorScheme } from "@/lib/color-scheme/use-color-scheme";
 
 interface DashboardSidebarNavProps {
@@ -130,7 +131,11 @@ function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 					<MenuLabel>{t("Documentation")}</MenuLabel>
 				</MenuItem>
 				<MenuSeparator />
-				<MenuItem href="/auth/sign-out">
+				<MenuItem
+					onAction={() => {
+						void signOutAction();
+					}}
+				>
 					<IconLogout />
 					<MenuLabel>{t("Sign out")}</MenuLabel>
 				</MenuItem>

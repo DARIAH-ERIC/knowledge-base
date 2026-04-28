@@ -1,3 +1,6 @@
+import type { User } from "@dariah-eric/auth";
+
+import { type Action, can } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
 
 export interface CountryReportSummaryData {
@@ -45,7 +48,17 @@ export interface CountryReportData {
 	summary: CountryReportSummaryData;
 }
 
-export async function getCountryReportData(id: string): Promise<CountryReportData | null> {
+export interface CountryReportHeaderData {
+	id: string;
+	country: { name: string };
+	campaign: { year: number };
+}
+
+export type AuthorizedCountryReportResult<T> =
+	| { status: "forbidden" | "not-found" }
+	| { status: "ok"; data: T };
+
+async function getCountryReportData(id: string): Promise<CountryReportData | null> {
 	const report = await db.query.countryReports.findFirst({
 		where: { id },
 		columns: {
@@ -182,4 +195,66 @@ export async function getCountryReportData(id: string): Promise<CountryReportDat
 			}),
 		},
 	};
+}
+
+async function getCountryReportHeader(id: string): Promise<CountryReportHeaderData | null> {
+	const report = await db.query.countryReports.findFirst({
+		where: { id },
+		columns: { id: true },
+		with: {
+			campaign: { columns: { year: true } },
+			country: { columns: { name: true } },
+		},
+	});
+
+	if (report == null) return null;
+
+	return {
+		id: report.id,
+		country: report.country,
+		campaign: report.campaign,
+	};
+}
+
+export async function getCountryReportDataForUser(
+	user: User,
+	id: string,
+	action: Extract<Action, "read" | "update"> = "read",
+): Promise<AuthorizedCountryReportResult<CountryReportData>> {
+	return getAuthorizedCountryReportForUser(user, id, getCountryReportData, action);
+}
+
+export async function getCountryReportHeaderForUser(
+	user: User,
+	id: string,
+	action: Extract<Action, "read" | "update"> = "read",
+): Promise<AuthorizedCountryReportResult<CountryReportHeaderData>> {
+	return getAuthorizedCountryReportForUser(user, id, getCountryReportHeader, action);
+}
+
+export async function getAuthorizedCountryReportForUser<T>(
+	user: User,
+	id: string,
+	load: (id: string) => Promise<T | null>,
+	action: Extract<Action, "read" | "update"> = "read",
+): Promise<AuthorizedCountryReportResult<T>> {
+	const header = await getCountryReportHeader(id);
+
+	if (header == null) {
+		return { status: "not-found" };
+	}
+
+	const allowed = await can(user, action, { type: "country_report", id });
+
+	if (!allowed) {
+		return { status: "forbidden" };
+	}
+
+	const report = await load(id);
+
+	if (report == null) {
+		return { status: "not-found" };
+	}
+
+	return { status: "ok", data: report };
 }

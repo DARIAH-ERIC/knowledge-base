@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import { getAuthorizedCountryReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { upsertCountryReportServiceKpisAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/upsert-country-report-service-kpis.action";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -41,30 +42,36 @@ export default async function DashboardReportingCountryReportServicesPage(
 
 	const { id } = await params;
 
-	const [report] = await Promise.all([
-		db.query.countryReports.findFirst({
-			where: { id },
-			columns: { id: true },
-			with: {
-				country: {
-					columns: { id: true },
-					with: {
-						services: {
-							columns: { id: true, name: true },
+	const { user } = await assertAuthenticated();
+	const result = await getAuthorizedCountryReportForUser(
+		user,
+		id,
+		(id) => {
+			return db.query.countryReports.findFirst({
+				where: { id },
+				columns: { id: true },
+				with: {
+					country: {
+						columns: { id: true },
+						with: {
+							services: {
+								columns: { id: true, name: true },
+							},
 						},
 					},
+					serviceKpis: {
+						columns: { serviceId: true, kpi: true, value: true },
+					},
 				},
-				serviceKpis: {
-					columns: { serviceId: true, kpi: true, value: true },
-				},
-			},
-		}),
-		assertAuthenticated(),
-	]);
+			});
+		},
+		"update",
+	);
 
-	if (report == null) {
+	if (result.status !== "ok") {
 		notFound();
 	}
+	const report = result.data;
 
 	const t = await getExtracted();
 

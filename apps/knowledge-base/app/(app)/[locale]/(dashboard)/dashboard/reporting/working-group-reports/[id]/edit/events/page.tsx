@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { WorkingGroupReportEventsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-events-form";
 import { createWorkingGroupReportEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/create-working-group-report-event.action";
 import { deleteWorkingGroupReportEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/delete-working-group-report-event.action";
+import { getAuthorizedWorkingGroupReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -32,23 +33,29 @@ export default async function DashboardReportingWorkingGroupReportEventsPage(
 
 	const { id } = await params;
 
-	const [report] = await Promise.all([
-		db.query.workingGroupReports.findFirst({
-			where: { id },
-			columns: { id: true },
-			with: {
-				events: {
-					columns: { id: true, title: true, date: true, url: true, role: true },
-					orderBy: { date: "asc" },
+	const { user } = await assertAuthenticated();
+	const result = await getAuthorizedWorkingGroupReportForUser(
+		user,
+		id,
+		(id) => {
+			return db.query.workingGroupReports.findFirst({
+				where: { id },
+				columns: { id: true },
+				with: {
+					events: {
+						columns: { id: true, title: true, date: true, url: true, role: true },
+						orderBy: { date: "asc" },
+					},
 				},
-			},
-		}),
-		assertAuthenticated(),
-	]);
+			});
+		},
+		"update",
+	);
 
-	if (report == null) {
+	if (result.status !== "ok") {
 		notFound();
 	}
+	const report = result.data;
 
 	return (
 		<WorkingGroupReportEventsForm

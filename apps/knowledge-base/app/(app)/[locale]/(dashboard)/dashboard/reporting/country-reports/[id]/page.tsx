@@ -13,9 +13,8 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { CountryReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary";
-import { getCountryReportData } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
+import { getCountryReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getUserAllCountryReports } from "@/lib/data/reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardReportingCountryReportPageProps {
@@ -23,25 +22,13 @@ interface DashboardReportingCountryReportPageProps {
 }
 
 export async function generateMetadata(
-	props: Readonly<DashboardReportingCountryReportPageProps>,
+	_props: Readonly<DashboardReportingCountryReportPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
-	const { params } = props;
-
-	const { id } = await params;
-
 	const t = await getExtracted();
 
-	const report = await getCountryReportData(id);
-
 	return createMetadata(resolvingMetadata, {
-		title:
-			report != null
-				? t("Dashboard - {name} country report {year}", {
-						name: report.country.name,
-						year: String(report.campaign.year),
-					})
-				: t("Dashboard - Country report"),
+		title: t("Dashboard - Country report"),
 	});
 }
 
@@ -56,19 +43,13 @@ export default async function DashboardReportingCountryReportPage(
 
 	const { id } = await params;
 
-	const [report, { user }] = await Promise.all([getCountryReportData(id), assertAuthenticated()]);
+	const { user } = await assertAuthenticated();
+	const result = await getCountryReportDataForUser(user, id);
 
-	if (report == null) {
+	if (result.status !== "ok") {
 		notFound();
 	}
-
-	if (user.role !== "admin") {
-		const userReports = await getUserAllCountryReports(user);
-		const hasAccess = userReports.some((r) => {
-			return r.reportId === id;
-		});
-		if (!hasAccess) notFound();
-	}
+	const report = result.data;
 
 	const t = await getExtracted();
 

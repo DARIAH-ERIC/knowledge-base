@@ -5,7 +5,8 @@ import type { ReactNode } from "react";
 
 import { CampaignQuestionsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-questions-form";
 import { createWorkingGroupReportQuestionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/create-working-group-report-question.action";
-import { db } from "@/lib/db";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getReportingCampaignQuestionsForAdmin } from "@/lib/data/admin-reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorCampaignQuestionsPageProps {
@@ -30,16 +31,8 @@ export default async function DashboardAdministratorCampaignQuestionsPage(
 
 	const { id } = await params;
 
-	const campaign = await db.query.reportingCampaigns.findFirst({
-		where: { id },
-		columns: { id: true },
-		with: {
-			workingGroupReportQuestions: {
-				columns: { id: true, question: true, position: true },
-				orderBy: { position: "asc" },
-			},
-		},
-	});
+	const { user } = await assertAuthenticated();
+	const campaign = await getReportingCampaignQuestionsForAdmin(user, id);
 
 	if (campaign == null) {
 		notFound();

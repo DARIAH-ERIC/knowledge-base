@@ -5,7 +5,8 @@ import type { ReactNode } from "react";
 
 import { CampaignCountryThresholdsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-country-thresholds-form";
 import { upsertCampaignCountryThresholdsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-country-thresholds.action";
-import { db } from "@/lib/db";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getReportingCampaignCountryThresholdsForAdmin } from "@/lib/data/admin-reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorCampaignCountriesPageProps {
@@ -30,22 +31,8 @@ export default async function DashboardAdministratorCampaignCountriesPage(
 
 	const { id } = await params;
 
-	const [campaign, countries] = await Promise.all([
-		db.query.reportingCampaigns.findFirst({
-			where: { id },
-			columns: { id: true },
-			with: {
-				countryThresholds: {
-					columns: { countryId: true, amount: true },
-				},
-			},
-		}),
-		db.query.organisationalUnits.findMany({
-			where: { type: { type: "country" } },
-			columns: { id: true, name: true },
-			orderBy: { name: "asc" },
-		}),
-	]);
+	const { user } = await assertAuthenticated();
+	const { campaign, countries } = await getReportingCampaignCountryThresholdsForAdmin(user, id);
 
 	if (campaign == null) {
 		notFound();

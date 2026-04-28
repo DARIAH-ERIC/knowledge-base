@@ -8,8 +8,8 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { CampaignStepNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-step-nav";
-import { assertAdmin } from "@/lib/auth/session";
-import { db } from "@/lib/db";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { getReportingCampaignHeaderForAdmin } from "@/lib/data/admin-reporting";
 
 interface CampaignEditLayoutProps {
 	children: ReactNode;
@@ -23,13 +23,8 @@ export default async function CampaignEditLayout(
 
 	const { id } = await params;
 
-	const [campaign] = await Promise.all([
-		db.query.reportingCampaigns.findFirst({
-			where: { id },
-			columns: { id: true, year: true },
-		}),
-		assertAdmin(),
-	]);
+	const { user } = await assertAuthenticated();
+	const campaign = await getReportingCampaignHeaderForAdmin(user, id);
 
 	if (campaign == null) {
 		notFound();

@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 
 import { CountryReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary";
 import { confirmCountryReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/confirm-country-report.action";
-import { getCountryReportData } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
+import { getCountryReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { submitCountryReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/submit-country-report.action";
 import { can } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
@@ -39,11 +39,13 @@ export default async function DashboardReportingCountryReportConfirmPage(
 
 	const { id } = await params;
 
-	const [report, { user }] = await Promise.all([getCountryReportData(id), assertAuthenticated()]);
+	const { user } = await assertAuthenticated();
+	const result = await getCountryReportDataForUser(user, id, "update");
 
-	if (report == null) {
+	if (result.status !== "ok") {
 		notFound();
 	}
+	const report = result.data;
 
 	const t = await getExtracted();
 	const canConfirm = await can(user, "confirm", { type: "country_report", id });
