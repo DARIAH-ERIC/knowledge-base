@@ -33,8 +33,10 @@ VALUES
 	('documents_policies'),
 	('events'),
 	('external_links'),
+	('funding_calls'),
 	('impact_case_studies'),
 	('news'),
+	('opportunities'),
 	('organisational_units'),
 	('pages'),
 	('persons'),
@@ -152,8 +154,10 @@ FROM
 			('documents_policies', 'description'),
 			('events', 'content'),
 			('external_links', 'description'),
+			('funding_calls', 'content'),
 			('impact_case_studies', 'content'),
 			('news', 'content'),
+			('opportunities', 'content'),
 			('organisational_units', 'description'),
 			('pages', 'content'),
 			('persons', 'biography'),
@@ -212,6 +216,13 @@ FROM
 	JOIN "person_role_types" "role_types" ON "role_types"."type" = "tmp"."role_type"
 	JOIN "organisational_unit_types" "unit_types" ON "unit_types"."type" = "tmp"."unit_type"
 ON CONFLICT ("role_type_id", "unit_type_id") DO NOTHING;
+
+--> statement-breakpoint
+INSERT INTO
+	"opportunity_sources" ("source")
+VALUES
+	('dariah'),
+	('external');
 
 --> statement-breakpoint
 INSERT INTO
