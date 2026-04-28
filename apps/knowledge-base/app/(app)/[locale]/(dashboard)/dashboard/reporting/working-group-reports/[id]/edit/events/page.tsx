@@ -56,6 +56,9 @@ export default async function DashboardReportingWorkingGroupReportEventsPage(
 		notFound();
 	}
 	const report = result.data;
+	if (report == null) {
+		notFound();
+	}
 
 	return (
 		<WorkingGroupReportEventsForm

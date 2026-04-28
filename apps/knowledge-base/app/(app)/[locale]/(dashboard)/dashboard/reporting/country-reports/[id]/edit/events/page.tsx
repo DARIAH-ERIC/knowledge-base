@@ -57,6 +57,9 @@ export default async function DashboardReportingCountryReportEventsPage(
 		notFound();
 	}
 	const report = result.data;
+	if (report == null) {
+		notFound();
+	}
 
 	return <CountryReportEventsForm formAction={updateCountryReportEventsAction} report={report} />;
 }

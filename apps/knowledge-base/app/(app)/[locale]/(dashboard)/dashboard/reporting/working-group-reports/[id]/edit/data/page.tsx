@@ -78,6 +78,9 @@ export default async function DashboardReportingWorkingGroupReportDataPage(
 		notFound();
 	}
 	const report = result.data;
+	if (report == null) {
+		notFound();
+	}
 
 	const { year } = report.campaign;
 

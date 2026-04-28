@@ -64,6 +64,9 @@ export default async function DashboardReportingCountryReportProjectsPage(
 		notFound();
 	}
 	const report = result.data;
+	if (report == null) {
+		notFound();
+	}
 
 	return (
 		<CountryReportProjectsForm

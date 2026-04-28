@@ -72,6 +72,9 @@ export default async function DashboardReportingCountryReportServicesPage(
 		notFound();
 	}
 	const report = result.data;
+	if (report == null) {
+		notFound();
+	}
 
 	const t = await getExtracted();
 

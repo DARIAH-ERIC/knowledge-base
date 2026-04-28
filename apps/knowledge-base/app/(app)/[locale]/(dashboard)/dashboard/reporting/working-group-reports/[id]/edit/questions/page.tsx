@@ -54,6 +54,9 @@ export default async function DashboardReportingWorkingGroupReportQuestionsPage(
 		notFound();
 	}
 	const report = result.data;
+	if (report == null) {
+		notFound();
+	}
 
 	const questions = await db.query.workingGroupReportQuestions.findMany({
 		where: { campaignId: report.campaignId },

@@ -71,6 +71,9 @@ export default async function DashboardReportingCountryReportContributorsPage(
 		notFound();
 	}
 	const report = result.data;
+	if (report == null) {
+		notFound();
+	}
 
 	const { year } = report.campaign;
 	const claimedIds = report.contributions.map((c) => {

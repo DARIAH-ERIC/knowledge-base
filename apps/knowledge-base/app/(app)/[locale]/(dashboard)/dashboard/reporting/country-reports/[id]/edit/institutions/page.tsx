@@ -62,6 +62,9 @@ export default async function DashboardReportingCountryReportInstitutionsPage(
 		notFound();
 	}
 	const report = result.data;
+	if (report == null) {
+		notFound();
+	}
 
 	const { year } = report.campaign;
 	const claimedOrgUnitIds = report.institutions.map((i) => {
