@@ -6,6 +6,7 @@ import { and, eq, inArray, sql } from "@/services/db/sql";
 export interface PersonPosition {
 	role: (typeof schema.personRoleTypesEnum)[number];
 	name: string;
+	type: (typeof schema.organisationalUnitTypesEnum)[number];
 }
 
 export async function getPersonPositions(
@@ -27,6 +28,7 @@ export async function getPersonPositions(
 			personId: schema.personsToOrganisationalUnits.personId,
 			role: schema.personRoleTypes.type,
 			name: schema.organisationalUnits.name,
+			type: schema.organisationalUnitTypes.type,
 		})
 		.from(schema.personsToOrganisationalUnits)
 		.innerJoin(
@@ -36,6 +38,10 @@ export async function getPersonPositions(
 		.innerJoin(
 			schema.organisationalUnits,
 			eq(schema.personsToOrganisationalUnits.organisationalUnitId, schema.organisationalUnits.id),
+		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 		)
 		.where(
 			and(
@@ -48,7 +54,7 @@ export async function getPersonPositions(
 
 	for (const row of rows) {
 		const items = rowsByPerson.get(row.personId) ?? [];
-		items.push({ role: row.role, name: row.name });
+		items.push({ role: row.role, name: row.name, type: row.type });
 		rowsByPerson.set(row.personId, items);
 	}
 
