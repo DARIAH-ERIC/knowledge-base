@@ -5,8 +5,8 @@ import type { ReactNode } from "react";
 
 import { DocumentBody } from "@/app/_components/document-body";
 import { HtmlDocument } from "@/app/_components/html-document";
+import { NotFoundState } from "@/app/_components/not-found-state";
 import { Providers } from "@/app/_components/providers";
-import { Main } from "@/components/main";
 import { defaultLocale } from "@/lib/i18n/locales";
 import { getMetadata } from "@/lib/i18n/metadata";
 
@@ -39,9 +39,16 @@ export default function GlobalNotFoundPage(): ReactNode {
 		<HtmlDocument locale={locale}>
 			<DocumentBody>
 				<Providers locale={locale}>
-					<Main className="grid place-content-center h-full">
-						<h1>{t("Page not found")}</h1>
-					</Main>
+					<NotFoundState
+						codeLabel={t("Error 404")}
+						description={t(
+							"The page you requested could not be found. It may have been moved, renamed, or never existed in this part of the knowledge base.",
+						)}
+						homeHref="/"
+						homeLabel={t("Back to home")}
+						logoLabel={t("Home")}
+						title={t("Page not found")}
+					/>
 				</Providers>
 			</DocumentBody>
 		</HtmlDocument>

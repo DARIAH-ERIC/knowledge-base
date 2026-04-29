@@ -5,9 +5,9 @@ import * as Sentry from "@sentry/nextjs";
 import { type ReactNode, useEffect } from "react";
 
 import { DocumentBody } from "@/app/_components/document-body";
+import { ErrorState } from "@/app/_components/error-state";
 import { HtmlDocument } from "@/app/_components/html-document";
 import { Providers } from "@/app/_components/providers";
-import { Main } from "@/components/main";
 import { defaultLocale } from "@/lib/i18n/locales";
 
 export { viewport } from "@/app/_lib/viewport.config";
@@ -21,10 +21,11 @@ export { viewport } from "@/app/_lib/viewport.config";
 
 interface GlobalErrorPageProps {
 	error: Error & { digest?: string };
+	reset: () => void;
 }
 
 export default function GlobalErrorPage(props: Readonly<GlobalErrorPageProps>): ReactNode {
-	const { error } = props;
+	const { error, reset } = props;
 
 	const locale = defaultLocale;
 
@@ -32,7 +33,13 @@ export default function GlobalErrorPage(props: Readonly<GlobalErrorPageProps>): 
 		meta: {
 			title: "Error",
 		},
+		description:
+			"An unexpected application error occurred. You can retry the current action or return to the home page.",
+		home: "Back to home",
+		logo: "Home",
+		recovery: "Recovery",
 		reset: "Try again",
+		status: "System status",
 		title: "Something went wrong",
 	};
 
@@ -46,12 +53,17 @@ export default function GlobalErrorPage(props: Readonly<GlobalErrorPageProps>): 
 			<title>{t.meta.title}</title>
 			<DocumentBody>
 				<Providers locale={locale}>
-					<Main>
-						<h1>{t.title}</h1>
-						<form>
-							<button type="submit">{t.reset}</button>
-						</form>
-					</Main>
+					<ErrorState
+						description={t.description}
+						homeHref="/"
+						homeLabel={t.home}
+						logoLabel={t.logo}
+						recoveryLabel={t.recovery}
+						reset={reset}
+						resetLabel={t.reset}
+						statusLabel={t.status}
+						title={t.title}
+					/>
 				</Providers>
 			</DocumentBody>
 		</HtmlDocument>
