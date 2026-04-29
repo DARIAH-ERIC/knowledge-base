@@ -1,5 +1,4 @@
-import { buttonStyles } from "@dariah-eric/ui/button";
-import { Link } from "@dariah-eric/ui/link";
+import { ButtonLink } from "@dariah-eric/ui/button-link";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -76,9 +75,9 @@ export default async function DashboardReportingAdministratorPage(
 								<p className="text-sm text-muted-fg">{item.description}</p>
 							</div>
 
-							<Link className={buttonStyles({ intent: "outline", size: "sm" })} href={item.href}>
+							<ButtonLink href={item.href} intent="outline" size="sm">
 								{t("Open")}
-							</Link>
+							</ButtonLink>
 						</section>
 					);
 				})}
