@@ -19,6 +19,7 @@ import { env } from "../config/env.config.ts";
 import { createCacheService } from "../lib/cache";
 import { createCampusCurriculum, createCampusResource } from "../lib/campus";
 import { createEpisciencesDocument } from "../lib/episciences";
+import { toPlainText as jsonContentToPlainText } from "../lib/json-content/to-plain-text";
 // import { createHalItem } from "../lib/hal";
 // import { createOpenAirePublication } from "../lib/openaire";
 import { createSshocItem } from "../lib/sshoc";
@@ -27,6 +28,76 @@ import { createZoteroItem } from "../lib/zotero";
 
 function formatNumber(n: number) {
 	return new Intl.NumberFormat("en-GB").format(n);
+}
+
+function mergeDescription(...values: Array<string | null | undefined>): string {
+	const parts = values
+		.map((value) => {
+			return value?.trim();
+		})
+		.filter((value): value is string => {
+			return value != null && value.length > 0;
+		});
+
+	return [...new Set(parts)].join("\n\n");
+}
+
+async function getPlainTextFieldContentByEntityId(
+	entityIds: Array<string>,
+	fieldName: string,
+): Promise<Map<string, string>> {
+	if (entityIds.length === 0) {
+		return new Map();
+	}
+
+	const rows = await db
+		.select({
+			entityId: schema.fields.entityId,
+			content: schema.richTextContentBlocks.content,
+			position: schema.contentBlocks.position,
+		})
+		.from(schema.fields)
+		.innerJoin(
+			schema.entityTypesFieldsNames,
+			eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+		)
+		.innerJoin(schema.contentBlocks, eq(schema.contentBlocks.fieldId, schema.fields.id))
+		.innerJoin(
+			schema.contentBlockTypes,
+			eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
+		)
+		.innerJoin(
+			schema.richTextContentBlocks,
+			eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
+		)
+		.where(
+			and(
+				inArray(schema.fields.entityId, entityIds),
+				eq(schema.entityTypesFieldsNames.fieldName, fieldName),
+				eq(schema.contentBlockTypes.type, "rich_text"),
+			),
+		)
+		.orderBy(schema.fields.entityId, schema.contentBlocks.position);
+
+	const contentByEntityId = new Map<string, Array<string>>();
+
+	for (const row of rows) {
+		const content = jsonContentToPlainText(row.content);
+
+		if (content.length === 0) {
+			continue;
+		}
+
+		const existing = contentByEntityId.get(row.entityId) ?? [];
+		existing.push(content);
+		contentByEntityId.set(row.entityId, existing);
+	}
+
+	return new Map(
+		[...contentByEntityId.entries()].map(([entityId, parts]) => {
+			return [entityId, mergeDescription(...parts)];
+		}),
+	);
 }
 
 const db = createDatabaseService({
@@ -349,6 +420,13 @@ async function main() {
 			},
 		});
 
+		const documentsPoliciesContentById = await getPlainTextFieldContentByEntityId(
+			documentsPolicies.map((item) => {
+				return item.id;
+			}),
+			"content",
+		);
+
 		website.push(
 			...documentsPolicies.map((item): WebsiteDocument => {
 				const type = "document-or-policy";
@@ -363,7 +441,7 @@ async function main() {
 					type,
 					id: [type, id].join(":"),
 					label: item.title,
-					description: item.summary,
+					description: mergeDescription(item.summary, documentsPoliciesContentById.get(item.id)),
 					/** All documents are listed on the same page. */
 					link: `/about/documents`,
 				};
@@ -399,6 +477,13 @@ async function main() {
 			},
 		});
 
+		const eventsContentById = await getPlainTextFieldContentByEntityId(
+			events.map((item) => {
+				return item.id;
+			}),
+			"content",
+		);
+
 		website.push(
 			...events.map((item): WebsiteDocument => {
 				const type = "event";
@@ -413,7 +498,7 @@ async function main() {
 					type,
 					id: [type, id].join(":"),
 					label: item.title,
-					description: item.summary,
+					description: mergeDescription(item.summary, eventsContentById.get(item.id)),
 					link: `/events/${id}`,
 				};
 			}),
@@ -448,6 +533,13 @@ async function main() {
 			},
 		});
 
+		const fundingCallsContentById = await getPlainTextFieldContentByEntityId(
+			fundingCalls.map((item) => {
+				return item.id;
+			}),
+			"content",
+		);
+
 		website.push(
 			...fundingCalls.map((item): WebsiteDocument => {
 				const type = "funding-call";
@@ -462,7 +554,7 @@ async function main() {
 					type,
 					id: [type, id].join(":"),
 					label: item.title,
-					description: item.summary ?? "",
+					description: mergeDescription(item.summary, fundingCallsContentById.get(item.id)),
 					link: `/funding-calls/${id}`,
 				};
 			}),
@@ -497,6 +589,13 @@ async function main() {
 			},
 		});
 
+		const impactCaseStudiesContentById = await getPlainTextFieldContentByEntityId(
+			impactCaseStudies.map((item) => {
+				return item.id;
+			}),
+			"content",
+		);
+
 		website.push(
 			...impactCaseStudies.map((item): WebsiteDocument => {
 				const type = "impact-case-study";
@@ -511,7 +610,7 @@ async function main() {
 					type,
 					id: [type, id].join(":"),
 					label: item.title,
-					description: item.summary,
+					description: mergeDescription(item.summary, impactCaseStudiesContentById.get(item.id)),
 					link: `/about/impact-case-studies/${id}`,
 				};
 			}),
@@ -546,6 +645,13 @@ async function main() {
 			},
 		});
 
+		const membersAndPartnersDescriptionById = await getPlainTextFieldContentByEntityId(
+			membersAndPartners.map((item) => {
+				return item.id;
+			}),
+			"description",
+		);
+
 		website.push(
 			...membersAndPartners.map((item): WebsiteDocument => {
 				const type = "country";
@@ -560,7 +666,10 @@ async function main() {
 					type,
 					id: [type, id].join(":"),
 					label: item.name,
-					description: item.summary ?? "",
+					description: mergeDescription(
+						item.summary,
+						membersAndPartnersDescriptionById.get(item.id),
+					),
 					link: `/network/members-and-partners/${id}`,
 				};
 			}),
@@ -580,6 +689,7 @@ async function main() {
 
 		const nationalConsortia = await db
 			.select({
+				entityId: schema.organisationalUnits.id,
 				countrySlug: countryEntities.slug,
 				itemSlug: itemEntities.slug,
 				label: schema.organisationalUnits.name,
@@ -615,6 +725,13 @@ async function main() {
 				),
 			);
 
+		const nationalConsortiaDescriptionById = await getPlainTextFieldContentByEntityId(
+			nationalConsortia.map((item) => {
+				return item.entityId;
+			}),
+			"description",
+		);
+
 		website.push(
 			...nationalConsortia.map((item): WebsiteDocument => {
 				const type = "national-consortium";
@@ -629,7 +746,10 @@ async function main() {
 					type,
 					id: [type, id].join(":"),
 					label: item.label,
-					description: item.description ?? "",
+					description: mergeDescription(
+						item.description,
+						nationalConsortiaDescriptionById.get(item.entityId),
+					),
 					link: `/network/members-and-partners/${item.countrySlug}`,
 				};
 			}),
@@ -637,6 +757,7 @@ async function main() {
 
 		const partnerInstitutions = await db
 			.select({
+				entityId: schema.organisationalUnits.id,
 				countrySlug: countryEntities.slug,
 				itemSlug: itemEntities.slug,
 				label: schema.organisationalUnits.name,
@@ -688,6 +809,13 @@ async function main() {
 				),
 			);
 
+		const partnerInstitutionsDescriptionById = await getPlainTextFieldContentByEntityId(
+			partnerInstitutions.map((item) => {
+				return item.entityId;
+			}),
+			"description",
+		);
+
 		website.push(
 			...partnerInstitutions.map((item): WebsiteDocument => {
 				const type = "institution";
@@ -702,7 +830,10 @@ async function main() {
 					type,
 					id: [type, id].join(":"),
 					label: item.label,
-					description: item.description ?? "",
+					description: mergeDescription(
+						item.description,
+						partnerInstitutionsDescriptionById.get(item.entityId),
+					),
 					link: `/network/members-and-partners/${item.countrySlug}`,
 				};
 			}),
@@ -710,6 +841,7 @@ async function main() {
 
 		const cooperatingPartnerInstitutions = await db
 			.select({
+				entityId: schema.organisationalUnits.id,
 				countrySlug: countryEntities.slug,
 				itemSlug: itemEntities.slug,
 				label: schema.organisationalUnits.name,
@@ -761,6 +893,13 @@ async function main() {
 				),
 			);
 
+		const cooperatingPartnerInstitutionsDescriptionById = await getPlainTextFieldContentByEntityId(
+			cooperatingPartnerInstitutions.map((item) => {
+				return item.entityId;
+			}),
+			"description",
+		);
+
 		website.push(
 			...cooperatingPartnerInstitutions.map((item): WebsiteDocument => {
 				const type = "institution";
@@ -775,7 +914,10 @@ async function main() {
 					type,
 					id: [type, id].join(":"),
 					label: item.label,
-					description: item.description ?? "",
+					description: mergeDescription(
+						item.description,
+						cooperatingPartnerInstitutionsDescriptionById.get(item.entityId),
+					),
 					link: `/network/members-and-partners/${item.countrySlug}`,
 				};
 			}),
@@ -785,6 +927,7 @@ async function main() {
 
 		const countryContributors = await db
 			.select({
+				entityId: schema.persons.id,
 				countrySlug: countryEntities.slug,
 				itemSlug: itemEntities.slug,
 				label: schema.persons.name,
@@ -819,6 +962,13 @@ async function main() {
 				),
 			);
 
+		const countryContributorsBiographyById = await getPlainTextFieldContentByEntityId(
+			countryContributors.map((item) => {
+				return item.entityId;
+			}),
+			"biography",
+		);
+
 		const contributorDocumentsById = new Map<string, WebsiteDocument>();
 
 		for (const item of countryContributors) {
@@ -839,7 +989,7 @@ async function main() {
 				type,
 				id: [type, id].join(":"),
 				label: item.label,
-				description: "",
+				description: mergeDescription(countryContributorsBiographyById.get(item.entityId)),
 				link: `/network/members-and-partners/${item.countrySlug}`,
 			});
 		}
@@ -875,6 +1025,13 @@ async function main() {
 			},
 		});
 
+		const newsContentById = await getPlainTextFieldContentByEntityId(
+			news.map((item) => {
+				return item.id;
+			}),
+			"content",
+		);
+
 		website.push(
 			...news.map((item): WebsiteDocument => {
 				const type = "news-item";
@@ -889,7 +1046,7 @@ async function main() {
 					type,
 					id: [type, id].join(":"),
 					label: item.title,
-					description: item.summary,
+					description: mergeDescription(item.summary, newsContentById.get(item.id)),
 					link: `/news/${id}`,
 				};
 			}),
@@ -924,6 +1081,13 @@ async function main() {
 			},
 		});
 
+		const opportunitiesContentById = await getPlainTextFieldContentByEntityId(
+			opportunities.map((item) => {
+				return item.id;
+			}),
+			"content",
+		);
+
 		website.push(
 			...opportunities.map((item): WebsiteDocument => {
 				const type = "opportunity";
@@ -938,7 +1102,7 @@ async function main() {
 					type,
 					id: [type, id].join(":"),
 					label: item.title,
-					description: item.summary ?? "",
+					description: mergeDescription(item.summary, opportunitiesContentById.get(item.id)),
 					link: `/opportunities/${id}`,
 				};
 			}),
@@ -973,6 +1137,13 @@ async function main() {
 			},
 		});
 
+		const pagesContentById = await getPlainTextFieldContentByEntityId(
+			pages.map((item) => {
+				return item.id;
+			}),
+			"content",
+		);
+
 		website.push(
 			...pages.map((item): WebsiteDocument => {
 				const type = "page";
@@ -987,7 +1158,7 @@ async function main() {
 					type,
 					id: [type, id].join(":"),
 					label: item.title,
-					description: item.summary,
+					description: mergeDescription(item.summary, pagesContentById.get(item.id)),
 					link: `/${id}`,
 				};
 			}),
@@ -1021,6 +1192,13 @@ async function main() {
 			},
 		});
 
+		const personsBiographyById = await getPlainTextFieldContentByEntityId(
+			persons.map((item) => {
+				return item.id;
+			}),
+			"biography",
+		);
+
 		website.push(
 			...persons.map((item): WebsiteDocument => {
 				const type = "person";
@@ -1035,7 +1213,7 @@ async function main() {
 					type,
 					id: [type, id].join(":"),
 					label: item.name,
-					description: "",
+					description: mergeDescription(personsBiographyById.get(item.id)),
 					/** FIXME: unclear where this should link to. */
 					link: `/persons/${id}`,
 				};
@@ -1071,6 +1249,13 @@ async function main() {
 			},
 		});
 
+		const dariahProjectsDescriptionById = await getPlainTextFieldContentByEntityId(
+			dariahProjects.map((item) => {
+				return item.id;
+			}),
+			"description",
+		);
+
 		website.push(
 			...dariahProjects.map((item): WebsiteDocument => {
 				const type = "project";
@@ -1085,7 +1270,7 @@ async function main() {
 					type,
 					id: [type, id].join(":"),
 					label: item.name,
-					description: item.summary,
+					description: mergeDescription(item.summary, dariahProjectsDescriptionById.get(item.id)),
 					link: `/projects/${id}`,
 				};
 			}),
@@ -1120,6 +1305,13 @@ async function main() {
 			},
 		});
 
+		const spotlightArticlesContentById = await getPlainTextFieldContentByEntityId(
+			spotlightArticles.map((item) => {
+				return item.id;
+			}),
+			"content",
+		);
+
 		website.push(
 			...spotlightArticles.map((item): WebsiteDocument => {
 				const type = "spotlight-article";
@@ -1134,7 +1326,7 @@ async function main() {
 					type,
 					id: [type, id].join(":"),
 					label: item.title,
-					description: item.summary,
+					description: mergeDescription(item.summary, spotlightArticlesContentById.get(item.id)),
 					link: `/spotlights/${id}`,
 				};
 			}),
@@ -1169,6 +1361,13 @@ async function main() {
 			},
 		});
 
+		const workingGroupsDescriptionById = await getPlainTextFieldContentByEntityId(
+			workingGroups.map((item) => {
+				return item.id;
+			}),
+			"description",
+		);
+
 		website.push(
 			...workingGroups.map((item): WebsiteDocument => {
 				const type = "working-group";
@@ -1183,7 +1382,7 @@ async function main() {
 					type,
 					id: [type, id].join(":"),
 					label: item.name,
-					description: item.summary ?? "",
+					description: mergeDescription(item.summary, workingGroupsDescriptionById.get(item.id)),
 					link: `/network/working-groups/${id}`,
 				};
 			}),
