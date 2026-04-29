@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { getAuthorizedCountryReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { upsertCountryReportServiceKpisAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/upsert-country-report-service-kpis.action";
 import { assertAuthenticated } from "@/lib/auth/session";
@@ -121,6 +122,8 @@ export default async function DashboardReportingCountryReportServicesPage(
 					</div>
 				</form>
 			)}
+
+			<ReportScreenCommentSection reportId={report.id} reportType="country" screenKey="services" />
 		</div>
 	);
 }

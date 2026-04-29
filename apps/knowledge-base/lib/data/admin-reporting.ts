@@ -102,9 +102,29 @@ export async function getWorkingGroupReportCreateDataForAdmin(currentUser: Pick<
 export async function getReportingCampaignsForAdmin(currentUser: Pick<User, "role">) {
 	assertAdminUser(currentUser);
 
-	return db.query.reportingCampaigns.findMany({
+	const campaigns = await db.query.reportingCampaigns.findMany({
 		orderBy: { year: "desc" },
 		columns: { id: true, year: true, status: true },
+		with: {
+			countryReports: {
+				columns: { id: true },
+			},
+			workingGroupReports: {
+				columns: { id: true },
+			},
+		},
+	});
+
+	return campaigns.map((campaign) => {
+		const reportCount = campaign.countryReports.length + campaign.workingGroupReports.length;
+
+		return {
+			id: campaign.id,
+			year: campaign.year,
+			status: campaign.status,
+			reportCount,
+			hasReports: reportCount > 0,
+		};
 	});
 }
 
