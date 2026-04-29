@@ -1,6 +1,7 @@
 export * from "./schema/assets";
 export * from "./schema/content-blocks";
 export * from "./schema/document-policy-groups";
+export * from "./schema/documentation-pages";
 export * from "./schema/documents-policies";
 export * from "./schema/entities";
 export * from "./schema/events";

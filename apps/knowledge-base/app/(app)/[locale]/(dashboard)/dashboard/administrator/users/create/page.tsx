@@ -5,9 +5,7 @@ import type { ReactNode } from "react";
 import { UserCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-create-form";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorCreateUserPageProps {
-	params: Promise<{ locale: string }>;
-}
+interface DashboardAdministratorCreateUserPageProps extends PageProps<"/[locale]/dashboard/administrator/users/create"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorCreateUserPageProps>,

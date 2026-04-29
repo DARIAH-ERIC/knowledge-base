@@ -11,10 +11,7 @@ import { getCountryReportHeaderForUser } from "@/app/(app)/[locale]/(dashboard)/
 import { CountryReportStepNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/_components/country-report-step-nav";
 import { assertAuthenticated } from "@/lib/auth/session";
 
-interface CountryReportEditLayoutProps {
-	children: ReactNode;
-	params: Promise<{ locale: string; id: string }>;
-}
+interface CountryReportEditLayoutProps extends LayoutProps<"/[locale]/dashboard/reporting/country-reports/[id]/edit"> {}
 
 export default async function CountryReportEditLayout(
 	props: Readonly<CountryReportEditLayoutProps>,

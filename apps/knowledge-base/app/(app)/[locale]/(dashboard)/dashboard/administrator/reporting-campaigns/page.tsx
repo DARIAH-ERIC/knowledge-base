@@ -8,9 +8,7 @@ import { assertAuthenticated } from "@/lib/auth/session";
 import { getReportingCampaignsForAdmin } from "@/lib/data/admin-reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorReportingCampaignsPageProps {
-	params: Promise<{ locale: string }>;
-}
+interface DashboardAdministratorReportingCampaignsPageProps extends PageProps<"/[locale]/dashboard/administrator/reporting-campaigns"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorReportingCampaignsPageProps>,

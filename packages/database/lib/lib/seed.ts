@@ -332,6 +332,37 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			}),
 		);
 
+		const documentationPages: Array<Omit<schema.DocumentationPageInput, "id">> = f.helpers.multiple(
+			() => {
+				return {
+					title: f.lorem.sentence(),
+				};
+			},
+			{ count: 25 },
+		);
+
+		const documentationPageEntities: Array<schema.EntityInput> = documentationPages.map(
+			(documentationPage) => {
+				return {
+					typeId: entityTypesByType.documentation_pages.id,
+					documentId: f.string.uuid(),
+					statusId: entityStatusByType.published.id,
+					slug: slugify(documentationPage.title),
+				};
+			},
+		);
+
+		const documentationPageIds = await db
+			.insert(schema.entities)
+			.values(documentationPageEntities)
+			.returning({ id: schema.entities.id });
+
+		await db.insert(schema.documentationPages).values(
+			documentationPageIds.map(({ id }, index) => {
+				return { ...documentationPages[index]!, id };
+			}),
+		);
+
 		const spotlightArticles: Array<Omit<schema.SpotlightArticleInput, "id">> = f.helpers.multiple(
 			() => {
 				const title = f.lorem.sentence();

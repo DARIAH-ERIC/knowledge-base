@@ -2,9 +2,7 @@ import type { ReactNode } from "react";
 
 import { assertAdminPageAccess } from "@/lib/auth/session";
 
-interface DashboardWebsiteLayoutProps {
-	children: ReactNode;
-}
+interface DashboardWebsiteLayoutProps extends LayoutProps<"/[locale]/dashboard/website"> {}
 
 export default async function DashboardWebsiteLayout(
 	props: Readonly<DashboardWebsiteLayoutProps>,

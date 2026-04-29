@@ -13,9 +13,7 @@ import { db } from "@/lib/db";
 import { and, eq, inArray, notInArray, sql } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardReportingCountryReportInstitutionsPageProps {
-	params: Promise<{ locale: string; id: string }>;
-}
+interface DashboardReportingCountryReportInstitutionsPageProps extends PageProps<"/[locale]/dashboard/reporting/country-reports/[id]/edit/institutions"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardReportingCountryReportInstitutionsPageProps>,

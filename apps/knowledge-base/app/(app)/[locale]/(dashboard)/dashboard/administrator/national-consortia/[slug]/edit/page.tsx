@@ -12,9 +12,7 @@ import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorEditNationalConsortiumPageProps {
-	params: Promise<{ locale: string; slug: string }>;
-}
+interface DashboardAdministratorEditNationalConsortiumPageProps extends PageProps<"/[locale]/dashboard/administrator/national-consortia/[slug]/edit"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorEditNationalConsortiumPageProps>,

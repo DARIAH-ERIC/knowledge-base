@@ -6,7 +6,7 @@ import { ContributionCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboa
 import { getContributionPersonOptions, getContributionRoleOptions } from "@/lib/data/contributions";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorCreateContributionPageProps {}
+interface DashboardAdministratorCreateContributionPageProps extends PageProps<"/[locale]/dashboard/administrator/contributions/create"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorCreateContributionPageProps>,
