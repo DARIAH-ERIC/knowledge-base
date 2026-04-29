@@ -8,9 +8,7 @@ import { assertAuthenticated } from "@/lib/auth/session";
 import { getSocialMediaByIdForAdmin } from "@/lib/data/social-media";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorEditSocialMediaPageProps {
-	params: Promise<{ locale: string; id: string }>;
-}
+interface DashboardAdministratorEditSocialMediaPageProps extends PageProps<"/[locale]/dashboard/administrator/social-media/[id]/edit"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorEditSocialMediaPageProps>,

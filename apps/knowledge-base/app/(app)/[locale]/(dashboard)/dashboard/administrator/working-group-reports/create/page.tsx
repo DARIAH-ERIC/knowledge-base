@@ -7,9 +7,7 @@ import { assertAuthenticated } from "@/lib/auth/session";
 import { getWorkingGroupReportCreateDataForAdmin } from "@/lib/data/admin-reporting";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorCreateWorkingGroupReportPageProps {
-	params: Promise<{ locale: string }>;
-}
+interface DashboardAdministratorCreateWorkingGroupReportPageProps extends PageProps<"/[locale]/dashboard/administrator/working-group-reports/create"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorCreateWorkingGroupReportPageProps>,

@@ -10,9 +10,7 @@ import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorEditContributionPageProps {
-	params: Promise<{ locale: string; id: string }>;
-}
+interface DashboardAdministratorEditContributionPageProps extends PageProps<"/[locale]/dashboard/administrator/contributions/[id]/edit"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorEditContributionPageProps>,

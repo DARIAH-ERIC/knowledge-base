@@ -30,6 +30,7 @@ ON CONFLICT ("type") DO NOTHING;
 INSERT INTO
 	"entity_types" ("type")
 VALUES
+	('documentation_pages'),
 	('documents_policies'),
 	('events'),
 	('external_links'),
@@ -151,6 +152,7 @@ SELECT
 FROM
 	(
 		VALUES
+			('documentation_pages', 'content'),
 			('documents_policies', 'description'),
 			('events', 'content'),
 			('external_links', 'description'),

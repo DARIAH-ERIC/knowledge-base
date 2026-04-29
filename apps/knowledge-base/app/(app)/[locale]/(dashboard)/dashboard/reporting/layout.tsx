@@ -2,9 +2,7 @@ import type { ReactNode } from "react";
 
 import { assertAuthenticated } from "@/lib/auth/session";
 
-interface ReportingLayoutProps {
-	children: ReactNode;
-}
+interface ReportingLayoutProps extends LayoutProps<"/[locale]/dashboard/reporting"> {}
 
 export default async function ReportingLayout(
 	props: Readonly<ReportingLayoutProps>,

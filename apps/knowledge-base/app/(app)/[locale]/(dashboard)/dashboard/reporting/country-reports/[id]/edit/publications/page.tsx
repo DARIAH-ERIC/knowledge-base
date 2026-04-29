@@ -4,9 +4,7 @@ import type { ReactNode } from "react";
 
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardReportingCountryReportPublicationsPageProps {
-	params: Promise<{ locale: string; id: string }>;
-}
+interface DashboardReportingCountryReportPublicationsPageProps extends PageProps<"/[locale]/dashboard/reporting/country-reports/[id]/edit/publications"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardReportingCountryReportPublicationsPageProps>,

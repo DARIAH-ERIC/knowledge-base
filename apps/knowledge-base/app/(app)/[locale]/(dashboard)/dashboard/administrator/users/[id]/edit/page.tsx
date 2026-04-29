@@ -8,9 +8,7 @@ import { assertAuthenticated } from "@/lib/auth/session";
 import { getUserForAdmin } from "@/lib/data/users";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorEditUserPageProps {
-	params: Promise<{ locale: string; id: string }>;
-}
+interface DashboardAdministratorEditUserPageProps extends PageProps<"/[locale]/dashboard/administrator/users/[id]/edit"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorEditUserPageProps>,

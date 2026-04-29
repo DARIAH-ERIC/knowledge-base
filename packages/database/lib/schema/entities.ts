@@ -6,6 +6,7 @@ import * as f from "../fields";
 import { uuidv7 } from "../functions";
 
 export const entityTypesEnum = [
+	"documentation_pages",
 	"documents_policies",
 	"events",
 	"external_links",

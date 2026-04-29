@@ -11,10 +11,7 @@ import { getWorkingGroupReportHeaderForUser } from "@/app/(app)/[locale]/(dashbo
 import { WorkingGroupReportStepNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/_components/working-group-report-step-nav";
 import { assertAuthenticated } from "@/lib/auth/session";
 
-interface WorkingGroupReportEditLayoutProps {
-	children: ReactNode;
-	params: Promise<{ locale: string; id: string }>;
-}
+interface WorkingGroupReportEditLayoutProps extends LayoutProps<"/[locale]/dashboard/reporting/working-group-reports/[id]/edit"> {}
 
 export default async function WorkingGroupReportEditLayout(
 	props: Readonly<WorkingGroupReportEditLayoutProps>,

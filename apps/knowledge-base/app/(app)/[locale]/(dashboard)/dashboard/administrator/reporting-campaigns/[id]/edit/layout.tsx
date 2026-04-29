@@ -11,10 +11,7 @@ import { CampaignStepNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/admi
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getReportingCampaignHeaderForAdmin } from "@/lib/data/admin-reporting";
 
-interface CampaignEditLayoutProps {
-	children: ReactNode;
-	params: Promise<{ locale: string; id: string }>;
-}
+interface CampaignEditLayoutProps extends LayoutProps<"/[locale]/dashboard/administrator/reporting-campaigns/[id]/edit"> {}
 
 export default async function CampaignEditLayout(
 	props: Readonly<CampaignEditLayoutProps>,

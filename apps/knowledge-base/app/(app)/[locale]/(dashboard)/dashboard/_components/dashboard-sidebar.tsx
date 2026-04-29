@@ -64,6 +64,12 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 				icon: <ListBulletIcon />,
 			},
 			{
+				href: "/dashboard/administrator/documentation-pages",
+				tooltip: t("Documentation pages"),
+				label: t("Documentation pages"),
+				icon: <ListBulletIcon />,
+			},
+			{
 				href: "/dashboard/administrator/governance-bodies",
 				tooltip: t("Governance bodies"),
 				label: t("Governance bodies"),

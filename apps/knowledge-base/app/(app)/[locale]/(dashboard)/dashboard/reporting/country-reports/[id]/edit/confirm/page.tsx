@@ -13,9 +13,7 @@ import { can } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardReportingCountryReportConfirmPageProps {
-	params: Promise<{ locale: string; id: string }>;
-}
+interface DashboardReportingCountryReportConfirmPageProps extends PageProps<"/[locale]/dashboard/reporting/country-reports/[id]/edit/confirm"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardReportingCountryReportConfirmPageProps>,
