@@ -3,6 +3,7 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { Button, buttonStyles } from "@dariah-eric/ui/button";
 import { Link } from "@dariah-eric/ui/link";
+import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import {
 	ChevronDownIcon,
 	ChevronUpIcon,
@@ -73,54 +74,70 @@ function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
 			</div>
 
 			<div className="flex shrink-0 items-center gap-x-1">
-				<Button
-					aria-label={t("Move up")}
-					intent="plain"
-					isDisabled={isFirst}
-					onPress={() => {
-						onMove(item.id, "up");
-					}}
-					size="sq-sm"
-				>
-					<ChevronUpIcon className="size-4" />
-				</Button>
-				<Button
-					aria-label={t("Move down")}
-					intent="plain"
-					isDisabled={isLast}
-					onPress={() => {
-						onMove(item.id, "down");
-					}}
-					size="sq-sm"
-				>
-					<ChevronDownIcon className="size-4" />
-				</Button>
-				<Button
-					aria-label={t("Edit")}
-					intent="plain"
-					onPress={() => {
-						onEdit(item);
-					}}
-					size="sq-sm"
-				>
-					<PencilSquareIcon className="size-4" />
-				</Button>
-				<Link
-					className={buttonStyles({ intent: "plain", size: "sq-sm" })}
-					href={`/dashboard/website/documents-policies/${item.entity.slug}/edit`}
-				>
-					<span className="text-xs">{t("Content")}</span>
-				</Link>
-				<Button
-					aria-label={t("Delete")}
-					intent="plain"
-					onPress={() => {
-						onDelete(item.id);
-					}}
-					size="sq-sm"
-				>
-					<TrashIcon className="size-4 text-danger" />
-				</Button>
+				<Tooltip>
+					<Button
+						aria-label={t("Move up")}
+						intent="plain"
+						isDisabled={isFirst}
+						onPress={() => {
+							onMove(item.id, "up");
+						}}
+						size="sq-sm"
+					>
+						<ChevronUpIcon className="size-4" />
+					</Button>
+					<TooltipContent inverse={true}>{t("Move up")}</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<Button
+						aria-label={t("Move down")}
+						intent="plain"
+						isDisabled={isLast}
+						onPress={() => {
+							onMove(item.id, "down");
+						}}
+						size="sq-sm"
+					>
+						<ChevronDownIcon className="size-4" />
+					</Button>
+					<TooltipContent inverse={true}>{t("Move down")}</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<Button
+						aria-label={t("Edit")}
+						intent="plain"
+						onPress={() => {
+							onEdit(item);
+						}}
+						size="sq-sm"
+					>
+						<PencilSquareIcon className="size-4" />
+					</Button>
+					<TooltipContent inverse={true}>{t("Edit")}</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<Link
+						aria-label={t("Content")}
+						className={buttonStyles({ intent: "plain", size: "sq-sm" })}
+						href={`/dashboard/website/documents-policies/${item.entity.slug}/edit`}
+					>
+						<span className="text-xs">{t("Content")}</span>
+					</Link>
+					<TooltipContent inverse={true}>{t("Content")}</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<Button
+						aria-label={t("Delete")}
+						intent="plain"
+						onPress={() => {
+							onDelete(item.id);
+						}}
+						size="sq-sm"
+					>
+						<TrashIcon className="size-4 text-danger" />
+					</Button>
+					<TooltipContent inverse={true}>{t("Delete")}</TooltipContent>
+				</Tooltip>
 			</div>
 		</div>
 	);
@@ -165,38 +182,47 @@ function DocumentSection(props: Readonly<DocumentSectionProps>): ReactNode {
 				<h2 className="flex-1 text-sm font-semibold">{label}</h2>
 				{groupId != null && onMoveGroup != null && onDeleteGroup != null && (
 					<div className="flex shrink-0 items-center gap-x-1">
-						<Button
-							aria-label={t("Move group up")}
-							intent="plain"
-							isDisabled={isFirstGroup}
-							onPress={() => {
-								onMoveGroup(groupId, "up");
-							}}
-							size="sq-sm"
-						>
-							<ChevronUpIcon className="size-4" />
-						</Button>
-						<Button
-							aria-label={t("Move group down")}
-							intent="plain"
-							isDisabled={isLastGroup}
-							onPress={() => {
-								onMoveGroup(groupId, "down");
-							}}
-							size="sq-sm"
-						>
-							<ChevronDownIcon className="size-4" />
-						</Button>
-						<Button
-							aria-label={t("Delete group")}
-							intent="plain"
-							onPress={() => {
-								onDeleteGroup(groupId);
-							}}
-							size="sq-sm"
-						>
-							<TrashIcon className="size-4 text-danger" />
-						</Button>
+						<Tooltip>
+							<Button
+								aria-label={t("Move group up")}
+								intent="plain"
+								isDisabled={isFirstGroup}
+								onPress={() => {
+									onMoveGroup(groupId, "up");
+								}}
+								size="sq-sm"
+							>
+								<ChevronUpIcon className="size-4" />
+							</Button>
+							<TooltipContent inverse={true}>{t("Move group up")}</TooltipContent>
+						</Tooltip>
+						<Tooltip>
+							<Button
+								aria-label={t("Move group down")}
+								intent="plain"
+								isDisabled={isLastGroup}
+								onPress={() => {
+									onMoveGroup(groupId, "down");
+								}}
+								size="sq-sm"
+							>
+								<ChevronDownIcon className="size-4" />
+							</Button>
+							<TooltipContent inverse={true}>{t("Move group down")}</TooltipContent>
+						</Tooltip>
+						<Tooltip>
+							<Button
+								aria-label={t("Delete group")}
+								intent="plain"
+								onPress={() => {
+									onDeleteGroup(groupId);
+								}}
+								size="sq-sm"
+							>
+								<TrashIcon className="size-4 text-danger" />
+							</Button>
+							<TooltipContent inverse={true}>{t("Delete group")}</TooltipContent>
+						</Tooltip>
 					</div>
 				)}
 			</div>

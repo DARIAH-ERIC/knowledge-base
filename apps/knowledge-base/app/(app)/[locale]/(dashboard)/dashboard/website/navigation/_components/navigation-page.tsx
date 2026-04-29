@@ -3,6 +3,7 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { Button } from "@dariah-eric/ui/button";
 import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
+import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import {
 	ChevronDownIcon,
 	ChevronRightIcon,
@@ -105,28 +106,34 @@ function ItemRow(props: Readonly<ItemRowProps>): ReactNode {
 				</div>
 
 				<div className="flex shrink-0 items-center gap-x-1">
-					<Button
-						aria-label={t("Move up")}
-						intent="plain"
-						isDisabled={isFirst}
-						onPress={() => {
-							onMoveItem(node.id, "up");
-						}}
-						size="sq-sm"
-					>
-						<ChevronUpIcon className="size-4" />
-					</Button>
-					<Button
-						aria-label={t("Move down")}
-						intent="plain"
-						isDisabled={isLast}
-						onPress={() => {
-							onMoveItem(node.id, "down");
-						}}
-						size="sq-sm"
-					>
-						<ChevronDownIcon className="size-4" />
-					</Button>
+					<Tooltip>
+						<Button
+							aria-label={t("Move up")}
+							intent="plain"
+							isDisabled={isFirst}
+							onPress={() => {
+								onMoveItem(node.id, "up");
+							}}
+							size="sq-sm"
+						>
+							<ChevronUpIcon className="size-4" />
+						</Button>
+						<TooltipContent inverse={true}>{t("Move up")}</TooltipContent>
+					</Tooltip>
+					<Tooltip>
+						<Button
+							aria-label={t("Move down")}
+							intent="plain"
+							isDisabled={isLast}
+							onPress={() => {
+								onMoveItem(node.id, "down");
+							}}
+							size="sq-sm"
+						>
+							<ChevronDownIcon className="size-4" />
+						</Button>
+						<TooltipContent inverse={true}>{t("Move down")}</TooltipContent>
+					</Tooltip>
 					<Button
 						intent="plain"
 						onPress={() => {
@@ -137,26 +144,32 @@ function ItemRow(props: Readonly<ItemRowProps>): ReactNode {
 						<PlusIcon className="mr-1 size-3.5" />
 						{t("Add child")}
 					</Button>
-					<Button
-						aria-label={t("Edit")}
-						intent="plain"
-						onPress={() => {
-							onEditItem(node);
-						}}
-						size="sq-sm"
-					>
-						<PencilSquareIcon className="size-4" />
-					</Button>
-					<Button
-						aria-label={t("Delete")}
-						intent="plain"
-						onPress={() => {
-							onDeleteItem(node.id);
-						}}
-						size="sq-sm"
-					>
-						<TrashIcon className="size-4 text-danger" />
-					</Button>
+					<Tooltip>
+						<Button
+							aria-label={t("Edit")}
+							intent="plain"
+							onPress={() => {
+								onEditItem(node);
+							}}
+							size="sq-sm"
+						>
+							<PencilSquareIcon className="size-4" />
+						</Button>
+						<TooltipContent inverse={true}>{t("Edit")}</TooltipContent>
+					</Tooltip>
+					<Tooltip>
+						<Button
+							aria-label={t("Delete")}
+							intent="plain"
+							onPress={() => {
+								onDeleteItem(node.id);
+							}}
+							size="sq-sm"
+						>
+							<TrashIcon className="size-4 text-danger" />
+						</Button>
+						<TooltipContent inverse={true}>{t("Delete")}</TooltipContent>
+					</Tooltip>
 				</div>
 			</div>
 

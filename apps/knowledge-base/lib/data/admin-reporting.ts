@@ -41,6 +41,7 @@ export async function getCountryReportCreateDataForAdmin(currentUser: Pick<User,
 
 	const [campaigns, countries] = await Promise.all([
 		db.query.reportingCampaigns.findMany({
+			where: { status: "open" },
 			orderBy: { year: "desc" },
 			columns: { id: true, year: true },
 		}),
@@ -84,6 +85,7 @@ export async function getWorkingGroupReportCreateDataForAdmin(currentUser: Pick<
 
 	const [campaigns, workingGroups] = await Promise.all([
 		db.query.reportingCampaigns.findMany({
+			where: { status: "open" },
 			orderBy: { year: "desc" },
 			columns: { id: true, year: true },
 		}),

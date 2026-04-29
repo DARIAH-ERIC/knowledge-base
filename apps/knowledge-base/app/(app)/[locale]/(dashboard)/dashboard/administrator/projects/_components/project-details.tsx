@@ -79,7 +79,11 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 				<DescriptionDetails>{project.scope.scope}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Funding")}</DescriptionTerm>
-				<DescriptionDetails>{project.funding}</DescriptionDetails>
+				<DescriptionDetails>
+					{project.funding != null
+						? format.number(project.funding, { style: "currency", currency: "EUR" })
+						: null}
+				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Call")}</DescriptionTerm>
 				<DescriptionDetails>{project.call}</DescriptionDetails>
