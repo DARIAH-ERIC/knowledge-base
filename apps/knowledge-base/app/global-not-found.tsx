@@ -38,7 +38,7 @@ export default function GlobalNotFoundPage(): ReactNode {
 	return (
 		<HtmlDocument locale={locale}>
 			<DocumentBody>
-				<Providers locale={locale}>
+				<Providers locale={locale} withClientProviders={false}>
 					<NotFoundState
 						codeLabel={t("Error 404")}
 						description={t(

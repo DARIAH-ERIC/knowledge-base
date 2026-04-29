@@ -52,7 +52,7 @@ export default function GlobalErrorPage(props: Readonly<GlobalErrorPageProps>): 
 		<HtmlDocument locale={locale}>
 			<title>{t.meta.title}</title>
 			<DocumentBody>
-				<Providers locale={locale}>
+				<Providers locale={locale} withClientProviders={false}>
 					<ErrorState
 						description={t.description}
 						homeHref="/"
