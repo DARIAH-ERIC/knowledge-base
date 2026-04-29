@@ -1,6 +1,5 @@
-import { buttonStyles } from "@dariah-eric/ui/button";
+import { ButtonLink } from "@dariah-eric/ui/button-link";
 import { EmptyState } from "@dariah-eric/ui/empty-state";
-import { Link } from "@dariah-eric/ui/link";
 import { getExtracted } from "next-intl/server";
 import { Fragment, type ReactNode } from "react";
 
@@ -58,16 +57,17 @@ export async function WorkingGroupReportsListPage(
 										{report.campaignYear} &middot; {formatStatus(report.reportStatus)}
 									</span>
 								</div>
-								<Link
-									className={buttonStyles({ intent: "plain", size: "sm" })}
+								<ButtonLink
 									href={
 										isEditable
 											? `/dashboard/reporting/working-group-reports/${report.reportId}/edit`
 											: `/dashboard/reporting/working-group-reports/${report.reportId}`
 									}
+									intent="plain"
+									size="sm"
 								>
 									{isEditable ? t("Edit") : t("View")}
-								</Link>
+								</ButtonLink>
 							</li>
 						);
 					})}

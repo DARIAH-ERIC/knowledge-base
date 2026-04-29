@@ -221,6 +221,12 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 						icon: <ListBulletIcon />,
 					},
 					{
+						href: "/dashboard/administrator/reporting-campaigns",
+						tooltip: t("Reporting campaigns"),
+						label: t("Reporting campaigns"),
+						icon: <ListBulletIcon />,
+					},
+					{
 						href: "/dashboard/administrator/country-reports",
 						tooltip: t("Country reports"),
 						label: t("Country reports"),
@@ -230,12 +236,6 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 						href: "/dashboard/administrator/working-group-reports",
 						tooltip: t("Working group reports"),
 						label: t("Working group reports"),
-						icon: <ListBulletIcon />,
-					},
-					{
-						href: "/dashboard/administrator/reporting-campaigns",
-						tooltip: t("Reporting campaigns"),
-						label: t("Reporting campaigns"),
 						icon: <ListBulletIcon />,
 					},
 				]

@@ -1,6 +1,5 @@
-import { buttonStyles } from "@dariah-eric/ui/button";
+import { ButtonLink } from "@dariah-eric/ui/button-link";
 import { EmptyState } from "@dariah-eric/ui/empty-state";
-import { Link } from "@dariah-eric/ui/link";
 import { getExtracted } from "next-intl/server";
 import { Fragment, type ReactNode } from "react";
 
@@ -62,12 +61,13 @@ export async function ReportingOverviewPage(
 												<span className="text-sm font-medium">{report.workingGroupName}</span>
 												<span className="text-xs text-muted-fg">{formatStatus(report.status)}</span>
 											</div>
-											<Link
-												className={buttonStyles({ intent: "plain", size: "sm" })}
+											<ButtonLink
 												href={`/dashboard/reporting/working-group-reports/${report.reportId}/edit`}
+												intent="plain"
+												size="sm"
 											>
 												{t("Edit")}
-											</Link>
+											</ButtonLink>
 										</li>
 									);
 								})}
@@ -89,12 +89,13 @@ export async function ReportingOverviewPage(
 												<span className="text-sm font-medium">{report.countryName}</span>
 												<span className="text-xs text-muted-fg">{formatStatus(report.status)}</span>
 											</div>
-											<Link
-												className={buttonStyles({ intent: "plain", size: "sm" })}
+											<ButtonLink
 												href={`/dashboard/reporting/country-reports/${report.reportId}/edit`}
+												intent="plain"
+												size="sm"
 											>
 												{t("Edit")}
-											</Link>
+											</ButtonLink>
 										</li>
 									);
 								})}

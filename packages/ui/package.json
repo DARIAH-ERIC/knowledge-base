@@ -11,6 +11,7 @@
 		"./badge": "./dist/badge.mjs",
 		"./breadcrumbs": "./dist/breadcrumbs.mjs",
 		"./button": "./dist/button.mjs",
+		"./button-link": "./dist/button-link.mjs",
 		"./calendar": "./dist/calendar.mjs",
 		"./card": "./dist/card.mjs",
 		"./carousel": "./dist/carousel.mjs",
