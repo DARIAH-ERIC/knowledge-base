@@ -14,6 +14,7 @@ import {
 } from "@dariah-eric/ui/table";
 import {
 	EllipsisHorizontalIcon,
+	EyeIcon,
 	PencilSquareIcon,
 	PlusIcon,
 	TrashIcon,
@@ -110,6 +111,10 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 											<EllipsisHorizontalIcon className="size-5" />
 										</Button>
 										<MenuContent placement="left top">
+											<MenuItem href={`/dashboard/reporting/country-reports/${item.id}`}>
+												<EyeIcon className="mr-2 size-4" />
+												<MenuLabel>{t("View")}</MenuLabel>
+											</MenuItem>
 											<MenuItem href={`/dashboard/administrator/country-reports/${item.id}/edit`}>
 												<PencilSquareIcon className="mr-2 size-4" />
 												<MenuLabel>{t("Edit")}</MenuLabel>

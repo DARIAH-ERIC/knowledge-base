@@ -43,6 +43,17 @@ export const createCountryReportAction = createServerAction(
 
 		const { campaignId, countryId, status } = result.output;
 
+		const campaign = await db.query.reportingCampaigns.findFirst({
+			where: { id: campaignId },
+			columns: { status: true },
+		});
+
+		if (campaign?.status !== "open") {
+			return createActionStateError({
+				message: t("Only open campaigns can be used for new reports."),
+			});
+		}
+
 		const existing = await db.query.countryReports.findFirst({
 			where: { campaignId, countryId },
 			columns: { id: true },

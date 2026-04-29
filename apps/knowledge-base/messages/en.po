@@ -100,6 +100,8 @@ msgstr "Send"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/update-country.action.ts:26
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/create-country-report.action.ts:24
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/update-country-report.action.ts:25
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_lib/create-documentation-page.action.ts:27
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_lib/update-documentation-page.action.ts:27
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/create-governance-body.action.ts:25
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/update-governance-body.action.ts:26
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/create-institution.action.ts:25
@@ -136,24 +138,24 @@ msgstr "Send"
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-project-contribution.action.ts:28
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/update-country-report-contributors.action.ts:29
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/update-country-report-events.action.ts:29
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy-from-dialog.action.ts:31
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy.action.ts:30
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.action.ts:30
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy.action.ts:29
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/create-event.action.ts:29
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/update-event.action.ts:30
-#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/create-funding-call.action.ts:29
-#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/update-funding-call.action.ts:29
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/create-impact-case-study.action.ts:29
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/update-impact-case-study.action.ts:30
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/create-news-item.action.ts:29
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/update-news-item.action.ts:30
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/create-opportunity.action.ts:29
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/update-opportunity.action.ts:29
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/create-page-item.action.ts:29
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/update-page-item.action.ts:30
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article.action.ts:29
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/update-spotlight-article.action.ts:30
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy-from-dialog.action.ts:32
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy.action.ts:31
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.action.ts:31
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy.action.ts:30
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/create-event.action.ts:30
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/update-event.action.ts:31
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/create-funding-call.action.ts:30
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/update-funding-call.action.ts:30
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/create-impact-case-study.action.ts:30
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/update-impact-case-study.action.ts:31
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/create-news-item.action.ts:30
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/update-news-item.action.ts:31
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/create-opportunity.action.ts:30
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/update-opportunity.action.ts:30
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/create-page-item.action.ts:30
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/update-page-item.action.ts:31
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article.action.ts:30
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/update-spotlight-article.action.ts:31
 #: lib/server/create-server-action.ts:28
 msgid "CDu063"
 msgstr "Too many requests."
@@ -178,6 +180,8 @@ msgstr "Too many requests."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/update-country.action.ts:41
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/create-country-report.action.ts:39
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/update-country-report.action.ts:40
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_lib/create-documentation-page.action.ts:42
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_lib/update-documentation-page.action.ts:42
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/create-governance-body.action.ts:40
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/update-governance-body.action.ts:41
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/create-institution.action.ts:40
@@ -216,31 +220,31 @@ msgstr "Too many requests."
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/create-working-group-report-event.action.ts:40
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/create-working-group-report-social-media.action.ts:40
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action.ts:41
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy-from-dialog.action.ts:48
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy.action.ts:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy-from-dialog.action.ts:49
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy.action.ts:46
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-policy-group.action.ts:37
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.action.ts:47
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy.action.ts:44
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/create-event.action.ts:44
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/update-event.action.ts:45
-#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/create-funding-call.action.ts:44
-#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/update-funding-call.action.ts:44
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.action.ts:48
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy.action.ts:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/create-event.action.ts:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/update-event.action.ts:46
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/create-funding-call.action.ts:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/update-funding-call.action.ts:45
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/create-impact-case-study-contributor.action.ts:39
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/create-impact-case-study.action.ts:44
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/update-impact-case-study.action.ts:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/create-impact-case-study.action.ts:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/update-impact-case-study.action.ts:46
 #: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_lib/update-site-metadata.action.ts:40
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/create-navigation-item.action.ts:40
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/create-navigation-menu.action.ts:39
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/update-navigation-item.action.ts:40
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/create-news-item.action.ts:44
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/update-news-item.action.ts:45
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/create-opportunity.action.ts:44
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/update-opportunity.action.ts:44
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/create-page-item.action.ts:44
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/update-page-item.action.ts:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/create-news-item.action.ts:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/update-news-item.action.ts:46
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/create-opportunity.action.ts:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/update-opportunity.action.ts:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/create-page-item.action.ts:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/update-page-item.action.ts:46
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article-contributor.action.ts:39
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article.action.ts:44
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/update-spotlight-article.action.ts:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article.action.ts:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/update-spotlight-article.action.ts:46
 #: app/(app)/[locale]/(default)/contact/_lib/send-contact-form-email.action.ts:36
 msgid "z9RwCc"
 msgstr "Invalid or missing fields."
@@ -474,8 +478,8 @@ msgstr "Updated password."
 
 #: app/(app)/[locale]/(auth)/auth/settings/page.tsx:27
 #: app/(app)/[locale]/(auth)/auth/settings/page.tsx:73
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:107
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/user-menu.tsx:56
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:108
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/user-menu.tsx:58
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-step-nav.tsx:28
 msgid "D3idYv"
 msgstr "Settings"
@@ -591,6 +595,7 @@ msgstr "Verify the code from the app"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:163
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-create-form.tsx:129
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-edit-form.tsx:94
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form.tsx:74
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:163
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:163
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:163
@@ -610,10 +615,10 @@ msgstr "Verify the code from the app"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:163
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-contributors-form.tsx:60
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-events-form.tsx:117
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/services/page.tsx:112
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/social-media/page.tsx:117
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/services/page.tsx:120
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/social-media/page.tsx:125
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-questions-form.tsx:55
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/data/page.tsx:147
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/data/page.tsx:155
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:169
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:164
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:207
@@ -685,12 +690,13 @@ msgstr "Selected items"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/async-multiple-select.tsx:211
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/async-option-picker.tsx:150
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/async-option-picker.tsx:153
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:865
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:881
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:290
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contribution-option-picker.tsx:136
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contribution-option-picker.tsx:147
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:137
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:100
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx:100
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:97
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:126
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:98
@@ -740,44 +746,44 @@ msgid "9+Ddtu"
 msgstr "Next"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/command-palette.tsx:47
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:333
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:352
 msgid "1QGkRH"
 msgstr "Quick search..."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:248
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:254
 msgid "zJ7SUK"
 msgstr "Press ArrowUp or ArrowDown to reorder"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:381
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1299
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:387
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1315
 msgid "ryK3qR"
 msgstr "Accordion"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:382
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1300
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:388
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1316
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/_components/working-group-report-step-nav.tsx:30
 msgid "XHHR08"
 msgstr "Data"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:383
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1301
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:389
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1317
 msgid "bp3HuS"
 msgstr "Embed"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:384
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1302
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:390
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1318
 msgid "WExVSr"
 msgstr "Gallery"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:385
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1303
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:391
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1319
 msgid "dzcp7T"
 msgstr "Hero"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:386
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:663
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1087
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1304
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:392
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:669
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1103
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1320
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:93
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:93
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:93
@@ -800,14 +806,16 @@ msgstr "Hero"
 msgid "+0zv6g"
 msgstr "Image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:387
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1305
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:393
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1321
 msgid "0tCfi4"
 msgstr "Rich text"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:388
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1223
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1306
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:394
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1239
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1322
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-details.tsx:50
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form.tsx:54
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:69
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:144
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:112
@@ -828,20 +836,20 @@ msgstr "Rich text"
 msgid "Jq3FDz"
 msgstr "Content"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:424
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:430
 msgid "aJ/bsX"
 msgstr "Drag to reorder"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:475
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:482
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:481
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:488
 msgid "g8fdXA"
 msgstr "Remove block"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:486
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:492
 msgid "LF5H8N"
 msgstr "Are you sure you want to remove this content block? This action cannot be undone."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:492
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:498
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx:295
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal.tsx:27
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:404
@@ -857,7 +865,7 @@ msgstr "Are you sure you want to remove this content block? This action cannot b
 msgid "47FYwb"
 msgstr "Cancel"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:494
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:500
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-questions-form.tsx:61
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-claimed-contributors-form.tsx:92
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:81
@@ -867,29 +875,29 @@ msgstr "Cancel"
 msgid "G/yZLu"
 msgstr "Remove"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:644
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:650
 msgid "6RLJA1"
 msgstr "Gallery layout"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:653
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:659
 msgid "HzfrYu"
 msgstr "Grid"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:654
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:660
 msgid "aC/Bx7"
 msgstr "Carousel"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:674
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:680
 msgid "Pg+LLi"
 msgstr "Up"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:684
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:690
 msgid "xhBLiY"
 msgstr "Down"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:707
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1016
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1091
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:713
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1032
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1107
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:96
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:96
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:96
@@ -905,26 +913,26 @@ msgstr "Down"
 msgid "T7w3zq"
 msgstr "Selected image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:742
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:975
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1039
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:748
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:991
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1055
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:394
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:137
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:138
 msgid "sq1btl"
 msgstr "Caption"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:762
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:768
 msgid "jsBzHH"
 msgstr "Add image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:806
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:816
 msgid "X6ruKu"
 msgstr "Data type"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:810
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:195
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:196
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:821
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:158
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:159
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-step-nav.tsx:29
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary.tsx:96
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/_components/country-report-step-nav.tsx:30
@@ -935,43 +943,54 @@ msgstr "Data type"
 msgid "ZvKSfJ"
 msgstr "Events"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:811
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:225
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:226
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:822
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:188
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:189
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:84
 msgid "NZyhSX"
 msgstr "News"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:826
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:823
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:194
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:195
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx:95
+msgid "zB5VYc"
+msgstr "Opportunities"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:824
+msgid "5+5Dw/"
+msgstr "Funding calls"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:842
 msgid "AEMsy2"
 msgstr "Selection mode"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:843
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:859
 msgid "fq86MK"
 msgstr "Most recent"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:844
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:860
 msgid "uRNuPl"
 msgstr "Explicit selection"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:857
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:873
 msgid "JyIOg4"
 msgstr "Number of entries"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:877
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:893
 msgid "P5XIax"
 msgstr "No entries found."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:877
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:893
 msgid "c1irFW"
 msgstr "Search to browse entries."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:906
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:922
 msgid "LtTjKV"
 msgstr "selected"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:956
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1139
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:972
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1155
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:71
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:675
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx:59
@@ -984,9 +1003,12 @@ msgstr "selected"
 msgid "bWjdfa"
 msgstr "URL"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:966
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1074
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1219
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:982
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1090
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1235
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-details.tsx:44
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form.tsx:46
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx:120
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:68
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-events-form.tsx:96
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-events-form.tsx:82
@@ -1011,19 +1033,19 @@ msgstr "URL"
 msgid "9a9+ww"
 msgstr "Title"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:967
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:983
 msgid "Gm0bCy"
 msgstr "Descriptive title for screen readers"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1083
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1099
 msgid "raTwUa"
 msgstr "Eyebrow"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1110
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1126
 msgid "NhOsKC"
 msgstr "CTAs"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1125
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1141
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:384
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:125
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:126
@@ -1032,15 +1054,15 @@ msgstr "CTAs"
 msgid "753yX5"
 msgstr "Label"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1165
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1181
 msgid "DysEL3"
 msgstr "Add CTA"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1194
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1210
 msgid "5ujeDa"
 msgstr "Item"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1274
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1290
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx:95
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page.tsx:252
 msgid "KDO3hW"
@@ -1179,6 +1201,8 @@ msgstr "End date"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-create-form.tsx:126
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-edit-form.tsx:90
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-edit-form.tsx:91
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form.tsx:70
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form.tsx:71
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:159
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:160
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:159
@@ -1260,42 +1284,42 @@ msgid "N2IrpM"
 msgstr "Confirm"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-breadcrumbs.tsx:43
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:103
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:349
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:352
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/user-menu.tsx:51
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:104
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:368
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:371
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/user-menu.tsx:53
 msgid "hzSNj4"
 msgstr "Dashboard"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:59
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:60
 msgid "h7ympN"
 msgstr "Open command menu"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:91
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/user-menu.tsx:37
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:92
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/user-menu.tsx:39
 #: app/(app)/[locale]/(default)/_components/user-menu.tsx:41
 msgid "bdcMGy"
 msgstr "Open menu"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:112
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:113
 msgid "tCOYpl"
 msgstr "Command menu"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:116
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:117
 msgid "DxgBSX"
 msgstr "Color scheme"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:119
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:120
 msgid "rru3FW"
 msgstr "Toggle color scheme"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:130
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/user-menu.tsx:63
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:131
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/user-menu.tsx:65
 msgid "isGKnz"
 msgstr "Documentation"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:135
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/user-menu.tsx:74
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:140
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/user-menu.tsx:76
 msgid "xXbJso"
 msgstr "Sign out"
 
@@ -1305,11 +1329,13 @@ msgstr "Administrator"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:50
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:51
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:154
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:155
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:177
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:178
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:345
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:140
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:141
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:219
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:220
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:245
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:246
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:364
 msgid "9uOFF3"
 msgstr "Overview"
 
@@ -1322,12 +1348,18 @@ msgstr "Countries"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:68
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:69
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx:93
+msgid "Nz7d4t"
+msgstr "Documentation pages"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:74
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:75
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:90
 msgid "0P1TrU"
 msgstr "Governance bodies"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:74
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:75
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:80
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:81
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:119
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:59
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary.tsx:52
@@ -1335,59 +1367,33 @@ msgstr "Governance bodies"
 msgid "/XO6LE"
 msgstr "Institutions"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:80
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:81
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:86
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:87
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:91
 msgid "TLU3vQ"
 msgstr "National consortia"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:86
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:87
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:92
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:93
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:51
 msgid "4BU/eo"
 msgstr "Newsletters"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:92
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:93
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:98
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:99
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:82
 msgid "JZnNTW"
 msgstr "Persons"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:98
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:99
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:104
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:105
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:85
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/_components/country-report-step-nav.tsx:35
 msgid "UxTJRa"
 msgstr "Projects"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:104
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:105
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx:60
-msgid "pYj07u"
-msgstr "Reporting campaigns"
-
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:110
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:111
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:160
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:161
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page.tsx:69
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/reporting-overview-page.tsx:80
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-reports-list-page.tsx:34
-msgid "yOdVub"
-msgstr "Country reports"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:116
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:117
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:166
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:167
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:69
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/reporting-overview-page.tsx:53
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-reports-list-page.tsx:34
-msgid "2k5El8"
-msgstr "Working group reports"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:122
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:123
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-step-nav.tsx:32
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_components/services-page.tsx:109
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary.tsx:165
@@ -1395,8 +1401,8 @@ msgstr "Working group reports"
 msgid "sZFybj"
 msgstr "Services"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:128
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:129
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:116
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:117
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:105
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:460
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:463
@@ -1409,84 +1415,107 @@ msgstr "Services"
 msgid "ZEEVQX"
 msgstr "Social media"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:134
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:135
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:122
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:123
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:85
 msgid "YDMrKK"
 msgstr "Users"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:140
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:141
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:128
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:129
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:93
 msgid "S+6JuP"
 msgstr "Working groups"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:150
-#: app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/reports/(index)/page.tsx:37
-#: app/(app)/[locale]/(dashboard)/dashboard/working-groups/[slug]/reports/(index)/page.tsx:37
-msgid "Ppx673"
-msgstr "Reports"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:173
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:136
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-social-media-amounts-form.tsx:49
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:129
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx:118
 msgid "JkLHGw"
 msgstr "Website"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:183
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:184
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:146
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:147
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page.tsx:58
 msgid "d1uESJ"
 msgstr "Assets"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:189
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:190
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:152
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:153
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:262
 msgid "aswkXQ"
 msgstr "Documents and policies"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:201
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:202
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:164
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:165
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:93
 msgid "5F/Zdm"
 msgstr "Funding Calls"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:207
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:208
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:170
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:171
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:93
 msgid "99bd1b"
 msgstr "Impact case studies"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:213
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:214
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:176
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:177
 msgid "8Q504V"
 msgstr "Metadata"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:219
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:220
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:182
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:183
 msgid "fBg+7V"
 msgstr "Navigation"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:231
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:232
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx:95
-msgid "zB5VYc"
-msgstr "Opportunities"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:237
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:238
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:200
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:201
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:84
 msgid "CxfKLC"
 msgstr "Pages"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:243
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:244
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:206
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:207
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:93
 msgid "FZzBJD"
 msgstr "Spotlight articles"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:316
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:214
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/reporting-overview-page.tsx:39
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/administrator/page.tsx:60
+msgid "reFEEC"
+msgstr "Reporting"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:225
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:226
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:251
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:252
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page.tsx:69
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/reporting-overview-page.tsx:80
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/administrator/page.tsx:41
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-reports-list-page.tsx:34
+msgid "yOdVub"
+msgstr "Country reports"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:231
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:232
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:257
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:258
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:69
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/reporting-overview-page.tsx:53
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/administrator/page.tsx:46
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-reports-list-page.tsx:34
+msgid "2k5El8"
+msgstr "Working group reports"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:237
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:238
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx:60
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/administrator/page.tsx:51
+msgid "pYj07u"
+msgstr "Reporting campaigns"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:335
 msgid "ShOrju"
 msgstr "Open quick search"
 
@@ -1494,6 +1523,7 @@ msgstr "Open quick search"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:217
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:180
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page.tsx:125
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx:166
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:155
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:202
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:156
@@ -1521,6 +1551,8 @@ msgstr "Delete"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:207
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:170
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page.tsx:115
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-details.tsx:40
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx:156
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:145
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:192
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:146
@@ -1671,14 +1703,14 @@ msgstr "Relations"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:72
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaign-form.tsx:63
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx:82
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx:56
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx:53
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_components/service-form.tsx:150
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_components/services-page.tsx:142
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-create-form.tsx:108
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-edit-form.tsx:71
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:92
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/confirm/page.tsx:57
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/confirm/page.tsx:60
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/confirm/page.tsx:57
 msgid "tzMNF3"
 msgstr "Status"
 
@@ -1783,6 +1815,7 @@ msgstr "Update the person-to-organisation relation."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:71
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-create-form.tsx:53
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-edit-form.tsx:51
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form.tsx:44
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:71
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:71
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:71
@@ -1839,6 +1872,7 @@ msgstr "All person-to-organisation relations in the DARIAH knowledge base."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:144
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:107
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page.tsx:80
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx:107
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:104
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:133
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:105
@@ -1872,6 +1906,7 @@ msgstr "Type"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:197
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:158
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page.tsx:105
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx:138
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:133
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:180
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:134
@@ -1897,7 +1932,7 @@ msgstr "Open actions menu"
 msgid "RNShTS"
 msgstr "contribution"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/[id]/edit/page.tsx:24
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/[id]/edit/page.tsx:22
 msgid "rLJ9df"
 msgstr "Administrator dashboard - Edit contribution"
 
@@ -1905,7 +1940,7 @@ msgstr "Administrator dashboard - Edit contribution"
 msgid "R+8s7P"
 msgstr "Administrator dashboard - Create contribution"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/page.tsx:62
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/page.tsx:63
 msgid "VqEMv5"
 msgstr "Administrator dashboard - Contributions"
 
@@ -2020,7 +2055,7 @@ msgstr "Add a description."
 msgid "Q8Qw5B"
 msgstr "Description"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/[slug]/edit/page.tsx:34
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/[slug]/edit/page.tsx:24
 msgid "eEv5rZ"
 msgstr "Administrator dashboard - Edit country"
 
@@ -2028,7 +2063,7 @@ msgstr "Administrator dashboard - Edit country"
 msgid "uFmoeG"
 msgstr "Administrator dashboard - Create country"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/page.tsx:55
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/page.tsx:56
 msgid "1T8e0z"
 msgstr "Administrator dashboard - Countries"
 
@@ -2080,17 +2115,105 @@ msgstr "country report"
 msgid "4tqO+Q"
 msgstr "A report for this country and campaign already exists."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/[id]/edit/page.tsx:21
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/[id]/edit/page.tsx:20
 msgid "DcTNYo"
 msgstr "Administrator dashboard - Edit country report"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/create/page.tsx:20
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/create/page.tsx:19
 msgid "Ke/Ojr"
 msgstr "Administrator dashboard - New country report"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/page.tsx:21
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/page.tsx:20
 msgid "vqZVq6"
 msgstr "Administrator dashboard - Country reports"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-create-form.tsx:15
+msgid "2oR8Nk"
+msgstr "New documentation page"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-details.tsx:47
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:41
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:63
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:45
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:45
+msgid "IoDlcd"
+msgstr "Slug"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-edit.tsx:28
+msgid "npShnk"
+msgstr "Edit documentation page"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form.tsx:44
+msgid "VL/iLD"
+msgstr "Enter the documentation page details."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form.tsx:54
+#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:144
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:187
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:98
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:145
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:141
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-form.tsx:141
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form.tsx:145
+msgid "ClikfP"
+msgstr "Add the content."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx:95
+msgid "o01S0D"
+msgstr "Manage all documentation pages in the DARIAH knowledge base."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx:123
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:116
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:124
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:124
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:114
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx:129
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:115
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:124
+msgid "xrk6zg"
+msgstr "Updated"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx:150
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:141
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:172
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-reports-list-page.tsx:69
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-reports-list-page.tsx:69
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:149
+#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:158
+#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:154
+#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:139
+#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx:168
+#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:143
+#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:154
+msgid "FgydNe"
+msgstr "View"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx:187
+msgid "WUP8Jo"
+msgstr "documentation page"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/[slug]/details/page.tsx:20
+msgid "QNV8+9"
+msgstr "Administrator dashboard - Documentation page details"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/[slug]/edit/page.tsx:20
+msgid "HIFkoc"
+msgstr "Administrator dashboard - Edit documentation page"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/create/page.tsx:17
+msgid "zi9te0"
+msgstr "Administrator dashboard - Create documentation page"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/page.tsx:55
+msgid "UWxgPo"
+msgstr "Administrator dashboard - Documentation pages"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:92
 msgid "MF6b++"
@@ -2112,7 +2235,7 @@ msgstr "Edit governance body"
 msgid "br5bnQ"
 msgstr "Enter the governance body details."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/[slug]/edit/page.tsx:34
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/[slug]/edit/page.tsx:24
 msgid "wgqipZ"
 msgstr "Administrator dashboard - Edit governance body"
 
@@ -2120,7 +2243,7 @@ msgstr "Administrator dashboard - Edit governance body"
 msgid "i0nH32"
 msgstr "Administrator dashboard - Create governance body"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/page.tsx:55
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/page.tsx:56
 msgid "ZNy+Ii"
 msgstr "Administrator dashboard - Governance bodies"
 
@@ -2160,7 +2283,7 @@ msgstr "Manage all institutions in the DARIAH knowledge base."
 msgid "cYONip"
 msgstr "institution"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/[slug]/edit/page.tsx:34
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/[slug]/edit/page.tsx:24
 msgid "T8ww02"
 msgstr "Administrator dashboard - Edit institution"
 
@@ -2168,7 +2291,7 @@ msgstr "Administrator dashboard - Edit institution"
 msgid "gwe60k"
 msgstr "Administrator dashboard - Create institution"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/page.tsx:55
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/page.tsx:56
 msgid "94gpbH"
 msgstr "Administrator dashboard - Institutions"
 
@@ -2192,7 +2315,7 @@ msgstr "Edit national consortium"
 msgid "jds8cg"
 msgstr "Enter the national consortium details."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/[slug]/edit/page.tsx:34
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/[slug]/edit/page.tsx:24
 msgid "lk1J0r"
 msgstr "Administrator dashboard - Edit national consortium"
 
@@ -2200,7 +2323,7 @@ msgstr "Administrator dashboard - Edit national consortium"
 msgid "E1GOx2"
 msgstr "Administrator dashboard - Create national consortium"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/page.tsx:55
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/page.tsx:56
 msgid "6GYvgO"
 msgstr "Administrator dashboard - National consortia"
 
@@ -2224,26 +2347,13 @@ msgstr "Opens"
 msgid "VLKK35"
 msgstr "Clicks"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/page.tsx:37
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/page.tsx:38
 msgid "nR3uiW"
 msgstr "Administrator dashboard - Newsletters"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-create-form.tsx:21
 msgid "qESp6V"
 msgstr "New person"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:41
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:63
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:45
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:45
-#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:45
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:45
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:45
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details.tsx:45
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-details.tsx:45
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-details.tsx:45
-msgid "IoDlcd"
-msgstr "Slug"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:44
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:62
@@ -2291,29 +2401,15 @@ msgstr "Biography"
 msgid "ArVBPN"
 msgstr "Manage all persons in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:141
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:172
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-reports-list-page.tsx:69
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-reports-list-page.tsx:69
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:149
-#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:158
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:154
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:139
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx:168
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:143
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:154
-msgid "FgydNe"
-msgstr "View"
-
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:176
 msgid "ADU4H2"
 msgstr "person"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/[slug]/details/page.tsx:21
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/[slug]/details/page.tsx:22
 msgid "4mbkk4"
 msgstr "Administrator dashboard - Person details"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/[slug]/edit/page.tsx:25
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/[slug]/edit/page.tsx:24
 msgid "P5I1ji"
 msgstr "Administrator dashboard - Edit person"
 
@@ -2321,7 +2417,7 @@ msgstr "Administrator dashboard - Edit person"
 msgid "cFvtc7"
 msgstr "Administrator dashboard - Create person"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/page.tsx:55
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/page.tsx:56
 msgid "SMXbAk"
 msgstr "Administrator dashboard - Persons"
 
@@ -2457,19 +2553,19 @@ msgstr "project"
 msgid "O166c7"
 msgstr "Invalid social media type."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/[slug]/details/page.tsx:23
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/[slug]/details/page.tsx:22
 msgid "BKqkq3"
 msgstr "Administrator dashboard - Project details"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/[slug]/edit/page.tsx:29
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/[slug]/edit/page.tsx:23
 msgid "MhC9X7"
 msgstr "Administrator dashboard - Edit project"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/create/page.tsx:22
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/create/page.tsx:21
 msgid "P2CKox"
 msgstr "Administrator dashboard - Create project"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/page.tsx:55
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/page.tsx:56
 msgid "cK0moa"
 msgstr "Administrator dashboard - Projects"
 
@@ -2694,51 +2790,51 @@ msgstr "Campaign cannot be launched."
 msgid "GrnZDN"
 msgstr "Saved."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/contributions/page.tsx:22
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/contributions/page.tsx:21
 msgid "Dl9H9W"
 msgstr "Administrator dashboard - Campaign contribution amounts"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/countries/page.tsx:22
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/countries/page.tsx:21
 msgid "lI6Yss"
 msgstr "Administrator dashboard - Campaign country thresholds"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/events/page.tsx:22
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/events/page.tsx:21
 msgid "jBPD+m"
 msgstr "Administrator dashboard - Campaign event amounts"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/questions/page.tsx:22
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/questions/page.tsx:21
 msgid "TmeIoJ"
 msgstr "Administrator dashboard - Campaign questions"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/services/page.tsx:22
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/services/page.tsx:21
 msgid "wi6MML"
 msgstr "Administrator dashboard - Campaign service sizes"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx:24
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx:23
 msgid "wiofrC"
 msgstr "Administrator dashboard - Campaign settings"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx:64
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx:61
 msgid "ncaGLo"
 msgstr "Launch campaign"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx:72
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx:69
 msgid "zwsj1U"
 msgstr "Close campaign"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx:78
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/settings/page.tsx:75
 msgid "2Qr868"
 msgstr "This campaign is closed."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/social-media/page.tsx:22
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/[id]/edit/social-media/page.tsx:21
 msgid "syv6/3"
 msgstr "Administrator dashboard - Campaign social media amounts"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/create/page.tsx:19
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/create/page.tsx:17
 msgid "LsD6Od"
 msgstr "Administrator dashboard - New reporting campaign"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/page.tsx:21
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/page.tsx:20
 msgid "LStJV2"
 msgstr "Administrator dashboard - Reporting campaigns"
 
@@ -2820,7 +2916,7 @@ msgstr "SSHOC ID"
 msgid "txlgci"
 msgstr "service"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/services/[id]/edit/page.tsx:27
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/services/[id]/edit/page.tsx:20
 msgid "wLRPJB"
 msgstr "Administrator dashboard - Edit service"
 
@@ -2828,7 +2924,7 @@ msgstr "Administrator dashboard - Edit service"
 msgid "6ytF99"
 msgstr "Administrator dashboard - New service"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/services/page.tsx:55
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/services/page.tsx:56
 msgid "b3OLH3"
 msgstr "Administrator dashboard - Services"
 
@@ -2856,15 +2952,15 @@ msgstr "Manage all social media in the DARIAH knowledge base."
 msgid "H6B2tI"
 msgstr "social media"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/[id]/edit/page.tsx:21
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/[id]/edit/page.tsx:20
 msgid "QR+o/0"
 msgstr "Administrator dashboard - Edit social media"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/create/page.tsx:19
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/create/page.tsx:17
 msgid "1buf0q"
 msgstr "Administrator dashboard - New social media"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/page.tsx:55
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/page.tsx:56
 msgid "YTttDU"
 msgstr "Administrator dashboard - Social media"
 
@@ -2935,11 +3031,11 @@ msgstr "This email address is already in use."
 msgid "fNr/cy"
 msgstr "User not found."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/[id]/edit/page.tsx:23
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/[id]/edit/page.tsx:20
 msgid "Tcf6SM"
 msgstr "Administrator dashboard - Edit user"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/create/page.tsx:19
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/create/page.tsx:17
 msgid "HnvFle"
 msgstr "Administrator dashboard - New user"
 
@@ -2977,21 +3073,21 @@ msgstr "working group report"
 msgid "SkLFGE"
 msgstr "A report for this working group and campaign already exists."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/[id]/edit/page.tsx:21
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/[id]/edit/page.tsx:20
 msgid "xx3yz6"
 msgstr "Administrator dashboard - Edit working group report"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/create/page.tsx:20
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/create/page.tsx:19
 msgid "Tgg6Jd"
 msgstr "Administrator dashboard - New working group report"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/page.tsx:21
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/page.tsx:20
 msgid "kAusnY"
 msgstr "Administrator dashboard - Working group reports"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-chairs-section.tsx:134
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary.tsx:73
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/data/page.tsx:154
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/data/page.tsx:162
 msgid "3wSbMZ"
 msgstr "Chairs"
 
@@ -3050,7 +3146,7 @@ msgstr "Role type not found."
 msgid "zvGTx9"
 msgstr "This chair relation already exists."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/[slug]/edit/page.tsx:34
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/[slug]/edit/page.tsx:25
 msgid "wJ7cFy"
 msgstr "Administrator dashboard - Edit working group"
 
@@ -3058,7 +3154,7 @@ msgstr "Administrator dashboard - Edit working group"
 msgid "1fQjzd"
 msgstr "Administrator dashboard - Create working group"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/page.tsx:55
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/page.tsx:56
 msgid "8Yb+bu"
 msgstr "Administrator dashboard - Working groups"
 
@@ -3074,6 +3170,11 @@ msgstr "Manage country."
 #: app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/reports/(index)/page.tsx:23
 msgid "CTcvHU"
 msgstr "Country dashboard - Reports"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/reports/(index)/page.tsx:37
+#: app/(app)/[locale]/(dashboard)/dashboard/working-groups/[slug]/reports/(index)/page.tsx:37
+msgid "Ppx673"
+msgstr "Reports"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/countries/[code]/reports/(index)/page.tsx:38
 msgid "6L8Yor"
@@ -3178,10 +3279,6 @@ msgstr "Edit summary"
 msgid "2sRCsy"
 msgstr "Skip to main content"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/reporting-overview-page.tsx:39
-msgid "reFEEC"
-msgstr "Reporting"
-
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/reporting-overview-page.tsx:40
 msgid "BIok98"
 msgstr "View and manage reports."
@@ -3195,6 +3292,31 @@ msgstr "No country or working group reports are available."
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-reports-list-page.tsx:42
 msgid "u++vY3"
 msgstr "No reports found"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/administrator/page.tsx:25
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/page.tsx:20
+msgid "Ul0ZZW"
+msgstr "Dashboard - Reporting"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/administrator/page.tsx:42
+msgid "FMF6tr"
+msgstr "Review and manage all country reports across campaigns."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/administrator/page.tsx:47
+msgid "/P1Hx0"
+msgstr "Review and manage all working group reports across campaigns."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/administrator/page.tsx:52
+msgid "uulRL8"
+msgstr "Configure campaigns, questions, thresholds, and lifecycle settings."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/administrator/page.tsx:62
+msgid "h5jnlS"
+msgstr "Manage reporting operations, campaigns, and report collections."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/administrator/page.tsx:80
+msgid "JfG49w"
+msgstr "Open"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-claimed-contributors-form.tsx:70
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary.tsx:71
@@ -3323,105 +3445,97 @@ msgstr "Publications"
 msgid "XHSoBk"
 msgstr "Report sections"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/confirm/page.tsx:27
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/confirm/page.tsx:25
 msgid "kWoNDD"
 msgstr "Dashboard - Confirm country report"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/confirm/page.tsx:65
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/confirm/page.tsx:68
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/confirm/page.tsx:65
 msgid "X4dRES"
 msgstr "Submit report"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/confirm/page.tsx:72
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/confirm/page.tsx:75
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/confirm/page.tsx:72
 msgid "1Fra7Q"
 msgstr "Accept report"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/confirm/page.tsx:77
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/confirm/page.tsx:80
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/confirm/page.tsx:77
 msgid "96OHmf"
 msgstr "This report has been accepted."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/confirm/page.tsx:86
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/page.tsx:93
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/confirm/page.tsx:89
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/page.tsx:96
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/page.tsx:72
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/confirm/page.tsx:86
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/page.tsx:72
 msgid "JudhTj"
 msgstr "Download JSON"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/contributors/page.tsx:28
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/contributors/page.tsx:27
 msgid "loiFYi"
 msgstr "Dashboard - Country report contributors"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/events/page.tsx:23
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/events/page.tsx:22
 msgid "Msju5A"
 msgstr "Dashboard - Country report events"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/institutions/page.tsx:26
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/institutions/page.tsx:25
 msgid "fAQdRj"
 msgstr "Dashboard - Country report institutions"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/projects/page.tsx:24
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/projects/page.tsx:23
 msgid "9pLpkq"
 msgstr "Dashboard - Country report project contributions"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/publications/page.tsx:18
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/publications/page.tsx:16
 msgid "17EnsP"
 msgstr "Dashboard - Country report publications"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/publications/page.tsx:29
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/publications/page.tsx:27
 msgid "DJLEaf"
 msgstr "Publications from the Zotero library."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/publications/page.tsx:30
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/software/page.tsx:32
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/publications/page.tsx:28
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/software/page.tsx:30
 msgid "gg0DYc"
 msgstr "Coming soon."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/services/page.tsx:27
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/services/page.tsx:26
 msgid "AuqtDx"
 msgstr "Dashboard - Country report service KPIs"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/services/page.tsx:82
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/services/page.tsx:90
 msgid "jK4wIk"
 msgstr "No services linked to this country."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/social-media/page.tsx:27
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/social-media/page.tsx:26
 msgid "pS12FS"
 msgstr "Dashboard - Country report social media KPIs"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/social-media/page.tsx:83
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/social-media/page.tsx:91
 msgid "oRgMqF"
 msgstr "No social media accounts linked to this country."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/software/page.tsx:18
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/software/page.tsx:16
 msgid "ILhv6W"
 msgstr "Dashboard - Country report software"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/software/page.tsx:30
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/edit/software/page.tsx:28
 msgid "t+OI1b"
 msgstr "Software contributions from the SSH Open Marketplace."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/page.tsx:40
-msgid "Af61MF"
-msgstr "Dashboard - {name} country report {year}"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/page.tsx:44
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/page.tsx:29
 msgid "DtXXAf"
 msgstr "Dashboard - Country report"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/page.tsx:81
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/page.tsx:84
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[id]/page.tsx:60
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/page.tsx:60
 msgid "hRUk8G"
 msgstr "Campaign {year}"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/page.tsx:17
 msgid "Jq1X2e"
 msgstr "Dashboard - Country reports"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/page.tsx:19
-msgid "Ul0ZZW"
-msgstr "Dashboard - Reporting"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-events-form.tsx:77
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-events-form.tsx:116
@@ -3457,17 +3571,17 @@ msgid "7X1psl"
 msgstr "No social media accounts linked to this working group."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary.tsx:54
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/data/page.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/data/page.tsx:134
 msgid "1cul9Z"
 msgstr "Working group data"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary.tsx:56
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/data/page.tsx:139
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/data/page.tsx:147
 msgid "gaA2p7"
 msgstr "Number of members"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary.tsx:58
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/data/page.tsx:143
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/data/page.tsx:151
 msgid "KLtrTn"
 msgstr "Mailing list"
 
@@ -3495,31 +3609,27 @@ msgstr "No working group reports are available for your account."
 msgid "+eQkjv"
 msgstr "This account is already listed."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/confirm/page.tsx:27
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/confirm/page.tsx:25
 msgid "r03djZ"
 msgstr "Dashboard - Confirm working group report"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/data/page.tsx:31
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/data/page.tsx:30
 msgid "yK6GuK"
 msgstr "Dashboard - Working group report data"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/events/page.tsx:24
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/events/page.tsx:23
 msgid "OT0X+P"
 msgstr "Dashboard - Working group report events"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/questions/page.tsx:23
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/questions/page.tsx:22
 msgid "EV6OIW"
 msgstr "Dashboard - Working group report questions"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/questions/page.tsx:62
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/questions/page.tsx:70
 msgid "Xzfuic"
 msgstr "No questions have been added for this campaign yet."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/page.tsx:40
-msgid "d82dao"
-msgstr "Dashboard - {name} working group report {year}"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/page.tsx:44
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/page.tsx:29
 msgid "EDjyDk"
 msgstr "Dashboard - Working group report"
 
@@ -3640,17 +3750,6 @@ msgstr "Enter the document or policy details."
 msgid "3uK0Qq"
 msgstr "Select or upload a document."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:144
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:187
-#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:98
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:145
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:141
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx:126
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-form.tsx:141
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form.tsx:145
-msgid "ClikfP"
-msgstr "Add the content."
-
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-create-dialog.tsx:40
 msgid "7NPc78"
 msgstr "Create a new document group."
@@ -3758,16 +3857,6 @@ msgstr "Location"
 msgid "tH9Pij"
 msgstr "Manage all events in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:116
-#: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:124
-#: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:124
-#: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page.tsx:114
-#: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page.tsx:129
-#: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/pages-page.tsx:115
-#: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page.tsx:124
-msgid "xrk6zg"
-msgstr "Updated"
-
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:184
 msgid "bHpXg4"
 msgstr "event"
@@ -3809,8 +3898,8 @@ msgid "jIof1/"
 msgstr "FundingCall"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/[slug]/details/page.tsx:20
-msgid "2Qvh+x"
-msgstr "Website dashboard - FundingCalls details"
+msgid "Soksuy"
+msgstr "Website dashboard - Funding call details"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/[slug]/edit/page.tsx:20
 msgid "8ZMp5q"
@@ -4073,8 +4162,8 @@ msgid "pURhLq"
 msgstr "Enter the opportunity details."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/[slug]/details/page.tsx:20
-msgid "jIaT4P"
-msgstr "Website dashboard - Opportunities details"
+msgid "mhW89h"
+msgstr "Website dashboard - Opportunity details"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/[slug]/edit/page.tsx:20
 msgid "tJFBA0"

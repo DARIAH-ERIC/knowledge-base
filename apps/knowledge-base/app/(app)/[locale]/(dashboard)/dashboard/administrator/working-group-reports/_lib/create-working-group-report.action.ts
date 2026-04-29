@@ -43,6 +43,17 @@ export const createWorkingGroupReportAction = createServerAction(
 
 		const { campaignId, workingGroupId, status } = result.output;
 
+		const campaign = await db.query.reportingCampaigns.findFirst({
+			where: { id: campaignId },
+			columns: { status: true },
+		});
+
+		if (campaign?.status !== "open") {
+			return createActionStateError({
+				message: t("Only open campaigns can be used for new reports."),
+			});
+		}
+
 		const existing = await db.query.workingGroupReports.findFirst({
 			where: { campaignId, workingGroupId },
 			columns: { id: true },
