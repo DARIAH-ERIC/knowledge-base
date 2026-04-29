@@ -194,6 +194,7 @@ export async function getContributionRoleOptions() {
 		.select({
 			roleTypeId: schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.roleTypeId,
 			roleType: schema.personRoleTypes.type,
+			unitType: schema.organisationalUnitTypes.type,
 		})
 		.from(schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations)
 		.innerJoin(
@@ -203,14 +204,30 @@ export async function getContributionRoleOptions() {
 				schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.roleTypeId,
 			),
 		)
-		.orderBy(schema.personRoleTypes.type);
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(
+				schema.organisationalUnitTypes.id,
+				schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.unitTypeId,
+			),
+		)
+		.orderBy(schema.personRoleTypes.type, schema.organisationalUnitTypes.type);
 
-	const uniqueRoleOptions = new Map<string, { roleType: string; roleTypeId: string }>();
+	const uniqueRoleOptions = new Map<
+		string,
+		{ roleType: string; roleTypeId: string; allowedUnitTypes: Array<string> }
+	>();
 
 	for (const row of rows) {
 		if (!uniqueRoleOptions.has(row.roleTypeId)) {
-			uniqueRoleOptions.set(row.roleTypeId, row);
+			uniqueRoleOptions.set(row.roleTypeId, {
+				roleType: row.roleType,
+				roleTypeId: row.roleTypeId,
+				allowedUnitTypes: [],
+			});
 		}
+
+		uniqueRoleOptions.get(row.roleTypeId)?.allowedUnitTypes.push(row.unitType);
 	}
 
 	return Array.from(uniqueRoleOptions.values());
