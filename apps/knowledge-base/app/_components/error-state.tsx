@@ -36,14 +36,14 @@ export function ErrorState(props: Readonly<ErrorStateProps>): ReactNode {
 		<Main className="relative isolate flex min-h-full items-center justify-center overflow-hidden px-6 py-10 sm:px-8">
 			<div
 				aria-hidden={true}
-				className="-translate-x-1/2 absolute top-0 left-1/2 h-80 w-[42rem] rounded-full bg-primary/12 blur-3xl"
+				className="-translate-x-1/2 absolute top-0 left-1/2 h-80 w-2xl rounded-full bg-primary/12 blur-3xl"
 			/>
 			<div
 				aria-hidden={true}
-				className="absolute right-0 bottom-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl"
+				className="absolute right-0 bottom-0 size-72 rounded-full bg-primary/10 blur-3xl"
 			/>
 
-			<section className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] border border-border/70 bg-bg/90 shadow-lg shadow-black/5 backdrop-blur">
+			<section className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] border border-border/70 bg-bg/90 shadow-lg shadow-black/5 backdrop-blur-sm">
 				<div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary/20 via-primary to-primary/20" />
 
 				<div className="grid gap-8 p-8 sm:p-10 lg:grid-cols-[1.2fr_0.8fr] lg:gap-12 lg:p-12">

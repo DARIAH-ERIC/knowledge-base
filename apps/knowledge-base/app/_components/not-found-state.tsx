@@ -20,14 +20,14 @@ export function NotFoundState(props: Readonly<NotFoundStateProps>): ReactNode {
 		<Main className="relative isolate flex min-h-full items-center justify-center overflow-hidden px-6 py-10 sm:px-8">
 			<div
 				aria-hidden={true}
-				className="-translate-x-1/2 absolute top-0 left-1/2 h-80 w-[42rem] rounded-full bg-primary/10 blur-3xl"
+				className="-translate-x-1/2 absolute top-0 left-1/2 h-80 w-2xl rounded-full bg-primary/10 blur-3xl"
 			/>
 			<div
 				aria-hidden={true}
-				className="absolute bottom-0 left-0 h-72 w-72 rounded-full bg-secondary/70 blur-3xl"
+				className="absolute bottom-0 left-0 size-72 rounded-full bg-secondary/70 blur-3xl"
 			/>
 
-			<section className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] border border-border/70 bg-bg/90 shadow-lg shadow-black/5 backdrop-blur">
+			<section className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] border border-border/70 bg-bg/90 shadow-lg shadow-black/5 backdrop-blur-sm">
 				<div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary/10 via-primary/70 to-primary/10" />
 
 				<div className="grid gap-8 p-8 sm:p-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:p-12">
@@ -72,12 +72,12 @@ export function NotFoundState(props: Readonly<NotFoundStateProps>): ReactNode {
 								<div className="absolute inset-0 rounded-full border border-border/60" />
 								<div className="absolute inset-5 rounded-full border border-primary/25" />
 								<div className="absolute inset-12 rounded-full border border-primary/35 bg-primary/6" />
-								<div className="absolute top-1/2 left-1/2 h-28 w-px -translate-x-1/2 -translate-y-1/2 bg-border/80" />
-								<div className="absolute top-1/2 left-1/2 h-px w-28 -translate-x-1/2 -translate-y-1/2 bg-border/80" />
-								<div className="absolute top-1/2 left-1/2 size-16 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/40 bg-bg/95 shadow-lg shadow-black/5" />
-								<div className="absolute top-1/2 left-1/2 size-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary" />
+								<div className="absolute top-1/2 left-1/2 h-28 w-px -translate-1/2 bg-border/80" />
+								<div className="absolute top-1/2 left-1/2 h-px w-28 -translate-1/2 bg-border/80" />
+								<div className="absolute top-1/2 left-1/2 size-16 -translate-1/2 rounded-full border border-primary/40 bg-bg/95 shadow-lg shadow-black/5" />
+								<div className="absolute top-1/2 left-1/2 size-5 -translate-1/2 rounded-full bg-primary" />
 								<div className="absolute top-10 right-12 rounded-full border border-border/70 bg-bg/90 px-3 py-1 font-medium text-muted-fg text-xs uppercase tracking-[0.2em]">
-									404
+									{"404"}
 								</div>
 							</div>
 						</div>
