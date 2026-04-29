@@ -78,7 +78,7 @@ const plugins: Array<(config: Config) => Config> = [
 				precompile: true,
 			},
 			// The app imports the published ui bundle, so the extractor needs to scan it too.
-			srcPath: ["./app", "./components", "./lib", "../../packages/ui/dist"],
+			srcPath: ["./app", "./components", "./lib", "../../packages/ui/lib"],
 		},
 		requestConfig: "./lib/i18n/request.ts",
 	}),
