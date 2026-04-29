@@ -39,6 +39,20 @@ export const ReportingCampaignInsertSchema = createInsertSchema(reportingCampaig
 export const ReportingCampaignUpdateSchema = createUpdateSchema(reportingCampaigns);
 
 export const reportStatusEnum = ["draft", "submitted", "accepted"] as const;
+export const reportScreenCommentTypeEnum = ["country", "working_group"] as const;
+export const reportScreenCommentKeyEnum = [
+	"institutions",
+	"contributors",
+	"events",
+	"social-media",
+	"services",
+	"software",
+	"publications",
+	"projects",
+	"data",
+	"questions",
+	"confirm",
+] as const;
 
 export const countryReports = p.pgTable(
 	"country_reports",
@@ -118,6 +132,40 @@ export type WorkingGroupReportInput = typeof workingGroupReports.$inferInsert;
 export const WorkingGroupReportSelectSchema = createSelectSchema(workingGroupReports);
 export const WorkingGroupReportInsertSchema = createInsertSchema(workingGroupReports);
 export const WorkingGroupReportUpdateSchema = createUpdateSchema(workingGroupReports);
+
+export const reportScreenComments = p.pgTable(
+	"report_screen_comments",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		reportType: p.text("report_type", { enum: reportScreenCommentTypeEnum }).notNull(),
+		reportId: p.uuid("report_id").notNull(),
+		screenKey: p.text("screen_key", { enum: reportScreenCommentKeyEnum }).notNull(),
+		comment: p.jsonb("comment").$type<JSONContent>(),
+		...f.timestamps(),
+	},
+	(t) => {
+		return [
+			p
+				.unique("report_screen_comments_report_type_report_id_screen_key_unique")
+				.on(t.reportType, t.reportId, t.screenKey),
+			p.check(
+				"report_screen_comments_report_type_enum_check",
+				inArray(t.reportType, reportScreenCommentTypeEnum),
+			),
+			p.check(
+				"report_screen_comments_screen_key_enum_check",
+				inArray(t.screenKey, reportScreenCommentKeyEnum),
+			),
+		];
+	},
+);
+
+export type ReportScreenComment = typeof reportScreenComments.$inferSelect;
+export type ReportScreenCommentInput = typeof reportScreenComments.$inferInsert;
+
+export const ReportScreenCommentSelectSchema = createSelectSchema(reportScreenComments);
+export const ReportScreenCommentInsertSchema = createInsertSchema(reportScreenComments);
+export const ReportScreenCommentUpdateSchema = createUpdateSchema(reportScreenComments);
 
 export const countryReportContributions = p.pgTable(
 	"country_report_contributions",

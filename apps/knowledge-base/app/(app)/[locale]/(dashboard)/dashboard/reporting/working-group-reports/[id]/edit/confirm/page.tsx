@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { WorkingGroupReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary";
 import { confirmWorkingGroupReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/confirm-working-group-report.action";
 import { getWorkingGroupReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
@@ -89,6 +90,12 @@ export default async function DashboardReportingWorkingGroupReportConfirmPage(
 					</ButtonLink>
 				</div>
 			</div>
+
+			<ReportScreenCommentSection
+				reportId={report.id}
+				reportType="working_group"
+				screenKey="confirm"
+			/>
 		</div>
 	);
 }

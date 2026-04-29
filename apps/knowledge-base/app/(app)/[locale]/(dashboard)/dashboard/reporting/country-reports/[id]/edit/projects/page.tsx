@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { CountryReportProjectsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form";
 import { createCountryReportProjectContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-project-contribution.action";
 import { deleteCountryReportProjectContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/delete-country-report-project-contribution.action";
@@ -67,11 +68,15 @@ export default async function DashboardReportingCountryReportProjectsPage(
 	}
 
 	return (
-		<CountryReportProjectsForm
-			addAction={createCountryReportProjectContributionAction}
-			allProjects={allProjects}
-			deleteAction={deleteCountryReportProjectContributionAction}
-			report={report}
-		/>
+		<div className="flex flex-col gap-y-12">
+			<CountryReportProjectsForm
+				addAction={createCountryReportProjectContributionAction}
+				allProjects={allProjects}
+				deleteAction={deleteCountryReportProjectContributionAction}
+				report={report}
+			/>
+
+			<ReportScreenCommentSection reportId={report.id} reportType="country" screenKey="projects" />
+		</div>
 	);
 }

@@ -33,7 +33,14 @@ import { deleteReportingCampaignAction } from "@/app/(app)/[locale]/(dashboard)/
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface ReportingCampaignsPageProps {
-	campaigns: Promise<Array<Pick<schema.ReportingCampaign, "id" | "year" | "status">>>;
+	campaigns: Promise<
+		Array<
+			Pick<schema.ReportingCampaign, "id" | "year" | "status"> & {
+				hasReports: boolean;
+				reportCount: number;
+			}
+		>
+	>;
 }
 
 export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPageProps>): ReactNode {
@@ -80,6 +87,7 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 				<TableHeader>
 					<TableColumn isRowHeader={true}>{t("Year")}</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
+					<TableColumn>{t("Reports")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={campaigns}>
@@ -88,6 +96,7 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 							<TableRow id={item.id}>
 								<TableCell>{item.year}</TableCell>
 								<TableCell>{item.status}</TableCell>
+								<TableCell>{item.reportCount}</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button
@@ -108,6 +117,7 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 											<MenuSeparator />
 											<MenuItem
 												intent="danger"
+												isDisabled={item.hasReports}
 												onAction={() => {
 													setItemToDelete({ id: item.id });
 												}}

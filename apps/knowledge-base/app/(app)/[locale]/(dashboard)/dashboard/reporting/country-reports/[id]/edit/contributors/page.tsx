@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { CountryReportClaimedContributorsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-claimed-contributors-form";
 import { CountryReportContributorsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-contributors-form";
 import { createCountryReportContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-contribution.action";
@@ -144,6 +145,12 @@ export default async function DashboardReportingCountryReportContributorsPage(
 			<CountryReportContributorsForm
 				formAction={updateCountryReportContributorsAction}
 				report={report}
+			/>
+
+			<ReportScreenCommentSection
+				reportId={report.id}
+				reportType="country"
+				screenKey="contributors"
 			/>
 		</div>
 	);

@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { WorkingGroupReportSocialMediaForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form";
 import { createWorkingGroupReportSocialMediaAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/create-working-group-report-social-media.action";
 import { deleteWorkingGroupReportSocialMediaAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/delete-working-group-report-social-media.action";
@@ -181,6 +182,12 @@ export default async function DashboardReportingWorkingGroupReportDataPage(
 					id: report.id,
 					socialMedia: report.socialMedia,
 				}}
+			/>
+
+			<ReportScreenCommentSection
+				reportId={report.id}
+				reportType="working_group"
+				screenKey="data"
 			/>
 		</div>
 	);
