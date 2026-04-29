@@ -93,9 +93,9 @@ RUN pnpm deploy --filter @dariah-eric/api --config.inject-workspace-packages=tru
 FROM base AS api
 USER node
 WORKDIR /app
-COPY --from=api-build /out/node_modules/ /app/node_modules/
-COPY --from=api-build /out/public/ /app/public/
-COPY --from=api-build /out/dist/ /app/dist/
+COPY --chown=node:node --from=api-build /out/node_modules/ /app/node_modules/
+COPY --chown=node:node --from=api-build /out/public/ /app/public/
+COPY --chown=node:node --from=api-build /out/dist/ /app/dist/
 ENV NODE_ENV=production
 EXPOSE 3000
 CMD [ "node", "./dist/index.mjs" ]
@@ -192,9 +192,9 @@ FROM base AS app
 USER node
 WORKDIR /app
 # `.next/standalone` is self-contained (includes its own `node_modules`)
-COPY --from=app-build /app/apps/knowledge-base/.next/standalone/ /app/
-COPY --from=app-build /app/apps/knowledge-base/.next/static/ /app/apps/knowledge-base/.next/static/
-COPY --from=app-build /app/apps/knowledge-base/public/ /app/apps/knowledge-base/public/
+COPY --chown=node:node --from=app-build /app/apps/knowledge-base/.next/standalone/ /app/
+COPY --chown=node:node --from=app-build /app/apps/knowledge-base/.next/static/ /app/apps/knowledge-base/.next/static/
+COPY --chown=node:node --from=app-build /app/apps/knowledge-base/public/ /app/apps/knowledge-base/public/
 ENV NODE_ENV=production
 EXPOSE 3000
 CMD [ "node", "./apps/knowledge-base/server.js" ]
