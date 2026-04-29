@@ -151,7 +151,7 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: workingGroup.slug,
-					statusId: statusByType.draft.id,
+					statusId: statusByType.published.id,
 					typeId: typesByType.organisational_units.id,
 					createdAt: new Date(workingGroup.createdAt),
 					updatedAt: new Date(workingGroup.updatedAt),
@@ -280,7 +280,7 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: slugify(country.name),
-					statusId: statusByType.draft.id,
+					statusId: statusByType.published.id,
 					typeId: typesByType.organisational_units.id,
 					createdAt: new Date(country.createdAt),
 					updatedAt: new Date(country.updatedAt),
@@ -322,7 +322,7 @@ async function main() {
 					.insert(schema.entities)
 					.values({
 						slug: slugify(country.consortiumName ?? `Consortium ${country.name}`),
-						statusId: statusByType.draft.id,
+						statusId: statusByType.published.id,
 						typeId: typesByType.organisational_units.id,
 						createdAt: new Date(country.createdAt),
 						updatedAt: new Date(country.updatedAt),
@@ -705,7 +705,7 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: slugify(person.name),
-					statusId: statusByType.draft.id,
+					statusId: statusByType.published.id,
 					typeId: typesByType.persons.id,
 					createdAt: new Date(person.createdAt),
 					updatedAt: new Date(person.updatedAt),
