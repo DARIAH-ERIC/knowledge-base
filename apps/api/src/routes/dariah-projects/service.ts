@@ -4,6 +4,7 @@ import { and, count, eq, not, sql } from "@/services/db/sql";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
@@ -303,6 +304,11 @@ export async function getDariahProjectById(
 		return null;
 	}
 
+	const [relatedEntities, relatedResources] = await Promise.all([
+		getRelatedEntities(db, id),
+		getRelatedResources(db, id),
+	]);
+
 	const { projectsToOrganisationalUnits, ...rest } = item;
 
 	const participants = projectsToOrganisationalUnits
@@ -338,6 +344,8 @@ export async function getDariahProjectById(
 		...fields,
 		participants,
 		coordinators,
+		relatedEntities,
+		relatedResources,
 	};
 }
 
@@ -508,7 +516,11 @@ export async function getDariahProjectBySlug(
 		return null;
 	}
 
-	const fields = await getContentBlocks(db, item.id);
+	const [fields, relatedEntities, relatedResources] = await Promise.all([
+		getContentBlocks(db, item.id),
+		getRelatedEntities(db, item.id),
+		getRelatedResources(db, item.id),
+	]);
 
 	const { projectsToOrganisationalUnits, ...rest } = item;
 
@@ -545,5 +557,7 @@ export async function getDariahProjectBySlug(
 		...fields,
 		participants,
 		coordinators,
+		relatedEntities,
+		relatedResources,
 	};
 }
