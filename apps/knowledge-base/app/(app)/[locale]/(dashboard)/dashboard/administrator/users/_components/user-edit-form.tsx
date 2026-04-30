@@ -9,14 +9,16 @@ import { UserForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrat
 import { updateUserAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/update-user.action";
 
 interface UserEditFormProps {
+	canCurrentUserManageAdmins: boolean;
 	user: Pick<schema.User, "id" | "name" | "email" | "role"> & {
+		canManageAdmins: boolean;
 		person: { id: string; name: string } | null;
 		organisationalUnit: { id: string; name: string } | null;
 	};
 }
 
 export function UserEditForm(props: Readonly<UserEditFormProps>): ReactNode {
-	const { user } = props;
+	const { canCurrentUserManageAdmins, user } = props;
 
 	const t = useExtracted();
 
@@ -24,7 +26,11 @@ export function UserEditForm(props: Readonly<UserEditFormProps>): ReactNode {
 		<Fragment>
 			<Heading>{t("Edit user")}</Heading>
 
-			<UserForm formAction={updateUserAction} user={user} />
+			<UserForm
+				canCurrentUserManageAdmins={canCurrentUserManageAdmins}
+				formAction={updateUserAction}
+				user={user}
+			/>
 		</Fragment>
 	);
 }

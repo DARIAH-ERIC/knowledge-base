@@ -7,6 +7,7 @@
 		"add:package": "turbo generate package",
 		"build": "turbo run build",
 		"data:ingest": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"ingest\" run data:ingest",
+		"data:seed:users:admin": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"seed\" run data:seed:users:admin",
 		"migration:get-unr-schema": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --q -filter \"data-migration\" run get-unr-schema",
 		"migration:migrate-unr-data": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"data-migration\" run migrate-unr-data",
 		"migration:migrate-website-data": "dotenvx run -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"data-migration\" run migrate",

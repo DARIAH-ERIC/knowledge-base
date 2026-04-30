@@ -1,0 +1,28 @@
+{
+	"name": "@dariah-eric/seed",
+	"private": true,
+	"license": "MIT",
+	"type": "module",
+	"sideEffects": false,
+	"scripts": {
+		"data:seed:users:admin": "tsx ./scripts/create-initial-admin-user.ts",
+		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
+		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
+		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
+		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
+		"types:check": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@acdh-oeaw/lib": "catalog:",
+		"@dariah-eric/auth": "workspace:^",
+		"@dariah-eric/configs": "workspace:^",
+		"@dariah-eric/database": "workspace:^",
+		"@dariah-eric/env": "workspace:^",
+		"@types/node": "catalog:",
+		"eslint": "catalog:",
+		"prettier": "catalog:",
+		"tsx": "catalog:",
+		"typescript": "catalog:",
+		"valibot": "catalog:"
+	}
+}
