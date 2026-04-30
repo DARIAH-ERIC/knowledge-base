@@ -36,6 +36,16 @@ export default async function DashboardReportingAdministratorPage(
 
 	const items = [
 		{
+			href: "/dashboard/administrator/reporting-campaigns",
+			title: t("Reporting campaigns"),
+			description: t("Configure campaigns, questions, thresholds, and lifecycle settings."),
+		},
+		{
+			href: "/dashboard/administrator/reporting-statistics",
+			title: t("Statistics"),
+			description: t("View reporting statistics and summary metrics across campaigns."),
+		},
+		{
 			href: "/dashboard/administrator/country-reports",
 			title: t("Country reports"),
 			description: t("Review and manage all country reports across campaigns."),
@@ -44,11 +54,6 @@ export default async function DashboardReportingAdministratorPage(
 			href: "/dashboard/administrator/working-group-reports",
 			title: t("Working group reports"),
 			description: t("Review and manage all working group reports across campaigns."),
-		},
-		{
-			href: "/dashboard/administrator/reporting-campaigns",
-			title: t("Reporting campaigns"),
-			description: t("Configure campaigns, questions, thresholds, and lifecycle settings."),
 		},
 	];
 
@@ -63,7 +68,7 @@ export default async function DashboardReportingAdministratorPage(
 				</HeaderContent>
 			</Header>
 
-			<div className="grid gap-4 px-(--layout-padding) md:grid-cols-3">
+			<div className="grid gap-4 px-(--layout-padding) pt-2 md:grid-cols-4">
 				{items.map((item) => {
 					return (
 						<section

@@ -8,6 +8,8 @@ import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getOrganisationalUnitEditDataForAdmin } from "@/lib/data/admin-organisational-units";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { getContributionPersonOptions } from "@/lib/data/contributions";
+import { getPersonRelationRoleOptions, getPersonRelations } from "@/lib/data/person-relations";
 import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -61,6 +63,16 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 		unitRelationStatusOptions,
 	} = governanceBodyData;
 
+	const [
+		{ items: initialPersonItems, total: initialPersonTotal },
+		personRelations,
+		personRelationRoleOptions,
+	] = await Promise.all([
+		getContributionPersonOptions(),
+		getPersonRelations(governanceBody.id),
+		getPersonRelationRoleOptions("governance_body"),
+	]);
+
 	const image =
 		governanceBody.image != null
 			? {
@@ -76,12 +88,16 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 		<GovernanceBodyEditForm
 			governanceBody={{ ...governanceBody, image }}
 			initialAssets={initialAssets}
+			initialPersonItems={initialPersonItems}
+			initialPersonTotal={initialPersonTotal}
 			initialRelatedEntityIds={relatedEntityIds}
 			initialRelatedEntityItems={initialRelatedEntities.items}
 			initialRelatedEntityTotal={initialRelatedEntities.total}
 			initialRelatedResourceIds={relatedResourceIds}
 			initialRelatedResourceItems={initialRelatedResources.items}
 			initialRelatedResourceTotal={initialRelatedResources.total}
+			personRelationRoleOptions={personRelationRoleOptions}
+			personRelations={personRelations}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}
