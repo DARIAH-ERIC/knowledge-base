@@ -2174,6 +2174,9 @@ importers:
       '@dariah-eric/env':
         specifier: workspace:^
         version: link:../../packages/env
+      '@dariah-eric/search':
+        specifier: workspace:^
+        version: link:../../packages/search
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.0

@@ -5,6 +5,7 @@
 	"type": "module",
 	"sideEffects": false,
 	"scripts": {
+		"data:seed:kitchen-sink": "tsx ./scripts/create-kitchen-sink-entities.ts",
 		"data:seed:users:admin": "tsx ./scripts/create-initial-admin-user.ts",
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
 		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
@@ -18,6 +19,7 @@
 		"@dariah-eric/configs": "workspace:^",
 		"@dariah-eric/database": "workspace:^",
 		"@dariah-eric/env": "workspace:^",
+		"@dariah-eric/search": "workspace:^",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
 		"prettier": "catalog:",

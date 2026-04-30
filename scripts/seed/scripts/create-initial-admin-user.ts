@@ -1,4 +1,4 @@
-import { log } from "@acdh-oeaw/lib";
+import { assert, log } from "@acdh-oeaw/lib";
 import { createUserWithPassword } from "@dariah-eric/auth";
 import { createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
@@ -33,6 +33,10 @@ async function main(): Promise<void> {
 		const email = env.ADMIN_EMAIL;
 		const name = env.ADMIN_NAME;
 		const password = env.ADMIN_PASSWORD;
+
+		assert(email, "Missing ADMIN_EMAIL environment variable.");
+		assert(name, "Missing ADMIN_NAME environment variable.");
+		assert(password, "Missing ADMIN_PASSWORD environment variable.");
 
 		const existingUser = await db.query.users.findFirst({
 			where: { email },
