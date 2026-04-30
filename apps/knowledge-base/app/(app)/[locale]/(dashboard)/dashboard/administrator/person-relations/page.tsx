@@ -2,9 +2,9 @@ import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
-import { InstitutionsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page";
+import { ContributionsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getInstitutionsForAdmin } from "@/lib/data/institutions";
+import { getContributionsForAdmin } from "@/lib/data/contributions";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -14,11 +14,18 @@ import {
 	type ListSortDirection,
 } from "@/lib/server/list-search-params";
 
-interface DashboardAdministratorInstitutionsPageProps extends PageProps<"/[locale]/dashboard/administrator/institutions"> {}
+interface DashboardAdministratorPersonRelationsPageProps extends PageProps<"/[locale]/dashboard/administrator/person-relations"> {}
 
-const pageSize = 10;
-const defaultSort = "name" as const;
-const validSorts = ["name"] as const;
+const pageSize = 20;
+const defaultSort = "personName" as const;
+const validSorts = [
+	"personName",
+	"roleType",
+	"organisationalUnitType",
+	"organisationalUnitName",
+	"durationStart",
+	"durationEnd",
+] as const;
 
 function createListHref(
 	q: string,
@@ -36,7 +43,6 @@ function createListHref(
 		searchParams.set("page", String(page));
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 	if (sort !== defaultSort || dir !== "asc") {
 		searchParams.set("sort", sort);
 		searchParams.set("dir", dir);
@@ -44,24 +50,24 @@ function createListHref(
 
 	const query = searchParams.toString();
 
-	return `/dashboard/administrator/institutions${query !== "" ? `?${query}` : ""}`;
+	return `/dashboard/administrator/person-relations${query !== "" ? `?${query}` : ""}`;
 }
 
 export async function generateMetadata(
-	_props: Readonly<DashboardAdministratorInstitutionsPageProps>,
+	_props: Readonly<DashboardAdministratorPersonRelationsPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Administrator dashboard - Institutions"),
+		title: t("Administrator dashboard - Person relations"),
 	});
 
 	return metadata;
 }
 
-export default async function DashboardAdministratorInstitutionsPage(
-	props: Readonly<DashboardAdministratorInstitutionsPageProps>,
+export default async function DashboardAdministratorPersonRelationsPage(
+	props: Readonly<DashboardAdministratorPersonRelationsPageProps>,
 ): Promise<ReactNode> {
 	const { params, searchParams } = props;
 	const [{ locale }, rawSearchParams] = await Promise.all([params, searchParams]);
@@ -72,18 +78,20 @@ export default async function DashboardAdministratorInstitutionsPage(
 		validSorts,
 	});
 	const { user } = await assertAuthenticated();
-	const institutions = await getInstitutionsForAdmin(user, {
+	const contributions = await getContributionsForAdmin(user, {
 		limit: pageSize,
 		offset: (page - 1) * pageSize,
 		q,
 		sort,
 		dir,
 	});
-	const totalPages = Math.max(Math.ceil(institutions.total / pageSize), 1);
+	const totalPages = Math.max(Math.ceil(contributions.total / pageSize), 1);
 
 	if (page > totalPages) {
 		redirect({ href: createListHref(q, totalPages, sort, dir), locale: locale as IntlLocale });
 	}
 
-	return <InstitutionsPage dir={dir} institutions={institutions} page={page} q={q} sort={sort} />;
+	return (
+		<ContributionsPage contributions={contributions} dir={dir} page={page} q={q} sort={sort} />
+	);
 }

@@ -2,9 +2,9 @@ import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
-import { ContributionsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page";
+import { InstitutionRelationsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getContributionsForAdmin } from "@/lib/data/contributions";
+import { getInstitutionRelationsForAdmin } from "@/lib/data/institution-relations";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -14,15 +14,15 @@ import {
 	type ListSortDirection,
 } from "@/lib/server/list-search-params";
 
-interface DashboardAdministratorContributionsPageProps extends PageProps<"/[locale]/dashboard/administrator/contributions"> {}
+interface DashboardAdministratorInstitutionRelationsPageProps extends PageProps<"/[locale]/dashboard/administrator/institution-relations"> {}
 
 const pageSize = 20;
-const defaultSort = "personName" as const;
+const defaultSort = "institutionName" as const;
 const validSorts = [
-	"personName",
-	"roleType",
-	"organisationalUnitType",
-	"organisationalUnitName",
+	"institutionName",
+	"statusType",
+	"relatedUnitName",
+	"relatedUnitType",
 	"durationStart",
 	"durationEnd",
 ] as const;
@@ -50,24 +50,24 @@ function createListHref(
 
 	const query = searchParams.toString();
 
-	return `/dashboard/administrator/contributions${query !== "" ? `?${query}` : ""}`;
+	return `/dashboard/administrator/institution-relations${query !== "" ? `?${query}` : ""}`;
 }
 
 export async function generateMetadata(
-	_props: Readonly<DashboardAdministratorContributionsPageProps>,
+	_props: Readonly<DashboardAdministratorInstitutionRelationsPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Administrator dashboard - Contributions"),
+		title: t("Administrator dashboard - Institution relations"),
 	});
 
 	return metadata;
 }
 
-export default async function DashboardAdministratorContributionsPage(
-	props: Readonly<DashboardAdministratorContributionsPageProps>,
+export default async function DashboardAdministratorInstitutionRelationsPage(
+	props: Readonly<DashboardAdministratorInstitutionRelationsPageProps>,
 ): Promise<ReactNode> {
 	const { params, searchParams } = props;
 	const [{ locale }, rawSearchParams] = await Promise.all([params, searchParams]);
@@ -78,20 +78,26 @@ export default async function DashboardAdministratorContributionsPage(
 		validSorts,
 	});
 	const { user } = await assertAuthenticated();
-	const contributions = await getContributionsForAdmin(user, {
+	const institutionRelations = await getInstitutionRelationsForAdmin(user, {
 		limit: pageSize,
 		offset: (page - 1) * pageSize,
 		q,
 		sort,
 		dir,
 	});
-	const totalPages = Math.max(Math.ceil(contributions.total / pageSize), 1);
+	const totalPages = Math.max(Math.ceil(institutionRelations.total / pageSize), 1);
 
 	if (page > totalPages) {
 		redirect({ href: createListHref(q, totalPages, sort, dir), locale: locale as IntlLocale });
 	}
 
 	return (
-		<ContributionsPage contributions={contributions} dir={dir} page={page} q={q} sort={sort} />
+		<InstitutionRelationsPage
+			dir={dir}
+			institutionRelations={institutionRelations}
+			page={page}
+			q={q}
+			sort={sort}
+		/>
 	);
 }

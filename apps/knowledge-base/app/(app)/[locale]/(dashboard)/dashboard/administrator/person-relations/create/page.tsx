@@ -6,23 +6,23 @@ import { ContributionCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboa
 import { getContributionPersonOptions, getContributionRoleOptions } from "@/lib/data/contributions";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorCreateContributionPageProps extends PageProps<"/[locale]/dashboard/administrator/contributions/create"> {}
+interface DashboardAdministratorCreatePersonRelationPageProps extends PageProps<"/[locale]/dashboard/administrator/person-relations/create"> {}
 
 export async function generateMetadata(
-	_props: Readonly<DashboardAdministratorCreateContributionPageProps>,
+	_props: Readonly<DashboardAdministratorCreatePersonRelationPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Administrator dashboard - Create contribution"),
+		title: t("Administrator dashboard - Create person relation"),
 	});
 
 	return metadata;
 }
 
-export default async function DashboardAdministratorCreateContributionPage(
-	_props: Readonly<DashboardAdministratorCreateContributionPageProps>,
+export default async function DashboardAdministratorCreatePersonRelationPage(
+	_props: Readonly<DashboardAdministratorCreatePersonRelationPageProps>,
 ): Promise<ReactNode> {
 	const [roleOptions, { items: initialPersons, total: initialPersonsTotal }] = await Promise.all([
 		getContributionRoleOptions(),
