@@ -132,7 +132,7 @@ export async function createSpotlightArticle(params: CreateSpotlightArticleParam
 		columns: {
 			id: true,
 		},
-		where: { type: "draft" },
+		where: { type: "published" },
 	});
 
 	if (entityStatus == null) {

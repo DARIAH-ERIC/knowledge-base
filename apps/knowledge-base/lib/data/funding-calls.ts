@@ -122,7 +122,7 @@ export async function createFundingCall(params: CreateFundingCallParams) {
 		columns: {
 			id: true,
 		},
-		where: { type: "draft" },
+		where: { type: "published" },
 	});
 
 	if (entityStatus == null) {

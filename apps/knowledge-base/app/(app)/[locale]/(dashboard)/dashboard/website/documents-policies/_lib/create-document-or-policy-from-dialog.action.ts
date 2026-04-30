@@ -65,7 +65,7 @@ export const createDocumentOrPolicyFromDialogAction = createServerAction(
 			assert(type);
 
 			const status = await tx.query.entityStatus.findFirst({
-				where: { type: "draft" },
+				where: { type: "published" },
 				columns: { id: true },
 			});
 

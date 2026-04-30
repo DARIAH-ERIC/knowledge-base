@@ -180,7 +180,7 @@ export async function createOrganisationalUnit(params: CreateOrganisationalUnitP
 		columns: {
 			id: true,
 		},
-		where: { type: "draft" },
+		where: { type: "published" },
 	});
 
 	if (entityStatus == null) {

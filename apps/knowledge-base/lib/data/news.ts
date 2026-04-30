@@ -131,7 +131,7 @@ export async function createNewsItem(params: CreateNewsItemParams) {
 		columns: {
 			id: true,
 		},
-		where: { type: "draft" },
+		where: { type: "published" },
 	});
 
 	if (entityStatus == null) {

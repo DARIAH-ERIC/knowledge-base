@@ -133,7 +133,7 @@ export async function createPage(params: CreatePageParams) {
 		columns: {
 			id: true,
 		},
-		where: { type: "draft" },
+		where: { type: "published" },
 	});
 
 	if (entityStatus == null) {

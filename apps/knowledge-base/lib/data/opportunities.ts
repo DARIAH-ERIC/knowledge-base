@@ -139,7 +139,7 @@ export async function createOpportunity(params: CreateOpportunityParams) {
 		columns: {
 			id: true,
 		},
-		where: { type: "draft" },
+		where: { type: "published" },
 	});
 
 	if (entityStatus == null) {
