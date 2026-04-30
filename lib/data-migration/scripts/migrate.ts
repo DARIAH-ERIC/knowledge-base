@@ -1251,7 +1251,7 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: page.slug,
-					statusId: statusByType.draft.id,
+					statusId: statusByType.published.id,
 					typeId: typesByType.pages.id,
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),
