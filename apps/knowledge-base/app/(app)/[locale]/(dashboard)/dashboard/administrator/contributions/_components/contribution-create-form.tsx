@@ -21,7 +21,7 @@ export function ContributionCreateForm(props: Readonly<ContributionCreateFormPro
 
 	return (
 		<Fragment>
-			<Heading>{t("New contribution")}</Heading>
+			<Heading>{t("New person relation")}</Heading>
 
 			<ContributionForm
 				description={t("Create a new person-to-organisation relation.")}

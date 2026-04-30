@@ -127,7 +127,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 		<Fragment>
 			<Header>
 				<HeaderContent>
-					<HeaderTitle>{t("Contributions")}</HeaderTitle>
+					<HeaderTitle>{t("Person relations")}</HeaderTitle>
 					<HeaderDescription>
 						{t("All person-to-organisation relations in the DARIAH knowledge base.")}
 					</HeaderDescription>
@@ -138,7 +138,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 					</SearchField>
 					<Link
 						className={buttonStyles({ intent: "secondary" })}
-						href="/dashboard/administrator/contributions/create"
+						href="/dashboard/administrator/person-relations/create"
 					>
 						<PlusIcon className="mr-2 size-4" />
 						{t("New")}
@@ -202,7 +202,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 											<EllipsisHorizontalIcon className="size-5" />
 										</Button>
 										<MenuContent placement="left top">
-											<MenuItem href={`/dashboard/administrator/contributions/${item.id}/edit`}>
+											<MenuItem href={`/dashboard/administrator/person-relations/${item.id}/edit`}>
 												<PencilSquareIcon className="mr-2 size-4" />
 												<MenuLabel>{t("Edit")}</MenuLabel>
 											</MenuItem>
@@ -235,7 +235,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 
 			<DeleteModal
 				isOpen={itemToDelete != null}
-				model={t("contribution")}
+				model={t("person relation")}
 				onAction={() => {
 					if (itemToDelete == null) {
 						return;

@@ -1,5 +1,6 @@
 import { parseArgs } from "node:util";
 
+import { log } from "@acdh-oeaw/lib";
 import { request } from "@dariah-eric/request";
 
 import { env } from "@/config/env.config";
@@ -100,7 +101,7 @@ async function main(): Promise<void> {
 		throw result.error;
 	}
 
-	console.log(JSON.stringify(result.value.data, null, 2));
+	log.info(JSON.stringify(result.value.data, null, 2));
 }
 
 main().catch((error: unknown) => {

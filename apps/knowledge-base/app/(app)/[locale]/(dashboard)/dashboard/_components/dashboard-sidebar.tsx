@@ -52,9 +52,15 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 				icon: <ListBulletIcon />,
 			},
 			{
-				href: "/dashboard/administrator/contributions",
-				tooltip: t("Contributions"),
-				label: t("Contributions"),
+				href: "/dashboard/administrator/person-relations",
+				tooltip: t("Person relations"),
+				label: t("Person relations"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/institution-relations",
+				tooltip: t("Institution relations"),
+				label: t("Institution relations"),
 				icon: <ListBulletIcon />,
 			},
 			{

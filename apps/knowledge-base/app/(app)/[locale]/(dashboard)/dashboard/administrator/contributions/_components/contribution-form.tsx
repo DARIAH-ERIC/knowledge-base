@@ -97,7 +97,7 @@ export function ContributionForm(props: Readonly<ContributionFormProps>): ReactN
 			return;
 		}
 
-		router.push("/dashboard/administrator/contributions");
+		router.push("/dashboard/administrator/person-relations");
 		router.refresh();
 	}, [router, state]);
 
