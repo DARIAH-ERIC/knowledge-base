@@ -1,7 +1,7 @@
 import { assert, keyBy, log } from "@acdh-oeaw/lib";
 import { createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
-import { createStorageService } from "@dariah-eric/storage";
+import { type AssetMetadata, createStorageService } from "@dariah-eric/storage";
 import { buffer } from "@dariah-eric/storage/lib";
 import slugify from "@sindresorhus/slugify";
 import { generateJSON } from "@tiptap/html";
@@ -9,7 +9,6 @@ import { StarterKit } from "@tiptap/starter-kit";
 import { eq, ilike } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 
-import type { AssetMetadata } from "../../../packages/storage/lib";
 import { placeholderImageUrl } from "../config/data-migration.config";
 import { env } from "../config/env.config";
 import {
@@ -504,16 +503,16 @@ async function main() {
 
 				institutionTypes =
 					institutionTypes.includes("partner_institution") &&
-					institutionTypes.some((t) => {
-						return [
-							"national_coordinating_institution",
-							"national_representative_institution",
-							"cooperating_partner",
-						].includes(t);
-					})
+						institutionTypes.some((t) => {
+							return [
+								"national_coordinating_institution",
+								"national_representative_institution",
+								"cooperating_partner",
+							].includes(t);
+						})
 						? institutionTypes.filter((t) => {
-								return t !== "partner_institution";
-							})
+							return t !== "partner_institution";
+						})
 						: institutionTypes;
 
 				for (const type of institutionTypes) {

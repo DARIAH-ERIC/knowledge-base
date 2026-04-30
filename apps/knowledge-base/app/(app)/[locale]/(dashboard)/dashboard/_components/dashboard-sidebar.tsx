@@ -52,18 +52,6 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 				icon: <ListBulletIcon />,
 			},
 			{
-				href: "/dashboard/administrator/person-relations",
-				tooltip: t("Person relations"),
-				label: t("Person relations"),
-				icon: <ListBulletIcon />,
-			},
-			{
-				href: "/dashboard/administrator/institution-relations",
-				tooltip: t("Institution relations"),
-				label: t("Institution relations"),
-				icon: <ListBulletIcon />,
-			},
-			{
 				href: "/dashboard/administrator/countries",
 				tooltip: t("Countries"),
 				label: t("Countries"),
@@ -88,6 +76,12 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 				icon: <ListBulletIcon />,
 			},
 			{
+				href: "/dashboard/administrator/institution-relations",
+				tooltip: t("Institution relations"),
+				label: t("Institution relations"),
+				icon: <ListBulletIcon />,
+			},
+			{
 				href: "/dashboard/administrator/national-consortia",
 				tooltip: t("National consortia"),
 				label: t("National consortia"),
@@ -103,6 +97,12 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 				href: "/dashboard/administrator/persons",
 				tooltip: t("Persons"),
 				label: t("Persons"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/person-relations",
+				tooltip: t("Person relations"),
+				label: t("Person relations"),
 				icon: <ListBulletIcon />,
 			},
 			{
