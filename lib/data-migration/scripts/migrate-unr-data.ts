@@ -503,16 +503,16 @@ async function main() {
 
 				institutionTypes =
 					institutionTypes.includes("partner_institution") &&
-						institutionTypes.some((t) => {
-							return [
-								"national_coordinating_institution",
-								"national_representative_institution",
-								"cooperating_partner",
-							].includes(t);
-						})
+					institutionTypes.some((t) => {
+						return [
+							"national_coordinating_institution",
+							"national_representative_institution",
+							"cooperating_partner",
+						].includes(t);
+					})
 						? institutionTypes.filter((t) => {
-							return t !== "partner_institution";
-						})
+								return t !== "partner_institution";
+							})
 						: institutionTypes;
 
 				for (const type of institutionTypes) {

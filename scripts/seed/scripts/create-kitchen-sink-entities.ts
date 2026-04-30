@@ -4,15 +4,8 @@ import { log } from "@acdh-oeaw/lib";
 import { createDatabaseService, type Database, type Transaction } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { eq, inArray } from "@dariah-eric/database/sql";
-import {
-	type ResourceDocument,
-	resourceSources,
-	resourceTypes,
-} from "@dariah-eric/search";
-import {
-	createSearchAdminService,
-	type SearchAdminService,
-} from "@dariah-eric/search/admin";
+import { type ResourceDocument, resourceSources, resourceTypes } from "@dariah-eric/search";
+import { createSearchAdminService, type SearchAdminService } from "@dariah-eric/search/admin";
 
 import { env } from "../config/env.config";
 
@@ -30,10 +23,7 @@ function createTimestampRange(start: string, end?: string | null) {
 	};
 }
 
-function assertLookupId(
-	value: string | undefined,
-	message: string,
-): string {
+function assertLookupId(value: string | undefined, message: string): string {
 	if (value == null) {
 		throw new Error(message);
 	}
@@ -81,10 +71,13 @@ async function upsertById(
 	const { id: _id, ...set } = row;
 	const _table = table;
 
-	await db.insert(_table).values(row as never).onConflictDoUpdate({
-		target: _table.id,
-		set: set as never,
-	});
+	await db
+		.insert(_table)
+		.values(row as never)
+		.onConflictDoUpdate({
+			target: _table.id,
+			set: set as never,
+		});
 }
 /* eslint-enable
 	@typescript-eslint/no-explicit-any,
@@ -212,17 +205,55 @@ async function main() {
 					.from(schema.entityTypesFieldsNames),
 			]);
 
-			const entityTypeIds = new Map(entityTypeRows.map((row) => { return [row.type, row.id] }));
-			const entityStatusIds = new Map(entityStatusRows.map((row) => { return [row.type, row.id] }));
-			const unitTypeIds = new Map(unitTypeRows.map((row) => { return [row.type, row.id] }));
-			const unitStatusIds = new Map(unitStatusRows.map((row) => { return [row.status, row.id] }));
-			const personRoleIds = new Map(personRoleRows.map((row) => { return [row.type, row.id] }));
-			const projectRoleIds = new Map(projectRoleRows.map((row) => { return [row.role, row.id] }));
-			const projectScopeIds = new Map(projectScopeRows.map((row) => { return [row.scope, row.id] }));
-			const socialMediaTypeIds = new Map(socialMediaTypeRows.map((row) => { return [row.type, row.id] }));
-			const contentBlockTypeIds = new Map(contentBlockTypeRows.map((row) => { return [row.type, row.id] }));
+			const entityTypeIds = new Map(
+				entityTypeRows.map((row) => {
+					return [row.type, row.id];
+				}),
+			);
+			const entityStatusIds = new Map(
+				entityStatusRows.map((row) => {
+					return [row.type, row.id];
+				}),
+			);
+			const unitTypeIds = new Map(
+				unitTypeRows.map((row) => {
+					return [row.type, row.id];
+				}),
+			);
+			const unitStatusIds = new Map(
+				unitStatusRows.map((row) => {
+					return [row.status, row.id];
+				}),
+			);
+			const personRoleIds = new Map(
+				personRoleRows.map((row) => {
+					return [row.type, row.id];
+				}),
+			);
+			const projectRoleIds = new Map(
+				projectRoleRows.map((row) => {
+					return [row.role, row.id];
+				}),
+			);
+			const projectScopeIds = new Map(
+				projectScopeRows.map((row) => {
+					return [row.scope, row.id];
+				}),
+			);
+			const socialMediaTypeIds = new Map(
+				socialMediaTypeRows.map((row) => {
+					return [row.type, row.id];
+				}),
+			);
+			const contentBlockTypeIds = new Map(
+				contentBlockTypeRows.map((row) => {
+					return [row.type, row.id];
+				}),
+			);
 			const dataContentBlockTypeIds = new Map(
-				dataContentBlockTypeRows.map((row) => { return [row.type, row.id] }),
+				dataContentBlockTypeRows.map((row) => {
+					return [row.type, row.id];
+				}),
 			);
 			const licenseId = licenseRows[0]?.id;
 
@@ -554,7 +585,8 @@ async function main() {
 				id: dariahEricEntityId,
 				name: "Kitchen Sink ERIC",
 				acronym: "KS-ERIC",
-				summary: "Support organisational unit for DARIAH project, working group, and membership relations.",
+				summary:
+					"Support organisational unit for DARIAH project, working group, and membership relations.",
 				metadata: { region: "Europe" },
 				imageId: createId("asset:image"),
 				typeId: assertLookupId(unitTypeIds.get("eric"), 'Missing organisational unit type "eric".'),
@@ -639,7 +671,8 @@ async function main() {
 				acronym: "KSP",
 				duration: createTimestampRange("2025-01-01T00:00:00.000Z", "2027-12-31T23:59:59.000Z"),
 				funding: 1_234_567.89,
-				summary: "A project that also qualifies as a DARIAH project and exercises all API relations.",
+				summary:
+					"A project that also qualifies as a DARIAH project and exercises all API relations.",
 				call: "HORIZON-INFRA-2025",
 				topic: "Interoperability and integration testing",
 				imageId: createId("asset:image"),
@@ -867,10 +900,7 @@ async function main() {
 					id: createId("project-org:funder-country"),
 					projectId: projectEntityId,
 					unitId: memberCountryEntityId,
-					roleId: assertLookupId(
-						projectRoleIds.get("funder"),
-						'Missing project role "funder".',
-					),
+					roleId: assertLookupId(projectRoleIds.get("funder"), 'Missing project role "funder".'),
 					duration: createTimestampRange("2025-01-01T00:00:00.000Z", null),
 				},
 				{
@@ -917,7 +947,10 @@ async function main() {
 				},
 			]);
 
-			const contentEntityIdsByType = new Map<(typeof schema.entityTypesEnum)[number], Array<string>>([
+			const contentEntityIdsByType = new Map<
+				(typeof schema.entityTypesEnum)[number],
+				Array<string>
+			>([
 				["projects", [projectEntityId]],
 				["events", [eventEntityId]],
 				["pages", [pageEntityId]],
@@ -932,24 +965,26 @@ async function main() {
 				],
 			]);
 
-			const fieldsToCreate = [...contentEntityIdsByType.entries()].flatMap(([entityType, entityIds]) => {
-				const entityTypeId = assertLookupId(
-					entityTypeIds.get(entityType),
-					`Missing entity type "${entityType}".`,
-				);
-				const fieldDefinitions = entityTypeFieldNames.get(entityTypeId) ?? [];
+			const fieldsToCreate = [...contentEntityIdsByType.entries()].flatMap(
+				([entityType, entityIds]) => {
+					const entityTypeId = assertLookupId(
+						entityTypeIds.get(entityType),
+						`Missing entity type "${entityType}".`,
+					);
+					const fieldDefinitions = entityTypeFieldNames.get(entityTypeId) ?? [];
 
-				return entityIds.flatMap((entityId) => {
-					return fieldDefinitions.map((fieldDefinition) => {
-						return {
-							id: createId(`field:${entityId}:${fieldDefinition.fieldName}`),
-							entityId,
-							fieldNameId: fieldDefinition.id,
-							fieldName: fieldDefinition.fieldName,
-						};
+					return entityIds.flatMap((entityId) => {
+						return fieldDefinitions.map((fieldDefinition) => {
+							return {
+								id: createId(`field:${entityId}:${fieldDefinition.fieldName}`),
+								entityId,
+								fieldNameId: fieldDefinition.id,
+								fieldName: fieldDefinition.fieldName,
+							};
+						});
 					});
-				});
-			});
+				},
+			);
 
 			for (const field of fieldsToCreate) {
 				await upsertById(tx, schema.fields, {
@@ -964,7 +999,9 @@ async function main() {
 			});
 
 			if (fieldIds.length > 0) {
-				await tx.delete(schema.contentBlocks).where(inArray(schema.contentBlocks.fieldId, fieldIds));
+				await tx
+					.delete(schema.contentBlocks)
+					.where(inArray(schema.contentBlocks.fieldId, fieldIds));
 			}
 
 			const contentBlocks = fieldsToCreate.flatMap((field) => {

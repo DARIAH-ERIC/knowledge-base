@@ -34,9 +34,9 @@ async function main(): Promise<void> {
 		const name = env.ADMIN_NAME;
 		const password = env.ADMIN_PASSWORD;
 
-		assert(email, "Missing ADMIN_EMAIL environment variable.")
-		assert(name, "Missing ADMIN_NAME environment variable.")
-		assert(password, "Missing ADMIN_PASSWORD environment variable.")
+		assert(email, "Missing ADMIN_EMAIL environment variable.");
+		assert(name, "Missing ADMIN_NAME environment variable.");
+		assert(password, "Missing ADMIN_PASSWORD environment variable.");
 
 		const existingUser = await db.query.users.findFirst({
 			where: { email },
