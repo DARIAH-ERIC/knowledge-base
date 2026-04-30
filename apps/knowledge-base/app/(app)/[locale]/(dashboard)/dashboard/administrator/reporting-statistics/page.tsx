@@ -23,10 +23,34 @@ export async function generateMetadata(
 }
 
 export default async function DashboardAdministratorReportingStatisticsPage(
-	_props: Readonly<DashboardAdministratorReportingStatisticsPageProps>,
+	props: Readonly<DashboardAdministratorReportingStatisticsPageProps>,
 ): Promise<ReactNode> {
+	const { searchParams } = props;
+	const rawSearchParams = await searchParams;
 	const { user } = await assertAdminPageAccess();
-	const data = await getReportingStatisticsForAdmin(user);
+	const campaignYearValue = rawSearchParams.campaignYear;
+	const countryNameValue = rawSearchParams.country;
+	const campaignYear =
+		typeof campaignYearValue === "string" && campaignYearValue !== ""
+			? Number.parseInt(campaignYearValue, 10)
+			: undefined;
+	const countryName =
+		typeof countryNameValue === "string" && countryNameValue !== "" ? countryNameValue : undefined;
+	const data = await getReportingStatisticsForAdmin(user, {
+		campaignYear: Number.isNaN(campaignYear) ? undefined : campaignYear,
+		countryName,
+	});
 
-	return <ReportingStatisticsPage data={data} />;
+	return (
+		<ReportingStatisticsPage
+			data={data}
+			filters={{
+				campaignYear:
+					typeof campaignYearValue === "string" && campaignYearValue !== ""
+						? campaignYearValue
+						: "",
+				countryName: typeof countryNameValue === "string" ? countryNameValue : "",
+			}}
+		/>
+	);
 }

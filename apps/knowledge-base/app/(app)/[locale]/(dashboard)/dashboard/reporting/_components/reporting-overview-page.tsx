@@ -23,7 +23,9 @@ function formatStatus(status: string): string {
 	return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
-function groupReportsByStatus<T extends { status: string }>(reports: Array<T>): Record<string, Array<T>> {
+function groupReportsByStatus<T extends { status: string }>(
+	reports: Array<T>,
+): Record<string, Array<T>> {
 	return reports.reduce<Record<string, Array<T>>>((groups, report) => {
 		const status = report.status;
 		groups[status] ??= [];
@@ -88,12 +90,8 @@ export async function ReportingOverviewPage(
 							<p className="text-xs font-medium uppercase tracking-wide text-muted-fg">
 								{t("Campaign")}
 							</p>
-							<p className="mt-2 text-2xl font-semibold text-fg">
-								{scope.campaignYear ?? "—"}
-							</p>
-							<p className="mt-1 text-sm text-muted-fg">
-								{t("Current open reporting campaign")}
-							</p>
+							<p className="mt-2 text-2xl font-semibold text-fg">{scope.campaignYear ?? "—"}</p>
+							<p className="mt-1 text-sm text-muted-fg">{t("Current open reporting campaign")}</p>
 						</section>
 
 						<section className="rounded-lg border bg-bg p-4">
@@ -103,13 +101,13 @@ export async function ReportingOverviewPage(
 							<p className="mt-2 text-2xl font-semibold text-fg">
 								{scope.countryReports.length.toLocaleString()}
 							</p>
-								<p className="mt-1 text-sm text-muted-fg">
-									{t("{draft} draft, {submitted} submitted, {accepted} accepted", {
-										accepted: String(countryAcceptedCount),
-										draft: String(countryDraftCount),
-										submitted: String(countrySubmittedCount),
-									})}
-								</p>
+							<p className="mt-1 text-sm text-muted-fg">
+								{t("{draft} draft, {submitted} submitted, {accepted} accepted", {
+									accepted: String(countryAcceptedCount),
+									draft: String(countryDraftCount),
+									submitted: String(countrySubmittedCount),
+								})}
+							</p>
 						</section>
 
 						<section className="rounded-lg border bg-bg p-4">
@@ -119,13 +117,13 @@ export async function ReportingOverviewPage(
 							<p className="mt-2 text-2xl font-semibold text-fg">
 								{scope.workingGroupReports.length.toLocaleString()}
 							</p>
-								<p className="mt-1 text-sm text-muted-fg">
-									{t("{draft} draft, {submitted} submitted, {accepted} accepted", {
-										accepted: String(workingGroupAcceptedCount),
-										draft: String(workingGroupDraftCount),
-										submitted: String(workingGroupSubmittedCount),
-									})}
-								</p>
+							<p className="mt-1 text-sm text-muted-fg">
+								{t("{draft} draft, {submitted} submitted, {accepted} accepted", {
+									accepted: String(workingGroupAcceptedCount),
+									draft: String(workingGroupDraftCount),
+									submitted: String(workingGroupSubmittedCount),
+								})}
+							</p>
 						</section>
 					</div>
 

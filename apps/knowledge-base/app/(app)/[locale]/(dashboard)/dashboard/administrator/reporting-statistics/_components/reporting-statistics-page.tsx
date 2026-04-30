@@ -16,9 +16,14 @@ import {
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import type { ReportingStatisticsData } from "@/lib/data/admin-reporting";
+import { LocaleLink } from "@/lib/navigation/navigation";
 
 interface ReportingStatisticsPageProps {
 	data: ReportingStatisticsData;
+	filters: {
+		campaignYear: string;
+		countryName: string;
+	};
 }
 
 const eurFormatter = new Intl.NumberFormat("en", {
@@ -31,7 +36,10 @@ function formatStatus(status: string): string {
 	return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
-function formatSignedNumber(value: number | null, format: "number" | "currency" = "number"): string {
+function formatSignedNumber(
+	value: number | null,
+	format: "number" | "currency" = "number",
+): string {
 	if (value == null) return "—";
 
 	const sign = value > 0 ? "+" : "";
@@ -46,7 +54,7 @@ function formatSignedNumber(value: number | null, format: "number" | "currency" 
 export async function ReportingStatisticsPage(
 	props: Readonly<ReportingStatisticsPageProps>,
 ): Promise<ReactNode> {
-	const { data } = props;
+	const { data, filters } = props;
 
 	const t = await getExtracted();
 
@@ -56,12 +64,72 @@ export async function ReportingStatisticsPage(
 				<HeaderContent>
 					<HeaderTitle>{t("Statistics")}</HeaderTitle>
 					<HeaderDescription>
-						{t("Review aggregate reporting data across campaigns and compare country-level changes over time.")}
+						{t(
+							"Review aggregate reporting data across campaigns and compare country-level changes over time.",
+						)}
 					</HeaderDescription>
 				</HeaderContent>
 			</Header>
 
 			<div className="flex flex-col gap-y-10 px-(--layout-padding)">
+				<section className="rounded-lg border bg-bg p-4">
+					<form
+						className="grid gap-4 md:grid-cols-[minmax(0,12rem)_minmax(0,16rem)_auto]"
+						method="get"
+					>
+						<label className="flex flex-col gap-y-1 text-sm">
+							<span className="font-medium text-fg">{t("Campaign year")}</span>
+							<select
+								className="h-10 rounded-md border bg-bg px-3 text-sm"
+								defaultValue={filters.campaignYear}
+								name="campaignYear"
+							>
+								<option value="">{t("All years")}</option>
+								{data.filterOptions.campaignYears.map((year) => {
+									return (
+										<option key={year} value={String(year)}>
+											{year}
+										</option>
+									);
+								})}
+							</select>
+						</label>
+
+						<label className="flex flex-col gap-y-1 text-sm">
+							<span className="font-medium text-fg">{t("Country")}</span>
+							<select
+								className="h-10 rounded-md border bg-bg px-3 text-sm"
+								defaultValue={filters.countryName}
+								name="country"
+							>
+								<option value="">{t("All countries")}</option>
+								{data.filterOptions.countries.map((country) => {
+									return (
+										<option key={country} value={country}>
+											{country}
+										</option>
+									);
+								})}
+							</select>
+						</label>
+
+						<div className="flex items-end gap-2">
+							<button
+								className="inline-flex h-10 items-center justify-center rounded-md border bg-fg px-4 text-sm font-medium text-bg"
+								type="submit"
+							>
+								{t("Apply")}
+							</button>
+							<LocaleLink
+								className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium"
+								href="/dashboard/administrator/reporting-statistics"
+							>
+								{t("Reset")}
+							</LocaleLink>
+						</div>
+					</form>
+				</section>
+
 				<section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 					<div className="rounded-lg border bg-bg p-4">
 						<p className="text-xs font-medium uppercase tracking-wide text-muted-fg">
@@ -123,7 +191,9 @@ export async function ReportingStatisticsPage(
 					<div className="flex flex-col gap-y-1">
 						<h2 className="text-sm font-semibold text-fg">{t("Campaign summary")}</h2>
 						<p className="text-sm text-muted-fg">
-							{t("Compare report volumes, workflow status, and aggregate activity by campaign year.")}
+							{t(
+								"Compare report volumes, workflow status, and aggregate activity by campaign year.",
+							)}
 						</p>
 					</div>
 
@@ -149,14 +219,18 @@ export async function ReportingStatisticsPage(
 										<TableCell>{formatStatus(item.status)}</TableCell>
 										<TableCell>
 											<div className="flex flex-col gap-y-0.5">
-												<span>{item.countryDraftCount + item.countrySubmittedCount + item.countryAcceptedCount}</span>
-													<span className="text-xs text-muted-fg">
-														{t("{draft}/{submitted}/{accepted}", {
-															accepted: String(item.countryAcceptedCount),
-															draft: String(item.countryDraftCount),
-															submitted: String(item.countrySubmittedCount),
-														})}
-													</span>
+												<span>
+													{item.countryDraftCount +
+														item.countrySubmittedCount +
+														item.countryAcceptedCount}
+												</span>
+												<span className="text-xs text-muted-fg">
+													{t("{draft}/{submitted}/{accepted}", {
+														accepted: String(item.countryAcceptedCount),
+														draft: String(item.countryDraftCount),
+														submitted: String(item.countrySubmittedCount),
+													})}
+												</span>
 											</div>
 										</TableCell>
 										<TableCell>
@@ -166,13 +240,13 @@ export async function ReportingStatisticsPage(
 														item.workingGroupSubmittedCount +
 														item.workingGroupAcceptedCount}
 												</span>
-													<span className="text-xs text-muted-fg">
-														{t("{draft}/{submitted}/{accepted}", {
-															accepted: String(item.workingGroupAcceptedCount),
-															draft: String(item.workingGroupDraftCount),
-															submitted: String(item.workingGroupSubmittedCount),
-														})}
-													</span>
+												<span className="text-xs text-muted-fg">
+													{t("{draft}/{submitted}/{accepted}", {
+														accepted: String(item.workingGroupAcceptedCount),
+														draft: String(item.workingGroupDraftCount),
+														submitted: String(item.workingGroupSubmittedCount),
+													})}
+												</span>
 											</div>
 										</TableCell>
 										<TableCell>{item.totalContributors.toLocaleString()}</TableCell>
@@ -184,17 +258,25 @@ export async function ReportingStatisticsPage(
 							}}
 						</TableBody>
 					</Table>
+					{data.campaignSummaries.length === 0 && (
+						<p className="text-sm text-muted-fg">{t("No matching campaigns were found.")}</p>
+					)}
 				</section>
 
 				<section className="flex flex-col gap-y-4">
 					<div className="flex flex-col gap-y-1">
 						<h2 className="text-sm font-semibold text-fg">{t("Country trends")}</h2>
 						<p className="text-sm text-muted-fg">
-							{t("Track structured country-report metrics by campaign year and compare year-over-year change.")}
+							{t(
+								"Track structured country-report metrics by campaign year and compare year-over-year change.",
+							)}
 						</p>
 					</div>
 
-					<Table aria-label="country trends" className="[--gutter:0] overflow-x-auto sm:[--gutter:0]">
+					<Table
+						aria-label="country trends"
+						className="[--gutter:0] overflow-x-auto sm:[--gutter:0]"
+					>
 						<TableHeader>
 							<TableColumn isRowHeader={true}>{t("Country")}</TableColumn>
 							<TableColumn>{t("Year")}</TableColumn>
@@ -230,36 +312,42 @@ export async function ReportingStatisticsPage(
 							}}
 						</TableBody>
 					</Table>
+					{data.countryTrends.length === 0 && (
+						<p className="text-sm text-muted-fg">{t("No matching country data were found.")}</p>
+					)}
 				</section>
 
-				<section className="flex flex-col gap-y-4">
-					<div className="flex flex-col gap-y-1">
-						<h2 className="text-sm font-semibold text-fg">{t("Working group yearly summary")}</h2>
-						<p className="text-sm text-muted-fg">
-							{t("Review aggregate working-group activity by campaign year without narrative answers.")}
-						</p>
-					</div>
+				{data.workingGroupYearSummaries.length > 0 && (
+					<section className="flex flex-col gap-y-4">
+						<div className="flex flex-col gap-y-1">
+							<h2 className="text-sm font-semibold text-fg">{t("Working group yearly summary")}</h2>
+							<p className="text-sm text-muted-fg">
+								{t(
+									"Review aggregate working-group activity by campaign year without narrative answers.",
+								)}
+							</p>
+						</div>
 
-					<Table
-						aria-label="working group yearly summary"
-						className="[--gutter:0] overflow-x-auto sm:[--gutter:0]"
-					>
-						<TableHeader>
-							<TableColumn isRowHeader={true}>{t("Year")}</TableColumn>
-							<TableColumn>{t("Reports")}</TableColumn>
-							<TableColumn>{t("Status split")}</TableColumn>
-							<TableColumn>{t("Members")}</TableColumn>
-							<TableColumn>{t("Events")}</TableColumn>
-							<TableColumn>{t("Organiser")}</TableColumn>
-							<TableColumn>{t("Presenter")}</TableColumn>
-							<TableColumn>{t("Social media")}</TableColumn>
-						</TableHeader>
-						<TableBody items={data.workingGroupYearSummaries}>
-							{(item) => {
-								return (
-									<TableRow id={String(item.campaignYear)}>
-										<TableCell>{item.campaignYear}</TableCell>
-										<TableCell>{item.reportCount.toLocaleString()}</TableCell>
+						<Table
+							aria-label="working group yearly summary"
+							className="[--gutter:0] overflow-x-auto sm:[--gutter:0]"
+						>
+							<TableHeader>
+								<TableColumn isRowHeader={true}>{t("Year")}</TableColumn>
+								<TableColumn>{t("Reports")}</TableColumn>
+								<TableColumn>{t("Status split")}</TableColumn>
+								<TableColumn>{t("Members")}</TableColumn>
+								<TableColumn>{t("Events")}</TableColumn>
+								<TableColumn>{t("Organiser")}</TableColumn>
+								<TableColumn>{t("Presenter")}</TableColumn>
+								<TableColumn>{t("Social media")}</TableColumn>
+							</TableHeader>
+							<TableBody items={data.workingGroupYearSummaries}>
+								{(item) => {
+									return (
+										<TableRow id={String(item.campaignYear)}>
+											<TableCell>{item.campaignYear}</TableCell>
+											<TableCell>{item.reportCount.toLocaleString()}</TableCell>
 											<TableCell>
 												{t("{draft}/{submitted}/{accepted}", {
 													accepted: String(item.acceptedCount),
@@ -267,17 +355,18 @@ export async function ReportingStatisticsPage(
 													submitted: String(item.submittedCount),
 												})}
 											</TableCell>
-										<TableCell>{item.totalMembers.toLocaleString()}</TableCell>
-										<TableCell>{item.totalEvents.toLocaleString()}</TableCell>
-										<TableCell>{item.organiserEvents.toLocaleString()}</TableCell>
-										<TableCell>{item.presenterEvents.toLocaleString()}</TableCell>
-										<TableCell>{item.socialMediaAccounts.toLocaleString()}</TableCell>
-									</TableRow>
-								);
-							}}
-						</TableBody>
-					</Table>
-				</section>
+											<TableCell>{item.totalMembers.toLocaleString()}</TableCell>
+											<TableCell>{item.totalEvents.toLocaleString()}</TableCell>
+											<TableCell>{item.organiserEvents.toLocaleString()}</TableCell>
+											<TableCell>{item.presenterEvents.toLocaleString()}</TableCell>
+											<TableCell>{item.socialMediaAccounts.toLocaleString()}</TableCell>
+										</TableRow>
+									);
+								}}
+							</TableBody>
+						</Table>
+					</section>
+				)}
 			</div>
 		</div>
 	);

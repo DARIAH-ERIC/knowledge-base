@@ -72,6 +72,15 @@ export interface ReportingStatisticsData {
 	campaignSummaries: Array<ReportingStatisticsCampaignSummary>;
 	countryTrends: Array<ReportingStatisticsCountryTrend>;
 	workingGroupYearSummaries: Array<ReportingStatisticsWorkingGroupYearSummary>;
+	filterOptions: {
+		campaignYears: Array<number>;
+		countries: Array<string>;
+	};
+}
+
+export interface ReportingStatisticsFilters {
+	campaignYear?: number;
+	countryName?: string;
 }
 
 export async function getCountryReportsForAdmin(currentUser: Pick<User, "role">) {
@@ -193,6 +202,7 @@ export async function getReportingCampaignsForAdmin(currentUser: Pick<User, "rol
 
 export async function getReportingStatisticsForAdmin(
 	currentUser: Pick<User, "role">,
+	filters: ReportingStatisticsFilters = {},
 ): Promise<ReportingStatisticsData> {
 	assertAdminUser(currentUser);
 
@@ -231,8 +241,45 @@ export async function getReportingStatisticsForAdmin(
 		},
 	});
 
+	const filterOptions = {
+		campaignYears: campaigns.map((campaign) => {
+			return campaign.year;
+		}),
+		countries: Array.from(
+			new Set(
+				campaigns.flatMap((campaign) => {
+					return campaign.countryReports.map((report) => {
+						return report.country.name;
+					});
+				}),
+			),
+		).sort((left, right) => {
+			return left.localeCompare(right);
+		}),
+	};
+
+	const filteredCampaigns = campaigns
+		.filter((campaign) => {
+			return filters.campaignYear == null || campaign.year === filters.campaignYear;
+		})
+		.map((campaign) => {
+			const countryReports = campaign.countryReports.filter((report) => {
+				return filters.countryName == null || report.country.name === filters.countryName;
+			});
+			const workingGroupReports = filters.countryName == null ? campaign.workingGroupReports : [];
+
+			return {
+				...campaign,
+				countryReports,
+				workingGroupReports,
+			};
+		})
+		.filter((campaign) => {
+			return campaign.countryReports.length > 0 || campaign.workingGroupReports.length > 0;
+		});
+
 	const overview: ReportingStatisticsOverview = {
-		campaignCount: campaigns.length,
+		campaignCount: filteredCampaigns.length,
 		totalCountryReports: 0,
 		totalWorkingGroupReports: 0,
 		totalContributors: 0,
@@ -242,13 +289,15 @@ export async function getReportingStatisticsForAdmin(
 	};
 
 	const campaignSummaries: Array<ReportingStatisticsCampaignSummary> = [];
-	const countryTrendBaseRows: Array<Omit<
-		ReportingStatisticsCountryTrend,
-		"contributorsDelta" | "eventsDelta" | "projectContributionsDelta"
-	>> = [];
+	const countryTrendBaseRows: Array<
+		Omit<
+			ReportingStatisticsCountryTrend,
+			"contributorsDelta" | "eventsDelta" | "projectContributionsDelta"
+		>
+	> = [];
 	const workingGroupYearSummaries: Array<ReportingStatisticsWorkingGroupYearSummary> = [];
 
-	for (const campaign of campaigns) {
+	for (const campaign of filteredCampaigns) {
 		let countryDraftCount = 0;
 		let countrySubmittedCount = 0;
 		let countryAcceptedCount = 0;
@@ -360,10 +409,7 @@ export async function getReportingStatisticsForAdmin(
 		});
 	}
 
-	const countryRowsByName = new Map<
-		string,
-		Array<(typeof countryTrendBaseRows)[number]>
-	>();
+	const countryRowsByName = new Map<string, Array<(typeof countryTrendBaseRows)[number]>>();
 
 	for (const row of countryTrendBaseRows) {
 		const rows = countryRowsByName.get(row.countryName) ?? [];
@@ -403,6 +449,7 @@ export async function getReportingStatisticsForAdmin(
 		campaignSummaries,
 		countryTrends,
 		workingGroupYearSummaries,
+		filterOptions,
 	};
 }
 
