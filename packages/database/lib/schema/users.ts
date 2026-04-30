@@ -20,6 +20,7 @@ export const users = p.pgTable(
 		twoFactorRecoveryCode: p.bytea("two_factor_recovery_code").notNull(),
 		name: p.text("name").notNull(),
 		role: p.text("role", { enum: userRoleEnum }).notNull().default("user"),
+		canManageAdmins: p.boolean("can_manage_admins").notNull().default(false),
 		personId: p.uuid("person_id").references(() => {
 			return persons.id;
 		}),
@@ -32,6 +33,15 @@ export const users = p.pgTable(
 		return [
 			p.uniqueIndex("users_email_unique").on(lower(t.email)),
 			p.check("users_role_enum_check", inArray(t.role, userRoleEnum)),
+			p.check(
+				"users_can_manage_admins_requires_admin_role_check",
+				sql`
+					NOT (
+						${t.canManageAdmins}
+						AND ${t.role} <> 'admin'
+					)
+				`,
+			),
 			p.check(
 				"users_actor_xor_check",
 				sql`

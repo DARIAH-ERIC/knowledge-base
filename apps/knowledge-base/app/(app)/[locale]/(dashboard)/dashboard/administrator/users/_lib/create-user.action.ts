@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
+import { canManageAdminAccounts } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/admin-management";
 import { CreateUserActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/create-user.schema";
 import { auth } from "@/lib/auth";
 import { assertAdmin } from "@/lib/auth/session";
@@ -26,7 +27,7 @@ export const createUserAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const { user: currentUser } = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			CreateUserActionInputSchema,
@@ -43,7 +44,15 @@ export const createUserAction = createServerAction(
 			});
 		}
 
-		const { name, email, role, password, personId, organisationalUnitId } = result.output;
+		const { name, email, role, password, personId, organisationalUnitId, canManageAdmins } =
+			result.output;
+		const canManageAdminsFlag = canManageAdmins === "true";
+
+		if (role === "admin" && !canManageAdminAccounts(currentUser)) {
+			return createActionStateError({
+				message: t("You are not allowed to create admin users."),
+			});
+		}
 
 		if (!(await auth.isEmailAvailable(email))) {
 			return createActionStateError({ message: t("This email address is already in use.") });
@@ -53,7 +62,12 @@ export const createUserAction = createServerAction(
 
 		await db
 			.update(schema.users)
-			.set({ role, personId: personId ?? null, organisationalUnitId: organisationalUnitId ?? null })
+			.set({
+				role,
+				canManageAdmins: role === "admin" ? canManageAdminsFlag : false,
+				personId: personId ?? null,
+				organisationalUnitId: organisationalUnitId ?? null,
+			})
 			.where(eq(schema.users.id, user.id));
 
 		revalidatePath("/[locale]/dashboard/administrator/users", "layout");

@@ -5,6 +5,7 @@ export const CreateUserActionInputSchema = v.pipe(
 		name: v.pipe(v.string(), v.nonEmpty()),
 		email: v.pipe(v.string(), v.email()),
 		role: v.picklist(["admin", "user"] as const),
+		canManageAdmins: v.optional(v.literal("true")),
 		password: v.pipe(v.string(), v.minLength(8)),
 		personId: v.optional(v.pipe(v.string(), v.uuid())),
 		organisationalUnitId: v.optional(v.pipe(v.string(), v.uuid())),
@@ -12,4 +13,7 @@ export const CreateUserActionInputSchema = v.pipe(
 	v.check(({ personId, organisationalUnitId }) => {
 		return !(personId != null && organisationalUnitId != null);
 	}, "A user can only be linked to a person or a country, not both."),
+	v.check(({ canManageAdmins, role }) => {
+		return canManageAdmins == null || role === "admin";
+	}, "Only admins can manage other admins."),
 );

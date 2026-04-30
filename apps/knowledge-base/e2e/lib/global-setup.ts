@@ -89,6 +89,7 @@ export default async function globalSetup(): Promise<void> {
 					name: E2E_ADMIN_NAME,
 					passwordHash,
 					role: "admin",
+					canManageAdmins: true,
 					isEmailVerified: true,
 					twoFactorTotpKey,
 					twoFactorRecoveryCode,
@@ -98,7 +99,7 @@ export default async function globalSetup(): Promise<void> {
 		} else {
 			await db
 				.update(schema.users)
-				.set({ role: "admin", isEmailVerified: true, twoFactorTotpKey })
+				.set({ role: "admin", canManageAdmins: true, isEmailVerified: true, twoFactorTotpKey })
 				.where(eq(schema.users.id, existingUser.id));
 		}
 

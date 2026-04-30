@@ -5,7 +5,7 @@ import { forbidden } from "next/navigation";
 import { db } from "@/lib/db";
 import { count, desc, eq, ilike, or } from "@/lib/db/sql";
 
-export type UsersSort = "name" | "email" | "role" | "isEmailVerified";
+export type UsersSort = "name" | "email" | "role" | "canManageAdmins" | "isEmailVerified";
 
 interface GetUsersParams {
 	limit: number;
@@ -16,7 +16,9 @@ interface GetUsersParams {
 }
 
 export interface UsersResult {
-	data: Array<Pick<schema.User, "email" | "id" | "isEmailVerified" | "name" | "role">>;
+	data: Array<
+		Pick<schema.User, "canManageAdmins" | "email" | "id" | "isEmailVerified" | "name" | "role">
+	>;
 	limit: number;
 	offset: number;
 	total: number;
@@ -27,6 +29,7 @@ export interface AdminUserDetails {
 	name: string;
 	email: string;
 	role: schema.User["role"];
+	canManageAdmins: boolean;
 	personId: string | null;
 	organisationalUnitId: string | null;
 	person: { id: string; name: string } | null;
@@ -56,17 +59,22 @@ async function getUsers(params: Readonly<GetUsersParams>): Promise<UsersResult> 
 				? dir === "asc"
 					? schema.users.role
 					: desc(schema.users.role)
-				: sort === "isEmailVerified"
+				: sort === "canManageAdmins"
 					? dir === "asc"
-						? schema.users.isEmailVerified
-						: desc(schema.users.isEmailVerified)
-					: dir === "asc"
-						? schema.users.name
-						: desc(schema.users.name);
+						? schema.users.canManageAdmins
+						: desc(schema.users.canManageAdmins)
+					: sort === "isEmailVerified"
+						? dir === "asc"
+							? schema.users.isEmailVerified
+							: desc(schema.users.isEmailVerified)
+						: dir === "asc"
+							? schema.users.name
+							: desc(schema.users.name);
 
 	const [items, aggregate] = await Promise.all([
 		db
 			.select({
+				canManageAdmins: schema.users.canManageAdmins,
 				email: schema.users.email,
 				id: schema.users.id,
 				isEmailVerified: schema.users.isEmailVerified,
@@ -111,6 +119,7 @@ export async function getUserForAdmin(
 			name: true,
 			email: true,
 			role: true,
+			canManageAdmins: true,
 			personId: true,
 			organisationalUnitId: true,
 		},

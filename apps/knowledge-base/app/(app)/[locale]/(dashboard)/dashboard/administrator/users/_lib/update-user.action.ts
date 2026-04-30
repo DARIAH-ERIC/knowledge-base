@@ -8,6 +8,11 @@ import { revalidatePath } from "next/cache";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
+import {
+	canManageAdminAccounts,
+	countAdminManagers,
+	isRemovingAdminManagementPrivilege,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/admin-management";
 import { UpdateUserActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/update-user.schema";
 import { auth } from "@/lib/auth";
 import { assertAdmin } from "@/lib/auth/session";
@@ -26,7 +31,7 @@ export const updateUserAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const { user: currentUser } = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			UpdateUserActionInputSchema,
@@ -43,15 +48,49 @@ export const updateUserAction = createServerAction(
 			});
 		}
 
-		const { id, name, email, role, personId, organisationalUnitId } = result.output;
+		const { id, name, email, role, personId, organisationalUnitId, canManageAdmins } =
+			result.output;
+		const canManageAdminsFlag = role === "admin" && canManageAdmins === "true";
 
 		const existing = await db.query.users.findFirst({
 			where: { id },
-			columns: { email: true },
+			columns: { email: true, role: true, canManageAdmins: true },
 		});
 
 		if (existing == null) {
 			return createActionStateError({ message: t("User not found.") });
+		}
+
+		const isPrivilegedUser = existing.role === "admin" || role === "admin";
+
+		if (isPrivilegedUser && !canManageAdminAccounts(currentUser)) {
+			return createActionStateError({
+				message: t("You are not allowed to change admin accounts."),
+			});
+		}
+
+		if (
+			currentUser.id === id &&
+			isRemovingAdminManagementPrivilege(existing, {
+				role,
+				canManageAdmins: canManageAdminsFlag,
+			})
+		) {
+			return createActionStateError({
+				message: t("You cannot remove your own ability to manage admin accounts."),
+			});
+		}
+
+		if (
+			isRemovingAdminManagementPrivilege(existing, {
+				role,
+				canManageAdmins: canManageAdminsFlag,
+			}) &&
+			(await countAdminManagers()) <= 1
+		) {
+			return createActionStateError({
+				message: t("At least one admin user must be allowed to manage admin accounts."),
+			});
 		}
 
 		if (
@@ -67,6 +106,7 @@ export const updateUserAction = createServerAction(
 				name,
 				email,
 				role,
+				canManageAdmins: canManageAdminsFlag,
 				personId: personId ?? null,
 				organisationalUnitId: organisationalUnitId ?? null,
 			})

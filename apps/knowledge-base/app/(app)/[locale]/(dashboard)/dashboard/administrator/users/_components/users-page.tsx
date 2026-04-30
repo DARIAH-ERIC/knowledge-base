@@ -36,13 +36,16 @@ import { deleteUserAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/adm
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface UsersPageProps {
+	currentUserCanManageAdmins: boolean;
 	currentUserId: string;
 	dir: "asc" | "desc";
 	page: number;
 	q: string;
-	sort: "name" | "email" | "role" | "isEmailVerified";
+	sort: "name" | "email" | "role" | "canManageAdmins" | "isEmailVerified";
 	users: {
-		data: Array<Pick<schema.User, "id" | "name" | "email" | "role" | "isEmailVerified">>;
+		data: Array<
+			Pick<schema.User, "id" | "name" | "email" | "role" | "canManageAdmins" | "isEmailVerified">
+		>;
 		total: number;
 	};
 }
@@ -51,6 +54,7 @@ const pageSize = 10;
 
 export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 	const {
+		currentUserCanManageAdmins,
 		currentUserId,
 		dir: initialDir,
 		page: initialPage,
@@ -117,6 +121,9 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 					<TableColumn allowsSorting={true} id="role">
 						{t("Role")}
 					</TableColumn>
+					<TableColumn allowsSorting={true} id="canManageAdmins">
+						{t("Can manage admins")}
+					</TableColumn>
 					<TableColumn allowsSorting={true} id="isEmailVerified">
 						{t("Email verified")}
 					</TableColumn>
@@ -129,6 +136,7 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 								<TableCell>{item.name}</TableCell>
 								<TableCell>{item.email}</TableCell>
 								<TableCell>{item.role}</TableCell>
+								<TableCell>{item.canManageAdmins ? t("Yes") : t("No")}</TableCell>
 								<TableCell>{item.isEmailVerified ? t("Yes") : t("No")}</TableCell>
 								<TableCell className="text-end">
 									<Menu>
@@ -141,14 +149,20 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 											<EllipsisHorizontalIcon className="size-5" />
 										</Button>
 										<MenuContent placement="left top">
-											<MenuItem href={`/dashboard/administrator/users/${item.id}/edit`}>
+											<MenuItem
+												href={`/dashboard/administrator/users/${item.id}/edit`}
+												isDisabled={!currentUserCanManageAdmins && item.role === "admin"}
+											>
 												<PencilSquareIcon className="mr-2 size-4" />
 												<MenuLabel>{t("Edit")}</MenuLabel>
 											</MenuItem>
 											<MenuSeparator />
 											<MenuItem
 												intent="danger"
-												isDisabled={item.id === currentUserId}
+												isDisabled={
+													item.id === currentUserId ||
+													(!currentUserCanManageAdmins && item.role === "admin")
+												}
 												onAction={() => {
 													setItemToDelete({ id: item.id });
 												}}
