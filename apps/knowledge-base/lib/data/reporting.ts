@@ -31,14 +31,15 @@ export interface CountryReportScope {
 }
 
 export async function getUserReportingScope(user: User): Promise<{
+	campaignYear: number | null;
 	workingGroupReports: Array<WorkingGroupReportScope>;
 	countryReports: Array<CountryReportScope>;
 }> {
-	const empty = { workingGroupReports: [], countryReports: [] };
+	const empty = { campaignYear: null, workingGroupReports: [], countryReports: [] };
 
 	const openCampaign = await db.query.reportingCampaigns.findFirst({
 		where: { status: "open" },
-		columns: { id: true },
+		columns: { id: true, year: true },
 	});
 
 	if (openCampaign == null) return empty;
@@ -191,6 +192,7 @@ export async function getUserReportingScope(user: User): Promise<{
 	}
 
 	return {
+		campaignYear: openCampaign.year,
 		workingGroupReports: wgReportItems,
 		countryReports: countryReportItems,
 	};
