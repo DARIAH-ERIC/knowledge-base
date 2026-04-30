@@ -8,9 +8,14 @@ import {
 	createEpisciencesClient,
 	type EpisciencesSearchDocument,
 } from "@dariah-eric/client-episciences";
-import { createSshocClient, type SearchItem } from "@dariah-eric/client-sshoc";
+import {
+	createSshocClient,
+	isCoreService,
+	isSoftware,
+	type SearchItem,
+} from "@dariah-eric/client-sshoc";
 import { createZoteroClient, type ZoteroJsonItem } from "@dariah-eric/client-zotero";
-import type { ResourceDocument } from "@dariah-eric/search";
+import type { ResourceDocument, WebsiteDocument } from "@dariah-eric/search";
 
 import { env } from "@/config/env.config";
 import { search } from "@/lib/search/admin";
@@ -34,6 +39,7 @@ interface ZoteroJsonItemData {
 
 export interface SyncResourcesSearchIndexResult {
 	count: number;
+	websiteCount: number;
 }
 
 function toPlainText(input: string): string {
@@ -211,15 +217,7 @@ function createSshocResourceDocument(item: SearchItem): ResourceDocument {
 
 	switch (item.category) {
 		case "tool-or-service": {
-			const isSoftware = item.properties.some((property) => {
-				return (
-					property.type.code === "resource-category" &&
-					property.concept?.vocabulary.code === "eosc-resource-category" &&
-					property.concept.code === "category-sharing_and_discovery-software"
-				);
-			});
-
-			if (isSoftware) {
+			if (isSoftware(item)) {
 				return {
 					id,
 					source,
@@ -240,14 +238,6 @@ function createSshocResourceDocument(item: SearchItem): ResourceDocument {
 				};
 			}
 
-			const isCoreService = item.properties.some((property) => {
-				return (
-					property.type.code === "keyword" &&
-					property.concept?.vocabulary.code === "sshoc-keyword" &&
-					property.concept.code === "dariahCoreService"
-				);
-			});
-
 			return {
 				id,
 				source,
@@ -261,7 +251,7 @@ function createSshocResourceDocument(item: SearchItem): ResourceDocument {
 				links,
 				source_actor_ids: actorIds,
 				upstream_sources: null,
-				kind: isCoreService ? "core" : "community",
+				kind: isCoreService(item) ? "core" : "community",
 				authors: null,
 				year: null,
 				pid: null,
@@ -368,6 +358,21 @@ function createZoteroResourceDocument(item: ZoteroJsonItem<ZoteroJsonItemData>):
 	};
 }
 
+function createWebsiteResourceDocument(resource: ResourceDocument): WebsiteDocument {
+	return {
+		id: resource.id,
+		kind: "resource",
+		source: resource.source,
+		source_id: resource.source_id,
+		source_updated_at: resource.source_updated_at,
+		imported_at: resource.imported_at,
+		type: resource.type,
+		label: resource.label,
+		description: resource.description,
+		link: resource.links[0],
+	};
+}
+
 export async function syncResourcesSearchIndex(): Promise<SyncResourcesSearchIndexResult> {
 	if (env.CAMPUS_API_BASE_URL == null) {
 		throw new Error("Missing environment variable: CAMPUS_API_BASE_URL");
@@ -462,6 +467,14 @@ export async function syncResourcesSearchIndex(): Promise<SyncResourcesSearchInd
 	];
 
 	(await search.collections.resources.ingest(resources)).unwrap();
+	const websiteDocuments = resources.map((resource) => {
+		return createWebsiteResourceDocument(resource);
+	});
 
-	return { count: resources.length };
+	(await search.collections.website.ingest(websiteDocuments)).unwrap();
+
+	return {
+		count: resources.length,
+		websiteCount: websiteDocuments.length,
+	};
 }

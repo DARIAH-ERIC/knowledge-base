@@ -65,7 +65,7 @@ export default function DashboardAdministratorPage(
 				<AdminTaskCard
 					actionLabel={t("Ingest SSHOC services")}
 					description={t(
-						"Fetch DARIAH services from the SSHOC Marketplace and upsert them into the administrator services dataset.",
+						"Fetch DARIAH services from the SSHOC Marketplace and upsert them into the services dataset.",
 					)}
 					formAction={ingestSshocServicesAction}
 					title={t("SSHOC Marketplace services")}

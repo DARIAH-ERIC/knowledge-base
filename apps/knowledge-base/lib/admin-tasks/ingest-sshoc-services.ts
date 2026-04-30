@@ -1,5 +1,10 @@
 import { createUrl } from "@acdh-oeaw/lib";
-import { createSshocClient, type SearchItem } from "@dariah-eric/client-sshoc";
+import {
+	createSshocClient,
+	isCoreService,
+	isSoftware,
+	type SearchItem,
+} from "@dariah-eric/client-sshoc";
 import * as schema from "@dariah-eric/database/schema";
 
 import { env } from "@/config/env.config";
@@ -21,26 +26,6 @@ export interface IngestSshocServicesResult {
 	markedNeedsReviewCount: number;
 	relationCount: number;
 	updatedCount: number;
-}
-
-function isSoftware(item: SearchItem): boolean {
-	return item.properties.some((property) => {
-		return (
-			property.type.code === "resource-category" &&
-			property.concept?.vocabulary.code === "eosc-resource-category" &&
-			property.concept.code === "category-sharing_and_discovery-software"
-		);
-	});
-}
-
-function isCoreService(item: SearchItem): boolean {
-	return item.properties.some((property) => {
-		return (
-			property.type.code === "keyword" &&
-			property.concept?.vocabulary.code === "sshoc-keyword" &&
-			property.concept.code === "dariahCoreService"
-		);
-	});
 }
 
 function createSshocSnapshot(item: SearchItem): SshocServiceSnapshot {

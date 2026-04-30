@@ -19,9 +19,13 @@ export const syncResourcesSearchIndexAction = createServerAction(
 		revalidatePath("/[locale]/dashboard/administrator", "layout");
 
 		return createActionStateSuccess({
-			message: t("Re-synced {count} resources search documents.", {
-				count: String(result.count),
-			}),
+			message: t(
+				"Re-synced {count} resources search documents and {websiteCount} website search documents.",
+				{
+					count: String(result.count),
+					websiteCount: String(result.websiteCount),
+				},
+			),
 		});
 	},
 );
