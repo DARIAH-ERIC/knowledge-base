@@ -5,9 +5,9 @@ import * as v from "valibot";
 
 const validate = define({
 	envVars: v.object({
-		ADMIN_EMAIL: v.pipe(v.string(), v.trim(), v.nonEmpty(), v.email()),
-		ADMIN_NAME: v.pipe(v.string(), v.trim(), v.nonEmpty()),
-		ADMIN_PASSWORD: v.pipe(v.string(), v.trim(), v.nonEmpty()),
+		ADMIN_EMAIL: v.optional(v.pipe(v.string(), v.trim(), v.nonEmpty(), v.email())),
+		ADMIN_NAME: v.optional(v.pipe(v.string(), v.trim(), v.nonEmpty())),
+		ADMIN_PASSWORD: v.optional(v.pipe(v.string(), v.trim(), v.nonEmpty())),
 		AUTH_ENCRYPTION_KEY: v.pipe(v.string(), v.length(32)),
 		DATABASE_HOST: v.pipe(v.string(), v.nonEmpty()),
 		DATABASE_NAME: v.pipe(v.string(), v.nonEmpty()),

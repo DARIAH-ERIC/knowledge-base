@@ -874,12 +874,12 @@ async function main() {
 					duration: createTimestampRange("2025-01-01T00:00:00.000Z", null),
 				},
 				{
-					id: createId("project-org:affiliated-governance"),
+					id: createId("project-org:participant-governance"),
 					projectId: projectEntityId,
 					unitId: governanceBodyEntityId,
 					roleId: assertLookupId(
-						projectRoleIds.get("affiliated"),
-						'Missing project role "affiliated".',
+						projectRoleIds.get("participant"),
+						'Missing project role "participant".',
 					),
 					duration: createTimestampRange("2025-01-01T00:00:00.000Z", null),
 				},
