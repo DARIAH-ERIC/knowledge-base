@@ -11,8 +11,7 @@ import {
 import { assertAdminPageAccess } from "@/lib/auth/session";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorReportingStatisticsPageProps
-	extends PageProps<"/[locale]/dashboard/administrator/reporting-statistics"> {}
+interface DashboardAdministratorReportingStatisticsPageProps extends PageProps<"/[locale]/dashboard/administrator/reporting-statistics"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorReportingStatisticsPageProps>,
