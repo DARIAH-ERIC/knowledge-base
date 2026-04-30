@@ -227,6 +227,12 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 						icon: <ListBulletIcon />,
 					},
 					{
+						href: "/dashboard/administrator/reporting-statistics",
+						tooltip: t("Statistics"),
+						label: t("Statistics"),
+						icon: <ListBulletIcon />,
+					},
+					{
 						href: "/dashboard/administrator/country-reports",
 						tooltip: t("Country reports"),
 						label: t("Country reports"),
