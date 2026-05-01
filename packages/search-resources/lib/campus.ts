@@ -2,7 +2,7 @@ import { isNonEmptyString } from "@acdh-oeaw/lib";
 import type { DariahCampusCurriculum, DariahCampusResource } from "@dariah-eric/client-campus";
 import type { ResourceDocument } from "@dariah-eric/search";
 
-import { toPlainText } from "../markdown/to-plain-text";
+import { toPlainText } from "./markdown/to-plain-text";
 
 export function createCampusResource(item: DariahCampusResource): ResourceDocument {
 	const source = "dariah-campus" as const;

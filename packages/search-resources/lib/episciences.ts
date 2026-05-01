@@ -5,27 +5,22 @@ export function createEpisciencesDocument(item: EpisciencesSearchDocument): Reso
 	const source = "episciences" as const;
 	const sourceId = String(item.docid ?? item.paperid);
 	const id = [source, sourceId].join(":");
-
 	const authors = item.author_fullname_s ?? [];
 	const keywords = item.keyword_t ?? [];
-
 	const title =
 		Array.isArray(item.paper_title_t) && item.paper_title_t.length > 0
 			? item.paper_title_t[0]!
 			: (item.en_paper_title_t ?? "");
-
 	const description =
 		Array.isArray(item.abstract_t) && item.abstract_t.length > 0
 			? item.abstract_t[0]!
 			: (item.en_abstract_t ?? "");
-
 	const year =
 		item.publication_date_year_fs != null
 			? Number(item.publication_date_year_fs)
 			: item.publication_date_tdate != null
 				? new Date(item.publication_date_tdate).getFullYear()
 				: null;
-
 	const doi = item.doi_s ?? null;
 	const links =
 		item.es_doc_url_s != null

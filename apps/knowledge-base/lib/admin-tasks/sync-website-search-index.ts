@@ -1,7 +1,4 @@
-import {
-	getSyncableWebsiteEntityIds,
-	syncWebsiteDocumentForEntityWithResult,
-} from "@/lib/search/website-index";
+import { syncWebsiteSearchIndex as syncWebsiteSearchDocuments } from "@/lib/search/website-index";
 
 export interface SyncWebsiteSearchIndexResult {
 	count: number;
@@ -9,17 +6,10 @@ export interface SyncWebsiteSearchIndexResult {
 }
 
 export async function syncWebsiteSearchIndex(): Promise<SyncWebsiteSearchIndexResult> {
-	const entityIds = await getSyncableWebsiteEntityIds();
-	const items = await Promise.all(
-		entityIds.map((entityId) => {
-			return syncWebsiteDocumentForEntityWithResult(entityId);
-		}),
-	);
+	const result = await syncWebsiteSearchDocuments();
 
 	return {
-		count: items.length,
-		failedCount: items.filter((item) => {
-			return !item.ok;
-		}).length,
+		count: result.count,
+		failedCount: 0,
 	};
 }

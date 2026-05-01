@@ -2,7 +2,7 @@ import { createUrl, unreachable } from "@acdh-oeaw/lib";
 import { isCoreService, isSoftware, type SearchItem } from "@dariah-eric/client-sshoc";
 import type { ResourceDocument } from "@dariah-eric/search";
 
-import { toPlainText } from "../markdown/to-plain-text";
+import { toPlainText } from "./markdown/to-plain-text";
 
 export function createSshocItem(item: SearchItem, marketplaceBaseUrl: string): ResourceDocument {
 	const keywords = [];
