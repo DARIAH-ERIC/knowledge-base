@@ -5,6 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
@@ -14,6 +15,7 @@ import { db } from "@/lib/db";
 import { and, eq, inArray, notInArray } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
+import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createServerAction } from "@/lib/server/create-server-action";
 
 export const updateProjectAction = createServerAction(
@@ -214,6 +216,10 @@ export const updateProjectAction = createServerAction(
 					}),
 				);
 			}
+		});
+
+		after(async () => {
+			await syncWebsiteDocumentForEntity(id);
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/projects", "layout");

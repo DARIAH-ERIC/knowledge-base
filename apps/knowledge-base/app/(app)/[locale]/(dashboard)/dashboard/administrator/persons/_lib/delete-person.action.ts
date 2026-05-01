@@ -2,13 +2,19 @@
 
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq, inArray, or } from "@/lib/db/sql";
+import {
+	deleteWebsiteDocument,
+	getWebsiteDocumentDescriptorByEntityId,
+} from "@/lib/search/website-index";
 
 export async function deletePersonAction(id: string): Promise<void> {
 	await assertAdmin();
+	const descriptor = await getWebsiteDocumentDescriptorByEntityId(id);
 
 	await db.transaction(async (tx) => {
 		await tx
@@ -43,6 +49,12 @@ export async function deletePersonAction(id: string): Promise<void> {
 		await tx.delete(schema.persons).where(eq(schema.persons.id, id));
 
 		await tx.delete(schema.entities).where(eq(schema.entities.id, id));
+	});
+
+	after(async () => {
+		if (descriptor != null) {
+			await deleteWebsiteDocument(descriptor);
+		}
 	});
 
 	revalidatePath("/[locale]/dashboard/administrator/persons", "layout");

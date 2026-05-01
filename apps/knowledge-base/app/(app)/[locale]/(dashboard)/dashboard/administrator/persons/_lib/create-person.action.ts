@@ -6,6 +6,7 @@ import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import slugify from "@sindresorhus/slugify";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
@@ -14,6 +15,7 @@ import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
+import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createServerAction } from "@/lib/server/create-server-action";
 
 export const createPersonAction = createServerAction(
@@ -45,6 +47,7 @@ export const createPersonAction = createServerAction(
 		const { biography, email, imageKey, name, orcid, position, sortName } = result.output;
 
 		const slug = slugify(name);
+		let entityId: string | null = null;
 
 		await db.transaction(async (tx) => {
 			const type = await tx.query.entityTypes.findFirst({
@@ -79,6 +82,7 @@ export const createPersonAction = createServerAction(
 				.returning({ id: schema.entities.id });
 
 			assert(entity);
+			entityId = entity.id;
 
 			const asset = await tx.query.assets.findFirst({
 				where: { key: imageKey },
@@ -132,6 +136,12 @@ export const createPersonAction = createServerAction(
 				id: contentBlock.id,
 				content: JSON.parse(biography) as schema.RichTextContentBlock["content"],
 			});
+		});
+
+		after(async () => {
+			if (entityId != null) {
+				await syncWebsiteDocumentForEntity(entityId);
+			}
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/persons", "layout");
