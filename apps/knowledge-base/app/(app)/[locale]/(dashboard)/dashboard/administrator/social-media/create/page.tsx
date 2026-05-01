@@ -5,9 +5,7 @@ import type { ReactNode } from "react";
 import { SocialMediaCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-create-form";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorCreateSocialMediaPageProps {
-	params: Promise<{ locale: string }>;
-}
+interface DashboardAdministratorCreateSocialMediaPageProps extends PageProps<"/[locale]/dashboard/administrator/social-media/create"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorCreateSocialMediaPageProps>,

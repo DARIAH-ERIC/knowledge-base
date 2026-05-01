@@ -27,7 +27,7 @@ export function ContributionEditForm(props: Readonly<ContributionEditFormProps>)
 
 	return (
 		<Fragment>
-			<Heading>{t("Edit contribution")}</Heading>
+			<Heading>{t("Edit person relation")}</Heading>
 
 			<ContributionForm
 				description={t("Update the person-to-organisation relation.")}

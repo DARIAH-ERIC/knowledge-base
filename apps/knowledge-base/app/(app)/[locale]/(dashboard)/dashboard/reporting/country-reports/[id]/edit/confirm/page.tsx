@@ -1,10 +1,12 @@
-import { Button, buttonStyles } from "@dariah-eric/ui/button";
+import { Button } from "@dariah-eric/ui/button";
+import { ButtonLink } from "@dariah-eric/ui/button-link";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { CountryReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary";
 import { confirmCountryReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/confirm-country-report.action";
 import { getCountryReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
@@ -13,9 +15,7 @@ import { can } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardReportingCountryReportConfirmPageProps {
-	params: Promise<{ locale: string; id: string }>;
-}
+interface DashboardReportingCountryReportConfirmPageProps extends PageProps<"/[locale]/dashboard/reporting/country-reports/[id]/edit/confirm"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardReportingCountryReportConfirmPageProps>,
@@ -79,16 +79,19 @@ export default async function DashboardReportingCountryReportConfirmPage(
 						<p className="text-sm text-muted-fg">{t("This report has been accepted.")}</p>
 					)}
 
-					<a
-						className={buttonStyles({ intent: "plain", size: "sm" })}
+					<ButtonLink
 						download={`country-report-${id}.json`}
 						href={`/api/reporting/country-reports/${id}/download`}
+						intent="plain"
+						size="sm"
 					>
 						<ArrowDownTrayIcon className="mr-2 size-4" />
 						{t("Download JSON")}
-					</a>
+					</ButtonLink>
 				</div>
 			</div>
+
+			<ReportScreenCommentSection reportId={report.id} reportType="country" screenKey="confirm" />
 		</div>
 	);
 }

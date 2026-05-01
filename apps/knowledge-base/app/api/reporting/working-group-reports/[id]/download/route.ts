@@ -5,7 +5,7 @@ import { getCurrentSession } from "@/lib/auth/session";
 
 export async function GET(
 	_request: NextRequest,
-	{ params }: { params: Promise<{ id: string }> },
+	{ params }: RouteContext<"/api/reporting/working-group-reports/[id]/download">,
 ): Promise<Response> {
 	const { session, user } = await getCurrentSession();
 

@@ -10,25 +10,23 @@ import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorEditContributionPageProps {
-	params: Promise<{ locale: string; id: string }>;
-}
+interface DashboardAdministratorEditPersonRelationPageProps extends PageProps<"/[locale]/dashboard/administrator/person-relations/[id]/edit"> {}
 
 export async function generateMetadata(
-	_props: Readonly<DashboardAdministratorEditContributionPageProps>,
+	_props: Readonly<DashboardAdministratorEditPersonRelationPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Administrator dashboard - Edit contribution"),
+		title: t("Administrator dashboard - Edit person relation"),
 	});
 
 	return metadata;
 }
 
-export default async function DashboardAdministratorEditContributionPage(
-	props: Readonly<DashboardAdministratorEditContributionPageProps>,
+export default async function DashboardAdministratorEditPersonRelationPage(
+	props: Readonly<DashboardAdministratorEditPersonRelationPageProps>,
 ): Promise<ReactNode> {
 	const { params } = props;
 	const { id } = await params;

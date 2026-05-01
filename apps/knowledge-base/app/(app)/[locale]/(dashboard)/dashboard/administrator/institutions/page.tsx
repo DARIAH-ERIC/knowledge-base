@@ -18,7 +18,7 @@ interface DashboardAdministratorInstitutionsPageProps extends PageProps<"/[local
 
 const pageSize = 10;
 const defaultSort = "name" as const;
-const validSorts = ["name", "country", "status"] as const;
+const validSorts = ["name"] as const;
 
 function createListHref(
 	q: string,
@@ -36,6 +36,7 @@ function createListHref(
 		searchParams.set("page", String(page));
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 	if (sort !== defaultSort || dir !== "asc") {
 		searchParams.set("sort", sort);
 		searchParams.set("dir", dir);

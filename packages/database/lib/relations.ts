@@ -19,6 +19,13 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.documentsPolicies.groupId,
 			}),
 		},
+		documentationPages: {
+			entity: r.one.entities({
+				from: r.documentationPages.id,
+				to: r.entities.id,
+				optional: false,
+			}),
+		},
 		documentsPolicies: {
 			entity: r.one.entities({
 				from: r.documentsPolicies.id,

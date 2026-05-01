@@ -3,9 +3,7 @@ import type { ReactNode } from "react";
 
 import { redirect } from "@/lib/navigation/navigation";
 
-interface DashboardAdministratorEditReportingCampaignPageProps {
-	params: Promise<{ locale: string; id: string }>;
-}
+interface DashboardAdministratorEditReportingCampaignPageProps extends PageProps<"/[locale]/dashboard/administrator/reporting-campaigns/[id]/edit"> {}
 
 export default async function DashboardAdministratorEditReportingCampaignPage(
 	props: Readonly<DashboardAdministratorEditReportingCampaignPageProps>,

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { WorkingGroupReportEventsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-events-form";
 import { createWorkingGroupReportEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/create-working-group-report-event.action";
 import { deleteWorkingGroupReportEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/delete-working-group-report-event.action";
@@ -11,9 +12,7 @@ import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardReportingWorkingGroupReportEventsPageProps {
-	params: Promise<{ locale: string; id: string }>;
-}
+interface DashboardReportingWorkingGroupReportEventsPageProps extends PageProps<"/[locale]/dashboard/reporting/working-group-reports/[id]/edit/events"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardReportingWorkingGroupReportEventsPageProps>,
@@ -61,10 +60,18 @@ export default async function DashboardReportingWorkingGroupReportEventsPage(
 	}
 
 	return (
-		<WorkingGroupReportEventsForm
-			addAction={createWorkingGroupReportEventAction}
-			deleteAction={deleteWorkingGroupReportEventAction}
-			report={report}
-		/>
+		<div className="flex flex-col gap-y-12">
+			<WorkingGroupReportEventsForm
+				addAction={createWorkingGroupReportEventAction}
+				deleteAction={deleteWorkingGroupReportEventAction}
+				report={report}
+			/>
+
+			<ReportScreenCommentSection
+				reportId={report.id}
+				reportType="working_group"
+				screenKey="events"
+			/>
+		</div>
 	);
 }

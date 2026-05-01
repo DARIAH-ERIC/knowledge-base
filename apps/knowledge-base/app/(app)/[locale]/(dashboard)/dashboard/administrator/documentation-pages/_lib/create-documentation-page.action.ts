@@ -1,0 +1,136 @@
+"use server";
+
+import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
+import * as schema from "@dariah-eric/database/schema";
+import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
+import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
+import slugify from "@sindresorhus/slugify";
+import { revalidatePath } from "next/cache";
+import { getExtracted, getLocale } from "next-intl/server";
+import * as v from "valibot";
+
+import { CreateDocumentationPageActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_lib/create-documentation-page.schema";
+import { assertAdmin } from "@/lib/auth/session";
+import type { ContentBlockInput } from "@/lib/content-block-input";
+import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
+import { db, type Transaction } from "@/lib/db";
+import { getIntlLanguage } from "@/lib/i18n/locales";
+import { redirect } from "@/lib/navigation/navigation";
+import { createServerAction } from "@/lib/server/create-server-action";
+
+export const createDocumentationPageAction = createServerAction(
+	async function createDocumentationPageAction(state, formData) {
+		const locale = await getLocale();
+		const t = await getExtracted();
+
+		if (!(await globalPostRequestRateLimit())) {
+			return createActionStateError({ message: t("Too many requests.") });
+		}
+
+		await assertAdmin();
+
+		const result = await v.safeParseAsync(
+			CreateDocumentationPageActionInputSchema,
+			getFormDataValues(formData),
+			{ lang: getIntlLanguage(locale) },
+		);
+
+		if (!result.success) {
+			const errors = v.flatten<typeof CreateDocumentationPageActionInputSchema>(result.issues);
+
+			return createActionStateError({
+				message: errors.root ?? t("Invalid or missing fields."),
+				validationErrors: errors.nested as unknown as ValidationErrors,
+			});
+		}
+
+		const { contentBlocks, title } = result.output;
+		const slug = slugify(title);
+		await db.transaction(async (tx) => {
+			const type = await tx.query.entityTypes.findFirst({
+				where: {
+					type: "documentation_pages",
+				},
+				columns: {
+					id: true,
+				},
+			});
+
+			assert(type);
+
+			const status = await tx.query.entityStatus.findFirst({
+				where: {
+					type: "draft",
+				},
+				columns: {
+					id: true,
+				},
+			});
+
+			assert(status);
+
+			const [entity] = await tx
+				.insert(schema.entities)
+				.values({
+					slug,
+					statusId: status.id,
+					typeId: type.id,
+				})
+				.returning({ id: schema.entities.id });
+
+			assert(entity);
+
+			await tx.insert(schema.documentationPages).values({
+				id: entity.id,
+				title,
+			});
+
+			const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({
+				where: {
+					entityTypeId: type.id,
+					fieldName: "content",
+				},
+				columns: { id: true },
+			});
+
+			assert(contentFieldName);
+
+			const [contentField] = await tx
+				.insert(schema.fields)
+				.values({ entityId: entity.id, fieldNameId: contentFieldName.id })
+				.returning({ id: schema.fields.id });
+
+			assert(contentField);
+
+			const contentBlockTypes = await db.query.contentBlockTypes.findMany();
+			const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => {
+				return item.type;
+			});
+
+			async function insertTypeBlock(tx: Transaction, block: ContentBlockInput, blockId: string) {
+				await upsertTypedContentBlock(tx, block, blockId, true);
+			}
+
+			await Promise.all(
+				contentBlocks.map(async (contentBlock, index) => {
+					const [added] = await tx
+						.insert(schema.contentBlocks)
+						.values({
+							fieldId: contentField.id,
+							typeId: contentBlockTypesByType[contentBlock.type].id,
+							position: index,
+						})
+						.returning({ id: schema.contentBlocks.id });
+
+					assert(added);
+
+					await insertTypeBlock(tx, contentBlock, added.id);
+				}),
+			);
+		});
+
+		revalidatePath("/[locale]/dashboard/website/documentation-pages", "layout");
+
+		redirect({ href: "/dashboard/website/documentation-pages", locale });
+	},
+);

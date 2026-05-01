@@ -10,7 +10,7 @@ async function main() {
 		},
 		sourceLocale: "en",
 		// Include the published ui bundle so app-owned extraction stays in sync with shared components.
-		srcPath: ["./app", "./components", "./lib", "../../packages/ui/dist"],
+		srcPath: ["./app", "./components", "./lib", "../../packages/ui/lib"],
 	});
 
 	log.success("Successfully extracted i18n messages.");

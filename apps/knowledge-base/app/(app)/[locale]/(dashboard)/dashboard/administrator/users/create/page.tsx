@@ -3,11 +3,10 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { UserCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-create-form";
+import { assertAuthenticated } from "@/lib/auth/session";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorCreateUserPageProps {
-	params: Promise<{ locale: string }>;
-}
+interface DashboardAdministratorCreateUserPageProps extends PageProps<"/[locale]/dashboard/administrator/users/create"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorCreateUserPageProps>,
@@ -22,8 +21,10 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardAdministratorCreateUserPage(
+export default async function DashboardAdministratorCreateUserPage(
 	_props: Readonly<DashboardAdministratorCreateUserPageProps>,
-): ReactNode {
-	return <UserCreateForm />;
+): Promise<ReactNode> {
+	const { user: currentUser } = await assertAuthenticated();
+
+	return <UserCreateForm canCurrentUserManageAdmins={currentUser.canManageAdmins} />;
 }

@@ -5,9 +5,7 @@ import type { ReactNode } from "react";
 import { ReportingCampaignCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaign-create-form";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorCreateReportingCampaignPageProps {
-	params: Promise<{ locale: string }>;
-}
+interface DashboardAdministratorCreateReportingCampaignPageProps extends PageProps<"/[locale]/dashboard/administrator/reporting-campaigns/create"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorCreateReportingCampaignPageProps>,

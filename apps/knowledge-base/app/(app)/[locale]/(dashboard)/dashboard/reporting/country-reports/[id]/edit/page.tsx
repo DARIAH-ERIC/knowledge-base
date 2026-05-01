@@ -2,9 +2,7 @@ import { getLocale } from "next-intl/server";
 
 import { redirect } from "@/lib/navigation/navigation";
 
-interface DashboardReportingEditCountryReportPageProps {
-	params: Promise<{ locale: string; id: string }>;
-}
+interface DashboardReportingEditCountryReportPageProps extends PageProps<"/[locale]/dashboard/reporting/country-reports/[id]/edit"> {}
 
 export default async function DashboardReportingEditCountryReportPage(
 	props: Readonly<DashboardReportingEditCountryReportPageProps>,

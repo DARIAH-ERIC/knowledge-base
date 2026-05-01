@@ -7,7 +7,13 @@ import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 const GovernanceBodyPersonSchema = v.object({
 	...v.pick(schema.PersonSelectSchema, ["id", "name", "sortName", "email", "orcid"]).entries,
 	position: v.nullable(
-		v.array(v.object({ role: v.picklist(schema.personRoleTypesEnum), name: v.string() })),
+		v.array(
+			v.object({
+				role: v.picklist(schema.personRoleTypesEnum),
+				name: v.string(),
+				type: v.picklist(schema.organisationalUnitTypesEnum),
+			}),
+		),
 	),
 	image: v.object({ url: v.string() }),
 	slug: v.string(),

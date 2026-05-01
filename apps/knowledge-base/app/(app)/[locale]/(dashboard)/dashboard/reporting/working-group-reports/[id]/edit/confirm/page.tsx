@@ -1,10 +1,12 @@
-import { Button, buttonStyles } from "@dariah-eric/ui/button";
+import { Button } from "@dariah-eric/ui/button";
+import { ButtonLink } from "@dariah-eric/ui/button-link";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { WorkingGroupReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary";
 import { confirmWorkingGroupReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/confirm-working-group-report.action";
 import { getWorkingGroupReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
@@ -13,9 +15,7 @@ import { can } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardReportingWorkingGroupReportConfirmPageProps {
-	params: Promise<{ locale: string; id: string }>;
-}
+interface DashboardReportingWorkingGroupReportConfirmPageProps extends PageProps<"/[locale]/dashboard/reporting/working-group-reports/[id]/edit/confirm"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardReportingWorkingGroupReportConfirmPageProps>,
@@ -79,16 +79,23 @@ export default async function DashboardReportingWorkingGroupReportConfirmPage(
 						<p className="text-sm text-muted-fg">{t("This report has been accepted.")}</p>
 					)}
 
-					<a
-						className={buttonStyles({ intent: "plain", size: "sm" })}
+					<ButtonLink
 						download={`working-group-report-${id}.json`}
 						href={`/api/reporting/working-group-reports/${id}/download`}
+						intent="plain"
+						size="sm"
 					>
 						<ArrowDownTrayIcon className="mr-2 size-4" />
 						{t("Download JSON")}
-					</a>
+					</ButtonLink>
 				</div>
 			</div>
+
+			<ReportScreenCommentSection
+				reportId={report.id}
+				reportType="working_group"
+				screenKey="confirm"
+			/>
 		</div>
 	);
 }

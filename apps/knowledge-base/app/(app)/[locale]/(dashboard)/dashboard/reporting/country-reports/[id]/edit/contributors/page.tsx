@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { CountryReportClaimedContributorsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-claimed-contributors-form";
 import { CountryReportContributorsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-contributors-form";
 import { createCountryReportContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-contribution.action";
@@ -15,9 +16,7 @@ import { db } from "@/lib/db";
 import { and, eq, inArray, notInArray, or, sql } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardReportingCountryReportContributorsPageProps {
-	params: Promise<{ locale: string; id: string }>;
-}
+interface DashboardReportingCountryReportContributorsPageProps extends PageProps<"/[locale]/dashboard/reporting/country-reports/[id]/edit/contributors"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardReportingCountryReportContributorsPageProps>,
@@ -146,6 +145,12 @@ export default async function DashboardReportingCountryReportContributorsPage(
 			<CountryReportContributorsForm
 				formAction={updateCountryReportContributorsAction}
 				report={report}
+			/>
+
+			<ReportScreenCommentSection
+				reportId={report.id}
+				reportType="country"
+				screenKey="contributors"
 			/>
 		</div>
 	);

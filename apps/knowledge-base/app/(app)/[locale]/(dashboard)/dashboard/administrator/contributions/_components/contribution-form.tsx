@@ -44,6 +44,12 @@ function formatRoleType(type: string): string {
 	return type.replaceAll("_", " ");
 }
 
+function formatRoleOptionLabel(option: ContributionRoleOption): string {
+	const allowedTypes = option.allowedUnitTypes.map(formatRoleType).join(", ");
+
+	return `${formatRoleType(option.roleType)} - ${allowedTypes}`;
+}
+
 function getValidationError(error: string | Array<string> | undefined): string | undefined {
 	if (typeof error === "string") {
 		return error;
@@ -91,7 +97,7 @@ export function ContributionForm(props: Readonly<ContributionFormProps>): ReactN
 			return;
 		}
 
-		router.push("/dashboard/administrator/contributions");
+		router.push("/dashboard/administrator/person-relations");
 		router.refresh();
 	}, [router, state]);
 
@@ -128,7 +134,7 @@ export function ContributionForm(props: Readonly<ContributionFormProps>): ReactN
 							{roleOptions.map((option) => {
 								return (
 									<SelectItem key={option.roleTypeId} id={option.roleTypeId}>
-										{formatRoleType(option.roleType)}
+										{formatRoleOptionLabel(option)}
 									</SelectItem>
 								);
 							})}

@@ -1,7 +1,6 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Badge } from "@dariah-eric/ui/badge";
 import { Button, buttonStyles } from "@dariah-eric/ui/button";
 import { Link } from "@dariah-eric/ui/link";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
@@ -34,15 +33,12 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/delete-institution.action";
-import type { InstitutionEricRelationStatus } from "@/lib/data/institutions";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface InstitutionsPageProps {
 	institutions: {
 		data: Array<
 			Pick<schema.OrganisationalUnit, "id" | "name"> & {
-				countryName: string | null;
-				ericRelationStatuses: Array<InstitutionEricRelationStatus>;
 				entity: Pick<schema.Entity, "slug">;
 			}
 		>;
@@ -51,26 +47,7 @@ interface InstitutionsPageProps {
 	dir: "asc" | "desc";
 	page: number;
 	q: string;
-	sort: "name" | "country" | "status";
-}
-
-function institutionStatusIntent(
-	status: InstitutionEricRelationStatus,
-): "danger" | "info" | "primary" | "success" {
-	switch (status) {
-		case "is_partner_institution_of": {
-			return "primary";
-		}
-		case "is_cooperating_partner_of": {
-			return "danger";
-		}
-		case "is_national_coordinating_institution_in": {
-			return "info";
-		}
-		case "is_national_representative_institution_in": {
-			return "success";
-		}
-	}
+	sort: "name";
 }
 
 const pageSize = 10;
@@ -86,12 +63,6 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 
 	const t = useExtracted();
 	const router = useRouter();
-	const institutionStatusLabels: Record<InstitutionEricRelationStatus, string> = {
-		is_cooperating_partner_of: t("Cooperating partner"),
-		is_national_coordinating_institution_in: t("National coordinating institution"),
-		is_national_representative_institution_in: t("National representative institution"),
-		is_partner_institution_of: t("Partner institution"),
-	};
 	const [items, optimisticallyRemoveItem] = useOptimistic(
 		institutions.data,
 		(state, id: string) => {
@@ -145,12 +116,6 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
 						{t("Name")}
 					</TableColumn>
-					<TableColumn allowsSorting={true} id="country">
-						{t("Country")}
-					</TableColumn>
-					<TableColumn allowsSorting={true} id="status">
-						{t("Status")}
-					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -158,22 +123,6 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 						return (
 							<TableRow>
 								<TableCell>{item.name}</TableCell>
-								<TableCell>{item.countryName ?? "—"}</TableCell>
-								<TableCell>
-									{item.ericRelationStatuses.length > 0 ? (
-										<div className="flex flex-wrap gap-2">
-											{item.ericRelationStatuses.map((status) => {
-												return (
-													<Badge key={status} intent={institutionStatusIntent(status)}>
-														{institutionStatusLabels[status]}
-													</Badge>
-												);
-											})}
-										</div>
-									) : (
-										"—"
-									)}
-								</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button

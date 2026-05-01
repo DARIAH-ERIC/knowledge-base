@@ -300,10 +300,16 @@ function extractAccordionItems(html: string): Array<{ title: string; bodyHtml: s
 		const itemEnd = findClosingDiv(html, m.index + m[0].length);
 		const itemHtml = html.slice(m.index, itemEnd);
 
-		const headerMatch = /<div[^>]+class="[^"]*ea-header[^"]*"[^>]*>([\s\S]*?)<\/div>/i.exec(
-			itemHtml,
-		);
-		const title = (headerMatch?.[1] ?? "").replaceAll(/<[^>]+>/g, "").trim();
+		const headerMatch =
+			// eslint-disable-next-line regexp/no-super-linear-backtracking, regexp/no-misleading-capturing-group, regexp/optimal-quantifier-concatenation
+			/<([a-z0-9]+)[^>]+class="[^"]*ea-header[^"]*"[^>]*>([\s\S]*?)<\/\1>/i.exec(itemHtml);
+		const headerHtml = headerMatch?.[2] ?? "";
+		const anchorMatch = /<a\b[^>]*>([\s\S]*?)<\/a>/i.exec(headerHtml);
+		const titleSource = anchorMatch?.[1] ?? headerHtml;
+		const title = titleSource
+			.replaceAll(/<[^>]+>/g, "")
+			.replaceAll("&nbsp;", " ")
+			.trim();
 
 		const bodyOpenMatch = /<div[^>]+class="[^"]*ea-body[^"]*"[^>]*>/i.exec(itemHtml);
 		let bodyHtml = "";
@@ -1245,7 +1251,7 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: page.slug,
-					statusId: statusByType.draft.id,
+					statusId: statusByType.published.id,
 					typeId: typesByType.pages.id,
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),

@@ -8,7 +8,13 @@ export const PersonBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.PersonSelectSchema, ["id", "name", "sortName", "email", "orcid"]).entries,
 		position: v.nullable(
-			v.array(v.object({ role: v.picklist(schema.personRoleTypesEnum), name: v.string() })),
+			v.array(
+				v.object({
+					role: v.picklist(schema.personRoleTypesEnum),
+					name: v.string(),
+					type: v.picklist(schema.organisationalUnitTypesEnum),
+				}),
+			),
 		),
 		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
@@ -32,7 +38,13 @@ export const PersonSchema = v.pipe(
 	v.object({
 		...v.pick(schema.PersonSelectSchema, ["id", "name", "sortName", "email", "orcid"]).entries,
 		position: v.nullable(
-			v.array(v.object({ role: v.picklist(schema.personRoleTypesEnum), name: v.string() })),
+			v.array(
+				v.object({
+					role: v.picklist(schema.personRoleTypesEnum),
+					name: v.string(),
+					type: v.picklist(schema.organisationalUnitTypesEnum),
+				}),
+			),
 		),
 		image: v.object({ url: v.string() }),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),

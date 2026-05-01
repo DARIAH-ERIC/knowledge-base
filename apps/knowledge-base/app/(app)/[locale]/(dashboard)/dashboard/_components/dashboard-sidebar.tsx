@@ -52,15 +52,15 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 				icon: <ListBulletIcon />,
 			},
 			{
-				href: "/dashboard/administrator/contributions",
-				tooltip: t("Contributions"),
-				label: t("Contributions"),
-				icon: <ListBulletIcon />,
-			},
-			{
 				href: "/dashboard/administrator/countries",
 				tooltip: t("Countries"),
 				label: t("Countries"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/documentation-pages",
+				tooltip: t("Documentation pages"),
+				label: t("Documentation pages"),
 				icon: <ListBulletIcon />,
 			},
 			{
@@ -73,6 +73,12 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 				href: "/dashboard/administrator/institutions",
 				tooltip: t("Institutions"),
 				label: t("Institutions"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/institution-relations",
+				tooltip: t("Institution relations"),
+				label: t("Institution relations"),
 				icon: <ListBulletIcon />,
 			},
 			{
@@ -91,6 +97,12 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 				href: "/dashboard/administrator/persons",
 				tooltip: t("Persons"),
 				label: t("Persons"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/person-relations",
+				tooltip: t("Person relations"),
+				label: t("Person relations"),
 				icon: <ListBulletIcon />,
 			},
 			{
@@ -215,6 +227,18 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 						icon: <ListBulletIcon />,
 					},
 					{
+						href: "/dashboard/administrator/reporting-campaigns",
+						tooltip: t("Reporting campaigns"),
+						label: t("Reporting campaigns"),
+						icon: <ListBulletIcon />,
+					},
+					{
+						href: "/dashboard/administrator/reporting-statistics",
+						tooltip: t("Statistics"),
+						label: t("Statistics"),
+						icon: <ListBulletIcon />,
+					},
+					{
 						href: "/dashboard/administrator/country-reports",
 						tooltip: t("Country reports"),
 						label: t("Country reports"),
@@ -224,12 +248,6 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 						href: "/dashboard/administrator/working-group-reports",
 						tooltip: t("Working group reports"),
 						label: t("Working group reports"),
-						icon: <ListBulletIcon />,
-					},
-					{
-						href: "/dashboard/administrator/reporting-campaigns",
-						tooltip: t("Reporting campaigns"),
-						label: t("Reporting campaigns"),
 						icon: <ListBulletIcon />,
 					},
 				]

@@ -62,6 +62,12 @@ function formatRoleType(type: string): string {
 	return type.replaceAll("_", " ");
 }
 
+function formatRoleOptionLabel(option: ContributionRoleOption): string {
+	const allowedTypes = option.allowedUnitTypes.map(formatRoleType).join(", ");
+
+	return `${formatRoleType(option.roleType)} - ${allowedTypes}`;
+}
+
 export function ContributionsSection(props: Readonly<ContributionsSectionProps>): ReactNode {
 	const { personId, roleOptions, contributions } = props;
 
@@ -201,7 +207,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 										{roleOptions.map((option) => {
 											return (
 												<SelectItem key={option.roleTypeId} id={option.roleTypeId}>
-													{formatRoleType(option.roleType)}
+													{formatRoleOptionLabel(option)}
 												</SelectItem>
 											);
 										})}

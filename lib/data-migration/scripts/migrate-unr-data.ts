@@ -1,7 +1,7 @@
 import { assert, keyBy, log } from "@acdh-oeaw/lib";
 import { createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
-import { createStorageService } from "@dariah-eric/storage";
+import { type AssetMetadata, createStorageService } from "@dariah-eric/storage";
 import { buffer } from "@dariah-eric/storage/lib";
 import slugify from "@sindresorhus/slugify";
 import { generateJSON } from "@tiptap/html";
@@ -9,7 +9,6 @@ import { StarterKit } from "@tiptap/starter-kit";
 import { eq, ilike } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 
-import type { AssetMetadata } from "../../../packages/storage/lib";
 import { placeholderImageUrl } from "../config/data-migration.config";
 import { env } from "../config/env.config";
 import {
@@ -151,7 +150,7 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: workingGroup.slug,
-					statusId: statusByType.draft.id,
+					statusId: statusByType.published.id,
 					typeId: typesByType.organisational_units.id,
 					createdAt: new Date(workingGroup.createdAt),
 					updatedAt: new Date(workingGroup.updatedAt),
@@ -280,7 +279,7 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: slugify(country.name),
-					statusId: statusByType.draft.id,
+					statusId: statusByType.published.id,
 					typeId: typesByType.organisational_units.id,
 					createdAt: new Date(country.createdAt),
 					updatedAt: new Date(country.updatedAt),
@@ -322,7 +321,7 @@ async function main() {
 					.insert(schema.entities)
 					.values({
 						slug: slugify(country.consortiumName ?? `Consortium ${country.name}`),
-						statusId: statusByType.draft.id,
+						statusId: statusByType.published.id,
 						typeId: typesByType.organisational_units.id,
 						createdAt: new Date(country.createdAt),
 						updatedAt: new Date(country.updatedAt),
@@ -705,7 +704,7 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: slugify(person.name),
-					statusId: statusByType.draft.id,
+					statusId: statusByType.published.id,
 					typeId: typesByType.persons.id,
 					createdAt: new Date(person.createdAt),
 					updatedAt: new Date(person.updatedAt),

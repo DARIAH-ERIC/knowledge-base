@@ -236,7 +236,14 @@ export const workingGroupUnitType = "working_group";
 export const workingGroups = p
 	.pgView("working_groups", {
 		id: p.uuid("id").notNull(),
-		metadata: p.jsonb("metadata"),
+		/** TODO: Holds activities, disciplines, memberTracking, mailingList, contactEmail. */
+		metadata: p.jsonb("metadata").$type<{
+			activities?: string;
+			disciplines?: string;
+			memberTracking?: string;
+			mailingList?: string;
+			contactEmail?: string;
+		}>(),
 		name: p.text("name").notNull(),
 		summary: p.text("summary"),
 		updatedAt: f.timestamp("updated_at").notNull(),

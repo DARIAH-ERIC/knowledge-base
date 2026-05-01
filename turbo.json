@@ -76,7 +76,14 @@
 		"ZOTERO_API_KEY",
 		"ZOTERO_GROUP_ID"
 	],
-	"globalPassThroughEnv": ["CI", "ENV_VALIDATION", "PORT"],
+	"globalPassThroughEnv": [
+		"ADMIN_EMAIL",
+		"ADMIN_NAME",
+		"ADMIN_PASSWORD",
+		"CI",
+		"ENV_VALIDATION",
+		"PORT"
+	],
 	"tasks": {
 		"build": {
 			"dependsOn": ["^build"],

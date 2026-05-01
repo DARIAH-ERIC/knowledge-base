@@ -81,7 +81,14 @@ interface CreateAuthServiceParams {
 
 export interface User extends Pick<
 	schema.User,
-	"id" | "email" | "name" | "role" | "isEmailVerified" | "personId" | "organisationalUnitId"
+	| "id"
+	| "email"
+	| "name"
+	| "role"
+	| "canManageAdmins"
+	| "isEmailVerified"
+	| "personId"
+	| "organisationalUnitId"
 > {
 	isTwoFactorRegistered: boolean;
 }
@@ -127,40 +134,90 @@ export type PasswordResetSessionValidationResult =
 	| AuthenticatedPasswordResetSession
 	| UnauthenticatedPasswordResetSession;
 
+interface CreateUserWithPasswordParams {
+	db: Database;
+	email: string;
+	encryptionKey: Buffer;
+	name: string;
+	password: string;
+}
+
+function generateRandomString() {
+	return randomBytes(32).toString("hex");
+}
+
+function generateTwoFactorKey(): string {
+	const bytes = randomBytes(5);
+	const value = encodeBase32UpperCaseNoPadding(bytes);
+	return value;
+}
+
+function generateTwoFactorRecoveryCode(): string {
+	const bytes = randomBytes(10);
+	const value = encodeBase32UpperCaseNoPadding(bytes);
+	return value;
+}
+
+function encrypt(data: Buffer, encryptionKey: Buffer): Buffer {
+	const iv = randomBytes(16);
+	const cipher = createCipheriv("aes-128-gcm", encryptionKey, iv);
+	return Buffer.concat([iv, cipher.update(data), cipher.final(), cipher.getAuthTag()]);
+}
+
+function encryptUtf8String(data: string, encryptionKey: Buffer): Buffer {
+	return encrypt(Buffer.from(data, "utf-8"), encryptionKey);
+}
+
+async function generatePasswordHash(password: string): Promise<string> {
+	return hash(password, {
+		memoryCost: 19_456,
+		timeCost: 2,
+		outputLen: 32,
+		parallelism: 1,
+	});
+}
+
+export async function createUserWithPassword(params: CreateUserWithPasswordParams): Promise<User> {
+	const { db, email, encryptionKey, name, password } = params;
+
+	const passwordHash = await generatePasswordHash(password);
+	const twoFactorRecoveryCode = encryptUtf8String(generateTwoFactorRecoveryCode(), encryptionKey);
+
+	const [user] = await db
+		.insert(schema.users)
+		.values({
+			email,
+			passwordHash,
+			name,
+			twoFactorRecoveryCode,
+		})
+		.returning({
+			id: schema.users.id,
+			email: schema.users.email,
+			name: schema.users.name,
+			role: schema.users.role,
+			canManageAdmins: schema.users.canManageAdmins,
+			isEmailVerified: schema.users.isEmailVerified,
+			personId: schema.users.personId,
+			organisationalUnitId: schema.users.organisationalUnitId,
+			isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
+		});
+
+	if (user == null) {
+		throw new DatabaseError({ message: "Failed to create user" });
+	}
+
+	return user;
+}
+
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createAuthService(params: CreateAuthServiceParams) {
 	const { config, context, secrets } = params;
 
 	const { cookies, db, email } = context;
 
-	function generateRandomString() {
-		return randomBytes(32).toString("hex");
-	}
-
 	function hashSessionSecret(secret: string): Buffer {
 		return createHash("sha-256").update(secret).digest();
-	}
-
-	function generateTwoFactorKey(): string {
-		const bytes = randomBytes(5);
-		const value = encodeBase32UpperCaseNoPadding(bytes);
-		return value;
-	}
-
-	function generateTwoFactorRecoveryCode(): string {
-		const bytes = randomBytes(10);
-		const value = encodeBase32UpperCaseNoPadding(bytes);
-		return value;
-	}
-
-	function encrypt(data: Buffer): Buffer {
-		const iv = randomBytes(16);
-		const cipher = createCipheriv("aes-128-gcm", secrets.encryptionKey, iv);
-		return Buffer.concat([iv, cipher.update(data), cipher.final(), cipher.getAuthTag()]);
-	}
-
-	function encryptString(data: string): Buffer {
-		return encrypt(Buffer.from(data, "utf-8"));
 	}
 
 	function decrypt(encrypted: Buffer): Buffer {
@@ -174,17 +231,16 @@ export function createAuthService(params: CreateAuthServiceParams) {
 		return Buffer.concat([decipher.update(ciphertext), decipher.final()]);
 	}
 
-	function decryptToString(data: Buffer): string {
-		return decrypt(data).toString("utf-8");
+	function encryptBuffer(data: Buffer): Buffer {
+		return encrypt(data, secrets.encryptionKey);
 	}
 
-	function generatePasswordHash(password: string): Promise<string> {
-		return hash(password, {
-			memoryCost: 19_456,
-			timeCost: 2,
-			outputLen: 32,
-			parallelism: 1,
-		});
+	function encryptString(data: string): Buffer {
+		return encryptUtf8String(data, secrets.encryptionKey);
+	}
+
+	function decryptToString(data: Buffer): string {
+		return decrypt(data).toString("utf-8");
 	}
 
 	async function createSession(
@@ -264,6 +320,7 @@ export function createAuthService(params: CreateAuthServiceParams) {
 					email: schema.users.email,
 					name: schema.users.name,
 					role: schema.users.role,
+					canManageAdmins: schema.users.canManageAdmins,
 					isEmailVerified: schema.users.isEmailVerified,
 					personId: schema.users.personId,
 					organisationalUnitId: schema.users.organisationalUnitId,
@@ -352,6 +409,7 @@ export function createAuthService(params: CreateAuthServiceParams) {
 				email: schema.users.email,
 				name: schema.users.name,
 				role: schema.users.role,
+				canManageAdmins: schema.users.canManageAdmins,
 				isEmailVerified: schema.users.isEmailVerified,
 				personId: schema.users.personId,
 				organisationalUnitId: schema.users.organisationalUnitId,
@@ -426,34 +484,13 @@ export function createAuthService(params: CreateAuthServiceParams) {
 	}
 
 	async function createUser(email: string, name: string, password: string): Promise<User> {
-		const passwordHash = await generatePasswordHash(password);
-
-		const twoFactorRecoveryCode = encryptString(generateTwoFactorRecoveryCode());
-
-		const [user] = await db
-			.insert(schema.users)
-			.values({
-				email,
-				passwordHash,
-				name,
-				twoFactorRecoveryCode,
-			})
-			.returning({
-				id: schema.users.id,
-				email: schema.users.email,
-				name: schema.users.name,
-				role: schema.users.role,
-				isEmailVerified: schema.users.isEmailVerified,
-				personId: schema.users.personId,
-				organisationalUnitId: schema.users.organisationalUnitId,
-				isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
-			});
-
-		if (user == null) {
-			throw new DatabaseError({ message: "Failed to create user" });
-		}
-
-		return user;
+		return createUserWithPassword({
+			db,
+			email,
+			encryptionKey: secrets.encryptionKey,
+			name,
+			password,
+		});
 	}
 
 	async function deleteEmailVerificationRequest(userId: string): Promise<void> {
@@ -726,6 +763,7 @@ export function createAuthService(params: CreateAuthServiceParams) {
 					email: schema.users.email,
 					name: schema.users.name,
 					role: schema.users.role,
+					canManageAdmins: schema.users.canManageAdmins,
 					isEmailVerified: schema.users.isEmailVerified,
 					personId: schema.users.personId,
 					organisationalUnitId: schema.users.organisationalUnitId,
@@ -848,7 +886,7 @@ export function createAuthService(params: CreateAuthServiceParams) {
 	}
 
 	async function updateUserTotpKey(userId: string, key: Buffer): Promise<void> {
-		const twoFactorTotpKey = encrypt(key);
+		const twoFactorTotpKey = encryptBuffer(key);
 
 		await db
 			.update(schema.users)

@@ -3,6 +3,7 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
+import { Checkbox } from "@dariah-eric/ui/checkbox";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
@@ -23,7 +24,9 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 type ActorType = "none" | "person" | "country";
 
 interface UserFormProps {
+	canCurrentUserManageAdmins: boolean;
 	user?: Pick<schema.User, "id" | "name" | "email" | "role"> & {
+		canManageAdmins: boolean;
 		person: { id: string; name: string } | null;
 		organisationalUnit: { id: string; name: string } | null;
 	};
@@ -31,7 +34,7 @@ interface UserFormProps {
 }
 
 export function UserForm(props: Readonly<UserFormProps>): ReactNode {
-	const { user, formAction } = props;
+	const { canCurrentUserManageAdmins, user, formAction } = props;
 
 	const t = useExtracted();
 
@@ -82,6 +85,16 @@ export function UserForm(props: Readonly<UserFormProps>): ReactNode {
 						</SelectContent>
 					</Select>
 					<input name="role" type="hidden" value={selectedRole} />
+
+					{canCurrentUserManageAdmins && selectedRole === "admin" ? (
+						<Checkbox
+							defaultSelected={user?.canManageAdmins ?? false}
+							name="canManageAdmins"
+							value="true"
+						>
+							{t("Can manage other admin users")}
+						</Checkbox>
+					) : null}
 
 					{user == null && (
 						<TextField isRequired={true} name="password" type="password">

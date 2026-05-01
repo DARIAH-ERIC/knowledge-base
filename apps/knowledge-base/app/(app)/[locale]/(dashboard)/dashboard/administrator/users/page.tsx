@@ -18,7 +18,7 @@ interface DashboardAdministratorUsersPageProps extends PageProps<"/[locale]/dash
 
 const pageSize = 10;
 const defaultSort = "name" as const;
-const validSorts = ["name", "email", "role", "isEmailVerified"] as const;
+const validSorts = ["name", "email", "role", "canManageAdmins", "isEmailVerified"] as const;
 
 function createListHref(
 	q: string,
@@ -89,6 +89,7 @@ export default async function DashboardAdministratorUsersPage(
 
 	return (
 		<UsersPage
+			currentUserCanManageAdmins={currentUser.canManageAdmins}
 			currentUserId={currentUser.id}
 			dir={dir}
 			page={page}

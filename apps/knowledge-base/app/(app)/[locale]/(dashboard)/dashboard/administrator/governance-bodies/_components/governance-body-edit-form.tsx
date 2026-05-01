@@ -6,9 +6,12 @@ import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { PersonRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { GovernanceBodyForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form";
 import { updateGovernanceBodyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/update-governance-body.action";
+import type { ContributionPersonOption } from "@/lib/data/contributions";
+import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
 import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
 
 interface GovernanceBodyEditFormProps {
@@ -25,6 +28,10 @@ interface GovernanceBodyEditFormProps {
 	initialRelatedResourceTotal: number;
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
+	personRelations: Array<PersonRelation>;
+	personRelationRoleOptions: Array<PersonRelationRoleOption>;
+	initialPersonItems: Array<ContributionPersonOption>;
+	initialPersonTotal: number;
 	relations: Array<UnitRelation>;
 	unitRelationStatusOptions: Array<UnitRelationStatusOption>;
 }
@@ -41,6 +48,10 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 		initialRelatedResourceTotal,
 		selectedRelatedEntities,
 		selectedRelatedResources,
+		personRelations,
+		personRelationRoleOptions,
+		initialPersonItems,
+		initialPersonTotal,
 		relations,
 		unitRelationStatusOptions,
 	} = props;
@@ -63,6 +74,14 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 				initialRelatedResourceTotal={initialRelatedResourceTotal}
 				selectedRelatedEntities={selectedRelatedEntities}
 				selectedRelatedResources={selectedRelatedResources}
+			/>
+
+			<PersonRelationsSection
+				initialPersonItems={initialPersonItems}
+				initialPersonTotal={initialPersonTotal}
+				relations={personRelations}
+				roleOptions={personRelationRoleOptions}
+				unitId={governanceBody.id}
 			/>
 
 			<UnitRelationsSection

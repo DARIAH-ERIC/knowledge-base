@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { CountryReportInstitutionsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form";
 import { createCountryReportInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-institution.action";
 import { deleteCountryReportInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/delete-country-report-institution.action";
@@ -13,9 +14,7 @@ import { db } from "@/lib/db";
 import { and, eq, inArray, notInArray, sql } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardReportingCountryReportInstitutionsPageProps {
-	params: Promise<{ locale: string; id: string }>;
-}
+interface DashboardReportingCountryReportInstitutionsPageProps extends PageProps<"/[locale]/dashboard/reporting/country-reports/[id]/edit/institutions"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardReportingCountryReportInstitutionsPageProps>,
@@ -108,11 +107,19 @@ export default async function DashboardReportingCountryReportInstitutionsPage(
 		.orderBy(schema.organisationalUnits.name);
 
 	return (
-		<CountryReportInstitutionsForm
-			addAction={createCountryReportInstitutionAction}
-			availableInstitutions={availableInstitutions}
-			deleteAction={deleteCountryReportInstitutionAction}
-			report={report}
-		/>
+		<div className="flex flex-col gap-y-12">
+			<CountryReportInstitutionsForm
+				addAction={createCountryReportInstitutionAction}
+				availableInstitutions={availableInstitutions}
+				deleteAction={deleteCountryReportInstitutionAction}
+				report={report}
+			/>
+
+			<ReportScreenCommentSection
+				reportId={report.id}
+				reportType="country"
+				screenKey="institutions"
+			/>
+		</div>
 	);
 }

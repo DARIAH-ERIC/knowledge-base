@@ -1,0 +1,16 @@
+import {
+	DocumentationPageSelectSchema,
+	DocumentationPageUpdateSchema,
+} from "@dariah-eric/database/schema";
+import * as v from "valibot";
+
+import { ContentBlockInputSchema } from "@/lib/content-block-input";
+
+export const UpdateDocumentationPageActionInputSchema = v.object({
+	...v.pick(DocumentationPageSelectSchema, ["id"]).entries,
+	...v.pick(DocumentationPageUpdateSchema, ["title"]).entries,
+	contentBlocks: v.optional(
+		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),
+		[],
+	),
+});

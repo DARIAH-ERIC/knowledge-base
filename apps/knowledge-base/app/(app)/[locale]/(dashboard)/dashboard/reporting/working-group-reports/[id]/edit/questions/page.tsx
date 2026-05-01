@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { WorkingGroupReportQuestionsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-questions-form";
 import { getAuthorizedWorkingGroupReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
 import { upsertWorkingGroupReportAnswersAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/upsert-working-group-report-answers.action";
@@ -10,9 +11,7 @@ import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardReportingWorkingGroupReportQuestionsPageProps {
-	params: Promise<{ locale: string; id: string }>;
-}
+interface DashboardReportingWorkingGroupReportQuestionsPageProps extends PageProps<"/[locale]/dashboard/reporting/working-group-reports/[id]/edit/questions"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardReportingWorkingGroupReportQuestionsPageProps>,
@@ -68,9 +67,17 @@ export default async function DashboardReportingWorkingGroupReportQuestionsPage(
 
 	if (questions.length === 0) {
 		return (
-			<p className="text-sm text-muted-fg">
-				{t("No questions have been added for this campaign yet.")}
-			</p>
+			<div className="flex flex-col gap-y-12">
+				<p className="text-sm text-muted-fg">
+					{t("No questions have been added for this campaign yet.")}
+				</p>
+
+				<ReportScreenCommentSection
+					reportId={report.id}
+					reportType="working_group"
+					screenKey="questions"
+				/>
+			</div>
 		);
 	}
 
@@ -81,11 +88,19 @@ export default async function DashboardReportingWorkingGroupReportQuestionsPage(
 	);
 
 	return (
-		<WorkingGroupReportQuestionsForm
-			answerMap={Object.fromEntries(answerMap)}
-			formAction={upsertWorkingGroupReportAnswersAction}
-			questions={questions}
-			reportId={report.id}
-		/>
+		<div className="flex flex-col gap-y-12">
+			<WorkingGroupReportQuestionsForm
+				answerMap={Object.fromEntries(answerMap)}
+				formAction={upsertWorkingGroupReportAnswersAction}
+				questions={questions}
+				reportId={report.id}
+			/>
+
+			<ReportScreenCommentSection
+				reportId={report.id}
+				reportType="working_group"
+				screenKey="questions"
+			/>
+		</div>
 	);
 }

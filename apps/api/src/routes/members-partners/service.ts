@@ -146,7 +146,7 @@ function mapPersonContributors(
 		imageKey: string;
 		role: string;
 	}>,
-	positions: Map<string, Array<{ role: string; name: string }> | null>,
+	positions: Map<string, Array<{ role: string; name: string; type: string }> | null>,
 ) {
 	return rows.map(({ imageKey, role, ...row }) => {
 		return {

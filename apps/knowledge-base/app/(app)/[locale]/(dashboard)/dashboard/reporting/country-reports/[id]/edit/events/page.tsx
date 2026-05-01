@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
+import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
 import { CountryReportEventsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-events-form";
 import { getAuthorizedCountryReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { updateCountryReportEventsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/update-country-report-events.action";
@@ -10,9 +11,7 @@ import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardReportingCountryReportEventsPageProps {
-	params: Promise<{ locale: string; id: string }>;
-}
+interface DashboardReportingCountryReportEventsPageProps extends PageProps<"/[locale]/dashboard/reporting/country-reports/[id]/edit/events"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardReportingCountryReportEventsPageProps>,
@@ -61,5 +60,11 @@ export default async function DashboardReportingCountryReportEventsPage(
 		notFound();
 	}
 
-	return <CountryReportEventsForm formAction={updateCountryReportEventsAction} report={report} />;
+	return (
+		<div className="flex flex-col gap-y-12">
+			<CountryReportEventsForm formAction={updateCountryReportEventsAction} report={report} />
+
+			<ReportScreenCommentSection reportId={report.id} reportType="country" screenKey="events" />
+		</div>
+	);
 }

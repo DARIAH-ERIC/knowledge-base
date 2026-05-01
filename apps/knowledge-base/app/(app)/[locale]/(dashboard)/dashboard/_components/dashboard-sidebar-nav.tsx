@@ -103,7 +103,7 @@ function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 					<IconDashboard />
 					<MenuLabel>{t("Dashboard")}</MenuLabel>
 				</MenuItem>
-				<MenuItem href="/dashboard/settings">
+				<MenuItem href="/auth/settings">
 					<IconSettings />
 					<MenuLabel>{t("Settings")}</MenuLabel>
 				</MenuItem>
