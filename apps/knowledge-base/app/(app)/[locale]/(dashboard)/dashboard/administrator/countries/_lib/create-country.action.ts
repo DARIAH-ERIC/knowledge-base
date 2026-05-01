@@ -63,7 +63,7 @@ export const createCountryAction = createServerAction(
 			assert(orgUnitType);
 
 			const entityStatus = await tx.query.entityStatus.findFirst({
-				where: { type: "draft" },
+				where: { type: "published" },
 				columns: { id: true },
 			});
 

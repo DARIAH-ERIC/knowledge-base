@@ -84,7 +84,7 @@ export const createWorkingGroupAction = createServerAction(
 			assert(unitStatus);
 
 			const entityStatus = await tx.query.entityStatus.findFirst({
-				where: { type: "draft" },
+				where: { type: "published" },
 				columns: { id: true },
 			});
 

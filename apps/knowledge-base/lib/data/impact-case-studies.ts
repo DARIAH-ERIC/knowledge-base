@@ -132,7 +132,7 @@ export async function createImpactCaseStudy(params: CreateImpactCaseStudyParams)
 		columns: {
 			id: true,
 		},
-		where: { type: "draft" },
+		where: { type: "published" },
 	});
 
 	if (entityStatus == null) {

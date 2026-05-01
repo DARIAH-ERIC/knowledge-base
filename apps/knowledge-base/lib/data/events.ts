@@ -138,7 +138,7 @@ export async function createEvent(params: CreateEventParams) {
 		columns: {
 			id: true,
 		},
-		where: { type: "draft" },
+		where: { type: "published" },
 	});
 
 	if (entityStatus == null) {
