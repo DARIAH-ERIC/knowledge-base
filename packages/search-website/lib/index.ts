@@ -684,13 +684,15 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					return null;
 				}
 
+				const content = await getPlainTextFieldContentByEntityId(db, [entityId], "content");
+
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "news-item",
 					sourceId: item.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
-					description: item.summary,
+					description: mergeDescription(content.get(entityId), item.summary),
 					link: `/news/${item.entity.slug}`,
 				});
 			}
@@ -723,13 +725,15 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					return null;
 				}
 
+				const content = await getPlainTextFieldContentByEntityId(db, [entityId], "content");
+
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "opportunity",
 					sourceId: item.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
-					description: item.summary ?? "",
+					description: mergeDescription(content.get(entityId), item.summary ?? ""),
 					link: `/opportunities/${item.entity.slug}`,
 				});
 			}
@@ -762,13 +766,15 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					return null;
 				}
 
+				const content = await getPlainTextFieldContentByEntityId(db, [entityId], "content");
+
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "page",
 					sourceId: item.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
-					description: item.summary,
+					description: mergeDescription(content.get(entityId), item.summary),
 					link: `/${item.entity.slug}`,
 				});
 			}
@@ -886,13 +892,15 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					return null;
 				}
 
+				const content = await getPlainTextFieldContentByEntityId(db, [entityId], "content");
+
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "spotlight-article",
 					sourceId: item.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
-					description: item.summary,
+					description: mergeDescription(content.get(entityId), item.summary),
 					link: `/spotlights/${item.entity.slug}`,
 				});
 			}
@@ -950,53 +958,116 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		const importedAt = params?.importedAt ?? Date.now();
 		const website: Array<WebsiteDocument> = [];
 
-		const [countryDescriptions, projectDescriptions, workingGroupDescriptions, personBiographies] =
-			await Promise.all([
-				getPlainTextFieldContentByEntityId(
-					db,
-					(
-						await db.query.membersAndPartners.findMany({
-							columns: { id: true },
-						})
-					).map((item) => {
-						return item.id;
-					}),
-					"description",
-				),
-				getPlainTextFieldContentByEntityId(
-					db,
-					(
-						await db.query.dariahProjects.findMany({
-							columns: { id: true },
-						})
-					).map((item) => {
-						return item.id;
-					}),
-					"description",
-				),
-				getPlainTextFieldContentByEntityId(
-					db,
-					(
-						await db.query.workingGroups.findMany({
-							columns: { id: true },
-						})
-					).map((item) => {
-						return item.id;
-					}),
-					"description",
-				),
-				getPlainTextFieldContentByEntityId(
-					db,
-					(
-						await db.query.persons.findMany({
-							columns: { id: true },
-						})
-					).map((item) => {
-						return item.id;
-					}),
-					"biography",
-				),
-			]);
+		const [
+			countryDescriptions,
+			newsContent,
+			opportunityContent,
+			pageContent,
+			personBiographies,
+			projectDescriptions,
+			spotlightContent,
+			workingGroupDescriptions,
+		] = await Promise.all([
+			getPlainTextFieldContentByEntityId(
+				db,
+				(
+					await db.query.membersAndPartners.findMany({
+						columns: { id: true },
+					})
+				).map((item) => {
+					return item.id;
+				}),
+				"description",
+			),
+			getPlainTextFieldContentByEntityId(
+				db,
+				(
+					await db.query.news.findMany({
+						columns: { id: true },
+					})
+				).map((item) => {
+					return item.id;
+				}),
+				"content",
+			),
+			getPlainTextFieldContentByEntityId(
+				db,
+				(
+					await db.query.opportunities.findMany({
+						columns: { id: true },
+					})
+				).map((item) => {
+					return item.id;
+				}),
+				"content",
+			),
+			getPlainTextFieldContentByEntityId(
+				db,
+				(
+					await db.query.pages.findMany({
+						columns: { id: true },
+					})
+				).map((item) => {
+					return item.id;
+				}),
+				"content",
+			),
+			getPlainTextFieldContentByEntityId(
+				db,
+				(
+					await db.query.persons.findMany({
+						columns: { id: true },
+					})
+				).map((item) => {
+					return item.id;
+				}),
+				"biography",
+			),
+			getPlainTextFieldContentByEntityId(
+				db,
+				(
+					await db.query.dariahProjects.findMany({
+						columns: { id: true },
+					})
+				).map((item) => {
+					return item.id;
+				}),
+				"description",
+			),
+			getPlainTextFieldContentByEntityId(
+				db,
+				(
+					await db.query.workingGroups.findMany({
+						columns: { id: true },
+					})
+				).map((item) => {
+					return item.id;
+				}),
+				"description",
+			),
+			getPlainTextFieldContentByEntityId(
+				db,
+				(
+					await db.query.spotlightArticles.findMany({
+						columns: { id: true },
+					})
+				).map((item) => {
+					return item.id;
+				}),
+				"content",
+			),
+			getPlainTextFieldContentByEntityId(
+				db,
+				(
+					await db.query.workingGroups.findMany({
+						columns: { id: true },
+					})
+				).map((item) => {
+					return item.id;
+				}),
+				"description",
+			),
+		]);
 
 		const documentsPolicies = await db.query.documentsPolicies.findMany({
 			columns: {
@@ -1411,6 +1482,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 
 		const countryContributors = await db
 			.select({
+				itemId: schema.persons.id,
 				countrySlug: countryEntities.slug,
 				itemSlug: itemEntities.slug,
 				label: schema.persons.name,
@@ -1457,7 +1529,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				type: "person",
 				id: ["person", `${item.countrySlug}:${item.itemSlug}`].join(":"),
 				label: item.label,
-				description: "",
+				description: personBiographies.get(item.itemId) ?? "",
 				link: `/network/members-and-partners/${item.countrySlug}`,
 			});
 		}
@@ -1495,7 +1567,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceId: item.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
-					description: item.summary,
+					description: mergeDescription(newsContent.get(item.id), item.summary),
 					link: `/news/${item.entity.slug}`,
 				});
 			}),
@@ -1532,7 +1604,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceId: item.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
-					description: item.summary ?? "",
+					description: mergeDescription(opportunityContent.get(item.id), item.summary ?? ""),
 					link: `/opportunities/${item.entity.slug}`,
 				});
 			}),
@@ -1569,7 +1641,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceId: item.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
-					description: item.summary,
+					description: mergeDescription(pageContent.get(item.id), item.summary),
 					link: `/${item.entity.slug}`,
 				});
 			}),
@@ -1679,7 +1751,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceId: item.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
-					description: item.summary,
+					description: mergeDescription(spotlightContent.get(item.id), item.summary),
 					link: `/spotlights/${item.entity.slug}`,
 				});
 			}),

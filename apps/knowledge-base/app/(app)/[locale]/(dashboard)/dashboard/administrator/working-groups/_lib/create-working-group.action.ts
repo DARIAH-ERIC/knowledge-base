@@ -6,6 +6,7 @@ import { createActionStateError, type ValidationErrors } from "@dariah-eric/next
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import slugify from "@sindresorhus/slugify";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
@@ -14,6 +15,7 @@ import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
+import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createServerAction } from "@/lib/server/create-server-action";
 
 export const createWorkingGroupAction = createServerAction(
@@ -46,6 +48,7 @@ export const createWorkingGroupAction = createServerAction(
 			result.output;
 
 		const slug = slugify(name);
+		let entityId: string | null = null;
 
 		await db.transaction(async (tx) => {
 			const entityType = await tx.query.entityTypes.findFirst({
@@ -93,6 +96,7 @@ export const createWorkingGroupAction = createServerAction(
 				.returning({ id: schema.entities.id });
 
 			assert(entity);
+			entityId = entity.id;
 
 			let imageId: string | null = null;
 
@@ -171,6 +175,12 @@ export const createWorkingGroupAction = createServerAction(
 				id: contentBlock.id,
 				content: JSON.parse(description) as schema.RichTextContentBlock["content"],
 			});
+		});
+
+		after(async () => {
+			if (entityId != null) {
+				await syncWebsiteDocumentForEntity(entityId);
+			}
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/working-groups", "layout");
