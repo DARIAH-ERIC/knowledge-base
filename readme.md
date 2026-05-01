@@ -8,5 +8,4 @@ set up local development environment:
 pnpm run dev:init
 pnpm run dev:services:up
 pnpm run dev:services:setup
-pnpm run dev:services:seed
 ```

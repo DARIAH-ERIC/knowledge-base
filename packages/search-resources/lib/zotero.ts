@@ -2,7 +2,7 @@ import { isNonEmptyString } from "@acdh-oeaw/lib";
 import type { ZoteroJsonItem } from "@dariah-eric/client-zotero";
 import type { ResourceDocument } from "@dariah-eric/search";
 
-interface ZoteroJsonItemData {
+export interface ZoteroJsonItemData {
 	title?: string;
 	abstractNote?: string;
 	creators?: Array<{
@@ -37,7 +37,6 @@ export function createZoteroItem(item: ZoteroJsonItem<ZoteroJsonItemData>): Reso
 
 	const yearRaw = data.date != null ? /\d{4}/.exec(data.date)?.[0] : null;
 	const year = yearRaw != null ? Number(yearRaw) : null;
-
 	const source = "zotero";
 	const sourceId = item.key;
 	const id = [source, sourceId].join(":");

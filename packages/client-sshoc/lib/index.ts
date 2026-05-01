@@ -187,6 +187,26 @@ export interface SearchItem {
 	thumbnailId?: string;
 }
 
+export function isSoftware(item: SearchItem): boolean {
+	return item.properties.some((property) => {
+		return (
+			property.type.code === "resource-category" &&
+			property.concept?.vocabulary.code === "eosc-resource-category" &&
+			property.concept.code === "category-sharing_and_discovery-software"
+		);
+	});
+}
+
+export function isCoreService(item: SearchItem): boolean {
+	return item.properties.some((property) => {
+		return (
+			property.type.code === "keyword" &&
+			property.concept?.vocabulary.code === "sshoc-keyword" &&
+			property.concept.code === "dariahCoreService"
+		);
+	});
+}
+
 export interface LabeledCheckedCount {
 	count: number;
 	checked: boolean;

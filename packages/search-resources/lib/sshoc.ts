@@ -1,8 +1,8 @@
 import { createUrl, unreachable } from "@acdh-oeaw/lib";
-import type { SearchItem } from "@dariah-eric/client-sshoc";
+import { isCoreService, isSoftware, type SearchItem } from "@dariah-eric/client-sshoc";
 import type { ResourceDocument } from "@dariah-eric/search";
 
-import { toPlainText } from "../markdown/to-plain-text";
+import { toPlainText } from "./markdown/to-plain-text";
 
 export function createSshocItem(item: SearchItem, marketplaceBaseUrl: string): ResourceDocument {
 	const keywords = [];
@@ -50,17 +50,7 @@ export function createSshocItem(item: SearchItem, marketplaceBaseUrl: string): R
 
 	switch (item.category) {
 		case "tool-or-service": {
-			/** @see {@link https://marketplace-api.sshopencloud.eu/api/property-types/resource-category} */
-			/** @see {@link https://marketplace-api.sshopencloud.eu/api/vocabularies/eosc-resource-category/concepts/category-sharing_and_discovery-software} */
-			const isSoftware = item.properties.some((property) => {
-				return (
-					property.type.code === "resource-category" &&
-					property.concept?.vocabulary.code === "eosc-resource-category" &&
-					property.concept.code === "category-sharing_and_discovery-software"
-				);
-			});
-
-			if (isSoftware) {
+			if (isSoftware(item)) {
 				return {
 					id,
 					source,
@@ -81,16 +71,6 @@ export function createSshocItem(item: SearchItem, marketplaceBaseUrl: string): R
 				};
 			}
 
-			/** @see {@link https://marketplace-api.sshopencloud.eu/api/property-types/keyword} */
-			/** @see {@link https://marketplace-api.sshopencloud.eu/api/vocabularies/sshoc-keyword/concepts/dariahCoreService} */
-			const isCoreService = item.properties.some((property) => {
-				return (
-					property.type.code === "keyword" &&
-					property.concept?.vocabulary.code === "sshoc-keyword" &&
-					property.concept.code === "dariahCoreService"
-				);
-			});
-
 			return {
 				id,
 				source,
@@ -104,7 +84,7 @@ export function createSshocItem(item: SearchItem, marketplaceBaseUrl: string): R
 				links,
 				source_actor_ids: actorIds,
 				upstream_sources: null,
-				kind: isCoreService ? "core" : "community",
+				kind: isCoreService(item) ? "core" : "community",
 				authors: null,
 				year: null,
 				pid: null,

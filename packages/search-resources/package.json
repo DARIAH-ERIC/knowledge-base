@@ -1,5 +1,5 @@
 {
-	"name": "@dariah-eric/ingest",
+	"name": "@dariah-eric/search-resources",
 	"private": true,
 	"license": "MIT",
 	"type": "module",
@@ -11,10 +11,8 @@
 		".": "./dist/index.mjs"
 	},
 	"scripts": {
-		"data:ingest:search": "tsx ./scripts/ingest-search-index.ts",
-		"data:ingest:search:entities": "tsx ./scripts/ingest-search-index-entities.ts",
-		"data:ingest:search:resources": "tsx ./scripts/ingest-search-index-resources.ts",
-		"data:ingest:sshoc": "tsx ./scripts/ingest-sshoc-services.ts",
+		"build": "tsdown",
+		"dev": "tsdown --watch",
 		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
 		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
@@ -25,20 +23,10 @@
 		"@acdh-oeaw/lib": "catalog:",
 		"@dariah-eric/client-campus": "workspace:^",
 		"@dariah-eric/client-episciences": "workspace:^",
-		"@dariah-eric/client-hal": "workspace:^",
-		"@dariah-eric/client-openaire": "workspace:^",
 		"@dariah-eric/client-sshoc": "workspace:^",
-		"@dariah-eric/client-zenodo": "workspace:^",
 		"@dariah-eric/client-zotero": "workspace:^",
 		"@dariah-eric/configs": "workspace:^",
-		"@dariah-eric/database": "workspace:^",
-		"@dariah-eric/env": "workspace:^",
-		"@dariah-eric/request": "workspace:^",
 		"@dariah-eric/search": "workspace:^",
-		"@dariah-eric/search-resources": "workspace:^",
-		"@dariah-eric/search-website": "workspace:^",
-		"@dariah-eric/sshoc-services": "workspace:^",
-		"@dariah-eric/storage": "workspace:^",
 		"@types/node": "catalog:",
 		"better-result": "catalog:",
 		"eslint": "catalog:",
@@ -46,9 +34,21 @@
 		"remark-parse": "catalog:",
 		"remark-stringify": "catalog:",
 		"strip-markdown": "catalog:",
-		"tsx": "catalog:",
+		"tsdown": "catalog:",
 		"typescript": "catalog:",
-		"unified": "catalog:",
-		"valibot": "catalog:"
+		"unified": "catalog:"
+	},
+	"peerDependencies": {
+		"@acdh-oeaw/lib": "catalog:",
+		"@dariah-eric/client-campus": "workspace:^",
+		"@dariah-eric/client-episciences": "workspace:^",
+		"@dariah-eric/client-sshoc": "workspace:^",
+		"@dariah-eric/client-zotero": "workspace:^",
+		"@dariah-eric/search": "workspace:^",
+		"better-result": "catalog:",
+		"remark-parse": "catalog:",
+		"remark-stringify": "catalog:",
+		"strip-markdown": "catalog:",
+		"unified": "catalog:"
 	}
 }
