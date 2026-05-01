@@ -119,13 +119,13 @@ jobs:
         run: pnpm run db:push && pnpm run db:migrations:apply
 
       - name: Seed database
-        run: pnpm run db:seed
+        run: pnpm run data:seed:db
 
       - name: Create storage bucket
         run: pnpm run storage:buckets:create
 
       - name: Seed storage
-        run: pnpm run storage:buckets:seed
+        run: pnpm run data:seed:storage
 
       - name: Generate search api key
         run: |
