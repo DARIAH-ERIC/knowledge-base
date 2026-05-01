@@ -1,7 +1,7 @@
 import type { Database } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { alias, and, eq, inArray, sql } from "@dariah-eric/database/sql";
-import type { WebsiteDocument } from "@dariah-eric/search";
+import type { SearchService, WebsiteDocument } from "@dariah-eric/search";
 import type { SearchAdminService } from "@dariah-eric/search/admin";
 
 export type SupportedWebsiteEntityType =
@@ -34,10 +34,12 @@ export interface SyncWebsiteDocumentResult {
 export interface CreateWebsiteSearchIndexServiceParams {
 	db: Database;
 	search: SearchAdminService;
+	searchService: SearchService;
 }
 
 export interface SyncWebsiteSearchIndexResult {
 	count: number;
+	failedCount: number;
 }
 
 type CanonicalWebsiteEntityType =
@@ -134,7 +136,7 @@ function isMissingSearchDocumentError(error: unknown): boolean {
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndexServiceParams) {
-	const { db, search } = params;
+	const { db, search, searchService } = params;
 
 	async function getWebsiteDocumentDescriptorByEntityId(
 		entityId: string,
@@ -237,13 +239,6 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			case "country": {
 				const items = await db.query.membersAndPartners.findMany({
 					columns: { id: true },
-					where: {
-						entity: {
-							status: {
-								type: "published",
-							},
-						},
-					},
 				});
 
 				return items.map((item) => {
@@ -254,13 +249,6 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			case "document-or-policy": {
 				const items = await db.query.documentsPolicies.findMany({
 					columns: { id: true },
-					where: {
-						entity: {
-							status: {
-								type: "published",
-							},
-						},
-					},
 				});
 
 				return items.map((item) => {
@@ -271,13 +259,6 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			case "event": {
 				const items = await db.query.events.findMany({
 					columns: { id: true },
-					where: {
-						entity: {
-							status: {
-								type: "published",
-							},
-						},
-					},
 				});
 
 				return items.map((item) => {
@@ -288,13 +269,6 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			case "funding-call": {
 				const items = await db.query.fundingCalls.findMany({
 					columns: { id: true },
-					where: {
-						entity: {
-							status: {
-								type: "published",
-							},
-						},
-					},
 				});
 
 				return items.map((item) => {
@@ -305,13 +279,6 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			case "impact-case-study": {
 				const items = await db.query.impactCaseStudies.findMany({
 					columns: { id: true },
-					where: {
-						entity: {
-							status: {
-								type: "published",
-							},
-						},
-					},
 				});
 
 				return items.map((item) => {
@@ -322,13 +289,6 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			case "news-item": {
 				const items = await db.query.news.findMany({
 					columns: { id: true },
-					where: {
-						entity: {
-							status: {
-								type: "published",
-							},
-						},
-					},
 				});
 
 				return items.map((item) => {
@@ -339,13 +299,6 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			case "opportunity": {
 				const items = await db.query.opportunities.findMany({
 					columns: { id: true },
-					where: {
-						entity: {
-							status: {
-								type: "published",
-							},
-						},
-					},
 				});
 
 				return items.map((item) => {
@@ -356,13 +309,6 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			case "page": {
 				const items = await db.query.pages.findMany({
 					columns: { id: true },
-					where: {
-						entity: {
-							status: {
-								type: "published",
-							},
-						},
-					},
 				});
 
 				return items.map((item) => {
@@ -373,13 +319,6 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			case "person": {
 				const items = await db.query.persons.findMany({
 					columns: { id: true },
-					where: {
-						entity: {
-							status: {
-								type: "published",
-							},
-						},
-					},
 				});
 
 				return items.map((item) => {
@@ -390,13 +329,6 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			case "project": {
 				const items = await db.query.dariahProjects.findMany({
 					columns: { id: true },
-					where: {
-						entity: {
-							status: {
-								type: "published",
-							},
-						},
-					},
 				});
 
 				return items.map((item) => {
@@ -407,13 +339,6 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			case "spotlight-article": {
 				const items = await db.query.spotlightArticles.findMany({
 					columns: { id: true },
-					where: {
-						entity: {
-							status: {
-								type: "published",
-							},
-						},
-					},
 				});
 
 				return items.map((item) => {
@@ -424,13 +349,6 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			case "working-group": {
 				const items = await db.query.workingGroups.findMany({
 					columns: { id: true },
-					where: {
-						entity: {
-							status: {
-								type: "published",
-							},
-						},
-					},
 				});
 
 				return items.map((item) => {
@@ -1648,8 +1566,58 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			throw result.error;
 		}
 
+		const currentDocumentIds = new Set(
+			documents.map((document) => {
+				return document.id;
+			}),
+		);
+
+		const existingDocumentIds = new Set<string>();
+		let page = 1;
+		let totalPages = 1;
+
+		do {
+			const result = await searchService.collections.website.search({
+				filterBy: "source:=dariah-knowledge-base",
+				page,
+				perPage: 250,
+				query: "*",
+			});
+
+			if (result.isErr()) {
+				throw result.error;
+			}
+
+			for (const item of result.value.items) {
+				existingDocumentIds.add(item.document.id);
+			}
+
+			totalPages = result.value.pagination.totalPages;
+			page += 1;
+		} while (page <= totalPages);
+
+		let failedCount = 0;
+
+		for (const documentId of existingDocumentIds) {
+			if (currentDocumentIds.has(documentId)) {
+				continue;
+			}
+
+			const result = await search.collections.website.delete(documentId);
+
+			if (result.isErr() && !isMissingSearchDocumentError(result.error)) {
+				console.error("Failed to delete stale website search document.", {
+					documentId,
+					error: result.error,
+				});
+
+				failedCount += 1;
+			}
+		}
+
 		return {
 			count: documents.length,
+			failedCount,
 		};
 	}
 

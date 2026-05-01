@@ -6,10 +6,5 @@ export interface SyncWebsiteSearchIndexResult {
 }
 
 export async function syncWebsiteSearchIndex(): Promise<SyncWebsiteSearchIndexResult> {
-	const result = await syncWebsiteSearchDocuments();
-
-	return {
-		count: result.count,
-		failedCount: 0,
-	};
+	return syncWebsiteSearchDocuments();
 }

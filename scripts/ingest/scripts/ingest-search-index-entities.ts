@@ -3,6 +3,7 @@ import { parseArgs } from "node:util";
 
 import { log } from "@acdh-oeaw/lib";
 import { createDatabaseService } from "@dariah-eric/database";
+import { createSearchService } from "@dariah-eric/search";
 import { createSearchAdminService } from "@dariah-eric/search/admin";
 import {
 	createWebsiteSearchIndexService,
@@ -39,7 +40,22 @@ const search = createSearchAdminService({
 	],
 });
 
-const websiteSearchIndex = createWebsiteSearchIndexService({ db, search });
+const searchService = createSearchService({
+	apiKey: env.TYPESENSE_ADMIN_API_KEY,
+	collections: {
+		resources: env.TYPESENSE_RESOURCE_COLLECTION_NAME,
+		website: env.TYPESENSE_WEBSITE_COLLECTION_NAME,
+	},
+	nodes: [
+		{
+			host: env.TYPESENSE_HOST,
+			port: env.TYPESENSE_PORT,
+			protocol: env.TYPESENSE_PROTOCOL,
+		},
+	],
+});
+
+const websiteSearchIndex = createWebsiteSearchIndexService({ db, search, searchService });
 
 const { values } = parseArgs({
 	args: process.argv.slice(2),
@@ -108,7 +124,8 @@ async function main(): Promise<void> {
 			JSON.stringify(
 				{
 					count: result.count,
-					ok: true,
+					failedCount: result.failedCount,
+					ok: result.failedCount === 0,
 				},
 				null,
 				2,
@@ -140,7 +157,11 @@ async function main(): Promise<void> {
 	);
 }
 
-main().catch((error: unknown) => {
-	log.error(error);
-	process.exitCode = 1;
-});
+main()
+	.catch((error: unknown) => {
+		log.error(error);
+		process.exitCode = 1;
+	})
+	.finally(() => {
+		return db.$client.end();
+	});

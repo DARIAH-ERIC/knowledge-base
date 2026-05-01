@@ -2,6 +2,12 @@ import type { DariahCampusClient } from "@dariah-eric/client-campus";
 import type { EpisciencesClient } from "@dariah-eric/client-episciences";
 import type { SshocClient } from "@dariah-eric/client-sshoc";
 import type { ZoteroClient } from "@dariah-eric/client-zotero";
+import {
+	type ResourceDocument,
+	resourceSources,
+	type SearchService,
+	type WebsiteDocument,
+} from "@dariah-eric/search";
 import type { SearchAdminService } from "@dariah-eric/search/admin";
 import { Result } from "better-result";
 
@@ -22,6 +28,7 @@ export interface CreateSearchResourcesServiceParams {
 	campus: DariahCampusClient;
 	episciences: EpisciencesClient;
 	search: SearchAdminService;
+	searchService: SearchService;
 	sshoc: SshocClient;
 	sshocMarketplaceBaseUrl: string;
 	zotero: ZoteroClient;
@@ -34,6 +41,7 @@ export interface FetchSearchResourcesParams {
 
 export interface SyncSearchResourcesResult {
 	count: number;
+	failedCount: number;
 	websiteCount: number;
 }
 
@@ -51,8 +59,18 @@ function getOrFetch<T, FetchError, CacheError>(
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createSearchResourcesService(params: CreateSearchResourcesServiceParams) {
-	const { campus, episciences, search, sshoc, sshocMarketplaceBaseUrl, zotero, zoteroGroupId } =
-		params;
+	const {
+		campus,
+		episciences,
+		search,
+		searchService,
+		sshoc,
+		sshocMarketplaceBaseUrl,
+		zotero,
+		zoteroGroupId,
+	} = params;
+
+	const externalSourcesFilter = `source:[${resourceSources.join(",")}]`;
 
 	async function fetchSearchIndexResourceSourceData(
 		options?: FetchSearchResourcesParams,
@@ -113,24 +131,140 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 		});
 	}
 
+	async function getExistingResourceDocumentIds(): Promise<Set<string>> {
+		const documentIds = new Set<string>();
+		let page = 1;
+		let totalPages = 1;
+
+		do {
+			const result = await searchService.collections.resources.search({
+				filterBy: externalSourcesFilter,
+				page,
+				perPage: 250,
+				query: "*",
+			});
+
+			if (result.isErr()) {
+				throw result.error;
+			}
+
+			for (const item of result.value.items) {
+				documentIds.add(item.document.id);
+			}
+
+			totalPages = result.value.pagination.totalPages;
+			page += 1;
+		} while (page <= totalPages);
+
+		return documentIds;
+	}
+
+	async function getExistingWebsiteResourceDocumentIds(): Promise<Set<string>> {
+		const documentIds = new Set<string>();
+		let page = 1;
+		let totalPages = 1;
+
+		do {
+			const result = await searchService.collections.website.search({
+				filterBy: externalSourcesFilter,
+				page,
+				perPage: 250,
+				query: "*",
+			});
+
+			if (result.isErr()) {
+				throw result.error;
+			}
+
+			for (const item of result.value.items) {
+				documentIds.add(item.document.id);
+			}
+
+			totalPages = result.value.pagination.totalPages;
+			page += 1;
+		} while (page <= totalPages);
+
+		return documentIds;
+	}
+
+	async function deleteStaleDocuments(params: {
+		currentDocuments: Array<ResourceDocument | WebsiteDocument>;
+		deleteDocument: (documentId: string) => Promise<Result<void, unknown>>;
+		existingDocumentIds: Set<string>;
+		logContext: "resource" | "website resource";
+	}): Promise<number> {
+		const { currentDocuments, deleteDocument, existingDocumentIds, logContext } = params;
+		const currentDocumentIds = new Set(
+			currentDocuments.map((document) => {
+				return document.id;
+			}),
+		);
+
+		let failedCount = 0;
+
+		for (const documentId of existingDocumentIds) {
+			if (currentDocumentIds.has(documentId)) {
+				continue;
+			}
+
+			const result = await deleteDocument(documentId);
+
+			if (result.isErr()) {
+				console.error(`Failed to delete stale ${logContext} search document.`, {
+					documentId,
+					error: result.error,
+				});
+
+				failedCount += 1;
+			}
+		}
+
+		return failedCount;
+	}
+
 	async function syncSearchResources(
 		options?: FetchSearchResourcesParams,
 	): Promise<SyncSearchResourcesResult> {
 		const sourceData = await fetchSearchIndexResourceSourceData(options);
 		const resources = createResourceDocuments(sourceData);
 		const websiteDocuments = createWebsiteResourceDocuments(resources);
+		const [existingResourceDocumentIds, existingWebsiteResourceDocumentIds] = await Promise.all([
+			getExistingResourceDocumentIds(),
+			getExistingWebsiteResourceDocumentIds(),
+		]);
 
-		const result = await Result.gen(async function* () {
-			yield* Result.await(search.collections.resources.ingest(resources));
-			yield* Result.await(search.collections.website.ingest(websiteDocuments));
+		const resourcesIngestResult = await search.collections.resources.ingest(resources);
+		if (resourcesIngestResult.isErr()) {
+			throw resourcesIngestResult.error;
+		}
 
-			return Result.ok({
-				count: resources.length,
-				websiteCount: websiteDocuments.length,
-			});
+		const websiteIngestResult = await search.collections.website.ingest(websiteDocuments);
+		if (websiteIngestResult.isErr()) {
+			throw websiteIngestResult.error;
+		}
+
+		const resourceDeleteFailedCount = await deleteStaleDocuments({
+			currentDocuments: resources,
+			deleteDocument(documentId) {
+				return search.collections.resources.delete(documentId);
+			},
+			existingDocumentIds: existingResourceDocumentIds,
+			logContext: "resource",
+		});
+		const websiteDeleteFailedCount = await deleteStaleDocuments({
+			currentDocuments: websiteDocuments,
+			deleteDocument(documentId) {
+				return search.collections.website.delete(documentId);
+			},
+			existingDocumentIds: existingWebsiteResourceDocumentIds,
+			logContext: "website resource",
 		});
 
-		return result.unwrap();
+		return {
+			count: resources.length,
+			failedCount: resourceDeleteFailedCount + websiteDeleteFailedCount,
+			websiteCount: websiteDocuments.length,
+		};
 	}
 
 	return {

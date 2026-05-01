@@ -5,6 +5,7 @@ import { createDariahCampusClient } from "@dariah-eric/client-campus";
 import { createEpisciencesClient } from "@dariah-eric/client-episciences";
 import { createSshocClient } from "@dariah-eric/client-sshoc";
 import { createZoteroClient } from "@dariah-eric/client-zotero";
+import { createSearchService } from "@dariah-eric/search";
 import { createSearchAdminService } from "@dariah-eric/search/admin";
 import { createSearchResourcesService } from "@dariah-eric/search-resources";
 
@@ -68,10 +69,26 @@ const search = createSearchAdminService({
 	],
 });
 
+const searchService = createSearchService({
+	apiKey: env.TYPESENSE_ADMIN_API_KEY,
+	collections: {
+		resources: env.TYPESENSE_RESOURCE_COLLECTION_NAME,
+		website: env.TYPESENSE_WEBSITE_COLLECTION_NAME,
+	},
+	nodes: [
+		{
+			host: env.TYPESENSE_HOST,
+			port: env.TYPESENSE_PORT,
+			protocol: env.TYPESENSE_PROTOCOL,
+		},
+	],
+});
+
 const searchResources = createSearchResourcesService({
 	campus,
 	episciences,
 	search,
+	searchService,
 	sshoc,
 	sshocMarketplaceBaseUrl: env.SSHOC_MARKETPLACE_BASE_URL,
 	zotero,

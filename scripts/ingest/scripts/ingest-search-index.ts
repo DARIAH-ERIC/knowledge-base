@@ -6,6 +6,7 @@ import { createEpisciencesClient } from "@dariah-eric/client-episciences";
 import { createSshocClient } from "@dariah-eric/client-sshoc";
 import { createZoteroClient } from "@dariah-eric/client-zotero";
 import { createDatabaseService } from "@dariah-eric/database";
+import { createSearchService } from "@dariah-eric/search";
 import { createSearchAdminService } from "@dariah-eric/search/admin";
 import { createSearchResourcesService } from "@dariah-eric/search-resources";
 import { createWebsiteSearchIndexService } from "@dariah-eric/search-website";
@@ -26,6 +27,21 @@ const db = createDatabaseService({
 }).unwrap();
 
 const search = createSearchAdminService({
+	apiKey: env.TYPESENSE_ADMIN_API_KEY,
+	collections: {
+		resources: env.TYPESENSE_RESOURCE_COLLECTION_NAME,
+		website: env.TYPESENSE_WEBSITE_COLLECTION_NAME,
+	},
+	nodes: [
+		{
+			host: env.TYPESENSE_HOST,
+			port: env.TYPESENSE_PORT,
+			protocol: env.TYPESENSE_PROTOCOL,
+		},
+	],
+});
+
+const searchService = createSearchService({
 	apiKey: env.TYPESENSE_ADMIN_API_KEY,
 	collections: {
 		resources: env.TYPESENSE_RESOURCE_COLLECTION_NAME,
@@ -86,19 +102,20 @@ const searchResources = createSearchResourcesService({
 	campus,
 	episciences,
 	search,
+	searchService,
 	sshoc,
 	sshocMarketplaceBaseUrl: env.SSHOC_MARKETPLACE_BASE_URL,
 	zotero,
 	zoteroGroupId: env.ZOTERO_GROUP_ID,
 });
 
-const websiteSearchIndex = createWebsiteSearchIndexService({ db, search });
+const websiteSearchIndex = createWebsiteSearchIndexService({ db, search, searchService });
 
 async function main(): Promise<void> {
 	const resources = await searchResources.syncSearchResources({ cache });
 
 	log.success(
-		`Synced ${String(resources.count)} external resources to resources and website indexes.`,
+		`Synced ${String(resources.count)} external resources to resources and website indexes with ${String(resources.failedCount)} stale-delete failures.`,
 	);
 
 	const website = await websiteSearchIndex.syncWebsiteSearchIndex();

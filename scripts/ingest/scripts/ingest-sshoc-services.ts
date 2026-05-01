@@ -42,7 +42,11 @@ async function main(): Promise<void> {
 	log.info(JSON.stringify(result, null, 2));
 }
 
-main().catch((error: unknown) => {
-	log.error(error);
-	process.exitCode = 1;
-});
+main()
+	.catch((error: unknown) => {
+		log.error(error);
+		process.exitCode = 1;
+	})
+	.finally(() => {
+		return db.$client.end();
+	});

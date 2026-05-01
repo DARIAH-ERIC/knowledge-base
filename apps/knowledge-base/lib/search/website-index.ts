@@ -1,3 +1,4 @@
+import { createSearchService } from "@dariah-eric/search";
 import {
 	createWebsiteSearchIndexService,
 	type SupportedWebsiteEntityType,
@@ -6,10 +7,26 @@ import {
 	type WebsiteDocumentDescriptor,
 } from "@dariah-eric/search-website";
 
+import { env } from "@/config/env.config";
 import { db } from "@/lib/db";
 import { search } from "@/lib/search/admin";
 
-const websiteSearchIndex = createWebsiteSearchIndexService({ db, search });
+const searchService = createSearchService({
+	apiKey: env.TYPESENSE_ADMIN_API_KEY,
+	collections: {
+		resources: env.NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME,
+		website: env.NEXT_PUBLIC_TYPESENSE_WEBSITE_COLLECTION_NAME,
+	},
+	nodes: [
+		{
+			host: env.NEXT_PUBLIC_TYPESENSE_HOST,
+			port: env.NEXT_PUBLIC_TYPESENSE_PORT,
+			protocol: env.NEXT_PUBLIC_TYPESENSE_PROTOCOL,
+		},
+	],
+});
+
+const websiteSearchIndex = createWebsiteSearchIndexService({ db, search, searchService });
 
 export { supportedWebsiteEntityTypes };
 export type {

@@ -3,6 +3,7 @@ import { createDariahCampusClient } from "@dariah-eric/client-campus";
 import { createEpisciencesClient } from "@dariah-eric/client-episciences";
 import { createSshocClient } from "@dariah-eric/client-sshoc";
 import { createZoteroClient } from "@dariah-eric/client-zotero";
+import { createSearchService } from "@dariah-eric/search";
 import { createSearchResourcesService } from "@dariah-eric/search-resources";
 
 import { env } from "@/config/env.config";
@@ -10,6 +11,7 @@ import { search } from "@/lib/search/admin";
 
 export interface SyncResourcesSearchIndexResult {
 	count: number;
+	failedCount: number;
 	websiteCount: number;
 }
 
@@ -55,10 +57,26 @@ export async function syncResourcesSearchIndex(): Promise<SyncResourcesSearchInd
 		},
 	});
 
+	const searchService = createSearchService({
+		apiKey: env.TYPESENSE_ADMIN_API_KEY,
+		collections: {
+			resources: env.NEXT_PUBLIC_TYPESENSE_RESOURCE_COLLECTION_NAME,
+			website: env.NEXT_PUBLIC_TYPESENSE_WEBSITE_COLLECTION_NAME,
+		},
+		nodes: [
+			{
+				host: env.NEXT_PUBLIC_TYPESENSE_HOST,
+				port: env.NEXT_PUBLIC_TYPESENSE_PORT,
+				protocol: env.NEXT_PUBLIC_TYPESENSE_PROTOCOL,
+			},
+		],
+	});
+
 	const searchResources = createSearchResourcesService({
 		campus,
 		episciences,
 		search,
+		searchService,
 		sshoc,
 		sshocMarketplaceBaseUrl,
 		zotero,
