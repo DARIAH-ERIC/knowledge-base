@@ -39,7 +39,7 @@ async function main(): Promise<void> {
 		sshocMarketplaceBaseUrl: env.SSHOC_MARKETPLACE_BASE_URL!,
 	});
 
-	log.info(JSON.stringify(result, null, 2));
+	log.success(JSON.stringify(result, null, 2));
 }
 
 main()

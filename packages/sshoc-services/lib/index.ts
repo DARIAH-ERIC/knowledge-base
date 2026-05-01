@@ -251,10 +251,6 @@ export async function ingestSshocServices(
 								return row.id;
 							});
 
-			await tx
-				.delete(schema.servicesToOrganisationalUnits)
-				.where(eq(schema.servicesToOrganisationalUnits.serviceId, serviceId));
-
 			const relations = [
 				...[...ownerUnitIds].map((organisationalUnitId) => {
 					return {
@@ -273,8 +269,36 @@ export async function ingestSshocServices(
 			];
 
 			if (relations.length > 0) {
-				await tx.insert(schema.servicesToOrganisationalUnits).values(relations);
-				relationCount += relations.length;
+				const existingRelations = await tx
+					.select({
+						organisationalUnitId: schema.servicesToOrganisationalUnits.organisationalUnitId,
+						roleId: schema.servicesToOrganisationalUnits.roleId,
+					})
+					.from(schema.servicesToOrganisationalUnits)
+					.where(eq(schema.servicesToOrganisationalUnits.serviceId, serviceId));
+
+				const existingRelationKeys = new Set(
+					existingRelations.map((relation) => {
+						return [relation.organisationalUnitId, relation.roleId].join(":");
+					}),
+				);
+
+				/**
+				 * Preserve locally curated relations for now. The correct fix is to store relation
+				 * provenance, then replace only the SSHOC-managed subset here. That also depends on a
+				 * product decision: are SSHOC service relations exclusively managed upstream, or can
+				 * admins add local owner/provider links that should survive re-ingest?
+				 */
+				const missingRelations = relations.filter((relation) => {
+					return !existingRelationKeys.has(
+						[relation.organisationalUnitId, relation.roleId].join(":"),
+					);
+				});
+
+				if (missingRelations.length > 0) {
+					await tx.insert(schema.servicesToOrganisationalUnits).values(missingRelations);
+					relationCount += missingRelations.length;
+				}
 			}
 		});
 

@@ -98,7 +98,7 @@ const searchResources = createSearchResourcesService({
 async function main(): Promise<void> {
 	const result = await searchResources.syncSearchResources({ cache });
 
-	log.info(JSON.stringify(result, null, 2));
+	log.success(JSON.stringify(result, null, 2));
 }
 
 main().catch((error: unknown) => {

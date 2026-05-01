@@ -142,7 +142,7 @@ async function main(): Promise<void> {
 		}),
 	);
 
-	log.info(
+	log.success(
 		JSON.stringify(
 			{
 				count: items.length,

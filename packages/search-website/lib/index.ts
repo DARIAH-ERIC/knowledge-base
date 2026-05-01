@@ -4,6 +4,8 @@ import { alias, and, eq, inArray, sql } from "@dariah-eric/database/sql";
 import type { SearchService, WebsiteDocument } from "@dariah-eric/search";
 import type { SearchAdminService } from "@dariah-eric/search/admin";
 
+import { toPlainText } from "./json-content/to-plain-text";
+
 export type SupportedWebsiteEntityType =
 	| "country"
 	| "document-or-policy"
@@ -77,6 +79,18 @@ function createWebsiteDocumentId(descriptor: WebsiteDocumentDescriptor): string 
 	return [descriptor.type, descriptor.slug].join(":");
 }
 
+function mergeDescription(...values: Array<string | null | undefined>): string {
+	const parts = values
+		.map((value) => {
+			return value?.trim();
+		})
+		.filter((value): value is string => {
+			return value != null && value.length > 0;
+		});
+
+	return [...new Set(parts)].join("\n\n");
+}
+
 function createWebsiteEntityDocument(params: {
 	description: string;
 	documentId?: string;
@@ -132,6 +146,64 @@ function isMissingSearchDocumentError(error: unknown): boolean {
 	}
 
 	return false;
+}
+
+async function getPlainTextFieldContentByEntityId(
+	db: Database,
+	entityIds: Array<string>,
+	fieldName: string,
+): Promise<Map<string, string>> {
+	if (entityIds.length === 0) {
+		return new Map();
+	}
+
+	const rows = await db
+		.select({
+			entityId: schema.fields.entityId,
+			content: schema.richTextContentBlocks.content,
+		})
+		.from(schema.fields)
+		.innerJoin(
+			schema.entityTypesFieldsNames,
+			eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+		)
+		.innerJoin(schema.contentBlocks, eq(schema.contentBlocks.fieldId, schema.fields.id))
+		.innerJoin(
+			schema.contentBlockTypes,
+			eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
+		)
+		.innerJoin(
+			schema.richTextContentBlocks,
+			eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
+		)
+		.where(
+			and(
+				inArray(schema.fields.entityId, entityIds),
+				eq(schema.entityTypesFieldsNames.fieldName, fieldName),
+				eq(schema.contentBlockTypes.type, "rich_text"),
+			),
+		)
+		.orderBy(schema.fields.entityId, schema.contentBlocks.position);
+
+	const contentByEntityId = new Map<string, Array<string>>();
+
+	for (const row of rows) {
+		const content = toPlainText(row.content);
+
+		if (content.length === 0) {
+			continue;
+		}
+
+		const existing = contentByEntityId.get(row.entityId) ?? [];
+		existing.push(content);
+		contentByEntityId.set(row.entityId, existing);
+	}
+
+	return new Map(
+		[...contentByEntityId.entries()].map(([entityId, parts]) => {
+			return [entityId, mergeDescription(...parts)];
+		}),
+	);
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -223,6 +295,9 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return null;
 			}
 			case "external_links": {
+				return null;
+			}
+			case "documentation_pages": {
 				return null;
 			}
 		}
@@ -408,13 +483,19 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					return null;
 				}
 
+				const descriptions = await getPlainTextFieldContentByEntityId(
+					db,
+					[entityId],
+					"description",
+				);
+
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "country",
 					sourceId: item.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
-					description: item.summary ?? "",
+					description: mergeDescription(descriptions.get(entityId), item.summary ?? ""),
 					link: `/network/members-and-partners/${item.entity.slug}`,
 				});
 			}
@@ -719,13 +800,15 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					return null;
 				}
 
+				const biographies = await getPlainTextFieldContentByEntityId(db, [entityId], "biography");
+
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "person",
 					sourceId: item.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
-					description: "",
+					description: biographies.get(entityId) ?? "",
 					link: `/persons/${item.entity.slug}`,
 				});
 			}
@@ -758,13 +841,19 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					return null;
 				}
 
+				const descriptions = await getPlainTextFieldContentByEntityId(
+					db,
+					[entityId],
+					"description",
+				);
+
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "project",
 					sourceId: item.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
-					description: item.summary,
+					description: mergeDescription(descriptions.get(entityId), item.summary),
 					link: `/projects/${item.entity.slug}`,
 				});
 			}
@@ -836,13 +925,19 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					return null;
 				}
 
+				const descriptions = await getPlainTextFieldContentByEntityId(
+					db,
+					[entityId],
+					"description",
+				);
+
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "working-group",
 					sourceId: item.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
-					description: item.summary ?? "",
+					description: mergeDescription(descriptions.get(entityId), item.summary ?? ""),
 					link: `/network/working-groups/${item.entity.slug}`,
 				});
 			}
@@ -854,6 +949,54 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 	}): Promise<Array<WebsiteDocument>> {
 		const importedAt = params?.importedAt ?? Date.now();
 		const website: Array<WebsiteDocument> = [];
+
+		const [countryDescriptions, projectDescriptions, workingGroupDescriptions, personBiographies] =
+			await Promise.all([
+				getPlainTextFieldContentByEntityId(
+					db,
+					(
+						await db.query.membersAndPartners.findMany({
+							columns: { id: true },
+						})
+					).map((item) => {
+						return item.id;
+					}),
+					"description",
+				),
+				getPlainTextFieldContentByEntityId(
+					db,
+					(
+						await db.query.dariahProjects.findMany({
+							columns: { id: true },
+						})
+					).map((item) => {
+						return item.id;
+					}),
+					"description",
+				),
+				getPlainTextFieldContentByEntityId(
+					db,
+					(
+						await db.query.workingGroups.findMany({
+							columns: { id: true },
+						})
+					).map((item) => {
+						return item.id;
+					}),
+					"description",
+				),
+				getPlainTextFieldContentByEntityId(
+					db,
+					(
+						await db.query.persons.findMany({
+							columns: { id: true },
+						})
+					).map((item) => {
+						return item.id;
+					}),
+					"biography",
+				),
+			]);
 
 		const documentsPolicies = await db.query.documentsPolicies.findMany({
 			columns: {
@@ -1034,7 +1177,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceId: item.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
-					description: item.summary ?? "",
+					description: mergeDescription(countryDescriptions.get(item.id), item.summary ?? ""),
 					link: `/network/members-and-partners/${item.entity.slug}`,
 				});
 			}),
@@ -1052,8 +1195,21 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		);
 		const publishedEntityStatus = alias(schema.entityStatus, "published_entity_status");
 
+		const organisationalUnitDescriptions = await getPlainTextFieldContentByEntityId(
+			db,
+			(
+				await db.query.organisationalUnits.findMany({
+					columns: { id: true },
+				})
+			).map((item) => {
+				return item.id;
+			}),
+			"description",
+		);
+
 		const nationalConsortia = await db
 			.select({
+				itemId: schema.organisationalUnits.id,
 				countrySlug: countryEntities.slug,
 				itemSlug: itemEntities.slug,
 				label: schema.organisationalUnits.name,
@@ -1098,7 +1254,10 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					documentId: `${item.countrySlug}:${item.itemSlug}`,
 					sourceUpdatedAt: item.sourceUpdatedAt,
 					label: item.label,
-					description: item.description ?? "",
+					description: mergeDescription(
+						organisationalUnitDescriptions.get(item.itemId),
+						item.description ?? "",
+					),
 					link: `/network/members-and-partners/${item.countrySlug}`,
 				});
 			}),
@@ -1106,6 +1265,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 
 		const partnerInstitutions = await db
 			.select({
+				itemId: schema.organisationalUnits.id,
 				countrySlug: countryEntities.slug,
 				itemSlug: itemEntities.slug,
 				label: schema.organisationalUnits.name,
@@ -1166,7 +1326,10 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					documentId: `${item.countrySlug}:${item.itemSlug}`,
 					sourceUpdatedAt: item.sourceUpdatedAt,
 					label: item.label,
-					description: item.description ?? "",
+					description: mergeDescription(
+						organisationalUnitDescriptions.get(item.itemId),
+						item.description ?? "",
+					),
 					link: `/network/members-and-partners/${item.countrySlug}`,
 				});
 			}),
@@ -1174,6 +1337,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 
 		const cooperatingPartnerInstitutions = await db
 			.select({
+				itemId: schema.organisationalUnits.id,
 				countrySlug: countryEntities.slug,
 				itemSlug: itemEntities.slug,
 				label: schema.organisationalUnits.name,
@@ -1234,7 +1398,10 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					documentId: `${item.countrySlug}:${item.itemSlug}`,
 					sourceUpdatedAt: item.sourceUpdatedAt,
 					label: item.label,
-					description: item.description ?? "",
+					description: mergeDescription(
+						organisationalUnitDescriptions.get(item.itemId),
+						item.description ?? "",
+					),
 					link: `/network/members-and-partners/${item.countrySlug}`,
 				});
 			}),
@@ -1438,7 +1605,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceId: item.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
-					description: "",
+					description: personBiographies.get(item.id) ?? "",
 					link: `/persons/${item.entity.slug}`,
 				});
 			}),
@@ -1475,7 +1642,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceId: item.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
-					description: item.summary,
+					description: mergeDescription(projectDescriptions.get(item.id), item.summary),
 					link: `/projects/${item.entity.slug}`,
 				});
 			}),
@@ -1549,7 +1716,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					sourceId: item.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
-					description: item.summary ?? "",
+					description: mergeDescription(workingGroupDescriptions.get(item.id), item.summary ?? ""),
 					link: `/network/working-groups/${item.entity.slug}`,
 				});
 			}),
