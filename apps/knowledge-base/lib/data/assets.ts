@@ -119,7 +119,7 @@ export async function uploadAsset(params: UploadAssetParams) {
 	const size = file.size;
 	const metadata = { "content-type": file.type, name: file.name };
 
-	const { key } = await s3.images.upload({ input, prefix, metadata, size });
+	const { key } = (await s3.upload({ input, prefix, metadata, size })).unwrap();
 
 	await db.insert(schema.assets).values({
 		key,
@@ -184,19 +184,4 @@ export async function getAssetsForDashboard(params: GetAssetsForDashboardParams)
 	});
 
 	return { items, total };
-}
-
-interface GetPresignedUploadUrlParams {
-	prefix: AssetPrefix;
-}
-
-export async function getPresignedUploadUrl(params: GetPresignedUploadUrlParams) {
-	const { prefix } = params;
-
-	const { key, url } = await s3.urls.generatePresignedUploadUrl({ prefix });
-
-	return {
-		key,
-		url,
-	};
 }

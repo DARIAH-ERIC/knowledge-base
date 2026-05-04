@@ -30,7 +30,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
 	const filename = asset.filename ?? asset.label;
 
-	const stream = await storage.objects.get({ key });
+	const stream = (await storage.download(key)).unwrap();
 
 	const webStream = Readable.toWeb(stream) as ReadableStream<Uint8Array>;
 

@@ -228,7 +228,7 @@ async function upload(
 ) {
 	const { input, metadata } = await readCached(assetsCache, url);
 
-	const { key } = await storage.images.upload({ prefix, input, metadata });
+	const { key } = (await storage.upload({ prefix, input, metadata })).unwrap();
 
 	const [asset] = await db
 		.insert(schema.assets)
@@ -1206,11 +1206,13 @@ async function main() {
 				const response = await fetch(item.href);
 				const mimeType = response.headers.get("content-type") ?? "application/octet-stream";
 				const input = await response.arrayBuffer();
-				const { key } = await storage.images.upload({
-					prefix: "documents",
-					input: Buffer.from(input),
-					metadata: { "content-type": mimeType },
-				});
+				const { key } = (
+					await storage.upload({
+						prefix: "documents",
+						input: Buffer.from(input),
+						metadata: { "content-type": mimeType },
+					})
+				).unwrap();
 
 				const [asset] = await tx
 					.insert(schema.assets)

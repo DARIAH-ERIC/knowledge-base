@@ -1175,6 +1175,9 @@ importers:
       '@faker-js/faker':
         specifier: 'catalog:'
         version: 10.3.0
+      '@sindresorhus/slugify':
+        specifier: 'catalog:'
+        version: 3.0.0
       valibot:
         specifier: 'catalog:'
         version: 1.2.0(typescript@5.9.3)
@@ -1991,35 +1994,28 @@ importers:
         version: 5.9.3
 
   packages/storage:
-    dependencies:
+    devDependencies:
       '@acdh-oeaw/lib':
         specifier: 'catalog:'
         version: 1.0.6
-      '@dariah-eric/env':
-        specifier: workspace:^
-        version: link:../env
-      minio:
-        specifier: 'catalog:'
-        version: 8.0.7
-      uuid:
-        specifier: 'catalog:'
-        version: 13.0.0
-      valibot:
-        specifier: 'catalog:'
-        version: 1.2.0(typescript@5.9.3)
-    devDependencies:
       '@dariah-eric/configs':
         specifier: workspace:^
         version: link:../configs
-      '@faker-js/faker':
-        specifier: 'catalog:'
-        version: 10.3.0
+      '@dariah-eric/env':
+        specifier: workspace:^
+        version: link:../env
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.0
+      better-result:
+        specifier: 'catalog:'
+        version: 2.7.0
       eslint:
         specifier: 'catalog:'
         version: 9.39.4(jiti@2.6.1)
+      minio:
+        specifier: 'catalog:'
+        version: 8.0.7
       prettier:
         specifier: 'catalog:'
         version: 3.8.1
@@ -2035,6 +2031,12 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+      uuid:
+        specifier: 'catalog:'
+        version: 13.0.0
+      valibot:
+        specifier: 'catalog:'
+        version: 1.2.0(typescript@5.9.3)
 
   packages/ui:
     dependencies:
@@ -2318,6 +2320,9 @@ importers:
       '@dariah-eric/search':
         specifier: workspace:^
         version: link:../../packages/search
+      '@dariah-eric/storage':
+        specifier: workspace:^
+        version: link:../../packages/storage
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.0

@@ -12,6 +12,7 @@ import type { Database } from "@/middlewares/db";
 import { createTestClient } from "~/test/lib/create-test-client";
 import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";
+import { Result, type InferOk } from "better-result";
 
 function createItems(count: number) {
 	const items = f.helpers.multiple(
@@ -77,37 +78,17 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 function createMockStorage(content = "test file content"): StorageService {
 	return {
-		bucket: { name: "test" },
-		images: {
-			// eslint-disable-next-line @typescript-eslint/require-await
-			async get() {
-				return { images: [] };
-			},
-			async remove() {
-				/* noop */
-			},
-			// eslint-disable-next-line @typescript-eslint/require-await
-			async upload() {
-				return { key: "" };
-			},
+		// eslint-disable-next-line @typescript-eslint/require-await
+		async upload() {
+			return Result.ok({ key: "" });
 		},
-		objects: {
-			// eslint-disable-next-line @typescript-eslint/require-await
-			async get() {
-				return Readable.from([Buffer.from(content)]);
-			},
-			copy(_params: {
-				source: { bucket: string; key: string };
-				prefix: string;
-			}): Promise<{ key: string; metadata: AssetMetadata }> {
-				throw new Error("Function not implemented.");
-			},
+		// eslint-disable-next-line @typescript-eslint/require-await
+		async download() {
+			return Result.ok(Readable.from([Buffer.from(content)]));
 		},
-		urls: {
-			// eslint-disable-next-line @typescript-eslint/require-await
-			async generatePresignedUploadUrl() {
-				return { key: "", url: "" };
-			},
+		// eslint-disable-next-line @typescript-eslint/require-await
+		async delete() {
+			throw new Error("Not implemented");
 		},
 	};
 }
@@ -349,21 +330,7 @@ describe("documents-policies", () => {
 		it("should return 404 for valid UUID with no record", async () => {
 			await withTransaction(async (db) => {
 				let storageCalled = false;
-				const storage: StorageService = {
-					...createMockStorage(),
-					objects: {
-						async get(params) {
-							storageCalled = true;
-							return createMockStorage().objects.get(params);
-						},
-						copy(_params: {
-							source: { bucket: string; key: string };
-							prefix: string;
-						}): Promise<{ key: string; metadata: AssetMetadata }> {
-							throw new Error("Function not implemented.");
-						},
-					},
-				};
+				const storage: StorageService = createMockStorage();
 				const client = createTestClient(db, storage);
 
 				const response = await client["documents-policies"][":id"].document.$get({

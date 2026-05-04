@@ -21,6 +21,7 @@
 		"@dariah-eric/search": "workspace:^",
 		"@dariah-eric/storage": "workspace:^",
 		"@faker-js/faker": "catalog:",
+		"@sindresorhus/slugify": "catalog:",
 		"valibot": "catalog:"
 	},
 	"devDependencies": {

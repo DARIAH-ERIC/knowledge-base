@@ -2,6 +2,7 @@ import { assert, keyBy, log } from "@acdh-oeaw/lib";
 import { createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { type AssetMetadata, createStorageService } from "@dariah-eric/storage";
+import { createStorageAdminService } from "@dariah-eric/storage/admin";
 import { buffer } from "@dariah-eric/storage/lib";
 import slugify from "@sindresorhus/slugify";
 import { generateJSON } from "@tiptap/html";
@@ -38,6 +39,17 @@ const db = createDatabaseService({
 }).unwrap();
 
 const storage = createStorageService({
+	config: {
+		accessKey: env.S3_ACCESS_KEY,
+		bucketName: env.S3_BUCKET_NAME,
+		endPoint: env.S3_HOST,
+		port: env.S3_PORT,
+		secretKey: env.S3_SECRET_KEY,
+		useSSL: env.S3_PROTOCOL === "https",
+	},
+});
+
+const storageAdmin = createStorageAdminService({
 	config: {
 		accessKey: env.S3_ACCESS_KEY,
 		bucketName: env.S3_BUCKET_NAME,
@@ -116,11 +128,13 @@ async function main() {
 		},
 	});
 
-	const { key: placeholderImage } = await storage.images.upload({
-		input: placeholderInput,
-		prefix: "images",
-		metadata: placeholderMetadata,
-	});
+	const { key: placeholderImage } = (
+		await storage.upload({
+			input: placeholderInput,
+			prefix: "images",
+			metadata: placeholderMetadata,
+		})
+	).unwrap();
 	const [placeholderAsset] = await db
 		.insert(schema.assets)
 		.values({
@@ -166,10 +180,12 @@ async function main() {
 				let metadata: AssetMetadata;
 
 				try {
-					({ key, metadata } = await storage.objects.copy({
-						source: { bucket: env.UNR_S3_BUCKET_NAME, key: workingGroup.logo },
-						prefix: "logos",
-					}));
+					({ key, metadata } = (
+						await storageAdmin.buckets.copy({
+							source: { bucket: env.UNR_S3_BUCKET_NAME, key: workingGroup.logo },
+							prefix: "logos",
+						})
+					).unwrap());
 					[asset] = await tx
 						.insert(schema.assets)
 						.values({
@@ -338,10 +354,12 @@ async function main() {
 					let metadata: AssetMetadata;
 
 					try {
-						({ key, metadata } = await storage.objects.copy({
-							source: { bucket: env.UNR_S3_BUCKET_NAME, key: country.logo },
-							prefix: "logos",
-						}));
+						({ key, metadata } = (
+							await storageAdmin.buckets.copy({
+								source: { bucket: env.UNR_S3_BUCKET_NAME, key: country.logo },
+								prefix: "logos",
+							})
+						).unwrap());
 						[asset] = await tx
 							.insert(schema.assets)
 							.values({
@@ -721,10 +739,12 @@ async function main() {
 				let metadata: AssetMetadata;
 
 				try {
-					({ key, metadata } = await storage.objects.copy({
-						source: { bucket: env.UNR_S3_BUCKET_NAME, key: person.image },
-						prefix: "avatars",
-					}));
+					({ key, metadata } = (
+						await storageAdmin.buckets.copy({
+							source: { bucket: env.UNR_S3_BUCKET_NAME, key: person.image },
+							prefix: "avatars",
+						})
+					).unwrap());
 					[asset] = await tx
 						.insert(schema.assets)
 						.values({
