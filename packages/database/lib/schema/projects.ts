@@ -7,7 +7,6 @@ import { uuidv7 } from "../functions";
 import { assets } from "./assets";
 import { entities } from "./entities";
 import { organisationalUnits } from "./organisational-units";
-import { reports } from "./reports";
 import { socialMedia } from "./social-media";
 
 export const projectScopesEnum = ["eu", "national", "regional"] as const;
@@ -133,27 +132,6 @@ export const ProjectToOrganisationalUnitUpdateSchema = createUpdateSchema(
 		duration: f.NullableTimestampRange,
 	},
 );
-
-export const projectsContributions = p.pgTable("project_contributions", {
-	id: p.uuid("id").primaryKey().default(uuidv7()),
-	projectId: p.uuid("project_id").references(() => {
-		return projects.id;
-	}),
-	reportId: p
-		.uuid("report_id")
-		.notNull()
-		.references(() => {
-			return reports.id;
-		}),
-	budget: p.numeric("budget", { mode: "number", precision: 12, scale: 2 }),
-});
-
-export type ProjectContribution = typeof projectsContributions.$inferSelect;
-export type ProjectContributionInput = typeof projectsContributions.$inferInsert;
-
-export const ProjectContributionSelectSchema = createSelectSchema(projectsContributions);
-export const ProjectContributionInsertSchema = createInsertSchema(projectsContributions);
-export const ProjectContributionUpdateSchema = createUpdateSchema(projectsContributions);
 
 export const projectsToSocialMedia = p.pgTable("projects_to_social_media", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
