@@ -28,8 +28,8 @@ export async function getDocumentationPages(params: GetDocumentationPagesParams)
 				? schema.documentationPages.title
 				: desc(schema.documentationPages.title)
 			: dir === "asc"
-				? schema.entities.updatedAt
-				: desc(schema.entities.updatedAt);
+				? schema.entityVersions.updatedAt
+				: desc(schema.entityVersions.updatedAt);
 
 	const [items, aggregate] = await Promise.all([
 		db
@@ -37,10 +37,11 @@ export async function getDocumentationPages(params: GetDocumentationPagesParams)
 				id: schema.documentationPages.id,
 				slug: schema.entities.slug,
 				title: schema.documentationPages.title,
-				updatedAt: schema.entities.updatedAt,
+				updatedAt: schema.entityVersions.updatedAt,
 			})
 			.from(schema.documentationPages)
-			.innerJoin(schema.entities, eq(schema.documentationPages.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.documentationPages.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.where(where)
 			.orderBy(orderBy)
 			.limit(limit)
@@ -48,7 +49,7 @@ export async function getDocumentationPages(params: GetDocumentationPagesParams)
 		db
 			.select({ total: count() })
 			.from(schema.documentationPages)
-			.innerJoin(schema.entities, eq(schema.documentationPages.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.documentationPages.id, schema.entityVersions.id))
 			.where(where),
 	]);
 
@@ -74,17 +75,29 @@ interface GetDocumentationPageByIdParams {
 export async function getDocumentationPageById(params: GetDocumentationPageByIdParams) {
 	const { id } = params;
 
-	return db.query.documentationPages.findFirst({
+	const item = await db.query.documentationPages.findFirst({
 		where: {
 			id,
 		},
 		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
+			entityVersion: {
+				columns: { id: true },
+				with: {
+					entity: {
+						columns: {
+							id: true,
+							slug: true,
+						},
+					},
 				},
 			},
 		},
 	});
+
+	if (item == null) {
+		return null;
+	}
+
+	const { entityVersion, ...rest } = item;
+	return { ...rest, entity: entityVersion.entity };
 }

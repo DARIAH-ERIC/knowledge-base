@@ -61,7 +61,7 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 	const [items, aggregate] = await Promise.all([
 		db.query.workingGroups.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -81,10 +81,12 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 				sshocMarketplaceActorId: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -109,7 +111,7 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -117,8 +119,8 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 		db
 			.select({ total: count() })
 			.from(schema.workingGroups)
-			.innerJoin(schema.entities, eq(schema.workingGroups.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.workingGroups.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(
 				and(
 					eq(schema.entityStatus.type, "published"),
@@ -151,7 +153,7 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 			};
 		});
 
-		return { ...item, image, socialMedia, publishedAt: item.entity.updatedAt.toISOString() };
+		return { ...item, image, socialMedia, publishedAt: item.entityVersion.updatedAt.toISOString() };
 	});
 
 	return { data, limit, offset, total };
@@ -178,8 +180,8 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 			eq(schema.personsToOrganisationalUnits.roleTypeId, schema.personRoleTypes.id),
 		)
 		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
-		.innerJoin(schema.entities, eq(schema.persons.id, schema.entities.id))
-		.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.where(
 			and(
@@ -222,7 +224,7 @@ export async function getWorkingGroupById(
 		db.query.workingGroups.findFirst({
 			where: {
 				id,
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -236,10 +238,12 @@ export async function getWorkingGroupById(
 				sshocMarketplaceActorId: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -302,7 +306,7 @@ export async function getWorkingGroupById(
 		...item,
 		image,
 		socialMedia,
-		publishedAt: item.entity.updatedAt.toISOString(),
+		publishedAt: item.entityVersion.updatedAt.toISOString(),
 		...fields,
 		chairs,
 		relatedEntities,
@@ -328,7 +332,7 @@ export async function getWorkingGroupSlugs(
 	const [items, aggregate] = await Promise.all([
 		db.query.workingGroups.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -338,10 +342,12 @@ export async function getWorkingGroupSlugs(
 				id: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -351,7 +357,7 @@ export async function getWorkingGroupSlugs(
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -359,8 +365,8 @@ export async function getWorkingGroupSlugs(
 		db
 			.select({ total: count() })
 			.from(schema.workingGroups)
-			.innerJoin(schema.entities, eq(schema.workingGroups.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.workingGroups.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
@@ -385,10 +391,12 @@ export async function getWorkingGroupBySlug(
 
 	const item = await db.query.workingGroups.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
 				status: {
 					type: "published",
+				},
+				entity: {
+					slug,
 				},
 			},
 		},
@@ -400,10 +408,12 @@ export async function getWorkingGroupBySlug(
 			sshocMarketplaceActorId: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
-					updatedAt: true,
+			entityVersion: {
+				columns: { updatedAt: true },
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
 				},
 			},
 			image: {
@@ -465,7 +475,7 @@ export async function getWorkingGroupBySlug(
 		...item,
 		image,
 		socialMedia,
-		publishedAt: item.entity.updatedAt.toISOString(),
+		publishedAt: item.entityVersion.updatedAt.toISOString(),
 		...fields,
 		chairs,
 		relatedEntities,

@@ -13,6 +13,7 @@ import { UpdateFundingCallActionInputSchema } from "@/app/(app)/[locale]/(dashbo
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
+import { getDocumentIdForVersion } from "@/lib/data/entity-lifecycle";
 import { db, type Transaction } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -49,7 +50,11 @@ export const updateFundingCallAction = createServerAction(
 
 		const { contentBlocks, title, id, summary, duration } = result.output;
 
+		let documentId: string | null = null;
+
 		await db.transaction(async (tx) => {
+			documentId = await getDocumentIdForVersion(tx, id);
+
 			await tx
 				.update(schema.fundingCalls)
 				.set({ title, summary, duration })
@@ -57,7 +62,7 @@ export const updateFundingCallAction = createServerAction(
 
 			const contentField = await tx.query.fields.findFirst({
 				where: {
-					entityId: id,
+					entityVersionId: id,
 					name: { fieldName: "content" },
 				},
 				columns: { id: true },
@@ -140,7 +145,9 @@ export const updateFundingCallAction = createServerAction(
 		});
 
 		after(async () => {
-			await syncWebsiteDocumentForEntity(id);
+			if (documentId != null) {
+				await syncWebsiteDocumentForEntity(documentId);
+			}
 			await dispatchWebhook({ type: "funding-calls" });
 		});
 

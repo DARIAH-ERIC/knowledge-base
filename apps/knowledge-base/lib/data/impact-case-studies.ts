@@ -30,8 +30,8 @@ export async function getImpactCaseStudies(params: GetImpactCaseStudiesParams) {
 				? schema.impactCaseStudies.title
 				: desc(schema.impactCaseStudies.title)
 			: dir === "asc"
-				? schema.entities.updatedAt
-				: desc(schema.entities.updatedAt);
+				? schema.entityVersions.updatedAt
+				: desc(schema.entityVersions.updatedAt);
 
 	const [items, aggregate] = await Promise.all([
 		db
@@ -40,10 +40,11 @@ export async function getImpactCaseStudies(params: GetImpactCaseStudiesParams) {
 				slug: schema.entities.slug,
 				summary: schema.impactCaseStudies.summary,
 				title: schema.impactCaseStudies.title,
-				updatedAt: schema.entities.updatedAt,
+				updatedAt: schema.entityVersions.updatedAt,
 			})
 			.from(schema.impactCaseStudies)
-			.innerJoin(schema.entities, eq(schema.impactCaseStudies.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.impactCaseStudies.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.where(where)
 			.orderBy(orderBy)
 			.limit(limit)
@@ -51,8 +52,8 @@ export async function getImpactCaseStudies(params: GetImpactCaseStudiesParams) {
 		db
 			.select({ total: count() })
 			.from(schema.impactCaseStudies)
-			.innerJoin(schema.entities, eq(schema.impactCaseStudies.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.impactCaseStudies.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where),
 	]);
 
@@ -83,9 +84,14 @@ export async function getImpactCaseStudyById(params: GetImpactCaseStudyByIdParam
 			id,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
+			entityVersion: {
+				columns: {},
+				with: {
+					entity: {
+						columns: {
+							slug: true,
+						},
+					},
 				},
 			},
 			image: {
@@ -105,88 +111,10 @@ export async function getImpactCaseStudyById(params: GetImpactCaseStudyByIdParam
 		options: { width: imageAssetWidth.featured },
 	});
 
-	const data = { ...item, image };
+	const { entityVersion, ...rest } = item;
+	const data = { ...rest, entity: entityVersion.entity, image };
 
 	return data;
-}
-
-interface CreateImpactCaseStudyParams extends schema.ImpactCaseStudyInput {
-	slug: schema.EntityInput["slug"];
-}
-
-export async function createImpactCaseStudy(params: CreateImpactCaseStudyParams) {
-	const { imageId, slug, summary, title } = params;
-
-	const entityType = await db.query.entityTypes.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "impact_case_studies" },
-	});
-
-	if (entityType == null) {
-		return;
-	}
-
-	const entityStatus = await db.query.entityStatus.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "published" },
-	});
-
-	if (entityStatus == null) {
-		return;
-	}
-
-	const entityId = await db.transaction(async (tx) => {
-		const [item] = await tx
-			.insert(schema.entities)
-			.values({
-				typeId: entityType.id,
-				statusId: entityStatus.id,
-				slug,
-			})
-			.returning({
-				id: schema.entities.id,
-			});
-
-		if (item == null) {
-			return tx.rollback();
-		}
-
-		const { id } = item;
-
-		const impactCaseStudy = {
-			id,
-			title,
-			summary,
-			imageId,
-			location,
-		};
-
-		await tx.insert(schema.impactCaseStudies).values(impactCaseStudy);
-
-		const fieldNamesIds = await tx.query.entityTypesFieldsNames.findMany({
-			where: {
-				entityTypeId: entityType.id,
-			},
-		});
-
-		const fields = fieldNamesIds.map(({ id: fieldNameId }) => {
-			return { entityId: id, fieldNameId };
-		});
-
-		await tx.insert(schema.fields).values(fields).returning({
-			id: schema.fields.id,
-		});
-
-		return id;
-	});
-
-	return {
-		entityId,
-	};
 }
 
 export type ImpactCaseStudiesWithEntities = Awaited<ReturnType<typeof getImpactCaseStudies>>;

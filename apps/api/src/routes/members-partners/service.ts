@@ -26,7 +26,7 @@ export async function getMembersAndPartners(
 	const [items, aggregate] = await Promise.all([
 		db.query.membersAndPartners.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -42,10 +42,12 @@ export async function getMembersAndPartners(
 				sshocMarketplaceActorId: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -70,7 +72,7 @@ export async function getMembersAndPartners(
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -78,8 +80,8 @@ export async function getMembersAndPartners(
 		db
 			.select({ total: count() })
 			.from(schema.membersAndPartners)
-			.innerJoin(schema.entities, eq(schema.membersAndPartners.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.membersAndPartners.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
@@ -107,7 +109,7 @@ export async function getMembersAndPartners(
 			};
 		});
 
-		return { ...item, image, socialMedia, publishedAt: item.entity.updatedAt.toISOString() };
+		return { ...item, image, socialMedia, publishedAt: item.entityVersion.updatedAt.toISOString() };
 	});
 
 	return { data, limit, offset, total };
@@ -256,7 +258,7 @@ async function getMemberObserverInstitutions(
 ) {
 	const items = (await db.query.organisationalUnits.findMany({
 		where: {
-			entity: {
+			entityVersion: {
 				status: {
 					type: "published",
 				},
@@ -275,9 +277,12 @@ async function getMemberObserverInstitutions(
 			name: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
+			entityVersion: {
+				columns: {},
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
 				},
 			},
 			socialMedia: {
@@ -298,8 +303,10 @@ async function getMemberObserverInstitutions(
 		},
 	})) as unknown as Array<{
 		name: string;
-		entity: {
-			slug: string;
+		entityVersion: {
+			entity: {
+				slug: string;
+			};
 		};
 		socialMedia: Array<{
 			url: string;
@@ -317,7 +324,7 @@ async function getMemberObserverInstitutions(
 
 		return {
 			name: item.name,
-			slug: item.entity.slug,
+			slug: item.entityVersion.entity.slug,
 			website,
 		};
 	});
@@ -329,7 +336,7 @@ async function getCooperatingPartnerInstitutions(
 ) {
 	const items = (await db.query.organisationalUnits.findMany({
 		where: {
-			entity: {
+			entityVersion: {
 				status: {
 					type: "published",
 				},
@@ -348,9 +355,12 @@ async function getCooperatingPartnerInstitutions(
 			name: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
+			entityVersion: {
+				columns: {},
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
 				},
 			},
 			socialMedia: {
@@ -371,8 +381,10 @@ async function getCooperatingPartnerInstitutions(
 		},
 	})) as unknown as Array<{
 		name: string;
-		entity: {
-			slug: string;
+		entityVersion: {
+			entity: {
+				slug: string;
+			};
 		};
 		socialMedia: Array<{
 			url: string;
@@ -390,7 +402,7 @@ async function getCooperatingPartnerInstitutions(
 
 		return {
 			name: item.name,
-			slug: item.entity.slug,
+			slug: item.entityVersion.entity.slug,
 			website,
 		};
 	});
@@ -399,7 +411,7 @@ async function getCooperatingPartnerInstitutions(
 async function getNationalConsortium(db: Database | Transaction, countryId: string) {
 	const item = await db.query.organisationalUnits.findFirst({
 		where: {
-			entity: {
+			entityVersion: {
 				status: {
 					type: "published",
 				},
@@ -421,9 +433,12 @@ async function getNationalConsortium(db: Database | Transaction, countryId: stri
 			name: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
+			entityVersion: {
+				columns: {},
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
 				},
 			},
 			image: {
@@ -440,7 +455,7 @@ async function getNationalConsortium(db: Database | Transaction, countryId: stri
 
 	return {
 		name: item.name,
-		slug: item.entity.slug,
+		slug: item.entityVersion.entity.slug,
 		image:
 			item.image != null
 				? images.generateSignedImageUrl({
@@ -462,8 +477,8 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 		})
 		.from(schema.personsToOrganisationalUnits)
 		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
-		.innerJoin(schema.entities, eq(schema.persons.id, schema.entities.id))
-		.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.innerJoin(
 			schema.personRoleTypes,
@@ -509,7 +524,7 @@ export async function getMemberOrPartnerById(
 		db.query.membersAndPartners.findFirst({
 			where: {
 				id,
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -525,10 +540,12 @@ export async function getMemberOrPartnerById(
 				sshocMarketplaceActorId: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -593,7 +610,7 @@ export async function getMemberOrPartnerById(
 		institutions,
 		contributors,
 		nationalConsortium,
-		publishedAt: item.entity.updatedAt.toISOString(),
+		publishedAt: item.entityVersion.updatedAt.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,
@@ -618,7 +635,7 @@ export async function getMemberOrPartnerSlugs(
 	const [items, aggregate] = await Promise.all([
 		db.query.membersAndPartners.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -628,10 +645,12 @@ export async function getMemberOrPartnerSlugs(
 				id: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -641,7 +660,7 @@ export async function getMemberOrPartnerSlugs(
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -649,8 +668,8 @@ export async function getMemberOrPartnerSlugs(
 		db
 			.select({ total: count() })
 			.from(schema.membersAndPartners)
-			.innerJoin(schema.entities, eq(schema.membersAndPartners.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.membersAndPartners.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
@@ -675,10 +694,12 @@ export async function getMemberOrPartnerBySlug(
 
 	const item = await db.query.membersAndPartners.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
 				status: {
 					type: "published",
+				},
+				entity: {
+					slug,
 				},
 			},
 		},
@@ -692,10 +713,12 @@ export async function getMemberOrPartnerBySlug(
 			sshocMarketplaceActorId: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
-					updatedAt: true,
+			entityVersion: {
+				columns: { updatedAt: true },
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
 				},
 			},
 			image: {
@@ -764,7 +787,7 @@ export async function getMemberOrPartnerBySlug(
 		institutions,
 		contributors,
 		nationalConsortium,
-		publishedAt: item.entity.updatedAt.toISOString(),
+		publishedAt: item.entityVersion.updatedAt.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,

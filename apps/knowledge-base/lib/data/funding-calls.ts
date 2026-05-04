@@ -28,8 +28,8 @@ export async function getFundingCalls(params: GetFundingCallsParams) {
 				? schema.fundingCalls.title
 				: desc(schema.fundingCalls.title)
 			: dir === "asc"
-				? schema.entities.updatedAt
-				: desc(schema.entities.updatedAt);
+				? schema.entityVersions.updatedAt
+				: desc(schema.entityVersions.updatedAt);
 
 	const [items, aggregate] = await Promise.all([
 		db
@@ -39,10 +39,11 @@ export async function getFundingCalls(params: GetFundingCallsParams) {
 				slug: schema.entities.slug,
 				summary: schema.fundingCalls.summary,
 				title: schema.fundingCalls.title,
-				updatedAt: schema.entities.updatedAt,
+				updatedAt: schema.entityVersions.updatedAt,
 			})
 			.from(schema.fundingCalls)
-			.innerJoin(schema.entities, eq(schema.fundingCalls.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.fundingCalls.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.where(where)
 			.orderBy(orderBy)
 			.limit(limit)
@@ -50,8 +51,8 @@ export async function getFundingCalls(params: GetFundingCallsParams) {
 		db
 			.select({ total: count() })
 			.from(schema.fundingCalls)
-			.innerJoin(schema.entities, eq(schema.fundingCalls.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.fundingCalls.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where),
 	]);
 
@@ -83,9 +84,14 @@ export async function getFundingCallById(params: GetFundingCallByIdParams) {
 			id,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
+			entityVersion: {
+				columns: {},
+				with: {
+					entity: {
+						columns: {
+							slug: true,
+						},
+					},
 				},
 			},
 		},
@@ -95,87 +101,10 @@ export async function getFundingCallById(params: GetFundingCallByIdParams) {
 		return null;
 	}
 
-	const data = { ...item };
+	const { entityVersion, ...rest } = item;
+	const data = { ...rest, entity: entityVersion.entity };
 
 	return data;
-}
-
-interface CreateFundingCallParams extends schema.FundingCallInput {
-	slug: schema.EntityInput["slug"];
-}
-
-export async function createFundingCall(params: CreateFundingCallParams) {
-	const { duration, slug, summary, title } = params;
-
-	const entityType = await db.query.entityTypes.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "funding_calls" },
-	});
-
-	if (entityType == null) {
-		return null;
-	}
-
-	const entityStatus = await db.query.entityStatus.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "published" },
-	});
-
-	if (entityStatus == null) {
-		return null;
-	}
-
-	const entityId = await db.transaction(async (tx) => {
-		const [item] = await tx
-			.insert(schema.entities)
-			.values({
-				typeId: entityType.id,
-				statusId: entityStatus.id,
-				slug,
-			})
-			.returning({
-				id: schema.entities.id,
-			});
-
-		if (item == null) {
-			return tx.rollback();
-		}
-
-		const { id } = item;
-
-		const fundingCall = {
-			id,
-			title,
-			summary,
-			duration,
-		};
-
-		await tx.insert(schema.fundingCalls).values(fundingCall);
-
-		const fieldNamesIds = await tx.query.entityTypesFieldsNames.findMany({
-			where: {
-				entityTypeId: entityType.id,
-			},
-		});
-
-		const fields = fieldNamesIds.map(({ id: fieldNameId }) => {
-			return { entityId: id, fieldNameId };
-		});
-
-		await tx.insert(schema.fields).values(fields).returning({
-			id: schema.fields.id,
-		});
-
-		return id;
-	});
-
-	return {
-		entityId,
-	};
 }
 
 export type FundingCallsWithEntities = Awaited<ReturnType<typeof getFundingCalls>>;

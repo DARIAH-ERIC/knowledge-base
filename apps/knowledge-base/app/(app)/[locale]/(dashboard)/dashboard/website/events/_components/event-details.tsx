@@ -18,7 +18,7 @@ import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 interface EventDetailsProps {
 	contentBlocks: Array<ContentBlock>;
 	event: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 }
 
@@ -32,7 +32,7 @@ export function EventDetails(props: Readonly<EventDetailsProps>): ReactNode {
 			<div className="flex justify-end">
 				<Link
 					className={buttonStyles({ intent: "secondary", size: "sm" })}
-					href={`/dashboard/website/events/${event.entity.slug}/edit`}
+					href={`/dashboard/website/events/${event.entityVersion.entity.slug}/edit`}
 				>
 					<PencilSquareIcon className="mr-2 size-4" />
 					{t("Edit")}
@@ -43,7 +43,7 @@ export function EventDetails(props: Readonly<EventDetailsProps>): ReactNode {
 				<DescriptionDetails>{event.title}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Slug")}</DescriptionTerm>
-				<DescriptionDetails>{event.entity.slug}</DescriptionDetails>
+				<DescriptionDetails>{event.entityVersion.entity.slug}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Summary")}</DescriptionTerm>
 				<DescriptionDetails>{event.summary}</DescriptionDetails>

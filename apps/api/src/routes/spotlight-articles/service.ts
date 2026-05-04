@@ -26,7 +26,7 @@ export async function getSpotlightArticles(
 	const [items, aggregate] = await Promise.all([
 		db.query.spotlightArticles.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -38,10 +38,12 @@ export async function getSpotlightArticles(
 				summary: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -51,7 +53,7 @@ export async function getSpotlightArticles(
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -59,8 +61,8 @@ export async function getSpotlightArticles(
 		db
 			.select({ total: count() })
 			.from(schema.spotlightArticles)
-			.innerJoin(schema.entities, eq(schema.spotlightArticles.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.spotlightArticles.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
@@ -72,7 +74,7 @@ export async function getSpotlightArticles(
 			options: { width: imageWidth.preview },
 		});
 
-		return { ...item, image, publishedAt: item.entity.updatedAt.toISOString() };
+		return { ...item, image, publishedAt: item.entityVersion.updatedAt.toISOString() };
 	});
 
 	return { data, limit, offset, total };
@@ -95,8 +97,8 @@ async function getContributors(db: Database | Transaction, spotlightArticleId: s
 		})
 		.from(schema.spotlightArticlesToPersons)
 		.innerJoin(schema.persons, eq(schema.spotlightArticlesToPersons.personId, schema.persons.id))
-		.innerJoin(schema.entities, eq(schema.persons.id, schema.entities.id))
-		.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.where(
 			and(
@@ -136,7 +138,7 @@ export async function getSpotlightArticleById(
 		db.query.spotlightArticles.findFirst({
 			where: {
 				id,
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -148,10 +150,12 @@ export async function getSpotlightArticleById(
 				summary: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -183,7 +187,7 @@ export async function getSpotlightArticleById(
 		...item,
 		contributors,
 		image,
-		publishedAt: item.entity.updatedAt.toISOString(),
+		publishedAt: item.entityVersion.updatedAt.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,
@@ -208,7 +212,7 @@ export async function getSpotlightArticleSlugs(
 	const [items, aggregate] = await Promise.all([
 		db.query.spotlightArticles.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -218,10 +222,12 @@ export async function getSpotlightArticleSlugs(
 				id: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -231,7 +237,7 @@ export async function getSpotlightArticleSlugs(
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -239,8 +245,8 @@ export async function getSpotlightArticleSlugs(
 		db
 			.select({ total: count() })
 			.from(schema.spotlightArticles)
-			.innerJoin(schema.entities, eq(schema.spotlightArticles.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.spotlightArticles.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
@@ -265,10 +271,12 @@ export async function getSpotlightArticleBySlug(
 
 	const item = await db.query.spotlightArticles.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
 				status: {
 					type: "published",
+				},
+				entity: {
+					slug,
 				},
 			},
 		},
@@ -278,10 +286,12 @@ export async function getSpotlightArticleBySlug(
 			summary: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
-					updatedAt: true,
+			entityVersion: {
+				columns: { updatedAt: true },
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
 				},
 			},
 			image: {
@@ -313,7 +323,7 @@ export async function getSpotlightArticleBySlug(
 		...item,
 		contributors,
 		image,
-		publishedAt: item.entity.updatedAt.toISOString(),
+		publishedAt: item.entityVersion.updatedAt.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,

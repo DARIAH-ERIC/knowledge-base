@@ -20,7 +20,8 @@ interface ProjectDetailsProps {
 		"acronym" | "call" | "duration" | "funding" | "id" | "name" | "summary" | "topic"
 	> & {
 		description: JSONContent | null;
-		entity: Pick<schema.Entity, "documentId" | "slug"> & {
+		entityVersion: {
+			entity: Pick<schema.Entity, "id" | "slug">;
 			status: Pick<schema.EntityStatus, "id" | "type">;
 		};
 		scope: Pick<schema.ProjectScope, "id" | "scope">;
@@ -50,7 +51,7 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 			<div className="flex justify-end">
 				<Link
 					className={buttonStyles({ intent: "secondary", size: "sm" })}
-					href={`/dashboard/administrator/projects/${project.entity.slug}/edit`}
+					href={`/dashboard/administrator/projects/${project.entityVersion.entity.slug}/edit`}
 				>
 					<PencilSquareIcon className="mr-2 size-4" />
 					{t("Edit")}
@@ -61,7 +62,7 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 				<DescriptionDetails>{project.name}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Slug")}</DescriptionTerm>
-				<DescriptionDetails>{project.entity.slug}</DescriptionDetails>
+				<DescriptionDetails>{project.entityVersion.entity.slug}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Acronym")}</DescriptionTerm>
 				<DescriptionDetails>{project.acronym}</DescriptionDetails>

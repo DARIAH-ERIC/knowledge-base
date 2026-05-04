@@ -11,6 +11,7 @@ import * as v from "valibot";
 
 import { UpdateProjectActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/update-project.schema";
 import { assertAdmin } from "@/lib/auth/session";
+import { getDocumentIdForVersion } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { and, eq, inArray, notInArray } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -60,7 +61,11 @@ export const updateProjectAction = createServerAction(
 			topic,
 		} = result.output;
 
+		let documentId: string | null = null;
+
 		await db.transaction(async (tx) => {
+			documentId = await getDocumentIdForVersion(tx, id);
+
 			let imageId = null;
 
 			if (imageKey != null) {
@@ -92,7 +97,7 @@ export const updateProjectAction = createServerAction(
 
 			const descriptionField = await tx.query.fields.findFirst({
 				where: {
-					entityId: id,
+					entityVersionId: id,
 					name: { fieldName: "description" },
 				},
 				columns: { id: true },
@@ -219,7 +224,9 @@ export const updateProjectAction = createServerAction(
 		});
 
 		after(async () => {
-			await syncWebsiteDocumentForEntity(id);
+			if (documentId != null) {
+				await syncWebsiteDocumentForEntity(documentId);
+			}
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/projects", "layout");

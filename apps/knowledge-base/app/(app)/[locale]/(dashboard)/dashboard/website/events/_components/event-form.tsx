@@ -32,7 +32,7 @@ interface EventFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
 	event?: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
@@ -191,7 +191,7 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 				{event != null ? (
 					<Fragment>
 						<input name="id" type="hidden" value={event.id} />
-						<input name="documentId" type="hidden" value={event.entity.documentId} />
+						<input name="documentId" type="hidden" value={event.entityVersion.entity.id} />
 					</Fragment>
 				) : null}
 

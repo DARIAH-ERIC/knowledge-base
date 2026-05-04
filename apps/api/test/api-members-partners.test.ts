@@ -15,24 +15,21 @@ import { withTransaction } from "~/test/lib/with-transaction";
 function createItems(count: number) {
 	const items = f.helpers.multiple(
 		() => {
-			const id = uuidv7();
-			const documentId = uuidv7();
+			const versionId = uuidv7();
+			const entityId = uuidv7();
 			const name = f.lorem.sentence();
 			const slug = slugify(name);
 
-			const entity = {
-				id,
-				slug,
-				documentId,
-			};
+			const entity = { id: entityId, slug };
+			const version = { id: versionId, entityId };
 
 			const organisationalUnit = {
-				id,
+				id: versionId,
 				name,
 				summary: f.lorem.paragraph(),
 			};
 
-			return { entity, organisationalUnit };
+			return { entity, version, organisationalUnit };
 		},
 		{ count },
 	);
@@ -43,20 +40,18 @@ function createItems(count: number) {
 function createPersonItems(count: number) {
 	return f.helpers.multiple(
 		() => {
-			const id = uuidv7();
-			const documentId = uuidv7();
+			const versionId = uuidv7();
+			const entityId = uuidv7();
 			const assetId = uuidv7();
 			const name = f.person.fullName();
 			const slug = slugify(name);
-			const affiliationId = uuidv7();
+			const affiliationVersionId = uuidv7();
+			const affiliationEntityId = uuidv7();
 			const affiliationName = f.company.name();
 
 			return {
-				entity: {
-					id,
-					slug,
-					documentId,
-				},
+				entity: { id: entityId, slug },
+				version: { id: versionId, entityId },
 				asset: {
 					id: assetId,
 					key: `persons/${assetId}.jpg`,
@@ -64,7 +59,7 @@ function createPersonItems(count: number) {
 					mimeType: "image/jpeg",
 				},
 				person: {
-					id,
+					id: versionId,
 					name,
 					position: f.person.jobTitle(),
 					sortName: f.person.lastName(),
@@ -73,13 +68,10 @@ function createPersonItems(count: number) {
 					imageId: assetId,
 				},
 				affiliation: {
-					entity: {
-						id: affiliationId,
-						slug: slugify(affiliationName),
-						documentId: uuidv7(),
-					},
+					entity: { id: affiliationEntityId, slug: slugify(affiliationName) },
+					version: { id: affiliationVersionId, entityId: affiliationEntityId },
 					organisationalUnit: {
-						id: affiliationId,
+						id: affiliationVersionId,
 						name: affiliationName,
 						summary: f.lorem.paragraph(),
 					},
@@ -187,8 +179,12 @@ async function seedPartnerInstitutions(
 
 	await db.insert(schema.entities).values({
 		...institution.entity,
-		statusId: status.id,
 		typeId: entityType.id,
+	});
+
+	await db.insert(schema.entityVersions).values({
+		...institution.version,
+		statusId: status.id,
 	});
 
 	await db.insert(schema.organisationalUnits).values({
@@ -263,14 +259,20 @@ async function seedContributor(
 	await db.insert(schema.assets).values(person.asset);
 	await db.insert(schema.entities).values({
 		...person.entity,
-		statusId: status.id,
 		typeId: entityType.id,
+	});
+	await db.insert(schema.entityVersions).values({
+		...person.version,
+		statusId: status.id,
 	});
 	await db.insert(schema.persons).values(person.person);
 	await db.insert(schema.entities).values({
 		...person.affiliation.entity,
-		statusId: status.id,
 		typeId: organisationalUnitEntityType.id,
+	});
+	await db.insert(schema.entityVersions).values({
+		...person.affiliation.version,
+		statusId: status.id,
 	});
 	await db.insert(schema.organisationalUnits).values({
 		...person.affiliation.organisationalUnit,
@@ -327,8 +329,12 @@ async function seedNationalConsortium(
 
 	await db.insert(schema.entities).values({
 		...consortium.entity,
-		statusId: status.id,
 		typeId: entityType.id,
+	});
+
+	await db.insert(schema.entityVersions).values({
+		...consortium.version,
+		statusId: status.id,
 	});
 
 	await db.insert(schema.organisationalUnits).values({
@@ -379,7 +385,13 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {
-			return { ...item.entity, statusId: status.id, typeId: entityType.id };
+			return { ...item.entity, typeId: entityType.id };
+		}),
+	);
+
+	await db.insert(schema.entityVersions).values(
+		items.map((item) => {
+			return { ...item.version, statusId: status.id };
 		}),
 	);
 
@@ -412,7 +424,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 	await Promise.all(
 		items.map((item) => {
-			return seedContentBlock(db, item.entity.id, entityType.id, "description");
+			return seedContentBlock(db, item.version.id, entityType.id, "description");
 		}),
 	);
 }
@@ -449,11 +461,12 @@ describe("members-partners", () => {
 
 				await db.insert(schema.entities).values(
 					ericItems.map((item) => {
-						return {
-							...item.entity,
-							statusId: status.id,
-							typeId: entityType.id,
-						};
+						return { ...item.entity, typeId: entityType.id };
+					}),
+				);
+				await db.insert(schema.entityVersions).values(
+					ericItems.map((item) => {
+						return { ...item.version, statusId: status.id };
 					}),
 				);
 				await db
@@ -464,11 +477,12 @@ describe("members-partners", () => {
 				const partnerItems = createItems(2);
 				await db.insert(schema.entities).values(
 					partnerItems.map((item) => {
-						return {
-							...item.entity,
-							statusId: status.id,
-							typeId: entityType.id,
-						};
+						return { ...item.entity, typeId: entityType.id };
+					}),
+				);
+				await db.insert(schema.entityVersions).values(
+					partnerItems.map((item) => {
+						return { ...item.version, statusId: status.id };
 					}),
 				);
 				await seedCooperatingPartner(db, ericItem.organisationalUnit.id, partnerItems);
@@ -554,7 +568,7 @@ describe("members-partners", () => {
 				await seed(db, items);
 
 				const item = items.at(1)!;
-				const id = item.entity.id;
+				const id = item.version.id;
 				const name = item.organisationalUnit.name;
 				const countryId = item.organisationalUnit.id;
 
@@ -580,11 +594,12 @@ describe("members-partners", () => {
 
 				await db.insert(schema.entities).values(
 					ericItems.map((entry) => {
-						return {
-							...entry.entity,
-							statusId: status.id,
-							typeId: entityType.id,
-						};
+						return { ...entry.entity, typeId: entityType.id };
+					}),
+				);
+				await db.insert(schema.entityVersions).values(
+					ericItems.map((entry) => {
+						return { ...entry.version, statusId: status.id };
 					}),
 				);
 				await db
@@ -692,11 +707,12 @@ describe("members-partners", () => {
 				const partnerItems = createItems(2);
 				await db.insert(schema.entities).values(
 					partnerItems.map((entry) => {
-						return {
-							...entry.entity,
-							statusId: status.id,
-							typeId: entityType.id,
-						};
+						return { ...entry.entity, typeId: entityType.id };
+					}),
+				);
+				await db.insert(schema.entityVersions).values(
+					partnerItems.map((entry) => {
+						return { ...entry.version, statusId: status.id };
 					}),
 				);
 				await seedCooperatingPartner(db, ericItem.organisationalUnit.id, partnerItems);
@@ -705,7 +721,7 @@ describe("members-partners", () => {
 
 				const response = await client["members-partners"][":id"].$get({
 					param: {
-						id: country.entity.id,
+						id: country.version.id,
 					},
 				});
 
@@ -839,11 +855,12 @@ describe("members-partners", () => {
 
 				await db.insert(schema.entities).values(
 					ericItems.map((entry) => {
-						return {
-							...entry.entity,
-							statusId: status.id,
-							typeId: entityType.id,
-						};
+						return { ...entry.entity, typeId: entityType.id };
+					}),
+				);
+				await db.insert(schema.entityVersions).values(
+					ericItems.map((entry) => {
+						return { ...entry.version, statusId: status.id };
 					}),
 				);
 				await db

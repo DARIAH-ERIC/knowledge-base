@@ -29,7 +29,7 @@ interface GovernanceBodyFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	governanceBody?: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
 		description?: JSONContent;
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
@@ -147,7 +147,7 @@ export function GovernanceBodyForm(props: Readonly<GovernanceBodyFormProps>): Re
 				{governanceBody != null ? (
 					<Fragment>
 						<input name="id" type="hidden" value={governanceBody.id} />
-						<input name="documentId" type="hidden" value={governanceBody.entity.documentId} />
+						<input name="documentId" type="hidden" value={governanceBody.entityVersion.entity.id} />
 					</Fragment>
 				) : null}
 

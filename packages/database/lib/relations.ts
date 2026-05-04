@@ -20,16 +20,16 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 		},
 		documentationPages: {
-			entity: r.one.entities({
+			entityVersion: r.one.entityVersions({
 				from: r.documentationPages.id,
-				to: r.entities.id,
+				to: r.entityVersions.id,
 				optional: false,
 			}),
 		},
 		documentsPolicies: {
-			entity: r.one.entities({
+			entityVersion: r.one.entityVersions({
 				from: r.documentsPolicies.id,
-				to: r.entities.id,
+				to: r.entityVersions.id,
 				optional: false,
 			}),
 			document: r.one.assets({
@@ -133,29 +133,40 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 		},
 		entities: {
-			entities: r.many.entities({
-				from: r.entities.id.through(r.entitiesToEntities.entityId),
-				to: r.entities.id.through(r.entitiesToEntities.relatedEntityId),
-			}),
-			fields: r.many.fields({
-				from: r.entities.id,
-				to: r.fields.entityId,
-			}),
-			status: r.one.entityStatus({
-				from: r.entities.statusId,
-				to: r.entityStatus.id,
-				optional: false,
-			}),
 			type: r.one.entityTypes({
 				from: r.entities.typeId,
 				to: r.entityTypes.id,
 				optional: false,
 			}),
+			versions: r.many.entityVersions({
+				from: r.entities.id,
+				to: r.entityVersions.entityId,
+			}),
+			relatedEntities: r.many.entities({
+				from: r.entities.id.through(r.entitiesToEntities.entityId),
+				to: r.entities.id.through(r.entitiesToEntities.relatedEntityId),
+			}),
+		},
+		entityVersions: {
+			entity: r.one.entities({
+				from: r.entityVersions.entityId,
+				to: r.entities.id,
+				optional: false,
+			}),
+			status: r.one.entityStatus({
+				from: r.entityVersions.statusId,
+				to: r.entityStatus.id,
+				optional: false,
+			}),
+			fields: r.many.fields({
+				from: r.entityVersions.id,
+				to: r.fields.entityVersionId,
+			}),
 		},
 		events: {
-			entity: r.one.entities({
+			entityVersion: r.one.entityVersions({
 				from: r.events.id,
-				to: r.entities.id,
+				to: r.entityVersions.id,
 				optional: false,
 			}),
 			image: r.one.assets({
@@ -171,9 +182,9 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 		},
 		fields: {
-			entity: r.one.entities({
-				from: r.fields.entityId,
-				to: r.entities.id,
+			entityVersion: r.one.entityVersions({
+				from: r.fields.entityVersionId,
+				to: r.entityVersions.id,
 				optional: false,
 			}),
 			name: r.one.entityTypesFieldsNames({
@@ -203,9 +214,9 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.impactCaseStudies.id.through(r.impactCaseStudiesToPersons.impactCaseStudyId),
 				to: r.persons.id.through(r.impactCaseStudiesToPersons.personId),
 			}),
-			entity: r.one.entities({
+			entityVersion: r.one.entityVersions({
 				from: r.impactCaseStudies.id,
-				to: r.entities.id,
+				to: r.entityVersions.id,
 				optional: false,
 			}),
 			image: r.one.assets({
@@ -215,9 +226,9 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 		},
 		dariahProjects: {
-			entity: r.one.entities({
+			entityVersion: r.one.entityVersions({
 				from: r.dariahProjects.id,
-				to: r.entities.id,
+				to: r.entityVersions.id,
 				optional: false,
 			}),
 			image: r.one.assets({
@@ -239,9 +250,9 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 		},
 		fundingCalls: {
-			entity: r.one.entities({
+			entityVersion: r.one.entityVersions({
 				from: r.fundingCalls.id,
-				to: r.entities.id,
+				to: r.entityVersions.id,
 				optional: false,
 			}),
 		},
@@ -250,9 +261,9 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.membersAndPartners.imageId,
 				to: r.assets.id,
 			}),
-			entity: r.one.entities({
+			entityVersion: r.one.entityVersions({
 				from: r.membersAndPartners.id,
-				to: r.entities.id,
+				to: r.entityVersions.id,
 				optional: false,
 			}),
 			socialMedia: r.many.socialMedia({
@@ -263,9 +274,9 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 		},
 		opportunities: {
-			entity: r.one.entities({
+			entityVersion: r.one.entityVersions({
 				from: r.opportunities.id,
-				to: r.entities.id,
+				to: r.entityVersions.id,
 				optional: false,
 			}),
 			source: r.one.opportunitySources({
@@ -279,9 +290,9 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.workingGroups.imageId,
 				to: r.assets.id,
 			}),
-			entity: r.one.entities({
+			entityVersion: r.one.entityVersions({
 				from: r.workingGroups.id,
-				to: r.entities.id,
+				to: r.entityVersions.id,
 				optional: false,
 			}),
 			socialMedia: r.many.socialMedia({
@@ -290,9 +301,9 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 		},
 		news: {
-			entity: r.one.entities({
+			entityVersion: r.one.entityVersions({
 				from: r.news.id,
-				to: r.entities.id,
+				to: r.entityVersions.id,
 				optional: false,
 			}),
 			image: r.one.assets({
@@ -306,9 +317,9 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.organisationalUnits.imageId,
 				to: r.assets.id,
 			}),
-			entity: r.one.entities({
+			entityVersion: r.one.entityVersions({
 				from: r.organisationalUnits.id,
-				to: r.entities.id,
+				to: r.entityVersions.id,
 				optional: false,
 			}),
 			organisationalUnits: r.many.organisationalUnits({
@@ -334,9 +345,9 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 		},
 		projects: {
-			entity: r.one.entities({
+			entityVersion: r.one.entityVersions({
 				from: r.projects.id,
-				to: r.entities.id,
+				to: r.entityVersions.id,
 				optional: false,
 			}),
 			image: r.one.assets({
@@ -378,22 +389,10 @@ export const relations = defineRelations(schema, (r) => {
 				optional: false,
 			}),
 		},
-		projectsContributions: {
-			project: r.one.projects({
-				from: r.projectsContributions.projectId,
-				to: r.projects.id,
-				optional: false,
-			}),
-			report: r.one.reports({
-				from: r.projectsContributions.reportId,
-				to: r.reports.id,
-				optional: false,
-			}),
-		},
 		pages: {
-			entity: r.one.entities({
+			entityVersion: r.one.entityVersions({
 				from: r.pages.id,
-				to: r.entities.id,
+				to: r.entityVersions.id,
 				optional: false,
 			}),
 			image: r.one.assets({
@@ -402,9 +401,9 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 		},
 		persons: {
-			entity: r.one.entities({
+			entityVersion: r.one.entityVersions({
 				from: r.persons.id,
-				to: r.entities.id,
+				to: r.entityVersions.id,
 				optional: false,
 			}),
 			image: r.one.assets({
@@ -837,9 +836,9 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.spotlightArticles.id.through(r.spotlightArticlesToPersons.spotlightArticleId),
 				to: r.persons.id.through(r.spotlightArticlesToPersons.personId),
 			}),
-			entity: r.one.entities({
+			entityVersion: r.one.entityVersions({
 				from: r.spotlightArticles.id,
-				to: r.entities.id,
+				to: r.entityVersions.id,
 				optional: false,
 			}),
 			image: r.one.assets({

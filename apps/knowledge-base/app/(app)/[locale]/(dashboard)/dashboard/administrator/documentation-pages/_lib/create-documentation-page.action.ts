@@ -13,6 +13,7 @@ import { CreateDocumentationPageActionInputSchema } from "@/app/(app)/[locale]/(
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
+import { createPublishedDocument } from "@/lib/data/entity-lifecycle";
 import { db, type Transaction } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -58,30 +59,10 @@ export const createDocumentationPageAction = createServerAction(
 
 			assert(type);
 
-			const status = await tx.query.entityStatus.findFirst({
-				where: {
-					type: "published",
-				},
-				columns: {
-					id: true,
-				},
-			});
-
-			assert(status);
-
-			const [entity] = await tx
-				.insert(schema.entities)
-				.values({
-					slug,
-					statusId: status.id,
-					typeId: type.id,
-				})
-				.returning({ id: schema.entities.id });
-
-			assert(entity);
+			const { versionId } = await createPublishedDocument(tx, type.id, slug);
 
 			await tx.insert(schema.documentationPages).values({
-				id: entity.id,
+				id: versionId,
 				title,
 			});
 
@@ -97,7 +78,7 @@ export const createDocumentationPageAction = createServerAction(
 
 			const [contentField] = await tx
 				.insert(schema.fields)
-				.values({ entityId: entity.id, fieldNameId: contentFieldName.id })
+				.values({ entityVersionId: versionId, fieldNameId: contentFieldName.id })
 				.returning({ id: schema.fields.id });
 
 			assert(contentField);

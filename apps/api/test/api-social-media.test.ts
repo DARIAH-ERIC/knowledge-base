@@ -55,13 +55,18 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	);
 
 	const unitId = uuidv7();
+	const unitEntityId = uuidv7();
 
 	await db.insert(schema.entities).values({
-		id: unitId,
+		id: unitEntityId,
 		slug: `unit-${unitId}`,
-		documentId: uuidv7(),
-		statusId: entityStatus.id,
 		typeId: entityType.id,
+	});
+
+	await db.insert(schema.entityVersions).values({
+		id: unitId,
+		entityId: unitEntityId,
+		statusId: entityStatus.id,
 	});
 
 	await db.insert(schema.organisationalUnits).values({

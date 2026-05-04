@@ -13,24 +13,21 @@ import { withTransaction } from "~/test/lib/with-transaction";
 function createItems(count: number) {
 	const items = f.helpers.multiple(
 		() => {
-			const id = uuidv7();
-			const documentId = uuidv7();
+			const versionId = uuidv7();
+			const entityId = uuidv7();
 			const title = f.lorem.sentence();
 			const slug = slugify(title);
 
-			const entity = {
-				id,
-				slug,
-				documentId,
-			};
+			const entity = { id: entityId, slug };
+			const version = { id: versionId, entityId };
 
 			const page = {
-				id,
+				id: versionId,
 				title,
 				summary: f.lorem.paragraph(),
 			};
 
-			return { entity, page };
+			return { entity, version, page };
 		},
 		{ count },
 	);
@@ -51,7 +48,13 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {
-			return { ...item.entity, statusId: status.id, typeId: type.id };
+			return { ...item.entity, typeId: type.id };
+		}),
+	);
+
+	await db.insert(schema.entityVersions).values(
+		items.map((item) => {
+			return { ...item.version, statusId: status.id };
 		}),
 	);
 
@@ -63,7 +66,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 	await Promise.all(
 		items.map((item) => {
-			return seedContentBlock(db, item.entity.id, type.id, "content");
+			return seedContentBlock(db, item.version.id, type.id, "content");
 		}),
 	);
 }
@@ -111,7 +114,7 @@ describe("pages", () => {
 				await seed(db, items);
 
 				const item = items.at(1)!;
-				const id = item.entity.id;
+				const id = item.page.id;
 				const title = item.page.title;
 
 				const response = await client.pages[":id"].$get({

@@ -131,7 +131,8 @@ interface ProjectFormProps {
 		"acronym" | "call" | "duration" | "funding" | "id" | "name" | "summary" | "topic"
 	> & {
 		description?: JSONContent;
-		entity: Pick<schema.Entity, "documentId" | "slug"> & {
+		entityVersion: {
+			entity: Pick<schema.Entity, "id" | "slug">;
 			status: Pick<schema.EntityStatus, "id" | "type">;
 		};
 		scope: Pick<schema.ProjectScope, "id" | "scope">;
@@ -722,7 +723,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 				{project != null ? (
 					<Fragment>
 						<input name="id" type="hidden" value={project.id} />
-						<input name="documentId" type="hidden" value={project.entity.documentId} />
+						<input name="documentId" type="hidden" value={project.entityVersion.entity.id} />
 					</Fragment>
 				) : null}
 

@@ -15,6 +15,7 @@ import { CreateOpportunityActionInputSchema } from "@/app/(app)/[locale]/(dashbo
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
+import { createPublishedDocument } from "@/lib/data/entity-lifecycle";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -50,7 +51,7 @@ export const createOpportunityAction = createServerAction(
 		const { contentBlocks, duration, sourceId, title, summary, website } = result.output;
 
 		const slug = slugify(title);
-		let entityId: string | null = null;
+		let documentId: string | null = null;
 
 		await db.transaction(async (tx) => {
 			const type = await tx.query.entityTypes.findFirst({
@@ -64,31 +65,11 @@ export const createOpportunityAction = createServerAction(
 
 			assert(type);
 
-			const status = await tx.query.entityStatus.findFirst({
-				where: {
-					type: "published",
-				},
-				columns: {
-					id: true,
-				},
-			});
-
-			assert(status);
-
-			const [entity] = await tx
-				.insert(schema.entities)
-				.values({
-					slug,
-					statusId: status.id,
-					typeId: type.id,
-				})
-				.returning({ id: schema.entities.id });
-
-			assert(entity);
-			entityId = entity.id;
+			const { documentId: docId, versionId } = await createPublishedDocument(tx, type.id, slug);
+			documentId = docId;
 
 			await tx.insert(schema.opportunities).values({
-				id: entity.id,
+				id: versionId,
 				duration,
 				sourceId,
 				title,
@@ -108,7 +89,7 @@ export const createOpportunityAction = createServerAction(
 
 			const [contentField] = await tx
 				.insert(schema.fields)
-				.values({ entityId: entity.id, fieldNameId: contentFieldName.id })
+				.values({ entityVersionId: versionId, fieldNameId: contentFieldName.id })
 				.returning({ id: schema.fields.id });
 
 			assert(contentField);
@@ -141,8 +122,8 @@ export const createOpportunityAction = createServerAction(
 		});
 
 		after(async () => {
-			if (entityId != null) {
-				await syncWebsiteDocumentForEntity(entityId);
+			if (documentId != null) {
+				await syncWebsiteDocumentForEntity(documentId);
 			}
 
 			await dispatchWebhook({ type: "opportunities" });

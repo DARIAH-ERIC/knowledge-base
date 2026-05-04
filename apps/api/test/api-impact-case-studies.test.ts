@@ -14,24 +14,21 @@ import { withTransaction } from "~/test/lib/with-transaction";
 function createItems(count: number) {
 	const items = f.helpers.multiple(
 		() => {
-			const id = uuidv7();
-			const documentId = uuidv7();
+			const versionId = uuidv7();
+			const entityId = uuidv7();
 			const title = f.lorem.sentence();
 			const slug = slugify(title);
 
-			const entity = {
-				id,
-				slug,
-				documentId,
-			};
+			const entity = { id: entityId, slug };
+			const version = { id: versionId, entityId };
 
 			const impactCaseStudy = {
-				id,
+				id: versionId,
 				title,
 				summary: f.lorem.paragraph(),
 			};
 
-			return { entity, impactCaseStudy };
+			return { entity, version, impactCaseStudy };
 		},
 		{ count },
 	);
@@ -40,20 +37,18 @@ function createItems(count: number) {
 }
 
 function createContributor() {
-	const id = uuidv7();
-	const documentId = uuidv7();
+	const versionId = uuidv7();
+	const entityId = uuidv7();
 	const assetId = uuidv7();
 	const name = f.person.fullName();
 	const slug = slugify(name);
-	const affiliationId = uuidv7();
+	const affiliationVersionId = uuidv7();
+	const affiliationEntityId = uuidv7();
 	const affiliationName = f.company.name();
 
 	return {
-		entity: {
-			id,
-			slug,
-			documentId,
-		},
+		entity: { id: entityId, slug },
+		version: { id: versionId, entityId },
 		asset: {
 			id: assetId,
 			key: `persons/${assetId}.jpg`,
@@ -61,7 +56,7 @@ function createContributor() {
 			mimeType: "image/jpeg",
 		},
 		person: {
-			id,
+			id: versionId,
 			name,
 			position: f.person.jobTitle(),
 			sortName: f.person.lastName(),
@@ -70,13 +65,10 @@ function createContributor() {
 			imageId: assetId,
 		},
 		affiliation: {
-			entity: {
-				id: affiliationId,
-				slug: slugify(affiliationName),
-				documentId: uuidv7(),
-			},
+			entity: { id: affiliationEntityId, slug: slugify(affiliationName) },
+			version: { id: affiliationVersionId, entityId: affiliationEntityId },
 			organisationalUnit: {
-				id: affiliationId,
+				id: affiliationVersionId,
 				name: affiliationName,
 				summary: f.lorem.paragraph(),
 			},
@@ -132,7 +124,13 @@ async function seed(
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {
-			return { ...item.entity, statusId: status.id, typeId: type.id };
+			return { ...item.entity, typeId: type.id };
+		}),
+	);
+
+	await db.insert(schema.entityVersions).values(
+		items.map((item) => {
+			return { ...item.version, statusId: status.id };
 		}),
 	);
 
@@ -144,7 +142,7 @@ async function seed(
 
 	await Promise.all(
 		items.map((item) => {
-			return seedContentBlock(db, item.entity.id, type.id, "content");
+			return seedContentBlock(db, item.version.id, type.id, "content");
 		}),
 	);
 
@@ -152,16 +150,24 @@ async function seed(
 
 	await db.insert(schema.entities).values({
 		...contributor.entity,
-		statusId: status.id,
 		typeId: personType.id,
+	});
+
+	await db.insert(schema.entityVersions).values({
+		...contributor.version,
+		statusId: status.id,
 	});
 
 	await db.insert(schema.persons).values(contributor.person);
 
 	await db.insert(schema.entities).values({
 		...contributor.affiliation.entity,
-		statusId: status.id,
 		typeId: organisationalUnitType.id,
+	});
+
+	await db.insert(schema.entityVersions).values({
+		...contributor.affiliation.version,
+		statusId: status.id,
 	});
 
 	await db.insert(schema.organisationalUnits).values({
@@ -179,7 +185,7 @@ async function seed(
 	await db.insert(schema.impactCaseStudiesToPersons).values(
 		items.map((item) => {
 			return {
-				impactCaseStudyId: item.entity.id,
+				impactCaseStudyId: item.version.id,
 				personId: contributor.person.id,
 			};
 		}),
@@ -230,7 +236,7 @@ describe("impact-case-studies", () => {
 				await seed(db, items, contributor);
 
 				const item = items.at(1)!;
-				const id = item.entity.id;
+				const id = item.impactCaseStudy.id;
 				const title = item.impactCaseStudy.title;
 				const contributorName = contributor.person.name;
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

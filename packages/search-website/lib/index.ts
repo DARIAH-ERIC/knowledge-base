@@ -159,7 +159,7 @@ async function getPlainTextFieldContentByEntityId(
 
 	const rows = await db
 		.select({
-			entityId: schema.fields.entityId,
+			entityId: schema.fields.entityVersionId,
 			content: schema.richTextContentBlocks.content,
 		})
 		.from(schema.fields)
@@ -178,12 +178,12 @@ async function getPlainTextFieldContentByEntityId(
 		)
 		.where(
 			and(
-				inArray(schema.fields.entityId, entityIds),
+				inArray(schema.fields.entityVersionId, entityIds),
 				eq(schema.entityTypesFieldsNames.fieldName, fieldName),
 				eq(schema.contentBlockTypes.type, "rich_text"),
 			),
 		)
-		.orderBy(schema.fields.entityId, schema.contentBlocks.position);
+		.orderBy(schema.fields.entityVersionId, schema.contentBlocks.position);
 
 	const contentByEntityId = new Map<string, Array<string>>();
 
@@ -459,7 +459,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				const item = await db.query.membersAndPartners.findFirst({
 					where: {
 						id: entityId,
-						entity: {
+						entityVersion: {
 							status: {
 								type: "published",
 							},
@@ -471,9 +471,14 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						updatedAt: true,
 					},
 					with: {
-						entity: {
-							columns: {
-								slug: true,
+						entityVersion: {
+							columns: {},
+							with: {
+								entity: {
+									columns: {
+										slug: true,
+									},
+								},
 							},
 						},
 					},
@@ -492,11 +497,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "country",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: mergeDescription(descriptions.get(entityId), item.summary ?? ""),
-					link: `/network/members-and-partners/${item.entity.slug}`,
+					link: `/network/members-and-partners/${item.entityVersion.entity.slug}`,
 				});
 			}
 
@@ -504,7 +509,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				const item = await db.query.documentsPolicies.findFirst({
 					where: {
 						id: entityId,
-						entity: {
+						entityVersion: {
 							status: {
 								type: "published",
 							},
@@ -516,9 +521,14 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						updatedAt: true,
 					},
 					with: {
-						entity: {
-							columns: {
-								slug: true,
+						entityVersion: {
+							columns: {},
+							with: {
+								entity: {
+									columns: {
+										slug: true,
+									},
+								},
 							},
 						},
 					},
@@ -531,7 +541,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "document-or-policy",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: item.summary,
@@ -543,7 +553,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				const item = await db.query.events.findFirst({
 					where: {
 						id: entityId,
-						entity: {
+						entityVersion: {
 							status: {
 								type: "published",
 							},
@@ -555,9 +565,14 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						updatedAt: true,
 					},
 					with: {
-						entity: {
-							columns: {
-								slug: true,
+						entityVersion: {
+							columns: {},
+							with: {
+								entity: {
+									columns: {
+										slug: true,
+									},
+								},
 							},
 						},
 					},
@@ -570,11 +585,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "event",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: item.summary,
-					link: `/events/${item.entity.slug}`,
+					link: `/events/${item.entityVersion.entity.slug}`,
 				});
 			}
 
@@ -582,7 +597,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				const item = await db.query.fundingCalls.findFirst({
 					where: {
 						id: entityId,
-						entity: {
+						entityVersion: {
 							status: {
 								type: "published",
 							},
@@ -594,9 +609,14 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						updatedAt: true,
 					},
 					with: {
-						entity: {
-							columns: {
-								slug: true,
+						entityVersion: {
+							columns: {},
+							with: {
+								entity: {
+									columns: {
+										slug: true,
+									},
+								},
 							},
 						},
 					},
@@ -609,11 +629,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "funding-call",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: item.summary ?? "",
-					link: `/funding-calls/${item.entity.slug}`,
+					link: `/funding-calls/${item.entityVersion.entity.slug}`,
 				});
 			}
 
@@ -621,7 +641,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				const item = await db.query.impactCaseStudies.findFirst({
 					where: {
 						id: entityId,
-						entity: {
+						entityVersion: {
 							status: {
 								type: "published",
 							},
@@ -633,9 +653,14 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						updatedAt: true,
 					},
 					with: {
-						entity: {
-							columns: {
-								slug: true,
+						entityVersion: {
+							columns: {},
+							with: {
+								entity: {
+									columns: {
+										slug: true,
+									},
+								},
 							},
 						},
 					},
@@ -648,11 +673,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "impact-case-study",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: item.summary,
-					link: `/about/impact-case-studies/${item.entity.slug}`,
+					link: `/about/impact-case-studies/${item.entityVersion.entity.slug}`,
 				});
 			}
 
@@ -660,7 +685,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				const item = await db.query.news.findFirst({
 					where: {
 						id: entityId,
-						entity: {
+						entityVersion: {
 							status: {
 								type: "published",
 							},
@@ -672,9 +697,14 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						updatedAt: true,
 					},
 					with: {
-						entity: {
-							columns: {
-								slug: true,
+						entityVersion: {
+							columns: {},
+							with: {
+								entity: {
+									columns: {
+										slug: true,
+									},
+								},
 							},
 						},
 					},
@@ -689,11 +719,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "news-item",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: mergeDescription(content.get(entityId), item.summary),
-					link: `/news/${item.entity.slug}`,
+					link: `/news/${item.entityVersion.entity.slug}`,
 				});
 			}
 
@@ -701,7 +731,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				const item = await db.query.opportunities.findFirst({
 					where: {
 						id: entityId,
-						entity: {
+						entityVersion: {
 							status: {
 								type: "published",
 							},
@@ -713,9 +743,14 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						updatedAt: true,
 					},
 					with: {
-						entity: {
-							columns: {
-								slug: true,
+						entityVersion: {
+							columns: {},
+							with: {
+								entity: {
+									columns: {
+										slug: true,
+									},
+								},
 							},
 						},
 					},
@@ -730,11 +765,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "opportunity",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: mergeDescription(content.get(entityId), item.summary ?? ""),
-					link: `/opportunities/${item.entity.slug}`,
+					link: `/opportunities/${item.entityVersion.entity.slug}`,
 				});
 			}
 
@@ -742,7 +777,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				const item = await db.query.pages.findFirst({
 					where: {
 						id: entityId,
-						entity: {
+						entityVersion: {
 							status: {
 								type: "published",
 							},
@@ -754,9 +789,14 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						updatedAt: true,
 					},
 					with: {
-						entity: {
-							columns: {
-								slug: true,
+						entityVersion: {
+							columns: {},
+							with: {
+								entity: {
+									columns: {
+										slug: true,
+									},
+								},
 							},
 						},
 					},
@@ -771,11 +811,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "page",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: mergeDescription(content.get(entityId), item.summary),
-					link: `/${item.entity.slug}`,
+					link: `/${item.entityVersion.entity.slug}`,
 				});
 			}
 
@@ -783,7 +823,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				const item = await db.query.persons.findFirst({
 					where: {
 						id: entityId,
-						entity: {
+						entityVersion: {
 							status: {
 								type: "published",
 							},
@@ -794,9 +834,14 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						updatedAt: true,
 					},
 					with: {
-						entity: {
-							columns: {
-								slug: true,
+						entityVersion: {
+							columns: {},
+							with: {
+								entity: {
+									columns: {
+										slug: true,
+									},
+								},
 							},
 						},
 					},
@@ -811,11 +856,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "person",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: biographies.get(entityId) ?? "",
-					link: `/persons/${item.entity.slug}`,
+					link: `/persons/${item.entityVersion.entity.slug}`,
 				});
 			}
 
@@ -823,7 +868,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				const item = await db.query.dariahProjects.findFirst({
 					where: {
 						id: entityId,
-						entity: {
+						entityVersion: {
 							status: {
 								type: "published",
 							},
@@ -835,9 +880,14 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						updatedAt: true,
 					},
 					with: {
-						entity: {
-							columns: {
-								slug: true,
+						entityVersion: {
+							columns: {},
+							with: {
+								entity: {
+									columns: {
+										slug: true,
+									},
+								},
 							},
 						},
 					},
@@ -856,11 +906,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "project",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: mergeDescription(descriptions.get(entityId), item.summary),
-					link: `/projects/${item.entity.slug}`,
+					link: `/projects/${item.entityVersion.entity.slug}`,
 				});
 			}
 
@@ -868,7 +918,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				const item = await db.query.spotlightArticles.findFirst({
 					where: {
 						id: entityId,
-						entity: {
+						entityVersion: {
 							status: {
 								type: "published",
 							},
@@ -880,9 +930,14 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						updatedAt: true,
 					},
 					with: {
-						entity: {
-							columns: {
-								slug: true,
+						entityVersion: {
+							columns: {},
+							with: {
+								entity: {
+									columns: {
+										slug: true,
+									},
+								},
 							},
 						},
 					},
@@ -897,11 +952,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "spotlight-article",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: mergeDescription(content.get(entityId), item.summary),
-					link: `/spotlights/${item.entity.slug}`,
+					link: `/spotlights/${item.entityVersion.entity.slug}`,
 				});
 			}
 
@@ -909,7 +964,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				const item = await db.query.workingGroups.findFirst({
 					where: {
 						id: entityId,
-						entity: {
+						entityVersion: {
 							status: {
 								type: "published",
 							},
@@ -921,9 +976,14 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						updatedAt: true,
 					},
 					with: {
-						entity: {
-							columns: {
-								slug: true,
+						entityVersion: {
+							columns: {},
+							with: {
+								entity: {
+									columns: {
+										slug: true,
+									},
+								},
 							},
 						},
 					},
@@ -942,11 +1002,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "working-group",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: mergeDescription(descriptions.get(entityId), item.summary ?? ""),
-					link: `/network/working-groups/${item.entity.slug}`,
+					link: `/network/working-groups/${item.entityVersion.entity.slug}`,
 				});
 			}
 		}
@@ -1077,16 +1137,21 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				updatedAt: true,
 			},
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
 				},
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
+				entityVersion: {
+					columns: {},
+					with: {
+						entity: {
+							columns: {
+								slug: true,
+							},
+						},
 					},
 				},
 			},
@@ -1097,7 +1162,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "document-or-policy",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: item.summary,
@@ -1114,16 +1179,21 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				updatedAt: true,
 			},
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
 				},
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
+				entityVersion: {
+					columns: {},
+					with: {
+						entity: {
+							columns: {
+								slug: true,
+							},
+						},
 					},
 				},
 			},
@@ -1134,11 +1204,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "event",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: item.summary,
-					link: `/events/${item.entity.slug}`,
+					link: `/events/${item.entityVersion.entity.slug}`,
 				});
 			}),
 		);
@@ -1151,16 +1221,21 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				updatedAt: true,
 			},
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
 				},
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
+				entityVersion: {
+					columns: {},
+					with: {
+						entity: {
+							columns: {
+								slug: true,
+							},
+						},
 					},
 				},
 			},
@@ -1171,11 +1246,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "funding-call",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: item.summary ?? "",
-					link: `/funding-calls/${item.entity.slug}`,
+					link: `/funding-calls/${item.entityVersion.entity.slug}`,
 				});
 			}),
 		);
@@ -1188,16 +1263,21 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				updatedAt: true,
 			},
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
 				},
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
+				entityVersion: {
+					columns: {},
+					with: {
+						entity: {
+							columns: {
+								slug: true,
+							},
+						},
 					},
 				},
 			},
@@ -1208,11 +1288,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "impact-case-study",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: item.summary,
-					link: `/about/impact-case-studies/${item.entity.slug}`,
+					link: `/about/impact-case-studies/${item.entityVersion.entity.slug}`,
 				});
 			}),
 		);
@@ -1225,16 +1305,21 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				updatedAt: true,
 			},
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
 				},
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
+				entityVersion: {
+					columns: {},
+					with: {
+						entity: {
+							columns: {
+								slug: true,
+							},
+						},
 					},
 				},
 			},
@@ -1245,17 +1330,19 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "country",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: mergeDescription(countryDescriptions.get(item.id), item.summary ?? ""),
-					link: `/network/members-and-partners/${item.entity.slug}`,
+					link: `/network/members-and-partners/${item.entityVersion.entity.slug}`,
 				});
 			}),
 		);
 
 		const countryEntities = alias(schema.entities, "country_entities");
+		const countryEntityVersions = alias(schema.entityVersions, "country_entity_versions");
 		const itemEntities = alias(schema.entities, "item_entities");
+		const itemEntityVersions = alias(schema.entityVersions, "item_entity_versions");
 		const organisationalRelationStatus = alias(
 			schema.organisationalUnitStatus,
 			"organisational_relation_status",
@@ -1288,8 +1375,9 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				sourceUpdatedAt: schema.organisationalUnits.updatedAt,
 			})
 			.from(schema.organisationalUnits)
-			.innerJoin(itemEntities, eq(schema.organisationalUnits.id, itemEntities.id))
-			.innerJoin(publishedEntityStatus, eq(itemEntities.statusId, publishedEntityStatus.id))
+			.innerJoin(itemEntityVersions, eq(schema.organisationalUnits.id, itemEntityVersions.id))
+			.innerJoin(itemEntities, eq(itemEntityVersions.entityId, itemEntities.id))
+			.innerJoin(publishedEntityStatus, eq(itemEntityVersions.statusId, publishedEntityStatus.id))
 			.innerJoin(
 				organisationalUnitType,
 				eq(schema.organisationalUnits.typeId, organisationalUnitType.id),
@@ -1306,7 +1394,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				schema.membersAndPartners,
 				eq(schema.organisationalUnitsRelations.relatedUnitId, schema.membersAndPartners.id),
 			)
-			.innerJoin(countryEntities, eq(schema.membersAndPartners.id, countryEntities.id))
+			.innerJoin(countryEntityVersions, eq(schema.membersAndPartners.id, countryEntityVersions.id))
+			.innerJoin(countryEntities, eq(countryEntityVersions.entityId, countryEntities.id))
 			.where(
 				and(
 					eq(publishedEntityStatus.type, "published"),
@@ -1344,8 +1433,9 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				sourceUpdatedAt: schema.organisationalUnits.updatedAt,
 			})
 			.from(schema.organisationalUnits)
-			.innerJoin(itemEntities, eq(schema.organisationalUnits.id, itemEntities.id))
-			.innerJoin(publishedEntityStatus, eq(itemEntities.statusId, publishedEntityStatus.id))
+			.innerJoin(itemEntityVersions, eq(schema.organisationalUnits.id, itemEntityVersions.id))
+			.innerJoin(itemEntities, eq(itemEntityVersions.entityId, itemEntities.id))
+			.innerJoin(publishedEntityStatus, eq(itemEntityVersions.statusId, publishedEntityStatus.id))
 			.innerJoin(
 				organisationalUnitType,
 				eq(schema.organisationalUnits.typeId, organisationalUnitType.id),
@@ -1362,7 +1452,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				schema.membersAndPartners,
 				eq(schema.organisationalUnitsRelations.relatedUnitId, schema.membersAndPartners.id),
 			)
-			.innerJoin(countryEntities, eq(schema.membersAndPartners.id, countryEntities.id))
+			.innerJoin(countryEntityVersions, eq(schema.membersAndPartners.id, countryEntityVersions.id))
+			.innerJoin(countryEntities, eq(countryEntityVersions.entityId, countryEntities.id))
 			.where(
 				and(
 					eq(publishedEntityStatus.type, "published"),
@@ -1416,8 +1507,9 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				sourceUpdatedAt: schema.organisationalUnits.updatedAt,
 			})
 			.from(schema.organisationalUnits)
-			.innerJoin(itemEntities, eq(schema.organisationalUnits.id, itemEntities.id))
-			.innerJoin(publishedEntityStatus, eq(itemEntities.statusId, publishedEntityStatus.id))
+			.innerJoin(itemEntityVersions, eq(schema.organisationalUnits.id, itemEntityVersions.id))
+			.innerJoin(itemEntities, eq(itemEntityVersions.entityId, itemEntities.id))
+			.innerJoin(publishedEntityStatus, eq(itemEntityVersions.statusId, publishedEntityStatus.id))
 			.innerJoin(
 				organisationalUnitType,
 				eq(schema.organisationalUnits.typeId, organisationalUnitType.id),
@@ -1434,7 +1526,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				schema.membersAndPartners,
 				eq(schema.organisationalUnitsRelations.relatedUnitId, schema.membersAndPartners.id),
 			)
-			.innerJoin(countryEntities, eq(schema.membersAndPartners.id, countryEntities.id))
+			.innerJoin(countryEntityVersions, eq(schema.membersAndPartners.id, countryEntityVersions.id))
+			.innerJoin(countryEntities, eq(countryEntityVersions.entityId, countryEntities.id))
 			.where(
 				and(
 					eq(publishedEntityStatus.type, "published"),
@@ -1493,8 +1586,9 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				schema.persons,
 				eq(schema.personsToOrganisationalUnits.personId, schema.persons.id),
 			)
-			.innerJoin(itemEntities, eq(schema.persons.id, itemEntities.id))
-			.innerJoin(publishedEntityStatus, eq(itemEntities.statusId, publishedEntityStatus.id))
+			.innerJoin(itemEntityVersions, eq(schema.persons.id, itemEntityVersions.id))
+			.innerJoin(itemEntities, eq(itemEntityVersions.entityId, itemEntities.id))
+			.innerJoin(publishedEntityStatus, eq(itemEntityVersions.statusId, publishedEntityStatus.id))
 			.innerJoin(
 				personRoleType,
 				eq(schema.personsToOrganisationalUnits.roleTypeId, personRoleType.id),
@@ -1503,7 +1597,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				schema.membersAndPartners,
 				eq(schema.personsToOrganisationalUnits.organisationalUnitId, schema.membersAndPartners.id),
 			)
-			.innerJoin(countryEntities, eq(schema.membersAndPartners.id, countryEntities.id))
+			.innerJoin(countryEntityVersions, eq(schema.membersAndPartners.id, countryEntityVersions.id))
+			.innerJoin(countryEntities, eq(countryEntityVersions.entityId, countryEntities.id))
 			.where(
 				and(
 					eq(publishedEntityStatus.type, "published"),
@@ -1544,16 +1639,21 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				updatedAt: true,
 			},
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
 				},
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
+				entityVersion: {
+					columns: {},
+					with: {
+						entity: {
+							columns: {
+								slug: true,
+							},
+						},
 					},
 				},
 			},
@@ -1564,11 +1664,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "news-item",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: mergeDescription(newsContent.get(item.id), item.summary),
-					link: `/news/${item.entity.slug}`,
+					link: `/news/${item.entityVersion.entity.slug}`,
 				});
 			}),
 		);
@@ -1581,16 +1681,21 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				updatedAt: true,
 			},
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
 				},
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
+				entityVersion: {
+					columns: {},
+					with: {
+						entity: {
+							columns: {
+								slug: true,
+							},
+						},
 					},
 				},
 			},
@@ -1601,11 +1706,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "opportunity",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: mergeDescription(opportunityContent.get(item.id), item.summary ?? ""),
-					link: `/opportunities/${item.entity.slug}`,
+					link: `/opportunities/${item.entityVersion.entity.slug}`,
 				});
 			}),
 		);
@@ -1618,16 +1723,21 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				updatedAt: true,
 			},
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
 				},
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
+				entityVersion: {
+					columns: {},
+					with: {
+						entity: {
+							columns: {
+								slug: true,
+							},
+						},
 					},
 				},
 			},
@@ -1638,11 +1748,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "page",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: mergeDescription(pageContent.get(item.id), item.summary),
-					link: `/${item.entity.slug}`,
+					link: `/${item.entityVersion.entity.slug}`,
 				});
 			}),
 		);
@@ -1654,16 +1764,21 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				updatedAt: true,
 			},
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
 				},
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
+				entityVersion: {
+					columns: {},
+					with: {
+						entity: {
+							columns: {
+								slug: true,
+							},
+						},
 					},
 				},
 			},
@@ -1674,11 +1789,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "person",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: personBiographies.get(item.id) ?? "",
-					link: `/persons/${item.entity.slug}`,
+					link: `/persons/${item.entityVersion.entity.slug}`,
 				});
 			}),
 		);
@@ -1691,16 +1806,21 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				updatedAt: true,
 			},
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
 				},
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
+				entityVersion: {
+					columns: {},
+					with: {
+						entity: {
+							columns: {
+								slug: true,
+							},
+						},
 					},
 				},
 			},
@@ -1711,11 +1831,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "project",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: mergeDescription(projectDescriptions.get(item.id), item.summary),
-					link: `/projects/${item.entity.slug}`,
+					link: `/projects/${item.entityVersion.entity.slug}`,
 				});
 			}),
 		);
@@ -1728,16 +1848,21 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				updatedAt: true,
 			},
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
 				},
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
+				entityVersion: {
+					columns: {},
+					with: {
+						entity: {
+							columns: {
+								slug: true,
+							},
+						},
 					},
 				},
 			},
@@ -1748,11 +1873,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "spotlight-article",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.title,
 					description: mergeDescription(spotlightContent.get(item.id), item.summary),
-					link: `/spotlights/${item.entity.slug}`,
+					link: `/spotlights/${item.entityVersion.entity.slug}`,
 				});
 			}),
 		);
@@ -1765,16 +1890,21 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				updatedAt: true,
 			},
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
 				},
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
+				entityVersion: {
+					columns: {},
+					with: {
+						entity: {
+							columns: {
+								slug: true,
+							},
+						},
 					},
 				},
 			},
@@ -1785,11 +1915,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				return createWebsiteEntityDocument({
 					importedAt,
 					type: "working-group",
-					sourceId: item.entity.slug,
+					sourceId: item.entityVersion.entity.slug,
 					sourceUpdatedAt: item.updatedAt,
 					label: item.name,
 					description: mergeDescription(workingGroupDescriptions.get(item.id), item.summary ?? ""),
-					link: `/network/working-groups/${item.entity.slug}`,
+					link: `/network/working-groups/${item.entityVersion.entity.slug}`,
 				});
 			}),
 		);

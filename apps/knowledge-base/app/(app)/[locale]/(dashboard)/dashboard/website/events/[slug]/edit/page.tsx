@@ -45,8 +45,10 @@ export default async function DashboardWebsiteEditEventPage(
 			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 			db.query.events.findFirst({
 				where: {
-					entity: {
-						slug,
+					entityVersion: {
+						entity: {
+							slug,
+						},
 					},
 				},
 				columns: {
@@ -58,12 +60,15 @@ export default async function DashboardWebsiteEditEventPage(
 					website: true,
 				},
 				with: {
-					entity: {
-						columns: {
-							documentId: true,
-							slug: true,
-						},
+					entityVersion: {
+						columns: { id: true },
 						with: {
+							entity: {
+								columns: {
+									id: true,
+									slug: true,
+								},
+							},
 							status: {
 								columns: {
 									id: true,
@@ -95,7 +100,8 @@ export default async function DashboardWebsiteEditEventPage(
 
 	const contentBlocks = await getEntityContentBlocks(event.id);
 
-	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(event.id);
+	const documentId = event.entityVersion.entity.id;
+	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(documentId);
 
 	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
 		getEntityRelationOptionsByIds(relatedEntityIds),

@@ -75,7 +75,8 @@ export async function getProjects(params: Readonly<GetProjectsParams>): Promise<
 				slug: schema.entities.slug,
 			})
 			.from(schema.projects)
-			.innerJoin(schema.entities, eq(schema.projects.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.projects.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.innerJoin(schema.projectScopes, eq(schema.projects.scopeId, schema.projectScopes.id))
 			.where(where)
 			.orderBy(orderBy)
@@ -84,7 +85,8 @@ export async function getProjects(params: Readonly<GetProjectsParams>): Promise<
 		db
 			.select({ total: count() })
 			.from(schema.projects)
-			.innerJoin(schema.entities, eq(schema.projects.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.projects.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.innerJoin(schema.projectScopes, eq(schema.projects.scopeId, schema.projectScopes.id))
 			.where(where),
 	]);
@@ -148,8 +150,10 @@ export async function getProjectBySlugForAdmin(currentUser: Pick<User, "role">, 
 
 	return db.query.projects.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
+				entity: {
+					slug,
+				},
 			},
 		},
 		columns: {
@@ -163,12 +167,15 @@ export async function getProjectBySlugForAdmin(currentUser: Pick<User, "role">, 
 			topic: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
-				},
+			entityVersion: {
+				columns: { id: true },
 				with: {
+					entity: {
+						columns: {
+							id: true,
+							slug: true,
+						},
+					},
 					status: {
 						columns: {
 							id: true,
@@ -214,7 +221,7 @@ export async function getProjectDetailsForAdmin(currentUser: Pick<User, "role">,
 			)
 			.where(
 				and(
-					eq(schema.fields.entityId, project.id),
+					eq(schema.fields.entityVersionId, project.id),
 					eq(schema.entityTypesFieldsNames.fieldName, "description"),
 				),
 			)
@@ -285,7 +292,7 @@ export async function getProjectEditDataForAdmin(currentUser: Pick<User, "role">
 			)
 			.where(
 				and(
-					eq(schema.fields.entityId, project.id),
+					eq(schema.fields.entityVersionId, project.id),
 					eq(schema.entityTypesFieldsNames.fieldName, "description"),
 				),
 			)

@@ -78,10 +78,14 @@ export async function getOrganisationalUnits(params: GetOrganisationalUnitsParam
 	const [items, aggregate] = await Promise.all([
 		db.query.organisationalUnits.findMany({
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { id: true, updatedAt: true },
+					with: {
+						entity: {
+							columns: {
+								slug: true,
+							},
+						},
 					},
 				},
 				image: {
@@ -91,7 +95,7 @@ export async function getOrganisationalUnits(params: GetOrganisationalUnitsParam
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -99,20 +103,25 @@ export async function getOrganisationalUnits(params: GetOrganisationalUnitsParam
 		db
 			.select({ total: count() })
 			.from(schema.organisationalUnits)
-			.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id)),
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id)),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		if (!item.image) return;
+		const { entityVersion, ...rest } = item;
+		const base = {
+			...rest,
+			entity: { slug: entityVersion.entity.slug, updatedAt: entityVersion.updatedAt },
+		};
+		if (!item.image) return base;
 		const image = images.generateSignedImageUrl({
 			key: item.image.key,
 			options: { width: imageAssetWidth.preview },
 		});
 
-		return { ...item, image };
+		return { ...base, image };
 	});
 
 	return { data, limit, offset, total };
@@ -130,9 +139,14 @@ export async function getOrganisationalUnitById(params: GetOrganisationalUnitByI
 			id,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
+			entityVersion: {
+				columns: {},
+				with: {
+					entity: {
+						columns: {
+							slug: true,
+						},
+					},
 				},
 			},
 			image: {
@@ -147,96 +161,18 @@ export async function getOrganisationalUnitById(params: GetOrganisationalUnitByI
 		return null;
 	}
 
-	if (!item.image) return item;
+	const { entityVersion, ...rest } = item;
+	const base = { ...rest, entity: entityVersion.entity };
+
+	if (!item.image) return base;
 	const image = images.generateSignedImageUrl({
 		key: item.image.key,
 		options: { width: imageAssetWidth.featured },
 	});
 
-	const data = { ...item, image };
+	const data = { ...base, image };
 
 	return data;
-}
-
-interface CreateOrganisationalUnitParams extends schema.OrganisationalUnitInput {
-	slug: schema.EntityInput["slug"];
-}
-
-export async function createOrganisationalUnit(params: CreateOrganisationalUnitParams) {
-	const { imageId, metadata, name, slug, summary, typeId } = params;
-
-	const entityType = await db.query.entityTypes.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "organisational_units" },
-	});
-
-	if (entityType == null) {
-		return null;
-	}
-
-	const entityStatus = await db.query.entityStatus.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "published" },
-	});
-
-	if (entityStatus == null) {
-		return null;
-	}
-
-	const entityId = await db.transaction(async (tx) => {
-		const [item] = await tx
-			.insert(schema.entities)
-			.values({
-				typeId: entityType.id,
-				documentId: undefined,
-				statusId: entityStatus.id,
-				slug,
-			})
-			.returning({
-				id: schema.entities.id,
-			});
-
-		if (item == null) {
-			return tx.rollback();
-		}
-
-		const { id } = item;
-
-		const organisationalUnit = {
-			id,
-			metadata,
-			name,
-			summary,
-			imageId,
-			typeId,
-		};
-
-		await tx.insert(schema.organisationalUnits).values(organisationalUnit);
-
-		const fieldNamesIds = await tx.query.entityTypesFieldsNames.findMany({
-			where: {
-				entityTypeId: entityType.id,
-			},
-		});
-
-		const fields = fieldNamesIds.map(({ id: fieldNameId }) => {
-			return { entityId: id, fieldNameId };
-		});
-
-		await tx.insert(schema.fields).values(fields).returning({
-			id: schema.fields.id,
-		});
-
-		return id;
-	});
-
-	return {
-		entityId,
-	};
 }
 
 export type OrganisationalUnitsWithEntities = Awaited<ReturnType<typeof getOrganisationalUnits>>;

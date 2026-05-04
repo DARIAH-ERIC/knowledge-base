@@ -12,7 +12,7 @@ import { updateDocumentationPageAction } from "@/app/(app)/[locale]/(dashboard)/
 interface DocumentationPageEditFormProps {
 	contentBlocks: Array<ContentBlock>;
 	documentationPage: Pick<schema.DocumentationPage, "id" | "title"> & {
-		entity: Pick<schema.Entity, "documentId" | "slug">;
+		entityVersion: { entity: Pick<schema.Entity, "id" | "slug"> };
 	};
 }
 

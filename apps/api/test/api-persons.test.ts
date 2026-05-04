@@ -14,20 +14,18 @@ import { withTransaction } from "~/test/lib/with-transaction";
 function createItems(count: number) {
 	const items = f.helpers.multiple(
 		() => {
-			const id = uuidv7();
-			const documentId = uuidv7();
+			const versionId = uuidv7();
+			const entityId = uuidv7();
 			const assetId = uuidv7();
 			const name = f.person.fullName();
 			const slug = slugify(name);
-			const affiliationId = uuidv7();
+			const affiliationVersionId = uuidv7();
+			const affiliationEntityId = uuidv7();
 			const affiliationName = f.company.name();
 			const affiliationSlug = slugify(affiliationName);
 
-			const entity = {
-				id,
-				slug,
-				documentId,
-			};
+			const entity = { id: entityId, slug };
+			const version = { id: versionId, entityId };
 
 			const asset = {
 				id: assetId,
@@ -37,7 +35,7 @@ function createItems(count: number) {
 			};
 
 			const person = {
-				id,
+				id: versionId,
 				name,
 				position: f.person.jobTitle(),
 				sortName: f.person.lastName(),
@@ -47,19 +45,16 @@ function createItems(count: number) {
 			};
 
 			const affiliation = {
-				entity: {
-					id: affiliationId,
-					slug: affiliationSlug,
-					documentId: uuidv7(),
-				},
+				entity: { id: affiliationEntityId, slug: affiliationSlug },
+				version: { id: affiliationVersionId, entityId: affiliationEntityId },
 				organisationalUnit: {
-					id: affiliationId,
+					id: affiliationVersionId,
 					name: affiliationName,
 					summary: f.lorem.paragraph(),
 				},
 			};
 
-			return { entity, asset, person, affiliation };
+			return { entity, version, asset, person, affiliation };
 		},
 		{ count },
 	);
@@ -100,7 +95,13 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {
-			return { ...item.entity, statusId: status.id, typeId: entityType.id };
+			return { ...item.entity, typeId: entityType.id };
+		}),
+	);
+
+	await db.insert(schema.entityVersions).values(
+		items.map((item) => {
+			return { ...item.version, statusId: status.id };
 		}),
 	);
 
@@ -112,11 +113,13 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {
-			return {
-				...item.affiliation.entity,
-				statusId: status.id,
-				typeId: organisationalUnitType.id,
-			};
+			return { ...item.affiliation.entity, typeId: organisationalUnitType.id };
+		}),
+	);
+
+	await db.insert(schema.entityVersions).values(
+		items.map((item) => {
+			return { ...item.affiliation.version, statusId: status.id };
 		}),
 	);
 
@@ -142,7 +145,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 	await Promise.all(
 		items.map((item) => {
-			return seedContentBlock(db, item.entity.id, entityType.id, "biography");
+			return seedContentBlock(db, item.version.id, entityType.id, "biography");
 		}),
 	);
 }
@@ -200,7 +203,7 @@ describe("persons", () => {
 				await seed(db, items);
 
 				const item = items.at(1)!;
-				const id = item.entity.id;
+				const id = item.person.id;
 				const name = item.person.name;
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 				const position = expect.arrayContaining([

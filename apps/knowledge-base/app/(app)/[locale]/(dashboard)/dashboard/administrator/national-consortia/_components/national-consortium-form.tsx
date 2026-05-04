@@ -29,7 +29,7 @@ interface NationalConsortiumFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	nationalConsortium?: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
 		description?: JSONContent;
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
@@ -147,7 +147,11 @@ export function NationalConsortiumForm(props: Readonly<NationalConsortiumFormPro
 				{nationalConsortium != null ? (
 					<Fragment>
 						<input name="id" type="hidden" value={nationalConsortium.id} />
-						<input name="documentId" type="hidden" value={nationalConsortium.entity.documentId} />
+						<input
+							name="documentId"
+							type="hidden"
+							value={nationalConsortium.entityVersion.entity.id}
+						/>
 					</Fragment>
 				) : null}
 

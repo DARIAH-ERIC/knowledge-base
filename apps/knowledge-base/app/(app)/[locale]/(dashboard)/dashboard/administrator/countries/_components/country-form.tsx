@@ -29,7 +29,7 @@ interface CountryFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	country?: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
 		description?: JSONContent;
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
@@ -147,7 +147,7 @@ export function CountryForm(props: Readonly<CountryFormProps>): ReactNode {
 				{country != null ? (
 					<Fragment>
 						<input name="id" type="hidden" value={country.id} />
-						<input name="documentId" type="hidden" value={country.entity.documentId} />
+						<input name="documentId" type="hidden" value={country.entityVersion.entity.id} />
 					</Fragment>
 				) : null}
 

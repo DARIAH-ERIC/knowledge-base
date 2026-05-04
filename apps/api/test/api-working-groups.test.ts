@@ -15,24 +15,21 @@ import { withTransaction } from "~/test/lib/with-transaction";
 function createItems(count: number) {
 	const items = f.helpers.multiple(
 		() => {
-			const id = uuidv7();
-			const documentId = uuidv7();
+			const versionId = uuidv7();
+			const entityId = uuidv7();
 			const name = f.lorem.sentence();
 			const slug = slugify(name);
 
-			const entity = {
-				id,
-				slug,
-				documentId,
-			};
+			const entity = { id: entityId, slug };
+			const version = { id: versionId, entityId };
 
 			const organisationalUnit = {
-				id,
+				id: versionId,
 				name,
 				summary: f.lorem.paragraph(),
 			};
 
-			return { entity, organisationalUnit };
+			return { entity, version, organisationalUnit };
 		},
 		{ count },
 	);
@@ -41,20 +38,18 @@ function createItems(count: number) {
 }
 
 function createChair() {
-	const id = uuidv7();
-	const documentId = uuidv7();
+	const versionId = uuidv7();
+	const entityId = uuidv7();
 	const assetId = uuidv7();
 	const name = f.person.fullName();
 	const slug = slugify(name);
-	const affiliationId = uuidv7();
+	const affiliationVersionId = uuidv7();
+	const affiliationEntityId = uuidv7();
 	const affiliationName = f.company.name();
 
 	return {
-		entity: {
-			id,
-			slug,
-			documentId,
-		},
+		entity: { id: entityId, slug },
+		version: { id: versionId, entityId },
 		asset: {
 			id: assetId,
 			key: `persons/${assetId}.jpg`,
@@ -62,7 +57,7 @@ function createChair() {
 			mimeType: "image/jpeg",
 		},
 		person: {
-			id,
+			id: versionId,
 			name,
 			position: f.person.jobTitle(),
 			sortName: f.person.lastName(),
@@ -71,13 +66,10 @@ function createChair() {
 			imageId: assetId,
 		},
 		affiliation: {
-			entity: {
-				id: affiliationId,
-				slug: slugify(affiliationName),
-				documentId: uuidv7(),
-			},
+			entity: { id: affiliationEntityId, slug: slugify(affiliationName) },
+			version: { id: affiliationVersionId, entityId: affiliationEntityId },
 			organisationalUnit: {
-				id: affiliationId,
+				id: affiliationVersionId,
 				name: affiliationName,
 				summary: f.lorem.paragraph(),
 			},
@@ -122,7 +114,13 @@ async function seedWithMixedStatuses(db: Database) {
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {
-			return { ...item.entity, statusId: status.id, typeId: entityType.id };
+			return { ...item.entity, typeId: entityType.id };
+		}),
+	);
+
+	await db.insert(schema.entityVersions).values(
+		items.map((item) => {
+			return { ...item.version, statusId: status.id };
 		}),
 	);
 
@@ -237,7 +235,13 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {
-			return { ...item.entity, statusId: status.id, typeId: entityType.id };
+			return { ...item.entity, typeId: entityType.id };
+		}),
+	);
+
+	await db.insert(schema.entityVersions).values(
+		items.map((item) => {
+			return { ...item.version, statusId: status.id };
 		}),
 	);
 
@@ -270,7 +274,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 
 	await Promise.all(
 		items.map((item) => {
-			return seedContentBlock(db, item.entity.id, entityType.id, "description");
+			return seedContentBlock(db, item.version.id, entityType.id, "description");
 		}),
 	);
 
@@ -278,16 +282,24 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 
 	await db.insert(schema.entities).values({
 		...chair.entity,
-		statusId: status.id,
 		typeId: personType.id,
+	});
+
+	await db.insert(schema.entityVersions).values({
+		...chair.version,
+		statusId: status.id,
 	});
 
 	await db.insert(schema.persons).values(chair.person);
 
 	await db.insert(schema.entities).values({
 		...chair.affiliation.entity,
-		statusId: status.id,
 		typeId: organisationalUnitEntityType.id,
+	});
+
+	await db.insert(schema.entityVersions).values({
+		...chair.affiliation.version,
+		statusId: status.id,
 	});
 
 	await db.insert(schema.organisationalUnits).values({
@@ -408,7 +420,7 @@ describe("working-groups", () => {
 				await seed(db, items, chair);
 
 				const item = items.at(1)!;
-				const id = item.entity.id;
+				const id = item.organisationalUnit.id;
 				const name = item.organisationalUnit.name;
 
 				const response = await client["working-groups"][":id"].$get({

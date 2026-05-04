@@ -16,25 +16,22 @@ import { withTransaction } from "~/test/lib/with-transaction";
 function createItems(count: number) {
 	const items = f.helpers.multiple(
 		() => {
-			const id = uuidv7();
-			const documentId = uuidv7();
+			const versionId = uuidv7();
+			const entityId = uuidv7();
 			const title = f.lorem.sentence();
 			const slug = slugify(title);
 
-			const entity = {
-				id,
-				slug,
-				documentId,
-			};
+			const entity = { id: entityId, slug };
+			const version = { id: versionId, entityId };
 
 			const documentOrPolicy = {
-				id,
+				id: versionId,
 				title,
 				summary: f.lorem.paragraph(),
 				url: f.internet.url(),
 			};
 
-			return { entity, documentOrPolicy };
+			return { entity, version, documentOrPolicy };
 		},
 		{ count },
 	);
@@ -58,7 +55,13 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {
-			return { ...item.entity, statusId: status.id, typeId: type.id };
+			return { ...item.entity, typeId: type.id };
+		}),
+	);
+
+	await db.insert(schema.entityVersions).values(
+		items.map((item) => {
+			return { ...item.version, statusId: status.id };
 		}),
 	);
 
@@ -70,7 +73,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 	await Promise.all(
 		items.map((item) => {
-			return seedContentBlock(db, item.entity.id, type.id, "description");
+			return seedContentBlock(db, item.version.id, type.id, "description");
 		}),
 	);
 }
@@ -155,7 +158,7 @@ describe("documents-policies", () => {
 				await seed(db, items);
 
 				const item = items.at(1)!;
-				const id = item.entity.id;
+				const id = item.documentOrPolicy.id;
 				const title = item.documentOrPolicy.title;
 
 				const response = await client["documents-policies"][":id"].$get({
@@ -287,25 +290,33 @@ describe("documents-policies", () => {
 			assert(status, "No entity status in database.");
 			assert(type, "No entity type in database.");
 
-			const id = uuidv7();
+			const versionId = uuidv7();
+			const entityId = uuidv7();
 			const assetId = uuidv7();
 			const title = "Test Policy";
 			const summary = "Test summary";
 			const mimeType = "text/plain";
 
 			await db.insert(schema.assets).values({ id: assetId, key, label: title, mimeType });
-			await db
-				.insert(schema.entities)
-				.values({ id, slug: `doc-${id}`, statusId: status.id, typeId: type.id });
+			await db.insert(schema.entities).values({
+				id: entityId,
+				slug: `doc-${versionId}`,
+				typeId: type.id,
+			});
+			await db.insert(schema.entityVersions).values({
+				id: versionId,
+				entityId,
+				statusId: status.id,
+			});
 			await db.insert(schema.documentsPolicies).values({
-				id,
+				id: versionId,
 				title,
 				summary,
 				url: "https://example.com",
 				documentId: assetId,
 			});
 
-			return { id };
+			return { id: versionId };
 		}
 
 		it("should stream file with correct headers for existing record", async () => {

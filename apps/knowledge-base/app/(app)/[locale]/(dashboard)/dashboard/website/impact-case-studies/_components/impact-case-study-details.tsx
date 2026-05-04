@@ -18,7 +18,7 @@ import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 interface ImpactCaseStudyDetailsProps {
 	contentBlocks: Array<ContentBlock>;
 	impactCaseStudy: Pick<schema.ImpactCaseStudy, "id" | "title" | "summary"> & {
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 }
 
@@ -32,7 +32,7 @@ export function ImpactCaseStudyDetails(props: Readonly<ImpactCaseStudyDetailsPro
 			<div className="flex justify-end">
 				<Link
 					className={buttonStyles({ intent: "secondary", size: "sm" })}
-					href={`/dashboard/website/impact-case-studies/${impactCaseStudy.entity.slug}/edit`}
+					href={`/dashboard/website/impact-case-studies/${impactCaseStudy.entityVersion.entity.slug}/edit`}
 				>
 					<PencilSquareIcon className="mr-2 size-4" />
 					{t("Edit")}
@@ -43,7 +43,7 @@ export function ImpactCaseStudyDetails(props: Readonly<ImpactCaseStudyDetailsPro
 				<DescriptionDetails>{impactCaseStudy.title}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Slug")}</DescriptionTerm>
-				<DescriptionDetails>{impactCaseStudy.entity.slug}</DescriptionDetails>
+				<DescriptionDetails>{impactCaseStudy.entityVersion.entity.slug}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Summary")}</DescriptionTerm>
 				<DescriptionDetails>{impactCaseStudy.summary}</DescriptionDetails>

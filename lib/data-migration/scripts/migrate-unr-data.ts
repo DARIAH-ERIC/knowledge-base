@@ -150,7 +150,6 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: workingGroup.slug,
-					statusId: statusByType.published.id,
 					typeId: typesByType.organisational_units.id,
 					createdAt: new Date(workingGroup.createdAt),
 					updatedAt: new Date(workingGroup.updatedAt),
@@ -158,7 +157,15 @@ async function main() {
 				.returning({ id: schema.entities.id });
 
 			assert(entity);
-			const id = entity.id;
+			const [version] = await tx
+				.insert(schema.entityVersions)
+				.values({
+					entityId: entity.id,
+					statusId: statusByType.published.id,
+				})
+				.returning({ id: schema.entityVersions.id });
+			assert(version);
+			const id = version.id;
 			let asset;
 
 			if (workingGroup.logo !== null) {
@@ -236,7 +243,7 @@ async function main() {
 			const [field] = await tx
 				.insert(schema.fields)
 				.values({
-					entityId: entity.id,
+					entityVersionId: version.id,
 					fieldNameId: fieldName.id,
 				})
 				.returning({ id: schema.fields.id });
@@ -279,7 +286,6 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: slugify(country.name),
-					statusId: statusByType.published.id,
 					typeId: typesByType.organisational_units.id,
 					createdAt: new Date(country.createdAt),
 					updatedAt: new Date(country.updatedAt),
@@ -321,7 +327,6 @@ async function main() {
 					.insert(schema.entities)
 					.values({
 						slug: slugify(country.consortiumName ?? `Consortium ${country.name}`),
-						statusId: statusByType.published.id,
 						typeId: typesByType.organisational_units.id,
 						createdAt: new Date(country.createdAt),
 						updatedAt: new Date(country.updatedAt),
@@ -330,7 +335,17 @@ async function main() {
 
 				assert(consortiumEntitiy);
 
-				const id = consortiumEntitiy.id;
+				const [consortiumVersion] = await tx
+					.insert(schema.entityVersions)
+					.values({
+						entityId: consortiumEntitiy.id,
+						statusId: statusByType.published.id,
+					})
+					.returning({ id: schema.entityVersions.id });
+
+				assert(consortiumVersion);
+
+				const id = consortiumVersion.id;
 				let asset;
 
 				if (country.logo !== null) {
@@ -370,7 +385,7 @@ async function main() {
 					const [field] = await tx
 						.insert(schema.fields)
 						.values({
-							entityId: consortiumEntitiy.id,
+							entityVersionId: consortiumVersion.id,
 							fieldNameId: fieldName.id,
 						})
 						.returning({ id: schema.fields.id });
@@ -465,7 +480,6 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: slugify(institution.name),
-					statusId: statusByType.published.id,
 					typeId: typesByType.organisational_units.id,
 					createdAt: new Date(institution.createdAt),
 					updatedAt: new Date(institution.createdAt),
@@ -474,7 +488,21 @@ async function main() {
 
 			assert(entity);
 
-			const id = entity.id;
+			const [version] = await tx
+
+				.insert(schema.entityVersions)
+
+				.values({
+					entityId: entity.id,
+
+					statusId: statusByType.published.id,
+				})
+
+				.returning({ id: schema.entityVersions.id });
+
+			assert(version);
+
+			const id = version.id;
 
 			const [orgUnit] = await tx
 				.insert(schema.organisationalUnits)
@@ -704,7 +732,6 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: slugify(person.name),
-					statusId: statusByType.published.id,
 					typeId: typesByType.persons.id,
 					createdAt: new Date(person.createdAt),
 					updatedAt: new Date(person.updatedAt),
@@ -713,7 +740,21 @@ async function main() {
 
 			assert(entity);
 
-			const id = entity.id;
+			const [version] = await tx
+
+				.insert(schema.entityVersions)
+
+				.values({
+					entityId: entity.id,
+
+					statusId: statusByType.published.id,
+				})
+
+				.returning({ id: schema.entityVersions.id });
+
+			assert(version);
+
+			const id = version.id;
 			let asset;
 
 			if (person.image !== null) {
@@ -770,7 +811,7 @@ async function main() {
 			const [field] = await tx
 				.insert(schema.fields)
 				.values({
-					entityId: entity.id,
+					entityVersionId: version.id,
 					fieldNameId: fieldName.id,
 				})
 				.returning({ id: schema.fields.id });
@@ -958,7 +999,7 @@ async function main() {
 				const [field] = await tx
 					.insert(schema.fields)
 					.values({
-						entityId: body.id,
+						entityVersionId: body.id,
 						fieldNameId: fieldName.id,
 					})
 					.returning({ id: schema.fields.id });
