@@ -5,7 +5,7 @@ import { createDatabaseService, type Database, type Transaction } from "@dariah-
 import * as schema from "@dariah-eric/database/schema";
 import { eq, inArray } from "@dariah-eric/database/sql";
 import { type ResourceDocument, resourceSources, resourceTypes } from "@dariah-eric/search";
-import { createSearchAdminService, type SearchAdminService } from "@dariah-eric/search/admin";
+import { createSearchAdminService } from "@dariah-eric/search/admin";
 
 import { env } from "../config/env.config";
 
@@ -29,33 +29,6 @@ function assertLookupId(value: string | undefined, message: string): string {
 	}
 
 	return value;
-}
-
-function getOptionalSearchAdminService(): SearchAdminService | null {
-	if (
-		env.TYPESENSE_ADMIN_API_KEY == null ||
-		env.TYPESENSE_HOST == null ||
-		env.TYPESENSE_PORT == null ||
-		env.TYPESENSE_RESOURCE_COLLECTION_NAME == null ||
-		env.TYPESENSE_WEBSITE_COLLECTION_NAME == null
-	) {
-		return null;
-	}
-
-	return createSearchAdminService({
-		apiKey: env.TYPESENSE_ADMIN_API_KEY,
-		nodes: [
-			{
-				host: env.TYPESENSE_HOST,
-				port: env.TYPESENSE_PORT,
-				protocol: env.TYPESENSE_PROTOCOL,
-			},
-		],
-		collections: {
-			resources: env.TYPESENSE_RESOURCE_COLLECTION_NAME,
-			website: env.TYPESENSE_WEBSITE_COLLECTION_NAME,
-		},
-	});
 }
 
 /* eslint-disable
@@ -86,14 +59,20 @@ async function upsertById(
 */
 
 async function ensureRelatedResources() {
-	const search = getOptionalSearchAdminService();
-
-	if (search == null) {
-		log.warn(
-			"Skipping Typesense resource seeding because TYPESENSE_* env vars are not fully configured.",
-		);
-		return [] as Array<string>;
-	}
+	const search = createSearchAdminService({
+		apiKey: env.TYPESENSE_ADMIN_API_KEY,
+		nodes: [
+			{
+				host: env.TYPESENSE_HOST,
+				port: env.TYPESENSE_PORT,
+				protocol: env.TYPESENSE_PROTOCOL,
+			},
+		],
+		collections: {
+			resources: env.TYPESENSE_RESOURCE_COLLECTION_NAME,
+			website: env.TYPESENSE_WEBSITE_COLLECTION_NAME,
+		},
+	});
 
 	const createResult = await search.collections.resources.create();
 	if (createResult.isErr()) {
