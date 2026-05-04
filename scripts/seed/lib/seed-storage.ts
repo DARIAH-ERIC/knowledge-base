@@ -1,7 +1,6 @@
+import type { StorageService } from "@dariah-eric/storage";
+import { stream } from "@dariah-eric/storage/lib";
 import { faker as f } from "@faker-js/faker";
-
-import type { Client } from "./admin-client";
-import { stream } from "./stream";
 
 export interface SeedConfig {
 	/** @default "2025-01-01" */
@@ -23,7 +22,7 @@ export interface SeedManifest {
 	}>;
 }
 
-export async function seed(client: Client, config: SeedConfig = {}): Promise<SeedManifest> {
+export async function seed(client: StorageService, config: SeedConfig = {}): Promise<SeedManifest> {
 	const { defaultRefDate = new Date(Date.UTC(2025, 0, 1)), seed = 42 } = config;
 
 	f.seed(seed);
@@ -54,12 +53,14 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<See
 		const input = await stream.fromUrl(new URL(url));
 		const [metadata, _stream] = await stream.getMetadata(input);
 
-		const { key } = await client.images.upload({
-			input: _stream,
-			metadata,
-			prefix: "avatars",
-			size: metadata.size,
-		});
+		const { key } = (
+			await client.upload({
+				input: _stream,
+				metadata,
+				prefix: "avatars",
+				size: metadata.size,
+			})
+		).unwrap();
 
 		seedManifest.avatars.push({ key, mimeType: metadata["content-type"], label: f.lorem.word() });
 	}
@@ -68,12 +69,14 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<See
 		const input = await stream.fromUrl(new URL(url));
 		const [metadata, _stream] = await stream.getMetadata(input);
 
-		const { key } = await client.images.upload({
-			input: _stream,
-			metadata,
-			prefix: "images",
-			size: metadata.size,
-		});
+		const { key } = (
+			await client.upload({
+				input: _stream,
+				metadata,
+				prefix: "images",
+				size: metadata.size,
+			})
+		).unwrap();
 
 		seedManifest.images.push({ key, mimeType: metadata["content-type"], label: f.lorem.word() });
 	}

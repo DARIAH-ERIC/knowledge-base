@@ -191,7 +191,7 @@ export const router = createRouter()
 			const storage = c.get("storage");
 			assert(storage, "Storage must be provided via middleware.");
 
-			const nodeStream = await storage.objects.get({ key });
+			const nodeStream = (await storage.download(key)).unwrap();
 			const webStream = Readable.toWeb(nodeStream) as ReadableStream;
 
 			return c.body(webStream, 200, {

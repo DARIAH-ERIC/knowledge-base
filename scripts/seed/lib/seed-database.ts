@@ -1,10 +1,9 @@
 import { groupBy, keyBy } from "@acdh-oeaw/lib";
+import type { Database } from "@dariah-eric/database";
+import * as schema from "@dariah-eric/database/schema";
+import { eq } from "@dariah-eric/database/sql";
 import { faker as f } from "@faker-js/faker";
 import slugify from "@sindresorhus/slugify";
-import { eq } from "drizzle-orm";
-
-import * as schema from "../schema";
-import type { Client } from "./admin-client";
 
 interface SeedManifest {
 	avatars: Array<{
@@ -27,7 +26,7 @@ export interface SeedConfig {
 	seedManifest?: SeedManifest;
 }
 
-export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
+export async function seed(db: Database, config: SeedConfig = {}): Promise<void> {
 	const { defaultRefDate = new Date(Date.UTC(2025, 0, 1)), seed = 42, seedManifest } = config;
 
 	f.seed(seed);

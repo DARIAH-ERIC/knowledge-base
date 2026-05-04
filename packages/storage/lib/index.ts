@@ -1,9 +1,17 @@
 import type { Readable } from "node:stream";
 
-import { type BucketItem, Client, type ItemBucketMetadata } from "minio";
+import { Result } from "better-result";
+import { Client, type ItemBucketMetadata } from "minio";
+import { v7 as uuidv7 } from "uuid";
 
-import { type AssetPrefix, presignedUrlExpirySeconds } from "../config/images.config";
-import { generateObjectKey } from "./generate-object-key";
+import type { AssetPrefix } from "../config/images.config";
+import { StorageDeleteError, StorageDownloadError, StorageUploadError } from "./errors";
+
+function generateObjectKey(prefix: AssetPrefix): string {
+	const objectName = `${prefix}/${uuidv7()}`;
+
+	return objectName;
+}
 
 export interface AssetMetadata extends ItemBucketMetadata {
 	"content-type": string;
@@ -24,7 +32,7 @@ export interface CreateStorageServiceParams {
 export function createStorageService(params: CreateStorageServiceParams) {
 	const { accessKey, bucketName, endPoint, port, secretKey, useSSL } = params.config;
 
-	const minio = new Client({
+	const client = new Client({
 		accessKey,
 		endPoint,
 		port,
@@ -32,88 +40,51 @@ export function createStorageService(params: CreateStorageServiceParams) {
 		useSSL,
 	});
 
-	const images = {
-		async get(prefix?: AssetPrefix) {
-			// TODO: `@aws-sdk/client-s3` has `max_keys` option and `listObjectsV2WithMetadata` method.
-			const stream = minio.listObjectsV2(bucketName, prefix, true);
-
-			const images: Array<{ key: string }> = [];
-
-			for await (const _item of stream) {
-				const item = _item as BucketItem;
-
-				/** Always defined because we query `listObjectsV2` with `recursive: true`.  */
-				const key = item.name!;
-
-				images.push({ key });
-			}
-
-			return { images };
-		},
-		async remove(params: { key: string }) {
-			const { key } = params;
-
-			await minio.removeObject(bucketName, key);
-		},
-		async upload(params: {
+	return {
+		upload({
+			input,
+			metadata,
+			prefix,
+			size,
+		}: {
 			input: Readable | Buffer;
 			metadata: AssetMetadata;
 			prefix: AssetPrefix;
 			size?: number;
 		}) {
-			const { input, metadata, prefix, size } = params;
-
-			const key = generateObjectKey(prefix);
-
-			await minio.putObject(bucketName, key, input, size, metadata);
-
-			return { key };
+			return Result.tryPromise({
+				async try() {
+					const key = generateObjectKey(prefix);
+					await client.putObject(bucketName, key, input, size, metadata);
+					return { key };
+				},
+				catch(cause) {
+					return new StorageUploadError({ cause });
+				},
+			});
 		},
-	};
 
-	const objects = {
-		async get(params: { key: string }) {
-			return minio.getObject(bucketName, params.key);
+		download(key: string) {
+			return Result.tryPromise({
+				async try() {
+					return client.getObject(bucketName, key);
+				},
+				catch(cause) {
+					return new StorageDownloadError({ cause });
+				},
+			});
 		},
-		async copy(params: {
-			source: {
-				bucket: string;
-				key: string;
-			};
-			prefix: string;
-		}) {
-			const { source, prefix } = params;
-			const key = `${prefix}/${source.key}`;
-			await minio.copyObject(bucketName, key, `/${source.bucket}/${source.key}`);
-			const stat = await minio.statObject(bucketName, key);
-			const meta = stat.metaData as Record<string, string>;
-			const metadata: AssetMetadata = {
-				...stat.metaData,
-				"content-type": meta["content-type"] ?? "application/octet-stream",
-			};
-			return { key, metadata };
+
+		delete(key: string) {
+			return Result.tryPromise({
+				async try() {
+					return client.removeObject(bucketName, key);
+				},
+				catch(cause) {
+					return new StorageDeleteError({ cause });
+				},
+			});
 		},
-	};
-
-	const urls = {
-		async generatePresignedUploadUrl(params: { prefix: AssetPrefix }) {
-			const { prefix } = params;
-
-			const key = generateObjectKey(prefix);
-
-			const url = await minio.presignedPutObject(bucketName, key, presignedUrlExpirySeconds);
-
-			return { key, url };
-		},
-	};
-
-	return {
-		bucket: {
-			name: bucketName,
-		},
-		images,
-		objects,
-		urls,
 	};
 }
 

@@ -1,19 +1,29 @@
 import { parseArgs } from "node:util";
 
 import { log } from "@acdh-oeaw/lib";
-import { db as databaseClient, seed as seedDatabase } from "@dariah-eric/database/lib";
+import { createDatabaseService } from "@dariah-eric/database";
 import { createSearchAdminService } from "@dariah-eric/search/admin";
-import {
-	adminClient as objectStoreClient,
-	seed as seedObjectStore,
-	type SeedManifest,
-} from "@dariah-eric/storage/lib";
+import { createStorageService } from "@dariah-eric/storage";
 import * as v from "valibot";
 
 import { env } from "../config/env.config";
+import { seed as seedDatabase } from "../lib/seed-database";
 import { seed as seedSearchIndex } from "../lib/seed-search-index";
+import { seed as seedObjectStore, type SeedManifest } from "../lib/seed-storage";
 
-const searchIndexClient = createSearchAdminService({
+const db = createDatabaseService({
+	connection: {
+		database: env.DATABASE_NAME,
+		host: env.DATABASE_HOST,
+		password: env.DATABASE_PASSWORD,
+		port: env.DATABASE_PORT,
+		ssl: env.DATABASE_SSL_CONNECTION === "enabled",
+		user: env.DATABASE_USER,
+	},
+	logger: false,
+}).unwrap();
+
+const search = createSearchAdminService({
 	apiKey: env.TYPESENSE_ADMIN_API_KEY,
 	collections: {
 		resources: env.TYPESENSE_RESOURCE_COLLECTION_NAME,
@@ -26,6 +36,17 @@ const searchIndexClient = createSearchAdminService({
 			protocol: env.TYPESENSE_PROTOCOL,
 		},
 	],
+});
+
+const storage = createStorageService({
+	config: {
+		accessKey: env.S3_ACCESS_KEY,
+		bucketName: env.S3_BUCKET_NAME,
+		endPoint: env.S3_HOST,
+		port: env.S3_PORT,
+		secretKey: env.S3_SECRET_KEY,
+		useSSL: env.S3_PROTOCOL === "https",
+	},
 });
 
 const _services = ["database", "object-store", "search-index"] as const;
@@ -45,17 +66,17 @@ async function main() {
 
 	if (services.has("object-store")) {
 		log.info("Seeding object-store...");
-		seedManifest = await seedObjectStore(objectStoreClient);
+		seedManifest = await seedObjectStore(storage);
 	}
 
 	if (services.has("database")) {
 		log.info("Seeding database...");
-		await seedDatabase(databaseClient, { seedManifest });
+		await seedDatabase(db, { seedManifest });
 	}
 
 	if (services.has("search-index")) {
 		log.info("Seeding search-index...");
-		await seedSearchIndex(searchIndexClient);
+		await seedSearchIndex(search);
 	}
 
 	log.success("Successfully seeded services.");
@@ -67,7 +88,7 @@ main()
 		process.exitCode = 1;
 	})
 	.finally(() => {
-		return databaseClient.$client.end().catch((error: unknown) => {
+		return db.$client.end().catch((error: unknown) => {
 			log.error("Failed to close database connection.\n", error);
 			process.exitCode = 1;
 		});
