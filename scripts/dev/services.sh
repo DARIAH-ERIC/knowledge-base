@@ -58,4 +58,4 @@ case "$ACTION" in
 		;;
 esac
 
-echo "Done."
+echo "✓ Done."
