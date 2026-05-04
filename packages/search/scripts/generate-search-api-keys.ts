@@ -22,6 +22,7 @@ async function main() {
 	const key = (await admin.apiKeys.create()).unwrap();
 
 	if (process.argv.includes("--raw")) {
+		// eslint-disable-next-line no-console
 		console.log(key);
 		return;
 	}
