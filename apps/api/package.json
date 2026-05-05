@@ -1,6 +1,7 @@
 {
 	"name": "@dariah-eric/api",
 	"private": true,
+	"license": "MIT",
 	"type": "module",
 	"scripts": {
 		"build": "tsdown ./src/index.ts",
@@ -61,6 +62,5 @@
 	},
 	"engines": {
 		"node": "24.x"
-	},
-	"licence": "MIT"
+	}
 }

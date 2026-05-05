@@ -28,6 +28,13 @@ const config = defineConfig(
 			"import-x/no-unresolved": "off",
 		},
 	},
+	/** Sorting is handled by `oxfmt` now. */
+	{
+		rules: {
+			"simple-import-sort/imports": "off",
+			"simple-import-sort/exports": "off",
+		},
+	},
 	{
 		name: "unicorn-config",
 		extends: [unicornPlugin.configs.unopinionated],
