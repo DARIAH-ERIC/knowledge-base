@@ -179,6 +179,7 @@ async function main() {
 				personRoleRows,
 				projectRoleRows,
 				projectScopeRows,
+				opportunitySourceRows,
 				socialMediaTypeRows,
 				contentBlockTypeRows,
 				dataContentBlockTypeRows,
@@ -192,6 +193,7 @@ async function main() {
 				tx.select().from(schema.personRoleTypes),
 				tx.select().from(schema.projectRoles),
 				tx.select().from(schema.projectScopes),
+				tx.select().from(schema.opportunitySources),
 				tx.select().from(schema.socialMediaTypes),
 				tx.select().from(schema.contentBlockTypes),
 				tx.select().from(schema.dataContentBlockTypes),
@@ -238,6 +240,11 @@ async function main() {
 			const projectScopeIds = new Map(
 				projectScopeRows.map((row) => {
 					return [row.scope, row.id];
+				}),
+			);
+			const opportunitySourceIds = new Map(
+				opportunitySourceRows.map((row) => {
+					return [row.source, row.id];
 				}),
 			);
 			const socialMediaTypeIds = new Map(
@@ -340,6 +347,8 @@ async function main() {
 			const nextEventEntityId = createId("entity:event:next");
 			const pageEntityId = createId("entity:page");
 			const newsEntityId = createId("entity:news");
+			const fundingCallEntityId = createId("entity:funding-call");
+			const opportunityEntityId = createId("entity:opportunity");
 			const spotlightEntityId = createId("entity:spotlight");
 			const impactEntityId = createId("entity:impact");
 			const documentPolicyEntityId = createId("entity:document-policy");
@@ -462,6 +471,26 @@ async function main() {
 					slug: "kitchen-sink",
 				},
 				{
+					id: fundingCallEntityId,
+					typeId: assertLookupId(
+						entityTypeIds.get("funding_calls"),
+						'Missing entity type "funding_calls".',
+					),
+					documentId: createId("document:funding-call"),
+					statusId: publishedStatusId,
+					slug: "kitchen-sink",
+				},
+				{
+					id: opportunityEntityId,
+					typeId: assertLookupId(
+						entityTypeIds.get("opportunities"),
+						'Missing entity type "opportunities".',
+					),
+					documentId: createId("document:opportunity"),
+					statusId: publishedStatusId,
+					slug: "kitchen-sink",
+				},
+				{
 					id: spotlightEntityId,
 					typeId: assertLookupId(
 						entityTypeIds.get("spotlight_articles"),
@@ -558,6 +587,23 @@ async function main() {
 				title: "Kitchen Sink News",
 				summary: "A news item seeded for API contract testing.",
 				imageId: createId("asset:image"),
+			});
+			await upsertById(tx, schema.fundingCalls, {
+				id: fundingCallEntityId,
+				title: "Kitchen Sink Funding Call",
+				summary: "A funding call seeded for API contract testing.",
+				duration: createTimestampRange("2026-06-01T00:00:00.000Z", "2026-06-30T23:59:59.000Z"),
+			});
+			await upsertById(tx, schema.opportunities, {
+				id: opportunityEntityId,
+				title: "Kitchen Sink Opportunity",
+				summary: "An opportunity seeded for API contract testing.",
+				duration: createTimestampRange("2026-07-01T00:00:00.000Z", "2026-07-31T23:59:59.000Z"),
+				sourceId: assertLookupId(
+					opportunitySourceIds.get("dariah"),
+					'Missing opportunity source "dariah".',
+				),
+				website: "https://example.org/opportunities/kitchen-sink",
 			});
 			await upsertById(tx, schema.spotlightArticles, {
 				id: spotlightEntityId,
@@ -955,6 +1001,8 @@ async function main() {
 				["events", [eventEntityId]],
 				["pages", [pageEntityId]],
 				["news", [newsEntityId]],
+				["funding_calls", [fundingCallEntityId]],
+				["opportunities", [opportunityEntityId]],
 				["spotlight_articles", [spotlightEntityId]],
 				["impact_case_studies", [impactEntityId]],
 				["documents_policies", [documentPolicyEntityId]],
@@ -1159,6 +1207,8 @@ async function main() {
 				eventEntityId,
 				pageEntityId,
 				newsEntityId,
+				fundingCallEntityId,
+				opportunityEntityId,
 				spotlightEntityId,
 				impactEntityId,
 			];
