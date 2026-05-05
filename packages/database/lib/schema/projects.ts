@@ -56,7 +56,7 @@ export const projects = p.pgTable("projects", {
 			return entities.id;
 		}),
 	metadata: p.jsonb("metadata"),
-	name: p.text("name").notNull(),
+	name: p.text("name").notNull().unique(),
 	acronym: p.text("acronym"),
 	duration: f.timestampRange("duration").notNull(),
 	funding: p.numeric("funding", { mode: "number", precision: 12, scale: 2 }),
