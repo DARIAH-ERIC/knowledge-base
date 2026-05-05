@@ -1,53 +1,38 @@
 "use server";
 
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 
 import { assertAdmin } from "@/lib/auth/session";
+import { deleteDocumentVersionTail } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
-import { eq, inArray, or } from "@/lib/db/sql";
+import { eq, or } from "@/lib/db/sql";
 
 export async function deleteCountryAction(id: string): Promise<void> {
 	await assertAdmin();
 
 	await db.transaction(async (tx) => {
+		const entityVersion = await tx.query.entityVersions.findFirst({
+			where: { id },
+			columns: { id: true, entityId: true },
+		});
+
+		assert(entityVersion);
+
 		await tx
 			.delete(schema.organisationalUnitsRelations)
 			.where(
 				or(
-					eq(schema.organisationalUnitsRelations.unitId, id),
-					eq(schema.organisationalUnitsRelations.relatedUnitId, id),
+					eq(schema.organisationalUnitsRelations.unitId, entityVersion.id),
+					eq(schema.organisationalUnitsRelations.relatedUnitId, entityVersion.id),
 				),
 			);
-
-		const entityFields = await tx
-			.select({ id: schema.fields.id })
-			.from(schema.fields)
-			.where(eq(schema.fields.entityId, id));
-
-		if (entityFields.length > 0) {
-			const fieldIds = entityFields.map((f) => {
-				return f.id;
-			});
-
-			await tx.delete(schema.contentBlocks).where(inArray(schema.contentBlocks.fieldId, fieldIds));
-			await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
-		}
-
-		await tx.delete(schema.entitiesToResources).where(eq(schema.entitiesToResources.entityId, id));
 
 		await tx
-			.delete(schema.entitiesToEntities)
-			.where(
-				or(
-					eq(schema.entitiesToEntities.entityId, id),
-					eq(schema.entitiesToEntities.relatedEntityId, id),
-				),
-			);
-
-		await tx.delete(schema.organisationalUnits).where(eq(schema.organisationalUnits.id, id));
-
-		await tx.delete(schema.entities).where(eq(schema.entities.id, id));
+			.delete(schema.organisationalUnits)
+			.where(eq(schema.organisationalUnits.id, entityVersion.id));
+		await deleteDocumentVersionTail(tx, entityVersion.id, entityVersion.entityId);
 	});
 
 	revalidatePath("/[locale]/dashboard/administrator/countries", "layout");

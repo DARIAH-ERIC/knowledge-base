@@ -22,7 +22,7 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 	const [items, aggregate] = await Promise.all([
 		db.query.projects.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -45,10 +45,12 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 				funding: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -76,7 +78,7 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -84,8 +86,8 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 		db
 			.select({ total: count() })
 			.from(schema.projects)
-			.innerJoin(schema.entities, eq(schema.projects.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.projects.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(
 				and(
 					eq(schema.entityStatus.type, "published"),
@@ -126,7 +128,7 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 			duration,
 			image,
 			socialMedia,
-			publishedAt: item.entity.updatedAt.toISOString(),
+			publishedAt: item.entityVersion.updatedAt.toISOString(),
 		};
 	});
 
@@ -146,7 +148,7 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 		db.query.projects.findFirst({
 			where: {
 				id,
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -162,10 +164,12 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 				funding: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -295,7 +299,7 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 		socialMedia,
 		funders,
 		partners,
-		publishedAt: item.entity.updatedAt.toISOString(),
+		publishedAt: item.entityVersion.updatedAt.toISOString(),
 		...fields,
 	};
 }
@@ -315,7 +319,7 @@ export async function getProjectSlugs(db: Database | Transaction, params: GetPro
 	const [items, aggregate] = await Promise.all([
 		db.query.projects.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -325,15 +329,17 @@ export async function getProjectSlugs(db: Database | Transaction, params: GetPro
 				id: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -341,8 +347,8 @@ export async function getProjectSlugs(db: Database | Transaction, params: GetPro
 		db
 			.select({ total: count() })
 			.from(schema.projects)
-			.innerJoin(schema.entities, eq(schema.projects.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.projects.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
@@ -364,10 +370,12 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 
 	const item = await db.query.projects.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
 				status: {
 					type: "published",
+				},
+				entity: {
+					slug,
 				},
 			},
 		},
@@ -381,10 +389,12 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 			funding: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
-					updatedAt: true,
+			entityVersion: {
+				columns: { updatedAt: true },
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
 				},
 			},
 			image: {
@@ -514,7 +524,7 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 		socialMedia,
 		funders,
 		partners,
-		publishedAt: item.entity.updatedAt.toISOString(),
+		publishedAt: item.entityVersion.updatedAt.toISOString(),
 		...fields,
 	};
 }

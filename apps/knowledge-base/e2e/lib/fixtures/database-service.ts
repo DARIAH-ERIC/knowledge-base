@@ -161,7 +161,7 @@ export class DatabaseService {
 			const entityFields = await tx
 				.select({ id: schema.fields.id })
 				.from(schema.fields)
-				.where(eq(schema.fields.entityId, entityId));
+				.where(eq(schema.fields.entityVersionId, entityId));
 
 			if (entityFields.length > 0) {
 				const fieldIds = entityFields.map((f) => {
@@ -218,7 +218,7 @@ export class DatabaseService {
 			const entityFields = await tx
 				.select({ id: schema.fields.id })
 				.from(schema.fields)
-				.where(eq(schema.fields.entityId, entityId));
+				.where(eq(schema.fields.entityVersionId, entityId));
 
 			if (entityFields.length > 0) {
 				const fieldIds = entityFields.map((f) => {
@@ -275,7 +275,7 @@ export class DatabaseService {
 			const entityFields = await tx
 				.select({ id: schema.fields.id })
 				.from(schema.fields)
-				.where(eq(schema.fields.entityId, entityId));
+				.where(eq(schema.fields.entityVersionId, entityId));
 
 			if (entityFields.length > 0) {
 				const fieldIds = entityFields.map((f) => {
@@ -337,7 +337,7 @@ export class DatabaseService {
 			const entityFields = await tx
 				.select({ id: schema.fields.id })
 				.from(schema.fields)
-				.where(eq(schema.fields.entityId, entityId));
+				.where(eq(schema.fields.entityVersionId, entityId));
 
 			if (entityFields.length > 0) {
 				const fieldIds = entityFields.map((f) => {
@@ -395,7 +395,7 @@ export class DatabaseService {
 			const entityFields = await tx
 				.select({ id: schema.fields.id })
 				.from(schema.fields)
-				.where(eq(schema.fields.entityId, entityId));
+				.where(eq(schema.fields.entityVersionId, entityId));
 
 			if (entityFields.length > 0) {
 				const fieldIds = entityFields.map((f) => {
@@ -452,7 +452,7 @@ export class DatabaseService {
 			const entityFields = await tx
 				.select({ id: schema.fields.id })
 				.from(schema.fields)
-				.where(eq(schema.fields.entityId, entityId));
+				.where(eq(schema.fields.entityVersionId, entityId));
 
 			if (entityFields.length > 0) {
 				const fieldIds = entityFields.map((f) => {
@@ -513,7 +513,7 @@ export class DatabaseService {
 			const entityFields = await tx
 				.select({ id: schema.fields.id })
 				.from(schema.fields)
-				.where(eq(schema.fields.entityId, entityId));
+				.where(eq(schema.fields.entityVersionId, entityId));
 
 			if (entityFields.length > 0) {
 				const fieldIds = entityFields.map((f) => {
@@ -579,7 +579,7 @@ export class DatabaseService {
 			const entityFields = await tx
 				.select({ id: schema.fields.id })
 				.from(schema.fields)
-				.where(eq(schema.fields.entityId, entityId));
+				.where(eq(schema.fields.entityVersionId, entityId));
 
 			if (entityFields.length > 0) {
 				const fieldIds = entityFields.map((f) => {

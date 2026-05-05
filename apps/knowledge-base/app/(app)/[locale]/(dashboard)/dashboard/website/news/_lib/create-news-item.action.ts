@@ -51,7 +51,7 @@ export const createNewsItemAction = createServerAction(
 			result.output;
 
 		const slug = slugify(title);
-		let entityId: string | null = null;
+		let documentId: string | null = null;
 
 		await db.transaction(async (tx) => {
 			const type = await tx.query.entityTypes.findFirst({
@@ -76,17 +76,26 @@ export const createNewsItemAction = createServerAction(
 
 			assert(status);
 
-			const [entity] = await tx
+			const [document] = await tx
 				.insert(schema.entities)
 				.values({
 					slug,
-					statusId: status.id,
 					typeId: type.id,
 				})
 				.returning({ id: schema.entities.id });
 
-			assert(entity);
-			entityId = entity.id;
+			assert(document);
+			documentId = document.id;
+
+			const [entityVersion] = await tx
+				.insert(schema.entityVersions)
+				.values({
+					entityId: document.id,
+					statusId: status.id,
+				})
+				.returning({ id: schema.entityVersions.id });
+
+			assert(entityVersion);
 
 			const asset = await tx.query.assets.findFirst({
 				where: { key: imageKey },
@@ -96,7 +105,7 @@ export const createNewsItemAction = createServerAction(
 			assert(asset);
 
 			await tx.insert(schema.news).values({
-				id: entity.id,
+				id: entityVersion.id,
 				imageId: asset.id,
 				title,
 				summary,
@@ -105,7 +114,7 @@ export const createNewsItemAction = createServerAction(
 			if (relatedEntityIds.length > 0) {
 				await tx.insert(schema.entitiesToEntities).values(
 					relatedEntityIds.map((relatedEntityId) => {
-						return { entityId: entity.id, relatedEntityId };
+						return { entityId: document.id, relatedEntityId };
 					}),
 				);
 			}
@@ -113,7 +122,7 @@ export const createNewsItemAction = createServerAction(
 			if (relatedResourceIds.length > 0) {
 				await tx.insert(schema.entitiesToResources).values(
 					relatedResourceIds.map((resourceId) => {
-						return { entityId: entity.id, resourceId };
+						return { entityId: document.id, resourceId };
 					}),
 				);
 			}
@@ -130,7 +139,7 @@ export const createNewsItemAction = createServerAction(
 
 			const [contentField] = await tx
 				.insert(schema.fields)
-				.values({ entityId: entity.id, fieldNameId: contentFieldName.id })
+				.values({ entityVersionId: entityVersion.id, fieldNameId: contentFieldName.id })
 				.returning({ id: schema.fields.id });
 
 			assert(contentField);
@@ -163,8 +172,8 @@ export const createNewsItemAction = createServerAction(
 		});
 
 		after(async () => {
-			if (entityId != null) {
-				await syncWebsiteDocumentForEntity(entityId);
+			if (documentId != null) {
+				await syncWebsiteDocumentForEntity(documentId);
 			}
 
 			await dispatchWebhook({ type: "news" });

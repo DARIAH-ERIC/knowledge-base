@@ -27,6 +27,51 @@ export interface SeedConfig {
 	seedManifest?: SeedManifest;
 }
 
+type SeedTx = Parameters<Parameters<Client["transaction"]>[0]>[0];
+
+interface DocumentVersion {
+	documentId: string;
+	versionId: string;
+}
+
+/**
+ * For each input slug: insert one `entities` row (the document) and one
+ * `entity_versions` row referencing it. Returns the pair of ids per input,
+ * in the same order, so callers can attach subtype data by index.
+ */
+async function createDocumentVersions(
+	db: SeedTx,
+	typeId: string,
+	statusId: string,
+	slugs: ReadonlyArray<string>,
+): Promise<Array<DocumentVersion>> {
+	if (slugs.length === 0) {
+		return [];
+	}
+
+	const documents = await db
+		.insert(schema.entities)
+		.values(
+			slugs.map((slug) => {
+				return { typeId, slug };
+			}),
+		)
+		.returning({ id: schema.entities.id });
+
+	const versions = await db
+		.insert(schema.entityVersions)
+		.values(
+			documents.map((document) => {
+				return { entityId: document.id, statusId };
+			}),
+		)
+		.returning({ id: schema.entityVersions.id, entityId: schema.entityVersions.entityId });
+
+	return versions.map((version) => {
+		return { documentId: version.entityId, versionId: version.id };
+	});
+}
+
 export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 	const { defaultRefDate = new Date(Date.UTC(2025, 0, 1)), seed = 42, seedManifest } = config;
 
@@ -34,22 +79,6 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 	f.setDefaultRefDate(defaultRefDate);
 
 	await db.transaction(async (db) => {
-		// const users: Array<schema.UserInput> = await Promise.all(
-		// 	f.helpers.multiple(
-		// 		async () => {
-		// 			return {
-		// 				username: f.internet.username(),
-		// 				email: f.internet.email(),
-		// 				passwordHash: await hashPassword(f.internet.password()),
-		// 				recoveryCode: Buffer.from(encryptString(generateRandomRecoveryCode())),
-		// 			};
-		// 		},
-		// 		{ count: 10 },
-		// 	),
-		// );
-
-		// await db.insert(schema.users).values(users);
-
 		const licenseIds = await db.select({ id: schema.licenses.id }).from(schema.licenses);
 
 		const images: Array<schema.AssetInput> = f.helpers.multiple(
@@ -112,6 +141,8 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			return type;
 		});
 
+		const publishedStatusId = entityStatusByType.published.id;
+
 		const fieldNameIds = await db
 			.select({
 				id: schema.entityTypesFieldsNames.id,
@@ -127,6 +158,16 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 		const fieldNamesByEntityTypeId = groupBy(fieldNameIds, ({ entityTypeId }) => {
 			return entityTypeId;
 		});
+
+		// All document/version pairs created during seeding, with their entity type id.
+		// Used afterward to seed fields (per version) and cross-document relations.
+		const seededDocuments: Array<DocumentVersion & { typeId: string }> = [];
+
+		function record(typeId: string, items: ReadonlyArray<DocumentVersion>) {
+			for (const item of items) {
+				seededDocuments.push({ ...item, typeId });
+			}
+		}
 
 		const persons: Array<Omit<schema.PersonInput, "id">> = f.helpers.multiple(
 			() => {
@@ -144,23 +185,19 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			{ count: 25 },
 		);
 
-		const personEntities: Array<schema.EntityInput> = persons.map((person) => {
-			return {
-				typeId: entityTypesByType.persons.id,
-				documentId: f.string.uuid(),
-				statusId: entityStatusByType.published.id,
-				slug: slugify(person.sortName),
-			};
-		});
-
-		const personIds = await db
-			.insert(schema.entities)
-			.values(personEntities)
-			.returning({ id: schema.entities.id });
+		const personIds = await createDocumentVersions(
+			db,
+			entityTypesByType.persons.id,
+			publishedStatusId,
+			persons.map((p) => {
+				return slugify(p.sortName);
+			}),
+		);
+		record(entityTypesByType.persons.id, personIds);
 
 		await db.insert(schema.persons).values(
-			personIds.map(({ id }, index) => {
-				return { ...persons[index]!, id };
+			personIds.map(({ versionId }, index) => {
+				return { ...persons[index]!, id: versionId };
 			}),
 		);
 
@@ -201,23 +238,19 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			{ count: 25 },
 		);
 
-		const eventEntities: Array<schema.EntityInput> = events.map((event) => {
-			return {
-				typeId: entityTypesByType.events.id,
-				documentId: f.string.uuid(),
-				statusId: entityStatusByType.published.id,
-				slug: slugify(event.title),
-			};
-		});
-
-		const eventIds = await db
-			.insert(schema.entities)
-			.values(eventEntities)
-			.returning({ id: schema.entities.id });
+		const eventIds = await createDocumentVersions(
+			db,
+			entityTypesByType.events.id,
+			publishedStatusId,
+			events.map((e) => {
+				return slugify(e.title);
+			}),
+		);
+		record(entityTypesByType.events.id, eventIds);
 
 		await db.insert(schema.events).values(
-			eventIds.map(({ id }, index) => {
-				return { ...events[index]!, id };
+			eventIds.map(({ versionId }, index) => {
+				return { ...events[index]!, id: versionId };
 			}),
 		);
 
@@ -234,35 +267,30 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			{ count: 25 },
 		);
 
-		const impactCaseStudyEntities: Array<schema.EntityInput> = impactCaseStudies.map(
-			(impactCaseStudy) => {
-				return {
-					typeId: entityTypesByType.impact_case_studies.id,
-					documentId: f.string.uuid(),
-					statusId: entityStatusByType.published.id,
-					slug: slugify(impactCaseStudy.title),
-				};
-			},
+		const impactCaseStudyIds = await createDocumentVersions(
+			db,
+			entityTypesByType.impact_case_studies.id,
+			publishedStatusId,
+			impactCaseStudies.map((s) => {
+				return slugify(s.title);
+			}),
 		);
-
-		const impactCaseStudyIds = await db
-			.insert(schema.entities)
-			.values(impactCaseStudyEntities)
-			.returning({ id: schema.entities.id });
+		record(entityTypesByType.impact_case_studies.id, impactCaseStudyIds);
 
 		await db.insert(schema.impactCaseStudies).values(
-			impactCaseStudyIds.map(({ id }, index) => {
-				return { ...impactCaseStudies[index]!, id };
+			impactCaseStudyIds.map(({ versionId }, index) => {
+				return { ...impactCaseStudies[index]!, id: versionId };
 			}),
 		);
 
-		const impactCaseStudiesToPersons = impactCaseStudyIds.flatMap(({ id: impactCaseStudyId }) => {
-			const persons = f.helpers.arrayElements(personIds, { min: 0, max: 3 });
-
-			return persons.map(({ id: personId }) => {
-				return { impactCaseStudyId, personId };
-			});
-		});
+		const impactCaseStudiesToPersons = impactCaseStudyIds.flatMap(
+			({ versionId: impactCaseStudyId }) => {
+				const selected = f.helpers.arrayElements(personIds, { min: 0, max: 3 });
+				return selected.map(({ versionId: personId }) => {
+					return { impactCaseStudyId, personId };
+				});
+			},
+		);
 
 		await db.insert(schema.impactCaseStudiesToPersons).values(impactCaseStudiesToPersons);
 
@@ -279,23 +307,19 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			{ count: 25 },
 		);
 
-		const newsItemEntities: Array<schema.EntityInput> = news.map((newsItem) => {
-			return {
-				typeId: entityTypesByType.news.id,
-				documentId: f.string.uuid(),
-				statusId: entityStatusByType.published.id,
-				slug: slugify(newsItem.title),
-			};
-		});
-
-		const newsItemIds = await db
-			.insert(schema.entities)
-			.values(newsItemEntities)
-			.returning({ id: schema.entities.id });
+		const newsItemIds = await createDocumentVersions(
+			db,
+			entityTypesByType.news.id,
+			publishedStatusId,
+			news.map((n) => {
+				return slugify(n.title);
+			}),
+		);
+		record(entityTypesByType.news.id, newsItemIds);
 
 		await db.insert(schema.news).values(
-			newsItemIds.map(({ id }, index) => {
-				return { ...news[index]!, id };
+			newsItemIds.map(({ versionId }, index) => {
+				return { ...news[index]!, id: versionId };
 			}),
 		);
 
@@ -312,23 +336,19 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			{ count: 25 },
 		);
 
-		const pageEntities: Array<schema.EntityInput> = pages.map((page) => {
-			return {
-				typeId: entityTypesByType.pages.id,
-				documentId: f.string.uuid(),
-				statusId: entityStatusByType.published.id,
-				slug: slugify(page.title),
-			};
-		});
-
-		const pageIds = await db
-			.insert(schema.entities)
-			.values(pageEntities)
-			.returning({ id: schema.entities.id });
+		const pageIds = await createDocumentVersions(
+			db,
+			entityTypesByType.pages.id,
+			publishedStatusId,
+			pages.map((p) => {
+				return slugify(p.title);
+			}),
+		);
+		record(entityTypesByType.pages.id, pageIds);
 
 		await db.insert(schema.pages).values(
-			pageIds.map(({ id }, index) => {
-				return { ...pages[index]!, id };
+			pageIds.map(({ versionId }, index) => {
+				return { ...pages[index]!, id: versionId };
 			}),
 		);
 
@@ -341,25 +361,19 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			{ count: 25 },
 		);
 
-		const documentationPageEntities: Array<schema.EntityInput> = documentationPages.map(
-			(documentationPage) => {
-				return {
-					typeId: entityTypesByType.documentation_pages.id,
-					documentId: f.string.uuid(),
-					statusId: entityStatusByType.published.id,
-					slug: slugify(documentationPage.title),
-				};
-			},
+		const documentationPageIds = await createDocumentVersions(
+			db,
+			entityTypesByType.documentation_pages.id,
+			publishedStatusId,
+			documentationPages.map((p) => {
+				return slugify(p.title);
+			}),
 		);
-
-		const documentationPageIds = await db
-			.insert(schema.entities)
-			.values(documentationPageEntities)
-			.returning({ id: schema.entities.id });
+		record(entityTypesByType.documentation_pages.id, documentationPageIds);
 
 		await db.insert(schema.documentationPages).values(
-			documentationPageIds.map(({ id }, index) => {
-				return { ...documentationPages[index]!, id };
+			documentationPageIds.map(({ versionId }, index) => {
+				return { ...documentationPages[index]!, id: versionId };
 			}),
 		);
 
@@ -376,35 +390,26 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 			{ count: 25 },
 		);
 
-		const spotlightArticleEntities: Array<schema.EntityInput> = spotlightArticles.map(
-			(spotlightArticle) => {
-				return {
-					typeId: entityTypesByType.spotlight_articles.id,
-					documentId: f.string.uuid(),
-					statusId: entityStatusByType.published.id,
-					slug: slugify(spotlightArticle.title),
-				};
-			},
+		const spotlightArticleIds = await createDocumentVersions(
+			db,
+			entityTypesByType.spotlight_articles.id,
+			publishedStatusId,
+			spotlightArticles.map((a) => {
+				return slugify(a.title);
+			}),
 		);
-
-		const spotlightArticleIds = await db
-			.insert(schema.entities)
-			.values(spotlightArticleEntities)
-			.returning({ id: schema.entities.id });
+		record(entityTypesByType.spotlight_articles.id, spotlightArticleIds);
 
 		await db.insert(schema.spotlightArticles).values(
-			spotlightArticleIds.map(({ id }, index) => {
-				return { ...spotlightArticles[index]!, id };
+			spotlightArticleIds.map(({ versionId }, index) => {
+				return { ...spotlightArticles[index]!, id: versionId };
 			}),
 		);
 
-		const entityIds = await db
-			.select({ id: schema.entities.id, typeId: schema.entities.typeId })
-			.from(schema.entities);
-
-		const fields: Array<schema.FieldInput> = entityIds.flatMap(({ id, typeId }) => {
-			return fieldNamesByEntityTypeId[typeId]!.map((fieldName) => {
-				return { entityId: id, fieldNameId: fieldName.id };
+		// fields hang off entity_versions; one row per (version, fieldName) for the version's type
+		const fields: Array<schema.FieldInput> = seededDocuments.flatMap(({ versionId, typeId }) => {
+			return (fieldNamesByEntityTypeId[typeId] ?? []).map((fieldName) => {
+				return { entityVersionId: versionId, fieldNameId: fieldName.id };
 			});
 		});
 
@@ -510,7 +515,12 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 
 		await db.insert(schema.richTextContentBlocks).values(richTextContentBlocks);
 
-		const entitiesToResources = entityIds.flatMap(({ id: entityId }) => {
+		// cross-document relations: keyed by documentId (the new entities table)
+		const allDocumentIds = seededDocuments.map(({ documentId }) => {
+			return documentId;
+		});
+
+		const entitiesToResources = allDocumentIds.flatMap((entityId) => {
 			return f.helpers.multiple(
 				() => {
 					return { entityId, resourceId: f.string.uuid() };
@@ -521,12 +531,10 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 
 		await db.insert(schema.entitiesToResources).values(entitiesToResources);
 
-		const entitiesToEntities = entityIds.flatMap(({ id: entityId }) => {
-			return f.helpers
-				.arrayElements(entityIds, { min: 0, max: 5 })
-				.map(({ id: relatedEntityId }) => {
-					return { entityId, relatedEntityId };
-				});
+		const entitiesToEntities = allDocumentIds.flatMap((entityId) => {
+			return f.helpers.arrayElements(allDocumentIds, { min: 0, max: 5 }).map((relatedEntityId) => {
+				return { entityId, relatedEntityId };
+			});
 		});
 
 		await db.insert(schema.entitiesToEntities).values(entitiesToEntities);
@@ -575,27 +583,20 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 				{ count: 25 },
 			);
 
-		const organisationalUnitsEntities: Array<schema.EntityInput> = organisationalUnits.map(
-			(organisationalUnit) => {
-				return {
-					typeId: entityTypesByType.organisational_units.id,
-					documentId: f.string.uuid(),
-					statusId: entityStatusByType.published.id,
-					slug: slugify(organisationalUnit.name),
-				};
-			},
+		const organisationalUnitIds = await createDocumentVersions(
+			db,
+			entityTypesByType.organisational_units.id,
+			publishedStatusId,
+			organisationalUnits.map((u) => {
+				return slugify(u.name);
+			}),
 		);
-
-		const organisationalUnitIds = await db
-			.insert(schema.entities)
-			.values(organisationalUnitsEntities)
-			.returning({ id: schema.entities.id });
 
 		const organisationalUnitsIds = await db
 			.insert(schema.organisationalUnits)
 			.values(
-				organisationalUnitIds.map(({ id }, index) => {
-					return { ...organisationalUnits[index]!, id };
+				organisationalUnitIds.map(({ versionId }, index) => {
+					return { ...organisationalUnits[index]!, id: versionId };
 				}),
 			)
 			.returning({ id: schema.organisationalUnits.id, typeId: schema.organisationalUnits.typeId });
@@ -681,7 +682,7 @@ export async function seed(db: Client, config: SeedConfig = {}): Promise<void> {
 				}
 
 				return {
-					personId: f.helpers.arrayElement(personIds).id,
+					personId: f.helpers.arrayElement(personIds).versionId,
 					roleTypeId,
 					organisationalUnitId: organisationalUnit.id,
 					duration: {

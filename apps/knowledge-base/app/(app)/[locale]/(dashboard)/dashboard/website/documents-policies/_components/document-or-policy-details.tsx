@@ -18,7 +18,7 @@ import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 interface DocumentOrPolicyDetailsProps {
 	contentBlocks: Array<ContentBlock>;
 	documentOrPolicy: Pick<schema.DocumentOrPolicy, "id" | "title" | "summary" | "url"> & {
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { document: { key: string; label: string; url: string; downloadUrl: string } };
 }
 
@@ -32,7 +32,7 @@ export function DocumentOrPolicyDetails(props: Readonly<DocumentOrPolicyDetailsP
 			<div className="flex justify-end">
 				<Link
 					className={buttonStyles({ intent: "secondary", size: "sm" })}
-					href={`/dashboard/website/documents-policies/${documentOrPolicy.entity.slug}/edit`}
+					href={`/dashboard/website/documents-policies/${documentOrPolicy.entityVersion.entity.slug}/edit`}
 				>
 					<PencilSquareIcon className="mr-2 size-4" />
 					{t("Edit")}
@@ -43,7 +43,7 @@ export function DocumentOrPolicyDetails(props: Readonly<DocumentOrPolicyDetailsP
 				<DescriptionDetails>{documentOrPolicy.title}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Slug")}</DescriptionTerm>
-				<DescriptionDetails>{documentOrPolicy.entity.slug}</DescriptionDetails>
+				<DescriptionDetails>{documentOrPolicy.entityVersion.entity.slug}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Summary")}</DescriptionTerm>
 				<DescriptionDetails>{documentOrPolicy.summary}</DescriptionDetails>

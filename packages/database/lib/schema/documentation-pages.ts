@@ -2,14 +2,14 @@ import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
 
 import * as f from "../fields";
-import { entities } from "./entities";
+import { entityVersions } from "./entities";
 
 export const documentationPages = p.pgTable("documentation_pages", {
 	id: p
 		.uuid("id")
 		.primaryKey()
 		.references(() => {
-			return entities.id;
+			return entityVersions.id;
 		}),
 	title: p.text("title").notNull(),
 	...f.timestamps(),

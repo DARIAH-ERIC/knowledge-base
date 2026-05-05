@@ -5,7 +5,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { assets } from "./assets";
-import { entities } from "./entities";
+import { entityVersions } from "./entities";
 import { organisationalUnits } from "./organisational-units";
 import { socialMedia } from "./social-media";
 
@@ -53,10 +53,10 @@ export const projects = p.pgTable("projects", {
 		.uuid("id")
 		.primaryKey()
 		.references(() => {
-			return entities.id;
+			return entityVersions.id;
 		}),
 	metadata: p.jsonb("metadata"),
-	name: p.text("name").notNull(),
+	name: p.text("name").notNull().unique(),
 	acronym: p.text("acronym"),
 	duration: f.timestampRange("duration").notNull(),
 	funding: p.numeric("funding", { mode: "number", precision: 12, scale: 2 }),

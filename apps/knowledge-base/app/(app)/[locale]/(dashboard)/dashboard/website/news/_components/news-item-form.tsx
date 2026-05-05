@@ -30,7 +30,7 @@ interface NewsItemFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
 	newsItem?: Pick<schema.NewsItem, "id" | "title" | "summary"> & {
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
@@ -145,7 +145,7 @@ export function NewsItemForm(props: Readonly<NewsItemFormProps>): ReactNode {
 				{newsItem != null ? (
 					<Fragment>
 						<input name="id" type="hidden" value={newsItem.id} />
-						<input name="documentId" type="hidden" value={newsItem.entity.documentId} />
+						<input name="documentId" type="hidden" value={newsItem.entityVersion.entity.id} />
 					</Fragment>
 				) : null}
 

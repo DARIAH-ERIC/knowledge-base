@@ -18,7 +18,7 @@ import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 interface DocumentationPageDetailsProps {
 	contentBlocks: Array<ContentBlock>;
 	documentationPage: Pick<schema.DocumentationPage, "title"> & {
-		entity: Pick<schema.Entity, "slug">;
+		entityVersion: { entity: Pick<schema.Entity, "id" | "slug"> };
 	};
 }
 
@@ -34,7 +34,7 @@ export function DocumentationPageDetails(
 			<div className="flex justify-end">
 				<Link
 					className={buttonStyles({ intent: "secondary", size: "sm" })}
-					href={`/dashboard/website/documentation-pages/${documentationPage.entity.slug}/edit`}
+					href={`/dashboard/website/documentation-pages/${documentationPage.entityVersion.entity.slug}/edit`}
 				>
 					<PencilSquareIcon className="mr-2 size-4" />
 					{t("Edit")}
@@ -45,7 +45,7 @@ export function DocumentationPageDetails(
 				<DescriptionDetails>{documentationPage.title}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Slug")}</DescriptionTerm>
-				<DescriptionDetails>{documentationPage.entity.slug}</DescriptionDetails>
+				<DescriptionDetails>{documentationPage.entityVersion.entity.slug}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Content")}</DescriptionTerm>
 				<DescriptionDetails>

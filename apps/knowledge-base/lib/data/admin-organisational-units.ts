@@ -36,7 +36,7 @@ async function getOrganisationalUnitBySlugForAdmin(
 	return db.query.organisationalUnits.findFirst({
 		where: {
 			type: { type: unitType },
-			entity: { slug },
+			entityVersion: { entity: { slug } },
 		},
 		columns: {
 			acronym: true,
@@ -45,10 +45,15 @@ async function getOrganisationalUnitBySlugForAdmin(
 			summary: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
+			entityVersion: {
+				columns: { id: true },
+				with: {
+					entity: {
+						columns: {
+							id: true,
+							slug: true,
+						},
+					},
 				},
 			},
 			image: {
@@ -73,6 +78,7 @@ export async function getOrganisationalUnitEditDataForAdmin(
 		return null;
 	}
 
+	const documentId = unit.entityVersion.entity.id;
 	const [descriptionRows, relationIds, relations, unitRelationStatusOptions] = await Promise.all([
 		db
 			.select({ content: schema.richTextContentBlocks.content })
@@ -85,12 +91,12 @@ export async function getOrganisationalUnitEditDataForAdmin(
 			)
 			.where(
 				and(
-					eq(schema.fields.entityId, unit.id),
+					eq(schema.fields.entityVersionId, unit.id),
 					eq(schema.entityTypesFieldsNames.fieldName, "description"),
 				),
 			)
 			.limit(1),
-		getEntityRelations(unit.id),
+		getEntityRelations(documentId),
 		getUnitRelations(unit.id),
 		getUnitRelationStatusOptions(unitType),
 	]);

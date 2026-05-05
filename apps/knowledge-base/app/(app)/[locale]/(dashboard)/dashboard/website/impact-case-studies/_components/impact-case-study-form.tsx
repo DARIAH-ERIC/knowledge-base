@@ -30,7 +30,7 @@ interface ImpactCaseStudyFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
 	impactCaseStudy?: Pick<schema.ImpactCaseStudy, "id" | "title" | "summary"> & {
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
@@ -149,7 +149,11 @@ export function ImpactCaseStudyForm(props: Readonly<ImpactCaseStudyFormProps>): 
 				{impactCaseStudy != null ? (
 					<Fragment>
 						<input name="id" type="hidden" value={impactCaseStudy.id} />
-						<input name="documentId" type="hidden" value={impactCaseStudy.entity.documentId} />
+						<input
+							name="documentId"
+							type="hidden"
+							value={impactCaseStudy.entityVersion.entity.id}
+						/>
 					</Fragment>
 				) : null}
 

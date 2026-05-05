@@ -30,7 +30,8 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface OpportunityFormProps {
 	contentBlocks?: Array<ContentBlock>;
 	opportunity?: Pick<schema.Opportunity, "id" | "duration" | "title" | "summary" | "website"> & {
-		entity: Pick<schema.Entity, "documentId" | "slug"> & {
+		entityVersion: {
+			entity: Pick<schema.Entity, "id" | "slug">;
 			status: Pick<schema.EntityStatus, "id" | "type">;
 		};
 		source: Pick<schema.OpportunitySource, "id" | "source">;
@@ -130,7 +131,7 @@ export function OpportunityForm(props: Readonly<OpportunityFormProps>): ReactNod
 				{opportunity != null ? (
 					<Fragment>
 						<input name="id" type="hidden" value={opportunity.id} />
-						<input name="documentId" type="hidden" value={opportunity.entity.documentId} />
+						<input name="documentId" type="hidden" value={opportunity.entityVersion.entity.id} />
 					</Fragment>
 				) : null}
 

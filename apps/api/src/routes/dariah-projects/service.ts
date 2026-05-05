@@ -17,7 +17,7 @@ function mapItem<
 			url: string;
 			type: { type: string };
 		}>;
-		entity: { updatedAt: Date };
+		entityVersion: { updatedAt: Date };
 		duration: { start: Date; end?: Date };
 	},
 >(item: T, width: number) {
@@ -46,7 +46,7 @@ function mapItem<
 		duration,
 		image,
 		socialMedia,
-		publishedAt: item.entity.updatedAt.toISOString(),
+		publishedAt: item.entityVersion.updatedAt.toISOString(),
 	};
 }
 
@@ -69,7 +69,7 @@ export async function getDariahProjects(
 	const [items, aggregate] = await Promise.all([
 		db.query.dariahProjects.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -92,10 +92,12 @@ export async function getDariahProjects(
 				funding: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -150,7 +152,7 @@ export async function getDariahProjects(
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -158,8 +160,8 @@ export async function getDariahProjects(
 		db
 			.select({ total: count() })
 			.from(schema.dariahProjects)
-			.innerJoin(schema.entities, eq(schema.dariahProjects.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.dariahProjects.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(
 				and(
 					eq(schema.entityStatus.type, "published"),
@@ -207,7 +209,7 @@ export async function getDariahProjectById(
 		db.query.dariahProjects.findFirst({
 			where: {
 				id,
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -223,10 +225,12 @@ export async function getDariahProjectById(
 				funding: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -367,7 +371,7 @@ export async function getDariahProjectSlugs(
 	const [items, aggregate] = await Promise.all([
 		db.query.dariahProjects.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -377,15 +381,17 @@ export async function getDariahProjectSlugs(
 				id: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -393,14 +399,14 @@ export async function getDariahProjectSlugs(
 		db
 			.select({ total: count() })
 			.from(schema.dariahProjects)
-			.innerJoin(schema.entities, eq(schema.dariahProjects.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.dariahProjects.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
-	const data = items.map(({ id, entity }) => {
-		return { id, entity: { slug: entity.slug } };
+	const data = items.map(({ id, entityVersion }) => {
+		return { id, entity: { slug: entityVersion.entity.slug } };
 	});
 
 	return { data, limit, offset, total };
@@ -420,10 +426,12 @@ export async function getDariahProjectBySlug(
 
 	const item = await db.query.dariahProjects.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
 				status: {
 					type: "published",
+				},
+				entity: {
+					slug,
 				},
 			},
 		},
@@ -437,10 +445,12 @@ export async function getDariahProjectBySlug(
 			funding: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
-					updatedAt: true,
+			entityVersion: {
+				columns: { updatedAt: true },
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
 				},
 			},
 			image: {

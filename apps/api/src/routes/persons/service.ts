@@ -22,7 +22,7 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 	const [items, aggregate] = await Promise.all([
 		db.query.persons.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -36,10 +36,12 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 				orcid: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -49,7 +51,7 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -57,8 +59,8 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 		db
 			.select({ total: count() })
 			.from(schema.persons)
-			.innerJoin(schema.entities, eq(schema.persons.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
@@ -80,7 +82,7 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 			...item,
 			position: positions.get(item.id) ?? null,
 			image,
-			publishedAt: item.entity.updatedAt.toISOString(),
+			publishedAt: item.entityVersion.updatedAt.toISOString(),
 		};
 	});
 
@@ -100,7 +102,7 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 		db.query.persons.findFirst({
 			where: {
 				id,
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -114,10 +116,12 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 				orcid: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -145,7 +149,7 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 		...item,
 		position: positions.get(item.id) ?? null,
 		image,
-		publishedAt: item.entity.updatedAt.toISOString(),
+		publishedAt: item.entityVersion.updatedAt.toISOString(),
 		...fields,
 	};
 }
@@ -165,7 +169,7 @@ export async function getPersonSlugs(db: Database | Transaction, params: GetPers
 	const [items, aggregate] = await Promise.all([
 		db.query.persons.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -175,15 +179,17 @@ export async function getPersonSlugs(db: Database | Transaction, params: GetPers
 				id: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -191,8 +197,8 @@ export async function getPersonSlugs(db: Database | Transaction, params: GetPers
 		db
 			.select({ total: count() })
 			.from(schema.persons)
-			.innerJoin(schema.entities, eq(schema.persons.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
@@ -214,10 +220,12 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 
 	const item = await db.query.persons.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
 				status: {
 					type: "published",
+				},
+				entity: {
+					slug,
 				},
 			},
 		},
@@ -229,10 +237,12 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 			orcid: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
-					updatedAt: true,
+			entityVersion: {
+				columns: { updatedAt: true },
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
 				},
 			},
 			image: {
@@ -260,7 +270,7 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 		...item,
 		position: positions.get(item.id) ?? null,
 		image,
-		publishedAt: item.entity.updatedAt.toISOString(),
+		publishedAt: item.entityVersion.updatedAt.toISOString(),
 		...fields,
 	};
 }

@@ -32,8 +32,10 @@ export default async function DashboardWebsiteFundingCallsDetailsPage(
 
 	const fundingCall = await db.query.fundingCalls.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
+				entity: {
+					slug,
+				},
 			},
 		},
 		columns: {
@@ -43,12 +45,15 @@ export default async function DashboardWebsiteFundingCallsDetailsPage(
 			summary: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
-				},
+			entityVersion: {
+				columns: { id: true },
 				with: {
+					entity: {
+						columns: {
+							id: true,
+							slug: true,
+						},
+					},
 					status: {
 						columns: {
 							id: true,

@@ -35,7 +35,12 @@ const documentColumns = {
 } as const;
 
 const documentWith = {
-	entity: { columns: { slug: true } },
+	entityVersion: {
+		columns: {},
+		with: {
+			entity: { columns: { slug: true } },
+		},
+	},
 	document: { columns: { key: true, label: true } },
 } as const;
 
@@ -61,18 +66,27 @@ export default async function DashboardWebsiteDocumentsPoliciesPage(
 				url: schema.documentsPolicies.url,
 				groupId: schema.documentsPolicies.groupId,
 				position: schema.documentsPolicies.position,
-				entity: { slug: schema.entities.slug },
+				slug: schema.entities.slug,
 				document: { key: schema.assets.key, label: schema.assets.label },
 			})
 			.from(schema.documentsPolicies)
-			.innerJoin(schema.entities, eq(schema.documentsPolicies.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.documentsPolicies.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.innerJoin(schema.assets, eq(schema.documentsPolicies.documentId, schema.assets.id))
 			.where(isNull(schema.documentsPolicies.groupId))
 			.orderBy(asc(schema.documentsPolicies.position)),
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "documents" }),
 	]);
 
+	const ungroupedShaped = ungrouped.map(({ slug, ...rest }) => {
+		return { ...rest, entityVersion: { entity: { slug } } };
+	});
+
 	return (
-		<DocumentsPoliciesPage groups={groups} initialAssets={initialAssets} ungrouped={ungrouped} />
+		<DocumentsPoliciesPage
+			groups={groups}
+			initialAssets={initialAssets}
+			ungrouped={ungroupedShaped}
+		/>
 	);
 }

@@ -13,6 +13,7 @@ import { UpdateImpactCaseStudyActionInputSchema } from "@/app/(app)/[locale]/(da
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
+import { getDocumentIdForVersion } from "@/lib/data/entity-lifecycle";
 import { syncEntityRelations } from "@/lib/data/relations";
 import { db, type Transaction } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
@@ -51,7 +52,11 @@ export const updateImpactCaseStudyAction = createServerAction(
 		const { contentBlocks, title, id, imageKey, summary, relatedEntityIds, relatedResourceIds } =
 			result.output;
 
+		let documentId: string | null = null;
+
 		await db.transaction(async (tx) => {
+			documentId = await getDocumentIdForVersion(tx, id);
+
 			const asset = await tx.query.assets.findFirst({
 				where: { key: imageKey },
 				columns: { id: true },
@@ -68,7 +73,7 @@ export const updateImpactCaseStudyAction = createServerAction(
 
 			const contentField = await tx.query.fields.findFirst({
 				where: {
-					entityId: id,
+					entityVersionId: id,
 					name: { fieldName: "content" },
 				},
 				columns: { id: true },
@@ -149,11 +154,13 @@ export const updateImpactCaseStudyAction = createServerAction(
 				);
 			}
 
-			await syncEntityRelations(tx, id, relatedEntityIds, relatedResourceIds);
+			await syncEntityRelations(tx, documentId, relatedEntityIds, relatedResourceIds);
 		});
 
 		after(async () => {
-			await syncWebsiteDocumentForEntity(id);
+			if (documentId != null) {
+				await syncWebsiteDocumentForEntity(documentId);
+			}
 			await dispatchWebhook({ type: "impact-case-studies" });
 		});
 

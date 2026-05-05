@@ -16,7 +16,7 @@ interface DocumentOrPolicyEditFormProps {
 		schema.DocumentOrPolicy,
 		"id" | "title" | "summary" | "url" | "groupId"
 	> & {
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { document: { key: string; label: string; url: string } };
 	groups: Array<Pick<schema.DocumentPolicyGroup, "id" | "label">>;
 }

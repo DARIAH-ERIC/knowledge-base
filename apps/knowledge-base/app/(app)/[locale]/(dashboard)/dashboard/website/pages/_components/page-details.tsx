@@ -18,7 +18,7 @@ import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 interface PageItemDetailsProps {
 	contentBlocks: Array<ContentBlock>;
 	pageItem: Pick<schema.Page, "id" | "title" | "summary"> & {
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 }
 
@@ -32,7 +32,7 @@ export function PageItemDetails(props: Readonly<PageItemDetailsProps>): ReactNod
 			<div className="flex justify-end">
 				<Link
 					className={buttonStyles({ intent: "secondary", size: "sm" })}
-					href={`/dashboard/website/pages/${pageItem.entity.slug}/edit`}
+					href={`/dashboard/website/pages/${pageItem.entityVersion.entity.slug}/edit`}
 				>
 					<PencilSquareIcon className="mr-2 size-4" />
 					{t("Edit")}
@@ -43,7 +43,7 @@ export function PageItemDetails(props: Readonly<PageItemDetailsProps>): ReactNod
 				<DescriptionDetails>{pageItem.title}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Slug")}</DescriptionTerm>
-				<DescriptionDetails>{pageItem.entity.slug}</DescriptionDetails>
+				<DescriptionDetails>{pageItem.entityVersion.entity.slug}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Summary")}</DescriptionTerm>
 				<DescriptionDetails>{pageItem.summary}</DescriptionDetails>

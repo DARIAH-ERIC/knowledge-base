@@ -10,7 +10,7 @@ import { createMetadata } from "@/lib/server/create-metadata";
 async function getDocumentationPages() {
 	const pages = await db.query.documentationPages.findMany({
 		where: {
-			entity: {
+			entityVersion: {
 				status: {
 					type: "published",
 				},
@@ -21,9 +21,14 @@ async function getDocumentationPages() {
 			title: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
+			entityVersion: {
+				columns: {},
+				with: {
+					entity: {
+						columns: {
+							slug: true,
+						},
+					},
 				},
 			},
 		},
@@ -67,7 +72,7 @@ export default async function DocumentationPage(
 					{pages.map((page) => {
 						return (
 							<li key={page.id}>
-								<Link href={`/documentation/${page.entity.slug}`}>{page.title}</Link>
+								<Link href={`/documentation/${page.entityVersion.entity.slug}`}>{page.title}</Link>
 							</li>
 						);
 					})}

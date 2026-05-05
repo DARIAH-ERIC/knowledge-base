@@ -10,6 +10,7 @@ import * as v from "valibot";
 
 import { UpdateInstitutionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/update-institution.schema";
 import { assertAdmin } from "@/lib/auth/session";
+import { getDocumentIdForVersion } from "@/lib/data/entity-lifecycle";
 import { syncEntityRelations } from "@/lib/data/relations";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
@@ -55,6 +56,8 @@ export const updateInstitutionAction = createServerAction(
 		} = result.output;
 
 		await db.transaction(async (tx) => {
+			const documentId = await getDocumentIdForVersion(tx, id);
+
 			let imageId: string | null = null;
 
 			if (imageKey != null) {
@@ -75,7 +78,7 @@ export const updateInstitutionAction = createServerAction(
 
 			const descriptionField = await tx.query.fields.findFirst({
 				where: {
-					entityId: id,
+					entityVersionId: id,
 					name: { fieldName: "description" },
 				},
 				columns: { id: true },
@@ -119,7 +122,7 @@ export const updateInstitutionAction = createServerAction(
 				}
 			}
 
-			await syncEntityRelations(tx, id, relatedEntityIds, relatedResourceIds);
+			await syncEntityRelations(tx, documentId, relatedEntityIds, relatedResourceIds);
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/institutions", "layout");

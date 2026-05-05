@@ -13,6 +13,7 @@ import { UpdateDocumentOrPolicyActionInputSchema } from "@/app/(app)/[locale]/(d
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
+import { getDocumentIdForVersion } from "@/lib/data/entity-lifecycle";
 import { db, type Transaction } from "@/lib/db";
 import { eq, inArray, isNull } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -49,7 +50,11 @@ export const updateDocumentOrPolicyAction = createServerAction(
 
 		const { contentBlocks, title, id, documentKey, summary, url, groupId } = result.output;
 
+		let entityDocumentId: string | null = null;
+
 		await db.transaction(async (tx) => {
+			entityDocumentId = await getDocumentIdForVersion(tx, id);
+
 			const asset = await tx.query.assets.findFirst({
 				where: { key: documentKey },
 				columns: { id: true },
@@ -94,7 +99,7 @@ export const updateDocumentOrPolicyAction = createServerAction(
 
 			const contentField = await tx.query.fields.findFirst({
 				where: {
-					entityId: id,
+					entityVersionId: id,
 					name: { fieldName: "content" },
 				},
 				columns: { id: true },
@@ -177,7 +182,9 @@ export const updateDocumentOrPolicyAction = createServerAction(
 		});
 
 		after(async () => {
-			await syncWebsiteDocumentForEntity(id);
+			if (entityDocumentId != null) {
+				await syncWebsiteDocumentForEntity(entityDocumentId);
+			}
 			await dispatchWebhook({ type: "documents-policies" });
 		});
 

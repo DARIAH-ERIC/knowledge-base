@@ -3,7 +3,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 import { assets } from "./assets";
-import { entities } from "./entities";
+import { entityVersions } from "./entities";
 import { articleContributorRolesEnum } from "./impact-case-studies";
 import { persons } from "./persons";
 
@@ -12,7 +12,7 @@ export const spotlightArticles = p.pgTable("spotlight_articles", {
 		.uuid("id")
 		.primaryKey()
 		.references(() => {
-			return entities.id;
+			return entityVersions.id;
 		}),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),

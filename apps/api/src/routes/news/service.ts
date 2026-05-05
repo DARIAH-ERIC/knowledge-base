@@ -22,7 +22,7 @@ export async function getNews(db: Database | Transaction, params: GetNewsParams)
 	const [items, aggregate] = await Promise.all([
 		db.query.news.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -34,10 +34,12 @@ export async function getNews(db: Database | Transaction, params: GetNewsParams)
 				summary: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -47,7 +49,7 @@ export async function getNews(db: Database | Transaction, params: GetNewsParams)
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -55,8 +57,8 @@ export async function getNews(db: Database | Transaction, params: GetNewsParams)
 		db
 			.select({ total: count() })
 			.from(schema.news)
-			.innerJoin(schema.entities, eq(schema.news.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.news.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
@@ -68,7 +70,7 @@ export async function getNews(db: Database | Transaction, params: GetNewsParams)
 			options: { width: imageWidth.preview },
 		});
 
-		return { ...item, image, publishedAt: item.entity.updatedAt.toISOString() };
+		return { ...item, image, publishedAt: item.entityVersion.updatedAt.toISOString() };
 	});
 
 	return { data, limit, offset, total };
@@ -87,7 +89,7 @@ export async function getNewsItemById(db: Database | Transaction, params: GetNew
 		db.query.news.findFirst({
 			where: {
 				id,
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -99,10 +101,12 @@ export async function getNewsItemById(db: Database | Transaction, params: GetNew
 				summary: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -132,7 +136,7 @@ export async function getNewsItemById(db: Database | Transaction, params: GetNew
 	return {
 		...item,
 		image,
-		publishedAt: item.entity.updatedAt.toISOString(),
+		publishedAt: item.entityVersion.updatedAt.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,
@@ -154,7 +158,7 @@ export async function getNewsItemSlugs(db: Database | Transaction, params: GetNe
 	const [items, aggregate] = await Promise.all([
 		db.query.news.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -164,10 +168,12 @@ export async function getNewsItemSlugs(db: Database | Transaction, params: GetNe
 				id: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -177,7 +183,7 @@ export async function getNewsItemSlugs(db: Database | Transaction, params: GetNe
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -185,8 +191,8 @@ export async function getNewsItemSlugs(db: Database | Transaction, params: GetNe
 		db
 			.select({ total: count() })
 			.from(schema.news)
-			.innerJoin(schema.entities, eq(schema.news.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.news.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
@@ -211,10 +217,12 @@ export async function getNewsItemBySlug(
 
 	const item = await db.query.news.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
 				status: {
 					type: "published",
+				},
+				entity: {
+					slug,
 				},
 			},
 		},
@@ -224,10 +232,12 @@ export async function getNewsItemBySlug(
 			summary: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
-					updatedAt: true,
+			entityVersion: {
+				columns: { updatedAt: true },
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
 				},
 			},
 			image: {
@@ -256,7 +266,7 @@ export async function getNewsItemBySlug(
 	return {
 		...item,
 		image,
-		publishedAt: item.entity.updatedAt.toISOString(),
+		publishedAt: item.entityVersion.updatedAt.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,

@@ -34,8 +34,10 @@ export default async function DashboardWebsiteEventDetailsPage(
 
 	const event = await db.query.events.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
+				entity: {
+					slug,
+				},
 			},
 		},
 		columns: {
@@ -47,12 +49,15 @@ export default async function DashboardWebsiteEventDetailsPage(
 			website: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
-				},
+			entityVersion: {
+				columns: { id: true },
 				with: {
+					entity: {
+						columns: {
+							id: true,
+							slug: true,
+						},
+					},
 					status: {
 						columns: {
 							id: true,

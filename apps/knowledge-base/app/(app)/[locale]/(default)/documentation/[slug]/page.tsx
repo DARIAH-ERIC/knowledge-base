@@ -11,8 +11,10 @@ import { createMetadata } from "@/lib/server/create-metadata";
 async function getDocumentationPage(slug: string) {
 	const page = await db.query.documentationPages.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
+				entity: {
+					slug,
+				},
 				status: {
 					type: "published",
 				},
