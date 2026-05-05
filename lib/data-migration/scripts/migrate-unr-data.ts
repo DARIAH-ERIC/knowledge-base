@@ -8,7 +8,7 @@ import { buffer } from "@dariah-eric/storage/lib";
 import slugify from "@sindresorhus/slugify";
 import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
-import { and, eq, ilike } from "drizzle-orm";
+import { and, count, eq, ilike } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 
 import { placeholderImageUrl } from "../config/data-migration.config";
@@ -257,7 +257,7 @@ async function main() {
 			const id = entity.id;
 			let asset;
 
-			if (workingGroup.logo !== null) {
+			if (workingGroup.logo != null) {
 				let key: string;
 				let metadata: AssetMetadata;
 
@@ -314,7 +314,7 @@ async function main() {
 				});
 			}
 
-			if (workingGroup.description === null) {
+			if (workingGroup.description == null) {
 				return;
 			}
 
@@ -356,6 +356,12 @@ async function main() {
 			});
 		});
 	}
+
+	const [workingGroupResult] = await db
+		.select({ count: count() })
+		.from(schema.organisationalUnits)
+		.where(eq(schema.organisationalUnits.typeId, organisationalUnitTypesByType.working_group.id));
+	assert(workingGroupResult?.count === workingGroups.length);
 
 	/**
 	 * ============================================================================================
@@ -412,7 +418,7 @@ async function main() {
 
 			// create an entity for each national consortium
 
-			if (country.marketplaceId !== null) {
+			if (country.marketplaceId != null) {
 				const [consortiumEntitiy] = await tx
 					.insert(schema.entities)
 					.values({
@@ -429,7 +435,7 @@ async function main() {
 				const id = consortiumEntitiy.id;
 				let asset;
 
-				if (country.logo !== null) {
+				if (country.logo != null) {
 					let key: string;
 					let metadata: AssetMetadata;
 
@@ -451,7 +457,7 @@ async function main() {
 					}
 				}
 
-				if (country.description !== null) {
+				if (country.description != null) {
 					const content = generateJSON(country.description, [StarterKit]);
 
 					const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
@@ -545,6 +551,12 @@ async function main() {
 		});
 	}
 
+	const [countryOrgUnitResult] = await db
+		.select({ count: count() })
+		.from(schema.organisationalUnits)
+		.where(eq(schema.organisationalUnits.typeId, organisationalUnitTypesByType.country.id));
+	assert(countryOrgUnitResult?.count === countries.length);
+
 	/**
 	 * ============================================================================================
 	 * Instititutions.
@@ -592,7 +604,7 @@ async function main() {
 
 			assert(umbrellaUnit);
 
-			if (institution.types !== null) {
+			if (institution.types != null) {
 				let institutionTypes = institution.types.filter((type) => {
 					return type !== "other";
 				});
@@ -664,7 +676,7 @@ async function main() {
 				.where(eq(countryToInstitution.b, institution.id))
 				.limit(1);
 
-			if (countryOfInstitution?.countryId === undefined) {
+			if (countryOfInstitution?.countryId == null) {
 				return;
 			}
 
@@ -680,6 +692,12 @@ async function main() {
 			});
 		});
 	}
+
+	const [institutionOrgUnitResult] = await db
+		.select({ count: count() })
+		.from(schema.organisationalUnits)
+		.where(eq(schema.organisationalUnits.typeId, organisationalUnitTypesByType.institution.id));
+	assert(institutionOrgUnitResult?.count === institutions.length);
 
 	/**
 	 * ============================================================================================
@@ -743,7 +761,7 @@ async function main() {
 				.where(eq(unrInstitutionToService.serviceId, service.id))
 				.limit(1);
 
-			if (institutionOfService?.institutionId === undefined) {
+			if (institutionOfService?.institutionId == null) {
 				return;
 			}
 
@@ -769,7 +787,7 @@ async function main() {
 				.where(eq(unrCountryToService.b, service.id))
 				.limit(1);
 
-			if (countryOfService?.countryId === undefined) {
+			if (countryOfService?.countryId == null) {
 				return;
 			}
 
@@ -786,6 +804,9 @@ async function main() {
 			});
 		});
 	}
+
+	const [serviceResult] = await db.select({ count: count() }).from(schema.services);
+	assert(serviceResult?.count === services.length);
 
 	/**
 	 * ============================================================================================
@@ -856,13 +877,13 @@ async function main() {
 
 			unrOutreachIdToSocialMediaId.set(outreachItem.id, kbSocialMedia.id);
 
-			if (outreachItem.countryId === null) {
+			if (outreachItem.countryId == null) {
 				return;
 			}
 
 			const organisationalUnitId = unrCountryIdToOrgUnitId.get(outreachItem.countryId);
 
-			if (organisationalUnitId === undefined) {
+			if (organisationalUnitId == null) {
 				return;
 			}
 
@@ -909,7 +930,7 @@ async function main() {
 				workingGroupOutreachItem.workingGroupId,
 			);
 
-			if (organisationalUnitId === undefined) {
+			if (organisationalUnitId == null) {
 				return;
 			}
 
@@ -972,7 +993,7 @@ async function main() {
 			const id = entity.id;
 			let asset;
 
-			if (person.image !== null) {
+			if (person.image != null) {
 				let key: string;
 				let metadata: AssetMetadata;
 
@@ -1008,7 +1029,7 @@ async function main() {
 				})
 				.returning({ id: schema.persons.id });
 
-			if (person.description === null) {
+			if (person.description == null) {
 				return;
 			}
 
@@ -1082,9 +1103,9 @@ async function main() {
 
 			for (const contributionByPerson of contributionsByPerson) {
 				const { countryId, role, workingGroupId, startDate, endDate } = contributionByPerson;
-				const countryOrgUnitId = countryId !== null ? unrCountryIdToOrgUnitId.get(countryId) : null;
+				const countryOrgUnitId = countryId != null ? unrCountryIdToOrgUnitId.get(countryId) : null;
 				const workingGroupOrgUnitId =
-					workingGroupId !== null ? unrWorkingGroupIdToOrgUnitId.get(workingGroupId) : null;
+					workingGroupId != null ? unrWorkingGroupIdToOrgUnitId.get(workingGroupId) : null;
 				let roleId;
 				let relatedOrgaUnitId;
 
@@ -1199,7 +1220,7 @@ async function main() {
 
 			assert(unrBody);
 
-			if (unrBody.description !== null) {
+			if (unrBody.description != null) {
 				const content = generateJSON(unrBody.description, [StarterKit]);
 
 				const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
@@ -1270,7 +1291,7 @@ async function main() {
 				.values({
 					campaignId,
 					countryId,
-					status: "submitted",
+					status: "accepted",
 					dariahCommissionedEvent: eventReports?.dariahCommissionedEvent,
 					smallEvents: eventReports?.smallMeetings,
 					mediumEvents: eventReports?.mediumMeetings,
@@ -1287,7 +1308,7 @@ async function main() {
 
 			unrReportIdToCountryReportId.set(report.id, countryReportId.id);
 
-			if (report.comments !== null) {
+			if (report.comments != null) {
 				for (const [k, v] of Object.entries(report.comments as ReportComment)) {
 					let screenKey = k;
 					switch (k) {
@@ -1425,7 +1446,7 @@ async function main() {
 					campaignId: reportCampaignId,
 					workingGroupId,
 					numberOfMembers: workingGroupReport.members,
-					status: "submitted",
+					status: "accepted",
 					createdAt: workingGroupReport.createdAt,
 					updatedAt: workingGroupReport.updatedAt,
 				})
@@ -1460,7 +1481,7 @@ async function main() {
 					})
 					.returning({ id: schema.workingGroupReportAnswers.id });
 			}
-			if (workingGroupReport.comments !== null) {
+			if (workingGroupReport.comments != null) {
 				for (const comment of Object.values(workingGroupReport.comments as ReportComment)) {
 					await tx.insert(schema.reportScreenComments).values({
 						comment: generateJSON(String(comment), [StarterKit]),
@@ -1522,7 +1543,7 @@ async function main() {
 					return time != null ? new Date(time) : null;
 				})
 				.filter((d) => {
-					return d !== null;
+					return d != null;
 				});
 
 			const projectMonthsEntries = [
@@ -1556,7 +1577,7 @@ async function main() {
 			const projectMonths = projectMonthsEntries[0] ?? null;
 
 			const endDate =
-				projectMonths !== null
+				projectMonths != null
 					? new Date(
 							new Date(startDate).setUTCMonth(new Date(startDate).getUTCMonth() + projectMonths),
 						)
