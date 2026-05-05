@@ -1,4 +1,6 @@
-import { assert, keyBy, log } from "@acdh-oeaw/lib";
+import { appendFileSync } from "node:fs";
+
+import { assert, groupBy, keyBy, log } from "@acdh-oeaw/lib";
 import { createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { type AssetMetadata, createStorageService } from "@dariah-eric/storage";
@@ -6,7 +8,7 @@ import { buffer } from "@dariah-eric/storage/lib";
 import slugify from "@sindresorhus/slugify";
 import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
-import { eq, ilike } from "drizzle-orm";
+import { and, eq, ilike } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 
 import { placeholderImageUrl } from "../config/data-migration.config";
@@ -17,14 +19,63 @@ import {
 	countries as unrCountries,
 	countryToInstitution,
 	countryToService as unrCountryToService,
+	eventReports as unrEventReports,
 	institutions as unrInstitutions,
 	institutionService as unrInstitutionToService,
 	institutionToPerson as unrInstitutionToPerson,
+	outreach as unrOutreach,
+	outreachKpis as unrOutreachKpis,
+	outreachReports as unrOutreachReports,
+	outreachTypeValues as unrOutreachTypeValues,
 	persons as unrPersons,
+	projects as unrProjects,
+	reportCampaigns as unrReportingCampaigns,
+	reports as unrReports,
 	roles,
+	serviceKpis as unrServiceKpis,
+	serviceReports as unrServiceReports,
 	services as unrServices,
-	workingGroups as unrWorkingGroups,
+	workingGroupOutreach as unrWorkingGroupOutreach,
+	workingGroupReports as unrWorkingGroupReports,
+	workingGroups as unrWorkingGroups
 } from "../unr-schema/schema";
+
+interface CampaignQuestionAnswer {
+	question: string,
+	answer: string
+}
+
+interface CampaignQuestions {
+	items: Array<CampaignQuestionAnswer>
+}
+
+interface ReportComment {
+	comments: string,
+	contributions: string,
+	institutions: string,
+	eventReports: string,
+	outreach: string,
+	projectFundingLeverages: string,
+	publications: string,
+	serviceReports: string,
+	software: string,
+}
+
+type ReportScreenCommentKey = (typeof schema.reportScreenCommentKeyEnum)[number];
+type SocialMediaType = (typeof schema.socialMediaTypesEnum)[number];
+
+const SOCIAL_MEDIA_DOMAINS: Record<SocialMediaType, Array<string>> = {
+	bluesky: ["bsky.app"],
+	twitter: ["twitter.com", "x.com"],
+	facebook: ["facebook.com"],
+	instagram: ["instagram.com"],
+	linkedin: ["linkedin.com"],
+	mastodon: ["mastodon.social"],
+	vimeo: ["vimeo.com"],
+	youtube: ["youtube.com", "youtu.be"],
+	website: [],
+	other: [],
+};
 
 const db = createDatabaseService({
 	connection: {
@@ -47,6 +98,29 @@ const storage = createStorageService({
 		useSSL: env.S3_PROTOCOL === "https",
 	},
 });
+
+const logToFile = (message: string, filepath = 'migration.log') => {
+	const timestamp = new Date().toISOString();
+	const line = `[${timestamp}] ${message}\n`;
+	appendFileSync(filepath, line);
+}
+
+const detectSocialMediaType = (url: string): SocialMediaType => {
+	let hostname;
+	try {
+		hostname = new URL(url).hostname;
+	} catch {
+		hostname = url.toLowerCase();
+	}
+	for (const [type, domains] of Object.entries(SOCIAL_MEDIA_DOMAINS)) {
+		if (domains.some(domain => { return hostname.includes(domain) })) {
+			return type as SocialMediaType;
+		}
+	}
+
+	return "other";
+}
+
 
 const unrDB = drizzle(env.UNR_DATABASE_DIRECT_URL);
 const client = unrDB;
@@ -82,6 +156,16 @@ async function main() {
 		return item.type;
 	});
 
+	const projectScopes = await db.query.projectScopes.findMany();
+	const projectScopesByScope = keyBy(projectScopes, (item) => {
+		return item.scope;
+	});
+
+	const projectRoles = await db.query.projectRoles.findMany();
+	const projectRolesByRole = keyBy(projectRoles, (item) => {
+		return item.role;
+	});
+
 	const entityTypes = await db.query.entityTypes.findMany();
 	const entityTypesByType = keyBy(entityTypes, (item) => {
 		return item.type;
@@ -95,6 +179,11 @@ async function main() {
 	const serviceStatuses = await db.query.serviceStatuses.findMany();
 	const serviceTypes = await db.query.serviceTypes.findMany();
 
+	const socialMediaTypes = await db.query.socialMediaTypes.findMany();
+	const socialMediaTypesByType = keyBy(socialMediaTypes, (item) => {
+		return item.type;
+	});
+
 	const bodies = await db.query.organisationalUnits.findMany({
 		where: {
 			typeId: organisationalUnitTypesByType.governance_body.id,
@@ -104,6 +193,10 @@ async function main() {
 	const unrCountryIdToOrgUnitId = new Map<string, string>();
 	const unrInstitutionIdToOrgUnitId = new Map<string, string>();
 	const unrWorkingGroupIdToOrgUnitId = new Map<string, string>();
+	const unrReportingCampaignIdToReportingCampaignId = new Map<string, string>();
+	const unrReportIdToCountryReportId = new Map<string, string>();
+	const unrServiceIdToServiceId = new Map<string, string>();
+	const unrOutreachIdToSocialMediaId = new Map<string, string>();
 
 	const placeholderInput = await buffer.fromUrl(placeholderImageUrl);
 	const placeholderMetadata = await buffer.getMetadata(placeholderInput);
@@ -503,16 +596,16 @@ async function main() {
 
 				institutionTypes =
 					institutionTypes.includes("partner_institution") &&
-					institutionTypes.some((t) => {
-						return [
-							"national_coordinating_institution",
-							"national_representative_institution",
-							"cooperating_partner",
-						].includes(t);
-					})
+						institutionTypes.some((t) => {
+							return [
+								"national_coordinating_institution",
+								"national_representative_institution",
+								"cooperating_partner",
+							].includes(t);
+						})
 						? institutionTypes.filter((t) => {
-								return t !== "partner_institution";
-							})
+							return t !== "partner_institution";
+						})
 						: institutionTypes;
 
 				for (const type of institutionTypes) {
@@ -635,6 +728,9 @@ async function main() {
 				.returning({ id: schema.services.id });
 
 			assert(kbService);
+
+			unrServiceIdToServiceId.set(service.id, kbService.id);
+
 			const [institutionOfService] = await client
 				.select({
 					institutionId: unrInstitutionToService.institutionId,
@@ -687,6 +783,152 @@ async function main() {
 			});
 		});
 	}
+
+	/**
+ * ============================================================================================
+ * Reporting Campaigns.
+ * ============================================================================================
+ */
+
+	const reportingCampaigns = await client.select().from(unrReportingCampaigns);
+
+	for (const reportingCampaign of reportingCampaigns) {
+
+		await db.transaction(async (tx) => {
+
+			const [kbReportingCampaign] = await tx.insert(schema.reportingCampaigns).values({
+				year: reportingCampaign.year,
+				status: "closed",
+				createdAt: reportingCampaign.createdAt,
+				updatedAt: reportingCampaign.updatedAt
+			}).returning({ id: schema.reportingCampaigns.id });
+
+			assert(kbReportingCampaign);
+
+			unrReportingCampaignIdToReportingCampaignId.set(reportingCampaign.id, kbReportingCampaign.id);
+
+		})
+	}
+
+	/**
+	 * ============================================================================================
+	 * Outreach.
+	 * ============================================================================================
+	 */
+
+	log.info("Migrating outreach...");
+
+	const outreach = await client.select().from(unrOutreach);
+	const outreachTypeValues = await client.select().from(unrOutreachTypeValues);
+	const workingGroupOutreach = await client.select().from(unrWorkingGroupOutreach);
+
+	for (const outreachItem of outreach) {
+		let socialMediaType: SocialMediaType;
+		const socialMediaUrl = outreachItem.url;
+		switch (outreachItem.type) {
+			case "national_website": {
+				socialMediaType = "website" as SocialMediaType;
+				break;
+			}
+			case "national_social_media":
+			case "social_media": {
+				socialMediaType = detectSocialMediaType(socialMediaUrl);
+				break;
+			}
+		}
+
+		await db.transaction(async (tx) => {
+			const [kbSocialMedia] = await tx
+				.insert(schema.socialMedia)
+				.values({
+					name: outreachItem.name,
+					typeId: socialMediaTypesByType[socialMediaType].id,
+					url: outreachItem.url,
+					createdAt: new Date(outreachItem.createdAt),
+					updatedAt: new Date(outreachItem.createdAt),
+				})
+				.returning({ id: schema.socialMedia.id });
+
+			assert(kbSocialMedia);
+
+			unrOutreachIdToSocialMediaId.set(outreachItem.id, kbSocialMedia.id);
+
+			if (outreachItem.countryId === null) { return; }
+
+			const organisationalUnitId = unrCountryIdToOrgUnitId.get(outreachItem.countryId);
+
+			if (organisationalUnitId === undefined) { return; }
+
+			await tx.insert(schema.organisationalUnitsToSocialMedia).values({
+				organisationalUnitId,
+				socialMediaId: kbSocialMedia.id,
+				createdAt: new Date(outreachItem.createdAt),
+				updatedAt: new Date(outreachItem.createdAt),
+			})
+		});
+	}
+
+	for (const workingGroupOutreachItem of workingGroupOutreach) {
+
+		let socialMediaType: SocialMediaType;
+		const socialMediaUrl = workingGroupOutreachItem.url;
+
+		switch (workingGroupOutreachItem.type) {
+			case "social_media": {
+				socialMediaType = detectSocialMediaType(socialMediaUrl);
+				break;
+			}
+			case "website": {
+				socialMediaType = "website"
+			}
+		}
+
+		await db.transaction(async (tx) => {
+			const [kbSocialMedia] = await tx
+				.insert(schema.socialMedia)
+				.values({
+					name: workingGroupOutreachItem.name,
+					typeId: socialMediaTypesByType[socialMediaType].id,
+					url: workingGroupOutreachItem.url,
+					createdAt: new Date(workingGroupOutreachItem.createdAt),
+					updatedAt: new Date(workingGroupOutreachItem.createdAt),
+				})
+				.returning({ id: schema.services.id });
+
+			assert(kbSocialMedia);
+
+			unrOutreachIdToSocialMediaId.set(workingGroupOutreachItem.id, kbSocialMedia.id);
+
+
+			const organisationalUnitId = unrWorkingGroupIdToOrgUnitId.get(workingGroupOutreachItem.workingGroupId);
+
+			if (organisationalUnitId === undefined) { return; }
+
+			await tx.insert(schema.organisationalUnitsToSocialMedia).values({
+				organisationalUnitId,
+				socialMediaId: kbSocialMedia.id,
+				createdAt: new Date(workingGroupOutreachItem.createdAt),
+				updatedAt: new Date(workingGroupOutreachItem.createdAt),
+			})
+		});
+	}
+
+	for (const outreachTypeValue of outreachTypeValues) {
+
+		const campaignId = unrReportingCampaignIdToReportingCampaignId.get(outreachTypeValue.reportCampaignId);
+		assert(campaignId);
+		const category = outreachTypeValue.type === "national_website" ? "website" : "other";
+		const amount = category === "website" ? 5000 : 2000;
+		await db.insert(schema.reportingCampaignSocialMediaAmounts).values({
+			campaignId,
+			category,
+			amount
+		}).onConflictDoNothing({
+			target: [schema.reportingCampaignSocialMediaAmounts.campaignId, schema.reportingCampaignSocialMediaAmounts.category],
+		});
+	}
+
+
 
 	/**
 	 * ============================================================================================
@@ -983,6 +1225,357 @@ async function main() {
 			}
 		});
 	}
+
+
+	/**
+ * ============================================================================================
+ * Reports.
+ * ============================================================================================
+ */
+
+	log.info("Migrating reports...");
+
+
+
+
+	const reports = await client.select().from(unrReports);
+	const outreachKpis = await client.select().from(unrOutreachKpis);
+	const serviceKpis = await client.select().from(unrServiceKpis);
+	const workingGroupReports = await client.select().from(unrWorkingGroupReports);
+
+	for (const report of reports) {
+
+		const campaignId = unrReportingCampaignIdToReportingCampaignId.get(report.reportCampaignId);
+		const countryId = unrCountryIdToOrgUnitId.get(report.countryId);
+		const [eventReports] = await client.select().from(unrEventReports).where(eq(unrEventReports.reportId, report.id));
+
+		assert(campaignId);
+		assert(countryId);
+
+		await db.transaction(async (tx) => {
+			const [countryReportId] = await tx.insert(schema.countryReports).values({
+				campaignId,
+				countryId,
+				status: "submitted",
+				dariahCommissionedEvent: eventReports?.dariahCommissionedEvent,
+				smallEvents: eventReports?.smallMeetings,
+				mediumEvents: eventReports?.mediumMeetings,
+				largeEvents: eventReports?.largeMeetings,
+				veryLargeEvents: eventReports?.veryLargeMeetings,
+				totalContributors: report.contributionsCount,
+				reusableOutcomes: eventReports?.reusableOutcomes,
+				createdAt: report.createdAt,
+				updatedAt: report.updatedAt,
+			}).returning({ id: schema.countryReports.id })
+
+
+			assert(countryReportId);
+
+			unrReportIdToCountryReportId.set(report.id, countryReportId.id);
+
+
+
+			if (report.comments !== null) {
+				for (const [k, v] of Object.entries((report.comments as ReportComment))) {
+
+					let screenKey = k;
+					switch (k) {
+						case "outreach": {
+							screenKey = "social-media";
+							break;
+						}
+						case "contributions": {
+							screenKey = "contributors";
+							break;
+						}
+						case "eventReports": {
+							screenKey = "events";
+							break;
+						}
+						case "serviceReports": {
+							screenKey = "services";
+							break;
+						}
+						case "projectFundingLeverages": {
+							screenKey = "projects";
+						}
+
+					}
+
+					await tx.insert(schema.reportScreenComments).values({
+						comment: generateJSON(String(v), [StarterKit]),
+						reportType: "country",
+						reportId: report.id,
+						screenKey: screenKey as ReportScreenCommentKey,
+						createdAt: report.createdAt,
+						updatedAt: report.updatedAt
+					})
+				}
+			}
+		})
+	}
+
+	for (const serviceKpi of serviceKpis) {
+
+		const [serviceReport] = await client.select().from(unrServiceReports).where(eq(unrServiceReports.id, serviceKpi.serviceReportId));
+		assert(serviceReport);
+		const countryReportId = unrReportIdToCountryReportId.get(serviceReport.reportId);
+		assert(countryReportId);
+		const serviceId = unrServiceIdToServiceId.get(serviceReport.serviceId);
+
+		assert(serviceId);
+
+		await db.transaction(async (tx) => {
+			const [countryReportServiceKpi] = await tx.insert(schema.countryReportServiceKpis).values({
+				serviceId,
+				countryReportId,
+				kpi: serviceKpi.unit,
+				value: serviceKpi.value
+			}).onConflictDoNothing({
+				target: [schema.countryReportServiceKpis.countryReportId, schema.countryReportServiceKpis.serviceId, schema.countryReportServiceKpis.kpi],
+			}).returning({
+				id: schema.countryReportServiceKpis.id
+			});
+			if (!countryReportServiceKpi) {
+				const [service] = await tx.select().from(schema.services).where(eq(schema.services.id, serviceId));
+				assert(service);
+				logToFile(`skipped duplicated entry ${serviceKpi.unit} for service ${service.name}.`);
+			}
+		})
+	}
+
+	for (const outreachKpi of outreachKpis) {
+
+		const [outReachReport] = await client.select().from(unrOutreachReports).where(eq(unrOutreachReports.id, outreachKpi.outreachReportId));
+		assert(outReachReport);
+		const countryReportId = unrReportIdToCountryReportId.get(outReachReport.reportId);
+		assert(countryReportId);
+		const socialMediaId = unrOutreachIdToSocialMediaId.get(outReachReport.outreachId);
+		assert(socialMediaId);
+
+		await db.transaction(async (tx) => {
+			const [countryReportSocialMediaKpi] = await tx.insert(schema.countryReportSocialMediaKpis).values({
+				socialMediaId,
+				countryReportId,
+				kpi: outreachKpi.unit === "mention" ? "mentions" : outreachKpi.unit,
+				value: outreachKpi.value
+			}).onConflictDoNothing({
+				target: [schema.countryReportSocialMediaKpis.countryReportId, schema.countryReportSocialMediaKpis.socialMediaId, schema.countryReportSocialMediaKpis.kpi],
+			}).returning({
+				id: schema.countryReportSocialMediaKpis.id
+			});
+			if (!countryReportSocialMediaKpi) {
+				const [socialMedia] = await tx.select().from(schema.socialMedia).where(eq(schema.socialMedia.id, socialMediaId));
+				assert(socialMedia);
+				logToFile(`skipped duplicated entry ${outreachKpi.unit} for service ${socialMedia.name}.`);
+			}
+		});
+	}
+
+	let i = 0;
+	for (const workingGroupReport of workingGroupReports) {
+
+		const reportCampaignId = unrReportingCampaignIdToReportingCampaignId.get(workingGroupReport.reportCampaignId);
+		const workingGroupId = unrWorkingGroupIdToOrgUnitId.get(workingGroupReport.workingGroupId);
+
+		assert(reportCampaignId);
+		assert(workingGroupId);
+
+		await db.transaction(async (tx) => {
+			const [kbWorkingGroupReport] = await tx.insert(schema.workingGroupReports).values({
+				campaignId: reportCampaignId,
+				workingGroupId,
+				numberOfMembers: workingGroupReport.members,
+				status: "submitted",
+				createdAt: workingGroupReport.createdAt,
+				updatedAt: workingGroupReport.updatedAt,
+			}).returning({ id: schema.workingGroupReports.id });
+
+			assert(kbWorkingGroupReport);
+
+			const campaignQuestions: Array<CampaignQuestionAnswer> = [...(workingGroupReport.narrativeQuestionsList as CampaignQuestions).items, ...(workingGroupReport.facultativeQuestionsList as CampaignQuestions).items];
+
+			for (const { question, answer } of campaignQuestions) {
+				i++;
+				const [wgReportQuestion]: Array<{ id: string }> = await tx.insert(schema.workingGroupReportQuestions).values({
+					campaignId: reportCampaignId,
+					question: generateJSON(question, [StarterKit]),
+					position: i,
+				}).returning({ id: schema.workingGroupReportQuestions.id })
+
+				assert(wgReportQuestion);
+
+				await tx.insert(schema.workingGroupReportAnswers).values({
+					questionId: wgReportQuestion.id,
+					workingGroupReportId: kbWorkingGroupReport.id,
+					answer: generateJSON(answer, [StarterKit]),
+				}).returning({ id: schema.workingGroupReportAnswers.id });
+			}
+			if (workingGroupReport.comments !== null) {
+				for (const comment of Object.values((workingGroupReport.comments as ReportComment))) {
+
+					await tx.insert(schema.reportScreenComments).values({
+						comment: generateJSON(String(comment), [StarterKit]),
+						reportType: "working_group",
+						reportId: workingGroupReport.id,
+						screenKey: "data",
+						createdAt: workingGroupReport.createdAt,
+						updatedAt: workingGroupReport.updatedAt
+					})
+				}
+			}
+		})
+	}
+
+
+	/**
+	 * ============================================================================================
+	 * Projects.
+	 * ============================================================================================
+	 */
+
+	log.info("Migrating projects...");
+
+	const projects = await client.select().from(unrProjects);
+
+	const groupedProjects = groupBy(projects, ({ acronym, name }) => {
+
+		return acronym ?? name;
+	});
+
+	for (const [projectName, projectLeverages] of Object.entries(groupedProjects)) {
+
+		const createdAt = new Date(Date.now());
+
+		await db.transaction(async (tx) => {
+			const [entity] = await tx
+				.insert(schema.entities)
+				.values({
+					slug: slugify(projectName),
+					statusId: statusByType.published.id,
+					typeId: typesByType.projects.id,
+					createdAt,
+					updatedAt: createdAt,
+				})
+				.returning({ id: schema.entities.id });
+
+			assert(entity);
+
+			const id = entity.id;
+
+			const startDates = [...new Set(projectLeverages.map(pL => { return pL.startDate?.getTime() }))].toSorted((dateA = 0, dateB = 0) => {
+				return dateA - dateB;
+			}).map((time) => {
+				return (time != null) ? new Date(time) : null;
+			}).filter(d => { return d !== null })
+
+			const projectMonthsEntries = [...new Set(projectLeverages.map(pL => { return pL.projectMonths }))]
+
+			if (startDates.length > 1) {
+				logToFile(`multiple start dates found for project ${projectName}: ${startDates.map(startDate => { return startDate.toISOString().slice(0, 10) }).join(',')}. Chose ${String(startDates[0]?.toISOString().slice(0, 10))}`);
+			}
+			if (projectMonthsEntries.length > 1) {
+				logToFile(`multiple project months entries found for project ${projectName}: ${projectMonthsEntries.map(pM => { return pM }).join(',')}. Chose ${String(projectMonthsEntries[0])}`);
+			}
+
+			const startDate = startDates[0] ?? new Date(Date.UTC(1900, 0, 1));
+			const projectMonths = projectMonthsEntries[0] ?? null;
+
+			const endDate = projectMonths !== null ? new Date(new Date(startDate).setUTCMonth(new Date(startDate).getUTCMonth() + projectMonths)) : null;
+
+			const projectScopes = [...new Set(projectLeverages.map(pL => { return pL.scope }))];
+
+			const projectScope = projectScopes[0] ?? "national";
+
+
+
+			const [kbProject] = await tx
+				.insert(schema.projects)
+				.values({
+					id,
+					acronym: projectLeverages[0]?.acronym,
+					duration: {
+						start: startDate,
+						end: endDate ?? undefined,
+					},
+					scopeId: projectScopesByScope[projectScope].id,
+					summary: "",
+					name: projectName,
+					createdAt,
+					updatedAt: createdAt
+				})
+				.returning({ id: schema.projects.id, duration: schema.projects.duration });
+
+			assert(kbProject);
+
+			const fundersEntries = projectLeverages.map(pL => { return pL.funders });
+			const funders = [...new Set(fundersEntries.flatMap(s => { return (s != null) ? s.split(";").map(v => { return v.trim() }) : [] }))];
+			funders.filter(f => { return f !== "Unknown" });
+			for (const funder of funders) {
+
+
+				let [fundingUnit] = await tx.select({ id: schema.organisationalUnits.id }).from(schema.organisationalUnits).where(and(eq(schema.organisationalUnits.name, funder), eq(schema.organisationalUnits.typeId, organisationalUnitTypesByType.institution.id)));
+				if (!fundingUnit) {
+					const [fundingUnitEntity] = await tx
+						.insert(schema.entities)
+						.values({
+							slug: slugify(funder),
+							statusId: statusByType.published.id,
+							typeId: typesByType.organisational_units.id,
+							createdAt,
+							updatedAt: createdAt,
+						})
+						.returning({ id: schema.entities.id });
+
+					assert(fundingUnitEntity);
+
+					const fundingUnitEntityId = fundingUnitEntity.id;
+
+					[fundingUnit] = await tx
+						.insert(schema.organisationalUnits)
+						.values({
+							id: fundingUnitEntityId,
+							name: funder,
+							summary: "",
+							typeId: organisationalUnitTypesByType.institution.id,
+							imageId: placeholderAsset.id,
+							createdAt,
+							updatedAt: createdAt,
+						})
+						.returning({ id: schema.organisationalUnits.id });
+				}
+				assert(fundingUnit);
+
+				await tx.insert(schema.projectsToOrganisationalUnits).values({
+					projectId: kbProject.id,
+					unitId: fundingUnit.id,
+					roleId: projectRolesByRole.funder.id,
+					duration: kbProject.duration
+				})
+			}
+			for (const projectLeverage of projectLeverages) {
+
+
+
+				const countryReportId = unrReportIdToCountryReportId.get(projectLeverage.reportId);
+				assert(countryReportId);
+
+				const [countryReportProjectContributionId] = await tx.insert(schema.countryReportProjectContributions).values({
+					projectId: kbProject.id,
+					amountEuros: Number(projectLeverage.amount),
+					countryReportId
+				}).onConflictDoNothing({
+					target: [schema.countryReportProjectContributions.projectId, schema.countryReportProjectContributions.countryReportId],
+				}).returning({
+					id: schema.countryReportProjectContributions.id
+				});
+				if (!countryReportProjectContributionId) {
+					logToFile(`skipped duplicated entry for ${projectName}.`);
+				}
+			}
+		});
+	}
+
 }
 
 main()
