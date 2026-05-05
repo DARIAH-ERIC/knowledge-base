@@ -3,10 +3,10 @@ import { defineConfig } from "oxfmt";
 const config = defineConfig({
 	ignorePatterns: [
 		"pnpm-workspace.yaml",
-		"contents/",
-		"db/migrations/",
-		"e2e/snapshots/",
-		"public/",
+		"apps/*/contents/",
+		"apps/*/e2e/snapshots/",
+		"apps/*/public/",
+		"packages/*/db/migrations/",
 		"turbo/generators/templates/**/*.hbs",
 	],
 	jsdoc: true,
