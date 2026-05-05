@@ -1,8 +1,8 @@
 import { STATUS_CODES } from "node:http";
 
 import type { ValidationTargets } from "hono";
-import { HTTPException } from "hono/http-exception";
 import { validator as openApiValidator } from "hono-openapi";
+import { HTTPException } from "hono/http-exception";
 import * as v from "valibot";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types

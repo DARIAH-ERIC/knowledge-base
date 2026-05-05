@@ -27,7 +27,9 @@ export const subscribeNewsletterAction = createServerAction<
 	const validation = await v.safeParseAsync(
 		SubscribeNewsletterInputSchema,
 		getFormDataValues(formData),
-		{ lang: getIntlLanguage(locale) },
+		{
+			lang: getIntlLanguage(locale),
+		},
 	);
 
 	if (!validation.success) {
@@ -56,7 +58,7 @@ export const subscribeNewsletterAction = createServerAction<
 					});
 				}
 			} catch {
-				/** noop */
+				/** Noop */
 			}
 		}
 

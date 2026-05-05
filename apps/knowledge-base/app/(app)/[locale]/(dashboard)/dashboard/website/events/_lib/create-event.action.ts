@@ -5,9 +5,9 @@ import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import slugify from "@sindresorhus/slugify";
+import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
-import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { CreateEventActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/create-event.schema";
@@ -35,7 +35,9 @@ export const createEventAction = createServerAction(
 		const result = await v.safeParseAsync(
 			CreateEventActionInputSchema,
 			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+			{
+				lang: getIntlLanguage(locale),
+			},
 		);
 
 		if (!result.success) {

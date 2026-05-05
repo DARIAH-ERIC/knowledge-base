@@ -19,9 +19,7 @@ import {
 } from "@/routes/projects/service";
 
 export const router = createRouter()
-	/**
-	 * GET /api/projects
-	 */
+	/** GET /api/projects */
 	.get(
 		"/",
 		describeRoute({
@@ -56,9 +54,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/projects/slugs
-	 */
+	/** GET /api/projects/slugs */
 	.get(
 		"/slugs",
 		describeRoute({
@@ -93,9 +89,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/projects/:id
-	 */
+	/** GET /api/projects/:id */
 	.get(
 		"/:id",
 		describeRoute({
@@ -135,9 +129,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/projects/slugs/:slug
-	 */
+	/** GET /api/projects/slugs/:slug */
 	.get(
 		"/slugs/:slug",
 		describeRoute({

@@ -43,7 +43,9 @@ export const setupTwoFactorAction = createServerAction(
 		const result = await v.safeParseAsync(
 			SetupTwoFactorActionInputSchema,
 			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+			{
+				lang: getIntlLanguage(locale),
+			},
 		);
 
 		if (!result.success) {

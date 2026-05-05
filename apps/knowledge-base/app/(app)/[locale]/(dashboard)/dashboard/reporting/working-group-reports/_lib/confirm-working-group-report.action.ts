@@ -1,8 +1,8 @@
 "use server";
 
 import * as schema from "@dariah-eric/database/schema";
-import { revalidatePath } from "next/cache";
 import { getLocale } from "next-intl/server";
+import { revalidatePath } from "next/cache";
 
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";

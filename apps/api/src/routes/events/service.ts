@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { and, asc, count, desc, eq, type SQL, sql } from "@/services/db/sql";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { EventOrder } from "@/routes/events/schemas";
+import { and, asc, count, desc, eq, type SQL, sql } from "@/services/db/sql";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
@@ -15,9 +15,15 @@ interface GetEventsParams {
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
-	/** ISO date string (YYYY-MM-DD). Only events whose duration overlaps on or after this date are returned. */
+	/**
+	 * ISO date string (YYYY-MM-DD). Only events whose duration overlaps on or after this date are
+	 * returned.
+	 */
 	from?: string;
-	/** ISO date string (YYYY-MM-DD). Only events whose duration overlaps on or before this date are returned. */
+	/**
+	 * ISO date string (YYYY-MM-DD). Only events whose duration overlaps on or before this date are
+	 * returned.
+	 */
 	until?: string;
 	/** Sort order by event start date. Defaults to "asc" when `from` is set, "desc" otherwise. */
 	order?: EventOrder;

@@ -286,8 +286,8 @@ export async function ingestSshocServices(
 				/**
 				 * Preserve locally curated relations for now. The correct fix is to store relation
 				 * provenance, then replace only the SSHOC-managed subset here. That also depends on a
-				 * product decision: are SSHOC service relations exclusively managed upstream, or can
-				 * admins add local owner/provider links that should survive re-ingest?
+				 * product decision: are SSHOC service relations exclusively managed upstream, or can admins
+				 * add local owner/provider links that should survive re-ingest?
 				 */
 				const missingRelations = relations.filter((relation) => {
 					return !existingRelationKeys.has(

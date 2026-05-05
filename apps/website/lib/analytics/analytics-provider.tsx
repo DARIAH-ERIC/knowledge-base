@@ -1,9 +1,9 @@
 "use client";
 
 import { createUrl } from "@acdh-oeaw/lib";
+import { useLocale } from "next-intl";
 import type { NextWebVitalsMetric } from "next/app";
 import { useReportWebVitals } from "next/web-vitals";
-import { useLocale } from "next-intl";
 import { Fragment, type ReactNode, Suspense, useEffect } from "react";
 
 import { env } from "@/config/env.config";
@@ -42,9 +42,7 @@ function PageViewTracker(): ReactNode {
 	return null;
 }
 
-/**
- * Track urls without locale prefix, and separate custom event for locale.
- */
+/** Track urls without locale prefix, and separate custom event for locale. */
 function trackPageView(locale: IntlLocale, url: URL): void {
 	/** @see {@link https://developer.matomo.org/guides/tracking-javascript-guide#custom-variables} */
 	window._paq?.push(["setCustomVariable", 1, "Locale", locale, "page"]);

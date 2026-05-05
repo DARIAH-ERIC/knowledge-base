@@ -32,7 +32,9 @@ export const resetTwoFactorAction = createServerAction(
 		const result = await v.safeParseAsync(
 			ResetTwoFactorActionInputSchema,
 			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+			{
+				lang: getIntlLanguage(locale),
+			},
 		);
 
 		if (!result.success) {

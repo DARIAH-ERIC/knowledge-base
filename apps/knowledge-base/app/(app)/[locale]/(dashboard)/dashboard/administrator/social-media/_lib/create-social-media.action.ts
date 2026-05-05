@@ -4,8 +4,8 @@ import { assert, getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { revalidatePath } from "next/cache";
 import { getExtracted, getLocale } from "next-intl/server";
+import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { CreateSocialMediaActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_lib/create-social-media.schema";
@@ -29,7 +29,9 @@ export const createSocialMediaAction = createServerAction(
 		const result = await v.safeParseAsync(
 			CreateSocialMediaActionInputSchema,
 			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+			{
+				lang: getIntlLanguage(locale),
+			},
 		);
 
 		if (!result.success) {

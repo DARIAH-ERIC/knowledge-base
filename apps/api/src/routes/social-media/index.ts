@@ -9,9 +9,7 @@ import { GetSocialMediaById, GetSocialMediaList } from "@/routes/social-media/sc
 import { getSocialMediaById, getSocialMediaList } from "@/routes/social-media/service";
 
 export const router = createRouter()
-	/**
-	 * GET /api/social-media
-	 */
+	/** GET /api/social-media */
 	.get(
 		"/",
 		describeRoute({
@@ -46,9 +44,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/social-media/:id
-	 */
+	/** GET /api/social-media/:id */
 	.get(
 		"/:id",
 		describeRoute({

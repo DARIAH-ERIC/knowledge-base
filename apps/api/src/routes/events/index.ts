@@ -9,9 +9,7 @@ import { GetEventById, GetEventBySlug, GetEvents, GetEventSlugs } from "@/routes
 import { getEventById, getEventBySlug, getEvents, getEventSlugs } from "@/routes/events/service";
 
 export const router = createRouter()
-	/**
-	 * GET /api/events
-	 */
+	/** GET /api/events */
 	.get(
 		"/",
 		describeRoute({
@@ -46,9 +44,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/events/slugs
-	 */
+	/** GET /api/events/slugs */
 	.get(
 		"/slugs",
 		describeRoute({
@@ -83,9 +79,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/events/:id
-	 */
+	/** GET /api/events/:id */
 	.get(
 		"/:id",
 		describeRoute({
@@ -125,9 +119,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/events/slugs/:slug
-	 */
+	/** GET /api/events/slugs/:slug */
 	.get(
 		"/slugs/:slug",
 		describeRoute({

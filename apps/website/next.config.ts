@@ -3,8 +3,8 @@ import type { NextConfig as Config } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 /**
- * File extensions and import attributes are necessary for node.js native typescript resolution
- * with `--experimental-next-config-strip-types` next.js cli option.
+ * File extensions and import attributes are necessary for node.js native typescript resolution with
+ * `--experimental-next-config-strip-types` next.js cli option.
  */
 import { env } from "./config/env.config.ts";
 
@@ -76,9 +76,7 @@ const plugins: Array<(config: Config) => Config> = [
 			org: env.NEXT_PUBLIC_WEBSITE_SENTRY_ORG,
 			project: env.NEXT_PUBLIC_WEBSITE_SENTRY_PROJECT,
 			silent: env.CI !== true,
-			/**
-			 * Route browser requests to `sentry` through a `next.js` rewrite to circumvent ad-blockers.
-			 */
+			/** Route browser requests to `sentry` through a `next.js` rewrite to circumvent ad-blockers. */
 			tunnelRoute: "/monitoring",
 			webpack: {
 				reactComponentAnnotation: {

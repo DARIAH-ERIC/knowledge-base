@@ -1,6 +1,6 @@
 import type { Metadata, ResolvingMetadata } from "next";
-import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
+import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { EventDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details";

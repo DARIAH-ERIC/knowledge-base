@@ -19,9 +19,7 @@ import {
 } from "@/routes/working-groups/service";
 
 export const router = createRouter()
-	/**
-	 * GET /api/working-groups
-	 */
+	/** GET /api/working-groups */
 	.get(
 		"/",
 		describeRoute({
@@ -56,9 +54,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/working-groups/slugs
-	 */
+	/** GET /api/working-groups/slugs */
 	.get(
 		"/slugs",
 		describeRoute({
@@ -93,9 +89,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/working-groups/:id
-	 */
+	/** GET /api/working-groups/:id */
 	.get(
 		"/:id",
 		describeRoute({
@@ -135,9 +129,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/working-groups/slugs/:slug
-	 */
+	/** GET /api/working-groups/slugs/:slug */
 	.get(
 		"/slugs/:slug",
 		describeRoute({

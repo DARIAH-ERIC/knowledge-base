@@ -7,9 +7,9 @@ import { createSshocClient } from "@dariah-eric/client-sshoc";
 import { createZoteroClient } from "@dariah-eric/client-zotero";
 import { createDatabaseService } from "@dariah-eric/database";
 import { createSearchService } from "@dariah-eric/search";
-import { createSearchAdminService } from "@dariah-eric/search/admin";
 import { createSearchResourcesService } from "@dariah-eric/search-resources";
 import { createWebsiteSearchIndexService } from "@dariah-eric/search-website";
+import { createSearchAdminService } from "@dariah-eric/search/admin";
 
 import { env } from "../config/env.config.ts";
 import { createCacheService } from "../lib/cache/index.ts";

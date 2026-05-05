@@ -22,7 +22,7 @@ interface SeedManifest {
 export interface SeedConfig {
 	/** @default "2025-01-01" */
 	defaultRefDate?: Date;
-	/** default 42 */
+	/** Default 42 */
 	seed?: number;
 	seedManifest?: SeedManifest;
 }

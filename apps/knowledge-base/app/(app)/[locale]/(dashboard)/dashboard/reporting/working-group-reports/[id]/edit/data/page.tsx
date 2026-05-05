@@ -4,8 +4,8 @@ import { Label } from "@dariah-eric/ui/field";
 import { Input } from "@dariah-eric/ui/input";
 import { TextField } from "@dariah-eric/ui/text-field";
 import type { Metadata, ResolvingMetadata } from "next";
-import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
+import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";

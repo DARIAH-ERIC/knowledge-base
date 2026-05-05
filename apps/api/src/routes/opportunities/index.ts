@@ -19,9 +19,7 @@ import {
 } from "@/routes/opportunities/service";
 
 export const router = createRouter()
-	/**
-	 * GET /api/opportunities
-	 */
+	/** GET /api/opportunities */
 	.get(
 		"/",
 		describeRoute({
@@ -56,9 +54,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/opportunities/slugs
-	 */
+	/** GET /api/opportunities/slugs */
 	.get(
 		"/slugs",
 		describeRoute({
@@ -93,9 +89,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/opportunities/:id
-	 */
+	/** GET /api/opportunities/:id */
 	.get(
 		"/:id",
 		describeRoute({
@@ -135,9 +129,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/opportunities/slugs/:slug
-	 */
+	/** GET /api/opportunities/slugs/:slug */
 	.get(
 		"/slugs/:slug",
 		describeRoute({

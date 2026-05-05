@@ -4,8 +4,8 @@ import { assert, getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { revalidatePath } from "next/cache";
 import { getExtracted, getLocale } from "next-intl/server";
+import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { UpdateGovernanceBodyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/update-governance-body.schema";
@@ -31,7 +31,9 @@ export const updateGovernanceBodyAction = createServerAction(
 		const result = await v.safeParseAsync(
 			UpdateGovernanceBodyActionInputSchema,
 			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+			{
+				lang: getIntlLanguage(locale),
+			},
 		);
 
 		if (!result.success) {

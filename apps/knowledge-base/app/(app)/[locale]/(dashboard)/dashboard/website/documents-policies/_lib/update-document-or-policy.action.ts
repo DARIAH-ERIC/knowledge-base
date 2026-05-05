@@ -4,9 +4,9 @@ import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
+import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
-import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { UpdateDocumentOrPolicyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy.schema";
@@ -35,7 +35,9 @@ export const updateDocumentOrPolicyAction = createServerAction(
 		const result = await v.safeParseAsync(
 			UpdateDocumentOrPolicyActionInputSchema,
 			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+			{
+				lang: getIntlLanguage(locale),
+			},
 		);
 
 		if (!result.success) {

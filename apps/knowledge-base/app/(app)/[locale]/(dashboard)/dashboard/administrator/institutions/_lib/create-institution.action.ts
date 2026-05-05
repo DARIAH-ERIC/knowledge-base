@@ -5,8 +5,8 @@ import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import slugify from "@sindresorhus/slugify";
-import { revalidatePath } from "next/cache";
 import { getExtracted, getLocale } from "next-intl/server";
+import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { CreateInstitutionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/create-institution.schema";
@@ -30,7 +30,9 @@ export const createInstitutionAction = createServerAction(
 		const result = await v.safeParseAsync(
 			CreateInstitutionActionInputSchema,
 			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+			{
+				lang: getIntlLanguage(locale),
+			},
 		);
 
 		if (!result.success) {

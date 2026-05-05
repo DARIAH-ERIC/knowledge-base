@@ -15,8 +15,8 @@ export const middleware: Middleware = function middleware(request, response) {
 		}
 
 		/**
-		 * 'next-intl` v4 adds an `x-default` alternate link for all routes,
-		 * which we don't want, since we only redirect on "/".
+		 * 'next-intl` v4 adds an `x-default` alternate link for all routes, which we don't want, since
+		 * we only redirect on "/".
 		 *
 		 * @see {@link https://next-intl.dev/docs/routing/configuration#alternate-links}
 		 */

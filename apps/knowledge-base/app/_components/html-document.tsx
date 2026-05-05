@@ -26,9 +26,7 @@ export function HtmlDocument(props: Readonly<HtmlDocumentProps>): ReactNode {
 			)}
 			dir={isRTL(locale) ? "rtl" : "ltr"}
 			lang={locale}
-			/**
-			 * Suppressing hydration warning because we add `data-ui-color-scheme` before first paint.
-			 */
+			/** Suppressing hydration warning because we add `data-ui-color-scheme` before first paint. */
 			suppressHydrationWarning={true}
 		>
 			<head>

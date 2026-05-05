@@ -3,7 +3,8 @@ import { request, type RequestResult } from "@dariah-eric/request";
 import type { RequestError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
 
-/** CSL item types returned by Zotero's `format=csljson` responses.
+/**
+ * CSL item types returned by Zotero's `format=csljson` responses.
  *
  * @see {@link https://www.zotero.org/support/dev/citation_styles/csl_0.8.1_syntax}
  */
@@ -182,7 +183,8 @@ export interface CreateZoteroClientParams {
 
 const pageSize = 100;
 
-/** Zotero item types used by the API `itemType` filter.
+/**
+ * Zotero item types used by the API `itemType` filter.
  *
  * @see {@link https://www.zotero.org/support/dev/web_api/v3/types_and_fields}
  * @see {@link https://api.zotero.org/itemTypes}

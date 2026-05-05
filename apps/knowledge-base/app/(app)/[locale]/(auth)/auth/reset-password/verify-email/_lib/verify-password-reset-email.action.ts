@@ -36,7 +36,9 @@ export const verifyPasswordResetEmailAction = createServerAction(
 		const result = await v.safeParseAsync(
 			VerifyPasswordResetEmailActionInputSchema,
 			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+			{
+				lang: getIntlLanguage(locale),
+			},
 		);
 
 		if (!result.success) {

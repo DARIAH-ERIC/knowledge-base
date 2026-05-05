@@ -328,10 +328,9 @@ function extractAccordionItems(html: string): Array<{ title: string; bodyHtml: s
 }
 
 /**
- * Parses WordPress HTML into content blocks, handling inline images (uploaded as
- * assets and stored as image content blocks), iframe embeds, and Easy Accordion
- * widgets. Text segments between specials become rich_text blocks. Blocks are
- * inserted in order into the given field.
+ * Parses WordPress HTML into content blocks, handling inline images (uploaded as assets and stored
+ * as image content blocks), iframe embeds, and Easy Accordion widgets. Text segments between
+ * specials become rich_text blocks. Blocks are inserted in order into the given field.
  */
 async function migrateHtmlContent(
 	tx: Transaction,

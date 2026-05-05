@@ -1,8 +1,8 @@
 import { createUrl } from "@acdh-oeaw/lib";
 import { ToastRegion } from "@dariah-eric/ui/toast";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { getExtracted, getLocale } from "next-intl/server";
+import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { jsonLdScriptProps } from "react-schemaorg";
 import type { WebSite, WithContext } from "schema-dts";
@@ -96,9 +96,8 @@ export default async function LocaleLayout(props: Readonly<LocaleLayoutProps>): 
 				<Providers
 					locale={locale}
 					/**
-					 * By default, all messages are made available client-side.
-					 * When explicitly passing messages, make sure to at least provide messages
-					 * for the error page.
+					 * By default, all messages are made available client-side. When explicitly passing
+					 * messages, make sure to at least provide messages for the error page.
 					 */
 					// messages={pick(await getMessages(), "ErrorPage")}
 				>

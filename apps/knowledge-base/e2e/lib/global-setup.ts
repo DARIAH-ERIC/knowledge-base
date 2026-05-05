@@ -65,9 +65,8 @@ export default async function globalSetup(): Promise<void> {
 
 	try {
 		/**
-		 * Upsert test admin user.
-		 * The `passwordHash` is a placeholder — we bypass password auth in e2etests by injecting a
-		 * pre-authenticated session directly into the database.
+		 * Upsert test admin user. The `passwordHash` is a placeholder — we bypass password auth in
+		 * e2etests by injecting a pre-authenticated session directly into the database.
 		 */
 		const passwordHash = `e2e-placeholder-${randomBytes(16).toString("hex")}`;
 		const twoFactorTotpKey = encrypt(randomBytes(20), encryptionKey);

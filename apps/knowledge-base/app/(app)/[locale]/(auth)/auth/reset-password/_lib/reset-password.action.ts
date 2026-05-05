@@ -37,7 +37,9 @@ export const resetPasswordAction = createServerAction(
 		const result = await v.safeParseAsync(
 			ResetPasswordActionInputSchema,
 			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+			{
+				lang: getIntlLanguage(locale),
+			},
 		);
 
 		if (!result.success) {

@@ -19,9 +19,7 @@ import {
 } from "@/routes/impact-case-studies/service";
 
 export const router = createRouter()
-	/**
-	 * GET /api/impact-case-studies
-	 */
+	/** GET /api/impact-case-studies */
 	.get(
 		"/",
 		describeRoute({
@@ -56,9 +54,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/impact-case-studies/slugs
-	 */
+	/** GET /api/impact-case-studies/slugs */
 	.get(
 		"/slugs",
 		describeRoute({
@@ -93,9 +89,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/impact-case-studies/:id
-	 */
+	/** GET /api/impact-case-studies/:id */
 	.get(
 		"/:id",
 		describeRoute({
@@ -135,9 +129,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/impact-case-studies/slugs/:slug
-	 */
+	/** GET /api/impact-case-studies/slugs/:slug */
 	.get(
 		"/slugs/:slug",
 		describeRoute({

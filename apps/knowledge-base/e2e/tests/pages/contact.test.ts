@@ -64,8 +64,8 @@ test.describe("contact page", () => {
 		}, "Email service disabled.");
 
 		/**
-		 * Run sequentially. Also requires setting `workers: 1` in `playwright.config.ts` to
-		 * avoid running test-suites concurrently.
+		 * Run sequentially. Also requires setting `workers: 1` in `playwright.config.ts` to avoid
+		 * running test-suites concurrently.
 		 */
 		test.describe.configure({ mode: "default" });
 
@@ -103,7 +103,9 @@ test.describe("contact page", () => {
 			await expect(contactPage.page.getByRole("main").getByRole("alert")).toBeEmpty();
 			await expect(contactPage.page.getByRole("main").getByRole("status")).toContainText(
 				"Successfully sent message.",
-				{ timeout: statusTimeoutMs },
+				{
+					timeout: statusTimeoutMs,
+				},
 			);
 
 			await expect
@@ -164,7 +166,9 @@ test.describe("contact page", () => {
 				await expect(contactPage.page.getByRole("main").getByRole("status")).toBeEmpty();
 				await expect(contactPage.page.getByRole("main").getByRole("alert")).toContainText(
 					"Failed to send message.",
-					{ timeout: statusTimeoutMs },
+					{
+						timeout: statusTimeoutMs,
+					},
 				);
 
 				const data = await emailService.getMessages();

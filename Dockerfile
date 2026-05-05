@@ -7,7 +7,6 @@ FROM node:24-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 ENV CI=true
-ENV SKIP_INSTALL_SIMPLE_GIT_HOOKS=1
 RUN corepack enable
 RUN pnpm add --global turbo
 

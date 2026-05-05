@@ -2,8 +2,8 @@ import { Button } from "@dariah-eric/ui/button";
 import { ButtonLink } from "@dariah-eric/ui/button-link";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import type { Metadata, ResolvingMetadata } from "next";
-import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
+import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";

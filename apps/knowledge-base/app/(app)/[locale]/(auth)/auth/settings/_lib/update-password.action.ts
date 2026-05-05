@@ -36,7 +36,9 @@ export const updatePasswordAction = createServerAction(
 		const result = await v.safeParseAsync(
 			UpdatePasswordActionInputSchema,
 			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+			{
+				lang: getIntlLanguage(locale),
+			},
 		);
 
 		if (!result.success) {

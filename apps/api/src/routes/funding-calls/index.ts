@@ -19,9 +19,7 @@ import {
 } from "@/routes/funding-calls/service";
 
 export const router = createRouter()
-	/**
-	 * GET /api/funding-calls
-	 */
+	/** GET /api/funding-calls */
 	.get(
 		"/",
 		describeRoute({
@@ -56,9 +54,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/funding-calls/slugs
-	 */
+	/** GET /api/funding-calls/slugs */
 	.get(
 		"/slugs",
 		describeRoute({
@@ -93,9 +89,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/funding-calls/:id
-	 */
+	/** GET /api/funding-calls/:id */
 	.get(
 		"/:id",
 		describeRoute({
@@ -135,9 +129,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/funding-calls/slugs/:slug
-	 */
+	/** GET /api/funding-calls/slugs/:slug */
 	.get(
 		"/slugs/:slug",
 		describeRoute({

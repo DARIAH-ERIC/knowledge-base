@@ -2,10 +2,13 @@
 	"name": "@dariah-eric/ui",
 	"private": true,
 	"license": "MIT",
+	"files": [
+		"./dist/",
+		"./messages/",
+		"./styles/"
+	],
 	"type": "module",
-	"engines": {
-		"node": "24.x"
-	},
+	"sideEffects": false,
 	"exports": {
 		"./avatar": "./dist/avatar.mjs",
 		"./badge": "./dist/badge.mjs",
@@ -69,23 +72,17 @@
 		"./i18n/en": "./messages/en.json",
 		"./styles": "./styles/index.css"
 	},
-	"files": [
-		"./dist/",
-		"./messages/",
-		"./styles/"
-	],
-	"sideEffects": false,
 	"scripts": {
 		"build": "tsdown",
 		"dev": "tsdown --watch",
-		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
-		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
+		"format:check": "oxfmt --check",
+		"format:fix": "oxfmt --write",
 		"i18n:convert-messages": "tsx ./scripts/i18n/convert-messages.ts",
 		"i18n:extract-messages": "tsx ./scripts/i18n/extract-messages.ts",
 		"lint:check": "run-p --continue-on-error \"lint:*:check\"",
-		"lint:fix": "run-p --continue-on-error \"lint:*:fix\"",
 		"lint:code:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:code:fix": "eslint . --flag unstable_native_nodejs_ts_config --fix",
+		"lint:fix": "run-p --continue-on-error \"lint:*:fix\"",
 		"lint:styles:check": "stylelint \"./styles/**/*.css\" --cache --ignore-path ./../../.gitignore",
 		"lint:styles:fix": "stylelint \"./styles/**/*.css\" --cache --ignore-path ./../../.gitignore --fix",
 		"storybook:build": "storybook build",
@@ -120,9 +117,6 @@
 		"tailwind-merge": "catalog:",
 		"tailwind-variants": "catalog:"
 	},
-	"peerDependencies": {
-		"@dariah-eric/next-lib": "workspace:^"
-	},
 	"devDependencies": {
 		"@acdh-oeaw/stylelint-config": "catalog:",
 		"@chromatic-com/storybook": "catalog:",
@@ -146,7 +140,6 @@
 		"npm-run-all2": "catalog:",
 		"playwright": "catalog:",
 		"po-parser": "catalog:",
-		"prettier": "catalog:",
 		"storybook": "catalog:",
 		"storybook-next-intl": "catalog:",
 		"stylelint": "catalog:",
@@ -160,32 +153,18 @@
 		"vite-tsconfig-paths": "catalog:",
 		"vitest": "catalog:"
 	},
-	"browserslist": {
-		"development": [
-			"baseline newly available"
-		],
-		"production": [
-			"baseline widely available"
-		]
+	"peerDependencies": {
+		"@dariah-eric/next-lib": "workspace:^"
 	},
-	"lint-staged": {
-		"*.@(js|ts|tsx)": [
-			"eslint --fix --flag unstable_native_nodejs_ts_config",
-			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write"
-		],
-		"*.@(css)": [
-			"stylelint --cache --fix",
-			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write"
-		],
-		"*.!(css|js|ts|tsx)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
+	"stylelint": {
+		"extends": "@acdh-oeaw/stylelint-config"
+	},
+	"engines": {
+		"node": "24.x"
 	},
 	"postcss": {
 		"plugins": {
 			"@tailwindcss/postcss": {}
 		}
-	},
-	"prettier": "@dariah-eric/configs/prettier",
-	"stylelint": {
-		"extends": "@acdh-oeaw/stylelint-config"
 	}
 }

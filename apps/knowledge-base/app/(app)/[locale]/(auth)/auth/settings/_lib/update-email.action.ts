@@ -37,7 +37,9 @@ export const updateEmailAction = createServerAction(
 		const result = await v.safeParseAsync(
 			UpdateEmailActionInputSchema,
 			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+			{
+				lang: getIntlLanguage(locale),
+			},
 		);
 
 		if (!result.success) {

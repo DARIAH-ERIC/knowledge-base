@@ -25,7 +25,9 @@ export const sendContactFormEmailAction = createServerAction<
 	const validation = await v.safeParseAsync(
 		SendContactFormInputSchema,
 		getFormDataValues(formData),
-		{ lang: getIntlLanguage(locale) },
+		{
+			lang: getIntlLanguage(locale),
+		},
 	);
 
 	if (!validation.success) {

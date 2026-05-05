@@ -332,8 +332,8 @@ function EmbedNodeView({
 }
 
 /**
- * Block-level embed node (YouTube, iframes). Stores url/title/caption and
- * renders an inline editing UI via a React NodeView.
+ * Block-level embed node (YouTube, iframes). Stores url/title/caption and renders an inline editing
+ * UI via a React NodeView.
  */
 export const EmbedNode = Node.create({
 	name: "embedBlock",

@@ -1,8 +1,8 @@
 "use server";
 
 import { createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { revalidatePath } from "next/cache";
 import { getExtracted } from "next-intl/server";
+import { revalidatePath } from "next/cache";
 
 import { syncWebsiteSearchIndex } from "@/lib/admin-tasks/sync-website-search-index";
 import { assertAdmin } from "@/lib/auth/session";

@@ -1,6 +1,6 @@
 import type { Metadata, ResolvingMetadata } from "next";
-import { forbidden, notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
+import { forbidden, notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { UserEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-edit-form";

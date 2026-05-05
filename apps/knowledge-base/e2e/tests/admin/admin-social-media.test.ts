@@ -4,8 +4,8 @@ import { expect, test } from "@/e2e/lib/test";
 
 test.describe("social media admin", () => {
 	/**
-	 * Run sequentially. Also requires setting `workers: 1` in `playwright.config.ts` to
-	 * avoid running test-suites concurrently.
+	 * Run sequentially. Also requires setting `workers: 1` in `playwright.config.ts` to avoid running
+	 * test-suites concurrently.
 	 */
 	test.describe.configure({ mode: "default" });
 

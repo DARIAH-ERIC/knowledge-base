@@ -8,9 +8,7 @@ import { GetNewsletters } from "@/routes/newsletters/schemas";
 import { getNewsletters } from "@/routes/newsletters/service";
 
 export const router = createRouter()
-	/**
-	 * GET /api/newsletters
-	 */
+	/** GET /api/newsletters */
 	.get(
 		"/",
 		describeRoute({

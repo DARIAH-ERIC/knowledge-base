@@ -3,8 +3,8 @@
 import { getFormDataValues } from "@acdh-oeaw/lib";
 import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { headers } from "next/headers";
 import { getExtracted, getLocale } from "next-intl/server";
+import { headers } from "next/headers";
 import * as v from "valibot";
 
 import { ForgotPasswordActionInputSchema } from "@/app/(app)/[locale]/(auth)/auth/forgot-password/_lib/forgot-password.schema";
@@ -30,7 +30,9 @@ export const forgotPasswordAction = createServerAction(
 		const result = await v.safeParseAsync(
 			ForgotPasswordActionInputSchema,
 			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+			{
+				lang: getIntlLanguage(locale),
+			},
 		);
 
 		if (!result.success) {

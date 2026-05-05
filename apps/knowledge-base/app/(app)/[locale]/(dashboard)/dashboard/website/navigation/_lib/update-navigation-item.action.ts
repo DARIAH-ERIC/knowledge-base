@@ -7,9 +7,9 @@ import {
 	createActionStateSuccess,
 	type ValidationErrors,
 } from "@dariah-eric/next-lib/actions";
+import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
-import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { UpdateNavigationItemActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/update-navigation-item.schema";
@@ -30,7 +30,9 @@ export const updateNavigationItemAction = createServerAction(
 		const result = await v.safeParseAsync(
 			UpdateNavigationItemActionInputSchema,
 			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+			{
+				lang: getIntlLanguage(locale),
+			},
 		);
 
 		if (!result.success) {

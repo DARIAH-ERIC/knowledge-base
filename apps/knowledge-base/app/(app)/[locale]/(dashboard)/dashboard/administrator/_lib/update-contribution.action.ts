@@ -8,8 +8,8 @@ import {
 	type ValidationErrors,
 } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { revalidatePath } from "next/cache";
 import { getExtracted, getLocale } from "next-intl/server";
+import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { UpdateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.schema";
@@ -33,7 +33,9 @@ export const updateContributionAction = createServerAction(
 		const result = await v.safeParseAsync(
 			UpdateContributionActionInputSchema,
 			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+			{
+				lang: getIntlLanguage(locale),
+			},
 		);
 
 		if (!result.success) {

@@ -10,8 +10,8 @@ export function ColorSchemeProvider(props: Readonly<ColorSchemeProviderProps>): 
 	const { children } = props;
 
 	/**
-	 * Re-apply the data attribute to the `html` element when the root layout re-mounts,
-	 * e.g. on locale change.
+	 * Re-apply the data attribute to the `html` element when the root layout re-mounts, e.g. on
+	 * locale change.
 	 */
 	useLayoutEffect(() => {
 		/**

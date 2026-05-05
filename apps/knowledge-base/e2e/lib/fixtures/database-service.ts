@@ -14,9 +14,9 @@ type Database = InferOk<ReturnType<typeof createDatabaseService>>;
 /**
  * Worker-scoped service that provides DB access and test-data helpers.
  *
- * Each test worker gets its own `DatabaseService` instance (and therefore its
- * own pg pool). Workers inherit env vars from the main Playwright process
- * (which called dotenvx in playwright.config.ts).
+ * Each test worker gets its own `DatabaseService` instance (and therefore its own pg pool). Workers
+ * inherit env vars from the main Playwright process (which called dotenvx in
+ * playwright.config.ts).
  */
 export class DatabaseService {
 	private readonly db: Database;
@@ -51,8 +51,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Returns the first entity from the database, formatted as it appears in the
-	 * "Related entities" MultipleSelect (`type / slug`). Used as a test relation target.
+	 * Returns the first entity from the database, formatted as it appears in the "Related entities"
+	 * MultipleSelect (`type / slug`). Used as a test relation target.
 	 */
 	async getTestEntity(): Promise<{ id: string; name: string }> {
 		const entity = await this.db.query.entities.findFirst({
@@ -138,8 +138,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Cascade-deletes a project and all its related records.
-	 * Replicates the logic in `delete-project.action.ts`.
+	 * Cascade-deletes a project and all its related records. Replicates the logic in
+	 * `delete-project.action.ts`.
 	 */
 	async deleteProject(entityId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
@@ -193,8 +193,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Finds all projects whose name starts with `[e2e-worker-{workerIndex}]`
-	 * and deletes them. Called in afterAll to ensure a clean state.
+	 * Finds all projects whose name starts with `[e2e-worker-{workerIndex}]` and deletes them. Called
+	 * in afterAll to ensure a clean state.
 	 */
 	async cleanupWorkerProjects(workerIndex: number): Promise<void> {
 		const prefix = `[e2e-worker-${String(workerIndex)}]`;
@@ -210,8 +210,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Cascade-deletes a page item and all its related records.
-	 * Replicates the logic in `delete-page-item.action.ts`.
+	 * Cascade-deletes a page item and all its related records. Replicates the logic in
+	 * `delete-page-item.action.ts`.
 	 */
 	async deletePageItem(entityId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
@@ -250,8 +250,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Finds all pages whose title starts with `[e2e-worker-{workerIndex}]`
-	 * and deletes them. Called in afterAll to ensure a clean state.
+	 * Finds all pages whose title starts with `[e2e-worker-{workerIndex}]` and deletes them. Called
+	 * in afterAll to ensure a clean state.
 	 */
 	async cleanupWorkerPageItems(workerIndex: number): Promise<void> {
 		const prefix = `[e2e-worker-${String(workerIndex)}]`;
@@ -267,8 +267,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Cascade-deletes an impact case study and all its related records.
-	 * Replicates the logic in `delete-impact-case-study.action.ts`.
+	 * Cascade-deletes an impact case study and all its related records. Replicates the logic in
+	 * `delete-impact-case-study.action.ts`.
 	 */
 	async deleteImpactCaseStudy(entityId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
@@ -312,8 +312,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Finds all impact case studies whose title starts with `[e2e-worker-{workerIndex}]`
-	 * and deletes them. Called in afterAll to ensure a clean state.
+	 * Finds all impact case studies whose title starts with `[e2e-worker-{workerIndex}]` and deletes
+	 * them. Called in afterAll to ensure a clean state.
 	 */
 	async cleanupWorkerImpactCaseStudies(workerIndex: number): Promise<void> {
 		const prefix = `[e2e-worker-${String(workerIndex)}]`;
@@ -329,8 +329,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Cascade-deletes a spotlight article and all its related records.
-	 * Replicates the logic in `delete-spotlight-article.action.ts`.
+	 * Cascade-deletes a spotlight article and all its related records. Replicates the logic in
+	 * `delete-spotlight-article.action.ts`.
 	 */
 	async deleteSpotlightArticle(entityId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
@@ -370,8 +370,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Finds all spotlight articles whose title starts with `[e2e-worker-{workerIndex}]`
-	 * and deletes them. Called in afterAll to ensure a clean state.
+	 * Finds all spotlight articles whose title starts with `[e2e-worker-{workerIndex}]` and deletes
+	 * them. Called in afterAll to ensure a clean state.
 	 */
 	async cleanupWorkerSpotlightArticles(workerIndex: number): Promise<void> {
 		const prefix = `[e2e-worker-${String(workerIndex)}]`;
@@ -387,8 +387,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Cascade-deletes an event and all its related records.
-	 * Replicates the logic in `delete-event.action.ts`.
+	 * Cascade-deletes an event and all its related records. Replicates the logic in
+	 * `delete-event.action.ts`.
 	 */
 	async deleteEvent(entityId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
@@ -427,8 +427,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Finds all events whose title starts with `[e2e-worker-{workerIndex}]`
-	 * and deletes them. Called in afterAll to ensure a clean state.
+	 * Finds all events whose title starts with `[e2e-worker-{workerIndex}]` and deletes them. Called
+	 * in afterAll to ensure a clean state.
 	 */
 	async cleanupWorkerEvents(workerIndex: number): Promise<void> {
 		const prefix = `[e2e-worker-${String(workerIndex)}]`;
@@ -444,8 +444,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Cascade-deletes a news item and all its related records.
-	 * Replicates the logic in `delete-news-item.action.ts`.
+	 * Cascade-deletes a news item and all its related records. Replicates the logic in
+	 * `delete-news-item.action.ts`.
 	 */
 	async deleteNewsItem(entityId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
@@ -484,8 +484,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Finds all news items whose title starts with `[e2e-worker-{workerIndex}]`
-	 * and deletes them. Called in afterAll to ensure a clean state.
+	 * Finds all news items whose title starts with `[e2e-worker-{workerIndex}]` and deletes them.
+	 * Called in afterAll to ensure a clean state.
 	 */
 	async cleanupWorkerNewsItems(workerIndex: number): Promise<void> {
 		const prefix = `[e2e-worker-${String(workerIndex)}]`;
@@ -501,8 +501,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Cascade-deletes a person and all their related records.
-	 * Replicates the logic in `delete-person.action.ts`.
+	 * Cascade-deletes a person and all their related records. Replicates the logic in
+	 * `delete-person.action.ts`.
 	 */
 	async deletePerson(entityId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
@@ -545,8 +545,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Finds all persons whose name starts with `[e2e-worker-{workerIndex}]`
-	 * and deletes them. Called in afterAll to ensure a clean state.
+	 * Finds all persons whose name starts with `[e2e-worker-{workerIndex}]` and deletes them. Called
+	 * in afterAll to ensure a clean state.
 	 */
 	async cleanupWorkerPersons(workerIndex: number): Promise<void> {
 		const prefix = `[e2e-worker-${String(workerIndex)}]`;
@@ -562,8 +562,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Cascade-deletes a working group and all its related records.
-	 * Replicates the logic in `delete-working-group.action.ts`.
+	 * Cascade-deletes a working group and all its related records. Replicates the logic in
+	 * `delete-working-group.action.ts`.
 	 */
 	async deleteWorkingGroup(entityId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
@@ -614,8 +614,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Finds all working groups whose name starts with `[e2e-worker-{workerIndex}]`
-	 * and deletes them. Called in afterAll to ensure a clean state.
+	 * Finds all working groups whose name starts with `[e2e-worker-{workerIndex}]` and deletes them.
+	 * Called in afterAll to ensure a clean state.
 	 */
 	async cleanupWorkerWorkingGroups(workerIndex: number): Promise<void> {
 		const prefix = `[e2e-worker-${String(workerIndex)}]`;
@@ -640,16 +640,16 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Deletes a user. Sessions, password reset sessions, and email verification
-	 * requests cascade on user delete.
+	 * Deletes a user. Sessions, password reset sessions, and email verification requests cascade on
+	 * user delete.
 	 */
 	async deleteUser(userId: string): Promise<void> {
 		await this.db.delete(schema.users).where(eq(schema.users.id, userId));
 	}
 
 	/**
-	 * Finds all users whose name starts with `[e2e-worker-{workerIndex}]`
-	 * and deletes them. Called in afterAll to ensure a clean state.
+	 * Finds all users whose name starts with `[e2e-worker-{workerIndex}]` and deletes them. Called in
+	 * afterAll to ensure a clean state.
 	 */
 	async cleanupWorkerUsers(workerIndex: number): Promise<void> {
 		const prefix = `[e2e-worker-${String(workerIndex)}]`;
@@ -665,8 +665,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Cascade-deletes a service and all its related records.
-	 * Replicates the logic in `delete-service.action.ts`.
+	 * Cascade-deletes a service and all its related records. Replicates the logic in
+	 * `delete-service.action.ts`.
 	 */
 	async deleteService(serviceId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
@@ -681,8 +681,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Finds all services whose name starts with `[e2e-worker-{workerIndex}]`
-	 * and deletes them. Called in afterAll to ensure a clean state.
+	 * Finds all services whose name starts with `[e2e-worker-{workerIndex}]` and deletes them. Called
+	 * in afterAll to ensure a clean state.
 	 */
 	async cleanupWorkerServices(workerIndex: number): Promise<void> {
 		const prefix = `[e2e-worker-${String(workerIndex)}]`;
@@ -698,8 +698,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Cascade-deletes a social media entry and all its related records.
-	 * Replicates the logic in `delete-social-media.action.ts`.
+	 * Cascade-deletes a social media entry and all its related records. Replicates the logic in
+	 * `delete-social-media.action.ts`.
 	 */
 	async deleteSocialMedia(socialMediaId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
@@ -711,8 +711,8 @@ export class DatabaseService {
 	}
 
 	/**
-	 * Finds all social media entries whose name starts with `[e2e-worker-{workerIndex}]`
-	 * and deletes them. Called in afterAll to ensure a clean state.
+	 * Finds all social media entries whose name starts with `[e2e-worker-{workerIndex}]` and deletes
+	 * them. Called in afterAll to ensure a clean state.
 	 */
 	async cleanupWorkerSocialMedia(workerIndex: number): Promise<void> {
 		const prefix = `[e2e-worker-${String(workerIndex)}]`;

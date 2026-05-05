@@ -4,10 +4,10 @@ import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
 import type { ComponentProps, ReactNode } from "react";
 
-import { ColorSchemeSelect } from "@/app/(app)/[locale]/_components/color-scheme-select";
 // import { LocaleSelect } from "@/app/(app)/[locale]/_components/locale-select";
 import { Navigation } from "@/app/(app)/[locale]/(default)/_components/navigation";
 import { UserMenu } from "@/app/(app)/[locale]/(default)/_components/user-menu";
+import { ColorSchemeSelect } from "@/app/(app)/[locale]/_components/color-scheme-select";
 import { getCurrentSession } from "@/lib/auth/session";
 import { createHref } from "@/lib/navigation/create-href";
 import type { NavigationConfig } from "@/lib/navigation/navigation";
