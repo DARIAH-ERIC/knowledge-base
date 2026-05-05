@@ -37,28 +37,28 @@ import {
 	services as unrServices,
 	workingGroupOutreach as unrWorkingGroupOutreach,
 	workingGroupReports as unrWorkingGroupReports,
-	workingGroups as unrWorkingGroups
+	workingGroups as unrWorkingGroups,
 } from "../unr-schema/schema";
 
 interface CampaignQuestionAnswer {
-	question: string,
-	answer: string
+	question: string;
+	answer: string;
 }
 
 interface CampaignQuestions {
-	items: Array<CampaignQuestionAnswer>
+	items: Array<CampaignQuestionAnswer>;
 }
 
 interface ReportComment {
-	comments: string,
-	contributions: string,
-	institutions: string,
-	eventReports: string,
-	outreach: string,
-	projectFundingLeverages: string,
-	publications: string,
-	serviceReports: string,
-	software: string,
+	comments: string;
+	contributions: string;
+	institutions: string;
+	eventReports: string;
+	outreach: string;
+	projectFundingLeverages: string;
+	publications: string;
+	serviceReports: string;
+	software: string;
 }
 
 type ReportScreenCommentKey = (typeof schema.reportScreenCommentKeyEnum)[number];
@@ -99,11 +99,11 @@ const storage = createStorageService({
 	},
 });
 
-const logToFile = (message: string, filepath = 'migration.log') => {
+const logToFile = (message: string, filepath = "migration.log") => {
 	const timestamp = new Date().toISOString();
 	const line = `[${timestamp}] ${message}\n`;
 	appendFileSync(filepath, line);
-}
+};
 
 const detectSocialMediaType = (url: string): SocialMediaType => {
 	let hostname;
@@ -113,14 +113,17 @@ const detectSocialMediaType = (url: string): SocialMediaType => {
 		hostname = url.toLowerCase();
 	}
 	for (const [type, domains] of Object.entries(SOCIAL_MEDIA_DOMAINS)) {
-		if (domains.some(domain => { return hostname.includes(domain) })) {
+		if (
+			domains.some((domain) => {
+				return hostname.includes(domain);
+			})
+		) {
 			return type as SocialMediaType;
 		}
 	}
 
 	return "other";
-}
-
+};
 
 const unrDB = drizzle(env.UNR_DATABASE_DIRECT_URL);
 const client = unrDB;
@@ -596,16 +599,16 @@ async function main() {
 
 				institutionTypes =
 					institutionTypes.includes("partner_institution") &&
-						institutionTypes.some((t) => {
-							return [
-								"national_coordinating_institution",
-								"national_representative_institution",
-								"cooperating_partner",
-							].includes(t);
-						})
+					institutionTypes.some((t) => {
+						return [
+							"national_coordinating_institution",
+							"national_representative_institution",
+							"cooperating_partner",
+						].includes(t);
+					})
 						? institutionTypes.filter((t) => {
-							return t !== "partner_institution";
-						})
+								return t !== "partner_institution";
+							})
 						: institutionTypes;
 
 				for (const type of institutionTypes) {
@@ -785,29 +788,29 @@ async function main() {
 	}
 
 	/**
- * ============================================================================================
- * Reporting Campaigns.
- * ============================================================================================
- */
+	 * ============================================================================================
+	 * Reporting Campaigns.
+	 * ============================================================================================
+	 */
 
 	const reportingCampaigns = await client.select().from(unrReportingCampaigns);
 
 	for (const reportingCampaign of reportingCampaigns) {
-
 		await db.transaction(async (tx) => {
-
-			const [kbReportingCampaign] = await tx.insert(schema.reportingCampaigns).values({
-				year: reportingCampaign.year,
-				status: "closed",
-				createdAt: reportingCampaign.createdAt,
-				updatedAt: reportingCampaign.updatedAt
-			}).returning({ id: schema.reportingCampaigns.id });
+			const [kbReportingCampaign] = await tx
+				.insert(schema.reportingCampaigns)
+				.values({
+					year: reportingCampaign.year,
+					status: "closed",
+					createdAt: reportingCampaign.createdAt,
+					updatedAt: reportingCampaign.updatedAt,
+				})
+				.returning({ id: schema.reportingCampaigns.id });
 
 			assert(kbReportingCampaign);
 
 			unrReportingCampaignIdToReportingCampaignId.set(reportingCampaign.id, kbReportingCampaign.id);
-
-		})
+		});
 	}
 
 	/**
@@ -853,23 +856,26 @@ async function main() {
 
 			unrOutreachIdToSocialMediaId.set(outreachItem.id, kbSocialMedia.id);
 
-			if (outreachItem.countryId === null) { return; }
+			if (outreachItem.countryId === null) {
+				return;
+			}
 
 			const organisationalUnitId = unrCountryIdToOrgUnitId.get(outreachItem.countryId);
 
-			if (organisationalUnitId === undefined) { return; }
+			if (organisationalUnitId === undefined) {
+				return;
+			}
 
 			await tx.insert(schema.organisationalUnitsToSocialMedia).values({
 				organisationalUnitId,
 				socialMediaId: kbSocialMedia.id,
 				createdAt: new Date(outreachItem.createdAt),
 				updatedAt: new Date(outreachItem.createdAt),
-			})
+			});
 		});
 	}
 
 	for (const workingGroupOutreachItem of workingGroupOutreach) {
-
 		let socialMediaType: SocialMediaType;
 		const socialMediaUrl = workingGroupOutreachItem.url;
 
@@ -879,7 +885,7 @@ async function main() {
 				break;
 			}
 			case "website": {
-				socialMediaType = "website"
+				socialMediaType = "website";
 			}
 		}
 
@@ -899,36 +905,44 @@ async function main() {
 
 			unrOutreachIdToSocialMediaId.set(workingGroupOutreachItem.id, kbSocialMedia.id);
 
+			const organisationalUnitId = unrWorkingGroupIdToOrgUnitId.get(
+				workingGroupOutreachItem.workingGroupId,
+			);
 
-			const organisationalUnitId = unrWorkingGroupIdToOrgUnitId.get(workingGroupOutreachItem.workingGroupId);
-
-			if (organisationalUnitId === undefined) { return; }
+			if (organisationalUnitId === undefined) {
+				return;
+			}
 
 			await tx.insert(schema.organisationalUnitsToSocialMedia).values({
 				organisationalUnitId,
 				socialMediaId: kbSocialMedia.id,
 				createdAt: new Date(workingGroupOutreachItem.createdAt),
 				updatedAt: new Date(workingGroupOutreachItem.createdAt),
-			})
+			});
 		});
 	}
 
 	for (const outreachTypeValue of outreachTypeValues) {
-
-		const campaignId = unrReportingCampaignIdToReportingCampaignId.get(outreachTypeValue.reportCampaignId);
+		const campaignId = unrReportingCampaignIdToReportingCampaignId.get(
+			outreachTypeValue.reportCampaignId,
+		);
 		assert(campaignId);
 		const category = outreachTypeValue.type === "national_website" ? "website" : "other";
 		const amount = category === "website" ? 5000 : 2000;
-		await db.insert(schema.reportingCampaignSocialMediaAmounts).values({
-			campaignId,
-			category,
-			amount
-		}).onConflictDoNothing({
-			target: [schema.reportingCampaignSocialMediaAmounts.campaignId, schema.reportingCampaignSocialMediaAmounts.category],
-		});
+		await db
+			.insert(schema.reportingCampaignSocialMediaAmounts)
+			.values({
+				campaignId,
+				category,
+				amount,
+			})
+			.onConflictDoNothing({
+				target: [
+					schema.reportingCampaignSocialMediaAmounts.campaignId,
+					schema.reportingCampaignSocialMediaAmounts.category,
+				],
+			});
 	}
-
-
 
 	/**
 	 * ============================================================================================
@@ -1226,17 +1240,13 @@ async function main() {
 		});
 	}
 
-
 	/**
- * ============================================================================================
- * Reports.
- * ============================================================================================
- */
+	 * ============================================================================================
+	 * Reports.
+	 * ============================================================================================
+	 */
 
 	log.info("Migrating reports...");
-
-
-
 
 	const reports = await client.select().from(unrReports);
 	const outreachKpis = await client.select().from(unrOutreachKpis);
@@ -1244,40 +1254,41 @@ async function main() {
 	const workingGroupReports = await client.select().from(unrWorkingGroupReports);
 
 	for (const report of reports) {
-
 		const campaignId = unrReportingCampaignIdToReportingCampaignId.get(report.reportCampaignId);
 		const countryId = unrCountryIdToOrgUnitId.get(report.countryId);
-		const [eventReports] = await client.select().from(unrEventReports).where(eq(unrEventReports.reportId, report.id));
+		const [eventReports] = await client
+			.select()
+			.from(unrEventReports)
+			.where(eq(unrEventReports.reportId, report.id));
 
 		assert(campaignId);
 		assert(countryId);
 
 		await db.transaction(async (tx) => {
-			const [countryReportId] = await tx.insert(schema.countryReports).values({
-				campaignId,
-				countryId,
-				status: "submitted",
-				dariahCommissionedEvent: eventReports?.dariahCommissionedEvent,
-				smallEvents: eventReports?.smallMeetings,
-				mediumEvents: eventReports?.mediumMeetings,
-				largeEvents: eventReports?.largeMeetings,
-				veryLargeEvents: eventReports?.veryLargeMeetings,
-				totalContributors: report.contributionsCount,
-				reusableOutcomes: eventReports?.reusableOutcomes,
-				createdAt: report.createdAt,
-				updatedAt: report.updatedAt,
-			}).returning({ id: schema.countryReports.id })
-
+			const [countryReportId] = await tx
+				.insert(schema.countryReports)
+				.values({
+					campaignId,
+					countryId,
+					status: "submitted",
+					dariahCommissionedEvent: eventReports?.dariahCommissionedEvent,
+					smallEvents: eventReports?.smallMeetings,
+					mediumEvents: eventReports?.mediumMeetings,
+					largeEvents: eventReports?.largeMeetings,
+					veryLargeEvents: eventReports?.veryLargeMeetings,
+					totalContributors: report.contributionsCount,
+					reusableOutcomes: eventReports?.reusableOutcomes,
+					createdAt: report.createdAt,
+					updatedAt: report.updatedAt,
+				})
+				.returning({ id: schema.countryReports.id });
 
 			assert(countryReportId);
 
 			unrReportIdToCountryReportId.set(report.id, countryReportId.id);
 
-
-
 			if (report.comments !== null) {
-				for (const [k, v] of Object.entries((report.comments as ReportComment))) {
-
+				for (const [k, v] of Object.entries(report.comments as ReportComment)) {
 					let screenKey = k;
 					switch (k) {
 						case "outreach": {
@@ -1299,7 +1310,6 @@ async function main() {
 						case "projectFundingLeverages": {
 							screenKey = "projects";
 						}
-
 					}
 
 					await tx.insert(schema.reportScreenComments).values({
@@ -1308,16 +1318,18 @@ async function main() {
 						reportId: report.id,
 						screenKey: screenKey as ReportScreenCommentKey,
 						createdAt: report.createdAt,
-						updatedAt: report.updatedAt
-					})
+						updatedAt: report.updatedAt,
+					});
 				}
 			}
-		})
+		});
 	}
 
 	for (const serviceKpi of serviceKpis) {
-
-		const [serviceReport] = await client.select().from(unrServiceReports).where(eq(unrServiceReports.id, serviceKpi.serviceReportId));
+		const [serviceReport] = await client
+			.select()
+			.from(unrServiceReports)
+			.where(eq(unrServiceReports.id, serviceKpi.serviceReportId));
 		assert(serviceReport);
 		const countryReportId = unrReportIdToCountryReportId.get(serviceReport.reportId);
 		assert(countryReportId);
@@ -1326,27 +1338,40 @@ async function main() {
 		assert(serviceId);
 
 		await db.transaction(async (tx) => {
-			const [countryReportServiceKpi] = await tx.insert(schema.countryReportServiceKpis).values({
-				serviceId,
-				countryReportId,
-				kpi: serviceKpi.unit,
-				value: serviceKpi.value
-			}).onConflictDoNothing({
-				target: [schema.countryReportServiceKpis.countryReportId, schema.countryReportServiceKpis.serviceId, schema.countryReportServiceKpis.kpi],
-			}).returning({
-				id: schema.countryReportServiceKpis.id
-			});
+			const [countryReportServiceKpi] = await tx
+				.insert(schema.countryReportServiceKpis)
+				.values({
+					serviceId,
+					countryReportId,
+					kpi: serviceKpi.unit,
+					value: serviceKpi.value,
+				})
+				.onConflictDoNothing({
+					target: [
+						schema.countryReportServiceKpis.countryReportId,
+						schema.countryReportServiceKpis.serviceId,
+						schema.countryReportServiceKpis.kpi,
+					],
+				})
+				.returning({
+					id: schema.countryReportServiceKpis.id,
+				});
 			if (!countryReportServiceKpi) {
-				const [service] = await tx.select().from(schema.services).where(eq(schema.services.id, serviceId));
+				const [service] = await tx
+					.select()
+					.from(schema.services)
+					.where(eq(schema.services.id, serviceId));
 				assert(service);
 				logToFile(`skipped duplicated entry ${serviceKpi.unit} for service ${service.name}.`);
 			}
-		})
+		});
 	}
 
 	for (const outreachKpi of outreachKpis) {
-
-		const [outReachReport] = await client.select().from(unrOutreachReports).where(eq(unrOutreachReports.id, outreachKpi.outreachReportId));
+		const [outReachReport] = await client
+			.select()
+			.from(unrOutreachReports)
+			.where(eq(unrOutreachReports.id, outreachKpi.outreachReportId));
 		assert(outReachReport);
 		const countryReportId = unrReportIdToCountryReportId.get(outReachReport.reportId);
 		assert(countryReportId);
@@ -1354,18 +1379,29 @@ async function main() {
 		assert(socialMediaId);
 
 		await db.transaction(async (tx) => {
-			const [countryReportSocialMediaKpi] = await tx.insert(schema.countryReportSocialMediaKpis).values({
-				socialMediaId,
-				countryReportId,
-				kpi: outreachKpi.unit === "mention" ? "mentions" : outreachKpi.unit,
-				value: outreachKpi.value
-			}).onConflictDoNothing({
-				target: [schema.countryReportSocialMediaKpis.countryReportId, schema.countryReportSocialMediaKpis.socialMediaId, schema.countryReportSocialMediaKpis.kpi],
-			}).returning({
-				id: schema.countryReportSocialMediaKpis.id
-			});
+			const [countryReportSocialMediaKpi] = await tx
+				.insert(schema.countryReportSocialMediaKpis)
+				.values({
+					socialMediaId,
+					countryReportId,
+					kpi: outreachKpi.unit === "mention" ? "mentions" : outreachKpi.unit,
+					value: outreachKpi.value,
+				})
+				.onConflictDoNothing({
+					target: [
+						schema.countryReportSocialMediaKpis.countryReportId,
+						schema.countryReportSocialMediaKpis.socialMediaId,
+						schema.countryReportSocialMediaKpis.kpi,
+					],
+				})
+				.returning({
+					id: schema.countryReportSocialMediaKpis.id,
+				});
 			if (!countryReportSocialMediaKpi) {
-				const [socialMedia] = await tx.select().from(schema.socialMedia).where(eq(schema.socialMedia.id, socialMediaId));
+				const [socialMedia] = await tx
+					.select()
+					.from(schema.socialMedia)
+					.where(eq(schema.socialMedia.id, socialMediaId));
 				assert(socialMedia);
 				logToFile(`skipped duplicated entry ${outreachKpi.unit} for service ${socialMedia.name}.`);
 			}
@@ -1374,59 +1410,70 @@ async function main() {
 
 	let i = 0;
 	for (const workingGroupReport of workingGroupReports) {
-
-		const reportCampaignId = unrReportingCampaignIdToReportingCampaignId.get(workingGroupReport.reportCampaignId);
+		const reportCampaignId = unrReportingCampaignIdToReportingCampaignId.get(
+			workingGroupReport.reportCampaignId,
+		);
 		const workingGroupId = unrWorkingGroupIdToOrgUnitId.get(workingGroupReport.workingGroupId);
 
 		assert(reportCampaignId);
 		assert(workingGroupId);
 
 		await db.transaction(async (tx) => {
-			const [kbWorkingGroupReport] = await tx.insert(schema.workingGroupReports).values({
-				campaignId: reportCampaignId,
-				workingGroupId,
-				numberOfMembers: workingGroupReport.members,
-				status: "submitted",
-				createdAt: workingGroupReport.createdAt,
-				updatedAt: workingGroupReport.updatedAt,
-			}).returning({ id: schema.workingGroupReports.id });
+			const [kbWorkingGroupReport] = await tx
+				.insert(schema.workingGroupReports)
+				.values({
+					campaignId: reportCampaignId,
+					workingGroupId,
+					numberOfMembers: workingGroupReport.members,
+					status: "submitted",
+					createdAt: workingGroupReport.createdAt,
+					updatedAt: workingGroupReport.updatedAt,
+				})
+				.returning({ id: schema.workingGroupReports.id });
 
 			assert(kbWorkingGroupReport);
 
-			const campaignQuestions: Array<CampaignQuestionAnswer> = [...(workingGroupReport.narrativeQuestionsList as CampaignQuestions).items, ...(workingGroupReport.facultativeQuestionsList as CampaignQuestions).items];
+			const campaignQuestions: Array<CampaignQuestionAnswer> = [
+				...(workingGroupReport.narrativeQuestionsList as CampaignQuestions).items,
+				...(workingGroupReport.facultativeQuestionsList as CampaignQuestions).items,
+			];
 
 			for (const { question, answer } of campaignQuestions) {
 				i++;
-				const [wgReportQuestion]: Array<{ id: string }> = await tx.insert(schema.workingGroupReportQuestions).values({
-					campaignId: reportCampaignId,
-					question: generateJSON(question, [StarterKit]),
-					position: i,
-				}).returning({ id: schema.workingGroupReportQuestions.id })
+				const [wgReportQuestion]: Array<{ id: string }> = await tx
+					.insert(schema.workingGroupReportQuestions)
+					.values({
+						campaignId: reportCampaignId,
+						question: generateJSON(question, [StarterKit]),
+						position: i,
+					})
+					.returning({ id: schema.workingGroupReportQuestions.id });
 
 				assert(wgReportQuestion);
 
-				await tx.insert(schema.workingGroupReportAnswers).values({
-					questionId: wgReportQuestion.id,
-					workingGroupReportId: kbWorkingGroupReport.id,
-					answer: generateJSON(answer, [StarterKit]),
-				}).returning({ id: schema.workingGroupReportAnswers.id });
+				await tx
+					.insert(schema.workingGroupReportAnswers)
+					.values({
+						questionId: wgReportQuestion.id,
+						workingGroupReportId: kbWorkingGroupReport.id,
+						answer: generateJSON(answer, [StarterKit]),
+					})
+					.returning({ id: schema.workingGroupReportAnswers.id });
 			}
 			if (workingGroupReport.comments !== null) {
-				for (const comment of Object.values((workingGroupReport.comments as ReportComment))) {
-
+				for (const comment of Object.values(workingGroupReport.comments as ReportComment)) {
 					await tx.insert(schema.reportScreenComments).values({
 						comment: generateJSON(String(comment), [StarterKit]),
 						reportType: "working_group",
 						reportId: workingGroupReport.id,
 						screenKey: "data",
 						createdAt: workingGroupReport.createdAt,
-						updatedAt: workingGroupReport.updatedAt
-					})
+						updatedAt: workingGroupReport.updatedAt,
+					});
 				}
 			}
-		})
+		});
 	}
-
 
 	/**
 	 * ============================================================================================
@@ -1439,12 +1486,10 @@ async function main() {
 	const projects = await client.select().from(unrProjects);
 
 	const groupedProjects = groupBy(projects, ({ acronym, name }) => {
-
 		return acronym ?? name;
 	});
 
 	for (const [projectName, projectLeverages] of Object.entries(groupedProjects)) {
-
 		const createdAt = new Date(Date.now());
 
 		await db.transaction(async (tx) => {
@@ -1463,31 +1508,69 @@ async function main() {
 
 			const id = entity.id;
 
-			const startDates = [...new Set(projectLeverages.map(pL => { return pL.startDate?.getTime() }))].toSorted((dateA = 0, dateB = 0) => {
-				return dateA - dateB;
-			}).map((time) => {
-				return (time != null) ? new Date(time) : null;
-			}).filter(d => { return d !== null })
+			const startDates = [
+				...new Set(
+					projectLeverages.map((pL) => {
+						return pL.startDate?.getTime();
+					}),
+				),
+			]
+				.toSorted((dateA = 0, dateB = 0) => {
+					return dateA - dateB;
+				})
+				.map((time) => {
+					return time != null ? new Date(time) : null;
+				})
+				.filter((d) => {
+					return d !== null;
+				});
 
-			const projectMonthsEntries = [...new Set(projectLeverages.map(pL => { return pL.projectMonths }))]
+			const projectMonthsEntries = [
+				...new Set(
+					projectLeverages.map((pL) => {
+						return pL.projectMonths;
+					}),
+				),
+			];
 
 			if (startDates.length > 1) {
-				logToFile(`multiple start dates found for project ${projectName}: ${startDates.map(startDate => { return startDate.toISOString().slice(0, 10) }).join(',')}. Chose ${String(startDates[0]?.toISOString().slice(0, 10))}`);
+				logToFile(
+					`multiple start dates found for project ${projectName}: ${startDates
+						.map((startDate) => {
+							return startDate.toISOString().slice(0, 10);
+						})
+						.join(",")}. Chose ${String(startDates[0]?.toISOString().slice(0, 10))}`,
+				);
 			}
 			if (projectMonthsEntries.length > 1) {
-				logToFile(`multiple project months entries found for project ${projectName}: ${projectMonthsEntries.map(pM => { return pM }).join(',')}. Chose ${String(projectMonthsEntries[0])}`);
+				logToFile(
+					`multiple project months entries found for project ${projectName}: ${projectMonthsEntries
+						.map((pM) => {
+							return pM;
+						})
+						.join(",")}. Chose ${String(projectMonthsEntries[0])}`,
+				);
 			}
 
 			const startDate = startDates[0] ?? new Date(Date.UTC(1900, 0, 1));
 			const projectMonths = projectMonthsEntries[0] ?? null;
 
-			const endDate = projectMonths !== null ? new Date(new Date(startDate).setUTCMonth(new Date(startDate).getUTCMonth() + projectMonths)) : null;
+			const endDate =
+				projectMonths !== null
+					? new Date(
+							new Date(startDate).setUTCMonth(new Date(startDate).getUTCMonth() + projectMonths),
+						)
+					: null;
 
-			const projectScopes = [...new Set(projectLeverages.map(pL => { return pL.scope }))];
+			const projectScopes = [
+				...new Set(
+					projectLeverages.map((pL) => {
+						return pL.scope;
+					}),
+				),
+			];
 
 			const projectScope = projectScopes[0] ?? "national";
-
-
 
 			const [kbProject] = await tx
 				.insert(schema.projects)
@@ -1502,19 +1585,39 @@ async function main() {
 					summary: "",
 					name: projectName,
 					createdAt,
-					updatedAt: createdAt
+					updatedAt: createdAt,
 				})
 				.returning({ id: schema.projects.id, duration: schema.projects.duration });
 
 			assert(kbProject);
 
-			const fundersEntries = projectLeverages.map(pL => { return pL.funders });
-			const funders = [...new Set(fundersEntries.flatMap(s => { return (s != null) ? s.split(";").map(v => { return v.trim() }) : [] }))];
-			funders.filter(f => { return f !== "Unknown" });
+			const fundersEntries = projectLeverages.map((pL) => {
+				return pL.funders;
+			});
+			const funders = [
+				...new Set(
+					fundersEntries.flatMap((s) => {
+						return s != null
+							? s.split(";").map((v) => {
+									return v.trim();
+								})
+							: [];
+					}),
+				),
+			];
+			funders.filter((f) => {
+				return f !== "Unknown";
+			});
 			for (const funder of funders) {
-
-
-				let [fundingUnit] = await tx.select({ id: schema.organisationalUnits.id }).from(schema.organisationalUnits).where(and(eq(schema.organisationalUnits.name, funder), eq(schema.organisationalUnits.typeId, organisationalUnitTypesByType.institution.id)));
+				let [fundingUnit] = await tx
+					.select({ id: schema.organisationalUnits.id })
+					.from(schema.organisationalUnits)
+					.where(
+						and(
+							eq(schema.organisationalUnits.name, funder),
+							eq(schema.organisationalUnits.typeId, organisationalUnitTypesByType.institution.id),
+						),
+					);
 				if (!fundingUnit) {
 					const [fundingUnitEntity] = await tx
 						.insert(schema.entities)
@@ -1550,32 +1653,35 @@ async function main() {
 					projectId: kbProject.id,
 					unitId: fundingUnit.id,
 					roleId: projectRolesByRole.funder.id,
-					duration: kbProject.duration
-				})
+					duration: kbProject.duration,
+				});
 			}
 			for (const projectLeverage of projectLeverages) {
-
-
-
 				const countryReportId = unrReportIdToCountryReportId.get(projectLeverage.reportId);
 				assert(countryReportId);
 
-				const [countryReportProjectContributionId] = await tx.insert(schema.countryReportProjectContributions).values({
-					projectId: kbProject.id,
-					amountEuros: Number(projectLeverage.amount),
-					countryReportId
-				}).onConflictDoNothing({
-					target: [schema.countryReportProjectContributions.projectId, schema.countryReportProjectContributions.countryReportId],
-				}).returning({
-					id: schema.countryReportProjectContributions.id
-				});
+				const [countryReportProjectContributionId] = await tx
+					.insert(schema.countryReportProjectContributions)
+					.values({
+						projectId: kbProject.id,
+						amountEuros: Number(projectLeverage.amount),
+						countryReportId,
+					})
+					.onConflictDoNothing({
+						target: [
+							schema.countryReportProjectContributions.projectId,
+							schema.countryReportProjectContributions.countryReportId,
+						],
+					})
+					.returning({
+						id: schema.countryReportProjectContributions.id,
+					});
 				if (!countryReportProjectContributionId) {
 					logToFile(`skipped duplicated entry for ${projectName}.`);
 				}
 			}
 		});
 	}
-
 }
 
 main()
