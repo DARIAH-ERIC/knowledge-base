@@ -254,7 +254,8 @@ VALUES
 	('twitter'),
 	('vimeo'),
 	('website'),
-	('youtube');
+	('youtube'),
+	('other');
 
 --> statement-breakpoint
 INSERT INTO
