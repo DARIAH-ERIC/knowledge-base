@@ -41,6 +41,29 @@ function createItems(count: number) {
 	return items;
 }
 
+function createItemWithDuration(duration: { start: Date; end?: Date }) {
+	const id = uuidv7();
+	const documentId = uuidv7();
+	const title = f.lorem.sentence();
+	const slug = slugify(title);
+
+	return {
+		entity: { id, slug, documentId },
+		fundingCall: {
+			id,
+			title,
+			summary: f.lorem.paragraph(),
+			duration,
+		},
+	};
+}
+
+function addDays(date: Date, days: number) {
+	const value = new Date(date);
+	value.setUTCDate(value.getUTCDate() + days);
+	return value;
+}
+
 async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	const [status, type] = await Promise.all([
 		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
@@ -95,6 +118,47 @@ describe("funding-calls", () => {
 				expect(data.data).toEqual(expect.arrayContaining([expect.objectContaining({ title })]));
 				expect(data.limit).toBe(limit);
 				expect(data.offset).toBe(offset);
+			});
+		});
+
+		it("should support repeated status filters and order the merged result by duration desc", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const now = new Date();
+
+				const openItem = createItemWithDuration({
+					start: addDays(now, -7),
+					end: addDays(now, 7),
+				});
+				const upcomingItem = createItemWithDuration({
+					start: addDays(now, 365),
+				});
+				const closedItem = createItemWithDuration({
+					start: addDays(now, -365),
+					end: addDays(now, -7),
+				});
+
+				await seed(db, [openItem, upcomingItem, closedItem]);
+
+				const response = await client["funding-calls"].$get({
+					query: {
+						status: ["upcoming", "open"],
+					},
+				});
+
+				expect(response.status).toBe(200);
+
+				const data = await response.json();
+
+				assert("data" in data);
+				const ids = data.data.map((item) => item.id);
+				expect(ids).toContain(upcomingItem.entity.id);
+				expect(ids).toContain(openItem.entity.id);
+				expect(ids).not.toContain(closedItem.entity.id);
+				expect(ids.indexOf(upcomingItem.entity.id)).toBeLessThan(ids.indexOf(openItem.entity.id));
+				expect(data.data).not.toEqual(
+					expect.arrayContaining([expect.objectContaining({ id: closedItem.entity.id })]),
+				);
 			});
 		});
 	});

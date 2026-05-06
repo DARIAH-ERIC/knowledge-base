@@ -82,8 +82,25 @@ export const FundingCallSlugListSchema = v.pipe(
 
 export type FundingCallSlugList = v.InferOutput<typeof FundingCallSlugListSchema>;
 
+export const fundingCallStatusValues = ["upcoming", "open", "closed"] as const;
+
+export type FundingCallStatus = (typeof fundingCallStatusValues)[number];
+
+export const FundingCallQuerySchema = v.object({
+	...PaginationQuerySchema.entries,
+	status: v.pipe(
+		v.optional(
+			v.union([v.picklist(fundingCallStatusValues), v.array(v.picklist(fundingCallStatusValues))]),
+		),
+		v.description(
+			"Filter by funding call status relative to the current time. Can be provided multiple times, e.g. `?status=upcoming&status=open`.",
+		),
+		v.metadata({ ref: "FundingCallStatusParam" }),
+	),
+});
+
 export const GetFundingCalls = {
-	QuerySchema: PaginationQuerySchema,
+	QuerySchema: FundingCallQuerySchema,
 	ResponseSchema: v.pipe(
 		v.object({
 			...PaginatedResponseSchema.entries,
