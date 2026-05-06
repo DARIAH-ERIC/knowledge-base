@@ -60,7 +60,7 @@ export function CampaignCountryThresholdsForm(
 								type="number"
 							>
 								<Label>{country.name}</Label>
-								<Input min={0} step="0.01" />
+								<Input min={0} step={1} />
 								<FieldError />
 							</TextField>
 						);

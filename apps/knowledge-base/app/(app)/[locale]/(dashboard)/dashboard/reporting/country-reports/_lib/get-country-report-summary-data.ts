@@ -2,6 +2,7 @@ import type { User } from "@dariah-eric/auth";
 
 import { type Action, can } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
+import { calculateCountryReportOperationalCostAmount } from "@/lib/reporting/calculate-country-report-operational-cost";
 
 export interface CountryReportSummaryData {
 	totalContributors: number | null;
@@ -11,6 +12,9 @@ export interface CountryReportSummaryData {
 	veryLargeEvents: number | null;
 	dariahCommissionedEvent: string | null;
 	reusableOutcomes: string | null;
+	operationalCostAmount: number;
+	thresholdAmount: number | null;
+	meetsThreshold: boolean | null;
 	institutions: Array<{
 		id: string;
 		name: string;
@@ -73,8 +77,27 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 			reusableOutcomes: true,
 		},
 		with: {
-			campaign: { columns: { year: true, status: true } },
-			country: { columns: { name: true } },
+			campaign: {
+				columns: { year: true, status: true },
+				with: {
+					eventAmounts: {
+						columns: { eventType: true, amount: true },
+					},
+					serviceSizes: {
+						columns: { serviceSize: true, visitsThreshold: true, amount: true },
+					},
+					socialMediaAmounts: {
+						columns: { category: true, amount: true },
+					},
+					contributionAmounts: {
+						columns: { roleType: true, amount: true },
+					},
+					countryThresholds: {
+						columns: { countryId: true, amount: true },
+					},
+				},
+			},
+			country: { columns: { id: true, name: true } },
 			institutions: {
 				columns: { id: true },
 				with: {
@@ -89,7 +112,14 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 						columns: { id: true },
 						with: {
 							person: { columns: { name: true } },
-							organisationalUnit: { columns: { name: true } },
+							organisationalUnit: {
+								columns: { name: true, acronym: true },
+								with: {
+									type: {
+										columns: { type: true },
+									},
+								},
+							},
 							roleType: { columns: { type: true } },
 						},
 					},
@@ -98,13 +128,27 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 			socialMediaKpis: {
 				columns: { socialMediaId: true, kpi: true, value: true },
 				with: {
-					socialMedia: { columns: { name: true, url: true } },
+					socialMedia: {
+						columns: { name: true, url: true },
+						with: {
+							type: {
+								columns: { type: true },
+							},
+						},
+					},
 				},
 			},
 			serviceKpis: {
 				columns: { serviceId: true, kpi: true, value: true },
 				with: {
-					service: { columns: { name: true } },
+					service: {
+						columns: { name: true },
+						with: {
+							type: {
+								columns: { type: true },
+							},
+						},
+					},
 				},
 			},
 			projectContributions: {
@@ -121,7 +165,12 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 
 	const socialMediaMap = new Map<
 		string,
-		{ name: string; url: string; kpis: Array<{ kpi: string; value: number }> }
+		{
+			name: string;
+			url: string;
+			socialMediaType: string;
+			kpis: Array<{ kpi: string; value: number }>;
+		}
 	>();
 	for (const row of report.socialMediaKpis) {
 		const existing = socialMediaMap.get(row.socialMediaId);
@@ -129,6 +178,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 			socialMediaMap.set(row.socialMediaId, {
 				name: row.socialMedia.name,
 				url: row.socialMedia.url,
+				socialMediaType: row.socialMedia.type.type,
 				kpis: [{ kpi: row.kpi, value: row.value }],
 			});
 		} else {
@@ -138,19 +188,63 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 
 	const serviceMap = new Map<
 		string,
-		{ name: string; kpis: Array<{ kpi: string; value: number }> }
+		{ name: string; serviceType: string; kpis: Array<{ kpi: string; value: number }> }
 	>();
 	for (const row of report.serviceKpis) {
 		const existing = serviceMap.get(row.serviceId);
 		if (existing == null) {
 			serviceMap.set(row.serviceId, {
 				name: row.service.name,
+				serviceType: row.service.type.type,
 				kpis: [{ kpi: row.kpi, value: row.value }],
 			});
 		} else {
 			existing.kpis.push({ kpi: row.kpi, value: row.value });
 		}
 	}
+
+	const thresholdAmount =
+		report.campaign.countryThresholds.find((threshold) => {
+			return threshold.countryId === report.country.id;
+		})?.amount ?? null;
+
+	const operationalCostAmount = calculateCountryReportOperationalCostAmount({
+		events: {
+			smallEvents: report.smallEvents,
+			mediumEvents: report.mediumEvents,
+			largeEvents: report.largeEvents,
+			veryLargeEvents: report.veryLargeEvents,
+			dariahCommissionedEvent: report.dariahCommissionedEvent,
+		},
+		eventAmounts: report.campaign.eventAmounts,
+		services: Array.from(serviceMap.values()).map((service) => {
+			return {
+				serviceType: service.serviceType,
+				kpis: service.kpis,
+			};
+		}),
+		serviceSizes: report.campaign.serviceSizes,
+		socialMedia: Array.from(socialMediaMap.values()).map((account) => {
+			return {
+				socialMediaType: account.socialMediaType,
+			};
+		}),
+		socialMediaAmounts: report.campaign.socialMediaAmounts,
+		contributions: report.contributions.map((contribution) => {
+			return {
+				roleType: contribution.personToOrgUnit.roleType.type,
+				organisationalUnitType: contribution.personToOrgUnit.organisationalUnit.type.type,
+				organisationalUnitName: contribution.personToOrgUnit.organisationalUnit.name,
+				organisationalUnitAcronym: contribution.personToOrgUnit.organisationalUnit.acronym,
+			};
+		}),
+		contributionAmounts: report.campaign.contributionAmounts.map((contributionAmount) => {
+			return {
+				roleType: contributionAmount.roleType,
+				amount: contributionAmount.amount,
+			};
+		}),
+	});
 
 	return {
 		id: report.id,
@@ -165,6 +259,9 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 			veryLargeEvents: report.veryLargeEvents,
 			dariahCommissionedEvent: report.dariahCommissionedEvent,
 			reusableOutcomes: report.reusableOutcomes,
+			operationalCostAmount,
+			thresholdAmount,
+			meetsThreshold: thresholdAmount != null ? operationalCostAmount >= thresholdAmount : null,
 			institutions: report.institutions.map((i) => {
 				return {
 					id: i.id,
@@ -181,10 +278,19 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 				};
 			}),
 			socialMediaAccounts: Array.from(socialMediaMap.entries()).map(([socialMediaId, data]) => {
-				return { socialMediaId, ...data };
+				return {
+					socialMediaId,
+					name: data.name,
+					url: data.url,
+					kpis: data.kpis,
+				};
 			}),
 			services: Array.from(serviceMap.entries()).map(([serviceId, data]) => {
-				return { serviceId, ...data };
+				return {
+					serviceId,
+					name: data.name,
+					kpis: data.kpis,
+				};
 			}),
 			projectContributions: report.projectContributions.map((p) => {
 				return {

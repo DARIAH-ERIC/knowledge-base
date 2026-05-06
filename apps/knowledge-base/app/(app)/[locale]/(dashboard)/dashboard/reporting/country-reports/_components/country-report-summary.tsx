@@ -88,6 +88,12 @@ export async function CountryReportSummary(
 				<dl className="grid max-w-xs grid-cols-[auto_1fr] gap-x-8 gap-y-2 text-sm">
 					<dt className="text-muted-fg">{t("Total contributors")}</dt>
 					<dd>{data.totalContributors ?? "—"}</dd>
+					<dt className="text-muted-fg">{t("Operational cost")}</dt>
+					<dd>{eurFormatter.format(data.operationalCostAmount)}</dd>
+					<dt className="text-muted-fg">{t("Threshold")}</dt>
+					<dd>{data.thresholdAmount != null ? eurFormatter.format(data.thresholdAmount) : "—"}</dd>
+					<dt className="text-muted-fg">{t("Threshold met")}</dt>
+					<dd>{data.meetsThreshold == null ? "—" : data.meetsThreshold ? t("Yes") : t("No")}</dd>
 				</dl>
 			</section>
 

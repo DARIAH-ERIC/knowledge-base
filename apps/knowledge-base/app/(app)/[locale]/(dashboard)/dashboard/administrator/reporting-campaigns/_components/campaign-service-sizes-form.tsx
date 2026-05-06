@@ -65,7 +65,7 @@ export function CampaignServiceSizesForm(
 						type="number"
 					>
 						<Label>{t("Small — amount")}</Label>
-						<Input min={0} step="0.01" />
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 
@@ -81,7 +81,7 @@ export function CampaignServiceSizesForm(
 						type="number"
 					>
 						<Label>{t("Medium — amount")}</Label>
-						<Input min={0} step="0.01" />
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 
@@ -97,7 +97,7 @@ export function CampaignServiceSizesForm(
 						type="number"
 					>
 						<Label>{t("Large — amount")}</Label>
-						<Input min={0} step="0.01" />
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 
@@ -117,7 +117,7 @@ export function CampaignServiceSizesForm(
 						type="number"
 					>
 						<Label>{t("Very large — amount")}</Label>
-						<Input min={0} step="0.01" />
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 				</FormSection>
@@ -129,7 +129,7 @@ export function CampaignServiceSizesForm(
 						type="number"
 					>
 						<Label>{t("Core service amount")}</Label>
-						<Input min={0} step="0.01" />
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 				</FormSection>

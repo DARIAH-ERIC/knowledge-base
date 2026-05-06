@@ -51,7 +51,7 @@ export function CampaignContributionAmountsForm(
 						type="number"
 					>
 						<Label>{t("National coordinator")}</Label>
-						<Input min={0} step="0.01" />
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 
@@ -61,57 +61,47 @@ export function CampaignContributionAmountsForm(
 						type="number"
 					>
 						<Label>{t("National coordinator deputy")}</Label>
-						<Input min={0} step="0.01" />
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 
 					<TextField
-						defaultValue={amountMap.national_representative ?? undefined}
-						name="national_representative"
+						defaultValue={amountMap.is_chair_of_jrc ?? undefined}
+						name="is_chair_of_jrc"
 						type="number"
 					>
-						<Label>{t("National representative")}</Label>
-						<Input min={0} step="0.01" />
+						<Label>{t("JRC chair / vice-chair")}</Label>
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 
 					<TextField
-						defaultValue={amountMap.national_representative_deputy ?? undefined}
-						name="national_representative_deputy"
-						type="number"
-					>
-						<Label>{t("National representative deputy")}</Label>
-						<Input min={0} step="0.01" />
-						<FieldError />
-					</TextField>
-
-					<TextField
-						defaultValue={amountMap.is_chair_of ?? undefined}
-						name="is_chair_of"
+						defaultValue={amountMap.is_chair_of_wg ?? undefined}
+						name="is_chair_of_wg"
 						type="number"
 					>
 						<Label>{t("WG chair")}</Label>
-						<Input min={0} step="0.01" />
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 
 					<TextField
-						defaultValue={amountMap.is_vice_chair_of ?? undefined}
-						name="is_vice_chair_of"
+						defaultValue={amountMap.is_member_of_jrc ?? undefined}
+						name="is_member_of_jrc"
 						type="number"
 					>
-						<Label>{t("WG vice-chair")}</Label>
-						<Input min={0} step="0.01" />
+						<Label>{t("JRC member")}</Label>
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 
 					<TextField
-						defaultValue={amountMap.is_member_of ?? undefined}
-						name="is_member_of"
+						defaultValue={amountMap.is_chair_of_ncc ?? undefined}
+						name="is_chair_of_ncc"
 						type="number"
 					>
-						<Label>{t("WG member")}</Label>
-						<Input min={0} step="0.01" />
+						<Label>{t("NCC chair / vice-chair")}</Label>
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 				</FormSection>

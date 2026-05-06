@@ -570,11 +570,10 @@ export const ReportingCampaignSocialMediaAmountInsertSchema = createInsertSchema
 export const reportingCampaignContributionRoleEnum = [
 	"national_coordinator",
 	"national_coordinator_deputy",
-	"national_representative",
-	"national_representative_deputy",
-	"is_chair_of",
-	"is_vice_chair_of",
-	"is_member_of",
+	"is_chair_of_jrc", // also includes vice-chair
+	"is_chair_of_wg",
+	"is_member_of_jrc",
+	"is_chair_of_ncc", // also includes vice-chair
 ] as const;
 
 export const reportingCampaignContributionAmounts = p.pgTable(

@@ -47,13 +47,13 @@ export function CampaignSocialMediaAmountsForm(
 				<FormSection title={t("Social media amounts")}>
 					<TextField defaultValue={amountMap.website ?? undefined} name="website" type="number">
 						<Label>{t("Website")}</Label>
-						<Input min={0} step="0.01" />
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 
 					<TextField defaultValue={amountMap.other ?? undefined} name="other" type="number">
 						<Label>{t("Other")}</Label>
-						<Input min={0} step="0.01" />
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 				</FormSection>

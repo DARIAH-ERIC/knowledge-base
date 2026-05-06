@@ -47,19 +47,19 @@ export function CampaignEventAmountsForm(
 				<FormSection title={t("Event amounts")}>
 					<TextField defaultValue={amountMap.small ?? undefined} name="small" type="number">
 						<Label>{t("Small events")}</Label>
-						<Input min={0} step="0.01" />
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 
 					<TextField defaultValue={amountMap.medium ?? undefined} name="medium" type="number">
 						<Label>{t("Medium events")}</Label>
-						<Input min={0} step="0.01" />
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 
 					<TextField defaultValue={amountMap.large ?? undefined} name="large" type="number">
 						<Label>{t("Large events")}</Label>
-						<Input min={0} step="0.01" />
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 
@@ -69,7 +69,7 @@ export function CampaignEventAmountsForm(
 						type="number"
 					>
 						<Label>{t("Very large events")}</Label>
-						<Input min={0} step="0.01" />
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 
@@ -79,7 +79,7 @@ export function CampaignEventAmountsForm(
 						type="number"
 					>
 						<Label>{t("DARIAH commissioned event")}</Label>
-						<Input min={0} step="0.01" />
+						<Input min={0} step={1} />
 						<FieldError />
 					</TextField>
 				</FormSection>

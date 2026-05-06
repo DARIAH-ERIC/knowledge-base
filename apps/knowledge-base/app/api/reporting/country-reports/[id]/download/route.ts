@@ -32,6 +32,9 @@ export async function GET(
 				country: report.country.name,
 				campaign: report.campaign.year,
 				totalContributors: report.summary.totalContributors,
+				operationalCostAmount: report.summary.operationalCostAmount,
+				thresholdAmount: report.summary.thresholdAmount,
+				meetsThreshold: report.summary.meetsThreshold,
 				institutions: report.summary.institutions.map((i) => {
 					return { name: i.name, acronym: i.acronym };
 				}),
