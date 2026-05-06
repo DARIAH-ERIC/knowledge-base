@@ -67,8 +67,11 @@ export const ContentBlockUpdateSchema = createUpdateSchema(contentBlocks);
 export const dataContentBlockTypesEnum = [
 	"events",
 	"funding_calls",
+	"impact_case_studies",
 	"news",
 	"opportunities",
+	"pages",
+	"spotlight_articles",
 ] as const;
 
 export const dataContentBlockTypes = p.pgTable(
