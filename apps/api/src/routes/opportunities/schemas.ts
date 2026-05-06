@@ -1,3 +1,4 @@
+import { ensureArray } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
@@ -92,21 +93,29 @@ export const opportunitySourceValues = ["dariah", "external"] as const;
 
 export type OpportunitySource = (typeof opportunitySourceValues)[number];
 
+const OpportunityStatusQuerySchema = v.pipe(
+	v.unknown(),
+	v.transform(ensureArray),
+	v.array(v.picklist(opportunityStatusValues)),
+);
+
+const OpportunitySourceQuerySchema = v.pipe(
+	v.unknown(),
+	v.transform(ensureArray),
+	v.array(v.picklist(opportunitySourceValues)),
+);
+
 export const OpportunitiesQuerySchema = v.object({
 	...PaginationQuerySchema.entries,
 	status: v.pipe(
-		v.optional(
-			v.union([v.picklist(opportunityStatusValues), v.array(v.picklist(opportunityStatusValues))]),
-		),
+		v.optional(OpportunityStatusQuerySchema),
 		v.description(
 			"Filter by opportunity status relative to the current time. Can be provided multiple times, e.g. `?status=upcoming&status=open`.",
 		),
 		v.metadata({ ref: "OpportunityStatusParam" }),
 	),
 	source: v.pipe(
-		v.optional(
-			v.union([v.picklist(opportunitySourceValues), v.array(v.picklist(opportunitySourceValues))]),
-		),
+		v.optional(OpportunitySourceQuerySchema),
 		v.description(
 			"Filter by opportunity source. Can be provided multiple times, e.g. `?source=dariah&source=external`.",
 		),
