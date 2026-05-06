@@ -6,7 +6,15 @@ import { db } from "@/lib/db";
 import { ilike, inArray } from "@/lib/db/sql";
 
 const defaultLimit = 20;
-const allowedTypes = ["events", "news", "opportunities", "funding_calls"] as const;
+const allowedTypes = [
+	"events",
+	"news",
+	"opportunities",
+	"funding_calls",
+	"pages",
+	"spotlight_articles",
+	"impact_case_studies",
+] as const;
 
 type ContentBlockEntryType = (typeof allowedTypes)[number];
 
@@ -96,6 +104,72 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 				.limit(limit)
 				.offset(offset),
 			db.$count(schema.opportunities, where),
+		]);
+
+		return NextResponse.json({ items, total: countResult });
+	}
+
+	if (type === "pages") {
+		const where =
+			q != null && q.trim() !== ""
+				? ilike(schema.pages.title, `%${q}%`)
+				: ids != null
+					? inArray(schema.pages.id, ids)
+					: undefined;
+
+		const [items, countResult] = await Promise.all([
+			db
+				.select({ id: schema.pages.id, title: schema.pages.title })
+				.from(schema.pages)
+				.where(where)
+				.orderBy(schema.pages.title)
+				.limit(limit)
+				.offset(offset),
+			db.$count(schema.pages, where),
+		]);
+
+		return NextResponse.json({ items, total: countResult });
+	}
+
+	if (type === "spotlight_articles") {
+		const where =
+			q != null && q.trim() !== ""
+				? ilike(schema.spotlightArticles.title, `%${q}%`)
+				: ids != null
+					? inArray(schema.spotlightArticles.id, ids)
+					: undefined;
+
+		const [items, countResult] = await Promise.all([
+			db
+				.select({ id: schema.spotlightArticles.id, title: schema.spotlightArticles.title })
+				.from(schema.spotlightArticles)
+				.where(where)
+				.orderBy(schema.spotlightArticles.title)
+				.limit(limit)
+				.offset(offset),
+			db.$count(schema.spotlightArticles, where),
+		]);
+
+		return NextResponse.json({ items, total: countResult });
+	}
+
+	if (type === "impact_case_studies") {
+		const where =
+			q != null && q.trim() !== ""
+				? ilike(schema.impactCaseStudies.title, `%${q}%`)
+				: ids != null
+					? inArray(schema.impactCaseStudies.id, ids)
+					: undefined;
+
+		const [items, countResult] = await Promise.all([
+			db
+				.select({ id: schema.impactCaseStudies.id, title: schema.impactCaseStudies.title })
+				.from(schema.impactCaseStudies)
+				.where(where)
+				.orderBy(schema.impactCaseStudies.title)
+				.limit(limit)
+				.offset(offset),
+			db.$count(schema.impactCaseStudies, where),
 		]);
 
 		return NextResponse.json({ items, total: countResult });
