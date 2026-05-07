@@ -54,18 +54,23 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 		}),
 	);
 
-	const unitId = uuidv7();
+	const unitVersionId = uuidv7();
+	const unitEntityId = uuidv7();
 
 	await db.insert(schema.entities).values({
-		id: unitId,
-		slug: `unit-${unitId}`,
-		documentId: uuidv7(),
-		statusId: entityStatus.id,
+		id: unitEntityId,
+		slug: `unit-${unitVersionId}`,
 		typeId: entityType.id,
 	});
 
+	await db.insert(schema.entityVersions).values({
+		id: unitVersionId,
+		entityId: unitEntityId,
+		statusId: entityStatus.id,
+	});
+
 	await db.insert(schema.organisationalUnits).values({
-		id: unitId,
+		id: unitVersionId,
 		name: f.company.name(),
 		summary: f.lorem.paragraph(),
 		typeId: unitType.id,
@@ -74,7 +79,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	await db.insert(schema.organisationalUnitsToSocialMedia).values(
 		items.map((item) => {
 			return {
-				organisationalUnitId: unitId,
+				organisationalUnitId: unitVersionId,
 				socialMediaId: item.socialMedia.id,
 			};
 		}),

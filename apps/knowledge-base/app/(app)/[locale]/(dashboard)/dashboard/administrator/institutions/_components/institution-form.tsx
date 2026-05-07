@@ -29,7 +29,7 @@ interface InstitutionFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	institution?: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
 		description?: JSONContent;
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
@@ -147,7 +147,7 @@ export function InstitutionForm(props: Readonly<InstitutionFormProps>): ReactNod
 				{institution != null ? (
 					<Fragment>
 						<input name="id" type="hidden" value={institution.id} />
-						<input name="documentId" type="hidden" value={institution.entity.documentId} />
+						<input name="documentId" type="hidden" value={institution.entityVersion.entity.id} />
 					</Fragment>
 				) : null}
 

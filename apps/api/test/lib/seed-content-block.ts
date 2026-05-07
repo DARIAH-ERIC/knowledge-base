@@ -8,7 +8,7 @@ import type { Database } from "@/middlewares/db";
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function seedContentBlock(
 	db: Database,
-	entityId: string,
+	entityVersionId: string,
 	entityTypeId: string,
 	fieldName: string,
 	// eslint-disable-next-line unicorn/no-object-as-default-parameter
@@ -31,7 +31,9 @@ export async function seedContentBlock(
 	const fieldId = uuidv7();
 	const blockId = uuidv7();
 
-	await db.insert(schema.fields).values({ id: fieldId, entityId, fieldNameId: fieldNameRecord.id });
+	await db
+		.insert(schema.fields)
+		.values({ id: fieldId, entityVersionId, fieldNameId: fieldNameRecord.id });
 	await db
 		.insert(schema.contentBlocks)
 		.values({ id: blockId, fieldId, typeId: blockType.id, position: 0 });

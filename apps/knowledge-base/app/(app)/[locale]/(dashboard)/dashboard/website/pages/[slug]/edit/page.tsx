@@ -45,8 +45,10 @@ export default async function DashboardWebsiteEditPageItemPage(
 			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 			db.query.pages.findFirst({
 				where: {
-					entity: {
-						slug,
+					entityVersion: {
+						entity: {
+							slug,
+						},
 					},
 				},
 				columns: {
@@ -55,10 +57,15 @@ export default async function DashboardWebsiteEditPageItemPage(
 					summary: true,
 				},
 				with: {
-					entity: {
-						columns: {
-							documentId: true,
-							slug: true,
+					entityVersion: {
+						columns: { id: true },
+						with: {
+							entity: {
+								columns: {
+									id: true,
+									slug: true,
+								},
+							},
 						},
 					},
 					image: {
@@ -77,7 +84,8 @@ export default async function DashboardWebsiteEditPageItemPage(
 		notFound();
 	}
 
-	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(pageItem.id);
+	const documentId = pageItem.entityVersion.entity.id;
+	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(documentId);
 
 	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
 		getEntityRelationOptionsByIds(relatedEntityIds),

@@ -61,7 +61,8 @@ export async function getPersons(params: Readonly<GetPersonsParams>): Promise<Pe
 				slug: schema.entities.slug,
 			})
 			.from(schema.persons)
-			.innerJoin(schema.entities, eq(schema.persons.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.where(where)
 			.orderBy(orderBy)
 			.limit(limit)
@@ -69,7 +70,8 @@ export async function getPersons(params: Readonly<GetPersonsParams>): Promise<Pe
 		db
 			.select({ total: count() })
 			.from(schema.persons)
-			.innerJoin(schema.entities, eq(schema.persons.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.where(where),
 	]);
 
@@ -103,8 +105,10 @@ export async function getPersonBySlugForAdmin(currentUser: Pick<User, "role">, s
 
 	return db.query.persons.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
+				entity: {
+					slug,
+				},
 			},
 		},
 		columns: {
@@ -116,12 +120,15 @@ export async function getPersonBySlugForAdmin(currentUser: Pick<User, "role">, s
 			sortName: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
-				},
+			entityVersion: {
+				columns: { id: true },
 				with: {
+					entity: {
+						columns: {
+							id: true,
+							slug: true,
+						},
+					},
 					status: {
 						columns: {
 							id: true,
@@ -160,7 +167,7 @@ export async function getPersonEditDataForAdmin(currentUser: Pick<User, "role">,
 		)
 		.where(
 			and(
-				eq(schema.fields.entityId, person.id),
+				eq(schema.fields.entityVersionId, person.id),
 				eq(schema.entityTypesFieldsNames.fieldName, "biography"),
 			),
 		)

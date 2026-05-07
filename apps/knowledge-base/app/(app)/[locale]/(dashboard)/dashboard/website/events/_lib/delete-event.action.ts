@@ -1,12 +1,14 @@
 "use server";
 
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
 import { assertAdmin } from "@/lib/auth/session";
+import { deleteDocumentVersionTail } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
-import { eq, inArray, or } from "@/lib/db/sql";
+import { eq } from "@/lib/db/sql";
 import {
 	deleteWebsiteDocument,
 	getWebsiteDocumentDescriptorByEntityId,
@@ -15,37 +17,22 @@ import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function deleteEventAction(id: string): Promise<void> {
 	await assertAdmin();
-	const descriptor = await getWebsiteDocumentDescriptorByEntityId(id);
 
-	await db.transaction(async (tx) => {
-		const entityFields = await tx
-			.select({ id: schema.fields.id })
-			.from(schema.fields)
-			.where(eq(schema.fields.entityId, id));
+	const descriptor = await db.transaction(async (tx) => {
+		const entityVersion = await tx.query.entityVersions.findFirst({
+			where: { id },
+			columns: { id: true, entityId: true },
+		});
 
-		if (entityFields.length > 0) {
-			const fieldIds = entityFields.map((f) => {
-				return f.id;
-			});
+		assert(entityVersion);
 
-			await tx.delete(schema.contentBlocks).where(inArray(schema.contentBlocks.fieldId, fieldIds));
-			await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
-		}
+		const documentId = entityVersion.entityId;
+		const documentDescriptor = await getWebsiteDocumentDescriptorByEntityId(documentId);
 
-		await tx.delete(schema.entitiesToResources).where(eq(schema.entitiesToResources.entityId, id));
+		await tx.delete(schema.events).where(eq(schema.events.id, entityVersion.id));
+		await deleteDocumentVersionTail(tx, entityVersion.id, documentId);
 
-		await tx
-			.delete(schema.entitiesToEntities)
-			.where(
-				or(
-					eq(schema.entitiesToEntities.entityId, id),
-					eq(schema.entitiesToEntities.relatedEntityId, id),
-				),
-			);
-
-		await tx.delete(schema.events).where(eq(schema.events.id, id));
-
-		await tx.delete(schema.entities).where(eq(schema.entities.id, id));
+		return documentDescriptor;
 	});
 
 	after(async () => {

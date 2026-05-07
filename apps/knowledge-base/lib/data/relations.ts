@@ -175,22 +175,22 @@ export async function getAvailableResources() {
 
 export async function syncEntityRelations(
 	tx: Transaction,
-	entityId: string,
-	relatedEntityIds: Array<string>,
+	documentId: string,
+	relatedDocumentIds: Array<string>,
 	relatedResourceIds: Array<string>,
 ) {
 	const [existingEntityRows, existingResourceRows] = await Promise.all([
 		tx
 			.select({ relatedEntityId: schema.entitiesToEntities.relatedEntityId })
 			.from(schema.entitiesToEntities)
-			.where(eq(schema.entitiesToEntities.entityId, entityId)),
+			.where(eq(schema.entitiesToEntities.entityId, documentId)),
 		tx
 			.select({ resourceId: schema.entitiesToResources.resourceId })
 			.from(schema.entitiesToResources)
-			.where(eq(schema.entitiesToResources.entityId, entityId)),
+			.where(eq(schema.entitiesToResources.entityId, documentId)),
 	]);
 
-	const existingEntityIds = new Set(
+	const existingDocumentIds = new Set(
 		existingEntityRows.map((r) => {
 			return r.relatedEntityId;
 		}),
@@ -201,11 +201,11 @@ export async function syncEntityRelations(
 		}),
 	);
 
-	const entityIdsToDelete = [...existingEntityIds].filter((x) => {
-		return !relatedEntityIds.includes(x);
+	const documentIdsToDelete = [...existingDocumentIds].filter((x) => {
+		return !relatedDocumentIds.includes(x);
 	});
-	const entityIdsToAdd = relatedEntityIds.filter((x) => {
-		return !existingEntityIds.has(x);
+	const documentIdsToAdd = relatedDocumentIds.filter((x) => {
+		return !existingDocumentIds.has(x);
 	});
 
 	const resourceIdsToDelete = [...existingResourceIds].filter((x) => {
@@ -216,20 +216,20 @@ export async function syncEntityRelations(
 	});
 
 	await Promise.all([
-		entityIdsToDelete.length > 0
+		documentIdsToDelete.length > 0
 			? tx
 					.delete(schema.entitiesToEntities)
 					.where(
 						and(
-							eq(schema.entitiesToEntities.entityId, entityId),
-							inArray(schema.entitiesToEntities.relatedEntityId, entityIdsToDelete),
+							eq(schema.entitiesToEntities.entityId, documentId),
+							inArray(schema.entitiesToEntities.relatedEntityId, documentIdsToDelete),
 						),
 					)
 			: Promise.resolve(),
-		entityIdsToAdd.length > 0
+		documentIdsToAdd.length > 0
 			? tx.insert(schema.entitiesToEntities).values(
-					entityIdsToAdd.map((relatedEntityId) => {
-						return { entityId, relatedEntityId };
+					documentIdsToAdd.map((relatedEntityId) => {
+						return { entityId: documentId, relatedEntityId };
 					}),
 				)
 			: Promise.resolve(),
@@ -238,7 +238,7 @@ export async function syncEntityRelations(
 					.delete(schema.entitiesToResources)
 					.where(
 						and(
-							eq(schema.entitiesToResources.entityId, entityId),
+							eq(schema.entitiesToResources.entityId, documentId),
 							inArray(schema.entitiesToResources.resourceId, resourceIdsToDelete),
 						),
 					)
@@ -246,23 +246,23 @@ export async function syncEntityRelations(
 		resourceIdsToAdd.length > 0
 			? tx.insert(schema.entitiesToResources).values(
 					resourceIdsToAdd.map((resourceId) => {
-						return { entityId, resourceId };
+						return { entityId: documentId, resourceId };
 					}),
 				)
 			: Promise.resolve(),
 	]);
 }
 
-export async function getEntityRelations(entityId: string) {
+export async function getEntityRelations(documentId: string) {
 	const [entityRelations, resourceRelations] = await Promise.all([
 		db
 			.select({ relatedEntityId: schema.entitiesToEntities.relatedEntityId })
 			.from(schema.entitiesToEntities)
-			.where(eq(schema.entitiesToEntities.entityId, entityId)),
+			.where(eq(schema.entitiesToEntities.entityId, documentId)),
 		db
 			.select({ resourceId: schema.entitiesToResources.resourceId })
 			.from(schema.entitiesToResources)
-			.where(eq(schema.entitiesToResources.entityId, entityId)),
+			.where(eq(schema.entitiesToResources.entityId, documentId)),
 	]);
 
 	return {

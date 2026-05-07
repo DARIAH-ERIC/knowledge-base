@@ -11,6 +11,7 @@ import * as v from "valibot";
 
 import { CreateGovernanceBodyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/create-governance-body.schema";
 import { assertAdmin } from "@/lib/auth/session";
+import { createPublishedDocument } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -62,19 +63,7 @@ export const createGovernanceBodyAction = createServerAction(
 
 			assert(orgUnitType);
 
-			const entityStatus = await tx.query.entityStatus.findFirst({
-				where: { type: "published" },
-				columns: { id: true },
-			});
-
-			assert(entityStatus);
-
-			const [entity] = await tx
-				.insert(schema.entities)
-				.values({ slug, statusId: entityStatus.id, typeId: entityType.id })
-				.returning({ id: schema.entities.id });
-
-			assert(entity);
+			const { documentId, versionId } = await createPublishedDocument(tx, entityType.id, slug);
 
 			let imageId: string | null = null;
 
@@ -90,7 +79,7 @@ export const createGovernanceBodyAction = createServerAction(
 			}
 
 			await tx.insert(schema.organisationalUnits).values({
-				id: entity.id,
+				id: versionId,
 				acronym,
 				imageId,
 				name,
@@ -101,7 +90,7 @@ export const createGovernanceBodyAction = createServerAction(
 			if (relatedEntityIds.length > 0) {
 				await tx.insert(schema.entitiesToEntities).values(
 					relatedEntityIds.map((relatedEntityId) => {
-						return { entityId: entity.id, relatedEntityId };
+						return { entityId: documentId, relatedEntityId };
 					}),
 				);
 			}
@@ -109,7 +98,7 @@ export const createGovernanceBodyAction = createServerAction(
 			if (relatedResourceIds.length > 0) {
 				await tx.insert(schema.entitiesToResources).values(
 					relatedResourceIds.map((resourceId) => {
-						return { entityId: entity.id, resourceId };
+						return { entityId: documentId, resourceId };
 					}),
 				);
 			}
@@ -123,7 +112,7 @@ export const createGovernanceBodyAction = createServerAction(
 
 			const [descriptionField] = await tx
 				.insert(schema.fields)
-				.values({ entityId: entity.id, fieldNameId: descriptionFieldName.id })
+				.values({ entityVersionId: versionId, fieldNameId: descriptionFieldName.id })
 				.returning({ id: schema.fields.id });
 
 			assert(descriptionField);

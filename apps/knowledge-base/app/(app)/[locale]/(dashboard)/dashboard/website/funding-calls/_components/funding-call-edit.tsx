@@ -12,7 +12,8 @@ import { updateFundingCallAction } from "@/app/(app)/[locale]/(dashboard)/dashbo
 interface FundingCallEditFormProps {
 	contentBlocks: Array<ContentBlock>;
 	fundingCall: Pick<schema.FundingCall, "id" | "duration" | "title" | "summary"> & {
-		entity: Pick<schema.Entity, "documentId" | "slug"> & {
+		entityVersion: {
+			entity: Pick<schema.Entity, "id" | "slug">;
 			status: Pick<schema.EntityStatus, "id" | "type">;
 		};
 	};

@@ -34,8 +34,10 @@ export default async function DashboardWebsiteImpactCaseStudyDetailsPage(
 
 	const impactCaseStudy = await db.query.impactCaseStudies.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
+				entity: {
+					slug,
+				},
 			},
 		},
 		columns: {
@@ -44,10 +46,15 @@ export default async function DashboardWebsiteImpactCaseStudyDetailsPage(
 			summary: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
+			entityVersion: {
+				columns: { id: true },
+				with: {
+					entity: {
+						columns: {
+							id: true,
+							slug: true,
+						},
+					},
 				},
 			},
 			image: {

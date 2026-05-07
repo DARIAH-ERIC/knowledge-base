@@ -1,8 +1,7 @@
-import { createDatabaseService } from "@dariah-eric/database";
+import { createDatabaseService, type Transaction } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
+import { and, eq, inArray, or, sql } from "@dariah-eric/database/sql";
 import type { InferOk } from "better-result";
-
-import { and, eq, inArray, or, sql } from "@/lib/db/sql";
 
 import { env } from "../../../config/env.config";
 
@@ -68,7 +67,7 @@ export class DatabaseService {
 		return { id: entity.id, name: `${entity.type.type} / ${entity.slug}` };
 	}
 
-	/** Returns related entity and resource IDs for a given entity (by its DB id). */
+	/** Returns related entity and resource IDs for a given entity (by its document DB id). */
 	async getEntityRelations(
 		entityId: string,
 	): Promise<{ relatedEntityIds: Array<string>; relatedResourceIds: Array<string> }> {
@@ -112,11 +111,16 @@ export class DatabaseService {
 		return row ?? null;
 	}
 
-	/** Finds a news item by exact title. */
+	/**
+	 * Finds a news item by exact title.
+	 * Returns the document entity ID (entities.id) so callers can use it with
+	 * getEntityRelations / getEntitiesToEntitiesRow.
+	 */
 	async getNewsItemByTitle(title: string): Promise<{ id: string } | null> {
 		const [row] = await this.db
-			.select({ id: schema.news.id })
+			.select({ id: schema.entityVersions.entityId })
 			.from(schema.news)
+			.innerJoin(schema.entityVersions, eq(schema.news.id, schema.entityVersions.id))
 			.where(eq(schema.news.title, title))
 			.limit(1);
 
@@ -137,58 +141,76 @@ export class DatabaseService {
 		return scope;
 	}
 
+	private async deleteDocumentVersionTail(
+		tx: Transaction,
+		versionId: string,
+		documentId: string,
+	): Promise<void> {
+		const entityFields = await tx
+			.select({ id: schema.fields.id })
+			.from(schema.fields)
+			.where(eq(schema.fields.entityVersionId, versionId));
+
+		if (entityFields.length > 0) {
+			const fieldIds = (entityFields as Array<{ id: string }>).map((f) => {
+				return f.id;
+			});
+
+			await tx.delete(schema.contentBlocks).where(inArray(schema.contentBlocks.fieldId, fieldIds));
+			await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+		}
+
+		await tx
+			.delete(schema.entitiesToResources)
+			.where(eq(schema.entitiesToResources.entityId, documentId));
+
+		await tx
+			.delete(schema.entitiesToEntities)
+			.where(
+				or(
+					eq(schema.entitiesToEntities.entityId, documentId),
+					eq(schema.entitiesToEntities.relatedEntityId, documentId),
+				),
+			);
+
+		await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, versionId));
+		await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
+	}
+
+	private async resolveVersion(
+		tx: Transaction,
+		versionId: string,
+	): Promise<{ versionId: string; documentId: string } | null> {
+		const [row] = await tx
+			.select({ id: schema.entityVersions.id, entityId: schema.entityVersions.entityId })
+			.from(schema.entityVersions)
+			.where(eq(schema.entityVersions.id, versionId))
+			.limit(1);
+
+		if (row == null) return null;
+		return { versionId: row.id, documentId: row.entityId };
+	}
+
 	/**
 	 * Cascade-deletes a project and all its related records.
 	 * Replicates the logic in `delete-project.action.ts`.
 	 */
-	async deleteProject(entityId: string): Promise<void> {
+	async deleteProject(versionId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
-			const partners = await tx
-				.select({ id: schema.projectsToOrganisationalUnits.id })
-				.from(schema.projectsToOrganisationalUnits)
-				.where(eq(schema.projectsToOrganisationalUnits.projectId, entityId));
-
-			if (partners.length > 0) {
-				const partnerIds = partners.map((p) => {
-					return p.id;
-				});
-
-				await tx
-					.delete(schema.projectsToOrganisationalUnits)
-					.where(inArray(schema.projectsToOrganisationalUnits.id, partnerIds));
-			}
-
-			const entityFields = await tx
-				.select({ id: schema.fields.id })
-				.from(schema.fields)
-				.where(eq(schema.fields.entityId, entityId));
-
-			if (entityFields.length > 0) {
-				const fieldIds = entityFields.map((f) => {
-					return f.id;
-				});
-
-				await tx
-					.delete(schema.contentBlocks)
-					.where(inArray(schema.contentBlocks.fieldId, fieldIds));
-				await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
-			}
+			const ids = await this.resolveVersion(tx, versionId);
+			if (ids == null) return;
+			const { documentId } = ids;
 
 			await tx
-				.delete(schema.entitiesToResources)
-				.where(eq(schema.entitiesToResources.entityId, entityId));
+				.delete(schema.projectsToOrganisationalUnits)
+				.where(eq(schema.projectsToOrganisationalUnits.projectId, versionId));
 
 			await tx
-				.delete(schema.entitiesToEntities)
-				.where(
-					or(
-						eq(schema.entitiesToEntities.entityId, entityId),
-						eq(schema.entitiesToEntities.relatedEntityId, entityId),
-					),
-				);
+				.delete(schema.projectsToSocialMedia)
+				.where(eq(schema.projectsToSocialMedia.projectId, versionId));
 
-			await tx.delete(schema.projects).where(eq(schema.projects.id, entityId));
-			await tx.delete(schema.entities).where(eq(schema.entities.id, entityId));
+			await tx.delete(schema.projects).where(eq(schema.projects.id, versionId));
+			await this.deleteDocumentVersionTail(tx, versionId, documentId);
 		});
 	}
 
@@ -213,39 +235,14 @@ export class DatabaseService {
 	 * Cascade-deletes a page item and all its related records.
 	 * Replicates the logic in `delete-page-item.action.ts`.
 	 */
-	async deletePageItem(entityId: string): Promise<void> {
+	async deletePageItem(versionId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
-			const entityFields = await tx
-				.select({ id: schema.fields.id })
-				.from(schema.fields)
-				.where(eq(schema.fields.entityId, entityId));
+			const ids = await this.resolveVersion(tx, versionId);
+			if (ids == null) return;
+			const { documentId } = ids;
 
-			if (entityFields.length > 0) {
-				const fieldIds = entityFields.map((f) => {
-					return f.id;
-				});
-
-				await tx
-					.delete(schema.contentBlocks)
-					.where(inArray(schema.contentBlocks.fieldId, fieldIds));
-				await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
-			}
-
-			await tx
-				.delete(schema.entitiesToResources)
-				.where(eq(schema.entitiesToResources.entityId, entityId));
-
-			await tx
-				.delete(schema.entitiesToEntities)
-				.where(
-					or(
-						eq(schema.entitiesToEntities.entityId, entityId),
-						eq(schema.entitiesToEntities.relatedEntityId, entityId),
-					),
-				);
-
-			await tx.delete(schema.pages).where(eq(schema.pages.id, entityId));
-			await tx.delete(schema.entities).where(eq(schema.entities.id, entityId));
+			await tx.delete(schema.pages).where(eq(schema.pages.id, versionId));
+			await this.deleteDocumentVersionTail(tx, versionId, documentId);
 		});
 	}
 
@@ -270,44 +267,19 @@ export class DatabaseService {
 	 * Cascade-deletes an impact case study and all its related records.
 	 * Replicates the logic in `delete-impact-case-study.action.ts`.
 	 */
-	async deleteImpactCaseStudy(entityId: string): Promise<void> {
+	async deleteImpactCaseStudy(versionId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
-			const entityFields = await tx
-				.select({ id: schema.fields.id })
-				.from(schema.fields)
-				.where(eq(schema.fields.entityId, entityId));
-
-			if (entityFields.length > 0) {
-				const fieldIds = entityFields.map((f) => {
-					return f.id;
-				});
-
-				await tx
-					.delete(schema.contentBlocks)
-					.where(inArray(schema.contentBlocks.fieldId, fieldIds));
-				await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
-			}
-
-			await tx
-				.delete(schema.entitiesToResources)
-				.where(eq(schema.entitiesToResources.entityId, entityId));
-
-			await tx
-				.delete(schema.entitiesToEntities)
-				.where(
-					or(
-						eq(schema.entitiesToEntities.entityId, entityId),
-						eq(schema.entitiesToEntities.relatedEntityId, entityId),
-					),
-				);
+			const ids = await this.resolveVersion(tx, versionId);
+			if (ids == null) return;
+			const { documentId } = ids;
 
 			await tx
 				.delete(schema.impactCaseStudiesToPersons)
-				.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyId, entityId));
+				.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyId, versionId));
 
-			await tx.delete(schema.impactCaseStudies).where(eq(schema.impactCaseStudies.id, entityId));
+			await tx.delete(schema.impactCaseStudies).where(eq(schema.impactCaseStudies.id, versionId));
 
-			await tx.delete(schema.entities).where(eq(schema.entities.id, entityId));
+			await this.deleteDocumentVersionTail(tx, versionId, documentId);
 		});
 	}
 
@@ -332,40 +304,19 @@ export class DatabaseService {
 	 * Cascade-deletes a spotlight article and all its related records.
 	 * Replicates the logic in `delete-spotlight-article.action.ts`.
 	 */
-	async deleteSpotlightArticle(entityId: string): Promise<void> {
+	async deleteSpotlightArticle(versionId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
-			const entityFields = await tx
-				.select({ id: schema.fields.id })
-				.from(schema.fields)
-				.where(eq(schema.fields.entityId, entityId));
-
-			if (entityFields.length > 0) {
-				const fieldIds = entityFields.map((f) => {
-					return f.id;
-				});
-
-				await tx
-					.delete(schema.contentBlocks)
-					.where(inArray(schema.contentBlocks.fieldId, fieldIds));
-				await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
-			}
+			const ids = await this.resolveVersion(tx, versionId);
+			if (ids == null) return;
+			const { documentId } = ids;
 
 			await tx
-				.delete(schema.entitiesToResources)
-				.where(eq(schema.entitiesToResources.entityId, entityId));
+				.delete(schema.spotlightArticlesToPersons)
+				.where(eq(schema.spotlightArticlesToPersons.spotlightArticleId, versionId));
 
-			await tx
-				.delete(schema.entitiesToEntities)
-				.where(
-					or(
-						eq(schema.entitiesToEntities.entityId, entityId),
-						eq(schema.entitiesToEntities.relatedEntityId, entityId),
-					),
-				);
+			await tx.delete(schema.spotlightArticles).where(eq(schema.spotlightArticles.id, versionId));
 
-			await tx.delete(schema.spotlightArticles).where(eq(schema.spotlightArticles.id, entityId));
-
-			await tx.delete(schema.entities).where(eq(schema.entities.id, entityId));
+			await this.deleteDocumentVersionTail(tx, versionId, documentId);
 		});
 	}
 
@@ -390,39 +341,14 @@ export class DatabaseService {
 	 * Cascade-deletes an event and all its related records.
 	 * Replicates the logic in `delete-event.action.ts`.
 	 */
-	async deleteEvent(entityId: string): Promise<void> {
+	async deleteEvent(versionId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
-			const entityFields = await tx
-				.select({ id: schema.fields.id })
-				.from(schema.fields)
-				.where(eq(schema.fields.entityId, entityId));
+			const ids = await this.resolveVersion(tx, versionId);
+			if (ids == null) return;
+			const { documentId } = ids;
 
-			if (entityFields.length > 0) {
-				const fieldIds = entityFields.map((f) => {
-					return f.id;
-				});
-
-				await tx
-					.delete(schema.contentBlocks)
-					.where(inArray(schema.contentBlocks.fieldId, fieldIds));
-				await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
-			}
-
-			await tx
-				.delete(schema.entitiesToResources)
-				.where(eq(schema.entitiesToResources.entityId, entityId));
-
-			await tx
-				.delete(schema.entitiesToEntities)
-				.where(
-					or(
-						eq(schema.entitiesToEntities.entityId, entityId),
-						eq(schema.entitiesToEntities.relatedEntityId, entityId),
-					),
-				);
-
-			await tx.delete(schema.events).where(eq(schema.events.id, entityId));
-			await tx.delete(schema.entities).where(eq(schema.entities.id, entityId));
+			await tx.delete(schema.events).where(eq(schema.events.id, versionId));
+			await this.deleteDocumentVersionTail(tx, versionId, documentId);
 		});
 	}
 
@@ -447,39 +373,14 @@ export class DatabaseService {
 	 * Cascade-deletes a news item and all its related records.
 	 * Replicates the logic in `delete-news-item.action.ts`.
 	 */
-	async deleteNewsItem(entityId: string): Promise<void> {
+	async deleteNewsItem(versionId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
-			const entityFields = await tx
-				.select({ id: schema.fields.id })
-				.from(schema.fields)
-				.where(eq(schema.fields.entityId, entityId));
+			const ids = await this.resolveVersion(tx, versionId);
+			if (ids == null) return;
+			const { documentId } = ids;
 
-			if (entityFields.length > 0) {
-				const fieldIds = entityFields.map((f) => {
-					return f.id;
-				});
-
-				await tx
-					.delete(schema.contentBlocks)
-					.where(inArray(schema.contentBlocks.fieldId, fieldIds));
-				await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
-			}
-
-			await tx
-				.delete(schema.entitiesToResources)
-				.where(eq(schema.entitiesToResources.entityId, entityId));
-
-			await tx
-				.delete(schema.entitiesToEntities)
-				.where(
-					or(
-						eq(schema.entitiesToEntities.entityId, entityId),
-						eq(schema.entitiesToEntities.relatedEntityId, entityId),
-					),
-				);
-
-			await tx.delete(schema.news).where(eq(schema.news.id, entityId));
-			await tx.delete(schema.entities).where(eq(schema.entities.id, entityId));
+			await tx.delete(schema.news).where(eq(schema.news.id, versionId));
+			await this.deleteDocumentVersionTail(tx, versionId, documentId);
 		});
 	}
 
@@ -504,43 +405,18 @@ export class DatabaseService {
 	 * Cascade-deletes a person and all their related records.
 	 * Replicates the logic in `delete-person.action.ts`.
 	 */
-	async deletePerson(entityId: string): Promise<void> {
+	async deletePerson(versionId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
+			const ids = await this.resolveVersion(tx, versionId);
+			if (ids == null) return;
+			const { documentId } = ids;
+
 			await tx
 				.delete(schema.personsToOrganisationalUnits)
-				.where(eq(schema.personsToOrganisationalUnits.personId, entityId));
+				.where(eq(schema.personsToOrganisationalUnits.personId, versionId));
 
-			const entityFields = await tx
-				.select({ id: schema.fields.id })
-				.from(schema.fields)
-				.where(eq(schema.fields.entityId, entityId));
-
-			if (entityFields.length > 0) {
-				const fieldIds = entityFields.map((f) => {
-					return f.id;
-				});
-
-				await tx
-					.delete(schema.contentBlocks)
-					.where(inArray(schema.contentBlocks.fieldId, fieldIds));
-				await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
-			}
-
-			await tx
-				.delete(schema.entitiesToResources)
-				.where(eq(schema.entitiesToResources.entityId, entityId));
-
-			await tx
-				.delete(schema.entitiesToEntities)
-				.where(
-					or(
-						eq(schema.entitiesToEntities.entityId, entityId),
-						eq(schema.entitiesToEntities.relatedEntityId, entityId),
-					),
-				);
-
-			await tx.delete(schema.persons).where(eq(schema.persons.id, entityId));
-			await tx.delete(schema.entities).where(eq(schema.entities.id, entityId));
+			await tx.delete(schema.persons).where(eq(schema.persons.id, versionId));
+			await this.deleteDocumentVersionTail(tx, versionId, documentId);
 		});
 	}
 
@@ -565,51 +441,26 @@ export class DatabaseService {
 	 * Cascade-deletes a working group and all its related records.
 	 * Replicates the logic in `delete-working-group.action.ts`.
 	 */
-	async deleteWorkingGroup(entityId: string): Promise<void> {
+	async deleteWorkingGroup(versionId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
+			const ids = await this.resolveVersion(tx, versionId);
+			if (ids == null) return;
+			const { documentId } = ids;
+
 			await tx
 				.delete(schema.organisationalUnitsRelations)
 				.where(
 					or(
-						eq(schema.organisationalUnitsRelations.unitId, entityId),
-						eq(schema.organisationalUnitsRelations.relatedUnitId, entityId),
-					),
-				);
-
-			const entityFields = await tx
-				.select({ id: schema.fields.id })
-				.from(schema.fields)
-				.where(eq(schema.fields.entityId, entityId));
-
-			if (entityFields.length > 0) {
-				const fieldIds = entityFields.map((f) => {
-					return f.id;
-				});
-
-				await tx
-					.delete(schema.contentBlocks)
-					.where(inArray(schema.contentBlocks.fieldId, fieldIds));
-				await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
-			}
-
-			await tx
-				.delete(schema.entitiesToResources)
-				.where(eq(schema.entitiesToResources.entityId, entityId));
-
-			await tx
-				.delete(schema.entitiesToEntities)
-				.where(
-					or(
-						eq(schema.entitiesToEntities.entityId, entityId),
-						eq(schema.entitiesToEntities.relatedEntityId, entityId),
+						eq(schema.organisationalUnitsRelations.unitId, versionId),
+						eq(schema.organisationalUnitsRelations.relatedUnitId, versionId),
 					),
 				);
 
 			await tx
 				.delete(schema.organisationalUnits)
-				.where(eq(schema.organisationalUnits.id, entityId));
+				.where(eq(schema.organisationalUnits.id, versionId));
 
-			await tx.delete(schema.entities).where(eq(schema.entities.id, entityId));
+			await this.deleteDocumentVersionTail(tx, versionId, documentId);
 		});
 	}
 

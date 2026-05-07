@@ -4,6 +4,7 @@ import { and, asc, count, desc, eq, type SQL, sql } from "@/services/db/sql";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { flattenEntityVersion } from "@/lib/entity-version";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { EventOrder } from "@/routes/events/schemas";
@@ -69,15 +70,18 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 				isFullDay: schema.events.isFullDay,
 				entity: {
 					slug: schema.entities.slug,
-					updatedAt: schema.entities.updatedAt,
+				},
+				entityVersion: {
+					updatedAt: schema.entityVersions.updatedAt,
 				},
 				image: {
 					key: schema.assets.key,
 				},
 			})
 			.from(schema.events)
-			.innerJoin(schema.entities, eq(schema.events.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.leftJoin(schema.assets, eq(schema.assets.id, schema.events.imageId))
 			.where(and(rangeFilter, eq(schema.entityStatus.type, "published")))
 			.orderBy(orderBy)
@@ -86,8 +90,8 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 		db
 			.select({ total: count() })
 			.from(schema.events)
-			.innerJoin(schema.entities, eq(schema.events.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(and(rangeFilter, eq(schema.entityStatus.type, "published"))),
 	]);
 
@@ -106,7 +110,8 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 			end: item.duration.end?.toISOString(),
 		};
 
-		return { ...item, duration, image, publishedAt: item.entity.updatedAt.toISOString() };
+		const { entityVersion, ...rest } = item;
+		return { ...rest, duration, image, publishedAt: entityVersion.updatedAt.toISOString() };
 	});
 
 	return { data, limit, offset, total };
@@ -171,16 +176,18 @@ async function getAdjacentEvents(db: Database | Transaction, params: GetAdjacent
 		db
 			.select(adjacentColumns)
 			.from(schema.events)
-			.innerJoin(schema.entities, eq(schema.events.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(and(sql`${cursor} < ${currentCursor}`, eq(schema.entityStatus.type, "published")))
 			.orderBy(desc(lower), desc(schema.events.id))
 			.limit(1),
 		db
 			.select(adjacentColumns)
 			.from(schema.events)
-			.innerJoin(schema.entities, eq(schema.events.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(and(sql`${cursor} > ${currentCursor}`, eq(schema.entityStatus.type, "published")))
 			.orderBy(asc(lower), asc(schema.events.id))
 			.limit(1),
@@ -208,7 +215,7 @@ export async function getEventById(db: Database | Transaction, params: GetEventB
 		db.query.events.findFirst({
 			where: {
 				id,
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -224,10 +231,12 @@ export async function getEventById(db: Database | Transaction, params: GetEventB
 				website: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -261,10 +270,9 @@ export async function getEventById(db: Database | Transaction, params: GetEventB
 	]);
 
 	return {
-		...item,
+		...flattenEntityVersion(item),
 		duration,
 		image,
-		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
 		links,
 		relatedEntities,
@@ -287,7 +295,7 @@ export async function getEventSlugs(db: Database | Transaction, params: GetEvent
 	const [items, aggregate] = await Promise.all([
 		db.query.events.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -297,10 +305,12 @@ export async function getEventSlugs(db: Database | Transaction, params: GetEvent
 				id: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -310,7 +320,7 @@ export async function getEventSlugs(db: Database | Transaction, params: GetEvent
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -318,14 +328,16 @@ export async function getEventSlugs(db: Database | Transaction, params: GetEvent
 		db
 			.select({ total: count() })
 			.from(schema.events)
-			.innerJoin(schema.entities, eq(schema.events.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
 
-	const data = items;
+	const data = items.map(({ id, entityVersion }) => {
+		return { id, entity: { slug: entityVersion.entity.slug } };
+	});
 
 	return { data, limit, offset, total };
 }
@@ -341,10 +353,12 @@ export async function getEventBySlug(db: Database | Transaction, params: GetEven
 
 	const item = await db.query.events.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
 				status: {
 					type: "published",
+				},
+				entity: {
+					slug,
 				},
 			},
 		},
@@ -358,10 +372,12 @@ export async function getEventBySlug(db: Database | Transaction, params: GetEven
 			website: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
-					updatedAt: true,
+			entityVersion: {
+				columns: { updatedAt: true },
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
 				},
 			},
 			image: {
@@ -394,10 +410,9 @@ export async function getEventBySlug(db: Database | Transaction, params: GetEven
 	]);
 
 	return {
-		...item,
+		...flattenEntityVersion(item),
 		duration,
 		image,
-		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
 		links,
 		relatedEntities,

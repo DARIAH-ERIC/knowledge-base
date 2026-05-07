@@ -15,7 +15,8 @@ interface OpportunityEditFormProps {
 		schema.Opportunity,
 		"id" | "duration" | "sourceId" | "title" | "summary" | "website"
 	> & {
-		entity: Pick<schema.Entity, "documentId" | "slug"> & {
+		entityVersion: {
+			entity: Pick<schema.Entity, "id" | "slug">;
 			status: Pick<schema.EntityStatus, "id" | "type">;
 		};
 		source: Pick<schema.OpportunitySource, "id" | "source">;

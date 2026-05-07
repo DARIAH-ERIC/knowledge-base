@@ -51,8 +51,10 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 		db.query.spotlightArticles.findFirst({
 			where: {
-				entity: {
-					slug,
+				entityVersion: {
+					entity: {
+						slug,
+					},
 				},
 			},
 			columns: {
@@ -61,10 +63,15 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 				summary: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						documentId: true,
-						slug: true,
+				entityVersion: {
+					columns: { id: true },
+					with: {
+						entity: {
+							columns: {
+								id: true,
+								slug: true,
+							},
+						},
 					},
 				},
 				image: {
@@ -88,9 +95,10 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 		key: spotlightArticle.image.key,
 		options: imageGridOptions,
 	});
+	const documentId = spotlightArticle.entityVersion.entity.id;
 	const [{ relatedEntityIds, relatedResourceIds }, contributors, contentBlocks] = await Promise.all(
 		[
-			getEntityRelations(spotlightArticle.id),
+			getEntityRelations(documentId),
 			getSpotlightArticleContributors(spotlightArticle.id),
 			getEntityContentBlocks(spotlightArticle.id),
 		],

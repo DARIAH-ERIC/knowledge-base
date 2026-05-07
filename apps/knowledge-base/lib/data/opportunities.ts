@@ -32,8 +32,8 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 					? schema.opportunitySources.source
 					: desc(schema.opportunitySources.source)
 				: dir === "asc"
-					? schema.entities.updatedAt
-					: desc(schema.entities.updatedAt);
+					? schema.entityVersions.updatedAt
+					: desc(schema.entityVersions.updatedAt);
 
 	const [items, aggregate] = await Promise.all([
 		db
@@ -45,11 +45,12 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 				slug: schema.entities.slug,
 				summary: schema.opportunities.summary,
 				title: schema.opportunities.title,
-				updatedAt: schema.entities.updatedAt,
+				updatedAt: schema.entityVersions.updatedAt,
 				website: schema.opportunities.website,
 			})
 			.from(schema.opportunities)
-			.innerJoin(schema.entities, eq(schema.opportunities.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.opportunities.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.innerJoin(
 				schema.opportunitySources,
 				eq(schema.opportunities.sourceId, schema.opportunitySources.id),
@@ -61,8 +62,8 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 		db
 			.select({ total: count() })
 			.from(schema.opportunities)
-			.innerJoin(schema.entities, eq(schema.opportunities.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.opportunities.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where),
 	]);
 
@@ -100,9 +101,14 @@ export async function getOpportunityById(params: GetOpportunityByIdParams) {
 			id,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
+			entityVersion: {
+				columns: {},
+				with: {
+					entity: {
+						columns: {
+							slug: true,
+						},
+					},
 				},
 			},
 		},
@@ -112,89 +118,10 @@ export async function getOpportunityById(params: GetOpportunityByIdParams) {
 		return null;
 	}
 
-	const data = { ...item };
+	const { entityVersion, ...rest } = item;
+	const data = { ...rest, entity: entityVersion.entity };
 
 	return data;
-}
-
-interface CreateOpportunityParams extends schema.OpportunityInput {
-	slug: schema.EntityInput["slug"];
-}
-
-export async function createOpportunity(params: CreateOpportunityParams) {
-	const { duration, sourceId, slug, summary, title, website } = params;
-
-	const entityType = await db.query.entityTypes.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "opportunities" },
-	});
-
-	if (entityType == null) {
-		return null;
-	}
-
-	const entityStatus = await db.query.entityStatus.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "published" },
-	});
-
-	if (entityStatus == null) {
-		return null;
-	}
-
-	const entityId = await db.transaction(async (tx) => {
-		const [item] = await tx
-			.insert(schema.entities)
-			.values({
-				typeId: entityType.id,
-				statusId: entityStatus.id,
-				slug,
-			})
-			.returning({
-				id: schema.entities.id,
-			});
-
-		if (item == null) {
-			return tx.rollback();
-		}
-
-		const { id } = item;
-
-		const opportunity = {
-			id,
-			title,
-			summary,
-			sourceId,
-			duration,
-			website,
-		};
-
-		await tx.insert(schema.opportunities).values(opportunity);
-
-		const fieldNamesIds = await tx.query.entityTypesFieldsNames.findMany({
-			where: {
-				entityTypeId: entityType.id,
-			},
-		});
-
-		const fields = fieldNamesIds.map(({ id: fieldNameId }) => {
-			return { entityId: id, fieldNameId };
-		});
-
-		await tx.insert(schema.fields).values(fields).returning({
-			id: schema.fields.id,
-		});
-
-		return id;
-	});
-
-	return {
-		entityId,
-	};
 }
 
 export type OpportunitiesWithEntities = Awaited<ReturnType<typeof getOpportunities>>;

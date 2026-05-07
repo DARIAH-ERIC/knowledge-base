@@ -34,8 +34,10 @@ export default async function DashboardWebsiteDocumentOrPolicyDetailsPage(
 
 	const documentOrPolicy = await db.query.documentsPolicies.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
+				entity: {
+					slug,
+				},
 			},
 		},
 		columns: {
@@ -45,10 +47,15 @@ export default async function DashboardWebsiteDocumentOrPolicyDetailsPage(
 			url: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
+			entityVersion: {
+				columns: { id: true },
+				with: {
+					entity: {
+						columns: {
+							id: true,
+							slug: true,
+						},
+					},
 				},
 			},
 			document: {

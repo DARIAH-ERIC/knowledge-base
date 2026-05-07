@@ -12,6 +12,7 @@ import * as v from "valibot";
 
 import { CreateWorkingGroupActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/create-working-group.schema";
 import { assertAdmin } from "@/lib/auth/session";
+import { createPublishedDocument } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -48,7 +49,7 @@ export const createWorkingGroupAction = createServerAction(
 			result.output;
 
 		const slug = slugify(name);
-		let entityId: string | null = null;
+		let documentId: string | null = null;
 
 		await db.transaction(async (tx) => {
 			const entityType = await tx.query.entityTypes.findFirst({
@@ -83,20 +84,12 @@ export const createWorkingGroupAction = createServerAction(
 
 			assert(unitStatus);
 
-			const entityStatus = await tx.query.entityStatus.findFirst({
-				where: { type: "published" },
-				columns: { id: true },
-			});
-
-			assert(entityStatus);
-
-			const [entity] = await tx
-				.insert(schema.entities)
-				.values({ slug, statusId: entityStatus.id, typeId: entityType.id })
-				.returning({ id: schema.entities.id });
-
-			assert(entity);
-			entityId = entity.id;
+			const { documentId: docId, versionId } = await createPublishedDocument(
+				tx,
+				entityType.id,
+				slug,
+			);
+			documentId = docId;
 
 			let imageId: string | null = null;
 
@@ -112,7 +105,7 @@ export const createWorkingGroupAction = createServerAction(
 			}
 
 			await tx.insert(schema.organisationalUnits).values({
-				id: entity.id,
+				id: versionId,
 				acronym,
 				imageId,
 				name,
@@ -121,7 +114,7 @@ export const createWorkingGroupAction = createServerAction(
 			});
 
 			await tx.insert(schema.organisationalUnitsRelations).values({
-				unitId: entity.id,
+				unitId: versionId,
 				relatedUnitId: umbrellaUnit.id,
 				duration: { start: new Date() },
 				status: unitStatus.id,
@@ -130,7 +123,7 @@ export const createWorkingGroupAction = createServerAction(
 			if (relatedEntityIds.length > 0) {
 				await tx.insert(schema.entitiesToEntities).values(
 					relatedEntityIds.map((relatedEntityId) => {
-						return { entityId: entity.id, relatedEntityId };
+						return { entityId: docId, relatedEntityId };
 					}),
 				);
 			}
@@ -138,7 +131,7 @@ export const createWorkingGroupAction = createServerAction(
 			if (relatedResourceIds.length > 0) {
 				await tx.insert(schema.entitiesToResources).values(
 					relatedResourceIds.map((resourceId) => {
-						return { entityId: entity.id, resourceId };
+						return { entityId: docId, resourceId };
 					}),
 				);
 			}
@@ -152,7 +145,7 @@ export const createWorkingGroupAction = createServerAction(
 
 			const [descriptionField] = await tx
 				.insert(schema.fields)
-				.values({ entityId: entity.id, fieldNameId: descriptionFieldName.id })
+				.values({ entityVersionId: versionId, fieldNameId: descriptionFieldName.id })
 				.returning({ id: schema.fields.id });
 
 			assert(descriptionField);
@@ -178,8 +171,8 @@ export const createWorkingGroupAction = createServerAction(
 		});
 
 		after(async () => {
-			if (entityId != null) {
-				await syncWebsiteDocumentForEntity(entityId);
+			if (documentId != null) {
+				await syncWebsiteDocumentForEntity(documentId);
 			}
 		});
 

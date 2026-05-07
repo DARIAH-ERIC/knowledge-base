@@ -51,7 +51,17 @@ export const updateNewsItemAction = createServerAction(
 		const { contentBlocks, title, id, imageKey, summary, relatedEntityIds, relatedResourceIds } =
 			result.output;
 
+		let documentId: string | null = null;
+
 		await db.transaction(async (tx) => {
+			const entityVersion = await tx.query.entityVersions.findFirst({
+				where: { id },
+				columns: { entityId: true },
+			});
+
+			assert(entityVersion);
+			documentId = entityVersion.entityId;
+
 			const asset = await tx.query.assets.findFirst({
 				where: { key: imageKey },
 				columns: { id: true },
@@ -65,7 +75,7 @@ export const updateNewsItemAction = createServerAction(
 
 			const contentField = await tx.query.fields.findFirst({
 				where: {
-					entityId: id,
+					entityVersionId: id,
 					name: { fieldName: "content" },
 				},
 				columns: { id: true },
@@ -146,11 +156,13 @@ export const updateNewsItemAction = createServerAction(
 				);
 			}
 
-			await syncEntityRelations(tx, id, relatedEntityIds, relatedResourceIds);
+			await syncEntityRelations(tx, documentId, relatedEntityIds, relatedResourceIds);
 		});
 
 		after(async () => {
-			await syncWebsiteDocumentForEntity(id);
+			if (documentId != null) {
+				await syncWebsiteDocumentForEntity(documentId);
+			}
 			await dispatchWebhook({ type: "news" });
 		});
 

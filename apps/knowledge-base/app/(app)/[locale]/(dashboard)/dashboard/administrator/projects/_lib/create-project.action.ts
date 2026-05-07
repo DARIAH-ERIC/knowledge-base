@@ -12,6 +12,7 @@ import * as v from "valibot";
 
 import { CreateProjectActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-project.schema";
 import { assertAdmin } from "@/lib/auth/session";
+import { createPublishedDocument } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -58,7 +59,7 @@ export const createProjectAction = createServerAction(
 		} = result.output;
 
 		const slug = slugify(name);
-		let entityId: string | null = null;
+		let documentId: string | null = null;
 
 		await db.transaction(async (tx) => {
 			const type = await tx.query.entityTypes.findFirst({
@@ -72,28 +73,8 @@ export const createProjectAction = createServerAction(
 
 			assert(type);
 
-			const status = await tx.query.entityStatus.findFirst({
-				where: {
-					type: "published",
-				},
-				columns: {
-					id: true,
-				},
-			});
-
-			assert(status);
-
-			const [entity] = await tx
-				.insert(schema.entities)
-				.values({
-					slug,
-					statusId: status.id,
-					typeId: type.id,
-				})
-				.returning({ id: schema.entities.id });
-
-			assert(entity);
-			entityId = entity.id;
+			const { documentId: docId, versionId } = await createPublishedDocument(tx, type.id, slug);
+			documentId = docId;
 
 			let imageId = null;
 
@@ -109,7 +90,7 @@ export const createProjectAction = createServerAction(
 			}
 
 			await tx.insert(schema.projects).values({
-				id: entity.id,
+				id: versionId,
 				acronym,
 				call,
 				duration,
@@ -133,7 +114,7 @@ export const createProjectAction = createServerAction(
 
 			const [descriptionField] = await tx
 				.insert(schema.fields)
-				.values({ entityId: entity.id, fieldNameId: descriptionFieldName.id })
+				.values({ entityVersionId: versionId, fieldNameId: descriptionFieldName.id })
 				.returning({ id: schema.fields.id });
 
 			assert(descriptionField);
@@ -159,8 +140,8 @@ export const createProjectAction = createServerAction(
 		});
 
 		after(async () => {
-			if (entityId != null) {
-				await syncWebsiteDocumentForEntity(entityId);
+			if (documentId != null) {
+				await syncWebsiteDocumentForEntity(documentId);
 			}
 		});
 

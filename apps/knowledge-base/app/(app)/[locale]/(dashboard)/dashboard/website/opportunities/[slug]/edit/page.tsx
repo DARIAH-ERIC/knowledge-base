@@ -32,8 +32,10 @@ export default async function DashboardWebsiteEditOpportunityPage(
 
 	const opportunity = await db.query.opportunities.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
+				entity: {
+					slug,
+				},
 			},
 		},
 		columns: {
@@ -45,12 +47,15 @@ export default async function DashboardWebsiteEditOpportunityPage(
 			website: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
-				},
+			entityVersion: {
+				columns: { id: true },
 				with: {
+					entity: {
+						columns: {
+							id: true,
+							slug: true,
+						},
+					},
 					status: {
 						columns: {
 							id: true,

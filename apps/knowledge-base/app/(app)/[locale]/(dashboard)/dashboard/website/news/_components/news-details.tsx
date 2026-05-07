@@ -18,7 +18,7 @@ import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 interface NewsItemDetailsProps {
 	contentBlocks: Array<ContentBlock>;
 	newsItem: Pick<schema.NewsItem, "id" | "title" | "summary"> & {
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 }
 
@@ -32,7 +32,7 @@ export function NewsItemDetails(props: Readonly<NewsItemDetailsProps>): ReactNod
 			<div className="flex justify-end">
 				<Link
 					className={buttonStyles({ intent: "secondary", size: "sm" })}
-					href={`/dashboard/website/news/${newsItem.entity.slug}/edit`}
+					href={`/dashboard/website/news/${newsItem.entityVersion.entity.slug}/edit`}
 				>
 					<PencilSquareIcon className="mr-2 size-4" />
 					{t("Edit")}
@@ -43,7 +43,7 @@ export function NewsItemDetails(props: Readonly<NewsItemDetailsProps>): ReactNod
 				<DescriptionDetails>{newsItem.title}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Slug")}</DescriptionTerm>
-				<DescriptionDetails>{newsItem.entity.slug}</DescriptionDetails>
+				<DescriptionDetails>{newsItem.entityVersion.entity.slug}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Summary")}</DescriptionTerm>
 				<DescriptionDetails>{newsItem.summary}</DescriptionDetails>

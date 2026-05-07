@@ -32,7 +32,7 @@ interface DocumentOrPolicyFormProps {
 		schema.DocumentOrPolicy,
 		"id" | "title" | "summary" | "url" | "groupId"
 	> & {
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { document: { key: string; label: string; url: string } };
 	groups: Array<Pick<schema.DocumentPolicyGroup, "id" | "label">>;
 	formAction: ServerAction;
@@ -148,7 +148,7 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 			{documentOrPolicy != null ? (
 				<Fragment>
 					<input name="id" type="hidden" value={documentOrPolicy.id} />
-					<input name="documentId" type="hidden" value={documentOrPolicy.entity.documentId} />
+					<input name="documentId" type="hidden" value={documentOrPolicy.entityVersion.entity.id} />
 				</Fragment>
 			) : null}
 

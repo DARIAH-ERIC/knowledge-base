@@ -68,7 +68,8 @@ export async function getWorkingGroups(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 			)
-			.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.where(where)
 			.orderBy(orderBy)
 			.limit(limit)
@@ -80,7 +81,8 @@ export async function getWorkingGroups(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 			)
-			.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.where(where),
 		db.query.organisationalUnits.findMany({
 			where: { type: { type: "eric" } },

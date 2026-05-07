@@ -45,8 +45,10 @@ export default async function DashboardWebsiteEditNewsItemPage(
 			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 			db.query.news.findFirst({
 				where: {
-					entity: {
-						slug,
+					entityVersion: {
+						entity: {
+							slug,
+						},
 					},
 				},
 				columns: {
@@ -55,12 +57,15 @@ export default async function DashboardWebsiteEditNewsItemPage(
 					summary: true,
 				},
 				with: {
-					entity: {
-						columns: {
-							documentId: true,
-							slug: true,
-						},
+					entityVersion: {
+						columns: { id: true },
 						with: {
+							entity: {
+								columns: {
+									id: true,
+									slug: true,
+								},
+							},
 							status: {
 								columns: {
 									id: true,
@@ -91,7 +96,8 @@ export default async function DashboardWebsiteEditNewsItemPage(
 	});
 	const contentBlocks = await getEntityContentBlocks(newsItem.id);
 
-	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(newsItem.id);
+	const documentId = newsItem.entityVersion.entity.id;
+	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(documentId);
 
 	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
 		getEntityRelationOptionsByIds(relatedEntityIds),

@@ -34,8 +34,10 @@ export default async function DashboardWebsitePageItemDetailsPage(
 
 	const pageItem = await db.query.pages.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
+				entity: {
+					slug,
+				},
 			},
 		},
 		columns: {
@@ -44,10 +46,15 @@ export default async function DashboardWebsitePageItemDetailsPage(
 			summary: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
+			entityVersion: {
+				columns: { id: true },
+				with: {
+					entity: {
+						columns: {
+							id: true,
+							slug: true,
+						},
+					},
 				},
 			},
 			image: {

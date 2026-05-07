@@ -5,7 +5,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { assets } from "./assets";
-import { entities } from "./entities";
+import { entityVersions } from "./entities";
 import { socialMedia } from "./social-media";
 
 export const organisationalUnitTypesEnum = [
@@ -69,7 +69,7 @@ export const organisationalUnits = p.pgTable("organisational_units", {
 		.uuid("id")
 		.primaryKey()
 		.references(() => {
-			return entities.id;
+			return entityVersions.id;
 		}),
 	metadata: p.jsonb("metadata"),
 	name: p.text("name").notNull(),

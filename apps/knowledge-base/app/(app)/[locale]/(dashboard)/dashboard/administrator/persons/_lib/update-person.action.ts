@@ -11,6 +11,7 @@ import * as v from "valibot";
 
 import { UpdatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.schema";
 import { assertAdmin } from "@/lib/auth/session";
+import { getDocumentIdForVersion } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -46,7 +47,11 @@ export const updatePersonAction = createServerAction(
 
 		const { biography, email, id, imageKey, name, orcid, position, sortName } = result.output;
 
+		let documentId: string | null = null;
+
 		await db.transaction(async (tx) => {
+			documentId = await getDocumentIdForVersion(tx, id);
+
 			const asset = await tx.query.assets.findFirst({
 				where: { key: imageKey },
 				columns: { id: true },
@@ -63,7 +68,7 @@ export const updatePersonAction = createServerAction(
 
 			const biographyField = await tx.query.fields.findFirst({
 				where: {
-					entityId: id,
+					entityVersionId: id,
 					name: { fieldName: "biography" },
 				},
 				columns: { id: true },
@@ -109,7 +114,9 @@ export const updatePersonAction = createServerAction(
 		});
 
 		after(async () => {
-			await syncWebsiteDocumentForEntity(id);
+			if (documentId != null) {
+				await syncWebsiteDocumentForEntity(documentId);
+			}
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/persons", "layout");

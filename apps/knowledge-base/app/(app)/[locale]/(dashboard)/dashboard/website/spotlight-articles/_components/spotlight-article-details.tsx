@@ -18,7 +18,7 @@ import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 interface SpotlightArticleDetailsProps {
 	contentBlocks: Array<ContentBlock>;
 	spotlightArticle: Pick<schema.SpotlightArticle, "id" | "title" | "summary"> & {
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 }
 
@@ -32,7 +32,7 @@ export function SpotlightArticleDetails(props: Readonly<SpotlightArticleDetailsP
 			<div className="flex justify-end">
 				<Link
 					className={buttonStyles({ intent: "secondary", size: "sm" })}
-					href={`/dashboard/website/spotlight-articles/${spotlightArticle.entity.slug}/edit`}
+					href={`/dashboard/website/spotlight-articles/${spotlightArticle.entityVersion.entity.slug}/edit`}
 				>
 					<PencilSquareIcon className="mr-2 size-4" />
 					{t("Edit")}
@@ -43,7 +43,7 @@ export function SpotlightArticleDetails(props: Readonly<SpotlightArticleDetailsP
 				<DescriptionDetails>{spotlightArticle.title}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Slug")}</DescriptionTerm>
-				<DescriptionDetails>{spotlightArticle.entity.slug}</DescriptionDetails>
+				<DescriptionDetails>{spotlightArticle.entityVersion.entity.slug}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Summary")}</DescriptionTerm>
 				<DescriptionDetails>{spotlightArticle.summary}</DescriptionDetails>

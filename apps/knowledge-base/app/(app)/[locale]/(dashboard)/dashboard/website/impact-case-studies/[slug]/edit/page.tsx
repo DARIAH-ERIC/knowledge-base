@@ -51,8 +51,10 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 		db.query.impactCaseStudies.findFirst({
 			where: {
-				entity: {
-					slug,
+				entityVersion: {
+					entity: {
+						slug,
+					},
 				},
 			},
 			columns: {
@@ -61,10 +63,15 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 				summary: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						documentId: true,
-						slug: true,
+				entityVersion: {
+					columns: { id: true },
+					with: {
+						entity: {
+							columns: {
+								id: true,
+								slug: true,
+							},
+						},
 					},
 				},
 				image: {
@@ -88,9 +95,10 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 		key: impactCaseStudy.image.key,
 		options: imageGridOptions,
 	});
+	const documentId = impactCaseStudy.entityVersion.entity.id;
 	const [{ relatedEntityIds, relatedResourceIds }, contributors, contentBlocks] = await Promise.all(
 		[
-			getEntityRelations(impactCaseStudy.id),
+			getEntityRelations(documentId),
 			getImpactCaseStudyContributors(impactCaseStudy.id),
 			getEntityContentBlocks(impactCaseStudy.id),
 		],

@@ -29,8 +29,8 @@ export async function getNews(params: GetNewsParams) {
 				? schema.news.title
 				: desc(schema.news.title)
 			: dir === "asc"
-				? schema.entities.updatedAt
-				: desc(schema.entities.updatedAt);
+				? schema.entityVersions.updatedAt
+				: desc(schema.entityVersions.updatedAt);
 
 	const [items, aggregate] = await Promise.all([
 		db
@@ -39,10 +39,11 @@ export async function getNews(params: GetNewsParams) {
 				slug: schema.entities.slug,
 				summary: schema.news.summary,
 				title: schema.news.title,
-				updatedAt: schema.entities.updatedAt,
+				updatedAt: schema.entityVersions.updatedAt,
 			})
 			.from(schema.news)
-			.innerJoin(schema.entities, eq(schema.news.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.news.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.where(where)
 			.orderBy(orderBy)
 			.limit(limit)
@@ -50,8 +51,8 @@ export async function getNews(params: GetNewsParams) {
 		db
 			.select({ total: count() })
 			.from(schema.news)
-			.innerJoin(schema.entities, eq(schema.news.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.news.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where),
 	]);
 
@@ -82,9 +83,14 @@ export async function getNewsItemById(params: GetNewsItemByIdParams) {
 			id,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
+			entityVersion: {
+				columns: {},
+				with: {
+					entity: {
+						columns: {
+							slug: true,
+						},
+					},
 				},
 			},
 			image: {
@@ -104,88 +110,10 @@ export async function getNewsItemById(params: GetNewsItemByIdParams) {
 		options: { width: imageAssetWidth.featured },
 	});
 
-	const data = { ...item, image };
+	const { entityVersion, ...rest } = item;
+	const data = { ...rest, entity: entityVersion.entity, image };
 
 	return data;
-}
-
-interface CreateNewsItemParams extends schema.NewsItemInput {
-	slug: schema.EntityInput["slug"];
-}
-
-export async function createNewsItem(params: CreateNewsItemParams) {
-	const { imageId, slug, summary, title } = params;
-
-	const entityType = await db.query.entityTypes.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "news" },
-	});
-
-	if (entityType == null) {
-		return null;
-	}
-
-	const entityStatus = await db.query.entityStatus.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "published" },
-	});
-
-	if (entityStatus == null) {
-		return null;
-	}
-
-	const entityId = await db.transaction(async (tx) => {
-		const [item] = await tx
-			.insert(schema.entities)
-			.values({
-				typeId: entityType.id,
-				documentId: undefined,
-				statusId: entityStatus.id,
-				slug,
-			})
-			.returning({
-				id: schema.entities.id,
-			});
-
-		if (item == null) {
-			return tx.rollback();
-		}
-
-		const { id } = item;
-
-		const newsItem = {
-			id,
-			title,
-			summary,
-			imageId,
-		};
-
-		await tx.insert(schema.news).values(newsItem);
-
-		const fieldNamesIds = await tx.query.entityTypesFieldsNames.findMany({
-			where: {
-				entityTypeId: entityType.id,
-			},
-		});
-
-		const fields = fieldNamesIds.map(({ id: fieldNameId }) => {
-			return { entityId: id, fieldNameId };
-		});
-
-		await tx.insert(schema.fields).values(fields).returning({
-			id: schema.fields.id,
-		});
-
-		return id;
-	});
-
-	return {
-		entityId,
-	};
 }
 
 export type NewsWithEntities = Awaited<ReturnType<typeof getNews>>;

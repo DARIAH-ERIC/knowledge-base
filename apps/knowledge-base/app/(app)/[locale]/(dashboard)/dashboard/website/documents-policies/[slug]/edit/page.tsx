@@ -38,8 +38,10 @@ export default async function DashboardWebsiteEditDocumentOrPolicyPage(
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "documents" }),
 		db.query.documentsPolicies.findFirst({
 			where: {
-				entity: {
-					slug,
+				entityVersion: {
+					entity: {
+						slug,
+					},
 				},
 			},
 			columns: {
@@ -50,10 +52,15 @@ export default async function DashboardWebsiteEditDocumentOrPolicyPage(
 				groupId: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						documentId: true,
-						slug: true,
+				entityVersion: {
+					columns: { id: true },
+					with: {
+						entity: {
+							columns: {
+								id: true,
+								slug: true,
+							},
+						},
 					},
 				},
 				document: {

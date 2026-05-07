@@ -14,7 +14,7 @@ import { Fragment, type ReactNode } from "react";
 
 interface PersonDetailsProps {
 	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "position" | "sortName"> & {
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 }
 
@@ -28,7 +28,7 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 			<div className="flex justify-end">
 				<Link
 					className={buttonStyles({ intent: "secondary", size: "sm" })}
-					href={`/dashboard/administrator/persons/${person.entity.slug}/edit`}
+					href={`/dashboard/administrator/persons/${person.entityVersion.entity.slug}/edit`}
 				>
 					<PencilSquareIcon className="mr-2 size-4" />
 					{t("Edit")}
@@ -39,7 +39,7 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 				<DescriptionDetails>{person.name}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Slug")}</DescriptionTerm>
-				<DescriptionDetails>{person.entity.slug}</DescriptionDetails>
+				<DescriptionDetails>{person.entityVersion.entity.slug}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Sort name")}</DescriptionTerm>
 				<DescriptionDetails>{person.sortName}</DescriptionDetails>

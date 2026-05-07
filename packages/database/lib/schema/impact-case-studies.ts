@@ -3,7 +3,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 import { assets } from "./assets";
-import { entities } from "./entities";
+import { entityVersions } from "./entities";
 import { persons } from "./persons";
 
 export const impactCaseStudies = p.pgTable("impact_case_studies", {
@@ -11,7 +11,7 @@ export const impactCaseStudies = p.pgTable("impact_case_studies", {
 		.uuid("id")
 		.primaryKey()
 		.references(() => {
-			return entities.id;
+			return entityVersions.id;
 		}),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),

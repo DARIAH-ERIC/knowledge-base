@@ -30,8 +30,8 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 				? schema.spotlightArticles.title
 				: desc(schema.spotlightArticles.title)
 			: dir === "asc"
-				? schema.entities.updatedAt
-				: desc(schema.entities.updatedAt);
+				? schema.entityVersions.updatedAt
+				: desc(schema.entityVersions.updatedAt);
 
 	const [items, aggregate] = await Promise.all([
 		db
@@ -40,10 +40,11 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 				slug: schema.entities.slug,
 				summary: schema.spotlightArticles.summary,
 				title: schema.spotlightArticles.title,
-				updatedAt: schema.entities.updatedAt,
+				updatedAt: schema.entityVersions.updatedAt,
 			})
 			.from(schema.spotlightArticles)
-			.innerJoin(schema.entities, eq(schema.spotlightArticles.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.spotlightArticles.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.where(where)
 			.orderBy(orderBy)
 			.limit(limit)
@@ -51,8 +52,8 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 		db
 			.select({ total: count() })
 			.from(schema.spotlightArticles)
-			.innerJoin(schema.entities, eq(schema.spotlightArticles.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.spotlightArticles.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where),
 	]);
 
@@ -83,9 +84,14 @@ export async function getSpotlightArticleById(params: GetSpotlightArticleByIdPar
 			id,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
+			entityVersion: {
+				columns: {},
+				with: {
+					entity: {
+						columns: {
+							slug: true,
+						},
+					},
 				},
 			},
 			image: {
@@ -105,88 +111,10 @@ export async function getSpotlightArticleById(params: GetSpotlightArticleByIdPar
 		options: { width: imageAssetWidth.featured },
 	});
 
-	const data = { ...item, image };
+	const { entityVersion, ...rest } = item;
+	const data = { ...rest, entity: entityVersion.entity, image };
 
 	return data;
-}
-
-interface CreateSpotlightArticleParams extends schema.SpotlightArticleInput {
-	slug: schema.EntityInput["slug"];
-}
-
-export async function createSpotlightArticle(params: CreateSpotlightArticleParams) {
-	const { imageId, slug, summary, title } = params;
-
-	const entityType = await db.query.entityTypes.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "spotlight_articles" },
-	});
-
-	if (entityType == null) {
-		return null;
-	}
-
-	const entityStatus = await db.query.entityStatus.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "published" },
-	});
-
-	if (entityStatus == null) {
-		return null;
-	}
-
-	const entityId = await db.transaction(async (tx) => {
-		const [item] = await tx
-			.insert(schema.entities)
-			.values({
-				typeId: entityType.id,
-				documentId: undefined,
-				statusId: entityStatus.id,
-				slug,
-			})
-			.returning({
-				id: schema.entities.id,
-			});
-
-		if (item == null) {
-			return tx.rollback();
-		}
-
-		const { id } = item;
-
-		const spotlightArticle = {
-			id,
-			title,
-			summary,
-			imageId,
-		};
-
-		await tx.insert(schema.spotlightArticles).values(spotlightArticle);
-
-		const fieldNamesIds = await tx.query.entityTypesFieldsNames.findMany({
-			where: {
-				entityTypeId: entityType.id,
-			},
-		});
-
-		const fields = fieldNamesIds.map(({ id: fieldNameId }) => {
-			return { entityId: id, fieldNameId };
-		});
-
-		await tx.insert(schema.fields).values(fields).returning({
-			id: schema.fields.id,
-		});
-
-		return id;
-	});
-
-	return {
-		entityId,
-	};
 }
 
 export type SpotlightArticlesWithEntities = Awaited<ReturnType<typeof getSpotlightArticles>>;

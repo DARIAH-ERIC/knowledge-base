@@ -16,7 +16,8 @@ interface ProjectEditFormProps {
 		"acronym" | "call" | "duration" | "funding" | "id" | "name" | "summary" | "topic"
 	> & {
 		description?: JSONContent;
-		entity: Pick<schema.Entity, "documentId" | "slug"> & {
+		entityVersion: {
+			entity: Pick<schema.Entity, "id" | "slug">;
 			status: Pick<schema.EntityStatus, "id" | "type">;
 		};
 		scope: Pick<schema.ProjectScope, "id" | "scope">;
