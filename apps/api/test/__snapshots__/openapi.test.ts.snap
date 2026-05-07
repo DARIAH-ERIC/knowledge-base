@@ -980,6 +980,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "vimeo",
                     "website",
                     "youtube",
+                    "other",
                   ],
                 },
                 "url": {
@@ -1072,6 +1073,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "vimeo",
               "website",
               "youtube",
+              "other",
             ],
           },
           "url": {
@@ -3873,6 +3875,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "vimeo",
                     "website",
                     "youtube",
+                    "other",
                   ],
                 },
                 "url": {
@@ -4199,6 +4202,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "vimeo",
                     "website",
                     "youtube",
+                    "other",
                   ],
                 },
                 "url": {
@@ -5243,6 +5247,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "vimeo",
                     "website",
                     "youtube",
+                    "other",
                   ],
                 },
                 "url": {
@@ -5442,6 +5447,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "vimeo",
                     "website",
                     "youtube",
+                    "other",
                   ],
                 },
                 "url": {
@@ -8277,6 +8283,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "vimeo",
                     "website",
                     "youtube",
+                    "other",
                   ],
                 },
                 "url": {
@@ -8370,6 +8377,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "vimeo",
               "website",
               "youtube",
+              "other",
             ],
           },
           "url": {
@@ -8528,6 +8536,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "vimeo",
               "website",
               "youtube",
+              "other",
             ],
           },
           "url": {
@@ -9579,6 +9588,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "vimeo",
                     "website",
                     "youtube",
+                    "other",
                   ],
                 },
                 "url": {
@@ -9757,6 +9767,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     "vimeo",
                     "website",
                     "youtube",
+                    "other",
                   ],
                 },
                 "url": {
