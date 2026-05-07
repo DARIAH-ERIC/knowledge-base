@@ -18,7 +18,7 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface ReportEvent {
 	id: string;
 	title: string;
-	date: string;
+	date: Date;
 	url: string | null;
 	role: "organiser" | "presenter";
 }
@@ -53,7 +53,7 @@ export function WorkingGroupReportEventsForm(
 									<div className="flex flex-col gap-y-0.5">
 										<p className="text-sm font-medium text-fg">{event.title}</p>
 										<p className="text-xs text-muted-fg">
-											{format.dateTime(new Date(event.date), { dateStyle: "medium" })}
+											{format.dateTime(event.date, { dateStyle: "medium" })}
 											{" · "}
 											{event.role.charAt(0).toUpperCase() + event.role.slice(1)}
 										</p>
