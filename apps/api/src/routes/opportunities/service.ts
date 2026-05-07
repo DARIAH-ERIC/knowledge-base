@@ -1,21 +1,61 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq } from "@/services/db/sql";
+import {
+	and,
+	count,
+	desc,
+	eq,
+	inArray,
+	or,
+	sql,
+	type SQL,
+	type SQLWrapper,
+} from "@/services/db/sql";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
+import type { OpportunitySource, OpportunityStatus } from "@/routes/opportunities/schemas";
 
 interface GetOpportunitiesParams {
 	/** @default 10 */
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
+	status?: OpportunityStatus | Array<OpportunityStatus>;
+	source?: OpportunitySource | Array<OpportunitySource>;
+}
+
+function buildStatusFilter(duration: SQLWrapper, statuses: Array<OpportunityStatus>): SQL {
+	const lower = sql`LOWER(${duration})`;
+	const upper = sql`UPPER(${duration})`;
+
+	return or(
+		...statuses.map((status) => {
+			switch (status) {
+				case "upcoming": {
+					return sql`${lower} > NOW()::TIMESTAMPTZ`;
+				}
+				case "open": {
+					return sql`${duration} @> NOW()::TIMESTAMPTZ`;
+				}
+				case "closed": {
+					return sql`${upper} <= NOW()::TIMESTAMPTZ`;
+				}
+			}
+		}),
+	)!;
 }
 
 export async function getOpportunities(db: Database | Transaction, params: GetOpportunitiesParams) {
-	const { limit = 10, offset = 0 } = params;
+	const { limit = 10, offset = 0, source, status } = params;
+	const statuses = status == null ? [] : Array.isArray(status) ? status : [status];
+	const sources = source == null ? [] : Array.isArray(source) ? source : [source];
+	const aggregateStatusFilter =
+		statuses.length > 0 ? buildStatusFilter(schema.opportunities.duration, statuses) : undefined;
+	const aggregateSourceFilter =
+		sources.length > 0 ? inArray(schema.opportunitySources.source, sources) : undefined;
 
 	const [items, aggregate] = await Promise.all([
 		db.query.opportunities.findMany({
@@ -25,6 +65,20 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 						type: "published",
 					},
 				},
+				RAW:
+					statuses.length > 0
+						? (t) => {
+								return buildStatusFilter(t.duration, statuses);
+							}
+						: undefined,
+				source:
+					sources.length > 0
+						? {
+								source: {
+									in: sources,
+								},
+							}
+						: undefined,
 			},
 			columns: {
 				id: true,
@@ -47,8 +101,8 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 					},
 				},
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+			orderBy(t) {
+				return [desc(sql`LOWER(${t.duration})`), desc(t.id)];
 			},
 			limit,
 			offset,
@@ -58,7 +112,17 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 			.from(schema.opportunities)
 			.innerJoin(schema.entities, eq(schema.opportunities.id, schema.entities.id))
 			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.opportunitySources,
+				eq(schema.opportunities.sourceId, schema.opportunitySources.id),
+			)
+			.where(
+				and(
+					eq(schema.entityStatus.type, "published"),
+					aggregateStatusFilter,
+					aggregateSourceFilter,
+				),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;

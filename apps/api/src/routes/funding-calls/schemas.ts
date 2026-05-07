@@ -1,3 +1,4 @@
+import { ensureArray } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
@@ -82,8 +83,29 @@ export const FundingCallSlugListSchema = v.pipe(
 
 export type FundingCallSlugList = v.InferOutput<typeof FundingCallSlugListSchema>;
 
+export const fundingCallStatusValues = ["upcoming", "open", "closed"] as const;
+
+export type FundingCallStatus = (typeof fundingCallStatusValues)[number];
+
+const FundingCallStatusQuerySchema = v.pipe(
+	v.unknown(),
+	v.transform(ensureArray),
+	v.array(v.picklist(fundingCallStatusValues)),
+);
+
+export const FundingCallQuerySchema = v.object({
+	...PaginationQuerySchema.entries,
+	status: v.pipe(
+		v.optional(FundingCallStatusQuerySchema),
+		v.description(
+			"Filter by funding call status relative to the current time. Can be provided multiple times, e.g. `?status=upcoming&status=open`.",
+		),
+		v.metadata({ ref: "FundingCallStatusParam" }),
+	),
+});
+
 export const GetFundingCalls = {
-	QuerySchema: PaginationQuerySchema,
+	QuerySchema: FundingCallQuerySchema,
 	ResponseSchema: v.pipe(
 		v.object({
 			...PaginatedResponseSchema.entries,

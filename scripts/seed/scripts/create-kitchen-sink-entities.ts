@@ -1,4 +1,6 @@
 import { createHash } from "node:crypto";
+import * as fs from "node:fs/promises";
+import { join } from "node:path";
 
 import { log } from "@acdh-oeaw/lib";
 import { createDatabaseService, type Database, type Transaction } from "@dariah-eric/database";
@@ -6,6 +8,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { eq, inArray } from "@dariah-eric/database/sql";
 import { type ResourceDocument, resourceSources, resourceTypes } from "@dariah-eric/search";
 import { createSearchAdminService, type SearchAdminService } from "@dariah-eric/search/admin";
+import { createStorageService } from "@dariah-eric/storage";
 
 import { env } from "../config/env.config";
 
@@ -29,6 +32,66 @@ function assertLookupId(value: string | undefined, message: string): string {
 	}
 
 	return value;
+}
+
+const assetsDirectory = join(import.meta.dirname, "..", "assets", "kitchen-sink");
+
+async function readKitchenSinkAsset(filename: string): Promise<Buffer> {
+	return fs.readFile(join(assetsDirectory, filename));
+}
+
+async function uploadKitchenSinkAssets() {
+	const storage = createStorageService({
+		config: {
+			accessKey: env.S3_ACCESS_KEY,
+			bucketName: env.S3_BUCKET_NAME,
+			endPoint: env.S3_HOST,
+			port: env.S3_PORT,
+			secretKey: env.S3_SECRET_KEY,
+			useSSL: env.S3_PROTOCOL === "https",
+		},
+	});
+
+	const [featuredImage, heroImage, avatarImage, documentPdf] = await Promise.all([
+		readKitchenSinkAsset("featured-image.png"),
+		readKitchenSinkAsset("hero-image.png"),
+		readKitchenSinkAsset("avatar.png"),
+		readKitchenSinkAsset("document.pdf"),
+	]);
+
+	const uploads = await Promise.all([
+		storage.images.upload({
+			input: featuredImage,
+			metadata: { "content-type": "image/png", name: "featured-image.png" },
+			prefix: "images",
+			size: featuredImage.length,
+		}),
+		storage.images.upload({
+			input: heroImage,
+			metadata: { "content-type": "image/png", name: "hero-image.png" },
+			prefix: "images",
+			size: heroImage.length,
+		}),
+		storage.images.upload({
+			input: avatarImage,
+			metadata: { "content-type": "image/png", name: "avatar.png" },
+			prefix: "avatars",
+			size: avatarImage.length,
+		}),
+		storage.images.upload({
+			input: documentPdf,
+			metadata: { "content-type": "application/pdf", name: "document.pdf" },
+			prefix: "documents",
+			size: documentPdf.length,
+		}),
+	]);
+
+	return {
+		avatarKey: uploads[2].key,
+		documentKey: uploads[3].key,
+		featuredImageKey: uploads[0].key,
+		heroImageKey: uploads[1].key,
+	};
 }
 
 function getOptionalSearchAdminService(): SearchAdminService | null {
@@ -169,6 +232,7 @@ async function main() {
 
 	try {
 		const resourceIds = await ensureRelatedResources();
+		const uploadedAssets = await uploadKitchenSinkAssets();
 
 		await db.transaction(async (tx) => {
 			const [
@@ -283,7 +347,7 @@ async function main() {
 			const assets = [
 				{
 					id: createId("asset:image"),
-					key: "kitchen-sink/featured-image.png",
+					key: uploadedAssets.featuredImageKey,
 					label: "Kitchen Sink Featured Image",
 					filename: "featured-image.png",
 					mimeType: "image/png",
@@ -293,7 +357,7 @@ async function main() {
 				},
 				{
 					id: createId("asset:hero-image"),
-					key: "kitchen-sink/hero-image.png",
+					key: uploadedAssets.heroImageKey,
 					label: "Kitchen Sink Hero Image",
 					filename: "hero-image.png",
 					mimeType: "image/png",
@@ -303,7 +367,7 @@ async function main() {
 				},
 				{
 					id: createId("asset:avatar"),
-					key: "kitchen-sink/avatar.png",
+					key: uploadedAssets.avatarKey,
 					label: "Kitchen Sink Avatar",
 					filename: "avatar.png",
 					mimeType: "image/png",
@@ -313,7 +377,7 @@ async function main() {
 				},
 				{
 					id: createId("asset:document"),
-					key: "kitchen-sink/document.pdf",
+					key: uploadedAssets.documentKey,
 					label: "Kitchen Sink Document",
 					filename: "document.pdf",
 					mimeType: "application/pdf",

@@ -2318,6 +2318,9 @@ importers:
       '@dariah-eric/search':
         specifier: workspace:^
         version: link:../../packages/search
+      '@dariah-eric/storage':
+        specifier: workspace:^
+        version: link:../../packages/storage
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.0

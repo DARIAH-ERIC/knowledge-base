@@ -43,6 +43,31 @@ function createItems(count: number, sourceId: string) {
 	return items;
 }
 
+function createItemWithDuration(duration: { start: Date; end?: Date }, sourceId: string) {
+	const id = uuidv7();
+	const documentId = uuidv7();
+	const title = f.lorem.sentence();
+	const slug = slugify(title);
+
+	return {
+		entity: { id, slug, documentId },
+		opportunity: {
+			id,
+			title,
+			summary: f.lorem.paragraph(),
+			duration,
+			sourceId,
+			website: f.internet.url(),
+		},
+	};
+}
+
+function addDays(date: Date, days: number) {
+	const value = new Date(date);
+	value.setUTCDate(value.getUTCDate() + days);
+	return value;
+}
+
 async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	const [status, type] = await Promise.all([
 		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
@@ -102,6 +127,86 @@ describe("opportunities", () => {
 				);
 				expect(data.limit).toBe(limit);
 				expect(data.offset).toBe(offset);
+			});
+		});
+
+		it("should support repeated status and source filters and order the merged result by duration desc", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const sources = await db.query.opportunitySources.findMany({
+					columns: { id: true, source: true },
+				});
+				const dariahSource = sources.find((item) => item.source === "dariah");
+				const externalSource = sources.find((item) => item.source === "external");
+				assert(dariahSource, 'No opportunity source "dariah" in database.');
+				assert(externalSource, 'No opportunity source "external" in database.');
+				const now = new Date();
+
+				const upcomingDariah = createItemWithDuration(
+					{ start: addDays(now, 365) },
+					dariahSource.id,
+				);
+				const openExternal = createItemWithDuration(
+					{ start: addDays(now, -7), end: addDays(now, 7) },
+					externalSource.id,
+				);
+				const closedDariah = createItemWithDuration(
+					{ start: addDays(now, -365), end: addDays(now, -7) },
+					dariahSource.id,
+				);
+
+				await seed(db, [upcomingDariah, openExternal, closedDariah]);
+
+				const response = await client.opportunities.$get({
+					query: {
+						status: ["upcoming", "open"],
+						source: ["dariah", "external"],
+					},
+				});
+
+				expect(response.status).toBe(200);
+
+				const data = await response.json();
+				const ids = data.data.map((item) => item.id);
+
+				expect(ids).toContain(upcomingDariah.entity.id);
+				expect(ids).toContain(openExternal.entity.id);
+				expect(ids).not.toContain(closedDariah.entity.id);
+				expect(ids.indexOf(upcomingDariah.entity.id)).toBeLessThan(
+					ids.indexOf(openExternal.entity.id),
+				);
+			});
+		});
+
+		it("should filter by source", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+				const sources = await db.query.opportunitySources.findMany({
+					columns: { id: true, source: true },
+				});
+				const dariahSource = sources.find((item) => item.source === "dariah");
+				const externalSource = sources.find((item) => item.source === "external");
+				assert(dariahSource, 'No opportunity source "dariah" in database.');
+				assert(externalSource, 'No opportunity source "external" in database.');
+
+				const dariahItem = createItems(1, dariahSource.id).at(0)!;
+				const externalItem = createItems(1, externalSource.id).at(0)!;
+
+				await seed(db, [dariahItem, externalItem]);
+
+				const response = await client.opportunities.$get({
+					query: {
+						source: "dariah",
+					},
+				});
+
+				expect(response.status).toBe(200);
+
+				const data = await response.json();
+				const ids = data.data.map((item) => item.id);
+
+				expect(ids).toContain(dariahItem.entity.id);
+				expect(ids).not.toContain(externalItem.entity.id);
 			});
 		});
 	});

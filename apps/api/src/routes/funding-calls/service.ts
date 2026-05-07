@@ -1,21 +1,47 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq } from "@/services/db/sql";
+import { and, count, desc, eq, or, sql, type SQL, type SQLWrapper } from "@/services/db/sql";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
+import type { FundingCallStatus } from "@/routes/funding-calls/schemas";
 
 interface GetFundingCallsParams {
 	/** @default 10 */
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
+	status?: FundingCallStatus | Array<FundingCallStatus>;
+}
+
+function buildStatusFilter(duration: SQLWrapper, statuses: Array<FundingCallStatus>): SQL {
+	const lower = sql`LOWER(${duration})`;
+	const upper = sql`UPPER(${duration})`;
+
+	return or(
+		...statuses.map((status) => {
+			switch (status) {
+				case "upcoming": {
+					return sql`${lower} > NOW()::TIMESTAMPTZ`;
+				}
+				case "open": {
+					return sql`${duration} @> NOW()::TIMESTAMPTZ`;
+				}
+				case "closed": {
+					return sql`${upper} <= NOW()::TIMESTAMPTZ`;
+				}
+			}
+		}),
+	)!;
 }
 
 export async function getFundingCalls(db: Database | Transaction, params: GetFundingCallsParams) {
-	const { limit = 10, offset = 0 } = params;
+	const { limit = 10, offset = 0, status } = params;
+	const statuses = status == null ? [] : Array.isArray(status) ? status : [status];
+	const aggregateStatusFilter =
+		statuses.length > 0 ? buildStatusFilter(schema.fundingCalls.duration, statuses) : undefined;
 
 	const [items, aggregate] = await Promise.all([
 		db.query.fundingCalls.findMany({
@@ -25,6 +51,12 @@ export async function getFundingCalls(db: Database | Transaction, params: GetFun
 						type: "published",
 					},
 				},
+				RAW:
+					statuses.length > 0
+						? (t) => {
+								return buildStatusFilter(t.duration, statuses);
+							}
+						: undefined,
 			},
 			columns: {
 				id: true,
@@ -40,8 +72,8 @@ export async function getFundingCalls(db: Database | Transaction, params: GetFun
 					},
 				},
 			},
-			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+			orderBy(t) {
+				return [desc(sql`LOWER(${t.duration})`), desc(t.id)];
 			},
 			limit,
 			offset,
@@ -51,7 +83,7 @@ export async function getFundingCalls(db: Database | Transaction, params: GetFun
 			.from(schema.fundingCalls)
 			.innerJoin(schema.entities, eq(schema.fundingCalls.id, schema.entities.id))
 			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.where(and(eq(schema.entityStatus.type, "published"), aggregateStatusFilter)),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
