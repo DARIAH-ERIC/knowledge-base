@@ -17,6 +17,7 @@
 		"start": "dotenvx run -q -f ./.env.local --ignore MISSING_ENV_FILE -- node ./dist/index.mjs",
 		"test": "dotenvx run -q -f ./.env.local --ignore MISSING_ENV_FILE -- vitest run",
 		"test:coverage": "dotenvx run -q -f ./.env.local --ignore MISSING_ENV_FILE -- vitest run --coverage",
+		"test:update-snapshots": "dotenvx run -q -f ./.env.local --ignore MISSING_ENV_FILE -- vitest run --update",
 		"test:watch": "dotenvx run -q -f ./.env.local --ignore MISSING_ENV_FILE -- vitest watch",
 		"types:check": "tsc --noEmit"
 	},
