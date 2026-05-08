@@ -1553,6 +1553,12 @@ async function main() {
 
 			unrReportIdToCountryReportId.set(report.id, countryReportId.id);
 
+			await tx.insert(schema.reportingCampaignCountryThresholds).values({
+				campaignId,
+				countryId,
+				amount: Number(report.operationalCostThreshold),
+			});
+
 			if (report.comments != null) {
 				for (const [k, v] of Object.entries(report.comments as ReportComment)) {
 					let screenKey = k;
