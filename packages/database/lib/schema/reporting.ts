@@ -415,7 +415,7 @@ export const workingGroupReportEvents = p.pgTable("working_group_report_events",
 			return workingGroupReports.id;
 		}),
 	title: p.text("title").notNull(),
-	date: p.date("date", { mode: "string" }).notNull(),
+	date: p.timestamp("date", { precision: 3 }).notNull(),
 	url: p.text("url"),
 	role: p.text("role", { enum: workingGroupEventRoleEnum }).notNull(),
 });
@@ -570,11 +570,10 @@ export const ReportingCampaignSocialMediaAmountInsertSchema = createInsertSchema
 export const reportingCampaignContributionRoleEnum = [
 	"national_coordinator",
 	"national_coordinator_deputy",
-	"national_representative",
-	"national_representative_deputy",
-	"is_chair_of",
-	"is_vice_chair_of",
-	"is_member_of",
+	"is_chair_of_jrc",
+	"is_chair_of_ncc",
+	"is_chair_of_wg",
+	"is_member_of_jrc",
 ] as const;
 
 export const reportingCampaignContributionAmounts = p.pgTable(
