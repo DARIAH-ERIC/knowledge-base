@@ -2,6 +2,8 @@ import { HttpError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createTestClient } from "~/test/lib/create-test-client";
+
 const { mailchimp } = vi.hoisted(() => {
 	return {
 		mailchimp: {
@@ -14,8 +16,6 @@ const { mailchimp } = vi.hoisted(() => {
 vi.mock("@/services/mailchimp", () => {
 	return { mailchimp };
 });
-
-import { createTestClient } from "~/test/lib/create-test-client";
 
 describe("newsletters", () => {
 	beforeEach(() => {
@@ -63,13 +63,16 @@ describe("newsletters", () => {
 
 		it("should return a specific message when the email is already subscribed", async () => {
 			mailchimp.subscribe.mockResolvedValue({
-				unwrap: () => {
+				unwrap() {
 					throw new HttpError({
 						request: new Request("https://example.com"),
-						response: new Response(JSON.stringify({ title: "Member Exists" }), {
-							status: 400,
-							headers: { "content-type": "application/json" },
-						}),
+						response: Response.json(
+							{ title: "Member Exists" },
+							{
+								status: 400,
+								headers: { "content-type": "application/json" },
+							},
+						),
 					});
 				},
 			});

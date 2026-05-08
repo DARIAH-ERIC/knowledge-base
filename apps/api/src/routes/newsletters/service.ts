@@ -2,9 +2,9 @@ import { STATUS_CODES } from "node:http";
 
 import { HttpError } from "@dariah-eric/request/errors";
 import { HTTPException } from "hono/http-exception";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 
 import { mailchimp } from "@/services/mailchimp";
-import type { ContentfulStatusCode } from "hono/utils/http-status";
 
 interface MailchimpErrorResponse {
 	title?: string;

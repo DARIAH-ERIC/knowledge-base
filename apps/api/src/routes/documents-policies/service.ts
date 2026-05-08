@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { count, eq } from "@/services/db/sql";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import type { Database, Transaction } from "@/middlewares/db";
+import { count, eq } from "@/services/db/sql";
 
 interface GetDocumentsPoliciesParams {
 	/** @default 10 */

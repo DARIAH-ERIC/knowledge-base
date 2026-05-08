@@ -1,7 +1,7 @@
-import type { OpenAPIV3_1 } from "openapi-types";
-
 import { testClient } from "hono/testing";
+import type { OpenAPIV3_1 } from "openapi-types";
 import { describe, expect, it } from "vitest";
+
 import { openapi } from "@/app";
 import { createApp } from "@/lib/factory";
 
