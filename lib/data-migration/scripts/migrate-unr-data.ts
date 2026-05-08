@@ -658,16 +658,16 @@ async function main() {
 
 				institutionTypes =
 					institutionTypes.includes("partner_institution") &&
-						institutionTypes.some((t) => {
-							return [
-								"national_coordinating_institution",
-								"national_representative_institution",
-								"cooperating_partner",
-							].includes(t);
-						})
+					institutionTypes.some((t) => {
+						return [
+							"national_coordinating_institution",
+							"national_representative_institution",
+							"cooperating_partner",
+						].includes(t);
+					})
 						? institutionTypes.filter((t) => {
-							return t !== "partner_institution";
-						})
+								return t !== "partner_institution";
+							})
 						: institutionTypes;
 
 				for (const type of institutionTypes) {
@@ -1801,8 +1801,6 @@ async function main() {
 				})
 				.returning({ id: schema.workingGroupReportQuestions.id });
 
-
-
 			assert(wgReportQuestion);
 
 			for (const { workingGroupReportId, answer } of qas) {
@@ -1908,8 +1906,8 @@ async function main() {
 			const endDate =
 				projectMonths != null
 					? new Date(
-						new Date(startDate).setUTCMonth(new Date(startDate).getUTCMonth() + projectMonths),
-					)
+							new Date(startDate).setUTCMonth(new Date(startDate).getUTCMonth() + projectMonths),
+						)
 					: null;
 
 			const projectScopes = [
@@ -1949,8 +1947,8 @@ async function main() {
 					fundersEntries.flatMap((s) => {
 						return s != null
 							? s.split(";").map((v) => {
-								return v.trim();
-							})
+									return v.trim();
+								})
 							: [];
 					}),
 				),
