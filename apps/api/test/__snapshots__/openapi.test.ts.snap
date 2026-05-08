@@ -4802,6 +4802,21 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         },
         "type": "array",
       },
+      "InternalServerErrorResponse": {
+        "description": "Internal server error response",
+        "properties": {
+          "message": {
+            "examples": [
+              "Internal Server Error",
+            ],
+            "type": "string",
+          },
+        },
+        "required": [
+          "message",
+        ],
+        "type": "object",
+      },
       "LimitParam": {
         "default": "10",
         "description": "Maximum number of items in paginated list",
@@ -9078,6 +9093,32 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         },
         "type": "array",
       },
+      "SubscribeNewsletterRequest": {
+        "description": "Newsletter subscription request",
+        "properties": {
+          "email": {
+            "format": "email",
+            "type": "string",
+          },
+        },
+        "required": [
+          "email",
+        ],
+        "type": "object",
+      },
+      "SubscribeNewsletterResponse": {
+        "description": "Newsletter subscription response",
+        "properties": {
+          "email": {
+            "format": "email",
+            "type": "string",
+          },
+        },
+        "required": [
+          "email",
+        ],
+        "type": "object",
+      },
       "WorkingGroup": {
         "description": "Working group",
         "properties": {
@@ -11537,6 +11578,58 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           },
         },
         "summary": "Get newsletters",
+        "tags": [
+          "newsletters",
+        ],
+      },
+    },
+    "/api/v1/newsletters/subscribe": {
+      "post": {
+        "description": "Subscribe an email address to the Mailchimp mailing list",
+        "operationId": "subscribeToNewsletter",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscribeNewsletterRequest",
+              },
+            },
+          },
+          "required": true,
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscribeNewsletterResponse",
+                },
+              },
+            },
+            "description": "Subscription created",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse",
+                },
+              },
+            },
+            "description": "Internal Server Error",
+          },
+        },
+        "summary": "Subscribe to newsletter",
         "tags": [
           "newsletters",
         ],
