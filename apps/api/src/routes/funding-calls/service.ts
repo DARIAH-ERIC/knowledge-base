@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { and, count, desc, eq, or, sql, type SQL, type SQLWrapper } from "@/services/db/sql";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { FundingCallStatus } from "@/routes/funding-calls/schemas";
+import { and, count, desc, eq, or, type SQL, sql, type SQLWrapper } from "@/services/db/sql";
 
 interface GetFundingCallsParams {
 	/** @default 10 */

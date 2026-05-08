@@ -83,7 +83,11 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 		}),
 	);
 
-	await db.insert(schema.opportunities).values(items.map((item) => item.opportunity));
+	await db.insert(schema.opportunities).values(
+		items.map((item) => {
+			return item.opportunity;
+		}),
+	);
 
 	await Promise.all(
 		items.map((item) => {
@@ -136,8 +140,12 @@ describe("opportunities", () => {
 				const sources = await db.query.opportunitySources.findMany({
 					columns: { id: true, source: true },
 				});
-				const dariahSource = sources.find((item) => item.source === "dariah");
-				const externalSource = sources.find((item) => item.source === "external");
+				const dariahSource = sources.find((item) => {
+					return item.source === "dariah";
+				});
+				const externalSource = sources.find((item) => {
+					return item.source === "external";
+				});
 				assert(dariahSource, 'No opportunity source "dariah" in database.');
 				assert(externalSource, 'No opportunity source "external" in database.');
 				const now = new Date();
@@ -167,7 +175,9 @@ describe("opportunities", () => {
 				expect(response.status).toBe(200);
 
 				const data = await response.json();
-				const ids = data.data.map((item) => item.id);
+				const ids = data.data.map((item) => {
+					return item.id;
+				});
 
 				expect(ids).toContain(upcomingDariah.entity.id);
 				expect(ids).toContain(openExternal.entity.id);
@@ -184,8 +194,12 @@ describe("opportunities", () => {
 				const sources = await db.query.opportunitySources.findMany({
 					columns: { id: true, source: true },
 				});
-				const dariahSource = sources.find((item) => item.source === "dariah");
-				const externalSource = sources.find((item) => item.source === "external");
+				const dariahSource = sources.find((item) => {
+					return item.source === "dariah";
+				});
+				const externalSource = sources.find((item) => {
+					return item.source === "external";
+				});
 				assert(dariahSource, 'No opportunity source "dariah" in database.');
 				assert(externalSource, 'No opportunity source "external" in database.');
 
@@ -203,7 +217,9 @@ describe("opportunities", () => {
 				expect(response.status).toBe(200);
 
 				const data = await response.json();
-				const ids = data.data.map((item) => item.id);
+				const ids = data.data.map((item) => {
+					return item.id;
+				});
 
 				expect(ids).toContain(dariahItem.entity.id);
 				expect(ids).not.toContain(externalItem.entity.id);

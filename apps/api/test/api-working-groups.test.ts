@@ -1,5 +1,4 @@
 import { assert } from "@acdh-oeaw/lib";
-import { inArray } from "@/services/db/sql";
 import * as schema from "@dariah-eric/database/schema";
 import { faker as f } from "@faker-js/faker";
 import slugify from "@sindresorhus/slugify";
@@ -8,6 +7,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
 import type { WorkingGroup } from "@/routes/working-groups/schemas";
+import { inArray } from "@/services/db/sql";
 import { createTestClient } from "~/test/lib/create-test-client";
 import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";

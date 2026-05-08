@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
+import * as schema from "@dariah-eric/database/schema";
+
+import { getContentBlocks } from "@/lib/content-blocks";
+import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
+import type { Database, Transaction } from "@/middlewares/db";
+import type { OpportunitySource, OpportunityStatus } from "@/routes/opportunities/schemas";
 import {
 	and,
 	count,
@@ -7,16 +13,10 @@ import {
 	eq,
 	inArray,
 	or,
-	sql,
 	type SQL,
+	sql,
 	type SQLWrapper,
 } from "@/services/db/sql";
-import * as schema from "@dariah-eric/database/schema";
-
-import { getContentBlocks } from "@/lib/content-blocks";
-import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
-import type { Database, Transaction } from "@/middlewares/db";
-import type { OpportunitySource, OpportunityStatus } from "@/routes/opportunities/schemas";
 
 interface GetOpportunitiesParams {
 	/** @default 10 */
