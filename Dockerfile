@@ -192,7 +192,7 @@ FROM base AS app
 USER node
 WORKDIR /app
 # `.next/standalone` is self-contained (includes its own `node_modules`)
-COPY --chown=node:node --from=app-build /app/apps/knowledge-base/.next/standalone/ /app/
+COPY --chown=node:node --from=app-build /app/apps/knowledge-base/.next/standalone/app/apps/knowledge-base/ /app/apps/knowledge-base/
 COPY --chown=node:node --from=app-build /app/apps/knowledge-base/.next/static/ /app/apps/knowledge-base/.next/static/
 COPY --chown=node:node --from=app-build /app/apps/knowledge-base/public/ /app/apps/knowledge-base/public/
 ENV NODE_ENV=production
