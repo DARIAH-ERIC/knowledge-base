@@ -1508,6 +1508,7 @@ async function main() {
 	 * For each report in unr:
 	 * - Creates a country report
 	 * - Updates the mapping between unr reports and kb country reports
+	 * - Creates reporting campaign country threshold
 	 * - For each comment in a report:
 	 *   - Creates report screen key comment
 	 */

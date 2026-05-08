@@ -221,16 +221,16 @@ amount is migrated to a project contribution
 
 ## reports
 
-| unr                        | kb                                 | comment  |
-| -------------------------- | ---------------------------------- | -------- |
-| report_campaign_id         | country_reports.campaign_id        |          |
-| country_id                 | country_reports.country_id         |          |
-| status                     | country_reports.status             | accepted |
-| contributions_count        | country_reports.total_contributors |          |
-| comments                   | report_screen_comments.comment     |          |
-| operational_cost           |                                    |          |
-| operational_cost_detail    |                                    |          |
-| operational_cost_threshold |                                    |          |
+| unr                        | kb                                           | comment  |
+| -------------------------- | -------------------------------------------- | -------- |
+| report_campaign_id         | country_reports.campaign_id                  |          |
+| country_id                 | country_reports.country_id                   |          |
+| status                     | country_reports.status                       | accepted |
+| contributions_count        | country_reports.total_contributors           |          |
+| comments                   | report_screen_comments.comment               |          |
+| operational_cost           |                                              |          |
+| operational_cost_detail    |                                              |          |
+| operational_cost_threshold | reporting_campaign_country_thresholds.amount |          |
 
 ## role_type_values
 
