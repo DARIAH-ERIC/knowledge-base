@@ -47,6 +47,8 @@ import {
 interface CampaignQuestionAnswer {
 	question: string;
 	answer: string;
+	campaignId: string;
+	workingGroupReportId: string;
 }
 
 interface CampaignQuestions {
@@ -656,16 +658,16 @@ async function main() {
 
 				institutionTypes =
 					institutionTypes.includes("partner_institution") &&
-					institutionTypes.some((t) => {
-						return [
-							"national_coordinating_institution",
-							"national_representative_institution",
-							"cooperating_partner",
-						].includes(t);
-					})
+						institutionTypes.some((t) => {
+							return [
+								"national_coordinating_institution",
+								"national_representative_institution",
+								"cooperating_partner",
+							].includes(t);
+						})
 						? institutionTypes.filter((t) => {
-								return t !== "partner_institution";
-							})
+							return t !== "partner_institution";
+						})
 						: institutionTypes;
 
 				for (const type of institutionTypes) {
@@ -1711,7 +1713,8 @@ async function main() {
 
 	log.info("Migrating working group reports...");
 
-	let i = 0;
+	const workingGroupReportQAs: Array<CampaignQuestionAnswer> = [];
+
 	for (const workingGroupReport of workingGroupReports) {
 		const reportCampaignId = unrReportingCampaignIdToReportingCampaignId.get(
 			workingGroupReport.reportCampaignId,
@@ -1736,33 +1739,18 @@ async function main() {
 
 			assert(kbWorkingGroupReport);
 
-			const campaignQuestions: Array<CampaignQuestionAnswer> = [
+			const reportedQAs: Array<CampaignQuestionAnswer> = [
 				...(workingGroupReport.narrativeQuestionsList as CampaignQuestions).items,
 				...(workingGroupReport.facultativeQuestionsList as CampaignQuestions).items,
 			];
-
-			for (const { question, answer } of campaignQuestions) {
-				i++;
-				const [wgReportQuestion]: Array<{ id: string }> = await tx
-					.insert(schema.workingGroupReportQuestions)
-					.values({
-						campaignId: reportCampaignId,
-						question: generateJSON(question, [StarterKit]),
-						position: i,
-					})
-					.returning({ id: schema.workingGroupReportQuestions.id });
-
-				assert(wgReportQuestion);
-
-				await tx
-					.insert(schema.workingGroupReportAnswers)
-					.values({
-						questionId: wgReportQuestion.id,
-						workingGroupReportId: kbWorkingGroupReport.id,
-						answer: generateJSON(answer, [StarterKit]),
-					})
-					.returning({ id: schema.workingGroupReportAnswers.id });
+			for (const reportedQA of reportedQAs) {
+				workingGroupReportQAs.push({
+					...reportedQA,
+					campaignId: reportCampaignId,
+					workingGroupReportId: kbWorkingGroupReport.id,
+				});
 			}
+
 			if (workingGroupReport.comments != null) {
 				for (const comment of Object.values(workingGroupReport.comments as ReportComment)) {
 					await tx.insert(schema.reportScreenComments).values({
@@ -1787,6 +1775,45 @@ async function main() {
 					url: workingGroupReportEvent.url,
 					role: workingGroupReportEvent.role,
 				});
+			}
+		});
+	}
+
+	const workingGroupReportQAsGrouped = groupBy(
+		workingGroupReportQAs,
+		({ campaignId, question }) => {
+			return `${campaignId}_${question}`;
+		},
+	);
+	let i = 0;
+	for (const [_q, qas] of Object.entries(workingGroupReportQAsGrouped)) {
+		assert(qas[0]);
+		const campaignId = qas[0].campaignId;
+		const question = qas[0].question;
+		i++;
+		await db.transaction(async (tx) => {
+			const [wgReportQuestion]: Array<{ id: string }> = await tx
+				.insert(schema.workingGroupReportQuestions)
+				.values({
+					campaignId,
+					question: generateJSON(question, [StarterKit]),
+					position: i,
+				})
+				.returning({ id: schema.workingGroupReportQuestions.id });
+
+
+
+			assert(wgReportQuestion);
+
+			for (const { workingGroupReportId, answer } of qas) {
+				await tx
+					.insert(schema.workingGroupReportAnswers)
+					.values({
+						questionId: wgReportQuestion.id,
+						workingGroupReportId,
+						answer: generateJSON(answer, [StarterKit]),
+					})
+					.returning({ id: schema.workingGroupReportAnswers.id });
 			}
 		});
 	}
@@ -1881,8 +1908,8 @@ async function main() {
 			const endDate =
 				projectMonths != null
 					? new Date(
-							new Date(startDate).setUTCMonth(new Date(startDate).getUTCMonth() + projectMonths),
-						)
+						new Date(startDate).setUTCMonth(new Date(startDate).getUTCMonth() + projectMonths),
+					)
 					: null;
 
 			const projectScopes = [
@@ -1922,8 +1949,8 @@ async function main() {
 					fundersEntries.flatMap((s) => {
 						return s != null
 							? s.split(";").map((v) => {
-									return v.trim();
-								})
+								return v.trim();
+							})
 							: [];
 					}),
 				),
