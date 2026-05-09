@@ -1,4 +1,3 @@
-import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
@@ -6,6 +5,9 @@ import type { ReactNode } from "react";
 
 import { FundingCallEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-edit";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { ensureDraftVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { fundingCallsLifecycleAdapter } from "@/lib/data/funding-calls.lifecycle-adapter";
+import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteEditFundingCallPageProps extends PageProps<"/[locale]/dashboard/website/funding-calls/[slug]/edit"> {}
@@ -30,14 +32,31 @@ export default async function DashboardWebsiteEditFundingCallPage(
 
 	const { slug } = await params;
 
-	const fundingCall = await db.query.fundingCalls.findFirst({
-		where: {
+	const anyVersion = await db.query.fundingCalls.findFirst({
+		where: { entityVersion: { entity: { slug } } },
+		columns: {},
+		with: {
 			entityVersion: {
-				entity: {
-					slug,
-				},
+				columns: {},
+				with: { entity: { columns: { id: true } } },
 			},
 		},
+	});
+
+	if (anyVersion == null) {
+		notFound();
+	}
+
+	const documentId = anyVersion.entityVersion.entity.id;
+
+	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+		const draftVersionId = await ensureDraftVersion(tx, documentId, fundingCallsLifecycleAdapter);
+		const { publishedId } = await getDocumentVersions(tx, documentId);
+		return { draftVersionId, publishedId };
+	});
+
+	const fundingCall = await db.query.fundingCalls.findFirst({
+		where: { id: draftVersionId },
 		columns: {
 			id: true,
 			duration: true,
@@ -71,5 +90,12 @@ export default async function DashboardWebsiteEditFundingCallPage(
 
 	const contentBlocks = await getEntityContentBlocks(fundingCall.id);
 
-	return <FundingCallEditForm contentBlocks={contentBlocks} fundingCall={{ ...fundingCall }} />;
+	return (
+		<FundingCallEditForm
+			contentBlocks={contentBlocks}
+			documentId={documentId}
+			fundingCall={{ ...fundingCall }}
+			isPublished={publishedId != null}
+		/>
+	);
 }

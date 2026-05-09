@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
 import { db } from "@/lib/db";
-import { count, desc, eq, ilike } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
 export type EventsSort = "title" | "updatedAt";
@@ -38,17 +38,53 @@ export async function getEvents(params: GetEventsParams) {
 			.select({
 				duration: schema.events.duration,
 				id: schema.events.id,
+				documentId: schema.entities.id,
 				location: schema.events.location,
 				slug: schema.entities.slug,
 				summary: schema.events.summary,
 				title: schema.events.title,
 				updatedAt: schema.entityVersions.updatedAt,
 				website: schema.events.website,
+				isPublished: sql<boolean>`
+					EXISTS (
+						SELECT
+							1
+						FROM
+							"entity_versions" AS "pv"
+							INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+						WHERE
+							"pv"."entity_id" = ${schema.entities.id}
+							AND "ps"."type" = 'published'
+					)
+				`,
 			})
 			.from(schema.events)
 			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-			.where(where)
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entities.id}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			)
 			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
@@ -57,7 +93,29 @@ export async function getEvents(params: GetEventsParams) {
 			.from(schema.events)
 			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(where),
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entityVersions.entityId}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -66,11 +124,13 @@ export async function getEvents(params: GetEventsParams) {
 		return {
 			duration: item.duration,
 			id: item.id,
+			documentId: item.documentId,
 			location: item.location,
 			entity: { slug: item.slug },
 			summary: item.summary,
 			title: item.title,
 			updatedAt: item.updatedAt,
+			isPublished: item.isPublished,
 			website: item.website,
 		};
 	});

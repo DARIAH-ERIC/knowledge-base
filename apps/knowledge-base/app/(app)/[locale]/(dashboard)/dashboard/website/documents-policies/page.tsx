@@ -38,7 +38,7 @@ const documentWith = {
 	entityVersion: {
 		columns: {},
 		with: {
-			entity: { columns: { slug: true } },
+			entity: { columns: { id: true, slug: true } },
 		},
 	},
 	document: { columns: { key: true, label: true } },
@@ -66,6 +66,7 @@ export default async function DashboardWebsiteDocumentsPoliciesPage(
 				url: schema.documentsPolicies.url,
 				groupId: schema.documentsPolicies.groupId,
 				position: schema.documentsPolicies.position,
+				entityId: schema.entities.id,
 				slug: schema.entities.slug,
 				document: { key: schema.assets.key, label: schema.assets.label },
 			})
@@ -78,8 +79,8 @@ export default async function DashboardWebsiteDocumentsPoliciesPage(
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "documents" }),
 	]);
 
-	const ungroupedShaped = ungrouped.map(({ slug, ...rest }) => {
-		return { ...rest, entityVersion: { entity: { slug } } };
+	const ungroupedShaped = ungrouped.map(({ slug, entityId, ...rest }) => {
+		return { ...rest, entityVersion: { entity: { id: entityId, slug } } };
 	});
 
 	return (

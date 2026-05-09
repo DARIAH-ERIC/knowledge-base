@@ -3,7 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { db } from "@/lib/db";
-import { count, desc, eq, ilike } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
 
 export type OpportunitiesSort = "title" | "source" | "updatedAt";
 
@@ -38,6 +38,7 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 	const [items, aggregate] = await Promise.all([
 		db
 			.select({
+				documentId: schema.entities.id,
 				duration: schema.opportunities.duration,
 				id: schema.opportunities.id,
 				source: schema.opportunitySources.source,
@@ -47,6 +48,18 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 				title: schema.opportunities.title,
 				updatedAt: schema.entityVersions.updatedAt,
 				website: schema.opportunities.website,
+				isPublished: sql<boolean>`
+					EXISTS (
+						SELECT
+							1
+						FROM
+							"entity_versions" AS "pv"
+							INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+						WHERE
+							"pv"."entity_id" = ${schema.entities.id}
+							AND "ps"."type" = 'published'
+					)
+				`,
 			})
 			.from(schema.opportunities)
 			.innerJoin(schema.entityVersions, eq(schema.opportunities.id, schema.entityVersions.id))
@@ -55,7 +68,30 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 				schema.opportunitySources,
 				eq(schema.opportunities.sourceId, schema.opportunitySources.id),
 			)
-			.where(where)
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entities.id}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			)
 			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
@@ -64,13 +100,36 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 			.from(schema.opportunities)
 			.innerJoin(schema.entityVersions, eq(schema.opportunities.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(where),
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entityVersions.entityId}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
 		return {
+			documentId: item.documentId,
 			duration: item.duration,
 			id: item.id,
 			sourceId: item.sourceId,
@@ -82,6 +141,7 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 			summary: item.summary,
 			title: item.title,
 			updatedAt: item.updatedAt,
+			isPublished: item.isPublished,
 			website: item.website,
 		};
 	});

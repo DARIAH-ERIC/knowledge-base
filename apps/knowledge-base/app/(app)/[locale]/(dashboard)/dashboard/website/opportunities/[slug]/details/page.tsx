@@ -1,11 +1,14 @@
-import { db } from "@dariah-eric/database/client";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { OpportunityDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-details";
+import { discardOpportunityDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/discard-opportunity-draft.action";
+import { publishOpportunityAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/publish-opportunity.action";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteOpportunitiesDetailsPageProps extends PageProps<"/[locale]/dashboard/website/opportunities/[slug]/details"> {}
@@ -26,18 +29,34 @@ export async function generateMetadata(
 export default async function DashboardWebsiteOpportunitiesDetailsPage(
 	props: Readonly<DashboardWebsiteOpportunitiesDetailsPageProps>,
 ): Promise<ReactNode> {
-	const { params } = props;
+	const { params, searchParams: searchParamsPromise } = props;
 
 	const { slug } = await params;
 
+	const doc = await db.query.entities.findFirst({
+		where: { slug },
+		columns: { id: true },
+	});
+
+	if (doc == null) {
+		notFound();
+	}
+
+	const { draftId, publishedId } = await db.transaction(async (tx) => {
+		return getDocumentVersions(tx, doc.id);
+	});
+
+	const { version } = await searchParamsPromise;
+	const selectedVersion: "draft" | "published" =
+		version === "published" && publishedId != null ? "published" : "draft";
+	const versionId =
+		selectedVersion === "published" && publishedId != null ? publishedId : (draftId ?? publishedId);
+	if (versionId == null) {
+		notFound();
+	}
+
 	const opportunity = await db.query.opportunities.findFirst({
-		where: {
-			entityVersion: {
-				entity: {
-					slug,
-				},
-			},
-		},
+		where: { id: versionId },
 		columns: {
 			id: true,
 			duration: true,
@@ -78,5 +97,16 @@ export default async function DashboardWebsiteOpportunitiesDetailsPage(
 
 	const contentBlocks = await getEntityContentBlocks(opportunity.id);
 
-	return <OpportunityDetails contentBlocks={contentBlocks} opportunity={{ ...opportunity }} />;
+	return (
+		<OpportunityDetails
+			contentBlocks={contentBlocks}
+			discardDraftAction={discardOpportunityDraftAction}
+			documentId={doc.id}
+			hasDraft={draftId != null}
+			isPublished={publishedId != null}
+			opportunity={{ ...opportunity }}
+			publishAction={publishOpportunityAction}
+			selectedVersion={selectedVersion}
+		/>
+	);
 }

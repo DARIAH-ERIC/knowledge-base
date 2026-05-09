@@ -6,16 +6,21 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { ArticleContributorsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section";
 import { SpotlightArticleForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form";
 import { createSpotlightArticleContributorAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article-contributor.action";
 import { deleteSpotlightArticleContributorAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/delete-spotlight-article-contributor.action";
+import { discardSpotlightArticleDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/discard-spotlight-article-draft.action";
+import { publishSpotlightArticleAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/publish-spotlight-article.action";
 import { updateSpotlightArticleAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/update-spotlight-article.action";
 import type { AvailablePerson, SpotlightArticleContributor } from "@/lib/data/article-contributors";
 
 interface SpotlightArticleEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
+	documentId: string;
+	isPublished: boolean;
 	spotlightArticle: Pick<schema.SpotlightArticle, "id" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
@@ -38,6 +43,8 @@ export function SpotlightArticleEditForm(
 	const {
 		initialAssets,
 		contentBlocks,
+		documentId,
+		isPublished,
 		spotlightArticle,
 		initialRelatedEntityIds,
 		initialRelatedEntityItems,
@@ -56,7 +63,16 @@ export function SpotlightArticleEditForm(
 
 	return (
 		<Fragment>
-			<Heading>{t("Edit spotlight article")}</Heading>
+			<div className="flex items-center justify-between">
+				<Heading>{t("Edit spotlight article")}</Heading>
+				<EntityLifecycleBar
+					discardDraftAction={discardSpotlightArticleDraftAction}
+					documentId={documentId}
+					hasDraft={true}
+					isPublished={isPublished}
+					publishAction={publishSpotlightArticleAction}
+				/>
+			</div>
 
 			<SpotlightArticleForm
 				contentBlocks={contentBlocks}

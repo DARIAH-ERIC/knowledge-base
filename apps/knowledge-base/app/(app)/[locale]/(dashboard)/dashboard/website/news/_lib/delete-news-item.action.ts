@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
 import { assertAdmin } from "@/lib/auth/session";
+import { getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { newsLifecycleAdapter } from "@/lib/data/news.lifecycle-adapter";
 import { db } from "@/lib/db";
 import { eq, inArray, or } from "@/lib/db/sql";
 import {
@@ -14,32 +16,43 @@ import {
 } from "@/lib/search/website-index";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export async function deleteNewsItemAction(id: string): Promise<void> {
+export async function deleteNewsItemAction(documentId: string): Promise<void> {
 	await assertAdmin();
 
 	const descriptor = await db.transaction(async (tx) => {
-		const entityVersion = await tx.query.entityVersions.findFirst({
-			where: { id },
-			columns: { id: true, entityId: true },
+		const entity = await tx.query.entities.findFirst({
+			where: { id: documentId },
+			columns: { id: true },
 		});
 
-		assert(entityVersion);
+		assert(entity, "Document not found.");
 
-		const documentId = entityVersion.entityId;
 		const documentDescriptor = await getWebsiteDocumentDescriptorByEntityId(documentId);
 
-		const entityFields = await tx
-			.select({ id: schema.fields.id })
-			.from(schema.fields)
-			.where(eq(schema.fields.entityVersionId, entityVersion.id));
+		const { draftId, publishedId } = await getDocumentVersions(tx, documentId);
+		const versionIds = [draftId, publishedId].filter((id): id is string => {
+			return id != null;
+		});
 
-		if (entityFields.length > 0) {
-			const fieldIds = entityFields.map((f) => {
-				return f.id;
-			});
+		for (const versionId of versionIds) {
+			await newsLifecycleAdapter.wipeSubtype(tx, versionId);
+		}
 
-			await tx.delete(schema.contentBlocks).where(inArray(schema.contentBlocks.fieldId, fieldIds));
-			await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+		for (const versionId of versionIds) {
+			const fieldRows = await tx
+				.select({ id: schema.fields.id })
+				.from(schema.fields)
+				.where(eq(schema.fields.entityVersionId, versionId));
+
+			if (fieldRows.length > 0) {
+				const fieldIds = fieldRows.map((f) => {
+					return f.id;
+				});
+				await tx
+					.delete(schema.contentBlocks)
+					.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+				await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+			}
 		}
 
 		await tx
@@ -55,8 +68,10 @@ export async function deleteNewsItemAction(id: string): Promise<void> {
 				),
 			);
 
-		await tx.delete(schema.news).where(eq(schema.news.id, entityVersion.id));
-		await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, entityVersion.id));
+		if (versionIds.length > 0) {
+			await tx.delete(schema.entityVersions).where(inArray(schema.entityVersions.id, versionIds));
+		}
+
 		await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
 
 		return documentDescriptor;

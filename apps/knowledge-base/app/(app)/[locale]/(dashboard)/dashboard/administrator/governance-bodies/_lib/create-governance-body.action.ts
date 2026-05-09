@@ -11,7 +11,7 @@ import * as v from "valibot";
 
 import { CreateGovernanceBodyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/create-governance-body.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { createPublishedDocument } from "@/lib/data/entity-lifecycle";
+import { createDraftDocument } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -63,7 +63,7 @@ export const createGovernanceBodyAction = createServerAction(
 
 			assert(orgUnitType);
 
-			const { documentId, versionId } = await createPublishedDocument(tx, entityType.id, slug);
+			const { documentId, versionId } = await createDraftDocument(tx, entityType.id, slug);
 
 			let imageId: string | null = null;
 

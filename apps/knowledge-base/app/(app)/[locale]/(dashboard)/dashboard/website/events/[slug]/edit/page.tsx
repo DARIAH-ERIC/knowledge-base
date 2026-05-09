@@ -7,6 +7,8 @@ import { EventEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/websit
 import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { ensureDraftVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { eventsLifecycleAdapter } from "@/lib/data/events.lifecycle-adapter";
 import {
 	getEntityRelationOptions,
 	getEntityRelationOptionsByIds,
@@ -40,17 +42,34 @@ export default async function DashboardWebsiteEditEventPage(
 
 	const { slug } = await params;
 
+	const anyVersion = await db.query.events.findFirst({
+		where: { entityVersion: { entity: { slug } } },
+		columns: {},
+		with: {
+			entityVersion: {
+				columns: {},
+				with: { entity: { columns: { id: true } } },
+			},
+		},
+	});
+
+	if (anyVersion == null) {
+		notFound();
+	}
+
+	const documentId = anyVersion.entityVersion.entity.id;
+
+	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+		const draftVersionId = await ensureDraftVersion(tx, documentId, eventsLifecycleAdapter);
+		const { publishedId } = await getDocumentVersions(tx, documentId);
+		return { draftVersionId, publishedId };
+	});
+
 	const [{ items: initialAssets }, event, initialRelatedEntities, initialRelatedResources] =
 		await Promise.all([
 			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 			db.query.events.findFirst({
-				where: {
-					entityVersion: {
-						entity: {
-							slug,
-						},
-					},
-				},
+				where: { id: draftVersionId },
 				columns: {
 					id: true,
 					duration: true,
@@ -100,7 +119,6 @@ export default async function DashboardWebsiteEditEventPage(
 
 	const contentBlocks = await getEntityContentBlocks(event.id);
 
-	const documentId = event.entityVersion.entity.id;
 	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(documentId);
 
 	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
@@ -111,6 +129,7 @@ export default async function DashboardWebsiteEditEventPage(
 	return (
 		<EventEditForm
 			contentBlocks={contentBlocks}
+			documentId={documentId}
 			event={{ ...event, image: { ...event.image, url: image.url } }}
 			initialAssets={initialAssets}
 			initialRelatedEntityIds={relatedEntityIds}
@@ -119,6 +138,7 @@ export default async function DashboardWebsiteEditEventPage(
 			initialRelatedResourceIds={relatedResourceIds}
 			initialRelatedResourceItems={initialRelatedResources.items}
 			initialRelatedResourceTotal={initialRelatedResources.total}
+			isPublished={publishedId != null}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}
 		/>

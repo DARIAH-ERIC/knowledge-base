@@ -8,6 +8,7 @@ import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getPersonOptions, getSpotlightArticleContributors } from "@/lib/data/article-contributors";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { ensureDraftVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
 import {
 	getEntityRelationOptions,
 	getEntityRelationOptionsByIds,
@@ -15,6 +16,7 @@ import {
 	getResourceRelationOptions,
 	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
+import { spotlightArticlesLifecycleAdapter } from "@/lib/data/spotlight-articles.lifecycle-adapter";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -41,6 +43,33 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 
 	const { slug } = await params;
 
+	const anyVersion = await db.query.spotlightArticles.findFirst({
+		where: { entityVersion: { entity: { slug } } },
+		columns: {},
+		with: {
+			entityVersion: {
+				columns: {},
+				with: { entity: { columns: { id: true } } },
+			},
+		},
+	});
+
+	if (anyVersion == null) {
+		notFound();
+	}
+
+	const documentId = anyVersion.entityVersion.entity.id;
+
+	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+		const draftVersionId = await ensureDraftVersion(
+			tx,
+			documentId,
+			spotlightArticlesLifecycleAdapter,
+		);
+		const { publishedId } = await getDocumentVersions(tx, documentId);
+		return { draftVersionId, publishedId };
+	});
+
 	const [
 		{ items: initialAssets },
 		spotlightArticle,
@@ -50,13 +79,7 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 		db.query.spotlightArticles.findFirst({
-			where: {
-				entityVersion: {
-					entity: {
-						slug,
-					},
-				},
-			},
+			where: { id: draftVersionId },
 			columns: {
 				id: true,
 				title: true,
@@ -70,6 +93,12 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 							columns: {
 								id: true,
 								slug: true,
+							},
+						},
+						status: {
+							columns: {
+								id: true,
+								type: true,
 							},
 						},
 					},
@@ -95,12 +124,11 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 		key: spotlightArticle.image.key,
 		options: imageGridOptions,
 	});
-	const documentId = spotlightArticle.entityVersion.entity.id;
 	const [{ relatedEntityIds, relatedResourceIds }, contributors, contentBlocks] = await Promise.all(
 		[
 			getEntityRelations(documentId),
-			getSpotlightArticleContributors(spotlightArticle.id),
-			getEntityContentBlocks(spotlightArticle.id),
+			getSpotlightArticleContributors(draftVersionId),
+			getEntityContentBlocks(draftVersionId),
 		],
 	);
 
@@ -113,6 +141,7 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 		<SpotlightArticleEditForm
 			contentBlocks={contentBlocks}
 			contributors={contributors}
+			documentId={documentId}
 			initialAssets={initialAssets}
 			initialPersonItems={initialPersons.items}
 			initialPersonTotal={initialPersons.total}
@@ -122,6 +151,7 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 			initialRelatedResourceIds={relatedResourceIds}
 			initialRelatedResourceItems={initialRelatedResources.items}
 			initialRelatedResourceTotal={initialRelatedResources.total}
+			isPublished={publishedId != null}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}
 			spotlightArticle={{

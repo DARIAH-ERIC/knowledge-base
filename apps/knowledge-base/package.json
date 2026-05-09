@@ -23,6 +23,8 @@
 		"lint:styles:fix": "stylelint \"./styles/**/*.css\" --cache --fix --ignore-path ./../../.gitignore",
 		"prepare": "run-s types:prepare",
 		"start": "PORT=3001 next start --experimental-next-config-strip-types",
+		"test": "dotenvx run -q -f ./.env.local --ignore MISSING_ENV_FILE -- vitest run",
+		"test:watch": "dotenvx run -q -f ./.env.local --ignore MISSING_ENV_FILE -- vitest watch",
 		"test:e2e": "PORT=3001 playwright test --config ./e2e/playwright.config.ts",
 		"test:e2e:codegen": "playwright codegen",
 		"test:e2e:install": "playwright install --with-deps",
@@ -94,6 +96,7 @@
 		"@acdh-oeaw/stylelint-config": "catalog:",
 		"@dariah-eric/configs": "workspace:^",
 		"@dotenvx/dotenvx": "catalog:",
+		"@faker-js/faker": "catalog:",
 		"@next/eslint-plugin-next": "catalog:",
 		"@playwright/test": "catalog:",
 		"@react-aria/optimize-locales-plugin": "catalog:",
@@ -119,7 +122,9 @@
 		"tailwindcss-react-aria-components": "catalog:",
 		"tsx": "catalog:",
 		"tw-animate-css": "catalog:",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"vite-tsconfig-paths": "catalog:",
+		"vitest": "catalog:"
 	},
 	"browserslist": {
 		"development": [

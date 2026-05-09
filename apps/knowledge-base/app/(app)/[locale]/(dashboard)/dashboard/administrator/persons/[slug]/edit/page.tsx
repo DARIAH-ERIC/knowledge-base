@@ -1,3 +1,4 @@
+import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { getExtracted } from "next-intl/server";
@@ -8,7 +9,10 @@ import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { getContributionRoleOptions, getPersonContributions } from "@/lib/data/contributions";
-import { getPersonEditDataForAdmin } from "@/lib/data/persons";
+import { ensureDraftVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
+import { db } from "@/lib/db";
+import { and, eq } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -34,22 +38,97 @@ export default async function DashboardAdministratorEditPersonPage(
 
 	const { slug } = await params;
 
-	const { user } = await assertAuthenticated();
-	const [{ items: initialAssets }, personData] = await Promise.all([
-		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "avatars" }),
-		getPersonEditDataForAdmin(user, slug),
-	]);
+	await assertAuthenticated();
 
-	if (personData == null) {
+	const anyVersion = await db.query.persons.findFirst({
+		where: { entityVersion: { entity: { slug } } },
+		columns: {},
+		with: {
+			entityVersion: {
+				columns: {},
+				with: { entity: { columns: { id: true } } },
+			},
+		},
+	});
+
+	if (anyVersion == null) {
 		notFound();
 	}
 
-	const { biography, person } = personData;
+	const documentId = anyVersion.entityVersion.entity.id;
 
-	const [contributions, contributionRoleOptions] = await Promise.all([
+	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+		const draftVersionId = await ensureDraftVersion(tx, documentId, personsLifecycleAdapter);
+		const { publishedId } = await getDocumentVersions(tx, documentId);
+		return { draftVersionId, publishedId };
+	});
+
+	const [{ items: initialAssets }, person] = await Promise.all([
+		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "avatars" }),
+		db.query.persons.findFirst({
+			where: { id: draftVersionId },
+			columns: {
+				id: true,
+				email: true,
+				name: true,
+				orcid: true,
+				position: true,
+				sortName: true,
+			},
+			with: {
+				entityVersion: {
+					columns: { id: true },
+					with: {
+						entity: {
+							columns: {
+								id: true,
+								slug: true,
+							},
+						},
+						status: {
+							columns: {
+								id: true,
+								type: true,
+							},
+						},
+					},
+				},
+				image: {
+					columns: {
+						key: true,
+						label: true,
+					},
+				},
+			},
+		}),
+	]);
+
+	if (person == null) {
+		notFound();
+	}
+
+	const [contributions, contributionRoleOptions, biographyRows] = await Promise.all([
 		getPersonContributions(person.id),
 		getContributionRoleOptions(),
+		db
+			.select({ content: schema.richTextContentBlocks.content })
+			.from(schema.richTextContentBlocks)
+			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.where(
+				and(
+					eq(schema.fields.entityVersionId, person.id),
+					eq(schema.entityTypesFieldsNames.fieldName, "biography"),
+				),
+			)
+			.limit(1),
 	]);
+
+	const biography = biographyRows.at(0)?.content;
 
 	const image = {
 		...person.image,
@@ -63,7 +142,9 @@ export default async function DashboardAdministratorEditPersonPage(
 		<PersonEditForm
 			contributionRoleOptions={contributionRoleOptions}
 			contributions={contributions}
+			documentId={documentId}
 			initialAssets={initialAssets}
+			isPublished={publishedId != null}
 			person={{ ...person, biography, image }}
 		/>
 	);

@@ -11,7 +11,8 @@ import * as v from "valibot";
 
 import { UpdatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { getDocumentIdForVersion } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion } from "@/lib/data/entity-lifecycle";
+import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -45,12 +46,11 @@ export const updatePersonAction = createServerAction(
 			});
 		}
 
-		const { biography, email, id, imageKey, name, orcid, position, sortName } = result.output;
-
-		let documentId: string | null = null;
+		const { biography, documentId, email, imageKey, name, orcid, position, sortName } =
+			result.output;
 
 		await db.transaction(async (tx) => {
-			documentId = await getDocumentIdForVersion(tx, id);
+			const draftVersionId = await ensureDraftVersion(tx, documentId, personsLifecycleAdapter);
 
 			const asset = await tx.query.assets.findFirst({
 				where: { key: imageKey },
@@ -64,11 +64,11 @@ export const updatePersonAction = createServerAction(
 			await tx
 				.update(schema.persons)
 				.set({ email, imageId, name, orcid, position, sortName })
-				.where(eq(schema.persons.id, id));
+				.where(eq(schema.persons.id, draftVersionId));
 
 			const biographyField = await tx.query.fields.findFirst({
 				where: {
-					entityVersionId: id,
+					entityVersionId: draftVersionId,
 					name: { fieldName: "biography" },
 				},
 				columns: { id: true },
@@ -114,9 +114,7 @@ export const updatePersonAction = createServerAction(
 		});
 
 		after(async () => {
-			if (documentId != null) {
-				await syncWebsiteDocumentForEntity(documentId);
-			}
+			await syncWebsiteDocumentForEntity(documentId);
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/persons", "layout");

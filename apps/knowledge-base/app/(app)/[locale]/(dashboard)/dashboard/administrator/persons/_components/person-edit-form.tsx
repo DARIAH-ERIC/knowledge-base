@@ -7,12 +7,17 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { ContributionsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section";
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { PersonForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form";
+import { discardPersonDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/discard-person-draft.action";
+import { publishPersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/publish-person.action";
 import { updatePersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.action";
 import type { ContributionRoleOption, PersonContribution } from "@/lib/data/contributions";
 
 interface PersonEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
+	documentId: string;
+	isPublished: boolean;
 	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "position" | "sortName"> & {
 		biography?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
@@ -22,13 +27,23 @@ interface PersonEditFormProps {
 }
 
 export function PersonEditForm(props: Readonly<PersonEditFormProps>): ReactNode {
-	const { initialAssets, person, contributions, contributionRoleOptions } = props;
+	const { initialAssets, documentId, isPublished, person, contributions, contributionRoleOptions } =
+		props;
 
 	const t = useExtracted();
 
 	return (
 		<Fragment>
-			<Heading>{t("Edit person")}</Heading>
+			<div className="flex items-center justify-between">
+				<Heading>{t("Edit person")}</Heading>
+				<EntityLifecycleBar
+					discardDraftAction={discardPersonDraftAction}
+					documentId={documentId}
+					hasDraft={true}
+					isPublished={isPublished}
+					publishAction={publishPersonAction}
+				/>
+			</div>
 
 			<PersonForm formAction={updatePersonAction} initialAssets={initialAssets} person={person} />
 

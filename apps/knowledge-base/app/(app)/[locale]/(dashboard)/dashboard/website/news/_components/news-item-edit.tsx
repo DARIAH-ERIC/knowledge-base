@@ -6,14 +6,19 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { NewsItemForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form";
+import { discardNewsItemDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/discard-news-item-draft.action";
+import { publishNewsItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/publish-news-item.action";
 import { updateNewsItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/update-news-item.action";
 
 interface NewsItemEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
+	documentId: string;
+	isPublished: boolean;
 	newsItem: Pick<schema.NewsItem, "id" | "title" | "summary"> & {
-		entityVersion: { entity: { id: string; slug: string } };
+		entityVersion: { entity: { id: string; slug: string }; status: { type: string } };
 	} & { image: { key: string; label: string; url: string } };
 	initialRelatedEntityIds: Array<string>;
 	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
@@ -29,6 +34,8 @@ export function NewsItemEditForm(props: Readonly<NewsItemEditFormProps>): ReactN
 	const {
 		initialAssets,
 		contentBlocks,
+		documentId,
+		isPublished,
 		newsItem,
 		initialRelatedEntityIds,
 		initialRelatedEntityItems,
@@ -44,7 +51,16 @@ export function NewsItemEditForm(props: Readonly<NewsItemEditFormProps>): ReactN
 
 	return (
 		<Fragment>
-			<Heading>{t("Edit news item")}</Heading>
+			<div className="flex items-center justify-between">
+				<Heading>{t("Edit news item")}</Heading>
+				<EntityLifecycleBar
+					discardDraftAction={discardNewsItemDraftAction}
+					documentId={documentId}
+					hasDraft={true}
+					isPublished={isPublished}
+					publishAction={publishNewsItemAction}
+				/>
+			</div>
 
 			<NewsItemForm
 				contentBlocks={contentBlocks}

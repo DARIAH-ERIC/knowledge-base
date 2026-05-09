@@ -15,7 +15,7 @@ import { CreateOpportunityActionInputSchema } from "@/app/(app)/[locale]/(dashbo
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
-import { createPublishedDocument } from "@/lib/data/entity-lifecycle";
+import { createDraftDocument } from "@/lib/data/entity-lifecycle";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -65,7 +65,7 @@ export const createOpportunityAction = createServerAction(
 
 			assert(type);
 
-			const { documentId: docId, versionId } = await createPublishedDocument(tx, type.id, slug);
+			const { documentId: docId, versionId } = await createDraftDocument(tx, type.id, slug);
 			documentId = docId;
 
 			await tx.insert(schema.opportunities).values({

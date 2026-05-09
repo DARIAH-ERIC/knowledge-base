@@ -14,7 +14,7 @@ import { CreateDocumentOrPolicyActionInputSchema } from "@/app/(app)/[locale]/(d
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
-import { createPublishedDocument } from "@/lib/data/entity-lifecycle";
+import { createDraftDocument } from "@/lib/data/entity-lifecycle";
 import { db, type Transaction } from "@/lib/db";
 import { eq, isNull } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -66,7 +66,7 @@ export const createDocumentOrPolicyAction = createServerAction(
 
 			assert(type);
 
-			const { documentId, versionId } = await createPublishedDocument(tx, type.id, slug);
+			const { documentId, versionId } = await createDraftDocument(tx, type.id, slug);
 			entityDocumentId = documentId;
 
 			const asset = await tx.query.assets.findFirst({

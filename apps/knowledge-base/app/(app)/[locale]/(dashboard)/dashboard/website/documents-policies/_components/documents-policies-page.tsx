@@ -36,7 +36,7 @@ type DocumentItem = Pick<
 	schema.DocumentOrPolicy,
 	"id" | "title" | "summary" | "url" | "groupId" | "position"
 > & {
-	entityVersion: { entity: Pick<schema.Entity, "slug"> };
+	entityVersion: { entity: Pick<schema.Entity, "id" | "slug"> };
 	document: Pick<schema.Asset, "key" | "label">;
 };
 
@@ -130,7 +130,7 @@ function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
 						aria-label={t("Delete")}
 						intent="plain"
 						onPress={() => {
-							onDelete(item.id);
+							onDelete(item.entityVersion.entity.id);
 						}}
 						size="sq-sm"
 					>

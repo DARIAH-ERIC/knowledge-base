@@ -10,7 +10,7 @@ import {
 } from "@/lib/data/organisational-units";
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, sql } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
 
 export type ProjectsSort = "name" | "acronym" | "funding" | "scope";
 
@@ -25,8 +25,11 @@ interface GetProjectsParams {
 export interface ProjectsResult {
 	data: Array<
 		Pick<schema.Project, "acronym" | "duration" | "funding" | "id" | "name"> & {
+			documentId: string;
 			entity: Pick<schema.Entity, "slug">;
+			isPublished: boolean;
 			scope: Pick<schema.ProjectScope, "id" | "scope">;
+			updatedAt: Date;
 		}
 	>;
 	limit: number;
@@ -66,19 +69,56 @@ export async function getProjects(params: Readonly<GetProjectsParams>): Promise<
 		db
 			.select({
 				acronym: schema.projects.acronym,
+				documentId: schema.entities.id,
 				duration: schema.projects.duration,
 				funding: schema.projects.funding,
+				updatedAt: schema.entityVersions.updatedAt,
 				id: schema.projects.id,
 				name: schema.projects.name,
 				scope: schema.projectScopes.scope,
 				scopeId: schema.projectScopes.id,
 				slug: schema.entities.slug,
+				isPublished: sql<boolean>`
+					EXISTS (
+						SELECT
+							1
+						FROM
+							"entity_versions" AS "pv"
+							INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+						WHERE
+							"pv"."entity_id" = ${schema.entities.id}
+							AND "ps"."type" = 'published'
+					)
+				`,
 			})
 			.from(schema.projects)
 			.innerJoin(schema.entityVersions, eq(schema.projects.id, schema.entityVersions.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.innerJoin(schema.projectScopes, eq(schema.projects.scopeId, schema.projectScopes.id))
-			.where(where)
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entities.id}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			)
 			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
@@ -88,18 +128,44 @@ export async function getProjects(params: Readonly<GetProjectsParams>): Promise<
 			.innerJoin(schema.entityVersions, eq(schema.projects.id, schema.entityVersions.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.innerJoin(schema.projectScopes, eq(schema.projects.scopeId, schema.projectScopes.id))
-			.where(where),
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entities.id}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			),
 	]);
 
 	return {
 		data: data.map((item) => {
 			return {
 				acronym: item.acronym,
+				documentId: item.documentId,
 				duration: item.duration,
 				entity: { slug: item.slug },
 				funding: item.funding,
 				id: item.id,
+				isPublished: item.isPublished,
 				name: item.name,
+				updatedAt: item.updatedAt,
 				scope: {
 					id: item.scopeId,
 					scope: item.scope,

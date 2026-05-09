@@ -12,7 +12,7 @@ import * as v from "valibot";
 
 import { CreatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/create-person.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { createPublishedDocument } from "@/lib/data/entity-lifecycle";
+import { createDraftDocument } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -62,7 +62,7 @@ export const createPersonAction = createServerAction(
 
 			assert(type);
 
-			const { documentId: docId, versionId } = await createPublishedDocument(tx, type.id, slug);
+			const { documentId: docId, versionId } = await createDraftDocument(tx, type.id, slug);
 			documentId = docId;
 
 			const asset = await tx.query.assets.findFirst({

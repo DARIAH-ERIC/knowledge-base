@@ -6,14 +6,19 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { EventForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form";
+import { discardEventDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/discard-event-draft.action";
+import { publishEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/publish-event.action";
 import { updateEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/update-event.action";
 
 interface EventEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
+	documentId: string;
+	isPublished: boolean;
 	event: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
-		entityVersion: { entity: { id: string; slug: string } };
+		entityVersion: { entity: { id: string; slug: string }; status: { type: string } };
 	} & { image: { key: string; label: string; url: string } };
 	initialRelatedEntityIds: Array<string>;
 	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
@@ -29,6 +34,8 @@ export function EventEditForm(props: Readonly<EventEditFormProps>): ReactNode {
 	const {
 		initialAssets,
 		contentBlocks,
+		documentId,
+		isPublished,
 		event,
 		initialRelatedEntityIds,
 		initialRelatedEntityItems,
@@ -44,7 +51,16 @@ export function EventEditForm(props: Readonly<EventEditFormProps>): ReactNode {
 
 	return (
 		<Fragment>
-			<Heading>{t("Edit event")}</Heading>
+			<div className="flex items-center justify-between">
+				<Heading>{t("Edit event")}</Heading>
+				<EntityLifecycleBar
+					discardDraftAction={discardEventDraftAction}
+					documentId={documentId}
+					hasDraft={true}
+					isPublished={isPublished}
+					publishAction={publishEventAction}
+				/>
+			</div>
 
 			<EventForm
 				contentBlocks={contentBlocks}

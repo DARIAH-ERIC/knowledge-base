@@ -7,6 +7,8 @@ import { DocumentOrPolicyEditForm } from "@/app/(app)/[locale]/(dashboard)/dashb
 import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
+import { ensureDraftVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { asc } from "@/lib/db/sql";
 import { images } from "@/lib/images";
@@ -34,16 +36,37 @@ export default async function DashboardWebsiteEditDocumentOrPolicyPage(
 
 	const { slug } = await params;
 
+	const anyVersion = await db.query.documentsPolicies.findFirst({
+		where: { entityVersion: { entity: { slug } } },
+		columns: {},
+		with: {
+			entityVersion: {
+				columns: {},
+				with: { entity: { columns: { id: true } } },
+			},
+		},
+	});
+
+	if (anyVersion == null) {
+		notFound();
+	}
+
+	const documentId = anyVersion.entityVersion.entity.id;
+
+	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+		const draftVersionId = await ensureDraftVersion(
+			tx,
+			documentId,
+			documentsPoliciesLifecycleAdapter,
+		);
+		const { publishedId } = await getDocumentVersions(tx, documentId);
+		return { draftVersionId, publishedId };
+	});
+
 	const [{ items: initialAssets }, documentOrPolicy, groups] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "documents" }),
 		db.query.documentsPolicies.findFirst({
-			where: {
-				entityVersion: {
-					entity: {
-						slug,
-					},
-				},
-			},
+			where: { id: draftVersionId },
 			columns: {
 				id: true,
 				title: true,
@@ -92,12 +115,14 @@ export default async function DashboardWebsiteEditDocumentOrPolicyPage(
 	return (
 		<DocumentOrPolicyEditForm
 			contentBlocks={contentBlocks}
+			documentId={documentId}
 			documentOrPolicy={{
 				...documentOrPolicy,
 				document: { ...documentOrPolicy.document, url: document.url },
 			}}
 			groups={groups}
 			initialAssets={initialAssets}
+			isPublished={publishedId != null}
 		/>
 	);
 }

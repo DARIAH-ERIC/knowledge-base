@@ -6,6 +6,8 @@ import type { ReactNode } from "react";
 
 import { OpportunityEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-edit";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { ensureDraftVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { opportunitiesLifecycleAdapter } from "@/lib/data/opportunities.lifecycle-adapter";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteEditOpportunityPageProps extends PageProps<"/[locale]/dashboard/website/opportunities/[slug]/edit"> {}
@@ -30,14 +32,31 @@ export default async function DashboardWebsiteEditOpportunityPage(
 
 	const { slug } = await params;
 
-	const opportunity = await db.query.opportunities.findFirst({
-		where: {
+	const anyVersion = await db.query.opportunities.findFirst({
+		where: { entityVersion: { entity: { slug } } },
+		columns: {},
+		with: {
 			entityVersion: {
-				entity: {
-					slug,
-				},
+				columns: {},
+				with: { entity: { columns: { id: true } } },
 			},
 		},
+	});
+
+	if (anyVersion == null) {
+		notFound();
+	}
+
+	const documentId = anyVersion.entityVersion.entity.id;
+
+	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+		const draftVersionId = await ensureDraftVersion(tx, documentId, opportunitiesLifecycleAdapter);
+		const { publishedId } = await getDocumentVersions(tx, documentId);
+		return { draftVersionId, publishedId };
+	});
+
+	const opportunity = await db.query.opportunities.findFirst({
+		where: { id: draftVersionId },
 		columns: {
 			id: true,
 			duration: true,
@@ -77,15 +96,19 @@ export default async function DashboardWebsiteEditOpportunityPage(
 		notFound();
 	}
 
-	const contentBlocks = await getEntityContentBlocks(opportunity.id);
-	const sources = await db.query.opportunitySources.findMany({
-		orderBy: { source: "asc" },
-		columns: { id: true, source: true },
-	});
+	const [contentBlocks, sources] = await Promise.all([
+		getEntityContentBlocks(opportunity.id),
+		db.query.opportunitySources.findMany({
+			orderBy: { source: "asc" },
+			columns: { id: true, source: true },
+		}),
+	]);
 
 	return (
 		<OpportunityEditForm
 			contentBlocks={contentBlocks}
+			documentId={documentId}
+			isPublished={publishedId != null}
 			opportunity={{ ...opportunity }}
 			sources={sources}
 		/>

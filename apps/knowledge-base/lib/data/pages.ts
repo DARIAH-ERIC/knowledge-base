@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
 import { db } from "@/lib/db";
-import { count, desc, eq, ilike } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
 export type PagesSort = "title" | "updatedAt";
@@ -36,15 +36,52 @@ export async function getPages(params: GetPagesParams) {
 		db
 			.select({
 				id: schema.pages.id,
+				documentId: schema.entities.id,
 				slug: schema.entities.slug,
 				summary: schema.pages.summary,
 				title: schema.pages.title,
+				isPublished: sql<boolean>`
+					EXISTS (
+						SELECT
+							1
+						FROM
+							"entity_versions" AS "pv"
+							INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+						WHERE
+							"pv"."entity_id" = ${schema.entities.id}
+							AND "ps"."type" = 'published'
+					)
+				`,
+				status: schema.entityStatus.type,
 				updatedAt: schema.entityVersions.updatedAt,
 			})
 			.from(schema.pages)
 			.innerJoin(schema.entityVersions, eq(schema.pages.id, schema.entityVersions.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-			.where(where)
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entities.id}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			)
 			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
@@ -53,7 +90,29 @@ export async function getPages(params: GetPagesParams) {
 			.from(schema.pages)
 			.innerJoin(schema.entityVersions, eq(schema.pages.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(where),
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entityVersions.entityId}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -61,9 +120,12 @@ export async function getPages(params: GetPagesParams) {
 	const data = items.map((item) => {
 		return {
 			id: item.id,
+			documentId: item.documentId,
 			entity: { slug: item.slug },
 			summary: item.summary,
 			title: item.title,
+			isPublished: item.isPublished,
+			status: item.status,
 			updatedAt: item.updatedAt,
 		};
 	});

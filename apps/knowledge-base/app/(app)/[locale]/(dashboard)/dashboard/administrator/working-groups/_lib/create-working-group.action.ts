@@ -12,7 +12,7 @@ import * as v from "valibot";
 
 import { CreateWorkingGroupActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/create-working-group.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { createPublishedDocument } from "@/lib/data/entity-lifecycle";
+import { createDraftDocument } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -84,11 +84,7 @@ export const createWorkingGroupAction = createServerAction(
 
 			assert(unitStatus);
 
-			const { documentId: docId, versionId } = await createPublishedDocument(
-				tx,
-				entityType.id,
-				slug,
-			);
+			const { documentId: docId, versionId } = await createDraftDocument(tx, entityType.id, slug);
 			documentId = docId;
 
 			let imageId: string | null = null;

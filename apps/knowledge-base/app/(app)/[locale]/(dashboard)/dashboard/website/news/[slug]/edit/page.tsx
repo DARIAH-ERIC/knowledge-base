@@ -7,6 +7,8 @@ import { NewsItemEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/web
 import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { ensureDraftVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { newsLifecycleAdapter } from "@/lib/data/news.lifecycle-adapter";
 import {
 	getEntityRelationOptions,
 	getEntityRelationOptionsByIds,
@@ -40,17 +42,35 @@ export default async function DashboardWebsiteEditNewsItemPage(
 
 	const { slug } = await params;
 
+	// Find the document ID via any existing news version for this slug.
+	const anyVersion = await db.query.news.findFirst({
+		where: { entityVersion: { entity: { slug } } },
+		columns: {},
+		with: {
+			entityVersion: {
+				columns: {},
+				with: { entity: { columns: { id: true } } },
+			},
+		},
+	});
+
+	if (anyVersion == null) {
+		notFound();
+	}
+
+	const documentId = anyVersion.entityVersion.entity.id;
+
+	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+		const draftVersionId = await ensureDraftVersion(tx, documentId, newsLifecycleAdapter);
+		const { publishedId } = await getDocumentVersions(tx, documentId);
+		return { draftVersionId, publishedId };
+	});
+
 	const [{ items: initialAssets }, newsItem, initialRelatedEntities, initialRelatedResources] =
 		await Promise.all([
 			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 			db.query.news.findFirst({
-				where: {
-					entityVersion: {
-						entity: {
-							slug,
-						},
-					},
-				},
+				where: { id: draftVersionId },
 				columns: {
 					id: true,
 					title: true,
@@ -96,7 +116,6 @@ export default async function DashboardWebsiteEditNewsItemPage(
 	});
 	const contentBlocks = await getEntityContentBlocks(newsItem.id);
 
-	const documentId = newsItem.entityVersion.entity.id;
 	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(documentId);
 
 	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
@@ -107,6 +126,7 @@ export default async function DashboardWebsiteEditNewsItemPage(
 	return (
 		<NewsItemEditForm
 			contentBlocks={contentBlocks}
+			documentId={documentId}
 			initialAssets={initialAssets}
 			initialRelatedEntityIds={relatedEntityIds}
 			initialRelatedEntityItems={initialRelatedEntities.items}
@@ -114,6 +134,7 @@ export default async function DashboardWebsiteEditNewsItemPage(
 			initialRelatedResourceIds={relatedResourceIds}
 			initialRelatedResourceItems={initialRelatedResources.items}
 			initialRelatedResourceTotal={initialRelatedResources.total}
+			isPublished={publishedId != null}
 			newsItem={{ ...newsItem, image: { ...newsItem.image, url: image.url } }}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}

@@ -11,7 +11,8 @@ import * as v from "valibot";
 
 import { UpdateWorkingGroupActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/update-working-group.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { getDocumentIdForVersion } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion } from "@/lib/data/entity-lifecycle";
+import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { syncEntityRelations } from "@/lib/data/relations";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
@@ -49,7 +50,7 @@ export const updateWorkingGroupAction = createServerAction(
 		const {
 			acronym,
 			description,
-			id,
+			documentId,
 			imageKey,
 			name,
 			relatedEntityIds,
@@ -57,10 +58,12 @@ export const updateWorkingGroupAction = createServerAction(
 			summary,
 		} = result.output;
 
-		let documentId: string | null = null;
-
 		await db.transaction(async (tx) => {
-			documentId = await getDocumentIdForVersion(tx, id);
+			const draftVersionId = await ensureDraftVersion(
+				tx,
+				documentId,
+				organisationalUnitsLifecycleAdapter,
+			);
 
 			let imageId: string | null = null;
 
@@ -78,11 +81,11 @@ export const updateWorkingGroupAction = createServerAction(
 			await tx
 				.update(schema.organisationalUnits)
 				.set({ acronym, imageId, name, summary })
-				.where(eq(schema.organisationalUnits.id, id));
+				.where(eq(schema.organisationalUnits.id, draftVersionId));
 
 			const descriptionField = await tx.query.fields.findFirst({
 				where: {
-					entityVersionId: id,
+					entityVersionId: draftVersionId,
 					name: { fieldName: "description" },
 				},
 				columns: { id: true },
@@ -130,9 +133,7 @@ export const updateWorkingGroupAction = createServerAction(
 		});
 
 		after(async () => {
-			if (documentId != null) {
-				await syncWebsiteDocumentForEntity(documentId);
-			}
+			await syncWebsiteDocumentForEntity(documentId);
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/working-groups", "layout");

@@ -14,6 +14,7 @@ import { CreateNewsItemActionInputSchema } from "@/app/(app)/[locale]/(dashboard
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
+import { createDraftDocument } from "@/lib/data/entity-lifecycle";
 import { db, type Transaction } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -55,47 +56,14 @@ export const createNewsItemAction = createServerAction(
 
 		await db.transaction(async (tx) => {
 			const type = await tx.query.entityTypes.findFirst({
-				where: {
-					type: "news",
-				},
-				columns: {
-					id: true,
-				},
+				where: { type: "news" },
+				columns: { id: true },
 			});
 
 			assert(type);
 
-			const status = await tx.query.entityStatus.findFirst({
-				where: {
-					type: "published",
-				},
-				columns: {
-					id: true,
-				},
-			});
-
-			assert(status);
-
-			const [document] = await tx
-				.insert(schema.entities)
-				.values({
-					slug,
-					typeId: type.id,
-				})
-				.returning({ id: schema.entities.id });
-
-			assert(document);
-			documentId = document.id;
-
-			const [entityVersion] = await tx
-				.insert(schema.entityVersions)
-				.values({
-					entityId: document.id,
-					statusId: status.id,
-				})
-				.returning({ id: schema.entityVersions.id });
-
-			assert(entityVersion);
+			const { documentId: docId, versionId } = await createDraftDocument(tx, type.id, slug);
+			documentId = docId;
 
 			const asset = await tx.query.assets.findFirst({
 				where: { key: imageKey },
@@ -105,7 +73,7 @@ export const createNewsItemAction = createServerAction(
 			assert(asset);
 
 			await tx.insert(schema.news).values({
-				id: entityVersion.id,
+				id: versionId,
 				imageId: asset.id,
 				title,
 				summary,
@@ -114,7 +82,7 @@ export const createNewsItemAction = createServerAction(
 			if (relatedEntityIds.length > 0) {
 				await tx.insert(schema.entitiesToEntities).values(
 					relatedEntityIds.map((relatedEntityId) => {
-						return { entityId: document.id, relatedEntityId };
+						return { entityId: docId, relatedEntityId };
 					}),
 				);
 			}
@@ -122,7 +90,7 @@ export const createNewsItemAction = createServerAction(
 			if (relatedResourceIds.length > 0) {
 				await tx.insert(schema.entitiesToResources).values(
 					relatedResourceIds.map((resourceId) => {
-						return { entityId: document.id, resourceId };
+						return { entityId: docId, resourceId };
 					}),
 				);
 			}
@@ -139,7 +107,7 @@ export const createNewsItemAction = createServerAction(
 
 			const [contentField] = await tx
 				.insert(schema.fields)
-				.values({ entityVersionId: entityVersion.id, fieldNameId: contentFieldName.id })
+				.values({ entityVersionId: versionId, fieldNameId: contentFieldName.id })
 				.returning({ id: schema.fields.id });
 
 			assert(contentField);

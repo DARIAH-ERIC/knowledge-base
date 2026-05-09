@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 
 import { DocumentationPageDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-details";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getDocumentVersions } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -24,17 +25,33 @@ export async function generateMetadata(
 export default async function DashboardAdministratorDocumentationPageDetailsPage(
 	props: Readonly<DashboardAdministratorDocumentationPageDetailsPageProps>,
 ): Promise<ReactNode> {
-	const { params } = props;
+	const { params, searchParams: searchParamsPromise } = props;
 	const { slug } = await params;
 
+	const doc = await db.query.entities.findFirst({
+		where: { slug },
+		columns: { id: true },
+	});
+
+	if (doc == null) {
+		notFound();
+	}
+
+	const { draftId, publishedId } = await db.transaction(async (tx) => {
+		return getDocumentVersions(tx, doc.id);
+	});
+
+	const { version } = await searchParamsPromise;
+	const selectedVersion: "draft" | "published" =
+		version === "published" && publishedId != null ? "published" : "draft";
+	const versionId =
+		selectedVersion === "published" && publishedId != null ? publishedId : (draftId ?? publishedId);
+	if (versionId == null) {
+		notFound();
+	}
+
 	const documentationPage = await db.query.documentationPages.findFirst({
-		where: {
-			entityVersion: {
-				entity: {
-					slug,
-				},
-			},
-		},
+		where: { id: versionId },
 		columns: {
 			id: true,
 			title: true,
@@ -61,6 +78,13 @@ export default async function DashboardAdministratorDocumentationPageDetailsPage
 	const contentBlocks = await getEntityContentBlocks(documentationPage.id);
 
 	return (
-		<DocumentationPageDetails contentBlocks={contentBlocks} documentationPage={documentationPage} />
+		<DocumentationPageDetails
+			contentBlocks={contentBlocks}
+			documentationPage={documentationPage}
+			documentId={doc.id}
+			hasDraft={draftId != null}
+			isPublished={publishedId != null}
+			selectedVersion={selectedVersion}
+		/>
 	);
 }

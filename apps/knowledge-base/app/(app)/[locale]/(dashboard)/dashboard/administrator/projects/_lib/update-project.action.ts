@@ -11,7 +11,8 @@ import * as v from "valibot";
 
 import { UpdateProjectActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/update-project.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { getDocumentIdForVersion } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion } from "@/lib/data/entity-lifecycle";
+import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
 import { db } from "@/lib/db";
 import { and, eq, inArray, notInArray } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -49,9 +50,9 @@ export const updateProjectAction = createServerAction(
 			acronym,
 			call,
 			description,
+			documentId,
 			duration,
 			funding,
-			id,
 			imageKey,
 			name,
 			partners,
@@ -61,10 +62,8 @@ export const updateProjectAction = createServerAction(
 			topic,
 		} = result.output;
 
-		let documentId: string | null = null;
-
 		await db.transaction(async (tx) => {
-			documentId = await getDocumentIdForVersion(tx, id);
+			const draftVersionId = await ensureDraftVersion(tx, documentId, projectsLifecycleAdapter);
 
 			let imageId = null;
 
@@ -82,7 +81,6 @@ export const updateProjectAction = createServerAction(
 			await tx
 				.update(schema.projects)
 				.set({
-					id,
 					acronym,
 					call,
 					duration,
@@ -93,11 +91,11 @@ export const updateProjectAction = createServerAction(
 					summary,
 					topic,
 				})
-				.where(eq(schema.projects.id, id));
+				.where(eq(schema.projects.id, draftVersionId));
 
 			const descriptionField = await tx.query.fields.findFirst({
 				where: {
-					entityVersionId: id,
+					entityVersionId: draftVersionId,
 					name: { fieldName: "description" },
 				},
 				columns: { id: true },
@@ -141,7 +139,6 @@ export const updateProjectAction = createServerAction(
 				}
 			}
 
-			// Sync partners: delete removed, update existing, insert new.
 			const submittedPartnerIds = partners
 				.map((p) => {
 					return p.id;
@@ -155,14 +152,14 @@ export const updateProjectAction = createServerAction(
 					.delete(schema.projectsToOrganisationalUnits)
 					.where(
 						and(
-							eq(schema.projectsToOrganisationalUnits.projectId, id),
+							eq(schema.projectsToOrganisationalUnits.projectId, draftVersionId),
 							notInArray(schema.projectsToOrganisationalUnits.id, submittedPartnerIds),
 						),
 					);
 			} else {
 				await tx
 					.delete(schema.projectsToOrganisationalUnits)
-					.where(eq(schema.projectsToOrganisationalUnits.projectId, id));
+					.where(eq(schema.projectsToOrganisationalUnits.projectId, draftVersionId));
 			}
 
 			for (const p of partners) {
@@ -179,13 +176,12 @@ export const updateProjectAction = createServerAction(
 				} else {
 					await tx
 						.insert(schema.projectsToOrganisationalUnits)
-						.values({ projectId: id, unitId: p.unitId, roleId: p.roleId, duration });
+						.values({ projectId: draftVersionId, unitId: p.unitId, roleId: p.roleId, duration });
 				}
 			}
 
-			// Sync social media: delete removed, insert new — preserve existing junction rows.
 			const existingSocialMedia = await tx.query.projectsToSocialMedia.findMany({
-				where: { projectId: id },
+				where: { projectId: draftVersionId },
 				columns: { id: true, socialMediaId: true },
 			});
 
@@ -217,16 +213,14 @@ export const updateProjectAction = createServerAction(
 			if (socialMediaToInsert.length > 0) {
 				await tx.insert(schema.projectsToSocialMedia).values(
 					socialMediaToInsert.map((socialMediaId) => {
-						return { projectId: id, socialMediaId };
+						return { projectId: draftVersionId, socialMediaId };
 					}),
 				);
 			}
 		});
 
 		after(async () => {
-			if (documentId != null) {
-				await syncWebsiteDocumentForEntity(documentId);
-			}
+			await syncWebsiteDocumentForEntity(documentId);
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/projects", "layout");

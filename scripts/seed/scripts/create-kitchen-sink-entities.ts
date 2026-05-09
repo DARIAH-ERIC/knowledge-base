@@ -142,6 +142,51 @@ async function upsertById(
 			set: set as never,
 		});
 }
+
+async function upsertPublishedDocument(
+	db: Db,
+	row: { id: string; statusId: string; typeId: string; slug: string; versionId: string },
+): Promise<{ documentId: string; versionId: string }> {
+	const [document] = await db
+		.insert(schema.entities)
+		.values({
+			id: row.id,
+			typeId: row.typeId,
+			slug: row.slug,
+		})
+		.onConflictDoUpdate({
+			target: [schema.entities.typeId, schema.entities.slug],
+			set: {
+				updatedAt: new Date(),
+			},
+		})
+		.returning({ id: schema.entities.id });
+
+	if (document == null) {
+		throw new Error(`Failed to upsert entity for type "${row.typeId}" and slug "${row.slug}".`);
+	}
+
+	const [version] = await db
+		.insert(schema.entityVersions)
+		.values({
+			id: row.versionId,
+			entityId: document.id,
+			statusId: row.statusId,
+		})
+		.onConflictDoUpdate({
+			target: [schema.entityVersions.entityId, schema.entityVersions.statusId],
+			set: {
+				updatedAt: new Date(),
+			},
+		})
+		.returning({ id: schema.entityVersions.id });
+
+	if (version == null) {
+		throw new Error(`Failed to upsert published version for entity "${document.id}".`);
+	}
+
+	return { documentId: document.id, versionId: version.id };
+}
 /* eslint-enable
 	@typescript-eslint/no-explicit-any,
 	@typescript-eslint/no-unsafe-assignment,
@@ -397,201 +442,291 @@ async function main() {
 				position: 1,
 			});
 
-			const projectEntityId = createId("entity:project");
-			const dariahEricEntityId = createId("entity:eric");
-			const workingGroupEntityId = createId("entity:working-group");
-			const governanceBodyEntityId = createId("entity:governance-body");
-			const memberCountryEntityId = createId("entity:country");
-			const institutionEntityId = createId("entity:institution");
-			const consortiumEntityId = createId("entity:national-consortium");
-			const kitchenSinkPersonEntityId = createId("entity:person:kitchen-sink");
-			const relatedPersonEntityId = createId("entity:person:related");
-			const eventEntityId = createId("entity:event:kitchen-sink");
-			const prevEventEntityId = createId("entity:event:previous");
-			const nextEventEntityId = createId("entity:event:next");
-			const pageEntityId = createId("entity:page");
-			const newsEntityId = createId("entity:news");
-			const fundingCallEntityId = createId("entity:funding-call");
-			const opportunityEntityId = createId("entity:opportunity");
-			const spotlightEntityId = createId("entity:spotlight");
-			const impactEntityId = createId("entity:impact");
-			const documentPolicyEntityId = createId("entity:document-policy");
+			const projectDocument = {
+				id: createId("entity:project"),
+				versionId: createId("version:project"),
+			};
+			const dariahEricDocument = {
+				id: createId("entity:eric"),
+				versionId: createId("version:eric"),
+			};
+			const workingGroupDocument = {
+				id: createId("entity:working-group"),
+				versionId: createId("version:working-group"),
+			};
+			const governanceBodyDocument = {
+				id: createId("entity:governance-body"),
+				versionId: createId("version:governance-body"),
+			};
+			const memberCountryDocument = {
+				id: createId("entity:country"),
+				versionId: createId("version:country"),
+			};
+			const institutionDocument = {
+				id: createId("entity:institution"),
+				versionId: createId("version:institution"),
+			};
+			const consortiumDocument = {
+				id: createId("entity:national-consortium"),
+				versionId: createId("version:national-consortium"),
+			};
+			const kitchenSinkPersonDocument = {
+				id: createId("entity:person:kitchen-sink"),
+				versionId: createId("version:person:kitchen-sink"),
+			};
+			const relatedPersonDocument = {
+				id: createId("entity:person:related"),
+				versionId: createId("version:person:related"),
+			};
+			const eventDocument = {
+				id: createId("entity:event:kitchen-sink"),
+				versionId: createId("version:event:kitchen-sink"),
+			};
+			const prevEventDocument = {
+				id: createId("entity:event:previous"),
+				versionId: createId("version:event:previous"),
+			};
+			const nextEventDocument = {
+				id: createId("entity:event:next"),
+				versionId: createId("version:event:next"),
+			};
+			const pageDocument = { id: createId("entity:page"), versionId: createId("version:page") };
+			const newsDocument = { id: createId("entity:news"), versionId: createId("version:news") };
+			const fundingCallDocument = {
+				id: createId("entity:funding-call"),
+				versionId: createId("version:funding-call"),
+			};
+			const opportunityDocument = {
+				id: createId("entity:opportunity"),
+				versionId: createId("version:opportunity"),
+			};
+			const spotlightDocument = {
+				id: createId("entity:spotlight"),
+				versionId: createId("version:spotlight"),
+			};
+			const impactDocument = {
+				id: createId("entity:impact"),
+				versionId: createId("version:impact"),
+			};
+			const documentPolicyDocument = {
+				id: createId("entity:document-policy"),
+				versionId: createId("version:document-policy"),
+			};
 
 			const entities = [
 				{
-					id: projectEntityId,
+					id: projectDocument.id,
+					versionId: projectDocument.versionId,
 					typeId: assertLookupId(entityTypeIds.get("projects"), 'Missing entity type "projects".'),
-					documentId: createId("document:project"),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink",
 				},
 				{
-					id: dariahEricEntityId,
+					id: dariahEricDocument.id,
+					versionId: dariahEricDocument.versionId,
 					typeId: assertLookupId(
 						entityTypeIds.get("organisational_units"),
 						'Missing entity type "organisational_units".',
 					),
-					documentId: createId("document:eric"),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink-eric",
 				},
 				{
-					id: workingGroupEntityId,
+					id: workingGroupDocument.id,
+					versionId: workingGroupDocument.versionId,
 					typeId: assertLookupId(
 						entityTypeIds.get("organisational_units"),
 						'Missing entity type "organisational_units".',
 					),
-					documentId: createId("document:working-group"),
 					statusId: publishedStatusId,
-					slug: "kitchen-sink",
+					slug: "kitchen-sink-working-group",
 				},
 				{
-					id: governanceBodyEntityId,
+					id: governanceBodyDocument.id,
+					versionId: governanceBodyDocument.versionId,
 					typeId: assertLookupId(
 						entityTypeIds.get("organisational_units"),
 						'Missing entity type "organisational_units".',
 					),
-					documentId: createId("document:governance-body"),
 					statusId: publishedStatusId,
-					slug: "kitchen-sink",
+					slug: "kitchen-sink-governance-body",
 				},
 				{
-					id: memberCountryEntityId,
+					id: memberCountryDocument.id,
+					versionId: memberCountryDocument.versionId,
 					typeId: assertLookupId(
 						entityTypeIds.get("organisational_units"),
 						'Missing entity type "organisational_units".',
 					),
-					documentId: createId("document:country"),
 					statusId: publishedStatusId,
-					slug: "kitchen-sink",
+					slug: "kitchen-sink-country",
 				},
 				{
-					id: institutionEntityId,
+					id: institutionDocument.id,
+					versionId: institutionDocument.versionId,
 					typeId: assertLookupId(
 						entityTypeIds.get("organisational_units"),
 						'Missing entity type "organisational_units".',
 					),
-					documentId: createId("document:institution"),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink-institution",
 				},
 				{
-					id: consortiumEntityId,
+					id: consortiumDocument.id,
+					versionId: consortiumDocument.versionId,
 					typeId: assertLookupId(
 						entityTypeIds.get("organisational_units"),
 						'Missing entity type "organisational_units".',
 					),
-					documentId: createId("document:national-consortium"),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink-national-consortium",
 				},
 				{
-					id: kitchenSinkPersonEntityId,
+					id: kitchenSinkPersonDocument.id,
+					versionId: kitchenSinkPersonDocument.versionId,
 					typeId: assertLookupId(entityTypeIds.get("persons"), 'Missing entity type "persons".'),
-					documentId: createId("document:person:kitchen-sink"),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink",
 				},
 				{
-					id: relatedPersonEntityId,
+					id: relatedPersonDocument.id,
+					versionId: relatedPersonDocument.versionId,
 					typeId: assertLookupId(entityTypeIds.get("persons"), 'Missing entity type "persons".'),
-					documentId: createId("document:person:related"),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink-related-person",
 				},
 				{
-					id: eventEntityId,
+					id: eventDocument.id,
+					versionId: eventDocument.versionId,
 					typeId: assertLookupId(entityTypeIds.get("events"), 'Missing entity type "events".'),
-					documentId: createId("document:event:kitchen-sink"),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink",
 				},
 				{
-					id: prevEventEntityId,
+					id: prevEventDocument.id,
+					versionId: prevEventDocument.versionId,
 					typeId: assertLookupId(entityTypeIds.get("events"), 'Missing entity type "events".'),
-					documentId: createId("document:event:previous"),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink-previous",
 				},
 				{
-					id: nextEventEntityId,
+					id: nextEventDocument.id,
+					versionId: nextEventDocument.versionId,
 					typeId: assertLookupId(entityTypeIds.get("events"), 'Missing entity type "events".'),
-					documentId: createId("document:event:next"),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink-next",
 				},
 				{
-					id: pageEntityId,
+					id: pageDocument.id,
+					versionId: pageDocument.versionId,
 					typeId: assertLookupId(entityTypeIds.get("pages"), 'Missing entity type "pages".'),
-					documentId: createId("document:page"),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink",
 				},
 				{
-					id: newsEntityId,
+					id: newsDocument.id,
+					versionId: newsDocument.versionId,
 					typeId: assertLookupId(entityTypeIds.get("news"), 'Missing entity type "news".'),
-					documentId: createId("document:news"),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink",
 				},
 				{
-					id: fundingCallEntityId,
+					id: fundingCallDocument.id,
+					versionId: fundingCallDocument.versionId,
 					typeId: assertLookupId(
 						entityTypeIds.get("funding_calls"),
 						'Missing entity type "funding_calls".',
 					),
-					documentId: createId("document:funding-call"),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink",
 				},
 				{
-					id: opportunityEntityId,
+					id: opportunityDocument.id,
+					versionId: opportunityDocument.versionId,
 					typeId: assertLookupId(
 						entityTypeIds.get("opportunities"),
 						'Missing entity type "opportunities".',
 					),
-					documentId: createId("document:opportunity"),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink",
 				},
 				{
-					id: spotlightEntityId,
+					id: spotlightDocument.id,
+					versionId: spotlightDocument.versionId,
 					typeId: assertLookupId(
 						entityTypeIds.get("spotlight_articles"),
 						'Missing entity type "spotlight_articles".',
 					),
-					documentId: createId("document:spotlight"),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink",
 				},
 				{
-					id: impactEntityId,
+					id: impactDocument.id,
+					versionId: impactDocument.versionId,
 					typeId: assertLookupId(
 						entityTypeIds.get("impact_case_studies"),
 						'Missing entity type "impact_case_studies".',
 					),
-					documentId: createId("document:impact"),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink",
 				},
 				{
-					id: documentPolicyEntityId,
+					id: documentPolicyDocument.id,
+					versionId: documentPolicyDocument.versionId,
 					typeId: assertLookupId(
 						entityTypeIds.get("documents_policies"),
 						'Missing entity type "documents_policies".',
 					),
-					documentId: createId("document:document-policy"),
 					statusId: publishedStatusId,
 					slug: "kitchen-sink",
 				},
 			];
 
+			const entityIdsBySeedId = new Map<string, { documentId: string; versionId: string }>();
+
 			for (const entity of entities) {
-				await upsertById(tx, schema.entities, entity);
+				const document = await upsertPublishedDocument(tx, entity);
+				entityIdsBySeedId.set(entity.id, document);
 			}
 
+			const projectEntityId = entityIdsBySeedId.get(projectDocument.id)!.documentId;
+			const projectVersionId = entityIdsBySeedId.get(projectDocument.id)!.versionId;
+			const dariahEricVersionId = entityIdsBySeedId.get(dariahEricDocument.id)!.versionId;
+			const workingGroupEntityId = entityIdsBySeedId.get(workingGroupDocument.id)!.documentId;
+			const workingGroupVersionId = entityIdsBySeedId.get(workingGroupDocument.id)!.versionId;
+			const governanceBodyEntityId = entityIdsBySeedId.get(governanceBodyDocument.id)!.documentId;
+			const governanceBodyVersionId = entityIdsBySeedId.get(governanceBodyDocument.id)!.versionId;
+			const memberCountryEntityId = entityIdsBySeedId.get(memberCountryDocument.id)!.documentId;
+			const memberCountryVersionId = entityIdsBySeedId.get(memberCountryDocument.id)!.versionId;
+			const institutionVersionId = entityIdsBySeedId.get(institutionDocument.id)!.versionId;
+			const consortiumVersionId = entityIdsBySeedId.get(consortiumDocument.id)!.versionId;
+			const kitchenSinkPersonEntityId = entityIdsBySeedId.get(
+				kitchenSinkPersonDocument.id,
+			)!.documentId;
+			const kitchenSinkPersonVersionId = entityIdsBySeedId.get(
+				kitchenSinkPersonDocument.id,
+			)!.versionId;
+			const relatedPersonVersionId = entityIdsBySeedId.get(relatedPersonDocument.id)!.versionId;
+			const eventEntityId = entityIdsBySeedId.get(eventDocument.id)!.documentId;
+			const eventVersionId = entityIdsBySeedId.get(eventDocument.id)!.versionId;
+			const prevEventVersionId = entityIdsBySeedId.get(prevEventDocument.id)!.versionId;
+			const nextEventVersionId = entityIdsBySeedId.get(nextEventDocument.id)!.versionId;
+			const pageEntityId = entityIdsBySeedId.get(pageDocument.id)!.documentId;
+			const pageVersionId = entityIdsBySeedId.get(pageDocument.id)!.versionId;
+			const newsEntityId = entityIdsBySeedId.get(newsDocument.id)!.documentId;
+			const newsVersionId = entityIdsBySeedId.get(newsDocument.id)!.versionId;
+			const fundingCallEntityId = entityIdsBySeedId.get(fundingCallDocument.id)!.documentId;
+			const fundingCallVersionId = entityIdsBySeedId.get(fundingCallDocument.id)!.versionId;
+			const opportunityEntityId = entityIdsBySeedId.get(opportunityDocument.id)!.documentId;
+			const opportunityVersionId = entityIdsBySeedId.get(opportunityDocument.id)!.versionId;
+			const spotlightEntityId = entityIdsBySeedId.get(spotlightDocument.id)!.documentId;
+			const spotlightVersionId = entityIdsBySeedId.get(spotlightDocument.id)!.versionId;
+			const impactEntityId = entityIdsBySeedId.get(impactDocument.id)!.documentId;
+			const impactVersionId = entityIdsBySeedId.get(impactDocument.id)!.versionId;
+			const documentPolicyVersionId = entityIdsBySeedId.get(documentPolicyDocument.id)!.versionId;
+
 			await upsertById(tx, schema.persons, {
-				id: kitchenSinkPersonEntityId,
+				id: kitchenSinkPersonVersionId,
 				name: "Kitchen Sink Person",
 				sortName: "Person, Kitchen Sink",
 				email: "kitchen.sink.person@example.org",
@@ -600,7 +735,7 @@ async function main() {
 				imageId: createId("asset:avatar"),
 			});
 			await upsertById(tx, schema.persons, {
-				id: relatedPersonEntityId,
+				id: relatedPersonVersionId,
 				name: "Related Kitchen Sink Person",
 				sortName: "Person, Related Kitchen Sink",
 				email: "related.person@example.org",
@@ -610,7 +745,7 @@ async function main() {
 			});
 
 			await upsertById(tx, schema.events, {
-				id: prevEventEntityId,
+				id: prevEventVersionId,
 				title: "Kitchen Sink Previous Event",
 				summary: "A previous event so the by-slug endpoint exposes `links.prev`.",
 				imageId: createId("asset:image"),
@@ -620,7 +755,7 @@ async function main() {
 				website: "https://example.org/events/kitchen-sink-previous",
 			});
 			await upsertById(tx, schema.events, {
-				id: eventEntityId,
+				id: eventVersionId,
 				title: "Kitchen Sink Event",
 				summary: "An event with every exposed API field populated.",
 				imageId: createId("asset:image"),
@@ -630,7 +765,7 @@ async function main() {
 				website: "https://example.org/events/kitchen-sink",
 			});
 			await upsertById(tx, schema.events, {
-				id: nextEventEntityId,
+				id: nextEventVersionId,
 				title: "Kitchen Sink Next Event",
 				summary: "A later event so the by-slug endpoint exposes `links.next`.",
 				imageId: createId("asset:image"),
@@ -641,25 +776,25 @@ async function main() {
 			});
 
 			await upsertById(tx, schema.pages, {
-				id: pageEntityId,
+				id: pageVersionId,
 				title: "Kitchen Sink Page",
 				summary: "A page seeded for API contract testing.",
 				imageId: createId("asset:image"),
 			});
 			await upsertById(tx, schema.news, {
-				id: newsEntityId,
+				id: newsVersionId,
 				title: "Kitchen Sink News",
 				summary: "A news item seeded for API contract testing.",
 				imageId: createId("asset:image"),
 			});
 			await upsertById(tx, schema.fundingCalls, {
-				id: fundingCallEntityId,
+				id: fundingCallVersionId,
 				title: "Kitchen Sink Funding Call",
 				summary: "A funding call seeded for API contract testing.",
 				duration: createTimestampRange("2026-06-01T00:00:00.000Z", "2026-06-30T23:59:59.000Z"),
 			});
 			await upsertById(tx, schema.opportunities, {
-				id: opportunityEntityId,
+				id: opportunityVersionId,
 				title: "Kitchen Sink Opportunity",
 				summary: "An opportunity seeded for API contract testing.",
 				duration: createTimestampRange("2026-07-01T00:00:00.000Z", "2026-07-31T23:59:59.000Z"),
@@ -670,19 +805,19 @@ async function main() {
 				website: "https://example.org/opportunities/kitchen-sink",
 			});
 			await upsertById(tx, schema.spotlightArticles, {
-				id: spotlightEntityId,
+				id: spotlightVersionId,
 				title: "Kitchen Sink Spotlight Article",
 				summary: "A spotlight article seeded for API contract testing.",
 				imageId: createId("asset:image"),
 			});
 			await upsertById(tx, schema.impactCaseStudies, {
-				id: impactEntityId,
+				id: impactVersionId,
 				title: "Kitchen Sink Impact Case Study",
 				summary: "An impact case study seeded for API contract testing.",
 				imageId: createId("asset:image"),
 			});
 			await upsertById(tx, schema.documentsPolicies, {
-				id: documentPolicyEntityId,
+				id: documentPolicyVersionId,
 				title: "Kitchen Sink Policy",
 				summary: "A document or policy seeded for API contract testing.",
 				url: "https://example.org/documents/kitchen-sink-policy",
@@ -692,7 +827,7 @@ async function main() {
 			});
 
 			await upsertById(tx, schema.organisationalUnits, {
-				id: dariahEricEntityId,
+				id: dariahEricVersionId,
 				name: "Kitchen Sink ERIC",
 				acronym: "KS-ERIC",
 				summary:
@@ -703,7 +838,7 @@ async function main() {
 				sshocMarketplaceActorId: 9001,
 			});
 			await upsertById(tx, schema.organisationalUnits, {
-				id: workingGroupEntityId,
+				id: workingGroupVersionId,
 				name: "Kitchen Sink Working Group",
 				acronym: "KSWG",
 				summary: "A working group with all fields, chairs, relations, and resources populated.",
@@ -722,7 +857,7 @@ async function main() {
 				sshocMarketplaceActorId: 9002,
 			});
 			await upsertById(tx, schema.organisationalUnits, {
-				id: governanceBodyEntityId,
+				id: governanceBodyVersionId,
 				name: "Kitchen Sink Governance Body",
 				acronym: "KSGB",
 				summary: "A governance body with persons, relations, and social media populated.",
@@ -735,7 +870,7 @@ async function main() {
 				sshocMarketplaceActorId: 9003,
 			});
 			await upsertById(tx, schema.organisationalUnits, {
-				id: memberCountryEntityId,
+				id: memberCountryVersionId,
 				name: "Kitchen Sink Country",
 				acronym: "KSC",
 				summary: "A member country with contributors, institutions, and consortium populated.",
@@ -748,7 +883,7 @@ async function main() {
 				sshocMarketplaceActorId: 9004,
 			});
 			await upsertById(tx, schema.organisationalUnits, {
-				id: institutionEntityId,
+				id: institutionVersionId,
 				name: "Kitchen Sink Institution",
 				acronym: "KSI",
 				summary: "An institution linked to the member country and ERIC for endpoint hydration.",
@@ -761,7 +896,7 @@ async function main() {
 				sshocMarketplaceActorId: 9005,
 			});
 			await upsertById(tx, schema.organisationalUnits, {
-				id: consortiumEntityId,
+				id: consortiumVersionId,
 				name: "Kitchen Sink National Consortium",
 				acronym: "KSNC",
 				summary: "A national consortium linked to the member country.",
@@ -775,7 +910,7 @@ async function main() {
 			});
 
 			await upsertById(tx, schema.projects, {
-				id: projectEntityId,
+				id: projectVersionId,
 				metadata: { programme: "Horizon Europe", contract: "KS-2026-001" },
 				name: "Kitchen Sink Project",
 				acronym: "KSP",
@@ -828,25 +963,25 @@ async function main() {
 
 			await upsertById(tx, schema.projectsToSocialMedia, {
 				id: createId("project-social:website"),
-				projectId: projectEntityId,
+				projectId: projectVersionId,
 				socialMediaId: createId("social-media:website"),
 			});
 			await upsertById(tx, schema.projectsToSocialMedia, {
 				id: createId("project-social:linkedin"),
-				projectId: projectEntityId,
+				projectId: projectVersionId,
 				socialMediaId: createId("social-media:linkedin"),
 			});
 
 			const organisationalUnitSocialLinks = [
-				[dariahEricEntityId, createId("social-media:website")],
-				[workingGroupEntityId, createId("social-media:website")],
-				[workingGroupEntityId, createId("social-media:mastodon")],
-				[governanceBodyEntityId, createId("social-media:website")],
-				[governanceBodyEntityId, createId("social-media:linkedin")],
-				[memberCountryEntityId, createId("social-media:website")],
-				[memberCountryEntityId, createId("social-media:linkedin")],
-				[institutionEntityId, createId("social-media:website")],
-				[consortiumEntityId, createId("social-media:website")],
+				[dariahEricVersionId, createId("social-media:website")],
+				[workingGroupVersionId, createId("social-media:website")],
+				[workingGroupVersionId, createId("social-media:mastodon")],
+				[governanceBodyVersionId, createId("social-media:website")],
+				[governanceBodyVersionId, createId("social-media:linkedin")],
+				[memberCountryVersionId, createId("social-media:website")],
+				[memberCountryVersionId, createId("social-media:linkedin")],
+				[institutionVersionId, createId("social-media:website")],
+				[consortiumVersionId, createId("social-media:website")],
 			] as const;
 
 			for (const [organisationalUnitId, socialMediaId] of organisationalUnitSocialLinks) {
@@ -859,31 +994,31 @@ async function main() {
 
 			await tx
 				.delete(schema.projectsToOrganisationalUnits)
-				.where(eq(schema.projectsToOrganisationalUnits.projectId, projectEntityId));
+				.where(eq(schema.projectsToOrganisationalUnits.projectId, projectVersionId));
 			await tx
 				.delete(schema.personsToOrganisationalUnits)
 				.where(
 					inArray(schema.personsToOrganisationalUnits.personId, [
-						kitchenSinkPersonEntityId,
-						relatedPersonEntityId,
+						kitchenSinkPersonVersionId,
+						relatedPersonVersionId,
 					]),
 				);
 			await tx
 				.delete(schema.organisationalUnitsRelations)
 				.where(
 					inArray(schema.organisationalUnitsRelations.unitId, [
-						workingGroupEntityId,
-						memberCountryEntityId,
-						institutionEntityId,
-						consortiumEntityId,
+						workingGroupVersionId,
+						memberCountryVersionId,
+						institutionVersionId,
+						consortiumVersionId,
 					]),
 				);
 
 			await tx.insert(schema.organisationalUnitsRelations).values([
 				{
 					id: createId("relation:working-group-to-eric"),
-					unitId: workingGroupEntityId,
-					relatedUnitId: dariahEricEntityId,
+					unitId: workingGroupVersionId,
+					relatedUnitId: dariahEricVersionId,
 					status: assertLookupId(
 						unitStatusIds.get("is_part_of"),
 						'Missing organisational unit status "is_part_of".',
@@ -892,8 +1027,8 @@ async function main() {
 				},
 				{
 					id: createId("relation:country-to-eric"),
-					unitId: memberCountryEntityId,
-					relatedUnitId: dariahEricEntityId,
+					unitId: memberCountryVersionId,
+					relatedUnitId: dariahEricVersionId,
 					status: assertLookupId(
 						unitStatusIds.get("is_member_of"),
 						'Missing organisational unit status "is_member_of".',
@@ -902,8 +1037,8 @@ async function main() {
 				},
 				{
 					id: createId("relation:institution-to-eric"),
-					unitId: institutionEntityId,
-					relatedUnitId: dariahEricEntityId,
+					unitId: institutionVersionId,
+					relatedUnitId: dariahEricVersionId,
 					status: assertLookupId(
 						unitStatusIds.get("is_partner_institution_of"),
 						'Missing organisational unit status "is_partner_institution_of".',
@@ -912,8 +1047,8 @@ async function main() {
 				},
 				{
 					id: createId("relation:institution-to-country"),
-					unitId: institutionEntityId,
-					relatedUnitId: memberCountryEntityId,
+					unitId: institutionVersionId,
+					relatedUnitId: memberCountryVersionId,
 					status: assertLookupId(
 						unitStatusIds.get("is_located_in"),
 						'Missing organisational unit status "is_located_in".',
@@ -922,8 +1057,8 @@ async function main() {
 				},
 				{
 					id: createId("relation:consortium-to-country"),
-					unitId: consortiumEntityId,
-					relatedUnitId: memberCountryEntityId,
+					unitId: consortiumVersionId,
+					relatedUnitId: memberCountryVersionId,
 					status: assertLookupId(
 						unitStatusIds.get("is_national_consortium_of"),
 						'Missing organisational unit status "is_national_consortium_of".',
@@ -935,8 +1070,8 @@ async function main() {
 			await tx.insert(schema.personsToOrganisationalUnits).values([
 				{
 					id: createId("person-org:wg-chair"),
-					personId: kitchenSinkPersonEntityId,
-					organisationalUnitId: workingGroupEntityId,
+					personId: kitchenSinkPersonVersionId,
+					organisationalUnitId: workingGroupVersionId,
 					roleTypeId: assertLookupId(
 						personRoleIds.get("is_chair_of"),
 						'Missing person role type "is_chair_of".',
@@ -945,8 +1080,8 @@ async function main() {
 				},
 				{
 					id: createId("person-org:governance-president"),
-					personId: kitchenSinkPersonEntityId,
-					organisationalUnitId: governanceBodyEntityId,
+					personId: kitchenSinkPersonVersionId,
+					organisationalUnitId: governanceBodyVersionId,
 					roleTypeId: assertLookupId(
 						personRoleIds.get("is_president_of"),
 						'Missing person role type "is_president_of".',
@@ -955,8 +1090,8 @@ async function main() {
 				},
 				{
 					id: createId("person-org:governance-member"),
-					personId: relatedPersonEntityId,
-					organisationalUnitId: governanceBodyEntityId,
+					personId: relatedPersonVersionId,
+					organisationalUnitId: governanceBodyVersionId,
 					roleTypeId: assertLookupId(
 						personRoleIds.get("is_member_of"),
 						'Missing person role type "is_member_of".',
@@ -965,8 +1100,8 @@ async function main() {
 				},
 				{
 					id: createId("person-org:country-national-coordinator"),
-					personId: kitchenSinkPersonEntityId,
-					organisationalUnitId: memberCountryEntityId,
+					personId: kitchenSinkPersonVersionId,
+					organisationalUnitId: memberCountryVersionId,
 					roleTypeId: assertLookupId(
 						personRoleIds.get("national_coordinator"),
 						'Missing person role type "national_coordinator".',
@@ -975,8 +1110,8 @@ async function main() {
 				},
 				{
 					id: createId("person-org:country-national-representative"),
-					personId: relatedPersonEntityId,
-					organisationalUnitId: memberCountryEntityId,
+					personId: relatedPersonVersionId,
+					organisationalUnitId: memberCountryVersionId,
 					roleTypeId: assertLookupId(
 						personRoleIds.get("national_representative"),
 						'Missing person role type "national_representative".',
@@ -988,8 +1123,8 @@ async function main() {
 			await tx.insert(schema.projectsToOrganisationalUnits).values([
 				{
 					id: createId("project-org:coordinator-eric"),
-					projectId: projectEntityId,
-					unitId: dariahEricEntityId,
+					projectId: projectVersionId,
+					unitId: dariahEricVersionId,
 					roleId: assertLookupId(
 						projectRoleIds.get("coordinator"),
 						'Missing project role "coordinator".',
@@ -998,8 +1133,8 @@ async function main() {
 				},
 				{
 					id: createId("project-org:participant-institution"),
-					projectId: projectEntityId,
-					unitId: institutionEntityId,
+					projectId: projectVersionId,
+					unitId: institutionVersionId,
 					roleId: assertLookupId(
 						projectRoleIds.get("participant"),
 						'Missing project role "participant".',
@@ -1008,15 +1143,15 @@ async function main() {
 				},
 				{
 					id: createId("project-org:funder-country"),
-					projectId: projectEntityId,
-					unitId: memberCountryEntityId,
+					projectId: projectVersionId,
+					unitId: memberCountryVersionId,
 					roleId: assertLookupId(projectRoleIds.get("funder"), 'Missing project role "funder".'),
 					duration: createTimestampRange("2025-01-01T00:00:00.000Z", null),
 				},
 				{
 					id: createId("project-org:participant-governance"),
-					projectId: projectEntityId,
-					unitId: governanceBodyEntityId,
+					projectId: projectVersionId,
+					unitId: governanceBodyVersionId,
 					roleId: assertLookupId(
 						projectRoleIds.get("participant"),
 						'Missing project role "participant".',
@@ -1027,32 +1162,32 @@ async function main() {
 
 			await tx
 				.delete(schema.spotlightArticlesToPersons)
-				.where(eq(schema.spotlightArticlesToPersons.spotlightArticleId, spotlightEntityId));
+				.where(eq(schema.spotlightArticlesToPersons.spotlightArticleId, spotlightVersionId));
 			await tx
 				.delete(schema.impactCaseStudiesToPersons)
-				.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyId, impactEntityId));
+				.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyId, impactVersionId));
 
 			await tx.insert(schema.spotlightArticlesToPersons).values([
 				{
-					spotlightArticleId: spotlightEntityId,
-					personId: kitchenSinkPersonEntityId,
+					spotlightArticleId: spotlightVersionId,
+					personId: kitchenSinkPersonVersionId,
 					role: "author",
 				},
 				{
-					spotlightArticleId: spotlightEntityId,
-					personId: relatedPersonEntityId,
+					spotlightArticleId: spotlightVersionId,
+					personId: relatedPersonVersionId,
 					role: "editor",
 				},
 			]);
 			await tx.insert(schema.impactCaseStudiesToPersons).values([
 				{
-					impactCaseStudyId: impactEntityId,
-					personId: kitchenSinkPersonEntityId,
+					impactCaseStudyId: impactVersionId,
+					personId: kitchenSinkPersonVersionId,
 					role: "author",
 				},
 				{
-					impactCaseStudyId: impactEntityId,
-					personId: relatedPersonEntityId,
+					impactCaseStudyId: impactVersionId,
+					personId: relatedPersonVersionId,
 					role: "contributor",
 				},
 			]);
@@ -1061,19 +1196,19 @@ async function main() {
 				(typeof schema.entityTypesEnum)[number],
 				Array<string>
 			>([
-				["projects", [projectEntityId]],
-				["events", [eventEntityId]],
-				["pages", [pageEntityId]],
-				["news", [newsEntityId]],
-				["funding_calls", [fundingCallEntityId]],
-				["opportunities", [opportunityEntityId]],
-				["spotlight_articles", [spotlightEntityId]],
-				["impact_case_studies", [impactEntityId]],
-				["documents_policies", [documentPolicyEntityId]],
-				["persons", [kitchenSinkPersonEntityId]],
+				["projects", [projectVersionId]],
+				["events", [eventVersionId]],
+				["pages", [pageVersionId]],
+				["news", [newsVersionId]],
+				["funding_calls", [fundingCallVersionId]],
+				["opportunities", [opportunityVersionId]],
+				["spotlight_articles", [spotlightVersionId]],
+				["impact_case_studies", [impactVersionId]],
+				["documents_policies", [documentPolicyVersionId]],
+				["persons", [kitchenSinkPersonVersionId]],
 				[
 					"organisational_units",
-					[workingGroupEntityId, governanceBodyEntityId, memberCountryEntityId],
+					[workingGroupVersionId, governanceBodyVersionId, memberCountryVersionId],
 				],
 			]);
 
@@ -1089,7 +1224,7 @@ async function main() {
 						return fieldDefinitions.map((fieldDefinition) => {
 							return {
 								id: createId(`field:${entityId}:${fieldDefinition.fieldName}`),
-								entityId,
+								entityVersionId: entityId,
 								fieldNameId: fieldDefinition.id,
 								fieldName: fieldDefinition.fieldName,
 							};
@@ -1101,7 +1236,7 @@ async function main() {
 			for (const field of fieldsToCreate) {
 				await upsertById(tx, schema.fields, {
 					id: field.id,
-					entityId: field.entityId,
+					entityVersionId: field.entityVersionId,
 					fieldNameId: field.fieldNameId,
 				});
 			}
@@ -1176,7 +1311,15 @@ async function main() {
 			});
 
 			if (contentBlocks.length > 0) {
-				await tx.insert(schema.contentBlocks).values(contentBlocks);
+				const uniqueContentBlocks = new Map(
+					contentBlocks.map((contentBlock) => {
+						return [contentBlock.id, contentBlock];
+					}),
+				);
+
+				for (const contentBlock of uniqueContentBlocks.values()) {
+					await upsertById(tx, schema.contentBlocks, contentBlock);
+				}
 			}
 
 			for (const field of fieldsToCreate) {
@@ -1284,17 +1427,27 @@ async function main() {
 				.delete(schema.entitiesToResources)
 				.where(inArray(schema.entitiesToResources.entityId, relatedEntityOwners));
 
-			await tx.insert(schema.entitiesToEntities).values(
-				relatedEntityOwners.flatMap((entityId) => {
-					const relatedIds = [kitchenSinkPersonEntityId, pageEntityId].filter((relatedEntityId) => {
-						return relatedEntityId !== entityId;
-					});
+			const entityRelations = new Map(
+				relatedEntityOwners
+					.flatMap((entityId) => {
+						const relatedIds = [kitchenSinkPersonEntityId, pageEntityId].filter(
+							(relatedEntityId) => {
+								return relatedEntityId !== entityId;
+							},
+						);
 
-					return relatedIds.map((relatedEntityId) => {
-						return { entityId, relatedEntityId };
-					});
-				}),
+						return relatedIds.map((relatedEntityId) => {
+							return { entityId, relatedEntityId };
+						});
+					})
+					.map((relation) => {
+						return [`${relation.entityId}:${relation.relatedEntityId}`, relation];
+					}),
 			);
+
+			if (entityRelations.size > 0) {
+				await tx.insert(schema.entitiesToEntities).values([...entityRelations.values()]);
+			}
 
 			if (resourceIds.length > 0) {
 				await tx.insert(schema.entitiesToResources).values(

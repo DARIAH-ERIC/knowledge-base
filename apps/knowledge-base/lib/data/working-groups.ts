@@ -3,7 +3,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, inArray } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike, inArray, or, sql } from "@/lib/db/sql";
 
 export type WorkingGroupsSort = "name";
 
@@ -18,9 +18,12 @@ interface GetWorkingGroupsParams {
 export interface WorkingGroupsResult {
 	data: Array<
 		Pick<schema.OrganisationalUnit, "id" | "name"> & {
+			documentId: string;
 			durationFrom: Date | null;
 			durationUntil: Date | null;
 			entity: Pick<schema.Entity, "slug">;
+			isPublished: boolean;
+			updatedAt: Date;
 		}
 	>;
 	limit: number;
@@ -59,9 +62,23 @@ export async function getWorkingGroups(
 	const [items, aggregate, erics] = await Promise.all([
 		db
 			.select({
+				documentId: schema.entities.id,
 				id: schema.organisationalUnits.id,
 				name: schema.organisationalUnits.name,
 				slug: schema.entities.slug,
+				updatedAt: schema.entityVersions.updatedAt,
+				isPublished: sql<boolean>`
+					EXISTS (
+						SELECT
+							1
+						FROM
+							"entity_versions" AS "pv"
+							INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+						WHERE
+							"pv"."entity_id" = ${schema.entities.id}
+							AND "ps"."type" = 'published'
+					)
+				`,
 			})
 			.from(schema.organisationalUnits)
 			.innerJoin(
@@ -70,7 +87,30 @@ export async function getWorkingGroups(
 			)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-			.where(where)
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entities.id}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			)
 			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
@@ -83,7 +123,30 @@ export async function getWorkingGroups(
 			)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-			.where(where),
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entities.id}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			),
 		db.query.organisationalUnits.findMany({
 			where: { type: { type: "eric" } },
 			columns: { id: true },
@@ -146,11 +209,14 @@ export async function getWorkingGroups(
 			const relation = relationByWorkingGroupId.get(item.id);
 
 			return {
+				documentId: item.documentId,
 				durationFrom: relation?.from ?? null,
 				durationUntil: relation?.until ?? null,
 				entity: { slug: item.slug },
 				id: item.id,
+				isPublished: item.isPublished,
 				name: item.name,
+				updatedAt: item.updatedAt,
 			};
 		}),
 		limit,

@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Badge } from "@dariah-eric/ui/badge";
 import { Button, buttonStyles } from "@dariah-eric/ui/button";
 import { Link } from "@dariah-eric/ui/link";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
@@ -43,9 +44,12 @@ interface WorkingGroupsPageProps {
 	workingGroups: {
 		data: Array<
 			Pick<schema.OrganisationalUnit, "id" | "name"> & {
+				documentId: string;
 				durationFrom: Date | null;
 				durationUntil: Date | null;
 				entity: Pick<schema.Entity, "slug">;
+				isPublished: boolean;
+				updatedAt: Date;
 			}
 		>;
 		total: number;
@@ -74,7 +78,7 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 			});
 		},
 	);
-	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
 		useUrlPaginatedSearch({
 			dir: initialDir,
@@ -121,6 +125,8 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 					</TableColumn>
 					<TableColumn>{t("From")}</TableColumn>
 					<TableColumn>{t("Until")}</TableColumn>
+					<TableColumn>{t("Updated")}</TableColumn>
+					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -139,6 +145,12 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 										: item.durationUntil != null
 											? format.dateTime(item.durationUntil, { dateStyle: "short" })
 											: t("present")}
+								</TableCell>
+								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
+								<TableCell>
+									<Badge intent={item.isPublished ? "success" : "warning"}>
+										{item.isPublished ? t("Live") : t("Draft")}
+									</Badge>
 								</TableCell>
 								<TableCell className="text-end">
 									<Menu>
@@ -161,7 +173,7 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 											<MenuItem
 												intent="danger"
 												onAction={() => {
-													setItemToDelete({ id: item.id });
+													setItemToDelete({ id: item.id, documentId: item.documentId });
 												}}
 											>
 												<TrashIcon className="mr-2 size-4" />
@@ -192,11 +204,11 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 						return;
 					}
 
-					const id = itemToDelete.id;
+					const { id, documentId } = itemToDelete;
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deleteWorkingGroupAction(id);
+						await deleteWorkingGroupAction(documentId);
 						router.refresh();
 						setItemToDelete(null);
 					});
