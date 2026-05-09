@@ -113,12 +113,6 @@
 		"//#format:fix": {
 			"outputs": [".prettiercache"]
 		},
-		"format:check": {
-			"outputs": [".prettiercache"]
-		},
-		"format:fix": {
-			"outputs": [".prettiercache"]
-		},
 		"lint:check": {
 			"dependsOn": ["^build"],
 			"outputs": [".stylelintcache"]
