@@ -578,6 +578,82 @@ export class DatabaseService {
 		}
 	}
 
+	/**
+	 * Deletes ALL versions (draft + published) of a news document and the document
+	 * row itself. Use this instead of `deleteNewsItem` when the document may have
+	 * more than one version (e.g. after publish or edit-after-publish flows).
+	 */
+	async deleteNewsDocument(documentId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const versions = await tx
+				.select({ id: schema.entityVersions.id })
+				.from(schema.entityVersions)
+				.where(eq(schema.entityVersions.entityId, documentId));
+
+			for (const version of versions) {
+				const entityFields = await tx
+					.select({ id: schema.fields.id })
+					.from(schema.fields)
+					.where(eq(schema.fields.entityVersionId, version.id));
+
+				if (entityFields.length > 0) {
+					const fieldIds = (entityFields as Array<{ id: string }>).map((f) => {
+						return f.id;
+					});
+					await tx
+						.delete(schema.contentBlocks)
+						.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+					await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+				}
+
+				await tx.delete(schema.news).where(eq(schema.news.id, version.id));
+				await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, version.id));
+			}
+
+			await tx
+				.delete(schema.entitiesToResources)
+				.where(eq(schema.entitiesToResources.entityId, documentId));
+
+			await tx
+				.delete(schema.entitiesToEntities)
+				.where(
+					or(
+						eq(schema.entitiesToEntities.entityId, documentId),
+						eq(schema.entitiesToEntities.relatedEntityId, documentId),
+					),
+				);
+
+			await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
+		});
+	}
+
+	/**
+	 * Finds all news documents whose title starts with `[e2e-worker-{workerIndex}]`
+	 * (across any version) and deletes all their versions. Safe for lifecycle tests
+	 * where items may be in published, draft+published, or published-only state.
+	 */
+	async cleanupWorkerNewsLifecycleItems(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const rows = await this.db
+			.select({ documentId: schema.entityVersions.entityId })
+			.from(schema.news)
+			.innerJoin(schema.entityVersions, eq(schema.news.id, schema.entityVersions.id))
+			.where(sql`${schema.news.title} LIKE ${`${prefix}%`}`);
+
+		const documentIds = [
+			...new Set(
+				rows.map((r) => {
+					return r.documentId;
+				}),
+			),
+		];
+
+		for (const documentId of documentIds) {
+			await this.deleteNewsDocument(documentId);
+		}
+	}
+
 	/** Closes the underlying pg pool. Called in worker teardown. */
 	async close(): Promise<void> {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
