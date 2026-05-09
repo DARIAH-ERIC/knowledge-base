@@ -1,4 +1,6 @@
-import { assert, keyBy, log } from "@acdh-oeaw/lib";
+import { appendFileSync } from "node:fs";
+
+import { assert, groupBy, keyBy, log } from "@acdh-oeaw/lib";
 import { createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { type AssetMetadata, createStorageService } from "@dariah-eric/storage";
@@ -6,7 +8,7 @@ import { buffer } from "@dariah-eric/storage/lib";
 import slugify from "@sindresorhus/slugify";
 import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
-import { eq, ilike } from "drizzle-orm";
+import { and, count, eq, ilike } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 
 import { placeholderImageUrl } from "../config/data-migration.config";
@@ -17,14 +19,73 @@ import {
 	countries as unrCountries,
 	countryToInstitution,
 	countryToService as unrCountryToService,
+	eventReports as unrEventReports,
+	eventSizeValues as unrEventSizeValues,
 	institutions as unrInstitutions,
 	institutionService as unrInstitutionToService,
 	institutionToPerson as unrInstitutionToPerson,
+	outreach as unrOutreach,
+	outreachKpis as unrOutreachKpis,
+	outreachReports as unrOutreachReports,
+	outreachTypeValues as unrOutreachTypeValues,
 	persons as unrPersons,
+	projects as unrProjects,
+	reportCampaigns as unrReportingCampaigns,
+	reports as unrReports,
 	roles,
+	roleTypeValues as unrRoleTypeValues,
+	serviceKpis as unrServiceKpis,
+	serviceReports as unrServiceReports,
 	services as unrServices,
+	serviceSizeValues as unrServiceSizeValues,
+	workingGroupEvents as unrWorkGroupEvents,
+	workingGroupOutreach as unrWorkingGroupOutreach,
+	workingGroupReports as unrWorkingGroupReports,
 	workingGroups as unrWorkingGroups,
 } from "../unr-schema/schema";
+
+interface CampaignQuestionAnswer {
+	question: string;
+	answer: string;
+	campaignId: string;
+	workingGroupReportId: string;
+}
+
+interface CampaignQuestions {
+	items: Array<CampaignQuestionAnswer>;
+}
+
+interface ReportComment {
+	comments: string;
+	contributions: string;
+	institutions: string;
+	eventReports: string;
+	outreach: string;
+	projectFundingLeverages: string;
+	publications: string;
+	serviceReports: string;
+	software: string;
+}
+
+type ServiceSizeThreshold = Record<string, number>;
+
+type ReportScreenCommentKey = (typeof schema.reportScreenCommentKeyEnum)[number];
+type SocialMediaType = (typeof schema.socialMediaTypesEnum)[number];
+type ReportingCampaignContributionAmountRoleType =
+	(typeof schema.reportingCampaignContributionRoleEnum)[number];
+
+const SOCIAL_MEDIA_DOMAINS: Record<SocialMediaType, Array<string>> = {
+	bluesky: ["bsky.app"],
+	twitter: ["twitter.com", "x.com"],
+	facebook: ["facebook.com"],
+	instagram: ["instagram.com"],
+	linkedin: ["linkedin.com"],
+	mastodon: ["mastodon.social"],
+	vimeo: ["vimeo.com"],
+	youtube: ["youtube.com", "youtu.be"],
+	website: [],
+	other: [],
+};
 
 const db = createDatabaseService({
 	connection: {
@@ -47,6 +108,32 @@ const storage = createStorageService({
 		useSSL: env.S3_PROTOCOL === "https",
 	},
 });
+
+const logToFile = (message: string, filepath = "migration.log") => {
+	const timestamp = new Date().toISOString();
+	const line = `[${timestamp}] ${message}\n`;
+	appendFileSync(filepath, line);
+};
+
+const detectSocialMediaType = (url: string): SocialMediaType => {
+	let hostname;
+	try {
+		hostname = new URL(url).hostname;
+	} catch {
+		hostname = url.toLowerCase();
+	}
+	for (const [type, domains] of Object.entries(SOCIAL_MEDIA_DOMAINS)) {
+		if (
+			domains.some((domain) => {
+				return hostname.includes(domain);
+			})
+		) {
+			return type as SocialMediaType;
+		}
+	}
+
+	return "other";
+};
 
 const unrDB = drizzle(env.UNR_DATABASE_DIRECT_URL);
 const client = unrDB;
@@ -82,6 +169,16 @@ async function main() {
 		return item.type;
 	});
 
+	const projectScopes = await db.query.projectScopes.findMany();
+	const projectScopesByScope = keyBy(projectScopes, (item) => {
+		return item.scope;
+	});
+
+	const projectRoles = await db.query.projectRoles.findMany();
+	const projectRolesByRole = keyBy(projectRoles, (item) => {
+		return item.role;
+	});
+
 	const entityTypes = await db.query.entityTypes.findMany();
 	const entityTypesByType = keyBy(entityTypes, (item) => {
 		return item.type;
@@ -95,6 +192,11 @@ async function main() {
 	const serviceStatuses = await db.query.serviceStatuses.findMany();
 	const serviceTypes = await db.query.serviceTypes.findMany();
 
+	const socialMediaTypes = await db.query.socialMediaTypes.findMany();
+	const socialMediaTypesByType = keyBy(socialMediaTypes, (item) => {
+		return item.type;
+	});
+
 	const bodies = await db.query.organisationalUnits.findMany({
 		where: {
 			typeId: organisationalUnitTypesByType.governance_body.id,
@@ -104,6 +206,10 @@ async function main() {
 	const unrCountryIdToOrgUnitId = new Map<string, string>();
 	const unrInstitutionIdToOrgUnitId = new Map<string, string>();
 	const unrWorkingGroupIdToOrgUnitId = new Map<string, string>();
+	const unrReportingCampaignIdToReportingCampaignId = new Map<string, string>();
+	const unrReportIdToCountryReportId = new Map<string, string>();
+	const unrServiceIdToServiceId = new Map<string, string>();
+	const unrOutreachIdToSocialMediaId = new Map<string, string>();
 
 	const placeholderInput = await buffer.fromUrl(placeholderImageUrl);
 	const placeholderMetadata = await buffer.getMetadata(placeholderInput);
@@ -132,12 +238,21 @@ async function main() {
 
 	assert(placeholderAsset, "Missing placeholder image.");
 
-	// nothing from unr is public
-
 	/**
-	 * ============================================================================================
-	 * Working Groups.
-	 * ============================================================================================
+	 * Migrates working groups from unr to knowledge base.
+	 *
+	 * For each working group:
+	 * - Creates an entity in the entity table
+	 * - Copies an existing logo from the old bucket to the new bucket
+	 * - Creates an asset in the assets table
+	 * - Creates an organisational unit of type working group
+	 * - Updates the mapping between unr working groups and kb organisational units
+	 * - Creates a relation between the organisational unit and the umbrella unit of type is_part_of
+	 * - Creates a field in the fields table if a description exists
+	 * - Creates a content block field realtion in the content blocks table
+	 * - Creates a richtext content block for the description
+	 * Checks if number of organisational units of type working group in kb matches number of
+	 * working groups in unr
 	 */
 
 	log.info("Migrating working groups...");
@@ -168,7 +283,7 @@ async function main() {
 			const id = version.id;
 			let asset;
 
-			if (workingGroup.logo !== null) {
+			if (workingGroup.logo != null) {
 				let key: string;
 				let metadata: AssetMetadata;
 
@@ -225,7 +340,7 @@ async function main() {
 				});
 			}
 
-			if (workingGroup.description === null) {
+			if (workingGroup.description == null) {
 				return;
 			}
 
@@ -268,10 +383,34 @@ async function main() {
 		});
 	}
 
+	const [workingGroupResult] = await db
+		.select({ count: count() })
+		.from(schema.organisationalUnits)
+		.where(eq(schema.organisationalUnits.typeId, organisationalUnitTypesByType.working_group.id));
+	assert(workingGroupResult?.count === workingGroups.length);
+
 	/**
-	 * ============================================================================================
-	 * Countries.
-	 * ============================================================================================
+	 * Migrates countries from unr to knowledge base.
+	 *
+	 * For each country:
+	 * - Creates an entity in the entity table
+	 * - Creates an organisational unit of type country
+	 * - Updates the mapping between unr countries and kb organisational units
+	 * - Creates another entity in the entity table if the unr country has a
+	 * 	 consortium name
+	 * - Copies an existing logo from the old bucket to the new bucket
+	 * - Creates an asset in the assets table
+	 * - Creates a field in the fields table if a description exists
+	 * - Creates a content block field realtion in the content blocks table
+	 * - Creates a richtext content block for the description
+	 * - Creates an organisational unit of type national consortium if the unr country has a
+	 * 	 consortium name
+	 * - Creates a relation between the national consortium organisational unit and the country
+	 *   organisitational unit of type: is_consortium_of
+	 * - Creates a relation between the country organisational unit and the umbrella unit of type
+	 *   is_member_of or is_cooperating_partner_of
+	 * Checks if number of organisational units of type country in kb matches number of
+	 * countries in unr
 	 */
 
 	log.info("Migrating countries...");
@@ -294,8 +433,6 @@ async function main() {
 
 			assert(countryEntity);
 			const id = countryEntity.id;
-
-			// create an org unit for each country
 
 			const [countryOrgUnit] = await tx
 				.insert(schema.organisationalUnits)
@@ -322,7 +459,7 @@ async function main() {
 
 			// create an entity for each national consortium
 
-			if (country.marketplaceId !== null) {
+			if (country.marketplaceId != null) {
 				const [consortiumEntitiy] = await tx
 					.insert(schema.entities)
 					.values({
@@ -348,7 +485,7 @@ async function main() {
 				const id = consortiumVersion.id;
 				let asset;
 
-				if (country.logo !== null) {
+				if (country.logo != null) {
 					let key: string;
 					let metadata: AssetMetadata;
 
@@ -370,7 +507,7 @@ async function main() {
 					}
 				}
 
-				if (country.description !== null) {
+				if (country.description != null) {
 					const content = generateJSON(country.description, [StarterKit]);
 
 					const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
@@ -464,10 +601,28 @@ async function main() {
 		});
 	}
 
+	const [countryOrgUnitResult] = await db
+		.select({ count: count() })
+		.from(schema.organisationalUnits)
+		.where(eq(schema.organisationalUnits.typeId, organisationalUnitTypesByType.country.id));
+	assert(countryOrgUnitResult?.count === countries.length);
+
 	/**
-	 * ============================================================================================
-	 * Instititutions.
-	 * ============================================================================================
+	 * Migrates institutions from unr to knowledge base.
+	 *
+	 * For each institution:
+	 * - Creates an entity in the entity table
+	 * - Creates an organisational unit of type institution
+	 * - Updates the mapping between unr institutions and kb organisational units
+	 * - Creates relations between the organisational unit and the umbrella unit of types:
+	 *   - is_cooperating_partner_of
+	 *   - is_national_coordinating_institution_in
+	 *   - is_national_representative_institution_in
+	 *   - is_partner_institution_of
+	 * - Creates relation between the organisational unit and an organisational unit of type country
+	 *   of type: is_located_in
+	 * Checks if number of organisational units of type institution in kb matches number of
+	 * institutions in unr
 	 */
 
 	log.info("Migrating institutions...");
@@ -524,7 +679,7 @@ async function main() {
 
 			assert(umbrellaUnit);
 
-			if (institution.types !== null) {
+			if (institution.types != null) {
 				let institutionTypes = institution.types.filter((type) => {
 					return type !== "other";
 				});
@@ -596,7 +751,7 @@ async function main() {
 				.where(eq(countryToInstitution.b, institution.id))
 				.limit(1);
 
-			if (countryOfInstitution?.countryId === undefined) {
+			if (countryOfInstitution?.countryId == null) {
 				return;
 			}
 
@@ -613,10 +768,24 @@ async function main() {
 		});
 	}
 
+	const [institutionOrgUnitResult] = await db
+		.select({ count: count() })
+		.from(schema.organisationalUnits)
+		.where(eq(schema.organisationalUnits.typeId, organisationalUnitTypesByType.institution.id));
+	assert(institutionOrgUnitResult?.count === institutions.length);
+
 	/**
-	 * ============================================================================================
-	 * Services.
-	 * ============================================================================================
+	 * Migrates services from unr to knowledge base.
+	 *
+	 * For each service:
+	 * - Creates a service
+	 * - Updates the mapping between unr services and kb services
+	 * - Creates relation between organisational unit of type institution and the service of types:
+	 *   - service_owner
+	 *   - service_provider
+	 * - Creates relation between organisational unit of type country and the service of type:
+	 *   - service_provider
+	 * Checks if number of services kb matches number of services in unr
 	 */
 
 	log.info("Migrating services...");
@@ -663,6 +832,9 @@ async function main() {
 				.returning({ id: schema.services.id });
 
 			assert(kbService);
+
+			unrServiceIdToServiceId.set(service.id, kbService.id);
+
 			const [institutionOfService] = await client
 				.select({
 					institutionId: unrInstitutionToService.institutionId,
@@ -672,7 +844,7 @@ async function main() {
 				.where(eq(unrInstitutionToService.serviceId, service.id))
 				.limit(1);
 
-			if (institutionOfService?.institutionId === undefined) {
+			if (institutionOfService?.institutionId == null) {
 				return;
 			}
 
@@ -698,7 +870,7 @@ async function main() {
 				.where(eq(unrCountryToService.b, service.id))
 				.limit(1);
 
-			if (countryOfService?.countryId === undefined) {
+			if (countryOfService?.countryId == null) {
 				return;
 			}
 
@@ -716,10 +888,225 @@ async function main() {
 		});
 	}
 
+	const [serviceResult] = await db.select({ count: count() }).from(schema.services);
+	assert(serviceResult?.count === services.length);
+
 	/**
-	 * ============================================================================================
-	 * Persons.
-	 * ============================================================================================
+	 * Migrates reporting campaigns from unr to knowledge base.
+	 *
+	 * For each reporting campaign:
+	 * - Creates a reporting campaign
+	 * - Updates the mapping between unr reporting campaigns and kb reporting campaigns
+	 */
+
+	log.info("Migrating reprting campaigns...");
+
+	const reportingCampaigns = await client.select().from(unrReportingCampaigns);
+
+	for (const reportingCampaign of reportingCampaigns) {
+		await db.transaction(async (tx) => {
+			const [kbReportingCampaign] = await tx
+				.insert(schema.reportingCampaigns)
+				.values({
+					year: reportingCampaign.year,
+					status: "closed",
+					createdAt: reportingCampaign.createdAt,
+					updatedAt: reportingCampaign.updatedAt,
+				})
+				.returning({ id: schema.reportingCampaigns.id });
+
+			assert(kbReportingCampaign);
+
+			unrReportingCampaignIdToReportingCampaignId.set(reportingCampaign.id, kbReportingCampaign.id);
+		});
+	}
+
+	/**
+	 * Migrates outreach from unr to knowledge base.
+	 *
+	 * For each outreach item:
+	 * - Creates a social media item either of type:
+	 *   - website
+	 *   - a dedicated social media type
+	 *   - other (if original type is social media but provider is one of the defined values)
+	 * - Updates the mapping between unr outreach and kb social media
+	 * - Creates relation between social media item and organisational unit of type country if provided in unr
+	 */
+
+	log.info("Migrating outreach...");
+
+	const outreach = await client.select().from(unrOutreach);
+	const outreachTypeValues = await client.select().from(unrOutreachTypeValues);
+	const workingGroupOutreach = await client.select().from(unrWorkingGroupOutreach);
+
+	for (const outreachItem of outreach) {
+		let socialMediaType: SocialMediaType;
+		const socialMediaUrl = outreachItem.url;
+		switch (outreachItem.type) {
+			case "national_website": {
+				socialMediaType = "website" as SocialMediaType;
+				break;
+			}
+			case "national_social_media":
+			case "social_media": {
+				socialMediaType = detectSocialMediaType(socialMediaUrl);
+				break;
+			}
+		}
+
+		await db.transaction(async (tx) => {
+			const [kbSocialMedia] = await tx
+				.insert(schema.socialMedia)
+				.values({
+					name: outreachItem.name,
+					typeId: socialMediaTypesByType[socialMediaType].id,
+					url: outreachItem.url,
+					duration: {
+						start: outreachItem.startDate ?? new Date(Date.UTC(1900, 0, 1)),
+						end: outreachItem.endDate ?? undefined,
+					},
+					createdAt: new Date(outreachItem.createdAt),
+					updatedAt: new Date(outreachItem.createdAt),
+				})
+				.returning({ id: schema.socialMedia.id });
+
+			assert(kbSocialMedia);
+
+			unrOutreachIdToSocialMediaId.set(outreachItem.id, kbSocialMedia.id);
+
+			if (outreachItem.countryId == null) {
+				return;
+			}
+
+			const organisationalUnitId = unrCountryIdToOrgUnitId.get(outreachItem.countryId);
+
+			if (organisationalUnitId == null) {
+				return;
+			}
+
+			await tx.insert(schema.organisationalUnitsToSocialMedia).values({
+				organisationalUnitId,
+				socialMediaId: kbSocialMedia.id,
+				createdAt: new Date(outreachItem.createdAt),
+				updatedAt: new Date(outreachItem.createdAt),
+			});
+		});
+	}
+
+	/**
+	 * Migrates working group outreach from unr to knowledge base.
+	 *
+	 * For each outreach item:
+	 * - Creates a social media item either of type:
+	 *   - website
+	 *   - a dedicated social media type
+	 *   - other (if original type is social media but provider is one of the defined values)
+	 * - Updates the mapping between unr working group outreach and kb social media
+	 * - Creates relation between social media item and organisational unit of type country if provided in unr
+	 */
+
+	log.info("Migrating working group outreach...");
+
+	for (const workingGroupOutreachItem of workingGroupOutreach) {
+		let socialMediaType: SocialMediaType;
+		const socialMediaUrl = workingGroupOutreachItem.url;
+
+		switch (workingGroupOutreachItem.type) {
+			case "social_media": {
+				socialMediaType = detectSocialMediaType(socialMediaUrl);
+				break;
+			}
+			case "website": {
+				socialMediaType = "website";
+			}
+		}
+
+		await db.transaction(async (tx) => {
+			const [kbSocialMedia] = await tx
+				.insert(schema.socialMedia)
+				.values({
+					name: workingGroupOutreachItem.name,
+					typeId: socialMediaTypesByType[socialMediaType].id,
+					url: workingGroupOutreachItem.url,
+					duration: {
+						start: workingGroupOutreachItem.startDate ?? new Date(Date.UTC(1900, 0, 1)),
+						end: workingGroupOutreachItem.endDate ?? undefined,
+					},
+					createdAt: new Date(workingGroupOutreachItem.createdAt),
+					updatedAt: new Date(workingGroupOutreachItem.createdAt),
+				})
+				.returning({ id: schema.services.id });
+
+			assert(kbSocialMedia);
+
+			unrOutreachIdToSocialMediaId.set(workingGroupOutreachItem.id, kbSocialMedia.id);
+
+			const organisationalUnitId = unrWorkingGroupIdToOrgUnitId.get(
+				workingGroupOutreachItem.workingGroupId,
+			);
+
+			if (organisationalUnitId == null) {
+				return;
+			}
+
+			await tx.insert(schema.organisationalUnitsToSocialMedia).values({
+				organisationalUnitId,
+				socialMediaId: kbSocialMedia.id,
+				createdAt: new Date(workingGroupOutreachItem.createdAt),
+				updatedAt: new Date(workingGroupOutreachItem.createdAt),
+			});
+		});
+	}
+
+	/**
+	 * Migrates outreach type values from unr to knowledge base.
+	 *
+	 * For each outreach type value:
+	 * - Creates a reporting campaign social media amount either of type:
+	 *   - website
+	 *   - other
+	 */
+
+	log.info("Migrating outreach type values...");
+
+	for (const outreachTypeValue of outreachTypeValues) {
+		const campaignId = unrReportingCampaignIdToReportingCampaignId.get(
+			outreachTypeValue.reportCampaignId,
+		);
+		assert(campaignId);
+		const category = outreachTypeValue.type === "national_website" ? "website" : "other";
+		const amount = category === "website" ? 5000 : 2000;
+		await db
+			.insert(schema.reportingCampaignSocialMediaAmounts)
+			.values({
+				campaignId,
+				category,
+				amount,
+			})
+			.onConflictDoNothing({
+				target: [
+					schema.reportingCampaignSocialMediaAmounts.campaignId,
+					schema.reportingCampaignSocialMediaAmounts.category,
+				],
+			});
+	}
+
+	/**
+	 * Migrates people from unr to knowledge base.
+	 *
+	 * For each person:
+	 * - Creates an entity in the entity table
+	 * - Copies an existing logo from the old bucket to the new bucket
+	 * - Creates an asset in the assets table
+	 * - Creates a field in the fields table if a biography exists
+	 * - Creates a content block field realtion in the content blocks table
+	 * - Creates a richtext content block for the biography
+	 * - Creates relations between the person and organisational units of type institution of type:
+	 *   - is_affiliated_with
+	 * - Creates relations between the person and organisational units either of type:
+	 *   - body: in roles is_member_of, is_chair_of
+	 *   - country: in roles national_coordinator, national_coordinator_deputy, national_representative, national_representative_deputy"
+	 *   - working group: in roles is_member_of, is_chair_of
 	 */
 
 	log.info("Migrating people...");
@@ -757,7 +1144,7 @@ async function main() {
 			const id = version.id;
 			let asset;
 
-			if (person.image !== null) {
+			if (person.image != null) {
 				let key: string;
 				let metadata: AssetMetadata;
 
@@ -793,7 +1180,7 @@ async function main() {
 				})
 				.returning({ id: schema.persons.id });
 
-			if (person.description === null) {
+			if (person.description == null) {
 				return;
 			}
 
@@ -838,7 +1225,9 @@ async function main() {
 				.select({ institutionId: unrInstitutionToPerson.a })
 				.from(unrInstitutionToPerson)
 				.where(eq(unrInstitutionToPerson.b, person.id));
+
 			assert(kbPerson);
+
 			for (const institution of institutionsOfPerson) {
 				const institutionOrgaUnitId = unrInstitutionIdToOrgUnitId.get(institution.institutionId);
 
@@ -867,9 +1256,9 @@ async function main() {
 
 			for (const contributionByPerson of contributionsByPerson) {
 				const { countryId, role, workingGroupId, startDate, endDate } = contributionByPerson;
-				const countryOrgUnitId = countryId !== null ? unrCountryIdToOrgUnitId.get(countryId) : null;
+				const countryOrgUnitId = countryId != null ? unrCountryIdToOrgUnitId.get(countryId) : null;
 				const workingGroupOrgUnitId =
-					workingGroupId !== null ? unrWorkingGroupIdToOrgUnitId.get(workingGroupId) : null;
+					workingGroupId != null ? unrWorkingGroupIdToOrgUnitId.get(workingGroupId) : null;
 				let roleId;
 				let relatedOrgaUnitId;
 
@@ -965,9 +1354,13 @@ async function main() {
 	}
 
 	/**
-	 * ============================================================================================
-	 * Bodies.
-	 * ============================================================================================
+	 * Migrates bodies data from unr to knowledge base.
+	 * Bodies are seeded per default
+	 *
+	 * For each body in unr:
+	 * - Creates a field in the fields table if a description exists
+	 * - Creates a content block field realtion in the content blocks table
+	 * - Creates a richtext content block for the description
 	 */
 
 	log.info("Migrating bodies...");
@@ -984,7 +1377,7 @@ async function main() {
 
 			assert(unrBody);
 
-			if (unrBody.description !== null) {
+			if (unrBody.description != null) {
 				const content = generateJSON(unrBody.description, [StarterKit]);
 
 				const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
@@ -1021,6 +1414,660 @@ async function main() {
 					content,
 					id: contentBlock.id,
 				});
+			}
+		});
+	}
+
+	/**
+	 * Migrates role values from unr to knowledge base.
+	 * For each role value in unr:
+	 * - Creates a reporting campaign contribution amount
+	 */
+
+	log.info("Migrating role values...");
+
+	const roleTypeValues = await client.select().from(unrRoleTypeValues);
+
+	for (const roleTypeValue of roleTypeValues) {
+		const campaignId = unrReportingCampaignIdToReportingCampaignId.get(
+			roleTypeValue.reportCampaignId,
+		);
+		const amount = roleTypeValue.annualValue;
+		let roleType: ReportingCampaignContributionAmountRoleType | null = null;
+		const unrRoleType = roleTypeValue.type;
+
+		switch (unrRoleType) {
+			case "national_coordinator":
+			case "national_coordinator_deputy": {
+				roleType = unrRoleType;
+				break;
+			}
+			case "jrc_member": {
+				roleType = "is_member_of_jrc";
+				break;
+			}
+			case "jrc_chair": {
+				roleType = "is_chair_of_jrc";
+				break;
+			}
+			case "ncc_chair": {
+				roleType = "is_chair_of_ncc";
+				break;
+			}
+			case "wg_chair": {
+				roleType = "is_chair_of_wg";
+				break;
+			}
+			case "national_representative":
+			case "national_representative_deputy":
+			case "dco_member":
+			case "director":
+			case "scientific_board_member":
+			case "smt_member":
+			case "wg_member":
+			case "national_consortium_contact":
+			case "cooperating_partner_contact": {
+				break;
+			}
+		}
+
+		assert(campaignId);
+
+		if (roleType != null) {
+			await db.transaction(async (tx) => {
+				await tx.insert(schema.reportingCampaignContributionAmounts).values({
+					campaignId,
+					roleType,
+					amount,
+				});
+			});
+		}
+	}
+
+	/**
+	 * Migrates event size values from unr to knowledge base.
+	 * For each size value in unr:
+	 * - Creates a reporting campaign event amount
+	 */
+
+	log.info("Migrating event size values...");
+
+	const eventSizeValues = await client.select().from(unrEventSizeValues);
+
+	for (const eventSizeValue of eventSizeValues) {
+		const campaignId = unrReportingCampaignIdToReportingCampaignId.get(
+			eventSizeValue.reportCampaignId,
+		);
+		const amount = eventSizeValue.annualValue;
+		const eventType = eventSizeValue.type;
+
+		assert(campaignId);
+		await db.transaction(async (tx) => {
+			await tx.insert(schema.reportingCampaignEventAmounts).values({
+				campaignId,
+				eventType,
+				amount,
+			});
+		});
+	}
+
+	/**
+	 * Migrates service size values from unr to knowledge base.
+	 * 	 * For each size value in unr:
+	 * - Creates a reporting campaign service size
+	 */
+
+	log.info("Migrating service size values...");
+
+	const serviceSizeValues = await client.select().from(unrServiceSizeValues);
+
+	for (const serviceSizeValue of serviceSizeValues) {
+		const campaignId = unrReportingCampaignIdToReportingCampaignId.get(
+			serviceSizeValue.reportCampaignId,
+		);
+		assert(campaignId);
+		const [unrReportingCampaign] = await client
+			.select()
+			.from(unrReportingCampaigns)
+			.where(eq(unrReportingCampaigns.id, serviceSizeValue.reportCampaignId));
+		const amount = serviceSizeValue.annualValue;
+		const serviceSize = serviceSizeValue.type;
+		const serviceSizeThresholds =
+			unrReportingCampaign?.serviceSizeThresholds as ServiceSizeThreshold;
+		const visitsThreshold = serviceSizeThresholds[serviceSize];
+
+		await db.transaction(async (tx) => {
+			await tx.insert(schema.reportingCampaignServiceSizes).values({
+				campaignId,
+				serviceSize,
+				visitsThreshold,
+				amount,
+			});
+		});
+	}
+
+	/**
+	 * Migrates reports from unr to knowledge base.
+	 * For each report in unr:
+	 * - Creates a country report
+	 * - Updates the mapping between unr reports and kb country reports
+	 * - Creates reporting campaign country threshold
+	 * - For each comment in a report:
+	 *   - Creates report screen key comment
+	 */
+
+	log.info("Migrating reports...");
+
+	const reports = await client.select().from(unrReports);
+	const outreachKpis = await client.select().from(unrOutreachKpis);
+	const serviceKpis = await client.select().from(unrServiceKpis);
+	const workingGroupReports = await client.select().from(unrWorkingGroupReports);
+
+	for (const report of reports) {
+		const campaignId = unrReportingCampaignIdToReportingCampaignId.get(report.reportCampaignId);
+		const countryId = unrCountryIdToOrgUnitId.get(report.countryId);
+		const [eventReports] = await client
+			.select()
+			.from(unrEventReports)
+			.where(eq(unrEventReports.reportId, report.id));
+
+		assert(campaignId);
+		assert(countryId);
+
+		await db.transaction(async (tx) => {
+			const [countryReportId] = await tx
+				.insert(schema.countryReports)
+				.values({
+					campaignId,
+					countryId,
+					status: "accepted",
+					dariahCommissionedEvent: eventReports?.dariahCommissionedEvent,
+					smallEvents: eventReports?.smallMeetings,
+					mediumEvents: eventReports?.mediumMeetings,
+					largeEvents: eventReports?.largeMeetings,
+					veryLargeEvents: eventReports?.veryLargeMeetings,
+					totalContributors: report.contributionsCount,
+					reusableOutcomes: eventReports?.reusableOutcomes,
+					createdAt: report.createdAt,
+					updatedAt: report.updatedAt,
+				})
+				.returning({ id: schema.countryReports.id });
+
+			assert(countryReportId);
+
+			unrReportIdToCountryReportId.set(report.id, countryReportId.id);
+
+			await tx.insert(schema.reportingCampaignCountryThresholds).values({
+				campaignId,
+				countryId,
+				amount: Number(report.operationalCostThreshold),
+			});
+
+			if (report.comments != null) {
+				for (const [k, v] of Object.entries(report.comments as ReportComment)) {
+					let screenKey = k;
+					switch (k) {
+						case "outreach": {
+							screenKey = "social-media";
+							break;
+						}
+						case "contributions": {
+							screenKey = "contributors";
+							break;
+						}
+						case "eventReports": {
+							screenKey = "events";
+							break;
+						}
+						case "serviceReports": {
+							screenKey = "services";
+							break;
+						}
+						case "projectFundingLeverages": {
+							screenKey = "projects";
+						}
+					}
+
+					await tx.insert(schema.reportScreenComments).values({
+						comment: generateJSON(String(v), [StarterKit]),
+						reportType: "country",
+						reportId: report.id,
+						screenKey: screenKey as ReportScreenCommentKey,
+						createdAt: report.createdAt,
+						updatedAt: report.updatedAt,
+					});
+				}
+			}
+		});
+	}
+
+	/**
+	 * Migrates service kpis from unr to knowledge base.
+	 * For each service kpi in unr:
+	 * - Creates a country report service kpi
+	 */
+
+	log.info("Migrating service kpis...");
+
+	for (const serviceKpi of serviceKpis) {
+		const [serviceReport] = await client
+			.select()
+			.from(unrServiceReports)
+			.where(eq(unrServiceReports.id, serviceKpi.serviceReportId));
+		assert(serviceReport);
+		const countryReportId = unrReportIdToCountryReportId.get(serviceReport.reportId);
+		assert(countryReportId);
+		const serviceId = unrServiceIdToServiceId.get(serviceReport.serviceId);
+
+		assert(serviceId);
+
+		await db.transaction(async (tx) => {
+			const [countryReportServiceKpi] = await tx
+				.insert(schema.countryReportServiceKpis)
+				.values({
+					serviceId,
+					countryReportId,
+					kpi: serviceKpi.unit,
+					value: serviceKpi.value,
+				})
+				.onConflictDoNothing({
+					target: [
+						schema.countryReportServiceKpis.countryReportId,
+						schema.countryReportServiceKpis.serviceId,
+						schema.countryReportServiceKpis.kpi,
+					],
+				})
+				.returning({
+					id: schema.countryReportServiceKpis.id,
+				});
+			if (!countryReportServiceKpi) {
+				const [service] = await tx
+					.select()
+					.from(schema.services)
+					.where(eq(schema.services.id, serviceId));
+				assert(service);
+				logToFile(`skipped duplicated entry ${serviceKpi.unit} for service ${service.name}.`);
+			}
+		});
+	}
+
+	/**
+	 * Migrates outreach kpis from unr to knowledge base.
+	 * For each outreach kpi in unr:
+	 * - Creates a country report social media kpi
+	 */
+
+	log.info("Migrating outreach kpis...");
+
+	for (const outreachKpi of outreachKpis) {
+		const [outReachReport] = await client
+			.select()
+			.from(unrOutreachReports)
+			.where(eq(unrOutreachReports.id, outreachKpi.outreachReportId));
+		assert(outReachReport);
+		const countryReportId = unrReportIdToCountryReportId.get(outReachReport.reportId);
+		assert(countryReportId);
+		const socialMediaId = unrOutreachIdToSocialMediaId.get(outReachReport.outreachId);
+		assert(socialMediaId);
+
+		await db.transaction(async (tx) => {
+			const [countryReportSocialMediaKpi] = await tx
+				.insert(schema.countryReportSocialMediaKpis)
+				.values({
+					socialMediaId,
+					countryReportId,
+					kpi: outreachKpi.unit === "mention" ? "mentions" : outreachKpi.unit,
+					value: outreachKpi.value,
+				})
+				.onConflictDoNothing({
+					target: [
+						schema.countryReportSocialMediaKpis.countryReportId,
+						schema.countryReportSocialMediaKpis.socialMediaId,
+						schema.countryReportSocialMediaKpis.kpi,
+					],
+				})
+				.returning({
+					id: schema.countryReportSocialMediaKpis.id,
+				});
+			if (!countryReportSocialMediaKpi) {
+				const [socialMedia] = await tx
+					.select()
+					.from(schema.socialMedia)
+					.where(eq(schema.socialMedia.id, socialMediaId));
+				assert(socialMedia);
+				logToFile(`skipped duplicated entry ${outreachKpi.unit} for service ${socialMedia.name}.`);
+			}
+		});
+	}
+
+	/**
+	 * Migrates working group reports from unr to knowledge base.
+	 * For each report in unr:
+	 * - Creates a working group report
+	 * - For each question, answer in a report:
+	 * 	 - Creates question, answer in working_group_report_questions and working_group_report_answers
+	 * - For each comment in a report:
+	 *   - Creates report screen key comment
+	 * - For each working group event:
+	 *   - Creates working group report event
+	 */
+
+	log.info("Migrating working group reports...");
+
+	const workingGroupReportQAs: Array<CampaignQuestionAnswer> = [];
+
+	for (const workingGroupReport of workingGroupReports) {
+		const reportCampaignId = unrReportingCampaignIdToReportingCampaignId.get(
+			workingGroupReport.reportCampaignId,
+		);
+		const workingGroupId = unrWorkingGroupIdToOrgUnitId.get(workingGroupReport.workingGroupId);
+
+		assert(reportCampaignId);
+		assert(workingGroupId);
+
+		await db.transaction(async (tx) => {
+			const [kbWorkingGroupReport] = await tx
+				.insert(schema.workingGroupReports)
+				.values({
+					campaignId: reportCampaignId,
+					workingGroupId,
+					numberOfMembers: workingGroupReport.members,
+					status: "accepted",
+					createdAt: workingGroupReport.createdAt,
+					updatedAt: workingGroupReport.updatedAt,
+				})
+				.returning({ id: schema.workingGroupReports.id });
+
+			assert(kbWorkingGroupReport);
+
+			const reportedQAs: Array<CampaignQuestionAnswer> = [
+				...(workingGroupReport.narrativeQuestionsList as CampaignQuestions).items,
+				...(workingGroupReport.facultativeQuestionsList as CampaignQuestions).items,
+			];
+			for (const reportedQA of reportedQAs) {
+				workingGroupReportQAs.push({
+					...reportedQA,
+					campaignId: reportCampaignId,
+					workingGroupReportId: kbWorkingGroupReport.id,
+				});
+			}
+
+			if (workingGroupReport.comments != null) {
+				for (const comment of Object.values(workingGroupReport.comments as ReportComment)) {
+					await tx.insert(schema.reportScreenComments).values({
+						comment: generateJSON(String(comment), [StarterKit]),
+						reportType: "working_group",
+						reportId: workingGroupReport.id,
+						screenKey: "data",
+						createdAt: workingGroupReport.createdAt,
+						updatedAt: workingGroupReport.updatedAt,
+					});
+				}
+			}
+			const workingGroupReportEvents = await client
+				.select()
+				.from(unrWorkGroupEvents)
+				.where(eq(unrWorkGroupEvents.reportId, workingGroupReport.id));
+			for (const workingGroupReportEvent of workingGroupReportEvents) {
+				await tx.insert(schema.workingGroupReportEvents).values({
+					workingGroupReportId: kbWorkingGroupReport.id,
+					title: workingGroupReportEvent.title,
+					date: workingGroupReportEvent.date ?? new Date(Date.UTC(1900, 0, 1)),
+					url: workingGroupReportEvent.url,
+					role: workingGroupReportEvent.role,
+				});
+			}
+		});
+	}
+
+	const workingGroupReportQAsGrouped = groupBy(
+		workingGroupReportQAs,
+		({ campaignId, question }) => {
+			return `${campaignId}_${question}`;
+		},
+	);
+	let i = 0;
+	for (const [_q, qas] of Object.entries(workingGroupReportQAsGrouped)) {
+		assert(qas[0]);
+		const campaignId = qas[0].campaignId;
+		const question = qas[0].question;
+		i++;
+		await db.transaction(async (tx) => {
+			const [wgReportQuestion]: Array<{ id: string }> = await tx
+				.insert(schema.workingGroupReportQuestions)
+				.values({
+					campaignId,
+					question: generateJSON(question, [StarterKit]),
+					position: i,
+				})
+				.returning({ id: schema.workingGroupReportQuestions.id });
+
+			assert(wgReportQuestion);
+
+			for (const { workingGroupReportId, answer } of qas) {
+				await tx
+					.insert(schema.workingGroupReportAnswers)
+					.values({
+						questionId: wgReportQuestion.id,
+						workingGroupReportId,
+						answer: generateJSON(answer, [StarterKit]),
+					})
+					.returning({ id: schema.workingGroupReportAnswers.id });
+			}
+		});
+	}
+
+	/**
+	 * Migrates project from unr to knowledge base.
+	 * Projects are grouped by either acronym or title
+	 * For each group:
+	 * - Creates an entity in the entity table
+	 * - Creates a project
+	 * - For each funder:
+	 *   - Creates organisational unit of type institution
+	 *   - Creates a relation between the funding unit and the project
+	 * - For each group item (project funding leverage):
+	 *   - Creates a country report project contribution
+	 */
+
+	log.info("Migrating projects...");
+
+	const projects = await client.select().from(unrProjects);
+
+	const groupedProjects = groupBy(projects, ({ acronym, name }) => {
+		return acronym ?? name;
+	});
+
+	for (const [projectName, projectLeverages] of Object.entries(groupedProjects)) {
+		const createdAt = new Date(Date.now());
+
+		await db.transaction(async (tx) => {
+			const [entity] = await tx
+				.insert(schema.entities)
+				.values({
+					slug: slugify(projectName),
+					statusId: statusByType.published.id,
+					typeId: typesByType.projects.id,
+					createdAt,
+					updatedAt: createdAt,
+				})
+				.returning({ id: schema.entities.id });
+
+			assert(entity);
+
+			const id = entity.id;
+
+			const startDates = [
+				...new Set(
+					projectLeverages.map((pL) => {
+						return pL.startDate?.getTime();
+					}),
+				),
+			]
+				.toSorted((dateA = 0, dateB = 0) => {
+					return dateA - dateB;
+				})
+				.map((time) => {
+					return time != null ? new Date(time) : null;
+				})
+				.filter((d) => {
+					return d != null;
+				});
+
+			const projectMonthsEntries = [
+				...new Set(
+					projectLeverages.map((pL) => {
+						return pL.projectMonths;
+					}),
+				),
+			];
+
+			if (startDates.length > 1) {
+				logToFile(
+					`multiple start dates found for project ${projectName}: ${startDates
+						.map((startDate) => {
+							return startDate.toISOString().slice(0, 10);
+						})
+						.join(",")}. Chose ${String(startDates[0]?.toISOString().slice(0, 10))}`,
+				);
+			}
+			if (projectMonthsEntries.length > 1) {
+				logToFile(
+					`multiple project months entries found for project ${projectName}: ${projectMonthsEntries
+						.map((pM) => {
+							return pM;
+						})
+						.join(",")}. Chose ${String(projectMonthsEntries[0])}`,
+				);
+			}
+
+			const startDate = startDates[0] ?? new Date(Date.UTC(1900, 0, 1));
+			const projectMonths = projectMonthsEntries[0] ?? null;
+
+			const endDate =
+				projectMonths != null
+					? new Date(
+							new Date(startDate).setUTCMonth(new Date(startDate).getUTCMonth() + projectMonths),
+						)
+					: null;
+
+			const projectScopes = [
+				...new Set(
+					projectLeverages.map((pL) => {
+						return pL.scope;
+					}),
+				),
+			];
+
+			const projectScope = projectScopes[0] ?? "national";
+
+			const [kbProject] = await tx
+				.insert(schema.projects)
+				.values({
+					id,
+					acronym: projectLeverages[0]?.acronym,
+					duration: {
+						start: startDate,
+						end: endDate ?? undefined,
+					},
+					scopeId: projectScopesByScope[projectScope].id,
+					summary: "",
+					name: projectName,
+					createdAt,
+					updatedAt: createdAt,
+				})
+				.returning({ id: schema.projects.id, duration: schema.projects.duration });
+
+			assert(kbProject);
+
+			const fundersEntries = projectLeverages.map((pL) => {
+				return pL.funders;
+			});
+			const funders = [
+				...new Set(
+					fundersEntries.flatMap((s) => {
+						return s != null
+							? s.split(";").map((v) => {
+									return v.trim();
+								})
+							: [];
+					}),
+				),
+			];
+			funders.filter((f) => {
+				return f !== "Unknown";
+			});
+			for (const funder of funders) {
+				let [fundingUnit] = await tx
+					.select({ id: schema.organisationalUnits.id })
+					.from(schema.organisationalUnits)
+					.where(
+						and(
+							eq(schema.organisationalUnits.name, funder),
+							eq(schema.organisationalUnits.typeId, organisationalUnitTypesByType.institution.id),
+						),
+					);
+				if (!fundingUnit) {
+					const [fundingUnitEntity] = await tx
+						.insert(schema.entities)
+						.values({
+							slug: slugify(funder),
+							statusId: statusByType.published.id,
+							typeId: typesByType.organisational_units.id,
+							createdAt,
+							updatedAt: createdAt,
+						})
+						.returning({ id: schema.entities.id });
+
+					assert(fundingUnitEntity);
+
+					const fundingUnitEntityId = fundingUnitEntity.id;
+
+					[fundingUnit] = await tx
+						.insert(schema.organisationalUnits)
+						.values({
+							id: fundingUnitEntityId,
+							name: funder,
+							summary: "",
+							typeId: organisationalUnitTypesByType.institution.id,
+							imageId: placeholderAsset.id,
+							createdAt,
+							updatedAt: createdAt,
+						})
+						.returning({ id: schema.organisationalUnits.id });
+				}
+				assert(fundingUnit);
+
+				await tx.insert(schema.projectsToOrganisationalUnits).values({
+					projectId: kbProject.id,
+					unitId: fundingUnit.id,
+					roleId: projectRolesByRole.funder.id,
+					duration: kbProject.duration,
+				});
+			}
+			for (const projectLeverage of projectLeverages) {
+				const countryReportId = unrReportIdToCountryReportId.get(projectLeverage.reportId);
+				assert(countryReportId);
+
+				const [countryReportProjectContributionId] = await tx
+					.insert(schema.countryReportProjectContributions)
+					.values({
+						projectId: kbProject.id,
+						amountEuros: Number(projectLeverage.amount),
+						countryReportId,
+					})
+					.onConflictDoNothing({
+						target: [
+							schema.countryReportProjectContributions.projectId,
+							schema.countryReportProjectContributions.countryReportId,
+						],
+					})
+					.returning({
+						id: schema.countryReportProjectContributions.id,
+					});
+				if (!countryReportProjectContributionId) {
+					logToFile(`skipped duplicated entry for ${projectName}.`);
+				}
 			}
 		});
 	}

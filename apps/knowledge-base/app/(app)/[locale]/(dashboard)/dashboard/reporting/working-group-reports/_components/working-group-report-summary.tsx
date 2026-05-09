@@ -15,7 +15,7 @@ export interface WorkingGroupReportSummaryData {
 	events: Array<{
 		id: string;
 		title: string;
-		date: string;
+		date: Date;
 		url: string | null;
 		role: string;
 	}>;

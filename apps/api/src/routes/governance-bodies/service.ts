@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { and, count, eq, inArray, sql } from "@/services/db/sql";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
@@ -8,6 +7,7 @@ import { flattenEntityVersion } from "@/lib/entity-version";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
+import { and, count, eq, inArray, sql } from "@/services/db/sql";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
@@ -102,12 +102,20 @@ async function getActiveGovernanceBodyPersons(
 			),
 		);
 
-	const positions = await getPersonPositions(db, [...new Set(rows.map((row) => row.id))]);
+	const positions = await getPersonPositions(db, [
+		...new Set(
+			rows.map((row) => {
+				return row.id;
+			}),
+		),
+	]);
 
 	for (const row of rows) {
 		const items = personsByGovernanceBody.get(row.governanceBodyId);
 
-		if (items == null) continue;
+		if (items == null) {
+			continue;
+		}
 
 		items.push({
 			id: row.id,
@@ -130,9 +138,11 @@ async function getActiveGovernanceBodyPersons(
 	}
 
 	for (const [governanceBodyId, items] of personsByGovernanceBody) {
-		const sorted = [...items].sort((a, b) => {
+		const sorted = items.toSorted((a, b) => {
 			const byName = a.sortName.localeCompare(b.sortName);
-			if (byName !== 0) return byName;
+			if (byName !== 0) {
+				return byName;
+			}
 			return a.role.localeCompare(b.role);
 		});
 		personsByGovernanceBody.set(governanceBodyId, sorted);

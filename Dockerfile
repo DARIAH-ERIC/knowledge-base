@@ -8,7 +8,7 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 ENV CI=true
 ENV SKIP_INSTALL_SIMPLE_GIT_HOOKS=1
-RUN corepack enable
+RUN corepack enable && corepack use pnpm@latest-10
 RUN pnpm add --global turbo
 
 # source
@@ -192,7 +192,7 @@ FROM base AS app
 USER node
 WORKDIR /app
 # `.next/standalone` is self-contained (includes its own `node_modules`)
-COPY --chown=node:node --from=app-build /app/apps/knowledge-base/.next/standalone/ /app/
+COPY --chown=node:node --from=app-build /app/apps/knowledge-base/.next/standalone/app/ /app/
 COPY --chown=node:node --from=app-build /app/apps/knowledge-base/.next/static/ /app/apps/knowledge-base/.next/static/
 COPY --chown=node:node --from=app-build /app/apps/knowledge-base/public/ /app/apps/knowledge-base/public/
 ENV NODE_ENV=production
