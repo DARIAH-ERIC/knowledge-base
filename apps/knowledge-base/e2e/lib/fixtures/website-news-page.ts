@@ -135,7 +135,9 @@ export class WebsiteNewsPage {
 	// ---------------------------------------------------------------------------
 
 	async gotoDetailsFromList(title: string): Promise<void> {
-		await this.rowByTitle(title).click();
+		const row = this.rowByTitle(title);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await this.page.getByRole("menuitem", { name: "View" }).click();
 		await this.page.waitForURL(`**${BASE_PATH}/**/details`);
 	}
 
