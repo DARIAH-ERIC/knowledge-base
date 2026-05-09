@@ -72,7 +72,7 @@ export async function getPersons(params: Readonly<GetPersonsParams>): Promise<Pe
 							"entity_versions" AS "pv"
 							INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
 						WHERE
-							"pv"."entity_id" = ${schema.entities.id}
+							"pv"."entity_id" = ${schema.entityVersions.entityId}
 							AND "ps"."type" = 'published'
 					)
 				`,
@@ -95,7 +95,7 @@ export async function getPersons(params: Readonly<GetPersonsParams>): Promise<Pe
 										"entity_versions" AS "ev2"
 										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
 									WHERE
-										"ev2"."entity_id" = ${schema.entities.id}
+										"ev2"."entity_id" = ${schema.entityVersions.entityId}
 										AND "es2"."type" = 'draft'
 								)
 							`,
@@ -127,7 +127,7 @@ export async function getPersons(params: Readonly<GetPersonsParams>): Promise<Pe
 										"entity_versions" AS "ev2"
 										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
 									WHERE
-										"ev2"."entity_id" = ${schema.entities.id}
+										"ev2"."entity_id" = ${schema.entityVersions.entityId}
 										AND "es2"."type" = 'draft'
 								)
 							`,

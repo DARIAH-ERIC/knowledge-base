@@ -283,6 +283,7 @@ export function TableRow<T extends object>(props: Readonly<TableRowProps<T>>): R
 				},
 			)}
 			data-slot="table-row"
+			href={href}
 			id={id}
 		>
 			{allowsDragging && (

@@ -97,7 +97,7 @@ test.describe("website news lifecycle", () => {
 
 		// Update the title.
 		const updatedTitle = `${newsPage.workerPrefix} Version B ${randomUUID()}`;
-		const titleField = page.getByLabel("Name");
+		const titleField = page.getByLabel("Title");
 		await titleField.clear();
 		await titleField.fill(updatedTitle);
 		await newsPage.submitForm();
