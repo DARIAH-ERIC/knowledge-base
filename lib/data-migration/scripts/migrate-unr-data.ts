@@ -432,7 +432,17 @@ async function main() {
 				.returning({ id: schema.entities.id });
 
 			assert(countryEntity);
-			const id = countryEntity.id;
+
+			const [countryVersion] = await tx
+				.insert(schema.entityVersions)
+				.values({
+					entityId: countryEntity.id,
+					statusId: statusByType.published.id,
+				})
+				.returning({ id: schema.entityVersions.id });
+
+			assert(countryVersion);
+			const id = countryVersion.id;
 
 			const [countryOrgUnit] = await tx
 				.insert(schema.organisationalUnits)
@@ -1886,7 +1896,6 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: slugify(projectName),
-					statusId: statusByType.published.id,
 					typeId: typesByType.projects.id,
 					createdAt,
 					updatedAt: createdAt,
@@ -1895,7 +1904,17 @@ async function main() {
 
 			assert(entity);
 
-			const id = entity.id;
+			const [version] = await tx
+				.insert(schema.entityVersions)
+				.values({
+					entityId: entity.id,
+					statusId: statusByType.published.id,
+				})
+				.returning({ id: schema.entityVersions.id });
+
+			assert(version);
+
+			const id = version.id;
 
 			const startDates = [
 				...new Set(
@@ -2012,7 +2031,6 @@ async function main() {
 						.insert(schema.entities)
 						.values({
 							slug: slugify(funder),
-							statusId: statusByType.published.id,
 							typeId: typesByType.organisational_units.id,
 							createdAt,
 							updatedAt: createdAt,
@@ -2021,7 +2039,17 @@ async function main() {
 
 					assert(fundingUnitEntity);
 
-					const fundingUnitEntityId = fundingUnitEntity.id;
+					const [fundingUnitVersion] = await tx
+						.insert(schema.entityVersions)
+						.values({
+							entityId: fundingUnitEntity.id,
+							statusId: statusByType.published.id,
+						})
+						.returning({ id: schema.entityVersions.id });
+
+					assert(fundingUnitVersion);
+
+					const fundingUnitEntityId = fundingUnitVersion.id;
 
 					[fundingUnit] = await tx
 						.insert(schema.organisationalUnits)
