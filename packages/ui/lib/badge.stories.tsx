@@ -23,6 +23,7 @@ export const Default: Story = {
 };
 
 export const Intents: Story = {
+	args: { children: null },
 	render() {
 		const intents = [
 			"primary",
