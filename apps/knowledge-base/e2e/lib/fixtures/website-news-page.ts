@@ -129,4 +129,77 @@ export class WebsiteNewsPage {
 	async confirmDelete(dialog: Locator): Promise<void> {
 		await dialog.getByRole("button", { name: "Delete" }).click();
 	}
+
+	// ---------------------------------------------------------------------------
+	// Details page — navigation
+	// ---------------------------------------------------------------------------
+
+	async gotoDetailsFromList(title: string): Promise<void> {
+		const row = this.rowByTitle(title);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await this.page.getByRole("menuitem", { name: "View" }).click();
+		await this.page.waitForURL(`**${BASE_PATH}/**/details`);
+	}
+
+	// ---------------------------------------------------------------------------
+	// Details page — status badges
+	// ---------------------------------------------------------------------------
+
+	/** "Draft" badge in the lifecycle bar (only present when no published version exists). */
+	detailsDraftBadge(): Locator {
+		return this.page.getByText("Draft", { exact: true });
+	}
+
+	/** "Live" badge in the lifecycle bar (only present when published-only, no draft). */
+	detailsLiveBadge(): Locator {
+		return this.page.getByText("Live", { exact: true });
+	}
+
+	/** "Live with changes" badge in the lifecycle bar (draft + published both exist). */
+	detailsLiveWithChangesBadge(): Locator {
+		return this.page.getByText("Live with changes");
+	}
+
+	// ---------------------------------------------------------------------------
+	// Details page — lifecycle actions
+	// ---------------------------------------------------------------------------
+
+	async publishItem(): Promise<void> {
+		await this.page.getByRole("button", { name: "Publish" }).click();
+		await this.page.waitForURL(`**${BASE_PATH}`);
+	}
+
+	async discardDraft(): Promise<void> {
+		await this.page.getByRole("button", { name: "Discard draft" }).click();
+		const dialog = this.page.getByRole("dialog");
+		await dialog.waitFor({ state: "visible" });
+		await dialog.getByRole("button", { name: "Discard" }).click();
+		await this.page.waitForURL(`**${BASE_PATH}`);
+	}
+
+	// ---------------------------------------------------------------------------
+	// Details page — version selector
+	// ---------------------------------------------------------------------------
+
+	versionSelectorDraftLink(): Locator {
+		return this.page.getByRole("link", { name: "Draft" });
+	}
+
+	versionSelectorPublishedLink(): Locator {
+		return this.page.getByRole("link", { name: "Published" });
+	}
+
+	// ---------------------------------------------------------------------------
+	// List page — status badge within a row
+	// ---------------------------------------------------------------------------
+
+	/** "Live" status badge inside a specific list row. */
+	liveBadgeInRow(title: string): Locator {
+		return this.rowByTitle(title).getByText("Live", { exact: true });
+	}
+
+	/** "Draft" status badge inside a specific list row. */
+	draftBadgeInRow(title: string): Locator {
+		return this.rowByTitle(title).getByText("Draft", { exact: true });
+	}
 }

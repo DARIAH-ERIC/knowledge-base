@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Badge } from "@dariah-eric/ui/badge";
 import { Button, buttonStyles } from "@dariah-eric/ui/button";
 import { Link } from "@dariah-eric/ui/link";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
@@ -34,6 +35,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteFundingCallAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/delete-funding-call.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface FundingCallsPageProps {
@@ -41,7 +43,9 @@ interface FundingCallsPageProps {
 	fundingCalls: {
 		data: Array<
 			Pick<schema.FundingCall, "id" | "duration" | "title" | "summary"> & {
+				documentId: string;
 				entity: Pick<schema.Entity, "slug">;
+				isPublished: boolean;
 				updatedAt: schema.Entity["updatedAt"];
 			}
 		>;
@@ -52,7 +56,7 @@ interface FundingCallsPageProps {
 	sort: "title" | "updatedAt";
 }
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 
 export function FundingCallsPage(props: Readonly<FundingCallsPageProps>): ReactNode {
 	const {
@@ -74,7 +78,7 @@ export function FundingCallsPage(props: Readonly<FundingCallsPageProps>): ReactN
 			});
 		},
 	);
-	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
 		useUrlPaginatedSearch({
 			dir: initialDir,
@@ -123,6 +127,7 @@ export function FundingCallsPage(props: Readonly<FundingCallsPageProps>): ReactN
 					<TableColumn allowsSorting={true} id="updatedAt">
 						{t("Updated")}
 					</TableColumn>
+					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -140,6 +145,11 @@ export function FundingCallsPage(props: Readonly<FundingCallsPageProps>): ReactN
 										: format.dateTime(item.duration.start, { dateStyle: "short" })}
 								</TableCell>
 								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
+								<TableCell>
+									<Badge intent={item.isPublished ? "success" : "warning"}>
+										{item.isPublished ? t("Live") : t("Draft")}
+									</Badge>
+								</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button
@@ -165,7 +175,7 @@ export function FundingCallsPage(props: Readonly<FundingCallsPageProps>): ReactN
 											<MenuItem
 												intent="danger"
 												onAction={() => {
-													setItemToDelete({ id: item.id });
+													setItemToDelete({ id: item.id, documentId: item.documentId });
 												}}
 											>
 												<TrashIcon className="mr-2 size-4" />
@@ -196,11 +206,11 @@ export function FundingCallsPage(props: Readonly<FundingCallsPageProps>): ReactN
 						return;
 					}
 
-					const id = itemToDelete.id;
+					const { id, documentId } = itemToDelete;
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deleteFundingCallAction(id);
+						await deleteFundingCallAction(documentId);
 						router.refresh();
 						setItemToDelete(null);
 					});

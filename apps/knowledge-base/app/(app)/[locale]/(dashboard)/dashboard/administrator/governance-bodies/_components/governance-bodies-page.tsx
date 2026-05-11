@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Badge } from "@dariah-eric/ui/badge";
 import { Button, buttonStyles } from "@dariah-eric/ui/button";
 import { Link } from "@dariah-eric/ui/link";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
@@ -19,7 +20,7 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
@@ -33,6 +34,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteGovernanceBodyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/delete-governance-body.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface GovernanceBodiesPageProps {
@@ -40,7 +42,10 @@ interface GovernanceBodiesPageProps {
 	governanceBodies: {
 		data: Array<
 			Pick<schema.OrganisationalUnit, "acronym" | "id" | "name"> & {
+				documentId: string;
 				entity: Pick<schema.Entity, "slug">;
+				isPublished: boolean;
+				updatedAt: Date;
 			}
 		>;
 		total: number;
@@ -50,7 +55,7 @@ interface GovernanceBodiesPageProps {
 	sort: "acronym" | "name";
 }
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 
 export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>): ReactNode {
 	const {
@@ -62,6 +67,7 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 	} = props;
 
 	const t = useExtracted();
+	const format = useFormatter();
 	const router = useRouter();
 	const [items, optimisticallyRemoveItem] = useOptimistic(
 		governanceBodies.data,
@@ -71,7 +77,7 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 			});
 		},
 	);
-	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
 		useUrlPaginatedSearch({
 			dir: initialDir,
@@ -119,6 +125,8 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 					<TableColumn allowsSorting={true} id="name">
 						{t("Name")}
 					</TableColumn>
+					<TableColumn>{t("Updated")}</TableColumn>
+					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -127,6 +135,12 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 							<TableRow>
 								<TableCell className="uppercase">{item.acronym}</TableCell>
 								<TableCell>{item.name}</TableCell>
+								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
+								<TableCell>
+									<Badge intent={item.isPublished ? "success" : "warning"}>
+										{item.isPublished ? t("Live") : t("Draft")}
+									</Badge>
+								</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button
@@ -148,7 +162,7 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 											<MenuItem
 												intent="danger"
 												onAction={() => {
-													setItemToDelete({ id: item.id });
+													setItemToDelete({ id: item.id, documentId: item.documentId });
 												}}
 											>
 												<TrashIcon className="mr-2 size-4" />
@@ -179,11 +193,11 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 						return;
 					}
 
-					const id = itemToDelete.id;
+					const { id, documentId } = itemToDelete;
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deleteGovernanceBodyAction(id);
+						await deleteGovernanceBodyAction(documentId);
 						router.refresh();
 						setItemToDelete(null);
 					});

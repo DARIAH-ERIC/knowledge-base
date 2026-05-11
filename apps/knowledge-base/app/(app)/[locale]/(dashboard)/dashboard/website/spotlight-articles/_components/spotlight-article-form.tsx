@@ -30,7 +30,7 @@ interface SpotlightArticleFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
 	spotlightArticle?: Pick<schema.SpotlightArticle, "id" | "title" | "summary"> & {
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
@@ -149,7 +149,11 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 				{spotlightArticle != null ? (
 					<Fragment>
 						<input name="id" type="hidden" value={spotlightArticle.id} />
-						<input name="documentId" type="hidden" value={spotlightArticle.entity.documentId} />
+						<input
+							name="documentId"
+							type="hidden"
+							value={spotlightArticle.entityVersion.entity.id}
+						/>
 					</Fragment>
 				) : null}
 

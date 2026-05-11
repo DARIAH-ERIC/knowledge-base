@@ -5,7 +5,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { assets } from "./assets";
-import { entities } from "./entities";
+import { entityVersions } from "./entities";
 import { organisationalUnits, organisationalUnitTypes } from "./organisational-units";
 
 export const personRoleTypesEnum = [
@@ -27,7 +27,7 @@ export const persons = p.pgTable("persons", {
 		.uuid("id")
 		.primaryKey()
 		.references(() => {
-			return entities.id;
+			return entityVersions.id;
 		}),
 	name: p.text("name").notNull(),
 	sortName: p.text("sort_name").notNull(),

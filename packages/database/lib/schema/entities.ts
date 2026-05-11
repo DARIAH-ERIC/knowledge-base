@@ -61,6 +61,10 @@ export const EntityStatusSelectSchema = createSelectSchema(entityStatus);
 export const EntityStatusInsertSchema = createInsertSchema(entityStatus);
 export const EntityStatusUpdateSchema = createUpdateSchema(entityStatus);
 
+/**
+ * A document is the stable identity of a piece of content across draft/published versions.
+ * Slug, type, and cross-type relations live here so they survive republishes.
+ */
 export const entities = p.pgTable(
 	"entities",
 	{
@@ -71,21 +75,11 @@ export const entities = p.pgTable(
 			.references(() => {
 				return entityTypes.id;
 			}),
-		documentId: p.uuid("document_id").notNull().default(uuidv7()),
-		statusId: p
-			.uuid("status_id")
-			.notNull()
-			.references(() => {
-				return entityStatus.id;
-			}),
 		slug: p.text("slug").notNull(),
 		...f.timestamps(),
 	},
 	(t) => {
-		return [
-			p.unique("entities_document_id_status_id_unique").on(t.documentId, t.statusId),
-			p.unique("entities_document_id_slug_unique").on(t.documentId, t.slug),
-		];
+		return [p.unique("entities_type_id_slug_unique").on(t.typeId, t.slug)];
 	},
 );
 
@@ -95,6 +89,40 @@ export type EntityInput = typeof entities.$inferInsert;
 export const EntitySelectSchema = createSelectSchema(entities);
 export const EntityInsertSchema = createInsertSchema(entities);
 export const EntityUpdateSchema = createUpdateSchema(entities);
+
+/**
+ * A version row holds the editable/publishable payload for a document at a given lifecycle status.
+ * Subtype tables (news, events, ...), fields, and content blocks all key off `entityVersions.id`.
+ */
+export const entityVersions = p.pgTable(
+	"entity_versions",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		entityId: p
+			.uuid("entity_id")
+			.notNull()
+			.references(() => {
+				return entities.id;
+			}),
+		statusId: p
+			.uuid("status_id")
+			.notNull()
+			.references(() => {
+				return entityStatus.id;
+			}),
+		...f.timestamps(),
+	},
+	(t) => {
+		return [p.unique("entity_versions_entity_id_status_id_unique").on(t.entityId, t.statusId)];
+	},
+);
+
+export type EntityVersion = typeof entityVersions.$inferSelect;
+export type EntityVersionInput = typeof entityVersions.$inferInsert;
+
+export const EntityVersionSelectSchema = createSelectSchema(entityVersions);
+export const EntityVersionInsertSchema = createInsertSchema(entityVersions);
+export const EntityVersionUpdateSchema = createUpdateSchema(entityVersions);
 
 export const entityTypesFieldsNames = p.pgTable(
 	"entity_types_fields_names",
@@ -126,11 +154,11 @@ export const fields = p.pgTable(
 	"fields",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
-		entityId: p
-			.uuid("entity_id")
+		entityVersionId: p
+			.uuid("entity_version_id")
 			.notNull()
 			.references(() => {
-				return entities.id;
+				return entityVersions.id;
 			}),
 		fieldNameId: p
 			.uuid("field_name_id")
@@ -141,7 +169,11 @@ export const fields = p.pgTable(
 		...f.timestamps(),
 	},
 	(t) => {
-		return [p.unique("fields_entity_id_field_name_id_unique").on(t.entityId, t.fieldNameId)];
+		return [
+			p
+				.unique("fields_entity_version_id_field_name_id_unique")
+				.on(t.entityVersionId, t.fieldNameId),
+		];
 	},
 );
 
@@ -152,28 +184,10 @@ export const FieldSelectSchema = createSelectSchema(fields);
 export const FieldInsertSchema = createInsertSchema(fields);
 export const FieldUpdateSchema = createUpdateSchema(fields);
 
-export const entitiesToResources = p.pgTable(
-	"entities_to_resources",
-	{
-		entityId: p
-			.uuid("entity_id")
-			.notNull()
-			.references(() => {
-				return entities.id;
-			}),
-		resourceId: p.text("resource_id").notNull(),
-		...f.timestamps(),
-	},
-	(t) => {
-		return [
-			p.primaryKey({
-				columns: [t.entityId, t.resourceId],
-				name: "entities_to_resources_pkey",
-			}),
-		];
-	},
-);
-
+/**
+ * Document-level: a relation between two documents, stable across versions.
+ * Public reads resolve through the related document's published version.
+ */
 export const entitiesToEntities = p.pgTable(
 	"entities_to_entities",
 	{
@@ -196,6 +210,31 @@ export const entitiesToEntities = p.pgTable(
 			p.primaryKey({
 				columns: [t.entityId, t.relatedEntityId],
 				name: "entities_to_entities_pkey",
+			}),
+		];
+	},
+);
+
+/**
+ * Document-level: a relation from a document to an external resource (search index id).
+ */
+export const entitiesToResources = p.pgTable(
+	"entities_to_resources",
+	{
+		entityId: p
+			.uuid("entity_id")
+			.notNull()
+			.references(() => {
+				return entities.id;
+			}),
+		resourceId: p.text("resource_id").notNull(),
+		...f.timestamps(),
+	},
+	(t) => {
+		return [
+			p.primaryKey({
+				columns: [t.entityId, t.resourceId],
+				name: "entities_to_resources_pkey",
 			}),
 		];
 	},

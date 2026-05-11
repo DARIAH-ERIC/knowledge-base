@@ -95,7 +95,14 @@ interface DataContentBlockItem {
 	type: "data";
 	position?: number;
 	content?: {
-		dataType?: "events" | "news" | "opportunities" | "funding_calls";
+		dataType?:
+			| "events"
+			| "news"
+			| "opportunities"
+			| "funding_calls"
+			| "pages"
+			| "spotlight_articles"
+			| "impact_case_studies";
 		limit?: number;
 		selectedIds?: Array<string>;
 	};
@@ -151,7 +158,15 @@ interface UnifiedContentBlockItem {
 type ContentBlockListItem = ContentBlock | UnifiedContentBlockItem;
 
 const UNIFIED_BLOCK_TYPES = new Set<ContentBlock["type"]>(["rich_text", "image", "embed"]);
-const DATA_CONTENT_BLOCK_TYPES = ["events", "news", "opportunities", "funding_calls"] as const;
+const DATA_CONTENT_BLOCK_TYPES = [
+	"events",
+	"news",
+	"opportunities",
+	"funding_calls",
+	"pages",
+	"spotlight_articles",
+	"impact_case_studies",
+] as const;
 type DataContentBlockType = (typeof DATA_CONTENT_BLOCK_TYPES)[number];
 
 function mergeInitialItems(items: Array<ContentBlock>): Array<ContentBlockListItem> {
@@ -822,6 +837,9 @@ function DataContentBlockPanel({
 							news: t("News"),
 							opportunities: t("Opportunities"),
 							funding_calls: t("Funding calls"),
+							pages: t("Pages"),
+							spotlight_articles: t("Spotlight articles"),
+							impact_case_studies: t("Impact case studies"),
 						};
 
 						return { id, name: labels[id] };

@@ -12,15 +12,16 @@ import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";
 
 function createProjectData() {
-	const id = uuidv7();
-	const documentId = uuidv7();
+	const versionId = uuidv7();
+	const entityId = uuidv7();
 	const name = f.lorem.sentence();
 	const slug = slugify(name);
 
-	const entity = { id, slug, documentId };
+	const entity = { id: entityId, slug };
+	const version = { id: versionId, entityId };
 
 	const project = {
-		id,
+		id: versionId,
 		name,
 		summary: f.lorem.paragraph(),
 		call: f.lorem.word(),
@@ -30,7 +31,7 @@ function createProjectData() {
 		},
 	};
 
-	return { entity, project };
+	return { entity, version, project };
 }
 
 interface SeedResult {
@@ -80,7 +81,13 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 
 	await db.insert(schema.entities).values(
 		allItems.map((item) => {
-			return { ...item.entity, statusId: status.id, typeId: entityType.id };
+			return { ...item.entity, typeId: entityType.id };
+		}),
+	);
+
+	await db.insert(schema.entityVersions).values(
+		allItems.map((item) => {
+			return { ...item.version, statusId: status.id };
 		}),
 	);
 
@@ -91,14 +98,19 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 	);
 
 	// Create eric unit (linked to DARIAH projects)
+	const umbrellaEntityId = uuidv7();
 	const umbrellaUnitId = uuidv7();
 
 	await db.insert(schema.entities).values({
-		id: umbrellaUnitId,
+		id: umbrellaEntityId,
 		slug: `umbrella-${umbrellaUnitId}`,
-		documentId: uuidv7(),
-		statusId: status.id,
 		typeId: unitEntityType.id,
+	});
+
+	await db.insert(schema.entityVersions).values({
+		id: umbrellaUnitId,
+		entityId: umbrellaEntityId,
+		statusId: status.id,
 	});
 
 	await db.insert(schema.organisationalUnits).values({
@@ -109,14 +121,19 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 	});
 
 	// Create non-umbrella unit (linked to the non-DARIAH project)
+	const otherEntityId = uuidv7();
 	const otherUnitId = uuidv7();
 
 	await db.insert(schema.entities).values({
-		id: otherUnitId,
+		id: otherEntityId,
 		slug: `other-${otherUnitId}`,
-		documentId: uuidv7(),
-		statusId: status.id,
 		typeId: unitEntityType.id,
+	});
+
+	await db.insert(schema.entityVersions).values({
+		id: otherUnitId,
+		entityId: otherEntityId,
+		statusId: status.id,
 	});
 
 	await db.insert(schema.organisationalUnits).values({
@@ -146,7 +163,7 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 
 	await Promise.all(
 		allItems.map((item) => {
-			return seedContentBlock(db, item.entity.id, entityType.id, "description");
+			return seedContentBlock(db, item.version.id, entityType.id, "description");
 		}),
 	);
 
@@ -181,16 +198,17 @@ async function seedWithMixedStatuses(db: Database): Promise<{
 
 	const activeItem = createProjectData();
 	const inactiveItem = (() => {
-		const id = uuidv7();
-		const documentId = uuidv7();
+		const versionId = uuidv7();
+		const entityId = uuidv7();
 		const name = f.lorem.sentence();
 		const slug = slugify(name);
 		const start = f.date.past({ years: 5 });
 		const end = f.date.between({ from: start, to: new Date() });
 		return {
-			entity: { id, slug, documentId },
+			entity: { id: entityId, slug },
+			version: { id: versionId, entityId },
 			project: {
-				id,
+				id: versionId,
 				name,
 				summary: f.lorem.paragraph(),
 				call: f.lorem.word(),
@@ -204,7 +222,13 @@ async function seedWithMixedStatuses(db: Database): Promise<{
 
 	await db.insert(schema.entities).values(
 		allItems.map((item) => {
-			return { ...item.entity, statusId: status.id, typeId: entityType.id };
+			return { ...item.entity, typeId: entityType.id };
+		}),
+	);
+
+	await db.insert(schema.entityVersions).values(
+		allItems.map((item) => {
+			return { ...item.version, statusId: status.id };
 		}),
 	);
 
@@ -214,14 +238,19 @@ async function seedWithMixedStatuses(db: Database): Promise<{
 		}),
 	);
 
+	const umbrellaEntityId = uuidv7();
 	const umbrellaUnitId = uuidv7();
 
 	await db.insert(schema.entities).values({
-		id: umbrellaUnitId,
+		id: umbrellaEntityId,
 		slug: `umbrella-${umbrellaUnitId}`,
-		documentId: uuidv7(),
-		statusId: status.id,
 		typeId: unitEntityType.id,
+	});
+
+	await db.insert(schema.entityVersions).values({
+		id: umbrellaUnitId,
+		entityId: umbrellaEntityId,
+		statusId: status.id,
 	});
 
 	await db.insert(schema.organisationalUnits).values({
@@ -357,7 +386,7 @@ describe("dariah-projects", () => {
 				const { dariahItems } = await seed(db, 1);
 
 				const item = dariahItems.at(0)!;
-				const id = item.entity.id;
+				const id = item.project.id;
 
 				const sm = await seedSocialMedia(db, id);
 
@@ -391,7 +420,7 @@ describe("dariah-projects", () => {
 				const { dariahItems, roleId: _ } = await seed(db, 3);
 
 				const item = dariahItems.at(1)!;
-				const id = item.entity.id;
+				const id = item.project.id;
 				const name = item.project.name;
 
 				const response = await client["dariah-projects"][":id"].$get({

@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Badge } from "@dariah-eric/ui/badge";
 import { Button, buttonStyles } from "@dariah-eric/ui/button";
 import { Link } from "@dariah-eric/ui/link";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
@@ -34,6 +35,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteImpactCaseStudyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/delete-impact-case-study.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface ImpactCaseStudiesPageProps {
@@ -41,7 +43,9 @@ interface ImpactCaseStudiesPageProps {
 	impactCaseStudies: {
 		data: Array<
 			Pick<schema.ImpactCaseStudy, "id" | "title" | "summary"> & {
+				documentId: string;
 				entity: Pick<schema.Entity, "slug">;
+				isPublished: boolean;
 				updatedAt: schema.Entity["updatedAt"];
 			}
 		>;
@@ -52,7 +56,7 @@ interface ImpactCaseStudiesPageProps {
 	sort: "title" | "updatedAt";
 }
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 
 export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps>): ReactNode {
 	const {
@@ -74,7 +78,7 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 			});
 		},
 	);
-	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
 		useUrlPaginatedSearch({
 			dir: initialDir,
@@ -123,6 +127,7 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 					<TableColumn allowsSorting={true} id="updatedAt">
 						{t("Updated")}
 					</TableColumn>
+					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -136,6 +141,11 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 									<div className="max-w-xs truncate">{item.summary}</div>
 								</TableCell>
 								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
+								<TableCell>
+									<Badge intent={item.isPublished ? "success" : "warning"}>
+										{item.isPublished ? t("Live") : t("Draft")}
+									</Badge>
+								</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button
@@ -163,7 +173,7 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 											<MenuItem
 												intent="danger"
 												onAction={() => {
-													setItemToDelete({ id: item.id });
+													setItemToDelete({ id: item.id, documentId: item.documentId });
 												}}
 											>
 												<TrashIcon className="mr-2 size-4" />
@@ -194,11 +204,11 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 						return;
 					}
 
-					const id = itemToDelete.id;
+					const { id, documentId } = itemToDelete;
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deleteImpactCaseStudyAction(id);
+						await deleteImpactCaseStudyAction(documentId);
 						router.refresh();
 						setItemToDelete(null);
 					});

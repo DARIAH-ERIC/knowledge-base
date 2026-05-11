@@ -1,13 +1,10 @@
-import {
-	ImpactCaseStudySelectSchema,
-	ImpactCaseStudyUpdateSchema,
-} from "@dariah-eric/database/schema";
+import { ImpactCaseStudyUpdateSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockInputSchema } from "@/lib/content-block-input";
 
 export const UpdateImpactCaseStudyActionInputSchema = v.object({
-	...v.pick(ImpactCaseStudySelectSchema, ["id"]).entries,
+	documentId: v.pipe(v.string(), v.uuid()),
 	...v.pick(ImpactCaseStudyUpdateSchema, ["title"]).entries,
 	...v.pick(ImpactCaseStudyUpdateSchema, ["summary"]).entries,
 	imageKey: v.pipe(v.string(), v.nonEmpty()),

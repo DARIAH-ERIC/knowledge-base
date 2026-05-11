@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { and, count, eq, inArray, sql } from "@/services/db/sql";
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { flattenEntityVersion } from "@/lib/entity-version";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
+import { and, count, eq, inArray, sql } from "@/services/db/sql";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
@@ -89,8 +90,9 @@ async function getActiveGovernanceBodyPersons(
 			eq(schema.personsToOrganisationalUnits.roleTypeId, schema.personRoleTypes.id),
 		)
 		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
-		.innerJoin(schema.entities, eq(schema.persons.id, schema.entities.id))
-		.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.where(
 			and(
@@ -100,12 +102,20 @@ async function getActiveGovernanceBodyPersons(
 			),
 		);
 
-	const positions = await getPersonPositions(db, [...new Set(rows.map((row) => row.id))]);
+	const positions = await getPersonPositions(db, [
+		...new Set(
+			rows.map((row) => {
+				return row.id;
+			}),
+		),
+	]);
 
 	for (const row of rows) {
 		const items = personsByGovernanceBody.get(row.governanceBodyId);
 
-		if (items == null) continue;
+		if (items == null) {
+			continue;
+		}
 
 		items.push({
 			id: row.id,
@@ -128,9 +138,11 @@ async function getActiveGovernanceBodyPersons(
 	}
 
 	for (const [governanceBodyId, items] of personsByGovernanceBody) {
-		const sorted = [...items].sort((a, b) => {
+		const sorted = items.toSorted((a, b) => {
 			const byName = a.sortName.localeCompare(b.sortName);
-			if (byName !== 0) return byName;
+			if (byName !== 0) {
+				return byName;
+			}
 			return a.role.localeCompare(b.role);
 		});
 		personsByGovernanceBody.set(governanceBodyId, sorted);
@@ -148,7 +160,7 @@ export async function getGovernanceBodies(
 	const [items, aggregate] = await Promise.all([
 		db.query.organisationalUnits.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -165,10 +177,12 @@ export async function getGovernanceBodies(
 				metadata: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -193,7 +207,7 @@ export async function getGovernanceBodies(
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -201,8 +215,8 @@ export async function getGovernanceBodies(
 		db
 			.select({ total: count() })
 			.from(schema.organisationalUnits)
-			.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.innerJoin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
@@ -233,11 +247,10 @@ export async function getGovernanceBodies(
 				: null;
 
 		return {
-			...item,
+			...flattenEntityVersion(item),
 			image,
 			socialMedia: mapSocialMedia(item.socialMedia),
 			persons: personsByGovernanceBody.get(item.id) ?? [],
-			publishedAt: item.entity.updatedAt.toISOString(),
 		};
 	});
 
@@ -259,7 +272,7 @@ export async function getGovernanceBodyById(
 			db.query.organisationalUnits.findFirst({
 				where: {
 					id,
-					entity: {
+					entityVersion: {
 						status: {
 							type: "published",
 						},
@@ -276,10 +289,12 @@ export async function getGovernanceBodyById(
 					metadata: true,
 				},
 				with: {
-					entity: {
-						columns: {
-							slug: true,
-							updatedAt: true,
+					entityVersion: {
+						columns: { updatedAt: true },
+						with: {
+							entity: {
+								columns: { slug: true },
+							},
 						},
 					},
 					image: {
@@ -323,11 +338,10 @@ export async function getGovernanceBodyById(
 			: null;
 
 	return {
-		...item,
+		...flattenEntityVersion(item),
 		image,
 		socialMedia: mapSocialMedia(item.socialMedia),
 		persons: personsByGovernanceBody.get(item.id) ?? [],
-		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,
@@ -350,7 +364,7 @@ export async function getGovernanceBodySlugs(
 	const [items, aggregate] = await Promise.all([
 		db.query.organisationalUnits.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -363,15 +377,17 @@ export async function getGovernanceBodySlugs(
 				id: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -379,8 +395,8 @@ export async function getGovernanceBodySlugs(
 		db
 			.select({ total: count() })
 			.from(schema.organisationalUnits)
-			.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.innerJoin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
@@ -395,7 +411,11 @@ export async function getGovernanceBodySlugs(
 
 	const total = aggregate.at(0)?.total ?? 0;
 
-	return { data: items, limit, offset, total };
+	const data = items.map(({ id, entityVersion }) => {
+		return { id, entity: { slug: entityVersion.entity.slug } };
+	});
+
+	return { data, limit, offset, total };
 }
 
 interface GetGovernanceBodyBySlugParams {
@@ -410,10 +430,12 @@ export async function getGovernanceBodyBySlug(
 
 	const item = await db.query.organisationalUnits.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
 				status: {
 					type: "published",
+				},
+				entity: {
+					slug,
 				},
 			},
 			type: {
@@ -428,10 +450,12 @@ export async function getGovernanceBodyBySlug(
 			metadata: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
-					updatedAt: true,
+			entityVersion: {
+				columns: { updatedAt: true },
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
 				},
 			},
 			image: {
@@ -477,11 +501,10 @@ export async function getGovernanceBodyBySlug(
 			: null;
 
 	return {
-		...item,
+		...flattenEntityVersion(item),
 		image,
 		socialMedia: mapSocialMedia(item.socialMedia),
 		persons: personsByGovernanceBody.get(item.id) ?? [],
-		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,

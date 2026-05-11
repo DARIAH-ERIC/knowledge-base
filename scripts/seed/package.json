@@ -36,5 +36,8 @@
 		"tsx": "catalog:",
 		"typescript": "catalog:",
 		"valibot": "catalog:"
+	},
+	"engines": {
+		"node": "24.x"
 	}
 }

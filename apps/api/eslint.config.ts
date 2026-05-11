@@ -11,6 +11,9 @@ const config = defineConfig(node, turbo, drizzle, {
 		"src/routes/**/service.ts",
 		"test/**/*.ts",
 	],
+	rules: {
+		"@typescript-eslint/no-unnecessary-type-parameters": "off",
+	},
 });
 
 export default config;

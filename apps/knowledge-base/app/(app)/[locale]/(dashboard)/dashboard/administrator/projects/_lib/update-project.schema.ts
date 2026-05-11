@@ -1,8 +1,8 @@
-import { ProjectSelectSchema, ProjectUpdateSchema } from "@dariah-eric/database/schema";
+import { ProjectUpdateSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 export const UpdateProjectActionInputSchema = v.object({
-	...v.pick(ProjectSelectSchema, ["id"]).entries,
+	documentId: v.pipe(v.string(), v.uuid()),
 	...v.pick(ProjectUpdateSchema, ["name", "scopeId", "summary"]).entries,
 	acronym: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	call: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),

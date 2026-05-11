@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
 import { db } from "@/lib/db";
-import { count, desc, eq, ilike } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
 export type EventsSort = "title" | "updatedAt";
@@ -30,33 +30,92 @@ export async function getEvents(params: GetEventsParams) {
 				? schema.events.title
 				: desc(schema.events.title)
 			: dir === "asc"
-				? schema.entities.updatedAt
-				: desc(schema.entities.updatedAt);
+				? schema.entityVersions.updatedAt
+				: desc(schema.entityVersions.updatedAt);
 
 	const [items, aggregate] = await Promise.all([
 		db
 			.select({
 				duration: schema.events.duration,
 				id: schema.events.id,
+				documentId: schema.entities.id,
 				location: schema.events.location,
 				slug: schema.entities.slug,
 				summary: schema.events.summary,
 				title: schema.events.title,
-				updatedAt: schema.entities.updatedAt,
+				updatedAt: schema.entityVersions.updatedAt,
 				website: schema.events.website,
+				isPublished: sql<boolean>`
+					EXISTS (
+						SELECT
+							1
+						FROM
+							"entity_versions" AS "pv"
+							INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+						WHERE
+							"pv"."entity_id" = ${schema.entityVersions.entityId}
+							AND "ps"."type" = 'published'
+					)
+				`,
 			})
 			.from(schema.events)
-			.innerJoin(schema.entities, eq(schema.events.id, schema.entities.id))
-			.where(where)
+			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entityVersions.entityId}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			)
 			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
 		db
 			.select({ total: count() })
 			.from(schema.events)
-			.innerJoin(schema.entities, eq(schema.events.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
-			.where(where),
+			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entityVersions.entityId}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -65,11 +124,13 @@ export async function getEvents(params: GetEventsParams) {
 		return {
 			duration: item.duration,
 			id: item.id,
+			documentId: item.documentId,
 			location: item.location,
 			entity: { slug: item.slug },
 			summary: item.summary,
 			title: item.title,
 			updatedAt: item.updatedAt,
+			isPublished: item.isPublished,
 			website: item.website,
 		};
 	});
@@ -89,9 +150,14 @@ export async function getEventById(params: GetEventByIdParams) {
 			id,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
+			entityVersion: {
+				columns: {},
+				with: {
+					entity: {
+						columns: {
+							slug: true,
+						},
+					},
 				},
 			},
 			image: {
@@ -111,91 +177,10 @@ export async function getEventById(params: GetEventByIdParams) {
 		options: { width: imageAssetWidth.featured },
 	});
 
-	const data = { ...item, image };
+	const { entityVersion, ...rest } = item;
+	const data = { ...rest, entity: entityVersion.entity, image };
 
 	return data;
-}
-
-interface CreateEventParams extends schema.EventInput {
-	slug: schema.EntityInput["slug"];
-}
-
-export async function createEvent(params: CreateEventParams) {
-	const { duration, imageId, isFullDay, location, slug, summary, title, website } = params;
-
-	const entityType = await db.query.entityTypes.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "events" },
-	});
-
-	if (entityType == null) {
-		return null;
-	}
-
-	const entityStatus = await db.query.entityStatus.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "published" },
-	});
-
-	if (entityStatus == null) {
-		return null;
-	}
-
-	const entityId = await db.transaction(async (tx) => {
-		const [item] = await tx
-			.insert(schema.entities)
-			.values({
-				typeId: entityType.id,
-				statusId: entityStatus.id,
-				slug,
-			})
-			.returning({
-				id: schema.entities.id,
-			});
-
-		if (item == null) {
-			return tx.rollback();
-		}
-
-		const { id } = item;
-
-		const event = {
-			id,
-			title,
-			summary,
-			imageId,
-			location,
-			duration,
-			isFullDay,
-			website,
-		};
-
-		await tx.insert(schema.events).values(event);
-
-		const fieldNamesIds = await tx.query.entityTypesFieldsNames.findMany({
-			where: {
-				entityTypeId: entityType.id,
-			},
-		});
-
-		const fields = fieldNamesIds.map(({ id: fieldNameId }) => {
-			return { entityId: id, fieldNameId };
-		});
-
-		await tx.insert(schema.fields).values(fields).returning({
-			id: schema.fields.id,
-		});
-
-		return id;
-	});
-
-	return {
-		entityId,
-	};
 }
 
 export type EventsWithEntities = Awaited<ReturnType<typeof getEvents>>;

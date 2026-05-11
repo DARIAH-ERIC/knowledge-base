@@ -3,6 +3,7 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { ServicesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_components/services-page";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getServicesForAdmin } from "@/lib/data/services";
 import type { IntlLocale } from "@/lib/i18n/locales";
@@ -16,7 +17,7 @@ import {
 
 interface DashboardAdministratorServicesPageProps extends PageProps<"/[locale]/dashboard/administrator/services"> {}
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 const defaultSort = "name" as const;
 const validSorts = ["name", "type", "status", "sshocMarketplaceId"] as const;
 

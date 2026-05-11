@@ -3,6 +3,7 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { OpportunitiesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunities-page";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { getOpportunities } from "@/lib/data/cached/opportunities";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -15,7 +16,7 @@ import {
 
 interface DashboardWebsiteOpportunitiesPageProps extends PageProps<"/[locale]/dashboard/website/opportunities"> {}
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 const defaultSort = "updatedAt" as const;
 const validSorts = ["title", "source", "updatedAt"] as const;
 

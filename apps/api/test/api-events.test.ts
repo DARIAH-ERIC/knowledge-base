@@ -13,19 +13,16 @@ import { withTransaction } from "~/test/lib/with-transaction";
 function createItems(count: number) {
 	const items = f.helpers.multiple(
 		() => {
-			const id = uuidv7();
-			const documentId = uuidv7();
+			const versionId = uuidv7();
+			const entityId = uuidv7();
 			const title = f.lorem.sentence();
 			const slug = slugify(title);
 
-			const entity = {
-				id,
-				slug,
-				documentId,
-			};
+			const entity = { id: entityId, slug };
+			const version = { id: versionId, entityId };
 
 			const event = {
-				id,
+				id: versionId,
 				title,
 				summary: f.lorem.paragraph(),
 				location: f.location.city(),
@@ -35,7 +32,7 @@ function createItems(count: number) {
 				},
 			};
 
-			return { entity, event };
+			return { entity, version, event };
 		},
 		{ count },
 	);
@@ -44,15 +41,16 @@ function createItems(count: number) {
 }
 
 function createItemWithDuration(duration: { start: Date; end?: Date }) {
-	const id = uuidv7();
-	const documentId = uuidv7();
+	const versionId = uuidv7();
+	const entityId = uuidv7();
 	const title = f.lorem.sentence();
 	const slug = slugify(title);
 
 	return {
-		entity: { id, slug, documentId },
+		entity: { id: entityId, slug },
+		version: { id: versionId, entityId },
 		event: {
-			id,
+			id: versionId,
 			title,
 			summary: f.lorem.paragraph(),
 			location: f.location.city(),
@@ -64,7 +62,7 @@ function createItemWithDuration(duration: { start: Date; end?: Date }) {
 
 function expectAdjacentEventLink(actual: unknown, item: ReturnType<typeof createItemWithDuration>) {
 	expect(actual).toMatchObject({
-		id: item.entity.id,
+		id: item.event.id,
 		title: item.event.title,
 		location: item.event.location,
 		duration: {
@@ -89,7 +87,13 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {
-			return { ...item.entity, statusId: status.id, typeId: type.id };
+			return { ...item.entity, typeId: type.id };
+		}),
+	);
+
+	await db.insert(schema.entityVersions).values(
+		items.map((item) => {
+			return { ...item.version, statusId: status.id };
 		}),
 	);
 
@@ -101,7 +105,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 	await Promise.all(
 		items.map((item) => {
-			return seedContentBlock(db, item.entity.id, type.id, "content");
+			return seedContentBlock(db, item.version.id, type.id, "content");
 		}),
 	);
 }
@@ -149,7 +153,7 @@ describe("events", () => {
 				await seed(db, items);
 
 				const item = items.at(1)!;
-				const id = item.entity.id;
+				const id = item.version.id;
 				const title = item.event.title;
 				const website = item.event.website;
 
@@ -410,7 +414,7 @@ describe("events", () => {
 					}),
 				);
 				for (const event of [t.upcoming1, t.upcoming2, t.upcoming3, t.upcoming4]) {
-					expect(allIds.has(event.entity.id)).toBe(true);
+					expect(allIds.has(event.version.id)).toBe(true);
 				}
 			});
 		});
@@ -790,7 +794,7 @@ describe("events", () => {
 
 				await seed(db, [early, middle, late]);
 
-				const response = await client.events[":id"].$get({ param: { id: middle.entity.id } });
+				const response = await client.events[":id"].$get({ param: { id: middle.version.id } });
 
 				expect(response.status).toBe(200);
 
@@ -812,7 +816,7 @@ describe("events", () => {
 
 				await seed(db, [early, late]);
 
-				const response = await client.events[":id"].$get({ param: { id: early.entity.id } });
+				const response = await client.events[":id"].$get({ param: { id: early.version.id } });
 
 				expect(response.status).toBe(200);
 
@@ -836,7 +840,7 @@ describe("events", () => {
 
 				await seed(db, [early, late]);
 
-				const response = await client.events[":id"].$get({ param: { id: late.entity.id } });
+				const response = await client.events[":id"].$get({ param: { id: late.version.id } });
 
 				expect(response.status).toBe(200);
 
@@ -862,9 +866,9 @@ describe("events", () => {
 				await seed(db, [a, b, c]);
 
 				const responses = await Promise.all([
-					client.events[":id"].$get({ param: { id: a.entity.id } }),
-					client.events[":id"].$get({ param: { id: b.entity.id } }),
-					client.events[":id"].$get({ param: { id: c.entity.id } }),
+					client.events[":id"].$get({ param: { id: a.version.id } }),
+					client.events[":id"].$get({ param: { id: b.version.id } }),
+					client.events[":id"].$get({ param: { id: c.version.id } }),
 				]);
 
 				const payloads = await Promise.all(
@@ -876,9 +880,11 @@ describe("events", () => {
 				// Sort IDs the same way the (lower, id::text) tuple cursor does,
 				// so we can assert that adjacency within the same-timestamp group is correct.
 				// eslint-disable-next-line unicorn/no-array-sort
-				const [firstId, middleId, lastId] = [a.entity.id, b.entity.id, c.entity.id].sort((x, y) => {
-					return x.localeCompare(y);
-				});
+				const [firstId, middleId, lastId] = [a.version.id, b.version.id, c.version.id].sort(
+					(x, y) => {
+						return x.localeCompare(y);
+					},
+				);
 
 				assert(firstId != null && middleId != null && lastId != null);
 

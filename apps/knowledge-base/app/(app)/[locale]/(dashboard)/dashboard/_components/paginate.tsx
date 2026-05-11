@@ -17,6 +17,8 @@ import {
 import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
 
+import { dashboardPageSize } from "@/config/pagination.config";
+
 function getPaginationRange(current: number, total: number, delta = 2) {
 	const range: Array<number> = [];
 	const left = Math.max(2, current - delta);
@@ -43,7 +45,7 @@ interface PaginateProps {
 export function Paginate({
 	isPending = false,
 	page,
-	perPage = 10,
+	perPage = dashboardPageSize,
 	setPage,
 	total,
 	totalItems,

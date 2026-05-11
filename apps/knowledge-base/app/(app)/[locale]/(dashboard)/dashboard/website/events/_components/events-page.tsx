@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Badge } from "@dariah-eric/ui/badge";
 import { Button, buttonStyles } from "@dariah-eric/ui/button";
 import { Link } from "@dariah-eric/ui/link";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
@@ -34,6 +35,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/delete-event.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface EventsPageProps {
@@ -41,7 +43,9 @@ interface EventsPageProps {
 	events: {
 		data: Array<
 			Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
+				documentId: string;
 				entity: Pick<schema.Entity, "slug">;
+				isPublished: boolean;
 				updatedAt: schema.Entity["updatedAt"];
 			}
 		>;
@@ -52,7 +56,7 @@ interface EventsPageProps {
 	sort: "title" | "updatedAt";
 }
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 
 export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 	const { dir: initialDir, events, page: initialPage, q: initialQ, sort: initialSort } = props;
@@ -65,7 +69,7 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 			return item.id !== id;
 		});
 	});
-	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
 		useUrlPaginatedSearch({
 			dir: initialDir,
@@ -115,6 +119,7 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 					<TableColumn allowsSorting={true} id="updatedAt">
 						{t("Updated")}
 					</TableColumn>
+					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -133,6 +138,11 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 								</TableCell>
 								<TableCell>{item.location}</TableCell>
 								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
+								<TableCell>
+									<Badge intent={item.isPublished ? "success" : "warning"}>
+										{item.isPublished ? t("Live") : t("Draft")}
+									</Badge>
+								</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button
@@ -156,7 +166,7 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 											<MenuItem
 												intent="danger"
 												onAction={() => {
-													setItemToDelete({ id: item.id });
+													setItemToDelete({ id: item.id, documentId: item.documentId });
 												}}
 											>
 												<TrashIcon className="mr-2 size-4" />
@@ -187,11 +197,11 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 						return;
 					}
 
-					const id = itemToDelete.id;
+					const { id, documentId } = itemToDelete;
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deleteEventAction(id);
+						await deleteEventAction(documentId);
 						router.refresh();
 						setItemToDelete(null);
 					});

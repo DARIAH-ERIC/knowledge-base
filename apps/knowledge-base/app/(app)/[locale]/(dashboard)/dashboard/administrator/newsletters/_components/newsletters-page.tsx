@@ -22,6 +22,7 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
+import { dashboardPageSize } from "@/config/pagination.config";
 import type { NewslettersResult } from "@/lib/data/newsletters";
 
 interface NewslettersPageProps {
@@ -30,7 +31,7 @@ interface NewslettersPageProps {
 	q: string;
 }
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 
 export function NewslettersPage(props: Readonly<NewslettersPageProps>): ReactNode {
 	const { newsletters, page: initialPage, q: initialQ } = props;

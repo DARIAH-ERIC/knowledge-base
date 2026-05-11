@@ -1,6 +1,5 @@
-import { db } from "@/services/db";
-
 import type { Database } from "@/middlewares/db";
+import { db } from "@/services/db";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function withTransaction(fn: (db: Database) => Promise<void>) {

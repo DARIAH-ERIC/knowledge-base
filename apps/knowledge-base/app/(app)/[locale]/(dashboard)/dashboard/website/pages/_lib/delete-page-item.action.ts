@@ -1,10 +1,13 @@
 "use server";
 
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
 import { assertAdmin } from "@/lib/auth/session";
+import { getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { pagesLifecycleAdapter } from "@/lib/data/pages.lifecycle-adapter";
 import { db } from "@/lib/db";
 import { eq, inArray, or } from "@/lib/db/sql";
 import {
@@ -13,39 +16,65 @@ import {
 } from "@/lib/search/website-index";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export async function deletePageItemAction(id: string): Promise<void> {
+export async function deletePageItemAction(documentId: string): Promise<void> {
 	await assertAdmin();
-	const descriptor = await getWebsiteDocumentDescriptorByEntityId(id);
 
-	await db.transaction(async (tx) => {
-		const entityFields = await tx
-			.select({ id: schema.fields.id })
-			.from(schema.fields)
-			.where(eq(schema.fields.entityId, id));
+	const descriptor = await db.transaction(async (tx) => {
+		const entity = await tx.query.entities.findFirst({
+			where: { id: documentId },
+			columns: { id: true },
+		});
 
-		if (entityFields.length > 0) {
-			const fieldIds = entityFields.map((f) => {
-				return f.id;
-			});
+		assert(entity, "Document not found.");
 
-			await tx.delete(schema.contentBlocks).where(inArray(schema.contentBlocks.fieldId, fieldIds));
-			await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+		const documentDescriptor = await getWebsiteDocumentDescriptorByEntityId(documentId);
+
+		const { draftId, publishedId } = await getDocumentVersions(tx, documentId);
+		const versionIds = [draftId, publishedId].filter((id): id is string => {
+			return id != null;
+		});
+
+		for (const versionId of versionIds) {
+			await pagesLifecycleAdapter.wipeSubtype(tx, versionId);
 		}
 
-		await tx.delete(schema.entitiesToResources).where(eq(schema.entitiesToResources.entityId, id));
+		for (const versionId of versionIds) {
+			const fieldRows = await tx
+				.select({ id: schema.fields.id })
+				.from(schema.fields)
+				.where(eq(schema.fields.entityVersionId, versionId));
+
+			if (fieldRows.length > 0) {
+				const fieldIds = fieldRows.map((f) => {
+					return f.id;
+				});
+				await tx
+					.delete(schema.contentBlocks)
+					.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+				await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+			}
+		}
+
+		await tx
+			.delete(schema.entitiesToResources)
+			.where(eq(schema.entitiesToResources.entityId, documentId));
 
 		await tx
 			.delete(schema.entitiesToEntities)
 			.where(
 				or(
-					eq(schema.entitiesToEntities.entityId, id),
-					eq(schema.entitiesToEntities.relatedEntityId, id),
+					eq(schema.entitiesToEntities.entityId, documentId),
+					eq(schema.entitiesToEntities.relatedEntityId, documentId),
 				),
 			);
 
-		await tx.delete(schema.pages).where(eq(schema.pages.id, id));
+		if (versionIds.length > 0) {
+			await tx.delete(schema.entityVersions).where(inArray(schema.entityVersions.id, versionIds));
+		}
 
-		await tx.delete(schema.entities).where(eq(schema.entities.id, id));
+		await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
+
+		return documentDescriptor;
 	});
 
 	after(async () => {

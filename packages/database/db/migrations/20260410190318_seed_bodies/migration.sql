@@ -1,42 +1,55 @@
+-- DARIAH-EU: insert one document row, one version row, then the org-unit row
 WITH
-	"entity" AS (
+	"document" AS (
 		INSERT INTO
-			"entities" ("type_id", "status_id", "slug")
+			"entities" ("type_id", "slug")
 		SELECT
 			"entity_types"."id",
-			"entity_status"."id",
 			'dariah-eu'
 		FROM
-			"entity_types",
-			"entity_status"
+			"entity_types"
 		WHERE
 			"entity_types"."type" = 'organisational_units'
-			AND "entity_status"."type" = 'published'
+		RETURNING
+			"id"
+	),
+	"version" AS (
+		INSERT INTO
+			"entity_versions" ("entity_id", "status_id")
+		SELECT
+			"document"."id",
+			"entity_status"."id"
+		FROM
+			"document",
+			"entity_status"
+		WHERE
+			"entity_status"."type" = 'published'
 		RETURNING
 			"id"
 	)
 INSERT INTO
 	"organisational_units" ("id", "name", "summary", "type_id")
 SELECT
-	"entity"."id",
+	"version"."id",
 	'DARIAH-EU',
 	'',
 	"organisational_unit_types"."id"
 FROM
-	"entity",
+	"version",
 	"organisational_unit_types"
 WHERE
 	"organisational_unit_types"."type" = 'eric'
 ON CONFLICT ("id") DO NOTHING;
 
 --> statement-breakpoint
+-- Governance bodies: bulk-insert documents, then their versions (joined by slug),
+-- then the org-unit rows keyed to those versions
 WITH
-	"body_entities" AS (
+	"body_documents" AS (
 		INSERT INTO
-			"entities" ("type_id", "status_id", "slug")
+			"entities" ("type_id", "slug")
 		SELECT
 			"entity_types"."id",
-			"entity_status"."id",
 			"tmp"."slug"
 		FROM
 			(
@@ -49,20 +62,33 @@ WITH
 					('scientific-advisory-board'),
 					('senior-management-team')
 			) AS "tmp" ("slug"),
-			"entity_types",
-			"entity_status"
+			"entity_types"
 		WHERE
 			"entity_types"."type" = 'organisational_units'
-			AND "entity_status"."type" = 'published'
 		RETURNING
 			"id",
 			"slug"
+	),
+	"body_versions" AS (
+		INSERT INTO
+			"entity_versions" ("entity_id", "status_id")
+		SELECT
+			"body_documents"."id",
+			"entity_status"."id"
+		FROM
+			"body_documents",
+			"entity_status"
+		WHERE
+			"entity_status"."type" = 'published'
+		RETURNING
+			"id",
+			"entity_id"
 	),
 	"body_units" AS (
 		INSERT INTO
 			"organisational_units" ("id", "name", "acronym", "summary", "type_id")
 		SELECT
-			"body_entities"."id",
+			"body_versions"."id",
 			"tmp"."name",
 			"tmp"."acronym",
 			'',
@@ -78,7 +104,8 @@ WITH
 					('scientific-advisory-board', 'Scientific advisory board', 'sab'),
 					('senior-management-team', 'Senior management team', 'smt')
 			) AS "tmp" ("slug", "name", "acronym")
-			JOIN "body_entities" ON "body_entities"."slug" = "tmp"."slug"
+			JOIN "body_documents" ON "body_documents"."slug" = "tmp"."slug"
+			JOIN "body_versions" ON "body_versions"."entity_id" = "body_documents"."id"
 			CROSS JOIN "organisational_unit_types"
 		WHERE
 			"organisational_unit_types"."type" = 'governance_body'
@@ -103,11 +130,12 @@ FROM
 	"body_units"
 	CROSS JOIN "organisational_unit_status"
 	CROSS JOIN (
+		-- DARIAH-EU's organisational_unit row id == its entity_version id
 		SELECT
-			"organisational_units"."id"
+			"entity_versions"."id"
 		FROM
-			"organisational_units"
-			JOIN "entities" ON "entities"."id" = "organisational_units"."id"
+			"entities"
+			JOIN "entity_versions" ON "entity_versions"."entity_id" = "entities"."id"
 		WHERE
 			"entities"."slug" = 'dariah-eu'
 	) AS "dariah_eu"

@@ -35,3 +35,28 @@ export const GetNewsletters = {
 		v.metadata({ ref: "GetNewslettersResponse" }),
 	),
 };
+
+export const SubscribeNewsletterRequestSchema = v.pipe(
+	v.object({
+		email: v.pipe(v.string(), v.email()),
+	}),
+	v.description("Newsletter subscription request"),
+	v.metadata({ ref: "SubscribeNewsletterRequest" }),
+);
+
+export type SubscribeNewsletterRequest = v.InferOutput<typeof SubscribeNewsletterRequestSchema>;
+
+export const SubscribeNewsletterResponseSchema = v.pipe(
+	v.object({
+		email: v.pipe(v.string(), v.email()),
+	}),
+	v.description("Newsletter subscription response"),
+	v.metadata({ ref: "SubscribeNewsletterResponse" }),
+);
+
+export type SubscribeNewsletterResponse = v.InferOutput<typeof SubscribeNewsletterResponseSchema>;
+
+export const SubscribeNewsletter = {
+	RequestSchema: SubscribeNewsletterRequestSchema,
+	ResponseSchema: SubscribeNewsletterResponseSchema,
+};

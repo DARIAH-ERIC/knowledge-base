@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, sql } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
 
 export type PersonsSort = "name" | "email" | "orcid";
 
@@ -19,7 +19,10 @@ interface GetPersonsParams {
 export interface PersonsResult {
 	data: Array<
 		Pick<schema.Person, "email" | "id" | "name" | "orcid"> & {
+			documentId: string;
 			entity: Pick<schema.Entity, "slug">;
+			isPublished: boolean;
+			updatedAt: Date;
 		}
 	>;
 	limit: number;
@@ -54,33 +57,98 @@ export async function getPersons(params: Readonly<GetPersonsParams>): Promise<Pe
 	const [data, aggregate] = await Promise.all([
 		db
 			.select({
+				documentId: schema.entities.id,
 				email: schema.persons.email,
 				id: schema.persons.id,
 				name: schema.persons.name,
 				orcid: schema.persons.orcid,
 				slug: schema.entities.slug,
+				updatedAt: schema.entityVersions.updatedAt,
+				isPublished: sql<boolean>`
+					EXISTS (
+						SELECT
+							1
+						FROM
+							"entity_versions" AS "pv"
+							INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+						WHERE
+							"pv"."entity_id" = ${schema.entityVersions.entityId}
+							AND "ps"."type" = 'published'
+					)
+				`,
 			})
 			.from(schema.persons)
-			.innerJoin(schema.entities, eq(schema.persons.id, schema.entities.id))
-			.where(where)
+			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entityVersions.entityId}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			)
 			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
 		db
 			.select({ total: count() })
 			.from(schema.persons)
-			.innerJoin(schema.entities, eq(schema.persons.id, schema.entities.id))
-			.where(where),
+			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entityVersions.entityId}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			),
 	]);
 
 	return {
 		data: data.map((item) => {
 			return {
+				documentId: item.documentId,
 				email: item.email,
 				entity: { slug: item.slug },
 				id: item.id,
+				isPublished: item.isPublished,
 				name: item.name,
 				orcid: item.orcid,
+				updatedAt: item.updatedAt,
 			};
 		}),
 		limit,
@@ -103,8 +171,10 @@ export async function getPersonBySlugForAdmin(currentUser: Pick<User, "role">, s
 
 	return db.query.persons.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
+				entity: {
+					slug,
+				},
 			},
 		},
 		columns: {
@@ -116,12 +186,15 @@ export async function getPersonBySlugForAdmin(currentUser: Pick<User, "role">, s
 			sortName: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
-				},
+			entityVersion: {
+				columns: { id: true },
 				with: {
+					entity: {
+						columns: {
+							id: true,
+							slug: true,
+						},
+					},
 					status: {
 						columns: {
 							id: true,
@@ -160,7 +233,7 @@ export async function getPersonEditDataForAdmin(currentUser: Pick<User, "role">,
 		)
 		.where(
 			and(
-				eq(schema.fields.entityId, person.id),
+				eq(schema.fields.entityVersionId, person.id),
 				eq(schema.entityTypesFieldsNames.fieldName, "biography"),
 			),
 		)

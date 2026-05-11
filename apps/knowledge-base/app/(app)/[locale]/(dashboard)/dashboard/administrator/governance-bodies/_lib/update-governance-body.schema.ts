@@ -1,11 +1,8 @@
-import {
-	OrganisationalUnitSelectSchema,
-	OrganisationalUnitUpdateSchema,
-} from "@dariah-eric/database/schema";
+import { OrganisationalUnitUpdateSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 export const UpdateGovernanceBodyActionInputSchema = v.object({
-	...v.pick(OrganisationalUnitSelectSchema, ["id"]).entries,
+	documentId: v.pipe(v.string(), v.uuid()),
 	...v.pick(OrganisationalUnitUpdateSchema, ["name", "summary"]).entries,
 	acronym: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	imageKey: v.optional(v.pipe(v.string(), v.nonEmpty())),

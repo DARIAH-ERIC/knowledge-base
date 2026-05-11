@@ -104,7 +104,7 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 			schema.accordionContentBlocks,
 			eq(schema.accordionContentBlocks.id, schema.contentBlocks.id),
 		)
-		.where(eq(schema.fields.entityId, entityId))
+		.where(eq(schema.fields.entityVersionId, entityId))
 		.orderBy(schema.contentBlocks.position);
 
 	// Group rows by field, preserving position order (already sorted by ORDER BY)

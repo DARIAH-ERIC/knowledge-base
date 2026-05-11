@@ -6,9 +6,12 @@ import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { PersonRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { GovernanceBodyForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form";
+import { discardGovernanceBodyDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/discard-governance-body-draft.action";
+import { publishGovernanceBodyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/publish-governance-body.action";
 import { updateGovernanceBodyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/update-governance-body.action";
 import type { ContributionPersonOption } from "@/lib/data/contributions";
 import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
@@ -16,9 +19,11 @@ import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-rel
 
 interface GovernanceBodyEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
+	documentId: string;
+	isPublished: boolean;
 	governanceBody: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
 		description?: JSONContent;
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	initialRelatedEntityIds: Array<string>;
 	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
@@ -39,6 +44,8 @@ interface GovernanceBodyEditFormProps {
 export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormProps>): ReactNode {
 	const {
 		initialAssets,
+		documentId,
+		isPublished,
 		governanceBody,
 		initialRelatedEntityIds,
 		initialRelatedEntityItems,
@@ -60,7 +67,16 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 
 	return (
 		<Fragment>
-			<Heading>{t("Edit governance body")}</Heading>
+			<div className="flex items-center justify-between">
+				<Heading>{t("Edit governance body")}</Heading>
+				<EntityLifecycleBar
+					discardDraftAction={discardGovernanceBodyDraftAction}
+					documentId={documentId}
+					hasDraft={true}
+					isPublished={isPublished}
+					publishAction={publishGovernanceBodyAction}
+				/>
+			</div>
 
 			<GovernanceBodyForm
 				formAction={updateGovernanceBodyAction}

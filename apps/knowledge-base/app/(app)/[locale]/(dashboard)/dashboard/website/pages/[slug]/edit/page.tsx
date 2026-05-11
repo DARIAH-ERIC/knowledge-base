@@ -7,6 +7,8 @@ import { PageItemEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/web
 import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { ensureDraftVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { pagesLifecycleAdapter } from "@/lib/data/pages.lifecycle-adapter";
 import {
 	getEntityRelationOptions,
 	getEntityRelationOptionsByIds,
@@ -40,25 +42,55 @@ export default async function DashboardWebsiteEditPageItemPage(
 
 	const { slug } = await params;
 
+	const anyVersion = await db.query.pages.findFirst({
+		where: { entityVersion: { entity: { slug } } },
+		columns: {},
+		with: {
+			entityVersion: {
+				columns: {},
+				with: { entity: { columns: { id: true } } },
+			},
+		},
+	});
+
+	if (anyVersion == null) {
+		notFound();
+	}
+
+	const documentId = anyVersion.entityVersion.entity.id;
+
+	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+		const draftVersionId = await ensureDraftVersion(tx, documentId, pagesLifecycleAdapter);
+		const { publishedId } = await getDocumentVersions(tx, documentId);
+		return { draftVersionId, publishedId };
+	});
+
 	const [{ items: initialAssets }, pageItem, initialRelatedEntities, initialRelatedResources] =
 		await Promise.all([
 			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 			db.query.pages.findFirst({
-				where: {
-					entity: {
-						slug,
-					},
-				},
+				where: { id: draftVersionId },
 				columns: {
 					id: true,
 					title: true,
 					summary: true,
 				},
 				with: {
-					entity: {
-						columns: {
-							documentId: true,
-							slug: true,
+					entityVersion: {
+						columns: { id: true },
+						with: {
+							entity: {
+								columns: {
+									id: true,
+									slug: true,
+								},
+							},
+							status: {
+								columns: {
+									id: true,
+									type: true,
+								},
+							},
 						},
 					},
 					image: {
@@ -77,7 +109,7 @@ export default async function DashboardWebsiteEditPageItemPage(
 		notFound();
 	}
 
-	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(pageItem.id);
+	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(documentId);
 
 	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
 		getEntityRelationOptionsByIds(relatedEntityIds),
@@ -96,6 +128,7 @@ export default async function DashboardWebsiteEditPageItemPage(
 	return (
 		<PageItemEditForm
 			contentBlocks={contentBlocks}
+			documentId={documentId}
 			initialAssets={initialAssets}
 			initialRelatedEntityIds={relatedEntityIds}
 			initialRelatedEntityItems={initialRelatedEntities.items}
@@ -103,6 +136,7 @@ export default async function DashboardWebsiteEditPageItemPage(
 			initialRelatedResourceIds={relatedResourceIds}
 			initialRelatedResourceItems={initialRelatedResources.items}
 			initialRelatedResourceTotal={initialRelatedResources.total}
+			isPublished={publishedId != null}
 			pageItem={{
 				...pageItem,
 				image: pageItem.image ? { ...pageItem.image, url: image!.url } : null,

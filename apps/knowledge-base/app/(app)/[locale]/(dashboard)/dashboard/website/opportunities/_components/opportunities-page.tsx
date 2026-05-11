@@ -35,6 +35,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteOpportunityAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/delete-opportunity.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface OpportunitiesPageProps {
@@ -42,7 +43,9 @@ interface OpportunitiesPageProps {
 	opportunities: {
 		data: Array<
 			Pick<schema.Opportunity, "id" | "duration" | "sourceId" | "title" | "summary" | "website"> & {
+				documentId: string;
 				entity: Pick<schema.Entity, "slug">;
+				isPublished: boolean;
 				source: Pick<schema.OpportunitySource, "id" | "source">;
 				updatedAt: schema.Entity["updatedAt"];
 			}
@@ -54,7 +57,7 @@ interface OpportunitiesPageProps {
 	sort: "title" | "source" | "updatedAt";
 }
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 
 export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): ReactNode {
 	const {
@@ -76,7 +79,7 @@ export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): Reac
 			});
 		},
 	);
-	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
 		useUrlPaginatedSearch({
 			dir: initialDir,
@@ -128,6 +131,7 @@ export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): Reac
 					<TableColumn allowsSorting={true} id="updatedAt">
 						{t("Updated")}
 					</TableColumn>
+					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -150,6 +154,11 @@ export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): Reac
 										: format.dateTime(item.duration.start, { dateStyle: "short" })}
 								</TableCell>
 								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
+								<TableCell>
+									<Badge intent={item.isPublished ? "success" : "warning"}>
+										{item.isPublished ? t("Live") : t("Draft")}
+									</Badge>
+								</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button
@@ -175,7 +184,7 @@ export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): Reac
 											<MenuItem
 												intent="danger"
 												onAction={() => {
-													setItemToDelete({ id: item.id });
+													setItemToDelete({ id: item.id, documentId: item.documentId });
 												}}
 											>
 												<TrashIcon className="mr-2 size-4" />
@@ -206,11 +215,11 @@ export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): Reac
 						return;
 					}
 
-					const id = itemToDelete.id;
+					const { id, documentId } = itemToDelete;
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deleteOpportunityAction(id);
+						await deleteOpportunityAction(documentId);
 						router.refresh();
 						setItemToDelete(null);
 					});

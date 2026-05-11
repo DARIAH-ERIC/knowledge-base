@@ -4,7 +4,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
-import { entities } from "./entities";
+import { entityVersions } from "./entities";
 
 export const opportunitySourcesEnum = ["dariah", "external"] as const;
 
@@ -34,7 +34,7 @@ export const opportunities = p.pgTable("opportunities", {
 		.uuid("id")
 		.primaryKey()
 		.references(() => {
-			return entities.id;
+			return entityVersions.id;
 		}),
 	title: p.text("title").notNull(),
 	summary: p.text("summary"),

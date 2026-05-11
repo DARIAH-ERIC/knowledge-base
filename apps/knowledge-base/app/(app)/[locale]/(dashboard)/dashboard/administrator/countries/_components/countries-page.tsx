@@ -34,6 +34,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteCountryAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/delete-country.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import type { CountryMemberObserverStatus } from "@/lib/data/countries";
 import { useRouter } from "@/lib/navigation/navigation";
 
@@ -61,7 +62,7 @@ function memberObserverStatusIntent(
 	return status === "is_member_of" ? "success" : "warning";
 }
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 
 export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 	const { countries, dir: initialDir, page: initialPage, q: initialQ, sort: initialSort } = props;

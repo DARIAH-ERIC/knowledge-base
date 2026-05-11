@@ -15,6 +15,7 @@ export const socialMediaTypesEnum = [
 	"vimeo",
 	"website",
 	"youtube",
+	"other",
 ] as const;
 
 export const socialMediaTypes = p.pgTable(

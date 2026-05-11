@@ -33,6 +33,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/delete-institution.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface InstitutionsPageProps {
@@ -50,7 +51,7 @@ interface InstitutionsPageProps {
 	sort: "name";
 }
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 
 export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactNode {
 	const {

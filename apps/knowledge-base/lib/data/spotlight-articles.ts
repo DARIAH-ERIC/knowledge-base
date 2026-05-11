@@ -4,7 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
 import { db } from "@/lib/db";
-import { count, desc, eq, ilike } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
 export type SpotlightArticlesSort = "title" | "updatedAt";
@@ -30,30 +30,90 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 				? schema.spotlightArticles.title
 				: desc(schema.spotlightArticles.title)
 			: dir === "asc"
-				? schema.entities.updatedAt
-				: desc(schema.entities.updatedAt);
+				? schema.entityVersions.updatedAt
+				: desc(schema.entityVersions.updatedAt);
 
 	const [items, aggregate] = await Promise.all([
 		db
 			.select({
 				id: schema.spotlightArticles.id,
+				documentId: schema.entities.id,
 				slug: schema.entities.slug,
 				summary: schema.spotlightArticles.summary,
 				title: schema.spotlightArticles.title,
-				updatedAt: schema.entities.updatedAt,
+				isPublished: sql<boolean>`
+					EXISTS (
+						SELECT
+							1
+						FROM
+							"entity_versions" AS "pv"
+							INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+						WHERE
+							"pv"."entity_id" = ${schema.entityVersions.entityId}
+							AND "ps"."type" = 'published'
+					)
+				`,
+				status: schema.entityStatus.type,
+				updatedAt: schema.entityVersions.updatedAt,
 			})
 			.from(schema.spotlightArticles)
-			.innerJoin(schema.entities, eq(schema.spotlightArticles.id, schema.entities.id))
-			.where(where)
+			.innerJoin(schema.entityVersions, eq(schema.spotlightArticles.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entityVersions.entityId}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			)
 			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
 		db
 			.select({ total: count() })
 			.from(schema.spotlightArticles)
-			.innerJoin(schema.entities, eq(schema.spotlightArticles.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
-			.where(where),
+			.innerJoin(schema.entityVersions, eq(schema.spotlightArticles.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entityVersions.entityId}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -61,9 +121,12 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 	const data = items.map((item) => {
 		return {
 			id: item.id,
+			documentId: item.documentId,
 			entity: { slug: item.slug },
 			summary: item.summary,
 			title: item.title,
+			isPublished: item.isPublished,
+			status: item.status,
 			updatedAt: item.updatedAt,
 		};
 	});
@@ -83,9 +146,14 @@ export async function getSpotlightArticleById(params: GetSpotlightArticleByIdPar
 			id,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
+			entityVersion: {
+				columns: {},
+				with: {
+					entity: {
+						columns: {
+							slug: true,
+						},
+					},
 				},
 			},
 			image: {
@@ -105,88 +173,10 @@ export async function getSpotlightArticleById(params: GetSpotlightArticleByIdPar
 		options: { width: imageAssetWidth.featured },
 	});
 
-	const data = { ...item, image };
+	const { entityVersion, ...rest } = item;
+	const data = { ...rest, entity: entityVersion.entity, image };
 
 	return data;
-}
-
-interface CreateSpotlightArticleParams extends schema.SpotlightArticleInput {
-	slug: schema.EntityInput["slug"];
-}
-
-export async function createSpotlightArticle(params: CreateSpotlightArticleParams) {
-	const { imageId, slug, summary, title } = params;
-
-	const entityType = await db.query.entityTypes.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "spotlight_articles" },
-	});
-
-	if (entityType == null) {
-		return null;
-	}
-
-	const entityStatus = await db.query.entityStatus.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "published" },
-	});
-
-	if (entityStatus == null) {
-		return null;
-	}
-
-	const entityId = await db.transaction(async (tx) => {
-		const [item] = await tx
-			.insert(schema.entities)
-			.values({
-				typeId: entityType.id,
-				documentId: undefined,
-				statusId: entityStatus.id,
-				slug,
-			})
-			.returning({
-				id: schema.entities.id,
-			});
-
-		if (item == null) {
-			return tx.rollback();
-		}
-
-		const { id } = item;
-
-		const spotlightArticle = {
-			id,
-			title,
-			summary,
-			imageId,
-		};
-
-		await tx.insert(schema.spotlightArticles).values(spotlightArticle);
-
-		const fieldNamesIds = await tx.query.entityTypesFieldsNames.findMany({
-			where: {
-				entityTypeId: entityType.id,
-			},
-		});
-
-		const fields = fieldNamesIds.map(({ id: fieldNameId }) => {
-			return { entityId: id, fieldNameId };
-		});
-
-		await tx.insert(schema.fields).values(fields).returning({
-			id: schema.fields.id,
-		});
-
-		return id;
-	});
-
-	return {
-		entityId,
-	};
 }
 
 export type SpotlightArticlesWithEntities = Awaited<ReturnType<typeof getSpotlightArticles>>;

@@ -3,6 +3,7 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { ContributionsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getContributionsForAdmin } from "@/lib/data/contributions";
 import type { IntlLocale } from "@/lib/i18n/locales";
@@ -16,7 +17,7 @@ import {
 
 interface DashboardAdministratorPersonRelationsPageProps extends PageProps<"/[locale]/dashboard/administrator/person-relations"> {}
 
-const pageSize = 20;
+const pageSize = dashboardPageSize;
 const defaultSort = "personName" as const;
 const validSorts = [
 	"personName",

@@ -15,7 +15,12 @@ INSERT INTO
 	"content_blocks_type_data_types" ("type")
 VALUES
 	('events'),
-	('news')
+	('funding_calls'),
+	('impact_case_studies'),
+	('news'),
+	('opportunities'),
+	('pages'),
+	('spotlight_articles')
 ON CONFLICT ("type") DO NOTHING;
 
 --> statement-breakpoint
@@ -254,7 +259,8 @@ VALUES
 	('twitter'),
 	('vimeo'),
 	('website'),
-	('youtube');
+	('youtube'),
+	('other');
 
 --> statement-breakpoint
 INSERT INTO
