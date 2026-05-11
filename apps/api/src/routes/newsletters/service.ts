@@ -45,11 +45,11 @@ interface SubscribeToNewsletterParams {
 export async function subscribeToNewsletter(params: SubscribeToNewsletterParams) {
 	const { email } = params;
 
-	try {
-		const { email_address } = (await mailchimp.subscribe({ email })).unwrap().data;
+	const result = await mailchimp.subscribe({ email });
 
-		return { email: email_address };
-	} catch (error) {
+	if (result.isErr()) {
+		const error = result.error;
+
 		if (HttpError.is(error)) {
 			const status = error.response.status;
 			let message = STATUS_CODES[status] ?? STATUS_CODES[500];
@@ -77,4 +77,8 @@ export async function subscribeToNewsletter(params: SubscribeToNewsletterParams)
 			message: STATUS_CODES[500],
 		});
 	}
+
+	const { email_address } = result.value.data;
+
+	return { email: email_address };
 }
