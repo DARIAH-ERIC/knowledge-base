@@ -84,7 +84,11 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 						schema.organisationalUnitTypes,
 						eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 					)
-					.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
+					.innerJoin(
+						schema.entityVersions,
+						eq(schema.organisationalUnits.id, schema.entityVersions.id),
+					)
+					.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 					.where(where)
 					.orderBy(nameOrderBy)
 			: db
@@ -98,7 +102,11 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 						schema.organisationalUnitTypes,
 						eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 					)
-					.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
+					.innerJoin(
+						schema.entityVersions,
+						eq(schema.organisationalUnits.id, schema.entityVersions.id),
+					)
+					.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 					.where(where)
 					.orderBy(nameOrderBy)
 					.limit(limit)
@@ -110,7 +118,8 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 			)
-			.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.where(where),
 		db.query.organisationalUnits.findMany({
 			where: { type: { type: "eric" } },

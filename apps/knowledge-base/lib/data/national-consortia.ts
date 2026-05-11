@@ -136,7 +136,11 @@ export async function getNationalConsortia(
 							schema.organisationalUnitTypes,
 							eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 						)
-						.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
+						.innerJoin(
+							schema.entityVersions,
+							eq(schema.organisationalUnits.id, schema.entityVersions.id),
+						)
+						.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 						.where(where)
 						.orderBy(nameOrderBy)
 				: db
@@ -150,7 +154,11 @@ export async function getNationalConsortia(
 							schema.organisationalUnitTypes,
 							eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 						)
-						.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
+						.innerJoin(
+							schema.entityVersions,
+							eq(schema.organisationalUnits.id, schema.entityVersions.id),
+						)
+						.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 						.where(where)
 						.orderBy(nameOrderBy)
 						.limit(limit)
@@ -162,7 +170,11 @@ export async function getNationalConsortia(
 					schema.organisationalUnitTypes,
 					eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 				)
-				.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
+				.innerJoin(
+					schema.entityVersions,
+					eq(schema.organisationalUnits.id, schema.entityVersions.id),
+				)
+				.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 				.where(where),
 		]);
 
@@ -284,7 +296,8 @@ export async function getNationalConsortia(
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 		)
-		.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
+		.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 		.where(
 			and(
 				eq(schema.organisationalUnitTypes.type, consortiumType),

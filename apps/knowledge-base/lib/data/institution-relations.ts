@@ -113,7 +113,8 @@ export async function getInstitutionRelations(
 				schema.organisationalUnits,
 				eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.unitId),
 			)
-			.innerJoin(schema.entities, eq(schema.entities.id, schema.organisationalUnits.id))
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.innerJoin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),

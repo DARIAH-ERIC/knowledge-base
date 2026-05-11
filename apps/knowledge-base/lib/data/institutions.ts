@@ -206,7 +206,11 @@ export async function getInstitutions(
 					schema.organisationalUnitTypes,
 					eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 				)
-				.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
+				.innerJoin(
+					schema.entityVersions,
+					eq(schema.organisationalUnits.id, schema.entityVersions.id),
+				)
+				.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 				.where(where)
 				.orderBy(nameOrderBy)
 				.limit(limit)
@@ -218,7 +222,11 @@ export async function getInstitutions(
 					schema.organisationalUnitTypes,
 					eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 				)
-				.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
+				.innerJoin(
+					schema.entityVersions,
+					eq(schema.organisationalUnits.id, schema.entityVersions.id),
+				)
+				.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 				.where(where),
 		]);
 		const institutionIds = items.map((item) => {
@@ -259,7 +267,8 @@ export async function getInstitutions(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 			)
-			.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.where(where)
 			.orderBy(nameOrderBy);
 		total = items.length;
@@ -354,7 +363,8 @@ export async function getInstitutions(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 			)
-			.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.where(
 				and(
 					eq(schema.organisationalUnitTypes.type, institutionType),
