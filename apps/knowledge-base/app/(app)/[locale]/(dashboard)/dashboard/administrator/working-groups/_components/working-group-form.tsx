@@ -29,7 +29,7 @@ interface WorkingGroupFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	workingGroup?: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
 		description?: JSONContent;
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
@@ -147,7 +147,7 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 				{workingGroup != null ? (
 					<Fragment>
 						<input name="id" type="hidden" value={workingGroup.id} />
-						<input name="documentId" type="hidden" value={workingGroup.entity.documentId} />
+						<input name="documentId" type="hidden" value={workingGroup.entityVersion.entity.id} />
 					</Fragment>
 				) : null}
 

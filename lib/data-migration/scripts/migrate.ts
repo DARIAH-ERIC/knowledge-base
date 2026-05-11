@@ -746,7 +746,6 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: page.slug,
-					statusId: statusByType.published.id,
 					typeId: typesByType.pages.id,
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),
@@ -755,7 +754,21 @@ async function main() {
 
 			assert(entity);
 
-			const id = entity.id;
+			const [version] = await tx
+
+				.insert(schema.entityVersions)
+
+				.values({
+					entityId: entity.id,
+
+					statusId: statusByType.published.id,
+				})
+
+				.returning({ id: schema.entityVersions.id });
+
+			assert(version);
+
+			const id = version.id;
 
 			const imageId = await uploadFeaturedImage(
 				"images",
@@ -822,7 +835,7 @@ async function main() {
 			const [field] = await tx
 				.insert(schema.fields)
 				.values({
-					entityId: entity.id,
+					entityVersionId: version.id,
 					fieldNameId: fieldName.id,
 				})
 				.returning({ id: schema.fields.id });
@@ -1194,14 +1207,27 @@ async function main() {
 					.insert(schema.entities)
 					.values({
 						slug: slugify(item.title),
-						statusId: statusByType.published.id,
 						typeId: typesByType.documents_policies.id,
 					})
 					.returning({ id: schema.entities.id });
 
 				assert(entity);
 
-				const id = entity.id;
+				const [version] = await tx
+
+					.insert(schema.entityVersions)
+
+					.values({
+						entityId: entity.id,
+
+						statusId: statusByType.published.id,
+					})
+
+					.returning({ id: schema.entityVersions.id });
+
+				assert(version);
+
+				const id = version.id;
 
 				const response = await fetch(item.href);
 				const mimeType = response.headers.get("content-type") ?? "application/octet-stream";
@@ -1251,7 +1277,6 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: page.slug,
-					statusId: statusByType.published.id,
 					typeId: typesByType.pages.id,
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),
@@ -1260,7 +1285,21 @@ async function main() {
 
 			assert(entity);
 
-			const id = entity.id;
+			const [version] = await tx
+
+				.insert(schema.entityVersions)
+
+				.values({
+					entityId: entity.id,
+
+					statusId: statusByType.published.id,
+				})
+
+				.returning({ id: schema.entityVersions.id });
+
+			assert(version);
+
+			const id = version.id;
 
 			const imageId = await uploadFeaturedImage(
 				"images",
@@ -1300,7 +1339,7 @@ async function main() {
 			const [field] = await tx
 				.insert(schema.fields)
 				.values({
-					entityId: entity.id,
+					entityVersionId: version.id,
 					fieldNameId: fieldName.id,
 				})
 				.returning({ id: schema.fields.id });
@@ -1343,7 +1382,6 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: post.slug,
-					statusId: statusByType.published.id,
 					typeId: typesByType.news.id,
 					createdAt: new Date(post.date_gmt),
 					updatedAt: new Date(post.modified_gmt),
@@ -1352,7 +1390,21 @@ async function main() {
 
 			assert(entity);
 
-			const id = entity.id;
+			const [version] = await tx
+
+				.insert(schema.entityVersions)
+
+				.values({
+					entityId: entity.id,
+
+					statusId: statusByType.published.id,
+				})
+
+				.returning({ id: schema.entityVersions.id });
+
+			assert(version);
+
+			const id = version.id;
 
 			const imageId = await uploadFeaturedImage(
 				"images",
@@ -1391,7 +1443,7 @@ async function main() {
 			const [field] = await tx
 				.insert(schema.fields)
 				.values({
-					entityId: entity.id,
+					entityVersionId: version.id,
 					fieldNameId: fieldName.id,
 				})
 				.returning({ id: schema.fields.id });
@@ -1425,7 +1477,6 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: event.slug,
-					statusId: statusByType.published.id,
 					typeId: typesByType.news.id,
 					createdAt: new Date(event.date_utc),
 					updatedAt: new Date(event.modified_utc),
@@ -1434,7 +1485,21 @@ async function main() {
 
 			assert(entity);
 
-			const id = entity.id;
+			const [version] = await tx
+
+				.insert(schema.entityVersions)
+
+				.values({
+					entityId: entity.id,
+
+					statusId: statusByType.published.id,
+				})
+
+				.returning({ id: schema.entityVersions.id });
+
+			assert(version);
+
+			const id = version.id;
 
 			const imageId =
 				event.image !== false
@@ -1480,7 +1545,7 @@ async function main() {
 			const [field] = await tx
 				.insert(schema.fields)
 				.values({
-					entityId: entity.id,
+					entityVersionId: version.id,
 					fieldNameId: fieldName.id,
 				})
 				.returning({ id: schema.fields.id });
@@ -1514,7 +1579,6 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: institution.slug,
-					statusId: statusByType.published.id,
 					typeId: typesByType.organisational_units.id,
 					createdAt: new Date(institution.date_gmt),
 					updatedAt: new Date(institution.modified_gmt),
@@ -1523,7 +1587,21 @@ async function main() {
 
 			assert(entity);
 
-			const id = entity.id;
+			const [version] = await tx
+
+				.insert(schema.entityVersions)
+
+				.values({
+					entityId: entity.id,
+
+					statusId: statusByType.published.id,
+				})
+
+				.returning({ id: schema.entityVersions.id });
+
+			assert(version);
+
+			const id = version.id;
 
 			const imageId = await uploadFeaturedImage(
 				"logos",
@@ -1651,7 +1729,7 @@ async function main() {
 			const [field] = await tx
 				.insert(schema.fields)
 				.values({
-					entityId: entity.id,
+					entityVersionId: version.id,
 					fieldNameId: fieldName.id,
 				})
 				.returning({ id: schema.fields.id });
@@ -1733,7 +1811,6 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: project.slug,
-					statusId: statusByType.published.id,
 					typeId: typesByType.projects.id,
 					createdAt: new Date(project.date_gmt),
 					updatedAt: new Date(project.modified_gmt),
@@ -1742,7 +1819,21 @@ async function main() {
 
 			assert(entity);
 
-			const id = entity.id;
+			const [version] = await tx
+
+				.insert(schema.entityVersions)
+
+				.values({
+					entityId: entity.id,
+
+					statusId: statusByType.published.id,
+				})
+
+				.returning({ id: schema.entityVersions.id });
+
+			assert(version);
+
+			const id = version.id;
 
 			const imageId = await uploadFeaturedImage(
 				"logos",
@@ -1860,7 +1951,7 @@ async function main() {
 			const [field] = await tx
 				.insert(schema.fields)
 				.values({
-					entityId: entity.id,
+					entityVersionId: version.id,
 					fieldNameId: fieldName.id,
 				})
 				.returning({ id: schema.fields.id });
@@ -1904,7 +1995,6 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug,
-					statusId: statusByType.published.id,
 					typeId: typesByType.persons.id,
 					createdAt: new Date(),
 					updatedAt: new Date(),
@@ -1913,7 +2003,21 @@ async function main() {
 
 			assert(entity);
 
-			const id = entity.id;
+			const [version] = await tx
+
+				.insert(schema.entityVersions)
+
+				.values({
+					entityId: entity.id,
+
+					statusId: statusByType.published.id,
+				})
+
+				.returning({ id: schema.entityVersions.id });
+
+			assert(version);
+
+			const id = version.id;
 
 			await tx.insert(schema.persons).values({
 				id,
@@ -1938,7 +2042,6 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: person.slug,
-					statusId: statusByType.published.id,
 					typeId: typesByType.persons.id,
 					createdAt: new Date(person.date_gmt),
 					updatedAt: new Date(person.modified_gmt),
@@ -1947,7 +2050,21 @@ async function main() {
 
 			assert(entity);
 
-			const id = entity.id;
+			const [version] = await tx
+
+				.insert(schema.entityVersions)
+
+				.values({
+					entityId: entity.id,
+
+					statusId: statusByType.published.id,
+				})
+
+				.returning({ id: schema.entityVersions.id });
+
+			assert(version);
+
+			const id = version.id;
 
 			const imageId = await uploadFeaturedImage(
 				"avatars",
@@ -2031,7 +2148,7 @@ async function main() {
 			const [field] = await tx
 				.insert(schema.fields)
 				.values({
-					entityId: entity.id,
+					entityVersionId: version.id,
 					fieldNameId: fieldName.id,
 				})
 				.returning({ id: schema.fields.id });

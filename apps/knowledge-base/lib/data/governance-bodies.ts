@@ -18,7 +18,10 @@ interface GetGovernanceBodiesParams {
 export interface GovernanceBodiesResult {
 	data: Array<
 		Pick<schema.OrganisationalUnit, "acronym" | "id" | "name"> & {
+			documentId: string;
 			entity: Pick<schema.Entity, "slug">;
+			isPublished: boolean;
+			updatedAt: Date;
 		}
 	>;
 	limit: number;
@@ -63,17 +66,55 @@ export async function getGovernanceBodies(
 		db
 			.select({
 				acronym: schema.organisationalUnits.acronym,
+				documentId: schema.entities.id,
 				id: schema.organisationalUnits.id,
 				name: schema.organisationalUnits.name,
 				slug: schema.entities.slug,
+				updatedAt: schema.entityVersions.updatedAt,
+				isPublished: sql<boolean>`
+					EXISTS (
+						SELECT
+							1
+						FROM
+							"entity_versions" AS "pv"
+							INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+						WHERE
+							"pv"."entity_id" = ${schema.entityVersions.entityId}
+							AND "ps"."type" = 'published'
+					)
+				`,
 			})
 			.from(schema.organisationalUnits)
 			.innerJoin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 			)
-			.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
-			.where(where)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entityVersions.entityId}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			)
 			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
@@ -84,17 +125,44 @@ export async function getGovernanceBodies(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 			)
-			.innerJoin(schema.entities, eq(schema.organisationalUnits.id, schema.entities.id))
-			.where(where),
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entityVersions.entityId}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			),
 	]);
 
 	return {
 		data: items.map((item) => {
 			return {
 				acronym: item.acronym,
+				documentId: item.documentId,
 				entity: { slug: item.slug },
 				id: item.id,
+				isPublished: item.isPublished,
 				name: item.name,
+				updatedAt: item.updatedAt,
 			};
 		}),
 		limit,

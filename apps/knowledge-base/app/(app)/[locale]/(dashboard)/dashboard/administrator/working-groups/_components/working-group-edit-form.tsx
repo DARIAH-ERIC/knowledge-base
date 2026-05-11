@@ -6,9 +6,12 @@ import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { WorkingGroupChairsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-chairs-section";
 import { WorkingGroupForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form";
+import { discardWorkingGroupDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/discard-working-group-draft.action";
+import { publishWorkingGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/publish-working-group.action";
 import { updateWorkingGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/update-working-group.action";
 import type { AvailablePerson } from "@/lib/data/article-contributors";
 import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
@@ -16,9 +19,11 @@ import type { WorkingGroupChair } from "@/lib/data/working-group-chairs";
 
 interface WorkingGroupEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
+	documentId: string;
+	isPublished: boolean;
 	workingGroup: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
 		description?: JSONContent;
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	initialRelatedEntityIds: Array<string>;
 	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
@@ -38,6 +43,8 @@ interface WorkingGroupEditFormProps {
 export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>): ReactNode {
 	const {
 		initialAssets,
+		documentId,
+		isPublished,
 		workingGroup,
 		initialRelatedEntityIds,
 		initialRelatedEntityItems,
@@ -58,7 +65,16 @@ export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>)
 
 	return (
 		<Fragment>
-			<Heading>{t("Edit working group")}</Heading>
+			<div className="flex items-center justify-between">
+				<Heading>{t("Edit working group")}</Heading>
+				<EntityLifecycleBar
+					discardDraftAction={discardWorkingGroupDraftAction}
+					documentId={documentId}
+					hasDraft={true}
+					isPublished={isPublished}
+					publishAction={publishWorkingGroupAction}
+				/>
+			</div>
 
 			<WorkingGroupForm
 				formAction={updateWorkingGroupAction}

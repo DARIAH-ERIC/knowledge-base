@@ -3,6 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { flattenEntityVersion } from "@/lib/entity-version";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq } from "@/services/db/sql";
 
@@ -22,7 +23,7 @@ export async function getDocumentsPolicies(
 	const [items, aggregate] = await Promise.all([
 		db.query.documentsPolicies.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -35,10 +36,12 @@ export async function getDocumentsPolicies(
 				url: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				group: {
@@ -50,7 +53,7 @@ export async function getDocumentsPolicies(
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -58,15 +61,15 @@ export async function getDocumentsPolicies(
 		db
 			.select({ total: count() })
 			.from(schema.documentsPolicies)
-			.innerJoin(schema.entities, eq(schema.documentsPolicies.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.documentsPolicies.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		return { ...item, publishedAt: item.entity.updatedAt.toISOString() };
+		return flattenEntityVersion(item);
 	});
 
 	return { data, limit, offset, total };
@@ -88,7 +91,7 @@ export async function getDocumentOrPolicyById(
 		db.query.documentsPolicies.findFirst({
 			where: {
 				id,
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -101,10 +104,12 @@ export async function getDocumentOrPolicyById(
 				url: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				group: {
@@ -123,7 +128,7 @@ export async function getDocumentOrPolicyById(
 		return null;
 	}
 
-	return { ...item, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
+	return { ...flattenEntityVersion(item), ...fields };
 }
 
 //
@@ -144,7 +149,7 @@ export async function getDocumentOrPolicySlugs(
 	const [items, aggregate] = await Promise.all([
 		db.query.documentsPolicies.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -154,15 +159,17 @@ export async function getDocumentOrPolicySlugs(
 				id: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -170,14 +177,18 @@ export async function getDocumentOrPolicySlugs(
 		db
 			.select({ total: count() })
 			.from(schema.documentsPolicies)
-			.innerJoin(schema.entities, eq(schema.documentsPolicies.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.documentsPolicies.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
 
-	return { data: items, limit, offset, total };
+	const data = items.map(({ id, entityVersion }) => {
+		return { id, entity: { slug: entityVersion.entity.slug } };
+	});
+
+	return { data, limit, offset, total };
 }
 
 //
@@ -195,7 +206,7 @@ export async function getDocumentOrPolicyDocument(
 	const item = await db.query.documentsPolicies.findFirst({
 		where: {
 			id,
-			entity: {
+			entityVersion: {
 				status: {
 					type: "published",
 				},
@@ -230,10 +241,12 @@ export async function getDocumentOrPolicyBySlug(
 
 	const item = await db.query.documentsPolicies.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
 				status: {
 					type: "published",
+				},
+				entity: {
+					slug,
 				},
 			},
 		},
@@ -244,10 +257,12 @@ export async function getDocumentOrPolicyBySlug(
 			url: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
-					updatedAt: true,
+			entityVersion: {
+				columns: { updatedAt: true },
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
 				},
 			},
 			group: {
@@ -266,5 +281,5 @@ export async function getDocumentOrPolicyBySlug(
 
 	const fields = await getContentBlocks(db, item.id);
 
-	return { ...item, publishedAt: item.entity.updatedAt.toISOString(), ...fields };
+	return { ...flattenEntityVersion(item), ...fields };
 }

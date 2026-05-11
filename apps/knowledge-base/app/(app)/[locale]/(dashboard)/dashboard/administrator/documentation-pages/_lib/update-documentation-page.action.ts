@@ -54,7 +54,7 @@ export const updateDocumentationPageAction = createServerAction(
 
 			const contentField = await tx.query.fields.findFirst({
 				where: {
-					entityId: id,
+					entityVersionId: id,
 					name: { fieldName: "content" },
 				},
 				columns: { id: true },

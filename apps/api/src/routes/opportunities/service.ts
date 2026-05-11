@@ -3,6 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { flattenEntityVersion } from "@/lib/entity-version";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { OpportunitySource, OpportunityStatus } from "@/routes/opportunities/schemas";
@@ -60,7 +61,7 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 	const [items, aggregate] = await Promise.all([
 		db.query.opportunities.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -88,10 +89,12 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 				duration: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				source: {
@@ -110,8 +113,8 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 		db
 			.select({ total: count() })
 			.from(schema.opportunities)
-			.innerJoin(schema.entities, eq(schema.opportunities.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.opportunities.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.innerJoin(
 				schema.opportunitySources,
 				eq(schema.opportunities.sourceId, schema.opportunitySources.id),
@@ -133,11 +136,7 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 			end: item.duration.end?.toISOString(),
 		};
 
-		return {
-			...item,
-			duration,
-			publishedAt: item.entity.updatedAt.toISOString(),
-		};
+		return { ...flattenEntityVersion(item), duration };
 	});
 
 	return { data, limit, offset, total };
@@ -159,7 +158,7 @@ export async function getOpportunityById(
 		db.query.opportunities.findFirst({
 			where: {
 				id,
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -173,10 +172,12 @@ export async function getOpportunityById(
 				duration: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				source: {
@@ -205,9 +206,8 @@ export async function getOpportunityById(
 	};
 
 	return {
-		...item,
+		...flattenEntityVersion(item),
 		duration,
-		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,
@@ -232,7 +232,7 @@ export async function getOpportunitySlugs(
 	const [items, aggregate] = await Promise.all([
 		db.query.opportunities.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -242,15 +242,17 @@ export async function getOpportunitySlugs(
 				id: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -258,14 +260,16 @@ export async function getOpportunitySlugs(
 		db
 			.select({ total: count() })
 			.from(schema.opportunities)
-			.innerJoin(schema.entities, eq(schema.opportunities.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.opportunities.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
 
-	const data = items;
+	const data = items.map(({ id, entityVersion }) => {
+		return { id, entity: { slug: entityVersion.entity.slug } };
+	});
 
 	return { data, limit, offset, total };
 }
@@ -284,10 +288,12 @@ export async function getOpportunityBySlug(
 
 	const item = await db.query.opportunities.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
 				status: {
 					type: "published",
+				},
+				entity: {
+					slug,
 				},
 			},
 		},
@@ -299,10 +305,12 @@ export async function getOpportunityBySlug(
 			duration: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
-					updatedAt: true,
+			entityVersion: {
+				columns: { updatedAt: true },
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
 				},
 			},
 			source: {
@@ -330,9 +338,8 @@ export async function getOpportunityBySlug(
 	};
 
 	return {
-		...item,
+		...flattenEntityVersion(item),
 		duration,
-		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,

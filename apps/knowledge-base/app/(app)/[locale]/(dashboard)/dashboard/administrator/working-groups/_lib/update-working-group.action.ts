@@ -11,6 +11,8 @@ import * as v from "valibot";
 
 import { UpdateWorkingGroupActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/update-working-group.schema";
 import { assertAdmin } from "@/lib/auth/session";
+import { ensureDraftVersion } from "@/lib/data/entity-lifecycle";
+import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { syncEntityRelations } from "@/lib/data/relations";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
@@ -48,7 +50,7 @@ export const updateWorkingGroupAction = createServerAction(
 		const {
 			acronym,
 			description,
-			id,
+			documentId,
 			imageKey,
 			name,
 			relatedEntityIds,
@@ -57,6 +59,12 @@ export const updateWorkingGroupAction = createServerAction(
 		} = result.output;
 
 		await db.transaction(async (tx) => {
+			const draftVersionId = await ensureDraftVersion(
+				tx,
+				documentId,
+				organisationalUnitsLifecycleAdapter,
+			);
+
 			let imageId: string | null = null;
 
 			if (imageKey != null) {
@@ -73,11 +81,11 @@ export const updateWorkingGroupAction = createServerAction(
 			await tx
 				.update(schema.organisationalUnits)
 				.set({ acronym, imageId, name, summary })
-				.where(eq(schema.organisationalUnits.id, id));
+				.where(eq(schema.organisationalUnits.id, draftVersionId));
 
 			const descriptionField = await tx.query.fields.findFirst({
 				where: {
-					entityId: id,
+					entityVersionId: draftVersionId,
 					name: { fieldName: "description" },
 				},
 				columns: { id: true },
@@ -121,11 +129,11 @@ export const updateWorkingGroupAction = createServerAction(
 				}
 			}
 
-			await syncEntityRelations(tx, id, relatedEntityIds, relatedResourceIds);
+			await syncEntityRelations(tx, documentId, relatedEntityIds, relatedResourceIds);
 		});
 
 		after(async () => {
-			await syncWebsiteDocumentForEntity(id);
+			await syncWebsiteDocumentForEntity(documentId);
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/working-groups", "layout");

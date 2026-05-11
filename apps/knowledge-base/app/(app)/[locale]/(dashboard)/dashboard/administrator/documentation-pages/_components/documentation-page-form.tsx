@@ -27,7 +27,7 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface DocumentationPageFormProps {
 	contentBlocks?: Array<ContentBlock>;
 	documentationPage?: Pick<schema.DocumentationPage, "id" | "title"> & {
-		entity: Pick<schema.Entity, "documentId">;
+		entityVersion: { entity: Pick<schema.Entity, "id"> };
 	};
 	formAction: ServerAction;
 }
@@ -58,7 +58,11 @@ export function DocumentationPageForm(props: Readonly<DocumentationPageFormProps
 				{documentationPage != null ? (
 					<Fragment>
 						<input name="id" type="hidden" value={documentationPage.id} />
-						<input name="documentId" type="hidden" value={documentationPage.entity.documentId} />
+						<input
+							name="documentId"
+							type="hidden"
+							value={documentationPage.entityVersion.entity.id}
+						/>
 					</Fragment>
 				) : null}
 

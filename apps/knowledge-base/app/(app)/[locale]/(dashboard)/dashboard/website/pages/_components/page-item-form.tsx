@@ -30,7 +30,7 @@ interface PageItemFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
 	pageItem?: Pick<schema.Page, "id" | "title" | "summary"> & {
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
@@ -145,7 +145,7 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 				{pageItem != null ? (
 					<Fragment>
 						<input name="id" type="hidden" value={pageItem.id} />
-						<input name="documentId" type="hidden" value={pageItem.entity.documentId} />
+						<input name="documentId" type="hidden" value={pageItem.entityVersion.entity.id} />
 					</Fragment>
 				) : null}
 

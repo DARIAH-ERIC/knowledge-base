@@ -14,29 +14,23 @@ import { withTransaction } from "~/test/lib/with-transaction";
 function createItems(count: number) {
 	const items = f.helpers.multiple(
 		() => {
-			const id = uuidv7();
-			const documentId = uuidv7();
+			const versionId = uuidv7();
+			const entityId = uuidv7();
 			const name = f.lorem.sentence();
 			const slug = slugify(name);
 
-			const entity = {
-				id,
-				slug,
-				documentId,
-			};
-
+			const entity = { id: entityId, slug };
+			const version = { id: versionId, entityId };
 			const project = {
-				id,
+				id: versionId,
 				name,
 				summary: f.lorem.paragraph(),
 				call: f.lorem.word(),
 				topic: f.lorem.word(),
-				duration: {
-					start: f.date.past({ years: 5 }),
-				},
+				duration: { start: f.date.past({ years: 5 }) },
 			};
 
-			return { entity, project };
+			return { entity, version, project };
 		},
 		{ count },
 	);
@@ -57,7 +51,13 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {
-			return { ...item.entity, statusId: status.id, typeId: entityType.id };
+			return { ...item.entity, typeId: entityType.id };
+		}),
+	);
+
+	await db.insert(schema.entityVersions).values(
+		items.map((item) => {
+			return { ...item.version, statusId: status.id };
 		}),
 	);
 
@@ -69,7 +69,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 	await Promise.all(
 		items.map((item) => {
-			return seedContentBlock(db, item.entity.id, entityType.id, "description");
+			return seedContentBlock(db, item.version.id, entityType.id, "description");
 		}),
 	);
 }
@@ -87,16 +87,17 @@ async function seedWithMixedStatuses(db: Database) {
 
 	const activeItem = createItems(1)[0]!;
 	const inactiveItem = (() => {
-		const id = uuidv7();
-		const documentId = uuidv7();
+		const versionId = uuidv7();
+		const entityId = uuidv7();
 		const name = f.lorem.sentence();
 		const slug = slugify(name);
 		const start = f.date.past({ years: 5 });
 		const end = f.date.between({ from: start, to: new Date() });
 		return {
-			entity: { id, slug, documentId },
+			entity: { id: entityId, slug },
+			version: { id: versionId, entityId },
 			project: {
-				id,
+				id: versionId,
 				name,
 				summary: f.lorem.paragraph(),
 				call: f.lorem.word(),
@@ -110,7 +111,13 @@ async function seedWithMixedStatuses(db: Database) {
 
 	await db.insert(schema.entities).values(
 		allItems.map((item) => {
-			return { ...item.entity, statusId: status.id, typeId: entityType.id };
+			return { ...item.entity, typeId: entityType.id };
+		}),
+	);
+
+	await db.insert(schema.entityVersions).values(
+		allItems.map((item) => {
+			return { ...item.version, statusId: status.id };
 		}),
 	);
 
@@ -176,20 +183,25 @@ async function seedOrganisationalUnit(
 	assert(unitType, "No organisational unit type in database.");
 	assert(role, "No project role in database.");
 
-	const unitId = uuidv7();
+	const unitVersionId = uuidv7();
+	const unitEntityId = uuidv7();
 
 	await db.insert(schema.entities).values({
-		id: unitId,
-		slug: `unit-${unitId}`,
-		documentId: uuidv7(),
-		statusId: status.id,
+		id: unitEntityId,
+		slug: `unit-${unitVersionId}`,
 		typeId: unitEntityType.id,
+	});
+
+	await db.insert(schema.entityVersions).values({
+		id: unitVersionId,
+		entityId: unitEntityId,
+		statusId: status.id,
 	});
 
 	const [organisationalUnit] = await db
 		.insert(schema.organisationalUnits)
 		.values({
-			id: unitId,
+			id: unitVersionId,
 			name: f.company.name(),
 			summary: f.lorem.paragraph(),
 			typeId: unitType.id,
@@ -250,7 +262,7 @@ describe("projects", () => {
 				await seed(db, items);
 
 				const item = items.at(0)!;
-				const id = item.entity.id;
+				const id = item.version.id;
 
 				const sm = await seedSocialMedia(db, id);
 
@@ -327,7 +339,7 @@ describe("projects", () => {
 				await seed(db, items);
 
 				const item = items.at(1)!;
-				const id = item.entity.id;
+				const id = item.version.id;
 				const name = item.project.name;
 
 				await seedOrganisationalUnit(db, id, "coordinator");

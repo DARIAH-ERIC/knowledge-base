@@ -13,27 +13,21 @@ import { withTransaction } from "~/test/lib/with-transaction";
 function createItems(count: number) {
 	const items = f.helpers.multiple(
 		() => {
-			const id = uuidv7();
-			const documentId = uuidv7();
+			const versionId = uuidv7();
+			const entityId = uuidv7();
 			const title = f.lorem.sentence();
 			const slug = slugify(title);
 
-			const entity = {
-				id,
-				slug,
-				documentId,
-			};
-
+			const entity = { id: entityId, slug };
+			const version = { id: versionId, entityId };
 			const fundingCall = {
-				id,
+				id: versionId,
 				title,
 				summary: f.lorem.paragraph(),
-				duration: {
-					start: f.date.future({ years: 2 }),
-				},
+				duration: { start: f.date.future({ years: 2 }) },
 			};
 
-			return { entity, fundingCall };
+			return { entity, version, fundingCall };
 		},
 		{ count },
 	);
@@ -42,19 +36,15 @@ function createItems(count: number) {
 }
 
 function createItemWithDuration(duration: { start: Date; end?: Date }) {
-	const id = uuidv7();
-	const documentId = uuidv7();
+	const versionId = uuidv7();
+	const entityId = uuidv7();
 	const title = f.lorem.sentence();
 	const slug = slugify(title);
 
 	return {
-		entity: { id, slug, documentId },
-		fundingCall: {
-			id,
-			title,
-			summary: f.lorem.paragraph(),
-			duration,
-		},
+		entity: { id: entityId, slug },
+		version: { id: versionId, entityId },
+		fundingCall: { id: versionId, title, summary: f.lorem.paragraph(), duration },
 	};
 }
 
@@ -75,7 +65,13 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {
-			return { ...item.entity, statusId: status.id, typeId: type.id };
+			return { ...item.entity, typeId: type.id };
+		}),
+	);
+
+	await db.insert(schema.entityVersions).values(
+		items.map((item) => {
+			return { ...item.version, statusId: status.id };
 		}),
 	);
 
@@ -87,7 +83,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 
 	await Promise.all(
 		items.map((item) => {
-			return seedContentBlock(db, item.entity.id, type.id, "content");
+			return seedContentBlock(db, item.version.id, type.id, "content");
 		}),
 	);
 }
@@ -158,12 +154,12 @@ describe("funding-calls", () => {
 				const ids = data.data.map((item) => {
 					return item.id;
 				});
-				expect(ids).toContain(upcomingItem.entity.id);
-				expect(ids).toContain(openItem.entity.id);
-				expect(ids).not.toContain(closedItem.entity.id);
-				expect(ids.indexOf(upcomingItem.entity.id)).toBeLessThan(ids.indexOf(openItem.entity.id));
+				expect(ids).toContain(upcomingItem.version.id);
+				expect(ids).toContain(openItem.version.id);
+				expect(ids).not.toContain(closedItem.version.id);
+				expect(ids.indexOf(upcomingItem.version.id)).toBeLessThan(ids.indexOf(openItem.version.id));
 				expect(data.data).not.toEqual(
-					expect.arrayContaining([expect.objectContaining({ id: closedItem.entity.id })]),
+					expect.arrayContaining([expect.objectContaining({ id: closedItem.version.id })]),
 				);
 			});
 		});
@@ -178,7 +174,7 @@ describe("funding-calls", () => {
 				await seed(db, items);
 
 				const item = items.at(1)!;
-				const id = item.entity.id;
+				const id = item.version.id;
 				const title = item.fundingCall.title;
 
 				const response = await client["funding-calls"][":id"].$get({

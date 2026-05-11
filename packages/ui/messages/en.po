@@ -211,7 +211,7 @@ msgctxt "ui"
 msgid "kh4wt0"
 msgstr "Toggle Sidebar"
 
-#: lib/table.tsx:291
+#: lib/table.tsx:292
 msgctxt "ui"
 msgid "8epGWu"
 msgstr "Reorder row"

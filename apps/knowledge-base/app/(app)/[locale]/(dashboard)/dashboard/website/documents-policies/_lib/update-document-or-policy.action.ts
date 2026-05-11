@@ -13,6 +13,8 @@ import { UpdateDocumentOrPolicyActionInputSchema } from "@/app/(app)/[locale]/(d
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
+import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
+import { ensureDraftVersion } from "@/lib/data/entity-lifecycle";
 import { db, type Transaction } from "@/lib/db";
 import { eq, inArray, isNull } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -47,9 +49,15 @@ export const updateDocumentOrPolicyAction = createServerAction(
 			});
 		}
 
-		const { contentBlocks, title, id, documentKey, summary, url, groupId } = result.output;
+		const { contentBlocks, documentId, documentKey, title, summary, url, groupId } = result.output;
 
 		await db.transaction(async (tx) => {
+			const draftVersionId = await ensureDraftVersion(
+				tx,
+				documentId,
+				documentsPoliciesLifecycleAdapter,
+			);
+
 			const asset = await tx.query.assets.findFirst({
 				where: { key: documentKey },
 				columns: { id: true },
@@ -57,10 +65,10 @@ export const updateDocumentOrPolicyAction = createServerAction(
 
 			assert(asset);
 
-			const documentId = asset.id;
+			const assetId = asset.id;
 
 			const current = await tx.query.documentsPolicies.findFirst({
-				where: { id },
+				where: { id: draftVersionId },
 				columns: { groupId: true },
 			});
 
@@ -83,18 +91,18 @@ export const updateDocumentOrPolicyAction = createServerAction(
 			await tx
 				.update(schema.documentsPolicies)
 				.set({
-					documentId,
+					documentId: assetId,
 					title,
 					summary,
 					url: url != null && url.length > 0 ? url : null,
 					groupId: newGroupId,
 					...(newPosition !== undefined ? { position: newPosition } : {}),
 				})
-				.where(eq(schema.documentsPolicies.id, id));
+				.where(eq(schema.documentsPolicies.id, draftVersionId));
 
 			const contentField = await tx.query.fields.findFirst({
 				where: {
-					entityId: id,
+					entityVersionId: draftVersionId,
 					name: { fieldName: "content" },
 				},
 				columns: { id: true },
@@ -105,79 +113,48 @@ export const updateDocumentOrPolicyAction = createServerAction(
 				return item.type;
 			});
 
-			async function upsertTypeBlock(
-				tx: Transaction,
-				block: ContentBlockInput,
-				blockId: string,
-				isNew: boolean,
-			) {
-				await upsertTypedContentBlock(tx, block, blockId, isNew);
+			async function upsertTypeBlock(tx: Transaction, block: ContentBlockInput, blockId: string) {
+				await upsertTypedContentBlock(tx, block, blockId, true);
 			}
 
 			if (contentField != null) {
-				const keptIds = new Set(
-					contentBlocks
-						.filter((cb) => {
-							return cb.position !== undefined;
-						})
-						.map((cb) => {
-							return cb.id;
-						}),
-				);
-
 				const existingBlocks = await tx.query.contentBlocks.findMany({
 					where: { fieldId: contentField.id },
 					columns: { id: true },
 				});
 
-				const toDelete = existingBlocks
-					.filter((b) => {
-						return !keptIds.has(b.id);
-					})
-					.map((b) => {
-						return b.id;
-					});
-
-				if (toDelete.length > 0) {
-					await tx.delete(schema.contentBlocks).where(inArray(schema.contentBlocks.id, toDelete));
+				if (existingBlocks.length > 0) {
+					await tx.delete(schema.contentBlocks).where(
+						inArray(
+							schema.contentBlocks.id,
+							existingBlocks.map((b) => {
+								return b.id;
+							}),
+						),
+					);
 				}
 
 				await Promise.all(
 					contentBlocks.map(async (contentBlock, index) => {
-						const { id, position } = contentBlock;
+						const [added] = await tx
+							.insert(schema.contentBlocks)
+							.values({
+								fieldId: contentField.id,
+								typeId: contentBlockTypesByType[contentBlock.type].id,
+								position: index,
+							})
+							.returning({ id: schema.contentBlocks.id });
 
-						if (position !== undefined) {
-							await tx
-								.update(schema.contentBlocks)
-								.set({
-									fieldId: contentField.id,
-									typeId: contentBlockTypesByType[contentBlock.type].id,
-									position: index,
-								})
-								.where(eq(schema.contentBlocks.id, id));
+						assert(added);
 
-							await upsertTypeBlock(tx, contentBlock, id, false);
-						} else {
-							const [added] = await tx
-								.insert(schema.contentBlocks)
-								.values({
-									fieldId: contentField.id,
-									typeId: contentBlockTypesByType[contentBlock.type].id,
-									position: index,
-								})
-								.returning({ id: schema.contentBlocks.id });
-
-							assert(added);
-
-							await upsertTypeBlock(tx, contentBlock, added.id, true);
-						}
+						await upsertTypeBlock(tx, contentBlock, added.id);
 					}),
 				);
 			}
 		});
 
 		after(async () => {
-			await syncWebsiteDocumentForEntity(id);
+			await syncWebsiteDocumentForEntity(documentId);
 			await dispatchWebhook({ type: "documents-policies" });
 		});
 

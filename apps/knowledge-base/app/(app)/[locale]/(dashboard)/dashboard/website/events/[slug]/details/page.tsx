@@ -4,8 +4,11 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { EventDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details";
+import { discardEventDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/discard-event-draft.action";
+import { publishEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/publish-event.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getDocumentVersions } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -28,16 +31,34 @@ export async function generateMetadata(
 export default async function DashboardWebsiteEventDetailsPage(
 	props: Readonly<DashboardWebsiteEventDetailsPageProps>,
 ): Promise<ReactNode> {
-	const { params } = props;
+	const { params, searchParams: searchParamsPromise } = props;
 
 	const { slug } = await params;
 
+	const doc = await db.query.entities.findFirst({
+		where: { slug },
+		columns: { id: true },
+	});
+
+	if (doc == null) {
+		notFound();
+	}
+
+	const { draftId, publishedId } = await db.transaction(async (tx) => {
+		return getDocumentVersions(tx, doc.id);
+	});
+
+	const { version } = await searchParamsPromise;
+	const selectedVersion: "draft" | "published" =
+		version === "published" && publishedId != null ? "published" : "draft";
+	const versionId =
+		selectedVersion === "published" && publishedId != null ? publishedId : (draftId ?? publishedId);
+	if (versionId == null) {
+		notFound();
+	}
+
 	const event = await db.query.events.findFirst({
-		where: {
-			entity: {
-				slug,
-			},
-		},
+		where: { id: versionId },
 		columns: {
 			id: true,
 			duration: true,
@@ -47,12 +68,15 @@ export default async function DashboardWebsiteEventDetailsPage(
 			website: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
-				},
+			entityVersion: {
+				columns: { id: true },
 				with: {
+					entity: {
+						columns: {
+							id: true,
+							slug: true,
+						},
+					},
 					status: {
 						columns: {
 							id: true,
@@ -84,7 +108,13 @@ export default async function DashboardWebsiteEventDetailsPage(
 	return (
 		<EventDetails
 			contentBlocks={contentBlocks}
+			discardDraftAction={discardEventDraftAction}
+			documentId={doc.id}
 			event={{ ...event, image: { ...event.image, url: image.url } }}
+			hasDraft={draftId != null}
+			isPublished={publishedId != null}
+			publishAction={publishEventAction}
+			selectedVersion={selectedVersion}
 		/>
 	);
 }

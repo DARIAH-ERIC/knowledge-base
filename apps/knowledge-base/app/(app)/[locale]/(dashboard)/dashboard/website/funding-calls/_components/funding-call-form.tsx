@@ -29,7 +29,8 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface FundingCallFormProps {
 	contentBlocks?: Array<ContentBlock>;
 	fundingCall?: Pick<schema.FundingCall, "id" | "duration" | "title" | "summary"> & {
-		entity: Pick<schema.Entity, "documentId" | "slug"> & {
+		entityVersion: {
+			entity: Pick<schema.Entity, "id" | "slug">;
 			status: Pick<schema.EntityStatus, "id" | "type">;
 		};
 	};
@@ -102,7 +103,7 @@ export function FundingCallForm(props: Readonly<FundingCallFormProps>): ReactNod
 				{fundingCall != null ? (
 					<Fragment>
 						<input name="id" type="hidden" value={fundingCall.id} />
-						<input name="documentId" type="hidden" value={fundingCall.entity.documentId} />
+						<input name="documentId" type="hidden" value={fundingCall.entityVersion.entity.id} />
 					</Fragment>
 				) : null}
 

@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Badge } from "@dariah-eric/ui/badge";
 import { Button, buttonStyles } from "@dariah-eric/ui/button";
 import { Link } from "@dariah-eric/ui/link";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
@@ -20,7 +21,7 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
@@ -42,7 +43,10 @@ interface PersonsPageProps {
 	persons: {
 		data: Array<
 			Pick<schema.Person, "email" | "id" | "name" | "orcid"> & {
+				documentId: string;
 				entity: Pick<schema.Entity, "slug">;
+				isPublished: boolean;
+				updatedAt: Date;
 			}
 		>;
 		total: number;
@@ -57,13 +61,14 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 	const { dir: initialDir, page: initialPage, persons, q: initialQ, sort: initialSort } = props;
 
 	const t = useExtracted();
+	const format = useFormatter();
 	const router = useRouter();
 	const [items, optimisticallyRemoveItem] = useOptimistic(persons.data, (state, id: string) => {
 		return state.filter((item) => {
 			return item.id !== id;
 		});
 	});
-	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
 		useUrlPaginatedSearch({
 			dir: initialDir,
@@ -114,6 +119,8 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 					<TableColumn allowsSorting={true} id="orcid">
 						{t("ORCID")}
 					</TableColumn>
+					<TableColumn>{t("Updated")}</TableColumn>
+					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -123,6 +130,12 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 								<TableCell>{item.name}</TableCell>
 								<TableCell>{item.email}</TableCell>
 								<TableCell>{item.orcid}</TableCell>
+								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
+								<TableCell>
+									<Badge intent={item.isPublished ? "success" : "warning"}>
+										{item.isPublished ? t("Live") : t("Draft")}
+									</Badge>
+								</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button
@@ -148,7 +161,7 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 											<MenuItem
 												intent="danger"
 												onAction={() => {
-													setItemToDelete({ id: item.id });
+													setItemToDelete({ id: item.id, documentId: item.documentId });
 												}}
 											>
 												<TrashIcon className="mr-2 size-4" />
@@ -179,11 +192,11 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 						return;
 					}
 
-					const id = itemToDelete.id;
+					const { id, documentId } = itemToDelete;
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deletePersonAction(id);
+						await deletePersonAction(documentId);
 						router.refresh();
 						setItemToDelete(null);
 					});

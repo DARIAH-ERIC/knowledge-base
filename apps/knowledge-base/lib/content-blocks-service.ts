@@ -201,9 +201,11 @@ export async function upsertTypedContentBlock(
 	}
 }
 
-export async function getEntityContentBlocks(entityId: string): Promise<Array<ContentBlock>> {
+export async function getEntityContentBlocks(
+	entityVersionId: string,
+): Promise<Array<ContentBlock>> {
 	const contentBlocksWhere = and(
-		eq(schema.fields.entityId, entityId),
+		eq(schema.fields.entityVersionId, entityVersionId),
 		eq(schema.entityTypesFieldsNames.fieldName, "content"),
 	);
 

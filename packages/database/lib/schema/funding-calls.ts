@@ -2,14 +2,14 @@ import * as p from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
 
 import * as f from "../fields";
-import { entities } from "./entities";
+import { entityVersions } from "./entities";
 
 export const fundingCalls = p.pgTable("funding_calls", {
 	id: p
 		.uuid("id")
 		.primaryKey()
 		.references(() => {
-			return entities.id;
+			return entityVersions.id;
 		}),
 	title: p.text("title").notNull(),
 	summary: p.text("summary"),

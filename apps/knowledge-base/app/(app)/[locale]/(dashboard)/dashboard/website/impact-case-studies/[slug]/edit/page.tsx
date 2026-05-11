@@ -8,6 +8,8 @@ import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getImpactCaseStudyContributors, getPersonOptions } from "@/lib/data/article-contributors";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { ensureDraftVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { impactCaseStudiesLifecycleAdapter } from "@/lib/data/impact-case-studies.lifecycle-adapter";
 import {
 	getEntityRelationOptions,
 	getEntityRelationOptionsByIds,
@@ -41,6 +43,33 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 
 	const { slug } = await params;
 
+	const anyVersion = await db.query.impactCaseStudies.findFirst({
+		where: { entityVersion: { entity: { slug } } },
+		columns: {},
+		with: {
+			entityVersion: {
+				columns: {},
+				with: { entity: { columns: { id: true } } },
+			},
+		},
+	});
+
+	if (anyVersion == null) {
+		notFound();
+	}
+
+	const documentId = anyVersion.entityVersion.entity.id;
+
+	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+		const draftVersionId = await ensureDraftVersion(
+			tx,
+			documentId,
+			impactCaseStudiesLifecycleAdapter,
+		);
+		const { publishedId } = await getDocumentVersions(tx, documentId);
+		return { draftVersionId, publishedId };
+	});
+
 	const [
 		{ items: initialAssets },
 		impactCaseStudy,
@@ -50,21 +79,28 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "images" }),
 		db.query.impactCaseStudies.findFirst({
-			where: {
-				entity: {
-					slug,
-				},
-			},
+			where: { id: draftVersionId },
 			columns: {
 				id: true,
 				title: true,
 				summary: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						documentId: true,
-						slug: true,
+				entityVersion: {
+					columns: { id: true },
+					with: {
+						entity: {
+							columns: {
+								id: true,
+								slug: true,
+							},
+						},
+						status: {
+							columns: {
+								id: true,
+								type: true,
+							},
+						},
 					},
 				},
 				image: {
@@ -90,9 +126,9 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 	});
 	const [{ relatedEntityIds, relatedResourceIds }, contributors, contentBlocks] = await Promise.all(
 		[
-			getEntityRelations(impactCaseStudy.id),
-			getImpactCaseStudyContributors(impactCaseStudy.id),
-			getEntityContentBlocks(impactCaseStudy.id),
+			getEntityRelations(documentId),
+			getImpactCaseStudyContributors(draftVersionId),
+			getEntityContentBlocks(draftVersionId),
 		],
 	);
 
@@ -105,6 +141,7 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 		<ImpactCaseStudyEditForm
 			contentBlocks={contentBlocks}
 			contributors={contributors}
+			documentId={documentId}
 			impactCaseStudy={{
 				...impactCaseStudy,
 				image: { ...impactCaseStudy.image, url: image.url },
@@ -118,6 +155,7 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 			initialRelatedResourceIds={relatedResourceIds}
 			initialRelatedResourceItems={initialRelatedResources.items}
 			initialRelatedResourceTotal={initialRelatedResources.total}
+			isPublished={publishedId != null}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}
 		/>

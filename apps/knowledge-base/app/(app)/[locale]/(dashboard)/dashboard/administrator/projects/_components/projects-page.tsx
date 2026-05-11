@@ -43,8 +43,11 @@ interface ProjectsPageProps {
 	projects: {
 		data: Array<
 			Pick<schema.Project, "acronym" | "duration" | "funding" | "id" | "name"> & {
+				documentId: string;
 				entity: Pick<schema.Entity, "slug">;
+				isPublished: boolean;
 				scope: Pick<schema.ProjectScope, "id" | "scope">;
+				updatedAt: Date;
 			}
 		>;
 		total: number;
@@ -66,7 +69,7 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 			return item.id !== id;
 		});
 	});
-	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
 		useUrlPaginatedSearch({
 			dir: initialDir,
@@ -121,6 +124,8 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 					<TableColumn allowsSorting={true} id="scope">
 						{t("Scope")}
 					</TableColumn>
+					<TableColumn>{t("Updated")}</TableColumn>
+					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -154,6 +159,12 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 										{item.scope.scope}
 									</Badge>
 								</TableCell>
+								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
+								<TableCell>
+									<Badge intent={item.isPublished ? "success" : "warning"}>
+										{item.isPublished ? t("Live") : t("Draft")}
+									</Badge>
+								</TableCell>
 								<TableCell className="text-end">
 									<Menu>
 										<Button
@@ -179,7 +190,7 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 											<MenuItem
 												intent="danger"
 												onAction={() => {
-													setItemToDelete({ id: item.id });
+													setItemToDelete({ id: item.id, documentId: item.documentId });
 												}}
 											>
 												<TrashIcon className="mr-2 size-4" />
@@ -210,11 +221,11 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 						return;
 					}
 
-					const id = itemToDelete.id;
+					const { id, documentId } = itemToDelete;
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deleteProjectAction(id);
+						await deleteProjectAction(documentId);
 						router.refresh();
 						setItemToDelete(null);
 					});

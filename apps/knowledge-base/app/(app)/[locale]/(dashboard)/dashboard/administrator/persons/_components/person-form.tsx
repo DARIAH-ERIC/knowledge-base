@@ -27,7 +27,7 @@ interface PersonFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	person?: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "position" | "sortName"> & {
 		biography?: JSONContent;
-		entity: { documentId: string; slug: string };
+		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 	formAction: ServerAction;
 }
@@ -133,7 +133,7 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 				{person != null ? (
 					<Fragment>
 						<input name="id" type="hidden" value={person.id} />
-						<input name="documentId" type="hidden" value={person.entity.documentId} />
+						<input name="documentId" type="hidden" value={person.entityVersion.entity.id} />
 					</Fragment>
 				) : null}
 

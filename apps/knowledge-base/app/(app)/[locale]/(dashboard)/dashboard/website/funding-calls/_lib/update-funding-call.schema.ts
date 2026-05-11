@@ -1,10 +1,10 @@
-import { FundingCallSelectSchema, FundingCallUpdateSchema } from "@dariah-eric/database/schema";
+import { FundingCallUpdateSchema } from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockInputSchema } from "@/lib/content-block-input";
 
 export const UpdateFundingCallActionInputSchema = v.object({
-	...v.pick(FundingCallSelectSchema, ["id"]).entries,
+	documentId: v.pipe(v.string(), v.uuid()),
 	...v.pick(FundingCallUpdateSchema, ["title", "summary"]).entries,
 	duration: v.object({
 		start: v.pipe(v.string(), v.isoDate(), v.toDate()),

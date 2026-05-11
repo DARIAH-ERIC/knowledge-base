@@ -3,6 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { flattenEntityVersion } from "@/lib/entity-version";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq } from "@/services/db/sql";
@@ -22,7 +23,7 @@ export async function getPages(db: Database | Transaction, params: GetPagesParam
 	const [items, aggregate] = await Promise.all([
 		db.query.pages.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -34,10 +35,12 @@ export async function getPages(db: Database | Transaction, params: GetPagesParam
 				summary: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -47,7 +50,7 @@ export async function getPages(db: Database | Transaction, params: GetPagesParam
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -55,8 +58,8 @@ export async function getPages(db: Database | Transaction, params: GetPagesParam
 		db
 			.select({ total: count() })
 			.from(schema.pages)
-			.innerJoin(schema.entities, eq(schema.pages.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.pages.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
@@ -71,7 +74,7 @@ export async function getPages(db: Database | Transaction, params: GetPagesParam
 					})
 				: null;
 
-		return { ...item, image, publishedAt: item.entity.updatedAt.toISOString() };
+		return { ...flattenEntityVersion(item), image };
 	});
 
 	return { data, limit, offset, total };
@@ -90,7 +93,7 @@ export async function getPageById(db: Database | Transaction, params: GetPageByI
 		db.query.pages.findFirst({
 			where: {
 				id,
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -102,10 +105,12 @@ export async function getPageById(db: Database | Transaction, params: GetPageByI
 				summary: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -136,9 +141,8 @@ export async function getPageById(db: Database | Transaction, params: GetPageByI
 			: null;
 
 	return {
-		...item,
+		...flattenEntityVersion(item),
 		image,
-		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,
@@ -160,7 +164,7 @@ export async function getPageSlugs(db: Database | Transaction, params: GetPageSl
 	const [items, aggregate] = await Promise.all([
 		db.query.pages.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -170,10 +174,12 @@ export async function getPageSlugs(db: Database | Transaction, params: GetPageSl
 				id: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -183,7 +189,7 @@ export async function getPageSlugs(db: Database | Transaction, params: GetPageSl
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -191,14 +197,16 @@ export async function getPageSlugs(db: Database | Transaction, params: GetPageSl
 		db
 			.select({ total: count() })
 			.from(schema.pages)
-			.innerJoin(schema.entities, eq(schema.pages.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.pages.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
 
-	const data = items;
+	const data = items.map(({ id, entityVersion }) => {
+		return { id, entity: { slug: entityVersion.entity.slug } };
+	});
 
 	return { data, limit, offset, total };
 }
@@ -214,10 +222,12 @@ export async function getPageBySlug(db: Database | Transaction, params: GetPageB
 
 	const item = await db.query.pages.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
 				status: {
 					type: "published",
+				},
+				entity: {
+					slug,
 				},
 			},
 		},
@@ -227,10 +237,12 @@ export async function getPageBySlug(db: Database | Transaction, params: GetPageB
 			summary: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
-					updatedAt: true,
+			entityVersion: {
+				columns: { updatedAt: true },
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
 				},
 			},
 			image: {
@@ -260,9 +272,8 @@ export async function getPageBySlug(db: Database | Transaction, params: GetPageB
 	]);
 
 	return {
-		...item,
+		...flattenEntityVersion(item),
 		image,
-		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,

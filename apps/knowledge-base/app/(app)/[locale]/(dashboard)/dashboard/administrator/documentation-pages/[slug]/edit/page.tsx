@@ -29,8 +29,10 @@ export default async function DashboardAdministratorEditDocumentationPage(
 
 	const documentationPage = await db.query.documentationPages.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
+				entity: {
+					slug,
+				},
 			},
 		},
 		columns: {
@@ -38,10 +40,15 @@ export default async function DashboardAdministratorEditDocumentationPage(
 			title: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					documentId: true,
-					slug: true,
+			entityVersion: {
+				columns: { id: true },
+				with: {
+					entity: {
+						columns: {
+							id: true,
+							slug: true,
+						},
+					},
 				},
 			},
 		},

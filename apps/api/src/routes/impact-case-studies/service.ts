@@ -3,6 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { flattenEntityVersion } from "@/lib/entity-version";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
@@ -26,7 +27,7 @@ export async function getImpactCaseStudies(
 	const [items, aggregate] = await Promise.all([
 		db.query.impactCaseStudies.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -38,10 +39,12 @@ export async function getImpactCaseStudies(
 				summary: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -51,7 +54,7 @@ export async function getImpactCaseStudies(
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -59,8 +62,8 @@ export async function getImpactCaseStudies(
 		db
 			.select({ total: count() })
 			.from(schema.impactCaseStudies)
-			.innerJoin(schema.entities, eq(schema.impactCaseStudies.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.impactCaseStudies.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
@@ -72,7 +75,7 @@ export async function getImpactCaseStudies(
 			options: { width: imageWidth.preview },
 		});
 
-		return { ...item, image, publishedAt: item.entity.updatedAt.toISOString() };
+		return { ...flattenEntityVersion(item), image };
 	});
 
 	return { data, limit, offset, total };
@@ -95,8 +98,9 @@ async function getContributors(db: Database | Transaction, impactCaseStudyId: st
 		})
 		.from(schema.impactCaseStudiesToPersons)
 		.innerJoin(schema.persons, eq(schema.impactCaseStudiesToPersons.personId, schema.persons.id))
-		.innerJoin(schema.entities, eq(schema.persons.id, schema.entities.id))
-		.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.where(
 			and(
@@ -136,7 +140,7 @@ export async function getImpactCaseStudyById(
 		db.query.impactCaseStudies.findFirst({
 			where: {
 				id,
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -148,10 +152,12 @@ export async function getImpactCaseStudyById(
 				summary: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -180,10 +186,9 @@ export async function getImpactCaseStudyById(
 	});
 
 	return {
-		...item,
+		...flattenEntityVersion(item),
 		contributors,
 		image,
-		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,
@@ -208,7 +213,7 @@ export async function getImpactCaseStudySlugs(
 	const [items, aggregate] = await Promise.all([
 		db.query.impactCaseStudies.findMany({
 			where: {
-				entity: {
+				entityVersion: {
 					status: {
 						type: "published",
 					},
@@ -218,10 +223,12 @@ export async function getImpactCaseStudySlugs(
 				id: true,
 			},
 			with: {
-				entity: {
-					columns: {
-						slug: true,
-						updatedAt: true,
+				entityVersion: {
+					columns: { updatedAt: true },
+					with: {
+						entity: {
+							columns: { slug: true },
+						},
 					},
 				},
 				image: {
@@ -231,7 +238,7 @@ export async function getImpactCaseStudySlugs(
 				},
 			},
 			orderBy(t, { desc, sql }) {
-				return [desc(sql`"entity"."r" ->> 'updatedAt'`)];
+				return [desc(sql`"entityVersion"."r" ->> 'updatedAt'`)];
 			},
 			limit,
 			offset,
@@ -239,14 +246,16 @@ export async function getImpactCaseStudySlugs(
 		db
 			.select({ total: count() })
 			.from(schema.impactCaseStudies)
-			.innerJoin(schema.entities, eq(schema.impactCaseStudies.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
+			.innerJoin(schema.entityVersions, eq(schema.impactCaseStudies.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(eq(schema.entityStatus.type, "published")),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
 
-	const data = items;
+	const data = items.map(({ id, entityVersion }) => {
+		return { id, entity: { slug: entityVersion.entity.slug } };
+	});
 
 	return { data, limit, offset, total };
 }
@@ -265,10 +274,12 @@ export async function getImpactCaseStudyBySlug(
 
 	const item = await db.query.impactCaseStudies.findFirst({
 		where: {
-			entity: {
-				slug,
+			entityVersion: {
 				status: {
 					type: "published",
+				},
+				entity: {
+					slug,
 				},
 			},
 		},
@@ -278,10 +289,12 @@ export async function getImpactCaseStudyBySlug(
 			summary: true,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
-					updatedAt: true,
+			entityVersion: {
+				columns: { updatedAt: true },
+				with: {
+					entity: {
+						columns: { slug: true },
+					},
 				},
 			},
 			image: {
@@ -310,10 +323,9 @@ export async function getImpactCaseStudyBySlug(
 	]);
 
 	return {
-		...item,
+		...flattenEntityVersion(item),
 		contributors,
 		image,
-		publishedAt: item.entity.updatedAt.toISOString(),
 		...fields,
 		relatedEntities,
 		relatedResources,

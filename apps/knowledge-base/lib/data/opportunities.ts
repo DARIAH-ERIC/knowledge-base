@@ -3,7 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { db } from "@/lib/db";
-import { count, desc, eq, ilike } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
 
 export type OpportunitiesSort = "title" | "source" | "updatedAt";
 
@@ -32,12 +32,13 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 					? schema.opportunitySources.source
 					: desc(schema.opportunitySources.source)
 				: dir === "asc"
-					? schema.entities.updatedAt
-					: desc(schema.entities.updatedAt);
+					? schema.entityVersions.updatedAt
+					: desc(schema.entityVersions.updatedAt);
 
 	const [items, aggregate] = await Promise.all([
 		db
 			.select({
+				documentId: schema.entities.id,
 				duration: schema.opportunities.duration,
 				id: schema.opportunities.id,
 				source: schema.opportunitySources.source,
@@ -45,31 +46,90 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 				slug: schema.entities.slug,
 				summary: schema.opportunities.summary,
 				title: schema.opportunities.title,
-				updatedAt: schema.entities.updatedAt,
+				updatedAt: schema.entityVersions.updatedAt,
 				website: schema.opportunities.website,
+				isPublished: sql<boolean>`
+					EXISTS (
+						SELECT
+							1
+						FROM
+							"entity_versions" AS "pv"
+							INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+						WHERE
+							"pv"."entity_id" = ${schema.entityVersions.entityId}
+							AND "ps"."type" = 'published'
+					)
+				`,
 			})
 			.from(schema.opportunities)
-			.innerJoin(schema.entities, eq(schema.opportunities.id, schema.entities.id))
+			.innerJoin(schema.entityVersions, eq(schema.opportunities.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.innerJoin(
 				schema.opportunitySources,
 				eq(schema.opportunities.sourceId, schema.opportunitySources.id),
 			)
-			.where(where)
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entityVersions.entityId}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			)
 			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
 		db
 			.select({ total: count() })
 			.from(schema.opportunities)
-			.innerJoin(schema.entities, eq(schema.opportunities.id, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entities.statusId, schema.entityStatus.id))
-			.where(where),
+			.innerJoin(schema.entityVersions, eq(schema.opportunities.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					or(
+						eq(schema.entityStatus.type, "draft"),
+						and(
+							eq(schema.entityStatus.type, "published"),
+							sql`
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "ev2"
+										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+									WHERE
+										"ev2"."entity_id" = ${schema.entityVersions.entityId}
+										AND "es2"."type" = 'draft'
+								)
+							`,
+						),
+					),
+					where,
+				),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
 		return {
+			documentId: item.documentId,
 			duration: item.duration,
 			id: item.id,
 			sourceId: item.sourceId,
@@ -81,6 +141,7 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 			summary: item.summary,
 			title: item.title,
 			updatedAt: item.updatedAt,
+			isPublished: item.isPublished,
 			website: item.website,
 		};
 	});
@@ -100,9 +161,14 @@ export async function getOpportunityById(params: GetOpportunityByIdParams) {
 			id,
 		},
 		with: {
-			entity: {
-				columns: {
-					slug: true,
+			entityVersion: {
+				columns: {},
+				with: {
+					entity: {
+						columns: {
+							slug: true,
+						},
+					},
 				},
 			},
 		},
@@ -112,89 +178,10 @@ export async function getOpportunityById(params: GetOpportunityByIdParams) {
 		return null;
 	}
 
-	const data = { ...item };
+	const { entityVersion, ...rest } = item;
+	const data = { ...rest, entity: entityVersion.entity };
 
 	return data;
-}
-
-interface CreateOpportunityParams extends schema.OpportunityInput {
-	slug: schema.EntityInput["slug"];
-}
-
-export async function createOpportunity(params: CreateOpportunityParams) {
-	const { duration, sourceId, slug, summary, title, website } = params;
-
-	const entityType = await db.query.entityTypes.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "opportunities" },
-	});
-
-	if (entityType == null) {
-		return null;
-	}
-
-	const entityStatus = await db.query.entityStatus.findFirst({
-		columns: {
-			id: true,
-		},
-		where: { type: "published" },
-	});
-
-	if (entityStatus == null) {
-		return null;
-	}
-
-	const entityId = await db.transaction(async (tx) => {
-		const [item] = await tx
-			.insert(schema.entities)
-			.values({
-				typeId: entityType.id,
-				statusId: entityStatus.id,
-				slug,
-			})
-			.returning({
-				id: schema.entities.id,
-			});
-
-		if (item == null) {
-			return tx.rollback();
-		}
-
-		const { id } = item;
-
-		const opportunity = {
-			id,
-			title,
-			summary,
-			sourceId,
-			duration,
-			website,
-		};
-
-		await tx.insert(schema.opportunities).values(opportunity);
-
-		const fieldNamesIds = await tx.query.entityTypesFieldsNames.findMany({
-			where: {
-				entityTypeId: entityType.id,
-			},
-		});
-
-		const fields = fieldNamesIds.map(({ id: fieldNameId }) => {
-			return { entityId: id, fieldNameId };
-		});
-
-		await tx.insert(schema.fields).values(fields).returning({
-			id: schema.fields.id,
-		});
-
-		return id;
-	});
-
-	return {
-		entityId,
-	};
 }
 
 export type OpportunitiesWithEntities = Awaited<ReturnType<typeof getOpportunities>>;

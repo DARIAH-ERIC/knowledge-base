@@ -6,17 +6,23 @@ import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { ProjectForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form";
+import { discardProjectDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/discard-project-draft.action";
+import { publishProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/publish-project.action";
 import { updateProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/update-project.action";
 
 interface ProjectEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
+	documentId: string;
+	isPublished: boolean;
 	project: Pick<
 		schema.Project,
 		"acronym" | "call" | "duration" | "funding" | "id" | "name" | "summary" | "topic"
 	> & {
 		description?: JSONContent;
-		entity: Pick<schema.Entity, "documentId" | "slug"> & {
+		entityVersion: {
+			entity: Pick<schema.Entity, "id" | "slug">;
 			status: Pick<schema.EntityStatus, "id" | "type">;
 		};
 		scope: Pick<schema.ProjectScope, "id" | "scope">;
@@ -43,6 +49,8 @@ interface ProjectEditFormProps {
 export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNode {
 	const {
 		initialAssets,
+		documentId,
+		isPublished,
 		project,
 		scopes,
 		initialOrgUnitItems,
@@ -59,7 +67,16 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 
 	return (
 		<Fragment>
-			<Heading>{t("Edit project")}</Heading>
+			<div className="flex items-center justify-between">
+				<Heading>{t("Edit project")}</Heading>
+				<EntityLifecycleBar
+					discardDraftAction={discardProjectDraftAction}
+					documentId={documentId}
+					hasDraft={true}
+					isPublished={isPublished}
+					publishAction={publishProjectAction}
+				/>
+			</div>
 
 			<ProjectForm
 				formAction={updateProjectAction}

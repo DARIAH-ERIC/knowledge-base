@@ -13,7 +13,9 @@ import { UpdateSpotlightArticleActionInputSchema } from "@/app/(app)/[locale]/(d
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
+import { ensureDraftVersion } from "@/lib/data/entity-lifecycle";
 import { syncEntityRelations } from "@/lib/data/relations";
+import { spotlightArticlesLifecycleAdapter } from "@/lib/data/spotlight-articles.lifecycle-adapter";
 import { db, type Transaction } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -48,10 +50,23 @@ export const updateSpotlightArticleAction = createServerAction(
 			});
 		}
 
-		const { contentBlocks, title, id, imageKey, summary, relatedEntityIds, relatedResourceIds } =
-			result.output;
+		const {
+			contentBlocks,
+			documentId,
+			title,
+			imageKey,
+			summary,
+			relatedEntityIds,
+			relatedResourceIds,
+		} = result.output;
 
 		await db.transaction(async (tx) => {
+			const draftVersionId = await ensureDraftVersion(
+				tx,
+				documentId,
+				spotlightArticlesLifecycleAdapter,
+			);
+
 			const asset = await tx.query.assets.findFirst({
 				where: { key: imageKey },
 				columns: { id: true },
@@ -59,16 +74,14 @@ export const updateSpotlightArticleAction = createServerAction(
 
 			assert(asset);
 
-			const imageId = asset.id;
-
 			await tx
 				.update(schema.spotlightArticles)
-				.set({ imageId, title, summary })
-				.where(eq(schema.spotlightArticles.id, id));
+				.set({ imageId: asset.id, title, summary })
+				.where(eq(schema.spotlightArticles.id, draftVersionId));
 
 			const contentField = await tx.query.fields.findFirst({
 				where: {
-					entityId: id,
+					entityVersionId: draftVersionId,
 					name: { fieldName: "content" },
 				},
 				columns: { id: true },
@@ -79,81 +92,50 @@ export const updateSpotlightArticleAction = createServerAction(
 				return item.type;
 			});
 
-			async function upsertTypeBlock(
-				tx: Transaction,
-				block: ContentBlockInput,
-				blockId: string,
-				isNew: boolean,
-			) {
-				await upsertTypedContentBlock(tx, block, blockId, isNew);
+			async function upsertTypeBlock(tx: Transaction, block: ContentBlockInput, blockId: string) {
+				await upsertTypedContentBlock(tx, block, blockId, true);
 			}
 
 			if (contentField != null) {
-				const keptIds = new Set(
-					contentBlocks
-						.filter((cb) => {
-							return cb.position !== undefined;
-						})
-						.map((cb) => {
-							return cb.id;
-						}),
-				);
-
 				const existingBlocks = await tx.query.contentBlocks.findMany({
 					where: { fieldId: contentField.id },
 					columns: { id: true },
 				});
 
-				const toDelete = existingBlocks
-					.filter((b) => {
-						return !keptIds.has(b.id);
-					})
-					.map((b) => {
-						return b.id;
-					});
-
-				if (toDelete.length > 0) {
-					await tx.delete(schema.contentBlocks).where(inArray(schema.contentBlocks.id, toDelete));
+				if (existingBlocks.length > 0) {
+					await tx.delete(schema.contentBlocks).where(
+						inArray(
+							schema.contentBlocks.id,
+							existingBlocks.map((b) => {
+								return b.id;
+							}),
+						),
+					);
 				}
 
 				await Promise.all(
 					contentBlocks.map(async (contentBlock, index) => {
-						const { id, position } = contentBlock;
+						const [added] = await tx
+							.insert(schema.contentBlocks)
+							.values({
+								fieldId: contentField.id,
+								typeId: contentBlockTypesByType[contentBlock.type].id,
+								position: index,
+							})
+							.returning({ id: schema.contentBlocks.id });
 
-						if (position !== undefined) {
-							await tx
-								.update(schema.contentBlocks)
-								.set({
-									fieldId: contentField.id,
-									typeId: contentBlockTypesByType[contentBlock.type].id,
-									position: index,
-								})
-								.where(eq(schema.contentBlocks.id, id));
+						assert(added);
 
-							await upsertTypeBlock(tx, contentBlock, id, false);
-						} else {
-							const [added] = await tx
-								.insert(schema.contentBlocks)
-								.values({
-									fieldId: contentField.id,
-									typeId: contentBlockTypesByType[contentBlock.type].id,
-									position: index,
-								})
-								.returning({ id: schema.contentBlocks.id });
-
-							assert(added);
-
-							await upsertTypeBlock(tx, contentBlock, added.id, true);
-						}
+						await upsertTypeBlock(tx, contentBlock, added.id);
 					}),
 				);
 			}
 
-			await syncEntityRelations(tx, id, relatedEntityIds, relatedResourceIds);
+			await syncEntityRelations(tx, documentId, relatedEntityIds, relatedResourceIds);
 		});
 
 		after(async () => {
-			await syncWebsiteDocumentForEntity(id);
+			await syncWebsiteDocumentForEntity(documentId);
 			await dispatchWebhook({ type: "spotlight-articles" });
 		});
 

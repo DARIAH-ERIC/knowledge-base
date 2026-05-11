@@ -4,14 +4,14 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 import * as f from "../fields";
 import { assets } from "./assets";
 import { documentPolicyGroups } from "./document-policy-groups";
-import { entities } from "./entities";
+import { entityVersions } from "./entities";
 
 export const documentsPolicies = p.pgTable("documents_policies", {
 	id: p
 		.uuid("id")
 		.primaryKey()
 		.references(() => {
-			return entities.id;
+			return entityVersions.id;
 		}),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
