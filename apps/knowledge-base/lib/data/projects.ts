@@ -27,6 +27,7 @@ export interface ProjectsResult {
 		Pick<schema.Project, "acronym" | "duration" | "funding" | "id" | "name"> & {
 			documentId: string;
 			entity: Pick<schema.Entity, "slug">;
+			hasDraft: boolean;
 			isPublished: boolean;
 			scope: Pick<schema.ProjectScope, "id" | "scope">;
 			updatedAt: Date;
@@ -78,6 +79,7 @@ export async function getProjects(params: Readonly<GetProjectsParams>): Promise<
 				scope: schema.projectScopes.scope,
 				scopeId: schema.projectScopes.id,
 				slug: schema.entities.slug,
+				hasDraft: sql<boolean>`${schema.entityStatus.type} = 'draft'`,
 				isPublished: sql<boolean>`
 					EXISTS (
 						SELECT
@@ -162,6 +164,7 @@ export async function getProjects(params: Readonly<GetProjectsParams>): Promise<
 				duration: item.duration,
 				entity: { slug: item.slug },
 				funding: item.funding,
+				hasDraft: item.hasDraft,
 				id: item.id,
 				isPublished: item.isPublished,
 				name: item.name,

@@ -20,6 +20,7 @@ export interface GovernanceBodiesResult {
 		Pick<schema.OrganisationalUnit, "acronym" | "id" | "name"> & {
 			documentId: string;
 			entity: Pick<schema.Entity, "slug">;
+			hasDraft: boolean;
 			isPublished: boolean;
 			updatedAt: Date;
 		}
@@ -71,6 +72,7 @@ export async function getGovernanceBodies(
 				name: schema.organisationalUnits.name,
 				slug: schema.entities.slug,
 				updatedAt: schema.entityVersions.updatedAt,
+				hasDraft: sql<boolean>`${schema.entityStatus.type} = 'draft'`,
 				isPublished: sql<boolean>`
 					EXISTS (
 						SELECT
@@ -159,6 +161,7 @@ export async function getGovernanceBodies(
 				acronym: item.acronym,
 				documentId: item.documentId,
 				entity: { slug: item.slug },
+				hasDraft: item.hasDraft,
 				id: item.id,
 				isPublished: item.isPublished,
 				name: item.name,

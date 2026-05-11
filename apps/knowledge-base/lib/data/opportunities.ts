@@ -48,6 +48,7 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 				title: schema.opportunities.title,
 				updatedAt: schema.entityVersions.updatedAt,
 				website: schema.opportunities.website,
+				hasDraft: sql<boolean>`${schema.entityStatus.type} = 'draft'`,
 				isPublished: sql<boolean>`
 					EXISTS (
 						SELECT
@@ -138,6 +139,7 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 				source: item.source,
 			},
 			entity: { slug: item.slug },
+			hasDraft: item.hasDraft,
 			summary: item.summary,
 			title: item.title,
 			updatedAt: item.updatedAt,
