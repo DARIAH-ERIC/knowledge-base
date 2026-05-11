@@ -61,28 +61,28 @@ function formatOrganisationalUnitType(type: string): string {
 
 function organisationalUnitTypeIntent(
 	type: string,
-): "danger" | "info" | "primary" | "secondary" | "success" | "warning" {
+): "amber" | "danger" | "emerald" | "info" | "pink" | "rose" | "secondary" | "slate" | "violet" {
 	switch (type) {
 		case "country": {
 			return "info";
 		}
 		case "eric": {
-			return "danger";
+			return "rose";
 		}
 		case "governance_body": {
-			return "secondary";
+			return "slate";
 		}
 		case "institution": {
-			return "primary";
+			return "emerald";
 		}
 		case "national_consortium": {
-			return "warning";
+			return "amber";
 		}
 		case "regional_hub": {
-			return "success";
+			return "violet";
 		}
 		case "working_group": {
-			return "success";
+			return "pink";
 		}
 		default: {
 			return "secondary";

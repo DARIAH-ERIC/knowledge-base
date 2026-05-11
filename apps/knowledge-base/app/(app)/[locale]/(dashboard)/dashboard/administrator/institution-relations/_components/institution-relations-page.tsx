@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { Label } from "@dariah-eric/ui/field";
@@ -58,6 +59,37 @@ interface InstitutionRelationsPageProps {
 
 function formatValue(value: string): string {
 	return value.replaceAll("_", " ");
+}
+
+function organisationalUnitTypeIntent(
+	type: string,
+): "amber" | "emerald" | "info" | "pink" | "rose" | "secondary" | "slate" | "violet" {
+	switch (type) {
+		case "country": {
+			return "info";
+		}
+		case "eric": {
+			return "rose";
+		}
+		case "governance_body": {
+			return "slate";
+		}
+		case "institution": {
+			return "emerald";
+		}
+		case "national_consortium": {
+			return "amber";
+		}
+		case "regional_hub": {
+			return "violet";
+		}
+		case "working_group": {
+			return "pink";
+		}
+		default: {
+			return "secondary";
+		}
+	}
 }
 
 const pageSize = dashboardPageSize;
@@ -119,11 +151,11 @@ export function InstitutionRelationsPage(
 					<TableColumn allowsSorting={true} id="statusType">
 						{t("Relation")}
 					</TableColumn>
-					<TableColumn allowsSorting={true} id="relatedUnitName">
-						{t("Related unit")}
-					</TableColumn>
 					<TableColumn allowsSorting={true} id="relatedUnitType">
-						{t("Related type")}
+						{t("Type")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="relatedUnitName">
+						{t("Name")}
 					</TableColumn>
 					<TableColumn allowsSorting={true} id="durationStart">
 						{t("From")}
@@ -139,8 +171,12 @@ export function InstitutionRelationsPage(
 							<TableRow id={item.id}>
 								<TableCell>{item.institutionName}</TableCell>
 								<TableCell>{formatValue(item.statusType)}</TableCell>
+								<TableCell>
+									<Badge intent={organisationalUnitTypeIntent(item.relatedUnitType)}>
+										{formatValue(item.relatedUnitType)}
+									</Badge>
+								</TableCell>
 								<TableCell>{item.relatedUnitName}</TableCell>
-								<TableCell>{formatValue(item.relatedUnitType)}</TableCell>
 								<TableCell>{format.dateTime(item.durationStart, { dateStyle: "short" })}</TableCell>
 								<TableCell>
 									{item.durationEnd != null
