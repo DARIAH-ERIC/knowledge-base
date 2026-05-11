@@ -8,7 +8,7 @@ import { buffer } from "@dariah-eric/storage/lib";
 import slugify from "@sindresorhus/slugify";
 import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
-import { and, count, eq, ilike } from "drizzle-orm";
+import { and, count, eq, ilike, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 
 import { placeholderImageUrl } from "../config/data-migration.config";
@@ -296,7 +296,7 @@ async function main() {
 						.insert(schema.assets)
 						.values({
 							key,
-							label: workingGroup.logo,
+							label: workingGroup.name,
 							mimeType: metadata["content-type"],
 						})
 						.returning({ id: schema.assets.id });
@@ -508,7 +508,7 @@ async function main() {
 							.insert(schema.assets)
 							.values({
 								key,
-								label: country.logo,
+								label: country.name,
 								mimeType: metadata["content-type"],
 							})
 							.returning({ id: schema.assets.id });
@@ -638,150 +638,167 @@ async function main() {
 	log.info("Migrating institutions...");
 
 	const institutions = await client.select().from(unrInstitutions);
+	assert(umbrellaUnit);
+
+	const processedInstitutions = new Set<string>();
 
 	for (const institution of institutions) {
-		await db.transaction(async (tx) => {
-			const [entity] = await tx
-				.insert(schema.entities)
-				.values({
-					slug: slugify(institution.name),
-					typeId: typesByType.organisational_units.id,
-					createdAt: new Date(institution.createdAt),
-					updatedAt: new Date(institution.createdAt),
-				})
-				.returning({ id: schema.entities.id });
-
-			assert(entity);
-
-			const [version] = await tx
-
-				.insert(schema.entityVersions)
-
-				.values({
-					entityId: entity.id,
-
-					statusId: statusByType.published.id,
-				})
-
-				.returning({ id: schema.entityVersions.id });
-
-			assert(version);
-
-			const id = version.id;
-
-			const [orgUnit] = await tx
-				.insert(schema.organisationalUnits)
-				.values({
-					id,
-					name: institution.name,
-					summary: "",
-					typeId: organisationalUnitTypesByType.institution.id,
-					metadata: { ror: institution.ror, url: institution.url },
-					imageId: placeholderAsset.id,
-					createdAt: new Date(institution.createdAt),
-					updatedAt: new Date(institution.createdAt),
-				})
-				.returning({ id: schema.organisationalUnits.id });
-
-			assert(orgUnit);
-
-			unrInstitutionIdToOrgUnitId.set(institution.id, orgUnit.id);
-
-			assert(umbrellaUnit);
-
-			if (institution.types != null) {
-				let institutionTypes = institution.types.filter((type) => {
-					return type !== "other";
-				});
-
-				institutionTypes =
-					institutionTypes.includes("partner_institution") &&
-					institutionTypes.some((t) => {
-						return [
-							"national_coordinating_institution",
-							"national_representative_institution",
-							"cooperating_partner",
-						].includes(t);
+		let slug = slugify(institution.name);
+		if (processedInstitutions.has(slug)) {
+			slug = `${slug}-duplicate`;
+		}
+		if (institution.name === "DARIAH-EU") {
+			unrInstitutionIdToOrgUnitId.set(institution.id, umbrellaUnit.id);
+		} else {
+			await db.transaction(async (tx) => {
+				const [entity] = await tx
+					.insert(schema.entities)
+					.values({
+						slug,
+						typeId: typesByType.organisational_units.id,
+						createdAt: new Date(institution.createdAt),
+						updatedAt: new Date(institution.createdAt),
 					})
-						? institutionTypes.filter((t) => {
-								return t !== "partner_institution";
-							})
-						: institutionTypes;
+					.returning({ id: schema.entities.id });
 
-				for (const type of institutionTypes) {
-					if (type === "cooperating_partner") {
-						await tx.insert(schema.organisationalUnitsRelations).values({
-							unitId: orgUnit.id,
-							relatedUnitId: umbrellaUnit.id,
-							duration: {
-								start: institution.startDate ?? new Date(Date.UTC(1900, 0, 1)),
-								end: institution.endDate ?? undefined,
-							},
-							status: organisationalUnitStatusByType.is_cooperating_partner_of.id,
-						});
-					}
-					if (type === "national_coordinating_institution") {
-						await tx.insert(schema.organisationalUnitsRelations).values({
-							unitId: orgUnit.id,
-							relatedUnitId: umbrellaUnit.id,
-							duration: {
-								start: institution.startDate ?? new Date(Date.UTC(1900, 0, 1)),
-								end: institution.endDate ?? undefined,
-							},
-							status: organisationalUnitStatusByType.is_national_coordinating_institution_in.id,
-						});
-					}
-					if (type === "national_representative_institution") {
-						await tx.insert(schema.organisationalUnitsRelations).values({
-							unitId: orgUnit.id,
-							relatedUnitId: umbrellaUnit.id,
-							duration: {
-								start: institution.startDate ?? new Date(Date.UTC(1900, 0, 1)),
-								end: institution.endDate ?? undefined,
-							},
-							status: organisationalUnitStatusByType.is_national_representative_institution_in.id,
-						});
-					}
-					if (type === "partner_institution") {
-						await tx.insert(schema.organisationalUnitsRelations).values({
-							unitId: orgUnit.id,
-							relatedUnitId: umbrellaUnit.id,
-							duration: {
-								start: institution.startDate ?? new Date(Date.UTC(1900, 0, 1)),
-								end: institution.endDate ?? undefined,
-							},
-							status: organisationalUnitStatusByType.is_partner_institution_of.id,
-						});
+				assert(entity);
+
+				const [version] = await tx
+
+					.insert(schema.entityVersions)
+
+					.values({
+						entityId: entity.id,
+
+						statusId: statusByType.published.id,
+					})
+
+					.returning({ id: schema.entityVersions.id });
+
+				assert(version);
+
+				const id = version.id;
+
+				const [orgUnit] = await tx
+					.insert(schema.organisationalUnits)
+					.values({
+						id,
+						name: institution.name,
+						summary: "",
+						typeId: organisationalUnitTypesByType.institution.id,
+						metadata: { ror: institution.ror, url: institution.url },
+						imageId: placeholderAsset.id,
+						createdAt: new Date(institution.createdAt),
+						updatedAt: new Date(institution.createdAt),
+					})
+					.returning({ id: schema.organisationalUnits.id });
+
+				assert(orgUnit);
+
+				unrInstitutionIdToOrgUnitId.set(institution.id, orgUnit.id);
+
+				assert(umbrellaUnit);
+
+				if (institution.types != null) {
+					let institutionTypes = institution.types.filter((type) => {
+						return type !== "other";
+					});
+
+					institutionTypes =
+						institutionTypes.includes("partner_institution") &&
+						institutionTypes.some((t) => {
+							return [
+								"national_coordinating_institution",
+								"national_representative_institution",
+								"cooperating_partner",
+							].includes(t);
+						})
+							? institutionTypes.filter((t) => {
+									return t !== "partner_institution";
+								})
+							: institutionTypes;
+
+					for (const type of institutionTypes) {
+						if (type === "cooperating_partner") {
+							await tx.insert(schema.organisationalUnitsRelations).values({
+								unitId: orgUnit.id,
+								relatedUnitId: umbrellaUnit.id,
+								duration: {
+									start: institution.startDate ?? new Date(Date.UTC(1900, 0, 1)),
+									end: institution.endDate ?? undefined,
+								},
+								status: organisationalUnitStatusByType.is_cooperating_partner_of.id,
+							});
+						}
+						if (type === "national_coordinating_institution") {
+							await tx.insert(schema.organisationalUnitsRelations).values({
+								unitId: orgUnit.id,
+								relatedUnitId: umbrellaUnit.id,
+								duration: {
+									start: institution.startDate ?? new Date(Date.UTC(1900, 0, 1)),
+									end: institution.endDate ?? undefined,
+								},
+								status: organisationalUnitStatusByType.is_national_coordinating_institution_in.id,
+							});
+						}
+						if (type === "national_representative_institution") {
+							await tx.insert(schema.organisationalUnitsRelations).values({
+								unitId: orgUnit.id,
+								relatedUnitId: umbrellaUnit.id,
+								duration: {
+									start: institution.startDate ?? new Date(Date.UTC(1900, 0, 1)),
+									end: institution.endDate ?? undefined,
+								},
+								status: organisationalUnitStatusByType.is_national_representative_institution_in.id,
+							});
+						}
+						if (type === "partner_institution") {
+							await tx.insert(schema.organisationalUnitsRelations).values({
+								unitId: orgUnit.id,
+								relatedUnitId: umbrellaUnit.id,
+								duration: {
+									start: institution.startDate ?? new Date(Date.UTC(1900, 0, 1)),
+									end: institution.endDate ?? undefined,
+								},
+								status: organisationalUnitStatusByType.is_partner_institution_of.id,
+							});
+						}
 					}
 				}
-			}
-			const [countryOfInstitution] = await client
-				.select({ countryId: countryToInstitution.a })
-				.from(countryToInstitution)
-				.where(eq(countryToInstitution.b, institution.id))
-				.limit(1);
+				const [countryOfInstitution] = await client
+					.select({ countryId: countryToInstitution.a })
+					.from(countryToInstitution)
+					.where(eq(countryToInstitution.b, institution.id))
+					.limit(1);
 
-			if (countryOfInstitution?.countryId == null) {
-				return;
-			}
+				if (countryOfInstitution?.countryId == null) {
+					return;
+				}
 
-			const countryOrgaUnitId = unrCountryIdToOrgUnitId.get(countryOfInstitution.countryId);
+				const countryOrgaUnitId = unrCountryIdToOrgUnitId.get(countryOfInstitution.countryId);
 
-			assert(countryOrgaUnitId);
+				assert(countryOrgaUnitId);
 
-			await tx.insert(schema.organisationalUnitsRelations).values({
-				unitId: orgUnit.id,
-				relatedUnitId: countryOrgaUnitId,
-				duration: { start: new Date(Date.UTC(1900, 0, 1)) },
-				status: organisationalUnitStatusByType.is_located_in.id,
+				await tx.insert(schema.organisationalUnitsRelations).values({
+					unitId: orgUnit.id,
+					relatedUnitId: countryOrgaUnitId,
+					duration: { start: new Date(Date.UTC(1900, 0, 1)) },
+					status: organisationalUnitStatusByType.is_located_in.id,
+				});
 			});
-		});
+		}
+		processedInstitutions.add(slug);
 	}
 
 	const [institutionOrgUnitResult] = await db
 		.select({ count: count() })
 		.from(schema.organisationalUnits)
-		.where(eq(schema.organisationalUnits.typeId, organisationalUnitTypesByType.institution.id));
+		.where(
+			or(
+				eq(schema.organisationalUnits.typeId, organisationalUnitTypesByType.institution.id),
+				eq(schema.organisationalUnits.typeId, organisationalUnitTypesByType.eric.id),
+			),
+		);
 	assert(institutionOrgUnitResult?.count === institutions.length);
 
 	/**
@@ -1167,7 +1184,7 @@ async function main() {
 						.insert(schema.assets)
 						.values({
 							key,
-							label: person.image,
+							label: person.name,
 							mimeType: metadata["content-type"],
 						})
 						.returning({ id: schema.assets.id });
@@ -1892,10 +1909,19 @@ async function main() {
 		const createdAt = new Date(Date.now());
 
 		await db.transaction(async (tx) => {
+			let slug = slugify(projectName);
+			// check if slug exists
+			const [slugExists] = await tx
+				.select()
+				.from(schema.entities)
+				.where(eq(schema.entities.slug, slug));
+			if (slugExists) {
+				slug = `${slug}-duplicate-${crypto.randomUUID()}`;
+			}
 			const [entity] = await tx
 				.insert(schema.entities)
 				.values({
-					slug: slugify(projectName),
+					slug,
 					typeId: typesByType.projects.id,
 					createdAt,
 					updatedAt: createdAt,
@@ -2007,7 +2033,7 @@ async function main() {
 					fundersEntries.flatMap((s) => {
 						return s != null
 							? s.split(";").map((v) => {
-									return v.trim();
+									return v.trim().replaceAll(/\s+/g, " ");
 								})
 							: [];
 					}),
@@ -2023,14 +2049,29 @@ async function main() {
 					.where(
 						and(
 							eq(schema.organisationalUnits.name, funder),
-							eq(schema.organisationalUnits.typeId, organisationalUnitTypesByType.institution.id),
+							or(
+								eq(schema.organisationalUnits.typeId, organisationalUnitTypesByType.institution.id),
+								eq(
+									schema.organisationalUnits.typeId,
+									organisationalUnitTypesByType.national_consortium.id,
+								),
+							),
 						),
 					);
 				if (!fundingUnit) {
+					let slug = slugify(funder);
+					// check if slug exists
+					const [slugExists] = await tx
+						.select()
+						.from(schema.entities)
+						.where(eq(schema.entities.slug, slug));
+					if (slugExists) {
+						slug = `${slug}-duplicate-${crypto.randomUUID()}`;
+					}
 					const [fundingUnitEntity] = await tx
 						.insert(schema.entities)
 						.values({
-							slug: slugify(funder),
+							slug,
 							typeId: typesByType.organisational_units.id,
 							createdAt,
 							updatedAt: createdAt,
