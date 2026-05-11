@@ -1756,6 +1756,30 @@
 		--info-subtle: oklch(68.5% 0.169 237.323deg / 15%);
 		--info-subtle-fg: oklch(50% 0.134 242.749deg);
 
+		--emerald: oklch(60.1% 0.132 165.147deg);
+		--emerald-subtle: oklch(69.8% 0.146 165.147deg / 15%);
+		--emerald-subtle-fg: oklch(51.2% 0.104 165.147deg);
+
+		--amber: oklch(78.1% 0.161 71.221deg);
+		--amber-subtle: oklch(84.2% 0.163 71.221deg / 20%);
+		--amber-subtle-fg: oklch(56.3% 0.137 53.978deg);
+
+		--rose: oklch(63.2% 0.196 10.126deg);
+		--rose-subtle: oklch(71.4% 0.172 10.126deg / 15%);
+		--rose-subtle-fg: oklch(53.4% 0.151 10.126deg);
+
+		--slate: oklch(54.1% 0.038 257.281deg);
+		--slate-subtle: oklch(72.1% 0.031 257.281deg / 18%);
+		--slate-subtle-fg: oklch(42.7% 0.033 257.281deg);
+
+		--violet: oklch(58.4% 0.155 304.321deg);
+		--violet-subtle: oklch(69.1% 0.142 304.321deg / 15%);
+		--violet-subtle-fg: oklch(49.8% 0.121 304.321deg);
+
+		--pink: oklch(65.4% 0.187 347.812deg);
+		--pink-subtle: oklch(72.8% 0.158 347.812deg / 15%);
+		--pink-subtle-fg: oklch(54.8% 0.146 347.812deg);
+
 		--warning: oklch(82.8% 0.189 84.429deg);
 		--warning-fg: oklch(27.9% 0.077 45.635deg);
 
@@ -1832,6 +1856,30 @@
 		--info-subtle: oklch(68.5% 0.169 237.323deg / 10%);
 		--info-subtle-fg: oklch(82.8% 0.111 230.318deg);
 
+		--emerald: oklch(60.1% 0.132 165.147deg);
+		--emerald-subtle: oklch(69.8% 0.146 165.147deg / 10%);
+		--emerald-subtle-fg: oklch(78.3% 0.129 165.147deg);
+
+		--amber: oklch(78.1% 0.161 71.221deg);
+		--amber-subtle: oklch(84.2% 0.163 71.221deg / 10%);
+		--amber-subtle-fg: oklch(82.4% 0.154 71.221deg);
+
+		--rose: oklch(63.2% 0.196 10.126deg);
+		--rose-subtle: oklch(71.4% 0.172 10.126deg / 10%);
+		--rose-subtle-fg: oklch(77.2% 0.138 10.126deg);
+
+		--slate: oklch(63.8% 0.034 257.281deg);
+		--slate-subtle: oklch(69.8% 0.028 257.281deg / 12%);
+		--slate-subtle-fg: oklch(83.9% 0.022 257.281deg);
+
+		--violet: oklch(58.4% 0.155 304.321deg);
+		--violet-subtle: oklch(69.1% 0.142 304.321deg / 10%);
+		--violet-subtle-fg: oklch(80.6% 0.116 304.321deg);
+
+		--pink: oklch(65.4% 0.187 347.812deg);
+		--pink-subtle: oklch(72.8% 0.158 347.812deg / 10%);
+		--pink-subtle-fg: oklch(80.1% 0.128 347.812deg);
+
 		--warning: oklch(82.8% 0.189 84.429deg);
 		--warning-fg: oklch(27.9% 0.077 45.635deg);
 
@@ -1902,6 +1950,30 @@
 
 	--color-info-subtle: var(--info-subtle);
 	--color-info-subtle-fg: var(--info-subtle-fg);
+
+	--color-emerald: var(--emerald);
+	--color-emerald-subtle: var(--emerald-subtle);
+	--color-emerald-subtle-fg: var(--emerald-subtle-fg);
+
+	--color-amber: var(--amber);
+	--color-amber-subtle: var(--amber-subtle);
+	--color-amber-subtle-fg: var(--amber-subtle-fg);
+
+	--color-rose: var(--rose);
+	--color-rose-subtle: var(--rose-subtle);
+	--color-rose-subtle-fg: var(--rose-subtle-fg);
+
+	--color-slate: var(--slate);
+	--color-slate-subtle: var(--slate-subtle);
+	--color-slate-subtle-fg: var(--slate-subtle-fg);
+
+	--color-violet: var(--violet);
+	--color-violet-subtle: var(--violet-subtle);
+	--color-violet-subtle-fg: var(--violet-subtle-fg);
+
+	--color-pink: var(--pink);
+	--color-pink-subtle: var(--pink-subtle);
+	--color-pink-subtle-fg: var(--pink-subtle-fg);
 
 	--color-warning: var(--warning);
 	--color-warning-fg: var(--warning-fg);

@@ -21,3 +21,33 @@ export const Default: Story = {
 		return <Badge {...rest}>{children}</Badge>;
 	},
 };
+
+export const Intents: Story = {
+	render() {
+		const intents = [
+			"primary",
+			"secondary",
+			"success",
+			"info",
+			"emerald",
+			"amber",
+			"rose",
+			"slate",
+			"violet",
+			"pink",
+			"warning",
+			"danger",
+			"outline",
+		] as const;
+
+		return (
+			<div className="flex flex-wrap gap-3">
+				{intents.map((intent) => {return (
+					<Badge key={intent} intent={intent}>
+						{intent}
+					</Badge>
+				)})}
+			</div>
+		);
+	},
+};
