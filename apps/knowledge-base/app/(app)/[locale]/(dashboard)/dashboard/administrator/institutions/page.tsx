@@ -3,6 +3,7 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { InstitutionsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getInstitutionsForAdmin } from "@/lib/data/institutions";
 import type { IntlLocale } from "@/lib/i18n/locales";
@@ -16,7 +17,7 @@ import {
 
 interface DashboardAdministratorInstitutionsPageProps extends PageProps<"/[locale]/dashboard/administrator/institutions"> {}
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 const defaultSort = "name" as const;
 const validSorts = ["name"] as const;
 

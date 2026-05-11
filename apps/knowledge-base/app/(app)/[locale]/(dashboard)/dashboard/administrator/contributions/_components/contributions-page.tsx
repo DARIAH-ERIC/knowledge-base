@@ -33,6 +33,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_lib/delete-contribution.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import type { ContributionsResult } from "@/lib/data/contributions";
 import { useRouter } from "@/lib/navigation/navigation";
 
@@ -89,7 +90,7 @@ function organisationalUnitTypeIntent(
 	}
 }
 
-const pageSize = 20;
+const pageSize = dashboardPageSize;
 
 export function ContributionsPage(props: Readonly<ContributionsPageProps>): ReactNode {
 	const {
@@ -228,6 +229,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 			<Paginate
 				isPending={isPending}
 				page={page}
+				perPage={pageSize}
 				setPage={setPage}
 				total={totalPages}
 				totalItems={contributions.total}

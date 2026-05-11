@@ -35,6 +35,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteFundingCallAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/delete-funding-call.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface FundingCallsPageProps {
@@ -55,7 +56,7 @@ interface FundingCallsPageProps {
 	sort: "title" | "updatedAt";
 }
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 
 export function FundingCallsPage(props: Readonly<FundingCallsPageProps>): ReactNode {
 	const {

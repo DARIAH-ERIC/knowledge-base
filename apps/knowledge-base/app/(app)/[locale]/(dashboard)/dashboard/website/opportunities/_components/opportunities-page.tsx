@@ -35,6 +35,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteOpportunityAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/delete-opportunity.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface OpportunitiesPageProps {
@@ -56,7 +57,7 @@ interface OpportunitiesPageProps {
 	sort: "title" | "source" | "updatedAt";
 }
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 
 export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): ReactNode {
 	const {

@@ -3,6 +3,7 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { NationalConsortiaPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getNationalConsortiaForAdmin } from "@/lib/data/national-consortia";
 import type { IntlLocale } from "@/lib/i18n/locales";
@@ -16,7 +17,7 @@ import {
 
 interface DashboardAdministratorNationalConsortiaPageProps extends PageProps<"/[locale]/dashboard/administrator/national-consortia"> {}
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 const defaultSort = "name" as const;
 const validSorts = ["name", "country"] as const;
 

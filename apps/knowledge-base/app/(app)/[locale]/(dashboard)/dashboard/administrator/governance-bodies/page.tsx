@@ -3,6 +3,7 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { GovernanceBodiesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getGovernanceBodiesForAdmin } from "@/lib/data/governance-bodies";
 import type { IntlLocale } from "@/lib/i18n/locales";
@@ -16,7 +17,7 @@ import {
 
 interface DashboardAdministratorGovernanceBodiesPageProps extends PageProps<"/[locale]/dashboard/administrator/governance-bodies"> {}
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 const defaultSort = "name" as const;
 const validSorts = ["acronym", "name"] as const;
 

@@ -35,6 +35,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteSpotlightArticleAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/delete-spotlight-article.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface SpotlightArticlesPageProps {
@@ -55,7 +56,7 @@ interface SpotlightArticlesPageProps {
 	};
 }
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 
 export function SpotlightArticlesPage(props: Readonly<SpotlightArticlesPageProps>): ReactNode {
 	const {

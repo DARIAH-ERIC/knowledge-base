@@ -3,6 +3,7 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { ImpactCaseStudiesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { getImpactCaseStudies } from "@/lib/data/cached/impact-case-studies";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -15,7 +16,7 @@ import {
 
 interface DashboardWebsiteImpactCaseStudiesPageProps extends PageProps<"/[locale]/dashboard/website/impact-case-studies"> {}
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 const defaultSort = "updatedAt" as const;
 const validSorts = ["title", "updatedAt"] as const;
 

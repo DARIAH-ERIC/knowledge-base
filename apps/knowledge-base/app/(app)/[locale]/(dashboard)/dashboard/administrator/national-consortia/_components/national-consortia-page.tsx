@@ -33,6 +33,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteNationalConsortiumAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/delete-national-consortium.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface NationalConsortiaPageProps {
@@ -51,7 +52,7 @@ interface NationalConsortiaPageProps {
 	sort: "name" | "country";
 }
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 
 export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps>): ReactNode {
 	const {

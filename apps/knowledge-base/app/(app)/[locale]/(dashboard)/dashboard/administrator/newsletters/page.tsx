@@ -3,6 +3,7 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { NewslettersPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getNewslettersForAdmin } from "@/lib/data/newsletters";
 import type { IntlLocale } from "@/lib/i18n/locales";
@@ -11,7 +12,7 @@ import { getListSearchParams } from "@/lib/server/list-search-params";
 
 interface DashboardAdministratorNewslettersPageProps extends PageProps<"/[locale]/dashboard/administrator/newsletters"> {}
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 
 function createListHref(q: string, page: number): string {
 	const searchParams = new URLSearchParams();

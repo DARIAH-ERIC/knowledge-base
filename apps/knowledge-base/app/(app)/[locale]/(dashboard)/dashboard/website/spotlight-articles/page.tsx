@@ -3,6 +3,7 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { SpotlightArticlesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-articles-page";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { getSpotlightArticles } from "@/lib/data/cached/spotlight-articles";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -15,7 +16,7 @@ import {
 
 interface DashboardWebsiteSpotlightArticlesPageProps extends PageProps<"/[locale]/dashboard/website/spotlight-articles"> {}
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 const defaultSort = "updatedAt" as const;
 const validSorts = ["title", "updatedAt"] as const;
 

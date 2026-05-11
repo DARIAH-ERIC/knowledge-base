@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import { AssetsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/assets-page";
 import { imageGridOptions } from "@/config/assets.config";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { type AssetPrefix, assetPrefixes } from "@/lib/data/assets";
 import { getAssetsForDashboard } from "@/lib/data/cached/assets";
 import type { IntlLocale } from "@/lib/i18n/locales";
@@ -13,7 +14,7 @@ import { getListSearchParams, getSearchParam } from "@/lib/server/list-search-pa
 
 interface DashboardWebsiteAssetsPageProps extends PageProps<"/[locale]/dashboard/website/assets"> {}
 
-const pageSize = 24;
+const pageSize = dashboardPageSize;
 
 function createListHref(q: string, prefix: string, page: number): string {
 	const searchParams = new URLSearchParams();
