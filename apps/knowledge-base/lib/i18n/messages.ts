@@ -16,11 +16,15 @@ export interface IntlMessages {
 export async function getIntlMessages(locale: IntlLocale): Promise<IntlMessages> {
 	const language = getIntlLanguage(locale);
 
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-	const [{ default: extracted }, { default: metadata }, { default: ui }] = await Promise.all([
+	const [
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+		{ default: extracted },
+		{ default: metadata },
+		// , { default: ui }
+	] = await Promise.all([
 		import(`@/messages/${language}.po`),
 		import(`@/messages/metadata/${language}/index.json`) as Promise<{ default: Metadata }>,
-		import(`@dariah-eric/ui/i18n/${language}`),
+		// import(`@dariah-eric/ui/i18n/${language}`),
 	]);
 
 	const social = keyBy(metadata.social, (item) => {
@@ -41,7 +45,7 @@ export async function getIntlMessages(locale: IntlLocale): Promise<IntlMessages>
 	}
 
 	const messages = {
-		...ui,
+		// ...ui,
 		...extracted,
 		metadata: {
 			...metadata,

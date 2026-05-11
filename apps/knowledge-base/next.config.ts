@@ -57,6 +57,8 @@ const config: Config = {
 			},
 		},
 	},
+	/** Required for i18n messages extraction, to compile `useExtracted` to `useTranslations`. */
+	transpilePackages: ["@dariah-eric/ui"],
 	// typedRoutes: true,
 	typescript: {
 		ignoreBuildErrors: true,
@@ -69,16 +71,15 @@ const plugins: Array<(config: Config) => Config> = [
 			/** @see {@link https://next-intl.dev/docs/workflows/typescript#messages-arguments} */
 			createMessagesDeclaration: ["./messages/metadata/en/index.json"],
 			extract: {
+				locales: "infer",
 				sourceLocale: "en",
+				srcPath: ["./app", "./components", "./lib", "../../packages/ui"],
 			},
 			messages: {
 				format: "po",
-				locales: "infer",
 				path: "./messages",
 				precompile: true,
 			},
-			// The app imports the published ui bundle, so the extractor needs to scan it too.
-			srcPath: ["./app", "./components", "./lib", "../../packages/ui/lib"],
 		},
 		requestConfig: "./lib/i18n/request.ts",
 	}),

@@ -1,4 +1,3 @@
-import type ui from "@dariah-eric/ui/i18n/en";
 import type { Page } from "@playwright/test";
 import { createFormatter, createTranslator } from "next-intl";
 
@@ -33,7 +32,6 @@ export type WithI18n<T> = T & { i18n: I18n };
 
 type Messages = typeof messages;
 type Metadata = typeof metadata;
-type UiMessages = typeof ui;
 
 async function getIntlMessages(locale: IntlLocale) {
 	const language = getIntlLanguage(locale);
@@ -44,9 +42,6 @@ async function getIntlMessages(locale: IntlLocale) {
 	const { default: _metadata } = (await import(`@/content/${language}/metadata/index.json`, {
 		with: { type: "json" },
 	})) as { default: Metadata };
-	const { default: _ui } = (await import(`@dariah-eric/ui/i18n/${language}`, {
-		with: { type: "json" },
-	})) as { default: UiMessages };
 
 	const _social: Record<string, string> = {};
 
@@ -56,7 +51,6 @@ async function getIntlMessages(locale: IntlLocale) {
 
 	const messages = {
 		..._messages,
-		..._ui,
 		metadata: {
 			..._metadata,
 			social: _social as Record<SocialMediaKind, string | undefined>,
