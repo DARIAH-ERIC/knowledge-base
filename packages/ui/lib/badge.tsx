@@ -19,15 +19,15 @@ export const badgeStyles = tv({
 				"[--badge-bg:var(--color-success-subtle)] [--badge-fg:var(--color-success-subtle-fg)] [--badge-overlay:var(--color-success)]/20",
 			info: "[--badge-bg:var(--color-info-subtle)] [--badge-fg:var(--color-info-subtle-fg)] [--badge-overlay:var(--color-sky-500)]/20",
 			emerald:
-				"[--badge-bg:var(--color-emerald-100)] [--badge-fg:var(--color-emerald-800)] [--badge-overlay:var(--color-emerald-500)]/20",
+				"[--badge-bg:var(--color-emerald-subtle)] [--badge-fg:var(--color-emerald-subtle-fg)] [--badge-overlay:var(--color-emerald)]/20",
 			amber:
-				"[--badge-bg:var(--color-amber-100)] [--badge-fg:var(--color-amber-800)] [--badge-overlay:var(--color-amber-500)]/20",
-			rose: "[--badge-bg:var(--color-rose-100)] [--badge-fg:var(--color-rose-800)] [--badge-overlay:var(--color-rose-500)]/20",
+				"[--badge-bg:var(--color-amber-subtle)] [--badge-fg:var(--color-amber-subtle-fg)] [--badge-overlay:var(--color-amber)]/20",
+			rose: "[--badge-bg:var(--color-rose-subtle)] [--badge-fg:var(--color-rose-subtle-fg)] [--badge-overlay:var(--color-rose)]/20",
 			slate:
-				"[--badge-bg:var(--color-slate-200)] [--badge-fg:var(--color-slate-800)] [--badge-overlay:var(--color-slate-500)]/20",
+				"[--badge-bg:var(--color-slate-subtle)] [--badge-fg:var(--color-slate-subtle-fg)] [--badge-overlay:var(--color-slate)]/20",
 			violet:
-				"[--badge-bg:var(--color-violet-100)] [--badge-fg:var(--color-violet-800)] [--badge-overlay:var(--color-violet-500)]/20",
-			pink: "[--badge-bg:var(--color-pink-100)] [--badge-fg:var(--color-pink-800)] [--badge-overlay:var(--color-pink-500)]/20",
+				"[--badge-bg:var(--color-violet-subtle)] [--badge-fg:var(--color-violet-subtle-fg)] [--badge-overlay:var(--color-violet)]/20",
+			pink: "[--badge-bg:var(--color-pink-subtle)] [--badge-fg:var(--color-pink-subtle-fg)] [--badge-overlay:var(--color-pink)]/20",
 			warning:
 				"[--badge-bg:var(--color-warning-subtle)] [--badge-fg:var(--color-warning-subtle-fg)] [--badge-overlay:var(--color-warning)]/20",
 			danger:
