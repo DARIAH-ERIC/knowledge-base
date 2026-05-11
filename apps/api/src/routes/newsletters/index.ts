@@ -98,8 +98,9 @@ export const router = createRouter()
 		validator("json", SubscribeNewsletter.RequestSchema),
 		async (c) => {
 			const { email } = c.req.valid("json");
+			const logger = c.get("logger");
 
-			const data = await subscribeToNewsletter({ email });
+			const data = await subscribeToNewsletter({ email, logger });
 
 			const payload = await validate(SubscribeNewsletter.ResponseSchema, data, 500);
 
