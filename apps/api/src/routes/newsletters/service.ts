@@ -4,9 +4,15 @@ import { HttpError } from "@dariah-eric/request/errors";
 import { HTTPException } from "hono/http-exception";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 
+import type { Logger } from "@/middlewares/logger";
 import { mailchimp } from "@/services/mailchimp";
 
 interface MailchimpErrorResponse {
+	detail?: string;
+	errors?: Array<{
+		field?: string;
+		message?: string;
+	}>;
 	title?: string;
 }
 
@@ -39,11 +45,12 @@ export async function getNewsletters(params: GetNewslettersParams) {
 
 interface SubscribeToNewsletterParams {
 	email: string;
+	logger?: Pick<Logger, "error">;
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function subscribeToNewsletter(params: SubscribeToNewsletterParams) {
-	const { email } = params;
+	const { email, logger } = params;
 
 	const result = await mailchimp.subscribe({ email });
 
@@ -53,18 +60,29 @@ export async function subscribeToNewsletter(params: SubscribeToNewsletterParams)
 		if (HttpError.is(error)) {
 			const status = error.response.status;
 			let message = STATUS_CODES[status] ?? STATUS_CODES[500];
+			let data: MailchimpErrorResponse | undefined;
 
-			if (status === 400) {
+			if (status >= 400 && status < 500) {
 				try {
-					const data = (await error.response.json()) as MailchimpErrorResponse;
+					data = (await error.response.json()) as MailchimpErrorResponse;
 
-					if (data.title === "Member Exists") {
+					if (status === 400 && data.title === "Member Exists") {
 						message = "Already subscribed";
 					}
 				} catch {
 					/** noop */
 				}
 			}
+
+			logger?.error(
+				{
+					email,
+					err: error,
+					mailchimp: data,
+					status,
+				},
+				"Newsletter subscription failed",
+			);
 
 			throw new HTTPException(status as ContentfulStatusCode, {
 				cause: error,
