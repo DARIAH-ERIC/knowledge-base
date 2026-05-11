@@ -69,16 +69,15 @@ const plugins: Array<(config: Config) => Config> = [
 			/** @see {@link https://next-intl.dev/docs/workflows/typescript#messages-arguments} */
 			createMessagesDeclaration: ["./messages/metadata/en/index.json"],
 			extract: {
+				locales: "infer",
 				sourceLocale: "en",
+				srcPath: ["./app", "./components", "./lib", "../../packages/ui/dist"],
 			},
 			messages: {
 				format: "po",
-				locales: "infer",
 				path: "./messages",
 				precompile: true,
 			},
-			// The app imports the published ui bundle, so the extractor needs to scan it too.
-			srcPath: ["./app", "./components", "./lib", "../../packages/ui/lib"],
 		},
 		requestConfig: "./lib/i18n/request.ts",
 	}),
