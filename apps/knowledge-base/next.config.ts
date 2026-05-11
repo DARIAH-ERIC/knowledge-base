@@ -73,7 +73,7 @@ const plugins: Array<(config: Config) => Config> = [
 			extract: {
 				locales: "infer",
 				sourceLocale: "en",
-				srcPath: ["./app", "./components", "./lib", "../../packages/ui/dist"],
+				srcPath: ["./app", "./components", "./lib", "../../packages/ui"],
 			},
 			messages: {
 				format: "po",
