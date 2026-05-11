@@ -56,18 +56,13 @@ import {
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
+import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
 import {
 	type MergeableBlock,
 	mergeBlocksToDocument,
 	splitDocumentToBlocks,
 } from "@/lib/content-blocks-document";
-
-interface Asset {
-	key: string;
-	label: string;
-	url: string;
-}
 
 interface RichTextContentBlockItem {
 	id: Key;
@@ -194,7 +189,7 @@ function mergeInitialItems(items: Array<ContentBlock>): Array<ContentBlockListIt
 }
 
 export interface ContentBlocksProps {
-	initialAssets?: Array<Asset>;
+	initialAssets?: Array<MediaLibraryAsset>;
 	items: Array<ContentBlock>;
 }
 
@@ -325,7 +320,7 @@ export function ContentBlocks({
 }
 
 interface ContentBlockItemProps {
-	initialAssets?: Array<Asset>;
+	initialAssets?: Array<MediaLibraryAsset>;
 	item: ContentBlockListItem;
 	onDelete: () => void;
 	onReorder: (sourceIdStr: string, targetId: Key, position: "before" | "after") => void;
@@ -531,7 +526,7 @@ function ContentBlockItem({
 }
 
 interface ContentBlockPanelProps {
-	initialAssets?: Array<Asset>;
+	initialAssets?: Array<MediaLibraryAsset>;
 	item: ContentBlockListItem;
 	onChange: (content: NonNullable<ContentBlockListItem["content"]>) => void;
 }
@@ -633,7 +628,7 @@ interface ContentBlockEntry {
 }
 
 interface GalleryContentBlockPanelProps {
-	initialAssets?: Array<Asset>;
+	initialAssets?: Array<MediaLibraryAsset>;
 	item: GalleryContentBlockItem;
 	onChange: (content: NonNullable<GalleryContentBlockItem["content"]>) => void;
 }
@@ -1026,7 +1021,7 @@ function EmbedContentBlockPanel({
 }
 
 interface ImageContentBlockPanelProps {
-	initialAssets?: Array<Asset>;
+	initialAssets?: Array<MediaLibraryAsset>;
 	item: ImageContentBlockItem;
 	onChange: (content: NonNullable<ImageContentBlockItem["content"]>) => void;
 }
@@ -1078,7 +1073,7 @@ function ImageContentBlockPanel({
 }
 
 interface HeroContentBlockPanelProps {
-	initialAssets?: Array<Asset>;
+	initialAssets?: Array<MediaLibraryAsset>;
 	item: HeroContentBlockItem;
 	onChange: (content: NonNullable<HeroContentBlockItem["content"]>) => void;
 }
@@ -1204,7 +1199,7 @@ function HeroContentBlockPanel({
 }
 
 interface AccordionContentBlockPanelProps {
-	initialAssets?: Array<Asset>;
+	initialAssets?: Array<MediaLibraryAsset>;
 	item: AccordionContentBlockItem;
 	onChange: (content: NonNullable<AccordionContentBlockItem["content"]>) => void;
 }

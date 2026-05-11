@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/u
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
 import {
 	Header,
 	HeaderAction,
@@ -23,6 +24,7 @@ interface AssetItem {
 	id: string;
 	key: string;
 	label: string;
+	mimeType: string;
 	url: string;
 }
 
@@ -112,7 +114,15 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 							<li key={asset.id}>
 								<figure className="flex flex-col gap-y-2">
 									<div className="overflow-hidden rounded-lg bg-muted aspect-square">
-										<img alt={asset.label} className="size-full object-cover" src={asset.url} />
+										<AssetPreview
+											alt={asset.label}
+											className="size-full"
+											imageClassName="object-cover"
+											kindLabelClassName="bg-background/90 text-xs"
+											mimeType={asset.mimeType}
+											src={asset.url}
+											storageKey={asset.key}
+										/>
 									</div>
 									<figcaption className="flex flex-col gap-y-0.5 px-0.5">
 										<span className="truncate text-sm/tight font-medium">{asset.label}</span>
