@@ -3,7 +3,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, inArray } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike, inArray, or, sql } from "@/lib/db/sql";
 
 export type CountryMemberObserverStatus = "is_member_of" | "is_observer_of" | null;
 
@@ -70,6 +70,24 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 	const nameOrderBy =
 		dir === "desc" ? desc(schema.organisationalUnits.name) : schema.organisationalUnits.name;
 	const needsDerivedSort = sort === "status";
+	const lifecycleWhere = or(
+		eq(schema.entityStatus.type, "draft"),
+		and(
+			eq(schema.entityStatus.type, "published"),
+			sql`
+				NOT EXISTS (
+					SELECT
+						1
+					FROM
+						"entity_versions" AS "ev2"
+						INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+					WHERE
+						"ev2"."entity_id" = ${schema.entityVersions.entityId}
+						AND "es2"."type" = 'draft'
+				)
+			`,
+		),
+	);
 
 	const [items, aggregate, erics] = await Promise.all([
 		needsDerivedSort
@@ -89,7 +107,11 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 						eq(schema.organisationalUnits.id, schema.entityVersions.id),
 					)
 					.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-					.where(where)
+					.innerJoin(
+						schema.entityStatus,
+						eq(schema.entityVersions.statusId, schema.entityStatus.id),
+					)
+					.where(and(lifecycleWhere, where))
 					.orderBy(nameOrderBy)
 			: db
 					.select({
@@ -107,7 +129,11 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 						eq(schema.organisationalUnits.id, schema.entityVersions.id),
 					)
 					.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-					.where(where)
+					.innerJoin(
+						schema.entityStatus,
+						eq(schema.entityVersions.statusId, schema.entityStatus.id),
+					)
+					.where(and(lifecycleWhere, where))
 					.orderBy(nameOrderBy)
 					.limit(limit)
 					.offset(offset),
@@ -120,7 +146,8 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 			)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-			.where(where),
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(and(lifecycleWhere, where)),
 		db.query.organisationalUnits.findMany({
 			where: { type: { type: "eric" } },
 			columns: { id: true },

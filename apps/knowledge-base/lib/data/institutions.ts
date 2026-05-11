@@ -3,7 +3,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike, inArray, or, sql } from "@/lib/db/sql";
 
 export type InstitutionEricRelationStatus =
 	| "is_cooperating_partner_of"
@@ -53,6 +53,24 @@ const institutionStatusLabels: Record<InstitutionEricRelationStatus, string> = {
 	is_national_representative_institution_in: "National representative institution",
 	is_partner_institution_of: "Partner institution",
 };
+const lifecycleWhere = or(
+	eq(schema.entityStatus.type, "draft"),
+	and(
+		eq(schema.entityStatus.type, "published"),
+		sql`
+			NOT EXISTS (
+				SELECT
+					1
+				FROM
+					"entity_versions" AS "ev2"
+					INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+				WHERE
+					"ev2"."entity_id" = ${schema.entityVersions.entityId}
+					AND "es2"."type" = 'draft'
+			)
+		`,
+	),
+);
 
 function compareStrings(a: string, b: string, dir: "asc" | "desc"): number {
 	return dir === "asc" ? a.localeCompare(b) : b.localeCompare(a);
@@ -211,7 +229,8 @@ export async function getInstitutions(
 					eq(schema.organisationalUnits.id, schema.entityVersions.id),
 				)
 				.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-				.where(where)
+				.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+				.where(and(lifecycleWhere, where))
 				.orderBy(nameOrderBy)
 				.limit(limit)
 				.offset(offset),
@@ -227,7 +246,8 @@ export async function getInstitutions(
 					eq(schema.organisationalUnits.id, schema.entityVersions.id),
 				)
 				.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-				.where(where),
+				.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+				.where(and(lifecycleWhere, where)),
 		]);
 		const institutionIds = items.map((item) => {
 			return item.id;
@@ -269,7 +289,8 @@ export async function getInstitutions(
 			)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-			.where(where)
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(and(lifecycleWhere, where))
 			.orderBy(nameOrderBy);
 		total = items.length;
 	} else {
@@ -365,8 +386,10 @@ export async function getInstitutions(
 			)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(
 				and(
+					lifecycleWhere,
 					eq(schema.organisationalUnitTypes.type, institutionType),
 					inArray(schema.organisationalUnits.id, matchedIds),
 				),
