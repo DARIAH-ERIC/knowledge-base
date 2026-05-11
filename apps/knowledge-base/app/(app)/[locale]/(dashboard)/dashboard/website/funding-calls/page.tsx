@@ -3,6 +3,7 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { FundingCallsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { getFundingCalls } from "@/lib/data/cached/funding-calls";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -15,7 +16,7 @@ import {
 
 interface DashboardWebsiteFundingCallsPageProps extends PageProps<"/[locale]/dashboard/website/funding-calls"> {}
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 const defaultSort = "updatedAt" as const;
 const validSorts = ["title", "updatedAt"] as const;
 

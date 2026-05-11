@@ -16,6 +16,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { UploadImageDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface AssetItem {
@@ -35,7 +36,7 @@ interface AssetsPageProps {
 	q: string;
 }
 
-const pageSize = 24;
+const pageSize = dashboardPageSize;
 
 export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 	const { assets, page: initialPage, prefix: initialPrefix, q: initialQ } = props;

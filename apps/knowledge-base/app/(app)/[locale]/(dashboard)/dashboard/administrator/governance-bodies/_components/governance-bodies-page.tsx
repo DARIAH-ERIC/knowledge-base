@@ -34,6 +34,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteGovernanceBodyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/delete-governance-body.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface GovernanceBodiesPageProps {
@@ -54,7 +55,7 @@ interface GovernanceBodiesPageProps {
 	sort: "acronym" | "name";
 }
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 
 export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>): ReactNode {
 	const {

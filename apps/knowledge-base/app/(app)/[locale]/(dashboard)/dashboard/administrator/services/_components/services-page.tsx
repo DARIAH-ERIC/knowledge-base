@@ -34,6 +34,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteServiceAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_lib/delete-service.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface ServicesPageProps {
@@ -78,7 +79,7 @@ function statusIntent(status: string): "success" | "warning" | "danger" | "info"
 	}
 }
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 
 export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 	const { dir: initialDir, page: initialPage, q: initialQ, services, sort: initialSort } = props;

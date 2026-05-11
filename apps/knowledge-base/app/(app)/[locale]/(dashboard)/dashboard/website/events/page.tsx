@@ -3,6 +3,7 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { EventsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { getEvents } from "@/lib/data/cached/events";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -15,7 +16,7 @@ import {
 
 interface DashboardWebsiteEventsPageProps extends PageProps<"/[locale]/dashboard/website/events"> {}
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 const defaultSort = "updatedAt" as const;
 const validSorts = ["title", "updatedAt"] as const;
 

@@ -39,6 +39,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { endUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-unit-relation.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import type { InstitutionRelationsResult } from "@/lib/data/institution-relations";
 
 interface InstitutionRelationsPageProps {
@@ -59,7 +60,7 @@ function formatValue(value: string): string {
 	return value.replaceAll("_", " ");
 }
 
-const pageSize = 20;
+const pageSize = dashboardPageSize;
 
 export function InstitutionRelationsPage(
 	props: Readonly<InstitutionRelationsPageProps>,
@@ -189,6 +190,7 @@ export function InstitutionRelationsPage(
 			<Paginate
 				isPending={isPending}
 				page={page}
+				perPage={pageSize}
 				setPage={setPage}
 				total={totalPages}
 				totalItems={institutionRelations.total}

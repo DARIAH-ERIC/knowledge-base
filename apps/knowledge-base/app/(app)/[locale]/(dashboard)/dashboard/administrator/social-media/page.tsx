@@ -3,6 +3,7 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { SocialMediaPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getSocialMediaForAdmin } from "@/lib/data/social-media";
 import type { IntlLocale } from "@/lib/i18n/locales";
@@ -16,7 +17,7 @@ import {
 
 interface DashboardAdministratorSocialMediaPageProps extends PageProps<"/[locale]/dashboard/administrator/social-media"> {}
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 const defaultSort = "name" as const;
 const validSorts = ["name", "type"] as const;
 

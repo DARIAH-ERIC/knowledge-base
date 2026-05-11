@@ -34,6 +34,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteWorkingGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/delete-working-group.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface WorkingGroupsPageProps {
@@ -56,7 +57,7 @@ interface WorkingGroupsPageProps {
 	};
 }
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 
 export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): ReactNode {
 	const {

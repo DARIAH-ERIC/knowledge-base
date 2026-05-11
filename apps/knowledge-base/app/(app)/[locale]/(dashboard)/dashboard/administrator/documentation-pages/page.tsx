@@ -3,6 +3,7 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { DocumentationPagesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { getDocumentationPages } from "@/lib/data/cached/documentation-pages";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -15,7 +16,7 @@ import {
 
 interface DashboardAdministratorDocumentationPagesPageProps extends PageProps<"/[locale]/dashboard/administrator/documentation-pages"> {}
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 const defaultSort = "updatedAt" as const;
 const validSorts = ["title", "updatedAt"] as const;
 

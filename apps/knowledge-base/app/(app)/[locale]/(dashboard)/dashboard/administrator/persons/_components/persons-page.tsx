@@ -35,6 +35,7 @@ import {
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deletePersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/delete-person.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface PersonsPageProps {
@@ -55,7 +56,7 @@ interface PersonsPageProps {
 	sort: "name" | "email" | "orcid";
 }
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 
 export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 	const { dir: initialDir, page: initialPage, persons, q: initialQ, sort: initialSort } = props;

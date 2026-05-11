@@ -3,6 +3,7 @@ import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { NewsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-page";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { getNews } from "@/lib/data/cached/news";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -15,7 +16,7 @@ import {
 
 interface DashboardWebsiteNewsPageProps extends PageProps<"/[locale]/dashboard/website/news"> {}
 
-const pageSize = 10;
+const pageSize = dashboardPageSize;
 const defaultSort = "updatedAt" as const;
 const validSorts = ["title", "updatedAt"] as const;
 
