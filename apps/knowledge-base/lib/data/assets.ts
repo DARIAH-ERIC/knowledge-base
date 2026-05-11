@@ -80,6 +80,7 @@ export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams)
 			columns: {
 				key: true,
 				label: true,
+				mimeType: true,
 			},
 			limit,
 			offset,
@@ -97,7 +98,7 @@ export async function getMediaLibraryAssets(params: GetMediaLibraryAssetsParams)
 			options: imageUrlOptions,
 		});
 
-		return { key: asset.key, label: asset.label, url };
+		return { key: asset.key, label: asset.label, mimeType: asset.mimeType, url };
 	});
 
 	return { items, total };
@@ -163,6 +164,7 @@ export async function getAssetsForDashboard(params: GetAssetsForDashboardParams)
 				id: true,
 				key: true,
 				label: true,
+				mimeType: true,
 			},
 			limit,
 			offset,
@@ -180,7 +182,7 @@ export async function getAssetsForDashboard(params: GetAssetsForDashboardParams)
 			options: imageUrlOptions,
 		});
 
-		return { id: asset.id, key: asset.key, label: asset.label, url };
+		return { id: asset.id, key: asset.key, label: asset.label, mimeType: asset.mimeType, url };
 	});
 
 	return { items, total };

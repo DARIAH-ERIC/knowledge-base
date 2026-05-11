@@ -28,12 +28,14 @@ import {
 } from "react";
 import { FileTrigger, type Selection } from "react-aria-components";
 
+import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
 import { imageMimeTypes, mediaLibraryPageSize } from "@/config/assets.config";
 
 interface Asset {
 	key: string;
 	label: string;
+	mimeType: string;
 	url: string;
 }
 
@@ -295,8 +297,8 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 								<div className="flex flex-1 items-center justify-center">
 									<p className="text-center text-muted-fg text-sm">
 										{appliedQ
-											? t("No images found for your search.")
-											: t("No images found. Upload one to get started.")}
+											? t("No assets found for your search.")
+											: t("No assets found. Upload one to get started.")}
 									</p>
 								</div>
 							) : (
@@ -321,10 +323,14 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 													id={asset.key}
 													textValue={asset.label}
 												>
-													<img
+													<AssetPreview
 														alt={asset.label}
-														className="size-24 rounded-sm object-cover"
+														className="size-24"
+														imageClassName="rounded-sm object-cover"
+														kindLabelClassName="bg-background/90"
+														mimeType={asset.mimeType}
 														src={asset.url}
+														storageKey={asset.key}
 													/>
 													<span className="w-24 truncate text-center text-xs text-muted-fg">
 														{asset.label}
