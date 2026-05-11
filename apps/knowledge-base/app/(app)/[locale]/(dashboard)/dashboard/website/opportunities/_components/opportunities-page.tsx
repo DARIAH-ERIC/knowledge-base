@@ -25,6 +25,7 @@ import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
+import { EntityLifecycleStatusBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge";
 import {
 	Header,
 	HeaderAction,
@@ -45,6 +46,7 @@ interface OpportunitiesPageProps {
 			Pick<schema.Opportunity, "id" | "duration" | "sourceId" | "title" | "summary" | "website"> & {
 				documentId: string;
 				entity: Pick<schema.Entity, "slug">;
+				hasDraft: boolean;
 				isPublished: boolean;
 				source: Pick<schema.OpportunitySource, "id" | "source">;
 				updatedAt: schema.Entity["updatedAt"];
@@ -155,9 +157,10 @@ export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): Reac
 								</TableCell>
 								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 								<TableCell>
-									<Badge intent={item.isPublished ? "success" : "warning"}>
-										{item.isPublished ? t("Live") : t("Draft")}
-									</Badge>
+									<EntityLifecycleStatusBadge
+										hasDraft={item.hasDraft}
+										isPublished={item.isPublished}
+									/>
 								</TableCell>
 								<TableCell className="text-end">
 									<Menu>

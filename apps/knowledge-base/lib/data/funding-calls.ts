@@ -123,6 +123,7 @@ export async function getFundingCalls(params: GetFundingCallsParams) {
 			duration: item.duration,
 			id: item.id,
 			entity: { slug: item.slug },
+			hasDraft: item.status === "draft",
 			summary: item.summary,
 			title: item.title,
 			isPublished: item.isPublished,

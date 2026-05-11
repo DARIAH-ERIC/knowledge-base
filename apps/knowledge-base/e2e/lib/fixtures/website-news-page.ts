@@ -198,6 +198,11 @@ export class WebsiteNewsPage {
 		return this.rowByTitle(title).getByText("Live", { exact: true });
 	}
 
+	/** "Live + Draft" status badge inside a specific list row. */
+	liveAndDraftBadgeInRow(title: string): Locator {
+		return this.rowByTitle(title).getByText("Live + Draft", { exact: true });
+	}
+
 	/** "Draft" status badge inside a specific list row. */
 	draftBadgeInRow(title: string): Locator {
 		return this.rowByTitle(title).getByText("Draft", { exact: true });

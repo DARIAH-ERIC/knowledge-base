@@ -25,6 +25,7 @@ import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
+import { EntityLifecycleStatusBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge";
 import {
 	Header,
 	HeaderAction,
@@ -46,6 +47,7 @@ interface ProjectsPageProps {
 			Pick<schema.Project, "acronym" | "duration" | "funding" | "id" | "name"> & {
 				documentId: string;
 				entity: Pick<schema.Entity, "slug">;
+				hasDraft: boolean;
 				isPublished: boolean;
 				scope: Pick<schema.ProjectScope, "id" | "scope">;
 				updatedAt: Date;
@@ -162,9 +164,10 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 								</TableCell>
 								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 								<TableCell>
-									<Badge intent={item.isPublished ? "success" : "warning"}>
-										{item.isPublished ? t("Live") : t("Draft")}
-									</Badge>
+									<EntityLifecycleStatusBadge
+										hasDraft={item.hasDraft}
+										isPublished={item.isPublished}
+									/>
 								</TableCell>
 								<TableCell className="text-end">
 									<Menu>

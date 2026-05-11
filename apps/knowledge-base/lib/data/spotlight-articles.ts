@@ -123,6 +123,7 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 			id: item.id,
 			documentId: item.documentId,
 			entity: { slug: item.slug },
+			hasDraft: item.status === "draft",
 			summary: item.summary,
 			title: item.title,
 			isPublished: item.isPublished,

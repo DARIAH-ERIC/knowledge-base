@@ -45,6 +45,7 @@ export async function getEvents(params: GetEventsParams) {
 				title: schema.events.title,
 				updatedAt: schema.entityVersions.updatedAt,
 				website: schema.events.website,
+				hasDraft: sql<boolean>`${schema.entityStatus.type} = 'draft'`,
 				isPublished: sql<boolean>`
 					EXISTS (
 						SELECT
@@ -127,6 +128,7 @@ export async function getEvents(params: GetEventsParams) {
 			documentId: item.documentId,
 			location: item.location,
 			entity: { slug: item.slug },
+			hasDraft: item.hasDraft,
 			summary: item.summary,
 			title: item.title,
 			updatedAt: item.updatedAt,

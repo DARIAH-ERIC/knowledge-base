@@ -39,9 +39,9 @@ test.describe("website news lifecycle", () => {
 		// Publish → redirected to list.
 		await newsPage.publishItem();
 
-		// List: live badge visible (published version now exists).
+		// List: live + draft badge visible (published version now exists, current row is draft).
 		await newsPage.searchByTitle(title);
-		await expect(newsPage.liveBadgeInRow(title)).toBeVisible();
+		await expect(newsPage.liveAndDraftBadgeInRow(title)).toBeVisible();
 
 		// Details: draft and published versions both exist → "Live with changes" badge.
 		await newsPage.gotoDetailsFromList(title);
@@ -102,9 +102,9 @@ test.describe("website news lifecycle", () => {
 		await titleField.fill(updatedTitle);
 		await newsPage.submitForm();
 
-		// List: row appears under updated title with "Live" badge (isPublished still true).
+		// List: row appears under updated title with "Live + Draft" badge (isPublished still true).
 		await newsPage.searchByTitle(updatedTitle);
-		await expect(newsPage.liveBadgeInRow(updatedTitle)).toBeVisible();
+		await expect(newsPage.liveAndDraftBadgeInRow(updatedTitle)).toBeVisible();
 
 		// Details: "Live with changes" — draft has new title, published has original.
 		await newsPage.gotoDetailsFromList(updatedTitle);

@@ -1,7 +1,6 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Badge } from "@dariah-eric/ui/badge";
 import { Button, buttonStyles } from "@dariah-eric/ui/button";
 import { Link } from "@dariah-eric/ui/link";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
@@ -24,6 +23,7 @@ import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
+import { EntityLifecycleStatusBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge";
 import {
 	Header,
 	HeaderAction,
@@ -44,6 +44,7 @@ interface GovernanceBodiesPageProps {
 			Pick<schema.OrganisationalUnit, "acronym" | "id" | "name"> & {
 				documentId: string;
 				entity: Pick<schema.Entity, "slug">;
+				hasDraft: boolean;
 				isPublished: boolean;
 				updatedAt: Date;
 			}
@@ -137,9 +138,10 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 								<TableCell>{item.name}</TableCell>
 								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 								<TableCell>
-									<Badge intent={item.isPublished ? "success" : "warning"}>
-										{item.isPublished ? t("Live") : t("Draft")}
-									</Badge>
+									<EntityLifecycleStatusBadge
+										hasDraft={item.hasDraft}
+										isPublished={item.isPublished}
+									/>
 								</TableCell>
 								<TableCell className="text-end">
 									<Menu>

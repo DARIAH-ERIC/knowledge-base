@@ -59,10 +59,29 @@ export async function getInstitutionRelations(
 		schema.organisationalUnitTypes.type,
 		"institution" as typeof schema.organisationalUnitTypes.$inferSelect.type,
 	);
+	const lifecycleWhere = or(
+		eq(schema.entityStatus.type, "draft"),
+		and(
+			eq(schema.entityStatus.type, "published"),
+			sql`
+				NOT EXISTS (
+					SELECT
+						1
+					FROM
+						"entity_versions" AS "ev2"
+						INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
+					WHERE
+						"ev2"."entity_id" = ${schema.entityVersions.entityId}
+						AND "es2"."type" = 'draft'
+				)
+			`,
+		),
+	);
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""
 			? and(
+					lifecycleWhere,
 					baseWhere,
 					or(
 						ilike(schema.organisationalUnits.name, `%${query}%`),
@@ -113,7 +132,9 @@ export async function getInstitutionRelations(
 				schema.organisationalUnits,
 				eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.unitId),
 			)
-			.innerJoin(schema.entities, eq(schema.entities.id, schema.organisationalUnits.id))
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.innerJoin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
@@ -130,7 +151,7 @@ export async function getInstitutionRelations(
 				relatedOrganisationalUnitTypes,
 				eq(relatedOrganisationalUnitTypes.id, relatedOrganisationalUnits.typeId),
 			)
-			.where(where ?? baseWhere)
+			.where(where ?? and(lifecycleWhere, baseWhere))
 			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
@@ -141,6 +162,8 @@ export async function getInstitutionRelations(
 				schema.organisationalUnits,
 				eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.unitId),
 			)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.innerJoin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
@@ -157,7 +180,7 @@ export async function getInstitutionRelations(
 				relatedOrganisationalUnitTypes,
 				eq(relatedOrganisationalUnitTypes.id, relatedOrganisationalUnits.typeId),
 			)
-			.where(where ?? baseWhere),
+			.where(where ?? and(lifecycleWhere, baseWhere)),
 	]);
 
 	return {
