@@ -62,9 +62,9 @@ describe("newsletters", () => {
 		});
 
 		it("should return a specific message when the email is already subscribed", async () => {
-			mailchimp.subscribe.mockResolvedValue({
-				unwrap() {
-					throw new HttpError({
+			mailchimp.subscribe.mockResolvedValue(
+				Result.err(
+					new HttpError({
 						request: new Request("https://example.com"),
 						response: Response.json(
 							{ title: "Member Exists" },
@@ -73,9 +73,9 @@ describe("newsletters", () => {
 								headers: { "content-type": "application/json" },
 							},
 						),
-					});
-				},
-			});
+					}),
+				),
+			);
 
 			const client = createTestClient(undefined as never);
 
