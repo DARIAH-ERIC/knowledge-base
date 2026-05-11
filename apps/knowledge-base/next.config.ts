@@ -57,6 +57,8 @@ const config: Config = {
 			},
 		},
 	},
+	/** Required for i18n messages extraction, to compile `useExtracted` to `useTranslations`. */
+	transpilePackages: ["@dariah-eric/ui"],
 	// typedRoutes: true,
 	typescript: {
 		ignoreBuildErrors: true,

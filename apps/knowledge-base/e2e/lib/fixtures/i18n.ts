@@ -45,12 +45,10 @@ async function getIntlMessages(locale: IntlLocale): Promise<IntlMessages> {
 		// { default: extracted },
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		{ default: metadata },
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-		{ default: ui },
+		// eslint-disable-next-line unicorn/no-single-promise-in-promise-methods
 	] = await Promise.all([
 		// import(`@/messages/${language}.json`, { with: { type: "json" } }),
 		import(`@/messages/metadata/${language}/index.json`, { with: { type: "json" } }),
-		import(`@dariah-eric/ui/i18n/${language}`, { with: { type: "json" } }),
 	]);
 
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -73,7 +71,6 @@ async function getIntlMessages(locale: IntlLocale): Promise<IntlMessages> {
 
 	const messages = {
 		// ...extracted,
-		...ui,
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		metadata: {
 			...metadata,
