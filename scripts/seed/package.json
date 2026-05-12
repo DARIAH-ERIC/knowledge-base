@@ -7,8 +7,8 @@
 	"scripts": {
 		"data:seed:kitchen-sink": "tsx ./scripts/create-kitchen-sink-entities.ts",
 		"data:seed:users:admin": "tsx ./scripts/create-initial-admin-user.ts",
-		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
-		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
+		"format:check": "oxfmt --check",
+		"format:fix": "oxfmt --write",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
 		"types:check": "tsc --noEmit"
@@ -23,7 +23,6 @@
 		"@dariah-eric/storage": "workspace:^",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
-		"prettier": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:",
 		"valibot": "catalog:"

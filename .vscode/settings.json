@@ -4,7 +4,7 @@
 	"editor.codeActionsOnSave": {
 		"source.fixAll": "explicit"
 	},
-	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.defaultFormatter": "oxc.oxc-vscode",
 	"editor.detectIndentation": false,
 	"editor.formatOnSave": true,
 	"editor.inlayHints.enabled": "offUnlessPressed",
@@ -53,6 +53,8 @@
 	"js/ts.tsdk.promptToUseWorkspaceVersion": true,
 	"less.validate": false,
 	"mdx.server.enable": true,
+	"oxc.enable.oxfmt": true,
+	"prettier.enable": false,
 	"scss.validate": false,
 	"search.exclude": {
 		"**/.next/**": true,

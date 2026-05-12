@@ -15,8 +15,8 @@
 		"data:ingest:search:entities": "tsx ./scripts/ingest-search-index-entities.ts",
 		"data:ingest:search:resources": "tsx ./scripts/ingest-search-index-resources.ts",
 		"data:ingest:sshoc": "tsx ./scripts/ingest-sshoc-services.ts",
-		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
-		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
+		"format:check": "oxfmt --check",
+		"format:fix": "oxfmt --write",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
 		"types:check": "tsc --noEmit"
@@ -42,7 +42,6 @@
 		"@types/node": "catalog:",
 		"better-result": "catalog:",
 		"eslint": "catalog:",
-		"prettier": "catalog:",
 		"remark-parse": "catalog:",
 		"remark-stringify": "catalog:",
 		"strip-markdown": "catalog:",

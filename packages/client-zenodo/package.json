@@ -13,8 +13,8 @@
 	"scripts": {
 		"build": "tsdown --sourcemap ./lib/index.ts",
 		"dev": "tsdown --watch ./lib/index.ts",
-		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
-		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
+		"format:check": "oxfmt --check",
+		"format:fix": "oxfmt --write",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
 		"types:check": "tsc --noEmit"
@@ -25,7 +25,6 @@
 		"@dariah-eric/request": "workspace:^",
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
-		"prettier": "catalog:",
 		"typescript": "catalog:",
 		"better-result": "catalog:",
 		"tsdown": "catalog:"
