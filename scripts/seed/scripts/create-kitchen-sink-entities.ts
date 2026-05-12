@@ -7,7 +7,7 @@ import { createDatabaseService, type Database, type Transaction } from "@dariah-
 import * as schema from "@dariah-eric/database/schema";
 import { eq, inArray } from "@dariah-eric/database/sql";
 import { type ResourceDocument, resourceSources, resourceTypes } from "@dariah-eric/search";
-import { createSearchAdminService, type SearchAdminService } from "@dariah-eric/search/admin";
+import { createSearchAdminService } from "@dariah-eric/search/admin";
 import { createStorageService } from "@dariah-eric/storage";
 
 import { env } from "../config/env.config";
@@ -60,30 +60,46 @@ async function uploadKitchenSinkAssets() {
 	]);
 
 	const uploads = await Promise.all([
-		storage.images.upload({
-			input: featuredImage,
-			metadata: { "content-type": "image/png", name: "featured-image.png" },
-			prefix: "images",
-			size: featuredImage.length,
-		}),
-		storage.images.upload({
-			input: heroImage,
-			metadata: { "content-type": "image/png", name: "hero-image.png" },
-			prefix: "images",
-			size: heroImage.length,
-		}),
-		storage.images.upload({
-			input: avatarImage,
-			metadata: { "content-type": "image/png", name: "avatar.png" },
-			prefix: "avatars",
-			size: avatarImage.length,
-		}),
-		storage.images.upload({
-			input: documentPdf,
-			metadata: { "content-type": "application/pdf", name: "document.pdf" },
-			prefix: "documents",
-			size: documentPdf.length,
-		}),
+		storage
+			.upload({
+				input: featuredImage,
+				metadata: { "content-type": "image/png", name: "featured-image.png" },
+				prefix: "images",
+				size: featuredImage.length,
+			})
+			.then((result) => {
+				return result.unwrap();
+			}),
+		storage
+			.upload({
+				input: heroImage,
+				metadata: { "content-type": "image/png", name: "hero-image.png" },
+				prefix: "images",
+				size: heroImage.length,
+			})
+			.then((result) => {
+				return result.unwrap();
+			}),
+		storage
+			.upload({
+				input: avatarImage,
+				metadata: { "content-type": "image/png", name: "avatar.png" },
+				prefix: "avatars",
+				size: avatarImage.length,
+			})
+			.then((result) => {
+				return result.unwrap();
+			}),
+		storage
+			.upload({
+				input: documentPdf,
+				metadata: { "content-type": "application/pdf", name: "document.pdf" },
+				prefix: "documents",
+				size: documentPdf.length,
+			})
+			.then((result) => {
+				return result.unwrap();
+			}),
 	]);
 
 	return {
@@ -92,33 +108,6 @@ async function uploadKitchenSinkAssets() {
 		featuredImageKey: uploads[0].key,
 		heroImageKey: uploads[1].key,
 	};
-}
-
-function getOptionalSearchAdminService(): SearchAdminService | null {
-	if (
-		env.TYPESENSE_ADMIN_API_KEY == null ||
-		env.TYPESENSE_HOST == null ||
-		env.TYPESENSE_PORT == null ||
-		env.TYPESENSE_RESOURCE_COLLECTION_NAME == null ||
-		env.TYPESENSE_WEBSITE_COLLECTION_NAME == null
-	) {
-		return null;
-	}
-
-	return createSearchAdminService({
-		apiKey: env.TYPESENSE_ADMIN_API_KEY,
-		nodes: [
-			{
-				host: env.TYPESENSE_HOST,
-				port: env.TYPESENSE_PORT,
-				protocol: env.TYPESENSE_PROTOCOL,
-			},
-		],
-		collections: {
-			resources: env.TYPESENSE_RESOURCE_COLLECTION_NAME,
-			website: env.TYPESENSE_WEBSITE_COLLECTION_NAME,
-		},
-	});
 }
 
 /* eslint-disable
@@ -194,14 +183,20 @@ async function upsertPublishedDocument(
 */
 
 async function ensureRelatedResources() {
-	const search = getOptionalSearchAdminService();
-
-	if (search == null) {
-		log.warn(
-			"Skipping Typesense resource seeding because TYPESENSE_* env vars are not fully configured.",
-		);
-		return [] as Array<string>;
-	}
+	const search = createSearchAdminService({
+		apiKey: env.TYPESENSE_ADMIN_API_KEY,
+		nodes: [
+			{
+				host: env.TYPESENSE_HOST,
+				port: env.TYPESENSE_PORT,
+				protocol: env.TYPESENSE_PROTOCOL,
+			},
+		],
+		collections: {
+			resources: env.TYPESENSE_RESOURCE_COLLECTION_NAME,
+			website: env.TYPESENSE_WEBSITE_COLLECTION_NAME,
+		},
+	});
 
 	const createResult = await search.collections.resources.create();
 	if (createResult.isErr()) {

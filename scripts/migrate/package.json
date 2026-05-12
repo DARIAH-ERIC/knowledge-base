@@ -1,17 +1,17 @@
 {
-	"name": "@dariah-eric/data-migration",
+	"name": "@dariah-eric/migrate",
 	"private": true,
 	"license": "MIT",
 	"type": "module",
 	"sideEffects": false,
 	"scripts": {
+		"data:migrate:get-unr-schema": "drizzle-kit introspect --config=./config/unr-db.config.ts",
+		"data:migrate:unr": "tsx ./scripts/migrate-unr.ts",
+		"data:migrate:wordpress": "tsx ./scripts/migrate-wordpress.ts",
 		"format:check": "oxfmt --check",
 		"format:fix": "oxfmt --write",
-		"get-unr-schema": "drizzle-kit introspect --config=./config/unr-db.config.ts",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
-		"migrate": "tsx ./scripts/migrate.ts",
-		"migrate-unr-data": "tsx ./scripts/migrate-unr-data.ts",
 		"types:check": "tsc --noEmit"
 	},
 	"dependencies": {
