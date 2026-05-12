@@ -92,7 +92,7 @@ describe("newsletters", () => {
 			});
 		});
 
-		it("should return a generic message for Mailchimp validation errors", async () => {
+		it("should forward the Mailchimp fake or invalid email message", async () => {
 			mailchimp.subscribe.mockResolvedValue(
 				Result.err(
 					new HttpError({
@@ -121,7 +121,7 @@ describe("newsletters", () => {
 
 			expect(response.status).toBe(400);
 			await expect(response.json()).resolves.toEqual({
-				message: "Bad Request",
+				message: "test@example.com looks fake or invalid, please enter a real email address.",
 			});
 		});
 

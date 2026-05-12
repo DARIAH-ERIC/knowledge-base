@@ -69,6 +69,13 @@ export async function subscribeToNewsletter(params: SubscribeToNewsletterParams)
 					if (status === 400 && data.title === "Member Exists") {
 						message = "Already subscribed";
 					}
+
+					if (
+						status === 400 &&
+						data.detail === `${email} looks fake or invalid, please enter a real email address.`
+					) {
+						message = data.detail;
+					}
 				} catch {
 					/** Noop */
 				}
