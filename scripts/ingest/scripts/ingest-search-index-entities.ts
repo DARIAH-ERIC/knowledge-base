@@ -4,12 +4,12 @@ import { parseArgs } from "node:util";
 import { log } from "@acdh-oeaw/lib";
 import { createDatabaseService } from "@dariah-eric/database";
 import { createSearchService } from "@dariah-eric/search";
-import { createSearchAdminService } from "@dariah-eric/search/admin";
 import {
 	createWebsiteSearchIndexService,
 	type SupportedWebsiteEntityType,
 	supportedWebsiteEntityTypes,
 } from "@dariah-eric/search-website";
+import { createSearchAdminService } from "@dariah-eric/search/admin";
 
 import { env } from "../config/env.config.ts";
 

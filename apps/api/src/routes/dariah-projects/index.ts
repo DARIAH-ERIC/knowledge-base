@@ -19,9 +19,7 @@ import {
 } from "@/routes/dariah-projects/service";
 
 export const router = createRouter()
-	/**
-	 * GET /api/dariah-projects
-	 */
+	/** GET /api/dariah-projects */
 	.get(
 		"/",
 		describeRoute({
@@ -56,9 +54,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/dariah-projects/slugs
-	 */
+	/** GET /api/dariah-projects/slugs */
 	.get(
 		"/slugs",
 		describeRoute({
@@ -93,9 +89,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/dariah-projects/:id
-	 */
+	/** GET /api/dariah-projects/:id */
 	.get(
 		"/:id",
 		describeRoute({
@@ -135,9 +129,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/dariah-projects/slugs/:slug
-	 */
+	/** GET /api/dariah-projects/slugs/:slug */
 	.get(
 		"/slugs/:slug",
 		describeRoute({

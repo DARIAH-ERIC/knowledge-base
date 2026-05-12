@@ -22,6 +22,7 @@ import { Keyboard } from "./keyboard";
 
 /**
  * Note: This is not exposed component, but it's used in other components to render dropdowns.
+ *
  * @internal
  */
 export const dropdownSectionStyles = tv({

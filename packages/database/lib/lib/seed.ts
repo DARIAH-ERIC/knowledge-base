@@ -22,7 +22,7 @@ interface SeedManifest {
 export interface SeedConfig {
 	/** @default "2025-01-01" */
 	defaultRefDate?: Date;
-	/** default 42 */
+	/** Default 42 */
 	seed?: number;
 	seedManifest?: SeedManifest;
 }
@@ -35,9 +35,9 @@ interface DocumentVersion {
 }
 
 /**
- * For each input slug: insert one `entities` row (the document) and one
- * `entity_versions` row referencing it. Returns the pair of ids per input,
- * in the same order, so callers can attach subtype data by index.
+ * For each input slug: insert one `entities` row (the document) and one `entity_versions` row
+ * referencing it. Returns the pair of ids per input, in the same order, so callers can attach
+ * subtype data by index.
  */
 async function createDocumentVersions(
 	db: SeedTx,

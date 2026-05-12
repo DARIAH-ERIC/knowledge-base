@@ -9,9 +9,7 @@ import { GetStatistics } from "@/routes/statistics/schemas";
 import { getStatistics } from "@/routes/statistics/service";
 
 export const router = createRouter()
-	/**
-	 * GET /api/statistics
-	 */
+	/** GET /api/statistics */
 	.get(
 		"/",
 		describeRoute({

@@ -3,11 +3,11 @@ import { STATUS_CODES } from "node:http";
 import type { StorageService } from "@dariah-eric/storage";
 import * as Sentry from "@sentry/node";
 import type { TypedResponse } from "hono";
+import { rateLimiter } from "hono-rate-limiter";
 import { cors } from "hono/cors";
 import { createFactory } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { requestId } from "hono/request-id";
-import { rateLimiter } from "hono-rate-limiter";
 
 import type { Database, Transaction } from "@/middlewares/db";
 import { type Logger, logger } from "@/middlewares/logger";

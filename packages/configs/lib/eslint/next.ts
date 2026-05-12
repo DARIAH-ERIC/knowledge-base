@@ -6,11 +6,11 @@ import nodeConfig from "@acdh-oeaw/eslint-config-node";
 import playwrightConfig from "@acdh-oeaw/eslint-config-playwright";
 import reactConfig from "@acdh-oeaw/eslint-config-react";
 import tailwindConfig from "@acdh-oeaw/eslint-config-tailwindcss";
-import { defineConfig, globalIgnores } from "eslint/config";
 import gitignore from "eslint-config-flat-gitignore";
 import checkFilePlugin from "eslint-plugin-check-file";
 import perfectionistPlugin from "eslint-plugin-perfectionist";
 import unicornPlugin from "eslint-plugin-unicorn";
+import { defineConfig, globalIgnores } from "eslint/config";
 
 export const restrictedImports = {
 	paths: [
@@ -58,6 +58,13 @@ const config = defineConfig(
 			"object-shorthand": ["error", "always", { avoidExplicitReturnArrows: true }],
 			"preserve-caught-error": "error",
 			"import-x/no-unresolved": "off",
+		},
+	},
+	/** Sorting is handled by `oxfmt` now. */
+	{
+		rules: {
+			"simple-import-sort/imports": "off",
+			"simple-import-sort/exports": "off",
 		},
 	},
 	{

@@ -1,6 +1,6 @@
+import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { ImageResponse } from "next/og";
-import { getExtracted } from "next-intl/server";
 
 import { MetadataImage } from "@/components/metadata-image";
 import { isValidLocale } from "@/lib/i18n/locales";

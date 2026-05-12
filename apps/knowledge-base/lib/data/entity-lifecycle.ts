@@ -17,24 +17,22 @@ export interface DocumentVersions {
 /**
  * Adapter that each entity type must implement to participate in the lifecycle.
  *
- * The generic helpers (ensureDraftVersion, publishVersion, discardDraftVersion) own
- * the entity_versions row, fields, content blocks, and document-level relations.
- * The adapter owns the type-specific subtype table row and any child rows it
- * controls directly (e.g. gallery items live under the content-block layer and are
- * handled by the generic clone, but a subtype-specific join table like
- * impactCaseStudiesToPersons is the adapter's responsibility).
+ * The generic helpers (ensureDraftVersion, publishVersion, discardDraftVersion) own the
+ * entity_versions row, fields, content blocks, and document-level relations. The adapter owns the
+ * type-specific subtype table row and any child rows it controls directly (e.g. gallery items live
+ * under the content-block layer and are handled by the generic clone, but a subtype-specific join
+ * table like impactCaseStudiesToPersons is the adapter's responsibility).
  */
 export interface EntityLifecycleAdapter {
 	/**
-	 * Copy the subtype row (and any subtype-owned children) from sourceVersionId to
-	 * targetVersionId. targetVersionId already exists as an entity_versions row.
+	 * Copy the subtype row (and any subtype-owned children) from sourceVersionId to targetVersionId.
+	 * targetVersionId already exists as an entity_versions row.
 	 */
 	cloneSubtype(tx: Transaction, sourceVersionId: string, targetVersionId: string): Promise<void>;
 
 	/**
-	 * Delete the subtype row (and any subtype-owned children) for versionId, in
-	 * preparation for it being overwritten. Do NOT delete the entity_versions row
-	 * itself — the caller does that.
+	 * Delete the subtype row (and any subtype-owned children) for versionId, in preparation for it
+	 * being overwritten. Do NOT delete the entity_versions row itself — the caller does that.
 	 */
 	wipeSubtype(tx: Transaction, versionId: string): Promise<void>;
 }
@@ -186,9 +184,8 @@ async function cloneTypedContentBlock(
 }
 
 /**
- * Copy all fields and content blocks (including all typed block variants) from
- * one entity version to another. Does not touch the subtype row — that is the
- * adapter's responsibility.
+ * Copy all fields and content blocks (including all typed block variants) from one entity version
+ * to another. Does not touch the subtype row — that is the adapter's responsibility.
  */
 async function cloneVersionContent(
 	tx: Transaction,
@@ -236,9 +233,9 @@ async function cloneVersionContent(
 }
 
 /**
- * Delete all fields and content blocks owned by a version. Typed content block
- * rows cascade automatically when content_blocks rows are deleted. Does NOT
- * delete the entity_versions row itself.
+ * Delete all fields and content blocks owned by a version. Typed content block rows cascade
+ * automatically when content_blocks rows are deleted. Does NOT delete the entity_versions row
+ * itself.
  */
 async function wipeVersionContent(tx: Transaction, versionId: string): Promise<void> {
 	const fieldRows = await tx
@@ -260,9 +257,8 @@ async function wipeVersionContent(tx: Transaction, versionId: string): Promise<v
 // ---------------------------------------------------------------------------
 
 /**
- * Insert a new document + published version row.
- * Subtype rows should be inserted with `id: versionId`.
- * Cross-document relations should reference `documentId`.
+ * Insert a new document + published version row. Subtype rows should be inserted with `id:
+ * versionId`. Cross-document relations should reference `documentId`.
  */
 export async function createPublishedDocument(
 	tx: Transaction,
@@ -281,8 +277,7 @@ export async function createPublishedDocument(
 }
 
 /**
- * Insert a new document + draft version row.
- * Subtype rows should be inserted with `id: versionId`.
+ * Insert a new document + draft version row. Subtype rows should be inserted with `id: versionId`.
  * Cross-document relations should reference `documentId`.
  */
 export async function createDraftDocument(
@@ -325,9 +320,9 @@ export async function getDocumentVersions(
 }
 
 /**
- * Return the draft version ID for `documentId`, creating one if it does not
- * exist yet. When creating, clones fields, content blocks, and subtype data
- * from the published version (if one exists).
+ * Return the draft version ID for `documentId`, creating one if it does not exist yet. When
+ * creating, clones fields, content blocks, and subtype data from the published version (if one
+ * exists).
  *
  * Returns the draft version ID.
  */
@@ -353,13 +348,13 @@ export async function ensureDraftVersion(
 /**
  * Promote the draft version of `documentId` to published.
  *
- * - If no published version exists yet: creates a new published version row and
- *   copies content from draft.
- * - If a published version already exists: wipes its content and replaces it
- *   with the draft content (the published version ID is stable across republishes).
+ * - If no published version exists yet: creates a new published version row and copies content from
+ *   draft.
+ * - If a published version already exists: wipes its content and replaces it with the draft content
+ *   (the published version ID is stable across republishes).
  *
- * Returns the published version ID.
- * Asserts that a draft version exists — callers should ensure one is present.
+ * Returns the published version ID. Asserts that a draft version exists — callers should ensure one
+ * is present.
  */
 export async function publishVersion(
 	tx: Transaction,
@@ -385,10 +380,7 @@ export async function publishVersion(
 	return publishedId;
 }
 
-/**
- * Delete the draft version of `documentId` (if one exists). Does not affect
- * the published version.
- */
+/** Delete the draft version of `documentId` (if one exists). Does not affect the published version. */
 export async function discardDraftVersion(
 	tx: Transaction,
 	documentId: string,
@@ -413,12 +405,11 @@ export async function getDocumentIdForVersion(tx: Transaction, versionId: string
 }
 
 /**
- * Delete the generic tail of a document: fields and content blocks under
- * `versionId`, cross-document relations, the version row, and the document
- * row itself.
+ * Delete the generic tail of a document: fields and content blocks under `versionId`,
+ * cross-document relations, the version row, and the document row itself.
  *
- * The subtype row must be deleted by the caller before calling this — each
- * subtype lives in a different table, and this helper does not know which.
+ * The subtype row must be deleted by the caller before calling this — each subtype lives in a
+ * different table, and this helper does not know which.
  */
 export async function deleteDocumentVersionTail(
 	tx: Transaction,

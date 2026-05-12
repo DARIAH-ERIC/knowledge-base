@@ -3,23 +3,22 @@
 	"private": true,
 	"license": "MIT",
 	"type": "module",
+	"sideEffects": false,
 	"exports": {
 		"./eslint/drizzle": "./lib/eslint/drizzle.ts",
 		"./eslint/next": "./lib/eslint/next.ts",
 		"./eslint/node": "./lib/eslint/node.ts",
 		"./eslint/storybook": "./lib/eslint/storybook.ts",
 		"./eslint/turbo": "./lib/eslint/turbo.ts",
-		"./prettier": "./lib/prettier/index.ts",
 		"./typescript/app": "./lib/typescript/app.json",
 		"./typescript/app-build": "./lib/typescript/app-build.json",
 		"./typescript/base": "./lib/typescript/lib.json",
 		"./typescript/lib": "./lib/typescript/lib.json",
 		"./typescript/lib-build": "./lib/typescript/lib-build.json"
 	},
-	"sideEffects": false,
 	"scripts": {
-		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
-		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
+		"format:check": "oxfmt --check",
+		"format:fix": "oxfmt --write",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
 		"types:check": "tsc --noEmit"
@@ -32,7 +31,6 @@
 		"@acdh-oeaw/eslint-config-react": "catalog:",
 		"@acdh-oeaw/eslint-config-storybook": "catalog:",
 		"@acdh-oeaw/eslint-config-tailwindcss": "catalog:",
-		"@acdh-oeaw/prettier-config": "catalog:",
 		"@acdh-oeaw/tsconfig": "catalog:",
 		"@acdh-oeaw/tsconfig-lib": "catalog:",
 		"eslint-config-flat-gitignore": "catalog:",
@@ -41,35 +39,15 @@
 		"eslint-plugin-drizzle": "catalog:",
 		"eslint-plugin-perfectionist": "catalog:",
 		"eslint-plugin-unicorn": "catalog:",
-		"globals": "catalog:",
-		"prettier-plugin-embed": "catalog:",
-		"prettier-plugin-sql": "catalog:"
-	},
-	"peerDependencies": {
-		"eslint": "*",
-		"prettier": "*",
-		"typescript": "*"
+		"globals": "catalog:"
 	},
 	"devDependencies": {
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
-		"prettier": "catalog:",
 		"typescript": "catalog:"
 	},
-	"browserslist": {
-		"development": [
-			"baseline newly available"
-		],
-		"production": [
-			"baseline widely available"
-		]
-	},
-	"lint-staged": {
-		"*.@(js|ts)": [
-			"eslint --fix --flag unstable_native_nodejs_ts_config",
-			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write"
-		],
-		"*.!(js|ts)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
-	},
-	"prettier": "./lib/prettier/index.ts"
+	"peerDependencies": {
+		"eslint": "*",
+		"typescript": "*"
+	}
 }

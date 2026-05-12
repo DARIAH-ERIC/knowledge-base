@@ -49,8 +49,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			return {
 				url: String(createUrl({ baseUrl, pathname: getPathname({ href: { pathname }, locale }) })),
 				/**
-				 * Only add `lastmod` when the publication date is actually known.
-				 * Don't use the build date instead.
+				 * Only add `lastmod` when the publication date is actually known. Don't use the build date
+				 * instead.
 				 */
 				// lastModified: new Date(),
 			};

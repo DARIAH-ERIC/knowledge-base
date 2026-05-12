@@ -56,7 +56,7 @@ export const subscribeNewsletterAction = createServerAction<
 					});
 				}
 			} catch {
-				/** noop */
+				/** Noop */
 			}
 		}
 

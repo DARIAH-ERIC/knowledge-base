@@ -56,8 +56,7 @@ jobs:
       NEXT_PUBLIC_APP_SERVICE_ID: "${{ vars.APP_SERVICE_ID }}"
       NEXT_PUBLIC_WEBSITE_BASE_URL: "http://localhost:3002"
       NEXT_PUBLIC_WEBSITE_IMPRINT_CUSTOM_CONFIG: "disabled"
-      NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL:
-        "${{ vars.NEXT_PUBLIC_IMPRINT_SERVICE_BASE_URL }}"
+      NEXT_PUBLIC_WEBSITE_IMPRINT_SERVICE_BASE_URL: "${{ vars.NEXT_PUBLIC_IMPRINT_SERVICE_BASE_URL }}"
       NEXT_PUBLIC_WEBSITE_MATOMO_BASE_URL: "${{ vars.NEXT_PUBLIC_MATOMO_BASE_URL }}"
       NEXT_PUBLIC_WEBSITE_MATOMO_ID: "${{ vars.NEXT_PUBLIC_WEBSITE_MATOMO_ID }}"
       NEXT_PUBLIC_WEBSITE_SERVICE_ID: "${{ vars.WEBSITE_SERVICE_ID }}"
@@ -164,8 +163,7 @@ jobs:
         id: cache-playwright-browsers
         with:
           path: "~/.cache/ms-playwright"
-          key:
-            "${{ matrix.os }}-${{ matrix.node-version }}-playwright-browsers-${{
+          key: "${{ matrix.os }}-${{ matrix.node-version }}-playwright-browsers-${{
             env.PLAYWRIGHT_VERSION }}"
 
       - name: Install playwright browsers

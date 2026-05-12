@@ -107,12 +107,8 @@
 			"dependsOn": ["^build"],
 			"persistent": true
 		},
-		"//#format:check": {
-			"outputs": [".prettiercache"]
-		},
-		"//#format:fix": {
-			"outputs": [".prettiercache"]
-		},
+		"//#format:check": {},
+		"//#format:fix": {},
 		"lint:check": {
 			"dependsOn": ["^build"],
 			"outputs": [".stylelintcache"]

@@ -18,9 +18,7 @@ const subscribeRateLimiter = rateLimiter({
 });
 
 export const router = createRouter()
-	/**
-	 * GET /api/newsletters
-	 */
+	/** GET /api/newsletters */
 	.get(
 		"/",
 		describeRoute({
@@ -52,9 +50,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * POST /api/newsletters/subscribe
-	 */
+	/** POST /api/newsletters/subscribe */
 	.post(
 		"/subscribe",
 		describeRoute({

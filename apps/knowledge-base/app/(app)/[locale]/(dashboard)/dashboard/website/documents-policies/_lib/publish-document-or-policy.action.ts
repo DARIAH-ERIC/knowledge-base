@@ -1,8 +1,8 @@
 "use server";
 
+import { getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
-import { getLocale } from "next-intl/server";
 
 import { assertAdmin } from "@/lib/auth/session";
 import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";

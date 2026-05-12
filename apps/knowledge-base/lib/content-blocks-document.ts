@@ -20,10 +20,9 @@ interface EmbedBlock {
 export type MergeableBlock = RichTextBlock | ImageBlock | EmbedBlock;
 
 /**
- * Merges an ordered sequence of rich_text and image blocks into a single Tiptap
- * document. Image blocks become `assetImage` nodes; rich_text blocks contribute
- * their child nodes directly. The result is used as the initial content of the
- * unified editor.
+ * Merges an ordered sequence of rich_text and image blocks into a single Tiptap document. Image
+ * blocks become `assetImage` nodes; rich_text blocks contribute their child nodes directly. The
+ * result is used as the initial content of the unified editor.
  */
 export function mergeBlocksToDocument(blocks: Array<MergeableBlock>): JSONContent {
 	const nodes: Array<JSONContent> = [];
@@ -61,10 +60,10 @@ export function mergeBlocksToDocument(blocks: Array<MergeableBlock>): JSONConten
 }
 
 /**
- * Splits a unified Tiptap document back into an ordered array of rich_text and
- * image ContentBlockInputs. `assetImage` nodes become image blocks; runs of
- * other nodes become rich_text blocks. All produced blocks are treated as new
- * (no `id` / `position`) so the server will delete the old blocks and re-insert.
+ * Splits a unified Tiptap document back into an ordered array of rich_text and image
+ * ContentBlockInputs. `assetImage` nodes become image blocks; runs of other nodes become rich_text
+ * blocks. All produced blocks are treated as new (no `id` / `position`) so the server will delete
+ * the old blocks and re-insert.
  */
 export function splitDocumentToBlocks(doc: JSONContent): Array<ContentBlockInput> {
 	const nodes = doc.content ?? [];

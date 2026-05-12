@@ -1,7 +1,7 @@
 import cn from "clsx/lite";
-import { connection } from "next/server";
 // import { connection } from "next/server";
 import { useTranslations } from "next-intl";
+import { connection } from "next/server";
 import type { ComponentProps, ReactNode } from "react";
 
 import { NavLink } from "@/app/(app)/[locale]/(default)/_components/nav-link";

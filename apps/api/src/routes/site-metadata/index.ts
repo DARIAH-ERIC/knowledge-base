@@ -9,9 +9,7 @@ import { GetSiteMetadata } from "@/routes/site-metadata/schemas";
 import { getSiteMetadata } from "@/routes/site-metadata/service";
 
 export const router = createRouter()
-	/**
-	 * GET /api/site-metadata
-	 */
+	/** GET /api/site-metadata */
 	.get(
 		"/",
 		describeRoute({

@@ -7,8 +7,8 @@ import {
 	HeaderDescription,
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
-import { getWorkingGroupReportHeaderForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
 import { WorkingGroupReportStepNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[id]/edit/_components/working-group-report-step-nav";
+import { getWorkingGroupReportHeaderForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
 import { assertAuthenticated } from "@/lib/auth/session";
 
 interface WorkingGroupReportEditLayoutProps extends LayoutProps<"/[locale]/dashboard/reporting/working-group-reports/[id]/edit"> {}

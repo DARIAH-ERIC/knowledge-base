@@ -70,7 +70,7 @@ export async function subscribeToNewsletter(params: SubscribeToNewsletterParams)
 						message = "Already subscribed";
 					}
 				} catch {
-					/** noop */
+					/** Noop */
 				}
 			}
 

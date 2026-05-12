@@ -25,6 +25,7 @@ export type ItemFacet = "activity" | "keyword" | "language";
  * Dynamic expression filter fields for the `d.` query param prefix.
  *
  * Standard index fields defined in `SearchFilter.ITEMS_INDEX_TYPE_PROPERTIES`:
+ *
  * @see {@link https://github.com/sshoc/sshoc-marketplace-backend/blob/master/src/main/java/eu/sshopencloud/marketplace/services/search/filter/SearchFilter.java}
  *
  * Dynamic property type codes defined in `property-type-data.yml`:

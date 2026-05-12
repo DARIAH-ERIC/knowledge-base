@@ -3,20 +3,17 @@
 	"private": true,
 	"license": "MIT",
 	"type": "module",
-	"engines": {
-		"node": "24.x"
-	},
 	"scripts": {
 		"analyze": "next experimental-analyze",
 		"build": "next build --experimental-next-config-strip-types",
 		"dev": "PORT=3002 next dev --experimental-next-config-strip-types",
 		"dev:watch": "PORT=3002 next dev --experimental-next-config-strip-types",
-		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
-		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
+		"format:check": "oxfmt --check",
+		"format:fix": "oxfmt --write",
 		"lint:check": "run-p --continue-on-error \"lint:*:check\"",
-		"lint:fix": "run-p --continue-on-error \"lint:*:fix\"",
 		"lint:code:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:code:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
+		"lint:fix": "run-p --continue-on-error \"lint:*:fix\"",
 		"lint:styles:check": "stylelint \"./styles/**/*.css\" --cache --config-basedir ../../packages/config --ignore-path ./../../.gitignore",
 		"lint:styles:fix": "stylelint \"./styles/**/*.css\" --cache --fix --ignore-path ./../../.gitignore",
 		"prepare": "run-s types:prepare",
@@ -87,7 +84,6 @@
 		"next-devtools-mcp": "catalog:",
 		"npm-run-all2": "catalog:",
 		"null-loader": "catalog:",
-		"prettier": "catalog:",
 		"schema-dts": "catalog:",
 		"stylelint": "catalog:",
 		"stylelint-config-standard": "catalog:",
@@ -97,32 +93,15 @@
 		"tw-animate-css": "catalog:",
 		"typescript": "catalog:"
 	},
-	"browserslist": {
-		"development": [
-			"baseline newly available"
-		],
-		"production": [
-			"baseline widely available"
-		]
+	"stylelint": {
+		"extends": "@acdh-oeaw/stylelint-config"
 	},
-	"lint-staged": {
-		"*.@(js|ts|tsx)": [
-			"eslint --fix --flag unstable_native_nodejs_ts_config",
-			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write"
-		],
-		"*.@(css)": [
-			"stylelint --cache --fix",
-			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write"
-		],
-		"*.!(css|js|ts|tsx)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
+	"engines": {
+		"node": "24.x"
 	},
 	"postcss": {
 		"plugins": {
 			"@tailwindcss/postcss": {}
 		}
-	},
-	"prettier": "@dariah-eric/configs/prettier",
-	"stylelint": {
-		"extends": "@acdh-oeaw/stylelint-config"
 	}
 }

@@ -2,10 +2,13 @@
 	"name": "@dariah-eric/database",
 	"private": true,
 	"license": "MIT",
+	"files": [
+		"./config/",
+		"./db/",
+		"./dist/"
+	],
 	"type": "module",
-	"engines": {
-		"node": "24.x"
-	},
+	"sideEffects": false,
 	"exports": {
 		".": "./dist/index.mjs",
 		"./client": "./dist/client.mjs",
@@ -15,12 +18,6 @@
 		"./schema": "./dist/schema.mjs",
 		"./sql": "./dist/sql.mjs"
 	},
-	"files": [
-		"./config/",
-		"./db/",
-		"./dist/"
-	],
-	"sideEffects": false,
 	"scripts": {
 		"build": "tsdown",
 		"db:migrations:apply": "drizzle-kit migrate --config=./config/drizzle.config.ts",
@@ -31,8 +28,8 @@
 		"db:seed": "tsx ./scripts/seed.ts",
 		"db:studio": "drizzle-kit studio --config=./config/drizzle.config.ts",
 		"dev": "tsdown --watch",
-		"format:check": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore",
-		"format:fix": "prettier . --cache --cache-location ./../../.prettiercache --check --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write",
+		"format:check": "oxfmt --check",
+		"format:fix": "oxfmt --write",
 		"generate:dbml-schema": "tsx ./scripts/generate-dbml-schema.ts",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
@@ -40,8 +37,8 @@
 	},
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
-		"@tiptap/core": "catalog:",
 		"@dariah-eric/env": "workspace:^",
+		"@tiptap/core": "catalog:",
 		"better-result": "catalog:",
 		"drizzle-orm": "catalog:",
 		"drizzle-valibot": "catalog:",
@@ -59,25 +56,11 @@
 		"drizzle-kit": "catalog:",
 		"drizzle-seed": "catalog:",
 		"eslint": "catalog:",
-		"prettier": "catalog:",
 		"tsdown": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:"
 	},
-	"browserslist": {
-		"development": [
-			"baseline newly available"
-		],
-		"production": [
-			"baseline widely available"
-		]
-	},
-	"lint-staged": {
-		"*.@(js|ts)": [
-			"eslint --fix --flag unstable_native_nodejs_ts_config",
-			"prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --write"
-		],
-		"*.!(js|ts)": "prettier --cache --cache-location ./../../.prettiercache --ignore-path ./../../.gitignore --ignore-path ./../../.prettierignore --ignore-unknown --write"
-	},
-	"prettier": "@dariah-eric/configs/prettier"
+	"engines": {
+		"node": "24.x"
+	}
 }

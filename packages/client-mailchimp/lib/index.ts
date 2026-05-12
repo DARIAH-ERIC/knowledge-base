@@ -157,8 +157,8 @@ export function createMailchimpClient(params: CreateMailchimpClientParams) {
 						pathname: `/3.0/lists/${listId}/members`,
 						searchParams: createUrlSearchParams({
 							/**
-							 * Currently `FNAME` and `LNAME` custom `merge_fields` are still required in `mailchimp`
-							 * settings, but the subscription forms only provide `email`.
+							 * Currently `FNAME` and `LNAME` custom `merge_fields` are still required in
+							 * `mailchimp` settings, but the subscription forms only provide `email`.
 							 */
 							skip_merge_validation: true,
 						}),
