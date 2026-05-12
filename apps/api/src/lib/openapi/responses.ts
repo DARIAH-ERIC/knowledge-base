@@ -20,6 +20,23 @@ export const BAD_REQUEST = {
 	},
 };
 
+export const UNAUTHORIZED = {
+	401: {
+		description: STATUS_CODES[401]!,
+		content: {
+			"application/json": {
+				schema: resolver(
+					v.pipe(
+						v.object({ message: v.pipe(v.string(), v.examples([STATUS_CODES[401]!])) }),
+						v.description("Unauthorized response"),
+						v.metadata({ ref: "UnauthorizedResponse" }),
+					),
+				),
+			},
+		},
+	},
+};
+
 export const NOT_FOUND = {
 	404: {
 		description: STATUS_CODES[404]!,
