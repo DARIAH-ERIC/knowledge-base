@@ -3,6 +3,7 @@ import { Result } from "better-result";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { subscribeToNewsletter } from "@/routes/newsletters/service";
+import { env } from "~/config/env.config";
 import { createTestClient } from "~/test/lib/create-test-client";
 
 const { mailchimp } = vi.hoisted(() => {
@@ -19,11 +20,29 @@ vi.mock("@/services/mailchimp", () => {
 });
 
 describe("newsletters", () => {
+	const headers = { "x-api-access-token": env.API_ACCESS_TOKEN ?? "" };
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
 	describe("POST /api/newsletters/subscribe", () => {
+		it("should require the api access token header", async () => {
+			const client = createTestClient(undefined as never);
+
+			const response = await client.newsletters.subscribe.$post({
+				json: {
+					email: "test@example.com",
+				},
+			});
+
+			expect(response.status).toBe(401);
+			expect(mailchimp.subscribe).not.toHaveBeenCalled();
+			await expect(response.json()).resolves.toEqual({
+				message: "Unauthorized",
+			});
+		});
+
 		it("should subscribe an email address", async () => {
 			mailchimp.subscribe.mockResolvedValue(
 				Result.ok({
@@ -40,7 +59,7 @@ describe("newsletters", () => {
 				json: {
 					email: "test@example.com",
 				},
-			});
+			}, { headers });
 
 			expect(response.status).toBe(201);
 			expect(mailchimp.subscribe).toHaveBeenCalledWith({ email: "test@example.com" });
@@ -56,7 +75,7 @@ describe("newsletters", () => {
 				json: {
 					email: "invalid-email",
 				},
-			});
+			}, { headers });
 
 			expect(response.status).toBe(400);
 			expect(mailchimp.subscribe).not.toHaveBeenCalled();
@@ -84,7 +103,7 @@ describe("newsletters", () => {
 				json: {
 					email: "test@example.com",
 				},
-			});
+			}, { headers });
 
 			expect(response.status).toBe(400);
 			await expect(response.json()).resolves.toEqual({
@@ -117,7 +136,7 @@ describe("newsletters", () => {
 				json: {
 					email: "test@example.com",
 				},
-			});
+			}, { headers });
 
 			expect(response.status).toBe(400);
 			await expect(response.json()).resolves.toEqual({
