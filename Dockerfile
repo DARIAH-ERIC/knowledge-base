@@ -53,7 +53,7 @@ RUN pnpm deploy --filter @dariah-eric/database --config.inject-workspace-package
 FROM base AS migrate
 USER node
 WORKDIR /app
-COPY --from=migrate-build /out/ .
+COPY --chown=node:node --from=migrate-build /out/ .
 CMD [ "pnpm", "run", "db:migrations:apply" ]
 
 # =================================================================================================
