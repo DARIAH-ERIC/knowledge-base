@@ -5,27 +5,59 @@ set -eu
 echo "Creating pods..."
 
 kubectl -n dariah-knowledge-base apply -f - <<EOF
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: pg-proxy
+  labels:
+    app: pg-proxy
 spec:
-  containers:
-  - name: socat
-    image: alpine/socat
-    command: ["socat", "TCP-LISTEN:5432,fork", "TCP:acdh-ch-ha-postgres-cluster-pgbouncer.postgres-cluster.svc:5432"]
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pg-proxy
+  template:
+    metadata:
+      labels:
+        app: pg-proxy
+    spec:
+      containers:
+      - name: socat
+        image: alpine/socat
+        command:
+          - socat
+          - TCP-LISTEN:5432,fork
+          - TCP:acdh-ch-ha-postgres-cluster-pgbouncer.postgres-cluster.svc:5432
+        ports:
+          - containerPort: 5432
 EOF
 
 kubectl -n dariah-knowledge-base apply -f - <<EOF
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: s3-proxy
+  labels:
+    app: s3-proxy
 spec:
-  containers:
-  - name: socat
-    image: alpine/socat
-    command: ["socat", "TCP-LISTEN:8080,fork", "TCP:s3-loadbalancer.s3-gateway.svc:8080"]
+  replicas: 1
+  selector:
+    matchLabels:
+      app: s3-proxy
+  template:
+    metadata:
+      labels:
+        app: s3-proxy
+    spec:
+      containers:
+      - name: socat
+        image: alpine/socat
+        command:
+          - socat
+          - TCP-LISTEN:8080,fork
+          - TCP:s3-loadbalancer.s3-gateway.svc:8080
+        ports:
+          - containerPort: 8080
 EOF
 
 cleanup() {
