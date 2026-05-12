@@ -1,6 +1,6 @@
 import { inArray } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
@@ -18,7 +18,7 @@ export const organisationalUnitTypesEnum = [
 	"working_group",
 ] as const;
 
-export const organisationalUnitTypes = p.pgTable(
+export const organisationalUnitTypes = p.snakeCase.table(
 	"organisational_unit_types",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -47,7 +47,7 @@ export const organisationalUnitStatusEnum = [
 	"is_partner_institution_of",
 ] as const;
 
-export const organisationalUnitStatus = p.pgTable(
+export const organisationalUnitStatus = p.snakeCase.table(
 	"organisational_unit_status",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -64,7 +64,7 @@ export const organisationalUnitStatus = p.pgTable(
 	},
 );
 
-export const organisationalUnits = p.pgTable("organisational_units", {
+export const organisationalUnits = p.snakeCase.table("organisational_units", {
 	id: p
 		.uuid("id")
 		.primaryKey()
@@ -95,7 +95,7 @@ export const OrganisationalUnitSelectSchema = createSelectSchema(organisationalU
 export const OrganisationalUnitInsertSchema = createInsertSchema(organisationalUnits);
 export const OrganisationalUnitUpdateSchema = createUpdateSchema(organisationalUnits);
 
-export const organisationalUnitsRelations = p.pgTable("organisational_units_to_units", {
+export const organisationalUnitsRelations = p.snakeCase.table("organisational_units_to_units", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	unitId: p
 		.uuid("unit_id")
@@ -134,7 +134,7 @@ export const OrganisationalUnitRelationUpdateSchema = createUpdateSchema(
 	{ duration: f.TimestampRange },
 );
 
-export const organisationalUnitsAllowedRelations = p.pgTable(
+export const organisationalUnitsAllowedRelations = p.snakeCase.table(
 	"organisational_units_allowed_relations",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -177,22 +177,25 @@ export const OrganisationalUnitAllowedRelationUpdateSchema = createUpdateSchema(
 	organisationalUnitsAllowedRelations,
 );
 
-export const organisationalUnitsToSocialMedia = p.pgTable("organisational_units_to_social_media", {
-	id: p.uuid("id").primaryKey().default(uuidv7()),
-	organisationalUnitId: p
-		.uuid("organisational_unit_id")
-		.notNull()
-		.references(() => {
-			return organisationalUnits.id;
-		}),
-	socialMediaId: p
-		.uuid("social_media_id")
-		.notNull()
-		.references(() => {
-			return socialMedia.id;
-		}),
-	...f.timestamps(),
-});
+export const organisationalUnitsToSocialMedia = p.snakeCase.table(
+	"organisational_units_to_social_media",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		organisationalUnitId: p
+			.uuid("organisational_unit_id")
+			.notNull()
+			.references(() => {
+				return organisationalUnits.id;
+			}),
+		socialMediaId: p
+			.uuid("social_media_id")
+			.notNull()
+			.references(() => {
+				return socialMedia.id;
+			}),
+		...f.timestamps(),
+	},
+);
 
 export type OrganisationalUnitToSocialMedia = typeof organisationalUnitsToSocialMedia.$inferSelect;
 export type OrganisationalUnitToSocialMediaInput =
@@ -216,8 +219,8 @@ export const membersAndPartnersUnitStatusEnum = [
 	"is_cooperating_partner_of",
 ] as const;
 
-export const membersAndPartners = p
-	.pgView("members_and_partners", {
+export const membersAndPartners = p.snakeCase
+	.view("members_and_partners", {
 		id: p.uuid("id").notNull(),
 		metadata: p.jsonb("metadata"),
 		name: p.text("name").notNull(),
@@ -233,8 +236,8 @@ export const membersAndPartners = p
 
 export const workingGroupUnitType = "working_group";
 
-export const workingGroups = p
-	.pgView("working_groups", {
+export const workingGroups = p.snakeCase
+	.view("working_groups", {
 		id: p.uuid("id").notNull(),
 		/** TODO: Holds activities, disciplines, memberTracking, mailingList, contactEmail. */
 		metadata: p.jsonb("metadata").$type<{
@@ -252,8 +255,8 @@ export const workingGroups = p
 	})
 	.existing();
 
-export const statistics = p
-	.pgView("statistics", {
+export const statistics = p.snakeCase
+	.view("statistics", {
 		memberCountries: p.integer("member_countries"),
 		partnerInstitutions: p.integer("partner_institutions"),
 		cooperatingPartners: p.integer("cooperating_partners"),

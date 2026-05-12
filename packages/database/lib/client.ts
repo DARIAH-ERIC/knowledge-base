@@ -12,7 +12,6 @@ declare global {
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createClient() {
 	const db = drizzle({
-		casing: "snake_case",
 		connection: {
 			database: env.DATABASE_NAME,
 			host: env.DATABASE_HOST,

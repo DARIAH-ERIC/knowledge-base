@@ -1,11 +1,11 @@
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { assets } from "./assets";
 import { entityVersions } from "./entities";
 
-export const events = p.pgTable("events", {
+export const events = p.snakeCase.table("events", {
 	id: p
 		.uuid("id")
 		.primaryKey()

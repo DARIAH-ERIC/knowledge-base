@@ -1,6 +1,6 @@
 import { inArray } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
@@ -8,7 +8,7 @@ import { entityVersions } from "./entities";
 
 export const opportunitySourcesEnum = ["dariah", "external"] as const;
 
-export const opportunitySources = p.pgTable(
+export const opportunitySources = p.snakeCase.table(
 	"opportunity_sources",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -29,7 +29,7 @@ export const OpportunitySourceSelectSchema = createSelectSchema(opportunitySourc
 export const OpportunitySourceInsertSchema = createInsertSchema(opportunitySources);
 export const OpportunitySourceUpdateSchema = createUpdateSchema(opportunitySources);
 
-export const opportunities = p.pgTable("opportunities", {
+export const opportunities = p.snakeCase.table("opportunities", {
 	id: p
 		.uuid("id")
 		.primaryKey()

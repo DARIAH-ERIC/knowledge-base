@@ -122,8 +122,8 @@ export function Tab(props: Readonly<TabProps>): ReactNode {
 							className={twMerge(
 								"absolute bg-primary-subtle-fg transition-[translate,width,height] duration-200",
 								orientation === "horizontal"
-									? "right-(--tab-gutter-x) -bottom-[calc(var(--tab-gutter-y)+1px)] left-(--tab-gutter-x) h-[2px]"
-									: "top-(--tab-gutter-y) bottom-(--tab-gutter-y) -left-[calc(var(--tab-gutter-x)-var(--tab-list-gutter)+1px)] w-[2px]",
+									? "inset-x-(--tab-gutter-x) -bottom-[calc(var(--tab-gutter-y)+1px)] h-[2px]"
+									: "inset-y-(--tab-gutter-y) -left-[calc(var(--tab-gutter-x)-var(--tab-list-gutter)+1px)] w-[2px]",
 							)}
 							data-slot="selected-indicator"
 						/>

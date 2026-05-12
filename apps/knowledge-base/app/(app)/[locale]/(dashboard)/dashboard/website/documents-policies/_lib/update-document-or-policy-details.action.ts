@@ -2,11 +2,7 @@
 
 import { assert, getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import {
-	createActionStateError,
-	createActionStateSuccess,
-	type ValidationErrors,
-} from "@dariah-eric/next-lib/actions";
+import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
@@ -47,7 +43,7 @@ export const updateDocumentOrPolicyDetailsAction = createServerAction(
 
 			return createActionStateError({
 				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested as unknown as ValidationErrors,
+				validationErrors: errors.nested,
 			});
 		}
 

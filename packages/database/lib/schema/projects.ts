@@ -1,6 +1,6 @@
 import { inArray } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
@@ -11,7 +11,7 @@ import { socialMedia } from "./social-media";
 
 export const projectScopesEnum = ["eu", "national", "regional"] as const;
 
-export const projectScopes = p.pgTable(
+export const projectScopes = p.snakeCase.table(
 	"project_scopes",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -33,7 +33,7 @@ export const projectRolesEnum = [
 	/** "third_party" */ "affiliated",
 ] as const;
 
-export const projectRoles = p.pgTable(
+export const projectRoles = p.snakeCase.table(
 	"project_roles",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -48,7 +48,7 @@ export const projectRoles = p.pgTable(
 export type ProjectRole = typeof projectRoles.$inferSelect;
 export type ProjectRoleInput = typeof projectRoles.$inferInsert;
 
-export const projects = p.pgTable("projects", {
+export const projects = p.snakeCase.table("projects", {
 	id: p
 		.uuid("id")
 		.primaryKey()
@@ -82,7 +82,7 @@ export const ProjectSelectSchema = createSelectSchema(projects, { duration: f.Ti
 export const ProjectInsertSchema = createInsertSchema(projects, { duration: f.TimestampRange });
 export const ProjectUpdateSchema = createUpdateSchema(projects, { duration: f.TimestampRange });
 
-export const projectsToOrganisationalUnits = p.pgTable(
+export const projectsToOrganisationalUnits = p.snakeCase.table(
 	"projects_to_organisational_units",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -133,7 +133,7 @@ export const ProjectToOrganisationalUnitUpdateSchema = createUpdateSchema(
 	},
 );
 
-export const projectsToSocialMedia = p.pgTable("projects_to_social_media", {
+export const projectsToSocialMedia = p.snakeCase.table("projects_to_social_media", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	projectId: p
 		.uuid("project_id")
@@ -159,8 +159,8 @@ export const ProjectToSocialMediaUpdateSchema = createUpdateSchema(projectsToSoc
 
 export const dariahProjectsUnitType = "eric";
 
-export const dariahProjects = p
-	.pgView("dariah_projects", {
+export const dariahProjects = p.snakeCase
+	.view("dariah_projects", {
 		id: p.uuid("id").notNull(),
 		metadata: p.jsonb("metadata"),
 		name: p.text("name").notNull(),

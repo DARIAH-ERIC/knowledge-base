@@ -19,7 +19,6 @@ export function createClient() {
 	});
 
 	const db = drizzle({
-		casing: "snake_case",
 		client,
 		logger: true,
 	});

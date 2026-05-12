@@ -3,7 +3,6 @@ import { defineConfig } from "drizzle-kit";
 import { env } from "./env.config";
 
 const config = defineConfig({
-	casing: "snake_case",
 	dbCredentials: {
 		database: env.DATABASE_NAME,
 		host: env.DATABASE_HOST,

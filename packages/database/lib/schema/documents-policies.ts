@@ -1,12 +1,12 @@
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { assets } from "./assets";
 import { documentPolicyGroups } from "./document-policy-groups";
 import { entityVersions } from "./entities";
 
-export const documentsPolicies = p.pgTable("documents_policies", {
+export const documentsPolicies = p.snakeCase.table("documents_policies", {
 	id: p
 		.uuid("id")
 		.primaryKey()

@@ -114,7 +114,6 @@ export function useUrlPaginatedSearch<TFilters extends UrlPaginatedFilters = Rec
 
 	useEffect(() => {
 		if (q !== committedQ.current) {
-			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setInputValue(q);
 		}
 		committedQ.current = q;

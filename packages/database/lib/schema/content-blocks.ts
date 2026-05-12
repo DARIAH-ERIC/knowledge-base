@@ -1,7 +1,7 @@
 import type { JSONContent } from "@tiptap/core";
 import { inArray } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
@@ -18,7 +18,7 @@ export const contentBlockTypesEnum = [
 	"rich_text",
 ] as const;
 
-export const contentBlockTypes = p.pgTable(
+export const contentBlockTypes = p.snakeCase.table(
 	"content_blocks_types",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -39,7 +39,7 @@ export const ContentBlockTypesSelectSchema = createSelectSchema(contentBlockType
 export const ContentBlockTypesInsertSchema = createInsertSchema(contentBlockTypes);
 export const ContentBlockTypesUpdateSchema = createUpdateSchema(contentBlockTypes);
 
-export const contentBlocks = p.pgTable("content_blocks", {
+export const contentBlocks = p.snakeCase.table("content_blocks", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	fieldId: p
 		.uuid("field_id")
@@ -74,7 +74,7 @@ export const dataContentBlockTypesEnum = [
 	"spotlight_articles",
 ] as const;
 
-export const dataContentBlockTypes = p.pgTable(
+export const dataContentBlockTypes = p.snakeCase.table(
 	"content_blocks_type_data_types",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -98,7 +98,7 @@ export const DataContentBlockTypesSelectSchema = createSelectSchema(dataContentB
 export const DataContentBlockTypesInsertSchema = createInsertSchema(dataContentBlockTypes);
 export const DataContentBlockTypesUpdateSchema = createUpdateSchema(dataContentBlockTypes);
 
-export const dataContentBlocks = p.pgTable("content_blocks_type_data", {
+export const dataContentBlocks = p.snakeCase.table("content_blocks_type_data", {
 	id: p
 		.uuid("id")
 		.primaryKey()
@@ -126,7 +126,7 @@ export const DataContentBlockSelectSchema = createSelectSchema(dataContentBlocks
 export const DataContentBlockInsertSchema = createInsertSchema(dataContentBlocks);
 export const DataContentBlockUpdateSchema = createUpdateSchema(dataContentBlocks);
 
-export const embedContentBlocks = p.pgTable("content_blocks_type_embed", {
+export const embedContentBlocks = p.snakeCase.table("content_blocks_type_embed", {
 	id: p
 		.uuid("id")
 		.primaryKey()
@@ -149,7 +149,7 @@ export const EmbedContentBlockSelectSchema = createSelectSchema(embedContentBloc
 export const EmbedContentBlockInsertSchema = createInsertSchema(embedContentBlocks);
 export const EmbedContentBlockUpdateSchema = createUpdateSchema(embedContentBlocks);
 
-export const galleryContentBlocks = p.pgTable("content_blocks_type_gallery", {
+export const galleryContentBlocks = p.snakeCase.table("content_blocks_type_gallery", {
 	id: p
 		.uuid("id")
 		.primaryKey()
@@ -173,7 +173,7 @@ export const GalleryContentBlockSelectSchema = createSelectSchema(galleryContent
 export const GalleryContentBlockInsertSchema = createInsertSchema(galleryContentBlocks);
 export const GalleryContentBlockUpdateSchema = createUpdateSchema(galleryContentBlocks);
 
-export const galleryContentBlockItems = p.pgTable("content_blocks_type_gallery_items", {
+export const galleryContentBlockItems = p.snakeCase.table("content_blocks_type_gallery_items", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	galleryContentBlockId: p
 		.uuid("gallery_content_block_id")
@@ -202,7 +202,7 @@ export const GalleryContentBlockItemSelectSchema = createSelectSchema(galleryCon
 export const GalleryContentBlockItemInsertSchema = createInsertSchema(galleryContentBlockItems);
 export const GalleryContentBlockItemUpdateSchema = createUpdateSchema(galleryContentBlockItems);
 
-export const imageContentBlocks = p.pgTable("content_blocks_type_image", {
+export const imageContentBlocks = p.snakeCase.table("content_blocks_type_image", {
 	id: p
 		.uuid("id")
 		.primaryKey()
@@ -229,7 +229,7 @@ export const ImageContentBlockSelectSchema = createSelectSchema(imageContentBloc
 export const ImageContentBlockInsertSchema = createInsertSchema(imageContentBlocks);
 export const ImageContentBlockUpdateSchema = createUpdateSchema(imageContentBlocks);
 
-export const heroContentBlocks = p.pgTable("content_blocks_type_hero", {
+export const heroContentBlocks = p.snakeCase.table("content_blocks_type_hero", {
 	id: p
 		.uuid("id")
 		.primaryKey()
@@ -255,7 +255,7 @@ export const HeroContentBlockSelectSchema = createSelectSchema(heroContentBlocks
 export const HeroContentBlockInsertSchema = createInsertSchema(heroContentBlocks);
 export const HeroContentBlockUpdateSchema = createUpdateSchema(heroContentBlocks);
 
-export const accordionContentBlocks = p.pgTable("content_blocks_type_accordion", {
+export const accordionContentBlocks = p.snakeCase.table("content_blocks_type_accordion", {
 	id: p
 		.uuid("id")
 		.primaryKey()
@@ -276,7 +276,7 @@ export const AccordionContentBlockSelectSchema = createSelectSchema(accordionCon
 export const AccordionContentBlockInsertSchema = createInsertSchema(accordionContentBlocks);
 export const AccordionContentBlockUpdateSchema = createUpdateSchema(accordionContentBlocks);
 
-export const richTextContentBlocks = p.pgTable("content_blocks_type_rich_text", {
+export const richTextContentBlocks = p.snakeCase.table("content_blocks_type_rich_text", {
 	id: p
 		.uuid("id")
 		.primaryKey()

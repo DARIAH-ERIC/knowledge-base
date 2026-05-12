@@ -29,7 +29,7 @@ export function ListBox<T extends object>(props: Readonly<ListBoxProps<T>>): Rea
 		<AriaListBox
 			{...rest}
 			className={cx(
-				"grid max-h-96 w-full min-w-56 scroll-py-1 grid-cols-[auto_1fr] flex-col gap-y-1 overflow-y-auto overscroll-contain rounded-xl border bg-bg p-1 outline-hidden [scrollbar-width:thin] *:[[role='group']+[role=group]]:mt-4 *:[[role='group']+[role=separator]]:mt-1 has-data-[slot=drag-icon]:grid-cols-[auto_auto_1fr] [&::-webkit-scrollbar]:size-0.5",
+				"grid max-h-96 w-full min-w-56 scroll-py-1 grid-cols-[auto_1fr] flex-col gap-y-1 overflow-y-auto overscroll-contain rounded-xl border bg-bg p-1 outline-hidden scrollbar-thin *:[[role='group']+[role=group]]:mt-4 *:[[role='group']+[role=separator]]:mt-1 has-data-[slot=drag-icon]:grid-cols-[auto_auto_1fr] [&::-webkit-scrollbar]:size-0.5",
 				className,
 			)}
 		/>

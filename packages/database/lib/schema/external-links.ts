@@ -1,11 +1,11 @@
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { assets } from "./assets";
 import { entityVersions } from "./entities";
 
-export const externalLinks = p.pgTable("external_links", {
+export const externalLinks = p.snakeCase.table("external_links", {
 	id: p
 		.uuid("id")
 		.primaryKey()

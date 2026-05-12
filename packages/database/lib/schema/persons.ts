@@ -1,6 +1,6 @@
 import { inArray } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
@@ -22,7 +22,7 @@ export const personRoleTypesEnum = [
 	"national_representative_deputy",
 ] as const;
 
-export const persons = p.pgTable("persons", {
+export const persons = p.snakeCase.table("persons", {
 	id: p
 		.uuid("id")
 		.primaryKey()
@@ -51,7 +51,7 @@ export const PersonSelectSchema = createSelectSchema(persons);
 export const PersonInsertSchema = createInsertSchema(persons);
 export const PersonUpdateSchema = createUpdateSchema(persons);
 
-export const personRoleTypes = p.pgTable(
+export const personRoleTypes = p.snakeCase.table(
 	"person_role_types",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -63,7 +63,7 @@ export const personRoleTypes = p.pgTable(
 	},
 );
 
-export const personsToOrganisationalUnits = p.pgTable("persons_to_organisational_units", {
+export const personsToOrganisationalUnits = p.snakeCase.table("persons_to_organisational_units", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	personId: p
 		.uuid("person_id")
@@ -100,7 +100,7 @@ export const PersonToOrganisationalUnitUpdateSchema = createUpdateSchema(
 	personsToOrganisationalUnits,
 );
 
-export const personRoleTypesToOrganisationalUnitTypesAllowedRelations = p.pgTable(
+export const personRoleTypesToOrganisationalUnitTypesAllowedRelations = p.snakeCase.table(
 	"person_role_types_to_organisational_unit_types",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),

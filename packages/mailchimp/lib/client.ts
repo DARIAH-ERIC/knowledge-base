@@ -29,9 +29,8 @@ export function createMailchimpClient(params: CreateMailchimpClientParams) {
 				baseUrl,
 				pathname: "/3.0/campaigns",
 				searchParams: createUrlSearchParams({
-					// eslint-disable-next-line unicorn/consistent-destructuring
 					count: params?.count ?? 10,
-					// eslint-disable-next-line unicorn/consistent-destructuring
+
 					offset: params?.offset ?? 0,
 					list_id: listId,
 					sort_dir: "DESC",

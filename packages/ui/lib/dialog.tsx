@@ -47,7 +47,7 @@ export function DialogHeader({ className, ...props }: Readonly<DialogHeaderProps
 	return (
 		<div
 			className={twMerge(
-				"relative space-y-1 p-(--gutter) pb-[calc(var(--gutter)---spacing(3))]",
+				"relative space-y-1 p-(--gutter) pb-[calc(var(--gutter)-(--spacing(3)))]",
 				className,
 			)}
 			data-slot="dialog-header"
@@ -120,7 +120,7 @@ export function DialogFooter({ className, ...props }: Readonly<DialogFooterProps
 	return (
 		<div
 			className={twMerge(
-				"isolate mt-auto flex flex-col-reverse justify-end gap-3 p-(--gutter) pt-[calc(var(--gutter)---spacing(2))] sm:flex-row group-not-has-data-[slot=dialog-body]/dialog:pt-0 group-not-has-data-[slot=dialog-body]/popover:pt-0",
+				"isolate mt-auto flex flex-col-reverse justify-end gap-3 p-(--gutter) pt-[calc(var(--gutter)-(--spacing(2)))] sm:flex-row group-not-has-data-[slot=dialog-body]/dialog:pt-0 group-not-has-data-[slot=dialog-body]/popover:pt-0",
 				className,
 			)}
 			data-slot="dialog-footer"

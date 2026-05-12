@@ -362,10 +362,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 
 								<div className="flex flex-col gap-4">
 									<div className="flex items-start gap-4">
-										<FileTrigger
-											acceptedFileTypes={acceptedFileTypes as Array<string>}
-											onSelect={handleFileChoose}
-										>
+										<FileTrigger acceptedFileTypes={acceptedFileTypes} onSelect={handleFileChoose}>
 											<Button intent="outline" type="button">
 												{t("Choose file...")}
 											</Button>

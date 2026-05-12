@@ -1,13 +1,13 @@
 import { sql } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { entities } from "./entities";
 
-export const navigationMenus = p.pgTable("navigation_menus", {
+export const navigationMenus = p.snakeCase.table("navigation_menus", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	name: p.text("name").notNull().unique(),
 	...f.timestamps(),
@@ -20,7 +20,7 @@ export const NavigationMenuSelectSchema = createSelectSchema(navigationMenus);
 export const NavigationMenuInsertSchema = createInsertSchema(navigationMenus);
 export const NavigationMenuUpdateSchema = createUpdateSchema(navigationMenus);
 
-export const navigationItems = p.pgTable(
+export const navigationItems = p.snakeCase.table(
 	"navigation_items",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),

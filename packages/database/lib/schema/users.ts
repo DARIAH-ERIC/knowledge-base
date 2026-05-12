@@ -1,6 +1,6 @@
 import { inArray, sql } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { lower, uuidv7 } from "../functions";
@@ -9,7 +9,7 @@ import { persons } from "./persons";
 
 export const userRoleEnum = ["admin", "user"] as const;
 
-export const users = p.pgTable(
+export const users = p.snakeCase.table(
 	"users",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -62,7 +62,7 @@ export const UserSelectSchema = createSelectSchema(users);
 export const UserInsertSchema = createInsertSchema(users);
 export const UserUpdateSchema = createUpdateSchema(users);
 
-export const sessions = p.pgTable("sessions", {
+export const sessions = p.snakeCase.table("sessions", {
 	id: p.text("id").primaryKey(),
 	secretHash: p.bytea("secret_hash").notNull(),
 	userId: p
@@ -86,7 +86,7 @@ export const SessionSelectSchema = createSelectSchema(sessions);
 export const SessionInsertSchema = createInsertSchema(sessions);
 export const SessionUpdateSchema = createUpdateSchema(sessions);
 
-export const passwordResetSessions = p.pgTable("password_reset_sessions", {
+export const passwordResetSessions = p.snakeCase.table("password_reset_sessions", {
 	id: p.text("id").primaryKey(),
 	userId: p
 		.uuid("user_id")
@@ -112,7 +112,7 @@ export const PasswordResetSessionSelectSchema = createSelectSchema(passwordReset
 export const PasswordResetSessionInsertSchema = createInsertSchema(passwordResetSessions);
 export const PasswordResetSessionUpdateSchema = createUpdateSchema(passwordResetSessions);
 
-export const emailVerificationRequests = p.pgTable("email_verification_requests", {
+export const emailVerificationRequests = p.snakeCase.table("email_verification_requests", {
 	id: p.text("id").primaryKey(),
 	userId: p
 		.uuid("user_id")

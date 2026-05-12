@@ -10,7 +10,7 @@ type CxArgs<T> = [...Array<ClassNameValue>, Render<T>] | [[...Array<ClassNameVal
 export function cx<T = unknown>(...args: CxArgs<T>): string | ((v: T) => string) {
 	let resolvedArgs = args;
 	if (args.length === 1 && Array.isArray(args[0])) {
-		resolvedArgs = args[0] as [...Array<ClassNameValue>, Render<T>];
+		resolvedArgs = args[0];
 	}
 
 	const className = resolvedArgs.pop() as Render<T>;

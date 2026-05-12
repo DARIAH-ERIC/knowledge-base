@@ -18,7 +18,6 @@ function createClient(params: CreateClientParams) {
 	const { connection, logger } = params;
 
 	const db = drizzle({
-		casing: "snake_case",
 		connection,
 		logger,
 		relations,

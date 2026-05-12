@@ -274,9 +274,9 @@ export function Sidebar(props: Readonly<SidebarProps>): ReactNode {
 					"relative h-svh bg-transparent transition-[width] duration-200 ease-linear",
 					intent === "default" && "group-data-[collapsible=dock]:w-(--sidebar-width-dock)",
 					intent === "float" &&
-						"group-data-[collapsible=dock]:w-[calc(var(--sidebar-width-dock)+--spacing(4))]",
+						"group-data-[collapsible=dock]:w-[calc(var(--sidebar-width-dock)+(--spacing(4)))]",
 					intent === "inset" &&
-						"group-data-[collapsible=dock]:w-[calc(var(--sidebar-width-dock)+--spacing(2))]",
+						"group-data-[collapsible=dock]:w-[calc(var(--sidebar-width-dock)+(--spacing(2)))]",
 				])}
 				data-slot="sidebar-gap"
 			/>
@@ -284,14 +284,12 @@ export function Sidebar(props: Readonly<SidebarProps>): ReactNode {
 				className={twMerge(
 					"fixed inset-y-0 z-10 hidden w-(--sidebar-width) bg-sidebar md:flex not-has-data-[slot=sidebar-footer]:pb-2",
 					"transition-[left,right,width] duration-200 ease-linear",
-					side === "left" &&
-						"left-0 group-data-[collapsible=hidden]:left-[calc(var(--sidebar-width)*-1)]",
-					side === "right" &&
-						"right-0 group-data-[collapsible=hidden]:right-[calc(var(--sidebar-width)*-1)]",
+					side === "left" && "left-0 group-data-[collapsible=hidden]:-left-(--sidebar-width)",
+					side === "right" && "right-0 group-data-[collapsible=hidden]:-right-(--sidebar-width)",
 					intent === "float" &&
 						"bg-bg p-2 group-data-[collapsible=dock]:w-[calc(--spacing(4)+2px)]",
 					intent === "inset" &&
-						"dark:bg-bg group-data-[collapsible=dock]:w-[calc(var(--sidebar-width-dock)+--spacing(2)+2px)]",
+						"dark:bg-bg group-data-[collapsible=dock]:w-[calc(var(--sidebar-width-dock)+(--spacing(2))+2px)]",
 					intent === "default" && [
 						"group-data-[collapsible=dock]:w-(--sidebar-width-dock)",
 						"border-sidebar-border group-data-[side=left]:border-r group-data-[side=right]:border-l",
@@ -717,7 +715,7 @@ export function SidebarSeparator(props: Readonly<SidebarSeparatorProps>): ReactN
 	return (
 		<AriaSeparator
 			className={twMerge(
-				"mx-auto h-px w-[calc(var(--sidebar-width)---spacing(10))] border-0 bg-sidebar-border forced-colors:bg-[ButtonBorder]",
+				"mx-auto h-px w-[calc(var(--sidebar-width)-(--spacing(10)))] border-0 bg-sidebar-border forced-colors:bg-[ButtonBorder]",
 				className,
 			)}
 			data-slot="sidebar-separator"

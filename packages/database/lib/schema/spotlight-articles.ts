@@ -1,5 +1,5 @@
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { assets } from "./assets";
@@ -7,7 +7,7 @@ import { entityVersions } from "./entities";
 import { articleContributorRolesEnum } from "./impact-case-studies";
 import { persons } from "./persons";
 
-export const spotlightArticles = p.pgTable("spotlight_articles", {
+export const spotlightArticles = p.snakeCase.table("spotlight_articles", {
 	id: p
 		.uuid("id")
 		.primaryKey()
@@ -32,7 +32,7 @@ export const SpotlightArticleSelectSchema = createSelectSchema(spotlightArticles
 export const SpotlightArticleInsertSchema = createInsertSchema(spotlightArticles);
 export const SpotlightArticleUpdateSchema = createUpdateSchema(spotlightArticles);
 
-export const spotlightArticlesToPersons = p.pgTable(
+export const spotlightArticlesToPersons = p.snakeCase.table(
 	"spotlight_articles_to_persons",
 	{
 		spotlightArticleId: p

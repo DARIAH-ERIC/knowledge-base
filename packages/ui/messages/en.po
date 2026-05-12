@@ -199,14 +199,14 @@ msgctxt "ui"
 msgid "JZy6jo"
 msgstr "Sidebar"
 
-#: lib/sidebar.tsx:741
-#: lib/sidebar.tsx:785
+#: lib/sidebar.tsx:739
+#: lib/sidebar.tsx:783
 msgctxt "ui"
 msgid "6D4Ghb"
 msgstr "Toggle sidebar"
 
-#: lib/sidebar.tsx:765
-#: lib/sidebar.tsx:797
+#: lib/sidebar.tsx:763
+#: lib/sidebar.tsx:795
 msgctxt "ui"
 msgid "kh4wt0"
 msgstr "Toggle Sidebar"
