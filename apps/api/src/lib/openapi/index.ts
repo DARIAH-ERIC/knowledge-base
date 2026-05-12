@@ -12,6 +12,16 @@ export function createOpenApi(app: ReturnType<typeof createApp>) {
 			"/openapi.json",
 			openAPIRouteHandler(app, {
 				documentation: {
+					components: {
+						securitySchemes: {
+							apiAccessToken: {
+								type: "apiKey",
+								in: "header",
+								name: "x-api-access-token",
+								description: "Required for protected endpoints, and to bypass rate limits.",
+							},
+						},
+					},
 					info: config,
 					servers: [{ url: env.API_BASE_URL, description: config.description }],
 				},

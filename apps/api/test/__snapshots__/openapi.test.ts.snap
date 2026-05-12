@@ -9119,6 +9119,21 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         ],
         "type": "object",
       },
+      "UnauthorizedResponse": {
+        "description": "Unauthorized response",
+        "properties": {
+          "message": {
+            "examples": [
+              "Unauthorized",
+            ],
+            "type": "string",
+          },
+        },
+        "required": [
+          "message",
+        ],
+        "type": "object",
+      },
       "WorkingGroup": {
         "description": "Working group",
         "properties": {
@@ -9907,6 +9922,14 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "active",
           "inactive",
         ],
+      },
+    },
+    "securitySchemes": {
+      "apiAccessToken": {
+        "description": "Required for protected endpoints, and to bypass rate limits.",
+        "in": "header",
+        "name": "x-api-access-token",
+        "type": "apiKey",
       },
     },
   },
@@ -11618,6 +11641,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             },
             "description": "Bad Request",
           },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse",
+                },
+              },
+            },
+            "description": "Unauthorized",
+          },
           "500": {
             "content": {
               "application/json": {
@@ -11629,6 +11662,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "description": "Internal Server Error",
           },
         },
+        "security": [
+          {
+            "apiAccessToken": [],
+          },
+        ],
         "summary": "Subscribe to newsletter",
         "tags": [
           "newsletters",
