@@ -2,11 +2,7 @@
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import {
-	createActionStateError,
-	createActionStateSuccess,
-	type ValidationErrors,
-} from "@dariah-eric/next-lib/actions";
+import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
 import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
@@ -37,7 +33,7 @@ export const createNavigationMenuAction = createServerAction(
 
 			return createActionStateError({
 				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested as unknown as ValidationErrors,
+				validationErrors: errors.nested,
 			});
 		}
 

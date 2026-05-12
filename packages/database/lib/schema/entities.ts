@@ -1,6 +1,6 @@
 import { inArray } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
@@ -21,7 +21,7 @@ export const entityTypesEnum = [
 	"spotlight_articles",
 ] as const;
 
-export const entityTypes = p.pgTable(
+export const entityTypes = p.snakeCase.table(
 	"entity_types",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -42,7 +42,7 @@ export const EntityTypeUpdateSchema = createUpdateSchema(entityTypes);
 
 export const entityStatusEnum = ["draft", "published"] as const;
 
-export const entityStatus = p.pgTable(
+export const entityStatus = p.snakeCase.table(
 	"entity_status",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -65,7 +65,7 @@ export const EntityStatusUpdateSchema = createUpdateSchema(entityStatus);
  * A document is the stable identity of a piece of content across draft/published versions. Slug,
  * type, and cross-type relations live here so they survive republishes.
  */
-export const entities = p.pgTable(
+export const entities = p.snakeCase.table(
 	"entities",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -94,7 +94,7 @@ export const EntityUpdateSchema = createUpdateSchema(entities);
  * A version row holds the editable/publishable payload for a document at a given lifecycle status.
  * Subtype tables (news, events, ...), fields, and content blocks all key off `entityVersions.id`.
  */
-export const entityVersions = p.pgTable(
+export const entityVersions = p.snakeCase.table(
 	"entity_versions",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -124,7 +124,7 @@ export const EntityVersionSelectSchema = createSelectSchema(entityVersions);
 export const EntityVersionInsertSchema = createInsertSchema(entityVersions);
 export const EntityVersionUpdateSchema = createUpdateSchema(entityVersions);
 
-export const entityTypesFieldsNames = p.pgTable(
+export const entityTypesFieldsNames = p.snakeCase.table(
 	"entity_types_fields_names",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -150,7 +150,7 @@ export type EntityTypesFieldsNames = typeof entityTypesFieldsNames.$inferSelect;
 
 export const entityTypesFieldsNamesSelectSchema = createSelectSchema(entityTypesFieldsNames);
 
-export const fields = p.pgTable(
+export const fields = p.snakeCase.table(
 	"fields",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -188,7 +188,7 @@ export const FieldUpdateSchema = createUpdateSchema(fields);
  * Document-level: a relation between two documents, stable across versions. Public reads resolve
  * through the related document's published version.
  */
-export const entitiesToEntities = p.pgTable(
+export const entitiesToEntities = p.snakeCase.table(
 	"entities_to_entities",
 	{
 		entityId: p
@@ -216,7 +216,7 @@ export const entitiesToEntities = p.pgTable(
 );
 
 /** Document-level: a relation from a document to an external resource (search index id). */
-export const entitiesToResources = p.pgTable(
+export const entitiesToResources = p.snakeCase.table(
 	"entities_to_resources",
 	{
 		entityId: p

@@ -1,11 +1,11 @@
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { licenses } from "./licenses";
 
-export const assets = p.pgTable("assets", {
+export const assets = p.snakeCase.table("assets", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	key: p.text("key").notNull(),
 	label: p.text("label").notNull(),

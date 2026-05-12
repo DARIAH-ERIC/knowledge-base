@@ -1,11 +1,11 @@
 import { sql } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { assets } from "./assets";
 
-export const siteMetadata = p.pgTable(
+export const siteMetadata = p.snakeCase.table(
 	"site_metadata",
 	{
 		id: p.integer("id").primaryKey().default(1),

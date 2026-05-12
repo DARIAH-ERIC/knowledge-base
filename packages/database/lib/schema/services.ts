@@ -1,6 +1,6 @@
 import { inArray } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
@@ -9,7 +9,7 @@ import { socialMedia } from "./social-media";
 
 export const serviceTypesEnum = ["community", "core", "internal"] as const;
 
-export const serviceTypes = p.pgTable(
+export const serviceTypes = p.snakeCase.table(
 	"service_types",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -42,7 +42,7 @@ export const serviceStatusesEnum = [
 	"to_be_discontinued",
 ] as const;
 
-export const serviceStatuses = p.pgTable(
+export const serviceStatuses = p.snakeCase.table(
 	"service_statuses",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -61,7 +61,7 @@ export const ServiceStatusSelectSchema = createSelectSchema(serviceStatuses);
 export const ServiceStatusInsertSchema = createInsertSchema(serviceStatuses);
 export const ServiceStatusUpdateSchema = createUpdateSchema(serviceStatuses);
 
-export const services = p.pgTable("services", {
+export const services = p.snakeCase.table("services", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	name: p.text("name").notNull(),
 	sshocMarketplaceId: p.text("sshoc_marketplace_id"),
@@ -101,7 +101,7 @@ export const ServiceUpdateSchema = createUpdateSchema(services);
  */
 export const organisationalUnitServiceRolesEnum = ["service_owner", "service_provider"] as const;
 
-export const organisationalUnitServiceRoles = p.pgTable(
+export const organisationalUnitServiceRoles = p.snakeCase.table(
 	"organisational_unit_service_roles",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -131,7 +131,7 @@ export const OrganisationalUnitServiceRoleUpdateSchema = createUpdateSchema(
 	organisationalUnitServiceRoles,
 );
 
-export const servicesToOrganisationalUnits = p.pgTable("services_to_organisational_units", {
+export const servicesToOrganisationalUnits = p.snakeCase.table("services_to_organisational_units", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	serviceId: p
 		.uuid("service_id")
@@ -167,7 +167,7 @@ export const ServiceToOrganisationalUnitUpdateSchema = createUpdateSchema(
 	servicesToOrganisationalUnits,
 );
 
-export const servicesToSocialMedia = p.pgTable("services_to_social_media", {
+export const servicesToSocialMedia = p.snakeCase.table("services_to_social_media", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	serviceId: p
 		.uuid("service_id")

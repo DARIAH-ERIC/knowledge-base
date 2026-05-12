@@ -1,7 +1,7 @@
 import type { JSONContent } from "@tiptap/core";
 import { inArray } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
@@ -13,7 +13,7 @@ import { socialMedia } from "./social-media";
 
 export const reportingCampaignStatusEnum = ["draft", "open", "closed"] as const;
 
-export const reportingCampaigns = p.pgTable(
+export const reportingCampaigns = p.snakeCase.table(
 	"reporting_campaigns",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -54,7 +54,7 @@ export const reportScreenCommentKeyEnum = [
 	"confirm",
 ] as const;
 
-export const countryReports = p.pgTable(
+export const countryReports = p.snakeCase.table(
 	"country_reports",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -95,7 +95,7 @@ export const CountryReportSelectSchema = createSelectSchema(countryReports);
 export const CountryReportInsertSchema = createInsertSchema(countryReports);
 export const CountryReportUpdateSchema = createUpdateSchema(countryReports);
 
-export const workingGroupReports = p.pgTable(
+export const workingGroupReports = p.snakeCase.table(
 	"working_group_reports",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -133,7 +133,7 @@ export const WorkingGroupReportSelectSchema = createSelectSchema(workingGroupRep
 export const WorkingGroupReportInsertSchema = createInsertSchema(workingGroupReports);
 export const WorkingGroupReportUpdateSchema = createUpdateSchema(workingGroupReports);
 
-export const reportScreenComments = p.pgTable(
+export const reportScreenComments = p.snakeCase.table(
 	"report_screen_comments",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -167,7 +167,7 @@ export const ReportScreenCommentSelectSchema = createSelectSchema(reportScreenCo
 export const ReportScreenCommentInsertSchema = createInsertSchema(reportScreenComments);
 export const ReportScreenCommentUpdateSchema = createUpdateSchema(reportScreenComments);
 
-export const countryReportContributions = p.pgTable(
+export const countryReportContributions = p.snakeCase.table(
 	"country_report_contributions",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -211,7 +211,7 @@ export const socialMediaKpiCategoryEnum = [
 	"watch_time",
 ] as const;
 
-export const countryReportSocialMediaKpis = p.pgTable(
+export const countryReportSocialMediaKpis = p.snakeCase.table(
 	"country_report_social_media_kpis",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -268,7 +268,7 @@ export const serviceKpiCategoryEnum = [
 	"websites_hosted",
 ] as const;
 
-export const countryReportServiceKpis = p.pgTable(
+export const countryReportServiceKpis = p.snakeCase.table(
 	"country_report_service_kpis",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -302,7 +302,7 @@ export const CountryReportServiceKpiSelectSchema = createSelectSchema(countryRep
 export const CountryReportServiceKpiInsertSchema = createInsertSchema(countryReportServiceKpis);
 export const CountryReportServiceKpiUpdateSchema = createUpdateSchema(countryReportServiceKpis);
 
-export const countryReportProjectContributions = p.pgTable(
+export const countryReportProjectContributions = p.snakeCase.table(
 	"country_report_project_contributions",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -340,7 +340,7 @@ export const CountryReportProjectContributionUpdateSchema = createUpdateSchema(
 	countryReportProjectContributions,
 );
 
-export const countryReportInstitutions = p.pgTable(
+export const countryReportInstitutions = p.snakeCase.table(
 	"country_report_institutions",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -369,7 +369,7 @@ export const CountryReportInstitutionSelectSchema = createSelectSchema(countryRe
 export const CountryReportInstitutionInsertSchema = createInsertSchema(countryReportInstitutions);
 export const CountryReportInstitutionUpdateSchema = createUpdateSchema(countryReportInstitutions);
 
-export const workingGroupReportSocialMedia = p.pgTable(
+export const workingGroupReportSocialMedia = p.snakeCase.table(
 	"working_group_report_social_media",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -406,7 +406,7 @@ export const WorkingGroupReportSocialMediaUpdateSchema = createUpdateSchema(
 
 export const workingGroupEventRoleEnum = ["organiser", "presenter"] as const;
 
-export const workingGroupReportEvents = p.pgTable("working_group_report_events", {
+export const workingGroupReportEvents = p.snakeCase.table("working_group_report_events", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	workingGroupReportId: p
 		.uuid("working_group_report_id")
@@ -427,7 +427,7 @@ export const WorkingGroupReportEventSelectSchema = createSelectSchema(workingGro
 export const WorkingGroupReportEventInsertSchema = createInsertSchema(workingGroupReportEvents);
 export const WorkingGroupReportEventUpdateSchema = createUpdateSchema(workingGroupReportEvents);
 
-export const workingGroupReportQuestions = p.pgTable(
+export const workingGroupReportQuestions = p.snakeCase.table(
 	"working_group_report_questions",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -458,7 +458,7 @@ export const WorkingGroupReportQuestionUpdateSchema = createUpdateSchema(
 	workingGroupReportQuestions,
 );
 
-export const workingGroupReportAnswers = p.pgTable(
+export const workingGroupReportAnswers = p.snakeCase.table(
 	"working_group_report_answers",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -495,7 +495,7 @@ export const reportingCampaignEventTypeEnum = [
 	"dariah_commissioned",
 ] as const;
 
-export const reportingCampaignEventAmounts = p.pgTable(
+export const reportingCampaignEventAmounts = p.snakeCase.table(
 	"reporting_campaign_event_amounts",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -531,7 +531,7 @@ export const ReportingCampaignEventAmountInsertSchema = createInsertSchema(
 
 export const reportingCampaignSocialMediaCategoryEnum = ["website", "other"] as const;
 
-export const reportingCampaignSocialMediaAmounts = p.pgTable(
+export const reportingCampaignSocialMediaAmounts = p.snakeCase.table(
 	"reporting_campaign_social_media_amounts",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -576,7 +576,7 @@ export const reportingCampaignContributionRoleEnum = [
 	"is_member_of_jrc",
 ] as const;
 
-export const reportingCampaignContributionAmounts = p.pgTable(
+export const reportingCampaignContributionAmounts = p.snakeCase.table(
 	"reporting_campaign_contribution_amounts",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -614,7 +614,7 @@ export const ReportingCampaignContributionAmountInsertSchema = createInsertSchem
 
 export const serviceSizeEnum = ["small", "medium", "large", "very_large", "core"] as const;
 
-export const reportingCampaignServiceSizes = p.pgTable(
+export const reportingCampaignServiceSizes = p.snakeCase.table(
 	"reporting_campaign_service_sizes",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -649,7 +649,7 @@ export const ReportingCampaignServiceSizeInsertSchema = createInsertSchema(
 	reportingCampaignServiceSizes,
 );
 
-export const reportingCampaignCountryThresholds = p.pgTable(
+export const reportingCampaignCountryThresholds = p.snakeCase.table(
 	"reporting_campaign_country_thresholds",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),

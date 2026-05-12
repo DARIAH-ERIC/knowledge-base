@@ -1,10 +1,10 @@
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { entityVersions } from "./entities";
 
-export const documentationPages = p.pgTable("documentation_pages", {
+export const documentationPages = p.snakeCase.table("documentation_pages", {
 	id: p
 		.uuid("id")
 		.primaryKey()

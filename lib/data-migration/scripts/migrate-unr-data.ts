@@ -969,7 +969,7 @@ async function main() {
 		const socialMediaUrl = outreachItem.url;
 		switch (outreachItem.type) {
 			case "national_website": {
-				socialMediaType = "website" as SocialMediaType;
+				socialMediaType = "website";
 				break;
 			}
 			case "national_social_media":

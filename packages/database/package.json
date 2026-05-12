@@ -41,7 +41,6 @@
 		"@tiptap/core": "catalog:",
 		"better-result": "catalog:",
 		"drizzle-orm": "catalog:",
-		"drizzle-valibot": "catalog:",
 		"pg": "catalog:",
 		"valibot": "catalog:"
 	},

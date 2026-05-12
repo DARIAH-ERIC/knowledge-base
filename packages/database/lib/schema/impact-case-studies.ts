@@ -1,12 +1,12 @@
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { assets } from "./assets";
 import { entityVersions } from "./entities";
 import { persons } from "./persons";
 
-export const impactCaseStudies = p.pgTable("impact_case_studies", {
+export const impactCaseStudies = p.snakeCase.table("impact_case_studies", {
 	id: p
 		.uuid("id")
 		.primaryKey()
@@ -34,7 +34,7 @@ export const ImpactCaseStudyUpdateSchema = createUpdateSchema(impactCaseStudies)
 export const articleContributorRolesEnum = ["author", "editor", "contributor"] as const;
 export type ArticleContributorRole = (typeof articleContributorRolesEnum)[number];
 
-export const impactCaseStudiesToPersons = p.pgTable(
+export const impactCaseStudiesToPersons = p.snakeCase.table(
 	"impact_case_studies_to_persons",
 	{
 		impactCaseStudyId: p

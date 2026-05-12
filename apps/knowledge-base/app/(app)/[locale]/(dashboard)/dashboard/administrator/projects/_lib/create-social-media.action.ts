@@ -2,11 +2,7 @@
 
 import { assert, getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import {
-	createActionStateError,
-	createActionStateSuccess,
-	type ValidationErrors,
-} from "@dariah-eric/next-lib/actions";
+import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
 import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
@@ -39,7 +35,7 @@ export const createSocialMediaAction = createServerAction<CreatedSocialMedia>(
 
 			return createActionStateError({
 				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested as ValidationErrors | undefined,
+				validationErrors: errors.nested,
 			});
 		}
 

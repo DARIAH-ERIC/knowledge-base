@@ -1,6 +1,6 @@
 import { inArray } from "drizzle-orm";
 import * as p from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-valibot";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-orm/valibot";
 
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
@@ -18,7 +18,7 @@ export const socialMediaTypesEnum = [
 	"other",
 ] as const;
 
-export const socialMediaTypes = p.pgTable(
+export const socialMediaTypes = p.snakeCase.table(
 	"social_media_types",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
@@ -37,7 +37,7 @@ export const SocialMediaTypeSelectSchema = createSelectSchema(socialMediaTypes);
 export const SocialMediaTypeInsertSchema = createInsertSchema(socialMediaTypes);
 export const SocialMediaTypeUpdateSchema = createUpdateSchema(socialMediaTypes);
 
-export const socialMedia = p.pgTable("social_media", {
+export const socialMedia = p.snakeCase.table("social_media", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	name: p.text("name").notNull(),
 	url: p.text("url").notNull(),

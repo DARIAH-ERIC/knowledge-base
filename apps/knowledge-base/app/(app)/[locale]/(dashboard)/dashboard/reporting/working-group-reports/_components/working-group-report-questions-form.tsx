@@ -44,7 +44,7 @@ export function WorkingGroupReportQuestionsForm(
 						</div>
 						<RichTextEditor
 							aria-label={`Answer to question ${String(question.position)}`}
-							content={existingAnswer != null ? (existingAnswer as JSONContent) : undefined}
+							content={existingAnswer ?? undefined}
 							name={`answers.${question.id}`}
 						/>
 					</section>
