@@ -99,6 +99,29 @@ export interface OpenAireIndicators {
 	citationImpact: OpenAireCitationImpact | null;
 }
 
+export interface OpenAireFundingStream {
+	id: string;
+	description: string | null;
+}
+
+export interface OpenAireProjectFunding {
+	fundingStream: OpenAireFundingStream;
+	jurisdiction: string | null;
+	name: string | null;
+	shortName: string | null;
+}
+
+export interface OpenAireGrant {
+	currency: string | null;
+	fundedAmount: number | null;
+	totalCost: number | null;
+}
+
+export interface OpenAireH2020Programme {
+	code: string;
+	description: string | null;
+}
+
 export interface ResearchProduct {
 	id: string;
 	type: OpenAireResearchProductType;
@@ -143,7 +166,26 @@ export interface ResearchProduct {
 	instances: Array<OpenAireInstance> | null;
 }
 
-export interface ResearchProductsResponseHeader {
+export interface Project {
+	id: string;
+	code: string;
+	acronym: string;
+	title: string;
+	callIdentifier: string | null;
+	fundings: Array<OpenAireProjectFunding> | null;
+	granted: OpenAireGrant | null;
+	h2020Programmes: Array<OpenAireH2020Programme> | null;
+	keywords: string | null;
+	openAccessMandateForDataset: boolean | null;
+	openAccessMandateForPublications: boolean | null;
+	startDate: string | null;
+	endDate: string | null;
+	subjects: Array<string> | null;
+	summary: string | null;
+	websiteUrl: string | null;
+}
+
+export interface OpenAireListResponseHeader {
 	numFound: number;
 	numFoundExact?: boolean;
 	maxScore: number;
@@ -155,8 +197,13 @@ export interface ResearchProductsResponseHeader {
 }
 
 export interface ResearchProductsResponse {
-	header: ResearchProductsResponseHeader;
+	header: OpenAireListResponseHeader;
 	results: Array<ResearchProduct>;
+}
+
+export interface ProjectsResponse {
+	header: OpenAireListResponseHeader;
+	results: Array<Project>;
 }
 
 export interface GetResearchProductsParams {
@@ -192,6 +239,32 @@ export interface GetResearchProductsParams {
 	relProjectCode?: string;
 	relCommunityId?: string;
 	relHostingDataSourceId?: string;
+	relCollectedFromDatasourceId?: string;
+	sortBy?: string;
+	page?: number;
+	pageSize?: number;
+	cursor?: string;
+}
+
+export interface GetProjectsParams {
+	/** Keyword search with AND/OR/NOT operators. */
+	search?: string;
+	title?: string;
+	keywords?: string;
+	id?: string;
+	code?: string;
+	acronym?: string;
+	callIdentifier?: string;
+	fundingShortName?: string;
+	fundingStreamId?: string;
+	fromStartDate?: string;
+	toStartDate?: string;
+	fromEndDate?: string;
+	toEndDate?: string;
+	relOrganizationName?: string;
+	relOrganizationId?: string;
+	relCommunityId?: string;
+	relOrganizationCountryCode?: string;
 	relCollectedFromDatasourceId?: string;
 	sortBy?: string;
 	page?: number;
@@ -297,7 +370,92 @@ export function createOpenAireClient(params: CreateOpenAireClientParams) {
 		);
 	}
 
+	function getProjects(params: GetProjectsParams): Promise<RequestResult<ProjectsResponse>> {
+		const {
+			search,
+			title,
+			keywords,
+			id,
+			code,
+			acronym,
+			callIdentifier,
+			fundingShortName,
+			fundingStreamId,
+			fromStartDate,
+			toStartDate,
+			fromEndDate,
+			toEndDate,
+			relOrganizationName,
+			relOrganizationId,
+			relCommunityId,
+			relOrganizationCountryCode,
+			relCollectedFromDatasourceId,
+			sortBy,
+			page,
+			pageSize: limit,
+			cursor,
+		} = params;
+
+		return request<ProjectsResponse>(
+			createUrl({
+				baseUrl,
+				pathname: "/graph/v2/projects",
+				searchParams: createUrlSearchParams({
+					search,
+					title,
+					keywords,
+					id,
+					code,
+					acronym,
+					callIdentifier,
+					fundingShortName,
+					fundingStreamId,
+					fromStartDate,
+					toStartDate,
+					fromEndDate,
+					toEndDate,
+					relOrganizationName,
+					relOrganizationId,
+					relCommunityId,
+					relOrganizationCountryCode,
+					relCollectedFromDatasourceId,
+					sortBy,
+					page,
+					pageSize: limit,
+					cursor,
+				}),
+			}),
+			{ responseType: "json" },
+		);
+	}
+
 	return {
+		projects: {
+			list(params: GetProjectsParams = {}): Promise<RequestResult<ProjectsResponse>> {
+				return getProjects(params);
+			},
+
+			listAll(
+				params: Omit<GetProjectsParams, "cursor" | "page" | "pageSize">,
+			): Promise<Result<Array<Project>, RequestError>> {
+				return Result.gen(async function* () {
+					const items: Array<Project> = [];
+					let cursor: string | undefined = "*";
+
+					while (cursor != null) {
+						const pageCursor: string = cursor;
+						const { data } = yield* Result.await(
+							getProjects({ ...params, cursor: pageCursor, pageSize }),
+						);
+						items.push(...data.results);
+						cursor = data.header.nextCursor;
+					}
+
+					return Result.ok(items);
+				});
+			},
+		},
+
 		researchProducts: {
 			list(
 				params: GetResearchProductsParams = {},
