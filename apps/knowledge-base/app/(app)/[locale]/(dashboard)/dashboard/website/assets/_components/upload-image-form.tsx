@@ -9,11 +9,6 @@ import { type ReactNode, useActionState } from "react";
 
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
 
-/**
- * TODO: use getPresignedUploadUrl to upload directly from the client to the object store, and then
- * call a server action to create a record in the assets table for that object key.
- */
-
 export function UploadImageForm(): ReactNode {
 	const t = useExtracted();
 
