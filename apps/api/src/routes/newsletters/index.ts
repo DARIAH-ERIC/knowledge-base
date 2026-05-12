@@ -7,6 +7,8 @@ import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "@/lib/openapi/responses";
 import { validate, validator } from "@/lib/openapi/validator";
 import { GetNewsletters, SubscribeNewsletter } from "@/routes/newsletters/schemas";
 import { getNewsletters, subscribeToNewsletter } from "@/routes/newsletters/service";
+import { env } from "~/config/env.config";
+import { HTTPException } from "hono/http-exception";
 // import { env } from "~/config/env.config";
 
 const subscribeRateLimiter = rateLimiter({
@@ -80,17 +82,17 @@ export const router = createRouter()
 			},
 		}),
 		subscribeRateLimiter,
-		// async (c, next) => {
-		// 	if (env.API_ACCESS_TOKEN == null) {
-		// 		throw new Error("Missing API_ACCESS_TOKEN");
-		// 	}
-		//
-		// 	if (c.req.header("x-api-access-token") !== env.API_ACCESS_TOKEN) {
-		// 		throw new HTTPException(401, { message: "Unauthorized" });
-		// 	}
-		//
-		// 	await next();
-		// },
+		async (c, next) => {
+			if (env.API_ACCESS_TOKEN == null) {
+				throw new Error("Missing API_ACCESS_TOKEN");
+			}
+
+			if (c.req.header("x-api-access-token") !== env.API_ACCESS_TOKEN) {
+				throw new HTTPException(401, { message: "Unauthorized" });
+			}
+
+			await next();
+		},
 		validator("json", SubscribeNewsletter.RequestSchema),
 		async (c) => {
 			const { email } = c.req.valid("json");
