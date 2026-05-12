@@ -6,7 +6,8 @@
 		"paths": {
 			"@/*": ["./*"]
 		},
-		"plugins": [{ "name": "next" }]
+		"plugins": [{ "name": "next" }],
+		"types": ["node", "nodemailer", "react", "react-dom"]
 	},
 	"include": [
 		"./**/*.js",

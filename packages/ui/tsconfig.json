@@ -6,7 +6,8 @@
 		"lib": ["dom", "esnext"],
 		"paths": {
 			"@/*": ["./*"]
-		}
+		},
+		"types": ["node", "react", "react-dom"]
 	},
 	"include": [
 		"./**/*.js",
