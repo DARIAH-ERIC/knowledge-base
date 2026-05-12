@@ -64,6 +64,3 @@ storybook-static/
 
 # data migration cache
 .cache/
-
-# data migration unr-schema
-scripts/migrate/unr-schema/
