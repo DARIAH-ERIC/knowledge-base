@@ -55,11 +55,14 @@ describe("newsletters", () => {
 
 			const client = createTestClient(undefined as never);
 
-			const response = await client.newsletters.subscribe.$post({
-				json: {
-					email: "test@example.com",
+			const response = await client.newsletters.subscribe.$post(
+				{
+					json: {
+						email: "test@example.com",
+					},
 				},
-			}, { headers });
+				{ headers },
+			);
 
 			expect(response.status).toBe(201);
 			expect(mailchimp.subscribe).toHaveBeenCalledWith({ email: "test@example.com" });
@@ -71,11 +74,14 @@ describe("newsletters", () => {
 		it("should reject invalid email addresses", async () => {
 			const client = createTestClient(undefined as never);
 
-			const response = await client.newsletters.subscribe.$post({
-				json: {
-					email: "invalid-email",
+			const response = await client.newsletters.subscribe.$post(
+				{
+					json: {
+						email: "invalid-email",
+					},
 				},
-			}, { headers });
+				{ headers },
+			);
 
 			expect(response.status).toBe(400);
 			expect(mailchimp.subscribe).not.toHaveBeenCalled();
@@ -99,11 +105,14 @@ describe("newsletters", () => {
 
 			const client = createTestClient(undefined as never);
 
-			const response = await client.newsletters.subscribe.$post({
-				json: {
-					email: "test@example.com",
+			const response = await client.newsletters.subscribe.$post(
+				{
+					json: {
+						email: "test@example.com",
+					},
 				},
-			}, { headers });
+				{ headers },
+			);
 
 			expect(response.status).toBe(400);
 			await expect(response.json()).resolves.toEqual({
@@ -132,11 +141,14 @@ describe("newsletters", () => {
 
 			const client = createTestClient(undefined as never);
 
-			const response = await client.newsletters.subscribe.$post({
-				json: {
-					email: "test@example.com",
+			const response = await client.newsletters.subscribe.$post(
+				{
+					json: {
+						email: "test@example.com",
+					},
 				},
-			}, { headers });
+				{ headers },
+			);
 
 			expect(response.status).toBe(400);
 			await expect(response.json()).resolves.toEqual({
