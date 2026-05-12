@@ -195,9 +195,7 @@ export interface GetEpisciencesPagesParams {
 export interface CreateEpisciencesClientParams {
 	config: {
 		baseUrl: string;
-		/**
-		 * API bearer token. Required for secured journal endpoints.
-		 */
+		/** API bearer token. Required for secured journal endpoints. */
 		token?: string;
 		/**
 		 * Default journal code used when callers do not pass one explicitly.
@@ -213,8 +211,8 @@ const pageSize = 30;
 
 function createHeaders(token?: string): RequestInit["headers"] | undefined {
 	/**
-	 * Api defaults to `application/ld+json`, but our request helper assumes `application/json`
-	 * for `responseType: "json"`, which produces a different response shape.
+	 * Api defaults to `application/ld+json`, but our request helper assumes `application/json` for
+	 * `responseType: "json"`, which produces a different response shape.
 	 */
 	const headers = {
 		accept: "application/ld+json",

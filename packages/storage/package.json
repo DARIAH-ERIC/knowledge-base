@@ -2,19 +2,16 @@
 	"name": "@dariah-eric/storage",
 	"private": true,
 	"license": "MIT",
+	"files": [
+		"./dist/"
+	],
 	"type": "module",
-	"engines": {
-		"node": "24.x"
-	},
+	"sideEffects": false,
 	"exports": {
 		".": "./dist/index.mjs",
 		"./config": "./config/images.config.ts",
 		"./lib": "./lib/lib/index.ts"
 	},
-	"files": [
-		"./dist/"
-	],
-	"sideEffects": false,
 	"scripts": {
 		"build": "tsdown",
 		"dev": "tsdown --watch",
@@ -43,5 +40,8 @@
 		"tsdown": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:"
+	},
+	"engines": {
+		"node": "24.x"
 	}
 }

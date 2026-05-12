@@ -19,9 +19,7 @@ import {
 } from "@/routes/spotlight-articles/service";
 
 export const router = createRouter()
-	/**
-	 * GET /api/spotlight-articles
-	 */
+	/** GET /api/spotlight-articles */
 	.get(
 		"/",
 		describeRoute({
@@ -56,9 +54,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/spotlight-articles/slugs
-	 */
+	/** GET /api/spotlight-articles/slugs */
 	.get(
 		"/slugs",
 		describeRoute({
@@ -93,9 +89,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/spotlight-articles/:id
-	 */
+	/** GET /api/spotlight-articles/:id */
 	.get(
 		"/:id",
 		describeRoute({
@@ -135,9 +129,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/spotlight-articles/slugs/:slug
-	 */
+	/** GET /api/spotlight-articles/slugs/:slug */
 	.get(
 		"/slugs/:slug",
 		describeRoute({

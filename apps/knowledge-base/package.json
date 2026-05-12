@@ -3,9 +3,6 @@
 	"private": true,
 	"license": "MIT",
 	"type": "module",
-	"engines": {
-		"node": "24.x"
-	},
 	"scripts": {
 		"analyze": "next experimental-analyze",
 		"build": "next build --experimental-next-config-strip-types",
@@ -16,20 +13,20 @@
 		"i18n:convert-messages": "tsx ./scripts/i18n/convert-messages.ts",
 		"i18n:extract-messages": "tsx ./scripts/i18n/extract-messages.ts",
 		"lint:check": "run-p --continue-on-error \"lint:*:check\"",
-		"lint:fix": "run-p --continue-on-error \"lint:*:fix\"",
 		"lint:code:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:code:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
+		"lint:fix": "run-p --continue-on-error \"lint:*:fix\"",
 		"lint:styles:check": "stylelint \"./styles/**/*.css\" --cache --ignore-path ./../../.gitignore",
 		"lint:styles:fix": "stylelint \"./styles/**/*.css\" --cache --fix --ignore-path ./../../.gitignore",
 		"prepare": "run-s types:prepare",
 		"start": "PORT=3001 next start --experimental-next-config-strip-types",
 		"test": "dotenvx run -q -f ./.env.local --ignore MISSING_ENV_FILE -- vitest run",
-		"test:watch": "dotenvx run -q -f ./.env.local --ignore MISSING_ENV_FILE -- vitest watch",
 		"test:e2e": "PORT=3001 playwright test --config ./e2e/playwright.config.ts",
 		"test:e2e:codegen": "playwright codegen",
 		"test:e2e:install": "playwright install --with-deps",
 		"test:e2e:ui": "pnpm run test:e2e --ui",
 		"test:e2e:update-snapshots": "pnpm run test:e2e --update-snapshots",
+		"test:watch": "dotenvx run -q -f ./.env.local --ignore MISSING_ENV_FILE -- vitest watch",
 		"types:check": "tsc --noEmit",
 		"types:prepare": "ENV_VALIDATION=\"disabled\" next typegen"
 	},
@@ -125,12 +122,15 @@
 		"vite-tsconfig-paths": "catalog:",
 		"vitest": "catalog:"
 	},
+	"stylelint": {
+		"extends": "@acdh-oeaw/stylelint-config"
+	},
+	"engines": {
+		"node": "24.x"
+	},
 	"postcss": {
 		"plugins": {
 			"@tailwindcss/postcss": {}
 		}
-	},
-	"stylelint": {
-		"extends": "@acdh-oeaw/stylelint-config"
 	}
 }

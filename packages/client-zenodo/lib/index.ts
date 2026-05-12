@@ -115,7 +115,8 @@ export interface CreateZenodoClientParams {
 const defaultCommunityId = "dariah";
 const pageSize = 100;
 
-/** Zenodo records search and community filtering:
+/**
+ * Zenodo records search and community filtering:
  *
  * @see {@link https://developers.zenodo.org/}
  * @see {@link https://zenodo.org/communities/dariah}

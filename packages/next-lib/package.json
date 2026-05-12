@@ -4,9 +4,6 @@
 	"license": "MIT",
 	"type": "module",
 	"sideEffects": false,
-	"engines": {
-		"node": "24.x"
-	},
 	"exports": {
 		"./actions": "./dist/actions/index.mjs",
 		"./middlewares": "./dist/middlewares/index.mjs",
@@ -39,5 +36,8 @@
 		"better-result": "catalog:",
 		"next": "catalog:",
 		"valibot": "catalog:"
+	},
+	"engines": {
+		"node": "24.x"
 	}
 }

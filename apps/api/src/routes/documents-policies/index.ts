@@ -27,9 +27,7 @@ function documentUrl(id: string) {
 }
 
 export const router = createRouter()
-	/**
-	 * GET /api/documents-policies
-	 */
+	/** GET /api/documents-policies */
 	.get(
 		"/",
 		describeRoute({
@@ -71,9 +69,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/documents-policies/slugs
-	 */
+	/** GET /api/documents-policies/slugs */
 	.get(
 		"/slugs",
 		describeRoute({
@@ -108,9 +104,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/documents-policies/:id
-	 */
+	/** GET /api/documents-policies/:id */
 	.get(
 		"/:id",
 		describeRoute({
@@ -152,9 +146,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/documents-policies/:id/document
-	 */
+	/** GET /api/documents-policies/:id/document */
 	.get(
 		"/:id/document",
 		describeRoute({
@@ -201,9 +193,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/documents-policies/slugs/:slug
-	 */
+	/** GET /api/documents-policies/slugs/:slug */
 	.get(
 		"/slugs/:slug",
 		describeRoute({

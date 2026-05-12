@@ -4,9 +4,6 @@
 	"license": "MIT",
 	"type": "module",
 	"sideEffects": false,
-	"engines": {
-		"node": "24.x"
-	},
 	"exports": {
 		".": "./dist/index.mjs",
 		"./errors": "./dist/errors.mjs"
@@ -30,5 +27,8 @@
 	},
 	"peerDependencies": {
 		"better-result": "catalog:"
+	},
+	"engines": {
+		"node": "24.x"
 	}
 }

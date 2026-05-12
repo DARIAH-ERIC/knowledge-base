@@ -1,9 +1,9 @@
 import baseConfig from "@acdh-oeaw/eslint-config";
 import nodeConfig from "@acdh-oeaw/eslint-config-node";
-import { defineConfig, globalIgnores } from "eslint/config";
 import gitignore from "eslint-config-flat-gitignore";
 import checkFilePlugin from "eslint-plugin-check-file";
 import unicornPlugin from "eslint-plugin-unicorn";
+import { defineConfig, globalIgnores } from "eslint/config";
 
 const config = defineConfig(
 	gitignore({ strict: true }),

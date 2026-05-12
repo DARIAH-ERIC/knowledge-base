@@ -1,11 +1,8 @@
 {
 	"name": "@dariah-eric/api",
 	"private": true,
-	"licence": "MIT",
+	"license": "MIT",
 	"type": "module",
-	"engines": {
-		"node": "24.x"
-	},
 	"scripts": {
 		"build": "tsdown ./src/index.ts",
 		"dev": "dotenvx run -q -f ./.env.local --ignore MISSING_ENV_FILE -- tsx watch ./src/index.ts | pino-pretty",
@@ -63,5 +60,8 @@
 		"uuid": "catalog:",
 		"vite-tsconfig-paths": "catalog:",
 		"vitest": "catalog:"
+	},
+	"engines": {
+		"node": "24.x"
 	}
 }

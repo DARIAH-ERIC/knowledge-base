@@ -64,8 +64,8 @@ test.describe("contact page", () => {
 		}, "Email service disabled.");
 
 		/**
-		 * Run sequentially. Also requires setting `workers: 1` in `playwright.config.ts` to
-		 * avoid running test-suites concurrently.
+		 * Run sequentially. Also requires setting `workers: 1` in `playwright.config.ts` to avoid
+		 * running test-suites concurrently.
 		 */
 		test.describe.configure({ mode: "default" });
 

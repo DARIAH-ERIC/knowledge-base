@@ -9,9 +9,7 @@ import { GetNavigation } from "@/routes/navigation/schemas";
 import { getNavigation } from "@/routes/navigation/service";
 
 export const router = createRouter()
-	/**
-	 * GET /api/navigation
-	 */
+	/** GET /api/navigation */
 	.get(
 		"/",
 		describeRoute({

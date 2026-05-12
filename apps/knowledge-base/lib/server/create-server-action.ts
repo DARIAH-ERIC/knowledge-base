@@ -5,8 +5,8 @@ import {
 	type ValidationErrors,
 } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { unstable_rethrow as rethrow } from "next/navigation";
 import { getExtracted } from "next-intl/server";
+import { unstable_rethrow as rethrow } from "next/navigation";
 
 export type ServerAction<
 	TData = unknown,

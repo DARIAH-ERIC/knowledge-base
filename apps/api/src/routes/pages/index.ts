@@ -9,9 +9,7 @@ import { GetPageById, GetPageBySlug, GetPages, GetPageSlugs } from "@/routes/pag
 import { getPageById, getPageBySlug, getPages, getPageSlugs } from "@/routes/pages/service";
 
 export const router = createRouter()
-	/**
-	 * GET /api/pages
-	 */
+	/** GET /api/pages */
 	.get(
 		"/",
 		describeRoute({
@@ -46,9 +44,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/pages/slugs
-	 */
+	/** GET /api/pages/slugs */
 	.get(
 		"/slugs",
 		describeRoute({
@@ -83,9 +79,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/pages/:id
-	 */
+	/** GET /api/pages/:id */
 	.get(
 		"/:id",
 		describeRoute({
@@ -125,9 +119,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/pages/slugs/:slug
-	 */
+	/** GET /api/pages/slugs/:slug */
 	.get(
 		"/slugs/:slug",
 		describeRoute({

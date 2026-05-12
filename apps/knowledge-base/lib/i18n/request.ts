@@ -1,5 +1,5 @@
-import * as rootParams from "next/root-params";
 import { getRequestConfig, type GetRequestConfigParams } from "next-intl/server";
+import * as rootParams from "next/root-params";
 
 import { formats } from "@/lib/i18n/formats";
 import { type IntlLocale, isValidLocale, timeZone } from "@/lib/i18n/locales";
@@ -12,9 +12,8 @@ async function getLocale(params: GetRequestConfigParams): Promise<IntlLocale> {
 	}
 
 	/**
-	 * FIXME:
-	 * Currently `next/root-params` are not supported in route handlers, so we fall back
-	 * to default locale.
+	 * FIXME: Currently `next/root-params` are not supported in route handlers, so we fall back to
+	 * default locale.
 	 */
 	try {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access

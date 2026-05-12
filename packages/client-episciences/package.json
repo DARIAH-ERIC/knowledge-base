@@ -24,10 +24,10 @@
 		"@dariah-eric/configs": "workspace:^",
 		"@dariah-eric/request": "workspace:^",
 		"@types/node": "catalog:",
-		"eslint": "catalog:",
-		"typescript": "catalog:",
 		"better-result": "catalog:",
-		"tsdown": "catalog:"
+		"eslint": "catalog:",
+		"tsdown": "catalog:",
+		"typescript": "catalog:"
 	},
 	"peerDependencies": {
 		"@acdh-oeaw/lib": "catalog:",

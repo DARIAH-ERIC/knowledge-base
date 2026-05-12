@@ -27,8 +27,8 @@ export async function createI18n(_page: Page, locale = defaultLocale): Promise<I
 export type WithI18n<T> = T & { i18n: I18n };
 
 /**
- * Copied from `@/lib/i18n/messages.ts` because `playwright` needs import attributes
- * for json imports.
+ * Copied from `@/lib/i18n/messages.ts` because `playwright` needs import attributes for json
+ * imports.
  */
 
 type Messages = typeof messages;

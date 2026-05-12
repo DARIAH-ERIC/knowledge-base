@@ -1,6 +1,6 @@
-import { defineConfig } from "eslint/config";
 // @ts-expect-error Missing type declarations.
 import drizzlePlugin from "eslint-plugin-drizzle";
+import { defineConfig } from "eslint/config";
 
 const config = defineConfig({
 	name: "drizzle-config",

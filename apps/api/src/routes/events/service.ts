@@ -16,9 +16,15 @@ interface GetEventsParams {
 	limit?: number;
 	/** @default 0 */
 	offset?: number;
-	/** ISO date string (YYYY-MM-DD). Only events whose duration overlaps on or after this date are returned. */
+	/**
+	 * ISO date string (YYYY-MM-DD). Only events whose duration overlaps on or after this date are
+	 * returned.
+	 */
 	from?: string;
-	/** ISO date string (YYYY-MM-DD). Only events whose duration overlaps on or before this date are returned. */
+	/**
+	 * ISO date string (YYYY-MM-DD). Only events whose duration overlaps on or before this date are
+	 * returned.
+	 */
 	until?: string;
 	/** Sort order by event start date. Defaults to "asc" when `from` is set, "desc" otherwise. */
 	order?: EventOrder;

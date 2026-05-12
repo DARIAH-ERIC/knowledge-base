@@ -1,5 +1,5 @@
-import { forbidden } from "next/navigation";
 import { getLocale } from "next-intl/server";
+import { forbidden } from "next/navigation";
 import { cache } from "react";
 
 import { auth } from "@/lib/auth";

@@ -29,12 +29,11 @@ export const ServiceTypeInsertSchema = createInsertSchema(serviceTypes);
 export const ServiceTypeUpdateSchema = createUpdateSchema(serviceTypes);
 
 /**
- * When services are ingested from sshoc marketplace, they default to "live".
- * All other statuses are managed in the dariah knowledge base. Upon re-ingest from
- * sshoc marketplace, the status field is not updated. When a service is no longer
- * included in the sshoc marketplace response (e.g. because it has been deprecated there),
- * its status is set to "needs_review" if its current status is still set to "live". In other
- * cases, the status field is not updated.
+ * When services are ingested from sshoc marketplace, they default to "live". All other statuses are
+ * managed in the dariah knowledge base. Upon re-ingest from sshoc marketplace, the status field is
+ * not updated. When a service is no longer included in the sshoc marketplace response (e.g. because
+ * it has been deprecated there), its status is set to "needs_review" if its current status is still
+ * set to "live". In other cases, the status field is not updated.
  */
 export const serviceStatusesEnum = [
 	"discontinued",
@@ -97,9 +96,8 @@ export const ServiceUpdateSchema = createUpdateSchema(services);
  * These are derived from the contributor role (of the actor/organisational unit) in sshoc
  * marketplace:
  *
- * "reviewer" => "service_owner"
- * "provider" => "service_provider"
- * "curator" is always DARIAH-EU but this is not reflected in our data model
+ * "reviewer" => "service_owner" "provider" => "service_provider" "curator" is always DARIAH-EU but
+ * this is not reflected in our data model
  */
 export const organisationalUnitServiceRolesEnum = ["service_owner", "service_provider"] as const;
 

@@ -3,6 +3,7 @@
 	"private": true,
 	"license": "MIT",
 	"type": "module",
+	"sideEffects": false,
 	"exports": {
 		"./eslint/drizzle": "./lib/eslint/drizzle.ts",
 		"./eslint/next": "./lib/eslint/next.ts",
@@ -15,7 +16,6 @@
 		"./typescript/lib": "./lib/typescript/lib.json",
 		"./typescript/lib-build": "./lib/typescript/lib-build.json"
 	},
-	"sideEffects": false,
 	"scripts": {
 		"format:check": "oxfmt --check",
 		"format:fix": "oxfmt --write",
@@ -41,13 +41,13 @@
 		"eslint-plugin-unicorn": "catalog:",
 		"globals": "catalog:"
 	},
-	"peerDependencies": {
-		"eslint": "*",
-		"typescript": "*"
-	},
 	"devDependencies": {
 		"@types/node": "catalog:",
 		"eslint": "catalog:",
 		"typescript": "catalog:"
+	},
+	"peerDependencies": {
+		"eslint": "*",
+		"typescript": "*"
 	}
 }

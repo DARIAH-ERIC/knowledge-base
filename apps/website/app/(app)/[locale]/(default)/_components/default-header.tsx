@@ -2,9 +2,9 @@ import cn from "clsx/lite";
 import { useTranslations } from "next-intl";
 import type { ComponentProps, ReactNode } from "react";
 
-import { ColorSchemeSelect } from "@/app/(app)/[locale]/_components/color-scheme-select";
 // import { LocaleSelect } from "@/app/(app)/[locale]/_components/locale-select";
 import { Navigation } from "@/app/(app)/[locale]/(default)/_components/navigation";
+import { ColorSchemeSelect } from "@/app/(app)/[locale]/_components/color-scheme-select";
 import { createHref } from "@/lib/navigation/create-href";
 import type { NavigationConfig } from "@/lib/navigation/navigation";
 

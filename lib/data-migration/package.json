@@ -3,16 +3,13 @@
 	"private": true,
 	"license": "MIT",
 	"type": "module",
-	"engines": {
-		"node": "24.x"
-	},
 	"sideEffects": false,
 	"scripts": {
 		"format:check": "oxfmt --check",
 		"format:fix": "oxfmt --write",
+		"get-unr-schema": "drizzle-kit introspect --config=./config/unr-db.config.ts",
 		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
 		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
-		"get-unr-schema": "drizzle-kit introspect --config=./config/unr-db.config.ts",
 		"migrate": "tsx ./scripts/migrate.ts",
 		"migrate-unr-data": "tsx ./scripts/migrate-unr-data.ts",
 		"types:check": "tsc --noEmit"
@@ -41,5 +38,8 @@
 		"tsx": "catalog:",
 		"typescript": "catalog:",
 		"wp-types": "catalog:"
+	},
+	"engines": {
+		"node": "24.x"
 	}
 }

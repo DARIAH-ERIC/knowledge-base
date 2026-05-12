@@ -1,8 +1,8 @@
 import { assert } from "@acdh-oeaw/lib";
 import { Client as MinioClient } from "minio";
 
-import { env } from "../../config/env.config";
 import { createStorageService } from "..";
+import { env } from "../../config/env.config";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createClient() {

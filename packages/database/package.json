@@ -2,10 +2,13 @@
 	"name": "@dariah-eric/database",
 	"private": true,
 	"license": "MIT",
+	"files": [
+		"./config/",
+		"./db/",
+		"./dist/"
+	],
 	"type": "module",
-	"engines": {
-		"node": "24.x"
-	},
+	"sideEffects": false,
 	"exports": {
 		".": "./dist/index.mjs",
 		"./client": "./dist/client.mjs",
@@ -15,12 +18,6 @@
 		"./schema": "./dist/schema.mjs",
 		"./sql": "./dist/sql.mjs"
 	},
-	"files": [
-		"./config/",
-		"./db/",
-		"./dist/"
-	],
-	"sideEffects": false,
 	"scripts": {
 		"build": "tsdown",
 		"db:migrations:apply": "drizzle-kit migrate --config=./config/drizzle.config.ts",
@@ -40,8 +37,8 @@
 	},
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
-		"@tiptap/core": "catalog:",
 		"@dariah-eric/env": "workspace:^",
+		"@tiptap/core": "catalog:",
 		"better-result": "catalog:",
 		"drizzle-orm": "catalog:",
 		"drizzle-valibot": "catalog:",
@@ -62,5 +59,8 @@
 		"tsdown": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:"
+	},
+	"engines": {
+		"node": "24.x"
 	}
 }

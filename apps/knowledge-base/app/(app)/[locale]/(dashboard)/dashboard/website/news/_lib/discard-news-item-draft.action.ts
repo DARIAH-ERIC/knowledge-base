@@ -1,8 +1,8 @@
 "use server";
 
 import { assert } from "@acdh-oeaw/lib";
-import { revalidatePath } from "next/cache";
 import { getLocale } from "next-intl/server";
+import { revalidatePath } from "next/cache";
 
 import { assertAdmin } from "@/lib/auth/session";
 import { discardDraftVersion } from "@/lib/data/entity-lifecycle";

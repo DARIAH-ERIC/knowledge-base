@@ -42,7 +42,7 @@ export function createStorageService(params: CreateStorageServiceParams) {
 			for await (const _item of stream) {
 				const item = _item as BucketItem;
 
-				/** Always defined because we query `listObjectsV2` with `recursive: true`.  */
+				/** Always defined because we query `listObjectsV2` with `recursive: true`. */
 				const key = item.name!;
 
 				images.push({ key });

@@ -6,7 +6,7 @@ import { stream } from "./stream";
 export interface SeedConfig {
 	/** @default "2025-01-01" */
 	defaultRefDate?: Date;
-	/** default 42 */
+	/** Default 42 */
 	seed?: number;
 }
 

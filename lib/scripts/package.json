@@ -3,9 +3,6 @@
 	"private": true,
 	"license": "MIT",
 	"type": "module",
-	"engines": {
-		"node": "24.x"
-	},
 	"sideEffects": false,
 	"scripts": {
 		"format:check": "oxfmt --check",
@@ -30,5 +27,8 @@
 		"eslint": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:"
+	},
+	"engines": {
+		"node": "24.x"
 	}
 }

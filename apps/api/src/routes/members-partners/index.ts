@@ -19,9 +19,7 @@ import {
 } from "@/routes/members-partners/service";
 
 export const router = createRouter()
-	/**
-	 * GET /api/members-partners
-	 */
+	/** GET /api/members-partners */
 	.get(
 		"/",
 		describeRoute({
@@ -56,9 +54,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/members-partners/slugs
-	 */
+	/** GET /api/members-partners/slugs */
 	.get(
 		"/slugs",
 		describeRoute({
@@ -93,9 +89,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/members-partners/:id
-	 */
+	/** GET /api/members-partners/:id */
 	.get(
 		"/:id",
 		describeRoute({
@@ -135,9 +129,7 @@ export const router = createRouter()
 		},
 	)
 
-	/**
-	 * GET /api/members-partners/slugs/:slug
-	 */
+	/** GET /api/members-partners/slugs/:slug */
 	.get(
 		"/slugs/:slug",
 		describeRoute({

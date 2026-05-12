@@ -62,8 +62,8 @@ export const EntityStatusInsertSchema = createInsertSchema(entityStatus);
 export const EntityStatusUpdateSchema = createUpdateSchema(entityStatus);
 
 /**
- * A document is the stable identity of a piece of content across draft/published versions.
- * Slug, type, and cross-type relations live here so they survive republishes.
+ * A document is the stable identity of a piece of content across draft/published versions. Slug,
+ * type, and cross-type relations live here so they survive republishes.
  */
 export const entities = p.pgTable(
 	"entities",
@@ -185,8 +185,8 @@ export const FieldInsertSchema = createInsertSchema(fields);
 export const FieldUpdateSchema = createUpdateSchema(fields);
 
 /**
- * Document-level: a relation between two documents, stable across versions.
- * Public reads resolve through the related document's published version.
+ * Document-level: a relation between two documents, stable across versions. Public reads resolve
+ * through the related document's published version.
  */
 export const entitiesToEntities = p.pgTable(
 	"entities_to_entities",
@@ -215,9 +215,7 @@ export const entitiesToEntities = p.pgTable(
 	},
 );
 
-/**
- * Document-level: a relation from a document to an external resource (search index id).
- */
+/** Document-level: a relation from a document to an external resource (search index id). */
 export const entitiesToResources = p.pgTable(
 	"entities_to_resources",
 	{

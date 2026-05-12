@@ -12,8 +12,8 @@ const validate = define({
 		NEXT_PUBLIC_TYPESENSE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 		NEXT_PUBLIC_TYPESENSE_PROTOCOL: v.optional(v.picklist(["http", "https"]), "https"),
 		/**
-		 * Optional, because we need to be able to create a collection, before we create
-		 * a search-only api key for that collection.
+		 * Optional, because we need to be able to create a collection, before we create a search-only
+		 * api key for that collection.
 		 */
 		NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY: v.optional(v.pipe(v.string(), v.nonEmpty())),
 		NEXT_PUBLIC_WEBSITE_BASE_URL: v.pipe(v.string(), v.url(), v.transform(removeTrailingSlash)),

@@ -52,8 +52,8 @@ test.describe("i18n", () => {
 		const i18n = await createI18n("de-AT");
 		const response = await page.goto("/de/unknown");
 		/**
-		 * When streaming a response (because the root layout has a suspense boundary
-		 * or a `loading.tsx`), the response status code will always be 200.
+		 * When streaming a response (because the root layout has a suspense boundary or a
+		 * `loading.tsx`), the response status code will always be 200.
 		 *
 		 * @see {@link https://nextjs.org/docs/app/building-your-application/routing/loading-ui-and-streaming#status-codes}
 		 * @see {@link https://nextjs.org/docs/app/api-reference/file-conventions/not-found}

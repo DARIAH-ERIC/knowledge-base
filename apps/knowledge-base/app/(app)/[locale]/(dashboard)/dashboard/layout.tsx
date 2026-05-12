@@ -1,7 +1,7 @@
 import { SidebarInset, SidebarProvider } from "@dariah-eric/ui/sidebar";
+import { getExtracted } from "next-intl/server";
 import { cookies } from "next/headers";
 import { connection } from "next/server";
-import { getExtracted } from "next-intl/server";
 import { Fragment, type ReactNode } from "react";
 
 import { DashboardSidebar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar";
@@ -22,8 +22,8 @@ export default async function DashbardLayout(
 	const t = await getExtracted();
 
 	/**
-	 * We cannot access the database when building the app in github actions,
-	 * so we need to ensure that all database access happens at request time only.
+	 * We cannot access the database when building the app in github actions, so we need to ensure
+	 * that all database access happens at request time only.
 	 */
 	await connection();
 

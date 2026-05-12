@@ -242,6 +242,7 @@ async function main() {
 	 * Migrates working groups from unr to knowledge base.
 	 *
 	 * For each working group:
+	 *
 	 * - Creates an entity in the entity table
 	 * - Copies an existing logo from the old bucket to the new bucket
 	 * - Creates an asset in the assets table
@@ -250,9 +251,8 @@ async function main() {
 	 * - Creates a relation between the organisational unit and the umbrella unit of type is_part_of
 	 * - Creates a field in the fields table if a description exists
 	 * - Creates a content block field realtion in the content blocks table
-	 * - Creates a richtext content block for the description
-	 * Checks if number of organisational units of type working group in kb matches number of
-	 * working groups in unr
+	 * - Creates a richtext content block for the description Checks if number of organisational units
+	 *   of type working group in kb matches number of working groups in unr
 	 */
 
 	log.info("Migrating working groups...");
@@ -393,24 +393,23 @@ async function main() {
 	 * Migrates countries from unr to knowledge base.
 	 *
 	 * For each country:
+	 *
 	 * - Creates an entity in the entity table
 	 * - Creates an organisational unit of type country
 	 * - Updates the mapping between unr countries and kb organisational units
-	 * - Creates another entity in the entity table if the unr country has a
-	 * 	 consortium name
+	 * - Creates another entity in the entity table if the unr country has a consortium name
 	 * - Copies an existing logo from the old bucket to the new bucket
 	 * - Creates an asset in the assets table
 	 * - Creates a field in the fields table if a description exists
 	 * - Creates a content block field realtion in the content blocks table
 	 * - Creates a richtext content block for the description
-	 * - Creates an organisational unit of type national consortium if the unr country has a
-	 * 	 consortium name
+	 * - Creates an organisational unit of type national consortium if the unr country has a consortium
+	 *   name
 	 * - Creates a relation between the national consortium organisational unit and the country
 	 *   organisitational unit of type: is_consortium_of
 	 * - Creates a relation between the country organisational unit and the umbrella unit of type
-	 *   is_member_of or is_cooperating_partner_of
-	 * Checks if number of organisational units of type country in kb matches number of
-	 * countries in unr
+	 *   is_member_of or is_cooperating_partner_of Checks if number of organisational units of type
+	 *   country in kb matches number of countries in unr
 	 */
 
 	log.info("Migrating countries...");
@@ -621,18 +620,19 @@ async function main() {
 	 * Migrates institutions from unr to knowledge base.
 	 *
 	 * For each institution:
+	 *
 	 * - Creates an entity in the entity table
 	 * - Creates an organisational unit of type institution
 	 * - Updates the mapping between unr institutions and kb organisational units
 	 * - Creates relations between the organisational unit and the umbrella unit of types:
-	 *   - is_cooperating_partner_of
-	 *   - is_national_coordinating_institution_in
-	 *   - is_national_representative_institution_in
-	 *   - is_partner_institution_of
-	 * - Creates relation between the organisational unit and an organisational unit of type country
-	 *   of type: is_located_in
-	 * Checks if number of organisational units of type institution in kb matches number of
-	 * institutions in unr
+	 *
+	 *   - Is_cooperating_partner_of
+	 *   - Is_national_coordinating_institution_in
+	 *   - Is_national_representative_institution_in
+	 *   - Is_partner_institution_of
+	 * - Creates relation between the organisational unit and an organisational unit of type country of
+	 *   type: is_located_in Checks if number of organisational units of type institution in kb
+	 *   matches number of institutions in unr
 	 */
 
 	log.info("Migrating institutions...");
@@ -805,14 +805,16 @@ async function main() {
 	 * Migrates services from unr to knowledge base.
 	 *
 	 * For each service:
+	 *
 	 * - Creates a service
 	 * - Updates the mapping between unr services and kb services
 	 * - Creates relation between organisational unit of type institution and the service of types:
-	 *   - service_owner
-	 *   - service_provider
+	 *
+	 *   - Service_owner
+	 *   - Service_provider
 	 * - Creates relation between organisational unit of type country and the service of type:
-	 *   - service_provider
-	 * Checks if number of services kb matches number of services in unr
+	 *
+	 *   - Service_provider Checks if number of services kb matches number of services in unr
 	 */
 
 	log.info("Migrating services...");
@@ -921,9 +923,8 @@ async function main() {
 	/**
 	 * Migrates reporting campaigns from unr to knowledge base.
 	 *
-	 * For each reporting campaign:
-	 * - Creates a reporting campaign
-	 * - Updates the mapping between unr reporting campaigns and kb reporting campaigns
+	 * For each reporting campaign: - Creates a reporting campaign - Updates the mapping between unr
+	 * reporting campaigns and kb reporting campaigns
 	 */
 
 	log.info("Migrating reprting campaigns...");
@@ -951,13 +952,10 @@ async function main() {
 	/**
 	 * Migrates outreach from unr to knowledge base.
 	 *
-	 * For each outreach item:
-	 * - Creates a social media item either of type:
-	 *   - website
-	 *   - a dedicated social media type
-	 *   - other (if original type is social media but provider is one of the defined values)
-	 * - Updates the mapping between unr outreach and kb social media
-	 * - Creates relation between social media item and organisational unit of type country if provided in unr
+	 * For each outreach item: - Creates a social media item either of type: - website - a dedicated
+	 * social media type - other (if original type is social media but provider is one of the defined
+	 * values) - Updates the mapping between unr outreach and kb social media - Creates relation
+	 * between social media item and organisational unit of type country if provided in unr
 	 */
 
 	log.info("Migrating outreach...");
@@ -1023,13 +1021,10 @@ async function main() {
 	/**
 	 * Migrates working group outreach from unr to knowledge base.
 	 *
-	 * For each outreach item:
-	 * - Creates a social media item either of type:
-	 *   - website
-	 *   - a dedicated social media type
-	 *   - other (if original type is social media but provider is one of the defined values)
-	 * - Updates the mapping between unr working group outreach and kb social media
-	 * - Creates relation between social media item and organisational unit of type country if provided in unr
+	 * For each outreach item: - Creates a social media item either of type: - website - a dedicated
+	 * social media type - other (if original type is social media but provider is one of the defined
+	 * values) - Updates the mapping between unr working group outreach and kb social media - Creates
+	 * relation between social media item and organisational unit of type country if provided in unr
 	 */
 
 	log.info("Migrating working group outreach...");
@@ -1088,10 +1083,8 @@ async function main() {
 	/**
 	 * Migrates outreach type values from unr to knowledge base.
 	 *
-	 * For each outreach type value:
-	 * - Creates a reporting campaign social media amount either of type:
-	 *   - website
-	 *   - other
+	 * For each outreach type value: - Creates a reporting campaign social media amount either of
+	 * type: - website - other
 	 */
 
 	log.info("Migrating outreach type values...");
@@ -1122,6 +1115,7 @@ async function main() {
 	 * Migrates people from unr to knowledge base.
 	 *
 	 * For each person:
+	 *
 	 * - Creates an entity in the entity table
 	 * - Copies an existing logo from the old bucket to the new bucket
 	 * - Creates an asset in the assets table
@@ -1129,11 +1123,14 @@ async function main() {
 	 * - Creates a content block field realtion in the content blocks table
 	 * - Creates a richtext content block for the biography
 	 * - Creates relations between the person and organisational units of type institution of type:
-	 *   - is_affiliated_with
+	 *
+	 *   - Is_affiliated_with
 	 * - Creates relations between the person and organisational units either of type:
-	 *   - body: in roles is_member_of, is_chair_of
-	 *   - country: in roles national_coordinator, national_coordinator_deputy, national_representative, national_representative_deputy"
-	 *   - working group: in roles is_member_of, is_chair_of
+	 *
+	 *   - Body: in roles is_member_of, is_chair_of
+	 *   - Country: in roles national_coordinator, national_coordinator_deputy, national_representative,
+	 *     national_representative_deputy"
+	 *   - Working group: in roles is_member_of, is_chair_of
 	 */
 
 	log.info("Migrating people...");
@@ -1381,13 +1378,11 @@ async function main() {
 	}
 
 	/**
-	 * Migrates bodies data from unr to knowledge base.
-	 * Bodies are seeded per default
+	 * Migrates bodies data from unr to knowledge base. Bodies are seeded per default
 	 *
-	 * For each body in unr:
-	 * - Creates a field in the fields table if a description exists
-	 * - Creates a content block field realtion in the content blocks table
-	 * - Creates a richtext content block for the description
+	 * For each body in unr: - Creates a field in the fields table if a description exists - Creates a
+	 * content block field realtion in the content blocks table - Creates a richtext content block for
+	 * the description
 	 */
 
 	log.info("Migrating bodies...");
@@ -1446,9 +1441,8 @@ async function main() {
 	}
 
 	/**
-	 * Migrates role values from unr to knowledge base.
-	 * For each role value in unr:
-	 * - Creates a reporting campaign contribution amount
+	 * Migrates role values from unr to knowledge base. For each role value in unr: - Creates a
+	 * reporting campaign contribution amount
 	 */
 
 	log.info("Migrating role values...");
@@ -1512,9 +1506,8 @@ async function main() {
 	}
 
 	/**
-	 * Migrates event size values from unr to knowledge base.
-	 * For each size value in unr:
-	 * - Creates a reporting campaign event amount
+	 * Migrates event size values from unr to knowledge base. For each size value in unr: - Creates a
+	 * reporting campaign event amount
 	 */
 
 	log.info("Migrating event size values...");
@@ -1539,9 +1532,8 @@ async function main() {
 	}
 
 	/**
-	 * Migrates service size values from unr to knowledge base.
-	 * 	 * For each size value in unr:
-	 * - Creates a reporting campaign service size
+	 * Migrates service size values from unr to knowledge base. * For each size value in unr: -
+	 * Creates a reporting campaign service size
 	 */
 
 	log.info("Migrating service size values...");
@@ -1574,13 +1566,9 @@ async function main() {
 	}
 
 	/**
-	 * Migrates reports from unr to knowledge base.
-	 * For each report in unr:
-	 * - Creates a country report
-	 * - Updates the mapping between unr reports and kb country reports
-	 * - Creates reporting campaign country threshold
-	 * - For each comment in a report:
-	 *   - Creates report screen key comment
+	 * Migrates reports from unr to knowledge base. For each report in unr: - Creates a country report
+	 * - Updates the mapping between unr reports and kb country reports - Creates reporting campaign
+	 * country threshold - For each comment in a report: - Creates report screen key comment
 	 */
 
 	log.info("Migrating reports...");
@@ -1669,9 +1657,8 @@ async function main() {
 	}
 
 	/**
-	 * Migrates service kpis from unr to knowledge base.
-	 * For each service kpi in unr:
-	 * - Creates a country report service kpi
+	 * Migrates service kpis from unr to knowledge base. For each service kpi in unr: - Creates a
+	 * country report service kpi
 	 */
 
 	log.info("Migrating service kpis...");
@@ -1719,9 +1706,8 @@ async function main() {
 	}
 
 	/**
-	 * Migrates outreach kpis from unr to knowledge base.
-	 * For each outreach kpi in unr:
-	 * - Creates a country report social media kpi
+	 * Migrates outreach kpis from unr to knowledge base. For each outreach kpi in unr: - Creates a
+	 * country report social media kpi
 	 */
 
 	log.info("Migrating outreach kpis...");
@@ -1768,14 +1754,17 @@ async function main() {
 	}
 
 	/**
-	 * Migrates working group reports from unr to knowledge base.
-	 * For each report in unr:
+	 * Migrates working group reports from unr to knowledge base. For each report in unr:
+	 *
 	 * - Creates a working group report
 	 * - For each question, answer in a report:
-	 * 	 - Creates question, answer in working_group_report_questions and working_group_report_answers
+	 *
+	 *   - Creates question, answer in working_group_report_questions and working_group_report_answers
 	 * - For each comment in a report:
+	 *
 	 *   - Creates report screen key comment
 	 * - For each working group event:
+	 *
 	 *   - Creates working group report event
 	 */
 
@@ -1885,16 +1874,11 @@ async function main() {
 	}
 
 	/**
-	 * Migrates project from unr to knowledge base.
-	 * Projects are grouped by either acronym or title
-	 * For each group:
-	 * - Creates an entity in the entity table
-	 * - Creates a project
-	 * - For each funder:
-	 *   - Creates organisational unit of type institution
-	 *   - Creates a relation between the funding unit and the project
-	 * - For each group item (project funding leverage):
-	 *   - Creates a country report project contribution
+	 * Migrates project from unr to knowledge base. Projects are grouped by either acronym or title
+	 * For each group: - Creates an entity in the entity table - Creates a project - For each funder:
+	 * - Creates organisational unit of type institution - Creates a relation between the funding unit
+	 * and the project - For each group item (project funding leverage): - Creates a country report
+	 * project contribution
 	 */
 
 	log.info("Migrating projects...");

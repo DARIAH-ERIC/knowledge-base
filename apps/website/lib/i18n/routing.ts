@@ -19,9 +19,9 @@ export type Prefixes = GetPrefixes<(typeof localePrefix)["prefixes"]>;
 export const routing = defineRouting({
 	defaultLocale,
 	/**
-	 * For GDPR-conformance, the locale cookie is stored as a session cookie, which expires when
-	 * the browser is closed. When using an explicit cookie consent banner, the cookie expiration
-	 * can be adjusted via `maxAge`.
+	 * For GDPR-conformance, the locale cookie is stored as a session cookie, which expires when the
+	 * browser is closed. When using an explicit cookie consent banner, the cookie expiration can be
+	 * adjusted via `maxAge`.
 	 */
 	// localeCookie: {
 	// 	maxAge: 60 * 60 * 24 * 365 /** 1 year. */,
