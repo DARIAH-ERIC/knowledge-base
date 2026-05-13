@@ -353,8 +353,8 @@ async function migrateHtmlContent(
 		index: number;
 		end: number;
 		segment:
-			| { kind: "iframe"; src: string; title: string }
-			| { kind: "accordion"; items: Array<{ title: string; bodyHtml: string }> };
+		| { kind: "iframe"; src: string; title: string }
+		| { kind: "accordion"; items: Array<{ title: string; bodyHtml: string }> };
 	}
 	const specials: Array<SpecialMatch> = [];
 
@@ -447,7 +447,7 @@ async function migrateHtmlContent(
 						// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
 						typeof node.attrs.alt === "string" && node.attrs.alt !== ""
 							? // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-								node.attrs.alt
+							node.attrs.alt
 							: undefined,
 					);
 					if (asset != null) {
@@ -1549,230 +1549,6 @@ async function main() {
 
 	/**
 	 * ============================================================================================
-	 * Institution.
-	 * ============================================================================================
-	 */
-
-	// log.info("Migrating institutions...");
-
-	// for (const institution of Object.values(data.institutions)) {
-	// 	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-	// 	assert(institution.status === "publish", "Institution has not been published.");
-
-	// 	await db.transaction(async (tx) => {
-	// 		const [entity] = await tx
-	// 			.insert(schema.entities)
-	// 			.values({
-	// 				slug: institution.slug,
-	// 				typeId: typesByType.organisational_units.id,
-	// 				createdAt: new Date(institution.date_gmt),
-	// 				updatedAt: new Date(institution.modified_gmt),
-	// 			})
-	// 			.returning({ id: schema.entities.id });
-
-	// 		assert(entity);
-
-	// 		const [version] = await tx
-
-	// 			.insert(schema.entityVersions)
-
-	// 			.values({
-	// 				entityId: entity.id,
-
-	// 				statusId: statusByType.published.id,
-	// 			})
-
-	// 			.returning({ id: schema.entityVersions.id });
-
-	// 		assert(version);
-
-	// 		const id = version.id;
-
-	// 		const imageId = await uploadFeaturedImage(
-	// 			"logos",
-	// 			assetsCache,
-	// 			data.media,
-	// 			institution.featured_media,
-	// 			institution.id,
-	// 		);
-
-	// 		const name = toPlaintext(institution.title.rendered);
-
-	// 		// Role IDs from https://www.dariah.eu/wp-json/wp/v2/dariah_institution_country_role:
-	// 		// 14 = national-coordinating-institution
-	// 		// 15 = partner-institutions
-	// 		// 20 = cooperating-partners
-	// 		// 112 = other
-	// 		const isNationalCoordinator = institution.dariah_institution_country_role.includes(14);
-	// 		const isPartnerInstitution = institution.dariah_institution_country_role.includes(15);
-	// 		const isCooperatingPartner = institution.dariah_institution_country_role.includes(20);
-
-	// 		const [orgUnit] = await tx
-	// 			.insert(schema.organisationalUnits)
-	// 			.values({
-	// 				id,
-	// 				name,
-	// 				summary: "",
-	// 				typeId: organisationalUnitTypesByType.institution.id,
-	// 				imageId: imageId ?? placeholderImage.id,
-	// 				createdAt: new Date(institution.date_gmt),
-	// 				updatedAt: new Date(institution.modified_gmt),
-	// 			})
-	// 			.returning({ id: schema.organisationalUnits.id });
-
-	// 		assert(orgUnit);
-
-	// 		wpInstitutionIdToOrgUnitId.set(institution.id, orgUnit.id);
-
-	// 		// WP institutions with missing country_data, manually assigned:
-	// 		// 392 = Gottfried Wilhelm Leibniz University of Hannover → Germany
-	// 		// 574 = Max Planck Institute for Social Law and Social Policy → Germany
-	// 		const countryName =
-	// 			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-	// 			institution.country_data?.title ??
-	// 			(institution.id === 392 || institution.id === 574 ? "Germany" : undefined);
-
-	// 		const countryOrgUnitId =
-	// 			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-	// 			countryName != null
-	// 				? kbCountries.find((kbc) => {
-	// 						return kbc.name === countryName;
-	// 					})?.id
-	// 				: undefined;
-
-	// 		if (countryOrgUnitId != null) {
-	// 			await tx.insert(schema.organisationalUnitsRelations).values({
-	// 				unitId: orgUnit.id,
-	// 				relatedUnitId: countryOrgUnitId,
-	// 				duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
-
-	// 				status: organisationalUnitStatusByType.is_located_in.id,
-	// 			});
-	// 		}
-
-	// 		if (isNationalCoordinator && umbrellaUnit != null) {
-	// 			await tx.insert(schema.organisationalUnitsRelations).values({
-	// 				unitId: orgUnit.id,
-	// 				relatedUnitId: umbrellaUnit.id,
-	// 				duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
-
-	// 				status: organisationalUnitStatusByType.is_national_coordinating_institution_in.id,
-	// 			});
-	// 		}
-
-	// 		if (isPartnerInstitution && countryOrgUnitId != null && umbrellaUnit != null) {
-	// 			await tx.insert(schema.organisationalUnitsRelations).values({
-	// 				unitId: orgUnit.id,
-	// 				relatedUnitId: umbrellaUnit.id,
-	// 				duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
-
-	// 				status: organisationalUnitStatusByType.is_partner_institution_of.id,
-	// 			});
-	// 		}
-
-	// 		if (isCooperatingPartner && countryOrgUnitId != null && umbrellaUnit != null) {
-	// 			await tx.insert(schema.organisationalUnitsRelations).values({
-	// 				unitId: orgUnit.id,
-	// 				relatedUnitId: umbrellaUnit.id,
-	// 				duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
-
-	// 				status: organisationalUnitStatusByType.is_cooperating_partner_of.id,
-	// 			});
-	// 		}
-
-	// 		if (isNonEmptyString(institution.website)) {
-	// 			const [sm] = await tx
-	// 				.insert(schema.socialMedia)
-	// 				.values({
-	// 					name: `${name} website`,
-	// 					typeId: socialMediaTypesByType.website.id,
-	// 					url: institution.website,
-	// 				})
-	// 				.returning({ id: schema.socialMedia.id });
-
-	// 			assert(sm);
-
-	// 			await tx.insert(schema.organisationalUnitsToSocialMedia).values({
-	// 				organisationalUnitId: orgUnit.id,
-	// 				socialMediaId: sm.id,
-	// 			});
-	// 		}
-
-	// 		if (institution.content.rendered.trim().length === 0) {
-	// 			return;
-	// 		}
-
-	// 		const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
-	// 			where: {
-	// 				entityTypeId: entityTypesByType.organisational_units.id,
-	// 				fieldName: "description",
-	// 			},
-	// 		});
-
-	// 		assert(fieldName);
-
-	// 		const [field] = await tx
-	// 			.insert(schema.fields)
-	// 			.values({
-	// 				entityVersionId: version.id,
-	// 				fieldNameId: fieldName.id,
-	// 			})
-	// 			.returning({ id: schema.fields.id });
-
-	// 		assert(field);
-
-	// 		await migrateHtmlContent(
-	// 			tx,
-	// 			institution.content.rendered,
-	// 			assetsCache,
-	// 			field.id,
-	// 			contentBlockTypesByType,
-	// 		);
-	// 	});
-	// }
-
-	/**
-	 * ============================================================================================
-	 * National representative institution relations.
-	 * ============================================================================================
-	 */
-
-	// log.info("Creating national representative institution relations...");
-
-	// for (const country of Object.values(data.countries)) {
-	// 	const countryOrgUnitId = wpCountryIdToOrgUnitId.get(country.id);
-	// 	if (countryOrgUnitId == null) {
-	// 		continue;
-	// 	}
-
-	// 	// Deduplicate: multiple persons from the same institution may be listed
-	// 	const repInstitutionWpIds = new Set(
-	// 		country.repPersons_data.map((p) => {
-	// 			return p.institution;
-	// 		}),
-	// 	);
-
-	// 	for (const wpInstId of repInstitutionWpIds) {
-	// 		const institutionOrgUnitId = wpInstitutionIdToOrgUnitId.get(wpInstId);
-	// 		if (institutionOrgUnitId == null) {
-	// 			continue;
-	// 		}
-
-	// 		if (umbrellaUnit == null) {
-	// 			continue;
-	// 		}
-
-	// 		await db.insert(schema.organisationalUnitsRelations).values({
-	// 			unitId: institutionOrgUnitId,
-	// 			relatedUnitId: umbrellaUnit.id,
-	// 			duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
-	// 			status: organisationalUnitStatusByType.is_national_representative_institution_in.id,
-	// 		});
-	// 	}
-	// }
-
-	/**
-	 * ============================================================================================
 	 * Projects.
 	 * ============================================================================================
 	 */
@@ -1890,12 +1666,12 @@ async function main() {
 							duration: meta.duration ?? {
 								start: new Date(Date.UTC(1900, 0, 1)),
 								end: new Date(Date.UTC(1900, 0, 1)),
-							}, // FIXME: manual fix needed
+							},
 							funding: meta.funding,
 							summary,
 							topic: meta.topic,
 							imageId: imageId ?? placeholderImageId,
-							scopeId: projectScopesByType.eu.id, // FIXME: we agreed to default to eu
+							scopeId: projectScopesByType.eu.id, /** We agreed to default to eu. */
 							createdAt: new Date(project.date_gmt),
 							updatedAt: new Date(project.modified_gmt),
 						})
@@ -1985,7 +1761,7 @@ async function main() {
 					if (
 						isBlank(existingProject.name) ||
 						normalizeProjectLookupValue(existingProject.name) ===
-							normalizeProjectLookupValue(existingProject.acronym ?? acronym)
+						normalizeProjectLookupValue(existingProject.acronym ?? acronym)
 					) {
 						projectUpdate.name = meta.fullName;
 					} else if (
@@ -2032,7 +1808,7 @@ async function main() {
 					if (
 						isBlank(existingProject.summary) ||
 						normalizeProjectLookupValue(existingProject.summary) ===
-							normalizeProjectLookupValue(acronym)
+						normalizeProjectLookupValue(acronym)
 					) {
 						projectUpdate.summary = meta.summary;
 					} else if (existingProject.summary !== meta.summary) {
@@ -2097,209 +1873,6 @@ async function main() {
 			}
 		});
 	}
-
-	/**
-	 * ============================================================================================
-	 * Person.
-	 * ============================================================================================
-	 */
-
-	// log.info("Migrating people...");
-
-	// // Hardcoded persons which dont exist in dariah_person collection, but are referenced as authors
-	// // in spotlights or impact-case-studies.
-	// const authors = [
-	// 	{ name: "Mengdi Zhang", sortName: "Zhang, Mengdi" },
-	// 	{ name: "Canan Hastik", sortName: "Hastik, Canan" },
-	// 	{ name: "Christof Schöch", sortName: "Schöch, Christof" },
-	// 	{ name: "Colter Wehmeier", sortName: "Wehmeier, Colter" },
-	// 	{ name: "Gaia Redaelli", sortName: "Redaelli, Gaia" },
-	// 	{ name: "Inés Matres", sortName: "Matres, Inés" },
-	// 	{ name: "Jouni Tuominen", sortName: "Tuominen, Jouni" },
-	// 	{ name: "Loup Bernard", sortName: "Bernard, Loup" },
-	// 	{ name: "Luise Borek", sortName: "Borek, Luise" },
-	// 	{ name: "Maciej Eder", sortName: "Eder, Maciej" },
-	// 	{ name: "Mikko Tolonen", sortName: "Tolonen, Mikko" },
-	// 	{ name: "Natalia Ermolaev", sortName: "Ermolaev, Natalia" },
-	// ];
-
-	// for (const person of authors) {
-	// 	await db.transaction(async (tx) => {
-	// 		const slug = slugify(person.name);
-
-	// 		const [entity] = await tx
-	// 			.insert(schema.entities)
-	// 			.values({
-	// 				slug,
-	// 				typeId: typesByType.persons.id,
-	// 				createdAt: new Date(),
-	// 				updatedAt: new Date(),
-	// 			})
-	// 			.returning({ id: schema.entities.id });
-
-	// 		assert(entity);
-
-	// 		const [version] = await tx
-
-	// 			.insert(schema.entityVersions)
-
-	// 			.values({
-	// 				entityId: entity.id,
-
-	// 				statusId: statusByType.published.id,
-	// 			})
-
-	// 			.returning({ id: schema.entityVersions.id });
-
-	// 		assert(version);
-
-	// 		const id = version.id;
-
-	// 		await tx.insert(schema.persons).values({
-	// 			id,
-	// 			name: person.name,
-	// 			sortName: person.sortName,
-	// 			// email: person.email,
-	// 			// position: person.position,
-	// 			// orcid,
-	// 			imageId: placeholderImage.id,
-	// 			createdAt: new Date(),
-	// 			updatedAt: new Date(),
-	// 		});
-	// 	});
-	// }
-
-	// for (const person of Object.values(data.people)) {
-	// 	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-	// 	assert(person.status === "publish", "Person has not been published.");
-
-	// 	await db.transaction(async (tx) => {
-	// 		const [entity] = await tx
-	// 			.insert(schema.entities)
-	// 			.values({
-	// 				slug: person.slug,
-	// 				typeId: typesByType.persons.id,
-	// 				createdAt: new Date(person.date_gmt),
-	// 				updatedAt: new Date(person.modified_gmt),
-	// 			})
-	// 			.returning({ id: schema.entities.id });
-
-	// 		assert(entity);
-
-	// 		const [version] = await tx
-
-	// 			.insert(schema.entityVersions)
-
-	// 			.values({
-	// 				entityId: entity.id,
-
-	// 				statusId: statusByType.published.id,
-	// 			})
-
-	// 			.returning({ id: schema.entityVersions.id });
-
-	// 		assert(version);
-
-	// 		const id = version.id;
-
-	// 		const imageId = await uploadFeaturedImage(
-	// 			"avatars",
-	// 			assetsCache,
-	// 			data.media,
-	// 			person.featured_media,
-	// 			person.id,
-	// 		);
-
-	// 		if (imageId == null) {
-	// 			log.warn(`Missing image (person id ${String(person.id)}).`);
-	// 		}
-
-	// 		await tx.insert(schema.persons).values({
-	// 			id,
-	// 			name: [person.firstname, person.lastname].filter(Boolean).join(" "),
-	// 			sortName: [person.lastname, person.firstname].filter(Boolean).join(", "),
-	// 			email: person.email,
-	// 			// orcid,
-	// 			imageId: imageId ?? placeholderImage.id,
-	// 			createdAt: new Date(person.date_gmt),
-	// 			updatedAt: new Date(person.modified_gmt),
-	// 		});
-
-	// 		wpPersonIdToDbId.set(person.id, id);
-
-	// 		// TODO: website
-	// 		// TODO: identifiant
-	// 		// TODO: twitter
-	// 		// TODO: skills
-	// 		// TODO: research
-
-	// 		const roles = parsePositionRoles(person.position);
-
-	// 		if (roles.length > 0) {
-	// 			if (person.institution_data != null) {
-	// 				const institution = data.institutions[person.institution_data.id];
-	// 				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-	// 				const countryName = institution?.country_data?.title;
-	// 				const countryOrgUnitId =
-	// 					countryName != null
-	// 						? kbCountries.find((kbc) => {
-	// 								return kbc.name === countryName;
-	// 							})?.id
-	// 						: undefined;
-
-	// 				if (countryOrgUnitId != null) {
-	// 					for (const role of roles) {
-	// 						await tx.insert(schema.personsToOrganisationalUnits).values({
-	// 							personId: id,
-	// 							organisationalUnitId: countryOrgUnitId,
-	// 							roleTypeId: personRoleTypesByType[role].id,
-	// 							duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
-	// 						});
-	// 					}
-	// 				} else {
-	// 					log.warn(
-	// 						`Person ${String(person.id)} ("${person.position}"): could not resolve country for institution ${String(person.institution_data.id)}.`,
-	// 					);
-	// 				}
-	// 			} else {
-	// 				log.warn(
-	// 					`Person ${String(person.id)} ("${person.position}"): no institution_data, skipping role relation.`,
-	// 				);
-	// 			}
-	// 		}
-
-	// 		if (person.content.rendered.trim().length === 0) {
-	// 			return;
-	// 		}
-
-	// 		const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
-	// 			where: {
-	// 				entityTypeId: entityTypesByType.persons.id,
-	// 				fieldName: "biography",
-	// 			},
-	// 		});
-
-	// 		assert(fieldName);
-
-	// 		const [field] = await tx
-	// 			.insert(schema.fields)
-	// 			.values({
-	// 				entityVersionId: version.id,
-	// 				fieldNameId: fieldName.id,
-	// 			})
-	// 			.returning({ id: schema.fields.id });
-
-	// 		assert(field);
-
-	// 		await migrateHtmlContent(
-	// 			tx,
-	// 			person.content.rendered,
-	// 			assetsCache,
-	// 			field.id,
-	// 			contentBlockTypesByType,
-	// 		);
-	// 	});
-	// }
 
 	/**
 	 * ============================================================================================
