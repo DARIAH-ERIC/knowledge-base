@@ -20,6 +20,11 @@ export async function dispatchWebhook(payload: { type: WebhookEntityType }): Pro
 		return;
 	}
 
+	log.info("[revalidation webhook] dispatching request", {
+		type: payload.type,
+		url: env.REVALIDATION_WEBHOOK_URL,
+	});
+
 	const result = await request(env.REVALIDATION_WEBHOOK_URL, {
 		method: "post",
 		headers: { Authorization: `Bearer ${env.REVALIDATION_WEBHOOK_SECRET}` },
