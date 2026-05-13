@@ -3,7 +3,6 @@ import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
-import { hasUnpublishedDraftChanges } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
 
@@ -78,17 +77,33 @@ export async function getPersons(params: Readonly<GetPersonsParams>): Promise<Pe
 							AND "ps"."type" = 'published'
 					)
 				`,
-				publishedUpdatedAt: sql<Date | null>`
-					(
-						SELECT
-							"pv"."updated_at"
-						FROM
-							"entity_versions" AS "pv"
-							INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+				hasDraft: sql<boolean>`
+					EXISTS (
+						SELECT 1
+						FROM "entity_versions" AS "dv"
+						INNER JOIN "entity_status" AS "ds" ON "dv"."status_id" = "ds"."id"
 						WHERE
-							"pv"."entity_id" = ${schema.entityVersions.entityId}
-							AND "ps"."type" = 'published'
-						LIMIT 1
+							"dv"."entity_id" = ${schema.entityVersions.entityId}
+							AND "ds"."type" = 'draft'
+							AND (
+								NOT EXISTS (
+									SELECT 1
+									FROM "entity_versions" AS "pv"
+									INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+									WHERE
+										"pv"."entity_id" = ${schema.entityVersions.entityId}
+										AND "ps"."type" = 'published'
+								)
+								OR "dv"."updated_at" > (
+									SELECT "pv"."updated_at"
+									FROM "entity_versions" AS "pv"
+									INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+									WHERE
+										"pv"."entity_id" = ${schema.entityVersions.entityId}
+										AND "ps"."type" = 'published'
+									LIMIT 1
+								)
+							)
 					)
 				`,
 				status: schema.entityStatus.type,
@@ -160,7 +175,7 @@ export async function getPersons(params: Readonly<GetPersonsParams>): Promise<Pe
 				documentId: item.documentId,
 				email: item.email,
 				entity: { slug: item.slug },
-				hasDraft: hasUnpublishedDraftChanges(item),
+				hasDraft: item.hasDraft,
 				id: item.id,
 				isPublished: item.isPublished,
 				name: item.name,

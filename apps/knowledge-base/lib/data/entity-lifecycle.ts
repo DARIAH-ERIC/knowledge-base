@@ -413,20 +413,6 @@ export async function touchVersion(
 	await setVersionUpdatedAt(tx, versionId, updatedAt);
 }
 
-export function hasUnpublishedDraftChanges(params: {
-	isPublished: boolean;
-	publishedUpdatedAt: Date | null;
-	status: "draft" | "published";
-	updatedAt: Date;
-}): boolean {
-	const { isPublished, publishedUpdatedAt, status, updatedAt } = params;
-
-	if (status !== "draft") return false;
-	if (!isPublished) return true;
-
-	return publishedUpdatedAt == null || updatedAt > publishedUpdatedAt;
-}
-
 /** Delete the draft version of `documentId` (if one exists). Does not affect the published version. */
 export async function discardDraftVersion(
 	tx: Transaction,
