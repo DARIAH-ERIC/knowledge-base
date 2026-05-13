@@ -2,7 +2,7 @@
 
 import { Badge } from "@dariah-eric/ui/badge";
 import { useExtracted } from "next-intl";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 interface EntityLifecycleStatusBadgeProps {
 	hasDraft: boolean;
@@ -16,12 +16,21 @@ export function EntityLifecycleStatusBadge(
 	const t = useExtracted();
 
 	if (hasDraft && isPublished) {
-		return <Badge intent="info">{t("Live + Draft")}</Badge>;
+		return (
+			<div className="flex flex-wrap gap-2">
+				<Badge intent="success">{t("Published")}</Badge>
+				<Badge intent="warning">{t("Draft")}</Badge>
+			</div>
+		);
 	}
 
 	if (hasDraft) {
 		return <Badge intent="warning">{t("Draft")}</Badge>;
 	}
 
-	return <Badge intent="success">{t("Live")}</Badge>;
+	if (isPublished) {
+		return <Badge intent="success">{t("Published")}</Badge>;
+	}
+
+	return <Fragment />;
 }
