@@ -69,10 +69,10 @@ echo "Starting port-forwards..."
 
 trap cleanup EXIT INT TERM
 
-kubectl -n dariah-knowledge-base port-forward pod/pg-proxy 5432:5432 &
+kubectl -n dariah-knowledge-base port-forward deployment/pg-proxy 5432:5432 &
 pid1=$!
 
-kubectl -n dariah-knowledge-base port-forward pod/s3-proxy 8080:8080 &
+kubectl -n dariah-knowledge-base port-forward deployment/s3-proxy 8080:8080 &
 pid2=$!
 
 wait
