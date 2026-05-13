@@ -353,8 +353,8 @@ async function migrateHtmlContent(
 		index: number;
 		end: number;
 		segment:
-		| { kind: "iframe"; src: string; title: string }
-		| { kind: "accordion"; items: Array<{ title: string; bodyHtml: string }> };
+			| { kind: "iframe"; src: string; title: string }
+			| { kind: "accordion"; items: Array<{ title: string; bodyHtml: string }> };
 	}
 	const specials: Array<SpecialMatch> = [];
 
@@ -447,7 +447,7 @@ async function migrateHtmlContent(
 						// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
 						typeof node.attrs.alt === "string" && node.attrs.alt !== ""
 							? // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-							node.attrs.alt
+								node.attrs.alt
 							: undefined,
 					);
 					if (asset != null) {
@@ -1671,7 +1671,7 @@ async function main() {
 							summary,
 							topic: meta.topic,
 							imageId: imageId ?? placeholderImageId,
-							scopeId: projectScopesByType.eu.id, /** We agreed to default to eu. */
+							scopeId: projectScopesByType.eu.id /** We agreed to default to eu. */,
 							createdAt: new Date(project.date_gmt),
 							updatedAt: new Date(project.modified_gmt),
 						})
@@ -1761,7 +1761,7 @@ async function main() {
 					if (
 						isBlank(existingProject.name) ||
 						normalizeProjectLookupValue(existingProject.name) ===
-						normalizeProjectLookupValue(existingProject.acronym ?? acronym)
+							normalizeProjectLookupValue(existingProject.acronym ?? acronym)
 					) {
 						projectUpdate.name = meta.fullName;
 					} else if (
@@ -1808,7 +1808,7 @@ async function main() {
 					if (
 						isBlank(existingProject.summary) ||
 						normalizeProjectLookupValue(existingProject.summary) ===
-						normalizeProjectLookupValue(acronym)
+							normalizeProjectLookupValue(acronym)
 					) {
 						projectUpdate.summary = meta.summary;
 					} else if (existingProject.summary !== meta.summary) {
