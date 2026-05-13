@@ -148,11 +148,7 @@ describe("news list query — prefer draft, fallback to published", () => {
 				.update(schema.news)
 				.set({ title: updatedTitle })
 				.where(eq(schema.news.id, draftVersionId));
-			await touchVersion(
-				tx,
-				draftVersionId,
-				new Date(publishedVersion.updatedAt.getTime() + 1000),
-			);
+			await touchVersion(tx, draftVersionId, new Date(publishedVersion.updatedAt.getTime() + 1000));
 
 			const { data } = await getNews({}, tx);
 			const item = data.find((d) => {
