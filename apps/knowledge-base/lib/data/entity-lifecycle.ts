@@ -61,6 +61,17 @@ async function createVersionRow(
 	return version.id;
 }
 
+async function setVersionUpdatedAt(
+	tx: Transaction,
+	versionId: string,
+	updatedAt: Date,
+): Promise<void> {
+	await tx
+		.update(schema.entityVersions)
+		.set({ updatedAt })
+		.where(eq(schema.entityVersions.id, versionId));
+}
+
 async function cloneTypedContentBlock(
 	tx: Transaction,
 	sourceBlockId: string,
@@ -340,6 +351,13 @@ export async function ensureDraftVersion(
 	if (publishedId != null) {
 		await cloneVersionContent(tx, publishedId, newDraftId);
 		await adapter.cloneSubtype(tx, publishedId, newDraftId);
+
+		const publishedVersion = await tx.query.entityVersions.findFirst({
+			where: { id: publishedId },
+			columns: { updatedAt: true },
+		});
+		assert(publishedVersion, `Published version "${publishedId}" not found in database.`);
+		await setVersionUpdatedAt(tx, newDraftId, publishedVersion.updatedAt);
 	}
 
 	return newDraftId;
@@ -363,11 +381,17 @@ export async function publishVersion(
 ): Promise<string> {
 	const { draftId, publishedId } = await getDocumentVersions(tx, documentId);
 	assert(draftId, "Cannot publish: no draft version exists for this document.");
+	const draftVersion = await tx.query.entityVersions.findFirst({
+		where: { id: draftId },
+		columns: { updatedAt: true },
+	});
+	assert(draftVersion, `Draft version "${draftId}" not found in database.`);
 
 	if (publishedId == null) {
 		const newPublishedId = await createVersionRow(tx, documentId, "published");
 		await cloneVersionContent(tx, draftId, newPublishedId);
 		await adapter.cloneSubtype(tx, draftId, newPublishedId);
+		await setVersionUpdatedAt(tx, newPublishedId, draftVersion.updatedAt);
 		return newPublishedId;
 	}
 
@@ -376,8 +400,31 @@ export async function publishVersion(
 	await adapter.wipeSubtype(tx, publishedId);
 	await cloneVersionContent(tx, draftId, publishedId);
 	await adapter.cloneSubtype(tx, draftId, publishedId);
+	await setVersionUpdatedAt(tx, publishedId, draftVersion.updatedAt);
 
 	return publishedId;
+}
+
+export async function touchVersion(
+	tx: Transaction,
+	versionId: string,
+	updatedAt: Date = new Date(),
+): Promise<void> {
+	await setVersionUpdatedAt(tx, versionId, updatedAt);
+}
+
+export function hasUnpublishedDraftChanges(params: {
+	isPublished: boolean;
+	publishedUpdatedAt: Date | null;
+	status: "draft" | "published";
+	updatedAt: Date;
+}): boolean {
+	const { isPublished, publishedUpdatedAt, status, updatedAt } = params;
+
+	if (status !== "draft") return false;
+	if (!isPublished) return true;
+
+	return publishedUpdatedAt == null || updatedAt > publishedUpdatedAt;
 }
 
 /** Delete the draft version of `documentId` (if one exists). Does not affect the published version. */

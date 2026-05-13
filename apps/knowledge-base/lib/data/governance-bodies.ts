@@ -2,6 +2,7 @@ import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
+import { hasUnpublishedDraftChanges } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
 
@@ -72,7 +73,6 @@ export async function getGovernanceBodies(
 				name: schema.organisationalUnits.name,
 				slug: schema.entities.slug,
 				updatedAt: schema.entityVersions.updatedAt,
-				hasDraft: sql<boolean>`${schema.entityStatus.type} = 'draft'`,
 				isPublished: sql<boolean>`
 					EXISTS (
 						SELECT
@@ -85,6 +85,20 @@ export async function getGovernanceBodies(
 							AND "ps"."type" = 'published'
 					)
 				`,
+				publishedUpdatedAt: sql<Date | null>`
+					(
+						SELECT
+							"pv"."updated_at"
+						FROM
+							"entity_versions" AS "pv"
+							INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+						WHERE
+							"pv"."entity_id" = ${schema.entityVersions.entityId}
+							AND "ps"."type" = 'published'
+						LIMIT 1
+					)
+				`,
+				status: schema.entityStatus.type,
 			})
 			.from(schema.organisationalUnits)
 			.innerJoin(
@@ -161,7 +175,7 @@ export async function getGovernanceBodies(
 				acronym: item.acronym,
 				documentId: item.documentId,
 				entity: { slug: item.slug },
-				hasDraft: item.hasDraft,
+				hasDraft: hasUnpublishedDraftChanges(item),
 				id: item.id,
 				isPublished: item.isPublished,
 				name: item.name,

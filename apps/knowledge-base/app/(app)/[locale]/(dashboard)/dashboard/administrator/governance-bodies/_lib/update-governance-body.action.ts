@@ -11,7 +11,7 @@ import * as v from "valibot";
 
 import { UpdateGovernanceBodyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/update-governance-body.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { ensureDraftVersion } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { syncEntityRelations } from "@/lib/data/relations";
 import { db } from "@/lib/db";
@@ -130,6 +130,7 @@ export const updateGovernanceBodyAction = createServerAction(
 			}
 
 			await syncEntityRelations(tx, documentId, relatedEntityIds, relatedResourceIds);
+			await touchVersion(tx, draftVersionId);
 		});
 
 		after(async () => {

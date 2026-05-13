@@ -39,9 +39,9 @@ test.describe("website news lifecycle", () => {
 		// Publish → redirected to list.
 		await newsPage.publishItem();
 
-		// List: live + draft badge visible (published version now exists, current row is draft).
+		// List: publish keeps the cloned draft in sync, so the row still reads as live.
 		await newsPage.searchByTitle(title);
-		await expect(newsPage.liveAndDraftBadgeInRow(title)).toBeVisible();
+		await expect(newsPage.liveBadgeInRow(title)).toBeVisible();
 
 		// Details: draft and published versions both exist → "Live with changes" badge.
 		await newsPage.gotoDetailsFromList(title);
