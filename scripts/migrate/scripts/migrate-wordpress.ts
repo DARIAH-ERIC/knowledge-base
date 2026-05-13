@@ -14,7 +14,7 @@ import type { JSONContent } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
 import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { toText } from "hast-util-to-text";
 import fromHtml from "rehype-parse";
 import { unified } from "unified";
@@ -640,6 +640,10 @@ function isBlank(value: string | null | undefined): boolean {
 	return value == null || value.trim().length === 0;
 }
 
+function normalizeInstitutionLookupValue(value: string): string {
+	return value.trim().replaceAll(/\s+/g, " ").toLowerCase();
+}
+
 function isPlaceholderProjectDuration(duration: { start: Date; end?: Date } | null): boolean {
 	if (duration == null) {
 		return true;
@@ -710,9 +714,19 @@ async function main() {
 		return item.type;
 	});
 
+	const organisationalUnitTypes = await db.query.organisationalUnitTypes.findMany();
+	const organisationalUnitTypesByType = keyBy(organisationalUnitTypes, (item) => {
+		return item.type;
+	});
+
 	const socialMediaTypes = await db.query.socialMediaTypes.findMany();
 	const socialMediaTypesByType = keyBy(socialMediaTypes, (item) => {
 		return item.type;
+	});
+
+	const organisationalUnitStatus = await db.query.organisationalUnitStatus.findMany();
+	const organisationalUnitStatusByType = keyBy(organisationalUnitStatus, (item) => {
+		return item.status;
 	});
 
 	const umbrellaUnit = await db.query.organisationalUnits.findFirst({
@@ -726,6 +740,235 @@ async function main() {
 	const placeholderImage = await upload("images", assetsCache, placeholderImageUrl, "Placeholder");
 	assert(placeholderImage, "Missing placeholder image.");
 	const placeholderImageId = placeholderImage.id;
+
+	const institutionOrgUnitIdsByName = new Map<string, string>();
+	const existingInstitutionOrgUnits = await db.query.organisationalUnits.findMany({
+		where: { type: { type: "institution" } },
+		columns: { id: true, name: true },
+	});
+
+	for (const institution of existingInstitutionOrgUnits) {
+		const name = normalizeInstitutionLookupValue(institution.name);
+		if (!institutionOrgUnitIdsByName.has(name)) {
+			institutionOrgUnitIdsByName.set(name, institution.id);
+		}
+	}
+
+	const countryOrgUnitIdsByName = new Map<string, string>();
+	const existingCountryOrgUnits = await db.query.organisationalUnits.findMany({
+		where: { type: { type: "country" } },
+		columns: { id: true, name: true },
+	});
+
+	for (const country of existingCountryOrgUnits) {
+		const name = normalizeInstitutionLookupValue(country.name);
+		if (!countryOrgUnitIdsByName.has(name)) {
+			countryOrgUnitIdsByName.set(name, country.id);
+		}
+	}
+
+	if (umbrellaUnit != null) {
+		const umbrellaName = normalizeInstitutionLookupValue(umbrellaUnit.name);
+		if (!institutionOrgUnitIdsByName.has(umbrellaName)) {
+			institutionOrgUnitIdsByName.set(umbrellaName, umbrellaUnit.id);
+		}
+	}
+
+	const wpCoordinatorInstitutionIds = new Set<number>();
+	const wpRepresentativeInstitutionIds = new Set<number>();
+
+	for (const country of Object.values(data.countries)) {
+		for (const person of country.coordinators_data) {
+			if (person.institution !== 0) {
+				wpCoordinatorInstitutionIds.add(person.institution);
+			}
+		}
+
+		for (const person of country.repPersons_data) {
+			if (person.institution !== 0) {
+				wpRepresentativeInstitutionIds.add(person.institution);
+			}
+		}
+	}
+
+	async function ensureOrganisationalUnitRelation(
+		tx: Transaction,
+		args: { unitId: string; relatedUnitId: string; statusId: string },
+	): Promise<void> {
+		const [existingRelation] = await tx
+			.select({ id: schema.organisationalUnitsRelations.id })
+			.from(schema.organisationalUnitsRelations)
+			.where(
+				and(
+					eq(schema.organisationalUnitsRelations.unitId, args.unitId),
+					eq(schema.organisationalUnitsRelations.relatedUnitId, args.relatedUnitId),
+					eq(schema.organisationalUnitsRelations.status, args.statusId),
+				),
+			)
+			.limit(1);
+
+		if (existingRelation != null) {
+			return;
+		}
+
+		await tx.insert(schema.organisationalUnitsRelations).values({
+			unitId: args.unitId,
+			relatedUnitId: args.relatedUnitId,
+			duration: { start: new Date(Date.UTC(1900, 0, 1)) },
+			status: args.statusId,
+		});
+	}
+
+	async function ensureInstitutionOrgUnit(
+		tx: Transaction,
+		wpInstitutionId: number,
+	): Promise<string | null> {
+		const existingId = wpInstitutionIdToOrgUnitId.get(wpInstitutionId);
+		if (existingId != null) {
+			return existingId;
+		}
+
+		const institution = data.institutions[wpInstitutionId];
+		if (institution == null) {
+			log.warn(`Missing wordpress institution ${String(wpInstitutionId)} referenced by project.`);
+			return null;
+		}
+
+		const name = toPlaintext(institution.title.rendered).trim();
+		const normalizedName = normalizeInstitutionLookupValue(name);
+		const existingInstitutionId = institutionOrgUnitIdsByName.get(normalizedName);
+
+		if (existingInstitutionId != null) {
+			wpInstitutionIdToOrgUnitId.set(wpInstitutionId, existingInstitutionId);
+			return existingInstitutionId;
+		}
+
+		let slug = slugify(institution.slug || name);
+		const slugExists = await tx.query.entities.findFirst({
+			where: {
+				typeId: typesByType.organisational_units.id,
+				slug,
+			},
+			columns: {
+				id: true,
+			},
+		});
+
+		if (slugExists != null) {
+			slug = `${slug}-duplicate-${randomUUID()}`;
+		}
+
+		const [entity] = await tx
+			.insert(schema.entities)
+			.values({
+				slug,
+				typeId: typesByType.organisational_units.id,
+				createdAt: new Date(institution.date_gmt),
+				updatedAt: new Date(institution.modified_gmt),
+			})
+			.returning({ id: schema.entities.id });
+
+		assert(entity);
+
+		const [version] = await tx
+			.insert(schema.entityVersions)
+			.values({
+				entityId: entity.id,
+				statusId: statusByType.published.id,
+			})
+			.returning({ id: schema.entityVersions.id });
+
+		assert(version);
+
+		const imageId = await uploadFeaturedImage(
+			"logos",
+			assetsCache,
+			data.media,
+			institution.featured_media,
+			institution.id,
+		);
+
+		const metadata = isNonEmptyString(institution.website) ? { url: institution.website } : {};
+
+		const [orgUnit] = await tx
+			.insert(schema.organisationalUnits)
+			.values({
+				id: version.id,
+				name,
+				summary: toSummary(institution.content.rendered),
+				typeId: organisationalUnitTypesByType.institution.id,
+				metadata,
+				imageId: imageId ?? placeholderImageId,
+				createdAt: new Date(institution.date_gmt),
+				updatedAt: new Date(institution.modified_gmt),
+			})
+			.returning({ id: schema.organisationalUnits.id });
+
+		assert(orgUnit);
+
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		const countryName = institution.country_data?.title;
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		if (countryName != null) {
+			const countryUnitId = countryOrgUnitIdsByName.get(
+				normalizeInstitutionLookupValue(countryName),
+			);
+			if (countryUnitId != null) {
+				await ensureOrganisationalUnitRelation(tx, {
+					unitId: orgUnit.id,
+					relatedUnitId: countryUnitId,
+					statusId: organisationalUnitStatusByType.is_located_in.id,
+				});
+			}
+		}
+
+		if (umbrellaUnit != null) {
+			const roleIds = new Set(institution.dariah_institution_country_role);
+			const relationStatuses = new Set<string>();
+
+			if (roleIds.has(20)) {
+				relationStatuses.add(organisationalUnitStatusByType.is_cooperating_partner_of.id);
+			}
+
+			if (roleIds.has(14) || wpCoordinatorInstitutionIds.has(wpInstitutionId)) {
+				relationStatuses.add(
+					organisationalUnitStatusByType.is_national_coordinating_institution_in.id,
+				);
+			}
+
+			if (wpRepresentativeInstitutionIds.has(wpInstitutionId)) {
+				relationStatuses.add(
+					organisationalUnitStatusByType.is_national_representative_institution_in.id,
+				);
+			}
+
+			if (
+				(roleIds.has(15) || roleIds.has(112)) &&
+				!relationStatuses.has(organisationalUnitStatusByType.is_cooperating_partner_of.id) &&
+				!relationStatuses.has(
+					organisationalUnitStatusByType.is_national_coordinating_institution_in.id,
+				) &&
+				!relationStatuses.has(
+					organisationalUnitStatusByType.is_national_representative_institution_in.id,
+				)
+			) {
+				relationStatuses.add(organisationalUnitStatusByType.is_partner_institution_of.id);
+			}
+
+			for (const statusId of relationStatuses) {
+				await ensureOrganisationalUnitRelation(tx, {
+					unitId: orgUnit.id,
+					relatedUnitId: umbrellaUnit.id,
+					statusId,
+				});
+			}
+		}
+
+		institutionOrgUnitIdsByName.set(normalizedName, orgUnit.id);
+		wpInstitutionIdToOrgUnitId.set(wpInstitutionId, orgUnit.id);
+
+		return orgUnit.id;
+	}
 
 	/**
 	 * ============================================================================================
@@ -1681,6 +1924,18 @@ async function main() {
 
 					projectIdsByAcronym.set(normalizeProjectLookupValue(acronym), createdProject.id);
 					projectIdsByName.set(normalizeProjectLookupValue(name), createdProject.id);
+					existingProjectsById.set(createdProject.id, {
+						id: createdProject.id,
+						acronym,
+						name,
+						duration: meta.duration ?? {
+							start: new Date(Date.UTC(1900, 0, 1)),
+							end: new Date(Date.UTC(1900, 0, 1)),
+						},
+						funding: meta.funding,
+						summary,
+						topic: meta.topic,
+					});
 
 					if (umbrellaUnit) {
 						await tx
@@ -1832,7 +2087,8 @@ async function main() {
 
 			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			if (project.relations.coordinator != null) {
-				const coordinatorOrgUnitId = wpInstitutionIdToOrgUnitId.get(
+				const coordinatorOrgUnitId = await ensureInstitutionOrgUnit(
+					tx,
 					project.relations.coordinator.id,
 				);
 				if (coordinatorOrgUnitId != null) {
@@ -1859,7 +2115,7 @@ async function main() {
 			);
 
 			for (const wpInstId of participantWpIds) {
-				const unitId = wpInstitutionIdToOrgUnitId.get(wpInstId);
+				const unitId = await ensureInstitutionOrgUnit(tx, wpInstId);
 				if (unitId != null) {
 					await tx
 						.insert(schema.projectsToOrganisationalUnits)
