@@ -136,14 +136,23 @@ describe("news list query — prefer draft, fallback to published", () => {
 		await withTransaction(async (tx) => {
 			const originalTitle = f.lorem.sentence();
 			const { documentId, versionId: draftVersionId } = await seedDraftNews(tx, originalTitle);
-			await publishVersion(tx, documentId, newsLifecycleAdapter);
+			const publishedId = await publishVersion(tx, documentId, newsLifecycleAdapter);
+			const publishedVersion = await tx.query.entityVersions.findFirst({
+				where: { id: publishedId },
+				columns: { updatedAt: true },
+			});
+			assert(publishedVersion);
 
 			const updatedTitle = f.lorem.sentence();
 			await tx
 				.update(schema.news)
 				.set({ title: updatedTitle })
 				.where(eq(schema.news.id, draftVersionId));
-			await touchVersion(tx, draftVersionId, new Date("2026-01-01T00:00:00.000Z"));
+			await touchVersion(
+				tx,
+				draftVersionId,
+				new Date(publishedVersion.updatedAt.getTime() + 1000),
+			);
 
 			const { data } = await getNews({}, tx);
 			const item = data.find((d) => {
