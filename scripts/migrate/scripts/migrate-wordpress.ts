@@ -1867,67 +1867,45 @@ async function main() {
 			projectIdsByName.get(normalizeProjectLookupValue(name));
 
 		await db.transaction(async (tx) => {
-			const projectId =
-				existingProjectId ??
-				(await (async () => {
-					const [entity] = await tx
-						.insert(schema.entities)
-						.values({
-							slug: project.slug,
-							typeId: typesByType.projects.id,
-							createdAt: new Date(project.date_gmt),
-							updatedAt: new Date(project.modified_gmt),
-						})
-						.returning({ id: schema.entities.id });
+			let projectId = existingProjectId;
 
-					assert(entity);
+			if (projectId == null) {
+				const [entity] = await tx
+					.insert(schema.entities)
+					.values({
+						slug: project.slug,
+						typeId: typesByType.projects.id,
+						createdAt: new Date(project.date_gmt),
+						updatedAt: new Date(project.modified_gmt),
+					})
+					.returning({ id: schema.entities.id });
 
-					const [version] = await tx
-						.insert(schema.entityVersions)
-						.values({
-							entityId: entity.id,
-							statusId: statusByType.published.id,
-						})
-						.returning({ id: schema.entityVersions.id });
+				assert(entity);
 
-					assert(version);
+				const [version] = await tx
+					.insert(schema.entityVersions)
+					.values({
+						entityId: entity.id,
+						statusId: statusByType.published.id,
+					})
+					.returning({ id: schema.entityVersions.id });
 
-					const imageId = await uploadFeaturedImage(
-						"logos",
-						assetsCache,
-						data.media,
-						project.featured_media,
-						project.id,
-					);
+				assert(version);
 
-					const [createdProject] = await tx
-						.insert(schema.projects)
-						.values({
-							id: version.id,
-							name,
-							acronym,
-							duration: meta.duration ?? {
-								start: new Date(Date.UTC(1900, 0, 1)),
-								end: new Date(Date.UTC(1900, 0, 1)),
-							},
-							funding: meta.funding,
-							summary,
-							topic: meta.topic,
-							imageId: imageId ?? placeholderImageId,
-							scopeId: projectScopesByType.eu.id /** We agreed to default to eu. */,
-							createdAt: new Date(project.date_gmt),
-							updatedAt: new Date(project.modified_gmt),
-						})
-						.returning({ id: schema.projects.id });
+				const imageId = await uploadFeaturedImage(
+					"logos",
+					assetsCache,
+					data.media,
+					project.featured_media,
+					project.id,
+				);
 
-					assert(createdProject);
-
-					projectIdsByAcronym.set(normalizeProjectLookupValue(acronym), createdProject.id);
-					projectIdsByName.set(normalizeProjectLookupValue(name), createdProject.id);
-					existingProjectsById.set(createdProject.id, {
-						id: createdProject.id,
-						acronym,
+				const [createdProject] = await tx
+					.insert(schema.projects)
+					.values({
+						id: version.id,
 						name,
+						acronym,
 						duration: meta.duration ?? {
 							start: new Date(Date.UTC(1900, 0, 1)),
 							end: new Date(Date.UTC(1900, 0, 1)),
@@ -1935,70 +1913,86 @@ async function main() {
 						funding: meta.funding,
 						summary,
 						topic: meta.topic,
+						imageId: imageId ?? placeholderImageId,
+						scopeId: projectScopesByType.eu.id /** We agreed to default to eu. */,
+						createdAt: new Date(project.date_gmt),
+						updatedAt: new Date(project.modified_gmt),
+					})
+					.returning({ id: schema.projects.id });
+
+				assert(createdProject);
+
+				projectIdsByAcronym.set(normalizeProjectLookupValue(acronym), createdProject.id);
+				projectIdsByName.set(normalizeProjectLookupValue(name), createdProject.id);
+				existingProjectsById.set(createdProject.id, {
+					id: createdProject.id,
+					acronym,
+					name,
+					duration: meta.duration ?? {
+						start: new Date(Date.UTC(1900, 0, 1)),
+						end: new Date(Date.UTC(1900, 0, 1)),
+					},
+					funding: meta.funding,
+					summary,
+					topic: meta.topic,
+				});
+
+				if (umbrellaUnit) {
+					await tx
+						.insert(schema.projectsToOrganisationalUnits)
+						.values({
+							projectId: createdProject.id,
+							unitId: umbrellaUnit.id,
+							roleId: projectRolesByType.participant.id,
+						})
+						.onConflictDoNothing();
+				}
+
+				if (isNonEmptyString(project.website)) {
+					const [sm] = await tx
+						.insert(schema.socialMedia)
+						.values({
+							name: `${name} website`,
+							typeId: socialMediaTypesByType.website.id,
+							url: project.website,
+						})
+						.returning({ id: schema.socialMedia.id });
+
+					assert(sm);
+
+					await tx.insert(schema.projectsToSocialMedia).values({
+						projectId: createdProject.id,
+						socialMediaId: sm.id,
+					});
+				}
+
+				const contentHtml = stripProjectMetaBlock(project.content.rendered);
+
+				if (contentHtml.length > 0) {
+					const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
+						where: {
+							entityTypeId: entityTypesByType.projects.id,
+							fieldName: "description",
+						},
 					});
 
-					if (umbrellaUnit) {
-						await tx
-							.insert(schema.projectsToOrganisationalUnits)
-							.values({
-								projectId: createdProject.id,
-								unitId: umbrellaUnit.id,
-								roleId: projectRolesByType.participant.id,
-							})
-							.onConflictDoNothing();
-					}
+					assert(fieldName);
 
-					if (isNonEmptyString(project.website)) {
-						const [sm] = await tx
-							.insert(schema.socialMedia)
-							.values({
-								name: `${name} website`,
-								typeId: socialMediaTypesByType.website.id,
-								url: project.website,
-							})
-							.returning({ id: schema.socialMedia.id });
+					const [field] = await tx
+						.insert(schema.fields)
+						.values({
+							entityVersionId: version.id,
+							fieldNameId: fieldName.id,
+						})
+						.returning({ id: schema.fields.id });
 
-						assert(sm);
+					assert(field);
 
-						await tx.insert(schema.projectsToSocialMedia).values({
-							projectId: createdProject.id,
-							socialMediaId: sm.id,
-						});
-					}
+					await migrateHtmlContent(tx, contentHtml, assetsCache, field.id, contentBlockTypesByType);
+				}
 
-					const contentHtml = stripProjectMetaBlock(project.content.rendered);
-
-					if (contentHtml.length > 0) {
-						const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
-							where: {
-								entityTypeId: entityTypesByType.projects.id,
-								fieldName: "description",
-							},
-						});
-
-						assert(fieldName);
-
-						const [field] = await tx
-							.insert(schema.fields)
-							.values({
-								entityVersionId: version.id,
-								fieldNameId: fieldName.id,
-							})
-							.returning({ id: schema.fields.id });
-
-						assert(field);
-
-						await migrateHtmlContent(
-							tx,
-							contentHtml,
-							assetsCache,
-							field.id,
-							contentBlockTypesByType,
-						);
-					}
-
-					return createdProject.id;
-				})());
+				projectId = createdProject.id;
+			}
 
 			if (existingProjectId != null) {
 				const existingProject = existingProjectsById.get(existingProjectId);
@@ -2084,6 +2078,8 @@ async function main() {
 					});
 				}
 			}
+
+			assert(projectId);
 
 			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			if (project.relations.coordinator != null) {
