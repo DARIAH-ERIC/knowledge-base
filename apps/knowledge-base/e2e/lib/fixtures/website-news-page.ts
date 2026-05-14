@@ -150,14 +150,14 @@ export class WebsiteNewsPage {
 		return this.page.getByText("Draft", { exact: true });
 	}
 
-	/** "Live" badge in the lifecycle bar (only present when published-only, no draft). */
-	detailsLiveBadge(): Locator {
-		return this.page.getByText("Live", { exact: true });
+	/** "Published" badge in the lifecycle bar (only present when published-only, no draft). */
+	detailsPublishedBadge(): Locator {
+		return this.page.getByText("Published", { exact: true });
 	}
 
-	/** "Live with changes" badge in the lifecycle bar (draft + published both exist). */
-	detailsLiveWithChangesBadge(): Locator {
-		return this.page.getByText("Live with changes");
+	/** "Published with draft changes" badge in the lifecycle bar (draft + published both exist). */
+	detailsPublishedWithDraftChangesBadge(): Locator {
+		return this.page.getByText("Published with draft changes");
 	}
 
 	// ---------------------------------------------------------------------------
@@ -193,14 +193,16 @@ export class WebsiteNewsPage {
 	// List page — status badge within a row
 	// ---------------------------------------------------------------------------
 
-	/** "Live" status badge inside a specific list row. */
-	liveBadgeInRow(title: string): Locator {
-		return this.rowByTitle(title).getByText("Live", { exact: true });
+	/** "Published" status badge inside a specific list row. */
+	publishedBadgeInRow(title: string): Locator {
+		return this.rowByTitle(title).getByText("Published", { exact: true });
 	}
 
-	/** "Live + Draft" status badge inside a specific list row. */
-	liveAndDraftBadgeInRow(title: string): Locator {
-		return this.rowByTitle(title).getByText("Live + Draft", { exact: true });
+	/** Both "Published" and "Draft" status badges inside a specific list row. */
+	publishedAndDraftBadgesInRow(title: string): Locator {
+		return this.rowByTitle(title)
+			.locator('[data-slot="badge"]')
+			.filter({ hasText: /Published|Draft/ });
 	}
 
 	/** "Draft" status badge inside a specific list row. */

@@ -13,7 +13,7 @@ import { UpdateEventActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/d
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
-import { ensureDraftVersion } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { eventsLifecycleAdapter } from "@/lib/data/events.lifecycle-adapter";
 import { syncEntityRelations } from "@/lib/data/relations";
 import { db, type Transaction } from "@/lib/db";
@@ -131,6 +131,7 @@ export const updateEventAction = createServerAction(
 			}
 
 			await syncEntityRelations(tx, documentId, relatedEntityIds, relatedResourceIds);
+			await touchVersion(tx, draftVersionId);
 		});
 
 		after(async () => {

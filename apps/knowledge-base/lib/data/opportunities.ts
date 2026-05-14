@@ -48,7 +48,6 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 				title: schema.opportunities.title,
 				updatedAt: schema.entityVersions.updatedAt,
 				website: schema.opportunities.website,
-				hasDraft: sql<boolean>`${schema.entityStatus.type} = 'draft'`,
 				isPublished: sql<boolean>`
 					EXISTS (
 						SELECT
@@ -61,6 +60,36 @@ export async function getOpportunities(params: GetOpportunitiesParams) {
 							AND "ps"."type" = 'published'
 					)
 				`,
+				hasDraft: sql<boolean>`
+					EXISTS (
+						SELECT 1
+						FROM "entity_versions" AS "dv"
+						INNER JOIN "entity_status" AS "ds" ON "dv"."status_id" = "ds"."id"
+						WHERE
+							"dv"."entity_id" = ${schema.entityVersions.entityId}
+							AND "ds"."type" = 'draft'
+							AND (
+								NOT EXISTS (
+									SELECT 1
+									FROM "entity_versions" AS "pv"
+									INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+									WHERE
+										"pv"."entity_id" = ${schema.entityVersions.entityId}
+										AND "ps"."type" = 'published'
+								)
+								OR "dv"."updated_at" > (
+									SELECT "pv"."updated_at"
+									FROM "entity_versions" AS "pv"
+									INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+									WHERE
+										"pv"."entity_id" = ${schema.entityVersions.entityId}
+										AND "ps"."type" = 'published'
+									LIMIT 1
+								)
+							)
+					)
+				`,
+				status: schema.entityStatus.type,
 			})
 			.from(schema.opportunities)
 			.innerJoin(schema.entityVersions, eq(schema.opportunities.id, schema.entityVersions.id))

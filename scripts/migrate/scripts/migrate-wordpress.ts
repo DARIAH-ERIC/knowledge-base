@@ -14,6 +14,7 @@ import type { JSONContent } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
 import { generateJSON } from "@tiptap/html";
 import { StarterKit } from "@tiptap/starter-kit";
+import { and, eq } from "drizzle-orm";
 import { toText } from "hast-util-to-text";
 import fromHtml from "rehype-parse";
 import { unified } from "unified";
@@ -556,6 +557,16 @@ interface ProjectMetadata {
 	summary: string | null;
 }
 
+const projectMetadataConflictLogFilePath = path.join(
+	cacheFolderPath,
+	"wordpress-project-metadata-conflicts.log",
+);
+
+async function logProjectMetadataConflict(message: string): Promise<void> {
+	const line = `[${new Date().toISOString()}] ${message}\n`;
+	await fs.appendFile(projectMetadataConflictLogFilePath, line, { encoding: "utf-8" });
+}
+
 function parseProjectDate(s: string): Date | null {
 	const m = /(\d{2})[-/](\d{2})[-/](\d{4})/.exec(s.trim());
 	if (!m) {
@@ -611,31 +622,49 @@ function stripProjectMetaBlock(html: string): string {
 		.trim();
 }
 
-type PersonRoleType =
-	| "national_coordinator"
-	| "national_coordinator_deputy"
-	| "national_representative";
-
-function parsePositionRoles(position: string): Array<PersonRoleType> {
-	const pos = position.trim();
-
-	if (/national representative and national coordinator/i.test(pos)) {
-		return ["national_representative", "national_coordinator"];
-	}
-	if (/^deputy national (?:co-)?coordinator/i.test(pos)) {
-		return ["national_coordinator_deputy"];
-	}
-	if (/^national coordinator/i.test(pos)) {
-		return ["national_coordinator"];
-	}
-	if (
-		/^national representative/i.test(pos) ||
-		/chair of general assembly \/ national representative/i.test(pos)
-	) {
-		return ["national_representative"];
+function getPageEntityType(
+	pageLink: string,
+): "impact_case_studies" | "pages" | "spotlight_articles" {
+	if (pageLink.startsWith("https://www.dariah.eu/activities/impact-case-studies/")) {
+		return "impact_case_studies";
 	}
 
-	return [];
+	if (pageLink.startsWith("https://www.dariah.eu/activities/spotlight/")) {
+		return "spotlight_articles";
+	}
+
+	return "pages";
+}
+
+function isBlank(value: string | null | undefined): boolean {
+	return value == null || value.trim().length === 0;
+}
+
+function normalizeInstitutionLookupValue(value: string): string {
+	return value.trim().replaceAll(/\s+/g, " ").toLowerCase();
+}
+
+function isPlaceholderProjectDuration(duration: { start: Date; end?: Date } | null): boolean {
+	if (duration == null) {
+		return true;
+	}
+
+	const placeholderStart = Date.UTC(1900, 0, 1);
+
+	return (
+		duration.start.getTime() === placeholderStart &&
+		(duration.end == null || duration.end.getTime() === placeholderStart)
+	);
+}
+
+function hasDifferentProjectDuration(
+	left: { start: Date; end?: Date },
+	right: { start: Date; end?: Date },
+): boolean {
+	return (
+		left.start.getTime() !== right.start.getTime() ||
+		(left.end?.getTime() ?? null) !== (right.end?.getTime() ?? null)
+	);
 }
 
 async function main() {
@@ -644,6 +673,7 @@ async function main() {
 	const data = await getData();
 
 	const assetsCache = await readAssetsCacheData();
+	await fs.writeFile(projectMetadataConflictLogFilePath, "", { encoding: "utf-8" });
 
 	const categoriesBySlug = keyBy(Object.values(data.categories), (item) => {
 		return item.slug;
@@ -659,24 +689,7 @@ async function main() {
 		return item.type;
 	});
 
-	const organisationalUnitTypes = await db.query.organisationalUnitTypes.findMany();
-	const organisationalUnitTypesByType = keyBy(organisationalUnitTypes, (item) => {
-		return item.type;
-	});
-
-	const organisationalUnitStatus = await db.query.organisationalUnitStatus.findMany();
-	const organisationalUnitStatusByType = keyBy(organisationalUnitStatus, (item) => {
-		return item.status;
-	});
-
-	const personRoleTypes = await db.query.personRoleTypes.findMany();
-	const personRoleTypesByType = keyBy(personRoleTypes, (item) => {
-		return item.type;
-	});
-
-	const wpCountryIdToOrgUnitId = new Map<number, string>();
 	const wpInstitutionIdToOrgUnitId = new Map<number, string>();
-	const wpPersonIdToDbId = new Map<number, string>();
 
 	const spotlightArticleIdToAuthorNames = new Map<string, Array<string>>();
 	const impactCaseStudyIdToAuthorNames = new Map<string, Array<string>>();
@@ -701,9 +714,19 @@ async function main() {
 		return item.type;
 	});
 
+	const organisationalUnitTypes = await db.query.organisationalUnitTypes.findMany();
+	const organisationalUnitTypesByType = keyBy(organisationalUnitTypes, (item) => {
+		return item.type;
+	});
+
 	const socialMediaTypes = await db.query.socialMediaTypes.findMany();
 	const socialMediaTypesByType = keyBy(socialMediaTypes, (item) => {
 		return item.type;
+	});
+
+	const organisationalUnitStatus = await db.query.organisationalUnitStatus.findMany();
+	const organisationalUnitStatusByType = keyBy(organisationalUnitStatus, (item) => {
+		return item.status;
 	});
 
 	const umbrellaUnit = await db.query.organisationalUnits.findFirst({
@@ -714,16 +737,238 @@ async function main() {
 		},
 	});
 
-	const kbCountries = await db.query.organisationalUnits.findMany({
-		where: {
-			type: {
-				type: "country",
-			},
-		},
-	});
-
 	const placeholderImage = await upload("images", assetsCache, placeholderImageUrl, "Placeholder");
 	assert(placeholderImage, "Missing placeholder image.");
+	const placeholderImageId = placeholderImage.id;
+
+	const institutionOrgUnitIdsByName = new Map<string, string>();
+	const existingInstitutionOrgUnits = await db.query.organisationalUnits.findMany({
+		where: { type: { type: "institution" } },
+		columns: { id: true, name: true },
+	});
+
+	for (const institution of existingInstitutionOrgUnits) {
+		const name = normalizeInstitutionLookupValue(institution.name);
+		if (!institutionOrgUnitIdsByName.has(name)) {
+			institutionOrgUnitIdsByName.set(name, institution.id);
+		}
+	}
+
+	const countryOrgUnitIdsByName = new Map<string, string>();
+	const existingCountryOrgUnits = await db.query.organisationalUnits.findMany({
+		where: { type: { type: "country" } },
+		columns: { id: true, name: true },
+	});
+
+	for (const country of existingCountryOrgUnits) {
+		const name = normalizeInstitutionLookupValue(country.name);
+		if (!countryOrgUnitIdsByName.has(name)) {
+			countryOrgUnitIdsByName.set(name, country.id);
+		}
+	}
+
+	if (umbrellaUnit != null) {
+		const umbrellaName = normalizeInstitutionLookupValue(umbrellaUnit.name);
+		if (!institutionOrgUnitIdsByName.has(umbrellaName)) {
+			institutionOrgUnitIdsByName.set(umbrellaName, umbrellaUnit.id);
+		}
+	}
+
+	const wpCoordinatorInstitutionIds = new Set<number>();
+	const wpRepresentativeInstitutionIds = new Set<number>();
+
+	for (const country of Object.values(data.countries)) {
+		for (const person of country.coordinators_data) {
+			if (person.institution !== 0) {
+				wpCoordinatorInstitutionIds.add(person.institution);
+			}
+		}
+
+		for (const person of country.repPersons_data) {
+			if (person.institution !== 0) {
+				wpRepresentativeInstitutionIds.add(person.institution);
+			}
+		}
+	}
+
+	async function ensureOrganisationalUnitRelation(
+		tx: Transaction,
+		args: { unitId: string; relatedUnitId: string; statusId: string },
+	): Promise<void> {
+		const [existingRelation] = await tx
+			.select({ id: schema.organisationalUnitsRelations.id })
+			.from(schema.organisationalUnitsRelations)
+			.where(
+				and(
+					eq(schema.organisationalUnitsRelations.unitId, args.unitId),
+					eq(schema.organisationalUnitsRelations.relatedUnitId, args.relatedUnitId),
+					eq(schema.organisationalUnitsRelations.status, args.statusId),
+				),
+			)
+			.limit(1);
+
+		if (existingRelation != null) {
+			return;
+		}
+
+		await tx.insert(schema.organisationalUnitsRelations).values({
+			unitId: args.unitId,
+			relatedUnitId: args.relatedUnitId,
+			duration: { start: new Date(Date.UTC(1900, 0, 1)) },
+			status: args.statusId,
+		});
+	}
+
+	async function ensureInstitutionOrgUnit(
+		tx: Transaction,
+		wpInstitutionId: number,
+	): Promise<string | null> {
+		const existingId = wpInstitutionIdToOrgUnitId.get(wpInstitutionId);
+		if (existingId != null) {
+			return existingId;
+		}
+
+		const institution = data.institutions[wpInstitutionId];
+		if (institution == null) {
+			log.warn(`Missing wordpress institution ${String(wpInstitutionId)} referenced by project.`);
+			return null;
+		}
+
+		const name = toPlaintext(institution.title.rendered).trim();
+		const normalizedName = normalizeInstitutionLookupValue(name);
+		const existingInstitutionId = institutionOrgUnitIdsByName.get(normalizedName);
+
+		if (existingInstitutionId != null) {
+			wpInstitutionIdToOrgUnitId.set(wpInstitutionId, existingInstitutionId);
+			return existingInstitutionId;
+		}
+
+		let slug = slugify(institution.slug || name);
+		const slugExists = await tx.query.entities.findFirst({
+			where: {
+				typeId: typesByType.organisational_units.id,
+				slug,
+			},
+			columns: {
+				id: true,
+			},
+		});
+
+		if (slugExists != null) {
+			slug = `${slug}-duplicate-${randomUUID()}`;
+		}
+
+		const [entity] = await tx
+			.insert(schema.entities)
+			.values({
+				slug,
+				typeId: typesByType.organisational_units.id,
+				createdAt: new Date(institution.date_gmt),
+				updatedAt: new Date(institution.modified_gmt),
+			})
+			.returning({ id: schema.entities.id });
+
+		assert(entity);
+
+		const [version] = await tx
+			.insert(schema.entityVersions)
+			.values({
+				entityId: entity.id,
+				statusId: statusByType.published.id,
+			})
+			.returning({ id: schema.entityVersions.id });
+
+		assert(version);
+
+		const imageId = await uploadFeaturedImage(
+			"logos",
+			assetsCache,
+			data.media,
+			institution.featured_media,
+			institution.id,
+		);
+
+		const metadata = isNonEmptyString(institution.website) ? { url: institution.website } : {};
+
+		const [orgUnit] = await tx
+			.insert(schema.organisationalUnits)
+			.values({
+				id: version.id,
+				name,
+				summary: toSummary(institution.content.rendered),
+				typeId: organisationalUnitTypesByType.institution.id,
+				metadata,
+				imageId: imageId ?? placeholderImageId,
+				createdAt: new Date(institution.date_gmt),
+				updatedAt: new Date(institution.modified_gmt),
+			})
+			.returning({ id: schema.organisationalUnits.id });
+
+		assert(orgUnit);
+
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		const countryName = institution.country_data?.title;
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		if (countryName != null) {
+			const countryUnitId = countryOrgUnitIdsByName.get(
+				normalizeInstitutionLookupValue(countryName),
+			);
+			if (countryUnitId != null) {
+				await ensureOrganisationalUnitRelation(tx, {
+					unitId: orgUnit.id,
+					relatedUnitId: countryUnitId,
+					statusId: organisationalUnitStatusByType.is_located_in.id,
+				});
+			}
+		}
+
+		if (umbrellaUnit != null) {
+			const roleIds = new Set(institution.dariah_institution_country_role);
+			const relationStatuses = new Set<string>();
+
+			if (roleIds.has(20)) {
+				relationStatuses.add(organisationalUnitStatusByType.is_cooperating_partner_of.id);
+			}
+
+			if (roleIds.has(14) || wpCoordinatorInstitutionIds.has(wpInstitutionId)) {
+				relationStatuses.add(
+					organisationalUnitStatusByType.is_national_coordinating_institution_in.id,
+				);
+			}
+
+			if (wpRepresentativeInstitutionIds.has(wpInstitutionId)) {
+				relationStatuses.add(
+					organisationalUnitStatusByType.is_national_representative_institution_in.id,
+				);
+			}
+
+			if (
+				(roleIds.has(15) || roleIds.has(112)) &&
+				!relationStatuses.has(organisationalUnitStatusByType.is_cooperating_partner_of.id) &&
+				!relationStatuses.has(
+					organisationalUnitStatusByType.is_national_coordinating_institution_in.id,
+				) &&
+				!relationStatuses.has(
+					organisationalUnitStatusByType.is_national_representative_institution_in.id,
+				)
+			) {
+				relationStatuses.add(organisationalUnitStatusByType.is_partner_institution_of.id);
+			}
+
+			for (const statusId of relationStatuses) {
+				await ensureOrganisationalUnitRelation(tx, {
+					unitId: orgUnit.id,
+					relatedUnitId: umbrellaUnit.id,
+					statusId,
+				});
+			}
+		}
+
+		institutionOrgUnitIdsByName.set(normalizedName, orgUnit.id);
+		wpInstitutionIdToOrgUnitId.set(wpInstitutionId, orgUnit.id);
+
+		return orgUnit.id;
+	}
 
 	/**
 	 * ============================================================================================
@@ -741,11 +986,14 @@ async function main() {
 		assert(page.status === "publish", "Page has not been published.");
 
 		await db.transaction(async (tx) => {
+			const pageEntityType = getPageEntityType(page.link);
+			const entityTypeId = typesByType[pageEntityType].id;
+
 			const [entity] = await tx
 				.insert(schema.entities)
 				.values({
 					slug: page.slug,
-					typeId: typesByType.pages.id,
+					typeId: entityTypeId,
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),
 				})
@@ -754,15 +1002,11 @@ async function main() {
 			assert(entity);
 
 			const [version] = await tx
-
 				.insert(schema.entityVersions)
-
 				.values({
 					entityId: entity.id,
-
 					statusId: statusByType.published.id,
 				})
-
 				.returning({ id: schema.entityVersions.id });
 
 			assert(version);
@@ -781,7 +1025,7 @@ async function main() {
 				log.warn(`Missing image (page id ${String(page.id)}).`);
 			}
 
-			if (page.link.startsWith("https://www.dariah.eu/activities/impact-case-studies/")) {
+			if (pageEntityType === "impact_case_studies") {
 				await tx.insert(schema.impactCaseStudies).values({
 					id,
 					title: toPlaintext(page.title.rendered),
@@ -794,7 +1038,7 @@ async function main() {
 				if (authorNames.length > 0) {
 					impactCaseStudyIdToAuthorNames.set(id, authorNames);
 				}
-			} else if (page.link.startsWith("https://www.dariah.eu/activities/spotlight/")) {
+			} else if (pageEntityType === "spotlight_articles") {
 				await tx.insert(schema.spotlightArticles).values({
 					id,
 					title: toPlaintext(page.title.rendered),
@@ -824,7 +1068,7 @@ async function main() {
 
 			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
 				where: {
-					entityTypeId: entityTypesByType.pages.id,
+					entityTypeId,
 					fieldName: "content",
 				},
 			});
@@ -1213,15 +1457,11 @@ async function main() {
 				assert(entity);
 
 				const [version] = await tx
-
 					.insert(schema.entityVersions)
-
 					.values({
 						entityId: entity.id,
-
 						statusId: statusByType.published.id,
 					})
-
 					.returning({ id: schema.entityVersions.id });
 
 				assert(version);
@@ -1287,15 +1527,11 @@ async function main() {
 			assert(entity);
 
 			const [version] = await tx
-
 				.insert(schema.entityVersions)
-
 				.values({
 					entityId: entity.id,
-
 					statusId: statusByType.published.id,
 				})
-
 				.returning({ id: schema.entityVersions.id });
 
 			assert(version);
@@ -1390,17 +1626,12 @@ async function main() {
 				.returning({ id: schema.entities.id });
 
 			assert(entity);
-
 			const [version] = await tx
-
 				.insert(schema.entityVersions)
-
 				.values({
 					entityId: entity.id,
-
 					statusId: statusByType.published.id,
 				})
-
 				.returning({ id: schema.entityVersions.id });
 
 			assert(version);
@@ -1478,7 +1709,7 @@ async function main() {
 				.insert(schema.entities)
 				.values({
 					slug: event.slug,
-					typeId: typesByType.news.id,
+					typeId: typesByType.events.id,
 					createdAt: new Date(event.date_utc),
 					updatedAt: new Date(event.modified_utc),
 				})
@@ -1487,15 +1718,11 @@ async function main() {
 			assert(entity);
 
 			const [version] = await tx
-
 				.insert(schema.entityVersions)
-
 				.values({
 					entityId: entity.id,
-
 					statusId: statusByType.published.id,
 				})
-
 				.returning({ id: schema.entityVersions.id });
 
 			assert(version);
@@ -1565,235 +1792,57 @@ async function main() {
 
 	/**
 	 * ============================================================================================
-	 * Institution.
-	 * ============================================================================================
-	 */
-
-	log.info("Migrating institutions...");
-
-	for (const institution of Object.values(data.institutions)) {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-		assert(institution.status === "publish", "Institution has not been published.");
-
-		await db.transaction(async (tx) => {
-			const [entity] = await tx
-				.insert(schema.entities)
-				.values({
-					slug: institution.slug,
-					typeId: typesByType.organisational_units.id,
-					createdAt: new Date(institution.date_gmt),
-					updatedAt: new Date(institution.modified_gmt),
-				})
-				.returning({ id: schema.entities.id });
-
-			assert(entity);
-
-			const [version] = await tx
-
-				.insert(schema.entityVersions)
-
-				.values({
-					entityId: entity.id,
-
-					statusId: statusByType.published.id,
-				})
-
-				.returning({ id: schema.entityVersions.id });
-
-			assert(version);
-
-			const id = version.id;
-
-			const imageId = await uploadFeaturedImage(
-				"logos",
-				assetsCache,
-				data.media,
-				institution.featured_media,
-				institution.id,
-			);
-
-			const name = toPlaintext(institution.title.rendered);
-
-			// Role IDs from https://www.dariah.eu/wp-json/wp/v2/dariah_institution_country_role:
-			// 14 = national-coordinating-institution
-			// 15 = partner-institutions
-			// 20 = cooperating-partners
-			// 112 = other
-			const isNationalCoordinator = institution.dariah_institution_country_role.includes(14);
-			const isPartnerInstitution = institution.dariah_institution_country_role.includes(15);
-			const isCooperatingPartner = institution.dariah_institution_country_role.includes(20);
-
-			const [orgUnit] = await tx
-				.insert(schema.organisationalUnits)
-				.values({
-					id,
-					name,
-					summary: "",
-					typeId: organisationalUnitTypesByType.institution.id,
-					imageId: imageId ?? placeholderImage.id,
-					createdAt: new Date(institution.date_gmt),
-					updatedAt: new Date(institution.modified_gmt),
-				})
-				.returning({ id: schema.organisationalUnits.id });
-
-			assert(orgUnit);
-
-			wpInstitutionIdToOrgUnitId.set(institution.id, orgUnit.id);
-
-			// WP institutions with missing country_data, manually assigned:
-			// 392 = Gottfried Wilhelm Leibniz University of Hannover → Germany
-			// 574 = Max Planck Institute for Social Law and Social Policy → Germany
-			const countryName =
-				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-				institution.country_data?.title ??
-				(institution.id === 392 || institution.id === 574 ? "Germany" : undefined);
-
-			const countryOrgUnitId =
-				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-				countryName != null
-					? kbCountries.find((kbc) => {
-							return kbc.name === countryName;
-						})?.id
-					: undefined;
-
-			if (countryOrgUnitId != null) {
-				await tx.insert(schema.organisationalUnitsRelations).values({
-					unitId: orgUnit.id,
-					relatedUnitId: countryOrgUnitId,
-					duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
-
-					status: organisationalUnitStatusByType.is_located_in.id,
-				});
-			}
-
-			if (isNationalCoordinator && umbrellaUnit != null) {
-				await tx.insert(schema.organisationalUnitsRelations).values({
-					unitId: orgUnit.id,
-					relatedUnitId: umbrellaUnit.id,
-					duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
-
-					status: organisationalUnitStatusByType.is_national_coordinating_institution_in.id,
-				});
-			}
-
-			if (isPartnerInstitution && countryOrgUnitId != null && umbrellaUnit != null) {
-				await tx.insert(schema.organisationalUnitsRelations).values({
-					unitId: orgUnit.id,
-					relatedUnitId: umbrellaUnit.id,
-					duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
-
-					status: organisationalUnitStatusByType.is_partner_institution_of.id,
-				});
-			}
-
-			if (isCooperatingPartner && countryOrgUnitId != null && umbrellaUnit != null) {
-				await tx.insert(schema.organisationalUnitsRelations).values({
-					unitId: orgUnit.id,
-					relatedUnitId: umbrellaUnit.id,
-					duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
-
-					status: organisationalUnitStatusByType.is_cooperating_partner_of.id,
-				});
-			}
-
-			if (isNonEmptyString(institution.website)) {
-				const [sm] = await tx
-					.insert(schema.socialMedia)
-					.values({
-						name: `${name} website`,
-						typeId: socialMediaTypesByType.website.id,
-						url: institution.website,
-					})
-					.returning({ id: schema.socialMedia.id });
-
-				assert(sm);
-
-				await tx.insert(schema.organisationalUnitsToSocialMedia).values({
-					organisationalUnitId: orgUnit.id,
-					socialMediaId: sm.id,
-				});
-			}
-
-			if (institution.content.rendered.trim().length === 0) {
-				return;
-			}
-
-			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
-				where: {
-					entityTypeId: entityTypesByType.organisational_units.id,
-					fieldName: "description",
-				},
-			});
-
-			assert(fieldName);
-
-			const [field] = await tx
-				.insert(schema.fields)
-				.values({
-					entityVersionId: version.id,
-					fieldNameId: fieldName.id,
-				})
-				.returning({ id: schema.fields.id });
-
-			assert(field);
-
-			await migrateHtmlContent(
-				tx,
-				institution.content.rendered,
-				assetsCache,
-				field.id,
-				contentBlockTypesByType,
-			);
-		});
-	}
-
-	/**
-	 * ============================================================================================
-	 * National representative institution relations.
-	 * ============================================================================================
-	 */
-
-	log.info("Creating national representative institution relations...");
-
-	for (const country of Object.values(data.countries)) {
-		const countryOrgUnitId = wpCountryIdToOrgUnitId.get(country.id);
-		if (countryOrgUnitId == null) {
-			continue;
-		}
-
-		// Deduplicate: multiple persons from the same institution may be listed
-		const repInstitutionWpIds = new Set(
-			country.repPersons_data.map((p) => {
-				return p.institution;
-			}),
-		);
-
-		for (const wpInstId of repInstitutionWpIds) {
-			const institutionOrgUnitId = wpInstitutionIdToOrgUnitId.get(wpInstId);
-			if (institutionOrgUnitId == null) {
-				continue;
-			}
-
-			if (umbrellaUnit == null) {
-				continue;
-			}
-
-			await db.insert(schema.organisationalUnitsRelations).values({
-				unitId: institutionOrgUnitId,
-				relatedUnitId: umbrellaUnit.id,
-				duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
-				status: organisationalUnitStatusByType.is_national_representative_institution_in.id,
-			});
-		}
-	}
-
-	/**
-	 * ============================================================================================
 	 * Projects.
 	 * ============================================================================================
 	 */
 
 	log.info("Migrating projects...");
+
+	function normalizeProjectLookupValue(value: string): string {
+		return value.trim().replaceAll(/\s+/g, " ").toLowerCase();
+	}
+
+	const projectIdsByAcronym = new Map<string, string>();
+	const projectIdsByName = new Map<string, string>();
+	const existingProjectsById = new Map<
+		string,
+		{
+			id: string;
+			acronym: string | null;
+			name: string;
+			duration: { start: Date; end?: Date };
+			funding: number | null;
+			summary: string;
+			topic: string | null;
+		}
+	>();
+	const existingProjects = await db.query.projects.findMany({
+		columns: {
+			id: true,
+			acronym: true,
+			name: true,
+			duration: true,
+			funding: true,
+			summary: true,
+			topic: true,
+		},
+	});
+
+	for (const project of existingProjects) {
+		existingProjectsById.set(project.id, project);
+
+		if (isNonEmptyString(project.acronym)) {
+			const acronym = normalizeProjectLookupValue(project.acronym);
+			if (!projectIdsByAcronym.has(acronym)) {
+				projectIdsByAcronym.set(acronym, project.id);
+			}
+		}
+
+		const name = normalizeProjectLookupValue(project.name);
+		if (!projectIdsByName.has(name)) {
+			projectIdsByName.set(name, project.id);
+		}
+	}
 
 	for (const project of Object.values(data.projects)) {
 		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -1807,108 +1856,246 @@ async function main() {
 			);
 		}
 
+		// Prefer HTML-extracted full name over WP fullname field (WP data has known
+		// corruptions, e.g. HIRMEOS has PARTHENOS's fullname). Fall back to title.
+		const name = meta.fullName ?? (project.fullname || project.title.rendered);
+		const acronym = project.title.rendered;
+		const summary = (meta.summary ?? toSummary(project.excerpt.rendered)) || project.title.rendered;
+
+		const existingProjectId =
+			projectIdsByAcronym.get(normalizeProjectLookupValue(acronym)) ??
+			projectIdsByName.get(normalizeProjectLookupValue(name));
+
 		await db.transaction(async (tx) => {
-			const [entity] = await tx
-				.insert(schema.entities)
-				.values({
-					slug: project.slug,
-					typeId: typesByType.projects.id,
-					createdAt: new Date(project.date_gmt),
-					updatedAt: new Date(project.modified_gmt),
-				})
-				.returning({ id: schema.entities.id });
+			let projectId = existingProjectId;
 
-			assert(entity);
+			if (projectId == null) {
+				const [entity] = await tx
+					.insert(schema.entities)
+					.values({
+						slug: project.slug,
+						typeId: typesByType.projects.id,
+						createdAt: new Date(project.date_gmt),
+						updatedAt: new Date(project.modified_gmt),
+					})
+					.returning({ id: schema.entities.id });
 
-			const [version] = await tx
+				assert(entity);
 
-				.insert(schema.entityVersions)
+				const [version] = await tx
+					.insert(schema.entityVersions)
+					.values({
+						entityId: entity.id,
+						statusId: statusByType.published.id,
+					})
+					.returning({ id: schema.entityVersions.id });
 
-				.values({
-					entityId: entity.id,
+				assert(version);
 
-					statusId: statusByType.published.id,
-				})
+				const imageId = await uploadFeaturedImage(
+					"logos",
+					assetsCache,
+					data.media,
+					project.featured_media,
+					project.id,
+				);
 
-				.returning({ id: schema.entityVersions.id });
+				const [createdProject] = await tx
+					.insert(schema.projects)
+					.values({
+						id: version.id,
+						name,
+						acronym,
+						duration: meta.duration ?? {
+							start: new Date(Date.UTC(1900, 0, 1)),
+							end: new Date(Date.UTC(1900, 0, 1)),
+						},
+						funding: meta.funding,
+						summary,
+						topic: meta.topic,
+						imageId: imageId ?? placeholderImageId,
+						scopeId: projectScopesByType.eu.id /** We agreed to default to eu. */,
+						createdAt: new Date(project.date_gmt),
+						updatedAt: new Date(project.modified_gmt),
+					})
+					.returning({ id: schema.projects.id });
 
-			assert(version);
+				assert(createdProject);
 
-			const id = version.id;
-
-			const imageId = await uploadFeaturedImage(
-				"logos",
-				assetsCache,
-				data.media,
-				project.featured_media,
-				project.id,
-			);
-
-			// Prefer HTML-extracted full name over WP fullname field (WP data has known
-			// corruptions, e.g. HIRMEOS has PARTHENOS's fullname). Fall back to title.
-			const name = meta.fullName ?? (project.fullname || project.title.rendered);
-			const summary =
-				(meta.summary ?? toSummary(project.excerpt.rendered)) || project.title.rendered;
-
-			const [p] = await tx
-				.insert(schema.projects)
-				.values({
-					id,
+				projectIdsByAcronym.set(normalizeProjectLookupValue(acronym), createdProject.id);
+				projectIdsByName.set(normalizeProjectLookupValue(name), createdProject.id);
+				existingProjectsById.set(createdProject.id, {
+					id: createdProject.id,
+					acronym,
 					name,
-					acronym: project.title.rendered,
 					duration: meta.duration ?? {
 						start: new Date(Date.UTC(1900, 0, 1)),
 						end: new Date(Date.UTC(1900, 0, 1)),
-					}, // FIXME: manual fix needed
+					},
 					funding: meta.funding,
 					summary,
 					topic: meta.topic,
-					imageId: imageId ?? placeholderImage.id,
-					scopeId: projectScopesByType.eu.id, // FIXME: we agreed to default to eu
-					createdAt: new Date(project.date_gmt),
-					updatedAt: new Date(project.modified_gmt),
-				})
-				.returning({ id: schema.projects.id });
-
-			assert(p);
-
-			if (umbrellaUnit) {
-				await tx.insert(schema.projectsToOrganisationalUnits).values({
-					projectId: p.id,
-					unitId: umbrellaUnit.id,
-					roleId: projectRolesByType.participant.id,
 				});
+
+				if (umbrellaUnit) {
+					await tx
+						.insert(schema.projectsToOrganisationalUnits)
+						.values({
+							projectId: createdProject.id,
+							unitId: umbrellaUnit.id,
+							roleId: projectRolesByType.participant.id,
+						})
+						.onConflictDoNothing();
+				}
+
+				if (isNonEmptyString(project.website)) {
+					const [sm] = await tx
+						.insert(schema.socialMedia)
+						.values({
+							name: `${name} website`,
+							typeId: socialMediaTypesByType.website.id,
+							url: project.website,
+						})
+						.returning({ id: schema.socialMedia.id });
+
+					assert(sm);
+
+					await tx.insert(schema.projectsToSocialMedia).values({
+						projectId: createdProject.id,
+						socialMediaId: sm.id,
+					});
+				}
+
+				const contentHtml = stripProjectMetaBlock(project.content.rendered);
+
+				if (contentHtml.length > 0) {
+					const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
+						where: {
+							entityTypeId: entityTypesByType.projects.id,
+							fieldName: "description",
+						},
+					});
+
+					assert(fieldName);
+
+					const [field] = await tx
+						.insert(schema.fields)
+						.values({
+							entityVersionId: version.id,
+							fieldNameId: fieldName.id,
+						})
+						.returning({ id: schema.fields.id });
+
+					assert(field);
+
+					await migrateHtmlContent(tx, contentHtml, assetsCache, field.id, contentBlockTypesByType);
+				}
+
+				projectId = createdProject.id;
 			}
 
-			if (isNonEmptyString(project.website)) {
-				const [sm] = await tx
-					.insert(schema.socialMedia)
-					.values({
-						name: `${name} website`,
-						typeId: socialMediaTypesByType.website.id,
-						url: project.website,
-					})
-					.returning({ id: schema.socialMedia.id });
+			if (existingProjectId != null) {
+				const existingProject = existingProjectsById.get(existingProjectId);
+				assert(existingProject);
 
-				assert(sm);
+				const projectUpdate: {
+					name?: string;
+					duration?: { start: Date; end?: Date };
+					funding?: number | null;
+					summary?: string;
+					topic?: string | null;
+				} = {};
 
-				await tx.insert(schema.projectsToSocialMedia).values({
-					projectId: p.id,
-					socialMediaId: sm.id,
-				});
+				if (meta.fullName != null) {
+					if (
+						isBlank(existingProject.name) ||
+						normalizeProjectLookupValue(existingProject.name) ===
+							normalizeProjectLookupValue(existingProject.acronym ?? acronym)
+					) {
+						projectUpdate.name = meta.fullName;
+					} else if (
+						normalizeProjectLookupValue(existingProject.name) !==
+						normalizeProjectLookupValue(meta.fullName)
+					) {
+						await logProjectMetadataConflict(
+							`Project ${String(project.id)} matched existing project ${existingProjectId}: conflicting full name (db="${existingProject.name}", wordpress="${meta.fullName}").`,
+						);
+					}
+				}
+
+				if (meta.duration != null) {
+					if (isPlaceholderProjectDuration(existingProject.duration)) {
+						projectUpdate.duration = meta.duration;
+					} else if (hasDifferentProjectDuration(existingProject.duration, meta.duration)) {
+						await logProjectMetadataConflict(
+							`Project ${String(project.id)} matched existing project ${existingProjectId}: conflicting duration (db="${existingProject.duration.start.toISOString()}..${existingProject.duration.end?.toISOString() ?? ""}", wordpress="${meta.duration.start.toISOString()}..${meta.duration.end?.toISOString() ?? ""}").`,
+						);
+					}
+				}
+
+				if (meta.funding != null) {
+					if (existingProject.funding == null) {
+						projectUpdate.funding = meta.funding;
+					} else if (existingProject.funding !== meta.funding) {
+						await logProjectMetadataConflict(
+							`Project ${String(project.id)} matched existing project ${existingProjectId}: conflicting funding (db="${String(existingProject.funding)}", wordpress="${String(meta.funding)}").`,
+						);
+					}
+				}
+
+				if (meta.topic != null) {
+					if (isBlank(existingProject.topic)) {
+						projectUpdate.topic = meta.topic;
+					} else if (existingProject.topic !== meta.topic) {
+						await logProjectMetadataConflict(
+							`Project ${String(project.id)} matched existing project ${existingProjectId}: conflicting topic (db="${existingProject.topic ?? ""}", wordpress="${meta.topic}").`,
+						);
+					}
+				}
+
+				if (meta.summary != null) {
+					if (
+						isBlank(existingProject.summary) ||
+						normalizeProjectLookupValue(existingProject.summary) ===
+							normalizeProjectLookupValue(acronym)
+					) {
+						projectUpdate.summary = meta.summary;
+					} else if (existingProject.summary !== meta.summary) {
+						await logProjectMetadataConflict(
+							`Project ${String(project.id)} matched existing project ${existingProjectId}: conflicting summary (db="${existingProject.summary}", wordpress="${meta.summary}").`,
+						);
+					}
+				}
+
+				if (Object.keys(projectUpdate).length > 0) {
+					await tx
+						.update(schema.projects)
+						.set(projectUpdate)
+						.where(eq(schema.projects.id, existingProjectId));
+					existingProjectsById.set(existingProjectId, {
+						...existingProject,
+						...projectUpdate,
+					});
+				}
 			}
+
+			assert(projectId);
 
 			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 			if (project.relations.coordinator != null) {
-				const coordinatorOrgUnitId = wpInstitutionIdToOrgUnitId.get(
+				const coordinatorOrgUnitId = await ensureInstitutionOrgUnit(
+					tx,
 					project.relations.coordinator.id,
 				);
 				if (coordinatorOrgUnitId != null) {
-					await tx.insert(schema.projectsToOrganisationalUnits).values({
-						projectId: p.id,
-						unitId: coordinatorOrgUnitId,
-						roleId: projectRolesByType.coordinator.id,
-					});
+					await tx
+						.insert(schema.projectsToOrganisationalUnits)
+						.values({
+							projectId,
+							unitId: coordinatorOrgUnitId,
+							roleId: projectRolesByType.coordinator.id,
+						})
+						.onConflictDoNothing();
 				}
 			}
 
@@ -1924,249 +2111,20 @@ async function main() {
 			);
 
 			for (const wpInstId of participantWpIds) {
-				const unitId = wpInstitutionIdToOrgUnitId.get(wpInstId);
+				const unitId = await ensureInstitutionOrgUnit(tx, wpInstId);
 				if (unitId != null) {
-					await tx.insert(schema.projectsToOrganisationalUnits).values({
-						projectId: p.id,
-						unitId,
-						roleId: projectRolesByType.participant.id,
-					});
+					await tx
+						.insert(schema.projectsToOrganisationalUnits)
+						.values({
+							projectId,
+							unitId,
+							roleId: projectRolesByType.participant.id,
+						})
+						.onConflictDoNothing();
 				}
 			}
-
-			const contentHtml = stripProjectMetaBlock(project.content.rendered);
-
-			if (contentHtml.length === 0) {
-				return;
-			}
-
-			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
-				where: {
-					entityTypeId: entityTypesByType.projects.id,
-					fieldName: "description",
-				},
-			});
-
-			assert(fieldName);
-
-			const [field] = await tx
-				.insert(schema.fields)
-				.values({
-					entityVersionId: version.id,
-					fieldNameId: fieldName.id,
-				})
-				.returning({ id: schema.fields.id });
-
-			assert(field);
-
-			await migrateHtmlContent(tx, contentHtml, assetsCache, field.id, contentBlockTypesByType);
 		});
 	}
-
-	/**
-	 * ============================================================================================
-	 * Person.
-	 * ============================================================================================
-	 */
-
-	log.info("Migrating people...");
-
-	// Hardcoded persons which dont exist in dariah_person collection, but are referenced as authors
-	// in spotlights or impact-case-studies.
-	const authors = [
-		{ name: "Mengdi Zhang", sortName: "Zhang, Mengdi" },
-		{ name: "Canan Hastik", sortName: "Hastik, Canan" },
-		{ name: "Christof Schöch", sortName: "Schöch, Christof" },
-		{ name: "Colter Wehmeier", sortName: "Wehmeier, Colter" },
-		{ name: "Gaia Redaelli", sortName: "Redaelli, Gaia" },
-		{ name: "Inés Matres", sortName: "Matres, Inés" },
-		{ name: "Jouni Tuominen", sortName: "Tuominen, Jouni" },
-		{ name: "Loup Bernard", sortName: "Bernard, Loup" },
-		{ name: "Luise Borek", sortName: "Borek, Luise" },
-		{ name: "Maciej Eder", sortName: "Eder, Maciej" },
-		{ name: "Mikko Tolonen", sortName: "Tolonen, Mikko" },
-		{ name: "Natalia Ermolaev", sortName: "Ermolaev, Natalia" },
-	];
-
-	for (const person of authors) {
-		await db.transaction(async (tx) => {
-			const slug = slugify(person.name);
-
-			const [entity] = await tx
-				.insert(schema.entities)
-				.values({
-					slug,
-					typeId: typesByType.persons.id,
-					createdAt: new Date(),
-					updatedAt: new Date(),
-				})
-				.returning({ id: schema.entities.id });
-
-			assert(entity);
-
-			const [version] = await tx
-
-				.insert(schema.entityVersions)
-
-				.values({
-					entityId: entity.id,
-
-					statusId: statusByType.published.id,
-				})
-
-				.returning({ id: schema.entityVersions.id });
-
-			assert(version);
-
-			const id = version.id;
-
-			await tx.insert(schema.persons).values({
-				id,
-				name: person.name,
-				sortName: person.sortName,
-				// email: person.email,
-				// position: person.position,
-				// orcid,
-				imageId: placeholderImage.id,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-			});
-		});
-	}
-
-	for (const person of Object.values(data.people)) {
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-		assert(person.status === "publish", "Person has not been published.");
-
-		await db.transaction(async (tx) => {
-			const [entity] = await tx
-				.insert(schema.entities)
-				.values({
-					slug: person.slug,
-					typeId: typesByType.persons.id,
-					createdAt: new Date(person.date_gmt),
-					updatedAt: new Date(person.modified_gmt),
-				})
-				.returning({ id: schema.entities.id });
-
-			assert(entity);
-
-			const [version] = await tx
-
-				.insert(schema.entityVersions)
-
-				.values({
-					entityId: entity.id,
-
-					statusId: statusByType.published.id,
-				})
-
-				.returning({ id: schema.entityVersions.id });
-
-			assert(version);
-
-			const id = version.id;
-
-			const imageId = await uploadFeaturedImage(
-				"avatars",
-				assetsCache,
-				data.media,
-				person.featured_media,
-				person.id,
-			);
-
-			if (imageId == null) {
-				log.warn(`Missing image (person id ${String(person.id)}).`);
-			}
-
-			await tx.insert(schema.persons).values({
-				id,
-				name: [person.firstname, person.lastname].filter(Boolean).join(" "),
-				sortName: [person.lastname, person.firstname].filter(Boolean).join(", "),
-				email: person.email,
-				// orcid,
-				imageId: imageId ?? placeholderImage.id,
-				createdAt: new Date(person.date_gmt),
-				updatedAt: new Date(person.modified_gmt),
-			});
-
-			wpPersonIdToDbId.set(person.id, id);
-
-			// TODO: website
-			// TODO: identifiant
-			// TODO: twitter
-			// TODO: skills
-			// TODO: research
-
-			const roles = parsePositionRoles(person.position);
-
-			if (roles.length > 0) {
-				if (person.institution_data != null) {
-					const institution = data.institutions[person.institution_data.id];
-					// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-					const countryName = institution?.country_data?.title;
-					const countryOrgUnitId =
-						countryName != null
-							? kbCountries.find((kbc) => {
-									return kbc.name === countryName;
-								})?.id
-							: undefined;
-
-					if (countryOrgUnitId != null) {
-						for (const role of roles) {
-							await tx.insert(schema.personsToOrganisationalUnits).values({
-								personId: id,
-								organisationalUnitId: countryOrgUnitId,
-								roleTypeId: personRoleTypesByType[role].id,
-								duration: { start: new Date(Date.UTC(1900, 0, 1)) }, // FIXME:
-							});
-						}
-					} else {
-						log.warn(
-							`Person ${String(person.id)} ("${person.position}"): could not resolve country for institution ${String(person.institution_data.id)}.`,
-						);
-					}
-				} else {
-					log.warn(
-						`Person ${String(person.id)} ("${person.position}"): no institution_data, skipping role relation.`,
-					);
-				}
-			}
-
-			if (person.content.rendered.trim().length === 0) {
-				return;
-			}
-
-			const fieldName = await tx.query.entityTypesFieldsNames.findFirst({
-				where: {
-					entityTypeId: entityTypesByType.persons.id,
-					fieldName: "biography",
-				},
-			});
-
-			assert(fieldName);
-
-			const [field] = await tx
-				.insert(schema.fields)
-				.values({
-					entityVersionId: version.id,
-					fieldNameId: fieldName.id,
-				})
-				.returning({ id: schema.fields.id });
-
-			assert(field);
-
-			await migrateHtmlContent(
-				tx,
-				person.content.rendered,
-				assetsCache,
-				field.id,
-				contentBlockTypesByType,
-			);
-		});
-	}
-
-	//
 
 	/**
 	 * ============================================================================================
@@ -2176,36 +2134,110 @@ async function main() {
 
 	log.info("Creating author relations for spotlight articles and impact case studies...");
 
-	const personsByName = new Map<string, string>();
-	for (const person of Object.values(data.people)) {
-		const fullName = [person.firstname, person.lastname].filter(Boolean).join(" ");
-		const dbId = wpPersonIdToDbId.get(person.id);
-		// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-		if (fullName && dbId) {
-			personsByName.set(fullName, dbId);
-		}
+	function normalizePersonName(name: string): string {
+		return name.trim().replaceAll(/\s+/g, " ").toLowerCase();
 	}
 
-	function resolvePersonByName(authorName: string): string | undefined {
-		const exact = personsByName.get(authorName);
+	function createSortName(name: string): string {
+		const parts = name.trim().split(/\s+/).filter(Boolean);
+
+		if (parts.length <= 1) {
+			return name;
+		}
+
+		const lastName = parts.at(-1)!;
+		const firstNames = parts.slice(0, -1).join(" ");
+
+		return `${lastName}, ${firstNames}`;
+	}
+
+	const personsByName = new Map<string, string>();
+	const existingPersons = await db.query.persons.findMany({
+		columns: {
+			id: true,
+			name: true,
+		},
+	});
+
+	for (const person of existingPersons) {
+		personsByName.set(normalizePersonName(person.name), person.id);
+	}
+
+	async function ensurePersonByName(authorName: string): Promise<string> {
+		const normalizedAuthorName = normalizePersonName(authorName);
+
+		const exact = personsByName.get(normalizedAuthorName);
 		if (exact != null) {
 			return exact;
 		}
+
 		for (const [name, dbId] of personsByName) {
-			if (authorName.includes(name)) {
+			if (normalizedAuthorName.includes(name)) {
 				return dbId;
 			}
 		}
-		return undefined;
+
+		const createdAt = new Date();
+
+		const personId = await db.transaction(async (tx) => {
+			let slug = slugify(authorName);
+			const slugExists = await tx.query.entities.findFirst({
+				where: {
+					typeId: typesByType.persons.id,
+					slug,
+				},
+				columns: {
+					id: true,
+				},
+			});
+
+			if (slugExists != null) {
+				slug = `${slug}-duplicate-${randomUUID()}`;
+			}
+
+			const [entity] = await tx
+				.insert(schema.entities)
+				.values({
+					slug,
+					typeId: typesByType.persons.id,
+					createdAt,
+					updatedAt: createdAt,
+				})
+				.returning({ id: schema.entities.id });
+
+			assert(entity);
+
+			const [version] = await tx
+				.insert(schema.entityVersions)
+				.values({
+					entityId: entity.id,
+					statusId: statusByType.published.id,
+				})
+				.returning({ id: schema.entityVersions.id });
+
+			assert(version);
+
+			await tx.insert(schema.persons).values({
+				id: version.id,
+				name: authorName,
+				sortName: createSortName(authorName),
+				imageId: placeholderImageId,
+				createdAt,
+				updatedAt: createdAt,
+			});
+
+			return version.id;
+		});
+
+		personsByName.set(normalizedAuthorName, personId);
+		log.info(`Created person "${authorName}" for author relation import.`);
+
+		return personId;
 	}
 
 	for (const [articleId, authorNames] of spotlightArticleIdToAuthorNames) {
 		for (const authorName of authorNames) {
-			const personDbId = resolvePersonByName(authorName);
-			if (personDbId == null) {
-				log.warn(`Spotlight article ${articleId}: author "${authorName}" not matched to a person.`);
-				continue;
-			}
+			const personDbId = await ensurePersonByName(authorName);
 			await db.insert(schema.spotlightArticlesToPersons).values({
 				spotlightArticleId: articleId,
 				personId: personDbId,
@@ -2216,11 +2248,7 @@ async function main() {
 
 	for (const [articleId, authorNames] of impactCaseStudyIdToAuthorNames) {
 		for (const authorName of authorNames) {
-			const personDbId = resolvePersonByName(authorName);
-			if (personDbId == null) {
-				log.warn(`Impact case study ${articleId}: author "${authorName}" not matched to a person.`);
-				continue;
-			}
+			const personDbId = await ensurePersonByName(authorName);
 			await db.insert(schema.impactCaseStudiesToPersons).values({
 				impactCaseStudyId: articleId,
 				personId: personDbId,

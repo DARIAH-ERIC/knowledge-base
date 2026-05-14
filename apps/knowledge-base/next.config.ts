@@ -15,7 +15,6 @@ const config: Config = {
 	compress: false,
 	experimental: {
 		authInterrupts: true,
-		browserDebugInfoInTerminal: true,
 		globalNotFound: true,
 		rootParams: true,
 		turbopackFileSystemCacheForDev: true,
@@ -33,6 +32,7 @@ const config: Config = {
 		remotePatterns: [{ hostname: "imgproxy.acdh.oeaw.ac.at" }],
 	},
 	logging: {
+		browserToTerminal: true,
 		fetches: {
 			fullUrl: true,
 		},

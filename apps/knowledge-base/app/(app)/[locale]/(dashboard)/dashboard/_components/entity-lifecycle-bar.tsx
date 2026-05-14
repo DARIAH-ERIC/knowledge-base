@@ -30,10 +30,10 @@ export function EntityLifecycleBar(props: Readonly<EntityLifecycleBarProps>): Re
 
 	if (isPublished && hasDraft) {
 		badgeIntent = "info";
-		badgeLabel = t("Live with changes");
+		badgeLabel = t("Published with draft changes");
 	} else if (isPublished && !hasDraft) {
 		badgeIntent = "success";
-		badgeLabel = t("Live");
+		badgeLabel = t("Published");
 	} else {
 		badgeIntent = "warning";
 		badgeLabel = t("Draft");

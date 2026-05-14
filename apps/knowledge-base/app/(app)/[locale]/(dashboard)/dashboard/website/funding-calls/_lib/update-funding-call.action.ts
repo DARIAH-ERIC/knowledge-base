@@ -13,7 +13,7 @@ import { UpdateFundingCallActionInputSchema } from "@/app/(app)/[locale]/(dashbo
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
-import { ensureDraftVersion } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { fundingCallsLifecycleAdapter } from "@/lib/data/funding-calls.lifecycle-adapter";
 import { db, type Transaction } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
@@ -110,6 +110,8 @@ export const updateFundingCallAction = createServerAction(
 					}),
 				);
 			}
+
+			await touchVersion(tx, draftVersionId);
 		});
 
 		after(async () => {
