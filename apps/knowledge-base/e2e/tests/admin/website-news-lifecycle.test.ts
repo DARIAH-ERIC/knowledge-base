@@ -39,26 +39,26 @@ test.describe("website news lifecycle", () => {
 		// Publish → redirected to list.
 		await newsPage.publishItem();
 
-		// List: publish keeps the cloned draft in sync, so the row still reads as live.
+		// List: publish keeps the cloned draft in sync, so the row still reads as published-only.
 		await newsPage.searchByTitle(title);
-		await expect(newsPage.liveBadgeInRow(title)).toBeVisible();
+		await expect(newsPage.publishedBadgeInRow(title)).toBeVisible();
 
-		// Details: draft and published versions both exist → "Live with changes" badge.
+		// Details: draft and published versions both exist → "Published with draft changes" badge.
 		await newsPage.gotoDetailsFromList(title);
-		await expect(newsPage.detailsLiveWithChangesBadge()).toBeVisible();
+		await expect(newsPage.detailsPublishedWithDraftChangesBadge()).toBeVisible();
 		await expect(page.getByRole("button", { name: "Publish" })).toBeVisible();
 		await expect(page.getByRole("button", { name: "Discard draft" })).toBeVisible();
 
 		// Discard draft → redirected to list.
 		await newsPage.discardDraft();
 
-		// List: still shows live badge (published version remains).
+		// List: still shows published badge (published version remains).
 		await newsPage.searchByTitle(title);
-		await expect(newsPage.liveBadgeInRow(title)).toBeVisible();
+		await expect(newsPage.publishedBadgeInRow(title)).toBeVisible();
 
-		// Details: published-only → "Live" badge, no Discard, no version selector.
+		// Details: published-only → "Published" badge, no Discard, no version selector.
 		await newsPage.gotoDetailsFromList(title);
-		await expect(newsPage.detailsLiveBadge()).toBeVisible();
+		await expect(newsPage.detailsPublishedBadge()).toBeVisible();
 		await expect(page.getByRole("button", { name: "Publish" })).toBeHidden();
 		await expect(page.getByRole("button", { name: "Discard draft" })).toBeHidden();
 		await expect(newsPage.versionSelectorDraftLink()).toBeHidden();
@@ -91,7 +91,7 @@ test.describe("website news lifecycle", () => {
 		// From the published-only details page, click Edit.
 		await newsPage.searchByTitle(originalTitle);
 		await newsPage.gotoDetailsFromList(originalTitle);
-		await expect(newsPage.detailsLiveBadge()).toBeVisible();
+		await expect(newsPage.detailsPublishedBadge()).toBeVisible();
 		await page.getByRole("link", { name: "Edit" }).click();
 		await page.waitForURL("**/edit");
 
@@ -102,13 +102,14 @@ test.describe("website news lifecycle", () => {
 		await titleField.fill(updatedTitle);
 		await newsPage.submitForm();
 
-		// List: row appears under updated title with "Live + Draft" badge (isPublished still true).
+		// List: row appears under updated title with separate "Published" and "Draft" badges.
 		await newsPage.searchByTitle(updatedTitle);
-		await expect(newsPage.liveAndDraftBadgeInRow(updatedTitle)).toBeVisible();
+		await expect(newsPage.publishedBadgeInRow(updatedTitle)).toBeVisible();
+		await expect(newsPage.draftBadgeInRow(updatedTitle)).toBeVisible();
 
-		// Details: "Live with changes" — draft has new title, published has original.
+		// Details: "Published with draft changes" — draft has new title, published has original.
 		await newsPage.gotoDetailsFromList(updatedTitle);
-		await expect(newsPage.detailsLiveWithChangesBadge()).toBeVisible();
+		await expect(newsPage.detailsPublishedWithDraftChangesBadge()).toBeVisible();
 
 		// Version selector is visible with both tabs.
 		await expect(newsPage.versionSelectorDraftLink()).toBeVisible();
