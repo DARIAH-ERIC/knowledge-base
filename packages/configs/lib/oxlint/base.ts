@@ -12,7 +12,8 @@ const config = defineConfig({
 	plugins: ["eslint", "import", "node", "oxc", "promise", "typescript", "unicorn"],
 	rules: {
 		/**
-		 * ============================================================================================ Correctness.
+		 * ============================================================================================
+		 * Correctness.
 		 * ============================================================================================
 		 */
 
@@ -143,7 +144,8 @@ const config = defineConfig({
 		"unicorn/prefer-string-starts-ends-with": "error",
 
 		/**
-		 * ============================================================================================ Suspicious.
+		 * ============================================================================================
+		 * Suspicious.
 		 * ============================================================================================
 		 */
 
@@ -201,7 +203,8 @@ const config = defineConfig({
 		"unicorn/require-post-message-target-origin": "error",
 
 		/**
-		 * ============================================================================================ Perf.
+		 * ============================================================================================
+		 * Perf.
 		 * ============================================================================================
 		 */
 
@@ -216,7 +219,8 @@ const config = defineConfig({
 		"unicorn/prefer-set-has": "error",
 
 		/**
-		 * ============================================================================================ Pedantic.
+		 * ============================================================================================
+		 * Pedantic.
 		 * ============================================================================================
 		 */
 
@@ -274,7 +278,10 @@ const config = defineConfig({
 		"typescript/no-unsafe-function-type": "error",
 		"typescript/no-unsafe-member-access": "error",
 		"typescript/no-unsafe-return": "error",
-		"typescript/only-throw-error": ["error", { allowThrowingAny: false, allowThrowingUnknown: false }],
+		"typescript/only-throw-error": [
+			"error",
+			{ allowThrowingAny: false, allowThrowingUnknown: false },
+		],
 		"typescript/prefer-enum-initializers": "error",
 		"typescript/prefer-includes": "error",
 		"typescript/prefer-nullish-coalescing": "error",
@@ -345,7 +352,8 @@ const config = defineConfig({
 		"unicorn/require-number-to-fixed-digits-argument": "error",
 
 		/**
-		 * ============================================================================================ Restriction.
+		 * ============================================================================================
+		 * Restriction.
 		 * ============================================================================================
 		 */
 
@@ -430,7 +438,8 @@ const config = defineConfig({
 		"unicorn/prefer-number-properties": "error",
 
 		/**
-		 * ============================================================================================ Style.
+		 * ============================================================================================
+		 * Style.
 		 * ============================================================================================
 		 */
 
@@ -514,7 +523,10 @@ const config = defineConfig({
 		"typescript/consistent-indexed-object-style": "error",
 		"typescript/consistent-type-assertions": "off",
 		"typescript/consistent-type-definitions": "error",
-		"typescript/consistent-type-exports": ["error", { fixMixedExportsWithInlineTypeSpecifier: true }],
+		"typescript/consistent-type-exports": [
+			"error",
+			{ fixMixedExportsWithInlineTypeSpecifier: true },
+		],
 		"typescript/consistent-type-imports": ["error", { fixStyle: "inline-type-imports" }],
 		"typescript/dot-notation": ["warn", { allowIndexSignaturePropertyAccess: true }],
 		"typescript/no-empty-interface": "off",
@@ -578,7 +590,8 @@ const config = defineConfig({
 		"unicorn/throw-new-error": "off",
 
 		/**
-		 * ============================================================================================ Nursery.
+		 * ============================================================================================
+		 * Nursery.
 		 * ============================================================================================
 		 */
 
