@@ -11,8 +11,8 @@
 		"format:check": "oxfmt --check",
 		"format:fix": "oxfmt --write",
 		"lint:check": "run-p --continue-on-error \"lint:*:check\"",
-		"lint:code:check": "eslint . --flag unstable_native_nodejs_ts_config",
-		"lint:code:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
+		"lint:code:check": "oxlint --report-unused-disable-directives --type-aware --type-check",
+		"lint:code:fix": "oxlint --fix --report-unused-disable-directives --type-aware --type-check",
 		"lint:fix": "run-p --continue-on-error \"lint:*:fix\"",
 		"lint:styles:check": "stylelint \"./styles/**/*.css\" --cache --config-basedir ../../packages/config --ignore-path ./../../.gitignore",
 		"lint:styles:fix": "stylelint \"./styles/**/*.css\" --cache --fix --ignore-path ./../../.gitignore",
@@ -64,7 +64,6 @@
 		"xast-util-to-xml": "catalog:"
 	},
 	"devDependencies": {
-		"@acdh-oeaw/stylelint-config": "catalog:",
 		"@dariah-eric/configs": "workspace:^",
 		"@dotenvx/dotenvx": "catalog:",
 		"@next/eslint-plugin-next": "catalog:",
@@ -79,14 +78,12 @@
 		"axe-playwright": "catalog:",
 		"babel-plugin-react-compiler": "catalog:",
 		"concurrently": "catalog:",
-		"eslint": "catalog:",
 		"is-in-ci": "catalog:",
 		"next-devtools-mcp": "catalog:",
 		"npm-run-all2": "catalog:",
 		"null-loader": "catalog:",
 		"schema-dts": "catalog:",
 		"stylelint": "catalog:",
-		"stylelint-config-standard": "catalog:",
 		"tailwindcss": "catalog:",
 		"tailwindcss-react-aria-components": "catalog:",
 		"tsx": "catalog:",
@@ -94,7 +91,7 @@
 		"typescript": "catalog:"
 	},
 	"stylelint": {
-		"extends": "@acdh-oeaw/stylelint-config"
+		"extends": "@dariah-eric/configs/stylelint/base"
 	},
 	"engines": {
 		"node": "24.x"

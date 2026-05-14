@@ -85,6 +85,17 @@
 		"PORT"
 	],
 	"tasks": {
+		"//#format:check": {},
+		"//#format:fix": {
+			"cache": false
+		},
+		"//#lint:root:check": {
+			"inputs": ["oxfmt.config.ts", "oxlint.config.ts", "turbo/generators/config.ts"]
+		},
+		"//#lint:root:fix": {
+			"cache": false,
+			"inputs": ["oxfmt.config.ts", "oxlint.config.ts", "turbo/generators/config.ts"]
+		},
 		"build": {
 			"dependsOn": ["^build"],
 			"inputs": ["$TURBO_DEFAULT$", "**/.env.local", "**/.env.*.local"],
@@ -107,15 +118,12 @@
 			"dependsOn": ["^build"],
 			"persistent": true
 		},
-		"//#format:check": {},
-		"//#format:fix": {},
 		"lint:check": {
-			"dependsOn": ["^build"],
-			"outputs": [".stylelintcache"]
+			"dependsOn": ["^build"]
 		},
 		"lint:fix": {
-			"dependsOn": ["^build"],
-			"outputs": [".stylelintcache"]
+			"cache": false,
+			"dependsOn": ["^build"]
 		},
 		"start": {
 			"cache": false,

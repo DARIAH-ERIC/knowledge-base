@@ -1,6 +1,6 @@
 import type { PlopTypes } from "@turbo/gen";
 
-// eslint-disable-next-line import/no-default-export
+// oxlint-disable-next-line import/no-default-export
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
 	plop.setGenerator("package", {
 		description: "Generate a new package",

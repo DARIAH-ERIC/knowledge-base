@@ -118,7 +118,6 @@
 		"tailwind-variants": "catalog:"
 	},
 	"devDependencies": {
-		"@acdh-oeaw/stylelint-config": "catalog:",
 		"@chromatic-com/storybook": "catalog:",
 		"@dariah-eric/configs": "workspace:^",
 		"@dariah-eric/next-lib": "workspace:^",
@@ -136,7 +135,6 @@
 		"@vitejs/plugin-react": "catalog:",
 		"@vitest/browser-playwright": "catalog:",
 		"@vitest/coverage-v8": "catalog:",
-		"eslint": "catalog:",
 		"npm-run-all2": "catalog:",
 		"playwright": "catalog:",
 		"po-parser": "catalog:",
@@ -157,7 +155,7 @@
 		"@dariah-eric/next-lib": "workspace:^"
 	},
 	"stylelint": {
-		"extends": "@acdh-oeaw/stylelint-config"
+		"extends": "@dariah-eric/configs/stylelint/base"
 	},
 	"engines": {
 		"node": "24.x"
