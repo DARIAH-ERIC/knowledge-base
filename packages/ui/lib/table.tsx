@@ -78,7 +78,10 @@ export function Table(props: Readonly<TableProps>): ReactNode {
 					)}
 				>
 					<div
-						className={twJoin("inline-block min-inline-full align-middle", !bleed && "sm:px-(--gutter)")}
+						className={twJoin(
+							"inline-block min-inline-full align-middle",
+							!bleed && "sm:px-(--gutter)",
+						)}
 					>
 						{allowResize === true ? (
 							<AriaResizableTableContainer data-slot="table-resizable-container">
@@ -114,11 +117,7 @@ export interface TableBodyProps<T extends object> extends AriaTableBodyProps<T> 
 
 export function TableBody<T extends object>(props: Readonly<TableBodyProps<T>>): ReactNode {
 	return (
-		<AriaTableBody
-			data-slot="table-body"
-			renderEmptyState={() => <EmptyState />}
-			{...props}
-		/>
+		<AriaTableBody data-slot="table-body" renderEmptyState={() => <EmptyState />} {...props} />
 	);
 }
 
@@ -260,7 +259,8 @@ export function TableRow<T extends object>(props: Readonly<TableRowProps<T>>): R
 						isDisabled,
 						isFocusVisible,
 					},
-				) => twMerge(
+				) =>
+					twMerge(
 						"group relative cursor-default text-muted-fg outline outline-transparent",
 						isFocusVisible &&
 							"bg-primary/5 outline-primary ring-3 ring-ring/20 hover:bg-primary/10",

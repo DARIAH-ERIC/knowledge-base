@@ -81,18 +81,18 @@ export function mapFacets<Field extends string>(
 ): Partial<Record<Field, SearchFacet>> {
 	return Object.fromEntries(
 		(facetCounts ?? []).map(({ field_name, counts, sampled, stats }) => [
-				field_name,
-				{
-					values: counts,
-					sampled,
-					stats: {
-						avg: stats.avg,
-						max: stats.max,
-						min: stats.min,
-						sum: stats.sum,
-						totalValues: stats.total_values,
-					},
+			field_name,
+			{
+				values: counts,
+				sampled,
+				stats: {
+					avg: stats.avg,
+					max: stats.max,
+					min: stats.min,
+					sum: stats.sum,
+					totalValues: stats.total_values,
 				},
-			]),
+			},
+		]),
 	) as Partial<Record<Field, SearchFacet>>;
 }

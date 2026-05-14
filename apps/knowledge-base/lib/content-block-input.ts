@@ -6,9 +6,7 @@ export const ContentBlockInputSchema = v.union([
 		id: v.string(),
 		type: v.literal("rich_text"),
 		position: v.optional(v.number()),
-		content: v.optional(
-			v.custom<JSONContent>(() => true),
-		),
+		content: v.optional(v.custom<JSONContent>(() => true)),
 	}),
 	v.object({
 		id: v.string(),

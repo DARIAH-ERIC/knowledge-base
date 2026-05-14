@@ -66,10 +66,7 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 						type: "published",
 					},
 				},
-				RAW:
-					statuses.length > 0
-						? (t) => buildStatusFilter(t.duration, statuses)
-						: undefined,
+				RAW: statuses.length > 0 ? (t) => buildStatusFilter(t.duration, statuses) : undefined,
 				source:
 					sources.length > 0
 						? {

@@ -27,35 +27,28 @@ export const navigationItems = p.snakeCase.table(
 		menuId: p
 			.uuid("menu_id")
 			.notNull()
-			.references(
-				() => navigationMenus.id,
-				{ onDelete: "cascade" },
-			),
-		parentId: p.uuid("parent_id").references(
-			(): AnyPgColumn => navigationItems.id,
-			{ onDelete: "cascade" },
-		),
+			.references(() => navigationMenus.id, { onDelete: "cascade" }),
+		parentId: p
+			.uuid("parent_id")
+			.references((): AnyPgColumn => navigationItems.id, { onDelete: "cascade" }),
 		label: p.text("label").notNull(),
 		href: p.text("href"),
-		entityId: p.uuid("entity_id").references(
-			() => entities.id,
-			{ onDelete: "set null" },
-		),
+		entityId: p.uuid("entity_id").references(() => entities.id, { onDelete: "set null" }),
 		isExternal: p.boolean("is_external").notNull().default(false),
 		position: p.integer("position").notNull().default(0),
 		...f.timestamps(),
 	},
 	(t) => [
-			p.check(
-				"navigation_items_link",
-				sql`
+		p.check(
+			"navigation_items_link",
+			sql`
 					NOT (
 						${t.href} IS NOT NULL
 						AND ${t.entityId} IS NOT NULL
 					)
 				`,
-			),
-		],
+		),
+	],
 );
 
 export type NavigationItem = typeof navigationItems.$inferSelect;

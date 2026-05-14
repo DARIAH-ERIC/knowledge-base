@@ -54,11 +54,13 @@ export function TooltipContent(props: Readonly<TooltipContentProps>): ReactNode 
 	return (
 		<AriaTooltip
 			{...rest}
-			className={composeRenderProps(className, (className, renderProps) => tooltipStyles({
+			className={composeRenderProps(className, (className, renderProps) =>
+				tooltipStyles({
 					...renderProps,
 					inverse,
 					className,
-				}))}
+				}),
+			)}
 			offset={offset}
 		>
 			{arrow ? (

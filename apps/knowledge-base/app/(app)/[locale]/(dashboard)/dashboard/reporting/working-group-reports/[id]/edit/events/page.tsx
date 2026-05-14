@@ -36,7 +36,8 @@ export default async function DashboardReportingWorkingGroupReportEventsPage(
 	const result = await getAuthorizedWorkingGroupReportForUser(
 		user,
 		id,
-		(id) => db.query.workingGroupReports.findFirst({
+		(id) =>
+			db.query.workingGroupReports.findFirst({
 				where: { id },
 				columns: { id: true },
 				with: {

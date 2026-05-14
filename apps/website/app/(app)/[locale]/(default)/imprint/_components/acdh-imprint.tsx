@@ -43,6 +43,9 @@ export async function AcdhImprint(props: Readonly<AcdhImprintProps>): Promise<Re
 
 	return (
 		// eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
-		<div className="richtext max-inline-(--breakpoint-md)" dangerouslySetInnerHTML={{ __html: html }} />
+		<div
+			className="richtext max-inline-(--breakpoint-md)"
+			dangerouslySetInnerHTML={{ __html: html }}
+		/>
 	);
 }

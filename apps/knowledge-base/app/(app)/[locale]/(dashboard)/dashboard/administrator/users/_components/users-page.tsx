@@ -66,7 +66,9 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 
 	const t = useExtracted();
 	const router = useRouter();
-	const [items, optimisticallyRemoveItem] = useOptimistic(users.data, (state, id: string) => state.filter((item) => item.id !== id));
+	const [items, optimisticallyRemoveItem] = useOptimistic(users.data, (state, id: string) =>
+		state.filter((item) => item.id !== id),
+	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
 		useUrlPaginatedSearch({
@@ -128,49 +130,49 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-							<TableRow id={item.id}>
-								<TableCell>{item.name}</TableCell>
-								<TableCell>{item.email}</TableCell>
-								<TableCell>{item.role}</TableCell>
-								<TableCell>{item.canManageAdmins ? t("Yes") : t("No")}</TableCell>
-								<TableCell>{item.isEmailVerified ? t("Yes") : t("No")}</TableCell>
-								<TableCell className="text-end">
-									<Menu>
-										<Button
-											aria-label={t("Open actions menu")}
-											className="block-7 sm:block-7"
-											intent="plain"
-											size="sq-sm"
+						<TableRow id={item.id}>
+							<TableCell>{item.name}</TableCell>
+							<TableCell>{item.email}</TableCell>
+							<TableCell>{item.role}</TableCell>
+							<TableCell>{item.canManageAdmins ? t("Yes") : t("No")}</TableCell>
+							<TableCell>{item.isEmailVerified ? t("Yes") : t("No")}</TableCell>
+							<TableCell className="text-end">
+								<Menu>
+									<Button
+										aria-label={t("Open actions menu")}
+										className="block-7 sm:block-7"
+										intent="plain"
+										size="sq-sm"
+									>
+										<EllipsisHorizontalIcon className="block-5 inline-5" />
+									</Button>
+									<MenuContent placement="left top">
+										<MenuItem
+											href={`/dashboard/administrator/users/${item.id}/edit`}
+											isDisabled={!currentUserCanManageAdmins && item.role === "admin"}
 										>
-											<EllipsisHorizontalIcon className="block-5 inline-5" />
-										</Button>
-										<MenuContent placement="left top">
-											<MenuItem
-												href={`/dashboard/administrator/users/${item.id}/edit`}
-												isDisabled={!currentUserCanManageAdmins && item.role === "admin"}
-											>
-												<PencilSquareIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Edit")}</MenuLabel>
-											</MenuItem>
-											<MenuSeparator />
-											<MenuItem
-												intent="danger"
-												isDisabled={
-													item.id === currentUserId ||
-													(!currentUserCanManageAdmins && item.role === "admin")
-												}
-												onAction={() => {
-													setItemToDelete({ id: item.id });
-												}}
-											>
-												<TrashIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Delete")}</MenuLabel>
-											</MenuItem>
-										</MenuContent>
-									</Menu>
-								</TableCell>
-							</TableRow>
-						)}
+											<PencilSquareIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Edit")}</MenuLabel>
+										</MenuItem>
+										<MenuSeparator />
+										<MenuItem
+											intent="danger"
+											isDisabled={
+												item.id === currentUserId ||
+												(!currentUserCanManageAdmins && item.role === "admin")
+											}
+											onAction={() => {
+												setItemToDelete({ id: item.id });
+											}}
+										>
+											<TrashIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Delete")}</MenuLabel>
+										</MenuItem>
+									</MenuContent>
+								</Menu>
+							</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 

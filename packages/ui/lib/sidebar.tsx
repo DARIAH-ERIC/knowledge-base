@@ -281,7 +281,8 @@ export function Sidebar(props: Readonly<SidebarProps>): ReactNode {
 					"fixed inset-y-0 z-10 hidden inline-(--sidebar-width) bg-sidebar md:flex not-has-data-[slot=sidebar-footer]:pbe-2",
 					"transition-[left,right,width] duration-200 ease-linear",
 					side === "left" && "inset-s-0 group-data-[collapsible=hidden]:-inset-s-(--sidebar-width)",
-					side === "right" && "inset-e-0 group-data-[collapsible=hidden]:-inset-e-(--sidebar-width)",
+					side === "right" &&
+						"inset-e-0 group-data-[collapsible=hidden]:-inset-e-(--sidebar-width)",
 					intent === "float" &&
 						"bg-bg p-2 group-data-[collapsible=dock]:inline-[calc(--spacing(4)+2px)]",
 					intent === "inset" &&
@@ -361,7 +362,9 @@ export function SidebarContent(props: Readonly<SidebarContentProps>): ReactNode 
 
 	useEffect(() => {
 		const el = ref.current;
-		if (!el) {return;}
+		if (!el) {
+			return;
+		}
 
 		const check = () => {
 			const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 1;
@@ -473,7 +476,8 @@ export function SidebarItem(props: Readonly<SidebarItemProps>): ReactNode {
 			aria-current={isCurrent === true ? "page" : undefined}
 			className={composeRenderProps(
 				className,
-				(className, { isFocusVisible, isPressed, isHovered, isDisabled }) => twMerge(
+				(className, { isFocusVisible, isPressed, isHovered, isDisabled }) =>
+					twMerge(
 						"inline-full min-inline-0 items-center rounded-lg p-2 text-start font-medium text-base/6 text-sidebar-fg has-[a]:p-0",
 						"group/sidebar-item relative col-span-full overflow-hidden focus-visible:outline-hidden",
 						"grid grid-cols-[auto_1fr_1.5rem_0.5rem_auto] sm:text-sm/5 **:last:data-[slot=icon]:ms-auto supports-[grid-template-columns:subgrid]:grid-cols-subgrid",
@@ -502,25 +506,25 @@ export function SidebarItem(props: Readonly<SidebarItemProps>): ReactNode {
 			{...rest}
 		>
 			{(values) => (
-					<Fragment>
-						{typeof children === "function" ? children({ ...values, isCollapsed }) : children}
+				<Fragment>
+					{typeof children === "function" ? children({ ...values, isCollapsed }) : children}
 
-						{badge != null &&
-							(state !== "collapsed" ? (
-								<span
-									className="absolute inset-ring-1 inset-ring-sidebar-border inset-y-1/2 inset-e-1.5 block-5.5 inline-auto -translate-y-1/2 rounded-full bg-fg/5 px-2 text-[10px]/5.5 group-hover/sidebar-item:inset-ring-muted-fg/30 group-current:inset-ring-transparent"
-									data-slot="sidebar-badge"
-								>
-									{badge}
-								</span>
-							) : (
-								<div
-									aria-hidden={true}
-									className="absolute inset-e-1 inset-bs-1 block-1.5 inline-1.5 rounded-full bg-primary"
-								/>
-							))}
-					</Fragment>
-				)}
+					{badge != null &&
+						(state !== "collapsed" ? (
+							<span
+								className="absolute inset-ring-1 inset-ring-sidebar-border inset-y-1/2 inset-e-1.5 block-5.5 inline-auto -translate-y-1/2 rounded-full bg-fg/5 px-2 text-[10px]/5.5 group-hover/sidebar-item:inset-ring-muted-fg/30 group-current:inset-ring-transparent"
+								data-slot="sidebar-badge"
+							>
+								{badge}
+							</span>
+						) : (
+							<div
+								aria-hidden={true}
+								className="absolute inset-e-1 inset-bs-1 block-1.5 inline-1.5 rounded-full bg-primary"
+							/>
+						))}
+				</Fragment>
+			)}
 		</Link>
 	);
 
@@ -613,7 +617,11 @@ export function SidebarDisclosure(props: Readonly<SidebarDisclosureProps>): Reac
 
 	return (
 		<AriaDisclosure
-			className={cx("col-span-full min-inline-0", state === "collapsed" ? "px-2" : "px-4", className)}
+			className={cx(
+				"col-span-full min-inline-0",
+				state === "collapsed" ? "px-2" : "px-4",
+				className,
+			)}
 			data-slot="sidebar-disclosure"
 			{...rest}
 		/>
@@ -637,7 +645,8 @@ export function SidebarDisclosureTrigger(
 				ref={ref}
 				className={composeRenderProps(
 					className,
-					(className, { isPressed, isFocusVisible, isHovered, isDisabled }) => twMerge(
+					(className, { isPressed, isFocusVisible, isHovered, isDisabled }) =>
+						twMerge(
 							"flex inline-full min-inline-0 items-center rounded-lg text-start font-medium text-base/6 text-sidebar-fg",
 							"group/sidebar-disclosure-trigger relative col-span-full overflow-hidden focus-visible:outline-hidden",
 							"**:data-[slot=icon]:block-5 **:data-[slot=icon]:inline-5 **:data-[slot=icon]:shrink-0 **:data-[slot=icon]:text-muted-fg sm:**:data-[slot=icon]:block-4 sm:**:data-[slot=icon]:inline-4",
@@ -656,16 +665,16 @@ export function SidebarDisclosureTrigger(
 				{...rest}
 			>
 				{(values) => (
-						<Fragment>
-							{typeof props.children === "function" ? props.children(values) : props.children}
-							{state !== "collapsed" && (
-								<ChevronDownIcon
-									className="z-10 ms-auto block-3.5 inline-3.5 transition-transform duration-200 group-aria-expanded/sidebar-disclosure-trigger:rotate-180"
-									data-slot="chevron"
-								/>
-							)}
-						</Fragment>
-					)}
+					<Fragment>
+						{typeof props.children === "function" ? props.children(values) : props.children}
+						{state !== "collapsed" && (
+							<ChevronDownIcon
+								className="z-10 ms-auto block-3.5 inline-3.5 transition-transform duration-200 group-aria-expanded/sidebar-disclosure-trigger:rotate-180"
+								data-slot="chevron"
+							/>
+						)}
+					</Fragment>
+				)}
 			</AriaButton>
 		</AriaHeading>
 	);
@@ -904,42 +913,42 @@ export function SidebarTreeContent(props: Readonly<SidebarTreeContentProps>): Re
 	return (
 		<AriaTreeItemContent data-slot="sidebar-item-content" {...rest}>
 			{(values) => (
-					<div className="relative flex inline-full min-inline-0 items-center">
-						<div
-							aria-hidden={true}
-							className="shrink-0"
-							style={{
-								width: `calc((var(--tree-item-level) - 1) * 1.25rem)`,
-							}}
-						/>
-						<div
-							className={twMerge(
-								"group/tree-item flex min-inline-0 flex-1 items-center gap-x-2 rounded-lg p-2 font-medium text-base/6 text-sidebar-fg sm:text-sm/5",
-								// eslint-disable-next-line better-tailwindcss/enforce-consistent-class-order
-								"**:data-[slot=icon]:-mx-0.5 **:data-[slot=icon]:shrink-0 [&_[data-slot='icon']:not([class*='size-'])]:block-5 [&_[data-slot='icon']:not([class*='size-'])]:inline-5 [&_[data-slot='icon']:not([class*='text-'])]:text-muted-fg sm:[&_[data-slot='icon']:not([class*='size-'])]:block-4 sm:[&_[data-slot='icon']:not([class*='size-'])]:inline-4",
-								"hover:bg-sidebar-accent hover:text-sidebar-accent-fg hover:[&_[data-slot='icon']:not([class*='text-'])]:text-sidebar-accent-fg",
-								"[--sidebar-current-bg:var(--color-sidebar-primary)] [--sidebar-current-fg:var(--color-sidebar-primary-fg)]",
-								values.isFocusVisible && "inset-ring inset-ring-sidebar-ring",
-								values.isPressed &&
-									"bg-sidebar-accent text-sidebar-accent-fg [&_[data-slot='icon']:not([class*='text-'])]:text-sidebar-accent-fg",
-								isCurrent === true &&
-									"font-medium text-(--sidebar-current-fg) hover:bg-(--sidebar-current-bg) hover:text-(--sidebar-current-fg) hover:[&_[data-slot='icon']:not([class*='text-'])]:text-(--sidebar-current-fg) [&_.text-muted-fg]:text-fg/80 [&_[data-slot='icon']:not([class*='text-'])]:text-(--sidebar-current-fg)",
-								values.isDisabled && "opacity-50",
-								className,
-							)}
-						>
-							{values.hasChildItems && (
-								<TreeIndicator
-									values={{
-										isDisabled: values.isDisabled,
-										isExpanded: values.isExpanded,
-									}}
-								/>
-							)}
-							{typeof children === "function" ? children(values) : children}
-						</div>
+				<div className="relative flex inline-full min-inline-0 items-center">
+					<div
+						aria-hidden={true}
+						className="shrink-0"
+						style={{
+							width: `calc((var(--tree-item-level) - 1) * 1.25rem)`,
+						}}
+					/>
+					<div
+						className={twMerge(
+							"group/tree-item flex min-inline-0 flex-1 items-center gap-x-2 rounded-lg p-2 font-medium text-base/6 text-sidebar-fg sm:text-sm/5",
+							// eslint-disable-next-line better-tailwindcss/enforce-consistent-class-order
+							"**:data-[slot=icon]:-mx-0.5 **:data-[slot=icon]:shrink-0 [&_[data-slot='icon']:not([class*='size-'])]:block-5 [&_[data-slot='icon']:not([class*='size-'])]:inline-5 [&_[data-slot='icon']:not([class*='text-'])]:text-muted-fg sm:[&_[data-slot='icon']:not([class*='size-'])]:block-4 sm:[&_[data-slot='icon']:not([class*='size-'])]:inline-4",
+							"hover:bg-sidebar-accent hover:text-sidebar-accent-fg hover:[&_[data-slot='icon']:not([class*='text-'])]:text-sidebar-accent-fg",
+							"[--sidebar-current-bg:var(--color-sidebar-primary)] [--sidebar-current-fg:var(--color-sidebar-primary-fg)]",
+							values.isFocusVisible && "inset-ring inset-ring-sidebar-ring",
+							values.isPressed &&
+								"bg-sidebar-accent text-sidebar-accent-fg [&_[data-slot='icon']:not([class*='text-'])]:text-sidebar-accent-fg",
+							isCurrent === true &&
+								"font-medium text-(--sidebar-current-fg) hover:bg-(--sidebar-current-bg) hover:text-(--sidebar-current-fg) hover:[&_[data-slot='icon']:not([class*='text-'])]:text-(--sidebar-current-fg) [&_.text-muted-fg]:text-fg/80 [&_[data-slot='icon']:not([class*='text-'])]:text-(--sidebar-current-fg)",
+							values.isDisabled && "opacity-50",
+							className,
+						)}
+					>
+						{values.hasChildItems && (
+							<TreeIndicator
+								values={{
+									isDisabled: values.isDisabled,
+									isExpanded: values.isExpanded,
+								}}
+							/>
+						)}
+						{typeof children === "function" ? children(values) : children}
 					</div>
-				)}
+				</div>
+			)}
 		</AriaTreeItemContent>
 	);
 }

@@ -64,9 +64,8 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 
 	const t = useExtracted();
 	const router = useRouter();
-	const [items, optimisticallyRemoveItem] = useOptimistic(
-		institutions.data,
-		(state, id: string) => state.filter((item) => item.id !== id),
+	const [items, optimisticallyRemoveItem] = useOptimistic(institutions.data, (state, id: string) =>
+		state.filter((item) => item.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
@@ -117,40 +116,40 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-							<TableRow>
-								<TableCell>{item.name}</TableCell>
-								<TableCell className="text-end">
-									<Menu>
-										<Button
-											aria-label={t("Open actions menu")}
-											className="block-7 sm:block-7"
-											intent="plain"
-											size="sq-sm"
+						<TableRow>
+							<TableCell>{item.name}</TableCell>
+							<TableCell className="text-end">
+								<Menu>
+									<Button
+										aria-label={t("Open actions menu")}
+										className="block-7 sm:block-7"
+										intent="plain"
+										size="sq-sm"
+									>
+										<EllipsisHorizontalIcon className="block-5 inline-5" />
+									</Button>
+									<MenuContent placement="left top">
+										<MenuItem
+											href={`/dashboard/administrator/institutions/${item.entity.slug}/edit`}
 										>
-											<EllipsisHorizontalIcon className="block-5 inline-5" />
-										</Button>
-										<MenuContent placement="left top">
-											<MenuItem
-												href={`/dashboard/administrator/institutions/${item.entity.slug}/edit`}
-											>
-												<PencilSquareIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Edit")}</MenuLabel>
-											</MenuItem>
-											<MenuSeparator />
-											<MenuItem
-												intent="danger"
-												onAction={() => {
-													setItemToDelete({ id: item.id });
-												}}
-											>
-												<TrashIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Delete")}</MenuLabel>
-											</MenuItem>
-										</MenuContent>
-									</Menu>
-								</TableCell>
-							</TableRow>
-						)}
+											<PencilSquareIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Edit")}</MenuLabel>
+										</MenuItem>
+										<MenuSeparator />
+										<MenuItem
+											intent="danger"
+											onAction={() => {
+												setItemToDelete({ id: item.id });
+											}}
+										>
+											<TrashIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Delete")}</MenuLabel>
+										</MenuItem>
+									</MenuContent>
+								</Menu>
+							</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 

@@ -48,15 +48,15 @@ export async function CountryReportSummary(
 					<h2 className="text-sm font-semibold text-fg">{t("Institutions")}</h2>
 					<ul className="divide-y rounded-md border">
 						{data.institutions.map((inst) => (
-								<li key={inst.id} className="px-4 py-3">
-									<p className="text-sm font-medium text-fg">
-										{inst.name}
-										{inst.acronym != null && (
-											<span className="ms-2 text-muted-fg">({inst.acronym})</span>
-										)}
-									</p>
-								</li>
-							))}
+							<li key={inst.id} className="px-4 py-3">
+								<p className="text-sm font-medium text-fg">
+									{inst.name}
+									{inst.acronym != null && (
+										<span className="ms-2 text-muted-fg">({inst.acronym})</span>
+									)}
+								</p>
+							</li>
+						))}
 					</ul>
 				</section>
 			)}
@@ -66,15 +66,15 @@ export async function CountryReportSummary(
 				{data.contributions.length > 0 && (
 					<ul className="mbe-4 divide-y rounded-md border">
 						{data.contributions.map((c) => (
-								<li key={c.id} className="px-4 py-3">
-									<p className="text-sm font-medium text-fg">{c.personName}</p>
-									<p className="text-xs text-muted-fg">
-										{formatRole(c.roleType)}
-										{" · "}
-										{c.orgUnitName}
-									</p>
-								</li>
-							))}
+							<li key={c.id} className="px-4 py-3">
+								<p className="text-sm font-medium text-fg">{c.personName}</p>
+								<p className="text-xs text-muted-fg">
+									{formatRole(c.roleType)}
+									{" · "}
+									{c.orgUnitName}
+								</p>
+							</li>
+						))}
 					</ul>
 				)}
 				<dl className="grid max-inline-xs grid-cols-[auto_1fr] gap-x-8 gap-y-2 text-sm">
@@ -133,11 +133,11 @@ export async function CountryReportSummary(
 								{nonZeroKpis.length > 0 ? (
 									<dl className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-3 lg:grid-cols-4">
 										{nonZeroKpis.map((k) => (
-												<div key={k.kpi}>
-													<dt className="text-xs text-muted-fg">{formatKpi(k.kpi)}</dt>
-													<dd className="font-medium">{k.value.toLocaleString()}</dd>
-												</div>
-											))}
+											<div key={k.kpi}>
+												<dt className="text-xs text-muted-fg">{formatKpi(k.kpi)}</dt>
+												<dd className="font-medium">{k.value.toLocaleString()}</dd>
+											</div>
+										))}
 									</dl>
 								) : (
 									<p className="text-sm text-muted-fg">{t("No KPIs recorded.")}</p>
@@ -160,11 +160,11 @@ export async function CountryReportSummary(
 								{nonZeroKpis.length > 0 ? (
 									<dl className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-3 lg:grid-cols-4">
 										{nonZeroKpis.map((k) => (
-												<div key={k.kpi}>
-													<dt className="text-xs text-muted-fg">{formatKpi(k.kpi)}</dt>
-													<dd className="font-medium">{k.value.toLocaleString()}</dd>
-												</div>
-											))}
+											<div key={k.kpi}>
+												<dt className="text-xs text-muted-fg">{formatKpi(k.kpi)}</dt>
+												<dd className="font-medium">{k.value.toLocaleString()}</dd>
+											</div>
+										))}
 									</dl>
 								) : (
 									<p className="text-sm text-muted-fg">{t("No KPIs recorded.")}</p>
@@ -180,13 +180,13 @@ export async function CountryReportSummary(
 					<h2 className="text-sm font-semibold text-fg">{t("Project contributions")}</h2>
 					<ul className="divide-y rounded-md border">
 						{data.projectContributions.map((p) => (
-								<li key={p.id} className="flex items-center justify-between gap-x-4 px-4 py-3">
-									<span className="text-sm font-medium text-fg">{p.projectName}</span>
-									<span className="shrink-0 text-sm text-muted-fg">
-										{eurFormatter.format(p.amountEuros)}
-									</span>
-								</li>
-							))}
+							<li key={p.id} className="flex items-center justify-between gap-x-4 px-4 py-3">
+								<span className="text-sm font-medium text-fg">{p.projectName}</span>
+								<span className="shrink-0 text-sm text-muted-fg">
+									{eurFormatter.format(p.amountEuros)}
+								</span>
+							</li>
+						))}
 					</ul>
 				</section>
 			)}

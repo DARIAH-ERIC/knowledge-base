@@ -43,7 +43,8 @@ export default async function DashboardReportingCountryReportSocialMediaPage(
 	const result = await getAuthorizedCountryReportForUser(
 		user,
 		id,
-		(id) => db.query.countryReports.findFirst({
+		(id) =>
+			db.query.countryReports.findFirst({
 				where: { id },
 				columns: { id: true },
 				with: {
@@ -90,29 +91,29 @@ export default async function DashboardReportingCountryReportSocialMediaPage(
 					<input name="id" type="hidden" value={report.id} />
 					<div className="flex flex-col gap-y-8">
 						{accounts.map((account) => (
-								<section key={account.id} className="flex flex-col gap-y-4">
-									<div className="space-y-1">
-										<h2 className="text-sm font-semibold text-fg">{account.name}</h2>
-										<p className="text-xs text-muted-fg">{account.url}</p>
-									</div>
-									<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-										{socialMediaKpiCategoryEnum.map((kpi) => {
-											const existing = kpiMap.get(`${account.id}-${kpi}`);
-											return (
-												<TextField
-													key={kpi}
-													defaultValue={existing != null ? String(existing) : undefined}
-													name={`kpis.${account.id}.${kpi}`}
-													type="number"
-												>
-													<Label className="text-xs">{formatKpi(kpi)}</Label>
-													<Input min={0} />
-												</TextField>
-											);
-										})}
-									</div>
-								</section>
-							))}
+							<section key={account.id} className="flex flex-col gap-y-4">
+								<div className="space-y-1">
+									<h2 className="text-sm font-semibold text-fg">{account.name}</h2>
+									<p className="text-xs text-muted-fg">{account.url}</p>
+								</div>
+								<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+									{socialMediaKpiCategoryEnum.map((kpi) => {
+										const existing = kpiMap.get(`${account.id}-${kpi}`);
+										return (
+											<TextField
+												key={kpi}
+												defaultValue={existing != null ? String(existing) : undefined}
+												name={`kpis.${account.id}.${kpi}`}
+												type="number"
+											>
+												<Label className="text-xs">{formatKpi(kpi)}</Label>
+												<Input min={0} />
+											</TextField>
+										);
+									})}
+								</div>
+							</section>
+						))}
 					</div>
 					<div className="mbs-6">
 						<Button type="submit">{t("Save")}</Button>

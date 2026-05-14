@@ -301,36 +301,18 @@ async function main() {
 					.from(schema.entityTypesFieldsNames),
 			]);
 
-			const entityTypeIds = new Map(
-				entityTypeRows.map((row) => [row.type, row.id]),
-			);
-			const entityStatusIds = new Map(
-				entityStatusRows.map((row) => [row.type, row.id]),
-			);
-			const unitTypeIds = new Map(
-				unitTypeRows.map((row) => [row.type, row.id]),
-			);
-			const unitStatusIds = new Map(
-				unitStatusRows.map((row) => [row.status, row.id]),
-			);
-			const personRoleIds = new Map(
-				personRoleRows.map((row) => [row.type, row.id]),
-			);
-			const projectRoleIds = new Map(
-				projectRoleRows.map((row) => [row.role, row.id]),
-			);
-			const projectScopeIds = new Map(
-				projectScopeRows.map((row) => [row.scope, row.id]),
-			);
+			const entityTypeIds = new Map(entityTypeRows.map((row) => [row.type, row.id]));
+			const entityStatusIds = new Map(entityStatusRows.map((row) => [row.type, row.id]));
+			const unitTypeIds = new Map(unitTypeRows.map((row) => [row.type, row.id]));
+			const unitStatusIds = new Map(unitStatusRows.map((row) => [row.status, row.id]));
+			const personRoleIds = new Map(personRoleRows.map((row) => [row.type, row.id]));
+			const projectRoleIds = new Map(projectRoleRows.map((row) => [row.role, row.id]));
+			const projectScopeIds = new Map(projectScopeRows.map((row) => [row.scope, row.id]));
 			const opportunitySourceIds = new Map(
 				opportunitySourceRows.map((row) => [row.source, row.id]),
 			);
-			const socialMediaTypeIds = new Map(
-				socialMediaTypeRows.map((row) => [row.type, row.id]),
-			);
-			const contentBlockTypeIds = new Map(
-				contentBlockTypeRows.map((row) => [row.type, row.id]),
-			);
+			const socialMediaTypeIds = new Map(socialMediaTypeRows.map((row) => [row.type, row.id]));
+			const contentBlockTypeIds = new Map(contentBlockTypeRows.map((row) => [row.type, row.id]));
 			const dataContentBlockTypeIds = new Map(
 				dataContentBlockTypeRows.map((row) => [row.type, row.id]),
 			);
@@ -1183,14 +1165,16 @@ async function main() {
 					);
 					const fieldDefinitions = entityTypeFieldNames.get(entityTypeId) ?? [];
 
-					return entityIds.flatMap((entityId) => fieldDefinitions.map((fieldDefinition) => {
+					return entityIds.flatMap((entityId) =>
+						fieldDefinitions.map((fieldDefinition) => {
 							return {
 								id: createId(`field:${entityId}:${fieldDefinition.fieldName}`),
 								entityVersionId: entityId,
 								fieldNameId: fieldDefinition.id,
 								fieldName: fieldDefinition.fieldName,
 							};
-						}));
+						}),
+					);
 				},
 			);
 
@@ -1211,61 +1195,61 @@ async function main() {
 			}
 
 			const contentBlocks = fieldsToCreate.flatMap((field) => [
-					{
-						id: createId(`block:${field.id}:hero`),
-						fieldId: field.id,
-						typeId: assertLookupId(
-							contentBlockTypeIds.get("hero"),
-							'Missing content block type "hero".',
-						),
-						position: 1,
-					},
-					{
-						id: createId(`block:${field.id}:image`),
-						fieldId: field.id,
-						typeId: assertLookupId(
-							contentBlockTypeIds.get("image"),
-							'Missing content block type "image".',
-						),
-						position: 2,
-					},
-					{
-						id: createId(`block:${field.id}:embed`),
-						fieldId: field.id,
-						typeId: assertLookupId(
-							contentBlockTypeIds.get("embed"),
-							'Missing content block type "embed".',
-						),
-						position: 3,
-					},
-					{
-						id: createId(`block:${field.id}:data`),
-						fieldId: field.id,
-						typeId: assertLookupId(
-							contentBlockTypeIds.get("data"),
-							'Missing content block type "data".',
-						),
-						position: 4,
-					},
-					{
-						id: createId(`block:${field.id}:accordion`),
-						fieldId: field.id,
-						typeId: assertLookupId(
-							contentBlockTypeIds.get("accordion"),
-							'Missing content block type "accordion".',
-						),
-						position: 5,
-					},
-					{
-						id: createId(`block:${field.id}:rich-text`),
-						fieldId: field.id,
-						typeId: assertLookupId(
-							contentBlockTypeIds.get("rich_text"),
-							'Missing content block type "rich_text".',
-						),
-						position: 6,
-					},
-				]);
+				{
+					id: createId(`block:${field.id}:hero`),
+					fieldId: field.id,
+					typeId: assertLookupId(
+						contentBlockTypeIds.get("hero"),
+						'Missing content block type "hero".',
+					),
+					position: 1,
+				},
+				{
+					id: createId(`block:${field.id}:image`),
+					fieldId: field.id,
+					typeId: assertLookupId(
+						contentBlockTypeIds.get("image"),
+						'Missing content block type "image".',
+					),
+					position: 2,
+				},
+				{
+					id: createId(`block:${field.id}:embed`),
+					fieldId: field.id,
+					typeId: assertLookupId(
+						contentBlockTypeIds.get("embed"),
+						'Missing content block type "embed".',
+					),
+					position: 3,
+				},
+				{
+					id: createId(`block:${field.id}:data`),
+					fieldId: field.id,
+					typeId: assertLookupId(
+						contentBlockTypeIds.get("data"),
+						'Missing content block type "data".',
+					),
+					position: 4,
+				},
+				{
+					id: createId(`block:${field.id}:accordion`),
+					fieldId: field.id,
+					typeId: assertLookupId(
+						contentBlockTypeIds.get("accordion"),
+						'Missing content block type "accordion".',
+					),
+					position: 5,
+				},
+				{
+					id: createId(`block:${field.id}:rich-text`),
+					fieldId: field.id,
+					typeId: assertLookupId(
+						contentBlockTypeIds.get("rich_text"),
+						'Missing content block type "rich_text".',
+					),
+					position: 6,
+				},
+			]);
 
 			if (contentBlocks.length > 0) {
 				const uniqueContentBlocks = new Map(
@@ -1402,9 +1386,11 @@ async function main() {
 
 			if (resourceIds.length > 0) {
 				await tx.insert(schema.entitiesToResources).values(
-					relatedEntityOwners.flatMap((entityId) => resourceIds.map((resourceId) => {
+					relatedEntityOwners.flatMap((entityId) =>
+						resourceIds.map((resourceId) => {
 							return { entityId, resourceId };
-						})),
+						}),
+					),
 				);
 			}
 		});

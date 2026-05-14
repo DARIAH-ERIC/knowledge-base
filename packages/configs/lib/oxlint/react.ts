@@ -41,7 +41,8 @@ const config = defineConfig({
 		"jsx-a11y/no-noninteractive-tabindex": "error",
 		"jsx-a11y/no-redundant-roles": ["warn"],
 		"jsx-a11y/no-static-element-interactions": "warn",
-		"jsx-a11y/prefer-tag-over-role": "warn",
+		/** @see {@link https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/issues/920} */
+		"jsx-a11y/prefer-tag-over-role": "off",
 		"jsx-a11y/role-has-required-aria-props": "error",
 		"jsx-a11y/role-supports-aria-props": "error",
 		"jsx-a11y/scope": "error",
@@ -85,7 +86,7 @@ const config = defineConfig({
 		 * ============================================================================================
 		 */
 
-		"react/jsx-no-constructed-context-values": "warn",
+		"react/jsx-no-constructed-context-values": "off" /** Fixed by react compiler. */,
 		"react/no-array-index-key": "warn",
 
 		/**

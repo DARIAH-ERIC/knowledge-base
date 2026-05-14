@@ -43,9 +43,7 @@ export function CountryReportInstitutionsForm(
 	const [state, action, isPending] = useActionState(addAction, createActionStateInitial());
 	const [selectedId, setSelectedId] = useState<string>("");
 
-	const claimedOrgUnitIds = new Set(
-		report.institutions.map((i) => i.organisationalUnitId),
-	);
+	const claimedOrgUnitIds = new Set(report.institutions.map((i) => i.organisationalUnitId));
 	const available = availableInstitutions.filter((i) => !claimedOrgUnitIds.has(i.id));
 
 	return (
@@ -55,29 +53,29 @@ export function CountryReportInstitutionsForm(
 					<h2 className="text-sm font-semibold text-fg">{t("Institutions")}</h2>
 					<ul className="divide-y divide-border rounded-md border">
 						{report.institutions.map((institution) => (
-								<li
-									key={institution.id}
-									className="flex items-center justify-between gap-x-4 px-4 py-3"
-								>
-									<div>
-										<p className="text-sm font-medium text-fg">
-											{institution.organisationalUnit.name}
+							<li
+								key={institution.id}
+								className="flex items-center justify-between gap-x-4 px-4 py-3"
+							>
+								<div>
+									<p className="text-sm font-medium text-fg">
+										{institution.organisationalUnit.name}
+									</p>
+									{institution.organisationalUnit.acronym != null && (
+										<p className="text-xs text-muted-fg">
+											{institution.organisationalUnit.acronym}
 										</p>
-										{institution.organisationalUnit.acronym != null && (
-											<p className="text-xs text-muted-fg">
-												{institution.organisationalUnit.acronym}
-											</p>
-										)}
-									</div>
-									<form action={deleteAction}>
-										<input name="institutionId" type="hidden" value={institution.id} />
-										<input name="countryReportId" type="hidden" value={report.id} />
-										<Button intent="danger" size="sm" type="submit">
-											{t("Remove")}
-										</Button>
-									</form>
-								</li>
-							))}
+									)}
+								</div>
+								<form action={deleteAction}>
+									<input name="institutionId" type="hidden" value={institution.id} />
+									<input name="countryReportId" type="hidden" value={report.id} />
+									<Button intent="danger" size="sm" type="submit">
+										{t("Remove")}
+									</Button>
+								</form>
+							</li>
+						))}
 					</ul>
 				</section>
 			)}
@@ -100,11 +98,11 @@ export function CountryReportInstitutionsForm(
 							<FieldError />
 							<SelectContent>
 								{available.map((institution) => (
-										<SelectItem key={institution.id} id={institution.id}>
-											{institution.name}
-											{institution.acronym != null && ` (${institution.acronym})`}
-										</SelectItem>
-									))}
+									<SelectItem key={institution.id} id={institution.id}>
+										{institution.name}
+										{institution.acronym != null && ` (${institution.acronym})`}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 						<input name="organisationalUnitId" type="hidden" value={selectedId} />

@@ -52,10 +52,7 @@ export async function getFundingCalls(db: Database | Transaction, params: GetFun
 						type: "published",
 					},
 				},
-				RAW:
-					statuses.length > 0
-						? (t) => buildStatusFilter(t.duration, statuses)
-						: undefined,
+				RAW: statuses.length > 0 ? (t) => buildStatusFilter(t.duration, statuses) : undefined,
 			},
 			columns: {
 				id: true,

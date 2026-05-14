@@ -35,10 +35,14 @@ function isImageMimeType(mimeType?: string): boolean {
 
 function getFileExtension(storageKey?: string): string | null {
 	const filename = storageKey?.split("/").pop();
-	if (filename == null) {return null;}
+	if (filename == null) {
+		return null;
+	}
 
 	const ext = filename.split(".").pop();
-	if (ext == null || ext === filename) {return null;}
+	if (ext == null || ext === filename) {
+		return null;
+	}
 
 	return ext.toUpperCase();
 }

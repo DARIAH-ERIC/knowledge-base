@@ -92,10 +92,10 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 					<SelectContent>
 						<SelectItem id="none">{t("None")}</SelectItem>
 						{groups.map((group) => (
-								<SelectItem key={group.id} id={group.id}>
-									{group.label}
-								</SelectItem>
-							))}
+							<SelectItem key={group.id} id={group.id}>
+								{group.label}
+							</SelectItem>
+						))}
 					</SelectContent>
 				</Select>
 				{selectedGroupId ? <input name="groupId" type="hidden" value={selectedGroupId} /> : null}

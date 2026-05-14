@@ -170,7 +170,8 @@ export function ToggleGroupItem(props: Readonly<ToggleGroupItemProps>): ReactNod
 	return (
 		<AriaToggleButton
 			{...rest}
-			className={composeRenderProps(className, (className, renderProps) => twMerge(
+			className={composeRenderProps(className, (className, renderProps) =>
+				twMerge(
 					toggleGroupItemStyles({
 						...renderProps,
 						size,
@@ -178,7 +179,8 @@ export function ToggleGroupItem(props: Readonly<ToggleGroupItemProps>): ReactNod
 						selectionMode,
 						className,
 					}),
-				))}
+				),
+			)}
 			data-slot="toggle-group-item"
 		/>
 	);

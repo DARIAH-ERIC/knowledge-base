@@ -74,9 +74,7 @@ export const updateDocumentationPageAction = createServerAction(
 
 			if (contentField != null) {
 				const keptIds = new Set(
-					contentBlocks
-						.filter((cb) => cb.position !== undefined)
-						.map((cb) => cb.id),
+					contentBlocks.filter((cb) => cb.position !== undefined).map((cb) => cb.id),
 				);
 
 				const existingBlocks = await tx.query.contentBlocks.findMany({

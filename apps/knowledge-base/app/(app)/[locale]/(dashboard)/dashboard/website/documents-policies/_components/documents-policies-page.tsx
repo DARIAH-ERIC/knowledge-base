@@ -232,16 +232,16 @@ function DocumentSection(props: Readonly<DocumentSectionProps>): ReactNode {
 			) : (
 				<div className="flex flex-col gap-y-0.5">
 					{items.map((item, index) => (
-							<DocumentRow
-								key={item.id}
-								isFirst={index === 0}
-								isLast={index === items.length - 1}
-								item={item}
-								onDelete={onDeleteDocument}
-								onEdit={onEditDocument}
-								onMove={onMoveDocument}
-							/>
-						))}
+						<DocumentRow
+							key={item.id}
+							isFirst={index === 0}
+							isLast={index === items.length - 1}
+							item={item}
+							onDelete={onDeleteDocument}
+							onEdit={onEditDocument}
+							onMove={onMoveDocument}
+						/>
+					))}
 				</div>
 			)}
 
@@ -304,39 +304,39 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 
 			<div className="p-(--layout-padding)">
 				{groups.map((group, groupIndex) => (
-						<DocumentSection
-							key={group.id}
-							groupId={group.id}
-							groups={allGroups}
-							initialAssets={initialAssets}
-							isFirstGroup={groupIndex === 0}
-							isLastGroup={groupIndex === groups.length - 1}
-							items={group.documentsPolicies}
-							label={group.label}
-							onAddDocument={(gid) => {
-								setDialogState({ isOpen: true, item: null, initialGroupId: gid });
-							}}
-							onDeleteDocument={(id) => {
-								setDocumentToDelete(id);
-							}}
-							onDeleteGroup={(id) => {
-								setGroupToDelete(id);
-							}}
-							onEditDocument={(item) => {
-								setDialogState({ isOpen: true, item });
-							}}
-							onMoveDocument={(id, direction) => {
-								startTransition(async () => {
-									await moveDocumentOrPolicyAction(id, direction);
-								});
-							}}
-							onMoveGroup={(id, direction) => {
-								startTransition(async () => {
-									await moveDocumentPolicyGroupAction(id, direction);
-								});
-							}}
-						/>
-					))}
+					<DocumentSection
+						key={group.id}
+						groupId={group.id}
+						groups={allGroups}
+						initialAssets={initialAssets}
+						isFirstGroup={groupIndex === 0}
+						isLastGroup={groupIndex === groups.length - 1}
+						items={group.documentsPolicies}
+						label={group.label}
+						onAddDocument={(gid) => {
+							setDialogState({ isOpen: true, item: null, initialGroupId: gid });
+						}}
+						onDeleteDocument={(id) => {
+							setDocumentToDelete(id);
+						}}
+						onDeleteGroup={(id) => {
+							setGroupToDelete(id);
+						}}
+						onEditDocument={(item) => {
+							setDialogState({ isOpen: true, item });
+						}}
+						onMoveDocument={(id, direction) => {
+							startTransition(async () => {
+								await moveDocumentOrPolicyAction(id, direction);
+							});
+						}}
+						onMoveGroup={(id, direction) => {
+							startTransition(async () => {
+								await moveDocumentPolicyGroupAction(id, direction);
+							});
+						}}
+					/>
+				))}
 
 				<DocumentSection
 					groupId={null}
@@ -378,14 +378,18 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 				isOpen={documentToDelete != null}
 				model={t("document or policy")}
 				onAction={() => {
-					if (documentToDelete == null) {return;}
+					if (documentToDelete == null) {
+						return;
+					}
 					startTransition(async () => {
 						await deleteDocumentOrPolicyAction(documentToDelete);
 						setDocumentToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) {setDocumentToDelete(null);}
+					if (!open) {
+						setDocumentToDelete(null);
+					}
 				}}
 			/>
 
@@ -393,14 +397,18 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 				isOpen={groupToDelete != null}
 				model={t("group")}
 				onAction={() => {
-					if (groupToDelete == null) {return;}
+					if (groupToDelete == null) {
+						return;
+					}
 					startTransition(async () => {
 						await deleteDocumentPolicyGroupAction(groupToDelete);
 						setGroupToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) {setGroupToDelete(null);}
+					if (!open) {
+						setGroupToDelete(null);
+					}
 				}}
 			/>
 		</Fragment>

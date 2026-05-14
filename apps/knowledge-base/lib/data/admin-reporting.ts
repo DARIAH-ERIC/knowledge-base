@@ -245,7 +245,9 @@ export async function getReportingStatisticsForAdmin(
 		campaignYears: campaigns.map((campaign) => campaign.year),
 		countries: Array.from(
 			new Set(
-				campaigns.flatMap((campaign) => campaign.countryReports.map((report) => report.country.name)),
+				campaigns.flatMap((campaign) =>
+					campaign.countryReports.map((report) => report.country.name),
+				),
 			),
 		).toSorted((left, right) => left.localeCompare(right)),
 	};
@@ -253,7 +255,9 @@ export async function getReportingStatisticsForAdmin(
 	const filteredCampaigns = campaigns
 		.filter((campaign) => filters.campaignYear == null || campaign.year === filters.campaignYear)
 		.map((campaign) => {
-			const countryReports = campaign.countryReports.filter((report) => filters.countryName == null || report.country.name === filters.countryName);
+			const countryReports = campaign.countryReports.filter(
+				(report) => filters.countryName == null || report.country.name === filters.countryName,
+			);
 			const workingGroupReports = filters.countryName == null ? campaign.workingGroupReports : [];
 
 			return {
@@ -262,7 +266,9 @@ export async function getReportingStatisticsForAdmin(
 				workingGroupReports,
 			};
 		})
-		.filter((campaign) => campaign.countryReports.length > 0 || campaign.workingGroupReports.length > 0);
+		.filter(
+			(campaign) => campaign.countryReports.length > 0 || campaign.workingGroupReports.length > 0,
+		);
 
 	const overview: ReportingStatisticsOverview = {
 		campaignCount: filteredCampaigns.length,
@@ -302,9 +308,15 @@ export async function getReportingStatisticsForAdmin(
 		let socialMediaAccounts = 0;
 
 		for (const report of campaign.countryReports) {
-			if (report.status === "draft") {countryDraftCount += 1;}
-			if (report.status === "submitted") {countrySubmittedCount += 1;}
-			if (report.status === "accepted") {countryAcceptedCount += 1;}
+			if (report.status === "draft") {
+				countryDraftCount += 1;
+			}
+			if (report.status === "submitted") {
+				countrySubmittedCount += 1;
+			}
+			if (report.status === "accepted") {
+				countryAcceptedCount += 1;
+			}
 
 			const contributors = report.totalContributors ?? 0;
 			const events =
@@ -313,10 +325,11 @@ export async function getReportingStatisticsForAdmin(
 				(report.largeEvents ?? 0) +
 				(report.veryLargeEvents ?? 0);
 			const institutions = report.institutions.length;
-			const services = new Set(
-				report.serviceKpis.map((serviceKpi) => serviceKpi.serviceId),
-			).size;
-			const projectContributions = report.projectContributions.reduce((sum, contribution) => sum + contribution.amountEuros, 0);
+			const services = new Set(report.serviceKpis.map((serviceKpi) => serviceKpi.serviceId)).size;
+			const projectContributions = report.projectContributions.reduce(
+				(sum, contribution) => sum + contribution.amountEuros,
+				0,
+			);
 
 			totalContributors += contributors;
 			totalCountryEvents += events;
@@ -337,17 +350,27 @@ export async function getReportingStatisticsForAdmin(
 		}
 
 		for (const report of campaign.workingGroupReports) {
-			if (report.status === "draft") {workingGroupDraftCount += 1;}
-			if (report.status === "submitted") {workingGroupSubmittedCount += 1;}
-			if (report.status === "accepted") {workingGroupAcceptedCount += 1;}
+			if (report.status === "draft") {
+				workingGroupDraftCount += 1;
+			}
+			if (report.status === "submitted") {
+				workingGroupSubmittedCount += 1;
+			}
+			if (report.status === "accepted") {
+				workingGroupAcceptedCount += 1;
+			}
 
 			totalWorkingGroupMembers += report.numberOfMembers ?? 0;
 			totalWorkingGroupEvents += report.events.length;
 			socialMediaAccounts += report.socialMedia.length;
 
 			for (const event of report.events) {
-				if (event.role === "organiser") {organiserEvents += 1;}
-				if (event.role === "presenter") {presenterEvents += 1;}
+				if (event.role === "organiser") {
+					organiserEvents += 1;
+				}
+				if (event.role === "presenter") {
+					presenterEvents += 1;
+				}
 			}
 		}
 
@@ -402,7 +425,9 @@ export async function getReportingStatisticsForAdmin(
 	const countryTrends = Array.from(countryRowsByName.entries())
 		.toSorted(([left], [right]) => left.localeCompare(right))
 		.flatMap(([, rows]) => {
-			const sortedRows = rows.slice().toSorted((left, right) => left.campaignYear - right.campaignYear);
+			const sortedRows = rows
+				.slice()
+				.toSorted((left, right) => left.campaignYear - right.campaignYear);
 
 			return sortedRows
 				.map((row, index) => {

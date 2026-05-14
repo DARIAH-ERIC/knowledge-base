@@ -17,7 +17,9 @@ export const documentsPoliciesLifecycleAdapter: EntityLifecycleAdapter = {
 			.from(schema.documentsPolicies)
 			.where(eq(schema.documentsPolicies.id, sourceVersionId))
 			.limit(1);
-		if (source == null) {return;}
+		if (source == null) {
+			return;
+		}
 		await tx.insert(schema.documentsPolicies).values({ id: targetVersionId, ...source });
 	},
 

@@ -35,7 +35,8 @@ export default async function DashboardReportingWorkingGroupReportQuestionsPage(
 	const result = await getAuthorizedWorkingGroupReportForUser(
 		user,
 		id,
-		(id) => db.query.workingGroupReports.findFirst({
+		(id) =>
+			db.query.workingGroupReports.findFirst({
 				where: { id },
 				columns: { id: true, campaignId: true },
 				with: {
@@ -79,9 +80,7 @@ export default async function DashboardReportingWorkingGroupReportQuestionsPage(
 		);
 	}
 
-	const answerMap = new Map(
-		report.answers.map((a) => [a.questionId, a.answer]),
-	);
+	const answerMap = new Map(report.answers.map((a) => [a.questionId, a.answer]));
 
 	return (
 		<div className="flex flex-col gap-y-12">

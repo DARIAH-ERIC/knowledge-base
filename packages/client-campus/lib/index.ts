@@ -135,7 +135,8 @@ function createListAll<TParams extends object, TItem>(
 		},
 	) => Promise<RequestResult<DariahCampusPaginatedResponse<TItem>>>,
 ): (params: TParams) => Promise<Result<Array<TItem>, RequestError>> {
-	return (params) => Result.gen(async function* () {
+	return (params) =>
+		Result.gen(async function* () {
 			const items: Array<TItem> = [];
 			let offset = 0;
 			let total = Infinity;

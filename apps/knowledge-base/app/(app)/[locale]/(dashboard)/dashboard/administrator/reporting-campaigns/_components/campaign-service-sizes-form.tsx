@@ -36,13 +36,13 @@ export function CampaignServiceSizesForm(
 
 	const sizeMap = Object.fromEntries(
 		sizes.map((s) => [
-				s.serviceSize,
-				{
-					// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-					amount: s.amount != null ? String(s.amount) : undefined,
-					threshold: s.visitsThreshold != null ? String(s.visitsThreshold) : undefined,
-				},
-			]),
+			s.serviceSize,
+			{
+				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+				amount: s.amount != null ? String(s.amount) : undefined,
+				threshold: s.visitsThreshold != null ? String(s.visitsThreshold) : undefined,
+			},
+		]),
 	);
 
 	return (

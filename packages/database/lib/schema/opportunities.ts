@@ -16,8 +16,8 @@ export const opportunitySources = p.snakeCase.table(
 		...f.timestamps(),
 	},
 	(t) => [
-			p.check("opportunity_sources_source_enum_check", inArray(t.source, opportunitySourcesEnum)),
-		],
+		p.check("opportunity_sources_source_enum_check", inArray(t.source, opportunitySourcesEnum)),
+	],
 );
 
 export type OpportunitySource = typeof opportunitySources.$inferSelect;

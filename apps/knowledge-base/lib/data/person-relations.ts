@@ -56,9 +56,7 @@ export async function getPersonRelationRoleOptions(
 		)
 		.orderBy(schema.personRoleTypes.type);
 
-	const byRoleTypeId = new Map(
-		rows.map((row) => [row.roleTypeId, row] as const),
-	);
+	const byRoleTypeId = new Map(rows.map((row) => [row.roleTypeId, row] as const));
 
 	return [...byRoleTypeId.values()];
 }

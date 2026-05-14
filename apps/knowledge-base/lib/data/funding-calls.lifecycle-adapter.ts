@@ -14,7 +14,9 @@ export const fundingCallsLifecycleAdapter: EntityLifecycleAdapter = {
 			.from(schema.fundingCalls)
 			.where(eq(schema.fundingCalls.id, sourceVersionId))
 			.limit(1);
-		if (source == null) {return;}
+		if (source == null) {
+			return;
+		}
 		await tx.insert(schema.fundingCalls).values({ id: targetVersionId, ...source });
 	},
 

@@ -79,8 +79,9 @@ export function NavigationMenuCreateDialog(): ReactNode {
 	const [formKey, setFormKey] = useState(0);
 
 	function handleOpenChange(open: boolean) {
-		if (open)
-			{setFormKey((k) => k + 1);}
+		if (open) {
+			setFormKey((k) => k + 1);
+		}
 		setIsOpen(open);
 	}
 

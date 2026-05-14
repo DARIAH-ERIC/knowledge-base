@@ -66,10 +66,10 @@ export function WorkingGroupReportCreateForm(
 							<FieldError />
 							<SelectContent>
 								{campaigns.map((campaign) => (
-										<SelectItem key={campaign.id} id={campaign.id}>
-											{campaign.year}
-										</SelectItem>
-									))}
+									<SelectItem key={campaign.id} id={campaign.id}>
+										{campaign.year}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 						<input name="campaignId" type="hidden" value={selectedCampaignId} />
@@ -86,10 +86,10 @@ export function WorkingGroupReportCreateForm(
 							<FieldError />
 							<SelectContent>
 								{workingGroups.map((workingGroup) => (
-										<SelectItem key={workingGroup.id} id={workingGroup.id}>
-											{workingGroup.name}
-										</SelectItem>
-									))}
+									<SelectItem key={workingGroup.id} id={workingGroup.id}>
+										{workingGroup.name}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 						<input name="workingGroupId" type="hidden" value={selectedWorkingGroupId} />
@@ -106,10 +106,10 @@ export function WorkingGroupReportCreateForm(
 							<FieldError />
 							<SelectContent>
 								{reportStatusEnum.map((status) => (
-										<SelectItem key={status} id={status}>
-											{formatStatus(status)}
-										</SelectItem>
-									))}
+									<SelectItem key={status} id={status}>
+										{formatStatus(status)}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 						<input name="status" type="hidden" value={selectedStatus} />

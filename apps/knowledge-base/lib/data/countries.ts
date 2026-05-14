@@ -42,9 +42,15 @@ function compareStrings(a: string, b: string, dir: "asc" | "desc"): number {
 }
 
 function compareNullableStrings(a: string | null, b: string | null, dir: "asc" | "desc"): number {
-	if (a == null && b == null) {return 0;}
-	if (a == null) {return 1;}
-	if (b == null) {return -1;}
+	if (a == null && b == null) {
+		return 0;
+	}
+	if (a == null) {
+		return 1;
+	}
+	if (b == null) {
+		return -1;
+	}
 	return compareStrings(a, b, dir);
 }
 
@@ -227,13 +233,14 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 		};
 	}
 
-	const sortedData = [...data].toSorted((a, b) => (
+	const sortedData = [...data].toSorted(
+		(a, b) =>
 			compareNullableStrings(
 				getCountryStatusSortValue(a.memberObserverStatus),
 				getCountryStatusSortValue(b.memberObserverStatus),
 				dir,
-			) || compareStrings(a.name, b.name, dir)
-		));
+			) || compareStrings(a.name, b.name, dir),
+	);
 
 	return {
 		data: sortedData.slice(offset, offset + limit),

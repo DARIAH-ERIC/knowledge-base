@@ -101,17 +101,17 @@ export function WorkingGroupChairsSection(
 
 				if (data != null) {
 					setLocalChairs((prev) => [
-							...prev,
-							{
-								id: data.id,
-								personId: person.id,
-								personName: person.name,
-								duration: {
-									start: new Date(data.durationStart),
-									...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
-								},
+						...prev,
+						{
+							id: data.id,
+							personId: person.id,
+							personName: person.name,
+							duration: {
+								start: new Date(data.durationStart),
+								...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
 							},
-						]);
+						},
+					]);
 				}
 
 				setSelectedPerson(null);
@@ -138,34 +138,34 @@ export function WorkingGroupChairsSection(
 						</TableHeader>
 						<TableBody items={localChairs}>
 							{(chair) => (
-									<TableRow id={chair.id}>
-										<TableCell>{chair.personName}</TableCell>
-										<TableCell>
-											{format.dateTime(chair.duration.start, { dateStyle: "short" })}
-										</TableCell>
-										<TableCell>
-											{chair.duration.end != null
-												? format.dateTime(chair.duration.end, { dateStyle: "short" })
-												: t("present")}
-										</TableCell>
-										<TableCell className="text-end">
-											{chair.duration.end == null && (
-												<Button
-													aria-label={t("End chairship")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														setItemToEnd({ id: chair.id });
-														setSelectedEndDate(null);
-													}}
-													size="sq-sm"
-												>
-													<ArchiveBoxXMarkIcon className="block-4 inline-4" />
-												</Button>
-											)}
-										</TableCell>
-									</TableRow>
-								)}
+								<TableRow id={chair.id}>
+									<TableCell>{chair.personName}</TableCell>
+									<TableCell>
+										{format.dateTime(chair.duration.start, { dateStyle: "short" })}
+									</TableCell>
+									<TableCell>
+										{chair.duration.end != null
+											? format.dateTime(chair.duration.end, { dateStyle: "short" })
+											: t("present")}
+									</TableCell>
+									<TableCell className="text-end">
+										{chair.duration.end == null && (
+											<Button
+												aria-label={t("End chairship")}
+												className="block-7 sm:block-7"
+												intent="plain"
+												onPress={() => {
+													setItemToEnd({ id: chair.id });
+													setSelectedEndDate(null);
+												}}
+												size="sq-sm"
+											>
+												<ArchiveBoxXMarkIcon className="block-4 inline-4" />
+											</Button>
+										)}
+									</TableCell>
+								</TableRow>
+							)}
 						</TableBody>
 					</Table>
 				) : (
@@ -228,7 +228,9 @@ export function WorkingGroupChairsSection(
 			<ModalContent
 				isOpen={itemToEnd != null}
 				onOpenChange={(open) => {
-					if (!open) {setItemToEnd(null);}
+					if (!open) {
+						setItemToEnd(null);
+					}
 				}}
 				role="alertdialog"
 				size="sm"
@@ -254,13 +256,19 @@ export function WorkingGroupChairsSection(
 					<Button
 						isDisabled={selectedEndDate == null}
 						onPress={() => {
-							if (itemToEnd == null || selectedEndDate == null) {return;}
+							if (itemToEnd == null || selectedEndDate == null) {
+								return;
+							}
 
 							const end = selectedEndDate.toDate(getLocalTimeZone());
 
 							startTransition(async () => {
 								await endWorkingGroupChairAction(itemToEnd.id, end);
-								setLocalChairs((prev) => prev.map((c) => c.id === itemToEnd.id ? { ...c, duration: { ...c.duration, end } } : c));
+								setLocalChairs((prev) =>
+									prev.map((c) =>
+										c.id === itemToEnd.id ? { ...c, duration: { ...c.duration, end } } : c,
+									),
+								);
 								setItemToEnd(null);
 							});
 						}}

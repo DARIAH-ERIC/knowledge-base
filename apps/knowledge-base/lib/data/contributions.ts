@@ -345,13 +345,11 @@ export async function getContributionOptions() {
 			),
 		);
 
-	if (allowedCombos.length === 0) {return [];}
+	if (allowedCombos.length === 0) {
+		return [];
+	}
 
-	const unitTypeIds = [
-		...new Set(
-			allowedCombos.map((c) => c.unitTypeId),
-		),
-	];
+	const unitTypeIds = [...new Set(allowedCombos.map((c) => c.unitTypeId))];
 
 	const orgUnits = await db
 		.select({
@@ -379,10 +377,7 @@ export async function getContributionOptions() {
 		const entry = byRole.get(combo.roleTypeId)!;
 
 		for (const unit of orgUnits) {
-			if (
-				unit.typeId === combo.unitTypeId &&
-				!entry.availableUnits.some((u) => u.id === unit.id)
-			) {
+			if (unit.typeId === combo.unitTypeId && !entry.availableUnits.some((u) => u.id === unit.id)) {
 				entry.availableUnits.push({ id: unit.id, name: unit.name });
 			}
 		}

@@ -78,10 +78,10 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 						<SelectContent>
 							<SelectItem id="all">{t("All prefixes")}</SelectItem>
 							{assetPrefixes.map((prefix) => (
-									<SelectItem key={prefix} id={prefix}>
-										{prefix}
-									</SelectItem>
-								))}
+								<SelectItem key={prefix} id={prefix}>
+									{prefix}
+								</SelectItem>
+							))}
 						</SelectContent>
 					</Select>
 
@@ -102,10 +102,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 					</p>
 				</div>
 			) : (
-				<ul
-					className="grid grid-cols-[repeat(auto-fill,minmax(min(12rem,100%),1fr))] gap-4 content-start"
-					
-				>
+				<ul className="grid grid-cols-[repeat(auto-fill,minmax(min(12rem,100%),1fr))] gap-4 content-start">
 					{assets.items.map((asset) => {
 						const prefix = asset.key.split("/")[0] ?? "";
 						return (

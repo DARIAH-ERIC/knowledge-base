@@ -56,22 +56,22 @@ export function PopoverContent(props: Readonly<PopoverContentProps>): ReactNode 
 			{...rest}
 		>
 			{(values) => (
-					<Fragment>
-						{arrow && (
-							<OverlayArrow className="group">
-								<svg
-									className="block fill-overlay stroke-border group-placement-bottom:rotate-180 group-placement-left:-rotate-90 group-placement-right:rotate-90 forced-colors:fill-[Canvas] forced-colors:stroke-[ButtonBorder]"
-									height={12}
-									viewBox="0 0 12 12"
-									width={12}
-								>
-									<path d="M0 0 L6 6 L12 0" />
-								</svg>
-							</OverlayArrow>
-						)}
-						{typeof children === "function" ? children(values) : children}
-					</Fragment>
-				)}
+				<Fragment>
+					{arrow && (
+						<OverlayArrow className="group">
+							<svg
+								className="block fill-overlay stroke-border group-placement-bottom:rotate-180 group-placement-left:-rotate-90 group-placement-right:rotate-90 forced-colors:fill-[Canvas] forced-colors:stroke-[ButtonBorder]"
+								height={12}
+								viewBox="0 0 12 12"
+								width={12}
+							>
+								<path d="M0 0 L6 6 L12 0" />
+							</svg>
+						</OverlayArrow>
+					)}
+					{typeof children === "function" ? children(values) : children}
+				</Fragment>
+			)}
 		</PopoverPrimitive>
 	);
 }

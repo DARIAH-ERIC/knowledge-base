@@ -44,7 +44,9 @@ export async function getNewsletters(
 
 	const result = await mailchimp.get({ count: 1000, offset: 0 });
 	const data: GetCampaignsResponse = result.unwrap().data;
-	const filtered = [...data.campaigns].filter((campaign) => campaign.settings.subject_line.toLowerCase().includes(query));
+	const filtered = [...data.campaigns].filter((campaign) =>
+		campaign.settings.subject_line.toLowerCase().includes(query),
+	);
 
 	return {
 		data: filtered.slice(offset, offset + limit),

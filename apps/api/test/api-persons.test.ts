@@ -87,9 +87,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	assert(institutionType, "No institution type in database.");
 	assert(affiliatedRoleType, "No affiliated role type in database.");
 
-	await db.insert(schema.assets).values(
-		items.map((item) => item.asset),
-	);
+	await db.insert(schema.assets).values(items.map((item) => item.asset));
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {
@@ -103,9 +101,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 		}),
 	);
 
-	await db.insert(schema.persons).values(
-		items.map((item) => item.person),
-	);
+	await db.insert(schema.persons).values(items.map((item) => item.person));
 
 	await db.insert(schema.entities).values(
 		items.map((item) => {

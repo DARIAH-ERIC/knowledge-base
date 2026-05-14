@@ -22,11 +22,11 @@ export const reportingCampaigns = p.snakeCase.table(
 		...f.timestamps(),
 	},
 	(t) => [
-			p.check(
-				"reporting_campaigns_status_enum_check",
-				inArray(t.status, reportingCampaignStatusEnum),
-			),
-		],
+		p.check(
+			"reporting_campaigns_status_enum_check",
+			inArray(t.status, reportingCampaignStatusEnum),
+		),
+	],
 );
 
 export type ReportingCampaign = typeof reportingCampaigns.$inferSelect;
@@ -75,9 +75,9 @@ export const countryReports = p.snakeCase.table(
 		...f.timestamps(),
 	},
 	(t) => [
-			p.unique("country_reports_campaign_id_country_id_unique").on(t.campaignId, t.countryId),
-			p.check("country_reports_status_enum_check", inArray(t.status, reportStatusEnum)),
-		],
+		p.unique("country_reports_campaign_id_country_id_unique").on(t.campaignId, t.countryId),
+		p.check("country_reports_status_enum_check", inArray(t.status, reportStatusEnum)),
+	],
 );
 
 export type CountryReport = typeof countryReports.$inferSelect;
@@ -105,11 +105,11 @@ export const workingGroupReports = p.snakeCase.table(
 		...f.timestamps(),
 	},
 	(t) => [
-			p
-				.unique("working_group_reports_campaign_id_working_group_id_unique")
-				.on(t.campaignId, t.workingGroupId),
-			p.check("working_group_reports_status_enum_check", inArray(t.status, reportStatusEnum)),
-		],
+		p
+			.unique("working_group_reports_campaign_id_working_group_id_unique")
+			.on(t.campaignId, t.workingGroupId),
+		p.check("working_group_reports_status_enum_check", inArray(t.status, reportStatusEnum)),
+	],
 );
 
 export type WorkingGroupReport = typeof workingGroupReports.$inferSelect;
@@ -130,18 +130,18 @@ export const reportScreenComments = p.snakeCase.table(
 		...f.timestamps(),
 	},
 	(t) => [
-			p
-				.unique("report_screen_comments_report_type_report_id_screen_key_unique")
-				.on(t.reportType, t.reportId, t.screenKey),
-			p.check(
-				"report_screen_comments_report_type_enum_check",
-				inArray(t.reportType, reportScreenCommentTypeEnum),
-			),
-			p.check(
-				"report_screen_comments_screen_key_enum_check",
-				inArray(t.screenKey, reportScreenCommentKeyEnum),
-			),
-		],
+		p
+			.unique("report_screen_comments_report_type_report_id_screen_key_unique")
+			.on(t.reportType, t.reportId, t.screenKey),
+		p.check(
+			"report_screen_comments_report_type_enum_check",
+			inArray(t.reportType, reportScreenCommentTypeEnum),
+		),
+		p.check(
+			"report_screen_comments_screen_key_enum_check",
+			inArray(t.screenKey, reportScreenCommentKeyEnum),
+		),
+	],
 );
 
 export type ReportScreenComment = typeof reportScreenComments.$inferSelect;
@@ -205,12 +205,12 @@ export const countryReportSocialMediaKpis = p.snakeCase.table(
 		value: p.integer("value").notNull(),
 	},
 	(t) => [
-			p.unique().on(t.countryReportId, t.socialMediaId, t.kpi),
-			p.check(
-				"country_report_social_media_kpis_kpi_enum_check",
-				inArray(t.kpi, socialMediaKpiCategoryEnum),
-			),
-		],
+		p.unique().on(t.countryReportId, t.socialMediaId, t.kpi),
+		p.check(
+			"country_report_social_media_kpis_kpi_enum_check",
+			inArray(t.kpi, socialMediaKpiCategoryEnum),
+		),
+	],
 );
 
 export type CountryReportSocialMediaKpi = typeof countryReportSocialMediaKpis.$inferSelect;
@@ -256,9 +256,9 @@ export const countryReportServiceKpis = p.snakeCase.table(
 		value: p.integer("value").notNull(),
 	},
 	(t) => [
-			p.unique().on(t.countryReportId, t.serviceId, t.kpi),
-			p.check("country_report_service_kpis_kpi_enum_check", inArray(t.kpi, serviceKpiCategoryEnum)),
-		],
+		p.unique().on(t.countryReportId, t.serviceId, t.kpi),
+		p.check("country_report_service_kpis_kpi_enum_check", inArray(t.kpi, serviceKpiCategoryEnum)),
+	],
 );
 
 export type CountryReportServiceKpi = typeof countryReportServiceKpis.$inferSelect;
@@ -443,12 +443,12 @@ export const reportingCampaignEventAmounts = p.snakeCase.table(
 		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
 	},
 	(t) => [
-			p.unique().on(t.campaignId, t.eventType),
-			p.check(
-				"reporting_campaign_event_amounts_event_type_enum_check",
-				inArray(t.eventType, reportingCampaignEventTypeEnum),
-			),
-		],
+		p.unique().on(t.campaignId, t.eventType),
+		p.check(
+			"reporting_campaign_event_amounts_event_type_enum_check",
+			inArray(t.eventType, reportingCampaignEventTypeEnum),
+		),
+	],
 );
 
 export type ReportingCampaignEventAmount = typeof reportingCampaignEventAmounts.$inferSelect;
@@ -475,12 +475,12 @@ export const reportingCampaignSocialMediaAmounts = p.snakeCase.table(
 		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
 	},
 	(t) => [
-			p.unique().on(t.campaignId, t.category),
-			p.check(
-				"reporting_campaign_social_media_amounts_category_enum_check",
-				inArray(t.category, reportingCampaignSocialMediaCategoryEnum),
-			),
-		],
+		p.unique().on(t.campaignId, t.category),
+		p.check(
+			"reporting_campaign_social_media_amounts_category_enum_check",
+			inArray(t.category, reportingCampaignSocialMediaCategoryEnum),
+		),
+	],
 );
 
 export type ReportingCampaignSocialMediaAmount =
@@ -516,12 +516,12 @@ export const reportingCampaignContributionAmounts = p.snakeCase.table(
 		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
 	},
 	(t) => [
-			p.unique().on(t.campaignId, t.roleType),
-			p.check(
-				"reporting_campaign_contribution_amounts_role_type_enum_check",
-				inArray(t.roleType, reportingCampaignContributionRoleEnum),
-			),
-		],
+		p.unique().on(t.campaignId, t.roleType),
+		p.check(
+			"reporting_campaign_contribution_amounts_role_type_enum_check",
+			inArray(t.roleType, reportingCampaignContributionRoleEnum),
+		),
+	],
 );
 
 export type ReportingCampaignContributionAmount =
@@ -551,12 +551,12 @@ export const reportingCampaignServiceSizes = p.snakeCase.table(
 		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
 	},
 	(t) => [
-			p.unique().on(t.campaignId, t.serviceSize),
-			p.check(
-				"reporting_campaign_service_sizes_service_size_enum_check",
-				inArray(t.serviceSize, serviceSizeEnum),
-			),
-		],
+		p.unique().on(t.campaignId, t.serviceSize),
+		p.check(
+			"reporting_campaign_service_sizes_service_size_enum_check",
+			inArray(t.serviceSize, serviceSizeEnum),
+		),
+	],
 );
 
 export type ReportingCampaignServiceSize = typeof reportingCampaignServiceSizes.$inferSelect;

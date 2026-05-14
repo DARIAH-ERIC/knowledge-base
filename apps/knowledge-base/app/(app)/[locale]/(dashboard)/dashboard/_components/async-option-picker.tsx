@@ -176,10 +176,10 @@ function AsyncOptionPickerInner<T extends AsyncOption>(
 									selectionMode="single"
 								>
 									{(item) => (
-											<ListBoxItem id={item.id} textValue={item.name}>
-												{renderOption(item)}
-											</ListBoxItem>
-										)}
+										<ListBoxItem id={item.id} textValue={item.name}>
+											{renderOption(item)}
+										</ListBoxItem>
+									)}
 								</ListBox>
 
 								{isPending ? (

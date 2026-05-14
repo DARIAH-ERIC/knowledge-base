@@ -20,10 +20,14 @@ const UpdateWorkingGroupReportDataSchema = v.object({
 });
 
 export async function updateWorkingGroupReportDataAction(formData: FormData): Promise<void> {
-	if (!(await globalPostRequestRateLimit())) {return;}
+	if (!(await globalPostRequestRateLimit())) {
+		return;
+	}
 
 	const result = v.safeParse(UpdateWorkingGroupReportDataSchema, getFormDataValues(formData));
-	if (!result.success) {return;}
+	if (!result.success) {
+		return;
+	}
 
 	const { id, numberOfMembers, mailingList } = result.output;
 

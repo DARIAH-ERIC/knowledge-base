@@ -45,9 +45,9 @@ export const impactCaseStudiesToPersons = p.snakeCase.table(
 		...f.timestamps(),
 	},
 	(t) => [
-			p.primaryKey({
-				columns: [t.impactCaseStudyId, t.personId],
-				name: "impact_case_studies_to_persons_pkey",
-			}),
-		],
+		p.primaryKey({
+			columns: [t.impactCaseStudyId, t.personId],
+			name: "impact_case_studies_to_persons_pkey",
+		}),
+	],
 );

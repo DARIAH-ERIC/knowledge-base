@@ -28,19 +28,29 @@ export async function getReportScreenComment(
 }
 
 export function isEmptyRichTextDocument(content: JSONContent | null | undefined): boolean {
-	if (content == null) {return true;}
-	if (content.type !== "doc") {return false;}
+	if (content == null) {
+		return true;
+	}
+	if (content.type !== "doc") {
+		return false;
+	}
 
 	const nodes = content.content ?? [];
 
-	if (nodes.length === 0) {return true;}
+	if (nodes.length === 0) {
+		return true;
+	}
 
 	return nodes.every((node) => {
 		if (node.type === "paragraph") {
 			const paragraphContent = node.content ?? [];
-			if (paragraphContent.length === 0) {return true;}
+			if (paragraphContent.length === 0) {
+				return true;
+			}
 
-			return paragraphContent.every((child) => child.type === "text" && (child.text ?? "").trim() === "");
+			return paragraphContent.every(
+				(child) => child.type === "text" && (child.text ?? "").trim() === "",
+			);
 		}
 
 		return false;

@@ -128,14 +128,16 @@ export async function ingestSshocServices(
 		serviceRoles.map((serviceRole) => [serviceRole.role, serviceRole.id] as const),
 	);
 	const organisationalUnitIdsByActorId = new Map(
-		organisationalUnits.flatMap((organisationalUnit) => organisationalUnit.sshocMarketplaceActorId == null
+		organisationalUnits.flatMap((organisationalUnit) =>
+			organisationalUnit.sshocMarketplaceActorId == null
 				? []
-				: ([[organisationalUnit.sshocMarketplaceActorId, organisationalUnit.id]] as const)),
+				: ([[organisationalUnit.sshocMarketplaceActorId, organisationalUnit.id]] as const),
+		),
 	);
 	const existingServicesByMarketplaceId = new Map(
-		existingServices.flatMap((service) => service.sshocMarketplaceId == null
-				? []
-				: ([[service.sshocMarketplaceId, service]] as const)),
+		existingServices.flatMap((service) =>
+			service.sshocMarketplaceId == null ? [] : ([[service.sshocMarketplaceId, service]] as const),
+		),
 	);
 
 	const liveStatusId = serviceStatusIds.get("live");
@@ -262,7 +264,9 @@ export async function ingestSshocServices(
 					.where(eq(schema.servicesToOrganisationalUnits.serviceId, serviceId));
 
 				const existingRelationKeys = new Set(
-					existingRelations.map((relation) => [relation.organisationalUnitId, relation.roleId].join(":")),
+					existingRelations.map((relation) =>
+						[relation.organisationalUnitId, relation.roleId].join(":"),
+					),
 				);
 
 				/**
@@ -271,9 +275,10 @@ export async function ingestSshocServices(
 				 * product decision: are SSHOC service relations exclusively managed upstream, or can admins
 				 * add local owner/provider links that should survive re-ingest?
 				 */
-				const missingRelations = relations.filter((relation) => !existingRelationKeys.has(
-						[relation.organisationalUnitId, relation.roleId].join(":"),
-					));
+				const missingRelations = relations.filter(
+					(relation) =>
+						!existingRelationKeys.has([relation.organisationalUnitId, relation.roleId].join(":")),
+				);
 
 				if (missingRelations.length > 0) {
 					await tx.insert(schema.servicesToOrganisationalUnits).values(missingRelations);
@@ -285,11 +290,12 @@ export async function ingestSshocServices(
 		seenMarketplaceIds.add(sshocMarketplaceId);
 	}
 
-	const servicesToMarkNeedsReview = existingServices.filter((service) => (
+	const servicesToMarkNeedsReview = existingServices.filter(
+		(service) =>
 			service.sshocMarketplaceId != null &&
 			!seenMarketplaceIds.has(service.sshocMarketplaceId) &&
-			service.status === "live"
-		));
+			service.status === "live",
+	);
 
 	if (servicesToMarkNeedsReview.length > 0) {
 		await db

@@ -14,7 +14,9 @@ export const spotlightArticlesLifecycleAdapter: EntityLifecycleAdapter = {
 			.from(schema.spotlightArticles)
 			.where(eq(schema.spotlightArticles.id, sourceVersionId))
 			.limit(1);
-		if (source == null) {return;}
+		if (source == null) {
+			return;
+		}
 		await tx.insert(schema.spotlightArticles).values({ id: targetVersionId, ...source });
 
 		const contributors = await tx

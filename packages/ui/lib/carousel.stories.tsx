@@ -37,14 +37,14 @@ export const Default: Story = {
 				<Carousel>
 					<CarouselContent>
 						{slides.map((slide) => (
-								<CarouselItem key={slide.id}>
-									<div
-										className={`flex block-40 items-center justify-center rounded-xl ${slide.bg} text-sm font-medium`}
-									>
-										{slide.label}
-									</div>
-								</CarouselItem>
-							))}
+							<CarouselItem key={slide.id}>
+								<div
+									className={`flex block-40 items-center justify-center rounded-xl ${slide.bg} text-sm font-medium`}
+								>
+									{slide.label}
+								</div>
+							</CarouselItem>
+						))}
 					</CarouselContent>
 					<CarouselHandler>
 						<CarouselButton segment="previous" />
@@ -64,14 +64,14 @@ export const MultipleVisible: Story = {
 				<Carousel opts={{ align: "start" }}>
 					<CarouselContent>
 						{slides.map((slide) => (
-								<CarouselItem key={slide.id} className="basis-1/2">
-									<div
-										className={`flex block-32 items-center justify-center rounded-xl ${slide.bg} text-sm font-medium`}
-									>
-										{slide.label}
-									</div>
-								</CarouselItem>
-							))}
+							<CarouselItem key={slide.id} className="basis-1/2">
+								<div
+									className={`flex block-32 items-center justify-center rounded-xl ${slide.bg} text-sm font-medium`}
+								>
+									{slide.label}
+								</div>
+							</CarouselItem>
+						))}
 					</CarouselContent>
 					<CarouselHandler>
 						<CarouselButton segment="previous" />

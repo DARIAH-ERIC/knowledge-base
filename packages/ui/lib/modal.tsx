@@ -104,11 +104,11 @@ export function ModalContent(props: Readonly<ModalContentProps>): ReactNode {
 			>
 				<Dialog role={role}>
 					{(values) => (
-							<Fragment>
-								{typeof children === "function" ? children(values) : children}
-								{closeButton && <DialogCloseIcon isDismissable={isDismissable} />}
-							</Fragment>
-						)}
+						<Fragment>
+							{typeof children === "function" ? children(values) : children}
+							{closeButton && <DialogCloseIcon isDismissable={isDismissable} />}
+						</Fragment>
+					)}
 				</Dialog>
 			</AriaModal>
 		</AriaModalOverlay>

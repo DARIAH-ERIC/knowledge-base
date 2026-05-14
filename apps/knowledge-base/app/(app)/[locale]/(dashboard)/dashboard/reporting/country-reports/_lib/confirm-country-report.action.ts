@@ -12,7 +12,9 @@ import { redirect } from "@/lib/navigation/navigation";
 
 export async function confirmCountryReportAction(formData: FormData): Promise<void> {
 	const id = formData.get("id");
-	if (typeof id !== "string") {return;}
+	if (typeof id !== "string") {
+		return;
+	}
 
 	const locale = await getLocale();
 	const { user } = await assertAuthenticated();

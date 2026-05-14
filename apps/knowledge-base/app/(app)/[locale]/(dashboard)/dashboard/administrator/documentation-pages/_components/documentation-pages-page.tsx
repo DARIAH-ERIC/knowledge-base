@@ -123,49 +123,49 @@ export function DocumentationPagesPage(props: Readonly<DocumentationPagesPagePro
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-							<TableRow href={`/dashboard/website/documentation-pages/${item.entity.slug}/details`}>
-								<TableCell>
-									<div className="max-inline-64 truncate">{item.title}</div>
-								</TableCell>
-								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
-								<TableCell className="text-end">
-									<Menu>
-										<Button
-											aria-label={t("Open actions menu")}
-											className="block-7 sm:block-7"
-											intent="plain"
-											size="sq-sm"
+						<TableRow href={`/dashboard/website/documentation-pages/${item.entity.slug}/details`}>
+							<TableCell>
+								<div className="max-inline-64 truncate">{item.title}</div>
+							</TableCell>
+							<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
+							<TableCell className="text-end">
+								<Menu>
+									<Button
+										aria-label={t("Open actions menu")}
+										className="block-7 sm:block-7"
+										intent="plain"
+										size="sq-sm"
+									>
+										<EllipsisHorizontalIcon className="block-5 inline-5" />
+									</Button>
+									<MenuContent placement="left top">
+										<MenuItem
+											href={`/dashboard/website/documentation-pages/${item.entity.slug}/details`}
 										>
-											<EllipsisHorizontalIcon className="block-5 inline-5" />
-										</Button>
-										<MenuContent placement="left top">
-											<MenuItem
-												href={`/dashboard/website/documentation-pages/${item.entity.slug}/details`}
-											>
-												<EyeIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("View")}</MenuLabel>
-											</MenuItem>
-											<MenuItem
-												href={`/dashboard/website/documentation-pages/${item.entity.slug}/edit`}
-											>
-												<PencilSquareIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Edit")}</MenuLabel>
-											</MenuItem>
-											<MenuSeparator />
-											<MenuItem
-												intent="danger"
-												onAction={() => {
-													setItemToDelete({ id: item.id });
-												}}
-											>
-												<TrashIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Delete")}</MenuLabel>
-											</MenuItem>
-										</MenuContent>
-									</Menu>
-								</TableCell>
-							</TableRow>
-						)}
+											<EyeIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("View")}</MenuLabel>
+										</MenuItem>
+										<MenuItem
+											href={`/dashboard/website/documentation-pages/${item.entity.slug}/edit`}
+										>
+											<PencilSquareIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Edit")}</MenuLabel>
+										</MenuItem>
+										<MenuSeparator />
+										<MenuItem
+											intent="danger"
+											onAction={() => {
+												setItemToDelete({ id: item.id });
+											}}
+										>
+											<TrashIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Delete")}</MenuLabel>
+										</MenuItem>
+									</MenuContent>
+								</Menu>
+							</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 

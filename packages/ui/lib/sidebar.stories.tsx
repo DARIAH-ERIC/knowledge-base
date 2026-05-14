@@ -74,27 +74,27 @@ export const Default: Story = {
 						<SidebarSectionGroup>
 							<SidebarSection label={"Navigation"}>
 								{navItems.map((item) => (
-										<SidebarItem
-											key={item.id}
-											href={item.href}
-											isCurrent={item.isCurrent}
-											tooltip={item.label}
-										>
-											<item.icon />
-											<SidebarLabel>{item.label}</SidebarLabel>
-										</SidebarItem>
-									))}
+									<SidebarItem
+										key={item.id}
+										href={item.href}
+										isCurrent={item.isCurrent}
+										tooltip={item.label}
+									>
+										<item.icon />
+										<SidebarLabel>{item.label}</SidebarLabel>
+									</SidebarItem>
+								))}
 							</SidebarSection>
 
 							<SidebarSeparator />
 
 							<SidebarSection label={"Account"}>
 								{settingsItems.map((item) => (
-										<SidebarItem key={item.id} href={item.href} tooltip={item.label}>
-											<item.icon />
-											<SidebarLabel>{item.label}</SidebarLabel>
-										</SidebarItem>
-									))}
+									<SidebarItem key={item.id} href={item.href} tooltip={item.label}>
+										<item.icon />
+										<SidebarLabel>{item.label}</SidebarLabel>
+									</SidebarItem>
+								))}
 							</SidebarSection>
 						</SidebarSectionGroup>
 					</SidebarContent>

@@ -220,30 +220,30 @@ function MenuTabPanel(props: Readonly<MenuTabPanelProps>): ReactNode {
 					<p className="text-muted-fg px-2 py-4 text-sm">{t("No items yet.")}</p>
 				) : (
 					tree.map((node, index) => (
-							<ItemRow
-								key={node.id}
-								depth={0}
-								entities={entities}
-								isFirst={index === 0}
-								isLast={index === tree.length - 1}
-								menuId={menu.id}
-								node={node}
-								onAddChild={(parentId) => {
-									setItemDialogState({ isOpen: true, parentId });
-								}}
-								onDeleteItem={(id) => {
-									setItemToDelete(id);
-								}}
-								onEditItem={(item) => {
-									setItemDialogState({ isOpen: true, item });
-								}}
-								onMoveItem={(id, direction) => {
-									startTransition(async () => {
-										await moveNavigationItemAction(id, direction);
-									});
-								}}
-							/>
-						))
+						<ItemRow
+							key={node.id}
+							depth={0}
+							entities={entities}
+							isFirst={index === 0}
+							isLast={index === tree.length - 1}
+							menuId={menu.id}
+							node={node}
+							onAddChild={(parentId) => {
+								setItemDialogState({ isOpen: true, parentId });
+							}}
+							onDeleteItem={(id) => {
+								setItemToDelete(id);
+							}}
+							onEditItem={(item) => {
+								setItemDialogState({ isOpen: true, item });
+							}}
+							onMoveItem={(id, direction) => {
+								startTransition(async () => {
+									await moveNavigationItemAction(id, direction);
+								});
+							}}
+						/>
+					))
 				)}
 			</div>
 
@@ -277,14 +277,18 @@ function MenuTabPanel(props: Readonly<MenuTabPanelProps>): ReactNode {
 				isOpen={itemToDelete != null}
 				model={t("navigation item")}
 				onAction={() => {
-					if (itemToDelete == null) {return;}
+					if (itemToDelete == null) {
+						return;
+					}
 					startTransition(async () => {
 						await deleteNavigationItemAction(itemToDelete);
 						setItemToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) {setItemToDelete(null);}
+					if (!open) {
+						setItemToDelete(null);
+					}
 				}}
 			/>
 		</Fragment>
@@ -319,36 +323,36 @@ export function NavigationPage(props: Readonly<NavigationPageProps>): ReactNode 
 					<Tabs>
 						<TabList className="mbe-4">
 							{menus.map((menu) => (
-									<Tab key={menu.id} id={menu.id}>
-										{menu.name}
-									</Tab>
-								))}
+								<Tab key={menu.id} id={menu.id}>
+									{menu.name}
+								</Tab>
+							))}
 						</TabList>
 
 						{menus.map((menu) => (
-								<TabPanel key={menu.id} id={menu.id}>
-									<div className="flex items-center justify-between mbe-4">
-										<span className="text-muted-fg text-sm">
-											{menu.items.length === 1
-												? t("1 item")
-												: `${String(menu.items.length)} ${t("items")}`}
-										</span>
-										<Button
-											aria-label={t("Delete menu")}
-											intent="plain"
-											onPress={() => {
-												setMenuToDelete(menu.id);
-											}}
-											size="sm"
-										>
-											<TrashIcon className="me-2 block-4 inline-4 text-danger" />
-											<span className="text-danger">{t("Delete menu")}</span>
-										</Button>
-									</div>
+							<TabPanel key={menu.id} id={menu.id}>
+								<div className="flex items-center justify-between mbe-4">
+									<span className="text-muted-fg text-sm">
+										{menu.items.length === 1
+											? t("1 item")
+											: `${String(menu.items.length)} ${t("items")}`}
+									</span>
+									<Button
+										aria-label={t("Delete menu")}
+										intent="plain"
+										onPress={() => {
+											setMenuToDelete(menu.id);
+										}}
+										size="sm"
+									>
+										<TrashIcon className="me-2 block-4 inline-4 text-danger" />
+										<span className="text-danger">{t("Delete menu")}</span>
+									</Button>
+								</div>
 
-									<MenuTabPanel entities={entities} menu={menu} />
-								</TabPanel>
-							))}
+								<MenuTabPanel entities={entities} menu={menu} />
+							</TabPanel>
+						))}
 					</Tabs>
 				)}
 			</div>
@@ -357,14 +361,18 @@ export function NavigationPage(props: Readonly<NavigationPageProps>): ReactNode 
 				isOpen={menuToDelete != null}
 				model={t("navigation menu")}
 				onAction={() => {
-					if (menuToDelete == null) {return;}
+					if (menuToDelete == null) {
+						return;
+					}
 					startTransition(async () => {
 						await deleteNavigationMenuAction(menuToDelete);
 						setMenuToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) {setMenuToDelete(null);}
+					if (!open) {
+						setMenuToDelete(null);
+					}
 				}}
 			/>
 		</Fragment>

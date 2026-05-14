@@ -42,12 +42,24 @@ export async function ReportingOverviewPage(
 	const t = await getExtracted();
 
 	const hasReports = scope.workingGroupReports.length > 0 || scope.countryReports.length > 0;
-	const countryDraftCount = scope.countryReports.filter((report) => report.status === "draft").length;
-	const countrySubmittedCount = scope.countryReports.filter((report) => report.status === "submitted").length;
-	const countryAcceptedCount = scope.countryReports.filter((report) => report.status === "accepted").length;
-	const workingGroupDraftCount = scope.workingGroupReports.filter((report) => report.status === "draft").length;
-	const workingGroupSubmittedCount = scope.workingGroupReports.filter((report) => report.status === "submitted").length;
-	const workingGroupAcceptedCount = scope.workingGroupReports.filter((report) => report.status === "accepted").length;
+	const countryDraftCount = scope.countryReports.filter(
+		(report) => report.status === "draft",
+	).length;
+	const countrySubmittedCount = scope.countryReports.filter(
+		(report) => report.status === "submitted",
+	).length;
+	const countryAcceptedCount = scope.countryReports.filter(
+		(report) => report.status === "accepted",
+	).length;
+	const workingGroupDraftCount = scope.workingGroupReports.filter(
+		(report) => report.status === "draft",
+	).length;
+	const workingGroupSubmittedCount = scope.workingGroupReports.filter(
+		(report) => report.status === "submitted",
+	).length;
+	const workingGroupAcceptedCount = scope.workingGroupReports.filter(
+		(report) => report.status === "accepted",
+	).length;
 
 	const groupedCountryReports = groupReportsByStatus(scope.countryReports);
 	const groupedWorkingGroupReports = groupReportsByStatus(scope.workingGroupReports);
@@ -127,7 +139,9 @@ export async function ReportingOverviewPage(
 								{statusOrder.map((status) => {
 									const reports = groupedWorkingGroupReports[status] ?? [];
 
-									if (reports.length === 0) {return null;}
+									if (reports.length === 0) {
+										return null;
+									}
 
 									return (
 										<section key={status} className="rounded-lg border bg-bg">
@@ -139,29 +153,27 @@ export async function ReportingOverviewPage(
 											</div>
 											<ul className="divide-y">
 												{reports.map((report) => (
-														<li
-															key={report.reportId}
-															className="flex items-center justify-between gap-x-4 px-4 py-3"
+													<li
+														key={report.reportId}
+														className="flex items-center justify-between gap-x-4 px-4 py-3"
+													>
+														<div className="flex flex-col gap-y-0.5">
+															<span className="text-sm font-medium">{report.workingGroupName}</span>
+															<span className="text-xs text-muted-fg">
+																{report.canConfirm
+																	? t("You can confirm this report.")
+																	: t("You can edit this report.")}
+															</span>
+														</div>
+														<ButtonLink
+															href={`/dashboard/reporting/working-group-reports/${report.reportId}/edit`}
+															intent="plain"
+															size="sm"
 														>
-															<div className="flex flex-col gap-y-0.5">
-																<span className="text-sm font-medium">
-																	{report.workingGroupName}
-																</span>
-																<span className="text-xs text-muted-fg">
-																	{report.canConfirm
-																		? t("You can confirm this report.")
-																		: t("You can edit this report.")}
-																</span>
-															</div>
-															<ButtonLink
-																href={`/dashboard/reporting/working-group-reports/${report.reportId}/edit`}
-																intent="plain"
-																size="sm"
-															>
-																{t("Open")}
-															</ButtonLink>
-														</li>
-													))}
+															{t("Open")}
+														</ButtonLink>
+													</li>
+												))}
 											</ul>
 										</section>
 									);
@@ -182,7 +194,9 @@ export async function ReportingOverviewPage(
 								{statusOrder.map((status) => {
 									const reports = groupedCountryReports[status] ?? [];
 
-									if (reports.length === 0) {return null;}
+									if (reports.length === 0) {
+										return null;
+									}
 
 									return (
 										<section key={status} className="rounded-lg border bg-bg">
@@ -194,27 +208,27 @@ export async function ReportingOverviewPage(
 											</div>
 											<ul className="divide-y">
 												{reports.map((report) => (
-														<li
-															key={report.reportId}
-															className="flex items-center justify-between gap-x-4 px-4 py-3"
+													<li
+														key={report.reportId}
+														className="flex items-center justify-between gap-x-4 px-4 py-3"
+													>
+														<div className="flex flex-col gap-y-0.5">
+															<span className="text-sm font-medium">{report.countryName}</span>
+															<span className="text-xs text-muted-fg">
+																{report.canConfirm
+																	? t("You can confirm this report.")
+																	: t("You can edit this report.")}
+															</span>
+														</div>
+														<ButtonLink
+															href={`/dashboard/reporting/country-reports/${report.reportId}/edit`}
+															intent="plain"
+															size="sm"
 														>
-															<div className="flex flex-col gap-y-0.5">
-																<span className="text-sm font-medium">{report.countryName}</span>
-																<span className="text-xs text-muted-fg">
-																	{report.canConfirm
-																		? t("You can confirm this report.")
-																		: t("You can edit this report.")}
-																</span>
-															</div>
-															<ButtonLink
-																href={`/dashboard/reporting/country-reports/${report.reportId}/edit`}
-																intent="plain"
-																size="sm"
-															>
-																{t("Open")}
-															</ButtonLink>
-														</li>
-													))}
+															{t("Open")}
+														</ButtonLink>
+													</li>
+												))}
 											</ul>
 										</section>
 									);

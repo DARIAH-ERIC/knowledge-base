@@ -435,9 +435,7 @@ export async function getProjectEditDataForAdmin(currentUser: Pick<User, "role">
 
 	const [selectedSocialMediaItems, selectedPartnerUnits] = await Promise.all([
 		getSocialMediaOptionsByIds(initialSocialMediaIds),
-		getOrganisationalUnitOptionsByIds(
-			initialPartners.map((partner) => partner.unitId),
-		),
+		getOrganisationalUnitOptionsByIds(initialPartners.map((partner) => partner.unitId)),
 	]);
 
 	return {

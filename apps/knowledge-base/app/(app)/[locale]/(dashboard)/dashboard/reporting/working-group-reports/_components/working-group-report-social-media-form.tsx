@@ -50,25 +50,22 @@ export function WorkingGroupReportSocialMediaForm(
 					<h2 className="text-sm font-semibold text-fg">{t("Social media accounts")}</h2>
 					<ul className="divide-y divide-border rounded-md border max-inline-sm">
 						{report.socialMedia.map((claimed) => (
-								<li
-									key={claimed.id}
-									className="flex items-center justify-between gap-x-4 px-4 py-3"
-								>
-									<div>
-										<p className="text-sm font-medium text-fg">{claimed.socialMedia.name}</p>
-										{claimed.socialMedia.url != null && (
-											<p className="text-xs text-muted-fg">{claimed.socialMedia.url}</p>
-										)}
-									</div>
-									<form action={deleteAction}>
-										<input name="claimedId" type="hidden" value={claimed.id} />
-										<input name="workingGroupReportId" type="hidden" value={report.id} />
-										<Button intent="danger" size="sm" type="submit">
-											{t("Remove")}
-										</Button>
-									</form>
-								</li>
-							))}
+							<li key={claimed.id} className="flex items-center justify-between gap-x-4 px-4 py-3">
+								<div>
+									<p className="text-sm font-medium text-fg">{claimed.socialMedia.name}</p>
+									{claimed.socialMedia.url != null && (
+										<p className="text-xs text-muted-fg">{claimed.socialMedia.url}</p>
+									)}
+								</div>
+								<form action={deleteAction}>
+									<input name="claimedId" type="hidden" value={claimed.id} />
+									<input name="workingGroupReportId" type="hidden" value={report.id} />
+									<Button intent="danger" size="sm" type="submit">
+										{t("Remove")}
+									</Button>
+								</form>
+							</li>
+						))}
 					</ul>
 				</section>
 			)}
@@ -91,11 +88,11 @@ export function WorkingGroupReportSocialMediaForm(
 							<FieldError />
 							<SelectContent>
 								{availableSocialMedia.map((account) => (
-										<SelectItem key={account.id} id={account.id}>
-											{account.name}
-											{account.url != null && ` (${account.url})`}
-										</SelectItem>
-									))}
+									<SelectItem key={account.id} id={account.id}>
+										{account.name}
+										{account.url != null && ` (${account.url})`}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 						<input name="socialMediaId" type="hidden" value={selectedId} />

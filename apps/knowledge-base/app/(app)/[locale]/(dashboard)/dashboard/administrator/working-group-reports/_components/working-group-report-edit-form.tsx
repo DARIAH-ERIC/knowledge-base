@@ -73,10 +73,10 @@ export function WorkingGroupReportEditForm(
 							<FieldError />
 							<SelectContent>
 								{reportStatusEnum.map((status) => (
-										<SelectItem key={status} id={status}>
-											{formatStatus(status)}
-										</SelectItem>
-									))}
+									<SelectItem key={status} id={status}>
+										{formatStatus(status)}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 						<input name="status" type="hidden" value={selectedStatus} />

@@ -101,11 +101,11 @@ export const organisationalUnitServiceRoles = p.snakeCase.table(
 		...f.timestamps(),
 	},
 	(t) => [
-			p.check(
-				"service_statuses_status_enum_check",
-				inArray(t.role, organisationalUnitServiceRolesEnum),
-			),
-		],
+		p.check(
+			"service_statuses_status_enum_check",
+			inArray(t.role, organisationalUnitServiceRolesEnum),
+		),
+	],
 );
 
 export type OrganisationalUnitServiceRole = typeof organisationalUnitServiceRoles.$inferSelect;

@@ -48,9 +48,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	assert(entityType, "No entity type in database.");
 	assert(unitType, "No organisational unit type in database.");
 
-	await db.insert(schema.socialMedia).values(
-		items.map((item) => item.socialMedia),
-	);
+	await db.insert(schema.socialMedia).values(items.map((item) => item.socialMedia));
 
 	const unitVersionId = uuidv7();
 	const unitEntityId = uuidv7();

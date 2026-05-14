@@ -43,9 +43,9 @@ export const spotlightArticlesToPersons = p.snakeCase.table(
 		...f.timestamps(),
 	},
 	(t) => [
-			p.primaryKey({
-				columns: [t.spotlightArticleId, t.personId],
-				name: "spotlight_articles_to_persons_pkey",
-			}),
-		],
+		p.primaryKey({
+			columns: [t.spotlightArticleId, t.personId],
+			name: "spotlight_articles_to_persons_pkey",
+		}),
+	],
 );

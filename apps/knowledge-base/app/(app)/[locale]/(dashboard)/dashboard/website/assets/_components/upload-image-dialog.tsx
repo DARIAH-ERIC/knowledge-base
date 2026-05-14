@@ -111,10 +111,10 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 							<FieldError />
 							<SelectContent>
 								{assetPrefixes.map((prefix) => (
-										<SelectItem key={prefix} id={prefix}>
-											{prefix}
-										</SelectItem>
-									))}
+									<SelectItem key={prefix} id={prefix}>
+										{prefix}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 

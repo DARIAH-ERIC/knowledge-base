@@ -64,7 +64,6 @@ export function CardDescription({
 }: Readonly<React.HTMLAttributes<HTMLDivElement>>): ReactNode {
 	return (
 		<div
-			
 			className={twMerge("row-start-2 text-pretty text-muted-fg text-sm/6", className)}
 			data-slot="card-description"
 			{...props}

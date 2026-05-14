@@ -25,9 +25,7 @@ export const contentBlockTypes = p.snakeCase.table(
 		type: p.text("type", { enum: contentBlockTypesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
-	(t) => [
-			p.check("content_blocks_types_type_enum_check", inArray(t.type, contentBlockTypesEnum)),
-		],
+	(t) => [p.check("content_blocks_types_type_enum_check", inArray(t.type, contentBlockTypesEnum))],
 );
 
 export type ContentBlockTypes = typeof contentBlockTypes.$inferSelect;
@@ -76,11 +74,11 @@ export const dataContentBlockTypes = p.snakeCase.table(
 		...f.timestamps(),
 	},
 	(t) => [
-			p.check(
-				"content_blocks_type_data_types_type_enum_check",
-				inArray(t.type, dataContentBlockTypesEnum),
-			),
-		],
+		p.check(
+			"content_blocks_type_data_types_type_enum_check",
+			inArray(t.type, dataContentBlockTypesEnum),
+		),
+	],
 );
 
 export type DataContentBlockTypes = typeof dataContentBlockTypes.$inferSelect;
@@ -94,10 +92,7 @@ export const dataContentBlocks = p.snakeCase.table("content_blocks_type_data", {
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(
-			() => contentBlocks.id,
-			{ onDelete: "cascade" },
-		),
+		.references(() => contentBlocks.id, { onDelete: "cascade" }),
 	typeId: p
 		.uuid("type_id")
 		.notNull()
@@ -118,10 +113,7 @@ export const embedContentBlocks = p.snakeCase.table("content_blocks_type_embed",
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(
-			() => contentBlocks.id,
-			{ onDelete: "cascade" },
-		),
+		.references(() => contentBlocks.id, { onDelete: "cascade" }),
 	url: p.text("url").notNull(),
 	title: p.text("title").notNull(),
 	caption: p.text("caption"),
@@ -139,10 +131,7 @@ export const galleryContentBlocks = p.snakeCase.table("content_blocks_type_galle
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(
-			() => contentBlocks.id,
-			{ onDelete: "cascade" },
-		),
+		.references(() => contentBlocks.id, { onDelete: "cascade" }),
 	layout: p
 		.text("layout", { enum: ["carousel", "grid"] })
 		.notNull()
@@ -162,10 +151,7 @@ export const galleryContentBlockItems = p.snakeCase.table("content_blocks_type_g
 	galleryContentBlockId: p
 		.uuid("gallery_content_block_id")
 		.notNull()
-		.references(
-			() => galleryContentBlocks.id,
-			{ onDelete: "cascade" },
-		),
+		.references(() => galleryContentBlocks.id, { onDelete: "cascade" }),
 	imageId: p
 		.uuid("image_id")
 		.notNull()
@@ -186,10 +172,7 @@ export const imageContentBlocks = p.snakeCase.table("content_blocks_type_image",
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(
-			() => contentBlocks.id,
-			{ onDelete: "cascade" },
-		),
+		.references(() => contentBlocks.id, { onDelete: "cascade" }),
 	imageId: p
 		.uuid("image_id")
 		.notNull()
@@ -209,10 +192,7 @@ export const heroContentBlocks = p.snakeCase.table("content_blocks_type_hero", {
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(
-			() => contentBlocks.id,
-			{ onDelete: "cascade" },
-		),
+		.references(() => contentBlocks.id, { onDelete: "cascade" }),
 	title: p.text("title").notNull(),
 	eyebrow: p.text("eyebrow"),
 	imageId: p.uuid("image_id").references(() => assets.id),
@@ -231,10 +211,7 @@ export const accordionContentBlocks = p.snakeCase.table("content_blocks_type_acc
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(
-			() => contentBlocks.id,
-			{ onDelete: "cascade" },
-		),
+		.references(() => contentBlocks.id, { onDelete: "cascade" }),
 	items: p.jsonb("items").notNull(),
 	...f.timestamps(),
 });
@@ -250,10 +227,7 @@ export const richTextContentBlocks = p.snakeCase.table("content_blocks_type_rich
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(
-			() => contentBlocks.id,
-			{ onDelete: "cascade" },
-		),
+		.references(() => contentBlocks.id, { onDelete: "cascade" }),
 	content: p.jsonb("content").$type<JSONContent>().notNull(),
 	...f.timestamps(),
 });

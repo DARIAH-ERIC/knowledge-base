@@ -62,18 +62,14 @@ function NavigationItemForm(props: Readonly<NavigationItemFormProps>): ReactNode
 	const [linkType, setLinkType] = useState<LinkType>(initialLinkType);
 
 	const initialEntityType =
-		item?.entityId != null
-			? (entities.find((e) => e.id === item.entityId)?.type ?? null)
-			: null;
+		item?.entityId != null ? (entities.find((e) => e.id === item.entityId)?.type ?? null) : null;
 	const [selectedEntityType, setSelectedEntityType] = useState<EntityType | null>(
 		initialEntityType,
 	);
 	const [selectedEntityId, setSelectedEntityId] = useState<string | null>(item?.entityId ?? null);
 
 	const filteredEntities =
-		selectedEntityType != null
-			? entities.filter((e) => e.type === selectedEntityType)
-			: [];
+		selectedEntityType != null ? entities.filter((e) => e.type === selectedEntityType) : [];
 
 	const serverAction = isEditMode ? updateNavigationItemAction : createNavigationItemAction;
 
@@ -177,10 +173,10 @@ function NavigationItemForm(props: Readonly<NavigationItemFormProps>): ReactNode
 							<SelectTrigger />
 							<SelectContent>
 								{allowedEntityTypes.map((type) => (
-										<SelectItem key={type} id={type} textValue={entityTypeLabels[type]}>
-											{entityTypeLabels[type]}
-										</SelectItem>
-									))}
+									<SelectItem key={type} id={type} textValue={entityTypeLabels[type]}>
+										{entityTypeLabels[type]}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 
@@ -197,10 +193,10 @@ function NavigationItemForm(props: Readonly<NavigationItemFormProps>): ReactNode
 							<FieldError />
 							<SelectContent>
 								{filteredEntities.map((entity) => (
-										<SelectItem key={entity.id} id={entity.id} textValue={entity.title}>
-											{entity.title}
-										</SelectItem>
-									))}
+									<SelectItem key={entity.id} id={entity.id} textValue={entity.title}>
+										{entity.title}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 					</Fragment>
@@ -248,8 +244,9 @@ export function NavigationItemFormDialog(
 	const [formKey, setFormKey] = useState(0);
 
 	function handleOpenChange(open: boolean) {
-		if (open)
-			{setFormKey((k) => k + 1);}
+		if (open) {
+			setFormKey((k) => k + 1);
+		}
 		onOpenChange(open);
 	}
 

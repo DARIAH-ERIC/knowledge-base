@@ -47,23 +47,23 @@ export function CommandPalette(props: Readonly<CommandPaletteProps>): ReactNode 
 			<CommandMenuSearch placeholder={t("Quick search...")} />
 			<CommandMenuList>
 				{sidebarMenu.map((section, index) => (
-						// eslint-disable-next-line @eslint-react/no-array-index-key
-						<CommandMenuSection key={index} label={section.title}>
-							{section.items.map((item, index) => (
-									<CommandMenuItem
-										// eslint-disable-next-line @eslint-react/no-array-index-key
-										key={index}
-										onAction={() => {
-											navigate(item.href);
-										}}
-										textValue={item.tooltip}
-									>
-										{item.icon}
-										<CommandMenuLabel>{item.label}</CommandMenuLabel>
-									</CommandMenuItem>
-								))}
-						</CommandMenuSection>
-					))}
+					// eslint-disable-next-line @eslint-react/no-array-index-key
+					<CommandMenuSection key={index} label={section.title}>
+						{section.items.map((item, index) => (
+							<CommandMenuItem
+								// eslint-disable-next-line @eslint-react/no-array-index-key
+								key={index}
+								onAction={() => {
+									navigate(item.href);
+								}}
+								textValue={item.tooltip}
+							>
+								{item.icon}
+								<CommandMenuLabel>{item.label}</CommandMenuLabel>
+							</CommandMenuItem>
+						))}
+					</CommandMenuSection>
+				))}
 			</CommandMenuList>
 		</CommandMenu>
 	);

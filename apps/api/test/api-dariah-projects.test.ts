@@ -70,10 +70,7 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 	assert(otherType, "No consortium type in database.");
 	assert(projectRole, "No project role in database.");
 
-	const dariahItems = f.helpers.multiple(
-		() => createProjectData(),
-		{ count },
-	);
+	const dariahItems = f.helpers.multiple(() => createProjectData(), { count });
 	const nonDariahItem = createProjectData();
 	const allItems = [...dariahItems, nonDariahItem];
 

@@ -94,7 +94,8 @@ function createListAll<TParams extends object, TItem extends HalDocument>(
 		params: TParams & { cursorMark?: string; rows: number; sort?: HalDocumentSort },
 	) => Promise<RequestResult<HalSearchResponse<TItem>>>,
 ): (params: TParams & { sort?: HalDocumentSort }) => Promise<Result<Array<TItem>, RequestError>> {
-	return (params) => Result.gen(async function* () {
+	return (params) =>
+		Result.gen(async function* () {
 			const items: Array<TItem> = [];
 			let cursorMark = "*";
 

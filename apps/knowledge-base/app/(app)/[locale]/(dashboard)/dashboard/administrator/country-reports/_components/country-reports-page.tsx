@@ -91,44 +91,44 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 				</TableHeader>
 				<TableBody items={reports}>
 					{(item) => (
-							<TableRow id={item.id}>
-								<TableCell>{item.country.name}</TableCell>
-								<TableCell>{item.campaign.year}</TableCell>
-								<TableCell>{formatStatus(item.status)}</TableCell>
-								<TableCell className="text-end">
-									<Menu>
-										<Button
-											aria-label={t("Open actions menu")}
-											className="block-7 sm:block-7"
-											intent="plain"
-											size="sq-sm"
+						<TableRow id={item.id}>
+							<TableCell>{item.country.name}</TableCell>
+							<TableCell>{item.campaign.year}</TableCell>
+							<TableCell>{formatStatus(item.status)}</TableCell>
+							<TableCell className="text-end">
+								<Menu>
+									<Button
+										aria-label={t("Open actions menu")}
+										className="block-7 sm:block-7"
+										intent="plain"
+										size="sq-sm"
+									>
+										<EllipsisHorizontalIcon className="block-5 inline-5" />
+									</Button>
+									<MenuContent placement="left top">
+										<MenuItem href={`/dashboard/reporting/country-reports/${item.id}`}>
+											<EyeIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("View")}</MenuLabel>
+										</MenuItem>
+										<MenuItem href={`/dashboard/administrator/country-reports/${item.id}/edit`}>
+											<PencilSquareIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Edit")}</MenuLabel>
+										</MenuItem>
+										<MenuSeparator />
+										<MenuItem
+											intent="danger"
+											onAction={() => {
+												setItemToDelete({ id: item.id });
+											}}
 										>
-											<EllipsisHorizontalIcon className="block-5 inline-5" />
-										</Button>
-										<MenuContent placement="left top">
-											<MenuItem href={`/dashboard/reporting/country-reports/${item.id}`}>
-												<EyeIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("View")}</MenuLabel>
-											</MenuItem>
-											<MenuItem href={`/dashboard/administrator/country-reports/${item.id}/edit`}>
-												<PencilSquareIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Edit")}</MenuLabel>
-											</MenuItem>
-											<MenuSeparator />
-											<MenuItem
-												intent="danger"
-												onAction={() => {
-													setItemToDelete({ id: item.id });
-												}}
-											>
-												<TrashIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Delete")}</MenuLabel>
-											</MenuItem>
-										</MenuContent>
-									</Menu>
-								</TableCell>
-							</TableRow>
-						)}
+											<TrashIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Delete")}</MenuLabel>
+										</MenuItem>
+									</MenuContent>
+								</Menu>
+							</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 
@@ -136,7 +136,9 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 				isOpen={itemToDelete != null}
 				model={t("country report")}
 				onAction={() => {
-					if (itemToDelete == null) {return;}
+					if (itemToDelete == null) {
+						return;
+					}
 
 					startTransition(async () => {
 						optimisticallyRemoveReport(itemToDelete.id);
@@ -146,7 +148,9 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) {setItemToDelete(null);}
+					if (!open) {
+						setItemToDelete(null);
+					}
 				}}
 			/>
 		</Fragment>

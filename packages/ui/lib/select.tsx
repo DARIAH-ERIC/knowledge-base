@@ -107,30 +107,30 @@ export function SelectTrigger(props: Readonly<SelectTriggerProps>): ReactNode {
 				{...rest}
 			>
 				{(values) => (
-						<Fragment>
-							{prefix != null ? <span className="text-muted-fg">{prefix}</span> : null}
-							{typeof children === "function" ? children(values) : children}
+					<Fragment>
+						{prefix != null ? <span className="text-muted-fg">{prefix}</span> : null}
+						{typeof children === "function" ? children(values) : children}
 
-							{children == null ? (
-								<Fragment>
-									<AriaSelectValue
-										className={twJoin([
-											"truncate text-start data-placeholder:text-muted-fg sm:text-sm/6 **:[[slot=description]]:hidden",
-											"has-data-[slot=avatar]:grid has-data-[slot=avatar]:grid-cols-[1fr_auto] has-data-[slot=avatar]:items-center has-data-[slot=avatar]:gap-x-2",
-											"has-data-[slot=icon]:grid has-data-[slot=icon]:grid-cols-[1fr_auto] has-data-[slot=icon]:items-center has-data-[slot=icon]:gap-x-2",
-											"*:data-[slot=icon]:block-5 *:data-[slot=icon]:inline-5 sm:*:data-[slot=icon]:block-4 sm:*:data-[slot=icon]:inline-4",
-											"*:data-[slot=avatar]:[--avatar-size:--spacing(5)] sm:*:data-[slot=avatar]:[--avatar-size:--spacing(4.5)]",
-										])}
-										data-slot="select-value"
-									/>
-									<ChevronUpDownIcon
-										className="-me-1 ms-auto block-5 inline-5 text-muted-fg sm:block-4 sm:inline-4"
-										data-slot="chevron"
-									/>
-								</Fragment>
-							) : null}
-						</Fragment>
-					)}
+						{children == null ? (
+							<Fragment>
+								<AriaSelectValue
+									className={twJoin([
+										"truncate text-start data-placeholder:text-muted-fg sm:text-sm/6 **:[[slot=description]]:hidden",
+										"has-data-[slot=avatar]:grid has-data-[slot=avatar]:grid-cols-[1fr_auto] has-data-[slot=avatar]:items-center has-data-[slot=avatar]:gap-x-2",
+										"has-data-[slot=icon]:grid has-data-[slot=icon]:grid-cols-[1fr_auto] has-data-[slot=icon]:items-center has-data-[slot=icon]:gap-x-2",
+										"*:data-[slot=icon]:block-5 *:data-[slot=icon]:inline-5 sm:*:data-[slot=icon]:block-4 sm:*:data-[slot=icon]:inline-4",
+										"*:data-[slot=avatar]:[--avatar-size:--spacing(5)] sm:*:data-[slot=avatar]:[--avatar-size:--spacing(4.5)]",
+									])}
+									data-slot="select-value"
+								/>
+								<ChevronUpDownIcon
+									className="-me-1 ms-auto block-5 inline-5 text-muted-fg sm:block-4 sm:inline-4"
+									data-slot="chevron"
+								/>
+							</Fragment>
+						) : null}
+					</Fragment>
+				)}
 			</AriaButton>
 		</span>
 	);

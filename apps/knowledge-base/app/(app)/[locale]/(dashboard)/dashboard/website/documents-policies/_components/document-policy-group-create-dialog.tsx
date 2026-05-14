@@ -29,7 +29,9 @@ function DocumentPolicyGroupForm(props: Readonly<{ onSuccess: () => void }>): Re
 	const [state, formAction, isPending] = useActionState(
 		async (prevState: ActionState, formData: FormData) => {
 			const result = await createDocumentPolicyGroupAction(prevState, formData);
-			if (result.status === "success") {onSuccess();}
+			if (result.status === "success") {
+				onSuccess();
+			}
 			return result;
 		},
 		createActionStateInitial(),
@@ -73,8 +75,9 @@ export function DocumentPolicyGroupCreateDialog(): ReactNode {
 	const [formKey, setFormKey] = useState(0);
 
 	function handleOpenChange(open: boolean) {
-		if (open)
-			{setFormKey((k) => k + 1);}
+		if (open) {
+			setFormKey((k) => k + 1);
+		}
 		setIsOpen(open);
 	}
 

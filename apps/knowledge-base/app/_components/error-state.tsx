@@ -67,7 +67,9 @@ export function ErrorState(props: Readonly<ErrorStateProps>): ReactNode {
 							<p className="font-medium text-muted-fg text-sm uppercase tracking-[0.24em]">
 								{statusLabel}
 							</p>
-							<h1 className="max-inline-lg font-semibold text-3xl text-balance sm:text-4xl">{title}</h1>
+							<h1 className="max-inline-lg font-semibold text-3xl text-balance sm:text-4xl">
+								{title}
+							</h1>
 							<p className="max-inline-xl text-base text-muted-fg sm:text-lg">{description}</p>
 						</div>
 

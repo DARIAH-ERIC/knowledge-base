@@ -33,41 +33,41 @@ export function Switch(props: Readonly<SwitchProps>): ReactNode {
 			}}
 		>
 			{(values) => (
-					<Fragment>
-						<span
-							className={twMerge(
-								"relative isolate inline-flex block-6 inline-10 cursor-default rounded-full p-0.75 sm:block-5 sm:inline-8",
-								"transition duration-200 ease-in-out",
-								"inset-ring inset-ring-input bg-input/30",
-								"forced-colors:outline forced-colors:[--switch-bg:Highlight]",
-								values.isHovered && "inset-ring-muted-fg/30",
-								values.isFocusVisible &&
-									"inset-ring-ring/70 bg-ring/20 ring-2 ring-ring/20 selected:inset-ring-ring/30 dark:inset-ring-ring/70",
-								values.isSelected &&
-									"inset-ring-(--switch-shadow) bg-(--switch-bg) dark:inset-ring-(--switch-bg-ring) dark:bg-(--switch-bg)",
-								values.isDisabled &&
-									"dark:group-disabled:bg-muted-fg/30 dark:group-disabled:group-selected:inset-ring-muted-fg/30 dark:group-disabled:group-selected:bg-(--switch-bg)",
-							)}
-							data-slot="indicator"
-						>
-							<span
-								aria-hidden="true"
-								className={twJoin(
-									"pointer-events-none relative inline-block block-4.5 inline-4.5 translate-x-0 rounded-full border border-transparent bg-white shadow-sm ring ring-fg/5 transition duration-200 ease-in-out sm:block-3.5 sm:inline-3.5",
-									values.isSelected &&
-										"translate-x-4 bg-(--switch) shadow-(--switch-shadow) ring-(--switch-ring) group-disabled:shadow-sm group-disabled:ring-secondary-fg/5 sm:translate-x-3",
-								)}
-							/>
-						</span>
-						{typeof children === "function" ? (
-							children(values)
-						) : typeof children === "string" ? (
-							<SwitchLabel>{children}</SwitchLabel>
-						) : (
-							children
+				<Fragment>
+					<span
+						className={twMerge(
+							"relative isolate inline-flex block-6 inline-10 cursor-default rounded-full p-0.75 sm:block-5 sm:inline-8",
+							"transition duration-200 ease-in-out",
+							"inset-ring inset-ring-input bg-input/30",
+							"forced-colors:outline forced-colors:[--switch-bg:Highlight]",
+							values.isHovered && "inset-ring-muted-fg/30",
+							values.isFocusVisible &&
+								"inset-ring-ring/70 bg-ring/20 ring-2 ring-ring/20 selected:inset-ring-ring/30 dark:inset-ring-ring/70",
+							values.isSelected &&
+								"inset-ring-(--switch-shadow) bg-(--switch-bg) dark:inset-ring-(--switch-bg-ring) dark:bg-(--switch-bg)",
+							values.isDisabled &&
+								"dark:group-disabled:bg-muted-fg/30 dark:group-disabled:group-selected:inset-ring-muted-fg/30 dark:group-disabled:group-selected:bg-(--switch-bg)",
 						)}
-					</Fragment>
-				)}
+						data-slot="indicator"
+					>
+						<span
+							aria-hidden="true"
+							className={twJoin(
+								"pointer-events-none relative inline-block block-4.5 inline-4.5 translate-x-0 rounded-full border border-transparent bg-white shadow-sm ring ring-fg/5 transition duration-200 ease-in-out sm:block-3.5 sm:inline-3.5",
+								values.isSelected &&
+									"translate-x-4 bg-(--switch) shadow-(--switch-shadow) ring-(--switch-ring) group-disabled:shadow-sm group-disabled:ring-secondary-fg/5 sm:translate-x-3",
+							)}
+						/>
+					</span>
+					{typeof children === "function" ? (
+						children(values)
+					) : typeof children === "string" ? (
+						<SwitchLabel>{children}</SwitchLabel>
+					) : (
+						children
+					)}
+				</Fragment>
+			)}
 		</AriaSwitch>
 	);
 }

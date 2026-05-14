@@ -25,10 +25,14 @@ async function createGalleryItems(
 	const galleryItems = await Promise.all(
 		items.map(async (item, position) => {
 			const imageKey = item.imageKey;
-			if (imageKey == null) {return null;}
+			if (imageKey == null) {
+				return null;
+			}
 
 			const imageId = await getAssetIdByKey(tx, imageKey);
-			if (imageId == null) {return null;}
+			if (imageId == null) {
+				return null;
+			}
 
 			const galleryItem: schema.GalleryContentBlockItemInput = {
 				galleryContentBlockId: blockId,
@@ -67,10 +71,14 @@ export async function upsertTypedContentBlock(
 
 		case "image": {
 			const imageKey = block.content?.imageKey;
-			if (imageKey == null) {break;}
+			if (imageKey == null) {
+				break;
+			}
 
 			const imageId = await getAssetIdByKey(tx, imageKey);
-			if (imageId == null) {break;}
+			if (imageId == null) {
+				break;
+			}
 
 			const caption = block.content?.caption ?? null;
 
@@ -92,7 +100,9 @@ export async function upsertTypedContentBlock(
 		case "embed": {
 			const url = block.content?.url;
 			const title = block.content?.title;
-			if (url == null || title == null) {break;}
+			if (url == null || title == null) {
+				break;
+			}
 
 			const caption = block.content?.caption ?? null;
 
@@ -109,13 +119,17 @@ export async function upsertTypedContentBlock(
 
 		case "data": {
 			const dataType = block.content?.dataType;
-			if (dataType == null) {break;}
+			if (dataType == null) {
+				break;
+			}
 
 			const dataContentBlockType = await tx.query.dataContentBlockTypes.findFirst({
 				where: { type: dataType },
 				columns: { id: true },
 			});
-			if (dataContentBlockType == null) {break;}
+			if (dataContentBlockType == null) {
+				break;
+			}
 
 			const limit = block.content?.limit ?? null;
 			const selectedIds = block.content?.selectedIds ?? null;
@@ -160,7 +174,9 @@ export async function upsertTypedContentBlock(
 
 		case "hero": {
 			const heroTitle = block.content?.title;
-			if (heroTitle == null) {break;}
+			if (heroTitle == null) {
+				break;
+			}
 
 			const heroImageKey = block.content?.imageKey;
 			const heroImageId = heroImageKey != null ? await getAssetIdByKey(tx, heroImageKey) : null;

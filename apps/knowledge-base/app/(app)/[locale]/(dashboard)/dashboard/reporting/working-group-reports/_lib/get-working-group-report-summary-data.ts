@@ -52,7 +52,9 @@ async function getWorkingGroupReportData(id: string): Promise<WorkingGroupReport
 		},
 	});
 
-	if (report == null) {return null;}
+	if (report == null) {
+		return null;
+	}
 
 	const [chairs, questions] = await Promise.all([
 		db
@@ -90,9 +92,7 @@ async function getWorkingGroupReportData(id: string): Promise<WorkingGroupReport
 		}),
 	]);
 
-	const answerMap = new Map(
-		report.answers.map((a) => [a.questionId, a.answer]),
-	);
+	const answerMap = new Map(report.answers.map((a) => [a.questionId, a.answer]));
 
 	return {
 		id: report.id,
@@ -128,7 +128,9 @@ async function getWorkingGroupReportHeader(
 		},
 	});
 
-	if (report == null) {return null;}
+	if (report == null) {
+		return null;
+	}
 
 	return {
 		id: report.id,

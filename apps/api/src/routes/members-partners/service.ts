@@ -318,8 +318,7 @@ async function getMemberObserverInstitutions(
 	}>;
 
 	return items.map((item) => {
-		const website =
-			item.socialMedia.find((sm) => sm.type.type === "website")?.url ?? null;
+		const website = item.socialMedia.find((sm) => sm.type.type === "website")?.url ?? null;
 
 		return {
 			name: item.name,
@@ -394,8 +393,7 @@ async function getCooperatingPartnerInstitutions(
 	}>;
 
 	return items.map((item) => {
-		const website =
-			item.socialMedia.find((sm) => sm.type.type === "website")?.url ?? null;
+		const website = item.socialMedia.find((sm) => sm.type.type === "website")?.url ?? null;
 
 		return {
 			name: item.name,

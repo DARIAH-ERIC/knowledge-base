@@ -67,7 +67,9 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 	const t = useExtracted();
 	const format = useFormatter();
 	const router = useRouter();
-	const [items, optimisticallyRemoveItem] = useOptimistic(projects.data, (state, id: string) => state.filter((item) => item.id !== id));
+	const [items, optimisticallyRemoveItem] = useOptimistic(projects.data, (state, id: string) =>
+		state.filter((item) => item.id !== id),
+	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
 		useUrlPaginatedSearch({
@@ -129,79 +131,79 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-							<TableRow href={`/dashboard/administrator/projects/${item.entity.slug}/details`}>
-								<TableCell>
-									<div className="max-inline-64 truncate">{item.name}</div>
-								</TableCell>
-								<TableCell>{item.acronym}</TableCell>
-								<TableCell>
-									{item.duration.end
-										? format.dateTimeRange(item.duration.start, item.duration.end, {
-												dateStyle: "short",
-											})
-										: format.dateTime(item.duration.start, { dateStyle: "short" })}
-								</TableCell>
-								<TableCell>
-									{item.funding != null
-										? format.number(item.funding, { style: "currency", currency: "EUR" })
-										: null}
-								</TableCell>
-								<TableCell>
-									<Badge
-										intent={
-											item.scope.scope === "eu"
-												? "danger"
-												: item.scope.scope === "national"
-													? "info"
-													: "warning"
-										}
+						<TableRow href={`/dashboard/administrator/projects/${item.entity.slug}/details`}>
+							<TableCell>
+								<div className="max-inline-64 truncate">{item.name}</div>
+							</TableCell>
+							<TableCell>{item.acronym}</TableCell>
+							<TableCell>
+								{item.duration.end
+									? format.dateTimeRange(item.duration.start, item.duration.end, {
+											dateStyle: "short",
+										})
+									: format.dateTime(item.duration.start, { dateStyle: "short" })}
+							</TableCell>
+							<TableCell>
+								{item.funding != null
+									? format.number(item.funding, { style: "currency", currency: "EUR" })
+									: null}
+							</TableCell>
+							<TableCell>
+								<Badge
+									intent={
+										item.scope.scope === "eu"
+											? "danger"
+											: item.scope.scope === "national"
+												? "info"
+												: "warning"
+									}
+								>
+									{item.scope.scope}
+								</Badge>
+							</TableCell>
+							<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
+							<TableCell>
+								<EntityLifecycleStatusBadge
+									hasDraft={item.hasDraft}
+									isPublished={item.isPublished}
+								/>
+							</TableCell>
+							<TableCell className="text-end">
+								<Menu>
+									<Button
+										aria-label={t("Open actions menu")}
+										className="block-7 sm:block-7"
+										intent="plain"
+										size="sq-sm"
 									>
-										{item.scope.scope}
-									</Badge>
-								</TableCell>
-								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
-								<TableCell>
-									<EntityLifecycleStatusBadge
-										hasDraft={item.hasDraft}
-										isPublished={item.isPublished}
-									/>
-								</TableCell>
-								<TableCell className="text-end">
-									<Menu>
-										<Button
-											aria-label={t("Open actions menu")}
-											className="block-7 sm:block-7"
-											intent="plain"
-											size="sq-sm"
+										<EllipsisHorizontalIcon className="block-5 inline-5" />
+									</Button>
+									<MenuContent placement="left top">
+										<MenuItem
+											href={`/dashboard/administrator/projects/${item.entity.slug}/details`}
 										>
-											<EllipsisHorizontalIcon className="block-5 inline-5" />
-										</Button>
-										<MenuContent placement="left top">
-											<MenuItem
-												href={`/dashboard/administrator/projects/${item.entity.slug}/details`}
-											>
-												<EyeIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("View")}</MenuLabel>
-											</MenuItem>
-											<MenuItem href={`/dashboard/administrator/projects/${item.entity.slug}/edit`}>
-												<PencilSquareIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Edit")}</MenuLabel>
-											</MenuItem>
-											<MenuSeparator />
-											<MenuItem
-												intent="danger"
-												onAction={() => {
-													setItemToDelete({ id: item.id, documentId: item.documentId });
-												}}
-											>
-												<TrashIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Delete")}</MenuLabel>
-											</MenuItem>
-										</MenuContent>
-									</Menu>
-								</TableCell>
-							</TableRow>
-						)}
+											<EyeIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("View")}</MenuLabel>
+										</MenuItem>
+										<MenuItem href={`/dashboard/administrator/projects/${item.entity.slug}/edit`}>
+											<PencilSquareIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Edit")}</MenuLabel>
+										</MenuItem>
+										<MenuSeparator />
+										<MenuItem
+											intent="danger"
+											onAction={() => {
+												setItemToDelete({ id: item.id, documentId: item.documentId });
+											}}
+										>
+											<TrashIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Delete")}</MenuLabel>
+										</MenuItem>
+									</MenuContent>
+								</Menu>
+							</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 

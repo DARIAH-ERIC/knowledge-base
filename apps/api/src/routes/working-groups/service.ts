@@ -67,10 +67,7 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 						type: "published",
 					},
 				},
-				RAW:
-					status != null
-						? (t) => buildStatusFilter(db, t.id, status)
-						: undefined,
+				RAW: status != null ? (t) => buildStatusFilter(db, t.id, status) : undefined,
 			},
 			columns: {
 				id: true,

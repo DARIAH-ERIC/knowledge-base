@@ -26,11 +26,11 @@ export const organisationalUnitTypes = p.snakeCase.table(
 		...f.timestamps(),
 	},
 	(t) => [
-			p.check(
-				"organisational_unit_types_type_enum_check",
-				inArray(t.type, organisationalUnitTypesEnum),
-			),
-		],
+		p.check(
+			"organisational_unit_types_type_enum_check",
+			inArray(t.type, organisationalUnitTypesEnum),
+		),
+	],
 );
 
 export const organisationalUnitStatusEnum = [
@@ -53,11 +53,11 @@ export const organisationalUnitStatus = p.snakeCase.table(
 		...f.timestamps(),
 	},
 	(t) => [
-			p.check(
-				"organisational_unit_status_status_enum_check",
-				inArray(t.status, organisationalUnitStatusEnum),
-			),
-		],
+		p.check(
+			"organisational_unit_status_status_enum_check",
+			inArray(t.status, organisationalUnitStatusEnum),
+		),
+	],
 );
 
 export const organisationalUnits = p.snakeCase.table("organisational_units", {

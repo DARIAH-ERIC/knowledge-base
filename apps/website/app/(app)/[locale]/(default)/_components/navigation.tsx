@@ -19,7 +19,7 @@ export function Navigation(props: Readonly<NavigationProps>): ReactNode {
 				<Logo className="block-8 inline-auto" />
 			</NavLink>
 
-			<ul className="flex flex-wrap items-center" >
+			<ul className="flex flex-wrap items-center">
 				{Object.entries(navigation).map(([id, item]) => {
 					switch (item.type) {
 						case "action": {

@@ -21,7 +21,9 @@ export async function moveDocumentOrPolicyAction(
 			columns: { id: true, position: true, groupId: true },
 		});
 
-		if (item == null) {return;}
+		if (item == null) {
+			return;
+		}
 
 		const siblings = await tx
 			.select({ id: schema.documentsPolicies.id, position: schema.documentsPolicies.position })
@@ -36,10 +38,14 @@ export async function moveDocumentOrPolicyAction(
 		const currentIndex = siblings.findIndex((s) => s.id === id);
 		const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
 
-		if (targetIndex < 0 || targetIndex >= siblings.length) {return;}
+		if (targetIndex < 0 || targetIndex >= siblings.length) {
+			return;
+		}
 
 		const target = siblings[targetIndex];
-		if (target == null) {return;}
+		if (target == null) {
+			return;
+		}
 
 		await tx
 			.update(schema.documentsPolicies)

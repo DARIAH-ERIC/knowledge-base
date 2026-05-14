@@ -60,16 +60,12 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 
 	const t = useExtracted();
 
-	const [selectedEntityIds, setSelectedEntityIds] = useState<Array<string>>(() => (
-			initialRelatedEntityIds ??
-			selectedRelatedEntities?.map((item) => item.id) ??
-			[]
-		));
-	const [selectedResourceIds, setSelectedResourceIds] = useState<Array<string>>(() => (
-			initialRelatedResourceIds ??
-			selectedRelatedResources?.map((item) => item.id) ??
-			[]
-		));
+	const [selectedEntityIds, setSelectedEntityIds] = useState<Array<string>>(
+		() => initialRelatedEntityIds ?? selectedRelatedEntities?.map((item) => item.id) ?? [],
+	);
+	const [selectedResourceIds, setSelectedResourceIds] = useState<Array<string>>(
+		() => initialRelatedResourceIds ?? selectedRelatedResources?.map((item) => item.id) ?? [],
+	);
 
 	return (
 		<Fragment>
@@ -88,13 +84,13 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 					value={selectedEntityIds}
 				/>
 				{selectedEntityIds.map((entityId, index) => (
-						<input
-							key={entityId}
-							name={`relatedEntityIds.${String(index)}`}
-							type="hidden"
-							value={entityId}
-						/>
-					))}
+					<input
+						key={entityId}
+						name={`relatedEntityIds.${String(index)}`}
+						type="hidden"
+						value={entityId}
+					/>
+				))}
 			</FormSection>
 
 			<Separator className="my-6" />
@@ -114,13 +110,13 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 					value={selectedResourceIds}
 				/>
 				{selectedResourceIds.map((resourceId, index) => (
-						<input
-							key={resourceId}
-							name={`relatedResourceIds.${String(index)}`}
-							type="hidden"
-							value={resourceId}
-						/>
-					))}
+					<input
+						key={resourceId}
+						name={`relatedResourceIds.${String(index)}`}
+						type="hidden"
+						value={resourceId}
+					/>
+				))}
 			</FormSection>
 		</Fragment>
 	);

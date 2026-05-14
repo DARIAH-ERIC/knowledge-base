@@ -117,7 +117,11 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
 					{project.image ? (
-						<img alt="" className="block-24 inline-24 rounded-lg object-cover" src={project.image.url} />
+						<img
+							alt=""
+							className="block-24 inline-24 rounded-lg object-cover"
+							src={project.image.url}
+						/>
 					) : null}
 				</DescriptionDetails>
 
@@ -134,16 +138,16 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 					{project.socialMedia.length > 0 ? (
 						<ul className="flex flex-col gap-1">
 							{project.socialMedia.map((item) => (
-									<li key={item.id} className="text-sm">
-										<span className="font-medium">{item.name}</span>
-										{" · "}
-										<span className="text-muted-fg">{item.type.type}</span>
-										{" · "}
-										<a className="underline" href={item.url} rel="noreferrer" target="_blank">
-											{item.url}
-										</a>
-									</li>
-								))}
+								<li key={item.id} className="text-sm">
+									<span className="font-medium">{item.name}</span>
+									{" · "}
+									<span className="text-muted-fg">{item.type.type}</span>
+									{" · "}
+									<a className="underline" href={item.url} rel="noreferrer" target="_blank">
+										{item.url}
+									</a>
+								</li>
+							))}
 						</ul>
 					) : null}
 				</DescriptionDetails>
@@ -153,22 +157,22 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 					{project.partners.length > 0 ? (
 						<ul className="flex flex-col gap-1">
 							{project.partners.map((partner) => (
-									<li key={partner.id} className="text-sm">
-										<span className="font-medium">{partner.unitName}</span>
-										{" · "}
-										<span className="text-muted-fg">{partner.roleName}</span>
-										{partner.duration != null ? (
-											<span className="text-muted-fg">
-												{" · "}
-												{partner.duration.end
-													? format.dateTimeRange(partner.duration.start, partner.duration.end, {
-															dateStyle: "short",
-														})
-													: format.dateTime(partner.duration.start, { dateStyle: "short" })}
-											</span>
-										) : null}
-									</li>
-								))}
+								<li key={partner.id} className="text-sm">
+									<span className="font-medium">{partner.unitName}</span>
+									{" · "}
+									<span className="text-muted-fg">{partner.roleName}</span>
+									{partner.duration != null ? (
+										<span className="text-muted-fg">
+											{" · "}
+											{partner.duration.end
+												? format.dateTimeRange(partner.duration.start, partner.duration.end, {
+														dateStyle: "short",
+													})
+												: format.dateTime(partner.duration.start, { dateStyle: "short" })}
+										</span>
+									) : null}
+								</li>
+							))}
 						</ul>
 					) : null}
 				</DescriptionDetails>

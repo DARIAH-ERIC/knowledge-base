@@ -84,13 +84,9 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 		}),
 	);
 
-	await db.insert(schema.opportunities).values(
-		items.map((item) => item.opportunity),
-	);
+	await db.insert(schema.opportunities).values(items.map((item) => item.opportunity));
 
-	await Promise.all(
-		items.map((item) => seedContentBlock(db, item.version.id, type.id, "content")),
-	);
+	await Promise.all(items.map((item) => seedContentBlock(db, item.version.id, type.id, "content")));
 }
 
 describe("opportunities", () => {

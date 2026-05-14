@@ -121,10 +121,10 @@ export const entityTypesFieldsNames = p.snakeCase.table(
 		fieldName: p.text("field_name").notNull(),
 	},
 	(t) => [
-			p
-				.unique("entity_types_fields_names_entity_type_id_field_name_unique")
-				.on(t.entityTypeId, t.fieldName),
-		],
+		p
+			.unique("entity_types_fields_names_entity_type_id_field_name_unique")
+			.on(t.entityTypeId, t.fieldName),
+	],
 );
 
 // only provide select for now: the entity type fields mapping should be changed via migrations
@@ -147,10 +147,8 @@ export const fields = p.snakeCase.table(
 		...f.timestamps(),
 	},
 	(t) => [
-			p
-				.unique("fields_entity_version_id_field_name_id_unique")
-				.on(t.entityVersionId, t.fieldNameId),
-		],
+		p.unique("fields_entity_version_id_field_name_id_unique").on(t.entityVersionId, t.fieldNameId),
+	],
 );
 
 export type Field = typeof fields.$inferSelect;
@@ -178,11 +176,11 @@ export const entitiesToEntities = p.snakeCase.table(
 		...f.timestamps(),
 	},
 	(t) => [
-			p.primaryKey({
-				columns: [t.entityId, t.relatedEntityId],
-				name: "entities_to_entities_pkey",
-			}),
-		],
+		p.primaryKey({
+			columns: [t.entityId, t.relatedEntityId],
+			name: "entities_to_entities_pkey",
+		}),
+	],
 );
 
 /** Document-level: a relation from a document to an external resource (search index id). */
@@ -197,9 +195,9 @@ export const entitiesToResources = p.snakeCase.table(
 		...f.timestamps(),
 	},
 	(t) => [
-			p.primaryKey({
-				columns: [t.entityId, t.resourceId],
-				name: "entities_to_resources_pkey",
-			}),
-		],
+		p.primaryKey({
+			columns: [t.entityId, t.resourceId],
+			name: "entities_to_resources_pkey",
+		}),
+	],
 );

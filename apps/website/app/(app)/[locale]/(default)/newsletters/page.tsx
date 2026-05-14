@@ -40,16 +40,16 @@ async function NewslettersList(): Promise<ReactNode> {
 	const newsletters = (await mailchimp.get()).unwrap().data.campaigns;
 
 	return (
-		<ul >
+		<ul>
 			{newsletters.map((newsletter) => (
-					<li key={newsletter.id}>
-						<article>
-							<h2>
-								<Link href={newsletter.archive_url}>{newsletter.settings.title}</Link>
-							</h2>
-						</article>
-					</li>
-				))}
+				<li key={newsletter.id}>
+					<article>
+						<h2>
+							<Link href={newsletter.archive_url}>{newsletter.settings.title}</Link>
+						</h2>
+					</article>
+				</li>
+			))}
 		</ul>
 	);
 }

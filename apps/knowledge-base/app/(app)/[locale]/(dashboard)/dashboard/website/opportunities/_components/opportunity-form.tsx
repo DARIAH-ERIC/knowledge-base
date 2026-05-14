@@ -67,10 +67,10 @@ export function OpportunityForm(props: Readonly<OpportunityFormProps>): ReactNod
 						<FieldError />
 						<SelectContent>
 							{sources.map((item) => (
-									<SelectItem key={item.id} id={item.id}>
-										{item.source}
-									</SelectItem>
-								))}
+								<SelectItem key={item.id} id={item.id}>
+									{item.source}
+								</SelectItem>
+							))}
 						</SelectContent>
 					</Select>
 

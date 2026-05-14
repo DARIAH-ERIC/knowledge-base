@@ -180,7 +180,9 @@ export class DatabaseService {
 			.where(eq(schema.entityVersions.id, versionId))
 			.limit(1);
 
-		if (row == null) {return null;}
+		if (row == null) {
+			return null;
+		}
 		return { versionId: row.id, documentId: row.entityId };
 	}
 
@@ -191,7 +193,9 @@ export class DatabaseService {
 	async deleteProject(versionId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
 			const ids = await this.resolveVersion(tx, versionId);
-			if (ids == null) {return;}
+			if (ids == null) {
+				return;
+			}
 			const { documentId } = ids;
 
 			await tx
@@ -231,7 +235,9 @@ export class DatabaseService {
 	async deletePageItem(versionId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
 			const ids = await this.resolveVersion(tx, versionId);
-			if (ids == null) {return;}
+			if (ids == null) {
+				return;
+			}
 			const { documentId } = ids;
 
 			await tx.delete(schema.pages).where(eq(schema.pages.id, versionId));
@@ -263,7 +269,9 @@ export class DatabaseService {
 	async deleteImpactCaseStudy(versionId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
 			const ids = await this.resolveVersion(tx, versionId);
-			if (ids == null) {return;}
+			if (ids == null) {
+				return;
+			}
 			const { documentId } = ids;
 
 			await tx
@@ -300,7 +308,9 @@ export class DatabaseService {
 	async deleteSpotlightArticle(versionId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
 			const ids = await this.resolveVersion(tx, versionId);
-			if (ids == null) {return;}
+			if (ids == null) {
+				return;
+			}
 			const { documentId } = ids;
 
 			await tx
@@ -337,7 +347,9 @@ export class DatabaseService {
 	async deleteEvent(versionId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
 			const ids = await this.resolveVersion(tx, versionId);
-			if (ids == null) {return;}
+			if (ids == null) {
+				return;
+			}
 			const { documentId } = ids;
 
 			await tx.delete(schema.events).where(eq(schema.events.id, versionId));
@@ -369,7 +381,9 @@ export class DatabaseService {
 	async deleteNewsItem(versionId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
 			const ids = await this.resolveVersion(tx, versionId);
-			if (ids == null) {return;}
+			if (ids == null) {
+				return;
+			}
 			const { documentId } = ids;
 
 			await tx.delete(schema.news).where(eq(schema.news.id, versionId));
@@ -401,7 +415,9 @@ export class DatabaseService {
 	async deletePerson(versionId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
 			const ids = await this.resolveVersion(tx, versionId);
-			if (ids == null) {return;}
+			if (ids == null) {
+				return;
+			}
 			const { documentId } = ids;
 
 			await tx
@@ -437,7 +453,9 @@ export class DatabaseService {
 	async deleteWorkingGroup(versionId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
 			const ids = await this.resolveVersion(tx, versionId);
-			if (ids == null) {return;}
+			if (ids == null) {
+				return;
+			}
 			const { documentId } = ids;
 
 			await tx
@@ -632,11 +650,7 @@ export class DatabaseService {
 			.innerJoin(schema.entityVersions, eq(schema.news.id, schema.entityVersions.id))
 			.where(sql`${schema.news.title} LIKE ${`${prefix}%`}`);
 
-		const documentIds = [
-			...new Set(
-				rows.map((r) => r.documentId),
-			),
-		];
+		const documentIds = [...new Set(rows.map((r) => r.documentId))];
 
 		for (const documentId of documentIds) {
 			await this.deleteNewsDocument(documentId);

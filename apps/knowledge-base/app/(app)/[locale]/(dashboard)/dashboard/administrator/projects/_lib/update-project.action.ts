@@ -181,9 +181,7 @@ export const updateProjectAction = createServerAction(
 				columns: { id: true, socialMediaId: true },
 			});
 
-			const existingSocialMediaIds = new Set(
-				existingSocialMedia.map((r) => r.socialMediaId),
-			);
+			const existingSocialMediaIds = new Set(existingSocialMedia.map((r) => r.socialMediaId));
 			const submittedSocialMediaIds = new Set(socialMediaIds);
 
 			const socialMediaToDelete = existingSocialMedia
@@ -196,7 +194,9 @@ export const updateProjectAction = createServerAction(
 					.where(inArray(schema.projectsToSocialMedia.id, socialMediaToDelete));
 			}
 
-			const socialMediaToInsert = socialMediaIds.filter((smId) => !existingSocialMediaIds.has(smId));
+			const socialMediaToInsert = socialMediaIds.filter(
+				(smId) => !existingSocialMediaIds.has(smId),
+			);
 
 			if (socialMediaToInsert.length > 0) {
 				await tx.insert(schema.projectsToSocialMedia).values(

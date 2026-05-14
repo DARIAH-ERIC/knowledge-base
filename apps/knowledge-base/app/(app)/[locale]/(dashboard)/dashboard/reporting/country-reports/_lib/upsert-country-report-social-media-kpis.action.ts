@@ -28,10 +28,14 @@ const UpsertCountryReportSocialMediaKpisSchema = v.object({
 });
 
 export async function upsertCountryReportSocialMediaKpisAction(formData: FormData): Promise<void> {
-	if (!(await globalPostRequestRateLimit())) {return;}
+	if (!(await globalPostRequestRateLimit())) {
+		return;
+	}
 
 	const result = v.safeParse(UpsertCountryReportSocialMediaKpisSchema, getFormDataValues(formData));
-	if (!result.success) {return;}
+	if (!result.success) {
+		return;
+	}
 
 	const { id, kpis } = result.output;
 

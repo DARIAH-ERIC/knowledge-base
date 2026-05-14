@@ -70,10 +70,10 @@ export default async function DocumentationPage(
 				</h1>
 				<ul className="list-disc space-y-2 ps-6">
 					{pages.map((page) => (
-							<li key={page.id}>
-								<Link href={`/documentation/${page.entityVersion.entity.slug}`}>{page.title}</Link>
-							</li>
-						))}
+						<li key={page.id}>
+							<Link href={`/documentation/${page.entityVersion.entity.slug}`}>{page.title}</Link>
+						</li>
+					))}
 				</ul>
 			</section>
 		</Main>

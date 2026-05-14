@@ -129,58 +129,58 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-							<TableRow href={`/dashboard/website/impact-case-studies/${item.entity.slug}/details`}>
-								<TableCell>
-									<div className="max-inline-64 truncate">{item.title}</div>
-								</TableCell>
-								<TableCell>
-									<div className="max-inline-xs truncate">{item.summary}</div>
-								</TableCell>
-								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
-								<TableCell>
-									<EntityLifecycleStatusBadge
-										hasDraft={item.hasDraft}
-										isPublished={item.isPublished}
-									/>
-								</TableCell>
-								<TableCell className="text-end">
-									<Menu>
-										<Button
-											aria-label={t("Open actions menu")}
-											className="block-7 sm:block-7"
-											intent="plain"
-											size="sq-sm"
+						<TableRow href={`/dashboard/website/impact-case-studies/${item.entity.slug}/details`}>
+							<TableCell>
+								<div className="max-inline-64 truncate">{item.title}</div>
+							</TableCell>
+							<TableCell>
+								<div className="max-inline-xs truncate">{item.summary}</div>
+							</TableCell>
+							<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
+							<TableCell>
+								<EntityLifecycleStatusBadge
+									hasDraft={item.hasDraft}
+									isPublished={item.isPublished}
+								/>
+							</TableCell>
+							<TableCell className="text-end">
+								<Menu>
+									<Button
+										aria-label={t("Open actions menu")}
+										className="block-7 sm:block-7"
+										intent="plain"
+										size="sq-sm"
+									>
+										<EllipsisHorizontalIcon className="block-5 inline-5" />
+									</Button>
+									<MenuContent placement="left top">
+										<MenuItem
+											href={`/dashboard/website/impact-case-studies/${item.entity.slug}/details`}
 										>
-											<EllipsisHorizontalIcon className="block-5 inline-5" />
-										</Button>
-										<MenuContent placement="left top">
-											<MenuItem
-												href={`/dashboard/website/impact-case-studies/${item.entity.slug}/details`}
-											>
-												<EyeIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("View")}</MenuLabel>
-											</MenuItem>
-											<MenuItem
-												href={`/dashboard/website/impact-case-studies/${item.entity.slug}/edit`}
-											>
-												<PencilSquareIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Edit")}</MenuLabel>
-											</MenuItem>
-											<MenuSeparator />
-											<MenuItem
-												intent="danger"
-												onAction={() => {
-													setItemToDelete({ id: item.id, documentId: item.documentId });
-												}}
-											>
-												<TrashIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Delete")}</MenuLabel>
-											</MenuItem>
-										</MenuContent>
-									</Menu>
-								</TableCell>
-							</TableRow>
-						)}
+											<EyeIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("View")}</MenuLabel>
+										</MenuItem>
+										<MenuItem
+											href={`/dashboard/website/impact-case-studies/${item.entity.slug}/edit`}
+										>
+											<PencilSquareIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Edit")}</MenuLabel>
+										</MenuItem>
+										<MenuSeparator />
+										<MenuItem
+											intent="danger"
+											onAction={() => {
+												setItemToDelete({ id: item.id, documentId: item.documentId });
+											}}
+										>
+											<TrashIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Delete")}</MenuLabel>
+										</MenuItem>
+									</MenuContent>
+								</Menu>
+							</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 

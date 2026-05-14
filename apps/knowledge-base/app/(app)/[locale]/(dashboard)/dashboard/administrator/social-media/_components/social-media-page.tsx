@@ -121,44 +121,44 @@ export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNod
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-							<TableRow id={item.id}>
-								<TableCell>{item.name}</TableCell>
-								<TableCell>{item.type.type}</TableCell>
-								<TableCell className="max-inline-xs truncate">
-									<a className="underline" href={item.url} rel="noreferrer" target="_blank">
-										{item.url}
-									</a>
-								</TableCell>
-								<TableCell className="text-end">
-									<Menu>
-										<Button
-											aria-label={t("Open actions menu")}
-											className="block-7 sm:block-7"
-											intent="plain"
-											size="sq-sm"
+						<TableRow id={item.id}>
+							<TableCell>{item.name}</TableCell>
+							<TableCell>{item.type.type}</TableCell>
+							<TableCell className="max-inline-xs truncate">
+								<a className="underline" href={item.url} rel="noreferrer" target="_blank">
+									{item.url}
+								</a>
+							</TableCell>
+							<TableCell className="text-end">
+								<Menu>
+									<Button
+										aria-label={t("Open actions menu")}
+										className="block-7 sm:block-7"
+										intent="plain"
+										size="sq-sm"
+									>
+										<EllipsisHorizontalIcon className="block-5 inline-5" />
+									</Button>
+									<MenuContent placement="left top">
+										<MenuItem href={`/dashboard/administrator/social-media/${item.id}/edit`}>
+											<PencilSquareIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Edit")}</MenuLabel>
+										</MenuItem>
+										<MenuSeparator />
+										<MenuItem
+											intent="danger"
+											onAction={() => {
+												setItemToDelete({ id: item.id });
+											}}
 										>
-											<EllipsisHorizontalIcon className="block-5 inline-5" />
-										</Button>
-										<MenuContent placement="left top">
-											<MenuItem href={`/dashboard/administrator/social-media/${item.id}/edit`}>
-												<PencilSquareIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Edit")}</MenuLabel>
-											</MenuItem>
-											<MenuSeparator />
-											<MenuItem
-												intent="danger"
-												onAction={() => {
-													setItemToDelete({ id: item.id });
-												}}
-											>
-												<TrashIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Delete")}</MenuLabel>
-											</MenuItem>
-										</MenuContent>
-									</Menu>
-								</TableCell>
-							</TableRow>
-						)}
+											<TrashIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Delete")}</MenuLabel>
+										</MenuItem>
+									</MenuContent>
+								</Menu>
+							</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 

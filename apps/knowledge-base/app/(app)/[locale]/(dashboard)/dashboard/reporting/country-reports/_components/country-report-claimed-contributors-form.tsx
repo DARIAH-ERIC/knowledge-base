@@ -52,9 +52,7 @@ export function CountryReportClaimedContributorsForm(
 	const [state, action, isPending] = useActionState(addAction, createActionStateInitial());
 	const [selectedId, setSelectedId] = useState<string>("");
 
-	const claimedIds = new Set(
-		report.contributions.map((c) => c.personToOrgUnit.id),
-	);
+	const claimedIds = new Set(report.contributions.map((c) => c.personToOrgUnit.id));
 	const available = availablePersonToOrgUnits.filter((p) => !claimedIds.has(p.id));
 
 	return (
@@ -64,29 +62,29 @@ export function CountryReportClaimedContributorsForm(
 					<h2 className="text-sm font-semibold text-fg">{t("Contributors")}</h2>
 					<ul className="divide-y divide-border rounded-md border">
 						{report.contributions.map((contribution) => (
-								<li
-									key={contribution.id}
-									className="flex items-center justify-between gap-x-4 px-4 py-3"
-								>
-									<div>
-										<p className="text-sm font-medium text-fg">
-											{contribution.personToOrgUnit.person.name}
-										</p>
-										<p className="text-xs text-muted-fg">
-											{formatRoleType(contribution.personToOrgUnit.roleType.type)}
-											{" — "}
-											{contribution.personToOrgUnit.organisationalUnit.name}
-										</p>
-									</div>
-									<form action={deleteAction}>
-										<input name="contributionId" type="hidden" value={contribution.id} />
-										<input name="countryReportId" type="hidden" value={report.id} />
-										<Button intent="danger" size="sm" type="submit">
-											{t("Remove")}
-										</Button>
-									</form>
-								</li>
-							))}
+							<li
+								key={contribution.id}
+								className="flex items-center justify-between gap-x-4 px-4 py-3"
+							>
+								<div>
+									<p className="text-sm font-medium text-fg">
+										{contribution.personToOrgUnit.person.name}
+									</p>
+									<p className="text-xs text-muted-fg">
+										{formatRoleType(contribution.personToOrgUnit.roleType.type)}
+										{" — "}
+										{contribution.personToOrgUnit.organisationalUnit.name}
+									</p>
+								</div>
+								<form action={deleteAction}>
+									<input name="contributionId" type="hidden" value={contribution.id} />
+									<input name="countryReportId" type="hidden" value={report.id} />
+									<Button intent="danger" size="sm" type="submit">
+										{t("Remove")}
+									</Button>
+								</form>
+							</li>
+						))}
 					</ul>
 				</section>
 			)}
@@ -109,15 +107,15 @@ export function CountryReportClaimedContributorsForm(
 							<FieldError />
 							<SelectContent>
 								{available.map((p) => (
-										<SelectItem key={p.id} id={p.id}>
-											{p.personName}
-											{" — "}
-											{formatRoleType(p.roleType)}
-											{" ("}
-											{p.orgUnitName}
-											{")"}
-										</SelectItem>
-									))}
+									<SelectItem key={p.id} id={p.id}>
+										{p.personName}
+										{" — "}
+										{formatRoleType(p.roleType)}
+										{" ("}
+										{p.orgUnitName}
+										{")"}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 						<input name="personToOrgUnitId" type="hidden" value={selectedId} />

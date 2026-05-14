@@ -70,7 +70,9 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 	const t = useExtracted();
 	const format = useFormatter();
 	const router = useRouter();
-	const [items, optimisticallyRemoveItem] = useOptimistic(countries.data, (state, id: string) => state.filter((item) => item.id !== id));
+	const [items, optimisticallyRemoveItem] = useOptimistic(countries.data, (state, id: string) =>
+		state.filter((item) => item.id !== id),
+	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
 		useUrlPaginatedSearch({
@@ -125,61 +127,59 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-							<TableRow>
-								<TableCell>{item.name}</TableCell>
-								<TableCell>
-									{item.memberObserverStatus != null ? (
-										<Badge intent={memberObserverStatusIntent(item.memberObserverStatus)}>
-											{item.memberObserverStatus === "is_member_of" ? t("Member") : t("Observer")}
-										</Badge>
-									) : (
-										"—"
-									)}
-								</TableCell>
-								<TableCell>
-									{item.memberObserverFrom != null
-										? format.dateTime(item.memberObserverFrom, { dateStyle: "short" })
-										: "—"}
-								</TableCell>
-								<TableCell>
-									{item.memberObserverStatus == null
-										? "—"
-										: item.memberObserverUntil != null
-											? format.dateTime(item.memberObserverUntil, { dateStyle: "short" })
-											: t("present")}
-								</TableCell>
-								<TableCell className="text-end">
-									<Menu>
-										<Button
-											aria-label={t("Open actions menu")}
-											className="block-7 sm:block-7"
-											intent="plain"
-											size="sq-sm"
+						<TableRow>
+							<TableCell>{item.name}</TableCell>
+							<TableCell>
+								{item.memberObserverStatus != null ? (
+									<Badge intent={memberObserverStatusIntent(item.memberObserverStatus)}>
+										{item.memberObserverStatus === "is_member_of" ? t("Member") : t("Observer")}
+									</Badge>
+								) : (
+									"—"
+								)}
+							</TableCell>
+							<TableCell>
+								{item.memberObserverFrom != null
+									? format.dateTime(item.memberObserverFrom, { dateStyle: "short" })
+									: "—"}
+							</TableCell>
+							<TableCell>
+								{item.memberObserverStatus == null
+									? "—"
+									: item.memberObserverUntil != null
+										? format.dateTime(item.memberObserverUntil, { dateStyle: "short" })
+										: t("present")}
+							</TableCell>
+							<TableCell className="text-end">
+								<Menu>
+									<Button
+										aria-label={t("Open actions menu")}
+										className="block-7 sm:block-7"
+										intent="plain"
+										size="sq-sm"
+									>
+										<EllipsisHorizontalIcon className="block-5 inline-5" />
+									</Button>
+									<MenuContent placement="left top">
+										<MenuItem href={`/dashboard/administrator/countries/${item.entity.slug}/edit`}>
+											<PencilSquareIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Edit")}</MenuLabel>
+										</MenuItem>
+										<MenuSeparator />
+										<MenuItem
+											intent="danger"
+											onAction={() => {
+												setItemToDelete({ id: item.id });
+											}}
 										>
-											<EllipsisHorizontalIcon className="block-5 inline-5" />
-										</Button>
-										<MenuContent placement="left top">
-											<MenuItem
-												href={`/dashboard/administrator/countries/${item.entity.slug}/edit`}
-											>
-												<PencilSquareIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Edit")}</MenuLabel>
-											</MenuItem>
-											<MenuSeparator />
-											<MenuItem
-												intent="danger"
-												onAction={() => {
-													setItemToDelete({ id: item.id });
-												}}
-											>
-												<TrashIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Delete")}</MenuLabel>
-											</MenuItem>
-										</MenuContent>
-									</Menu>
-								</TableCell>
-							</TableRow>
-						)}
+											<TrashIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Delete")}</MenuLabel>
+										</MenuItem>
+									</MenuContent>
+								</Menu>
+							</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 

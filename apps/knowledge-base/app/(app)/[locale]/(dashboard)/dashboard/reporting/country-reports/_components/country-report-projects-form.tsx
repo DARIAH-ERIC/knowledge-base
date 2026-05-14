@@ -40,9 +40,7 @@ export function CountryReportProjectsForm(
 	const [state, action, isPending] = useActionState(addAction, createActionStateInitial());
 	const [selectedProjectId, setSelectedProjectId] = useState<string>("");
 
-	const existingProjectIds = new Set(
-		report.projectContributions.map((c) => c.project.id),
-	);
+	const existingProjectIds = new Set(report.projectContributions.map((c) => c.project.id));
 	const availableProjects = allProjects.filter((p) => !existingProjectIds.has(p.id));
 
 	return (
@@ -52,25 +50,25 @@ export function CountryReportProjectsForm(
 					<h2 className="text-sm font-semibold text-fg">{t("Project contributions")}</h2>
 					<ul className="divide-y divide-border rounded-md border">
 						{report.projectContributions.map((contribution) => (
-								<li
-									key={contribution.id}
-									className="flex items-center justify-between gap-x-4 px-4 py-3"
-								>
-									<div>
-										<p className="text-sm font-medium text-fg">{contribution.project.name}</p>
-										<p className="text-xs text-muted-fg">
-											{t("Amount")}: {contribution.amountEuros.toLocaleString()} {"EUR"}
-										</p>
-									</div>
-									<form action={deleteAction}>
-										<input name="contributionId" type="hidden" value={contribution.id} />
-										<input name="countryReportId" type="hidden" value={report.id} />
-										<Button intent="danger" size="sm" type="submit">
-											{t("Remove")}
-										</Button>
-									</form>
-								</li>
-							))}
+							<li
+								key={contribution.id}
+								className="flex items-center justify-between gap-x-4 px-4 py-3"
+							>
+								<div>
+									<p className="text-sm font-medium text-fg">{contribution.project.name}</p>
+									<p className="text-xs text-muted-fg">
+										{t("Amount")}: {contribution.amountEuros.toLocaleString()} {"EUR"}
+									</p>
+								</div>
+								<form action={deleteAction}>
+									<input name="contributionId" type="hidden" value={contribution.id} />
+									<input name="countryReportId" type="hidden" value={report.id} />
+									<Button intent="danger" size="sm" type="submit">
+										{t("Remove")}
+									</Button>
+								</form>
+							</li>
+						))}
 					</ul>
 				</section>
 			)}
@@ -93,10 +91,10 @@ export function CountryReportProjectsForm(
 							<FieldError />
 							<SelectContent>
 								{availableProjects.map((project) => (
-										<SelectItem key={project.id} id={project.id}>
-											{project.name}
-										</SelectItem>
-									))}
+									<SelectItem key={project.id} id={project.id}>
+										{project.name}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 						<input name="projectId" type="hidden" value={selectedProjectId} />

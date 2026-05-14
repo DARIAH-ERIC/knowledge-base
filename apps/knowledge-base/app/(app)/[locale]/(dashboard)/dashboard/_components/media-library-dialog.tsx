@@ -204,7 +204,9 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 	}
 
 	function handleUploadAction(formData: FormData) {
-		if (pendingFile == null) {return;}
+		if (pendingFile == null) {
+			return;
+		}
 		formData.append("file", pendingFile);
 		startUploading(async () => {
 			const result = await uploadImageAction(createActionStateInitial(), formData);
@@ -217,7 +219,9 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 	}
 
 	function handleConfirm() {
-		if (selectedAsset == null) {return;}
+		if (selectedAsset == null) {
+			return;
+		}
 		onSelect(selectedAsset.key, selectedAsset.url);
 		setIsOpen(false);
 	}
@@ -260,17 +264,17 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 						<TabPanel className="flex flex-1 flex-col gap-3 min-block-0" id="select">
 							<div className="flex gap-2">
 								{prefixes.map((p) => (
-										<Button
-											key={p}
-											intent={selectedPrefix === p ? "primary" : "outline"}
-											isDisabled={isPending}
-											onPress={() => {
-												handlePrefixChange(p);
-											}}
-										>
-											{p}
-										</Button>
-									))}
+									<Button
+										key={p}
+										intent={selectedPrefix === p ? "primary" : "outline"}
+										isDisabled={isPending}
+										onPress={() => {
+											handlePrefixChange(p);
+										}}
+									>
+										{p}
+									</Button>
+								))}
 							</div>
 
 							<form className="flex gap-2" onSubmit={handleSearch}>
@@ -309,25 +313,25 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 										selectionMode="single"
 									>
 										{(asset) => (
-												<GridListItem
-													className="flex flex-col gap-1 p-1 place-content-center"
-													id={asset.key}
-													textValue={asset.label}
-												>
-													<AssetPreview
-														alt={asset.label}
-														className="block-24 inline-24"
-														imageClassName="rounded-sm object-cover"
-														kindLabelClassName="bg-background/90"
-														mimeType={asset.mimeType}
-														src={asset.url}
-														storageKey={asset.key}
-													/>
-													<span className="inline-24 truncate text-center text-xs text-muted-fg">
-														{asset.label}
-													</span>
-												</GridListItem>
-											)}
+											<GridListItem
+												className="flex flex-col gap-1 p-1 place-content-center"
+												id={asset.key}
+												textValue={asset.label}
+											>
+												<AssetPreview
+													alt={asset.label}
+													className="block-24 inline-24"
+													imageClassName="rounded-sm object-cover"
+													kindLabelClassName="bg-background/90"
+													mimeType={asset.mimeType}
+													src={asset.url}
+													storageKey={asset.key}
+												/>
+												<span className="inline-24 truncate text-center text-xs text-muted-fg">
+													{asset.label}
+												</span>
+											</GridListItem>
+										)}
 									</GridList>
 
 									{isPending ? (

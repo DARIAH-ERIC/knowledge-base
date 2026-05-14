@@ -142,14 +142,17 @@ export async function getResourceRelationOptionsByIds(ids: ReadonlyArray<string>
 		}
 
 		const itemById = new Map(
-			result.value.items.map((hit) => [
-					hit.document.id,
-					{
-						description: hit.document.type,
-						id: hit.document.id,
-						name: hit.document.label,
-					},
-				] as const),
+			result.value.items.map(
+				(hit) =>
+					[
+						hit.document.id,
+						{
+							description: hit.document.type,
+							id: hit.document.id,
+							name: hit.document.label,
+						},
+					] as const,
+			),
 		);
 
 		return ids.flatMap((id) => {
@@ -186,17 +189,17 @@ export async function syncEntityRelations(
 			.where(eq(schema.entitiesToResources.entityId, documentId)),
 	]);
 
-	const existingDocumentIds = new Set(
-		existingEntityRows.map((r) => r.relatedEntityId),
-	);
-	const existingResourceIds = new Set(
-		existingResourceRows.map((r) => r.resourceId),
-	);
+	const existingDocumentIds = new Set(existingEntityRows.map((r) => r.relatedEntityId));
+	const existingResourceIds = new Set(existingResourceRows.map((r) => r.resourceId));
 
-	const documentIdsToDelete = [...existingDocumentIds].filter((x) => !relatedDocumentIds.includes(x));
+	const documentIdsToDelete = [...existingDocumentIds].filter(
+		(x) => !relatedDocumentIds.includes(x),
+	);
 	const documentIdsToAdd = relatedDocumentIds.filter((x) => !existingDocumentIds.has(x));
 
-	const resourceIdsToDelete = [...existingResourceIds].filter((x) => !relatedResourceIds.includes(x));
+	const resourceIdsToDelete = [...existingResourceIds].filter(
+		(x) => !relatedResourceIds.includes(x),
+	);
 	const resourceIdsToAdd = relatedResourceIds.filter((x) => !existingResourceIds.has(x));
 
 	await Promise.all([

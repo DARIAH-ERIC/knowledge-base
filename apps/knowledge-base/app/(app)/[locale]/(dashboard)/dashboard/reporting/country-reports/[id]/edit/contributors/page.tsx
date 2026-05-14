@@ -40,7 +40,8 @@ export default async function DashboardReportingCountryReportContributorsPage(
 	const result = await getAuthorizedCountryReportForUser(
 		user,
 		id,
-		(id) => db.query.countryReports.findFirst({
+		(id) =>
+			db.query.countryReports.findFirst({
 				where: { id },
 				columns: { id: true, totalContributors: true },
 				with: {

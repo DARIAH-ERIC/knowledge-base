@@ -128,48 +128,48 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-							<TableRow>
-								<TableCell className="uppercase">{item.acronym}</TableCell>
-								<TableCell>{item.name}</TableCell>
-								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
-								<TableCell>
-									<EntityLifecycleStatusBadge
-										hasDraft={item.hasDraft}
-										isPublished={item.isPublished}
-									/>
-								</TableCell>
-								<TableCell className="text-end">
-									<Menu>
-										<Button
-											aria-label={t("Open actions menu")}
-											className="block-7 sm:block-7"
-											intent="plain"
-											size="sq-sm"
+						<TableRow>
+							<TableCell className="uppercase">{item.acronym}</TableCell>
+							<TableCell>{item.name}</TableCell>
+							<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
+							<TableCell>
+								<EntityLifecycleStatusBadge
+									hasDraft={item.hasDraft}
+									isPublished={item.isPublished}
+								/>
+							</TableCell>
+							<TableCell className="text-end">
+								<Menu>
+									<Button
+										aria-label={t("Open actions menu")}
+										className="block-7 sm:block-7"
+										intent="plain"
+										size="sq-sm"
+									>
+										<EllipsisHorizontalIcon className="block-5 inline-5" />
+									</Button>
+									<MenuContent placement="left top">
+										<MenuItem
+											href={`/dashboard/administrator/governance-bodies/${item.entity.slug}/edit`}
 										>
-											<EllipsisHorizontalIcon className="block-5 inline-5" />
-										</Button>
-										<MenuContent placement="left top">
-											<MenuItem
-												href={`/dashboard/administrator/governance-bodies/${item.entity.slug}/edit`}
-											>
-												<PencilSquareIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Edit")}</MenuLabel>
-											</MenuItem>
-											<MenuSeparator />
-											<MenuItem
-												intent="danger"
-												onAction={() => {
-													setItemToDelete({ id: item.id, documentId: item.documentId });
-												}}
-											>
-												<TrashIcon className="me-2 block-4 inline-4" />
-												<MenuLabel>{t("Delete")}</MenuLabel>
-											</MenuItem>
-										</MenuContent>
-									</Menu>
-								</TableCell>
-							</TableRow>
-						)}
+											<PencilSquareIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Edit")}</MenuLabel>
+										</MenuItem>
+										<MenuSeparator />
+										<MenuItem
+											intent="danger"
+											onAction={() => {
+												setItemToDelete({ id: item.id, documentId: item.documentId });
+											}}
+										>
+											<TrashIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Delete")}</MenuLabel>
+										</MenuItem>
+									</MenuContent>
+								</Menu>
+							</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 

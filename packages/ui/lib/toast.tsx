@@ -43,26 +43,26 @@ export function ToastRegion(): ReactNode {
 			queue={queue}
 		>
 			{({ toast }) => (
-					<Toast toast={toast}>
-						<AriaToastContent className="ui:flex ui:flex-col ui:flex-1 ui:min-inline-0">
-							<AriaText className="ui:font-semibold ui:text-white ui:text-sm" slot="title">
-								{toast.content.title}
+				<Toast toast={toast}>
+					<AriaToastContent className="ui:flex ui:flex-col ui:flex-1 ui:min-inline-0">
+						<AriaText className="ui:font-semibold ui:text-white ui:text-sm" slot="title">
+							{toast.content.title}
+						</AriaText>
+						{toast.content.description != null ? (
+							<AriaText className="ui:text-xs ui:text-white" slot="description">
+								{toast.content.description}
 							</AriaText>
-							{toast.content.description != null ? (
-								<AriaText className="ui:text-xs ui:text-white" slot="description">
-									{toast.content.description}
-								</AriaText>
-							) : null}
-						</AriaToastContent>
-						<AriaButton
-							aria-label={t("Close")}
-							className="ui:flex ui:flex-none ui:appearance-none ui:block-8 ui:inline-8 ui:rounded-sm ui:bg-transparent ui:border-none ui:text-white ui:p-0 ui:outline-none ui:items-center ui:justify-center ui:hover:bg-white/10 ui:pressed:bg-white/15 ui:focus-visible:outline-solid ui:focus-visible:outline-2 ui:focus-visible:outline-white ui:focus-visible:outline-offset-2"
-							slot="close"
-						>
-							<XIcon className="block-4 inline-4" />
-						</AriaButton>
-					</Toast>
-				)}
+						) : null}
+					</AriaToastContent>
+					<AriaButton
+						aria-label={t("Close")}
+						className="ui:flex ui:flex-none ui:appearance-none ui:block-8 ui:inline-8 ui:rounded-sm ui:bg-transparent ui:border-none ui:text-white ui:p-0 ui:outline-none ui:items-center ui:justify-center ui:hover:bg-white/10 ui:pressed:bg-white/15 ui:focus-visible:outline-solid ui:focus-visible:outline-2 ui:focus-visible:outline-white ui:focus-visible:outline-offset-2"
+						slot="close"
+					>
+						<XIcon className="block-4 inline-4" />
+					</AriaButton>
+				</Toast>
+			)}
 		</AriaToastRegion>
 	);
 }
@@ -75,10 +75,12 @@ export function Toast(props: Readonly<ToastProps>): ReactNode {
 	return (
 		<AriaToast
 			{...rest}
-			className={composeRenderProps(className, (className) => cn(
+			className={composeRenderProps(className, (className) =>
+				cn(
 					className,
 					"ui:flex ui:items-center ui:gap-4 ui:bg-blue-600 ui:px-4 ui:py-3 ui:rounded-lg ui:outline-none ui:[view-transition-class:toast] ui:inline-57.5 ui:forced-colors:outline ui:focus-visible:outline-solid ui:focus-visible:outline-2 ui:focus-visible:outline-blue-600 ui:focus-visible:outline-offset-2",
-				))}
+				),
+			)}
 			style={{ viewTransitionName: toast.key }}
 			toast={toast}
 		/>

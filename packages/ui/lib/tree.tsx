@@ -70,34 +70,34 @@ export function TreeContent(props: Readonly<TreeContentProps>): ReactNode {
 	return (
 		<AriaTreeItemContent {...rest}>
 			{(values) => (
+				<div
+					className={twMerge(
+						"relative flex inline-full min-inline-0 items-center gap-x-1 truncate text-sm/6",
+						className,
+					)}
+				>
+					{values.selectionMode === "multiple" && values.selectionBehavior === "toggle" && (
+						<Checkbox className="[--indicator-mt:0] sm:[--indicator-mt:0]" slot="selection" />
+					)}
 					<div
-						className={twMerge(
-							"relative flex inline-full min-inline-0 items-center gap-x-1 truncate text-sm/6",
-							className,
+						className={twJoin(
+							"relative inline-[calc(calc(var(--tree-item-level)-1)*(--spacing(5)))] shrink-0",
+							"before:absolute before:inset-0 before:-ms-1 before:bg-[repeating-linear-gradient(to_right,transparent_0,transparent_calc(var(--tree-item-level)-1px),var(--border)_calc(var(--tree-item-level)-1px),var(--border)_calc(var(--tree-item-level)))]",
 						)}
-					>
-						{values.selectionMode === "multiple" && values.selectionBehavior === "toggle" && (
-							<Checkbox className="[--indicator-mt:0] sm:[--indicator-mt:0]" slot="selection" />
-						)}
-						<div
-							className={twJoin(
-								"relative inline-[calc(calc(var(--tree-item-level)-1)*(--spacing(5)))] shrink-0",
-								"before:absolute before:inset-0 before:-ms-1 before:bg-[repeating-linear-gradient(to_right,transparent_0,transparent_calc(var(--tree-item-level)-1px),var(--border)_calc(var(--tree-item-level)-1px),var(--border)_calc(var(--tree-item-level)))]",
-							)}
+					/>
+					{values.hasChildItems ? (
+						<TreeIndicator
+							values={{
+								isDisabled: values.isDisabled,
+								isExpanded: values.isExpanded,
+							}}
 						/>
-						{values.hasChildItems ? (
-							<TreeIndicator
-								values={{
-									isDisabled: values.isDisabled,
-									isExpanded: values.isExpanded,
-								}}
-							/>
-						) : (
-							<span aria-hidden={true} className="block inline-5 shrink-0" />
-						)}
-						{typeof children === "function" ? children(values) : children}
-					</div>
-				)}
+					) : (
+						<span aria-hidden={true} className="block inline-5 shrink-0" />
+					)}
+					{typeof children === "function" ? children(values) : children}
+				</div>
+			)}
 		</AriaTreeItemContent>
 	);
 }

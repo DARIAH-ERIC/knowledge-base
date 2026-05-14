@@ -103,7 +103,10 @@ export function ArticleContributorsSection(
 			setState(newState);
 
 			if (newState.status === "success" && person != null && role != null) {
-				setLocalContributors((prev) => [...prev, { personId: person.id, personName: person.name, role }]);
+				setLocalContributors((prev) => [
+					...prev,
+					{ personId: person.id, personName: person.name, role },
+				]);
 				setSelectedPerson(null);
 				setSelectedRole(null);
 			}
@@ -128,27 +131,29 @@ export function ArticleContributorsSection(
 						</TableHeader>
 						<TableBody items={localContributors}>
 							{(contributor) => (
-									<TableRow id={contributor.personId}>
-										<TableCell>{contributor.personName}</TableCell>
-										<TableCell>{formatRole(contributor.role)}</TableCell>
-										<TableCell className="text-end">
-											<Button
-												aria-label={t("Remove contributor")}
-												className="block-7 sm:block-7"
-												intent="plain"
-												onPress={() => {
-													startTransition(async () => {
-														await deleteAction(articleId, contributor.personId);
-														setLocalContributors((prev) => prev.filter((c) => c.personId !== contributor.personId));
-													});
-												}}
-												size="sq-sm"
-											>
-												<TrashIcon className="block-4 inline-4" />
-											</Button>
-										</TableCell>
-									</TableRow>
-								)}
+								<TableRow id={contributor.personId}>
+									<TableCell>{contributor.personName}</TableCell>
+									<TableCell>{formatRole(contributor.role)}</TableCell>
+									<TableCell className="text-end">
+										<Button
+											aria-label={t("Remove contributor")}
+											className="block-7 sm:block-7"
+											intent="plain"
+											onPress={() => {
+												startTransition(async () => {
+													await deleteAction(articleId, contributor.personId);
+													setLocalContributors((prev) =>
+														prev.filter((c) => c.personId !== contributor.personId),
+													);
+												});
+											}}
+											size="sq-sm"
+										>
+											<TrashIcon className="block-4 inline-4" />
+										</Button>
+									</TableCell>
+								</TableRow>
+							)}
 						</TableBody>
 					</Table>
 				) : (
@@ -189,10 +194,10 @@ export function ArticleContributorsSection(
 								<FieldError />
 								<SelectContent>
 									{articleContributorRolesEnum.map((role) => (
-											<SelectItem key={role} id={role}>
-												{formatRole(role)}
-											</SelectItem>
-										))}
+										<SelectItem key={role} id={role}>
+											{formatRole(role)}
+										</SelectItem>
+									))}
 								</SelectContent>
 							</Select>
 							<input name="role" type="hidden" value={selectedRole ?? ""} />

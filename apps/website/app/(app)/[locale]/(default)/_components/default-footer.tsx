@@ -57,7 +57,7 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 					</NavLink>
 
 					<nav aria-label={t("navigation-social-media.label")}>
-						<ul className="flex flex-wrap items-center gap-x-4 gap-y-2" >
+						<ul className="flex flex-wrap items-center gap-x-4 gap-y-2">
 							{Object.entries(meta.social).map(([_kind, href]) => {
 								const kind = _kind as keyof typeof meta.social;
 
@@ -83,7 +83,7 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 
 				<div className="flex flex-col gap-y-6">
 					<nav aria-label={t("navigation.label")}>
-						<ul className="-mx-2.5 flex flex-wrap items-center gap-x-4 gap-y-2" >
+						<ul className="-mx-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
 							{Object.entries(links).map(([id, link]) => {
 								if (id === "home") {
 									return null;

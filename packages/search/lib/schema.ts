@@ -62,9 +62,9 @@ function getQueryableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 	fields: F,
 ): Array<QueryableFieldNames<F[number]>> {
 	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
-	return fields
-		.filter((f) => f.index !== false)
-		.map((f) => f.name) as Array<QueryableFieldNames<F[number]>>;
+	return fields.filter((f) => f.index !== false).map((f) => f.name) as Array<
+		QueryableFieldNames<F[number]>
+	>;
 }
 
 function getSearchableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
@@ -80,27 +80,27 @@ function getFilterableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 	fields: F,
 ): Array<FilterableFieldNames<F[number]>> {
 	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
-	return fields
-		.filter((f) => f.index !== false)
-		.map((f) => f.name) as Array<FilterableFieldNames<F[number]>>;
+	return fields.filter((f) => f.index !== false).map((f) => f.name) as Array<
+		FilterableFieldNames<F[number]>
+	>;
 }
 
 function getSortableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 	fields: F,
 ): Array<SortableFieldNames<F[number]>> {
 	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
-	return fields
-		.filter((f) => f.sort === true)
-		.map((f) => f.name) as Array<SortableFieldNames<F[number]>>;
+	return fields.filter((f) => f.sort === true).map((f) => f.name) as Array<
+		SortableFieldNames<F[number]>
+	>;
 }
 
 function getFacetableFields<F extends ReadonlyArray<CollectionFieldSchema>>(
 	fields: F,
 ): Array<FacetableFieldNames<F[number]>> {
 	// oxlint-disable-next-line typescript/no-unsafe-type-assertion
-	return fields
-		.filter((f) => f.facet === true)
-		.map((f) => f.name) as Array<FacetableFieldNames<F[number]>>;
+	return fields.filter((f) => f.facet === true).map((f) => f.name) as Array<
+		FacetableFieldNames<F[number]>
+	>;
 }
 
 export type CollectionDocument<C extends { fields: ReadonlyArray<CollectionFieldSchema> }> =

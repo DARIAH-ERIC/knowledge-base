@@ -112,19 +112,19 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 
 				if (data != null) {
 					setLocalRelations((prev) => [
-							...prev,
-							{
-								id: data.id,
-								statusId: option.statusId,
-								statusType: option.statusType as UnitRelation["statusType"],
-								relatedUnitId: relatedUnit.id,
-								relatedUnitName: relatedUnit.name,
-								duration: {
-									start: new Date(data.durationStart),
-									...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
-								},
+						...prev,
+						{
+							id: data.id,
+							statusId: option.statusId,
+							statusType: option.statusType as UnitRelation["statusType"],
+							relatedUnitId: relatedUnit.id,
+							relatedUnitName: relatedUnit.name,
+							duration: {
+								start: new Date(data.durationStart),
+								...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
 							},
-						]);
+						},
+					]);
 				}
 
 				setSelectedStatusId(null);
@@ -153,35 +153,35 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 						</TableHeader>
 						<TableBody items={localRelations}>
 							{(relation) => (
-									<TableRow id={relation.id}>
-										<TableCell>{formatStatus(relation.statusType)}</TableCell>
-										<TableCell>{relation.relatedUnitName}</TableCell>
-										<TableCell>
-											{format.dateTime(relation.duration.start, { dateStyle: "short" })}
-										</TableCell>
-										<TableCell>
-											{relation.duration.end != null
-												? format.dateTime(relation.duration.end, { dateStyle: "short" })
-												: t("present")}
-										</TableCell>
-										<TableCell className="text-end">
-											{relation.duration.end == null && (
-												<Button
-													aria-label={t("End relation")}
-													className="block-7 sm:block-7"
-													intent="plain"
-													onPress={() => {
-														setItemToEnd({ id: relation.id });
-														setSelectedEndDate(null);
-													}}
-													size="sq-sm"
-												>
-													<ArchiveBoxXMarkIcon className="block-4 inline-4" />
-												</Button>
-											)}
-										</TableCell>
-									</TableRow>
-								)}
+								<TableRow id={relation.id}>
+									<TableCell>{formatStatus(relation.statusType)}</TableCell>
+									<TableCell>{relation.relatedUnitName}</TableCell>
+									<TableCell>
+										{format.dateTime(relation.duration.start, { dateStyle: "short" })}
+									</TableCell>
+									<TableCell>
+										{relation.duration.end != null
+											? format.dateTime(relation.duration.end, { dateStyle: "short" })
+											: t("present")}
+									</TableCell>
+									<TableCell className="text-end">
+										{relation.duration.end == null && (
+											<Button
+												aria-label={t("End relation")}
+												className="block-7 sm:block-7"
+												intent="plain"
+												onPress={() => {
+													setItemToEnd({ id: relation.id });
+													setSelectedEndDate(null);
+												}}
+												size="sq-sm"
+											>
+												<ArchiveBoxXMarkIcon className="block-4 inline-4" />
+											</Button>
+										)}
+									</TableCell>
+								</TableRow>
+							)}
 						</TableBody>
 					</Table>
 				) : (
@@ -209,10 +209,10 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									<FieldError />
 									<SelectContent>
 										{statusOptions.map((option) => (
-												<SelectItem key={option.statusId} id={option.statusId}>
-													{formatStatus(option.statusType)}
-												</SelectItem>
-											))}
+											<SelectItem key={option.statusId} id={option.statusId}>
+												{formatStatus(option.statusType)}
+											</SelectItem>
+										))}
 									</SelectContent>
 								</Select>
 								<input name="statusId" type="hidden" value={selectedStatusId ?? ""} />
@@ -276,7 +276,9 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 			<ModalContent
 				isOpen={itemToEnd != null}
 				onOpenChange={(open) => {
-					if (!open) {setItemToEnd(null);}
+					if (!open) {
+						setItemToEnd(null);
+					}
 				}}
 				role="alertdialog"
 				size="sm"
@@ -302,15 +304,21 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 					<Button
 						isDisabled={selectedEndDate == null}
 						onPress={() => {
-							if (itemToEnd == null || selectedEndDate == null) {return;}
+							if (itemToEnd == null || selectedEndDate == null) {
+								return;
+							}
 
 							const end = selectedEndDate.toDate(getLocalTimeZone());
 
 							startTransition(async () => {
 								await endUnitRelationAction(itemToEnd.id, end);
-								setLocalRelations((prev) => prev.map((relation) => relation.id === itemToEnd.id
+								setLocalRelations((prev) =>
+									prev.map((relation) =>
+										relation.id === itemToEnd.id
 											? { ...relation, duration: { ...relation.duration, end } }
-											: relation));
+											: relation,
+									),
+								);
 								setItemToEnd(null);
 							});
 						}}

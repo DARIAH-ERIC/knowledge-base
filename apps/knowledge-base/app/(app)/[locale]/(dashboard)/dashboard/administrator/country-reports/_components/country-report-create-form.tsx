@@ -64,10 +64,10 @@ export function CountryReportCreateForm(props: Readonly<CountryReportCreateFormP
 							<FieldError />
 							<SelectContent>
 								{campaigns.map((campaign) => (
-										<SelectItem key={campaign.id} id={campaign.id}>
-											{campaign.year}
-										</SelectItem>
-									))}
+									<SelectItem key={campaign.id} id={campaign.id}>
+										{campaign.year}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 						<input name="campaignId" type="hidden" value={selectedCampaignId} />
@@ -84,10 +84,10 @@ export function CountryReportCreateForm(props: Readonly<CountryReportCreateFormP
 							<FieldError />
 							<SelectContent>
 								{countries.map((country) => (
-										<SelectItem key={country.id} id={country.id}>
-											{country.name}
-										</SelectItem>
-									))}
+									<SelectItem key={country.id} id={country.id}>
+										{country.name}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 						<input name="countryId" type="hidden" value={selectedCountryId} />
@@ -104,10 +104,10 @@ export function CountryReportCreateForm(props: Readonly<CountryReportCreateFormP
 							<FieldError />
 							<SelectContent>
 								{reportStatusEnum.map((status) => (
-										<SelectItem key={status} id={status}>
-											{formatStatus(status)}
-										</SelectItem>
-									))}
+									<SelectItem key={status} id={status}>
+										{formatStatus(status)}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 						<input name="status" type="hidden" value={selectedStatus} />

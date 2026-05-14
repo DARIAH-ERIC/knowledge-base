@@ -40,7 +40,9 @@ function formatSignedNumber(
 	value: number | null,
 	format: "number" | "currency" = "number",
 ): string {
-	if (value == null) {return "—";}
+	if (value == null) {
+		return "—";
+	}
 
 	const sign = value > 0 ? "+" : "";
 
@@ -86,10 +88,10 @@ export async function ReportingStatisticsPage(
 							>
 								<option value="">{t("All years")}</option>
 								{data.filterOptions.campaignYears.map((year) => (
-										<option key={year} value={String(year)}>
-											{year}
-										</option>
-									))}
+									<option key={year} value={String(year)}>
+										{year}
+									</option>
+								))}
 							</select>
 						</label>
 
@@ -102,10 +104,10 @@ export async function ReportingStatisticsPage(
 							>
 								<option value="">{t("All countries")}</option>
 								{data.filterOptions.countries.map((country) => (
-										<option key={country} value={country}>
-											{country}
-										</option>
-									))}
+									<option key={country} value={country}>
+										{country}
+									</option>
+								))}
 							</select>
 						</label>
 
@@ -209,47 +211,47 @@ export async function ReportingStatisticsPage(
 						</TableHeader>
 						<TableBody items={data.campaignSummaries}>
 							{(item) => (
-									<TableRow id={item.id}>
-										<TableCell>{item.year}</TableCell>
-										<TableCell>{formatStatus(item.status)}</TableCell>
-										<TableCell>
-											<div className="flex flex-col gap-y-0.5">
-												<span>
-													{item.countryDraftCount +
-														item.countrySubmittedCount +
-														item.countryAcceptedCount}
-												</span>
-												<span className="text-xs text-muted-fg">
-													{t("{draft}/{submitted}/{accepted}", {
-														accepted: String(item.countryAcceptedCount),
-														draft: String(item.countryDraftCount),
-														submitted: String(item.countrySubmittedCount),
-													})}
-												</span>
-											</div>
-										</TableCell>
-										<TableCell>
-											<div className="flex flex-col gap-y-0.5">
-												<span>
-													{item.workingGroupDraftCount +
-														item.workingGroupSubmittedCount +
-														item.workingGroupAcceptedCount}
-												</span>
-												<span className="text-xs text-muted-fg">
-													{t("{draft}/{submitted}/{accepted}", {
-														accepted: String(item.workingGroupAcceptedCount),
-														draft: String(item.workingGroupDraftCount),
-														submitted: String(item.workingGroupSubmittedCount),
-													})}
-												</span>
-											</div>
-										</TableCell>
-										<TableCell>{item.totalContributors.toLocaleString()}</TableCell>
-										<TableCell>{item.totalCountryEvents.toLocaleString()}</TableCell>
-										<TableCell>{item.totalWorkingGroupEvents.toLocaleString()}</TableCell>
-										<TableCell>{eurFormatter.format(item.totalProjectContributions)}</TableCell>
-									</TableRow>
-								)}
+								<TableRow id={item.id}>
+									<TableCell>{item.year}</TableCell>
+									<TableCell>{formatStatus(item.status)}</TableCell>
+									<TableCell>
+										<div className="flex flex-col gap-y-0.5">
+											<span>
+												{item.countryDraftCount +
+													item.countrySubmittedCount +
+													item.countryAcceptedCount}
+											</span>
+											<span className="text-xs text-muted-fg">
+												{t("{draft}/{submitted}/{accepted}", {
+													accepted: String(item.countryAcceptedCount),
+													draft: String(item.countryDraftCount),
+													submitted: String(item.countrySubmittedCount),
+												})}
+											</span>
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="flex flex-col gap-y-0.5">
+											<span>
+												{item.workingGroupDraftCount +
+													item.workingGroupSubmittedCount +
+													item.workingGroupAcceptedCount}
+											</span>
+											<span className="text-xs text-muted-fg">
+												{t("{draft}/{submitted}/{accepted}", {
+													accepted: String(item.workingGroupAcceptedCount),
+													draft: String(item.workingGroupDraftCount),
+													submitted: String(item.workingGroupSubmittedCount),
+												})}
+											</span>
+										</div>
+									</TableCell>
+									<TableCell>{item.totalContributors.toLocaleString()}</TableCell>
+									<TableCell>{item.totalCountryEvents.toLocaleString()}</TableCell>
+									<TableCell>{item.totalWorkingGroupEvents.toLocaleString()}</TableCell>
+									<TableCell>{eurFormatter.format(item.totalProjectContributions)}</TableCell>
+								</TableRow>
+							)}
 						</TableBody>
 					</Table>
 					{data.campaignSummaries.length === 0 && (
@@ -286,22 +288,22 @@ export async function ReportingStatisticsPage(
 						</TableHeader>
 						<TableBody items={data.countryTrends}>
 							{(item) => (
-									<TableRow id={`${item.countryName}-${String(item.campaignYear)}`}>
-										<TableCell>{item.countryName}</TableCell>
-										<TableCell>{item.campaignYear}</TableCell>
-										<TableCell>{formatStatus(item.status)}</TableCell>
-										<TableCell>{item.totalContributors.toLocaleString()}</TableCell>
-										<TableCell>{item.totalEvents.toLocaleString()}</TableCell>
-										<TableCell>{item.institutions.toLocaleString()}</TableCell>
-										<TableCell>{item.services.toLocaleString()}</TableCell>
-										<TableCell>{eurFormatter.format(item.projectContributions)}</TableCell>
-										<TableCell>{formatSignedNumber(item.contributorsDelta)}</TableCell>
-										<TableCell>{formatSignedNumber(item.eventsDelta)}</TableCell>
-										<TableCell>
-											{formatSignedNumber(item.projectContributionsDelta, "currency")}
-										</TableCell>
-									</TableRow>
-								)}
+								<TableRow id={`${item.countryName}-${String(item.campaignYear)}`}>
+									<TableCell>{item.countryName}</TableCell>
+									<TableCell>{item.campaignYear}</TableCell>
+									<TableCell>{formatStatus(item.status)}</TableCell>
+									<TableCell>{item.totalContributors.toLocaleString()}</TableCell>
+									<TableCell>{item.totalEvents.toLocaleString()}</TableCell>
+									<TableCell>{item.institutions.toLocaleString()}</TableCell>
+									<TableCell>{item.services.toLocaleString()}</TableCell>
+									<TableCell>{eurFormatter.format(item.projectContributions)}</TableCell>
+									<TableCell>{formatSignedNumber(item.contributorsDelta)}</TableCell>
+									<TableCell>{formatSignedNumber(item.eventsDelta)}</TableCell>
+									<TableCell>
+										{formatSignedNumber(item.projectContributionsDelta, "currency")}
+									</TableCell>
+								</TableRow>
+							)}
 						</TableBody>
 					</Table>
 					{data.countryTrends.length === 0 && (
@@ -336,23 +338,23 @@ export async function ReportingStatisticsPage(
 							</TableHeader>
 							<TableBody items={data.workingGroupYearSummaries}>
 								{(item) => (
-										<TableRow id={String(item.campaignYear)}>
-											<TableCell>{item.campaignYear}</TableCell>
-											<TableCell>{item.reportCount.toLocaleString()}</TableCell>
-											<TableCell>
-												{t("{draft}/{submitted}/{accepted}", {
-													accepted: String(item.acceptedCount),
-													draft: String(item.draftCount),
-													submitted: String(item.submittedCount),
-												})}
-											</TableCell>
-											<TableCell>{item.totalMembers.toLocaleString()}</TableCell>
-											<TableCell>{item.totalEvents.toLocaleString()}</TableCell>
-											<TableCell>{item.organiserEvents.toLocaleString()}</TableCell>
-											<TableCell>{item.presenterEvents.toLocaleString()}</TableCell>
-											<TableCell>{item.socialMediaAccounts.toLocaleString()}</TableCell>
-										</TableRow>
-									)}
+									<TableRow id={String(item.campaignYear)}>
+										<TableCell>{item.campaignYear}</TableCell>
+										<TableCell>{item.reportCount.toLocaleString()}</TableCell>
+										<TableCell>
+											{t("{draft}/{submitted}/{accepted}", {
+												accepted: String(item.acceptedCount),
+												draft: String(item.draftCount),
+												submitted: String(item.submittedCount),
+											})}
+										</TableCell>
+										<TableCell>{item.totalMembers.toLocaleString()}</TableCell>
+										<TableCell>{item.totalEvents.toLocaleString()}</TableCell>
+										<TableCell>{item.organiserEvents.toLocaleString()}</TableCell>
+										<TableCell>{item.presenterEvents.toLocaleString()}</TableCell>
+										<TableCell>{item.socialMediaAccounts.toLocaleString()}</TableCell>
+									</TableRow>
+								)}
 							</TableBody>
 						</Table>
 					</section>

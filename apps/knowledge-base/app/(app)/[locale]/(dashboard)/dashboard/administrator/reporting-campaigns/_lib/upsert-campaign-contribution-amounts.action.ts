@@ -48,7 +48,9 @@ export const upsertCampaignContributionAmountsAction = createServerAction(
 		await db.transaction(async (tx) => {
 			for (const roleType of reportingCampaignContributionRoleEnum) {
 				const amount = amounts[roleType];
-				if (amount == null) {continue;}
+				if (amount == null) {
+					continue;
+				}
 
 				await tx
 					.insert(schema.reportingCampaignContributionAmounts)

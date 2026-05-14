@@ -117,7 +117,8 @@ export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 
 	return (
 		<AriaMenuItem
-			className={composeRenderProps(className, (className, { hasSubmenu, ...renderProps }) => dropdownItemStyles({
+			className={composeRenderProps(className, (className, { hasSubmenu, ...renderProps }) =>
+				dropdownItemStyles({
 					...renderProps,
 					intent,
 					className: hasSubmenu
@@ -129,7 +130,8 @@ export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 								className,
 							)
 						: className,
-				}))}
+				}),
+			)}
 			data-slot="menu-item"
 			render={(domProps, renderProps) => {
 				if ("href" in domProps && domProps.href && !renderProps.isDisabled) {
@@ -148,30 +150,33 @@ export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 			{...rest}
 		>
 			{(values) => (
-					<Fragment>
-						{values.isSelected && (
-							<span
-								className={twJoin(
-									"group-has-data-[slot=avatar]:absolute group-has-data-[slot=avatar]:inset-e-0",
-									"group-has-data-[slot=icon]:absolute group-has-data-[slot=icon]:inset-e-0",
-								)}
-							>
-								{values.selectionMode === "single" && (
-									<CheckIcon className="-mx-0.5 me-2 block-4 inline-4" data-slot="check-indicator" />
-								)}
-								{values.selectionMode === "multiple" && (
-									<CheckIcon className="-mx-0.5 me-2 block-4 inline-4" data-slot="check-indicator" />
-								)}
-							</span>
-						)}
+				<Fragment>
+					{values.isSelected && (
+						<span
+							className={twJoin(
+								"group-has-data-[slot=avatar]:absolute group-has-data-[slot=avatar]:inset-e-0",
+								"group-has-data-[slot=icon]:absolute group-has-data-[slot=icon]:inset-e-0",
+							)}
+						>
+							{values.selectionMode === "single" && (
+								<CheckIcon className="-mx-0.5 me-2 block-4 inline-4" data-slot="check-indicator" />
+							)}
+							{values.selectionMode === "multiple" && (
+								<CheckIcon className="-mx-0.5 me-2 block-4 inline-4" data-slot="check-indicator" />
+							)}
+						</span>
+					)}
 
-						{typeof children === "function" ? children(values) : children}
+					{typeof children === "function" ? children(values) : children}
 
-						{values.hasSubmenu && (
-							<ChevronRightIcon className="absolute inset-e-2 block-3.5 inline-3.5" data-slot="chevron" />
-						)}
-					</Fragment>
-				)}
+					{values.hasSubmenu && (
+						<ChevronRightIcon
+							className="absolute inset-e-2 block-3.5 inline-3.5"
+							data-slot="chevron"
+						/>
+					)}
+				</Fragment>
+			)}
 		</AriaMenuItem>
 	);
 }

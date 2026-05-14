@@ -102,11 +102,7 @@ async function getActiveGovernanceBodyPersons(
 			),
 		);
 
-	const positions = await getPersonPositions(db, [
-		...new Set(
-			rows.map((row) => row.id),
-		),
-	]);
+	const positions = await getPersonPositions(db, [...new Set(rows.map((row) => row.id))]);
 
 	for (const row of rows) {
 		const items = personsByGovernanceBody.get(row.governanceBodyId);

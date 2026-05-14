@@ -55,7 +55,9 @@ function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>): React
 	const [state, formAction, isPending] = useActionState(
 		async (prevState: ActionState, formData: FormData) => {
 			const result = await serverAction(prevState, formData);
-			if (result.status === "success") {onSuccess();}
+			if (result.status === "success") {
+				onSuccess();
+			}
 			return result;
 		},
 		createActionStateInitial(),
@@ -112,10 +114,10 @@ function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>): React
 					<SelectContent>
 						<SelectItem id="none">{t("None")}</SelectItem>
 						{groups.map((group) => (
-								<SelectItem key={group.id} id={group.id}>
-									{group.label}
-								</SelectItem>
-							))}
+							<SelectItem key={group.id} id={group.id}>
+								{group.label}
+							</SelectItem>
+						))}
 					</SelectContent>
 				</Select>
 				{selectedGroupId ? <input name="groupId" type="hidden" value={selectedGroupId} /> : null}
@@ -187,8 +189,9 @@ export function DocumentOrPolicyFormDialog(
 	const [formKey, setFormKey] = useState(0);
 
 	function handleOpenChange(open: boolean) {
-		if (open)
-			{setFormKey((k) => k + 1);}
+		if (open) {
+			setFormKey((k) => k + 1);
+		}
 		onOpenChange(open);
 	}
 

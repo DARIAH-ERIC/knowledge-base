@@ -54,15 +54,15 @@ export function BreadcrumbsItem({
 			{...props}
 		>
 			{({ isCurrent }) => (
-					<Fragment>
-						{href != null ? (
-							<Link href={href as string} {...props} />
-						) : (
-							<span className="cursor-default text-muted-fg">{props.children as ReactNode}</span>
-						)}
-						{!isCurrent && effectiveSeparator !== false && <Separator separator={separatorValue} />}
-					</Fragment>
-				)}
+				<Fragment>
+					{href != null ? (
+						<Link href={href as string} {...props} />
+					) : (
+						<span className="cursor-default text-muted-fg">{props.children as ReactNode}</span>
+					)}
+					{!isCurrent && effectiveSeparator !== false && <Separator separator={separatorValue} />}
+				</Fragment>
+			)}
 		</Breadcrumb>
 	);
 }

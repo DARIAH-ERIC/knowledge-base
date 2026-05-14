@@ -49,17 +49,17 @@ export function CampaignCountryThresholdsForm(
 
 				<FormSection title={t("Country thresholds")}>
 					{countries.map((country) => (
-							<TextField
-								key={country.id}
-								defaultValue={thresholdMap[country.id]}
-								name={`amounts.${country.id}`}
-								type="number"
-							>
-								<Label>{country.name}</Label>
-								<Input min={0} step="0.01" />
-								<FieldError />
-							</TextField>
-						))}
+						<TextField
+							key={country.id}
+							defaultValue={thresholdMap[country.id]}
+							name={`amounts.${country.id}`}
+							type="number"
+						>
+							<Label>{country.name}</Label>
+							<Input min={0} step="0.01" />
+							<FieldError />
+						</TextField>
+					))}
 				</FormSection>
 
 				<Button className="self-start" isPending={isPending} type="submit">

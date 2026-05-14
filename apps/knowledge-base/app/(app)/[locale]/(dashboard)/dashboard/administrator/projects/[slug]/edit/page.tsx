@@ -186,9 +186,7 @@ export default async function DashboardAdministratorEditProjectPage(
 
 	const [selectedSocialMediaItems, selectedPartnerUnits] = await Promise.all([
 		getSocialMediaOptionsByIds(initialSocialMediaIds),
-		getOrganisationalUnitOptionsByIds(
-			initialPartners.map((partner) => partner.unitId),
-		),
+		getOrganisationalUnitOptionsByIds(initialPartners.map((partner) => partner.unitId)),
 	]);
 
 	const description = descriptionRows.at(0)?.content;

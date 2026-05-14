@@ -15,7 +15,9 @@ interface AnalyticsScriptProps {
 export function AnalyticsScript(props: Readonly<AnalyticsScriptProps>): ReactNode {
 	const { baseUrl, id } = props;
 
-	if (baseUrl == null || id == null) {return null;}
+	if (baseUrl == null || id == null) {
+		return null;
+	}
 
 	return (
 		<Script

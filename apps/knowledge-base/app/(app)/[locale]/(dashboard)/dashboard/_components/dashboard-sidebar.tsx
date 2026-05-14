@@ -381,22 +381,22 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 					</SidebarSection>
 
 					{sidebarMenu.map((section, index) => (
-							// eslint-disable-next-line @eslint-react/no-array-index-key
-							<SidebarSection key={index} label={section.title}>
-								{section.items.map((item, index) => (
-										<SidebarItem
-											// eslint-disable-next-line @eslint-react/no-array-index-key
-											key={index}
-											href={item.href}
-											isCurrent={currentHref === item.href}
-											tooltip={item.tooltip}
-										>
-											{item.icon}
-											<SidebarLabel>{item.label}</SidebarLabel>
-										</SidebarItem>
-									))}
-							</SidebarSection>
-						))}
+						// eslint-disable-next-line @eslint-react/no-array-index-key
+						<SidebarSection key={index} label={section.title}>
+							{section.items.map((item, index) => (
+								<SidebarItem
+									// eslint-disable-next-line @eslint-react/no-array-index-key
+									key={index}
+									href={item.href}
+									isCurrent={currentHref === item.href}
+									tooltip={item.tooltip}
+								>
+									{item.icon}
+									<SidebarLabel>{item.label}</SidebarLabel>
+								</SidebarItem>
+							))}
+						</SidebarSection>
+					))}
 				</SidebarSectionGroup>
 			</SidebarContent>
 

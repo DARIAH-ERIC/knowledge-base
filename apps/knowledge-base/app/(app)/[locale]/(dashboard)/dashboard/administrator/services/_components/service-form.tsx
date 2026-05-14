@@ -128,10 +128,10 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 						<FieldError />
 						<SelectContent>
 							{serviceTypes.map((type) => (
-									<SelectItem key={type.id} id={type.id}>
-										{formatServiceType(type.type)}
-									</SelectItem>
-								))}
+								<SelectItem key={type.id} id={type.id}>
+									{formatServiceType(type.type)}
+								</SelectItem>
+							))}
 						</SelectContent>
 					</Select>
 					<input name="typeId" type="hidden" value={selectedTypeId} />
@@ -148,10 +148,10 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 						<FieldError />
 						<SelectContent>
 							{serviceStatuses.map((status) => (
-									<SelectItem key={status.id} id={status.id}>
-										{formatServiceStatus(status.status)}
-									</SelectItem>
-								))}
+								<SelectItem key={status.id} id={status.id}>
+									{formatServiceStatus(status.status)}
+								</SelectItem>
+							))}
 						</SelectContent>
 					</Select>
 					<input name="statusId" type="hidden" value={selectedStatusId} />
@@ -213,7 +213,9 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 						selectedItems={selectedOrganisationalUnits}
 						value={selectedOwnerUnitIds}
 					/>
-					{selectedOwnerUnitIds.map((id) => <input key={id} name="ownerUnitIds" type="hidden" value={id} />)}
+					{selectedOwnerUnitIds.map((id) => (
+						<input key={id} name="ownerUnitIds" type="hidden" value={id} />
+					))}
 
 					<AsyncMultipleSelect
 						aria-label={t("Service providers")}
@@ -226,7 +228,9 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 						selectedItems={selectedOrganisationalUnits}
 						value={selectedProviderUnitIds}
 					/>
-					{selectedProviderUnitIds.map((id) => <input key={id} name="providerUnitIds" type="hidden" value={id} />)}
+					{selectedProviderUnitIds.map((id) => (
+						<input key={id} name="providerUnitIds" type="hidden" value={id} />
+					))}
 				</FormSection>
 
 				{service != null && <input name="id" type="hidden" value={service.id} />}

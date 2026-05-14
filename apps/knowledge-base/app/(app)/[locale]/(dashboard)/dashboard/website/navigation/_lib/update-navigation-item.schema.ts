@@ -13,5 +13,8 @@ export const UpdateNavigationItemActionInputSchema = v.pipe(
 			),
 		),
 	}),
-	v.check(({ href, entityId }) => !(href != null && entityId != null), "A URL and an internal link cannot both be set."),
+	v.check(
+		({ href, entityId }) => !(href != null && entityId != null),
+		"A URL and an internal link cannot both be set.",
+	),
 );

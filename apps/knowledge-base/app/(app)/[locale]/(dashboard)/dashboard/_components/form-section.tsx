@@ -112,7 +112,10 @@ export function FormActions({
 }: Readonly<FormActionsProps>): ReactNode {
 	return (
 		<div
-			className={twMerge("flex inline-full max-inline-3xl items-center justify-end gap-x-4", className)}
+			className={twMerge(
+				"flex inline-full max-inline-3xl items-center justify-end gap-x-4",
+				className,
+			)}
 			{...props}
 		>
 			{children}

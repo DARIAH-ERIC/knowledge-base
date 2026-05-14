@@ -135,7 +135,10 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 		return map;
 	}, [displayedItems, initialItems, localSelectedItems, selectedItems, value]);
 
-	const resolvedSelectedItems = useMemo(() => value.map((id) => selectedItemMap.get(id) ?? { id, name: id }), [selectedItemMap, value]);
+	const resolvedSelectedItems = useMemo(
+		() => value.map((id) => selectedItemMap.get(id) ?? { id, name: id }),
+		[selectedItemMap, value],
+	);
 
 	const renderOption = renderItem ?? renderDefaultItem;
 	const loadErrorMessage =
@@ -157,13 +160,13 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 					<div className="flex min-inline-0 flex-1 flex-wrap gap-1 text-start">
 						{resolvedSelectedItems.length > 0 ? (
 							resolvedSelectedItems.map((item) => (
-									<span
-										key={item.id}
-										className="inline-flex items-center rounded-md border bg-muted px-2 py-0.5 text-xs font-medium text-fg"
-									>
-										{item.name}
-									</span>
-								))
+								<span
+									key={item.id}
+									className="inline-flex items-center rounded-md border bg-muted px-2 py-0.5 text-xs font-medium text-fg"
+								>
+									{item.name}
+								</span>
+							))
 						) : (
 							<span className="text-muted-fg">{placeholder ?? t("No selected items")}</span>
 						)}
@@ -177,9 +180,7 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 							<TagGroup
 								aria-label={t("Selected items")}
 								onRemove={(keys) => {
-									onChange(
-										value.filter((id) => !keys.has(id)),
-									);
+									onChange(value.filter((id) => !keys.has(id)));
 								}}
 							>
 								<TagList items={resolvedSelectedItems}>
@@ -219,9 +220,7 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 										const nextSelectedKeys = new Set(nextValue);
 
 										setLocalSelectedItems((previousItems) => {
-											const map = new Map(
-												previousItems.map((item) => [item.id, item] as const),
-											);
+											const map = new Map(previousItems.map((item) => [item.id, item] as const));
 
 											for (const item of displayedItems) {
 												if (nextSelectedKeys.has(item.id)) {
@@ -239,10 +238,10 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 									selectionMode="multiple"
 								>
 									{(item) => (
-											<ListBoxItem id={item.id} textValue={item.name}>
-												{renderOption(item)}
-											</ListBoxItem>
-										)}
+										<ListBoxItem id={item.id} textValue={item.name}>
+											{renderOption(item)}
+										</ListBoxItem>
+									)}
 								</ListBox>
 
 								{isPending ? (

@@ -41,13 +41,13 @@ export const Default: Story = {
 				</TableHeader>
 				<TableBody items={rows}>
 					{(row) => (
-							<TableRow id={row.id}>
-								<TableCell>{row.name}</TableCell>
-								<TableCell>{row.role}</TableCell>
-								<TableCell>{row.status}</TableCell>
-								<TableCell>{row.joined}</TableCell>
-							</TableRow>
-						)}
+						<TableRow id={row.id}>
+							<TableCell>{row.name}</TableCell>
+							<TableCell>{row.role}</TableCell>
+							<TableCell>{row.status}</TableCell>
+							<TableCell>{row.joined}</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 		);
@@ -64,13 +64,13 @@ export const Striped: Story = {
 				</TableHeader>
 				<TableBody items={rows}>
 					{(row) => (
-							<TableRow id={row.id}>
-								<TableCell>{row.name}</TableCell>
-								<TableCell>{row.role}</TableCell>
-								<TableCell>{row.status}</TableCell>
-								<TableCell>{row.joined}</TableCell>
-							</TableRow>
-						)}
+						<TableRow id={row.id}>
+							<TableCell>{row.name}</TableCell>
+							<TableCell>{row.role}</TableCell>
+							<TableCell>{row.status}</TableCell>
+							<TableCell>{row.joined}</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 		);
@@ -87,13 +87,13 @@ export const WithGrid: Story = {
 				</TableHeader>
 				<TableBody items={rows}>
 					{(row) => (
-							<TableRow id={row.id}>
-								<TableCell>{row.name}</TableCell>
-								<TableCell>{row.role}</TableCell>
-								<TableCell>{row.status}</TableCell>
-								<TableCell>{row.joined}</TableCell>
-							</TableRow>
-						)}
+						<TableRow id={row.id}>
+							<TableCell>{row.name}</TableCell>
+							<TableCell>{row.role}</TableCell>
+							<TableCell>{row.status}</TableCell>
+							<TableCell>{row.joined}</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 		);
@@ -108,9 +108,7 @@ export const Empty: Story = {
 				<TableHeader columns={columns}>
 					{(column) => <TableColumn id={column.id}>{column.name}</TableColumn>}
 				</TableHeader>
-				<TableBody items={[]}>
-					{() => <TableRow id="empty" />}
-				</TableBody>
+				<TableBody items={[]}>{() => <TableRow id="empty" />}</TableBody>
 			</Table>
 		);
 	},

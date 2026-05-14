@@ -45,22 +45,21 @@ export function Calendar<T extends DateValue>({
 				<CalendarGridHeader />
 				<CalendarGridBody>
 					{(date) => (
-							<CalendarCell
-								className={composeRenderProps(
+						<CalendarCell
+							className={composeRenderProps(className, (className, { isSelected, isDisabled }) =>
+								twMerge(
+									"relative flex block-11 inline-11 cursor-default items-center justify-center rounded-lg text-fg tabular-nums outline-hidden hover:bg-secondary-fg/15 sm:block-9 sm:inline-9 sm:text-sm/6 forced-colors:text-[ButtonText] forced-colors:outline-0",
+									isSelected &&
+										"bg-primary text-primary-fg pressed:bg-primary hover:bg-primary/90 data-invalid:bg-danger data-invalid:text-danger-fg forced-colors:bg-[Highlight] forced-colors:text-[Highlight] forced-colors:data-invalid:bg-[Mark]",
+									isDisabled && "text-muted-fg forced-colors:text-[GrayText]",
+									date.compare(now) === 0 &&
+										"after:pointer-events-none after:absolute after:inset-s-1/2 after:inset-be-1 after:z-10 after:block-[3px] after:inline-[3px] after:-translate-x-1/2 after:rounded-full after:bg-primary selected:after:bg-primary-fg focus-visible:after:bg-primary-fg",
 									className,
-									(className, { isSelected, isDisabled }) => twMerge(
-											"relative flex block-11 inline-11 cursor-default items-center justify-center rounded-lg text-fg tabular-nums outline-hidden hover:bg-secondary-fg/15 sm:block-9 sm:inline-9 sm:text-sm/6 forced-colors:text-[ButtonText] forced-colors:outline-0",
-											isSelected &&
-												"bg-primary text-primary-fg pressed:bg-primary hover:bg-primary/90 data-invalid:bg-danger data-invalid:text-danger-fg forced-colors:bg-[Highlight] forced-colors:text-[Highlight] forced-colors:data-invalid:bg-[Mark]",
-											isDisabled && "text-muted-fg forced-colors:text-[GrayText]",
-											date.compare(now) === 0 &&
-												"after:pointer-events-none after:absolute after:inset-s-1/2 after:inset-be-1 after:z-10 after:block-[3px] after:inline-[3px] after:-translate-x-1/2 after:rounded-full after:bg-primary selected:after:bg-primary-fg focus-visible:after:bg-primary-fg",
-											className,
-										),
-								)}
-								date={date}
-							/>
-						)}
+								),
+							)}
+							date={date}
+						/>
+					)}
 				</CalendarGridBody>
 			</CalendarGrid>
 		</CalendarPrimitive>
@@ -151,10 +150,10 @@ export function SelectMonth({ state }: Readonly<{ state: CalendarState }>): Reac
 			<SelectTrigger className="inline-22 text-sm/5 sm:px-2.5 sm:py-1.5 sm:*:text-sm/5 **:data-[slot=select-value]:inline-block **:data-[slot=select-value]:truncate" />
 			<SelectContent className="min-inline-0">
 				{months.map((month, index) => (
-						<SelectItem key={index} id={(index + 1).toString()} textValue={month}>
-							<SelectLabel>{month}</SelectLabel>
-						</SelectItem>
-					))}
+					<SelectItem key={index} id={(index + 1).toString()} textValue={month}>
+						<SelectLabel>{month}</SelectLabel>
+					</SelectItem>
+				))}
 			</SelectContent>
 		</Select>
 	);
@@ -189,10 +188,10 @@ export function SelectYear({ state }: Readonly<{ state: CalendarState }>): React
 			<SelectTrigger className="text-sm/5 sm:px-2.5 sm:py-1.5 sm:*:text-sm/5" />
 			<SelectContent>
 				{years.map((year, i) => (
-						<SelectItem key={i} id={i} textValue={year.formatted}>
-							<SelectLabel>{year.formatted}</SelectLabel>
-						</SelectItem>
-					))}
+					<SelectItem key={i} id={i} textValue={year.formatted}>
+						<SelectLabel>{year.formatted}</SelectLabel>
+					</SelectItem>
+				))}
 			</SelectContent>
 		</Select>
 	);
@@ -202,10 +201,10 @@ export function CalendarGridHeader(): ReactNode {
 	return (
 		<CalendarGridHeaderPrimitive>
 			{(day) => (
-					<CalendarHeaderCell className="pbe-2 text-center font-semibold text-muted-fg text-sm/6 sm:px-0 sm:py-0.5 lg:text-xs">
-						{day}
-					</CalendarHeaderCell>
-				)}
+				<CalendarHeaderCell className="pbe-2 text-center font-semibold text-muted-fg text-sm/6 sm:px-0 sm:py-0.5 lg:text-xs">
+					{day}
+				</CalendarHeaderCell>
+			)}
 		</CalendarGridHeaderPrimitive>
 	);
 }

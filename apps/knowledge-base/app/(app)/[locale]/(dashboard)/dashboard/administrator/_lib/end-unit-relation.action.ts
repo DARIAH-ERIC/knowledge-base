@@ -15,7 +15,9 @@ export async function endUnitRelationAction(id: string, end: Date): Promise<void
 		columns: { duration: true },
 	});
 
-	if (relation == null) {return;}
+	if (relation == null) {
+		return;
+	}
 
 	await db
 		.update(schema.organisationalUnitsRelations)

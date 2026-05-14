@@ -38,10 +38,10 @@ export function Meter(props: Readonly<MeterProps>): ReactNode {
 			)}
 		>
 			{(values) => (
-					<MeterContext value={{ ...values, color }}>
-						{typeof children === "function" ? children(values) : children}
-					</MeterContext>
-				)}
+				<MeterContext value={{ ...values, color }}>
+					{typeof children === "function" ? children(values) : children}
+				</MeterContext>
+			)}
 		</PrimitiveMeter>
 	);
 }
@@ -106,7 +106,11 @@ export function MeterHeader(props: Readonly<MeterHeaderProps>): ReactNode {
 }
 
 function getMeterColor(value: number): string {
-	if (value < 50) {return "var(--color-success)";}
-	if (value < 80) {return "var(--color-warning)";}
+	if (value < 50) {
+		return "var(--color-success)";
+	}
+	if (value < 80) {
+		return "var(--color-warning)";
+	}
 	return "var(--color-danger)";
 }

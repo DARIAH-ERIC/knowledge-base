@@ -34,10 +34,10 @@ export function ColorSchemeSelect(props: Readonly<ColorSchemeSelectProps>): Reac
 			<SelectTrigger />
 			<SelectContent>
 				{Object.entries(items).map(([value, label]) => (
-						<SelectItem key={value} id={value}>
-							{label}
-						</SelectItem>
-					))}
+					<SelectItem key={value} id={value}>
+						{label}
+					</SelectItem>
+				))}
 			</SelectContent>
 		</Select>
 	);

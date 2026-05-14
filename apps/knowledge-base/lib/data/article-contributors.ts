@@ -50,9 +50,7 @@ export async function getPersonOptionsByIds(ids: ReadonlyArray<string>) {
 		.where(inArray(schema.persons.id, [...ids]))
 		.orderBy(schema.persons.sortName);
 
-	const itemById = new Map(
-		rows.map((row) => [row.id, row] as const),
-	);
+	const itemById = new Map(rows.map((row) => [row.id, row] as const));
 
 	return ids.flatMap((id) => {
 		const item = itemById.get(id);

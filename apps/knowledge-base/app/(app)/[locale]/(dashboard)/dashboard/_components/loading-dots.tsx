@@ -36,14 +36,14 @@ export function LoadingDots({
 			role="status"
 		>
 			{[0, 1, 2].map((i) => (
-					<div
-						key={i}
-						className={twMerge("rounded-full bg-muted-fg", sizeClasses[size], speedClasses[speed])}
-						style={{
-							animationDelay: `${String(i * 0.15)}s`,
-						}}
-					/>
-				))}
+				<div
+					key={i}
+					className={twMerge("rounded-full bg-muted-fg", sizeClasses[size], speedClasses[speed])}
+					style={{
+						animationDelay: `${String(i * 0.15)}s`,
+					}}
+				/>
+			))}
 			<span className="sr-only">{t("Loading...")}</span>
 		</div>
 	);

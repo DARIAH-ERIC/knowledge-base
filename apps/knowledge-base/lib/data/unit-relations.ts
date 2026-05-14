@@ -73,9 +73,7 @@ export async function getUnitRelationStatusOptions(
 		)
 		.orderBy(schema.organisationalUnitStatus.status);
 
-	const byStatusId = new Map(
-		rows.map((row) => [row.statusId, row] as const),
-	);
+	const byStatusId = new Map(rows.map((row) => [row.statusId, row] as const));
 
 	return [...byStatusId.values()];
 }
@@ -106,9 +104,7 @@ export async function getUnitRelationRelatedUnitOptions(
 		);
 
 	const relatedUnitTypeIds = [
-		...new Set(
-			allowedRelatedUnitTypes.map((row) => row.relatedUnitTypeId),
-		),
+		...new Set(allowedRelatedUnitTypes.map((row) => row.relatedUnitTypeId)),
 	];
 
 	if (relatedUnitTypeIds.length === 0) {
@@ -166,13 +162,11 @@ export async function getUnitRelationOptions(unitType: string) {
 			),
 		);
 
-	if (allowedCombos.length === 0) {return [];}
+	if (allowedCombos.length === 0) {
+		return [];
+	}
 
-	const relatedUnitTypeIds = [
-		...new Set(
-			allowedCombos.map((c) => c.relatedUnitTypeId),
-		),
-	];
+	const relatedUnitTypeIds = [...new Set(allowedCombos.map((c) => c.relatedUnitTypeId))];
 
 	const relatedUnits = await db
 		.select({

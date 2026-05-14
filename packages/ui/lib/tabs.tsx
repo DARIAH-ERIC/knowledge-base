@@ -56,7 +56,8 @@ export function TabList<T extends object>(props: Readonly<TabListProps<T>>): Rea
 		<TabListPrimitive
 			{...rest}
 			ref={ref}
-			className={composeRenderProps(className, (className, { orientation }) => twMerge([
+			className={composeRenderProps(className, (className, { orientation }) =>
+				twMerge([
 					"[--tab-list-gutter:--spacing(1)]",
 					"relative flex forced-color-adjust-none",
 					orientation === "horizontal" &&
@@ -64,7 +65,8 @@ export function TabList<T extends object>(props: Readonly<TabListProps<T>>): Rea
 					orientation === "vertical" &&
 						"min-inline-56 shrink-0 flex-col items-start gap-y-(--tab-list-gutter) border-s px-(--tab-list-gutter) [--tab-list-gutter:--spacing(2)]",
 					className,
-				]))}
+				]),
+			)}
 			data-slot="tab-list"
 		/>
 	);
@@ -113,19 +115,19 @@ export function Tab(props: Readonly<TabProps>): ReactNode {
 			}}
 		>
 			{(values) => (
-					<Fragment>
-						{typeof children === "function" ? children(values) : children}
-						<SelectionIndicator
-							className={twMerge(
-								"absolute bg-primary-subtle-fg transition-[translate,width,height] duration-200",
-								orientation === "horizontal"
-									? "inset-x-(--tab-gutter-x) -inset-be-[calc(var(--tab-gutter-y)+1px)] block-[2px]"
-									: "inset-y-(--tab-gutter-y) -inset-s-[calc(var(--tab-gutter-x)-var(--tab-list-gutter)+1px)] inline-[2px]",
-							)}
-							data-slot="selected-indicator"
-						/>
-					</Fragment>
-				)}
+				<Fragment>
+					{typeof children === "function" ? children(values) : children}
+					<SelectionIndicator
+						className={twMerge(
+							"absolute bg-primary-subtle-fg transition-[translate,width,height] duration-200",
+							orientation === "horizontal"
+								? "inset-x-(--tab-gutter-x) -inset-be-[calc(var(--tab-gutter-y)+1px)] block-[2px]"
+								: "inset-y-(--tab-gutter-y) -inset-s-[calc(var(--tab-gutter-x)-var(--tab-list-gutter)+1px)] inline-[2px]",
+						)}
+						data-slot="selected-indicator"
+					/>
+				</Fragment>
+			)}
 		</TabPrimitive>
 	);
 }

@@ -103,9 +103,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 		}),
 	);
 
-	await Promise.all(
-		items.map((item) => seedContentBlock(db, item.version.id, type.id, "content")),
-	);
+	await Promise.all(items.map((item) => seedContentBlock(db, item.version.id, type.id, "content")));
 }
 
 describe("events", () => {
@@ -341,17 +339,15 @@ describe("events", () => {
 				// Default order for from-anchored queries is asc: soonest event first.
 				// Verify the entire result set is sorted ascending by start date.
 				const starts = data.data.map((e) => e.duration.start);
-				expect(
-					starts.every((s, i) => i === 0 || s >= starts[i - 1]!),
-				).toBe(true);
+				expect(starts.every((s, i) => i === 0 || s >= starts[i - 1]!)).toBe(true);
 
 				// Verify our four upcoming events all appear and are in the right relative order.
 				const titles = data.data.map((e) => e.title);
-				const positions = [t.upcoming1, t.upcoming2, t.upcoming3, t.upcoming4].map((e) => titles.indexOf(e.event.title));
+				const positions = [t.upcoming1, t.upcoming2, t.upcoming3, t.upcoming4].map((e) =>
+					titles.indexOf(e.event.title),
+				);
 
-				expect(
-					positions.every((p) => p !== -1),
-				).toBe(true);
+				expect(positions.every((p) => p !== -1)).toBe(true);
 				expect(positions[0]).toBeLessThan(positions[1]!);
 				expect(positions[1]).toBeLessThan(positions[2]!);
 				expect(positions[2]).toBeLessThan(positions[3]!);
@@ -384,17 +380,11 @@ describe("events", () => {
 				const page2 = await page2Response.json();
 
 				// Pages must not overlap.
-				const ids1 = new Set(
-					page1.data.map((e) => e.id),
-				);
-				expect(
-					page2.data.every((e) => !ids1.has(e.id)),
-				).toBe(true);
+				const ids1 = new Set(page1.data.map((e) => e.id));
+				expect(page2.data.every((e) => !ids1.has(e.id))).toBe(true);
 
 				// All four upcoming events must appear across both pages.
-				const allIds = new Set(
-					[...page1.data, ...page2.data].map((e) => e.id),
-				);
+				const allIds = new Set([...page1.data, ...page2.data].map((e) => e.id));
 				for (const event of [t.upcoming1, t.upcoming2, t.upcoming3, t.upcoming4]) {
 					expect(allIds.has(event.version.id)).toBe(true);
 				}
@@ -746,12 +736,8 @@ describe("events", () => {
 				expect(page2Data.data.length).toBeGreaterThanOrEqual(2);
 
 				// No overlap between pages.
-				const page1Ids = new Set(
-					page1Data.data.map((e) => e.id),
-				);
-				expect(
-					page2Data.data.every((e) => !page1Ids.has(e.id)),
-				).toBe(true);
+				const page1Ids = new Set(page1Data.data.map((e) => e.id));
+				expect(page2Data.data.every((e) => !page1Ids.has(e.id))).toBe(true);
 			});
 		});
 	});
@@ -845,9 +831,7 @@ describe("events", () => {
 					client.events[":id"].$get({ param: { id: c.version.id } }),
 				]);
 
-				const payloads = await Promise.all(
-					responses.map((r) => r.json()),
-				);
+				const payloads = await Promise.all(responses.map((r) => r.json()));
 
 				// Sort IDs the same way the (lower, id::text) tuple cursor does,
 				// so we can assert that adjacency within the same-timestamp group is correct.

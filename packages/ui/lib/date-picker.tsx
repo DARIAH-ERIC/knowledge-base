@@ -38,11 +38,11 @@ export function DatePicker<T extends DateValue>({
 	return (
 		<DatePickerPrimitive className={cx(fieldStyles(), className)} data-slot="control" {...props}>
 			{(values) => (
-					<Fragment>
-						{typeof children === "function" ? children(values) : children}
-						<DatePickerOverlay {...popover} />
-					</Fragment>
-				)}
+				<Fragment>
+					{typeof children === "function" ? children(values) : children}
+					<DatePickerOverlay {...popover} />
+				</Fragment>
+			)}
 		</DatePickerPrimitive>
 	);
 }

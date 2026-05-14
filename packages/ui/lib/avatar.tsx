@@ -76,7 +76,9 @@ export function Avatar({
 					</text>
 				</svg>
 			)}
-			{src !== null && <img alt={alt} className="block-full inline-full object-cover object-center" src={src} />}
+			{src !== null && (
+				<img alt={alt} className="block-full inline-full object-cover object-center" src={src} />
+			)}
 		</span>
 	);
 }

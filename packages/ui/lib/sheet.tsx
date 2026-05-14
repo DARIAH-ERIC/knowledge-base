@@ -76,13 +76,16 @@ export function SheetContent({
 			>
 				<Dialog aria-label={props["aria-label"]} className="sm:[--gutter:--spacing(6)]" role={role}>
 					{(values) => (
-							<Fragment>
-								{typeof children === "function" ? children(values) : children}
-								{closeButton && (
-									<DialogCloseIcon className="inset-e-2.5 inset-bs-2.5" isDismissable={isDismissable} />
-								)}
-							</Fragment>
-						)}
+						<Fragment>
+							{typeof children === "function" ? children(values) : children}
+							{closeButton && (
+								<DialogCloseIcon
+									className="inset-e-2.5 inset-bs-2.5"
+									isDismissable={isDismissable}
+								/>
+							)}
+						</Fragment>
+					)}
 				</Dialog>
 			</AriaModal>
 		</AriaModalOverlay>

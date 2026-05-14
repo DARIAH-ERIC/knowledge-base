@@ -113,25 +113,27 @@ export function DropdownItem({
 	const textValue = typeof children === "string" ? children : undefined;
 	return (
 		<ListBoxItemPrimitive
-			className={composeRenderProps(className, (className, renderProps) => dropdownItemStyles({ ...renderProps, intent, className }))}
+			className={composeRenderProps(className, (className, renderProps) =>
+				dropdownItemStyles({ ...renderProps, intent, className }),
+			)}
 			textValue={textValue}
 			{...props}
 		>
 			{composeRenderProps(children, (children, { isSelected }) => (
-					<Fragment>
-						{isSelected && (
-							<CheckIcon
-								className={twJoin(
-									"me-1.5 -ms-0.5 block-[lh] inline-4 shrink-0",
-									"group-has-data-[slot=icon]:absolute group-has-data-[slot=icon]:inset-bs-1/2 group-has-data-[slot=icon]:inset-e-0.5 group-has-data-[slot=icon]:-translate-y-1/2",
-									"group-has-data-[slot=avatar]:absolute group-has-data-[slot=avatar]:inset-bs-1/2 group-has-data-[slot=avatar]:inset-e-0.5 group-has-data-[slot=avatar]:-translate-y-1/2",
-								)}
-								data-slot="check-indicator"
-							/>
-						)}
-						{typeof children === "string" ? <DropdownLabel>{children}</DropdownLabel> : children}
-					</Fragment>
-				))}
+				<Fragment>
+					{isSelected && (
+						<CheckIcon
+							className={twJoin(
+								"me-1.5 -ms-0.5 block-[lh] inline-4 shrink-0",
+								"group-has-data-[slot=icon]:absolute group-has-data-[slot=icon]:inset-bs-1/2 group-has-data-[slot=icon]:inset-e-0.5 group-has-data-[slot=icon]:-translate-y-1/2",
+								"group-has-data-[slot=avatar]:absolute group-has-data-[slot=avatar]:inset-bs-1/2 group-has-data-[slot=avatar]:inset-e-0.5 group-has-data-[slot=avatar]:-translate-y-1/2",
+							)}
+							data-slot="check-indicator"
+						/>
+					)}
+					{typeof children === "string" ? <DropdownLabel>{children}</DropdownLabel> : children}
+				</Fragment>
+			))}
 		</ListBoxItemPrimitive>
 	);
 }

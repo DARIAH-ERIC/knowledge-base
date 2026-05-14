@@ -50,10 +50,7 @@ export function createZoteroItem(item: ZoteroJsonItem<ZoteroJsonItemData>): Reso
 		label: data.title ?? "",
 		description: data.abstractNote ?? "",
 		links: data.url != null ? [data.url] : [],
-		keywords:
-			data.tags
-				?.map((tag) => tag.tag)
-				.filter((keyword) => isNonEmptyString(keyword)) ?? [],
+		keywords: data.tags?.map((tag) => tag.tag).filter((keyword) => isNonEmptyString(keyword)) ?? [],
 		kind: data.itemType ?? null,
 		source_actor_ids: null,
 		upstream_sources: null,
