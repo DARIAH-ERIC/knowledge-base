@@ -21,7 +21,7 @@ export function ResendEmailVerificationCodeForm(): ReactNode {
 		<Form action={action} className="flex flex-col gap-y-6" state={state}>
 			<FormStatus state={state} />
 
-			<SubmitButton className="mt-2" intent="secondary">
+			<SubmitButton className="mbs-2" intent="secondary">
 				{t("Resend verification code")}
 			</SubmitButton>
 		</Form>

@@ -75,43 +75,39 @@ export function NewslettersPage(props: Readonly<NewslettersPageProps>): ReactNod
 					<TableColumn>{t("Clicks")}</TableColumn>
 				</TableHeader>
 				<TableBody items={newsletters.data}>
-					{(item) => {
-						return (
-							<TableRow>
-								<TableCell>{item.settings.subject_line}</TableCell>
-								<TableCell>
-									{item.send_time
-										? format.dateTime(new Date(item.send_time), { dateStyle: "short" })
-										: null}
-								</TableCell>
-								<TableCell>{format.number(item.emails_sent)}</TableCell>
-								<TableCell>{item.archive_url}</TableCell>
-								<TableCell>
-									<Badge intent={item.status === "sent" ? "success" : "primary"}>
-										{item.status}
-									</Badge>
-								</TableCell>
-								<TableCell>
-									{item.report_summary != null ? (
-										<Fragment>
-											{format.number(item.report_summary.opens)} (
-											{(item.report_summary.open_rate * 100).toFixed(2)}
-											{"%"})
-										</Fragment>
-									) : null}
-								</TableCell>
-								<TableCell>
-									{item.report_summary != null ? (
-										<Fragment>
-											{format.number(item.report_summary.clicks)} (
-											{(item.report_summary.click_rate * 100).toFixed(2)}
-											{"%"})
-										</Fragment>
-									) : null}
-								</TableCell>
-							</TableRow>
-						);
-					}}
+					{(item) => (
+						<TableRow>
+							<TableCell>{item.settings.subject_line}</TableCell>
+							<TableCell>
+								{item.send_time
+									? format.dateTime(new Date(item.send_time), { dateStyle: "short" })
+									: null}
+							</TableCell>
+							<TableCell>{format.number(item.emails_sent)}</TableCell>
+							<TableCell>{item.archive_url}</TableCell>
+							<TableCell>
+								<Badge intent={item.status === "sent" ? "success" : "primary"}>{item.status}</Badge>
+							</TableCell>
+							<TableCell>
+								{item.report_summary != null ? (
+									<Fragment>
+										{format.number(item.report_summary.opens)} (
+										{(item.report_summary.open_rate * 100).toFixed(2)}
+										{"%"})
+									</Fragment>
+								) : null}
+							</TableCell>
+							<TableCell>
+								{item.report_summary != null ? (
+									<Fragment>
+										{format.number(item.report_summary.clicks)} (
+										{(item.report_summary.click_rate * 100).toFixed(2)}
+										{"%"})
+									</Fragment>
+								) : null}
+							</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 

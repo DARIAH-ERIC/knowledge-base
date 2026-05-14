@@ -35,17 +35,15 @@ export function LoadingDots({
 			className={twMerge("flex items-center space-x-2", className)}
 			role="status"
 		>
-			{[0, 1, 2].map((i) => {
-				return (
-					<div
-						key={i}
-						className={twMerge("rounded-full bg-muted-fg", sizeClasses[size], speedClasses[speed])}
-						style={{
-							animationDelay: `${String(i * 0.15)}s`,
-						}}
-					/>
-				);
-			})}
+			{[0, 1, 2].map((i) => (
+				<div
+					key={i}
+					className={twMerge("rounded-full bg-muted-fg", sizeClasses[size], speedClasses[speed])}
+					style={{
+						animationDelay: `${String(i * 0.15)}s`,
+					}}
+				/>
+			))}
 			<span className="sr-only">{t("Loading...")}</span>
 		</div>
 	);

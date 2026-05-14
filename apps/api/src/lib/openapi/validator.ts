@@ -7,6 +7,7 @@ import * as v from "valibot";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function validator<
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
 	TValidationTargets extends keyof ValidationTargets,
 	TSchema extends v.GenericSchema | v.GenericSchemaAsync,
 >(target: TValidationTargets, schema: TSchema) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, type FC } from "react";
+import { type FC, createContext } from "react";
 
 export interface UiContextValue {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

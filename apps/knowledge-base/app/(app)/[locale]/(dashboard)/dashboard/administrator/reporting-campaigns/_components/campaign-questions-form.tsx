@@ -35,35 +35,30 @@ export function CampaignQuestionsForm(props: Readonly<CampaignQuestionsFormProps
 				<p className="text-sm text-muted-fg">{t("No questions yet.")}</p>
 			) : (
 				<ol className="flex flex-col gap-y-4">
-					{questions.map((q) => {
-						return (
-							<li
-								key={q.id}
-								className="flex items-start gap-x-4 rounded-md border border-border p-4"
-							>
-								<div className="flex-1 space-y-2">
-									<span className="text-xs text-muted-fg">
-										{t("Question")} {q.position}
-									</span>
-									<div className="richtext richtext-sm">
-										<RichTextEditor
-											aria-label={t("Question")}
-											content={q.question}
-											isEditable={false}
-										/>
-									</div>
+					{questions.map((q) => (
+						<li key={q.id} className="flex items-start gap-x-4 rounded-md border border-border p-4">
+							<div className="flex-1 space-y-2">
+								<span className="text-xs text-muted-fg">
+									{t("Question")} {q.position}
+								</span>
+								<div className="richtext richtext-sm">
+									<RichTextEditor
+										aria-label={t("Question")}
+										content={q.question}
+										isEditable={false}
+									/>
 								</div>
+							</div>
 
-								<form action={deleteWorkingGroupReportQuestionAction}>
-									<input name="campaignId" type="hidden" value={campaignId} />
-									<input name="id" type="hidden" value={q.id} />
-									<Button intent="danger" size="sm" type="submit">
-										{t("Remove")}
-									</Button>
-								</form>
-							</li>
-						);
-					})}
+							<form action={deleteWorkingGroupReportQuestionAction}>
+								<input name="campaignId" type="hidden" value={campaignId} />
+								<input name="id" type="hidden" value={q.id} />
+								<Button intent="danger" size="sm" type="submit">
+									{t("Remove")}
+								</Button>
+							</form>
+						</li>
+					))}
 				</ol>
 			)}
 

@@ -16,10 +16,10 @@ export function Navigation(props: Readonly<NavigationProps>): ReactNode {
 		<nav aria-label={label} className="hidden lg:flex lg:gap-x-6">
 			<NavLink href={navigation.home.href} size="icon">
 				<span className="sr-only">{navigation.home.label}</span>
-				<Logo className="h-8 w-auto" />
+				<Logo className="block-8 inline-auto" />
 			</NavLink>
 
-			<ul className="flex flex-wrap items-center" role="list">
+			<ul className="flex flex-wrap items-center">
 				{Object.entries(navigation).map(([id, item]) => {
 					switch (item.type) {
 						case "action": {

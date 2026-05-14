@@ -1,20 +1,21 @@
+import { log } from "@acdh-oeaw/lib";
 import type { DariahCampusClient } from "@dariah-eric/client-campus";
 import type { EpisciencesClient } from "@dariah-eric/client-episciences";
 import type { SshocClient } from "@dariah-eric/client-sshoc";
 import type { ZoteroClient } from "@dariah-eric/client-zotero";
 import {
 	type ResourceDocument,
-	resourceSources,
 	type SearchService,
 	type WebsiteDocument,
+	resourceSources,
 } from "@dariah-eric/search";
 import type { SearchAdminService } from "@dariah-eric/search/admin";
 import { Result } from "better-result";
 
 import {
+	type SearchIndexResourceSourceData,
 	createSearchIndexResourceDocuments,
 	createWebsiteResourceDocuments,
-	type SearchIndexResourceSourceData,
 } from "./resources";
 
 export interface SearchResourcesCache<CacheError = unknown> {
@@ -85,25 +86,17 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 				episciencesDocumentsResult,
 				zoteroItemsResult,
 			] = await Promise.all([
-				getOrFetch(cache, "sshoc/items", () => {
-					return sshoc.items.searchAll({
+				getOrFetch(cache, "sshoc/items", () =>
+					sshoc.items.searchAll({
 						"f.keyword": ["DARIAH Resource"],
 						categories: ["tool-or-service", "training-material", "workflow"],
 						order: ["label"],
-					});
-				}),
-				getOrFetch(cache, "campus/resources", () => {
-					return campus.resources.listAll();
-				}),
-				getOrFetch(cache, "campus/curricula", () => {
-					return campus.curricula.listAll();
-				}),
-				getOrFetch(cache, "episciences/documents", () => {
-					return episciences.search.listAll();
-				}),
-				getOrFetch(cache, "zotero/items", () => {
-					return zotero.items.listAll({ groupId: zoteroGroupId });
-				}),
+					}),
+				),
+				getOrFetch(cache, "campus/resources", () => campus.resources.listAll()),
+				getOrFetch(cache, "campus/curricula", () => campus.curricula.listAll()),
+				getOrFetch(cache, "episciences/documents", () => episciences.search.listAll()),
+				getOrFetch(cache, "zotero/items", () => zotero.items.listAll({ groupId: zoteroGroupId })),
 			]);
 
 			const sshocItems = yield* sshocItemsResult;
@@ -134,7 +127,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 	async function getExistingResourceDocumentIds(): Promise<Set<string>> {
 		const documentIds = new Set<string>();
 		let page = 1;
-		let totalPages = 1;
+		let totalPages;
 
 		do {
 			const result = await searchService.collections.resources.search({
@@ -162,7 +155,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 	async function getExistingWebsiteResourceDocumentIds(): Promise<Set<string>> {
 		const documentIds = new Set<string>();
 		let page = 1;
-		let totalPages = 1;
+		let totalPages;
 
 		do {
 			const result = await searchService.collections.website.search({
@@ -194,11 +187,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 		logContext: "resource" | "website resource";
 	}): Promise<number> {
 		const { currentDocuments, deleteDocument, existingDocumentIds, logContext } = params;
-		const currentDocumentIds = new Set(
-			currentDocuments.map((document) => {
-				return document.id;
-			}),
-		);
+		const currentDocumentIds = new Set(currentDocuments.map((document) => document.id));
 
 		let failedCount = 0;
 
@@ -210,7 +199,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 			const result = await deleteDocument(documentId);
 
 			if (result.isErr()) {
-				console.error(`Failed to delete stale ${logContext} search document.`, {
+				log.error(`Failed to delete stale ${logContext} search document.`, {
 					documentId,
 					error: result.error,
 				});

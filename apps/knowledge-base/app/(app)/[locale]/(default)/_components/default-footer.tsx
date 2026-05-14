@@ -47,16 +47,16 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 	} satisfies Record<string, NavigationLink>;
 
 	return (
-		<footer {...rest} className={cn("border-t border-stroke-weak", className)}>
+		<footer {...rest} className={cn("border-bs border-stroke-weak", className)}>
 			<div className="container flex flex-col gap-y-6 px-8 py-12 xs:px-16">
 				<div className="flex flex-col gap-y-8 xs:flex-row xs:items-center xs:justify-between">
-					<NavLink className="mr-auto -ml-1" href={links.home.href} size="icon">
+					<NavLink className="me-auto -ms-1" href={links.home.href} size="icon">
 						<span className="sr-only">{links.home.label}</span>
-						<Logo className="h-8 w-auto" />
+						<Logo className="block-8 inline-auto" />
 					</NavLink>
 
 					<nav aria-label={t("Social media")}>
-						<ul className="flex flex-wrap items-center gap-x-4 gap-y-2" role="list">
+						<ul className="flex flex-wrap items-center gap-x-4 gap-y-2">
 							{Object.values(meta.social).map((social) => {
 								const { href, kind, label } = social;
 
@@ -70,7 +70,7 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 									<li key={kind} className="inline-flex shrink-0">
 										<NavLink href={href} size="icon">
 											<span className="sr-only">{label}</span>
-											<Icon aria-hidden={true} className="size-6" />
+											<Icon aria-hidden={true} className="block-6 inline-6" />
 										</NavLink>
 									</li>
 								);
@@ -81,7 +81,7 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 
 				<div className="flex flex-col gap-y-6">
 					<nav aria-label={t("Secondary")}>
-						<ul className="-mx-2.5 flex flex-wrap items-center gap-x-4 gap-y-2" role="list">
+						<ul className="-mx-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
 							{Object.entries(links).map(([id, link]) => {
 								if (id === "home") {
 									return null;

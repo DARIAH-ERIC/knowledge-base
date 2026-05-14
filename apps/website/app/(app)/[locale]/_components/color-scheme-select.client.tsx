@@ -31,13 +31,11 @@ export function ColorSchemeSelect(props: Readonly<ColorSchemeSelectProps>): Reac
 				}}
 				value={value}
 			>
-				{Object.entries(items).map(([value, label]) => {
-					return (
-						<option key={value} value={value}>
-							{label}
-						</option>
-					);
-				})}
+				{Object.entries(items).map(([value, label]) => (
+					<option key={value} value={value}>
+						{label}
+					</option>
+				))}
 			</select>
 		</label>
 	);

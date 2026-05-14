@@ -43,8 +43,8 @@ export default async function DashboardReportingWorkingGroupReportDataPage(
 	const result = await getAuthorizedWorkingGroupReportForUser(
 		user,
 		id,
-		(id) => {
-			return db.query.workingGroupReports.findFirst({
+		(id) =>
+			db.query.workingGroupReports.findFirst({
 				where: { id },
 				columns: {
 					id: true,
@@ -68,8 +68,7 @@ export default async function DashboardReportingWorkingGroupReportDataPage(
 						},
 					},
 				},
-			});
-		},
+			}),
 		"update",
 	);
 
@@ -111,22 +110,17 @@ export default async function DashboardReportingWorkingGroupReportDataPage(
 
 	const t = await getExtracted();
 
-	const claimedSocialMediaIds = new Set(
-		report.socialMedia.map((s) => {
-			return s.socialMediaId;
-		}),
+	const claimedSocialMediaIds = new Set(report.socialMedia.map((s) => s.socialMediaId));
+	const availableSocialMedia = report.workingGroup.socialMedia.filter(
+		(s) => !claimedSocialMediaIds.has(s.id),
 	);
-	const availableSocialMedia = report.workingGroup.socialMedia.filter((s) => {
-		return !claimedSocialMediaIds.has(s.id);
-	});
 
+	// oxlint-disable-next-line unicorn/consistent-function-scoping
 	function formatRole(role: string): string {
 		return role
 			.replaceAll("_", " ")
 			.replace(/^is /, "")
-			.replaceAll(/\b\w/g, (c) => {
-				return c.toUpperCase();
-			});
+			.replaceAll(/\b\w/g, (c) => c.toUpperCase());
 	}
 
 	return (
@@ -135,7 +129,7 @@ export default async function DashboardReportingWorkingGroupReportDataPage(
 				<h2 className="text-sm font-semibold text-fg">{t("Working group data")}</h2>
 				<form
 					action={updateWorkingGroupReportDataAction}
-					className="flex flex-col gap-y-4 max-w-sm"
+					className="flex flex-col gap-y-4 max-inline-sm"
 				>
 					<input name="id" type="hidden" value={report.id} />
 					<TextField
@@ -161,15 +155,13 @@ export default async function DashboardReportingWorkingGroupReportDataPage(
 			{chairs.length > 0 && (
 				<section className="flex flex-col gap-y-3">
 					<h2 className="text-sm font-semibold text-fg">{t("Chairs")}</h2>
-					<ul className="divide-y divide-border rounded-md border max-w-sm">
-						{chairs.map((chair) => {
-							return (
-								<li key={chair.id} className="px-4 py-3">
-									<p className="text-sm font-medium text-fg">{chair.personName}</p>
-									<p className="text-xs text-muted-fg">{formatRole(chair.roleType)}</p>
-								</li>
-							);
-						})}
+					<ul className="divide-y divide-border rounded-md border max-inline-sm">
+						{chairs.map((chair) => (
+							<li key={chair.id} className="px-4 py-3">
+								<p className="text-sm font-medium text-fg">{chair.personName}</p>
+								<p className="text-xs text-muted-fg">{formatRole(chair.roleType)}</p>
+							</li>
+						))}
 					</ul>
 				</section>
 			)}

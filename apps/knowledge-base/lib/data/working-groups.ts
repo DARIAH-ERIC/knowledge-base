@@ -184,12 +184,8 @@ export async function getWorkingGroups(
 		}),
 	]);
 
-	const workingGroupIds = items.map((item) => {
-		return item.id;
-	});
-	const ericIds = erics.map((eric) => {
-		return eric.id;
-	});
+	const workingGroupIds = items.map((item) => item.id);
+	const ericIds = erics.map((eric) => eric.id);
 
 	let relationByWorkingGroupId = new Map<string, { from: Date; until: Date | null }>();
 

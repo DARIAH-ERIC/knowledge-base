@@ -3,7 +3,7 @@ import { testClient } from "hono/testing";
 
 import { api } from "@/app";
 import { createApp } from "@/lib/factory";
-import { type Database, database as databaseMiddleware, type Transaction } from "@/middlewares/db";
+import { type Database, type Transaction, database as databaseMiddleware } from "@/middlewares/db";
 import { storage as storageMiddleware } from "@/middlewares/storage";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types

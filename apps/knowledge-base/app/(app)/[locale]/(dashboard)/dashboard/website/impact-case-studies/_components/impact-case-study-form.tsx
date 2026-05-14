@@ -3,7 +3,7 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
-import { FieldError, fieldErrorStyles, Label } from "@dariah-eric/ui/field";
+import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
@@ -96,7 +96,7 @@ export function ImpactCaseStudyForm(props: Readonly<ImpactCaseStudyFormProps>): 
 					{selectedImage != null && (
 						<img
 							alt={t("Selected image")}
-							className="size-24 rounded-lg object-cover"
+							className="block-24 inline-24 rounded-lg object-cover"
 							src={selectedImage.url}
 						/>
 					)}

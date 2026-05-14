@@ -26,9 +26,7 @@ export async function generateMetadata(
 export default function DashboardAdministratorWorkingGroupReportsPage(
 	_props: Readonly<DashboardAdministratorWorkingGroupReportsPageProps>,
 ): ReactNode {
-	const reports = assertAuthenticated().then(({ user }) => {
-		return getWorkingGroupReportsForAdmin(user);
-	});
+	const reports = assertAuthenticated().then(({ user }) => getWorkingGroupReportsForAdmin(user));
 
 	return (
 		<Suspense fallback={<LoadingScreen />}>

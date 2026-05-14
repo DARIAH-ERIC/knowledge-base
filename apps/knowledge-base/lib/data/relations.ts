@@ -3,7 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { relationOptionsPageSize } from "@/lib/constants/relations";
-import { db, type Transaction } from "@/lib/db";
+import { type Transaction, db } from "@/lib/db";
 import { and, count, eq, ilike, inArray, or } from "@/lib/db/sql";
 import { search } from "@/lib/search";
 
@@ -74,9 +74,7 @@ export async function getEntityRelationOptionsByIds(ids: ReadonlyArray<string>) 
 		.orderBy(schema.entities.slug);
 
 	const itemById = new Map(
-		rows.map((row) => {
-			return [row.id, { id: row.id, name: `${row.entityType} / ${row.slug}` }] as const;
-		}),
+		rows.map((row) => [row.id, { id: row.id, name: `${row.entityType} / ${row.slug}` }] as const),
 	);
 
 	return ids.flatMap((id) => {
@@ -144,16 +142,17 @@ export async function getResourceRelationOptionsByIds(ids: ReadonlyArray<string>
 		}
 
 		const itemById = new Map(
-			result.value.items.map((hit) => {
-				return [
-					hit.document.id,
-					{
-						description: hit.document.type,
-						id: hit.document.id,
-						name: hit.document.label,
-					},
-				] as const;
-			}),
+			result.value.items.map(
+				(hit) =>
+					[
+						hit.document.id,
+						{
+							description: hit.document.type,
+							id: hit.document.id,
+							name: hit.document.label,
+						},
+					] as const,
+			),
 		);
 
 		return ids.flatMap((id) => {
@@ -190,30 +189,18 @@ export async function syncEntityRelations(
 			.where(eq(schema.entitiesToResources.entityId, documentId)),
 	]);
 
-	const existingDocumentIds = new Set(
-		existingEntityRows.map((r) => {
-			return r.relatedEntityId;
-		}),
-	);
-	const existingResourceIds = new Set(
-		existingResourceRows.map((r) => {
-			return r.resourceId;
-		}),
-	);
+	const existingDocumentIds = new Set(existingEntityRows.map((r) => r.relatedEntityId));
+	const existingResourceIds = new Set(existingResourceRows.map((r) => r.resourceId));
 
-	const documentIdsToDelete = [...existingDocumentIds].filter((x) => {
-		return !relatedDocumentIds.includes(x);
-	});
-	const documentIdsToAdd = relatedDocumentIds.filter((x) => {
-		return !existingDocumentIds.has(x);
-	});
+	const documentIdsToDelete = [...existingDocumentIds].filter(
+		(x) => !relatedDocumentIds.includes(x),
+	);
+	const documentIdsToAdd = relatedDocumentIds.filter((x) => !existingDocumentIds.has(x));
 
-	const resourceIdsToDelete = [...existingResourceIds].filter((x) => {
-		return !relatedResourceIds.includes(x);
-	});
-	const resourceIdsToAdd = relatedResourceIds.filter((x) => {
-		return !existingResourceIds.has(x);
-	});
+	const resourceIdsToDelete = [...existingResourceIds].filter(
+		(x) => !relatedResourceIds.includes(x),
+	);
+	const resourceIdsToAdd = relatedResourceIds.filter((x) => !existingResourceIds.has(x));
 
 	await Promise.all([
 		documentIdsToDelete.length > 0
@@ -266,11 +253,7 @@ export async function getEntityRelations(documentId: string) {
 	]);
 
 	return {
-		relatedEntityIds: entityRelations.map((r) => {
-			return r.relatedEntityId;
-		}),
-		relatedResourceIds: resourceRelations.map((r) => {
-			return r.resourceId;
-		}),
+		relatedEntityIds: entityRelations.map((r) => r.relatedEntityId),
+		relatedResourceIds: resourceRelations.map((r) => r.resourceId),
 	};
 }

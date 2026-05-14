@@ -33,18 +33,18 @@ export function ErrorState(props: Readonly<ErrorStateProps>): ReactNode {
 	} = props;
 
 	return (
-		<Main className="relative isolate flex min-h-full items-center justify-center overflow-hidden px-6 py-10 sm:px-8">
+		<Main className="relative isolate flex min-block-full items-center justify-center overflow-hidden px-6 py-10 sm:px-8">
 			<div
 				aria-hidden={true}
-				className="-translate-x-1/2 absolute top-0 left-1/2 h-80 w-2xl rounded-full bg-primary/12 blur-3xl"
+				className="-translate-x-1/2 absolute inset-bs-0 inset-s-1/2 block-80 inline-2xl rounded-full bg-primary/12 blur-3xl"
 			/>
 			<div
 				aria-hidden={true}
-				className="absolute right-0 bottom-0 size-72 rounded-full bg-primary/10 blur-3xl"
+				className="absolute inset-e-0 inset-be-0 block-72 inline-72 rounded-full bg-primary/10 blur-3xl"
 			/>
 
-			<section className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] border border-border/70 bg-bg/90 shadow-lg shadow-black/5 backdrop-blur-sm">
-				<div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary/20 via-primary to-primary/20" />
+			<section className="relative inline-full max-inline-3xl overflow-hidden rounded-[2rem] border border-border/70 bg-bg/90 shadow-lg shadow-black/5 backdrop-blur-sm">
+				<div className="absolute inset-x-0 inset-bs-0 block-1 bg-linear-to-r from-primary/20 via-primary to-primary/20" />
 
 				<div className="grid gap-8 p-8 sm:p-10 lg:grid-cols-[1.2fr_0.8fr] lg:gap-12 lg:p-12">
 					<div className="flex flex-col gap-6">
@@ -67,8 +67,10 @@ export function ErrorState(props: Readonly<ErrorStateProps>): ReactNode {
 							<p className="font-medium text-muted-fg text-sm uppercase tracking-[0.24em]">
 								{statusLabel}
 							</p>
-							<h1 className="max-w-lg font-semibold text-3xl text-balance sm:text-4xl">{title}</h1>
-							<p className="max-w-xl text-base text-muted-fg sm:text-lg">{description}</p>
+							<h1 className="max-inline-lg font-semibold text-3xl text-balance sm:text-4xl">
+								{title}
+							</h1>
+							<p className="max-inline-xl text-base text-muted-fg sm:text-lg">{description}</p>
 						</div>
 
 						<div className="flex flex-col gap-3 sm:flex-row">
@@ -81,29 +83,29 @@ export function ErrorState(props: Readonly<ErrorStateProps>): ReactNode {
 						</div>
 					</div>
 
-					<div className="relative hidden min-h-80 overflow-hidden rounded-[1.5rem] border border-border/60 bg-secondary/60 lg:block">
+					<div className="relative hidden min-block-80 overflow-hidden rounded-[1.5rem] border border-border/60 bg-secondary/60 lg:block">
 						<div
 							aria-hidden={true}
 							className="absolute inset-6 rounded-[1.25rem] border border-dashed border-border/80"
 						/>
 						<div
 							aria-hidden={true}
-							className="absolute top-8 right-8 rounded-full border border-border/70 bg-bg/90 px-3 py-1 font-medium text-muted-fg text-xs uppercase tracking-[0.2em]"
+							className="absolute inset-bs-8 inset-e-8 rounded-full border border-border/70 bg-bg/90 px-3 py-1 font-medium text-muted-fg text-xs uppercase tracking-[0.2em]"
 						>
 							{recoveryLabel}
 						</div>
 						<div className="absolute inset-0 flex items-center justify-center">
-							<div className="relative aspect-square w-56 max-w-[75%]">
+							<div className="relative aspect-square inline-56 max-inline-[75%]">
 								<div className="absolute inset-0 rounded-full border border-primary/20 bg-primary/8" />
 								<div className="absolute inset-6 rounded-full border border-primary/30" />
 								<div className="absolute inset-14 rounded-3xl border border-border/70 bg-bg/95 shadow-lg shadow-black/5" />
-								<div className="absolute inset-x-20 top-24 h-2 rounded-full bg-primary/80" />
-								<div className="absolute inset-x-20 top-32 h-2 rounded-full bg-muted" />
-								<div className="absolute inset-x-20 top-40 h-2 rounded-full bg-muted" />
-								<div className="absolute right-16 bottom-16 flex size-14 items-center justify-center rounded-2xl bg-primary text-primary-fg shadow-lg shadow-primary/25">
+								<div className="absolute inset-x-20 inset-bs-24 block-2 rounded-full bg-primary/80" />
+								<div className="absolute inset-x-20 inset-bs-32 block-2 rounded-full bg-muted" />
+								<div className="absolute inset-x-20 inset-bs-40 block-2 rounded-full bg-muted" />
+								<div className="absolute inset-e-16 inset-be-16 flex block-14 inline-14 items-center justify-center rounded-2xl bg-primary text-primary-fg shadow-lg shadow-primary/25">
 									<svg
 										aria-hidden={true}
-										className="size-7"
+										className="block-7 inline-7"
 										fill="none"
 										viewBox="0 0 24 24"
 										xmlns="http://www.w3.org/2000/svg"

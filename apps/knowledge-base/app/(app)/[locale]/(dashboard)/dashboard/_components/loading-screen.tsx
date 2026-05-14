@@ -4,7 +4,7 @@ import { LoadingDots } from "@/app/(app)/[locale]/(dashboard)/dashboard/_compone
 
 export function LoadingScreen(): ReactNode {
 	return (
-		<div className="flex min-h-56 items-center justify-center sm:min-h-[75vh]">
+		<div className="flex min-block-56 items-center justify-center sm:min-block-[75vh]">
 			<LoadingDots size="large" />
 		</div>
 	);

@@ -1,8 +1,8 @@
 import { assert } from "@acdh-oeaw/lib";
 import { createSshocClient } from "@dariah-eric/client-sshoc";
 import {
-	ingestSshocServices as ingestSshocServicesWithDependencies,
 	type IngestSshocServicesResult,
+	ingestSshocServices as ingestSshocServicesWithDependencies,
 } from "@dariah-eric/sshoc-services";
 
 import { env } from "@/config/env.config";

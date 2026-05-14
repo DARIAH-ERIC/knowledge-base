@@ -8,14 +8,14 @@ import { validate, validator } from "@/lib/openapi/validator";
 import {
 	GetWorkingGroupById,
 	GetWorkingGroupBySlug,
-	GetWorkingGroups,
 	GetWorkingGroupSlugs,
+	GetWorkingGroups,
 } from "@/routes/working-groups/schemas";
 import {
 	getWorkingGroupById,
 	getWorkingGroupBySlug,
-	getWorkingGroups,
 	getWorkingGroupSlugs,
+	getWorkingGroups,
 } from "@/routes/working-groups/service";
 
 export const router = createRouter()

@@ -56,8 +56,9 @@ export const Default: Story = {
 	args: {},
 	render() {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<Tree aria-label={"File system"} items={files}>
+					{/* oxlint-disable-next-line unicorn/consistent-function-scoping */}
 					{function renderItem(item) {
 						return (
 							<TreeItem id={item.id} textValue={item.name}>
@@ -83,8 +84,9 @@ export const Selectable: Story = {
 	args: {},
 	render() {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<Tree aria-label={"File system"} items={files} selectionMode="single">
+					{/* oxlint-disable-next-line unicorn/consistent-function-scoping */}
 					{function renderItem(item) {
 						return (
 							<TreeItem id={item.id} textValue={item.name}>
@@ -110,8 +112,9 @@ export const MultiSelectable: Story = {
 	args: {},
 	render() {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<Tree aria-label={"File system"} items={files} selectionMode="multiple">
+					{/* oxlint-disable-next-line unicorn/consistent-function-scoping */}
 					{function renderItem(item) {
 						return (
 							<TreeItem id={item.id} textValue={item.name}>

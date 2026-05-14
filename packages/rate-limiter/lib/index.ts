@@ -4,17 +4,17 @@ interface RefillBucket {
 }
 
 export class RefillingTokenBucket<_Key> {
-	public max: number;
-	public refillIntervalSeconds: number;
+	max: number;
+	refillIntervalSeconds: number;
 
 	constructor(max: number, refillIntervalSeconds: number) {
 		this.max = max;
 		this.refillIntervalSeconds = refillIntervalSeconds;
 	}
 
-	private storage = new Map<_Key, RefillBucket>();
+	private readonly storage = new Map<_Key, RefillBucket>();
 
-	public check(key: _Key, cost: number): boolean {
+	check(key: _Key, cost: number): boolean {
 		const bucket = this.storage.get(key);
 
 		if (bucket == null) {
@@ -31,7 +31,7 @@ export class RefillingTokenBucket<_Key> {
 		return bucket.count >= cost;
 	}
 
-	public consume(key: _Key, cost: number): boolean {
+	consume(key: _Key, cost: number): boolean {
 		let bucket = this.storage.get(key);
 
 		const now = Date.now();
@@ -70,15 +70,15 @@ interface ThrottlingCounter {
 }
 
 export class Throttler<_Key> {
-	public timeoutSeconds: Array<number>;
+	timeoutSeconds: Array<number>;
 
-	private storage = new Map<_Key, ThrottlingCounter>();
+	private readonly storage = new Map<_Key, ThrottlingCounter>();
 
 	constructor(timeoutSeconds: Array<number>) {
 		this.timeoutSeconds = timeoutSeconds;
 	}
 
-	public consume(key: _Key): boolean {
+	consume(key: _Key): boolean {
 		let counter = this.storage.get(key);
 
 		const now = Date.now();
@@ -107,7 +107,7 @@ export class Throttler<_Key> {
 		return true;
 	}
 
-	public reset(key: _Key): void {
+	reset(key: _Key): void {
 		this.storage.delete(key);
 	}
 }
@@ -118,17 +118,17 @@ interface ExpiringBucket {
 }
 
 export class ExpiringTokenBucket<_Key> {
-	public max: number;
-	public expiresInSeconds: number;
+	max: number;
+	expiresInSeconds: number;
 
-	private storage = new Map<_Key, ExpiringBucket>();
+	private readonly storage = new Map<_Key, ExpiringBucket>();
 
 	constructor(max: number, expiresInSeconds: number) {
 		this.max = max;
 		this.expiresInSeconds = expiresInSeconds;
 	}
 
-	public check(key: _Key, cost: number): boolean {
+	check(key: _Key, cost: number): boolean {
 		const bucket = this.storage.get(key);
 
 		const now = Date.now();
@@ -144,7 +144,7 @@ export class ExpiringTokenBucket<_Key> {
 		return bucket.count >= cost;
 	}
 
-	public consume(key: _Key, cost: number): boolean {
+	consume(key: _Key, cost: number): boolean {
 		let bucket = this.storage.get(key);
 
 		const now = Date.now();
@@ -175,7 +175,7 @@ export class ExpiringTokenBucket<_Key> {
 		return true;
 	}
 
-	public reset(key: _Key): void {
+	reset(key: _Key): void {
 		this.storage.delete(key);
 	}
 }

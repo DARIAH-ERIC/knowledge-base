@@ -1,6 +1,8 @@
+// oxlint-disable jsx-a11y/iframe-has-title
+
 "use client";
 
-import { type JSONContent, mergeAttributes, Node } from "@tiptap/core";
+import { type JSONContent, Node, mergeAttributes } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
 import {
 	EditorContent,
@@ -79,7 +81,7 @@ export function RichTextEditorToolbarButton({
 			<ButtonPrimitive
 				aria-label={ariaLabel}
 				className={twMerge(
-					"relative inline-flex size-8 items-center justify-center rounded-md transition-colors text-muted-fg hover:text-fg focus:outline-none focus:ring-2 focus:ring-ring",
+					"relative inline-flex block-8 inline-8 items-center justify-center rounded-md transition-colors text-muted-fg hover:text-fg focus:outline-none focus:ring-2 focus:ring-ring",
 					isActive === true && "bg-primary-subtle/50 text-fg",
 				)}
 				onPress={() => {
@@ -87,7 +89,7 @@ export function RichTextEditorToolbarButton({
 				}}
 				type="button"
 			>
-				<Icon className="size-4" />
+				<Icon className="block-4 inline-4" />
 			</ButtonPrimitive>
 			<TooltipContent inverse={true}>{ariaLabel}</TooltipContent>
 		</Tooltip>
@@ -126,7 +128,9 @@ function BlockNodeSurface({
 				)}
 				contentEditable={false}
 				onDoubleClick={(e) => {
-					if (!isEditable || onDoubleClick == null) return;
+					if (!isEditable || onDoubleClick == null) {
+						return;
+					}
 					e.preventDefault();
 					onDoubleClick();
 				}}
@@ -139,9 +143,13 @@ function BlockNodeSurface({
 
 function getEmbedUrl(url: string): string {
 	const watchMatch = /youtube\.com\/watch\?.*?v=([\w-]+)/.exec(url);
-	if (watchMatch != null) return `https://www.youtube-nocookie.com/embed/${watchMatch[1]!}`;
+	if (watchMatch != null) {
+		return `https://www.youtube-nocookie.com/embed/${watchMatch[1]!}`;
+	}
 	const shortMatch = /youtu\.be\/([\w-]+)/.exec(url);
-	if (shortMatch != null) return `https://www.youtube-nocookie.com/embed/${shortMatch[1]!}`;
+	if (shortMatch != null) {
+		return `https://www.youtube-nocookie.com/embed/${shortMatch[1]!}`;
+	}
 	return url;
 }
 
@@ -163,11 +171,13 @@ function EmbedNodeView({
 	const [captionInput, setCaptionInput] = useState(caption ?? "");
 
 	function handleApply() {
-		if (!urlInput.trim() || !titleInput.trim()) return;
+		if (!urlInput.trim() || !titleInput.trim()) {
+			return;
+		}
 		updateAttributes({
 			url: urlInput.trim(),
 			title: titleInput.trim(),
-			caption: captionInput.trim() || null,
+			caption: captionInput.trim() ?? null,
 		});
 		setIsEditing(false);
 	}
@@ -186,7 +196,9 @@ function EmbedNodeView({
 
 	function selectNode() {
 		const pos = getPos();
-		if (typeof pos !== "number") return;
+		if (typeof pos !== "number") {
+			return;
+		}
 		editor.commands.setNodeSelection(pos);
 	}
 
@@ -276,11 +288,11 @@ function EmbedNodeView({
 				) : (
 					<div>
 						{embedUrl != null && (
-							<div className="aspect-video w-full">
+							<div className="aspect-video inline-full">
 								<iframe
 									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 									allowFullScreen={true}
-									className="size-full"
+									className="block-full inline-full"
 									referrerPolicy="strict-origin-when-cross-origin"
 									sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
 									src={embedUrl}
@@ -289,8 +301,8 @@ function EmbedNodeView({
 							</div>
 						)}
 						{editor.isEditable ? (
-							<div className="flex items-center justify-between gap-x-2 border-t border-border px-4 py-2">
-								<span className="min-w-0 truncate text-xs text-muted-fg">{url}</span>
+							<div className="flex items-center justify-between gap-x-2 border-bs border-border px-4 py-2">
+								<span className="min-inline-0 truncate text-xs text-muted-fg">{url}</span>
 								<div className="flex shrink-0 gap-x-1">
 									<button
 										aria-label="Edit embed"
@@ -304,7 +316,7 @@ function EmbedNodeView({
 										}}
 										type="button"
 									>
-										<PencilIcon className="size-3.5" />
+										<PencilIcon className="block-3.5 inline-3.5" />
 									</button>
 									<button
 										aria-label="Remove embed"
@@ -312,17 +324,17 @@ function EmbedNodeView({
 										onClick={deleteNode}
 										type="button"
 									>
-										<Trash2Icon className="size-3.5" />
+										<Trash2Icon className="block-3.5 inline-3.5" />
 									</button>
 								</div>
 							</div>
 						) : (
-							<div className="border-t border-border px-4 py-2">
-								<span className="min-w-0 truncate text-xs text-muted-fg">{url}</span>
+							<div className="border-bs border-border px-4 py-2">
+								<span className="min-inline-0 truncate text-xs text-muted-fg">{url}</span>
 							</div>
 						)}
 						{caption != null && caption !== "" && (
-							<p className="border-t border-border px-4 py-2 text-sm text-muted-fg">{caption}</p>
+							<p className="border-bs border-border px-4 py-2 text-sm text-muted-fg">{caption}</p>
 						)}
 					</div>
 				)}
@@ -419,18 +431,22 @@ function AssetImageNodeView({
 
 	function selectNode() {
 		const pos = getPos();
-		if (typeof pos !== "number") return;
+		if (typeof pos !== "number") {
+			return;
+		}
 		editor.commands.setNodeSelection(pos);
 	}
 
 	function handleApply() {
 		const nextImageUrl = imageUrlInput.trim();
-		if (!nextImageUrl) return;
+		if (!nextImageUrl) {
+			return;
+		}
 
 		updateAttributes({
-			imageKey: imageKeyInput.trim() || null,
+			imageKey: imageKeyInput.trim() ?? null,
 			imageUrl: nextImageUrl,
-			caption: captionInput.trim() || null,
+			caption: captionInput.trim() ?? null,
 		});
 		setIsEditing(false);
 	}
@@ -455,7 +471,7 @@ function AssetImageNodeView({
 								updateAttributes({
 									imageKey: nextImageKey,
 									imageUrl: nextImageUrl,
-									caption: captionInput.trim() || null,
+									caption: captionInput.trim() ?? null,
 								});
 								setImageKeyInput(nextImageKey);
 								setImageUrlInput(nextImageUrl);
@@ -542,13 +558,13 @@ function AssetImageNodeView({
 					<div className="relative">
 						<img
 							alt={caption ?? ""}
-							className="block w-full max-h-96 object-contain"
+							className="block inline-full max-block-96 object-contain"
 							data-asset-image=""
 							data-image-key={imageKey ?? undefined}
 							draggable={false}
 							src={imageUrl ?? ""}
 						/>
-						<div className="absolute inset-x-0 top-0 flex justify-end gap-x-1 p-2 opacity-0 transition-opacity group-hover:opacity-100">
+						<div className="absolute inset-x-0 inset-bs-0 flex justify-end gap-x-1 p-2 opacity-0 transition-opacity group-hover:opacity-100">
 							<button
 								aria-label="Edit image"
 								className="rounded-sm bg-bg/90 p-1 text-muted-fg shadow-sm hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -559,7 +575,7 @@ function AssetImageNodeView({
 								}}
 								type="button"
 							>
-								<PencilIcon className="size-3.5" />
+								<PencilIcon className="block-3.5 inline-3.5" />
 							</button>
 							<button
 								aria-label="Remove image"
@@ -567,12 +583,12 @@ function AssetImageNodeView({
 								onClick={deleteNode}
 								type="button"
 							>
-								<Trash2Icon className="size-3.5" />
+								<Trash2Icon className="block-3.5 inline-3.5" />
 							</button>
 						</div>
 					</div>
 					{caption != null && caption !== "" ? (
-						<p className="border-t border-border px-4 py-2 text-sm text-muted-fg">{caption}</p>
+						<p className="border-bs border-border px-4 py-2 text-sm text-muted-fg">{caption}</p>
 					) : null}
 				</div>
 			)}
@@ -627,9 +643,9 @@ function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
 		},
 
 		addNodeView() {
-			return ReactNodeViewRenderer((props) => {
-				return <AssetImageNodeView {...props} renderImagePicker={renderImagePicker} />;
-			});
+			return ReactNodeViewRenderer((props) => (
+				<AssetImageNodeView {...props} renderImagePicker={renderImagePicker} />
+			));
 		},
 	});
 }
@@ -648,13 +664,12 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	const t = useExtracted("ui");
 
-	const initialContent = useMemo(() => {
-		return normalizeInitialContent(content);
-	}, [content]);
+	const initialContent = useMemo(() => normalizeInitialContent(content), [content]);
 
-	const assetImageNode = useMemo(() => {
-		return createAssetImageNode(renderImagePicker);
-	}, [renderImagePicker]);
+	const assetImageNode = useMemo(
+		() => createAssetImageNode(renderImagePicker),
+		[renderImagePicker],
+	);
 
 	const editor = useEditor({
 		extensions: [
@@ -675,6 +690,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		onUpdate() {
 			if (editor) {
 				const json = editor.getJSON();
+				// oxlint-disable-next-line no-use-before-define
 				setEditorJson(json);
 				onChange?.(json);
 			}
@@ -729,13 +745,19 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 	);
 
 	const applyLink = useCallback(() => {
-		if (!editor) return;
+		if (!editor) {
+			return;
+		}
 		const href = linkHrefInput.trim();
-		if (!href) return;
+		if (!href) {
+			return;
+		}
 
 		const sel = savedSelectionRef.current;
 		const chain = editor.chain().focus();
-		if (sel) chain.setTextSelection(sel);
+		if (sel) {
+			chain.setTextSelection(sel);
+		}
 
 		if (sel && sel.from === sel.to && !(activeState?.isLink ?? false)) {
 			chain
@@ -749,16 +771,22 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 	}, [editor, linkHrefInput, activeState?.isLink]);
 
 	const removeLink = useCallback(() => {
-		if (!editor) return;
+		if (!editor) {
+			return;
+		}
 		const sel = savedSelectionRef.current;
 		const chain = editor.chain().focus();
-		if (sel) chain.setTextSelection(sel);
+		if (sel) {
+			chain.setTextSelection(sel);
+		}
 		chain.unsetLink().run();
 		setIsLinkPopoverOpen(false);
 	}, [editor]);
 
 	const insertEmbed = useCallback(() => {
-		if (!editor) return;
+		if (!editor) {
+			return;
+		}
 		editor
 			.chain()
 			.focus()
@@ -768,7 +796,9 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	const insertImage = useCallback(
 		(imageKey: string, imageUrl: string) => {
-			if (!editor) return;
+			if (!editor) {
+				return;
+			}
 			if (imageKey) {
 				editor
 					.chain()
@@ -791,13 +821,13 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 			className={twMerge("relative overflow-clip rounded-lg border border-input bg-bg", className)}
 		>
 			{isEditable ? (
-				<div className="sticky top-0 z-10 flex flex-wrap items-center gap-0.5 border-b border-border bg-muted px-2 py-1.5">
+				<div className="sticky inset-bs-0 z-10 flex flex-wrap items-center gap-0.5 border-be border-border bg-muted px-2 py-1.5">
 					<RichTextEditorIconButton
 						aria-label={t("Bold")}
 						icon={BoldIcon}
 						isActive={activeState?.isBold}
 						onClick={() => {
-							return editor.chain().focus().toggleBold().run();
+							editor.chain().focus().toggleBold().run();
 						}}
 					/>
 					<RichTextEditorIconButton
@@ -805,7 +835,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 						icon={ItalicIcon}
 						isActive={activeState?.isItalic}
 						onClick={() => {
-							return editor.chain().focus().toggleItalic().run();
+							editor.chain().focus().toggleItalic().run();
 						}}
 					/>
 					<RichTextEditorIconButton
@@ -813,16 +843,16 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 						icon={CodeIcon}
 						isActive={activeState?.isCode}
 						onClick={() => {
-							return editor.chain().focus().toggleCode().run();
+							editor.chain().focus().toggleCode().run();
 						}}
 					/>
-					<span className="mx-1 h-4 w-px bg-border" />
+					<span className="mx-1 block-4 inline-px bg-border" />
 					<RichTextEditorIconButton
 						aria-label={t("Heading 2")}
 						icon={Heading2Icon}
 						isActive={activeState?.isHeading2}
 						onClick={() => {
-							return editor.chain().focus().toggleHeading({ level: 2 }).run();
+							editor.chain().focus().toggleHeading({ level: 2 }).run();
 						}}
 					/>
 					<RichTextEditorIconButton
@@ -830,7 +860,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 						icon={Heading3Icon}
 						isActive={activeState?.isHeading3}
 						onClick={() => {
-							return editor.chain().focus().toggleHeading({ level: 3 }).run();
+							editor.chain().focus().toggleHeading({ level: 3 }).run();
 						}}
 					/>
 					<RichTextEditorIconButton
@@ -838,16 +868,16 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 						icon={Heading4Icon}
 						isActive={activeState?.isHeading4}
 						onClick={() => {
-							return editor.chain().focus().toggleHeading({ level: 4 }).run();
+							editor.chain().focus().toggleHeading({ level: 4 }).run();
 						}}
 					/>
-					<span className="mx-1 h-4 w-px bg-border" />
+					<span className="mx-1 block-4 inline-px bg-border" />
 					<RichTextEditorIconButton
 						aria-label={t("Bullet List")}
 						icon={ListIcon}
 						isActive={activeState?.isBulletList}
 						onClick={() => {
-							return editor.chain().focus().toggleBulletList().run();
+							editor.chain().focus().toggleBulletList().run();
 						}}
 					/>
 					<RichTextEditorIconButton
@@ -855,7 +885,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 						icon={ListOrderedIcon}
 						isActive={activeState?.isOrderedList}
 						onClick={() => {
-							return editor.chain().focus().toggleOrderedList().run();
+							editor.chain().focus().toggleOrderedList().run();
 						}}
 					/>
 					<RichTextEditorIconButton
@@ -863,26 +893,26 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 						icon={QuoteIcon}
 						isActive={activeState?.isBlockquote}
 						onClick={() => {
-							return editor.chain().focus().toggleBlockquote().run();
+							editor.chain().focus().toggleBlockquote().run();
 						}}
 					/>
-					<span className="mx-1 h-4 w-px bg-border" />
+					<span className="mx-1 block-4 inline-px bg-border" />
 					<Popover isOpen={isLinkPopoverOpen} onOpenChange={handleLinkPopoverOpenChange}>
 						<Tooltip>
 							<PopoverTrigger
 								aria-label={t("Link")}
 								className={twMerge(
-									"relative inline-flex size-8 cursor-pointer items-center justify-center rounded-md border-transparent bg-transparent transition-colors text-muted-fg hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+									"relative inline-flex block-8 inline-8 cursor-pointer items-center justify-center rounded-md border-transparent bg-transparent transition-colors text-muted-fg hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
 									activeState?.isLink === true && "bg-primary-subtle/50 text-fg",
 								)}
 							>
-								<LinkIcon className="size-4" />
+								<LinkIcon className="block-4 inline-4" />
 							</PopoverTrigger>
 							<TooltipContent inverse={true}>{t("Link")}</TooltipContent>
 						</Tooltip>
 						<PopoverContent className="p-3">
 							<form
-								className="flex w-56 flex-col gap-2"
+								className="flex inline-56 flex-col gap-2"
 								onSubmit={(e) => {
 									e.preventDefault();
 									applyLink();
@@ -913,13 +943,15 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 					</Popover>
 					{renderImagePicker != null ? (
 						<>
-							<span className="mx-1 h-4 w-px bg-border" />
+							<span className="mx-1 block-4 inline-px bg-border" />
 							{renderImagePicker(insertImage)}
 						</>
 					) : null}
 					{renderEmbedInsert != null ? (
 						<>
-							{renderImagePicker == null ? <span className="mx-1 h-4 w-px bg-border" /> : null}
+							{renderImagePicker == null ? (
+								<span className="mx-1 block-4 inline-px bg-border" />
+							) : null}
 							{renderEmbedInsert(insertEmbed)}
 						</>
 					) : null}

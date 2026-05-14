@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
-import { expect, type Locator, type Page } from "@playwright/test";
+import { type Locator, type Page, expect } from "@playwright/test";
 
 import type { I18n } from "@/e2e/lib/fixtures/i18n";
-import { defaultLocale, type IntlLocale } from "@/lib/i18n/locales";
+import { type IntlLocale, defaultLocale } from "@/lib/i18n/locales";
 import { localePrefix } from "@/lib/i18n/routing";
 // import { getPathname } from "@/lib/i18n/navigation";
 
@@ -59,6 +59,6 @@ export class ContactPage {
 				await locator.fill(value);
 				return await locator.inputValue();
 			})
-			.toEqual(value);
+			.toStrictEqual(value);
 	};
 }

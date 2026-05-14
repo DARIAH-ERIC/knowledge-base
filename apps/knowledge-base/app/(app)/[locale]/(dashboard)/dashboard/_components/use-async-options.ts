@@ -97,6 +97,7 @@ export function useAsyncOptions<T extends AsyncOption>(
 						return;
 					}
 
+					// oxlint-disable-next-line unicorn/no-instanceof-builtins
 					setLoadError(error instanceof Error ? error : new Error("Failed to load async options."));
 				}
 			});
@@ -116,11 +117,12 @@ export function useAsyncOptions<T extends AsyncOption>(
 		runFetch(offset + pageSize, appliedQ);
 	}, [appliedQ, offset, pageSize, runFetch]);
 
-	useEffect(() => {
-		return () => {
+	useEffect(
+		() => () => {
 			abort();
-		};
-	}, [abort]);
+		},
+		[abort],
+	);
 
 	const hasPrev = offset > 0;
 	const hasNext = offset + displayedItems.length < total;

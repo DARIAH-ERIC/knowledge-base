@@ -17,12 +17,12 @@ import { Separator } from "@dariah-eric/ui/separator";
 import { SidebarNav, SidebarTrigger, useSidebar } from "@dariah-eric/ui/sidebar";
 import { Switch } from "@dariah-eric/ui/switch";
 import {
-	ArrowLeftStartOnRectangleIcon as IconLogout,
-	Cog6ToothIcon as IconSettings,
 	CommandLineIcon as IconCommandRegular,
-	MagnifyingGlassIcon as IconSearch,
-	MoonIcon as IconMoon,
 	Squares2X2Icon as IconDashboard,
+	ArrowLeftStartOnRectangleIcon as IconLogout,
+	MoonIcon as IconMoon,
+	MagnifyingGlassIcon as IconSearch,
+	Cog6ToothIcon as IconSettings,
 	SunIcon as IconSun,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
@@ -47,13 +47,13 @@ export function DashboardSidebarNav(props: Readonly<DashboardSidebarNavProps>): 
 	const t = useExtracted();
 
 	return (
-		<SidebarNav className="border-b bg-sidebar">
+		<SidebarNav className="border-be bg-sidebar">
 			<span className="flex items-center gap-x-4">
 				<SidebarTrigger className="-mx-2" />
-				<Separator className="h-6" orientation="vertical" />
+				<Separator className="block-6" orientation="vertical" />
 				{breadcrumbs}
 			</span>
-			<div className="ml-auto flex items-center gap-x-2">
+			<div className="ms-auto flex items-center gap-x-2">
 				{isMobile ? (
 					<Fragment>
 						<Button
@@ -92,7 +92,7 @@ function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 			<MenuTrigger aria-label={t("Open menu")}>
 				<Avatar alt={user.name} initials={user.name.at(0)} />
 			</MenuTrigger>
-			<MenuContent className="min-w-60" placement="bottom">
+			<MenuContent className="min-inline-60" placement="bottom">
 				<MenuSection>
 					<MenuHeader separator={true}>
 						<span className="block">{user.name}</span>
@@ -112,13 +112,13 @@ function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 					<IconCommandRegular />
 					<MenuLabel>{t("Command menu")}</MenuLabel>
 				</MenuItem>
-				<MenuItem className="[&>[slot=label]+[data-slot=icon]]:top-1.5 [&>[slot=label]+[data-slot=icon]]:right-11">
+				<MenuItem className="[&>[slot=label]+[data-slot=icon]]:inset-bs-1.5 [&>[slot=label]+[data-slot=icon]]:inset-e-11">
 					{colorScheme === "dark" ? <IconMoon /> : <IconSun />}
 					<MenuLabel>{t("Color scheme")}</MenuLabel>
 					<span data-slot="icon">
 						<Switch
 							aria-label={t("Toggle color scheme")}
-							className="ml-auto"
+							className="ms-auto"
 							isSelected={colorScheme === "dark"}
 							onChange={() => {
 								setColorScheme(colorScheme === "dark" ? "light" : "dark");

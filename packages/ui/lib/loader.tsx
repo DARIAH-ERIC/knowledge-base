@@ -10,7 +10,7 @@ function Ring(props: Readonly<SVGProps<SVGSVGElement>>): ReactNode {
 
 	return (
 		<svg
-			className={twMerge("size-4", className)}
+			className={twMerge("block-4 inline-4", className)}
 			{...rest}
 			aria-hidden={true}
 			fill="none"
@@ -37,7 +37,7 @@ function Spin(props: Readonly<SVGProps<SVGSVGElement>>): ReactNode {
 	const { className, ...rest } = props;
 
 	return (
-		<svg className={twMerge("size-4", className)} viewBox="0 0 2400 2400" {...rest}>
+		<svg className={twMerge("block-4 inline-4", className)} viewBox="0 0 2400 2400" {...rest}>
 			<g fill="none" strokeLinecap="round" strokeWidth="200">
 				<line x1="1200" x2="1200" y1="600" y2="100" />
 				<line opacity="0.5" x1="1200" x2="1200" y1="2300" y2="1800" />
@@ -101,7 +101,7 @@ export function Loader(props: Readonly<LoaderProps>): ReactNode {
 			<LoaderComponent
 				ref={ref}
 				className={twMerge(
-					"size-4",
+					"block-4 inline-4",
 					["ring"].includes(variant) && "animate-spin",
 					variant === "spin" && "stroke-current",
 					className,

@@ -25,26 +25,11 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 				id: f.string.uuid(),
 				imported_at: f.date.past().getTime(),
 				source_updated_at:
-					f.helpers.maybe(
-						() => {
-							return f.date.past().getTime();
-						},
-						{ probability: 0.6 },
-					) ?? null,
+					f.helpers.maybe(() => f.date.past().getTime(), { probability: 0.6 }) ?? null,
 				label: f.lorem.sentence(),
 				description: f.lorem.paragraphs(2, "\n\n"),
-				keywords: f.helpers.multiple(
-					() => {
-						return f.lorem.word();
-					},
-					{ count: { min: 3, max: 8 } },
-				),
-				links: f.helpers.multiple(
-					() => {
-						return f.internet.url();
-					},
-					{ count: { min: 1, max: 3 } },
-				),
+				keywords: f.helpers.multiple(() => f.lorem.word(), { count: { min: 3, max: 8 } }),
+				links: f.helpers.multiple(() => f.internet.url(), { count: { min: 1, max: 3 } }),
 			} satisfies Partial<ResourceDocument>;
 
 			switch (type) {
@@ -57,20 +42,9 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 						source_actor_ids: null,
 						upstream_sources: null,
 						kind: f.helpers.arrayElement(["article", "book", "conference", "thesis", null]),
-						authors: f.helpers.multiple(
-							() => {
-								return f.person.fullName();
-							},
-							{ count: { min: 1, max: 5 } },
-						),
+						authors: f.helpers.multiple(() => f.person.fullName(), { count: { min: 1, max: 5 } }),
 						year: f.number.int({ min: 1990, max: 2024 }),
-						pid:
-							f.helpers.maybe(
-								() => {
-									return f.string.alphanumeric(10);
-								},
-								{ probability: 0.7 },
-							) ?? null,
+						pid: f.helpers.maybe(() => f.string.alphanumeric(10), { probability: 0.7 }) ?? null,
 					};
 				}
 
@@ -82,12 +56,9 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 						source_id: f.string.alphanumeric(12),
 						upstream_sources: null,
 						kind: f.helpers.arrayElement(resourceServiceKinds),
-						source_actor_ids: f.helpers.multiple(
-							() => {
-								return f.string.alphanumeric(12);
-							},
-							{ count: { min: 1, max: 3 } },
-						),
+						source_actor_ids: f.helpers.multiple(() => f.string.alphanumeric(12), {
+							count: { min: 1, max: 3 },
+						}),
 						authors: null,
 						year: null,
 						pid: null,
@@ -102,12 +73,9 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 						source_id: f.string.alphanumeric(12),
 						upstream_sources: null,
 						kind: null,
-						source_actor_ids: f.helpers.multiple(
-							() => {
-								return f.string.alphanumeric(12);
-							},
-							{ count: { min: 1, max: 3 } },
-						),
+						source_actor_ids: f.helpers.multiple(() => f.string.alphanumeric(12), {
+							count: { min: 1, max: 3 },
+						}),
 						authors: null,
 						year: null,
 						pid: null,
@@ -120,12 +88,9 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 						type,
 						source: "ssh-open-marketplace",
 						source_id: f.string.alphanumeric(12),
-						source_actor_ids: f.helpers.multiple(
-							() => {
-								return f.string.alphanumeric(12);
-							},
-							{ count: { min: 1, max: 3 } },
-						),
+						source_actor_ids: f.helpers.multiple(() => f.string.alphanumeric(12), {
+							count: { min: 1, max: 3 },
+						}),
 						upstream_sources: [],
 						kind: null,
 						authors: null,
@@ -140,12 +105,9 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 						type,
 						source: "ssh-open-marketplace",
 						source_id: f.string.alphanumeric(12),
-						source_actor_ids: f.helpers.multiple(
-							() => {
-								return f.string.alphanumeric(12);
-							},
-							{ count: { min: 1, max: 3 } },
-						),
+						source_actor_ids: f.helpers.multiple(() => f.string.alphanumeric(12), {
+							count: { min: 1, max: 3 },
+						}),
 						upstream_sources: null,
 						kind: null,
 						authors: null,

@@ -58,7 +58,7 @@ export function define<
 
 		return Result.try({
 			try() {
-				// eslint-disable-next-line no-restricted-syntax
+				// oxlint-disable-next-line node/no-process-env
 				const mode = _mode ?? v.parse(ValidationModeSchema, process.env.ENV_VALIDATION);
 
 				const environment = {} as Record<string, unknown>;

@@ -53,13 +53,13 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 	return (
 		<Fragment>
 			<Button
-				className="min-w-max"
+				className="min-inline-max"
 				intent="secondary"
 				onPress={() => {
 					setIsOpen(true);
 				}}
 			>
-				<ArrowUpTrayIcon className="mr-2 size-4" />
+				<ArrowUpTrayIcon className="me-2 block-4 inline-4" />
 				{t("Upload image")}
 			</Button>
 
@@ -76,13 +76,13 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 						<div className="flex flex-col gap-y-2">
 							<label className="text-sm font-medium">
 								{t("File")}
-								<span aria-hidden={true} className="ml-0.5 text-danger">
+								<span aria-hidden={true} className="ms-0.5 text-danger">
 									{"*"}
 								</span>
 							</label>
 							<input
 								accept="image/jpeg, image/png"
-								className="block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-secondary-fg focus:outline-none hover:file:bg-secondary/80"
+								className="block inline-full text-sm file:me-4 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-secondary-fg focus:outline-none hover:file:bg-secondary/80"
 								name="file"
 								onChange={(e) => {
 									const file = e.target.files?.[0];
@@ -99,7 +99,7 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 							{filePreview != null && (
 								<img
 									alt={t("Preview")}
-									className="mt-1 size-24 rounded-lg object-cover"
+									className="mbs-1 block-24 inline-24 rounded-lg object-cover"
 									src={filePreview}
 								/>
 							)}
@@ -110,13 +110,11 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 							<SelectTrigger />
 							<FieldError />
 							<SelectContent>
-								{assetPrefixes.map((prefix) => {
-									return (
-										<SelectItem key={prefix} id={prefix}>
-											{prefix}
-										</SelectItem>
-									);
-								})}
+								{assetPrefixes.map((prefix) => (
+									<SelectItem key={prefix} id={prefix}>
+										{prefix}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 

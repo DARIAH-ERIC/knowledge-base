@@ -64,9 +64,7 @@ export function useUrlPaginatedSearch<TFilters extends UrlPaginatedFilters = Rec
 	const [optimisticState, setOptimisticState] = useOptimistic<
 		UrlPaginatedSearchState<TFilters>,
 		UrlPaginatedSearchState<TFilters>
-	>(initialState, (_currentState, nextState) => {
-		return nextState;
-	});
+	>(initialState, (_currentState, nextState) => nextState);
 	const [inputValue, setInputValue] = useState(q);
 	const committedQ = useRef(q);
 

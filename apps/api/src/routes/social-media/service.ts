@@ -82,9 +82,7 @@ export async function getSocialMediaList(
 
 	const total = aggregate.at(0)?.total ?? 0;
 
-	const data = items.map((item) => {
-		return mapItem(item);
-	});
+	const data = items.map((item) => mapItem(item));
 
 	return { data, limit, offset, total };
 }

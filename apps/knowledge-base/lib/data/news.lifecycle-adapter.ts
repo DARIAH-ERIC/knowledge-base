@@ -20,7 +20,9 @@ export const newsLifecycleAdapter: EntityLifecycleAdapter = {
 			.where(eq(schema.news.id, sourceVersionId))
 			.limit(1);
 
-		if (source == null) return;
+		if (source == null) {
+			return;
+		}
 
 		await tx.insert(schema.news).values({ id: targetVersionId, ...source });
 	},

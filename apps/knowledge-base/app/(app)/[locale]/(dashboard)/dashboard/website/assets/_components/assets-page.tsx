@@ -77,13 +77,11 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 						<SelectTrigger />
 						<SelectContent>
 							<SelectItem id="all">{t("All prefixes")}</SelectItem>
-							{assetPrefixes.map((prefix) => {
-								return (
-									<SelectItem key={prefix} id={prefix}>
-										{prefix}
-									</SelectItem>
-								);
-							})}
+							{assetPrefixes.map((prefix) => (
+								<SelectItem key={prefix} id={prefix}>
+									{prefix}
+								</SelectItem>
+							))}
 						</SelectContent>
 					</Select>
 
@@ -104,10 +102,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 					</p>
 				</div>
 			) : (
-				<ul
-					className="grid grid-cols-[repeat(auto-fill,minmax(min(12rem,100%),1fr))] gap-4 content-start"
-					role="list"
-				>
+				<ul className="grid grid-cols-[repeat(auto-fill,minmax(min(12rem,100%),1fr))] gap-4 content-start">
 					{assets.items.map((asset) => {
 						const prefix = asset.key.split("/")[0] ?? "";
 						return (
@@ -116,7 +111,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 									<div className="overflow-hidden rounded-lg bg-muted aspect-square">
 										<AssetPreview
 											alt={asset.label}
-											className="size-full"
+											className="block-full inline-full"
 											imageClassName="object-cover"
 											kindLabelClassName="bg-background/90 text-xs"
 											mimeType={asset.mimeType}

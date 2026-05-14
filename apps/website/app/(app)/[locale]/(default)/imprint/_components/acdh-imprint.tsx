@@ -1,4 +1,4 @@
-import { createUrl, createUrlSearchParams, HttpError, isErr, request } from "@acdh-oeaw/lib";
+import { HttpError, createUrl, createUrlSearchParams, isErr, request } from "@acdh-oeaw/lib";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -43,6 +43,9 @@ export async function AcdhImprint(props: Readonly<AcdhImprintProps>): Promise<Re
 
 	return (
 		// eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
-		<div className="richtext max-w-(--breakpoint-md)" dangerouslySetInnerHTML={{ __html: html }} />
+		<div
+			className="richtext max-inline-(--breakpoint-md)"
+			dangerouslySetInnerHTML={{ __html: html }}
+		/>
 	);
 }

@@ -3,7 +3,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 import type { I18n } from "@/e2e/lib/fixtures/i18n";
-import { defaultLocale, type IntlLocale } from "@/lib/i18n/locales";
+import { type IntlLocale, defaultLocale } from "@/lib/i18n/locales";
 import { localePrefix } from "@/lib/i18n/routing";
 // import { getPathname } from "@/lib/i18n/navigation";
 

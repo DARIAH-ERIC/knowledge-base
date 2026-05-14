@@ -48,7 +48,7 @@ test.describe("i18n", () => {
 		createI18n,
 		page,
 	}) => {
-		// @ts-expect-error Skipped test because only a single locale is configured.
+		// @ts-expect-error -- Skipped test because only a single locale is configured.
 		const i18n = await createI18n("de-AT");
 		const response = await page.goto("/de/unknown");
 		/**
@@ -80,11 +80,11 @@ test.describe("i18n", () => {
 
 	// eslint-disable-next-line playwright/no-skipped-test
 	test.skip("should support switching locale", async ({ createI18n, createImprintPage, page }) => {
-		// // @ts-expect-error Single locale could be configured.
+		// // @ts-expect-error -- Single locale could be configured.
 		// eslint-disable-next-line playwright/no-skipped-test, @typescript-eslint/no-unnecessary-condition
 		test.skip(locales.length === 1, "Only single locale configured.");
 
-		// @ts-expect-error Skipped test because only a single locale is configured.
+		// @ts-expect-error -- Skipped test because only a single locale is configured.
 		const { imprintPage, i18n: de } = await createImprintPage("de-AT");
 		await imprintPage.goto();
 
@@ -132,7 +132,7 @@ test.describe("i18n", () => {
 			const { indexPage } = await createIndexPage(locale);
 			const response = await indexPage.goto();
 			const headers = response?.headers().link?.split(/, |\n/);
-			expect(headers).toEqual(
+			expect(headers).toStrictEqual(
 				expect.arrayContaining([
 					// `<${createAbsoluteUrl("/de")}>; rel="alternate"; hreflang="de-AT"`,
 					`<${createAbsoluteUrl("/en")}>; rel="alternate"; hreflang="en-GB"`,
@@ -145,13 +145,13 @@ test.describe("i18n", () => {
 			const { imprintPage } = await createImprintPage(locale);
 			const response = await imprintPage.goto();
 			const headers = response?.headers().link?.split(/, |\n/);
-			expect(headers).toEqual(
+			expect(headers).toStrictEqual(
 				expect.arrayContaining([
 					// `<${createAbsoluteUrl("/de/imprint")}>; rel="alternate"; hreflang="de-AT"`,
 					`<${createAbsoluteUrl("/en/imprint")}>; rel="alternate"; hreflang="en-GB"`,
 				]),
 			);
-			expect(headers).toEqual(
+			expect(headers).toStrictEqual(
 				expect.not.arrayContaining([
 					`<${createAbsoluteUrl("/imprint")}>; rel="alternate"; hreflang="x-default"`,
 				]),

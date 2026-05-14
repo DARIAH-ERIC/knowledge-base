@@ -9,7 +9,7 @@ import * as v from "valibot";
 import { env } from "../config/env.config";
 import { seed as seedDatabase } from "../lib/seed-database";
 import { seed as seedSearchIndex } from "../lib/seed-search-index";
-import { seed as seedObjectStore, type SeedManifest } from "../lib/seed-storage";
+import { type SeedManifest, seed as seedObjectStore } from "../lib/seed-storage";
 
 const db = createDatabaseService({
 	connection: {
@@ -53,9 +53,7 @@ const _services = ["database", "object-store", "search-index"] as const;
 
 const ArgsSchema = v.pipe(
 	v.array(v.picklist(_services)),
-	v.transform((value) => {
-		return value.length === 0 ? _services : value;
-	}),
+	v.transform((value) => (value.length === 0 ? _services : value)),
 );
 
 async function main() {
@@ -87,9 +85,11 @@ main()
 		log.error("Failed to seed services.", error);
 		process.exitCode = 1;
 	})
-	.finally(() => {
-		return db.$client.end().catch((error: unknown) => {
+	// oxlint-disable-next-line typescript/no-misused-promises
+	.finally(() =>
+		// oxlint-disable-next-line typescript/strict-void-return
+		db.$client.end().catch((error: unknown) => {
 			log.error("Failed to close database connection.\n", error);
 			process.exitCode = 1;
-		});
-	});
+		}),
+	);

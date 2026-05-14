@@ -48,29 +48,24 @@ export function WorkingGroupReportSocialMediaForm(
 			{report.socialMedia.length > 0 && (
 				<section className="flex flex-col gap-y-3">
 					<h2 className="text-sm font-semibold text-fg">{t("Social media accounts")}</h2>
-					<ul className="divide-y divide-border rounded-md border max-w-sm">
-						{report.socialMedia.map((claimed) => {
-							return (
-								<li
-									key={claimed.id}
-									className="flex items-center justify-between gap-x-4 px-4 py-3"
-								>
-									<div>
-										<p className="text-sm font-medium text-fg">{claimed.socialMedia.name}</p>
-										{claimed.socialMedia.url != null && (
-											<p className="text-xs text-muted-fg">{claimed.socialMedia.url}</p>
-										)}
-									</div>
-									<form action={deleteAction}>
-										<input name="claimedId" type="hidden" value={claimed.id} />
-										<input name="workingGroupReportId" type="hidden" value={report.id} />
-										<Button intent="danger" size="sm" type="submit">
-											{t("Remove")}
-										</Button>
-									</form>
-								</li>
-							);
-						})}
+					<ul className="divide-y divide-border rounded-md border max-inline-sm">
+						{report.socialMedia.map((claimed) => (
+							<li key={claimed.id} className="flex items-center justify-between gap-x-4 px-4 py-3">
+								<div>
+									<p className="text-sm font-medium text-fg">{claimed.socialMedia.name}</p>
+									{claimed.socialMedia.url != null && (
+										<p className="text-xs text-muted-fg">{claimed.socialMedia.url}</p>
+									)}
+								</div>
+								<form action={deleteAction}>
+									<input name="claimedId" type="hidden" value={claimed.id} />
+									<input name="workingGroupReportId" type="hidden" value={report.id} />
+									<Button intent="danger" size="sm" type="submit">
+										{t("Remove")}
+									</Button>
+								</form>
+							</li>
+						))}
 					</ul>
 				</section>
 			)}
@@ -78,7 +73,7 @@ export function WorkingGroupReportSocialMediaForm(
 			{availableSocialMedia.length > 0 && (
 				<section className="flex flex-col gap-y-3">
 					<h2 className="text-sm font-semibold text-fg">{t("Add social media account")}</h2>
-					<Form action={action} className="flex flex-col gap-y-4 max-w-sm" state={state}>
+					<Form action={action} className="flex flex-col gap-y-4 max-inline-sm" state={state}>
 						<input name="workingGroupReportId" type="hidden" value={report.id} />
 
 						<Select
@@ -92,14 +87,12 @@ export function WorkingGroupReportSocialMediaForm(
 							<SelectTrigger />
 							<FieldError />
 							<SelectContent>
-								{availableSocialMedia.map((account) => {
-									return (
-										<SelectItem key={account.id} id={account.id}>
-											{account.name}
-											{account.url != null && ` (${account.url})`}
-										</SelectItem>
-									);
-								})}
+								{availableSocialMedia.map((account) => (
+									<SelectItem key={account.id} id={account.id}>
+										{account.name}
+										{account.url != null && ` (${account.url})`}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 						<input name="socialMediaId" type="hidden" value={selectedId} />

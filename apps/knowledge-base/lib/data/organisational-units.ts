@@ -60,11 +60,7 @@ export async function getOrganisationalUnitOptionsByIds(ids: ReadonlyArray<strin
 		.where(inArray(schema.organisationalUnits.id, [...ids]))
 		.orderBy(schema.organisationalUnits.name);
 
-	const itemById = new Map(
-		rows.map((row) => {
-			return [row.id, row] as const;
-		}),
-	);
+	const itemById = new Map(rows.map((row) => [row.id, row] as const));
 
 	return ids.flatMap((id) => {
 		const item = itemById.get(id);
@@ -115,7 +111,9 @@ export async function getOrganisationalUnits(params: GetOrganisationalUnitsParam
 			...rest,
 			entity: { slug: entityVersion.entity.slug, updatedAt: entityVersion.updatedAt },
 		};
-		if (!item.image) return base;
+		if (!item.image) {
+			return base;
+		}
 		const image = images.generateSignedImageUrl({
 			key: item.image.key,
 			options: { width: imageAssetWidth.preview },
@@ -164,7 +162,9 @@ export async function getOrganisationalUnitById(params: GetOrganisationalUnitByI
 	const { entityVersion, ...rest } = item;
 	const base = { ...rest, entity: entityVersion.entity };
 
-	if (!item.image) return base;
+	if (!item.image) {
+		return base;
+	}
 	const image = images.generateSignedImageUrl({
 		key: item.image.key,
 		options: { width: imageAssetWidth.featured },

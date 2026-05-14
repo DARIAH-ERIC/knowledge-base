@@ -72,13 +72,8 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 	const t = useExtracted();
 	const format = useFormatter();
 	const router = useRouter();
-	const [items, optimisticallyRemoveItem] = useOptimistic(
-		workingGroups.data,
-		(state, id: string) => {
-			return state.filter((item) => {
-				return item.id !== id;
-			});
-		},
+	const [items, optimisticallyRemoveItem] = useOptimistic(workingGroups.data, (state, id: string) =>
+		state.filter((item) => item.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
@@ -109,7 +104,7 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 						className={buttonStyles({ intent: "secondary" })}
 						href="/dashboard/administrator/working-groups/create"
 					>
-						<PlusIcon className="mr-2 size-4" />
+						<PlusIcon className="me-2 block-4 inline-4" />
 						{t("New")}
 					</Link>
 				</HeaderAction>
@@ -132,62 +127,60 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
-					{(item) => {
-						return (
-							<TableRow>
-								<TableCell>{item.name}</TableCell>
-								<TableCell>
-									{item.durationFrom != null
-										? format.dateTime(item.durationFrom, { dateStyle: "short" })
-										: "—"}
-								</TableCell>
-								<TableCell>
-									{item.durationFrom == null
-										? "—"
-										: item.durationUntil != null
-											? format.dateTime(item.durationUntil, { dateStyle: "short" })
-											: t("present")}
-								</TableCell>
-								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
-								<TableCell>
-									<EntityLifecycleStatusBadge
-										hasDraft={item.hasDraft}
-										isPublished={item.isPublished}
-									/>
-								</TableCell>
-								<TableCell className="text-end">
-									<Menu>
-										<Button
-											aria-label={t("Open actions menu")}
-											className="h-7 sm:h-7"
-											intent="plain"
-											size="sq-sm"
+					{(item) => (
+						<TableRow>
+							<TableCell>{item.name}</TableCell>
+							<TableCell>
+								{item.durationFrom != null
+									? format.dateTime(item.durationFrom, { dateStyle: "short" })
+									: "—"}
+							</TableCell>
+							<TableCell>
+								{item.durationFrom == null
+									? "—"
+									: item.durationUntil != null
+										? format.dateTime(item.durationUntil, { dateStyle: "short" })
+										: t("present")}
+							</TableCell>
+							<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
+							<TableCell>
+								<EntityLifecycleStatusBadge
+									hasDraft={item.hasDraft}
+									isPublished={item.isPublished}
+								/>
+							</TableCell>
+							<TableCell className="text-end">
+								<Menu>
+									<Button
+										aria-label={t("Open actions menu")}
+										className="block-7 sm:block-7"
+										intent="plain"
+										size="sq-sm"
+									>
+										<EllipsisHorizontalIcon className="block-5 inline-5" />
+									</Button>
+									<MenuContent placement="left top">
+										<MenuItem
+											href={`/dashboard/administrator/working-groups/${item.entity.slug}/edit`}
 										>
-											<EllipsisHorizontalIcon className="size-5" />
-										</Button>
-										<MenuContent placement="left top">
-											<MenuItem
-												href={`/dashboard/administrator/working-groups/${item.entity.slug}/edit`}
-											>
-												<PencilSquareIcon className="mr-2 size-4" />
-												<MenuLabel>{t("Edit")}</MenuLabel>
-											</MenuItem>
-											<MenuSeparator />
-											<MenuItem
-												intent="danger"
-												onAction={() => {
-													setItemToDelete({ id: item.id, documentId: item.documentId });
-												}}
-											>
-												<TrashIcon className="mr-2 size-4" />
-												<MenuLabel>{t("Delete")}</MenuLabel>
-											</MenuItem>
-										</MenuContent>
-									</Menu>
-								</TableCell>
-							</TableRow>
-						);
-					}}
+											<PencilSquareIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Edit")}</MenuLabel>
+										</MenuItem>
+										<MenuSeparator />
+										<MenuItem
+											intent="danger"
+											onAction={() => {
+												setItemToDelete({ id: item.id, documentId: item.documentId });
+											}}
+										>
+											<TrashIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Delete")}</MenuLabel>
+										</MenuItem>
+									</MenuContent>
+								</Menu>
+							</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 

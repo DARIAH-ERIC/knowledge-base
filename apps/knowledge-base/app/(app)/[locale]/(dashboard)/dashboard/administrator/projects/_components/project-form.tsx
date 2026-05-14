@@ -5,7 +5,7 @@ import { socialMediaTypesEnum } from "@dariah-eric/database/schema";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
-import { FieldError, fieldErrorStyles, Label } from "@dariah-eric/ui/field";
+import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
@@ -182,30 +182,27 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 	);
 	const [imageKeyError, setImageKeyError] = useState(false);
 
-	const [partners, setPartners] = useState<Array<PartnerEntry>>(() => {
-		return (
+	const [partners, setPartners] = useState<Array<PartnerEntry>>(
+		() =>
 			initialPartners?.map((p) => {
 				return { ...p, _tempId: p.id, existingId: p.id };
-			}) ?? []
-		);
-	});
+			}) ?? [],
+	);
 
 	const [selectedSocialMediaIds, setSelectedSocialMediaIds] = useState<Array<string>>(
 		initialSocialMediaIds ?? [],
 	);
 
-	const [localSocialMediaItems, setLocalSocialMediaItems] = useState<Array<AsyncOption>>(() => {
-		return selectedSocialMediaItems ?? [];
-	});
+	const [localSocialMediaItems, setLocalSocialMediaItems] = useState<Array<AsyncOption>>(
+		() => selectedSocialMediaItems ?? [],
+	);
 
 	const [isCreateSocialMediaOpen, setIsCreateSocialMediaOpen] = useState(false);
 	const [createSocialMediaFormKey, setCreateSocialMediaFormKey] = useState(0);
 
 	const [createSocialMediaState, setCreateSocialMediaState] = useState<
 		ActionState<CreatedSocialMedia>
-	>(() => {
-		return createActionStateInitial();
-	});
+	>(() => createActionStateInitial());
 	const [isCreateSocialMediaPending, startCreateSocialMediaTransition] = useTransition();
 
 	function handleCreateSocialMedia(formData: FormData) {
@@ -213,23 +210,17 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 			const result = await createSocialMediaAction(createSocialMediaState, formData);
 			setCreateSocialMediaState(result);
 			if (result.status === "success") {
-				setLocalSocialMediaItems((prev) => {
-					return [
-						...prev,
-						{
-							description: `${result.data.type.type} · ${result.data.url}`,
-							id: result.data.id,
-							name: result.data.name,
-						},
-					];
-				});
-				setSelectedSocialMediaIds((prev) => {
-					return [...prev, result.data.id];
-				});
+				setLocalSocialMediaItems((prev) => [
+					...prev,
+					{
+						description: `${result.data.type.type} · ${result.data.url}`,
+						id: result.data.id,
+						name: result.data.name,
+					},
+				]);
+				setSelectedSocialMediaIds((prev) => [...prev, result.data.id]);
 				setIsCreateSocialMediaOpen(false);
-				setCreateSocialMediaFormKey((prev) => {
-					return prev + 1;
-				});
+				setCreateSocialMediaFormKey((prev) => prev + 1);
 			}
 		});
 	}
@@ -263,9 +254,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 			return;
 		}
 
-		const role = roles.find((r) => {
-			return r.id === dialog.roleId;
-		});
+		const role = roles.find((r) => r.id === dialog.roleId);
 
 		const entry: PartnerEntry = {
 			_tempId:
@@ -283,26 +272,16 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 		};
 
 		if (dialog.editingIndex !== null) {
-			setPartners((prev) => {
-				return prev.map((p, i) => {
-					return i === dialog.editingIndex ? entry : p;
-				});
-			});
+			setPartners((prev) => prev.map((p, i) => (i === dialog.editingIndex ? entry : p)));
 		} else {
-			setPartners((prev) => {
-				return [...prev, entry];
-			});
+			setPartners((prev) => [...prev, entry]);
 		}
 
 		setDialog(emptyDialog);
 	}
 
 	function removePartner(index: number) {
-		setPartners((prev) => {
-			return prev.filter((_, i) => {
-				return i !== index;
-			});
-		});
+		setPartners((prev) => prev.filter((_, i) => i !== index));
 	}
 
 	return (
@@ -385,13 +364,11 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 						<SelectTrigger />
 						<FieldError />
 						<SelectContent>
-							{scopes.map((item) => {
-								return (
-									<SelectItem key={item.id} id={item.id}>
-										{item.scope}
-									</SelectItem>
-								);
-							})}
+							{scopes.map((item) => (
+								<SelectItem key={item.id} id={item.id}>
+									{item.scope}
+								</SelectItem>
+							))}
 						</SelectContent>
 					</Select>
 
@@ -408,7 +385,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 					{selectedImage != null && (
 						<img
 							alt={t("Selected image")}
-							className="size-24 rounded-lg object-cover"
+							className="block-24 inline-24 rounded-lg object-cover"
 							src={selectedImage.url}
 						/>
 					)}
@@ -480,11 +457,9 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 						<PlusIcon />
 						{t("Create social media")}
 					</Button>
-					{selectedSocialMediaIds.map((id, index) => {
-						return (
-							<input key={id} name={`socialMediaIds.${String(index)}`} type="hidden" value={id} />
-						);
-					})}
+					{selectedSocialMediaIds.map((id, index) => (
+						<input key={id} name={`socialMediaIds.${String(index)}`} type="hidden" value={id} />
+					))}
 				</FormSection>
 
 				<Separator className="my-6" />
@@ -494,74 +469,70 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 					title={t("Partners")}
 				>
 					<div className="flex flex-col gap-3">
-						{partners.map((partner, index) => {
-							return (
-								<div
-									key={partner._tempId}
-									className="flex items-center gap-3 rounded-lg border px-4 py-3"
-								>
-									<div className="min-w-0 flex-1">
-										<p className="truncate text-sm font-medium">{partner.unitName}</p>
-										<p className="text-xs text-muted-fg">
-											{partner.roleName}
-											{partner.durationStart != null ? ` · ${partner.durationStart}` : null}
-											{partner.durationEnd != null ? ` – ${partner.durationEnd}` : null}
-										</p>
-									</div>
-									<Button
-										aria-label={t("Edit partner")}
-										intent="plain"
-										onPress={() => {
-											openEditDialog(index);
-										}}
-										size="sq-xs"
-									>
-										<PencilSquareIcon />
-									</Button>
-									<Button
-										aria-label={t("Remove partner")}
-										intent="plain"
-										onPress={() => {
-											removePartner(index);
-										}}
-										size="sq-xs"
-									>
-										<TrashIcon />
-									</Button>
+						{partners.map((partner, index) => (
+							<div
+								key={partner._tempId}
+								className="flex items-center gap-3 rounded-lg border px-4 py-3"
+							>
+								<div className="min-inline-0 flex-1">
+									<p className="truncate text-sm font-medium">{partner.unitName}</p>
+									<p className="text-xs text-muted-fg">
+										{partner.roleName}
+										{partner.durationStart != null ? ` · ${partner.durationStart}` : null}
+										{partner.durationEnd != null ? ` – ${partner.durationEnd}` : null}
+									</p>
 								</div>
-							);
-						})}
+								<Button
+									aria-label={t("Edit partner")}
+									intent="plain"
+									onPress={() => {
+										openEditDialog(index);
+									}}
+									size="sq-xs"
+								>
+									<PencilSquareIcon />
+								</Button>
+								<Button
+									aria-label={t("Remove partner")}
+									intent="plain"
+									onPress={() => {
+										removePartner(index);
+									}}
+									size="sq-xs"
+								>
+									<TrashIcon />
+								</Button>
+							</div>
+						))}
 						<Button className="self-start" intent="outline" onPress={openAddDialog}>
 							<PlusIcon />
 							{t("Add partner")}
 						</Button>
 					</div>
 					{partners.map(
-						({ _tempId, existingId, unitId, roleId, durationStart, durationEnd }, index) => {
-							return (
-								<Fragment key={_tempId}>
-									{existingId != null && (
-										<input name={`partners.${String(index)}.id`} type="hidden" value={existingId} />
-									)}
-									<input name={`partners.${String(index)}.unitId`} type="hidden" value={unitId} />
-									<input name={`partners.${String(index)}.roleId`} type="hidden" value={roleId} />
-									{durationStart != null && (
-										<input
-											name={`partners.${String(index)}.durationStart`}
-											type="hidden"
-											value={durationStart}
-										/>
-									)}
-									{durationEnd != null && (
-										<input
-											name={`partners.${String(index)}.durationEnd`}
-											type="hidden"
-											value={durationEnd}
-										/>
-									)}
-								</Fragment>
-							);
-						},
+						({ _tempId, existingId, unitId, roleId, durationStart, durationEnd }, index) => (
+							<Fragment key={_tempId}>
+								{existingId != null && (
+									<input name={`partners.${String(index)}.id`} type="hidden" value={existingId} />
+								)}
+								<input name={`partners.${String(index)}.unitId`} type="hidden" value={unitId} />
+								<input name={`partners.${String(index)}.roleId`} type="hidden" value={roleId} />
+								{durationStart != null && (
+									<input
+										name={`partners.${String(index)}.durationStart`}
+										type="hidden"
+										value={durationStart}
+									/>
+								)}
+								{durationEnd != null && (
+									<input
+										name={`partners.${String(index)}.durationEnd`}
+										type="hidden"
+										value={durationEnd}
+									/>
+								)}
+							</Fragment>
+						),
 					)}
 				</FormSection>
 
@@ -605,9 +576,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 							<Label>{t("Role")}</Label>
 							<SelectTrigger />
 							<SelectContent items={roles}>
-								{(role) => {
-									return <SelectItem id={role.id}>{role.role}</SelectItem>;
-								}}
+								{(role) => <SelectItem id={role.id}>{role.role}</SelectItem>}
 							</SelectContent>
 						</Select>
 
@@ -650,9 +619,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 					onOpenChange={(open) => {
 						setIsCreateSocialMediaOpen(open);
 						if (!open) {
-							setCreateSocialMediaFormKey((prev) => {
-								return prev + 1;
-							});
+							setCreateSocialMediaFormKey((prev) => prev + 1);
 						}
 					}}
 				>
@@ -683,13 +650,11 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 								<SelectTrigger />
 								<FieldError />
 								<SelectContent>
-									{socialMediaTypesEnum.map((type) => {
-										return (
-											<SelectItem key={type} id={type}>
-												{type}
-											</SelectItem>
-										);
-									})}
+									{socialMediaTypesEnum.map((type) => (
+										<SelectItem key={type} id={type}>
+											{type}
+										</SelectItem>
+									))}
 								</SelectContent>
 							</Select>
 
@@ -716,7 +681,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 								)}
 							</Button>
 						</ModalFooter>
-						<FormStatus className="px-6 pb-4" state={createSocialMediaState} />
+						<FormStatus className="px-6 pbe-4" state={createSocialMediaState} />
 					</Form>
 				</ModalContent>
 

@@ -68,14 +68,12 @@ export default async function DocumentationPage(
 				<h1 className="text-5xl font-extrabold tracking-tight text-text-strong">
 					{t("Documentation")}
 				</h1>
-				<ul className="list-disc space-y-2 pl-6">
-					{pages.map((page) => {
-						return (
-							<li key={page.id}>
-								<Link href={`/documentation/${page.entityVersion.entity.slug}`}>{page.title}</Link>
-							</li>
-						);
-					})}
+				<ul className="list-disc space-y-2 ps-6">
+					{pages.map((page) => (
+						<li key={page.id}>
+							<Link href={`/documentation/${page.entityVersion.entity.slug}`}>{page.title}</Link>
+						</li>
+					))}
 				</ul>
 			</section>
 		</Main>

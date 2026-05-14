@@ -25,11 +25,7 @@ export const contentBlockTypes = p.snakeCase.table(
 		type: p.text("type", { enum: contentBlockTypesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [
-			p.check("content_blocks_types_type_enum_check", inArray(t.type, contentBlockTypesEnum)),
-		];
-	},
+	(t) => [p.check("content_blocks_types_type_enum_check", inArray(t.type, contentBlockTypesEnum))],
 );
 
 export type ContentBlockTypes = typeof contentBlockTypes.$inferSelect;
@@ -44,15 +40,11 @@ export const contentBlocks = p.snakeCase.table("content_blocks", {
 	fieldId: p
 		.uuid("field_id")
 		.notNull()
-		.references(() => {
-			return fields.id;
-		}),
+		.references(() => fields.id),
 	typeId: p
 		.uuid("type_id")
 		.notNull()
-		.references(() => {
-			return contentBlockTypes.id;
-		}),
+		.references(() => contentBlockTypes.id),
 	position: p.integer("position").notNull(),
 	...f.timestamps(),
 });
@@ -81,14 +73,12 @@ export const dataContentBlockTypes = p.snakeCase.table(
 		type: p.text("type", { enum: dataContentBlockTypesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [
-			p.check(
-				"content_blocks_type_data_types_type_enum_check",
-				inArray(t.type, dataContentBlockTypesEnum),
-			),
-		];
-	},
+	(t) => [
+		p.check(
+			"content_blocks_type_data_types_type_enum_check",
+			inArray(t.type, dataContentBlockTypesEnum),
+		),
+	],
 );
 
 export type DataContentBlockTypes = typeof dataContentBlockTypes.$inferSelect;
@@ -102,18 +92,11 @@ export const dataContentBlocks = p.snakeCase.table("content_blocks_type_data", {
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(
-			() => {
-				return contentBlocks.id;
-			},
-			{ onDelete: "cascade" },
-		),
+		.references(() => contentBlocks.id, { onDelete: "cascade" }),
 	typeId: p
 		.uuid("type_id")
 		.notNull()
-		.references(() => {
-			return dataContentBlockTypes.id;
-		}),
+		.references(() => dataContentBlockTypes.id),
 	limit: p.integer("limit"),
 	selectedIds: p.jsonb("selected_ids"),
 	...f.timestamps(),
@@ -130,12 +113,7 @@ export const embedContentBlocks = p.snakeCase.table("content_blocks_type_embed",
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(
-			() => {
-				return contentBlocks.id;
-			},
-			{ onDelete: "cascade" },
-		),
+		.references(() => contentBlocks.id, { onDelete: "cascade" }),
 	url: p.text("url").notNull(),
 	title: p.text("title").notNull(),
 	caption: p.text("caption"),
@@ -153,12 +131,7 @@ export const galleryContentBlocks = p.snakeCase.table("content_blocks_type_galle
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(
-			() => {
-				return contentBlocks.id;
-			},
-			{ onDelete: "cascade" },
-		),
+		.references(() => contentBlocks.id, { onDelete: "cascade" }),
 	layout: p
 		.text("layout", { enum: ["carousel", "grid"] })
 		.notNull()
@@ -178,18 +151,11 @@ export const galleryContentBlockItems = p.snakeCase.table("content_blocks_type_g
 	galleryContentBlockId: p
 		.uuid("gallery_content_block_id")
 		.notNull()
-		.references(
-			() => {
-				return galleryContentBlocks.id;
-			},
-			{ onDelete: "cascade" },
-		),
+		.references(() => galleryContentBlocks.id, { onDelete: "cascade" }),
 	imageId: p
 		.uuid("image_id")
 		.notNull()
-		.references(() => {
-			return assets.id;
-		}),
+		.references(() => assets.id),
 	position: p.integer("position").notNull(),
 	caption: p.text("caption"),
 	...f.timestamps(),
@@ -206,18 +172,11 @@ export const imageContentBlocks = p.snakeCase.table("content_blocks_type_image",
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(
-			() => {
-				return contentBlocks.id;
-			},
-			{ onDelete: "cascade" },
-		),
+		.references(() => contentBlocks.id, { onDelete: "cascade" }),
 	imageId: p
 		.uuid("image_id")
 		.notNull()
-		.references(() => {
-			return assets.id;
-		}),
+		.references(() => assets.id),
 	caption: p.text("caption"),
 	...f.timestamps(),
 });
@@ -233,17 +192,10 @@ export const heroContentBlocks = p.snakeCase.table("content_blocks_type_hero", {
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(
-			() => {
-				return contentBlocks.id;
-			},
-			{ onDelete: "cascade" },
-		),
+		.references(() => contentBlocks.id, { onDelete: "cascade" }),
 	title: p.text("title").notNull(),
 	eyebrow: p.text("eyebrow"),
-	imageId: p.uuid("image_id").references(() => {
-		return assets.id;
-	}),
+	imageId: p.uuid("image_id").references(() => assets.id),
 	ctas: p.jsonb("ctas"),
 	...f.timestamps(),
 });
@@ -259,12 +211,7 @@ export const accordionContentBlocks = p.snakeCase.table("content_blocks_type_acc
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(
-			() => {
-				return contentBlocks.id;
-			},
-			{ onDelete: "cascade" },
-		),
+		.references(() => contentBlocks.id, { onDelete: "cascade" }),
 	items: p.jsonb("items").notNull(),
 	...f.timestamps(),
 });
@@ -280,12 +227,7 @@ export const richTextContentBlocks = p.snakeCase.table("content_blocks_type_rich
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(
-			() => {
-				return contentBlocks.id;
-			},
-			{ onDelete: "cascade" },
-		),
+		.references(() => contentBlocks.id, { onDelete: "cascade" }),
 	content: p.jsonb("content").$type<JSONContent>().notNull(),
 	...f.timestamps(),
 });

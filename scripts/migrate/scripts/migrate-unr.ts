@@ -15,16 +15,17 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { placeholderImageUrl } from "../config/data-migration.config";
 import { env } from "../config/env.config";
 import {
+	countryToInstitution,
+	roles,
 	bodies as unrBodies,
 	contributions as unrContributions,
 	countries as unrCountries,
-	countryToInstitution,
 	countryToService as unrCountryToService,
 	eventReports as unrEventReports,
 	eventSizeValues as unrEventSizeValues,
-	institutions as unrInstitutions,
-	institutionService as unrInstitutionToService,
 	institutionToPerson as unrInstitutionToPerson,
+	institutionService as unrInstitutionToService,
+	institutions as unrInstitutions,
 	outreach as unrOutreach,
 	outreachKpis as unrOutreachKpis,
 	outreachReports as unrOutreachReports,
@@ -33,12 +34,11 @@ import {
 	projects as unrProjects,
 	reportCampaigns as unrReportingCampaigns,
 	reports as unrReports,
-	roles,
 	roleTypeValues as unrRoleTypeValues,
 	serviceKpis as unrServiceKpis,
 	serviceReports as unrServiceReports,
-	services as unrServices,
 	serviceSizeValues as unrServiceSizeValues,
+	services as unrServices,
 	workingGroupEvents as unrWorkGroupEvents,
 	workingGroupOutreach as unrWorkingGroupOutreach,
 	workingGroupReports as unrWorkingGroupReports,
@@ -135,11 +135,7 @@ const detectSocialMediaType = (url: string): SocialMediaType => {
 		hostname = url.toLowerCase();
 	}
 	for (const [type, domains] of Object.entries(SOCIAL_MEDIA_DOMAINS)) {
-		if (
-			domains.some((domain) => {
-				return hostname.includes(domain);
-			})
-		) {
+		if (domains.some((domain) => hostname.includes(domain))) {
 			return type as SocialMediaType;
 		}
 	}
@@ -152,62 +148,43 @@ const client = unrDB;
 
 async function main() {
 	const status = await db.query.entityStatus.findMany();
-	const statusByType = keyBy(status, (item) => {
-		return item.type;
-	});
+	const statusByType = keyBy(status, (item) => item.type);
 
 	const types = await db.query.entityTypes.findMany();
-	const typesByType = keyBy(types, (item) => {
-		return item.type;
-	});
+	const typesByType = keyBy(types, (item) => item.type);
 
 	const organisationalUnitTypes = await db.query.organisationalUnitTypes.findMany();
-	const organisationalUnitTypesByType = keyBy(organisationalUnitTypes, (item) => {
-		return item.type;
-	});
+	const organisationalUnitTypesByType = keyBy(organisationalUnitTypes, (item) => item.type);
 
 	const organisationalUnitStatus = await db.query.organisationalUnitStatus.findMany();
-	const organisationalUnitStatusByType = keyBy(organisationalUnitStatus, (item) => {
-		return item.status;
-	});
+	const organisationalUnitStatusByType = keyBy(organisationalUnitStatus, (item) => item.status);
 
 	const organisationalUnitServiceRoles = await db.query.organisationalUnitServiceRoles.findMany();
-	const organisationalUnitServiceRolesByRole = keyBy(organisationalUnitServiceRoles, (item) => {
-		return item.role;
-	});
+	const organisationalUnitServiceRolesByRole = keyBy(
+		organisationalUnitServiceRoles,
+		(item) => item.role,
+	);
 
 	const personRoleTypes = await db.query.personRoleTypes.findMany();
-	const personRoleTypesByType = keyBy(personRoleTypes, (item) => {
-		return item.type;
-	});
+	const personRoleTypesByType = keyBy(personRoleTypes, (item) => item.type);
 
 	const projectScopes = await db.query.projectScopes.findMany();
-	const projectScopesByScope = keyBy(projectScopes, (item) => {
-		return item.scope;
-	});
+	const projectScopesByScope = keyBy(projectScopes, (item) => item.scope);
 
 	const projectRoles = await db.query.projectRoles.findMany();
-	const projectRolesByRole = keyBy(projectRoles, (item) => {
-		return item.role;
-	});
+	const projectRolesByRole = keyBy(projectRoles, (item) => item.role);
 
 	const entityTypes = await db.query.entityTypes.findMany();
-	const entityTypesByType = keyBy(entityTypes, (item) => {
-		return item.type;
-	});
+	const entityTypesByType = keyBy(entityTypes, (item) => item.type);
 
 	const contentBlockTypes = await db.query.contentBlockTypes.findMany();
-	const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => {
-		return item.type;
-	});
+	const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
 
 	const serviceStatuses = await db.query.serviceStatuses.findMany();
 	const serviceTypes = await db.query.serviceTypes.findMany();
 
 	const socialMediaTypes = await db.query.socialMediaTypes.findMany();
-	const socialMediaTypesByType = keyBy(socialMediaTypes, (item) => {
-		return item.type;
-	});
+	const socialMediaTypesByType = keyBy(socialMediaTypes, (item) => item.type);
 
 	const bodies = await db.query.organisationalUnits.findMany({
 		where: {
@@ -317,7 +294,7 @@ async function main() {
 						})
 						.returning({ id: schema.assets.id });
 				} catch (error) {
-					console.error(error);
+					log.error(error);
 				}
 			}
 
@@ -530,7 +507,7 @@ async function main() {
 							})
 							.returning({ id: schema.assets.id });
 					} catch (error) {
-						console.error(error);
+						log.error(error);
 					}
 				}
 
@@ -718,22 +695,18 @@ async function main() {
 				assert(umbrellaUnit);
 
 				if (institution.types != null) {
-					let institutionTypes = institution.types.filter((type) => {
-						return type !== "other";
-					});
+					let institutionTypes = institution.types.filter((type) => type !== "other");
 
 					institutionTypes =
 						institutionTypes.includes("partner_institution") &&
-						institutionTypes.some((t) => {
-							return [
+						institutionTypes.some((t) =>
+							[
 								"national_coordinating_institution",
 								"national_representative_institution",
 								"cooperating_partner",
-							].includes(t);
-						})
-							? institutionTypes.filter((t) => {
-									return t !== "partner_institution";
-								})
+							].includes(t),
+						)
+							? institutionTypes.filter((t) => t !== "partner_institution")
 							: institutionTypes;
 
 					for (const type of institutionTypes) {
@@ -841,12 +814,8 @@ async function main() {
 
 	for (const service of services) {
 		const unrServiceStatus = service.status === "in_preparation" ? "needs_review" : service.status;
-		const serviceStatus = serviceStatuses.find((s) => {
-			return s.status === unrServiceStatus;
-		});
-		const serviceType = serviceTypes.find((t) => {
-			return t.type === service.type;
-		});
+		const serviceStatus = serviceStatuses.find((s) => s.status === unrServiceStatus);
+		const serviceType = serviceTypes.find((t) => t.type === service.type);
 
 		assert(serviceStatus);
 		assert(serviceType);
@@ -898,9 +867,7 @@ async function main() {
 			const { institutionId, role: unrRole } = institutionOfService;
 
 			const institutionOrgaUnitId = unrInstitutionIdToOrgUnitId.get(institutionId);
-			const role = organisationalUnitServiceRoles.find((r) => {
-				return r.role === unrRole;
-			});
+			const role = organisationalUnitServiceRoles.find((r) => r.role === unrRole);
 
 			assert(institutionOrgaUnitId);
 			assert(role);
@@ -1206,7 +1173,7 @@ async function main() {
 						})
 						.returning({ id: schema.assets.id });
 				} catch (error) {
-					console.error(error);
+					log.error(error);
 				}
 			}
 
@@ -1327,51 +1294,37 @@ async function main() {
 					}
 					case "smt_member": {
 						roleId = personRoleTypesByType.is_member_of.id;
-						relatedOrgaUnitId = bodies.find((b) => {
-							return b.acronym === "smt";
-						})?.id;
+						relatedOrgaUnitId = bodies.find((b) => b.acronym === "smt")?.id;
 						break;
 					}
 					case "scientific_board_member": {
 						roleId = personRoleTypesByType.is_member_of.id;
-						relatedOrgaUnitId = bodies.find((b) => {
-							return b.acronym === "sab";
-						})?.id;
+						relatedOrgaUnitId = bodies.find((b) => b.acronym === "sab")?.id;
 						break;
 					}
 					case "dco_member": {
 						roleId = personRoleTypesByType.is_member_of.id;
-						relatedOrgaUnitId = bodies.find((b) => {
-							return b.acronym === "dco";
-						})?.id;
+						relatedOrgaUnitId = bodies.find((b) => b.acronym === "dco")?.id;
 						break;
 					}
 					case "jrc_member": {
 						roleId = personRoleTypesByType.is_member_of.id;
-						relatedOrgaUnitId = bodies.find((b) => {
-							return b.acronym === "jrc";
-						})?.id;
+						relatedOrgaUnitId = bodies.find((b) => b.acronym === "jrc")?.id;
 						break;
 					}
 					case "director": {
 						roleId = personRoleTypesByType.is_member_of.id;
-						relatedOrgaUnitId = bodies.find((b) => {
-							return b.acronym === "bod";
-						})?.id;
+						relatedOrgaUnitId = bodies.find((b) => b.acronym === "bod")?.id;
 						break;
 					}
 					case "jrc_chair": {
 						roleId = personRoleTypesByType.is_chair_of.id;
-						relatedOrgaUnitId = bodies.find((b) => {
-							return b.acronym === "jrc";
-						})?.id;
+						relatedOrgaUnitId = bodies.find((b) => b.acronym === "jrc")?.id;
 						break;
 					}
 					case "ncc_chair": {
 						roleId = personRoleTypesByType.is_chair_of.id;
-						relatedOrgaUnitId = bodies.find((b) => {
-							return b.acronym === "ncc";
-						})?.id;
+						relatedOrgaUnitId = bodies.find((b) => b.acronym === "ncc")?.id;
 						break;
 					}
 					case "national_consortium_contact":
@@ -1858,9 +1811,7 @@ async function main() {
 
 	const workingGroupReportQAsGrouped = groupBy(
 		workingGroupReportQAs,
-		({ campaignId, question }) => {
-			return `${campaignId}_${question}`;
-		},
+		({ campaignId, question }) => `${campaignId}_${question}`,
 	);
 	let i = 0;
 	for (const [_q, qas] of Object.entries(workingGroupReportQAsGrouped)) {
@@ -1905,9 +1856,7 @@ async function main() {
 
 	const projects = await client.select().from(unrProjects);
 
-	const groupedProjects = groupBy(projects, ({ acronym, name }) => {
-		return acronym ?? name;
-	});
+	const groupedProjects = groupBy(projects, ({ acronym, name }) => acronym ?? name);
 
 	for (const [projectName, projectLeverages] of Object.entries(groupedProjects)) {
 		const createdAt = new Date(Date.now());
@@ -1946,46 +1895,24 @@ async function main() {
 
 			const id = version.id;
 
-			const startDates = [
-				...new Set(
-					projectLeverages.map((pL) => {
-						return pL.startDate?.getTime();
-					}),
-				),
-			]
-				.toSorted((dateA = 0, dateB = 0) => {
-					return dateA - dateB;
-				})
-				.map((time) => {
-					return time != null ? new Date(time) : null;
-				})
-				.filter((d) => {
-					return d != null;
-				});
+			const startDates = [...new Set(projectLeverages.map((pL) => pL.startDate?.getTime()))]
+				.toSorted((dateA = 0, dateB = 0) => dateA - dateB)
+				.map((time) => (time != null ? new Date(time) : null))
+				.filter((d) => d != null);
 
-			const projectMonthsEntries = [
-				...new Set(
-					projectLeverages.map((pL) => {
-						return pL.projectMonths;
-					}),
-				),
-			];
+			const projectMonthsEntries = [...new Set(projectLeverages.map((pL) => pL.projectMonths))];
 
 			if (startDates.length > 1) {
 				logToFile(
 					`multiple start dates found for project ${projectName}: ${startDates
-						.map((startDate) => {
-							return startDate.toISOString().slice(0, 10);
-						})
+						.map((startDate) => startDate.toISOString().slice(0, 10))
 						.join(",")}. Chose ${String(startDates[0]?.toISOString().slice(0, 10))}`,
 				);
 			}
 			if (projectMonthsEntries.length > 1) {
 				logToFile(
 					`multiple project months entries found for project ${projectName}: ${projectMonthsEntries
-						.map((pM) => {
-							return pM;
-						})
+						.map((pM) => pM)
 						.join(",")}. Chose ${String(projectMonthsEntries[0])}`,
 				);
 			}
@@ -2000,13 +1927,7 @@ async function main() {
 						)
 					: null;
 
-			const projectScopes = [
-				...new Set(
-					projectLeverages.map((pL) => {
-						return pL.scope;
-					}),
-				),
-			];
+			const projectScopes = [...new Set(projectLeverages.map((pL) => pL.scope))];
 
 			const projectScope = projectScopes[0] ?? "national";
 
@@ -2029,23 +1950,15 @@ async function main() {
 
 			assert(kbProject);
 
-			const fundersEntries = projectLeverages.map((pL) => {
-				return pL.funders;
-			});
+			const fundersEntries = projectLeverages.map((pL) => pL.funders);
 			const funders = [
 				...new Set(
-					fundersEntries.flatMap((s) => {
-						return s != null
-							? s.split(";").map((v) => {
-									return v.trim().replaceAll(/\s+/g, " ");
-								})
-							: [];
-					}),
+					fundersEntries.flatMap((s) =>
+						s != null ? s.split(";").map((v) => v.trim().replaceAll(/\s+/g, " ")) : [],
+					),
 				),
 			];
-			funders.filter((f) => {
-				return f !== "Unknown";
-			});
+			funders.filter((f) => f !== "Unknown");
 			for (const funder of funders) {
 				let [fundingUnit] = await tx
 					.select({ id: schema.organisationalUnits.id })
@@ -2151,9 +2064,11 @@ main()
 		log.error("Failed to complete data migration.", error);
 		process.exitCode = 1;
 	})
-	.finally(() => {
-		return db.$client.end().catch((error: unknown) => {
+	// oxlint-disable-next-line typescript/no-misused-promises
+	.finally(() =>
+		// oxlint-disable-next-line typescript/strict-void-return
+		db.$client.end().catch((error: unknown) => {
 			log.error("Failed to close database connection.\n", error);
 			process.exitCode = 1;
-		});
-	});
+		}),
+	);

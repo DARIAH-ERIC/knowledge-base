@@ -93,17 +93,13 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 	const [selectedStatusId, setSelectedStatusId] = useState<string | null>(null);
 	const [selectedUnitItem, setSelectedUnitItem] = useState<AsyncOption | null>(null);
 
-	const [state, setState] = useState<ActionState>(() => {
-		return createActionStateInitial();
-	});
+	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
 	const [isPending, startFormTransition] = useTransition();
 
 	function formAction(formData: FormData) {
 		const statusId = selectedStatusId;
 		const relatedUnit = selectedUnitItem;
-		const option = statusOptions.find((entry) => {
-			return entry.statusId === statusId;
-		});
+		const option = statusOptions.find((entry) => entry.statusId === statusId);
 
 		startFormTransition(async () => {
 			const newState = await createUnitRelationAction(state, formData);
@@ -115,22 +111,20 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 					| undefined;
 
 				if (data != null) {
-					setLocalRelations((prev) => {
-						return [
-							...prev,
-							{
-								id: data.id,
-								statusId: option.statusId,
-								statusType: option.statusType as UnitRelation["statusType"],
-								relatedUnitId: relatedUnit.id,
-								relatedUnitName: relatedUnit.name,
-								duration: {
-									start: new Date(data.durationStart),
-									...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
-								},
+					setLocalRelations((prev) => [
+						...prev,
+						{
+							id: data.id,
+							statusId: option.statusId,
+							statusType: option.statusType as UnitRelation["statusType"],
+							relatedUnitId: relatedUnit.id,
+							relatedUnitName: relatedUnit.name,
+							duration: {
+								start: new Date(data.durationStart),
+								...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
 							},
-						];
-					});
+						},
+					]);
 				}
 
 				setSelectedStatusId(null);
@@ -143,7 +137,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 		<Fragment>
 			<Separator className="my-8" />
 
-			<div className="max-w-3xl space-y-6">
+			<div className="max-inline-3xl space-y-6">
 				<div className="space-y-1">
 					<FormSectionTitle title={t("Relations")} />
 				</div>
@@ -158,38 +152,36 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 							<TableColumn />
 						</TableHeader>
 						<TableBody items={localRelations}>
-							{(relation) => {
-								return (
-									<TableRow id={relation.id}>
-										<TableCell>{formatStatus(relation.statusType)}</TableCell>
-										<TableCell>{relation.relatedUnitName}</TableCell>
-										<TableCell>
-											{format.dateTime(relation.duration.start, { dateStyle: "short" })}
-										</TableCell>
-										<TableCell>
-											{relation.duration.end != null
-												? format.dateTime(relation.duration.end, { dateStyle: "short" })
-												: t("present")}
-										</TableCell>
-										<TableCell className="text-end">
-											{relation.duration.end == null && (
-												<Button
-													aria-label={t("End relation")}
-													className="h-7 sm:h-7"
-													intent="plain"
-													onPress={() => {
-														setItemToEnd({ id: relation.id });
-														setSelectedEndDate(null);
-													}}
-													size="sq-sm"
-												>
-													<ArchiveBoxXMarkIcon className="size-4" />
-												</Button>
-											)}
-										</TableCell>
-									</TableRow>
-								);
-							}}
+							{(relation) => (
+								<TableRow id={relation.id}>
+									<TableCell>{formatStatus(relation.statusType)}</TableCell>
+									<TableCell>{relation.relatedUnitName}</TableCell>
+									<TableCell>
+										{format.dateTime(relation.duration.start, { dateStyle: "short" })}
+									</TableCell>
+									<TableCell>
+										{relation.duration.end != null
+											? format.dateTime(relation.duration.end, { dateStyle: "short" })
+											: t("present")}
+									</TableCell>
+									<TableCell className="text-end">
+										{relation.duration.end == null && (
+											<Button
+												aria-label={t("End relation")}
+												className="block-7 sm:block-7"
+												intent="plain"
+												onPress={() => {
+													setItemToEnd({ id: relation.id });
+													setSelectedEndDate(null);
+												}}
+												size="sq-sm"
+											>
+												<ArchiveBoxXMarkIcon className="block-4 inline-4" />
+											</Button>
+										)}
+									</TableCell>
+								</TableRow>
+							)}
 						</TableBody>
 					</Table>
 				) : (
@@ -216,13 +208,11 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 									<SelectTrigger />
 									<FieldError />
 									<SelectContent>
-										{statusOptions.map((option) => {
-											return (
-												<SelectItem key={option.statusId} id={option.statusId}>
-													{formatStatus(option.statusType)}
-												</SelectItem>
-											);
-										})}
+										{statusOptions.map((option) => (
+											<SelectItem key={option.statusId} id={option.statusId}>
+												{formatStatus(option.statusType)}
+											</SelectItem>
+										))}
 									</SelectContent>
 								</Select>
 								<input name="statusId" type="hidden" value={selectedStatusId ?? ""} />
@@ -286,7 +276,9 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 			<ModalContent
 				isOpen={itemToEnd != null}
 				onOpenChange={(open) => {
-					if (!open) setItemToEnd(null);
+					if (!open) {
+						setItemToEnd(null);
+					}
 				}}
 				role="alertdialog"
 				size="sm"
@@ -312,19 +304,21 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 					<Button
 						isDisabled={selectedEndDate == null}
 						onPress={() => {
-							if (itemToEnd == null || selectedEndDate == null) return;
+							if (itemToEnd == null || selectedEndDate == null) {
+								return;
+							}
 
 							const end = selectedEndDate.toDate(getLocalTimeZone());
 
 							startTransition(async () => {
 								await endUnitRelationAction(itemToEnd.id, end);
-								setLocalRelations((prev) => {
-									return prev.map((relation) => {
-										return relation.id === itemToEnd.id
+								setLocalRelations((prev) =>
+									prev.map((relation) =>
+										relation.id === itemToEnd.id
 											? { ...relation, duration: { ...relation.duration, end } }
-											: relation;
-									});
-								});
+											: relation,
+									),
+								);
 								setItemToEnd(null);
 							});
 						}}

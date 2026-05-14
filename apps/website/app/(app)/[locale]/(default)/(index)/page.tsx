@@ -27,7 +27,7 @@ export default function IndexPage(_props: Readonly<IndexPageProps>): ReactNode {
 
 	return (
 		<Main className="container flex-1 px-8 py-12 xs:px-16">
-			<section className="flex min-h-full flex-col items-center justify-center gap-y-4 py-24">
+			<section className="flex min-block-full flex-col items-center justify-center gap-y-4 py-24">
 				<h1 className="text-center text-6xl font-extrabold tracking-tight text-text-strong">
 					{t("title")}
 				</h1>

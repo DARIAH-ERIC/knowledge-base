@@ -102,13 +102,7 @@ async function getActiveGovernanceBodyPersons(
 			),
 		);
 
-	const positions = await getPersonPositions(db, [
-		...new Set(
-			rows.map((row) => {
-				return row.id;
-			}),
-		),
-	]);
+	const positions = await getPersonPositions(db, [...new Set(rows.map((row) => row.id))]);
 
 	for (const row of rows) {
 		const items = personsByGovernanceBody.get(row.governanceBodyId);
@@ -232,9 +226,7 @@ export async function getGovernanceBodies(
 	const total = aggregate.at(0)?.total ?? 0;
 	const personsByGovernanceBody = await getActiveGovernanceBodyPersons(
 		db,
-		items.map((item) => {
-			return item.id;
-		}),
+		items.map((item) => item.id),
 	);
 
 	const data = items.map((item) => {

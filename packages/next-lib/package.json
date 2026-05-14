@@ -14,8 +14,8 @@
 		"dev": "tsdown --watch",
 		"format:check": "oxfmt --check",
 		"format:fix": "oxfmt --write",
-		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
-		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
+		"lint:check": "oxlint --report-unused-disable-directives --type-aware --type-check",
+		"lint:fix": "oxlint --fix --report-unused-disable-directives --type-aware --type-check",
 		"types:check": "tsc --noEmit"
 	},
 	"devDependencies": {
@@ -24,7 +24,6 @@
 		"@dariah-eric/rate-limiter": "workspace:^",
 		"@types/node": "catalog:",
 		"better-result": "catalog:",
-		"eslint": "catalog:",
 		"next": "catalog:",
 		"tsdown": "catalog:",
 		"typescript": "catalog:",

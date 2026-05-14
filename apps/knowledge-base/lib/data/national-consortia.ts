@@ -38,9 +38,15 @@ function compareStrings(a: string, b: string, dir: "asc" | "desc"): number {
 }
 
 function compareNullableStrings(a: string | null, b: string | null, dir: "asc" | "desc"): number {
-	if (a == null && b == null) return 0;
-	if (a == null) return 1;
-	if (b == null) return -1;
+	if (a == null && b == null) {
+		return 0;
+	}
+	if (a == null) {
+		return 1;
+	}
+	if (b == null) {
+		return -1;
+	}
 	return compareStrings(a, b, dir);
 }
 
@@ -104,11 +110,7 @@ async function getCountryNamesByUnitIds(
 		}
 	}
 
-	return new Map(
-		ids.map((id) => {
-			return [id, countryByUnitId.get(id)?.name ?? null] as const;
-		}),
-	);
+	return new Map(ids.map((id) => [id, countryByUnitId.get(id)?.name ?? null] as const));
 }
 
 export async function getNationalConsortia(
@@ -206,11 +208,7 @@ export async function getNationalConsortia(
 		]);
 
 		if (sort !== "country") {
-			const countryNames = await getCountryNamesByUnitIds(
-				items.map((item) => {
-					return item.id;
-				}),
-			);
+			const countryNames = await getCountryNamesByUnitIds(items.map((item) => item.id));
 
 			return {
 				data: items.map((item) => {
@@ -227,11 +225,7 @@ export async function getNationalConsortia(
 			};
 		}
 
-		const countryNames = await getCountryNamesByUnitIds(
-			items.map((item) => {
-				return item.id;
-			}),
-		);
+		const countryNames = await getCountryNamesByUnitIds(items.map((item) => item.id));
 		const sortedItems = items
 			.map((item) => {
 				return {
@@ -241,12 +235,11 @@ export async function getNationalConsortia(
 					name: item.name,
 				};
 			})
-			.sort((a, b) => {
-				return (
+			.toSorted(
+				(a, b) =>
 					compareNullableStrings(a.countryName, b.countryName, dir) ||
-					compareStrings(a.name, b.name, dir)
-				);
-			});
+					compareStrings(a.name, b.name, dir),
+			);
 
 		return {
 			data: sortedItems.slice(offset, offset + limit),
@@ -298,14 +291,7 @@ export async function getNationalConsortia(
 	]);
 
 	const matchedIds = Array.from(
-		new Set([
-			...nameMatches.map((item) => {
-				return item.id;
-			}),
-			...countryMatches.map((item) => {
-				return item.id;
-			}),
-		]),
+		new Set([...nameMatches.map((item) => item.id), ...countryMatches.map((item) => item.id)]),
 	);
 
 	if (matchedIds.length === 0) {
@@ -337,11 +323,7 @@ export async function getNationalConsortia(
 
 	if (sort !== "country") {
 		const pagedItems = orderedItems.slice(offset, offset + limit);
-		const countryNames = await getCountryNamesByUnitIds(
-			pagedItems.map((item) => {
-				return item.id;
-			}),
-		);
+		const countryNames = await getCountryNamesByUnitIds(pagedItems.map((item) => item.id));
 
 		return {
 			data: pagedItems.map((item) => {
@@ -358,11 +340,7 @@ export async function getNationalConsortia(
 		};
 	}
 
-	const countryNames = await getCountryNamesByUnitIds(
-		orderedItems.map((item) => {
-			return item.id;
-		}),
-	);
+	const countryNames = await getCountryNamesByUnitIds(orderedItems.map((item) => item.id));
 	const sortedItems = orderedItems
 		.map((item) => {
 			return {
@@ -372,12 +350,11 @@ export async function getNationalConsortia(
 				name: item.name,
 			};
 		})
-		.sort((a, b) => {
-			return (
+		.toSorted(
+			(a, b) =>
 				compareNullableStrings(a.countryName, b.countryName, dir) ||
-				compareStrings(a.name, b.name, dir)
-			);
-		});
+				compareStrings(a.name, b.name, dir),
+		);
 
 	return {
 		data: sortedItems.slice(offset, offset + limit),

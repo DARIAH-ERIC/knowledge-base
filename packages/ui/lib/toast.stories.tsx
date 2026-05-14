@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Fragment } from "react";
 
 import { Button } from "./button";
-import { queue, ToastRegion } from "./toast";
+import { ToastRegion, queue } from "./toast";
 
 const meta = {
 	title: "Components/Toast",

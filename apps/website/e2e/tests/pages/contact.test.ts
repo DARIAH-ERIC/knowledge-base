@@ -25,7 +25,7 @@ test.describe("contact page", () => {
 			await contactPage.goto();
 
 			const { getViolations } = await createAccessibilityScanner();
-			expect(await getViolations()).toEqual([]);
+			expect(await getViolations()).toStrictEqual([]);
 		}
 	});
 
@@ -59,9 +59,7 @@ test.describe("contact page", () => {
 
 	test.describe("contact form", () => {
 		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(() => {
-			return env.MAILPIT_API_BASE_URL == null;
-		}, "Email service disabled.");
+		test.skip(() => env.MAILPIT_API_BASE_URL == null, "Email service disabled.");
 
 		/**
 		 * Run sequentially. Also requires setting `workers: 1` in `playwright.config.ts` to avoid

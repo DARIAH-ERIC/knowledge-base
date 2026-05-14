@@ -33,10 +33,10 @@ export function ReportScreenCommentForm(props: Readonly<ReportScreenCommentFormP
 	);
 
 	return (
-		<section className="flex flex-col gap-y-4 border-t pt-6">
+		<section className="flex flex-col gap-y-4 border-bs pbs-6">
 			<h2 className="text-sm font-semibold text-fg">{t("Comment")}</h2>
 
-			<Form action={action} className="flex flex-col gap-y-4 max-w-3xl" state={state}>
+			<Form action={action} className="flex flex-col gap-y-4 max-inline-3xl" state={state}>
 				<input name="reportId" type="hidden" value={reportId} />
 				<input name="reportType" type="hidden" value={reportType} />
 				<input name="screenKey" type="hidden" value={screenKey} />

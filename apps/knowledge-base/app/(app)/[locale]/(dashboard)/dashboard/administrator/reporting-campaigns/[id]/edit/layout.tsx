@@ -36,7 +36,7 @@ export default async function CampaignEditLayout(
 				</HeaderContent>
 			</Header>
 
-			<div className="flex flex-col gap-y-6 px-(--layout-padding) pt-6">
+			<div className="flex flex-col gap-y-6 px-(--layout-padding) pbs-6">
 				<CampaignStepNav campaignId={id} />
 				{children}
 			</div>

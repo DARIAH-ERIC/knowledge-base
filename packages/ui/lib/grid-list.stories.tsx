@@ -35,21 +35,19 @@ export const Default: Story = {
 	args: {},
 	render() {
 		return (
-			<div className="w-72">
+			<div className="inline-72">
 				<GridList aria-label={"Team members"}>
-					{members.map((member) => {
-						return (
-							<GridListItem key={member.id} id={member.id} textValue={member.name}>
-								<GridListStart>
-									<UserCircleIcon className="size-8 text-muted-fg" />
-									<div>
-										<GridListLabel>{member.name}</GridListLabel>
-										<GridListDescription>{member.role}</GridListDescription>
-									</div>
-								</GridListStart>
-							</GridListItem>
-						);
-					})}
+					{members.map((member) => (
+						<GridListItem key={member.id} id={member.id} textValue={member.name}>
+							<GridListStart>
+								<UserCircleIcon className="block-8 inline-8 text-muted-fg" />
+								<div>
+									<GridListLabel>{member.name}</GridListLabel>
+									<GridListDescription>{member.role}</GridListDescription>
+								</div>
+							</GridListStart>
+						</GridListItem>
+					))}
 				</GridList>
 			</div>
 		);
@@ -60,20 +58,18 @@ export const Selectable: Story = {
 	args: {},
 	render() {
 		return (
-			<div className="w-72">
+			<div className="inline-72">
 				<GridList aria-label={"Team members"} selectionMode="multiple">
-					{members.map((member) => {
-						return (
-							<GridListItem key={member.id} id={member.id} textValue={member.name}>
-								<GridListStart>
-									<div>
-										<GridListLabel>{member.name}</GridListLabel>
-										<GridListDescription>{member.role}</GridListDescription>
-									</div>
-								</GridListStart>
-							</GridListItem>
-						);
-					})}
+					{members.map((member) => (
+						<GridListItem key={member.id} id={member.id} textValue={member.name}>
+							<GridListStart>
+								<div>
+									<GridListLabel>{member.name}</GridListLabel>
+									<GridListDescription>{member.role}</GridListDescription>
+								</div>
+							</GridListStart>
+						</GridListItem>
+					))}
 				</GridList>
 			</div>
 		);
@@ -84,7 +80,7 @@ export const WithSections: Story = {
 	args: {},
 	render() {
 		return (
-			<div className="w-72">
+			<div className="inline-72">
 				<GridList aria-label={"Team"}>
 					<GridListSection>
 						<GridListHeader>{"Administrators"}</GridListHeader>

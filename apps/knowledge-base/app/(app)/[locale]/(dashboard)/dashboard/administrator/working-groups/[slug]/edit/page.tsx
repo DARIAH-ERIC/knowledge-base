@@ -18,7 +18,7 @@ import {
 	getResourceRelationOptions,
 	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
-import { getUnitRelations, getUnitRelationStatusOptions } from "@/lib/data/unit-relations";
+import { getUnitRelationStatusOptions, getUnitRelations } from "@/lib/data/unit-relations";
 import { getWorkingGroupChairs } from "@/lib/data/working-group-chairs";
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";

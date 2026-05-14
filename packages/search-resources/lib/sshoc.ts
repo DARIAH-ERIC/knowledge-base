@@ -1,5 +1,5 @@
 import { createUrl, unreachable } from "@acdh-oeaw/lib";
-import { isCoreService, isSoftware, type SearchItem } from "@dariah-eric/client-sshoc";
+import { type SearchItem, isCoreService, isSoftware } from "@dariah-eric/client-sshoc";
 import type { ResourceDocument } from "@dariah-eric/search";
 
 import { toPlainText } from "./markdown/to-plain-text";
@@ -39,12 +39,8 @@ export function createSshocItem(item: SearchItem, marketplaceBaseUrl: string): R
 	/** Description supports markdown. */
 	const description = toPlainText(item.description);
 
-	const sourceActorIds = item.contributors.flatMap((contributor) => {
-		return contributor.actor.id;
-	});
-	const actorIds = sourceActorIds.map((sourceActorId) => {
-		return [source, sourceActorId].join(":");
-	});
+	const sourceActorIds = item.contributors.flatMap((contributor) => contributor.actor.id);
+	const actorIds = sourceActorIds.map((sourceActorId) => [source, sourceActorId].join(":"));
 
 	const sourceUpdatedAt = new Date(item.lastInfoUpdate).getTime();
 

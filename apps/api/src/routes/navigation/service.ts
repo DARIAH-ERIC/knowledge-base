@@ -22,13 +22,9 @@ function buildTree(
 ): Array<NavigationItemWithChildren> {
 	return (
 		items
-			.filter((item) => {
-				return item.parentId === parentId;
-			})
+			.filter((item) => item.parentId === parentId)
 			// eslint-disable-next-line unicorn/no-array-sort
-			.sort((a, b) => {
-				return a.position - b.position;
-			})
+			.sort((a, b) => a.position - b.position)
 			.map((item) => {
 				return {
 					...item,

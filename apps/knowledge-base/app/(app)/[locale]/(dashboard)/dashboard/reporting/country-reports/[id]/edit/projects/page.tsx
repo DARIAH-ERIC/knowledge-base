@@ -37,8 +37,8 @@ export default async function DashboardReportingCountryReportProjectsPage(
 		getAuthorizedCountryReportForUser(
 			user,
 			id,
-			(id) => {
-				return db.query.countryReports.findFirst({
+			(id) =>
+				db.query.countryReports.findFirst({
 					where: { id },
 					columns: { id: true },
 					with: {
@@ -49,8 +49,7 @@ export default async function DashboardReportingCountryReportProjectsPage(
 							},
 						},
 					},
-				});
-			},
+				}),
 			"update",
 		),
 		db.query.projects.findMany({

@@ -2,7 +2,7 @@
 
 import { ChevronDownIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { useExtracted } from "next-intl";
-import { createContext, type ReactNode, type Ref, use } from "react";
+import { type ReactNode, type Ref, createContext, use } from "react";
 import {
 	Button as AriaButton,
 	Cell as AriaCell,
@@ -12,7 +12,7 @@ import {
 	type ColumnProps as AriaColumnProps,
 	ColumnResizer as AriaColumnResizer,
 	type ColumnResizerProps as AriaColumnResizerProps,
-	composeRenderProps,
+	type TableHeaderProps as AriaHeaderProps,
 	ResizableTableContainer as AriaResizableTableContainer,
 	Row as AriaRow,
 	type RowProps as AriaRowProps,
@@ -20,8 +20,8 @@ import {
 	TableBody as AriaTableBody,
 	type TableBodyProps as AriaTableBodyProps,
 	TableHeader as AriaTableHeader,
-	type TableHeaderProps as AriaHeaderProps,
 	type TableProps as AriaTableProps,
+	composeRenderProps,
 	useTableOptions,
 } from "react-aria-components";
 import { twJoin, twMerge } from "tailwind-merge";
@@ -50,7 +50,7 @@ function useTableContext(): TableProps {
 function Root(props: Readonly<TableProps>): ReactNode {
 	return (
 		<AriaTable
-			className="w-full min-w-full caption-bottom text-sm/6 outline-hidden [--table-selected-bg:var(--color-secondary)]/50"
+			className="inline-full min-inline-full caption-bottom text-sm/6 outline-hidden [--table-selected-bg:var(--color-secondary)]/50"
 			{...props}
 		/>
 	);
@@ -78,7 +78,10 @@ export function Table(props: Readonly<TableProps>): ReactNode {
 					)}
 				>
 					<div
-						className={twJoin("inline-block min-w-full align-middle", !bleed && "sm:px-(--gutter)")}
+						className={twJoin(
+							"inline-block min-inline-full align-middle",
+							!bleed && "sm:px-(--gutter)",
+						)}
 					>
 						{allowResize === true ? (
 							<AriaResizableTableContainer data-slot="table-resizable-container">
@@ -101,11 +104,11 @@ function ColumnResizer(props: Readonly<AriaColumnResizerProps>): ReactNode {
 		<AriaColumnResizer
 			{...rest}
 			className={cx(
-				"absolute inset-y-0 right-0 grid w-px touch-none place-content-center px-1 resizable-both:cursor-ew-resize [data-resizable-direction=left]:cursor-e-resize [data-resizable-direction=right]:cursor-w-resize [&[data-resizing]>div]:bg-primary",
+				"absolute inset-y-0 inset-e-0 grid inline-px touch-none place-content-center px-1 resizable-both:cursor-ew-resize [data-resizable-direction=left]:cursor-e-resize [data-resizable-direction=right]:cursor-w-resize [&[data-resizing]>div]:bg-primary",
 				className,
 			)}
 		>
-			<div className="h-full w-px bg-border py-(--gutter-y)" />
+			<div className="block-full inline-px bg-border py-(--gutter-y)" />
 		</AriaColumnResizer>
 	);
 }
@@ -114,13 +117,7 @@ export interface TableBodyProps<T extends object> extends AriaTableBodyProps<T> 
 
 export function TableBody<T extends object>(props: Readonly<TableBodyProps<T>>): ReactNode {
 	return (
-		<AriaTableBody
-			data-slot="table-body"
-			renderEmptyState={() => {
-				return <EmptyState />;
-			}}
-			{...props}
-		/>
+		<AriaTableBody data-slot="table-body" renderEmptyState={() => <EmptyState />} {...props} />
 	);
 }
 
@@ -139,12 +136,12 @@ export function TableColumn(props: Readonly<TableColumnProps>): ReactNode {
 			{...rest}
 			className={cx(
 				[
-					"text-left font-medium text-muted-fg",
+					"text-start font-medium text-muted-fg",
 					"relative outline-hidden allows-sorting:cursor-default dragging:cursor-grabbing",
 					"px-4 py-(--gutter-y)",
-					"first:pl-(--gutter,--spacing(2)) last:pr-(--gutter,--spacing(2))",
-					bleed !== true && "sm:last:pr-1 sm:first:pl-1",
-					grid === true && "border-l first:border-l-0",
+					"first:ps-(--gutter,--spacing(2)) last:pe-(--gutter,--spacing(2))",
+					bleed !== true && "sm:last:pe-1 sm:first:ps-1",
+					grid === true && "border-s first:border-s-0",
 					isResizable && "overflow-hidden truncate",
 				],
 				className,
@@ -166,7 +163,7 @@ export function TableColumn(props: Readonly<TableColumnProps>): ReactNode {
 						{values.allowsSorting && (
 							<span
 								className={twJoin(
-									"grid size-[1.15rem] flex-none shrink-0 place-content-center rounded-sm ring-1 ring-transparent *:data-[slot=icon]:size-3.5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:transition-transform *:data-[slot=icon]:duration-200",
+									"grid block-[1.15rem] inline-[1.15rem] flex-none shrink-0 place-content-center rounded-sm ring-1 ring-transparent *:data-[slot=icon]:block-3.5 *:data-[slot=icon]:inline-3.5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:transition-transform *:data-[slot=icon]:duration-200",
 									isSorted
 										? "bg-primary/10 text-primary ring-primary/15"
 										: values.isHovered
@@ -205,14 +202,14 @@ export function TableHeader<T extends object>(props: Readonly<TableHeaderProps<T
 		<AriaTableHeader
 			{...rest}
 			ref={ref}
-			className={cx("border-b bg-secondary/50", className)}
+			className={cx("border-be bg-secondary/50", className)}
 			data-slot="table-header"
 		>
 			{allowsDragging && (
 				<AriaColumn
 					className={twMerge(
-						"first:pl-(--gutter,--spacing(2))",
-						bleed !== true && "sm:last:pr-1 sm:first:pl-1",
+						"first:ps-(--gutter,--spacing(2))",
+						bleed !== true && "sm:last:pe-1 sm:first:ps-1",
 					)}
 					data-slot="table-column"
 				/>
@@ -220,8 +217,8 @@ export function TableHeader<T extends object>(props: Readonly<TableHeaderProps<T
 			{selectionBehavior === "toggle" && (
 				<AriaColumn
 					className={twMerge(
-						"first:pl-(--gutter,--spacing(2))",
-						bleed !== true && "sm:last:pr-1 sm:first:pl-1",
+						"first:ps-(--gutter,--spacing(2))",
+						bleed !== true && "sm:last:pe-1 sm:first:ps-1",
 					)}
 					data-slot="table-column"
 				>
@@ -262,8 +259,8 @@ export function TableRow<T extends object>(props: Readonly<TableRowProps<T>>): R
 						isDisabled,
 						isFocusVisible,
 					},
-				) => {
-					return twMerge(
+				) =>
+					twMerge(
 						"group relative cursor-default text-muted-fg outline outline-transparent",
 						isFocusVisible &&
 							"bg-primary/5 outline-primary ring-3 ring-ring/20 hover:bg-primary/10",
@@ -279,8 +276,7 @@ export function TableRow<T extends object>(props: Readonly<TableRowProps<T>>): R
 							"bg-(--table-selected-bg)/50 text-fg selected:bg-(--table-selected-bg)/50",
 						isDisabled && "opacity-50",
 						className,
-					);
-				},
+					),
 			)}
 			data-slot="table-row"
 			href={href}
@@ -344,10 +340,10 @@ export function TableCell(props: Readonly<TableCellProps>): ReactNode {
 			{...rest}
 			className={cx(
 				twJoin(
-					"group px-4 py-(--gutter-y) align-middle outline-hidden first:pl-(--gutter,--spacing(2)) last:pr-(--gutter,--spacing(2)) group-has-data-focus-visible-within:text-fg",
-					striped !== true && "border-b",
-					grid === true && "border-l first:border-l-0",
-					bleed !== true && "sm:last:pr-1 sm:first:pl-1",
+					"group px-4 py-(--gutter-y) align-middle outline-hidden first:ps-(--gutter,--spacing(2)) last:pe-(--gutter,--spacing(2)) group-has-data-focus-visible-within:text-fg",
+					striped !== true && "border-be",
+					grid === true && "border-s first:border-s-0",
+					bleed !== true && "sm:last:pe-1 sm:first:ps-1",
 					allowResize === true && "overflow-hidden truncate",
 				),
 				className,

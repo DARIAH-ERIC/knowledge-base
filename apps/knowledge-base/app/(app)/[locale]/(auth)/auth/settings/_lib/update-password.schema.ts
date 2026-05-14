@@ -9,9 +9,7 @@ export const UpdatePasswordActionInputSchema = v.pipe(
 	v.forward(
 		v.partialCheck(
 			[["new-password"], ["new-password-confirmation"]],
-			(input) => {
-				return input["new-password-confirmation"] === input["new-password"];
-			},
+			(input) => input["new-password-confirmation"] === input["new-password"],
 			"Passwords don't match.",
 		),
 		["new-password-confirmation"],

@@ -118,11 +118,7 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 		fieldMap.get(row.fieldId)!.blocks.push(normalizeRow(row));
 	}
 
-	return Object.fromEntries(
-		[...fieldMap.values()].map(({ name, blocks }) => {
-			return [name, blocks];
-		}),
-	);
+	return Object.fromEntries([...fieldMap.values()].map(({ name, blocks }) => [name, blocks]));
 }
 
 function normalizeRow(row: {

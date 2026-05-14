@@ -13,14 +13,10 @@ export const siteMetadata = p.snakeCase.table(
 		description: p.text("description").notNull(),
 		ogTitle: p.text("og_title"),
 		ogDescription: p.text("og_description"),
-		ogImageId: p.uuid("og_image_id").references(() => {
-			return assets.id;
-		}),
+		ogImageId: p.uuid("og_image_id").references(() => assets.id),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [p.check("site_metadata_singleton", sql`${t.id} = 1`)];
-	},
+	(t) => [p.check("site_metadata_singleton", sql`${t.id} = 1`)],
 );
 
 export type SiteMetadata = typeof siteMetadata.$inferSelect;

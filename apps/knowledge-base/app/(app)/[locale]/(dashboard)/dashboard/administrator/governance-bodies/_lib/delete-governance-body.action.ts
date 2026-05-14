@@ -22,9 +22,7 @@ export async function deleteGovernanceBodyAction(documentId: string): Promise<vo
 		assert(entity, "Document not found.");
 
 		const { draftId, publishedId } = await getDocumentVersions(tx, documentId);
-		const versionIds = [draftId, publishedId].filter((id): id is string => {
-			return id != null;
-		});
+		const versionIds = [draftId, publishedId].filter((id): id is string => id != null);
 
 		for (const versionId of versionIds) {
 			await organisationalUnitsLifecycleAdapter.wipeSubtype(tx, versionId);
@@ -37,9 +35,7 @@ export async function deleteGovernanceBodyAction(documentId: string): Promise<vo
 				.where(eq(schema.fields.entityVersionId, versionId));
 
 			if (fieldRows.length > 0) {
-				const fieldIds = fieldRows.map((f) => {
-					return f.id;
-				});
+				const fieldIds = fieldRows.map((f) => f.id);
 				await tx
 					.delete(schema.contentBlocks)
 					.where(inArray(schema.contentBlocks.fieldId, fieldIds));

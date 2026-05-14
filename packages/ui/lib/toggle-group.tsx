@@ -1,12 +1,12 @@
 "use client";
 
-import { createContext, type ReactNode, use } from "react";
+import { type ReactNode, createContext, use } from "react";
 import {
-	composeRenderProps,
 	ToggleButton as AriaToggleButton,
 	ToggleButtonGroup as AriaToggleButtonGroup,
 	type ToggleButtonGroupProps as AriaToggleButtonGroupProps,
 	type ToggleButtonProps as AriaToggleButtonProps,
+	composeRenderProps,
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 import { tv } from "tailwind-variants";
@@ -68,7 +68,7 @@ export function ToggleGroup(props: Readonly<ToggleGroupProps>): ReactNode {
 							"*:data-[slot=toggle-group-item]:rounded-full",
 						selectionMode === "multiple" &&
 							isCircle === true &&
-							"*:data-[slot=toggle-group-item]:last:rounded-r-full *:data-[slot=toggle-group-item]:first:rounded-l-full",
+							"*:data-[slot=toggle-group-item]:last:rounded-e-full *:data-[slot=toggle-group-item]:first:rounded-s-full",
 					],
 					className,
 				)}
@@ -98,33 +98,33 @@ export const toggleGroupItemStyles = tv({
 		},
 		size: {
 			xs: [
-				"min-h-8 gap-x-1.5 px-2.5 py-1.5 text-sm sm:min-h-7 sm:px-2 sm:py-1.5 sm:text-xs/4",
-				"*:data-[slot=icon]:-mx-px *:data-[slot=icon]:size-3.5 sm:*:data-[slot=icon]:size-3",
-				"*:data-[slot=loader]:-mx-px *:data-[slot=loader]:size-3.5 sm:*:data-[slot=loader]:size-3",
+				"min-block-8 gap-x-1.5 px-2.5 py-1.5 text-sm sm:min-block-7 sm:px-2 sm:py-1.5 sm:text-xs/4",
+				"*:data-[slot=icon]:-mx-px *:data-[slot=icon]:block-3.5 *:data-[slot=icon]:inline-3.5 sm:*:data-[slot=icon]:block-3 sm:*:data-[slot=icon]:inline-3",
+				"*:data-[slot=loader]:-mx-px *:data-[slot=loader]:block-3.5 *:data-[slot=loader]:inline-3.5 sm:*:data-[slot=loader]:block-3 sm:*:data-[slot=loader]:inline-3",
 			],
 			sm: [
-				"min-h-9 gap-x-1.5 px-3 py-1.5 sm:min-h-8 sm:px-2.5 sm:py-1.5 sm:text-sm/5",
-				"*:data-[slot=icon]:size-4.5 sm:*:data-[slot=icon]:size-4",
-				"*:data-[slot=loader]:size-4.5 sm:*:data-[slot=loader]:size-4",
+				"min-block-9 gap-x-1.5 px-3 py-1.5 sm:min-block-8 sm:px-2.5 sm:py-1.5 sm:text-sm/5",
+				"*:data-[slot=icon]:block-4.5 *:data-[slot=icon]:inline-4.5 sm:*:data-[slot=icon]:block-4 sm:*:data-[slot=icon]:inline-4",
+				"*:data-[slot=loader]:block-4.5 *:data-[slot=loader]:inline-4.5 sm:*:data-[slot=loader]:block-4 sm:*:data-[slot=loader]:inline-4",
 			],
 			md: [
-				"min-h-10 gap-x-2 px-3.5 py-2 sm:min-h-9 sm:px-3 sm:py-1.5 sm:text-sm/6",
-				"*:data-[slot=icon]:size-5 sm:*:data-[slot=icon]:size-4",
-				"*:data-[slot=loader]:size-5 sm:*:data-[slot=loader]:size-4",
+				"min-block-10 gap-x-2 px-3.5 py-2 sm:min-block-9 sm:px-3 sm:py-1.5 sm:text-sm/6",
+				"*:data-[slot=icon]:block-5 *:data-[slot=icon]:inline-5 sm:*:data-[slot=icon]:block-4 sm:*:data-[slot=icon]:inline-4",
+				"*:data-[slot=loader]:block-5 *:data-[slot=loader]:inline-5 sm:*:data-[slot=loader]:block-4 sm:*:data-[slot=loader]:inline-4",
 			],
 			lg: [
-				"min-h-11 gap-x-2 px-4 py-2.5 sm:min-h-10 sm:px-3.5 sm:py-2 sm:text-sm/6",
-				"*:data-[slot=icon]:size-5 sm:*:data-[slot=icon]:size-4.5",
-				"*:data-[slot=loader]:size-5 sm:*:data-[slot=loader]:size-4.5",
+				"min-block-11 gap-x-2 px-4 py-2.5 sm:min-block-10 sm:px-3.5 sm:py-2 sm:text-sm/6",
+				"*:data-[slot=icon]:block-5 *:data-[slot=icon]:inline-5 sm:*:data-[slot=icon]:block-4.5 sm:*:data-[slot=icon]:inline-4.5",
+				"*:data-[slot=loader]:block-5 *:data-[slot=loader]:inline-5 sm:*:data-[slot=loader]:block-4.5 sm:*:data-[slot=loader]:inline-4.5",
 			],
 			"sq-xs":
-				"touch-area size-8 sm:size-7 sm:*:data-[slot=icon]:size-3 sm:*:data-[slot=loader]:size-3 *:data-[slot=icon]:size-3.5 *:data-[slot=loader]:size-3.5",
+				"touch-area block-8 inline-8 sm:block-7 sm:inline-7 sm:*:data-[slot=icon]:block-3 sm:*:data-[slot=icon]:inline-3 sm:*:data-[slot=loader]:block-3 sm:*:data-[slot=loader]:inline-3 *:data-[slot=icon]:block-3.5 *:data-[slot=icon]:inline-3.5 *:data-[slot=loader]:block-3.5 *:data-[slot=loader]:inline-3.5",
 			"sq-sm":
-				"touch-area size-9 sm:size-8 sm:*:data-[slot=icon]:size-4 sm:*:data-[slot=loader]:size-4 *:data-[slot=icon]:size-4.5 *:data-[slot=loader]:size-4.5",
+				"touch-area block-9 inline-9 sm:block-8 sm:inline-8 sm:*:data-[slot=icon]:block-4 sm:*:data-[slot=icon]:inline-4 sm:*:data-[slot=loader]:block-4 sm:*:data-[slot=loader]:inline-4 *:data-[slot=icon]:block-4.5 *:data-[slot=icon]:inline-4.5 *:data-[slot=loader]:block-4.5 *:data-[slot=loader]:inline-4.5",
 			"sq-md":
-				"touch-area size-10 sm:size-9 sm:*:data-[slot=icon]:size-4.5 sm:*:data-[slot=loader]:size-4.5 *:data-[slot=icon]:size-5 *:data-[slot=loader]:size-5",
+				"touch-area block-10 inline-10 sm:block-9 sm:inline-9 sm:*:data-[slot=icon]:block-4.5 sm:*:data-[slot=icon]:inline-4.5 sm:*:data-[slot=loader]:block-4.5 sm:*:data-[slot=loader]:inline-4.5 *:data-[slot=icon]:block-5 *:data-[slot=icon]:inline-5 *:data-[slot=loader]:block-5 *:data-[slot=loader]:inline-5",
 			"sq-lg":
-				"touch-area size-11 sm:size-10 sm:*:data-[slot=icon]:size-5 sm:*:data-[slot=loader]:size-5 *:data-[slot=icon]:size-5 *:data-[slot=loader]:size-5",
+				"touch-area block-11 inline-11 sm:block-10 sm:inline-10 sm:*:data-[slot=icon]:block-5 sm:*:data-[slot=icon]:inline-5 sm:*:data-[slot=loader]:block-5 sm:*:data-[slot=loader]:inline-5 *:data-[slot=icon]:block-5 *:data-[slot=icon]:inline-5 *:data-[slot=loader]:block-5 *:data-[slot=loader]:inline-5",
 		},
 		isSelected: {
 			true: "inset-ring-fg/20 bg-(--toggle-selected-bg) text-(--toggle-selected-fg) [--toggle-icon:var(--primary-fg)] hover:bg-(--toggle-selected-bg)/90",
@@ -147,13 +147,13 @@ export const toggleGroupItemStyles = tv({
 			selectionMode: "multiple",
 			orientation: "horizontal",
 			className:
-				"not-first:-ml-px first:rounded-l-[calc(var(--toggle-group-radius)-var(--toggle-gutter))] last:rounded-r-[calc(var(--toggle-group-radius)-var(--toggle-gutter))]",
+				"not-first:-ms-px first:rounded-s-[calc(var(--toggle-group-radius)-var(--toggle-gutter))] last:rounded-e-[calc(var(--toggle-group-radius)-var(--toggle-gutter))]",
 		},
 		{
 			selectionMode: "multiple",
 			orientation: "vertical",
 			className:
-				"not-first:-mt-px first:rounded-t-[calc(var(--toggle-group-radius)-var(--toggle-gutter))] last:rounded-b-[calc(var(--toggle-group-radius)-var(--toggle-gutter))]",
+				"not-first:-mbs-px first:rounded-t-[calc(var(--toggle-group-radius)-var(--toggle-gutter))] last:rounded-b-[calc(var(--toggle-group-radius)-var(--toggle-gutter))]",
 		},
 	],
 });
@@ -170,8 +170,8 @@ export function ToggleGroupItem(props: Readonly<ToggleGroupItemProps>): ReactNod
 	return (
 		<AriaToggleButton
 			{...rest}
-			className={composeRenderProps(className, (className, renderProps) => {
-				return twMerge(
+			className={composeRenderProps(className, (className, renderProps) =>
+				twMerge(
 					toggleGroupItemStyles({
 						...renderProps,
 						size,
@@ -179,8 +179,8 @@ export function ToggleGroupItem(props: Readonly<ToggleGroupItemProps>): ReactNod
 						selectionMode,
 						className,
 					}),
-				);
-			})}
+				),
+			)}
 			data-slot="toggle-group-item"
 		/>
 	);

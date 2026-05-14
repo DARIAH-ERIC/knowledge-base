@@ -1,5 +1,5 @@
 import { unique } from "@acdh-oeaw/lib";
-import { type Formats, hasLocale, type Timezone } from "next-intl";
+import { type Formats, type Timezone, hasLocale } from "next-intl";
 
 import en from "@/messages/en.json";
 

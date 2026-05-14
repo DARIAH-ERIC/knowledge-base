@@ -6,9 +6,10 @@ import { defaultLocale } from "@/lib/i18n/locales";
 
 test.describe("analytics service", () => {
 	// eslint-disable-next-line playwright/no-skipped-test
-	test.skip(() => {
-		return env.NEXT_PUBLIC_APP_MATOMO_BASE_URL == null || env.NEXT_PUBLIC_APP_MATOMO_ID == null;
-	}, "Analytics service disabled.");
+	test.skip(
+		() => env.NEXT_PUBLIC_APP_MATOMO_BASE_URL == null || env.NEXT_PUBLIC_APP_MATOMO_ID == null,
+		"Analytics service disabled.",
+	);
 
 	const baseUrl = String(
 		createUrl({ baseUrl: env.NEXT_PUBLIC_APP_MATOMO_BASE_URL!, pathname: "/matomo.php?**" }),

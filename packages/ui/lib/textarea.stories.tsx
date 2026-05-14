@@ -20,7 +20,7 @@ export const Default: Story = {
 	args: { placeholder: "Enter your message..." },
 	render(props) {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<TextField>
 					<Label>{"Message"}</Label>
 					<TextArea {...props} />
@@ -34,7 +34,7 @@ export const WithDescription: Story = {
 	args: { placeholder: "Describe your issue..." },
 	render(props) {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<TextField>
 					<Label>{"Description"}</Label>
 					<TextArea {...props} />

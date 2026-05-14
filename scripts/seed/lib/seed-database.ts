@@ -1,3 +1,5 @@
+// oxlint-disable oxc/no-map-spread
+
 import { groupBy, keyBy } from "@acdh-oeaw/lib";
 import type { Database, Transaction } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
@@ -126,17 +128,13 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 			.select({ id: schema.entityTypes.id, type: schema.entityTypes.type })
 			.from(schema.entityTypes);
 
-		const entityTypesByType = keyBy(entityTypeIds, ({ type }) => {
-			return type;
-		});
+		const entityTypesByType = keyBy(entityTypeIds, ({ type }) => type);
 
 		const entityStatusIds = await db
 			.select({ id: schema.entityStatus.id, type: schema.entityStatus.type })
 			.from(schema.entityStatus);
 
-		const entityStatusByType = keyBy(entityStatusIds, ({ type }) => {
-			return type;
-		});
+		const entityStatusByType = keyBy(entityStatusIds, ({ type }) => type);
 
 		const publishedStatusId = entityStatusByType.published.id;
 
@@ -152,9 +150,7 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 				eq(schema.entityTypesFieldsNames.entityTypeId, schema.entityTypes.id),
 			);
 
-		const fieldNamesByEntityTypeId = groupBy(fieldNameIds, ({ entityTypeId }) => {
-			return entityTypeId;
-		});
+		const fieldNamesByEntityTypeId = groupBy(fieldNameIds, ({ entityTypeId }) => entityTypeId);
 
 		// All document/version pairs created during seeding, with their entity type id.
 		// Used afterward to seed fields (per version) and cross-document relations.
@@ -186,9 +182,7 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 			db,
 			entityTypesByType.persons.id,
 			publishedStatusId,
-			persons.map((p) => {
-				return slugify(p.sortName);
-			}),
+			persons.map((p) => slugify(p.sortName)),
 		);
 		record(entityTypesByType.persons.id, personIds);
 
@@ -202,12 +196,9 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 			() => {
 				const title = f.lorem.sentence();
 				const start = f.date.past({ years: 5 });
-				const end = f.helpers.maybe(
-					() => {
-						return f.date.soon({ refDate: start, days: 7 });
-					},
-					{ probability: 0.25 },
-				);
+				const end = f.helpers.maybe(() => f.date.soon({ refDate: start, days: 7 }), {
+					probability: 0.25,
+				});
 				const isFullDay = f.datatype.boolean({ probability: 0.5 });
 				if (isFullDay) {
 					start.setUTCHours(0, 0, 0, 0);
@@ -224,12 +215,7 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 						end,
 					},
 					isFullDay,
-					website: f.helpers.maybe(
-						() => {
-							return f.internet.url();
-						},
-						{ probability: 0.75 },
-					),
+					website: f.helpers.maybe(() => f.internet.url(), { probability: 0.75 }),
 				};
 			},
 			{ count: 25 },
@@ -239,9 +225,7 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 			db,
 			entityTypesByType.events.id,
 			publishedStatusId,
-			events.map((e) => {
-				return slugify(e.title);
-			}),
+			events.map((e) => slugify(e.title)),
 		);
 		record(entityTypesByType.events.id, eventIds);
 
@@ -268,9 +252,7 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 			db,
 			entityTypesByType.impact_case_studies.id,
 			publishedStatusId,
-			impactCaseStudies.map((s) => {
-				return slugify(s.title);
-			}),
+			impactCaseStudies.map((s) => slugify(s.title)),
 		);
 		record(entityTypesByType.impact_case_studies.id, impactCaseStudyIds);
 
@@ -308,9 +290,7 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 			db,
 			entityTypesByType.news.id,
 			publishedStatusId,
-			news.map((n) => {
-				return slugify(n.title);
-			}),
+			news.map((n) => slugify(n.title)),
 		);
 		record(entityTypesByType.news.id, newsItemIds);
 
@@ -337,9 +317,7 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 			db,
 			entityTypesByType.pages.id,
 			publishedStatusId,
-			pages.map((p) => {
-				return slugify(p.title);
-			}),
+			pages.map((p) => slugify(p.title)),
 		);
 		record(entityTypesByType.pages.id, pageIds);
 
@@ -362,9 +340,7 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 			db,
 			entityTypesByType.documentation_pages.id,
 			publishedStatusId,
-			documentationPages.map((p) => {
-				return slugify(p.title);
-			}),
+			documentationPages.map((p) => slugify(p.title)),
 		);
 		record(entityTypesByType.documentation_pages.id, documentationPageIds);
 
@@ -391,9 +367,7 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 			db,
 			entityTypesByType.spotlight_articles.id,
 			publishedStatusId,
-			spotlightArticles.map((a) => {
-				return slugify(a.title);
-			}),
+			spotlightArticles.map((a) => slugify(a.title)),
 		);
 		record(entityTypesByType.spotlight_articles.id, spotlightArticleIds);
 
@@ -404,11 +378,11 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 		);
 
 		// fields hang off entity_versions; one row per (version, fieldName) for the version's type
-		const fields: Array<schema.FieldInput> = seededDocuments.flatMap(({ versionId, typeId }) => {
-			return (fieldNamesByEntityTypeId[typeId] ?? []).map((fieldName) => {
+		const fields: Array<schema.FieldInput> = seededDocuments.flatMap(({ versionId, typeId }) =>
+			(fieldNamesByEntityTypeId[typeId] ?? []).map((fieldName) => {
 				return { entityVersionId: versionId, fieldNameId: fieldName.id };
-			});
-		});
+			}),
+		);
 
 		const fieldIds = await db
 			.insert(schema.fields)
@@ -424,41 +398,31 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 			.select({ id: schema.contentBlockTypes.id, type: schema.contentBlockTypes.type })
 			.from(schema.contentBlockTypes);
 
-		const contentBlockTypesById = keyBy(contentBlockTypeIds, ({ id }) => {
-			return id;
-		});
-		const contentBlockTypesByType = keyBy(contentBlockTypeIds, ({ type }) => {
-			return type;
-		});
+		const contentBlockTypesById = keyBy(contentBlockTypeIds, ({ id }) => id);
+		const contentBlockTypesByType = keyBy(contentBlockTypeIds, ({ type }) => type);
 
-		const contentBlocks: Array<schema.ContentBlockInput> = fieldIds.flatMap(({ id: fieldId }) => {
-			return [
-				{ fieldId, typeId: contentBlockTypesByType.image.id, position: 1 },
-				{ fieldId, typeId: contentBlockTypesByType.gallery.id, position: 2 },
-				{ fieldId, typeId: contentBlockTypesByType.rich_text.id, position: 3 },
-			];
-		});
+		const contentBlocks: Array<schema.ContentBlockInput> = fieldIds.flatMap(({ id: fieldId }) => [
+			{ fieldId, typeId: contentBlockTypesByType.image.id, position: 1 },
+			{ fieldId, typeId: contentBlockTypesByType.gallery.id, position: 2 },
+			{ fieldId, typeId: contentBlockTypesByType.rich_text.id, position: 3 },
+		]);
 
 		const contentBlockIds = await db
 			.insert(schema.contentBlocks)
 			.values(contentBlocks)
 			.returning({ id: schema.contentBlocks.id, typeId: schema.contentBlocks.typeId });
 
-		const contentBlockIdsByType = groupBy(contentBlockIds, ({ typeId }) => {
-			return contentBlockTypesById[typeId]!.type;
-		});
+		const contentBlockIdsByType = groupBy(
+			contentBlockIds,
+			({ typeId }) => contentBlockTypesById[typeId]!.type,
+		);
 
 		const imageContentBlocks: Array<schema.ImageContentBlockInput> =
 			contentBlockIdsByType.image.map(({ id }) => {
 				return {
 					id,
 					imageId: f.helpers.arrayElement(imageIds).id,
-					caption: f.helpers.maybe(
-						() => {
-							return f.lorem.sentence();
-						},
-						{ probability: 0.5 },
-					),
+					caption: f.helpers.maybe(() => f.lorem.sentence(), { probability: 0.5 }),
 				};
 			});
 
@@ -475,23 +439,16 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 		await db.insert(schema.galleryContentBlocks).values(galleryContentBlocks);
 
 		const galleryContentBlockItems: Array<schema.GalleryContentBlockItemInput> =
-			contentBlockIdsByType.gallery.flatMap(({ id: galleryContentBlockId }) => {
-				return f.helpers
-					.arrayElements(imageIds, { min: 3, max: 5 })
-					.map(({ id: imageId }, position) => {
-						return {
-							galleryContentBlockId,
-							imageId,
-							position,
-							caption: f.helpers.maybe(
-								() => {
-									return f.lorem.sentence();
-								},
-								{ probability: 0.5 },
-							),
-						};
-					});
-			});
+			contentBlockIdsByType.gallery.flatMap(({ id: galleryContentBlockId }) =>
+				f.helpers.arrayElements(imageIds, { min: 3, max: 5 }).map(({ id: imageId }, position) => {
+					return {
+						galleryContentBlockId,
+						imageId,
+						position,
+						caption: f.helpers.maybe(() => f.lorem.sentence(), { probability: 0.5 }),
+					};
+				}),
+			);
 
 		await db.insert(schema.galleryContentBlockItems).values(galleryContentBlockItems);
 
@@ -513,26 +470,24 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 		await db.insert(schema.richTextContentBlocks).values(richTextContentBlocks);
 
 		// cross-document relations: keyed by documentId (the new entities table)
-		const allDocumentIds = seededDocuments.map(({ documentId }) => {
-			return documentId;
-		});
+		const allDocumentIds = seededDocuments.map(({ documentId }) => documentId);
 
-		const entitiesToResources = allDocumentIds.flatMap((entityId) => {
-			return f.helpers.multiple(
+		const entitiesToResources = allDocumentIds.flatMap((entityId) =>
+			f.helpers.multiple(
 				() => {
 					return { entityId, resourceId: f.string.uuid() };
 				},
 				{ count: f.number.int({ min: 0, max: 5 }) },
-			);
-		});
+			),
+		);
 
 		await db.insert(schema.entitiesToResources).values(entitiesToResources);
 
-		const entitiesToEntities = allDocumentIds.flatMap((entityId) => {
-			return f.helpers.arrayElements(allDocumentIds, { min: 0, max: 5 }).map((relatedEntityId) => {
+		const entitiesToEntities = allDocumentIds.flatMap((entityId) =>
+			f.helpers.arrayElements(allDocumentIds, { min: 0, max: 5 }).map((relatedEntityId) => {
 				return { entityId, relatedEntityId };
-			});
-		});
+			}),
+		);
 
 		await db.insert(schema.entitiesToEntities).values(entitiesToEntities);
 
@@ -540,9 +495,7 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 			.select({ id: schema.organisationalUnitTypes.id, type: schema.organisationalUnitTypes.type })
 			.from(schema.organisationalUnitTypes);
 
-		const organisationalUnitsTypesByType = keyBy(organisationalUnitTypeIds, ({ type }) => {
-			return type;
-		});
+		const organisationalUnitsTypesByType = keyBy(organisationalUnitTypeIds, ({ type }) => type);
 
 		const organisationalUnitsAllowedRelationsValues = await db
 			.select({
@@ -563,18 +516,13 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 						name,
 						metadata: { country: f.location.country() },
 						summary: f.lorem.paragraph(),
-						imageId: f.helpers.maybe(
-							() => {
-								return f.helpers.arrayElement(imageIds).id;
-							},
-							{ probability: 0.5 },
-						),
+						imageId: f.helpers.maybe(() => f.helpers.arrayElement(imageIds).id, {
+							probability: 0.5,
+						}),
 						typeId:
 							i === 0
 								? eric.id
-								: Object.values(rest).map((type) => {
-										return type.id;
-									})[i % Object.values(rest).length]!,
+								: Object.values(rest).map((type) => type.id)[i % Object.values(rest).length]!,
 					};
 				},
 				{ count: 25 },
@@ -584,9 +532,7 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 			db,
 			entityTypesByType.organisational_units.id,
 			publishedStatusId,
-			organisationalUnits.map((u) => {
-				return slugify(u.name);
-			}),
+			organisationalUnits.map((u) => slugify(u.name)),
 		);
 
 		const organisationalUnitsIds = await db
@@ -599,25 +545,22 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 			.returning({ id: schema.organisationalUnits.id, typeId: schema.organisationalUnits.typeId });
 
 		const unitsToUnits: Array<schema.OrganisationalUnitRelationInput> = f.helpers
-			.multiple(
-				() => {
-					return f.helpers.arrayElement(organisationalUnitsAllowedRelationsValues);
-				},
-				{ count: 25 },
-			)
+			.multiple(() => f.helpers.arrayElement(organisationalUnitsAllowedRelationsValues), {
+				count: 25,
+			})
 			.map((organisationalUnitsAllowedRelation) => {
 				const unit = f.helpers.arrayElement(
-					organisationalUnitsIds.filter((organisationalUnit) => {
-						return organisationalUnit.typeId === organisationalUnitsAllowedRelation.unitTypeId;
-					}),
+					organisationalUnitsIds.filter(
+						(organisationalUnit) =>
+							organisationalUnit.typeId === organisationalUnitsAllowedRelation.unitTypeId,
+					),
 				);
 
 				const relatedUnit = f.helpers.arrayElement(
-					organisationalUnitsIds.filter((organisationalUnit) => {
-						return (
-							organisationalUnit.typeId === organisationalUnitsAllowedRelation.relatedUnitTypeId
-						);
-					}),
+					organisationalUnitsIds.filter(
+						(organisationalUnit) =>
+							organisationalUnit.typeId === organisationalUnitsAllowedRelation.relatedUnitTypeId,
+					),
 				);
 
 				const start = f.date.past({ years: 5 });
@@ -634,12 +577,9 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 						start,
 						end:
 							minEndDate < yesterday
-								? f.helpers.maybe(
-										() => {
-											return f.date.between({ from: minEndDate, to: yesterday });
-										},
-										{ probability: 0.25 },
-									)
+								? f.helpers.maybe(() => f.date.between({ from: minEndDate, to: yesterday }), {
+										probability: 0.25,
+									})
 								: undefined,
 					},
 				};
@@ -660,18 +600,15 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 					personsToOrganisationalUnitsAllowedRelations,
 				);
 				const organisationalUnit = f.helpers.arrayElement(
-					organisationalUnitsIds.filter((organisationalUnit) => {
-						return organisationalUnit.typeId === unitTypeId;
-					}),
+					organisationalUnitsIds.filter(
+						(organisationalUnit) => organisationalUnit.typeId === unitTypeId,
+					),
 				);
 
 				const start = f.date.past({ years: 5 });
-				const end = f.helpers.maybe(
-					() => {
-						return f.date.between({ from: start, to: Date.now() });
-					},
-					{ probability: 0.25 },
-				);
+				const end = f.helpers.maybe(() => f.date.between({ from: start, to: Date.now() }), {
+					probability: 0.25,
+				});
 				const isFullDay = f.datatype.boolean({ probability: 0.75 });
 				if (isFullDay) {
 					start.setUTCHours(0, 0, 0, 0);

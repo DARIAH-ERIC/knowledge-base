@@ -35,8 +35,8 @@ export default async function DashboardReportingCountryReportEventsPage(
 	const result = await getAuthorizedCountryReportForUser(
 		user,
 		id,
-		(id) => {
-			return db.query.countryReports.findFirst({
+		(id) =>
+			db.query.countryReports.findFirst({
 				where: { id },
 				columns: {
 					id: true,
@@ -47,8 +47,7 @@ export default async function DashboardReportingCountryReportEventsPage(
 					dariahCommissionedEvent: true,
 					reusableOutcomes: true,
 				},
-			});
-		},
+			}),
 		"update",
 	);
 

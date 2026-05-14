@@ -61,9 +61,7 @@ export async function getPersonPositions(
 	for (const personId of personIds) {
 		const personRows = rowsByPerson.get(personId) ?? [];
 		// eslint-disable-next-line unicorn/no-array-sort
-		const sorted = personRows.sort((a, b) => {
-			return a.name.localeCompare(b.name);
-		});
+		const sorted = personRows.sort((a, b) => a.name.localeCompare(b.name));
 
 		positions.set(personId, sorted.length > 0 ? sorted : null);
 	}

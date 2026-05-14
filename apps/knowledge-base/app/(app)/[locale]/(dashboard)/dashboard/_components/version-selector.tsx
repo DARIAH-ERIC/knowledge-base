@@ -18,7 +18,9 @@ export function VersionSelector(props: Readonly<VersionSelectorProps>): ReactNod
 
 	const t = useExtracted();
 
-	if (!hasDraft || !isPublished) return null;
+	if (!hasDraft || !isPublished) {
+		return null;
+	}
 
 	return (
 		<div className="flex items-center gap-x-1 rounded-md border p-1">

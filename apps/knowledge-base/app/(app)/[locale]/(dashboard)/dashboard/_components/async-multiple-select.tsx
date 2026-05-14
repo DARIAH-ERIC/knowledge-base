@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@dariah-eric/ui/button";
-import { fieldErrorStyles, fieldStyles, Label } from "@dariah-eric/ui/field";
+import { Label, fieldErrorStyles, fieldStyles } from "@dariah-eric/ui/field";
 import { ListBox, ListBoxDescription, ListBoxItem, ListBoxLabel } from "@dariah-eric/ui/list-box";
 import { Popover, PopoverContent } from "@dariah-eric/ui/popover";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
@@ -135,11 +135,10 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 		return map;
 	}, [displayedItems, initialItems, localSelectedItems, selectedItems, value]);
 
-	const resolvedSelectedItems = useMemo(() => {
-		return value.map((id) => {
-			return selectedItemMap.get(id) ?? { id, name: id };
-		});
-	}, [selectedItemMap, value]);
+	const resolvedSelectedItems = useMemo(
+		() => value.map((id) => selectedItemMap.get(id) ?? { id, name: id }),
+		[selectedItemMap, value],
+	);
 
 	const renderOption = renderItem ?? renderDefaultItem;
 	const loadErrorMessage =
@@ -153,47 +152,39 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 
 			<Popover isOpen={isOpen} onOpenChange={setIsOpen}>
 				<Button
-					className="min-h-10 w-full justify-between gap-3 py-2 font-normal"
+					className="min-block-10 inline-full justify-between gap-3 py-2 font-normal"
 					intent="outline"
 					isDisabled={isDisabled}
 					type="button"
 				>
-					<div className="flex min-w-0 flex-1 flex-wrap gap-1 text-start">
+					<div className="flex min-inline-0 flex-1 flex-wrap gap-1 text-start">
 						{resolvedSelectedItems.length > 0 ? (
-							resolvedSelectedItems.map((item) => {
-								return (
-									<span
-										key={item.id}
-										className="inline-flex items-center rounded-md border bg-muted px-2 py-0.5 text-xs font-medium text-fg"
-									>
-										{item.name}
-									</span>
-								);
-							})
+							resolvedSelectedItems.map((item) => (
+								<span
+									key={item.id}
+									className="inline-flex items-center rounded-md border bg-muted px-2 py-0.5 text-xs font-medium text-fg"
+								>
+									{item.name}
+								</span>
+							))
 						) : (
 							<span className="text-muted-fg">{placeholder ?? t("No selected items")}</span>
 						)}
 					</div>
-					<ChevronUpDownIcon className="size-4 shrink-0 text-muted-fg" />
+					<ChevronUpDownIcon className="block-4 inline-4 shrink-0 text-muted-fg" />
 				</Button>
 
-				<PopoverContent className="w-(--trigger-width) p-3">
+				<PopoverContent className="inline-(--trigger-width) p-3">
 					<div className="flex flex-col gap-3">
 						{resolvedSelectedItems.length > 0 ? (
 							<TagGroup
 								aria-label={t("Selected items")}
 								onRemove={(keys) => {
-									onChange(
-										value.filter((id) => {
-											return !keys.has(id);
-										}),
-									);
+									onChange(value.filter((id) => !keys.has(id)));
 								}}
 							>
 								<TagList items={resolvedSelectedItems}>
-									{(item) => {
-										return <Tag className="rounded-md">{item.name}</Tag>;
-									}}
+									{(item) => <Tag className="rounded-md">{item.name}</Tag>}
 								</TagList>
 							</TagGroup>
 						) : null}
@@ -229,11 +220,7 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 										const nextSelectedKeys = new Set(nextValue);
 
 										setLocalSelectedItems((previousItems) => {
-											const map = new Map(
-												previousItems.map((item) => {
-													return [item.id, item] as const;
-												}),
-											);
+											const map = new Map(previousItems.map((item) => [item.id, item] as const));
 
 											for (const item of displayedItems) {
 												if (nextSelectedKeys.has(item.id)) {
@@ -250,13 +237,11 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 									selectionBehavior="toggle"
 									selectionMode="multiple"
 								>
-									{(item) => {
-										return (
-											<ListBoxItem id={item.id} textValue={item.name}>
-												{renderOption(item)}
-											</ListBoxItem>
-										);
-									}}
+									{(item) => (
+										<ListBoxItem id={item.id} textValue={item.name}>
+											{renderOption(item)}
+										</ListBoxItem>
+									)}
 								</ListBox>
 
 								{isPending ? (

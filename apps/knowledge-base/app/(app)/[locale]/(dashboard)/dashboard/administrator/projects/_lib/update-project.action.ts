@@ -2,7 +2,7 @@
 
 import { assert, getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
+import { type ValidationErrors, createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
@@ -140,12 +140,8 @@ export const updateProjectAction = createServerAction(
 			}
 
 			const submittedPartnerIds = partners
-				.map((p) => {
-					return p.id;
-				})
-				.filter((pid): pid is string => {
-					return pid != null;
-				});
+				.map((p) => p.id)
+				.filter((pid): pid is string => pid != null);
 
 			if (submittedPartnerIds.length > 0) {
 				await tx
@@ -185,20 +181,12 @@ export const updateProjectAction = createServerAction(
 				columns: { id: true, socialMediaId: true },
 			});
 
-			const existingSocialMediaIds = new Set(
-				existingSocialMedia.map((r) => {
-					return r.socialMediaId;
-				}),
-			);
+			const existingSocialMediaIds = new Set(existingSocialMedia.map((r) => r.socialMediaId));
 			const submittedSocialMediaIds = new Set(socialMediaIds);
 
 			const socialMediaToDelete = existingSocialMedia
-				.filter((r) => {
-					return !submittedSocialMediaIds.has(r.socialMediaId);
-				})
-				.map((r) => {
-					return r.id;
-				});
+				.filter((r) => !submittedSocialMediaIds.has(r.socialMediaId))
+				.map((r) => r.id);
 
 			if (socialMediaToDelete.length > 0) {
 				await tx
@@ -206,9 +194,9 @@ export const updateProjectAction = createServerAction(
 					.where(inArray(schema.projectsToSocialMedia.id, socialMediaToDelete));
 			}
 
-			const socialMediaToInsert = socialMediaIds.filter((smId) => {
-				return !existingSocialMediaIds.has(smId);
-			});
+			const socialMediaToInsert = socialMediaIds.filter(
+				(smId) => !existingSocialMediaIds.has(smId),
+			);
 
 			if (socialMediaToInsert.length > 0) {
 				await tx.insert(schema.projectsToSocialMedia).values(

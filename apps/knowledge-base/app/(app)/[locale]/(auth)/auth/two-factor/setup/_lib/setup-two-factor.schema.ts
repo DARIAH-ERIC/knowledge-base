@@ -10,10 +10,6 @@ export const SetupTwoFactorActionInputSchema = v.object({
 export const TotpKeySchema = v.pipe(
 	v.string(),
 	v.length(28),
-	v.transform((input) => {
-		return Buffer.from(auth.decodeBase64(input));
-	}),
-	v.check((key) => {
-		return key.byteLength === 20;
-	}),
+	v.transform((input) => Buffer.from(auth.decodeBase64(input))),
+	v.check((key) => key.byteLength === 20),
 );

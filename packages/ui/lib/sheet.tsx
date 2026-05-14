@@ -2,10 +2,10 @@
 
 import { Fragment, type ReactNode } from "react";
 import {
-	type DialogProps,
 	DialogTrigger as AriaDialogTrigger,
 	Modal as AriaModal,
 	ModalOverlay as AriaModalOverlay,
+	type DialogProps,
 	type ModalOverlayProps,
 } from "react-aria-components";
 
@@ -57,7 +57,7 @@ export function SheetContent({
 	const isDismissable = isDismissableInternal ?? role !== "alertdialog";
 	return (
 		<AriaModalOverlay
-			className="fixed inset-s-0 top-0 z-50 size-full overflow-hidden bg-black/15 entering:fade-in entering:animate-in entering:duration-500 exiting:fade-out exiting:animate-out exiting:duration-300"
+			className="fixed inset-s-0 inset-bs-0 z-50 block-full inline-full overflow-hidden bg-black/15 entering:fade-in entering:animate-in entering:duration-500 exiting:fade-out exiting:animate-out exiting:duration-300"
 			isDismissable={isDismissable}
 			{...props}
 		>
@@ -75,16 +75,17 @@ export function SheetContent({
 				data-float={isFloat}
 			>
 				<Dialog aria-label={props["aria-label"]} className="sm:[--gutter:--spacing(6)]" role={role}>
-					{(values) => {
-						return (
-							<Fragment>
-								{typeof children === "function" ? children(values) : children}
-								{closeButton && (
-									<DialogCloseIcon className="inset-e-2.5 top-2.5" isDismissable={isDismissable} />
-								)}
-							</Fragment>
-						);
-					}}
+					{(values) => (
+						<Fragment>
+							{typeof children === "function" ? children(values) : children}
+							{closeButton && (
+								<DialogCloseIcon
+									className="inset-e-2.5 inset-bs-2.5"
+									isDismissable={isDismissable}
+								/>
+							)}
+						</Fragment>
+					)}
 				</Dialog>
 			</AriaModal>
 		</AriaModalOverlay>

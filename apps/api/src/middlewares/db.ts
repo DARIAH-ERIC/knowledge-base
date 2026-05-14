@@ -1,5 +1,5 @@
 import { createMiddleware } from "@/lib/factory";
-import { type Database, db as client, type Transaction } from "@/services/db";
+import { type Database, type Transaction, db as client } from "@/services/db";
 
 export type { Database, Transaction };
 

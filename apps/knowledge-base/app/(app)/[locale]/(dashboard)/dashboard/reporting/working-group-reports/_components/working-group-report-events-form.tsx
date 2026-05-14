@@ -47,35 +47,33 @@ export function WorkingGroupReportEventsForm(
 				<section className="flex flex-col gap-y-3">
 					<h2 className="text-sm font-semibold text-fg">{t("Events")}</h2>
 					<ul className="divide-y divide-border rounded-md border">
-						{report.events.map((event) => {
-							return (
-								<li key={event.id} className="flex items-start justify-between gap-x-4 px-4 py-3">
-									<div className="flex flex-col gap-y-0.5">
-										<p className="text-sm font-medium text-fg">{event.title}</p>
-										<p className="text-xs text-muted-fg">
-											{format.dateTime(event.date, { dateStyle: "medium" })}
-											{" · "}
-											{event.role.charAt(0).toUpperCase() + event.role.slice(1)}
-										</p>
-										{event.url != null && <p className="text-xs text-muted-fg">{event.url}</p>}
-									</div>
-									<form action={deleteAction}>
-										<input name="eventId" type="hidden" value={event.id} />
-										<input name="workingGroupReportId" type="hidden" value={report.id} />
-										<Button intent="danger" size="sm" type="submit">
-											{t("Remove")}
-										</Button>
-									</form>
-								</li>
-							);
-						})}
+						{report.events.map((event) => (
+							<li key={event.id} className="flex items-start justify-between gap-x-4 px-4 py-3">
+								<div className="flex flex-col gap-y-0.5">
+									<p className="text-sm font-medium text-fg">{event.title}</p>
+									<p className="text-xs text-muted-fg">
+										{format.dateTime(event.date, { dateStyle: "medium" })}
+										{" · "}
+										{event.role.charAt(0).toUpperCase() + event.role.slice(1)}
+									</p>
+									{event.url != null && <p className="text-xs text-muted-fg">{event.url}</p>}
+								</div>
+								<form action={deleteAction}>
+									<input name="eventId" type="hidden" value={event.id} />
+									<input name="workingGroupReportId" type="hidden" value={report.id} />
+									<Button intent="danger" size="sm" type="submit">
+										{t("Remove")}
+									</Button>
+								</form>
+							</li>
+						))}
 					</ul>
 				</section>
 			)}
 
 			<section className="flex flex-col gap-y-3">
 				<h2 className="text-sm font-semibold text-fg">{t("Add event")}</h2>
-				<Form action={action} className="flex flex-col gap-y-4 max-w-sm" state={state}>
+				<Form action={action} className="flex flex-col gap-y-4 max-inline-sm" state={state}>
 					<input name="workingGroupReportId" type="hidden" value={report.id} />
 
 					<TextField isRequired={true} name="title">

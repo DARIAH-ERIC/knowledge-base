@@ -11,17 +11,13 @@ export const spotlightArticles = p.snakeCase.table("spotlight_articles", {
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(() => {
-			return entityVersions.id;
-		}),
+		.references(() => entityVersions.id),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
 	imageId: p
 		.uuid("image_id")
 		.notNull()
-		.references(() => {
-			return assets.id;
-		}),
+		.references(() => assets.id),
 	...f.timestamps(),
 });
 
@@ -38,24 +34,18 @@ export const spotlightArticlesToPersons = p.snakeCase.table(
 		spotlightArticleId: p
 			.uuid("spotlight_article_id")
 			.notNull()
-			.references(() => {
-				return spotlightArticles.id;
-			}),
+			.references(() => spotlightArticles.id),
 		personId: p
 			.uuid("person_id")
 			.notNull()
-			.references(() => {
-				return persons.id;
-			}),
+			.references(() => persons.id),
 		role: p.text("role", { enum: articleContributorRolesEnum }).notNull().default("author"),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [
-			p.primaryKey({
-				columns: [t.spotlightArticleId, t.personId],
-				name: "spotlight_articles_to_persons_pkey",
-			}),
-		];
-	},
+	(t) => [
+		p.primaryKey({
+			columns: [t.spotlightArticleId, t.personId],
+			name: "spotlight_articles_to_persons_pkey",
+		}),
+	],
 );

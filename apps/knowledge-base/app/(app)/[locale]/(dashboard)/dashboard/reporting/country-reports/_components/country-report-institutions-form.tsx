@@ -43,14 +43,8 @@ export function CountryReportInstitutionsForm(
 	const [state, action, isPending] = useActionState(addAction, createActionStateInitial());
 	const [selectedId, setSelectedId] = useState<string>("");
 
-	const claimedOrgUnitIds = new Set(
-		report.institutions.map((i) => {
-			return i.organisationalUnitId;
-		}),
-	);
-	const available = availableInstitutions.filter((i) => {
-		return !claimedOrgUnitIds.has(i.id);
-	});
+	const claimedOrgUnitIds = new Set(report.institutions.map((i) => i.organisationalUnitId));
+	const available = availableInstitutions.filter((i) => !claimedOrgUnitIds.has(i.id));
 
 	return (
 		<div className="flex flex-col gap-y-8">
@@ -58,32 +52,30 @@ export function CountryReportInstitutionsForm(
 				<section className="flex flex-col gap-y-3">
 					<h2 className="text-sm font-semibold text-fg">{t("Institutions")}</h2>
 					<ul className="divide-y divide-border rounded-md border">
-						{report.institutions.map((institution) => {
-							return (
-								<li
-									key={institution.id}
-									className="flex items-center justify-between gap-x-4 px-4 py-3"
-								>
-									<div>
-										<p className="text-sm font-medium text-fg">
-											{institution.organisationalUnit.name}
+						{report.institutions.map((institution) => (
+							<li
+								key={institution.id}
+								className="flex items-center justify-between gap-x-4 px-4 py-3"
+							>
+								<div>
+									<p className="text-sm font-medium text-fg">
+										{institution.organisationalUnit.name}
+									</p>
+									{institution.organisationalUnit.acronym != null && (
+										<p className="text-xs text-muted-fg">
+											{institution.organisationalUnit.acronym}
 										</p>
-										{institution.organisationalUnit.acronym != null && (
-											<p className="text-xs text-muted-fg">
-												{institution.organisationalUnit.acronym}
-											</p>
-										)}
-									</div>
-									<form action={deleteAction}>
-										<input name="institutionId" type="hidden" value={institution.id} />
-										<input name="countryReportId" type="hidden" value={report.id} />
-										<Button intent="danger" size="sm" type="submit">
-											{t("Remove")}
-										</Button>
-									</form>
-								</li>
-							);
-						})}
+									)}
+								</div>
+								<form action={deleteAction}>
+									<input name="institutionId" type="hidden" value={institution.id} />
+									<input name="countryReportId" type="hidden" value={report.id} />
+									<Button intent="danger" size="sm" type="submit">
+										{t("Remove")}
+									</Button>
+								</form>
+							</li>
+						))}
 					</ul>
 				</section>
 			)}
@@ -91,7 +83,7 @@ export function CountryReportInstitutionsForm(
 			{available.length > 0 && (
 				<section className="flex flex-col gap-y-3">
 					<h2 className="text-sm font-semibold text-fg">{t("Add institution")}</h2>
-					<Form action={action} className="flex flex-col gap-y-4 max-w-sm" state={state}>
+					<Form action={action} className="flex flex-col gap-y-4 max-inline-sm" state={state}>
 						<input name="countryReportId" type="hidden" value={report.id} />
 
 						<Select
@@ -105,14 +97,12 @@ export function CountryReportInstitutionsForm(
 							<SelectTrigger />
 							<FieldError />
 							<SelectContent>
-								{available.map((institution) => {
-									return (
-										<SelectItem key={institution.id} id={institution.id}>
-											{institution.name}
-											{institution.acronym != null && ` (${institution.acronym})`}
-										</SelectItem>
-									);
-								})}
+								{available.map((institution) => (
+									<SelectItem key={institution.id} id={institution.id}>
+										{institution.name}
+										{institution.acronym != null && ` (${institution.acronym})`}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 						<input name="organisationalUnitId" type="hidden" value={selectedId} />

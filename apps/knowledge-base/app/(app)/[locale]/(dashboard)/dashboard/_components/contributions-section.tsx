@@ -2,8 +2,8 @@
 
 import {
 	type ActionState,
-	createActionStateInitial,
 	type GetValidationErrors,
+	createActionStateInitial,
 } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
@@ -88,9 +88,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 		state.status === "error"
 			? (state.validationErrors as ContributionValidationErrors | undefined)
 			: undefined;
-	const selectedRoleOption = roleOptions.find((option) => {
-		return option.roleTypeId === selectedRoleTypeId;
-	});
+	const selectedRoleOption = roleOptions.find((option) => option.roleTypeId === selectedRoleTypeId);
 
 	function formAction(formData: FormData) {
 		const roleTypeId = selectedRoleTypeId;
@@ -104,22 +102,20 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 			if (newState.status === "success" && option != null && unit != null) {
 				const data = newState.data as CreateContributionActionData;
 
-				setLocalContributions((prev) => {
-					return [
-						...prev,
-						{
-							id: data.id,
-							roleTypeId: roleTypeId!,
-							roleType: option.roleType as PersonContribution["roleType"],
-							organisationalUnitId: unit.id,
-							organisationalUnitName: unit.name,
-							duration: {
-								start: new Date(data.durationStart),
-								...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
-							},
+				setLocalContributions((prev) => [
+					...prev,
+					{
+						id: data.id,
+						roleTypeId: roleTypeId!,
+						roleType: option.roleType as PersonContribution["roleType"],
+						organisationalUnitId: unit.id,
+						organisationalUnitName: unit.name,
+						duration: {
+							start: new Date(data.durationStart),
+							...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
 						},
-					];
-				});
+					},
+				]);
 
 				setSelectedRoleTypeId(null);
 				setSelectedUnit(null);
@@ -131,7 +127,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 		<Fragment>
 			<Separator className="my-8" />
 
-			<div className="max-w-3xl space-y-6">
+			<div className="max-inline-3xl space-y-6">
 				<div className="space-y-1">
 					<FormSectionTitle title={t("Contributions")} />
 				</div>
@@ -146,38 +142,36 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 							<TableColumn />
 						</TableHeader>
 						<TableBody items={localContributions}>
-							{(contribution) => {
-								return (
-									<TableRow id={contribution.id}>
-										<TableCell>{formatRoleType(contribution.roleType)}</TableCell>
-										<TableCell>{contribution.organisationalUnitName}</TableCell>
-										<TableCell>
-											{format.dateTime(contribution.duration.start, { dateStyle: "short" })}
-										</TableCell>
-										<TableCell>
-											{contribution.duration.end != null
-												? format.dateTime(contribution.duration.end, { dateStyle: "short" })
-												: t("present")}
-										</TableCell>
-										<TableCell className="text-end">
-											{contribution.duration.end == null && (
-												<Button
-													aria-label={t("End contribution")}
-													className="h-7 sm:h-7"
-													intent="plain"
-													onPress={() => {
-														setItemToEnd({ id: contribution.id });
-														setSelectedEndDate(null);
-													}}
-													size="sq-sm"
-												>
-													<ArchiveBoxXMarkIcon className="size-4" />
-												</Button>
-											)}
-										</TableCell>
-									</TableRow>
-								);
-							}}
+							{(contribution) => (
+								<TableRow id={contribution.id}>
+									<TableCell>{formatRoleType(contribution.roleType)}</TableCell>
+									<TableCell>{contribution.organisationalUnitName}</TableCell>
+									<TableCell>
+										{format.dateTime(contribution.duration.start, { dateStyle: "short" })}
+									</TableCell>
+									<TableCell>
+										{contribution.duration.end != null
+											? format.dateTime(contribution.duration.end, { dateStyle: "short" })
+											: t("present")}
+									</TableCell>
+									<TableCell className="text-end">
+										{contribution.duration.end == null && (
+											<Button
+												aria-label={t("End contribution")}
+												className="block-7 sm:block-7"
+												intent="plain"
+												onPress={() => {
+													setItemToEnd({ id: contribution.id });
+													setSelectedEndDate(null);
+												}}
+												size="sq-sm"
+											>
+												<ArchiveBoxXMarkIcon className="block-4 inline-4" />
+											</Button>
+										)}
+									</TableCell>
+								</TableRow>
+							)}
 						</TableBody>
 					</Table>
 				) : (
@@ -204,13 +198,11 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 									<SelectTrigger />
 									<FieldError />
 									<SelectContent>
-										{roleOptions.map((option) => {
-											return (
-												<SelectItem key={option.roleTypeId} id={option.roleTypeId}>
-													{formatRoleOptionLabel(option)}
-												</SelectItem>
-											);
-										})}
+										{roleOptions.map((option) => (
+											<SelectItem key={option.roleTypeId} id={option.roleTypeId}>
+												{formatRoleOptionLabel(option)}
+											</SelectItem>
+										))}
 									</SelectContent>
 								</Select>
 								<input name="roleTypeId" type="hidden" value={selectedRoleTypeId ?? ""} />
@@ -276,7 +268,9 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 			<ModalContent
 				isOpen={itemToEnd != null}
 				onOpenChange={(open) => {
-					if (!open) setItemToEnd(null);
+					if (!open) {
+						setItemToEnd(null);
+					}
 				}}
 				role="alertdialog"
 				size="sm"
@@ -302,17 +296,19 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 					<Button
 						isDisabled={selectedEndDate == null}
 						onPress={() => {
-							if (itemToEnd == null || selectedEndDate == null) return;
+							if (itemToEnd == null || selectedEndDate == null) {
+								return;
+							}
 
 							const end = selectedEndDate.toDate(getLocalTimeZone());
 
 							startTransition(async () => {
 								await endContributionAction(itemToEnd.id, end);
-								setLocalContributions((prev) => {
-									return prev.map((c) => {
-										return c.id === itemToEnd.id ? { ...c, duration: { ...c.duration, end } } : c;
-									});
-								});
+								setLocalContributions((prev) =>
+									prev.map((c) =>
+										c.id === itemToEnd.id ? { ...c, duration: { ...c.duration, end } } : c,
+									),
+								);
 								setItemToEnd(null);
 							});
 						}}

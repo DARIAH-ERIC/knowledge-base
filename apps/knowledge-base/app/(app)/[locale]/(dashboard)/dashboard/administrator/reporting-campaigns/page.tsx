@@ -26,9 +26,7 @@ export async function generateMetadata(
 export default function DashboardAdministratorReportingCampaignsPage(
 	_props: Readonly<DashboardAdministratorReportingCampaignsPageProps>,
 ): ReactNode {
-	const campaigns = assertAuthenticated().then(({ user }) => {
-		return getReportingCampaignsForAdmin(user);
-	});
+	const campaigns = assertAuthenticated().then(({ user }) => getReportingCampaignsForAdmin(user));
 
 	return (
 		<Suspense fallback={<LoadingScreen />}>

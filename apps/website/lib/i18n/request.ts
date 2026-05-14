@@ -1,4 +1,4 @@
-import { getRequestConfig, type GetRequestConfigParams } from "next-intl/server";
+import { type GetRequestConfigParams, getRequestConfig } from "next-intl/server";
 import * as rootParams from "next/root-params";
 
 import { formats } from "@/lib/i18n/formats";
@@ -24,6 +24,7 @@ async function getLocale(params: GetRequestConfigParams): Promise<IntlLocale> {
 	}
 }
 
+// oxlint-disable-next-line import/no-default-export
 export default getRequestConfig(async (params) => {
 	const locale = await getLocale(params);
 	const messages = await getIntlMessages(locale);

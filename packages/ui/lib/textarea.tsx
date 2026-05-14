@@ -15,12 +15,12 @@ export function TextArea(props: Readonly<TextAreaProps>): ReactNode {
 	const { className, ...rest } = props;
 
 	return (
-		<span className="relative block w-full" data-slot="control">
+		<span className="relative block inline-full" data-slot="control">
 			<AriaTextArea
 				{...rest}
 				className={cx(
 					twJoin([
-						"field-sizing-content relative block min-h-16 w-full appearance-none rounded-lg px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)]",
+						"field-sizing-content relative block min-block-16 inline-full appearance-none rounded-lg px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)]",
 						"text-base/6 text-fg placeholder:text-muted-fg sm:text-sm/6",
 						"border border-input hover:border-muted-fg/30",
 						"focus:border-ring/70 focus:bg-primary-subtle/5 focus:outline-hidden focus:ring-3 focus:ring-ring/20",

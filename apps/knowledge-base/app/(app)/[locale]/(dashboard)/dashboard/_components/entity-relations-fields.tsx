@@ -60,24 +60,12 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 
 	const t = useExtracted();
 
-	const [selectedEntityIds, setSelectedEntityIds] = useState<Array<string>>(() => {
-		return (
-			initialRelatedEntityIds ??
-			selectedRelatedEntities?.map((item) => {
-				return item.id;
-			}) ??
-			[]
-		);
-	});
-	const [selectedResourceIds, setSelectedResourceIds] = useState<Array<string>>(() => {
-		return (
-			initialRelatedResourceIds ??
-			selectedRelatedResources?.map((item) => {
-				return item.id;
-			}) ??
-			[]
-		);
-	});
+	const [selectedEntityIds, setSelectedEntityIds] = useState<Array<string>>(
+		() => initialRelatedEntityIds ?? selectedRelatedEntities?.map((item) => item.id) ?? [],
+	);
+	const [selectedResourceIds, setSelectedResourceIds] = useState<Array<string>>(
+		() => initialRelatedResourceIds ?? selectedRelatedResources?.map((item) => item.id) ?? [],
+	);
 
 	return (
 		<Fragment>
@@ -85,9 +73,7 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 				<AsyncMultipleSelect
 					aria-label={t("Related entities")}
 					emptyMessage={t("No related entities found.")}
-					fetchPage={(params) => {
-						return fetchRelationOptionsPage("entities", params);
-					}}
+					fetchPage={(params) => fetchRelationOptionsPage("entities", params)}
 					initialItems={initialRelatedEntityItems}
 					initialTotal={initialRelatedEntityTotal}
 					onChange={(ids) => {
@@ -97,16 +83,14 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 					selectedItems={selectedRelatedEntities}
 					value={selectedEntityIds}
 				/>
-				{selectedEntityIds.map((entityId, index) => {
-					return (
-						<input
-							key={entityId}
-							name={`relatedEntityIds.${String(index)}`}
-							type="hidden"
-							value={entityId}
-						/>
-					);
-				})}
+				{selectedEntityIds.map((entityId, index) => (
+					<input
+						key={entityId}
+						name={`relatedEntityIds.${String(index)}`}
+						type="hidden"
+						value={entityId}
+					/>
+				))}
 			</FormSection>
 
 			<Separator className="my-6" />
@@ -115,9 +99,7 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 				<AsyncMultipleSelect
 					aria-label={t("Related resources")}
 					emptyMessage={t("No related resources found.")}
-					fetchPage={(params) => {
-						return fetchRelationOptionsPage("resources", params);
-					}}
+					fetchPage={(params) => fetchRelationOptionsPage("resources", params)}
 					initialItems={initialRelatedResourceItems}
 					initialTotal={initialRelatedResourceTotal}
 					onChange={(ids) => {
@@ -127,16 +109,14 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 					selectedItems={selectedRelatedResources}
 					value={selectedResourceIds}
 				/>
-				{selectedResourceIds.map((resourceId, index) => {
-					return (
-						<input
-							key={resourceId}
-							name={`relatedResourceIds.${String(index)}`}
-							type="hidden"
-							value={resourceId}
-						/>
-					);
-				})}
+				{selectedResourceIds.map((resourceId, index) => (
+					<input
+						key={resourceId}
+						name={`relatedResourceIds.${String(index)}`}
+						type="hidden"
+						value={resourceId}
+					/>
+				))}
 			</FormSection>
 		</Fragment>
 	);

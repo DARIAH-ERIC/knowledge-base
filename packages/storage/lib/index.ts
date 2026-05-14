@@ -41,6 +41,7 @@ export function createStorageService(params: CreateStorageServiceParams) {
 	});
 
 	return {
+		// oxlint-disable-next-line typescript/explicit-module-boundary-types
 		upload({
 			input,
 			metadata,
@@ -64,6 +65,7 @@ export function createStorageService(params: CreateStorageServiceParams) {
 			});
 		},
 
+		// oxlint-disable-next-line typescript/explicit-module-boundary-types
 		download(key: string) {
 			return Result.tryPromise({
 				async try() {
@@ -75,6 +77,7 @@ export function createStorageService(params: CreateStorageServiceParams) {
 			});
 		},
 
+		// oxlint-disable-next-line typescript/explicit-module-boundary-types
 		delete(key: string) {
 			return Result.tryPromise({
 				async try() {

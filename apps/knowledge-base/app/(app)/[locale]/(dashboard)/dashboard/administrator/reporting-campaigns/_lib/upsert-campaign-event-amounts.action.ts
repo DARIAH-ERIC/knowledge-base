@@ -46,7 +46,9 @@ export const upsertCampaignEventAmountsAction = createServerAction(
 		await db.transaction(async (tx) => {
 			for (const eventType of reportingCampaignEventTypeEnum) {
 				const amount = amounts[eventType];
-				if (amount == null) continue;
+				if (amount == null) {
+					continue;
+				}
 
 				await tx
 					.insert(schema.reportingCampaignEventAmounts)

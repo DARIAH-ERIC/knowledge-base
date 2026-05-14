@@ -5,8 +5,8 @@ import { createRouter } from "@/lib/factory";
 import { resolver } from "@/lib/openapi/resolver";
 import { BAD_REQUEST, NOT_FOUND } from "@/lib/openapi/responses";
 import { validate, validator } from "@/lib/openapi/validator";
-import { GetEventById, GetEventBySlug, GetEvents, GetEventSlugs } from "@/routes/events/schemas";
-import { getEventById, getEventBySlug, getEvents, getEventSlugs } from "@/routes/events/service";
+import { GetEventById, GetEventBySlug, GetEventSlugs, GetEvents } from "@/routes/events/schemas";
+import { getEventById, getEventBySlug, getEventSlugs, getEvents } from "@/routes/events/service";
 
 export const router = createRouter()
 	/** GET /api/events */

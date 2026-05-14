@@ -1,5 +1,5 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
-import { request, type RequestResult } from "@dariah-eric/request";
+import { type RequestResult, request } from "@dariah-eric/request";
 import type { RequestError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
 
@@ -233,8 +233,8 @@ function createListAll<TParams extends object, TItem>(
 		params: TParams & { page: number; itemsPerPage: number },
 	) => Promise<RequestResult<EpisciencesHydraCollection<TItem>>>,
 ): (params: TParams) => Promise<Result<Array<TItem>, RequestError>> {
-	return (params) => {
-		return Result.gen(async function* () {
+	return (params) =>
+		Result.gen(async function* () {
 			const items: Array<TItem> = [];
 			let page = 1;
 			let totalItems = Infinity;
@@ -254,7 +254,6 @@ function createListAll<TParams extends object, TItem>(
 
 			return Result.ok(items);
 		});
-	};
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -435,9 +434,7 @@ export function createEpisciencesClient(params: CreateEpisciencesClientParams) {
 			listAll(
 				params: Omit<GetEpisciencesBoardParams, "page" | "itemsPerPage"> = {},
 			): Promise<Result<Array<EpisciencesUser>, RequestError>> {
-				return createListAll((pageParams) => {
-					return getBoardMembers(pageParams);
-				})(params);
+				return createListAll((pageParams) => getBoardMembers(pageParams))(params);
 			},
 		},
 
@@ -518,9 +515,7 @@ export function createEpisciencesClient(params: CreateEpisciencesClientParams) {
 			listAll(
 				params: Omit<GetEpisciencesSearchParams, "page" | "itemsPerPage"> = {},
 			): Promise<Result<Array<EpisciencesSearchDocument>, RequestError>> {
-				return createListAll((pageParams) => {
-					return searchDocuments(pageParams);
-				})(params);
+				return createListAll((pageParams) => searchDocuments(pageParams))(params);
 			},
 		},
 	};

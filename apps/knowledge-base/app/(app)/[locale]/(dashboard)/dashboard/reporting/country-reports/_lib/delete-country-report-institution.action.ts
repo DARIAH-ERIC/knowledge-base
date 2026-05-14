@@ -10,11 +10,15 @@ import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 
 export async function deleteCountryReportInstitutionAction(formData: FormData): Promise<void> {
-	if (!(await globalPostRequestRateLimit())) return;
+	if (!(await globalPostRequestRateLimit())) {
+		return;
+	}
 
 	const institutionId = formData.get("institutionId");
 	const countryReportId = formData.get("countryReportId");
-	if (typeof institutionId !== "string" || typeof countryReportId !== "string") return;
+	if (typeof institutionId !== "string" || typeof countryReportId !== "string") {
+		return;
+	}
 
 	const { user } = await assertAuthenticated();
 	await assertCan(user, "update", { type: "country_report", id: countryReportId });

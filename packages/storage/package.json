@@ -16,8 +16,8 @@
 		"dev": "tsdown --watch",
 		"format:check": "oxfmt --check",
 		"format:fix": "oxfmt --write",
-		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
-		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
+		"lint:check": "oxlint --report-unused-disable-directives --type-aware --type-check",
+		"lint:fix": "oxlint --fix --report-unused-disable-directives --type-aware --type-check",
 		"storage:buckets:create": "tsx ./scripts/create-buckets.ts",
 		"storage:buckets:reset": "tsx ./scripts/reset-buckets.ts",
 		"types:check": "tsc --noEmit"
@@ -34,7 +34,6 @@
 		"@dariah-eric/configs": "workspace:^",
 		"@faker-js/faker": "catalog:",
 		"@types/node": "catalog:",
-		"eslint": "catalog:",
 		"sharp": "catalog:",
 		"tsdown": "catalog:",
 		"tsx": "catalog:",

@@ -33,20 +33,18 @@ export const Default: Story = {
 	args: {},
 	render() {
 		return (
-			<div className="w-80">
+			<div className="inline-80">
 				<Carousel>
 					<CarouselContent>
-						{slides.map((slide) => {
-							return (
-								<CarouselItem key={slide.id}>
-									<div
-										className={`flex h-40 items-center justify-center rounded-xl ${slide.bg} text-sm font-medium`}
-									>
-										{slide.label}
-									</div>
-								</CarouselItem>
-							);
-						})}
+						{slides.map((slide) => (
+							<CarouselItem key={slide.id}>
+								<div
+									className={`flex block-40 items-center justify-center rounded-xl ${slide.bg} text-sm font-medium`}
+								>
+									{slide.label}
+								</div>
+							</CarouselItem>
+						))}
 					</CarouselContent>
 					<CarouselHandler>
 						<CarouselButton segment="previous" />
@@ -62,20 +60,18 @@ export const MultipleVisible: Story = {
 	args: {},
 	render() {
 		return (
-			<div className="w-96">
+			<div className="inline-96">
 				<Carousel opts={{ align: "start" }}>
 					<CarouselContent>
-						{slides.map((slide) => {
-							return (
-								<CarouselItem key={slide.id} className="basis-1/2">
-									<div
-										className={`flex h-32 items-center justify-center rounded-xl ${slide.bg} text-sm font-medium`}
-									>
-										{slide.label}
-									</div>
-								</CarouselItem>
-							);
-						})}
+						{slides.map((slide) => (
+							<CarouselItem key={slide.id} className="basis-1/2">
+								<div
+									className={`flex block-32 items-center justify-center rounded-xl ${slide.bg} text-sm font-medium`}
+								>
+									{slide.label}
+								</div>
+							</CarouselItem>
+						))}
 					</CarouselContent>
 					<CarouselHandler>
 						<CarouselButton segment="previous" />

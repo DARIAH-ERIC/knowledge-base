@@ -49,8 +49,8 @@ export function TreeItem<T extends object>(props: Readonly<TreeItemProps<T>>): R
 					"shrink-0 rounded-lg px-2 py-1.5 pe-2",
 					"group/tree-item relative flex select-none rounded-lg focus:outline-hidden",
 					"focus:bg-(--tree-active-bg) focus:text-(--tree-active-fg) focus:**:[.text-muted-fg]:text-(--tree-active-fg)",
-					"**:data-[slot=avatar]:size-6 **:data-[slot=avatar]:*:size-6 sm:**:data-[slot=avatar]:size-5 sm:**:data-[slot=avatar]:*:size-5",
-					"**:data-[slot=icon]:me-1 **:data-[slot=icon]:size-5 **:data-[slot=icon]:shrink-0 sm:**:data-[slot=icon]:size-4",
+					"**:data-[slot=avatar]:block-6 **:data-[slot=avatar]:inline-6 **:data-[slot=avatar]:*:block-6 **:data-[slot=avatar]:*:inline-6 sm:**:data-[slot=avatar]:block-5 sm:**:data-[slot=avatar]:inline-5 sm:**:data-[slot=avatar]:*:block-5 sm:**:data-[slot=avatar]:*:inline-5",
+					"**:data-[slot=icon]:me-1 **:data-[slot=icon]:block-5 **:data-[slot=icon]:inline-5 **:data-[slot=icon]:shrink-0 sm:**:data-[slot=icon]:block-4 sm:**:data-[slot=icon]:inline-4",
 					"disabled:opacity-50",
 					"href" in props ? "cursor-pointer" : "cursor-default",
 				],
@@ -69,37 +69,35 @@ export function TreeContent(props: Readonly<TreeContentProps>): ReactNode {
 
 	return (
 		<AriaTreeItemContent {...rest}>
-			{(values) => {
-				return (
+			{(values) => (
+				<div
+					className={twMerge(
+						"relative flex inline-full min-inline-0 items-center gap-x-1 truncate text-sm/6",
+						className,
+					)}
+				>
+					{values.selectionMode === "multiple" && values.selectionBehavior === "toggle" && (
+						<Checkbox className="[--indicator-mt:0] sm:[--indicator-mt:0]" slot="selection" />
+					)}
 					<div
-						className={twMerge(
-							"relative flex w-full min-w-0 items-center gap-x-1 truncate text-sm/6",
-							className,
+						className={twJoin(
+							"relative inline-[calc(calc(var(--tree-item-level)-1)*(--spacing(5)))] shrink-0",
+							"before:absolute before:inset-0 before:-ms-1 before:bg-[repeating-linear-gradient(to_right,transparent_0,transparent_calc(var(--tree-item-level)-1px),var(--border)_calc(var(--tree-item-level)-1px),var(--border)_calc(var(--tree-item-level)))]",
 						)}
-					>
-						{values.selectionMode === "multiple" && values.selectionBehavior === "toggle" && (
-							<Checkbox className="[--indicator-mt:0] sm:[--indicator-mt:0]" slot="selection" />
-						)}
-						<div
-							className={twJoin(
-								"relative w-[calc(calc(var(--tree-item-level)-1)*(--spacing(5)))] shrink-0",
-								"before:absolute before:inset-0 before:-ms-1 before:bg-[repeating-linear-gradient(to_right,transparent_0,transparent_calc(var(--tree-item-level)-1px),var(--border)_calc(var(--tree-item-level)-1px),var(--border)_calc(var(--tree-item-level)))]",
-							)}
+					/>
+					{values.hasChildItems ? (
+						<TreeIndicator
+							values={{
+								isDisabled: values.isDisabled,
+								isExpanded: values.isExpanded,
+							}}
 						/>
-						{values.hasChildItems ? (
-							<TreeIndicator
-								values={{
-									isDisabled: values.isDisabled,
-									isExpanded: values.isExpanded,
-								}}
-							/>
-						) : (
-							<span aria-hidden={true} className="block w-5 shrink-0" />
-						)}
-						{typeof children === "function" ? children(values) : children}
-					</div>
-				);
-			}}
+					) : (
+						<span aria-hidden={true} className="block inline-5 shrink-0" />
+					)}
+					{typeof children === "function" ? children(values) : children}
+				</div>
+			)}
 		</AriaTreeItemContent>
 	);
 }
@@ -122,7 +120,7 @@ export function TreeIndicator(props: Readonly<TreeIndicatorProps>): ReactNode {
 		>
 			<ChevronRightIcon
 				className={twJoin(
-					"-mx-0.5 size-5 transition-transform duration-200 ease-in-out sm:size-4",
+					"-mx-0.5 block-5 inline-5 transition-transform duration-200 ease-in-out sm:block-4 sm:inline-4",
 					values.isExpanded && "rotate-90",
 				)}
 				data-slot="chevron"

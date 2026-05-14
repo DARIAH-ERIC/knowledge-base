@@ -19,7 +19,7 @@ export const Default: Story = {
 	args: {},
 	render(props) {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<SearchField {...props}>
 					<Label>{"Search"}</Label>
 					<SearchInput placeholder={"Search..."} />

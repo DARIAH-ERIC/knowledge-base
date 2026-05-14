@@ -8,15 +8,15 @@ import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { OpportunitySource, OpportunityStatus } from "@/routes/opportunities/schemas";
 import {
+	type SQL,
+	type SQLWrapper,
 	and,
 	count,
 	desc,
 	eq,
 	inArray,
 	or,
-	type SQL,
 	sql,
-	type SQLWrapper,
 } from "@/services/db/sql";
 
 interface GetOpportunitiesParams {
@@ -66,12 +66,7 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 						type: "published",
 					},
 				},
-				RAW:
-					statuses.length > 0
-						? (t) => {
-								return buildStatusFilter(t.duration, statuses);
-							}
-						: undefined,
+				RAW: statuses.length > 0 ? (t) => buildStatusFilter(t.duration, statuses) : undefined,
 				source:
 					sources.length > 0
 						? {

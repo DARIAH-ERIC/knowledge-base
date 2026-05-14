@@ -3,9 +3,9 @@
 import { CheckIcon, MinusIcon } from "@heroicons/react/20/solid";
 import type { ReactNode } from "react";
 import {
-	Checkbox as CheckboxPrimitive,
 	CheckboxGroup as CheckboxGroupPrimitive,
 	type CheckboxGroupProps,
+	Checkbox as CheckboxPrimitive,
 	type CheckboxProps,
 	composeRenderProps,
 } from "react-aria-components";
@@ -54,7 +54,7 @@ export function Checkbox({ className, children, ...props }: Readonly<CheckboxPro
 						<div
 							className={twMerge(
 								"grid grid-cols-[1.125rem_1fr] gap-y-1 sm:grid-cols-[1rem_1fr] has-data-[slot=label]:gap-x-3",
-								"*:data-[slot=indicator]:col-start-1 *:data-[slot=indicator]:row-start-1 *:data-[slot=indicator]:mt-(--indicator-mt)",
+								"*:data-[slot=indicator]:col-start-1 *:data-[slot=indicator]:row-start-1 *:data-[slot=indicator]:mbs-(--indicator-mt)",
 								"*:data-[slot=label]:col-start-2 *:data-[slot=label]:row-start-1",
 								"*:[[slot=description]]:col-start-2 *:[[slot=description]]:row-start-2",
 								"has-[[slot=description]]:**:data-[slot=label]:font-medium",
@@ -63,10 +63,10 @@ export function Checkbox({ className, children, ...props }: Readonly<CheckboxPro
 							<span
 								className={twMerge([
 									"relative inset-ring inset-ring-input isolate flex shrink-0 items-center justify-center rounded-sm text-bg transition group-hover:inset-ring-muted-fg/30",
-									"sm:size-4 sm:*:data-[slot=check-indicator]:size-3.5",
-									"size-4.5 *:data-[slot=check-indicator]:size-4",
+									"sm:block-4 sm:inline-4 sm:*:data-[slot=check-indicator]:block-3.5 sm:*:data-[slot=check-indicator]:inline-3.5",
+									"block-4.5 inline-4.5 *:data-[slot=check-indicator]:block-4 *:data-[slot=check-indicator]:inline-4",
 									"in-disabled:bg-muted",
-									(isSelected || isIndeterminate) && [
+									(isSelected ?? isIndeterminate) && [
 										"inset-ring-(--checkbox-ring,var(--color-ring)) bg-(--checkbox-bg,var(--color-primary)) text-(--checkbox-fg,var(--color-primary-fg))",
 										"group-invalid:bg-danger group-invalid:text-danger-fg dark:group-invalid:inset-ring-danger-subtle-fg/70",
 									],

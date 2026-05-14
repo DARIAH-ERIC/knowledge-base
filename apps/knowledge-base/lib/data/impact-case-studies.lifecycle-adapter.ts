@@ -14,7 +14,9 @@ export const impactCaseStudiesLifecycleAdapter: EntityLifecycleAdapter = {
 			.from(schema.impactCaseStudies)
 			.where(eq(schema.impactCaseStudies.id, sourceVersionId))
 			.limit(1);
-		if (source == null) return;
+		if (source == null) {
+			return;
+		}
 		await tx.insert(schema.impactCaseStudies).values({ id: targetVersionId, ...source });
 
 		const contributors = await tx

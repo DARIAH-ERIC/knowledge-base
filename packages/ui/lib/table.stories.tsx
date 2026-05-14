@@ -37,21 +37,17 @@ export const Default: Story = {
 		return (
 			<Table {...props}>
 				<TableHeader columns={columns}>
-					{(column) => {
-						return <TableColumn id={column.id}>{column.name}</TableColumn>;
-					}}
+					{(column) => <TableColumn id={column.id}>{column.name}</TableColumn>}
 				</TableHeader>
 				<TableBody items={rows}>
-					{(row) => {
-						return (
-							<TableRow id={row.id}>
-								<TableCell>{row.name}</TableCell>
-								<TableCell>{row.role}</TableCell>
-								<TableCell>{row.status}</TableCell>
-								<TableCell>{row.joined}</TableCell>
-							</TableRow>
-						);
-					}}
+					{(row) => (
+						<TableRow id={row.id}>
+							<TableCell>{row.name}</TableCell>
+							<TableCell>{row.role}</TableCell>
+							<TableCell>{row.status}</TableCell>
+							<TableCell>{row.joined}</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 		);
@@ -64,21 +60,17 @@ export const Striped: Story = {
 		return (
 			<Table {...props}>
 				<TableHeader columns={columns}>
-					{(column) => {
-						return <TableColumn id={column.id}>{column.name}</TableColumn>;
-					}}
+					{(column) => <TableColumn id={column.id}>{column.name}</TableColumn>}
 				</TableHeader>
 				<TableBody items={rows}>
-					{(row) => {
-						return (
-							<TableRow id={row.id}>
-								<TableCell>{row.name}</TableCell>
-								<TableCell>{row.role}</TableCell>
-								<TableCell>{row.status}</TableCell>
-								<TableCell>{row.joined}</TableCell>
-							</TableRow>
-						);
-					}}
+					{(row) => (
+						<TableRow id={row.id}>
+							<TableCell>{row.name}</TableCell>
+							<TableCell>{row.role}</TableCell>
+							<TableCell>{row.status}</TableCell>
+							<TableCell>{row.joined}</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 		);
@@ -91,21 +83,17 @@ export const WithGrid: Story = {
 		return (
 			<Table {...props}>
 				<TableHeader columns={columns}>
-					{(column) => {
-						return <TableColumn id={column.id}>{column.name}</TableColumn>;
-					}}
+					{(column) => <TableColumn id={column.id}>{column.name}</TableColumn>}
 				</TableHeader>
 				<TableBody items={rows}>
-					{(row) => {
-						return (
-							<TableRow id={row.id}>
-								<TableCell>{row.name}</TableCell>
-								<TableCell>{row.role}</TableCell>
-								<TableCell>{row.status}</TableCell>
-								<TableCell>{row.joined}</TableCell>
-							</TableRow>
-						);
-					}}
+					{(row) => (
+						<TableRow id={row.id}>
+							<TableCell>{row.name}</TableCell>
+							<TableCell>{row.role}</TableCell>
+							<TableCell>{row.status}</TableCell>
+							<TableCell>{row.joined}</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 		);
@@ -118,15 +106,9 @@ export const Empty: Story = {
 		return (
 			<Table {...props}>
 				<TableHeader columns={columns}>
-					{(column) => {
-						return <TableColumn id={column.id}>{column.name}</TableColumn>;
-					}}
+					{(column) => <TableColumn id={column.id}>{column.name}</TableColumn>}
 				</TableHeader>
-				<TableBody items={[]}>
-					{() => {
-						return <TableRow id="empty" />;
-					}}
-				</TableBody>
+				<TableBody items={[]}>{() => <TableRow id="empty" />}</TableBody>
 			</Table>
 		);
 	},

@@ -25,14 +25,12 @@ export const organisationalUnitTypes = p.snakeCase.table(
 		type: p.text("type", { enum: organisationalUnitTypesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [
-			p.check(
-				"organisational_unit_types_type_enum_check",
-				inArray(t.type, organisationalUnitTypesEnum),
-			),
-		];
-	},
+	(t) => [
+		p.check(
+			"organisational_unit_types_type_enum_check",
+			inArray(t.type, organisationalUnitTypesEnum),
+		),
+	],
 );
 
 export const organisationalUnitStatusEnum = [
@@ -54,36 +52,28 @@ export const organisationalUnitStatus = p.snakeCase.table(
 		status: p.text("status", { enum: organisationalUnitStatusEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [
-			p.check(
-				"organisational_unit_status_status_enum_check",
-				inArray(t.status, organisationalUnitStatusEnum),
-			),
-		];
-	},
+	(t) => [
+		p.check(
+			"organisational_unit_status_status_enum_check",
+			inArray(t.status, organisationalUnitStatusEnum),
+		),
+	],
 );
 
 export const organisationalUnits = p.snakeCase.table("organisational_units", {
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(() => {
-			return entityVersions.id;
-		}),
+		.references(() => entityVersions.id),
 	metadata: p.jsonb("metadata"),
 	name: p.text("name").notNull(),
 	acronym: p.text("acronym"),
 	summary: p.text("summary"),
-	imageId: p.uuid("image_id").references(() => {
-		return assets.id;
-	}),
+	imageId: p.uuid("image_id").references(() => assets.id),
 	typeId: p
 		.uuid("type_id")
 		.notNull()
-		.references(() => {
-			return organisationalUnitTypes.id;
-		}),
+		.references(() => organisationalUnitTypes.id),
 	sshocMarketplaceActorId: p.integer("sshoc_marketplace_actor_id"),
 	...f.timestamps(),
 });
@@ -100,22 +90,16 @@ export const organisationalUnitsRelations = p.snakeCase.table("organisational_un
 	unitId: p
 		.uuid("unit_id")
 		.notNull()
-		.references(() => {
-			return organisationalUnits.id;
-		}),
+		.references(() => organisationalUnits.id),
 	relatedUnitId: p
 		.uuid("related_unit_id")
 		.notNull()
-		.references(() => {
-			return organisationalUnits.id;
-		}),
+		.references(() => organisationalUnits.id),
 	duration: f.timestampRange("duration").notNull(),
 	status: p
 		.uuid("status")
 		.notNull()
-		.references(() => {
-			return organisationalUnitStatus.id;
-		}),
+		.references(() => organisationalUnitStatus.id),
 });
 
 export type OrganisationalUnitRelation = typeof organisationalUnitsRelations.$inferSelect;
@@ -141,25 +125,17 @@ export const organisationalUnitsAllowedRelations = p.snakeCase.table(
 		unitTypeId: p
 			.uuid("unit_type_id")
 			.notNull()
-			.references(() => {
-				return organisationalUnitTypes.id;
-			}),
+			.references(() => organisationalUnitTypes.id),
 		relatedUnitTypeId: p
 			.uuid("related_unit_type_id")
 			.notNull()
-			.references(() => {
-				return organisationalUnitTypes.id;
-			}),
+			.references(() => organisationalUnitTypes.id),
 		relationTypeId: p
 			.uuid("relation_type_id")
 			.notNull()
-			.references(() => {
-				return organisationalUnitStatus.id;
-			}),
+			.references(() => organisationalUnitStatus.id),
 	},
-	(t) => {
-		return [p.unique().on(t.unitTypeId, t.relatedUnitTypeId, t.relationTypeId)];
-	},
+	(t) => [p.unique().on(t.unitTypeId, t.relatedUnitTypeId, t.relationTypeId)],
 );
 
 export type OrganisationalUnitAllowedRelation =
@@ -184,15 +160,11 @@ export const organisationalUnitsToSocialMedia = p.snakeCase.table(
 		organisationalUnitId: p
 			.uuid("organisational_unit_id")
 			.notNull()
-			.references(() => {
-				return organisationalUnits.id;
-			}),
+			.references(() => organisationalUnits.id),
 		socialMediaId: p
 			.uuid("social_media_id")
 			.notNull()
-			.references(() => {
-				return socialMedia.id;
-			}),
+			.references(() => socialMedia.id),
 		...f.timestamps(),
 	},
 );

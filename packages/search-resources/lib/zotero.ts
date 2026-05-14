@@ -25,9 +25,7 @@ export function createZoteroItem(item: ZoteroJsonItem<ZoteroJsonItemData>): Reso
 
 	for (const creator of data.creators ?? []) {
 		const name = [creator.firstName, creator.lastName]
-			.filter((name) => {
-				return isNonEmptyString(name);
-			})
+			.filter((name) => isNonEmptyString(name))
 			.join(" ");
 
 		if (isNonEmptyString(name)) {
@@ -52,14 +50,7 @@ export function createZoteroItem(item: ZoteroJsonItem<ZoteroJsonItemData>): Reso
 		label: data.title ?? "",
 		description: data.abstractNote ?? "",
 		links: data.url != null ? [data.url] : [],
-		keywords:
-			data.tags
-				?.map((tag) => {
-					return tag.tag;
-				})
-				.filter((keyword) => {
-					return isNonEmptyString(keyword);
-				}) ?? [],
+		keywords: data.tags?.map((tag) => tag.tag).filter((keyword) => isNonEmptyString(keyword)) ?? [],
 		kind: data.itemType ?? null,
 		source_actor_ids: null,
 		upstream_sources: null,

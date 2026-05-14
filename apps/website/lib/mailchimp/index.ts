@@ -1,8 +1,8 @@
 import { assert } from "@acdh-oeaw/lib";
 import {
 	type CreateListMemberResponse,
-	createMailchimpClient,
 	type GetCampaignsResponse,
+	createMailchimpClient,
 } from "@dariah-eric/mailchimp";
 
 import { env } from "@/config/env.config";

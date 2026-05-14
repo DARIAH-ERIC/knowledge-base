@@ -1,9 +1,9 @@
 import { createUrl } from "@acdh-oeaw/lib";
 import {
-	isCoreService,
-	isSoftware,
 	type SearchItem,
 	type SshocClient,
+	isCoreService,
+	isSoftware,
 } from "@dariah-eric/client-sshoc";
 import type { Database } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
@@ -38,9 +38,7 @@ function createSshocSnapshot(
 ): SshocServiceSnapshot {
 	return {
 		accessibleAt: item.accessibleAt ?? [],
-		actorIds: item.contributors.map((contributor) => {
-			return contributor.actor.id;
-		}),
+		actorIds: item.contributors.map((contributor) => contributor.actor.id),
 		itemId: item.id,
 		lastInfoUpdate: item.lastInfoUpdate,
 		marketplaceUrl: String(
@@ -83,9 +81,7 @@ export async function ingestSshocServices(
 				categories: ["tool-or-service"],
 				order: ["label"],
 			})
-			.then((result) => {
-				return result.unwrap();
-			}),
+			.then((result) => result.unwrap()),
 		db
 			.select({ id: schema.serviceTypes.id, type: schema.serviceTypes.type })
 			.from(schema.serviceTypes)
@@ -123,33 +119,25 @@ export async function ingestSshocServices(
 	]);
 
 	const serviceTypeIds = new Map(
-		serviceTypes.map((serviceType) => {
-			return [serviceType.type, serviceType.id] as const;
-		}),
+		serviceTypes.map((serviceType) => [serviceType.type, serviceType.id] as const),
 	);
 	const serviceStatusIds = new Map(
-		serviceStatuses.map((serviceStatus) => {
-			return [serviceStatus.status, serviceStatus.id] as const;
-		}),
+		serviceStatuses.map((serviceStatus) => [serviceStatus.status, serviceStatus.id] as const),
 	);
 	const serviceRoleIds = new Map(
-		serviceRoles.map((serviceRole) => {
-			return [serviceRole.role, serviceRole.id] as const;
-		}),
+		serviceRoles.map((serviceRole) => [serviceRole.role, serviceRole.id] as const),
 	);
 	const organisationalUnitIdsByActorId = new Map(
-		organisationalUnits.flatMap((organisationalUnit) => {
-			return organisationalUnit.sshocMarketplaceActorId == null
+		organisationalUnits.flatMap((organisationalUnit) =>
+			organisationalUnit.sshocMarketplaceActorId == null
 				? []
-				: ([[organisationalUnit.sshocMarketplaceActorId, organisationalUnit.id]] as const);
-		}),
+				: ([[organisationalUnit.sshocMarketplaceActorId, organisationalUnit.id]] as const),
+		),
 	);
 	const existingServicesByMarketplaceId = new Map(
-		existingServices.flatMap((service) => {
-			return service.sshocMarketplaceId == null
-				? []
-				: ([[service.sshocMarketplaceId, service]] as const);
-		}),
+		existingServices.flatMap((service) =>
+			service.sshocMarketplaceId == null ? [] : ([[service.sshocMarketplaceId, service]] as const),
+		),
 	);
 
 	const liveStatusId = serviceStatusIds.get("live");
@@ -165,9 +153,7 @@ export async function ingestSshocServices(
 		throw new Error("Missing organisational unit service role lookup data.");
 	}
 
-	const sshocServices = items.filter((item) => {
-		return !isSoftware(item);
-	});
+	const sshocServices = items.filter((item) => !isSoftware(item));
 
 	let createdCount = 0;
 	let updatedCount = 0;
@@ -278,9 +264,9 @@ export async function ingestSshocServices(
 					.where(eq(schema.servicesToOrganisationalUnits.serviceId, serviceId));
 
 				const existingRelationKeys = new Set(
-					existingRelations.map((relation) => {
-						return [relation.organisationalUnitId, relation.roleId].join(":");
-					}),
+					existingRelations.map((relation) =>
+						[relation.organisationalUnitId, relation.roleId].join(":"),
+					),
 				);
 
 				/**
@@ -289,11 +275,10 @@ export async function ingestSshocServices(
 				 * product decision: are SSHOC service relations exclusively managed upstream, or can admins
 				 * add local owner/provider links that should survive re-ingest?
 				 */
-				const missingRelations = relations.filter((relation) => {
-					return !existingRelationKeys.has(
-						[relation.organisationalUnitId, relation.roleId].join(":"),
-					);
-				});
+				const missingRelations = relations.filter(
+					(relation) =>
+						!existingRelationKeys.has([relation.organisationalUnitId, relation.roleId].join(":")),
+				);
 
 				if (missingRelations.length > 0) {
 					await tx.insert(schema.servicesToOrganisationalUnits).values(missingRelations);
@@ -305,13 +290,12 @@ export async function ingestSshocServices(
 		seenMarketplaceIds.add(sshocMarketplaceId);
 	}
 
-	const servicesToMarkNeedsReview = existingServices.filter((service) => {
-		return (
+	const servicesToMarkNeedsReview = existingServices.filter(
+		(service) =>
 			service.sshocMarketplaceId != null &&
 			!seenMarketplaceIds.has(service.sshocMarketplaceId) &&
-			service.status === "live"
-		);
-	});
+			service.status === "live",
+	);
 
 	if (servicesToMarkNeedsReview.length > 0) {
 		await db
@@ -320,9 +304,7 @@ export async function ingestSshocServices(
 			.where(
 				inArray(
 					schema.services.id,
-					servicesToMarkNeedsReview.map((service) => {
-						return service.id;
-					}),
+					servicesToMarkNeedsReview.map((service) => service.id),
 				),
 			);
 	}

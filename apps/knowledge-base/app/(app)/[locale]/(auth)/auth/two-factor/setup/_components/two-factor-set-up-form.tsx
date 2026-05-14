@@ -35,7 +35,7 @@ export function TwoFactorSetUpForm(props: Readonly<TwoFactorSetUpFormProps>): Re
 				<Input />
 			</TextField>
 
-			<SubmitButton className="mt-2">{t("Save")}</SubmitButton>
+			<SubmitButton className="mbs-2">{t("Save")}</SubmitButton>
 		</Form>
 	);
 }

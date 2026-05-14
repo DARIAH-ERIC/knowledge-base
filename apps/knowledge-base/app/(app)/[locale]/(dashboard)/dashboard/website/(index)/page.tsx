@@ -35,7 +35,7 @@ export default function DashboardWebsitePage(
 	return (
 		<Fragment>
 			<Heading>{t("Website dashboard")}</Heading>
-			<Header className="my-(--layout-gutter) border-t">
+			<Header className="my-(--layout-gutter) border-bs">
 				<HeaderContent>
 					<HeaderTitle>{t("Lorem ipsum")}</HeaderTitle>
 					<HeaderDescription>

@@ -10,7 +10,7 @@ interface AttributesProps extends Omit<ToolbarProps, "className"> {
 export function FiltersBar({ className, ...props }: Readonly<AttributesProps>): ReactNode {
 	return (
 		<div
-			className={cn("-mx-(--layout-padding) -mb-(--layout-padding) border-b bg-muted", className)}
+			className={cn("-mx-(--layout-padding) -mbe-(--layout-padding) border-be bg-muted", className)}
 		>
 			<Toolbar
 				className="flex flex-col justify-between gap-2 p-(--layout-padding) lg:flex-row"
@@ -36,7 +36,7 @@ export function FiltersRight({
 		<Group
 			{...props}
 			className={cn(
-				"grid w-full grid-cols-2 gap-2 self-end sm:w-auto sm:*:data-[slot=select]:min-w-40 sm:*:data-[slot=select]:max-w-40",
+				"grid inline-full grid-cols-2 gap-2 self-end sm:inline-auto sm:*:data-[slot=select]:min-inline-40 sm:*:data-[slot=select]:max-inline-40",
 				cols === 1 && "sm:grid-cols-1",
 				cols === 2 && "sm:grid-cols-2",
 				cols === 3 && "sm:grid-cols-3",

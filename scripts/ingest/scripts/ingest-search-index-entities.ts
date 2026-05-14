@@ -1,12 +1,11 @@
-// eslint-disable-next-line n/no-unsupported-features/node-builtins
 import { parseArgs } from "node:util";
 
 import { log } from "@acdh-oeaw/lib";
 import { createDatabaseService } from "@dariah-eric/database";
 import { createSearchService } from "@dariah-eric/search";
 import {
-	createWebsiteSearchIndexService,
 	type SupportedWebsiteEntityType,
+	createWebsiteSearchIndexService,
 	supportedWebsiteEntityTypes,
 } from "@dariah-eric/search-website";
 import { createSearchAdminService } from "@dariah-eric/search/admin";
@@ -99,12 +98,8 @@ function createEntityIds(): Promise<Array<string>> {
 	if (values.entityIds != null) {
 		const entityIds = values.entityIds
 			.split(",")
-			.map((value) => {
-				return value.trim();
-			})
-			.filter((value) => {
-				return value.length > 0;
-			});
+			.map((value) => value.trim())
+			.filter((value) => value.length > 0);
 
 		if (entityIds.length === 0) {
 			throw new Error("Expected at least one entity id in --entityIds.");
@@ -137,18 +132,16 @@ async function main(): Promise<void> {
 
 	const entityIds = await createEntityIds();
 	const items = await Promise.all(
-		entityIds.map((entityId) => {
-			return websiteSearchIndex.syncWebsiteDocumentForEntityWithResult(entityId);
-		}),
+		entityIds.map((entityId) =>
+			websiteSearchIndex.syncWebsiteDocumentForEntityWithResult(entityId),
+		),
 	);
 
 	log.success(
 		JSON.stringify(
 			{
 				count: items.length,
-				ok: items.every((item) => {
-					return item.ok;
-				}),
+				ok: items.every((item) => item.ok),
 				items,
 			},
 			null,
@@ -162,6 +155,5 @@ main()
 		log.error(error);
 		process.exitCode = 1;
 	})
-	.finally(() => {
-		return db.$client.end();
-	});
+	// oxlint-disable-next-line typescript/no-misused-promises, typescript/strict-void-return
+	.finally(() => db.$client.end());

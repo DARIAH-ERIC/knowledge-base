@@ -3,7 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
-import { type Database, db, type Transaction } from "@/lib/db";
+import { type Database, type Transaction, db } from "@/lib/db";
 import { and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images/";
 

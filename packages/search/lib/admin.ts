@@ -2,7 +2,7 @@ import { Result } from "better-result";
 import { Client } from "typesense";
 
 import { type ResourceDocument, resourcesCollection } from "./collections/resources";
-import { websiteCollection, type WebsiteDocument } from "./collections/website";
+import { type WebsiteDocument, websiteCollection } from "./collections/website";
 import {
 	SearchApiKeyError,
 	SearchCollectionError,

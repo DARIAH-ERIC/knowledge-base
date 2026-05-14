@@ -2,17 +2,16 @@
 
 import { XCircleIcon } from "@heroicons/react/16/solid";
 import { useExtracted } from "next-intl";
-import type React from "react";
 import { Fragment, type ReactNode } from "react";
 import {
-	Button,
-	composeRenderProps,
 	Tag as AriaTag,
 	TagGroup as AriaTagGroup,
 	type TagGroupProps as AriaTagGroupProps,
 	TagList as AriaTagList,
 	type TagListProps as AriaTagListProps,
 	type TagProps as AriaTagProps,
+	Button,
+	composeRenderProps,
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
@@ -55,10 +54,10 @@ export function Tag(props: Readonly<TagProps>): ReactNode {
 			className={cx(
 				"inset-ring inset-ring-input outline-hidden dark:bg-input/30",
 				"inline-flex items-center gap-x-1.5 py-0.5 font-medium text-xs/5 forced-colors:outline",
-				"*:data-[slot=icon]:size-3 *:data-[slot=icon]:shrink-0",
+				"*:data-[slot=icon]:block-3 *:data-[slot=icon]:inline-3 *:data-[slot=icon]:shrink-0",
 				"cursor-default rounded-full px-2",
 				"selected:inset-ring-ring/70 selected:bg-primary-subtle selected:text-primary-subtle-fg",
-				"disabled:opacity-50 disabled:forced-colors:text-[GrayText]",
+				"disabled:opacity-50 forced-colors:disabled:text-[GrayText]",
 				className,
 			)}
 			textValue={textValue}
@@ -71,7 +70,7 @@ export function Tag(props: Readonly<TagProps>): ReactNode {
 						{children}
 						{allowsRemoving && (
 							<Button aria-label={t("Remove tag")} className="" slot="remove">
-								<XCircleIcon className="-mr-1 size-4" />
+								<XCircleIcon className="-me-1 block-4 inline-4" />
 							</Button>
 						)}
 					</Fragment>

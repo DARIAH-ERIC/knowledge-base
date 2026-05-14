@@ -1,5 +1,5 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
-import { request, type RequestResult } from "@dariah-eric/request";
+import { type RequestResult, request } from "@dariah-eric/request";
 import type { RequestError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
 
@@ -135,8 +135,8 @@ function createListAll<TParams extends object, TItem>(
 		},
 	) => Promise<RequestResult<DariahCampusPaginatedResponse<TItem>>>,
 ): (params: TParams) => Promise<Result<Array<TItem>, RequestError>> {
-	return (params) => {
-		return Result.gen(async function* () {
+	return (params) =>
+		Result.gen(async function* () {
 			const items: Array<TItem> = [];
 			let offset = 0;
 			let total = Infinity;
@@ -157,7 +157,6 @@ function createListAll<TParams extends object, TItem>(
 
 			return Result.ok(items);
 		});
-	};
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -214,9 +213,7 @@ export function createDariahCampusClient(params: CreateDariahCampusClientParams)
 			listAll(
 				params: Omit<ListDariahCampusCurriculaParams, "limit" | "offset"> = {},
 			): Promise<Result<Array<DariahCampusCurriculum>, RequestError>> {
-				return createListAll((pageParams) => {
-					return listCurricula(pageParams);
-				})(params);
+				return createListAll((pageParams) => listCurricula(pageParams))(params);
 			},
 		},
 
@@ -230,9 +227,7 @@ export function createDariahCampusClient(params: CreateDariahCampusClientParams)
 			listAll(
 				params: Omit<ListDariahCampusResourcesParams, "limit" | "offset"> = {},
 			): Promise<Result<Array<DariahCampusResource>, RequestError>> {
-				return createListAll((pageParams) => {
-					return listResources(pageParams);
-				})(params);
+				return createListAll((pageParams) => listResources(pageParams))(params);
 			},
 		},
 	};

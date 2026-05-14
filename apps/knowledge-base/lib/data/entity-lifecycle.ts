@@ -85,7 +85,9 @@ async function cloneTypedContentBlock(
 				.from(schema.richTextContentBlocks)
 				.where(eq(schema.richTextContentBlocks.id, sourceBlockId))
 				.limit(1);
-			if (source == null) return;
+			if (source == null) {
+				return;
+			}
 			await tx
 				.insert(schema.richTextContentBlocks)
 				.values({ id: targetBlockId, content: source.content });
@@ -101,7 +103,9 @@ async function cloneTypedContentBlock(
 				.from(schema.imageContentBlocks)
 				.where(eq(schema.imageContentBlocks.id, sourceBlockId))
 				.limit(1);
-			if (source == null) return;
+			if (source == null) {
+				return;
+			}
 			await tx.insert(schema.imageContentBlocks).values({ id: targetBlockId, ...source });
 			break;
 		}
@@ -116,7 +120,9 @@ async function cloneTypedContentBlock(
 				.from(schema.dataContentBlocks)
 				.where(eq(schema.dataContentBlocks.id, sourceBlockId))
 				.limit(1);
-			if (source == null) return;
+			if (source == null) {
+				return;
+			}
 			await tx.insert(schema.dataContentBlocks).values({ id: targetBlockId, ...source });
 			break;
 		}
@@ -131,7 +137,9 @@ async function cloneTypedContentBlock(
 				.from(schema.embedContentBlocks)
 				.where(eq(schema.embedContentBlocks.id, sourceBlockId))
 				.limit(1);
-			if (source == null) return;
+			if (source == null) {
+				return;
+			}
 			await tx.insert(schema.embedContentBlocks).values({ id: targetBlockId, ...source });
 			break;
 		}
@@ -147,7 +155,9 @@ async function cloneTypedContentBlock(
 				.from(schema.heroContentBlocks)
 				.where(eq(schema.heroContentBlocks.id, sourceBlockId))
 				.limit(1);
-			if (source == null) return;
+			if (source == null) {
+				return;
+			}
 			await tx.insert(schema.heroContentBlocks).values({ id: targetBlockId, ...source });
 			break;
 		}
@@ -158,7 +168,9 @@ async function cloneTypedContentBlock(
 				.from(schema.accordionContentBlocks)
 				.where(eq(schema.accordionContentBlocks.id, sourceBlockId))
 				.limit(1);
-			if (source == null) return;
+			if (source == null) {
+				return;
+			}
 			await tx.insert(schema.accordionContentBlocks).values({ id: targetBlockId, ...source });
 			break;
 		}
@@ -169,7 +181,9 @@ async function cloneTypedContentBlock(
 				.from(schema.galleryContentBlocks)
 				.where(eq(schema.galleryContentBlocks.id, sourceBlockId))
 				.limit(1);
-			if (source == null) return;
+			if (source == null) {
+				return;
+			}
 			await tx.insert(schema.galleryContentBlocks).values({ id: targetBlockId, ...source });
 
 			const items = await tx
@@ -255,9 +269,7 @@ async function wipeVersionContent(tx: Transaction, versionId: string): Promise<v
 		.where(eq(schema.fields.entityVersionId, versionId));
 
 	if (fieldRows.length > 0) {
-		const fieldIds = fieldRows.map((f) => {
-			return f.id;
-		});
+		const fieldIds = fieldRows.map((f) => f.id);
 		await tx.delete(schema.contentBlocks).where(inArray(schema.contentBlocks.fieldId, fieldIds));
 		await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
 	}
@@ -322,9 +334,13 @@ export async function getDocumentVersions(
 	let publishedId: string | null = null;
 
 	for (const row of rows) {
-		if (row.statusType === "draft") draftId = row.id;
+		if (row.statusType === "draft") {
+			draftId = row.id;
+		}
 		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-		else if (row.statusType === "published") publishedId = row.id;
+		else if (row.statusType === "published") {
+			publishedId = row.id;
+		}
 	}
 
 	return { draftId, publishedId };
@@ -344,7 +360,9 @@ export async function ensureDraftVersion(
 ): Promise<string> {
 	const { draftId, publishedId } = await getDocumentVersions(tx, documentId);
 
-	if (draftId != null) return draftId;
+	if (draftId != null) {
+		return draftId;
+	}
 
 	const newDraftId = await createVersionRow(tx, documentId, "draft");
 
@@ -420,7 +438,9 @@ export async function discardDraftVersion(
 	adapter: EntityLifecycleAdapter,
 ): Promise<void> {
 	const { draftId } = await getDocumentVersions(tx, documentId);
-	if (draftId == null) return;
+	if (draftId == null) {
+		return;
+	}
 
 	await adapter.wipeSubtype(tx, draftId);
 	await wipeVersionContent(tx, draftId);

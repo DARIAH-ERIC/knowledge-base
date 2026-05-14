@@ -79,10 +79,9 @@ export function NavigationMenuCreateDialog(): ReactNode {
 	const [formKey, setFormKey] = useState(0);
 
 	function handleOpenChange(open: boolean) {
-		if (open)
-			setFormKey((k) => {
-				return k + 1;
-			});
+		if (open) {
+			setFormKey((k) => k + 1);
+		}
 		setIsOpen(open);
 	}
 
@@ -94,7 +93,7 @@ export function NavigationMenuCreateDialog(): ReactNode {
 					handleOpenChange(true);
 				}}
 			>
-				<PlusIcon className="mr-2 size-4" />
+				<PlusIcon className="me-2 block-4 inline-4" />
 				{t("New menu")}
 			</Button>
 

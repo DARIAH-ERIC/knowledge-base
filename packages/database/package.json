@@ -29,8 +29,8 @@
 		"format:check": "oxfmt --check",
 		"format:fix": "oxfmt --write",
 		"generate:dbml-schema": "tsx ./scripts/generate-dbml-schema.ts",
-		"lint:check": "eslint . --flag unstable_native_nodejs_ts_config",
-		"lint:fix": "eslint . --fix --flag unstable_native_nodejs_ts_config",
+		"lint:check": "oxlint --report-unused-disable-directives --type-aware --type-check",
+		"lint:fix": "oxlint --fix --report-unused-disable-directives --type-aware --type-check",
 		"types:check": "tsc --noEmit"
 	},
 	"dependencies": {
@@ -52,7 +52,6 @@
 		"drizzle-dbml-generator": "catalog:",
 		"drizzle-kit": "catalog:",
 		"drizzle-seed": "catalog:",
-		"eslint": "catalog:",
 		"tsdown": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:"

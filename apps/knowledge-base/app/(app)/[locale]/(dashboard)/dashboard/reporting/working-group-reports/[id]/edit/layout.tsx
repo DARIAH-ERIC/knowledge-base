@@ -40,7 +40,7 @@ export default async function WorkingGroupReportEditLayout(
 				</HeaderContent>
 			</Header>
 
-			<div className="flex flex-col gap-y-6 px-(--layout-padding) pt-6">
+			<div className="flex flex-col gap-y-6 px-(--layout-padding) pbs-6">
 				<WorkingGroupReportStepNav reportId={id} />
 				{children}
 			</div>

@@ -28,9 +28,7 @@ export const entityTypes = p.snakeCase.table(
 		type: p.text("type", { enum: entityTypesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [p.check("entity_types_type_enum_check", inArray(t.type, entityTypesEnum))];
-	},
+	(t) => [p.check("entity_types_type_enum_check", inArray(t.type, entityTypesEnum))],
 );
 
 export type EntityType = typeof entityTypes.$inferSelect;
@@ -49,9 +47,7 @@ export const entityStatus = p.snakeCase.table(
 		type: p.text("type", { enum: entityStatusEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [p.check("entity_status_type_enum_check", inArray(t.type, entityStatusEnum))];
-	},
+	(t) => [p.check("entity_status_type_enum_check", inArray(t.type, entityStatusEnum))],
 );
 
 export type EntityStatus = typeof entityStatus.$inferSelect;
@@ -72,15 +68,11 @@ export const entities = p.snakeCase.table(
 		typeId: p
 			.uuid("type_id")
 			.notNull()
-			.references(() => {
-				return entityTypes.id;
-			}),
+			.references(() => entityTypes.id),
 		slug: p.text("slug").notNull(),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [p.unique("entities_type_id_slug_unique").on(t.typeId, t.slug)];
-	},
+	(t) => [p.unique("entities_type_id_slug_unique").on(t.typeId, t.slug)],
 );
 
 export type Entity = typeof entities.$inferSelect;
@@ -101,20 +93,14 @@ export const entityVersions = p.snakeCase.table(
 		entityId: p
 			.uuid("entity_id")
 			.notNull()
-			.references(() => {
-				return entities.id;
-			}),
+			.references(() => entities.id),
 		statusId: p
 			.uuid("status_id")
 			.notNull()
-			.references(() => {
-				return entityStatus.id;
-			}),
+			.references(() => entityStatus.id),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [p.unique("entity_versions_entity_id_status_id_unique").on(t.entityId, t.statusId)];
-	},
+	(t) => [p.unique("entity_versions_entity_id_status_id_unique").on(t.entityId, t.statusId)],
 );
 
 export type EntityVersion = typeof entityVersions.$inferSelect;
@@ -131,18 +117,14 @@ export const entityTypesFieldsNames = p.snakeCase.table(
 		entityTypeId: p
 			.uuid("entity_type_id")
 			.notNull()
-			.references(() => {
-				return entityTypes.id;
-			}),
+			.references(() => entityTypes.id),
 		fieldName: p.text("field_name").notNull(),
 	},
-	(t) => {
-		return [
-			p
-				.unique("entity_types_fields_names_entity_type_id_field_name_unique")
-				.on(t.entityTypeId, t.fieldName),
-		];
-	},
+	(t) => [
+		p
+			.unique("entity_types_fields_names_entity_type_id_field_name_unique")
+			.on(t.entityTypeId, t.fieldName),
+	],
 );
 
 // only provide select for now: the entity type fields mapping should be changed via migrations
@@ -157,24 +139,16 @@ export const fields = p.snakeCase.table(
 		entityVersionId: p
 			.uuid("entity_version_id")
 			.notNull()
-			.references(() => {
-				return entityVersions.id;
-			}),
+			.references(() => entityVersions.id),
 		fieldNameId: p
 			.uuid("field_name_id")
 			.notNull()
-			.references(() => {
-				return entityTypesFieldsNames.id;
-			}),
+			.references(() => entityTypesFieldsNames.id),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [
-			p
-				.unique("fields_entity_version_id_field_name_id_unique")
-				.on(t.entityVersionId, t.fieldNameId),
-		];
-	},
+	(t) => [
+		p.unique("fields_entity_version_id_field_name_id_unique").on(t.entityVersionId, t.fieldNameId),
+	],
 );
 
 export type Field = typeof fields.$inferSelect;
@@ -194,25 +168,19 @@ export const entitiesToEntities = p.snakeCase.table(
 		entityId: p
 			.uuid("entity_id")
 			.notNull()
-			.references(() => {
-				return entities.id;
-			}),
+			.references(() => entities.id),
 		relatedEntityId: p
 			.uuid("related_entity_id")
 			.notNull()
-			.references(() => {
-				return entities.id;
-			}),
+			.references(() => entities.id),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [
-			p.primaryKey({
-				columns: [t.entityId, t.relatedEntityId],
-				name: "entities_to_entities_pkey",
-			}),
-		];
-	},
+	(t) => [
+		p.primaryKey({
+			columns: [t.entityId, t.relatedEntityId],
+			name: "entities_to_entities_pkey",
+		}),
+	],
 );
 
 /** Document-level: a relation from a document to an external resource (search index id). */
@@ -222,18 +190,14 @@ export const entitiesToResources = p.snakeCase.table(
 		entityId: p
 			.uuid("entity_id")
 			.notNull()
-			.references(() => {
-				return entities.id;
-			}),
+			.references(() => entities.id),
 		resourceId: p.text("resource_id").notNull(),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [
-			p.primaryKey({
-				columns: [t.entityId, t.resourceId],
-				name: "entities_to_resources_pkey",
-			}),
-		];
-	},
+	(t) => [
+		p.primaryKey({
+			columns: [t.entityId, t.resourceId],
+			name: "entities_to_resources_pkey",
+		}),
+	],
 );

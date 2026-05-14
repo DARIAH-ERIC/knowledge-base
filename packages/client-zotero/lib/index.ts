@@ -1,5 +1,5 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
-import { request, type RequestResult } from "@dariah-eric/request";
+import { type RequestResult, request } from "@dariah-eric/request";
 import type { RequestError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
 
@@ -240,11 +240,11 @@ function createListAll<TItem, TResponse, TBaseParams extends object>(
 	) => Promise<RequestResult<TResponse>>,
 	getItems: (response: TResponse) => Array<TItem>,
 ): (params: TBaseParams) => Promise<Result<Array<TItem>, RequestError>> {
-	return (params) => {
-		return Result.gen(async function* () {
+	return (params) =>
+		Result.gen(async function* () {
 			const items: Array<TItem> = [];
 			let start = 0;
-			let totalResults = Infinity;
+			let totalResults;
 
 			do {
 				const pageParams: TBaseParams & { limit: number; start: number } = {
@@ -260,7 +260,6 @@ function createListAll<TItem, TResponse, TBaseParams extends object>(
 
 			return Result.ok(items);
 		});
-	};
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -379,9 +378,7 @@ export function createZoteroClient(params: CreateZoteroClientParams) {
 			listAll(
 				params: Omit<GetGroupItemsParams, "limit" | "start">,
 			): Promise<Result<Array<ZoteroJsonItem>, RequestError>> {
-				return createListAll(getGroupItemsJson, (response) => {
-					return response;
-				})(params);
+				return createListAll(getGroupItemsJson, (response) => response)(params);
 			},
 
 			csljson: {
@@ -392,9 +389,7 @@ export function createZoteroClient(params: CreateZoteroClientParams) {
 				listAll(
 					params: Omit<GetGroupItemsParams, "limit" | "start">,
 				): Promise<Result<Array<ZoteroCslItem>, RequestError>> {
-					return createListAll(getGroupItemsCslJson, (response) => {
-						return response.items;
-					})(params);
+					return createListAll(getGroupItemsCslJson, (response) => response.items)(params);
 				},
 			},
 		},
@@ -407,9 +402,7 @@ export function createZoteroClient(params: CreateZoteroClientParams) {
 			listAll(
 				params: Omit<GetGroupCollectionsParams, "limit" | "start">,
 			): Promise<Result<Array<ZoteroCollection>, RequestError>> {
-				return createListAll(getGroupCollections, (response) => {
-					return response;
-				})(params);
+				return createListAll(getGroupCollections, (response) => response)(params);
 			},
 
 			items: {
@@ -420,9 +413,7 @@ export function createZoteroClient(params: CreateZoteroClientParams) {
 				listAll(
 					params: Omit<GetCollectionItemsParams, "limit" | "start">,
 				): Promise<Result<Array<ZoteroJsonItem>, RequestError>> {
-					return createListAll(getCollectionItemsJson, (response) => {
-						return response;
-					})(params);
+					return createListAll(getCollectionItemsJson, (response) => response)(params);
 				},
 
 				csljson: {
@@ -433,9 +424,7 @@ export function createZoteroClient(params: CreateZoteroClientParams) {
 					listAll(
 						params: Omit<GetCollectionItemsParams, "limit" | "start">,
 					): Promise<Result<Array<ZoteroCslItem>, RequestError>> {
-						return createListAll(getCollectionItemsCslJson, (response) => {
-							return response.items;
-						})(params);
+						return createListAll(getCollectionItemsCslJson, (response) => response.items)(params);
 					},
 				},
 			},

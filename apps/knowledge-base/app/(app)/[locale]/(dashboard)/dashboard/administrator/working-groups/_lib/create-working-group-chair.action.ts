@@ -59,9 +59,7 @@ export const createWorkingGroupChairAction = createServerAction(
 			.insert(schema.personsToOrganisationalUnits)
 			.values({ personId, organisationalUnitId: unitId, roleTypeId: roleType.id, duration })
 			.returning({ id: schema.personsToOrganisationalUnits.id })
-			.then((rows) => {
-				return rows[0]!;
-			});
+			.then((rows) => rows[0]!);
 
 		revalidatePath("/[locale]/dashboard/administrator/working-groups", "layout");
 

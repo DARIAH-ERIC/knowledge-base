@@ -8,14 +8,14 @@ import { validate, validator } from "@/lib/openapi/validator";
 import {
 	GetSpotlightArticleById,
 	GetSpotlightArticleBySlug,
-	GetSpotlightArticles,
 	GetSpotlightArticleSlugs,
+	GetSpotlightArticles,
 } from "@/routes/spotlight-articles/schemas";
 import {
 	getSpotlightArticleById,
 	getSpotlightArticleBySlug,
-	getSpotlightArticles,
 	getSpotlightArticleSlugs,
+	getSpotlightArticles,
 } from "@/routes/spotlight-articles/service";
 
 export const router = createRouter()

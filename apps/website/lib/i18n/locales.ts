@@ -1,5 +1,5 @@
 import { unique } from "@acdh-oeaw/lib";
-import { hasLocale, type Timezone } from "next-intl";
+import { type Timezone, hasLocale } from "next-intl";
 
 export const locales = [
 	// "de-AT",

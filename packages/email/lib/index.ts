@@ -1,5 +1,5 @@
 import { Result } from "better-result";
-import { createTransport, type SendMailOptions } from "nodemailer";
+import { type SendMailOptions, createTransport } from "nodemailer";
 import type SMTPTransport from "nodemailer/lib/smtp-transport";
 
 import { EmailConnectionError, EmailSendError } from "./errors";

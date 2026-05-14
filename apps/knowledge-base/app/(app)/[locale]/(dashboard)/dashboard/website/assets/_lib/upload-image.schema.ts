@@ -7,9 +7,7 @@ export const UploadImageInputSchema = v.object({
 	file: v.pipe(
 		v.file(),
 		v.mimeType(imageMimeTypes),
-		v.check((input) => {
-			return input.size <= imageSizeLimit;
-		}),
+		v.check((input) => input.size <= imageSizeLimit),
 	),
 	licenseId: v.optional(v.pipe(v.string(), v.nonEmpty())),
 	prefix: v.picklist(assetPrefixes),

@@ -168,28 +168,16 @@ export async function getServiceForAdmin(currentUser: Pick<User, "role">, id: st
 		.from(schema.servicesToOrganisationalUnits)
 		.where(eq(schema.servicesToOrganisationalUnits.serviceId, id));
 
-	const ownerRoleId = serviceRoles.find((r) => {
-		return r.role === "service_owner";
-	})?.id;
-	const providerRoleId = serviceRoles.find((r) => {
-		return r.role === "service_provider";
-	})?.id;
+	const ownerRoleId = serviceRoles.find((r) => r.role === "service_owner")?.id;
+	const providerRoleId = serviceRoles.find((r) => r.role === "service_provider")?.id;
 
 	const ownerUnitIds = unitRoleRows
-		.filter((r) => {
-			return r.roleId === ownerRoleId;
-		})
-		.map((r) => {
-			return r.organisationalUnitId;
-		});
+		.filter((r) => r.roleId === ownerRoleId)
+		.map((r) => r.organisationalUnitId);
 
 	const providerUnitIds = unitRoleRows
-		.filter((r) => {
-			return r.roleId === providerRoleId;
-		})
-		.map((r) => {
-			return r.organisationalUnitId;
-		});
+		.filter((r) => r.roleId === providerRoleId)
+		.map((r) => r.organisationalUnitId);
 
 	const selectedOrganisationalUnits = await getOrganisationalUnitOptionsByIds([
 		...new Set([...ownerUnitIds, ...providerUnitIds]),

@@ -66,10 +66,10 @@ function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
 
 	return (
 		<div className="flex items-center gap-x-2 rounded-md p-2 hover:bg-muted/50">
-			<div className="min-w-0 flex-1">
+			<div className="min-inline-0 flex-1">
 				<span className="text-sm font-medium">{item.title}</span>
 				{item.summary ? (
-					<span className="text-muted-fg ml-2 truncate text-xs">{item.summary}</span>
+					<span className="text-muted-fg ms-2 truncate text-xs">{item.summary}</span>
 				) : null}
 			</div>
 
@@ -84,7 +84,7 @@ function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
 						}}
 						size="sq-sm"
 					>
-						<ChevronUpIcon className="size-4" />
+						<ChevronUpIcon className="block-4 inline-4" />
 					</Button>
 					<TooltipContent inverse={true}>{t("Move up")}</TooltipContent>
 				</Tooltip>
@@ -98,7 +98,7 @@ function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
 						}}
 						size="sq-sm"
 					>
-						<ChevronDownIcon className="size-4" />
+						<ChevronDownIcon className="block-4 inline-4" />
 					</Button>
 					<TooltipContent inverse={true}>{t("Move down")}</TooltipContent>
 				</Tooltip>
@@ -111,7 +111,7 @@ function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
 						}}
 						size="sq-sm"
 					>
-						<PencilSquareIcon className="size-4" />
+						<PencilSquareIcon className="block-4 inline-4" />
 					</Button>
 					<TooltipContent inverse={true}>{t("Edit")}</TooltipContent>
 				</Tooltip>
@@ -134,7 +134,7 @@ function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
 						}}
 						size="sq-sm"
 					>
-						<TrashIcon className="size-4 text-danger" />
+						<TrashIcon className="block-4 inline-4 text-danger" />
 					</Button>
 					<TooltipContent inverse={true}>{t("Delete")}</TooltipContent>
 				</Tooltip>
@@ -177,8 +177,8 @@ function DocumentSection(props: Readonly<DocumentSectionProps>): ReactNode {
 	const t = useExtracted();
 
 	return (
-		<div className="mb-6">
-			<div className="mb-2 flex items-center gap-x-2 border-b pb-2">
+		<div className="mbe-6">
+			<div className="mbe-2 flex items-center gap-x-2 border-be pbe-2">
 				<h2 className="flex-1 text-sm font-semibold">{label}</h2>
 				{groupId != null && onMoveGroup != null && onDeleteGroup != null && (
 					<div className="flex shrink-0 items-center gap-x-1">
@@ -192,7 +192,7 @@ function DocumentSection(props: Readonly<DocumentSectionProps>): ReactNode {
 								}}
 								size="sq-sm"
 							>
-								<ChevronUpIcon className="size-4" />
+								<ChevronUpIcon className="block-4 inline-4" />
 							</Button>
 							<TooltipContent inverse={true}>{t("Move group up")}</TooltipContent>
 						</Tooltip>
@@ -206,7 +206,7 @@ function DocumentSection(props: Readonly<DocumentSectionProps>): ReactNode {
 								}}
 								size="sq-sm"
 							>
-								<ChevronDownIcon className="size-4" />
+								<ChevronDownIcon className="block-4 inline-4" />
 							</Button>
 							<TooltipContent inverse={true}>{t("Move group down")}</TooltipContent>
 						</Tooltip>
@@ -219,7 +219,7 @@ function DocumentSection(props: Readonly<DocumentSectionProps>): ReactNode {
 								}}
 								size="sq-sm"
 							>
-								<TrashIcon className="size-4 text-danger" />
+								<TrashIcon className="block-4 inline-4 text-danger" />
 							</Button>
 							<TooltipContent inverse={true}>{t("Delete group")}</TooltipContent>
 						</Tooltip>
@@ -231,23 +231,21 @@ function DocumentSection(props: Readonly<DocumentSectionProps>): ReactNode {
 				<p className="text-muted-fg p-2 text-xs">{t("No documents yet.")}</p>
 			) : (
 				<div className="flex flex-col gap-y-0.5">
-					{items.map((item, index) => {
-						return (
-							<DocumentRow
-								key={item.id}
-								isFirst={index === 0}
-								isLast={index === items.length - 1}
-								item={item}
-								onDelete={onDeleteDocument}
-								onEdit={onEditDocument}
-								onMove={onMoveDocument}
-							/>
-						);
-					})}
+					{items.map((item, index) => (
+						<DocumentRow
+							key={item.id}
+							isFirst={index === 0}
+							isLast={index === items.length - 1}
+							item={item}
+							onDelete={onDeleteDocument}
+							onEdit={onEditDocument}
+							onMove={onMoveDocument}
+						/>
+					))}
 				</div>
 			)}
 
-			<div className="mt-2">
+			<div className="mbs-2">
 				<Button
 					intent="plain"
 					onPress={() => {
@@ -255,7 +253,7 @@ function DocumentSection(props: Readonly<DocumentSectionProps>): ReactNode {
 					}}
 					size="sm"
 				>
-					<PlusIcon className="mr-1 size-3.5" />
+					<PlusIcon className="me-1 block-3.5 inline-3.5" />
 					{t("Add document")}
 				</Button>
 			</div>
@@ -298,49 +296,47 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 							setDialogState({ isOpen: true, item: null, initialGroupId: null });
 						}}
 					>
-						<PlusIcon className="mr-2 size-4" />
+						<PlusIcon className="me-2 block-4 inline-4" />
 						{t("New document")}
 					</Button>
 				</HeaderAction>
 			</Header>
 
 			<div className="p-(--layout-padding)">
-				{groups.map((group, groupIndex) => {
-					return (
-						<DocumentSection
-							key={group.id}
-							groupId={group.id}
-							groups={allGroups}
-							initialAssets={initialAssets}
-							isFirstGroup={groupIndex === 0}
-							isLastGroup={groupIndex === groups.length - 1}
-							items={group.documentsPolicies}
-							label={group.label}
-							onAddDocument={(gid) => {
-								setDialogState({ isOpen: true, item: null, initialGroupId: gid });
-							}}
-							onDeleteDocument={(id) => {
-								setDocumentToDelete(id);
-							}}
-							onDeleteGroup={(id) => {
-								setGroupToDelete(id);
-							}}
-							onEditDocument={(item) => {
-								setDialogState({ isOpen: true, item });
-							}}
-							onMoveDocument={(id, direction) => {
-								startTransition(async () => {
-									await moveDocumentOrPolicyAction(id, direction);
-								});
-							}}
-							onMoveGroup={(id, direction) => {
-								startTransition(async () => {
-									await moveDocumentPolicyGroupAction(id, direction);
-								});
-							}}
-						/>
-					);
-				})}
+				{groups.map((group, groupIndex) => (
+					<DocumentSection
+						key={group.id}
+						groupId={group.id}
+						groups={allGroups}
+						initialAssets={initialAssets}
+						isFirstGroup={groupIndex === 0}
+						isLastGroup={groupIndex === groups.length - 1}
+						items={group.documentsPolicies}
+						label={group.label}
+						onAddDocument={(gid) => {
+							setDialogState({ isOpen: true, item: null, initialGroupId: gid });
+						}}
+						onDeleteDocument={(id) => {
+							setDocumentToDelete(id);
+						}}
+						onDeleteGroup={(id) => {
+							setGroupToDelete(id);
+						}}
+						onEditDocument={(item) => {
+							setDialogState({ isOpen: true, item });
+						}}
+						onMoveDocument={(id, direction) => {
+							startTransition(async () => {
+								await moveDocumentOrPolicyAction(id, direction);
+							});
+						}}
+						onMoveGroup={(id, direction) => {
+							startTransition(async () => {
+								await moveDocumentPolicyGroupAction(id, direction);
+							});
+						}}
+					/>
+				))}
 
 				<DocumentSection
 					groupId={null}
@@ -382,14 +378,18 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 				isOpen={documentToDelete != null}
 				model={t("document or policy")}
 				onAction={() => {
-					if (documentToDelete == null) return;
+					if (documentToDelete == null) {
+						return;
+					}
 					startTransition(async () => {
 						await deleteDocumentOrPolicyAction(documentToDelete);
 						setDocumentToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) setDocumentToDelete(null);
+					if (!open) {
+						setDocumentToDelete(null);
+					}
 				}}
 			/>
 
@@ -397,14 +397,18 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 				isOpen={groupToDelete != null}
 				model={t("group")}
 				onAction={() => {
-					if (groupToDelete == null) return;
+					if (groupToDelete == null) {
+						return;
+					}
 					startTransition(async () => {
 						await deleteDocumentPolicyGroupAction(groupToDelete);
 						setGroupToDelete(null);
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) setGroupToDelete(null);
+					if (!open) {
+						setGroupToDelete(null);
+					}
 				}}
 			/>
 		</Fragment>

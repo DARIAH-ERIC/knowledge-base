@@ -13,8 +13,8 @@ import { AdminUsersPage } from "@/e2e/lib/fixtures/admin-users-page";
 import { AdminWorkingGroupsPage } from "@/e2e/lib/fixtures/admin-working-groups-page";
 import { ContactPage } from "@/e2e/lib/fixtures/contact-page";
 import { DatabaseService } from "@/e2e/lib/fixtures/database-service";
-import { createEmailService, type EmailService } from "@/e2e/lib/fixtures/email-service";
-import { createI18n, type I18n, type WithI18n } from "@/e2e/lib/fixtures/i18n";
+import { type EmailService, createEmailService } from "@/e2e/lib/fixtures/email-service";
+import { type I18n, type WithI18n, createI18n } from "@/e2e/lib/fixtures/i18n";
 import { ImprintPage } from "@/e2e/lib/fixtures/imprint-page";
 import { IndexPage } from "@/e2e/lib/fixtures/index-page";
 import { WebsiteEventsPage } from "@/e2e/lib/fixtures/website-events-page";
@@ -22,7 +22,7 @@ import { WebsiteImpactCaseStudiesPage } from "@/e2e/lib/fixtures/website-impact-
 import { WebsiteNewsPage } from "@/e2e/lib/fixtures/website-news-page";
 import { WebsitePagesPage } from "@/e2e/lib/fixtures/website-pages-page";
 import { WebsiteSpotlightArticlesPage } from "@/e2e/lib/fixtures/website-spotlight-articles-page";
-import { defaultLocale, type IntlLocale } from "@/lib/i18n/locales";
+import { type IntlLocale, defaultLocale } from "@/lib/i18n/locales";
 
 interface TestFixtures {
 	// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
@@ -76,9 +76,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 					}),
 				);
 
-				await context.route(baseUrl, (route) => {
-					return route.fulfill({ status: 204, body: "" });
-				});
+				await context.route(baseUrl, (route) => route.fulfill({ status: 204, body: "" }));
 			}
 
 			await use();
@@ -87,21 +85,15 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 	],
 
 	async createAccessibilityScanner({ page }, use) {
-		await use(() => {
-			return createAccessibilityScanner(page);
-		});
+		await use(() => createAccessibilityScanner(page));
 	},
 
 	async createEmailService({ request }, use) {
-		await use(() => {
-			return createEmailService(request);
-		});
+		await use(() => createEmailService(request));
 	},
 
 	async createI18n({ page }, use) {
-		await use((locale) => {
-			return createI18n(page, locale);
-		});
+		await use((locale) => createI18n(page, locale));
 	},
 
 	async createContactPage({ page }, use) {
@@ -135,69 +127,47 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 	},
 
 	async createAdminProjectsPage({ page }, use) {
-		await use((workerIndex: number) => {
-			return new AdminProjectsPage(page, workerIndex);
-		});
+		await use((workerIndex: number) => new AdminProjectsPage(page, workerIndex));
 	},
 
 	async createAdminPersonsPage({ page }, use) {
-		await use((workerIndex: number) => {
-			return new AdminPersonsPage(page, workerIndex);
-		});
+		await use((workerIndex: number) => new AdminPersonsPage(page, workerIndex));
 	},
 
 	async createAdminServicesPage({ page }, use) {
-		await use((workerIndex: number) => {
-			return new AdminServicesPage(page, workerIndex);
-		});
+		await use((workerIndex: number) => new AdminServicesPage(page, workerIndex));
 	},
 
 	async createAdminSocialMediaPage({ page }, use) {
-		await use((workerIndex: number) => {
-			return new AdminSocialMediaPage(page, workerIndex);
-		});
+		await use((workerIndex: number) => new AdminSocialMediaPage(page, workerIndex));
 	},
 
 	async createAdminUsersPage({ page }, use) {
-		await use((workerIndex: number) => {
-			return new AdminUsersPage(page, workerIndex);
-		});
+		await use((workerIndex: number) => new AdminUsersPage(page, workerIndex));
 	},
 
 	async createAdminWorkingGroupsPage({ page }, use) {
-		await use((workerIndex: number) => {
-			return new AdminWorkingGroupsPage(page, workerIndex);
-		});
+		await use((workerIndex: number) => new AdminWorkingGroupsPage(page, workerIndex));
 	},
 
 	async createWebsiteEventsPage({ page }, use) {
-		await use((workerIndex: number) => {
-			return new WebsiteEventsPage(page, workerIndex);
-		});
+		await use((workerIndex: number) => new WebsiteEventsPage(page, workerIndex));
 	},
 
 	async createWebsiteImpactCaseStudiesPage({ page }, use) {
-		await use((workerIndex: number) => {
-			return new WebsiteImpactCaseStudiesPage(page, workerIndex);
-		});
+		await use((workerIndex: number) => new WebsiteImpactCaseStudiesPage(page, workerIndex));
 	},
 
 	async createWebsiteNewsPage({ page }, use) {
-		await use((workerIndex: number) => {
-			return new WebsiteNewsPage(page, workerIndex);
-		});
+		await use((workerIndex: number) => new WebsiteNewsPage(page, workerIndex));
 	},
 
 	async createWebsitePagesPage({ page }, use) {
-		await use((workerIndex: number) => {
-			return new WebsitePagesPage(page, workerIndex);
-		});
+		await use((workerIndex: number) => new WebsitePagesPage(page, workerIndex));
 	},
 
 	async createWebsiteSpotlightArticlesPage({ page }, use) {
-		await use((workerIndex: number) => {
-			return new WebsiteSpotlightArticlesPage(page, workerIndex);
-		});
+		await use((workerIndex: number) => new WebsiteSpotlightArticlesPage(page, workerIndex));
 	},
 
 	db: [

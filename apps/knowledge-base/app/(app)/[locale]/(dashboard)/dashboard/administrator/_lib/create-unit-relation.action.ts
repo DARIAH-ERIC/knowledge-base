@@ -59,9 +59,7 @@ export const createUnitRelationAction = createServerAction(
 			.insert(schema.organisationalUnitsRelations)
 			.values({ unitId, relatedUnitId, status: statusId, duration })
 			.returning({ id: schema.organisationalUnitsRelations.id })
-			.then((rows) => {
-				return rows[0]!;
-			});
+			.then((rows) => rows[0]!);
 
 		revalidatePath("/[locale]/dashboard/administrator", "layout");
 

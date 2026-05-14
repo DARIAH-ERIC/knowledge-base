@@ -1,10 +1,10 @@
 import { createSearchService } from "@dariah-eric/search";
 import {
-	createWebsiteSearchIndexService,
 	type SupportedWebsiteEntityType,
-	supportedWebsiteEntityTypes,
 	type SyncWebsiteDocumentResult,
 	type WebsiteDocumentDescriptor,
+	createWebsiteSearchIndexService,
+	supportedWebsiteEntityTypes,
 } from "@dariah-eric/search-website";
 
 import { env } from "@/config/env.config";

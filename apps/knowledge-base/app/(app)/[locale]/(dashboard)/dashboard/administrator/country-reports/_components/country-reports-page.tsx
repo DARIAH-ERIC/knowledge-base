@@ -55,11 +55,7 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 	const router = useRouter();
 	const [reports, optimisticallyRemoveReport] = useOptimistic(
 		resolvedReports,
-		(state, id: string) => {
-			return state.filter((r) => {
-				return r.id !== id;
-			});
-		},
+		(state, id: string) => state.filter((r) => r.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 
@@ -77,7 +73,7 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 						className={buttonStyles({ intent: "secondary" })}
 						href="/dashboard/administrator/country-reports/create"
 					>
-						<PlusIcon className="mr-2 size-4" />
+						<PlusIcon className="me-2 block-4 inline-4" />
 						{t("New")}
 					</Link>
 				</HeaderAction>
@@ -94,47 +90,45 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={reports}>
-					{(item) => {
-						return (
-							<TableRow id={item.id}>
-								<TableCell>{item.country.name}</TableCell>
-								<TableCell>{item.campaign.year}</TableCell>
-								<TableCell>{formatStatus(item.status)}</TableCell>
-								<TableCell className="text-end">
-									<Menu>
-										<Button
-											aria-label={t("Open actions menu")}
-											className="h-7 sm:h-7"
-											intent="plain"
-											size="sq-sm"
+					{(item) => (
+						<TableRow id={item.id}>
+							<TableCell>{item.country.name}</TableCell>
+							<TableCell>{item.campaign.year}</TableCell>
+							<TableCell>{formatStatus(item.status)}</TableCell>
+							<TableCell className="text-end">
+								<Menu>
+									<Button
+										aria-label={t("Open actions menu")}
+										className="block-7 sm:block-7"
+										intent="plain"
+										size="sq-sm"
+									>
+										<EllipsisHorizontalIcon className="block-5 inline-5" />
+									</Button>
+									<MenuContent placement="left top">
+										<MenuItem href={`/dashboard/reporting/country-reports/${item.id}`}>
+											<EyeIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("View")}</MenuLabel>
+										</MenuItem>
+										<MenuItem href={`/dashboard/administrator/country-reports/${item.id}/edit`}>
+											<PencilSquareIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Edit")}</MenuLabel>
+										</MenuItem>
+										<MenuSeparator />
+										<MenuItem
+											intent="danger"
+											onAction={() => {
+												setItemToDelete({ id: item.id });
+											}}
 										>
-											<EllipsisHorizontalIcon className="size-5" />
-										</Button>
-										<MenuContent placement="left top">
-											<MenuItem href={`/dashboard/reporting/country-reports/${item.id}`}>
-												<EyeIcon className="mr-2 size-4" />
-												<MenuLabel>{t("View")}</MenuLabel>
-											</MenuItem>
-											<MenuItem href={`/dashboard/administrator/country-reports/${item.id}/edit`}>
-												<PencilSquareIcon className="mr-2 size-4" />
-												<MenuLabel>{t("Edit")}</MenuLabel>
-											</MenuItem>
-											<MenuSeparator />
-											<MenuItem
-												intent="danger"
-												onAction={() => {
-													setItemToDelete({ id: item.id });
-												}}
-											>
-												<TrashIcon className="mr-2 size-4" />
-												<MenuLabel>{t("Delete")}</MenuLabel>
-											</MenuItem>
-										</MenuContent>
-									</Menu>
-								</TableCell>
-							</TableRow>
-						);
-					}}
+											<TrashIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("Delete")}</MenuLabel>
+										</MenuItem>
+									</MenuContent>
+								</Menu>
+							</TableCell>
+						</TableRow>
+					)}
 				</TableBody>
 			</Table>
 
@@ -142,7 +136,9 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 				isOpen={itemToDelete != null}
 				model={t("country report")}
 				onAction={() => {
-					if (itemToDelete == null) return;
+					if (itemToDelete == null) {
+						return;
+					}
 
 					startTransition(async () => {
 						optimisticallyRemoveReport(itemToDelete.id);
@@ -152,7 +148,9 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) setItemToDelete(null);
+					if (!open) {
+						setItemToDelete(null);
+					}
 				}}
 			/>
 		</Fragment>

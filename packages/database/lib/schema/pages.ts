@@ -9,14 +9,10 @@ export const pages = p.snakeCase.table("pages", {
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(() => {
-			return entityVersions.id;
-		}),
+		.references(() => entityVersions.id),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
-	imageId: p.uuid("image_id").references(() => {
-		return assets.id;
-	}),
+	imageId: p.uuid("image_id").references(() => assets.id),
 	...f.timestamps(),
 });
 

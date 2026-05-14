@@ -76,6 +76,7 @@ const meta = {
 		isEditable: { control: "boolean" },
 	},
 	args: {
+		// oxlint-disable-next-line typescript/strict-void-return
 		onChange: fn(),
 	},
 } satisfies Meta<typeof RichTextEditor>;
@@ -88,7 +89,7 @@ export const Default: Story = {
 	args: {},
 	render(props) {
 		return (
-			<div className="w-160">
+			<div className="inline-160">
 				<RichTextEditor {...props} />
 			</div>
 		);
@@ -101,7 +102,7 @@ export const WithContent: Story = {
 	},
 	render(props) {
 		return (
-			<div className="w-160">
+			<div className="inline-160">
 				<RichTextEditor {...props} />
 			</div>
 		);
@@ -115,7 +116,7 @@ export const ReadOnly: Story = {
 	},
 	render(props) {
 		return (
-			<div className="w-160">
+			<div className="inline-160">
 				<RichTextEditor {...props} />
 			</div>
 		);
@@ -128,7 +129,7 @@ export const Renderer: Story = {
 	},
 	render({ content }) {
 		return (
-			<div className="w-160">
+			<div className="inline-160">
 				<RichTextRenderer content={content!} />
 			</div>
 		);

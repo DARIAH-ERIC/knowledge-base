@@ -19,7 +19,7 @@ export const Default: Story = {
 	args: {},
 	render(props) {
 		return (
-			<div className="w-48">
+			<div className="inline-48">
 				<Select {...props}>
 					<Label>{"Country"}</Label>
 					<SelectTrigger />
@@ -39,7 +39,7 @@ export const WithPlaceholder: Story = {
 	args: { placeholder: "Select a role..." },
 	render(props) {
 		return (
-			<div className="w-48">
+			<div className="inline-48">
 				<Select {...props}>
 					<Label>{"Role"}</Label>
 					<SelectTrigger />

@@ -16,9 +16,7 @@ export const serviceTypes = p.snakeCase.table(
 		type: p.text("type", { enum: serviceTypesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [p.check("service_types_type_enum_check", inArray(t.type, serviceTypesEnum))];
-	},
+	(t) => [p.check("service_types_type_enum_check", inArray(t.type, serviceTypesEnum))],
 );
 
 export type ServiceType = typeof serviceTypes.$inferSelect;
@@ -49,9 +47,7 @@ export const serviceStatuses = p.snakeCase.table(
 		status: p.text("status", { enum: serviceStatusesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [p.check("service_statuses_status_enum_check", inArray(t.status, serviceStatusesEnum))];
-	},
+	(t) => [p.check("service_statuses_status_enum_check", inArray(t.status, serviceStatusesEnum))],
 );
 
 export type ServiceStatus = typeof serviceStatuses.$inferSelect;
@@ -68,15 +64,11 @@ export const services = p.snakeCase.table("services", {
 	typeId: p
 		.uuid("type_id")
 		.notNull()
-		.references(() => {
-			return serviceTypes.id;
-		}),
+		.references(() => serviceTypes.id),
 	statusId: p
 		.uuid("status_id")
 		.notNull()
-		.references(() => {
-			return serviceStatuses.id;
-		}),
+		.references(() => serviceStatuses.id),
 	comment: p.text("comment"),
 	dariahBranding: p.boolean("dariah_branding"),
 	monitoring: p.boolean("monitoring"),
@@ -108,14 +100,12 @@ export const organisationalUnitServiceRoles = p.snakeCase.table(
 		role: p.text("role", { enum: organisationalUnitServiceRolesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [
-			p.check(
-				"service_statuses_status_enum_check",
-				inArray(t.role, organisationalUnitServiceRolesEnum),
-			),
-		];
-	},
+	(t) => [
+		p.check(
+			"service_statuses_status_enum_check",
+			inArray(t.role, organisationalUnitServiceRolesEnum),
+		),
+	],
 );
 
 export type OrganisationalUnitServiceRole = typeof organisationalUnitServiceRoles.$inferSelect;
@@ -136,21 +126,15 @@ export const servicesToOrganisationalUnits = p.snakeCase.table("services_to_orga
 	serviceId: p
 		.uuid("service_id")
 		.notNull()
-		.references(() => {
-			return services.id;
-		}),
+		.references(() => services.id),
 	organisationalUnitId: p
 		.uuid("organisational_unit_id")
 		.notNull()
-		.references(() => {
-			return organisationalUnits.id;
-		}),
+		.references(() => organisationalUnits.id),
 	roleId: p
 		.uuid("role_id")
 		.notNull()
-		.references(() => {
-			return organisationalUnitServiceRoles.id;
-		}),
+		.references(() => organisationalUnitServiceRoles.id),
 	...f.timestamps(),
 });
 
@@ -172,15 +156,11 @@ export const servicesToSocialMedia = p.snakeCase.table("services_to_social_media
 	serviceId: p
 		.uuid("service_id")
 		.notNull()
-		.references(() => {
-			return services.id;
-		}),
+		.references(() => services.id),
 	socialMediaId: p
 		.uuid("social_media_id")
 		.notNull()
-		.references(() => {
-			return socialMedia.id;
-		}),
+		.references(() => socialMedia.id),
 	...f.timestamps(),
 });
 

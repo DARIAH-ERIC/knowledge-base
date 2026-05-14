@@ -10,6 +10,7 @@ export async function withTransaction(fn: (db: Database) => Promise<void>) {
 		});
 	} catch (error) {
 		/** TransactionRollbackError */
+		// oxlint-disable-next-line unicorn/no-instanceof-builtins
 		if (error instanceof Error && error.message === "Rollback") {
 			return;
 		}

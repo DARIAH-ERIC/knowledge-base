@@ -15,7 +15,9 @@ interface AnalyticsScriptProps {
 export function AnalyticsScript(props: Readonly<AnalyticsScriptProps>): ReactNode {
 	const { baseUrl, id } = props;
 
-	if (baseUrl == null || id == null) return null;
+	if (baseUrl == null || id == null) {
+		return null;
+	}
 
 	return (
 		<Script
@@ -37,7 +39,7 @@ function createAnalyticsScript(baseUrl: string, id: number): void {
 	_paq.push(["setSiteId", id]);
 	const d = document,
 		g = d.createElement("script"),
-		s = d.getElementsByTagName("script")[0];
+		s = d.querySelectorAll("script")[0];
 	g.async = true;
 	g.src = `${u}matomo.js`;
 	s?.parentNode?.insertBefore(g, s);

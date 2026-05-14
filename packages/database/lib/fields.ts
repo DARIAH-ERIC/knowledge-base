@@ -19,9 +19,7 @@ export function timestamps() {
 		updatedAt: timestamp("updated_at")
 			.notNull()
 			.defaultNow()
-			.$onUpdate(() => {
-				return now();
-			}),
+			.$onUpdate(() => now()),
 		// deletedAt: timestamp("deleted_at"),
 	};
 }
@@ -31,9 +29,7 @@ export const TimestampRange = v.pipe(
 		start: v.date(),
 		end: v.optional(v.date()),
 	}),
-	v.check(({ start, end }) => {
-		return !end || start <= end;
-	}),
+	v.check(({ start, end }) => !end || start <= end),
 );
 
 export const NullableTimestampRange = v.nullable(TimestampRange);

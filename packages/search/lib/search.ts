@@ -66,9 +66,7 @@ export interface SearchCollectionParams<
 export function serializeSort<Field extends string>(
 	sortBy?: Array<SearchSort<Field>>,
 ): Array<string> | undefined {
-	return sortBy?.map(({ field, direction }) => {
-		return `${field}:${direction}`;
-	});
+	return sortBy?.map(({ field, direction }) => `${field}:${direction}`);
 }
 
 export type TypesenseFacetCount<Field extends string> = Omit<
@@ -82,21 +80,19 @@ export function mapFacets<Field extends string>(
 	facetCounts?: Array<TypesenseFacetCount<Field>>,
 ): Partial<Record<Field, SearchFacet>> {
 	return Object.fromEntries(
-		(facetCounts ?? []).map(({ field_name, counts, sampled, stats }) => {
-			return [
-				field_name,
-				{
-					values: counts,
-					sampled,
-					stats: {
-						avg: stats.avg,
-						max: stats.max,
-						min: stats.min,
-						sum: stats.sum,
-						totalValues: stats.total_values,
-					},
+		(facetCounts ?? []).map(({ field_name, counts, sampled, stats }) => [
+			field_name,
+			{
+				values: counts,
+				sampled,
+				stats: {
+					avg: stats.avg,
+					max: stats.max,
+					min: stats.min,
+					sum: stats.sum,
+					totalValues: stats.total_values,
 				},
-			];
-		}),
+			},
+		]),
 	) as Partial<Record<Field, SearchFacet>>;
 }

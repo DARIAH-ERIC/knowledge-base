@@ -84,13 +84,10 @@ export function ContributionForm(props: Readonly<ContributionFormProps>): ReactN
 	);
 
 	const validationErrors = state.status === "error" ? state.validationErrors : undefined;
-	const selectedRole = useMemo(() => {
-		return (
-			roleOptions.find((option) => {
-				return option.roleTypeId === selectedRoleTypeId;
-			}) ?? null
-		);
-	}, [roleOptions, selectedRoleTypeId]);
+	const selectedRole = useMemo(
+		() => roleOptions.find((option) => option.roleTypeId === selectedRoleTypeId) ?? null,
+		[roleOptions, selectedRoleTypeId],
+	);
 
 	useEffect(() => {
 		if (!isActionStateSuccess(state)) {
@@ -131,13 +128,11 @@ export function ContributionForm(props: Readonly<ContributionFormProps>): ReactN
 						<SelectTrigger />
 						<FieldError />
 						<SelectContent>
-							{roleOptions.map((option) => {
-								return (
-									<SelectItem key={option.roleTypeId} id={option.roleTypeId}>
-										{formatRoleOptionLabel(option)}
-									</SelectItem>
-								);
-							})}
+							{roleOptions.map((option) => (
+								<SelectItem key={option.roleTypeId} id={option.roleTypeId}>
+									{formatRoleOptionLabel(option)}
+								</SelectItem>
+							))}
 						</SelectContent>
 					</Select>
 					<input name="roleTypeId" type="hidden" value={selectedRoleTypeId ?? ""} />

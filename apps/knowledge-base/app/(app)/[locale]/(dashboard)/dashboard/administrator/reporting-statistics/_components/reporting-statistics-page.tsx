@@ -40,7 +40,9 @@ function formatSignedNumber(
 	value: number | null,
 	format: "number" | "currency" = "number",
 ): string {
-	if (value == null) return "—";
+	if (value == null) {
+		return "—";
+	}
 
 	const sign = value > 0 ? "+" : "";
 
@@ -80,48 +82,44 @@ export async function ReportingStatisticsPage(
 						<label className="flex flex-col gap-y-1 text-sm">
 							<span className="font-medium text-fg">{t("Campaign year")}</span>
 							<select
-								className="h-10 rounded-md border bg-bg px-3 text-sm"
+								className="block-10 rounded-md border bg-bg px-3 text-sm"
 								defaultValue={filters.campaignYear}
 								name="campaignYear"
 							>
 								<option value="">{t("All years")}</option>
-								{data.filterOptions.campaignYears.map((year) => {
-									return (
-										<option key={year} value={String(year)}>
-											{year}
-										</option>
-									);
-								})}
+								{data.filterOptions.campaignYears.map((year) => (
+									<option key={year} value={String(year)}>
+										{year}
+									</option>
+								))}
 							</select>
 						</label>
 
 						<label className="flex flex-col gap-y-1 text-sm">
 							<span className="font-medium text-fg">{t("Country")}</span>
 							<select
-								className="h-10 rounded-md border bg-bg px-3 text-sm"
+								className="block-10 rounded-md border bg-bg px-3 text-sm"
 								defaultValue={filters.countryName}
 								name="country"
 							>
 								<option value="">{t("All countries")}</option>
-								{data.filterOptions.countries.map((country) => {
-									return (
-										<option key={country} value={country}>
-											{country}
-										</option>
-									);
-								})}
+								{data.filterOptions.countries.map((country) => (
+									<option key={country} value={country}>
+										{country}
+									</option>
+								))}
 							</select>
 						</label>
 
 						<div className="flex items-end gap-2">
 							<button
-								className="inline-flex h-10 items-center justify-center rounded-md border bg-fg px-4 text-sm font-medium text-bg"
+								className="inline-flex block-10 items-center justify-center rounded-md border bg-fg px-4 text-sm font-medium text-bg"
 								type="submit"
 							>
 								{t("Apply")}
 							</button>
 							<LocaleLink
-								className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium"
+								className="inline-flex block-10 items-center justify-center rounded-md border px-4 text-sm font-medium"
 								href="/dashboard/administrator/reporting-statistics"
 							>
 								{t("Reset")}
@@ -135,20 +133,20 @@ export async function ReportingStatisticsPage(
 						<p className="text-xs font-medium uppercase tracking-wide text-muted-fg">
 							{t("Campaigns")}
 						</p>
-						<p className="mt-2 text-2xl font-semibold text-fg">
+						<p className="mbs-2 text-2xl font-semibold text-fg">
 							{data.overview.campaignCount.toLocaleString()}
 						</p>
-						<p className="mt-1 text-sm text-muted-fg">{t("Reporting campaigns in the system")}</p>
+						<p className="mbs-1 text-sm text-muted-fg">{t("Reporting campaigns in the system")}</p>
 					</div>
 
 					<div className="rounded-lg border bg-bg p-4">
 						<p className="text-xs font-medium uppercase tracking-wide text-muted-fg">
 							{t("Country reports")}
 						</p>
-						<p className="mt-2 text-2xl font-semibold text-fg">
+						<p className="mbs-2 text-2xl font-semibold text-fg">
 							{data.overview.totalCountryReports.toLocaleString()}
 						</p>
-						<p className="mt-1 text-sm text-muted-fg">
+						<p className="mbs-1 text-sm text-muted-fg">
 							{t("{count} contributors reported", {
 								count: data.overview.totalContributors.toLocaleString(),
 							})}
@@ -159,12 +157,12 @@ export async function ReportingStatisticsPage(
 						<p className="text-xs font-medium uppercase tracking-wide text-muted-fg">
 							{t("Events")}
 						</p>
-						<p className="mt-2 text-2xl font-semibold text-fg">
+						<p className="mbs-2 text-2xl font-semibold text-fg">
 							{(
 								data.overview.totalCountryEvents + data.overview.totalWorkingGroupEvents
 							).toLocaleString()}
 						</p>
-						<p className="mt-1 text-sm text-muted-fg">
+						<p className="mbs-1 text-sm text-muted-fg">
 							{t("{country} country, {workingGroups} working group", {
 								country: data.overview.totalCountryEvents.toLocaleString(),
 								workingGroups: data.overview.totalWorkingGroupEvents.toLocaleString(),
@@ -176,10 +174,10 @@ export async function ReportingStatisticsPage(
 						<p className="text-xs font-medium uppercase tracking-wide text-muted-fg">
 							{t("Project contributions")}
 						</p>
-						<p className="mt-2 text-2xl font-semibold text-fg">
+						<p className="mbs-2 text-2xl font-semibold text-fg">
 							{eurFormatter.format(data.overview.totalProjectContributions)}
 						</p>
-						<p className="mt-1 text-sm text-muted-fg">
+						<p className="mbs-1 text-sm text-muted-fg">
 							{t("{count} working group reports", {
 								count: data.overview.totalWorkingGroupReports.toLocaleString(),
 							})}
@@ -212,50 +210,48 @@ export async function ReportingStatisticsPage(
 							<TableColumn>{t("Project EUR")}</TableColumn>
 						</TableHeader>
 						<TableBody items={data.campaignSummaries}>
-							{(item) => {
-								return (
-									<TableRow id={item.id}>
-										<TableCell>{item.year}</TableCell>
-										<TableCell>{formatStatus(item.status)}</TableCell>
-										<TableCell>
-											<div className="flex flex-col gap-y-0.5">
-												<span>
-													{item.countryDraftCount +
-														item.countrySubmittedCount +
-														item.countryAcceptedCount}
-												</span>
-												<span className="text-xs text-muted-fg">
-													{t("{draft}/{submitted}/{accepted}", {
-														accepted: String(item.countryAcceptedCount),
-														draft: String(item.countryDraftCount),
-														submitted: String(item.countrySubmittedCount),
-													})}
-												</span>
-											</div>
-										</TableCell>
-										<TableCell>
-											<div className="flex flex-col gap-y-0.5">
-												<span>
-													{item.workingGroupDraftCount +
-														item.workingGroupSubmittedCount +
-														item.workingGroupAcceptedCount}
-												</span>
-												<span className="text-xs text-muted-fg">
-													{t("{draft}/{submitted}/{accepted}", {
-														accepted: String(item.workingGroupAcceptedCount),
-														draft: String(item.workingGroupDraftCount),
-														submitted: String(item.workingGroupSubmittedCount),
-													})}
-												</span>
-											</div>
-										</TableCell>
-										<TableCell>{item.totalContributors.toLocaleString()}</TableCell>
-										<TableCell>{item.totalCountryEvents.toLocaleString()}</TableCell>
-										<TableCell>{item.totalWorkingGroupEvents.toLocaleString()}</TableCell>
-										<TableCell>{eurFormatter.format(item.totalProjectContributions)}</TableCell>
-									</TableRow>
-								);
-							}}
+							{(item) => (
+								<TableRow id={item.id}>
+									<TableCell>{item.year}</TableCell>
+									<TableCell>{formatStatus(item.status)}</TableCell>
+									<TableCell>
+										<div className="flex flex-col gap-y-0.5">
+											<span>
+												{item.countryDraftCount +
+													item.countrySubmittedCount +
+													item.countryAcceptedCount}
+											</span>
+											<span className="text-xs text-muted-fg">
+												{t("{draft}/{submitted}/{accepted}", {
+													accepted: String(item.countryAcceptedCount),
+													draft: String(item.countryDraftCount),
+													submitted: String(item.countrySubmittedCount),
+												})}
+											</span>
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="flex flex-col gap-y-0.5">
+											<span>
+												{item.workingGroupDraftCount +
+													item.workingGroupSubmittedCount +
+													item.workingGroupAcceptedCount}
+											</span>
+											<span className="text-xs text-muted-fg">
+												{t("{draft}/{submitted}/{accepted}", {
+													accepted: String(item.workingGroupAcceptedCount),
+													draft: String(item.workingGroupDraftCount),
+													submitted: String(item.workingGroupSubmittedCount),
+												})}
+											</span>
+										</div>
+									</TableCell>
+									<TableCell>{item.totalContributors.toLocaleString()}</TableCell>
+									<TableCell>{item.totalCountryEvents.toLocaleString()}</TableCell>
+									<TableCell>{item.totalWorkingGroupEvents.toLocaleString()}</TableCell>
+									<TableCell>{eurFormatter.format(item.totalProjectContributions)}</TableCell>
+								</TableRow>
+							)}
 						</TableBody>
 					</Table>
 					{data.campaignSummaries.length === 0 && (
@@ -291,25 +287,23 @@ export async function ReportingStatisticsPage(
 							<TableColumn>{t("Delta EUR")}</TableColumn>
 						</TableHeader>
 						<TableBody items={data.countryTrends}>
-							{(item) => {
-								return (
-									<TableRow id={`${item.countryName}-${String(item.campaignYear)}`}>
-										<TableCell>{item.countryName}</TableCell>
-										<TableCell>{item.campaignYear}</TableCell>
-										<TableCell>{formatStatus(item.status)}</TableCell>
-										<TableCell>{item.totalContributors.toLocaleString()}</TableCell>
-										<TableCell>{item.totalEvents.toLocaleString()}</TableCell>
-										<TableCell>{item.institutions.toLocaleString()}</TableCell>
-										<TableCell>{item.services.toLocaleString()}</TableCell>
-										<TableCell>{eurFormatter.format(item.projectContributions)}</TableCell>
-										<TableCell>{formatSignedNumber(item.contributorsDelta)}</TableCell>
-										<TableCell>{formatSignedNumber(item.eventsDelta)}</TableCell>
-										<TableCell>
-											{formatSignedNumber(item.projectContributionsDelta, "currency")}
-										</TableCell>
-									</TableRow>
-								);
-							}}
+							{(item) => (
+								<TableRow id={`${item.countryName}-${String(item.campaignYear)}`}>
+									<TableCell>{item.countryName}</TableCell>
+									<TableCell>{item.campaignYear}</TableCell>
+									<TableCell>{formatStatus(item.status)}</TableCell>
+									<TableCell>{item.totalContributors.toLocaleString()}</TableCell>
+									<TableCell>{item.totalEvents.toLocaleString()}</TableCell>
+									<TableCell>{item.institutions.toLocaleString()}</TableCell>
+									<TableCell>{item.services.toLocaleString()}</TableCell>
+									<TableCell>{eurFormatter.format(item.projectContributions)}</TableCell>
+									<TableCell>{formatSignedNumber(item.contributorsDelta)}</TableCell>
+									<TableCell>{formatSignedNumber(item.eventsDelta)}</TableCell>
+									<TableCell>
+										{formatSignedNumber(item.projectContributionsDelta, "currency")}
+									</TableCell>
+								</TableRow>
+							)}
 						</TableBody>
 					</Table>
 					{data.countryTrends.length === 0 && (
@@ -343,26 +337,24 @@ export async function ReportingStatisticsPage(
 								<TableColumn>{t("Social media")}</TableColumn>
 							</TableHeader>
 							<TableBody items={data.workingGroupYearSummaries}>
-								{(item) => {
-									return (
-										<TableRow id={String(item.campaignYear)}>
-											<TableCell>{item.campaignYear}</TableCell>
-											<TableCell>{item.reportCount.toLocaleString()}</TableCell>
-											<TableCell>
-												{t("{draft}/{submitted}/{accepted}", {
-													accepted: String(item.acceptedCount),
-													draft: String(item.draftCount),
-													submitted: String(item.submittedCount),
-												})}
-											</TableCell>
-											<TableCell>{item.totalMembers.toLocaleString()}</TableCell>
-											<TableCell>{item.totalEvents.toLocaleString()}</TableCell>
-											<TableCell>{item.organiserEvents.toLocaleString()}</TableCell>
-											<TableCell>{item.presenterEvents.toLocaleString()}</TableCell>
-											<TableCell>{item.socialMediaAccounts.toLocaleString()}</TableCell>
-										</TableRow>
-									);
-								}}
+								{(item) => (
+									<TableRow id={String(item.campaignYear)}>
+										<TableCell>{item.campaignYear}</TableCell>
+										<TableCell>{item.reportCount.toLocaleString()}</TableCell>
+										<TableCell>
+											{t("{draft}/{submitted}/{accepted}", {
+												accepted: String(item.acceptedCount),
+												draft: String(item.draftCount),
+												submitted: String(item.submittedCount),
+											})}
+										</TableCell>
+										<TableCell>{item.totalMembers.toLocaleString()}</TableCell>
+										<TableCell>{item.totalEvents.toLocaleString()}</TableCell>
+										<TableCell>{item.organiserEvents.toLocaleString()}</TableCell>
+										<TableCell>{item.presenterEvents.toLocaleString()}</TableCell>
+										<TableCell>{item.socialMediaAccounts.toLocaleString()}</TableCell>
+									</TableRow>
+								)}
 							</TableBody>
 						</Table>
 					</section>

@@ -10,10 +10,12 @@ export const UpdateUserActionInputSchema = v.pipe(
 		personId: v.optional(v.pipe(v.string(), v.uuid())),
 		organisationalUnitId: v.optional(v.pipe(v.string(), v.uuid())),
 	}),
-	v.check(({ personId, organisationalUnitId }) => {
-		return !(personId != null && organisationalUnitId != null);
-	}, "A user can only be linked to a person or a country, not both."),
-	v.check(({ canManageAdmins, role }) => {
-		return canManageAdmins == null || role === "admin";
-	}, "Only admins can manage other admins."),
+	v.check(
+		({ personId, organisationalUnitId }) => !(personId != null && organisationalUnitId != null),
+		"A user can only be linked to a person or a country, not both.",
+	),
+	v.check(
+		({ canManageAdmins, role }) => canManageAdmins == null || role === "admin",
+		"Only admins can manage other admins.",
+	),
 );

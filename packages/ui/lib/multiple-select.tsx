@@ -2,7 +2,7 @@
 
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { useExtracted } from "next-intl";
-import React, { Children, Fragment, isValidElement, type ReactNode, useMemo, useRef } from "react";
+import React, { Children, Fragment, type ReactNode, isValidElement, useMemo, useRef } from "react";
 import {
 	Autocomplete,
 	Select,
@@ -59,12 +59,12 @@ export function MultipleSelect<T extends OptionBase>(
 	const { contains } = useFilter({ sensitivity: "base" });
 
 	const { before, after, list } = useMemo(() => {
-		// eslint-disable-next-line @eslint-react/no-children-to-array
 		const arr = Children.toArray(children);
-		const idx = arr.findIndex((c) => {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-			return isValidElement(c) && (c.type as any)?.displayName === "MultipleSelectContent";
-		});
+		const idx = arr.findIndex(
+			// @ts-expect-error -- display name
+			// oxlint-disable-next-line typescript/no-unnecessary-condition
+			(c) => isValidElement(c) && c.type?.displayName === "MultipleSelectContent",
+		);
 		if (idx === -1) {
 			return { before: arr, after: [], list: null as null | MultipleSelectContentProps<T> };
 		}
@@ -85,40 +85,30 @@ export function MultipleSelect<T extends OptionBase>(
 				<Fragment>
 					<div
 						ref={triggerRef}
-						className="flex w-full items-center gap-2 rounded-lg border p-1"
+						className="flex inline-full items-center gap-2 rounded-lg border p-1"
 						data-slot="control"
 					>
 						<SelectValue<T> className="flex-1">
-							{({ selectedItems, state }) => {
-								return (
-									<TagGroup
-										aria-label={t("Selected items")}
-										onRemove={(keys) => {
-											if (Array.isArray(state.value)) {
-												state.setValue(
-													state.value.filter((k) => {
-														// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-														return !keys.has(k);
-													}),
-												);
-											}
-										}}
+							{({ selectedItems, state }) => (
+								<TagGroup
+									aria-label={t("Selected items")}
+									onRemove={(keys) => {
+										if (Array.isArray(state.value)) {
+											// oxlint-disable-next-line typescript/no-unsafe-argument
+											state.setValue(state.value.filter((k) => !keys.has(k)));
+										}
+									}}
+								>
+									<TagList
+										items={selectedItems.filter((i) => i != null)}
+										renderEmptyState={() => (
+											<i className="ps-2 text-muted-fg text-sm">{placeholder}</i>
+										)}
 									>
-										<TagList
-											items={selectedItems.filter((i) => {
-												return i != null;
-											})}
-											renderEmptyState={() => {
-												return <i className="pl-2 text-muted-fg text-sm">{placeholder}</i>;
-											}}
-										>
-											{(item) => {
-												return <Tag className="rounded-md">{item.name}</Tag>;
-											}}
-										</TagList>
-									</TagGroup>
-								);
-							}}
+										{(item) => <Tag className="rounded-md">{item.name}</Tag>}
+									</TagList>
+								</TagGroup>
+							)}
 						</SelectValue>
 						<Button
 							aria-label={t("Open options")}
@@ -130,7 +120,7 @@ export function MultipleSelect<T extends OptionBase>(
 						</Button>
 					</div>
 					<PopoverContent
-						className="flex w-full flex-col"
+						className="flex inline-full flex-col"
 						placement="bottom"
 						triggerRef={triggerRef}
 					>
@@ -139,7 +129,7 @@ export function MultipleSelect<T extends OptionBase>(
 								<SearchInput className="border-none outline-hidden focus:ring-0" />
 							</SearchField>
 							<ListBox
-								className="rounded-t-none border-0 border-t bg-transparent shadow-none"
+								className="rounded-t-none border-0 border-bs bg-transparent shadow-none"
 								items={list.items}
 							>
 								{list.children}

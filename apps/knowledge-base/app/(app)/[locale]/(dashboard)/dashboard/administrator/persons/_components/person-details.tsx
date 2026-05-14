@@ -77,7 +77,11 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
-					<img alt="" className="size-24 rounded-lg object-cover" src={person.image.url} />
+					<img
+						alt=""
+						className="block-24 inline-24 rounded-lg object-cover"
+						src={person.image.url}
+					/>
 				</DescriptionDetails>
 			</DescriptionList>
 		</Fragment>

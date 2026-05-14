@@ -14,7 +14,9 @@ export const pagesLifecycleAdapter: EntityLifecycleAdapter = {
 			.from(schema.pages)
 			.where(eq(schema.pages.id, sourceVersionId))
 			.limit(1);
-		if (source == null) return;
+		if (source == null) {
+			return;
+		}
 		await tx.insert(schema.pages).values({ id: targetVersionId, ...source });
 	},
 

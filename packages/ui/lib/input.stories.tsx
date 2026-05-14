@@ -21,7 +21,7 @@ export const Default: Story = {
 	args: { placeholder: "Enter value..." },
 	render(props) {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<TextField>
 					<Label>{"Name"}</Label>
 					<Input {...props} />
@@ -35,7 +35,7 @@ export const WithIcon: Story = {
 	args: { placeholder: "Search..." },
 	render(props) {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<TextField>
 					<Label>{"Search"}</Label>
 					<InputGroup>

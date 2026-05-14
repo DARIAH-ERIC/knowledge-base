@@ -77,18 +77,22 @@ function compareStrings(a: string, b: string, dir: "asc" | "desc"): number {
 }
 
 function compareNullableStrings(a: string | null, b: string | null, dir: "asc" | "desc"): number {
-	if (a == null && b == null) return 0;
-	if (a == null) return 1;
-	if (b == null) return -1;
+	if (a == null && b == null) {
+		return 0;
+	}
+	if (a == null) {
+		return 1;
+	}
+	if (b == null) {
+		return -1;
+	}
 	return compareStrings(a, b, dir);
 }
 
 function normalizeInstitutionStatuses(
 	statuses: ReadonlyArray<InstitutionEricRelationStatus>,
 ): Array<InstitutionEricRelationStatus> {
-	return institutionStatuses.filter((status) => {
-		return statuses.includes(status);
-	});
+	return institutionStatuses.filter((status) => statuses.includes(status));
 }
 
 function getInstitutionStatusSortValue(
@@ -100,11 +104,7 @@ function getInstitutionStatusSortValue(
 		return null;
 	}
 
-	return normalizedStatuses
-		.map((status) => {
-			return institutionStatusLabels[status];
-		})
-		.join(" | ");
+	return normalizedStatuses.map((status) => institutionStatusLabels[status]).join(" | ");
 }
 
 async function getInstitutionRelationData(ids: ReadonlyArray<string>) {
@@ -119,9 +119,7 @@ async function getInstitutionRelationData(ids: ReadonlyArray<string>) {
 		where: { type: { type: "eric" } },
 		columns: { id: true },
 	});
-	const ericIds = erics.map((eric) => {
-		return eric.id;
-	});
+	const ericIds = erics.map((eric) => eric.id);
 
 	const [relations, countries] = await Promise.all([
 		ericIds.length > 0
@@ -249,9 +247,7 @@ export async function getInstitutions(
 				.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 				.where(and(lifecycleWhere, where)),
 		]);
-		const institutionIds = items.map((item) => {
-			return item.id;
-		});
+		const institutionIds = items.map((item) => item.id);
 		const { countryNameByInstitutionId, statusesByInstitutionId } =
 			await getInstitutionRelationData(institutionIds);
 
@@ -271,7 +267,9 @@ export async function getInstitutions(
 		};
 	}
 
+	// oxlint-disable-next-line no-useless-assignment
 	let items: Array<{ id: string; name: string; slug: string }> = [];
+	// oxlint-disable-next-line no-useless-assignment
 	let total = 0;
 
 	if (query == null || query === "") {
@@ -294,9 +292,9 @@ export async function getInstitutions(
 			.orderBy(nameOrderBy);
 		total = items.length;
 	} else {
-		const matchingStatuses = institutionStatuses.filter((status) => {
-			return institutionStatusLabels[status].toLowerCase().includes(query.toLowerCase());
-		});
+		const matchingStatuses = institutionStatuses.filter((status) =>
+			institutionStatusLabels[status].toLowerCase().includes(query.toLowerCase()),
+		);
 
 		const [nameMatches, countryMatches, statusMatches] = await Promise.all([
 			db
@@ -357,15 +355,9 @@ export async function getInstitutions(
 
 		const matchedIds = Array.from(
 			new Set([
-				...nameMatches.map((item) => {
-					return item.id;
-				}),
-				...countryMatches.map((item) => {
-					return item.id;
-				}),
-				...statusMatches.map((item) => {
-					return item.id;
-				}),
+				...nameMatches.map((item) => item.id),
+				...countryMatches.map((item) => item.id),
+				...statusMatches.map((item) => item.id),
 			]),
 		);
 
@@ -401,11 +393,7 @@ export async function getInstitutions(
 	if (!needsDerivedSort) {
 		const pagedItems = items.slice(offset, offset + limit);
 		const { countryNameByInstitutionId, statusesByInstitutionId } =
-			await getInstitutionRelationData(
-				pagedItems.map((item) => {
-					return item.id;
-				}),
-			);
+			await getInstitutionRelationData(pagedItems.map((item) => item.id));
 
 		return {
 			data: pagedItems.map((institution) => {
@@ -424,9 +412,7 @@ export async function getInstitutions(
 	}
 
 	const { countryNameByInstitutionId, statusesByInstitutionId } = await getInstitutionRelationData(
-		items.map((item) => {
-			return item.id;
-		}),
+		items.map((item) => item.id),
 	);
 	const sortedItems = items
 		.map((institution) => {
@@ -438,7 +424,7 @@ export async function getInstitutions(
 				name: institution.name,
 			};
 		})
-		.sort((a, b) => {
+		.toSorted((a, b) => {
 			if (sort === "country") {
 				return (
 					compareNullableStrings(a.countryName, b.countryName, dir) ||

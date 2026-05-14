@@ -42,24 +42,24 @@ export async function ReportingOverviewPage(
 	const t = await getExtracted();
 
 	const hasReports = scope.workingGroupReports.length > 0 || scope.countryReports.length > 0;
-	const countryDraftCount = scope.countryReports.filter((report) => {
-		return report.status === "draft";
-	}).length;
-	const countrySubmittedCount = scope.countryReports.filter((report) => {
-		return report.status === "submitted";
-	}).length;
-	const countryAcceptedCount = scope.countryReports.filter((report) => {
-		return report.status === "accepted";
-	}).length;
-	const workingGroupDraftCount = scope.workingGroupReports.filter((report) => {
-		return report.status === "draft";
-	}).length;
-	const workingGroupSubmittedCount = scope.workingGroupReports.filter((report) => {
-		return report.status === "submitted";
-	}).length;
-	const workingGroupAcceptedCount = scope.workingGroupReports.filter((report) => {
-		return report.status === "accepted";
-	}).length;
+	const countryDraftCount = scope.countryReports.filter(
+		(report) => report.status === "draft",
+	).length;
+	const countrySubmittedCount = scope.countryReports.filter(
+		(report) => report.status === "submitted",
+	).length;
+	const countryAcceptedCount = scope.countryReports.filter(
+		(report) => report.status === "accepted",
+	).length;
+	const workingGroupDraftCount = scope.workingGroupReports.filter(
+		(report) => report.status === "draft",
+	).length;
+	const workingGroupSubmittedCount = scope.workingGroupReports.filter(
+		(report) => report.status === "submitted",
+	).length;
+	const workingGroupAcceptedCount = scope.workingGroupReports.filter(
+		(report) => report.status === "accepted",
+	).length;
 
 	const groupedCountryReports = groupReportsByStatus(scope.countryReports);
 	const groupedWorkingGroupReports = groupReportsByStatus(scope.workingGroupReports);
@@ -90,18 +90,18 @@ export async function ReportingOverviewPage(
 							<p className="text-xs font-medium uppercase tracking-wide text-muted-fg">
 								{t("Campaign")}
 							</p>
-							<p className="mt-2 text-2xl font-semibold text-fg">{scope.campaignYear ?? "—"}</p>
-							<p className="mt-1 text-sm text-muted-fg">{t("Current open reporting campaign")}</p>
+							<p className="mbs-2 text-2xl font-semibold text-fg">{scope.campaignYear ?? "—"}</p>
+							<p className="mbs-1 text-sm text-muted-fg">{t("Current open reporting campaign")}</p>
 						</section>
 
 						<section className="rounded-lg border bg-bg p-4">
 							<p className="text-xs font-medium uppercase tracking-wide text-muted-fg">
 								{t("Country reports")}
 							</p>
-							<p className="mt-2 text-2xl font-semibold text-fg">
+							<p className="mbs-2 text-2xl font-semibold text-fg">
 								{scope.countryReports.length.toLocaleString()}
 							</p>
-							<p className="mt-1 text-sm text-muted-fg">
+							<p className="mbs-1 text-sm text-muted-fg">
 								{t("{draft} draft, {submitted} submitted, {accepted} accepted", {
 									accepted: String(countryAcceptedCount),
 									draft: String(countryDraftCount),
@@ -114,10 +114,10 @@ export async function ReportingOverviewPage(
 							<p className="text-xs font-medium uppercase tracking-wide text-muted-fg">
 								{t("Working group reports")}
 							</p>
-							<p className="mt-2 text-2xl font-semibold text-fg">
+							<p className="mbs-2 text-2xl font-semibold text-fg">
 								{scope.workingGroupReports.length.toLocaleString()}
 							</p>
-							<p className="mt-1 text-sm text-muted-fg">
+							<p className="mbs-1 text-sm text-muted-fg">
 								{t("{draft} draft, {submitted} submitted, {accepted} accepted", {
 									accepted: String(workingGroupAcceptedCount),
 									draft: String(workingGroupDraftCount),
@@ -139,43 +139,41 @@ export async function ReportingOverviewPage(
 								{statusOrder.map((status) => {
 									const reports = groupedWorkingGroupReports[status] ?? [];
 
-									if (reports.length === 0) return null;
+									if (reports.length === 0) {
+										return null;
+									}
 
 									return (
 										<section key={status} className="rounded-lg border bg-bg">
-											<div className="border-b px-4 py-3">
+											<div className="border-be px-4 py-3">
 												<h3 className="text-sm font-medium text-fg">{formatStatus(status)}</h3>
 												<p className="text-xs text-muted-fg">
 													{t("{count} reports", { count: String(reports.length) })}
 												</p>
 											</div>
 											<ul className="divide-y">
-												{reports.map((report) => {
-													return (
-														<li
-															key={report.reportId}
-															className="flex items-center justify-between gap-x-4 px-4 py-3"
+												{reports.map((report) => (
+													<li
+														key={report.reportId}
+														className="flex items-center justify-between gap-x-4 px-4 py-3"
+													>
+														<div className="flex flex-col gap-y-0.5">
+															<span className="text-sm font-medium">{report.workingGroupName}</span>
+															<span className="text-xs text-muted-fg">
+																{report.canConfirm
+																	? t("You can confirm this report.")
+																	: t("You can edit this report.")}
+															</span>
+														</div>
+														<ButtonLink
+															href={`/dashboard/reporting/working-group-reports/${report.reportId}/edit`}
+															intent="plain"
+															size="sm"
 														>
-															<div className="flex flex-col gap-y-0.5">
-																<span className="text-sm font-medium">
-																	{report.workingGroupName}
-																</span>
-																<span className="text-xs text-muted-fg">
-																	{report.canConfirm
-																		? t("You can confirm this report.")
-																		: t("You can edit this report.")}
-																</span>
-															</div>
-															<ButtonLink
-																href={`/dashboard/reporting/working-group-reports/${report.reportId}/edit`}
-																intent="plain"
-																size="sm"
-															>
-																{t("Open")}
-															</ButtonLink>
-														</li>
-													);
-												})}
+															{t("Open")}
+														</ButtonLink>
+													</li>
+												))}
 											</ul>
 										</section>
 									);
@@ -196,41 +194,41 @@ export async function ReportingOverviewPage(
 								{statusOrder.map((status) => {
 									const reports = groupedCountryReports[status] ?? [];
 
-									if (reports.length === 0) return null;
+									if (reports.length === 0) {
+										return null;
+									}
 
 									return (
 										<section key={status} className="rounded-lg border bg-bg">
-											<div className="border-b px-4 py-3">
+											<div className="border-be px-4 py-3">
 												<h3 className="text-sm font-medium text-fg">{formatStatus(status)}</h3>
 												<p className="text-xs text-muted-fg">
 													{t("{count} reports", { count: String(reports.length) })}
 												</p>
 											</div>
 											<ul className="divide-y">
-												{reports.map((report) => {
-													return (
-														<li
-															key={report.reportId}
-															className="flex items-center justify-between gap-x-4 px-4 py-3"
+												{reports.map((report) => (
+													<li
+														key={report.reportId}
+														className="flex items-center justify-between gap-x-4 px-4 py-3"
+													>
+														<div className="flex flex-col gap-y-0.5">
+															<span className="text-sm font-medium">{report.countryName}</span>
+															<span className="text-xs text-muted-fg">
+																{report.canConfirm
+																	? t("You can confirm this report.")
+																	: t("You can edit this report.")}
+															</span>
+														</div>
+														<ButtonLink
+															href={`/dashboard/reporting/country-reports/${report.reportId}/edit`}
+															intent="plain"
+															size="sm"
 														>
-															<div className="flex flex-col gap-y-0.5">
-																<span className="text-sm font-medium">{report.countryName}</span>
-																<span className="text-xs text-muted-fg">
-																	{report.canConfirm
-																		? t("You can confirm this report.")
-																		: t("You can edit this report.")}
-																</span>
-															</div>
-															<ButtonLink
-																href={`/dashboard/reporting/country-reports/${report.reportId}/edit`}
-																intent="plain"
-																size="sm"
-															>
-																{t("Open")}
-															</ButtonLink>
-														</li>
-													);
-												})}
+															{t("Open")}
+														</ButtonLink>
+													</li>
+												))}
 											</ul>
 										</section>
 									);

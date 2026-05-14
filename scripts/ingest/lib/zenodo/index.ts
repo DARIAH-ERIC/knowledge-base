@@ -6,18 +6,13 @@ import type { ResourceDocument } from "@dariah-eric/search";
 /** @see {@link https://zenodo.org/communities/dariah} */
 export function createZenodoItem(item: ZenodoRecord): ResourceDocument {
 	const authors = item.metadata.creators
-		.map((creator) => {
-			return creator.name.trim();
-		})
-		.filter((name) => {
-			return isNonEmptyString(name);
-		});
+		.map((creator) => creator.name.trim())
+		.filter((name) => isNonEmptyString(name));
 
 	const keywords =
-		[item.metadata.keywords, item.metadata.keyword].find((value) => {
-			return isNonEmptyArray(value);
-		}) ?? [];
+		[item.metadata.keywords, item.metadata.keyword].find((value) => isNonEmptyArray(value)) ?? [];
 
+	// oxlint-disable-next-line unicorn/consistent-function-scoping
 	function resolveLink(link: string | Record<string, string> | undefined): string | undefined {
 		if (link == null) {
 			return undefined;

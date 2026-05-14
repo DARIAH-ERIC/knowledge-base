@@ -6,22 +6,22 @@ msgstr ""
 "X-Generator: next-intl\n"
 "X-Crowdin-SourceKey: msgstr\n"
 
-#: lib/calendar.tsx:107
+#: lib/calendar.tsx:103
 msgctxt "ui"
 msgid "8mRNBD"
 msgstr "Previous month"
 
-#: lib/calendar.tsx:117
+#: lib/calendar.tsx:113
 msgctxt "ui"
 msgid "PqmLVn"
 msgstr "Next month"
 
-#: lib/calendar.tsx:148
+#: lib/calendar.tsx:144
 msgctxt "ui"
 msgid "pig+2F"
 msgstr "Select month"
 
-#: lib/calendar.tsx:186
+#: lib/calendar.tsx:180
 msgctxt "ui"
 msgid "HppWvq"
 msgstr "Select year"
@@ -51,18 +51,18 @@ msgctxt "ui"
 msgid "0BUTMv"
 msgstr "Search..."
 
-#: lib/date-picker.tsx:69
+#: lib/date-picker.tsx:67
 msgctxt "ui"
 msgid "WZXD9N"
 msgstr "Date picker"
 
-#: lib/date-picker.tsx:104
+#: lib/date-picker.tsx:102
 msgctxt "ui"
 msgid "OHAWov"
 msgstr "Open calendar"
 
 #: lib/dialog.tsx:149
-#: lib/toast.tsx:59
+#: lib/toast.tsx:58
 msgctxt "ui"
 msgid "rbrahO"
 msgstr "Close"
@@ -77,7 +77,7 @@ msgctxt "ui"
 msgid "2I546+"
 msgstr "No information is currently available in this section."
 
-#: lib/grid-list.tsx:100
+#: lib/grid-list.tsx:97
 msgctxt "ui"
 msgid "4ZUjCU"
 msgstr "Reorder item"
@@ -87,12 +87,12 @@ msgctxt "ui"
 msgid "99OtWT"
 msgstr "Pending..."
 
-#: lib/multiple-select.tsx:95
+#: lib/multiple-select.tsx:94
 msgctxt "ui"
 msgid "ch1L7M"
 msgstr "Selected items"
 
-#: lib/multiple-select.tsx:124
+#: lib/multiple-select.tsx:114
 msgctxt "ui"
 msgid "hBhV8k"
 msgstr "Open options"
@@ -123,63 +123,63 @@ msgctxt "ui"
 msgid "N8BBfe"
 msgstr "Last page"
 
-#: lib/rich-text-editor.tsx:796
+#: lib/rich-text-editor.tsx:826
 msgctxt "ui"
 msgid "Dkkmwm"
 msgstr "Bold"
 
-#: lib/rich-text-editor.tsx:804
+#: lib/rich-text-editor.tsx:834
 msgctxt "ui"
 msgid "g2V+es"
 msgstr "Italic"
 
-#: lib/rich-text-editor.tsx:812
+#: lib/rich-text-editor.tsx:842
 msgctxt "ui"
 msgid "h2vipu"
 msgstr "Code"
 
-#: lib/rich-text-editor.tsx:821
+#: lib/rich-text-editor.tsx:851
 msgctxt "ui"
 msgid "Zqekct"
 msgstr "Heading 2"
 
-#: lib/rich-text-editor.tsx:829
+#: lib/rich-text-editor.tsx:859
 msgctxt "ui"
 msgid "BDbgCL"
 msgstr "Heading 3"
 
-#: lib/rich-text-editor.tsx:837
+#: lib/rich-text-editor.tsx:867
 msgctxt "ui"
 msgid "BKF2fN"
 msgstr "Heading 4"
 
-#: lib/rich-text-editor.tsx:846
+#: lib/rich-text-editor.tsx:876
 msgctxt "ui"
 msgid "6sdKFe"
 msgstr "Bullet List"
 
-#: lib/rich-text-editor.tsx:854
+#: lib/rich-text-editor.tsx:884
 msgctxt "ui"
 msgid "rU4xig"
 msgstr "Ordered List"
 
-#: lib/rich-text-editor.tsx:862
+#: lib/rich-text-editor.tsx:892
 msgctxt "ui"
 msgid "+RDJVD"
 msgstr "Blockquote"
 
-#: lib/rich-text-editor.tsx:873
-#: lib/rich-text-editor.tsx:881
+#: lib/rich-text-editor.tsx:903
+#: lib/rich-text-editor.tsx:911
 msgctxt "ui"
 msgid "JBWS0c"
 msgstr "Link"
 
-#: lib/rich-text-editor.tsx:903
+#: lib/rich-text-editor.tsx:933
 msgctxt "ui"
 msgid "EWw/tK"
 msgstr "Apply"
 
-#: lib/rich-text-editor.tsx:907
+#: lib/rich-text-editor.tsx:937
 msgctxt "ui"
 msgid "G/yZLu"
 msgstr "Remove"
@@ -194,29 +194,29 @@ msgctxt "ui"
 msgid "4YJHut"
 msgstr "Clear search"
 
-#: lib/sidebar.tsx:243
+#: lib/sidebar.tsx:239
 msgctxt "ui"
 msgid "JZy6jo"
 msgstr "Sidebar"
 
-#: lib/sidebar.tsx:739
-#: lib/sidebar.tsx:783
+#: lib/sidebar.tsx:727
+#: lib/sidebar.tsx:771
 msgctxt "ui"
 msgid "6D4Ghb"
 msgstr "Toggle sidebar"
 
-#: lib/sidebar.tsx:763
-#: lib/sidebar.tsx:795
+#: lib/sidebar.tsx:751
+#: lib/sidebar.tsx:783
 msgctxt "ui"
 msgid "kh4wt0"
 msgstr "Toggle Sidebar"
 
-#: lib/table.tsx:292
+#: lib/table.tsx:288
 msgctxt "ui"
 msgid "8epGWu"
 msgstr "Reorder row"
 
-#: lib/tag-group.tsx:73
+#: lib/tag-group.tsx:72
 msgctxt "ui"
 msgid "NNbHjg"
 msgstr "Remove tag"

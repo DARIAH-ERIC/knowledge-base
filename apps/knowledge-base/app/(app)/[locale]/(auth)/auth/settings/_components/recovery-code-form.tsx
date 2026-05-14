@@ -34,7 +34,7 @@ export function RecoveryCodeForm(props: Readonly<RecoveryCodeFormProps>): ReactN
 				<span className="text-fg">{newRecoveryCode ?? recoveryCode}</span>
 			</Text>
 
-			<SubmitButton className="mt-2">{t("Generate new code")}</SubmitButton>
+			<SubmitButton className="mbs-2">{t("Generate new code")}</SubmitButton>
 		</Form>
 	);
 }

@@ -16,7 +16,9 @@ export const opportunitiesLifecycleAdapter: EntityLifecycleAdapter = {
 			.from(schema.opportunities)
 			.where(eq(schema.opportunities.id, sourceVersionId))
 			.limit(1);
-		if (source == null) return;
+		if (source == null) {
+			return;
+		}
 		await tx.insert(schema.opportunities).values({ id: targetVersionId, ...source });
 	},
 

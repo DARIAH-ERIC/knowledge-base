@@ -2,9 +2,9 @@ import type { ReactNode } from "react";
 
 import { ReportScreenCommentForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-form";
 import {
-	getReportScreenComment,
 	type ReportScreenCommentKey,
 	type ReportScreenCommentType,
+	getReportScreenComment,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_lib/report-screen-comments";
 
 interface ReportScreenCommentSectionProps {

@@ -66,7 +66,9 @@ export const upsertCampaignServiceSizesAction = createServerAction(
 
 		await db.transaction(async (tx) => {
 			for (const { serviceSize, threshold, amount } of tiered) {
-				if (amount == null) continue;
+				if (amount == null) {
+					continue;
+				}
 
 				await tx
 					.insert(schema.reportingCampaignServiceSizes)

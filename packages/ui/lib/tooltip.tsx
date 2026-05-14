@@ -2,18 +2,18 @@
 
 import type { ComponentProps, ReactNode } from "react";
 import {
-	composeRenderProps,
 	OverlayArrow as AriaOverlayArrow,
 	Tooltip as AriaTooltip,
 	type TooltipProps as AriaTooltipProps,
 	TooltipTrigger as AriaTooltipTrigger,
+	composeRenderProps,
 } from "react-aria-components";
 import { twJoin } from "tailwind-merge";
-import { tv, type VariantProps } from "tailwind-variants";
+import { type VariantProps, tv } from "tailwind-variants";
 
 export const tooltipStyles = tv({
 	base: [
-		"group max-w-sm origin-(--trigger-anchor-point) rounded-lg border border-(--tooltip-border) px-2.5 py-1.5 text-sm/6 will-change-transform [--tooltip-border:var(--color-muted-fg)]/30 dark:shadow-none *:[strong]:font-medium",
+		"group max-inline-sm origin-(--trigger-anchor-point) rounded-lg border border-(--tooltip-border) px-2.5 py-1.5 text-sm/6 will-change-transform [--tooltip-border:var(--color-muted-fg)]/30 dark:shadow-none *:[strong]:font-medium",
 	],
 	variants: {
 		inverse: {
@@ -54,13 +54,13 @@ export function TooltipContent(props: Readonly<TooltipContentProps>): ReactNode 
 	return (
 		<AriaTooltip
 			{...rest}
-			className={composeRenderProps(className, (className, renderProps) => {
-				return tooltipStyles({
+			className={composeRenderProps(className, (className, renderProps) =>
+				tooltipStyles({
 					...renderProps,
 					inverse,
 					className,
-				});
-			})}
+				}),
+			)}
 			offset={offset}
 		>
 			{arrow ? (
