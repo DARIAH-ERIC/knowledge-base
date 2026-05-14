@@ -11,7 +11,7 @@ import * as v from "valibot";
 
 import { UpdateWorkingGroupActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/update-working-group.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { ensureDraftVersion } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { syncEntityRelations } from "@/lib/data/relations";
 import { db } from "@/lib/db";
@@ -130,6 +130,7 @@ export const updateWorkingGroupAction = createServerAction(
 			}
 
 			await syncEntityRelations(tx, documentId, relatedEntityIds, relatedResourceIds);
+			await touchVersion(tx, draftVersionId);
 		});
 
 		after(async () => {

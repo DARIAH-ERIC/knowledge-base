@@ -1805,7 +1805,7 @@ msgstr "Open quick search"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:152
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:157
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:171
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:201
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:203
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx:126
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_components/services-page.tsx:185
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx:160
@@ -1836,7 +1836,7 @@ msgstr "Delete"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:142
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:147
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:161
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:191
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:193
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx:115
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_components/services-page.tsx:175
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx:150
@@ -1860,16 +1860,19 @@ msgid "wEQDC6"
 msgstr "Edit"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar.tsx:33
-msgid "sQITd3"
-msgstr "Live with changes"
+msgid "9LVq+R"
+msgstr "Published with draft changes"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar.tsx:36
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge.tsx:26
-msgid "Dn82AL"
-msgstr "Live"
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge.tsx:21
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge.tsx:32
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector.tsx:41
+msgid "w7tf2z"
+msgstr "Published"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar.tsx:39
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge.tsx:23
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge.tsx:22
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge.tsx:28
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector.tsx:32
 msgid "W6nwjo"
 msgstr "Draft"
@@ -1890,10 +1893,6 @@ msgstr "Discard unpublished changes? The published version will remain."
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar.tsx:99
 msgid "nmpevl"
 msgstr "Discard"
-
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge.tsx:19
-msgid "NqSD2T"
-msgstr "Live + Draft"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields.tsx:84
 msgid "zK20E5"
@@ -2128,10 +2127,6 @@ msgstr "No related unit selected"
 msgid "nAgsxP"
 msgstr "Set the date on which this relation ended."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector.tsx:41
-msgid "w7tf2z"
-msgstr "Published"
-
 #: app/(app)/[locale]/(dashboard)/dashboard/(index)/page.tsx:20
 msgid "msSyC/"
 msgstr "Welcome, {name}"
@@ -2332,7 +2327,7 @@ msgstr "Type"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:130
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:135
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:145
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:175
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:177
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx:103
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_components/services-page.tsx:165
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx:140
@@ -2521,7 +2516,7 @@ msgstr "Manage all country reports in the DARIAH knowledge base."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page.tsx:116
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx:151
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:157
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:187
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:189
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:116
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-reports-list-page.tsx:69
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-reports-list-page.tsx:69
@@ -2985,7 +2980,7 @@ msgstr "Create"
 msgid "2BhsB2"
 msgstr "Manage all projects in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:222
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:224
 msgid "RbFAl7"
 msgstr "project"
 
@@ -4311,7 +4306,7 @@ msgstr "No images found. Upload one to get started."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:63
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:70
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx:32
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx:27
 msgid "vMUomP"
 msgstr "Upload image"
 
@@ -4339,7 +4334,7 @@ msgstr "Describe the image for accessibility"
 msgid "TvrY88"
 msgstr "Optional caption displayed below the image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx:27
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx:22
 msgid "FKUPrI"
 msgstr "Select an image to upload"
 

@@ -53,6 +53,35 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 							AND "ps"."type" = 'published'
 					)
 				`,
+				hasDraft: sql<boolean>`
+					EXISTS (
+						SELECT 1
+						FROM "entity_versions" AS "dv"
+						INNER JOIN "entity_status" AS "ds" ON "dv"."status_id" = "ds"."id"
+						WHERE
+							"dv"."entity_id" = ${schema.entityVersions.entityId}
+							AND "ds"."type" = 'draft'
+							AND (
+								NOT EXISTS (
+									SELECT 1
+									FROM "entity_versions" AS "pv"
+									INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+									WHERE
+										"pv"."entity_id" = ${schema.entityVersions.entityId}
+										AND "ps"."type" = 'published'
+								)
+								OR "dv"."updated_at" > (
+									SELECT "pv"."updated_at"
+									FROM "entity_versions" AS "pv"
+									INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+									WHERE
+										"pv"."entity_id" = ${schema.entityVersions.entityId}
+										AND "ps"."type" = 'published'
+									LIMIT 1
+								)
+							)
+					)
+				`,
 				status: schema.entityStatus.type,
 				updatedAt: schema.entityVersions.updatedAt,
 			})
@@ -123,7 +152,7 @@ export async function getSpotlightArticles(params: GetSpotlightArticlesParams) {
 			id: item.id,
 			documentId: item.documentId,
 			entity: { slug: item.slug },
-			hasDraft: item.status === "draft",
+			hasDraft: item.hasDraft,
 			summary: item.summary,
 			title: item.title,
 			isPublished: item.isPublished,

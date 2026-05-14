@@ -10,10 +10,11 @@ import {
 	ensureDraftVersion,
 	getDocumentVersions,
 	publishVersion,
+	touchVersion,
 } from "@/lib/data/entity-lifecycle";
 import { newsLifecycleAdapter } from "@/lib/data/news.lifecycle-adapter";
 import type { db } from "@/lib/db";
-import { eq } from "@/lib/db/sql";
+import { eq, inArray } from "@/lib/db/sql";
 import { withTransaction } from "@/test/lib/with-transaction";
 
 // ---------------------------------------------------------------------------
@@ -154,6 +155,35 @@ describe("news lifecycle", () => {
 
 			const newDraft = await tx.query.news.findFirst({ where: { id: newDraftId } });
 			expect(newDraft?.title).toBe(title);
+
+			const versions = await tx
+				.select({ id: schema.entityVersions.id, updatedAt: schema.entityVersions.updatedAt })
+				.from(schema.entityVersions)
+				.where(inArray(schema.entityVersions.id, [publishedId, newDraftId]));
+			const byId = new Map(
+				versions.map((version) => {
+					return [version.id, version.updatedAt];
+				}),
+			);
+
+			expect(byId.get(newDraftId)?.toISOString()).toBe(byId.get(publishedId)?.toISOString());
+		});
+	});
+
+	it("publishVersion syncs published updatedAt with the draft timestamp", async () => {
+		await withTransaction(async (tx) => {
+			const { documentId, versionId: draftVersionId } = await seedDraftNews(tx);
+			const updatedAt = new Date("2026-02-01T00:00:00.000Z");
+
+			await touchVersion(tx, draftVersionId, updatedAt);
+			const publishedId = await publishVersion(tx, documentId, newsLifecycleAdapter);
+
+			const publishedVersion = await tx.query.entityVersions.findFirst({
+				where: { id: publishedId },
+				columns: { updatedAt: true },
+			});
+
+			expect(publishedVersion?.updatedAt.toISOString()).toBe(updatedAt.toISOString());
 		});
 	});
 

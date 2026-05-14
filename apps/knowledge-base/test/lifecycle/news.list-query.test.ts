@@ -8,6 +8,7 @@ import {
 	createDraftDocument,
 	discardDraftVersion,
 	publishVersion,
+	touchVersion,
 } from "@/lib/data/entity-lifecycle";
 import { getNews } from "@/lib/data/news";
 import { newsLifecycleAdapter } from "@/lib/data/news.lifecycle-adapter";
@@ -66,7 +67,7 @@ describe("news list query — prefer draft, fallback to published", () => {
 		});
 	});
 
-	it("draft+published document appears exactly once showing the draft", async () => {
+	it("draft+published document appears exactly once and hides a cloned no-op draft", async () => {
 		await withTransaction(async (tx) => {
 			const { documentId } = await seedDraftNews(tx);
 			await publishVersion(tx, documentId, newsLifecycleAdapter);
@@ -79,6 +80,7 @@ describe("news list query — prefer draft, fallback to published", () => {
 			expect(matching).toHaveLength(1);
 			expect(matching[0]?.status).toBe("draft");
 			expect(matching[0]?.isPublished).toBe(true);
+			expect(matching[0]?.hasDraft).toBe(false);
 		});
 	});
 
@@ -127,6 +129,35 @@ describe("news list query — prefer draft, fallback to published", () => {
 			});
 
 			expect(item?.title).toBe(updatedTitle);
+		});
+	});
+
+	it("newer draft changes appear as draft on top of live content", async () => {
+		await withTransaction(async (tx) => {
+			const originalTitle = f.lorem.sentence();
+			const { documentId, versionId: draftVersionId } = await seedDraftNews(tx, originalTitle);
+			const publishedId = await publishVersion(tx, documentId, newsLifecycleAdapter);
+			const publishedVersion = await tx.query.entityVersions.findFirst({
+				where: { id: publishedId },
+				columns: { updatedAt: true },
+			});
+			assert(publishedVersion);
+
+			const updatedTitle = f.lorem.sentence();
+			await tx
+				.update(schema.news)
+				.set({ title: updatedTitle })
+				.where(eq(schema.news.id, draftVersionId));
+			await touchVersion(tx, draftVersionId, new Date(publishedVersion.updatedAt.getTime() + 1000));
+
+			const { data } = await getNews({}, tx);
+			const item = data.find((d) => {
+				return d.documentId === documentId;
+			});
+
+			expect(item?.title).toBe(updatedTitle);
+			expect(item?.isPublished).toBe(true);
+			expect(item?.hasDraft).toBe(true);
 		});
 	});
 });

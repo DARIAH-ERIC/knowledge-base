@@ -135,7 +135,9 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 					{(item) => {
 						return (
 							<TableRow href={`/dashboard/administrator/projects/${item.entity.slug}/details`}>
-								<TableCell>{item.name}</TableCell>
+								<TableCell>
+									<div className="max-w-64 truncate">{item.name}</div>
+								</TableCell>
 								<TableCell>{item.acronym}</TableCell>
 								<TableCell>
 									{item.duration.end

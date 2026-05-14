@@ -14,7 +14,7 @@ import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
-import { ensureDraftVersion } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { db, type Transaction } from "@/lib/db";
 import { eq, inArray, isNull } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -151,6 +151,8 @@ export const updateDocumentOrPolicyAction = createServerAction(
 					}),
 				);
 			}
+
+			await touchVersion(tx, draftVersionId);
 		});
 
 		after(async () => {

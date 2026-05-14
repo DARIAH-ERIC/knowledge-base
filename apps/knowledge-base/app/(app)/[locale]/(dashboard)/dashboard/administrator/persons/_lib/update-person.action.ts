@@ -11,7 +11,7 @@ import * as v from "valibot";
 
 import { UpdatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { ensureDraftVersion } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
@@ -111,6 +111,8 @@ export const updatePersonAction = createServerAction(
 					});
 				}
 			}
+
+			await touchVersion(tx, draftVersionId);
 		});
 
 		after(async () => {
