@@ -16,7 +16,7 @@ export const organisationalUnitsLifecycleAdapter: EntityLifecycleAdapter = {
 			.from(schema.organisationalUnits)
 			.where(eq(schema.organisationalUnits.id, sourceVersionId))
 			.limit(1);
-		if (source == null) return;
+		if (source == null) {return;}
 		await tx.insert(schema.organisationalUnits).values({ id: targetVersionId, ...source });
 
 		const relations = await tx

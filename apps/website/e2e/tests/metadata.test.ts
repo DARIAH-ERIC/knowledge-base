@@ -3,7 +3,7 @@ import { jsonLdScriptProps } from "react-schemaorg";
 
 import { env } from "@/config/env.config";
 import { expect, test } from "@/e2e/lib/test";
-import { defaultLocale, type IntlLocale, locales } from "@/lib/i18n/locales";
+import { type IntlLocale, defaultLocale, locales } from "@/lib/i18n/locales";
 import { localePrefix } from "@/lib/i18n/routing";
 // import { getPathname } from "@/lib/i18n/navigation";
 

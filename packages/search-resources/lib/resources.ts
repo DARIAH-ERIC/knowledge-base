@@ -7,7 +7,7 @@ import type { ResourceDocument, WebsiteDocument } from "@dariah-eric/search";
 import { createCampusCurriculum, createCampusResource } from "./campus";
 import { createEpisciencesDocument } from "./episciences";
 import { createSshocItem } from "./sshoc";
-import { createZoteroItem, type ZoteroJsonItemData } from "./zotero";
+import { type ZoteroJsonItemData, createZoteroItem } from "./zotero";
 
 export interface SearchIndexResourceSourceData {
 	campusCurricula: Array<DariahCampusCurriculum>;
@@ -30,21 +30,11 @@ export function createSearchIndexResourceDocuments(
 		sourceData;
 
 	return [
-		...sshocItems.map((item) => {
-			return createSshocItem(item, sshocMarketplaceBaseUrl);
-		}),
-		...campusResources.map((item) => {
-			return createCampusResource(item);
-		}),
-		...campusCurricula.map((item) => {
-			return createCampusCurriculum(item);
-		}),
-		...episciencesDocuments.map((item) => {
-			return createEpisciencesDocument(item);
-		}),
-		...zoteroItems.map((item) => {
-			return createZoteroItem(item);
-		}),
+		...sshocItems.map((item) => createSshocItem(item, sshocMarketplaceBaseUrl)),
+		...campusResources.map((item) => createCampusResource(item)),
+		...campusCurricula.map((item) => createCampusCurriculum(item)),
+		...episciencesDocuments.map((item) => createEpisciencesDocument(item)),
+		...zoteroItems.map((item) => createZoteroItem(item)),
 	];
 }
 
@@ -66,7 +56,5 @@ export function createWebsiteResourceDocument(resource: ResourceDocument): Websi
 export function createWebsiteResourceDocuments(
 	resources: Array<ResourceDocument>,
 ): Array<WebsiteDocument> {
-	return resources.map((resource) => {
-		return createWebsiteResourceDocument(resource);
-	});
+	return resources.map((resource) => createWebsiteResourceDocument(resource));
 }

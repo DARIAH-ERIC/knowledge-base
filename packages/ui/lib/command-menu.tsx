@@ -2,7 +2,7 @@
 
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import { useExtracted } from "next-intl";
-import { type ComponentProps, createContext, type ReactNode, use, useEffect } from "react";
+import { type ComponentProps, type ReactNode, createContext, use, useEffect } from "react";
 import {
 	Autocomplete,
 	type AutocompleteProps,
@@ -85,11 +85,11 @@ export function CommandMenu({
 	const t = useExtracted("ui");
 
 	const { contains } = useFilter({ sensitivity: "base" });
-	const filter = (textValue: string, inputValue: string) => {
-		return contains(textValue, inputValue);
-	};
+	const filter = (textValue: string, inputValue: string) => contains(textValue, inputValue);
 	useEffect(() => {
-		if (shortcut == null) return;
+		if (shortcut == null) {
+			return;
+		}
 
 		const onKeyDown = (e: KeyboardEvent) => {
 			if (e.key === shortcut && (e.metaKey || e.ctrlKey)) {
@@ -107,7 +107,7 @@ export function CommandMenu({
 			<ModalContext value={{ isOpen: props.isOpen, onOpenChange }}>
 				<ModalOverlay
 					className={twJoin(
-						"fixed inset-0 z-50 h-(--visual-viewport-height,100vh) w-screen overflow-hidden bg-black/15",
+						"fixed inset-0 z-50 block-(--visual-viewport-height,100vh) inline-screen overflow-hidden bg-black/15",
 						"grid grid-rows-[1fr_auto] justify-items-center text-center sm:grid-rows-[1fr_auto_3fr]",
 						"entering:fade-in entering:animate-in entering:duration-300 entering:ease-out",
 						"exiting:fade-out exiting:animate-out exiting:ease-in",
@@ -118,8 +118,8 @@ export function CommandMenu({
 				>
 					<Modal
 						className={cx(
-							"row-start-2 bg-overlay text-left text-overlay-fg shadow-lg outline-none ring ring-muted-fg/15 md:row-start-1 dark:ring-border",
-							"max-h-[calc(var(--visual-viewport-height)*0.8)] w-full sm:fixed sm:top-[10%] sm:left-1/2 sm:-translate-x-1/2",
+							"row-start-2 bg-overlay text-start text-overlay-fg shadow-lg outline-none ring ring-muted-fg/15 md:row-start-1 dark:ring-border",
+							"max-block-[calc(var(--visual-viewport-height)*0.8)] inline-full sm:fixed sm:inset-bs-[10%] sm:inset-s-1/2 sm:-translate-x-1/2",
 							"rounded-t-2xl md:rounded-xl",
 							sizes[size],
 							"entering:slide-in-from-bottom entering:animate-in entering:duration-300 entering:ease-out sm:entering:zoom-in-95 sm:entering:slide-in-from-bottom-0",
@@ -129,7 +129,7 @@ export function CommandMenu({
 					>
 						<Dialog
 							aria-label={props["aria-label"] ?? t("Command menu")}
-							className="flex max-h-[inherit] flex-col overflow-hidden outline-hidden"
+							className="flex max-block-[inherit] flex-col overflow-hidden outline-hidden"
 						>
 							<Autocomplete filter={filter} {...props} />
 						</Dialog>
@@ -158,19 +158,19 @@ export function CommandMenuSearch({
 		<SearchField
 			aria-label={t("Quick search")}
 			autoFocus={true}
-			className={cx("flex w-full items-center px-2.5 py-1", className)}
+			className={cx("flex inline-full items-center px-2.5 py-1", className)}
 			{...props}
 		>
 			{isPending === true ? (
-				<Loader className="size-4.5" variant="spin" />
+				<Loader className="block-4.5 inline-4.5" variant="spin" />
 			) : (
 				<MagnifyingGlassIcon
-					className="size-5 shrink-0 text-muted-fg"
+					className="block-5 inline-5 shrink-0 text-muted-fg"
 					data-slot="command-menu-search-icon"
 				/>
 			)}
 			<Input
-				className="w-full min-w-0 bg-transparent px-2.5 py-2 text-base text-fg placeholder-muted-fg outline-hidden focus:outline-hidden sm:px-2 sm:py-1.5 sm:text-sm [&::-ms-reveal]:hidden [&::-webkit-search-cancel-button]:hidden"
+				className="inline-full min-inline-0 bg-transparent px-2.5 py-2 text-base text-fg placeholder-muted-fg outline-hidden focus:outline-hidden sm:px-2 sm:py-1.5 sm:text-sm [&::-ms-reveal]:hidden [&::-webkit-search-cancel-button]:hidden"
 				placeholder={placeholder ?? t("Search...")}
 			/>
 			{escapeButton === true && (
@@ -192,10 +192,11 @@ export function CommandMenuList<T extends object>({
 	...props
 }: Readonly<MenuProps<T>>): ReactNode {
 	return (
+		// oxlint-disable-next-line no-use-before-define
 		<CollectionRendererContext value={renderer}>
 			<MenuPrimitive
 				className={cx(
-					"grid max-h-full flex-1 grid-cols-[auto_1fr] content-start overflow-y-auto border-t p-2 sm:max-h-110 *:[[role=group]]:mb-6 *:[[role=group]]:last:mb-0",
+					"grid max-block-full flex-1 grid-cols-[auto_1fr] content-start overflow-y-auto border-bs p-2 sm:max-block-110 *:[[role=group]]:mbe-6 *:[[role=group]]:last:mbe-0",
 					className,
 				)}
 				{...props}
@@ -217,7 +218,7 @@ export function CommandMenuSection<T extends object>({
 			{...props}
 		>
 			{"label" in props && (
-				<Header className="col-span-full mb-1 block min-w-(--trigger-width) truncate px-2.5 text-muted-fg text-xs">
+				<Header className="col-span-full mbe-1 block min-inline-(--trigger-width) truncate px-2.5 text-muted-fg text-xs">
 					{props.label}
 				</Header>
 			)}
@@ -248,7 +249,7 @@ export function CommandMenuDescription({
 	...props
 }: Readonly<CommandMenuDescriptionProps>): ReactNode {
 	return (
-		<MenuDescription className={twMerge("col-start-3 row-start-1 ml-auto", className)} {...props} />
+		<MenuDescription className={twMerge("col-start-3 row-start-1 ms-auto", className)} {...props} />
 	);
 }
 
@@ -281,8 +282,8 @@ export function CommandMenuFooter({
 	return (
 		<div
 			className={twMerge(
-				"col-span-full flex-none border-t px-2 py-1.5 text-muted-fg text-sm",
-				"*:[kbd]:inset-ring *:[kbd]:inset-ring-fg/10 *:[kbd]:mx-1 *:[kbd]:inline-grid *:[kbd]:h-4 *:[kbd]:min-w-4 *:[kbd]:place-content-center *:[kbd]:rounded-xs *:[kbd]:bg-secondary",
+				"col-span-full flex-none border-bs px-2 py-1.5 text-muted-fg text-sm",
+				"*:[kbd]:inset-ring *:[kbd]:inset-ring-fg/10 *:[kbd]:mx-1 *:[kbd]:inline-grid *:[kbd]:block-4 *:[kbd]:min-inline-4 *:[kbd]:place-content-center *:[kbd]:rounded-xs *:[kbd]:bg-secondary",
 				className,
 			)}
 			{...props}
@@ -298,7 +299,7 @@ export function CommandMenuShortcut({
 	return (
 		<DropdownKeyboard
 			className={twMerge(
-				"gap-0.5 text-[10.5px] uppercase *:inset-ring *:inset-ring-muted-fg/20 *:grid *:size-5.5 *:place-content-center *:rounded-xs *:bg-bg",
+				"gap-0.5 text-[10.5px] uppercase *:inset-ring *:inset-ring-muted-fg/20 *:grid *:block-5.5 *:inline-5.5 *:place-content-center *:rounded-xs *:bg-bg",
 				className,
 			)}
 			{...props}

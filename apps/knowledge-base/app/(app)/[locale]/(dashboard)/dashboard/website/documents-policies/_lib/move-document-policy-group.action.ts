@@ -19,7 +19,7 @@ export async function moveDocumentPolicyGroupAction(
 			columns: { id: true, position: true },
 		});
 
-		if (group == null) return;
+		if (group == null) {return;}
 
 		const siblings = await tx
 			.select({
@@ -29,15 +29,13 @@ export async function moveDocumentPolicyGroupAction(
 			.from(schema.documentPolicyGroups)
 			.orderBy(schema.documentPolicyGroups.position, schema.documentPolicyGroups.label);
 
-		const currentIndex = siblings.findIndex((s) => {
-			return s.id === id;
-		});
+		const currentIndex = siblings.findIndex((s) => s.id === id);
 		const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
 
-		if (targetIndex < 0 || targetIndex >= siblings.length) return;
+		if (targetIndex < 0 || targetIndex >= siblings.length) {return;}
 
 		const target = siblings[targetIndex];
-		if (target == null) return;
+		if (target == null) {return;}
 
 		await tx
 			.update(schema.documentPolicyGroups)

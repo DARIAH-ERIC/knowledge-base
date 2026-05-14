@@ -1,4 +1,4 @@
-import { defineRouting, type LocalePrefix } from "next-intl/routing";
+import { type LocalePrefix, defineRouting } from "next-intl/routing";
 
 import { defaultLocale, locales } from "@/lib/i18n/locales";
 

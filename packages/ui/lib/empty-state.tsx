@@ -20,15 +20,15 @@ export function EmptyState(props: Readonly<EmptyStateProps>): ReactNode {
 	return (
 		<div
 			aria-hidden={true}
-			className={cn("relative flex h-72 items-center justify-center md:h-100", className)}
+			className={cn("relative flex block-72 items-center justify-center md:block-100", className)}
 		>
 			<div
 				aria-hidden={true}
-				className="absolute top-1/2 m-auto grid size-15 -translate-y-1/2 place-content-center rounded-full border border-border/50 md:size-20"
+				className="absolute inset-bs-1/2 m-auto grid block-15 inline-15 -translate-y-1/2 place-content-center rounded-full border border-border/50 md:block-20 md:inline-20"
 			>
 				<svg
 					aria-hidden={true}
-					className="size-8"
+					className="block-8 inline-8"
 					fill="none"
 					viewBox="0 0 24 24"
 					xmlns="http://www.w3.org/2000/svg"
@@ -43,7 +43,7 @@ export function EmptyState(props: Readonly<EmptyStateProps>): ReactNode {
 
 				<svg
 					aria-hidden={true}
-					className="absolute -top-20 size-5 text-muted-fg/50"
+					className="absolute -inset-bs-20 block-5 inline-5 text-muted-fg/50"
 					fill="none"
 					viewBox="0 0 24 24"
 					xmlns="http://www.w3.org/2000/svg"
@@ -57,7 +57,7 @@ export function EmptyState(props: Readonly<EmptyStateProps>): ReactNode {
 
 				<svg
 					aria-hidden={true}
-					className="absolute top-0 -left-10 size-5 text-muted-fg/80"
+					className="absolute inset-bs-0 -inset-s-10 block-5 inline-5 text-muted-fg/80"
 					fill="none"
 					viewBox="0 0 24 24"
 					xmlns="http://www.w3.org/2000/svg"
@@ -72,7 +72,7 @@ export function EmptyState(props: Readonly<EmptyStateProps>): ReactNode {
 
 				<svg
 					aria-hidden={true}
-					className="absolute top-16 -left-20 size-5 text-muted-fg/70"
+					className="absolute inset-bs-16 -inset-s-20 block-5 inline-5 text-muted-fg/70"
 					fill="none"
 					viewBox="0 0 24 24"
 					xmlns="http://www.w3.org/2000/svg"
@@ -87,7 +87,7 @@ export function EmptyState(props: Readonly<EmptyStateProps>): ReactNode {
 
 				<svg
 					aria-hidden={true}
-					className="absolute top-16 -right-24 size-5 text-muted-fg/50"
+					className="absolute inset-bs-16 -inset-e-24 block-5 inline-5 text-muted-fg/50"
 					fill="none"
 					viewBox="0 0 24 24"
 					xmlns="http://www.w3.org/2000/svg"
@@ -106,7 +106,7 @@ export function EmptyState(props: Readonly<EmptyStateProps>): ReactNode {
 
 				<svg
 					aria-hidden={true}
-					className="absolute top-0 left-24 size-5 text-muted-fg/80"
+					className="absolute inset-bs-0 inset-s-24 block-5 inline-5 text-muted-fg/80"
 					fill="none"
 					viewBox="0 0 24 24"
 					xmlns="http://www.w3.org/2000/svg"
@@ -121,7 +121,7 @@ export function EmptyState(props: Readonly<EmptyStateProps>): ReactNode {
 
 				<svg
 					aria-hidden={true}
-					className="absolute -top-20 -right-20 size-5 text-muted-fg/80"
+					className="absolute -inset-bs-20 -inset-e-20 block-5 inline-5 text-muted-fg/80"
 					fill="none"
 					viewBox="0 0 24 24"
 					xmlns="http://www.w3.org/2000/svg"
@@ -136,7 +136,7 @@ export function EmptyState(props: Readonly<EmptyStateProps>): ReactNode {
 
 				<svg
 					aria-hidden={true}
-					className="absolute -top-10 -left-20 size-5 text-muted-fg/50"
+					className="absolute -inset-bs-10 -inset-s-20 block-5 inline-5 text-muted-fg/50"
 					fill="none"
 					viewBox="0 0 24 24"
 					xmlns="http://www.w3.org/2000/svg"
@@ -158,22 +158,22 @@ export function EmptyState(props: Readonly<EmptyStateProps>): ReactNode {
 			</div>
 			<i
 				aria-hidden={true}
-				className="absolute top-1/2 m-auto size-30 -translate-y-1/2 rounded-full border border-border/40 md:size-40"
+				className="absolute inset-bs-1/2 m-auto block-30 inline-30 -translate-y-1/2 rounded-full border border-border/40 md:block-40 md:inline-40"
 			/>
 			<i
 				aria-hidden={true}
-				className="absolute top-1/2 m-auto size-45 -translate-y-1/2 rounded-full border border-border/30 md:size-60"
+				className="absolute inset-bs-1/2 m-auto block-45 inline-45 -translate-y-1/2 rounded-full border border-border/30 md:block-60 md:inline-60"
 			/>
 			<i
 				aria-hidden={true}
-				className="absolute top-1/2 m-auto size-60 -translate-y-1/2 rounded-full border border-border/20 md:size-80"
+				className="absolute inset-bs-1/2 m-auto block-60 inline-60 -translate-y-1/2 rounded-full border border-border/20 md:block-80 md:inline-80"
 			/>
 			<i
 				aria-hidden={true}
-				className="absolute top-1/2 m-auto size-80 -translate-y-1/2 rounded-full border border-border/10 md:size-100"
+				className="absolute inset-bs-1/2 m-auto block-80 inline-80 -translate-y-1/2 rounded-full border border-border/10 md:block-100 md:inline-100"
 			/>
 
-			<div className="absolute top-[65%] space-y-0.5 px-2 text-center">
+			<div className="absolute inset-bs-[65%] space-y-0.5 px-2 text-center">
 				<CardTitle className="font-semibold text-lg">{title ?? t("No data found")}</CardTitle>
 				<CardDescription>
 					{description ?? t("No information is currently available in this section.")}

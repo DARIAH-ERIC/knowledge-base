@@ -48,7 +48,7 @@ export const upsertCampaignSocialMediaAmountsAction = createServerAction(
 		await db.transaction(async (tx) => {
 			for (const category of reportingCampaignSocialMediaCategoryEnum) {
 				const amount = amounts[category];
-				if (amount == null) continue;
+				if (amount == null) {continue;}
 
 				await tx
 					.insert(schema.reportingCampaignSocialMediaAmounts)

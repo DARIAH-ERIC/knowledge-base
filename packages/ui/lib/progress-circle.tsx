@@ -19,10 +19,9 @@ export function ProgressCircle(props: Readonly<ProgressCircleProps>): ReactNode 
 
 	return (
 		<AriaProgressBar {...rest}>
-			{({ percentage, isIndeterminate }) => {
-				return (
+			{({ percentage, isIndeterminate }) => (
 					<svg
-						className={twMerge("size-4 shrink-0", className)}
+						className={twMerge("block-4 inline-4 shrink-0", className)}
 						data-slot="icon"
 						fill="none"
 						viewBox="0 0 24 24"
@@ -64,8 +63,7 @@ export function ProgressCircle(props: Readonly<ProgressCircleProps>): ReactNode 
 							/>
 						)}
 					</svg>
-				);
-			}}
+				)}
 		</AriaProgressBar>
 	);
 }

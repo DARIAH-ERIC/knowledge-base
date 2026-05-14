@@ -1,5 +1,5 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
-import { request, type RequestResult } from "@dariah-eric/request";
+import { type RequestResult, request } from "@dariah-eric/request";
 import type { RequestError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
 
@@ -126,17 +126,15 @@ function createListAll<TParams extends object>(
 		params: TParams & { page: number; size: number },
 	) => Promise<RequestResult<ZenodoRecordsResponse>>,
 ): (params: TParams) => Promise<Result<Array<ZenodoRecord>, RequestError>> {
-	return (params) => {
-		return Result.gen(async function* () {
+	return (params) =>
+		Result.gen(async function* () {
 			const items: Array<ZenodoRecord> = [];
 			let page = 1;
 			let totalItems = Infinity;
 
 			// Zenodo returns a wrapper object with total hits and the current page of records,
 			// so we keep paging until we have consumed the reported total.
-			// oxlint-disable-next-line typescript/no-unnecessary-condition
 			while (items.length < totalItems) {
-				// oxlint-disable-next-line no-await-in-loop
 				const { data } = yield* Result.await(getPage({ ...params, page, size: pageSize }));
 				items.push(...data.hits.hits);
 				totalItems = data.hits.total;
@@ -150,7 +148,6 @@ function createListAll<TParams extends object>(
 
 			return Result.ok(items);
 		});
-	};
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -202,9 +199,7 @@ export function createZenodoClient(params: CreateZenodoClientParams) {
 			listAll(
 				params: Omit<GetZenodoRecordsParams, "page" | "size"> = {},
 			): Promise<Result<Array<ZenodoRecord>, RequestError>> {
-				return createListAll((pageParams) => {
-					return listRecords(pageParams);
-				})(params);
+				return createListAll((pageParams) => listRecords(pageParams))(params);
 			},
 		},
 	};

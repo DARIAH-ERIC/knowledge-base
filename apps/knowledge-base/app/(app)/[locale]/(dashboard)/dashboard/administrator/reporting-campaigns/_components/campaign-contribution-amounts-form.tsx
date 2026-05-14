@@ -33,10 +33,7 @@ export function CampaignContributionAmountsForm(
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
 	const amountMap = Object.fromEntries(
-		amounts.map((a) => {
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-			return [a.roleType, a.amount != null ? String(a.amount) : undefined];
-		}),
+		amounts.map((a) => [a.roleType, a.amount != null ? String(a.amount) : undefined]),
 	);
 
 	return (

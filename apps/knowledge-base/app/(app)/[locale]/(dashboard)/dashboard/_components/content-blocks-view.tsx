@@ -1,3 +1,5 @@
+// oxlint-disable jsx-a11y/iframe-has-title
+
 "use client";
 
 import { StarterKit } from "@tiptap/starter-kit";
@@ -25,9 +27,9 @@ interface ContentBlocksViewProps {
 }
 
 export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewProps>): ReactNode {
-	return contentBlocks.map((contentBlock) => {
-		return <ContentBlockView key={String(contentBlock.id)} contentBlock={contentBlock} />;
-	});
+	return contentBlocks.map((contentBlock) => (
+		<ContentBlockView key={String(contentBlock.id)} contentBlock={contentBlock} />
+	));
 }
 
 interface ContentBlockViewProps {
@@ -45,36 +47,34 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 
 			return (
 				<div className="flex flex-col divide-y divide-border rounded-lg border border-border">
-					{items.map((accordionItem, idx) => {
-						return (
-							<details key={idx} className="group px-4">
-								<summary className="flex cursor-pointer items-center justify-between py-3 text-sm font-medium">
-									{accordionItem.title}
-									<svg
-										className="size-4 shrink-0 transition-transform group-open:rotate-180"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path
-											d="M19 9l-7 7-7-7"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth={2}
-										/>
-									</svg>
-								</summary>
-								{accordionItem.content != null && (
-									<div className="richtext richtext-sm pb-3">
-										{renderToReactElement({
-											content: accordionItem.content,
-											extensions: [StarterKit],
-										})}
-									</div>
-								)}
-							</details>
-						);
-					})}
+					{items.map((accordionItem, idx) => (
+						<details key={idx} className="group px-4">
+							<summary className="flex cursor-pointer items-center justify-between py-3 text-sm font-medium">
+								{accordionItem.title}
+								<svg
+									className="block-4 inline-4 shrink-0 transition-transform group-open:rotate-180"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										d="M19 9l-7 7-7-7"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										strokeWidth={2}
+									/>
+								</svg>
+							</summary>
+							{accordionItem.content != null && (
+								<div className="richtext richtext-sm pbe-3">
+									{renderToReactElement({
+										content: accordionItem.content,
+										extensions: [StarterKit],
+									})}
+								</div>
+							)}
+						</details>
+					))}
 				</div>
 			);
 		}
@@ -96,11 +96,11 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 
 			return (
 				<figure>
-					<div className="aspect-video w-full overflow-hidden rounded-lg">
+					<div className="aspect-video inline-full overflow-hidden rounded-lg">
 						<iframe
 							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 							allowFullScreen={true}
-							className="size-full"
+							className="block-full inline-full"
 							sandbox="allow-scripts allow-same-origin allow-presentation"
 							src={embedUrl}
 							title={title ?? embedUrl}
@@ -121,15 +121,17 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 
 			if (layout === "carousel") {
 				return (
-					<div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2">
+					<div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pbe-2">
 						{items.map((item, idx) => {
-							if (item.imageUrl == null || item.imageUrl === "") return null;
+							if (item.imageUrl == null || item.imageUrl === "") {
+								return null;
+							}
 
 							return (
-								<figure key={idx} className="w-[min(20rem,80vw)] shrink-0 snap-start">
+								<figure key={idx} className="inline-[min(20rem,80vw)] shrink-0 snap-start">
 									<img
 										alt={item.caption ?? ""}
-										className="aspect-4/3 w-full rounded-lg object-cover"
+										className="aspect-4/3 inline-full rounded-lg object-cover"
 										src={item.imageUrl}
 									/>
 									{item.caption != null ? <figcaption>{item.caption}</figcaption> : null}
@@ -143,13 +145,15 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 			return (
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 					{items.map((item, idx) => {
-						if (item.imageUrl == null || item.imageUrl === "") return null;
+						if (item.imageUrl == null || item.imageUrl === "") {
+							return null;
+						}
 
 						return (
 							<figure key={idx}>
 								<img
 									alt={item.caption ?? ""}
-									className="aspect-4/3 w-full rounded-lg object-cover"
+									className="aspect-4/3 inline-full rounded-lg object-cover"
 									src={item.imageUrl}
 								/>
 								{item.caption != null ? <figcaption>{item.caption}</figcaption> : null}
@@ -177,21 +181,19 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 					)}
 					<h2 className="text-2xl font-bold">{title}</h2>
 					{imageUrl != null && (
-						<img alt="" className="w-full rounded-lg object-cover" src={imageUrl} />
+						<img alt="" className="inline-full rounded-lg object-cover" src={imageUrl} />
 					)}
 					{ctas != null && ctas.length > 0 && (
 						<div className="flex flex-wrap gap-2">
-							{ctas.map((cta, idx) => {
-								return (
-									<a
-										key={idx}
-										className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-fg"
-										href={cta.url}
-									>
-										{cta.label}
-									</a>
-								);
-							})}
+							{ctas.map((cta, idx) => (
+								<a
+									key={idx}
+									className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-fg"
+									href={cta.url}
+								>
+									{cta.label}
+								</a>
+							))}
 						</div>
 					)}
 				</div>

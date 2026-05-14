@@ -9,9 +9,9 @@ import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
 import {
+	type ListSortDirection,
 	getListSearchParams,
 	getListSortSearchParams,
-	type ListSortDirection,
 } from "@/lib/server/list-search-params";
 
 interface DashboardWebsiteFundingCallsPageProps extends PageProps<"/[locale]/dashboard/website/funding-calls"> {}

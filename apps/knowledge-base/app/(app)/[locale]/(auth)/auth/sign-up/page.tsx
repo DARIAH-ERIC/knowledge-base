@@ -55,9 +55,9 @@ export default async function SignUpPage(_props: Readonly<SignUpPageProps>): Pro
 	}
 
 	return (
-		<Main className="min-h-full p-6 items-center justify-center flex flex-col">
-			<div className="w-full max-w-sm flex flex-col gap-y-4">
-				<Link aria-label={t("Home")} className="mb-2 rounded-xs self-start inline-block" href="/">
+		<Main className="min-block-full p-6 items-center justify-center flex flex-col">
+			<div className="inline-full max-inline-sm flex flex-col gap-y-4">
+				<Link aria-label={t("Home")} className="mbe-2 rounded-xs self-start inline-block" href="/">
 					<Avatar
 						className="dark:invert"
 						isSquare={true}
@@ -82,7 +82,7 @@ export default async function SignUpPage(_props: Readonly<SignUpPageProps>): Pro
 
 				<SignUpForm />
 
-				<Text className="mt-4">
+				<Text className="mbs-4">
 					{t("Already have an account?")} <TextLink href="/auth/sign-in">{t("Sign in")}</TextLink>
 				</Text>
 			</div>

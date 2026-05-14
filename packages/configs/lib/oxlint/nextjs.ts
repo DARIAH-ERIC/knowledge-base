@@ -73,13 +73,17 @@ const config = defineConfig({
 		{
 			files: [
 				"next.config.ts",
+				"app/**/default.tsx",
 				"app/**/error.tsx",
+				"app/**/forbidden.tsx",
 				"app/**/global-error.tsx",
 				"app/**/global-not-found.tsx",
 				"app/**/not-found.tsx",
 				"app/**/layout.tsx",
+				"app/**/loading.tsx",
 				"app/**/opengraph-image.tsx",
 				"app/**/page.tsx",
+				"app/**/unauthorized.tsx",
 				"app/manifest.ts",
 				"app/robots.ts",
 				"app/sitemap.ts",

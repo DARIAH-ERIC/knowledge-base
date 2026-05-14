@@ -18,7 +18,7 @@ export default async function DashboardPage(): Promise<ReactNode> {
 	return (
 		<Fragment>
 			<Heading>{t("Welcome, {name}", { name: user.name })}</Heading>
-			<Header className="my-(--layout-gutter) border-t">
+			<Header className="my-(--layout-gutter) border-bs">
 				<HeaderContent>
 					<HeaderTitle>{t("Lorem ipsum")}</HeaderTitle>
 					<HeaderDescription>

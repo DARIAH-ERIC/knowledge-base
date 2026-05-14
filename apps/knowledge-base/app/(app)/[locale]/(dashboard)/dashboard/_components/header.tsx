@@ -6,7 +6,7 @@ export function Header({ className, ...props }: Readonly<ComponentProps<"div">>)
 	return (
 		<div className={twMerge("-m-(--layout-padding) bg-muted", className)}>
 			<div
-				className="flex min-w-0 flex-col items-start justify-between gap-4 border-b p-(--layout-padding) md:flex-row md:items-end **:data-[slot=card-header]:max-w-lg"
+				className="flex min-inline-0 flex-col items-start justify-between gap-4 border-be p-(--layout-padding) md:flex-row md:items-end **:data-[slot=card-header]:max-inline-lg"
 				{...props}
 			/>
 		</div>

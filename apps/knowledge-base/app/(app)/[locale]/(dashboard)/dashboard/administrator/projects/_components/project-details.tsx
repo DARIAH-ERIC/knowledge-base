@@ -117,7 +117,7 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
 					{project.image ? (
-						<img alt="" className="size-24 rounded-lg object-cover" src={project.image.url} />
+						<img alt="" className="block-24 inline-24 rounded-lg object-cover" src={project.image.url} />
 					) : null}
 				</DescriptionDetails>
 
@@ -133,8 +133,7 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 				<DescriptionDetails>
 					{project.socialMedia.length > 0 ? (
 						<ul className="flex flex-col gap-1">
-							{project.socialMedia.map((item) => {
-								return (
+							{project.socialMedia.map((item) => (
 									<li key={item.id} className="text-sm">
 										<span className="font-medium">{item.name}</span>
 										{" · "}
@@ -144,8 +143,7 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 											{item.url}
 										</a>
 									</li>
-								);
-							})}
+								))}
 						</ul>
 					) : null}
 				</DescriptionDetails>
@@ -154,8 +152,7 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 				<DescriptionDetails>
 					{project.partners.length > 0 ? (
 						<ul className="flex flex-col gap-1">
-							{project.partners.map((partner) => {
-								return (
+							{project.partners.map((partner) => (
 									<li key={partner.id} className="text-sm">
 										<span className="font-medium">{partner.unitName}</span>
 										{" · "}
@@ -171,8 +168,7 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 											</span>
 										) : null}
 									</li>
-								);
-							})}
+								))}
 						</ul>
 					) : null}
 				</DescriptionDetails>

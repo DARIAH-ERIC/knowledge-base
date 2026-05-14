@@ -6,7 +6,7 @@ import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { assets } from "./assets";
 import { entityVersions } from "./entities";
-import { organisationalUnits, organisationalUnitTypes } from "./organisational-units";
+import { organisationalUnitTypes, organisationalUnits } from "./organisational-units";
 
 export const personRoleTypesEnum = [
 	"is_affiliated_with",
@@ -26,9 +26,7 @@ export const persons = p.snakeCase.table("persons", {
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(() => {
-			return entityVersions.id;
-		}),
+		.references(() => entityVersions.id),
 	name: p.text("name").notNull(),
 	sortName: p.text("sort_name").notNull(),
 	email: p.text("email"),
@@ -38,9 +36,7 @@ export const persons = p.snakeCase.table("persons", {
 	imageId: p
 		.uuid("image_id")
 		.notNull()
-		.references(() => {
-			return assets.id;
-		}),
+		.references(() => assets.id),
 	...f.timestamps(),
 });
 
@@ -58,9 +54,7 @@ export const personRoleTypes = p.snakeCase.table(
 		type: p.text("type", { enum: personRoleTypesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [p.check("person_role_types_type_enum_check", inArray(t.type, personRoleTypesEnum))];
-	},
+	(t) => [p.check("person_role_types_type_enum_check", inArray(t.type, personRoleTypesEnum))],
 );
 
 export const personsToOrganisationalUnits = p.snakeCase.table("persons_to_organisational_units", {
@@ -68,21 +62,15 @@ export const personsToOrganisationalUnits = p.snakeCase.table("persons_to_organi
 	personId: p
 		.uuid("person_id")
 		.notNull()
-		.references(() => {
-			return persons.id;
-		}),
+		.references(() => persons.id),
 	organisationalUnitId: p
 		.uuid("organisational_unit_id")
 		.notNull()
-		.references(() => {
-			return organisationalUnits.id;
-		}),
+		.references(() => organisationalUnits.id),
 	roleTypeId: p
 		.uuid("role_type_id")
 		.notNull()
-		.references(() => {
-			return personRoleTypes.id;
-		}),
+		.references(() => personRoleTypes.id),
 	duration: f.timestampRange("duration").notNull(),
 	...f.timestamps(),
 });
@@ -107,17 +95,11 @@ export const personRoleTypesToOrganisationalUnitTypesAllowedRelations = p.snakeC
 		roleTypeId: p
 			.uuid("role_type_id")
 			.notNull()
-			.references(() => {
-				return personRoleTypes.id;
-			}),
+			.references(() => personRoleTypes.id),
 		unitTypeId: p
 			.uuid("unit_type_id")
 			.notNull()
-			.references(() => {
-				return organisationalUnitTypes.id;
-			}),
+			.references(() => organisationalUnitTypes.id),
 	},
-	(t) => {
-		return [p.unique().on(t.roleTypeId, t.unitTypeId)];
-	},
+	(t) => [p.unique().on(t.roleTypeId, t.unitTypeId)],
 );

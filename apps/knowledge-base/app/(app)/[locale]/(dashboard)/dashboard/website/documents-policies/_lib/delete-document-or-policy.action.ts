@@ -30,9 +30,7 @@ export async function deleteDocumentOrPolicyAction(documentId: string): Promise<
 		const documentDescriptor = await getWebsiteDocumentDescriptorByEntityId(documentId);
 
 		const { draftId, publishedId } = await getDocumentVersions(tx, documentId);
-		const versionIds = [draftId, publishedId].filter((id): id is string => {
-			return id != null;
-		});
+		const versionIds = [draftId, publishedId].filter((id): id is string => id != null);
 
 		for (const versionId of versionIds) {
 			await documentsPoliciesLifecycleAdapter.wipeSubtype(tx, versionId);
@@ -45,9 +43,7 @@ export async function deleteDocumentOrPolicyAction(documentId: string): Promise<
 				.where(eq(schema.fields.entityVersionId, versionId));
 
 			if (fieldRows.length > 0) {
-				const fieldIds = fieldRows.map((f) => {
-					return f.id;
-				});
+				const fieldIds = fieldRows.map((f) => f.id);
 				await tx
 					.delete(schema.contentBlocks)
 					.where(inArray(schema.contentBlocks.fieldId, fieldIds));

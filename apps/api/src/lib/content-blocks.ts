@@ -119,9 +119,7 @@ export async function getContentBlocks(db: Database | Transaction, entityId: str
 	}
 
 	return Object.fromEntries(
-		[...fieldMap.values()].map(({ name, blocks }) => {
-			return [name, blocks];
-		}),
+		[...fieldMap.values()].map(({ name, blocks }) => [name, blocks]),
 	);
 }
 

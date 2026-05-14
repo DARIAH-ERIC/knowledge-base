@@ -44,23 +44,23 @@ async function hasActiveRelation(
 }
 
 export async function can(user: User, action: Action, resource: Resource): Promise<boolean> {
-	if (user.role === "admin") return true;
+	if (user.role === "admin") {return true;}
 
 	if (resource.type === "organisational_unit") {
-		if (action !== "update") return false;
-		if (user.personId == null) return false;
+		if (action !== "update") {return false;}
+		if (user.personId == null) {return false;}
 		return hasActiveRelation(user.personId, resource.id, chairRoles);
 	}
 
 	if (resource.type === "working_group_report") {
-		if (action !== "read" && action !== "update" && action !== "confirm") return false;
-		if (user.personId == null) return false;
+		if (action !== "read" && action !== "update" && action !== "confirm") {return false;}
+		if (user.personId == null) {return false;}
 
 		const report = await db.query.workingGroupReports.findFirst({
 			where: { id: resource.id },
 			columns: { workingGroupId: true },
 		});
-		if (report == null) return false;
+		if (report == null) {return false;}
 
 		if (action === "confirm") {
 			return hasActiveRelation(user.personId, report.workingGroupId, chairRoles);
@@ -74,13 +74,13 @@ export async function can(user: User, action: Action, resource: Resource): Promi
 
 	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 	if (resource.type === "country_report") {
-		if (action !== "read" && action !== "update" && action !== "confirm") return false;
+		if (action !== "read" && action !== "update" && action !== "confirm") {return false;}
 
 		const report = await db.query.countryReports.findFirst({
 			where: { id: resource.id },
 			columns: { countryId: true },
 		});
-		if (report == null) return false;
+		if (report == null) {return false;}
 
 		if (
 			(action === "read" || action === "update") &&
@@ -89,7 +89,7 @@ export async function can(user: User, action: Action, resource: Resource): Promi
 			return true;
 		}
 
-		if (user.personId == null) return false;
+		if (user.personId == null) {return false;}
 
 		if (action === "confirm") {
 			return hasActiveRelation(user.personId, report.countryId, coordinatorRoles);

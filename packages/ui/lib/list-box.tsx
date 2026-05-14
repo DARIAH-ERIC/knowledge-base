@@ -3,20 +3,20 @@
 import { CheckIcon } from "@heroicons/react/20/solid";
 import { Fragment, type ReactNode } from "react";
 import {
-	composeRenderProps,
 	ListBox as AriaListBox,
 	ListBoxItem as AriaListBoxItem,
 	type ListBoxItemProps as AriaListBoxItemProps,
 	type ListBoxProps as AriaListBoxProps,
+	composeRenderProps,
 } from "react-aria-components";
 import { twJoin, twMerge } from "tailwind-merge";
 
 import {
 	DropdownDescription,
-	dropdownItemStyles,
 	DropdownLabel,
 	DropdownSection,
 	type DropdownSectionProps,
+	dropdownItemStyles,
 } from "@/lib/dropdown";
 import { cx } from "@/lib/primitive";
 
@@ -29,7 +29,7 @@ export function ListBox<T extends object>(props: Readonly<ListBoxProps<T>>): Rea
 		<AriaListBox
 			{...rest}
 			className={cx(
-				"grid max-h-96 w-full min-w-56 scroll-py-1 grid-cols-[auto_1fr] flex-col gap-y-1 overflow-y-auto overscroll-contain rounded-xl border bg-bg p-1 outline-hidden scrollbar-thin *:[[role='group']+[role=group]]:mt-4 *:[[role='group']+[role=separator]]:mt-1 has-data-[slot=drag-icon]:grid-cols-[auto_auto_1fr] [&::-webkit-scrollbar]:size-0.5",
+				"grid max-block-96 inline-full min-inline-56 scroll-py-1 grid-cols-[auto_1fr] flex-col gap-y-1 overflow-y-auto overscroll-contain rounded-xl border bg-bg p-1 outline-hidden scrollbar-thin *:[[role='group']+[role=group]]:mbs-4 *:[[role='group']+[role=separator]]:mbs-1 has-data-[slot=drag-icon]:grid-cols-[auto_auto_1fr] [&::-webkit-scrollbar]:block-0.5 [&::-webkit-scrollbar]:inline-0.5",
 				className,
 			)}
 		/>
@@ -45,8 +45,8 @@ export function ListBoxItem<T extends object>(props: Readonly<ListBoxItemProps<T
 
 	return (
 		<AriaListBoxItem
-			className={composeRenderProps(className, (className, renderProps) => {
-				return dropdownItemStyles({
+			className={composeRenderProps(className, (className, renderProps) =>
+				dropdownItemStyles({
 					...renderProps,
 					className: twJoin(
 						"group not-has-[[slot=description]]:items-start",
@@ -56,8 +56,8 @@ export function ListBoxItem<T extends object>(props: Readonly<ListBoxItemProps<T
 						"href" in props ? "cursor-pointer" : "cursor-default",
 						className,
 					),
-				});
-			})}
+				}),
+			)}
 			data-slot="list-box-item"
 			textValue={textValue}
 			{...rest}
@@ -69,7 +69,7 @@ export function ListBoxItem<T extends object>(props: Readonly<ListBoxItemProps<T
 					<Fragment>
 						{allowsDragging === true ? (
 							<svg
-								className="mr-2 size-5 h-lh text-muted-fg sm:w-4"
+								className="me-2 inline-5 block-lh text-muted-fg sm:inline-4"
 								data-slot="drag-icon"
 								fill="none"
 								viewBox="0 0 24 24"
@@ -103,7 +103,7 @@ export function ListBoxItem<T extends object>(props: Readonly<ListBoxItemProps<T
 						) : null}
 						{isSelected ? (
 							<CheckIcon
-								className="-mx-0.5 mr-2 h-lh w-5 shrink-0 group-allows-dragging:col-start-2 sm:w-4"
+								className="-mx-0.5 me-2 block-lh inline-5 shrink-0 group-allows-dragging:col-start-2 sm:inline-4"
 								data-slot="check-icon"
 							/>
 						) : null}
@@ -130,7 +130,7 @@ export function ListBoxSection<T extends object>(
 
 	return (
 		<DropdownSection
-			className={twMerge("gap-y-1 *:data-[slot=list-box-item]:last:-mb-1.5", className)}
+			className={twMerge("gap-y-1 *:data-[slot=list-box-item]:last:-mbe-1.5", className)}
 			{...rest}
 		/>
 	);

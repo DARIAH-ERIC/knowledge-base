@@ -76,15 +76,11 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	);
 
 	await db.insert(schema.fundingCalls).values(
-		items.map((item) => {
-			return item.fundingCall;
-		}),
+		items.map((item) => item.fundingCall),
 	);
 
 	await Promise.all(
-		items.map((item) => {
-			return seedContentBlock(db, item.version.id, type.id, "content");
-		}),
+		items.map((item) => seedContentBlock(db, item.version.id, type.id, "content")),
 	);
 }
 
@@ -151,9 +147,7 @@ describe("funding-calls", () => {
 				const data = await response.json();
 
 				assert("data" in data);
-				const ids = data.data.map((item) => {
-					return item.id;
-				});
+				const ids = data.data.map((item) => item.id);
 				expect(ids).toContain(upcomingItem.version.id);
 				expect(ids).toContain(openItem.version.id);
 				expect(ids).not.toContain(closedItem.version.id);

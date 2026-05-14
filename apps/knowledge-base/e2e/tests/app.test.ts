@@ -20,20 +20,20 @@ test.describe("app", () => {
 		const response = await request.get("/favicon.ico");
 		const status = response.status();
 
-		expect(status).toEqual(200);
+		expect(status).toBe(200);
 	});
 
 	test("should serve an svg favicon", async ({ request }) => {
 		const response = await request.get("/icon.svg");
 		const status = response.status();
 
-		expect(status).toEqual(200);
+		expect(status).toBe(200);
 	});
 
 	test("should serve an apple favicon", async ({ request }) => {
 		const response = await request.get("/apple-icon.png");
 		const status = response.status();
 
-		expect(status).toEqual(200);
+		expect(status).toBe(200);
 	});
 });

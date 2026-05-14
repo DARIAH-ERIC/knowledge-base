@@ -5,8 +5,8 @@ import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
 import {
 	Button as AriaButton,
-	type InputProps,
 	SearchField as AriaSearchField,
+	type InputProps,
 	type SearchFieldProps,
 } from "react-aria-components";
 import { twJoin } from "tailwind-merge";
@@ -43,7 +43,7 @@ export function SearchInput(props: Readonly<InputProps>): ReactNode {
 					"px-3 py-2 sm:px-2.5 sm:py-1.5 sm:text-sm/5",
 				)}
 			>
-				<XMarkIcon className="size-5 sm:size-4" />
+				<XMarkIcon className="block-5 inline-5 sm:block-4 sm:inline-4" />
 			</AriaButton>
 		</InputGroup>
 	);

@@ -74,9 +74,7 @@ export async function getUnitRelationStatusOptions(
 		.orderBy(schema.organisationalUnitStatus.status);
 
 	const byStatusId = new Map(
-		rows.map((row) => {
-			return [row.statusId, row] as const;
-		}),
+		rows.map((row) => [row.statusId, row] as const),
 	);
 
 	return [...byStatusId.values()];
@@ -109,9 +107,7 @@ export async function getUnitRelationRelatedUnitOptions(
 
 	const relatedUnitTypeIds = [
 		...new Set(
-			allowedRelatedUnitTypes.map((row) => {
-				return row.relatedUnitTypeId;
-			}),
+			allowedRelatedUnitTypes.map((row) => row.relatedUnitTypeId),
 		),
 	];
 
@@ -170,13 +166,11 @@ export async function getUnitRelationOptions(unitType: string) {
 			),
 		);
 
-	if (allowedCombos.length === 0) return [];
+	if (allowedCombos.length === 0) {return [];}
 
 	const relatedUnitTypeIds = [
 		...new Set(
-			allowedCombos.map((c) => {
-				return c.relatedUnitTypeId;
-			}),
+			allowedCombos.map((c) => c.relatedUnitTypeId),
 		),
 	];
 
@@ -208,9 +202,7 @@ export async function getUnitRelationOptions(unitType: string) {
 		for (const unit of relatedUnits) {
 			if (
 				unit.typeId === combo.relatedUnitTypeId &&
-				!entry.availableUnits.some((u) => {
-					return u.id === unit.id;
-				})
+				!entry.availableUnits.some((u) => u.id === unit.id)
 			) {
 				entry.availableUnits.push({ id: unit.id, name: unit.name });
 			}
@@ -220,9 +212,7 @@ export async function getUnitRelationOptions(unitType: string) {
 	return Array.from(byStatus.values()).map((entry) => {
 		return {
 			...entry,
-			availableUnits: entry.availableUnits.sort((a, b) => {
-				return a.name.localeCompare(b.name);
-			}),
+			availableUnits: entry.availableUnits.toSorted((a, b) => a.name.localeCompare(b.name)),
 		};
 	});
 }

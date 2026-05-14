@@ -4,7 +4,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
 import { assert, isNonEmptyString, keyBy, log, unreachable } from "@acdh-oeaw/lib";
-import { createDatabaseService, type Transaction } from "@dariah-eric/database";
+import { type Transaction, createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { createStorageService } from "@dariah-eric/storage";
 import type { AssetPrefix } from "@dariah-eric/storage/config";
@@ -28,7 +28,7 @@ import {
 	placeholderImageUrl,
 } from "../config/data-migration.config";
 import { env } from "../config/env.config";
-import { getWordPressData, type WordPressData } from "../src/lib/get-wordpress-data";
+import { type WordPressData, getWordPressData } from "../src/lib/get-wordpress-data";
 
 const db = createDatabaseService({
 	connection: {
@@ -57,12 +57,8 @@ function toSummary(html: string): string {
 function extractAuthorsFromHtml(html: string): Array<string> {
 	const lines = toPlaintext(html)
 		.split(/\r?\n+/)
-		.map((line) => {
-			return line.trim();
-		})
-		.filter((line) => {
-			return line.length > 0;
-		})
+		.map((line) => line.trim())
+		.filter((line) => line.length > 0)
 		.slice(0, 20);
 
 	const affiliations = [
@@ -93,6 +89,7 @@ function extractAuthorsFromHtml(html: string): Array<string> {
 		"followed by",
 	];
 
+	// oxlint-disable-next-line unicorn/consistent-function-scoping
 	const isLikelyName = (value: string): boolean => {
 		const parts = value.trim().split(/\s+/);
 
@@ -135,20 +132,12 @@ function extractAuthorsFromHtml(html: string): Array<string> {
 		const pieces = candidate.split(/[,;/&]|\sand\s/i);
 
 		return pieces
-			.map((piece) => {
-				return piece.trim();
-			})
-			.filter((piece) => {
-				return piece.length > 0;
-			})
+			.map((piece) => piece.trim())
+			.filter((piece) => piece.length > 0)
 			.filter((piece) => {
 				const lower = piece.toLowerCase();
 
-				if (
-					affiliations.some((marker) => {
-						return lower.includes(marker);
-					})
-				) {
+				if (affiliations.some((marker) => lower.includes(marker))) {
 					return false;
 				}
 
@@ -301,9 +290,9 @@ function extractAccordionItems(html: string): Array<{ title: string; bodyHtml: s
 		const itemEnd = findClosingDiv(html, m.index + m[0].length);
 		const itemHtml = html.slice(m.index, itemEnd);
 
-		const headerMatch =
-			// eslint-disable-next-line regexp/no-super-linear-backtracking, regexp/no-misleading-capturing-group, regexp/optimal-quantifier-concatenation
-			/<([a-z0-9]+)[^>]+class="[^"]*ea-header[^"]*"[^>]*>([\s\S]*?)<\/\1>/i.exec(itemHtml);
+		const headerMatch = /<([a-z0-9]+)[^>]+class="[^"]*ea-header[^"]*"[^>]*>([\s\S]*?)<\/\1>/i.exec(
+			itemHtml,
+		);
 		const headerHtml = headerMatch?.[2] ?? "";
 		const anchorMatch = /<a\b[^>]*>([\s\S]*?)<\/a>/i.exec(headerHtml);
 		const titleSource = anchorMatch?.[1] ?? headerHtml;
@@ -381,9 +370,7 @@ async function migrateHtmlContent(
 		});
 	}
 
-	specials.sort((a, b) => {
-		return a.index - b.index;
-	});
+	specials.sort((a, b) => a.index - b.index);
 
 	type Segment =
 		| { kind: "html"; content: string }
@@ -592,12 +579,10 @@ function extractProjectMetadata(html: string): ProjectMetadata {
 		/<strong>\s*Duration[^<]*<\/strong>\s*(?::\s*)?from\s+([\d/-]+)\s+to\s+([\d/-]+)/i.exec(
 			normalized,
 		);
-	// eslint-disable-next-line regexp/no-super-linear-backtracking
 	const euMatch = /<strong>EU Contribution<\/strong>\s*(?::\s*)?EUR\s*([\d\s,.']*\d)/i.exec(
 		normalized,
 	);
 	const topicMatch = /<strong>Topic<\/strong>[^<]*<a[^>]+href="([^"]+)"/i.exec(normalized);
-	// eslint-disable-next-line regexp/no-super-linear-backtracking
 	const summaryMatch = /<strong>Summary<\/strong>\s*:\s*([\s\S]*?)(?=<\/p>)/i.exec(normalized);
 
 	const startDate = durationMatch ? parseProjectDate(durationMatch[1]!) : null;
@@ -675,19 +660,13 @@ async function main() {
 	const assetsCache = await readAssetsCacheData();
 	await fs.writeFile(projectMetadataConflictLogFilePath, "", { encoding: "utf-8" });
 
-	const categoriesBySlug = keyBy(Object.values(data.categories), (item) => {
-		return item.slug;
-	});
+	const categoriesBySlug = keyBy(Object.values(data.categories), (item) => item.slug);
 
 	const status = await db.query.entityStatus.findMany();
-	const statusByType = keyBy(status, (item) => {
-		return item.type;
-	});
+	const statusByType = keyBy(status, (item) => item.type);
 
 	const types = await db.query.entityTypes.findMany();
-	const typesByType = keyBy(types, (item) => {
-		return item.type;
-	});
+	const typesByType = keyBy(types, (item) => item.type);
 
 	const wpInstitutionIdToOrgUnitId = new Map<number, string>();
 
@@ -695,39 +674,25 @@ async function main() {
 	const impactCaseStudyIdToAuthorNames = new Map<string, Array<string>>();
 
 	const projectScopes = await db.query.projectScopes.findMany();
-	const projectScopesByType = keyBy(projectScopes, (item) => {
-		return item.scope;
-	});
+	const projectScopesByType = keyBy(projectScopes, (item) => item.scope);
 
 	const projectRoles = await db.query.projectRoles.findMany();
-	const projectRolesByType = keyBy(projectRoles, (item) => {
-		return item.role;
-	});
+	const projectRolesByType = keyBy(projectRoles, (item) => item.role);
 
 	const contentBlockTypes = await db.query.contentBlockTypes.findMany();
-	const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => {
-		return item.type;
-	});
+	const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
 
 	const entityTypes = await db.query.entityTypes.findMany();
-	const entityTypesByType = keyBy(entityTypes, (item) => {
-		return item.type;
-	});
+	const entityTypesByType = keyBy(entityTypes, (item) => item.type);
 
 	const organisationalUnitTypes = await db.query.organisationalUnitTypes.findMany();
-	const organisationalUnitTypesByType = keyBy(organisationalUnitTypes, (item) => {
-		return item.type;
-	});
+	const organisationalUnitTypesByType = keyBy(organisationalUnitTypes, (item) => item.type);
 
 	const socialMediaTypes = await db.query.socialMediaTypes.findMany();
-	const socialMediaTypesByType = keyBy(socialMediaTypes, (item) => {
-		return item.type;
-	});
+	const socialMediaTypesByType = keyBy(socialMediaTypes, (item) => item.type);
 
 	const organisationalUnitStatus = await db.query.organisationalUnitStatus.findMany();
-	const organisationalUnitStatusByType = keyBy(organisationalUnitStatus, (item) => {
-		return item.status;
-	});
+	const organisationalUnitStatusByType = keyBy(organisationalUnitStatus, (item) => item.status);
 
 	const umbrellaUnit = await db.query.organisationalUnits.findFirst({
 		where: {
@@ -1798,6 +1763,7 @@ async function main() {
 
 	log.info("Migrating projects...");
 
+	// oxlint-disable-next-line unicorn/consistent-function-scoping
 	function normalizeProjectLookupValue(value: string): string {
 		return value.trim().replaceAll(/\s+/g, " ").toLowerCase();
 	}
@@ -2101,13 +2067,8 @@ async function main() {
 
 			const participantWpIds = new Set(
 				project.relations.institutions
-					.map((i) => {
-						return i.id;
-					})
-					.filter((id) => {
-						// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-						return id !== project.relations.coordinator?.id;
-					}),
+					.map((i) => i.id)
+					.filter((id) => id !== project.relations.coordinator?.id),
 			);
 
 			for (const wpInstId of participantWpIds) {
@@ -2134,10 +2095,12 @@ async function main() {
 
 	log.info("Creating author relations for spotlight articles and impact case studies...");
 
+	// oxlint-disable-next-line unicorn/consistent-function-scoping
 	function normalizePersonName(name: string): string {
 		return name.trim().replaceAll(/\s+/g, " ").toLowerCase();
 	}
 
+	// oxlint-disable-next-line unicorn/consistent-function-scoping
 	function createSortName(name: string): string {
 		const parts = name.trim().split(/\s+/).filter(Boolean);
 
@@ -2271,9 +2234,11 @@ main()
 		log.error("Failed to complete data migration.", error);
 		process.exitCode = 1;
 	})
-	.finally(() => {
-		return db.$client.end().catch((error: unknown) => {
+	// oxlint-disable-next-line typescript/no-misused-promises
+	.finally(() =>
+		// oxlint-disable-next-line typescript/strict-void-return
+		db.$client.end().catch((error: unknown) => {
 			log.error("Failed to close database connection.\n", error);
 			process.exitCode = 1;
-		});
-	});
+		}),
+	);

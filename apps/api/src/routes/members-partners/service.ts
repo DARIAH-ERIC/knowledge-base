@@ -7,7 +7,7 @@ import { flattenEntityVersion } from "@/lib/entity-version";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
-import { and, count, eq, exists, sql, type SQLWrapper } from "@/services/db/sql";
+import { type SQLWrapper, and, count, eq, exists, sql } from "@/services/db/sql";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
@@ -319,9 +319,7 @@ async function getMemberObserverInstitutions(
 
 	return items.map((item) => {
 		const website =
-			item.socialMedia.find((sm) => {
-				return sm.type.type === "website";
-			})?.url ?? null;
+			item.socialMedia.find((sm) => sm.type.type === "website")?.url ?? null;
 
 		return {
 			name: item.name,
@@ -397,9 +395,7 @@ async function getCooperatingPartnerInstitutions(
 
 	return items.map((item) => {
 		const website =
-			item.socialMedia.find((sm) => {
-				return sm.type.type === "website";
-			})?.url ?? null;
+			item.socialMedia.find((sm) => sm.type.type === "website")?.url ?? null;
 
 		return {
 			name: item.name,
@@ -504,9 +500,7 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 
 	const positions = await getPersonPositions(
 		db,
-		rows.map((row) => {
-			return row.id;
-		}),
+		rows.map((row) => row.id),
 	);
 
 	return mapPersonContributors(rows, positions);

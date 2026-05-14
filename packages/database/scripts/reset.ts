@@ -14,9 +14,11 @@ main()
 		log.error("Failed to reset database.\n", error);
 		process.exitCode = 1;
 	})
-	.finally(() => {
-		return db.$client.end().catch((error: unknown) => {
+	// oxlint-disable-next-line typescript/no-misused-promises
+	.finally(() =>
+		// oxlint-disable-next-line typescript/strict-void-return
+		db.$client.end().catch((error: unknown) => {
 			log.error("Failed to close database connection.\n", error);
 			process.exitCode = 1;
-		});
-	});
+		}),
+	);

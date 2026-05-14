@@ -1,5 +1,5 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
-import { request, type RequestResult } from "@dariah-eric/request";
+import { type RequestResult, request } from "@dariah-eric/request";
 import type { RequestError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
 
@@ -189,23 +189,21 @@ export interface SearchItem {
 }
 
 export function isSoftware(item: SearchItem): boolean {
-	return item.properties.some((property) => {
-		return (
+	return item.properties.some(
+		(property) =>
 			property.type.code === "resource-category" &&
 			property.concept?.vocabulary.code === "eosc-resource-category" &&
-			property.concept.code === "category-sharing_and_discovery-software"
-		);
-	});
+			property.concept.code === "category-sharing_and_discovery-software",
+	);
 }
 
 export function isCoreService(item: SearchItem): boolean {
-	return item.properties.some((property) => {
-		return (
+	return item.properties.some(
+		(property) =>
 			property.type.code === "keyword" &&
 			property.concept?.vocabulary.code === "sshoc-keyword" &&
-			property.concept.code === "dariahCoreService"
-		);
-	});
+			property.concept.code === "dariahCoreService",
+	);
 }
 
 export interface LabeledCheckedCount {
@@ -294,7 +292,7 @@ export function createSshocClient(params: CreateSshocClientParams) {
 				return Result.gen(async function* () {
 					const items: Array<SearchItem> = [];
 					let page = 1;
-					let totalPages = 1;
+					let totalPages;
 
 					do {
 						const { data } = yield* Result.await(searchItems({ ...params, page, perpage }));

@@ -182,25 +182,19 @@ export default async function DashboardAdministratorEditProjectPage(
 		};
 	});
 
-	const initialSocialMediaIds = existingSocialMedia.map((row) => {
-		return row.socialMediaId;
-	});
+	const initialSocialMediaIds = existingSocialMedia.map((row) => row.socialMediaId);
 
 	const [selectedSocialMediaItems, selectedPartnerUnits] = await Promise.all([
 		getSocialMediaOptionsByIds(initialSocialMediaIds),
 		getOrganisationalUnitOptionsByIds(
-			initialPartners.map((partner) => {
-				return partner.unitId;
-			}),
+			initialPartners.map((partner) => partner.unitId),
 		),
 	]);
 
 	const description = descriptionRows.at(0)?.content;
 
 	const resolvedPartners = initialPartners.map((partner) => {
-		const matchedUnit = selectedPartnerUnits.find((unit) => {
-			return unit.id === partner.unitId;
-		});
+		const matchedUnit = selectedPartnerUnits.find((unit) => unit.id === partner.unitId);
 
 		return { ...partner, unitName: matchedUnit?.name ?? partner.unitName };
 	});

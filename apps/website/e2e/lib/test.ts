@@ -6,11 +6,11 @@ import { test as base } from "@playwright/test";
 import { env } from "@/config/env.config";
 import { type AccessibilityScanner, createAccessibilityScanner } from "@/e2e/lib/fixtures/a11y";
 import { ContactPage } from "@/e2e/lib/fixtures/contact-page";
-import { createEmailService, type EmailService } from "@/e2e/lib/fixtures/email-service";
-import { createI18n, type I18n, type WithI18n } from "@/e2e/lib/fixtures/i18n";
+import { type EmailService, createEmailService } from "@/e2e/lib/fixtures/email-service";
+import { type I18n, type WithI18n, createI18n } from "@/e2e/lib/fixtures/i18n";
 import { ImprintPage } from "@/e2e/lib/fixtures/imprint-page";
 import { IndexPage } from "@/e2e/lib/fixtures/index-page";
-import { defaultLocale, type IntlLocale } from "@/lib/i18n/locales";
+import { type IntlLocale, defaultLocale } from "@/lib/i18n/locales";
 
 interface Fixtures {
 	// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
@@ -49,9 +49,7 @@ export const test = base.extend<Fixtures>({
 					}),
 				);
 
-				await context.route(baseUrl, (route) => {
-					return route.fulfill({ status: 204, body: "" });
-				});
+				await context.route(baseUrl, (route) => route.fulfill({ status: 204, body: "" }));
 			}
 
 			await use();
@@ -60,21 +58,15 @@ export const test = base.extend<Fixtures>({
 	],
 
 	async createAccessibilityScanner({ page }, use) {
-		await use(() => {
-			return createAccessibilityScanner(page);
-		});
+		await use(() => createAccessibilityScanner(page));
 	},
 
 	async createEmailService({ request }, use) {
-		await use(() => {
-			return createEmailService(request);
-		});
+		await use(() => createEmailService(request));
 	},
 
 	async createI18n({ page }, use) {
-		await use((locale) => {
-			return createI18n(page, locale);
-		});
+		await use((locale) => createI18n(page, locale));
 	},
 
 	async createContactPage({ page }, use) {

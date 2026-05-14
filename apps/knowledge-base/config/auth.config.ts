@@ -22,7 +22,7 @@ export const emailVerificationRequests: { cookie: CookieConfig } = {
 		options: {
 			httpOnly: true,
 			sameSite: "lax" as const,
-			// eslint-disable-next-line no-restricted-syntax
+			// oxlint-disable-next-line node/no-process-env
 			secure: process.env.NODE_ENV === "production",
 			path: "/",
 		},
@@ -36,7 +36,7 @@ export const passwordResetSessions: { cookie: CookieConfig } = {
 		options: {
 			httpOnly: true,
 			sameSite: "lax" as const,
-			// eslint-disable-next-line no-restricted-syntax
+			// oxlint-disable-next-line node/no-process-env
 			secure: process.env.NODE_ENV === "production",
 			path: "/",
 		},
@@ -50,7 +50,7 @@ export const sessions: { cookie: CookieConfig } = {
 		options: {
 			httpOnly: true,
 			sameSite: "lax" as const,
-			// eslint-disable-next-line no-restricted-syntax
+			// oxlint-disable-next-line node/no-process-env
 			secure: process.env.NODE_ENV === "production",
 			path: "/",
 		},

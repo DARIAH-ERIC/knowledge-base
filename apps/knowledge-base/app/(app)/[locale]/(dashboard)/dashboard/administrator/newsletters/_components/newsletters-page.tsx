@@ -75,8 +75,7 @@ export function NewslettersPage(props: Readonly<NewslettersPageProps>): ReactNod
 					<TableColumn>{t("Clicks")}</TableColumn>
 				</TableHeader>
 				<TableBody items={newsletters.data}>
-					{(item) => {
-						return (
+					{(item) => (
 							<TableRow>
 								<TableCell>{item.settings.subject_line}</TableCell>
 								<TableCell>
@@ -110,8 +109,7 @@ export function NewslettersPage(props: Readonly<NewslettersPageProps>): ReactNod
 									) : null}
 								</TableCell>
 							</TableRow>
-						);
-					}}
+						)}
 				</TableBody>
 			</Table>
 

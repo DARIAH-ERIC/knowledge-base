@@ -1,19 +1,21 @@
+// oxlint-disable no-use-before-define
+
 import { sql } from "drizzle-orm";
 import {
+	boolean,
+	customType,
+	index,
+	integer,
+	jsonb,
+	numeric,
 	pgEnum,
 	pgTable,
+	primaryKey,
+	text,
+	timestamp,
+	uniqueIndex,
 	uuid,
 	varchar,
-	text,
-	customType,
-	timestamp,
-	jsonb,
-	integer,
-	numeric,
-	boolean,
-	index,
-	uniqueIndex,
-	primaryKey,
 } from "drizzle-orm/pg-core";
 
 export const bodyType = pgEnum("body_type", ["bod", "dco", "ga", "jrc", "ncc", "sb", "smt"]);
@@ -143,27 +145,15 @@ export const bodyToRole = pgTable(
 	{
 		a: uuid("A")
 			.notNull()
-			.references(
-				() => {
-					return bodies.id;
-				},
-				{ onDelete: "cascade", onUpdate: "cascade" },
-			),
+			.references(() => bodies.id, { onDelete: "cascade", onUpdate: "cascade" }),
 		b: uuid("B")
 			.notNull()
-			.references(
-				() => {
-					return roles.id;
-				},
-				{ onDelete: "cascade", onUpdate: "cascade" },
-			),
+			.references(() => roles.id, { onDelete: "cascade", onUpdate: "cascade" }),
 	},
-	(table) => {
-		return [
-			primaryKey({ columns: [table.a, table.b], name: "_BodyToRole_AB_pkey" }),
-			index("_BodyToRole_B_index").using("btree", table.b.asc().nullsLast()),
-		];
-	},
+	(table) => [
+		primaryKey({ columns: [table.a, table.b], name: "_BodyToRole_AB_pkey" }),
+		index("_BodyToRole_B_index").using("btree", table.b.asc().nullsLast()),
+	],
 );
 
 export const countryToInstitution = pgTable(
@@ -171,27 +161,15 @@ export const countryToInstitution = pgTable(
 	{
 		a: uuid("A")
 			.notNull()
-			.references(
-				() => {
-					return countries.id;
-				},
-				{ onDelete: "cascade", onUpdate: "cascade" },
-			),
+			.references(() => countries.id, { onDelete: "cascade", onUpdate: "cascade" }),
 		b: uuid("B")
 			.notNull()
-			.references(
-				() => {
-					return institutions.id;
-				},
-				{ onDelete: "cascade", onUpdate: "cascade" },
-			),
+			.references(() => institutions.id, { onDelete: "cascade", onUpdate: "cascade" }),
 	},
-	(table) => {
-		return [
-			primaryKey({ columns: [table.a, table.b], name: "_CountryToInstitution_AB_pkey" }),
-			index("_CountryToInstitution_B_index").using("btree", table.b.asc().nullsLast()),
-		];
-	},
+	(table) => [
+		primaryKey({ columns: [table.a, table.b], name: "_CountryToInstitution_AB_pkey" }),
+		index("_CountryToInstitution_B_index").using("btree", table.b.asc().nullsLast()),
+	],
 );
 
 export const countryToService = pgTable(
@@ -199,27 +177,15 @@ export const countryToService = pgTable(
 	{
 		a: uuid("A")
 			.notNull()
-			.references(
-				() => {
-					return countries.id;
-				},
-				{ onDelete: "cascade", onUpdate: "cascade" },
-			),
+			.references(() => countries.id, { onDelete: "cascade", onUpdate: "cascade" }),
 		b: uuid("B")
 			.notNull()
-			.references(
-				() => {
-					return services.id;
-				},
-				{ onDelete: "cascade", onUpdate: "cascade" },
-			),
+			.references(() => services.id, { onDelete: "cascade", onUpdate: "cascade" }),
 	},
-	(table) => {
-		return [
-			primaryKey({ columns: [table.a, table.b], name: "_CountryToService_AB_pkey" }),
-			index("_CountryToService_B_index").using("btree", table.b.asc().nullsLast()),
-		];
-	},
+	(table) => [
+		primaryKey({ columns: [table.a, table.b], name: "_CountryToService_AB_pkey" }),
+		index("_CountryToService_B_index").using("btree", table.b.asc().nullsLast()),
+	],
 );
 
 export const countryToSoftware = pgTable(
@@ -227,27 +193,15 @@ export const countryToSoftware = pgTable(
 	{
 		a: uuid("A")
 			.notNull()
-			.references(
-				() => {
-					return countries.id;
-				},
-				{ onDelete: "cascade", onUpdate: "cascade" },
-			),
+			.references(() => countries.id, { onDelete: "cascade", onUpdate: "cascade" }),
 		b: uuid("B")
 			.notNull()
-			.references(
-				() => {
-					return software.id;
-				},
-				{ onDelete: "cascade", onUpdate: "cascade" },
-			),
+			.references(() => software.id, { onDelete: "cascade", onUpdate: "cascade" }),
 	},
-	(table) => {
-		return [
-			primaryKey({ columns: [table.a, table.b], name: "_CountryToSoftware_AB_pkey" }),
-			index("_CountryToSoftware_B_index").using("btree", table.b.asc().nullsLast()),
-		];
-	},
+	(table) => [
+		primaryKey({ columns: [table.a, table.b], name: "_CountryToSoftware_AB_pkey" }),
+		index("_CountryToSoftware_B_index").using("btree", table.b.asc().nullsLast()),
+	],
 );
 
 export const institutionToPerson = pgTable(
@@ -255,27 +209,15 @@ export const institutionToPerson = pgTable(
 	{
 		a: uuid("A")
 			.notNull()
-			.references(
-				() => {
-					return institutions.id;
-				},
-				{ onDelete: "cascade", onUpdate: "cascade" },
-			),
+			.references(() => institutions.id, { onDelete: "cascade", onUpdate: "cascade" }),
 		b: uuid("B")
 			.notNull()
-			.references(
-				() => {
-					return persons.id;
-				},
-				{ onDelete: "cascade", onUpdate: "cascade" },
-			),
+			.references(() => persons.id, { onDelete: "cascade", onUpdate: "cascade" }),
 	},
-	(table) => {
-		return [
-			primaryKey({ columns: [table.a, table.b], name: "_InstitutionToPerson_AB_pkey" }),
-			index("_InstitutionToPerson_B_index").using("btree", table.b.asc().nullsLast()),
-		];
-	},
+	(table) => [
+		primaryKey({ columns: [table.a, table.b], name: "_InstitutionToPerson_AB_pkey" }),
+		index("_InstitutionToPerson_B_index").using("btree", table.b.asc().nullsLast()),
+	],
 );
 
 export const prismaMigrations = pgTable("_prisma_migrations", {
@@ -307,34 +249,20 @@ export const contributions = pgTable("contributions", {
 	id: uuid().primaryKey(),
 	endDate: timestamp("end_date", { precision: 3 }),
 	startDate: timestamp("start_date", { precision: 3 }),
-	countryId: uuid("country_id").references(
-		() => {
-			return countries.id;
-		},
-		{ onDelete: "set null", onUpdate: "cascade" },
-	),
+	countryId: uuid("country_id").references(() => countries.id, {
+		onDelete: "set null",
+		onUpdate: "cascade",
+	}),
 	personId: uuid("person_id")
 		.notNull()
-		.references(
-			() => {
-				return persons.id;
-			},
-			{ onDelete: "cascade", onUpdate: "cascade" },
-		),
+		.references(() => persons.id, { onDelete: "cascade", onUpdate: "cascade" }),
 	roleId: uuid("role_id")
 		.notNull()
-		.references(
-			() => {
-				return roles.id;
-			},
-			{ onDelete: "cascade", onUpdate: "cascade" },
-		),
-	workingGroupId: uuid("working_group_id").references(
-		() => {
-			return workingGroups.id;
-		},
-		{ onDelete: "set null", onUpdate: "cascade" },
-	),
+		.references(() => roles.id, { onDelete: "cascade", onUpdate: "cascade" }),
+	workingGroupId: uuid("working_group_id").references(() => workingGroups.id, {
+		onDelete: "set null",
+		onUpdate: "cascade",
+	}),
 	createdAt: timestamp("created_at", { precision: 3 })
 		.default(sql`CURRENT_TIMESTAMP`)
 		.notNull(),
@@ -359,9 +287,7 @@ export const countries = pgTable(
 		description: text(),
 		consortiumName: text("consortium_name"),
 	},
-	(table) => {
-		return [index("countries_code_idx").using("btree", table.code.asc().nullsLast())];
-	},
+	(table) => [index("countries_code_idx").using("btree", table.code.asc().nullsLast())],
 );
 
 export const eventReports = pgTable(
@@ -375,23 +301,16 @@ export const eventReports = pgTable(
 		smallMeetings: integer("small_meetings"),
 		reportId: uuid("report_id")
 			.notNull()
-			.references(
-				() => {
-					return reports.id;
-				},
-				{ onDelete: "cascade", onUpdate: "cascade" },
-			),
+			.references(() => reports.id, { onDelete: "cascade", onUpdate: "cascade" }),
 		createdAt: timestamp("created_at", { precision: 3 })
 			.default(sql`CURRENT_TIMESTAMP`)
 			.notNull(),
 		updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
 		veryLargeMeetings: integer("very_large_meetings"),
 	},
-	(table) => {
-		return [
-			uniqueIndex("event_reports_report_id_key").using("btree", table.reportId.asc().nullsLast()),
-		];
-	},
+	(table) => [
+		uniqueIndex("event_reports_report_id_key").using("btree", table.reportId.asc().nullsLast()),
+	],
 );
 
 export const eventSizeValues = pgTable(
@@ -406,22 +325,15 @@ export const eventSizeValues = pgTable(
 		updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
 		reportCampaignId: uuid("report_campaign_id")
 			.notNull()
-			.references(
-				() => {
-					return reportCampaigns.id;
-				},
-				{ onDelete: "restrict", onUpdate: "cascade" },
-			),
+			.references(() => reportCampaigns.id, { onDelete: "restrict", onUpdate: "cascade" }),
 	},
-	(table) => {
-		return [
-			uniqueIndex("event_size_values_report_campaign_id_type_key").using(
-				"btree",
-				table.reportCampaignId.asc().nullsLast(),
-				table.type.asc().nullsLast(),
-			),
-		];
-	},
+	(table) => [
+		uniqueIndex("event_size_values_report_campaign_id_type_key").using(
+			"btree",
+			table.reportCampaignId.asc().nullsLast(),
+			table.type.asc().nullsLast(),
+		),
+	],
 );
 
 export const institutionService = pgTable(
@@ -430,31 +342,19 @@ export const institutionService = pgTable(
 		role: institutionServiceRole().notNull(),
 		institutionId: uuid("institution_id")
 			.notNull()
-			.references(
-				() => {
-					return institutions.id;
-				},
-				{ onDelete: "cascade", onUpdate: "cascade" },
-			),
+			.references(() => institutions.id, { onDelete: "cascade", onUpdate: "cascade" }),
 		serviceId: uuid("service_id")
 			.notNull()
-			.references(
-				() => {
-					return services.id;
-				},
-				{ onDelete: "cascade", onUpdate: "cascade" },
-			),
+			.references(() => services.id, { onDelete: "cascade", onUpdate: "cascade" }),
 	},
-	(table) => {
-		return [
-			uniqueIndex("institution_service_institution_id_role_service_id_key").using(
-				"btree",
-				table.institutionId.asc().nullsLast(),
-				table.role.asc().nullsLast(),
-				table.serviceId.asc().nullsLast(),
-			),
-		];
-	},
+	(table) => [
+		uniqueIndex("institution_service_institution_id_role_service_id_key").using(
+			"btree",
+			table.institutionId.asc().nullsLast(),
+			table.role.asc().nullsLast(),
+			table.serviceId.asc().nullsLast(),
+		),
+	],
 );
 
 export const institutions = pgTable("institutions", {
@@ -478,12 +378,10 @@ export const outreach = pgTable("outreach", {
 	startDate: timestamp("start_date", { precision: 3 }),
 	type: outreachType().notNull(),
 	url: text().notNull(),
-	countryId: uuid("country_id").references(
-		() => {
-			return countries.id;
-		},
-		{ onDelete: "cascade", onUpdate: "cascade" },
-	),
+	countryId: uuid("country_id").references(() => countries.id, {
+		onDelete: "cascade",
+		onUpdate: "cascade",
+	}),
 	createdAt: timestamp("created_at", { precision: 3 })
 		.default(sql`CURRENT_TIMESTAMP`)
 		.notNull(),
@@ -496,12 +394,7 @@ export const outreachKpis = pgTable("outreach_kpis", {
 	value: integer().notNull(),
 	outreachReportId: uuid("outreach_report_id")
 		.notNull()
-		.references(
-			() => {
-				return outreachReports.id;
-			},
-			{ onDelete: "cascade", onUpdate: "cascade" },
-		),
+		.references(() => outreachReports.id, { onDelete: "cascade", onUpdate: "cascade" }),
 	createdAt: timestamp("created_at", { precision: 3 })
 		.default(sql`CURRENT_TIMESTAMP`)
 		.notNull(),
@@ -512,20 +405,10 @@ export const outreachReports = pgTable("outreach_reports", {
 	id: uuid().primaryKey(),
 	outreachId: uuid("outreach_id")
 		.notNull()
-		.references(
-			() => {
-				return outreach.id;
-			},
-			{ onDelete: "cascade", onUpdate: "cascade" },
-		),
+		.references(() => outreach.id, { onDelete: "cascade", onUpdate: "cascade" }),
 	reportId: uuid("report_id")
 		.notNull()
-		.references(
-			() => {
-				return reports.id;
-			},
-			{ onDelete: "cascade", onUpdate: "cascade" },
-		),
+		.references(() => reports.id, { onDelete: "cascade", onUpdate: "cascade" }),
 	createdAt: timestamp("created_at", { precision: 3 })
 		.default(sql`CURRENT_TIMESTAMP`)
 		.notNull(),
@@ -544,22 +427,15 @@ export const outreachTypeValues = pgTable(
 		updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
 		reportCampaignId: uuid("report_campaign_id")
 			.notNull()
-			.references(
-				() => {
-					return reportCampaigns.id;
-				},
-				{ onDelete: "restrict", onUpdate: "cascade" },
-			),
+			.references(() => reportCampaigns.id, { onDelete: "restrict", onUpdate: "cascade" }),
 	},
-	(table) => {
-		return [
-			uniqueIndex("outreach_type_values_report_campaign_id_type_key").using(
-				"btree",
-				table.reportCampaignId.asc().nullsLast(),
-				table.type.asc().nullsLast(),
-			),
-		];
-	},
+	(table) => [
+		uniqueIndex("outreach_type_values_report_campaign_id_type_key").using(
+			"btree",
+			table.reportCampaignId.asc().nullsLast(),
+			table.type.asc().nullsLast(),
+		),
+	],
 );
 
 export const persons = pgTable("persons", {
@@ -598,12 +474,7 @@ export const projects = pgTable("projects", {
 	totalAmount: numeric("total_amount", { precision: 12, scale: 2 }),
 	reportId: uuid("report_id")
 		.notNull()
-		.references(
-			() => {
-				return reports.id;
-			},
-			{ onDelete: "cascade", onUpdate: "cascade" },
-		),
+		.references(() => reports.id, { onDelete: "cascade", onUpdate: "cascade" }),
 	createdAt: timestamp("created_at", { precision: 3 })
 		.default(sql`CURRENT_TIMESTAMP`)
 		.notNull(),
@@ -625,12 +496,10 @@ export const reportCampaigns = pgTable(
 		facultativeQuestionsListTemplate: jsonb("facultative_questions_list_template"),
 		narrativeQuestionsListTemplate: jsonb("narrative_questions_list_template"),
 	},
-	(table) => {
-		return [
-			index("report_campaigns_year_idx").using("btree", table.year.asc().nullsLast()),
-			uniqueIndex("report_campaigns_year_key").using("btree", table.year.asc().nullsLast()),
-		];
-	},
+	(table) => [
+		index("report_campaigns_year_idx").using("btree", table.year.asc().nullsLast()),
+		uniqueIndex("report_campaigns_year_key").using("btree", table.year.asc().nullsLast()),
+	],
 );
 
 export const reports = pgTable(
@@ -645,38 +514,26 @@ export const reports = pgTable(
 		status: reportStatus().default("draft").notNull(),
 		countryId: uuid("country_id")
 			.notNull()
-			.references(
-				() => {
-					return countries.id;
-				},
-				{ onDelete: "cascade", onUpdate: "cascade" },
-			),
+			.references(() => countries.id, { onDelete: "cascade", onUpdate: "cascade" }),
 		createdAt: timestamp("created_at", { precision: 3 })
 			.default(sql`CURRENT_TIMESTAMP`)
 			.notNull(),
 		updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
 		reportCampaignId: uuid("report_campaign_id")
 			.notNull()
-			.references(
-				() => {
-					return reportCampaigns.id;
-				},
-				{ onDelete: "restrict", onUpdate: "cascade" },
-			),
+			.references(() => reportCampaigns.id, { onDelete: "restrict", onUpdate: "cascade" }),
 	},
-	(table) => {
-		return [
-			uniqueIndex("reports_report_campaign_id_country_id_key").using(
-				"btree",
-				table.reportCampaignId.asc().nullsLast(),
-				table.countryId.asc().nullsLast(),
-			),
-			index("reports_report_campaign_id_idx").using(
-				"btree",
-				table.reportCampaignId.asc().nullsLast(),
-			),
-		];
-	},
+	(table) => [
+		uniqueIndex("reports_report_campaign_id_country_id_key").using(
+			"btree",
+			table.reportCampaignId.asc().nullsLast(),
+			table.countryId.asc().nullsLast(),
+		),
+		index("reports_report_campaign_id_idx").using(
+			"btree",
+			table.reportCampaignId.asc().nullsLast(),
+		),
+	],
 );
 
 export const researchPolicyDevelopments = pgTable("research_policy_developments", {
@@ -686,12 +543,7 @@ export const researchPolicyDevelopments = pgTable("research_policy_developments"
 	outcome: text(),
 	reportId: uuid("report_id")
 		.notNull()
-		.references(
-			() => {
-				return reports.id;
-			},
-			{ onDelete: "cascade", onUpdate: "cascade" },
-		),
+		.references(() => reports.id, { onDelete: "cascade", onUpdate: "cascade" }),
 	createdAt: timestamp("created_at", { precision: 3 })
 		.default(sql`CURRENT_TIMESTAMP`)
 		.notNull(),
@@ -706,26 +558,19 @@ export const roleTypeValues = pgTable(
 		type: roleType().notNull(),
 		reportCampaignId: uuid("report_campaign_id")
 			.notNull()
-			.references(
-				() => {
-					return reportCampaigns.id;
-				},
-				{ onDelete: "restrict", onUpdate: "cascade" },
-			),
+			.references(() => reportCampaigns.id, { onDelete: "restrict", onUpdate: "cascade" }),
 		createdAt: timestamp("created_at", { precision: 3 })
 			.default(sql`now()`)
 			.notNull(),
 		updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
 	},
-	(table) => {
-		return [
-			uniqueIndex("role_type_values_report_campaign_id_type_key").using(
-				"btree",
-				table.reportCampaignId.asc().nullsLast(),
-				table.type.asc().nullsLast(),
-			),
-		];
-	},
+	(table) => [
+		uniqueIndex("role_type_values_report_campaign_id_type_key").using(
+			"btree",
+			table.reportCampaignId.asc().nullsLast(),
+			table.type.asc().nullsLast(),
+		),
+	],
 );
 
 export const roles = pgTable("roles", {
@@ -744,12 +589,7 @@ export const serviceKpis = pgTable("service_kpis", {
 	value: integer().notNull(),
 	serviceReportId: uuid("service_report_id")
 		.notNull()
-		.references(
-			() => {
-				return serviceReports.id;
-			},
-			{ onDelete: "cascade", onUpdate: "cascade" },
-		),
+		.references(() => serviceReports.id, { onDelete: "cascade", onUpdate: "cascade" }),
 	createdAt: timestamp("created_at", { precision: 3 })
 		.default(sql`CURRENT_TIMESTAMP`)
 		.notNull(),
@@ -760,20 +600,10 @@ export const serviceReports = pgTable("service_reports", {
 	id: uuid().primaryKey(),
 	reportId: uuid("report_id")
 		.notNull()
-		.references(
-			() => {
-				return reports.id;
-			},
-			{ onDelete: "cascade", onUpdate: "cascade" },
-		),
+		.references(() => reports.id, { onDelete: "cascade", onUpdate: "cascade" }),
 	serviceId: uuid("service_id")
 		.notNull()
-		.references(
-			() => {
-				return services.id;
-			},
-			{ onDelete: "cascade", onUpdate: "cascade" },
-		),
+		.references(() => services.id, { onDelete: "cascade", onUpdate: "cascade" }),
 	createdAt: timestamp("created_at", { precision: 3 })
 		.default(sql`CURRENT_TIMESTAMP`)
 		.notNull(),
@@ -792,22 +622,15 @@ export const serviceSizeValues = pgTable(
 		updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
 		reportCampaignId: uuid("report_campaign_id")
 			.notNull()
-			.references(
-				() => {
-					return reportCampaigns.id;
-				},
-				{ onDelete: "restrict", onUpdate: "cascade" },
-			),
+			.references(() => reportCampaigns.id, { onDelete: "restrict", onUpdate: "cascade" }),
 	},
-	(table) => {
-		return [
-			uniqueIndex("service_size_values_report_campaign_id_type_key").using(
-				"btree",
-				table.reportCampaignId.asc().nullsLast(),
-				table.type.asc().nullsLast(),
-			),
-		];
-	},
+	(table) => [
+		uniqueIndex("service_size_values_report_campaign_id_type_key").using(
+			"btree",
+			table.reportCampaignId.asc().nullsLast(),
+			table.type.asc().nullsLast(),
+		),
+	],
 );
 
 export const services = pgTable("services", {
@@ -845,12 +668,7 @@ export const sessions = pgTable("sessions", {
 	lastVerifiedAt: timestamp("last_verified_at", { precision: 3 }).notNull(),
 	userId: uuid("user_id")
 		.notNull()
-		.references(
-			() => {
-				return users.id;
-			},
-			{ onDelete: "cascade", onUpdate: "cascade" },
-		),
+		.references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" }),
 });
 
 export const software = pgTable("software", {
@@ -875,22 +693,16 @@ export const users = pgTable(
 		name: text().notNull(),
 		password: text().notNull(),
 		role: userRole().default("contributor").notNull(),
-		countryId: uuid("country_id").references(
-			() => {
-				return countries.id;
-			},
-			{ onDelete: "set null", onUpdate: "cascade" },
-		),
-		personId: uuid("person_id").references(
-			() => {
-				return persons.id;
-			},
-			{ onDelete: "set null", onUpdate: "cascade" },
-		),
+		countryId: uuid("country_id").references(() => countries.id, {
+			onDelete: "set null",
+			onUpdate: "cascade",
+		}),
+		personId: uuid("person_id").references(() => persons.id, {
+			onDelete: "set null",
+			onUpdate: "cascade",
+		}),
 	},
-	(table) => {
-		return [uniqueIndex("users_email_key").using("btree", table.email.asc().nullsLast())];
-	},
+	(table) => [uniqueIndex("users_email_key").using("btree", table.email.asc().nullsLast())],
 );
 
 export const workingGroupEvents = pgTable("working_group_events", {
@@ -901,12 +713,7 @@ export const workingGroupEvents = pgTable("working_group_events", {
 	url: text().notNull(),
 	reportId: uuid("report_id")
 		.notNull()
-		.references(
-			() => {
-				return workingGroupReports.id;
-			},
-			{ onDelete: "restrict", onUpdate: "cascade" },
-		),
+		.references(() => workingGroupReports.id, { onDelete: "restrict", onUpdate: "cascade" }),
 });
 
 export const workingGroupOutreach = pgTable("working_group_outreach", {
@@ -917,12 +724,7 @@ export const workingGroupOutreach = pgTable("working_group_outreach", {
 	url: text().notNull(),
 	workingGroupId: uuid("working_group_id")
 		.notNull()
-		.references(
-			() => {
-				return workingGroups.id;
-			},
-			{ onDelete: "restrict", onUpdate: "cascade" },
-		),
+		.references(() => workingGroups.id, { onDelete: "restrict", onUpdate: "cascade" }),
 	createdAt: timestamp("created_at", { precision: 3 })
 		.default(sql`CURRENT_TIMESTAMP`)
 		.notNull(),
@@ -940,9 +742,8 @@ export const workingGroupReports = pgTable(
 		workingGroupId: uuid("working_group_id")
 			.notNull()
 			.references(
-				() => {
-					return workingGroups.id;
-				},
+				// oxlint-disable-next-line no-use-before-define
+				() => workingGroups.id,
 				{ onDelete: "restrict", onUpdate: "cascade" },
 			),
 		createdAt: timestamp("created_at", { precision: 3 })
@@ -951,28 +752,21 @@ export const workingGroupReports = pgTable(
 		updatedAt: timestamp("updated_at", { precision: 3 }).notNull(),
 		reportCampaignId: uuid("report_campaign_id")
 			.notNull()
-			.references(
-				() => {
-					return reportCampaigns.id;
-				},
-				{ onDelete: "restrict", onUpdate: "cascade" },
-			),
+			.references(() => reportCampaigns.id, { onDelete: "restrict", onUpdate: "cascade" }),
 		facultativeQuestionsList: jsonb("facultative_questions_list"),
 		narrativeQuestionsList: jsonb("narrative_questions_list"),
 	},
-	(table) => {
-		return [
-			index("working_group_reports_report_campaign_id_idx").using(
-				"btree",
-				table.reportCampaignId.asc().nullsLast(),
-			),
-			uniqueIndex("working_group_reports_report_campaign_id_working_group_id_key").using(
-				"btree",
-				table.reportCampaignId.asc().nullsLast(),
-				table.workingGroupId.asc().nullsLast(),
-			),
-		];
-	},
+	(table) => [
+		index("working_group_reports_report_campaign_id_idx").using(
+			"btree",
+			table.reportCampaignId.asc().nullsLast(),
+		),
+		uniqueIndex("working_group_reports_report_campaign_id_working_group_id_key").using(
+			"btree",
+			table.reportCampaignId.asc().nullsLast(),
+			table.workingGroupId.asc().nullsLast(),
+		),
+	],
 );
 
 export const workingGroups = pgTable(
@@ -994,7 +788,5 @@ export const workingGroups = pgTable(
 		description: text(),
 		logo: text(),
 	},
-	(table) => {
-		return [index("working_groups_slug_idx").using("btree", table.slug.asc().nullsLast())];
-	},
+	(table) => [index("working_groups_slug_idx").using("btree", table.slug.asc().nullsLast())],
 );

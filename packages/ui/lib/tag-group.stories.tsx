@@ -13,6 +13,7 @@ const meta = {
 	tags: ["autodocs"],
 	argTypes: {},
 	args: {
+		// oxlint-disable-next-line typescript/strict-void-return
 		onRemove: fn(),
 	},
 } satisfies Meta<typeof TagGroup>;

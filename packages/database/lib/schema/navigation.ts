@@ -28,31 +28,24 @@ export const navigationItems = p.snakeCase.table(
 			.uuid("menu_id")
 			.notNull()
 			.references(
-				() => {
-					return navigationMenus.id;
-				},
+				() => navigationMenus.id,
 				{ onDelete: "cascade" },
 			),
 		parentId: p.uuid("parent_id").references(
-			(): AnyPgColumn => {
-				return navigationItems.id;
-			},
+			(): AnyPgColumn => navigationItems.id,
 			{ onDelete: "cascade" },
 		),
 		label: p.text("label").notNull(),
 		href: p.text("href"),
 		entityId: p.uuid("entity_id").references(
-			() => {
-				return entities.id;
-			},
+			() => entities.id,
 			{ onDelete: "set null" },
 		),
 		isExternal: p.boolean("is_external").notNull().default(false),
 		position: p.integer("position").notNull().default(0),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [
+	(t) => [
 			p.check(
 				"navigation_items_link",
 				sql`
@@ -62,8 +55,7 @@ export const navigationItems = p.snakeCase.table(
 					)
 				`,
 			),
-		];
-	},
+		],
 );
 
 export type NavigationItem = typeof navigationItems.$inferSelect;

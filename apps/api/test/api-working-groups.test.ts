@@ -1,3 +1,5 @@
+// oxlint-disable oxc/no-map-spread
+
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { faker as f } from "@faker-js/faker";
@@ -252,6 +254,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 	});
 
 	await db.insert(schema.organisationalUnits).values(
+		// oxlint-disable-next-line oxc/no-map-spread
 		items.slice(1).map((item) => {
 			return { ...item.organisationalUnit, typeId: workingGroupType.id, imageId: asset.id };
 		}),
@@ -273,9 +276,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 	);
 
 	await Promise.all(
-		items.map((item) => {
-			return seedContentBlock(db, item.version.id, entityType.id, "description");
-		}),
+		items.map((item) => seedContentBlock(db, item.version.id, entityType.id, "description")),
 	);
 
 	await db.insert(schema.assets).values(chair.asset);
@@ -445,12 +446,12 @@ describe("working-groups", () => {
 									role: "is_affiliated_with",
 									name: chair.affiliation.organisationalUnit.name,
 								}),
-								...items.slice(1).map((i) => {
-									return expect.objectContaining({
+								...items.slice(1).map((i) =>
+									expect.objectContaining({
 										role: "is_chair_of",
 										name: i.organisationalUnit.name,
-									});
-								}),
+									}),
+								),
 							]),
 						}),
 					]),
@@ -571,12 +572,12 @@ describe("working-groups", () => {
 									role: "is_affiliated_with",
 									name: chair.affiliation.organisationalUnit.name,
 								}),
-								...items.slice(1).map((i) => {
-									return expect.objectContaining({
+								...items.slice(1).map((i) =>
+									expect.objectContaining({
 										role: "is_chair_of",
 										name: i.organisationalUnit.name,
-									});
-								}),
+									}),
+								),
 							]),
 						}),
 					]),

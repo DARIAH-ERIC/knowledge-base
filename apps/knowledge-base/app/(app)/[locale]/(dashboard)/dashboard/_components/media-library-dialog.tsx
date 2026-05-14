@@ -62,9 +62,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 	const [activeTab, setActiveTab] = useState<ActiveTab>("select");
 
 	// Select tab state
-	const [selectedKeys, setSelectedKeys] = useState<Selection>(() => {
-		return new Set();
-	});
+	const [selectedKeys, setSelectedKeys] = useState<Selection>(() => new Set());
 	const [selectedAsset, setSelectedAsset] = useState<MediaLibraryAsset | null>(null);
 	const [displayedAssets, setDisplayedAssets] = useState<Array<MediaLibraryAsset>>(initialAssets);
 	const [selectedPrefix, setSelectedPrefix] = useState<T>(defaultPrefix);
@@ -152,9 +150,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 		setSelectedKeys(keys);
 		if (keys !== "all" && keys.size > 0) {
 			const key = [...keys][0] as string;
-			const asset = displayedAssets.find((a) => {
-				return a.key === key;
-			});
+			const asset = displayedAssets.find((a) => a.key === key);
 			if (asset) {
 				setSelectedAsset(asset);
 			}
@@ -208,7 +204,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 	}
 
 	function handleUploadAction(formData: FormData) {
-		if (pendingFile == null) return;
+		if (pendingFile == null) {return;}
 		formData.append("file", pendingFile);
 		startUploading(async () => {
 			const result = await uploadImageAction(createActionStateInitial(), formData);
@@ -221,7 +217,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 	}
 
 	function handleConfirm() {
-		if (selectedAsset == null) return;
+		if (selectedAsset == null) {return;}
 		onSelect(selectedAsset.key, selectedAsset.url);
 		setIsOpen(false);
 	}
@@ -245,9 +241,9 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 					title={t("Media library")}
 				/>
 
-				<ModalBody className="flex h-128 flex-col">
+				<ModalBody className="flex block-128 flex-col">
 					<Tabs
-						className="flex flex-1 flex-col min-h-0"
+						className="flex flex-1 flex-col min-block-0"
 						onSelectionChange={(key) => {
 							if (activeTab === "upload" && key !== "upload") {
 								resetUploadTab();
@@ -261,10 +257,9 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 							<Tab id="upload">{t("Upload")}</Tab>
 						</TabList>
 
-						<TabPanel className="flex flex-1 flex-col gap-3 min-h-0" id="select">
+						<TabPanel className="flex flex-1 flex-col gap-3 min-block-0" id="select">
 							<div className="flex gap-2">
-								{prefixes.map((p) => {
-									return (
+								{prefixes.map((p) => (
 										<Button
 											key={p}
 											intent={selectedPrefix === p ? "primary" : "outline"}
@@ -275,14 +270,13 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 										>
 											{p}
 										</Button>
-									);
-								})}
+									))}
 							</div>
 
 							<form className="flex gap-2" onSubmit={handleSearch}>
 								<input
 									ref={searchInputRef}
-									className="h-9 flex-1 rounded-md border border-input bg-transparent px-3 text-sm outline-none placeholder:text-muted-fg focus:ring-2 focus:ring-ring"
+									className="block-9 flex-1 rounded-md border border-input bg-transparent px-3 text-sm outline-none placeholder:text-muted-fg focus:ring-2 focus:ring-ring"
 									placeholder={t("Search...")}
 									type="search"
 								/>
@@ -314,8 +308,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 										selectionBehavior="replace"
 										selectionMode="single"
 									>
-										{(asset) => {
-											return (
+										{(asset) => (
 												<GridListItem
 													className="flex flex-col gap-1 p-1 place-content-center"
 													id={asset.key}
@@ -323,19 +316,18 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 												>
 													<AssetPreview
 														alt={asset.label}
-														className="size-24"
+														className="block-24 inline-24"
 														imageClassName="rounded-sm object-cover"
 														kindLabelClassName="bg-background/90"
 														mimeType={asset.mimeType}
 														src={asset.url}
 														storageKey={asset.key}
 													/>
-													<span className="w-24 truncate text-center text-xs text-muted-fg">
+													<span className="inline-24 truncate text-center text-xs text-muted-fg">
 														{asset.label}
 													</span>
 												</GridListItem>
-											);
-										}}
+											)}
 									</GridList>
 
 									{isPending ? (
@@ -371,7 +363,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 										{pendingFileUrl != null ? (
 											<img
 												alt={t("Preview")}
-												className="size-24 rounded-sm object-cover"
+												className="block-24 inline-24 rounded-sm object-cover"
 												src={pendingFileUrl}
 											/>
 										) : null}

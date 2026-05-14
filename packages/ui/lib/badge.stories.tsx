@@ -43,13 +43,11 @@ export const Intents: Story = {
 
 		return (
 			<div className="flex flex-wrap gap-3">
-				{intents.map((intent) => {
-					return (
+				{intents.map((intent) => (
 						<Badge key={intent} intent={intent}>
 							{intent}
 						</Badge>
-					);
-				})}
+					))}
 			</div>
 		);
 	},

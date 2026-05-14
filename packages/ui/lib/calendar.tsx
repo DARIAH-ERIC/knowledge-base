@@ -6,18 +6,18 @@ import { useExtracted } from "next-intl";
 import { type ReactNode, use } from "react";
 import { useDateFormatter } from "react-aria";
 import {
-	Calendar as CalendarPrimitive,
 	CalendarCell,
 	CalendarGrid,
 	CalendarGridBody,
 	CalendarGridHeader as CalendarGridHeaderPrimitive,
 	CalendarHeaderCell,
+	Calendar as CalendarPrimitive,
 	type CalendarProps as CalendarPrimitiveProps,
 	type CalendarState,
 	CalendarStateContext,
-	composeRenderProps,
 	type DateValue,
 	Heading,
+	composeRenderProps,
 	useLocale,
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
@@ -44,27 +44,23 @@ export function Calendar<T extends DateValue>({
 			<CalendarGrid>
 				<CalendarGridHeader />
 				<CalendarGridBody>
-					{(date) => {
-						return (
+					{(date) => (
 							<CalendarCell
 								className={composeRenderProps(
 									className,
-									(className, { isSelected, isDisabled }) => {
-										return twMerge(
-											"relative flex size-11 cursor-default items-center justify-center rounded-lg text-fg tabular-nums outline-hidden hover:bg-secondary-fg/15 sm:size-9 sm:text-sm/6 forced-colors:text-[ButtonText] forced-colors:outline-0",
+									(className, { isSelected, isDisabled }) => twMerge(
+											"relative flex block-11 inline-11 cursor-default items-center justify-center rounded-lg text-fg tabular-nums outline-hidden hover:bg-secondary-fg/15 sm:block-9 sm:inline-9 sm:text-sm/6 forced-colors:text-[ButtonText] forced-colors:outline-0",
 											isSelected &&
 												"bg-primary text-primary-fg pressed:bg-primary hover:bg-primary/90 data-invalid:bg-danger data-invalid:text-danger-fg forced-colors:bg-[Highlight] forced-colors:text-[Highlight] forced-colors:data-invalid:bg-[Mark]",
 											isDisabled && "text-muted-fg forced-colors:text-[GrayText]",
 											date.compare(now) === 0 &&
-												"after:pointer-events-none after:absolute after:inset-s-1/2 after:bottom-1 after:z-10 after:size-[3px] after:-translate-x-1/2 after:rounded-full after:bg-primary selected:after:bg-primary-fg focus-visible:after:bg-primary-fg",
+												"after:pointer-events-none after:absolute after:inset-s-1/2 after:inset-be-1 after:z-10 after:block-[3px] after:inline-[3px] after:-translate-x-1/2 after:rounded-full after:bg-primary selected:after:bg-primary-fg focus-visible:after:bg-primary-fg",
 											className,
-										);
-									},
+										),
 								)}
 								date={date}
 							/>
-						);
-					}}
+						)}
 				</CalendarGridBody>
 			</CalendarGrid>
 		</CalendarPrimitive>
@@ -83,7 +79,7 @@ export function CalendarHeader({
 	return (
 		<header
 			className={twMerge(
-				"flex w-full justify-between gap-1.5 pt-1 pr-1 pb-5 pl-1.5 sm:pb-4",
+				"flex inline-full justify-between gap-1.5 pbs-1 pe-1 pbe-5 ps-1.5 sm:pbe-4",
 				className,
 			)}
 			data-slot="calendar-header"
@@ -97,7 +93,7 @@ export function CalendarHeader({
 			)}
 			<Heading
 				className={twMerge(
-					"mr-2 flex-1 text-left font-medium text-muted-fg sm:text-sm",
+					"me-2 flex-1 text-start font-medium text-muted-fg sm:text-sm",
 					isRange === false && "sr-only",
 					className,
 				)}
@@ -105,7 +101,7 @@ export function CalendarHeader({
 			<div className="flex items-center gap-1">
 				<Button
 					aria-label={t("Previous month")}
-					className="size-8 sm:size-7 **:data-[slot=icon]:text-fg"
+					className="block-8 inline-8 sm:block-7 sm:inline-7 **:data-[slot=icon]:text-fg"
 					intent="plain"
 					isCircle={true}
 					size="sq-sm"
@@ -115,7 +111,7 @@ export function CalendarHeader({
 				</Button>
 				<Button
 					aria-label={t("Next month")}
-					className="size-8 sm:size-7 **:data-[slot=icon]:text-fg"
+					className="block-8 inline-8 sm:block-7 sm:inline-7 **:data-[slot=icon]:text-fg"
 					intent="plain"
 					isCircle={true}
 					size="sq-sm"
@@ -152,15 +148,13 @@ export function SelectMonth({ state }: Readonly<{ state: CalendarState }>): Reac
 			}}
 			value={state.focusedDate.month.toString()}
 		>
-			<SelectTrigger className="w-22 text-sm/5 sm:px-2.5 sm:py-1.5 sm:*:text-sm/5 **:data-[slot=select-value]:inline-block **:data-[slot=select-value]:truncate" />
-			<SelectContent className="min-w-0">
-				{months.map((month, index) => {
-					return (
+			<SelectTrigger className="inline-22 text-sm/5 sm:px-2.5 sm:py-1.5 sm:*:text-sm/5 **:data-[slot=select-value]:inline-block **:data-[slot=select-value]:truncate" />
+			<SelectContent className="min-inline-0">
+				{months.map((month, index) => (
 						<SelectItem key={index} id={(index + 1).toString()} textValue={month}>
 							<SelectLabel>{month}</SelectLabel>
 						</SelectItem>
-					);
-				})}
+					))}
 			</SelectContent>
 		</Select>
 	);
@@ -194,13 +188,11 @@ export function SelectYear({ state }: Readonly<{ state: CalendarState }>): React
 		>
 			<SelectTrigger className="text-sm/5 sm:px-2.5 sm:py-1.5 sm:*:text-sm/5" />
 			<SelectContent>
-				{years.map((year, i) => {
-					return (
+				{years.map((year, i) => (
 						<SelectItem key={i} id={i} textValue={year.formatted}>
 							<SelectLabel>{year.formatted}</SelectLabel>
 						</SelectItem>
-					);
-				})}
+					))}
 			</SelectContent>
 		</Select>
 	);
@@ -209,13 +201,11 @@ export function SelectYear({ state }: Readonly<{ state: CalendarState }>): React
 export function CalendarGridHeader(): ReactNode {
 	return (
 		<CalendarGridHeaderPrimitive>
-			{(day) => {
-				return (
-					<CalendarHeaderCell className="pb-2 text-center font-semibold text-muted-fg text-sm/6 sm:px-0 sm:py-0.5 lg:text-xs">
+			{(day) => (
+					<CalendarHeaderCell className="pbe-2 text-center font-semibold text-muted-fg text-sm/6 sm:px-0 sm:py-0.5 lg:text-xs">
 						{day}
 					</CalendarHeaderCell>
-				);
-			}}
+				)}
 		</CalendarGridHeaderPrimitive>
 	);
 }

@@ -73,7 +73,7 @@ export function ModalContent(props: Readonly<ModalContentProps>): ReactNode {
 	return (
 		<AriaModalOverlay
 			className={twJoin(
-				"fixed inset-0 z-50 h-(--visual-viewport-height,100vh) bg-black/15",
+				"fixed inset-0 z-50 block-(--visual-viewport-height,100vh) bg-black/15",
 				"grid grid-rows-[1fr_auto] justify-items-center sm:grid-rows-[1fr_auto_3fr]",
 				size === "fullscreen" ? "md:p-3" : "md:p-4",
 				"entering:fade-in entering:animate-in entering:duration-300 entering:ease-out",
@@ -86,7 +86,7 @@ export function ModalContent(props: Readonly<ModalContentProps>): ReactNode {
 		>
 			<AriaModal
 				className={cx(
-					"row-start-2 w-full text-left align-middle",
+					"row-start-2 inline-full text-start align-middle",
 					"[--visual-viewport-vertical-padding:16px]",
 					size === "fullscreen"
 						? "sm:rounded-md sm:[--visual-viewport-vertical-padding:16px]"
@@ -103,14 +103,12 @@ export function ModalContent(props: Readonly<ModalContentProps>): ReactNode {
 				{...props}
 			>
 				<Dialog role={role}>
-					{(values) => {
-						return (
+					{(values) => (
 							<Fragment>
 								{typeof children === "function" ? children(values) : children}
 								{closeButton && <DialogCloseIcon isDismissable={isDismissable} />}
 							</Fragment>
-						);
-					}}
+						)}
 				</Dialog>
 			</AriaModal>
 		</AriaModalOverlay>

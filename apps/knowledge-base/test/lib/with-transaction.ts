@@ -11,6 +11,7 @@ export async function withTransaction(fn: Parameters<typeof db.transaction>[0]):
 			tx.rollback();
 		});
 	} catch (error) {
+		// oxlint-disable-next-line unicorn/no-instanceof-builtins
 		if (error instanceof Error && error.message === "Rollback") {
 			return;
 		}

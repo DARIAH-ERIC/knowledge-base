@@ -30,7 +30,7 @@ export function PasswordResetEmailVerificationForm(): ReactNode {
 				<Input />
 			</TextField>
 
-			<SubmitButton className="mt-2">{t("Verify")}</SubmitButton>
+			<SubmitButton className="mbs-2">{t("Verify")}</SubmitButton>
 		</Form>
 	);
 }

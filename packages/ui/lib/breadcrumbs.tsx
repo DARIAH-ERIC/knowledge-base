@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronRightIcon } from "@heroicons/react/24/solid";
-import { createContext, Fragment, type ReactNode, use } from "react";
+import { Fragment, type ReactNode, createContext, use } from "react";
 import {
 	Breadcrumb,
 	type BreadcrumbProps,
@@ -53,8 +53,7 @@ export function BreadcrumbsItem({
 			data-slot="breadcrumb-item"
 			{...props}
 		>
-			{({ isCurrent }) => {
-				return (
+			{({ isCurrent }) => (
 					<Fragment>
 						{href != null ? (
 							<Link href={href as string} {...props} />
@@ -63,8 +62,7 @@ export function BreadcrumbsItem({
 						)}
 						{!isCurrent && effectiveSeparator !== false && <Separator separator={separatorValue} />}
 					</Fragment>
-				);
-			}}
+				)}
 		</Breadcrumb>
 	);
 }
@@ -75,7 +73,7 @@ export function Separator({
 	separator?: BreadcrumbsItemProps["separator"];
 }>): ReactNode {
 	return (
-		<span className="*:shrink-0 *:text-muted-fg *:data-[slot=icon]:size-3.5">
+		<span className="*:shrink-0 *:text-muted-fg *:data-[slot=icon]:block-3.5 *:data-[slot=icon]:inline-3.5">
 			{separator === "chevron" && <ChevronRightIcon />}
 			{separator === "slash" && <span className="text-muted-fg">/</span>}
 		</span>

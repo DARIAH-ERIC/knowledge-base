@@ -10,9 +10,7 @@ const validate = define({
 			v.pipe(
 				v.string(),
 				v.nonEmpty(),
-				v.transform((value) => {
-					return value.split(",");
-				}),
+				v.transform((value) => value.split(",")),
 				v.array(v.pipe(v.string(), v.trim(), v.url())),
 			),
 		),

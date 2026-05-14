@@ -10,11 +10,11 @@ import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 
 export async function deleteWorkingGroupReportEventAction(formData: FormData): Promise<void> {
-	if (!(await globalPostRequestRateLimit())) return;
+	if (!(await globalPostRequestRateLimit())) {return;}
 
 	const eventId = formData.get("eventId");
 	const workingGroupReportId = formData.get("workingGroupReportId");
-	if (typeof eventId !== "string" || typeof workingGroupReportId !== "string") return;
+	if (typeof eventId !== "string" || typeof workingGroupReportId !== "string") {return;}
 
 	const { user } = await assertAuthenticated();
 	await assertCan(user, "update", { type: "working_group_report", id: workingGroupReportId });

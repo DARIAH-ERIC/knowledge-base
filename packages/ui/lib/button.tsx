@@ -5,7 +5,7 @@ import {
 	Button as ButtonPrimitive,
 	type ButtonProps as ButtonPrimitiveProps,
 } from "react-aria-components";
-import { tv, type VariantProps } from "tailwind-variants";
+import { type VariantProps, tv } from "tailwind-variants";
 
 import { cx } from "@/lib/primitive";
 
@@ -17,7 +17,7 @@ export const buttonStyles = tv({
 		"focus:outline-0 focus-visible:outline focus-visible:outline-offset-2 focus-visible:ring-2 focus-visible:ring-offset-3 focus-visible:ring-offset-bg",
 		"forced-colors:[--btn-icon:ButtonText] forced-colors:hover:[--btn-icon:ButtonText] *:data-[slot=icon]:-mx-0.5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:self-center *:data-[slot=icon]:text-(--btn-icon) focus-visible:*:data-[slot=icon]:text-(--btn-icon-active)/80 hover:*:data-[slot=icon]:text-(--btn-icon-active)/90",
 		"*:data-[slot=loader]:-mx-0.5 *:data-[slot=loader]:shrink-0 *:data-[slot=loader]:self-center *:data-[slot=loader]:text-(--btn-icon)",
-		"pending:opacity-50 disabled:opacity-50 disabled:forced-colors:text-[GrayText]",
+		"pending:opacity-50 disabled:opacity-50 forced-colors:disabled:text-[GrayText]",
 		"*:data-[slot=color-swatch]:-mx-0.5 *:data-[slot=color-swatch]:shrink-0 *:data-[slot=color-swatch]:self-center *:data-[slot=color-swatch]:[--color-swatch-size:--spacing(5)]",
 	],
 	variants: {
@@ -37,44 +37,44 @@ export const buttonStyles = tv({
 		},
 		size: {
 			xs: [
-				"min-h-8 gap-x-1.5 px-[calc(--spacing(3)-1px)] py-[calc(--spacing(1.5)-1px)] text-sm sm:min-h-7 sm:px-2 sm:py-[calc(--spacing(1.5)-1px)] sm:text-xs/4",
-				"*:data-[slot=icon]:-mx-px *:data-[slot=icon]:size-3.5 sm:*:data-[slot=icon]:size-3",
-				"*:data-[slot=loader]:-mx-px *:data-[slot=loader]:size-3.5 sm:*:data-[slot=loader]:size-3",
+				"min-block-8 gap-x-1.5 px-[calc(--spacing(3)-1px)] py-[calc(--spacing(1.5)-1px)] text-sm sm:min-block-7 sm:px-2 sm:py-[calc(--spacing(1.5)-1px)] sm:text-xs/4",
+				"*:data-[slot=icon]:-mx-px *:data-[slot=icon]:block-3.5 *:data-[slot=icon]:inline-3.5 sm:*:data-[slot=icon]:block-3 sm:*:data-[slot=icon]:inline-3",
+				"*:data-[slot=loader]:-mx-px *:data-[slot=loader]:block-3.5 *:data-[slot=loader]:inline-3.5 sm:*:data-[slot=loader]:block-3 sm:*:data-[slot=loader]:inline-3",
 			],
 			sm: [
-				"min-h-9 gap-x-1.5 px-3 py-[calc(--spacing(2)-1px)] sm:min-h-8 sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/5",
-				"*:data-[slot=icon]:size-4.5 sm:*:data-[slot=icon]:size-4",
-				"*:data-[slot=loader]:size-4.5 sm:*:data-[slot=loader]:size-4",
+				"min-block-9 gap-x-1.5 px-3 py-[calc(--spacing(2)-1px)] sm:min-block-8 sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/5",
+				"*:data-[slot=icon]:block-4.5 *:data-[slot=icon]:inline-4.5 sm:*:data-[slot=icon]:block-4 sm:*:data-[slot=icon]:inline-4",
+				"*:data-[slot=loader]:block-4.5 *:data-[slot=loader]:inline-4.5 sm:*:data-[slot=loader]:block-4 sm:*:data-[slot=loader]:inline-4",
 			],
 			md: [
-				"min-h-10 gap-x-2 px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:min-h-9 sm:px-3 sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6",
-				"*:data-[slot=icon]:size-5 sm:*:data-[slot=icon]:size-4",
-				"*:data-[slot=loader]:size-5 sm:*:data-[slot=loader]:size-4",
+				"min-block-10 gap-x-2 px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:min-block-9 sm:px-3 sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6",
+				"*:data-[slot=icon]:block-5 *:data-[slot=icon]:inline-5 sm:*:data-[slot=icon]:block-4 sm:*:data-[slot=icon]:inline-4",
+				"*:data-[slot=loader]:block-5 *:data-[slot=loader]:inline-5 sm:*:data-[slot=loader]:block-4 sm:*:data-[slot=loader]:inline-4",
 			],
 			lg: [
-				"min-h-10 gap-x-2 px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(3)-1px)] sm:min-h-9 sm:px-3 sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/7",
-				"*:data-[slot=icon]:size-5 sm:*:data-[slot=icon]:size-4.5",
-				"*:data-[slot=loader]:size-5 sm:*:data-[slot=loader]:size-4.5",
+				"min-block-10 gap-x-2 px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(3)-1px)] sm:min-block-9 sm:px-3 sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/7",
+				"*:data-[slot=icon]:block-5 *:data-[slot=icon]:inline-5 sm:*:data-[slot=icon]:block-4.5 sm:*:data-[slot=icon]:inline-4.5",
+				"*:data-[slot=loader]:block-5 *:data-[slot=loader]:inline-5 sm:*:data-[slot=loader]:block-4.5 sm:*:data-[slot=loader]:inline-4.5",
 			],
 			"sq-xs": [
-				"touch-area size-8 sm:size-7",
-				"*:data-[slot=icon]:size-3.5 sm:*:data-[slot=icon]:size-3",
-				"*:data-[slot=loader]:size-3.5 sm:*:data-[slot=loader]:size-3",
+				"touch-area block-8 inline-8 sm:block-7 sm:inline-7",
+				"*:data-[slot=icon]:block-3.5 *:data-[slot=icon]:inline-3.5 sm:*:data-[slot=icon]:block-3 sm:*:data-[slot=icon]:inline-3",
+				"*:data-[slot=loader]:block-3.5 *:data-[slot=loader]:inline-3.5 sm:*:data-[slot=loader]:block-3 sm:*:data-[slot=loader]:inline-3",
 			],
 			"sq-sm": [
-				"touch-area size-10 sm:size-8",
-				"*:data-[slot=icon]:size-4.5 sm:*:data-[slot=icon]:size-4",
-				"*:data-[slot=loader]:size-4.5 sm:*:data-[slot=loader]:size-4",
+				"touch-area block-10 inline-10 sm:block-8 sm:inline-8",
+				"*:data-[slot=icon]:block-4.5 *:data-[slot=icon]:inline-4.5 sm:*:data-[slot=icon]:block-4 sm:*:data-[slot=icon]:inline-4",
+				"*:data-[slot=loader]:block-4.5 *:data-[slot=loader]:inline-4.5 sm:*:data-[slot=loader]:block-4 sm:*:data-[slot=loader]:inline-4",
 			],
 			"sq-md": [
-				"touch-area size-11 sm:size-9",
-				"*:data-[slot=icon]:size-5 sm:*:data-[slot=icon]:size-4.5",
-				"*:data-[slot=loader]:size-5 sm:*:data-[slot=loader]:size-4.5",
+				"touch-area block-11 inline-11 sm:block-9 sm:inline-9",
+				"*:data-[slot=icon]:block-5 *:data-[slot=icon]:inline-5 sm:*:data-[slot=icon]:block-4.5 sm:*:data-[slot=icon]:inline-4.5",
+				"*:data-[slot=loader]:block-5 *:data-[slot=loader]:inline-5 sm:*:data-[slot=loader]:block-4.5 sm:*:data-[slot=loader]:inline-4.5",
 			],
 			"sq-lg": [
-				"touch-area size-12 sm:size-10",
-				"*:data-[slot=icon]:size-6 sm:*:data-[slot=icon]:size-5",
-				"*:data-[slot=loader]:size-6 sm:*:data-[slot=loader]:size-5",
+				"touch-area block-12 inline-12 sm:block-10 sm:inline-10",
+				"*:data-[slot=icon]:block-6 *:data-[slot=icon]:inline-6 sm:*:data-[slot=icon]:block-5 sm:*:data-[slot=icon]:inline-5",
+				"*:data-[slot=loader]:block-6 *:data-[slot=loader]:inline-6 sm:*:data-[slot=loader]:block-5 sm:*:data-[slot=loader]:inline-5",
 			],
 		},
 

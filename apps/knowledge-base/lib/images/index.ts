@@ -1,4 +1,4 @@
-import { createImagesService, type ImageUrlOptions } from "@dariah-eric/images";
+import { type ImageUrlOptions, createImagesService } from "@dariah-eric/images";
 
 import { env } from "@/config/env.config";
 

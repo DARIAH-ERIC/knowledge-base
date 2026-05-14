@@ -67,9 +67,7 @@ export class WebsiteNewsPage {
 		await dialog.waitFor({ state: "visible" });
 
 		const option = dialog.getByRole("option", { name: entityName, exact: true });
-		const isOptionVisible = await option.isVisible().catch(() => {
-			return false;
-		});
+		const isOptionVisible = await option.isVisible().catch(() => false);
 
 		if (!isOptionVisible) {
 			await dialog.getByRole("searchbox").fill(entityName);

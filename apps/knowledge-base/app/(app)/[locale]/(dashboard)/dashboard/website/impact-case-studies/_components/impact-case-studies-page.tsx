@@ -73,11 +73,7 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 	const router = useRouter();
 	const [items, optimisticallyRemoveItem] = useOptimistic(
 		impactCaseStudies.data,
-		(state, id: string) => {
-			return state.filter((item) => {
-				return item.id !== id;
-			});
-		},
+		(state, id: string) => state.filter((item) => item.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
@@ -108,7 +104,7 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 						className={buttonStyles({ intent: "secondary" })}
 						href="/dashboard/website/impact-case-studies/create"
 					>
-						<PlusIcon className="mr-2 size-4" />
+						<PlusIcon className="me-2 block-4 inline-4" />
 						{t("New")}
 					</Link>
 				</HeaderAction>
@@ -132,14 +128,13 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
-					{(item) => {
-						return (
+					{(item) => (
 							<TableRow href={`/dashboard/website/impact-case-studies/${item.entity.slug}/details`}>
 								<TableCell>
-									<div className="max-w-64 truncate">{item.title}</div>
+									<div className="max-inline-64 truncate">{item.title}</div>
 								</TableCell>
 								<TableCell>
-									<div className="max-w-xs truncate">{item.summary}</div>
+									<div className="max-inline-xs truncate">{item.summary}</div>
 								</TableCell>
 								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 								<TableCell>
@@ -152,23 +147,23 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 									<Menu>
 										<Button
 											aria-label={t("Open actions menu")}
-											className="h-7 sm:h-7"
+											className="block-7 sm:block-7"
 											intent="plain"
 											size="sq-sm"
 										>
-											<EllipsisHorizontalIcon className="size-5" />
+											<EllipsisHorizontalIcon className="block-5 inline-5" />
 										</Button>
 										<MenuContent placement="left top">
 											<MenuItem
 												href={`/dashboard/website/impact-case-studies/${item.entity.slug}/details`}
 											>
-												<EyeIcon className="mr-2 size-4" />
+												<EyeIcon className="me-2 block-4 inline-4" />
 												<MenuLabel>{t("View")}</MenuLabel>
 											</MenuItem>
 											<MenuItem
 												href={`/dashboard/website/impact-case-studies/${item.entity.slug}/edit`}
 											>
-												<PencilSquareIcon className="mr-2 size-4" />
+												<PencilSquareIcon className="me-2 block-4 inline-4" />
 												<MenuLabel>{t("Edit")}</MenuLabel>
 											</MenuItem>
 											<MenuSeparator />
@@ -178,15 +173,14 @@ export function ImpactCaseStudiesPage(props: Readonly<ImpactCaseStudiesPageProps
 													setItemToDelete({ id: item.id, documentId: item.documentId });
 												}}
 											>
-												<TrashIcon className="mr-2 size-4" />
+												<TrashIcon className="me-2 block-4 inline-4" />
 												<MenuLabel>{t("Delete")}</MenuLabel>
 											</MenuItem>
 										</MenuContent>
 									</Menu>
 								</TableCell>
 							</TableRow>
-						);
-					}}
+						)}
 				</TableBody>
 			</Table>
 

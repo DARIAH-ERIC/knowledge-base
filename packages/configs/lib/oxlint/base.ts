@@ -165,7 +165,7 @@ const config = defineConfig({
 		"no-unnecessary-type-assertion": "error",
 		"no-unnecessary-type-constraint": "error",
 		"no-unsafe-enum-comparison": "error",
-		"no-unsafe-type-assertion": "warn",
+		"no-unsafe-type-assertion": "off",
 		"no-useless-concat": "warn",
 		"no-useless-constructor": "off",
 		"preserve-caught-error": "error",
@@ -212,7 +212,7 @@ const config = defineConfig({
 		"no-useless-call": "error",
 
 		"oxc/no-accumulating-spread": "error",
-		"oxc/no-map-spread": "error",
+		"oxc/no-map-spread": "off",
 
 		"unicorn/prefer-array-find": "error",
 		"unicorn/prefer-array-flat-map": "error",
@@ -267,7 +267,7 @@ const config = defineConfig({
 				"ts-nocheck": { descriptionFormat: "^ -- .+$" },
 			},
 		],
-		"typescript/ban-types": "error",
+		"typescript/ban-types": "off",
 		"typescript/no-confusing-void-expression": "error",
 		"typescript/no-deprecated": "warn",
 		"typescript/no-misused-promises": "error",
@@ -614,6 +614,12 @@ const config = defineConfig({
 		"unicorn/no-useless-iterator-to-array": "error",
 	},
 	overrides: [
+		{
+			files: ["*.d.ts"],
+			rules: {
+				"unicorn/require-module-specifiers": "error",
+			},
+		},
 		{
 			files: ["*.config.ts"],
 			rules: {

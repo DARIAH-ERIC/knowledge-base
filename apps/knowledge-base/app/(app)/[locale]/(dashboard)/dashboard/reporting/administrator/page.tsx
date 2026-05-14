@@ -68,9 +68,8 @@ export default async function DashboardReportingAdministratorPage(
 				</HeaderContent>
 			</Header>
 
-			<div className="grid gap-4 px-(--layout-padding) pt-2 md:grid-cols-4">
-				{items.map((item) => {
-					return (
+			<div className="grid gap-4 px-(--layout-padding) pbs-2 md:grid-cols-4">
+				{items.map((item) => (
 						<section
 							key={item.href}
 							className="flex flex-col justify-between gap-y-4 rounded-lg border bg-bg p-4"
@@ -84,8 +83,7 @@ export default async function DashboardReportingAdministratorPage(
 								{t("Open")}
 							</ButtonLink>
 						</section>
-					);
-				})}
+					))}
 			</div>
 		</div>
 	);

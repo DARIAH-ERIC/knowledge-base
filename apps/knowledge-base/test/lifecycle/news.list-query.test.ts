@@ -40,9 +40,7 @@ describe("news list query — prefer draft, fallback to published", () => {
 			const { documentId } = await seedDraftNews(tx);
 
 			const { data } = await getNews({}, tx);
-			const item = data.find((d) => {
-				return d.documentId === documentId;
-			});
+			const item = data.find((d) => d.documentId === documentId);
 
 			expect(item).toBeDefined();
 			expect(item?.status).toBe("draft");
@@ -57,9 +55,7 @@ describe("news list query — prefer draft, fallback to published", () => {
 			await discardDraftVersion(tx, documentId, newsLifecycleAdapter);
 
 			const { data } = await getNews({}, tx);
-			const matching = data.filter((d) => {
-				return d.documentId === documentId;
-			});
+			const matching = data.filter((d) => d.documentId === documentId);
 
 			expect(matching).toHaveLength(1);
 			expect(matching[0]?.status).toBe("published");
@@ -73,9 +69,7 @@ describe("news list query — prefer draft, fallback to published", () => {
 			await publishVersion(tx, documentId, newsLifecycleAdapter);
 
 			const { data } = await getNews({}, tx);
-			const matching = data.filter((d) => {
-				return d.documentId === documentId;
-			});
+			const matching = data.filter((d) => d.documentId === documentId);
 
 			expect(matching).toHaveLength(1);
 			expect(matching[0]?.status).toBe("draft");
@@ -102,9 +96,7 @@ describe("news list query — prefer draft, fallback to published", () => {
 			]);
 
 			const { data, total } = await getNews({ limit: 1000 }, tx);
-			const seededInResults = data.filter((d) => {
-				return seededIds.has(d.documentId);
-			});
+			const seededInResults = data.filter((d) => seededIds.has(d.documentId));
 
 			expect(seededInResults).toHaveLength(3);
 			expect(total).toBeGreaterThanOrEqual(3);
@@ -124,9 +116,7 @@ describe("news list query — prefer draft, fallback to published", () => {
 				.where(eq(schema.news.id, draftVersionId));
 
 			const { data } = await getNews({}, tx);
-			const item = data.find((d) => {
-				return d.documentId === documentId;
-			});
+			const item = data.find((d) => d.documentId === documentId);
 
 			expect(item?.title).toBe(updatedTitle);
 		});
@@ -151,9 +141,7 @@ describe("news list query — prefer draft, fallback to published", () => {
 			await touchVersion(tx, draftVersionId, new Date(publishedVersion.updatedAt.getTime() + 1000));
 
 			const { data } = await getNews({}, tx);
-			const item = data.find((d) => {
-				return d.documentId === documentId;
-			});
+			const item = data.find((d) => d.documentId === documentId);
 
 			expect(item?.title).toBe(updatedTitle);
 			expect(item?.isPublished).toBe(true);

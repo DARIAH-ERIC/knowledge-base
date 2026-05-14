@@ -71,9 +71,7 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 	assert(projectRole, "No project role in database.");
 
 	const dariahItems = f.helpers.multiple(
-		() => {
-			return createProjectData();
-		},
+		() => createProjectData(),
 		{ count },
 	);
 	const nonDariahItem = createProjectData();
@@ -162,9 +160,7 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 	});
 
 	await Promise.all(
-		allItems.map((item) => {
-			return seedContentBlock(db, item.version.id, entityType.id, "description");
-		}),
+		allItems.map((item) => seedContentBlock(db, item.version.id, entityType.id, "description")),
 	);
 
 	return { dariahItems, nonDariahItem, umbrellaUnitId, roleId: projectRole.id };

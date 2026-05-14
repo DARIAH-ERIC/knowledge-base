@@ -1,4 +1,4 @@
-/* eslint-disable react/jsx-no-literals */
+// oxlint-disable jsx-a11y/iframe-has-title
 
 "use client";
 
@@ -202,9 +202,7 @@ export function ContentBlocks({
 }: Readonly<ContentBlocksProps>): ReactNode {
 	const t = useExtracted();
 
-	const [mergedInitialItems] = useState(() => {
-		return mergeInitialItems(initialItems);
-	});
+	const [mergedInitialItems] = useState(() => mergeInitialItems(initialItems));
 
 	const list = useListData<ContentBlockListItem>({
 		initialItems: mergedInitialItems,
@@ -213,13 +211,9 @@ export function ContentBlocks({
 		},
 	});
 
-	const [expandedKeys, setExpandedKeys] = useState<Set<Key>>(() => {
-		return new Set(
-			mergedInitialItems.map((item) => {
-				return String(item.id);
-			}),
-		);
-	});
+	const [expandedKeys, setExpandedKeys] = useState<Set<Key>>(
+		() => new Set(mergedInitialItems.map((item) => String(item.id))),
+	);
 
 	const addItem = (type: ContentBlockListItem["type"]) => {
 		const newItem: ContentBlockListItem =
@@ -227,17 +221,15 @@ export function ContentBlocks({
 				? { id: crypto.randomUUID(), type: "unified_content" }
 				: { id: crypto.randomUUID(), type };
 		list.append(newItem);
-		setExpandedKeys((prev) => {
-			return new Set([...prev, String(newItem.id)]);
-		});
+		setExpandedKeys((prev) => new Set([...prev, String(newItem.id)]));
 	};
 
 	function handleKeyboardReorder(e: KeyboardEvent<HTMLButtonElement>, id: Key) {
-		if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+		if (e.key !== "ArrowUp" && e.key !== "ArrowDown") {
+			return;
+		}
 		e.preventDefault();
-		const idx = list.items.findIndex((item) => {
-			return item.id === id;
-		});
+		const idx = list.items.findIndex((item) => item.id === id);
 		if (e.key === "ArrowUp" && idx > 0) {
 			list.moveBefore(list.items[idx - 1]!.id, [id]);
 		} else if (e.key === "ArrowDown" && idx < list.items.length - 1) {
@@ -247,10 +239,10 @@ export function ContentBlocks({
 
 	function handleReorder(sourceIdStr: string, targetId: Key, position: "before" | "after") {
 		// getText() always returns a string; look up the actual Key to avoid type mismatches.
-		const sourceItem = list.items.find((item) => {
-			return String(item.id) === sourceIdStr;
-		});
-		if (sourceItem == null || sourceItem.id === targetId) return;
+		const sourceItem = list.items.find((item) => String(item.id) === sourceIdStr);
+		if (sourceItem == null || sourceItem.id === targetId) {
+			return;
+		}
 		if (position === "before") {
 			list.moveBefore(targetId, [sourceItem.id]);
 		} else {
@@ -271,31 +263,29 @@ export function ContentBlocks({
 					setExpandedKeys(keys);
 				}}
 			>
-				{list.items.map((item) => {
-					return (
-						<ContentBlockItem
-							key={String(item.id)}
-							initialAssets={initialAssets}
-							item={item}
-							onDelete={() => {
-								list.remove(item.id);
-								setExpandedKeys((prev) => {
-									const next = new Set(prev);
-									next.delete(String(item.id));
-									return next;
-								});
-							}}
-							onKeyboardReorder={handleKeyboardReorder}
-							onReorder={handleReorder}
-							onUpdate={(content) => {
-								list.update(item.id, {
-									...item,
-									content,
-								} as ContentBlockListItem);
-							}}
-						/>
-					);
-				})}
+				{list.items.map((item) => (
+					<ContentBlockItem
+						key={String(item.id)}
+						initialAssets={initialAssets}
+						item={item}
+						onDelete={() => {
+							list.remove(item.id);
+							setExpandedKeys((prev) => {
+								const next = new Set(prev);
+								next.delete(String(item.id));
+								return next;
+							});
+						}}
+						onKeyboardReorder={handleKeyboardReorder}
+						onReorder={handleReorder}
+						onUpdate={(content) => {
+							list.update(item.id, {
+								...item,
+								content,
+							} as ContentBlockListItem);
+						}}
+					/>
+				))}
 			</DisclosureGroup>
 			{list.items
 				.flatMap((item): Array<object> => {
@@ -304,16 +294,14 @@ export function ContentBlocks({
 					}
 					return [item];
 				})
-				.map((block, idx) => {
-					return (
-						<input
-							key={`block-${String(idx)}`}
-							name={`contentBlocks.${String(idx)}`}
-							type="hidden"
-							value={JSON.stringify(block)}
-						/>
-					);
-				})}
+				.map((block, idx) => (
+					<input
+						key={`block-${String(idx)}`}
+						name={`contentBlocks.${String(idx)}`}
+						type="hidden"
+						value={JSON.stringify(block)}
+					/>
+				))}
 			<ContentBlockMenu onAdd={addItem} />
 		</Fragment>
 	);
@@ -379,7 +367,7 @@ function ContentBlockItem({
 		onDropExit() {
 			setDropPosition(null);
 		},
-		// eslint-disable-next-line @typescript-eslint/no-misused-promises
+		// oxlint-disable-next-line typescript/no-misused-promises, typescript/strict-void-return
 		async onDrop(e) {
 			// Capture position before clearing — onDrop is async.
 			const position = dropPosition ?? "after";
@@ -405,20 +393,20 @@ function ContentBlockItem({
 	};
 
 	const contentBlockTypeIcons: Record<ContentBlockTypes["type"] | "unified_content", ReactNode> = {
-		accordion: <ListBulletIcon className="size-4 shrink-0" />,
-		data: <Square3Stack3DIcon className="size-4 shrink-0" />,
-		embed: <CodeBracketSquareIcon className="size-4 shrink-0" />,
-		gallery: <Squares2X2Icon className="size-4 shrink-0" />,
-		hero: <RectangleGroupIcon className="size-4 shrink-0" />,
-		image: <PhotoIcon className="size-4 shrink-0" />,
-		rich_text: <PencilSquareIcon className="size-4 shrink-0" />,
-		unified_content: <PencilSquareIcon className="size-4 shrink-0" />,
+		accordion: <ListBulletIcon className="block-4 inline-4 shrink-0" />,
+		data: <Square3Stack3DIcon className="block-4 inline-4 shrink-0" />,
+		embed: <CodeBracketSquareIcon className="block-4 inline-4 shrink-0" />,
+		gallery: <Squares2X2Icon className="block-4 inline-4 shrink-0" />,
+		hero: <RectangleGroupIcon className="block-4 inline-4 shrink-0" />,
+		image: <PhotoIcon className="block-4 inline-4 shrink-0" />,
+		rich_text: <PencilSquareIcon className="block-4 inline-4 shrink-0" />,
+		unified_content: <PencilSquareIcon className="block-4 inline-4 shrink-0" />,
 	};
 
 	return (
 		<>
 			{isDropTarget && dropPosition === "before" && (
-				<div aria-hidden={true} className="mx-1 h-0.5 rounded-full bg-accent" />
+				<div aria-hidden={true} className="mx-1 block-0.5 rounded-full bg-accent" />
 			)}
 			{/* tabIndex={-1} makes the element programmatically focusable for DragManager
 			    keyboard navigation without adding it to the natural tab order. */}
@@ -445,7 +433,7 @@ function ContentBlockItem({
 							onPress={dragButtonProps.onPress}
 						>
 							<svg
-								className="size-5 text-muted-fg sm:size-4"
+								className="block-5 inline-5 text-muted-fg sm:block-4 sm:inline-4"
 								fill="none"
 								viewBox="0 0 24 24"
 								xmlns="http://www.w3.org/2000/svg"
@@ -478,12 +466,12 @@ function ContentBlockItem({
 						</AriaButton>
 						<Heading className="flex flex-1 items-center">
 							<AriaButton
-								className="flex flex-1 items-center gap-x-2 text-left text-sm/6 font-medium outline-hidden"
+								className="flex flex-1 items-center gap-x-2 text-start text-sm/6 font-medium outline-hidden"
 								slot="trigger"
 							>
 								{contentBlockTypeIcons[item.type]}
 								<span className="flex-1">{contentBlockTypeNames[item.type]}</span>
-								<ChevronDownIcon className="size-4 shrink-0 transition-transform group-data-expanded:rotate-180" />
+								<ChevronDownIcon className="block-4 inline-4 shrink-0 transition-transform group-data-expanded:rotate-180" />
 							</AriaButton>
 						</Heading>
 						<Modal>
@@ -491,7 +479,7 @@ function ContentBlockItem({
 								aria-label={t("Remove block")}
 								className="shrink-0 text-muted-fg rounded-sm hover:text-danger focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
 							>
-								<TrashIcon className="size-4" />
+								<TrashIcon className="block-4 inline-4" />
 							</AriaButton>
 							<ModalContent role="alertdialog" size="sm">
 								<ModalHeader>
@@ -513,13 +501,13 @@ function ContentBlockItem({
 							</ModalContent>
 						</Modal>
 					</div>
-					<DisclosurePanel className="px-3 pb-3">
+					<DisclosurePanel className="px-3 pbe-3">
 						<ContentBlockPanel initialAssets={initialAssets} item={item} onChange={onUpdate} />
 					</DisclosurePanel>
 				</Disclosure>
 			</div>
 			{isDropTarget && dropPosition === "after" && (
-				<div aria-hidden={true} className="mx-1 h-0.5 rounded-full bg-accent" />
+				<div aria-hidden={true} className="mx-1 block-0.5 rounded-full bg-accent" />
 			)}
 		</>
 	);
@@ -573,43 +561,37 @@ function ContentBlockPanel({
 		case "unified_content": {
 			return (
 				<RichTextEditor
-					className="w-full"
+					className="inline-full"
 					content={item.content}
 					onChange={(content: JSONContent) => {
 						onChange(content);
 					}}
-					renderEmbedInsert={(insertEmbed) => {
-						return (
-							<RichTextEditorToolbarButton
-								aria-label="Insert embed"
-								icon={CodeBracketSquareIcon}
-								onClick={insertEmbed}
-							/>
-						);
-					}}
+					renderEmbedInsert={(insertEmbed) => (
+						<RichTextEditorToolbarButton
+							aria-label="Insert embed"
+							icon={CodeBracketSquareIcon}
+							onClick={insertEmbed}
+						/>
+					)}
 					renderImagePicker={
 						initialAssets != null
-							? (insert) => {
-									return (
-										<MediaLibraryDialog
-											defaultPrefix="images"
-											initialAssets={initialAssets}
-											onSelect={(key, url) => {
-												insert(key, url);
-											}}
-											prefixes={["avatars", "images", "logos"]}
-											trigger={({ open }) => {
-												return (
-													<RichTextEditorToolbarButton
-														aria-label="Insert image"
-														icon={ImageIcon}
-														onClick={open}
-													/>
-												);
-											}}
-										/>
-									);
-								}
+							? (insert) => (
+									<MediaLibraryDialog
+										defaultPrefix="images"
+										initialAssets={initialAssets}
+										onSelect={(key, url) => {
+											insert(key, url);
+										}}
+										prefixes={["avatars", "images", "logos"]}
+										trigger={({ open }) => (
+											<RichTextEditorToolbarButton
+												aria-label="Insert image"
+												icon={ImageIcon}
+												onClick={open}
+											/>
+										)}
+									/>
+								)
 							: undefined
 					}
 				/>
@@ -645,11 +627,15 @@ function GalleryContentBlockPanel({
 
 	function moveItem(index: number, direction: -1 | 1) {
 		const nextIndex = index + direction;
-		if (nextIndex < 0 || nextIndex >= items.length) return;
+		if (nextIndex < 0 || nextIndex >= items.length) {
+			return;
+		}
 
 		const next = [...items];
 		const [moved] = next.splice(index, 1);
-		if (moved == null) return;
+		if (moved == null) {
+			return;
+		}
 		next.splice(nextIndex, 0, moved);
 		onChange({ ...item.content, layout, items: next });
 	}
@@ -671,96 +657,90 @@ function GalleryContentBlockPanel({
 			</ToggleGroup>
 
 			<div className="flex flex-col gap-y-3">
-				{items.map((galleryItem, idx) => {
-					return (
-						<div key={idx} className="flex flex-col gap-y-3 rounded-lg border border-border p-3">
-							<div className="flex items-center justify-between">
-								<span className="text-sm font-medium">
-									{t("Image")} {idx + 1}
-								</span>
-								<div className="flex items-center gap-x-2">
-									<Button
-										intent="outline"
-										isDisabled={idx === 0}
-										onPress={() => {
-											moveItem(idx, -1);
-										}}
-										size="sm"
-									>
-										{t("Up")}
-									</Button>
-									<Button
-										intent="outline"
-										isDisabled={idx === items.length - 1}
-										onPress={() => {
-											moveItem(idx, 1);
-										}}
-										size="sm"
-									>
-										{t("Down")}
-									</Button>
-									<Button
-										intent="outline"
-										onPress={() => {
-											onChange({
-												...item.content,
-												layout,
-												items: items.filter((_, itemIndex) => {
-													return itemIndex !== idx;
-												}),
-											});
-										}}
-										size="sm"
-									>
-										<TrashIcon className="size-4" />
-									</Button>
-								</div>
-							</div>
-
-							<div className="flex items-start gap-x-4">
-								{galleryItem.imageUrl != null && (
-									<img
-										alt={galleryItem.caption ?? t("Selected image")}
-										className="size-24 shrink-0 rounded-lg object-cover"
-										src={galleryItem.imageUrl}
-									/>
-								)}
-								<MediaLibraryDialog
-									defaultPrefix="images"
-									initialAssets={initialAssets ?? []}
-									onSelect={(imageKey, imageUrl) => {
+				{items.map((galleryItem, idx) => (
+					<div key={idx} className="flex flex-col gap-y-3 rounded-lg border border-border p-3">
+						<div className="flex items-center justify-between">
+							<span className="text-sm font-medium">
+								{t("Image")} {idx + 1}
+							</span>
+							<div className="flex items-center gap-x-2">
+								<Button
+									intent="outline"
+									isDisabled={idx === 0}
+									onPress={() => {
+										moveItem(idx, -1);
+									}}
+									size="sm"
+								>
+									{t("Up")}
+								</Button>
+								<Button
+									intent="outline"
+									isDisabled={idx === items.length - 1}
+									onPress={() => {
+										moveItem(idx, 1);
+									}}
+									size="sm"
+								>
+									{t("Down")}
+								</Button>
+								<Button
+									intent="outline"
+									onPress={() => {
 										onChange({
 											...item.content,
 											layout,
-											items: items.map((existingItem, itemIndex) => {
-												return itemIndex === idx
-													? { ...existingItem, imageKey, imageUrl }
-													: existingItem;
-											}),
+											items: items.filter((_, itemIndex) => itemIndex !== idx),
 										});
 									}}
-									prefixes={["avatars", "images", "logos"]}
-								/>
+									size="sm"
+								>
+									<TrashIcon className="block-4 inline-4" />
+								</Button>
 							</div>
+						</div>
 
-							<TextField
-								onChange={(value) => {
+						<div className="flex items-start gap-x-4">
+							{galleryItem.imageUrl != null && (
+								<img
+									alt={galleryItem.caption ?? t("Selected image")}
+									className="block-24 inline-24 shrink-0 rounded-lg object-cover"
+									src={galleryItem.imageUrl}
+								/>
+							)}
+							<MediaLibraryDialog
+								defaultPrefix="images"
+								initialAssets={initialAssets ?? []}
+								onSelect={(imageKey, imageUrl) => {
 									onChange({
 										...item.content,
 										layout,
-										items: items.map((existingItem, itemIndex) => {
-											return itemIndex === idx ? { ...existingItem, caption: value } : existingItem;
-										}),
+										items: items.map((existingItem, itemIndex) =>
+											itemIndex === idx ? { ...existingItem, imageKey, imageUrl } : existingItem,
+										),
 									});
 								}}
-								value={galleryItem.caption ?? ""}
-							>
-								<Label>{t("Caption")}</Label>
-								<Input />
-							</TextField>
+								prefixes={["avatars", "images", "logos"]}
+							/>
 						</div>
-					);
-				})}
+
+						<TextField
+							onChange={(value) => {
+								onChange({
+									...item.content,
+									layout,
+									items: items.map((existingItem, itemIndex) =>
+										itemIndex === idx ? { ...existingItem, caption: value } : existingItem,
+									),
+								});
+							}}
+							value={galleryItem.caption ?? ""}
+						>
+							<Label>{t("Caption")}</Label>
+							<Input />
+						</TextField>
+					</div>
+				))}
 			</div>
 
 			<Button
@@ -774,7 +754,7 @@ function GalleryContentBlockPanel({
 				}}
 				size="sm"
 			>
-				<PlusIcon className="size-4" />
+				<PlusIcon className="block-4 inline-4" />
 				{t("Add image")}
 			</Button>
 		</div>
@@ -803,7 +783,9 @@ function DataContentBlockPanel({
 
 	async function fetchEntries(type: DataContentBlockType, q: string) {
 		const params = new URLSearchParams({ type, limit: "20" });
-		if (q.trim() !== "") params.set("q", q.trim());
+		if (q.trim() !== "") {
+			params.set("q", q.trim());
+		}
 		const res = await fetch(`/api/content-block-entries?${params.toString()}`);
 		const data = (await res.json()) as { items: Array<ContentBlockEntry> };
 		setEntries(data.items);
@@ -840,13 +822,11 @@ function DataContentBlockPanel({
 						return { id, name: labels[id] };
 					})}
 				>
-					{(entry) => {
-						return (
-							<SelectItem id={entry.id} textValue={entry.name}>
-								<SelectLabel>{entry.name}</SelectLabel>
-							</SelectItem>
-						);
-					}}
+					{(entry) => (
+						<SelectItem id={entry.id} textValue={entry.name}>
+							<SelectLabel>{entry.name}</SelectLabel>
+						</SelectItem>
+					)}
 				</SelectContent>
 			</Select>
 
@@ -900,33 +880,29 @@ function DataContentBlockPanel({
 					>
 						<SearchInput />
 					</SearchField>
-					<div className="flex max-h-64 flex-col gap-y-2 overflow-y-auto rounded-lg border border-border p-2">
+					<div className="flex max-block-64 flex-col gap-y-2 overflow-y-auto rounded-lg border border-border p-2">
 						{entries.length === 0 ? (
 							<p className="px-2 py-1 text-sm text-muted-fg">
 								{query.trim() !== "" ? t("No entries found.") : t("Search to browse entries.")}
 							</p>
 						) : (
-							entries.map((entry) => {
-								return (
-									<Checkbox
-										key={entry.id}
-										// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-										isSelected={selectedIds?.includes(entry.id) ?? false}
-										onChange={(checked) => {
-											const next = checked
-												? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-													[...(selectedIds ?? []), entry.id]
-												: // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-													(selectedIds ?? []).filter((id) => {
-														return id !== entry.id;
-													});
-											onChange({ ...item.content, selectedIds: next });
-										}}
-									>
-										{entry.title}
-									</Checkbox>
-								);
-							})
+							entries.map((entry) => (
+								<Checkbox
+									key={entry.id}
+									// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+									isSelected={selectedIds?.includes(entry.id) ?? false}
+									onChange={(checked) => {
+										const next = checked
+											? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+												[...(selectedIds ?? []), entry.id]
+											: // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+												(selectedIds ?? []).filter((id) => id !== entry.id);
+										onChange({ ...item.content, selectedIds: next });
+									}}
+								>
+									{entry.title}
+								</Checkbox>
+							))
 						)}
 					</div>
 					{/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
@@ -1005,11 +981,11 @@ function EmbedContentBlockPanel({
 				<Input />
 			</TextField>
 			{embedUrl != null && (
-				<div className="aspect-video w-full overflow-hidden rounded-lg border border-border">
+				<div className="aspect-video inline-full overflow-hidden rounded-lg border border-border">
 					<iframe
 						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 						allowFullScreen={true}
-						className="size-full"
+						className="block-full inline-full"
 						sandbox="allow-scripts allow-same-origin allow-presentation"
 						src={embedUrl}
 						title={title ?? embedUrl}
@@ -1043,7 +1019,7 @@ function ImageContentBlockPanel({
 				{imageUrl != null && (
 					<img
 						alt={caption ?? t("Selected image")}
-						className="size-24 rounded-lg object-cover shrink-0"
+						className="block-24 inline-24 rounded-lg object-cover shrink-0"
 						src={imageUrl}
 					/>
 				)}
@@ -1118,7 +1094,7 @@ function HeroContentBlockPanel({
 					{imageUrl != null && (
 						<img
 							alt={t("Selected image")}
-							className="size-24 rounded-lg object-cover shrink-0"
+							className="block-24 inline-24 rounded-lg object-cover shrink-0"
 							src={imageUrl}
 						/>
 					)}
@@ -1137,52 +1113,44 @@ function HeroContentBlockPanel({
 			</div>
 			<div className="flex flex-col gap-y-3">
 				<Label>{t("CTAs")}</Label>
-				{ctas.map((cta, idx) => {
-					return (
-						<div key={idx} className="flex items-end gap-x-2">
-							<TextField
-								className="flex-1"
-								isRequired={true}
-								onChange={(value) => {
-									const next = ctas.map((c, i) => {
-										return i === idx ? { ...c, label: value } : c;
-									});
-									onChange({ ...item.content, ctas: next });
-								}}
-								value={cta.label}
-							>
-								<Label>{t("Label")}</Label>
-								<Input />
-							</TextField>
-							<TextField
-								className="flex-1"
-								isRequired={true}
-								onChange={(value) => {
-									const next = ctas.map((c, i) => {
-										return i === idx ? { ...c, url: value } : c;
-									});
-									onChange({ ...item.content, ctas: next });
-								}}
-								value={cta.url}
-							>
-								<Label>{t("URL")}</Label>
-								<Input placeholder="https://" />
-							</TextField>
-							<Button
-								intent="outline"
-								onPress={() => {
-									const next = ctas.filter((_, i) => {
-										return i !== idx;
-									});
-									onChange({ ...item.content, ctas: next });
-								}}
-								size="sm"
-							>
-								<TrashIcon className="size-4" />
-							</Button>
-						</div>
-					);
-				})}
+				{ctas.map((cta, idx) => (
+					<div key={idx} className="flex items-end gap-x-2">
+						<TextField
+							className="flex-1"
+							isRequired={true}
+							onChange={(value) => {
+								const next = ctas.map((c, i) => (i === idx ? { ...c, label: value } : c));
+								onChange({ ...item.content, ctas: next });
+							}}
+							value={cta.label}
+						>
+							<Label>{t("Label")}</Label>
+							<Input />
+						</TextField>
+						<TextField
+							className="flex-1"
+							isRequired={true}
+							onChange={(value) => {
+								const next = ctas.map((c, i) => (i === idx ? { ...c, url: value } : c));
+								onChange({ ...item.content, ctas: next });
+							}}
+							value={cta.url}
+						>
+							<Label>{t("URL")}</Label>
+							<Input placeholder="https://" />
+						</TextField>
+						<Button
+							intent="outline"
+							onPress={() => {
+								const next = ctas.filter((_, i) => i !== idx);
+								onChange({ ...item.content, ctas: next });
+							}}
+							size="sm"
+						>
+							<TrashIcon className="block-4 inline-4" />
+						</Button>
+					</div>
+				))}
 				<Button
 					intent="secondary"
 					onPress={() => {
@@ -1190,7 +1158,7 @@ function HeroContentBlockPanel({
 					}}
 					size="sm"
 				>
-					<PlusIcon className="size-4" />
+					<PlusIcon className="block-4 inline-4" />
 					{t("Add CTA")}
 				</Button>
 			</div>
@@ -1215,80 +1183,68 @@ function AccordionContentBlockPanel({
 
 	return (
 		<div className="flex flex-col gap-y-4">
-			{items.map((accordionItem, idx) => {
-				return (
-					<div key={idx} className="flex flex-col gap-y-3 rounded-lg border border-border p-3">
-						<div className="flex items-center justify-between">
-							<span className="text-sm font-medium">
-								{t("Item")} {idx + 1}
-							</span>
-							<Button
-								intent="outline"
-								onPress={() => {
-									const next = items.filter((_, i) => {
-										return i !== idx;
-									});
-									onChange({ ...item.content, items: next });
-								}}
-								size="sm"
-							>
-								<TrashIcon className="size-4" />
-							</Button>
-						</div>
-						<TextField
-							isRequired={true}
-							onChange={(value) => {
-								const next = items.map((it, i) => {
-									return i === idx ? { ...it, title: value } : it;
-								});
+			{items.map((accordionItem, idx) => (
+				<div key={idx} className="flex flex-col gap-y-3 rounded-lg border border-border p-3">
+					<div className="flex items-center justify-between">
+						<span className="text-sm font-medium">
+							{t("Item")} {idx + 1}
+						</span>
+						<Button
+							intent="outline"
+							onPress={() => {
+								const next = items.filter((_, i) => i !== idx);
 								onChange({ ...item.content, items: next });
 							}}
-							value={accordionItem.title}
+							size="sm"
 						>
-							<Label>{t("Title")}</Label>
-							<Input />
-						</TextField>
-						<div className="flex flex-col gap-y-1">
-							<Label>{t("Content")}</Label>
-							<RichTextEditor
-								className="w-full"
-								content={accordionItem.content}
-								onChange={(content: JSONContent) => {
-									const next = items.map((it, i) => {
-										return i === idx ? { ...it, content } : it;
-									});
-									onChange({ ...item.content, items: next });
-								}}
-								renderImagePicker={
-									initialAssets != null
-										? (insert) => {
-												return (
-													<MediaLibraryDialog
-														defaultPrefix="images"
-														initialAssets={initialAssets}
-														onSelect={(_key, url) => {
-															insert("", url);
-														}}
-														prefixes={["avatars", "images", "logos"]}
-														trigger={({ open }) => {
-															return (
-																<RichTextEditorToolbarButton
-																	aria-label="Insert image"
-																	icon={ImageIcon}
-																	onClick={open}
-																/>
-															);
-														}}
-													/>
-												);
-											}
-										: undefined
-								}
-							/>
-						</div>
+							<TrashIcon className="block-4 inline-4" />
+						</Button>
 					</div>
-				);
-			})}
+					<TextField
+						isRequired={true}
+						onChange={(value) => {
+							const next = items.map((it, i) => (i === idx ? { ...it, title: value } : it));
+							onChange({ ...item.content, items: next });
+						}}
+						value={accordionItem.title}
+					>
+						<Label>{t("Title")}</Label>
+						<Input />
+					</TextField>
+					<div className="flex flex-col gap-y-1">
+						<Label>{t("Content")}</Label>
+						<RichTextEditor
+							className="inline-full"
+							content={accordionItem.content}
+							onChange={(content: JSONContent) => {
+								const next = items.map((it, i) => (i === idx ? { ...it, content } : it));
+								onChange({ ...item.content, items: next });
+							}}
+							renderImagePicker={
+								initialAssets != null
+									? (insert) => (
+											<MediaLibraryDialog
+												defaultPrefix="images"
+												initialAssets={initialAssets}
+												onSelect={(_key, url) => {
+													insert("", url);
+												}}
+												prefixes={["avatars", "images", "logos"]}
+												trigger={({ open }) => (
+													<RichTextEditorToolbarButton
+														aria-label="Insert image"
+														icon={ImageIcon}
+														onClick={open}
+													/>
+												)}
+											/>
+										)
+									: undefined
+							}
+						/>
+					</div>
+				</div>
+			))}
 			<Button
 				intent="secondary"
 				onPress={() => {
@@ -1299,7 +1255,7 @@ function AccordionContentBlockPanel({
 				}}
 				size="sm"
 			>
-				<PlusIcon className="size-4" />
+				<PlusIcon className="block-4 inline-4" />
 				{t("Add item")}
 			</Button>
 		</div>
@@ -1341,20 +1297,18 @@ export function ContentBlockMenu({ onAdd }: Readonly<ContentBlockMenuProps>): Re
 				<PlusIcon />
 				Add block
 			</Button>
-			<MenuContent className="min-w-60" placement="bottom">
-				{MENU_BLOCK_TYPES.map(({ type, icon }) => {
-					return (
-						<MenuItem
-							key={type}
-							onAction={() => {
-								onAdd(type);
-							}}
-						>
-							{icon}
-							<MenuLabel>{contentBlockTypeNames[type]}</MenuLabel>
-						</MenuItem>
-					);
-				})}
+			<MenuContent className="min-inline-60" placement="bottom">
+				{MENU_BLOCK_TYPES.map(({ type, icon }) => (
+					<MenuItem
+						key={type}
+						onAction={() => {
+							onAdd(type);
+						}}
+					>
+						{icon}
+						<MenuLabel>{contentBlockTypeNames[type]}</MenuLabel>
+					</MenuItem>
+				))}
 			</MenuContent>
 		</Menu>
 	);

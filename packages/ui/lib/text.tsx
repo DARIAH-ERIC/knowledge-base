@@ -26,12 +26,10 @@ export function TextLink({
 	return (
 		<Link
 			{...props}
-			className={composeRenderProps(className, (className) => {
-				return cn(
+			className={composeRenderProps(className, (className) => cn(
 					"text-primary-subtle-fg decoration-primary-subtle-fg/50 hover:underline hover:decoration-primary-subtle-fg has-data-[slot=icon]:inline-flex has-data-[slot=icon]:items-center has-data-[slot=icon]:gap-x-1",
 					className,
-				);
-			})}
+				))}
 		/>
 	);
 }

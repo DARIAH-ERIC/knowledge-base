@@ -47,8 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		routes.push(`/${segments.join("/")}`);
 	}
 
-	const entries = locales.flatMap((locale) => {
-		return routes.map((pathname) => {
+	const entries = locales.flatMap((locale) => routes.map((pathname) => {
 			return {
 				url: String(createUrl({ baseUrl, pathname: getPathname({ href: { pathname }, locale }) })),
 				/**
@@ -57,8 +56,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 				 */
 				// lastModified: new Date(),
 			};
-		});
-	});
+		}));
 
 	return entries;
 }

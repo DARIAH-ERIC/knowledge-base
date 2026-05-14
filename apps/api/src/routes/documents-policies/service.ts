@@ -68,9 +68,7 @@ export async function getDocumentsPolicies(
 
 	const total = aggregate.at(0)?.total ?? 0;
 
-	const data = items.map((item) => {
-		return flattenEntityVersion(item);
-	});
+	const data = items.map((item) => flattenEntityVersion(item));
 
 	return { data, limit, offset, total };
 }

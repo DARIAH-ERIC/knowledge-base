@@ -94,7 +94,7 @@ export function GovernanceBodyForm(props: Readonly<GovernanceBodyFormProps>): Re
 					{selectedImage != null && (
 						<img
 							alt={t("Selected image")}
-							className="size-24 rounded-lg object-cover"
+							className="block-24 inline-24 rounded-lg object-cover"
 							src={selectedImage.url}
 						/>
 					)}

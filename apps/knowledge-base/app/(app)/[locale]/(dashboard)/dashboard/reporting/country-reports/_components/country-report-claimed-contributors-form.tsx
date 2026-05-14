@@ -40,9 +40,7 @@ interface CountryReportClaimedContributorsFormProps {
 }
 
 function formatRoleType(roleType: string): string {
-	return roleType.replaceAll("_", " ").replace(/^\w/, (c) => {
-		return c.toUpperCase();
-	});
+	return roleType.replaceAll("_", " ").replace(/^\w/, (c) => c.toUpperCase());
 }
 
 export function CountryReportClaimedContributorsForm(
@@ -55,13 +53,9 @@ export function CountryReportClaimedContributorsForm(
 	const [selectedId, setSelectedId] = useState<string>("");
 
 	const claimedIds = new Set(
-		report.contributions.map((c) => {
-			return c.personToOrgUnit.id;
-		}),
+		report.contributions.map((c) => c.personToOrgUnit.id),
 	);
-	const available = availablePersonToOrgUnits.filter((p) => {
-		return !claimedIds.has(p.id);
-	});
+	const available = availablePersonToOrgUnits.filter((p) => !claimedIds.has(p.id));
 
 	return (
 		<div className="flex flex-col gap-y-8">
@@ -69,8 +63,7 @@ export function CountryReportClaimedContributorsForm(
 				<section className="flex flex-col gap-y-3">
 					<h2 className="text-sm font-semibold text-fg">{t("Contributors")}</h2>
 					<ul className="divide-y divide-border rounded-md border">
-						{report.contributions.map((contribution) => {
-							return (
+						{report.contributions.map((contribution) => (
 								<li
 									key={contribution.id}
 									className="flex items-center justify-between gap-x-4 px-4 py-3"
@@ -93,8 +86,7 @@ export function CountryReportClaimedContributorsForm(
 										</Button>
 									</form>
 								</li>
-							);
-						})}
+							))}
 					</ul>
 				</section>
 			)}
@@ -102,7 +94,7 @@ export function CountryReportClaimedContributorsForm(
 			{available.length > 0 && (
 				<section className="flex flex-col gap-y-3">
 					<h2 className="text-sm font-semibold text-fg">{t("Add contributor")}</h2>
-					<Form action={action} className="flex flex-col gap-y-4 max-w-sm" state={state}>
+					<Form action={action} className="flex flex-col gap-y-4 max-inline-sm" state={state}>
 						<input name="countryReportId" type="hidden" value={report.id} />
 
 						<Select
@@ -116,8 +108,7 @@ export function CountryReportClaimedContributorsForm(
 							<SelectTrigger />
 							<FieldError />
 							<SelectContent>
-								{available.map((p) => {
-									return (
+								{available.map((p) => (
 										<SelectItem key={p.id} id={p.id}>
 											{p.personName}
 											{" — "}
@@ -126,8 +117,7 @@ export function CountryReportClaimedContributorsForm(
 											{p.orgUnitName}
 											{")"}
 										</SelectItem>
-									);
-								})}
+									))}
 							</SelectContent>
 						</Select>
 						<input name="personToOrgUnitId" type="hidden" value={selectedId} />

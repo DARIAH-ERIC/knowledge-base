@@ -13,9 +13,7 @@ export const assets = p.snakeCase.table("assets", {
 	mimeType: p.text("mime_type").notNull(),
 	caption: p.text("caption"),
 	alt: p.text("alt"),
-	licenseId: p.uuid("license_id").references(() => {
-		return licenses.id;
-	}),
+	licenseId: p.uuid("license_id").references(() => licenses.id),
 	...f.timestamps(),
 });
 

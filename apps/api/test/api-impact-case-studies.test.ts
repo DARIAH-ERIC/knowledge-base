@@ -141,9 +141,7 @@ async function seed(
 	);
 
 	await Promise.all(
-		items.map((item) => {
-			return seedContentBlock(db, item.version.id, type.id, "content");
-		}),
+		items.map((item) => seedContentBlock(db, item.version.id, type.id, "content")),
 	);
 
 	await db.insert(schema.assets).values(contributor.asset);

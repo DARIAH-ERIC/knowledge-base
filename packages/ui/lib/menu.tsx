@@ -6,29 +6,29 @@ import {
 	Button as AriaButton,
 	type ButtonProps as AriaButtonProps,
 	Collection as AriaCollection,
-	composeRenderProps,
 	Header as AriaHeader,
 	Menu as AriaMenu,
 	MenuItem as AriaMenuItem,
 	type MenuItemProps as AriaMenuItemProps,
 	type MenuProps as AriaMenuProps,
-	MenuSection as MenuSectionPrimitive,
 	type MenuSectionProps as AriaMenuSectionProps,
 	MenuTrigger as AriaMenuTrigger,
 	type MenuTriggerProps as AriaMenuTriggerProps,
 	SubmenuTrigger as AriaSubmenuTrigger,
 	type SubmenuTriggerProps as AriaSubmenuTriggerProps,
+	MenuSection as MenuSectionPrimitive,
+	composeRenderProps,
 } from "react-aria-components";
 import { twJoin, twMerge } from "tailwind-merge";
-import { tv, type VariantProps } from "tailwind-variants";
+import { type VariantProps, tv } from "tailwind-variants";
 
 import {
 	DropdownDescription,
-	dropdownItemStyles,
 	DropdownKeyboard,
 	DropdownLabel,
-	dropdownSectionStyles,
 	DropdownSeparator,
+	dropdownItemStyles,
+	dropdownSectionStyles,
 } from "@/lib/dropdown";
 import { PopoverContent, type PopoverContentProps } from "@/lib/popover";
 import { cx } from "@/lib/primitive";
@@ -61,7 +61,7 @@ export function MenuTrigger(props: Readonly<MenuTriggerProps>): ReactNode {
 	return (
 		<AriaButton
 			className={cx(
-				"relative inline text-left outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
+				"relative inline text-start outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
 				className,
 			)}
 			data-slot="menu-trigger"
@@ -88,7 +88,7 @@ interface MenuContentProps<T> extends AriaMenuProps<T>, Pick<PopoverContentProps
 }
 
 export const menuContentStyles = tv({
-	base: "grid max-h-[inherit] grid-cols-[auto_1fr] overflow-y-auto overflow-x-hidden overscroll-contain p-1 outline-hidden [clip-path:inset(0_0_0_0_round_calc(var(--radius-xl)-(--spacing(1))))] *:[[role='group']+[role=group]]:mt-1 *:[[role='group']+[role=separator]]:mt-1",
+	base: "grid max-block-[inherit] grid-cols-[auto_1fr] overflow-y-auto overflow-x-hidden overscroll-contain p-1 outline-hidden [clip-path:inset(0_0_0_0_round_calc(var(--radius-xl)-(--spacing(1))))] *:[[role='group']+[role=group]]:mbs-1 *:[[role='group']+[role=separator]]:mbs-1",
 });
 
 export function MenuContent<T extends object>(props: Readonly<MenuContentProps<T>>): ReactNode {
@@ -96,7 +96,7 @@ export function MenuContent<T extends object>(props: Readonly<MenuContentProps<T
 
 	return (
 		<PopoverContent
-			className={cx("min-w-32", popover?.className)}
+			className={cx("min-inline-32", popover?.className)}
 			placement={placement}
 			{...popover}
 		>
@@ -117,8 +117,7 @@ export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 
 	return (
 		<AriaMenuItem
-			className={composeRenderProps(className, (className, { hasSubmenu, ...renderProps }) => {
-				return dropdownItemStyles({
+			className={composeRenderProps(className, (className, { hasSubmenu, ...renderProps }) => dropdownItemStyles({
 					...renderProps,
 					intent,
 					className: hasSubmenu
@@ -130,8 +129,7 @@ export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 								className,
 							)
 						: className,
-				});
-			})}
+				}))}
 			data-slot="menu-item"
 			render={(domProps, renderProps) => {
 				if ("href" in domProps && domProps.href && !renderProps.isDisabled) {
@@ -149,21 +147,20 @@ export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 			textValue={textValue}
 			{...rest}
 		>
-			{(values) => {
-				return (
+			{(values) => (
 					<Fragment>
 						{values.isSelected && (
 							<span
 								className={twJoin(
-									"group-has-data-[slot=avatar]:absolute group-has-data-[slot=avatar]:right-0",
-									"group-has-data-[slot=icon]:absolute group-has-data-[slot=icon]:right-0",
+									"group-has-data-[slot=avatar]:absolute group-has-data-[slot=avatar]:inset-e-0",
+									"group-has-data-[slot=icon]:absolute group-has-data-[slot=icon]:inset-e-0",
 								)}
 							>
 								{values.selectionMode === "single" && (
-									<CheckIcon className="-mx-0.5 mr-2 size-4" data-slot="check-indicator" />
+									<CheckIcon className="-mx-0.5 me-2 block-4 inline-4" data-slot="check-indicator" />
 								)}
 								{values.selectionMode === "multiple" && (
-									<CheckIcon className="-mx-0.5 mr-2 size-4" data-slot="check-indicator" />
+									<CheckIcon className="-mx-0.5 me-2 block-4 inline-4" data-slot="check-indicator" />
 								)}
 							</span>
 						)}
@@ -171,11 +168,10 @@ export function MenuItem(props: Readonly<MenuItemProps>): ReactNode {
 						{typeof children === "function" ? children(values) : children}
 
 						{values.hasSubmenu && (
-							<ChevronRightIcon className="absolute right-2 size-3.5" data-slot="chevron" />
+							<ChevronRightIcon className="absolute inset-e-2 block-3.5 inline-3.5" data-slot="chevron" />
 						)}
 					</Fragment>
-				);
-			}}
+				)}
 		</AriaMenuItem>
 	);
 }
@@ -191,7 +187,7 @@ export function MenuHeader(props: Readonly<MenuHeaderProps>): ReactNode {
 		<AriaHeader
 			className={twMerge(
 				"col-span-full px-2.5 py-2 font-medium text-base sm:text-sm",
-				separator && "-mx-1 mb-1 border-b sm:px-3 sm:pb-2.5",
+				separator && "-mx-1 mbe-1 border-be sm:px-3 sm:pbe-2.5",
 				className,
 			)}
 			{...rest}

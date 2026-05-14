@@ -1,5 +1,5 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
-import { request, type RequestResult } from "@dariah-eric/request";
+import { type RequestResult, request } from "@dariah-eric/request";
 import type { RequestError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
 
@@ -94,8 +94,7 @@ function createListAll<TParams extends object, TItem extends HalDocument>(
 		params: TParams & { cursorMark?: string; rows: number; sort?: HalDocumentSort },
 	) => Promise<RequestResult<HalSearchResponse<TItem>>>,
 ): (params: TParams & { sort?: HalDocumentSort }) => Promise<Result<Array<TItem>, RequestError>> {
-	return (params) => {
-		return Result.gen(async function* () {
+	return (params) => Result.gen(async function* () {
 			const items: Array<TItem> = [];
 			let cursorMark = "*";
 
@@ -115,7 +114,6 @@ function createListAll<TParams extends object, TItem extends HalDocument>(
 
 			return Result.ok(items);
 		});
-	};
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -147,9 +145,7 @@ export function createHalClient(params: CreateHalClientParams) {
 					sort?: HalDocumentSort;
 				} = {},
 			): Promise<Result<Array<HalDocument>, RequestError>> {
-				return createListAll((pageParams) => {
-					return listDocuments(pageParams);
-				})(params);
+				return createListAll((pageParams) => listDocuments(pageParams))(params);
 			},
 		},
 	};

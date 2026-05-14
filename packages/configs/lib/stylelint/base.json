@@ -5,7 +5,22 @@
 		"at-rule-descriptor-no-unknown": true,
 		"at-rule-descriptor-value-no-unknown": true,
 		"at-rule-no-deprecated": true,
-		"at-rule-no-unknown": true,
+		"at-rule-no-unknown": [
+			true,
+			{
+				"ignoreAtRules": [
+					"apply",
+					"config",
+					"custom-variant",
+					"plugin",
+					"source",
+					"tailwind",
+					"theme",
+					"utility",
+					"variant"
+				]
+			}
+		],
 		"at-rule-prelude-no-invalid": [true, { "ignoreAtRules": ["media"] }],
 		"block-no-empty": true,
 		"comment-no-empty": true,
@@ -28,7 +43,10 @@
 		"media-query-no-invalid": true,
 		"media-type-no-deprecated": true,
 		"named-grid-areas-no-invalid": true,
-		"nesting-selector-no-missing-scoping-root": true,
+		"nesting-selector-no-missing-scoping-root": [
+			true,
+			{ "ignoreAtRules": ["custom-variant", "utility", "variant"] }
+		],
 		"no-descending-specificity": true,
 		"no-duplicate-at-import-rules": true,
 		"no-duplicate-selectors": true,
@@ -84,7 +102,7 @@
 			}
 		],
 		"custom-media-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
-		"custom-property-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
+		"custom-property-pattern": "^_?([a-z][a-z0-9]*)(--?[a-z0-9]+)*$",
 		"declaration-block-no-redundant-longhand-properties": true,
 		"declaration-block-single-line-max-declarations": 1,
 		"declaration-empty-line-before": [
@@ -98,7 +116,7 @@
 		"function-name-case": "lower",
 		"function-url-quotes": "always",
 		"hue-degree-notation": "angle",
-		"import-notation": "url",
+		"import-notation": "string",
 		"keyframe-selector-notation": "percentage-unless-within-keyword-only-block",
 		"keyframes-name-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
 		"layer-name-pattern": "^([a-z][a-z0-9]*)([.-][a-z0-9]+)*$",

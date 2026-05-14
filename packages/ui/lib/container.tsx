@@ -14,7 +14,7 @@ export function Container({
 	return (
 		<div
 			className={twMerge(
-				"mx-auto w-full max-w-(--container-breakpoint) [--container-breakpoint:var(--breakpoint-xl)] [--container-padding:--spacing(4)]",
+				"mx-auto inline-full max-inline-(--container-breakpoint) [--container-breakpoint:var(--breakpoint-xl)] [--container-padding:--spacing(4)]",
 				constrained ? "sm:px-(--container-padding)" : "px-(--container-padding)",
 				className,
 			)}

@@ -36,19 +36,18 @@ export function RangeCalendar<T extends DateValue>(
 						>
 							<CalendarGridHeader />
 							<CalendarGridBody className="snap-start">
-								{(date) => {
-									return (
+								{(date) => (
 										<CalendarCell
 											className={twMerge([
 												"shrink-0 [--cell-fg:var(--color-primary-subtle-fg)] [--cell:var(--color-primary-subtle)]",
-												"group/calendar-cell relative size-11 cursor-default outline-hidden leading-[2.286rem] selection-start:rounded-s-lg selection-end:rounded-e-lg outside-month:text-muted-fg sm:size-9 sm:text-sm",
+												"group/calendar-cell relative block-11 inline-11 cursor-default outline-hidden leading-[2.286rem] selection-start:rounded-s-lg selection-end:rounded-e-lg outside-month:text-muted-fg sm:block-9 sm:inline-9 sm:text-sm",
 												"selected:bg-(--cell) selected:text-(--cell-fg)",
 												"selected:after:bg-primary-fg focus-visible:after:bg-primary-fg",
 												"invalid:selected:bg-danger-subtle",
 												"[td:first-child_&]:rounded-s-lg [td:last-child_&]:rounded-e-lg",
 												"forced-colors:selected:bg-[Highlight] forced-colors:selected:text-[HighlightText] forced-colors:invalid:selected:bg-[Mark]",
 												date.compare(now) === 0 &&
-													"after:pointer-events-none after:absolute after:inset-s-1/2 after:bottom-1 after:z-10 after:size-[3px] after:-translate-x-1/2 after:rounded-full after:bg-primary selected:after:bg-primary-fg",
+													"after:pointer-events-none after:absolute after:inset-s-1/2 after:inset-be-1 after:z-10 after:block-[3px] after:inline-[3px] after:-translate-x-1/2 after:rounded-full after:bg-primary selected:after:bg-primary-fg",
 											])}
 											date={date}
 										>
@@ -58,11 +57,10 @@ export function RangeCalendar<T extends DateValue>(
 												isSelectionStart,
 												isSelectionEnd,
 												isDisabled,
-											}) => {
-												return (
+											}) => (
 													<span
 														className={twMerge(
-															"flex size-full items-center justify-center rounded-lg tabular-nums forced-color-adjust-none",
+															"flex block-full inline-full items-center justify-center rounded-lg tabular-nums forced-color-adjust-none",
 															isSelected && (isSelectionStart || isSelectionEnd)
 																? "bg-primary text-primary-fg group-invalid/calendar-cell:bg-danger group-invalid/calendar-cell:text-danger-fg forced-colors:bg-[Highlight] forced-colors:text-[HighlightText] forced-colors:group-invalid/calendar-cell:bg-[Mark]"
 																: isSelected
@@ -82,11 +80,9 @@ export function RangeCalendar<T extends DateValue>(
 													>
 														{formattedDate}
 													</span>
-												);
-											}}
+												)}
 										</CalendarCell>
-									);
-								}}
+									)}
 							</CalendarGridBody>
 						</CalendarGrid>
 					);

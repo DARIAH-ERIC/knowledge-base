@@ -21,16 +21,11 @@ export const users = p.snakeCase.table(
 		name: p.text("name").notNull(),
 		role: p.text("role", { enum: userRoleEnum }).notNull().default("user"),
 		canManageAdmins: p.boolean("can_manage_admins").notNull().default(false),
-		personId: p.uuid("person_id").references(() => {
-			return persons.id;
-		}),
-		organisationalUnitId: p.uuid("organisational_unit_id").references(() => {
-			return organisationalUnits.id;
-		}),
+		personId: p.uuid("person_id").references(() => persons.id),
+		organisationalUnitId: p.uuid("organisational_unit_id").references(() => organisationalUnits.id),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [
+	(t) => [
 			p.uniqueIndex("users_email_unique").on(lower(t.email)),
 			p.check("users_role_enum_check", inArray(t.role, userRoleEnum)),
 			p.check(
@@ -51,8 +46,7 @@ export const users = p.snakeCase.table(
 					)
 				`,
 			),
-		];
-	},
+		],
 );
 
 export type User = typeof users.$inferSelect;
@@ -69,9 +63,7 @@ export const sessions = p.snakeCase.table("sessions", {
 		.uuid("user_id")
 		.notNull()
 		.references(
-			() => {
-				return users.id;
-			},
+			() => users.id,
 			{ onDelete: "cascade" },
 		),
 	expiresAt: f.timestamp("expires_at").notNull(),
@@ -92,9 +84,7 @@ export const passwordResetSessions = p.snakeCase.table("password_reset_sessions"
 		.uuid("user_id")
 		.notNull()
 		.references(
-			() => {
-				return users.id;
-			},
+			() => users.id,
 			{ onDelete: "cascade" },
 		),
 	email: p.text("email").notNull(),
@@ -118,9 +108,7 @@ export const emailVerificationRequests = p.snakeCase.table("email_verification_r
 		.uuid("user_id")
 		.notNull()
 		.references(
-			() => {
-				return users.id;
-			},
+			() => users.id,
 			{ onDelete: "cascade" },
 		),
 	email: p.text("email").notNull(),

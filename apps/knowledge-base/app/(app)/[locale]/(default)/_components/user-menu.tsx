@@ -42,7 +42,7 @@ export function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 				<Avatar initials={user.name.at(0)} isSquare={true} />
 			</MenuTrigger>
 
-			<MenuContent className="min-w-64" popover={{ placement: "bottom end" }}>
+			<MenuContent className="min-inline-64" popover={{ placement: "bottom end" }}>
 				<MenuSection>
 					<MenuHeader separator={true}>
 						<span className="block">{user.name}</span>

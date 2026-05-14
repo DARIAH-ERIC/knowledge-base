@@ -72,9 +72,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	);
 
 	await Promise.all(
-		items.map((item) => {
-			return seedContentBlock(db, item.version.id, type.id, "content");
-		}),
+		items.map((item) => seedContentBlock(db, item.version.id, type.id, "content")),
 	);
 }
 

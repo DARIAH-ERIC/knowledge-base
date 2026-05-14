@@ -80,6 +80,7 @@ export function createStorageAdminService(params: CreateStorageAdminServiceParam
 				});
 			},
 
+			// oxlint-disable-next-line typescript/explicit-module-boundary-types
 			async copy(params: {
 				source: {
 					bucket: string;

@@ -72,11 +72,7 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 	const router = useRouter();
 	const [items, optimisticallyRemoveItem] = useOptimistic(
 		governanceBodies.data,
-		(state, id: string) => {
-			return state.filter((item) => {
-				return item.id !== id;
-			});
-		},
+		(state, id: string) => state.filter((item) => item.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
@@ -107,7 +103,7 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 						className={buttonStyles({ intent: "secondary" })}
 						href="/dashboard/administrator/governance-bodies/create"
 					>
-						<PlusIcon className="mr-2 size-4" />
+						<PlusIcon className="me-2 block-4 inline-4" />
 						{t("New")}
 					</Link>
 				</HeaderAction>
@@ -131,8 +127,7 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
-					{(item) => {
-						return (
+					{(item) => (
 							<TableRow>
 								<TableCell className="uppercase">{item.acronym}</TableCell>
 								<TableCell>{item.name}</TableCell>
@@ -147,17 +142,17 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 									<Menu>
 										<Button
 											aria-label={t("Open actions menu")}
-											className="h-7 sm:h-7"
+											className="block-7 sm:block-7"
 											intent="plain"
 											size="sq-sm"
 										>
-											<EllipsisHorizontalIcon className="size-5" />
+											<EllipsisHorizontalIcon className="block-5 inline-5" />
 										</Button>
 										<MenuContent placement="left top">
 											<MenuItem
 												href={`/dashboard/administrator/governance-bodies/${item.entity.slug}/edit`}
 											>
-												<PencilSquareIcon className="mr-2 size-4" />
+												<PencilSquareIcon className="me-2 block-4 inline-4" />
 												<MenuLabel>{t("Edit")}</MenuLabel>
 											</MenuItem>
 											<MenuSeparator />
@@ -167,15 +162,14 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 													setItemToDelete({ id: item.id, documentId: item.documentId });
 												}}
 											>
-												<TrashIcon className="mr-2 size-4" />
+												<TrashIcon className="me-2 block-4 inline-4" />
 												<MenuLabel>{t("Delete")}</MenuLabel>
 											</MenuItem>
 										</MenuContent>
 									</Menu>
 								</TableCell>
 							</TableRow>
-						);
-					}}
+						)}
 				</TableBody>
 			</Table>
 

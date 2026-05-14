@@ -7,7 +7,7 @@ import { flattenEntityVersion } from "@/lib/entity-version";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { EventOrder } from "@/routes/events/schemas";
-import { and, asc, count, desc, eq, type SQL, sql } from "@/services/db/sql";
+import { type SQL, and, asc, count, desc, eq, sql } from "@/services/db/sql";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
@@ -160,6 +160,7 @@ async function getAdjacentEvents(db: Database | Transaction, params: GetAdjacent
 		},
 	} as const;
 
+	// oxlint-disable-next-line unicorn/consistent-function-scoping
 	function serializeAdjacentEvent(item: {
 		id: schema.Event["id"];
 		title: schema.Event["title"];

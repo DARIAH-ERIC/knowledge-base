@@ -29,7 +29,7 @@ export function AdminTaskCard(props: Readonly<AdminTaskCardProps>): ReactNode {
 	const [state, action] = useActionState(formAction, createActionStateInitial());
 
 	return (
-		<Card className="h-full">
+		<Card className="block-full">
 			<CardHeader>
 				<CardTitle>{title}</CardTitle>
 				<CardDescription>{description}</CardDescription>

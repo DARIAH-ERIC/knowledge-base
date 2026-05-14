@@ -91,6 +91,4 @@ const plugins: Array<(config: Config) => Config> = [
 	},
 ];
 
-export default plugins.reduce((config, plugin) => {
-	return plugin(config);
-}, config);
+export default plugins.reduce((config, plugin) => plugin(config), config);

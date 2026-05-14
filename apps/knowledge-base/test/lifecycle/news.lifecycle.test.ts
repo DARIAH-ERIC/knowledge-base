@@ -161,9 +161,7 @@ describe("news lifecycle", () => {
 				.from(schema.entityVersions)
 				.where(inArray(schema.entityVersions.id, [publishedId, newDraftId]));
 			const byId = new Map(
-				versions.map((version) => {
-					return [version.id, version.updatedAt];
-				}),
+				versions.map((version) => [version.id, version.updatedAt]),
 			);
 
 			expect(byId.get(newDraftId)?.toISOString()).toBe(byId.get(publishedId)?.toISOString());

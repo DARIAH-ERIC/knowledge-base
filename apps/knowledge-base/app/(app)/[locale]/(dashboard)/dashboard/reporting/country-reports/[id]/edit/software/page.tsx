@@ -33,12 +33,10 @@ export default async function DashboardReportingCountryReportSoftwarePage(
 	const result = await getAuthorizedCountryReportForUser(
 		user,
 		id,
-		(id) => {
-			return db.query.countryReports.findFirst({
+		(id) => db.query.countryReports.findFirst({
 				where: { id },
 				columns: { id: true },
-			});
-		},
+			}),
 		"update",
 	);
 

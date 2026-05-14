@@ -147,6 +147,6 @@ test.describe("website news admin – related entities", () => {
 
 		const rowAfter = await db.getEntitiesToEntitiesRow(newsItem!.id, testEntity.id);
 		expect(rowAfter).not.toBeNull();
-		expect(rowAfter!.createdAt).toEqual(rowBefore!.createdAt);
+		expect(rowAfter!.createdAt).toStrictEqual(rowBefore!.createdAt);
 	});
 });

@@ -64,13 +64,11 @@ export function ReportingCampaignForm(props: Readonly<ReportingCampaignFormProps
 						<SelectTrigger />
 						<FieldError />
 						<SelectContent>
-							{reportingCampaignStatusEnum.map((status) => {
-								return (
+							{reportingCampaignStatusEnum.map((status) => (
 									<SelectItem key={status} id={status}>
 										{formatStatus(status)}
 									</SelectItem>
-								);
-							})}
+								))}
 						</SelectContent>
 					</Select>
 					<input name="status" type="hidden" value={selectedStatus} />

@@ -8,14 +8,14 @@ import { validate, validator } from "@/lib/openapi/validator";
 import {
 	GetPersonById,
 	GetPersonBySlug,
-	GetPersons,
 	GetPersonSlugs,
+	GetPersons,
 } from "@/routes/persons/schemas";
 import {
 	getPersonById,
 	getPersonBySlug,
-	getPersons,
 	getPersonSlugs,
+	getPersons,
 } from "@/routes/persons/service";
 
 export const router = createRouter()

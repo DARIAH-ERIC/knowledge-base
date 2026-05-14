@@ -264,9 +264,7 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 	const { projectsToOrganisationalUnits, ...rest } = flattenEntityVersion(item);
 
 	const funders = projectsToOrganisationalUnits
-		.filter((r) => {
-			return r.role.role === "funder";
-		})
+		.filter((r) => r.role.role === "funder")
 		.map((r) => {
 			return {
 				...r.unit,
@@ -278,9 +276,7 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 			};
 		});
 	const partners = projectsToOrganisationalUnits
-		.filter((r) => {
-			return r.role.role !== "funder";
-		})
+		.filter((r) => r.role.role !== "funder")
 		.map((r) => {
 			return {
 				...r.unit,
@@ -490,9 +486,7 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 	const { projectsToOrganisationalUnits, ...rest } = flattenEntityVersion(item);
 
 	const funders = projectsToOrganisationalUnits
-		.filter((r) => {
-			return r.role.role === "funder";
-		})
+		.filter((r) => r.role.role === "funder")
 		.map((r) => {
 			return {
 				...r.unit,
@@ -504,9 +498,7 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 			};
 		});
 	const partners = projectsToOrganisationalUnits
-		.filter((r) => {
-			return r.role.role !== "funder";
-		})
+		.filter((r) => r.role.role !== "funder")
 		.map((r) => {
 			return {
 				...r.unit,

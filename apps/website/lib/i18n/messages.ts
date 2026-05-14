@@ -1,7 +1,7 @@
 import type ui from "@dariah-eric/ui/i18n/en";
 
 import type metadata from "@/content/en/metadata/index.json";
-import { getIntlLanguage, type IntlLocale } from "@/lib/i18n/locales";
+import { type IntlLocale, getIntlLanguage } from "@/lib/i18n/locales";
 import type { SocialMediaKind } from "@/lib/social-media/social-media.config";
 import type messages from "@/messages/en.json";
 

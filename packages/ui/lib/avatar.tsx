@@ -37,7 +37,7 @@ export function Avatar({
 			data-slot="avatar"
 			{...props}
 			className={twMerge(
-				"inline-grid size-(--avatar-size) shrink-0 align-middle outline-1 outline-fg/(--ring-opacity) -outline-offset-1 [--avatar-radius:20%] [--ring-opacity:20%] *:col-start-1 *:row-start-1 *:size-(--avatar-size)",
+				"inline-grid block-(--avatar-size) inline-(--avatar-size) shrink-0 align-middle outline-1 outline-fg/(--ring-opacity) -outline-offset-1 [--avatar-radius:20%] [--ring-opacity:20%] *:col-start-1 *:row-start-1 *:block-(--avatar-size) *:inline-(--avatar-size)",
 				size === "xs" && "[--avatar-size:--spacing(5)]",
 				size === "sm" && "[--avatar-size:--spacing(6)]",
 				size === "md" && "[--avatar-size:--spacing(8)]",
@@ -60,7 +60,7 @@ export function Avatar({
 			{initials !== undefined && (
 				<svg
 					aria-hidden={alt ? undefined : "true"}
-					className="size-full select-none fill-current p-[5%] text-base text-[48px] uppercase"
+					className="block-full inline-full select-none fill-current p-[5%] text-base text-[48px] uppercase"
 					viewBox="0 0 100 100"
 				>
 					{alt && <title>{alt}</title>}
@@ -76,7 +76,7 @@ export function Avatar({
 					</text>
 				</svg>
 			)}
-			{src !== null && <img alt={alt} className="size-full object-cover object-center" src={src} />}
+			{src !== null && <img alt={alt} className="block-full inline-full object-cover object-center" src={src} />}
 		</span>
 	);
 }

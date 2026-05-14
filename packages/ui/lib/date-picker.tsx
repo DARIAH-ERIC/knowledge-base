@@ -37,14 +37,12 @@ export function DatePicker<T extends DateValue>({
 }: Readonly<DatePickerProps<T>>): ReactNode {
 	return (
 		<DatePickerPrimitive className={cx(fieldStyles(), className)} data-slot="control" {...props}>
-			{(values) => {
-				return (
+			{(values) => (
 					<Fragment>
 						{typeof children === "function" ? children(values) : children}
 						<DatePickerOverlay {...popover} />
 					</Fragment>
-				);
-			}}
+				)}
 		</DatePickerPrimitive>
 	);
 }
@@ -79,8 +77,8 @@ export function DatePickerOverlay({
 		<PopoverContent
 			arrow={false}
 			className={twJoin(
-				"flex min-w-auto max-w-none snap-x justify-center p-4 sm:min-w-66 sm:p-2 sm:pt-3",
-				visibleDuration.months === 1 ? "sm:max-w-2xs" : "sm:max-w-none",
+				"flex min-inline-auto max-inline-none snap-x justify-center p-4 sm:min-inline-66 sm:p-2 sm:pbs-3",
+				visibleDuration.months === 1 ? "sm:max-inline-2xs" : "sm:max-inline-none",
 			)}
 			placement={placement}
 			{...props}
@@ -98,7 +96,7 @@ export function DatePickerTrigger({ className, ...props }: Readonly<GroupProps>)
 	const t = useExtracted("ui");
 
 	return (
-		<InputGroup className={cx("*:data-[slot=control]:w-full", className)} {...props}>
+		<InputGroup className={cx("*:data-[slot=control]:inline-full", className)} {...props}>
 			<DateInput />
 			<Button
 				aria-label={t("Open calendar")}
@@ -106,7 +104,7 @@ export function DatePickerTrigger({ className, ...props }: Readonly<GroupProps>)
 					"touch-area grid place-content-center outline-hidden",
 					"text-muted-fg pressed:text-fg hover:text-fg focus-visible:text-fg",
 					"px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6",
-					"*:data-[slot=icon]:size-4.5 sm:*:data-[slot=icon]:size-4",
+					"*:data-[slot=icon]:block-4.5 *:data-[slot=icon]:inline-4.5 sm:*:data-[slot=icon]:block-4 sm:*:data-[slot=icon]:inline-4",
 				)}
 				data-slot="date-picker-trigger"
 			>

@@ -65,11 +65,7 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 	const t = useExtracted();
 	const format = useFormatter();
 	const router = useRouter();
-	const [items, optimisticallyRemoveItem] = useOptimistic(news.data, (state, id: string) => {
-		return state.filter((item) => {
-			return item.id !== id;
-		});
-	});
+	const [items, optimisticallyRemoveItem] = useOptimistic(news.data, (state, id: string) => state.filter((item) => item.id !== id));
 	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
 		useUrlPaginatedSearch({
@@ -99,7 +95,7 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 						className={buttonStyles({ intent: "secondary" })}
 						href="/dashboard/website/news/create"
 					>
-						<PlusIcon className="mr-2 size-4" />
+						<PlusIcon className="me-2 block-4 inline-4" />
 						{t("New")}
 					</Link>
 				</HeaderAction>
@@ -122,11 +118,10 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
-					{(item) => {
-						return (
+					{(item) => (
 							<TableRow href={`/dashboard/website/news/${item.entity.slug}/details`}>
 								<TableCell>
-									<div className="max-w-64 truncate">{item.title}</div>
+									<div className="max-inline-64 truncate">{item.title}</div>
 								</TableCell>
 								<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 								<TableCell>
@@ -139,19 +134,19 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 									<Menu>
 										<Button
 											aria-label={t("Open actions menu")}
-											className="h-7 sm:h-7"
+											className="block-7 sm:block-7"
 											intent="plain"
 											size="sq-sm"
 										>
-											<EllipsisHorizontalIcon className="size-5" />
+											<EllipsisHorizontalIcon className="block-5 inline-5" />
 										</Button>
 										<MenuContent placement="left top">
 											<MenuItem href={`/dashboard/website/news/${item.entity.slug}/details`}>
-												<EyeIcon className="mr-2 size-4" />
+												<EyeIcon className="me-2 block-4 inline-4" />
 												<MenuLabel>{t("View")}</MenuLabel>
 											</MenuItem>
 											<MenuItem href={`/dashboard/website/news/${item.entity.slug}/edit`}>
-												<PencilSquareIcon className="mr-2 size-4" />
+												<PencilSquareIcon className="me-2 block-4 inline-4" />
 												<MenuLabel>{t("Edit")}</MenuLabel>
 											</MenuItem>
 											<MenuSeparator />
@@ -161,15 +156,14 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 													setItemToDelete({ id: item.id, documentId: item.documentId });
 												}}
 											>
-												<TrashIcon className="mr-2 size-4" />
+												<TrashIcon className="me-2 block-4 inline-4" />
 												<MenuLabel>{t("Delete")}</MenuLabel>
 											</MenuItem>
 										</MenuContent>
 									</Menu>
 								</TableCell>
 							</TableRow>
-						);
-					}}
+						)}
 				</TableBody>
 			</Table>
 

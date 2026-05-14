@@ -29,7 +29,7 @@ function DocumentPolicyGroupForm(props: Readonly<{ onSuccess: () => void }>): Re
 	const [state, formAction, isPending] = useActionState(
 		async (prevState: ActionState, formData: FormData) => {
 			const result = await createDocumentPolicyGroupAction(prevState, formData);
-			if (result.status === "success") onSuccess();
+			if (result.status === "success") {onSuccess();}
 			return result;
 		},
 		createActionStateInitial(),
@@ -74,9 +74,7 @@ export function DocumentPolicyGroupCreateDialog(): ReactNode {
 
 	function handleOpenChange(open: boolean) {
 		if (open)
-			setFormKey((k) => {
-				return k + 1;
-			});
+			{setFormKey((k) => k + 1);}
 		setIsOpen(open);
 	}
 
@@ -88,7 +86,7 @@ export function DocumentPolicyGroupCreateDialog(): ReactNode {
 					handleOpenChange(true);
 				}}
 			>
-				<PlusIcon className="mr-2 size-4" />
+				<PlusIcon className="me-2 block-4 inline-4" />
 				{t("New group")}
 			</Button>
 

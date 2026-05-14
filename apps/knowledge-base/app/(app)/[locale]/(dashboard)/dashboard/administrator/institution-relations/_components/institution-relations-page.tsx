@@ -166,8 +166,7 @@ export function InstitutionRelationsPage(
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
-					{(item) => {
-						return (
+					{(item) => (
 							<TableRow id={item.id}>
 								<TableCell>{item.institutionName}</TableCell>
 								<TableCell>{formatValue(item.statusType)}</TableCell>
@@ -187,17 +186,17 @@ export function InstitutionRelationsPage(
 									<Menu>
 										<Button
 											aria-label={t("Open actions menu")}
-											className="h-7 sm:h-7"
+											className="block-7 sm:block-7"
 											intent="plain"
 											size="sq-sm"
 										>
-											<EllipsisHorizontalIcon className="size-5" />
+											<EllipsisHorizontalIcon className="block-5 inline-5" />
 										</Button>
 										<MenuContent placement="left top">
 											<MenuItem
 												href={`/dashboard/administrator/institutions/${item.institutionSlug}/edit`}
 											>
-												<PencilSquareIcon className="mr-2 size-4" />
+												<PencilSquareIcon className="me-2 block-4 inline-4" />
 												<MenuLabel>{t("Edit institution")}</MenuLabel>
 											</MenuItem>
 											{item.durationEnd == null ? (
@@ -209,7 +208,7 @@ export function InstitutionRelationsPage(
 															setSelectedEndDate(null);
 														}}
 													>
-														<ArchiveBoxXMarkIcon className="mr-2 size-4" />
+														<ArchiveBoxXMarkIcon className="me-2 block-4 inline-4" />
 														<MenuLabel>{t("End relation")}</MenuLabel>
 													</MenuItem>
 												</Fragment>
@@ -218,8 +217,7 @@ export function InstitutionRelationsPage(
 									</Menu>
 								</TableCell>
 							</TableRow>
-						);
-					}}
+						)}
 				</TableBody>
 			</Table>
 
@@ -235,7 +233,7 @@ export function InstitutionRelationsPage(
 			<ModalContent
 				isOpen={itemToEnd != null}
 				onOpenChange={(open) => {
-					if (!open) setItemToEnd(null);
+					if (!open) {setItemToEnd(null);}
 				}}
 				role="alertdialog"
 				size="sm"
@@ -261,19 +259,15 @@ export function InstitutionRelationsPage(
 					<Button
 						isDisabled={selectedEndDate == null}
 						onPress={() => {
-							if (itemToEnd == null || selectedEndDate == null) return;
+							if (itemToEnd == null || selectedEndDate == null) {return;}
 
 							const end = selectedEndDate.toDate(getLocalTimeZone());
 
 							startTransition(async () => {
 								await endUnitRelationAction(itemToEnd.id, end);
-								setItems((prev) => {
-									return prev.map((relation) => {
-										return relation.id === itemToEnd.id
+								setItems((prev) => prev.map((relation) => relation.id === itemToEnd.id
 											? { ...relation, durationEnd: end }
-											: relation;
-									});
-								});
+											: relation));
 								setItemToEnd(null);
 							});
 						}}

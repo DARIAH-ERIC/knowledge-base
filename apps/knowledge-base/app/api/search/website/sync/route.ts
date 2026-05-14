@@ -66,14 +66,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 				: [...result.output.entityIds];
 
 	const items = await Promise.all(
-		entityIds.map(async (entityId) => {
-			return syncWebsiteDocumentForEntityWithResult(entityId);
-		}),
+		entityIds.map(async (entityId) => syncWebsiteDocumentForEntityWithResult(entityId)),
 	);
 
-	const ok = items.every((item) => {
-		return item.ok;
-	});
+	const ok = items.every((item) => item.ok);
 
 	return NextResponse.json(
 		{

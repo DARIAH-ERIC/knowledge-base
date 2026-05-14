@@ -52,12 +52,8 @@ export async function GET(
 						url: a.url,
 						kpis: Object.fromEntries(
 							a.kpis
-								.filter((k) => {
-									return k.value > 0;
-								})
-								.map((k) => {
-									return [k.kpi, k.value];
-								}),
+								.filter((k) => k.value > 0)
+								.map((k) => [k.kpi, k.value]),
 						),
 					};
 				}),
@@ -66,12 +62,8 @@ export async function GET(
 						name: s.name,
 						kpis: Object.fromEntries(
 							s.kpis
-								.filter((k) => {
-									return k.value > 0;
-								})
-								.map((k) => {
-									return [k.kpi, k.value];
-								}),
+								.filter((k) => k.value > 0)
+								.map((k) => [k.kpi, k.value]),
 						),
 					};
 				}),

@@ -27,7 +27,7 @@ export function UpdateEmailForm(): ReactNode {
 				<Input />
 			</TextField>
 
-			<SubmitButton className="mt-2">{t("Update")}</SubmitButton>
+			<SubmitButton className="mbs-2">{t("Update")}</SubmitButton>
 		</Form>
 	);
 }

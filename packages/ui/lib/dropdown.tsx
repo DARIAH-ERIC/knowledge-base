@@ -4,7 +4,6 @@ import { CheckIcon } from "@heroicons/react/16/solid";
 import { Fragment, type ReactNode } from "react";
 import {
 	Collection,
-	composeRenderProps,
 	Header,
 	ListBoxItem as ListBoxItemPrimitive,
 	type ListBoxItemProps,
@@ -14,6 +13,7 @@ import {
 	type SeparatorProps,
 	Text,
 	type TextProps,
+	composeRenderProps,
 } from "react-aria-components";
 import { twJoin, twMerge } from "tailwind-merge";
 import { tv } from "tailwind-variants";
@@ -54,14 +54,14 @@ export function DropdownSection<T extends object>({
 
 export const dropdownItemStyles = tv({
 	base: [
-		"min-w-0 [--mr-icon:--spacing(2)] sm:[--mr-icon:--spacing(1.5)]",
+		"min-inline-0 [--mr-icon:--spacing(2)] sm:[--mr-icon:--spacing(1.5)]",
 		"col-span-full grid grid-cols-[auto_1fr_1.5rem_0.5rem_auto] px-3 py-2 sm:px-2.5 sm:py-1.5 supports-[grid-template-columns:subgrid]:grid-cols-subgrid",
 		"not-has-[[slot=description]]:items-center",
 		"group relative cursor-default select-none rounded-[calc(var(--radius-xl)-(--spacing(1)))] text-base/6 text-fg outline-0 sm:text-sm/6",
-		"**:data-[slot=avatar]:mr-(--mr-icon) **:data-[slot=avatar]:[--avatar-size:--spacing(6)] **:data-[slot=avatar]:*:mr-(--mr-icon) sm:**:data-[slot=avatar]:[--avatar-size:--spacing(5)]",
+		"**:data-[slot=avatar]:me-(--mr-icon) **:data-[slot=avatar]:[--avatar-size:--spacing(6)] **:data-[slot=avatar]:*:me-(--mr-icon) sm:**:data-[slot=avatar]:[--avatar-size:--spacing(5)]",
 		// eslint-disable-next-line better-tailwindcss/enforce-consistent-class-order
-		"**:data-[slot=icon]:size-5 **:data-[slot=icon]:shrink-0 [&_[data-slot='icon']:not([class*='text-'])]:text-muted-fg sm:**:data-[slot=icon]:size-4 *:data-[slot=icon]:mr-(--mr-icon) has-data-[slot=description]:**:data-[slot=icon]:h-lh",
-		"[&>[slot=label]+[data-slot=icon]]:absolute [&>[slot=label]+[data-slot=icon]]:right-1",
+		"**:data-[slot=icon]:block-5 **:data-[slot=icon]:inline-5 **:data-[slot=icon]:shrink-0 [&_[data-slot='icon']:not([class*='text-'])]:text-muted-fg sm:**:data-[slot=icon]:block-4 sm:**:data-[slot=icon]:inline-4 *:data-[slot=icon]:me-(--mr-icon) has-data-[slot=description]:**:data-[slot=icon]:block-lh",
+		"[&>[slot=label]+[data-slot=icon]]:absolute [&>[slot=label]+[data-slot=icon]]:inset-e-1",
 		"forced-color-adjust-none forced-colors:text-[CanvasText] forced-colors:**:data-[slot=icon]:text-[CanvasText] forced-colors:group-focus:**:data-[slot=icon]:text-[CanvasText]",
 	],
 	variants: {
@@ -113,29 +113,25 @@ export function DropdownItem({
 	const textValue = typeof children === "string" ? children : undefined;
 	return (
 		<ListBoxItemPrimitive
-			className={composeRenderProps(className, (className, renderProps) => {
-				return dropdownItemStyles({ ...renderProps, intent, className });
-			})}
+			className={composeRenderProps(className, (className, renderProps) => dropdownItemStyles({ ...renderProps, intent, className }))}
 			textValue={textValue}
 			{...props}
 		>
-			{composeRenderProps(children, (children, { isSelected }) => {
-				return (
+			{composeRenderProps(children, (children, { isSelected }) => (
 					<Fragment>
 						{isSelected && (
 							<CheckIcon
 								className={twJoin(
-									"mr-1.5 -ml-0.5 h-[lh] w-4 shrink-0",
-									"group-has-data-[slot=icon]:absolute group-has-data-[slot=icon]:top-1/2 group-has-data-[slot=icon]:right-0.5 group-has-data-[slot=icon]:-translate-y-1/2",
-									"group-has-data-[slot=avatar]:absolute group-has-data-[slot=avatar]:top-1/2 group-has-data-[slot=avatar]:right-0.5 group-has-data-[slot=avatar]:-translate-y-1/2",
+									"me-1.5 -ms-0.5 block-[lh] inline-4 shrink-0",
+									"group-has-data-[slot=icon]:absolute group-has-data-[slot=icon]:inset-bs-1/2 group-has-data-[slot=icon]:inset-e-0.5 group-has-data-[slot=icon]:-translate-y-1/2",
+									"group-has-data-[slot=avatar]:absolute group-has-data-[slot=avatar]:inset-bs-1/2 group-has-data-[slot=avatar]:inset-e-0.5 group-has-data-[slot=avatar]:-translate-y-1/2",
 								)}
 								data-slot="check-indicator"
 							/>
 						)}
 						{typeof children === "string" ? <DropdownLabel>{children}</DropdownLabel> : children}
 					</Fragment>
-				);
-			})}
+				))}
 		</ListBoxItemPrimitive>
 	);
 }
@@ -174,7 +170,7 @@ export function DropdownDescription({
 export function DropdownSeparator({ className, ...props }: Readonly<SeparatorProps>): ReactNode {
 	return (
 		<Separator
-			className={twMerge("col-span-full -mx-1 my-1 h-px bg-fg/10", className)}
+			className={twMerge("col-span-full -mx-1 my-1 block-px bg-fg/10", className)}
 			orientation="horizontal"
 			{...props}
 		/>
@@ -192,7 +188,7 @@ export function DropdownKeyboard({
 	return (
 		<Keyboard
 			className={twMerge(
-				"absolute right-2 pl-2 group-hover:text-primary-fg group-focus:text-primary-fg",
+				"absolute inset-e-2 ps-2 group-hover:text-primary-fg group-focus:text-primary-fg",
 				className,
 			)}
 			{...props}

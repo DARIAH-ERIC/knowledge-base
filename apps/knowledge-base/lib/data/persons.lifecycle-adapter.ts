@@ -17,7 +17,7 @@ export const personsLifecycleAdapter: EntityLifecycleAdapter = {
 			.from(schema.persons)
 			.where(eq(schema.persons.id, sourceVersionId))
 			.limit(1);
-		if (source == null) return;
+		if (source == null) {return;}
 		await tx.insert(schema.persons).values({ id: targetVersionId, ...source });
 
 		const memberships = await tx

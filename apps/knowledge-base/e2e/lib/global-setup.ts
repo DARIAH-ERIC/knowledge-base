@@ -1,3 +1,5 @@
+// oxlint-disable node/no-process-env
+
 import { createCipheriv, createHash, randomBytes } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -6,9 +8,9 @@ import { log } from "@acdh-oeaw/lib";
 import { config as dotenv } from "@dotenvx/dotenvx";
 
 dotenv({
-	path: [".env.test.local", ".env.local", ".env.test", ".env"].map((filePath) => {
-		return join(import.meta.dirname, "../..", filePath);
-	}),
+	path: [".env.test.local", ".env.local", ".env.test", ".env"].map((filePath) =>
+		join(import.meta.dirname, "../..", filePath),
+	),
 	ignore: ["MISSING_ENV_FILE"],
 	quiet: true,
 });
@@ -34,7 +36,6 @@ function hashSessionSecret(secret: string): Buffer {
 
 // eslint-disable-next-line import-x/no-default-export
 export default async function globalSetup(): Promise<void> {
-	// eslint-disable-next-line no-restricted-syntax
 	const authEncryptionKeyHex = process.env.AUTH_ENCRYPTION_KEY;
 	if (authEncryptionKeyHex?.length !== 32) {
 		throw new Error("AUTH_ENCRYPTION_KEY must be a 32-character hex string (16 bytes)");
@@ -49,15 +50,10 @@ export default async function globalSetup(): Promise<void> {
 
 	const db = createDatabaseService({
 		connection: {
-			// eslint-disable-next-line no-restricted-syntax
 			database: process.env.DATABASE_NAME,
-			// eslint-disable-next-line no-restricted-syntax
 			host: process.env.DATABASE_HOST,
-			// eslint-disable-next-line no-restricted-syntax
 			password: process.env.DATABASE_PASSWORD,
-			// eslint-disable-next-line no-restricted-syntax
 			port: Number(process.env.DATABASE_PORT),
-			// eslint-disable-next-line no-restricted-syntax
 			user: process.env.DATABASE_USER,
 		},
 		logger: false,
@@ -140,7 +136,6 @@ export default async function globalSetup(): Promise<void> {
 		});
 
 		const baseUrl =
-			// eslint-disable-next-line no-restricted-syntax
 			process.env.NEXT_PUBLIC_APP_BASE_URL ?? `http://localhost:${process.env.PORT ?? "3001"}`;
 		const url = new URL(baseUrl);
 

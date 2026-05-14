@@ -68,9 +68,7 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 	const total = aggregate.at(0)?.total ?? 0;
 	const positions = await getPersonPositions(
 		db,
-		items.map((item) => {
-			return item.id;
-		}),
+		items.map((item) => item.id),
 	);
 
 	const data = items.map((item) => {

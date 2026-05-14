@@ -16,9 +16,7 @@ export const SignUpActionInputSchema = v.pipe(
 	v.forward(
 		v.partialCheck(
 			[["password"], ["password-confirmation"]],
-			(input) => {
-				return input["password-confirmation"] === input.password;
-			},
+			(input) => input["password-confirmation"] === input.password,
 			"Passwords don't match.",
 		),
 		["password-confirmation"],

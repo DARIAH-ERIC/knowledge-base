@@ -63,9 +63,7 @@ function NavigationItemForm(props: Readonly<NavigationItemFormProps>): ReactNode
 
 	const initialEntityType =
 		item?.entityId != null
-			? (entities.find((e) => {
-					return e.id === item.entityId;
-				})?.type ?? null)
+			? (entities.find((e) => e.id === item.entityId)?.type ?? null)
 			: null;
 	const [selectedEntityType, setSelectedEntityType] = useState<EntityType | null>(
 		initialEntityType,
@@ -74,9 +72,7 @@ function NavigationItemForm(props: Readonly<NavigationItemFormProps>): ReactNode
 
 	const filteredEntities =
 		selectedEntityType != null
-			? entities.filter((e) => {
-					return e.type === selectedEntityType;
-				})
+			? entities.filter((e) => e.type === selectedEntityType)
 			: [];
 
 	const serverAction = isEditMode ? updateNavigationItemAction : createNavigationItemAction;
@@ -180,13 +176,11 @@ function NavigationItemForm(props: Readonly<NavigationItemFormProps>): ReactNode
 							<Label>{t("Content type")}</Label>
 							<SelectTrigger />
 							<SelectContent>
-								{allowedEntityTypes.map((type) => {
-									return (
+								{allowedEntityTypes.map((type) => (
 										<SelectItem key={type} id={type} textValue={entityTypeLabels[type]}>
 											{entityTypeLabels[type]}
 										</SelectItem>
-									);
-								})}
+									))}
 							</SelectContent>
 						</Select>
 
@@ -202,13 +196,11 @@ function NavigationItemForm(props: Readonly<NavigationItemFormProps>): ReactNode
 							<SelectTrigger />
 							<FieldError />
 							<SelectContent>
-								{filteredEntities.map((entity) => {
-									return (
+								{filteredEntities.map((entity) => (
 										<SelectItem key={entity.id} id={entity.id} textValue={entity.title}>
 											{entity.title}
 										</SelectItem>
-									);
-								})}
+									))}
 							</SelectContent>
 						</Select>
 					</Fragment>
@@ -257,9 +249,7 @@ export function NavigationItemFormDialog(
 
 	function handleOpenChange(open: boolean) {
 		if (open)
-			setFormKey((k) => {
-				return k + 1;
-			});
+			{setFormKey((k) => k + 1);}
 		onOpenChange(open);
 	}
 

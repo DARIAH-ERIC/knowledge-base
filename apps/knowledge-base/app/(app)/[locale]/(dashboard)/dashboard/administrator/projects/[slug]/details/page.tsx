@@ -48,9 +48,7 @@ export default async function DashboardAdministratorProjectDetailsPage(
 		notFound();
 	}
 
-	const { draftId, publishedId } = await db.transaction(async (tx) => {
-		return getDocumentVersions(tx, doc.id);
-	});
+	const { draftId, publishedId } = await db.transaction(async (tx) => getDocumentVersions(tx, doc.id));
 
 	const { version } = await searchParamsPromise;
 	const selectedVersion: "draft" | "published" =
@@ -178,9 +176,7 @@ export default async function DashboardAdministratorProjectDetailsPage(
 						duration: partner.duration ?? null,
 					};
 				}),
-				socialMedia: socialMediaLinks.map((link) => {
-					return link.socialMedia;
-				}),
+				socialMedia: socialMediaLinks.map((link) => link.socialMedia),
 			}}
 			publishAction={publishProjectAction}
 			selectedVersion={selectedVersion}

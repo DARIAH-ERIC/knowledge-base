@@ -13,15 +13,11 @@ function formatRole(role: string): string {
 	return role
 		.replaceAll("_", " ")
 		.replace(/^is /, "")
-		.replaceAll(/\b\w/g, (c) => {
-			return c.toUpperCase();
-		});
+		.replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function formatKpi(kpi: string): string {
-	return kpi.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => {
-		return c.toUpperCase();
-	});
+	return kpi.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
 const eurFormatter = new Intl.NumberFormat("en", {
@@ -51,18 +47,16 @@ export async function CountryReportSummary(
 				<section className="flex flex-col gap-y-4">
 					<h2 className="text-sm font-semibold text-fg">{t("Institutions")}</h2>
 					<ul className="divide-y rounded-md border">
-						{data.institutions.map((inst) => {
-							return (
+						{data.institutions.map((inst) => (
 								<li key={inst.id} className="px-4 py-3">
 									<p className="text-sm font-medium text-fg">
 										{inst.name}
 										{inst.acronym != null && (
-											<span className="ml-2 text-muted-fg">({inst.acronym})</span>
+											<span className="ms-2 text-muted-fg">({inst.acronym})</span>
 										)}
 									</p>
 								</li>
-							);
-						})}
+							))}
 					</ul>
 				</section>
 			)}
@@ -70,9 +64,8 @@ export async function CountryReportSummary(
 			<section className="flex flex-col gap-y-4">
 				<h2 className="text-sm font-semibold text-fg">{t("Contributors")}</h2>
 				{data.contributions.length > 0 && (
-					<ul className="mb-4 divide-y rounded-md border">
-						{data.contributions.map((c) => {
-							return (
+					<ul className="mbe-4 divide-y rounded-md border">
+						{data.contributions.map((c) => (
 								<li key={c.id} className="px-4 py-3">
 									<p className="text-sm font-medium text-fg">{c.personName}</p>
 									<p className="text-xs text-muted-fg">
@@ -81,11 +74,10 @@ export async function CountryReportSummary(
 										{c.orgUnitName}
 									</p>
 								</li>
-							);
-						})}
+							))}
 					</ul>
 				)}
-				<dl className="grid max-w-xs grid-cols-[auto_1fr] gap-x-8 gap-y-2 text-sm">
+				<dl className="grid max-inline-xs grid-cols-[auto_1fr] gap-x-8 gap-y-2 text-sm">
 					<dt className="text-muted-fg">{t("Total contributors")}</dt>
 					<dd>{data.totalContributors ?? "—"}</dd>
 				</dl>
@@ -94,7 +86,7 @@ export async function CountryReportSummary(
 			{hasEvents && (
 				<section className="flex flex-col gap-y-4">
 					<h2 className="text-sm font-semibold text-fg">{t("Events")}</h2>
-					<dl className="grid max-w-xs grid-cols-[auto_1fr] gap-x-8 gap-y-2 text-sm">
+					<dl className="grid max-inline-xs grid-cols-[auto_1fr] gap-x-8 gap-y-2 text-sm">
 						<dt className="text-muted-fg">{t("Small")}</dt>
 						<dd>{data.smallEvents ?? "—"}</dd>
 						<dt className="text-muted-fg">{t("Medium")}</dt>
@@ -123,9 +115,7 @@ export async function CountryReportSummary(
 				<section className="flex flex-col gap-y-6">
 					<h2 className="text-sm font-semibold text-fg">{t("Social media")}</h2>
 					{data.socialMediaAccounts.map((account) => {
-						const nonZeroKpis = account.kpis.filter((k) => {
-							return k.value > 0;
-						});
+						const nonZeroKpis = account.kpis.filter((k) => k.value > 0);
 
 						return (
 							<div key={account.socialMediaId} className="flex flex-col gap-y-3">
@@ -142,14 +132,12 @@ export async function CountryReportSummary(
 								</div>
 								{nonZeroKpis.length > 0 ? (
 									<dl className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-3 lg:grid-cols-4">
-										{nonZeroKpis.map((k) => {
-											return (
+										{nonZeroKpis.map((k) => (
 												<div key={k.kpi}>
 													<dt className="text-xs text-muted-fg">{formatKpi(k.kpi)}</dt>
 													<dd className="font-medium">{k.value.toLocaleString()}</dd>
 												</div>
-											);
-										})}
+											))}
 									</dl>
 								) : (
 									<p className="text-sm text-muted-fg">{t("No KPIs recorded.")}</p>
@@ -164,23 +152,19 @@ export async function CountryReportSummary(
 				<section className="flex flex-col gap-y-6">
 					<h2 className="text-sm font-semibold text-fg">{t("Services")}</h2>
 					{data.services.map((service) => {
-						const nonZeroKpis = service.kpis.filter((k) => {
-							return k.value > 0;
-						});
+						const nonZeroKpis = service.kpis.filter((k) => k.value > 0);
 
 						return (
 							<div key={service.serviceId} className="flex flex-col gap-y-3">
 								<p className="text-sm font-medium text-fg">{service.name}</p>
 								{nonZeroKpis.length > 0 ? (
 									<dl className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-3 lg:grid-cols-4">
-										{nonZeroKpis.map((k) => {
-											return (
+										{nonZeroKpis.map((k) => (
 												<div key={k.kpi}>
 													<dt className="text-xs text-muted-fg">{formatKpi(k.kpi)}</dt>
 													<dd className="font-medium">{k.value.toLocaleString()}</dd>
 												</div>
-											);
-										})}
+											))}
 									</dl>
 								) : (
 									<p className="text-sm text-muted-fg">{t("No KPIs recorded.")}</p>
@@ -195,16 +179,14 @@ export async function CountryReportSummary(
 				<section className="flex flex-col gap-y-4">
 					<h2 className="text-sm font-semibold text-fg">{t("Project contributions")}</h2>
 					<ul className="divide-y rounded-md border">
-						{data.projectContributions.map((p) => {
-							return (
+						{data.projectContributions.map((p) => (
 								<li key={p.id} className="flex items-center justify-between gap-x-4 px-4 py-3">
 									<span className="text-sm font-medium text-fg">{p.projectName}</span>
 									<span className="shrink-0 text-sm text-muted-fg">
 										{eurFormatter.format(p.amountEuros)}
 									</span>
 								</li>
-							);
-						})}
+							))}
 					</ul>
 				</section>
 			)}

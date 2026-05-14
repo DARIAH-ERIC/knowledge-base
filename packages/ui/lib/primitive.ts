@@ -18,7 +18,5 @@ export function cx<T = unknown>(...args: CxArgs<T>): string | ((v: T) => string)
 
 	const fixed = twMerge(...tailwinds);
 
-	return composeRenderProps(className, (cn) => {
-		return twMerge(fixed, cn);
-	});
+	return composeRenderProps(className, (cn) => twMerge(fixed, cn));
 }

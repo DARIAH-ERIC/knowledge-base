@@ -8,14 +8,14 @@ import { validate, validator } from "@/lib/openapi/validator";
 import {
 	GetFundingCallById,
 	GetFundingCallBySlug,
-	GetFundingCalls,
 	GetFundingCallSlugs,
+	GetFundingCalls,
 } from "@/routes/funding-calls/schemas";
 import {
 	getFundingCallById,
 	getFundingCallBySlug,
-	getFundingCalls,
 	getFundingCallSlugs,
+	getFundingCalls,
 } from "@/routes/funding-calls/service";
 
 export const router = createRouter()

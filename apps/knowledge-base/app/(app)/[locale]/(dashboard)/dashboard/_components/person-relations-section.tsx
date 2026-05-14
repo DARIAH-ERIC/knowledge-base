@@ -2,8 +2,8 @@
 
 import {
 	type ActionState,
-	createActionStateInitial,
 	type GetValidationErrors,
+	createActionStateInitial,
 } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
@@ -72,18 +72,14 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 	const [selectedRoleTypeId, setSelectedRoleTypeId] = useState<string | null>(null);
 	const [selectedPerson, setSelectedPerson] = useState<ContributionPersonOption | null>(null);
 
-	const [state, setState] = useState<ActionState>(() => {
-		return createActionStateInitial();
-	});
+	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
 	const [isPending, startFormTransition] = useTransition();
 
 	const validationErrors =
 		state.status === "error"
 			? (state.validationErrors as ContributionValidationErrors | undefined)
 			: undefined;
-	const selectedRoleOption = roleOptions.find((option) => {
-		return option.roleTypeId === selectedRoleTypeId;
-	});
+	const selectedRoleOption = roleOptions.find((option) => option.roleTypeId === selectedRoleTypeId);
 
 	function formAction(formData: FormData) {
 		const person = selectedPerson;
@@ -99,8 +95,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 					| undefined;
 
 				if (data != null) {
-					setLocalRelations((prev) => {
-						return [
+					setLocalRelations((prev) => [
 							...prev,
 							{
 								id: data.id,
@@ -113,8 +108,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 									...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
 								},
 							},
-						];
-					});
+						]);
 				}
 
 				setSelectedRoleTypeId(null);
@@ -127,7 +121,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 		<Fragment>
 			<Separator className="my-8" />
 
-			<div className="max-w-3xl space-y-6">
+			<div className="max-inline-3xl space-y-6">
 				<div className="space-y-1">
 					<FormSectionTitle title={t("People")} />
 				</div>
@@ -142,8 +136,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 							<TableColumn />
 						</TableHeader>
 						<TableBody items={localRelations}>
-							{(relation) => {
-								return (
+							{(relation) => (
 									<TableRow id={relation.id}>
 										<TableCell>{relation.personName}</TableCell>
 										<TableCell>{formatRoleType(relation.roleType)}</TableCell>
@@ -159,7 +152,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 											{relation.duration.end == null && (
 												<Button
 													aria-label={t("End person relation")}
-													className="h-7 sm:h-7"
+													className="block-7 sm:block-7"
 													intent="plain"
 													onPress={() => {
 														setItemToEnd({ id: relation.id });
@@ -167,13 +160,12 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 													}}
 													size="sq-sm"
 												>
-													<ArchiveBoxXMarkIcon className="size-4" />
+													<ArchiveBoxXMarkIcon className="block-4 inline-4" />
 												</Button>
 											)}
 										</TableCell>
 									</TableRow>
-								);
-							}}
+								)}
 						</TableBody>
 					</Table>
 				) : (
@@ -199,13 +191,11 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 									<SelectTrigger />
 									<FieldError />
 									<SelectContent>
-										{roleOptions.map((option) => {
-											return (
+										{roleOptions.map((option) => (
 												<SelectItem key={option.roleTypeId} id={option.roleTypeId}>
 													{formatRoleType(option.roleType)}
 												</SelectItem>
-											);
-										})}
+											))}
 									</SelectContent>
 								</Select>
 								<input name="roleTypeId" type="hidden" value={selectedRoleTypeId ?? ""} />
@@ -262,7 +252,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 			<ModalContent
 				isOpen={itemToEnd != null}
 				onOpenChange={(open) => {
-					if (!open) setItemToEnd(null);
+					if (!open) {setItemToEnd(null);}
 				}}
 				role="alertdialog"
 				size="sm"
@@ -288,19 +278,15 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 					<Button
 						isDisabled={selectedEndDate == null}
 						onPress={() => {
-							if (itemToEnd == null || selectedEndDate == null) return;
+							if (itemToEnd == null || selectedEndDate == null) {return;}
 
 							const end = selectedEndDate.toDate(getLocalTimeZone());
 
 							startTransition(async () => {
 								await endContributionAction(itemToEnd.id, end);
-								setLocalRelations((prev) => {
-									return prev.map((relation) => {
-										return relation.id === itemToEnd.id
+								setLocalRelations((prev) => prev.map((relation) => relation.id === itemToEnd.id
 											? { ...relation, duration: { ...relation.duration, end } }
-											: relation;
-									});
-								});
+											: relation));
 								setItemToEnd(null);
 							});
 						}}

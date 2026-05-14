@@ -10,17 +10,13 @@ export const impactCaseStudies = p.snakeCase.table("impact_case_studies", {
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(() => {
-			return entityVersions.id;
-		}),
+		.references(() => entityVersions.id),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
 	imageId: p
 		.uuid("image_id")
 		.notNull()
-		.references(() => {
-			return assets.id;
-		}),
+		.references(() => assets.id),
 	...f.timestamps(),
 });
 
@@ -40,24 +36,18 @@ export const impactCaseStudiesToPersons = p.snakeCase.table(
 		impactCaseStudyId: p
 			.uuid("impact_case_study_id")
 			.notNull()
-			.references(() => {
-				return impactCaseStudies.id;
-			}),
+			.references(() => impactCaseStudies.id),
 		personId: p
 			.uuid("person_id")
 			.notNull()
-			.references(() => {
-				return persons.id;
-			}),
+			.references(() => persons.id),
 		role: p.text("role", { enum: articleContributorRolesEnum }).notNull().default("author"),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [
+	(t) => [
 			p.primaryKey({
 				columns: [t.impactCaseStudyId, t.personId],
 				name: "impact_case_studies_to_persons_pkey",
 			}),
-		];
-	},
+		],
 );

@@ -29,9 +29,7 @@ export async function generateMetadata(
 }
 
 function formatKpi(kpi: string): string {
-	return kpi.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => {
-		return c.toUpperCase();
-	});
+	return kpi.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export default async function DashboardReportingCountryReportServicesPage(
@@ -45,8 +43,7 @@ export default async function DashboardReportingCountryReportServicesPage(
 	const result = await getAuthorizedCountryReportForUser(
 		user,
 		id,
-		(id) => {
-			return db.query.countryReports.findFirst({
+		(id) => db.query.countryReports.findFirst({
 				where: { id },
 				columns: { id: true },
 				with: {
@@ -62,8 +59,7 @@ export default async function DashboardReportingCountryReportServicesPage(
 						columns: { serviceId: true, kpi: true, value: true },
 					},
 				},
-			});
-		},
+			}),
 		"update",
 	);
 
@@ -78,9 +74,7 @@ export default async function DashboardReportingCountryReportServicesPage(
 	const t = await getExtracted();
 
 	const kpiMap = new Map(
-		report.serviceKpis.map((k) => {
-			return [`${k.serviceId}-${k.kpi}`, k.value];
-		}),
+		report.serviceKpis.map((k) => [`${k.serviceId}-${k.kpi}`, k.value]),
 	);
 
 	const services = report.country.services;
@@ -93,8 +87,7 @@ export default async function DashboardReportingCountryReportServicesPage(
 				<form action={upsertCountryReportServiceKpisAction}>
 					<input name="id" type="hidden" value={report.id} />
 					<div className="flex flex-col gap-y-8">
-						{services.map((service) => {
-							return (
+						{services.map((service) => (
 								<section key={service.id} className="flex flex-col gap-y-4">
 									<h2 className="text-sm font-semibold text-fg">{service.name}</h2>
 									<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -114,10 +107,9 @@ export default async function DashboardReportingCountryReportServicesPage(
 										})}
 									</div>
 								</section>
-							);
-						})}
+							))}
 					</div>
-					<div className="mt-6">
+					<div className="mbs-6">
 						<Button type="submit">{t("Save")}</Button>
 					</div>
 				</form>

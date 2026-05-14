@@ -61,7 +61,7 @@ export const Default: Story = {
 	args: { collapsible: "dock" },
 	render(props) {
 		return (
-			<SidebarProvider className="h-svh">
+			<SidebarProvider className="block-svh">
 				<Sidebar {...props}>
 					<SidebarHeader>
 						<SidebarItem href="#">
@@ -73,8 +73,7 @@ export const Default: Story = {
 					<SidebarContent>
 						<SidebarSectionGroup>
 							<SidebarSection label={"Navigation"}>
-								{navItems.map((item) => {
-									return (
+								{navItems.map((item) => (
 										<SidebarItem
 											key={item.id}
 											href={item.href}
@@ -84,21 +83,18 @@ export const Default: Story = {
 											<item.icon />
 											<SidebarLabel>{item.label}</SidebarLabel>
 										</SidebarItem>
-									);
-								})}
+									))}
 							</SidebarSection>
 
 							<SidebarSeparator />
 
 							<SidebarSection label={"Account"}>
-								{settingsItems.map((item) => {
-									return (
+								{settingsItems.map((item) => (
 										<SidebarItem key={item.id} href={item.href} tooltip={item.label}>
 											<item.icon />
 											<SidebarLabel>{item.label}</SidebarLabel>
 										</SidebarItem>
-									);
-								})}
+									))}
 							</SidebarSection>
 						</SidebarSectionGroup>
 					</SidebarContent>

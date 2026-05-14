@@ -20,7 +20,7 @@ export const projectsLifecycleAdapter: EntityLifecycleAdapter = {
 			.from(schema.projects)
 			.where(eq(schema.projects.id, sourceVersionId))
 			.limit(1);
-		if (source == null) return;
+		if (source == null) {return;}
 		await tx.insert(schema.projects).values({ id: targetVersionId, ...source });
 
 		const partners = await tx

@@ -35,8 +35,7 @@ export function CampaignQuestionsForm(props: Readonly<CampaignQuestionsFormProps
 				<p className="text-sm text-muted-fg">{t("No questions yet.")}</p>
 			) : (
 				<ol className="flex flex-col gap-y-4">
-					{questions.map((q) => {
-						return (
+					{questions.map((q) => (
 							<li
 								key={q.id}
 								className="flex items-start gap-x-4 rounded-md border border-border p-4"
@@ -62,8 +61,7 @@ export function CampaignQuestionsForm(props: Readonly<CampaignQuestionsFormProps
 									</Button>
 								</form>
 							</li>
-						);
-					})}
+						))}
 				</ol>
 			)}
 

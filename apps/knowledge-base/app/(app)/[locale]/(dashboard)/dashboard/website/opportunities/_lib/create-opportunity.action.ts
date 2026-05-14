@@ -1,9 +1,9 @@
 "use server";
 
 import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
-import { db, type Transaction } from "@dariah-eric/database/client";
+import { type Transaction, db } from "@dariah-eric/database/client";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
+import { type ValidationErrors, createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import slugify from "@sindresorhus/slugify";
 import { getExtracted, getLocale } from "next-intl/server";
@@ -95,9 +95,7 @@ export const createOpportunityAction = createServerAction(
 			assert(contentField);
 
 			const contentBlockTypes = await db.query.contentBlockTypes.findMany();
-			const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => {
-				return item.type;
-			});
+			const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
 
 			async function insertTypeBlock(tx: Transaction, block: ContentBlockInput, blockId: string) {
 				await upsertTypedContentBlock(tx, block, blockId, true);

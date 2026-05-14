@@ -28,10 +28,10 @@ const UpsertCountryReportServiceKpisSchema = v.object({
 });
 
 export async function upsertCountryReportServiceKpisAction(formData: FormData): Promise<void> {
-	if (!(await globalPostRequestRateLimit())) return;
+	if (!(await globalPostRequestRateLimit())) {return;}
 
 	const result = v.safeParse(UpsertCountryReportServiceKpisSchema, getFormDataValues(formData));
-	if (!result.success) return;
+	if (!result.success) {return;}
 
 	const { id, kpis } = result.output;
 

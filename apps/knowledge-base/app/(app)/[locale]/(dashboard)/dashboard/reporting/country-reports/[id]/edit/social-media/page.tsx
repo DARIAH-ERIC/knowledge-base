@@ -29,9 +29,7 @@ export async function generateMetadata(
 }
 
 function formatKpi(kpi: string): string {
-	return kpi.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => {
-		return c.toUpperCase();
-	});
+	return kpi.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export default async function DashboardReportingCountryReportSocialMediaPage(
@@ -45,8 +43,7 @@ export default async function DashboardReportingCountryReportSocialMediaPage(
 	const result = await getAuthorizedCountryReportForUser(
 		user,
 		id,
-		(id) => {
-			return db.query.countryReports.findFirst({
+		(id) => db.query.countryReports.findFirst({
 				where: { id },
 				columns: { id: true },
 				with: {
@@ -62,8 +59,7 @@ export default async function DashboardReportingCountryReportSocialMediaPage(
 						columns: { socialMediaId: true, kpi: true, value: true },
 					},
 				},
-			});
-		},
+			}),
 		"update",
 	);
 
@@ -78,9 +74,7 @@ export default async function DashboardReportingCountryReportSocialMediaPage(
 	const t = await getExtracted();
 
 	const kpiMap = new Map(
-		report.socialMediaKpis.map((k) => {
-			return [`${k.socialMediaId}-${k.kpi}`, k.value];
-		}),
+		report.socialMediaKpis.map((k) => [`${k.socialMediaId}-${k.kpi}`, k.value]),
 	);
 
 	const accounts = report.country.socialMedia;
@@ -95,8 +89,7 @@ export default async function DashboardReportingCountryReportSocialMediaPage(
 				<form action={upsertCountryReportSocialMediaKpisAction}>
 					<input name="id" type="hidden" value={report.id} />
 					<div className="flex flex-col gap-y-8">
-						{accounts.map((account) => {
-							return (
+						{accounts.map((account) => (
 								<section key={account.id} className="flex flex-col gap-y-4">
 									<div className="space-y-1">
 										<h2 className="text-sm font-semibold text-fg">{account.name}</h2>
@@ -119,10 +112,9 @@ export default async function DashboardReportingCountryReportSocialMediaPage(
 										})}
 									</div>
 								</section>
-							);
-						})}
+							))}
 					</div>
-					<div className="mt-6">
+					<div className="mbs-6">
 						<Button type="submit">{t("Save")}</Button>
 					</div>
 				</form>

@@ -8,9 +8,7 @@ export const fundingCalls = p.snakeCase.table("funding_calls", {
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(() => {
-			return entityVersions.id;
-		}),
+		.references(() => entityVersions.id),
 	title: p.text("title").notNull(),
 	summary: p.text("summary"),
 	duration: f.timestampRange("duration").notNull(),

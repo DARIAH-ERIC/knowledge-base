@@ -2,7 +2,7 @@
 
 import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
+import { type ValidationErrors, createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
@@ -71,7 +71,7 @@ export const createServiceAction = createServerAction(
 				})
 				.returning({ id: schema.services.id });
 
-			if (service == null) return;
+			if (service == null) {return;}
 
 			const ownerRole = await tx.query.organisationalUnitServiceRoles.findFirst({
 				where: { role: "service_owner" },

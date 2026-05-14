@@ -7,7 +7,7 @@ import { flattenEntityVersion } from "@/lib/entity-version";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { FundingCallStatus } from "@/routes/funding-calls/schemas";
-import { and, count, desc, eq, or, type SQL, sql, type SQLWrapper } from "@/services/db/sql";
+import { type SQL, type SQLWrapper, and, count, desc, eq, or, sql } from "@/services/db/sql";
 
 interface GetFundingCallsParams {
 	/** @default 10 */
@@ -54,9 +54,7 @@ export async function getFundingCalls(db: Database | Transaction, params: GetFun
 				},
 				RAW:
 					statuses.length > 0
-						? (t) => {
-								return buildStatusFilter(t.duration, statuses);
-							}
+						? (t) => buildStatusFilter(t.duration, statuses)
 						: undefined,
 			},
 			columns: {

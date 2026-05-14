@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-restricted-imports */
-
 import { createNavigation } from "next-intl/navigation";
 import type { ComponentProps, ReactNode } from "react";
 

@@ -10,24 +10,24 @@ import {
 import {
 	type ResourceDocument,
 	type ResourceFacetField,
-	resourcesCollection,
 	type ResourceSearchResult,
 	type SearchResourcesParams,
+	resourcesCollection,
 } from "./collections/resources";
 import {
 	type SearchWebsiteParams,
-	websiteCollection,
 	type WebsiteDocument,
 	type WebsiteFacetField,
 	type WebsiteSearchResult,
+	websiteCollection,
 } from "./collections/website";
 import { SearchError } from "./errors";
 import {
-	mapFacets,
 	type SearchCollectionParams,
 	type SearchResult,
-	serializeSort,
 	type TypesenseFacetCount,
+	mapFacets,
+	serializeSort,
 } from "./search";
 
 export type {
@@ -145,9 +145,7 @@ function mapSearchResponse<Document extends object, FacetField extends string>(
 				return {
 					document,
 					highlight: Object.fromEntries(
-						highlights.map(({ field, snippet }) => {
-							return [field, snippet ?? ""];
-						}),
+						highlights.map(({ field, snippet }) => [field, snippet ?? ""]),
 					) as Partial<Record<keyof Document, string>>,
 				};
 			}) ?? [],

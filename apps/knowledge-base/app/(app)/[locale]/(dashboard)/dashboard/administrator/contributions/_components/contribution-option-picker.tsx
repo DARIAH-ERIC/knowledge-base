@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@dariah-eric/ui/button";
-import { fieldErrorStyles, fieldStyles, Label } from "@dariah-eric/ui/field";
+import { Label, fieldErrorStyles, fieldStyles } from "@dariah-eric/ui/field";
 import { ListBox, ListBoxItem } from "@dariah-eric/ui/list-box";
 import { Popover, PopoverContent } from "@dariah-eric/ui/popover";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
@@ -118,7 +118,7 @@ export function ContributionOptionPicker(
 
 			<Popover isOpen={isOpen} onOpenChange={handleOpenChange}>
 				<Button
-					className="w-full justify-between font-normal"
+					className="inline-full justify-between font-normal"
 					intent="outline"
 					isDisabled={isDisabled}
 					type="button"
@@ -126,10 +126,10 @@ export function ContributionOptionPicker(
 					<span className={selectedItem == null ? "text-muted-fg" : undefined}>
 						{selectedItem?.name ?? placeholder}
 					</span>
-					<ChevronUpDownIcon className="size-4 text-muted-fg" />
+					<ChevronUpDownIcon className="block-4 inline-4 text-muted-fg" />
 				</Button>
 
-				<PopoverContent className="w-(--trigger-width) p-3">
+				<PopoverContent className="inline-(--trigger-width) p-3">
 					<div className="flex flex-col gap-3">
 						<div className="flex gap-2">
 							<SearchField className="flex-1" onChange={setSearchText} value={searchText}>
@@ -157,9 +157,7 @@ export function ContributionOptionPicker(
 								aria-label={label}
 								items={displayedItems}
 								onAction={(key) => {
-									const item = displayedItems.find((entry) => {
-										return entry.id === key;
-									});
+									const item = displayedItems.find((entry) => entry.id === key);
 
 									if (item == null) {
 										return;
@@ -171,9 +169,7 @@ export function ContributionOptionPicker(
 								selectedKeys={selectedItem != null ? new Set([selectedItem.id]) : new Set()}
 								selectionMode="single"
 							>
-								{(item) => {
-									return <ListBoxItem id={item.id}>{item.name}</ListBoxItem>;
-								}}
+								{(item) => <ListBoxItem id={item.id}>{item.name}</ListBoxItem>}
 							</ListBox>
 						) : (
 							<p className="py-3 text-center text-muted-fg text-sm">{emptyMessage}</p>

@@ -38,7 +38,7 @@ export function ResetPasswordForm(): ReactNode {
 				<Input />
 			</TextField>
 
-			<SubmitButton className="mt-2">{t("Reset password")}</SubmitButton>
+			<SubmitButton className="mbs-2">{t("Reset password")}</SubmitButton>
 		</Form>
 	);
 }

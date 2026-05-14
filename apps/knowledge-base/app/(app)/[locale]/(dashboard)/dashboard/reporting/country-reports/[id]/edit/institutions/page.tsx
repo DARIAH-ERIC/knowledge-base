@@ -38,8 +38,7 @@ export default async function DashboardReportingCountryReportInstitutionsPage(
 	const result = await getAuthorizedCountryReportForUser(
 		user,
 		id,
-		(id) => {
-			return db.query.countryReports.findFirst({
+		(id) => db.query.countryReports.findFirst({
 				where: { id },
 				columns: { id: true },
 				with: {
@@ -52,8 +51,7 @@ export default async function DashboardReportingCountryReportInstitutionsPage(
 						},
 					},
 				},
-			});
-		},
+			}),
 		"update",
 	);
 
@@ -66,9 +64,7 @@ export default async function DashboardReportingCountryReportInstitutionsPage(
 	}
 
 	const { year } = report.campaign;
-	const claimedOrgUnitIds = report.institutions.map((i) => {
-		return i.organisationalUnitId;
-	});
+	const claimedOrgUnitIds = report.institutions.map((i) => i.organisationalUnitId);
 
 	const availableInstitutions = await db
 		.selectDistinct({

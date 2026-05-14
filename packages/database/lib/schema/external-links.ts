@@ -9,18 +9,14 @@ export const externalLinks = p.snakeCase.table("external_links", {
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(() => {
-			return entityVersions.id;
-		}),
+		.references(() => entityVersions.id),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
 	url: p.text("url").notNull(),
 	imageId: p
 		.uuid("image_id")
 		.notNull()
-		.references(() => {
-			return assets.id;
-		}),
+		.references(() => assets.id),
 	...f.timestamps(),
 });
 

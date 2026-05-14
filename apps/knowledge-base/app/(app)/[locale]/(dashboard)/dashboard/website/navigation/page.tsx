@@ -44,15 +44,9 @@ export default async function DashboardWebsiteNavigationPage(
 	]);
 
 	const entityTitleMap = new Map<string, { title: string; type: EntityOption["type"] }>([
-		...pages.map((e): [string, { title: string; type: EntityOption["type"] }] => {
-			return [e.id, { title: e.title, type: "page" }];
-		}),
-		...spotlightArticles.map((e): [string, { title: string; type: EntityOption["type"] }] => {
-			return [e.id, { title: e.title, type: "spotlight" }];
-		}),
-		...impactCaseStudies.map((e): [string, { title: string; type: EntityOption["type"] }] => {
-			return [e.id, { title: e.title, type: "impact-case-study" }];
-		}),
+		...pages.map((e): [string, { title: string; type: EntityOption["type"] }] => [e.id, { title: e.title, type: "page" }]),
+		...spotlightArticles.map((e): [string, { title: string; type: EntityOption["type"] }] => [e.id, { title: e.title, type: "spotlight" }]),
+		...impactCaseStudies.map((e): [string, { title: string; type: EntityOption["type"] }] => [e.id, { title: e.title, type: "impact-case-study" }]),
 	]);
 
 	const menusWithItems = menus.map((menu) => {

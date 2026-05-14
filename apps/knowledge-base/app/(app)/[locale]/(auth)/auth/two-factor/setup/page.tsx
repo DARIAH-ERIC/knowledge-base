@@ -58,9 +58,9 @@ export default async function TwoFactorSetupPage(
 	const qrcode = renderSVG(uri);
 
 	return (
-		<Main className="min-h-full p-6 items-center justify-center flex flex-col">
-			<div className="w-full max-w-sm flex flex-col gap-y-4">
-				<Link aria-label={t("Home")} className="mb-2 rounded-xs self-start inline-block" href="/">
+		<Main className="min-block-full p-6 items-center justify-center flex flex-col">
+			<div className="inline-full max-inline-sm flex flex-col gap-y-4">
+				<Link aria-label={t("Home")} className="mbe-2 rounded-xs self-start inline-block" href="/">
 					<Avatar
 						className="dark:invert"
 						isSquare={true}
@@ -75,7 +75,7 @@ export default async function TwoFactorSetupPage(
 
 				<div className="flex flex-col gap-y-4">
 					{/* eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml */}
-					<div className="size-48" dangerouslySetInnerHTML={{ __html: qrcode }} />
+					<div className="block-48 inline-48" dangerouslySetInnerHTML={{ __html: qrcode }} />
 
 					<TwoFactorSetUpForm encodedTotpKey={key} />
 				</div>

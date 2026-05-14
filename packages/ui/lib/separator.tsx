@@ -17,7 +17,7 @@ export function Separator(props: Readonly<SeparatorProps>): ReactNode {
 			{...rest}
 			className={twMerge(
 				"shrink-0 bg-border forced-colors:bg-[ButtonBorder]",
-				orientation === "horizontal" ? "h-px w-full" : "h-full w-px",
+				orientation === "horizontal" ? "block-px inline-full" : "block-full inline-px",
 				className,
 			)}
 		/>

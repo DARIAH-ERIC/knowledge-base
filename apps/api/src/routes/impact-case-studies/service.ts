@@ -111,9 +111,7 @@ async function getContributors(db: Database | Transaction, impactCaseStudyId: st
 
 	const positions = await getPersonPositions(
 		db,
-		rows.map((row) => {
-			return row.id;
-		}),
+		rows.map((row) => row.id),
 	);
 
 	return rows.map(({ imageKey, ...row }) => {

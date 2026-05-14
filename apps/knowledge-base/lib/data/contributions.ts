@@ -345,13 +345,11 @@ export async function getContributionOptions() {
 			),
 		);
 
-	if (allowedCombos.length === 0) return [];
+	if (allowedCombos.length === 0) {return [];}
 
 	const unitTypeIds = [
 		...new Set(
-			allowedCombos.map((c) => {
-				return c.unitTypeId;
-			}),
+			allowedCombos.map((c) => c.unitTypeId),
 		),
 	];
 
@@ -383,9 +381,7 @@ export async function getContributionOptions() {
 		for (const unit of orgUnits) {
 			if (
 				unit.typeId === combo.unitTypeId &&
-				!entry.availableUnits.some((u) => {
-					return u.id === unit.id;
-				})
+				!entry.availableUnits.some((u) => u.id === unit.id)
 			) {
 				entry.availableUnits.push({ id: unit.id, name: unit.name });
 			}
@@ -395,9 +391,7 @@ export async function getContributionOptions() {
 	return Array.from(byRole.values()).map((entry) => {
 		return {
 			...entry,
-			availableUnits: entry.availableUnits.sort((a, b) => {
-				return a.name.localeCompare(b.name);
-			}),
+			availableUnits: entry.availableUnits.toSorted((a, b) => a.name.localeCompare(b.name)),
 		};
 	});
 }

@@ -21,7 +21,7 @@ export async function moveNavigationItemAction(
 			columns: { id: true, position: true, menuId: true, parentId: true },
 		});
 
-		if (item == null) return;
+		if (item == null) {return;}
 
 		const siblings = await tx
 			.select({ id: schema.navigationItems.id, position: schema.navigationItems.position })
@@ -36,15 +36,13 @@ export async function moveNavigationItemAction(
 			)
 			.orderBy(schema.navigationItems.position);
 
-		const currentIndex = siblings.findIndex((s) => {
-			return s.id === id;
-		});
+		const currentIndex = siblings.findIndex((s) => s.id === id);
 		const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
 
-		if (targetIndex < 0 || targetIndex >= siblings.length) return;
+		if (targetIndex < 0 || targetIndex >= siblings.length) {return;}
 
 		const target = siblings[targetIndex];
-		if (target == null) return;
+		if (target == null) {return;}
 
 		await tx
 			.update(schema.navigationItems)

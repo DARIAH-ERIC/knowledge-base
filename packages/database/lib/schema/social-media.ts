@@ -25,9 +25,7 @@ export const socialMediaTypes = p.snakeCase.table(
 		type: p.text("type", { enum: socialMediaTypesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [p.check("social_media_types_type_enum_check", inArray(t.type, socialMediaTypesEnum))];
-	},
+	(t) => [p.check("social_media_types_type_enum_check", inArray(t.type, socialMediaTypesEnum))],
 );
 
 export type SocialMediaType = typeof socialMediaTypes.$inferSelect;
@@ -45,9 +43,7 @@ export const socialMedia = p.snakeCase.table("social_media", {
 	typeId: p
 		.uuid("type_id")
 		.notNull()
-		.references(() => {
-			return socialMediaTypes.id;
-		}),
+		.references(() => socialMediaTypes.id),
 	...f.timestamps(),
 });
 

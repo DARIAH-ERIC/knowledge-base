@@ -7,7 +7,7 @@ import { flattenEntityVersion } from "@/lib/entity-version";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
-import { and, count, eq, exists, not, sql, type SQLWrapper } from "@/services/db/sql";
+import { type SQLWrapper, and, count, eq, exists, not, sql } from "@/services/db/sql";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
@@ -69,9 +69,7 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 				},
 				RAW:
 					status != null
-						? (t) => {
-								return buildStatusFilter(db, t.id, status);
-							}
+						? (t) => buildStatusFilter(db, t.id, status)
 						: undefined,
 			},
 			columns: {
@@ -196,9 +194,7 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 
 	const positions = await getPersonPositions(
 		db,
-		rows.map((row) => {
-			return row.id;
-		}),
+		rows.map((row) => row.id),
 	);
 
 	return rows.map(({ imageKey, roleType, ...row }) => {

@@ -8,12 +8,8 @@ export function createCampusResource(item: DariahCampusResource): ResourceDocume
 	const source = "dariah-campus" as const;
 	const sourceId = item.id;
 	const id = [source, sourceId].join(":");
-	const authors = [...item.authors, ...item.editors].map((person) => {
-		return person.name;
-	});
-	const keywords = item.tags.map((tag) => {
-		return tag.name;
-	});
+	const authors = [...item.authors, ...item.editors].map((person) => person.name);
+	const keywords = item.tags.map((tag) => tag.name);
 	const year = isNonEmptyString(item["publication-date"])
 		? new Date(item["publication-date"]).getFullYear()
 		: null;
@@ -46,12 +42,8 @@ export function createCampusCurriculum(item: DariahCampusCurriculum): ResourceDo
 	const source = "dariah-campus" as const;
 	const sourceId = item.id;
 	const id = [source, sourceId].join(":");
-	const authors = item.editors.map((person) => {
-		return person.name;
-	});
-	const keywords = item.tags.map((tag) => {
-		return tag.name;
-	});
+	const authors = item.editors.map((person) => person.name);
+	const keywords = item.tags.map((tag) => tag.name);
 	const year = isNonEmptyString(item["publication-date"])
 		? new Date(item["publication-date"]).getFullYear()
 		: null;

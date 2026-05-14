@@ -3,7 +3,7 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
-import { FieldError, fieldErrorStyles, Label } from "@dariah-eric/ui/field";
+import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
@@ -91,13 +91,11 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 					<FieldError />
 					<SelectContent>
 						<SelectItem id="none">{t("None")}</SelectItem>
-						{groups.map((group) => {
-							return (
+						{groups.map((group) => (
 								<SelectItem key={group.id} id={group.id}>
 									{group.label}
 								</SelectItem>
-							);
-						})}
+							))}
 					</SelectContent>
 				</Select>
 				{selectedGroupId ? <input name="groupId" type="hidden" value={selectedGroupId} /> : null}
@@ -113,9 +111,7 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 					defaultPrefix="documents"
 					initialAssets={initialAssets}
 					onSelect={(key, _url) => {
-						const asset = initialAssets.find((a) => {
-							return a.key === key;
-						});
+						const asset = initialAssets.find((a) => a.key === key);
 						setSelectedDocument({ key, label: asset?.label ?? key });
 					}}
 					prefixes={["documents"]}

@@ -20,7 +20,7 @@ export const Default: Story = {
 	args: {},
 	render(props) {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<TextField {...props}>
 					<Label>{"Email"}</Label>
 					<Input placeholder={"you@example.com"} type="email" />
@@ -34,7 +34,7 @@ export const WithDescription: Story = {
 	args: {},
 	render(props) {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<TextField {...props}>
 					<Label>{"Email"}</Label>
 					<Input placeholder={"you@example.com"} type="email" />
@@ -49,7 +49,7 @@ export const Required: Story = {
 	args: { isRequired: true },
 	render(props) {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<TextField {...props}>
 					<Label>{"Username"}</Label>
 					<Input placeholder={"Enter username"} />
@@ -64,7 +64,7 @@ export const Disabled: Story = {
 	args: { isDisabled: true, defaultValue: "john.doe" },
 	render(props) {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<TextField {...props}>
 					<Label>{"Username"}</Label>
 					<Input />

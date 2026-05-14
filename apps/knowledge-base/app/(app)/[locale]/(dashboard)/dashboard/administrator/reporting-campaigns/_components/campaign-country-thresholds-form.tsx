@@ -39,10 +39,7 @@ export function CampaignCountryThresholdsForm(
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
 	const thresholdMap = Object.fromEntries(
-		thresholds.map((th) => {
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-			return [th.countryId, th.amount != null ? String(th.amount) : undefined];
-		}),
+		thresholds.map((th) => [th.countryId, th.amount != null ? String(th.amount) : undefined]),
 	);
 
 	return (
@@ -51,8 +48,7 @@ export function CampaignCountryThresholdsForm(
 				<input name="id" type="hidden" value={campaignId} />
 
 				<FormSection title={t("Country thresholds")}>
-					{countries.map((country) => {
-						return (
+					{countries.map((country) => (
 							<TextField
 								key={country.id}
 								defaultValue={thresholdMap[country.id]}
@@ -63,8 +59,7 @@ export function CampaignCountryThresholdsForm(
 								<Input min={0} step="0.01" />
 								<FieldError />
 							</TextField>
-						);
-					})}
+						))}
 				</FormSection>
 
 				<Button className="self-start" isPending={isPending} type="submit">

@@ -69,13 +69,13 @@ export default async function DashboardReportingWorkingGroupReportPage(
 						intent="secondary"
 						size="sm"
 					>
-						<ArrowDownTrayIcon className="mr-2 size-4" />
+						<ArrowDownTrayIcon className="me-2 block-4 inline-4" />
 						{t("Download JSON")}
 					</ButtonLink>
 				</HeaderAction>
 			</Header>
 
-			<div className="px-(--layout-padding) pt-6">
+			<div className="px-(--layout-padding) pbs-6">
 				<WorkingGroupReportSummary data={report.summary} />
 			</div>
 		</div>

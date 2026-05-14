@@ -104,9 +104,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	);
 
 	await Promise.all(
-		items.map((item) => {
-			return seedContentBlock(db, item.version.id, type.id, "content");
-		}),
+		items.map((item) => seedContentBlock(db, item.version.id, type.id, "content")),
 	);
 }
 
@@ -342,27 +340,17 @@ describe("events", () => {
 
 				// Default order for from-anchored queries is asc: soonest event first.
 				// Verify the entire result set is sorted ascending by start date.
-				const starts = data.data.map((e) => {
-					return e.duration.start;
-				});
+				const starts = data.data.map((e) => e.duration.start);
 				expect(
-					starts.every((s, i) => {
-						return i === 0 || s >= starts[i - 1]!;
-					}),
+					starts.every((s, i) => i === 0 || s >= starts[i - 1]!),
 				).toBe(true);
 
 				// Verify our four upcoming events all appear and are in the right relative order.
-				const titles = data.data.map((e) => {
-					return e.title;
-				});
-				const positions = [t.upcoming1, t.upcoming2, t.upcoming3, t.upcoming4].map((e) => {
-					return titles.indexOf(e.event.title);
-				});
+				const titles = data.data.map((e) => e.title);
+				const positions = [t.upcoming1, t.upcoming2, t.upcoming3, t.upcoming4].map((e) => titles.indexOf(e.event.title));
 
 				expect(
-					positions.every((p) => {
-						return p !== -1;
-					}),
+					positions.every((p) => p !== -1),
 				).toBe(true);
 				expect(positions[0]).toBeLessThan(positions[1]!);
 				expect(positions[1]).toBeLessThan(positions[2]!);
@@ -397,21 +385,15 @@ describe("events", () => {
 
 				// Pages must not overlap.
 				const ids1 = new Set(
-					page1.data.map((e) => {
-						return e.id;
-					}),
+					page1.data.map((e) => e.id),
 				);
 				expect(
-					page2.data.every((e) => {
-						return !ids1.has(e.id);
-					}),
+					page2.data.every((e) => !ids1.has(e.id)),
 				).toBe(true);
 
 				// All four upcoming events must appear across both pages.
 				const allIds = new Set(
-					[...page1.data, ...page2.data].map((e) => {
-						return e.id;
-					}),
+					[...page1.data, ...page2.data].map((e) => e.id),
 				);
 				for (const event of [t.upcoming1, t.upcoming2, t.upcoming3, t.upcoming4]) {
 					expect(allIds.has(event.version.id)).toBe(true);
@@ -442,9 +424,7 @@ describe("events", () => {
 					]),
 				);
 
-				const titles = data.data.map((e) => {
-					return e.title;
-				});
+				const titles = data.data.map((e) => e.title);
 				expect(titles.indexOf(t.past2.event.title)).toBeLessThan(
 					titles.indexOf(t.past1.event.title),
 				);
@@ -505,9 +485,7 @@ describe("events", () => {
 				);
 
 				// Default order for from-anchored queries is asc: cross-month event (Feb 25) before in-March event (Mar 12).
-				const titles = data.data.map((e) => {
-					return e.title;
-				});
+				const titles = data.data.map((e) => e.title);
 				expect(titles.indexOf(c.crossMonth.event.title)).toBeLessThan(
 					titles.indexOf(c.inMarch.event.title),
 				);
@@ -769,14 +747,10 @@ describe("events", () => {
 
 				// No overlap between pages.
 				const page1Ids = new Set(
-					page1Data.data.map((e) => {
-						return e.id;
-					}),
+					page1Data.data.map((e) => e.id),
 				);
 				expect(
-					page2Data.data.every((e) => {
-						return !page1Ids.has(e.id);
-					}),
+					page2Data.data.every((e) => !page1Ids.has(e.id)),
 				).toBe(true);
 			});
 		});
@@ -872,26 +846,20 @@ describe("events", () => {
 				]);
 
 				const payloads = await Promise.all(
-					responses.map((r) => {
-						return r.json();
-					}),
+					responses.map((r) => r.json()),
 				);
 
 				// Sort IDs the same way the (lower, id::text) tuple cursor does,
 				// so we can assert that adjacency within the same-timestamp group is correct.
 				// eslint-disable-next-line unicorn/no-array-sort
 				const [firstId, middleId, lastId] = [a.version.id, b.version.id, c.version.id].sort(
-					(x, y) => {
-						return x.localeCompare(y);
-					},
+					(x, y) => x.localeCompare(y),
 				);
 
 				assert(firstId != null && middleId != null && lastId != null);
 
 				const findPayload = (id: string) => {
-					const p = payloads.find((payload) => {
-						return "id" in payload && payload.id === id;
-					});
+					const p = payloads.find((payload) => "id" in payload && payload.id === id);
 					assert(p != null && "links" in p);
 					return p;
 				};

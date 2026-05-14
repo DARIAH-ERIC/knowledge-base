@@ -54,7 +54,7 @@ export default async function DashboardReportingCountryReportConfirmPage(
 		<div className="flex flex-col gap-y-10">
 			<CountryReportSummary data={report.summary} />
 
-			<div className="border-t pt-6 flex flex-col gap-y-4">
+			<div className="border-bs pbs-6 flex flex-col gap-y-4">
 				<div className="space-y-1">
 					<p className="text-sm font-medium text-fg">{t("Status")}</p>
 					<p className="text-sm text-muted-fg">{formatStatus(report.status)}</p>
@@ -85,7 +85,7 @@ export default async function DashboardReportingCountryReportConfirmPage(
 						intent="plain"
 						size="sm"
 					>
-						<ArrowDownTrayIcon className="mr-2 size-4" />
+						<ArrowDownTrayIcon className="me-2 block-4 inline-4" />
 						{t("Download JSON")}
 					</ButtonLink>
 				</div>

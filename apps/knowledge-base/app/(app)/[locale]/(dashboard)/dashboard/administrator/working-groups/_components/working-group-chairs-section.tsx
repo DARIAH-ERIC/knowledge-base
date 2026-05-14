@@ -78,17 +78,13 @@ export function WorkingGroupChairsSection(
 	const t = useExtracted();
 	const format = useFormatter();
 
-	const [localChairs, setLocalChairs] = useState(() => {
-		return chairs;
-	});
+	const [localChairs, setLocalChairs] = useState(() => chairs);
 	const [itemToEnd, setItemToEnd] = useState<{ id: string } | null>(null);
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
 
 	const [selectedPerson, setSelectedPerson] = useState<AvailablePerson | null>(null);
 
-	const [state, setState] = useState<ActionState>(() => {
-		return createActionStateInitial();
-	});
+	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
 	const [isPending, startFormTransition] = useTransition();
 
 	function formAction(formData: FormData) {
@@ -104,8 +100,7 @@ export function WorkingGroupChairsSection(
 					| undefined;
 
 				if (data != null) {
-					setLocalChairs((prev) => {
-						return [
+					setLocalChairs((prev) => [
 							...prev,
 							{
 								id: data.id,
@@ -116,8 +111,7 @@ export function WorkingGroupChairsSection(
 									...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
 								},
 							},
-						];
-					});
+						]);
 				}
 
 				setSelectedPerson(null);
@@ -129,7 +123,7 @@ export function WorkingGroupChairsSection(
 		<Fragment>
 			<Separator className="my-8" />
 
-			<div className="max-w-3xl space-y-6">
+			<div className="max-inline-3xl space-y-6">
 				<div className="space-y-1">
 					<FormSectionTitle title={t("Chairs")} />
 				</div>
@@ -143,8 +137,7 @@ export function WorkingGroupChairsSection(
 							<TableColumn />
 						</TableHeader>
 						<TableBody items={localChairs}>
-							{(chair) => {
-								return (
+							{(chair) => (
 									<TableRow id={chair.id}>
 										<TableCell>{chair.personName}</TableCell>
 										<TableCell>
@@ -159,7 +152,7 @@ export function WorkingGroupChairsSection(
 											{chair.duration.end == null && (
 												<Button
 													aria-label={t("End chairship")}
-													className="h-7 sm:h-7"
+													className="block-7 sm:block-7"
 													intent="plain"
 													onPress={() => {
 														setItemToEnd({ id: chair.id });
@@ -167,13 +160,12 @@ export function WorkingGroupChairsSection(
 													}}
 													size="sq-sm"
 												>
-													<ArchiveBoxXMarkIcon className="size-4" />
+													<ArchiveBoxXMarkIcon className="block-4 inline-4" />
 												</Button>
 											)}
 										</TableCell>
 									</TableRow>
-								);
-							}}
+								)}
 						</TableBody>
 					</Table>
 				) : (
@@ -236,7 +228,7 @@ export function WorkingGroupChairsSection(
 			<ModalContent
 				isOpen={itemToEnd != null}
 				onOpenChange={(open) => {
-					if (!open) setItemToEnd(null);
+					if (!open) {setItemToEnd(null);}
 				}}
 				role="alertdialog"
 				size="sm"
@@ -262,17 +254,13 @@ export function WorkingGroupChairsSection(
 					<Button
 						isDisabled={selectedEndDate == null}
 						onPress={() => {
-							if (itemToEnd == null || selectedEndDate == null) return;
+							if (itemToEnd == null || selectedEndDate == null) {return;}
 
 							const end = selectedEndDate.toDate(getLocalTimeZone());
 
 							startTransition(async () => {
 								await endWorkingGroupChairAction(itemToEnd.id, end);
-								setLocalChairs((prev) => {
-									return prev.map((c) => {
-										return c.id === itemToEnd.id ? { ...c, duration: { ...c.duration, end } } : c;
-									});
-								});
+								setLocalChairs((prev) => prev.map((c) => c.id === itemToEnd.id ? { ...c, duration: { ...c.duration, end } } : c));
 								setItemToEnd(null);
 							});
 						}}

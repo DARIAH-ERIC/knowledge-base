@@ -63,9 +63,7 @@ export const createContributionAction = createServerAction(
 				),
 			)
 			.limit(1)
-			.then((rows) => {
-				return rows[0] ?? null;
-			});
+			.then((rows) => rows[0] ?? null);
 
 		if (allowedRelation == null) {
 			return createActionStateError({
@@ -89,9 +87,7 @@ export const createContributionAction = createServerAction(
 			.insert(schema.personsToOrganisationalUnits)
 			.values({ personId, organisationalUnitId, roleTypeId, duration })
 			.returning({ id: schema.personsToOrganisationalUnits.id })
-			.then((rows) => {
-				return rows[0]!;
-			});
+			.then((rows) => rows[0]!);
 
 		revalidatePath("/[locale]/dashboard/administrator", "layout");
 

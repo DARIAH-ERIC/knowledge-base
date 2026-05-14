@@ -5,8 +5,8 @@ import { createRouter } from "@/lib/factory";
 import { resolver } from "@/lib/openapi/resolver";
 import { BAD_REQUEST, NOT_FOUND } from "@/lib/openapi/responses";
 import { validate, validator } from "@/lib/openapi/validator";
-import { GetPageById, GetPageBySlug, GetPages, GetPageSlugs } from "@/routes/pages/schemas";
-import { getPageById, getPageBySlug, getPages, getPageSlugs } from "@/routes/pages/service";
+import { GetPageById, GetPageBySlug, GetPageSlugs, GetPages } from "@/routes/pages/schemas";
+import { getPageById, getPageBySlug, getPageSlugs, getPages } from "@/routes/pages/service";
 
 export const router = createRouter()
 	/** GET /api/pages */

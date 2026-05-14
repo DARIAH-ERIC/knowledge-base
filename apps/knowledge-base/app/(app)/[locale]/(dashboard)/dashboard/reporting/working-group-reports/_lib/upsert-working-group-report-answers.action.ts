@@ -20,10 +20,10 @@ const UpsertWorkingGroupReportAnswersSchema = v.object({
 });
 
 export async function upsertWorkingGroupReportAnswersAction(formData: FormData): Promise<void> {
-	if (!(await globalPostRequestRateLimit())) return;
+	if (!(await globalPostRequestRateLimit())) {return;}
 
 	const result = v.safeParse(UpsertWorkingGroupReportAnswersSchema, getFormDataValues(formData));
-	if (!result.success) return;
+	if (!result.success) {return;}
 
 	const { id: reportId, answers } = result.output;
 

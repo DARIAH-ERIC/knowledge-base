@@ -21,14 +21,12 @@ export const reportingCampaigns = p.snakeCase.table(
 		status: p.text("status", { enum: reportingCampaignStatusEnum }).notNull().default("draft"),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [
+	(t) => [
 			p.check(
 				"reporting_campaigns_status_enum_check",
 				inArray(t.status, reportingCampaignStatusEnum),
 			),
-		];
-	},
+		],
 );
 
 export type ReportingCampaign = typeof reportingCampaigns.$inferSelect;
@@ -61,15 +59,11 @@ export const countryReports = p.snakeCase.table(
 		campaignId: p
 			.uuid("campaign_id")
 			.notNull()
-			.references(() => {
-				return reportingCampaigns.id;
-			}),
+			.references(() => reportingCampaigns.id),
 		countryId: p
 			.uuid("country_id")
 			.notNull()
-			.references(() => {
-				return organisationalUnits.id;
-			}),
+			.references(() => organisationalUnits.id),
 		status: p.text("status", { enum: reportStatusEnum }).notNull().default("draft"),
 		totalContributors: p.integer("total_contributors"),
 		smallEvents: p.integer("small_events"),
@@ -80,12 +74,10 @@ export const countryReports = p.snakeCase.table(
 		reusableOutcomes: p.text("reusable_outcomes"),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [
+	(t) => [
 			p.unique("country_reports_campaign_id_country_id_unique").on(t.campaignId, t.countryId),
 			p.check("country_reports_status_enum_check", inArray(t.status, reportStatusEnum)),
-		];
-	},
+		],
 );
 
 export type CountryReport = typeof countryReports.$inferSelect;
@@ -102,28 +94,22 @@ export const workingGroupReports = p.snakeCase.table(
 		campaignId: p
 			.uuid("campaign_id")
 			.notNull()
-			.references(() => {
-				return reportingCampaigns.id;
-			}),
+			.references(() => reportingCampaigns.id),
 		workingGroupId: p
 			.uuid("working_group_id")
 			.notNull()
-			.references(() => {
-				return organisationalUnits.id;
-			}),
+			.references(() => organisationalUnits.id),
 		status: p.text("status", { enum: reportStatusEnum }).notNull().default("draft"),
 		numberOfMembers: p.integer("number_of_members"),
 		mailingList: p.text("mailing_list"),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [
+	(t) => [
 			p
 				.unique("working_group_reports_campaign_id_working_group_id_unique")
 				.on(t.campaignId, t.workingGroupId),
 			p.check("working_group_reports_status_enum_check", inArray(t.status, reportStatusEnum)),
-		];
-	},
+		],
 );
 
 export type WorkingGroupReport = typeof workingGroupReports.$inferSelect;
@@ -143,8 +129,7 @@ export const reportScreenComments = p.snakeCase.table(
 		comment: p.jsonb("comment").$type<JSONContent>(),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [
+	(t) => [
 			p
 				.unique("report_screen_comments_report_type_report_id_screen_key_unique")
 				.on(t.reportType, t.reportId, t.screenKey),
@@ -156,8 +141,7 @@ export const reportScreenComments = p.snakeCase.table(
 				"report_screen_comments_screen_key_enum_check",
 				inArray(t.screenKey, reportScreenCommentKeyEnum),
 			),
-		];
-	},
+		],
 );
 
 export type ReportScreenComment = typeof reportScreenComments.$inferSelect;
@@ -174,19 +158,13 @@ export const countryReportContributions = p.snakeCase.table(
 		countryReportId: p
 			.uuid("country_report_id")
 			.notNull()
-			.references(() => {
-				return countryReports.id;
-			}),
+			.references(() => countryReports.id),
 		personToOrgUnitId: p
 			.uuid("person_to_org_unit_id")
 			.notNull()
-			.references(() => {
-				return personsToOrganisationalUnits.id;
-			}),
+			.references(() => personsToOrganisationalUnits.id),
 	},
-	(t) => {
-		return [p.unique().on(t.countryReportId, t.personToOrgUnitId)];
-	},
+	(t) => [p.unique().on(t.countryReportId, t.personToOrgUnitId)],
 );
 
 export type CountryReportContribution = typeof countryReportContributions.$inferSelect;
@@ -218,27 +196,21 @@ export const countryReportSocialMediaKpis = p.snakeCase.table(
 		countryReportId: p
 			.uuid("country_report_id")
 			.notNull()
-			.references(() => {
-				return countryReports.id;
-			}),
+			.references(() => countryReports.id),
 		socialMediaId: p
 			.uuid("social_media_id")
 			.notNull()
-			.references(() => {
-				return socialMedia.id;
-			}),
+			.references(() => socialMedia.id),
 		kpi: p.text("kpi", { enum: socialMediaKpiCategoryEnum }).notNull(),
 		value: p.integer("value").notNull(),
 	},
-	(t) => {
-		return [
+	(t) => [
 			p.unique().on(t.countryReportId, t.socialMediaId, t.kpi),
 			p.check(
 				"country_report_social_media_kpis_kpi_enum_check",
 				inArray(t.kpi, socialMediaKpiCategoryEnum),
 			),
-		];
-	},
+		],
 );
 
 export type CountryReportSocialMediaKpi = typeof countryReportSocialMediaKpis.$inferSelect;
@@ -275,24 +247,18 @@ export const countryReportServiceKpis = p.snakeCase.table(
 		countryReportId: p
 			.uuid("country_report_id")
 			.notNull()
-			.references(() => {
-				return countryReports.id;
-			}),
+			.references(() => countryReports.id),
 		serviceId: p
 			.uuid("service_id")
 			.notNull()
-			.references(() => {
-				return services.id;
-			}),
+			.references(() => services.id),
 		kpi: p.text("kpi", { enum: serviceKpiCategoryEnum }).notNull(),
 		value: p.integer("value").notNull(),
 	},
-	(t) => {
-		return [
+	(t) => [
 			p.unique().on(t.countryReportId, t.serviceId, t.kpi),
 			p.check("country_report_service_kpis_kpi_enum_check", inArray(t.kpi, serviceKpiCategoryEnum)),
-		];
-	},
+		],
 );
 
 export type CountryReportServiceKpi = typeof countryReportServiceKpis.$inferSelect;
@@ -309,20 +275,14 @@ export const countryReportProjectContributions = p.snakeCase.table(
 		countryReportId: p
 			.uuid("country_report_id")
 			.notNull()
-			.references(() => {
-				return countryReports.id;
-			}),
+			.references(() => countryReports.id),
 		projectId: p
 			.uuid("project_id")
 			.notNull()
-			.references(() => {
-				return projects.id;
-			}),
+			.references(() => projects.id),
 		amountEuros: p.numeric("amount_euros", { mode: "number", precision: 12, scale: 2 }).notNull(),
 	},
-	(t) => {
-		return [p.unique().on(t.countryReportId, t.projectId)];
-	},
+	(t) => [p.unique().on(t.countryReportId, t.projectId)],
 );
 
 export type CountryReportProjectContribution =
@@ -347,19 +307,13 @@ export const countryReportInstitutions = p.snakeCase.table(
 		countryReportId: p
 			.uuid("country_report_id")
 			.notNull()
-			.references(() => {
-				return countryReports.id;
-			}),
+			.references(() => countryReports.id),
 		organisationalUnitId: p
 			.uuid("organisational_unit_id")
 			.notNull()
-			.references(() => {
-				return organisationalUnits.id;
-			}),
+			.references(() => organisationalUnits.id),
 	},
-	(t) => {
-		return [p.unique().on(t.countryReportId, t.organisationalUnitId)];
-	},
+	(t) => [p.unique().on(t.countryReportId, t.organisationalUnitId)],
 );
 
 export type CountryReportInstitution = typeof countryReportInstitutions.$inferSelect;
@@ -376,19 +330,13 @@ export const workingGroupReportSocialMedia = p.snakeCase.table(
 		workingGroupReportId: p
 			.uuid("working_group_report_id")
 			.notNull()
-			.references(() => {
-				return workingGroupReports.id;
-			}),
+			.references(() => workingGroupReports.id),
 		socialMediaId: p
 			.uuid("social_media_id")
 			.notNull()
-			.references(() => {
-				return socialMedia.id;
-			}),
+			.references(() => socialMedia.id),
 	},
-	(t) => {
-		return [p.unique().on(t.workingGroupReportId, t.socialMediaId)];
-	},
+	(t) => [p.unique().on(t.workingGroupReportId, t.socialMediaId)],
 );
 
 export type WorkingGroupReportSocialMedia = typeof workingGroupReportSocialMedia.$inferSelect;
@@ -411,9 +359,7 @@ export const workingGroupReportEvents = p.snakeCase.table("working_group_report_
 	workingGroupReportId: p
 		.uuid("working_group_report_id")
 		.notNull()
-		.references(() => {
-			return workingGroupReports.id;
-		}),
+		.references(() => workingGroupReports.id),
 	title: p.text("title").notNull(),
 	date: p.timestamp("date", { precision: 3 }).notNull(),
 	url: p.text("url"),
@@ -434,15 +380,11 @@ export const workingGroupReportQuestions = p.snakeCase.table(
 		campaignId: p
 			.uuid("campaign_id")
 			.notNull()
-			.references(() => {
-				return reportingCampaigns.id;
-			}),
+			.references(() => reportingCampaigns.id),
 		question: p.jsonb("question").$type<JSONContent>().notNull(),
 		position: p.integer("position").notNull(),
 	},
-	(t) => {
-		return [p.unique().on(t.campaignId, t.position)];
-	},
+	(t) => [p.unique().on(t.campaignId, t.position)],
 );
 
 export type WorkingGroupReportQuestion = typeof workingGroupReportQuestions.$inferSelect;
@@ -465,20 +407,14 @@ export const workingGroupReportAnswers = p.snakeCase.table(
 		workingGroupReportId: p
 			.uuid("working_group_report_id")
 			.notNull()
-			.references(() => {
-				return workingGroupReports.id;
-			}),
+			.references(() => workingGroupReports.id),
 		questionId: p
 			.uuid("question_id")
 			.notNull()
-			.references(() => {
-				return workingGroupReportQuestions.id;
-			}),
+			.references(() => workingGroupReportQuestions.id),
 		answer: p.jsonb("answer").$type<JSONContent>().notNull(),
 	},
-	(t) => {
-		return [p.unique().on(t.workingGroupReportId, t.questionId)];
-	},
+	(t) => [p.unique().on(t.workingGroupReportId, t.questionId)],
 );
 
 export type WorkingGroupReportAnswer = typeof workingGroupReportAnswers.$inferSelect;
@@ -502,21 +438,17 @@ export const reportingCampaignEventAmounts = p.snakeCase.table(
 		campaignId: p
 			.uuid("campaign_id")
 			.notNull()
-			.references(() => {
-				return reportingCampaigns.id;
-			}),
+			.references(() => reportingCampaigns.id),
 		eventType: p.text("event_type", { enum: reportingCampaignEventTypeEnum }).notNull(),
 		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
 	},
-	(t) => {
-		return [
+	(t) => [
 			p.unique().on(t.campaignId, t.eventType),
 			p.check(
 				"reporting_campaign_event_amounts_event_type_enum_check",
 				inArray(t.eventType, reportingCampaignEventTypeEnum),
 			),
-		];
-	},
+		],
 );
 
 export type ReportingCampaignEventAmount = typeof reportingCampaignEventAmounts.$inferSelect;
@@ -538,21 +470,17 @@ export const reportingCampaignSocialMediaAmounts = p.snakeCase.table(
 		campaignId: p
 			.uuid("campaign_id")
 			.notNull()
-			.references(() => {
-				return reportingCampaigns.id;
-			}),
+			.references(() => reportingCampaigns.id),
 		category: p.text("category", { enum: reportingCampaignSocialMediaCategoryEnum }).notNull(),
 		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
 	},
-	(t) => {
-		return [
+	(t) => [
 			p.unique().on(t.campaignId, t.category),
 			p.check(
 				"reporting_campaign_social_media_amounts_category_enum_check",
 				inArray(t.category, reportingCampaignSocialMediaCategoryEnum),
 			),
-		];
-	},
+		],
 );
 
 export type ReportingCampaignSocialMediaAmount =
@@ -583,21 +511,17 @@ export const reportingCampaignContributionAmounts = p.snakeCase.table(
 		campaignId: p
 			.uuid("campaign_id")
 			.notNull()
-			.references(() => {
-				return reportingCampaigns.id;
-			}),
+			.references(() => reportingCampaigns.id),
 		roleType: p.text("role_type", { enum: reportingCampaignContributionRoleEnum }).notNull(),
 		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
 	},
-	(t) => {
-		return [
+	(t) => [
 			p.unique().on(t.campaignId, t.roleType),
 			p.check(
 				"reporting_campaign_contribution_amounts_role_type_enum_check",
 				inArray(t.roleType, reportingCampaignContributionRoleEnum),
 			),
-		];
-	},
+		],
 );
 
 export type ReportingCampaignContributionAmount =
@@ -621,22 +545,18 @@ export const reportingCampaignServiceSizes = p.snakeCase.table(
 		campaignId: p
 			.uuid("campaign_id")
 			.notNull()
-			.references(() => {
-				return reportingCampaigns.id;
-			}),
+			.references(() => reportingCampaigns.id),
 		serviceSize: p.text("service_size", { enum: serviceSizeEnum }).notNull(),
 		visitsThreshold: p.integer("visits_threshold"),
 		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
 	},
-	(t) => {
-		return [
+	(t) => [
 			p.unique().on(t.campaignId, t.serviceSize),
 			p.check(
 				"reporting_campaign_service_sizes_service_size_enum_check",
 				inArray(t.serviceSize, serviceSizeEnum),
 			),
-		];
-	},
+		],
 );
 
 export type ReportingCampaignServiceSize = typeof reportingCampaignServiceSizes.$inferSelect;
@@ -656,20 +576,14 @@ export const reportingCampaignCountryThresholds = p.snakeCase.table(
 		campaignId: p
 			.uuid("campaign_id")
 			.notNull()
-			.references(() => {
-				return reportingCampaigns.id;
-			}),
+			.references(() => reportingCampaigns.id),
 		countryId: p
 			.uuid("country_id")
 			.notNull()
-			.references(() => {
-				return organisationalUnits.id;
-			}),
+			.references(() => organisationalUnits.id),
 		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
 	},
-	(t) => {
-		return [p.unique().on(t.campaignId, t.countryId)];
-	},
+	(t) => [p.unique().on(t.campaignId, t.countryId)],
 );
 
 export type ReportingCampaignCountryThreshold =

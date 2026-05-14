@@ -72,13 +72,11 @@ export function SocialMediaForm(props: Readonly<SocialMediaFormProps>): ReactNod
 						<SelectTrigger />
 						<FieldError />
 						<SelectContent>
-							{socialMediaTypesEnum.map((type) => {
-								return (
+							{socialMediaTypesEnum.map((type) => (
 									<SelectItem key={type} id={type}>
 										{formatType(type)}
 									</SelectItem>
-								);
-							})}
+								))}
 						</SelectContent>
 					</Select>
 					<input name="type" type="hidden" value={selectedType} />

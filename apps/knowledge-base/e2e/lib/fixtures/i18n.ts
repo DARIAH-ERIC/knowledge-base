@@ -2,7 +2,7 @@ import { keyBy } from "@acdh-oeaw/lib";
 import type { Page } from "@playwright/test";
 import { createFormatter, createTranslator } from "next-intl";
 
-import { defaultLocale, getIntlLanguage, type IntlLocale } from "@/lib/i18n/locales";
+import { type IntlLocale, defaultLocale, getIntlLanguage } from "@/lib/i18n/locales";
 import type metadataMessages from "@/messages/metadata/en/index.json";
 
 export interface I18n {
@@ -54,9 +54,7 @@ async function getIntlMessages(locale: IntlLocale): Promise<IntlMessages> {
 	]);
 
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-	const social = keyBy(metadata.social as SocialMedia, (item) => {
-		return item.kind;
-	});
+	const social = keyBy(metadata.social as SocialMedia, (item) => item.kind);
 
 	switch (language) {
 		// case "de": {

@@ -180,9 +180,7 @@ export async function getDariahProjects(
 		const { projectsToOrganisationalUnits, ...rest } = item;
 
 		const role =
-			projectsToOrganisationalUnits.find((r) => {
-				return r.unit.type.type === "eric";
-			})?.role.role ?? null;
+			projectsToOrganisationalUnits.find((r) => r.unit.type.type === "eric")?.role.role ?? null;
 
 		return {
 			...mapItem(rest, imageWidth.preview),
@@ -316,9 +314,7 @@ export async function getDariahProjectById(
 	const { projectsToOrganisationalUnits, ...rest } = item;
 
 	const participants = projectsToOrganisationalUnits
-		.filter((r) => {
-			return r.role.role === "participant";
-		})
+		.filter((r) => r.role.role === "participant")
 		.map((r) => {
 			return {
 				...r.unit,
@@ -330,9 +326,7 @@ export async function getDariahProjectById(
 		});
 
 	const coordinators = projectsToOrganisationalUnits
-		.filter((r) => {
-			return r.role.role === "coordinator";
-		})
+		.filter((r) => r.role.role === "coordinator")
 		.map((r) => {
 			return {
 				...r.unit,
@@ -535,9 +529,7 @@ export async function getDariahProjectBySlug(
 	const { projectsToOrganisationalUnits, ...rest } = item;
 
 	const participants = projectsToOrganisationalUnits
-		.filter((r) => {
-			return r.role.role === "participant";
-		})
+		.filter((r) => r.role.role === "participant")
 		.map((r) => {
 			return {
 				...r.unit,
@@ -549,9 +541,7 @@ export async function getDariahProjectBySlug(
 		});
 
 	const coordinators = projectsToOrganisationalUnits
-		.filter((r) => {
-			return r.role.role === "coordinator";
-		})
+		.filter((r) => r.role.role === "coordinator")
 		.map((r) => {
 			return {
 				...r.unit,

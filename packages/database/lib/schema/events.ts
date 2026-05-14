@@ -9,17 +9,13 @@ export const events = p.snakeCase.table("events", {
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(() => {
-			return entityVersions.id;
-		}),
+		.references(() => entityVersions.id),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
 	imageId: p
 		.uuid("image_id")
 		.notNull()
-		.references(() => {
-			return assets.id;
-		}),
+		.references(() => assets.id),
 	location: p.text("location").notNull(),
 	duration: f.timestampRange("duration").notNull(),
 	isFullDay: p.boolean("is_full_day").notNull().default(false),

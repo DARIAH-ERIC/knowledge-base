@@ -35,10 +35,10 @@ function isImageMimeType(mimeType?: string): boolean {
 
 function getFileExtension(storageKey?: string): string | null {
 	const filename = storageKey?.split("/").pop();
-	if (filename == null) return null;
+	if (filename == null) {return null;}
 
 	const ext = filename.split(".").pop();
-	if (ext == null || ext === filename) return null;
+	if (ext == null || ext === filename) {return null;}
 
 	return ext.toUpperCase();
 }
@@ -88,7 +88,7 @@ export function AssetPreview(props: Readonly<AssetPreviewProps>): ReactNode {
 			role="img"
 		>
 			<div className="flex flex-col items-center gap-2">
-				<FallbackIcon aria-hidden={true} className="size-8 shrink-0" />
+				<FallbackIcon aria-hidden={true} className="block-8 inline-8 shrink-0" />
 				<span
 					className={cn(
 						"rounded-full border border-border bg-bg px-2 py-0.5 font-medium text-[10px] tracking-wide",

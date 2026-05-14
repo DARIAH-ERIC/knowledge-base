@@ -177,16 +177,14 @@ export async function getSocialMediaOptionsByIds(ids: ReadonlyArray<string>) {
 		.where(inArray(schema.socialMedia.id, [...ids]));
 
 	const itemById = new Map(
-		rows.map((row) => {
-			return [
+		rows.map((row) => [
 				row.id,
 				{
 					description: `${row.type} · ${row.url}`,
 					id: row.id,
 					name: row.name,
 				},
-			] as const;
-		}),
+			] as const),
 	);
 
 	return ids.flatMap((id) => {

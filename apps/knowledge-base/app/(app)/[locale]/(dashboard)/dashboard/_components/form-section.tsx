@@ -1,5 +1,5 @@
 import { Description } from "@dariah-eric/ui/field";
-import { createContext, Fragment, type ReactNode, use } from "react";
+import { Fragment, type ReactNode, createContext, use } from "react";
 import { twMerge } from "tailwind-merge";
 
 type FormLayoutVariant = "two-column" | "stacked";
@@ -44,7 +44,7 @@ export function FormSection({
 
 	if (variant === "stacked") {
 		return (
-			<section className={twMerge("flex flex-col gap-y-6 max-w-3xl", className)} {...props}>
+			<section className={twMerge("flex flex-col gap-y-6 max-inline-3xl", className)} {...props}>
 				{title != null || description != null ? (
 					<div className="space-y-1">
 						{title != null ? <FormSectionTitle title={title} /> : null}
@@ -58,7 +58,7 @@ export function FormSection({
 
 	return (
 		<section
-			className={twMerge("grid gap-x-8 gap-y-6 max-w-3xl sm:grid-cols-2", className)}
+			className={twMerge("grid gap-x-8 gap-y-6 max-inline-3xl sm:grid-cols-2", className)}
 			{...props}
 		>
 			{title != null || description != null ? (
@@ -112,7 +112,7 @@ export function FormActions({
 }: Readonly<FormActionsProps>): ReactNode {
 	return (
 		<div
-			className={twMerge("flex w-full max-w-3xl items-center justify-end gap-x-4", className)}
+			className={twMerge("flex inline-full max-inline-3xl items-center justify-end gap-x-4", className)}
 			{...props}
 		>
 			{children}

@@ -39,7 +39,7 @@ export default function DashboardAdministratorPage(
 	return (
 		<Fragment>
 			<Heading>{t("Administrator dashboard")}</Heading>
-			<Header className="my-(--layout-gutter) border-t">
+			<Header className="my-(--layout-gutter) border-bs">
 				<HeaderContent>
 					<HeaderTitle>{t("Admin tasks")}</HeaderTitle>
 					<HeaderDescription>

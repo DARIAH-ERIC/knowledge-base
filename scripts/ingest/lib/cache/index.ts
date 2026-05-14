@@ -31,9 +31,7 @@ export function createCacheService(params: CreateCacheServiceParams) {
 				return Result.tryPromise({
 					// oxlint-disable-next-line typescript/no-unsafe-type-assertion
 					try() {
-						return readFile(file, { encoding: "utf-8" }).then((content) => {
-							return JSON.parse(content) as T;
-						});
+						return readFile(file, { encoding: "utf-8" }).then((content) => JSON.parse(content) as T);
 					},
 					catch(cause) {
 						return new CacheFileError({ cause });

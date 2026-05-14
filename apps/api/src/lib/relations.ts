@@ -67,9 +67,7 @@ export async function getRelatedResources(db: Database | Transaction, entityId: 
 		return [];
 	}
 
-	const ids = rows.map((r) => {
-		return r.resourceId;
-	});
+	const ids = rows.map((r) => r.resourceId);
 
 	const result = await search.collections.resources.search({
 		query: "*",

@@ -130,6 +130,5 @@ main()
 		log.error("Failed to ingest data.\n", error);
 		process.exitCode = 1;
 	})
-	.finally(() => {
-		return db.$client.end();
-	});
+	// oxlint-disable-next-line typescript/no-misused-promises, typescript/strict-void-return
+	.finally(() => db.$client.end());

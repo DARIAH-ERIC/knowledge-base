@@ -57,9 +57,7 @@ export default async function DashboardAdministratorEditPersonRelationPage(
 			)
 			.where(eq(schema.personsToOrganisationalUnits.id, id))
 			.limit(1)
-			.then((rows) => {
-				return rows[0] ?? null;
-			}),
+			.then((rows) => rows[0] ?? null),
 		getContributionRoleOptions(),
 	]);
 

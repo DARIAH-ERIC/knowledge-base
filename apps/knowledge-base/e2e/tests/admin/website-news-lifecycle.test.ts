@@ -120,17 +120,13 @@ test.describe("website news lifecycle", () => {
 
 		// Switch to published tab — original title shown.
 		await newsPage.versionSelectorPublishedLink().click();
-		await page.waitForURL((url) => {
-			return url.searchParams.get("version") === "published";
-		});
+		await page.waitForURL((url) => url.searchParams.get("version") === "published");
 		await expect(page.getByText(originalTitle)).toBeVisible();
 		await expect(page.getByText(updatedTitle)).toBeHidden();
 
 		// Switch back to draft tab — updated title shown again.
 		await newsPage.versionSelectorDraftLink().click();
-		await page.waitForURL((url) => {
-			return url.searchParams.get("version") == null;
-		});
+		await page.waitForURL((url) => url.searchParams.get("version") == null);
 		await expect(page.getByText(updatedTitle)).toBeVisible();
 	});
 });

@@ -4,15 +4,15 @@ import { useExtracted } from "next-intl";
 import { type ComponentProps, Fragment, type ReactNode } from "react";
 import {
 	Button,
-	composeRenderProps,
-	GridList as GridListPrimitive,
 	GridListHeader as GridListHeaderPrimitive,
 	GridListItem as GridListItemPrimitive,
 	type GridListItemProps,
+	GridList as GridListPrimitive,
 	type GridListProps,
 	GridListSection as GridListSectionPrimitive,
 	Text,
 	type TextProps,
+	composeRenderProps,
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
@@ -55,7 +55,7 @@ export function GridListHeader({
 }: Readonly<ComponentProps<typeof GridListHeaderPrimitive>>): ReactNode {
 	return (
 		<GridListHeaderPrimitive
-			className={twMerge("mb-2 font-semibold text-sm/6", className)}
+			className={twMerge("mbe-2 font-semibold text-sm/6", className)}
 			data-slot="grid-list-header"
 			{...props}
 		/>
@@ -77,29 +77,26 @@ export function GridListItem({
 			{...props}
 			className={composeRenderProps(
 				className,
-				(className, { isHovered, isFocusVisible, isSelected }) => {
-					return twMerge(
+				(className, { isHovered, isFocusVisible, isSelected }) => twMerge(
 						"[--grid-list-item-bg-active:var(--color-primary-subtle)] [--grid-list-item-text-active:var(--color-primary-subtle-fg)]",
 						"group inset-ring inset-ring-border rounded-lg px-3 py-2.5",
-						"relative min-w-0 outline-hidden [--mr-icon:--spacing(2)]",
-						"flex min-w-0 cursor-default items-center gap-2 sm:gap-2.5",
+						"relative min-inline-0 outline-hidden [--mr-icon:--spacing(2)]",
+						"flex min-inline-0 cursor-default items-center gap-2 sm:gap-2.5",
 						"dragging:cursor-grab dragging:opacity-70 dragging:**:[[slot=drag]]:text-(--grid-list-item-text-active)",
-						"**:data-[slot=icon]:size-5 **:data-[slot=icon]:shrink-0 **:data-[slot=icon]:text-muted-fg sm:**:data-[slot=icon]:size-4",
+						"**:data-[slot=icon]:block-5 **:data-[slot=icon]:inline-5 **:data-[slot=icon]:shrink-0 **:data-[slot=icon]:text-muted-fg sm:**:data-[slot=icon]:block-4 sm:**:data-[slot=icon]:inline-4",
 						(isSelected || isHovered || isFocusVisible) &&
 							"inset-ring-ring/70 bg-(--grid-list-item-bg-active) text-(--grid-list-item-text-active) **:[.text-muted-fg]:text-(--grid-list-item-text-active)/60",
 						"href" in props && "cursor-pointer",
 						className,
-					);
-				},
+					),
 			)}
 		>
-			{(values) => {
-				return (
+			{(values) => (
 					<Fragment>
 						{values.allowsDragging === true && (
 							<Button aria-label={t("Reorder item")} slot="drag">
 								<svg
-									className="size-5 text-muted-fg sm:size-4"
+									className="block-5 inline-5 text-muted-fg sm:block-4 sm:inline-4"
 									data-slot="drag-icon"
 									fill="none"
 									viewBox="0 0 24 24"
@@ -141,8 +138,7 @@ export function GridListItem({
 						)}
 						{typeof children === "function" ? children(values) : children}
 					</Fragment>
-				);
-			}}
+				)}
 		</GridListItemPrimitive>
 	);
 }
@@ -161,7 +157,7 @@ export function GridListSpacer({
 	...props
 }: Readonly<ComponentProps<"div">>): ReactNode {
 	return (
-		<div ref={ref} aria-hidden={true} className={twMerge("-ml-4 flex-1", className)} {...props} />
+		<div ref={ref} aria-hidden={true} className={twMerge("-ms-4 flex-1", className)} {...props} />
 	);
 }
 

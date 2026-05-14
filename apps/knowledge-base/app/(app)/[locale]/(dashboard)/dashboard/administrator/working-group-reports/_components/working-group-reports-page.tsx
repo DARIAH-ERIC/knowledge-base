@@ -55,11 +55,7 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 	const router = useRouter();
 	const [reports, optimisticallyRemoveReport] = useOptimistic(
 		resolvedReports,
-		(state, id: string) => {
-			return state.filter((r) => {
-				return r.id !== id;
-			});
-		},
+		(state, id: string) => state.filter((r) => r.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 
@@ -77,7 +73,7 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 						className={buttonStyles({ intent: "secondary" })}
 						href="/dashboard/administrator/working-group-reports/create"
 					>
-						<PlusIcon className="mr-2 size-4" />
+						<PlusIcon className="me-2 block-4 inline-4" />
 						{t("New")}
 					</Link>
 				</HeaderAction>
@@ -94,8 +90,7 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={reports}>
-					{(item) => {
-						return (
+					{(item) => (
 							<TableRow id={item.id}>
 								<TableCell>{item.workingGroup.name}</TableCell>
 								<TableCell>{item.campaign.year}</TableCell>
@@ -104,21 +99,21 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 									<Menu>
 										<Button
 											aria-label={t("Open actions menu")}
-											className="h-7 sm:h-7"
+											className="block-7 sm:block-7"
 											intent="plain"
 											size="sq-sm"
 										>
-											<EllipsisHorizontalIcon className="size-5" />
+											<EllipsisHorizontalIcon className="block-5 inline-5" />
 										</Button>
 										<MenuContent placement="left top">
 											<MenuItem href={`/dashboard/reporting/working-group-reports/${item.id}`}>
-												<EyeIcon className="mr-2 size-4" />
+												<EyeIcon className="me-2 block-4 inline-4" />
 												<MenuLabel>{t("View")}</MenuLabel>
 											</MenuItem>
 											<MenuItem
 												href={`/dashboard/administrator/working-group-reports/${item.id}/edit`}
 											>
-												<PencilSquareIcon className="mr-2 size-4" />
+												<PencilSquareIcon className="me-2 block-4 inline-4" />
 												<MenuLabel>{t("Edit")}</MenuLabel>
 											</MenuItem>
 											<MenuSeparator />
@@ -128,15 +123,14 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 													setItemToDelete({ id: item.id });
 												}}
 											>
-												<TrashIcon className="mr-2 size-4" />
+												<TrashIcon className="me-2 block-4 inline-4" />
 												<MenuLabel>{t("Delete")}</MenuLabel>
 											</MenuItem>
 										</MenuContent>
 									</Menu>
 								</TableCell>
 							</TableRow>
-						);
-					}}
+						)}
 				</TableBody>
 			</Table>
 
@@ -144,7 +138,7 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 				isOpen={itemToDelete != null}
 				model={t("working group report")}
 				onAction={() => {
-					if (itemToDelete == null) return;
+					if (itemToDelete == null) {return;}
 
 					startTransition(async () => {
 						optimisticallyRemoveReport(itemToDelete.id);
@@ -154,7 +148,7 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) setItemToDelete(null);
+					if (!open) {setItemToDelete(null);}
 				}}
 			/>
 		</Fragment>

@@ -18,9 +18,7 @@ export const projectScopes = p.snakeCase.table(
 		scope: p.text("scope", { enum: projectScopesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [p.check("project_scopes_scope_enum_check", inArray(t.scope, projectScopesEnum))];
-	},
+	(t) => [p.check("project_scopes_scope_enum_check", inArray(t.scope, projectScopesEnum))],
 );
 
 export type ProjectScope = typeof projectScopes.$inferSelect;
@@ -40,9 +38,7 @@ export const projectRoles = p.snakeCase.table(
 		role: p.text("role", { enum: projectRolesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [p.check("project_roles_role_enum_check", inArray(t.role, projectRolesEnum))];
-	},
+	(t) => [p.check("project_roles_role_enum_check", inArray(t.role, projectRolesEnum))],
 );
 
 export type ProjectRole = typeof projectRoles.$inferSelect;
@@ -52,9 +48,7 @@ export const projects = p.snakeCase.table("projects", {
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(() => {
-			return entityVersions.id;
-		}),
+		.references(() => entityVersions.id),
 	metadata: p.jsonb("metadata"),
 	name: p.text("name").notNull().unique(),
 	acronym: p.text("acronym"),
@@ -63,15 +57,11 @@ export const projects = p.snakeCase.table("projects", {
 	summary: p.text("summary").notNull(),
 	call: p.text("call"),
 	topic: p.text("topic"),
-	imageId: p.uuid("image_id").references(() => {
-		return assets.id;
-	}),
+	imageId: p.uuid("image_id").references(() => assets.id),
 	scopeId: p
 		.uuid("scope_id")
 		.notNull()
-		.references(() => {
-			return projectScopes.id;
-		}),
+		.references(() => projectScopes.id),
 	...f.timestamps(),
 });
 
@@ -89,26 +79,18 @@ export const projectsToOrganisationalUnits = p.snakeCase.table(
 		projectId: p
 			.uuid("project_id")
 			.notNull()
-			.references(() => {
-				return projects.id;
-			}),
+			.references(() => projects.id),
 		unitId: p
 			.uuid("unit_id")
 			.notNull()
-			.references(() => {
-				return organisationalUnits.id;
-			}),
+			.references(() => organisationalUnits.id),
 		roleId: p
 			.uuid("role_id")
 			.notNull()
-			.references(() => {
-				return projectRoles.id;
-			}),
+			.references(() => projectRoles.id),
 		duration: f.timestampRange("duration"),
 	},
-	(t) => {
-		return [p.unique().on(t.projectId, t.roleId, t.unitId)];
-	},
+	(t) => [p.unique().on(t.projectId, t.roleId, t.unitId)],
 );
 
 export type ProjectToOrganisationalUnit = typeof projectsToOrganisationalUnits.$inferSelect;
@@ -138,15 +120,11 @@ export const projectsToSocialMedia = p.snakeCase.table("projects_to_social_media
 	projectId: p
 		.uuid("project_id")
 		.notNull()
-		.references(() => {
-			return projects.id;
-		}),
+		.references(() => projects.id),
 	socialMediaId: p
 		.uuid("social_media_id")
 		.notNull()
-		.references(() => {
-			return socialMedia.id;
-		}),
+		.references(() => socialMedia.id),
 	...f.timestamps(),
 });
 

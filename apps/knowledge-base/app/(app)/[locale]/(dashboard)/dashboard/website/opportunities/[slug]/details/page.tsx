@@ -42,9 +42,7 @@ export default async function DashboardWebsiteOpportunitiesDetailsPage(
 		notFound();
 	}
 
-	const { draftId, publishedId } = await db.transaction(async (tx) => {
-		return getDocumentVersions(tx, doc.id);
-	});
+	const { draftId, publishedId } = await db.transaction(async (tx) => getDocumentVersions(tx, doc.id));
 
 	const { version } = await searchParamsPromise;
 	const selectedVersion: "draft" | "published" =

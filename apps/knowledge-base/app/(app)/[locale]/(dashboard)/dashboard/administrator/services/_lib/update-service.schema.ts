@@ -9,21 +9,15 @@ export const UpdateServiceActionInputSchema = v.object({
 	comment: v.optional(v.pipe(v.string(), v.nonEmpty())),
 	dariahBranding: v.pipe(
 		v.optional(v.string()),
-		v.transform((s) => {
-			return s === "true";
-		}),
+		v.transform((s) => s === "true"),
 	),
 	monitoring: v.pipe(
 		v.optional(v.string()),
-		v.transform((s) => {
-			return s === "true";
-		}),
+		v.transform((s) => s === "true"),
 	),
 	privateSupplier: v.pipe(
 		v.optional(v.string()),
-		v.transform((s) => {
-			return s === "true";
-		}),
+		v.transform((s) => s === "true"),
 	),
 	metadata: v.optional(v.pipe(v.looseObject({}))),
 	ownerUnitIds: v.optional(v.array(v.pipe(v.string(), v.uuid())), []),

@@ -20,7 +20,7 @@ export const Default: Story = {
 	args: { value: 40, "aria-label": "Storage used" },
 	render(props) {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<Meter {...props}>
 					<MeterHeader>
 						<span>{"Storage used"}</span>
@@ -37,7 +37,7 @@ export const Warning: Story = {
 	args: { value: 70, "aria-label": "Storage used" },
 	render(props) {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<Meter {...props}>
 					<MeterHeader>
 						<span>{"Storage used"}</span>
@@ -54,7 +54,7 @@ export const Critical: Story = {
 	args: { value: 90, "aria-label": "Storage used" },
 	render(props) {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<Meter {...props}>
 					<MeterHeader>
 						<span>{"Storage used"}</span>

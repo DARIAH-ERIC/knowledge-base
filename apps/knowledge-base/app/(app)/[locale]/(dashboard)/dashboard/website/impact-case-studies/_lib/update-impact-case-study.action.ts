@@ -2,7 +2,7 @@
 
 import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, type ValidationErrors } from "@dariah-eric/next-lib/actions";
+import { type ValidationErrors, createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
@@ -16,7 +16,7 @@ import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { ensureDraftVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { impactCaseStudiesLifecycleAdapter } from "@/lib/data/impact-case-studies.lifecycle-adapter";
 import { syncEntityRelations } from "@/lib/data/relations";
-import { db, type Transaction } from "@/lib/db";
+import { type Transaction, db } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
@@ -88,9 +88,7 @@ export const updateImpactCaseStudyAction = createServerAction(
 			});
 
 			const contentBlockTypes = await db.query.contentBlockTypes.findMany();
-			const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => {
-				return item.type;
-			});
+			const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
 
 			async function upsertTypeBlock(tx: Transaction, block: ContentBlockInput, blockId: string) {
 				await upsertTypedContentBlock(tx, block, blockId, true);
@@ -106,9 +104,7 @@ export const updateImpactCaseStudyAction = createServerAction(
 					await tx.delete(schema.contentBlocks).where(
 						inArray(
 							schema.contentBlocks.id,
-							existingBlocks.map((b) => {
-								return b.id;
-							}),
+							existingBlocks.map((b) => b.id),
 						),
 					);
 				}

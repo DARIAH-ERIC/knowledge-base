@@ -26,9 +26,7 @@ export async function generateMetadata(
 export default function DashboardAdministratorCountryReportsPage(
 	_props: Readonly<DashboardAdministratorCountryReportsPageProps>,
 ): ReactNode {
-	const reports = assertAuthenticated().then(({ user }) => {
-		return getCountryReportsForAdmin(user);
-	});
+	const reports = assertAuthenticated().then(({ user }) => getCountryReportsForAdmin(user));
 
 	return (
 		<Suspense fallback={<LoadingScreen />}>

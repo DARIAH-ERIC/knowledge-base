@@ -8,14 +8,14 @@ import { validate, validator } from "@/lib/openapi/validator";
 import {
 	GetDariahProjectById,
 	GetDariahProjectBySlug,
-	GetDariahProjects,
 	GetDariahProjectSlugs,
+	GetDariahProjects,
 } from "@/routes/dariah-projects/schemas";
 import {
 	getDariahProjectById,
 	getDariahProjectBySlug,
-	getDariahProjects,
 	getDariahProjectSlugs,
+	getDariahProjects,
 } from "@/routes/dariah-projects/service";
 
 export const router = createRouter()

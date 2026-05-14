@@ -10,21 +10,15 @@ export const documentsPolicies = p.snakeCase.table("documents_policies", {
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(() => {
-			return entityVersions.id;
-		}),
+		.references(() => entityVersions.id),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
 	url: p.text("url"),
 	documentId: p
 		.uuid("document_id")
 		.notNull()
-		.references(() => {
-			return assets.id;
-		}),
-	groupId: p.uuid("group_id").references(() => {
-		return documentPolicyGroups.id;
-	}),
+		.references(() => assets.id),
+	groupId: p.uuid("group_id").references(() => documentPolicyGroups.id),
 	position: p.integer("position").notNull().default(0),
 	...f.timestamps(),
 });

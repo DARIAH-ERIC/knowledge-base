@@ -71,7 +71,7 @@ export function splitDocumentToBlocks(doc: JSONContent): Array<ContentBlockInput
 	let richTextRun: Array<JSONContent> = [];
 
 	function flushRichText() {
-		if (richTextRun.length === 0) return;
+		if (richTextRun.length === 0) {return;}
 		blocks.push({
 			id: crypto.randomUUID(),
 			type: "rich_text",

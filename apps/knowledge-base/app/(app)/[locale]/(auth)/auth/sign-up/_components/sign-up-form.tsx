@@ -50,7 +50,7 @@ export function SignUpForm(): ReactNode {
 				<Input />
 			</TextField>
 
-			<SubmitButton className="mt-2">{t("Continue")}</SubmitButton>
+			<SubmitButton className="mbs-2">{t("Continue")}</SubmitButton>
 		</Form>
 	);
 }

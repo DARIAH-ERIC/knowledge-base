@@ -72,9 +72,7 @@ export const updateContributionAction = createServerAction(
 				),
 			)
 			.limit(1)
-			.then((rows) => {
-				return rows[0] ?? null;
-			});
+			.then((rows) => rows[0] ?? null);
 
 		if (allowedRelation == null) {
 			return createActionStateError({

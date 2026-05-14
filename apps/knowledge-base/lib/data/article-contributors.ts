@@ -51,9 +51,7 @@ export async function getPersonOptionsByIds(ids: ReadonlyArray<string>) {
 		.orderBy(schema.persons.sortName);
 
 	const itemById = new Map(
-		rows.map((row) => {
-			return [row.id, row] as const;
-		}),
+		rows.map((row) => [row.id, row] as const),
 	);
 
 	return ids.flatMap((id) => {

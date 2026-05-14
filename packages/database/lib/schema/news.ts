@@ -9,17 +9,13 @@ export const news = p.snakeCase.table("news", {
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(() => {
-			return entityVersions.id;
-		}),
+		.references(() => entityVersions.id),
 	title: p.text("title").notNull(),
 	summary: p.text("summary").notNull(),
 	imageId: p
 		.uuid("image_id")
 		.notNull()
-		.references(() => {
-			return assets.id;
-		}),
+		.references(() => assets.id),
 	...f.timestamps(),
 });
 

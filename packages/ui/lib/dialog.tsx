@@ -24,7 +24,7 @@ export function Dialog({
 	return (
 		<AriaDialog
 			className={twMerge(
-				"peer/dialog group/dialog relative flex max-h-[calc(var(--visual-viewport-height)-var(--visual-viewport-vertical-padding))] flex-col overflow-hidden outline-hidden [--gutter:--spacing(6)] sm:[--gutter:--spacing(8)]",
+				"peer/dialog group/dialog relative flex max-block-[calc(var(--visual-viewport-height)-var(--visual-viewport-vertical-padding))] flex-col overflow-hidden outline-hidden [--gutter:--spacing(6)] sm:[--gutter:--spacing(8)]",
 				className,
 			)}
 			data-slot="dialog"
@@ -47,7 +47,7 @@ export function DialogHeader({ className, ...props }: Readonly<DialogHeaderProps
 	return (
 		<div
 			className={twMerge(
-				"relative space-y-1 p-(--gutter) pb-[calc(var(--gutter)-(--spacing(3)))]",
+				"relative space-y-1 p-(--gutter) pbe-[calc(var(--gutter)-(--spacing(3)))]",
 				className,
 			)}
 			data-slot="dialog-header"
@@ -105,8 +105,8 @@ export function DialogBody({ className, ...props }: Readonly<DialogBodyProps>): 
 	return (
 		<div
 			className={twMerge(
-				"isolate flex min-h-0 flex-1 flex-col overflow-auto px-(--gutter) py-1",
-				"**:data-[slot=dialog-footer]:px-0 **:data-[slot=dialog-footer]:pt-0",
+				"isolate flex min-block-0 flex-1 flex-col overflow-auto px-(--gutter) py-1",
+				"**:data-[slot=dialog-footer]:px-0 **:data-[slot=dialog-footer]:pbs-0",
 				className,
 			)}
 			data-slot="dialog-body"
@@ -120,7 +120,7 @@ export function DialogFooter({ className, ...props }: Readonly<DialogFooterProps
 	return (
 		<div
 			className={twMerge(
-				"isolate mt-auto flex flex-col-reverse justify-end gap-3 p-(--gutter) pt-[calc(var(--gutter)-(--spacing(2)))] sm:flex-row group-not-has-data-[slot=dialog-body]/dialog:pt-0 group-not-has-data-[slot=dialog-body]/popover:pt-0",
+				"isolate mbs-auto flex flex-col-reverse justify-end gap-3 p-(--gutter) pbs-[calc(var(--gutter)-(--spacing(2)))] sm:flex-row group-not-has-data-[slot=dialog-body]/dialog:pbs-0 group-not-has-data-[slot=dialog-body]/popover:pbs-0",
 				className,
 			)}
 			data-slot="dialog-footer"
@@ -148,12 +148,12 @@ export function DialogCloseIcon({
 		<AriaButton
 			aria-label={t("Close")}
 			className={cx(
-				"absolute inset-e-1 top-1 z-50 grid size-8 place-content-center rounded-xl hover:bg-secondary focus:bg-secondary focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary sm:top-2 sm:size-7 sm:rounded-md",
+				"absolute inset-e-1 inset-bs-1 z-50 grid block-8 inline-8 place-content-center rounded-xl hover:bg-secondary focus:bg-secondary focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary sm:inset-bs-2 sm:block-7 sm:inline-7 sm:rounded-md",
 				className,
 			)}
 			slot="close"
 		>
-			<XMarkIcon className="size-4" />
+			<XMarkIcon className="block-4 inline-4" />
 		</AriaButton>
 	) : null;
 }

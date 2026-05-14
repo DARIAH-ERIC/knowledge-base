@@ -1,3 +1,6 @@
+// @see {@link https://github.com/oxc-project/oxc/issues/20704}
+// oxlint-disable import/namespace -- exports only exist in "browser" export condition
+
 import * as Sentry from "@sentry/nextjs";
 
 import { env } from "@/config/env.config";

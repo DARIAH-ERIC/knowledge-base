@@ -79,9 +79,7 @@ function formatServiceType(type: string): string {
 }
 
 function formatServiceStatus(status: string): string {
-	return status.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => {
-		return c.toUpperCase();
-	});
+	return status.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
@@ -129,13 +127,11 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 						<SelectTrigger />
 						<FieldError />
 						<SelectContent>
-							{serviceTypes.map((type) => {
-								return (
+							{serviceTypes.map((type) => (
 									<SelectItem key={type.id} id={type.id}>
 										{formatServiceType(type.type)}
 									</SelectItem>
-								);
-							})}
+								))}
 						</SelectContent>
 					</Select>
 					<input name="typeId" type="hidden" value={selectedTypeId} />
@@ -151,13 +147,11 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 						<SelectTrigger />
 						<FieldError />
 						<SelectContent>
-							{serviceStatuses.map((status) => {
-								return (
+							{serviceStatuses.map((status) => (
 									<SelectItem key={status.id} id={status.id}>
 										{formatServiceStatus(status.status)}
 									</SelectItem>
-								);
-							})}
+								))}
 						</SelectContent>
 					</Select>
 					<input name="statusId" type="hidden" value={selectedStatusId} />
@@ -219,9 +213,7 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 						selectedItems={selectedOrganisationalUnits}
 						value={selectedOwnerUnitIds}
 					/>
-					{selectedOwnerUnitIds.map((id) => {
-						return <input key={id} name="ownerUnitIds" type="hidden" value={id} />;
-					})}
+					{selectedOwnerUnitIds.map((id) => <input key={id} name="ownerUnitIds" type="hidden" value={id} />)}
 
 					<AsyncMultipleSelect
 						aria-label={t("Service providers")}
@@ -234,9 +226,7 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 						selectedItems={selectedOrganisationalUnits}
 						value={selectedProviderUnitIds}
 					/>
-					{selectedProviderUnitIds.map((id) => {
-						return <input key={id} name="providerUnitIds" type="hidden" value={id} />;
-					})}
+					{selectedProviderUnitIds.map((id) => <input key={id} name="providerUnitIds" type="hidden" value={id} />)}
 				</FormSection>
 
 				{service != null && <input name="id" type="hidden" value={service.id} />}

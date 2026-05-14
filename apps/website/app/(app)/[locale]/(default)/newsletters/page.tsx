@@ -40,9 +40,8 @@ async function NewslettersList(): Promise<ReactNode> {
 	const newsletters = (await mailchimp.get()).unwrap().data.campaigns;
 
 	return (
-		<ul role="list">
-			{newsletters.map((newsletter) => {
-				return (
+		<ul >
+			{newsletters.map((newsletter) => (
 					<li key={newsletter.id}>
 						<article>
 							<h2>
@@ -50,8 +49,7 @@ async function NewslettersList(): Promise<ReactNode> {
 							</h2>
 						</article>
 					</li>
-				);
-			})}
+				))}
 		</ul>
 	);
 }

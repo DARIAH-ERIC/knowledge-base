@@ -15,7 +15,7 @@ export async function endWorkingGroupChairAction(id: string, end: Date): Promise
 		columns: { duration: true },
 	});
 
-	if (relation == null) return;
+	if (relation == null) {return;}
 
 	await db
 		.update(schema.personsToOrganisationalUnits)

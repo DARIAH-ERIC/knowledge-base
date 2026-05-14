@@ -25,12 +25,10 @@ export async function deleteDocumentPolicyGroupAction(id: string): Promise<void>
 			.orderBy(schema.documentsPolicies.position);
 
 		await Promise.all(
-			ungrouped.map((doc, index) => {
-				return tx
+			ungrouped.map((doc, index) => tx
 					.update(schema.documentsPolicies)
 					.set({ position: index })
-					.where(eq(schema.documentsPolicies.id, doc.id));
-			}),
+					.where(eq(schema.documentsPolicies.id, doc.id))),
 		);
 
 		await tx.delete(schema.documentPolicyGroups).where(eq(schema.documentPolicyGroups.id, id));

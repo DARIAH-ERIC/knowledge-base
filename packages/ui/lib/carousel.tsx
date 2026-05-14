@@ -5,10 +5,10 @@ import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-reac
 import { useExtracted } from "next-intl";
 import {
 	type ComponentProps,
-	createContext,
 	type HTMLAttributes,
 	type KeyboardEvent,
 	type ReactNode,
+	createContext,
 	use,
 	useCallback,
 	useEffect,
@@ -170,7 +170,7 @@ export function CarouselContent({
 			<div
 				className={twMerge(
 					"flex",
-					orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
+					orientation === "horizontal" ? "-ms-4" : "-mbs-4 flex-col",
 					className,
 				)}
 				{...props}
@@ -185,8 +185,8 @@ export function CarouselItem({ className, ...props }: Readonly<ComponentProps<"d
 	return (
 		<div
 			className={twMerge(
-				"group/carousel-item relative min-w-0 shrink-0 grow-0 basis-full focus:outline-hidden focus-visible:outline-hidden",
-				orientation === "horizontal" ? "pl-4" : "pt-4",
+				"group/carousel-item relative min-inline-0 shrink-0 grow-0 basis-full focus:outline-hidden focus-visible:outline-hidden",
+				orientation === "horizontal" ? "ps-4" : "pbs-4",
 				className,
 			)}
 			{...props}
@@ -204,7 +204,7 @@ export function CarouselHandler({
 		<div
 			ref={ref}
 			className={twMerge(
-				"relative z-10 mt-6 flex items-center gap-x-2",
+				"relative z-10 mbs-6 flex items-center gap-x-2",
 				orientation === "horizontal" ? "justify-end" : "justify-center",
 				className,
 			)}
@@ -244,7 +244,7 @@ export function CarouselButton({
 			size={size}
 			{...props}
 		>
-			<Icon className="size-4" />
+			<Icon className="block-4 inline-4" />
 		</Button>
 	);
 }

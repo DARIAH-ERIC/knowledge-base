@@ -41,13 +41,9 @@ export function CountryReportProjectsForm(
 	const [selectedProjectId, setSelectedProjectId] = useState<string>("");
 
 	const existingProjectIds = new Set(
-		report.projectContributions.map((c) => {
-			return c.project.id;
-		}),
+		report.projectContributions.map((c) => c.project.id),
 	);
-	const availableProjects = allProjects.filter((p) => {
-		return !existingProjectIds.has(p.id);
-	});
+	const availableProjects = allProjects.filter((p) => !existingProjectIds.has(p.id));
 
 	return (
 		<div className="flex flex-col gap-y-8">
@@ -55,8 +51,7 @@ export function CountryReportProjectsForm(
 				<section className="flex flex-col gap-y-3">
 					<h2 className="text-sm font-semibold text-fg">{t("Project contributions")}</h2>
 					<ul className="divide-y divide-border rounded-md border">
-						{report.projectContributions.map((contribution) => {
-							return (
+						{report.projectContributions.map((contribution) => (
 								<li
 									key={contribution.id}
 									className="flex items-center justify-between gap-x-4 px-4 py-3"
@@ -75,8 +70,7 @@ export function CountryReportProjectsForm(
 										</Button>
 									</form>
 								</li>
-							);
-						})}
+							))}
 					</ul>
 				</section>
 			)}
@@ -84,7 +78,7 @@ export function CountryReportProjectsForm(
 			{availableProjects.length > 0 && (
 				<section className="flex flex-col gap-y-3">
 					<h2 className="text-sm font-semibold text-fg">{t("Add project contribution")}</h2>
-					<Form action={action} className="flex flex-col gap-y-4 max-w-sm" state={state}>
+					<Form action={action} className="flex flex-col gap-y-4 max-inline-sm" state={state}>
 						<input name="countryReportId" type="hidden" value={report.id} />
 
 						<Select
@@ -98,13 +92,11 @@ export function CountryReportProjectsForm(
 							<SelectTrigger />
 							<FieldError />
 							<SelectContent>
-								{availableProjects.map((project) => {
-									return (
+								{availableProjects.map((project) => (
 										<SelectItem key={project.id} id={project.id}>
 											{project.name}
 										</SelectItem>
-									);
-								})}
+									))}
 							</SelectContent>
 						</Select>
 						<input name="projectId" type="hidden" value={selectedProjectId} />

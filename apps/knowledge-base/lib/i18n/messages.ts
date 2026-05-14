@@ -1,6 +1,6 @@
 import { keyBy } from "@acdh-oeaw/lib";
 
-import { getIntlLanguage, type IntlLocale } from "@/lib/i18n/locales";
+import { type IntlLocale, getIntlLanguage } from "@/lib/i18n/locales";
 import type metadataMessages from "@/messages/metadata/en/index.json";
 
 type Metadata = typeof metadataMessages;
@@ -23,9 +23,7 @@ export async function getIntlMessages(locale: IntlLocale): Promise<IntlMessages>
 		import(`@dariah-eric/ui/i18n/${language}`),
 	]);
 
-	const social = keyBy(metadata.social, (item) => {
-		return item.kind;
-	});
+	const social = keyBy(metadata.social, (item) => item.kind);
 
 	switch (language) {
 		// case "de": {

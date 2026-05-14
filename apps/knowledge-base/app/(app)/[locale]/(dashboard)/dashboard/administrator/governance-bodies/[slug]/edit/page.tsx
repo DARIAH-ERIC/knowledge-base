@@ -19,7 +19,7 @@ import {
 	getResourceRelationOptions,
 	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
-import { getUnitRelations, getUnitRelationStatusOptions } from "@/lib/data/unit-relations";
+import { getUnitRelationStatusOptions, getUnitRelations } from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
 import { images } from "@/lib/images";

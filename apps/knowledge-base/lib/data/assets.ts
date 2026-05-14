@@ -8,7 +8,7 @@ import { relationsFilterToSQL } from "@dariah-eric/database/relations";
 import * as schema from "@dariah-eric/database/schema";
 
 import { db } from "@/lib/db";
-import { images, type ImageUrlOptions } from "@/lib/images";
+import { type ImageUrlOptions, images } from "@/lib/images";
 import { type AssetPrefix, assetPrefixes, storage as s3 } from "@/lib/storage";
 
 export { assetPrefixes };

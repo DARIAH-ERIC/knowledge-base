@@ -35,16 +35,14 @@ export function CampaignServiceSizesForm(
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
 	const sizeMap = Object.fromEntries(
-		sizes.map((s) => {
-			return [
+		sizes.map((s) => [
 				s.serviceSize,
 				{
 					// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 					amount: s.amount != null ? String(s.amount) : undefined,
 					threshold: s.visitsThreshold != null ? String(s.visitsThreshold) : undefined,
 				},
-			];
-		}),
+			]),
 	);
 
 	return (

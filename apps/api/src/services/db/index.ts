@@ -1,8 +1,8 @@
 import {
-	createDatabaseService,
 	type Database,
-	schema,
 	type Transaction,
+	createDatabaseService,
+	schema,
 } from "@dariah-eric/database";
 
 import { env } from "~/config/env.config";

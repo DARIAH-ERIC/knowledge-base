@@ -362,7 +362,7 @@
 		font-family: var(--font-body);
 		overflow-wrap: break-word;
 		font-synthesis: none;
-		text-rendering: optimizeLegibility;
+		text-rendering: optimizelegibility;
 		-moz-osx-font-smoothing: grayscale;
 		-webkit-font-smoothing: antialiased;
 		text-size-adjust: none;

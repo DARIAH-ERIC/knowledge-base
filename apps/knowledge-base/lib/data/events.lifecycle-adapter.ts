@@ -24,7 +24,7 @@ export const eventsLifecycleAdapter: EntityLifecycleAdapter = {
 			.where(eq(schema.events.id, sourceVersionId))
 			.limit(1);
 
-		if (source == null) return;
+		if (source == null) {return;}
 
 		await tx.insert(schema.events).values({ id: targetVersionId, ...source });
 	},

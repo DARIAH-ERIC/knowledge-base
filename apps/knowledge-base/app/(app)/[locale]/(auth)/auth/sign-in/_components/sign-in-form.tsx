@@ -33,7 +33,7 @@ export function SignInForm(): ReactNode {
 				<Input />
 			</TextField>
 
-			<SubmitButton className="mt-2">{t("Sign in")}</SubmitButton>
+			<SubmitButton className="mbs-2">{t("Sign in")}</SubmitButton>
 		</Form>
 	);
 }

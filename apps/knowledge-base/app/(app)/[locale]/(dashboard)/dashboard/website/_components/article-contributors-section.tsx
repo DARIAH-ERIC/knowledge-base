@@ -87,15 +87,11 @@ export function ArticleContributorsSection(
 
 	const t = useExtracted();
 
-	const [localContributors, setLocalContributors] = useState(() => {
-		return contributors;
-	});
+	const [localContributors, setLocalContributors] = useState(() => contributors);
 	const [selectedPerson, setSelectedPerson] = useState<AvailablePerson | null>(null);
 	const [selectedRole, setSelectedRole] = useState<string | null>(null);
 
-	const [state, setState] = useState<ActionState>(() => {
-		return createActionStateInitial();
-	});
+	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
 	const [isPending, startFormTransition] = useTransition();
 
 	function formAction(formData: FormData) {
@@ -107,9 +103,7 @@ export function ArticleContributorsSection(
 			setState(newState);
 
 			if (newState.status === "success" && person != null && role != null) {
-				setLocalContributors((prev) => {
-					return [...prev, { personId: person.id, personName: person.name, role }];
-				});
+				setLocalContributors((prev) => [...prev, { personId: person.id, personName: person.name, role }]);
 				setSelectedPerson(null);
 				setSelectedRole(null);
 			}
@@ -120,7 +114,7 @@ export function ArticleContributorsSection(
 		<Fragment>
 			<Separator className="my-8" />
 
-			<div className="max-w-3xl space-y-6">
+			<div className="max-inline-3xl space-y-6">
 				<div className="space-y-1">
 					<FormSectionTitle title={t("Contributors")} />
 				</div>
@@ -133,34 +127,28 @@ export function ArticleContributorsSection(
 							<TableColumn />
 						</TableHeader>
 						<TableBody items={localContributors}>
-							{(contributor) => {
-								return (
+							{(contributor) => (
 									<TableRow id={contributor.personId}>
 										<TableCell>{contributor.personName}</TableCell>
 										<TableCell>{formatRole(contributor.role)}</TableCell>
 										<TableCell className="text-end">
 											<Button
 												aria-label={t("Remove contributor")}
-												className="h-7 sm:h-7"
+												className="block-7 sm:block-7"
 												intent="plain"
 												onPress={() => {
 													startTransition(async () => {
 														await deleteAction(articleId, contributor.personId);
-														setLocalContributors((prev) => {
-															return prev.filter((c) => {
-																return c.personId !== contributor.personId;
-															});
-														});
+														setLocalContributors((prev) => prev.filter((c) => c.personId !== contributor.personId));
 													});
 												}}
 												size="sq-sm"
 											>
-												<TrashIcon className="size-4" />
+												<TrashIcon className="block-4 inline-4" />
 											</Button>
 										</TableCell>
 									</TableRow>
-								);
-							}}
+								)}
 						</TableBody>
 					</Table>
 				) : (
@@ -200,13 +188,11 @@ export function ArticleContributorsSection(
 								<SelectTrigger />
 								<FieldError />
 								<SelectContent>
-									{articleContributorRolesEnum.map((role) => {
-										return (
+									{articleContributorRolesEnum.map((role) => (
 											<SelectItem key={role} id={role}>
 												{formatRole(role)}
 											</SelectItem>
-										);
-									})}
+										))}
 								</SelectContent>
 							</Select>
 							<input name="role" type="hidden" value={selectedRole ?? ""} />

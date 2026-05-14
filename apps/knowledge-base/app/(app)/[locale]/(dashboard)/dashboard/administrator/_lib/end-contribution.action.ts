@@ -15,7 +15,7 @@ export async function endContributionAction(id: string, end: Date): Promise<void
 		columns: { duration: true },
 	});
 
-	if (contribution == null) return;
+	if (contribution == null) {return;}
 
 	await db
 		.update(schema.personsToOrganisationalUnits)

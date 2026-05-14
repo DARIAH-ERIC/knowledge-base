@@ -117,7 +117,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 		},
 	});
 
-	if (report == null) return null;
+	if (report == null) {return null;}
 
 	const socialMediaMap = new Map<
 		string,
@@ -207,7 +207,7 @@ async function getCountryReportHeader(id: string): Promise<CountryReportHeaderDa
 		},
 	});
 
-	if (report == null) return null;
+	if (report == null) {return null;}
 
 	return {
 		id: report.id,

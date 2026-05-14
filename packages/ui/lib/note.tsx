@@ -27,7 +27,7 @@ export function Note(props: Readonly<NoteProps>): ReactNode {
 	return (
 		<div
 			className={twMerge([
-				"grid w-full grid-cols-[auto_1fr] overflow-hidden rounded-lg border border-current/15 p-[calc(--spacing(4)-1px)] backdrop-blur-2xl sm:text-sm/6",
+				"grid inline-full grid-cols-[auto_1fr] overflow-hidden rounded-lg border border-current/15 p-[calc(--spacing(4)-1px)] backdrop-blur-2xl sm:text-sm/6",
 				"*:[a]:hover:underline **:[strong]:font-medium",
 				intent === "default" && "bg-muted/50 text-secondary-fg",
 				intent === "info" &&
@@ -46,7 +46,7 @@ export function Note(props: Readonly<NoteProps>): ReactNode {
 			{IconComponent != null && indicator && (
 				<div
 					className={twJoin(
-						"mr-3 grid size-8 place-content-center rounded-full border-2",
+						"me-3 grid block-8 inline-8 place-content-center rounded-full border-2",
 						intent === "warning" && "border-warning-subtle-fg/40",
 						intent === "success" && "border-success-subtle-fg/40",
 						intent === "danger" && "border-danger-subtle-fg/40",
@@ -55,14 +55,14 @@ export function Note(props: Readonly<NoteProps>): ReactNode {
 				>
 					<div
 						className={twJoin(
-							"grid size-6 place-content-center rounded-full border-2",
+							"grid block-6 inline-6 place-content-center rounded-full border-2",
 							intent === "warning" && "border-warning-subtle-fg/85",
 							intent === "success" && "border-success-subtle-fg/85",
 							intent === "danger" && "border-danger-subtle-fg/85",
 							intent === "info" && "border-info-subtle-fg/85",
 						)}
 					>
-						<IconComponent className="size-5 shrink-0" />
+						<IconComponent className="block-5 inline-5 shrink-0" />
 					</div>
 				</div>
 			)}

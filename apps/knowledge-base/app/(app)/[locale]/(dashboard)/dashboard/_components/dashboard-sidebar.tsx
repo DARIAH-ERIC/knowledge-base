@@ -286,11 +286,7 @@ function getCurrentSidebarHref(
 ): string | undefined {
 	const hrefs = [
 		"/dashboard",
-		...sidebarMenu.flatMap((section) => {
-			return section.items.map((item) => {
-				return item.href;
-			});
-		}),
+		...sidebarMenu.flatMap((section) => section.items.map((item) => item.href)),
 	];
 
 	return hrefs.reduce<string | undefined>((currentHref, href) => {
@@ -330,25 +326,25 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 		<Sidebar {...sidebarProps}>
 			<SidebarHeader>
 				<Link
-					className="flex items-center gap-x-2 group-data-[collapsible=dock]:size-8 group-data-[collapsible=dock]:items-center group-data-[collapsible=dock]:justify-center"
+					className="flex items-center gap-x-2 group-data-[collapsible=dock]:block-8 group-data-[collapsible=dock]:inline-8 group-data-[collapsible=dock]:items-center group-data-[collapsible=dock]:justify-center"
 					href="/dashboard"
 				>
-					<Logo className="size-5" />
+					<Logo className="block-5 inline-5" />
 					<SidebarLabel className="font-medium">{meta.title}</SidebarLabel>
 				</Link>
 			</SidebarHeader>
 			<SidebarContent>
-				<SidebarSectionGroup className="pb-4">
+				<SidebarSectionGroup className="pbe-4">
 					{!isMobile ? (
 						<Fragment>
 							<CommandPalette isAdmin={isAdmin} isOpen={isCmdOpen} setIsOpen={setIsCmdOpen} />
-							<div className="px-4 pt-2">
+							<div className="px-4 pbs-2">
 								<Button
 									aria-label={t("Open quick search")}
 									className={cn(
 										"group",
 										state === "expanded" &&
-											"bg-bg sm:w-full sm:justify-between dark:bg-secondary/50",
+											"bg-bg sm:inline-full sm:justify-between dark:bg-secondary/50",
 									)}
 									intent={state === "expanded" ? "outline" : "plain"}
 									onPress={() => {
@@ -359,7 +355,7 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 									{state === "expanded" ? (
 										<Fragment>
 											<span className="flex items-center gap-x-2">
-												<MagnifyingGlassIcon className="size-5 sm:size-4" />
+												<MagnifyingGlassIcon className="block-5 inline-5 sm:block-4 sm:inline-4" />
 												<span className="truncate text-muted-fg group-hover:text-fg">
 													{t("Quick search...")}
 												</span>
@@ -384,12 +380,10 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 						</SidebarItem>
 					</SidebarSection>
 
-					{sidebarMenu.map((section, index) => {
-						return (
+					{sidebarMenu.map((section, index) => (
 							// eslint-disable-next-line @eslint-react/no-array-index-key
 							<SidebarSection key={index} label={section.title}>
-								{section.items.map((item, index) => {
-									return (
+								{section.items.map((item, index) => (
 										<SidebarItem
 											// eslint-disable-next-line @eslint-react/no-array-index-key
 											key={index}
@@ -400,16 +394,14 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 											{item.icon}
 											<SidebarLabel>{item.label}</SidebarLabel>
 										</SidebarItem>
-									);
-								})}
+									))}
 							</SidebarSection>
-						);
-					})}
+						))}
 				</SidebarSectionGroup>
 			</SidebarContent>
 
 			<SidebarFooter
-				className={state === "collapsed" ? "p-4" : "border-t px-4 py-2.5"}
+				className={state === "collapsed" ? "p-4" : "border-bs px-4 py-2.5"}
 			></SidebarFooter>
 
 			<SidebarRail />

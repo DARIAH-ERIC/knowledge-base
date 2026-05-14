@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
-import { tv, type VariantProps } from "tailwind-variants";
+import { type VariantProps, tv } from "tailwind-variants";
 
 export const badgeStyles = tv({
 	base: [
 		"inline-flex items-center gap-x-1.5 py-0.5 font-medium text-xs/5 forced-colors:outline",
 		"inset-ring inset-ring-(--badge-ring) bg-(--badge-bg) text-(--badge-fg) [--badge-ring:transparent]",
 		"group-hover:bg-(--badge-overlay) group-focus:bg-(--badge-overlay)",
-		"*:data-[slot=icon]:size-3 *:data-[slot=icon]:shrink-0",
+		"*:data-[slot=icon]:block-3 *:data-[slot=icon]:inline-3 *:data-[slot=icon]:shrink-0",
 		"duration-200",
 	],
 	variants: {

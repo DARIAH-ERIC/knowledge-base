@@ -19,7 +19,7 @@ export const Default: Story = {
 	args: {},
 	render(props) {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<NumberField {...props}>
 					<Label>{"Quantity"}</Label>
 					<NumberInput />
@@ -33,7 +33,7 @@ export const WithDescription: Story = {
 	args: {},
 	render(props) {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<NumberField {...props}>
 					<Label>{"Price"}</Label>
 					<NumberInput placeholder={"0.00"} />
@@ -48,7 +48,7 @@ export const Required: Story = {
 	args: { isRequired: true },
 	render(props) {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<NumberField {...props}>
 					<Label>{"Amount"}</Label>
 					<NumberInput />
@@ -63,7 +63,7 @@ export const Disabled: Story = {
 	args: { isDisabled: true, defaultValue: 42 },
 	render(props) {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<NumberField {...props}>
 					<Label>{"Count"}</Label>
 					<NumberInput />
@@ -77,7 +77,7 @@ export const WithMinMax: Story = {
 	args: { minValue: 0, maxValue: 100, defaultValue: 50 },
 	render(props) {
 		return (
-			<div className="w-64">
+			<div className="inline-64">
 				<NumberField {...props}>
 					<Label>{"Percentage"}</Label>
 					<NumberInput />

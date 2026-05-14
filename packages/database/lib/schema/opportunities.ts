@@ -15,11 +15,9 @@ export const opportunitySources = p.snakeCase.table(
 		source: p.text("source", { enum: opportunitySourcesEnum }).notNull().unique(),
 		...f.timestamps(),
 	},
-	(t) => {
-		return [
+	(t) => [
 			p.check("opportunity_sources_source_enum_check", inArray(t.source, opportunitySourcesEnum)),
-		];
-	},
+		],
 );
 
 export type OpportunitySource = typeof opportunitySources.$inferSelect;
@@ -33,18 +31,14 @@ export const opportunities = p.snakeCase.table("opportunities", {
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(() => {
-			return entityVersions.id;
-		}),
+		.references(() => entityVersions.id),
 	title: p.text("title").notNull(),
 	summary: p.text("summary"),
 	duration: f.timestampRange("duration").notNull(),
 	sourceId: p
 		.uuid("source_id")
 		.notNull()
-		.references(() => {
-			return opportunitySources.id;
-		}),
+		.references(() => opportunitySources.id),
 	website: p.text("website"),
 	...f.timestamps(),
 });

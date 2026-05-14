@@ -9,6 +9,7 @@ const meta = {
 	tags: ["autodocs"],
 	argTypes: {},
 	args: {
+		// oxlint-disable-next-line typescript/strict-void-return
 		onPress: fn(),
 	},
 } satisfies Meta<typeof Button>;

@@ -26,10 +26,10 @@ function getPaginationRange(current: number, total: number, delta = 2) {
 	if (total >= 1) {
 		range.push(1);
 	}
-	if (left > 2) range.push(-1);
-	for (let i = left; i <= right; i++) range.push(i);
-	if (right < total - 1) range.push(-2);
-	if (total > 1) range.push(total);
+	if (left > 2) {range.push(-1);}
+	for (let i = left; i <= right; i++) {range.push(i);}
+	if (right < total - 1) {range.push(-2);}
+	if (total > 1) {range.push(total);}
 	return range;
 }
 
@@ -87,9 +87,8 @@ export function Paginate({
 						setPage(page - 1);
 					}}
 				/>
-				<PaginationSection className="**:data-[slot=pagination-item]:min-w-8">
-					{pages.map((n) => {
-						return n < 0 ? (
+				<PaginationSection className="**:data-[slot=pagination-item]:min-inline-8">
+					{pages.map((n) => n < 0 ? (
 							<PaginationGap key={`gap-${String(n)}`} />
 						) : (
 							<PaginationItem
@@ -102,8 +101,7 @@ export function Paginate({
 							>
 								{n}
 							</PaginationItem>
-						);
-					})}
+						))}
 				</PaginationSection>
 				<PaginationNext
 					isDisabled={isPending || page === safeTotal}
@@ -132,7 +130,7 @@ export function Paginate({
 						setPage(page - 1);
 					}}
 				/>
-				<PaginationSection className="rounded-(--section-radius) border px-3 *:min-w-4">
+				<PaginationSection className="rounded-(--section-radius) border px-3 *:min-inline-4">
 					<PaginationLabel>{page}</PaginationLabel>
 					<PaginationLabel className="text-muted-fg">/</PaginationLabel>
 					<PaginationLabel>{safeTotal}</PaginationLabel>

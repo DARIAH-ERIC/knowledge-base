@@ -3,7 +3,7 @@ import type { Page } from "@playwright/test";
 import { createFormatter, createTranslator } from "next-intl";
 
 import type metadata from "@/content/en/metadata/index.json";
-import { defaultLocale, getIntlLanguage, type IntlLocale } from "@/lib/i18n/locales";
+import { type IntlLocale, defaultLocale, getIntlLanguage } from "@/lib/i18n/locales";
 import type { IntlMessages } from "@/lib/i18n/messages";
 import type { SocialMediaKind } from "@/lib/social-media/social-media.config";
 import type messages from "@/messages/en.json";

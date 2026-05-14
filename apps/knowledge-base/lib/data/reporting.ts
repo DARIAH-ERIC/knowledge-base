@@ -42,7 +42,7 @@ export async function getUserReportingScope(user: User): Promise<{
 		columns: { id: true, year: true },
 	});
 
-	if (openCampaign == null) return empty;
+	if (openCampaign == null) {return empty;}
 
 	const wgReportItems: Array<WorkingGroupReportScope> = [];
 	const countryReportItems: Array<CountryReportScope> = [];
@@ -82,12 +82,8 @@ export async function getUserReportingScope(user: User): Promise<{
 		const wgOrgUnitIds = [
 			...new Set(
 				relations
-					.filter((r) => {
-						return r.orgUnitType === "working_group";
-					})
-					.map((r) => {
-						return r.orgUnitId;
-					}),
+					.filter((r) => r.orgUnitType === "working_group")
+					.map((r) => r.orgUnitId),
 			),
 		];
 
@@ -107,12 +103,8 @@ export async function getUserReportingScope(user: User): Promise<{
 				);
 
 			for (const report of wgReports) {
-				const relationsForWg = relations.filter((r) => {
-					return r.orgUnitId === report.workingGroupId && r.orgUnitType === "working_group";
-				});
-				const canConfirm = relationsForWg.some((r) => {
-					return (chairRoles as ReadonlyArray<string>).includes(r.roleType);
-				});
+				const relationsForWg = relations.filter((r) => r.orgUnitId === report.workingGroupId && r.orgUnitType === "working_group");
+				const canConfirm = relationsForWg.some((r) => (chairRoles as ReadonlyArray<string>).includes(r.roleType));
 				wgReportItems.push({
 					reportId: report.id,
 					workingGroupName: relationsForWg[0]?.orgUnitName ?? "",
@@ -125,12 +117,8 @@ export async function getUserReportingScope(user: User): Promise<{
 		const countryOrgUnitIds = [
 			...new Set(
 				relations
-					.filter((r) => {
-						return r.orgUnitType === "country";
-					})
-					.map((r) => {
-						return r.orgUnitId;
-					}),
+					.filter((r) => r.orgUnitType === "country")
+					.map((r) => r.orgUnitId),
 			),
 		];
 
@@ -150,12 +138,8 @@ export async function getUserReportingScope(user: User): Promise<{
 				);
 
 			for (const report of personCountryReports) {
-				const relationsForCountry = relations.filter((r) => {
-					return r.orgUnitId === report.countryId && r.orgUnitType === "country";
-				});
-				const canConfirm = relationsForCountry.some((r) => {
-					return (coordinatorRoles as ReadonlyArray<string>).includes(r.roleType);
-				});
+				const relationsForCountry = relations.filter((r) => r.orgUnitId === report.countryId && r.orgUnitType === "country");
+				const canConfirm = relationsForCountry.some((r) => (coordinatorRoles as ReadonlyArray<string>).includes(r.roleType));
 				countryReportItems.push({
 					reportId: report.id,
 					countryName: relationsForCountry[0]?.orgUnitName ?? "",
@@ -173,9 +157,7 @@ export async function getUserReportingScope(user: User): Promise<{
 		});
 
 		if (report != null) {
-			const alreadyIncluded = countryReportItems.some((r) => {
-				return r.reportId === report.id;
-			});
+			const alreadyIncluded = countryReportItems.some((r) => r.reportId === report.id);
 			if (!alreadyIncluded) {
 				const country = await db.query.organisationalUnits.findFirst({
 					where: { id: user.organisationalUnitId },
@@ -236,9 +218,7 @@ export async function getUserAllCountryReports(
 			);
 
 		countryOrgUnitIds.push(
-			...relations.map((r) => {
-				return r.orgUnitId;
-			}),
+			...relations.map((r) => r.orgUnitId),
 		);
 	}
 
@@ -246,7 +226,7 @@ export async function getUserAllCountryReports(
 		countryOrgUnitIds.push(user.organisationalUnitId);
 	}
 
-	if (countryOrgUnitIds.length === 0) return [];
+	if (countryOrgUnitIds.length === 0) {return [];}
 
 	const uniqueIds = [...new Set(countryOrgUnitIds)];
 
@@ -292,7 +272,7 @@ export interface WorkingGroupReportHistoryItem {
 export async function getUserAllWorkingGroupReports(
 	user: User,
 ): Promise<Array<WorkingGroupReportHistoryItem>> {
-	if (user.personId == null) return [];
+	if (user.personId == null) {return [];}
 
 	const relations = await db
 		.select({ orgUnitId: schema.personsToOrganisationalUnits.organisationalUnitId })
@@ -319,13 +299,11 @@ export async function getUserAllWorkingGroupReports(
 
 	const wgOrgUnitIds = [
 		...new Set(
-			relations.map((r) => {
-				return r.orgUnitId;
-			}),
+			relations.map((r) => r.orgUnitId),
 		),
 	];
 
-	if (wgOrgUnitIds.length === 0) return [];
+	if (wgOrgUnitIds.length === 0) {return [];}
 
 	const rows = await db
 		.select({

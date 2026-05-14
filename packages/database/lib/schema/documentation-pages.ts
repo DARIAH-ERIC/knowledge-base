@@ -8,9 +8,7 @@ export const documentationPages = p.snakeCase.table("documentation_pages", {
 	id: p
 		.uuid("id")
 		.primaryKey()
-		.references(() => {
-			return entityVersions.id;
-		}),
+		.references(() => entityVersions.id),
 	title: p.text("title").notNull(),
 	...f.timestamps(),
 });

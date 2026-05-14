@@ -34,9 +34,7 @@ function formatRole(role: string): string {
 	return role
 		.replaceAll("_", " ")
 		.replace(/^is /, "")
-		.replaceAll(/\b\w/g, (c) => {
-			return c.toUpperCase();
-		});
+		.replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
 const dateFormatter = new Intl.DateTimeFormat("en", { dateStyle: "medium" });
@@ -52,7 +50,7 @@ export async function WorkingGroupReportSummary(
 		<div className="flex flex-col gap-y-10">
 			<section className="flex flex-col gap-y-4">
 				<h2 className="text-sm font-semibold text-fg">{t("Working group data")}</h2>
-				<dl className="grid max-w-sm grid-cols-[auto_1fr] gap-x-8 gap-y-3 text-sm">
+				<dl className="grid max-inline-sm grid-cols-[auto_1fr] gap-x-8 gap-y-3 text-sm">
 					<dt className="text-muted-fg">{t("Number of members")}</dt>
 					<dd>{data.numberOfMembers ?? "—"}</dd>
 					<dt className="text-muted-fg">{t("Mailing list")}</dt>
@@ -71,15 +69,13 @@ export async function WorkingGroupReportSummary(
 			{data.chairs.length > 0 && (
 				<section className="flex flex-col gap-y-4">
 					<h2 className="text-sm font-semibold text-fg">{t("Chairs")}</h2>
-					<ul className="max-w-sm divide-y rounded-md border">
-						{data.chairs.map((chair) => {
-							return (
+					<ul className="max-inline-sm divide-y rounded-md border">
+						{data.chairs.map((chair) => (
 								<li key={chair.id} className="px-4 py-3">
 									<p className="text-sm font-medium text-fg">{chair.personName}</p>
 									<p className="text-xs text-muted-fg">{formatRole(chair.roleType)}</p>
 								</li>
-							);
-						})}
+							))}
 					</ul>
 				</section>
 			)}
@@ -87,9 +83,8 @@ export async function WorkingGroupReportSummary(
 			{data.socialMedia.length > 0 && (
 				<section className="flex flex-col gap-y-4">
 					<h2 className="text-sm font-semibold text-fg">{t("Social media")}</h2>
-					<ul className="max-w-sm divide-y rounded-md border">
-						{data.socialMedia.map((item) => {
-							return (
+					<ul className="max-inline-sm divide-y rounded-md border">
+						{data.socialMedia.map((item) => (
 								<li key={item.id} className="px-4 py-3">
 									<p className="text-sm font-medium text-fg">{item.socialMedia.name}</p>
 									<a
@@ -101,8 +96,7 @@ export async function WorkingGroupReportSummary(
 										{item.socialMedia.url}
 									</a>
 								</li>
-							);
-						})}
+							))}
 					</ul>
 				</section>
 			)}
@@ -111,8 +105,7 @@ export async function WorkingGroupReportSummary(
 				<section className="flex flex-col gap-y-4">
 					<h2 className="text-sm font-semibold text-fg">{t("Events")}</h2>
 					<ul className="divide-y rounded-md border">
-						{data.events.map((event) => {
-							return (
+						{data.events.map((event) => (
 								<li key={event.id} className="flex items-center justify-between gap-x-4 px-4 py-3">
 									<div className="flex flex-col gap-y-0.5">
 										<span className="text-sm font-medium text-fg">{event.title}</span>
@@ -133,8 +126,7 @@ export async function WorkingGroupReportSummary(
 										</a>
 									)}
 								</li>
-							);
-						})}
+							))}
 					</ul>
 				</section>
 			)}
@@ -142,8 +134,7 @@ export async function WorkingGroupReportSummary(
 			{data.questions.length > 0 && (
 				<section className="flex flex-col gap-y-6">
 					<h2 className="text-sm font-semibold text-fg">{t("Questions")}</h2>
-					{data.questions.map((q) => {
-						return (
+					{data.questions.map((q) => (
 							<div key={q.id} className="flex flex-col gap-y-3">
 								<div className="rounded-md border border-border bg-muted/30 p-4">
 									<RichTextView ariaLabel={t("Question")} content={q.question} />
@@ -156,8 +147,7 @@ export async function WorkingGroupReportSummary(
 									<p className="px-4 text-sm text-muted-fg">{t("No answer provided.")}</p>
 								)}
 							</div>
-						);
-					})}
+						))}
 				</section>
 			)}
 		</div>

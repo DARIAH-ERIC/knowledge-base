@@ -52,11 +52,7 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 	const router = useRouter();
 	const [campaigns, optimisticallyRemoveCampaign] = useOptimistic(
 		resolvedCampaigns,
-		(state, id: string) => {
-			return state.filter((c) => {
-				return c.id !== id;
-			});
-		},
+		(state, id: string) => state.filter((c) => c.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 
@@ -74,7 +70,7 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 						className={buttonStyles({ intent: "secondary" })}
 						href="/dashboard/administrator/reporting-campaigns/create"
 					>
-						<PlusIcon className="mr-2 size-4" />
+						<PlusIcon className="me-2 block-4 inline-4" />
 						{t("New")}
 					</Link>
 				</HeaderAction>
@@ -91,8 +87,7 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={campaigns}>
-					{(item) => {
-						return (
+					{(item) => (
 							<TableRow id={item.id}>
 								<TableCell>{item.year}</TableCell>
 								<TableCell>{item.status}</TableCell>
@@ -101,17 +96,17 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 									<Menu>
 										<Button
 											aria-label={t("Open actions menu")}
-											className="h-7 sm:h-7"
+											className="block-7 sm:block-7"
 											intent="plain"
 											size="sq-sm"
 										>
-											<EllipsisHorizontalIcon className="size-5" />
+											<EllipsisHorizontalIcon className="block-5 inline-5" />
 										</Button>
 										<MenuContent placement="left top">
 											<MenuItem
 												href={`/dashboard/administrator/reporting-campaigns/${item.id}/edit`}
 											>
-												<PencilSquareIcon className="mr-2 size-4" />
+												<PencilSquareIcon className="me-2 block-4 inline-4" />
 												<MenuLabel>{t("Edit")}</MenuLabel>
 											</MenuItem>
 											<MenuSeparator />
@@ -122,15 +117,14 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 													setItemToDelete({ id: item.id });
 												}}
 											>
-												<TrashIcon className="mr-2 size-4" />
+												<TrashIcon className="me-2 block-4 inline-4" />
 												<MenuLabel>{t("Delete")}</MenuLabel>
 											</MenuItem>
 										</MenuContent>
 									</Menu>
 								</TableCell>
 							</TableRow>
-						);
-					}}
+						)}
 				</TableBody>
 			</Table>
 
@@ -138,7 +132,7 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 				isOpen={itemToDelete != null}
 				model={t("reporting campaign")}
 				onAction={() => {
-					if (itemToDelete == null) return;
+					if (itemToDelete == null) {return;}
 
 					startTransition(async () => {
 						optimisticallyRemoveCampaign(itemToDelete.id);
@@ -148,7 +142,7 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 					});
 				}}
 				onOpenChange={(open) => {
-					if (!open) setItemToDelete(null);
+					if (!open) {setItemToDelete(null);}
 				}}
 			/>
 		</Fragment>

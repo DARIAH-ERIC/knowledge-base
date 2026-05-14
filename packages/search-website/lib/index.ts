@@ -1,3 +1,4 @@
+import { log } from "@acdh-oeaw/lib";
 import type { Database } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { alias, and, eq, inArray, sql } from "@dariah-eric/database/sql";
@@ -81,12 +82,8 @@ function createWebsiteDocumentId(descriptor: WebsiteDocumentDescriptor): string 
 
 function mergeDescription(...values: Array<string | null | undefined>): string {
 	const parts = values
-		.map((value) => {
-			return value?.trim();
-		})
-		.filter((value): value is string => {
-			return value != null && value.length > 0;
-		});
+		.map((value) => value?.trim())
+		.filter((value): value is string => value != null && value.length > 0);
 
 	return [...new Set(parts)].join("\n\n");
 }
@@ -200,9 +197,10 @@ async function getPlainTextFieldContentByEntityId(
 	}
 
 	return new Map(
-		[...contentByEntityId.entries()].map(([entityId, parts]) => {
-			return [entityId, mergeDescription(...parts)];
-		}),
+		[...contentByEntityId.entries()].map(([entityId, parts]) => [
+			entityId,
+			mergeDescription(...parts),
+		]),
 	);
 }
 
@@ -316,9 +314,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => {
-					return item.id;
-				});
+				return items.map((item) => item.id);
 			}
 
 			case "document-or-policy": {
@@ -326,9 +322,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => {
-					return item.id;
-				});
+				return items.map((item) => item.id);
 			}
 
 			case "event": {
@@ -336,9 +330,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => {
-					return item.id;
-				});
+				return items.map((item) => item.id);
 			}
 
 			case "funding-call": {
@@ -346,9 +338,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => {
-					return item.id;
-				});
+				return items.map((item) => item.id);
 			}
 
 			case "impact-case-study": {
@@ -356,9 +346,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => {
-					return item.id;
-				});
+				return items.map((item) => item.id);
 			}
 
 			case "news-item": {
@@ -366,9 +354,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => {
-					return item.id;
-				});
+				return items.map((item) => item.id);
 			}
 
 			case "opportunity": {
@@ -376,9 +362,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => {
-					return item.id;
-				});
+				return items.map((item) => item.id);
 			}
 
 			case "page": {
@@ -386,9 +370,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => {
-					return item.id;
-				});
+				return items.map((item) => item.id);
 			}
 
 			case "person": {
@@ -396,9 +378,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => {
-					return item.id;
-				});
+				return items.map((item) => item.id);
 			}
 
 			case "project": {
@@ -406,9 +386,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => {
-					return item.id;
-				});
+				return items.map((item) => item.id);
 			}
 
 			case "spotlight-article": {
@@ -416,9 +394,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => {
-					return item.id;
-				});
+				return items.map((item) => item.id);
 			}
 
 			case "working-group": {
@@ -426,16 +402,12 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					columns: { id: true },
 				});
 
-				return items.map((item) => {
-					return item.id;
-				});
+				return items.map((item) => item.id);
 			}
 
 			case undefined: {
 				const groups = await Promise.all(
-					supportedWebsiteEntityTypes.map((type) => {
-						return getSyncableWebsiteEntityIdsByType(type);
-					}),
+					supportedWebsiteEntityTypes.map((type) => getSyncableWebsiteEntityIdsByType(type)),
 				);
 
 				return groups.flat();
@@ -1034,9 +1006,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					await db.query.membersAndPartners.findMany({
 						columns: { id: true },
 					})
-				).map((item) => {
-					return item.id;
-				}),
+				).map((item) => item.id),
 				"description",
 			),
 			getPlainTextFieldContentByEntityId(
@@ -1045,9 +1015,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					await db.query.news.findMany({
 						columns: { id: true },
 					})
-				).map((item) => {
-					return item.id;
-				}),
+				).map((item) => item.id),
 				"content",
 			),
 			getPlainTextFieldContentByEntityId(
@@ -1056,9 +1024,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					await db.query.opportunities.findMany({
 						columns: { id: true },
 					})
-				).map((item) => {
-					return item.id;
-				}),
+				).map((item) => item.id),
 				"content",
 			),
 			getPlainTextFieldContentByEntityId(
@@ -1067,9 +1033,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					await db.query.pages.findMany({
 						columns: { id: true },
 					})
-				).map((item) => {
-					return item.id;
-				}),
+				).map((item) => item.id),
 				"content",
 			),
 			getPlainTextFieldContentByEntityId(
@@ -1078,9 +1042,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					await db.query.persons.findMany({
 						columns: { id: true },
 					})
-				).map((item) => {
-					return item.id;
-				}),
+				).map((item) => item.id),
 				"biography",
 			),
 			getPlainTextFieldContentByEntityId(
@@ -1089,9 +1051,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					await db.query.dariahProjects.findMany({
 						columns: { id: true },
 					})
-				).map((item) => {
-					return item.id;
-				}),
+				).map((item) => item.id),
 				"description",
 			),
 			getPlainTextFieldContentByEntityId(
@@ -1100,9 +1060,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					await db.query.workingGroups.findMany({
 						columns: { id: true },
 					})
-				).map((item) => {
-					return item.id;
-				}),
+				).map((item) => item.id),
 				"description",
 			),
 			getPlainTextFieldContentByEntityId(
@@ -1111,9 +1069,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					await db.query.spotlightArticles.findMany({
 						columns: { id: true },
 					})
-				).map((item) => {
-					return item.id;
-				}),
+				).map((item) => item.id),
 				"content",
 			),
 			getPlainTextFieldContentByEntityId(
@@ -1122,9 +1078,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					await db.query.workingGroups.findMany({
 						columns: { id: true },
 					})
-				).map((item) => {
-					return item.id;
-				}),
+				).map((item) => item.id),
 				"description",
 			),
 		]);
@@ -1158,8 +1112,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		});
 
 		website.push(
-			...documentsPolicies.map((item) => {
-				return createWebsiteEntityDocument({
+			...documentsPolicies.map((item) =>
+				createWebsiteEntityDocument({
 					importedAt,
 					type: "document-or-policy",
 					sourceId: item.entityVersion.entity.slug,
@@ -1167,8 +1121,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					label: item.title,
 					description: item.summary,
 					link: "/about/documents",
-				});
-			}),
+				}),
+			),
 		);
 
 		const events = await db.query.events.findMany({
@@ -1200,8 +1154,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		});
 
 		website.push(
-			...events.map((item) => {
-				return createWebsiteEntityDocument({
+			...events.map((item) =>
+				createWebsiteEntityDocument({
 					importedAt,
 					type: "event",
 					sourceId: item.entityVersion.entity.slug,
@@ -1209,8 +1163,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					label: item.title,
 					description: item.summary,
 					link: `/events/${item.entityVersion.entity.slug}`,
-				});
-			}),
+				}),
+			),
 		);
 
 		const fundingCalls = await db.query.fundingCalls.findMany({
@@ -1242,8 +1196,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		});
 
 		website.push(
-			...fundingCalls.map((item) => {
-				return createWebsiteEntityDocument({
+			...fundingCalls.map((item) =>
+				createWebsiteEntityDocument({
 					importedAt,
 					type: "funding-call",
 					sourceId: item.entityVersion.entity.slug,
@@ -1251,8 +1205,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					label: item.title,
 					description: item.summary ?? "",
 					link: `/funding-calls/${item.entityVersion.entity.slug}`,
-				});
-			}),
+				}),
+			),
 		);
 
 		const impactCaseStudies = await db.query.impactCaseStudies.findMany({
@@ -1284,8 +1238,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		});
 
 		website.push(
-			...impactCaseStudies.map((item) => {
-				return createWebsiteEntityDocument({
+			...impactCaseStudies.map((item) =>
+				createWebsiteEntityDocument({
 					importedAt,
 					type: "impact-case-study",
 					sourceId: item.entityVersion.entity.slug,
@@ -1293,8 +1247,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					label: item.title,
 					description: item.summary,
 					link: `/about/impact-case-studies/${item.entityVersion.entity.slug}`,
-				});
-			}),
+				}),
+			),
 		);
 
 		const membersAndPartners = await db.query.membersAndPartners.findMany({
@@ -1326,8 +1280,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		});
 
 		website.push(
-			...membersAndPartners.map((item) => {
-				return createWebsiteEntityDocument({
+			...membersAndPartners.map((item) =>
+				createWebsiteEntityDocument({
 					importedAt,
 					type: "country",
 					sourceId: item.entityVersion.entity.slug,
@@ -1335,8 +1289,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					label: item.name,
 					description: mergeDescription(countryDescriptions.get(item.id), item.summary ?? ""),
 					link: `/network/members-and-partners/${item.entityVersion.entity.slug}`,
-				});
-			}),
+				}),
+			),
 		);
 
 		const countryEntities = alias(schema.entities, "country_entities");
@@ -1359,9 +1313,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				await db.query.organisationalUnits.findMany({
 					columns: { id: true },
 				})
-			).map((item) => {
-				return item.id;
-			}),
+			).map((item) => item.id),
 			"description",
 		);
 
@@ -1406,8 +1358,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			);
 
 		website.push(
-			...nationalConsortia.map((item) => {
-				return createWebsiteEntityDocument({
+			...nationalConsortia.map((item) =>
+				createWebsiteEntityDocument({
 					importedAt,
 					type: "national-consortium",
 					sourceId: item.itemSlug,
@@ -1419,8 +1371,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						item.description ?? "",
 					),
 					link: `/network/members-and-partners/${item.countrySlug}`,
-				});
-			}),
+				}),
+			),
 		);
 
 		const partnerInstitutions = await db
@@ -1480,8 +1432,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			);
 
 		website.push(
-			...partnerInstitutions.map((item) => {
-				return createWebsiteEntityDocument({
+			...partnerInstitutions.map((item) =>
+				createWebsiteEntityDocument({
 					importedAt,
 					type: "institution",
 					sourceId: item.itemSlug,
@@ -1493,8 +1445,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						item.description ?? "",
 					),
 					link: `/network/members-and-partners/${item.countrySlug}`,
-				});
-			}),
+				}),
+			),
 		);
 
 		const cooperatingPartnerInstitutions = await db
@@ -1554,8 +1506,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			);
 
 		website.push(
-			...cooperatingPartnerInstitutions.map((item) => {
-				return createWebsiteEntityDocument({
+			...cooperatingPartnerInstitutions.map((item) =>
+				createWebsiteEntityDocument({
 					importedAt,
 					type: "institution",
 					sourceId: item.itemSlug,
@@ -1567,8 +1519,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 						item.description ?? "",
 					),
 					link: `/network/members-and-partners/${item.countrySlug}`,
-				});
-			}),
+				}),
+			),
 		);
 
 		const personRoleType = alias(schema.personRoleTypes, "person_role_type");
@@ -1660,8 +1612,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		});
 
 		website.push(
-			...news.map((item) => {
-				return createWebsiteEntityDocument({
+			...news.map((item) =>
+				createWebsiteEntityDocument({
 					importedAt,
 					type: "news-item",
 					sourceId: item.entityVersion.entity.slug,
@@ -1669,8 +1621,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					label: item.title,
 					description: mergeDescription(newsContent.get(item.id), item.summary),
 					link: `/news/${item.entityVersion.entity.slug}`,
-				});
-			}),
+				}),
+			),
 		);
 
 		const opportunities = await db.query.opportunities.findMany({
@@ -1702,8 +1654,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		});
 
 		website.push(
-			...opportunities.map((item) => {
-				return createWebsiteEntityDocument({
+			...opportunities.map((item) =>
+				createWebsiteEntityDocument({
 					importedAt,
 					type: "opportunity",
 					sourceId: item.entityVersion.entity.slug,
@@ -1711,8 +1663,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					label: item.title,
 					description: mergeDescription(opportunityContent.get(item.id), item.summary ?? ""),
 					link: `/opportunities/${item.entityVersion.entity.slug}`,
-				});
-			}),
+				}),
+			),
 		);
 
 		const pages = await db.query.pages.findMany({
@@ -1744,8 +1696,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		});
 
 		website.push(
-			...pages.map((item) => {
-				return createWebsiteEntityDocument({
+			...pages.map((item) =>
+				createWebsiteEntityDocument({
 					importedAt,
 					type: "page",
 					sourceId: item.entityVersion.entity.slug,
@@ -1753,8 +1705,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					label: item.title,
 					description: mergeDescription(pageContent.get(item.id), item.summary),
 					link: `/${item.entityVersion.entity.slug}`,
-				});
-			}),
+				}),
+			),
 		);
 
 		const persons = await db.query.persons.findMany({
@@ -1785,8 +1737,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		});
 
 		website.push(
-			...persons.map((item) => {
-				return createWebsiteEntityDocument({
+			...persons.map((item) =>
+				createWebsiteEntityDocument({
 					importedAt,
 					type: "person",
 					sourceId: item.entityVersion.entity.slug,
@@ -1794,8 +1746,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					label: item.name,
 					description: personBiographies.get(item.id) ?? "",
 					link: `/persons/${item.entityVersion.entity.slug}`,
-				});
-			}),
+				}),
+			),
 		);
 
 		const dariahProjects = await db.query.dariahProjects.findMany({
@@ -1827,8 +1779,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		});
 
 		website.push(
-			...dariahProjects.map((item) => {
-				return createWebsiteEntityDocument({
+			...dariahProjects.map((item) =>
+				createWebsiteEntityDocument({
 					importedAt,
 					type: "project",
 					sourceId: item.entityVersion.entity.slug,
@@ -1836,8 +1788,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					label: item.name,
 					description: mergeDescription(projectDescriptions.get(item.id), item.summary),
 					link: `/projects/${item.entityVersion.entity.slug}`,
-				});
-			}),
+				}),
+			),
 		);
 
 		const spotlightArticles = await db.query.spotlightArticles.findMany({
@@ -1869,8 +1821,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		});
 
 		website.push(
-			...spotlightArticles.map((item) => {
-				return createWebsiteEntityDocument({
+			...spotlightArticles.map((item) =>
+				createWebsiteEntityDocument({
 					importedAt,
 					type: "spotlight-article",
 					sourceId: item.entityVersion.entity.slug,
@@ -1878,8 +1830,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					label: item.title,
 					description: mergeDescription(spotlightContent.get(item.id), item.summary),
 					link: `/spotlights/${item.entityVersion.entity.slug}`,
-				});
-			}),
+				}),
+			),
 		);
 
 		const workingGroups = await db.query.workingGroups.findMany({
@@ -1911,8 +1863,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		});
 
 		website.push(
-			...workingGroups.map((item) => {
-				return createWebsiteEntityDocument({
+			...workingGroups.map((item) =>
+				createWebsiteEntityDocument({
 					importedAt,
 					type: "working-group",
 					sourceId: item.entityVersion.entity.slug,
@@ -1920,8 +1872,8 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 					label: item.name,
 					description: mergeDescription(workingGroupDescriptions.get(item.id), item.summary ?? ""),
 					link: `/network/working-groups/${item.entityVersion.entity.slug}`,
-				});
-			}),
+				}),
+			),
 		);
 
 		return website;
@@ -1935,15 +1887,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			throw result.error;
 		}
 
-		const currentDocumentIds = new Set(
-			documents.map((document) => {
-				return document.id;
-			}),
-		);
+		const currentDocumentIds = new Set(documents.map((document) => document.id));
 
 		const existingDocumentIds = new Set<string>();
 		let page = 1;
-		let totalPages = 1;
+		let totalPages;
 
 		do {
 			const result = await searchService.collections.website.search({
@@ -1975,7 +1923,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			const result = await search.collections.website.delete(documentId);
 
 			if (result.isErr() && !isMissingSearchDocumentError(result.error)) {
-				console.error("Failed to delete stale website search document.", {
+				log.error("Failed to delete stale website search document.", {
 					documentId,
 					error: result.error,
 				});
@@ -1997,7 +1945,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		const result = await search.collections.website.delete(documentId);
 
 		if (result.isErr() && !isMissingSearchDocumentError(result.error)) {
-			console.error("Failed to delete website search document.", {
+			log.error("Failed to delete website search document.", {
 				documentId,
 				error: result.error,
 			});
@@ -2041,7 +1989,7 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		const result = await search.collections.website.upsert(document);
 
 		if (result.isErr()) {
-			console.error("Failed to upsert website search document.", {
+			log.error("Failed to upsert website search document.", {
 				entityId,
 				documentId: document.id,
 				error: result.error,

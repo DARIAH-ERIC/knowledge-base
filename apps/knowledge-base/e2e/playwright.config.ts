@@ -1,10 +1,8 @@
-/* eslint-disable no-restricted-syntax */
-
 import { join } from "node:path";
 
 import { isNonEmptyString } from "@acdh-oeaw/lib";
 import { config as dotenv } from "@dotenvx/dotenvx";
-import { defineConfig, devices, type PlaywrightTestConfig } from "@playwright/test";
+import { type PlaywrightTestConfig, defineConfig, devices } from "@playwright/test";
 import isCI from "is-in-ci";
 
 /**
@@ -12,9 +10,9 @@ import isCI from "is-in-ci";
  * to the vs code plugin as well.
  */
 dotenv({
-	path: [".env.test.local", ".env.local", ".env.test", ".env"].map((filePath) => {
-		return join(import.meta.dirname, "..", filePath);
-	}),
+	path: [".env.test.local", ".env.local", ".env.test", ".env"].map((filePath) =>
+		join(import.meta.dirname, "..", filePath),
+	),
 	ignore: ["MISSING_ENV_FILE"],
 	quiet: true,
 });
@@ -22,6 +20,7 @@ dotenv({
 function getConfig():
 	| { kind: "remote"; baseUrl: string; webServer: undefined }
 	| { kind: "local"; baseUrl: string; webServer: PlaywrightTestConfig["webServer"] } {
+	// oxlint-disable-next-line node/no-process-env
 	const remoteBaseUrl = process.env.PLAYWRIGHT_TEST_APP_BASE_URL;
 
 	if (isNonEmptyString(remoteBaseUrl)) {
@@ -32,6 +31,7 @@ function getConfig():
 		};
 	}
 
+	// oxlint-disable-next-line node/no-process-env
 	const port = Number(process.env.PORT) || 3001;
 	const baseUrl = `http://localhost:${String(port)}`;
 

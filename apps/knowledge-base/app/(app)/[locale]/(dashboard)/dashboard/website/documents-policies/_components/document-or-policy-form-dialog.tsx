@@ -3,7 +3,7 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
-import { FieldError, fieldErrorStyles, Label } from "@dariah-eric/ui/field";
+import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
@@ -55,7 +55,7 @@ function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>): React
 	const [state, formAction, isPending] = useActionState(
 		async (prevState: ActionState, formData: FormData) => {
 			const result = await serverAction(prevState, formData);
-			if (result.status === "success") onSuccess();
+			if (result.status === "success") {onSuccess();}
 			return result;
 		},
 		createActionStateInitial(),
@@ -111,29 +111,25 @@ function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>): React
 					<FieldError />
 					<SelectContent>
 						<SelectItem id="none">{t("None")}</SelectItem>
-						{groups.map((group) => {
-							return (
+						{groups.map((group) => (
 								<SelectItem key={group.id} id={group.id}>
 									{group.label}
 								</SelectItem>
-							);
-						})}
+							))}
 					</SelectContent>
 				</Select>
 				{selectedGroupId ? <input name="groupId" type="hidden" value={selectedGroupId} /> : null}
 
 				<div>
-					<Label className="mb-1.5 block text-sm font-medium">{t("Document")}</Label>
+					<Label className="mbe-1.5 block text-sm font-medium">{t("Document")}</Label>
 					{selectedDocument != null && (
-						<p className="mb-2 text-sm text-muted-fg">{selectedDocument.label}</p>
+						<p className="mbe-2 text-sm text-muted-fg">{selectedDocument.label}</p>
 					)}
 					<MediaLibraryDialog
 						defaultPrefix="documents"
 						initialAssets={initialAssets}
 						onSelect={(key) => {
-							const asset = initialAssets.find((a) => {
-								return a.key === key;
-							});
+							const asset = initialAssets.find((a) => a.key === key);
 							setSelectedDocument({ key, label: asset?.label ?? key });
 						}}
 						prefixes={["documents"]}
@@ -192,9 +188,7 @@ export function DocumentOrPolicyFormDialog(
 
 	function handleOpenChange(open: boolean) {
 		if (open)
-			setFormKey((k) => {
-				return k + 1;
-			});
+			{setFormKey((k) => k + 1);}
 		onOpenChange(open);
 	}
 

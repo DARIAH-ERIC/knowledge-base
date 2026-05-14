@@ -8,7 +8,7 @@ export function Card({
 	return (
 		<div
 			className={twMerge(
-				"group/card flex flex-col gap-(--gutter) rounded-lg border py-(--gutter) text-fg shadow-xs [--gutter:--spacing(6)] **:data-[slot=table-header]:bg-muted/50 **:[table]:overflow-hidden has-[table]:overflow-hidden has-[table]:**:data-[slot=card-footer]:border-t has-[table]:not-has-data-[slot=card-footer]:pb-0",
+				"group/card flex flex-col gap-(--gutter) rounded-lg border py-(--gutter) text-fg shadow-xs [--gutter:--spacing(6)] **:data-[slot=table-header]:bg-muted/50 **:[table]:overflow-hidden has-[table]:overflow-hidden has-[table]:**:data-[slot=card-footer]:border-bs has-[table]:not-has-data-[slot=card-footer]:pbe-0",
 				className,
 			)}
 			data-slot="card"
@@ -64,7 +64,7 @@ export function CardDescription({
 }: Readonly<React.HTMLAttributes<HTMLDivElement>>): ReactNode {
 	return (
 		<div
-			{...props}
+			
 			className={twMerge("row-start-2 text-pretty text-muted-fg text-sm/6", className)}
 			data-slot="card-description"
 			{...props}
@@ -94,7 +94,7 @@ export function CardContent({
 }: Readonly<React.HTMLAttributes<HTMLDivElement>>): ReactNode {
 	return (
 		<div
-			className={twMerge("px-(--gutter) has-[table]:border-t", className)}
+			className={twMerge("px-(--gutter) has-[table]:border-bs", className)}
 			data-slot="card-content"
 			{...props}
 		/>
@@ -108,7 +108,7 @@ export function CardFooter({
 	return (
 		<div
 			className={twMerge(
-				"flex items-center px-(--gutter) group-has-[table]/card:pt-(--gutter) [.border-t]:pt-6",
+				"flex items-center px-(--gutter) group-has-[table]/card:pbs-(--gutter) [.border-t]:pbs-6",
 				className,
 			)}
 			data-slot="card-footer"

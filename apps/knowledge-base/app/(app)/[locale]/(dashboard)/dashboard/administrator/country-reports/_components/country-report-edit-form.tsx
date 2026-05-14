@@ -70,13 +70,11 @@ export function CountryReportEditForm(props: Readonly<CountryReportEditFormProps
 							<SelectTrigger />
 							<FieldError />
 							<SelectContent>
-								{reportStatusEnum.map((status) => {
-									return (
+								{reportStatusEnum.map((status) => (
 										<SelectItem key={status} id={status}>
 											{formatStatus(status)}
 										</SelectItem>
-									);
-								})}
+									))}
 							</SelectContent>
 						</Select>
 						<input name="status" type="hidden" value={selectedStatus} />

@@ -106,11 +106,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 	const router = useRouter();
 	const [items, optimisticallyRemoveItem] = useOptimistic(
 		contributions.data,
-		(state, id: string) => {
-			return state.filter((item) => {
-				return item.id !== id;
-			});
-		},
+		(state, id: string) => state.filter((item) => item.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
@@ -141,7 +137,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 						className={buttonStyles({ intent: "secondary" })}
 						href="/dashboard/administrator/person-relations/create"
 					>
-						<PlusIcon className="mr-2 size-4" />
+						<PlusIcon className="me-2 block-4 inline-4" />
 						{t("New")}
 					</Link>
 				</HeaderAction>
@@ -175,8 +171,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
-					{(item) => {
-						return (
+					{(item) => (
 							<TableRow id={item.id}>
 								<TableCell>{item.personName}</TableCell>
 								<TableCell>{formatRoleType(item.roleType)}</TableCell>
@@ -196,15 +191,15 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 									<Menu>
 										<Button
 											aria-label={t("Open actions menu")}
-											className="h-7 sm:h-7"
+											className="block-7 sm:block-7"
 											intent="plain"
 											size="sq-sm"
 										>
-											<EllipsisHorizontalIcon className="size-5" />
+											<EllipsisHorizontalIcon className="block-5 inline-5" />
 										</Button>
 										<MenuContent placement="left top">
 											<MenuItem href={`/dashboard/administrator/person-relations/${item.id}/edit`}>
-												<PencilSquareIcon className="mr-2 size-4" />
+												<PencilSquareIcon className="me-2 block-4 inline-4" />
 												<MenuLabel>{t("Edit")}</MenuLabel>
 											</MenuItem>
 											<MenuSeparator />
@@ -214,15 +209,14 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 													setItemToDelete({ id: item.id });
 												}}
 											>
-												<TrashIcon className="mr-2 size-4" />
+												<TrashIcon className="me-2 block-4 inline-4" />
 												<MenuLabel>{t("Delete")}</MenuLabel>
 											</MenuItem>
 										</MenuContent>
 									</Menu>
 								</TableCell>
 							</TableRow>
-						);
-					}}
+						)}
 				</TableBody>
 			</Table>
 
