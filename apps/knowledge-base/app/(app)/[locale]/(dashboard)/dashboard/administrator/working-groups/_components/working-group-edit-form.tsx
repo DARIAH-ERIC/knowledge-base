@@ -20,6 +20,7 @@ import type { WorkingGroupChair } from "@/lib/data/working-group-chairs";
 interface WorkingGroupEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	documentId: string;
+	hasDraftChanges: boolean;
 	isPublished: boolean;
 	workingGroup: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
 		description?: JSONContent;
@@ -44,6 +45,7 @@ export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>)
 	const {
 		initialAssets,
 		documentId,
+		hasDraftChanges,
 		isPublished,
 		workingGroup,
 		initialRelatedEntityIds,
@@ -70,7 +72,7 @@ export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>)
 				<EntityLifecycleBar
 					discardDraftAction={discardWorkingGroupDraftAction}
 					documentId={documentId}
-					hasDraft={true}
+					hasDraft={hasDraftChanges}
 					isPublished={isPublished}
 					publishAction={publishWorkingGroupAction}
 				/>

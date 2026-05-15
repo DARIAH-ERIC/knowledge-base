@@ -17,6 +17,7 @@ import type { ContributionRoleOption, PersonContribution } from "@/lib/data/cont
 interface PersonEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	documentId: string;
+	hasDraftChanges: boolean;
 	isPublished: boolean;
 	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "position" | "sortName"> & {
 		biography?: JSONContent;
@@ -27,8 +28,15 @@ interface PersonEditFormProps {
 }
 
 export function PersonEditForm(props: Readonly<PersonEditFormProps>): ReactNode {
-	const { initialAssets, documentId, isPublished, person, contributions, contributionRoleOptions } =
-		props;
+	const {
+		initialAssets,
+		documentId,
+		hasDraftChanges,
+		isPublished,
+		person,
+		contributions,
+		contributionRoleOptions,
+	} = props;
 
 	const t = useExtracted();
 
@@ -39,7 +47,7 @@ export function PersonEditForm(props: Readonly<PersonEditFormProps>): ReactNode 
 				<EntityLifecycleBar
 					discardDraftAction={discardPersonDraftAction}
 					documentId={documentId}
-					hasDraft={true}
+					hasDraft={hasDraftChanges}
 					isPublished={isPublished}
 					publishAction={publishPersonAction}
 				/>

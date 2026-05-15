@@ -14,6 +14,10 @@ export interface DocumentVersions {
 	publishedId: string | null;
 }
 
+export interface DocumentLifecycleState extends DocumentVersions {
+	hasDraftChanges: boolean;
+}
+
 /**
  * Adapter that each entity type must implement to participate in the lifecycle.
  *
@@ -344,6 +348,48 @@ export async function getDocumentVersions(
 	}
 
 	return { draftId, publishedId };
+}
+
+/** Return lifecycle state while treating a synced draft clone as "no draft changes". */
+export async function getDocumentLifecycleState(
+	tx: Transaction,
+	documentId: string,
+): Promise<DocumentLifecycleState> {
+	const rows = await tx
+		.select({
+			id: schema.entityVersions.id,
+			statusType: schema.entityStatus.type,
+			updatedAt: schema.entityVersions.updatedAt,
+		})
+		.from(schema.entityVersions)
+		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.where(eq(schema.entityVersions.entityId, documentId));
+
+	let draftId: string | null = null;
+	let draftUpdatedAt: Date | null = null;
+	let publishedId: string | null = null;
+	let publishedUpdatedAt: Date | null = null;
+
+	for (const row of rows) {
+		if (row.statusType === "draft") {
+			draftId = row.id;
+			draftUpdatedAt = row.updatedAt;
+		}
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		else if (row.statusType === "published") {
+			publishedId = row.id;
+			publishedUpdatedAt = row.updatedAt;
+		}
+	}
+
+	const hasDraftChanges =
+		draftId != null &&
+		(publishedId == null ||
+			(draftUpdatedAt != null &&
+				publishedUpdatedAt != null &&
+				draftUpdatedAt.getTime() > publishedUpdatedAt.getTime()));
+
+	return { draftId, publishedId, hasDraftChanges };
 }
 
 /**

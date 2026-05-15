@@ -9,7 +9,7 @@ import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getPersonOptions } from "@/lib/data/article-contributors";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
-import { ensureDraftVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import {
 	getEntityRelationOptions,
@@ -65,14 +65,14 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 
 	const documentId = anyVersion.entityVersion.entity.id;
 
-	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+	const { draftVersionId, hasDraftChanges, publishedId } = await db.transaction(async (tx) => {
 		const draftVersionId = await ensureDraftVersion(
 			tx,
 			documentId,
 			organisationalUnitsLifecycleAdapter,
 		);
-		const { publishedId } = await getDocumentVersions(tx, documentId);
-		return { draftVersionId, publishedId };
+		const { hasDraftChanges, publishedId } = await getDocumentLifecycleState(tx, documentId);
+		return { draftVersionId, hasDraftChanges, publishedId };
 	});
 
 	const [
@@ -170,6 +170,7 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 		<WorkingGroupEditForm
 			chairs={chairs}
 			documentId={documentId}
+			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
 			initialPersonItems={initialPersons.items}
 			initialPersonTotal={initialPersons.total}

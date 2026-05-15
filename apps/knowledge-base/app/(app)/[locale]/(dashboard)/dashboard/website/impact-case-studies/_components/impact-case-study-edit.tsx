@@ -20,6 +20,7 @@ interface ImpactCaseStudyEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
 	documentId: string;
+	hasDraftChanges: boolean;
 	isPublished: boolean;
 	impactCaseStudy: Pick<schema.ImpactCaseStudy, "id" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
@@ -42,6 +43,7 @@ export function ImpactCaseStudyEditForm(props: Readonly<ImpactCaseStudyEditFormP
 		initialAssets,
 		contentBlocks,
 		documentId,
+		hasDraftChanges,
 		isPublished,
 		impactCaseStudy,
 		initialRelatedEntityIds,
@@ -66,7 +68,7 @@ export function ImpactCaseStudyEditForm(props: Readonly<ImpactCaseStudyEditFormP
 				<EntityLifecycleBar
 					discardDraftAction={discardImpactCaseStudyDraftAction}
 					documentId={documentId}
-					hasDraft={true}
+					hasDraft={hasDraftChanges}
 					isPublished={isPublished}
 					publishAction={publishImpactCaseStudyAction}
 				/>

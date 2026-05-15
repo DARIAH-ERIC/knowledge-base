@@ -7,7 +7,7 @@ import { NewsItemEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/web
 import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
-import { ensureDraftVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { newsLifecycleAdapter } from "@/lib/data/news.lifecycle-adapter";
 import {
 	getEntityRelationOptions,
@@ -60,10 +60,10 @@ export default async function DashboardWebsiteEditNewsItemPage(
 
 	const documentId = anyVersion.entityVersion.entity.id;
 
-	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+	const { draftVersionId, hasDraftChanges, publishedId } = await db.transaction(async (tx) => {
 		const draftVersionId = await ensureDraftVersion(tx, documentId, newsLifecycleAdapter);
-		const { publishedId } = await getDocumentVersions(tx, documentId);
-		return { draftVersionId, publishedId };
+		const { hasDraftChanges, publishedId } = await getDocumentLifecycleState(tx, documentId);
+		return { draftVersionId, hasDraftChanges, publishedId };
 	});
 
 	const [{ items: initialAssets }, newsItem, initialRelatedEntities, initialRelatedResources] =
@@ -127,6 +127,7 @@ export default async function DashboardWebsiteEditNewsItemPage(
 		<NewsItemEditForm
 			contentBlocks={contentBlocks}
 			documentId={documentId}
+			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
 			initialRelatedEntityIds={relatedEntityIds}
 			initialRelatedEntityItems={initialRelatedEntities.items}

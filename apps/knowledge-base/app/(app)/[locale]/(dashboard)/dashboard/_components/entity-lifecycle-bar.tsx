@@ -63,7 +63,7 @@ export function EntityLifecycleBar(props: Readonly<EntityLifecycleBarProps>): Re
 					}}
 					size="sm"
 				>
-					{t("Publish")}
+					{t("Publish saved draft")}
 				</Button>
 			) : null}
 

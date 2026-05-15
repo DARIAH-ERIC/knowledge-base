@@ -8,7 +8,7 @@ import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getPersonOptions, getSpotlightArticleContributors } from "@/lib/data/article-contributors";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
-import { ensureDraftVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import {
 	getEntityRelationOptions,
 	getEntityRelationOptionsByIds,
@@ -60,14 +60,14 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 
 	const documentId = anyVersion.entityVersion.entity.id;
 
-	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+	const { draftVersionId, hasDraftChanges, publishedId } = await db.transaction(async (tx) => {
 		const draftVersionId = await ensureDraftVersion(
 			tx,
 			documentId,
 			spotlightArticlesLifecycleAdapter,
 		);
-		const { publishedId } = await getDocumentVersions(tx, documentId);
-		return { draftVersionId, publishedId };
+		const { hasDraftChanges, publishedId } = await getDocumentLifecycleState(tx, documentId);
+		return { draftVersionId, hasDraftChanges, publishedId };
 	});
 
 	const [
@@ -142,6 +142,7 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 			contentBlocks={contentBlocks}
 			contributors={contributors}
 			documentId={documentId}
+			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
 			initialPersonItems={initialPersons.items}
 			initialPersonTotal={initialPersons.total}

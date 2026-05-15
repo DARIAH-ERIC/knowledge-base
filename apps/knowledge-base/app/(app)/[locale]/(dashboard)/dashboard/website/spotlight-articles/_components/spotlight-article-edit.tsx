@@ -20,6 +20,7 @@ interface SpotlightArticleEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
 	documentId: string;
+	hasDraftChanges: boolean;
 	isPublished: boolean;
 	spotlightArticle: Pick<schema.SpotlightArticle, "id" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
@@ -44,6 +45,7 @@ export function SpotlightArticleEditForm(
 		initialAssets,
 		contentBlocks,
 		documentId,
+		hasDraftChanges,
 		isPublished,
 		spotlightArticle,
 		initialRelatedEntityIds,
@@ -68,7 +70,7 @@ export function SpotlightArticleEditForm(
 				<EntityLifecycleBar
 					discardDraftAction={discardSpotlightArticleDraftAction}
 					documentId={documentId}
-					hasDraft={true}
+					hasDraft={hasDraftChanges}
 					isPublished={isPublished}
 					publishAction={publishSpotlightArticleAction}
 				/>

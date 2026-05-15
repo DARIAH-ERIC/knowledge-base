@@ -20,6 +20,7 @@ import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-rel
 interface GovernanceBodyEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	documentId: string;
+	hasDraftChanges: boolean;
 	isPublished: boolean;
 	governanceBody: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
 		description?: JSONContent;
@@ -45,6 +46,7 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 	const {
 		initialAssets,
 		documentId,
+		hasDraftChanges,
 		isPublished,
 		governanceBody,
 		initialRelatedEntityIds,
@@ -72,7 +74,7 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 				<EntityLifecycleBar
 					discardDraftAction={discardGovernanceBodyDraftAction}
 					documentId={documentId}
-					hasDraft={true}
+					hasDraft={hasDraftChanges}
 					isPublished={isPublished}
 					publishAction={publishGovernanceBodyAction}
 				/>

@@ -9,7 +9,7 @@ import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { getContributionPersonOptions } from "@/lib/data/contributions";
-import { ensureDraftVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { getPersonRelationRoleOptions, getPersonRelations } from "@/lib/data/person-relations";
 import {
@@ -65,14 +65,14 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 
 	const documentId = anyVersion.entityVersion.entity.id;
 
-	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+	const { draftVersionId, hasDraftChanges, publishedId } = await db.transaction(async (tx) => {
 		const draftVersionId = await ensureDraftVersion(
 			tx,
 			documentId,
 			organisationalUnitsLifecycleAdapter,
 		);
-		const { publishedId } = await getDocumentVersions(tx, documentId);
-		return { draftVersionId, publishedId };
+		const { hasDraftChanges, publishedId } = await getDocumentLifecycleState(tx, documentId);
+		return { draftVersionId, hasDraftChanges, publishedId };
 	});
 
 	const [
@@ -173,6 +173,7 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 		<GovernanceBodyEditForm
 			documentId={documentId}
 			governanceBody={{ ...governanceBody, description, image }}
+			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
 			initialPersonItems={initialPersonItems}
 			initialPersonTotal={initialPersonTotal}
