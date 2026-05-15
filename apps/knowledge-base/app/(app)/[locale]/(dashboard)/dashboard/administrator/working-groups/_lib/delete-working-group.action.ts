@@ -14,6 +14,7 @@ import {
 	deleteWebsiteDocument,
 	getWebsiteDocumentDescriptorByEntityId,
 } from "@/lib/search/website-index";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function deleteWorkingGroupAction(documentId: string): Promise<void> {
 	await assertAdmin();
@@ -76,6 +77,8 @@ export async function deleteWorkingGroupAction(documentId: string): Promise<void
 		if (descriptor != null) {
 			await deleteWebsiteDocument(descriptor);
 		}
+
+		await dispatchWebhook({ type: "working-groups" });
 	});
 
 	revalidatePath("/[locale]/dashboard/administrator/working-groups", "layout");

@@ -16,6 +16,7 @@ import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const createGovernanceBodyAction = createServerAction(
 	async function createGovernanceBodyAction(state, formData) {
@@ -137,6 +138,7 @@ export const createGovernanceBodyAction = createServerAction(
 			});
 		});
 
+		await dispatchWebhook({ type: "governance-bodies" });
 		revalidatePath("/[locale]/dashboard/administrator/governance-bodies", "layout");
 
 		redirect({ href: "/dashboard/administrator/governance-bodies", locale });

@@ -10,6 +10,7 @@ import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-u
 import { db } from "@/lib/db";
 import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function publishGovernanceBodyAction(documentId: string): Promise<void> {
 	await assertAdmin();
@@ -20,6 +21,7 @@ export async function publishGovernanceBodyAction(documentId: string): Promise<v
 
 	after(async () => {
 		await syncWebsiteDocumentForEntity(documentId);
+		await dispatchWebhook({ type: "governance-bodies" });
 	});
 
 	revalidatePath("/[locale]/dashboard/administrator/governance-bodies", "layout");

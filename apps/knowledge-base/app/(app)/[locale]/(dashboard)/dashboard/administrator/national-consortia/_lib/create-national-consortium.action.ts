@@ -16,6 +16,7 @@ import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const createNationalConsortiumAction = createServerAction(
 	async function createNationalConsortiumAction(state, formData) {
@@ -137,6 +138,7 @@ export const createNationalConsortiumAction = createServerAction(
 			});
 		});
 
+		await dispatchWebhook({ type: "members-partners" });
 		revalidatePath("/[locale]/dashboard/administrator/national-consortia", "layout");
 
 		redirect({ href: "/dashboard/administrator/national-consortia", locale });

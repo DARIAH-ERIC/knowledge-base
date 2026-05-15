@@ -4,8 +4,18 @@ import type { Database, Transaction } from "@/middlewares/db";
 import { alias, and, eq, sql } from "@/services/db/sql";
 import { search } from "@/services/search";
 
+async function resolveDocumentId(db: Database | Transaction, id: string) {
+	const entityVersion = await db.query.entityVersions.findFirst({
+		where: { id },
+		columns: { entityId: true },
+	});
+
+	return entityVersion?.entityId ?? id;
+}
+
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getRelatedEntities(db: Database | Transaction, entityId: string) {
+	const documentId = await resolveDocumentId(db, entityId);
 	const publishedEntityVersions = alias(schema.entityVersions, "published_entity_versions");
 	const publishedEntityStatus = alias(schema.entityStatus, "published_entity_status");
 
@@ -53,15 +63,16 @@ export async function getRelatedEntities(db: Database | Transaction, entityId: s
 			eq(publishedEntityVersions.id, schema.organisationalUnits.id),
 		)
 		.leftJoin(schema.projects, eq(publishedEntityVersions.id, schema.projects.id))
-		.where(eq(schema.entitiesToEntities.entityId, entityId));
+		.where(eq(schema.entitiesToEntities.entityId, documentId));
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getRelatedResources(db: Database | Transaction, entityId: string) {
+	const documentId = await resolveDocumentId(db, entityId);
 	const rows = await db
 		.select({ resourceId: schema.entitiesToResources.resourceId })
 		.from(schema.entitiesToResources)
-		.where(eq(schema.entitiesToResources.entityId, entityId));
+		.where(eq(schema.entitiesToResources.entityId, documentId));
 
 	if (rows.length === 0) {
 		return [];

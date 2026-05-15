@@ -19,6 +19,7 @@ import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updatePersonAction = createServerAction(
 	async function updatePersonAction(state, formData) {
@@ -117,6 +118,7 @@ export const updatePersonAction = createServerAction(
 
 		after(async () => {
 			await syncWebsiteDocumentForEntity(documentId);
+			await dispatchWebhook({ type: "persons" });
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/persons", "layout");
