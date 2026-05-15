@@ -17,7 +17,7 @@ export const ingestSshocServicesAction = createServerAction(
 		const result = await ingestSshocServices();
 
 		revalidatePath("/[locale]/dashboard/administrator", "layout");
-		revalidatePath("/[locale]/dashboard/administrator/services", "layout");
+		revalidatePath("/[locale]/dashboard/administrator/sshoc-services", "layout");
 
 		return createActionStateSuccess({
 			message: t(

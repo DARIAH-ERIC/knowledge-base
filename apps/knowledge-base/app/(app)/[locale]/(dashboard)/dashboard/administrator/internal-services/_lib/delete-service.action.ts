@@ -12,5 +12,5 @@ export async function deleteServiceAction(id: string): Promise<void> {
 
 	await db.delete(schema.services).where(eq(schema.services.id, id));
 
-	revalidatePath("/[locale]/dashboard/administrator/services", "layout");
+	revalidatePath("/[locale]/dashboard/administrator/internal-services", "layout");
 }

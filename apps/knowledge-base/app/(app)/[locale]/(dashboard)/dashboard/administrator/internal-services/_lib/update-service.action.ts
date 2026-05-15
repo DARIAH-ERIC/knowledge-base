@@ -8,15 +8,16 @@ import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
-import { CreateServiceActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_lib/create-service.schema";
+import { UpdateServiceActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_lib/update-service.schema";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { eq } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
 
-export const createServiceAction = createServerAction(
-	async function createServiceAction(state, formData) {
+export const updateServiceAction = createServerAction(
+	async function updateServiceAction(state, formData) {
 		const locale = await getLocale();
 		const t = await getExtracted();
 
@@ -27,13 +28,13 @@ export const createServiceAction = createServerAction(
 		await assertAdmin();
 
 		const result = await v.safeParseAsync(
-			CreateServiceActionInputSchema,
+			UpdateServiceActionInputSchema,
 			getFormDataValues(formData),
 			{ lang: getIntlLanguage(locale) },
 		);
 
 		if (!result.success) {
-			const errors = v.flatten<typeof CreateServiceActionInputSchema>(result.issues);
+			const errors = v.flatten<typeof UpdateServiceActionInputSchema>(result.issues);
 
 			return createActionStateError({
 				message: errors.root ?? t("Invalid or missing fields."),
@@ -42,9 +43,9 @@ export const createServiceAction = createServerAction(
 		}
 
 		const {
+			id,
 			name,
 			sshocMarketplaceId,
-			typeId,
 			statusId,
 			comment,
 			dariahBranding,
@@ -56,12 +57,11 @@ export const createServiceAction = createServerAction(
 		} = result.output;
 
 		await db.transaction(async (tx) => {
-			const [service] = await tx
-				.insert(schema.services)
-				.values({
+			await tx
+				.update(schema.services)
+				.set({
 					name,
 					sshocMarketplaceId,
-					typeId,
 					statusId,
 					comment,
 					dariahBranding,
@@ -69,11 +69,11 @@ export const createServiceAction = createServerAction(
 					metadata,
 					privateSupplier,
 				})
-				.returning({ id: schema.services.id });
+				.where(eq(schema.services.id, id));
 
-			if (service == null) {
-				return;
-			}
+			await tx
+				.delete(schema.servicesToOrganisationalUnits)
+				.where(eq(schema.servicesToOrganisationalUnits.serviceId, id));
 
 			const ownerRole = await tx.query.organisationalUnitServiceRoles.findFirst({
 				where: { role: "service_owner" },
@@ -89,21 +89,13 @@ export const createServiceAction = createServerAction(
 
 			if (ownerRole != null) {
 				for (const unitId of ownerUnitIds) {
-					relations.push({
-						serviceId: service.id,
-						organisationalUnitId: unitId,
-						roleId: ownerRole.id,
-					});
+					relations.push({ serviceId: id, organisationalUnitId: unitId, roleId: ownerRole.id });
 				}
 			}
 
 			if (providerRole != null) {
 				for (const unitId of providerUnitIds) {
-					relations.push({
-						serviceId: service.id,
-						organisationalUnitId: unitId,
-						roleId: providerRole.id,
-					});
+					relations.push({ serviceId: id, organisationalUnitId: unitId, roleId: providerRole.id });
 				}
 			}
 
@@ -112,8 +104,8 @@ export const createServiceAction = createServerAction(
 			}
 		});
 
-		revalidatePath("/[locale]/dashboard/administrator/services", "layout");
+		revalidatePath("/[locale]/dashboard/administrator/internal-services", "layout");
 
-		redirect({ href: "/dashboard/administrator/services", locale });
+		redirect({ href: "/dashboard/administrator/internal-services", locale });
 	},
 );

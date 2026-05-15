@@ -9,15 +9,20 @@ import {
 	getOrganisationalUnitOptionsByIds,
 } from "@/lib/data/organisational-units";
 import { db } from "@/lib/db";
-import { count, desc, eq, ilike, sql } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
 
 export type ServicesSort = "name" | "type" | "status" | "sshocMarketplaceId";
+type ServiceTypes = (typeof schema.serviceTypesEnum)[number];
+
+const InternalServiceTypes: Array<ServiceTypes> = ["internal"];
+const SSHOCServiceTypes: Array<ServiceTypes> = ["community", "core"];
 
 interface GetServicesParams {
 	limit: number;
 	offset: number;
 	q?: string;
 	sort?: ServicesSort;
+	type: "internal" | "sshoc";
 	dir?: "asc" | "desc";
 }
 
@@ -40,10 +45,14 @@ function assertAdminUser(user: Pick<User, "role">): void {
 }
 
 export async function getServices(params: Readonly<GetServicesParams>): Promise<ServicesResult> {
-	const { limit, offset, q, sort = "name", dir = "asc" } = params;
+	const { limit, offset, q, sort = "name", type, dir = "asc" } = params;
 	const query = q?.trim();
-	const where =
-		query != null && query !== "" ? ilike(schema.services.name, `%${query}%`) : undefined;
+	const serviceTypes: Array<ServiceTypes> =
+		type === "internal" ? InternalServiceTypes : SSHOCServiceTypes;
+	const where = and(
+		query != null && query !== "" ? ilike(schema.services.name, `%${query}%`) : undefined,
+		inArray(schema.serviceTypes.type, serviceTypes),
+	);
 	const orderBy =
 		sort === "type"
 			? dir === "asc"
@@ -142,6 +151,18 @@ export async function getServiceForAdmin(currentUser: Pick<User, "role">, id: st
 					dariahBranding: true,
 					monitoring: true,
 					privateSupplier: true,
+				},
+				with: {
+					status: {
+						columns: {
+							status: true,
+						},
+					},
+					type: {
+						columns: {
+							type: true,
+						},
+					},
 				},
 			}),
 			db.query.serviceTypes.findMany({
