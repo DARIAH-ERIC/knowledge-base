@@ -61,6 +61,8 @@ export function useAsyncOptions<T extends AsyncOption>(
 	const [isPending, startTransition] = useTransition();
 
 	const abortRef = useRef<AbortController | null>(null);
+	const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const isFirstSearchRef = useRef(true);
 
 	const abort = useCallback(() => {
 		abortRef.current?.abort();
@@ -106,6 +108,10 @@ export function useAsyncOptions<T extends AsyncOption>(
 	);
 
 	const handleSearch = useCallback(() => {
+		if (debounceTimerRef.current != null) {
+			clearTimeout(debounceTimerRef.current);
+			debounceTimerRef.current = null;
+		}
 		runFetch(0, searchText.trim());
 	}, [runFetch, searchText]);
 
@@ -116,6 +122,23 @@ export function useAsyncOptions<T extends AsyncOption>(
 	const handleNext = useCallback(() => {
 		runFetch(offset + pageSize, appliedQ);
 	}, [appliedQ, offset, pageSize, runFetch]);
+
+	useEffect(() => {
+		if (isFirstSearchRef.current) {
+			isFirstSearchRef.current = false;
+			return;
+		}
+
+		const timer = setTimeout(() => {
+			debounceTimerRef.current = null;
+			runFetch(0, searchText.trim());
+		}, 350);
+		debounceTimerRef.current = timer;
+
+		return () => {
+			clearTimeout(timer);
+		};
+	}, [searchText, runFetch]);
 
 	useEffect(
 		() => () => {

@@ -74,7 +74,9 @@ export async function getEntityRelationOptionsByIds(ids: ReadonlyArray<string>) 
 		.orderBy(schema.entities.slug);
 
 	const itemById = new Map(
-		rows.map((row) => [row.id, { id: row.id, name: row.slug, description: row.entityType }] as const),
+		rows.map(
+			(row) => [row.id, { id: row.id, name: row.slug, description: row.entityType }] as const,
+		),
 	);
 
 	return ids.flatMap((id) => {

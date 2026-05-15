@@ -7,7 +7,7 @@ import { Popover, PopoverContent } from "@dariah-eric/ui/popover";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import { Tag, TagGroup, TagList } from "@dariah-eric/ui/tag-group";
-import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useMemo, useRef, useState } from "react";
 
@@ -60,8 +60,10 @@ export function AsyncMultipleSelect<T extends AsyncOption>(
 	return <AsyncMultipleSelectInner key={String(cacheKey ?? "default")} {...rest} />;
 }
 
-interface AsyncMultipleSelectInnerProps<T extends AsyncOption>
-	extends Omit<AsyncMultipleSelectProps<T>, "cacheKey"> {}
+interface AsyncMultipleSelectInnerProps<T extends AsyncOption> extends Omit<
+	AsyncMultipleSelectProps<T>,
+	"cacheKey"
+> {}
 
 function AsyncMultipleSelectInner<T extends AsyncOption>(
 	props: Readonly<AsyncMultipleSelectInnerProps<T>>,
@@ -154,10 +156,13 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 				data-slot="control"
 				className={[
 					"flex min-block-10 items-start gap-2 rounded-lg border border-border bg-transparent px-3 py-2",
-					isDisabled ? "cursor-not-allowed opacity-50" : undefined,
-				]
-					.filter(Boolean)
-					.join(" ")}
+					isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+				].join(" ")}
+				onClick={(e) => {
+					if ((e.target as HTMLElement).closest("button") == null && !isDisabled) {
+						setIsOpen(true);
+					}
+				}}
 			>
 				{resolvedSelectedItems.length > 0 ? (
 					<TagGroup
@@ -189,7 +194,14 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 						size="xs"
 						type="button"
 					>
-						<ChevronUpDownIcon className="block-4 inline-4 shrink-0 text-muted-fg" />
+						<ChevronDownIcon
+							className={[
+								"block-4 inline-4 shrink-0 text-muted-fg transition-transform duration-200",
+								isOpen ? "rotate-180" : undefined,
+							]
+								.filter(Boolean)
+								.join(" ")}
+						/>
 					</Button>
 
 					<PopoverContent
@@ -198,29 +210,12 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 						triggerRef={triggerRef}
 					>
 						<div className="flex flex-col gap-3 p-3">
-							<div className="flex gap-2">
-								<SearchField
-									className="flex-1"
-									onChange={setSearchText}
-									onSubmit={handleSearch}
-									value={searchText}
-								>
-									<SearchInput autoFocus={true} placeholder={inputPlaceholder ?? t("Search")} />
-								</SearchField>
-								<Button
-									intent="outline"
-									isDisabled={isPending}
-									onPress={handleSearch}
-									type="button"
-								>
-									{t("Search")}
-								</Button>
-							</div>
+							<SearchField onChange={setSearchText} onSubmit={handleSearch} value={searchText}>
+								<SearchInput autoFocus={true} placeholder={inputPlaceholder ?? t("Search")} />
+							</SearchField>
 
 							{loadError != null ? (
-								<p className="py-3 text-center text-danger-subtle-fg text-sm">
-									{loadErrorMessage}
-								</p>
+								<p className="py-3 text-center text-danger-subtle-fg text-sm">{loadErrorMessage}</p>
 							) : displayedItems.length > 0 ? (
 								<div className="relative">
 									<ListBox
@@ -236,9 +231,7 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 											const nextSelectedKeys = new Set(nextValue);
 
 											setLocalSelectedItems((previousItems) => {
-												const map = new Map(
-													previousItems.map((item) => [item.id, item] as const),
-												);
+												const map = new Map(previousItems.map((item) => [item.id, item] as const));
 
 												for (const item of displayedItems) {
 													if (nextSelectedKeys.has(item.id)) {
@@ -278,24 +271,26 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 								</p>
 							)}
 
-							<div className="flex justify-between gap-2">
-								<Button
-									intent="outline"
-									isDisabled={!hasPrev || isPending}
-									onPress={handlePrev}
-									type="button"
-								>
-									{t("Previous")}
-								</Button>
-								<Button
-									intent="outline"
-									isDisabled={!hasNext || isPending}
-									onPress={handleNext}
-									type="button"
-								>
-									{t("Next")}
-								</Button>
-							</div>
+							{hasPrev || hasNext ? (
+								<div className="flex justify-between gap-2">
+									<Button
+										intent="outline"
+										isDisabled={!hasPrev || isPending}
+										onPress={handlePrev}
+										type="button"
+									>
+										{t("Previous")}
+									</Button>
+									<Button
+										intent="outline"
+										isDisabled={!hasNext || isPending}
+										onPress={handleNext}
+										type="button"
+									>
+										{t("Next")}
+									</Button>
+								</div>
+							) : null}
 						</div>
 					</PopoverContent>
 				</Popover>

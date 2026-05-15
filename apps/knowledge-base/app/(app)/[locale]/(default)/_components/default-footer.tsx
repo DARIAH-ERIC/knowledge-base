@@ -49,8 +49,8 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 
 	return (
 		<footer {...rest} className={cn("border-bs border-stroke-weak", className)}>
-			<div className="container flex flex-col gap-y-6 px-8 py-12 xs:px-16">
-				<div className="flex flex-col gap-y-8 xs:flex-row xs:items-center xs:justify-between">
+			<div className="container flex flex-col gap-y-6 px-8 py-12 sm:px-16">
+				<div className="flex flex-col gap-y-8 sm:flex-row sm:items-center sm:justify-between">
 					<NavLink className="me-auto -ms-1" href={links.home.href} size="icon">
 						<span className="sr-only">{links.home.label}</span>
 						<Logo className="block-8 inline-auto" />
@@ -81,7 +81,7 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 				</div>
 
 				<div className="flex flex-col gap-y-6">
-					<div className="flex items-center justify-between gap-x-6">
+					<div className="flex flex-col gap-y-4 sm:flex-row sm:items-center sm:justify-between sm:gap-x-6">
 						<nav aria-label={t("Secondary")}>
 							<ul className="-mx-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
 								{Object.entries(links).map(([id, link]) => {
@@ -100,7 +100,9 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 							</ul>
 						</nav>
 
-						<ColorSchemeSelect />
+						<div>
+							<ColorSchemeSelect />
+						</div>
 					</div>
 
 					<small className="text-xs text-text-weak">

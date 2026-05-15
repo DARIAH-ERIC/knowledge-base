@@ -6,7 +6,7 @@ import { ListBox, ListBoxDescription, ListBoxItem, ListBoxLabel } from "@dariah-
 import { Popover, PopoverContent } from "@dariah-eric/ui/popover";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
-import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useState } from "react";
 
@@ -135,24 +135,21 @@ function AsyncOptionPickerInner<T extends AsyncOption>(
 					<span className={selectedItem == null ? "text-muted-fg" : undefined}>
 						{selectedItem?.name ?? placeholder}
 					</span>
-					<ChevronUpDownIcon className="block-4 inline-4 text-muted-fg" />
+					<ChevronDownIcon
+						className={[
+							"block-4 inline-4 text-muted-fg transition-transform duration-200",
+							isOpen ? "rotate-180" : undefined,
+						]
+							.filter(Boolean)
+							.join(" ")}
+					/>
 				</Button>
 
 				<PopoverContent className="inline-(--trigger-width) p-3" shouldFlip={true}>
 					<div className="flex flex-col gap-3">
-						<div className="flex gap-2">
-							<SearchField
-								className="flex-1"
-								onChange={setSearchText}
-								onSubmit={handleSearch}
-								value={searchText}
-							>
-								<SearchInput autoFocus={true} placeholder={inputPlaceholder ?? t("Search")} />
-							</SearchField>
-							<Button intent="outline" isDisabled={isPending} onPress={handleSearch} type="button">
-								{t("Search")}
-							</Button>
-						</div>
+						<SearchField onChange={setSearchText} onSubmit={handleSearch} value={searchText}>
+							<SearchInput autoFocus={true} placeholder={inputPlaceholder ?? t("Search")} />
+						</SearchField>
 
 						{loadError != null ? (
 							<p className="py-3 text-center text-danger-subtle-fg text-sm">{loadErrorMessage}</p>
@@ -198,24 +195,26 @@ function AsyncOptionPickerInner<T extends AsyncOption>(
 							</p>
 						)}
 
-						<div className="flex justify-between gap-2">
-							<Button
-								intent="outline"
-								isDisabled={!hasPrev || isPending}
-								onPress={handlePrev}
-								type="button"
-							>
-								{t("Previous")}
-							</Button>
-							<Button
-								intent="outline"
-								isDisabled={!hasNext || isPending}
-								onPress={handleNext}
-								type="button"
-							>
-								{t("Next")}
-							</Button>
-						</div>
+						{hasPrev || hasNext ? (
+							<div className="flex justify-between gap-2">
+								<Button
+									intent="outline"
+									isDisabled={!hasPrev || isPending}
+									onPress={handlePrev}
+									type="button"
+								>
+									{t("Previous")}
+								</Button>
+								<Button
+									intent="outline"
+									isDisabled={!hasNext || isPending}
+									onPress={handleNext}
+									type="button"
+								>
+									{t("Next")}
+								</Button>
+							</div>
+						) : null}
 					</div>
 				</PopoverContent>
 			</Popover>
