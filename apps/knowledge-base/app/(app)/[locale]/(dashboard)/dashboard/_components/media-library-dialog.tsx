@@ -14,6 +14,7 @@ import {
 	ModalHeader,
 } from "@dariah-eric/ui/modal";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
 import { TextField } from "@dariah-eric/ui/text-field";
 import cn from "clsx/lite";
@@ -44,6 +45,12 @@ interface MediaLibraryDialogProps<T extends AssetPrefix> {
 
 type ActiveTab = "select" | "upload";
 
+interface LicenseOption {
+	id: string;
+	code: string;
+	name: string;
+}
+
 export function MediaLibraryDialog<T extends AssetPrefix>(
 	props: Readonly<MediaLibraryDialogProps<T>>,
 ): ReactNode {
@@ -73,6 +80,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 	// Upload tab state
 	const [pendingFile, setPendingFile] = useState<File | null>(null);
 	const [pendingFileUrl, setPendingFileUrl] = useState<string | null>(null);
+	const [licenseOptions, setLicenseOptions] = useState<Array<LicenseOption>>([]);
 	const [isUploading, startUploading] = useTransition();
 
 	const searchInputRef = useRef<HTMLInputElement>(null);
@@ -98,6 +106,13 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 		return data.items;
 	}
 
+	async function fetchLicenseOptions(): Promise<Array<LicenseOption>> {
+		const response = await fetch("/api/licenses");
+		const data = (await response.json()) as { items: Array<LicenseOption> };
+
+		return data.items;
+	}
+
 	function resetUploadTab() {
 		if (pendingFileUrl != null) {
 			URL.revokeObjectURL(pendingFileUrl);
@@ -119,8 +134,12 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 			searchInputRef.current.value = "";
 		}
 		startFetching(async () => {
-			const items = await fetchPage(0, "", defaultPrefix);
+			const [items, licenses] = await Promise.all([
+				fetchPage(0, "", defaultPrefix),
+				fetchLicenseOptions(),
+			]);
 			setDisplayedAssets(items);
+			setLicenseOptions(licenses);
 		});
 	}
 
@@ -391,6 +410,19 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 										<Label>{t("Caption")}</Label>
 										<Input />
 									</TextField>
+
+									<Select defaultValue="none" name="licenseId">
+										<Label>{t("License")}</Label>
+										<SelectTrigger />
+										<SelectContent>
+											<SelectItem id="none">{t("No license")}</SelectItem>
+											{licenseOptions.map((license) => (
+												<SelectItem key={license.id} id={license.id}>
+													{license.code} - {license.name}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
 								</div>
 							</form>
 						</TabPanel>
