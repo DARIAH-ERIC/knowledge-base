@@ -2,12 +2,10 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
-import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { RichTextEditor } from "@dariah-eric/ui/rich-text-editor";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
@@ -16,6 +14,7 @@ import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
+import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
 import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import {
 	FormActions,
@@ -153,16 +152,10 @@ export function GovernanceBodyForm(props: Readonly<GovernanceBodyFormProps>): Re
 
 				<FormActions>
 					<FormStatus state={state} />
-					<Button isPending={isPending} type="submit">
-						{isPending ? (
-							<Fragment>
-								<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
-								<span aria-hidden={true}>{t("Saving...")}</span>
-							</Fragment>
-						) : (
-							t("Save")
-						)}
-					</Button>
+					<DraftFormSubmitButtons
+						isPending={isPending}
+						showSaveAndPublish={governanceBody != null}
+					/>
 				</FormActions>
 			</Form>
 		</FormLayout>

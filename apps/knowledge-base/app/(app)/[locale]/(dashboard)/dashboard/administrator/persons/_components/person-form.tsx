@@ -2,12 +2,10 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
-import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { RichTextEditor } from "@dariah-eric/ui/rich-text-editor";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
@@ -15,6 +13,7 @@ import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
+import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
 import {
 	FormActions,
 	FormLayout,
@@ -139,16 +138,11 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 
 				<FormActions>
 					<FormStatus state={state} />
-					<Button isDisabled={selectedImage == null} isPending={isPending} type="submit">
-						{isPending ? (
-							<Fragment>
-								<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
-								<span aria-hidden={true}>{t("Saving...")}</span>
-							</Fragment>
-						) : (
-							t("Save")
-						)}
-					</Button>
+					<DraftFormSubmitButtons
+						isDisabled={selectedImage == null}
+						isPending={isPending}
+						showSaveAndPublish={person != null}
+					/>
 				</FormActions>
 			</Form>
 		</FormLayout>

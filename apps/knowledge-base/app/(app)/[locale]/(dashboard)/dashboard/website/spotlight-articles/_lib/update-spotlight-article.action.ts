@@ -13,11 +13,12 @@ import { UpdateSpotlightArticleActionInputSchema } from "@/app/(app)/[locale]/(d
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
-import { ensureDraftVersion, touchVersion } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { syncEntityRelations } from "@/lib/data/relations";
 import { spotlightArticlesLifecycleAdapter } from "@/lib/data/spotlight-articles.lifecycle-adapter";
 import { type Transaction, db } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
+import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -129,6 +130,10 @@ export const updateSpotlightArticleAction = createServerAction(
 
 			await syncEntityRelations(tx, documentId, relatedEntityIds, relatedResourceIds);
 			await touchVersion(tx, draftVersionId);
+
+			if (shouldSaveAndPublish(formData)) {
+				await publishVersion(tx, documentId, spotlightArticlesLifecycleAdapter);
+			}
 		});
 
 		after(async () => {
