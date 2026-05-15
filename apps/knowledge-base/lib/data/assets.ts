@@ -8,6 +8,7 @@ import { relationsFilterToSQL } from "@dariah-eric/database/relations";
 import * as schema from "@dariah-eric/database/schema";
 
 import { db } from "@/lib/db";
+import { eq } from "@/lib/db/sql";
 import { type ImageUrlOptions, images } from "@/lib/images";
 import { type AssetPrefix, assetPrefixes, storage as s3 } from "@/lib/storage";
 
@@ -137,6 +138,26 @@ export async function uploadAsset(params: UploadAssetParams) {
 	};
 }
 
+interface UpdateAssetMetadataParams {
+	id: string;
+	label: string;
+	alt?: string | null;
+	caption?: string | null;
+}
+
+export async function updateAssetMetadata(params: UpdateAssetMetadataParams) {
+	const { id, label, alt, caption } = params;
+
+	await db
+		.update(schema.assets)
+		.set({
+			label,
+			alt,
+			caption,
+		})
+		.where(eq(schema.assets.id, id));
+}
+
 interface GetAssetsForDashboardParams {
 	imageUrlOptions: ImageUrlOptions;
 	/** @default 24 */
@@ -164,6 +185,8 @@ export async function getAssetsForDashboard(params: GetAssetsForDashboardParams)
 				id: true,
 				key: true,
 				label: true,
+				alt: true,
+				caption: true,
 				mimeType: true,
 			},
 			limit,
@@ -182,7 +205,15 @@ export async function getAssetsForDashboard(params: GetAssetsForDashboardParams)
 			options: imageUrlOptions,
 		});
 
-		return { id: asset.id, key: asset.key, label: asset.label, mimeType: asset.mimeType, url };
+		return {
+			id: asset.id,
+			key: asset.key,
+			label: asset.label,
+			alt: asset.alt,
+			caption: asset.caption,
+			mimeType: asset.mimeType,
+			url,
+		};
 	});
 
 	return { items, total };

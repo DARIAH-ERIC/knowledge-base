@@ -16,6 +16,7 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
+import { EditAssetMetadataDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog";
 import { UploadImageDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
@@ -24,6 +25,8 @@ interface AssetItem {
 	id: string;
 	key: string;
 	label: string;
+	alt: string | null;
+	caption: string | null;
 	mimeType: string;
 	url: string;
 }
@@ -108,15 +111,21 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 						return (
 							<li key={asset.id}>
 								<figure className="flex flex-col gap-y-2">
-									<div className="overflow-hidden rounded-lg bg-muted aspect-square">
+									<div className="relative overflow-hidden rounded-lg bg-muted aspect-square">
 										<AssetPreview
-											alt={asset.label}
+											alt={asset.alt ?? asset.label}
 											className="block-full inline-full"
 											imageClassName="object-cover"
 											kindLabelClassName="bg-background/90 text-xs"
 											mimeType={asset.mimeType}
 											src={asset.url}
 											storageKey={asset.key}
+										/>
+										<EditAssetMetadataDialog
+											asset={asset}
+											onSuccess={() => {
+												router.refresh();
+											}}
 										/>
 									</div>
 									<figcaption className="flex flex-col gap-y-0.5 px-0.5">
