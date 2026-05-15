@@ -100,7 +100,7 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 							</ul>
 						</nav>
 
-						<div>
+						<div className="ml-auto">
 							<ColorSchemeSelect />
 						</div>
 					</div>

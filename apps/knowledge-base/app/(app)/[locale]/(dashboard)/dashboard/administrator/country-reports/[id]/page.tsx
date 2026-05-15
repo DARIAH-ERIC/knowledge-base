@@ -71,6 +71,15 @@ export default async function DashboardAdministratorCountryReportPage(
 				</HeaderContent>
 				<HeaderAction>
 					<ButtonLink
+						download={`country-report-${id}.pdf`}
+						href={`/api/reporting/country-reports/${id}/download.pdf`}
+						intent="secondary"
+						size="sm"
+					>
+						<ArrowDownTrayIcon className="me-2 block-4 inline-4" />
+						{t("Download PDF")}
+					</ButtonLink>
+					<ButtonLink
 						download={`country-report-${id}.json`}
 						href={`/api/reporting/country-reports/${id}/download`}
 						intent="secondary"

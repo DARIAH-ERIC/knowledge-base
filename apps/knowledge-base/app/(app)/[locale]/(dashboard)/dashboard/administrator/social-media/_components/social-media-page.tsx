@@ -122,7 +122,9 @@ export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNod
 				<TableBody items={items}>
 					{(item) => (
 						<TableRow id={item.id}>
-							<TableCell>{item.name}</TableCell>
+							<TableCell>
+								<div className="max-inline-64 truncate">{item.name}</div>
+							</TableCell>
 							<TableCell>{item.type.type}</TableCell>
 							<TableCell className="max-inline-xs truncate">
 								<a className="underline" href={item.url} rel="noreferrer" target="_blank">
