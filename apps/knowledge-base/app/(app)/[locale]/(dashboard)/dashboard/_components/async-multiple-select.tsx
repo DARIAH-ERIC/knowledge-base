@@ -181,7 +181,7 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 						</TagList>
 					</TagGroup>
 				) : (
-					<span className="flex-1 text-muted-fg text-sm leading-6">
+					<span className="flex-1 text-muted-fg text-sm/6">
 						{placeholder ?? t("No selected items")}
 					</span>
 				)}
