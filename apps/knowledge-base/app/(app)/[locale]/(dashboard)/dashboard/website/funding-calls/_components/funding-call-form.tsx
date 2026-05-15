@@ -11,6 +11,7 @@ import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
+import { TextArea } from "@dariah-eric/ui/textarea";
 import { CalendarDate } from "@internationalized/date";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState } from "react";
@@ -55,7 +56,7 @@ export function FundingCallForm(props: Readonly<FundingCallFormProps>): ReactNod
 					</TextField>
 					<TextField defaultValue={fundingCall?.summary ?? undefined} name="summary">
 						<Label>{t("Summary")}</Label>
-						<Input />
+						<TextArea />
 						<FieldError />
 					</TextField>
 					<DatePicker
