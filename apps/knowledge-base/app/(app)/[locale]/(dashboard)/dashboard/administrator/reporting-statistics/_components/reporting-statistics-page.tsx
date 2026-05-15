@@ -1,3 +1,5 @@
+"use client";
+
 import {
 	Table,
 	TableBody,
@@ -6,7 +8,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { getExtracted } from "next-intl/server";
+import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
 
 import {
@@ -53,12 +55,10 @@ function formatSignedNumber(
 	return `${sign}${value.toLocaleString()}`;
 }
 
-export async function ReportingStatisticsPage(
-	props: Readonly<ReportingStatisticsPageProps>,
-): Promise<ReactNode> {
+export function ReportingStatisticsPage(props: Readonly<ReportingStatisticsPageProps>): ReactNode {
 	const { data, filters } = props;
 
-	const t = await getExtracted();
+	const t = useExtracted();
 
 	return (
 		<div className="flex flex-col gap-y-8">
