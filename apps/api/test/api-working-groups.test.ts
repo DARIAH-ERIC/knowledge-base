@@ -79,6 +79,19 @@ function createChair() {
 	};
 }
 
+function createRelatedPage() {
+	const versionId = uuidv7();
+	const entityId = uuidv7();
+	const title = f.lorem.sentence();
+	const slug = slugify(title);
+
+	return {
+		entity: { id: entityId, slug },
+		version: { id: versionId, entityId },
+		page: { id: versionId, title, summary: f.lorem.paragraph() },
+	};
+}
+
 async function seedWithMixedStatuses(db: Database) {
 	const [status, entityType, asset, workingGroupType, umbrellaConsortiumType, unitStatus] =
 		await Promise.all([
@@ -417,10 +430,36 @@ describe("working-groups", () => {
 				const client = createTestClient(db);
 
 				const items = createItems(3);
-				const chair = createChair();
-				await seed(db, items, chair);
-
 				const item = items.at(1)!;
+				const chair = createChair();
+				const relatedPage = createRelatedPage();
+				await seed(db, items, chair);
+				const [status, pageType, asset] = await Promise.all([
+					db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+					db.query.entityTypes.findFirst({ columns: { id: true }, where: { type: "pages" } }),
+					db.query.assets.findFirst({ columns: { id: true } }),
+				]);
+				assert(status, "No entity status in database.");
+				assert(pageType, "No page entity type in database.");
+				assert(asset, "No assets in database.");
+
+				await db.insert(schema.entities).values({
+					...relatedPage.entity,
+					typeId: pageType.id,
+				});
+				await db.insert(schema.entityVersions).values({
+					...relatedPage.version,
+					statusId: status.id,
+				});
+				await db.insert(schema.pages).values({
+					...relatedPage.page,
+					imageId: asset.id,
+				});
+				await db.insert(schema.entitiesToEntities).values({
+					entityId: item.entity.id,
+					relatedEntityId: relatedPage.entity.id,
+				});
+
 				const id = item.organisationalUnit.id;
 				const name = item.organisationalUnit.name;
 
@@ -456,6 +495,13 @@ describe("working-groups", () => {
 						}),
 					]),
 					name,
+					relatedEntities: expect.arrayContaining([
+						expect.objectContaining({
+							slug: relatedPage.entity.slug,
+							entityType: "pages",
+							label: relatedPage.page.title,
+						}),
+					]),
 				});
 				/* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
 				expect(data.description).toHaveLength(1);
