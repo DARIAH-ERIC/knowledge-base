@@ -106,7 +106,7 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 										<EllipsisHorizontalIcon className="block-5 inline-5" />
 									</Button>
 									<MenuContent placement="left top">
-										<MenuItem href={`/dashboard/reporting/working-group-reports/${item.id}`}>
+										<MenuItem href={`/dashboard/administrator/working-group-reports/${item.id}`}>
 											<EyeIcon className="me-2 block-4 inline-4" />
 											<MenuLabel>{t("View")}</MenuLabel>
 										</MenuItem>
