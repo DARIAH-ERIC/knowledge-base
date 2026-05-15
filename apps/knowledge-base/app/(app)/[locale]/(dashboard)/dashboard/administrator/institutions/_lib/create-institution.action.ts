@@ -16,6 +16,7 @@ import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const createInstitutionAction = createServerAction(
 	async function createInstitutionAction(state, formData) {
@@ -137,6 +138,7 @@ export const createInstitutionAction = createServerAction(
 			});
 		});
 
+		await dispatchWebhook({ type: "members-partners" });
 		revalidatePath("/[locale]/dashboard/administrator/institutions", "layout");
 
 		redirect({ href: "/dashboard/administrator/institutions", locale });

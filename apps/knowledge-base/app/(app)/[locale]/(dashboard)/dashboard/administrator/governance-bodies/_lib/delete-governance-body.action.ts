@@ -9,6 +9,7 @@ import { getDocumentVersions } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { db } from "@/lib/db";
 import { eq, inArray, or } from "@/lib/db/sql";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function deleteGovernanceBodyAction(documentId: string): Promise<void> {
 	await assertAdmin();
@@ -63,5 +64,6 @@ export async function deleteGovernanceBodyAction(documentId: string): Promise<vo
 		await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
 	});
 
+	await dispatchWebhook({ type: "governance-bodies" });
 	revalidatePath("/[locale]/dashboard/administrator/governance-bodies", "layout");
 }

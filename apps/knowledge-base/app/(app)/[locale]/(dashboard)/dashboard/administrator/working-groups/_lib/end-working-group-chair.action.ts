@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function endWorkingGroupChairAction(id: string, end: Date): Promise<void> {
 	await assertAdmin();
@@ -24,5 +25,6 @@ export async function endWorkingGroupChairAction(id: string, end: Date): Promise
 		.set({ duration: { start: relation.duration.start, end } })
 		.where(eq(schema.personsToOrganisationalUnits.id, id));
 
+	await dispatchWebhook({ type: "working-groups" });
 	revalidatePath("/[locale]/dashboard/administrator/working-groups", "layout");
 }

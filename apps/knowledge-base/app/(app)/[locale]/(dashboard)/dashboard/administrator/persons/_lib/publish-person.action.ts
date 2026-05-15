@@ -10,6 +10,7 @@ import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
 import { db } from "@/lib/db";
 import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function publishPersonAction(documentId: string): Promise<void> {
 	await assertAdmin();
@@ -20,6 +21,7 @@ export async function publishPersonAction(documentId: string): Promise<void> {
 
 	after(async () => {
 		await syncWebsiteDocumentForEntity(documentId);
+		await dispatchWebhook({ type: "persons" });
 	});
 
 	revalidatePath("/[locale]/dashboard/administrator/persons", "layout");

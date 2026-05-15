@@ -8,6 +8,7 @@ import { assertAdmin } from "@/lib/auth/session";
 import { deleteDocumentVersionTail } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { eq, or } from "@/lib/db/sql";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function deleteInstitutionAction(id: string): Promise<void> {
 	await assertAdmin();
@@ -35,5 +36,6 @@ export async function deleteInstitutionAction(id: string): Promise<void> {
 		await deleteDocumentVersionTail(tx, entityVersion.id, entityVersion.entityId);
 	});
 
+	await dispatchWebhook({ type: "members-partners" });
 	revalidatePath("/[locale]/dashboard/administrator/institutions", "layout");
 }

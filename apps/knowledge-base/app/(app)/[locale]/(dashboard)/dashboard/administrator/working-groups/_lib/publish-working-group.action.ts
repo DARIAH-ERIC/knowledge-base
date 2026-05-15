@@ -10,6 +10,7 @@ import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-u
 import { db } from "@/lib/db";
 import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function publishWorkingGroupAction(documentId: string): Promise<void> {
 	await assertAdmin();
@@ -20,6 +21,7 @@ export async function publishWorkingGroupAction(documentId: string): Promise<voi
 
 	after(async () => {
 		await syncWebsiteDocumentForEntity(documentId);
+		await dispatchWebhook({ type: "working-groups" });
 	});
 
 	revalidatePath("/[locale]/dashboard/administrator/working-groups", "layout");

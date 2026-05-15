@@ -12,6 +12,7 @@ import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const createWorkingGroupChairAction = createServerAction(
 	async function createWorkingGroupChairAction(state, formData) {
@@ -61,6 +62,7 @@ export const createWorkingGroupChairAction = createServerAction(
 			.returning({ id: schema.personsToOrganisationalUnits.id })
 			.then((rows) => rows[0]!);
 
+		await dispatchWebhook({ type: "working-groups" });
 		revalidatePath("/[locale]/dashboard/administrator/working-groups", "layout");
 
 		return createActionStateSuccess({

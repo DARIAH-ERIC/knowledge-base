@@ -10,6 +10,7 @@ import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter"
 import { db } from "@/lib/db";
 import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function publishProjectAction(documentId: string): Promise<void> {
 	await assertAdmin();
@@ -20,6 +21,7 @@ export async function publishProjectAction(documentId: string): Promise<void> {
 
 	after(async () => {
 		await syncWebsiteDocumentForEntity(documentId);
+		await dispatchWebhook({ type: "dariah-projects" });
 	});
 
 	revalidatePath("/[locale]/dashboard/administrator/projects", "layout");
