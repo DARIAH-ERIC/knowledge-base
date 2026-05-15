@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import type { ComponentProps, ReactNode } from "react";
 
 import { NavLink } from "@/app/(app)/[locale]/(default)/_components/nav-link";
+import { ColorSchemeSelect } from "@/app/(app)/[locale]/_components/color-scheme-select";
 import { Logo } from "@/components/logo";
 import { useMetadata } from "@/lib/i18n/metadata";
 import { createHref } from "@/lib/navigation/create-href";
@@ -80,23 +81,27 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 				</div>
 
 				<div className="flex flex-col gap-y-6">
-					<nav aria-label={t("Secondary")}>
-						<ul className="-mx-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
-							{Object.entries(links).map(([id, link]) => {
-								if (id === "home") {
-									return null;
-								}
+					<div className="flex items-center justify-between gap-x-6">
+						<nav aria-label={t("Secondary")}>
+							<ul className="-mx-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
+								{Object.entries(links).map(([id, link]) => {
+									if (id === "home") {
+										return null;
+									}
 
-								return (
-									<li key={id}>
-										<NavLink href={link.href} size="md">
-											{link.label}
-										</NavLink>
-									</li>
-								);
-							})}
-						</ul>
-					</nav>
+									return (
+										<li key={id}>
+											<NavLink href={link.href} size="md">
+												{link.label}
+											</NavLink>
+										</li>
+									);
+								})}
+							</ul>
+						</nav>
+
+						<ColorSchemeSelect />
+					</div>
 
 					<small className="text-xs text-text-weak">
 						&copy; <CurrentYear />{" "}
