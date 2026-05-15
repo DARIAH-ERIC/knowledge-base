@@ -12,6 +12,7 @@ import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
+import { TextArea } from "@dariah-eric/ui/textarea";
 import { CalendarDate } from "@internationalized/date";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState } from "react";
@@ -76,7 +77,7 @@ export function OpportunityForm(props: Readonly<OpportunityFormProps>): ReactNod
 
 					<TextField defaultValue={opportunity?.summary ?? undefined} name="summary">
 						<Label>{t("Summary")}</Label>
-						<Input />
+						<TextArea />
 						<FieldError />
 					</TextField>
 					<DatePicker
