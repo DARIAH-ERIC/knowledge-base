@@ -20,6 +20,7 @@ import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const updateWorkingGroupAction = createServerAction(
 	async function updateWorkingGroupAction(state, formData) {
@@ -135,6 +136,7 @@ export const updateWorkingGroupAction = createServerAction(
 
 		after(async () => {
 			await syncWebsiteDocumentForEntity(documentId);
+			await dispatchWebhook({ type: "working-groups" });
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/working-groups", "layout");

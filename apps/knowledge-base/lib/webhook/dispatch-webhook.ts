@@ -4,16 +4,21 @@ import { request } from "@dariah-eric/request";
 import { env } from "@/config/env.config";
 
 export type WebhookEntityType =
+	| "dariah-projects"
 	| "documents-policies"
 	| "events"
 	| "funding-calls"
+	| "governance-bodies"
 	| "impact-case-studies"
+	| "members-partners"
 	| "navigation"
 	| "opportunities"
 	| "news"
 	| "pages"
+	| "persons"
 	| "site-metadata"
-	| "spotlight-articles";
+	| "spotlight-articles"
+	| "working-groups";
 
 export async function dispatchWebhook(payload: { type: WebhookEntityType }): Promise<void> {
 	if (env.REVALIDATION_WEBHOOK_URL == null || env.REVALIDATION_WEBHOOK_SECRET == null) {

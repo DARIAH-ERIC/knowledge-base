@@ -18,6 +18,7 @@ import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createServerAction } from "@/lib/server/create-server-action";
+import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export const createProjectAction = createServerAction(
 	async function createProjectAction(state, formData) {
@@ -143,6 +144,8 @@ export const createProjectAction = createServerAction(
 			if (documentId != null) {
 				await syncWebsiteDocumentForEntity(documentId);
 			}
+
+			await dispatchWebhook({ type: "dariah-projects" });
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/projects", "layout");
