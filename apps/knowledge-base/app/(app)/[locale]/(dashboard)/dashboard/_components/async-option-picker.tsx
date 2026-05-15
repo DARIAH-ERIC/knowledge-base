@@ -43,10 +43,10 @@ function renderDefaultItem(item: AsyncOption): ReactNode {
 	}
 
 	return (
-		<div className="col-start-2">
+		<>
 			<ListBoxLabel>{item.name}</ListBoxLabel>
 			<ListBoxDescription>{item.description}</ListBoxDescription>
-		</div>
+		</>
 	);
 }
 
@@ -138,7 +138,7 @@ function AsyncOptionPickerInner<T extends AsyncOption>(
 					<ChevronUpDownIcon className="block-4 inline-4 text-muted-fg" />
 				</Button>
 
-				<PopoverContent className="inline-(--trigger-width) p-3">
+				<PopoverContent className="inline-(--trigger-width) p-3" shouldFlip={true}>
 					<div className="flex flex-col gap-3">
 						<div className="flex gap-2">
 							<SearchField
@@ -160,7 +160,7 @@ function AsyncOptionPickerInner<T extends AsyncOption>(
 							<div className="relative">
 								<ListBox
 									aria-label={ariaLabel}
-									className={isPending ? "opacity-50" : undefined}
+									className={isPending ? "max-block-56 opacity-50" : "max-block-56"}
 									items={displayedItems}
 									onAction={(key) => {
 										const item = displayedItems.find((entry) => entry.id === key);

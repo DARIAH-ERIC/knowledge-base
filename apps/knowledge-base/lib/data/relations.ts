@@ -51,7 +51,7 @@ export async function getEntityRelationOptions(
 
 	return {
 		items: rows.map((row) => {
-			return { id: row.id, name: `${row.entityType} / ${row.slug}` };
+			return { id: row.id, name: row.slug, description: row.entityType };
 		}),
 		total: aggregate.at(0)?.total ?? 0,
 	};
@@ -74,7 +74,7 @@ export async function getEntityRelationOptionsByIds(ids: ReadonlyArray<string>) 
 		.orderBy(schema.entities.slug);
 
 	const itemById = new Map(
-		rows.map((row) => [row.id, { id: row.id, name: `${row.entityType} / ${row.slug}` }] as const),
+		rows.map((row) => [row.id, { id: row.id, name: row.slug, description: row.entityType }] as const),
 	);
 
 	return ids.flatMap((id) => {
