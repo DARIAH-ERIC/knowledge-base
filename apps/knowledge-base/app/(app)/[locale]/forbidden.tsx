@@ -3,13 +3,13 @@ import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
-import { Main } from "@/components/main";
+import { ForbiddenState } from "@/app/_components/forbidden-state";
 
 export async function generateMetadata(): Promise<Metadata> {
 	const t = await getExtracted();
 
 	const metadata: Metadata = {
-		title: t("Forbidden"),
+		title: t("Access forbidden"),
 		/**
 		 * Automatically set by next.js.
 		 *
@@ -27,10 +27,15 @@ export default function ForbiddenPage(): ReactNode {
 	const t = useExtracted();
 
 	return (
-		<Main className="flex-1">
-			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">
-				{t("Forbidden")}
-			</h1>
-		</Main>
+		<ForbiddenState
+			codeLabel={t("Error 403")}
+			description={t(
+				"You don't have permission to access this page. If you believe this is a mistake, please contact your administrator.",
+			)}
+			homeHref="/"
+			homeLabel={t("Back to home")}
+			logoLabel={t("Home")}
+			title={t("Access forbidden")}
+		/>
 	);
 }

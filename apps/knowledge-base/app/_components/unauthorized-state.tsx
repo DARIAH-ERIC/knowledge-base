@@ -4,17 +4,20 @@ import type { ReactNode } from "react";
 
 import { Main } from "@/components/main";
 
-interface NotFoundStateProps {
+interface UnauthorizedStateProps {
 	codeLabel: string;
 	description: string;
 	homeHref: string;
 	homeLabel: string;
 	logoLabel: string;
+	signInHref: string;
+	signInLabel: string;
 	title: string;
 }
 
-export function NotFoundState(props: Readonly<NotFoundStateProps>): ReactNode {
-	const { codeLabel, description, homeHref, homeLabel, logoLabel, title } = props;
+export function UnauthorizedState(props: Readonly<UnauthorizedStateProps>): ReactNode {
+	const { codeLabel, description, homeHref, homeLabel, logoLabel, signInHref, signInLabel, title } =
+		props;
 
 	return (
 		<Main className="relative isolate flex min-block-full items-center justify-center overflow-hidden px-6 py-10 sm:px-8">
@@ -58,7 +61,10 @@ export function NotFoundState(props: Readonly<NotFoundStateProps>): ReactNode {
 						</div>
 
 						<div className="flex flex-col gap-3 sm:flex-row">
-							<ButtonLink href={homeHref} size="lg">
+							<ButtonLink href={signInHref} size="lg">
+								{signInLabel}
+							</ButtonLink>
+							<ButtonLink href={homeHref} intent="outline" size="lg">
 								{homeLabel}
 							</ButtonLink>
 						</div>
@@ -77,9 +83,25 @@ export function NotFoundState(props: Readonly<NotFoundStateProps>): ReactNode {
 								<div className="absolute inset-bs-1/2 inset-s-1/2 block-28 inline-px -translate-1/2 bg-border/80" />
 								<div className="absolute inset-bs-1/2 inset-s-1/2 block-px inline-28 -translate-1/2 bg-border/80" />
 								<div className="absolute inset-bs-1/2 inset-s-1/2 block-16 inline-16 -translate-1/2 rounded-full border border-primary/40 bg-bg/95 shadow-lg shadow-black/5" />
-								<div className="absolute inset-bs-1/2 inset-s-1/2 block-5 inline-5 -translate-1/2 rounded-full bg-primary" />
+								<div className="absolute inset-bs-1/2 inset-s-1/2 flex block-10 inline-10 -translate-1/2 items-center justify-center rounded-full bg-primary text-primary-fg shadow-md shadow-primary/20">
+									<svg
+										aria-hidden={true}
+										className="block-5 inline-5"
+										fill="none"
+										viewBox="0 0 24 24"
+										xmlns="http://www.w3.org/2000/svg"
+									>
+										<path
+											d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25z"
+											stroke="currentColor"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											strokeWidth="1.75"
+										/>
+									</svg>
+								</div>
 								<div className="absolute inset-bs-10 inset-e-12 rounded-full border border-border/70 bg-bg/90 px-3 py-1 font-medium text-muted-fg text-xs uppercase tracking-[0.2em]">
-									{"404"}
+									{"401"}
 								</div>
 							</div>
 						</div>
