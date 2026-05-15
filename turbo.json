@@ -149,5 +149,6 @@
 			"dependsOn": ["^build"],
 			"outputs": ["*.tsbuildinfo"]
 		}
-	}
+	},
+	"ui": "tui"
 }

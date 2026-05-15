@@ -17,7 +17,7 @@ export function EntityLifecycleStatusBadge(
 
 	if (hasDraft && isPublished) {
 		return (
-			<div className="flex flex-wrap gap-2">
+			<div className="flex gap-2">
 				<Badge intent="success">{t("Published")}</Badge>
 				<Badge intent="warning">{t("Draft")}</Badge>
 			</div>

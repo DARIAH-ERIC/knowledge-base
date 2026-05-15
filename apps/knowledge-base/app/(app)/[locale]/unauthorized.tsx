@@ -3,13 +3,13 @@ import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
-import { Main } from "@/components/main";
+import { UnauthorizedState } from "@/app/_components/unauthorized-state";
 
 export async function generateMetadata(): Promise<Metadata> {
 	const t = await getExtracted();
 
 	const metadata: Metadata = {
-		title: t("Unauthorized"),
+		title: t("Sign in required"),
 		/**
 		 * Automatically set by next.js.
 		 *
@@ -27,10 +27,17 @@ export default function UnauthorizedPage(): ReactNode {
 	const t = useExtracted();
 
 	return (
-		<Main className="flex-1">
-			<h1 className="px-2 text-3xl font-semibold tracking-tight text-text-strong">
-				{t("Unauthorized")}
-			</h1>
-		</Main>
+		<UnauthorizedState
+			codeLabel={t("Error 401")}
+			description={t(
+				"You need to sign in to access this page. If you already have an account, please sign in below.",
+			)}
+			homeHref="/"
+			homeLabel={t("Back to home")}
+			logoLabel={t("Home")}
+			signInHref="/auth/sign-in"
+			signInLabel={t("Sign in")}
+			title={t("Sign in required")}
+		/>
 	);
 }
