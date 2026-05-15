@@ -16,6 +16,7 @@ interface DocumentOrPolicyEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
 	documentId: string;
+	hasDraftChanges: boolean;
 	isPublished: boolean;
 	documentOrPolicy: Pick<
 		schema.DocumentOrPolicy,
@@ -29,7 +30,15 @@ interface DocumentOrPolicyEditFormProps {
 export function DocumentOrPolicyEditForm(
 	props: Readonly<DocumentOrPolicyEditFormProps>,
 ): ReactNode {
-	const { initialAssets, contentBlocks, documentId, isPublished, documentOrPolicy, groups } = props;
+	const {
+		initialAssets,
+		contentBlocks,
+		documentId,
+		hasDraftChanges,
+		isPublished,
+		documentOrPolicy,
+		groups,
+	} = props;
 
 	const t = useExtracted();
 
@@ -40,7 +49,7 @@ export function DocumentOrPolicyEditForm(
 				<EntityLifecycleBar
 					discardDraftAction={discardDocumentOrPolicyDraftAction}
 					documentId={documentId}
-					hasDraft={true}
+					hasDraft={hasDraftChanges}
 					isPublished={isPublished}
 					publishAction={publishDocumentOrPolicyAction}
 				/>

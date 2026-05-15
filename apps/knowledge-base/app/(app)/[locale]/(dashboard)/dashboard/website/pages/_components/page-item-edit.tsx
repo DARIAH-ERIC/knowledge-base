@@ -16,6 +16,7 @@ interface PageItemEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
 	documentId: string;
+	hasDraftChanges: boolean;
 	isPublished: boolean;
 	pageItem: Pick<schema.Page, "id" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
@@ -35,6 +36,7 @@ export function PageItemEditForm(props: Readonly<PageItemEditFormProps>): ReactN
 		initialAssets,
 		contentBlocks,
 		documentId,
+		hasDraftChanges,
 		isPublished,
 		pageItem,
 		initialRelatedEntityIds,
@@ -56,7 +58,7 @@ export function PageItemEditForm(props: Readonly<PageItemEditFormProps>): ReactN
 				<EntityLifecycleBar
 					discardDraftAction={discardPageItemDraftAction}
 					documentId={documentId}
-					hasDraft={true}
+					hasDraft={hasDraftChanges}
 					isPublished={isPublished}
 					publishAction={publishPageItemAction}
 				/>

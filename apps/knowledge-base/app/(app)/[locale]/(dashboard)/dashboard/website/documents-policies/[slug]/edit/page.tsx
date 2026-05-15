@@ -8,7 +8,7 @@ import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
-import { ensureDraftVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { asc } from "@/lib/db/sql";
 import { images } from "@/lib/images";
@@ -53,14 +53,14 @@ export default async function DashboardWebsiteEditDocumentOrPolicyPage(
 
 	const documentId = anyVersion.entityVersion.entity.id;
 
-	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+	const { draftVersionId, hasDraftChanges, publishedId } = await db.transaction(async (tx) => {
 		const draftVersionId = await ensureDraftVersion(
 			tx,
 			documentId,
 			documentsPoliciesLifecycleAdapter,
 		);
-		const { publishedId } = await getDocumentVersions(tx, documentId);
-		return { draftVersionId, publishedId };
+		const { hasDraftChanges, publishedId } = await getDocumentLifecycleState(tx, documentId);
+		return { draftVersionId, hasDraftChanges, publishedId };
 	});
 
 	const [{ items: initialAssets }, documentOrPolicy, groups] = await Promise.all([
@@ -121,6 +121,7 @@ export default async function DashboardWebsiteEditDocumentOrPolicyPage(
 				document: { ...documentOrPolicy.document, url: document.url },
 			}}
 			groups={groups}
+			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
 			isPublished={publishedId != null}
 		/>

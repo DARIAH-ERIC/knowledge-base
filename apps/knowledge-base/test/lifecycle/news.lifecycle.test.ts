@@ -8,6 +8,7 @@ import {
 	createDraftDocument,
 	discardDraftVersion,
 	ensureDraftVersion,
+	getDocumentLifecycleState,
 	getDocumentVersions,
 	publishVersion,
 	touchVersion,
@@ -193,6 +194,37 @@ describe("news lifecycle", () => {
 			const versions = await getDocumentVersions(tx, documentId);
 			expect(versions.draftId).toBeNull();
 			expect(versions.publishedId).toBe(publishedId);
+		});
+	});
+
+	it("getDocumentLifecycleState treats a synced draft clone as no draft changes", async () => {
+		await withTransaction(async (tx) => {
+			const { documentId } = await seedDraftNews(tx);
+			await publishVersion(tx, documentId, newsLifecycleAdapter);
+
+			const state = await getDocumentLifecycleState(tx, documentId);
+
+			expect(state.publishedId).not.toBeNull();
+			expect(state.draftId).not.toBeNull();
+			expect(state.hasDraftChanges).toBe(false);
+		});
+	});
+
+	it("getDocumentLifecycleState detects newer unpublished draft changes", async () => {
+		await withTransaction(async (tx) => {
+			const { documentId, versionId: draftVersionId } = await seedDraftNews(tx);
+			const publishedId = await publishVersion(tx, documentId, newsLifecycleAdapter);
+			const publishedVersion = await tx.query.entityVersions.findFirst({
+				where: { id: publishedId },
+				columns: { updatedAt: true },
+			});
+			assert(publishedVersion);
+
+			await touchVersion(tx, draftVersionId, new Date(publishedVersion.updatedAt.getTime() + 1000));
+
+			const state = await getDocumentLifecycleState(tx, documentId);
+
+			expect(state.hasDraftChanges).toBe(true);
 		});
 	});
 

@@ -8,7 +8,7 @@ import { ProjectEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/admi
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
-import { ensureDraftVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import {
 	getOrganisationalUnitOptions,
 	getOrganisationalUnitOptionsByIds,
@@ -61,10 +61,10 @@ export default async function DashboardAdministratorEditProjectPage(
 
 	const documentId = anyVersion.entityVersion.entity.id;
 
-	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+	const { draftVersionId, hasDraftChanges, publishedId } = await db.transaction(async (tx) => {
 		const draftVersionId = await ensureDraftVersion(tx, documentId, projectsLifecycleAdapter);
-		const { publishedId } = await getDocumentVersions(tx, documentId);
-		return { draftVersionId, publishedId };
+		const { hasDraftChanges, publishedId } = await getDocumentLifecycleState(tx, documentId);
+		return { draftVersionId, hasDraftChanges, publishedId };
 	});
 
 	const [{ items: initialAssets }, project] = await Promise.all([
@@ -211,6 +211,7 @@ export default async function DashboardAdministratorEditProjectPage(
 	return (
 		<ProjectEditForm
 			documentId={documentId}
+			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
 			initialOrgUnitItems={initialOrgUnits.items}
 			initialOrgUnitTotal={initialOrgUnits.total}

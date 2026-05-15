@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 
 import { OpportunityEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-edit";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
-import { ensureDraftVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { opportunitiesLifecycleAdapter } from "@/lib/data/opportunities.lifecycle-adapter";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -49,10 +49,10 @@ export default async function DashboardWebsiteEditOpportunityPage(
 
 	const documentId = anyVersion.entityVersion.entity.id;
 
-	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+	const { draftVersionId, hasDraftChanges, publishedId } = await db.transaction(async (tx) => {
 		const draftVersionId = await ensureDraftVersion(tx, documentId, opportunitiesLifecycleAdapter);
-		const { publishedId } = await getDocumentVersions(tx, documentId);
-		return { draftVersionId, publishedId };
+		const { hasDraftChanges, publishedId } = await getDocumentLifecycleState(tx, documentId);
+		return { draftVersionId, hasDraftChanges, publishedId };
 	});
 
 	const opportunity = await db.query.opportunities.findFirst({
@@ -108,6 +108,7 @@ export default async function DashboardWebsiteEditOpportunityPage(
 		<OpportunityEditForm
 			contentBlocks={contentBlocks}
 			documentId={documentId}
+			hasDraftChanges={hasDraftChanges}
 			isPublished={publishedId != null}
 			opportunity={{ ...opportunity }}
 			sources={sources}

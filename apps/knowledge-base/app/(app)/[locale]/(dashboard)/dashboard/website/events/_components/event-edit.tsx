@@ -16,6 +16,7 @@ interface EventEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
 	documentId: string;
+	hasDraftChanges: boolean;
 	isPublished: boolean;
 	event: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
 		entityVersion: { entity: { id: string; slug: string }; status: { type: string } };
@@ -35,6 +36,7 @@ export function EventEditForm(props: Readonly<EventEditFormProps>): ReactNode {
 		initialAssets,
 		contentBlocks,
 		documentId,
+		hasDraftChanges,
 		isPublished,
 		event,
 		initialRelatedEntityIds,
@@ -56,7 +58,7 @@ export function EventEditForm(props: Readonly<EventEditFormProps>): ReactNode {
 				<EntityLifecycleBar
 					discardDraftAction={discardEventDraftAction}
 					documentId={documentId}
-					hasDraft={true}
+					hasDraft={hasDraftChanges}
 					isPublished={isPublished}
 					publishAction={publishEventAction}
 				/>

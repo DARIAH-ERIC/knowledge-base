@@ -15,6 +15,7 @@ import { updateOpportunityAction } from "@/app/(app)/[locale]/(dashboard)/dashbo
 interface OpportunityEditFormProps {
 	contentBlocks: Array<ContentBlock>;
 	documentId: string;
+	hasDraftChanges: boolean;
 	isPublished: boolean;
 	opportunity: Pick<
 		schema.Opportunity,
@@ -30,7 +31,7 @@ interface OpportunityEditFormProps {
 }
 
 export function OpportunityEditForm(props: Readonly<OpportunityEditFormProps>): ReactNode {
-	const { contentBlocks, documentId, isPublished, opportunity, sources } = props;
+	const { contentBlocks, documentId, hasDraftChanges, isPublished, opportunity, sources } = props;
 
 	const t = useExtracted();
 
@@ -41,7 +42,7 @@ export function OpportunityEditForm(props: Readonly<OpportunityEditFormProps>): 
 				<EntityLifecycleBar
 					discardDraftAction={discardOpportunityDraftAction}
 					documentId={documentId}
-					hasDraft={true}
+					hasDraft={hasDraftChanges}
 					isPublished={isPublished}
 					publishAction={publishOpportunityAction}
 				/>

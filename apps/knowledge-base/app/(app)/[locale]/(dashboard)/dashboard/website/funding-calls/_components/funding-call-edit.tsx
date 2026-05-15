@@ -15,6 +15,7 @@ import { updateFundingCallAction } from "@/app/(app)/[locale]/(dashboard)/dashbo
 interface FundingCallEditFormProps {
 	contentBlocks: Array<ContentBlock>;
 	documentId: string;
+	hasDraftChanges: boolean;
 	isPublished: boolean;
 	fundingCall: Pick<schema.FundingCall, "id" | "duration" | "title" | "summary"> & {
 		entityVersion: {
@@ -25,7 +26,7 @@ interface FundingCallEditFormProps {
 }
 
 export function FundingCallEditForm(props: Readonly<FundingCallEditFormProps>): ReactNode {
-	const { contentBlocks, documentId, isPublished, fundingCall } = props;
+	const { contentBlocks, documentId, hasDraftChanges, isPublished, fundingCall } = props;
 
 	const t = useExtracted();
 
@@ -36,7 +37,7 @@ export function FundingCallEditForm(props: Readonly<FundingCallEditFormProps>): 
 				<EntityLifecycleBar
 					discardDraftAction={discardFundingCallDraftAction}
 					documentId={documentId}
-					hasDraft={true}
+					hasDraft={hasDraftChanges}
 					isPublished={isPublished}
 					publishAction={publishFundingCallAction}
 				/>

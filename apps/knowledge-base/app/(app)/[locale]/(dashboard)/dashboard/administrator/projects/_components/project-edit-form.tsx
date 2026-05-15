@@ -15,6 +15,7 @@ import { updateProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/
 interface ProjectEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	documentId: string;
+	hasDraftChanges: boolean;
 	isPublished: boolean;
 	project: Pick<
 		schema.Project,
@@ -50,6 +51,7 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 	const {
 		initialAssets,
 		documentId,
+		hasDraftChanges,
 		isPublished,
 		project,
 		scopes,
@@ -72,7 +74,7 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 				<EntityLifecycleBar
 					discardDraftAction={discardProjectDraftAction}
 					documentId={documentId}
-					hasDraft={true}
+					hasDraft={hasDraftChanges}
 					isPublished={isPublished}
 					publishAction={publishProjectAction}
 				/>

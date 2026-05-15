@@ -16,6 +16,7 @@ interface NewsItemEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks: Array<ContentBlock>;
 	documentId: string;
+	hasDraftChanges: boolean;
 	isPublished: boolean;
 	newsItem: Pick<schema.NewsItem, "id" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string }; status: { type: string } };
@@ -35,6 +36,7 @@ export function NewsItemEditForm(props: Readonly<NewsItemEditFormProps>): ReactN
 		initialAssets,
 		contentBlocks,
 		documentId,
+		hasDraftChanges,
 		isPublished,
 		newsItem,
 		initialRelatedEntityIds,
@@ -56,7 +58,7 @@ export function NewsItemEditForm(props: Readonly<NewsItemEditFormProps>): ReactN
 				<EntityLifecycleBar
 					discardDraftAction={discardNewsItemDraftAction}
 					documentId={documentId}
-					hasDraft={true}
+					hasDraft={hasDraftChanges}
 					isPublished={isPublished}
 					publishAction={publishNewsItemAction}
 				/>

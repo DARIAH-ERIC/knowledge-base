@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 
 import { FundingCallEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-edit";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
-import { ensureDraftVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { fundingCallsLifecycleAdapter } from "@/lib/data/funding-calls.lifecycle-adapter";
 import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -49,10 +49,10 @@ export default async function DashboardWebsiteEditFundingCallPage(
 
 	const documentId = anyVersion.entityVersion.entity.id;
 
-	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+	const { draftVersionId, hasDraftChanges, publishedId } = await db.transaction(async (tx) => {
 		const draftVersionId = await ensureDraftVersion(tx, documentId, fundingCallsLifecycleAdapter);
-		const { publishedId } = await getDocumentVersions(tx, documentId);
-		return { draftVersionId, publishedId };
+		const { hasDraftChanges, publishedId } = await getDocumentLifecycleState(tx, documentId);
+		return { draftVersionId, hasDraftChanges, publishedId };
 	});
 
 	const fundingCall = await db.query.fundingCalls.findFirst({
@@ -95,6 +95,7 @@ export default async function DashboardWebsiteEditFundingCallPage(
 			contentBlocks={contentBlocks}
 			documentId={documentId}
 			fundingCall={{ ...fundingCall }}
+			hasDraftChanges={hasDraftChanges}
 			isPublished={publishedId != null}
 		/>
 	);
