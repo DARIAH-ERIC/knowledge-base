@@ -7,9 +7,9 @@ import { Popover, PopoverContent } from "@dariah-eric/ui/popover";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import { Tag, TagGroup, TagList } from "@dariah-eric/ui/tag-group";
-import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useMemo, useState } from "react";
+import { type ReactNode, useMemo, useRef, useState } from "react";
 
 import {
 	type AsyncOption,
@@ -45,10 +45,10 @@ function renderDefaultItem(item: AsyncOption): ReactNode {
 	}
 
 	return (
-		<div className="col-start-2">
+		<>
 			<ListBoxLabel>{item.name}</ListBoxLabel>
 			<ListBoxDescription>{item.description}</ListBoxDescription>
-		</div>
+		</>
 	);
 }
 
@@ -88,6 +88,7 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 
 	const t = useExtracted();
 
+	const triggerRef = useRef<HTMLDivElement>(null);
 	const [isOpen, setIsOpen] = useState(false);
 	const [localSelectedItems, setLocalSelectedItems] = useState<Array<T>>(emptySelectedItems);
 
@@ -150,137 +151,150 @@ function AsyncMultipleSelectInner<T extends AsyncOption>(
 		<div className={fieldStyles()}>
 			{label != null ? <Label>{label}</Label> : null}
 
-			<Popover isOpen={isOpen} onOpenChange={setIsOpen}>
-				<Button
-					className="min-block-10 inline-full justify-between gap-3 py-2 font-normal"
-					intent="outline"
-					isDisabled={isDisabled}
-					type="button"
-				>
-					<div className="flex min-inline-0 flex-1 flex-wrap gap-1 text-start">
-						{resolvedSelectedItems.length > 0 ? (
-							resolvedSelectedItems.map((item) => (
-								<span
-									key={item.id}
-									className="inline-flex items-center rounded-md border bg-muted px-2 py-0.5 text-xs font-medium text-fg"
-								>
-									{item.name}
-								</span>
-							))
-						) : (
-							<span className="text-muted-fg">{placeholder ?? t("No selected items")}</span>
-						)}
-					</div>
-					<ChevronUpDownIcon className="block-4 inline-4 shrink-0 text-muted-fg" />
-				</Button>
+			<div
+				ref={triggerRef}
+				data-slot="control"
+				className={[
+					"flex min-block-10 items-start gap-2 rounded-lg border border-border bg-transparent px-3 py-2",
+					isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+				].join(" ")}
+				onClick={(e) => {
+					if ((e.target as HTMLElement).closest("button") == null && !isDisabled) {
+						setIsOpen(true);
+					}
+				}}
+			>
+				{resolvedSelectedItems.length > 0 ? (
+					<TagGroup
+						aria-label={t("Selected items")}
+						className="min-inline-0 flex-1 flex-row"
+						onRemove={
+							isDisabled
+								? undefined
+								: (keys) => {
+										onChange(value.filter((id) => !keys.has(id)));
+									}
+						}
+					>
+						<TagList items={resolvedSelectedItems}>
+							{(item) => <Tag className="rounded-md">{item.name}</Tag>}
+						</TagList>
+					</TagGroup>
+				) : (
+					<span className="flex-1 text-muted-fg text-sm/6">
+						{placeholder ?? t("No selected items")}
+					</span>
+				)}
 
-				<PopoverContent className="inline-(--trigger-width) p-3">
-					<div className="flex flex-col gap-3">
-						{resolvedSelectedItems.length > 0 ? (
-							<TagGroup
-								aria-label={t("Selected items")}
-								onRemove={(keys) => {
-									onChange(value.filter((id) => !keys.has(id)));
-								}}
-							>
-								<TagList items={resolvedSelectedItems}>
-									{(item) => <Tag className="rounded-md">{item.name}</Tag>}
-								</TagList>
-							</TagGroup>
-						) : null}
+				<Popover isOpen={isOpen} onOpenChange={setIsOpen}>
+					<Button
+						className="shrink-0 px-2"
+						intent="plain"
+						isDisabled={isDisabled}
+						size="xs"
+						type="button"
+					>
+						<ChevronDownIcon
+							className={[
+								"block-4 inline-4 shrink-0 text-muted-fg transition-transform duration-200",
+								isOpen ? "rotate-180" : undefined,
+							]
+								.filter(Boolean)
+								.join(" ")}
+						/>
+					</Button>
 
-						<div className="flex gap-2">
-							<SearchField
-								className="flex-1"
-								onChange={setSearchText}
-								onSubmit={handleSearch}
-								value={searchText}
-							>
+					<PopoverContent
+						className="inline-(--trigger-width) overflow-hidden p-0"
+						shouldFlip={true}
+						triggerRef={triggerRef}
+					>
+						<div className="flex flex-col gap-3 p-3">
+							<SearchField onChange={setSearchText} onSubmit={handleSearch} value={searchText}>
 								<SearchInput autoFocus={true} placeholder={inputPlaceholder ?? t("Search")} />
 							</SearchField>
-							<Button intent="outline" isDisabled={isPending} onPress={handleSearch} type="button">
-								{t("Search")}
-							</Button>
-						</div>
 
-						{loadError != null ? (
-							<p className="py-3 text-center text-danger-subtle-fg text-sm">{loadErrorMessage}</p>
-						) : displayedItems.length > 0 ? (
-							<div className="relative">
-								<ListBox
-									aria-label={ariaLabel}
-									className={isPending ? "opacity-50" : undefined}
-									items={displayedItems}
-									onSelectionChange={(keys) => {
-										if (keys === "all") {
-											return;
-										}
-
-										const nextValue = [...keys].map(String);
-										const nextSelectedKeys = new Set(nextValue);
-
-										setLocalSelectedItems((previousItems) => {
-											const map = new Map(previousItems.map((item) => [item.id, item] as const));
-
-											for (const item of displayedItems) {
-												if (nextSelectedKeys.has(item.id)) {
-													map.set(item.id, item);
-												}
+							{loadError != null ? (
+								<p className="py-3 text-center text-danger-subtle-fg text-sm">{loadErrorMessage}</p>
+							) : displayedItems.length > 0 ? (
+								<div className="relative">
+									<ListBox
+										aria-label={ariaLabel}
+										className={isPending ? "max-block-56 opacity-50" : "max-block-56"}
+										items={displayedItems}
+										onSelectionChange={(keys) => {
+											if (keys === "all") {
+												return;
 											}
 
-											return [...map.values()];
-										});
+											const nextValue = [...keys].map(String);
+											const nextSelectedKeys = new Set(nextValue);
 
-										onChange(nextValue);
-									}}
-									selectedKeys={new Set(value)}
-									selectionBehavior="toggle"
-									selectionMode="multiple"
-								>
-									{(item) => (
-										<ListBoxItem id={item.id} textValue={item.name}>
-											{renderOption(item)}
-										</ListBoxItem>
-									)}
-								</ListBox>
+											setLocalSelectedItems((previousItems) => {
+												const map = new Map(previousItems.map((item) => [item.id, item] as const));
 
-								{isPending ? (
-									<div className="absolute inset-0 flex items-center justify-center">
-										<ProgressCircle aria-label={t("Loading...")} isIndeterminate={true} />
-									</div>
-								) : null}
-							</div>
-						) : isPending ? (
-							<div className="flex items-center justify-center py-6">
-								<ProgressCircle aria-label={t("Loading...")} isIndeterminate={true} />
-							</div>
-						) : (
-							<p className="py-3 text-center text-muted-fg text-sm">
-								{emptyMessage ?? t("No options found.")}
-							</p>
-						)}
+												for (const item of displayedItems) {
+													if (nextSelectedKeys.has(item.id)) {
+														map.set(item.id, item);
+													}
+												}
 
-						<div className="flex justify-between gap-2">
-							<Button
-								intent="outline"
-								isDisabled={!hasPrev || isPending}
-								onPress={handlePrev}
-								type="button"
-							>
-								{t("Previous")}
-							</Button>
-							<Button
-								intent="outline"
-								isDisabled={!hasNext || isPending}
-								onPress={handleNext}
-								type="button"
-							>
-								{t("Next")}
-							</Button>
+												return [...map.values()];
+											});
+
+											onChange(nextValue);
+										}}
+										selectedKeys={new Set(value)}
+										selectionBehavior="toggle"
+										selectionMode="multiple"
+									>
+										{(item) => (
+											<ListBoxItem id={item.id} textValue={item.name}>
+												{renderOption(item)}
+											</ListBoxItem>
+										)}
+									</ListBox>
+
+									{isPending ? (
+										<div className="absolute inset-0 flex items-center justify-center">
+											<ProgressCircle aria-label={t("Loading...")} isIndeterminate={true} />
+										</div>
+									) : null}
+								</div>
+							) : isPending ? (
+								<div className="flex items-center justify-center py-6">
+									<ProgressCircle aria-label={t("Loading...")} isIndeterminate={true} />
+								</div>
+							) : (
+								<p className="py-3 text-center text-muted-fg text-sm">
+									{emptyMessage ?? t("No options found.")}
+								</p>
+							)}
+
+							{hasPrev || hasNext ? (
+								<div className="flex justify-between gap-2">
+									<Button
+										intent="outline"
+										isDisabled={!hasPrev || isPending}
+										onPress={handlePrev}
+										type="button"
+									>
+										{t("Previous")}
+									</Button>
+									<Button
+										intent="outline"
+										isDisabled={!hasNext || isPending}
+										onPress={handleNext}
+										type="button"
+									>
+										{t("Next")}
+									</Button>
+								</div>
+							) : null}
 						</div>
-					</div>
-				</PopoverContent>
-			</Popover>
+					</PopoverContent>
+				</Popover>
+			</div>
 
 			{errorMessage != null && errorMessage !== "" ? (
 				<div className={fieldErrorStyles()}>{errorMessage}</div>

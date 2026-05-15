@@ -58,9 +58,17 @@ export class WebsiteNewsPage {
 			.filter({ has: this.page.getByRole("listbox", { name: "Related entities" }) });
 	}
 
+	private relatedEntitiesControl(): Locator {
+		return this.relatedEntitiesSection().locator('[data-slot="control"]').first();
+	}
+
+	private async closeRelatedEntitiesDialog(dialog: Locator): Promise<void> {
+		await this.page.locator("body").click({ position: { x: 1, y: 1 } });
+		await dialog.waitFor({ state: "hidden" });
+	}
+
 	async selectRelatedEntity(entityName: string): Promise<void> {
-		const section = this.relatedEntitiesSection();
-		const trigger = section.getByRole("button").first();
+		const trigger = this.relatedEntitiesControl();
 		const dialog = this.relatedEntitiesDialog();
 
 		await trigger.click();
@@ -70,33 +78,19 @@ export class WebsiteNewsPage {
 		const isOptionVisible = await option.isVisible().catch(() => false);
 
 		if (!isOptionVisible) {
-			await dialog.getByRole("searchbox").fill(entityName);
-			await dialog.getByRole("button", { name: "Search" }).click();
+			const searchbox = dialog.getByRole("searchbox");
+			await searchbox.fill(entityName);
+			await searchbox.press("Enter");
 		}
 
 		await dialog.getByRole("option", { name: entityName, exact: true }).click();
-		await trigger.evaluate((element) => {
-			(element as HTMLButtonElement).click();
-		});
-		await dialog.waitFor({ state: "hidden" });
+		await this.closeRelatedEntitiesDialog(dialog);
 	}
 
 	async removeRelatedEntity(entityName: string): Promise<void> {
 		const section = this.relatedEntitiesSection();
-		const trigger = section.getByRole("button").first();
-		const dialog = this.relatedEntitiesDialog();
-
-		await trigger.click();
-		await dialog.waitFor({ state: "visible" });
-		await dialog
-			.getByRole("grid", { name: "Selected items" })
-			.getByRole("row", { name: entityName, exact: true })
-			.getByRole("button")
-			.click();
-		await trigger.evaluate((element) => {
-			(element as HTMLButtonElement).click();
-		});
-		await dialog.waitFor({ state: "hidden" });
+		await section.getByText(entityName, { exact: true }).waitFor({ state: "visible" });
+		await section.locator('button[slot="remove"]').click();
 	}
 
 	async submitForm(): Promise<void> {
