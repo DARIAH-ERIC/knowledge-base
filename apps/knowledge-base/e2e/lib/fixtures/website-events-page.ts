@@ -68,7 +68,7 @@ export class WebsiteEventsPage {
 	}
 
 	async submitForm(): Promise<void> {
-		await this.page.getByRole("button", { name: "Save", exact: true }).click();
+		await this.page.getByRole("button", { name: /^(?:Save|Save \(as draft\))$/ }).click();
 		/** After a successful create/edit, the server action redirects back to the list. */
 		await this.page.waitForURL(`**${BASE_PATH}`);
 	}

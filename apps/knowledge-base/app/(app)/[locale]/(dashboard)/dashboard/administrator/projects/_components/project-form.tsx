@@ -31,6 +31,7 @@ import { Fragment, type ReactNode, useActionState, useState, useTransition } fro
 
 import { AsyncMultipleSelect } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/async-multiple-select";
 import { AsyncOptionPicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/async-option-picker";
+import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
 import {
 	FormActions,
 	FormLayout,
@@ -694,16 +695,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 
 				<FormActions>
 					<FormStatus state={state} />
-					<Button isPending={isPending} type="submit">
-						{isPending ? (
-							<Fragment>
-								<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
-								<span aria-hidden={true}>{t("Saving...")}</span>
-							</Fragment>
-						) : (
-							t("Save")
-						)}
-					</Button>
+					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={project != null} />
 				</FormActions>
 			</Form>
 		</FormLayout>

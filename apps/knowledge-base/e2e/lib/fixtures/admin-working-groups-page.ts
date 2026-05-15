@@ -45,7 +45,7 @@ export class AdminWorkingGroupsPage {
 	}
 
 	async submitForm(): Promise<void> {
-		await this.page.getByRole("button", { name: "Save", exact: true }).click();
+		await this.page.getByRole("button", { name: /^(?:Save|Save \(as draft\))$/ }).click();
 		await this.page.waitForURL(`**${BASE_PATH}`);
 	}
 

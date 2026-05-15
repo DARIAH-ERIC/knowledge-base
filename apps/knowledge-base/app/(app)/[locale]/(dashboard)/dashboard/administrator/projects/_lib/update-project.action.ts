@@ -11,10 +11,11 @@ import * as v from "valibot";
 
 import { UpdateProjectActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/update-project.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { ensureDraftVersion, touchVersion } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
 import { db } from "@/lib/db";
 import { and, eq, inArray, notInArray } from "@/lib/db/sql";
+import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -208,6 +209,10 @@ export const updateProjectAction = createServerAction(
 			}
 
 			await touchVersion(tx, draftVersionId);
+
+			if (shouldSaveAndPublish(formData)) {
+				await publishVersion(tx, documentId, projectsLifecycleAdapter);
+			}
 		});
 
 		after(async () => {
