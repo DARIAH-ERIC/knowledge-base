@@ -2,7 +2,7 @@ import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
-import { ServicesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_components/services-page";
+import { ServicesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/services-page";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getServicesForAdmin } from "@/lib/data/services";
@@ -15,7 +15,7 @@ import {
 	getListSortSearchParams,
 } from "@/lib/server/list-search-params";
 
-interface DashboardAdministratorServicesPageProps extends PageProps<"/[locale]/dashboard/administrator/services"> {}
+interface DashboardAdministratorSshocServicesPageProps extends PageProps<"/[locale]/dashboard/administrator/sshoc-services"> {}
 
 const pageSize = dashboardPageSize;
 const defaultSort = "name" as const;
@@ -44,24 +44,24 @@ function createListHref(
 
 	const query = searchParams.toString();
 
-	return `/dashboard/administrator/services${query !== "" ? `?${query}` : ""}`;
+	return `/dashboard/administrator/sshoc-services${query !== "" ? `?${query}` : ""}`;
 }
 
 export async function generateMetadata(
-	_props: Readonly<DashboardAdministratorServicesPageProps>,
+	_props: Readonly<DashboardAdministratorSshocServicesPageProps>,
 	resolvingMetadata: ResolvingMetadata,
 ): Promise<Metadata> {
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Administrator dashboard - Services"),
+		title: t("Administrator dashboard - Sshoc Services"),
 	});
 
 	return metadata;
 }
 
-export default async function DashboardAdministratorServicesPage(
-	props: Readonly<DashboardAdministratorServicesPageProps>,
+export default async function DashboardAdministratorSshocServicesPage(
+	props: Readonly<DashboardAdministratorSshocServicesPageProps>,
 ): Promise<ReactNode> {
 	const { params, searchParams } = props;
 	const [{ locale }, rawSearchParams] = await Promise.all([params, searchParams]);
@@ -77,6 +77,7 @@ export default async function DashboardAdministratorServicesPage(
 		offset: (page - 1) * pageSize,
 		q,
 		sort,
+		type: "sshoc",
 		dir,
 	});
 	const totalPages = Math.max(Math.ceil(services.total / pageSize), 1);

@@ -3,12 +3,12 @@ import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { ServiceEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_components/service-edit-form";
+import { ServiceEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-edit-form";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getServiceForAdmin } from "@/lib/data/services";
 import { createMetadata } from "@/lib/server/create-metadata";
 
-interface DashboardAdministratorEditServicePageProps extends PageProps<"/[locale]/dashboard/administrator/services/[id]/edit"> {}
+interface DashboardAdministratorEditServicePageProps extends PageProps<"/[locale]/dashboard/administrator/internal-services/[id]/edit"> {}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorEditServicePageProps>,
@@ -17,7 +17,7 @@ export async function generateMetadata(
 	const t = await getExtracted();
 
 	const metadata: Metadata = await createMetadata(resolvingMetadata, {
-		title: t("Administrator dashboard - Edit service"),
+		title: t("Administrator dashboard - Edit internal service"),
 	});
 
 	return metadata;
@@ -44,7 +44,6 @@ export default async function DashboardAdministratorEditServicePage(
 			selectedOrganisationalUnits={serviceData.selectedOrganisationalUnits}
 			service={serviceData.service}
 			serviceStatuses={serviceData.serviceStatuses}
-			serviceTypes={serviceData.serviceTypes}
 		/>
 	);
 }

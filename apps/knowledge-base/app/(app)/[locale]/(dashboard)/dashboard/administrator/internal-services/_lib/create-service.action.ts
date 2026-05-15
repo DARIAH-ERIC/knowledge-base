@@ -1,6 +1,7 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
+import { assert, getFormDataValues } from "@acdh-oeaw/lib";
+import { eq } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { type ValidationErrors, createActionStateError } from "@dariah-eric/next-lib/actions";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
@@ -8,16 +9,15 @@ import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
-import { UpdateServiceActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_lib/update-service.schema";
+import { CreateServiceActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_lib/create-service.schema";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { eq } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
 
-export const updateServiceAction = createServerAction(
-	async function updateServiceAction(state, formData) {
+export const createServiceAction = createServerAction(
+	async function createServiceAction(state, formData) {
 		const locale = await getLocale();
 		const t = await getExtracted();
 
@@ -28,13 +28,13 @@ export const updateServiceAction = createServerAction(
 		await assertAdmin();
 
 		const result = await v.safeParseAsync(
-			UpdateServiceActionInputSchema,
+			CreateServiceActionInputSchema,
 			getFormDataValues(formData),
 			{ lang: getIntlLanguage(locale) },
 		);
 
 		if (!result.success) {
-			const errors = v.flatten<typeof UpdateServiceActionInputSchema>(result.issues);
+			const errors = v.flatten<typeof CreateServiceActionInputSchema>(result.issues);
 
 			return createActionStateError({
 				message: errors.root ?? t("Invalid or missing fields."),
@@ -43,10 +43,8 @@ export const updateServiceAction = createServerAction(
 		}
 
 		const {
-			id,
 			name,
 			sshocMarketplaceId,
-			typeId,
 			statusId,
 			comment,
 			dariahBranding,
@@ -57,13 +55,20 @@ export const updateServiceAction = createServerAction(
 			providerUnitIds,
 		} = result.output;
 
+		const [serviceType] = await db
+			.select()
+			.from(schema.serviceTypes)
+			.where(eq(schema.serviceTypes.type, "internal"));
+
+		assert(serviceType);
+
 		await db.transaction(async (tx) => {
-			await tx
-				.update(schema.services)
-				.set({
+			const [service] = await tx
+				.insert(schema.services)
+				.values({
 					name,
 					sshocMarketplaceId,
-					typeId,
+					typeId: serviceType.id,
 					statusId,
 					comment,
 					dariahBranding,
@@ -71,11 +76,11 @@ export const updateServiceAction = createServerAction(
 					metadata,
 					privateSupplier,
 				})
-				.where(eq(schema.services.id, id));
+				.returning({ id: schema.services.id });
 
-			await tx
-				.delete(schema.servicesToOrganisationalUnits)
-				.where(eq(schema.servicesToOrganisationalUnits.serviceId, id));
+			if (service == null) {
+				return;
+			}
 
 			const ownerRole = await tx.query.organisationalUnitServiceRoles.findFirst({
 				where: { role: "service_owner" },
@@ -91,13 +96,21 @@ export const updateServiceAction = createServerAction(
 
 			if (ownerRole != null) {
 				for (const unitId of ownerUnitIds) {
-					relations.push({ serviceId: id, organisationalUnitId: unitId, roleId: ownerRole.id });
+					relations.push({
+						serviceId: service.id,
+						organisationalUnitId: unitId,
+						roleId: ownerRole.id,
+					});
 				}
 			}
 
 			if (providerRole != null) {
 				for (const unitId of providerUnitIds) {
-					relations.push({ serviceId: id, organisationalUnitId: unitId, roleId: providerRole.id });
+					relations.push({
+						serviceId: service.id,
+						organisationalUnitId: unitId,
+						roleId: providerRole.id,
+					});
 				}
 			}
 
@@ -106,8 +119,8 @@ export const updateServiceAction = createServerAction(
 			}
 		});
 
-		revalidatePath("/[locale]/dashboard/administrator/services", "layout");
+		revalidatePath("/[locale]/dashboard/administrator/internal-services", "layout");
 
-		redirect({ href: "/dashboard/administrator/services", locale });
+		redirect({ href: "/dashboard/administrator/internal-services", locale });
 	},
 );

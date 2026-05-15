@@ -2,9 +2,8 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { Badge } from "@dariah-eric/ui/badge";
-import { Button, buttonStyles } from "@dariah-eric/ui/button";
-import { Link } from "@dariah-eric/ui/link";
-import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
+import { Button } from "@dariah-eric/ui/button";
+import { Menu, MenuContent, MenuItem, MenuLabel } from "@dariah-eric/ui/menu";
 import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import {
 	Table,
@@ -14,16 +13,10 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import {
-	EllipsisHorizontalIcon,
-	PencilSquareIcon,
-	PlusIcon,
-	TrashIcon,
-} from "@heroicons/react/24/outline";
+import { EllipsisHorizontalIcon, EyeIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
+import { Fragment, type ReactNode, useOptimistic } from "react";
 
-import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
 	Header,
 	HeaderAction,
@@ -33,9 +26,7 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
 import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
-import { deleteServiceAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_lib/delete-service.action";
 import { dashboardPageSize } from "@/config/pagination.config";
-import { useRouter } from "@/lib/navigation/navigation";
 
 interface ServicesPageProps {
 	dir: "asc" | "desc";
@@ -83,11 +74,9 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 	const { dir: initialDir, page: initialPage, q: initialQ, services, sort: initialSort } = props;
 
 	const t = useExtracted();
-	const router = useRouter();
-	const [items, optimisticallyRemoveItem] = useOptimistic(services.data, (state, id: string) =>
+	const [items] = useOptimistic(services.data, (state, id: string) =>
 		state.filter((item) => item.id !== id),
 	);
-	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
 		useUrlPaginatedSearch({
 			dir: initialDir,
@@ -95,7 +84,6 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 			q: initialQ,
 			sort: initialSort,
 		});
-	const [isDeletePending, startDeleteTransition] = useTransition();
 
 	const totalPages = Math.max(Math.ceil(services.total / pageSize), 1);
 
@@ -105,20 +93,13 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 				<HeaderContent>
 					<HeaderTitle>{t("Services")}</HeaderTitle>
 					<HeaderDescription>
-						{t("Manage all services in the DARIAH knowledge base.")}
+						{t("Manage all SSHOC services in the DARIAH knowledge base.")}
 					</HeaderDescription>
 				</HeaderContent>
 				<HeaderAction>
 					<SearchField onChange={setInputValue} value={inputValue}>
 						<SearchInput placeholder={t("Search")} />
 					</SearchField>
-					<Link
-						className={buttonStyles({ intent: "secondary" })}
-						href="/dashboard/administrator/services/create"
-					>
-						<PlusIcon className="me-2 block-4 inline-4" />
-						{t("New")}
-					</Link>
 				</HeaderAction>
 			</Header>
 
@@ -165,19 +146,9 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 										<EllipsisHorizontalIcon className="block-5 inline-5" />
 									</Button>
 									<MenuContent placement="left top">
-										<MenuItem href={`/dashboard/administrator/services/${item.id}/edit`}>
-											<PencilSquareIcon className="me-2 block-4 inline-4" />
-											<MenuLabel>{t("Edit")}</MenuLabel>
-										</MenuItem>
-										<MenuSeparator />
-										<MenuItem
-											intent="danger"
-											onAction={() => {
-												setItemToDelete({ id: item.id });
-											}}
-										>
-											<TrashIcon className="me-2 block-4 inline-4" />
-											<MenuLabel>{t("Delete")}</MenuLabel>
+										<MenuItem href={`/dashboard/administrator/sshoc-services/${item.id}/view`}>
+											<EyeIcon className="me-2 block-4 inline-4" />
+											<MenuLabel>{t("View")}</MenuLabel>
 										</MenuItem>
 									</MenuContent>
 								</Menu>
@@ -193,30 +164,6 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 				setPage={setPage}
 				total={totalPages}
 				totalItems={services.total}
-			/>
-
-			<DeleteModal
-				isOpen={itemToDelete != null}
-				model={t("service")}
-				onAction={() => {
-					if (itemToDelete == null) {
-						return;
-					}
-
-					const id = itemToDelete.id;
-
-					startDeleteTransition(async () => {
-						optimisticallyRemoveItem(id);
-						await deleteServiceAction(id);
-						router.refresh();
-						setItemToDelete(null);
-					});
-				}}
-				onOpenChange={(open) => {
-					if (!open && !isDeletePending) {
-						setItemToDelete(null);
-					}
-				}}
 			/>
 		</Fragment>
 	);

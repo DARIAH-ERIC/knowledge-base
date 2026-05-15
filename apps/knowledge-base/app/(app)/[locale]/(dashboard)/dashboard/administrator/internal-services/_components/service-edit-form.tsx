@@ -5,8 +5,8 @@ import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
-import { ServiceForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_components/service-form";
-import { updateServiceAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/services/_lib/update-service.action";
+import { ServiceForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form";
+import { updateServiceAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_lib/update-service.action";
 
 interface ServiceEditFormProps {
 	service: Pick<
@@ -14,7 +14,6 @@ interface ServiceEditFormProps {
 		| "id"
 		| "name"
 		| "sshocMarketplaceId"
-		| "typeId"
 		| "statusId"
 		| "comment"
 		| "dariahBranding"
@@ -24,7 +23,6 @@ interface ServiceEditFormProps {
 		ownerUnitIds: Array<string>;
 		providerUnitIds: Array<string>;
 	};
-	serviceTypes: Array<Pick<schema.ServiceType, "id" | "type">>;
 	serviceStatuses: Array<Pick<schema.ServiceStatus, "id" | "status">>;
 	initialOrganisationalUnitItems: Array<{ id: string; name: string }>;
 	initialOrganisationalUnitTotal: number;
@@ -34,7 +32,6 @@ interface ServiceEditFormProps {
 export function ServiceEditForm(props: Readonly<ServiceEditFormProps>): ReactNode {
 	const {
 		service,
-		serviceTypes,
 		serviceStatuses,
 		initialOrganisationalUnitItems,
 		initialOrganisationalUnitTotal,
@@ -45,7 +42,7 @@ export function ServiceEditForm(props: Readonly<ServiceEditFormProps>): ReactNod
 
 	return (
 		<Fragment>
-			<Heading>{t("Edit service")}</Heading>
+			<Heading>{t("Edit internal service")}</Heading>
 
 			<ServiceForm
 				formAction={updateServiceAction}
@@ -54,7 +51,6 @@ export function ServiceEditForm(props: Readonly<ServiceEditFormProps>): ReactNod
 				selectedOrganisationalUnits={selectedOrganisationalUnits}
 				service={service}
 				serviceStatuses={serviceStatuses}
-				serviceTypes={serviceTypes}
 			/>
 		</Fragment>
 	);

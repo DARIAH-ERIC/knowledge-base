@@ -2,7 +2,7 @@ import type { Locator, Page } from "@playwright/test";
 
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
-const BASE_PATH = "/en/dashboard/administrator/services";
+const BASE_PATH = "/en/dashboard/administrator/internal-services";
 
 export class AdminServicesPage {
 	readonly page: Page;
