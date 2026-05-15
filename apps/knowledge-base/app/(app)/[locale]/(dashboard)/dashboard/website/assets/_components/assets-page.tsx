@@ -27,8 +27,15 @@ interface AssetItem {
 	label: string;
 	alt: string | null;
 	caption: string | null;
+	licenseId: string | null;
 	mimeType: string;
 	url: string;
+}
+
+interface LicenseOption {
+	id: string;
+	code: string;
+	name: string;
 }
 
 interface AssetsPageProps {
@@ -36,6 +43,7 @@ interface AssetsPageProps {
 		items: Array<AssetItem>;
 		total: number;
 	};
+	licenses: Array<LicenseOption>;
 	page: number;
 	prefix: string;
 	q: string;
@@ -44,7 +52,7 @@ interface AssetsPageProps {
 const pageSize = dashboardPageSize;
 
 export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
-	const { assets, page: initialPage, prefix: initialPrefix, q: initialQ } = props;
+	const { assets, licenses, page: initialPage, prefix: initialPrefix, q: initialQ } = props;
 
 	const t = useExtracted();
 	const router = useRouter();
@@ -89,6 +97,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 					</Select>
 
 					<UploadImageDialog
+						licenses={licenses}
 						onSuccess={() => {
 							router.refresh();
 						}}
@@ -123,6 +132,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 										/>
 										<EditAssetMetadataDialog
 											asset={asset}
+											licenses={licenses}
 											onSuccess={() => {
 												router.refresh();
 											}}

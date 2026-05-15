@@ -143,10 +143,11 @@ interface UpdateAssetMetadataParams {
 	label: string;
 	alt?: string | null;
 	caption?: string | null;
+	licenseId?: schema.AssetInput["licenseId"] | null;
 }
 
 export async function updateAssetMetadata(params: UpdateAssetMetadataParams) {
-	const { id, label, alt, caption } = params;
+	const { id, label, alt, caption, licenseId } = params;
 
 	await db
 		.update(schema.assets)
@@ -154,6 +155,7 @@ export async function updateAssetMetadata(params: UpdateAssetMetadataParams) {
 			label,
 			alt,
 			caption,
+			licenseId,
 		})
 		.where(eq(schema.assets.id, id));
 }
@@ -187,6 +189,7 @@ export async function getAssetsForDashboard(params: GetAssetsForDashboardParams)
 				label: true,
 				alt: true,
 				caption: true,
+				licenseId: true,
 				mimeType: true,
 			},
 			limit,
@@ -211,6 +214,7 @@ export async function getAssetsForDashboard(params: GetAssetsForDashboardParams)
 			label: asset.label,
 			alt: asset.alt,
 			caption: asset.caption,
+			licenseId: asset.licenseId,
 			mimeType: asset.mimeType,
 			url,
 		};

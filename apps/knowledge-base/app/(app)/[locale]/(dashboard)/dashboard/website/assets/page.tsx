@@ -7,6 +7,7 @@ import { imageGridOptions } from "@/config/assets.config";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { type AssetPrefix, assetPrefixes } from "@/lib/data/assets";
 import { getAssetsForDashboard } from "@/lib/data/cached/assets";
+import { getLicenseOptions } from "@/lib/data/licenses";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -59,13 +60,16 @@ export default async function DashboardWebsiteAssetsPage(
 	const prefix = assetPrefixes.includes(rawPrefix as AssetPrefix)
 		? (rawPrefix as AssetPrefix)
 		: undefined;
-	const assets = await getAssetsForDashboard({
-		imageUrlOptions: imageGridOptions,
-		limit: pageSize,
-		offset: (page - 1) * pageSize,
-		prefix,
-		q,
-	});
+	const [assets, licenses] = await Promise.all([
+		getAssetsForDashboard({
+			imageUrlOptions: imageGridOptions,
+			limit: pageSize,
+			offset: (page - 1) * pageSize,
+			prefix,
+			q,
+		}),
+		getLicenseOptions(),
+	]);
 	const totalPages = Math.max(Math.ceil(assets.total / pageSize), 1);
 
 	if (page > totalPages) {
@@ -75,5 +79,5 @@ export default async function DashboardWebsiteAssetsPage(
 		});
 	}
 
-	return <AssetsPage assets={assets} page={page} prefix={prefix ?? ""} q={q} />;
+	return <AssetsPage assets={assets} licenses={licenses} page={page} prefix={prefix ?? ""} q={q} />;
 }

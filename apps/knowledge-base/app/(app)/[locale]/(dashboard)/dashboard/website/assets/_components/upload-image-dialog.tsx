@@ -26,11 +26,12 @@ import { Fragment, type ReactNode, useActionState, useState } from "react";
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
 
 interface UploadImageDialogProps {
+	licenses: Array<{ id: string; code: string; name: string }>;
 	onSuccess: () => void;
 }
 
 export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): ReactNode {
-	const { onSuccess } = props;
+	const { licenses, onSuccess } = props;
 
 	const t = useExtracted();
 
@@ -137,6 +138,20 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 							<TextArea placeholder={t("Optional caption displayed below the image")} rows={2} />
 							<FieldError />
 						</TextField>
+
+						<Select defaultValue="none" name="licenseId">
+							<Label>{t("License")}</Label>
+							<SelectTrigger />
+							<FieldError />
+							<SelectContent>
+								<SelectItem id="none">{t("No license")}</SelectItem>
+								{licenses.map((license) => (
+									<SelectItem key={license.id} id={license.id}>
+										{license.code} - {license.name}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 					</ModalBody>
 
 					<ModalFooter>

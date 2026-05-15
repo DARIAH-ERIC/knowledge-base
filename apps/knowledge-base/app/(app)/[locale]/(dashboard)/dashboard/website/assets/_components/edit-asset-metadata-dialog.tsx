@@ -14,6 +14,7 @@ import {
 	ModalHeader,
 } from "@dariah-eric/ui/modal";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
@@ -29,17 +30,19 @@ interface AssetMetadataItem {
 	label: string;
 	alt: string | null;
 	caption: string | null;
+	licenseId: string | null;
 	mimeType: string;
 	url: string;
 }
 
 interface EditAssetMetadataDialogProps {
 	asset: AssetMetadataItem;
+	licenses: Array<{ id: string; code: string; name: string }>;
 	onSuccess: () => void;
 }
 
 export function EditAssetMetadataDialog(props: Readonly<EditAssetMetadataDialogProps>): ReactNode {
-	const { asset, onSuccess } = props;
+	const { asset, licenses, onSuccess } = props;
 
 	const t = useExtracted();
 	const [isOpen, setIsOpen] = useState(false);
@@ -113,6 +116,20 @@ export function EditAssetMetadataDialog(props: Readonly<EditAssetMetadataDialogP
 							<TextArea placeholder={t("Optional caption displayed below the image")} rows={3} />
 							<FieldError />
 						</TextField>
+
+						<Select defaultValue={asset.licenseId ?? "none"} name="licenseId">
+							<Label>{t("License")}</Label>
+							<SelectTrigger />
+							<FieldError />
+							<SelectContent>
+								<SelectItem id="none">{t("No license")}</SelectItem>
+								{licenses.map((license) => (
+									<SelectItem key={license.id} id={license.id}>
+										{license.code} - {license.name}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 					</ModalBody>
 
 					<ModalFooter>
