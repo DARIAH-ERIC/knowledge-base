@@ -22,7 +22,6 @@ test.describe("services admin", () => {
 		await servicesPage.gotoCreate();
 
 		await servicesPage.fillName(name);
-		await servicesPage.selectFirstType();
 		await servicesPage.selectFirstStatus();
 
 		await servicesPage.submitForm();
