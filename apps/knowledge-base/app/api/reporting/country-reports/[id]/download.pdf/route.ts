@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 
 import { getCountryReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
-import { createTextPdf, type PdfSection } from "@/app/api/reporting/_lib/text-pdf";
+import { type PdfSection, createTextPdf } from "@/app/api/reporting/_lib/text-pdf";
 import { getCurrentSession } from "@/lib/auth/session";
 
 function value(value: number | string | null): string {
@@ -69,9 +69,9 @@ export async function GET(
 					title: "Contributors",
 					lines: [
 						`Total contributors: ${value(report.summary.totalContributors)}`,
-						...report.summary.contributions.map((c) => {
-							return `${c.personName} - ${formatRole(c.roleType)} - ${c.orgUnitName}`;
-						}),
+						...report.summary.contributions.map(
+							(c) => `${c.personName} - ${formatRole(c.roleType)} - ${c.orgUnitName}`,
+						),
 					],
 				},
 				{
@@ -120,9 +120,9 @@ export async function GET(
 					title: "Project contributions",
 					lines:
 						report.summary.projectContributions.length > 0
-							? report.summary.projectContributions.map((p) => {
-									return `${p.projectName}: ${eurFormatter.format(p.amountEuros)}`;
-								})
+							? report.summary.projectContributions.map(
+									(p) => `${p.projectName}: ${eurFormatter.format(p.amountEuros)}`,
+								)
 							: ["No project contributions recorded."],
 				},
 			];

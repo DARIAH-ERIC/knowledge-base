@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { getWorkingGroupReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
 import { richTextToText } from "@/app/api/reporting/_lib/rich-text-to-text";
-import { createTextPdf, type PdfSection } from "@/app/api/reporting/_lib/text-pdf";
+import { type PdfSection, createTextPdf } from "@/app/api/reporting/_lib/text-pdf";
 import { getCurrentSession } from "@/lib/auth/session";
 
 function value(value: number | string | null): string {
@@ -67,9 +67,9 @@ export async function GET(
 					title: "Social media",
 					lines:
 						report.summary.socialMedia.length > 0
-							? report.summary.socialMedia.map((item) => {
-									return `${item.socialMedia.name} - ${item.socialMedia.url}`;
-								})
+							? report.summary.socialMedia.map(
+									(item) => `${item.socialMedia.name} - ${item.socialMedia.url}`,
+								)
 							: ["No social media recorded."],
 				},
 				{
@@ -88,12 +88,10 @@ export async function GET(
 					title: "Questions",
 					lines:
 						report.summary.questions.length > 0
-							? report.summary.questions.flatMap((question) => {
-									return [
-										`Question: ${richTextToText(question.question)}`,
-										`Answer: ${richTextToText(question.answer) || "No answer provided."}`,
-									];
-								})
+							? report.summary.questions.flatMap((question) => [
+									`Question: ${richTextToText(question.question)}`,
+									`Answer: ${richTextToText(question.answer) || "No answer provided."}`,
+								])
 							: ["No questions recorded."],
 				},
 			];
