@@ -51,7 +51,7 @@ export class DatabaseService {
 
 	/**
 	 * Returns the first entity from the database, formatted as it appears in the "Related entities"
-	 * MultipleSelect (`type / slug`). Used as a test relation target.
+	 * MultipleSelect. Used as a test relation target.
 	 */
 	async getTestEntity(): Promise<{ id: string; name: string }> {
 		const entity = await this.db.query.entities.findFirst({
@@ -64,7 +64,7 @@ export class DatabaseService {
 			throw new Error("No entities found in database — required for relation tests.");
 		}
 
-		return { id: entity.id, name: `${entity.type.type} / ${entity.slug}` };
+		return { id: entity.id, name: entity.slug };
 	}
 
 	/** Returns related entity and resource IDs for a given entity (by its document DB id). */
@@ -398,13 +398,16 @@ export class DatabaseService {
 	async cleanupWorkerNewsItems(workerIndex: number): Promise<void> {
 		const prefix = `[e2e-worker-${String(workerIndex)}]`;
 
-		const items = await this.db
-			.select({ id: schema.news.id })
+		const rows = await this.db
+			.select({ documentId: schema.entityVersions.entityId })
 			.from(schema.news)
+			.innerJoin(schema.entityVersions, eq(schema.news.id, schema.entityVersions.id))
 			.where(sql`${schema.news.title} LIKE ${`${prefix}%`}`);
 
-		for (const item of items) {
-			await this.deleteNewsItem(item.id);
+		const documentIds = [...new Set(rows.map((row) => row.documentId))];
+
+		for (const documentId of documentIds) {
+			await this.deleteNewsDocument(documentId);
 		}
 	}
 
