@@ -3,6 +3,7 @@ import * as schema from "@dariah-eric/database/schema";
 import type { Database, Transaction } from "@/middlewares/db";
 import { and, eq, inArray, sql } from "@/services/db/sql";
 
+// oxlint-disable-next-line typescript/explicit-module-boundary-types
 export async function getOrganigram(db: Database | Transaction) {
 	const nodes = await db.query.organigramNodes.findMany({
 		columns: {
