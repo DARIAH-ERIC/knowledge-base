@@ -7,6 +7,7 @@ import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { RichTextEditor } from "@dariah-eric/ui/rich-text-editor";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
@@ -27,6 +28,7 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface GovernanceBodyFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	governanceBody?: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
+		metadata: schema.GovernanceBodyMetadata | null;
 		description?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
@@ -63,6 +65,7 @@ export function GovernanceBodyForm(props: Readonly<GovernanceBodyFormProps>): Re
 	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
 		governanceBody?.image ?? null,
 	);
+	const [selectedType, setSelectedType] = useState<string>(governanceBody?.metadata?.type ?? "");
 
 	return (
 		<FormLayout>
@@ -85,6 +88,24 @@ export function GovernanceBodyForm(props: Readonly<GovernanceBodyFormProps>): Re
 						<TextArea />
 						<FieldError />
 					</TextField>
+
+					<Select
+						onChange={(key) => {
+							setSelectedType(String(key));
+						}}
+						value={selectedType || null}
+					>
+						<Label>{t("Body type")}</Label>
+						<SelectTrigger />
+						<FieldError />
+						<SelectContent>
+							<SelectItem id="governing_body">{t("Governing body")}</SelectItem>
+							<SelectItem id="executive_body">{t("Executive body")}</SelectItem>
+							<SelectItem id="operational_body">{t("Operational body")}</SelectItem>
+							<SelectItem id="advisory_body">{t("Advisory body")}</SelectItem>
+						</SelectContent>
+					</Select>
+					<input name="type" type="hidden" value={selectedType} />
 				</FormSection>
 
 				<Separator className="my-6" />

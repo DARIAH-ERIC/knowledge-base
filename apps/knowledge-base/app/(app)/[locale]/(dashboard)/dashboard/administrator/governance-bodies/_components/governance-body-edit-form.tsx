@@ -23,6 +23,7 @@ interface GovernanceBodyEditFormProps {
 	hasDraftChanges: boolean;
 	isPublished: boolean;
 	governanceBody: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
+		metadata: schema.GovernanceBodyMetadata | null;
 		description?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };

@@ -34,6 +34,8 @@ export const organisationalUnitTypes = p.snakeCase.table(
 );
 
 export const organisationalUnitStatusEnum = [
+	"appoints",
+	"advises",
 	"is_located_in",
 	"is_member_of",
 	"is_national_consortium_of",
@@ -43,6 +45,9 @@ export const organisationalUnitStatusEnum = [
 	"is_cooperating_partner_of",
 	"is_part_of",
 	"is_partner_institution_of",
+	"is_represented_in",
+	"oversees",
+	"supports",
 ] as const;
 
 export const organisationalUnitStatus = p.snakeCase.table(
@@ -182,6 +187,17 @@ export const OrganisationalUnitToSocialMediaInsertSchema = createInsertSchema(
 export const OrganisationalUnitToSocialMediaUpdateSchema = createUpdateSchema(
 	organisationalUnitsToSocialMedia,
 );
+
+export const governanceBodyMetadataTypesEnum = [
+	"governing_body",
+	"executive_body",
+	"operational_body",
+	"advisory_body",
+] as const;
+
+export interface GovernanceBodyMetadata {
+	type: (typeof governanceBodyMetadataTypesEnum)[number];
+}
 
 export const membersAndPartnersUnitType = "country";
 

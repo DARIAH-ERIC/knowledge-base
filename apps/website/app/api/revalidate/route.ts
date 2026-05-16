@@ -16,6 +16,7 @@ export const cacheTags = {
 	navigation: "navigation",
 	news: "news",
 	newsletters: "newsletters",
+	organigram: "organigram",
 	opportunities: "opportunities",
 	pages: "pages",
 	persons: "persons",
@@ -36,6 +37,7 @@ type EntityType =
 	| "site-metadata"
 	| "navigation"
 	| "news"
+	| "organigram"
 	| "opportunities"
 	| "pages"
 	| "persons"
@@ -56,6 +58,7 @@ const entityTypeToCacheTags: Record<
 	"site-metadata": [cacheTags.siteMetadata],
 	navigation: [cacheTags.navigation],
 	news: [cacheTags.news],
+	organigram: [cacheTags.organigram],
 	opportunities: [cacheTags.opportunities],
 	pages: [cacheTags.pages],
 	persons: [cacheTags.persons],

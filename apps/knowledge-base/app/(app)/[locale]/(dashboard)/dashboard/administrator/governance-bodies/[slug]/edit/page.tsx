@@ -89,6 +89,7 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 			columns: {
 				acronym: true,
 				id: true,
+				metadata: true,
 				name: true,
 				summary: true,
 			},
@@ -172,7 +173,12 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 	return (
 		<GovernanceBodyEditForm
 			documentId={documentId}
-			governanceBody={{ ...governanceBody, description, image }}
+			governanceBody={{
+				...governanceBody,
+				description,
+				image,
+				metadata: governanceBody.metadata as schema.GovernanceBodyMetadata | null,
+			}}
 			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
 			initialPersonItems={initialPersonItems}

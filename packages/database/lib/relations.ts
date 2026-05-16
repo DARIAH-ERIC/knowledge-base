@@ -146,6 +146,10 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.entities.id.through(r.entitiesToEntities.entityId),
 				to: r.entities.id.through(r.entitiesToEntities.relatedEntityId),
 			}),
+			organigramNode: r.one.organigramNodes({
+				from: r.entities.id,
+				to: r.organigramNodes.entityId,
+			}),
 		},
 		entityVersions: {
 			entity: r.one.entities({
@@ -342,6 +346,32 @@ export const relations = defineRelations(schema, (r) => {
 					r.servicesToOrganisationalUnits.organisationalUnitId,
 				),
 				to: r.services.id.through(r.servicesToOrganisationalUnits.serviceId),
+			}),
+		},
+		organigramNodes: {
+			entity: r.one.entities({
+				from: r.organigramNodes.entityId,
+				to: r.entities.id,
+			}),
+			outgoingEdges: r.many.organigramEdges({
+				from: r.organigramNodes.id,
+				to: r.organigramEdges.fromNodeId,
+			}),
+			incomingEdges: r.many.organigramEdges({
+				from: r.organigramNodes.id,
+				to: r.organigramEdges.toNodeId,
+			}),
+		},
+		organigramEdges: {
+			fromNode: r.one.organigramNodes({
+				from: r.organigramEdges.fromNodeId,
+				to: r.organigramNodes.id,
+				optional: false,
+			}),
+			toNode: r.one.organigramNodes({
+				from: r.organigramEdges.toNodeId,
+				to: r.organigramNodes.id,
+				optional: false,
 			}),
 		},
 		projects: {

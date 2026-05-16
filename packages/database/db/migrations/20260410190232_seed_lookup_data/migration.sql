@@ -107,6 +107,8 @@ VALUES
 INSERT INTO
 	"organisational_unit_status" ("status")
 VALUES
+	('appoints'),
+	('advises'),
 	('is_located_in'),
 	('is_member_of'),
 	('is_national_consortium_of'),
@@ -115,7 +117,10 @@ VALUES
 	('is_observer_of'),
 	('is_cooperating_partner_of'),
 	('is_part_of'),
-	('is_partner_institution_of');
+	('is_partner_institution_of'),
+	('is_represented_in'),
+	('oversees'),
+	('supports');
 
 --> statement-breakpoint
 INSERT INTO
@@ -132,6 +137,11 @@ FROM
 	(
 		VALUES
 			('governance_body', 'eric', 'is_part_of'),
+			('governance_body', 'governance_body', 'appoints'),
+			('governance_body', 'governance_body', 'advises'),
+			('governance_body', 'governance_body', 'is_represented_in'),
+			('governance_body', 'governance_body', 'oversees'),
+			('governance_body', 'governance_body', 'supports'),
 			('country', 'eric', 'is_member_of'),
 			('country', 'eric', 'is_observer_of'),
 			('national_consortium', 'country', 'is_national_consortium_of'),

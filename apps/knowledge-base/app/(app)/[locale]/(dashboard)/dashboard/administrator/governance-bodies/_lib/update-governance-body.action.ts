@@ -58,6 +58,7 @@ export const updateGovernanceBodyAction = createServerAction(
 			relatedEntityIds,
 			relatedResourceIds,
 			summary,
+			type,
 		} = result.output;
 
 		await db.transaction(async (tx) => {
@@ -82,7 +83,7 @@ export const updateGovernanceBodyAction = createServerAction(
 
 			await tx
 				.update(schema.organisationalUnits)
-				.set({ acronym, imageId, name, summary })
+				.set({ acronym, imageId, metadata: type != null ? { type } : null, name, summary })
 				.where(eq(schema.organisationalUnits.id, draftVersionId));
 
 			const descriptionField = await tx.query.fields.findFirst({
