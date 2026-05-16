@@ -58,12 +58,6 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 				icon: <ListBulletIcon />,
 			},
 			{
-				href: "/dashboard/administrator/documentation-pages",
-				tooltip: t("Documentation pages"),
-				label: t("Documentation pages"),
-				icon: <ListBulletIcon />,
-			},
-			{
 				href: "/dashboard/administrator/governance-bodies",
 				tooltip: t("Governance bodies"),
 				label: t("Governance bodies"),
@@ -139,6 +133,24 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 				href: "/dashboard/administrator/working-groups",
 				tooltip: t("Working groups"),
 				label: t("Working groups"),
+				icon: <ListBulletIcon />,
+			},
+		],
+	};
+
+	const knowledgeBaseSection: SidebarMenuSection = {
+		title: t("Knowledge base"),
+		items: [
+			{
+				href: "/dashboard/administrator/internal-pages",
+				tooltip: t("Internal pages"),
+				label: t("Internal pages"),
+				icon: <ListBulletIcon />,
+			},
+			{
+				href: "/dashboard/administrator/documentation-pages",
+				tooltip: t("Documentation pages"),
+				label: t("Documentation pages"),
 				icon: <ListBulletIcon />,
 			},
 		],
@@ -281,6 +293,7 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 
 	return [
 		...(isAdmin ? [adminSection] : []),
+		...(isAdmin ? [knowledgeBaseSection] : []),
 		reportingSection,
 		...(isAdmin ? [websiteSection] : []),
 	] satisfies Array<SidebarMenuSection>;

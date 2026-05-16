@@ -26,6 +26,13 @@ export const relations = defineRelations(schema, (r) => {
 				optional: false,
 			}),
 		},
+		internalPages: {
+			entityVersion: r.one.entityVersions({
+				from: r.internalPages.id,
+				to: r.entityVersions.id,
+				optional: false,
+			}),
+		},
 		documentsPolicies: {
 			entityVersion: r.one.entityVersions({
 				from: r.documentsPolicies.id,

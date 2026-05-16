@@ -298,7 +298,12 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			case "documentation_pages": {
 				return null;
 			}
+			case "internal_pages": {
+				return null;
+			}
 		}
+
+		return null;
 	}
 
 	async function getSyncableWebsiteEntityIds(): Promise<Array<string>> {

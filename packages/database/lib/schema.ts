@@ -8,6 +8,7 @@ export * from "./schema/events";
 export * from "./schema/external-links";
 export * from "./schema/funding-calls";
 export * from "./schema/impact-case-studies";
+export * from "./schema/internal-pages";
 export * from "./schema/licenses";
 export * from "./schema/navigation";
 export * from "./schema/news";
