@@ -1,9 +1,24 @@
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
+const publicEntityTypesEnum = [
+	"documents_policies",
+	"events",
+	"external_links",
+	"funding_calls",
+	"impact_case_studies",
+	"news",
+	"opportunities",
+	"organisational_units",
+	"pages",
+	"persons",
+	"projects",
+	"spotlight_articles",
+] as const satisfies ReadonlyArray<(typeof schema.entityTypesEnum)[number]>;
+
 const EntityRefSchema = v.nullable(
 	v.object({
-		type: v.picklist(schema.entityTypesEnum),
+		type: v.picklist(publicEntityTypesEnum),
 		slug: v.string(),
 	}),
 );
