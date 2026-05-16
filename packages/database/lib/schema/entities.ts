@@ -12,6 +12,7 @@ export const entityTypesEnum = [
 	"external_links",
 	"funding_calls",
 	"impact_case_studies",
+	"internal_pages",
 	"news",
 	"opportunities",
 	"organisational_units",

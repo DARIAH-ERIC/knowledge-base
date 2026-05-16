@@ -70,6 +70,12 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 				icon: <ListBulletIcon />,
 			},
 			{
+				href: "/dashboard/administrator/internal-pages",
+				tooltip: t("Internal pages"),
+				label: t("Internal pages"),
+				icon: <ListBulletIcon />,
+			},
+			{
 				href: "/dashboard/administrator/institutions",
 				tooltip: t("Institutions"),
 				label: t("Institutions"),
