@@ -1,54 +1,6 @@
-CREATE TABLE "organigram_nodes" (
-	"id" uuid PRIMARY KEY DEFAULT UUIDV7() NOT NULL,
-	"slug" text NOT NULL,
-	"label" text NOT NULL,
-	"description" text,
-	"kind" text NOT NULL,
-	"entity_id" uuid,
-	"position" integer,
-	"created_at" timestamp with time zone DEFAULT NOW() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT NOW() NOT NULL,
-	CONSTRAINT "organigram_nodes_slug_unique" UNIQUE("slug"),
-	CONSTRAINT "organigram_nodes_entity_id_unique" UNIQUE("entity_id"),
-	CONSTRAINT "organigram_nodes_kind_enum_check" CHECK ("organigram_nodes"."kind" IN ('governance_body', 'collective'))
-);
-
---> statement-breakpoint
-
-ALTER TABLE "organigram_nodes"
-ADD CONSTRAINT "organigram_nodes_entity_id_entities_id_fk"
-FOREIGN KEY ("entity_id") REFERENCES "public"."entities"("id")
-ON DELETE NO ACTION ON UPDATE NO ACTION;
-
---> statement-breakpoint
-
-CREATE TABLE "organigram_edges" (
-	"id" uuid PRIMARY KEY DEFAULT UUIDV7() NOT NULL,
-	"from_node_id" uuid NOT NULL,
-	"to_node_id" uuid NOT NULL,
-	"relation" text NOT NULL,
-	"position" integer,
-	"created_at" timestamp with time zone DEFAULT NOW() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT NOW() NOT NULL,
-	CONSTRAINT "organigram_edges_relation_enum_check" CHECK ("organigram_edges"."relation" IN ('appoints', 'advises', 'oversees', 'supports', 'is_represented_in')),
-	CONSTRAINT "organigram_edges_from_node_id_to_node_id_relation_unique" UNIQUE("from_node_id", "to_node_id", "relation")
-);
-
---> statement-breakpoint
-
-ALTER TABLE "organigram_edges"
-ADD CONSTRAINT "organigram_edges_from_node_id_organigram_nodes_id_fk"
-FOREIGN KEY ("from_node_id") REFERENCES "public"."organigram_nodes"("id")
-ON DELETE NO ACTION ON UPDATE NO ACTION;
-
---> statement-breakpoint
-
-ALTER TABLE "organigram_edges"
-ADD CONSTRAINT "organigram_edges_to_node_id_organigram_nodes_id_fk"
-FOREIGN KEY ("to_node_id") REFERENCES "public"."organigram_nodes"("id")
-ON DELETE NO ACTION ON UPDATE NO ACTION;
-
---> statement-breakpoint
+-- Seed-only migration.
+-- Schema objects for organigram tables are created via `db:push`, so this file
+-- must stay idempotent and avoid DDL that would fail when the tables already exist.
 
 INSERT INTO
 	"organigram_nodes" ("slug", "label", "kind", "entity_id", "position")
