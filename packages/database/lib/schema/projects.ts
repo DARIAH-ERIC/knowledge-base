@@ -50,7 +50,7 @@ export const projects = p.snakeCase.table("projects", {
 		.primaryKey()
 		.references(() => entityVersions.id),
 	metadata: p.jsonb("metadata"),
-	name: p.text("name").notNull().unique(),
+	name: p.text("name").notNull(),
 	acronym: p.text("acronym"),
 	duration: f.timestampRange("duration").notNull(),
 	funding: p.numeric("funding", { mode: "number", precision: 12, scale: 2 }),
