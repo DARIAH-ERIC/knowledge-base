@@ -1,7 +1,11 @@
 "use server";
 
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
+import {
+	type ValidationErrors,
+	createActionStateError,
+	createActionStateSuccess,
+} from "@dariah-eric/next-lib/actions";
 import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
@@ -15,8 +19,8 @@ import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-function normalizeArray(entries: FormDataEntryValue[]): Array<string> {
-	return entries.map((entry) => String(entry));
+function normalizeArray(entries: Array<FormDataEntryValue>): Array<string> {
+	return entries.flatMap((entry) => (typeof entry === "string" ? [entry] : []));
 }
 
 export const updateOrganigramAction = createServerAction(
@@ -65,7 +69,7 @@ export const updateOrganigramAction = createServerAction(
 
 			return createActionStateError({
 				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
+				validationErrors: errors.nested as unknown as ValidationErrors,
 			});
 		}
 

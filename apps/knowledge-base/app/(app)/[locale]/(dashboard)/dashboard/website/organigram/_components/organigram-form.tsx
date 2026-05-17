@@ -61,7 +61,11 @@ export function OrganigramForm(props: Readonly<OrganigramFormProps>): ReactNode 
 								{index === 0 ? <FieldError /> : null}
 							</TextField>
 
-							<TextField defaultValue={node.position ?? undefined} name="position" type="number">
+							<TextField
+								defaultValue={node.position != null ? String(node.position) : undefined}
+								name="position"
+								type="number"
+							>
 								<Label>{t("Position")}</Label>
 								<Input />
 							</TextField>
