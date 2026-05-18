@@ -37,9 +37,29 @@ export const organisationalUnitsLifecycleAdapter: EntityLifecycleAdapter = {
 				}),
 			);
 		}
+
+		const personRelations = await tx
+			.select({
+				personId: schema.personsToOrganisationalUnits.personId,
+				roleTypeId: schema.personsToOrganisationalUnits.roleTypeId,
+				duration: schema.personsToOrganisationalUnits.duration,
+			})
+			.from(schema.personsToOrganisationalUnits)
+			.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, sourceVersionId));
+
+		if (personRelations.length > 0) {
+			await tx.insert(schema.personsToOrganisationalUnits).values(
+				personRelations.map((r) => {
+					return { organisationalUnitId: targetVersionId, ...r };
+				}),
+			);
+		}
 	},
 
 	async wipeSubtype(tx, versionId) {
+		await tx
+			.delete(schema.personsToOrganisationalUnits)
+			.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, versionId));
 		await tx
 			.delete(schema.organisationalUnitsRelations)
 			.where(
