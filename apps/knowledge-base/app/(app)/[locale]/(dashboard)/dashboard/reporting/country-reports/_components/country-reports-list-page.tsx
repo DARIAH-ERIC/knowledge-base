@@ -58,11 +58,7 @@ export async function CountryReportsListPage(
 									</span>
 								</div>
 								<ButtonLink
-									href={
-										isEditable
-											? `/dashboard/reporting/country-reports/${report.reportId}/edit`
-											: `/dashboard/reporting/country-reports/${report.reportId}`
-									}
+									href={isEditable ? `/edit` : report.reportHref}
 									intent="plain"
 									size="sm"
 								>

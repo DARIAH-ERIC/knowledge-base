@@ -18,6 +18,7 @@ const relevantRoles = [
 
 export interface WorkingGroupReportScope {
 	reportId: string;
+	reportHref: string;
 	workingGroupName: string;
 	status: string;
 	canConfirm: boolean;
@@ -25,6 +26,7 @@ export interface WorkingGroupReportScope {
 
 export interface CountryReportScope {
 	reportId: string;
+	reportHref: string;
 	countryName: string;
 	status: string;
 	canConfirm: boolean;
@@ -57,6 +59,7 @@ export async function getUserReportingScope(user: User): Promise<{
 				orgUnitId: schema.personsToOrganisationalUnits.organisationalUnitId,
 				orgUnitName: schema.organisationalUnits.name,
 				orgUnitType: schema.organisationalUnitTypes.type,
+				orgUnitSlug: schema.entities.slug,
 				roleType: schema.personRoleTypes.type,
 			})
 			.from(schema.personsToOrganisationalUnits)
@@ -64,6 +67,8 @@ export async function getUserReportingScope(user: User): Promise<{
 				schema.organisationalUnits,
 				eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
 			)
+			.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.organisationalUnits.id))
+			.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 			.innerJoin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
@@ -111,6 +116,7 @@ export async function getUserReportingScope(user: User): Promise<{
 				);
 				wgReportItems.push({
 					reportId: report.id,
+					reportHref: `/dashboard/reporting/working-group-reports/${openCampaign.year}/${relationsForWg[0]?.orgUnitSlug ?? ""}`,
 					workingGroupName: relationsForWg[0]?.orgUnitName ?? "",
 					status: report.status,
 					canConfirm,
@@ -146,6 +152,7 @@ export async function getUserReportingScope(user: User): Promise<{
 				);
 				countryReportItems.push({
 					reportId: report.id,
+					reportHref: `/dashboard/reporting/country-reports/${openCampaign.year}/${relationsForCountry[0]?.orgUnitSlug ?? ""}`,
 					countryName: relationsForCountry[0]?.orgUnitName ?? "",
 					status: report.status,
 					canConfirm,
@@ -166,9 +173,11 @@ export async function getUserReportingScope(user: User): Promise<{
 				const country = await db.query.organisationalUnits.findFirst({
 					where: { id: user.organisationalUnitId },
 					columns: { name: true },
+					with: { entityVersion: { columns: {}, with: { entity: { columns: { slug: true } } } } },
 				});
 				countryReportItems.push({
 					reportId: report.id,
+					reportHref: `/dashboard/reporting/country-reports/${openCampaign.year}/${country?.entityVersion.entity.slug ?? ""}`,
 					countryName: country?.name ?? "",
 					status: report.status,
 					canConfirm: false,
@@ -186,6 +195,7 @@ export async function getUserReportingScope(user: User): Promise<{
 
 export interface CountryReportHistoryItem {
 	reportId: string;
+	reportHref: string;
 	countryName: string;
 	reportStatus: string;
 	campaignYear: number;
@@ -237,6 +247,7 @@ export async function getUserAllCountryReports(
 	const rows = await db
 		.select({
 			id: schema.countryReports.id,
+			slug: schema.entities.slug,
 			reportStatus: schema.countryReports.status,
 			countryName: schema.organisationalUnits.name,
 			campaignYear: schema.reportingCampaigns.year,
@@ -251,12 +262,15 @@ export async function getUserAllCountryReports(
 			schema.organisationalUnits,
 			eq(schema.organisationalUnits.id, schema.countryReports.countryId),
 		)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.organisationalUnits.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 		.where(inArray(schema.countryReports.countryId, uniqueIds))
 		.orderBy(desc(schema.reportingCampaigns.year));
 
 	return rows.map((r) => {
 		return {
 			reportId: r.id,
+			reportHref: `/dashboard/reporting/country-reports/${r.campaignYear}/${r.slug}`,
 			countryName: r.countryName,
 			reportStatus: r.reportStatus,
 			campaignYear: r.campaignYear,
@@ -267,6 +281,7 @@ export async function getUserAllCountryReports(
 
 export interface WorkingGroupReportHistoryItem {
 	reportId: string;
+	reportHref: string;
 	workingGroupName: string;
 	reportStatus: string;
 	campaignYear: number;
@@ -312,6 +327,7 @@ export async function getUserAllWorkingGroupReports(
 	const rows = await db
 		.select({
 			id: schema.workingGroupReports.id,
+			slug: schema.entities.slug,
 			reportStatus: schema.workingGroupReports.status,
 			workingGroupName: schema.organisationalUnits.name,
 			campaignYear: schema.reportingCampaigns.year,
@@ -326,12 +342,15 @@ export async function getUserAllWorkingGroupReports(
 			schema.organisationalUnits,
 			eq(schema.organisationalUnits.id, schema.workingGroupReports.workingGroupId),
 		)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.organisationalUnits.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 		.where(inArray(schema.workingGroupReports.workingGroupId, wgOrgUnitIds))
 		.orderBy(desc(schema.reportingCampaigns.year));
 
 	return rows.map((r) => {
 		return {
 			reportId: r.id,
+			reportHref: `/dashboard/reporting/working-group-reports/${r.campaignYear}/${r.slug}`,
 			workingGroupName: r.workingGroupName,
 			reportStatus: r.reportStatus,
 			campaignYear: r.campaignYear,

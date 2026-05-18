@@ -10,6 +10,7 @@ import * as v from "valibot";
 
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { getCountryReportEditHrefById } from "@/lib/data/reporting-urls";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { redirect } from "@/lib/navigation/navigation";
@@ -74,5 +75,5 @@ export async function upsertCountryReportSocialMediaKpisAction(formData: FormDat
 
 	revalidatePath("/[locale]/dashboard/reporting", "layout");
 
-	redirect({ href: `/dashboard/reporting/country-reports/${id}/edit/social-media`, locale });
+	redirect({ href: await getCountryReportEditHrefById(id, "social-media"), locale });
 }
