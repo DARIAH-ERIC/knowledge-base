@@ -28,7 +28,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { type CalendarDate, getLocalTimeZone } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, startTransition, useState } from "react";
+import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import {
 	Header,
@@ -94,6 +94,11 @@ function organisationalUnitTypeIntent(
 
 const pageSize = dashboardPageSize;
 
+interface EndRelationAction {
+	end: Date;
+	id: string;
+}
+
 export function InstitutionRelationsPage(
 	props: Readonly<InstitutionRelationsPageProps>,
 ): ReactNode {
@@ -107,7 +112,13 @@ export function InstitutionRelationsPage(
 
 	const t = useExtracted();
 	const format = useFormatter();
-	const [items, setItems] = useState(institutionRelations.data);
+	const [items, optimisticallyEndItem] = useOptimistic(
+		institutionRelations.data,
+		(state, action: EndRelationAction) =>
+			state.map((relation) =>
+				relation.id === action.id ? { ...relation, durationEnd: action.end } : relation,
+			),
+	);
 	const [itemToEnd, setItemToEnd] = useState<{ id: string } | null>(null);
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
@@ -117,6 +128,7 @@ export function InstitutionRelationsPage(
 			q: initialQ,
 			sort: initialSort,
 		});
+	const [isEndPending, startEndTransition] = useTransition();
 
 	const totalPages = Math.max(Math.ceil(institutionRelations.total / pageSize), 1);
 
@@ -233,7 +245,7 @@ export function InstitutionRelationsPage(
 			<ModalContent
 				isOpen={itemToEnd != null}
 				onOpenChange={(open) => {
-					if (!open) {
+					if (!open && !isEndPending) {
 						setItemToEnd(null);
 					}
 				}}
@@ -267,13 +279,9 @@ export function InstitutionRelationsPage(
 
 							const end = selectedEndDate.toDate(getLocalTimeZone());
 
-							startTransition(async () => {
+							startEndTransition(async () => {
+								optimisticallyEndItem({ id: itemToEnd.id, end });
 								await endUnitRelationAction(itemToEnd.id, end);
-								setItems((prev) =>
-									prev.map((relation) =>
-										relation.id === itemToEnd.id ? { ...relation, durationEnd: end } : relation,
-									),
-								);
 								setItemToEnd(null);
 							});
 						}}
