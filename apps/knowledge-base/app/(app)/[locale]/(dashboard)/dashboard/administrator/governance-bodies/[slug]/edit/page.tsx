@@ -19,6 +19,7 @@ import {
 	getResourceRelationOptions,
 	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
+import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { getUnitRelationStatusOptions, getUnitRelations } from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
@@ -79,11 +80,13 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 		{ items: initialAssets },
 		initialRelatedEntities,
 		initialRelatedResources,
+		initialSocialMedia,
 		governanceBody,
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
 		getEntityRelationOptions(),
 		getResourceRelationOptions(),
+		getSocialMediaOptions(),
 		db.query.organisationalUnits.findFirst({
 			where: { id: draftVersionId },
 			columns: {
@@ -126,6 +129,7 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 		relations,
 		unitRelationStatusOptions,
 		descriptionRows,
+		socialMediaRows,
 	] = await Promise.all([
 		getContributionPersonOptions(),
 		getPersonRelations(governanceBody.id),
@@ -149,14 +153,21 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 				),
 			)
 			.limit(1),
+		db.query.organisationalUnitsToSocialMedia.findMany({
+			where: { organisationalUnitId: governanceBody.id },
+			columns: { socialMediaId: true },
+		}),
 	]);
 
 	const description = descriptionRows.at(0)?.content;
+	const socialMediaIds = socialMediaRows.map((row) => row.socialMediaId);
 
-	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
-		getEntityRelationOptionsByIds(relatedEntityIds),
-		getResourceRelationOptionsByIds(relatedResourceIds),
-	]);
+	const [selectedRelatedEntities, selectedRelatedResources, selectedSocialMediaItems] =
+		await Promise.all([
+			getEntityRelationOptionsByIds(relatedEntityIds),
+			getResourceRelationOptionsByIds(relatedResourceIds),
+			getSocialMediaOptionsByIds(socialMediaIds),
+		]);
 
 	const image =
 		governanceBody.image != null
@@ -183,12 +194,16 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 			initialRelatedResourceIds={relatedResourceIds}
 			initialRelatedResourceItems={initialRelatedResources.items}
 			initialRelatedResourceTotal={initialRelatedResources.total}
+			initialSocialMediaIds={socialMediaIds}
+			initialSocialMediaItems={initialSocialMedia.items}
+			initialSocialMediaTotal={initialSocialMedia.total}
 			isPublished={publishedId != null}
 			personRelationRoleOptions={personRelationRoleOptions}
 			personRelations={personRelations}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}
+			selectedSocialMediaItems={selectedSocialMediaItems}
 			unitRelationStatusOptions={unitRelationStatusOptions}
 		/>
 	);

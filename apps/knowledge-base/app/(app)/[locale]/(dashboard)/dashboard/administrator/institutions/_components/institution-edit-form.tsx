@@ -23,8 +23,12 @@ interface InstitutionEditFormProps {
 	initialRelatedResourceIds: Array<string>;
 	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
 	initialRelatedResourceTotal: number;
+	initialSocialMediaIds: Array<string>;
+	initialSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
+	initialSocialMediaTotal: number;
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
+	selectedSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
 	relations: Array<UnitRelation>;
 	unitRelationStatusOptions: Array<UnitRelationStatusOption>;
 }
@@ -39,8 +43,12 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 		initialRelatedResourceIds,
 		initialRelatedResourceItems,
 		initialRelatedResourceTotal,
+		initialSocialMediaIds,
+		initialSocialMediaItems,
+		initialSocialMediaTotal,
 		selectedRelatedEntities,
 		selectedRelatedResources,
+		selectedSocialMediaItems,
 		relations,
 		unitRelationStatusOptions,
 	} = props;
@@ -60,9 +68,13 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 				initialRelatedResourceIds={initialRelatedResourceIds}
 				initialRelatedResourceItems={initialRelatedResourceItems}
 				initialRelatedResourceTotal={initialRelatedResourceTotal}
+				initialSocialMediaIds={initialSocialMediaIds}
+				initialSocialMediaItems={initialSocialMediaItems}
+				initialSocialMediaTotal={initialSocialMediaTotal}
 				institution={institution}
 				selectedRelatedEntities={selectedRelatedEntities}
 				selectedRelatedResources={selectedRelatedResources}
+				selectedSocialMediaItems={selectedSocialMediaItems}
 			/>
 
 			<UnitRelationsSection

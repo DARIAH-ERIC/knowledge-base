@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
 import { assertAdmin } from "@/lib/auth/session";
+import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
@@ -15,14 +16,18 @@ export async function deleteImpactCaseStudyContributorAction(
 ): Promise<void> {
 	await assertAdmin();
 
-	await db
-		.delete(schema.impactCaseStudiesToPersons)
-		.where(
-			and(
-				eq(schema.impactCaseStudiesToPersons.impactCaseStudyId, articleId),
-				eq(schema.impactCaseStudiesToPersons.personId, personId),
-			),
-		);
+	await db.transaction(async (tx) => {
+		await tx
+			.delete(schema.impactCaseStudiesToPersons)
+			.where(
+				and(
+					eq(schema.impactCaseStudiesToPersons.impactCaseStudyId, articleId),
+					eq(schema.impactCaseStudiesToPersons.personId, personId),
+				),
+			);
+
+		await touchVersion(tx, articleId);
+	});
 
 	after(async () => {
 		await dispatchWebhook({ type: "impact-case-studies" });

@@ -8,7 +8,11 @@ import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getOrganisationalUnitEditDataForAdmin } from "@/lib/data/admin-organisational-units";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { ensureDraftVersion } from "@/lib/data/entity-lifecycle";
+import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
+import { getSocialMediaOptions } from "@/lib/data/social-media";
+import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -35,18 +39,41 @@ export default async function DashboardAdministratorEditNationalConsortiumPage(
 	const { slug } = await params;
 	const { user } = await assertAuthenticated();
 
+	const anyVersion = await db.query.organisationalUnits.findFirst({
+		where: { entityVersion: { entity: { slug } }, type: { type: "national_consortium" } },
+		columns: {},
+		with: {
+			entityVersion: {
+				columns: {},
+				with: { entity: { columns: { id: true } } },
+			},
+		},
+	});
+
+	if (anyVersion == null) {
+		notFound();
+	}
+
+	const documentId = anyVersion.entityVersion.entity.id;
+	const draftVersionId = await db.transaction((tx) => {
+		return ensureDraftVersion(tx, documentId, organisationalUnitsLifecycleAdapter);
+	});
+
 	const [
 		{ items: initialAssets },
 		initialRelatedEntities,
 		initialRelatedResources,
+		initialSocialMedia,
 		nationalConsortiumData,
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
 		getEntityRelationOptions(),
 		getResourceRelationOptions(),
+		getSocialMediaOptions(),
 		getOrganisationalUnitEditDataForAdmin(user, {
 			slug,
 			unitType: "national_consortium",
+			versionId: draftVersionId,
 		}),
 	]);
 
@@ -60,6 +87,8 @@ export default async function DashboardAdministratorEditNationalConsortiumPage(
 		relatedResourceIds,
 		selectedRelatedEntities,
 		selectedRelatedResources,
+		selectedSocialMediaItems,
+		socialMediaIds,
 		unit: nationalConsortium,
 		unitRelationStatusOptions,
 	} = nationalConsortiumData;
@@ -84,10 +113,14 @@ export default async function DashboardAdministratorEditNationalConsortiumPage(
 			initialRelatedResourceIds={relatedResourceIds}
 			initialRelatedResourceItems={initialRelatedResources.items}
 			initialRelatedResourceTotal={initialRelatedResources.total}
+			initialSocialMediaIds={socialMediaIds}
+			initialSocialMediaItems={initialSocialMedia.items}
+			initialSocialMediaTotal={initialSocialMedia.total}
 			nationalConsortium={{ ...nationalConsortium, image }}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}
+			selectedSocialMediaItems={selectedSocialMediaItems}
 			unitRelationStatusOptions={unitRelationStatusOptions}
 		/>
 	);

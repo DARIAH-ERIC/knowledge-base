@@ -10,6 +10,7 @@ import * as v from "valibot";
 
 import { UpdateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.schema";
 import { assertAdmin } from "@/lib/auth/session";
+import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -45,7 +46,7 @@ export const updateContributionAction = createServerAction(
 
 		const contribution = await db.query.personsToOrganisationalUnits.findFirst({
 			where: { id },
-			columns: { id: true },
+			columns: { id: true, organisationalUnitId: true },
 		});
 
 		if (contribution == null) {
@@ -94,10 +95,18 @@ export const updateContributionAction = createServerAction(
 			return createActionStateError({ message: t("This contribution already exists.") });
 		}
 
-		await db
-			.update(schema.personsToOrganisationalUnits)
-			.set({ duration, organisationalUnitId, personId, roleTypeId })
-			.where(eq(schema.personsToOrganisationalUnits.id, id));
+		await db.transaction(async (tx) => {
+			await tx
+				.update(schema.personsToOrganisationalUnits)
+				.set({ duration, organisationalUnitId, personId, roleTypeId })
+				.where(eq(schema.personsToOrganisationalUnits.id, id));
+
+			await touchVersion(tx, contribution.organisationalUnitId);
+
+			if (contribution.organisationalUnitId !== organisationalUnitId) {
+				await touchVersion(tx, organisationalUnitId);
+			}
+		});
 
 		revalidatePath("/[locale]/dashboard/administrator", "layout");
 

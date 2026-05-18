@@ -18,6 +18,7 @@ import {
 	getResourceRelationOptions,
 	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
+import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { getUnitRelationStatusOptions, getUnitRelations } from "@/lib/data/unit-relations";
 import { getWorkingGroupChairs } from "@/lib/data/working-group-chairs";
 import { db } from "@/lib/db";
@@ -80,12 +81,14 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 		initialRelatedEntities,
 		initialRelatedResources,
 		initialPersons,
+		initialSocialMedia,
 		workingGroup,
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
 		getEntityRelationOptions(),
 		getResourceRelationOptions(),
 		getPersonOptions(),
+		getSocialMediaOptions(),
 		db.query.organisationalUnits.findFirst({
 			where: { id: draftVersionId },
 			columns: {
@@ -120,40 +123,49 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 		notFound();
 	}
 
-	const [{ relatedEntityIds, relatedResourceIds }, relations, chairs, descriptionRows] =
-		await Promise.all([
-			getEntityRelations(documentId),
-			getUnitRelations(workingGroup.id),
-			getWorkingGroupChairs(workingGroup.id),
-			db
-				.select({ content: schema.richTextContentBlocks.content })
-				.from(schema.richTextContentBlocks)
-				.innerJoin(
-					schema.contentBlocks,
-					eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
-				)
-				.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
-				.innerJoin(
-					schema.entityTypesFieldsNames,
-					eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
-				)
-				.where(
-					and(
-						eq(schema.fields.entityVersionId, workingGroup.id),
-						eq(schema.entityTypesFieldsNames.fieldName, "description"),
-					),
-				)
-				.limit(1),
-		]);
+	const [
+		{ relatedEntityIds, relatedResourceIds },
+		relations,
+		chairs,
+		descriptionRows,
+		socialMediaRows,
+	] = await Promise.all([
+		getEntityRelations(documentId),
+		getUnitRelations(workingGroup.id),
+		getWorkingGroupChairs(workingGroup.id),
+		db
+			.select({ content: schema.richTextContentBlocks.content })
+			.from(schema.richTextContentBlocks)
+			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.where(
+				and(
+					eq(schema.fields.entityVersionId, workingGroup.id),
+					eq(schema.entityTypesFieldsNames.fieldName, "description"),
+				),
+			)
+			.limit(1),
+		db.query.organisationalUnitsToSocialMedia.findMany({
+			where: { organisationalUnitId: workingGroup.id },
+			columns: { socialMediaId: true },
+		}),
+	]);
 
 	const description = descriptionRows.at(0)?.content;
+	const socialMediaIds = socialMediaRows.map((row) => row.socialMediaId);
 
 	const unitRelationStatusOptions = await getUnitRelationStatusOptions("working_group");
 
-	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
-		getEntityRelationOptionsByIds(relatedEntityIds),
-		getResourceRelationOptionsByIds(relatedResourceIds),
-	]);
+	const [selectedRelatedEntities, selectedRelatedResources, selectedSocialMediaItems] =
+		await Promise.all([
+			getEntityRelationOptionsByIds(relatedEntityIds),
+			getResourceRelationOptionsByIds(relatedResourceIds),
+			getSocialMediaOptionsByIds(socialMediaIds),
+		]);
 
 	const image =
 		workingGroup.image != null
@@ -180,10 +192,14 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 			initialRelatedResourceIds={relatedResourceIds}
 			initialRelatedResourceItems={initialRelatedResources.items}
 			initialRelatedResourceTotal={initialRelatedResources.total}
+			initialSocialMediaIds={socialMediaIds}
+			initialSocialMediaItems={initialSocialMedia.items}
+			initialSocialMediaTotal={initialSocialMedia.total}
 			isPublished={publishedId != null}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}
+			selectedSocialMediaItems={selectedSocialMediaItems}
 			unitRelationStatusOptions={unitRelationStatusOptions}
 			workingGroup={{ ...workingGroup, description, image }}
 		/>
