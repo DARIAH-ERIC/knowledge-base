@@ -2,8 +2,9 @@
 
 import * as schema from "@dariah-eric/database/schema";
 
+import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { count, desc, eq, ilike } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike } from "@/lib/db/sql";
 
 export type InternalPagesSort = "title" | "updatedAt";
 
@@ -18,8 +19,9 @@ interface GetInternalPagesParams {
 export async function getInternalPages(params: GetInternalPagesParams) {
 	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
 	const query = q?.trim();
-	const where =
+	const searchWhere =
 		query != null && query !== "" ? ilike(schema.internalPages.title, `%${query}%`) : undefined;
+	const where = and(currentEntityVersionWhere(), searchWhere);
 	const orderBy =
 		sort === "title"
 			? dir === "asc"
@@ -40,6 +42,7 @@ export async function getInternalPages(params: GetInternalPagesParams) {
 			.from(schema.internalPages)
 			.innerJoin(schema.entityVersions, eq(schema.internalPages.id, schema.entityVersions.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where)
 			.orderBy(orderBy)
 			.limit(limit)
@@ -48,6 +51,7 @@ export async function getInternalPages(params: GetInternalPagesParams) {
 			.select({ total: count() })
 			.from(schema.internalPages)
 			.innerJoin(schema.entityVersions, eq(schema.internalPages.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where),
 	]);
 

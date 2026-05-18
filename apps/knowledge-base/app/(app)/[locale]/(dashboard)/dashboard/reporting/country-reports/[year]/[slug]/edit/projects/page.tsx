@@ -1,3 +1,4 @@
+import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -9,8 +10,10 @@ import { createCountryReportProjectContributionAction } from "@/app/(app)/[local
 import { deleteCountryReportProjectContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/delete-country-report-project-contribution.action";
 import { getAuthorizedCountryReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { resolveCountryReportId } from "@/lib/data/reporting-urls";
 import { db } from "@/lib/db";
+import { eq } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardReportingCountryReportProjectsPageProps extends PageProps<"/[locale]/dashboard/reporting/country-reports/[year]/[slug]/edit/projects"> {}
@@ -58,10 +61,13 @@ export default async function DashboardReportingCountryReportProjectsPage(
 				}),
 			"update",
 		),
-		db.query.projects.findMany({
-			columns: { id: true, name: true },
-			orderBy: { name: "asc" },
-		}),
+		db
+			.select({ id: schema.projects.id, name: schema.projects.name })
+			.from(schema.projects)
+			.innerJoin(schema.entityVersions, eq(schema.projects.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(currentEntityVersionWhere())
+			.orderBy(schema.projects.name),
 	]);
 
 	if (result.status !== "ok") {

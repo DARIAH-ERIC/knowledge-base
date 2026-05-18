@@ -3,8 +3,9 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
+import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { count, eq, ilike, inArray } from "@/lib/db/sql";
+import { and, count, eq, ilike, inArray } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 
 export interface OrganisationalUnitOption {
@@ -30,20 +31,28 @@ export async function getOrganisationalUnitOptions(
 ): Promise<{ items: Array<OrganisationalUnitOption>; total: number }> {
 	const { limit = 20, offset = 0, q } = params;
 	const query = q?.trim();
-	const where =
+	const searchWhere =
 		query != null && query !== ""
 			? ilike(schema.organisationalUnits.name, `%${query}%`)
 			: undefined;
+	const where = and(currentEntityVersionWhere(), searchWhere);
 
 	const [items, aggregate] = await Promise.all([
 		db
 			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
 			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where)
 			.orderBy(schema.organisationalUnits.name)
 			.limit(limit)
 			.offset(offset),
-		db.select({ total: count() }).from(schema.organisationalUnits).where(where),
+		db
+			.select({ total: count() })
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(where),
 	]);
 
 	return { items, total: aggregate.at(0)?.total ?? 0 };

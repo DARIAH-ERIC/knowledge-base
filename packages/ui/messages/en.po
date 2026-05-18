@@ -6,22 +6,83 @@ msgstr ""
 "X-Generator: next-intl\n"
 "X-Crowdin-SourceKey: msgstr\n"
 
-#: lib/calendar.tsx:103
+#: lib/async-multiple-select.tsx:163
+#: lib/async-select.tsx:129
+msgctxt "ui"
+msgid "JDP92p"
+msgstr "Could not load options."
+
+#: lib/async-multiple-select.tsx:193
+#: lib/multiple-select.tsx:121
+msgctxt "ui"
+msgid "ch1L7M"
+msgstr "Selected items"
+
+#: lib/async-multiple-select.tsx:207
+msgctxt "ui"
+msgid "Klxvi/"
+msgstr "No selected items"
+
+#: lib/async-multiple-select.tsx:215
+#: lib/multiple-select.tsx:141
+#: lib/searchable-select.tsx:92
+msgctxt "ui"
+msgid "hBhV8k"
+msgstr "Open options"
+
+#: lib/async-multiple-select.tsx:240
+#: lib/async-select.tsx:186
+#: lib/multiple-select.tsx:166
+#: lib/search-field.tsx:26
+msgctxt "ui"
+msgid "xmcVZ0"
+msgstr "Search"
+
+#: lib/async-multiple-select.tsx:289
+#: lib/async-multiple-select.tsx:295
+#: lib/async-select.tsx:232
+#: lib/async-select.tsx:238
+#: lib/loader.tsx:95
+msgctxt "ui"
+msgid "99OtWT"
+msgstr "Pending..."
+
+#: lib/async-multiple-select.tsx:299
+#: lib/async-select.tsx:242
+msgctxt "ui"
+msgid "GEi2T8"
+msgstr "No options found."
+
+#: lib/async-multiple-select.tsx:311
+#: lib/async-select.tsx:254
+#: lib/pagination.tsx:152
+msgctxt "ui"
+msgid "k9hDFZ"
+msgstr "Previous page"
+
+#: lib/async-multiple-select.tsx:319
+#: lib/async-select.tsx:262
+#: lib/pagination.tsx:198
+msgctxt "ui"
+msgid "rBj9Ib"
+msgstr "Next page"
+
+#: lib/calendar.tsx:102
 msgctxt "ui"
 msgid "8mRNBD"
 msgstr "Previous month"
 
-#: lib/calendar.tsx:113
+#: lib/calendar.tsx:112
 msgctxt "ui"
 msgid "PqmLVn"
 msgstr "Next month"
 
-#: lib/calendar.tsx:144
+#: lib/calendar.tsx:143
 msgctxt "ui"
 msgid "pig+2F"
 msgstr "Select month"
 
-#: lib/calendar.tsx:180
+#: lib/calendar.tsx:179
 msgctxt "ui"
 msgid "HppWvq"
 msgstr "Select year"
@@ -77,25 +138,10 @@ msgctxt "ui"
 msgid "2I546+"
 msgstr "No information is currently available in this section."
 
-#: lib/grid-list.tsx:97
+#: lib/grid-list.tsx:98
 msgctxt "ui"
 msgid "4ZUjCU"
 msgstr "Reorder item"
-
-#: lib/loader.tsx:95
-msgctxt "ui"
-msgid "99OtWT"
-msgstr "Pending..."
-
-#: lib/multiple-select.tsx:94
-msgctxt "ui"
-msgid "ch1L7M"
-msgstr "Selected items"
-
-#: lib/multiple-select.tsx:114
-msgctxt "ui"
-msgid "hBhV8k"
-msgstr "Open options"
 
 #: lib/pagination.tsx:19
 #: lib/pagination.tsx:52
@@ -107,16 +153,6 @@ msgstr "Pagination"
 msgctxt "ui"
 msgid "A64Z+T"
 msgstr "First page"
-
-#: lib/pagination.tsx:152
-msgctxt "ui"
-msgid "k9hDFZ"
-msgstr "Previous page"
-
-#: lib/pagination.tsx:198
-msgctxt "ui"
-msgid "rBj9Ib"
-msgstr "Next page"
 
 #: lib/pagination.tsx:244
 msgctxt "ui"
@@ -184,11 +220,6 @@ msgctxt "ui"
 msgid "G/yZLu"
 msgstr "Remove"
 
-#: lib/search-field.tsx:26
-msgctxt "ui"
-msgid "xmcVZ0"
-msgstr "Search"
-
 #: lib/search-field.tsx:40
 msgctxt "ui"
 msgid "4YJHut"
@@ -199,14 +230,14 @@ msgctxt "ui"
 msgid "JZy6jo"
 msgstr "Sidebar"
 
-#: lib/sidebar.tsx:727
-#: lib/sidebar.tsx:771
+#: lib/sidebar.tsx:736
+#: lib/sidebar.tsx:780
 msgctxt "ui"
 msgid "6D4Ghb"
 msgstr "Toggle sidebar"
 
-#: lib/sidebar.tsx:751
-#: lib/sidebar.tsx:783
+#: lib/sidebar.tsx:760
+#: lib/sidebar.tsx:792
 msgctxt "ui"
 msgid "kh4wt0"
 msgstr "Toggle Sidebar"

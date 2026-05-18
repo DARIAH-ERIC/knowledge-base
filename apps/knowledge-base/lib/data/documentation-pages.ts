@@ -2,8 +2,9 @@
 
 import * as schema from "@dariah-eric/database/schema";
 
+import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { count, desc, eq, ilike } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike } from "@/lib/db/sql";
 
 export type DocumentationPagesSort = "title" | "updatedAt";
 
@@ -18,10 +19,11 @@ interface GetDocumentationPagesParams {
 export async function getDocumentationPages(params: GetDocumentationPagesParams) {
 	const { limit = 10, offset = 0, q, sort = "updatedAt", dir = "desc" } = params;
 	const query = q?.trim();
-	const where =
+	const searchWhere =
 		query != null && query !== ""
 			? ilike(schema.documentationPages.title, `%${query}%`)
 			: undefined;
+	const where = and(currentEntityVersionWhere(), searchWhere);
 	const orderBy =
 		sort === "title"
 			? dir === "asc"
@@ -42,6 +44,7 @@ export async function getDocumentationPages(params: GetDocumentationPagesParams)
 			.from(schema.documentationPages)
 			.innerJoin(schema.entityVersions, eq(schema.documentationPages.id, schema.entityVersions.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where)
 			.orderBy(orderBy)
 			.limit(limit)
@@ -50,6 +53,7 @@ export async function getDocumentationPages(params: GetDocumentationPagesParams)
 			.select({ total: count() })
 			.from(schema.documentationPages)
 			.innerJoin(schema.entityVersions, eq(schema.documentationPages.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where),
 	]);
 

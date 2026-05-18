@@ -3,8 +3,9 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { relationOptionsPageSize } from "@/lib/constants/relations";
+import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { count, eq, ilike, inArray } from "@/lib/db/sql";
+import { and, count, eq, ilike, inArray } from "@/lib/db/sql";
 
 export interface PersonOption {
 	id: string;
@@ -22,18 +23,26 @@ export async function getPersonOptions(
 ): Promise<{ items: Array<PersonOption>; total: number }> {
 	const { limit = relationOptionsPageSize, offset = 0, q } = params;
 	const query = q?.trim();
-	const where =
+	const searchWhere =
 		query != null && query !== "" ? ilike(schema.persons.name, `%${query}%`) : undefined;
+	const where = and(currentEntityVersionWhere(), searchWhere);
 
 	const [items, aggregate] = await Promise.all([
 		db
 			.select({ id: schema.persons.id, name: schema.persons.name })
 			.from(schema.persons)
+			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where)
 			.orderBy(schema.persons.sortName)
 			.limit(limit)
 			.offset(offset),
-		db.select({ total: count() }).from(schema.persons).where(where),
+		db
+			.select({ total: count() })
+			.from(schema.persons)
+			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(where),
 	]);
 
 	return { items, total: aggregate.at(0)?.total ?? 0 };
