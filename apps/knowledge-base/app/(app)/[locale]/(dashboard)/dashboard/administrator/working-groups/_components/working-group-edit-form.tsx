@@ -32,8 +32,12 @@ interface WorkingGroupEditFormProps {
 	initialRelatedResourceIds: Array<string>;
 	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
 	initialRelatedResourceTotal: number;
+	initialSocialMediaIds: Array<string>;
+	initialSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
+	initialSocialMediaTotal: number;
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
+	selectedSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
 	relations: Array<UnitRelation>;
 	unitRelationStatusOptions: Array<UnitRelationStatusOption>;
 	chairs: Array<WorkingGroupChair>;
@@ -54,8 +58,12 @@ export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>)
 		initialRelatedResourceIds,
 		initialRelatedResourceItems,
 		initialRelatedResourceTotal,
+		initialSocialMediaIds,
+		initialSocialMediaItems,
+		initialSocialMediaTotal,
 		selectedRelatedEntities,
 		selectedRelatedResources,
+		selectedSocialMediaItems,
 		relations,
 		unitRelationStatusOptions,
 		chairs,
@@ -87,8 +95,12 @@ export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>)
 				initialRelatedResourceIds={initialRelatedResourceIds}
 				initialRelatedResourceItems={initialRelatedResourceItems}
 				initialRelatedResourceTotal={initialRelatedResourceTotal}
+				initialSocialMediaIds={initialSocialMediaIds}
+				initialSocialMediaItems={initialSocialMediaItems}
+				initialSocialMediaTotal={initialSocialMediaTotal}
 				selectedRelatedEntities={selectedRelatedEntities}
 				selectedRelatedResources={selectedRelatedResources}
+				selectedSocialMediaItems={selectedSocialMediaItems}
 				workingGroup={workingGroup}
 			/>
 

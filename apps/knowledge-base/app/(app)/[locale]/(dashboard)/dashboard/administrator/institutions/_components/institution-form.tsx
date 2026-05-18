@@ -22,6 +22,7 @@ import {
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import { SocialMediaRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface InstitutionFormProps {
@@ -37,8 +38,12 @@ interface InstitutionFormProps {
 	initialRelatedResourceIds?: Array<string>;
 	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
 	initialRelatedResourceTotal: number;
+	initialSocialMediaIds?: Array<string>;
+	initialSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
+	initialSocialMediaTotal?: number;
 	selectedRelatedEntities?: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources?: Array<{ id: string; name: string; description?: string }>;
+	selectedSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
 }
 
 export function InstitutionForm(props: Readonly<InstitutionFormProps>): ReactNode {
@@ -52,8 +57,12 @@ export function InstitutionForm(props: Readonly<InstitutionFormProps>): ReactNod
 		initialRelatedResourceIds,
 		initialRelatedResourceItems,
 		initialRelatedResourceTotal,
+		initialSocialMediaIds,
+		initialSocialMediaItems,
+		initialSocialMediaTotal,
 		selectedRelatedEntities,
 		selectedRelatedResources,
+		selectedSocialMediaItems,
 	} = props;
 
 	const t = useExtracted();
@@ -132,6 +141,20 @@ export function InstitutionForm(props: Readonly<InstitutionFormProps>): ReactNod
 
 				<Separator className="my-6" />
 
+				{initialSocialMediaItems != null && initialSocialMediaTotal != null ? (
+					<Fragment>
+						<SocialMediaRelationsFields
+							description={t("Link social media accounts to this institution.")}
+							initialSocialMediaIds={initialSocialMediaIds}
+							initialSocialMediaItems={initialSocialMediaItems}
+							initialSocialMediaTotal={initialSocialMediaTotal}
+							selectedSocialMediaItems={selectedSocialMediaItems}
+						/>
+
+						<Separator className="my-6" />
+					</Fragment>
+				) : null}
+
 				<EntityRelationsFields
 					initialRelatedEntityIds={initialRelatedEntityIds}
 					initialRelatedEntityItems={initialRelatedEntityItems}
@@ -152,7 +175,7 @@ export function InstitutionForm(props: Readonly<InstitutionFormProps>): ReactNod
 
 				<FormActions>
 					<FormStatus state={state} />
-					<DraftFormSubmitButtons isPending={isPending} />
+					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={institution != null} />
 				</FormActions>
 			</Form>
 		</FormLayout>

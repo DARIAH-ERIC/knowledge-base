@@ -22,6 +22,7 @@ import {
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import { SocialMediaRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface WorkingGroupFormProps {
@@ -37,8 +38,12 @@ interface WorkingGroupFormProps {
 	initialRelatedResourceIds?: Array<string>;
 	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
 	initialRelatedResourceTotal: number;
+	initialSocialMediaIds?: Array<string>;
+	initialSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
+	initialSocialMediaTotal?: number;
 	selectedRelatedEntities?: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources?: Array<{ id: string; name: string; description?: string }>;
+	selectedSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
 }
 
 export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactNode {
@@ -52,8 +57,12 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 		initialRelatedResourceIds,
 		initialRelatedResourceItems,
 		initialRelatedResourceTotal,
+		initialSocialMediaIds,
+		initialSocialMediaItems,
+		initialSocialMediaTotal,
 		selectedRelatedEntities,
 		selectedRelatedResources,
+		selectedSocialMediaItems,
 	} = props;
 
 	const t = useExtracted();
@@ -131,6 +140,20 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 				</FormSection>
 
 				<Separator className="my-6" />
+
+				{initialSocialMediaItems != null && initialSocialMediaTotal != null ? (
+					<Fragment>
+						<SocialMediaRelationsFields
+							description={t("Link social media accounts to this working group.")}
+							initialSocialMediaIds={initialSocialMediaIds}
+							initialSocialMediaItems={initialSocialMediaItems}
+							initialSocialMediaTotal={initialSocialMediaTotal}
+							selectedSocialMediaItems={selectedSocialMediaItems}
+						/>
+
+						<Separator className="my-6" />
+					</Fragment>
+				) : null}
 
 				<EntityRelationsFields
 					initialRelatedEntityIds={initialRelatedEntityIds}

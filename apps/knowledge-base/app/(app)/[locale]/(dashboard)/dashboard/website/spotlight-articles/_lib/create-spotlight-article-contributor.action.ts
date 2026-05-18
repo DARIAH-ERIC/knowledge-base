@@ -9,6 +9,7 @@ import * as v from "valibot";
 
 import { CreateSpotlightArticleContributorActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article-contributor.schema";
 import { assertAdmin } from "@/lib/auth/session";
+import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -48,9 +49,13 @@ export const createSpotlightArticleContributorAction = createServerAction(
 			return createActionStateError({ message: t("This contributor already exists.") });
 		}
 
-		await db
-			.insert(schema.spotlightArticlesToPersons)
-			.values({ spotlightArticleId: articleId, personId, role });
+		await db.transaction(async (tx) => {
+			await tx
+				.insert(schema.spotlightArticlesToPersons)
+				.values({ spotlightArticleId: articleId, personId, role });
+
+			await touchVersion(tx, articleId);
+		});
 
 		revalidatePath("/[locale]/dashboard/website/spotlight-articles", "layout");
 

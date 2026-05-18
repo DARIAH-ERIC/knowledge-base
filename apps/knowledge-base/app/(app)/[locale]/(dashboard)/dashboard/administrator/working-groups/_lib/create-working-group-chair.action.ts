@@ -9,6 +9,7 @@ import * as v from "valibot";
 
 import { CreateWorkingGroupChairActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/create-working-group-chair.schema";
 import { assertAdmin } from "@/lib/auth/session";
+import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -56,11 +57,17 @@ export const createWorkingGroupChairAction = createServerAction(
 			return createActionStateError({ message: t("This chair relation already exists.") });
 		}
 
-		const returned = await db
-			.insert(schema.personsToOrganisationalUnits)
-			.values({ personId, organisationalUnitId: unitId, roleTypeId: roleType.id, duration })
-			.returning({ id: schema.personsToOrganisationalUnits.id })
-			.then((rows) => rows[0]!);
+		const returned = await db.transaction(async (tx) => {
+			const row = await tx
+				.insert(schema.personsToOrganisationalUnits)
+				.values({ personId, organisationalUnitId: unitId, roleTypeId: roleType.id, duration })
+				.returning({ id: schema.personsToOrganisationalUnits.id })
+				.then((rows) => rows[0]!);
+
+			await touchVersion(tx, unitId);
+
+			return row;
+		});
 
 		await dispatchWebhook({ type: "working-groups" });
 		revalidatePath("/[locale]/dashboard/administrator/working-groups", "layout");

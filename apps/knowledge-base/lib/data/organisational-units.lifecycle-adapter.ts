@@ -54,9 +54,25 @@ export const organisationalUnitsLifecycleAdapter: EntityLifecycleAdapter = {
 				}),
 			);
 		}
+
+		const socialMedia = await tx
+			.select({ socialMediaId: schema.organisationalUnitsToSocialMedia.socialMediaId })
+			.from(schema.organisationalUnitsToSocialMedia)
+			.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, sourceVersionId));
+
+		if (socialMedia.length > 0) {
+			await tx.insert(schema.organisationalUnitsToSocialMedia).values(
+				socialMedia.map((s) => {
+					return { organisationalUnitId: targetVersionId, ...s };
+				}),
+			);
+		}
 	},
 
 	async wipeSubtype(tx, versionId) {
+		await tx
+			.delete(schema.organisationalUnitsToSocialMedia)
+			.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, versionId));
 		await tx
 			.delete(schema.personsToOrganisationalUnits)
 			.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, versionId));

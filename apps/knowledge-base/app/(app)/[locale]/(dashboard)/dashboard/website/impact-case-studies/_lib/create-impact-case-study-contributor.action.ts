@@ -9,6 +9,7 @@ import * as v from "valibot";
 
 import { CreateImpactCaseStudyContributorActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/create-impact-case-study-contributor.schema";
 import { assertAdmin } from "@/lib/auth/session";
+import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -48,9 +49,13 @@ export const createImpactCaseStudyContributorAction = createServerAction(
 			return createActionStateError({ message: t("This contributor already exists.") });
 		}
 
-		await db
-			.insert(schema.impactCaseStudiesToPersons)
-			.values({ impactCaseStudyId: articleId, personId, role });
+		await db.transaction(async (tx) => {
+			await tx
+				.insert(schema.impactCaseStudiesToPersons)
+				.values({ impactCaseStudyId: articleId, personId, role });
+
+			await touchVersion(tx, articleId);
+		});
 
 		revalidatePath("/[locale]/dashboard/website/impact-case-studies", "layout");
 

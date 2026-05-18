@@ -10,6 +10,7 @@ import * as v from "valibot";
 
 import { CreateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.schema";
 import { assertAdmin } from "@/lib/auth/session";
+import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -83,11 +84,17 @@ export const createContributionAction = createServerAction(
 			return createActionStateError({ message: t("This contribution already exists.") });
 		}
 
-		const returned = await db
-			.insert(schema.personsToOrganisationalUnits)
-			.values({ personId, organisationalUnitId, roleTypeId, duration })
-			.returning({ id: schema.personsToOrganisationalUnits.id })
-			.then((rows) => rows[0]!);
+		const returned = await db.transaction(async (tx) => {
+			const row = await tx
+				.insert(schema.personsToOrganisationalUnits)
+				.values({ personId, organisationalUnitId, roleTypeId, duration })
+				.returning({ id: schema.personsToOrganisationalUnits.id })
+				.then((rows) => rows[0]!);
+
+			await touchVersion(tx, organisationalUnitId);
+
+			return row;
+		});
 
 		revalidatePath("/[locale]/dashboard/administrator", "layout");
 

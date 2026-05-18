@@ -23,8 +23,12 @@ interface NationalConsortiumEditFormProps {
 	initialRelatedResourceIds: Array<string>;
 	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
 	initialRelatedResourceTotal: number;
+	initialSocialMediaIds: Array<string>;
+	initialSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
+	initialSocialMediaTotal: number;
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
+	selectedSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
 	relations: Array<UnitRelation>;
 	unitRelationStatusOptions: Array<UnitRelationStatusOption>;
 }
@@ -41,8 +45,12 @@ export function NationalConsortiumEditForm(
 		initialRelatedResourceIds,
 		initialRelatedResourceItems,
 		initialRelatedResourceTotal,
+		initialSocialMediaIds,
+		initialSocialMediaItems,
+		initialSocialMediaTotal,
 		selectedRelatedEntities,
 		selectedRelatedResources,
+		selectedSocialMediaItems,
 		relations,
 		unitRelationStatusOptions,
 	} = props;
@@ -62,9 +70,13 @@ export function NationalConsortiumEditForm(
 				initialRelatedResourceIds={initialRelatedResourceIds}
 				initialRelatedResourceItems={initialRelatedResourceItems}
 				initialRelatedResourceTotal={initialRelatedResourceTotal}
+				initialSocialMediaIds={initialSocialMediaIds}
+				initialSocialMediaItems={initialSocialMediaItems}
+				initialSocialMediaTotal={initialSocialMediaTotal}
 				nationalConsortium={nationalConsortium}
 				selectedRelatedEntities={selectedRelatedEntities}
 				selectedRelatedResources={selectedRelatedResources}
+				selectedSocialMediaItems={selectedSocialMediaItems}
 			/>
 
 			<UnitRelationsSection

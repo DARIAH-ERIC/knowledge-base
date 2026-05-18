@@ -8,7 +8,11 @@ import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getOrganisationalUnitEditDataForAdmin } from "@/lib/data/admin-organisational-units";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { ensureDraftVersion } from "@/lib/data/entity-lifecycle";
+import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
+import { getSocialMediaOptions } from "@/lib/data/social-media";
+import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -35,13 +39,43 @@ export default async function DashboardAdministratorEditCountryPage(
 	const { slug } = await params;
 	const { user } = await assertAuthenticated();
 
-	const [{ items: initialAssets }, initialRelatedEntities, initialRelatedResources, countryData] =
-		await Promise.all([
-			getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
-			getEntityRelationOptions(),
-			getResourceRelationOptions(),
-			getOrganisationalUnitEditDataForAdmin(user, { slug, unitType: "country" }),
-		]);
+	const anyVersion = await db.query.organisationalUnits.findFirst({
+		where: { entityVersion: { entity: { slug } }, type: { type: "country" } },
+		columns: {},
+		with: {
+			entityVersion: {
+				columns: {},
+				with: { entity: { columns: { id: true } } },
+			},
+		},
+	});
+
+	if (anyVersion == null) {
+		notFound();
+	}
+
+	const documentId = anyVersion.entityVersion.entity.id;
+	const draftVersionId = await db.transaction((tx) =>
+		ensureDraftVersion(tx, documentId, organisationalUnitsLifecycleAdapter),
+	);
+
+	const [
+		{ items: initialAssets },
+		initialRelatedEntities,
+		initialRelatedResources,
+		initialSocialMedia,
+		countryData,
+	] = await Promise.all([
+		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
+		getEntityRelationOptions(),
+		getResourceRelationOptions(),
+		getSocialMediaOptions(),
+		getOrganisationalUnitEditDataForAdmin(user, {
+			slug,
+			unitType: "country",
+			versionId: draftVersionId,
+		}),
+	]);
 
 	if (countryData == null) {
 		notFound();
@@ -53,6 +87,8 @@ export default async function DashboardAdministratorEditCountryPage(
 		relatedResourceIds,
 		selectedRelatedEntities,
 		selectedRelatedResources,
+		selectedSocialMediaItems,
+		socialMediaIds,
 		unit: country,
 		unitRelationStatusOptions,
 	} = countryData;
@@ -78,9 +114,13 @@ export default async function DashboardAdministratorEditCountryPage(
 			initialRelatedResourceIds={relatedResourceIds}
 			initialRelatedResourceItems={initialRelatedResources.items}
 			initialRelatedResourceTotal={initialRelatedResources.total}
+			initialSocialMediaIds={socialMediaIds}
+			initialSocialMediaItems={initialSocialMedia.items}
+			initialSocialMediaTotal={initialSocialMedia.total}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}
+			selectedSocialMediaItems={selectedSocialMediaItems}
 			unitRelationStatusOptions={unitRelationStatusOptions}
 		/>
 	);
