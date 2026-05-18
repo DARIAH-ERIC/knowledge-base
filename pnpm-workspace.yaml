@@ -30,7 +30,6 @@ catalog:
   "@imgproxy/imgproxy-js-core": ^1.7.0
   "@imgproxy/imgproxy-node": ^1.1.0
   "@internationalized/date": ^3.12.0
-  "@next/eslint-plugin-next": ^16.1.6
   "@node-rs/argon2": ^2.0.2
   "@oslojs/binary": ^1.0.0
   "@oslojs/crypto": ^1.0.1
