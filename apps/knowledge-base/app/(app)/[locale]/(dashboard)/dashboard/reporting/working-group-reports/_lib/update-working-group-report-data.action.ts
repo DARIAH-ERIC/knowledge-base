@@ -10,6 +10,7 @@ import * as v from "valibot";
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { getWorkingGroupReportEditHrefById } from "@/lib/data/reporting-urls";
 import { eq } from "@/lib/db/sql";
 import { redirect } from "@/lib/navigation/navigation";
 
@@ -45,5 +46,5 @@ export async function updateWorkingGroupReportDataAction(formData: FormData): Pr
 
 	revalidatePath("/[locale]/dashboard/reporting", "layout");
 
-	redirect({ href: `/dashboard/reporting/working-group-reports/${id}/edit/data`, locale });
+	redirect({ href: await getWorkingGroupReportEditHrefById(id, "data"), locale });
 }

@@ -165,11 +165,7 @@ export async function ReportingOverviewPage(
 																	: t("You can edit this report.")}
 															</span>
 														</div>
-														<ButtonLink
-															href={`/dashboard/reporting/working-group-reports/${report.reportId}/edit`}
-															intent="plain"
-															size="sm"
-														>
+														<ButtonLink href={`${report.reportHref}/edit`} intent="plain" size="sm">
 															{t("Open")}
 														</ButtonLink>
 													</li>
@@ -220,11 +216,7 @@ export async function ReportingOverviewPage(
 																	: t("You can edit this report.")}
 															</span>
 														</div>
-														<ButtonLink
-															href={`/dashboard/reporting/country-reports/${report.reportId}/edit`}
-															intent="plain"
-															size="sm"
-														>
+														<ButtonLink href={`${report.reportHref}/edit`} intent="plain" size="sm">
 															{t("Open")}
 														</ButtonLink>
 													</li>

@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { getWorkingGroupReportEditHrefById } from "@/lib/data/reporting-urls";
 import { eq } from "@/lib/db/sql";
 import { redirect } from "@/lib/navigation/navigation";
 
@@ -27,5 +28,5 @@ export async function submitWorkingGroupReportAction(formData: FormData): Promis
 
 	revalidatePath("/[locale]/dashboard/reporting", "layout");
 
-	redirect({ href: `/dashboard/reporting/working-group-reports/${id}/edit/confirm`, locale });
+	redirect({ href: await getWorkingGroupReportEditHrefById(id, "confirm"), locale });
 }

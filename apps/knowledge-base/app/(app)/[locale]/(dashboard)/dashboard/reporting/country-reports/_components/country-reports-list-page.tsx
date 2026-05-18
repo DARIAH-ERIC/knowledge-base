@@ -60,8 +60,8 @@ export async function CountryReportsListPage(
 								<ButtonLink
 									href={
 										isEditable
-											? `/dashboard/reporting/country-reports/${report.reportId}/edit`
-											: `/dashboard/reporting/country-reports/${report.reportId}`
+											? `/edit`
+											: report.reportHref
 									}
 									intent="plain"
 									size="sm"

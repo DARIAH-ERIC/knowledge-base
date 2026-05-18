@@ -60,8 +60,8 @@ export async function WorkingGroupReportsListPage(
 								<ButtonLink
 									href={
 										isEditable
-											? `/dashboard/reporting/working-group-reports/${report.reportId}/edit`
-											: `/dashboard/reporting/working-group-reports/${report.reportId}`
+											? `/edit`
+											: report.reportHref
 									}
 									intent="plain"
 									size="sm"

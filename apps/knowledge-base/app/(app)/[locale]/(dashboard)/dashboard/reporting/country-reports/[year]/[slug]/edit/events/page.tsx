@@ -1,0 +1,75 @@
+import type { Metadata, ResolvingMetadata } from "next";
+import { getExtracted } from "next-intl/server";
+import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
+
+import { ReportScreenCommentSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-screen-comment-section";
+import { CountryReportEventsForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-events-form";
+import { getAuthorizedCountryReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
+import { updateCountryReportEventsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/update-country-report-events.action";
+import { assertAuthenticated } from "@/lib/auth/session";
+import { resolveCountryReportId } from "@/lib/data/reporting-urls";
+import { db } from "@/lib/db";
+import { createMetadata } from "@/lib/server/create-metadata";
+
+interface DashboardReportingCountryReportEventsPageProps extends PageProps<"/[locale]/dashboard/reporting/country-reports/[year]/[slug]/edit/events"> {}
+
+export async function generateMetadata(
+	_props: Readonly<DashboardReportingCountryReportEventsPageProps>,
+	resolvingMetadata: ResolvingMetadata,
+): Promise<Metadata> {
+	const t = await getExtracted();
+
+	return createMetadata(resolvingMetadata, {
+		title: t("Dashboard - Country report events"),
+	});
+}
+
+export default async function DashboardReportingCountryReportEventsPage(
+	props: Readonly<DashboardReportingCountryReportEventsPageProps>,
+): Promise<ReactNode> {
+	const { params } = props;
+
+	const { year: routeYear, slug } = await params;
+	const id = await resolveCountryReportId({ year: routeYear, slug });
+
+	if (id == null) {
+		notFound();
+	}
+
+	const { user } = await assertAuthenticated();
+	const result = await getAuthorizedCountryReportForUser(
+		user,
+		id,
+		(id) =>
+			db.query.countryReports.findFirst({
+				where: { id },
+				columns: {
+					id: true,
+					smallEvents: true,
+					mediumEvents: true,
+					largeEvents: true,
+					veryLargeEvents: true,
+					dariahCommissionedEvent: true,
+					reusableOutcomes: true,
+				},
+			}),
+		"update",
+	);
+
+	if (result.status !== "ok") {
+		notFound();
+	}
+	const report = result.data;
+	if (report == null) {
+		notFound();
+	}
+
+	return (
+		<div className="flex flex-col gap-y-12">
+			<CountryReportEventsForm formAction={updateCountryReportEventsAction} report={report} />
+
+			<ReportScreenCommentSection reportId={report.id} reportType="country" screenKey="events" />
+		</div>
+	);
+}

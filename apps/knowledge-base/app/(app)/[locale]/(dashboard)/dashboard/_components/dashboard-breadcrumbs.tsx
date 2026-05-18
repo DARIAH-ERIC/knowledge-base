@@ -10,7 +10,14 @@ import { usePathname } from "@/lib/navigation/navigation";
 // only serve as parents for "edit" or "details" sub-routes.
 const ACTION_SEGMENTS = new Set(["edit", "details"]);
 
-function getBreadcrumbSegments(pathname: string): Array<{ href?: string; label: string }> {
+interface DashboardBreadcrumbsProps {
+	labels?: Record<string, string>;
+}
+
+function getBreadcrumbSegments(
+	pathname: string,
+	labels: Record<string, string> = {},
+): Array<{ href?: string; label: string }> {
 	const dashboardPrefix = "/dashboard";
 
 	if (pathname === dashboardPrefix || !pathname.startsWith(dashboardPrefix)) {
@@ -20,10 +27,15 @@ function getBreadcrumbSegments(pathname: string): Array<{ href?: string; label: 
 	const segments = pathname.slice(dashboardPrefix.length).split("/").filter(Boolean);
 
 	return segments.map((segment, index) => {
-		const label = decodeURIComponent(segment).replaceAll("-", " ");
+		const label = labels[segment] ?? decodeURIComponent(segment).replaceAll("-", " ");
 		const isLast = index === segments.length - 1;
 		const nextSegment = segments[index + 1];
-		const isDynamicParam = nextSegment != null && ACTION_SEGMENTS.has(nextSegment);
+		const isReportYearSegment =
+			segments[0] === "reporting" &&
+			(segments[1] === "country-reports" || segments[1] === "working-group-reports") &&
+			index === 2;
+		const isDynamicParam =
+			isReportYearSegment || (nextSegment != null && ACTION_SEGMENTS.has(nextSegment));
 
 		const href =
 			isLast || isDynamicParam ? undefined : `/dashboard/${segments.slice(0, index + 1).join("/")}`;
@@ -32,9 +44,10 @@ function getBreadcrumbSegments(pathname: string): Array<{ href?: string; label: 
 	});
 }
 
-export function DashboardBreadcrumbs(): ReactNode {
+export function DashboardBreadcrumbs(props: Readonly<DashboardBreadcrumbsProps> = {}): ReactNode {
+	const { labels } = props;
 	const pathname = usePathname();
-	const segments = getBreadcrumbSegments(pathname);
+	const segments = getBreadcrumbSegments(pathname, labels);
 	const t = useExtracted();
 
 	return (
