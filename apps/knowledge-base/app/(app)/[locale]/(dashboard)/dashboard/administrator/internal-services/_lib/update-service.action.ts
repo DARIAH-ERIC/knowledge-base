@@ -45,7 +45,6 @@ export const updateServiceAction = createServerAction(
 		const {
 			id,
 			name,
-			sshocMarketplaceId,
 			statusId,
 			comment,
 			dariahBranding,
@@ -61,7 +60,6 @@ export const updateServiceAction = createServerAction(
 				.update(schema.services)
 				.set({
 					name,
-					sshocMarketplaceId,
 					statusId,
 					comment,
 					dariahBranding,

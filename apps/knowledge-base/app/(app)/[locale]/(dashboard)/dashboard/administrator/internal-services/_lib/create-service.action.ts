@@ -44,7 +44,6 @@ export const createServiceAction = createServerAction(
 
 		const {
 			name,
-			sshocMarketplaceId,
 			statusId,
 			comment,
 			dariahBranding,
@@ -67,7 +66,6 @@ export const createServiceAction = createServerAction(
 				.insert(schema.services)
 				.values({
 					name,
-					sshocMarketplaceId,
 					typeId: serviceType.id,
 					statusId,
 					comment,

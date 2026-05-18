@@ -30,14 +30,7 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface ServiceFormProps {
 	service?: Pick<
 		schema.Service,
-		| "id"
-		| "name"
-		| "sshocMarketplaceId"
-		| "statusId"
-		| "comment"
-		| "dariahBranding"
-		| "monitoring"
-		| "privateSupplier"
+		"id" | "name" | "statusId" | "comment" | "dariahBranding" | "monitoring" | "privateSupplier"
 	> & {
 		ownerUnitIds: Array<string>;
 		providerUnitIds: Array<string>;
@@ -126,15 +119,6 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 						</SelectContent>
 					</Select>
 					<input name="statusId" type="hidden" value={selectedStatusId} />
-
-					<TextField
-						defaultValue={service?.sshocMarketplaceId ?? undefined}
-						name="sshocMarketplaceId"
-					>
-						<Label>{t("SSHOC Marketplace ID")}</Label>
-						<Input />
-						<FieldError />
-					</TextField>
 
 					<TextField defaultValue={service?.comment ?? undefined} name="comment">
 						<Label>{t("Comment")}</Label>
