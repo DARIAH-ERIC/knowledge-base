@@ -1,6 +1,6 @@
 import * as schema from "@dariah-eric/database/schema";
 
-import { and, eq, or, sql, type SQL } from "@/lib/db/sql";
+import { type SQL, and, eq, or, sql } from "@/lib/db/sql";
 
 export function currentEntityVersionWhere(): SQL | undefined {
 	return or(

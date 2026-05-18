@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth/session";
 import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { and, count, eq, ilike, inArray, type SQL } from "@/lib/db/sql";
+import { type SQL, and, count, eq, ilike, inArray } from "@/lib/db/sql";
 
 const defaultLimit = 20;
 const allowedTypes = [
