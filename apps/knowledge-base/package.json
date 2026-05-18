@@ -94,7 +94,6 @@
 		"@dariah-eric/configs": "workspace:^",
 		"@dotenvx/dotenvx": "catalog:",
 		"@faker-js/faker": "catalog:",
-		"@next/eslint-plugin-next": "catalog:",
 		"@playwright/test": "catalog:",
 		"@react-aria/optimize-locales-plugin": "catalog:",
 		"@tailwindcss/postcss": "catalog:",

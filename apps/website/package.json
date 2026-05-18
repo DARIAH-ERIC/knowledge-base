@@ -66,7 +66,6 @@
 	"devDependencies": {
 		"@dariah-eric/configs": "workspace:^",
 		"@dotenvx/dotenvx": "catalog:",
-		"@next/eslint-plugin-next": "catalog:",
 		"@playwright/test": "catalog:",
 		"@react-aria/optimize-locales-plugin": "catalog:",
 		"@tailwindcss/postcss": "catalog:",

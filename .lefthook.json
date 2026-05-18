@@ -3,16 +3,16 @@
 	"pre-commit": {
 		"commands": {
 			"oxlint": {
-				"run": "pnpm exec eslint --fix --flag unstable_native_nodejs_ts_config {staged_files}",
+				"run": "bun oxlint --fix --report-unused-disable-directives --type-aware --type-check {staged_files}",
 				"stage_fixed": true
 			},
 			"stylelint": {
 				"glob": "*.css",
-				"run": "pnpm exec stylelint --fix {staged_files}",
+				"run": "bun stylelint --fix {staged_files}",
 				"stage_fixed": true
 			},
 			"oxfmt": {
-				"run": "pnpm exec oxfmt --no-error-on-unmatched-pattern --write {staged_files}",
+				"run": "bun oxfmt --no-error-on-unmatched-pattern --write {staged_files}",
 				"stage_fixed": true
 			}
 		}
