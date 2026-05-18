@@ -234,10 +234,22 @@ export interface GetResearchProductsParams {
 	popularityClass?: OpenAireImpactClass;
 	impulseClass?: OpenAireImpactClass;
 	citationCountClass?: OpenAireImpactClass;
+	/**
+	 * @example
+	 * 	"openorgs____::f0c3e27c112272a3781226c5890b228c" for dariah
+	 */
 	relOrganizationId?: string;
 	relProjectId?: string;
 	relProjectCode?: string;
+	/**
+	 * @example
+	 * 	"dariah" for dariah
+	 */
 	relCommunityId?: string;
+	/**
+	 * @example
+	 * 	"issn__online::7d157c8f847606bf72bb8a4a1e8b1514" for transformations journal
+	 */
 	relHostingDataSourceId?: string;
 	relCollectedFromDatasourceId?: string;
 	sortBy?: string;
