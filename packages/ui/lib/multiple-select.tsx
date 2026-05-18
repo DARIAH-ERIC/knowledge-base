@@ -1,8 +1,18 @@
 "use client";
 
 import { PlusIcon } from "@heroicons/react/20/solid";
+import { useResizeObserver } from "@react-aria/utils";
 import { useExtracted } from "next-intl";
-import React, { Children, Fragment, type ReactNode, isValidElement, useMemo, useRef } from "react";
+import React, {
+	Children,
+	Fragment,
+	type ReactNode,
+	isValidElement,
+	useCallback,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import {
 	Autocomplete,
 	Select,
@@ -26,9 +36,10 @@ interface OptionBase {
 
 interface MultipleSelectProps<T extends OptionBase> extends Omit<
 	SelectProps<T, "multiple">,
-	"onSelectionChange" | "selectionMode" | "children"
+	"selectionMode" | "children"
 > {
 	placeholder?: string;
+	searchPlaceholder?: string;
 	className?: string;
 	children?: React.ReactNode;
 	name?: string;
@@ -50,11 +61,27 @@ MultipleSelectContent.displayName = "MultipleSelectContent";
 export function MultipleSelect<T extends OptionBase>(
 	props: Readonly<MultipleSelectProps<T>>,
 ): ReactNode {
-	const { placeholder = "No selected items", className, children, name, ...rest } = props;
+	const {
+		placeholder = "No selected items",
+		searchPlaceholder,
+		className,
+		children,
+		name,
+		...rest
+	} = props;
 
 	const t = useExtracted("ui");
 
 	const triggerRef = useRef<HTMLDivElement | null>(null);
+	const [triggerWidth, setTriggerWidth] = useState<string | undefined>();
+
+	const onResize = useCallback(() => {
+		if (triggerRef.current) {
+			setTriggerWidth(`${triggerRef.current.offsetWidth}px`);
+		}
+	}, []);
+
+	useResizeObserver({ ref: triggerRef, onResize });
 
 	const { contains } = useFilter({ sensitivity: "base" });
 
@@ -74,7 +101,7 @@ export function MultipleSelect<T extends OptionBase>(
 
 	return (
 		<Select
-			className={cx(fieldStyles(), className)}
+			className={cx(fieldStyles({ className: "group/select" }), className)}
 			data-slot="control"
 			name={name}
 			selectionMode="multiple"
@@ -85,10 +112,10 @@ export function MultipleSelect<T extends OptionBase>(
 				<Fragment>
 					<div
 						ref={triggerRef}
-						className="flex inline-full items-center gap-2 rounded-lg border p-1"
+						className="flex inline-full items-center gap-2 rounded-lg border border-input p-1 group-open/select:border-ring/70 group-open/select:ring-3 group-open/select:ring-ring/20 has-[:focus-visible]:border-ring/70 has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/20"
 						data-slot="control"
 					>
-						<SelectValue<T> className="flex-1">
+						<SelectValue<T> className="flex-1 min-inline-0">
 							{({ selectedItems, state }) => (
 								<TagGroup
 									aria-label={t("Selected items")}
@@ -102,7 +129,7 @@ export function MultipleSelect<T extends OptionBase>(
 									<TagList
 										items={selectedItems.filter((i) => i != null)}
 										renderEmptyState={() => (
-											<i className="ps-2 text-muted-fg text-sm">{placeholder}</i>
+											<i className="ps-2 text-muted-fg text-sm not-italic">{placeholder}</i>
 										)}
 									>
 										{(item) => <Tag className="rounded-md">{item.name}</Tag>}
@@ -112,7 +139,7 @@ export function MultipleSelect<T extends OptionBase>(
 						</SelectValue>
 						<Button
 							aria-label={t("Open options")}
-							className="self-end rounded-[calc(var(--radius-lg)-(--spacing(1)))]"
+							className="rounded-[calc(var(--radius-lg)-(--spacing(1)))]"
 							intent="secondary"
 							size="sq-xs"
 						>
@@ -120,16 +147,27 @@ export function MultipleSelect<T extends OptionBase>(
 						</Button>
 					</div>
 					<PopoverContent
-						className="flex inline-full flex-col"
+						className="flex inline-(--trigger-width) max-inline-none flex-col overflow-hidden p-0"
 						placement="bottom"
+						style={
+							triggerWidth != null
+								? ({ "--trigger-width": triggerWidth } as React.CSSProperties)
+								: undefined
+						}
 						triggerRef={triggerRef}
 					>
 						<Autocomplete filter={contains}>
-							<SearchField autoFocus={true} className="rounded-none outline-hidden">
-								<SearchInput className="border-none outline-hidden focus:ring-0" />
+							<SearchField
+								autoFocus={true}
+								className="rounded-none border-be border-fg/10 py-0.5 outline-hidden"
+							>
+								<SearchInput
+									className="border-none outline-hidden focus:ring-0"
+									placeholder={searchPlaceholder ?? t("Search")}
+								/>
 							</SearchField>
 							<ListBox
-								className="rounded-t-none border-0 border-bs bg-transparent shadow-none"
+								className="grid min-block-0 inline-full flex-1 grid-cols-[auto_1fr] gap-y-1 overflow-y-auto rounded-none border-0 bg-transparent p-1 shadow-none outline-hidden"
 								items={list.items}
 							>
 								{list.children}

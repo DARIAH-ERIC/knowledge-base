@@ -63,7 +63,7 @@ export class WebsiteNewsPage {
 	}
 
 	private async closeRelatedEntitiesDialog(dialog: Locator): Promise<void> {
-		await this.page.locator("body").click({ position: { x: 1, y: 1 } });
+		await this.page.mouse.click(1, 1);
 		await dialog.waitFor({ state: "hidden" });
 	}
 
@@ -89,8 +89,10 @@ export class WebsiteNewsPage {
 
 	async removeRelatedEntity(entityName: string): Promise<void> {
 		const section = this.relatedEntitiesSection();
+		const dialog = this.relatedEntitiesDialog();
 		await section.getByText(entityName, { exact: true }).waitFor({ state: "visible" });
 		await section.locator('button[slot="remove"]').click();
+		await this.closeRelatedEntitiesDialog(dialog);
 	}
 
 	async submitForm(): Promise<void> {

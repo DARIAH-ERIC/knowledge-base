@@ -10,6 +10,8 @@
 	"type": "module",
 	"sideEffects": false,
 	"exports": {
+		"./async-multiple-select": "./dist/async-multiple-select.mjs",
+		"./async-select": "./dist/async-select.mjs",
 		"./avatar": "./dist/avatar.mjs",
 		"./badge": "./dist/badge.mjs",
 		"./breadcrumbs": "./dist/breadcrumbs.mjs",
@@ -51,6 +53,7 @@
 		"./range-calendar": "./dist/range-calendar.mjs",
 		"./rich-text-editor": "./dist/rich-text-editor.mjs",
 		"./search-field": "./dist/search-field.mjs",
+		"./searchable-select": "./dist/searchable-select.mjs",
 		"./select": "./dist/select.mjs",
 		"./separator": "./dist/separator.mjs",
 		"./sheet": "./dist/sheet.mjs",
@@ -69,6 +72,7 @@
 		"./tooltip": "./dist/tooltip.mjs",
 		"./tree": "./dist/tree.mjs",
 		"./ui-provider": "./dist/ui-provider.mjs",
+		"./use-async-options": "./dist/use-async-options.mjs",
 		"./i18n/en": "./messages/en.json",
 		"./styles": "./styles/index.css"
 	},

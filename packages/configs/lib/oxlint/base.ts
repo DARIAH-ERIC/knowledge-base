@@ -190,7 +190,7 @@ const config = defineConfig({
 		"typescript/no-unnecessary-type-conversion": "error",
 		"typescript/no-unnecessary-type-parameters": "error",
 
-		"unicorn/consistent-function-scoping": "error",
+		"unicorn/consistent-function-scoping": "off",
 		"unicorn/no-accessor-recursion": "warn",
 		"unicorn/no-array-reverse": "warn",
 		"unicorn/no-array-sort": "warn",

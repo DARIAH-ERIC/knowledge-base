@@ -58,9 +58,10 @@ export const dropdownItemStyles = tv({
 		"col-span-full grid grid-cols-[auto_1fr_1.5rem_0.5rem_auto] px-3 py-2 sm:px-2.5 sm:py-1.5 supports-[grid-template-columns:subgrid]:grid-cols-subgrid",
 		"not-has-[[slot=description]]:items-center",
 		"group relative cursor-default select-none rounded-[calc(var(--radius-xl)-(--spacing(1)))] text-base/6 text-fg outline-0 sm:text-sm/6",
-		"**:data-[slot=avatar]:me-(--mr-icon) **:data-[slot=avatar]:[--avatar-size:--spacing(6)] **:data-[slot=avatar]:*:me-(--mr-icon) sm:**:data-[slot=avatar]:[--avatar-size:--spacing(5)]",
-		// eslint-disable-next-line better-tailwindcss/enforce-consistent-class-order
-		"**:data-[slot=icon]:block-5 **:data-[slot=icon]:inline-5 **:data-[slot=icon]:shrink-0 [&_[data-slot='icon']:not([class*='text-'])]:text-muted-fg sm:**:data-[slot=icon]:block-4 sm:**:data-[slot=icon]:inline-4 *:data-[slot=icon]:me-(--mr-icon) has-data-[slot=description]:**:data-[slot=icon]:block-lh",
+		// oxlint-disable-next-line better-tailwindcss/enforce-consistent-class-order
+		"**:data-[slot=avatar]:me-(--mr-icon) **:data-[slot=avatar]:[--avatar-size:--spacing(6)] **:data-[slot=avatar]:*:me-(--mr-icon) sm:**:data-[slot=avatar]:[--avatar-size:--spacing(5)] has-data-[slot=description]:**:data-[slot=avatar]:self-start has-data-[slot=description]:**:data-[slot=avatar]:mbs-1.5",
+		// oxlint-disable-next-line better-tailwindcss/enforce-consistent-class-order
+		"*:data-[slot=icon]:me-(--mr-icon) [&_[data-slot='icon']:not([class*='text-'])]:text-muted-fg **:data-[slot=icon]:block-5 **:data-[slot=icon]:inline-5 **:data-[slot=icon]:shrink-0 sm:**:data-[slot=icon]:block-4 sm:**:data-[slot=icon]:inline-4 has-data-[slot=description]:**:data-[slot=icon]:self-start has-data-[slot=description]:**:data-[slot=icon]:mbs-1 has-data-[slot=description]:**:data-[slot=icon]:block-4 has-data-[slot=description]:**:data-[slot=icon]:inline-4",
 		"[&>[slot=label]+[data-slot=icon]]:absolute [&>[slot=label]+[data-slot=icon]]:inset-e-1",
 		"forced-color-adjust-none forced-colors:text-[CanvasText] forced-colors:**:data-[slot=icon]:text-[CanvasText] forced-colors:group-focus:**:data-[slot=icon]:text-[CanvasText]",
 	],
@@ -124,9 +125,12 @@ export function DropdownItem({
 					{isSelected && (
 						<CheckIcon
 							className={twJoin(
-								"me-1.5 -ms-0.5 block-[lh] inline-4 shrink-0",
+								"me-1.5 -ms-0.5 block-4 inline-4 shrink-0",
+								"group-has-[[slot=description]]:self-start group-has-[[slot=description]]:mbs-1",
 								"group-has-data-[slot=icon]:absolute group-has-data-[slot=icon]:inset-bs-1/2 group-has-data-[slot=icon]:inset-e-0.5 group-has-data-[slot=icon]:-translate-y-1/2",
+								"sm:group-has-data-[slot=icon]:group-has-[[slot=description]]:inset-bs-2.5 group-has-data-[slot=icon]:group-has-[[slot=description]]:inset-bs-3 group-has-data-[slot=icon]:group-has-[[slot=description]]:translate-y-0",
 								"group-has-data-[slot=avatar]:absolute group-has-data-[slot=avatar]:inset-bs-1/2 group-has-data-[slot=avatar]:inset-e-0.5 group-has-data-[slot=avatar]:-translate-y-1/2",
+								"sm:group-has-data-[slot=avatar]:group-has-[[slot=description]]:inset-bs-2.5 group-has-data-[slot=avatar]:group-has-[[slot=description]]:inset-bs-3 group-has-data-[slot=avatar]:group-has-[[slot=description]]:translate-y-0",
 							)}
 							data-slot="check-indicator"
 						/>
