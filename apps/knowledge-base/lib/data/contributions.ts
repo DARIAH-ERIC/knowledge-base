@@ -3,6 +3,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { contributionOptionsPageSize } from "@/lib/constants/contributions";
+import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { and, count, desc, eq, ilike, inArray, or, sql } from "@/lib/db/sql";
 
@@ -245,23 +246,32 @@ interface GetContributionOptionsParams {
 export async function getContributionPersonOptions(params: GetContributionOptionsParams = {}) {
 	const { limit = contributionOptionsPageSize, offset = 0, q } = params;
 	const query = q?.trim();
-	const where =
+	const searchWhere =
 		query != null && query !== ""
 			? or(ilike(schema.persons.name, `%${query}%`), ilike(schema.persons.sortName, `%${query}%`))
 			: undefined;
+	const lifecycleWhere = currentEntityVersionWhere();
+	const where = and(lifecycleWhere, searchWhere);
 
 	const [items, aggregate] = await Promise.all([
 		db
 			.select({ id: schema.persons.id, name: schema.persons.name })
 			.from(schema.persons)
+			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where)
 			.orderBy(schema.persons.sortName)
 			.limit(limit)
 			.offset(offset),
-		db.$count(schema.persons, where),
+		db
+			.select({ total: count() })
+			.from(schema.persons)
+			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(where),
 	]);
 
-	return { items, total: aggregate };
+	return { items, total: aggregate.at(0)?.total ?? 0 };
 }
 
 export type ContributionPersonOption = Awaited<
@@ -284,6 +294,7 @@ export async function getContributionOrganisationalUnitOptions(
 
 	const query = q?.trim();
 	const where = and(
+		currentEntityVersionWhere(),
 		eq(schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.roleTypeId, roleTypeId),
 		query != null && query !== ""
 			? ilike(schema.organisationalUnits.name, `%${query}%`)
@@ -297,6 +308,8 @@ export async function getContributionOrganisationalUnitOptions(
 				name: schema.organisationalUnits.name,
 			})
 			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.innerJoin(
 				schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations,
 				eq(
@@ -311,6 +324,8 @@ export async function getContributionOrganisationalUnitOptions(
 		db
 			.select({ total: count() })
 			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.innerJoin(
 				schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations,
 				eq(
@@ -358,7 +373,11 @@ export async function getContributionOptions() {
 			typeId: schema.organisationalUnits.typeId,
 		})
 		.from(schema.organisationalUnits)
-		.where(inArray(schema.organisationalUnits.typeId, unitTypeIds));
+		.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.where(
+			and(currentEntityVersionWhere(), inArray(schema.organisationalUnits.typeId, unitTypeIds)),
+		);
 
 	const byRole = new Map<
 		string,
@@ -399,6 +418,7 @@ export async function getCountryOptions(params: GetContributionOptionsParams = {
 	const query = q?.trim();
 
 	const where = and(
+		currentEntityVersionWhere(),
 		eq(schema.organisationalUnitTypes.type, "country"),
 		query != null && query !== ""
 			? ilike(schema.organisationalUnits.name, `%${query}%`)
@@ -409,6 +429,8 @@ export async function getCountryOptions(params: GetContributionOptionsParams = {
 		db
 			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
 			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.innerJoin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
@@ -420,6 +442,8 @@ export async function getCountryOptions(params: GetContributionOptionsParams = {
 		db
 			.select({ total: count() })
 			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.innerJoin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),

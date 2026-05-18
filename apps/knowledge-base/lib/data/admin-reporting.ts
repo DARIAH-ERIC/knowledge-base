@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
 import type { User } from "@dariah-eric/auth";
+import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
+import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
+import { and, eq } from "@/lib/db/sql";
 
 function assertAdminUser(user: Pick<User, "role">): void {
 	if (user.role !== "admin") {
@@ -117,11 +120,17 @@ export async function getCountryReportCreateDataForAdmin(currentUser: Pick<User,
 			orderBy: { year: "desc" },
 			columns: { id: true, year: true },
 		}),
-		db.query.organisationalUnits.findMany({
-			where: { type: { type: "country" } },
-			orderBy: { name: "asc" },
-			columns: { id: true, name: true },
-		}),
+		db
+			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
+			.where(and(currentEntityVersionWhere(), eq(schema.organisationalUnitTypes.type, "country")))
+			.orderBy(schema.organisationalUnits.name),
 	]);
 
 	return { campaigns, countries };
@@ -161,11 +170,19 @@ export async function getWorkingGroupReportCreateDataForAdmin(currentUser: Pick<
 			orderBy: { year: "desc" },
 			columns: { id: true, year: true },
 		}),
-		db.query.organisationalUnits.findMany({
-			where: { type: { type: "working_group" } },
-			orderBy: { name: "asc" },
-			columns: { id: true, name: true },
-		}),
+		db
+			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
+			.where(
+				and(currentEntityVersionWhere(), eq(schema.organisationalUnitTypes.type, "working_group")),
+			)
+			.orderBy(schema.organisationalUnits.name),
 	]);
 
 	return { campaigns, workingGroups };
@@ -513,11 +530,17 @@ export async function getReportingCampaignCountryThresholdsForAdmin(
 				},
 			},
 		}),
-		db.query.organisationalUnits.findMany({
-			where: { type: { type: "country" } },
-			columns: { id: true, name: true },
-			orderBy: { name: "asc" },
-		}),
+		db
+			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
+			.where(and(currentEntityVersionWhere(), eq(schema.organisationalUnitTypes.type, "country")))
+			.orderBy(schema.organisationalUnits.name),
 	]);
 
 	return { campaign, countries };

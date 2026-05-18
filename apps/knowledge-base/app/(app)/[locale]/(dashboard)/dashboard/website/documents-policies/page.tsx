@@ -6,8 +6,9 @@ import type { ReactNode } from "react";
 import { DocumentsPoliciesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { asc, eq, isNull } from "@/lib/db/sql";
+import { asc, eq } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteDocumentsPoliciesPageProps extends PageProps<"/[locale]/dashboard/website/documents-policies"> {}
@@ -25,38 +26,12 @@ export async function generateMetadata(
 	return metadata;
 }
 
-const documentColumns = {
-	id: true,
-	title: true,
-	summary: true,
-	url: true,
-	groupId: true,
-	position: true,
-} as const;
-
-const documentWith = {
-	entityVersion: {
-		columns: {},
-		with: {
-			entity: { columns: { id: true, slug: true } },
-		},
-	},
-	document: { columns: { key: true, label: true } },
-} as const;
-
 export default async function DashboardWebsiteDocumentsPoliciesPage(
 	_props: Readonly<DashboardWebsiteDocumentsPoliciesPageProps>,
 ): Promise<ReactNode> {
-	const [groups, ungrouped, { items: initialAssets }] = await Promise.all([
+	const [groups, documents, { items: initialAssets }] = await Promise.all([
 		db.query.documentPolicyGroups.findMany({
 			orderBy: { position: "asc" },
-			with: {
-				documentsPolicies: {
-					columns: documentColumns,
-					with: documentWith,
-					orderBy: { position: "asc" },
-				},
-			},
 		}),
 		db
 			.select({
@@ -72,22 +47,30 @@ export default async function DashboardWebsiteDocumentsPoliciesPage(
 			})
 			.from(schema.documentsPolicies)
 			.innerJoin(schema.entityVersions, eq(schema.documentsPolicies.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.innerJoin(schema.assets, eq(schema.documentsPolicies.documentId, schema.assets.id))
-			.where(isNull(schema.documentsPolicies.groupId))
+			.where(currentEntityVersionWhere())
 			.orderBy(asc(schema.documentsPolicies.position)),
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "documents" }),
 	]);
 
-	const ungroupedShaped = ungrouped.map(({ slug, entityId, ...rest }) => {
+	const documentsShaped = documents.map(({ slug, entityId, ...rest }) => {
 		return { ...rest, entityVersion: { entity: { id: entityId, slug } } };
 	});
+	const groupsWithDocuments = groups.map((group) => {
+		return {
+			...group,
+			documentsPolicies: documentsShaped.filter((document) => document.groupId === group.id),
+		};
+	});
+	const ungrouped = documentsShaped.filter((document) => document.groupId == null);
 
 	return (
 		<DocumentsPoliciesPage
-			groups={groups}
+			groups={groupsWithDocuments}
 			initialAssets={initialAssets}
-			ungrouped={ungroupedShaped}
+			ungrouped={ungrouped}
 		/>
 	);
 }

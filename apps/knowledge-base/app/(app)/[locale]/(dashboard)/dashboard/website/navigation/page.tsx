@@ -1,10 +1,13 @@
+import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import type { EntityOption } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog";
 import { NavigationPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page";
+import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
+import { eq } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteNavigationPageProps extends PageProps<"/[locale]/dashboard/website/navigation"> {}
@@ -32,15 +35,27 @@ export default async function DashboardWebsiteNavigationPage(
 				items: true,
 			},
 		}),
-		db.query.pages.findMany({ columns: { id: true, title: true }, orderBy: { title: "asc" } }),
-		db.query.spotlightArticles.findMany({
-			columns: { id: true, title: true },
-			orderBy: { title: "asc" },
-		}),
-		db.query.impactCaseStudies.findMany({
-			columns: { id: true, title: true },
-			orderBy: { title: "asc" },
-		}),
+		db
+			.select({ id: schema.pages.id, title: schema.pages.title })
+			.from(schema.pages)
+			.innerJoin(schema.entityVersions, eq(schema.pages.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(currentEntityVersionWhere())
+			.orderBy(schema.pages.title),
+		db
+			.select({ id: schema.spotlightArticles.id, title: schema.spotlightArticles.title })
+			.from(schema.spotlightArticles)
+			.innerJoin(schema.entityVersions, eq(schema.spotlightArticles.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(currentEntityVersionWhere())
+			.orderBy(schema.spotlightArticles.title),
+		db
+			.select({ id: schema.impactCaseStudies.id, title: schema.impactCaseStudies.title })
+			.from(schema.impactCaseStudies)
+			.innerJoin(schema.entityVersions, eq(schema.impactCaseStudies.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(currentEntityVersionWhere())
+			.orderBy(schema.impactCaseStudies.title),
 	]);
 
 	const entityTitleMap = new Map<string, { title: string; type: EntityOption["type"] }>([

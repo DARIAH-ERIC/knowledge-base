@@ -1,6 +1,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { relationOptionsPageSize } from "@/lib/constants/relations";
+import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { and, count, eq, ilike, inArray } from "@/lib/db/sql";
 
@@ -112,6 +113,7 @@ export async function getUnitRelationRelatedUnitOptions(
 	}
 
 	const where = and(
+		currentEntityVersionWhere(),
 		inArray(schema.organisationalUnits.typeId, relatedUnitTypeIds),
 		query != null && query !== ""
 			? ilike(schema.organisationalUnits.name, `%${query}%`)
@@ -122,11 +124,18 @@ export async function getUnitRelationRelatedUnitOptions(
 		db
 			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
 			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where)
 			.orderBy(schema.organisationalUnits.name)
 			.limit(limit)
 			.offset(offset),
-		db.select({ total: count() }).from(schema.organisationalUnits).where(where),
+		db
+			.select({ total: count() })
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(where),
 	]);
 
 	return { items, total: aggregate.at(0)?.total ?? 0 };
@@ -175,7 +184,14 @@ export async function getUnitRelationOptions(unitType: string) {
 			typeId: schema.organisationalUnits.typeId,
 		})
 		.from(schema.organisationalUnits)
-		.where(inArray(schema.organisationalUnits.typeId, relatedUnitTypeIds));
+		.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.where(
+			and(
+				currentEntityVersionWhere(),
+				inArray(schema.organisationalUnits.typeId, relatedUnitTypeIds),
+			),
+		);
 
 	const byStatus = new Map<
 		string,
