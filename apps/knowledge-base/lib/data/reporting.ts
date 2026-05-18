@@ -67,10 +67,7 @@ export async function getUserReportingScope(user: User): Promise<{
 				schema.organisationalUnits,
 				eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
 			)
-			.innerJoin(
-				schema.entityVersions,
-				eq(schema.entityVersions.id, schema.organisationalUnits.id),
-			)
+			.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.organisationalUnits.id))
 			.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 			.innerJoin(
 				schema.organisationalUnitTypes,

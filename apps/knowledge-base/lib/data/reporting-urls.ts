@@ -42,10 +42,7 @@ export async function resolveCountryReportId(params: ReportRouteParams): Promise
 			schema.reportingCampaigns,
 			eq(schema.reportingCampaigns.id, schema.countryReports.campaignId),
 		)
-		.innerJoin(
-			schema.entityVersions,
-			eq(schema.entityVersions.id, schema.countryReports.countryId),
-		)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.countryReports.countryId))
 		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 		.where(and(eq(schema.reportingCampaigns.year, year), eq(schema.entities.slug, params.slug)))
 		.limit(1);
@@ -91,17 +88,16 @@ export async function getCountryReportEditHrefById(id: string, step?: string): P
 			schema.reportingCampaigns,
 			eq(schema.reportingCampaigns.id, schema.countryReports.campaignId),
 		)
-		.innerJoin(
-			schema.entityVersions,
-			eq(schema.entityVersions.id, schema.countryReports.countryId),
-		)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.countryReports.countryId))
 		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 		.where(eq(schema.countryReports.id, id))
 		.limit(1);
 
 	const [item] = report;
 
-	return item == null ? "/dashboard/reporting/country-reports" : getCountryReportEditHref(item.year, item.slug, step);
+	return item == null
+		? "/dashboard/reporting/country-reports"
+		: getCountryReportEditHref(item.year, item.slug, step);
 }
 
 export async function getWorkingGroupReportEditHrefById(

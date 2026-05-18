@@ -58,11 +58,7 @@ export async function WorkingGroupReportsListPage(
 									</span>
 								</div>
 								<ButtonLink
-									href={
-										isEditable
-											? `/edit`
-											: report.reportHref
-									}
+									href={isEditable ? `/edit` : report.reportHref}
 									intent="plain"
 									size="sm"
 								>

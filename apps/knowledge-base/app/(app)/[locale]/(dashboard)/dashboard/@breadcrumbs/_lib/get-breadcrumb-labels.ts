@@ -45,9 +45,7 @@ async function getWorkingGroupReportLabel(id: string): Promise<string | null> {
 		},
 	});
 
-	return report == null
-		? null
-		: formatReportLabel(report.workingGroup.name, report.campaign.year);
+	return report == null ? null : formatReportLabel(report.workingGroup.name, report.campaign.year);
 }
 
 async function getCountryReportLabelByRoute(year: string, slug: string): Promise<string | null> {

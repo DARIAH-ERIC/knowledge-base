@@ -47,7 +47,9 @@ export default async function WorkingGroupReportEditLayout(
 			</Header>
 
 			<div className="flex flex-col gap-y-6 px-(--layout-padding) pbs-6">
-				<WorkingGroupReportStepNav reportHref={getWorkingGroupReportHref(Number(routeYear), slug)} />
+				<WorkingGroupReportStepNav
+					reportHref={getWorkingGroupReportHref(Number(routeYear), slug)}
+				/>
 				{children}
 			</div>
 		</div>
