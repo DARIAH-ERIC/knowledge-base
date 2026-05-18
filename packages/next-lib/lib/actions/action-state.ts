@@ -1,6 +1,6 @@
 import type * as v from "valibot";
 
-export type ValidationErrors = Record<string, string | Array<string>>;
+export type ValidationErrors = Record<string, string | ReadonlyArray<string> | undefined>;
 
 interface ActionStateBase {
 	status: "initial" | "success" | "error";
@@ -19,17 +19,17 @@ export interface ActionStateSuccess<TData = unknown> extends ActionStateBase {
 }
 
 export interface ActionStateError<
-	TValidationErrors extends ValidationErrors = ValidationErrors,
+	TValidationErrors extends object = ValidationErrors,
 > extends ActionStateBase {
 	status: "error";
 	message?: string | Array<string> | undefined;
 	validationErrors?: TValidationErrors | undefined;
 }
 
-export type ActionState<
-	TData = unknown,
-	TValidationErrors extends ValidationErrors = ValidationErrors,
-> = ActionStateInitial | ActionStateSuccess<TData> | ActionStateError<TValidationErrors>;
+export type ActionState<TData = unknown, TValidationErrors extends object = ValidationErrors> =
+	| ActionStateInitial
+	| ActionStateSuccess<TData>
+	| ActionStateError<TValidationErrors>;
 
 export function createActionStateInitial(params?: {
 	formData?: FormData | undefined;
@@ -65,7 +65,7 @@ export function createActionStateSuccess<TData = unknown>(params: {
 }
 
 export function createActionStateError<
-	TValidationErrors extends ValidationErrors = ValidationErrors,
+	TValidationErrors extends object = ValidationErrors,
 >(params: {
 	formData?: FormData | undefined;
 	message?: string | Array<string> | undefined;
@@ -82,21 +82,21 @@ export function createActionStateError<
 
 export function isActionStateInitial<
 	TData = unknown,
-	TValidationErrors extends ValidationErrors = ValidationErrors,
+	TValidationErrors extends object = ValidationErrors,
 >(state: ActionState<TData, TValidationErrors>): state is ActionStateInitial {
 	return state.status === "initial";
 }
 
 export function isActionStateSuccess<
 	TData = unknown,
-	TValidationErrors extends ValidationErrors = ValidationErrors,
+	TValidationErrors extends object = ValidationErrors,
 >(state: ActionState<TData, TValidationErrors>): state is ActionStateSuccess<TData> {
 	return state.status === "success";
 }
 
 export function isActionStateError<
 	TData = unknown,
-	TValidationErrors extends ValidationErrors = ValidationErrors,
+	TValidationErrors extends object = ValidationErrors,
 >(state: ActionState<TData, TValidationErrors>): state is ActionStateError<TValidationErrors> {
 	return state.status === "error";
 }
