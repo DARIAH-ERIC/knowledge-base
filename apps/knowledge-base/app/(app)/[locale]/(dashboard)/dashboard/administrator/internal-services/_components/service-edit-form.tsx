@@ -11,14 +11,7 @@ import { updateServiceAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/
 interface ServiceEditFormProps {
 	service: Pick<
 		schema.Service,
-		| "id"
-		| "name"
-		| "sshocMarketplaceId"
-		| "statusId"
-		| "comment"
-		| "dariahBranding"
-		| "monitoring"
-		| "privateSupplier"
+		"id" | "name" | "statusId" | "comment" | "dariahBranding" | "monitoring" | "privateSupplier"
 	> & {
 		ownerUnitIds: Array<string>;
 		providerUnitIds: Array<string>;

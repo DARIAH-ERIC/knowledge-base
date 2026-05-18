@@ -43,14 +43,14 @@ interface ServicesPageProps {
 	q: string;
 	services: {
 		data: Array<
-			Pick<schema.Service, "id" | "name" | "sshocMarketplaceId"> & {
+			Pick<schema.Service, "id" | "name"> & {
 				status: Pick<schema.ServiceStatus, "status">;
 				type: Pick<schema.ServiceType, "type">;
 			}
 		>;
 		total: number;
 	};
-	sort: "name" | "type" | "status" | "sshocMarketplaceId";
+	sort: "name" | "type" | "status";
 }
 
 function formatServiceStatus(status: string): string {
@@ -138,9 +138,6 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 					<TableColumn allowsSorting={true} id="status">
 						{t("Status")}
 					</TableColumn>
-					<TableColumn allowsSorting={true} id="sshocMarketplaceId">
-						{t("SSHOC ID")}
-					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -153,7 +150,6 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 									{formatServiceStatus(item.status.status)}
 								</Badge>
 							</TableCell>
-							<TableCell>{item.sshocMarketplaceId ?? "—"}</TableCell>
 							<TableCell className="text-end">
 								<Menu>
 									<Button

@@ -1830,7 +1830,8 @@ async function main() {
 
 		const existingProjectId =
 			projectIdsByAcronym.get(normalizeProjectLookupValue(acronym)) ??
-			projectIdsByName.get(normalizeProjectLookupValue(name));
+			projectIdsByName.get(normalizeProjectLookupValue(name)) ??
+			projectIdsByName.get(normalizeProjectLookupValue(acronym));
 
 		await db.transaction(async (tx) => {
 			let projectId = existingProjectId;
