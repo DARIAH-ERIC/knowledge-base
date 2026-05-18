@@ -2,6 +2,7 @@
 
 import { articleContributorRolesEnum } from "@dariah-eric/database/schema";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
@@ -17,17 +18,16 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
+import type { AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
-import { AsyncOptionPicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/async-option-picker";
 import {
 	FormLayout,
 	FormSection,
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import type { AsyncOptionsFetchPageParams } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-async-options";
 import type { AvailablePerson } from "@/lib/data/article-contributors";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
@@ -167,7 +167,7 @@ export function ArticleContributorsSection(
 							title={t("Add contributor")}
 							variant="stacked"
 						>
-							<AsyncOptionPicker
+							<AsyncSelect
 								aria-label={t("Person")}
 								emptyMessage={t("No persons found.")}
 								fetchPage={fetchPersonOptionsPage}

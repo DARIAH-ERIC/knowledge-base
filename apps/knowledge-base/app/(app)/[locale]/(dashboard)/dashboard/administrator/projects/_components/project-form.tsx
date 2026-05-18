@@ -3,6 +3,8 @@
 import type * as schema from "@dariah-eric/database/schema";
 import { socialMediaTypesEnum } from "@dariah-eric/database/schema";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { AsyncMultipleSelect } from "@dariah-eric/ui/async-multiple-select";
+import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
@@ -23,14 +25,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/u
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
+import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/20/solid";
 import { CalendarDate, parseDate } from "@internationalized/date";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState, useTransition } from "react";
 
-import { AsyncMultipleSelect } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/async-multiple-select";
-import { AsyncOptionPicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/async-option-picker";
 import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
 import {
 	FormActions,
@@ -38,10 +39,6 @@ import {
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
-import type {
-	AsyncOption,
-	AsyncOptionsFetchPageParams,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-async-options";
 import {
 	type CreatedSocialMedia,
 	createSocialMediaAction,
@@ -550,7 +547,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 						title={dialog.editingIndex !== null ? t("Edit partner") : t("Add partner")}
 					/>
 					<ModalBody className="flex flex-col gap-y-4">
-						<AsyncOptionPicker
+						<AsyncSelect
 							aria-label={t("Organisation")}
 							fetchPage={fetchOrganisationalUnitOptionsPage}
 							initialItems={initialOrgUnitItems}

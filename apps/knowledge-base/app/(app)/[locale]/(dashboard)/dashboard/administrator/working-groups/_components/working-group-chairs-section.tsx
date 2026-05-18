@@ -1,6 +1,7 @@
 "use client";
 
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
@@ -23,18 +24,17 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
+import type { AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { ArchiveBoxXMarkIcon } from "@heroicons/react/24/outline";
 import { type CalendarDate, getLocalTimeZone } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
-import { AsyncOptionPicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/async-option-picker";
 import {
 	FormLayout,
 	FormSection,
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import type { AsyncOptionsFetchPageParams } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-async-options";
 import { createWorkingGroupChairAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/create-working-group-chair.action";
 import { endWorkingGroupChairAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/end-working-group-chair.action";
 import type { AvailablePerson } from "@/lib/data/article-contributors";
@@ -179,7 +179,7 @@ export function WorkingGroupChairsSection(
 							title={t("Add chair")}
 							variant="stacked"
 						>
-							<AsyncOptionPicker
+							<AsyncSelect
 								aria-label={t("Person")}
 								emptyMessage={t("No persons found.")}
 								fetchPage={fetchPersonOptionsPage}
