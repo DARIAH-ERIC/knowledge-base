@@ -49,8 +49,7 @@ export function ListBoxItem<T extends object>(props: Readonly<ListBoxItemProps<T
 				dropdownItemStyles({
 					...renderProps,
 					className: twJoin(
-						"group not-has-[[slot=description]]:items-start",
-						// "has-data-[slot=drag-icon]:*:data-[slot=check-icon]:absolute has-data-[slot=drag-icon]:*:data-[slot=check-icon]:right-0",
+						"group",
 						"has-data-[slot=drag-icon]:*:[[slot=label]]:col-start-3",
 						"has-data-[slot=drag-icon]:*:data-[slot=icon]:col-start-2",
 						"href" in props ? "cursor-pointer" : "cursor-default",
@@ -103,7 +102,14 @@ export function ListBoxItem<T extends object>(props: Readonly<ListBoxItemProps<T
 						) : null}
 						{isSelected ? (
 							<CheckIcon
-								className="-mx-0.5 me-2 block-lh inline-5 shrink-0 group-allows-dragging:col-start-2 sm:inline-4"
+								className={twJoin(
+									"-mx-0.5 me-2 block-4 inline-4 shrink-0 group-allows-dragging:col-start-2 sm:inline-4",
+									"group-has-[[slot=description]]:self-start group-has-[[slot=description]]:mbs-1",
+									"group-has-data-[slot=icon]:absolute group-has-data-[slot=icon]:inset-bs-1/2 group-has-data-[slot=icon]:inset-e-0.5 group-has-data-[slot=icon]:-translate-y-1/2",
+									"sm:group-has-data-[slot=icon]:group-has-[[slot=description]]:inset-bs-2.5 group-has-data-[slot=icon]:group-has-[[slot=description]]:inset-bs-3 group-has-data-[slot=icon]:group-has-[[slot=description]]:translate-y-0",
+									"group-has-data-[slot=avatar]:absolute group-has-data-[slot=avatar]:inset-bs-1/2 group-has-data-[slot=avatar]:inset-e-0.5 group-has-data-[slot=avatar]:-translate-y-1/2",
+									"sm:group-has-data-[slot=avatar]:group-has-[[slot=description]]:inset-bs-2.5 group-has-data-[slot=avatar]:group-has-[[slot=description]]:inset-bs-3 group-has-data-[slot=avatar]:group-has-[[slot=description]]:translate-y-0",
+								)}
 								data-slot="check-icon"
 							/>
 						) : null}

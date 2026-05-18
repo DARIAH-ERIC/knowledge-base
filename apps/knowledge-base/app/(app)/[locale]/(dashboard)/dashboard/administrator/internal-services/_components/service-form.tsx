@@ -2,6 +2,7 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { AsyncMultipleSelect } from "@dariah-eric/ui/async-multiple-select";
 import { Button } from "@dariah-eric/ui/button";
 import { Checkbox } from "@dariah-eric/ui/checkbox";
 import { FieldError, Label } from "@dariah-eric/ui/field";
@@ -13,18 +14,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/u
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
+import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
-import { AsyncMultipleSelect } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/async-multiple-select";
 import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import type {
-	AsyncOption,
-	AsyncOptionsFetchPageParams,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-async-options";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface ServiceFormProps {

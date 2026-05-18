@@ -1,6 +1,7 @@
 "use client";
 
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
@@ -24,21 +25,17 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
+import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { ArchiveBoxXMarkIcon } from "@heroicons/react/24/outline";
 import { type CalendarDate, getLocalTimeZone } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
-import { AsyncOptionPicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/async-option-picker";
 import {
 	FormLayout,
 	FormSection,
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import type {
-	AsyncOption,
-	AsyncOptionsFetchPageParams,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-async-options";
 import { createUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-unit-relation.action";
 import { endUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-unit-relation.action";
 import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
@@ -217,7 +214,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 								</Select>
 								<input name="statusId" type="hidden" value={selectedStatusId ?? ""} />
 
-								<AsyncOptionPicker
+								<AsyncSelect
 									aria-label={t("Related unit")}
 									cacheKey={selectedStatusId ?? "none"}
 									emptyMessage={t("No related units found.")}

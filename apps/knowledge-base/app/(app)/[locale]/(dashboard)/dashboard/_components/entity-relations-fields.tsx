@@ -1,15 +1,12 @@
 "use client";
 
+import { AsyncMultipleSelect } from "@dariah-eric/ui/async-multiple-select";
 import { Separator } from "@dariah-eric/ui/separator";
+import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useState } from "react";
 
-import { AsyncMultipleSelect } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/async-multiple-select";
 import { FormSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import type {
-	AsyncOption,
-	AsyncOptionsFetchPageParams,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-async-options";
 
 interface EntityRelationsFieldsProps {
 	initialRelatedEntityIds?: Array<string>;
