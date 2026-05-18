@@ -55,9 +55,9 @@ export default async function DashboardAdministratorEditInstitutionPage(
 	}
 
 	const documentId = anyVersion.entityVersion.entity.id;
-	const draftVersionId = await db.transaction((tx) => {
-		return ensureDraftVersion(tx, documentId, organisationalUnitsLifecycleAdapter);
-	});
+	const draftVersionId = await db.transaction((tx) =>
+		ensureDraftVersion(tx, documentId, organisationalUnitsLifecycleAdapter),
+	);
 
 	const [
 		{ items: initialAssets },
