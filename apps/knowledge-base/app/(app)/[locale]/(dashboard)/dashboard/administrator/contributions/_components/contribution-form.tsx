@@ -50,7 +50,7 @@ function formatRoleOptionLabel(option: ContributionRoleOption): string {
 	return `${formatRoleType(option.roleType)} - ${allowedTypes}`;
 }
 
-function getValidationError(error: string | Array<string> | undefined): string | undefined {
+function getValidationError(error: string | ReadonlyArray<string> | undefined): string | undefined {
 	if (typeof error === "string") {
 		return error;
 	}
