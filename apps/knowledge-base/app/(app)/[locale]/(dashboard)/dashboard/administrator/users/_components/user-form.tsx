@@ -95,9 +95,7 @@ export function UserForm(props: Readonly<UserFormProps>): ReactNode {
 		user?.person != null ? "person" : user?.organisationalUnit != null ? "country" : "none";
 
 	const [actorType, setActorType] = useState<ActorType>(initialActorType);
-	const [selectedPerson, setSelectedPerson] = useState<AsyncOption | null>(
-		user?.person ?? null,
-	);
+	const [selectedPerson, setSelectedPerson] = useState<AsyncOption | null>(user?.person ?? null);
 	const [selectedCountry, setSelectedCountry] = useState<AsyncOption | null>(
 		user?.organisationalUnit ?? null,
 	);

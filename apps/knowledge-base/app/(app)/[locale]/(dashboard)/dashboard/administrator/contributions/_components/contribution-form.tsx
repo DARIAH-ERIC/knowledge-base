@@ -125,9 +125,7 @@ export function ContributionForm(props: Readonly<ContributionFormProps>): ReactN
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
-	const [selectedPerson, setSelectedPerson] = useState<AsyncOption | null>(
-		values?.person ?? null,
-	);
+	const [selectedPerson, setSelectedPerson] = useState<AsyncOption | null>(values?.person ?? null);
 	const [selectedRoleTypeId, setSelectedRoleTypeId] = useState<string | null>(
 		values?.roleTypeId ?? null,
 	);
