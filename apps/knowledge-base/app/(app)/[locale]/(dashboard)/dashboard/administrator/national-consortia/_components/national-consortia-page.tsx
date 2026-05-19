@@ -23,6 +23,7 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
+import { EntityLifecycleStatusBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge";
 import {
 	Header,
 	HeaderAction,
@@ -42,6 +43,8 @@ interface NationalConsortiaPageProps {
 			Pick<schema.OrganisationalUnit, "id" | "name"> & {
 				countryName: string | null;
 				entity: Pick<schema.Entity, "slug">;
+				hasDraft: boolean;
+				isPublished: boolean;
 			}
 		>;
 		total: number;
@@ -117,12 +120,19 @@ export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps
 					<TableColumn allowsSorting={true} id="country">
 						{t("Country")}
 					</TableColumn>
+					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
 						<TableRow>
 							<TableCell>{item.name}</TableCell>
+							<TableCell>
+								<EntityLifecycleStatusBadge
+									hasDraft={item.hasDraft}
+									isPublished={item.isPublished}
+								/>
+							</TableCell>
 							<TableCell>{item.countryName ?? "—"}</TableCell>
 							<TableCell className="text-end">
 								<Menu>

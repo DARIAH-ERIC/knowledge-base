@@ -692,7 +692,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 
 				<FormActions>
 					<FormStatus state={state} />
-					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={project != null} />
+					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={true} />
 				</FormActions>
 			</Form>
 		</FormLayout>

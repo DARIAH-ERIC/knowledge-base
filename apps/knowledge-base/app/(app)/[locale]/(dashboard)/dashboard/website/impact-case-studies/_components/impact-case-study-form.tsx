@@ -162,7 +162,7 @@ export function ImpactCaseStudyForm(props: Readonly<ImpactCaseStudyFormProps>): 
 					<DraftFormSubmitButtons
 						isDisabled={selectedImage == null}
 						isPending={isPending}
-						showSaveAndPublish={impactCaseStudy != null}
+						showSaveAndPublish={true}
 					/>
 				</FormActions>
 			</Form>

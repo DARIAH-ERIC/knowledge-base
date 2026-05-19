@@ -162,7 +162,7 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 					<DraftFormSubmitButtons
 						isDisabled={selectedImage == null}
 						isPending={isPending}
-						showSaveAndPublish={spotlightArticle != null}
+						showSaveAndPublish={true}
 					/>
 				</FormActions>
 			</Form>

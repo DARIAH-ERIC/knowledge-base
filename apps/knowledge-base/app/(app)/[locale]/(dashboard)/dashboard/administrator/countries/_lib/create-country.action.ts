@@ -11,8 +11,10 @@ import * as v from "valibot";
 
 import { CreateCountryActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/create-country.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { createPublishedDocument } from "@/lib/data/entity-lifecycle";
+import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
+import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { db } from "@/lib/db";
+import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -64,7 +66,7 @@ export const createCountryAction = createServerAction(
 
 			assert(orgUnitType);
 
-			const { documentId, versionId } = await createPublishedDocument(tx, entityType.id, slug);
+			const { documentId, versionId } = await createDraftDocument(tx, entityType.id, slug);
 
 			let imageId: string | null = null;
 
@@ -136,6 +138,10 @@ export const createCountryAction = createServerAction(
 				id: contentBlock.id,
 				content: JSON.parse(description) as schema.RichTextContentBlock["content"],
 			});
+
+			if (shouldSaveAndPublish(formData)) {
+				await publishVersion(tx, documentId, organisationalUnitsLifecycleAdapter);
+			}
 		});
 
 		await dispatchWebhook({ type: "members-partners" });

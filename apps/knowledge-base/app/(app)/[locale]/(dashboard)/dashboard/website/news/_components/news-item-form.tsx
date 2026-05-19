@@ -154,7 +154,7 @@ export function NewsItemForm(props: Readonly<NewsItemFormProps>): ReactNode {
 					<DraftFormSubmitButtons
 						isDisabled={selectedImage == null}
 						isPending={isPending}
-						showSaveAndPublish={newsItem != null}
+						showSaveAndPublish={true}
 					/>
 				</FormActions>
 			</Form>

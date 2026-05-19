@@ -67,10 +67,7 @@ export function DocumentationPageForm(props: Readonly<DocumentationPageFormProps
 
 				<FormActions>
 					<FormStatus state={state} />
-					<DraftFormSubmitButtons
-						isPending={isPending}
-						showSaveAndPublish={documentationPage != null}
-					/>
+					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={true} />
 				</FormActions>
 			</Form>
 		</FormLayout>

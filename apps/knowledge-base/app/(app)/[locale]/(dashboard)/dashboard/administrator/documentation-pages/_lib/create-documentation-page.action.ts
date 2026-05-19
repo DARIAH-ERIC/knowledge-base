@@ -13,8 +13,10 @@ import { CreateDocumentationPageActionInputSchema } from "@/app/(app)/[locale]/(
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
-import { createPublishedDocument } from "@/lib/data/entity-lifecycle";
+import { documentationPagesLifecycleAdapter } from "@/lib/data/documentation-pages.lifecycle-adapter";
+import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
 import { type Transaction, db } from "@/lib/db";
+import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -59,7 +61,7 @@ export const createDocumentationPageAction = createServerAction(
 
 			assert(type);
 
-			const { versionId } = await createPublishedDocument(tx, type.id, slug);
+			const { documentId, versionId } = await createDraftDocument(tx, type.id, slug);
 
 			await tx.insert(schema.documentationPages).values({
 				id: versionId,
@@ -106,6 +108,10 @@ export const createDocumentationPageAction = createServerAction(
 					await insertTypeBlock(tx, contentBlock, added.id);
 				}),
 			);
+
+			if (shouldSaveAndPublish(formData)) {
+				await publishVersion(tx, documentId, documentationPagesLifecycleAdapter);
+			}
 		});
 
 		revalidatePath("/[locale]/dashboard/website/documentation-pages", "layout");

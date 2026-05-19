@@ -200,7 +200,7 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 					<DraftFormSubmitButtons
 						isDisabled={selectedImage == null}
 						isPending={isPending}
-						showSaveAndPublish={event != null}
+						showSaveAndPublish={true}
 					/>
 				</FormActions>
 			</Form>

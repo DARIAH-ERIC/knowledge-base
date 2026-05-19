@@ -14,6 +14,7 @@ import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
+import { ensureEntityVersionField } from "@/lib/data/entity-version-fields";
 import { eventsLifecycleAdapter } from "@/lib/data/events.lifecycle-adapter";
 import { syncEntityRelations } from "@/lib/data/relations";
 import { type Transaction, db } from "@/lib/db";
@@ -79,13 +80,7 @@ export const updateEventAction = createServerAction(
 				.set({ imageId: asset.id, title, summary, location, website, duration })
 				.where(eq(schema.events.id, draftVersionId));
 
-			const contentField = await tx.query.fields.findFirst({
-				where: {
-					entityVersionId: draftVersionId,
-					name: { fieldName: "content" },
-				},
-				columns: { id: true },
-			});
+			const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");
 
 			const contentBlockTypes = await db.query.contentBlockTypes.findMany();
 			const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
@@ -94,38 +89,36 @@ export const updateEventAction = createServerAction(
 				await upsertTypedContentBlock(tx, block, blockId, true);
 			}
 
-			if (contentField != null) {
-				const existingBlocks = await tx.query.contentBlocks.findMany({
-					where: { fieldId: contentField.id },
-					columns: { id: true },
-				});
+			const existingBlocks = await tx.query.contentBlocks.findMany({
+				where: { fieldId: contentField.id },
+				columns: { id: true },
+			});
 
-				if (existingBlocks.length > 0) {
-					await tx.delete(schema.contentBlocks).where(
-						inArray(
-							schema.contentBlocks.id,
-							existingBlocks.map((b) => b.id),
-						),
-					);
-				}
-
-				await Promise.all(
-					contentBlocks.map(async (contentBlock, index) => {
-						const [added] = await tx
-							.insert(schema.contentBlocks)
-							.values({
-								fieldId: contentField.id,
-								typeId: contentBlockTypesByType[contentBlock.type].id,
-								position: index,
-							})
-							.returning({ id: schema.contentBlocks.id });
-
-						assert(added);
-
-						await upsertTypeBlock(tx, contentBlock, added.id);
-					}),
+			if (existingBlocks.length > 0) {
+				await tx.delete(schema.contentBlocks).where(
+					inArray(
+						schema.contentBlocks.id,
+						existingBlocks.map((b) => b.id),
+					),
 				);
 			}
+
+			await Promise.all(
+				contentBlocks.map(async (contentBlock, index) => {
+					const [added] = await tx
+						.insert(schema.contentBlocks)
+						.values({
+							fieldId: contentField.id,
+							typeId: contentBlockTypesByType[contentBlock.type].id,
+							position: index,
+						})
+						.returning({ id: schema.contentBlocks.id });
+
+					assert(added);
+
+					await upsertTypeBlock(tx, contentBlock, added.id);
+				}),
+			);
 
 			await syncEntityRelations(tx, documentId, relatedEntityIds, relatedResourceIds);
 			await touchVersion(tx, draftVersionId);

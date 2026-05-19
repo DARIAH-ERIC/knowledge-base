@@ -12,6 +12,7 @@ import * as v from "valibot";
 import { UpdatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.schema";
 import { assertAdmin } from "@/lib/auth/session";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
+import { upsertRichTextEntityVersionField } from "@/lib/data/entity-version-fields";
 import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
@@ -68,51 +69,9 @@ export const updatePersonAction = createServerAction(
 				.set({ email, imageId, name, orcid, position, sortName })
 				.where(eq(schema.persons.id, draftVersionId));
 
-			const biographyField = await tx.query.fields.findFirst({
-				where: {
-					entityVersionId: draftVersionId,
-					name: { fieldName: "biography" },
-				},
-				columns: { id: true },
-			});
-
 			const parsedContent = JSON.parse(biography) as schema.RichTextContentBlock["content"];
 
-			if (biographyField != null) {
-				const existingContentBlock = await tx.query.contentBlocks.findFirst({
-					where: {
-						fieldId: biographyField.id,
-						type: { type: "rich_text" },
-					},
-					columns: { id: true },
-				});
-
-				if (existingContentBlock != null) {
-					await tx
-						.update(schema.richTextContentBlocks)
-						.set({ content: parsedContent })
-						.where(eq(schema.richTextContentBlocks.id, existingContentBlock.id));
-				} else {
-					const richTextType = await tx.query.contentBlockTypes.findFirst({
-						where: { type: "rich_text" },
-						columns: { id: true },
-					});
-
-					assert(richTextType);
-
-					const [newContentBlock] = await tx
-						.insert(schema.contentBlocks)
-						.values({ fieldId: biographyField.id, typeId: richTextType.id, position: 0 })
-						.returning({ id: schema.contentBlocks.id });
-
-					assert(newContentBlock);
-
-					await tx.insert(schema.richTextContentBlocks).values({
-						id: newContentBlock.id,
-						content: parsedContent,
-					});
-				}
-			}
+			await upsertRichTextEntityVersionField(tx, draftVersionId, "biography", parsedContent);
 
 			await touchVersion(tx, draftVersionId);
 

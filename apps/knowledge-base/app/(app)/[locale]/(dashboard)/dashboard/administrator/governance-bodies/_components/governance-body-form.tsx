@@ -175,10 +175,7 @@ export function GovernanceBodyForm(props: Readonly<GovernanceBodyFormProps>): Re
 
 				<FormActions>
 					<FormStatus state={state} />
-					<DraftFormSubmitButtons
-						isPending={isPending}
-						showSaveAndPublish={governanceBody != null}
-					/>
+					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={true} />
 				</FormActions>
 			</Form>
 		</FormLayout>

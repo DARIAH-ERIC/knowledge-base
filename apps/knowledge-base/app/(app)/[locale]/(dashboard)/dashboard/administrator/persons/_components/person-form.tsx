@@ -141,7 +141,7 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 					<DraftFormSubmitButtons
 						isDisabled={selectedImage == null}
 						isPending={isPending}
-						showSaveAndPublish={person != null}
+						showSaveAndPublish={true}
 					/>
 				</FormActions>
 			</Form>

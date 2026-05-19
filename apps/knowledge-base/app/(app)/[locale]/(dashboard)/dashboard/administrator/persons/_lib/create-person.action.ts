@@ -12,8 +12,10 @@ import * as v from "valibot";
 
 import { CreatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/create-person.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { createDraftDocument } from "@/lib/data/entity-lifecycle";
+import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
+import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
 import { db } from "@/lib/db";
+import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -118,6 +120,10 @@ export const createPersonAction = createServerAction(
 				id: contentBlock.id,
 				content: JSON.parse(biography) as schema.RichTextContentBlock["content"],
 			});
+
+			if (shouldSaveAndPublish(formData)) {
+				await publishVersion(tx, docId, personsLifecycleAdapter);
+			}
 		});
 
 		after(async () => {

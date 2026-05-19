@@ -14,9 +14,11 @@ import { CreateDocumentOrPolicyActionInputSchema } from "@/app/(app)/[locale]/(d
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
-import { createDraftDocument } from "@/lib/data/entity-lifecycle";
+import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
+import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
 import { type Transaction, db } from "@/lib/db";
 import { eq, isNull } from "@/lib/db/sql";
+import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -135,6 +137,10 @@ export const createDocumentOrPolicyAction = createServerAction(
 					await insertTypeBlock(tx, contentBlock, added.id);
 				}),
 			);
+
+			if (shouldSaveAndPublish(formData)) {
+				await publishVersion(tx, documentId, documentsPoliciesLifecycleAdapter);
+			}
 		});
 
 		after(async () => {

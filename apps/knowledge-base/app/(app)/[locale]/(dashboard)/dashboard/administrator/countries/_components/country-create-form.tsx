@@ -37,6 +37,7 @@ export function CountryCreateForm(props: Readonly<CountryCreateFormProps>): Reac
 				initialRelatedEntityTotal={initialRelatedEntityTotal}
 				initialRelatedResourceItems={initialRelatedResourceItems}
 				initialRelatedResourceTotal={initialRelatedResourceTotal}
+				showSaveAndPublish={true}
 			/>
 		</Fragment>
 	);

@@ -23,6 +23,7 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
+import { EntityLifecycleStatusBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge";
 import {
 	Header,
 	HeaderAction,
@@ -41,6 +42,8 @@ interface InstitutionsPageProps {
 		data: Array<
 			Pick<schema.OrganisationalUnit, "id" | "name"> & {
 				entity: Pick<schema.Entity, "slug">;
+				hasDraft: boolean;
+				isPublished: boolean;
 			}
 		>;
 		total: number;
@@ -112,12 +115,19 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
 						{t("Name")}
 					</TableColumn>
+					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
 						<TableRow>
 							<TableCell>{item.name}</TableCell>
+							<TableCell>
+								<EntityLifecycleStatusBadge
+									hasDraft={item.hasDraft}
+									isPublished={item.isPublished}
+								/>
+							</TableCell>
 							<TableCell className="text-end">
 								<Menu>
 									<Button

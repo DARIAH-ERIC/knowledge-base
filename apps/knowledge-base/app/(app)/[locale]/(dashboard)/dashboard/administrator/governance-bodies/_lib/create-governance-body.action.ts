@@ -11,8 +11,10 @@ import * as v from "valibot";
 
 import { CreateGovernanceBodyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/create-governance-body.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { createDraftDocument } from "@/lib/data/entity-lifecycle";
+import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
+import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { db } from "@/lib/db";
+import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -136,6 +138,10 @@ export const createGovernanceBodyAction = createServerAction(
 				id: contentBlock.id,
 				content: JSON.parse(description) as schema.RichTextContentBlock["content"],
 			});
+
+			if (shouldSaveAndPublish(formData)) {
+				await publishVersion(tx, documentId, organisationalUnitsLifecycleAdapter);
+			}
 		});
 
 		await dispatchWebhook({ type: "governance-bodies" });

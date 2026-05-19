@@ -2,7 +2,6 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
@@ -14,12 +13,12 @@ import {
 	ModalFooter,
 	ModalHeader,
 } from "@dariah-eric/ui/modal";
-import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useActionState, useState } from "react";
+import { type ReactNode, useActionState, useState } from "react";
 
+import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
 import { createDocumentOrPolicyFromDialogAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy-from-dialog.action";
 import { updateDocumentOrPolicyDetailsAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.action";
@@ -157,16 +156,11 @@ function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>): React
 
 			<ModalFooter>
 				<ModalClose>{t("Cancel")}</ModalClose>
-				<Button isDisabled={selectedDocument == null} isPending={isPending} type="submit">
-					{isPending ? (
-						<Fragment>
-							<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
-							<span aria-hidden={true}>{t("Saving...")}</span>
-						</Fragment>
-					) : (
-						t("Save")
-					)}
-				</Button>
+				<DraftFormSubmitButtons
+					isDisabled={selectedDocument == null}
+					isPending={isPending}
+					showSaveAndPublish={!isEditMode}
+				/>
 			</ModalFooter>
 		</Form>
 	);
