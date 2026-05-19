@@ -5,7 +5,7 @@ import { forbidden } from "next/navigation";
 import { contributionOptionsPageSize } from "@/lib/constants/contributions";
 import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, inArray, or, sql } from "@/lib/db/sql";
+import { alias, and, count, desc, eq, ilike, inArray, or, sql } from "@/lib/db/sql";
 
 export type ContributionsSort =
 	| "personName"
@@ -27,8 +27,10 @@ export interface ContributionsResult {
 	data: Array<{
 		id: string;
 		personName: string;
+		personSlug: string;
 		roleType: string;
 		organisationalUnitName: string;
+		organisationalUnitSlug: string;
 		organisationalUnitType: string;
 		durationStart: Date;
 		durationEnd: Date | undefined;
@@ -48,6 +50,13 @@ export async function getContributions(
 	params: Readonly<GetContributionsParams>,
 ): Promise<ContributionsResult> {
 	const { limit, offset, q, sort = "personName", dir = "asc" } = params;
+	const personEntityVersions = alias(schema.entityVersions, "person_entity_versions");
+	const personEntities = alias(schema.entities, "person_entities");
+	const organisationalUnitEntityVersions = alias(
+		schema.entityVersions,
+		"organisational_unit_entity_versions",
+	);
+	const organisationalUnitEntities = alias(schema.entities, "organisational_unit_entities");
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""
@@ -89,8 +98,10 @@ export async function getContributions(
 			.select({
 				id: schema.personsToOrganisationalUnits.id,
 				personName: schema.persons.name,
+				personSlug: personEntities.slug,
 				roleType: schema.personRoleTypes.type,
 				organisationalUnitName: schema.organisationalUnits.name,
+				organisationalUnitSlug: organisationalUnitEntities.slug,
 				organisationalUnitType: schema.organisationalUnitTypes.type,
 				duration: schema.personsToOrganisationalUnits.duration,
 			})
@@ -99,6 +110,8 @@ export async function getContributions(
 				schema.persons,
 				eq(schema.persons.id, schema.personsToOrganisationalUnits.personId),
 			)
+			.innerJoin(personEntityVersions, eq(schema.persons.id, personEntityVersions.id))
+			.innerJoin(personEntities, eq(personEntityVersions.entityId, personEntities.id))
 			.innerJoin(
 				schema.personRoleTypes,
 				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
@@ -106,6 +119,14 @@ export async function getContributions(
 			.innerJoin(
 				schema.organisationalUnits,
 				eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
+			)
+			.innerJoin(
+				organisationalUnitEntityVersions,
+				eq(schema.organisationalUnits.id, organisationalUnitEntityVersions.id),
+			)
+			.innerJoin(
+				organisationalUnitEntities,
+				eq(organisationalUnitEntityVersions.entityId, organisationalUnitEntities.id),
 			)
 			.innerJoin(
 				schema.organisationalUnitTypes,
@@ -142,8 +163,10 @@ export async function getContributions(
 			return {
 				id: row.id,
 				personName: row.personName,
+				personSlug: row.personSlug,
 				roleType: row.roleType,
 				organisationalUnitName: row.organisationalUnitName,
+				organisationalUnitSlug: row.organisationalUnitSlug,
 				organisationalUnitType: row.organisationalUnitType,
 				durationStart: row.duration.start,
 				durationEnd: row.duration.end,

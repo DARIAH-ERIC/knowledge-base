@@ -90,6 +90,29 @@ function organisationalUnitTypeIntent(
 	}
 }
 
+function getOrganisationalUnitEditHref(type: string, slug: string): string | null {
+	switch (type) {
+		case "country": {
+			return `/dashboard/administrator/countries/${slug}/edit`;
+		}
+		case "governance_body": {
+			return `/dashboard/administrator/governance-bodies/${slug}/edit`;
+		}
+		case "institution": {
+			return `/dashboard/administrator/institutions/${slug}/edit`;
+		}
+		case "national_consortium": {
+			return `/dashboard/administrator/national-consortia/${slug}/edit`;
+		}
+		case "working_group": {
+			return `/dashboard/administrator/working-groups/${slug}/edit`;
+		}
+		default: {
+			return null;
+		}
+	}
+}
+
 const pageSize = dashboardPageSize;
 
 export function ContributionsPage(props: Readonly<ContributionsPageProps>): ReactNode {
@@ -170,52 +193,65 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
-					{(item) => (
-						<TableRow id={item.id}>
-							<TableCell>{item.personName}</TableCell>
-							<TableCell>{formatRoleType(item.roleType)}</TableCell>
-							<TableCell>
-								<Badge intent={organisationalUnitTypeIntent(item.organisationalUnitType)}>
-									{formatOrganisationalUnitType(item.organisationalUnitType)}
-								</Badge>
-							</TableCell>
-							<TableCell>{item.organisationalUnitName}</TableCell>
-							<TableCell>{format.dateTime(item.durationStart, { dateStyle: "short" })}</TableCell>
-							<TableCell>
-								{item.durationEnd != null
-									? format.dateTime(item.durationEnd, { dateStyle: "short" })
-									: t("present")}
-							</TableCell>
-							<TableCell className="text-end">
-								<Menu>
-									<Button
-										aria-label={t("Open actions menu")}
-										className="block-7 sm:block-7"
-										intent="plain"
-										size="sq-sm"
-									>
-										<EllipsisHorizontalIcon className="block-5 inline-5" />
-									</Button>
-									<MenuContent placement="left top">
-										<MenuItem href={`/dashboard/administrator/person-relations/${item.id}/edit`}>
-											<PencilSquareIcon className="me-2 block-4 inline-4" />
-											<MenuLabel>{t("Edit")}</MenuLabel>
-										</MenuItem>
-										<MenuSeparator />
-										<MenuItem
-											intent="danger"
-											onAction={() => {
-												setItemToDelete({ id: item.id });
-											}}
+					{(item) => {
+						const organisationalUnitEditHref = getOrganisationalUnitEditHref(
+							item.organisationalUnitType,
+							item.organisationalUnitSlug,
+						);
+
+						return (
+							<TableRow id={item.id}>
+								<TableCell>{item.personName}</TableCell>
+								<TableCell>{formatRoleType(item.roleType)}</TableCell>
+								<TableCell>
+									<Badge intent={organisationalUnitTypeIntent(item.organisationalUnitType)}>
+										{formatOrganisationalUnitType(item.organisationalUnitType)}
+									</Badge>
+								</TableCell>
+								<TableCell>{item.organisationalUnitName}</TableCell>
+								<TableCell>{format.dateTime(item.durationStart, { dateStyle: "short" })}</TableCell>
+								<TableCell>
+									{item.durationEnd != null
+										? format.dateTime(item.durationEnd, { dateStyle: "short" })
+										: t("present")}
+								</TableCell>
+								<TableCell className="text-end">
+									<Menu>
+										<Button
+											aria-label={t("Open actions menu")}
+											className="block-7 sm:block-7"
+											intent="plain"
+											size="sq-sm"
 										>
-											<TrashIcon className="me-2 block-4 inline-4" />
-											<MenuLabel>{t("Delete")}</MenuLabel>
-										</MenuItem>
-									</MenuContent>
-								</Menu>
-							</TableCell>
-						</TableRow>
-					)}
+											<EllipsisHorizontalIcon className="block-5 inline-5" />
+										</Button>
+										<MenuContent placement="left top">
+											<MenuItem href={`/dashboard/administrator/persons/${item.personSlug}/edit`}>
+												<PencilSquareIcon className="me-2 block-4 inline-4" />
+												<MenuLabel>{t("Edit person")}</MenuLabel>
+											</MenuItem>
+											{organisationalUnitEditHref != null ? (
+												<MenuItem href={organisationalUnitEditHref}>
+													<PencilSquareIcon className="me-2 block-4 inline-4" />
+													<MenuLabel>{t("Edit organisation")}</MenuLabel>
+												</MenuItem>
+											) : null}
+											<MenuSeparator />
+											<MenuItem
+												intent="danger"
+												onAction={() => {
+													setItemToDelete({ id: item.id });
+												}}
+											>
+												<TrashIcon className="me-2 block-4 inline-4" />
+												<MenuLabel>{t("Delete")}</MenuLabel>
+											</MenuItem>
+										</MenuContent>
+									</Menu>
+								</TableCell>
+							</TableRow>
+						);
+					}}
 				</TableBody>
 			</Table>
 
