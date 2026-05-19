@@ -6,13 +6,19 @@ import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { CountryForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form";
+import { discardCountryDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/discard-country-draft.action";
+import { publishCountryAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/publish-country.action";
 import { updateCountryAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/update-country.action";
 import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
 
 interface CountryEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
+	documentId: string;
+	hasDraftChanges: boolean;
+	isPublished: boolean;
 	country: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
 		description?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
@@ -36,6 +42,9 @@ interface CountryEditFormProps {
 export function CountryEditForm(props: Readonly<CountryEditFormProps>): ReactNode {
 	const {
 		initialAssets,
+		documentId,
+		hasDraftChanges,
+		isPublished,
 		country,
 		initialRelatedEntityIds,
 		initialRelatedEntityItems,
@@ -57,7 +66,16 @@ export function CountryEditForm(props: Readonly<CountryEditFormProps>): ReactNod
 
 	return (
 		<Fragment>
-			<Heading>{t("Edit country")}</Heading>
+			<div className="flex items-center justify-between">
+				<Heading>{t("Edit country")}</Heading>
+				<EntityLifecycleBar
+					discardDraftAction={discardCountryDraftAction}
+					documentId={documentId}
+					hasDraft={hasDraftChanges}
+					isPublished={isPublished}
+					publishAction={publishCountryAction}
+				/>
+			</div>
 
 			<CountryForm
 				country={country}
@@ -75,6 +93,7 @@ export function CountryEditForm(props: Readonly<CountryEditFormProps>): ReactNod
 				selectedRelatedEntities={selectedRelatedEntities}
 				selectedRelatedResources={selectedRelatedResources}
 				selectedSocialMediaItems={selectedSocialMediaItems}
+				showSaveAndPublish={true}
 			/>
 
 			<UnitRelationsSection

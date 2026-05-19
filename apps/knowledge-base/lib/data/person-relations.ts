@@ -13,6 +13,7 @@ export async function getPersonRelations(organisationalUnitId: string) {
 			roleTypeId: schema.personsToOrganisationalUnits.roleTypeId,
 			roleType: schema.personRoleTypes.type,
 			duration: schema.personsToOrganisationalUnits.duration,
+			targetUnitType: schema.organisationalUnitTypes.type,
 		})
 		.from(schema.personsToOrganisationalUnits)
 		.innerJoin(schema.persons, eq(schema.persons.id, schema.personsToOrganisationalUnits.personId))
@@ -20,10 +21,49 @@ export async function getPersonRelations(organisationalUnitId: string) {
 			schema.personRoleTypes,
 			eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
 		)
+		.innerJoin(
+			schema.organisationalUnits,
+			eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
+		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
 		.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, organisationalUnitId));
 }
 
 export type PersonRelation = Awaited<ReturnType<typeof getPersonRelations>>[number];
+
+export type RelationLifecycleStatus = "changed" | "new";
+
+function durationKey(duration: PersonRelation["duration"]): string {
+	return [duration.start.toISOString(), duration.end?.toISOString() ?? ""].join(":");
+}
+
+export function annotatePersonRelationLifecycle(
+	draftRelations: Array<PersonRelation>,
+	publishedRelations: Array<PersonRelation>,
+): Array<PersonRelation & { lifecycleStatus?: RelationLifecycleStatus }> {
+	const publishedByIdentity = new Map(
+		publishedRelations.map(
+			(relation) => [[relation.personId, relation.roleTypeId].join(":"), relation] as const,
+		),
+	);
+
+	return draftRelations.map((relation) => {
+		const published = publishedByIdentity.get([relation.personId, relation.roleTypeId].join(":"));
+
+		if (published == null) {
+			return { ...relation, lifecycleStatus: "new" };
+		}
+
+		if (durationKey(relation.duration) !== durationKey(published.duration)) {
+			return { ...relation, lifecycleStatus: "changed" };
+		}
+
+		return relation;
+	});
+}
 
 export async function getPersonRelationRoleOptions(
 	unitType: string,

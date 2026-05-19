@@ -11,6 +11,8 @@ import * as v from "valibot";
 import { CreateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.schema";
 import { assertAdmin } from "@/lib/auth/session";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
+import { ensureOrganisationalUnitDraftVersion } from "@/lib/data/organisational-unit-drafts";
+import { ensurePersonDraftVersion } from "@/lib/data/person-drafts";
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -44,29 +46,79 @@ export const createContributionAction = createServerAction(
 
 		const { personId, roleTypeId, organisationalUnitId, duration } = result.output;
 
-		const allowedRelation = await db
-			.select({ id: schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.id })
-			.from(schema.organisationalUnits)
-			.innerJoin(
-				schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations,
-				eq(
-					schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.unitTypeId,
-					schema.organisationalUnits.typeId,
-				),
-			)
-			.where(
-				and(
-					eq(schema.organisationalUnits.id, organisationalUnitId),
+		const returned = await db.transaction(async (tx) => {
+			const draftPersonId = await ensurePersonDraftVersion(tx, personId);
+			const draftOrganisationalUnitId = await ensureOrganisationalUnitDraftVersion(
+				tx,
+				organisationalUnitId,
+			);
+			const allowedRelation = await tx
+				.select({ id: schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.id })
+				.from(schema.organisationalUnits)
+				.innerJoin(
+					schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations,
 					eq(
-						schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.roleTypeId,
-						roleTypeId,
+						schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.unitTypeId,
+						schema.organisationalUnits.typeId,
 					),
-				),
-			)
-			.limit(1)
-			.then((rows) => rows[0] ?? null);
+				)
+				.where(
+					and(
+						eq(schema.organisationalUnits.id, draftOrganisationalUnitId),
+						eq(
+							schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.roleTypeId,
+							roleTypeId,
+						),
+					),
+				)
+				.limit(1)
+				.then((rows) => rows[0] ?? null);
 
-		if (allowedRelation == null) {
+			if (allowedRelation == null) {
+				return { error: "role-not-allowed" as const };
+			}
+
+			const existing = await tx.query.personsToOrganisationalUnits.findFirst({
+				where: {
+					personId: draftPersonId,
+					organisationalUnitId: draftOrganisationalUnitId,
+					roleTypeId,
+				},
+				columns: { id: true },
+			});
+
+			if (existing != null) {
+				return { error: "duplicate" as const };
+			}
+
+			const unit = await tx.query.organisationalUnits.findFirst({
+				where: { id: draftOrganisationalUnitId },
+				columns: {},
+				with: { type: { columns: { type: true } } },
+			});
+
+			const row = await tx
+				.insert(schema.personsToOrganisationalUnits)
+				.values({
+					personId: draftPersonId,
+					organisationalUnitId: draftOrganisationalUnitId,
+					roleTypeId,
+					duration,
+				})
+				.returning({ id: schema.personsToOrganisationalUnits.id })
+				.then((rows) => rows[0]!);
+
+			await touchVersion(tx, draftPersonId);
+			await touchVersion(tx, draftOrganisationalUnitId);
+
+			return { row, targetUnitType: unit?.type.type };
+		});
+
+		if ("error" in returned) {
+			if (returned.error === "duplicate") {
+				return createActionStateError({ message: t("This contribution already exists.") });
+			}
+
 			return createActionStateError({
 				message: t("The selected role is not allowed for this organisation."),
 				validationErrors: {
@@ -75,34 +127,14 @@ export const createContributionAction = createServerAction(
 			});
 		}
 
-		const existing = await db.query.personsToOrganisationalUnits.findFirst({
-			where: { personId, organisationalUnitId, roleTypeId },
-			columns: { id: true },
-		});
-
-		if (existing != null) {
-			return createActionStateError({ message: t("This contribution already exists.") });
-		}
-
-		const returned = await db.transaction(async (tx) => {
-			const row = await tx
-				.insert(schema.personsToOrganisationalUnits)
-				.values({ personId, organisationalUnitId, roleTypeId, duration })
-				.returning({ id: schema.personsToOrganisationalUnits.id })
-				.then((rows) => rows[0]!);
-
-			await touchVersion(tx, organisationalUnitId);
-
-			return row;
-		});
-
 		revalidatePath("/[locale]/dashboard/administrator", "layout");
 
 		return createActionStateSuccess({
 			data: {
-				id: returned.id,
+				id: returned.row.id,
 				durationStart: duration.start.toISOString(),
 				durationEnd: duration.end?.toISOString() ?? null,
+				targetUnitType: returned.targetUnitType,
 			},
 		});
 	},

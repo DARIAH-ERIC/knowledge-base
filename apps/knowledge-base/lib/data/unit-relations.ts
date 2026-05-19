@@ -15,6 +15,7 @@ export async function getUnitRelations(unitId: string) {
 			statusType: schema.organisationalUnitStatus.status,
 			relatedUnitId: schema.organisationalUnitsRelations.relatedUnitId,
 			relatedUnitName: schema.organisationalUnits.name,
+			relatedUnitType: schema.organisationalUnitTypes.type,
 		})
 		.from(schema.organisationalUnitsRelations)
 		.innerJoin(
@@ -25,10 +26,47 @@ export async function getUnitRelations(unitId: string) {
 			schema.organisationalUnits,
 			eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.relatedUnitId),
 		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
 		.where(eq(schema.organisationalUnitsRelations.unitId, unitId));
 }
 
 export type UnitRelation = Awaited<ReturnType<typeof getUnitRelations>>[number];
+
+export type RelationLifecycleStatus = "changed" | "new";
+
+function durationKey(duration: UnitRelation["duration"]): string {
+	return [duration.start.toISOString(), duration.end?.toISOString() ?? ""].join(":");
+}
+
+export function annotateUnitRelationLifecycle(
+	draftRelations: Array<UnitRelation>,
+	publishedRelations: Array<UnitRelation>,
+): Array<UnitRelation & { lifecycleStatus?: RelationLifecycleStatus }> {
+	const publishedByIdentity = new Map(
+		publishedRelations.map(
+			(relation) => [[relation.relatedUnitId, relation.statusId].join(":"), relation] as const,
+		),
+	);
+
+	return draftRelations.map((relation) => {
+		const published = publishedByIdentity.get(
+			[relation.relatedUnitId, relation.statusId].join(":"),
+		);
+
+		if (published == null) {
+			return { ...relation, lifecycleStatus: "new" };
+		}
+
+		if (durationKey(relation.duration) !== durationKey(published.duration)) {
+			return { ...relation, lifecycleStatus: "changed" };
+		}
+
+		return relation;
+	});
+}
 
 export interface UnitRelationStatusOption {
 	statusId: string;

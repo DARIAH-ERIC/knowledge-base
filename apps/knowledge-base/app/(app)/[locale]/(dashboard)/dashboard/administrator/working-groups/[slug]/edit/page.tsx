@@ -19,8 +19,15 @@ import {
 	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
-import { getUnitRelationStatusOptions, getUnitRelations } from "@/lib/data/unit-relations";
-import { getWorkingGroupChairs } from "@/lib/data/working-group-chairs";
+import {
+	annotateUnitRelationLifecycle,
+	getUnitRelationStatusOptions,
+	getUnitRelations,
+} from "@/lib/data/unit-relations";
+import {
+	annotateWorkingGroupChairLifecycle,
+	getWorkingGroupChairs,
+} from "@/lib/data/working-group-chairs";
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
 import { images } from "@/lib/images";
@@ -129,6 +136,8 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 		chairs,
 		descriptionRows,
 		socialMediaRows,
+		publishedRelations,
+		publishedChairs,
 	] = await Promise.all([
 		getEntityRelations(documentId),
 		getUnitRelations(workingGroup.id),
@@ -153,6 +162,8 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 			where: { organisationalUnitId: workingGroup.id },
 			columns: { socialMediaId: true },
 		}),
+		publishedId != null ? getUnitRelations(publishedId) : Promise.resolve([]),
+		publishedId != null ? getWorkingGroupChairs(publishedId) : Promise.resolve([]),
 	]);
 
 	const description = descriptionRows.at(0)?.content;
@@ -180,7 +191,7 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 
 	return (
 		<WorkingGroupEditForm
-			chairs={chairs}
+			chairs={annotateWorkingGroupChairLifecycle(chairs, publishedChairs)}
 			documentId={documentId}
 			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
@@ -196,7 +207,7 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 			initialSocialMediaItems={initialSocialMedia.items}
 			initialSocialMediaTotal={initialSocialMedia.total}
 			isPublished={publishedId != null}
-			relations={relations}
+			relations={annotateUnitRelationLifecycle(relations, publishedRelations)}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}
 			selectedSocialMediaItems={selectedSocialMediaItems}

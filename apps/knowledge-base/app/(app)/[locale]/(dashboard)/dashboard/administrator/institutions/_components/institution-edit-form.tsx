@@ -6,13 +6,19 @@ import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { InstitutionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form";
+import { discardInstitutionDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/discard-institution-draft.action";
+import { publishInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/publish-institution.action";
 import { updateInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/update-institution.action";
 import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
 
 interface InstitutionEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
+	documentId: string;
+	hasDraftChanges: boolean;
+	isPublished: boolean;
 	institution: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
 		description?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
@@ -36,6 +42,9 @@ interface InstitutionEditFormProps {
 export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): ReactNode {
 	const {
 		initialAssets,
+		documentId,
+		hasDraftChanges,
+		isPublished,
 		institution,
 		initialRelatedEntityIds,
 		initialRelatedEntityItems,
@@ -57,7 +66,16 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 
 	return (
 		<Fragment>
-			<Heading>{t("Edit institution")}</Heading>
+			<div className="flex items-center justify-between">
+				<Heading>{t("Edit institution")}</Heading>
+				<EntityLifecycleBar
+					discardDraftAction={discardInstitutionDraftAction}
+					documentId={documentId}
+					hasDraft={hasDraftChanges}
+					isPublished={isPublished}
+					publishAction={publishInstitutionAction}
+				/>
+			</div>
 
 			<InstitutionForm
 				formAction={updateInstitutionAction}

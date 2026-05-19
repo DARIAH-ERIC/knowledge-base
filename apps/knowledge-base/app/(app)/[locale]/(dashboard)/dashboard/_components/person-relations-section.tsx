@@ -5,6 +5,7 @@ import {
 	type GetValidationErrors,
 	createActionStateInitial,
 } from "@dariah-eric/next-lib/actions";
+import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
@@ -47,7 +48,7 @@ import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person
 
 interface PersonRelationsSectionProps {
 	unitId: string;
-	relations: Array<PersonRelation>;
+	relations: Array<PersonRelation & { lifecycleStatus?: "changed" | "new" }>;
 	roleOptions: Array<PersonRelationRoleOption>;
 	initialPersonItems: Array<ContributionPersonOption>;
 	initialPersonTotal: number;
@@ -57,6 +58,17 @@ type ContributionValidationErrors = GetValidationErrors<typeof CreateContributio
 
 function formatRoleType(type: string): string {
 	return type.replaceAll("_", " ");
+}
+
+function formatUnitType(type: string): string {
+	return type.replaceAll("_", " ");
+}
+
+function formatLifecycleStatus(
+	status: "changed" | "new",
+	t: ReturnType<typeof useExtracted>,
+): string {
+	return status === "new" ? t("New") : t("Changed");
 }
 
 export function PersonRelationsSection(props: Readonly<PersonRelationsSectionProps>): ReactNode {
@@ -91,7 +103,12 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 
 			if (newState.status === "success" && option != null && person != null) {
 				const data = newState.data as
-					| { id: string; durationStart: string; durationEnd: string | null }
+					| {
+							id: string;
+							durationStart: string;
+							durationEnd: string | null;
+							targetUnitType: PersonRelation["targetUnitType"];
+					  }
 					| undefined;
 
 				if (data != null) {
@@ -103,6 +120,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 							personName: person.name,
 							roleTypeId: option.roleTypeId,
 							roleType: option.roleType as PersonRelation["roleType"],
+							targetUnitType: data.targetUnitType,
 							duration: {
 								start: new Date(data.durationStart),
 								...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
@@ -130,6 +148,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 					<Table aria-label="people" className="[--gutter:0] sm:[--gutter:0]">
 						<TableHeader>
 							<TableColumn isRowHeader={true}>{t("Person")}</TableColumn>
+							<TableColumn>{t("Type")}</TableColumn>
 							<TableColumn>{t("Role")}</TableColumn>
 							<TableColumn>{t("From")}</TableColumn>
 							<TableColumn>{t("Until")}</TableColumn>
@@ -139,7 +158,19 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 							{(relation) => (
 								<TableRow id={relation.id}>
 									<TableCell>{relation.personName}</TableCell>
-									<TableCell>{formatRoleType(relation.roleType)}</TableCell>
+									<TableCell>
+										<Badge intent="slate">{formatUnitType(relation.targetUnitType)}</Badge>
+									</TableCell>
+									<TableCell>
+										<div className="flex items-center gap-x-2">
+											<span>{formatRoleType(relation.roleType)}</span>
+											{relation.lifecycleStatus != null && (
+												<Badge intent={relation.lifecycleStatus === "new" ? "emerald" : "amber"}>
+													{formatLifecycleStatus(relation.lifecycleStatus, t)}
+												</Badge>
+											)}
+										</div>
+									</TableCell>
 									<TableCell>
 										{format.dateTime(relation.duration.start, { dateStyle: "short" })}
 									</TableCell>

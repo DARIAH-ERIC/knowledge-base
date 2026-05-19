@@ -10,6 +10,7 @@ import * as v from "valibot";
 import { CreateWorkingGroupChairActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/create-working-group-chair.schema";
 import { assertAdmin } from "@/lib/auth/session";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
+import { ensureOrganisationalUnitDraftVersion } from "@/lib/data/organisational-unit-drafts";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -48,33 +49,38 @@ export const createWorkingGroupChairAction = createServerAction(
 			return createActionStateError({ message: t("Role type not found.") });
 		}
 
-		const existing = await db.query.personsToOrganisationalUnits.findFirst({
-			where: { personId, organisationalUnitId: unitId, roleTypeId: roleType.id },
-			columns: { id: true },
-		});
-
-		if (existing != null) {
-			return createActionStateError({ message: t("This chair relation already exists.") });
-		}
-
 		const returned = await db.transaction(async (tx) => {
+			const draftUnitId = await ensureOrganisationalUnitDraftVersion(tx, unitId);
+			const existing = await tx.query.personsToOrganisationalUnits.findFirst({
+				where: { personId, organisationalUnitId: draftUnitId, roleTypeId: roleType.id },
+				columns: { id: true },
+			});
+
+			if (existing != null) {
+				return { error: "duplicate" as const };
+			}
+
 			const row = await tx
 				.insert(schema.personsToOrganisationalUnits)
-				.values({ personId, organisationalUnitId: unitId, roleTypeId: roleType.id, duration })
+				.values({ personId, organisationalUnitId: draftUnitId, roleTypeId: roleType.id, duration })
 				.returning({ id: schema.personsToOrganisationalUnits.id })
 				.then((rows) => rows[0]!);
 
-			await touchVersion(tx, unitId);
+			await touchVersion(tx, draftUnitId);
 
-			return row;
+			return { row };
 		});
+
+		if ("error" in returned) {
+			return createActionStateError({ message: t("This chair relation already exists.") });
+		}
 
 		await dispatchWebhook({ type: "working-groups" });
 		revalidatePath("/[locale]/dashboard/administrator/working-groups", "layout");
 
 		return createActionStateSuccess({
 			data: {
-				id: returned.id,
+				id: returned.row.id,
 				durationStart: duration.start.toISOString(),
 				durationEnd: duration.end?.toISOString() ?? null,
 			},

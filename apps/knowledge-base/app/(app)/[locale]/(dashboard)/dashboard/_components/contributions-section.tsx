@@ -5,6 +5,7 @@ import {
 	type GetValidationErrors,
 	createActionStateInitial,
 } from "@dariah-eric/next-lib/actions";
+import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
@@ -46,7 +47,7 @@ import type { ContributionRoleOption, PersonContribution } from "@/lib/data/cont
 
 interface ContributionsSectionProps {
 	personId: string;
-	contributions: Array<PersonContribution>;
+	contributions: Array<PersonContribution & { lifecycleStatus?: "changed" | "new" }>;
 	roleOptions: Array<ContributionRoleOption>;
 }
 
@@ -54,12 +55,20 @@ interface CreateContributionActionData {
 	id: string;
 	durationStart: string;
 	durationEnd: string | null;
+	targetUnitType: PersonContribution["organisationalUnitType"];
 }
 
 type ContributionValidationErrors = GetValidationErrors<typeof CreateContributionActionInputSchema>;
 
 function formatRoleType(type: string): string {
 	return type.replaceAll("_", " ");
+}
+
+function formatLifecycleStatus(
+	status: "changed" | "new",
+	t: ReturnType<typeof useExtracted>,
+): string {
+	return status === "new" ? t("New") : t("Changed");
 }
 
 function formatRoleOptionLabel(option: ContributionRoleOption): string {
@@ -110,6 +119,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 						roleType: option.roleType as PersonContribution["roleType"],
 						organisationalUnitId: unit.id,
 						organisationalUnitName: unit.name,
+						organisationalUnitType: data.targetUnitType,
 						duration: {
 							start: new Date(data.durationStart),
 							...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
@@ -136,6 +146,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 					<Table aria-label="contributions" className="[--gutter:0] sm:[--gutter:0]">
 						<TableHeader>
 							<TableColumn isRowHeader={true}>{t("Role")}</TableColumn>
+							<TableColumn>{t("Type")}</TableColumn>
 							<TableColumn>{t("Organisation")}</TableColumn>
 							<TableColumn>{t("From")}</TableColumn>
 							<TableColumn>{t("Until")}</TableColumn>
@@ -144,7 +155,23 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 						<TableBody items={localContributions}>
 							{(contribution) => (
 								<TableRow id={contribution.id}>
-									<TableCell>{formatRoleType(contribution.roleType)}</TableCell>
+									<TableCell>
+										<div className="flex items-center gap-x-2">
+											<span>{formatRoleType(contribution.roleType)}</span>
+											{contribution.lifecycleStatus != null && (
+												<Badge
+													intent={contribution.lifecycleStatus === "new" ? "emerald" : "amber"}
+												>
+													{formatLifecycleStatus(contribution.lifecycleStatus, t)}
+												</Badge>
+											)}
+										</div>
+									</TableCell>
+									<TableCell>
+										<Badge intent="slate">
+											{formatRoleType(contribution.organisationalUnitType)}
+										</Badge>
+									</TableCell>
 									<TableCell>{contribution.organisationalUnitName}</TableCell>
 									<TableCell>
 										{format.dateTime(contribution.duration.start, { dateStyle: "short" })}

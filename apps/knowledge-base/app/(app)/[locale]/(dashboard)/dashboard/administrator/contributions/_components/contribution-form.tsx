@@ -1,17 +1,16 @@
 "use client";
 
 import { createActionStateInitial, isActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
-import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { parseDate } from "@internationalized/date";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useActionState, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useActionState, useEffect, useMemo, useState } from "react";
 
+import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
 import {
 	FormActions,
 	FormLayout,
@@ -38,6 +37,7 @@ interface ContributionFormProps {
 	initialPersonsTotal?: number;
 	roleOptions: Array<ContributionRoleOption>;
 	values?: ContributionFormValues;
+	showSaveAndPublish?: boolean;
 }
 
 function formatRoleType(type: string): string {
@@ -66,6 +66,7 @@ export function ContributionForm(props: Readonly<ContributionFormProps>): ReactN
 		initialPersonsTotal = 0,
 		roleOptions,
 		values,
+		showSaveAndPublish,
 	} = props;
 
 	const t = useExtracted();
@@ -179,16 +180,7 @@ export function ContributionForm(props: Readonly<ContributionFormProps>): ReactN
 
 				<FormActions>
 					<FormStatus state={state} />
-					<Button isPending={isPending} type="submit">
-						{isPending ? (
-							<Fragment>
-								<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
-								<span aria-hidden={true}>{t("Saving...")}</span>
-							</Fragment>
-						) : (
-							t("Save")
-						)}
-					</Button>
+					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={showSaveAndPublish} />
 				</FormActions>
 			</Form>
 		</FormLayout>

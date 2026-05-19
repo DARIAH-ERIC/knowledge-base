@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 
 import { ContributionEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contribution-edit-form";
 import { getContributionRoleOptions } from "@/lib/data/contributions";
+import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -65,6 +66,28 @@ export default async function DashboardAdministratorEditPersonRelationPage(
 		notFound();
 	}
 
+	const [personVersion, organisationalUnitVersion] = await Promise.all([
+		db.query.entityVersions.findFirst({
+			where: { id: contribution.personId },
+			columns: {},
+			with: { entity: { columns: { id: true } } },
+		}),
+		db.query.entityVersions.findFirst({
+			where: { id: contribution.organisationalUnitId },
+			columns: {},
+			with: { entity: { columns: { id: true } } },
+		}),
+	]);
+
+	if (personVersion == null || organisationalUnitVersion == null) {
+		notFound();
+	}
+
+	const [personLifecycle, organisationalUnitLifecycle] = await Promise.all([
+		db.transaction((tx) => getDocumentLifecycleState(tx, personVersion.entity.id)),
+		db.transaction((tx) => getDocumentLifecycleState(tx, organisationalUnitVersion.entity.id)),
+	]);
+
 	return (
 		<ContributionEditForm
 			contribution={{
@@ -77,6 +100,18 @@ export default async function DashboardAdministratorEditPersonRelationPage(
 				},
 				person: { id: contribution.personId, name: contribution.personName },
 				roleTypeId: contribution.roleTypeId,
+			}}
+			lifecycle={{
+				person: {
+					documentId: personVersion.entity.id,
+					hasDraftChanges: personLifecycle.hasDraftChanges,
+					isPublished: personLifecycle.publishedId != null,
+				},
+				organisationalUnit: {
+					documentId: organisationalUnitVersion.entity.id,
+					hasDraftChanges: organisationalUnitLifecycle.hasDraftChanges,
+					isPublished: organisationalUnitLifecycle.publishedId != null,
+				},
 			}}
 			roleOptions={roleOptions}
 		/>

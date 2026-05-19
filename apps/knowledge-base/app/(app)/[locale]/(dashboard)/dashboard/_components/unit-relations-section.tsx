@@ -2,6 +2,7 @@
 
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { AsyncSelect } from "@dariah-eric/ui/async-select";
+import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
@@ -42,7 +43,7 @@ import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-rel
 
 interface UnitRelationsSectionProps {
 	unitId: string;
-	relations: Array<UnitRelation>;
+	relations: Array<UnitRelation & { lifecycleStatus?: "changed" | "new" }>;
 	statusOptions: Array<UnitRelationStatusOption>;
 }
 
@@ -77,6 +78,17 @@ function formatStatus(type: string): string {
 	return type.replaceAll("_", " ");
 }
 
+function formatUnitType(type: string): string {
+	return type.replaceAll("_", " ");
+}
+
+function formatLifecycleStatus(
+	status: "changed" | "new",
+	t: ReturnType<typeof useExtracted>,
+): string {
+	return status === "new" ? t("New") : t("Changed");
+}
+
 export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>): ReactNode {
 	const { unitId, relations, statusOptions } = props;
 
@@ -104,7 +116,12 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 
 			if (newState.status === "success" && option != null && relatedUnit != null) {
 				const data = newState.data as
-					| { id: string; durationStart: string; durationEnd: string | null }
+					| {
+							id: string;
+							durationStart: string;
+							durationEnd: string | null;
+							relatedUnitType: UnitRelation["relatedUnitType"];
+					  }
 					| undefined;
 
 				if (data != null) {
@@ -116,6 +133,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 							statusType: option.statusType as UnitRelation["statusType"],
 							relatedUnitId: relatedUnit.id,
 							relatedUnitName: relatedUnit.name,
+							relatedUnitType: data.relatedUnitType,
 							duration: {
 								start: new Date(data.durationStart),
 								...(data.durationEnd != null ? { end: new Date(data.durationEnd) } : {}),
@@ -143,6 +161,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 					<Table aria-label="relations" className="[--gutter:0] sm:[--gutter:0]">
 						<TableHeader>
 							<TableColumn isRowHeader={true}>{t("Status")}</TableColumn>
+							<TableColumn>{t("Type")}</TableColumn>
 							<TableColumn>{t("Related unit")}</TableColumn>
 							<TableColumn>{t("From")}</TableColumn>
 							<TableColumn>{t("Until")}</TableColumn>
@@ -151,7 +170,19 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 						<TableBody items={localRelations}>
 							{(relation) => (
 								<TableRow id={relation.id}>
-									<TableCell>{formatStatus(relation.statusType)}</TableCell>
+									<TableCell>
+										<div className="flex items-center gap-x-2">
+											<span>{formatStatus(relation.statusType)}</span>
+											{relation.lifecycleStatus != null && (
+												<Badge intent={relation.lifecycleStatus === "new" ? "emerald" : "amber"}>
+													{formatLifecycleStatus(relation.lifecycleStatus, t)}
+												</Badge>
+											)}
+										</div>
+									</TableCell>
+									<TableCell>
+										<Badge intent="slate">{formatUnitType(relation.relatedUnitType)}</Badge>
+									</TableCell>
 									<TableCell>{relation.relatedUnitName}</TableCell>
 									<TableCell>
 										{format.dateTime(relation.duration.start, { dateStyle: "short" })}

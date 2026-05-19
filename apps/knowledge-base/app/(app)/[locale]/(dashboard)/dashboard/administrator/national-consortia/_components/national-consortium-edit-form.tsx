@@ -6,13 +6,19 @@ import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { NationalConsortiumForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form";
+import { discardNationalConsortiumDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/discard-national-consortium-draft.action";
+import { publishNationalConsortiumAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/publish-national-consortium.action";
 import { updateNationalConsortiumAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/update-national-consortium.action";
 import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
 
 interface NationalConsortiumEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
+	documentId: string;
+	hasDraftChanges: boolean;
+	isPublished: boolean;
 	nationalConsortium: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
 		description?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
@@ -38,6 +44,9 @@ export function NationalConsortiumEditForm(
 ): ReactNode {
 	const {
 		initialAssets,
+		documentId,
+		hasDraftChanges,
+		isPublished,
 		nationalConsortium,
 		initialRelatedEntityIds,
 		initialRelatedEntityItems,
@@ -59,7 +68,16 @@ export function NationalConsortiumEditForm(
 
 	return (
 		<Fragment>
-			<Heading>{t("Edit national consortium")}</Heading>
+			<div className="flex items-center justify-between">
+				<Heading>{t("Edit national consortium")}</Heading>
+				<EntityLifecycleBar
+					discardDraftAction={discardNationalConsortiumDraftAction}
+					documentId={documentId}
+					hasDraft={hasDraftChanges}
+					isPublished={isPublished}
+					publishAction={publishNationalConsortiumAction}
+				/>
+			</div>
 
 			<NationalConsortiumForm
 				formAction={updateNationalConsortiumAction}
@@ -77,6 +95,7 @@ export function NationalConsortiumEditForm(
 				selectedRelatedEntities={selectedRelatedEntities}
 				selectedRelatedResources={selectedRelatedResources}
 				selectedSocialMediaItems={selectedSocialMediaItems}
+				showSaveAndPublish={true}
 			/>
 
 			<UnitRelationsSection

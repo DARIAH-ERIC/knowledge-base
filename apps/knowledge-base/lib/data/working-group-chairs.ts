@@ -28,3 +28,32 @@ export async function getWorkingGroupChairs(unitId: string) {
 }
 
 export type WorkingGroupChair = Awaited<ReturnType<typeof getWorkingGroupChairs>>[number];
+
+export type RelationLifecycleStatus = "changed" | "new";
+
+function durationKey(duration: WorkingGroupChair["duration"]): string {
+	return [duration.start.toISOString(), duration.end?.toISOString() ?? ""].join(":");
+}
+
+export function annotateWorkingGroupChairLifecycle(
+	draftChairs: Array<WorkingGroupChair>,
+	publishedChairs: Array<WorkingGroupChair>,
+): Array<WorkingGroupChair & { lifecycleStatus?: RelationLifecycleStatus }> {
+	const publishedByPersonId = new Map(
+		publishedChairs.map((chair) => [chair.personId, chair] as const),
+	);
+
+	return draftChairs.map((chair) => {
+		const published = publishedByPersonId.get(chair.personId);
+
+		if (published == null) {
+			return { ...chair, lifecycleStatus: "new" };
+		}
+
+		if (durationKey(chair.duration) !== durationKey(published.duration)) {
+			return { ...chair, lifecycleStatus: "changed" };
+		}
+
+		return chair;
+	});
+}
