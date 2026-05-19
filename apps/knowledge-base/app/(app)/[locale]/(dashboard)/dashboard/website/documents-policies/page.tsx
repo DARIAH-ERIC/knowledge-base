@@ -8,7 +8,7 @@ import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { asc, eq } from "@/lib/db/sql";
+import { asc, eq, sql } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardWebsiteDocumentsPoliciesPageProps extends PageProps<"/[locale]/dashboard/website/documents-policies"> {}
@@ -43,6 +43,47 @@ export default async function DashboardWebsiteDocumentsPoliciesPage(
 				position: schema.documentsPolicies.position,
 				entityId: schema.entities.id,
 				slug: schema.entities.slug,
+				hasDraft: sql<boolean>`
+					EXISTS (
+						SELECT
+							1
+						FROM
+							"entity_versions" AS "dv"
+							INNER JOIN "entity_status" AS "ds" ON "dv"."status_id" = "ds"."id"
+						WHERE
+							"dv"."entity_id" = ${schema.entityVersions.entityId}
+							AND "ds"."type" = 'draft'
+							AND (
+								NOT EXISTS (
+									SELECT
+										1
+									FROM
+										"entity_versions" AS "pv"
+										INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+									WHERE
+										"pv"."entity_id" = ${schema.entityVersions.entityId}
+										AND "ps"."type" = 'published'
+								)
+								OR "dv"."updated_at" > (
+									SELECT
+										"pv"."updated_at"
+									FROM
+										"entity_versions" AS "pv"
+										INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+									WHERE
+										"pv"."entity_id" = ${schema.entityVersions.entityId}
+										AND "ps"."type" = 'published'
+									LIMIT 1
+								)
+							)
+					)
+				`,
+				isPublished: sql<boolean>`EXISTS (
+					SELECT 1 FROM "entity_versions" AS "published_versions"
+					INNER JOIN "entity_status" AS "published_status" ON "published_versions"."status_id" = "published_status"."id"
+					WHERE "published_versions"."entity_id" = ${schema.entities.id}
+					AND "published_status"."type" = 'published'
+				)`,
 				document: { key: schema.assets.key, label: schema.assets.label },
 			})
 			.from(schema.documentsPolicies)

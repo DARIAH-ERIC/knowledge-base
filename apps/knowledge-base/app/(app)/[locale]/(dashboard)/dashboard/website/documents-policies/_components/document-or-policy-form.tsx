@@ -153,7 +153,7 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 				<DraftFormSubmitButtons
 					isDisabled={selectedDocument == null}
 					isPending={isPending}
-					showSaveAndPublish={documentOrPolicy != null}
+					showSaveAndPublish={true}
 				/>
 			</FormActions>
 		</Form>

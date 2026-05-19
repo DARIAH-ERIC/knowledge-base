@@ -15,6 +15,7 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
+import { EntityLifecycleStatusBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge";
 import {
 	Header,
 	HeaderAction,
@@ -37,6 +38,8 @@ type DocumentItem = Pick<
 	"id" | "title" | "summary" | "url" | "groupId" | "position"
 > & {
 	entityVersion: { entity: Pick<schema.Entity, "id" | "slug"> };
+	hasDraft: boolean;
+	isPublished: boolean;
 	document: Pick<schema.Asset, "key" | "label">;
 };
 
@@ -66,7 +69,8 @@ function DocumentRow(props: Readonly<DocumentRowProps>): ReactNode {
 
 	return (
 		<div className="flex items-center gap-x-2 rounded-md p-2 hover:bg-muted/50">
-			<div className="min-inline-0 flex-1">
+			<div className="min-inline-0 flex flex-1 items-center gap-x-2">
+				<EntityLifecycleStatusBadge hasDraft={item.hasDraft} isPublished={item.isPublished} />
 				<span className="text-sm font-medium">{item.title}</span>
 				{item.summary ? (
 					<span className="text-muted-fg ms-2 truncate text-xs">{item.summary}</span>

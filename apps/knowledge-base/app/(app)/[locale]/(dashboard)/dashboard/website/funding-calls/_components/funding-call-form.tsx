@@ -109,7 +109,7 @@ export function FundingCallForm(props: Readonly<FundingCallFormProps>): ReactNod
 
 				<FormActions>
 					<FormStatus state={state} />
-					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={fundingCall != null} />
+					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={true} />
 				</FormActions>
 			</Form>
 		</FormLayout>

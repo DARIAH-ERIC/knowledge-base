@@ -135,7 +135,7 @@ export function OpportunityForm(props: Readonly<OpportunityFormProps>): ReactNod
 
 				<FormActions>
 					<FormStatus state={state} />
-					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={opportunity != null} />
+					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={true} />
 				</FormActions>
 			</Form>
 		</FormLayout>

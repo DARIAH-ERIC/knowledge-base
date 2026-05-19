@@ -24,6 +24,7 @@ import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
+import { EntityLifecycleStatusBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge";
 import {
 	Header,
 	HeaderAction,
@@ -46,6 +47,8 @@ interface CountriesPageProps {
 				memberObserverStatus: CountryMemberObserverStatus;
 				memberObserverUntil: Date | null;
 				entity: Pick<schema.Entity, "slug">;
+				hasDraft: boolean;
+				isPublished: boolean;
 			}
 		>;
 		total: number;
@@ -118,8 +121,9 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
 						{t("Name")}
 					</TableColumn>
+					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn allowsSorting={true} id="status">
-						{t("Status")}
+						{t("Membership")}
 					</TableColumn>
 					<TableColumn>{t("From")}</TableColumn>
 					<TableColumn>{t("Until")}</TableColumn>
@@ -129,6 +133,12 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 					{(item) => (
 						<TableRow>
 							<TableCell>{item.name}</TableCell>
+							<TableCell>
+								<EntityLifecycleStatusBadge
+									hasDraft={item.hasDraft}
+									isPublished={item.isPublished}
+								/>
+							</TableCell>
 							<TableCell>
 								{item.memberObserverStatus != null ? (
 									<Badge intent={memberObserverStatusIntent(item.memberObserverStatus)}>

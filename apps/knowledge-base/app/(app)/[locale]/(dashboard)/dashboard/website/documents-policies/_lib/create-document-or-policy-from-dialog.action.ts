@@ -12,9 +12,11 @@ import * as v from "valibot";
 
 import { CreateDocumentOrPolicyFromDialogActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy-from-dialog.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { createPublishedDocument } from "@/lib/data/entity-lifecycle";
+import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
+import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { eq, isNull } from "@/lib/db/sql";
+import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -61,7 +63,7 @@ export const createDocumentOrPolicyFromDialogAction = createServerAction(
 
 			assert(type);
 
-			const { documentId, versionId } = await createPublishedDocument(tx, type.id, slug);
+			const { documentId, versionId } = await createDraftDocument(tx, type.id, slug);
 			entityDocumentId = documentId;
 
 			const asset = await tx.query.assets.findFirst({
@@ -100,6 +102,10 @@ export const createDocumentOrPolicyFromDialogAction = createServerAction(
 			await tx
 				.insert(schema.fields)
 				.values({ entityVersionId: versionId, fieldNameId: contentFieldName.id });
+
+			if (shouldSaveAndPublish(formData)) {
+				await publishVersion(tx, documentId, documentsPoliciesLifecycleAdapter);
+			}
 		});
 
 		after(async () => {

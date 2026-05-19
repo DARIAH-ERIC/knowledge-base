@@ -13,6 +13,7 @@ import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
+import { ensureEntityVersionField } from "@/lib/data/entity-version-fields";
 import { internalPagesLifecycleAdapter } from "@/lib/data/internal-pages.lifecycle-adapter";
 import { type Transaction, db } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
@@ -61,13 +62,7 @@ export const updateInternalPageAction = createServerAction(
 				.set({ title })
 				.where(eq(schema.internalPages.id, draftVersionId));
 
-			const contentField = await tx.query.fields.findFirst({
-				where: {
-					entityVersionId: draftVersionId,
-					name: { fieldName: "content" },
-				},
-				columns: { id: true },
-			});
+			const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");
 
 			const contentBlockTypes = await db.query.contentBlockTypes.findMany();
 			const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
@@ -81,56 +76,54 @@ export const updateInternalPageAction = createServerAction(
 				await upsertTypedContentBlock(tx, block, blockId, isNew);
 			}
 
-			if (contentField != null) {
-				const keptIds = new Set(
-					contentBlocks.filter((cb) => cb.position !== undefined).map((cb) => cb.id),
-				);
+			const keptIds = new Set(
+				contentBlocks.filter((cb) => cb.position !== undefined).map((cb) => cb.id),
+			);
 
-				const existingBlocks = await tx.query.contentBlocks.findMany({
-					where: { fieldId: contentField.id },
-					columns: { id: true },
-				});
+			const existingBlocks = await tx.query.contentBlocks.findMany({
+				where: { fieldId: contentField.id },
+				columns: { id: true },
+			});
 
-				const toDelete = existingBlocks
-					.filter((block) => !keptIds.has(block.id))
-					.map((block) => block.id);
+			const toDelete = existingBlocks
+				.filter((block) => !keptIds.has(block.id))
+				.map((block) => block.id);
 
-				if (toDelete.length > 0) {
-					await tx.delete(schema.contentBlocks).where(inArray(schema.contentBlocks.id, toDelete));
-				}
-
-				await Promise.all(
-					contentBlocks.map(async (contentBlock, index) => {
-						const { id, position } = contentBlock;
-
-						if (position !== undefined) {
-							await tx
-								.update(schema.contentBlocks)
-								.set({
-									fieldId: contentField.id,
-									typeId: contentBlockTypesByType[contentBlock.type].id,
-									position: index,
-								})
-								.where(eq(schema.contentBlocks.id, id));
-
-							await upsertTypeBlock(tx, contentBlock, id, false);
-						} else {
-							const [added] = await tx
-								.insert(schema.contentBlocks)
-								.values({
-									fieldId: contentField.id,
-									typeId: contentBlockTypesByType[contentBlock.type].id,
-									position: index,
-								})
-								.returning({ id: schema.contentBlocks.id });
-
-							assert(added);
-
-							await upsertTypeBlock(tx, contentBlock, added.id, true);
-						}
-					}),
-				);
+			if (toDelete.length > 0) {
+				await tx.delete(schema.contentBlocks).where(inArray(schema.contentBlocks.id, toDelete));
 			}
+
+			await Promise.all(
+				contentBlocks.map(async (contentBlock, index) => {
+					const { id, position } = contentBlock;
+
+					if (position !== undefined) {
+						await tx
+							.update(schema.contentBlocks)
+							.set({
+								fieldId: contentField.id,
+								typeId: contentBlockTypesByType[contentBlock.type].id,
+								position: index,
+							})
+							.where(eq(schema.contentBlocks.id, id));
+
+						await upsertTypeBlock(tx, contentBlock, id, false);
+					} else {
+						const [added] = await tx
+							.insert(schema.contentBlocks)
+							.values({
+								fieldId: contentField.id,
+								typeId: contentBlockTypesByType[contentBlock.type].id,
+								position: index,
+							})
+							.returning({ id: schema.contentBlocks.id });
+
+						assert(added);
+
+						await upsertTypeBlock(tx, contentBlock, added.id, true);
+					}
+				}),
+			);
 
 			await touchVersion(tx, draftVersionId);
 

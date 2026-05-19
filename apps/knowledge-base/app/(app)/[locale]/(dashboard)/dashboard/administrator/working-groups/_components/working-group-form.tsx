@@ -175,7 +175,7 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 
 				<FormActions>
 					<FormStatus state={state} />
-					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={workingGroup != null} />
+					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={true} />
 				</FormActions>
 			</Form>
 		</FormLayout>

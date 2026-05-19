@@ -175,7 +175,7 @@ export function InstitutionForm(props: Readonly<InstitutionFormProps>): ReactNod
 
 				<FormActions>
 					<FormStatus state={state} />
-					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={institution != null} />
+					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={true} />
 				</FormActions>
 			</Form>
 		</FormLayout>

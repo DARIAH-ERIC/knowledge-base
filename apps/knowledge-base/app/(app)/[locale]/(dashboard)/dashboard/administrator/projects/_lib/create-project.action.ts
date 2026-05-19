@@ -12,8 +12,10 @@ import * as v from "valibot";
 
 import { CreateProjectActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-project.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { createDraftDocument } from "@/lib/data/entity-lifecycle";
+import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
+import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
 import { db } from "@/lib/db";
+import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -138,6 +140,10 @@ export const createProjectAction = createServerAction(
 				id: contentBlock.id,
 				content: JSON.parse(description) as schema.RichTextContentBlock["content"],
 			});
+
+			if (shouldSaveAndPublish(formData)) {
+				await publishVersion(tx, docId, projectsLifecycleAdapter);
+			}
 		});
 
 		after(async () => {

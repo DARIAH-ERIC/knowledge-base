@@ -39,6 +39,7 @@ export function NationalConsortiumCreateForm(
 				initialRelatedEntityTotal={initialRelatedEntityTotal}
 				initialRelatedResourceItems={initialRelatedResourceItems}
 				initialRelatedResourceTotal={initialRelatedResourceTotal}
+				showSaveAndPublish={true}
 			/>
 		</Fragment>
 	);

@@ -20,6 +20,8 @@ export interface NationalConsortiaResult {
 		Pick<schema.OrganisationalUnit, "id" | "name"> & {
 			countryName: string | null;
 			entity: Pick<schema.Entity, "slug">;
+			hasDraft: boolean;
+			isPublished: boolean;
 		}
 	>;
 	limit: number;
@@ -150,6 +152,47 @@ export async function getNationalConsortia(
 							id: schema.organisationalUnits.id,
 							name: schema.organisationalUnits.name,
 							slug: schema.entities.slug,
+							hasDraft: sql<boolean>`
+							EXISTS (
+								SELECT
+									1
+								FROM
+									"entity_versions" AS "dv"
+									INNER JOIN "entity_status" AS "ds" ON "dv"."status_id" = "ds"."id"
+								WHERE
+									"dv"."entity_id" = ${schema.entityVersions.entityId}
+									AND "ds"."type" = 'draft'
+									AND (
+										NOT EXISTS (
+											SELECT
+												1
+											FROM
+												"entity_versions" AS "pv"
+												INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+											WHERE
+												"pv"."entity_id" = ${schema.entityVersions.entityId}
+												AND "ps"."type" = 'published'
+										)
+										OR "dv"."updated_at" > (
+											SELECT
+												"pv"."updated_at"
+											FROM
+												"entity_versions" AS "pv"
+												INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+											WHERE
+												"pv"."entity_id" = ${schema.entityVersions.entityId}
+												AND "ps"."type" = 'published'
+											LIMIT 1
+										)
+									)
+							)
+						`,
+							isPublished: sql<boolean>`EXISTS (
+							SELECT 1 FROM "entity_versions" AS "published_versions"
+							INNER JOIN "entity_status" AS "published_status" ON "published_versions"."status_id" = "published_status"."id"
+							WHERE "published_versions"."entity_id" = ${schema.entities.id}
+							AND "published_status"."type" = 'published'
+						)`,
 						})
 						.from(schema.organisationalUnits)
 						.innerJoin(
@@ -172,6 +215,47 @@ export async function getNationalConsortia(
 							id: schema.organisationalUnits.id,
 							name: schema.organisationalUnits.name,
 							slug: schema.entities.slug,
+							hasDraft: sql<boolean>`
+							EXISTS (
+								SELECT
+									1
+								FROM
+									"entity_versions" AS "dv"
+									INNER JOIN "entity_status" AS "ds" ON "dv"."status_id" = "ds"."id"
+								WHERE
+									"dv"."entity_id" = ${schema.entityVersions.entityId}
+									AND "ds"."type" = 'draft'
+									AND (
+										NOT EXISTS (
+											SELECT
+												1
+											FROM
+												"entity_versions" AS "pv"
+												INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+											WHERE
+												"pv"."entity_id" = ${schema.entityVersions.entityId}
+												AND "ps"."type" = 'published'
+										)
+										OR "dv"."updated_at" > (
+											SELECT
+												"pv"."updated_at"
+											FROM
+												"entity_versions" AS "pv"
+												INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+											WHERE
+												"pv"."entity_id" = ${schema.entityVersions.entityId}
+												AND "ps"."type" = 'published'
+											LIMIT 1
+										)
+									)
+							)
+						`,
+							isPublished: sql<boolean>`EXISTS (
+							SELECT 1 FROM "entity_versions" AS "published_versions"
+							INNER JOIN "entity_status" AS "published_status" ON "published_versions"."status_id" = "published_status"."id"
+							WHERE "published_versions"."entity_id" = ${schema.entities.id}
+							AND "published_status"."type" = 'published'
+						)`,
 						})
 						.from(schema.organisationalUnits)
 						.innerJoin(
@@ -215,6 +299,8 @@ export async function getNationalConsortia(
 					return {
 						countryName: countryNames.get(item.id) ?? null,
 						entity: { slug: item.slug },
+						hasDraft: item.hasDraft,
+						isPublished: item.isPublished,
 						id: item.id,
 						name: item.name,
 					};
@@ -231,6 +317,8 @@ export async function getNationalConsortia(
 				return {
 					countryName: countryNames.get(item.id) ?? null,
 					entity: { slug: item.slug },
+					hasDraft: item.hasDraft,
+					isPublished: item.isPublished,
 					id: item.id,
 					name: item.name,
 				};
@@ -303,6 +391,47 @@ export async function getNationalConsortia(
 			id: schema.organisationalUnits.id,
 			name: schema.organisationalUnits.name,
 			slug: schema.entities.slug,
+			hasDraft: sql<boolean>`
+							EXISTS (
+								SELECT
+									1
+								FROM
+									"entity_versions" AS "dv"
+									INNER JOIN "entity_status" AS "ds" ON "dv"."status_id" = "ds"."id"
+								WHERE
+									"dv"."entity_id" = ${schema.entityVersions.entityId}
+									AND "ds"."type" = 'draft'
+									AND (
+										NOT EXISTS (
+											SELECT
+												1
+											FROM
+												"entity_versions" AS "pv"
+												INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+											WHERE
+												"pv"."entity_id" = ${schema.entityVersions.entityId}
+												AND "ps"."type" = 'published'
+										)
+										OR "dv"."updated_at" > (
+											SELECT
+												"pv"."updated_at"
+											FROM
+												"entity_versions" AS "pv"
+												INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
+											WHERE
+												"pv"."entity_id" = ${schema.entityVersions.entityId}
+												AND "ps"."type" = 'published'
+											LIMIT 1
+										)
+									)
+							)
+						`,
+			isPublished: sql<boolean>`EXISTS (
+							SELECT 1 FROM "entity_versions" AS "published_versions"
+							INNER JOIN "entity_status" AS "published_status" ON "published_versions"."status_id" = "published_status"."id"
+							WHERE "published_versions"."entity_id" = ${schema.entities.id}
+							AND "published_status"."type" = 'published'
+						)`,
 		})
 		.from(schema.organisationalUnits)
 		.innerJoin(
@@ -330,6 +459,8 @@ export async function getNationalConsortia(
 				return {
 					countryName: countryNames.get(item.id) ?? null,
 					entity: { slug: item.slug },
+					hasDraft: item.hasDraft,
+					isPublished: item.isPublished,
 					id: item.id,
 					name: item.name,
 				};
@@ -346,6 +477,8 @@ export async function getNationalConsortia(
 			return {
 				countryName: countryNames.get(item.id) ?? null,
 				entity: { slug: item.slug },
+				hasDraft: item.hasDraft,
+				isPublished: item.isPublished,
 				id: item.id,
 				name: item.name,
 			};

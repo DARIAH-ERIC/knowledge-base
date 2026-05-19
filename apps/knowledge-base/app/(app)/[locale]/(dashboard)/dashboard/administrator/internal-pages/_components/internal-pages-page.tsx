@@ -16,6 +16,7 @@ import { EllipsisHorizontalIcon, PencilSquareIcon } from "@heroicons/react/24/ou
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityLifecycleStatusBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge";
 import {
 	Header,
 	HeaderAction,
@@ -34,6 +35,8 @@ interface InternalPagesPageProps {
 			Pick<schema.InternalPage, "id" | "title"> & {
 				entity: Pick<schema.Entity, "slug">;
 				updatedAt: schema.Entity["updatedAt"];
+				hasDraft: boolean;
+				isPublished: boolean;
 			}
 		>;
 		total: number;
@@ -92,6 +95,7 @@ export function InternalPagesPage(props: Readonly<InternalPagesPageProps>): Reac
 					<TableColumn allowsSorting={true} id="title" isRowHeader={true}>
 						{t("Title")}
 					</TableColumn>
+					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn allowsSorting={true} id="updatedAt">
 						{t("Updated")}
 					</TableColumn>
@@ -102,6 +106,12 @@ export function InternalPagesPage(props: Readonly<InternalPagesPageProps>): Reac
 						<TableRow href={`/dashboard/administrator/internal-pages/${item.entity.slug}/edit`}>
 							<TableCell>
 								<div className="max-inline-64 truncate">{item.title}</div>
+							</TableCell>
+							<TableCell>
+								<EntityLifecycleStatusBadge
+									hasDraft={item.hasDraft}
+									isPublished={item.isPublished}
+								/>
 							</TableCell>
 							<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 							<TableCell className="text-end">

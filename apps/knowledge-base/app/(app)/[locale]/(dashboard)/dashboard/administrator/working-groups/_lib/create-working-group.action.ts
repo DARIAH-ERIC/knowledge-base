@@ -12,8 +12,10 @@ import * as v from "valibot";
 
 import { CreateWorkingGroupActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/create-working-group.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { createDraftDocument } from "@/lib/data/entity-lifecycle";
+import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
+import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { db } from "@/lib/db";
+import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -165,6 +167,10 @@ export const createWorkingGroupAction = createServerAction(
 				id: contentBlock.id,
 				content: JSON.parse(description) as schema.RichTextContentBlock["content"],
 			});
+
+			if (shouldSaveAndPublish(formData)) {
+				await publishVersion(tx, docId, organisationalUnitsLifecycleAdapter);
+			}
 		});
 
 		after(async () => {
