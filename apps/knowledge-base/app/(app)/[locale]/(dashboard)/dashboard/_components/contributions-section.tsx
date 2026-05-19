@@ -5,6 +5,7 @@ import {
 	type GetValidationErrors,
 	createActionStateInitial,
 } from "@dariah-eric/next-lib/actions";
+import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
@@ -29,6 +30,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
+import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { ArchiveBoxXMarkIcon } from "@heroicons/react/24/outline";
 import { type CalendarDate, getLocalTimeZone } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
@@ -42,7 +44,6 @@ import {
 import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action";
 import type { CreateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.schema";
 import { endContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-contribution.action";
-import { ContributionOptionPicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contribution-option-picker";
 import type { ContributionRoleOption, PersonContribution } from "@/lib/data/contributions";
 
 interface ContributionsSectionProps {
@@ -59,6 +60,32 @@ interface CreateContributionActionData {
 }
 
 type ContributionValidationErrors = GetValidationErrors<typeof CreateContributionActionInputSchema>;
+
+async function fetchOrganisationalUnitOptionsPage(
+	roleTypeId: string,
+	params: Readonly<AsyncOptionsFetchPageParams>,
+): Promise<{ items: Array<AsyncOption>; total: number }> {
+	const searchParams = new URLSearchParams({
+		limit: String(params.limit),
+		offset: String(params.offset),
+		resource: "organisational-units",
+		roleTypeId,
+	});
+
+	if (params.q !== "") {
+		searchParams.set("q", params.q);
+	}
+
+	const response = await fetch(`/api/contributions/options?${searchParams.toString()}`, {
+		signal: params.signal,
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to load organisations.");
+	}
+
+	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+}
 
 function formatRoleType(type: string): string {
 	return type.replaceAll("_", " ");
@@ -88,7 +115,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
 
 	const [selectedRoleTypeId, setSelectedRoleTypeId] = useState<string | null>(null);
-	const [selectedUnit, setSelectedUnit] = useState<{ id: string; name: string } | null>(null);
+	const [selectedUnit, setSelectedUnit] = useState<AsyncOption | null>(null);
 
 	const [state, setState] = useState<ActionState>(createActionStateInitial());
 	const [isPending, startFormTransition] = useTransition();
@@ -234,8 +261,9 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 								</Select>
 								<input name="roleTypeId" type="hidden" value={selectedRoleTypeId ?? ""} />
 
-								<ContributionOptionPicker
-									key={`organisational-units:${selectedRoleTypeId ?? ""}`}
+								<AsyncSelect
+									aria-label={t("Organisation")}
+									cacheKey={selectedRoleTypeId ?? "none"}
 									emptyMessage={
 										selectedRoleOption != null
 											? t("No organisations found.")
@@ -246,16 +274,24 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 											? validationErrors.organisationalUnitId
 											: undefined
 									}
+									fetchPage={(params) => {
+										if (selectedRoleTypeId == null) {
+											return Promise.resolve({ items: [], total: 0 });
+										}
+
+										return fetchOrganisationalUnitOptionsPage(selectedRoleTypeId, params);
+									}}
+									initialItems={[]}
+									initialTotal={0}
 									isDisabled={selectedRoleOption == null}
 									label={t("Organisation")}
+									loadOnMount={selectedRoleTypeId != null}
 									onSelect={setSelectedUnit}
 									placeholder={
 										selectedRoleOption != null
 											? t("Select an organisation")
 											: t("Select a role first")
 									}
-									resource="organisational-units"
-									roleTypeId={selectedRoleTypeId}
 									selectedItem={selectedUnit}
 								/>
 								<input name="organisationalUnitId" type="hidden" value={selectedUnit?.id ?? ""} />

@@ -2,6 +2,7 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Button } from "@dariah-eric/ui/button";
 import { Checkbox } from "@dariah-eric/ui/checkbox";
 import { FieldError, Label } from "@dariah-eric/ui/field";
@@ -11,6 +12,7 @@ import { Input } from "@dariah-eric/ui/input";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { TextField } from "@dariah-eric/ui/text-field";
+import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
@@ -18,8 +20,55 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import { ContributionOptionPicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contribution-option-picker";
 import type { ServerAction } from "@/lib/server/create-server-action";
+
+async function fetchPersonOptionsPage(
+	params: Readonly<AsyncOptionsFetchPageParams>,
+): Promise<{ items: Array<AsyncOption>; total: number }> {
+	const searchParams = new URLSearchParams({
+		limit: String(params.limit),
+		offset: String(params.offset),
+		resource: "persons",
+	});
+
+	if (params.q !== "") {
+		searchParams.set("q", params.q);
+	}
+
+	const response = await fetch(`/api/contributions/options?${searchParams.toString()}`, {
+		signal: params.signal,
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to load persons.");
+	}
+
+	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+}
+
+async function fetchCountryOptionsPage(
+	params: Readonly<AsyncOptionsFetchPageParams>,
+): Promise<{ items: Array<AsyncOption>; total: number }> {
+	const searchParams = new URLSearchParams({
+		limit: String(params.limit),
+		offset: String(params.offset),
+		resource: "countries",
+	});
+
+	if (params.q !== "") {
+		searchParams.set("q", params.q);
+	}
+
+	const response = await fetch(`/api/contributions/options?${searchParams.toString()}`, {
+		signal: params.signal,
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to load countries.");
+	}
+
+	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+}
 
 type ActorType = "none" | "person" | "country";
 
@@ -46,10 +95,10 @@ export function UserForm(props: Readonly<UserFormProps>): ReactNode {
 		user?.person != null ? "person" : user?.organisationalUnit != null ? "country" : "none";
 
 	const [actorType, setActorType] = useState<ActorType>(initialActorType);
-	const [selectedPerson, setSelectedPerson] = useState<{ id: string; name: string } | null>(
+	const [selectedPerson, setSelectedPerson] = useState<AsyncOption | null>(
 		user?.person ?? null,
 	);
-	const [selectedCountry, setSelectedCountry] = useState<{ id: string; name: string } | null>(
+	const [selectedCountry, setSelectedCountry] = useState<AsyncOption | null>(
 		user?.organisationalUnit ?? null,
 	);
 
@@ -126,23 +175,31 @@ export function UserForm(props: Readonly<UserFormProps>): ReactNode {
 					</Select>
 
 					{actorType === "person" && (
-						<ContributionOptionPicker
+						<AsyncSelect
+							aria-label={t("Person")}
 							emptyMessage={t("No persons found.")}
+							fetchPage={fetchPersonOptionsPage}
+							initialItems={[]}
+							initialTotal={0}
 							label={t("Person")}
+							loadOnMount={true}
 							onSelect={setSelectedPerson}
 							placeholder={t("Select a person")}
-							resource="persons"
 							selectedItem={selectedPerson}
 						/>
 					)}
 
 					{actorType === "country" && (
-						<ContributionOptionPicker
+						<AsyncSelect
+							aria-label={t("Country")}
 							emptyMessage={t("No countries found.")}
+							fetchPage={fetchCountryOptionsPage}
+							initialItems={[]}
+							initialTotal={0}
 							label={t("Country")}
+							loadOnMount={true}
 							onSelect={setSelectedCountry}
 							placeholder={t("Select a country")}
-							resource="countries"
 							selectedItem={selectedCountry}
 						/>
 					)}

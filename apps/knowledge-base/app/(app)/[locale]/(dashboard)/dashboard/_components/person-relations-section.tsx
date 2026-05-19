@@ -5,6 +5,7 @@ import {
 	type GetValidationErrors,
 	createActionStateInitial,
 } from "@dariah-eric/next-lib/actions";
+import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
@@ -29,6 +30,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
+import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { ArchiveBoxXMarkIcon } from "@heroicons/react/24/outline";
 import { type CalendarDate, getLocalTimeZone } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
@@ -42,19 +44,41 @@ import {
 import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action";
 import type { CreateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.schema";
 import { endContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-contribution.action";
-import { ContributionOptionPicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contribution-option-picker";
-import type { ContributionPersonOption } from "@/lib/data/contributions";
 import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
 
 interface PersonRelationsSectionProps {
 	unitId: string;
 	relations: Array<PersonRelation & { lifecycleStatus?: "changed" | "new" }>;
 	roleOptions: Array<PersonRelationRoleOption>;
-	initialPersonItems: Array<ContributionPersonOption>;
+	initialPersonItems: Array<AsyncOption>;
 	initialPersonTotal: number;
 }
 
 type ContributionValidationErrors = GetValidationErrors<typeof CreateContributionActionInputSchema>;
+
+async function fetchPersonOptionsPage(
+	params: Readonly<AsyncOptionsFetchPageParams>,
+): Promise<{ items: Array<AsyncOption>; total: number }> {
+	const searchParams = new URLSearchParams({
+		limit: String(params.limit),
+		offset: String(params.offset),
+		resource: "persons",
+	});
+
+	if (params.q !== "") {
+		searchParams.set("q", params.q);
+	}
+
+	const response = await fetch(`/api/contributions/options?${searchParams.toString()}`, {
+		signal: params.signal,
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to load persons.");
+	}
+
+	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+}
 
 function formatRoleType(type: string): string {
 	return type.replaceAll("_", " ");
@@ -82,7 +106,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
 
 	const [selectedRoleTypeId, setSelectedRoleTypeId] = useState<string | null>(null);
-	const [selectedPerson, setSelectedPerson] = useState<ContributionPersonOption | null>(null);
+	const [selectedPerson, setSelectedPerson] = useState<AsyncOption | null>(null);
 
 	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
 	const [isPending, startFormTransition] = useTransition();
@@ -231,19 +255,20 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 								</Select>
 								<input name="roleTypeId" type="hidden" value={selectedRoleTypeId ?? ""} />
 
-								<ContributionOptionPicker
+								<AsyncSelect
+									aria-label={t("Person")}
 									emptyMessage={t("No persons found.")}
 									errorMessage={
 										typeof validationErrors?.personId === "string"
 											? validationErrors.personId
 											: undefined
 									}
+									fetchPage={fetchPersonOptionsPage}
 									initialItems={initialPersonItems}
 									initialTotal={initialPersonTotal}
 									label={t("Person")}
 									onSelect={setSelectedPerson}
 									placeholder={t("No person selected")}
-									resource="persons"
 									selectedItem={selectedPerson}
 								/>
 								<input name="personId" type="hidden" value={selectedPerson?.id ?? ""} />
