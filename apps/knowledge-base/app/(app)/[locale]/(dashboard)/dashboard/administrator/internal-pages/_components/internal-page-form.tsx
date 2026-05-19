@@ -2,21 +2,20 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
-import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useActionState } from "react";
+import { type ReactNode, useActionState } from "react";
 
 import {
 	type ContentBlock,
 	ContentBlocks,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
 import {
 	FormActions,
 	FormLayout,
@@ -60,16 +59,7 @@ export function InternalPageForm(props: Readonly<InternalPageFormProps>): ReactN
 
 				<FormActions>
 					<FormStatus state={state} />
-					<Button isPending={isPending} type="submit">
-						{isPending ? (
-							<Fragment>
-								<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
-								<span aria-hidden={true}>{t("Saving...")}</span>
-							</Fragment>
-						) : (
-							t("Save")
-						)}
-					</Button>
+					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={true} />
 				</FormActions>
 			</Form>
 		</FormLayout>

@@ -12,8 +12,11 @@ import { UpdateDocumentationPageActionInputSchema } from "@/app/(app)/[locale]/(
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
+import { documentationPagesLifecycleAdapter } from "@/lib/data/documentation-pages.lifecycle-adapter";
+import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { type Transaction, db } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
+import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -44,17 +47,23 @@ export const updateDocumentationPageAction = createServerAction(
 			});
 		}
 
-		const { contentBlocks, id, title } = result.output;
+		const { contentBlocks, documentId, title } = result.output;
 
 		await db.transaction(async (tx) => {
+			const draftVersionId = await ensureDraftVersion(
+				tx,
+				documentId,
+				documentationPagesLifecycleAdapter,
+			);
+
 			await tx
 				.update(schema.documentationPages)
 				.set({ title })
-				.where(eq(schema.documentationPages.id, id));
+				.where(eq(schema.documentationPages.id, draftVersionId));
 
 			const contentField = await tx.query.fields.findFirst({
 				where: {
-					entityVersionId: id,
+					entityVersionId: draftVersionId,
 					name: { fieldName: "content" },
 				},
 				columns: { id: true },
@@ -122,10 +131,16 @@ export const updateDocumentationPageAction = createServerAction(
 					}),
 				);
 			}
+
+			await touchVersion(tx, draftVersionId);
+
+			if (shouldSaveAndPublish(formData)) {
+				await publishVersion(tx, documentId, documentationPagesLifecycleAdapter);
+			}
 		});
 
-		revalidatePath("/[locale]/dashboard/website/documentation-pages", "layout");
+		revalidatePath("/[locale]/dashboard/administrator/documentation-pages", "layout");
 
-		redirect({ href: "/dashboard/website/documentation-pages", locale });
+		redirect({ href: "/dashboard/administrator/documentation-pages", locale });
 	},
 );

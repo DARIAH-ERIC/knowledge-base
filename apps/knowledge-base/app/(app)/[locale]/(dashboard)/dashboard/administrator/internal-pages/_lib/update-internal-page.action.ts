@@ -12,8 +12,11 @@ import { UpdateInternalPageActionInputSchema } from "@/app/(app)/[locale]/(dashb
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
+import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
+import { internalPagesLifecycleAdapter } from "@/lib/data/internal-pages.lifecycle-adapter";
 import { type Transaction, db } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
+import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -44,14 +47,23 @@ export const updateInternalPageAction = createServerAction(
 			});
 		}
 
-		const { contentBlocks, id, title } = result.output;
+		const { contentBlocks, documentId, title } = result.output;
 
 		await db.transaction(async (tx) => {
-			await tx.update(schema.internalPages).set({ title }).where(eq(schema.internalPages.id, id));
+			const draftVersionId = await ensureDraftVersion(
+				tx,
+				documentId,
+				internalPagesLifecycleAdapter,
+			);
+
+			await tx
+				.update(schema.internalPages)
+				.set({ title })
+				.where(eq(schema.internalPages.id, draftVersionId));
 
 			const contentField = await tx.query.fields.findFirst({
 				where: {
-					entityVersionId: id,
+					entityVersionId: draftVersionId,
 					name: { fieldName: "content" },
 				},
 				columns: { id: true },
@@ -118,6 +130,12 @@ export const updateInternalPageAction = createServerAction(
 						}
 					}),
 				);
+			}
+
+			await touchVersion(tx, draftVersionId);
+
+			if (shouldSaveAndPublish(formData)) {
+				await publishVersion(tx, documentId, internalPagesLifecycleAdapter);
 			}
 		});
 
