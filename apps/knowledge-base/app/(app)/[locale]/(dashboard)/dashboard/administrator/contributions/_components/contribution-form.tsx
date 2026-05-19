@@ -1,11 +1,13 @@
 "use client";
 
 import { createActionStateInitial, isActionStateSuccess } from "@dariah-eric/next-lib/actions";
+import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
+import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { parseDate } from "@internationalized/date";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useActionState, useEffect, useMemo, useState } from "react";
@@ -16,10 +18,59 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import { ContributionOptionPicker } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contribution-option-picker";
-import type { ContributionPersonOption, ContributionRoleOption } from "@/lib/data/contributions";
+import type { ContributionRoleOption } from "@/lib/data/contributions";
 import { useRouter } from "@/lib/navigation/navigation";
 import type { ServerAction } from "@/lib/server/create-server-action";
+
+async function fetchPersonOptionsPage(
+	params: Readonly<AsyncOptionsFetchPageParams>,
+): Promise<{ items: Array<AsyncOption>; total: number }> {
+	const searchParams = new URLSearchParams({
+		limit: String(params.limit),
+		offset: String(params.offset),
+		resource: "persons",
+	});
+
+	if (params.q !== "") {
+		searchParams.set("q", params.q);
+	}
+
+	const response = await fetch(`/api/contributions/options?${searchParams.toString()}`, {
+		signal: params.signal,
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to load persons.");
+	}
+
+	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+}
+
+async function fetchOrganisationalUnitOptionsPage(
+	roleTypeId: string,
+	params: Readonly<AsyncOptionsFetchPageParams>,
+): Promise<{ items: Array<AsyncOption>; total: number }> {
+	const searchParams = new URLSearchParams({
+		limit: String(params.limit),
+		offset: String(params.offset),
+		resource: "organisational-units",
+		roleTypeId,
+	});
+
+	if (params.q !== "") {
+		searchParams.set("q", params.q);
+	}
+
+	const response = await fetch(`/api/contributions/options?${searchParams.toString()}`, {
+		signal: params.signal,
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to load organisations.");
+	}
+
+	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+}
 
 interface ContributionFormValues {
 	id?: string;
@@ -33,7 +84,7 @@ interface ContributionFormValues {
 interface ContributionFormProps {
 	formAction: ServerAction;
 	description: string;
-	initialPersons?: Array<ContributionPersonOption>;
+	initialPersons?: Array<AsyncOption>;
 	initialPersonsTotal?: number;
 	roleOptions: Array<ContributionRoleOption>;
 	values?: ContributionFormValues;
@@ -74,13 +125,11 @@ export function ContributionForm(props: Readonly<ContributionFormProps>): ReactN
 
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
-	const [selectedPerson, setSelectedPerson] = useState<ContributionPersonOption | null>(
-		values?.person ?? null,
-	);
+	const [selectedPerson, setSelectedPerson] = useState<AsyncOption | null>(values?.person ?? null);
 	const [selectedRoleTypeId, setSelectedRoleTypeId] = useState<string | null>(
 		values?.roleTypeId ?? null,
 	);
-	const [selectedUnit, setSelectedUnit] = useState<{ id: string; name: string } | null>(
+	const [selectedUnit, setSelectedUnit] = useState<AsyncOption | null>(
 		values?.organisationalUnit ?? null,
 	);
 
@@ -103,15 +152,16 @@ export function ContributionForm(props: Readonly<ContributionFormProps>): ReactN
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
 				<FormSection description={description} title={t("Details")} variant="stacked">
-					<ContributionOptionPicker
+					<AsyncSelect
+						aria-label={t("Person")}
 						emptyMessage={t("No persons found.")}
 						errorMessage={getValidationError(validationErrors?.personId)}
+						fetchPage={fetchPersonOptionsPage}
 						initialItems={initialPersons}
 						initialTotal={initialPersonsTotal}
 						label={t("Person")}
 						onSelect={setSelectedPerson}
 						placeholder={t("Select a person")}
-						resource="persons"
 						selectedItem={selectedPerson}
 					/>
 					{values?.id != null ? <input name="id" type="hidden" value={values.id} /> : null}
@@ -138,20 +188,29 @@ export function ContributionForm(props: Readonly<ContributionFormProps>): ReactN
 					</Select>
 					<input name="roleTypeId" type="hidden" value={selectedRoleTypeId ?? ""} />
 
-					<ContributionOptionPicker
-						key={`organisational-units:${selectedRoleTypeId ?? ""}`}
+					<AsyncSelect
+						aria-label={t("Organisation")}
+						cacheKey={selectedRoleTypeId ?? "none"}
 						emptyMessage={
 							selectedRole != null ? t("No organisations found.") : t("Select a role first.")
 						}
 						errorMessage={getValidationError(validationErrors?.organisationalUnitId)}
+						fetchPage={(params) => {
+							if (selectedRoleTypeId == null) {
+								return Promise.resolve({ items: [], total: 0 });
+							}
+
+							return fetchOrganisationalUnitOptionsPage(selectedRoleTypeId, params);
+						}}
+						initialItems={[]}
+						initialTotal={0}
 						isDisabled={selectedRole == null}
 						label={t("Organisation")}
+						loadOnMount={selectedRoleTypeId != null}
 						onSelect={setSelectedUnit}
 						placeholder={
 							selectedRole != null ? t("Select an organisation") : t("Select a role first")
 						}
-						resource="organisational-units"
-						roleTypeId={selectedRoleTypeId}
 						selectedItem={selectedUnit}
 					/>
 					<input name="organisationalUnitId" type="hidden" value={selectedUnit?.id ?? ""} />
