@@ -44,6 +44,7 @@ interface CountryFormProps {
 	selectedRelatedEntities?: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources?: Array<{ id: string; name: string; description?: string }>;
 	selectedSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
+	showSaveAndPublish?: boolean;
 }
 
 export function CountryForm(props: Readonly<CountryFormProps>): ReactNode {
@@ -63,6 +64,7 @@ export function CountryForm(props: Readonly<CountryFormProps>): ReactNode {
 		selectedRelatedEntities,
 		selectedRelatedResources,
 		selectedSocialMediaItems,
+		showSaveAndPublish,
 	} = props;
 
 	const t = useExtracted();
@@ -175,7 +177,7 @@ export function CountryForm(props: Readonly<CountryFormProps>): ReactNode {
 
 				<FormActions>
 					<FormStatus state={state} />
-					<DraftFormSubmitButtons isPending={isPending} />
+					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={showSaveAndPublish} />
 				</FormActions>
 			</Form>
 		</FormLayout>

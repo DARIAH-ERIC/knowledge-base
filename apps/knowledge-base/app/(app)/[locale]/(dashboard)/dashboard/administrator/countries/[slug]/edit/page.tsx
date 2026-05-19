@@ -55,14 +55,14 @@ export default async function DashboardAdministratorEditCountryPage(
 	}
 
 	const documentId = anyVersion.entityVersion.entity.id;
-	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+	const { draftVersionId, hasDraftChanges, publishedId } = await db.transaction(async (tx) => {
 		const draftVersionId = await ensureDraftVersion(
 			tx,
 			documentId,
 			organisationalUnitsLifecycleAdapter,
 		);
-		const { publishedId } = await getDocumentLifecycleState(tx, documentId);
-		return { draftVersionId, publishedId };
+		const { hasDraftChanges, publishedId } = await getDocumentLifecycleState(tx, documentId);
+		return { draftVersionId, hasDraftChanges, publishedId };
 	});
 
 	const [
@@ -114,6 +114,8 @@ export default async function DashboardAdministratorEditCountryPage(
 	return (
 		<CountryEditForm
 			country={{ ...country, image }}
+			documentId={documentId}
+			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
 			initialRelatedEntityIds={relatedEntityIds}
 			initialRelatedEntityItems={initialRelatedEntities.items}
@@ -124,6 +126,7 @@ export default async function DashboardAdministratorEditCountryPage(
 			initialSocialMediaIds={socialMediaIds}
 			initialSocialMediaItems={initialSocialMedia.items}
 			initialSocialMediaTotal={initialSocialMedia.total}
+			isPublished={publishedId != null}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}

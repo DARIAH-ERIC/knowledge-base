@@ -10,11 +10,14 @@ import * as v from "valibot";
 
 import { UpdateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { touchVersion } from "@/lib/data/entity-lifecycle";
+import { publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { ensureOrganisationalUnitDraftVersion } from "@/lib/data/organisational-unit-drafts";
+import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { ensurePersonDraftVersion } from "@/lib/data/person-drafts";
+import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
+import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 
@@ -150,6 +153,33 @@ export const updateContributionAction = createServerAction(
 
 			if (sourceDraftOrganisationalUnitId !== targetDraftOrganisationalUnitId) {
 				await touchVersion(tx, targetDraftOrganisationalUnitId);
+			}
+
+			if (shouldSaveAndPublish(formData)) {
+				const [personVersion, organisationalUnitVersion] = await Promise.all([
+					tx.query.entityVersions.findFirst({
+						where: { id: targetDraftPersonId },
+						columns: {},
+						with: { entity: { columns: { id: true } } },
+					}),
+					tx.query.entityVersions.findFirst({
+						where: { id: targetDraftOrganisationalUnitId },
+						columns: {},
+						with: { entity: { columns: { id: true } } },
+					}),
+				]);
+
+				if (personVersion != null) {
+					await publishVersion(tx, personVersion.entity.id, personsLifecycleAdapter);
+				}
+
+				if (organisationalUnitVersion != null) {
+					await publishVersion(
+						tx,
+						organisationalUnitVersion.entity.id,
+						organisationalUnitsLifecycleAdapter,
+					);
+				}
 			}
 
 			return { id: draftContribution.id };

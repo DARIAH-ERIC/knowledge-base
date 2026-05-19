@@ -55,14 +55,14 @@ export default async function DashboardAdministratorEditNationalConsortiumPage(
 	}
 
 	const documentId = anyVersion.entityVersion.entity.id;
-	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+	const { draftVersionId, hasDraftChanges, publishedId } = await db.transaction(async (tx) => {
 		const draftVersionId = await ensureDraftVersion(
 			tx,
 			documentId,
 			organisationalUnitsLifecycleAdapter,
 		);
-		const { publishedId } = await getDocumentLifecycleState(tx, documentId);
-		return { draftVersionId, publishedId };
+		const { hasDraftChanges, publishedId } = await getDocumentLifecycleState(tx, documentId);
+		return { draftVersionId, hasDraftChanges, publishedId };
 	});
 
 	const [
@@ -113,6 +113,8 @@ export default async function DashboardAdministratorEditNationalConsortiumPage(
 
 	return (
 		<NationalConsortiumEditForm
+			documentId={documentId}
+			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
 			initialRelatedEntityIds={relatedEntityIds}
 			initialRelatedEntityItems={initialRelatedEntities.items}
@@ -123,6 +125,7 @@ export default async function DashboardAdministratorEditNationalConsortiumPage(
 			initialSocialMediaIds={socialMediaIds}
 			initialSocialMediaItems={initialSocialMedia.items}
 			initialSocialMediaTotal={initialSocialMedia.total}
+			isPublished={publishedId != null}
 			nationalConsortium={{ ...nationalConsortium, image }}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}

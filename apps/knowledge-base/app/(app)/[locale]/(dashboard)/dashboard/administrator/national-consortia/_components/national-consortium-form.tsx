@@ -44,6 +44,7 @@ interface NationalConsortiumFormProps {
 	selectedRelatedEntities?: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources?: Array<{ id: string; name: string; description?: string }>;
 	selectedSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
+	showSaveAndPublish?: boolean;
 }
 
 export function NationalConsortiumForm(props: Readonly<NationalConsortiumFormProps>): ReactNode {
@@ -63,6 +64,7 @@ export function NationalConsortiumForm(props: Readonly<NationalConsortiumFormPro
 		selectedRelatedEntities,
 		selectedRelatedResources,
 		selectedSocialMediaItems,
+		showSaveAndPublish,
 	} = props;
 
 	const t = useExtracted();
@@ -179,7 +181,7 @@ export function NationalConsortiumForm(props: Readonly<NationalConsortiumFormPro
 
 				<FormActions>
 					<FormStatus state={state} />
-					<DraftFormSubmitButtons isPending={isPending} />
+					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={showSaveAndPublish} />
 				</FormActions>
 			</Form>
 		</FormLayout>
