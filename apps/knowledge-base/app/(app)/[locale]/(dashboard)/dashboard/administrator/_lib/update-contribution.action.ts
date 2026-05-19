@@ -11,6 +11,8 @@ import * as v from "valibot";
 import { UpdateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.schema";
 import { assertAdmin } from "@/lib/auth/session";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
+import { ensureOrganisationalUnitDraftVersion } from "@/lib/data/organisational-unit-drafts";
+import { ensurePersonDraftVersion } from "@/lib/data/person-drafts";
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -46,36 +48,122 @@ export const updateContributionAction = createServerAction(
 
 		const contribution = await db.query.personsToOrganisationalUnits.findFirst({
 			where: { id },
-			columns: { id: true, organisationalUnitId: true },
+			columns: {
+				id: true,
+				duration: true,
+				organisationalUnitId: true,
+				personId: true,
+				roleTypeId: true,
+			},
 		});
 
 		if (contribution == null) {
 			return createActionStateError({ message: t("Contribution not found.") });
 		}
 
-		const allowedRelation = await db
-			.select({ id: schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.id })
-			.from(schema.organisationalUnits)
-			.innerJoin(
-				schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations,
-				eq(
-					schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.unitTypeId,
-					schema.organisationalUnits.typeId,
-				),
-			)
-			.where(
-				and(
-					eq(schema.organisationalUnits.id, organisationalUnitId),
-					eq(
-						schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.roleTypeId,
-						roleTypeId,
-					),
-				),
-			)
-			.limit(1)
-			.then((rows) => rows[0] ?? null);
+		const returned = await db.transaction(async (tx) => {
+			const sourceDraftPersonId = await ensurePersonDraftVersion(tx, contribution.personId);
+			const targetDraftPersonId = await ensurePersonDraftVersion(tx, personId);
+			const sourceDraftOrganisationalUnitId = await ensureOrganisationalUnitDraftVersion(
+				tx,
+				contribution.organisationalUnitId,
+			);
+			const targetDraftOrganisationalUnitId = await ensureOrganisationalUnitDraftVersion(
+				tx,
+				organisationalUnitId,
+			);
+			const draftContribution =
+				sourceDraftPersonId === contribution.personId &&
+				sourceDraftOrganisationalUnitId === contribution.organisationalUnitId
+					? { id }
+					: await tx.query.personsToOrganisationalUnits.findFirst({
+							where: {
+								personId: sourceDraftPersonId,
+								organisationalUnitId: sourceDraftOrganisationalUnitId,
+								roleTypeId: contribution.roleTypeId,
+							},
+							columns: { id: true },
+						});
 
-		if (allowedRelation == null) {
+			if (draftContribution == null) {
+				return { error: "not-found" as const };
+			}
+
+			const allowedRelation = await tx
+				.select({ id: schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.id })
+				.from(schema.organisationalUnits)
+				.innerJoin(
+					schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations,
+					eq(
+						schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.unitTypeId,
+						schema.organisationalUnits.typeId,
+					),
+				)
+				.where(
+					and(
+						eq(schema.organisationalUnits.id, targetDraftOrganisationalUnitId),
+						eq(
+							schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.roleTypeId,
+							roleTypeId,
+						),
+					),
+				)
+				.limit(1)
+				.then((rows) => rows[0] ?? null);
+
+			if (allowedRelation == null) {
+				return { error: "role-not-allowed" as const };
+			}
+
+			const existing = await tx.query.personsToOrganisationalUnits.findFirst({
+				where: {
+					AND: [
+						{ personId: targetDraftPersonId },
+						{ organisationalUnitId: targetDraftOrganisationalUnitId },
+						{ roleTypeId },
+						{ id: { ne: draftContribution.id } },
+					],
+				},
+				columns: { id: true },
+			});
+
+			if (existing != null) {
+				return { error: "duplicate" as const };
+			}
+
+			await tx
+				.update(schema.personsToOrganisationalUnits)
+				.set({
+					duration,
+					organisationalUnitId: targetDraftOrganisationalUnitId,
+					personId: targetDraftPersonId,
+					roleTypeId,
+				})
+				.where(eq(schema.personsToOrganisationalUnits.id, draftContribution.id));
+
+			await touchVersion(tx, sourceDraftPersonId);
+			await touchVersion(tx, sourceDraftOrganisationalUnitId);
+
+			if (sourceDraftPersonId !== targetDraftPersonId) {
+				await touchVersion(tx, targetDraftPersonId);
+			}
+
+			if (sourceDraftOrganisationalUnitId !== targetDraftOrganisationalUnitId) {
+				await touchVersion(tx, targetDraftOrganisationalUnitId);
+			}
+
+			return { id: draftContribution.id };
+		});
+
+		if ("error" in returned) {
+			if (returned.error === "duplicate") {
+				return createActionStateError({ message: t("This contribution already exists.") });
+			}
+
+			if (returned.error === "not-found") {
+				return createActionStateError({ message: t("Contribution not found.") });
+			}
+
 			return createActionStateError({
 				message: t("The selected role is not allowed for this organisation."),
 				validationErrors: {
@@ -84,32 +172,8 @@ export const updateContributionAction = createServerAction(
 			});
 		}
 
-		const existing = await db.query.personsToOrganisationalUnits.findFirst({
-			where: {
-				AND: [{ personId }, { organisationalUnitId }, { roleTypeId }, { id: { ne: id } }],
-			},
-			columns: { id: true },
-		});
-
-		if (existing != null) {
-			return createActionStateError({ message: t("This contribution already exists.") });
-		}
-
-		await db.transaction(async (tx) => {
-			await tx
-				.update(schema.personsToOrganisationalUnits)
-				.set({ duration, organisationalUnitId, personId, roleTypeId })
-				.where(eq(schema.personsToOrganisationalUnits.id, id));
-
-			await touchVersion(tx, contribution.organisationalUnitId);
-
-			if (contribution.organisationalUnitId !== organisationalUnitId) {
-				await touchVersion(tx, organisationalUnitId);
-			}
-		});
-
 		revalidatePath("/[locale]/dashboard/administrator", "layout");
 
-		return createActionStateSuccess({ data: { id } });
+		return createActionStateSuccess({ data: { id: returned.id } });
 	},
 );

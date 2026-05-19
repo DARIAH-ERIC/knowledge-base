@@ -8,7 +8,7 @@ import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getOrganisationalUnitEditDataForAdmin } from "@/lib/data/admin-organisational-units";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
-import { ensureDraftVersion } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
 import { getSocialMediaOptions } from "@/lib/data/social-media";
@@ -55,9 +55,15 @@ export default async function DashboardAdministratorEditNationalConsortiumPage(
 	}
 
 	const documentId = anyVersion.entityVersion.entity.id;
-	const draftVersionId = await db.transaction((tx) =>
-		ensureDraftVersion(tx, documentId, organisationalUnitsLifecycleAdapter),
-	);
+	const { draftVersionId, publishedId } = await db.transaction(async (tx) => {
+		const draftVersionId = await ensureDraftVersion(
+			tx,
+			documentId,
+			organisationalUnitsLifecycleAdapter,
+		);
+		const { publishedId } = await getDocumentLifecycleState(tx, documentId);
+		return { draftVersionId, publishedId };
+	});
 
 	const [
 		{ items: initialAssets },
@@ -74,6 +80,7 @@ export default async function DashboardAdministratorEditNationalConsortiumPage(
 			slug,
 			unitType: "national_consortium",
 			versionId: draftVersionId,
+			publishedVersionId: publishedId,
 		}),
 	]);
 

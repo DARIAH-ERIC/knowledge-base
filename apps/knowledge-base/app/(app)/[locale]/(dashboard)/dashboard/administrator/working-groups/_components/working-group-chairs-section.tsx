@@ -2,6 +2,7 @@
 
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { AsyncSelect } from "@dariah-eric/ui/async-select";
+import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
@@ -42,9 +43,16 @@ import type { WorkingGroupChair } from "@/lib/data/working-group-chairs";
 
 interface WorkingGroupChairsSectionProps {
 	unitId: string;
-	chairs: Array<WorkingGroupChair>;
+	chairs: Array<WorkingGroupChair & { lifecycleStatus?: "changed" | "new" }>;
 	initialPersonItems: Array<AvailablePerson>;
 	initialPersonTotal: number;
+}
+
+function formatLifecycleStatus(
+	status: "changed" | "new",
+	t: ReturnType<typeof useExtracted>,
+): string {
+	return status === "new" ? t("New") : t("Changed");
 }
 
 async function fetchPersonOptionsPage(
@@ -139,7 +147,16 @@ export function WorkingGroupChairsSection(
 						<TableBody items={localChairs}>
 							{(chair) => (
 								<TableRow id={chair.id}>
-									<TableCell>{chair.personName}</TableCell>
+									<TableCell>
+										<div className="flex items-center gap-x-2">
+											<span>{chair.personName}</span>
+											{chair.lifecycleStatus != null && (
+												<Badge intent={chair.lifecycleStatus === "new" ? "emerald" : "amber"}>
+													{formatLifecycleStatus(chair.lifecycleStatus, t)}
+												</Badge>
+											)}
+										</div>
+									</TableCell>
 									<TableCell>
 										{format.dateTime(chair.duration.start, { dateStyle: "short" })}
 									</TableCell>

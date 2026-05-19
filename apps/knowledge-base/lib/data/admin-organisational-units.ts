@@ -9,7 +9,11 @@ import {
 	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
 import { getSocialMediaOptionsByIds } from "@/lib/data/social-media";
-import { getUnitRelationStatusOptions, getUnitRelations } from "@/lib/data/unit-relations";
+import {
+	annotateUnitRelationLifecycle,
+	getUnitRelationStatusOptions,
+	getUnitRelations,
+} from "@/lib/data/unit-relations";
 import { getWorkingGroupChairs } from "@/lib/data/working-group-chairs";
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
@@ -73,9 +77,14 @@ async function getOrganisationalUnitBySlugForAdmin(
 
 export async function getOrganisationalUnitEditDataForAdmin(
 	currentUser: Pick<User, "role">,
-	params: { slug: string; unitType: ManagedOrganisationalUnitType; versionId?: string },
+	params: {
+		slug: string;
+		unitType: ManagedOrganisationalUnitType;
+		versionId?: string;
+		publishedVersionId?: string | null;
+	},
 ) {
-	const { slug, unitType, versionId } = params;
+	const { slug, unitType, versionId, publishedVersionId } = params;
 
 	const unit = await getOrganisationalUnitBySlugForAdmin(currentUser, unitType, slug, versionId);
 
@@ -84,35 +93,39 @@ export async function getOrganisationalUnitEditDataForAdmin(
 	}
 
 	const documentId = unit.entityVersion.entity.id;
-	const [descriptionRows, relationIds, relations, socialMediaRows, unitRelationStatusOptions] =
-		await Promise.all([
-			db
-				.select({ content: schema.richTextContentBlocks.content })
-				.from(schema.richTextContentBlocks)
-				.innerJoin(
-					schema.contentBlocks,
-					eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
-				)
-				.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
-				.innerJoin(
-					schema.entityTypesFieldsNames,
-					eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
-				)
-				.where(
-					and(
-						eq(schema.fields.entityVersionId, unit.id),
-						eq(schema.entityTypesFieldsNames.fieldName, "description"),
-					),
-				)
-				.limit(1),
-			getEntityRelations(documentId),
-			getUnitRelations(unit.id),
-			db.query.organisationalUnitsToSocialMedia.findMany({
-				where: { organisationalUnitId: unit.id },
-				columns: { socialMediaId: true },
-			}),
-			getUnitRelationStatusOptions(unitType),
-		]);
+	const [
+		descriptionRows,
+		relationIds,
+		relations,
+		socialMediaRows,
+		unitRelationStatusOptions,
+		publishedRelations,
+	] = await Promise.all([
+		db
+			.select({ content: schema.richTextContentBlocks.content })
+			.from(schema.richTextContentBlocks)
+			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.where(
+				and(
+					eq(schema.fields.entityVersionId, unit.id),
+					eq(schema.entityTypesFieldsNames.fieldName, "description"),
+				),
+			)
+			.limit(1),
+		getEntityRelations(documentId),
+		getUnitRelations(unit.id),
+		db.query.organisationalUnitsToSocialMedia.findMany({
+			where: { organisationalUnitId: unit.id },
+			columns: { socialMediaId: true },
+		}),
+		getUnitRelationStatusOptions(unitType),
+		publishedVersionId != null ? getUnitRelations(publishedVersionId) : Promise.resolve([]),
+	]);
 
 	const { relatedEntityIds, relatedResourceIds } = relationIds;
 	const socialMediaIds = socialMediaRows.map((row) => row.socialMediaId);
@@ -124,7 +137,7 @@ export async function getOrganisationalUnitEditDataForAdmin(
 		]);
 
 	return {
-		relations,
+		relations: annotateUnitRelationLifecycle(relations, publishedRelations),
 		relatedEntityIds,
 		relatedResourceIds,
 		selectedSocialMediaItems,

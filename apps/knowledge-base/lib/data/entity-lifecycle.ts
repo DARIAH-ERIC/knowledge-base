@@ -35,6 +35,12 @@ export interface EntityLifecycleAdapter {
 	cloneSubtype(tx: Transaction, sourceVersionId: string, targetVersionId: string): Promise<void>;
 
 	/**
+	 * Replace subtype-owned rows for an existing target version from a source version. Adapters can
+	 * override this when replacement must preserve rows owned by other versions.
+	 */
+	replaceSubtype?(tx: Transaction, sourceVersionId: string, targetVersionId: string): Promise<void>;
+
+	/**
 	 * Delete the subtype row (and any subtype-owned children) for versionId, in preparation for it
 	 * being overwritten. Do NOT delete the entity_versions row itself — the caller does that.
 	 */
@@ -461,9 +467,13 @@ export async function publishVersion(
 
 	// Replace published content in place (stable published ID).
 	await wipeVersionContent(tx, publishedId);
-	await adapter.wipeSubtype(tx, publishedId);
 	await cloneVersionContent(tx, draftId, publishedId);
-	await adapter.cloneSubtype(tx, draftId, publishedId);
+	if (adapter.replaceSubtype != null) {
+		await adapter.replaceSubtype(tx, draftId, publishedId);
+	} else {
+		await adapter.wipeSubtype(tx, publishedId);
+		await adapter.cloneSubtype(tx, draftId, publishedId);
+	}
 	await setVersionUpdatedAt(tx, publishedId, draftVersion.updatedAt);
 
 	return publishedId;

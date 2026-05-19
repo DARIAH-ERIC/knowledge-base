@@ -174,6 +174,7 @@ export async function getPersonContributions(personId: string) {
 			roleType: schema.personRoleTypes.type,
 			organisationalUnitId: schema.personsToOrganisationalUnits.organisationalUnitId,
 			organisationalUnitName: schema.organisationalUnits.name,
+			organisationalUnitType: schema.organisationalUnitTypes.type,
 		})
 		.from(schema.personsToOrganisationalUnits)
 		.innerJoin(
@@ -184,10 +185,51 @@ export async function getPersonContributions(personId: string) {
 			schema.organisationalUnits,
 			eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
 		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
 		.where(eq(schema.personsToOrganisationalUnits.personId, personId));
 }
 
 export type PersonContribution = Awaited<ReturnType<typeof getPersonContributions>>[number];
+
+export type ContributionLifecycleStatus = "changed" | "new";
+
+function durationKey(duration: PersonContribution["duration"]): string {
+	return [duration.start.toISOString(), duration.end?.toISOString() ?? ""].join(":");
+}
+
+export function annotatePersonContributionLifecycle(
+	draftContributions: Array<PersonContribution>,
+	publishedContributions: Array<PersonContribution>,
+): Array<PersonContribution & { lifecycleStatus?: ContributionLifecycleStatus }> {
+	const publishedByIdentity = new Map(
+		publishedContributions.map(
+			(contribution) =>
+				[
+					[contribution.organisationalUnitId, contribution.roleTypeId].join(":"),
+					contribution,
+				] as const,
+		),
+	);
+
+	return draftContributions.map((contribution) => {
+		const published = publishedByIdentity.get(
+			[contribution.organisationalUnitId, contribution.roleTypeId].join(":"),
+		);
+
+		if (published == null) {
+			return { ...contribution, lifecycleStatus: "new" };
+		}
+
+		if (durationKey(contribution.duration) !== durationKey(published.duration)) {
+			return { ...contribution, lifecycleStatus: "changed" };
+		}
+
+		return contribution;
+	});
+}
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getContributionRoleOptions() {
