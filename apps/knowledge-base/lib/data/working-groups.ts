@@ -17,7 +17,7 @@ interface GetWorkingGroupsParams {
 
 export interface WorkingGroupsResult {
 	data: Array<
-		Pick<schema.OrganisationalUnit, "acronym" | "id" | "name"> & {
+		Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "sshocMarketplaceActorId"> & {
 			documentId: string;
 			durationFrom: Date | null;
 			durationUntil: Date | null;
@@ -70,6 +70,7 @@ export async function getWorkingGroups(
 				documentId: schema.entities.id,
 				id: schema.organisationalUnits.id,
 				name: schema.organisationalUnits.name,
+				sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
 				slug: schema.entities.slug,
 				updatedAt: schema.entityVersions.updatedAt,
 				isPublished: sql<boolean>`
@@ -249,6 +250,7 @@ export async function getWorkingGroups(
 				id: item.id,
 				isPublished: item.isPublished,
 				name: item.name,
+				sshocMarketplaceActorId: item.sshocMarketplaceActorId,
 				updatedAt: item.updatedAt,
 			};
 		}),

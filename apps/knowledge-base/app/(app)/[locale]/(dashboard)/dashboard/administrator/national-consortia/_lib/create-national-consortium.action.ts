@@ -46,8 +46,16 @@ export const createNationalConsortiumAction = createServerAction(
 			});
 		}
 
-		const { acronym, description, imageKey, name, relatedEntityIds, relatedResourceIds, summary } =
-			result.output;
+		const {
+			acronym,
+			description,
+			imageKey,
+			name,
+			relatedEntityIds,
+			relatedResourceIds,
+			sshocMarketplaceActorId,
+			summary,
+		} = result.output;
 
 		const slug = slugify(name);
 
@@ -86,6 +94,7 @@ export const createNationalConsortiumAction = createServerAction(
 				acronym,
 				imageId,
 				name,
+				sshocMarketplaceActorId,
 				summary,
 				typeId: orgUnitType.id,
 			});
