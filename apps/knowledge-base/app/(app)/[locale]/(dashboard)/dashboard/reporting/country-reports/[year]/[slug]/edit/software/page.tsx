@@ -1,3 +1,4 @@
+import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -8,6 +9,7 @@ import { getAuthorizedCountryReportForUser } from "@/app/(app)/[locale]/(dashboa
 import { assertAuthenticated } from "@/lib/auth/session";
 import { resolveCountryReportId } from "@/lib/data/reporting-urls";
 import { db } from "@/lib/db";
+import { and, eq, sql } from "@/lib/db/sql";
 import { search } from "@/lib/search";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -46,7 +48,7 @@ export default async function DashboardReportingCountryReportSoftwarePage(
 				columns: { id: true },
 				with: {
 					country: {
-						columns: { sshocMarketplaceActorId: true },
+						columns: { id: true },
 					},
 				},
 			}),
@@ -62,12 +64,52 @@ export default async function DashboardReportingCountryReportSoftwarePage(
 	}
 
 	const t = await getExtracted();
-	const actorId = report.country.sshocMarketplaceActorId;
+	const year = Number(routeYear);
+	const actorIds = new Set<number>();
+
+	const nationalConsortiumActorIds = await db
+		.select({ sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId })
+		.from(schema.organisationalUnitsRelations)
+		.innerJoin(
+			schema.organisationalUnitStatus,
+			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+		)
+		.innerJoin(
+			schema.organisationalUnits,
+			eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.unitId),
+		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
+		.where(
+			and(
+				eq(schema.organisationalUnitsRelations.relatedUnitId, report.country.id),
+				eq(schema.organisationalUnitStatus.status, "is_national_consortium_of"),
+				eq(
+					schema.organisationalUnitTypes.type,
+					"national_consortium" as typeof schema.organisationalUnitTypes.$inferSelect.type,
+				),
+				sql`
+					${schema.organisationalUnitsRelations.duration} && tstzrange (
+						MAKE_DATE(${year}, 1, 1)::TIMESTAMPTZ,
+						MAKE_DATE(${year + 1}, 1, 1)::TIMESTAMPTZ
+					)
+				`,
+			),
+		);
+
+	for (const { sshocMarketplaceActorId } of nationalConsortiumActorIds) {
+		if (sshocMarketplaceActorId != null) {
+			actorIds.add(sshocMarketplaceActorId);
+		}
+	}
+
 	const softwareResult =
-		actorId == null
+		actorIds.size === 0
 			? null
 			: await search.collections.resources.search({
-					filterBy: `type:=software && source:=ssh-open-marketplace && source_actor_ids:=[\`ssh-open-marketplace:${actorId}\`]`,
+					filterBy: `type:=software && source:=ssh-open-marketplace && source_actor_ids:=[${[...actorIds].map((actorId) => `\`ssh-open-marketplace:${actorId}\``).join(",")}]`,
 					perPage: 100,
 					query: "*",
 					queryBy: ["label", "description", "keywords"],
@@ -81,9 +123,9 @@ export default async function DashboardReportingCountryReportSoftwarePage(
 				<p className="text-sm text-muted-fg">
 					{t("Software contributions from the SSH Open Marketplace.")}
 				</p>
-				{actorId == null ? (
+				{actorIds.size === 0 ? (
 					<p className="text-sm text-muted-fg italic">
-						{t("This country has no SSH Open Marketplace actor id.")}
+						{t("This country has no national consortium with an SSH Open Marketplace actor id.")}
 					</p>
 				) : software.length === 0 ? (
 					<p className="text-sm text-muted-fg italic">

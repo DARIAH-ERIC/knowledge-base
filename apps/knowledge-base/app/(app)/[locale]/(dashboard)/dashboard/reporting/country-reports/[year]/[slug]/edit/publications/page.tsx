@@ -1,3 +1,4 @@
+import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -8,6 +9,7 @@ import { getAuthorizedCountryReportForUser } from "@/app/(app)/[locale]/(dashboa
 import { assertAuthenticated } from "@/lib/auth/session";
 import { resolveCountryReportId } from "@/lib/data/reporting-urls";
 import { db } from "@/lib/db";
+import { and, eq, sql } from "@/lib/db/sql";
 import { search } from "@/lib/search";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -37,25 +39,21 @@ export default async function DashboardReportingCountryReportPublicationsPage(
 	}
 
 	const { user } = await assertAuthenticated();
-	const [result, publicationsResult] = await Promise.all([
-		getAuthorizedCountryReportForUser(
-			user,
-			id,
-			(id) =>
-				db.query.countryReports.findFirst({
-					where: { id },
-					columns: { id: true },
-				}),
-			"update",
-		),
-		search.collections.resources.search({
-			filterBy: `type:=publication && source:=zotero && year:=${Number(routeYear)}`,
-			perPage: 100,
-			query: "*",
-			queryBy: ["label", "description", "keywords"],
-			sortBy: [{ field: "label", direction: "asc" }],
-		}),
-	]);
+	const result = await getAuthorizedCountryReportForUser(
+		user,
+		id,
+		(id) =>
+			db.query.countryReports.findFirst({
+				where: { id },
+				columns: { id: true },
+				with: {
+					country: {
+						columns: { id: true },
+					},
+				},
+			}),
+		"update",
+	);
 
 	if (result.status !== "ok") {
 		notFound();
@@ -66,13 +64,68 @@ export default async function DashboardReportingCountryReportPublicationsPage(
 	}
 
 	const t = await getExtracted();
-	const publications = publicationsResult.isOk() ? publicationsResult.value.items : [];
+	const year = Number(routeYear);
+	const actorIds = new Set<number>();
+
+	const nationalConsortiumActorIds = await db
+		.select({ sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId })
+		.from(schema.organisationalUnitsRelations)
+		.innerJoin(
+			schema.organisationalUnitStatus,
+			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+		)
+		.innerJoin(
+			schema.organisationalUnits,
+			eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.unitId),
+		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
+		.where(
+			and(
+				eq(schema.organisationalUnitsRelations.relatedUnitId, report.country.id),
+				eq(schema.organisationalUnitStatus.status, "is_national_consortium_of"),
+				eq(
+					schema.organisationalUnitTypes.type,
+					"national_consortium" as typeof schema.organisationalUnitTypes.$inferSelect.type,
+				),
+				sql`
+					${schema.organisationalUnitsRelations.duration} && tstzrange (
+						MAKE_DATE(${year}, 1, 1)::TIMESTAMPTZ,
+						MAKE_DATE(${year + 1}, 1, 1)::TIMESTAMPTZ
+					)
+				`,
+			),
+		);
+
+	for (const { sshocMarketplaceActorId } of nationalConsortiumActorIds) {
+		if (sshocMarketplaceActorId != null) {
+			actorIds.add(sshocMarketplaceActorId);
+		}
+	}
+
+	const publicationsResult =
+		actorIds.size === 0
+			? null
+			: await search.collections.resources.search({
+					filterBy: `type:=publication && source:=zotero && year:=${year} && source_actor_ids:=[${[...actorIds].map((actorId) => `\`ssh-open-marketplace:${actorId}\``).join(",")}]`,
+					perPage: 100,
+					query: "*",
+					queryBy: ["label", "description", "keywords"],
+					sortBy: [{ field: "label", direction: "asc" }],
+				});
+	const publications = publicationsResult?.isOk() === true ? publicationsResult.value.items : [];
 
 	return (
 		<div className="flex flex-col gap-y-12">
 			<div className="flex flex-col gap-y-4">
 				<p className="text-sm text-muted-fg">{t("Publications from the Zotero library.")}</p>
-				{publications.length === 0 ? (
+				{actorIds.size === 0 ? (
+					<p className="text-sm text-muted-fg italic">
+						{t("This country has no national consortium with an SSH Open Marketplace actor id.")}
+					</p>
+				) : publications.length === 0 ? (
 					<p className="text-sm text-muted-fg italic">
 						{t("No Zotero publications found for this reporting year.")}
 					</p>
