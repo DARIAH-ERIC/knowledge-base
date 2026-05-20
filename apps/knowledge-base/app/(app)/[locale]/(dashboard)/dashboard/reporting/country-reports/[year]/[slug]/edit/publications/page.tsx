@@ -1,4 +1,5 @@
 import * as schema from "@dariah-eric/database/schema";
+import type { SearchResourcesParams } from "@dariah-eric/search";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -105,17 +106,39 @@ export default async function DashboardReportingCountryReportPublicationsPage(
 		}
 	}
 
-	const publicationsResult =
+	const publicationsSearchParams: SearchResourcesParams = {
+		filterBy: `type:=publication && source:=zotero && year:=${year} && source_actor_ids:=[${[...actorIds].map((actorId) => `\`ssh-open-marketplace:${actorId}\``).join(",")}]`,
+		perPage: 100,
+		query: "*",
+		queryBy: ["label", "description", "keywords"],
+		sortBy: [{ field: "label", direction: "asc" }],
+	};
+	const firstPublicationsResult =
 		actorIds.size === 0
 			? null
-			: await search.collections.resources.search({
-					filterBy: `type:=publication && source:=zotero && year:=${year} && source_actor_ids:=[${[...actorIds].map((actorId) => `\`ssh-open-marketplace:${actorId}\``).join(",")}]`,
-					perPage: 100,
-					query: "*",
-					queryBy: ["label", "description", "keywords"],
-					sortBy: [{ field: "label", direction: "asc" }],
-				});
-	const publications = publicationsResult?.isOk() === true ? publicationsResult.value.items : [];
+			: await search.collections.resources.search({ ...publicationsSearchParams, page: 1 });
+	const remainingPublicationsResults =
+		firstPublicationsResult?.isOk() === true
+			? await Promise.all(
+					Array.from(
+						{ length: Math.max(firstPublicationsResult.value.pagination.totalPages - 1, 0) },
+						(_, index) =>
+							search.collections.resources.search({
+								...publicationsSearchParams,
+								page: index + 2,
+							}),
+					),
+				)
+			: [];
+	const publications =
+		firstPublicationsResult?.isOk() === true
+			? [
+					...firstPublicationsResult.value.items,
+					...remainingPublicationsResults.flatMap((result) =>
+						result.isOk() ? result.value.items : [],
+					),
+				]
+			: [];
 
 	return (
 		<div className="flex flex-col gap-y-12">
