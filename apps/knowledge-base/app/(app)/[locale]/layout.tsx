@@ -1,7 +1,7 @@
 import { createUrl } from "@acdh-oeaw/lib";
 import { ToastRegion } from "@dariah-eric/ui/toast";
 import type { Metadata } from "next";
-import { getExtracted, getLocale } from "next-intl/server";
+import { getLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { jsonLdScriptProps } from "react-schemaorg";
@@ -28,7 +28,6 @@ export function generateStaticParams(): Array<Awaited<LocaleLayoutProps["params"
 
 export async function generateMetadata(): Promise<Promise<Metadata>> {
 	const locale = await getLocale();
-	const t = await getExtracted();
 	const meta = await getMetadata();
 
 	const metadata: Metadata = {
@@ -42,11 +41,6 @@ export async function generateMetadata(): Promise<Promise<Metadata>> {
 			 * @see {@link https://github.com/amannn/next-intl/issues/2119}
 			 */
 			canonical: "./",
-			types: {
-				"application/rss+xml": [
-					{ title: t("RSS feed ({locale})", { locale }), url: `/${locale}/rss.xml` },
-				],
-			},
 		},
 		title: {
 			default: meta.title,

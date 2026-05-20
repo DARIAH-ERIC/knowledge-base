@@ -86,9 +86,7 @@
 		"uqr": "catalog:",
 		"use-debounce": "catalog:",
 		"uuid": "catalog:",
-		"valibot": "catalog:",
-		"xast-util-feed": "catalog:",
-		"xast-util-to-xml": "catalog:"
+		"valibot": "catalog:"
 	},
 	"devDependencies": {
 		"@dariah-eric/configs": "workspace:^",
