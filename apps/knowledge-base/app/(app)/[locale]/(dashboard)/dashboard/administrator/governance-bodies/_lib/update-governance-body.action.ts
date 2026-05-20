@@ -60,6 +60,7 @@ export const updateGovernanceBodyAction = createServerAction(
 			relatedResourceIds,
 			socialMediaIds,
 			summary,
+			type,
 		} = result.output;
 
 		await db.transaction(async (tx) => {
@@ -84,7 +85,7 @@ export const updateGovernanceBodyAction = createServerAction(
 
 			await tx
 				.update(schema.organisationalUnits)
-				.set({ acronym, imageId, name, summary })
+				.set({ acronym, imageId, metadata: type != null ? { type } : null, name, summary })
 				.where(eq(schema.organisationalUnits.id, draftVersionId));
 
 			const parsedContent = JSON.parse(description) as schema.RichTextContentBlock["content"];

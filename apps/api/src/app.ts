@@ -16,6 +16,7 @@ import { router as navigation } from "@/routes/navigation";
 import { router as news } from "@/routes/news";
 import { router as newsletters } from "@/routes/newsletters";
 import { router as opportunities } from "@/routes/opportunities";
+import { router as organigram } from "@/routes/organigram";
 import { router as pages } from "@/routes/pages";
 import { router as persons } from "@/routes/persons";
 import { router as projects } from "@/routes/projects";
@@ -40,6 +41,7 @@ const api = createRouter()
 	.route("/members-partners", membersAndPartners)
 	.route("/news", news)
 	.route("/newsletters", newsletters)
+	.route("/organigram", organigram)
 	.route("/opportunities", opportunities)
 	.route("/pages", pages)
 	.route("/persons", persons)

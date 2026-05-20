@@ -4,6 +4,10 @@ import * as v from "valibot";
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
+const GovernanceBodyMetadataSchema = v.object({
+	type: v.picklist(schema.governanceBodyMetadataTypesEnum),
+});
+
 const GovernanceBodyPersonSchema = v.object({
 	...v.pick(schema.PersonSelectSchema, ["id", "name", "sortName", "email", "orcid"]).entries,
 	position: v.nullable(
@@ -26,13 +30,8 @@ const GovernanceBodyPersonSchema = v.object({
 
 export const GovernanceBodyBaseSchema = v.pipe(
 	v.object({
-		...v.pick(schema.OrganisationalUnitSelectSchema, [
-			"id",
-			"name",
-			"acronym",
-			"summary",
-			"metadata",
-		]).entries,
+		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name", "acronym", "summary"]).entries,
+		metadata: v.nullable(GovernanceBodyMetadataSchema),
 		image: v.nullable(v.object({ url: v.string() })),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
@@ -64,13 +63,8 @@ export type GovernanceBodyList = v.InferOutput<typeof GovernanceBodyListSchema>;
 
 export const GovernanceBodySchema = v.pipe(
 	v.object({
-		...v.pick(schema.OrganisationalUnitSelectSchema, [
-			"id",
-			"name",
-			"acronym",
-			"summary",
-			"metadata",
-		]).entries,
+		...v.pick(schema.OrganisationalUnitSelectSchema, ["id", "name", "acronym", "summary"]).entries,
+		metadata: v.nullable(GovernanceBodyMetadataSchema),
 		image: v.nullable(v.object({ url: v.string() })),
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),

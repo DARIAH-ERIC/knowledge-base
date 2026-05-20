@@ -202,6 +202,12 @@ export function useSidebarMenu(isAdmin: boolean): Array<SidebarMenuSection> {
 				icon: <ListBulletIcon />,
 			},
 			{
+				href: "/dashboard/website/organigram",
+				tooltip: t("Organigram"),
+				label: t("Organigram"),
+				icon: <ListBulletIcon />,
+			},
+			{
 				href: "/dashboard/website/navigation",
 				tooltip: t("Navigation"),
 				label: t("Navigation"),

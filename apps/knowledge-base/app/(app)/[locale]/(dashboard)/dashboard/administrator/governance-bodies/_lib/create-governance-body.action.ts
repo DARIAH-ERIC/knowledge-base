@@ -46,8 +46,16 @@ export const createGovernanceBodyAction = createServerAction(
 			});
 		}
 
-		const { acronym, description, imageKey, name, relatedEntityIds, relatedResourceIds, summary } =
-			result.output;
+		const {
+			acronym,
+			description,
+			imageKey,
+			name,
+			relatedEntityIds,
+			relatedResourceIds,
+			summary,
+			type,
+		} = result.output;
 
 		const slug = slugify(name);
 
@@ -85,6 +93,7 @@ export const createGovernanceBodyAction = createServerAction(
 				id: versionId,
 				acronym,
 				imageId,
+				metadata: type != null ? { type } : null,
 				name,
 				summary,
 				typeId: orgUnitType.id,

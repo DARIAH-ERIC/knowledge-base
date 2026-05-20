@@ -14,6 +14,7 @@ export type WebhookEntityType =
 	| "navigation"
 	| "opportunities"
 	| "news"
+	| "organigram"
 	| "pages"
 	| "persons"
 	| "site-metadata"

@@ -13,6 +13,7 @@ export * from "./schema/licenses";
 export * from "./schema/navigation";
 export * from "./schema/news";
 export * from "./schema/opportunities";
+export * from "./schema/organigram";
 export * from "./schema/organisational-units";
 export * from "./schema/pages";
 export * from "./schema/persons";

@@ -3033,6 +3033,187 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         ],
         "type": "object",
       },
+      "GetOrganigramResponse": {
+        "description": "Organigram nodes and edges",
+        "properties": {
+          "edges": {
+            "items": {
+              "properties": {
+                "fromNodeId": {
+                  "format": "uuid",
+                  "type": "string",
+                },
+                "id": {
+                  "type": "string",
+                },
+                "position": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
+                "relation": {
+                  "enum": [
+                    "appoints",
+                    "advises",
+                    "oversees",
+                    "supports",
+                    "is_represented_in",
+                  ],
+                  "type": "string",
+                },
+                "toNodeId": {
+                  "format": "uuid",
+                  "type": "string",
+                },
+              },
+              "required": [
+                "id",
+                "fromNodeId",
+                "toNodeId",
+                "relation",
+                "position",
+              ],
+              "type": "object",
+            },
+            "type": "array",
+          },
+          "nodes": {
+            "items": {
+              "properties": {
+                "description": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
+                "id": {
+                  "format": "uuid",
+                  "type": "string",
+                },
+                "kind": {
+                  "enum": [
+                    "governance_body",
+                    "collective",
+                  ],
+                  "type": "string",
+                },
+                "label": {
+                  "type": "string",
+                },
+                "position": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
+                "slug": {
+                  "type": "string",
+                },
+                "unit": {
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "acronym": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "id": {
+                          "format": "uuid",
+                          "type": "string",
+                        },
+                        "metadata": {
+                          "anyOf": [
+                            {},
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "name": {
+                          "type": "string",
+                        },
+                        "slug": {
+                          "type": "string",
+                        },
+                        "summary": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                            },
+                            {
+                              "type": "null",
+                            },
+                          ],
+                        },
+                        "type": {
+                          "enum": [
+                            "governance_body",
+                            "national_consortium",
+                            "country",
+                            "institution",
+                            "regional_hub",
+                            "eric",
+                            "working_group",
+                          ],
+                          "type": "string",
+                        },
+                      },
+                      "required": [
+                        "id",
+                        "slug",
+                        "name",
+                        "acronym",
+                        "summary",
+                        "type",
+                        "metadata",
+                      ],
+                      "type": "object",
+                    },
+                    {
+                      "type": "null",
+                    },
+                  ],
+                },
+              },
+              "required": [
+                "id",
+                "slug",
+                "label",
+                "description",
+                "kind",
+                "position",
+                "unit",
+              ],
+              "type": "object",
+            },
+            "type": "array",
+          },
+        },
+        "required": [
+          "nodes",
+          "edges",
+        ],
+        "type": "object",
+      },
       "GetPageSlugsResponse": {
         "description": "Paginated list of page slugs",
         "properties": {
@@ -3584,35 +3765,21 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "metadata": {
             "anyOf": [
               {
-                "anyOf": [
-                  {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                      },
-                      {
-                        "type": "number",
-                      },
-                      {
-                        "type": "boolean",
-                      },
-                      {
-                        "type": "null",
-                      },
+                "properties": {
+                  "type": {
+                    "enum": [
+                      "governing_body",
+                      "executive_body",
+                      "operational_body",
+                      "advisory_body",
                     ],
+                    "type": "string",
                   },
-                  {
-                    "items": {},
-                    "type": "array",
-                  },
-                  {
-                    "additionalProperties": {},
-                    "propertyNames": {
-                      "type": "string",
-                    },
-                    "type": "object",
-                  },
+                },
+                "required": [
+                  "type",
                 ],
+                "type": "object",
               },
               {
                 "type": "null",
@@ -3987,35 +4154,21 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "metadata": {
             "anyOf": [
               {
-                "anyOf": [
-                  {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                      },
-                      {
-                        "type": "number",
-                      },
-                      {
-                        "type": "boolean",
-                      },
-                      {
-                        "type": "null",
-                      },
+                "properties": {
+                  "type": {
+                    "enum": [
+                      "governing_body",
+                      "executive_body",
+                      "operational_body",
+                      "advisory_body",
                     ],
+                    "type": "string",
                   },
-                  {
-                    "items": {},
-                    "type": "array",
-                  },
-                  {
-                    "additionalProperties": {},
-                    "propertyNames": {
-                      "type": "string",
-                    },
-                    "type": "object",
-                  },
+                },
+                "required": [
+                  "type",
                 ],
+                "type": "object",
               },
               {
                 "type": "null",
@@ -11940,6 +12093,28 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "summary": "Get opportunity by id",
         "tags": [
           "opportunities",
+        ],
+      },
+    },
+    "/api/v1/organigram": {
+      "get": {
+        "description": "Retrieve organigram nodes and edges",
+        "operationId": "getOrganigram",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOrganigramResponse",
+                },
+              },
+            },
+            "description": "Success response",
+          },
+        },
+        "summary": "Get organigram",
+        "tags": [
+          "organigram",
         ],
       },
     },
