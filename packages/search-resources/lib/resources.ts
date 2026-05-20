@@ -7,7 +7,7 @@ import type { ResourceDocument, WebsiteDocument } from "@dariah-eric/search";
 import { createCampusCurriculum, createCampusResource } from "./campus";
 import { createEpisciencesDocument } from "./episciences";
 import { createSshocItem } from "./sshoc";
-import { type ZoteroJsonItemData, createZoteroItem } from "./zotero";
+import { type ZoteroJsonItemData, createZoteroItem, isZoteroItemInCollection } from "./zotero";
 
 export interface SearchIndexResourceSourceData {
 	campusCurricula: Array<DariahCampusCurriculum>;
@@ -34,7 +34,9 @@ export function createSearchIndexResourceDocuments(
 		...campusResources.map((item) => createCampusResource(item)),
 		...campusCurricula.map((item) => createCampusCurriculum(item)),
 		...episciencesDocuments.map((item) => createEpisciencesDocument(item)),
-		...zoteroItems.map((item) => createZoteroItem(item)),
+		...zoteroItems
+			.filter((item) => isZoteroItemInCollection(item))
+			.map((item) => createZoteroItem(item)),
 	];
 }
 

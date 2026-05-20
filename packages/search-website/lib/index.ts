@@ -316,6 +316,13 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 		switch (entityType) {
 			case "country": {
 				const items = await db.query.membersAndPartners.findMany({
+					where: {
+						entityVersion: {
+							status: {
+								type: "published",
+							},
+						},
+					},
 					columns: { id: true },
 				});
 
@@ -324,6 +331,13 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 
 			case "document-or-policy": {
 				const items = await db.query.documentsPolicies.findMany({
+					where: {
+						entityVersion: {
+							status: {
+								type: "published",
+							},
+						},
+					},
 					columns: { id: true },
 				});
 
@@ -332,6 +346,13 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 
 			case "event": {
 				const items = await db.query.events.findMany({
+					where: {
+						entityVersion: {
+							status: {
+								type: "published",
+							},
+						},
+					},
 					columns: { id: true },
 				});
 
@@ -340,6 +361,13 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 
 			case "funding-call": {
 				const items = await db.query.fundingCalls.findMany({
+					where: {
+						entityVersion: {
+							status: {
+								type: "published",
+							},
+						},
+					},
 					columns: { id: true },
 				});
 
@@ -348,6 +376,13 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 
 			case "impact-case-study": {
 				const items = await db.query.impactCaseStudies.findMany({
+					where: {
+						entityVersion: {
+							status: {
+								type: "published",
+							},
+						},
+					},
 					columns: { id: true },
 				});
 
@@ -356,6 +391,13 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 
 			case "news-item": {
 				const items = await db.query.news.findMany({
+					where: {
+						entityVersion: {
+							status: {
+								type: "published",
+							},
+						},
+					},
 					columns: { id: true },
 				});
 
@@ -364,6 +406,13 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 
 			case "opportunity": {
 				const items = await db.query.opportunities.findMany({
+					where: {
+						entityVersion: {
+							status: {
+								type: "published",
+							},
+						},
+					},
 					columns: { id: true },
 				});
 
@@ -372,6 +421,13 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 
 			case "page": {
 				const items = await db.query.pages.findMany({
+					where: {
+						entityVersion: {
+							status: {
+								type: "published",
+							},
+						},
+					},
 					columns: { id: true },
 				});
 
@@ -380,6 +436,13 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 
 			case "person": {
 				const items = await db.query.persons.findMany({
+					where: {
+						entityVersion: {
+							status: {
+								type: "published",
+							},
+						},
+					},
 					columns: { id: true },
 				});
 
@@ -388,6 +451,13 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 
 			case "project": {
 				const items = await db.query.dariahProjects.findMany({
+					where: {
+						entityVersion: {
+							status: {
+								type: "published",
+							},
+						},
+					},
 					columns: { id: true },
 				});
 
@@ -396,6 +466,13 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 
 			case "spotlight-article": {
 				const items = await db.query.spotlightArticles.findMany({
+					where: {
+						entityVersion: {
+							status: {
+								type: "published",
+							},
+						},
+					},
 					columns: { id: true },
 				});
 
@@ -404,6 +481,13 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 
 			case "working-group": {
 				const items = await db.query.workingGroups.findMany({
+					where: {
+						entityVersion: {
+							status: {
+								type: "published",
+							},
+						},
+					},
 					columns: { id: true },
 				});
 
