@@ -104,7 +104,9 @@ export default async function DashboardReportingCountryReportPublicationsPage(
 										<p className="line-clamp-3 text-sm text-muted-fg">{document.description}</p>
 									) : null}
 									{document.pid != null ? (
-										<p className="text-xs text-muted-fg">{t("DOI: {doi}", { doi: document.pid })}</p>
+										<p className="text-xs text-muted-fg">
+											{t("DOI: {doi}", { doi: document.pid })}
+										</p>
 									) : null}
 								</div>
 							</li>
