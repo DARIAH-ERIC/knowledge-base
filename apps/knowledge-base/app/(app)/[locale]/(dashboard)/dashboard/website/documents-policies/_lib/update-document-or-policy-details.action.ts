@@ -11,7 +11,7 @@ import * as v from "valibot";
 
 import { UpdateDocumentOrPolicyDetailsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.schema";
 import { assertAdmin } from "@/lib/auth/session";
-import { getDocumentIdForVersion } from "@/lib/data/entity-lifecycle";
+import { getDocumentIdForVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { eq, isNull } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -50,9 +50,12 @@ export const updateDocumentOrPolicyDetailsAction = createServerAction(
 		const { id, title, summary, url, groupId, documentKey } = result.output;
 
 		let entityDocumentId: string | null = null;
+		let shouldSyncPublishedVersion = false;
 
 		await db.transaction(async (tx) => {
 			entityDocumentId = await getDocumentIdForVersion(tx, id);
+			const { publishedId } = await getDocumentVersions(tx, entityDocumentId);
+			shouldSyncPublishedVersion = publishedId === id;
 
 			const asset = await tx.query.assets.findFirst({
 				where: { key: documentKey },
@@ -96,6 +99,10 @@ export const updateDocumentOrPolicyDetailsAction = createServerAction(
 		});
 
 		after(async () => {
+			if (!shouldSyncPublishedVersion) {
+				return;
+			}
+
 			if (entityDocumentId != null) {
 				await syncWebsiteDocumentForEntity(entityDocumentId);
 			}

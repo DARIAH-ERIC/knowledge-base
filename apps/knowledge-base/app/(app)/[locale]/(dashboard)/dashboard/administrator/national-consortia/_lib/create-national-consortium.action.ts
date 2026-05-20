@@ -144,7 +144,9 @@ export const createNationalConsortiumAction = createServerAction(
 			}
 		});
 
-		await dispatchWebhook({ type: "members-partners" });
+		if (shouldSaveAndPublish(formData)) {
+			await dispatchWebhook({ type: "members-partners" });
+		}
 		revalidatePath("/[locale]/dashboard/administrator/national-consortia", "layout");
 
 		redirect({ href: "/dashboard/administrator/national-consortia", locale });

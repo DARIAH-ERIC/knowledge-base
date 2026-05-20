@@ -144,7 +144,9 @@ export const createGovernanceBodyAction = createServerAction(
 			}
 		});
 
-		await dispatchWebhook({ type: "governance-bodies" });
+		if (shouldSaveAndPublish(formData)) {
+			await dispatchWebhook({ type: "governance-bodies" });
+		}
 		revalidatePath("/[locale]/dashboard/administrator/governance-bodies", "layout");
 
 		redirect({ href: "/dashboard/administrator/governance-bodies", locale });

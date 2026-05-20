@@ -144,6 +144,10 @@ export const createNewsItemAction = createServerAction(
 		});
 
 		after(async () => {
+			if (!shouldSaveAndPublish(formData)) {
+				return;
+			}
+
 			if (documentId != null) {
 				await syncWebsiteDocumentForEntity(documentId);
 			}

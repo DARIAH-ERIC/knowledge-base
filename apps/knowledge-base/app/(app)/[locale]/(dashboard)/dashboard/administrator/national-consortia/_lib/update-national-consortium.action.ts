@@ -128,6 +128,10 @@ export const updateNationalConsortiumAction = createServerAction(
 		});
 
 		after(async () => {
+			if (!shouldSaveAndPublish(formData)) {
+				return;
+			}
+
 			await syncWebsiteDocumentForEntity(documentId);
 			await dispatchWebhook({ type: "members-partners" });
 		});
