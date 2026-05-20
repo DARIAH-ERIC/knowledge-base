@@ -64,6 +64,6 @@ export const resetPasswordAction = createServerAction(
 		await auth.setSessionCookie(session.token, session.expiresAt);
 		await auth.deletePasswordResetSessionCookie();
 
-		redirect({ href: "/", locale });
+		redirect({ href: "/dashboard", locale });
 	},
 );

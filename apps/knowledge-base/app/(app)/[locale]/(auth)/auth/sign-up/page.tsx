@@ -51,7 +51,7 @@ export default async function SignUpPage(_props: Readonly<SignUpPageProps>): Pro
 			redirect({ href: "/auth/two-factor", locale });
 		}
 
-		redirect({ href: "/", locale });
+		redirect({ href: "/dashboard", locale });
 	}
 
 	return (

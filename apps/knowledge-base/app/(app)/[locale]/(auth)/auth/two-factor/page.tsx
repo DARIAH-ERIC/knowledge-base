@@ -53,7 +53,7 @@ export default async function TwoFactorPage(
 	}
 
 	if (session.isTwoFactorVerified) {
-		redirect({ href: "/", locale });
+		redirect({ href: "/dashboard", locale });
 	}
 
 	return (
