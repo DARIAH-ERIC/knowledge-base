@@ -6,8 +6,8 @@ import { v7 as uuidv7 } from "uuid";
 import { describe, expect, it } from "vitest";
 
 import type { Database } from "@/middlewares/db";
-import type { MemberOrPartner } from "@/routes/members-partners/schemas";
-import { inArray } from "@/services/db/sql";
+import type { MemberOrPartner, MemberOrPartnerBase } from "@/routes/members-partners/schemas";
+import { eq, inArray } from "@/services/db/sql";
 import { createTestClient } from "~/test/lib/create-test-client";
 import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";
@@ -35,6 +35,29 @@ function createItems(count: number) {
 	);
 
 	return items;
+}
+
+function createAsset(label = f.lorem.words(2)) {
+	const id = uuidv7();
+
+	return {
+		id,
+		key: `logos/${id}.jpg`,
+		label,
+		mimeType: "image/jpeg",
+	};
+}
+
+function createRichTextContent(text: string) {
+	return {
+		type: "doc",
+		content: [
+			{
+				type: "paragraph",
+				content: [{ type: "text", text }],
+			},
+		],
+	};
 }
 
 function createPersonItems(count: number) {
@@ -353,7 +376,11 @@ async function seedNationalConsortium(
 	return consortium;
 }
 
-async function seed(db: Database, items: ReturnType<typeof createItems>) {
+async function seed(
+	db: Database,
+	items: ReturnType<typeof createItems>,
+	descriptionContentByVersionId = new Map<string, Parameters<typeof seedContentBlock>[4]>(),
+) {
 	const [status, entityType, asset, countryType, umbrellaConsortiumType, memberObserverStatus] =
 		await Promise.all([
 			db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
@@ -423,7 +450,15 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	);
 
 	await Promise.all(
-		items.map((item) => seedContentBlock(db, item.version.id, entityType.id, "description")),
+		items.map((item) =>
+			seedContentBlock(
+				db,
+				item.version.id,
+				entityType.id,
+				"description",
+				descriptionContentByVersionId.get(item.version.id),
+			),
+		),
 	);
 }
 
@@ -680,6 +715,116 @@ describe("members-partners", () => {
 				});
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
+			});
+		});
+
+		it("should prefer national consortium logo and non-empty description for member countries", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const items = createItems(2);
+				const item = items.at(1)!;
+				const countryDescription = createRichTextContent("Country description");
+				const consortiumDescription = createRichTextContent("Consortium description");
+				const consortiumAsset = createAsset("National consortium logo");
+				await seed(db, items, new Map([[item.version.id, countryDescription]]));
+
+				const [entityType] = await Promise.all([
+					db.query.entityTypes.findFirst({
+						columns: { id: true },
+						where: { type: "organisational_units" },
+					}),
+					db.insert(schema.assets).values(consortiumAsset),
+				]);
+
+				assert(entityType);
+
+				const nationalConsortium = await seedNationalConsortium(
+					db,
+					item.organisationalUnit.id,
+					createItems(1),
+				);
+
+				await db
+					.update(schema.organisationalUnits)
+					.set({ imageId: consortiumAsset.id })
+					.where(eq(schema.organisationalUnits.id, nationalConsortium.organisationalUnit.id));
+				await db
+					.update(schema.organisationalUnits)
+					.set({ imageId: null })
+					.where(eq(schema.organisationalUnits.id, item.organisationalUnit.id));
+
+				await seedContentBlock(
+					db,
+					nationalConsortium.version.id,
+					entityType.id,
+					"description",
+					consortiumDescription,
+				);
+
+				const detailResponse = await client["members-partners"][":id"].$get({
+					param: { id: item.version.id },
+				});
+				const listResponse = await client["members-partners"].$get({
+					query: { limit: "10", offset: "0" },
+				});
+
+				expect(detailResponse.status).toBe(200);
+				expect(listResponse.status).toBe(200);
+
+				const detailData = (await detailResponse.json()) as MemberOrPartner;
+				const listData = (await listResponse.json()) as {
+					data: Array<MemberOrPartnerBase>;
+				};
+
+				const listItem = listData.data.find((entry) => entry.id === item.version.id);
+				assert(listItem);
+
+				expect(detailData.nationalConsortium?.image).not.toBeNull();
+				expect(detailData.image).toEqual(detailData.nationalConsortium?.image);
+				expect(listItem.image).not.toBeNull();
+				expect(detailData.description).toEqual([
+					{ type: "rich_text", content: consortiumDescription },
+				]);
+			});
+		});
+
+		it("should fall back to country description when national consortium description is empty", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const items = createItems(2);
+				const item = items.at(1)!;
+				const countryDescription = createRichTextContent("Country fallback description");
+				await seed(db, items, new Map([[item.version.id, countryDescription]]));
+
+				const entityType = await db.query.entityTypes.findFirst({
+					columns: { id: true },
+					where: { type: "organisational_units" },
+				});
+
+				assert(entityType);
+
+				const nationalConsortium = await seedNationalConsortium(
+					db,
+					item.organisationalUnit.id,
+					createItems(1),
+				);
+
+				await seedContentBlock(db, nationalConsortium.version.id, entityType.id, "description", {
+					type: "doc",
+					content: [],
+				});
+
+				const response = await client["members-partners"][":id"].$get({
+					param: { id: item.version.id },
+				});
+
+				expect(response.status).toBe(200);
+
+				const data = (await response.json()) as MemberOrPartner;
+
+				expect(data.description).toEqual([{ type: "rich_text", content: countryDescription }]);
 			});
 		});
 
