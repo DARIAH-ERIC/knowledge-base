@@ -40,7 +40,7 @@ import { useRouter } from "@/lib/navigation/navigation";
 interface InstitutionsPageProps {
 	institutions: {
 		data: Array<
-			Pick<schema.OrganisationalUnit, "id" | "name"> & {
+			Pick<schema.OrganisationalUnit, "acronym" | "id" | "name"> & {
 				entity: Pick<schema.Entity, "slug">;
 				hasDraft: boolean;
 				isPublished: boolean;
@@ -115,6 +115,7 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
 						{t("Name")}
 					</TableColumn>
+					<TableColumn>{t("Acronym")}</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
@@ -122,6 +123,7 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 					{(item) => (
 						<TableRow>
 							<TableCell>{item.name}</TableCell>
+							<TableCell>{item.acronym}</TableCell>
 							<TableCell>
 								<EntityLifecycleStatusBadge
 									hasDraft={item.hasDraft}

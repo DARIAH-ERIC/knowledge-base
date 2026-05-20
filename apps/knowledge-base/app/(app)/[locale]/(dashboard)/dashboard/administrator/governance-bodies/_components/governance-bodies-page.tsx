@@ -19,7 +19,7 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useExtracted, useFormatter } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
@@ -46,7 +46,6 @@ interface GovernanceBodiesPageProps {
 				entity: Pick<schema.Entity, "slug">;
 				hasDraft: boolean;
 				isPublished: boolean;
-				updatedAt: Date;
 			}
 		>;
 		total: number;
@@ -68,7 +67,6 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 	} = props;
 
 	const t = useExtracted();
-	const format = useFormatter();
 	const router = useRouter();
 	const [items, optimisticallyRemoveItem] = useOptimistic(
 		governanceBodies.data,
@@ -116,22 +114,20 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 				sortDescriptor={sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn allowsSorting={true} id="acronym" isRowHeader={true}>
-						{t("Acronym")}
-					</TableColumn>
-					<TableColumn allowsSorting={true} id="name">
+					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
 						{t("Name")}
 					</TableColumn>
-					<TableColumn>{t("Updated")}</TableColumn>
+					<TableColumn allowsSorting={true} id="acronym">
+						{t("Acronym")}
+					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
 						<TableRow>
-							<TableCell className="uppercase">{item.acronym}</TableCell>
 							<TableCell>{item.name}</TableCell>
-							<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
+							<TableCell className="uppercase">{item.acronym}</TableCell>
 							<TableCell>
 								<EntityLifecycleStatusBadge
 									hasDraft={item.hasDraft}

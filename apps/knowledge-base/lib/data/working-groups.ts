@@ -17,7 +17,7 @@ interface GetWorkingGroupsParams {
 
 export interface WorkingGroupsResult {
 	data: Array<
-		Pick<schema.OrganisationalUnit, "id" | "name"> & {
+		Pick<schema.OrganisationalUnit, "acronym" | "id" | "name"> & {
 			documentId: string;
 			durationFrom: Date | null;
 			durationUntil: Date | null;
@@ -50,7 +50,10 @@ export async function getWorkingGroups(
 						schema.organisationalUnitTypes.type,
 						"working_group" as typeof schema.organisationalUnitTypes.$inferSelect.type,
 					),
-					ilike(schema.organisationalUnits.name, `%${query}%`),
+					or(
+						ilike(schema.organisationalUnits.name, `%${query}%`),
+						ilike(schema.organisationalUnits.acronym, `%${query}%`),
+					),
 				)
 			: eq(
 					schema.organisationalUnitTypes.type,
@@ -63,6 +66,7 @@ export async function getWorkingGroups(
 	const [items, aggregate, erics] = await Promise.all([
 		db
 			.select({
+				acronym: schema.organisationalUnits.acronym,
 				documentId: schema.entities.id,
 				id: schema.organisationalUnits.id,
 				name: schema.organisationalUnits.name,
@@ -241,6 +245,7 @@ export async function getWorkingGroups(
 				durationUntil: relation?.until ?? null,
 				entity: { slug: item.slug },
 				hasDraft: item.hasDraft,
+				acronym: item.acronym,
 				id: item.id,
 				isPublished: item.isPublished,
 				name: item.name,

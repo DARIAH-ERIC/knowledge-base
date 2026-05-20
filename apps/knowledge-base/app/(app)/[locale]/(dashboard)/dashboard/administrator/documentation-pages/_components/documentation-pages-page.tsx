@@ -20,7 +20,7 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useExtracted, useFormatter } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
@@ -44,7 +44,6 @@ interface DocumentationPagesPageProps {
 		data: Array<
 			Pick<schema.DocumentationPage, "id" | "title"> & {
 				entity: Pick<schema.Entity, "slug">;
-				updatedAt: schema.Entity["updatedAt"];
 				hasDraft: boolean;
 				isPublished: boolean;
 			}
@@ -68,7 +67,6 @@ export function DocumentationPagesPage(props: Readonly<DocumentationPagesPagePro
 	} = props;
 
 	const t = useExtracted();
-	const format = useFormatter();
 	const router = useRouter();
 	const [items, optimisticallyRemoveItem] = useOptimistic(
 		documentationPages.data,
@@ -120,9 +118,6 @@ export function DocumentationPagesPage(props: Readonly<DocumentationPagesPagePro
 						{t("Title")}
 					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
-					<TableColumn allowsSorting={true} id="updatedAt">
-						{t("Updated")}
-					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -137,7 +132,6 @@ export function DocumentationPagesPage(props: Readonly<DocumentationPagesPagePro
 									isPublished={item.isPublished}
 								/>
 							</TableCell>
-							<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 							<TableCell className="text-end">
 								<Menu>
 									<Button

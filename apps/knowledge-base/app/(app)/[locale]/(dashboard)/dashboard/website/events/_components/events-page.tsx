@@ -125,7 +125,7 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 					{(item) => (
 						<TableRow href={`/dashboard/website/events/${item.entity.slug}/details`}>
 							<TableCell>
-								<div className="max-inline-64 truncate">{item.title}</div>
+								<div className="max-inline-96 truncate">{item.title}</div>
 							</TableCell>
 							<TableCell>
 								{item.duration.end != null

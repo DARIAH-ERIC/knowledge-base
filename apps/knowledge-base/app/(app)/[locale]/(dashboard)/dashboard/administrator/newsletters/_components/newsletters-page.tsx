@@ -84,7 +84,11 @@ export function NewslettersPage(props: Readonly<NewslettersPageProps>): ReactNod
 									: null}
 							</TableCell>
 							<TableCell>{format.number(item.emails_sent)}</TableCell>
-							<TableCell>{item.archive_url}</TableCell>
+							<TableCell>
+								<a className="underline" href={item.archive_url} rel="noreferrer" target="_blank">
+									{item.archive_url}
+								</a>
+							</TableCell>
 							<TableCell>
 								<Badge intent={item.status === "sent" ? "success" : "primary"}>{item.status}</Badge>
 							</TableCell>

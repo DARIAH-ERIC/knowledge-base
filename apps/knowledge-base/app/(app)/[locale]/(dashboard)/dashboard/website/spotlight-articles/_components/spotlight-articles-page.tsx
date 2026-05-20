@@ -131,7 +131,7 @@ export function SpotlightArticlesPage(props: Readonly<SpotlightArticlesPageProps
 					{(item) => (
 						<TableRow href={`/dashboard/website/spotlight-articles/${item.entity.slug}/details`}>
 							<TableCell>
-								<div className="max-inline-64 truncate">{item.title}</div>
+								<div className="max-inline-96 truncate">{item.title}</div>
 							</TableCell>
 							<TableCell>
 								<div className="max-inline-xs truncate">{item.summary}</div>

@@ -44,14 +44,13 @@ interface WorkingGroupsPageProps {
 	sort: "name";
 	workingGroups: {
 		data: Array<
-			Pick<schema.OrganisationalUnit, "id" | "name"> & {
+			Pick<schema.OrganisationalUnit, "acronym" | "id" | "name"> & {
 				documentId: string;
 				durationFrom: Date | null;
 				durationUntil: Date | null;
 				entity: Pick<schema.Entity, "slug">;
 				hasDraft: boolean;
 				isPublished: boolean;
-				updatedAt: Date;
 			}
 		>;
 		total: number;
@@ -120,9 +119,9 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
 						{t("Name")}
 					</TableColumn>
+					<TableColumn>{t("Acronym")}</TableColumn>
 					<TableColumn>{t("From")}</TableColumn>
 					<TableColumn>{t("Until")}</TableColumn>
-					<TableColumn>{t("Updated")}</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
@@ -130,6 +129,7 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 					{(item) => (
 						<TableRow>
 							<TableCell>{item.name}</TableCell>
+							<TableCell>{item.acronym}</TableCell>
 							<TableCell>
 								{item.durationFrom != null
 									? format.dateTime(item.durationFrom, { dateStyle: "short" })
@@ -142,7 +142,6 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 										? format.dateTime(item.durationUntil, { dateStyle: "short" })
 										: t("present")}
 							</TableCell>
-							<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 							<TableCell>
 								<EntityLifecycleStatusBadge
 									hasDraft={item.hasDraft}

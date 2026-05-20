@@ -50,7 +50,6 @@ interface ProjectsPageProps {
 				hasDraft: boolean;
 				isPublished: boolean;
 				scope: Pick<schema.ProjectScope, "id" | "scope">;
-				updatedAt: Date;
 			}
 		>;
 		total: number;
@@ -125,7 +124,6 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 					<TableColumn allowsSorting={true} id="scope">
 						{t("Scope")}
 					</TableColumn>
-					<TableColumn>{t("Updated")}</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
@@ -161,7 +159,6 @@ export function ProjectsPage(props: Readonly<ProjectsPageProps>): ReactNode {
 									{item.scope.scope}
 								</Badge>
 							</TableCell>
-							<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 							<TableCell>
 								<EntityLifecycleStatusBadge
 									hasDraft={item.hasDraft}

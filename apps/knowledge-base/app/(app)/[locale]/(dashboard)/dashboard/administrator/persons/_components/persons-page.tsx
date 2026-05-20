@@ -20,7 +20,7 @@ import {
 	PlusIcon,
 	TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useExtracted, useFormatter } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
@@ -48,7 +48,6 @@ interface PersonsPageProps {
 				entity: Pick<schema.Entity, "slug">;
 				hasDraft: boolean;
 				isPublished: boolean;
-				updatedAt: Date;
 			}
 		>;
 		total: number;
@@ -63,7 +62,6 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 	const { dir: initialDir, page: initialPage, persons, q: initialQ, sort: initialSort } = props;
 
 	const t = useExtracted();
-	const format = useFormatter();
 	const router = useRouter();
 	const [items, optimisticallyRemoveItem] = useOptimistic(persons.data, (state, id: string) =>
 		state.filter((item) => item.id !== id),
@@ -119,7 +117,6 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 					<TableColumn allowsSorting={true} id="orcid">
 						{t("ORCID")}
 					</TableColumn>
-					<TableColumn>{t("Updated")}</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
@@ -129,7 +126,6 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 							<TableCell>{item.name}</TableCell>
 							<TableCell>{item.email}</TableCell>
 							<TableCell>{item.orcid}</TableCell>
-							<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 							<TableCell>
 								<EntityLifecycleStatusBadge
 									hasDraft={item.hasDraft}
