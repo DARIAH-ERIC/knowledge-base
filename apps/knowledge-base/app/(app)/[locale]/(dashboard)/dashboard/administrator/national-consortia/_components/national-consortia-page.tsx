@@ -127,13 +127,13 @@ export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps
 					{(item) => (
 						<TableRow>
 							<TableCell>{item.name}</TableCell>
+							<TableCell>{item.countryName ?? "—"}</TableCell>
 							<TableCell>
 								<EntityLifecycleStatusBadge
 									hasDraft={item.hasDraft}
 									isPublished={item.isPublished}
 								/>
 							</TableCell>
-							<TableCell>{item.countryName ?? "—"}</TableCell>
 							<TableCell className="text-end">
 								<Menu>
 									<Button

@@ -121,24 +121,18 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
 						{t("Name")}
 					</TableColumn>
-					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn allowsSorting={true} id="status">
 						{t("Membership")}
 					</TableColumn>
 					<TableColumn>{t("From")}</TableColumn>
 					<TableColumn>{t("Until")}</TableColumn>
+					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
 						<TableRow>
 							<TableCell>{item.name}</TableCell>
-							<TableCell>
-								<EntityLifecycleStatusBadge
-									hasDraft={item.hasDraft}
-									isPublished={item.isPublished}
-								/>
-							</TableCell>
 							<TableCell>
 								{item.memberObserverStatus != null ? (
 									<Badge intent={memberObserverStatusIntent(item.memberObserverStatus)}>
@@ -159,6 +153,12 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 									: item.memberObserverUntil != null
 										? format.dateTime(item.memberObserverUntil, { dateStyle: "short" })
 										: t("present")}
+							</TableCell>
+							<TableCell>
+								<EntityLifecycleStatusBadge
+									hasDraft={item.hasDraft}
+									isPublished={item.isPublished}
+								/>
 							</TableCell>
 							<TableCell className="text-end">
 								<Menu>
