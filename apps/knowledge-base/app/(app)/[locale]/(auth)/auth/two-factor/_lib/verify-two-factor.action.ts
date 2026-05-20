@@ -73,6 +73,6 @@ export const verifyTwoFactorAction = createServerAction(
 
 		await auth.setSessionAsTwoFactorVerified(session.id);
 
-		redirect({ href: "/", locale });
+		redirect({ href: "/dashboard", locale });
 	},
 );

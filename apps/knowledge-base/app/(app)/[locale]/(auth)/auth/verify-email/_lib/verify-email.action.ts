@@ -88,6 +88,6 @@ export const verifyEmailAction = createServerAction(
 			redirect({ href: "/auth/two-factor/setup", locale });
 		}
 
-		redirect({ href: "/", locale });
+		redirect({ href: "/dashboard", locale });
 	},
 );

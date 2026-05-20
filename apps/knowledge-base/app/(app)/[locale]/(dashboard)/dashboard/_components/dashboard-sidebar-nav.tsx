@@ -15,7 +15,6 @@ import {
 } from "@dariah-eric/ui/menu";
 import { Separator } from "@dariah-eric/ui/separator";
 import { SidebarNav, SidebarTrigger, useSidebar } from "@dariah-eric/ui/sidebar";
-import { Switch } from "@dariah-eric/ui/switch";
 import {
 	CommandLineIcon as IconCommandRegular,
 	Squares2X2Icon as IconDashboard,
@@ -29,6 +28,7 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useState } from "react";
 
 import { CommandPalette } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/command-palette";
+import { ColorSchemeToggle } from "@/app/(app)/[locale]/_components/color-scheme-toggle.client";
 import { signOutAction } from "@/lib/auth/sign-out.action";
 import { useColorScheme } from "@/lib/color-scheme/use-color-scheme";
 
@@ -83,7 +83,7 @@ interface UserMenuProps {
 function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 	const { user } = props;
 
-	const { colorScheme, setColorScheme } = useColorScheme();
+	const { colorScheme } = useColorScheme();
 
 	const t = useExtracted();
 
@@ -116,14 +116,7 @@ function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 					{colorScheme === "dark" ? <IconMoon /> : <IconSun />}
 					<MenuLabel>{t("Color scheme")}</MenuLabel>
 					<span data-slot="icon">
-						<Switch
-							aria-label={t("Toggle color scheme")}
-							className="ms-auto"
-							isSelected={colorScheme === "dark"}
-							onChange={() => {
-								setColorScheme(colorScheme === "dark" ? "light" : "dark");
-							}}
-						/>
+						<ColorSchemeToggle className="ms-auto" label={t("Toggle color scheme")} />
 					</span>
 				</MenuItem>
 				<MenuSeparator />

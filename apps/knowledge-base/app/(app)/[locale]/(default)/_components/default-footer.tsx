@@ -4,7 +4,7 @@ import { connection } from "next/server";
 import type { ComponentProps, ReactNode } from "react";
 
 import { NavLink } from "@/app/(app)/[locale]/(default)/_components/nav-link";
-import { ColorSchemeSelect } from "@/app/(app)/[locale]/_components/color-scheme-select";
+import { ColorSchemeToggle } from "@/app/(app)/[locale]/_components/color-scheme-toggle";
 import { Logo } from "@/components/logo";
 import { useMetadata } from "@/lib/i18n/metadata";
 import { createHref } from "@/lib/navigation/create-href";
@@ -100,8 +100,8 @@ export function DefaultFooter(props: Readonly<DefaultFooterProps>): ReactNode {
 							</ul>
 						</nav>
 
-						<div className="ms-auto">
-							<ColorSchemeSelect />
+						<div className="self-start">
+							<ColorSchemeToggle />
 						</div>
 					</div>
 

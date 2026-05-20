@@ -50,7 +50,7 @@ export default async function SignInPage(_props: Readonly<SignInPageProps>): Pro
 			redirect({ href: "/auth/two-factor", locale });
 		}
 
-		redirect({ href: "/", locale });
+		redirect({ href: "/dashboard", locale });
 	}
 
 	return (

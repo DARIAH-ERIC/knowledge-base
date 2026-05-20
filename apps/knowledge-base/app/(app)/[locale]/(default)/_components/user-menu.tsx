@@ -1,5 +1,3 @@
-/* eslint-disable react/jsx-no-literals */
-
 "use client";
 
 import { Avatar } from "@dariah-eric/ui/avatar";
@@ -39,7 +37,7 @@ export function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 	return (
 		<Menu>
 			<MenuTrigger aria-label={t("Open menu")}>
-				<Avatar initials={user.name.at(0)} isSquare={true} />
+				<Avatar initials={user.name.at(0)} />
 			</MenuTrigger>
 
 			<MenuContent className="min-inline-64" popover={{ placement: "bottom end" }}>

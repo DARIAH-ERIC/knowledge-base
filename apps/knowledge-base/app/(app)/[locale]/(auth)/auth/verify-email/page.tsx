@@ -52,7 +52,7 @@ export default async function VerifyEmailPage(
 	const emailVerificationRequest = await auth.getEmailVerificationRequestFromRequest();
 
 	if (emailVerificationRequest == null && user.isEmailVerified) {
-		redirect({ href: "/", locale });
+		redirect({ href: "/dashboard", locale });
 	}
 
 	return (
