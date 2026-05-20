@@ -25,7 +25,8 @@ export async function generateMetadata(
 }
 
 export default async function IndexPage(_props: Readonly<IndexPageProps>): Promise<ReactNode> {
-	const [{ session }, t] = await Promise.all([getCurrentSession(), getExtracted()]);
+	const t = await getExtracted();
+	const { session } = await getCurrentSession();
 
 	const cta =
 		session == null
