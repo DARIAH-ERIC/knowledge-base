@@ -123,7 +123,7 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 					{(item) => (
 						<TableRow href={`/dashboard/website/news/${item.entity.slug}/details`}>
 							<TableCell>
-								<div className="max-inline-64 truncate">{item.title}</div>
+								<div className="max-inline-96 truncate">{item.title}</div>
 							</TableCell>
 							<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 							<TableCell>

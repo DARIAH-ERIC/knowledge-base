@@ -13,7 +13,7 @@ import {
 	TableRow,
 } from "@dariah-eric/ui/table";
 import { EllipsisHorizontalIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
-import { useExtracted, useFormatter } from "next-intl";
+import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { EntityLifecycleStatusBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge";
@@ -34,7 +34,6 @@ interface InternalPagesPageProps {
 		data: Array<
 			Pick<schema.InternalPage, "id" | "title"> & {
 				entity: Pick<schema.Entity, "slug">;
-				updatedAt: schema.Entity["updatedAt"];
 				hasDraft: boolean;
 				isPublished: boolean;
 			}
@@ -58,7 +57,6 @@ export function InternalPagesPage(props: Readonly<InternalPagesPageProps>): Reac
 	} = props;
 
 	const t = useExtracted();
-	const format = useFormatter();
 	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
 		useUrlPaginatedSearch({
 			dir: initialDir,
@@ -96,9 +94,6 @@ export function InternalPagesPage(props: Readonly<InternalPagesPageProps>): Reac
 						{t("Title")}
 					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
-					<TableColumn allowsSorting={true} id="updatedAt">
-						{t("Updated")}
-					</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={internalPages.data}>
@@ -113,7 +108,6 @@ export function InternalPagesPage(props: Readonly<InternalPagesPageProps>): Reac
 									isPublished={item.isPublished}
 								/>
 							</TableCell>
-							<TableCell>{format.dateTime(item.updatedAt, { dateStyle: "short" })}</TableCell>
 							<TableCell className="text-end">
 								<Menu>
 									<Button

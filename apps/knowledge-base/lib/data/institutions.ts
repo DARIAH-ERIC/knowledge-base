@@ -23,7 +23,7 @@ interface GetInstitutionsParams {
 
 export interface InstitutionsResult {
 	data: Array<
-		Pick<schema.OrganisationalUnit, "id" | "name"> & {
+		Pick<schema.OrganisationalUnit, "acronym" | "id" | "name"> & {
 			countryName: string | null;
 			ericRelationStatuses: Array<InstitutionEricRelationStatus>;
 			entity: Pick<schema.Entity, "slug">;
@@ -215,6 +215,7 @@ export async function getInstitutions(
 		const [items, aggregate] = await Promise.all([
 			db
 				.select({
+					acronym: schema.organisationalUnits.acronym,
 					id: schema.organisationalUnits.id,
 					name: schema.organisationalUnits.name,
 					slug: schema.entities.slug,
@@ -302,6 +303,7 @@ export async function getInstitutions(
 					hasDraft: institution.hasDraft,
 					isPublished: institution.isPublished,
 					ericRelationStatuses: statusesByInstitutionId.get(institution.id) ?? [],
+					acronym: institution.acronym,
 					id: institution.id,
 					name: institution.name,
 				};
@@ -314,6 +316,7 @@ export async function getInstitutions(
 
 	// oxlint-disable-next-line no-useless-assignment
 	let items: Array<{
+		acronym: string | null;
 		id: string;
 		name: string;
 		slug: string;
@@ -327,6 +330,7 @@ export async function getInstitutions(
 		const where = eq(schema.organisationalUnitTypes.type, institutionType);
 		items = await db
 			.select({
+				acronym: schema.organisationalUnits.acronym,
 				id: schema.organisationalUnits.id,
 				name: schema.organisationalUnits.name,
 				slug: schema.entities.slug,
@@ -399,7 +403,10 @@ export async function getInstitutions(
 				.where(
 					and(
 						eq(schema.organisationalUnitTypes.type, institutionType),
-						ilike(schema.organisationalUnits.name, `%${query}%`),
+						or(
+							ilike(schema.organisationalUnits.name, `%${query}%`),
+							ilike(schema.organisationalUnits.acronym, `%${query}%`),
+						),
 					),
 				),
 			db
@@ -459,6 +466,7 @@ export async function getInstitutions(
 
 		items = await db
 			.select({
+				acronym: schema.organisationalUnits.acronym,
 				id: schema.organisationalUnits.id,
 				name: schema.organisationalUnits.name,
 				slug: schema.entities.slug,
@@ -536,6 +544,7 @@ export async function getInstitutions(
 					hasDraft: institution.hasDraft,
 					isPublished: institution.isPublished,
 					ericRelationStatuses: statusesByInstitutionId.get(institution.id) ?? [],
+					acronym: institution.acronym,
 					id: institution.id,
 					name: institution.name,
 				};
@@ -557,6 +566,7 @@ export async function getInstitutions(
 				hasDraft: institution.hasDraft,
 				isPublished: institution.isPublished,
 				ericRelationStatuses: statusesByInstitutionId.get(institution.id) ?? [],
+				acronym: institution.acronym,
 				id: institution.id,
 				name: institution.name,
 			};
