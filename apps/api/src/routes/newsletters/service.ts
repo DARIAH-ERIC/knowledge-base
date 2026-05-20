@@ -33,8 +33,8 @@ export async function getNewsletters(params: GetNewslettersParams) {
 	const data = result.campaigns.map((campaign) => {
 		return {
 			id: campaign.id,
-			subject_line: campaign.settings.subject_line,
-			send_time: campaign.send_time || null,
+			subject_line: campaign.settings.subject_line ?? campaign.settings.title ?? "",
+			send_time: campaign.send_time ?? null,
 			archive_url: campaign.archive_url,
 			status: campaign.status,
 		};

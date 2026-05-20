@@ -26,6 +26,57 @@ describe("newsletters", () => {
 		vi.clearAllMocks();
 	});
 
+	describe("GET /api/newsletters", () => {
+		it("should return newsletter campaigns with a fallback title when subject line is missing", async () => {
+			mailchimp.get.mockResolvedValue(
+				Result.ok({
+					data: {
+						campaigns: [
+							{
+								id: "campaign-id",
+								archive_url: "https://example.com/newsletter",
+								send_time: undefined,
+								settings: {
+									subject_line: undefined,
+									title: "Newsletter title",
+								},
+								status: "sent",
+							},
+						],
+						total_items: 1,
+					},
+					headers: new Headers(),
+				}),
+			);
+
+			const client = createTestClient(undefined as never);
+
+			const response = await client.newsletters.$get({
+				query: {
+					limit: "10",
+					offset: "0",
+				},
+			});
+
+			expect(response.status).toBe(200);
+			expect(mailchimp.get).toHaveBeenCalledWith({ count: 10, offset: 0 });
+			await expect(response.json()).resolves.toEqual({
+				data: [
+					{
+						id: "campaign-id",
+						subject_line: "Newsletter title",
+						send_time: null,
+						archive_url: "https://example.com/newsletter",
+						status: "sent",
+					},
+				],
+				limit: 10,
+				offset: 0,
+				total: 1,
+			});
+		});
+	});
+
 	describe("POST /api/newsletters/subscribe", () => {
 		it("should require the api access token header", async () => {
 			const client = createTestClient(undefined as never);
