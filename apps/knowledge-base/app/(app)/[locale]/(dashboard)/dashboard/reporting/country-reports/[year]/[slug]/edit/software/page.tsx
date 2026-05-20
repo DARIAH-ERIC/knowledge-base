@@ -8,6 +8,7 @@ import { getAuthorizedCountryReportForUser } from "@/app/(app)/[locale]/(dashboa
 import { assertAuthenticated } from "@/lib/auth/session";
 import { resolveCountryReportId } from "@/lib/data/reporting-urls";
 import { db } from "@/lib/db";
+import { search } from "@/lib/search";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardReportingCountryReportSoftwarePageProps extends PageProps<"/[locale]/dashboard/reporting/country-reports/[year]/[slug]/edit/software"> {}
@@ -43,6 +44,11 @@ export default async function DashboardReportingCountryReportSoftwarePage(
 			db.query.countryReports.findFirst({
 				where: { id },
 				columns: { id: true },
+				with: {
+					country: {
+						columns: { sshocMarketplaceActorId: true },
+					},
+				},
 			}),
 		"update",
 	);
@@ -56,6 +62,18 @@ export default async function DashboardReportingCountryReportSoftwarePage(
 	}
 
 	const t = await getExtracted();
+	const actorId = report.country.sshocMarketplaceActorId;
+	const softwareResult =
+		actorId == null
+			? null
+			: await search.collections.resources.search({
+					filterBy: `type:=software && source:=ssh-open-marketplace && source_actor_ids:=[\`ssh-open-marketplace:${actorId}\`]`,
+					perPage: 100,
+					query: "*",
+					queryBy: ["label", "description", "keywords"],
+					sortBy: [{ field: "label", direction: "asc" }],
+				});
+	const software = softwareResult?.isOk() === true ? softwareResult.value.items : [];
 
 	return (
 		<div className="flex flex-col gap-y-12">
@@ -63,7 +81,39 @@ export default async function DashboardReportingCountryReportSoftwarePage(
 				<p className="text-sm text-muted-fg">
 					{t("Software contributions from the SSH Open Marketplace.")}
 				</p>
-				<p className="text-sm text-muted-fg italic">{t("Coming soon.")}</p>
+				{actorId == null ? (
+					<p className="text-sm text-muted-fg italic">
+						{t("This country has no SSH Open Marketplace actor id.")}
+					</p>
+				) : software.length === 0 ? (
+					<p className="text-sm text-muted-fg italic">
+						{t("No SSH Open Marketplace software found for this country.")}
+					</p>
+				) : (
+					<ul className="flex flex-col gap-y-3">
+						{software.map(({ document }) => (
+							<li key={document.id} className="rounded-md border border-border p-4">
+								<div className="flex flex-col gap-y-2">
+									{document.links[0] != null ? (
+										<a
+											className="text-sm font-semibold text-fg underline-offset-4 hover:underline"
+											href={document.links[0]}
+											rel="noreferrer"
+											target="_blank"
+										>
+											{document.label}
+										</a>
+									) : (
+										<p className="text-sm font-semibold text-fg">{document.label}</p>
+									)}
+									{document.description !== "" ? (
+										<p className="line-clamp-3 text-sm text-muted-fg">{document.description}</p>
+									) : null}
+								</div>
+							</li>
+						))}
+					</ul>
+				)}
 			</div>
 
 			<ReportScreenCommentSection reportId={report.id} reportType="country" screenKey="software" />
