@@ -7,6 +7,7 @@ import { flattenEntityVersion } from "@/lib/entity-version";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
+import { hardcodedWorkingGroups } from "@/routes/governance-bodies/hardcoded-working-groups";
 import { and, count, eq, inArray, sql } from "@/services/db/sql";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
@@ -30,6 +31,19 @@ interface GovernanceBodyPerson {
 	role: (typeof schema.personRoleTypesEnum)[number];
 	duration: { start: string; end: string | null };
 }
+
+const hardcodedWorkingGroupsGovernanceBody = {
+	id: "019b7a56-b301-7f93-9d24-91333bdc3ca8",
+	name: "working groups",
+	acronym: null,
+	summary:
+		"Self-organised communities of practice within DARIAH which contribute to bringing together state-of-art digital arts and humanities activities and scaling their results to a European level.",
+	metadata: {},
+	image: null,
+	entity: { slug: "working-groups" },
+	publishedAt: "2026-01-01T00:00:00.000Z",
+	socialMedia: [],
+};
 
 function mapSocialMedia(
 	socialMedia: Array<{
@@ -55,6 +69,99 @@ function mapSocialMedia(
 				: null,
 		};
 	});
+}
+
+async function getActiveWorkingGroupChairs(db: Database | Transaction) {
+	const rows = await db
+		.select({
+			id: schema.persons.id,
+			name: schema.persons.name,
+			sortName: schema.persons.sortName,
+			email: schema.persons.email,
+			orcid: schema.persons.orcid,
+			slug: schema.entities.slug,
+			imageKey: schema.assets.key,
+			role: schema.personRoleTypes.type,
+			duration: schema.personsToOrganisationalUnits.duration,
+		})
+		.from(schema.personsToOrganisationalUnits)
+		.innerJoin(
+			schema.personRoleTypes,
+			eq(schema.personsToOrganisationalUnits.roleTypeId, schema.personRoleTypes.id),
+		)
+		.innerJoin(
+			schema.organisationalUnits,
+			eq(schema.personsToOrganisationalUnits.organisationalUnitId, schema.organisationalUnits.id),
+		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+		)
+		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
+		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
+		.where(
+			and(
+				eq(schema.personRoleTypes.type, "is_chair_of"),
+				eq(schema.organisationalUnitTypes.type, "working_group"),
+				eq(schema.entityStatus.type, "published"),
+				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
+			),
+		);
+
+	const positions = await getPersonPositions(db, [...new Set(rows.map((row) => row.id))]);
+	const chairsByPerson = new Map<string, GovernanceBodyPerson>();
+
+	for (const row of rows) {
+		if (chairsByPerson.has(row.id)) {
+			continue;
+		}
+
+		chairsByPerson.set(row.id, {
+			id: row.id,
+			name: row.name,
+			sortName: row.sortName,
+			email: row.email,
+			orcid: row.orcid,
+			position: positions.get(row.id) ?? null,
+			image: images.generateSignedImageUrl({
+				key: row.imageKey,
+				options: { width: imageWidth.avatar },
+			}),
+			slug: row.slug,
+			role: row.role,
+			duration: {
+				start: row.duration.start.toISOString(),
+				end: row.duration.end?.toISOString() ?? null,
+			},
+		});
+	}
+
+	return [...chairsByPerson.values()].toSorted((a, b) => {
+		const byName = a.sortName.localeCompare(b.sortName);
+		if (byName !== 0) {
+			return byName;
+		}
+		return a.name.localeCompare(b.name);
+	});
+}
+
+async function getHardcodedWorkingGroupsGovernanceBody(db: Database | Transaction) {
+	return {
+		...hardcodedWorkingGroupsGovernanceBody,
+		persons: await getActiveWorkingGroupChairs(db),
+	};
+}
+
+async function getHardcodedWorkingGroupsGovernanceBodyDetails(db: Database | Transaction) {
+	return {
+		...(await getHardcodedWorkingGroupsGovernanceBody(db)),
+		description: hardcodedWorkingGroups.description,
+		relatedEntities: [],
+		relatedResources: [],
+	};
 }
 
 async function getActiveGovernanceBodyPersons(
@@ -246,7 +353,11 @@ export async function getGovernanceBodies(
 		};
 	});
 
-	return { data, limit, offset, total };
+	if (offset <= total && offset + limit > total) {
+		data.push(await getHardcodedWorkingGroupsGovernanceBody(db));
+	}
+
+	return { data, limit, offset, total: total + 1 };
 }
 
 interface GetGovernanceBodyByIdParams {
@@ -258,6 +369,10 @@ export async function getGovernanceBodyById(
 	params: GetGovernanceBodyByIdParams,
 ) {
 	const { id } = params;
+
+	if (id === hardcodedWorkingGroupsGovernanceBody.id) {
+		return getHardcodedWorkingGroupsGovernanceBodyDetails(db);
+	}
 
 	const [item, fields, relatedEntities, relatedResources, personsByGovernanceBody] =
 		await Promise.all([
@@ -407,7 +522,14 @@ export async function getGovernanceBodySlugs(
 		return { id, entity: { slug: entityVersion.entity.slug } };
 	});
 
-	return { data, limit, offset, total };
+	if (offset <= total && offset + limit > total) {
+		data.push({
+			id: hardcodedWorkingGroupsGovernanceBody.id,
+			entity: hardcodedWorkingGroupsGovernanceBody.entity,
+		});
+	}
+
+	return { data, limit, offset, total: total + 1 };
 }
 
 interface GetGovernanceBodyBySlugParams {
@@ -419,6 +541,10 @@ export async function getGovernanceBodyBySlug(
 	params: GetGovernanceBodyBySlugParams,
 ) {
 	const { slug } = params;
+
+	if (slug === hardcodedWorkingGroupsGovernanceBody.entity.slug) {
+		return getHardcodedWorkingGroupsGovernanceBodyDetails(db);
+	}
 
 	const item = await db.query.organisationalUnits.findFirst({
 		where: {
