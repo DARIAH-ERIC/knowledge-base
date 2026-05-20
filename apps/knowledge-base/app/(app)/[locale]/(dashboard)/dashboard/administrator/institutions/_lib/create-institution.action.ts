@@ -144,7 +144,9 @@ export const createInstitutionAction = createServerAction(
 			}
 		});
 
-		await dispatchWebhook({ type: "members-partners" });
+		if (shouldSaveAndPublish(formData)) {
+			await dispatchWebhook({ type: "members-partners" });
+		}
 		revalidatePath("/[locale]/dashboard/administrator/institutions", "layout");
 
 		redirect({ href: "/dashboard/administrator/institutions", locale });

@@ -144,6 +144,10 @@ export const createDocumentOrPolicyAction = createServerAction(
 		});
 
 		after(async () => {
+			if (!shouldSaveAndPublish(formData)) {
+				return;
+			}
+
 			if (entityDocumentId != null) {
 				await syncWebsiteDocumentForEntity(entityDocumentId);
 			}

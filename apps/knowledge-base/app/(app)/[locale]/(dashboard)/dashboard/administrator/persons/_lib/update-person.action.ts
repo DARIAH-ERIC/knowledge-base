@@ -81,6 +81,10 @@ export const updatePersonAction = createServerAction(
 		});
 
 		after(async () => {
+			if (!shouldSaveAndPublish(formData)) {
+				return;
+			}
+
 			await syncWebsiteDocumentForEntity(documentId);
 			await dispatchWebhook({ type: "persons" });
 		});

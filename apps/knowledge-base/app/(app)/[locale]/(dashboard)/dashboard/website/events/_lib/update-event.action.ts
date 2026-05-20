@@ -129,6 +129,10 @@ export const updateEventAction = createServerAction(
 		});
 
 		after(async () => {
+			if (!shouldSaveAndPublish(formData)) {
+				return;
+			}
+
 			await syncWebsiteDocumentForEntity(documentId);
 			await dispatchWebhook({ type: "events" });
 		});

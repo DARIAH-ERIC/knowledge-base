@@ -147,6 +147,10 @@ export const createProjectAction = createServerAction(
 		});
 
 		after(async () => {
+			if (!shouldSaveAndPublish(formData)) {
+				return;
+			}
+
 			if (documentId != null) {
 				await syncWebsiteDocumentForEntity(documentId);
 			}
