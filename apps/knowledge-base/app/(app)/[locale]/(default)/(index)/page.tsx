@@ -1,9 +1,10 @@
 import { ButtonLink } from "@dariah-eric/ui/button-link";
 import type { Metadata, ResolvingMetadata } from "next";
-import { useExtracted } from "next-intl";
+import { getExtracted } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Main } from "@/app/(app)/[locale]/(default)/_components/main";
+import { getCurrentSession } from "@/lib/auth/session";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface IndexPageProps extends PageProps<"/[locale]"> {}
@@ -23,8 +24,14 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function IndexPage(_props: Readonly<IndexPageProps>): ReactNode {
-	const t = useExtracted();
+export default async function IndexPage(_props: Readonly<IndexPageProps>): Promise<ReactNode> {
+	const t = await getExtracted();
+	const { session } = await getCurrentSession();
+
+	const cta =
+		session == null
+			? { href: "/auth/sign-in", label: t("Sign in") }
+			: { href: "/dashboard", label: t("Go to dashboard") };
 
 	return (
 		<Main className="container flex-1 px-8 py-12 xs:px-16">
@@ -38,10 +45,10 @@ export default function IndexPage(_props: Readonly<IndexPageProps>): ReactNode {
 					</p>
 				</div>
 				<div className="flex flex-col gap-3 sm:flex-row">
-					<ButtonLink href="/auth/sign-in" size="lg">
-						{t("Sign in")}
+					<ButtonLink className="min-inline-40" href={cta.href} size="lg">
+						{cta.label}
 					</ButtonLink>
-					<ButtonLink href="/documentation" intent="outline" size="lg">
+					<ButtonLink className="min-inline-40" href="/documentation" intent="outline" size="lg">
 						{t("Read documentation")}
 					</ButtonLink>
 				</div>

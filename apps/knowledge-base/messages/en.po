@@ -252,22 +252,6 @@ msgctxt "ui"
 msgid "NNbHjg"
 msgstr "Remove tag"
 
-#: app/(app)/[locale]/_components/color-scheme-select.tsx:11
-msgid "+CwN9C"
-msgstr "System"
-
-#: app/(app)/[locale]/_components/color-scheme-select.tsx:12
-msgid "3cc4Ct"
-msgstr "Light"
-
-#: app/(app)/[locale]/_components/color-scheme-select.tsx:13
-msgid "tOdNiY"
-msgstr "Dark"
-
-#: app/(app)/[locale]/_components/color-scheme-select.tsx:16
-msgid "o9rZ47"
-msgstr "Change color scheme"
-
 #: app/(app)/[locale]/_components/color-scheme-toggle.tsx:9
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav.tsx:119
 msgid "rru3FW"
@@ -547,7 +531,6 @@ msgstr "We will send a password reset code to your email address."
 #: app/(app)/[locale]/(auth)/auth/sign-in/page.tsx:69
 #: app/(app)/[locale]/(auth)/auth/sign-up/page.tsx:86
 #: app/(app)/[locale]/(default)/_components/default-header.tsx:52
-#: app/(app)/[locale]/(default)/(index)/page.tsx:42
 #: app/(app)/[locale]/unauthorized.tsx:39
 msgid "SQJto2"
 msgstr "Sign in"
@@ -854,7 +837,7 @@ msgid "+5d9Hf"
 msgstr "Verify the code from the app"
 
 #: app/(app)/[locale]/(auth)/auth/two-factor/setup/_components/two-factor-set-up-form.tsx:38
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons.tsx:30
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons.tsx:50
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-create-form.tsx:123
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-edit-form.tsx:92
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:197
@@ -1358,7 +1341,7 @@ msgstr "Organisation"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx:177
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section.tsx:166
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:188
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:128
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:127
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:173
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-chairs-section.tsx:143
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:123
@@ -1369,7 +1352,7 @@ msgstr "From"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx:178
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section.tsx:167
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:191
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:129
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:128
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:176
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-chairs-section.tsx:144
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:124
@@ -1380,7 +1363,7 @@ msgstr "Until"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx:204
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section.tsx:193
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:216
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:161
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:155
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:195
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-chairs-section.tsx:166
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:143
@@ -1458,8 +1441,8 @@ msgstr "End date"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx:317
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx:318
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons.tsx:22
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons.tsx:23
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons.tsx:35
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons.tsx:36
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx:294
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx:295
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx:194
@@ -1803,11 +1786,11 @@ msgstr "Open quick search"
 msgid "K3r6DQ"
 msgstr "Delete"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons.tsx:30
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons.tsx:50
 msgid "1y23Mb"
 msgstr "Save (as draft)"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons.tsx:41
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons.tsx:64
 msgid "HQ/1MD"
 msgstr "Save and publish"
 
@@ -2103,7 +2086,7 @@ msgid "mn5pjI"
 msgstr "Relations"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section.tsx:163
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:124
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:129
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-create-form.tsx:102
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-edit-form.tsx:69
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page.tsx:89
@@ -2128,8 +2111,8 @@ msgstr "Relations"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-edit-form.tsx:71
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:89
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:126
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/confirm/page.tsx:65
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/edit/confirm/page.tsx:65
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/confirm/page.tsx:64
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/edit/confirm/page.tsx:64
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:121
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:126
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:127
@@ -2394,15 +2377,15 @@ msgstr "person relation"
 msgid "zpAgR4"
 msgstr "Manage all countries in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:125
 msgid "wxFA74"
 msgstr "Membership"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:145
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:139
 msgid "7L86Z5"
 msgstr "Member"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:145
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:139
 msgid "TLrvIO"
 msgstr "Observer"
 
@@ -2610,17 +2593,17 @@ msgstr "Administrator dashboard - Country report"
 msgid "hRUk8G"
 msgstr "Campaign {year}"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/[id]/page.tsx:80
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/[id]/page.tsx:80
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/[id]/page.tsx:79
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/[id]/page.tsx:79
 msgid "TclprG"
 msgstr "Download PDF"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/[id]/page.tsx:89
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/[id]/page.tsx:89
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/confirm/page.tsx:95
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/page.tsx:79
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/edit/confirm/page.tsx:95
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/page.tsx:79
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/[id]/page.tsx:87
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/[id]/page.tsx:87
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/confirm/page.tsx:93
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/page.tsx:78
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/edit/confirm/page.tsx:93
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/page.tsx:78
 msgid "JudhTj"
 msgstr "Download JSON"
 
@@ -4158,22 +4141,22 @@ msgstr "Publications"
 msgid "XHSoBk"
 msgstr "Report sections"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/confirm/page.tsx:28
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/confirm/page.tsx:27
 msgid "kWoNDD"
 msgstr "Dashboard - Confirm country report"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/confirm/page.tsx:73
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/edit/confirm/page.tsx:73
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/confirm/page.tsx:72
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/edit/confirm/page.tsx:72
 msgid "X4dRES"
 msgstr "Submit report"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/confirm/page.tsx:80
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/edit/confirm/page.tsx:80
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/confirm/page.tsx:79
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/edit/confirm/page.tsx:79
 msgid "1Fra7Q"
 msgstr "Accept report"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/confirm/page.tsx:85
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/edit/confirm/page.tsx:85
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/confirm/page.tsx:84
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/edit/confirm/page.tsx:84
 msgid "96OHmf"
 msgstr "This report has been accepted."
 
@@ -4306,7 +4289,7 @@ msgstr "No working group reports are available for your account."
 msgid "+eQkjv"
 msgstr "This account is already listed."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/edit/confirm/page.tsx:28
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/edit/confirm/page.tsx:27
 msgid "r03djZ"
 msgstr "Dashboard - Confirm working group report"
 
@@ -5032,19 +5015,6 @@ msgstr "Secondary"
 msgid "EFTSMc"
 msgstr "Main"
 
-#: app/(app)/[locale]/(default)/(index)/page.tsx:34
-#: app/(app)/[locale]/opengraph-image.tsx:38
-msgid "3umvLQ"
-msgstr "DARIAH Knowledge Base"
-
-#: app/(app)/[locale]/(default)/(index)/page.tsx:37
-msgid "yd+0BL"
-msgstr "Your central hub for everything DARIAH-related."
-
-#: app/(app)/[locale]/(default)/(index)/page.tsx:45
-msgid "rsNxxA"
-msgstr "Read documentation"
-
 #: app/(app)/[locale]/(default)/contact/_components/contact-form.tsx:50
 msgid "LLtKhp"
 msgstr "Subject"
@@ -5101,9 +5071,9 @@ msgstr "Error 403"
 msgid "tW7xtV"
 msgstr "You don't have permission to access this page. If you believe this is a mistake, please contact your administrator."
 
-#: app/(app)/[locale]/layout.tsx:47
-msgid "cSmcVJ"
-msgstr "RSS feed ({locale})"
+#: app/(app)/[locale]/opengraph-image.tsx:38
+msgid "3umvLQ"
+msgstr "DARIAH Knowledge Base"
 
 #: app/(app)/[locale]/unauthorized.tsx:12
 #: app/(app)/[locale]/unauthorized.tsx:40
