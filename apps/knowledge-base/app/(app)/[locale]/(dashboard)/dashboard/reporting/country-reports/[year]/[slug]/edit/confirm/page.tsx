@@ -1,5 +1,4 @@
-import { Button } from "@dariah-eric/ui/button";
-import { ButtonLink } from "@dariah-eric/ui/button-link";
+import { Button, buttonStyles } from "@dariah-eric/ui/button";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
@@ -85,15 +84,14 @@ export default async function DashboardReportingCountryReportConfirmPage(
 						<p className="text-sm text-muted-fg">{t("This report has been accepted.")}</p>
 					)}
 
-					<ButtonLink
+					<a
+						className={buttonStyles({ intent: "plain", size: "sm" })}
 						download={`country-report-${id}.json`}
 						href={`/api/reporting/country-reports/${id}/download`}
-						intent="plain"
-						size="sm"
 					>
 						<ArrowDownTrayIcon className="me-2 block-4 inline-4" />
 						{t("Download JSON")}
-					</ButtonLink>
+					</a>
 				</div>
 			</div>
 
