@@ -887,48 +887,6 @@ async function main() {
 			}
 		}
 
-		if (umbrellaUnit != null) {
-			const roleIds = new Set(institution.dariah_institution_country_role);
-			const relationStatuses = new Set<string>();
-
-			if (roleIds.has(20)) {
-				relationStatuses.add(organisationalUnitStatusByType.is_cooperating_partner_of.id);
-			}
-
-			if (roleIds.has(14) || wpCoordinatorInstitutionIds.has(wpInstitutionId)) {
-				relationStatuses.add(
-					organisationalUnitStatusByType.is_national_coordinating_institution_in.id,
-				);
-			}
-
-			if (wpRepresentativeInstitutionIds.has(wpInstitutionId)) {
-				relationStatuses.add(
-					organisationalUnitStatusByType.is_national_representative_institution_in.id,
-				);
-			}
-
-			if (
-				(roleIds.has(15) || roleIds.has(112)) &&
-				!relationStatuses.has(organisationalUnitStatusByType.is_cooperating_partner_of.id) &&
-				!relationStatuses.has(
-					organisationalUnitStatusByType.is_national_coordinating_institution_in.id,
-				) &&
-				!relationStatuses.has(
-					organisationalUnitStatusByType.is_national_representative_institution_in.id,
-				)
-			) {
-				relationStatuses.add(organisationalUnitStatusByType.is_partner_institution_of.id);
-			}
-
-			for (const statusId of relationStatuses) {
-				await ensureOrganisationalUnitRelation(tx, {
-					unitId: orgUnit.id,
-					relatedUnitId: umbrellaUnit.id,
-					statusId,
-				});
-			}
-		}
-
 		institutionOrgUnitIdsByName.set(normalizedName, orgUnit.id);
 		wpInstitutionIdToOrgUnitId.set(wpInstitutionId, orgUnit.id);
 
