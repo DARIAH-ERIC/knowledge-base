@@ -764,6 +764,9 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 				.insertContent({ type: "text", text: href, marks: [{ type: "link", attrs: { href } }] })
 				.run();
 		} else {
+			if (activeState?.isLink === true) {
+				chain.extendMarkRange("link");
+			}
 			chain.setLink({ href }).run();
 		}
 
@@ -779,9 +782,12 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		if (sel) {
 			chain.setTextSelection(sel);
 		}
+		if (activeState?.isLink === true) {
+			chain.extendMarkRange("link");
+		}
 		chain.unsetLink().run();
 		setIsLinkPopoverOpen(false);
-	}, [editor]);
+	}, [editor, activeState?.isLink]);
 
 	const insertEmbed = useCallback(() => {
 		if (!editor) {
