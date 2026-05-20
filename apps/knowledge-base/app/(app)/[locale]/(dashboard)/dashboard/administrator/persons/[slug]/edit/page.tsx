@@ -76,7 +76,6 @@ export default async function DashboardAdministratorEditPersonPage(
 				email: true,
 				name: true,
 				orcid: true,
-				position: true,
 				sortName: true,
 			},
 			with: {

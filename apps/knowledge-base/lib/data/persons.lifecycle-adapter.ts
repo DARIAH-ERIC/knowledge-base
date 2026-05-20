@@ -11,7 +11,6 @@ export const personsLifecycleAdapter: EntityLifecycleAdapter = {
 				imageId: schema.persons.imageId,
 				name: schema.persons.name,
 				orcid: schema.persons.orcid,
-				position: schema.persons.position,
 				sortName: schema.persons.sortName,
 			})
 			.from(schema.persons)

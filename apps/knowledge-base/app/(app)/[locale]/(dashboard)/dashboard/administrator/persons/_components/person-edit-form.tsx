@@ -19,7 +19,7 @@ interface PersonEditFormProps {
 	documentId: string;
 	hasDraftChanges: boolean;
 	isPublished: boolean;
-	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "position" | "sortName"> & {
+	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
 		biography?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };

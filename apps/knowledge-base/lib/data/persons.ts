@@ -214,7 +214,6 @@ export async function getPersonBySlugForAdmin(currentUser: Pick<User, "role">, s
 			email: true,
 			name: true,
 			orcid: true,
-			position: true,
 			sortName: true,
 		},
 		with: {

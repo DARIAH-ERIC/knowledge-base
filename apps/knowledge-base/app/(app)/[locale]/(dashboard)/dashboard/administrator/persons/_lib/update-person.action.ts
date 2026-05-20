@@ -49,8 +49,7 @@ export const updatePersonAction = createServerAction(
 			});
 		}
 
-		const { biography, documentId, email, imageKey, name, orcid, position, sortName } =
-			result.output;
+		const { biography, documentId, email, imageKey, name, orcid, sortName } = result.output;
 
 		await db.transaction(async (tx) => {
 			const draftVersionId = await ensureDraftVersion(tx, documentId, personsLifecycleAdapter);
@@ -66,7 +65,7 @@ export const updatePersonAction = createServerAction(
 
 			await tx
 				.update(schema.persons)
-				.set({ email, imageId, name, orcid, position, sortName })
+				.set({ email, imageId, name, orcid, sortName })
 				.where(eq(schema.persons.id, draftVersionId));
 
 			const parsedContent = JSON.parse(biography) as schema.RichTextContentBlock["content"];
