@@ -1,4 +1,4 @@
-import { buttonStyles } from "@dariah-eric/ui/button";
+import { buttonStyles } from "@dariah-eric/ui/button-styles";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
