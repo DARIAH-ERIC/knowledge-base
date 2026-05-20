@@ -7,7 +7,7 @@ import {
 } from "@dariah-eric/client-sshoc";
 import type { Database } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
-import { eq, inArray, isNotNull } from "@dariah-eric/database/sql";
+import { and, eq, inArray, isNotNull } from "@dariah-eric/database/sql";
 
 interface SshocServiceSnapshot {
 	accessibleAt: Array<string>;
@@ -105,7 +105,14 @@ export async function ingestSshocServices(
 				sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
 			})
 			.from(schema.organisationalUnits)
-			.where(isNotNull(schema.organisationalUnits.sshocMarketplaceActorId)),
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					isNotNull(schema.organisationalUnits.sshocMarketplaceActorId),
+					eq(schema.entityStatus.type, "published"),
+				),
+			),
 		db
 			.select({
 				id: schema.services.id,

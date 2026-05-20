@@ -16,7 +16,12 @@ export interface ZoteroJsonItemData {
 	DOI?: string;
 	itemType?: string;
 	dateModified?: string;
+	collections?: Array<string>;
 	[key: string]: unknown;
+}
+
+export function isZoteroItemInCollection(item: ZoteroJsonItem<ZoteroJsonItemData>): boolean {
+	return item.data.collections != null && item.data.collections.length > 0;
 }
 
 export function createZoteroItem(item: ZoteroJsonItem<ZoteroJsonItemData>): ResourceDocument {
