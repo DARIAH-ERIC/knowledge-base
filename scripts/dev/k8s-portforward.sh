@@ -61,13 +61,20 @@ spec:
 EOF
 
 cleanup() {
+  trap - EXIT INT TERM
   echo "Stopping port-forwards..."
   kill "$pid1" "$pid2" 2>/dev/null
 }
 
+interrupt() {
+  cleanup
+  exit 130
+}
+
 echo "Starting port-forwards..."
 
-trap cleanup EXIT INT TERM
+trap cleanup EXIT
+trap interrupt INT TERM
 
 kubectl -n dariah-knowledge-base port-forward deployment/pg-proxy 5432:5432 &
 pid1=$!
