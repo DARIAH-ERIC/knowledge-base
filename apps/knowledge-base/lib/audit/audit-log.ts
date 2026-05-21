@@ -1,3 +1,4 @@
+import { isNonEmptyString, unique } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
 import type { Database, Transaction } from "@/lib/db";
@@ -42,14 +43,14 @@ const sensitiveFieldNames = new Set([
 const subjectIdFieldNames = ["id", "documentId", "entityId", "campaignId", "slug", "code"] as const;
 
 export function getAuditSummaryFromFormData(formData: FormData): Record<string, unknown> {
-	const fields = Array.from(new Set(Array.from(formData.keys())))
+	const fields = unique(Array.from(formData.keys()))
 		.filter((field) => !sensitiveFieldNames.has(field))
 		.toSorted();
 	const intent = formData.get("intent");
 
 	return {
 		fields,
-		...(typeof intent === "string" && intent !== "" ? { intent } : {}),
+		...(isNonEmptyString(intent) ? { intent } : {}),
 	};
 }
 
