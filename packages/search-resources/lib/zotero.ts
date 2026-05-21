@@ -24,7 +24,10 @@ export function isZoteroItemInCollection(item: ZoteroJsonItem<ZoteroJsonItemData
 	return item.data.collections != null && item.data.collections.length > 0;
 }
 
-export function createZoteroItem(item: ZoteroJsonItem<ZoteroJsonItemData>): ResourceDocument {
+export function createZoteroItem(
+	item: ZoteroJsonItem<ZoteroJsonItemData>,
+	sourceActorIds: Array<string> | null = null,
+): ResourceDocument {
 	const data = item.data;
 	const authors = [];
 
@@ -57,7 +60,7 @@ export function createZoteroItem(item: ZoteroJsonItem<ZoteroJsonItemData>): Reso
 		links: data.url != null ? [data.url] : [],
 		keywords: data.tags?.map((tag) => tag.tag).filter((keyword) => isNonEmptyString(keyword)) ?? [],
 		kind: data.itemType ?? null,
-		source_actor_ids: null,
+		source_actor_ids: sourceActorIds,
 		upstream_sources: null,
 		authors,
 		year,

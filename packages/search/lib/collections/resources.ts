@@ -61,7 +61,7 @@ export interface PublicationResourceDocument extends ResourceDocumentBase {
 	type: "publication";
 	kind: string | null;
 	source: "episciences" | "hal" | "open-aire" | "zenodo" | "zotero";
-	source_actor_ids: null;
+	source_actor_ids: Array<string> | null;
 	upstream_sources: Array<string> | null;
 	authors: Array<string>;
 	year: number | null;

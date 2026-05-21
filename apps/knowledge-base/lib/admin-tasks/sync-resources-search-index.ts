@@ -7,6 +7,7 @@ import { createSearchService } from "@dariah-eric/search";
 import { createSearchResourcesService } from "@dariah-eric/search-resources";
 
 import { env } from "@/config/env.config";
+import { db } from "@/lib/db";
 import { search } from "@/lib/search/admin";
 
 export interface SyncResourcesSearchIndexResult {
@@ -31,6 +32,23 @@ export async function syncResourcesSearchIndex(): Promise<SyncResourcesSearchInd
 
 	const sshocMarketplaceBaseUrl = env.SSHOC_MARKETPLACE_BASE_URL;
 	const zoteroGroupId = env.ZOTERO_GROUP_ID;
+	const workingGroups = await db.query.workingGroups.findMany({
+		columns: {
+			sshocMarketplaceActorId: true,
+		},
+		with: {
+			entityVersion: {
+				columns: {},
+				with: {
+					entity: {
+						columns: {
+							slug: true,
+						},
+					},
+				},
+			},
+		},
+	});
 
 	const campus = createDariahCampusClient({
 		config: {
@@ -79,6 +97,12 @@ export async function syncResourcesSearchIndex(): Promise<SyncResourcesSearchInd
 		searchService,
 		sshoc,
 		sshocMarketplaceBaseUrl,
+		workingGroups: workingGroups.map((workingGroup) => {
+			return {
+				slug: workingGroup.entityVersion.entity.slug,
+				sshocMarketplaceActorId: workingGroup.sshocMarketplaceActorId,
+			};
+		}),
 		zotero,
 		zoteroGroupId,
 	});

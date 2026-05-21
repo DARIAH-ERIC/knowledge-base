@@ -26,6 +26,33 @@ const db = createDatabaseService({
 	logger: true,
 }).unwrap();
 
+async function getWorkingGroupSourceData() {
+	const items = await db.query.workingGroups.findMany({
+		columns: {
+			sshocMarketplaceActorId: true,
+		},
+		with: {
+			entityVersion: {
+				columns: {},
+				with: {
+					entity: {
+						columns: {
+							slug: true,
+						},
+					},
+				},
+			},
+		},
+	});
+
+	return items.map((item) => {
+		return {
+			slug: item.entityVersion.entity.slug,
+			sshocMarketplaceActorId: item.sshocMarketplaceActorId,
+		};
+	});
+}
+
 const search = createSearchAdminService({
 	apiKey: env.TYPESENSE_ADMIN_API_KEY,
 	collections: {
@@ -105,6 +132,7 @@ const searchResources = createSearchResourcesService({
 	searchService,
 	sshoc,
 	sshocMarketplaceBaseUrl: env.SSHOC_MARKETPLACE_BASE_URL,
+	workingGroups: await getWorkingGroupSourceData(),
 	zotero,
 	zoteroGroupId: env.ZOTERO_GROUP_ID,
 });

@@ -22,6 +22,7 @@
 		"search:api-keys:generate": "tsx ./scripts/generate-search-api-keys.ts",
 		"search:collections:create": "tsx ./scripts/create-collections.ts",
 		"search:collections:reset": "tsx ./scripts/reset-collections.ts",
+		"search:resources:working-groups": "tsx ./scripts/query-working-group-resources.ts",
 		"types:check": "tsc --noEmit"
 	},
 	"devDependencies": {

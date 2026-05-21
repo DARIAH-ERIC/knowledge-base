@@ -14,6 +14,7 @@ import { Result } from "better-result";
 
 import {
 	type SearchIndexResourceSourceData,
+	type WorkingGroupSourceData,
 	createSearchIndexResourceDocuments,
 	createWebsiteResourceDocuments,
 } from "./resources";
@@ -32,6 +33,7 @@ export interface CreateSearchResourcesServiceParams {
 	searchService: SearchService;
 	sshoc: SshocClient;
 	sshocMarketplaceBaseUrl: string;
+	workingGroups: Array<WorkingGroupSourceData>;
 	zotero: ZoteroClient;
 	zoteroGroupId: string;
 }
@@ -67,6 +69,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 		searchService,
 		sshoc,
 		sshocMarketplaceBaseUrl,
+		workingGroups,
 		zotero,
 		zoteroGroupId,
 	} = params;
@@ -84,6 +87,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 				campusResourcesResult,
 				campusCurriculaResult,
 				episciencesDocumentsResult,
+				zoteroCollectionsResult,
 				zoteroItemsResult,
 			] = await Promise.all([
 				getOrFetch(cache, "sshoc/items", () =>
@@ -96,6 +100,9 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 				getOrFetch(cache, "campus/resources", () => campus.resources.listAll()),
 				getOrFetch(cache, "campus/curricula", () => campus.curricula.listAll()),
 				getOrFetch(cache, "episciences/documents", () => episciences.search.listAll()),
+				getOrFetch(cache, "zotero/collections", () =>
+					zotero.collections.listAll({ groupId: zoteroGroupId }),
+				),
 				getOrFetch(cache, "zotero/items", () => zotero.items.listAll({ groupId: zoteroGroupId })),
 			]);
 
@@ -103,6 +110,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 			const campusResources = yield* campusResourcesResult;
 			const campusCurricula = yield* campusCurriculaResult;
 			const episciencesDocuments = yield* episciencesDocumentsResult;
+			const zoteroCollections = yield* zoteroCollectionsResult;
 			const zoteroItems = yield* zoteroItemsResult;
 
 			return Result.ok({
@@ -110,6 +118,8 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 				campusResources,
 				episciencesDocuments,
 				sshocItems,
+				workingGroups,
+				zoteroCollections,
 				zoteroItems,
 			});
 		});

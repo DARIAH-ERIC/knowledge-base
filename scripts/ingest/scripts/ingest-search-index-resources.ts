@@ -5,6 +5,7 @@ import { createDariahCampusClient } from "@dariah-eric/client-campus";
 import { createEpisciencesClient } from "@dariah-eric/client-episciences";
 import { createSshocClient } from "@dariah-eric/client-sshoc";
 import { createZoteroClient } from "@dariah-eric/client-zotero";
+import { createDatabaseService } from "@dariah-eric/database";
 import { createSearchService } from "@dariah-eric/search";
 import { createSearchResourcesService } from "@dariah-eric/search-resources";
 import { createSearchAdminService } from "@dariah-eric/search/admin";
@@ -15,6 +16,45 @@ import { createCacheService } from "../lib/cache/index.ts";
 const cache = createCacheService({
 	cacheDir: path.join(process.cwd(), ".cache"),
 });
+
+const db = createDatabaseService({
+	connection: {
+		database: env.DATABASE_NAME,
+		host: env.DATABASE_HOST,
+		password: env.DATABASE_PASSWORD,
+		port: env.DATABASE_PORT,
+		ssl: env.DATABASE_SSL_CONNECTION === "enabled",
+		user: env.DATABASE_USER,
+	},
+	logger: true,
+}).unwrap();
+
+async function getWorkingGroupSourceData() {
+	const items = await db.query.workingGroups.findMany({
+		columns: {
+			sshocMarketplaceActorId: true,
+		},
+		with: {
+			entityVersion: {
+				columns: {},
+				with: {
+					entity: {
+						columns: {
+							slug: true,
+						},
+					},
+				},
+			},
+		},
+	});
+
+	return items.map((item) => {
+		return {
+			slug: item.entityVersion.entity.slug,
+			sshocMarketplaceActorId: item.sshocMarketplaceActorId,
+		};
+	});
+}
 
 assert(env.CAMPUS_API_BASE_URL, "Missing environment variable: `CAMPUS_API_BASE_URL`.");
 assert(env.EPISCIENCES_API_BASE_URL, "Missing environment variable: `EPISCIENCES_API_BASE_URL`.");
@@ -91,6 +131,7 @@ const searchResources = createSearchResourcesService({
 	searchService,
 	sshoc,
 	sshocMarketplaceBaseUrl: env.SSHOC_MARKETPLACE_BASE_URL,
+	workingGroups: await getWorkingGroupSourceData(),
 	zotero,
 	zoteroGroupId: env.ZOTERO_GROUP_ID,
 });

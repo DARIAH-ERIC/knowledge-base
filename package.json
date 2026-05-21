@@ -41,6 +41,7 @@
 		"search:api-keys:generate": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"search\" run search:api-keys:generate",
 		"search:collections:create": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"search\" run search:collections:create",
 		"search:collections:reset": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"search\" run search:collections:reset",
+		"search:resources:working-groups": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"search\" run search:resources:working-groups",
 		"storage:buckets:create": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"storage\" run storage:buckets:create",
 		"storage:buckets:reset": "dotenvx run -q -f ./.devcontainer/.env --ignore MISSING_ENV_FILE -- pnpm --filter \"storage\" run storage:buckets:reset",
 		"test": "turbo run test",
