@@ -17,7 +17,7 @@ interface PersonDetailsProps {
 	hasDraft: boolean;
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
-	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "position" | "sortName"> & {
+	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 	publishAction: (documentId: string) => Promise<void>;
@@ -71,9 +71,6 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 
 				<DescriptionTerm>{t("ORCID")}</DescriptionTerm>
 				<DescriptionDetails>{person.orcid}</DescriptionDetails>
-
-				<DescriptionTerm>{t("Position")}</DescriptionTerm>
-				<DescriptionDetails>{person.position ?? "-"}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>

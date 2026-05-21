@@ -53,7 +53,7 @@ export const createPersonAction = createServerAction(
 			});
 		}
 
-		const { biography, email, imageKey, name, orcid, position, sortName } = result.output;
+		const { biography, email, imageKey, name, orcid, sortName } = result.output;
 
 		const slug = slugify(name);
 		let documentId: string | null = null;
@@ -86,7 +86,6 @@ export const createPersonAction = createServerAction(
 				imageId: asset.id,
 				name,
 				orcid,
-				position,
 				sortName,
 			});
 

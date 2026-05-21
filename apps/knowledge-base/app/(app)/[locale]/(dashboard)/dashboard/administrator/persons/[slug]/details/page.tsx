@@ -66,7 +66,6 @@ export default async function DashboardAdministratorPersonDetailsPage(
 			email: true,
 			name: true,
 			orcid: true,
-			position: true,
 			sortName: true,
 		},
 		with: {

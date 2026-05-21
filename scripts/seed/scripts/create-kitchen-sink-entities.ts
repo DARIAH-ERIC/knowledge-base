@@ -676,7 +676,6 @@ async function main() {
 				sortName: "Person, Kitchen Sink",
 				email: "kitchen.sink.person@example.org",
 				orcid: "0000-0002-1825-0097",
-				position: "Senior Integration Tester",
 				imageId: createId("asset:avatar"),
 			});
 			await upsertById(tx, schema.persons, {
@@ -685,7 +684,6 @@ async function main() {
 				sortName: "Person, Related Kitchen Sink",
 				email: "related.person@example.org",
 				orcid: "0000-0002-1694-233X",
-				position: "Research Infrastructure Coordinator",
 				imageId: createId("asset:avatar"),
 			});
 

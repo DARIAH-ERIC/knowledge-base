@@ -84,7 +84,6 @@ function createPersonItems(count: number) {
 				person: {
 					id: versionId,
 					name,
-					position: f.person.jobTitle(),
 					sortName: f.person.lastName(),
 					email: f.internet.email(),
 					orcid: `0000-000${String(f.number.int({ min: 1, max: 9 }))}-${String(f.number.int({ min: 1000, max: 9999 }))}-${String(f.number.int({ min: 1000, max: 9999 }))}`,

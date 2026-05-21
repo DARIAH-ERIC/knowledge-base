@@ -28,7 +28,6 @@ test.describe("persons admin", () => {
 
 		await personsPage.fillName(name);
 		await personsPage.fillSortName("Person, Test");
-		await personsPage.fillPosition("Research fellow");
 		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
 
 		await personsPage.submitForm();
@@ -45,7 +44,6 @@ test.describe("persons admin", () => {
 		await personsPage.gotoCreate();
 		await personsPage.fillName(originalName);
 		await personsPage.fillSortName("Me, Edit");
-		await personsPage.fillPosition("Officer");
 		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await personsPage.submitForm();
 
@@ -61,7 +59,6 @@ test.describe("persons admin", () => {
 		const nameField = page.getByLabel("Name", { exact: true });
 		await nameField.clear();
 		await nameField.fill(updatedName);
-		await personsPage.fillPosition("Senior officer");
 
 		await personsPage.submitForm();
 
@@ -79,7 +76,6 @@ test.describe("persons admin", () => {
 		await personsPage.gotoCreate();
 		await personsPage.fillName(name);
 		await personsPage.fillSortName("Me, Delete");
-		await personsPage.fillPosition("Coordinator");
 		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await personsPage.submitForm();
 

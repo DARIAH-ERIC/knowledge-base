@@ -31,8 +31,6 @@ export const persons = p.snakeCase.table("persons", {
 	sortName: p.text("sort_name").notNull(),
 	email: p.text("email"),
 	orcid: p.text("orcid"),
-	/** E.g. "Research fellow" or "Officer for service development and integration". */
-	position: p.text("position"),
 	imageId: p
 		.uuid("image_id")
 		.notNull()
