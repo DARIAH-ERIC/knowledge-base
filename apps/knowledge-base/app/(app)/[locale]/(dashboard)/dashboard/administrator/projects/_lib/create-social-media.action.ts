@@ -7,6 +7,11 @@ import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { CreateSocialMediaSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-social-media.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -24,7 +29,7 @@ export const createSocialMediaAction = createServerAction<CreatedSocialMedia>(
 		const locale = await getLocale();
 		const t = await getExtracted();
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(CreateSocialMediaSchema, getFormDataValues(formData), {
 			lang: getIntlLanguage(locale),
@@ -61,6 +66,14 @@ export const createSocialMediaAction = createServerAction<CreatedSocialMedia>(
 			.returning({ id: schema.socialMedia.id });
 
 		assert(created);
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "create",
+			subjectType: "projects",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: getAuditSummaryFromFormData(formData),
+		});
 
 		return createActionStateSuccess({
 			data: { id: created.id, name, url, type: { type } },

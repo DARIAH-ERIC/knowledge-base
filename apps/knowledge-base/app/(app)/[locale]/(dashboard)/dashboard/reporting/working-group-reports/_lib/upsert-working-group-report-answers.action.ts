@@ -8,6 +8,11 @@ import { getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getWorkingGroupReportEditHrefById } from "@/lib/data/reporting-urls";
@@ -61,6 +66,14 @@ export async function upsertWorkingGroupReportAnswersAction(formData: FormData):
 					.values({ workingGroupReportId: reportId, questionId, answer });
 			}
 		}
+	});
+
+	await recordAuditEvent(db, {
+		actorUserId: user.id,
+		action: "update",
+		subjectType: "working_group_report",
+		subjectId: getAuditSubjectIdFromFormData(formData),
+		summary: getAuditSummaryFromFormData(formData),
 	});
 
 	revalidatePath("/[locale]/dashboard/reporting", "layout");

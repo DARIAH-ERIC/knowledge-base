@@ -4,6 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
+import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { and, eq, isNull } from "@/lib/db/sql";
@@ -13,7 +14,7 @@ export async function moveNavigationItemAction(
 	id: string,
 	direction: "up" | "down",
 ): Promise<void> {
-	await assertAdmin();
+	const auditSession = await assertAdmin();
 
 	await db.transaction(async (tx) => {
 		const item = await tx.query.navigationItems.findFirst({
@@ -63,6 +64,14 @@ export async function moveNavigationItemAction(
 
 	after(async () => {
 		await dispatchWebhook({ type: "navigation" });
+	});
+
+	await recordAuditEvent(db, {
+		actorUserId: auditSession?.user.id,
+		action: "update",
+		subjectType: "navigation",
+		subjectId: id,
+		summary: { direction },
 	});
 
 	revalidatePath("/[locale]/dashboard/website/navigation", "layout");

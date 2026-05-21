@@ -4,6 +4,7 @@ import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 
+import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { getDocumentVersions } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
@@ -12,7 +13,7 @@ import { eq, inArray, or } from "@/lib/db/sql";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function deleteGovernanceBodyAction(documentId: string): Promise<void> {
-	await assertAdmin();
+	const auditSession = await assertAdmin();
 
 	await db.transaction(async (tx) => {
 		const entity = await tx.query.entities.findFirst({
@@ -65,5 +66,13 @@ export async function deleteGovernanceBodyAction(documentId: string): Promise<vo
 	});
 
 	await dispatchWebhook({ type: "governance-bodies" });
+	await recordAuditEvent(db, {
+		actorUserId: auditSession?.user.id,
+		action: "delete",
+		subjectType: "governance_bodies",
+		subjectId: documentId,
+		summary: {},
+	});
+
 	revalidatePath("/[locale]/dashboard/administrator/governance-bodies", "layout");
 }

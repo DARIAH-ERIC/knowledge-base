@@ -10,6 +10,11 @@ import { after } from "next/server";
 import * as v from "valibot";
 
 import { UpdateDocumentOrPolicyDetailsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { getDocumentIdForVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
@@ -28,7 +33,7 @@ export const updateDocumentOrPolicyDetailsAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			UpdateDocumentOrPolicyDetailsActionInputSchema,
@@ -107,6 +112,14 @@ export const updateDocumentOrPolicyDetailsAction = createServerAction(
 				await syncWebsiteDocumentForEntity(entityDocumentId);
 			}
 			await dispatchWebhook({ type: "documents-policies" });
+		});
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "update",
+			subjectType: "documents_policies",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: getAuditSummaryFromFormData(formData),
 		});
 
 		revalidatePath("/[locale]/dashboard/website/documents-policies", "layout");

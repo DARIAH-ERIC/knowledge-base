@@ -3,6 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 
+import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { ensureOrganisationalUnitDraftVersion } from "@/lib/data/organisational-unit-drafts";
@@ -11,7 +12,7 @@ import { eq } from "@/lib/db/sql";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function endWorkingGroupChairAction(id: string, end: Date): Promise<void> {
-	await assertAdmin();
+	const auditSession = await assertAdmin();
 
 	const relation = await db.query.personsToOrganisationalUnits.findFirst({
 		where: { id },
@@ -52,5 +53,13 @@ export async function endWorkingGroupChairAction(id: string, end: Date): Promise
 	});
 
 	await dispatchWebhook({ type: "working-groups" });
+	await recordAuditEvent(db, {
+		actorUserId: auditSession?.user.id,
+		action: "relation_end",
+		subjectType: "working_groups",
+		subjectId: id,
+		summary: { end },
+	});
+
 	revalidatePath("/[locale]/dashboard/administrator/working-groups", "layout");
 }

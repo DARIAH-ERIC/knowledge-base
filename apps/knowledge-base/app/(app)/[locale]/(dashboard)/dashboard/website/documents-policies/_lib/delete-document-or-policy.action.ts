@@ -5,6 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
+import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
 import { getDocumentVersions } from "@/lib/data/entity-lifecycle";
@@ -17,7 +18,7 @@ import {
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function deleteDocumentOrPolicyAction(documentId: string): Promise<void> {
-	await assertAdmin();
+	const auditSession = await assertAdmin();
 
 	const descriptor = await db.transaction(async (tx) => {
 		const entity = await tx.query.entities.findFirst({
@@ -79,6 +80,14 @@ export async function deleteDocumentOrPolicyAction(documentId: string): Promise<
 		}
 
 		await dispatchWebhook({ type: "documents-policies" });
+	});
+
+	await recordAuditEvent(db, {
+		actorUserId: auditSession?.user.id,
+		action: "delete",
+		subjectType: "documents_policies",
+		subjectId: documentId,
+		summary: {},
 	});
 
 	revalidatePath("/[locale]/dashboard/website/documents-policies", "layout");

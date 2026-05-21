@@ -8,6 +8,11 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { CreateSpotlightArticleContributorActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article-contributor.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
@@ -19,7 +24,7 @@ export const createSpotlightArticleContributorAction = createServerAction(
 		const locale = await getLocale();
 		const t = await getExtracted();
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			CreateSpotlightArticleContributorActionInputSchema,
@@ -55,6 +60,14 @@ export const createSpotlightArticleContributorAction = createServerAction(
 				.values({ spotlightArticleId: articleId, personId, role });
 
 			await touchVersion(tx, articleId);
+		});
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "create",
+			subjectType: "spotlight_articles",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: getAuditSummaryFromFormData(formData),
 		});
 
 		revalidatePath("/[locale]/dashboard/website/spotlight-articles", "layout");

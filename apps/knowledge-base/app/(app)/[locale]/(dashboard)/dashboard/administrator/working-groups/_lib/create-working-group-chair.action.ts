@@ -8,6 +8,11 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { CreateWorkingGroupChairActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/create-working-group-chair.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { ensureOrganisationalUnitDraftVersion } from "@/lib/data/organisational-unit-drafts";
@@ -21,7 +26,7 @@ export const createWorkingGroupChairAction = createServerAction(
 		const locale = await getLocale();
 		const t = await getExtracted();
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			CreateWorkingGroupChairActionInputSchema,
@@ -76,6 +81,14 @@ export const createWorkingGroupChairAction = createServerAction(
 		}
 
 		await dispatchWebhook({ type: "working-groups" });
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "create",
+			subjectType: "working_groups",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: getAuditSummaryFromFormData(formData),
+		});
+
 		revalidatePath("/[locale]/dashboard/administrator/working-groups", "layout");
 
 		return createActionStateSuccess({

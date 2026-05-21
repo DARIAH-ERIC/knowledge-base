@@ -4,6 +4,11 @@ import * as schema from "@dariah-eric/database/schema";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { revalidatePath } from "next/cache";
 
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -26,6 +31,14 @@ export async function deleteCountryReportContributionAction(formData: FormData):
 	await db
 		.delete(schema.countryReportContributions)
 		.where(eq(schema.countryReportContributions.id, contributionId));
+
+	await recordAuditEvent(db, {
+		actorUserId: user.id,
+		action: "delete",
+		subjectType: "country_report",
+		subjectId: getAuditSubjectIdFromFormData(formData),
+		summary: getAuditSummaryFromFormData(formData),
+	});
 
 	revalidatePath("/[locale]/dashboard/reporting", "layout");
 }

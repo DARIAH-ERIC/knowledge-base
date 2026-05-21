@@ -8,6 +8,11 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { CreateWorkingGroupReportSocialMediaActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/create-working-group-report-social-media.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -54,6 +59,14 @@ export const createWorkingGroupReportSocialMediaAction = createServerAction(
 		await db
 			.insert(schema.workingGroupReportSocialMedia)
 			.values({ workingGroupReportId, socialMediaId });
+
+		await recordAuditEvent(db, {
+			actorUserId: user.id,
+			action: "create",
+			subjectType: "working_group_report",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: getAuditSummaryFromFormData(formData),
+		});
 
 		revalidatePath("/[locale]/dashboard/reporting", "layout");
 

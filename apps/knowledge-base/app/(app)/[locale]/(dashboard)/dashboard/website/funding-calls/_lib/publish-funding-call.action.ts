@@ -4,6 +4,7 @@ import { getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
+import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { publishVersion } from "@/lib/data/entity-lifecycle";
 import { fundingCallsLifecycleAdapter } from "@/lib/data/funding-calls.lifecycle-adapter";
@@ -13,7 +14,7 @@ import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function publishFundingCallAction(documentId: string): Promise<void> {
-	await assertAdmin();
+	const auditSession = await assertAdmin();
 
 	await db.transaction(async (tx) => {
 		await publishVersion(tx, documentId, fundingCallsLifecycleAdapter);
@@ -22,6 +23,14 @@ export async function publishFundingCallAction(documentId: string): Promise<void
 	after(async () => {
 		await syncWebsiteDocumentForEntity(documentId);
 		await dispatchWebhook({ type: "funding-calls" });
+	});
+
+	await recordAuditEvent(db, {
+		actorUserId: auditSession?.user.id,
+		action: "publish",
+		subjectType: "funding_calls",
+		subjectId: documentId,
+		summary: {},
 	});
 
 	revalidatePath("/[locale]/dashboard/website/funding-calls", "layout");

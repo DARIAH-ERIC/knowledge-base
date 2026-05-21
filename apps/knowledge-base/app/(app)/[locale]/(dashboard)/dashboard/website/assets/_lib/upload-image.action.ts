@@ -12,8 +12,14 @@ import * as v from "valibot";
 
 import { UploadImageInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.schema";
 import { imageGridOptions } from "@/config/assets.config";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { uploadAsset } from "@/lib/data/assets";
+import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { images } from "@/lib/images";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -26,7 +32,7 @@ export const uploadImageAction = createServerAction<
 	const t = await getExtracted();
 
 	// FIXME:
-	const { user: _ } = await assertAdmin();
+	const auditSession = await assertAdmin();
 	// await assertAuthorized(user)
 
 	const validation = await v.safeParseAsync(UploadImageInputSchema, getFormDataValues(formData), {
@@ -47,6 +53,14 @@ export const uploadImageAction = createServerAction<
 
 	const { key } = await uploadAsset({ file, licenseId, prefix, label, alt, caption });
 	const { url } = images.generateSignedImageUrl({ key, options: imageGridOptions });
+
+	await recordAuditEvent(db, {
+		actorUserId: auditSession?.user.id,
+		action: "create",
+		subjectType: "assets",
+		subjectId: getAuditSubjectIdFromFormData(formData),
+		summary: getAuditSummaryFromFormData(formData),
+	});
 
 	revalidatePath("/[locale]/dashboard/website/assets", "page");
 	revalidatePath("/[locale]/dashboard/administrator/persons", "layout");

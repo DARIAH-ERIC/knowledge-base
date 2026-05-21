@@ -5,6 +5,7 @@ import { getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
+import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { publishVersion } from "@/lib/data/entity-lifecycle";
 import { eventsLifecycleAdapter } from "@/lib/data/events.lifecycle-adapter";
@@ -14,7 +15,7 @@ import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function publishEventAction(documentId: string): Promise<void> {
-	await assertAdmin();
+	const auditSession = await assertAdmin();
 
 	assert(documentId, "Missing documentId.");
 
@@ -25,6 +26,14 @@ export async function publishEventAction(documentId: string): Promise<void> {
 	after(async () => {
 		await syncWebsiteDocumentForEntity(documentId);
 		await dispatchWebhook({ type: "events" });
+	});
+
+	await recordAuditEvent(db, {
+		actorUserId: auditSession?.user.id,
+		action: "publish",
+		subjectType: "events",
+		subjectId: documentId,
+		summary: {},
 	});
 
 	revalidatePath("/[locale]/dashboard/website/events", "layout");
