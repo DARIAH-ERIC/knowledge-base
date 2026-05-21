@@ -13,6 +13,10 @@ jobs:
     name: Detect changed apps
     runs-on: ubuntu-24.04
 
+    env:
+      TURBO_TEAM: "${{ secrets.TURBO_TEAM }}"
+      TURBO_TOKEN: "${{ secrets.TURBO_TOKEN }}"
+
     outputs:
       matrix: ${{ steps.changes.outputs.matrix }}
       has_changes: ${{ steps.changes.outputs.has_changes }}
@@ -192,6 +196,8 @@ jobs:
             "TYPESENSE_RESOURCE_COLLECTION_NAME=${{ vars.K8S_SECRET_TYPESENSE_RESOURCE_COLLECTION_NAME }}"
             "TYPESENSE_WEBSITE_COLLECTION_NAME=${{ vars.K8S_SECRET_TYPESENSE_WEBSITE_COLLECTION_NAME }}"
             "TYPESENSE_SEARCH_API_KEY=${{ secrets.K8S_SECRET_TYPESENSE_SEARCH_API_KEY }}"
+            "TURBO_TEAM=${{ secrets.TURBO_TEAM }}"
+            "TURBO_TOKEN=${{ secrets.TURBO_TOKEN }}"
             "UNR_DATABASE_DIRECT_URL=${{ secrets.K8S_SECRET_UNR_DATABASE_DIRECT_URL }}"
             "UNR_S3_BUCKET_NAME=${{ vars.K8S_SECRET_UNR_S3_BUCKET_NAME }}"
             "ZOTERO_API_KEY=${{ secrets.K8S_SECRET_ZOTERO_API_KEY }}"
@@ -241,6 +247,9 @@ jobs:
           push: true
           tags: "${{ steps.meta-migrate.outputs.tags }}"
           labels: "${{ steps.meta-migrate.outputs.labels }}"
+          secrets: |
+            "TURBO_TEAM=${{ secrets.TURBO_TEAM }}"
+            "TURBO_TOKEN=${{ secrets.TURBO_TOKEN }}"
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
