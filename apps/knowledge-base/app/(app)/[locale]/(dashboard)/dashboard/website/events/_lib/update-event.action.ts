@@ -62,6 +62,7 @@ export const updateEventAction = createServerAction(
 			documentId,
 			title,
 			imageKey,
+			isFullDay,
 			summary,
 			duration,
 			location,
@@ -82,7 +83,7 @@ export const updateEventAction = createServerAction(
 
 			await tx
 				.update(schema.events)
-				.set({ imageId: asset.id, title, summary, location, website, duration })
+				.set({ imageId: asset.id, title, summary, location, website, duration, isFullDay })
 				.where(eq(schema.events.id, draftVersionId));
 
 			const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");

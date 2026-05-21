@@ -42,7 +42,9 @@ RUN pnpm install --frozen-lockfile
 
 FROM migrate-install AS migrate-build
 COPY --from=migrate-prune /app/out/full/ .
-RUN turbo run build --filter=@dariah-eric/database^...
+RUN --mount=type=secret,id=TURBO_TEAM,env=TURBO_TEAM \
+    --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN \
+    turbo run build --filter=@dariah-eric/database^...
 # We don't set `injectWorkspacePackages` directly in `pnpm-workspace.yaml` because it currently
 # produces lots of peer dependency warnings.
 RUN pnpm deploy --filter @dariah-eric/database --config.inject-workspace-packages=true /out
@@ -81,7 +83,9 @@ RUN pnpm install --frozen-lockfile
 
 FROM api-install AS api-build
 COPY --from=api-prune /app/out/full/ .
-RUN turbo run build --filter=@dariah-eric/api
+RUN --mount=type=secret,id=TURBO_TEAM,env=TURBO_TEAM \
+    --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN \
+    turbo run build --filter=@dariah-eric/api
 # We don't set `injectWorkspacePackages` directly in `pnpm-workspace.yaml` because it currently
 # produces lots of peer dependency warnings.
 RUN pnpm deploy --filter @dariah-eric/api --config.inject-workspace-packages=true --prod /out
@@ -178,6 +182,8 @@ RUN --mount=type=secret,id=API_ACCESS_TOKEN,env=API_ACCESS_TOKEN \
     --mount=type=secret,id=SSHOC_MARKETPLACE_PASSWORD,env=SSHOC_MARKETPLACE_PASSWORD \
     --mount=type=secret,id=SSHOC_MARKETPLACE_USER,env=SSHOC_MARKETPLACE_USER \
     --mount=type=secret,id=TYPESENSE_ADMIN_API_KEY,env=TYPESENSE_ADMIN_API_KEY \
+    --mount=type=secret,id=TURBO_TEAM,env=TURBO_TEAM \
+    --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN \
 		--mount=type=secret,id=UNR_DATABASE_DIRECT_URL,env=UNR_DATABASE_DIRECT_URL \
 		--mount=type=secret,id=UNR_S3_BUCKET_NAME,env=UNR_S3_BUCKET_NAME \
     --mount=type=secret,id=ZOTERO_API_KEY,env=ZOTERO_API_KEY \

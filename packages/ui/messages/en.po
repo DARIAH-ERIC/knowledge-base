@@ -55,14 +55,14 @@ msgstr "No options found."
 
 #: lib/async-multiple-select.tsx:311
 #: lib/async-select.tsx:254
-#: lib/pagination.tsx:152
+#: lib/pagination.tsx:153
 msgctxt "ui"
 msgid "k9hDFZ"
 msgstr "Previous page"
 
 #: lib/async-multiple-select.tsx:319
 #: lib/async-select.tsx:262
-#: lib/pagination.tsx:198
+#: lib/pagination.tsx:199
 msgctxt "ui"
 msgid "rBj9Ib"
 msgstr "Next page"
@@ -143,79 +143,79 @@ msgctxt "ui"
 msgid "4ZUjCU"
 msgstr "Reorder item"
 
-#: lib/pagination.tsx:19
-#: lib/pagination.tsx:52
+#: lib/pagination.tsx:20
+#: lib/pagination.tsx:53
 msgctxt "ui"
 msgid "ZATT08"
 msgstr "Pagination"
 
-#: lib/pagination.tsx:103
+#: lib/pagination.tsx:104
 msgctxt "ui"
 msgid "A64Z+T"
 msgstr "First page"
 
-#: lib/pagination.tsx:244
+#: lib/pagination.tsx:245
 msgctxt "ui"
 msgid "N8BBfe"
 msgstr "Last page"
 
-#: lib/rich-text-editor.tsx:826
+#: lib/rich-text-editor.tsx:832
 msgctxt "ui"
 msgid "Dkkmwm"
 msgstr "Bold"
 
-#: lib/rich-text-editor.tsx:834
+#: lib/rich-text-editor.tsx:840
 msgctxt "ui"
 msgid "g2V+es"
 msgstr "Italic"
 
-#: lib/rich-text-editor.tsx:842
+#: lib/rich-text-editor.tsx:848
 msgctxt "ui"
 msgid "h2vipu"
 msgstr "Code"
 
-#: lib/rich-text-editor.tsx:851
+#: lib/rich-text-editor.tsx:857
 msgctxt "ui"
 msgid "Zqekct"
 msgstr "Heading 2"
 
-#: lib/rich-text-editor.tsx:859
+#: lib/rich-text-editor.tsx:865
 msgctxt "ui"
 msgid "BDbgCL"
 msgstr "Heading 3"
 
-#: lib/rich-text-editor.tsx:867
+#: lib/rich-text-editor.tsx:873
 msgctxt "ui"
 msgid "BKF2fN"
 msgstr "Heading 4"
 
-#: lib/rich-text-editor.tsx:876
+#: lib/rich-text-editor.tsx:882
 msgctxt "ui"
 msgid "6sdKFe"
 msgstr "Bullet List"
 
-#: lib/rich-text-editor.tsx:884
+#: lib/rich-text-editor.tsx:890
 msgctxt "ui"
 msgid "rU4xig"
 msgstr "Ordered List"
 
-#: lib/rich-text-editor.tsx:892
+#: lib/rich-text-editor.tsx:898
 msgctxt "ui"
 msgid "+RDJVD"
 msgstr "Blockquote"
 
-#: lib/rich-text-editor.tsx:903
-#: lib/rich-text-editor.tsx:911
+#: lib/rich-text-editor.tsx:909
+#: lib/rich-text-editor.tsx:917
 msgctxt "ui"
 msgid "JBWS0c"
 msgstr "Link"
 
-#: lib/rich-text-editor.tsx:933
+#: lib/rich-text-editor.tsx:939
 msgctxt "ui"
 msgid "EWw/tK"
 msgstr "Apply"
 
-#: lib/rich-text-editor.tsx:937
+#: lib/rich-text-editor.tsx:943
 msgctxt "ui"
 msgid "G/yZLu"
 msgstr "Remove"

@@ -73,6 +73,7 @@ export default async function DashboardWebsiteEditEventPage(
 				columns: {
 					id: true,
 					duration: true,
+					isFullDay: true,
 					location: true,
 					title: true,
 					summary: true,
