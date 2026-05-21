@@ -1,1 +1,1 @@
-ALTER TABLE "persons" DROP COLUMN "position";
+ALTER TABLE "persons" DROP COLUMN IF EXISTS "position";
