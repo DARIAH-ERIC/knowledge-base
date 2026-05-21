@@ -59,6 +59,7 @@ export const updateWorkingGroupAction = createServerAction(
 			relatedEntityIds,
 			relatedResourceIds,
 			socialMediaIds,
+			sshocMarketplaceActorId,
 			summary,
 		} = result.output;
 
@@ -84,7 +85,7 @@ export const updateWorkingGroupAction = createServerAction(
 
 			await tx
 				.update(schema.organisationalUnits)
-				.set({ acronym, imageId, name, summary })
+				.set({ acronym, imageId, name, sshocMarketplaceActorId, summary })
 				.where(eq(schema.organisationalUnits.id, draftVersionId));
 
 			const parsedContent = JSON.parse(description) as schema.RichTextContentBlock["content"];

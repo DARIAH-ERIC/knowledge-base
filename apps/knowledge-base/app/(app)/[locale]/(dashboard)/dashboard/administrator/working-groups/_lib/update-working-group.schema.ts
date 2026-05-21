@@ -5,6 +5,10 @@ export const UpdateWorkingGroupActionInputSchema = v.object({
 	documentId: v.pipe(v.string(), v.uuid()),
 	...v.pick(OrganisationalUnitUpdateSchema, ["name", "summary"]).entries,
 	acronym: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
+	sshocMarketplaceActorId: v.nullish(
+		v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
+		null,
+	),
 	imageKey: v.optional(v.pipe(v.string(), v.nonEmpty())),
 	description: v.pipe(v.string(), v.nonEmpty()),
 	relatedEntityIds: v.optional(v.array(v.pipe(v.string(), v.uuid())), []),

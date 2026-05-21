@@ -41,7 +41,7 @@ import { useRouter } from "@/lib/navigation/navigation";
 interface NationalConsortiaPageProps {
 	nationalConsortia: {
 		data: Array<
-			Pick<schema.OrganisationalUnit, "id" | "name"> & {
+			Pick<schema.OrganisationalUnit, "id" | "name" | "sshocMarketplaceActorId"> & {
 				countryName: string | null;
 				entity: Pick<schema.Entity, "slug">;
 				hasDraft: boolean;
@@ -121,6 +121,7 @@ export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps
 					<TableColumn allowsSorting={true} id="country">
 						{t("Country")}
 					</TableColumn>
+					<TableColumn>{t("SSHOC actor ID")}</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
@@ -129,6 +130,7 @@ export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps
 						<TableRow>
 							<TableCell>{item.name}</TableCell>
 							<TableCell>{item.countryName ?? "—"}</TableCell>
+							<TableCell>{item.sshocMarketplaceActorId ?? "—"}</TableCell>
 							<TableCell>
 								<EntityLifecycleStatusBadge
 									hasDraft={item.hasDraft}

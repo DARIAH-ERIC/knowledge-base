@@ -27,7 +27,10 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface NationalConsortiumFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
-	nationalConsortium?: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
+	nationalConsortium?: Pick<
+		schema.OrganisationalUnit,
+		"acronym" | "id" | "name" | "sshocMarketplaceActorId" | "summary"
+	> & {
 		description?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
@@ -87,6 +90,20 @@ export function NationalConsortiumForm(props: Readonly<NationalConsortiumFormPro
 
 					<TextField defaultValue={nationalConsortium?.acronym ?? undefined} name="acronym">
 						<Label>{t("Acronym")}</Label>
+						<Input />
+						<FieldError />
+					</TextField>
+
+					<TextField
+						defaultValue={
+							nationalConsortium?.sshocMarketplaceActorId != null
+								? String(nationalConsortium.sshocMarketplaceActorId)
+								: undefined
+						}
+						name="sshocMarketplaceActorId"
+						type="number"
+					>
+						<Label>{t("SSHOC actor ID")}</Label>
 						<Input />
 						<FieldError />
 					</TextField>
