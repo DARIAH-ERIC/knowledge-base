@@ -9,6 +9,11 @@ import { after } from "next/server";
 import * as v from "valibot";
 
 import { UpdateSiteMetadataActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_lib/update-site-metadata.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { sql } from "@/lib/db/sql";
@@ -21,7 +26,7 @@ export const updateSiteMetadataAction = createServerAction(
 		const locale = await getLocale();
 		const t = await getExtracted();
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			UpdateSiteMetadataActionInputSchema,
@@ -65,6 +70,14 @@ export const updateSiteMetadataAction = createServerAction(
 
 		after(async () => {
 			await dispatchWebhook({ type: "site-metadata" });
+		});
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "update",
+			subjectType: "metadata",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: getAuditSummaryFromFormData(formData),
 		});
 
 		revalidatePath("/[locale]/dashboard/website/metadata", "layout");

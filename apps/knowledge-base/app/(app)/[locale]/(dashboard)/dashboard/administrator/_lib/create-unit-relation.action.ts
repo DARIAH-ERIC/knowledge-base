@@ -9,6 +9,11 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { CreateUnitRelationActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-unit-relation.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { ensureOrganisationalUnitDraftVersion } from "@/lib/data/organisational-unit-drafts";
@@ -25,7 +30,7 @@ export const createUnitRelationAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			CreateUnitRelationActionInputSchema,
@@ -79,6 +84,14 @@ export const createUnitRelationAction = createServerAction(
 		if ("error" in returned) {
 			return createActionStateError({ message: t("This relation already exists.") });
 		}
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "create",
+			subjectType: "create_unit_relation",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: getAuditSummaryFromFormData(formData),
+		});
 
 		revalidatePath("/[locale]/dashboard/administrator", "layout");
 

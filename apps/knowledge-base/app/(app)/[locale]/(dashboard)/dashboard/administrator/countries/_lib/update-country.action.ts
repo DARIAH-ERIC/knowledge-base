@@ -10,6 +10,11 @@ import { after } from "next/server";
 import * as v from "valibot";
 
 import { UpdateCountryActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/update-country.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { upsertRichTextEntityVersionField } from "@/lib/data/entity-version-fields";
@@ -33,7 +38,7 @@ export const updateCountryAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			UpdateCountryActionInputSchema,
@@ -135,6 +140,17 @@ export const updateCountryAction = createServerAction(
 			await syncWebsiteDocumentForEntity(documentId);
 			await dispatchWebhook({ type: "members-partners" });
 		});
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "update",
+			subjectType: "countries",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: {
+				...getAuditSummaryFromFormData(formData),
+				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
+			},
+		});
+
 		revalidatePath("/[locale]/dashboard/administrator/countries", "layout");
 
 		redirect({ href: "/dashboard/administrator/countries", locale });

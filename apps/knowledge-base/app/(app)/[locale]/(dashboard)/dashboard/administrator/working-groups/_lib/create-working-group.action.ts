@@ -11,6 +11,11 @@ import { after } from "next/server";
 import * as v from "valibot";
 
 import { CreateWorkingGroupActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/create-working-group.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
@@ -31,7 +36,7 @@ export const createWorkingGroupAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			CreateWorkingGroupActionInputSchema,
@@ -192,6 +197,17 @@ export const createWorkingGroupAction = createServerAction(
 			}
 
 			await dispatchWebhook({ type: "working-groups" });
+		});
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "create",
+			subjectType: "working_groups",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: {
+				...getAuditSummaryFromFormData(formData),
+				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
+			},
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/working-groups", "layout");

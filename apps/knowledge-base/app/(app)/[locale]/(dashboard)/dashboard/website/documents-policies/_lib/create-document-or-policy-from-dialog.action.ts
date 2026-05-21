@@ -11,6 +11,11 @@ import { after } from "next/server";
 import * as v from "valibot";
 
 import { CreateDocumentOrPolicyFromDialogActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy-from-dialog.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
@@ -31,7 +36,7 @@ export const createDocumentOrPolicyFromDialogAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			CreateDocumentOrPolicyFromDialogActionInputSchema,
@@ -118,6 +123,17 @@ export const createDocumentOrPolicyFromDialogAction = createServerAction(
 			}
 
 			await dispatchWebhook({ type: "documents-policies" });
+		});
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "create",
+			subjectType: "documents_policies",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: {
+				...getAuditSummaryFromFormData(formData),
+				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
+			},
 		});
 
 		revalidatePath("/[locale]/dashboard/website/documents-policies", "layout");

@@ -10,6 +10,11 @@ import { after } from "next/server";
 import * as v from "valibot";
 
 import { UpdateWorkingGroupActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/update-working-group.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { upsertRichTextEntityVersionField } from "@/lib/data/entity-version-fields";
@@ -33,7 +38,7 @@ export const updateWorkingGroupAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			UpdateWorkingGroupActionInputSchema,
@@ -135,6 +140,17 @@ export const updateWorkingGroupAction = createServerAction(
 
 			await syncWebsiteDocumentForEntity(documentId);
 			await dispatchWebhook({ type: "working-groups" });
+		});
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "update",
+			subjectType: "working_groups",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: {
+				...getAuditSummaryFromFormData(formData),
+				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
+			},
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/working-groups", "layout");

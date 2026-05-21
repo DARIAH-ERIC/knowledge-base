@@ -9,6 +9,11 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { UpdateInternalPageActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_lib/update-internal-page.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
@@ -31,7 +36,7 @@ export const updateInternalPageAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			UpdateInternalPageActionInputSchema,
@@ -130,6 +135,17 @@ export const updateInternalPageAction = createServerAction(
 			if (shouldSaveAndPublish(formData)) {
 				await publishVersion(tx, documentId, internalPagesLifecycleAdapter);
 			}
+		});
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "update",
+			subjectType: "internal_pages",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: {
+				...getAuditSummaryFromFormData(formData),
+				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
+			},
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/internal-pages", "layout");

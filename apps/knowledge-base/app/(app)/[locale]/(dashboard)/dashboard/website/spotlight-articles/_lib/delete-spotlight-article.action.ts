@@ -5,6 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
+import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { getDocumentVersions } from "@/lib/data/entity-lifecycle";
 import { spotlightArticlesLifecycleAdapter } from "@/lib/data/spotlight-articles.lifecycle-adapter";
@@ -17,7 +18,7 @@ import {
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function deleteSpotlightArticleAction(documentId: string): Promise<void> {
-	await assertAdmin();
+	const auditSession = await assertAdmin();
 
 	const descriptor = await db.transaction(async (tx) => {
 		const entity = await tx.query.entities.findFirst({
@@ -79,6 +80,14 @@ export async function deleteSpotlightArticleAction(documentId: string): Promise<
 		}
 
 		await dispatchWebhook({ type: "spotlight-articles" });
+	});
+
+	await recordAuditEvent(db, {
+		actorUserId: auditSession?.user.id,
+		action: "delete",
+		subjectType: "spotlight_articles",
+		subjectId: documentId,
+		summary: {},
 	});
 
 	revalidatePath("/[locale]/dashboard/website/spotlight-articles", "layout");

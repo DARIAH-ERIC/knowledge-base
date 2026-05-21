@@ -11,6 +11,11 @@ import { after } from "next/server";
 import * as v from "valibot";
 
 import { CreateDocumentOrPolicyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
@@ -34,7 +39,7 @@ export const createDocumentOrPolicyAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			CreateDocumentOrPolicyActionInputSchema,
@@ -153,6 +158,17 @@ export const createDocumentOrPolicyAction = createServerAction(
 			}
 
 			await dispatchWebhook({ type: "documents-policies" });
+		});
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "create",
+			subjectType: "documents_policies",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: {
+				...getAuditSummaryFromFormData(formData),
+				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
+			},
 		});
 
 		revalidatePath("/[locale]/dashboard/website/documents-policies", "layout");

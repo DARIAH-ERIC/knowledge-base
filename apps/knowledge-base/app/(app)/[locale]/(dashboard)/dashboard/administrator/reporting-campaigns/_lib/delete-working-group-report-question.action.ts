@@ -6,6 +6,11 @@ import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
@@ -19,7 +24,7 @@ export async function deleteWorkingGroupReportQuestionAction(formData: FormData)
 		throw new Error(t("Too many requests."));
 	}
 
-	await assertAdmin();
+	const auditSession = await assertAdmin();
 
 	const { id, campaignId } = getFormDataValues(formData) as {
 		id: string;
@@ -29,6 +34,14 @@ export async function deleteWorkingGroupReportQuestionAction(formData: FormData)
 	await db
 		.delete(schema.workingGroupReportQuestions)
 		.where(eq(schema.workingGroupReportQuestions.id, id));
+
+	await recordAuditEvent(db, {
+		actorUserId: auditSession?.user.id,
+		action: "delete",
+		subjectType: "reporting_campaigns",
+		subjectId: getAuditSubjectIdFromFormData(formData),
+		summary: getAuditSummaryFromFormData(formData),
+	});
 
 	revalidatePath("/[locale]/dashboard/administrator/reporting-campaigns", "layout");
 

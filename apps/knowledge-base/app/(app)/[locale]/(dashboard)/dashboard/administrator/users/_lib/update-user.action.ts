@@ -14,6 +14,11 @@ import {
 	isRemovingAdminManagementPrivilege,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/admin-management";
 import { UpdateUserActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/update-user.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { auth } from "@/lib/auth";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -111,6 +116,14 @@ export const updateUserAction = createServerAction(
 				organisationalUnitId: organisationalUnitId ?? null,
 			})
 			.where(eq(schema.users.id, id));
+
+		await recordAuditEvent(db, {
+			actorUserId: currentUser.id,
+			action: "update",
+			subjectType: "users",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: getAuditSummaryFromFormData(formData),
+		});
 
 		revalidatePath("/[locale]/dashboard/administrator/users", "layout");
 

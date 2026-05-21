@@ -4,13 +4,14 @@ import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
+import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq, isNull } from "@/lib/db/sql";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
 export async function deleteDocumentPolicyGroupAction(id: string): Promise<void> {
-	await assertAdmin();
+	const auditSession = await assertAdmin();
 
 	await db.transaction(async (tx) => {
 		await tx
@@ -38,6 +39,14 @@ export async function deleteDocumentPolicyGroupAction(id: string): Promise<void>
 
 	after(async () => {
 		await dispatchWebhook({ type: "documents-policies" });
+	});
+
+	await recordAuditEvent(db, {
+		actorUserId: auditSession?.user.id,
+		action: "delete",
+		subjectType: "documents_policies",
+		subjectId: id,
+		summary: {},
 	});
 
 	revalidatePath("/[locale]/dashboard/website/documents-policies", "layout");

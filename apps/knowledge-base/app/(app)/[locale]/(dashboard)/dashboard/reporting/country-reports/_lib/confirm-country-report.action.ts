@@ -4,6 +4,11 @@ import * as schema from "@dariah-eric/database/schema";
 import { getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getCountryReportEditHrefById } from "@/lib/data/reporting-urls";
@@ -25,6 +30,17 @@ export async function confirmCountryReportAction(formData: FormData): Promise<vo
 		.update(schema.countryReports)
 		.set({ status: "accepted" })
 		.where(eq(schema.countryReports.id, id));
+
+	await recordAuditEvent(db, {
+		actorUserId: user.id,
+		action: "update",
+		subjectType: "country_report",
+		subjectId: getAuditSubjectIdFromFormData(formData),
+		summary: {
+			...getAuditSummaryFromFormData(formData),
+			status: "confirmed",
+		},
+	});
 
 	revalidatePath("/[locale]/dashboard/reporting", "layout");
 

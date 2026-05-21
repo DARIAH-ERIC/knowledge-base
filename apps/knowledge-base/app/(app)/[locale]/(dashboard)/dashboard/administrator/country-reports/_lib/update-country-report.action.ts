@@ -9,6 +9,11 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { UpdateCountryReportActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/update-country-report.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
@@ -25,7 +30,7 @@ export const updateCountryReportAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			UpdateCountryReportActionInputSchema,
@@ -45,6 +50,14 @@ export const updateCountryReportAction = createServerAction(
 		const { id, status } = result.output;
 
 		await db.update(schema.countryReports).set({ status }).where(eq(schema.countryReports.id, id));
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "update",
+			subjectType: "country_reports",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: getAuditSummaryFromFormData(formData),
+		});
 
 		revalidatePath("/[locale]/dashboard/administrator/country-reports", "layout");
 

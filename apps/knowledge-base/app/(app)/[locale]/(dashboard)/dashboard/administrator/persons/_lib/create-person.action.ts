@@ -11,6 +11,11 @@ import { after } from "next/server";
 import * as v from "valibot";
 
 import { CreatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/create-person.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
 import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
@@ -31,7 +36,7 @@ export const createPersonAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			CreatePersonActionInputSchema,
@@ -136,6 +141,17 @@ export const createPersonAction = createServerAction(
 			}
 
 			await dispatchWebhook({ type: "persons" });
+		});
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "create",
+			subjectType: "persons",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: {
+				...getAuditSummaryFromFormData(formData),
+				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
+			},
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/persons", "layout");
