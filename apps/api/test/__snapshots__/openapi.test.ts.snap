@@ -2056,6 +2056,9 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
             "format": "uuid",
             "type": "string",
           },
+          "isFullDay": {
+            "type": "boolean",
+          },
           "location": {
             "type": "string",
           },
@@ -2067,6 +2070,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "id",
           "title",
           "location",
+          "isFullDay",
           "duration",
           "entity",
         ],

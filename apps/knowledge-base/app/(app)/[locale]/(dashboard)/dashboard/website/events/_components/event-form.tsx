@@ -2,6 +2,7 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { Checkbox } from "@dariah-eric/ui/checkbox";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
@@ -31,7 +32,10 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface EventFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
 	contentBlocks?: Array<ContentBlock>;
-	event?: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
+	event?: Pick<
+		schema.Event,
+		"id" | "duration" | "isFullDay" | "location" | "title" | "summary" | "website"
+	> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 	formAction: ServerAction;
@@ -120,6 +124,9 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 						<Label>{t("End date")}</Label>
 						<DatePickerTrigger />
 					</DatePicker>
+					<Checkbox defaultSelected={event?.isFullDay ?? false} name="isFullDay" value="true">
+						{t("Full day")}
+					</Checkbox>
 					<TextField defaultValue={event?.location ?? undefined} isRequired={true} name="location">
 						<Label>{t("Location")}</Label>
 						<Input />
