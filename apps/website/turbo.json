@@ -8,6 +8,8 @@
 		"types:check": {
 			"dependsOn": ["$TURBO_EXTENDS$", "types:prepare"]
 		},
-		"types:prepare": {}
+		"types:prepare": {
+			"cache": false
+		}
 	}
 }
