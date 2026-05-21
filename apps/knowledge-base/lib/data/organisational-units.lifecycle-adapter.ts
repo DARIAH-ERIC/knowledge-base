@@ -9,7 +9,9 @@ export const organisationalUnitsLifecycleAdapter: EntityLifecycleAdapter = {
 			.select({
 				acronym: schema.organisationalUnits.acronym,
 				imageId: schema.organisationalUnits.imageId,
+				metadata: schema.organisationalUnits.metadata,
 				name: schema.organisationalUnits.name,
+				sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
 				summary: schema.organisationalUnits.summary,
 				typeId: schema.organisationalUnits.typeId,
 			})
@@ -74,7 +76,9 @@ export const organisationalUnitsLifecycleAdapter: EntityLifecycleAdapter = {
 			.select({
 				acronym: schema.organisationalUnits.acronym,
 				imageId: schema.organisationalUnits.imageId,
+				metadata: schema.organisationalUnits.metadata,
 				name: schema.organisationalUnits.name,
+				sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
 				summary: schema.organisationalUnits.summary,
 				typeId: schema.organisationalUnits.typeId,
 			})
