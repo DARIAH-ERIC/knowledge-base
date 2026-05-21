@@ -12,6 +12,7 @@ export const projectsLifecycleAdapter: EntityLifecycleAdapter = {
 				duration: schema.projects.duration,
 				funding: schema.projects.funding,
 				imageId: schema.projects.imageId,
+				metadata: schema.projects.metadata,
 				name: schema.projects.name,
 				scopeId: schema.projects.scopeId,
 				summary: schema.projects.summary,
