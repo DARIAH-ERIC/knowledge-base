@@ -10,6 +10,11 @@ import { after } from "next/server";
 import * as v from "valibot";
 
 import { UpdateImpactCaseStudyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/update-impact-case-study.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
@@ -35,7 +40,7 @@ export const updateImpactCaseStudyAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			UpdateImpactCaseStudyActionInputSchema,
@@ -136,6 +141,17 @@ export const updateImpactCaseStudyAction = createServerAction(
 
 			await syncWebsiteDocumentForEntity(documentId);
 			await dispatchWebhook({ type: "impact-case-studies" });
+		});
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "update",
+			subjectType: "impact_case_studies",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: {
+				...getAuditSummaryFromFormData(formData),
+				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
+			},
 		});
 
 		revalidatePath("/[locale]/dashboard/website/impact-case-studies", "layout");

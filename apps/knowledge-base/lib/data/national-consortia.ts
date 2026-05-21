@@ -17,7 +17,7 @@ interface GetNationalConsortiaParams {
 
 export interface NationalConsortiaResult {
 	data: Array<
-		Pick<schema.OrganisationalUnit, "id" | "name"> & {
+		Pick<schema.OrganisationalUnit, "id" | "name" | "sshocMarketplaceActorId"> & {
 			countryName: string | null;
 			entity: Pick<schema.Entity, "slug">;
 			hasDraft: boolean;
@@ -151,6 +151,7 @@ export async function getNationalConsortia(
 						.select({
 							id: schema.organisationalUnits.id,
 							name: schema.organisationalUnits.name,
+							sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
 							slug: schema.entities.slug,
 							hasDraft: sql<boolean>`
 							EXISTS (
@@ -214,6 +215,7 @@ export async function getNationalConsortia(
 						.select({
 							id: schema.organisationalUnits.id,
 							name: schema.organisationalUnits.name,
+							sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
 							slug: schema.entities.slug,
 							hasDraft: sql<boolean>`
 							EXISTS (
@@ -303,6 +305,7 @@ export async function getNationalConsortia(
 						isPublished: item.isPublished,
 						id: item.id,
 						name: item.name,
+						sshocMarketplaceActorId: item.sshocMarketplaceActorId,
 					};
 				}),
 				limit,
@@ -321,6 +324,7 @@ export async function getNationalConsortia(
 					isPublished: item.isPublished,
 					id: item.id,
 					name: item.name,
+					sshocMarketplaceActorId: item.sshocMarketplaceActorId,
 				};
 			})
 			.toSorted(
@@ -390,6 +394,7 @@ export async function getNationalConsortia(
 		.select({
 			id: schema.organisationalUnits.id,
 			name: schema.organisationalUnits.name,
+			sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
 			slug: schema.entities.slug,
 			hasDraft: sql<boolean>`
 							EXISTS (
@@ -463,6 +468,7 @@ export async function getNationalConsortia(
 					isPublished: item.isPublished,
 					id: item.id,
 					name: item.name,
+					sshocMarketplaceActorId: item.sshocMarketplaceActorId,
 				};
 			}),
 			limit,
@@ -481,6 +487,7 @@ export async function getNationalConsortia(
 				isPublished: item.isPublished,
 				id: item.id,
 				name: item.name,
+				sshocMarketplaceActorId: item.sshocMarketplaceActorId,
 			};
 		})
 		.toSorted(

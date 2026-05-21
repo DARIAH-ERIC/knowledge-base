@@ -10,6 +10,11 @@ import { after } from "next/server";
 import * as v from "valibot";
 
 import { UpdateProjectActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/update-project.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { upsertRichTextEntityVersionField } from "@/lib/data/entity-version-fields";
@@ -32,7 +37,7 @@ export const updateProjectAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			UpdateProjectActionInputSchema,
@@ -181,6 +186,17 @@ export const updateProjectAction = createServerAction(
 
 			await syncWebsiteDocumentForEntity(documentId);
 			await dispatchWebhook({ type: "dariah-projects" });
+		});
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "update",
+			subjectType: "projects",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: {
+				...getAuditSummaryFromFormData(formData),
+				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
+			},
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/projects", "layout");

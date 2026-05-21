@@ -10,6 +10,11 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { CreateInstitutionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/create-institution.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
@@ -29,7 +34,7 @@ export const createInstitutionAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			CreateInstitutionActionInputSchema,
@@ -147,6 +152,17 @@ export const createInstitutionAction = createServerAction(
 		if (shouldSaveAndPublish(formData)) {
 			await dispatchWebhook({ type: "members-partners" });
 		}
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "create",
+			subjectType: "institutions",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: {
+				...getAuditSummaryFromFormData(formData),
+				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
+			},
+		});
+
 		revalidatePath("/[locale]/dashboard/administrator/institutions", "layout");
 
 		redirect({ href: "/dashboard/administrator/institutions", locale });

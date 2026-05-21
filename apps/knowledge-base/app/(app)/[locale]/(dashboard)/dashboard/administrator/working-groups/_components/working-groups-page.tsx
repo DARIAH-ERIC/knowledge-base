@@ -1,7 +1,8 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Button, buttonStyles } from "@dariah-eric/ui/button";
+import { Button } from "@dariah-eric/ui/button";
+import { buttonStyles } from "@dariah-eric/ui/button-styles";
 import { Link } from "@dariah-eric/ui/link";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
 import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
@@ -44,7 +45,7 @@ interface WorkingGroupsPageProps {
 	sort: "name";
 	workingGroups: {
 		data: Array<
-			Pick<schema.OrganisationalUnit, "acronym" | "id" | "name"> & {
+			Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "sshocMarketplaceActorId"> & {
 				documentId: string;
 				durationFrom: Date | null;
 				durationUntil: Date | null;
@@ -120,6 +121,7 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 						{t("Name")}
 					</TableColumn>
 					<TableColumn>{t("Acronym")}</TableColumn>
+					<TableColumn>{t("SSHOC actor ID")}</TableColumn>
 					<TableColumn>{t("From")}</TableColumn>
 					<TableColumn>{t("Until")}</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
@@ -130,6 +132,7 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 						<TableRow>
 							<TableCell>{item.name}</TableCell>
 							<TableCell>{item.acronym}</TableCell>
+							<TableCell>{item.sshocMarketplaceActorId ?? "—"}</TableCell>
 							<TableCell>
 								{item.durationFrom != null
 									? format.dateTime(item.durationFrom, { dateStyle: "short" })

@@ -78,6 +78,8 @@ jobs:
       TYPESENSE_PROTOCOL: "http"
       TYPESENSE_RESOURCE_COLLECTION_NAME: "dariah-resources"
       TYPESENSE_WEBSITE_COLLECTION_NAME: "dariah-website"
+      TURBO_TEAM: "${{ vars.TURBO_TEAM }}"
+      TURBO_TOKEN: "${{ secrets.TURBO_TOKEN }}"
       UNR_DATABASE_DIRECT_URL: "postgresql://dariah-unr:dariah-unr@localhost:5432/dariah-unr"
       UNR_S3_BUCKET_NAME: "dariah-unr"
 
@@ -107,10 +109,7 @@ jobs:
         run: turbo run --filter "./packages/*" build
 
       - name: Lint
-        # set concurrency to avoid
-        # @see {@link https://github.com/schoero/eslint-plugin-better-tailwindcss/issues/261}
-        # @see {@link https://github.com/schoero/eslint-plugin-better-tailwindcss/issues/341}
-        run: turbo run lint:check --concurrency 5
+        run: turbo run lint:check
 
       - name: Typecheck
         run: turbo run types:check

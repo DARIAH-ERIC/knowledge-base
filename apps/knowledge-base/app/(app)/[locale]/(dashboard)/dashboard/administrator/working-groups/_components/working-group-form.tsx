@@ -27,7 +27,10 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface WorkingGroupFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
-	workingGroup?: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
+	workingGroup?: Pick<
+		schema.OrganisationalUnit,
+		"acronym" | "id" | "name" | "sshocMarketplaceActorId" | "summary"
+	> & {
 		description?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
@@ -85,6 +88,20 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 
 					<TextField defaultValue={workingGroup?.acronym ?? undefined} name="acronym">
 						<Label>{t("Acronym")}</Label>
+						<Input />
+						<FieldError />
+					</TextField>
+
+					<TextField
+						defaultValue={
+							workingGroup?.sshocMarketplaceActorId != null
+								? String(workingGroup.sshocMarketplaceActorId)
+								: undefined
+						}
+						name="sshocMarketplaceActorId"
+						type="number"
+					>
+						<Label>{t("SSHOC actor ID")}</Label>
 						<Input />
 						<FieldError />
 					</TextField>

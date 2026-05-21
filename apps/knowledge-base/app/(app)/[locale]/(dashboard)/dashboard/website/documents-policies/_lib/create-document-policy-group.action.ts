@@ -8,6 +8,11 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { CreateDocumentPolicyGroupActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-policy-group.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
@@ -18,7 +23,7 @@ export const createDocumentPolicyGroupAction = createServerAction(
 		const locale = await getLocale();
 		const t = await getExtracted();
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			CreateDocumentPolicyGroupActionInputSchema,
@@ -44,6 +49,14 @@ export const createDocumentPolicyGroupAction = createServerAction(
 		await db.insert(schema.documentPolicyGroups).values({
 			label,
 			position: existing.length,
+		});
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "create",
+			subjectType: "documents_policies",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: getAuditSummaryFromFormData(formData),
 		});
 
 		revalidatePath("/[locale]/dashboard/website/documents-policies", "layout");

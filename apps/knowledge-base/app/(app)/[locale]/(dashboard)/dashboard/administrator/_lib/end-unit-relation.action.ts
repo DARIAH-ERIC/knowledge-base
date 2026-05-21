@@ -3,6 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 
+import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { ensureOrganisationalUnitDraftVersion } from "@/lib/data/organisational-unit-drafts";
@@ -10,7 +11,7 @@ import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 
 export async function endUnitRelationAction(id: string, end: Date): Promise<void> {
-	await assertAdmin();
+	const auditSession = await assertAdmin();
 
 	const relation = await db.query.organisationalUnitsRelations.findFirst({
 		where: { id },
@@ -45,6 +46,14 @@ export async function endUnitRelationAction(id: string, end: Date): Promise<void
 			.where(eq(schema.organisationalUnitsRelations.id, draftRelation.id));
 
 		await touchVersion(tx, draftUnitId);
+	});
+
+	await recordAuditEvent(db, {
+		actorUserId: auditSession?.user.id,
+		action: "relation_end",
+		subjectType: "end_unit_relation",
+		subjectId: id,
+		summary: { end },
 	});
 
 	revalidatePath("/[locale]/dashboard/administrator", "layout");

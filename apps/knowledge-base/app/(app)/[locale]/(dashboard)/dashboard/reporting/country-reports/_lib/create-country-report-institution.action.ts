@@ -9,6 +9,11 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { CreateCountryReportInstitutionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-institution.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -61,6 +66,14 @@ export const createCountryReportInstitutionAction = createServerAction(
 		await db
 			.insert(schema.countryReportInstitutions)
 			.values({ countryReportId, organisationalUnitId });
+
+		await recordAuditEvent(db, {
+			actorUserId: user.id,
+			action: "create",
+			subjectType: "country_report",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: getAuditSummaryFromFormData(formData),
+		});
 
 		revalidatePath("/[locale]/dashboard/reporting", "layout");
 

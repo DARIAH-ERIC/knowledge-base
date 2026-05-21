@@ -102,6 +102,7 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 				acronym: true,
 				id: true,
 				name: true,
+				sshocMarketplaceActorId: true,
 				summary: true,
 			},
 			with: {

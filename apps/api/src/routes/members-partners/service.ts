@@ -2,7 +2,7 @@
 
 import * as schema from "@dariah-eric/database/schema";
 
-import { getContentBlocks } from "@/lib/content-blocks";
+import { type ContentBlock, getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
@@ -88,30 +88,37 @@ export async function getMembersAndPartners(
 
 	const total = aggregate.at(0)?.total ?? 0;
 
-	const data = items.map((item) => {
-		const image =
-			item.image != null
-				? images.generateSignedImageUrl({
-						key: item.image.key,
-						options: { width: imageWidth.preview },
-					})
-				: null;
+	const data = await Promise.all(
+		items.map(async (item) => {
+			const nationalConsortium =
+				item.status === "is_member_of" || item.status === "is_observer_of"
+					? await getNationalConsortium(db, item.id)
+					: null;
+			const image =
+				nationalConsortium?.image ??
+				(item.image != null
+					? images.generateSignedImageUrl({
+							key: item.image.key,
+							options: { width: imageWidth.preview },
+						})
+					: null);
 
-		const socialMedia = item.socialMedia.map((sm) => {
-			return {
-				...sm,
-				type: sm.type.type,
-				duration: sm.duration
-					? {
-							start: sm.duration.start.toISOString(),
-							end: sm.duration.end?.toISOString() ?? null,
-						}
-					: null,
-			};
-		});
+			const socialMedia = item.socialMedia.map((sm) => {
+				return {
+					...sm,
+					type: sm.type.type,
+					duration: sm.duration
+						? {
+								start: sm.duration.start.toISOString(),
+								end: sm.duration.end?.toISOString() ?? null,
+							}
+						: null,
+				};
+			});
 
-		return { ...flattenEntityVersion(item), image, socialMedia };
-	});
+			return { ...flattenEntityVersion(item), image, socialMedia };
+		}),
+	);
 
 	return { data, limit, offset, total };
 }
@@ -163,6 +170,56 @@ function mapPersonContributors(
 			}),
 		};
 	});
+}
+
+function hasContent(block: ContentBlock): boolean {
+	switch (block.type) {
+		case "rich_text": {
+			return hasRichTextContent(block.content);
+		}
+		case "accordion": {
+			return block.items.length > 0;
+		}
+		case "hero": {
+			return (
+				block.title.trim().length > 0 ||
+				(block.eyebrow?.trim().length ?? 0) > 0 ||
+				block.image != null ||
+				(block.ctas?.length ?? 0) > 0
+			);
+		}
+		case "data":
+		case "embed":
+		case "image": {
+			return true;
+		}
+	}
+}
+
+function hasRichTextContent(content: unknown): boolean {
+	if (typeof content === "string") {
+		return content.trim().length > 0;
+	}
+
+	if (Array.isArray(content)) {
+		return content.some((item) => hasRichTextContent(item));
+	}
+
+	if (content != null && typeof content === "object") {
+		const value = content as { content?: unknown; text?: unknown };
+
+		if (typeof value.text === "string") {
+			return value.text.trim().length > 0;
+		}
+
+		return hasRichTextContent(value.content);
+	}
+
+	return false;
+}
+
+function hasContentBlocks(blocks: Array<ContentBlock> | undefined): blocks is Array<ContentBlock> {
+	return blocks?.some((block) => hasContent(block)) === true;
 }
 
 function buildActiveRelationExistsFilter(
@@ -403,7 +460,11 @@ async function getCooperatingPartnerInstitutions(
 	});
 }
 
-async function getNationalConsortium(db: Database | Transaction, countryId: string) {
+async function getNationalConsortium(
+	db: Database | Transaction,
+	countryId: string,
+	options?: { imageSize?: number; includeDescription?: boolean },
+) {
 	const item = await db.query.organisationalUnits.findFirst({
 		where: {
 			entityVersion: {
@@ -429,7 +490,7 @@ async function getNationalConsortium(db: Database | Transaction, countryId: stri
 		},
 		with: {
 			entityVersion: {
-				columns: {},
+				columns: { id: true },
 				with: {
 					entity: {
 						columns: { slug: true },
@@ -448,6 +509,9 @@ async function getNationalConsortium(db: Database | Transaction, countryId: stri
 		return null;
 	}
 
+	const fields =
+		options?.includeDescription === true ? await getContentBlocks(db, item.entityVersion.id) : {};
+
 	return {
 		name: item.name,
 		slug: item.entityVersion.entity.slug,
@@ -455,9 +519,10 @@ async function getNationalConsortium(db: Database | Transaction, countryId: stri
 			item.image != null
 				? images.generateSignedImageUrl({
 						key: item.image.key,
-						options: { width: imageWidth.preview },
+						options: { width: options?.imageSize ?? imageWidth.preview },
 					})
 				: null,
+		description: fields.description,
 	};
 }
 
@@ -578,14 +643,6 @@ export async function getMemberOrPartnerById(
 	const includeInstitutions =
 		includeCountryRelations || item.status === "is_cooperating_partner_of";
 
-	const image =
-		item.image != null
-			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
-			: null;
-
 	const institutionsPromise =
 		item.status === "is_cooperating_partner_of"
 			? getCooperatingPartnerInstitutions(db, item.id)
@@ -594,8 +651,25 @@ export async function getMemberOrPartnerById(
 	const [institutions, contributors, nationalConsortium] = await Promise.all([
 		includeInstitutions ? institutionsPromise : Promise.resolve([]),
 		includeCountryRelations ? getContributors(db, item.id) : Promise.resolve([]),
-		includeCountryRelations ? getNationalConsortium(db, item.id) : Promise.resolve(null),
+		includeCountryRelations
+			? getNationalConsortium(db, item.id, {
+					imageSize: imageWidth.featured,
+					includeDescription: true,
+				})
+			: Promise.resolve(null),
 	]);
+
+	const image =
+		nationalConsortium?.image ??
+		(item.image != null
+			? images.generateSignedImageUrl({
+					key: item.image.key,
+					options: { width: imageWidth.featured },
+				})
+			: null);
+	const description = hasContentBlocks(nationalConsortium?.description)
+		? nationalConsortium.description
+		: fields.description;
 
 	return {
 		...flattenEntityVersion(item),
@@ -605,6 +679,7 @@ export async function getMemberOrPartnerById(
 		contributors,
 		nationalConsortium,
 		...fields,
+		description,
 		relatedEntities,
 		relatedResources,
 	};
@@ -743,14 +818,6 @@ export async function getMemberOrPartnerBySlug(
 		return null;
 	}
 
-	const image =
-		item.image != null
-			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
-			: null;
-
 	const includeCountryRelations =
 		item.status === "is_member_of" || item.status === "is_observer_of";
 	const includeInstitutions =
@@ -770,10 +837,27 @@ export async function getMemberOrPartnerBySlug(
 		getContentBlocks(db, item.id),
 		includeInstitutions ? institutionsPromise : Promise.resolve([]),
 		includeCountryRelations ? getContributors(db, item.id) : Promise.resolve([]),
-		includeCountryRelations ? getNationalConsortium(db, item.id) : Promise.resolve(null),
+		includeCountryRelations
+			? getNationalConsortium(db, item.id, {
+					imageSize: imageWidth.featured,
+					includeDescription: true,
+				})
+			: Promise.resolve(null),
 		getRelatedEntities(db, item.id),
 		getRelatedResources(db, item.id),
 	]);
+
+	const image =
+		nationalConsortium?.image ??
+		(item.image != null
+			? images.generateSignedImageUrl({
+					key: item.image.key,
+					options: { width: imageWidth.featured },
+				})
+			: null);
+	const description = hasContentBlocks(nationalConsortium?.description)
+		? nationalConsortium.description
+		: fields.description;
 
 	return {
 		...flattenEntityVersion(item),
@@ -783,6 +867,7 @@ export async function getMemberOrPartnerBySlug(
 		contributors,
 		nationalConsortium,
 		...fields,
+		description,
 		relatedEntities,
 		relatedResources,
 	};

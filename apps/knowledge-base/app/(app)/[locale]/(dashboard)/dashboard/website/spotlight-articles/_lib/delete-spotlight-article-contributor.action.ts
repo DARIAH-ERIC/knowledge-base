@@ -4,6 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
+import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
@@ -14,7 +15,7 @@ export async function deleteSpotlightArticleContributorAction(
 	articleId: string,
 	personId: string,
 ): Promise<void> {
-	await assertAdmin();
+	const auditSession = await assertAdmin();
 
 	await db.transaction(async (tx) => {
 		await tx
@@ -31,6 +32,14 @@ export async function deleteSpotlightArticleContributorAction(
 
 	after(async () => {
 		await dispatchWebhook({ type: "spotlight-articles" });
+	});
+
+	await recordAuditEvent(db, {
+		actorUserId: auditSession?.user.id,
+		action: "delete",
+		subjectType: "spotlight_articles",
+		subjectId: articleId,
+		summary: { personId },
 	});
 
 	revalidatePath("/[locale]/dashboard/website/spotlight-articles", "layout");

@@ -7,6 +7,13 @@ export { type RelationsFilter, relationsFilterToSQL };
 
 export const relations = defineRelations(schema, (r) => {
 	return {
+		auditLogs: {
+			actor: r.one.users({
+				from: r.auditLogs.actorUserId,
+				to: r.users.id,
+				optional: true,
+			}),
+		},
 		assets: {
 			license: r.one.licenses({
 				from: r.assets.licenseId,

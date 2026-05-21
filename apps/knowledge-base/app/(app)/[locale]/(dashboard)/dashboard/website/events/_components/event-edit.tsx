@@ -18,7 +18,10 @@ interface EventEditFormProps {
 	documentId: string;
 	hasDraftChanges: boolean;
 	isPublished: boolean;
-	event: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
+	event: Pick<
+		schema.Event,
+		"id" | "duration" | "isFullDay" | "location" | "title" | "summary" | "website"
+	> & {
 		entityVersion: { entity: { id: string; slug: string }; status: { type: string } };
 	} & { image: { key: string; label: string; url: string } };
 	initialRelatedEntityIds: Array<string>;

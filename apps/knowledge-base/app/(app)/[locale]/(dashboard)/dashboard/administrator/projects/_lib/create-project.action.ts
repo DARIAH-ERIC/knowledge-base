@@ -11,6 +11,11 @@ import { after } from "next/server";
 import * as v from "valibot";
 
 import { CreateProjectActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-project.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
 import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
@@ -31,7 +36,7 @@ export const createProjectAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			CreateProjectActionInputSchema,
@@ -156,6 +161,17 @@ export const createProjectAction = createServerAction(
 			}
 
 			await dispatchWebhook({ type: "dariah-projects" });
+		});
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "create",
+			subjectType: "projects",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: {
+				...getAuditSummaryFromFormData(formData),
+				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
+			},
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator/projects", "layout");

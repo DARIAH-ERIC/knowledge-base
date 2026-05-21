@@ -10,6 +10,11 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { CreateNationalConsortiumActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/create-national-consortium.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
@@ -29,7 +34,7 @@ export const createNationalConsortiumAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			CreateNationalConsortiumActionInputSchema,
@@ -46,8 +51,16 @@ export const createNationalConsortiumAction = createServerAction(
 			});
 		}
 
-		const { acronym, description, imageKey, name, relatedEntityIds, relatedResourceIds, summary } =
-			result.output;
+		const {
+			acronym,
+			description,
+			imageKey,
+			name,
+			relatedEntityIds,
+			relatedResourceIds,
+			sshocMarketplaceActorId,
+			summary,
+		} = result.output;
 
 		const slug = slugify(name);
 
@@ -86,6 +99,7 @@ export const createNationalConsortiumAction = createServerAction(
 				acronym,
 				imageId,
 				name,
+				sshocMarketplaceActorId,
 				summary,
 				typeId: orgUnitType.id,
 			});
@@ -147,6 +161,17 @@ export const createNationalConsortiumAction = createServerAction(
 		if (shouldSaveAndPublish(formData)) {
 			await dispatchWebhook({ type: "members-partners" });
 		}
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "create",
+			subjectType: "national_consortia",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: {
+				...getAuditSummaryFromFormData(formData),
+				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
+			},
+		});
+
 		revalidatePath("/[locale]/dashboard/administrator/national-consortia", "layout");
 
 		redirect({ href: "/dashboard/administrator/national-consortia", locale });

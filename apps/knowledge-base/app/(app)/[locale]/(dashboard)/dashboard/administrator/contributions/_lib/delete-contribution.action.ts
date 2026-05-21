@@ -3,6 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 
+import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { ensureOrganisationalUnitDraftVersion } from "@/lib/data/organisational-unit-drafts";
@@ -11,7 +12,7 @@ import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 
 export async function deleteContributionAction(id: string): Promise<void> {
-	await assertAdmin();
+	const auditSession = await assertAdmin();
 
 	await db.transaction(async (tx) => {
 		const contribution = await tx.query.personsToOrganisationalUnits.findFirst({
@@ -55,6 +56,14 @@ export async function deleteContributionAction(id: string): Promise<void> {
 
 		await touchVersion(tx, draftPersonId);
 		await touchVersion(tx, draftOrganisationalUnitId);
+	});
+
+	await recordAuditEvent(db, {
+		actorUserId: auditSession?.user.id,
+		action: "delete",
+		subjectType: "contributions",
+		subjectId: id,
+		summary: {},
 	});
 
 	revalidatePath("/[locale]/dashboard/administrator/contributions", "layout");

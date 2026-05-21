@@ -8,6 +8,11 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { CreateImpactCaseStudyContributorActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/create-impact-case-study-contributor.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
@@ -19,7 +24,7 @@ export const createImpactCaseStudyContributorAction = createServerAction(
 		const locale = await getLocale();
 		const t = await getExtracted();
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			CreateImpactCaseStudyContributorActionInputSchema,
@@ -55,6 +60,14 @@ export const createImpactCaseStudyContributorAction = createServerAction(
 				.values({ impactCaseStudyId: articleId, personId, role });
 
 			await touchVersion(tx, articleId);
+		});
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "create",
+			subjectType: "impact_case_studies",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: getAuditSummaryFromFormData(formData),
 		});
 
 		revalidatePath("/[locale]/dashboard/website/impact-case-studies", "layout");

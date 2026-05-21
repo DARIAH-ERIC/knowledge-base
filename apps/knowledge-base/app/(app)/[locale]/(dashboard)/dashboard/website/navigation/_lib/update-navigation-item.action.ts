@@ -9,6 +9,11 @@ import { after } from "next/server";
 import * as v from "valibot";
 
 import { UpdateNavigationItemActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/update-navigation-item.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
@@ -21,7 +26,7 @@ export const updateNavigationItemAction = createServerAction(
 		const locale = await getLocale();
 		const t = await getExtracted();
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			UpdateNavigationItemActionInputSchema,
@@ -52,6 +57,14 @@ export const updateNavigationItemAction = createServerAction(
 
 		after(async () => {
 			await dispatchWebhook({ type: "navigation" });
+		});
+
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "update",
+			subjectType: "navigation",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: getAuditSummaryFromFormData(formData),
 		});
 
 		revalidatePath("/[locale]/dashboard/website/navigation", "layout");

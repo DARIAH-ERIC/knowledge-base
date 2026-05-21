@@ -10,6 +10,11 @@ import * as v from "valibot";
 
 import { canManageAdminAccounts } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/admin-management";
 import { CreateUserActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/create-user.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { auth } from "@/lib/auth";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -69,6 +74,14 @@ export const createUserAction = createServerAction(
 				organisationalUnitId: organisationalUnitId ?? null,
 			})
 			.where(eq(schema.users.id, user.id));
+
+		await recordAuditEvent(db, {
+			actorUserId: currentUser.id,
+			action: "create",
+			subjectType: "users",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: getAuditSummaryFromFormData(formData),
+		});
 
 		revalidatePath("/[locale]/dashboard/administrator/users", "layout");
 

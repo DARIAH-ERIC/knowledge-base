@@ -3,6 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 import { revalidatePath } from "next/cache";
 
+import { recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
@@ -11,7 +12,7 @@ export async function moveDocumentPolicyGroupAction(
 	id: string,
 	direction: "up" | "down",
 ): Promise<void> {
-	await assertAdmin();
+	const auditSession = await assertAdmin();
 
 	await db.transaction(async (tx) => {
 		const group = await tx.query.documentPolicyGroups.findFirst({
@@ -52,6 +53,14 @@ export async function moveDocumentPolicyGroupAction(
 			.update(schema.documentPolicyGroups)
 			.set({ position: group.position })
 			.where(eq(schema.documentPolicyGroups.id, target.id));
+	});
+
+	await recordAuditEvent(db, {
+		actorUserId: auditSession?.user.id,
+		action: "update",
+		subjectType: "documents_policies",
+		subjectId: id,
+		summary: { direction },
 	});
 
 	revalidatePath("/[locale]/dashboard/website/documents-policies", "layout");

@@ -10,6 +10,11 @@ import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { CreateCountryActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/create-country.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
@@ -29,7 +34,7 @@ export const createCountryAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			CreateCountryActionInputSchema,
@@ -147,6 +152,17 @@ export const createCountryAction = createServerAction(
 		if (shouldSaveAndPublish(formData)) {
 			await dispatchWebhook({ type: "members-partners" });
 		}
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "create",
+			subjectType: "countries",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: {
+				...getAuditSummaryFromFormData(formData),
+				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
+			},
+		});
+
 		revalidatePath("/[locale]/dashboard/administrator/countries", "layout");
 
 		redirect({ href: "/dashboard/administrator/countries", locale });

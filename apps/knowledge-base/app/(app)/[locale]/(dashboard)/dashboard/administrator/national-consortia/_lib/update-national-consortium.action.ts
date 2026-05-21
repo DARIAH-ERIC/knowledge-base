@@ -10,6 +10,11 @@ import { after } from "next/server";
 import * as v from "valibot";
 
 import { UpdateNationalConsortiumActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/update-national-consortium.schema";
+import {
+	getAuditSubjectIdFromFormData,
+	getAuditSummaryFromFormData,
+	recordAuditEvent,
+} from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { upsertRichTextEntityVersionField } from "@/lib/data/entity-version-fields";
@@ -33,7 +38,7 @@ export const updateNationalConsortiumAction = createServerAction(
 			return createActionStateError({ message: t("Too many requests.") });
 		}
 
-		await assertAdmin();
+		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			UpdateNationalConsortiumActionInputSchema,
@@ -59,6 +64,7 @@ export const updateNationalConsortiumAction = createServerAction(
 			relatedEntityIds,
 			relatedResourceIds,
 			socialMediaIds,
+			sshocMarketplaceActorId,
 			summary,
 		} = result.output;
 
@@ -84,7 +90,7 @@ export const updateNationalConsortiumAction = createServerAction(
 
 			await tx
 				.update(schema.organisationalUnits)
-				.set({ acronym, imageId, name, summary })
+				.set({ acronym, imageId, name, sshocMarketplaceActorId, summary })
 				.where(eq(schema.organisationalUnits.id, draftVersionId));
 
 			const parsedContent = JSON.parse(description) as schema.RichTextContentBlock["content"];
@@ -135,6 +141,17 @@ export const updateNationalConsortiumAction = createServerAction(
 			await syncWebsiteDocumentForEntity(documentId);
 			await dispatchWebhook({ type: "members-partners" });
 		});
+		await recordAuditEvent(db, {
+			actorUserId: auditSession?.user.id,
+			action: "update",
+			subjectType: "national_consortia",
+			subjectId: getAuditSubjectIdFromFormData(formData),
+			summary: {
+				...getAuditSummaryFromFormData(formData),
+				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
+			},
+		});
+
 		revalidatePath("/[locale]/dashboard/administrator/national-consortia", "layout");
 
 		redirect({ href: "/dashboard/administrator/national-consortia", locale });

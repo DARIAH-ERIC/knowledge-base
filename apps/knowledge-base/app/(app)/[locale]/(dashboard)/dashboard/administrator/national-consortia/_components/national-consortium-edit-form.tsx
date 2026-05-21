@@ -19,7 +19,10 @@ interface NationalConsortiumEditFormProps {
 	documentId: string;
 	hasDraftChanges: boolean;
 	isPublished: boolean;
-	nationalConsortium: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
+	nationalConsortium: Pick<
+		schema.OrganisationalUnit,
+		"acronym" | "id" | "name" | "sshocMarketplaceActorId" | "summary"
+	> & {
 		description?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
