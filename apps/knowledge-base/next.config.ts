@@ -38,9 +38,6 @@ const config: Config = {
 		},
 	},
 	output: env.BUILD_MODE,
-	outputFileTracingIncludes: {
-		"/api/reporting/**/*": ["./node_modules/pdfkit/js/data/*.afm"],
-	},
 	reactCompiler: true,
 	turbopack: {
 		rules: {
