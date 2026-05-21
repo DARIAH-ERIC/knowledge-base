@@ -4,10 +4,9 @@ import * as v from "valibot";
 export const CreateNationalConsortiumActionInputSchema = v.object({
 	...v.pick(OrganisationalUnitInsertSchema, ["name", "summary"]).entries,
 	acronym: v.optional(v.pipe(v.string(), v.nonEmpty())),
-	sshocMarketplaceActorId: v.pipe(
-		v.string(),
-		v.transform((value) => (value.trim() === "" ? null : Number(value))),
-		v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1))),
+	sshocMarketplaceActorId: v.nullish(
+		v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
+		null,
 	),
 	imageKey: v.optional(v.pipe(v.string(), v.nonEmpty())),
 	description: v.pipe(v.string(), v.nonEmpty()),

@@ -8,10 +8,9 @@ export const UpdateNationalConsortiumActionInputSchema = v.object({
 	...v.pick(OrganisationalUnitSelectSchema, ["id"]).entries,
 	...v.pick(OrganisationalUnitUpdateSchema, ["name", "summary"]).entries,
 	acronym: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
-	sshocMarketplaceActorId: v.pipe(
-		v.string(),
-		v.transform((value) => (value.trim() === "" ? null : Number(value))),
-		v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1))),
+	sshocMarketplaceActorId: v.nullish(
+		v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
+		null,
 	),
 	documentId: v.pipe(v.string(), v.uuid()),
 	imageKey: v.optional(v.pipe(v.string(), v.nonEmpty())),
