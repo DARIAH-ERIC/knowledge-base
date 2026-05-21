@@ -4,7 +4,6 @@ import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
-import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
@@ -16,10 +15,9 @@ import {
 	type ContentBlock,
 	ContentBlocks,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
-import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
+import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
 import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import {
-	FormActions,
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
@@ -157,14 +155,12 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 					</Fragment>
 				) : null}
 
-				<FormActions>
-					<FormStatus state={state} />
-					<DraftFormSubmitButtons
-						isDisabled={selectedImage == null}
-						isPending={isPending}
-						showSaveAndPublish={true}
-					/>
-				</FormActions>
+				<EntityFormActions
+					entityName={t("Spotlight article")}
+					isDisabled={selectedImage == null}
+					isPending={isPending}
+					state={state}
+				/>
 			</Form>
 		</FormLayout>
 	);

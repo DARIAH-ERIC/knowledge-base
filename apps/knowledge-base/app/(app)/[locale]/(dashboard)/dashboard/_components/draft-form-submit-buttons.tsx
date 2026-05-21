@@ -10,13 +10,23 @@ import { saveAndPublishIntent } from "@/lib/form-intent";
 type SubmitIntent = "draft" | "publish";
 
 interface DraftFormSubmitButtonsProps {
+	draftLabel?: string;
 	isDisabled?: boolean;
 	isPending: boolean;
+	publishLabel?: string;
+	saveLabel?: string;
 	showSaveAndPublish?: boolean;
 }
 
 export function DraftFormSubmitButtons(props: Readonly<DraftFormSubmitButtonsProps>): ReactNode {
-	const { isDisabled, isPending, showSaveAndPublish = false } = props;
+	const {
+		draftLabel,
+		isDisabled,
+		isPending,
+		publishLabel,
+		saveLabel,
+		showSaveAndPublish = false,
+	} = props;
 	const t = useExtracted();
 	const [pendingIntent, setPendingIntent] = useState<SubmitIntent | null>(null);
 
@@ -47,7 +57,11 @@ export function DraftFormSubmitButtons(props: Readonly<DraftFormSubmitButtonsPro
 				}}
 				type="submit"
 			>
-				{isDraftPending ? pendingContent : showSaveAndPublish ? t("Save (as draft)") : t("Save")}
+				{isDraftPending
+					? pendingContent
+					: showSaveAndPublish
+						? (draftLabel ?? t("Save (as draft)"))
+						: (saveLabel ?? t("Save"))}
 			</Button>
 			{showSaveAndPublish ? (
 				<Button
@@ -61,7 +75,7 @@ export function DraftFormSubmitButtons(props: Readonly<DraftFormSubmitButtonsPro
 					type="submit"
 					value={saveAndPublishIntent}
 				>
-					{isPublishPending ? pendingContent : t("Save and publish")}
+					{isPublishPending ? pendingContent : (publishLabel ?? t("Save and publish"))}
 				</Button>
 			) : null}
 		</Fragment>

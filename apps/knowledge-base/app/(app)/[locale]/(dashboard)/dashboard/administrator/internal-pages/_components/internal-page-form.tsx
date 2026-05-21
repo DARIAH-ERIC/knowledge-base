@@ -4,7 +4,6 @@ import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
-import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
@@ -15,9 +14,8 @@ import {
 	type ContentBlock,
 	ContentBlocks,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
-import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
+import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
 import {
-	FormActions,
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
@@ -57,10 +55,7 @@ export function InternalPageForm(props: Readonly<InternalPageFormProps>): ReactN
 				<input name="id" type="hidden" value={internalPage.id} />
 				<input name="documentId" type="hidden" value={internalPage.entityVersion.entity.id} />
 
-				<FormActions>
-					<FormStatus state={state} />
-					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={true} />
-				</FormActions>
+				<EntityFormActions entityName={t("Internal page")} isPending={isPending} state={state} />
 			</Form>
 		</FormLayout>
 	);

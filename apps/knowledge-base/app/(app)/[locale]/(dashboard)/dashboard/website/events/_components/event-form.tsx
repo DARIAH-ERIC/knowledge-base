@@ -6,7 +6,6 @@ import { Checkbox } from "@dariah-eric/ui/checkbox";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
-import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
@@ -19,10 +18,9 @@ import {
 	type ContentBlock,
 	ContentBlocks,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
-import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
+import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
 import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import {
-	FormActions,
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
@@ -202,14 +200,12 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 					</Fragment>
 				) : null}
 
-				<FormActions>
-					<FormStatus state={state} />
-					<DraftFormSubmitButtons
-						isDisabled={selectedImage == null}
-						isPending={isPending}
-						showSaveAndPublish={true}
-					/>
-				</FormActions>
+				<EntityFormActions
+					entityName={t("Event")}
+					isDisabled={selectedImage == null}
+					isPending={isPending}
+					state={state}
+				/>
 			</Form>
 		</FormLayout>
 	);
