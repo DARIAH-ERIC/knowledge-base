@@ -17,6 +17,7 @@
 		"./breadcrumbs": "./dist/breadcrumbs.mjs",
 		"./button": "./dist/button.mjs",
 		"./button-link": "./dist/button-link.mjs",
+		"./button-styles": "./dist/button-styles.mjs",
 		"./calendar": "./dist/calendar.mjs",
 		"./card": "./dist/card.mjs",
 		"./carousel": "./dist/carousel.mjs",

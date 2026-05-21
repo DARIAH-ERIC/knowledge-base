@@ -1,7 +1,8 @@
 "use client";
 
 import { Badge } from "@dariah-eric/ui/badge";
-import { Button, buttonStyles } from "@dariah-eric/ui/button";
+import { Button } from "@dariah-eric/ui/button";
+import { buttonStyles } from "@dariah-eric/ui/button-styles";
 import { Link } from "@dariah-eric/ui/link";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
 import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";

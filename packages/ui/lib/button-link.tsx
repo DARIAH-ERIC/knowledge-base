@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import type { VariantProps } from "tailwind-variants";
 
-import { buttonStyles } from "@/lib/button";
+import { buttonStyles } from "@/lib/button-styles";
 import { Link, type LinkProps } from "@/lib/link";
 import { cx } from "@/lib/primitive";
 

@@ -1,3 +1,5 @@
+import * as schema from "@dariah-eric/database/schema";
+import type { SearchResourcesParams } from "@dariah-eric/search";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -8,6 +10,8 @@ import { getAuthorizedCountryReportForUser } from "@/app/(app)/[locale]/(dashboa
 import { assertAuthenticated } from "@/lib/auth/session";
 import { resolveCountryReportId } from "@/lib/data/reporting-urls";
 import { db } from "@/lib/db";
+import { and, eq, sql } from "@/lib/db/sql";
+import { search } from "@/lib/search";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardReportingCountryReportSoftwarePageProps extends PageProps<"/[locale]/dashboard/reporting/country-reports/[year]/[slug]/edit/software"> {}
@@ -43,6 +47,11 @@ export default async function DashboardReportingCountryReportSoftwarePage(
 			db.query.countryReports.findFirst({
 				where: { id },
 				columns: { id: true },
+				with: {
+					country: {
+						columns: { id: true },
+					},
+				},
 			}),
 		"update",
 	);
@@ -56,6 +65,80 @@ export default async function DashboardReportingCountryReportSoftwarePage(
 	}
 
 	const t = await getExtracted();
+	const year = Number(routeYear);
+	const actorIds = new Set<number>();
+
+	const nationalConsortiumActorIds = await db
+		.select({ sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId })
+		.from(schema.organisationalUnitsRelations)
+		.innerJoin(
+			schema.organisationalUnitStatus,
+			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+		)
+		.innerJoin(
+			schema.organisationalUnits,
+			eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.unitId),
+		)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
+		.where(
+			and(
+				eq(schema.organisationalUnitsRelations.relatedUnitId, report.country.id),
+				eq(schema.organisationalUnitStatus.status, "is_national_consortium_of"),
+				eq(
+					schema.organisationalUnitTypes.type,
+					"national_consortium" as typeof schema.organisationalUnitTypes.$inferSelect.type,
+				),
+				sql`
+					${schema.organisationalUnitsRelations.duration} && tstzrange (
+						MAKE_DATE(${year}, 1, 1)::TIMESTAMPTZ,
+						MAKE_DATE(${year + 1}, 1, 1)::TIMESTAMPTZ
+					)
+				`,
+			),
+		);
+
+	for (const { sshocMarketplaceActorId } of nationalConsortiumActorIds) {
+		if (sshocMarketplaceActorId != null) {
+			actorIds.add(sshocMarketplaceActorId);
+		}
+	}
+
+	const softwareSearchParams: SearchResourcesParams = {
+		filterBy: `type:=software && source:=ssh-open-marketplace && source_actor_ids:=[${[...actorIds].map((actorId) => `\`ssh-open-marketplace:${actorId}\``).join(",")}]`,
+		perPage: 100,
+		query: "*",
+		queryBy: ["label", "description", "keywords"],
+		sortBy: [{ field: "label", direction: "asc" }],
+	};
+	const firstSoftwareResult =
+		actorIds.size === 0
+			? null
+			: await search.collections.resources.search({ ...softwareSearchParams, page: 1 });
+	const remainingSoftwareResults =
+		firstSoftwareResult?.isOk() === true
+			? await Promise.all(
+					Array.from(
+						{ length: Math.max(firstSoftwareResult.value.pagination.totalPages - 1, 0) },
+						(_, index) =>
+							search.collections.resources.search({
+								...softwareSearchParams,
+								page: index + 2,
+							}),
+					),
+				)
+			: [];
+	const software =
+		firstSoftwareResult?.isOk() === true
+			? [
+					...firstSoftwareResult.value.items,
+					...remainingSoftwareResults.flatMap((result) =>
+						result.isOk() ? result.value.items : [],
+					),
+				]
+			: [];
 
 	return (
 		<div className="flex flex-col gap-y-12">
@@ -63,7 +146,39 @@ export default async function DashboardReportingCountryReportSoftwarePage(
 				<p className="text-sm text-muted-fg">
 					{t("Software contributions from the SSH Open Marketplace.")}
 				</p>
-				<p className="text-sm text-muted-fg italic">{t("Coming soon.")}</p>
+				{actorIds.size === 0 ? (
+					<p className="text-sm text-muted-fg italic">
+						{t("This country has no national consortium with an SSH Open Marketplace actor id.")}
+					</p>
+				) : software.length === 0 ? (
+					<p className="text-sm text-muted-fg italic">
+						{t("No SSH Open Marketplace software found for this country.")}
+					</p>
+				) : (
+					<ul className="flex flex-col gap-y-3">
+						{software.map(({ document }) => (
+							<li key={document.id} className="rounded-md border border-border p-4">
+								<div className="flex flex-col gap-y-2">
+									{document.links[0] != null ? (
+										<a
+											className="text-sm font-semibold text-fg underline-offset-4 hover:underline"
+											href={document.links[0]}
+											rel="noreferrer"
+											target="_blank"
+										>
+											{document.label}
+										</a>
+									) : (
+										<p className="text-sm font-semibold text-fg">{document.label}</p>
+									)}
+									{document.description !== "" ? (
+										<p className="line-clamp-3 text-sm text-muted-fg">{document.description}</p>
+									) : null}
+								</div>
+							</li>
+						))}
+					</ul>
+				)}
 			</div>
 
 			<ReportScreenCommentSection reportId={report.id} reportType="country" screenKey="software" />

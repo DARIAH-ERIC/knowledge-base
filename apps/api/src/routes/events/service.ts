@@ -154,6 +154,7 @@ async function getAdjacentEvents(db: Database | Transaction, params: GetAdjacent
 		id: schema.events.id,
 		title: schema.events.title,
 		location: schema.events.location,
+		isFullDay: schema.events.isFullDay,
 		duration: schema.events.duration,
 		entity: {
 			slug: schema.entities.slug,
@@ -165,6 +166,7 @@ async function getAdjacentEvents(db: Database | Transaction, params: GetAdjacent
 		id: schema.Event["id"];
 		title: schema.Event["title"];
 		location: schema.Event["location"];
+		isFullDay: schema.Event["isFullDay"];
 		duration: schema.Event["duration"];
 		entity: {
 			slug: schema.Entity["slug"];

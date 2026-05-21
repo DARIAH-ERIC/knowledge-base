@@ -6,6 +6,10 @@ import { ContentBlockInputSchema } from "@/lib/content-block-input";
 export const UpdateEventActionInputSchema = v.object({
 	documentId: v.pipe(v.string(), v.uuid()),
 	...v.pick(EventUpdateSchema, ["title", "summary", "location", "website"]).entries,
+	isFullDay: v.pipe(
+		v.optional(v.string()),
+		v.transform((s) => s === "true"),
+	),
 	duration: v.object({
 		start: v.pipe(v.string(), v.isoDate(), v.toDate()),
 		end: v.optional(v.pipe(v.string(), v.isoDate(), v.toDate())),

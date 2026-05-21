@@ -4,7 +4,8 @@ import { useExtracted } from "next-intl";
 import { type ComponentProps, Fragment, type ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
 
-import { type ButtonProps, buttonStyles } from "@/lib/button";
+import type { ButtonProps } from "@/lib/button";
+import { buttonStyles } from "@/lib/button-styles";
 import { Link, type LinkProps } from "@/lib/link";
 
 export interface PaginationProps extends ComponentProps<"nav"> {}
