@@ -8,8 +8,21 @@ import turbo from "@dariah-eric/configs/oxlint/turbo";
 import vitest from "@dariah-eric/configs/oxlint/vitest";
 import { defineConfig } from "oxlint";
 
+const configs = [base, react, storybook, turbo, vitest];
+
+/**
+ * Avoid issues with synckit in github actions.
+ *
+ * @see {@link https://github.com/schoero/eslint-plugin-better-tailwindcss/issues/261}
+ * @see {@link https://github.com/schoero/eslint-plugin-better-tailwindcss/issues/341}
+ */
+// oxlint-disable-next-line node/no-process-env
+if (process.env.CI == null) {
+	configs.push(tailwindcss);
+}
+
 const config = defineConfig({
-	extends: [base, react, storybook, tailwindcss, turbo, vitest],
+	extends: configs,
 	options: {
 		reportUnusedDisableDirectives: "error",
 		typeAware: true,

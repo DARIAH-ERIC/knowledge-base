@@ -107,10 +107,7 @@ jobs:
         run: turbo run --filter "./packages/*" build
 
       - name: Lint
-        # set concurrency to avoid
-        # @see {@link https://github.com/schoero/eslint-plugin-better-tailwindcss/issues/261}
-        # @see {@link https://github.com/schoero/eslint-plugin-better-tailwindcss/issues/341}
-        run: turbo run lint:check --concurrency 5
+        run: turbo run lint:check
 
       - name: Typecheck
         run: turbo run types:check

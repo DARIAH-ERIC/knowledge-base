@@ -9,8 +9,21 @@ import tailwindcss from "@dariah-eric/configs/oxlint/tailwindcss";
 import turbo from "@dariah-eric/configs/oxlint/turbo";
 import { defineConfig } from "oxlint";
 
+const configs = [base, nextjs, playwright, react, regexp, turbo];
+
+/**
+ * Avoid issues with synckit in github actions.
+ *
+ * @see {@link https://github.com/schoero/eslint-plugin-better-tailwindcss/issues/261}
+ * @see {@link https://github.com/schoero/eslint-plugin-better-tailwindcss/issues/341}
+ */
+// oxlint-disable-next-line node/no-process-env
+if (process.env.CI == null) {
+	configs.push(tailwindcss);
+}
+
 const config = defineConfig({
-	extends: [base, nextjs, playwright, react, regexp, tailwindcss, turbo],
+	extends: configs,
 	options: {
 		reportUnusedDisableDirectives: "error",
 		typeAware: true,
