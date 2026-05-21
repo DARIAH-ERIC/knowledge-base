@@ -78,7 +78,7 @@ jobs:
       TYPESENSE_PROTOCOL: "http"
       TYPESENSE_RESOURCE_COLLECTION_NAME: "dariah-resources"
       TYPESENSE_WEBSITE_COLLECTION_NAME: "dariah-website"
-      TURBO_TEAM: "${{ secrets.TURBO_TEAM }}"
+      TURBO_TEAM: "${{ vars.TURBO_TEAM }}"
       TURBO_TOKEN: "${{ secrets.TURBO_TOKEN }}"
       UNR_DATABASE_DIRECT_URL: "postgresql://dariah-unr:dariah-unr@localhost:5432/dariah-unr"
       UNR_S3_BUCKET_NAME: "dariah-unr"
