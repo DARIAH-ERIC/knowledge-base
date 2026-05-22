@@ -49,6 +49,8 @@ const config: Config = {
 		"/api/reporting/**/*": ["./node_modules/pdfkit/js/data/*.afm"],
 	},
 	reactCompiler: true,
+	/** @see {@link https://github.com/foliojs/pdfkit/issues/1549} */
+	serverExternalPackages: ["pdfkit"],
 	turbopack: {
 		rules: {
 			/** @see {@link https://github.com/vercel/next.js/discussions/77721#discussioncomment-14576268} */
