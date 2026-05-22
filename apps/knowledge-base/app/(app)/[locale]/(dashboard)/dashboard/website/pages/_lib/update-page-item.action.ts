@@ -85,7 +85,7 @@ export const updatePageItemAction = createServerAction(
 
 			await tx
 				.update(schema.pages)
-				.set({ imageId: imageId ?? undefined, title, summary })
+				.set({ imageId, title, summary })
 				.where(eq(schema.pages.id, draftVersionId));
 
 			const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");

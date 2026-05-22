@@ -46,6 +46,10 @@ export class WebsitePagesPage {
 		await this.page.getByRole("dialog").getByRole("button", { name: "Select" }).click();
 	}
 
+	async removeImage(): Promise<void> {
+		await this.page.getByRole("button", { name: "Remove image" }).click();
+	}
+
 	async submitForm(): Promise<void> {
 		await this.page.getByRole("button", { name: /^(?:Save|Save \(as draft\))$/ }).click();
 		/** After a successful create/edit, the server action redirects back to the list. */

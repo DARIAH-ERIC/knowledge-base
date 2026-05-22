@@ -2,6 +2,7 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
@@ -114,6 +115,16 @@ export function GovernanceBodyForm(props: Readonly<GovernanceBodyFormProps>): Re
 						}}
 						prefixes={["avatars", "images", "logos"]}
 					/>
+					{selectedImage != null ? (
+						<Button
+							intent="outline"
+							onPress={() => {
+								setSelectedImage(null);
+							}}
+						>
+							{t("Remove image")}
+						</Button>
+					) : null}
 
 					<input
 						aria-hidden={true}

@@ -396,6 +396,17 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 						}}
 						prefixes={["logos"]}
 					/>
+					{selectedImage != null ? (
+						<Button
+							intent="outline"
+							onPress={() => {
+								setSelectedImage(null);
+								setImageKeyError(false);
+							}}
+						>
+							{t("Remove image")}
+						</Button>
+					) : null}
 
 					<input
 						aria-hidden={true}

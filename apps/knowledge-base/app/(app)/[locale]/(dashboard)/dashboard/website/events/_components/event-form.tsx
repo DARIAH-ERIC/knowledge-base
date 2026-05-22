@@ -4,7 +4,7 @@ import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { Checkbox } from "@dariah-eric/ui/checkbox";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
-import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
+import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
@@ -26,7 +26,7 @@ import {
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import { ImageSelectField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface EventFormProps {
@@ -72,9 +72,6 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 	const [selectedImage, setSelectedImage] = useState<{ key: string; url: string } | null>(
 		event?.image ?? null,
 	);
-
-	const [imageKeyError, setImageKeyError] = useState(false);
-
 	return (
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
@@ -141,39 +138,19 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 
 				<Separator className="my-6" />
 
-				<FormSection description={t("Select or upload an image.")} title={t("Image")}>
-					{selectedImage != null && (
-						<img
-							alt={t("Selected image")}
-							className="block-24 inline-24 rounded-lg object-cover"
-							src={selectedImage.url}
-						/>
-					)}
-					<MediaLibraryDialog
+				<FormSection
+					description={t("Select or upload an image.")}
+					isRequired={true}
+					title={t("Image")}
+				>
+					<ImageSelectField
 						defaultPrefix="images"
 						initialAssets={initialAssets}
-						onSelect={(key, url) => {
-							setSelectedImage({ key, url });
-						}}
+						isRequired={true}
+						onChange={setSelectedImage}
 						prefixes={["avatars", "images", "logos"]}
+						selectedImage={selectedImage}
 					/>
-
-					<input
-						aria-hidden={true}
-						className="sr-only"
-						name="imageKey"
-						onInvalid={(e) => {
-							e.preventDefault();
-							setImageKeyError(true);
-						}}
-						readOnly={true}
-						// required={true}
-						tabIndex={-1}
-						value={selectedImage?.key ?? ""}
-					/>
-					{imageKeyError ? (
-						<div className={fieldErrorStyles()}>{t("Please select an image.")}</div>
-					) : null}
 				</FormSection>
 
 				<Separator className="my-6" />
@@ -204,11 +181,7 @@ export function EventForm(props: Readonly<EventFormProps>): ReactNode {
 
 				<FormActions>
 					<FormStatus state={state} />
-					<DraftFormSubmitButtons
-						isDisabled={selectedImage == null}
-						isPending={isPending}
-						showSaveAndPublish={true}
-					/>
+					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={true} />
 				</FormActions>
 			</Form>
 		</FormLayout>
