@@ -1,7 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 
+import { imageSizeLimit } from "@/config/assets.config";
 import { expect, test } from "@/e2e/lib/test";
+import { formatFileSize } from "@/lib/format-file-size";
 
 test.describe("website news admin", () => {
 	/**
@@ -56,6 +58,33 @@ test.describe("website news admin", () => {
 
 		await newsPage.searchByTitle(title);
 		await expect(newsPage.rowByTitle(title)).toBeVisible();
+	});
+
+	test("should show an inline error for an oversized uploaded image", async ({
+		createWebsiteNewsPage,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const newsPage = createWebsiteNewsPage(workerIndex);
+
+		await newsPage.gotoCreate();
+		await newsPage.page.getByRole("button", { name: "Select image" }).click();
+
+		const dialog = newsPage.page.getByRole("dialog", { name: "Media library" });
+		await dialog.getByRole("tab", { name: "Upload" }).click();
+		await dialog.locator('input[type="file"]').setInputFiles({
+			name: "oversized.png",
+			mimeType: "image/png",
+			buffer: Buffer.alloc(imageSizeLimit + 1),
+		});
+
+		await expect(
+			dialog.getByText(
+				`The selected image is too large. Choose an image smaller than ${formatFileSize(
+					imageSizeLimit,
+				)}.`,
+			),
+		).toBeVisible();
+		await expect(dialog.getByRole("button", { name: "Upload" })).toBeDisabled();
 	});
 
 	test("should edit a news item title", async ({ page, createWebsiteNewsPage }) => {

@@ -4,7 +4,8 @@ export const imageMimeTypes = ["image/jpeg", "image/png"] as const;
 
 export const mediaLibraryPageSize = 20;
 
-export const imageSizeLimit = 4 * 1024 * 1024; /** 4 MB */
+/** Must be less than `serverActions.bodySizeLimit` in `next.config.ts`. */
+export const imageSizeLimit = 6 * 1024 * 1024; /** 6 MB */
 
 export const imageGridOptions: ImageUrlOptions = {
 	enlarge: 1,
