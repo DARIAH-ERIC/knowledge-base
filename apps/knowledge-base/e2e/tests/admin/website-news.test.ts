@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { join } from "node:path";
 
 import { expect, test } from "@/e2e/lib/test";
 
@@ -16,6 +17,7 @@ test.describe("website news admin", () => {
 
 	test.afterAll(async ({ db }, testInfo) => {
 		await db.cleanupWorkerNewsItems(testInfo.workerIndex);
+		await db.cleanupWorkerAssets(testInfo.workerIndex);
 	});
 
 	test("should create a news item", async ({ createWebsiteNewsPage }) => {
@@ -29,6 +31,26 @@ test.describe("website news admin", () => {
 		await newsPage.fillTitle(title);
 		await newsPage.fillSummary("E2E test news item summary");
 		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+
+		await newsPage.submitForm();
+
+		await newsPage.searchByTitle(title);
+		await expect(newsPage.rowByTitle(title)).toBeVisible();
+	});
+
+	test("should create a news item with an uploaded image", async ({ createWebsiteNewsPage }) => {
+		const workerIndex = test.info().workerIndex;
+		const newsPage = createWebsiteNewsPage(workerIndex);
+
+		const title = `${newsPage.workerPrefix} Uploaded Image News ${randomUUID()}`;
+		const imageLabel = `${newsPage.workerPrefix} Uploaded Image ${randomUUID()}`;
+		const filePath = join(process.cwd(), "public/android-chrome-192x192.png");
+
+		await newsPage.gotoCreate();
+
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item with uploaded image");
+		await newsPage.uploadImageFromMediaLibrary(filePath, imageLabel);
 
 		await newsPage.submitForm();
 

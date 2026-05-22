@@ -411,6 +411,13 @@ export class DatabaseService {
 		}
 	}
 
+	/** Deletes assets uploaded by tests after dependent rows have been removed. */
+	async cleanupWorkerAssets(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		await this.db.delete(schema.assets).where(sql`${schema.assets.label} LIKE ${`${prefix}%`}`);
+	}
+
 	/**
 	 * Cascade-deletes a person and all their related records. Replicates the logic in
 	 * `delete-person.action.ts`.
