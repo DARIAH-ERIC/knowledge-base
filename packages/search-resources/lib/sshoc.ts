@@ -54,11 +54,15 @@ export function createSshocItem(
 		const actorId = contributor.actor.id;
 		const ncSlugs = orgUnits.sshocActorIdToNc.get(actorId);
 		if (ncSlugs != null) {
-			for (const slug of ncSlugs) nationalConsortia.add(slug);
+			for (const slug of ncSlugs) {
+				nationalConsortia.add(slug);
+			}
 		}
 		const wgSlugs = orgUnits.sshocActorIdToWg.get(actorId);
 		if (wgSlugs != null) {
-			for (const slug of wgSlugs) workingGroups.add(slug);
+			for (const slug of wgSlugs) {
+				workingGroups.add(slug);
+			}
 		}
 	}
 	const national_consortia = [...nationalConsortia];

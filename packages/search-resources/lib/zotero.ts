@@ -71,7 +71,9 @@ export function createZoteroItem(
 		}
 		const ncSlugs = orgUnits.countrySlugToNc.get(name.toLowerCase());
 		if (ncSlugs != null) {
-			for (const slug of ncSlugs) nationalConsortia.add(slug);
+			for (const slug of ncSlugs) {
+				nationalConsortia.add(slug);
+			}
 			continue;
 		}
 		if (orgUnits.wgSlugs.has(name)) {
