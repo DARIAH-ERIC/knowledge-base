@@ -4,7 +4,8 @@ services:
     container_name: dariah-knowledge-base-imgproxy
     restart: unless-stopped
     depends_on:
-      - minio
+      minio:
+        condition: service_healthy
     environment:
       # IMGPROXY_MALLOC: jemalloc
       IMGPROXY_KEY: ${IMGPROXY_KEY}

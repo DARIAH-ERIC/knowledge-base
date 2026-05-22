@@ -195,10 +195,12 @@ jobs:
           TYPESENSE_DATA_DIR: /data
           TYPESENSE_ENABLE_CORS: "true"
       minio:
-        image: bitnami/minio:latest
+        image: quay.io/minio/minio:latest
         env:
+          MINIO_OPTS: '--console-address ":9001"'
           MINIO_ROOT_USER: ${{ env.S3_ACCESS_KEY }}
           MINIO_ROOT_PASSWORD: ${{ env.S3_SECRET_KEY }}
+          MINIO_VOLUMES: /data
       imgproxy:
         image: ghcr.io/imgproxy/imgproxy:latest
         env:

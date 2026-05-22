@@ -6,7 +6,8 @@ services:
       - ..:/workspace:cached
     command: sleep infinity
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
 networks:
   default:
