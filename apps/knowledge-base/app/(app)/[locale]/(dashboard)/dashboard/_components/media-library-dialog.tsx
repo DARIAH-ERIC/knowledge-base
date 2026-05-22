@@ -32,7 +32,8 @@ import { FileTrigger, type Selection } from "react-aria-components";
 import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
-import { imageMimeTypes, mediaLibraryPageSize } from "@/config/assets.config";
+import { imageMimeTypes, imageSizeLimit, mediaLibraryPageSize } from "@/config/assets.config";
+import { formatFileSize } from "@/lib/format-file-size";
 
 interface MediaLibraryDialogProps<T extends AssetPrefix> {
 	acceptedFileTypes?: ReadonlyArray<string>;
@@ -80,6 +81,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 	// Upload tab state
 	const [pendingFile, setPendingFile] = useState<File | null>(null);
 	const [pendingFileUrl, setPendingFileUrl] = useState<string | null>(null);
+	const [uploadError, setUploadError] = useState<string | null>(null);
 	const [licenseOptions, setLicenseOptions] = useState<Array<LicenseOption>>([]);
 	const [isUploading, startUploading] = useTransition();
 
@@ -119,6 +121,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 		}
 		setPendingFile(null);
 		setPendingFileUrl(null);
+		setUploadError(null);
 		uploadFormRef.current?.reset();
 	}
 
@@ -218,12 +221,25 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 		if (pendingFileUrl != null) {
 			URL.revokeObjectURL(pendingFileUrl);
 		}
+
+		if (file != null && file.size > imageSizeLimit) {
+			setPendingFile(null);
+			setPendingFileUrl(null);
+			setUploadError(
+				t("The selected image is too large. Choose an image smaller than {size}.", {
+					size: formatFileSize(imageSizeLimit),
+				}),
+			);
+			return;
+		}
+
 		setPendingFile(file);
 		setPendingFileUrl(file != null ? URL.createObjectURL(file) : null);
+		setUploadError(null);
 	}
 
 	function handleUploadAction(formData: FormData) {
-		if (pendingFile == null) {
+		if (pendingFile == null || pendingFile.size > imageSizeLimit) {
 			return;
 		}
 		formData.append("file", pendingFile);
@@ -396,6 +412,12 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 										<p className="text-muted-fg text-sm">{pendingFile.name}</p>
 									) : null}
 
+									{uploadError != null ? (
+										<p className="text-danger text-sm" role="alert">
+											{uploadError}
+										</p>
+									) : null}
+
 									<TextField name="label">
 										<Label>{t("Label")}</Label>
 										<Input placeholder={pendingFile?.name ?? ""} />
@@ -437,7 +459,12 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 							{t("Select")}
 						</Button>
 					) : (
-						<Button form="upload-form" isPending={isUploading} type="submit">
+						<Button
+							form="upload-form"
+							isDisabled={pendingFile == null || uploadError != null}
+							isPending={isUploading}
+							type="submit"
+						>
 							{isUploading ? (
 								<Fragment>
 									<ProgressCircle isIndeterminate={true} />

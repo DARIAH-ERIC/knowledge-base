@@ -24,6 +24,8 @@ import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
 import { uploadImageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.action";
+import { imageSizeLimit } from "@/config/assets.config";
+import { formatFileSize } from "@/lib/format-file-size";
 
 interface UploadImageDialogProps {
 	licenses: Array<{ id: string; code: string; name: string }>;
@@ -37,6 +39,7 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 
 	const [isOpen, setIsOpen] = useState(false);
 	const [filePreview, setFilePreview] = useState<string | null>(null);
+	const [fileError, setFileError] = useState<string | null>(null);
 
 	const [state, formAction, isPending] = useActionState(
 		async (prevState: ActionState<{ key: string; url: string }>, formData: FormData) => {
@@ -44,6 +47,7 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 			if (result.status === "success") {
 				setIsOpen(false);
 				setFilePreview(null);
+				setFileError(null);
 				onSuccess();
 			}
 			return result;
@@ -88,9 +92,23 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 								onChange={(e) => {
 									const file = e.target.files?.[0];
 									if (file != null) {
+										if (file.size > imageSizeLimit) {
+											e.target.value = "";
+											if (filePreview != null) {
+												URL.revokeObjectURL(filePreview);
+											}
+											setFilePreview(null);
+											setFileError(
+												t("The selected image is too large. Choose an image smaller than {size}.", {
+													size: formatFileSize(imageSizeLimit),
+												}),
+											);
+											return;
+										}
 										if (filePreview != null) {
 											URL.revokeObjectURL(filePreview);
 										}
+										setFileError(null);
 										setFilePreview(URL.createObjectURL(file));
 									}
 								}}
@@ -104,6 +122,11 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 									src={filePreview}
 								/>
 							)}
+							{fileError != null ? (
+								<p className="text-danger text-sm" role="alert">
+									{fileError}
+								</p>
+							) : null}
 						</div>
 
 						<Select defaultValue="images" isRequired={true} name="prefix">
@@ -157,7 +180,7 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 					<ModalFooter>
 						<ModalClose>{t("Cancel")}</ModalClose>
 
-						<Button isPending={isPending} type="submit">
+						<Button isDisabled={fileError != null} isPending={isPending} type="submit">
 							{isPending ? (
 								<Fragment>
 									<ProgressCircle aria-label={t("Uploading...")} isIndeterminate={true} />
