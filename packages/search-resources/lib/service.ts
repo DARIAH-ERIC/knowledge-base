@@ -13,6 +13,7 @@ import type { SearchAdminService } from "@dariah-eric/search/admin";
 import { Result } from "better-result";
 
 import {
+	type OrgUnitResourceLookups,
 	type SearchIndexResourceSourceData,
 	createSearchIndexResourceDocuments,
 	createWebsiteResourceDocuments,
@@ -34,6 +35,11 @@ export interface CreateSearchResourcesServiceParams {
 	sshocMarketplaceBaseUrl: string;
 	zotero: ZoteroClient;
 	zoteroGroupId: string;
+	/**
+	 * Lookups used to resolve sshoc actor ids and zotero collection names to the slugs of national
+	 * consortia and working groups that own a resource.
+	 */
+	orgUnits: OrgUnitResourceLookups;
 }
 
 export interface FetchSearchResourcesParams {
@@ -69,6 +75,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 		sshocMarketplaceBaseUrl,
 		zotero,
 		zoteroGroupId,
+		orgUnits,
 	} = params;
 
 	const externalSourcesFilter = `source:[${resourceSources.join(",")}]`;
@@ -85,6 +92,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 				campusCurriculaResult,
 				episciencesDocumentsResult,
 				zoteroItemsResult,
+				zoteroCollectionsResult,
 			] = await Promise.all([
 				getOrFetch(cache, "sshoc/items", () =>
 					sshoc.items.searchAll({
@@ -97,6 +105,9 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 				getOrFetch(cache, "campus/curricula", () => campus.curricula.listAll()),
 				getOrFetch(cache, "episciences/documents", () => episciences.search.listAll()),
 				getOrFetch(cache, "zotero/items", () => zotero.items.listAll({ groupId: zoteroGroupId })),
+				getOrFetch(cache, "zotero/collections", () =>
+					zotero.collections.listAll({ groupId: zoteroGroupId }),
+				),
 			]);
 
 			const sshocItems = yield* sshocItemsResult;
@@ -104,6 +115,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 			const campusCurricula = yield* campusCurriculaResult;
 			const episciencesDocuments = yield* episciencesDocumentsResult;
 			const zoteroItems = yield* zoteroItemsResult;
+			const zoteroCollections = yield* zoteroCollectionsResult;
 
 			return Result.ok({
 				campusCurricula,
@@ -111,6 +123,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 				episciencesDocuments,
 				sshocItems,
 				zoteroItems,
+				zoteroCollections,
 			});
 		});
 
@@ -121,6 +134,7 @@ export function createSearchResourcesService(params: CreateSearchResourcesServic
 		return createSearchIndexResourceDocuments({
 			sourceData,
 			sshocMarketplaceBaseUrl,
+			orgUnits,
 		});
 	}
 

@@ -5,6 +5,7 @@ export {
 	type CreateSearchIndexResourceDocumentsParams,
 	createWebsiteResourceDocument,
 	createWebsiteResourceDocuments,
+	type OrgUnitResourceLookups,
 	type SearchIndexResourceSourceData,
 } from "./resources";
 export {
@@ -14,5 +15,11 @@ export {
 	type SearchResourcesCache,
 	type SyncSearchResourcesResult,
 } from "./service";
-export { createSshocItem } from "./sshoc";
-export { createZoteroItem, type ZoteroJsonItemData } from "./zotero";
+export { loadOrgUnitLookups } from "./org-units";
+export { createSshocItem, type SshocOrgUnitLookups } from "./sshoc";
+export {
+	createZoteroItem,
+	type ZoteroCollectionLookup,
+	type ZoteroJsonItemData,
+	type ZoteroOrgUnitLookups,
+} from "./zotero";

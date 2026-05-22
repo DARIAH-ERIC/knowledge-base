@@ -4,9 +4,10 @@ import { createEpisciencesClient } from "@dariah-eric/client-episciences";
 import { createSshocClient } from "@dariah-eric/client-sshoc";
 import { createZoteroClient } from "@dariah-eric/client-zotero";
 import { createSearchService } from "@dariah-eric/search";
-import { createSearchResourcesService } from "@dariah-eric/search-resources";
+import { createSearchResourcesService, loadOrgUnitLookups } from "@dariah-eric/search-resources";
 
 import { env } from "@/config/env.config";
+import { db } from "@/lib/db";
 import { search } from "@/lib/search/admin";
 
 export interface SyncResourcesSearchIndexResult {
@@ -72,6 +73,8 @@ export async function syncResourcesSearchIndex(): Promise<SyncResourcesSearchInd
 		],
 	});
 
+	const orgUnits = await loadOrgUnitLookups(db);
+
 	const searchResources = createSearchResourcesService({
 		campus,
 		episciences,
@@ -81,6 +84,7 @@ export async function syncResourcesSearchIndex(): Promise<SyncResourcesSearchInd
 		sshocMarketplaceBaseUrl,
 		zotero,
 		zoteroGroupId,
+		orgUnits,
 	});
 
 	return searchResources.syncSearchResources();

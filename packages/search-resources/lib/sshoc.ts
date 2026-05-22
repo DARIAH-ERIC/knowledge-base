@@ -4,7 +4,16 @@ import type { ResourceDocument } from "@dariah-eric/search";
 
 import { toPlainText } from "./markdown/to-plain-text";
 
-export function createSshocItem(item: SearchItem, marketplaceBaseUrl: string): ResourceDocument {
+export interface SshocOrgUnitLookups {
+	sshocActorIdToNc: Map<number, Set<string>>;
+	sshocActorIdToWg: Map<number, Set<string>>;
+}
+
+export function createSshocItem(
+	item: SearchItem,
+	marketplaceBaseUrl: string,
+	orgUnits: SshocOrgUnitLookups,
+): ResourceDocument {
 	const keywords = [];
 
 	for (const property of item.properties) {
@@ -39,8 +48,25 @@ export function createSshocItem(item: SearchItem, marketplaceBaseUrl: string): R
 	/** Description supports markdown. */
 	const description = toPlainText(item.description);
 
-	const sourceActorIds = item.contributors.flatMap((contributor) => contributor.actor.id);
-	const actorIds = sourceActorIds.map((sourceActorId) => [source, sourceActorId].join(":"));
+	const nationalConsortia = new Set<string>();
+	const workingGroups = new Set<string>();
+	for (const contributor of item.contributors) {
+		const actorId = contributor.actor.id;
+		const ncSlugs = orgUnits.sshocActorIdToNc.get(actorId);
+		if (ncSlugs != null) {
+			for (const slug of ncSlugs) {
+				nationalConsortia.add(slug);
+			}
+		}
+		const wgSlugs = orgUnits.sshocActorIdToWg.get(actorId);
+		if (wgSlugs != null) {
+			for (const slug of wgSlugs) {
+				workingGroups.add(slug);
+			}
+		}
+	}
+	const national_consortia = [...nationalConsortia];
+	const working_groups = [...workingGroups];
 
 	const sourceUpdatedAt = new Date(item.lastInfoUpdate).getTime();
 
@@ -58,7 +84,8 @@ export function createSshocItem(item: SearchItem, marketplaceBaseUrl: string): R
 					description,
 					keywords,
 					links,
-					source_actor_ids: actorIds,
+					national_consortia,
+					working_groups,
 					upstream_sources: null,
 					kind: null,
 					authors: null,
@@ -78,7 +105,8 @@ export function createSshocItem(item: SearchItem, marketplaceBaseUrl: string): R
 				description,
 				keywords,
 				links,
-				source_actor_ids: actorIds,
+				national_consortia,
+				working_groups,
 				upstream_sources: null,
 				kind: isCoreService(item) ? "core" : "community",
 				authors: null,
@@ -99,7 +127,8 @@ export function createSshocItem(item: SearchItem, marketplaceBaseUrl: string): R
 				description,
 				keywords,
 				links,
-				source_actor_ids: actorIds,
+				national_consortia,
+				working_groups,
 				upstream_sources: [],
 				kind: null,
 				authors: null,
@@ -120,7 +149,8 @@ export function createSshocItem(item: SearchItem, marketplaceBaseUrl: string): R
 				description,
 				keywords,
 				links,
-				source_actor_ids: actorIds,
+				national_consortia,
+				working_groups,
 				upstream_sources: null,
 				kind: null,
 				authors: null,

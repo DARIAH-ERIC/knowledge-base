@@ -39,7 +39,8 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 						type,
 						source: f.helpers.arrayElement(["open-aire", "zotero"]),
 						source_id: f.string.alphanumeric(12),
-						source_actor_ids: null,
+						national_consortia: [],
+						working_groups: [],
 						upstream_sources: null,
 						kind: f.helpers.arrayElement(["article", "book", "conference", "thesis", null]),
 						authors: f.helpers.multiple(() => f.person.fullName(), { count: { min: 1, max: 5 } }),
@@ -56,8 +57,11 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 						source_id: f.string.alphanumeric(12),
 						upstream_sources: null,
 						kind: f.helpers.arrayElement(resourceServiceKinds),
-						source_actor_ids: f.helpers.multiple(() => f.string.alphanumeric(12), {
-							count: { min: 1, max: 3 },
+						national_consortia: f.helpers.multiple(() => f.lorem.slug(2), {
+							count: { min: 0, max: 2 },
+						}),
+						working_groups: f.helpers.multiple(() => f.lorem.slug(2), {
+							count: { min: 0, max: 2 },
 						}),
 						authors: null,
 						year: null,
@@ -73,8 +77,11 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 						source_id: f.string.alphanumeric(12),
 						upstream_sources: null,
 						kind: null,
-						source_actor_ids: f.helpers.multiple(() => f.string.alphanumeric(12), {
-							count: { min: 1, max: 3 },
+						national_consortia: f.helpers.multiple(() => f.lorem.slug(2), {
+							count: { min: 0, max: 2 },
+						}),
+						working_groups: f.helpers.multiple(() => f.lorem.slug(2), {
+							count: { min: 0, max: 2 },
 						}),
 						authors: null,
 						year: null,
@@ -88,8 +95,11 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 						type,
 						source: "ssh-open-marketplace",
 						source_id: f.string.alphanumeric(12),
-						source_actor_ids: f.helpers.multiple(() => f.string.alphanumeric(12), {
-							count: { min: 1, max: 3 },
+						national_consortia: f.helpers.multiple(() => f.lorem.slug(2), {
+							count: { min: 0, max: 2 },
+						}),
+						working_groups: f.helpers.multiple(() => f.lorem.slug(2), {
+							count: { min: 0, max: 2 },
 						}),
 						upstream_sources: [],
 						kind: null,
@@ -105,8 +115,11 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 						type,
 						source: "ssh-open-marketplace",
 						source_id: f.string.alphanumeric(12),
-						source_actor_ids: f.helpers.multiple(() => f.string.alphanumeric(12), {
-							count: { min: 1, max: 3 },
+						national_consortia: f.helpers.multiple(() => f.lorem.slug(2), {
+							count: { min: 0, max: 2 },
+						}),
+						working_groups: f.helpers.multiple(() => f.lorem.slug(2), {
+							count: { min: 0, max: 2 },
 						}),
 						upstream_sources: null,
 						kind: null,
