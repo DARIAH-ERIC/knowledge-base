@@ -26,7 +26,7 @@ export function EntityFormActions(props: Readonly<EntityFormActionsProps>): Reac
 		<>
 			<Separator className="my-6" />
 
-			<FormActions className="flex-wrap items-end justify-between gap-y-4">
+			<FormActions className="flex-col items-start justify-start gap-y-4">
 				<div className="space-y-1">
 					<p className="text-sm font-semibold text-fg">
 						{t("{entityName} actions", { entityName })}
@@ -38,7 +38,7 @@ export function EntityFormActions(props: Readonly<EntityFormActionsProps>): Reac
 					</p>
 					<FormStatus state={state} />
 				</div>
-				<div className="flex items-center gap-x-4">
+				<div className="flex flex-wrap items-center gap-4">
 					<DraftFormSubmitButtons
 						draftLabel={t("Save {entityName} as draft", {
 							entityName: normalizedEntityName,
