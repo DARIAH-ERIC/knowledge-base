@@ -14,7 +14,8 @@ export const resourcesCollection = defineCollection({
 		{ name: "source", type: "string", index: true, facet: true },
 		{ name: "source_id", type: "string", index: false },
 		{ name: "source_updated_at", type: "int64", index: true, optional: true, sort: true },
-		{ name: "source_actor_ids", type: "string[]", index: true, facet: true, optional: true },
+		{ name: "national_consortia", type: "string[]", index: true, facet: true, optional: true },
+		{ name: "working_groups", type: "string[]", index: true, facet: true, optional: true },
 		{ name: "upstream_sources", type: "string[]", index: true, facet: true, optional: true },
 		{ name: "imported_at", type: "int64", index: false },
 		{ name: "type", type: "string", index: true, facet: true },
@@ -61,7 +62,8 @@ export interface PublicationResourceDocument extends ResourceDocumentBase {
 	type: "publication";
 	kind: string | null;
 	source: "episciences" | "hal" | "open-aire" | "zenodo" | "zotero";
-	source_actor_ids: null;
+	national_consortia: Array<string>;
+	working_groups: Array<string>;
 	upstream_sources: Array<string> | null;
 	authors: Array<string>;
 	year: number | null;
@@ -72,7 +74,8 @@ export interface ServiceResourceDocument extends ResourceDocumentBase {
 	type: "service";
 	kind: ResourceServiceKind;
 	source: "ssh-open-marketplace";
-	source_actor_ids: Array<string>;
+	national_consortia: Array<string>;
+	working_groups: Array<string>;
 	upstream_sources: null;
 	authors: null;
 	year: null;
@@ -83,7 +86,8 @@ export interface SoftwareResourceDocument extends ResourceDocumentBase {
 	type: "software";
 	kind: null;
 	source: "ssh-open-marketplace";
-	source_actor_ids: Array<string>;
+	national_consortia: Array<string>;
+	working_groups: Array<string>;
 	upstream_sources: null;
 	authors: null;
 	year: null;
@@ -94,7 +98,8 @@ export interface TrainingMaterialResourceDocument extends ResourceDocumentBase {
 	type: "training-material";
 	kind: null;
 	source: "dariah-campus" | "ssh-open-marketplace";
-	source_actor_ids: Array<string>;
+	national_consortia: Array<string>;
+	working_groups: Array<string>;
 	upstream_sources: Array<string>;
 	authors: Array<string> | null;
 	year: number | null;
@@ -105,7 +110,8 @@ export interface WorkflowResourceDocument extends ResourceDocumentBase {
 	type: "workflow";
 	kind: null;
 	source: "ssh-open-marketplace";
-	source_actor_ids: Array<string>;
+	national_consortia: Array<string>;
+	working_groups: Array<string>;
 	upstream_sources: null;
 	authors: null;
 	year: null;

@@ -1,7 +1,27 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
-import { type RequestResult, request } from "@dariah-eric/request";
-import type { RequestError } from "@dariah-eric/request/errors";
+import { type RequestOptions, type RequestResult, request } from "@dariah-eric/request";
+import { type RequestError, HttpError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
+
+/**
+ * Retry transient failures (network errors, timeouts, 5xx and 429). Zotero is occasionally slow to
+ * respond, and ingest sequentially paginates through many requests — a single hiccup should not
+ * fail the whole run.
+ */
+const retry: RequestOptions["retry"] = {
+	backoff: "exponential",
+	delayMs: 1000,
+	times: 3,
+	shouldRetry(error) {
+		if (error._tag === "NetworkError" || error._tag === "TimeoutError") {
+			return true;
+		}
+		if (HttpError.is(error)) {
+			return error.response.status >= 500 || error.response.status === 429;
+		}
+		return false;
+	},
+};
 
 /**
  * CSL item types returned by Zotero's `format=csljson` responses.
@@ -184,55 +204,91 @@ export interface CreateZoteroClientParams {
 const pageSize = 100;
 
 /**
- * Zotero item types used by the API `itemType` filter.
+ * All known Zotero item types, kept here for documentation and to derive {@link ZoteroItemType}. The
+ * actual API filter is built from {@link excludedZoteroItemTypes} so newly-introduced types are
+ * ingested by default.
  *
  * @see {@link https://www.zotero.org/support/dev/web_api/v3/types_and_fields}
  * @see {@link https://api.zotero.org/itemTypes}
  */
 export const zoteroItemTypes = [
-	// "artwork",
-	// "audioRecording",
-	// "bill",
+	"annotation",
+	"artwork",
+	"attachment",
+	"audioRecording",
+	"bill",
 	"blogPost",
 	"book",
 	"bookSection",
-	// "case",
+	"case",
+	"computerProgram",
 	"conferencePaper",
-	// "dataset",
-	// "dictionaryEntry",
-	// "document",
-	// "email",
-	// "encyclopediaArticle",
-	// "film",
-	// "forumPost",
-	// "hearing",
-	// "instantMessage",
-	// "interview",
+	"dataset",
+	"dictionaryEntry",
+	"document",
+	"email",
+	"encyclopediaArticle",
+	"film",
+	"forumPost",
+	"hearing",
+	"instantMessage",
+	"interview",
 	"journalArticle",
-	// "letter",
-	// "magazineArticle",
-	// "manuscript",
-	// "map",
-	// "newspaperArticle",
-	// "note",
-	// "patent",
-	// "podcast",
-	// "preprint",
-	// "presentation",
-	// "radioBroadcast",
-	// "report",
-	// "computerProgram",
-	// "standard",
-	// "statute",
-	// "tvBroadcast",
-	// "thesis",
-	// "videoRecording",
-	// "webpage",
+	"letter",
+	"magazineArticle",
+	"manuscript",
+	"map",
+	"newspaperArticle",
+	"note",
+	"patent",
+	"podcast",
+	"preprint",
+	"presentation",
+	"radioBroadcast",
+	"report",
+	"standard",
+	"statute",
+	"thesis",
+	"tvBroadcast",
+	"videoRecording",
+	"webpage",
 ] as const;
 
-export type ZoteroItemType = (typeof zoteroItemTypes)[number];
+/**
+ * Zotero item types excluded from ingest.
+ *
+ * Note: the Zotero API accepts a single negation (e.g. `itemType=-note`) but rejects multiple
+ * negations combined with any operator (`-note || -attachment`, `-note && -attachment`, comma-
+ * separated, etc. — empirically all return 400 Bad Request as of 2026-05). When this list has more
+ * than one entry, {@link buildZoteroItemTypeFilter} falls back to enumerating the included types
+ * positively.
+ */
+export const excludedZoteroItemTypes = ["note"] as const satisfies ReadonlyArray<
+	(typeof zoteroItemTypes)[number]
+>;
 
-const zoteroItemType = zoteroItemTypes.join(" || ");
+export type ZoteroItemType = Exclude<
+	(typeof zoteroItemTypes)[number],
+	(typeof excludedZoteroItemTypes)[number]
+>;
+
+/**
+ * Build the `itemType` filter expression from {@link excludedZoteroItemTypes}. The Zotero API
+ * accepts a single negation (`-note`) but rejects multiple negations combined with any operator
+ * (`-note || -attachment`, `-note && -attachment`, etc. all return 400). For more than one
+ * exclusion we therefore enumerate the included types instead.
+ *
+ * @see {@link https://www.zotero.org/support/dev/web_api/v3/basics#searching}
+ */
+function buildZoteroItemTypeFilter(): string {
+	if (excludedZoteroItemTypes.length === 1) {
+		return `-${excludedZoteroItemTypes[0]}`;
+	}
+	const excluded = new Set<string>(excludedZoteroItemTypes);
+	return zoteroItemTypes.filter((type) => !excluded.has(type)).join(" || ");
+}
+
+const zoteroItemType = buildZoteroItemTypeFilter();
 
 function createListAll<TItem, TResponse, TBaseParams extends object>(
 	getPage: (
@@ -287,7 +343,7 @@ export function createZoteroClient(params: CreateZoteroClientParams) {
 					start,
 				}),
 			}),
-			{ headers, responseType: "json" },
+			{ headers, responseType: "json", retry, timeout: 30_000 },
 		);
 	}
 
@@ -308,7 +364,7 @@ export function createZoteroClient(params: CreateZoteroClientParams) {
 					start,
 				}),
 			}),
-			{ headers, responseType: "json" },
+			{ headers, responseType: "json", retry, timeout: 30_000 },
 		);
 	}
 
@@ -324,7 +380,7 @@ export function createZoteroClient(params: CreateZoteroClientParams) {
 				pathname: `/groups/${groupId}/collections`,
 				searchParams: createUrlSearchParams({ limit, start }),
 			}),
-			{ headers, responseType: "json" },
+			{ headers, responseType: "json", retry, timeout: 30_000 },
 		);
 	}
 
@@ -344,7 +400,7 @@ export function createZoteroClient(params: CreateZoteroClientParams) {
 					start,
 				}),
 			}),
-			{ headers, responseType: "json" },
+			{ headers, responseType: "json", retry, timeout: 30_000 },
 		);
 	}
 
@@ -365,7 +421,7 @@ export function createZoteroClient(params: CreateZoteroClientParams) {
 					start,
 				}),
 			}),
-			{ headers, responseType: "json" },
+			{ headers, responseType: "json", retry, timeout: 30_000 },
 		);
 	}
 

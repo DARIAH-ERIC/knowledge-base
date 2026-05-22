@@ -1594,6 +1594,9 @@ importers:
       '@dariah-eric/configs':
         specifier: workspace:^
         version: link:../configs
+      '@dariah-eric/database':
+        specifier: workspace:^
+        version: link:../database
       '@dariah-eric/search':
         specifier: workspace:^
         version: link:../search

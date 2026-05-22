@@ -1,4 +1,4 @@
-import { isNonEmptyString } from "@acdh-oeaw/lib";
+import { isNonEmptyString, log } from "@acdh-oeaw/lib";
 import type { ZoteroJsonItem } from "@dariah-eric/client-zotero";
 import type { ResourceDocument } from "@dariah-eric/search";
 
@@ -20,11 +20,27 @@ export interface ZoteroJsonItemData {
 	[key: string]: unknown;
 }
 
+export interface ZoteroOrgUnitLookups {
+	/** Lowercased country slug → set of currently-active national-consortium slugs for that country. */
+	countrySlugToNc: Map<string, Set<string>>;
+	/** Slugs of currently published working groups. */
+	wgSlugs: Set<string>;
+}
+
+export interface ZoteroCollectionLookup {
+	/** Zotero collection key → collection name. */
+	namesByKey: Map<string, string>;
+}
+
 export function isZoteroItemInCollection(item: ZoteroJsonItem<ZoteroJsonItemData>): boolean {
 	return item.data.collections != null && item.data.collections.length > 0;
 }
 
-export function createZoteroItem(item: ZoteroJsonItem<ZoteroJsonItemData>): ResourceDocument {
+export function createZoteroItem(
+	item: ZoteroJsonItem<ZoteroJsonItemData>,
+	collections: ZoteroCollectionLookup,
+	orgUnits: ZoteroOrgUnitLookups,
+): ResourceDocument {
 	const data = item.data;
 	const authors = [];
 
@@ -45,6 +61,28 @@ export function createZoteroItem(item: ZoteroJsonItem<ZoteroJsonItemData>): Reso
 	const id = [source, sourceId].join(":");
 	const sourceUpdatedAt = data.dateModified != null ? new Date(data.dateModified).getTime() : null;
 
+	const nationalConsortia = new Set<string>();
+	const workingGroups = new Set<string>();
+	for (const collectionKey of data.collections ?? []) {
+		const name = collections.namesByKey.get(collectionKey);
+		if (name == null) {
+			log.warn(`Zotero item ${item.key} references unknown collection key ${collectionKey}.`);
+			continue;
+		}
+		const ncSlugs = orgUnits.countrySlugToNc.get(name.toLowerCase());
+		if (ncSlugs != null) {
+			for (const slug of ncSlugs) nationalConsortia.add(slug);
+			continue;
+		}
+		if (orgUnits.wgSlugs.has(name)) {
+			workingGroups.add(name);
+			continue;
+		}
+		log.warn(
+			`Zotero collection "${name}" (key ${collectionKey}) does not match any country or working group.`,
+		);
+	}
+
 	return {
 		id,
 		source,
@@ -57,7 +95,8 @@ export function createZoteroItem(item: ZoteroJsonItem<ZoteroJsonItemData>): Reso
 		links: data.url != null ? [data.url] : [],
 		keywords: data.tags?.map((tag) => tag.tag).filter((keyword) => isNonEmptyString(keyword)) ?? [],
 		kind: data.itemType ?? null,
-		source_actor_ids: null,
+		national_consortia: [...nationalConsortia],
+		working_groups: [...workingGroups],
 		upstream_sources: null,
 		authors,
 		year,
