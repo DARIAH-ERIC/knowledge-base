@@ -186,6 +186,15 @@ const storage = createStorageService({
 
 type AssetsCache = Map<string, string>;
 
+interface ListPageImageReference {
+	pageSlug: string;
+	pageHref: string;
+	imageUrl: string;
+	mediaId: number | null;
+	title: string;
+	alt: string | null;
+}
+
 async function readCached(assetsCache: AssetsCache, url: URL) {
 	const cacheKey = String(url);
 
@@ -257,6 +266,104 @@ async function uploadFeaturedImage(
 	assert(asset, `Missing asset (entity id ${String(id)}).`);
 
 	return asset.id;
+}
+
+async function uploadListPageImage(
+	prefix: AssetPrefix,
+	assetsCache: AssetsCache,
+	media: WordPressData["media"],
+	image: ListPageImageReference,
+) {
+	const wpMedia = image.mediaId != null ? media[image.mediaId] : undefined;
+	const url = new URL(wpMedia?.source_url ?? image.imageUrl, apiBaseUrl);
+	const label =
+		wpMedia != null ? toPlaintext(wpMedia.title.rendered).trim() : image.title || image.pageSlug;
+	const caption = wpMedia != null ? toPlaintext(wpMedia.caption.rendered).trim() : image.title;
+	const alt = wpMedia?.alt_text ?? image.alt ?? undefined;
+	const asset = await upload(prefix, assetsCache, url, label, caption, alt);
+
+	assert(asset, `Missing list page image asset (${image.pageSlug}).`);
+
+	return asset.id;
+}
+
+function decodeHtmlAttribute(value: string): string {
+	return value
+		.replaceAll("&amp;", "&")
+		.replaceAll("&quot;", '"')
+		.replaceAll("&#039;", "'")
+		.replaceAll("&#8217;", "'");
+}
+
+function getHtmlAttribute(html: string, attribute: string): string | null {
+	const match = new RegExp(`\\s${attribute}="([^"]*)"`, "i").exec(html);
+	return match != null ? decodeHtmlAttribute(match[1]!) : null;
+}
+
+function getSlugFromWordPressHref(href: string): string | null {
+	try {
+		const url = new URL(href, apiBaseUrl);
+		const parts = url.pathname.split("/").filter((part) => part.length > 0);
+		return parts.at(-1) ?? null;
+	} catch {
+		return null;
+	}
+}
+
+function extractListPageImageReferences(
+	html: string,
+	expectedPathPrefix: string,
+): Map<string, ListPageImageReference> {
+	const images = new Map<string, ListPageImageReference>();
+	const figureRe = /<figure\b[\s\S]*?<\/figure>/gi;
+	let figureMatch: RegExpExecArray | null;
+
+	while ((figureMatch = figureRe.exec(html)) !== null) {
+		const figureHtml = figureMatch[0];
+		const hrefMatches = Array.from(figureHtml.matchAll(/<a\b[^>]*\shref="([^"]*)"[^>]*>/gi));
+		const href = hrefMatches
+			.map((match) => decodeHtmlAttribute(match[1]!))
+			.find((candidate) => {
+				try {
+					const url = new URL(candidate, apiBaseUrl);
+					return url.pathname.startsWith(expectedPathPrefix);
+				} catch {
+					return false;
+				}
+			});
+
+		if (href == null) {
+			continue;
+		}
+
+		const imageMatch = /<img\b[^>]*>/i.exec(figureHtml);
+		const imageHtml = imageMatch?.[0];
+		if (imageHtml == null) {
+			continue;
+		}
+
+		const imageUrl = getHtmlAttribute(imageHtml, "src") ?? getHtmlAttribute(imageHtml, "data-src");
+		const pageSlug = getSlugFromWordPressHref(href);
+		if (imageUrl == null || pageSlug == null || images.has(pageSlug)) {
+			continue;
+		}
+
+		const mediaIdMatch = /\bwp-image-(\d+)\b/i.exec(imageHtml);
+		const captionMatch = /<figcaption\b[^>]*>([\s\S]*?)<\/figcaption>/i.exec(figureHtml);
+		const title = captionMatch != null ? toPlaintext(captionMatch[1]!).trim() : pageSlug;
+		const alt = getHtmlAttribute(imageHtml, "alt");
+
+		images.set(pageSlug, {
+			pageSlug,
+			pageHref: href,
+			imageUrl: String(new URL(imageUrl, apiBaseUrl)),
+			mediaId: mediaIdMatch != null ? Number(mediaIdMatch[1]) : null,
+			title,
+			alt,
+		});
+	}
+
+	return images;
 }
 
 /** Returns the index just after the `</div>` that closes the div opened at `afterOpenTag`. */
@@ -706,6 +813,27 @@ async function main() {
 	assert(placeholderImage, "Missing placeholder image.");
 	const placeholderImageId = placeholderImage.id;
 
+	const impactCaseStudiesListPage = Object.values(data.pages).find(
+		(page) => page.slug === "impact-case-studies",
+	);
+	const spotlightListPage = Object.values(data.pages).find((page) => page.slug === "spotlight");
+	const impactCaseStudyListPageImages =
+		impactCaseStudiesListPage != null
+			? extractListPageImageReferences(
+					impactCaseStudiesListPage.content.rendered,
+					"/activities/impact-case-studies/",
+				)
+			: new Map<string, ListPageImageReference>();
+	const spotlightListPageImages =
+		spotlightListPage != null
+			? extractListPageImageReferences(spotlightListPage.content.rendered, "/activities/spotlight/")
+			: new Map<string, ListPageImageReference>();
+	log.info(
+		`Found ${String(impactCaseStudyListPageImages.size)} impact case study list images and ${String(
+			spotlightListPageImages.size,
+		)} spotlight list images.`,
+	);
+
 	const institutionOrgUnitIdsByName = new Map<string, string>();
 	const existingInstitutionOrgUnits = await db.query.organisationalUnits.findMany({
 		where: { type: { type: "institution" } },
@@ -936,7 +1064,23 @@ async function main() {
 
 			const id = version.id;
 
-			const imageId = await uploadFeaturedImage(
+			let imageId: string | null = null;
+			const listPageImage =
+				pageEntityType === "impact_case_studies"
+					? impactCaseStudyListPageImages.get(page.slug)
+					: pageEntityType === "spotlight_articles"
+						? spotlightListPageImages.get(page.slug)
+						: undefined;
+
+			if (listPageImage != null) {
+				try {
+					imageId = await uploadListPageImage("images", assetsCache, data.media, listPageImage);
+				} catch {
+					log.warn(`Failed to migrate list page image (page id ${String(page.id)}).`);
+				}
+			}
+
+			imageId ??= await uploadFeaturedImage(
 				"images",
 				assetsCache,
 				data.media,
