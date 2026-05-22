@@ -32,7 +32,9 @@ test.describe("website news admin", () => {
 		await newsPage.fillTitle(`${newsPage.workerPrefix} Missing Image ${randomUUID()}`);
 		await newsPage.fillSummary("E2E test news item without image");
 
-		const saveButton = newsPage.page.getByRole("button", { name: /^(?:Save|Save \(as draft\))$/ });
+		const saveButton = newsPage.page.getByRole("button", {
+			name: /^Save(?! and publish\b).*$/,
+		});
 		await expect(saveButton).toBeEnabled();
 		await saveButton.click();
 

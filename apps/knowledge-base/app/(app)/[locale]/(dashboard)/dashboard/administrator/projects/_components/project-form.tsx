@@ -32,9 +32,8 @@ import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState, useTransition } from "react";
 
-import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
+import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
 import {
-	FormActions,
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
@@ -701,10 +700,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 					</Fragment>
 				) : null}
 
-				<FormActions>
-					<FormStatus state={state} />
-					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={true} />
-				</FormActions>
+				<EntityFormActions entityName={t("Project")} isPending={isPending} state={state} />
 			</Form>
 		</FormLayout>
 	);

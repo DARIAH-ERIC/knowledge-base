@@ -5,16 +5,14 @@ import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
-import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { parseDate } from "@internationalized/date";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useActionState, useEffect, useMemo, useState } from "react";
 
-import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
+import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
 import {
-	FormActions,
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
@@ -237,10 +235,12 @@ export function ContributionForm(props: Readonly<ContributionFormProps>): ReactN
 					</DatePicker>
 				</FormSection>
 
-				<FormActions>
-					<FormStatus state={state} />
-					<DraftFormSubmitButtons isPending={isPending} showSaveAndPublish={showSaveAndPublish} />
-				</FormActions>
+				<EntityFormActions
+					entityName={t("Contribution")}
+					isPending={isPending}
+					showSaveAndPublish={showSaveAndPublish}
+					state={state}
+				/>
 			</Form>
 		</FormLayout>
 	);
