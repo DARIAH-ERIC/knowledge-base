@@ -122,6 +122,17 @@ export class DatabaseService {
 		return row ?? null;
 	}
 
+	async getPageItemByTitle(title: string): Promise<{ id: string; imageId: string | null } | null> {
+		const [row] = await this.db
+			.select({ id: schema.entityVersions.entityId, imageId: schema.pages.imageId })
+			.from(schema.pages)
+			.innerJoin(schema.entityVersions, eq(schema.pages.id, schema.entityVersions.id))
+			.where(eq(schema.pages.title, title))
+			.limit(1);
+
+		return row ?? null;
+	}
+
 	/** Returns any project scope from the database (needed as a required field). */
 	async getProjectScope(): Promise<{ id: string; scope: string }> {
 		const [scope] = await this.db

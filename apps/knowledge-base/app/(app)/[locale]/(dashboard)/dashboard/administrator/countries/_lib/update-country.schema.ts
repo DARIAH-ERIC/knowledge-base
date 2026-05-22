@@ -9,7 +9,7 @@ export const UpdateCountryActionInputSchema = v.object({
 	...v.pick(OrganisationalUnitUpdateSchema, ["name", "summary"]).entries,
 	acronym: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	documentId: v.pipe(v.string(), v.uuid()),
-	imageKey: v.optional(v.pipe(v.string(), v.nonEmpty())),
+	imageKey: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	description: v.pipe(v.string(), v.nonEmpty()),
 	relatedEntityIds: v.optional(v.array(v.pipe(v.string(), v.uuid())), []),
 	relatedResourceIds: v.optional(v.array(v.pipe(v.string(), v.nonEmpty())), []),

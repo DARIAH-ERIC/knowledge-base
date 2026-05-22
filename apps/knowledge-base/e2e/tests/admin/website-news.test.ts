@@ -22,6 +22,23 @@ test.describe("website news admin", () => {
 		await db.cleanupWorkerAssets(testInfo.workerIndex);
 	});
 
+	test("should show an inline validation error when a required image is missing", async ({
+		createWebsiteNewsPage,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const newsPage = createWebsiteNewsPage(workerIndex);
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(`${newsPage.workerPrefix} Missing Image ${randomUUID()}`);
+		await newsPage.fillSummary("E2E test news item without image");
+
+		const saveButton = newsPage.page.getByRole("button", { name: /^(?:Save|Save \(as draft\))$/ });
+		await expect(saveButton).toBeEnabled();
+		await saveButton.click();
+
+		await expect(newsPage.page.getByText("Please select an image.")).toBeVisible();
+	});
+
 	test("should create a news item", async ({ createWebsiteNewsPage }) => {
 		const workerIndex = test.info().workerIndex;
 		const newsPage = createWebsiteNewsPage(workerIndex);
