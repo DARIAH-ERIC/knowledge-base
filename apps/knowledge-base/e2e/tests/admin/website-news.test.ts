@@ -33,7 +33,7 @@ test.describe("website news admin", () => {
 		await newsPage.fillSummary("E2E test news item without image");
 
 		const saveButton = newsPage.page.getByRole("button", {
-			name: /^Save (?!and publish\b).+$/,
+			name: /^Save(?! and publish\b).*$/,
 		});
 		await expect(saveButton).toBeEnabled();
 		await saveButton.click();
