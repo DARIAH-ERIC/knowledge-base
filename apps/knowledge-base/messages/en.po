@@ -769,7 +769,7 @@ msgstr "Forgot password?"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:96
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/services-page.tsx:134
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:119
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:83
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:86
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:60
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:55
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:113
@@ -783,7 +783,7 @@ msgstr "Forgot password?"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/services-page.tsx:114
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form.tsx:108
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:116
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:81
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:84
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:121
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:64
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:64
@@ -947,14 +947,14 @@ msgstr "Hero"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:103
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:101
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:101
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:103
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:78
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:87
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:120
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:75
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:81
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:117
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:382
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:101
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:118
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:73
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:137
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:144
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:73
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:95
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-details.tsx:73
@@ -983,7 +983,7 @@ msgstr "Rich text"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:129
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:131
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:78
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:187
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:194
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:73
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:99
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-details.tsx:78
@@ -1016,7 +1016,7 @@ msgstr "Are you sure you want to remove this content block? This action cannot b
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section.tsx:358
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal.tsx:27
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar.tsx:90
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:433
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:455
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section.tsx:335
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/social-media-relations-fields.tsx:190
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section.tsx:331
@@ -1025,7 +1025,7 @@ msgstr "Are you sure you want to remove this content block? This action cannot b
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:670
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-chairs-section.tsx:272
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:136
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:158
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:181
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:158
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-create-dialog.tsx:55
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx:214
@@ -1069,11 +1069,11 @@ msgstr "Down"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:106
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:104
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:104
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:106
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:90
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:123
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:84
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:385
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:104
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:140
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:121
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:147
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:98
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:94
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-form.tsx:94
@@ -1084,10 +1084,10 @@ msgstr "Selected image"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:739
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:980
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1044
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:410
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:432
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:115
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:136
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:137
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:159
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:160
 msgid "sq1btl"
 msgstr "Caption"
 
@@ -1171,7 +1171,7 @@ msgid "JyIOg4"
 msgstr "Number of entries"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:874
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:307
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:323
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page.tsx:157
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:103
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-pages-page.tsx:99
@@ -1239,7 +1239,7 @@ msgstr "URL"
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:64
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:87
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:62
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:79
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:83
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:115
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:52
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:121
@@ -1270,10 +1270,10 @@ msgid "NhOsKC"
 msgstr "CTAs"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:1127
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:400
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:422
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:103
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:124
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:125
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:147
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:148
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-policy-group-create-dialog.tsx:48
 #: app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog.tsx:103
 msgid "753yX5"
@@ -1345,7 +1345,7 @@ msgstr "Organisation"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:128
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:173
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-chairs-section.tsx:143
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:124
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:125
 msgid "dM+p3/"
 msgstr "From"
 
@@ -1356,7 +1356,7 @@ msgstr "From"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:129
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:176
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-chairs-section.tsx:144
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:125
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:126
 msgid "yPg8s6"
 msgstr "Until"
 
@@ -1367,7 +1367,7 @@ msgstr "Until"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page.tsx:156
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:195
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-chairs-section.tsx:166
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:144
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:146
 msgid "0JY2XP"
 msgstr "present"
 
@@ -1416,7 +1416,7 @@ msgstr "Select a role first"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:337
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx:98
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-chairs-section.tsx:215
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:103
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:107
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:75
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx:96
 msgid "n5QvJy"
@@ -1434,7 +1434,7 @@ msgstr "Start date"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx:110
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-chairs-section.tsx:221
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-chairs-section.tsx:267
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:120
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:124
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:92
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx:113
 msgid "Humfno"
@@ -1678,7 +1678,7 @@ msgstr "Documentation pages"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:160
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-social-media-amounts-form.tsx:46
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:129
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:136
 #: app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form.tsx:117
 msgid "JkLHGw"
 msgstr "Website"
@@ -1765,14 +1765,14 @@ msgstr "Open quick search"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:163
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:159
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/services-page.tsx:177
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:163
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:165
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:163
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:198
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx:120
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx:158
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:170
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:128
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:177
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:179
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:135
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:144
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:173
@@ -1804,14 +1804,14 @@ msgstr "Save and publish"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:149
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-pages-page.tsx:126
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/services-page.tsx:167
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:153
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:155
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:153
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:188
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx:109
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-page.tsx:148
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:156
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:118
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:167
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:169
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-reports-list-page.tsx:65
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-reports-list-page.tsx:65
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page.tsx:112
@@ -1905,81 +1905,87 @@ msgstr "Loading"
 msgid "gjBiyj"
 msgstr "Loading..."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:257
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:229
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:102
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx:34
+msgid "Fl1BuZ"
+msgstr "The selected image is too large. Choose an image smaller than {size}."
+
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:273
 msgid "6nAe2O"
 msgstr "Select image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:263
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:279
 msgid "ciJ33H"
 msgstr "Select an existing image or upload a new one."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:264
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:322
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:280
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:338
 msgid "BFLVwB"
 msgstr "Media library"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:279
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:437
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:295
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:459
 msgid "kQAf2d"
 msgstr "Select"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:280
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:447
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:167
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:296
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:474
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:190
 msgid "p4N05H"
 msgstr "Upload"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:303
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:319
 msgid "0BUTMv"
 msgstr "Search..."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:315
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:331
 msgid "rEooS9"
 msgstr "No assets found for your search."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:316
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:332
 msgid "n0m/x/"
 msgstr "No assets found. Upload one to get started."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:366
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:382
 msgid "JJNc3c"
 msgstr "Previous"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:369
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:385
 msgid "9+Ddtu"
 msgstr "Next"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:382
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:398
 msgid "ylLD+l"
 msgstr "Choose file..."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:388
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:102
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:404
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:120
 msgid "TJo5E6"
 msgstr "Preview"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:405
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:427
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:109
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:130
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:131
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:153
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:154
 msgid "VGwyxc"
 msgstr "Alt text"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:415
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:437
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:121
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:143
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:166
 msgid "HBxXD/"
 msgstr "License"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:418
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:440
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:125
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:147
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:170
 msgid "KWv6Ra"
 msgstr "No license"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:444
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:163
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:164
+#: app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog.tsx:471
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:186
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:187
 msgid "JEsxDw"
 msgstr "Uploading..."
 
@@ -2097,7 +2103,7 @@ msgstr "Relations"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-pages-page.tsx:96
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:107
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/services-page.tsx:140
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:124
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:125
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/newsletters/_components/newsletters-page.tsx:73
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:121
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:128
@@ -2111,7 +2117,7 @@ msgstr "Relations"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-create-form.tsx:104
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-edit-form.tsx:71
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:90
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:127
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/confirm/page.tsx:65
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/[year]/[slug]/edit/confirm/page.tsx:65
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:122
@@ -2279,16 +2285,16 @@ msgstr "Create a new person-to-organisation relation."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:79
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-page-form.tsx:43
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form.tsx:94
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:81
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:84
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:52
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:288
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaign-form.tsx:44
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_components/social-media-form.tsx:51
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-create-form.tsx:55
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-report-edit-form.tsx:53
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:79
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:82
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:60
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:77
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:81
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:50
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:75
 #: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:51
@@ -2342,7 +2348,7 @@ msgstr "New"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:137
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-pages-page.tsx:114
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/services-page.tsx:157
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:141
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:143
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/persons-page.tsx:139
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:172
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page.tsx:99
@@ -2350,7 +2356,7 @@ msgstr "New"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/sshoc-services/_components/services-page.tsx:141
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/users-page.tsx:143
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page.tsx:102
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:155
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:157
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:149
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-calls-page.tsx:153
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:150
@@ -2411,11 +2417,11 @@ msgstr "Enter the country details."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:87
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:87
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:119
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:89
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:92
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:89
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:296
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page.tsx:119
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:87
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:90
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:123
 msgid "w4pX4t"
 msgstr "Acronym"
@@ -2423,15 +2429,15 @@ msgstr "Acronym"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:95
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:93
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:93
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:95
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:112
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:128
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:374
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:93
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:110
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-details.tsx:70
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form-dialog.tsx:93
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:72
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-details.tsx:70
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:85
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:89
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-details.tsx:70
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:57
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-studies-page.tsx:124
@@ -2453,11 +2459,11 @@ msgstr "Summary"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:103
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:101
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:101
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:103
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:87
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:120
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:81
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:382
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:101
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:137
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:118
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:144
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:95
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:91
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-form.tsx:91
@@ -2468,8 +2474,8 @@ msgstr "Select or upload an image."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:133
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:131
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:131
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:133
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:131
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:150
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:148
 msgid "Gq20/r"
 msgstr "Add a description."
 
@@ -2479,13 +2485,13 @@ msgstr "Add a description."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form.tsx:136
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:132
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:136
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:134
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:138
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:151
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:155
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-details.tsx:131
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:422
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:426
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:132
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:136
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:149
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:153
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-events-form.tsx:104
 #: app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_components/site-metadata-form.tsx:64
 msgid "Q8Qw5B"
@@ -2647,7 +2653,7 @@ msgstr "Enter the documentation page details."
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form.tsx:53
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-pages/_components/internal-page-form.tsx:53
 #: app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form.tsx:140
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:187
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:194
 #: app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_components/funding-call-form.tsx:99
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:145
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:141
@@ -2886,7 +2892,14 @@ msgstr "Administrator dashboard - Internal Services"
 msgid "wod28x"
 msgstr "Manage all national consortia in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:183
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:124
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:106
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:104
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:124
+msgid "A44/L1"
+msgstr "SSHOC actor ID"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page.tsx:185
 msgid "T2UuNj"
 msgstr "national consortium"
 
@@ -2894,15 +2907,15 @@ msgstr "national consortium"
 msgid "ULPwDV"
 msgstr "New national consortium"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-edit-form.tsx:72
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-edit-form.tsx:75
 msgid "tPseaB"
 msgstr "Edit national consortium"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:81
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:84
 msgid "jds8cg"
 msgstr "Enter the national consortium details."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:149
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form.tsx:166
 msgid "2rGQj1"
 msgstr "Link social media accounts to this national consortium."
 
@@ -2965,18 +2978,13 @@ msgstr "Sort name"
 msgid "Pl/c87"
 msgstr "ORCID"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-details.tsx:75
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:79
-msgid "U6qGuO"
-msgstr "Position"
-
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:51
 msgid "kYvEZZ"
 msgstr "Enter the personal and contact details related to the person."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:118
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:112
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:414
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:168
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:175
 #: app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form.tsx:126
 #: app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form.tsx:122
 #: app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-form.tsx:122
@@ -2984,11 +2992,11 @@ msgstr "Enter the personal and contact details related to the person."
 msgid "zoLKpc"
 msgstr "Please select an image."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:125
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:119
 msgid "DixDH+"
 msgstr "Add a short biography."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form.tsx:120
 msgid "5ez1Yf"
 msgstr "Biography"
 
@@ -3806,15 +3814,15 @@ msgstr "Set the date on which this chairship ended."
 msgid "tUJyne"
 msgstr "New working group"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-edit-form.tsx:79
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-edit-form.tsx:82
 msgid "4LGNI7"
 msgstr "Edit working group"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:79
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:82
 msgid "kxX3r8"
 msgstr "Enter the working group details."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:147
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form.tsx:164
 msgid "gRw81g"
 msgstr "Link social media accounts to this working group."
 
@@ -3822,7 +3830,7 @@ msgstr "Link social media accounts to this working group."
 msgid "T9x9is"
 msgstr "Manage all working groups in the DARIAH knowledge base."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:197
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-groups-page.tsx:199
 msgid "SG8W0/"
 msgstr "working group"
 
@@ -4370,38 +4378,38 @@ msgid "23lI3e"
 msgstr "Edit asset metadata"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:110
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:132
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:155
 msgid "DAQ44c"
 msgstr "Describe the image for accessibility"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog.tsx:116
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:138
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:161
 msgid "TvrY88"
 msgstr "Optional caption displayed below the image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:64
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:71
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx:27
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:68
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:75
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx:53
 msgid "vMUomP"
 msgstr "Upload image"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:70
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:74
 msgid "EQZvEB"
 msgstr "Upload a new image to the media library."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:79
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:83
 msgid "gyrIEl"
 msgstr "File"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:110
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:133
 msgid "ci7V7t"
 msgstr "Prefix"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:126
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog.tsx:149
 msgid "vHHtee"
 msgstr "Defaults to file name"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx:22
+#: app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-form.tsx:25
 msgid "FKUPrI"
 msgstr "Select an image to upload"
 
@@ -4548,15 +4556,19 @@ msgstr "Website dashboard - Documents and policies"
 msgid "C+Npdp"
 msgstr "New event"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-edit.tsx:57
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-edit.tsx:60
 msgid "j0OO6t"
 msgstr "Edit event"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:77
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:81
 msgid "uEcyd6"
 msgstr "Enter the event details."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:124
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:128
+msgid "c8fC8Z"
+msgstr "Full day"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form.tsx:131
 #: app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/events-page.tsx:118
 msgid "rvirM2"
 msgstr "Location"

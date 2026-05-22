@@ -17,6 +17,13 @@ const config: Config = {
 		authInterrupts: true,
 		globalNotFound: true,
 		rootParams: true,
+		serverActions: {
+			/**
+			 * Must be larger than `imageSizeLimit` in `config/assets.config.ts` to allow multipart
+			 * form-data overhead.
+			 */
+			bodySizeLimit: "8mb",
+		},
 		turbopackFileSystemCacheForDev: true,
 		viewTransition: true,
 	},

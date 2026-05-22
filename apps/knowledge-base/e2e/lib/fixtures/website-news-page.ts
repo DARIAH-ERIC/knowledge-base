@@ -46,6 +46,18 @@ export class WebsiteNewsPage {
 		await this.page.getByRole("dialog").getByRole("button", { name: "Select" }).click();
 	}
 
+	async uploadImageFromMediaLibrary(filePath: string, label: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Select image" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		await dialog.waitFor({ state: "visible" });
+		await dialog.getByRole("tab", { name: "Upload" }).click();
+		await dialog.locator('input[type="file"]').setInputFiles(filePath);
+		await dialog.getByLabel("Label").fill(label);
+		await dialog.getByLabel("Alt text").fill(`${label} alt text`);
+		await dialog.getByRole("button", { name: "Upload" }).click();
+		await dialog.waitFor({ state: "hidden" });
+	}
+
 	private relatedEntitiesSection(): Locator {
 		return this.page
 			.locator("section")
