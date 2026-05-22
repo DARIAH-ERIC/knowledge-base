@@ -17,6 +17,9 @@ const config: Config = {
 		authInterrupts: true,
 		globalNotFound: true,
 		rootParams: true,
+		serverActions: {
+			bodySizeLimit: "10mb",
+		},
 		turbopackFileSystemCacheForDev: true,
 		viewTransition: true,
 	},
