@@ -112,6 +112,16 @@ export function SiteMetadataForm(props: Readonly<SiteMetadataFormProps>): ReactN
 						}}
 						prefixes={["avatars", "images", "logos"]}
 					/>
+					{selectedImage != null ? (
+						<Button
+							intent="outline"
+							onPress={() => {
+								setSelectedImage(null);
+							}}
+						>
+							{t("Remove image")}
+						</Button>
+					) : null}
 					<input
 						aria-hidden={true}
 						className="sr-only"

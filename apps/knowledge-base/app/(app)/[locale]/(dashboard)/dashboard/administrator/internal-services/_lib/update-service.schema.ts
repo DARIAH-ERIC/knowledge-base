@@ -4,7 +4,7 @@ export const UpdateServiceActionInputSchema = v.object({
 	id: v.pipe(v.string(), v.uuid()),
 	name: v.pipe(v.string(), v.nonEmpty()),
 	statusId: v.pipe(v.string(), v.uuid()),
-	comment: v.optional(v.pipe(v.string(), v.nonEmpty())),
+	comment: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	dariahBranding: v.pipe(
 		v.optional(v.string()),
 		v.transform((s) => s === "true"),

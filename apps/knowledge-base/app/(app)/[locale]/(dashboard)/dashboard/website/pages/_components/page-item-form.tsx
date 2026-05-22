@@ -2,6 +2,7 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { Input } from "@dariah-eric/ui/input";
@@ -99,9 +100,21 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 						initialAssets={initialAssets}
 						onSelect={(key, url) => {
 							setSelectedImage({ key, url });
+							setImageKeyError(false);
 						}}
 						prefixes={["avatars", "images", "logos"]}
 					/>
+					{selectedImage != null ? (
+						<Button
+							intent="outline"
+							onPress={() => {
+								setSelectedImage(null);
+								setImageKeyError(false);
+							}}
+						>
+							{t("Remove image")}
+						</Button>
+					) : null}
 
 					<input
 						aria-hidden={true}
