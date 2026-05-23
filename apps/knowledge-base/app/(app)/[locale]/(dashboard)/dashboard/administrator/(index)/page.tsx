@@ -1,6 +1,5 @@
 import { Heading } from "@dariah-eric/ui/heading";
 import type { Metadata, ResolvingMetadata } from "next";
-import { useExtracted } from "next-intl";
 import { getExtracted } from "next-intl/server";
 import { Fragment, type ReactNode } from "react";
 
@@ -14,6 +13,7 @@ import { AdminTaskCard } from "@/app/(app)/[locale]/(dashboard)/dashboard/admini
 import { ingestSshocServicesAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/ingest-sshoc-services.action";
 import { syncResourcesSearchIndexAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/sync-resources-search-index.action";
 import { syncWebsiteSearchIndexAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/sync-website-search-index.action";
+import { getLatestBackgroundJobs } from "@/lib/admin-tasks/get-latest-background-jobs";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorPageProps extends PageProps<"/[locale]/dashboard/administrator"> {}
@@ -31,10 +31,12 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardAdministratorPage(
+export default async function DashboardAdministratorPage(
 	_props: Readonly<DashboardAdministratorPageProps>,
-): ReactNode {
-	const t = useExtracted();
+): Promise<ReactNode> {
+	const t = await getExtracted();
+
+	const latestJobs = await getLatestBackgroundJobs();
 
 	return (
 		<Fragment>
@@ -52,6 +54,7 @@ export default function DashboardAdministratorPage(
 					actionLabel={t("Re-sync resources index")}
 					description={t("Fetch external resources and upsert the Typesense resources collection.")}
 					formAction={syncResourcesSearchIndexAction}
+					latestJob={latestJobs.get("sync_resources_search_index") ?? null}
 					title={t("Resources search index")}
 				/>
 				<AdminTaskCard
@@ -60,6 +63,7 @@ export default function DashboardAdministratorPage(
 						"Rebuild the website search index entries for all syncable published content.",
 					)}
 					formAction={syncWebsiteSearchIndexAction}
+					latestJob={latestJobs.get("sync_website_search_index") ?? null}
 					title={t("Website search index")}
 				/>
 				<AdminTaskCard
@@ -68,6 +72,7 @@ export default function DashboardAdministratorPage(
 						"Fetch DARIAH services from the SSHOC Marketplace and upsert them into the services dataset.",
 					)}
 					formAction={ingestSshocServicesAction}
+					latestJob={latestJobs.get("ingest_sshoc_services") ?? null}
 					title={t("SSHOC Marketplace services")}
 				/>
 			</div>
