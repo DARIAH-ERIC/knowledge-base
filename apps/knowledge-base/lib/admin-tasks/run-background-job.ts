@@ -88,6 +88,7 @@ export async function runBackgroundJob<T>(
 					status: "failed",
 					finishedAt: new Date(),
 					error:
+						// oxlint-disable-next-line unicorn/no-instanceof-builtins
 						error instanceof Error
 							? (error.stack ?? error.message)
 							: typeof error === "string"
