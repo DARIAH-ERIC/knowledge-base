@@ -2,11 +2,6 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { Badge } from "@dariah-eric/ui/badge";
-import { Button } from "@dariah-eric/ui/button";
-import { buttonStyles } from "@dariah-eric/ui/button-styles";
-import { Link } from "@dariah-eric/ui/link";
-import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
-import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import {
 	Table,
 	TableBody,
@@ -15,26 +10,19 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import {
-	EllipsisHorizontalIcon,
-	EyeIcon,
-	PencilSquareIcon,
-	PlusIcon,
-	TrashIcon,
-} from "@heroicons/react/24/outline";
+import { EyeIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
-import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import { EntityLifecycleStatusBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge";
 import {
-	Header,
-	HeaderAction,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
-import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+	EntityDeleteModal,
+	EntityListHeader,
+	EntityListPagination,
+	EntityListSearchField,
+	NewLink,
+	RowActionsMenu,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteOpportunityAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/delete-opportunity.action";
 import { dashboardPageSize } from "@/config/pagination.config";
@@ -78,45 +66,32 @@ export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): Reac
 		state.filter((item) => item.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
-	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
-		useUrlPaginatedSearch({
-			dir: initialDir,
-			page: initialPage,
-			q: initialQ,
-			sort: initialSort,
-		});
+	const search = useUrlPaginatedSearch({
+		dir: initialDir,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+	});
 	const [isDeletePending, startDeleteTransition] = useTransition();
-
-	const totalPages = Math.max(Math.ceil(opportunities.total / pageSize), 1);
 
 	return (
 		<Fragment>
-			<Header>
-				<HeaderContent>
-					<HeaderTitle>{t("Opportunities")}</HeaderTitle>
-					<HeaderDescription>
-						{t("Manage all opportunities in the DARIAH knowledge base.")}
-					</HeaderDescription>
-				</HeaderContent>
-				<HeaderAction>
-					<SearchField onChange={setInputValue} value={inputValue}>
-						<SearchInput placeholder={t("Search")} />
-					</SearchField>
-					<Link
-						className={buttonStyles({ intent: "secondary" })}
-						href="/dashboard/website/opportunities/create"
-					>
-						<PlusIcon className="me-2 block-4 inline-4" />
-						{t("New")}
-					</Link>
-				</HeaderAction>
-			</Header>
+			<EntityListHeader
+				title={t("Opportunities")}
+				description={t("Manage all opportunities in the DARIAH knowledge base.")}
+				action={
+					<>
+						<EntityListSearchField search={search} />
+						<NewLink href="/dashboard/website/opportunities/create">{t("New")}</NewLink>
+					</>
+				}
+			/>
 
 			<Table
 				aria-label="opportunities"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
-				onSortChange={setSortDescriptor}
-				sortDescriptor={sortDescriptor}
+				onSortChange={search.setSortDescriptor}
+				sortDescriptor={search.sortDescriptor}
 			>
 				<TableHeader>
 					<TableColumn allowsSorting={true} id="title" isRowHeader={true}>
@@ -158,54 +133,46 @@ export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): Reac
 								/>
 							</TableCell>
 							<TableCell className="text-end">
-								<Menu>
-									<Button
-										aria-label={t("Open actions menu")}
-										className="block-7 sm:block-7"
-										intent="plain"
-										size="sq-sm"
+								<RowActionsMenu>
+									<RowActionsMenu.Link
+										href={`/dashboard/website/opportunities/${item.entity.slug}/details`}
+										icon={<EyeIcon className="me-2 block-4 inline-4" />}
 									>
-										<EllipsisHorizontalIcon className="block-5 inline-5" />
-									</Button>
-									<MenuContent placement="left top">
-										<MenuItem href={`/dashboard/website/opportunities/${item.entity.slug}/details`}>
-											<EyeIcon className="me-2 block-4 inline-4" />
-											<MenuLabel>{t("View")}</MenuLabel>
-										</MenuItem>
-										<MenuItem href={`/dashboard/website/opportunities/${item.entity.slug}/edit`}>
-											<PencilSquareIcon className="me-2 block-4 inline-4" />
-											<MenuLabel>{t("Edit")}</MenuLabel>
-										</MenuItem>
-										<MenuSeparator />
-										<MenuItem
-											intent="danger"
-											onAction={() => {
-												setItemToDelete({ id: item.id, documentId: item.documentId });
-											}}
-										>
-											<TrashIcon className="me-2 block-4 inline-4" />
-											<MenuLabel>{t("Delete")}</MenuLabel>
-										</MenuItem>
-									</MenuContent>
-								</Menu>
+										{t("View")}
+									</RowActionsMenu.Link>
+									<RowActionsMenu.Link
+										href={`/dashboard/website/opportunities/${item.entity.slug}/edit`}
+										icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
+									>
+										{t("Edit")}
+									</RowActionsMenu.Link>
+									<RowActionsMenu.Separator />
+									<RowActionsMenu.Action
+										danger={true}
+										icon={<TrashIcon className="me-2 block-4 inline-4" />}
+										onAction={() => {
+											setItemToDelete({ id: item.id, documentId: item.documentId });
+										}}
+									>
+										{t("Delete")}
+									</RowActionsMenu.Action>
+								</RowActionsMenu>
 							</TableCell>
 						</TableRow>
 					)}
 				</TableBody>
 			</Table>
 
-			<Paginate
-				isPending={isPending}
-				page={page}
-				setPage={setPage}
-				total={totalPages}
-				totalItems={opportunities.total}
-			/>
+			<EntityListPagination search={search} total={opportunities.total} pageSize={pageSize} />
 
-			<DeleteModal
-				isOpen={itemToDelete != null}
+			<EntityDeleteModal
+				item={itemToDelete}
 				model={t("opportunity")}
-				onAction={() => {
+				isPending={isDeletePending}
+				onClose={() => {
+					setItemToDelete(null);
+				}}
+				onConfirm={() => {
 					if (itemToDelete == null) {
 						return;
 					}
@@ -218,11 +185,6 @@ export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): Reac
 						router.refresh();
 						setItemToDelete(null);
 					});
-				}}
-				onOpenChange={(open) => {
-					if (!open && !isDeletePending) {
-						setItemToDelete(null);
-					}
 				}}
 			/>
 		</Fragment>

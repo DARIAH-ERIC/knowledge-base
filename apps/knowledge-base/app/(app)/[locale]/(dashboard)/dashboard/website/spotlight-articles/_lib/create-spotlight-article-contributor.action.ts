@@ -1,52 +1,24 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
+import { createActionStateError } from "@dariah-eric/next-lib/actions";
+import { getExtracted } from "next-intl/server";
 
 import { CreateSpotlightArticleContributorActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article-contributor.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export const createSpotlightArticleContributorAction = createServerAction(
-	async function createSpotlightArticleContributorAction(state, formData) {
-		const locale = await getLocale();
+export const createSpotlightArticleContributorAction = createMutationAction({
+	schema: CreateSpotlightArticleContributorActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "create", subjectType: "spotlight_articles" },
+	revalidate: "/[locale]/dashboard/website/spotlight-articles",
+
+	async preCheck({ input }) {
 		const t = await getExtracted();
-
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			CreateSpotlightArticleContributorActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateSpotlightArticleContributorActionInputSchema>(
-				result.issues,
-			);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { articleId, personId, role } = result.output;
-
 		const existing = await db.query.spotlightArticlesToPersons.findFirst({
-			where: { spotlightArticleId: articleId, personId },
+			where: { spotlightArticleId: input.articleId, personId: input.personId },
 			columns: { personId: true },
 		});
 
@@ -54,24 +26,18 @@ export const createSpotlightArticleContributorAction = createServerAction(
 			return createActionStateError({ message: t("This contributor already exists.") });
 		}
 
-		await db.transaction(async (tx) => {
-			await tx
-				.insert(schema.spotlightArticlesToPersons)
-				.values({ spotlightArticleId: articleId, personId, role });
-
-			await touchVersion(tx, articleId);
-		});
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "create",
-			subjectType: "spotlight_articles",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
-
-		revalidatePath("/[locale]/dashboard/website/spotlight-articles", "layout");
-
-		return createActionStateSuccess({ data: undefined });
+		return undefined;
 	},
-);
+
+	async mutate(tx, input) {
+		await tx.insert(schema.spotlightArticlesToPersons).values({
+			spotlightArticleId: input.articleId,
+			personId: input.personId,
+			role: input.role,
+		});
+
+		await touchVersion(tx, input.articleId);
+
+		return { subjectId: input.articleId };
+	},
+});

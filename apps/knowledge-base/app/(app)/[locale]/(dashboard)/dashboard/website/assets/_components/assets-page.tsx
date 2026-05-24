@@ -1,20 +1,16 @@
 "use client";
 
 import { assetPrefixes } from "@dariah-eric/storage/config";
-import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { AssetPreview } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/asset-preview";
 import {
-	Header,
-	HeaderAction,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
-import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+	EntityListHeader,
+	EntityListPagination,
+	EntityListSearchField,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { EditAssetMetadataDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/edit-asset-metadata-dialog";
 import { UploadImageDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_components/upload-image-dialog";
@@ -56,59 +52,56 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 
 	const t = useExtracted();
 	const router = useRouter();
-	const { filters, inputValue, isPending, page, setFilter, setInputValue, setPage } =
-		useUrlPaginatedSearch({
-			filters: { prefix: initialPrefix },
-			page: initialPage,
-			q: initialQ,
-		});
-	const selectedPrefix = filters.prefix !== "" ? filters.prefix : "all";
+	const search = useUrlPaginatedSearch({
+		filters: { prefix: initialPrefix },
+		page: initialPage,
+		q: initialQ,
+	});
+	const selectedPrefix = search.filters.prefix !== "" ? search.filters.prefix : "all";
 	const totalPages = Math.max(1, Math.ceil(assets.total / pageSize));
 
 	return (
 		<Fragment>
-			<Header>
-				<HeaderContent>
-					<HeaderTitle>{t("Assets")}</HeaderTitle>
-					<HeaderDescription>{t("Manage all images in the media library.")}</HeaderDescription>
-				</HeaderContent>
-				<HeaderAction>
-					<SearchField onChange={setInputValue} value={inputValue}>
-						<SearchInput placeholder={t("Search by label")} />
-					</SearchField>
+			<EntityListHeader
+				title={t("Assets")}
+				description={t("Manage all images in the media library.")}
+				action={
+					<>
+						<EntityListSearchField search={search} placeholder={t("Search by label")} />
 
-					<Select
-						aria-label={t("Filter by prefix")}
-						onChange={(key) => {
-							const value = String(key);
-							setFilter("prefix", value === "all" ? "" : value);
-						}}
-						value={selectedPrefix}
-					>
-						<SelectTrigger />
-						<SelectContent>
-							<SelectItem id="all">{t("All prefixes")}</SelectItem>
-							{assetPrefixes.map((prefix) => (
-								<SelectItem key={prefix} id={prefix}>
-									{prefix}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
+						<Select
+							aria-label={t("Filter by prefix")}
+							onChange={(key) => {
+								const value = String(key);
+								search.setFilter("prefix", value === "all" ? "" : value);
+							}}
+							value={selectedPrefix}
+						>
+							<SelectTrigger />
+							<SelectContent>
+								<SelectItem id="all">{t("All prefixes")}</SelectItem>
+								{assetPrefixes.map((prefix) => (
+									<SelectItem key={prefix} id={prefix}>
+										{prefix}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 
-					<UploadImageDialog
-						licenses={licenses}
-						onSuccess={() => {
-							router.refresh();
-						}}
-					/>
-				</HeaderAction>
-			</Header>
+						<UploadImageDialog
+							licenses={licenses}
+							onSuccess={() => {
+								router.refresh();
+							}}
+						/>
+					</>
+				}
+			/>
 
 			{assets.items.length === 0 ? (
 				<div className="flex flex-1 items-center justify-center py-16">
 					<p className="text-center text-muted-fg text-sm">
-						{inputValue !== "" || selectedPrefix !== "all"
+						{search.inputValue !== "" || selectedPrefix !== "all"
 							? t("No images match your filters.")
 							: t("No images found. Upload one to get started.")}
 					</p>
@@ -150,14 +143,7 @@ export function AssetsPage(props: Readonly<AssetsPageProps>): ReactNode {
 			)}
 
 			{totalPages > 1 ? (
-				<Paginate
-					isPending={isPending}
-					page={page}
-					perPage={pageSize}
-					setPage={setPage}
-					total={totalPages}
-					totalItems={assets.total}
-				/>
+				<EntityListPagination search={search} total={assets.total} pageSize={pageSize} />
 			) : null}
 		</Fragment>
 	);

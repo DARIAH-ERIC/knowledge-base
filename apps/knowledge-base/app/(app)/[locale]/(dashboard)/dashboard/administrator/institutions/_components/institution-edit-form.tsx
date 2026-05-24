@@ -1,12 +1,11 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Heading } from "@dariah-eric/ui/heading";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
-import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { InstitutionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form";
 import { discardInstitutionDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/discard-institution-draft.action";
@@ -66,16 +65,16 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 
 	return (
 		<Fragment>
-			<div className="flex items-center justify-between">
-				<Heading>{t("Edit institution")}</Heading>
-				<EntityLifecycleBar
-					discardDraftAction={discardInstitutionDraftAction}
-					documentId={documentId}
-					hasDraft={hasDraftChanges}
-					isPublished={isPublished}
-					publishAction={publishInstitutionAction}
-				/>
-			</div>
+			<EntityFormHeader
+				title={t("Edit institution")}
+				lifecycle={{
+					documentId,
+					hasDraft: hasDraftChanges,
+					isPublished,
+					publishAction: publishInstitutionAction,
+					discardDraftAction: discardInstitutionDraftAction,
+				}}
+			/>
 
 			<InstitutionForm
 				formAction={updateInstitutionAction}

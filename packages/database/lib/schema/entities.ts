@@ -111,6 +111,30 @@ export const EntityVersionSelectSchema = createSelectSchema(entityVersions);
 export const EntityVersionInsertSchema = createInsertSchema(entityVersions);
 export const EntityVersionUpdateSchema = createUpdateSchema(entityVersions);
 
+export const documentLifecycleStateEnum = ["draft", "published", "published_with_changes"] as const;
+export type DocumentLifecycleStateValue = (typeof documentLifecycleStateEnum)[number];
+
+// Per-document lifecycle snapshot. Backed by the view defined in
+// db/migrations/20260524100000_add_document_lifecycle_view/migration.sql — keep
+// the SQL CASE arms aligned with `documentLifecycleStateEnum` above.
+export const documentLifecycle = p.snakeCase
+	.view("document_lifecycle", {
+		documentId: p.uuid("document_id").notNull(),
+		typeId: p.uuid("type_id").notNull(),
+		draftId: p.uuid("draft_id"),
+		draftUpdatedAt: f.timestamp("draft_updated_at"),
+		publishedId: p.uuid("published_id"),
+		publishedUpdatedAt: f.timestamp("published_updated_at"),
+		hasDraftChanges: p.boolean("has_draft_changes").notNull(),
+		state: p
+			.text("state", { enum: documentLifecycleStateEnum })
+			.notNull()
+			.$type<DocumentLifecycleStateValue>(),
+	})
+	.existing();
+
+export type DocumentLifecycleRow = typeof documentLifecycle.$inferSelect;
+
 export const entityTypesFieldsNames = p.snakeCase.table(
 	"entity_types_fields_names",
 	{

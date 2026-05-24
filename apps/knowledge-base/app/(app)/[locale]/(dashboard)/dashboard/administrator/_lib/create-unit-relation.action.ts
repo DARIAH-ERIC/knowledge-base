@@ -3,34 +3,27 @@
 import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { CreateUnitRelationActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-unit-relation.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
+import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { ensureOrganisationalUnitDraftVersion } from "@/lib/data/organisational-unit-drafts";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 
+/**
+ * Stays on createServerAction because the success response carries typed data. Auth gate is in the
+ * wrapper, audit is written inside the same transaction as the mutation.
+ */
 export const createUnitRelationAction = createServerAction(
-	async function createUnitRelationAction(state, formData) {
+	{ requireAdmin: true },
+	async function createUnitRelationAction(state, formData, { user }) {
 		const locale = await getLocale();
 		const t = await getExtracted();
-
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
-
-		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			CreateUnitRelationActionInputSchema,
@@ -40,7 +33,6 @@ export const createUnitRelationAction = createServerAction(
 
 		if (!result.success) {
 			const errors = v.flatten<typeof CreateUnitRelationActionInputSchema>(result.issues);
-
 			return createActionStateError({
 				message: errors.root ?? t("Invalid or missing fields."),
 				validationErrors: errors.nested,
@@ -78,20 +70,20 @@ export const createUnitRelationAction = createServerAction(
 
 			await touchVersion(tx, draftUnitId);
 
+			await recordAuditEvent(tx, {
+				actorUserId: user?.id,
+				action: "create",
+				subjectType: "create_unit_relation",
+				subjectId: row.id,
+				summary: getAuditSummaryFromFormData(formData),
+			});
+
 			return { relatedUnitType: relatedUnit?.type.type, row };
 		});
 
 		if ("error" in returned) {
 			return createActionStateError({ message: t("This relation already exists.") });
 		}
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "create",
-			subjectType: "create_unit_relation",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
 
 		revalidatePath("/[locale]/dashboard/administrator", "layout");
 

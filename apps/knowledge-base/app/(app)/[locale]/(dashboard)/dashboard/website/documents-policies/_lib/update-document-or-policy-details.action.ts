@@ -1,129 +1,79 @@
 "use server";
 
-import { assert, getFormDataValues } from "@acdh-oeaw/lib";
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-import * as v from "valibot";
 
 import { UpdateDocumentOrPolicyDetailsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy-details.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { getDocumentIdForVersion, getDocumentVersions } from "@/lib/data/entity-lifecycle";
-import { db } from "@/lib/db";
 import { eq, isNull } from "@/lib/db/sql";
-import { getIntlLanguage } from "@/lib/i18n/locales";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export const updateDocumentOrPolicyDetailsAction = createServerAction(
-	async function updateDocumentOrPolicyDetailsAction(state, formData) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+export const updateDocumentOrPolicyDetailsAction = createMutationAction<
+	typeof UpdateDocumentOrPolicyDetailsActionInputSchema,
+	{ entityDocumentId: string; shouldSyncPublishedVersion: boolean }
+>({
+	schema: UpdateDocumentOrPolicyDetailsActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "update", subjectType: "documents_policies" },
+	revalidate: "/[locale]/dashboard/website/documents-policies",
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
+	async mutate(tx, input) {
+		const entityDocumentId = await getDocumentIdForVersion(tx, input.id);
+		const { publishedId } = await getDocumentVersions(tx, entityDocumentId);
+		const shouldSyncPublishedVersion = publishedId === input.id;
+
+		const asset = await tx.query.assets.findFirst({
+			where: { key: input.documentKey },
+			columns: { id: true },
+		});
+
+		assert(asset);
+
+		const current = await tx.query.documentsPolicies.findFirst({
+			where: { id: input.id },
+			columns: { groupId: true },
+		});
+
+		const newGroupId = input.groupId ?? null;
+		let newPosition: number | undefined;
+
+		if (current != null && current.groupId !== newGroupId) {
+			const siblings = await tx
+				.select({ id: schema.documentsPolicies.id })
+				.from(schema.documentsPolicies)
+				.where(
+					newGroupId != null
+						? eq(schema.documentsPolicies.groupId, newGroupId)
+						: isNull(schema.documentsPolicies.groupId),
+				);
+
+			newPosition = siblings.length;
 		}
 
-		const auditSession = await assertAdmin();
+		await tx
+			.update(schema.documentsPolicies)
+			.set({
+				title: input.title,
+				summary: input.summary,
+				url: input.url != null && input.url.length > 0 ? input.url : null,
+				groupId: newGroupId,
+				documentId: asset.id,
+				...(newPosition !== undefined ? { position: newPosition } : {}),
+			})
+			.where(eq(schema.documentsPolicies.id, input.id));
 
-		const result = await v.safeParseAsync(
-			UpdateDocumentOrPolicyDetailsActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof UpdateDocumentOrPolicyDetailsActionInputSchema>(
-				result.issues,
-			);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { id, title, summary, url, groupId, documentKey } = result.output;
-
-		let entityDocumentId: string | null = null;
-		let shouldSyncPublishedVersion = false;
-
-		await db.transaction(async (tx) => {
-			entityDocumentId = await getDocumentIdForVersion(tx, id);
-			const { publishedId } = await getDocumentVersions(tx, entityDocumentId);
-			shouldSyncPublishedVersion = publishedId === id;
-
-			const asset = await tx.query.assets.findFirst({
-				where: { key: documentKey },
-				columns: { id: true },
-			});
-
-			assert(asset);
-
-			const current = await tx.query.documentsPolicies.findFirst({
-				where: { id },
-				columns: { groupId: true },
-			});
-
-			const newGroupId = groupId ?? null;
-			let newPosition: number | undefined;
-
-			if (current != null && current.groupId !== newGroupId) {
-				const siblings = await tx
-					.select({ id: schema.documentsPolicies.id })
-					.from(schema.documentsPolicies)
-					.where(
-						newGroupId != null
-							? eq(schema.documentsPolicies.groupId, newGroupId)
-							: isNull(schema.documentsPolicies.groupId),
-					);
-
-				newPosition = siblings.length;
-			}
-
-			await tx
-				.update(schema.documentsPolicies)
-				.set({
-					title,
-					summary,
-					url: url != null && url.length > 0 ? url : null,
-					groupId: newGroupId,
-					documentId: asset.id,
-					...(newPosition !== undefined ? { position: newPosition } : {}),
-				})
-				.where(eq(schema.documentsPolicies.id, id));
-		});
-
-		after(async () => {
-			if (!shouldSyncPublishedVersion) {
-				return;
-			}
-
-			if (entityDocumentId != null) {
-				await syncWebsiteDocumentForEntity(entityDocumentId);
-			}
-			await dispatchWebhook({ type: "documents-policies" });
-		});
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "update",
-			subjectType: "documents_policies",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
-
-		revalidatePath("/[locale]/dashboard/website/documents-policies", "layout");
-
-		return createActionStateSuccess({});
+		return {
+			subjectId: input.id,
+			successData: { entityDocumentId, shouldSyncPublishedVersion },
+		};
 	},
-);
+
+	async postCommit({ result }) {
+		if (result.successData == null || !result.successData.shouldSyncPublishedVersion) return;
+
+		await syncWebsiteDocumentForEntity(result.successData.entityDocumentId);
+		await dispatchWebhook({ type: "documents-policies" });
+	},
+});

@@ -1,40 +1,24 @@
 "use server";
 
-import { getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { publishVersion } from "@/lib/data/entity-lifecycle";
 import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
-import { db } from "@/lib/db";
-import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
+import { createCommandAction } from "@/lib/server/create-command-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export async function publishPersonAction(documentId: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const publishPersonAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "publish", subjectType: "persons" },
+	revalidate: "/[locale]/dashboard/administrator/persons",
+	redirect: "/dashboard/administrator/persons",
 
-	await db.transaction(async (tx) => {
+	async mutate(tx, [documentId]: [string]) {
 		await publishVersion(tx, documentId, personsLifecycleAdapter);
-	});
+		return { subjectId: documentId };
+	},
 
-	after(async () => {
-		await syncWebsiteDocumentForEntity(documentId);
+	async postCommit({ result }) {
+		await syncWebsiteDocumentForEntity(result.subjectId);
 		await dispatchWebhook({ type: "persons" });
-	});
-
-	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
-		action: "publish",
-		subjectType: "persons",
-		subjectId: documentId,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/administrator/persons", "layout");
-
-	const locale = await getLocale();
-	redirect({ href: "/dashboard/administrator/persons", locale });
-}
+	},
+});

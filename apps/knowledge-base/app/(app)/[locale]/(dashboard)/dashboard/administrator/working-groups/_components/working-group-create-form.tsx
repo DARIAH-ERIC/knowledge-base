@@ -1,9 +1,9 @@
 "use client";
 
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { WorkingGroupForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form";
 import { createWorkingGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/create-working-group.action";
 
@@ -28,7 +28,7 @@ export function WorkingGroupCreateForm(props: Readonly<WorkingGroupCreateFormPro
 
 	return (
 		<Fragment>
-			<Heading>{t("New working group")}</Heading>
+			<EntityFormHeader title={t("New working group")} />
 
 			<WorkingGroupForm
 				formAction={createWorkingGroupAction}

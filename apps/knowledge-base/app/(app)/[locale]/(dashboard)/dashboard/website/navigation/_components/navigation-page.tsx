@@ -15,14 +15,10 @@ import {
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState } from "react";
 
-import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
-	Header,
-	HeaderAction,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+	EntityDeleteModal,
+	EntityListHeader,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
 	type EntityOption,
 	NavigationItemFormDialog,
@@ -273,10 +269,14 @@ function MenuTabPanel(props: Readonly<MenuTabPanelProps>): ReactNode {
 				parentId={itemDialogState.parentId}
 			/>
 
-			<DeleteModal
-				isOpen={itemToDelete != null}
+			<EntityDeleteModal
+				item={itemToDelete != null ? { id: itemToDelete } : null}
 				model={t("navigation item")}
-				onAction={() => {
+				isPending={false}
+				onClose={() => {
+					setItemToDelete(null);
+				}}
+				onConfirm={() => {
 					if (itemToDelete == null) {
 						return;
 					}
@@ -284,11 +284,6 @@ function MenuTabPanel(props: Readonly<MenuTabPanelProps>): ReactNode {
 						await deleteNavigationItemAction(itemToDelete);
 						setItemToDelete(null);
 					});
-				}}
-				onOpenChange={(open) => {
-					if (!open) {
-						setItemToDelete(null);
-					}
 				}}
 			/>
 		</Fragment>
@@ -304,15 +299,11 @@ export function NavigationPage(props: Readonly<NavigationPageProps>): ReactNode 
 
 	return (
 		<Fragment>
-			<Header>
-				<HeaderContent>
-					<HeaderTitle>{t("Website navigation")}</HeaderTitle>
-					<HeaderDescription>{t("Manage website navigation.")}</HeaderDescription>
-				</HeaderContent>
-				<HeaderAction>
-					<NavigationMenuCreateDialog />
-				</HeaderAction>
-			</Header>
+			<EntityListHeader
+				title={t("Website navigation")}
+				description={t("Manage website navigation.")}
+				action={<NavigationMenuCreateDialog />}
+			/>
 
 			<div className="p-(--layout-padding)">
 				{menus.length === 0 ? (
@@ -357,10 +348,14 @@ export function NavigationPage(props: Readonly<NavigationPageProps>): ReactNode 
 				)}
 			</div>
 
-			<DeleteModal
-				isOpen={menuToDelete != null}
+			<EntityDeleteModal
+				item={menuToDelete != null ? { id: menuToDelete } : null}
 				model={t("navigation menu")}
-				onAction={() => {
+				isPending={false}
+				onClose={() => {
+					setMenuToDelete(null);
+				}}
+				onConfirm={() => {
 					if (menuToDelete == null) {
 						return;
 					}
@@ -368,11 +363,6 @@ export function NavigationPage(props: Readonly<NavigationPageProps>): ReactNode 
 						await deleteNavigationMenuAction(menuToDelete);
 						setMenuToDelete(null);
 					});
-				}}
-				onOpenChange={(open) => {
-					if (!open) {
-						setMenuToDelete(null);
-					}
 				}}
 			/>
 		</Fragment>

@@ -1,55 +1,25 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
+import { getExtracted } from "next-intl/server";
 
 import { CreateReportingCampaignActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/create-reporting-campaign.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export const createReportingCampaignAction = createServerAction(
-	async function createReportingCampaignAction(state, formData) {
-		const locale = await getLocale();
+export const createReportingCampaignAction = createMutationAction({
+	schema: CreateReportingCampaignActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "create", subjectType: "reporting_campaigns" },
+	revalidate: "/[locale]/dashboard/administrator/reporting-campaigns",
+	redirect: "/dashboard/administrator/reporting-campaigns",
+
+	async preCheck({ input }) {
 		const t = await getExtracted();
-
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
-
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			CreateReportingCampaignActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateReportingCampaignActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { year, status } = result.output;
-
 		const existing = await db.query.reportingCampaigns.findFirst({
-			where: { year },
+			where: { year: input.year },
 			columns: { id: true },
 		});
 
@@ -62,18 +32,16 @@ export const createReportingCampaignAction = createServerAction(
 			});
 		}
 
-		await db.insert(schema.reportingCampaigns).values({ year, status });
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "create",
-			subjectType: "reporting_campaigns",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
-
-		revalidatePath("/[locale]/dashboard/administrator/reporting-campaigns", "layout");
-
-		redirect({ href: "/dashboard/administrator/reporting-campaigns", locale });
+		return undefined;
 	},
-);
+
+	async mutate(tx, input) {
+		const [created] = await tx
+			.insert(schema.reportingCampaigns)
+			.values({ year: input.year, status: input.status })
+			.returning({ id: schema.reportingCampaigns.id });
+		assert(created);
+
+		return { subjectId: created.id };
+	},
+});

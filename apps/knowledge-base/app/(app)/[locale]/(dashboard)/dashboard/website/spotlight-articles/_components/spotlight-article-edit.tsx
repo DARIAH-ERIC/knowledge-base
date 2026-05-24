@@ -1,12 +1,11 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
-import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { ArticleContributorsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section";
 import { SpotlightArticleForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form";
 import { createSpotlightArticleContributorAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article-contributor.action";
@@ -65,16 +64,16 @@ export function SpotlightArticleEditForm(
 
 	return (
 		<Fragment>
-			<div className="flex items-center justify-between">
-				<Heading>{t("Edit spotlight article")}</Heading>
-				<EntityLifecycleBar
-					discardDraftAction={discardSpotlightArticleDraftAction}
-					documentId={documentId}
-					hasDraft={hasDraftChanges}
-					isPublished={isPublished}
-					publishAction={publishSpotlightArticleAction}
-				/>
-			</div>
+			<EntityFormHeader
+				title={t("Edit spotlight article")}
+				lifecycle={{
+					documentId,
+					hasDraft: hasDraftChanges,
+					isPublished,
+					publishAction: publishSpotlightArticleAction,
+					discardDraftAction: discardSpotlightArticleDraftAction,
+				}}
+			/>
 
 			<SpotlightArticleForm
 				contentBlocks={contentBlocks}

@@ -15,15 +15,11 @@ import {
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState } from "react";
 
-import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import { EntityLifecycleStatusBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge";
 import {
-	Header,
-	HeaderAction,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+	EntityDeleteModal,
+	EntityListHeader,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
 	type DocumentOrPolicyDialogItem,
 	DocumentOrPolicyFormDialog,
@@ -286,26 +282,24 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 
 	return (
 		<Fragment>
-			<Header>
-				<HeaderContent>
-					<HeaderTitle>{t("Documents and policies")}</HeaderTitle>
-					<HeaderDescription>
-						{t("Manage all documents and policies in the DARIAH knowledge base.")}
-					</HeaderDescription>
-				</HeaderContent>
-				<HeaderAction>
-					<DocumentPolicyGroupCreateDialog />
-					<Button
-						intent="secondary"
-						onPress={() => {
-							setDialogState({ isOpen: true, item: null, initialGroupId: null });
-						}}
-					>
-						<PlusIcon className="me-2 block-4 inline-4" />
-						{t("New document")}
-					</Button>
-				</HeaderAction>
-			</Header>
+			<EntityListHeader
+				title={t("Documents and policies")}
+				description={t("Manage all documents and policies in the DARIAH knowledge base.")}
+				action={
+					<>
+						<DocumentPolicyGroupCreateDialog />
+						<Button
+							intent="secondary"
+							onPress={() => {
+								setDialogState({ isOpen: true, item: null, initialGroupId: null });
+							}}
+						>
+							<PlusIcon className="me-2 block-4 inline-4" />
+							{t("New document")}
+						</Button>
+					</>
+				}
+			/>
 
 			<div className="p-(--layout-padding)">
 				{groups.map((group, groupIndex) => (
@@ -379,10 +373,14 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 				}}
 			/>
 
-			<DeleteModal
-				isOpen={documentToDelete != null}
+			<EntityDeleteModal
+				item={documentToDelete != null ? { id: documentToDelete } : null}
 				model={t("document or policy")}
-				onAction={() => {
+				isPending={false}
+				onClose={() => {
+					setDocumentToDelete(null);
+				}}
+				onConfirm={() => {
 					if (documentToDelete == null) {
 						return;
 					}
@@ -391,17 +389,16 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 						setDocumentToDelete(null);
 					});
 				}}
-				onOpenChange={(open) => {
-					if (!open) {
-						setDocumentToDelete(null);
-					}
-				}}
 			/>
 
-			<DeleteModal
-				isOpen={groupToDelete != null}
+			<EntityDeleteModal
+				item={groupToDelete != null ? { id: groupToDelete } : null}
 				model={t("group")}
-				onAction={() => {
+				isPending={false}
+				onClose={() => {
+					setGroupToDelete(null);
+				}}
+				onConfirm={() => {
 					if (groupToDelete == null) {
 						return;
 					}
@@ -409,11 +406,6 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 						await deleteDocumentPolicyGroupAction(groupToDelete);
 						setGroupToDelete(null);
 					});
-				}}
-				onOpenChange={(open) => {
-					if (!open) {
-						setGroupToDelete(null);
-					}
 				}}
 			/>
 		</Fragment>

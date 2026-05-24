@@ -1,32 +1,17 @@
 "use server";
 
-import { getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { discardDraftVersion } from "@/lib/data/entity-lifecycle";
 import { opportunitiesLifecycleAdapter } from "@/lib/data/opportunities.lifecycle-adapter";
-import { db } from "@/lib/db";
-import { redirect } from "@/lib/navigation/navigation";
+import { createCommandAction } from "@/lib/server/create-command-action";
 
-export async function discardOpportunityDraftAction(documentId: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const discardOpportunityDraftAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "discard_draft", subjectType: "opportunities" },
+	revalidate: "/[locale]/dashboard/website/opportunities",
+	redirect: "/dashboard/website/opportunities",
 
-	await db.transaction(async (tx) => {
+	async mutate(tx, [documentId]: [string]) {
 		await discardDraftVersion(tx, documentId, opportunitiesLifecycleAdapter);
-	});
-
-	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
-		action: "discard_draft",
-		subjectType: "opportunities",
-		subjectId: documentId,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/website/opportunities", "layout");
-
-	const locale = await getLocale();
-	redirect({ href: "/dashboard/website/opportunities", locale });
-}
+		return { subjectId: documentId };
+	},
+});

@@ -2,26 +2,31 @@
 
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { revalidatePath } from "next/cache";
 
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { getDocumentVersions } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
-import { db } from "@/lib/db";
 import { eq, inArray, or } from "@/lib/db/sql";
+import {
+	type WebsiteDocumentDescriptor,
+	deleteWebsiteDocument,
+	getWebsiteDocumentDescriptorByEntityId,
+} from "@/lib/search/website-index";
+import { createCommandAction } from "@/lib/server/create-command-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export async function deleteGovernanceBodyAction(documentId: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const deleteGovernanceBodyAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "delete", subjectType: "governance_bodies" },
+	revalidate: "/[locale]/dashboard/administrator/governance-bodies",
 
-	await db.transaction(async (tx) => {
+	async mutate(tx, [documentId]: [string]) {
 		const entity = await tx.query.entities.findFirst({
 			where: { id: documentId },
 			columns: { id: true },
 		});
-
 		assert(entity, "Document not found.");
+
+		const descriptor = await getWebsiteDocumentDescriptorByEntityId(documentId);
 
 		const { draftId, publishedId } = await getDocumentVersions(tx, documentId);
 		const versionIds = [draftId, publishedId].filter((id): id is string => id != null);
@@ -63,16 +68,17 @@ export async function deleteGovernanceBodyAction(documentId: string): Promise<vo
 		}
 
 		await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
-	});
 
-	await dispatchWebhook({ type: "governance-bodies" });
-	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
-		action: "delete",
-		subjectType: "governance_bodies",
-		subjectId: documentId,
-		summary: {},
-	});
+		return {
+			subjectId: documentId,
+			descriptor: descriptor as WebsiteDocumentDescriptor | null,
+		};
+	},
 
-	revalidatePath("/[locale]/dashboard/administrator/governance-bodies", "layout");
-}
+	async postCommit({ result }) {
+		if (result.descriptor != null) {
+			await deleteWebsiteDocument(result.descriptor);
+		}
+		await dispatchWebhook({ type: "governance-bodies" });
+	},
+});

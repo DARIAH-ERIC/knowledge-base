@@ -1,9 +1,9 @@
 "use client";
 
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { CountryForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form";
 import { createCountryAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/create-country.action";
 
@@ -28,7 +28,7 @@ export function CountryCreateForm(props: Readonly<CountryCreateFormProps>): Reac
 
 	return (
 		<Fragment>
-			<Heading>{t("New country")}</Heading>
+			<EntityFormHeader title={t("New country")} />
 
 			<CountryForm
 				formAction={createCountryAction}

@@ -3,18 +3,12 @@
 import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import * as v from "valibot";
 
 import { CreateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
+import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { ensureOrganisationalUnitDraftVersion } from "@/lib/data/organisational-unit-drafts";
 import { ensurePersonDraftVersion } from "@/lib/data/person-drafts";
@@ -23,16 +17,16 @@ import { and, eq } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 
+/**
+ * Stays on createServerAction because the success response carries typed data (id + duration +
+ * targetUnitType) that the client component consumes. The auth gate now lives in the wrapper, and
+ * audit is written inside the same transaction as the mutation.
+ */
 export const createContributionAction = createServerAction(
-	async function createContributionAction(state, formData) {
+	{ requireAdmin: true },
+	async function createContributionAction(state, formData, { user }) {
 		const locale = await getLocale();
 		const t = await getExtracted();
-
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
-
-		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(
 			CreateContributionActionInputSchema,
@@ -42,7 +36,6 @@ export const createContributionAction = createServerAction(
 
 		if (!result.success) {
 			const errors = v.flatten<typeof CreateContributionActionInputSchema>(result.issues);
-
 			return createActionStateError({
 				message: errors.root ?? t("Invalid or missing fields."),
 				validationErrors: errors.nested,
@@ -116,6 +109,14 @@ export const createContributionAction = createServerAction(
 			await touchVersion(tx, draftPersonId);
 			await touchVersion(tx, draftOrganisationalUnitId);
 
+			await recordAuditEvent(tx, {
+				actorUserId: user?.id,
+				action: "create",
+				subjectType: "create_contribution",
+				subjectId: row.id,
+				summary: getAuditSummaryFromFormData(formData),
+			});
+
 			return { row, targetUnitType: unit?.type.type };
 		});
 
@@ -123,7 +124,6 @@ export const createContributionAction = createServerAction(
 			if (returned.error === "duplicate") {
 				return createActionStateError({ message: t("This contribution already exists.") });
 			}
-
 			return createActionStateError({
 				message: t("The selected role is not allowed for this organisation."),
 				validationErrors: {
@@ -131,14 +131,6 @@ export const createContributionAction = createServerAction(
 				},
 			});
 		}
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "create",
-			subjectType: "create_contribution",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
 
 		revalidatePath("/[locale]/dashboard/administrator", "layout");
 

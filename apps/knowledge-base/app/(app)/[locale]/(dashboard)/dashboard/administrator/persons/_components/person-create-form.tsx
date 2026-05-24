@@ -1,9 +1,9 @@
 "use client";
 
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { PersonForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form";
 import { createPersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/create-person.action";
 
@@ -18,7 +18,7 @@ export function PersonCreateForm(props: Readonly<PersonCreateFormProps>): ReactN
 
 	return (
 		<Fragment>
-			<Heading>{t("New person")}</Heading>
+			<EntityFormHeader title={t("New person")} />
 
 			<PersonForm formAction={createPersonAction} initialAssets={initialAssets} />
 		</Fragment>

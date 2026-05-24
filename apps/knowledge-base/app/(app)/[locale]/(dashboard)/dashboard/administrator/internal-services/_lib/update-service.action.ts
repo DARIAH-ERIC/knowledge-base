@@ -1,122 +1,72 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
 
 import { UpdateServiceActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_lib/update-service.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export const updateServiceAction = createServerAction(
-	async function updateServiceAction(state, formData) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+export const updateServiceAction = createMutationAction({
+	schema: UpdateServiceActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "update", subjectType: "internal_services" },
+	revalidate: "/[locale]/dashboard/administrator/internal-services",
+	redirect: "/dashboard/administrator/internal-services",
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
+	async mutate(tx, input) {
+		await tx
+			.update(schema.services)
+			.set({
+				name: input.name,
+				statusId: input.statusId,
+				comment: input.comment,
+				dariahBranding: input.dariahBranding,
+				monitoring: input.monitoring,
+				metadata: input.metadata ?? {},
+				privateSupplier: input.privateSupplier,
+			})
+			.where(eq(schema.services.id, input.id));
 
-		const auditSession = await assertAdmin();
+		await tx
+			.delete(schema.servicesToOrganisationalUnits)
+			.where(eq(schema.servicesToOrganisationalUnits.serviceId, input.id));
 
-		const result = await v.safeParseAsync(
-			UpdateServiceActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof UpdateServiceActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const {
-			id,
-			name,
-			statusId,
-			comment,
-			dariahBranding,
-			monitoring,
-			privateSupplier,
-			metadata = {},
-			ownerUnitIds,
-			providerUnitIds,
-		} = result.output;
-
-		await db.transaction(async (tx) => {
-			await tx
-				.update(schema.services)
-				.set({
-					name,
-					statusId,
-					comment,
-					dariahBranding,
-					monitoring,
-					metadata,
-					privateSupplier,
-				})
-				.where(eq(schema.services.id, id));
-
-			await tx
-				.delete(schema.servicesToOrganisationalUnits)
-				.where(eq(schema.servicesToOrganisationalUnits.serviceId, id));
-
-			const ownerRole = await tx.query.organisationalUnitServiceRoles.findFirst({
-				where: { role: "service_owner" },
-				columns: { id: true },
-			});
-
-			const providerRole = await tx.query.organisationalUnitServiceRoles.findFirst({
-				where: { role: "service_provider" },
-				columns: { id: true },
-			});
-
-			const relations: Array<typeof schema.servicesToOrganisationalUnits.$inferInsert> = [];
-
-			if (ownerRole != null) {
-				for (const unitId of ownerUnitIds) {
-					relations.push({ serviceId: id, organisationalUnitId: unitId, roleId: ownerRole.id });
-				}
-			}
-
-			if (providerRole != null) {
-				for (const unitId of providerUnitIds) {
-					relations.push({ serviceId: id, organisationalUnitId: unitId, roleId: providerRole.id });
-				}
-			}
-
-			if (relations.length > 0) {
-				await tx.insert(schema.servicesToOrganisationalUnits).values(relations);
-			}
+		const ownerRole = await tx.query.organisationalUnitServiceRoles.findFirst({
+			where: { role: "service_owner" },
+			columns: { id: true },
 		});
 
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "update",
-			subjectType: "internal_services",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
+		const providerRole = await tx.query.organisationalUnitServiceRoles.findFirst({
+			where: { role: "service_provider" },
+			columns: { id: true },
 		});
 
-		revalidatePath("/[locale]/dashboard/administrator/internal-services", "layout");
+		const relations: Array<typeof schema.servicesToOrganisationalUnits.$inferInsert> = [];
 
-		redirect({ href: "/dashboard/administrator/internal-services", locale });
+		if (ownerRole != null) {
+			for (const unitId of input.ownerUnitIds) {
+				relations.push({
+					serviceId: input.id,
+					organisationalUnitId: unitId,
+					roleId: ownerRole.id,
+				});
+			}
+		}
+
+		if (providerRole != null) {
+			for (const unitId of input.providerUnitIds) {
+				relations.push({
+					serviceId: input.id,
+					organisationalUnitId: unitId,
+					roleId: providerRole.id,
+				});
+			}
+		}
+
+		if (relations.length > 0) {
+			await tx.insert(schema.servicesToOrganisationalUnits).values(relations);
+		}
+
+		return { subjectId: input.id };
 	},
-);
+});

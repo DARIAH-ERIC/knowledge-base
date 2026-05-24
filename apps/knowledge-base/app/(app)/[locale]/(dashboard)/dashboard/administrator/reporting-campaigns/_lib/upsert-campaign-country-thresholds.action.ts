@@ -1,81 +1,35 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
+import { getExtracted } from "next-intl/server";
 
 import { UpsertCampaignCountryThresholdsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-country-thresholds.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import { db } from "@/lib/db";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export const upsertCampaignCountryThresholdsAction = createServerAction(
-	async function upsertCampaignCountryThresholdsAction(state, formData) {
-		const locale = await getLocale();
+export const upsertCampaignCountryThresholdsAction = createMutationAction({
+	schema: UpsertCampaignCountryThresholdsActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "update", subjectType: "reporting_campaigns" },
+	revalidate: "/[locale]/dashboard/administrator/reporting-campaigns",
+
+	async mutate(tx, input) {
 		const t = await getExtracted();
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
+		if (input.amounts != null) {
+			for (const [countryId, amount] of Object.entries(input.amounts)) {
+				await tx
+					.insert(schema.reportingCampaignCountryThresholds)
+					.values({ campaignId: input.id, countryId, amount })
+					.onConflictDoUpdate({
+						target: [
+							schema.reportingCampaignCountryThresholds.campaignId,
+							schema.reportingCampaignCountryThresholds.countryId,
+						],
+						set: { amount },
+					});
+			}
 		}
 
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			UpsertCampaignCountryThresholdsActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof UpsertCampaignCountryThresholdsActionInputSchema>(
-				result.issues,
-			);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { id, amounts } = result.output;
-
-		if (amounts != null) {
-			await db.transaction(async (tx) => {
-				for (const [countryId, amount] of Object.entries(amounts)) {
-					await tx
-						.insert(schema.reportingCampaignCountryThresholds)
-						.values({ campaignId: id, countryId, amount })
-						.onConflictDoUpdate({
-							target: [
-								schema.reportingCampaignCountryThresholds.campaignId,
-								schema.reportingCampaignCountryThresholds.countryId,
-							],
-							set: { amount },
-						});
-				}
-			});
-		}
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "update",
-			subjectType: "reporting_campaigns",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
-
-		revalidatePath("/[locale]/dashboard/administrator/reporting-campaigns", "layout");
-
-		return createActionStateSuccess({ message: t("Saved.") });
+		return { subjectId: input.id, successMessage: t("Saved.") };
 	},
-);
+});

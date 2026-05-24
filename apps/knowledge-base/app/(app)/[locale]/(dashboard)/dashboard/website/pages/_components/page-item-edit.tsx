@@ -1,12 +1,11 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
-import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { PageItemForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-form";
 import { discardPageItemDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/discard-page-item-draft.action";
 import { publishPageItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/publish-page-item.action";
@@ -53,16 +52,16 @@ export function PageItemEditForm(props: Readonly<PageItemEditFormProps>): ReactN
 
 	return (
 		<Fragment>
-			<div className="flex items-center justify-between">
-				<Heading>{t("Edit page")}</Heading>
-				<EntityLifecycleBar
-					discardDraftAction={discardPageItemDraftAction}
-					documentId={documentId}
-					hasDraft={hasDraftChanges}
-					isPublished={isPublished}
-					publishAction={publishPageItemAction}
-				/>
-			</div>
+			<EntityFormHeader
+				title={t("Edit page")}
+				lifecycle={{
+					documentId,
+					hasDraft: hasDraftChanges,
+					isPublished,
+					publishAction: publishPageItemAction,
+					discardDraftAction: discardPageItemDraftAction,
+				}}
+			/>
 
 			<PageItemForm
 				contentBlocks={contentBlocks}

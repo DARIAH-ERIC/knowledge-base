@@ -1,12 +1,11 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Heading } from "@dariah-eric/ui/heading";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
-import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { PersonRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { GovernanceBodyForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form";
@@ -77,16 +76,16 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 
 	return (
 		<Fragment>
-			<div className="flex items-center justify-between">
-				<Heading>{t("Edit governance body")}</Heading>
-				<EntityLifecycleBar
-					discardDraftAction={discardGovernanceBodyDraftAction}
-					documentId={documentId}
-					hasDraft={hasDraftChanges}
-					isPublished={isPublished}
-					publishAction={publishGovernanceBodyAction}
-				/>
-			</div>
+			<EntityFormHeader
+				title={t("Edit governance body")}
+				lifecycle={{
+					documentId,
+					hasDraft: hasDraftChanges,
+					isPublished,
+					publishAction: publishGovernanceBodyAction,
+					discardDraftAction: discardGovernanceBodyDraftAction,
+				}}
+			/>
 
 			<GovernanceBodyForm
 				formAction={updateGovernanceBodyAction}

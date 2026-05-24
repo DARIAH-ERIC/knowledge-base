@@ -23,8 +23,8 @@ interface PageItemDetailsProps {
 	pageItem: Pick<schema.Page, "id" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
-	publishAction: (documentId: string) => Promise<void>;
-	discardDraftAction?: (documentId: string) => Promise<void>;
+	publishAction: (documentId: string) => Promise<unknown>;
+	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
 
 export function PageItemDetails(props: Readonly<PageItemDetailsProps>): ReactNode {

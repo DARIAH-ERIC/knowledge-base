@@ -1,126 +1,83 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
+import { getExtracted } from "next-intl/server";
 
 import { UpsertCampaignServiceSizesActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-service-sizes.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import { db } from "@/lib/db";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export const upsertCampaignServiceSizesAction = createServerAction(
-	async function upsertCampaignServiceSizesAction(state, formData) {
-		const locale = await getLocale();
+export const upsertCampaignServiceSizesAction = createMutationAction({
+	schema: UpsertCampaignServiceSizesActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "update", subjectType: "reporting_campaigns" },
+	revalidate: "/[locale]/dashboard/administrator/reporting-campaigns",
+
+	async mutate(tx, input) {
 		const t = await getExtracted();
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
-
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			UpsertCampaignServiceSizesActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof UpsertCampaignServiceSizesActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const {
-			id,
-			small_threshold,
-			small_amount,
-			medium_threshold,
-			medium_amount,
-			large_threshold,
-			large_amount,
-			very_large_threshold,
-			very_large_amount,
-			core_amount,
-		} = result.output;
-
 		const tiered = [
-			{ serviceSize: "small" as const, threshold: small_threshold, amount: small_amount },
-			{ serviceSize: "medium" as const, threshold: medium_threshold, amount: medium_amount },
-			{ serviceSize: "large" as const, threshold: large_threshold, amount: large_amount },
+			{
+				serviceSize: "small" as const,
+				threshold: input.small_threshold,
+				amount: input.small_amount,
+			},
+			{
+				serviceSize: "medium" as const,
+				threshold: input.medium_threshold,
+				amount: input.medium_amount,
+			},
+			{
+				serviceSize: "large" as const,
+				threshold: input.large_threshold,
+				amount: input.large_amount,
+			},
 			{
 				serviceSize: "very_large" as const,
-				threshold: very_large_threshold,
-				amount: very_large_amount,
+				threshold: input.very_large_threshold,
+				amount: input.very_large_amount,
 			},
 		];
 
-		await db.transaction(async (tx) => {
-			for (const { serviceSize, threshold, amount } of tiered) {
-				if (amount == null) {
-					continue;
-				}
-
-				await tx
-					.insert(schema.reportingCampaignServiceSizes)
-					.values({
-						campaignId: id,
-						serviceSize,
-						visitsThreshold: threshold ?? null,
-						amount,
-					})
-					.onConflictDoUpdate({
-						target: [
-							schema.reportingCampaignServiceSizes.campaignId,
-							schema.reportingCampaignServiceSizes.serviceSize,
-						],
-						set: { visitsThreshold: threshold ?? null, amount },
-					});
+		for (const { serviceSize, threshold, amount } of tiered) {
+			if (amount == null) {
+				continue;
 			}
 
-			if (core_amount != null) {
-				await tx
-					.insert(schema.reportingCampaignServiceSizes)
-					.values({
-						campaignId: id,
-						serviceSize: "core",
-						visitsThreshold: null,
-						amount: core_amount,
-					})
-					.onConflictDoUpdate({
-						target: [
-							schema.reportingCampaignServiceSizes.campaignId,
-							schema.reportingCampaignServiceSizes.serviceSize,
-						],
-						set: { amount: core_amount },
-					});
-			}
-		});
+			await tx
+				.insert(schema.reportingCampaignServiceSizes)
+				.values({
+					campaignId: input.id,
+					serviceSize,
+					visitsThreshold: threshold ?? null,
+					amount,
+				})
+				.onConflictDoUpdate({
+					target: [
+						schema.reportingCampaignServiceSizes.campaignId,
+						schema.reportingCampaignServiceSizes.serviceSize,
+					],
+					set: { visitsThreshold: threshold ?? null, amount },
+				});
+		}
 
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "update",
-			subjectType: "reporting_campaigns",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
+		if (input.core_amount != null) {
+			await tx
+				.insert(schema.reportingCampaignServiceSizes)
+				.values({
+					campaignId: input.id,
+					serviceSize: "core",
+					visitsThreshold: null,
+					amount: input.core_amount,
+				})
+				.onConflictDoUpdate({
+					target: [
+						schema.reportingCampaignServiceSizes.campaignId,
+						schema.reportingCampaignServiceSizes.serviceSize,
+					],
+					set: { amount: input.core_amount },
+				});
+		}
 
-		revalidatePath("/[locale]/dashboard/administrator/reporting-campaigns", "layout");
-
-		return createActionStateSuccess({ message: t("Saved.") });
+		return { subjectId: input.id, successMessage: t("Saved.") };
 	},
-);
+});

@@ -1,12 +1,11 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
-import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { OpportunityForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_components/opportunity-form";
 import { discardOpportunityDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/discard-opportunity-draft.action";
 import { publishOpportunityAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/publish-opportunity.action";
@@ -37,16 +36,16 @@ export function OpportunityEditForm(props: Readonly<OpportunityEditFormProps>): 
 
 	return (
 		<Fragment>
-			<div className="flex items-center justify-between">
-				<Heading>{t("Edit opportunity")}</Heading>
-				<EntityLifecycleBar
-					discardDraftAction={discardOpportunityDraftAction}
-					documentId={documentId}
-					hasDraft={hasDraftChanges}
-					isPublished={isPublished}
-					publishAction={publishOpportunityAction}
-				/>
-			</div>
+			<EntityFormHeader
+				title={t("Edit opportunity")}
+				lifecycle={{
+					documentId,
+					hasDraft: hasDraftChanges,
+					isPublished,
+					publishAction: publishOpportunityAction,
+					discardDraftAction: discardOpportunityDraftAction,
+				}}
+			/>
 
 			<OpportunityForm
 				contentBlocks={contentBlocks}

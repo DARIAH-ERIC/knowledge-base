@@ -1,40 +1,24 @@
 "use server";
 
-import { getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { publishVersion } from "@/lib/data/entity-lifecycle";
 import { spotlightArticlesLifecycleAdapter } from "@/lib/data/spotlight-articles.lifecycle-adapter";
-import { db } from "@/lib/db";
-import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
+import { createCommandAction } from "@/lib/server/create-command-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export async function publishSpotlightArticleAction(documentId: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const publishSpotlightArticleAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "publish", subjectType: "spotlight_articles" },
+	revalidate: "/[locale]/dashboard/website/spotlight-articles",
+	redirect: "/dashboard/website/spotlight-articles",
 
-	await db.transaction(async (tx) => {
+	async mutate(tx, [documentId]: [string]) {
 		await publishVersion(tx, documentId, spotlightArticlesLifecycleAdapter);
-	});
+		return { subjectId: documentId };
+	},
 
-	after(async () => {
-		await syncWebsiteDocumentForEntity(documentId);
+	async postCommit({ result }) {
+		await syncWebsiteDocumentForEntity(result.subjectId);
 		await dispatchWebhook({ type: "spotlight-articles" });
-	});
-
-	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
-		action: "publish",
-		subjectType: "spotlight_articles",
-		subjectId: documentId,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/website/spotlight-articles", "layout");
-
-	const locale = await getLocale();
-	redirect({ href: "/dashboard/website/spotlight-articles", locale });
-}
+	},
+});

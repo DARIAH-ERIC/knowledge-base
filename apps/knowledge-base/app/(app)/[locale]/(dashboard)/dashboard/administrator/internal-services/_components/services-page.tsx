@@ -2,11 +2,6 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { Badge } from "@dariah-eric/ui/badge";
-import { Button } from "@dariah-eric/ui/button";
-import { buttonStyles } from "@dariah-eric/ui/button-styles";
-import { Link } from "@dariah-eric/ui/link";
-import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
-import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import {
 	Table,
 	TableBody,
@@ -15,24 +10,18 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import {
-	EllipsisHorizontalIcon,
-	PencilSquareIcon,
-	PlusIcon,
-	TrashIcon,
-} from "@heroicons/react/24/outline";
+import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
-import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
-	Header,
-	HeaderAction,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
-import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+	EntityDeleteModal,
+	EntityListHeader,
+	EntityListPagination,
+	EntityListSearchField,
+	NewLink,
+	RowActionsMenu,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteServiceAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_lib/delete-service.action";
 import { dashboardPageSize } from "@/config/pagination.config";
@@ -89,45 +78,32 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 		state.filter((item) => item.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
-	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
-		useUrlPaginatedSearch({
-			dir: initialDir,
-			page: initialPage,
-			q: initialQ,
-			sort: initialSort,
-		});
+	const search = useUrlPaginatedSearch({
+		dir: initialDir,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+	});
 	const [isDeletePending, startDeleteTransition] = useTransition();
-
-	const totalPages = Math.max(Math.ceil(services.total / pageSize), 1);
 
 	return (
 		<Fragment>
-			<Header>
-				<HeaderContent>
-					<HeaderTitle>{t("Internal Services")}</HeaderTitle>
-					<HeaderDescription>
-						{t("Manage all internal services in the DARIAH knowledge base.")}
-					</HeaderDescription>
-				</HeaderContent>
-				<HeaderAction>
-					<SearchField onChange={setInputValue} value={inputValue}>
-						<SearchInput placeholder={t("Search")} />
-					</SearchField>
-					<Link
-						className={buttonStyles({ intent: "secondary" })}
-						href="/dashboard/administrator/internal-services/create"
-					>
-						<PlusIcon className="me-2 block-4 inline-4" />
-						{t("New")}
-					</Link>
-				</HeaderAction>
-			</Header>
+			<EntityListHeader
+				title={t("Internal Services")}
+				description={t("Manage all internal services in the DARIAH knowledge base.")}
+				action={
+					<>
+						<EntityListSearchField search={search} />
+						<NewLink href="/dashboard/administrator/internal-services/create">{t("New")}</NewLink>
+					</>
+				}
+			/>
 
 			<Table
 				aria-label="services"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
-				onSortChange={setSortDescriptor}
-				sortDescriptor={sortDescriptor}
+				onSortChange={search.setSortDescriptor}
+				sortDescriptor={search.sortDescriptor}
 			>
 				<TableHeader>
 					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
@@ -152,50 +128,40 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 								</Badge>
 							</TableCell>
 							<TableCell className="text-end">
-								<Menu>
-									<Button
-										aria-label={t("Open actions menu")}
-										className="block-7 sm:block-7"
-										intent="plain"
-										size="sq-sm"
+								<RowActionsMenu>
+									<RowActionsMenu.Link
+										href={`/dashboard/administrator/internal-services/${item.id}/edit`}
+										icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
 									>
-										<EllipsisHorizontalIcon className="block-5 inline-5" />
-									</Button>
-									<MenuContent placement="left top">
-										<MenuItem href={`/dashboard/administrator/internal-services/${item.id}/edit`}>
-											<PencilSquareIcon className="me-2 block-4 inline-4" />
-											<MenuLabel>{t("Edit")}</MenuLabel>
-										</MenuItem>
-										<MenuSeparator />
-										<MenuItem
-											intent="danger"
-											onAction={() => {
-												setItemToDelete({ id: item.id });
-											}}
-										>
-											<TrashIcon className="me-2 block-4 inline-4" />
-											<MenuLabel>{t("Delete")}</MenuLabel>
-										</MenuItem>
-									</MenuContent>
-								</Menu>
+										{t("Edit")}
+									</RowActionsMenu.Link>
+									<RowActionsMenu.Separator />
+									<RowActionsMenu.Action
+										danger={true}
+										icon={<TrashIcon className="me-2 block-4 inline-4" />}
+										onAction={() => {
+											setItemToDelete({ id: item.id });
+										}}
+									>
+										{t("Delete")}
+									</RowActionsMenu.Action>
+								</RowActionsMenu>
 							</TableCell>
 						</TableRow>
 					)}
 				</TableBody>
 			</Table>
 
-			<Paginate
-				isPending={isPending}
-				page={page}
-				setPage={setPage}
-				total={totalPages}
-				totalItems={services.total}
-			/>
+			<EntityListPagination search={search} total={services.total} pageSize={pageSize} />
 
-			<DeleteModal
-				isOpen={itemToDelete != null}
+			<EntityDeleteModal
+				item={itemToDelete}
 				model={t("service")}
-				onAction={() => {
+				isPending={isDeletePending}
+				onClose={() => {
+					setItemToDelete(null);
+				}}
+				onConfirm={() => {
 					if (itemToDelete == null) {
 						return;
 					}
@@ -208,11 +174,6 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 						router.refresh();
 						setItemToDelete(null);
 					});
-				}}
-				onOpenChange={(open) => {
-					if (!open && !isDeletePending) {
-						setItemToDelete(null);
-					}
 				}}
 			/>
 		</Fragment>

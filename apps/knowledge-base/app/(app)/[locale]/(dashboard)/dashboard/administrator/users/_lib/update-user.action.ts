@@ -1,12 +1,8 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
+import { getExtracted } from "next-intl/server";
 
 import {
 	canManageAdminAccounts,
@@ -14,51 +10,24 @@ import {
 	isRemovingAdminManagementPrivilege,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/admin-management";
 import { UpdateUserActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/update-user.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
 import { auth } from "@/lib/auth";
-import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export const updateUserAction = createServerAction(
-	async function updateUserAction(state, formData) {
-		const locale = await getLocale();
+export const updateUserAction = createMutationAction({
+	schema: UpdateUserActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "update", subjectType: "users" },
+	revalidate: "/[locale]/dashboard/administrator/users",
+	redirect: "/dashboard/administrator/users",
+
+	async preCheck({ input, ctx }) {
 		const t = await getExtracted();
-
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
-
-		const { user: currentUser } = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			UpdateUserActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof UpdateUserActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { id, name, email, role, personId, organisationalUnitId, canManageAdmins } =
-			result.output;
-		const canManageAdminsFlag = role === "admin" && canManageAdmins === "true";
+		const canManageAdminsFlag = input.role === "admin" && input.canManageAdmins === "true";
 
 		const existing = await db.query.users.findFirst({
-			where: { id },
+			where: { id: input.id },
 			columns: { email: true, role: true, canManageAdmins: true },
 		});
 
@@ -66,18 +35,18 @@ export const updateUserAction = createServerAction(
 			return createActionStateError({ message: t("User not found.") });
 		}
 
-		const isPrivilegedUser = existing.role === "admin" || role === "admin";
-
-		if (isPrivilegedUser && !canManageAdminAccounts(currentUser)) {
+		const isPrivilegedUser = existing.role === "admin" || input.role === "admin";
+		if (isPrivilegedUser && (ctx.user == null || !canManageAdminAccounts(ctx.user))) {
 			return createActionStateError({
 				message: t("You are not allowed to change admin accounts."),
 			});
 		}
 
 		if (
-			currentUser.id === id &&
+			ctx.user != null &&
+			ctx.user.id === input.id &&
 			isRemovingAdminManagementPrivilege(existing, {
-				role,
+				role: input.role,
 				canManageAdmins: canManageAdminsFlag,
 			})
 		) {
@@ -88,7 +57,7 @@ export const updateUserAction = createServerAction(
 
 		if (
 			isRemovingAdminManagementPrivilege(existing, {
-				role,
+				role: input.role,
 				canManageAdmins: canManageAdminsFlag,
 			}) &&
 			(await countAdminManagers()) <= 1
@@ -99,34 +68,32 @@ export const updateUserAction = createServerAction(
 		}
 
 		if (
-			existing.email.toLowerCase() !== email.toLowerCase() &&
-			!(await auth.isEmailAvailable(email))
+			existing.email.toLowerCase() !== input.email.toLowerCase() &&
+			!(await auth.isEmailAvailable(input.email))
 		) {
-			return createActionStateError({ message: t("This email address is already in use.") });
+			return createActionStateError({
+				message: t("This email address is already in use."),
+			});
 		}
 
-		await db
+		return undefined;
+	},
+
+	async mutate(tx, input) {
+		const canManageAdminsFlag = input.role === "admin" && input.canManageAdmins === "true";
+
+		await tx
 			.update(schema.users)
 			.set({
-				name,
-				email,
-				role,
+				name: input.name,
+				email: input.email,
+				role: input.role,
 				canManageAdmins: canManageAdminsFlag,
-				personId: personId ?? null,
-				organisationalUnitId: organisationalUnitId ?? null,
+				personId: input.personId ?? null,
+				organisationalUnitId: input.organisationalUnitId ?? null,
 			})
-			.where(eq(schema.users.id, id));
+			.where(eq(schema.users.id, input.id));
 
-		await recordAuditEvent(db, {
-			actorUserId: currentUser.id,
-			action: "update",
-			subjectType: "users",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
-
-		revalidatePath("/[locale]/dashboard/administrator/users", "layout");
-
-		redirect({ href: "/dashboard/administrator/users", locale });
+		return { subjectId: input.id };
 	},
-);
+});

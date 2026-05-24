@@ -1,158 +1,89 @@
 "use server";
 
-import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
-import { type Transaction, db } from "@dariah-eric/database/client";
+import { assert, keyBy } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import slugify from "@sindresorhus/slugify";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-import * as v from "valibot";
 
 import { CreateFundingCallActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/create-funding-call.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
 import { fundingCallsLifecycleAdapter } from "@/lib/data/funding-calls.lifecycle-adapter";
+import { db } from "@/lib/db";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export const createFundingCallAction = createServerAction(
-	async function createFundingCallAction(state, formData) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+export const createFundingCallAction = createMutationAction({
+	schema: CreateFundingCallActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "create", subjectType: "funding_calls" },
+	revalidate: "/[locale]/dashboard/website/funding-calls",
+	redirect: "/dashboard/website/funding-calls",
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
+	async mutate(tx, input, { formData }) {
+		const slug = slugify(input.title);
 
-		const auditSession = await assertAdmin();
+		const type = await tx.query.entityTypes.findFirst({
+			where: { type: "funding_calls" },
+			columns: { id: true },
+		});
+		assert(type);
 
-		const result = await v.safeParseAsync(
-			CreateFundingCallActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+		const { documentId, versionId } = await createDraftDocument(tx, type.id, slug);
+
+		await tx.insert(schema.fundingCalls).values({
+			id: versionId,
+			duration: input.duration,
+			title: input.title,
+			summary: input.summary,
+		});
+
+		const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({
+			where: { entityTypeId: type.id, fieldName: "content" },
+			columns: { id: true },
+		});
+		assert(contentFieldName);
+
+		const [contentField] = await tx
+			.insert(schema.fields)
+			.values({ entityVersionId: versionId, fieldNameId: contentFieldName.id })
+			.returning({ id: schema.fields.id });
+		assert(contentField);
+
+		const contentBlockTypes = await db.query.contentBlockTypes.findMany();
+		const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
+
+		await Promise.all(
+			input.contentBlocks.map(async (contentBlock, index) => {
+				const [added] = await tx
+					.insert(schema.contentBlocks)
+					.values({
+						fieldId: contentField.id,
+						typeId: contentBlockTypesByType[contentBlock.type].id,
+						position: index,
+					})
+					.returning({ id: schema.contentBlocks.id });
+				assert(added);
+				await upsertTypedContentBlock(tx, contentBlock, added.id, true);
+			}),
 		);
 
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateFundingCallActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
+		if (shouldSaveAndPublish(formData)) {
+			await publishVersion(tx, documentId, fundingCallsLifecycleAdapter);
 		}
 
-		const { contentBlocks, duration, title, summary } = result.output;
-
-		const slug = slugify(title);
-		let documentId: string | null = null;
-
-		await db.transaction(async (tx) => {
-			const type = await tx.query.entityTypes.findFirst({
-				where: {
-					type: "funding_calls",
-				},
-				columns: {
-					id: true,
-				},
-			});
-
-			assert(type);
-
-			const { documentId: docId, versionId } = await createDraftDocument(tx, type.id, slug);
-			documentId = docId;
-
-			await tx.insert(schema.fundingCalls).values({
-				id: versionId,
-				duration,
-				title,
-				summary,
-			});
-
-			const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({
-				where: {
-					entityTypeId: type.id,
-					fieldName: "content",
-				},
-				columns: { id: true },
-			});
-
-			assert(contentFieldName);
-
-			const [contentField] = await tx
-				.insert(schema.fields)
-				.values({ entityVersionId: versionId, fieldNameId: contentFieldName.id })
-				.returning({ id: schema.fields.id });
-
-			assert(contentField);
-
-			const contentBlockTypes = await db.query.contentBlockTypes.findMany();
-			const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
-
-			async function insertTypeBlock(tx: Transaction, block: ContentBlockInput, blockId: string) {
-				await upsertTypedContentBlock(tx, block, blockId, true);
-			}
-
-			await Promise.all(
-				contentBlocks.map(async (contentBlock, index) => {
-					const [added] = await tx
-						.insert(schema.contentBlocks)
-						.values({
-							fieldId: contentField.id,
-							typeId: contentBlockTypesByType[contentBlock.type].id,
-							position: index,
-						})
-						.returning({ id: schema.contentBlocks.id });
-
-					assert(added);
-
-					await insertTypeBlock(tx, contentBlock, added.id);
-				}),
-			);
-
-			if (shouldSaveAndPublish(formData)) {
-				await publishVersion(tx, docId, fundingCallsLifecycleAdapter);
-			}
-		});
-
-		after(async () => {
-			if (!shouldSaveAndPublish(formData)) {
-				return;
-			}
-
-			if (documentId != null) {
-				await syncWebsiteDocumentForEntity(documentId);
-			}
-
-			await dispatchWebhook({ type: "funding-calls" });
-		});
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "create",
-			subjectType: "funding_calls",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: {
-				...getAuditSummaryFromFormData(formData),
+		return {
+			subjectId: documentId,
+			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},
-		});
-
-		revalidatePath("/[locale]/dashboard/website/funding-calls", "layout");
-
-		redirect({ href: "/dashboard/website/funding-calls", locale });
+		};
 	},
-);
+
+	async postCommit({ result, ctx }) {
+		if (!shouldSaveAndPublish(ctx.formData)) return;
+		await syncWebsiteDocumentForEntity(result.subjectId);
+		await dispatchWebhook({ type: "funding-calls" });
+	},
+});

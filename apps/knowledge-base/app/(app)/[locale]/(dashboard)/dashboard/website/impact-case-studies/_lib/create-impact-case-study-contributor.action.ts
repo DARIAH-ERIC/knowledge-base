@@ -1,52 +1,24 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
+import { createActionStateError } from "@dariah-eric/next-lib/actions";
+import { getExtracted } from "next-intl/server";
 
 import { CreateImpactCaseStudyContributorActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/create-impact-case-study-contributor.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export const createImpactCaseStudyContributorAction = createServerAction(
-	async function createImpactCaseStudyContributorAction(state, formData) {
-		const locale = await getLocale();
+export const createImpactCaseStudyContributorAction = createMutationAction({
+	schema: CreateImpactCaseStudyContributorActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "create", subjectType: "impact_case_studies" },
+	revalidate: "/[locale]/dashboard/website/impact-case-studies",
+
+	async preCheck({ input }) {
 		const t = await getExtracted();
-
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			CreateImpactCaseStudyContributorActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateImpactCaseStudyContributorActionInputSchema>(
-				result.issues,
-			);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { articleId, personId, role } = result.output;
-
 		const existing = await db.query.impactCaseStudiesToPersons.findFirst({
-			where: { impactCaseStudyId: articleId, personId },
+			where: { impactCaseStudyId: input.articleId, personId: input.personId },
 			columns: { personId: true },
 		});
 
@@ -54,24 +26,18 @@ export const createImpactCaseStudyContributorAction = createServerAction(
 			return createActionStateError({ message: t("This contributor already exists.") });
 		}
 
-		await db.transaction(async (tx) => {
-			await tx
-				.insert(schema.impactCaseStudiesToPersons)
-				.values({ impactCaseStudyId: articleId, personId, role });
-
-			await touchVersion(tx, articleId);
-		});
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "create",
-			subjectType: "impact_case_studies",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
-
-		revalidatePath("/[locale]/dashboard/website/impact-case-studies", "layout");
-
-		return createActionStateSuccess({ data: undefined });
+		return undefined;
 	},
-);
+
+	async mutate(tx, input) {
+		await tx.insert(schema.impactCaseStudiesToPersons).values({
+			impactCaseStudyId: input.articleId,
+			personId: input.personId,
+			role: input.role,
+		});
+
+		await touchVersion(tx, input.articleId);
+
+		return { subjectId: input.articleId };
+	},
+});

@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { GovernanceBodiesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getGovernanceBodiesForAdmin } from "@/lib/data/governance-bodies";
+import { getGovernanceBodiesForAdmin } from "@/lib/data/cached/governance-bodies";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";

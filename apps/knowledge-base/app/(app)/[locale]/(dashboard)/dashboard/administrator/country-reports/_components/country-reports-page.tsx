@@ -1,10 +1,6 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Button } from "@dariah-eric/ui/button";
-import { buttonStyles } from "@dariah-eric/ui/button-styles";
-import { Link } from "@dariah-eric/ui/link";
-import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
 import {
 	Table,
 	TableBody,
@@ -13,24 +9,16 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import {
-	EllipsisHorizontalIcon,
-	EyeIcon,
-	PencilSquareIcon,
-	PlusIcon,
-	TrashIcon,
-} from "@heroicons/react/24/outline";
+import { EyeIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, startTransition, use, useOptimistic, useState } from "react";
 
-import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
-	Header,
-	HeaderAction,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+	EntityDeleteModal,
+	EntityListHeader,
+	NewLink,
+	RowActionsMenu,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { deleteCountryReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/delete-country-report.action";
 import { useRouter } from "@/lib/navigation/navigation";
 
@@ -62,23 +50,13 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 
 	return (
 		<Fragment>
-			<Header>
-				<HeaderContent>
-					<HeaderTitle>{t("Country reports")}</HeaderTitle>
-					<HeaderDescription>
-						{t("Manage all country reports in the DARIAH knowledge base.")}
-					</HeaderDescription>
-				</HeaderContent>
-				<HeaderAction>
-					<Link
-						className={buttonStyles({ intent: "secondary" })}
-						href="/dashboard/administrator/country-reports/create"
-					>
-						<PlusIcon className="me-2 block-4 inline-4" />
-						{t("New")}
-					</Link>
-				</HeaderAction>
-			</Header>
+			<EntityListHeader
+				title={t("Country reports")}
+				description={t("Manage all country reports in the DARIAH knowledge base.")}
+				action={
+					<NewLink href="/dashboard/administrator/country-reports/create">{t("New")}</NewLink>
+				}
+			/>
 
 			<Table
 				aria-label="country reports"
@@ -97,46 +75,44 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 							<TableCell>{item.campaign.year}</TableCell>
 							<TableCell>{formatStatus(item.status)}</TableCell>
 							<TableCell className="text-end">
-								<Menu>
-									<Button
-										aria-label={t("Open actions menu")}
-										className="block-7 sm:block-7"
-										intent="plain"
-										size="sq-sm"
+								<RowActionsMenu>
+									<RowActionsMenu.Link
+										href={`/dashboard/administrator/country-reports/${item.id}`}
+										icon={<EyeIcon className="me-2 block-4 inline-4" />}
 									>
-										<EllipsisHorizontalIcon className="block-5 inline-5" />
-									</Button>
-									<MenuContent placement="left top">
-										<MenuItem href={`/dashboard/administrator/country-reports/${item.id}`}>
-											<EyeIcon className="me-2 block-4 inline-4" />
-											<MenuLabel>{t("View")}</MenuLabel>
-										</MenuItem>
-										<MenuItem href={`/dashboard/administrator/country-reports/${item.id}/edit`}>
-											<PencilSquareIcon className="me-2 block-4 inline-4" />
-											<MenuLabel>{t("Edit")}</MenuLabel>
-										</MenuItem>
-										<MenuSeparator />
-										<MenuItem
-											intent="danger"
-											onAction={() => {
-												setItemToDelete({ id: item.id });
-											}}
-										>
-											<TrashIcon className="me-2 block-4 inline-4" />
-											<MenuLabel>{t("Delete")}</MenuLabel>
-										</MenuItem>
-									</MenuContent>
-								</Menu>
+										{t("View")}
+									</RowActionsMenu.Link>
+									<RowActionsMenu.Link
+										href={`/dashboard/administrator/country-reports/${item.id}/edit`}
+										icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
+									>
+										{t("Edit")}
+									</RowActionsMenu.Link>
+									<RowActionsMenu.Separator />
+									<RowActionsMenu.Action
+										danger={true}
+										icon={<TrashIcon className="me-2 block-4 inline-4" />}
+										onAction={() => {
+											setItemToDelete({ id: item.id });
+										}}
+									>
+										{t("Delete")}
+									</RowActionsMenu.Action>
+								</RowActionsMenu>
 							</TableCell>
 						</TableRow>
 					)}
 				</TableBody>
 			</Table>
 
-			<DeleteModal
-				isOpen={itemToDelete != null}
+			<EntityDeleteModal
+				item={itemToDelete}
 				model={t("country report")}
-				onAction={() => {
+				isPending={false}
+				onClose={() => {
+					setItemToDelete(null);
+				}}
+				onConfirm={() => {
 					if (itemToDelete == null) {
 						return;
 					}
@@ -147,11 +123,6 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 						router.refresh();
 						setItemToDelete(null);
 					});
-				}}
-				onOpenChange={(open) => {
-					if (!open) {
-						setItemToDelete(null);
-					}
 				}}
 			/>
 		</Fragment>

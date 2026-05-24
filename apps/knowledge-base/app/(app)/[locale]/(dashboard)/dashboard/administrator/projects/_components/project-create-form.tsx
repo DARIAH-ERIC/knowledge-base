@@ -1,10 +1,10 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { ProjectForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form";
 import { createProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-project.action";
 
@@ -33,7 +33,7 @@ export function ProjectCreateForm(props: Readonly<ProjectCreateFormProps>): Reac
 
 	return (
 		<Fragment>
-			<Heading>{t("New project")}</Heading>
+			<EntityFormHeader title={t("New project")} />
 
 			<ProjectForm
 				formAction={createProjectAction}

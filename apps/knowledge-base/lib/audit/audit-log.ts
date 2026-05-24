@@ -40,8 +40,6 @@ const sensitiveFieldNames = new Set([
 	"twoFactorRecoveryCode",
 ]);
 
-const subjectIdFieldNames = ["id", "documentId", "entityId", "campaignId", "slug", "code"] as const;
-
 export function getAuditSummaryFromFormData(formData: FormData): Record<string, unknown> {
 	const fields = unique(Array.from(formData.keys()))
 		.filter((field) => !sensitiveFieldNames.has(field))
@@ -52,16 +50,4 @@ export function getAuditSummaryFromFormData(formData: FormData): Record<string, 
 		fields,
 		...(isNonEmptyString(intent) ? { intent } : {}),
 	};
-}
-
-export function getAuditSubjectIdFromFormData(formData: FormData): string {
-	for (const field of subjectIdFieldNames) {
-		const value = formData.get(field);
-
-		if (typeof value === "string" && value !== "") {
-			return value;
-		}
-	}
-
-	return "unknown";
 }

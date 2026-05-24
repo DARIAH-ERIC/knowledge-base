@@ -1,170 +1,118 @@
 "use server";
 
-import { assert, getFormDataValues } from "@acdh-oeaw/lib";
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import slugify from "@sindresorhus/slugify";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
 
 import { CreateCountryActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/create-country.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
-import { db } from "@/lib/db";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export const createCountryAction = createServerAction(
-	async function createCountryAction(state, formData) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+export const createCountryAction = createMutationAction({
+	schema: CreateCountryActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "create", subjectType: "countries" },
+	revalidate: "/[locale]/dashboard/administrator/countries",
+	redirect: "/dashboard/administrator/countries",
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
+	async mutate(tx, input, { formData }) {
+		const slug = slugify(input.name);
+
+		const entityType = await tx.query.entityTypes.findFirst({
+			where: { type: "organisational_units" },
+			columns: { id: true },
+		});
+		assert(entityType);
+
+		const orgUnitType = await tx.query.organisationalUnitTypes.findFirst({
+			where: { type: "country" },
+			columns: { id: true },
+		});
+		assert(orgUnitType);
+
+		const { documentId, versionId } = await createDraftDocument(tx, entityType.id, slug);
+
+		let imageId: string | null = null;
+		if (input.imageKey != null) {
+			const asset = await tx.query.assets.findFirst({
+				where: { key: input.imageKey },
+				columns: { id: true },
+			});
+			assert(asset);
+			imageId = asset.id;
 		}
 
-		const auditSession = await assertAdmin();
+		await tx.insert(schema.organisationalUnits).values({
+			id: versionId,
+			acronym: input.acronym,
+			imageId,
+			name: input.name,
+			summary: input.summary,
+			typeId: orgUnitType.id,
+		});
 
-		const result = await v.safeParseAsync(
-			CreateCountryActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateCountryActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
+		if (input.relatedEntityIds.length > 0) {
+			await tx.insert(schema.entitiesToEntities).values(
+				input.relatedEntityIds.map((relatedEntityId) => {
+					return { entityId: documentId, relatedEntityId };
+				}),
+			);
 		}
 
-		const { acronym, description, imageKey, name, relatedEntityIds, relatedResourceIds, summary } =
-			result.output;
+		if (input.relatedResourceIds.length > 0) {
+			await tx.insert(schema.entitiesToResources).values(
+				input.relatedResourceIds.map((resourceId) => {
+					return { entityId: documentId, resourceId };
+				}),
+			);
+		}
 
-		const slug = slugify(name);
+		const descriptionFieldName = await tx.query.entityTypesFieldsNames.findFirst({
+			where: { entityTypeId: entityType.id, fieldName: "description" },
+			columns: { id: true },
+		});
+		assert(descriptionFieldName);
 
-		await db.transaction(async (tx) => {
-			const entityType = await tx.query.entityTypes.findFirst({
-				where: { type: "organisational_units" },
-				columns: { id: true },
-			});
+		const [descriptionField] = await tx
+			.insert(schema.fields)
+			.values({ entityVersionId: versionId, fieldNameId: descriptionFieldName.id })
+			.returning({ id: schema.fields.id });
+		assert(descriptionField);
 
-			assert(entityType);
+		const richTextType = await tx.query.contentBlockTypes.findFirst({
+			where: { type: "rich_text" },
+			columns: { id: true },
+		});
+		assert(richTextType);
 
-			const orgUnitType = await tx.query.organisationalUnitTypes.findFirst({
-				where: { type: "country" },
-				columns: { id: true },
-			});
+		const [contentBlock] = await tx
+			.insert(schema.contentBlocks)
+			.values({ fieldId: descriptionField.id, typeId: richTextType.id, position: 0 })
+			.returning({ id: schema.contentBlocks.id });
+		assert(contentBlock);
 
-			assert(orgUnitType);
-
-			const { documentId, versionId } = await createDraftDocument(tx, entityType.id, slug);
-
-			let imageId: string | null = null;
-
-			if (imageKey != null) {
-				const asset = await tx.query.assets.findFirst({
-					where: { key: imageKey },
-					columns: { id: true },
-				});
-
-				assert(asset);
-
-				imageId = asset.id;
-			}
-
-			await tx.insert(schema.organisationalUnits).values({
-				id: versionId,
-				acronym,
-				imageId,
-				name,
-				summary,
-				typeId: orgUnitType.id,
-			});
-
-			if (relatedEntityIds.length > 0) {
-				await tx.insert(schema.entitiesToEntities).values(
-					relatedEntityIds.map((relatedEntityId) => {
-						return { entityId: documentId, relatedEntityId };
-					}),
-				);
-			}
-
-			if (relatedResourceIds.length > 0) {
-				await tx.insert(schema.entitiesToResources).values(
-					relatedResourceIds.map((resourceId) => {
-						return { entityId: documentId, resourceId };
-					}),
-				);
-			}
-
-			const descriptionFieldName = await tx.query.entityTypesFieldsNames.findFirst({
-				where: { entityTypeId: entityType.id, fieldName: "description" },
-				columns: { id: true },
-			});
-
-			assert(descriptionFieldName);
-
-			const [descriptionField] = await tx
-				.insert(schema.fields)
-				.values({ entityVersionId: versionId, fieldNameId: descriptionFieldName.id })
-				.returning({ id: schema.fields.id });
-
-			assert(descriptionField);
-
-			const richTextType = await tx.query.contentBlockTypes.findFirst({
-				where: { type: "rich_text" },
-				columns: { id: true },
-			});
-
-			assert(richTextType);
-
-			const [contentBlock] = await tx
-				.insert(schema.contentBlocks)
-				.values({ fieldId: descriptionField.id, typeId: richTextType.id, position: 0 })
-				.returning({ id: schema.contentBlocks.id });
-
-			assert(contentBlock);
-
-			await tx.insert(schema.richTextContentBlocks).values({
-				id: contentBlock.id,
-				content: JSON.parse(description) as schema.RichTextContentBlock["content"],
-			});
-
-			if (shouldSaveAndPublish(formData)) {
-				await publishVersion(tx, documentId, organisationalUnitsLifecycleAdapter);
-			}
+		await tx.insert(schema.richTextContentBlocks).values({
+			id: contentBlock.id,
+			content: JSON.parse(input.description) as schema.RichTextContentBlock["content"],
 		});
 
 		if (shouldSaveAndPublish(formData)) {
-			await dispatchWebhook({ type: "members-partners" });
+			await publishVersion(tx, documentId, organisationalUnitsLifecycleAdapter);
 		}
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "create",
-			subjectType: "countries",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: {
-				...getAuditSummaryFromFormData(formData),
+
+		return {
+			subjectId: documentId,
+			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},
-		});
-
-		revalidatePath("/[locale]/dashboard/administrator/countries", "layout");
-
-		redirect({ href: "/dashboard/administrator/countries", locale });
+		};
 	},
-);
+
+	async postCommit({ result, ctx }) {
+		if (!shouldSaveAndPublish(ctx.formData)) return;
+		await dispatchWebhook({ type: "members-partners" });
+	},
+});

@@ -1,111 +1,64 @@
 "use server";
 
-import { assert, getFormDataValues } from "@acdh-oeaw/lib";
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-import * as v from "valibot";
 
 import { UpdatePersonActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/update-person.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { upsertRichTextEntityVersionField } from "@/lib/data/entity-version-fields";
 import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
-import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export const updatePersonAction = createServerAction(
-	async function updatePersonAction(state, formData) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+export const updatePersonAction = createMutationAction({
+	schema: UpdatePersonActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "update", subjectType: "persons" },
+	revalidate: "/[locale]/dashboard/administrator/persons",
+	redirect: "/dashboard/administrator/persons",
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
+	async mutate(tx, input, { formData }) {
+		const draftVersionId = await ensureDraftVersion(tx, input.documentId, personsLifecycleAdapter);
+
+		const asset = await tx.query.assets.findFirst({
+			where: { key: input.imageKey },
+			columns: { id: true },
+		});
+		assert(asset);
+
+		await tx
+			.update(schema.persons)
+			.set({
+				email: input.email,
+				imageId: asset.id,
+				name: input.name,
+				orcid: input.orcid,
+				sortName: input.sortName,
+			})
+			.where(eq(schema.persons.id, draftVersionId));
+
+		const parsedContent = JSON.parse(input.biography) as schema.RichTextContentBlock["content"];
+		await upsertRichTextEntityVersionField(tx, draftVersionId, "biography", parsedContent);
+		await touchVersion(tx, draftVersionId);
+
+		if (shouldSaveAndPublish(formData)) {
+			await publishVersion(tx, input.documentId, personsLifecycleAdapter);
 		}
 
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			UpdatePersonActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof UpdatePersonActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { biography, documentId, email, imageKey, name, orcid, sortName } = result.output;
-
-		await db.transaction(async (tx) => {
-			const draftVersionId = await ensureDraftVersion(tx, documentId, personsLifecycleAdapter);
-
-			const asset = await tx.query.assets.findFirst({
-				where: { key: imageKey },
-				columns: { id: true },
-			});
-
-			assert(asset);
-
-			const imageId = asset.id;
-
-			await tx
-				.update(schema.persons)
-				.set({ email, imageId, name, orcid, sortName })
-				.where(eq(schema.persons.id, draftVersionId));
-
-			const parsedContent = JSON.parse(biography) as schema.RichTextContentBlock["content"];
-
-			await upsertRichTextEntityVersionField(tx, draftVersionId, "biography", parsedContent);
-
-			await touchVersion(tx, draftVersionId);
-
-			if (shouldSaveAndPublish(formData)) {
-				await publishVersion(tx, documentId, personsLifecycleAdapter);
-			}
-		});
-
-		after(async () => {
-			if (!shouldSaveAndPublish(formData)) {
-				return;
-			}
-
-			await syncWebsiteDocumentForEntity(documentId);
-			await dispatchWebhook({ type: "persons" });
-		});
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "update",
-			subjectType: "persons",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: {
-				...getAuditSummaryFromFormData(formData),
+		return {
+			subjectId: input.documentId,
+			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},
-		});
-
-		revalidatePath("/[locale]/dashboard/administrator/persons", "layout");
-
-		redirect({ href: "/dashboard/administrator/persons", locale });
+		};
 	},
-);
+
+	async postCommit({ result, ctx }) {
+		if (!shouldSaveAndPublish(ctx.formData)) return;
+		await syncWebsiteDocumentForEntity(result.subjectId);
+		await dispatchWebhook({ type: "persons" });
+	},
+});

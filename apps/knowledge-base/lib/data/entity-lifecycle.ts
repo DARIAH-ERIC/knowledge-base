@@ -334,26 +334,16 @@ export async function getDocumentVersions(
 	tx: Transaction,
 	documentId: string,
 ): Promise<DocumentVersions> {
-	const rows = await tx
-		.select({ id: schema.entityVersions.id, statusType: schema.entityStatus.type })
-		.from(schema.entityVersions)
-		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-		.where(eq(schema.entityVersions.entityId, documentId));
+	const row = await tx
+		.select({
+			draftId: schema.documentLifecycle.draftId,
+			publishedId: schema.documentLifecycle.publishedId,
+		})
+		.from(schema.documentLifecycle)
+		.where(eq(schema.documentLifecycle.documentId, documentId))
+		.then((rows) => rows[0]);
 
-	let draftId: string | null = null;
-	let publishedId: string | null = null;
-
-	for (const row of rows) {
-		if (row.statusType === "draft") {
-			draftId = row.id;
-		}
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-		else if (row.statusType === "published") {
-			publishedId = row.id;
-		}
-	}
-
-	return { draftId, publishedId };
+	return { draftId: row?.draftId ?? null, publishedId: row?.publishedId ?? null };
 }
 
 /** Return lifecycle state while treating a synced draft clone as "no draft changes". */
@@ -361,41 +351,21 @@ export async function getDocumentLifecycleState(
 	tx: Transaction,
 	documentId: string,
 ): Promise<DocumentLifecycleState> {
-	const rows = await tx
+	const row = await tx
 		.select({
-			id: schema.entityVersions.id,
-			statusType: schema.entityStatus.type,
-			updatedAt: schema.entityVersions.updatedAt,
+			draftId: schema.documentLifecycle.draftId,
+			publishedId: schema.documentLifecycle.publishedId,
+			hasDraftChanges: schema.documentLifecycle.hasDraftChanges,
 		})
-		.from(schema.entityVersions)
-		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-		.where(eq(schema.entityVersions.entityId, documentId));
+		.from(schema.documentLifecycle)
+		.where(eq(schema.documentLifecycle.documentId, documentId))
+		.then((rows) => rows[0]);
 
-	let draftId: string | null = null;
-	let draftUpdatedAt: Date | null = null;
-	let publishedId: string | null = null;
-	let publishedUpdatedAt: Date | null = null;
-
-	for (const row of rows) {
-		if (row.statusType === "draft") {
-			draftId = row.id;
-			draftUpdatedAt = row.updatedAt;
-		}
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-		else if (row.statusType === "published") {
-			publishedId = row.id;
-			publishedUpdatedAt = row.updatedAt;
-		}
-	}
-
-	const hasDraftChanges =
-		draftId != null &&
-		(publishedId == null ||
-			(draftUpdatedAt != null &&
-				publishedUpdatedAt != null &&
-				draftUpdatedAt.getTime() > publishedUpdatedAt.getTime()));
-
-	return { draftId, publishedId, hasDraftChanges };
+	return {
+		draftId: row?.draftId ?? null,
+		publishedId: row?.publishedId ?? null,
+		hasDraftChanges: row?.hasDraftChanges ?? false,
+	};
 }
 
 /**

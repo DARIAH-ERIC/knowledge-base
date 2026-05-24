@@ -23,8 +23,8 @@ interface OpportunityDetailsProps {
 	opportunity: Pick<schema.Opportunity, "id" | "duration" | "title" | "summary" | "website"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	};
-	publishAction: (documentId: string) => Promise<void>;
-	discardDraftAction?: (documentId: string) => Promise<void>;
+	publishAction: (documentId: string) => Promise<unknown>;
+	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
 
 export function OpportunityDetails(props: Readonly<OpportunityDetailsProps>): ReactNode {

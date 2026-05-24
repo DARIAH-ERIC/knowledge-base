@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { InstitutionsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getInstitutionsForAdmin } from "@/lib/data/institutions";
+import { getInstitutionsForAdmin } from "@/lib/data/cached/institutions";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";

@@ -39,11 +39,33 @@ test.describe("website news lifecycle", () => {
 		// Publish → redirected to list.
 		await newsPage.publishItem();
 
-		// List: publish keeps the cloned draft in sync, so the row still reads as published-only.
+		// List: hasDraft is computed via "draft updated_at > published updated_at" and is false right
+		// after publish (publishVersion sets them equal), so the row reads as published-only.
 		await newsPage.searchByTitle(title);
 		await expect(newsPage.publishedBadgeInRow(title)).toBeVisible();
 
-		// Details: draft and published versions both exist → "Published with draft changes" badge.
+		// Details: the cloned draft row exists but is identical to published, so the bar treats this
+		// as a clean published-only state — "Published" badge, no Discard, no version selector.
+		await newsPage.gotoDetailsFromList(title);
+		await expect(newsPage.detailsPublishedBadge()).toBeVisible();
+		await expect(page.getByRole("button", { name: "Publish" })).toBeHidden();
+		await expect(page.getByRole("button", { name: "Discard draft" })).toBeHidden();
+		await expect(newsPage.versionSelectorDraftLink()).toBeHidden();
+
+		// Edit the draft so it diverges from published.
+		await page.getByRole("link", { name: "Edit" }).click();
+		await page.waitForURL("**/edit");
+		const summaryField = page.getByLabel("Summary");
+		await summaryField.clear();
+		await summaryField.fill("Lifecycle test summary — edited");
+		await newsPage.submitForm();
+
+		// List: both badges now visible (draft is newer than published).
+		await newsPage.searchByTitle(title);
+		await expect(newsPage.publishedBadgeInRow(title)).toBeVisible();
+		await expect(newsPage.draftBadgeInRow(title)).toBeVisible();
+
+		// Details: now "Published with draft changes" + Publish + Discard.
 		await newsPage.gotoDetailsFromList(title);
 		await expect(newsPage.detailsPublishedWithDraftChangesBadge()).toBeVisible();
 		await expect(page.getByRole("button", { name: "Publish" })).toBeVisible();
@@ -52,11 +74,12 @@ test.describe("website news lifecycle", () => {
 		// Discard draft → redirected to list.
 		await newsPage.discardDraft();
 
-		// List: still shows published badge (published version remains).
+		// List: only published remains.
 		await newsPage.searchByTitle(title);
 		await expect(newsPage.publishedBadgeInRow(title)).toBeVisible();
+		await expect(newsPage.draftBadgeInRow(title)).toBeHidden();
 
-		// Details: published-only → "Published" badge, no Discard, no version selector.
+		// Details: "Published" only, no Discard, no version selector.
 		await newsPage.gotoDetailsFromList(title);
 		await expect(newsPage.detailsPublishedBadge()).toBeVisible();
 		await expect(page.getByRole("button", { name: "Publish" })).toBeHidden();
@@ -73,7 +96,8 @@ test.describe("website news lifecycle", () => {
 
 		const originalTitle = `${newsPage.workerPrefix} Version A ${randomUUID()}`;
 
-		// Create → Publish → Discard to reach a clean published-only state.
+		// Create → Publish. The post-publish state already reads as published-only on the details
+		// page (the cloned draft row exists but has no changes from published).
 		await newsPage.gotoCreate();
 		await newsPage.fillTitle(originalTitle);
 		await newsPage.fillSummary("Version selector test");
@@ -83,10 +107,6 @@ test.describe("website news lifecycle", () => {
 		await newsPage.searchByTitle(originalTitle);
 		await newsPage.gotoDetailsFromList(originalTitle);
 		await newsPage.publishItem();
-
-		await newsPage.searchByTitle(originalTitle);
-		await newsPage.gotoDetailsFromList(originalTitle);
-		await newsPage.discardDraft();
 
 		// From the published-only details page, click Edit.
 		await newsPage.searchByTitle(originalTitle);

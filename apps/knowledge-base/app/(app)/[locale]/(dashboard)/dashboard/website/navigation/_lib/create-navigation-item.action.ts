@@ -1,83 +1,45 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-import * as v from "valibot";
 
 import { CreateNavigationItemActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/create-navigation-item.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import { db } from "@/lib/db";
 import { and, eq, isNull } from "@/lib/db/sql";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export const createNavigationItemAction = createServerAction(
-	async function createNavigationItemAction(state, formData) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+export const createNavigationItemAction = createMutationAction({
+	schema: CreateNavigationItemActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "create", subjectType: "navigation" },
+	revalidate: "/[locale]/dashboard/website/navigation",
 
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			CreateNavigationItemActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateNavigationItemActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { menuId, parentId, label, href, entityId, isExternal } = result.output;
-
-		const siblings = await db
+	async mutate(tx, input) {
+		const siblings = await tx
 			.select({ id: schema.navigationItems.id })
 			.from(schema.navigationItems)
 			.where(
-				parentId != null
-					? eq(schema.navigationItems.parentId, parentId)
-					: and(eq(schema.navigationItems.menuId, menuId), isNull(schema.navigationItems.parentId)),
+				input.parentId != null
+					? eq(schema.navigationItems.parentId, input.parentId)
+					: and(
+							eq(schema.navigationItems.menuId, input.menuId),
+							isNull(schema.navigationItems.parentId),
+						),
 			);
 
-		await db.insert(schema.navigationItems).values({
-			menuId,
-			parentId: parentId ?? null,
-			label,
-			href: href ?? null,
-			entityId: entityId ?? null,
-			isExternal: isExternal ?? false,
+		await tx.insert(schema.navigationItems).values({
+			menuId: input.menuId,
+			parentId: input.parentId ?? null,
+			label: input.label,
+			href: input.href ?? null,
+			entityId: input.entityId ?? null,
+			isExternal: input.isExternal ?? false,
 			position: siblings.length,
 		});
 
-		after(async () => {
-			await dispatchWebhook({ type: "navigation" });
-		});
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "create",
-			subjectType: "navigation",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
-
-		revalidatePath("/[locale]/dashboard/website/navigation", "layout");
-
-		return createActionStateSuccess({});
+		return { subjectId: input.menuId };
 	},
-);
+
+	async postCommit() {
+		await dispatchWebhook({ type: "navigation" });
+	},
+});

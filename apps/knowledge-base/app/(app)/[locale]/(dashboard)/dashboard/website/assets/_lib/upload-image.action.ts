@@ -12,61 +12,61 @@ import * as v from "valibot";
 
 import { UploadImageInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/assets/_lib/upload-image.schema";
 import { imageGridOptions } from "@/config/assets.config";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
+import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
 import { uploadAsset } from "@/lib/data/assets";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { images } from "@/lib/images";
 import { createServerAction } from "@/lib/server/create-server-action";
 
+/**
+ * Stays on createServerAction because the client component types the return as `ActionState<{ key,
+ * url }>` and createMutationAction's response shape is `ActionState<unknown>`. Wiring a typed data
+ * return through createMutationAction would require additional generic plumbing for a single call
+ * site.
+ */
 export const uploadImageAction = createServerAction<
 	{ key: string; url: string },
 	GetValidationErrors<typeof UploadImageInputSchema>
->(async function uploadImageAction(state, formData) {
-	const locale = await getLocale();
-	const t = await getExtracted();
+>(
+	// FIXME: should use a coarser-grained "can upload assets" capability instead of requireAdmin
+	{ requireAdmin: true },
+	async function uploadImageAction(state, formData, { user }) {
+		const locale = await getLocale();
+		const t = await getExtracted();
 
-	// FIXME:
-	const auditSession = await assertAdmin();
-	// await assertAuthorized(user)
-
-	const validation = await v.safeParseAsync(UploadImageInputSchema, getFormDataValues(formData), {
-		lang: getIntlLanguage(locale),
-	});
-
-	if (!validation.success) {
-		const errors = v.flatten<typeof UploadImageInputSchema>(validation.issues);
-
-		return createActionStateError({
-			formData,
-			message: errors.root ?? t("Invalid or missing fields."),
-			validationErrors: errors.nested,
+		const validation = await v.safeParseAsync(UploadImageInputSchema, getFormDataValues(formData), {
+			lang: getIntlLanguage(locale),
 		});
-	}
 
-	const { file, licenseId, prefix, label, alt, caption } = validation.output;
+		if (!validation.success) {
+			const errors = v.flatten<typeof UploadImageInputSchema>(validation.issues);
+			return createActionStateError({
+				formData,
+				message: errors.root ?? t("Invalid or missing fields."),
+				validationErrors: errors.nested,
+			});
+		}
 
-	const { key } = await uploadAsset({ file, licenseId, prefix, label, alt, caption });
-	const { url } = images.generateSignedImageUrl({ key, options: imageGridOptions });
+		const { file, licenseId, prefix, label, alt, caption } = validation.output;
 
-	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
-		action: "create",
-		subjectType: "assets",
-		subjectId: getAuditSubjectIdFromFormData(formData),
-		summary: getAuditSummaryFromFormData(formData),
-	});
+		const { key } = await uploadAsset({ file, licenseId, prefix, label, alt, caption });
+		const { url } = images.generateSignedImageUrl({ key, options: imageGridOptions });
 
-	revalidatePath("/[locale]/dashboard/website/assets", "page");
-	revalidatePath("/[locale]/dashboard/administrator/persons", "layout");
+		await recordAuditEvent(db, {
+			actorUserId: user?.id,
+			action: "create",
+			subjectType: "assets",
+			subjectId: key,
+			summary: getAuditSummaryFromFormData(formData),
+		});
 
-	return createActionStateSuccess({
-		message: t("Successfully uploaded image."),
-		data: { key, url },
-	});
-});
+		revalidatePath("/[locale]/dashboard/website/assets", "page");
+		revalidatePath("/[locale]/dashboard/administrator/persons", "layout");
+
+		return createActionStateSuccess({
+			message: t("Successfully uploaded image."),
+			data: { key, url },
+		});
+	},
+);

@@ -1,87 +1,58 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-import * as v from "valibot";
+import { getExtracted } from "next-intl/server";
 
 import { UpdateSiteMetadataActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/metadata/_lib/update-site-metadata.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import { db } from "@/lib/db";
 import { sql } from "@/lib/db/sql";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export const updateSiteMetadataAction = createServerAction(
-	async function updateSiteMetadataAction(state, formData) {
-		const locale = await getLocale();
+export const updateSiteMetadataAction = createMutationAction({
+	schema: UpdateSiteMetadataActionInputSchema,
+	requireAdmin: true,
+	/** Site metadata is a singleton — no per-row id. */
+	audit: { action: "update", subjectType: "metadata" },
+	revalidate: "/[locale]/dashboard/website/metadata",
+
+	async mutate(tx, input) {
 		const t = await getExtracted();
 
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			UpdateSiteMetadataActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof UpdateSiteMetadataActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
+		let ogImageId: string | null = null;
+		if (input.imageKey != null) {
+			const asset = await tx.query.assets.findFirst({
+				where: { key: input.imageKey },
+				columns: { id: true },
 			});
+			if (asset != null) ogImageId = asset.id;
 		}
 
-		const { title, description, ogTitle, ogDescription, imageKey } = result.output;
+		await tx
+			.insert(schema.siteMetadata)
+			.values({
+				id: 1,
+				title: input.title,
+				description: input.description,
+				ogTitle: input.ogTitle,
+				ogDescription: input.ogDescription,
+				ogImageId,
+			})
+			.onConflictDoUpdate({
+				target: schema.siteMetadata.id,
+				set: {
+					title: input.title,
+					description: input.description,
+					ogTitle: input.ogTitle,
+					ogDescription: input.ogDescription,
+					ogImageId,
+					updatedAt: sql`NOW()`,
+				},
+			});
 
-		await db.transaction(async (tx) => {
-			let ogImageId: string | null = null;
-
-			if (imageKey != null) {
-				const asset = await tx.query.assets.findFirst({
-					where: { key: imageKey },
-					columns: { id: true },
-				});
-
-				if (asset != null) {
-					ogImageId = asset.id;
-				}
-			}
-
-			await tx
-				.insert(schema.siteMetadata)
-				.values({ id: 1, title, description, ogTitle, ogDescription, ogImageId })
-				.onConflictDoUpdate({
-					target: schema.siteMetadata.id,
-					set: { title, description, ogTitle, ogDescription, ogImageId, updatedAt: sql`NOW()` },
-				});
-		});
-
-		after(async () => {
-			await dispatchWebhook({ type: "site-metadata" });
-		});
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "update",
-			subjectType: "metadata",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
-
-		revalidatePath("/[locale]/dashboard/website/metadata", "layout");
-
-		return createActionStateSuccess({ message: t("Metadata saved.") });
+		return { subjectId: "site", successMessage: t("Metadata saved.") };
 	},
-);
+
+	async postCommit() {
+		await dispatchWebhook({ type: "site-metadata" });
+	},
+});
