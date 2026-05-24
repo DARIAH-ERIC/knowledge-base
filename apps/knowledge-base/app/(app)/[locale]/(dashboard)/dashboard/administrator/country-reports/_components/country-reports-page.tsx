@@ -1,7 +1,6 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import {
 	Table,
 	TableBody,
@@ -139,12 +138,7 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 					startDeleteTransition(async () => {
 						optimisticallyRemoveReport(id);
 						try {
-							const state = await deleteCountryReportAction(id);
-							if (isActionStateError(state)) {
-								const message = Array.isArray(state.message) ? state.message[0] : state.message;
-								setDeleteError(message ?? t("Could not delete country report. Please try again."));
-								return;
-							}
+							await deleteCountryReportAction(id);
 							router.refresh();
 							setItemToDelete(null);
 						} catch {

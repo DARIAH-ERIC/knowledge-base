@@ -1,7 +1,6 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import {
 	Table,
 	TableBody,
@@ -133,14 +132,7 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 					startDeleteTransition(async () => {
 						optimisticallyRemoveCampaign(id);
 						try {
-							const state = await deleteReportingCampaignAction(id);
-							if (isActionStateError(state)) {
-								const message = Array.isArray(state.message) ? state.message[0] : state.message;
-								setDeleteError(
-									message ?? t("Could not delete reporting campaign. Please try again."),
-								);
-								return;
-							}
+							await deleteReportingCampaignAction(id);
 							router.refresh();
 							setItemToDelete(null);
 						} catch {

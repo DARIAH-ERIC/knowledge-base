@@ -1,6 +1,5 @@
 "use client";
 
-import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import { Badge } from "@dariah-eric/ui/badge";
 import {
 	Table,
@@ -250,12 +249,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
 						try {
-							const state = await deleteContributionAction(id);
-							if (isActionStateError(state)) {
-								const message = Array.isArray(state.message) ? state.message[0] : state.message;
-								setDeleteError(message ?? t("Could not delete person relation. Please try again."));
-								return;
-							}
+							await deleteContributionAction(id);
 							router.refresh();
 							setItemToDelete(null);
 						} catch {

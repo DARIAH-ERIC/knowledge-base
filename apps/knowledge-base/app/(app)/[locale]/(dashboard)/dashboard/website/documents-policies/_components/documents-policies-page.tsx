@@ -1,7 +1,6 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
 import { buttonStyles } from "@dariah-eric/ui/button-styles";
 import { Link } from "@dariah-eric/ui/link";
@@ -395,14 +394,7 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 					setDocumentDeleteError(null);
 					startDocumentDeleteTransition(async () => {
 						try {
-							const state = await deleteDocumentOrPolicyAction(id);
-							if (isActionStateError(state)) {
-								const message = Array.isArray(state.message) ? state.message[0] : state.message;
-								setDocumentDeleteError(
-									message ?? t("Could not delete document or policy. Please try again."),
-								);
-								return;
-							}
+							await deleteDocumentOrPolicyAction(id);
 							setDocumentToDelete(null);
 						} catch {
 							setDocumentDeleteError(t("Could not delete document or policy. Please try again."));
@@ -428,12 +420,7 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 					setGroupDeleteError(null);
 					startGroupDeleteTransition(async () => {
 						try {
-							const state = await deleteDocumentPolicyGroupAction(id);
-							if (isActionStateError(state)) {
-								const message = Array.isArray(state.message) ? state.message[0] : state.message;
-								setGroupDeleteError(message ?? t("Could not delete group. Please try again."));
-								return;
-							}
+							await deleteDocumentPolicyGroupAction(id);
 							setGroupToDelete(null);
 						} catch {
 							setGroupDeleteError(t("Could not delete group. Please try again."));

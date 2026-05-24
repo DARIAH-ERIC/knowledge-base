@@ -6,7 +6,7 @@ import { forbidden } from "next/navigation";
 
 import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { and, count, eq, ilike, inArray, sql } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
 
 interface GetReportingListParams {
 	limit: number;
@@ -112,16 +112,31 @@ export async function getCountryReportsForAdmin(
 			: undefined;
 
 	const [data, aggregate] = await Promise.all([
-		db.query.countryReports.findMany({
-			where,
-			limit,
-			offset,
-			columns: { id: true, status: true },
-			with: {
-				campaign: { columns: { id: true, year: true } },
-				country: { columns: { id: true, name: true } },
-			},
-		}),
+		db
+			.select({
+				id: schema.countryReports.id,
+				status: schema.countryReports.status,
+				campaign: {
+					id: schema.reportingCampaigns.id,
+					year: schema.reportingCampaigns.year,
+				},
+				country: {
+					id: schema.organisationalUnits.id,
+					name: schema.organisationalUnits.name,
+				},
+			})
+			.from(schema.countryReports)
+			.innerJoin(
+				schema.reportingCampaigns,
+				eq(schema.countryReports.campaignId, schema.reportingCampaigns.id),
+			)
+			.innerJoin(
+				schema.organisationalUnits,
+				eq(schema.countryReports.countryId, schema.organisationalUnits.id),
+			)
+			.where(where)
+			.limit(limit)
+			.offset(offset),
 		db.select({ total: count() }).from(schema.countryReports).where(where),
 	]);
 
@@ -186,16 +201,31 @@ export async function getWorkingGroupReportsForAdmin(
 			: undefined;
 
 	const [data, aggregate] = await Promise.all([
-		db.query.workingGroupReports.findMany({
-			where,
-			limit,
-			offset,
-			columns: { id: true, status: true },
-			with: {
-				campaign: { columns: { id: true, year: true } },
-				workingGroup: { columns: { id: true, name: true } },
-			},
-		}),
+		db
+			.select({
+				id: schema.workingGroupReports.id,
+				status: schema.workingGroupReports.status,
+				campaign: {
+					id: schema.reportingCampaigns.id,
+					year: schema.reportingCampaigns.year,
+				},
+				workingGroup: {
+					id: schema.organisationalUnits.id,
+					name: schema.organisationalUnits.name,
+				},
+			})
+			.from(schema.workingGroupReports)
+			.innerJoin(
+				schema.reportingCampaigns,
+				eq(schema.workingGroupReports.campaignId, schema.reportingCampaigns.id),
+			)
+			.innerJoin(
+				schema.organisationalUnits,
+				eq(schema.workingGroupReports.workingGroupId, schema.organisationalUnits.id),
+			)
+			.where(where)
+			.limit(limit)
+			.offset(offset),
 		db.select({ total: count() }).from(schema.workingGroupReports).where(where),
 	]);
 
@@ -256,22 +286,24 @@ export async function getReportingCampaignsForAdmin(
 			: undefined;
 
 	const [campaigns, aggregate] = await Promise.all([
-		db.query.reportingCampaigns.findMany({
-			where,
-			orderBy: { year: "desc" },
-			limit,
-			offset,
-			columns: { id: true, year: true, status: true },
-			with: {
-				countryReports: { columns: { id: true } },
-				workingGroupReports: { columns: { id: true } },
-			},
-		}),
+		db
+			.select({
+				id: schema.reportingCampaigns.id,
+				year: schema.reportingCampaigns.year,
+				status: schema.reportingCampaigns.status,
+				countryReportCount: sql<number>`(select count(*) from ${schema.countryReports} where ${schema.countryReports.campaignId} = ${schema.reportingCampaigns.id})`,
+				workingGroupReportCount: sql<number>`(select count(*) from ${schema.workingGroupReports} where ${schema.workingGroupReports.campaignId} = ${schema.reportingCampaigns.id})`,
+			})
+			.from(schema.reportingCampaigns)
+			.where(where)
+			.orderBy(desc(schema.reportingCampaigns.year))
+			.limit(limit)
+			.offset(offset),
 		db.select({ total: count() }).from(schema.reportingCampaigns).where(where),
 	]);
 
 	const data = campaigns.map((campaign) => {
-		const reportCount = campaign.countryReports.length + campaign.workingGroupReports.length;
+		const reportCount = campaign.countryReportCount + campaign.workingGroupReportCount;
 		return {
 			id: campaign.id,
 			year: campaign.year,

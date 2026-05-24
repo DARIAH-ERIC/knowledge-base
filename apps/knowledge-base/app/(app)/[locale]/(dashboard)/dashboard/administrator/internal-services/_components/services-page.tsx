@@ -1,7 +1,6 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import { Badge } from "@dariah-eric/ui/badge";
 import {
 	Table,
@@ -176,12 +175,7 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
 						try {
-							const state = await deleteServiceAction(id);
-							if (isActionStateError(state)) {
-								const message = Array.isArray(state.message) ? state.message[0] : state.message;
-								setDeleteError(message ?? t("Could not delete service. Please try again."));
-								return;
-							}
+							await deleteServiceAction(id);
 							router.refresh();
 							setItemToDelete(null);
 						} catch {

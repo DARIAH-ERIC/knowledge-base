@@ -1,7 +1,6 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
 import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
 import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
@@ -289,14 +288,7 @@ function MenuTabPanel(props: Readonly<MenuTabPanelProps>): ReactNode {
 					setDeleteItemError(null);
 					startDeleteItemTransition(async () => {
 						try {
-							const state = await deleteNavigationItemAction(id);
-							if (isActionStateError(state)) {
-								const message = Array.isArray(state.message) ? state.message[0] : state.message;
-								setDeleteItemError(
-									message ?? t("Could not delete navigation item. Please try again."),
-								);
-								return;
-							}
+							await deleteNavigationItemAction(id);
 							setItemToDelete(null);
 						} catch {
 							setDeleteItemError(t("Could not delete navigation item. Please try again."));
@@ -385,14 +377,7 @@ export function NavigationPage(props: Readonly<NavigationPageProps>): ReactNode 
 					setDeleteMenuError(null);
 					startDeleteMenuTransition(async () => {
 						try {
-							const state = await deleteNavigationMenuAction(id);
-							if (isActionStateError(state)) {
-								const message = Array.isArray(state.message) ? state.message[0] : state.message;
-								setDeleteMenuError(
-									message ?? t("Could not delete navigation menu. Please try again."),
-								);
-								return;
-							}
+							await deleteNavigationMenuAction(id);
 							setMenuToDelete(null);
 						} catch {
 							setDeleteMenuError(t("Could not delete navigation menu. Please try again."));

@@ -1,7 +1,6 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import {
 	Table,
 	TableBody,
@@ -167,12 +166,7 @@ export function UsersPage(props: Readonly<UsersPageProps>): ReactNode {
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
 						try {
-							const state = await deleteUserAction(id);
-							if (isActionStateError(state)) {
-								const message = Array.isArray(state.message) ? state.message[0] : state.message;
-								setDeleteError(message ?? t("Could not delete user. Please try again."));
-								return;
-							}
+							await deleteUserAction(id);
 							router.refresh();
 							setItemToDelete(null);
 						} catch {

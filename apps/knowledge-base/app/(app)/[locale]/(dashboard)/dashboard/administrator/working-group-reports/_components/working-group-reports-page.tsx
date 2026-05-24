@@ -1,7 +1,6 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import {
 	Table,
 	TableBody,
@@ -141,14 +140,7 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 					startDeleteTransition(async () => {
 						optimisticallyRemoveReport(id);
 						try {
-							const state = await deleteWorkingGroupReportAction(id);
-							if (isActionStateError(state)) {
-								const message = Array.isArray(state.message) ? state.message[0] : state.message;
-								setDeleteError(
-									message ?? t("Could not delete working group report. Please try again."),
-								);
-								return;
-							}
+							await deleteWorkingGroupReportAction(id);
 							router.refresh();
 							setItemToDelete(null);
 						} catch {
