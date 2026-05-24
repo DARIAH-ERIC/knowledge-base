@@ -16,7 +16,7 @@ export const ingestSshocServicesAction = createServerAction(
 		const t = await getExtracted();
 
 		const auditSession = await assertAdmin();
-		const actorUserId = auditSession?.user.id ?? null;
+		const actorUserId = auditSession.user.id;
 
 		const outcome = await runBackgroundJob({
 			kind: "ingest_sshoc_services",
@@ -25,7 +25,7 @@ export const ingestSshocServicesAction = createServerAction(
 				const result = await ingestSshocServices();
 
 				await recordAuditEvent(db, {
-					actorUserId: actorUserId ?? undefined,
+					actorUserId,
 					action: "ingest",
 					subjectType: "sshoc_services",
 					subjectId: "all",

@@ -1,17 +1,26 @@
 "use server";
 
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import type { JSONContent } from "@tiptap/core";
 import { getExtracted } from "next-intl/server";
 import * as v from "valibot";
 
-import { db } from "@/lib/db";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
 const CreateWorkingGroupReportQuestionSchema = v.object({
 	campaignId: v.pipe(v.string(), v.uuid()),
-	question: v.pipe(v.string(), v.nonEmpty()),
+	question: v.pipe(
+		v.string(),
+		v.nonEmpty(),
+		v.rawTransform(({ dataset, addIssue, NEVER }) => {
+			try {
+				return JSON.parse(dataset.value) as JSONContent;
+			} catch {
+				addIssue({ message: "Invalid question content." });
+				return NEVER;
+			}
+		}),
+	),
 });
 
 export const createWorkingGroupReportQuestionAction = createMutationAction({
@@ -30,18 +39,9 @@ export const createWorkingGroupReportQuestionAction = createMutationAction({
 		});
 		const nextPosition = existing.length > 0 ? existing[0]!.position + 1 : 1;
 
-		let question: JSONContent;
-		try {
-			question = JSON.parse(input.question) as JSONContent;
-		} catch {
-			// Return-of-error from inside mutate isn't supported; throw so the wrapper's catch turns
-			// this into a generic "Internal server error". Validation should normally have caught it.
-			throw createActionStateError({ message: t("Invalid question content.") });
-		}
-
 		await tx.insert(schema.workingGroupReportQuestions).values({
 			campaignId: input.campaignId,
-			question,
+			question: input.question,
 			position: nextPosition,
 		});
 

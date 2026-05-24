@@ -16,7 +16,7 @@ export const syncWebsiteSearchIndexAction = createServerAction(
 		const t = await getExtracted();
 
 		const auditSession = await assertAdmin();
-		const actorUserId = auditSession?.user.id ?? null;
+		const actorUserId = auditSession.user.id;
 
 		const outcome = await runBackgroundJob({
 			kind: "sync_website_search_index",
@@ -25,7 +25,7 @@ export const syncWebsiteSearchIndexAction = createServerAction(
 				const result = await syncWebsiteSearchIndex();
 
 				await recordAuditEvent(db, {
-					actorUserId: actorUserId ?? undefined,
+					actorUserId,
 					action: "sync",
 					subjectType: "website_search_index",
 					subjectId: "all",

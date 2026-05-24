@@ -35,7 +35,7 @@ export async function deleteSpotlightArticleContributorAction(
 	});
 
 	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
+		actorUserId: auditSession.user.id,
 		action: "delete",
 		subjectType: "spotlight_articles",
 		subjectId: articleId,

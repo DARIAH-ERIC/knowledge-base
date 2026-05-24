@@ -1,7 +1,6 @@
 "use server";
 
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import type { JSONContent } from "@tiptap/core";
 import { getExtracted } from "next-intl/server";
 import * as v from "valibot";
@@ -15,7 +14,22 @@ const UpsertReportScreenCommentActionInputSchema = v.object({
 	reportId: v.pipe(v.string(), v.uuid()),
 	reportType: v.picklist(schema.reportScreenCommentTypeEnum),
 	screenKey: v.picklist(schema.reportScreenCommentKeyEnum),
-	comment: v.optional(v.string()),
+	comment: v.optional(
+		v.pipe(
+			v.string(),
+			v.rawTransform(({ dataset, addIssue, NEVER }) => {
+				if (dataset.value.trim() === "") {
+					return null;
+				}
+				try {
+					return JSON.parse(dataset.value) as JSONContent;
+				} catch {
+					addIssue({ message: "Invalid or missing fields." });
+					return NEVER;
+				}
+			}),
+		),
+	),
 });
 
 export const upsertReportScreenCommentAction = createMutationAction({
@@ -35,15 +49,7 @@ export const upsertReportScreenCommentAction = createMutationAction({
 	async mutate(tx, input) {
 		const t = await getExtracted();
 
-		let comment: JSONContent | null = null;
-
-		if (input.comment != null && input.comment.trim() !== "") {
-			try {
-				comment = JSON.parse(input.comment) as JSONContent;
-			} catch {
-				throw createActionStateError({ message: t("Invalid or missing fields.") });
-			}
-		}
+		const comment = input.comment ?? null;
 
 		if (isEmptyRichTextDocument(comment)) {
 			await tx

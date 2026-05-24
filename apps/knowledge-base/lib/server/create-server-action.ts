@@ -95,7 +95,7 @@ export function createServerAction<
 			let user: User | null = null;
 			if (options.requireAdmin === true) {
 				const session = await assertAdmin();
-				user = session?.user ?? null;
+				user = session.user;
 			} else if (options.requireAuth === true) {
 				const session = await assertAuthenticated();
 				user = session.user;

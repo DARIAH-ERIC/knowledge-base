@@ -7,7 +7,6 @@ import { getDocumentVersions } from "@/lib/data/entity-lifecycle";
 import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
 import { eq, inArray, or } from "@/lib/db/sql";
 import {
-	type WebsiteDocumentDescriptor,
 	deleteWebsiteDocument,
 	getWebsiteDocumentDescriptorByEntityId,
 } from "@/lib/search/website-index";
@@ -71,7 +70,7 @@ export const deleteProjectAction = createCommandAction({
 
 		return {
 			subjectId: documentId,
-			descriptor: descriptor as WebsiteDocumentDescriptor | null,
+			descriptor,
 		};
 	},
 

@@ -54,7 +54,7 @@ export async function endWorkingGroupChairAction(id: string, end: Date): Promise
 
 	await dispatchWebhook({ type: "working-groups" });
 	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
+		actorUserId: auditSession.user.id,
 		action: "relation_end",
 		subjectType: "working_groups",
 		subjectId: id,

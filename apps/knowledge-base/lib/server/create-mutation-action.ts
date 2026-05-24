@@ -2,7 +2,6 @@ import { getFormDataValues } from "@acdh-oeaw/lib";
 import type { User } from "@dariah-eric/auth";
 import {
 	type ActionState,
-	type ValidationErrors,
 	createActionStateError,
 	createActionStateSuccess,
 } from "@dariah-eric/next-lib/actions";
@@ -17,9 +16,9 @@ import {
 	recordAuditEvent,
 } from "@/lib/audit/audit-log";
 import { type Transaction, db } from "@/lib/db";
-import { getIntlLanguage, type IntlLocale } from "@/lib/i18n/locales";
+import { type IntlLocale, getIntlLanguage } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
-import { createServerAction, type ServerAction } from "@/lib/server/create-server-action";
+import { type ServerAction, createServerAction } from "@/lib/server/create-server-action";
 
 /**
  * What the mutate function returns. - `auditSummary` is merged into the audit row's summary field.
@@ -91,7 +90,7 @@ export interface CreateMutationActionOptions<
 	preCheck?: (params: {
 		input: v.InferOutput<TSchema>;
 		ctx: MutationContext;
-	}) => Promise<ActionState<unknown, ValidationErrors> | void>;
+	}) => Promise<ActionState | undefined>;
 }
 
 /**
@@ -102,11 +101,11 @@ export interface CreateMutationActionOptions<
  */
 export function createMutationAction<TSchema extends v.GenericSchema, TSuccessData = unknown>(
 	opts: CreateMutationActionOptions<TSchema, TSuccessData>,
-): ServerAction<unknown, ValidationErrors> {
-	return createServerAction<unknown, ValidationErrors>(
+): ServerAction {
+	return createServerAction(
 		{ requireAdmin: opts.requireAdmin, requireAuth: opts.requireAuth },
 		async (state, formData, { user }) => {
-			const locale = (await getLocale()) as IntlLocale;
+			const locale = await getLocale();
 			const t = await getExtracted();
 
 			const parsed = await v.safeParseAsync(opts.schema, getFormDataValues(formData), {

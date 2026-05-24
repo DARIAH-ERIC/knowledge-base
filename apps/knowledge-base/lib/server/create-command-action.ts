@@ -16,7 +16,7 @@ import { after } from "next/server";
 import { type AuditLogAction, recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin, assertAuthenticated } from "@/lib/auth/session";
 import { type Transaction, db } from "@/lib/db";
-import { type IntlLocale } from "@/lib/i18n/locales";
+import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import type { MutationResult } from "@/lib/server/create-mutation-action";
 
@@ -86,13 +86,13 @@ export function createCommandAction<
 			let user: User | null = null;
 			if (opts.requireAdmin === true) {
 				const session = await assertAdmin();
-				user = session?.user ?? null;
+				user = session.user;
 			} else if (opts.requireAuth === true) {
 				const session = await assertAuthenticated();
 				user = session.user;
 			}
 
-			const locale = (await getLocale()) as IntlLocale;
+			const locale = await getLocale();
 			const ctx: CommandContext = { user, locale };
 
 			const result = await db.transaction(async (tx) => {

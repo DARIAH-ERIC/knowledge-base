@@ -71,7 +71,9 @@ export const updateDocumentOrPolicyDetailsAction = createMutationAction<
 	},
 
 	async postCommit({ result }) {
-		if (result.successData == null || !result.successData.shouldSyncPublishedVersion) return;
+		if (result.successData == null || !result.successData.shouldSyncPublishedVersion) {
+			return;
+		}
 
 		await syncWebsiteDocumentForEntity(result.successData.entityDocumentId);
 		await dispatchWebhook({ type: "documents-policies" });

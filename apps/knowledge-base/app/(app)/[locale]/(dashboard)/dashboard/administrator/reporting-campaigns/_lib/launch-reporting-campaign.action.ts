@@ -39,7 +39,7 @@ export async function launchReportingCampaignAction(formData: FormData): Promise
 		.where(eq(schema.reportingCampaigns.id, id));
 
 	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
+		actorUserId: auditSession.user.id,
 		action: "launch",
 		subjectType: "reporting_campaigns",
 		subjectId: id,

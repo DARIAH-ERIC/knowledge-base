@@ -18,7 +18,7 @@ export async function discardDocumentOrPolicyDraftAction(documentId: string): Pr
 	});
 
 	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
+		actorUserId: auditSession.user.id,
 		action: "discard_draft",
 		subjectType: "documents_policies",
 		subjectId: documentId,

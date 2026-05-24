@@ -111,8 +111,10 @@ export const createNationalConsortiumAction = createMutationAction({
 		};
 	},
 
-	async postCommit({ result, ctx }) {
-		if (!shouldSaveAndPublish(ctx.formData)) return;
+	async postCommit({ ctx }) {
+		if (!shouldSaveAndPublish(ctx.formData)) {
+			return;
+		}
 		await dispatchWebhook({ type: "members-partners" });
 	},
 });

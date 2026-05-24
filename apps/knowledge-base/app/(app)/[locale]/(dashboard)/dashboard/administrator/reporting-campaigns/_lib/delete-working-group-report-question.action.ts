@@ -32,7 +32,7 @@ export async function deleteWorkingGroupReportQuestionAction(formData: FormData)
 		.where(eq(schema.workingGroupReportQuestions.id, id));
 
 	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
+		actorUserId: auditSession.user.id,
 		action: "delete",
 		subjectType: "reporting_campaigns",
 		subjectId: campaignId,

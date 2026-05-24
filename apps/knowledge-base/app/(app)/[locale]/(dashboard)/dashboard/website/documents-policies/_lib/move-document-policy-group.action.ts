@@ -56,7 +56,7 @@ export async function moveDocumentPolicyGroupAction(
 	});
 
 	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
+		actorUserId: auditSession.user.id,
 		action: "update",
 		subjectType: "documents_policies",
 		subjectId: id,

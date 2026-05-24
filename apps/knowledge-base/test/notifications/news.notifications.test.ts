@@ -44,7 +44,7 @@ vi.mock("@dariah-eric/next-lib/rate-limiter", () => {
 });
 
 vi.mock("@/lib/auth/session", () => {
-	return { assertAdmin: vi.fn().mockResolvedValue(undefined) };
+	return { assertAdmin: vi.fn().mockResolvedValue({ user: null }) };
 });
 
 vi.mock("@/lib/navigation/navigation", () => {

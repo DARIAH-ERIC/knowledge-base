@@ -24,7 +24,9 @@ export const updateSiteMetadataAction = createMutationAction({
 				where: { key: input.imageKey },
 				columns: { id: true },
 			});
-			if (asset != null) ogImageId = asset.id;
+			if (asset != null) {
+				ogImageId = asset.id;
+			}
 		}
 
 		await tx

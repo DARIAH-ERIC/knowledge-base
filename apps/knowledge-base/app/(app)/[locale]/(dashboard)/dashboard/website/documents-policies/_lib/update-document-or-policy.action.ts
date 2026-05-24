@@ -123,7 +123,9 @@ export const updateDocumentOrPolicyAction = createMutationAction<
 	},
 
 	async postCommit({ result, input }) {
-		if (result.successData == null || !result.successData.published) return;
+		if (result.successData == null || !result.successData.published) {
+			return;
+		}
 
 		await syncWebsiteDocumentForEntity(input.documentId);
 		await dispatchWebhook({ type: "documents-policies" });

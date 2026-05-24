@@ -82,7 +82,9 @@ export const createFundingCallAction = createMutationAction({
 	},
 
 	async postCommit({ result, ctx }) {
-		if (!shouldSaveAndPublish(ctx.formData)) return;
+		if (!shouldSaveAndPublish(ctx.formData)) {
+			return;
+		}
 		await syncWebsiteDocumentForEntity(result.subjectId);
 		await dispatchWebhook({ type: "funding-calls" });
 	},

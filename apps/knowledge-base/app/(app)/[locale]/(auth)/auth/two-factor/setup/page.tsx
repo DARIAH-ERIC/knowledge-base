@@ -74,7 +74,6 @@ export default async function TwoFactorSetupPage(
 				</div>
 
 				<div className="flex flex-col gap-y-4">
-					{/* eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml */}
 					<div className="block-48 inline-48" dangerouslySetInnerHTML={{ __html: qrcode }} />
 
 					<TwoFactorSetUpForm encodedTotpKey={key} />

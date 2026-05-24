@@ -3,6 +3,9 @@
 import { join } from "node:path";
 
 import { log } from "@acdh-oeaw/lib";
+import type { Database } from "@dariah-eric/database";
+import type * as SchemaModule from "@dariah-eric/database/schema";
+import type { sql as SqlFn } from "@dariah-eric/database/sql";
 import { config as dotenv } from "@dotenvx/dotenvx";
 
 dotenv({
@@ -18,19 +21,16 @@ const PREFIX_PATTERN = "[e2e-worker-%";
 interface LeakCheck {
 	label: string;
 	query: (
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		db: any,
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		schema: any,
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		sql: any,
+		db: Database,
+		schema: typeof SchemaModule,
+		sql: typeof SqlFn,
 	) => Promise<Array<{ identifier: string }>>;
 }
 
 const checks: ReadonlyArray<LeakCheck> = [
 	{
 		label: "persons",
-		query: async (db, schema, sql) =>
+		query: (db, schema, sql) =>
 			db
 				.select({ identifier: schema.persons.name })
 				.from(schema.persons)
@@ -38,7 +38,7 @@ const checks: ReadonlyArray<LeakCheck> = [
 	},
 	{
 		label: "projects",
-		query: async (db, schema, sql) =>
+		query: (db, schema, sql) =>
 			db
 				.select({ identifier: schema.projects.name })
 				.from(schema.projects)
@@ -46,7 +46,7 @@ const checks: ReadonlyArray<LeakCheck> = [
 	},
 	{
 		label: "pages",
-		query: async (db, schema, sql) =>
+		query: (db, schema, sql) =>
 			db
 				.select({ identifier: schema.pages.title })
 				.from(schema.pages)
@@ -54,7 +54,7 @@ const checks: ReadonlyArray<LeakCheck> = [
 	},
 	{
 		label: "impact case studies",
-		query: async (db, schema, sql) =>
+		query: (db, schema, sql) =>
 			db
 				.select({ identifier: schema.impactCaseStudies.title })
 				.from(schema.impactCaseStudies)
@@ -62,7 +62,7 @@ const checks: ReadonlyArray<LeakCheck> = [
 	},
 	{
 		label: "spotlight articles",
-		query: async (db, schema, sql) =>
+		query: (db, schema, sql) =>
 			db
 				.select({ identifier: schema.spotlightArticles.title })
 				.from(schema.spotlightArticles)
@@ -70,7 +70,7 @@ const checks: ReadonlyArray<LeakCheck> = [
 	},
 	{
 		label: "events",
-		query: async (db, schema, sql) =>
+		query: (db, schema, sql) =>
 			db
 				.select({ identifier: schema.events.title })
 				.from(schema.events)
@@ -78,7 +78,7 @@ const checks: ReadonlyArray<LeakCheck> = [
 	},
 	{
 		label: "news",
-		query: async (db, schema, sql) =>
+		query: (db, schema, sql) =>
 			db
 				.select({ identifier: schema.news.title })
 				.from(schema.news)
@@ -86,7 +86,7 @@ const checks: ReadonlyArray<LeakCheck> = [
 	},
 	{
 		label: "organisational units",
-		query: async (db, schema, sql) =>
+		query: (db, schema, sql) =>
 			db
 				.select({ identifier: schema.organisationalUnits.name })
 				.from(schema.organisationalUnits)
@@ -94,7 +94,7 @@ const checks: ReadonlyArray<LeakCheck> = [
 	},
 	{
 		label: "services",
-		query: async (db, schema, sql) =>
+		query: (db, schema, sql) =>
 			db
 				.select({ identifier: schema.services.name })
 				.from(schema.services)
@@ -102,7 +102,7 @@ const checks: ReadonlyArray<LeakCheck> = [
 	},
 	{
 		label: "social media",
-		query: async (db, schema, sql) =>
+		query: (db, schema, sql) =>
 			db
 				.select({ identifier: schema.socialMedia.name })
 				.from(schema.socialMedia)
@@ -110,7 +110,7 @@ const checks: ReadonlyArray<LeakCheck> = [
 	},
 	{
 		label: "users",
-		query: async (db, schema, sql) =>
+		query: (db, schema, sql) =>
 			db
 				.select({ identifier: schema.users.name })
 				.from(schema.users)
@@ -118,7 +118,7 @@ const checks: ReadonlyArray<LeakCheck> = [
 	},
 	{
 		label: "assets",
-		query: async (db, schema, sql) =>
+		query: (db, schema, sql) =>
 			db
 				.select({ identifier: schema.assets.label })
 				.from(schema.assets)

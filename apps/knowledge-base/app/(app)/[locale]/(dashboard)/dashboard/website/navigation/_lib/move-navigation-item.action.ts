@@ -67,7 +67,7 @@ export async function moveNavigationItemAction(
 	});
 
 	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
+		actorUserId: auditSession.user.id,
 		action: "update",
 		subjectType: "navigation",
 		subjectId: id,
