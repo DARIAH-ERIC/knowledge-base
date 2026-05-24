@@ -19,12 +19,7 @@ import { getIntlLanguage } from "@/lib/i18n/locales";
 import { images } from "@/lib/images";
 import { createServerAction } from "@/lib/server/create-server-action";
 
-/**
- * Stays on createServerAction because the client component types the return as `ActionState<{ key,
- * url }>` and createMutationAction's response shape is `ActionState<unknown>`. Wiring a typed data
- * return through createMutationAction would require additional generic plumbing for a single call
- * site.
- */
+/** Uses createServerAction because the success response carries typed data. */
 export const uploadImageAction = createServerAction<
 	{ key: string; url: string },
 	GetValidationErrors<typeof UploadImageInputSchema>

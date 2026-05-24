@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import { Badge } from "@dariah-eric/ui/badge";
 import {
 	Table,
@@ -67,6 +68,7 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 		state.filter((item) => item.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const search = useUrlPaginatedSearch({
 		dir: initialDir,
 		page: initialPage,
@@ -168,8 +170,10 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 				item={itemToDelete}
 				model={t("country")}
 				isPending={isDeletePending}
+				error={deleteError}
 				onClose={() => {
 					setItemToDelete(null);
+					setDeleteError(null);
 				}}
 				onConfirm={() => {
 					if (itemToDelete == null) {
@@ -177,12 +181,22 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 					}
 
 					const id = itemToDelete.id;
+					setDeleteError(null);
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deleteCountryAction(id);
-						router.refresh();
-						setItemToDelete(null);
+						try {
+							const state = await deleteCountryAction(id);
+							if (isActionStateError(state)) {
+								const message = Array.isArray(state.message) ? state.message[0] : state.message;
+								setDeleteError(message ?? t("Could not delete country. Please try again."));
+								return;
+							}
+							router.refresh();
+							setItemToDelete(null);
+						} catch {
+							setDeleteError(t("Could not delete country. Please try again."));
+						}
 					});
 				}}
 			/>

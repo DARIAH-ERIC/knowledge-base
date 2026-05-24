@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import {
 	Table,
 	TableBody,
@@ -59,6 +60,7 @@ export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNod
 		(state, id: string) => state.filter((item) => item.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const search = useUrlPaginatedSearch({
 		dir: initialDir,
 		page: initialPage,
@@ -139,8 +141,10 @@ export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNod
 				item={itemToDelete}
 				model={t("social media")}
 				isPending={isDeletePending}
+				error={deleteError}
 				onClose={() => {
 					setItemToDelete(null);
+					setDeleteError(null);
 				}}
 				onConfirm={() => {
 					if (itemToDelete == null) {
@@ -148,12 +152,22 @@ export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNod
 					}
 
 					const id = itemToDelete.id;
+					setDeleteError(null);
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deleteSocialMediaAction(id);
-						router.refresh();
-						setItemToDelete(null);
+						try {
+							const state = await deleteSocialMediaAction(id);
+							if (isActionStateError(state)) {
+								const message = Array.isArray(state.message) ? state.message[0] : state.message;
+								setDeleteError(message ?? t("Could not delete social media. Please try again."));
+								return;
+							}
+							router.refresh();
+							setItemToDelete(null);
+						} catch {
+							setDeleteError(t("Could not delete social media. Please try again."));
+						}
 					});
 				}}
 			/>

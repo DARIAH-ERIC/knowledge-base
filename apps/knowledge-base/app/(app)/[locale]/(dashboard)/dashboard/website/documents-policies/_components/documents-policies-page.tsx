@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
 import { buttonStyles } from "@dariah-eric/ui/button-styles";
 import { Link } from "@dariah-eric/ui/link";
@@ -13,7 +14,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, useState } from "react";
+import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
 import { EntityLifecycleStatusBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge";
 import {
@@ -278,7 +279,11 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 	}>({ isOpen: false });
 
 	const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
+	const [documentDeleteError, setDocumentDeleteError] = useState<string | null>(null);
+	const [isDocumentDeletePending, startDocumentDeleteTransition] = useTransition();
 	const [groupToDelete, setGroupToDelete] = useState<string | null>(null);
+	const [groupDeleteError, setGroupDeleteError] = useState<string | null>(null);
+	const [isGroupDeletePending, startGroupDeleteTransition] = useTransition();
 
 	return (
 		<Fragment>
@@ -376,17 +381,32 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 			<EntityDeleteModal
 				item={documentToDelete != null ? { id: documentToDelete } : null}
 				model={t("document or policy")}
-				isPending={false}
+				isPending={isDocumentDeletePending}
+				error={documentDeleteError}
 				onClose={() => {
 					setDocumentToDelete(null);
+					setDocumentDeleteError(null);
 				}}
 				onConfirm={() => {
 					if (documentToDelete == null) {
 						return;
 					}
-					startTransition(async () => {
-						await deleteDocumentOrPolicyAction(documentToDelete);
-						setDocumentToDelete(null);
+					const id = documentToDelete;
+					setDocumentDeleteError(null);
+					startDocumentDeleteTransition(async () => {
+						try {
+							const state = await deleteDocumentOrPolicyAction(id);
+							if (isActionStateError(state)) {
+								const message = Array.isArray(state.message) ? state.message[0] : state.message;
+								setDocumentDeleteError(
+									message ?? t("Could not delete document or policy. Please try again."),
+								);
+								return;
+							}
+							setDocumentToDelete(null);
+						} catch {
+							setDocumentDeleteError(t("Could not delete document or policy. Please try again."));
+						}
 					});
 				}}
 			/>
@@ -394,17 +414,30 @@ export function DocumentsPoliciesPage(props: Readonly<DocumentsPoliciesPageProps
 			<EntityDeleteModal
 				item={groupToDelete != null ? { id: groupToDelete } : null}
 				model={t("group")}
-				isPending={false}
+				isPending={isGroupDeletePending}
+				error={groupDeleteError}
 				onClose={() => {
 					setGroupToDelete(null);
+					setGroupDeleteError(null);
 				}}
 				onConfirm={() => {
 					if (groupToDelete == null) {
 						return;
 					}
-					startTransition(async () => {
-						await deleteDocumentPolicyGroupAction(groupToDelete);
-						setGroupToDelete(null);
+					const id = groupToDelete;
+					setGroupDeleteError(null);
+					startGroupDeleteTransition(async () => {
+						try {
+							const state = await deleteDocumentPolicyGroupAction(id);
+							if (isActionStateError(state)) {
+								const message = Array.isArray(state.message) ? state.message[0] : state.message;
+								setGroupDeleteError(message ?? t("Could not delete group. Please try again."));
+								return;
+							}
+							setGroupToDelete(null);
+						} catch {
+							setGroupDeleteError(t("Could not delete group. Please try again."));
+						}
 					});
 				}}
 			/>

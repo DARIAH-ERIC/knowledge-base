@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import {
 	Table,
 	TableBody,
@@ -58,6 +59,7 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 		state.filter((item) => item.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const search = useUrlPaginatedSearch({
 		dir: initialDir,
 		page: initialPage,
@@ -145,8 +147,10 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 				item={itemToDelete}
 				model={t("news item")}
 				isPending={isDeletePending}
+				error={deleteError}
 				onClose={() => {
 					setItemToDelete(null);
+					setDeleteError(null);
 				}}
 				onConfirm={() => {
 					if (itemToDelete == null) {
@@ -154,12 +158,22 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 					}
 
 					const { id, documentId } = itemToDelete;
+					setDeleteError(null);
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deleteNewsItemAction(documentId);
-						router.refresh();
-						setItemToDelete(null);
+						try {
+							const state = await deleteNewsItemAction(documentId);
+							if (isActionStateError(state)) {
+								const message = Array.isArray(state.message) ? state.message[0] : state.message;
+								setDeleteError(message ?? t("Could not delete news item. Please try again."));
+								return;
+							}
+							router.refresh();
+							setItemToDelete(null);
+						} catch {
+							setDeleteError(t("Could not delete news item. Please try again."));
+						}
 					});
 				}}
 			/>

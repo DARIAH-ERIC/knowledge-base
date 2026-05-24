@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import {
 	Table,
 	TableBody,
@@ -61,6 +62,7 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 		state.filter((item) => item.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const search = useUrlPaginatedSearch({
 		dir: initialDir,
 		page: initialPage,
@@ -138,8 +140,10 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 				item={itemToDelete}
 				model={t("institution")}
 				isPending={isDeletePending}
+				error={deleteError}
 				onClose={() => {
 					setItemToDelete(null);
+					setDeleteError(null);
 				}}
 				onConfirm={() => {
 					if (itemToDelete == null) {
@@ -147,12 +151,22 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 					}
 
 					const id = itemToDelete.id;
+					setDeleteError(null);
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deleteInstitutionAction(id);
-						router.refresh();
-						setItemToDelete(null);
+						try {
+							const state = await deleteInstitutionAction(id);
+							if (isActionStateError(state)) {
+								const message = Array.isArray(state.message) ? state.message[0] : state.message;
+								setDeleteError(message ?? t("Could not delete institution. Please try again."));
+								return;
+							}
+							router.refresh();
+							setItemToDelete(null);
+						} catch {
+							setDeleteError(t("Could not delete institution. Please try again."));
+						}
 					});
 				}}
 			/>

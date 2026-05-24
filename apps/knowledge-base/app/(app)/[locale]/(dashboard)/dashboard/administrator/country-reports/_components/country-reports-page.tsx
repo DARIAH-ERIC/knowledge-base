@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import {
 	Table,
 	TableBody,
@@ -11,15 +12,19 @@ import {
 } from "@dariah-eric/ui/table";
 import { EyeIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useOptimistic, useState } from "react";
+import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import {
 	EntityDeleteModal,
 	EntityListHeader,
+	EntityListPagination,
+	EntityListSearchField,
 	NewLink,
 	RowActionsMenu,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteCountryReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/delete-country-report.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 type CountryReportRow = Pick<schema.CountryReport, "id" | "status"> & {
@@ -28,25 +33,29 @@ type CountryReportRow = Pick<schema.CountryReport, "id" | "status"> & {
 };
 
 interface CountryReportsPageProps {
-	reports: Promise<Array<CountryReportRow>>;
+	reports: { data: Array<CountryReportRow>; total: number };
+	page: number;
+	q: string;
 }
 
 function formatStatus(status: string): string {
 	return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
-export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): ReactNode {
-	const { reports: reportsPromise } = props;
+const pageSize = dashboardPageSize;
 
-	const resolvedReports = use(reportsPromise);
+export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): ReactNode {
+	const { reports, page: initialPage, q: initialQ } = props;
 
 	const t = useExtracted();
 	const router = useRouter();
-	const [reports, optimisticallyRemoveReport] = useOptimistic(
-		resolvedReports,
-		(state, id: string) => state.filter((r) => r.id !== id),
+	const [items, optimisticallyRemoveReport] = useOptimistic(reports.data, (state, id: string) =>
+		state.filter((r) => r.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
+	const [isDeletePending, startDeleteTransition] = useTransition();
+	const search = useUrlPaginatedSearch({ page: initialPage, q: initialQ });
 
 	return (
 		<Fragment>
@@ -54,7 +63,10 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 				title={t("Country reports")}
 				description={t("Manage all country reports in the DARIAH knowledge base.")}
 				action={
-					<NewLink href="/dashboard/administrator/country-reports/create">{t("New")}</NewLink>
+					<>
+						<EntityListSearchField search={search} />
+						<NewLink href="/dashboard/administrator/country-reports/create">{t("New")}</NewLink>
+					</>
 				}
 			/>
 
@@ -68,7 +80,7 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
-				<TableBody items={reports}>
+				<TableBody items={items}>
 					{(item) => (
 						<TableRow id={item.id}>
 							<TableCell>{item.country.name}</TableCell>
@@ -105,23 +117,39 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 				</TableBody>
 			</Table>
 
+			<EntityListPagination search={search} total={reports.total} pageSize={pageSize} />
+
 			<EntityDeleteModal
 				item={itemToDelete}
 				model={t("country report")}
-				isPending={false}
+				isPending={isDeletePending}
+				error={deleteError}
 				onClose={() => {
 					setItemToDelete(null);
+					setDeleteError(null);
 				}}
 				onConfirm={() => {
 					if (itemToDelete == null) {
 						return;
 					}
 
-					startTransition(async () => {
-						optimisticallyRemoveReport(itemToDelete.id);
-						await deleteCountryReportAction(itemToDelete.id);
-						router.refresh();
-						setItemToDelete(null);
+					const id = itemToDelete.id;
+					setDeleteError(null);
+
+					startDeleteTransition(async () => {
+						optimisticallyRemoveReport(id);
+						try {
+							const state = await deleteCountryReportAction(id);
+							if (isActionStateError(state)) {
+								const message = Array.isArray(state.message) ? state.message[0] : state.message;
+								setDeleteError(message ?? t("Could not delete country report. Please try again."));
+								return;
+							}
+							router.refresh();
+							setItemToDelete(null);
+						} catch {
+							setDeleteError(t("Could not delete country report. Please try again."));
+						}
 					});
 				}}
 			/>

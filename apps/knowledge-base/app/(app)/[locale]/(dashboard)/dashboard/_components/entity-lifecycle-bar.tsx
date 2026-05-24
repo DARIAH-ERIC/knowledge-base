@@ -9,11 +9,7 @@ import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useState, useTransition } from "react";
 
-/**
- * Lifecycle command actions wrapped by createCommandAction return an ActionState on completion; the
- * bar currently doesn't surface failures (Phase 2 R3 follow-up), so we just ignore the return
- * value.
- */
+/** Lifecycle command actions return an ActionState on completion; the bar ignores it. */
 type LifecycleAction = (documentId: string) => Promise<unknown>;
 
 interface EntityLifecycleBarProps {

@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import { Button } from "@dariah-eric/ui/button";
 import { Tab, TabList, TabPanel, Tabs } from "@dariah-eric/ui/tabs";
 import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
@@ -13,7 +14,7 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, useState } from "react";
+import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
 import {
 	EntityDeleteModal,
@@ -208,6 +209,8 @@ function MenuTabPanel(props: Readonly<MenuTabPanelProps>): ReactNode {
 	}>({ isOpen: false });
 
 	const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+	const [deleteItemError, setDeleteItemError] = useState<string | null>(null);
+	const [isDeleteItemPending, startDeleteItemTransition] = useTransition();
 
 	return (
 		<Fragment>
@@ -272,17 +275,32 @@ function MenuTabPanel(props: Readonly<MenuTabPanelProps>): ReactNode {
 			<EntityDeleteModal
 				item={itemToDelete != null ? { id: itemToDelete } : null}
 				model={t("navigation item")}
-				isPending={false}
+				isPending={isDeleteItemPending}
+				error={deleteItemError}
 				onClose={() => {
 					setItemToDelete(null);
+					setDeleteItemError(null);
 				}}
 				onConfirm={() => {
 					if (itemToDelete == null) {
 						return;
 					}
-					startTransition(async () => {
-						await deleteNavigationItemAction(itemToDelete);
-						setItemToDelete(null);
+					const id = itemToDelete;
+					setDeleteItemError(null);
+					startDeleteItemTransition(async () => {
+						try {
+							const state = await deleteNavigationItemAction(id);
+							if (isActionStateError(state)) {
+								const message = Array.isArray(state.message) ? state.message[0] : state.message;
+								setDeleteItemError(
+									message ?? t("Could not delete navigation item. Please try again."),
+								);
+								return;
+							}
+							setItemToDelete(null);
+						} catch {
+							setDeleteItemError(t("Could not delete navigation item. Please try again."));
+						}
 					});
 				}}
 			/>
@@ -296,6 +314,8 @@ export function NavigationPage(props: Readonly<NavigationPageProps>): ReactNode 
 	const t = useExtracted();
 
 	const [menuToDelete, setMenuToDelete] = useState<string | null>(null);
+	const [deleteMenuError, setDeleteMenuError] = useState<string | null>(null);
+	const [isDeleteMenuPending, startDeleteMenuTransition] = useTransition();
 
 	return (
 		<Fragment>
@@ -351,17 +371,32 @@ export function NavigationPage(props: Readonly<NavigationPageProps>): ReactNode 
 			<EntityDeleteModal
 				item={menuToDelete != null ? { id: menuToDelete } : null}
 				model={t("navigation menu")}
-				isPending={false}
+				isPending={isDeleteMenuPending}
+				error={deleteMenuError}
 				onClose={() => {
 					setMenuToDelete(null);
+					setDeleteMenuError(null);
 				}}
 				onConfirm={() => {
 					if (menuToDelete == null) {
 						return;
 					}
-					startTransition(async () => {
-						await deleteNavigationMenuAction(menuToDelete);
-						setMenuToDelete(null);
+					const id = menuToDelete;
+					setDeleteMenuError(null);
+					startDeleteMenuTransition(async () => {
+						try {
+							const state = await deleteNavigationMenuAction(id);
+							if (isActionStateError(state)) {
+								const message = Array.isArray(state.message) ? state.message[0] : state.message;
+								setDeleteMenuError(
+									message ?? t("Could not delete navigation menu. Please try again."),
+								);
+								return;
+							}
+							setMenuToDelete(null);
+						} catch {
+							setDeleteMenuError(t("Could not delete navigation menu. Please try again."));
+						}
 					});
 				}}
 			/>

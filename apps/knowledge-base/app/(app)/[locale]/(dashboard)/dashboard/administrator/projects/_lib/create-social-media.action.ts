@@ -19,7 +19,7 @@ export interface CreatedSocialMedia {
 	type: { type: string };
 }
 
-/** Stays on createServerAction because the success response carries typed data. */
+/** Uses createServerAction because the success response carries typed data. */
 export const createSocialMediaAction = createServerAction<CreatedSocialMedia>(
 	{ requireAdmin: true },
 	async function createSocialMediaAction(_state, formData, { user }) {

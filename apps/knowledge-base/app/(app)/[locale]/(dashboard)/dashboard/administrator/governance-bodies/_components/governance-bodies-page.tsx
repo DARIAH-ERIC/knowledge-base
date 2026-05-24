@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import {
 	Table,
 	TableBody,
@@ -63,6 +64,7 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 		(state, id: string) => state.filter((item) => item.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const search = useUrlPaginatedSearch({
 		dir: initialDir,
 		page: initialPage,
@@ -142,8 +144,10 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 				item={itemToDelete}
 				model={t("governance body")}
 				isPending={isDeletePending}
+				error={deleteError}
 				onClose={() => {
 					setItemToDelete(null);
+					setDeleteError(null);
 				}}
 				onConfirm={() => {
 					if (itemToDelete == null) {
@@ -151,12 +155,22 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 					}
 
 					const { id, documentId } = itemToDelete;
+					setDeleteError(null);
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deleteGovernanceBodyAction(documentId);
-						router.refresh();
-						setItemToDelete(null);
+						try {
+							const state = await deleteGovernanceBodyAction(documentId);
+							if (isActionStateError(state)) {
+								const message = Array.isArray(state.message) ? state.message[0] : state.message;
+								setDeleteError(message ?? t("Could not delete governance body. Please try again."));
+								return;
+							}
+							router.refresh();
+							setItemToDelete(null);
+						} catch {
+							setDeleteError(t("Could not delete governance body. Please try again."));
+						}
 					});
 				}}
 			/>

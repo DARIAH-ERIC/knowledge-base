@@ -1,14 +1,35 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import { type ReactNode, Suspense } from "react";
+import type { ReactNode } from "react";
 
-import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
 import { ReportingCampaignsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/reporting-campaigns-page";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getReportingCampaignsForAdmin } from "@/lib/data/admin-reporting";
+import type { IntlLocale } from "@/lib/i18n/locales";
+import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { getListSearchParams } from "@/lib/server/list-search-params";
 
 interface DashboardAdministratorReportingCampaignsPageProps extends PageProps<"/[locale]/dashboard/administrator/reporting-campaigns"> {}
+
+const pageSize = dashboardPageSize;
+
+function createListHref(q: string, page: number): string {
+	const searchParams = new URLSearchParams();
+
+	if (q !== "") {
+		searchParams.set("q", q);
+	}
+
+	if (page > 1) {
+		searchParams.set("page", String(page));
+	}
+
+	const query = searchParams.toString();
+
+	return `/dashboard/administrator/reporting-campaigns${query !== "" ? `?${query}` : ""}`;
+}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorReportingCampaignsPageProps>,
@@ -23,14 +44,23 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardAdministratorReportingCampaignsPage(
-	_props: Readonly<DashboardAdministratorReportingCampaignsPageProps>,
-): ReactNode {
-	const campaigns = assertAuthenticated().then(({ user }) => getReportingCampaignsForAdmin(user));
+export default async function DashboardAdministratorReportingCampaignsPage(
+	props: Readonly<DashboardAdministratorReportingCampaignsPageProps>,
+): Promise<ReactNode> {
+	const { params, searchParams } = props;
+	const [{ locale }, rawSearchParams] = await Promise.all([params, searchParams]);
+	const { page, q } = getListSearchParams(rawSearchParams);
+	const { user } = await assertAuthenticated();
+	const campaigns = await getReportingCampaignsForAdmin(user, {
+		limit: pageSize,
+		offset: (page - 1) * pageSize,
+		q,
+	});
+	const totalPages = Math.max(Math.ceil(campaigns.total / pageSize), 1);
 
-	return (
-		<Suspense fallback={<LoadingScreen />}>
-			<ReportingCampaignsPage campaigns={campaigns} />
-		</Suspense>
-	);
+	if (page > totalPages) {
+		redirect({ href: createListHref(q, totalPages), locale: locale as IntlLocale });
+	}
+
+	return <ReportingCampaignsPage campaigns={campaigns} page={page} q={q} />;
 }

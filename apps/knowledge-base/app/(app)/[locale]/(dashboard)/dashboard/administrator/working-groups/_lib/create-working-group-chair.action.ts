@@ -17,7 +17,7 @@ import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-/** Stays on createServerAction because the success response carries typed data. */
+/** Uses createServerAction because the success response carries typed data. */
 export const createWorkingGroupChairAction = createServerAction(
 	{ requireAdmin: true },
 	async function createWorkingGroupChairAction(state, formData, { user }) {

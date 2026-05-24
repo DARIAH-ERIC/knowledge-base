@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import {
 	Table,
 	TableBody,
@@ -65,6 +66,7 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 		state.filter((item) => item.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const search = useUrlPaginatedSearch({
 		dir: initialDir,
 		page: initialPage,
@@ -158,8 +160,10 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 				item={itemToDelete}
 				model={t("working group")}
 				isPending={isDeletePending}
+				error={deleteError}
 				onClose={() => {
 					setItemToDelete(null);
+					setDeleteError(null);
 				}}
 				onConfirm={() => {
 					if (itemToDelete == null) {
@@ -167,12 +171,22 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 					}
 
 					const { id, documentId } = itemToDelete;
+					setDeleteError(null);
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deleteWorkingGroupAction(documentId);
-						router.refresh();
-						setItemToDelete(null);
+						try {
+							const state = await deleteWorkingGroupAction(documentId);
+							if (isActionStateError(state)) {
+								const message = Array.isArray(state.message) ? state.message[0] : state.message;
+								setDeleteError(message ?? t("Could not delete working group. Please try again."));
+								return;
+							}
+							router.refresh();
+							setItemToDelete(null);
+						} catch {
+							setDeleteError(t("Could not delete working group. Please try again."));
+						}
 					});
 				}}
 			/>

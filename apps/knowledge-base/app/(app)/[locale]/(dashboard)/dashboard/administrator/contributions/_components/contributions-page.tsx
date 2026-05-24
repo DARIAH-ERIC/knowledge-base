@@ -1,5 +1,6 @@
 "use client";
 
+import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import { Badge } from "@dariah-eric/ui/badge";
 import {
 	Table,
@@ -121,6 +122,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 		state.filter((item) => item.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const search = useUrlPaginatedSearch({
 		dir: initialDir,
 		page: initialPage,
@@ -232,8 +234,10 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 				item={itemToDelete}
 				model={t("person relation")}
 				isPending={isDeletePending}
+				error={deleteError}
 				onClose={() => {
 					setItemToDelete(null);
+					setDeleteError(null);
 				}}
 				onConfirm={() => {
 					if (itemToDelete == null) {
@@ -241,12 +245,22 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 					}
 
 					const id = itemToDelete.id;
+					setDeleteError(null);
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deleteContributionAction(id);
-						router.refresh();
-						setItemToDelete(null);
+						try {
+							const state = await deleteContributionAction(id);
+							if (isActionStateError(state)) {
+								const message = Array.isArray(state.message) ? state.message[0] : state.message;
+								setDeleteError(message ?? t("Could not delete person relation. Please try again."));
+								return;
+							}
+							router.refresh();
+							setItemToDelete(null);
+						} catch {
+							setDeleteError(t("Could not delete person relation. Please try again."));
+						}
 					});
 				}}
 			/>

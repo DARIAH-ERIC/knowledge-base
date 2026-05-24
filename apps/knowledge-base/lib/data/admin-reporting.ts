@@ -6,7 +6,13 @@ import { forbidden } from "next/navigation";
 
 import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { and, eq } from "@/lib/db/sql";
+import { and, count, eq, ilike, inArray, sql } from "@/lib/db/sql";
+
+interface GetReportingListParams {
+	limit: number;
+	offset: number;
+	q?: string;
+}
 
 function assertAdminUser(user: Pick<User, "role">): void {
 	if (user.role !== "admin") {
@@ -86,16 +92,40 @@ export interface ReportingStatisticsFilters {
 	countryName?: string;
 }
 
-export async function getCountryReportsForAdmin(currentUser: Pick<User, "role">) {
+export async function getCountryReportsForAdmin(
+	currentUser: Pick<User, "role">,
+	params: Readonly<GetReportingListParams>,
+) {
 	assertAdminUser(currentUser);
 
-	return db.query.countryReports.findMany({
-		columns: { id: true, status: true },
-		with: {
-			campaign: { columns: { id: true, year: true } },
-			country: { columns: { id: true, name: true } },
-		},
-	});
+	const { limit, offset, q } = params;
+	const query = q?.trim();
+	const where =
+		query != null && query !== ""
+			? inArray(
+					schema.countryReports.countryId,
+					db
+						.select({ id: schema.organisationalUnits.id })
+						.from(schema.organisationalUnits)
+						.where(ilike(schema.organisationalUnits.name, `%${query}%`)),
+				)
+			: undefined;
+
+	const [data, aggregate] = await Promise.all([
+		db.query.countryReports.findMany({
+			where,
+			limit,
+			offset,
+			columns: { id: true, status: true },
+			with: {
+				campaign: { columns: { id: true, year: true } },
+				country: { columns: { id: true, name: true } },
+			},
+		}),
+		db.select({ total: count() }).from(schema.countryReports).where(where),
+	]);
+
+	return { data, total: aggregate[0]?.total ?? 0 };
 }
 
 export async function getCountryReportForAdmin(currentUser: Pick<User, "role">, id: string) {
@@ -136,16 +166,40 @@ export async function getCountryReportCreateDataForAdmin(currentUser: Pick<User,
 	return { campaigns, countries };
 }
 
-export async function getWorkingGroupReportsForAdmin(currentUser: Pick<User, "role">) {
+export async function getWorkingGroupReportsForAdmin(
+	currentUser: Pick<User, "role">,
+	params: Readonly<GetReportingListParams>,
+) {
 	assertAdminUser(currentUser);
 
-	return db.query.workingGroupReports.findMany({
-		columns: { id: true, status: true },
-		with: {
-			campaign: { columns: { id: true, year: true } },
-			workingGroup: { columns: { id: true, name: true } },
-		},
-	});
+	const { limit, offset, q } = params;
+	const query = q?.trim();
+	const where =
+		query != null && query !== ""
+			? inArray(
+					schema.workingGroupReports.workingGroupId,
+					db
+						.select({ id: schema.organisationalUnits.id })
+						.from(schema.organisationalUnits)
+						.where(ilike(schema.organisationalUnits.name, `%${query}%`)),
+				)
+			: undefined;
+
+	const [data, aggregate] = await Promise.all([
+		db.query.workingGroupReports.findMany({
+			where,
+			limit,
+			offset,
+			columns: { id: true, status: true },
+			with: {
+				campaign: { columns: { id: true, year: true } },
+				workingGroup: { columns: { id: true, name: true } },
+			},
+		}),
+		db.select({ total: count() }).from(schema.workingGroupReports).where(where),
+	]);
+
+	return { data, total: aggregate[0]?.total ?? 0 };
 }
 
 export async function getWorkingGroupReportForAdmin(currentUser: Pick<User, "role">, id: string) {
@@ -188,25 +242,36 @@ export async function getWorkingGroupReportCreateDataForAdmin(currentUser: Pick<
 	return { campaigns, workingGroups };
 }
 
-export async function getReportingCampaignsForAdmin(currentUser: Pick<User, "role">) {
+export async function getReportingCampaignsForAdmin(
+	currentUser: Pick<User, "role">,
+	params: Readonly<GetReportingListParams>,
+) {
 	assertAdminUser(currentUser);
 
-	const campaigns = await db.query.reportingCampaigns.findMany({
-		orderBy: { year: "desc" },
-		columns: { id: true, year: true, status: true },
-		with: {
-			countryReports: {
-				columns: { id: true },
-			},
-			workingGroupReports: {
-				columns: { id: true },
-			},
-		},
-	});
+	const { limit, offset, q } = params;
+	const query = q?.trim();
+	const where =
+		query != null && query !== ""
+			? sql<boolean>`${schema.reportingCampaigns.year}::text ilike ${`%${query}%`}`
+			: undefined;
 
-	return campaigns.map((campaign) => {
+	const [campaigns, aggregate] = await Promise.all([
+		db.query.reportingCampaigns.findMany({
+			where,
+			orderBy: { year: "desc" },
+			limit,
+			offset,
+			columns: { id: true, year: true, status: true },
+			with: {
+				countryReports: { columns: { id: true } },
+				workingGroupReports: { columns: { id: true } },
+			},
+		}),
+		db.select({ total: count() }).from(schema.reportingCampaigns).where(where),
+	]);
+
+	const data = campaigns.map((campaign) => {
 		const reportCount = campaign.countryReports.length + campaign.workingGroupReports.length;
-
 		return {
 			id: campaign.id,
 			year: campaign.year,
@@ -215,6 +280,8 @@ export async function getReportingCampaignsForAdmin(currentUser: Pick<User, "rol
 			hasReports: reportCount > 0,
 		};
 	});
+
+	return { data, total: aggregate[0]?.total ?? 0 };
 }
 
 export async function getReportingStatisticsForAdmin(

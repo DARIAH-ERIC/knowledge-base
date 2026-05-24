@@ -15,10 +15,7 @@ import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 
-/**
- * Stays on createServerAction because the success response carries typed data. Auth gate is in the
- * wrapper, audit is written inside the same transaction as the mutation.
- */
+/** Uses createServerAction because the success response carries typed data. */
 export const createUnitRelationAction = createServerAction(
 	{ requireAdmin: true },
 	async function createUnitRelationAction(state, formData, { user }) {

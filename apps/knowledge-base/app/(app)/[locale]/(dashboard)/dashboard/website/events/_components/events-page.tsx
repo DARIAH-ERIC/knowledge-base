@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import {
 	Table,
 	TableBody,
@@ -58,6 +59,7 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 		state.filter((item) => item.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const search = useUrlPaginatedSearch({
 		dir: initialDir,
 		page: initialPage,
@@ -155,8 +157,10 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 				item={itemToDelete}
 				model={t("event")}
 				isPending={isDeletePending}
+				error={deleteError}
 				onClose={() => {
 					setItemToDelete(null);
+					setDeleteError(null);
 				}}
 				onConfirm={() => {
 					if (itemToDelete == null) {
@@ -164,12 +168,22 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 					}
 
 					const { id, documentId } = itemToDelete;
+					setDeleteError(null);
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deleteEventAction(documentId);
-						router.refresh();
-						setItemToDelete(null);
+						try {
+							const state = await deleteEventAction(documentId);
+							if (isActionStateError(state)) {
+								const message = Array.isArray(state.message) ? state.message[0] : state.message;
+								setDeleteError(message ?? t("Could not delete event. Please try again."));
+								return;
+							}
+							router.refresh();
+							setItemToDelete(null);
+						} catch {
+							setDeleteError(t("Could not delete event. Please try again."));
+						}
 					});
 				}}
 			/>

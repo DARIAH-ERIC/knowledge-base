@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import { Badge } from "@dariah-eric/ui/badge";
 import {
 	Table,
@@ -66,6 +67,7 @@ export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): Reac
 		state.filter((item) => item.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const search = useUrlPaginatedSearch({
 		dir: initialDir,
 		page: initialPage,
@@ -169,8 +171,10 @@ export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): Reac
 				item={itemToDelete}
 				model={t("opportunity")}
 				isPending={isDeletePending}
+				error={deleteError}
 				onClose={() => {
 					setItemToDelete(null);
+					setDeleteError(null);
 				}}
 				onConfirm={() => {
 					if (itemToDelete == null) {
@@ -178,12 +182,22 @@ export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): Reac
 					}
 
 					const { id, documentId } = itemToDelete;
+					setDeleteError(null);
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deleteOpportunityAction(documentId);
-						router.refresh();
-						setItemToDelete(null);
+						try {
+							const state = await deleteOpportunityAction(documentId);
+							if (isActionStateError(state)) {
+								const message = Array.isArray(state.message) ? state.message[0] : state.message;
+								setDeleteError(message ?? t("Could not delete opportunity. Please try again."));
+								return;
+							}
+							router.refresh();
+							setItemToDelete(null);
+						} catch {
+							setDeleteError(t("Could not delete opportunity. Please try again."));
+						}
 					});
 				}}
 			/>

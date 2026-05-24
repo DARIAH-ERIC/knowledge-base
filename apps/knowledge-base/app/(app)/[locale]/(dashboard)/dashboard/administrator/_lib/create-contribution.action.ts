@@ -17,11 +17,7 @@ import { and, eq } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 
-/**
- * Stays on createServerAction because the success response carries typed data (id + duration +
- * targetUnitType) that the client component consumes. The auth gate now lives in the wrapper, and
- * audit is written inside the same transaction as the mutation.
- */
+/** Uses createServerAction because the success response carries typed data. */
 export const createContributionAction = createServerAction(
 	{ requireAdmin: true },
 	async function createContributionAction(state, formData, { user }) {

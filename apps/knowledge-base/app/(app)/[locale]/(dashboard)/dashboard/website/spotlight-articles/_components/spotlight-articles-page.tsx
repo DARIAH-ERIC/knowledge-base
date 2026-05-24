@@ -1,6 +1,7 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { isActionStateError } from "@dariah-eric/next-lib/actions";
 import {
 	Table,
 	TableBody,
@@ -65,6 +66,7 @@ export function SpotlightArticlesPage(props: Readonly<SpotlightArticlesPageProps
 		(state, id: string) => state.filter((item) => item.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string; documentId: string } | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const search = useUrlPaginatedSearch({
 		dir: initialDir,
 		page: initialPage,
@@ -156,8 +158,10 @@ export function SpotlightArticlesPage(props: Readonly<SpotlightArticlesPageProps
 				item={itemToDelete}
 				model={t("spotlight article")}
 				isPending={isDeletePending}
+				error={deleteError}
 				onClose={() => {
 					setItemToDelete(null);
+					setDeleteError(null);
 				}}
 				onConfirm={() => {
 					if (itemToDelete == null) {
@@ -165,12 +169,24 @@ export function SpotlightArticlesPage(props: Readonly<SpotlightArticlesPageProps
 					}
 
 					const { id, documentId } = itemToDelete;
+					setDeleteError(null);
 
 					startDeleteTransition(async () => {
 						optimisticallyRemoveItem(id);
-						await deleteSpotlightArticleAction(documentId);
-						router.refresh();
-						setItemToDelete(null);
+						try {
+							const state = await deleteSpotlightArticleAction(documentId);
+							if (isActionStateError(state)) {
+								const message = Array.isArray(state.message) ? state.message[0] : state.message;
+								setDeleteError(
+									message ?? t("Could not delete spotlight article. Please try again."),
+								);
+								return;
+							}
+							router.refresh();
+							setItemToDelete(null);
+						} catch {
+							setDeleteError(t("Could not delete spotlight article. Please try again."));
+						}
 					});
 				}}
 			/>
