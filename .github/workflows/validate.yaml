@@ -153,12 +153,13 @@ jobs:
     runs-on: ubuntu-24.04
     container:
       image: mcr.microsoft.com/playwright:v1.60.0-noble
-      options: --ipc=host
+      options: --user 1001 --ipc=host
     timeout-minutes: 60
 
     env:
       DATABASE_HOST: "postgres"
       EMAIL_SMTP_SERVER: "mailpit"
+      HOME: "/home/pwuser"
       IMGPROXY_BASE_URL: "http://imgproxy:8080"
       MAILPIT_API_BASE_URL: "http://mailpit:8025"
       NEXT_PUBLIC_TYPESENSE_HOST: "typesense"
