@@ -1135,10 +1135,7 @@ export class DatabaseService {
 		const rows = await this.db
 			.select({ documentId: schema.entityVersions.entityId })
 			.from(schema.documentationPages)
-			.innerJoin(
-				schema.entityVersions,
-				eq(schema.documentationPages.id, schema.entityVersions.id),
-			)
+			.innerJoin(schema.entityVersions, eq(schema.documentationPages.id, schema.entityVersions.id))
 			.where(sql`${schema.documentationPages.title} LIKE ${`${prefix}%`}`);
 
 		const documentIds = [...new Set(rows.map((r) => r.documentId))];

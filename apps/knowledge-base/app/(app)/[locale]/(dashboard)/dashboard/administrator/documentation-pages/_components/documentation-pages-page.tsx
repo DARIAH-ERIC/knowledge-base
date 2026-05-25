@@ -100,7 +100,9 @@ export function DocumentationPagesPage(props: Readonly<DocumentationPagesPagePro
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-						<TableRow href={`/dashboard/administrator/documentation-pages/${item.entity.slug}/details`}>
+						<TableRow
+							href={`/dashboard/administrator/documentation-pages/${item.entity.slug}/details`}
+						>
 							<TableCell>
 								<div className="max-inline-64 truncate">{item.title}</div>
 							</TableCell>
