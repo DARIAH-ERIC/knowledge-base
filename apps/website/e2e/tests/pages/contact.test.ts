@@ -61,10 +61,7 @@ test.describe("contact page", () => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(() => env.MAILPIT_API_BASE_URL == null, "Email service disabled.");
 
-		/**
-		 * Run sequentially. Also requires setting `workers: 1` in `playwright.config.ts` to avoid
-		 * running test-suites concurrently.
-		 */
+		/** Uses shared Mailpit state, so keep these tests isolated from other mail tests. */
 		test.describe.configure({ mode: "default" });
 
 		const statusTimeoutMs = 5000;
