@@ -176,6 +176,9 @@ jobs:
       TYPESENSE_HOST: "typesense"
       UNR_DATABASE_DIRECT_URL: "postgresql://dariah-unr:dariah-unr@postgres:5432/dariah-unr"
 
+    # The e2e job runs inside the Playwright container, so GitHub service containers
+    # provide stable DNS names on the job network. The validate job uses docker
+    # compose instead to exercise the same service setup developers use locally.
     services:
       postgres:
         image: postgres:18
@@ -192,8 +195,14 @@ jobs:
         image: typesense/typesense:30.0
         env:
           TYPESENSE_API_KEY: ${{ env.TYPESENSE_ADMIN_API_KEY }}
-          TYPESENSE_DATA_DIR: /data
+          TYPESENSE_DATA_DIR: /tmp
           TYPESENSE_ENABLE_CORS: "true"
+        options: >-
+          --health-cmd "bash -c 'cat < /dev/null > /dev/tcp/localhost/8108'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-start-period 15s
+          --health-retries 10
       minio:
         image: quay.io/minio/minio:latest
         env:
@@ -222,13 +231,14 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
+        with:
+          cache: true
 
       - name: Use node.js 24.x
         uses: actions/setup-node@v6
         with:
           node-version: 24.x
-          cache: "pnpm"
 
       - name: Install turborepo cli globally
         run: pnpm add --global turbo
@@ -237,6 +247,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Wait for services
+        shell: bash
         run: |
           set -euo pipefail
           for service in postgres:5432 typesense:8108 minio:9000 mailpit:1025 imgproxy:8080; do
@@ -267,6 +278,7 @@ jobs:
         run: pnpm run data:seed:storage
 
       - name: Generate search api key
+        shell: bash
         run: |
           set -euo pipefail
           SEARCH_API_KEY="$(pnpm --silent run search:api-keys:generate --raw)"
@@ -285,7 +297,7 @@ jobs:
       - name: Run e2e tests
         run: turbo run test:e2e
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: playwright-report

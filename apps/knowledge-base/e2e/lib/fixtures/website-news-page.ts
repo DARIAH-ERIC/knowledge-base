@@ -104,14 +104,18 @@ export class WebsiteNewsPage {
 		await this.closeRelatedEntitiesDialog(dialog);
 	}
 
+	private contentBlockEditor(): Locator {
+		return this.page.getByRole("textbox", { name: "Content" });
+	}
+
 	async addContentBlock(text: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Add block" }).click();
 		await this.page.getByRole("menuitem", { name: "Content" }).click();
-		await this.page.getByRole("textbox").last().fill(text);
+		await this.contentBlockEditor().fill(text);
 	}
 
 	async updateContentBlockText(text: string): Promise<void> {
-		const editor = this.page.getByRole("textbox").last();
+		const editor = this.contentBlockEditor();
 		await editor.clear();
 		await editor.fill(text);
 	}
@@ -123,9 +127,11 @@ export class WebsiteNewsPage {
 	}
 
 	async submitForm(): Promise<void> {
-		await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
 		/** After a successful create/edit, the server action redirects back to the list. */
-		await this.page.waitForURL(`**${BASE_PATH}`);
+		await Promise.all([
+			this.page.waitForURL(`**${BASE_PATH}`),
+			this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click(),
+		]);
 	}
 
 	// ---------------------------------------------------------------------------

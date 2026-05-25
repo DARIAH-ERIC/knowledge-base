@@ -12,9 +12,10 @@ services:
     volumes:
       - typesense-data:/data
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8108/health"]
+      test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/localhost/8108"]
       interval: 5s
       timeout: 5s
+      start_period: 15s
       retries: 10
 
   typesense-dashboard:

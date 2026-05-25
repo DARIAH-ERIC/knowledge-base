@@ -52,8 +52,10 @@ export class WebsiteFundingCallsPage {
 	}
 
 	async submitForm(): Promise<void> {
-		await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
-		await this.page.waitForURL(`**${BASE_PATH}`, { timeout: 60_000 });
+		await Promise.all([
+			this.page.waitForURL(`**${BASE_PATH}`, { timeout: 60_000 }),
+			this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click(),
+		]);
 	}
 
 	// ---------------------------------------------------------------------------
