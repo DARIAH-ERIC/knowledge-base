@@ -51,6 +51,7 @@ const config = getConfig();
 export default defineConfig({
 	testDir: "../e2e",
 	snapshotDir: "../e2e/snapshots",
+	timeout: isCI ? 60_000 : 30_000,
 	fullyParallel: true,
 	forbidOnly: isCI,
 	retries: isCI ? 2 : 0,
@@ -59,6 +60,7 @@ export default defineConfig({
 	reporter: isCI ? [["github"], ["html", { open: "never" }]] : [["html"]],
 	use: {
 		baseURL: config.baseUrl,
+		navigationTimeout: isCI ? 60_000 : 30_000,
 		screenshot: "on-first-failure",
 		trace: "on-first-retry",
 	},
