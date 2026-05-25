@@ -258,6 +258,9 @@ jobs:
             done
           done
 
+      - name: Build packages
+        run: turbo run --filter "./packages/*" build
+
       - name: Apply database migrations
         run: pnpm run db:push && pnpm run db:migrations:apply
 
