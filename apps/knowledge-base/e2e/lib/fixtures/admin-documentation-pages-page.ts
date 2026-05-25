@@ -35,8 +35,10 @@ export class AdminDocumentationPagesPage {
 	}
 
 	async submitForm(): Promise<void> {
-		await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
-		await this.page.waitForURL(`**${BASE_PATH}`);
+		await Promise.all([
+			this.page.waitForURL(`**${BASE_PATH}`),
+			this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click(),
+		]);
 	}
 
 	// ---------------------------------------------------------------------------

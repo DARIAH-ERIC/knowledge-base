@@ -47,9 +47,11 @@ export class WebsiteSpotlightArticlesPage {
 	}
 
 	async submitForm(): Promise<void> {
-		await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
 		/** After a successful create/edit, the server action redirects back to the list. */
-		await this.page.waitForURL(`**${BASE_PATH}`);
+		await Promise.all([
+			this.page.waitForURL(`**${BASE_PATH}`),
+			this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click(),
+		]);
 	}
 
 	// ---------------------------------------------------------------------------

@@ -11,13 +11,20 @@ services:
       - "${TYPESENSE_PORT:-8108}:8108"
     volumes:
       - typesense-data:/data
+    healthcheck:
+      test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/localhost/8108"]
+      interval: 5s
+      timeout: 5s
+      start_period: 15s
+      retries: 10
 
   typesense-dashboard:
     image: ghcr.io/bfritscher/typesense-dashboard:latest
     container_name: dariah-knowledge-base-typesense-dashboard
     restart: unless-stopped
     depends_on:
-      - typesense
+      typesense:
+        condition: service_healthy
     ports:
       - "${TYPESENSE_DASHBOARD_PORT:-5050}:80"
 

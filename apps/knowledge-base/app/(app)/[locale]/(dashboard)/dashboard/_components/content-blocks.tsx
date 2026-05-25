@@ -561,6 +561,7 @@ function ContentBlockPanel({
 		case "unified_content": {
 			return (
 				<RichTextEditor
+					aria-label="Content"
 					className="inline-full"
 					content={item.content}
 					onChange={(content: JSONContent) => {
