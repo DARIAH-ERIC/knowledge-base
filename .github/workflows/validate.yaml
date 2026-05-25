@@ -145,17 +145,6 @@ jobs:
       - name: Test
         run: turbo run test
 
-      # https://nextjs.org/docs/pages/building-your-application/deploying/ci-build-caching#github-actions
-      # - name: Cache Next.js build output
-      #   uses: actions/cache@v5
-      #   with:
-      #     path: "${{ github.workspace }}/.next/cache"
-      #     key:
-      #       "${{ matrix.os }}-${{ matrix.node-version }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}"
-
-      - name: Build app
-        run: turbo run build
-
       - name: Stop services
         run: pnpm run dev:services:down
 
@@ -205,11 +194,15 @@ jobs:
           --health-retries 10
       minio:
         image: quay.io/minio/minio:latest
+        command: server /data --console-address ":9001"
         env:
-          MINIO_OPTS: '--console-address ":9001"'
           MINIO_ROOT_USER: ${{ env.S3_ACCESS_KEY }}
           MINIO_ROOT_PASSWORD: ${{ env.S3_SECRET_KEY }}
-          MINIO_VOLUMES: /data
+        options: >-
+          --health-cmd "mc ready local"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
       imgproxy:
         image: ghcr.io/imgproxy/imgproxy:latest
         env:
