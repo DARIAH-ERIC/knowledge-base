@@ -19,10 +19,11 @@ const E2E_ADMIN_EMAIL = "e2e-admin@example.com";
 const E2E_ADMIN_NAME = "E2E Admin";
 const E2E_NON_ADMIN_EMAIL = "e2e-user@example.com";
 const E2E_NON_ADMIN_NAME = "E2E User";
-const E2E_TEST_ASSET_KEYS: Array<{ key: string; label: string }> = [
+const E2E_TEST_ASSET_KEYS: Array<{ key: string; label: string; mimeType?: string }> = [
 	{ key: "avatars/e2e-test-asset", label: "E2E Test Asset" },
 	{ key: "images/e2e-test-asset", label: "E2E Test Asset" },
 	{ key: "logos/e2e-test-asset", label: "E2E Test Asset" },
+	{ key: "documents/e2e-test-document", label: "E2E Test Document", mimeType: "application/pdf" },
 ];
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 30;
 
@@ -166,7 +167,7 @@ export default async function globalSetup(): Promise<void> {
 			log.info(`[globalSetup] Session written for ${input.email} (role=${input.role})`);
 		}
 
-		for (const { key, label } of E2E_TEST_ASSET_KEYS) {
+		for (const { key, label, mimeType } of E2E_TEST_ASSET_KEYS) {
 			const existingAsset = await db.query.assets.findFirst({
 				where: { key },
 				columns: { id: true },
@@ -176,7 +177,7 @@ export default async function globalSetup(): Promise<void> {
 				await db.insert(schema.assets).values({
 					key,
 					label,
-					mimeType: "image/jpeg",
+					mimeType: mimeType ?? "image/jpeg",
 				});
 			}
 		}

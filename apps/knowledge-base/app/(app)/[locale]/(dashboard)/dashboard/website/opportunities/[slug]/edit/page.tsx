@@ -97,7 +97,7 @@ export default async function DashboardWebsiteEditOpportunityPage(
 	}
 
 	const [contentBlocks, sources] = await Promise.all([
-		getEntityContentBlocks(opportunity.id),
+		getEntityContentBlocks(opportunity.id, "content"),
 		db.query.opportunitySources.findMany({
 			orderBy: { source: "asc" },
 			columns: { id: true, source: true },

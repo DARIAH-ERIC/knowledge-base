@@ -42,7 +42,7 @@ export async function InternalPageView(props: Readonly<InternalPageViewProps>): 
 	const { slug } = props;
 
 	const page = await getPublishedInternalPage(slug);
-	const contentBlocks = await getEntityContentBlocks(page.id);
+	const contentBlocks = await getEntityContentBlocks(page.id, "content");
 
 	return (
 		<Main className="container flex-1 px-8 py-12 xs:px-16">

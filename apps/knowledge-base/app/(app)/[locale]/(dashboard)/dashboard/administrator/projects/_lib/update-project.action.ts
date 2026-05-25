@@ -48,8 +48,10 @@ export const updateProjectAction = createMutationAction({
 			})
 			.where(eq(schema.projects.id, draftVersionId));
 
-		const parsedContent = JSON.parse(input.description) as schema.RichTextContentBlock["content"];
-		await upsertRichTextEntityVersionField(tx, draftVersionId, "description", parsedContent);
+		if (input.description != null) {
+			const parsedContent = JSON.parse(input.description) as schema.RichTextContentBlock["content"];
+			await upsertRichTextEntityVersionField(tx, draftVersionId, "description", parsedContent);
+		}
 
 		const submittedPartnerIds = input.partners
 			.map((p) => p.id)

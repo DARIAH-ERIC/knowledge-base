@@ -120,7 +120,7 @@ export default async function DashboardWebsiteEventDetailsPage(
 		options: imageGridOptions,
 	});
 
-	const contentBlocks = await getEntityContentBlocks(event.id);
+	const contentBlocks = await getEntityContentBlocks(event.id, "content");
 
 	return (
 		<EventDetails

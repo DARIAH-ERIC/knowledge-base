@@ -117,7 +117,7 @@ export default async function DashboardWebsiteNewsItemDetailsPage(
 		options: imageGridOptions,
 	});
 
-	const contentBlocks = await getEntityContentBlocks(newsItem.id);
+	const contentBlocks = await getEntityContentBlocks(newsItem.id, "content");
 
 	return (
 		<NewsItemDetails

@@ -2,9 +2,9 @@ import type { Locator, Page } from "@playwright/test";
 
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
-const BASE_PATH = "/en/dashboard/website/impact-case-studies";
+const BASE_PATH = "/en/dashboard/administrator/documentation-pages";
 
-export class WebsiteImpactCaseStudiesPage {
+export class AdminDocumentationPagesPage {
 	readonly page: Page;
 	readonly workerIndex: number;
 
@@ -34,21 +34,8 @@ export class WebsiteImpactCaseStudiesPage {
 		await this.page.getByLabel("Title").fill(title);
 	}
 
-	async fillSummary(summary: string): Promise<void> {
-		await this.page.getByLabel("Summary").fill(summary);
-	}
-
-	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Select image" }).click();
-		await this.page.waitForSelector('[role="dialog"]');
-		await this.page.waitForSelector('[role="gridcell"]');
-		await this.page.getByRole("gridcell", { name: assetLabel }).click();
-		await this.page.getByRole("dialog").getByRole("button", { name: "Select" }).click();
-	}
-
 	async submitForm(): Promise<void> {
 		await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
-		/** After a successful create/edit, the server action redirects back to the list. */
 		await this.page.waitForURL(`**${BASE_PATH}`);
 	}
 
@@ -68,7 +55,7 @@ export class WebsiteImpactCaseStudiesPage {
 		const row = this.rowByTitle(title);
 		await row.getByRole("button", { name: "Open actions menu" }).click();
 		await this.page.getByRole("menuitem", { name: "Delete" }).click();
-		return this.page.getByRole("dialog", { name: /Delete impact case study/i });
+		return this.page.getByRole("dialog", { name: /Delete documentation page/i });
 	}
 
 	async confirmDelete(dialog: Locator): Promise<void> {
@@ -90,7 +77,7 @@ export class WebsiteImpactCaseStudiesPage {
 		const editHref = await this.page.getByRole("link", { name: "Edit" }).getAttribute("href");
 
 		if (editHref == null) {
-			throw new Error("Could not find edit link on impact case study details page.");
+			throw new Error("Could not find edit link on documentation page details page.");
 		}
 
 		await this.page.goto(editHref);

@@ -40,10 +40,11 @@ export class WebsiteNewsPage {
 
 	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Select image" }).click();
-		await this.page.waitForSelector('[role="dialog"]');
-		await this.page.waitForSelector('[role="gridcell"]');
-		await this.page.getByRole("gridcell", { name: assetLabel }).click();
-		await this.page.getByRole("dialog").getByRole("button", { name: "Select" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		await dialog.waitFor({ state: "visible" });
+		await dialog.getByRole("gridcell", { name: assetLabel }).click();
+		await dialog.getByRole("button", { name: "Select" }).click();
+		await dialog.waitFor({ state: "hidden" });
 	}
 
 	async uploadImageFromMediaLibrary(filePath: string, label: string): Promise<void> {
@@ -71,7 +72,7 @@ export class WebsiteNewsPage {
 	}
 
 	private relatedEntitiesControl(): Locator {
-		return this.relatedEntitiesSection().locator('[data-slot="control"]').first();
+		return this.relatedEntitiesSection().locator('button:has([data-slot="chevron"])');
 	}
 
 	private async closeRelatedEntitiesDialog(dialog: Locator): Promise<void> {
@@ -86,16 +87,12 @@ export class WebsiteNewsPage {
 		await trigger.click();
 		await dialog.waitFor({ state: "visible" });
 
+		const searchbox = dialog.getByRole("searchbox");
+		await searchbox.fill(entityName);
+
 		const option = dialog.getByRole("option", { name: entityName, exact: true });
-		const isOptionVisible = await option.isVisible().catch(() => false);
-
-		if (!isOptionVisible) {
-			const searchbox = dialog.getByRole("searchbox");
-			await searchbox.fill(entityName);
-			await searchbox.press("Enter");
-		}
-
-		await dialog.getByRole("option", { name: entityName, exact: true }).click();
+		await option.waitFor({ state: "visible" });
+		await option.click();
 		await this.closeRelatedEntitiesDialog(dialog);
 	}
 
@@ -103,8 +100,26 @@ export class WebsiteNewsPage {
 		const section = this.relatedEntitiesSection();
 		const dialog = this.relatedEntitiesDialog();
 		await section.getByText(entityName, { exact: true }).waitFor({ state: "visible" });
-		await section.locator('button[slot="remove"]').click();
+		await section.getByRole("button", { name: entityName }).click();
 		await this.closeRelatedEntitiesDialog(dialog);
+	}
+
+	async addContentBlock(text: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.page.getByRole("textbox").last().fill(text);
+	}
+
+	async updateContentBlockText(text: string): Promise<void> {
+		const editor = this.page.getByRole("textbox").last();
+		await editor.clear();
+		await editor.fill(text);
+	}
+
+	async removeFirstContentBlock(): Promise<void> {
+		await this.page.getByRole("button", { name: "Remove block" }).first().click();
+		const dialog = this.page.getByRole("alertdialog", { name: "Remove block" });
+		await dialog.getByRole("button", { name: "Remove" }).click();
 	}
 
 	async submitForm(): Promise<void> {
@@ -145,6 +160,26 @@ export class WebsiteNewsPage {
 		await row.getByRole("button", { name: "Open actions menu" }).click();
 		await this.page.getByRole("menuitem", { name: "View" }).click();
 		await this.page.waitForURL(`**${BASE_PATH}/**/details`);
+	}
+
+	async gotoEditFromDetails(): Promise<void> {
+		const editHref = await this.page.getByRole("link", { name: "Edit" }).getAttribute("href");
+
+		if (editHref == null) {
+			throw new Error("Could not find edit link on news details page.");
+		}
+
+		await this.page.goto(editHref);
+		await this.page.waitForURL(`**${BASE_PATH}/**/edit`);
+	}
+
+	async gotoEditFromList(title: string): Promise<void> {
+		const row = this.rowByTitle(title);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			this.page.waitForURL(`**${BASE_PATH}/**/edit`),
+			this.page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
 	}
 
 	// ---------------------------------------------------------------------------

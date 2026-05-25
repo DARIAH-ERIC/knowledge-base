@@ -64,8 +64,10 @@ test.describe("website news admin – related entities", () => {
 		await newsPage.searchByTitle(title);
 		const row = newsPage.rowByTitle(title);
 		await row.getByRole("button", { name: "Open actions menu" }).click();
-		await page.getByRole("menuitem", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
 
 		await newsPage.selectRelatedEntity(testEntity.name);
 		await newsPage.submitForm();
@@ -100,14 +102,53 @@ test.describe("website news admin – related entities", () => {
 		await newsPage.searchByTitle(title);
 		const row = newsPage.rowByTitle(title);
 		await row.getByRole("button", { name: "Open actions menu" }).click();
-		await page.getByRole("menuitem", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
 
 		await newsPage.removeRelatedEntity(testEntity.name);
 		await newsPage.submitForm();
 
 		const relations = await db.getEntityRelations(newsItem!.id);
 		expect(relations.relatedEntityIds).not.toContain(testEntity.id);
+	});
+
+	test("should keep remaining related entities when one of several relations is removed", async ({
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const newsPage = createWebsiteNewsPage(workerIndex);
+		const testEntities = await db.getTestEntities(2);
+		const firstEntity = testEntities[0]!;
+		const secondEntity = testEntities[1]!;
+
+		const title = `${newsPage.workerPrefix} Relations Multiple ${randomUUID()}`;
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test — remove one of several related entities");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await newsPage.selectRelatedEntity(firstEntity.name);
+		await newsPage.selectRelatedEntity(secondEntity.name);
+		await newsPage.submitForm();
+
+		const newsItem = await db.getNewsItemByTitle(title);
+		expect(newsItem).not.toBeNull();
+		const relationsBefore = await db.getEntityRelations(newsItem!.id);
+		expect(relationsBefore.relatedEntityIds).toStrictEqual(
+			expect.arrayContaining([firstEntity.id, secondEntity.id]),
+		);
+
+		await newsPage.searchByTitle(title);
+		await newsPage.gotoEditFromList(title);
+		await newsPage.removeRelatedEntity(firstEntity.name);
+		await newsPage.submitForm();
+
+		const relations = await db.getEntityRelations(newsItem!.id);
+		expect(relations.relatedEntityIds).not.toContain(firstEntity.id);
+		expect(relations.relatedEntityIds).toContain(secondEntity.id);
 	});
 
 	test("should preserve the relation row when editing unrelated fields", async ({
@@ -136,8 +177,10 @@ test.describe("website news admin – related entities", () => {
 		await newsPage.searchByTitle(title);
 		const row = newsPage.rowByTitle(title);
 		await row.getByRole("button", { name: "Open actions menu" }).click();
-		await page.getByRole("menuitem", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
 
 		const updatedTitle = `${newsPage.workerPrefix} Relations Stable Updated ${randomUUID()}`;
 		const titleField = page.getByLabel("Title");

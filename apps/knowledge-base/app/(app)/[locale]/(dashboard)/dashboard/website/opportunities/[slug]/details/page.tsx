@@ -112,7 +112,7 @@ export default async function DashboardWebsiteOpportunitiesDetailsPage(
 		notFound();
 	}
 
-	const contentBlocks = await getEntityContentBlocks(opportunity.id);
+	const contentBlocks = await getEntityContentBlocks(opportunity.id, "content");
 
 	return (
 		<OpportunityDetails

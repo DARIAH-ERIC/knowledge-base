@@ -114,7 +114,8 @@ export default async function DashboardWebsiteDocumentOrPolicyDetailsPage(
 
 	const downloadUrl = `/api/assets/download?key=${encodeURIComponent(documentOrPolicy.document.key)}`;
 
-	const contentBlocks = await getEntityContentBlocks(documentOrPolicy.id);
+	const contentBlocks = await getEntityContentBlocks(documentOrPolicy.id, "description");
+	const hasPublishableDraft = draftId != null && (publishedId == null || hasDraftChanges);
 
 	return (
 		<DocumentOrPolicyDetails
@@ -125,7 +126,7 @@ export default async function DashboardWebsiteDocumentOrPolicyDetailsPage(
 				...documentOrPolicy,
 				document: { ...documentOrPolicy.document, url: document.url, downloadUrl },
 			}}
-			hasDraft={hasDraftChanges}
+			hasDraft={hasPublishableDraft}
 			isPublished={publishedId != null}
 			publishAction={publishDocumentOrPolicyAction}
 			selectedVersion={selectedVersion}

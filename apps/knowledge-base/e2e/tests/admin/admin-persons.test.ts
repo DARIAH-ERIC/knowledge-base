@@ -53,8 +53,10 @@ test.describe("persons admin", () => {
 		await expect(row).toBeVisible();
 
 		await row.getByRole("button", { name: "Open actions menu" }).click();
-		await page.getByRole("menuitem", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
 
 		const updatedName = `${personsPage.workerPrefix} Updated ${randomUUID()}`;
 		const nameField = page.getByLabel("Name", { exact: true });

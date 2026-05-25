@@ -53,34 +53,36 @@ export const createProjectAction = createMutationAction({
 			topic: input.topic,
 		});
 
-		const descriptionFieldName = await tx.query.entityTypesFieldsNames.findFirst({
-			where: { entityTypeId: type.id, fieldName: "description" },
-			columns: { id: true },
-		});
-		assert(descriptionFieldName);
+		if (input.description != null) {
+			const descriptionFieldName = await tx.query.entityTypesFieldsNames.findFirst({
+				where: { entityTypeId: type.id, fieldName: "description" },
+				columns: { id: true },
+			});
+			assert(descriptionFieldName);
 
-		const [descriptionField] = await tx
-			.insert(schema.fields)
-			.values({ entityVersionId: versionId, fieldNameId: descriptionFieldName.id })
-			.returning({ id: schema.fields.id });
-		assert(descriptionField);
+			const [descriptionField] = await tx
+				.insert(schema.fields)
+				.values({ entityVersionId: versionId, fieldNameId: descriptionFieldName.id })
+				.returning({ id: schema.fields.id });
+			assert(descriptionField);
 
-		const richTextType = await tx.query.contentBlockTypes.findFirst({
-			where: { type: "rich_text" },
-			columns: { id: true },
-		});
-		assert(richTextType);
+			const richTextType = await tx.query.contentBlockTypes.findFirst({
+				where: { type: "rich_text" },
+				columns: { id: true },
+			});
+			assert(richTextType);
 
-		const [contentBlock] = await tx
-			.insert(schema.contentBlocks)
-			.values({ fieldId: descriptionField.id, typeId: richTextType.id, position: 0 })
-			.returning({ id: schema.contentBlocks.id });
-		assert(contentBlock);
+			const [contentBlock] = await tx
+				.insert(schema.contentBlocks)
+				.values({ fieldId: descriptionField.id, typeId: richTextType.id, position: 0 })
+				.returning({ id: schema.contentBlocks.id });
+			assert(contentBlock);
 
-		await tx.insert(schema.richTextContentBlocks).values({
-			id: contentBlock.id,
-			content: JSON.parse(input.description) as schema.RichTextContentBlock["content"],
-		});
+			await tx.insert(schema.richTextContentBlocks).values({
+				id: contentBlock.id,
+				content: JSON.parse(input.description) as schema.RichTextContentBlock["content"],
+			});
+		}
 
 		if (shouldSaveAndPublish(formData)) {
 			await publishVersion(tx, documentId, projectsLifecycleAdapter);

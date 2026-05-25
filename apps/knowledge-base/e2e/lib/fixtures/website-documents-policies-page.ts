@@ -1,10 +1,10 @@
-import type { Locator, Page } from "@playwright/test";
+import { type Locator, type Page, expect } from "@playwright/test";
 
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
-const BASE_PATH = "/en/dashboard/website/impact-case-studies";
+const BASE_PATH = "/en/dashboard/website/documents-policies";
 
-export class WebsiteImpactCaseStudiesPage {
+export class WebsiteDocumentsPoliciesPage {
 	readonly page: Page;
 	readonly workerIndex: number;
 
@@ -38,18 +38,29 @@ export class WebsiteImpactCaseStudiesPage {
 		await this.page.getByLabel("Summary").fill(summary);
 	}
 
-	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
+	async selectDocumentFromMediaLibrary(assetLabel: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Select image" }).click();
-		await this.page.waitForSelector('[role="dialog"]');
-		await this.page.waitForSelector('[role="gridcell"]');
-		await this.page.getByRole("gridcell", { name: assetLabel }).click();
-		await this.page.getByRole("dialog").getByRole("button", { name: "Select" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		await dialog.waitFor({ state: "visible" });
+		await dialog.getByRole("gridcell", { name: assetLabel }).click();
+		await dialog.getByRole("button", { name: "Select" }).click();
+		await dialog.waitFor({ state: "hidden" });
+		await this.page.getByText(assetLabel, { exact: true }).waitFor({ state: "visible" });
+		await expect(this.page.locator('input[name="documentKey"]')).not.toHaveValue("");
 	}
 
 	async submitForm(): Promise<void> {
 		await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
-		/** After a successful create/edit, the server action redirects back to the list. */
-		await this.page.waitForURL(`**${BASE_PATH}`);
+		const serverError = this.page.getByText("Internal server error.", { exact: true });
+
+		await Promise.race([
+			this.page.waitForURL(`**${BASE_PATH}`),
+			serverError.waitFor({ state: "visible" }),
+		]);
+		await expect(
+			serverError,
+			"document or policy form should not surface a server action error",
+		).toBeHidden();
 	}
 
 	// ---------------------------------------------------------------------------
@@ -57,18 +68,25 @@ export class WebsiteImpactCaseStudiesPage {
 	// ---------------------------------------------------------------------------
 
 	async searchByTitle(title: string): Promise<void> {
-		await fillSearchAndWaitForUrl(this.page, BASE_PATH, title);
+		const searchbox = this.page.getByRole("searchbox");
+		if (await searchbox.isVisible()) {
+			await fillSearchAndWaitForUrl(this.page, BASE_PATH, title);
+		} else {
+			await expect(this.rowByTitle(title)).toBeVisible();
+		}
 	}
 
 	rowByTitle(title: string): Locator {
-		return this.page.getByRole("row").filter({ hasText: title });
+		return this.page
+			.getByText(title, { exact: true })
+			.locator("xpath=ancestor::div[contains(@class, 'rounded-md')][1]");
 	}
 
 	async openDeleteDialog(title: string): Promise<Locator> {
 		const row = this.rowByTitle(title);
 		await row.getByRole("button", { name: "Open actions menu" }).click();
 		await this.page.getByRole("menuitem", { name: "Delete" }).click();
-		return this.page.getByRole("dialog", { name: /Delete impact case study/i });
+		return this.page.getByRole("dialog", { name: /Delete document or policy/i });
 	}
 
 	async confirmDelete(dialog: Locator): Promise<void> {
@@ -81,8 +99,13 @@ export class WebsiteImpactCaseStudiesPage {
 
 	async gotoDetailsFromList(title: string): Promise<void> {
 		const row = this.rowByTitle(title);
-		await row.getByRole("button", { name: "Open actions menu" }).click();
-		await this.page.getByRole("menuitem", { name: "View" }).click();
+		const editHref = await row.getByRole("link", { name: "Content" }).getAttribute("href");
+
+		if (editHref == null) {
+			throw new Error(`Could not find content edit link for document or policy "${title}".`);
+		}
+
+		await this.page.goto(editHref.replace(/\/edit$/, "/details"));
 		await this.page.waitForURL(`**${BASE_PATH}/**/details`);
 	}
 
@@ -90,7 +113,7 @@ export class WebsiteImpactCaseStudiesPage {
 		const editHref = await this.page.getByRole("link", { name: "Edit" }).getAttribute("href");
 
 		if (editHref == null) {
-			throw new Error("Could not find edit link on impact case study details page.");
+			throw new Error("Could not find edit link on document or policy details page.");
 		}
 
 		await this.page.goto(editHref);

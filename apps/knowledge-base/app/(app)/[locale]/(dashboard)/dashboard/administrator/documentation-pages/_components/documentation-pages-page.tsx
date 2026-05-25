@@ -80,7 +80,7 @@ export function DocumentationPagesPage(props: Readonly<DocumentationPagesPagePro
 				action={
 					<>
 						<EntityListSearchField search={search} />
-						<NewLink href="/dashboard/website/documentation-pages/create">{t("New")}</NewLink>
+						<NewLink href="/dashboard/administrator/documentation-pages/create">{t("New")}</NewLink>
 					</>
 				}
 			/>
@@ -100,7 +100,9 @@ export function DocumentationPagesPage(props: Readonly<DocumentationPagesPagePro
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-						<TableRow href={`/dashboard/website/documentation-pages/${item.entity.slug}/details`}>
+						<TableRow
+							href={`/dashboard/administrator/documentation-pages/${item.entity.slug}/details`}
+						>
 							<TableCell>
 								<div className="max-inline-64 truncate">{item.title}</div>
 							</TableCell>
@@ -113,13 +115,13 @@ export function DocumentationPagesPage(props: Readonly<DocumentationPagesPagePro
 							<TableCell className="text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Link
-										href={`/dashboard/website/documentation-pages/${item.entity.slug}/details`}
+										href={`/dashboard/administrator/documentation-pages/${item.entity.slug}/details`}
 										icon={<EyeIcon className="me-2 block-4 inline-4" />}
 									>
 										{t("View")}
 									</RowActionsMenu.Link>
 									<RowActionsMenu.Link
-										href={`/dashboard/website/documentation-pages/${item.entity.slug}/edit`}
+										href={`/dashboard/administrator/documentation-pages/${item.entity.slug}/edit`}
 										icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
 									>
 										{t("Edit")}

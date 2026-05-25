@@ -2,9 +2,9 @@ import type { Locator, Page } from "@playwright/test";
 
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
-const BASE_PATH = "/en/dashboard/website/impact-case-studies";
+const BASE_PATH = "/en/dashboard/website/opportunities";
 
-export class WebsiteImpactCaseStudiesPage {
+export class WebsiteOpportunitiesPage {
 	readonly page: Page;
 	readonly workerIndex: number;
 
@@ -34,21 +34,33 @@ export class WebsiteImpactCaseStudiesPage {
 		await this.page.getByLabel("Title").fill(title);
 	}
 
-	async fillSummary(summary: string): Promise<void> {
-		await this.page.getByLabel("Summary").fill(summary);
+	async selectFirstSource(): Promise<void> {
+		const sourceControl = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.getByText("Source", { exact: true }) });
+		await sourceControl.locator("button").click();
+		await this.page.getByRole("option").first().click();
 	}
 
-	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Select image" }).click();
-		await this.page.waitForSelector('[role="dialog"]');
-		await this.page.waitForSelector('[role="gridcell"]');
-		await this.page.getByRole("gridcell", { name: assetLabel }).click();
-		await this.page.getByRole("dialog").getByRole("button", { name: "Select" }).click();
+	async fillDatePicker(label: string, year: number, month: number, day: number): Promise<void> {
+		const group = this.page.getByRole("group", { name: label });
+
+		const daySegment = group.getByRole("spinbutton", { name: /day/i });
+		const monthSegment = group.getByRole("spinbutton", { name: /month/i });
+		const yearSegment = group.getByRole("spinbutton", { name: /year/i });
+
+		await daySegment.click();
+		await this.page.keyboard.type(String(day).padStart(2, "0"));
+
+		await monthSegment.click();
+		await this.page.keyboard.type(String(month).padStart(2, "0"));
+
+		await yearSegment.click();
+		await this.page.keyboard.type(String(year));
 	}
 
 	async submitForm(): Promise<void> {
 		await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
-		/** After a successful create/edit, the server action redirects back to the list. */
 		await this.page.waitForURL(`**${BASE_PATH}`);
 	}
 
@@ -68,7 +80,7 @@ export class WebsiteImpactCaseStudiesPage {
 		const row = this.rowByTitle(title);
 		await row.getByRole("button", { name: "Open actions menu" }).click();
 		await this.page.getByRole("menuitem", { name: "Delete" }).click();
-		return this.page.getByRole("dialog", { name: /Delete impact case study/i });
+		return this.page.getByRole("dialog", { name: /Delete opportunity/i });
 	}
 
 	async confirmDelete(dialog: Locator): Promise<void> {
@@ -90,7 +102,7 @@ export class WebsiteImpactCaseStudiesPage {
 		const editHref = await this.page.getByRole("link", { name: "Edit" }).getAttribute("href");
 
 		if (editHref == null) {
-			throw new Error("Could not find edit link on impact case study details page.");
+			throw new Error("Could not find edit link on opportunity details page.");
 		}
 
 		await this.page.goto(editHref);
