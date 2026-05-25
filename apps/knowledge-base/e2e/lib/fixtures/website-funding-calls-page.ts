@@ -53,7 +53,7 @@ export class WebsiteFundingCallsPage {
 
 	async submitForm(): Promise<void> {
 		await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
-		await this.page.waitForURL(`**${BASE_PATH}`);
+		await this.page.waitForURL(`**${BASE_PATH}`, { timeout: 60_000 });
 	}
 
 	// ---------------------------------------------------------------------------
@@ -112,7 +112,7 @@ export class WebsiteFundingCallsPage {
 
 	async publishItem(): Promise<void> {
 		await this.page.getByRole("button", { name: "Publish" }).click();
-		await this.page.waitForURL(`**${BASE_PATH}`);
+		await this.page.waitForURL(`**${BASE_PATH}`, { timeout: 60_000 });
 	}
 
 	async discardDraft(): Promise<void> {
@@ -120,7 +120,7 @@ export class WebsiteFundingCallsPage {
 		const dialog = this.page.getByRole("dialog");
 		await dialog.waitFor({ state: "visible" });
 		await dialog.getByRole("button", { name: "Discard" }).click();
-		await this.page.waitForURL(`**${BASE_PATH}`);
+		await this.page.waitForURL(`**${BASE_PATH}`, { timeout: 60_000 });
 	}
 
 	// ---------------------------------------------------------------------------

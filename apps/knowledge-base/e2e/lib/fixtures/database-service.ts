@@ -67,6 +67,22 @@ export class DatabaseService {
 		return { id: entity.id, name: entity.slug };
 	}
 
+	async getTestEntities(count: number): Promise<Array<{ id: string; name: string }>> {
+		const entities = await this.db.query.entities.findMany({
+			columns: { id: true, slug: true },
+			orderBy: { slug: "asc" },
+			limit: count,
+		});
+
+		if (entities.length < count) {
+			throw new Error(`Expected at least ${String(count)} entities for relation tests.`);
+		}
+
+		return entities.map((entity) => {
+			return { id: entity.id, name: entity.slug };
+		});
+	}
+
 	/** Returns related entity and resource IDs for a given entity (by its document DB id). */
 	async getEntityRelations(
 		entityId: string,
@@ -111,15 +127,59 @@ export class DatabaseService {
 	 * Finds a news item by exact title. Returns the document entity ID (entities.id) so callers can
 	 * use it with getEntityRelations / getEntitiesToEntitiesRow.
 	 */
-	async getNewsItemByTitle(title: string): Promise<{ id: string } | null> {
+	async getNewsItemByTitle(title: string): Promise<{ id: string; imageId: string } | null> {
 		const [row] = await this.db
-			.select({ id: schema.entityVersions.entityId })
+			.select({ id: schema.entityVersions.entityId, imageId: schema.news.imageId })
 			.from(schema.news)
 			.innerJoin(schema.entityVersions, eq(schema.news.id, schema.entityVersions.id))
 			.where(eq(schema.news.title, title))
 			.limit(1);
 
 		return row ?? null;
+	}
+
+	async getAssetByLabel(label: string): Promise<{ id: string; key: string } | null> {
+		const asset = await this.db.query.assets.findFirst({
+			where: { label },
+			columns: { id: true, key: true },
+		});
+
+		return asset ?? null;
+	}
+
+	async getNewsContentBlocksByTitle(
+		title: string,
+	): Promise<Array<{ type: string; position: number; content: unknown }>> {
+		const [newsItem] = await this.db
+			.select({ versionId: schema.news.id })
+			.from(schema.news)
+			.where(eq(schema.news.title, title))
+			.limit(1);
+
+		if (newsItem == null) {
+			return [];
+		}
+
+		const rows = await this.db
+			.select({
+				content: sql<unknown>`${schema.richTextContentBlocks.content}`,
+				position: schema.contentBlocks.position,
+				type: schema.contentBlockTypes.type,
+			})
+			.from(schema.contentBlocks)
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.contentBlockTypes,
+				eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
+			)
+			.leftJoin(
+				schema.richTextContentBlocks,
+				eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
+			)
+			.where(eq(schema.fields.entityVersionId, newsItem.versionId))
+			.orderBy(schema.contentBlocks.position);
+
+		return rows;
 	}
 
 	async getPageItemByTitle(title: string): Promise<{ id: string; imageId: string | null } | null> {

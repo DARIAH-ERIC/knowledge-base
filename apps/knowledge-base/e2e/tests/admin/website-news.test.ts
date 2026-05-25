@@ -79,6 +79,39 @@ test.describe("website news admin", () => {
 		await expect(newsPage.rowByTitle(title)).toBeVisible();
 	});
 
+	test("should replace a selected image when editing a news item", async ({
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const newsPage = createWebsiteNewsPage(workerIndex);
+
+		const title = `${newsPage.workerPrefix} Replace Image News ${randomUUID()}`;
+		const imageLabel = `${newsPage.workerPrefix} Replacement Image ${randomUUID()}`;
+		const filePath = join(process.cwd(), "public/android-chrome-192x192.png");
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item with replaceable image");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await newsPage.submitForm();
+
+		const before = await db.getNewsItemByTitle(title);
+		expect(before).not.toBeNull();
+
+		await newsPage.searchByTitle(title);
+		await newsPage.gotoEditFromList(title);
+		await newsPage.uploadImageFromMediaLibrary(filePath, imageLabel);
+		await newsPage.submitForm();
+
+		const replacementAsset = await db.getAssetByLabel(imageLabel);
+		expect(replacementAsset).not.toBeNull();
+		const after = await db.getNewsItemByTitle(title);
+		expect(after).not.toBeNull();
+		expect(after!.imageId).toBe(replacementAsset!.id);
+		expect(after!.imageId).not.toBe(before!.imageId);
+	});
+
 	test("should show an inline error for an oversized uploaded image", async ({
 		createWebsiteNewsPage,
 	}) => {
@@ -136,6 +169,53 @@ test.describe("website news admin", () => {
 		await expect(newsPage.rowByTitle(updatedTitle)).toBeVisible();
 		await newsPage.searchByTitle(originalTitle);
 		await expect(newsPage.rowByTitle(originalTitle)).toBeHidden();
+	});
+
+	test("should add, edit, and remove content blocks", async ({
+		page,
+		createWebsiteNewsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const newsPage = createWebsiteNewsPage(workerIndex);
+
+		const title = `${newsPage.workerPrefix} Content Blocks ${randomUUID()}`;
+		const firstBlockText = `First content block ${randomUUID()}`;
+		const updatedBlockText = `Updated content block ${randomUUID()}`;
+
+		await newsPage.gotoCreate();
+		await newsPage.fillTitle(title);
+		await newsPage.fillSummary("E2E test news item with content blocks");
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await newsPage.addContentBlock(firstBlockText);
+		await newsPage.submitForm();
+
+		let contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks).toHaveLength(1);
+		expect(contentBlocks[0]!.type).toBe("rich_text");
+		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(firstBlockText);
+
+		await newsPage.searchByTitle(title);
+		await newsPage.gotoDetailsFromList(title);
+		await expect(page.getByText(firstBlockText)).toBeVisible();
+
+		await page.getByRole("link", { name: "Edit" }).click();
+		await page.waitForURL("**/edit");
+		await newsPage.updateContentBlockText(updatedBlockText);
+		await newsPage.submitForm();
+
+		contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks).toHaveLength(1);
+		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(updatedBlockText);
+		expect(JSON.stringify(contentBlocks[0]!.content)).not.toContain(firstBlockText);
+
+		await newsPage.searchByTitle(title);
+		await newsPage.gotoEditFromList(title);
+		await newsPage.removeFirstContentBlock();
+		await newsPage.submitForm();
+
+		contentBlocks = await db.getNewsContentBlocksByTitle(title);
+		expect(contentBlocks).toHaveLength(0);
 	});
 
 	test("should delete a news item", async ({ createWebsiteNewsPage }) => {

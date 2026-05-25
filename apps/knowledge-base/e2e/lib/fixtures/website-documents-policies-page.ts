@@ -40,10 +40,12 @@ export class WebsiteDocumentsPoliciesPage {
 
 	async selectDocumentFromMediaLibrary(assetLabel: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Select image" }).click();
-		await this.page.waitForSelector('[role="dialog"]');
-		await this.page.waitForSelector('[role="gridcell"]');
-		await this.page.getByRole("gridcell", { name: assetLabel }).click();
-		await this.page.getByRole("dialog").getByRole("button", { name: "Select" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		await dialog.waitFor({ state: "visible" });
+		await dialog.getByRole("gridcell", { name: assetLabel }).click();
+		await dialog.getByRole("button", { name: "Select" }).click();
+		await dialog.waitFor({ state: "hidden" });
+		await this.page.getByText(assetLabel, { exact: true }).waitFor({ state: "visible" });
 	}
 
 	async submitForm(): Promise<void> {

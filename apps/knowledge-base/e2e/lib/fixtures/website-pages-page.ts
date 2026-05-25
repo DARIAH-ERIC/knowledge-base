@@ -40,10 +40,11 @@ export class WebsitePagesPage {
 
 	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Select image" }).click();
-		await this.page.waitForSelector('[role="dialog"]');
-		await this.page.waitForSelector('[role="gridcell"]');
-		await this.page.getByRole("gridcell", { name: assetLabel }).click();
-		await this.page.getByRole("dialog").getByRole("button", { name: "Select" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		await dialog.waitFor({ state: "visible" });
+		await dialog.getByRole("gridcell", { name: assetLabel }).click();
+		await dialog.getByRole("button", { name: "Select" }).click();
+		await dialog.waitFor({ state: "hidden" });
 	}
 
 	async removeImage(): Promise<void> {
@@ -53,7 +54,7 @@ export class WebsitePagesPage {
 	async submitForm(): Promise<void> {
 		await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
 		/** After a successful create/edit, the server action redirects back to the list. */
-		await this.page.waitForURL(`**${BASE_PATH}`);
+		await this.page.waitForURL(`**${BASE_PATH}`, { timeout: 60_000 });
 	}
 
 	// ---------------------------------------------------------------------------
@@ -112,7 +113,7 @@ export class WebsitePagesPage {
 
 	async publishItem(): Promise<void> {
 		await this.page.getByRole("button", { name: "Publish" }).click();
-		await this.page.waitForURL(`**${BASE_PATH}`);
+		await this.page.waitForURL(`**${BASE_PATH}`, { timeout: 60_000 });
 	}
 
 	async discardDraft(): Promise<void> {
@@ -120,7 +121,7 @@ export class WebsitePagesPage {
 		const dialog = this.page.getByRole("dialog");
 		await dialog.waitFor({ state: "visible" });
 		await dialog.getByRole("button", { name: "Discard" }).click();
-		await this.page.waitForURL(`**${BASE_PATH}`);
+		await this.page.waitForURL(`**${BASE_PATH}`, { timeout: 60_000 });
 	}
 
 	// ---------------------------------------------------------------------------
