@@ -288,7 +288,7 @@ jobs:
         run: pnpm exec turbo run build
 
       - name: Run e2e tests
-        run: pnpm exec turbo run --filter "@dariah-eric/knowledge-base" test:e2e -- --project=admin --project=non-admin --workers=1
+        run: pnpm exec turbo run --filter "@dariah-eric/knowledge-base" test:e2e -- --project=admin --project=non-admin
 
       - uses: actions/upload-artifact@v7
         if: ${{ failure() }}
