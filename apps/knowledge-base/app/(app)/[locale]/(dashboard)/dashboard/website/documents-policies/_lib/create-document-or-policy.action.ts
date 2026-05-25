@@ -8,6 +8,7 @@ import { CreateDocumentOrPolicyActionInputSchema } from "@/app/(app)/[locale]/(d
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
+import { ensureEntityVersionField } from "@/lib/data/entity-version-fields";
 import { db } from "@/lib/db";
 import { eq, isNull } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
@@ -63,19 +64,7 @@ export const createDocumentOrPolicyAction = createMutationAction<
 			position: siblings.length,
 		});
 
-		const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({
-			where: { entityTypeId: type.id, fieldName: "content" },
-			columns: { id: true },
-		});
-
-		assert(contentFieldName);
-
-		const [contentField] = await tx
-			.insert(schema.fields)
-			.values({ entityVersionId: versionId, fieldNameId: contentFieldName.id })
-			.returning({ id: schema.fields.id });
-
-		assert(contentField);
+		const contentField = await ensureEntityVersionField(tx, versionId, "description");
 
 		const contentBlockTypes = await db.query.contentBlockTypes.findMany();
 		const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);

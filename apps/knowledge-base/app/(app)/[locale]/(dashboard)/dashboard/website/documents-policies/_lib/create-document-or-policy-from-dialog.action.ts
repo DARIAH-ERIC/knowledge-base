@@ -7,6 +7,7 @@ import slugify from "@sindresorhus/slugify";
 import { CreateDocumentOrPolicyFromDialogActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy-from-dialog.schema";
 import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
+import { ensureEntityVersionField } from "@/lib/data/entity-version-fields";
 import { eq, isNull } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -60,16 +61,7 @@ export const createDocumentOrPolicyFromDialogAction = createMutationAction<
 			position: siblings.length,
 		});
 
-		const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({
-			where: { entityTypeId: type.id, fieldName: "content" },
-			columns: { id: true },
-		});
-
-		assert(contentFieldName);
-
-		await tx
-			.insert(schema.fields)
-			.values({ entityVersionId: versionId, fieldNameId: contentFieldName.id });
+		await ensureEntityVersionField(tx, versionId, "description");
 
 		const published = shouldSaveAndPublish(formData);
 		if (published) {

@@ -72,7 +72,7 @@ export const updateDocumentOrPolicyAction = createMutationAction<
 			})
 			.where(eq(schema.documentsPolicies.id, draftVersionId));
 
-		const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");
+		const contentField = await ensureEntityVersionField(tx, draftVersionId, "description");
 
 		const contentBlockTypes = await db.query.contentBlockTypes.findMany();
 		const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);

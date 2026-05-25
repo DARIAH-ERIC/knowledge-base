@@ -51,11 +51,16 @@ export class WebsiteDocumentsPoliciesPage {
 
 	async submitForm(): Promise<void> {
 		await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
+		const serverError = this.page.getByText("Internal server error.", { exact: true });
+
+		await Promise.race([
+			this.page.waitForURL(`**${BASE_PATH}`),
+			serverError.waitFor({ state: "visible" }),
+		]);
 		await expect(
-			this.page.getByText("Internal server error.", { exact: true }),
+			serverError,
 			"document or policy form should not surface a server action error",
 		).toBeHidden();
-		await this.page.waitForURL(`**${BASE_PATH}`);
 	}
 
 	// ---------------------------------------------------------------------------
