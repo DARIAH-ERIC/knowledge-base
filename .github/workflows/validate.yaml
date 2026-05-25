@@ -95,10 +95,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build packages
-        run: turbo run --filter "./packages/*" build
+        run: pnpm exec turbo run --filter "./packages/*" build
 
       - name: Check
-        run: turbo run format:check lint:check types:check
+        run: pnpm exec turbo run format:check lint:check types:check
 
   test:
     name: Test
@@ -121,6 +121,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm exec turbo run --filter "./packages/*" build
 
       - name: Start services
         run: pnpm run dev:services:up
@@ -151,7 +154,7 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Test
-        run: turbo run test
+        run: pnpm exec turbo run test
 
       - name: Stop services
         run: pnpm run dev:services:down
@@ -270,7 +273,7 @@ jobs:
           done
 
       - name: Build packages
-        run: turbo run --filter "./packages/*" build
+        run: pnpm exec turbo run --filter "./packages/*" build
 
       - name: Prepare dev environment
         run: pnpm run dev:prepare
@@ -282,10 +285,10 @@ jobs:
         run: pnpm run data:seed:kitchen-sink
 
       - name: Build app
-        run: turbo run build
+        run: pnpm exec turbo run build
 
       - name: Run e2e tests
-        run: turbo run --filter "@dariah-eric/knowledge-base" test:e2e
+        run: pnpm exec turbo run --filter "@dariah-eric/knowledge-base" test:e2e
 
       - uses: actions/upload-artifact@v7
         if: ${{ failure() }}
