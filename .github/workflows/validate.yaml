@@ -73,46 +73,50 @@ env:
 
 jobs:
   validate:
-    name: Validate
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
-
-    strategy:
-      fail-fast: true
-      matrix:
-        node-version: [24.x]
-        os: [ubuntu-24.04]
+    name: Format / Lint / Typecheck
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Use node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
+        uses: pnpm/action-setup@v6
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: "pnpm"
+          cache: true
 
-      - name: Install turborepo cli globally
-        run: pnpm add --global turbo
+      - name: Use node.js
+        uses: actions/setup-node@v6
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Format
-        run: turbo run format:check
-
       - name: Build packages
         run: turbo run --filter "./packages/*" build
 
-      - name: Lint
-        run: turbo run lint:check
+      - name: Check
+        run: turbo run format:check lint:check types:check
 
-      - name: Typecheck
-        run: turbo run types:check
+  test:
+    name: Test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          cache: true
+
+      - name: Use node.js
+        uses: actions/setup-node@v6
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Start services
         run: pnpm run dev:services:up
@@ -234,13 +238,8 @@ jobs:
         with:
           cache: true
 
-      - name: Use node.js 24.x
+      - name: Use node.js
         uses: actions/setup-node@v6
-        with:
-          node-version: 24.x
-
-      - name: Install turborepo cli globally
-        run: pnpm add --global turbo
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -292,7 +291,7 @@ jobs:
   build-deploy:
     name: Build and deploy
     if: ${{ github.event_name == 'push' }}
-    needs: [validate, e2e]
+    needs: [validate, test, e2e]
     uses: ./.github/workflows/build-deploy.yaml
     secrets: inherit
     # https://docs.github.com/en/actions/using-workflows/reusing-workflows#access-and-permissions
