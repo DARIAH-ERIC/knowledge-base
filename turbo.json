@@ -156,6 +156,7 @@
 			"persistent": true
 		},
 		"test": {
+			"cache": false,
 			"dependsOn": ["^build"],
 			"inputs": ["$TURBO_DEFAULT$", "**/.env.local", "**/.env.*.local"],
 			"outputs": ["coverage/**"]

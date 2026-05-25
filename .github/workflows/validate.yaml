@@ -73,7 +73,7 @@ env:
 
 jobs:
   validate:
-    name: Format / Lint / Typecheck
+    name: Validate
     runs-on: ubuntu-24.04
     timeout-minutes: 15
 
@@ -288,6 +288,8 @@ jobs:
         run: pnpm exec turbo run build
 
       - name: Run e2e tests
+        env:
+          E2E_ALL_BROWSERS: ${{ github.event_name == 'push' && 'true' || 'false' }}
         run: pnpm exec turbo run --filter "@dariah-eric/knowledge-base" test:e2e
 
       - uses: actions/upload-artifact@v7
