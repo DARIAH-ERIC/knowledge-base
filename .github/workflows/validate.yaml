@@ -153,6 +153,7 @@ jobs:
     runs-on: ubuntu-24.04
     container:
       image: mcr.microsoft.com/playwright:v1.60.0-noble
+      options: --ipc=host
     timeout-minutes: 60
 
     env:
@@ -161,6 +162,7 @@ jobs:
       IMGPROXY_BASE_URL: "http://imgproxy:8080"
       MAILPIT_API_BASE_URL: "http://mailpit:8025"
       NEXT_PUBLIC_TYPESENSE_HOST: "typesense"
+      PLAYWRIGHT_BROWSERS_PATH: "/ms-playwright"
       S3_HOST: "minio"
       TYPESENSE_HOST: "typesense"
       UNR_DATABASE_DIRECT_URL: "postgresql://dariah-unr:dariah-unr@postgres:5432/dariah-unr"
@@ -222,6 +224,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Trust repository
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v6
