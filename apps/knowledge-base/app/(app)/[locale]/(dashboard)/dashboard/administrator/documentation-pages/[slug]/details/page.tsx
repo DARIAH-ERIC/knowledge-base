@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { DocumentationPageDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-details";
+import { discardDocumentationPageDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_lib/discard-documentation-page-draft.action";
+import { publishDocumentationPageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_lib/publish-documentation-page.action";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
@@ -93,14 +95,17 @@ export default async function DashboardAdministratorDocumentationPageDetailsPage
 	}
 
 	const contentBlocks = await getEntityContentBlocks(documentationPage.id);
+	const hasPublishableDraft = draftId != null && (publishedId == null || hasDraftChanges);
 
 	return (
 		<DocumentationPageDetails
 			contentBlocks={contentBlocks}
 			documentationPage={documentationPage}
+			discardDraftAction={discardDocumentationPageDraftAction}
 			documentId={doc.id}
-			hasDraft={hasDraftChanges}
+			hasDraft={hasPublishableDraft}
 			isPublished={publishedId != null}
+			publishAction={publishDocumentationPageAction}
 			selectedVersion={selectedVersion}
 		/>
 	);

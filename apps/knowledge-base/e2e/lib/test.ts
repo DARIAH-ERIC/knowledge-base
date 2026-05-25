@@ -5,6 +5,7 @@ import { test as base } from "@playwright/test";
 
 import { env } from "@/config/env.config";
 import { type AccessibilityScanner, createAccessibilityScanner } from "@/e2e/lib/fixtures/a11y";
+import { AdminDocumentationPagesPage } from "@/e2e/lib/fixtures/admin-documentation-pages-page";
 import { AdminPersonsPage } from "@/e2e/lib/fixtures/admin-persons-page";
 import { AdminProjectsPage } from "@/e2e/lib/fixtures/admin-projects-page";
 import { AdminServicesPage } from "@/e2e/lib/fixtures/admin-services-page";
@@ -17,9 +18,12 @@ import { type EmailService, createEmailService } from "@/e2e/lib/fixtures/email-
 import { type I18n, type WithI18n, createI18n } from "@/e2e/lib/fixtures/i18n";
 import { ImprintPage } from "@/e2e/lib/fixtures/imprint-page";
 import { IndexPage } from "@/e2e/lib/fixtures/index-page";
+import { WebsiteDocumentsPoliciesPage } from "@/e2e/lib/fixtures/website-documents-policies-page";
 import { WebsiteEventsPage } from "@/e2e/lib/fixtures/website-events-page";
+import { WebsiteFundingCallsPage } from "@/e2e/lib/fixtures/website-funding-calls-page";
 import { WebsiteImpactCaseStudiesPage } from "@/e2e/lib/fixtures/website-impact-case-studies-page";
 import { WebsiteNewsPage } from "@/e2e/lib/fixtures/website-news-page";
+import { WebsiteOpportunitiesPage } from "@/e2e/lib/fixtures/website-opportunities-page";
 import { WebsitePagesPage } from "@/e2e/lib/fixtures/website-pages-page";
 import { WebsiteSpotlightArticlesPage } from "@/e2e/lib/fixtures/website-spotlight-articles-page";
 import { type IntlLocale, defaultLocale } from "@/lib/i18n/locales";
@@ -34,15 +38,19 @@ interface TestFixtures {
 	createContactPage: (locale: IntlLocale) => Promise<WithI18n<{ contactPage: ContactPage }>>;
 	createImprintPage: (locale: IntlLocale) => Promise<WithI18n<{ imprintPage: ImprintPage }>>;
 	createIndexPage: (locale: IntlLocale) => Promise<WithI18n<{ indexPage: IndexPage }>>;
+	createAdminDocumentationPagesPage: (workerIndex: number) => AdminDocumentationPagesPage;
 	createAdminPersonsPage: (workerIndex: number) => AdminPersonsPage;
 	createAdminProjectsPage: (workerIndex: number) => AdminProjectsPage;
 	createAdminServicesPage: (workerIndex: number) => AdminServicesPage;
 	createAdminSocialMediaPage: (workerIndex: number) => AdminSocialMediaPage;
 	createAdminUsersPage: (workerIndex: number) => AdminUsersPage;
 	createAdminWorkingGroupsPage: (workerIndex: number) => AdminWorkingGroupsPage;
+	createWebsiteDocumentsPoliciesPage: (workerIndex: number) => WebsiteDocumentsPoliciesPage;
 	createWebsiteEventsPage: (workerIndex: number) => WebsiteEventsPage;
+	createWebsiteFundingCallsPage: (workerIndex: number) => WebsiteFundingCallsPage;
 	createWebsiteImpactCaseStudiesPage: (workerIndex: number) => WebsiteImpactCaseStudiesPage;
 	createWebsiteNewsPage: (workerIndex: number) => WebsiteNewsPage;
+	createWebsiteOpportunitiesPage: (workerIndex: number) => WebsiteOpportunitiesPage;
 	createWebsitePagesPage: (workerIndex: number) => WebsitePagesPage;
 	createWebsiteSpotlightArticlesPage: (workerIndex: number) => WebsiteSpotlightArticlesPage;
 }
@@ -126,6 +134,10 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 		await use(createIndexPage);
 	},
 
+	async createAdminDocumentationPagesPage({ page }, use) {
+		await use((workerIndex: number) => new AdminDocumentationPagesPage(page, workerIndex));
+	},
+
 	async createAdminProjectsPage({ page }, use) {
 		await use((workerIndex: number) => new AdminProjectsPage(page, workerIndex));
 	},
@@ -150,8 +162,16 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 		await use((workerIndex: number) => new AdminWorkingGroupsPage(page, workerIndex));
 	},
 
+	async createWebsiteDocumentsPoliciesPage({ page }, use) {
+		await use((workerIndex: number) => new WebsiteDocumentsPoliciesPage(page, workerIndex));
+	},
+
 	async createWebsiteEventsPage({ page }, use) {
 		await use((workerIndex: number) => new WebsiteEventsPage(page, workerIndex));
+	},
+
+	async createWebsiteFundingCallsPage({ page }, use) {
+		await use((workerIndex: number) => new WebsiteFundingCallsPage(page, workerIndex));
 	},
 
 	async createWebsiteImpactCaseStudiesPage({ page }, use) {
@@ -160,6 +180,10 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 
 	async createWebsiteNewsPage({ page }, use) {
 		await use((workerIndex: number) => new WebsiteNewsPage(page, workerIndex));
+	},
+
+	async createWebsiteOpportunitiesPage({ page }, use) {
+		await use((workerIndex: number) => new WebsiteOpportunitiesPage(page, workerIndex));
 	},
 
 	async createWebsitePagesPage({ page }, use) {

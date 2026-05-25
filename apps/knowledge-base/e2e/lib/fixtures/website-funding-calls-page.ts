@@ -2,60 +2,36 @@ import type { Locator, Page } from "@playwright/test";
 
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
-const BASE_PATH = "/en/dashboard/administrator/projects";
+const BASE_PATH = "/en/dashboard/website/funding-calls";
 
-export class AdminProjectsPage {
+export class WebsiteFundingCallsPage {
 	readonly page: Page;
 	readonly workerIndex: number;
-
-	readonly projectsTable: Locator;
-	readonly newProjectLink: Locator;
 
 	constructor(page: Page, workerIndex: number) {
 		this.page = page;
 		this.workerIndex = workerIndex;
-		this.projectsTable = page.getByRole("table");
-		this.newProjectLink = page.getByRole("link", { name: "New" });
 	}
 
 	get workerPrefix(): string {
 		return `[e2e-worker-${String(this.workerIndex)}]`;
 	}
 
-	/** Navigate to the projects list page. */
 	async goto(): Promise<void> {
 		await this.page.goto(BASE_PATH);
 		await this.page.waitForURL(`**${BASE_PATH}`);
 	}
 
-	/** Navigate to the create project form. */
 	async gotoCreate(): Promise<void> {
 		await this.page.goto(`${BASE_PATH}/create`);
-	}
-
-	/** Navigate to the edit form for a project identified by its slug. */
-	async gotoEdit(slug: string): Promise<void> {
-		await this.page.goto(`${BASE_PATH}/${slug}/edit`);
 	}
 
 	// ---------------------------------------------------------------------------
 	// Form helpers
 	// ---------------------------------------------------------------------------
 
-	async fillName(name: string): Promise<void> {
-		await this.page.getByRole("main").getByLabel("Name").fill(name);
-	}
-
-	async fillSummary(text: string): Promise<void> {
-		await this.page.getByLabel("Summary").fill(text);
-	}
-
-	async selectFirstScope(): Promise<void> {
-		const scopeControl = this.page
-			.locator('[data-slot="control"]')
-			.filter({ has: this.page.getByText("Scope", { exact: true }) });
-		await scopeControl.locator("button").click();
-		await this.page.getByRole("option").first().click();
+	async fillTitle(title: string): Promise<void> {
+		await this.page.getByLabel("Title").fill(title);
 	}
 
 	async fillDatePicker(label: string, year: number, month: number, day: number): Promise<void> {
@@ -75,24 +51,8 @@ export class AdminProjectsPage {
 		await this.page.keyboard.type(String(year));
 	}
 
-	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Select image" }).click();
-		await this.page.waitForSelector('[role="dialog"]');
-		await this.page.waitForSelector('[role="gridcell"]');
-		await this.page.getByRole("gridcell", { name: assetLabel }).click();
-
-		await this.page.getByRole("dialog").getByRole("button", { name: "Select" }).click();
-	}
-
-	async fillDescription(text: string): Promise<void> {
-		const editor = this.page.getByRole("textbox", { name: "Description" });
-		await editor.click();
-		await this.page.keyboard.type(text);
-	}
-
 	async submitForm(): Promise<void> {
 		await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
-		/** After a successful create/edit, the server action redirects back to the list. */
 		await this.page.waitForURL(`**${BASE_PATH}`);
 	}
 
@@ -100,19 +60,19 @@ export class AdminProjectsPage {
 	// List page helpers
 	// ---------------------------------------------------------------------------
 
-	async searchByName(name: string): Promise<void> {
-		await fillSearchAndWaitForUrl(this.page, BASE_PATH, name);
+	async searchByTitle(title: string): Promise<void> {
+		await fillSearchAndWaitForUrl(this.page, BASE_PATH, title);
 	}
 
-	projectRowByName(name: string): Locator {
-		return this.page.getByRole("row").filter({ hasText: name });
+	rowByTitle(title: string): Locator {
+		return this.page.getByRole("row").filter({ hasText: title });
 	}
 
-	async openDeleteDialog(name: string): Promise<Locator> {
-		const row = this.projectRowByName(name);
+	async openDeleteDialog(title: string): Promise<Locator> {
+		const row = this.rowByTitle(title);
 		await row.getByRole("button", { name: "Open actions menu" }).click();
 		await this.page.getByRole("menuitem", { name: "Delete" }).click();
-		return this.page.getByRole("dialog", { name: /Delete project/i });
+		return this.page.getByRole("dialog", { name: /Delete funding call/i });
 	}
 
 	async confirmDelete(dialog: Locator): Promise<void> {
@@ -123,8 +83,8 @@ export class AdminProjectsPage {
 	// Details page — navigation
 	// ---------------------------------------------------------------------------
 
-	async gotoDetailsFromList(name: string): Promise<void> {
-		const row = this.projectRowByName(name);
+	async gotoDetailsFromList(title: string): Promise<void> {
+		const row = this.rowByTitle(title);
 		await row.getByRole("button", { name: "Open actions menu" }).click();
 		await this.page.getByRole("menuitem", { name: "View" }).click();
 		await this.page.waitForURL(`**${BASE_PATH}/**/details`);
@@ -179,11 +139,11 @@ export class AdminProjectsPage {
 	// List page — status badges within a row
 	// ---------------------------------------------------------------------------
 
-	publishedBadgeInRow(name: string): Locator {
-		return this.projectRowByName(name).getByText("Published", { exact: true });
+	publishedBadgeInRow(title: string): Locator {
+		return this.rowByTitle(title).getByText("Published", { exact: true });
 	}
 
-	draftBadgeInRow(name: string): Locator {
-		return this.projectRowByName(name).getByText("Draft", { exact: true });
+	draftBadgeInRow(title: string): Locator {
+		return this.rowByTitle(title).getByText("Draft", { exact: true });
 	}
 }

@@ -217,11 +217,16 @@ export async function upsertTypedContentBlock(
 
 export async function getEntityContentBlocks(
 	entityVersionId: string,
+	fieldName?: string,
 ): Promise<Array<ContentBlock>> {
-	const contentBlocksWhere = and(
-		eq(schema.fields.entityVersionId, entityVersionId),
-		eq(schema.entityTypesFieldsNames.fieldName, "content"),
-	);
+	// Most entity types have a single content-block field; pass fieldName for multi-field types.
+	const contentBlocksWhere =
+		fieldName != null
+			? and(
+					eq(schema.fields.entityVersionId, entityVersionId),
+					eq(schema.entityTypesFieldsNames.fieldName, fieldName),
+				)
+			: eq(schema.fields.entityVersionId, entityVersionId);
 
 	const [
 		richTextContentBlocks,

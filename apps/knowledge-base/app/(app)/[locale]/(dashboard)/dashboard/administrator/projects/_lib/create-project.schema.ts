@@ -10,5 +10,5 @@ export const CreateProjectActionInputSchema = v.object({
 		end: v.optional(v.pipe(v.string(), v.isoDate(), v.toDate())),
 	}),
 	imageKey: v.optional(v.pipe(v.string(), v.nonEmpty())),
-	description: v.pipe(v.string(), v.nonEmpty()),
+	description: v.optional(v.pipe(v.string(), v.nonEmpty())),
 });

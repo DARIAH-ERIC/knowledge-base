@@ -749,6 +749,581 @@ export class DatabaseService {
 		}
 	}
 
+	/** Returns the document asset inserted by globalSetup. */
+	async getTestDocumentAsset(): Promise<{ id: string; key: string }> {
+		const asset = await this.db.query.assets.findFirst({
+			where: { key: "documents/e2e-test-document" },
+			columns: { id: true, key: true },
+		});
+
+		if (asset == null) {
+			throw new Error(
+				`Test document asset "documents/e2e-test-document" not found — make sure globalSetup ran successfully.`,
+			);
+		}
+
+		return asset;
+	}
+
+	/** Returns the first opportunity source from the database. */
+	async getOpportunitySource(): Promise<{ id: string; source: string }> {
+		const [source] = await this.db
+			.select({ id: schema.opportunitySources.id, source: schema.opportunitySources.source })
+			.from(schema.opportunitySources)
+			.limit(1);
+
+		if (source == null) {
+			throw new Error("No opportunity sources found in the database.");
+		}
+
+		return source;
+	}
+
+	async deleteProjectDocument(documentId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const versions = await tx
+				.select({ id: schema.entityVersions.id })
+				.from(schema.entityVersions)
+				.where(eq(schema.entityVersions.entityId, documentId));
+
+			for (const version of versions) {
+				const entityFields = await tx
+					.select({ id: schema.fields.id })
+					.from(schema.fields)
+					.where(eq(schema.fields.entityVersionId, version.id));
+
+				if (entityFields.length > 0) {
+					const fieldIds = (entityFields as Array<{ id: string }>).map((f) => f.id);
+					await tx
+						.delete(schema.contentBlocks)
+						.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+					await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+				}
+
+				await tx
+					.delete(schema.projectsToOrganisationalUnits)
+					.where(eq(schema.projectsToOrganisationalUnits.projectId, version.id));
+				await tx
+					.delete(schema.projectsToSocialMedia)
+					.where(eq(schema.projectsToSocialMedia.projectId, version.id));
+				await tx.delete(schema.projects).where(eq(schema.projects.id, version.id));
+				await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, version.id));
+			}
+
+			await tx
+				.delete(schema.entitiesToResources)
+				.where(eq(schema.entitiesToResources.entityId, documentId));
+
+			await tx
+				.delete(schema.entitiesToEntities)
+				.where(
+					or(
+						eq(schema.entitiesToEntities.entityId, documentId),
+						eq(schema.entitiesToEntities.relatedEntityId, documentId),
+					),
+				);
+
+			await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
+		});
+	}
+
+	async cleanupWorkerProjectsLifecycleItems(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const rows = await this.db
+			.select({ documentId: schema.entityVersions.entityId })
+			.from(schema.projects)
+			.innerJoin(schema.entityVersions, eq(schema.projects.id, schema.entityVersions.id))
+			.where(sql`${schema.projects.name} LIKE ${`${prefix}%`}`);
+
+		const documentIds = [...new Set(rows.map((r) => r.documentId))];
+
+		for (const documentId of documentIds) {
+			await this.deleteProjectDocument(documentId);
+		}
+	}
+
+	async deleteEventDocument(documentId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const versions = await tx
+				.select({ id: schema.entityVersions.id })
+				.from(schema.entityVersions)
+				.where(eq(schema.entityVersions.entityId, documentId));
+
+			for (const version of versions) {
+				const entityFields = await tx
+					.select({ id: schema.fields.id })
+					.from(schema.fields)
+					.where(eq(schema.fields.entityVersionId, version.id));
+
+				if (entityFields.length > 0) {
+					const fieldIds = (entityFields as Array<{ id: string }>).map((f) => f.id);
+					await tx
+						.delete(schema.contentBlocks)
+						.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+					await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+				}
+
+				await tx.delete(schema.events).where(eq(schema.events.id, version.id));
+				await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, version.id));
+			}
+
+			await tx
+				.delete(schema.entitiesToResources)
+				.where(eq(schema.entitiesToResources.entityId, documentId));
+
+			await tx
+				.delete(schema.entitiesToEntities)
+				.where(
+					or(
+						eq(schema.entitiesToEntities.entityId, documentId),
+						eq(schema.entitiesToEntities.relatedEntityId, documentId),
+					),
+				);
+
+			await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
+		});
+	}
+
+	async cleanupWorkerEventsLifecycleItems(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const rows = await this.db
+			.select({ documentId: schema.entityVersions.entityId })
+			.from(schema.events)
+			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
+			.where(sql`${schema.events.title} LIKE ${`${prefix}%`}`);
+
+		const documentIds = [...new Set(rows.map((r) => r.documentId))];
+
+		for (const documentId of documentIds) {
+			await this.deleteEventDocument(documentId);
+		}
+	}
+
+	async deleteSpotlightArticleDocument(documentId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const versions = await tx
+				.select({ id: schema.entityVersions.id })
+				.from(schema.entityVersions)
+				.where(eq(schema.entityVersions.entityId, documentId));
+
+			for (const version of versions) {
+				const entityFields = await tx
+					.select({ id: schema.fields.id })
+					.from(schema.fields)
+					.where(eq(schema.fields.entityVersionId, version.id));
+
+				if (entityFields.length > 0) {
+					const fieldIds = (entityFields as Array<{ id: string }>).map((f) => f.id);
+					await tx
+						.delete(schema.contentBlocks)
+						.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+					await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+				}
+
+				await tx
+					.delete(schema.spotlightArticlesToPersons)
+					.where(eq(schema.spotlightArticlesToPersons.spotlightArticleId, version.id));
+				await tx
+					.delete(schema.spotlightArticles)
+					.where(eq(schema.spotlightArticles.id, version.id));
+				await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, version.id));
+			}
+
+			await tx
+				.delete(schema.entitiesToResources)
+				.where(eq(schema.entitiesToResources.entityId, documentId));
+
+			await tx
+				.delete(schema.entitiesToEntities)
+				.where(
+					or(
+						eq(schema.entitiesToEntities.entityId, documentId),
+						eq(schema.entitiesToEntities.relatedEntityId, documentId),
+					),
+				);
+
+			await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
+		});
+	}
+
+	async cleanupWorkerSpotlightArticlesLifecycleItems(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const rows = await this.db
+			.select({ documentId: schema.entityVersions.entityId })
+			.from(schema.spotlightArticles)
+			.innerJoin(schema.entityVersions, eq(schema.spotlightArticles.id, schema.entityVersions.id))
+			.where(sql`${schema.spotlightArticles.title} LIKE ${`${prefix}%`}`);
+
+		const documentIds = [...new Set(rows.map((r) => r.documentId))];
+
+		for (const documentId of documentIds) {
+			await this.deleteSpotlightArticleDocument(documentId);
+		}
+	}
+
+	async deleteImpactCaseStudyDocument(documentId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const versions = await tx
+				.select({ id: schema.entityVersions.id })
+				.from(schema.entityVersions)
+				.where(eq(schema.entityVersions.entityId, documentId));
+
+			for (const version of versions) {
+				const entityFields = await tx
+					.select({ id: schema.fields.id })
+					.from(schema.fields)
+					.where(eq(schema.fields.entityVersionId, version.id));
+
+				if (entityFields.length > 0) {
+					const fieldIds = (entityFields as Array<{ id: string }>).map((f) => f.id);
+					await tx
+						.delete(schema.contentBlocks)
+						.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+					await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+				}
+
+				await tx
+					.delete(schema.impactCaseStudiesToPersons)
+					.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyId, version.id));
+				await tx
+					.delete(schema.impactCaseStudies)
+					.where(eq(schema.impactCaseStudies.id, version.id));
+				await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, version.id));
+			}
+
+			await tx
+				.delete(schema.entitiesToResources)
+				.where(eq(schema.entitiesToResources.entityId, documentId));
+
+			await tx
+				.delete(schema.entitiesToEntities)
+				.where(
+					or(
+						eq(schema.entitiesToEntities.entityId, documentId),
+						eq(schema.entitiesToEntities.relatedEntityId, documentId),
+					),
+				);
+
+			await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
+		});
+	}
+
+	async cleanupWorkerImpactCaseStudiesLifecycleItems(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const rows = await this.db
+			.select({ documentId: schema.entityVersions.entityId })
+			.from(schema.impactCaseStudies)
+			.innerJoin(schema.entityVersions, eq(schema.impactCaseStudies.id, schema.entityVersions.id))
+			.where(sql`${schema.impactCaseStudies.title} LIKE ${`${prefix}%`}`);
+
+		const documentIds = [...new Set(rows.map((r) => r.documentId))];
+
+		for (const documentId of documentIds) {
+			await this.deleteImpactCaseStudyDocument(documentId);
+		}
+	}
+
+	async deletePageDocument(documentId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const versions = await tx
+				.select({ id: schema.entityVersions.id })
+				.from(schema.entityVersions)
+				.where(eq(schema.entityVersions.entityId, documentId));
+
+			for (const version of versions) {
+				const entityFields = await tx
+					.select({ id: schema.fields.id })
+					.from(schema.fields)
+					.where(eq(schema.fields.entityVersionId, version.id));
+
+				if (entityFields.length > 0) {
+					const fieldIds = (entityFields as Array<{ id: string }>).map((f) => f.id);
+					await tx
+						.delete(schema.contentBlocks)
+						.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+					await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+				}
+
+				await tx.delete(schema.pages).where(eq(schema.pages.id, version.id));
+				await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, version.id));
+			}
+
+			await tx
+				.delete(schema.entitiesToResources)
+				.where(eq(schema.entitiesToResources.entityId, documentId));
+
+			await tx
+				.delete(schema.entitiesToEntities)
+				.where(
+					or(
+						eq(schema.entitiesToEntities.entityId, documentId),
+						eq(schema.entitiesToEntities.relatedEntityId, documentId),
+					),
+				);
+
+			await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
+		});
+	}
+
+	async cleanupWorkerPageItemsLifecycleItems(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const rows = await this.db
+			.select({ documentId: schema.entityVersions.entityId })
+			.from(schema.pages)
+			.innerJoin(schema.entityVersions, eq(schema.pages.id, schema.entityVersions.id))
+			.where(sql`${schema.pages.title} LIKE ${`${prefix}%`}`);
+
+		const documentIds = [...new Set(rows.map((r) => r.documentId))];
+
+		for (const documentId of documentIds) {
+			await this.deletePageDocument(documentId);
+		}
+	}
+
+	async deleteDocumentationPageDocument(documentId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const versions = await tx
+				.select({ id: schema.entityVersions.id })
+				.from(schema.entityVersions)
+				.where(eq(schema.entityVersions.entityId, documentId));
+
+			for (const version of versions) {
+				const entityFields = await tx
+					.select({ id: schema.fields.id })
+					.from(schema.fields)
+					.where(eq(schema.fields.entityVersionId, version.id));
+
+				if (entityFields.length > 0) {
+					const fieldIds = (entityFields as Array<{ id: string }>).map((f) => f.id);
+					await tx
+						.delete(schema.contentBlocks)
+						.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+					await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+				}
+
+				await tx
+					.delete(schema.documentationPages)
+					.where(eq(schema.documentationPages.id, version.id));
+				await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, version.id));
+			}
+
+			await tx
+				.delete(schema.entitiesToResources)
+				.where(eq(schema.entitiesToResources.entityId, documentId));
+
+			await tx
+				.delete(schema.entitiesToEntities)
+				.where(
+					or(
+						eq(schema.entitiesToEntities.entityId, documentId),
+						eq(schema.entitiesToEntities.relatedEntityId, documentId),
+					),
+				);
+
+			await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
+		});
+	}
+
+	async cleanupWorkerDocumentationPagesLifecycleItems(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const rows = await this.db
+			.select({ documentId: schema.entityVersions.entityId })
+			.from(schema.documentationPages)
+			.innerJoin(
+				schema.entityVersions,
+				eq(schema.documentationPages.id, schema.entityVersions.id),
+			)
+			.where(sql`${schema.documentationPages.title} LIKE ${`${prefix}%`}`);
+
+		const documentIds = [...new Set(rows.map((r) => r.documentId))];
+
+		for (const documentId of documentIds) {
+			await this.deleteDocumentationPageDocument(documentId);
+		}
+	}
+
+	async deleteDocumentOrPolicyDocument(documentId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const versions = await tx
+				.select({ id: schema.entityVersions.id })
+				.from(schema.entityVersions)
+				.where(eq(schema.entityVersions.entityId, documentId));
+
+			for (const version of versions) {
+				const entityFields = await tx
+					.select({ id: schema.fields.id })
+					.from(schema.fields)
+					.where(eq(schema.fields.entityVersionId, version.id));
+
+				if (entityFields.length > 0) {
+					const fieldIds = (entityFields as Array<{ id: string }>).map((f) => f.id);
+					await tx
+						.delete(schema.contentBlocks)
+						.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+					await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+				}
+
+				await tx
+					.delete(schema.documentsPolicies)
+					.where(eq(schema.documentsPolicies.id, version.id));
+				await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, version.id));
+			}
+
+			await tx
+				.delete(schema.entitiesToResources)
+				.where(eq(schema.entitiesToResources.entityId, documentId));
+
+			await tx
+				.delete(schema.entitiesToEntities)
+				.where(
+					or(
+						eq(schema.entitiesToEntities.entityId, documentId),
+						eq(schema.entitiesToEntities.relatedEntityId, documentId),
+					),
+				);
+
+			await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
+		});
+	}
+
+	async cleanupWorkerDocumentsPoliciesLifecycleItems(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const rows = await this.db
+			.select({ documentId: schema.entityVersions.entityId })
+			.from(schema.documentsPolicies)
+			.innerJoin(schema.entityVersions, eq(schema.documentsPolicies.id, schema.entityVersions.id))
+			.where(sql`${schema.documentsPolicies.title} LIKE ${`${prefix}%`}`);
+
+		const documentIds = [...new Set(rows.map((r) => r.documentId))];
+
+		for (const documentId of documentIds) {
+			await this.deleteDocumentOrPolicyDocument(documentId);
+		}
+	}
+
+	async deleteFundingCallDocument(documentId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const versions = await tx
+				.select({ id: schema.entityVersions.id })
+				.from(schema.entityVersions)
+				.where(eq(schema.entityVersions.entityId, documentId));
+
+			for (const version of versions) {
+				const entityFields = await tx
+					.select({ id: schema.fields.id })
+					.from(schema.fields)
+					.where(eq(schema.fields.entityVersionId, version.id));
+
+				if (entityFields.length > 0) {
+					const fieldIds = (entityFields as Array<{ id: string }>).map((f) => f.id);
+					await tx
+						.delete(schema.contentBlocks)
+						.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+					await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+				}
+
+				await tx.delete(schema.fundingCalls).where(eq(schema.fundingCalls.id, version.id));
+				await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, version.id));
+			}
+
+			await tx
+				.delete(schema.entitiesToResources)
+				.where(eq(schema.entitiesToResources.entityId, documentId));
+
+			await tx
+				.delete(schema.entitiesToEntities)
+				.where(
+					or(
+						eq(schema.entitiesToEntities.entityId, documentId),
+						eq(schema.entitiesToEntities.relatedEntityId, documentId),
+					),
+				);
+
+			await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
+		});
+	}
+
+	async cleanupWorkerFundingCallsLifecycleItems(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const rows = await this.db
+			.select({ documentId: schema.entityVersions.entityId })
+			.from(schema.fundingCalls)
+			.innerJoin(schema.entityVersions, eq(schema.fundingCalls.id, schema.entityVersions.id))
+			.where(sql`${schema.fundingCalls.title} LIKE ${`${prefix}%`}`);
+
+		const documentIds = [...new Set(rows.map((r) => r.documentId))];
+
+		for (const documentId of documentIds) {
+			await this.deleteFundingCallDocument(documentId);
+		}
+	}
+
+	async deleteOpportunityDocument(documentId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const versions = await tx
+				.select({ id: schema.entityVersions.id })
+				.from(schema.entityVersions)
+				.where(eq(schema.entityVersions.entityId, documentId));
+
+			for (const version of versions) {
+				const entityFields = await tx
+					.select({ id: schema.fields.id })
+					.from(schema.fields)
+					.where(eq(schema.fields.entityVersionId, version.id));
+
+				if (entityFields.length > 0) {
+					const fieldIds = (entityFields as Array<{ id: string }>).map((f) => f.id);
+					await tx
+						.delete(schema.contentBlocks)
+						.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+					await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+				}
+
+				await tx.delete(schema.opportunities).where(eq(schema.opportunities.id, version.id));
+				await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, version.id));
+			}
+
+			await tx
+				.delete(schema.entitiesToResources)
+				.where(eq(schema.entitiesToResources.entityId, documentId));
+
+			await tx
+				.delete(schema.entitiesToEntities)
+				.where(
+					or(
+						eq(schema.entitiesToEntities.entityId, documentId),
+						eq(schema.entitiesToEntities.relatedEntityId, documentId),
+					),
+				);
+
+			await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
+		});
+	}
+
+	async cleanupWorkerOpportunitiesLifecycleItems(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const rows = await this.db
+			.select({ documentId: schema.entityVersions.entityId })
+			.from(schema.opportunities)
+			.innerJoin(schema.entityVersions, eq(schema.opportunities.id, schema.entityVersions.id))
+			.where(sql`${schema.opportunities.title} LIKE ${`${prefix}%`}`);
+
+		const documentIds = [...new Set(rows.map((r) => r.documentId))];
+
+		for (const documentId of documentIds) {
+			await this.deleteOpportunityDocument(documentId);
+		}
+	}
+
 	/** Closes the underlying pg pool. Called in worker teardown. */
 	async close(): Promise<void> {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
