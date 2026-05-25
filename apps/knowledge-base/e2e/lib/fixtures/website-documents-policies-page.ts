@@ -46,10 +46,15 @@ export class WebsiteDocumentsPoliciesPage {
 		await dialog.getByRole("button", { name: "Select" }).click();
 		await dialog.waitFor({ state: "hidden" });
 		await this.page.getByText(assetLabel, { exact: true }).waitFor({ state: "visible" });
+		await expect(this.page.locator('input[name="documentKey"]')).not.toHaveValue("");
 	}
 
 	async submitForm(): Promise<void> {
 		await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
+		await expect(
+			this.page.getByText("Internal server error.", { exact: true }),
+			"document or policy form should not surface a server action error",
+		).toBeHidden();
 		await this.page.waitForURL(`**${BASE_PATH}`);
 	}
 

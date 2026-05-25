@@ -40,10 +40,11 @@ export class WebsiteNewsPage {
 
 	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Select image" }).click();
-		await this.page.waitForSelector('[role="dialog"]');
-		await this.page.waitForSelector('[role="gridcell"]');
-		await this.page.getByRole("gridcell", { name: assetLabel }).click();
-		await this.page.getByRole("dialog").getByRole("button", { name: "Select" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		await dialog.waitFor({ state: "visible" });
+		await dialog.getByRole("gridcell", { name: assetLabel }).click();
+		await dialog.getByRole("button", { name: "Select" }).click();
+		await dialog.waitFor({ state: "hidden" });
 	}
 
 	async uploadImageFromMediaLibrary(filePath: string, label: string): Promise<void> {
@@ -71,7 +72,7 @@ export class WebsiteNewsPage {
 	}
 
 	private relatedEntitiesControl(): Locator {
-		return this.relatedEntitiesSection().locator('[data-slot="control"]').first();
+		return this.relatedEntitiesSection().locator('button:has([data-slot="chevron"])');
 	}
 
 	private async closeRelatedEntitiesDialog(dialog: Locator): Promise<void> {
