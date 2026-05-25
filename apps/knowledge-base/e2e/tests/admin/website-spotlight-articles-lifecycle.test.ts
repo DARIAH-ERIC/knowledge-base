@@ -55,8 +55,7 @@ test.describe("website spotlight articles lifecycle", () => {
 		await expect(spotlightPage.versionSelectorDraftLink()).toBeHidden();
 
 		// Edit the draft — changes the draft's updated_at so it diverges from published.
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await spotlightPage.gotoEditFromDetails();
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();
 		await titleField.fill(`${title} Edited`);
@@ -112,8 +111,7 @@ test.describe("website spotlight articles lifecycle", () => {
 		await spotlightPage.searchByTitle(originalTitle);
 		await spotlightPage.gotoDetailsFromList(originalTitle);
 		await expect(spotlightPage.detailsPublishedBadge()).toBeVisible();
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await spotlightPage.gotoEditFromDetails();
 
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();

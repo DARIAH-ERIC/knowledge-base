@@ -54,8 +54,7 @@ test.describe("persons admin lifecycle", () => {
 		await expect(personsPage.versionSelectorDraftLink()).toBeHidden();
 
 		// Edit the draft — changes the draft's updated_at so it diverges from published.
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await personsPage.gotoEditFromDetails();
 		const sortNameField = page.getByLabel("Sort name");
 		await sortNameField.clear();
 		await sortNameField.fill("Lifecycle, Edited");
@@ -113,8 +112,7 @@ test.describe("persons admin lifecycle", () => {
 		await personsPage.searchByName(name);
 		await personsPage.gotoDetailsFromList(name);
 		await expect(personsPage.detailsPublishedBadge()).toBeVisible();
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await personsPage.gotoEditFromDetails();
 
 		const sortNameField = page.getByLabel("Sort name");
 		await sortNameField.clear();

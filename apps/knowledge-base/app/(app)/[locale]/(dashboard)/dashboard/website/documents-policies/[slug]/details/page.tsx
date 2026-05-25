@@ -114,7 +114,7 @@ export default async function DashboardWebsiteDocumentOrPolicyDetailsPage(
 
 	const downloadUrl = `/api/assets/download?key=${encodeURIComponent(documentOrPolicy.document.key)}`;
 
-	const contentBlocks = await getEntityContentBlocks(documentOrPolicy.id);
+	const contentBlocks = await getEntityContentBlocks(documentOrPolicy.id, "description");
 	const hasPublishableDraft = draftId != null && (publishedId == null || hasDraftChanges);
 
 	return (

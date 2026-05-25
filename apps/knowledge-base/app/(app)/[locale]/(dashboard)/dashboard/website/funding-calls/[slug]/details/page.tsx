@@ -105,7 +105,7 @@ export default async function DashboardWebsiteFundingCallsDetailsPage(
 		notFound();
 	}
 
-	const contentBlocks = await getEntityContentBlocks(fundingCall.id);
+	const contentBlocks = await getEntityContentBlocks(fundingCall.id, "content");
 
 	return (
 		<FundingCallDetails

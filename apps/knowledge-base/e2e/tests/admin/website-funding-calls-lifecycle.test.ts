@@ -50,8 +50,7 @@ test.describe("website funding calls lifecycle", () => {
 		await expect(fundingCallsPage.versionSelectorDraftLink()).toBeHidden();
 
 		// Edit the draft — title change diverges draft from published.
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await fundingCallsPage.gotoEditFromDetails();
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();
 		await titleField.fill(`${title} Edited`);
@@ -106,8 +105,7 @@ test.describe("website funding calls lifecycle", () => {
 		await fundingCallsPage.searchByTitle(originalTitle);
 		await fundingCallsPage.gotoDetailsFromList(originalTitle);
 		await expect(fundingCallsPage.detailsPublishedBadge()).toBeVisible();
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await fundingCallsPage.gotoEditFromDetails();
 
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();

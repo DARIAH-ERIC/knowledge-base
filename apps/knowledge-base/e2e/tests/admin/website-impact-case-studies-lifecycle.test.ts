@@ -55,8 +55,7 @@ test.describe("website impact case studies lifecycle", () => {
 		await expect(impactPage.versionSelectorDraftLink()).toBeHidden();
 
 		// Edit the draft — changes the draft's updated_at so it diverges from published.
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await impactPage.gotoEditFromDetails();
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();
 		await titleField.fill(`${title} Edited`);
@@ -112,8 +111,7 @@ test.describe("website impact case studies lifecycle", () => {
 		await impactPage.searchByTitle(originalTitle);
 		await impactPage.gotoDetailsFromList(originalTitle);
 		await expect(impactPage.detailsPublishedBadge()).toBeVisible();
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await impactPage.gotoEditFromDetails();
 
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();

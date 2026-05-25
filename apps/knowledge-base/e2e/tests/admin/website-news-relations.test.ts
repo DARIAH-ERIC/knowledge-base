@@ -64,8 +64,10 @@ test.describe("website news admin – related entities", () => {
 		await newsPage.searchByTitle(title);
 		const row = newsPage.rowByTitle(title);
 		await row.getByRole("button", { name: "Open actions menu" }).click();
-		await page.getByRole("menuitem", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
 
 		await newsPage.selectRelatedEntity(testEntity.name);
 		await newsPage.submitForm();
@@ -100,8 +102,10 @@ test.describe("website news admin – related entities", () => {
 		await newsPage.searchByTitle(title);
 		const row = newsPage.rowByTitle(title);
 		await row.getByRole("button", { name: "Open actions menu" }).click();
-		await page.getByRole("menuitem", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
 
 		await newsPage.removeRelatedEntity(testEntity.name);
 		await newsPage.submitForm();
@@ -173,8 +177,10 @@ test.describe("website news admin – related entities", () => {
 		await newsPage.searchByTitle(title);
 		const row = newsPage.rowByTitle(title);
 		await row.getByRole("button", { name: "Open actions menu" }).click();
-		await page.getByRole("menuitem", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
 
 		const updatedTitle = `${newsPage.workerPrefix} Relations Stable Updated ${randomUUID()}`;
 		const titleField = page.getByLabel("Title");

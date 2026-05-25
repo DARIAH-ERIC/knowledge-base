@@ -7,16 +7,13 @@ import { eq } from "@/lib/db/sql";
 export async function ensureEntityVersionField(
 	tx: Transaction,
 	entityVersionId: string,
-	fieldName?: string,
+	fieldName: string,
 ): Promise<{ id: string }> {
 	const existingField = await tx.query.fields.findFirst({
-		where:
-			fieldName != null
-				? {
-						entityVersionId,
-						name: { fieldName },
-					}
-				: { entityVersionId },
+		where: {
+			entityVersionId,
+			name: { fieldName },
+		},
 		columns: { id: true },
 	});
 
@@ -34,10 +31,7 @@ export async function ensureEntityVersionField(
 	assert(version);
 
 	const fieldNameRow = await tx.query.entityTypesFieldsNames.findFirst({
-		where:
-			fieldName != null
-				? { entityTypeId: version.entityTypeId, fieldName }
-				: { entityTypeId: version.entityTypeId },
+		where: { entityTypeId: version.entityTypeId, fieldName },
 		columns: { id: true },
 	});
 

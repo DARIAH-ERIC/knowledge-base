@@ -88,7 +88,7 @@ export default async function DashboardWebsiteEditFundingCallPage(
 		notFound();
 	}
 
-	const contentBlocks = await getEntityContentBlocks(fundingCall.id);
+	const contentBlocks = await getEntityContentBlocks(fundingCall.id, "content");
 
 	return (
 		<FundingCallEditForm

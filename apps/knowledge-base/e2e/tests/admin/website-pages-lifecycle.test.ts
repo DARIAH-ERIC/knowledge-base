@@ -47,8 +47,7 @@ test.describe("website pages lifecycle", () => {
 		await expect(pagesPage.versionSelectorDraftLink()).toBeHidden();
 
 		// Edit the draft — changes the draft's updated_at so it diverges from published.
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await pagesPage.gotoEditFromDetails();
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();
 		await titleField.fill(`${title} Edited`);
@@ -103,8 +102,7 @@ test.describe("website pages lifecycle", () => {
 		await pagesPage.searchByTitle(originalTitle);
 		await pagesPage.gotoDetailsFromList(originalTitle);
 		await expect(pagesPage.detailsPublishedBadge()).toBeVisible();
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await pagesPage.gotoEditFromDetails();
 
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();

@@ -111,7 +111,7 @@ export default async function DashboardWebsiteSpotlightArticleDetailsPage(
 		options: imageGridOptions,
 	});
 
-	const contentBlocks = await getEntityContentBlocks(spotlightArticle.id);
+	const contentBlocks = await getEntityContentBlocks(spotlightArticle.id, "content");
 
 	return (
 		<SpotlightArticleDetails

@@ -111,7 +111,7 @@ export default async function DashboardWebsiteImpactCaseStudyDetailsPage(
 		options: imageGridOptions,
 	});
 
-	const contentBlocks = await getEntityContentBlocks(impactCaseStudy.id);
+	const contentBlocks = await getEntityContentBlocks(impactCaseStudy.id, "content");
 
 	return (
 		<ImpactCaseStudyDetails

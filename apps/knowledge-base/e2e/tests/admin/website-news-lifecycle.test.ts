@@ -53,8 +53,7 @@ test.describe("website news lifecycle", () => {
 		await expect(newsPage.versionSelectorDraftLink()).toBeHidden();
 
 		// Edit the draft so it diverges from published.
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await newsPage.gotoEditFromDetails();
 		const summaryField = page.getByLabel("Summary");
 		await summaryField.clear();
 		await summaryField.fill("Lifecycle test summary — edited");
@@ -112,8 +111,7 @@ test.describe("website news lifecycle", () => {
 		await newsPage.searchByTitle(originalTitle);
 		await newsPage.gotoDetailsFromList(originalTitle);
 		await expect(newsPage.detailsPublishedBadge()).toBeVisible();
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await newsPage.gotoEditFromDetails();
 
 		// Update the title.
 		const updatedTitle = `${newsPage.workerPrefix} Version B ${randomUUID()}`;

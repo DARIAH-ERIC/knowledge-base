@@ -162,11 +162,24 @@ export class WebsiteNewsPage {
 		await this.page.waitForURL(`**${BASE_PATH}/**/details`);
 	}
 
+	async gotoEditFromDetails(): Promise<void> {
+		const editHref = await this.page.getByRole("link", { name: "Edit" }).getAttribute("href");
+
+		if (editHref == null) {
+			throw new Error("Could not find edit link on news details page.");
+		}
+
+		await this.page.goto(editHref);
+		await this.page.waitForURL(`**${BASE_PATH}/**/edit`);
+	}
+
 	async gotoEditFromList(title: string): Promise<void> {
 		const row = this.rowByTitle(title);
 		await row.getByRole("button", { name: "Open actions menu" }).click();
-		await this.page.getByRole("menuitem", { name: "Edit" }).click();
-		await this.page.waitForURL(`**${BASE_PATH}/**/edit`);
+		await Promise.all([
+			this.page.waitForURL(`**${BASE_PATH}/**/edit`),
+			this.page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
 	}
 
 	// ---------------------------------------------------------------------------

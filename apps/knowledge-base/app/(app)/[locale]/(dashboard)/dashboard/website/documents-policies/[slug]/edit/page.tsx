@@ -110,7 +110,7 @@ export default async function DashboardWebsiteEditDocumentOrPolicyPage(
 		key: documentOrPolicy.document.key,
 		options: imageGridOptions,
 	});
-	const contentBlocks = await getEntityContentBlocks(documentOrPolicy.id);
+	const contentBlocks = await getEntityContentBlocks(documentOrPolicy.id, "description");
 
 	return (
 		<DocumentOrPolicyEditForm

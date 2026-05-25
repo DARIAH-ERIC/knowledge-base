@@ -130,6 +130,17 @@ export class AdminProjectsPage {
 		await this.page.waitForURL(`**${BASE_PATH}/**/details`);
 	}
 
+	async gotoEditFromDetails(): Promise<void> {
+		const editHref = await this.page.getByRole("link", { name: "Edit" }).getAttribute("href");
+
+		if (editHref == null) {
+			throw new Error("Could not find edit link on project details page.");
+		}
+
+		await this.page.goto(editHref);
+		await this.page.waitForURL(`**${BASE_PATH}/**/edit`);
+	}
+
 	// ---------------------------------------------------------------------------
 	// Details page — status badges
 	// ---------------------------------------------------------------------------

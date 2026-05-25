@@ -49,8 +49,7 @@ test.describe("admin documentation pages lifecycle", () => {
 		await expect(docPagesPage.versionSelectorDraftLink()).toBeHidden();
 
 		// Edit the draft — changes the draft's updated_at so it diverges from published.
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await docPagesPage.gotoEditFromDetails();
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();
 		await titleField.fill(`${title} Edited`);
@@ -104,8 +103,7 @@ test.describe("admin documentation pages lifecycle", () => {
 		await docPagesPage.searchByTitle(originalTitle);
 		await docPagesPage.gotoDetailsFromList(originalTitle);
 		await expect(docPagesPage.detailsPublishedBadge()).toBeVisible();
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await docPagesPage.gotoEditFromDetails();
 
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();

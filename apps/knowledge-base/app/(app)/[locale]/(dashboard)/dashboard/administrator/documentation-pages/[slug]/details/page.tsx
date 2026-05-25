@@ -94,7 +94,7 @@ export default async function DashboardAdministratorDocumentationPageDetailsPage
 		notFound();
 	}
 
-	const contentBlocks = await getEntityContentBlocks(documentationPage.id);
+	const contentBlocks = await getEntityContentBlocks(documentationPage.id, "content");
 	const hasPublishableDraft = draftId != null && (publishedId == null || hasDraftChanges);
 
 	return (

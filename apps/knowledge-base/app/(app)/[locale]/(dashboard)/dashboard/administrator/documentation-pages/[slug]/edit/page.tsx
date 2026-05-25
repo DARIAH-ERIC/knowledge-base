@@ -87,7 +87,7 @@ export default async function DashboardAdministratorEditDocumentationPage(
 		notFound();
 	}
 
-	const contentBlocks = await getEntityContentBlocks(documentationPage.id);
+	const contentBlocks = await getEntityContentBlocks(documentationPage.id, "content");
 
 	return (
 		<DocumentationPageEditForm

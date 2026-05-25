@@ -113,7 +113,7 @@ export default async function DashboardWebsitePageItemDetailsPage(
 			})
 		: null;
 
-	const contentBlocks = await getEntityContentBlocks(pageItem.id);
+	const contentBlocks = await getEntityContentBlocks(pageItem.id, "content");
 
 	return (
 		<PageItemDetails

@@ -54,8 +54,7 @@ test.describe("website events lifecycle", () => {
 		await expect(eventsPage.versionSelectorDraftLink()).toBeHidden();
 
 		// Edit the draft — changes the draft's updated_at so it diverges from published.
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await eventsPage.gotoEditFromDetails();
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();
 		await titleField.fill(`${title} Edited`);
@@ -113,8 +112,7 @@ test.describe("website events lifecycle", () => {
 		await eventsPage.searchByTitle(originalTitle);
 		await eventsPage.gotoDetailsFromList(originalTitle);
 		await expect(eventsPage.detailsPublishedBadge()).toBeVisible();
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await eventsPage.gotoEditFromDetails();
 
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();

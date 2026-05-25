@@ -55,8 +55,7 @@ test.describe("website documents-policies lifecycle", () => {
 		await expect(docPoliciesPage.versionSelectorDraftLink()).toBeHidden();
 
 		// Edit the draft — title change diverges draft from published.
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await docPoliciesPage.gotoEditFromDetails();
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();
 		await titleField.fill(`${title} Edited`);
@@ -112,8 +111,7 @@ test.describe("website documents-policies lifecycle", () => {
 		await docPoliciesPage.searchByTitle(originalTitle);
 		await docPoliciesPage.gotoDetailsFromList(originalTitle);
 		await expect(docPoliciesPage.detailsPublishedBadge()).toBeVisible();
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await docPoliciesPage.gotoEditFromDetails();
 
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();

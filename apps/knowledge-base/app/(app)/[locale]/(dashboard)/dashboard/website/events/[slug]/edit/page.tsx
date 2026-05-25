@@ -118,7 +118,7 @@ export default async function DashboardWebsiteEditEventPage(
 		options: imageGridOptions,
 	});
 
-	const contentBlocks = await getEntityContentBlocks(event.id);
+	const contentBlocks = await getEntityContentBlocks(event.id, "content");
 
 	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(documentId);
 

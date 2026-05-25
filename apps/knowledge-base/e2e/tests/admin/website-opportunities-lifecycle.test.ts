@@ -55,8 +55,7 @@ test.describe("website opportunities lifecycle", () => {
 		await expect(opportunitiesPage.versionSelectorDraftLink()).toBeHidden();
 
 		// Edit the draft — title change diverges draft from published.
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await opportunitiesPage.gotoEditFromDetails();
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();
 		await titleField.fill(`${title} Edited`);
@@ -112,8 +111,7 @@ test.describe("website opportunities lifecycle", () => {
 		await opportunitiesPage.searchByTitle(originalTitle);
 		await opportunitiesPage.gotoDetailsFromList(originalTitle);
 		await expect(opportunitiesPage.detailsPublishedBadge()).toBeVisible();
-		await page.getByRole("link", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await opportunitiesPage.gotoEditFromDetails();
 
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();
