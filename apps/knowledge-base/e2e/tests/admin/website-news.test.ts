@@ -7,8 +7,8 @@ import { formatFileSize } from "@/lib/format-file-size";
 
 test.describe("website news admin", () => {
 	/**
-	 * Run sequentially. Also requires setting `workers: 1` in `playwright.config.ts` to avoid running
-	 * test-suites concurrently.
+	 * Run sequentially within this file. Suites may run concurrently because test data is isolated by
+	 * Playwright worker index.
 	 */
 	test.describe.configure({ mode: "default" });
 

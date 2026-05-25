@@ -267,25 +267,16 @@ jobs:
       - name: Build packages
         run: turbo run --filter "./packages/*" build
 
-      - name: Apply database migrations
-        run: pnpm run db:push && pnpm run db:migrations:apply
+      - name: Setup services
+        run: pnpm run dev:services:setup
 
-      - name: Seed database
-        run: pnpm run data:seed:db
-
-      - name: Create storage bucket
-        run: pnpm run storage:buckets:create
-
-      - name: Seed storage
-        run: pnpm run data:seed:storage
-
-      - name: Generate search api key
+      - name: Export search api key
         shell: bash
         run: |
           set -euo pipefail
-          SEARCH_API_KEY="$(pnpm --silent run search:api-keys:generate --raw)"
+          SEARCH_API_KEY="$(sed -n -E 's/^TYPESENSE_SEARCH_API_KEY="?([^"]*)"?$/\1/p' ./.devcontainer/.env)"
           if [ -z "$SEARCH_API_KEY" ]; then
-            echo "Failed to generate search api key." >&2
+            echo "Failed to read generated search api key." >&2
             exit 1
           fi
           {
@@ -293,19 +284,20 @@ jobs:
             echo "TYPESENSE_SEARCH_API_KEY=$SEARCH_API_KEY"
           } >> "$GITHUB_ENV"
 
+      - name: Seed kitchen sink data
+        run: pnpm run data:seed:kitchen-sink
+
       - name: Build app
         run: turbo run build
 
       - name: Run e2e tests
-        run: turbo run test:e2e
+        run: turbo run --filter "@dariah-eric/knowledge-base" test:e2e
 
       - uses: actions/upload-artifact@v7
-        if: ${{ !cancelled() }}
+        if: ${{ failure() }}
         with:
           name: playwright-report
-          path: |
-            apps/knowledge-base/playwright-report/
-            apps/website/playwright-report/
+          path: apps/knowledge-base/playwright-report/
           retention-days: 30
 
   build-deploy:
