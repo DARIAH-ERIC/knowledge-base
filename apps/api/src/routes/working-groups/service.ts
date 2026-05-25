@@ -4,11 +4,12 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
+import { generateImageUrl } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
+import { mapSocialMedia } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
 import { type SQLWrapper, and, count, eq, exists, not, sql } from "@/services/db/sql";
-import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
 interface GetWorkingGroupsParams {
@@ -126,26 +127,8 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image =
-			item.image != null
-				? images.generateSignedImageUrl({
-						key: item.image.key,
-						options: { width: imageWidth.preview },
-					})
-				: null;
-
-		const socialMedia = item.socialMedia.map((sm) => {
-			return {
-				...sm,
-				type: sm.type.type,
-				duration: sm.duration
-					? {
-							start: sm.duration.start.toISOString(),
-							end: sm.duration.end?.toISOString() ?? null,
-						}
-					: null,
-			};
-		});
+		const image = generateImageUrl(item.image, imageWidth.preview);
+		const socialMedia = mapSocialMedia(item.socialMedia);
 
 		return { ...flattenEntityVersion(item), image, socialMedia };
 	});
@@ -199,10 +182,7 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 			...row,
 			position: positions.get(row.id) ?? null,
 			role: roleType,
-			image: images.generateSignedImageUrl({
-				key: imageKey,
-				options: { width: imageWidth.avatar },
-			}),
+			image: generateImageUrl({ key: imageKey }, imageWidth.avatar),
 		};
 	});
 }
@@ -271,26 +251,8 @@ export async function getWorkingGroupById(
 		return null;
 	}
 
-	const image =
-		item.image != null
-			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
-			: null;
-
-	const socialMedia = item.socialMedia.map((sm) => {
-		return {
-			...sm,
-			type: sm.type.type,
-			duration: sm.duration
-				? {
-						start: sm.duration.start.toISOString(),
-						end: sm.duration.end?.toISOString() ?? null,
-					}
-				: null,
-		};
-	});
+	const image = generateImageUrl(item.image, imageWidth.featured);
+	const socialMedia = mapSocialMedia(item.socialMedia);
 
 	const [relatedEntities, relatedResources] = await Promise.all([
 		getRelatedEntities(db, id),
@@ -441,26 +403,8 @@ export async function getWorkingGroupBySlug(
 		return null;
 	}
 
-	const image =
-		item.image != null
-			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
-			: null;
-
-	const socialMedia = item.socialMedia.map((sm) => {
-		return {
-			...sm,
-			type: sm.type.type,
-			duration: sm.duration
-				? {
-						start: sm.duration.start.toISOString(),
-						end: sm.duration.end?.toISOString() ?? null,
-					}
-				: null,
-		};
-	});
+	const image = generateImageUrl(item.image, imageWidth.featured);
+	const socialMedia = mapSocialMedia(item.socialMedia);
 
 	const [fields, chairs, relatedEntities, relatedResources] = await Promise.all([
 		getContentBlocks(db, item.id),

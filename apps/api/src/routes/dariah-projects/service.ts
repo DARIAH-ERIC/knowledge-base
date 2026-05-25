@@ -3,11 +3,12 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
+import { generateImageUrl } from "@/lib/images";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq, not, sql } from "@/services/db/sql";
-import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
 function mapItem<
@@ -22,18 +23,8 @@ function mapItem<
 		duration: { start: Date; end?: Date };
 	},
 >(item: T, width: number) {
-	const image =
-		item.image != null
-			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width },
-				})
-			: null;
-
-	const duration = {
-		start: item.duration.start.toISOString(),
-		end: item.duration.end?.toISOString(),
-	};
+	const image = generateImageUrl(item.image, width);
+	const duration = serializeDateRange(item.duration);
 
 	const socialMedia = item.socialMedia.map((sm) => {
 		return {

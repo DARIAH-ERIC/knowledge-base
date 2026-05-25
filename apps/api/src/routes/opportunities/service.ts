@@ -3,6 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
@@ -123,10 +124,7 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const duration = {
-			start: item.duration.start.toISOString(),
-			end: item.duration.end?.toISOString(),
-		};
+		const duration = serializeDateRange(item.duration);
 
 		return { ...flattenEntityVersion(item), duration };
 	});
@@ -192,10 +190,7 @@ export async function getOpportunityById(
 		getRelatedResources(db, id),
 	]);
 
-	const duration = {
-		start: item.duration.start.toISOString(),
-		end: item.duration.end?.toISOString(),
-	};
+	const duration = serializeDateRange(item.duration);
 
 	return {
 		...flattenEntityVersion(item),
@@ -326,10 +321,7 @@ export async function getOpportunityBySlug(
 		getRelatedResources(db, item.id),
 	]);
 
-	const duration = {
-		start: item.duration.start.toISOString(),
-		end: item.duration.end?.toISOString(),
-	};
+	const duration = serializeDateRange(item.duration);
 
 	return {
 		...flattenEntityVersion(item),

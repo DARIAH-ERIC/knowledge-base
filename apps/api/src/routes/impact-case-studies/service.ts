@@ -4,11 +4,11 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
+import { generateImageUrl } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq } from "@/services/db/sql";
-import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
 interface GetImpactCaseStudiesParams {
@@ -72,10 +72,7 @@ export async function getImpactCaseStudies(
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = images.generateSignedImageUrl({
-			key: item.image.key,
-			options: { width: imageWidth.preview },
-		});
+		const image = generateImageUrl(item.image, imageWidth.preview);
 
 		return { ...flattenEntityVersion(item), image };
 	});
@@ -118,10 +115,7 @@ async function getContributors(db: Database | Transaction, impactCaseStudyId: st
 		return {
 			...row,
 			position: positions.get(row.id) ?? null,
-			image: images.generateSignedImageUrl({
-				key: imageKey,
-				options: { width: imageWidth.avatar },
-			}),
+			image: generateImageUrl({ key: imageKey }, imageWidth.avatar),
 		};
 	});
 }
@@ -178,10 +172,7 @@ export async function getImpactCaseStudyById(
 		getRelatedResources(db, id),
 	]);
 
-	const image = images.generateSignedImageUrl({
-		key: item.image.key,
-		options: { width: imageWidth.featured },
-	});
+	const image = generateImageUrl(item.image, imageWidth.featured);
 
 	return {
 		...flattenEntityVersion(item),
@@ -311,10 +302,7 @@ export async function getImpactCaseStudyBySlug(
 
 	const contributors = await getContributors(db, item.id);
 
-	const image = images.generateSignedImageUrl({
-		key: item.image.key,
-		options: { width: imageWidth.featured },
-	});
+	const image = generateImageUrl(item.image, imageWidth.featured);
 
 	const [fields, relatedEntities, relatedResources] = await Promise.all([
 		getContentBlocks(db, item.id),

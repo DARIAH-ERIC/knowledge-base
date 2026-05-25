@@ -4,12 +4,13 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
+import { generateImageUrl } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
+import { mapSocialMedia } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
 import { hardcodedWorkingGroups } from "@/routes/governance-bodies/hardcoded-working-groups";
 import { and, count, eq, inArray, sql } from "@/services/db/sql";
-import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
 interface GetGovernanceBodiesParams {
@@ -44,32 +45,6 @@ const hardcodedWorkingGroupsGovernanceBody = {
 	publishedAt: "2026-01-01T00:00:00.000Z",
 	socialMedia: [],
 };
-
-function mapSocialMedia(
-	socialMedia: Array<{
-		id: string;
-		name: string;
-		url: string;
-		duration: {
-			start: Date;
-			end?: Date | undefined;
-		} | null;
-		type: { type: (typeof schema.socialMediaTypesEnum)[number] };
-	}>,
-) {
-	return socialMedia.map((sm) => {
-		return {
-			...sm,
-			type: sm.type.type,
-			duration: sm.duration
-				? {
-						start: sm.duration.start.toISOString(),
-						end: sm.duration.end?.toISOString() ?? null,
-					}
-				: null,
-		};
-	});
-}
 
 async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 	const rows = await db
@@ -128,10 +103,7 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 			email: row.email,
 			orcid: row.orcid,
 			position: positions.get(row.id) ?? null,
-			image: images.generateSignedImageUrl({
-				key: row.imageKey,
-				options: { width: imageWidth.avatar },
-			}),
+			image: generateImageUrl({ key: row.imageKey }, imageWidth.avatar),
 			slug: row.slug,
 			role: row.role,
 			duration: {
@@ -229,10 +201,7 @@ async function getActiveGovernanceBodyPersons(
 			email: row.email,
 			orcid: row.orcid,
 			position: positions.get(row.id) ?? null,
-			image: images.generateSignedImageUrl({
-				key: row.imageKey,
-				options: { width: imageWidth.avatar },
-			}),
+			image: generateImageUrl({ key: row.imageKey }, imageWidth.avatar),
 			slug: row.slug,
 			role: row.role,
 			duration: {
@@ -339,13 +308,7 @@ export async function getGovernanceBodies(
 	);
 
 	const data = items.map((item) => {
-		const image =
-			item.image != null
-				? images.generateSignedImageUrl({
-						key: item.image.key,
-						options: { width: imageWidth.preview },
-					})
-				: null;
+		const image = generateImageUrl(item.image, imageWidth.preview);
 
 		return {
 			...flattenEntityVersion(item),
@@ -438,13 +401,7 @@ export async function getGovernanceBodyById(
 		return null;
 	}
 
-	const image =
-		item.image != null
-			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
-			: null;
+	const image = generateImageUrl(item.image, imageWidth.featured);
 
 	return {
 		...flattenEntityVersion(item),
@@ -610,13 +567,7 @@ export async function getGovernanceBodyBySlug(
 		getActiveGovernanceBodyPersons(db, [item.id]),
 	]);
 
-	const image =
-		item.image != null
-			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
-			: null;
+	const image = generateImageUrl(item.image, imageWidth.featured);
 
 	return {
 		...flattenEntityVersion(item),

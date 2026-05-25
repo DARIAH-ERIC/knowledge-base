@@ -3,12 +3,13 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
+import { generateImageUrl } from "@/lib/images";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { EventOrder } from "@/routes/events/schemas";
 import { type SQL, and, asc, count, desc, eq, sql } from "@/services/db/sql";
-import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
 interface GetEventsParams {
@@ -110,17 +111,8 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image = item.image
-			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.preview },
-				})
-			: null;
-
-		const duration = {
-			start: item.duration.start.toISOString(),
-			end: item.duration.end?.toISOString(),
-		};
+		const image = generateImageUrl(item.image, imageWidth.preview);
+		const duration = serializeDateRange(item.duration);
 
 		const { entityVersion, ...rest } = item;
 		return { ...rest, duration, image, publishedAt: entityVersion.updatedAt.toISOString() };
@@ -178,13 +170,7 @@ async function getAdjacentEvents(db: Database | Transaction, params: GetAdjacent
 			slug: schema.Entity["slug"];
 		};
 	}) {
-		return {
-			...item,
-			duration: {
-				start: item.duration.start.toISOString(),
-				end: item.duration.end?.toISOString(),
-			},
-		};
+		return { ...item, duration: serializeDateRange(item.duration) };
 	}
 
 	const [prevRows, nextRows] = await Promise.all([
@@ -274,15 +260,8 @@ export async function getEventById(db: Database | Transaction, params: GetEventB
 		return null;
 	}
 
-	const image = images.generateSignedImageUrl({
-		key: item.image.key,
-		options: { width: imageWidth.featured },
-	});
-
-	const duration = {
-		start: item.duration.start.toISOString(),
-		end: item.duration.end?.toISOString(),
-	};
+	const image = generateImageUrl(item.image, imageWidth.featured);
+	const duration = serializeDateRange(item.duration);
 
 	const [links, relatedEntities, relatedResources] = await Promise.all([
 		getAdjacentEvents(db, { id, startDate: item.duration.start }),
@@ -415,15 +394,8 @@ export async function getEventBySlug(db: Database | Transaction, params: GetEven
 		return null;
 	}
 
-	const image = images.generateSignedImageUrl({
-		key: item.image.key,
-		options: { width: imageWidth.featured },
-	});
-
-	const duration = {
-		start: item.duration.start.toISOString(),
-		end: item.duration.end?.toISOString(),
-	};
+	const image = generateImageUrl(item.image, imageWidth.featured);
+	const duration = serializeDateRange(item.duration);
 
 	const [fields, links, relatedEntities, relatedResources] = await Promise.all([
 		getContentBlocks(db, item.id),
