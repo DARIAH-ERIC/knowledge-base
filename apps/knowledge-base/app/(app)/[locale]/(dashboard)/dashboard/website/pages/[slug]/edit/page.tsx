@@ -123,7 +123,7 @@ export default async function DashboardWebsiteEditPageItemPage(
 			})
 		: null;
 
-	const contentBlocks = await getEntityContentBlocks(pageItem.id);
+	const contentBlocks = await getEntityContentBlocks(pageItem.id, "content");
 
 	return (
 		<PageItemEditForm

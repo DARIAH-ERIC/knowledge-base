@@ -17,10 +17,13 @@ dotenv({
 
 const E2E_ADMIN_EMAIL = "e2e-admin@example.com";
 const E2E_ADMIN_NAME = "E2E Admin";
-const E2E_TEST_ASSET_KEYS: Array<{ key: string; label: string }> = [
+const E2E_NON_ADMIN_EMAIL = "e2e-user@example.com";
+const E2E_NON_ADMIN_NAME = "E2E User";
+const E2E_TEST_ASSET_KEYS: Array<{ key: string; label: string; mimeType?: string }> = [
 	{ key: "avatars/e2e-test-asset", label: "E2E Test Asset" },
 	{ key: "images/e2e-test-asset", label: "E2E Test Asset" },
 	{ key: "logos/e2e-test-asset", label: "E2E Test Asset" },
+	{ key: "documents/e2e-test-document", label: "E2E Test Document", mimeType: "application/pdf" },
 ];
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 30;
 
@@ -61,50 +64,110 @@ export default async function globalSetup(): Promise<void> {
 
 	try {
 		/**
-		 * Upsert test admin user. The `passwordHash` is a placeholder — we bypass password auth in
-		 * e2etests by injecting a pre-authenticated session directly into the database.
+		 * Upserts a user and writes a freshly-minted session for them to `<authDir>/<storageFile>`. The
+		 * `passwordHash` is a placeholder — we bypass password auth in e2e tests by injecting a
+		 * pre-authenticated session directly into the database.
 		 */
-		const passwordHash = `e2e-placeholder-${randomBytes(16).toString("hex")}`;
-		const twoFactorTotpKey = encrypt(randomBytes(20), encryptionKey);
-		const twoFactorRecoveryCode = encrypt(
-			Buffer.from("E2ETESTRECOVERYCODE1", "utf-8"),
-			encryptionKey,
-		);
+		async function upsertUserAndWriteSession(input: {
+			email: string;
+			name: string;
+			role: "admin" | "user";
+			canManageAdmins: boolean;
+			storageFile: string;
+		}): Promise<void> {
+			const passwordHash = `e2e-placeholder-${randomBytes(16).toString("hex")}`;
+			const twoFactorTotpKey = encrypt(randomBytes(20), encryptionKey);
+			const twoFactorRecoveryCode = encrypt(
+				Buffer.from("E2ETESTRECOVERYCODE1", "utf-8"),
+				encryptionKey,
+			);
 
-		let existingUser = await db.query.users.findFirst({
-			where: { email: E2E_ADMIN_EMAIL },
-			columns: { id: true },
-		});
+			let existingUser = await db.query.users.findFirst({
+				where: { email: input.email },
+				columns: { id: true },
+			});
 
-		if (existingUser == null) {
-			const [inserted] = await db
-				.insert(schema.users)
-				.values({
-					email: E2E_ADMIN_EMAIL,
-					name: E2E_ADMIN_NAME,
-					passwordHash,
-					role: "admin",
-					canManageAdmins: true,
-					isEmailVerified: true,
-					twoFactorTotpKey,
-					twoFactorRecoveryCode,
-				})
-				.returning({ id: schema.users.id });
-			existingUser = inserted;
-		} else {
-			await db
-				.update(schema.users)
-				.set({ role: "admin", canManageAdmins: true, isEmailVerified: true, twoFactorTotpKey })
-				.where(eq(schema.users.id, existingUser.id));
+			if (existingUser == null) {
+				const [inserted] = await db
+					.insert(schema.users)
+					.values({
+						email: input.email,
+						name: input.name,
+						passwordHash,
+						role: input.role,
+						canManageAdmins: input.canManageAdmins,
+						isEmailVerified: true,
+						twoFactorTotpKey,
+						twoFactorRecoveryCode,
+					})
+					.returning({ id: schema.users.id });
+				existingUser = inserted;
+			} else {
+				await db
+					.update(schema.users)
+					.set({
+						role: input.role,
+						canManageAdmins: input.canManageAdmins,
+						isEmailVerified: true,
+						twoFactorTotpKey,
+					})
+					.where(eq(schema.users.id, existingUser.id));
+			}
+
+			if (existingUser == null) {
+				throw new Error(`Failed to create or find the test user "${input.email}"`);
+			}
+
+			const userId = existingUser.id;
+
+			await db.delete(schema.sessions).where(eq(schema.sessions.userId, userId));
+
+			const sessionId = randomBytes(32).toString("hex");
+			const sessionSecret = randomBytes(32).toString("hex");
+			const sessionSecretHash = hashSessionSecret(sessionSecret);
+			const sessionToken = `${sessionId}.${sessionSecret}`;
+			const sessionExpiresAt = new Date(Date.now() + SESSION_DURATION_MS);
+
+			await db.insert(schema.sessions).values({
+				id: sessionId,
+				secretHash: sessionSecretHash,
+				userId,
+				expiresAt: sessionExpiresAt,
+				isTwoFactorVerified: true,
+			});
+
+			const baseUrl =
+				process.env.NEXT_PUBLIC_APP_BASE_URL ?? `http://localhost:${process.env.PORT ?? "3001"}`;
+			const url = new URL(baseUrl);
+
+			const storageState = {
+				cookies: [
+					{
+						name: "session",
+						value: sessionToken,
+						domain: url.hostname,
+						path: "/",
+						expires: Math.floor(sessionExpiresAt.getTime() / 1000),
+						httpOnly: true,
+						secure: url.protocol === "https:",
+						sameSite: "Lax" as const,
+					},
+				],
+				origins: [] as Array<never>,
+			};
+
+			const authDir = join(import.meta.dirname, "../.auth");
+			await mkdir(authDir, { recursive: true });
+			await writeFile(
+				join(authDir, input.storageFile),
+				JSON.stringify(storageState, null, 2),
+				"utf-8",
+			);
+
+			log.info(`[globalSetup] Session written for ${input.email} (role=${input.role})`);
 		}
 
-		if (existingUser == null) {
-			throw new Error("Failed to create or find the test admin user");
-		}
-
-		const userId = existingUser.id;
-
-		for (const { key, label } of E2E_TEST_ASSET_KEYS) {
+		for (const { key, label, mimeType } of E2E_TEST_ASSET_KEYS) {
 			const existingAsset = await db.query.assets.findFirst({
 				where: { key },
 				columns: { id: true },
@@ -114,52 +177,26 @@ export default async function globalSetup(): Promise<void> {
 				await db.insert(schema.assets).values({
 					key,
 					label,
-					mimeType: "image/jpeg",
+					mimeType: mimeType ?? "image/jpeg",
 				});
 			}
 		}
 
-		await db.delete(schema.sessions).where(eq(schema.sessions.userId, userId));
-
-		const sessionId = randomBytes(32).toString("hex");
-		const sessionSecret = randomBytes(32).toString("hex");
-		const sessionSecretHash = hashSessionSecret(sessionSecret);
-		const sessionToken = `${sessionId}.${sessionSecret}`;
-		const sessionExpiresAt = new Date(Date.now() + SESSION_DURATION_MS);
-
-		await db.insert(schema.sessions).values({
-			id: sessionId,
-			secretHash: sessionSecretHash,
-			userId,
-			expiresAt: sessionExpiresAt,
-			isTwoFactorVerified: true,
+		await upsertUserAndWriteSession({
+			email: E2E_ADMIN_EMAIL,
+			name: E2E_ADMIN_NAME,
+			role: "admin",
+			canManageAdmins: true,
+			storageFile: "admin.json",
 		});
 
-		const baseUrl =
-			process.env.NEXT_PUBLIC_APP_BASE_URL ?? `http://localhost:${process.env.PORT ?? "3001"}`;
-		const url = new URL(baseUrl);
-
-		const storageState = {
-			cookies: [
-				{
-					name: "session",
-					value: sessionToken,
-					domain: url.hostname,
-					path: "/",
-					expires: Math.floor(sessionExpiresAt.getTime() / 1000),
-					httpOnly: true,
-					secure: url.protocol === "https:",
-					sameSite: "Lax" as const,
-				},
-			],
-			origins: [] as Array<never>,
-		};
-
-		const authDir = join(import.meta.dirname, "../.auth");
-		await mkdir(authDir, { recursive: true });
-		await writeFile(join(authDir, "admin.json"), JSON.stringify(storageState, null, 2), "utf-8");
-
-		log.info(`[globalSetup] Admin session written for ${E2E_ADMIN_EMAIL}`);
+		await upsertUserAndWriteSession({
+			email: E2E_NON_ADMIN_EMAIL,
+			name: E2E_NON_ADMIN_NAME,
+			role: "user",
+			canManageAdmins: false,
+			storageFile: "non-admin.json",
+		});
 	} finally {
 		await db.$client.end();
 	}

@@ -1,0 +1,179 @@
+import { type Locator, type Page, expect } from "@playwright/test";
+
+import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
+
+const BASE_PATH = "/en/dashboard/website/documents-policies";
+
+export class WebsiteDocumentsPoliciesPage {
+	readonly page: Page;
+	readonly workerIndex: number;
+
+	constructor(page: Page, workerIndex: number) {
+		this.page = page;
+		this.workerIndex = workerIndex;
+	}
+
+	get workerPrefix(): string {
+		return `[e2e-worker-${String(this.workerIndex)}]`;
+	}
+
+	async goto(): Promise<void> {
+		await this.page.goto(BASE_PATH);
+		await this.page.waitForURL(`**${BASE_PATH}`);
+	}
+
+	async gotoCreate(): Promise<void> {
+		await this.page.goto(`${BASE_PATH}/create`);
+	}
+
+	// ---------------------------------------------------------------------------
+	// Form helpers
+	// ---------------------------------------------------------------------------
+
+	async fillTitle(title: string): Promise<void> {
+		await this.page.getByLabel("Title").fill(title);
+	}
+
+	async fillSummary(summary: string): Promise<void> {
+		await this.page.getByLabel("Summary").fill(summary);
+	}
+
+	async selectDocumentFromMediaLibrary(assetLabel: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Select image" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		await dialog.waitFor({ state: "visible" });
+		await dialog.getByRole("gridcell", { name: assetLabel }).click();
+		await dialog.getByRole("button", { name: "Select" }).click();
+		await dialog.waitFor({ state: "hidden" });
+		await this.page.getByText(assetLabel, { exact: true }).waitFor({ state: "visible" });
+		await expect(this.page.locator('input[name="documentKey"]')).not.toHaveValue("");
+	}
+
+	async submitForm(): Promise<void> {
+		await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
+		const serverError = this.page.getByText("Internal server error.", { exact: true });
+
+		await Promise.race([
+			this.page.waitForURL(`**${BASE_PATH}`),
+			serverError.waitFor({ state: "visible" }),
+		]);
+		await expect(
+			serverError,
+			"document or policy form should not surface a server action error",
+		).toBeHidden();
+	}
+
+	// ---------------------------------------------------------------------------
+	// List page helpers
+	// ---------------------------------------------------------------------------
+
+	async searchByTitle(title: string): Promise<void> {
+		const searchbox = this.page.getByRole("searchbox");
+		if (await searchbox.isVisible()) {
+			await fillSearchAndWaitForUrl(this.page, BASE_PATH, title);
+		} else {
+			await expect(this.rowByTitle(title)).toBeVisible();
+		}
+	}
+
+	rowByTitle(title: string): Locator {
+		return this.page
+			.getByText(title, { exact: true })
+			.locator("xpath=ancestor::div[contains(@class, 'rounded-md')][1]");
+	}
+
+	async openDeleteDialog(title: string): Promise<Locator> {
+		const row = this.rowByTitle(title);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await this.page.getByRole("menuitem", { name: "Delete" }).click();
+		return this.page.getByRole("dialog", { name: /Delete document or policy/i });
+	}
+
+	async confirmDelete(dialog: Locator): Promise<void> {
+		await dialog.getByRole("button", { name: "Delete" }).click();
+	}
+
+	// ---------------------------------------------------------------------------
+	// Details page — navigation
+	// ---------------------------------------------------------------------------
+
+	async gotoDetailsFromList(title: string): Promise<void> {
+		const row = this.rowByTitle(title);
+		const editHref = await row.getByRole("link", { name: "Content" }).getAttribute("href");
+
+		if (editHref == null) {
+			throw new Error(`Could not find content edit link for document or policy "${title}".`);
+		}
+
+		await this.page.goto(editHref.replace(/\/edit$/, "/details"));
+		await this.page.waitForURL(`**${BASE_PATH}/**/details`);
+	}
+
+	async gotoEditFromDetails(): Promise<void> {
+		const editHref = await this.page.getByRole("link", { name: "Edit" }).getAttribute("href");
+
+		if (editHref == null) {
+			throw new Error("Could not find edit link on document or policy details page.");
+		}
+
+		await this.page.goto(editHref);
+		await this.page.waitForURL(`**${BASE_PATH}/**/edit`);
+	}
+
+	// ---------------------------------------------------------------------------
+	// Details page — status badges
+	// ---------------------------------------------------------------------------
+
+	detailsDraftBadge(): Locator {
+		return this.page.getByText("Draft", { exact: true });
+	}
+
+	detailsPublishedBadge(): Locator {
+		return this.page.getByText("Published", { exact: true });
+	}
+
+	detailsPublishedWithDraftChangesBadge(): Locator {
+		return this.page.getByText("Published with draft changes");
+	}
+
+	// ---------------------------------------------------------------------------
+	// Details page — lifecycle actions
+	// ---------------------------------------------------------------------------
+
+	async publishItem(): Promise<void> {
+		await this.page.getByRole("button", { name: "Publish" }).click();
+		await this.page.waitForURL(`**${BASE_PATH}`);
+	}
+
+	async discardDraft(): Promise<void> {
+		await this.page.getByRole("button", { name: "Discard draft" }).click();
+		const dialog = this.page.getByRole("dialog");
+		await dialog.waitFor({ state: "visible" });
+		await dialog.getByRole("button", { name: "Discard" }).click();
+		await this.page.waitForURL(`**${BASE_PATH}`);
+	}
+
+	// ---------------------------------------------------------------------------
+	// Details page — version selector
+	// ---------------------------------------------------------------------------
+
+	versionSelectorDraftLink(): Locator {
+		return this.page.getByRole("link", { name: "Draft" });
+	}
+
+	versionSelectorPublishedLink(): Locator {
+		return this.page.getByRole("link", { name: "Published" });
+	}
+
+	// ---------------------------------------------------------------------------
+	// List page — status badges within a row
+	// ---------------------------------------------------------------------------
+
+	publishedBadgeInRow(title: string): Locator {
+		return this.rowByTitle(title).getByText("Published", { exact: true });
+	}
+
+	draftBadgeInRow(title: string): Locator {
+		return this.rowByTitle(title).getByText("Draft", { exact: true });
+	}
+}

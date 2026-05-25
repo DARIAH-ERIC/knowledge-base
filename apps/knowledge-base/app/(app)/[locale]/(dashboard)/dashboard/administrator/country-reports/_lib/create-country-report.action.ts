@@ -1,55 +1,26 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
+import { getExtracted } from "next-intl/server";
 
 import { CreateCountryReportActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/create-country-report.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export const createCountryReportAction = createServerAction(
-	async function createCountryReportAction(state, formData) {
-		const locale = await getLocale();
+export const createCountryReportAction = createMutationAction({
+	schema: CreateCountryReportActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "create", subjectType: "country_reports" },
+	revalidate: "/[locale]/dashboard/administrator/country-reports",
+	redirect: "/dashboard/administrator/country-reports",
+
+	async preCheck({ input }) {
 		const t = await getExtracted();
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
-
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			CreateCountryReportActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateCountryReportActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { campaignId, countryId, status } = result.output;
-
 		const campaign = await db.query.reportingCampaigns.findFirst({
-			where: { id: campaignId },
+			where: { id: input.campaignId },
 			columns: { status: true },
 		});
 
@@ -60,7 +31,7 @@ export const createCountryReportAction = createServerAction(
 		}
 
 		const existing = await db.query.countryReports.findFirst({
-			where: { campaignId, countryId },
+			where: { campaignId: input.campaignId, countryId: input.countryId },
 			columns: { id: true },
 		});
 
@@ -70,18 +41,21 @@ export const createCountryReportAction = createServerAction(
 			});
 		}
 
-		await db.insert(schema.countryReports).values({ campaignId, countryId, status });
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "create",
-			subjectType: "country_reports",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
-
-		revalidatePath("/[locale]/dashboard/administrator/country-reports", "layout");
-
-		redirect({ href: "/dashboard/administrator/country-reports", locale });
+		return undefined;
 	},
-);
+
+	async mutate(tx, input) {
+		const [created] = await tx
+			.insert(schema.countryReports)
+			.values({
+				campaignId: input.campaignId,
+				countryId: input.countryId,
+				status: input.status,
+			})
+			.returning({ id: schema.countryReports.id });
+
+		assert(created);
+
+		return { subjectId: created.id };
+	},
+});

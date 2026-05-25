@@ -4,10 +4,10 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
+import { generateImageUrl } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq } from "@/services/db/sql";
-import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
 interface GetPersonsParams {
@@ -61,8 +61,10 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 			.select({ total: count() })
 			.from(schema.persons)
 			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -72,10 +74,7 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 	);
 
 	const data = items.map((item) => {
-		const image = images.generateSignedImageUrl({
-			key: item.image.key,
-			options: { width: imageWidth.avatar },
-		});
+		const image = generateImageUrl(item.image, imageWidth.avatar);
 
 		return {
 			...flattenEntityVersion(item),
@@ -138,10 +137,7 @@ export async function getPersonById(db: Database | Transaction, params: GetPerso
 
 	const positions = await getPersonPositions(db, [item.id]);
 
-	const image = images.generateSignedImageUrl({
-		key: item.image.key,
-		options: { width: imageWidth.featured },
-	});
+	const image = generateImageUrl(item.image, imageWidth.featured);
 
 	return {
 		...flattenEntityVersion(item),
@@ -195,8 +191,10 @@ export async function getPersonSlugs(db: Database | Transaction, params: GetPers
 			.select({ total: count() })
 			.from(schema.persons)
 			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -258,10 +256,7 @@ export async function getPersonBySlug(db: Database | Transaction, params: GetPer
 
 	const positions = await getPersonPositions(db, [item.id]);
 
-	const image = images.generateSignedImageUrl({
-		key: item.image.key,
-		options: { width: imageWidth.featured },
-	});
+	const image = generateImageUrl(item.image, imageWidth.featured);
 
 	const fields = await getContentBlocks(db, item.id);
 

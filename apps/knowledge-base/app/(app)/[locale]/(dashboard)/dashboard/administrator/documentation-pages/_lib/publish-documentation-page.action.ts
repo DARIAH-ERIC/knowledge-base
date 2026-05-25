@@ -1,32 +1,17 @@
 "use server";
 
-import { getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { documentationPagesLifecycleAdapter } from "@/lib/data/documentation-pages.lifecycle-adapter";
 import { publishVersion } from "@/lib/data/entity-lifecycle";
-import { db } from "@/lib/db";
-import { redirect } from "@/lib/navigation/navigation";
+import { createCommandAction } from "@/lib/server/create-command-action";
 
-export async function publishDocumentationPageAction(documentId: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const publishDocumentationPageAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "publish", subjectType: "documentation_pages" },
+	revalidate: "/[locale]/dashboard/administrator/documentation-pages",
+	redirect: "/dashboard/administrator/documentation-pages",
 
-	await db.transaction(async (tx) => {
+	async mutate(tx, [documentId]: [string]) {
 		await publishVersion(tx, documentId, documentationPagesLifecycleAdapter);
-	});
-
-	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
-		action: "publish",
-		subjectType: "documentation_pages",
-		subjectId: documentId,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/administrator/documentation-pages", "layout");
-
-	const locale = await getLocale();
-	redirect({ href: "/dashboard/administrator/documentation-pages", locale });
-}
+		return { subjectId: documentId };
+	},
+});

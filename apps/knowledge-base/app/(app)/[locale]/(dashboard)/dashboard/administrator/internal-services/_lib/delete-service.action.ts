@@ -14,7 +14,7 @@ export async function deleteServiceAction(id: string): Promise<void> {
 	await db.delete(schema.services).where(eq(schema.services.id, id));
 
 	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
+		actorUserId: auditSession.user.id,
 		action: "delete",
 		subjectType: "internal_services",
 		subjectId: id,

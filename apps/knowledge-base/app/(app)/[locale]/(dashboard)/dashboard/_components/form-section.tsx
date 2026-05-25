@@ -29,6 +29,7 @@ interface FormSectionProps extends React.ComponentProps<"section"> {
 	title?: string;
 	description?: string;
 	variant?: FormLayoutVariant;
+	isRequired?: boolean;
 }
 
 export function FormSection({
@@ -36,6 +37,7 @@ export function FormSection({
 	description,
 	children,
 	className,
+	isRequired,
 	variant: variantProp,
 	...props
 }: Readonly<FormSectionProps>): ReactNode {
@@ -47,7 +49,7 @@ export function FormSection({
 			<section className={twMerge("flex flex-col gap-y-6 max-inline-3xl", className)} {...props}>
 				{title != null || description != null ? (
 					<div className="space-y-1">
-						{title != null ? <FormSectionTitle title={title} /> : null}
+						{title != null ? <FormSectionTitle isRequired={isRequired} title={title} /> : null}
 						{description != null ? <Description>{description}</Description> : null}
 					</div>
 				) : null}
@@ -64,7 +66,7 @@ export function FormSection({
 			{title != null || description != null ? (
 				<Fragment>
 					<div className="space-y-1">
-						{title != null ? <FormSectionTitle title={title} /> : null}
+						{title != null ? <FormSectionTitle isRequired={isRequired} title={title} /> : null}
 						{description != null ? <Description>{description}</Description> : null}
 					</div>
 					<div className="flex flex-col gap-y-6">{children}</div>
@@ -77,17 +79,23 @@ export function FormSection({
 }
 
 interface FormSectionTitleProps
-	extends Pick<FormSectionProps, "title">, React.ComponentProps<"h2"> {}
+	extends Pick<FormSectionProps, "isRequired" | "title">, React.ComponentProps<"h2"> {}
 
 export function FormSectionTitle({
 	title,
 	className,
 	children,
+	isRequired,
 	...props
 }: Readonly<FormSectionTitleProps>): ReactNode {
 	return (
 		<h2 className={twMerge("font-semibold text-base/7 text-fg sm:text-sm/6", className)} {...props}>
 			{title ?? children}
+			{isRequired === true ? (
+				<span aria-hidden={true} className="ms-0.5 text-danger">
+					{"*"}
+				</span>
+			) : null}
 		</h2>
 	);
 }

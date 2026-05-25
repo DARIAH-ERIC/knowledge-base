@@ -1,32 +1,17 @@
 "use server";
 
-import { getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { discardDraftVersion } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
-import { db } from "@/lib/db";
-import { redirect } from "@/lib/navigation/navigation";
+import { createCommandAction } from "@/lib/server/create-command-action";
 
-export async function discardNationalConsortiumDraftAction(documentId: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const discardNationalConsortiumDraftAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "discard_draft", subjectType: "national_consortia" },
+	revalidate: "/[locale]/dashboard/administrator/national-consortia",
+	redirect: "/dashboard/administrator/national-consortia",
 
-	await db.transaction(async (tx) => {
+	async mutate(tx, [documentId]: [string]) {
 		await discardDraftVersion(tx, documentId, organisationalUnitsLifecycleAdapter);
-	});
-
-	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
-		action: "discard_draft",
-		subjectType: "national_consortia",
-		subjectId: documentId,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/administrator/national-consortia", "layout");
-
-	const locale = await getLocale();
-	redirect({ href: "/dashboard/administrator/national-consortia", locale });
-}
+		return { subjectId: documentId };
+	},
+});

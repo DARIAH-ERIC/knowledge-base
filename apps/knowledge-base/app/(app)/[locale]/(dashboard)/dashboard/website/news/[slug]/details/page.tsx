@@ -8,7 +8,7 @@ import { discardNewsItemDraftAction } from "@/app/(app)/[locale]/(dashboard)/das
 import { publishNewsItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/publish-news-item.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
-import { getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -44,15 +44,32 @@ export default async function DashboardWebsiteNewsItemDetailsPage(
 		notFound();
 	}
 
-	const { draftId, publishedId } = await db.transaction(async (tx) =>
-		getDocumentVersions(tx, doc.id),
+	const { draftId, publishedId, hasDraftChanges } = await db.transaction(async (tx) =>
+		getDocumentLifecycleState(tx, doc.id),
 	);
 
+	/**
+	 * The version selector and "with draft changes" UX only kick in when the draft actually diverges
+	 * from the published version. Right after publish, a draft row still exists as a clone of the new
+	 * published version but has no real changes — we treat that as published-only.
+	 */
+	const showVersionSelector = hasDraftChanges && publishedId != null && draftId != null;
+
 	const { version } = await searchParamsPromise;
-	const selectedVersion: "draft" | "published" =
-		version === "published" && publishedId != null ? "published" : "draft";
-	const versionId =
-		selectedVersion === "published" && publishedId != null ? publishedId : (draftId ?? publishedId);
+	let selectedVersion: "draft" | "published";
+	let versionId: string | null;
+
+	if (showVersionSelector) {
+		selectedVersion = version === "published" ? "published" : "draft";
+		versionId = selectedVersion === "published" ? publishedId : draftId;
+	} else if (publishedId != null) {
+		selectedVersion = "published";
+		versionId = publishedId;
+	} else {
+		selectedVersion = "draft";
+		versionId = draftId;
+	}
+
 	if (versionId == null) {
 		notFound();
 	}
@@ -100,14 +117,14 @@ export default async function DashboardWebsiteNewsItemDetailsPage(
 		options: imageGridOptions,
 	});
 
-	const contentBlocks = await getEntityContentBlocks(newsItem.id);
+	const contentBlocks = await getEntityContentBlocks(newsItem.id, "content");
 
 	return (
 		<NewsItemDetails
 			contentBlocks={contentBlocks}
 			discardDraftAction={discardNewsItemDraftAction}
 			documentId={doc.id}
-			hasDraft={draftId != null}
+			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
 			newsItem={{ ...newsItem, image: { ...newsItem.image, url: image.url } }}
 			publishAction={publishNewsItemAction}

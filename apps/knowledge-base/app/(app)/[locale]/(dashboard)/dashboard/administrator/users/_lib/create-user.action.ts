@@ -1,90 +1,55 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
+import { getExtracted } from "next-intl/server";
 
 import { canManageAdminAccounts } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/admin-management";
 import { CreateUserActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/create-user.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
 import { auth } from "@/lib/auth";
-import { assertAdmin } from "@/lib/auth/session";
-import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export const createUserAction = createServerAction(
-	async function createUserAction(state, formData) {
-		const locale = await getLocale();
+export const createUserAction = createMutationAction({
+	schema: CreateUserActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "create", subjectType: "users" },
+	revalidate: "/[locale]/dashboard/administrator/users",
+	redirect: "/dashboard/administrator/users",
+
+	async preCheck({ input, ctx }) {
 		const t = await getExtracted();
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
-
-		const { user: currentUser } = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			CreateUserActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateUserActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { name, email, role, password, personId, organisationalUnitId, canManageAdmins } =
-			result.output;
-		const canManageAdminsFlag = canManageAdmins === "true";
-
-		if (role === "admin" && !canManageAdminAccounts(currentUser)) {
+		if (input.role === "admin" && (ctx.user == null || !canManageAdminAccounts(ctx.user))) {
 			return createActionStateError({
 				message: t("You are not allowed to create admin users."),
 			});
 		}
 
-		if (!(await auth.isEmailAvailable(email))) {
-			return createActionStateError({ message: t("This email address is already in use.") });
+		if (!(await auth.isEmailAvailable(input.email))) {
+			return createActionStateError({
+				message: t("This email address is already in use."),
+			});
 		}
 
-		const user = await auth.createUser(email, name, password);
+		return undefined;
+	},
 
-		await db
+	async mutate(tx, input) {
+		const canManageAdminsFlag = input.canManageAdmins === "true";
+
+		const user = await auth.createUser(input.email, input.name, input.password);
+
+		await tx
 			.update(schema.users)
 			.set({
-				role,
-				canManageAdmins: role === "admin" ? canManageAdminsFlag : false,
-				personId: personId ?? null,
-				organisationalUnitId: organisationalUnitId ?? null,
+				role: input.role,
+				canManageAdmins: input.role === "admin" ? canManageAdminsFlag : false,
+				personId: input.personId ?? null,
+				organisationalUnitId: input.organisationalUnitId ?? null,
 			})
 			.where(eq(schema.users.id, user.id));
 
-		await recordAuditEvent(db, {
-			actorUserId: currentUser.id,
-			action: "create",
-			subjectType: "users",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
-
-		revalidatePath("/[locale]/dashboard/administrator/users", "layout");
-
-		redirect({ href: "/dashboard/administrator/users", locale });
+		return { subjectId: user.id };
 	},
-);
+});

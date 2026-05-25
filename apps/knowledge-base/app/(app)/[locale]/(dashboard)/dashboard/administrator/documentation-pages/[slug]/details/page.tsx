@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { DocumentationPageDetails } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-details";
+import { discardDocumentationPageDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_lib/discard-documentation-page-draft.action";
+import { publishDocumentationPageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_lib/publish-documentation-page.action";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
-import { getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -37,15 +39,32 @@ export default async function DashboardAdministratorDocumentationPageDetailsPage
 		notFound();
 	}
 
-	const { draftId, publishedId } = await db.transaction(async (tx) =>
-		getDocumentVersions(tx, doc.id),
+	const { draftId, publishedId, hasDraftChanges } = await db.transaction(async (tx) =>
+		getDocumentLifecycleState(tx, doc.id),
 	);
 
+	/**
+	 * The version selector and "with draft changes" UX only kick in when the draft actually diverges
+	 * from the published version. Right after publish, a draft row still exists as a clone of the new
+	 * published version but has no real changes — we treat that as published-only.
+	 */
+	const showVersionSelector = hasDraftChanges && publishedId != null && draftId != null;
+
 	const { version } = await searchParamsPromise;
-	const selectedVersion: "draft" | "published" =
-		version === "published" && publishedId != null ? "published" : "draft";
-	const versionId =
-		selectedVersion === "published" && publishedId != null ? publishedId : (draftId ?? publishedId);
+	let selectedVersion: "draft" | "published";
+	let versionId: string | null;
+
+	if (showVersionSelector) {
+		selectedVersion = version === "published" ? "published" : "draft";
+		versionId = selectedVersion === "published" ? publishedId : draftId;
+	} else if (publishedId != null) {
+		selectedVersion = "published";
+		versionId = publishedId;
+	} else {
+		selectedVersion = "draft";
+		versionId = draftId;
+	}
+
 	if (versionId == null) {
 		notFound();
 	}
@@ -75,15 +94,18 @@ export default async function DashboardAdministratorDocumentationPageDetailsPage
 		notFound();
 	}
 
-	const contentBlocks = await getEntityContentBlocks(documentationPage.id);
+	const contentBlocks = await getEntityContentBlocks(documentationPage.id, "content");
+	const hasPublishableDraft = draftId != null && (publishedId == null || hasDraftChanges);
 
 	return (
 		<DocumentationPageDetails
 			contentBlocks={contentBlocks}
 			documentationPage={documentationPage}
+			discardDraftAction={discardDocumentationPageDraftAction}
 			documentId={doc.id}
-			hasDraft={draftId != null}
+			hasDraft={hasPublishableDraft}
 			isPublished={publishedId != null}
+			publishAction={publishDocumentationPageAction}
 			selectedVersion={selectedVersion}
 		/>
 	);

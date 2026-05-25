@@ -83,7 +83,7 @@ export default async function DashboardAdministratorEditInternalPage(
 		notFound();
 	}
 
-	const contentBlocks = await getEntityContentBlocks(internalPage.id);
+	const contentBlocks = await getEntityContentBlocks(internalPage.id, "content");
 
 	return (
 		<InternalPageEditForm

@@ -1,9 +1,9 @@
 "use client";
 
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { NationalConsortiumForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form";
 import { createNationalConsortiumAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/create-national-consortium.action";
 
@@ -30,7 +30,7 @@ export function NationalConsortiumCreateForm(
 
 	return (
 		<Fragment>
-			<Heading>{t("New national consortium")}</Heading>
+			<EntityFormHeader title={t("New national consortium")} />
 
 			<NationalConsortiumForm
 				formAction={createNationalConsortiumAction}

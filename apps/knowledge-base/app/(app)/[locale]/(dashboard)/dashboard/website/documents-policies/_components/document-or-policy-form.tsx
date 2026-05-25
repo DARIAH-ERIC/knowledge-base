@@ -4,7 +4,6 @@ import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
-import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { Separator } from "@dariah-eric/ui/separator";
@@ -17,11 +16,8 @@ import {
 	type ContentBlock,
 	ContentBlocks,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
-import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
-import {
-	FormActions,
-	FormSection,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
+import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
+import { FormSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
@@ -148,14 +144,12 @@ export function DocumentOrPolicyForm(props: Readonly<DocumentOrPolicyFormProps>)
 				</Fragment>
 			) : null}
 
-			<FormActions>
-				<FormStatus state={state} />
-				<DraftFormSubmitButtons
-					isDisabled={selectedDocument == null}
-					isPending={isPending}
-					showSaveAndPublish={true}
-				/>
-			</FormActions>
+			<EntityFormActions
+				entityName={t("Document or policy")}
+				isDisabled={selectedDocument == null}
+				isPending={isPending}
+				state={state}
+			/>
 		</Form>
 	);
 }

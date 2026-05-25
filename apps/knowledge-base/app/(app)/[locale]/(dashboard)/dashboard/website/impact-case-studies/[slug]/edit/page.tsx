@@ -128,7 +128,7 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 		[
 			getEntityRelations(documentId),
 			getImpactCaseStudyContributors(draftVersionId),
-			getEntityContentBlocks(draftVersionId),
+			getEntityContentBlocks(draftVersionId, "content"),
 		],
 	);
 

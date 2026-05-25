@@ -1,10 +1,10 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { DocumentOrPolicyForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/document-or-policy-form";
 import { createDocumentOrPolicyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy.action";
 
@@ -22,7 +22,7 @@ export function DocumentOrPolicyCreateForm(
 
 	return (
 		<Fragment>
-			<Heading>{t("New document or policy")}</Heading>
+			<EntityFormHeader title={t("New document or policy")} />
 
 			<DocumentOrPolicyForm
 				formAction={createDocumentOrPolicyAction}

@@ -66,10 +66,10 @@ export default async function DashboardReportingCountryReportSoftwarePage(
 
 	const t = await getExtracted();
 	const year = Number(routeYear);
-	const actorIds = new Set<number>();
+	const consortiumSlugs = new Set<string>();
 
-	const nationalConsortiumActorIds = await db
-		.select({ sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId })
+	const nationalConsortiumSlugs = await db
+		.select({ slug: schema.entities.slug })
 		.from(schema.organisationalUnitsRelations)
 		.innerJoin(
 			schema.organisationalUnitStatus,
@@ -83,6 +83,8 @@ export default async function DashboardReportingCountryReportSoftwarePage(
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 		)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.organisationalUnits.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 		.where(
 			and(
 				eq(schema.organisationalUnitsRelations.relatedUnitId, report.country.id),
@@ -100,21 +102,19 @@ export default async function DashboardReportingCountryReportSoftwarePage(
 			),
 		);
 
-	for (const { sshocMarketplaceActorId } of nationalConsortiumActorIds) {
-		if (sshocMarketplaceActorId != null) {
-			actorIds.add(sshocMarketplaceActorId);
-		}
+	for (const { slug } of nationalConsortiumSlugs) {
+		consortiumSlugs.add(slug);
 	}
 
 	const softwareSearchParams: SearchResourcesParams = {
-		filterBy: `type:=software && source:=ssh-open-marketplace && source_actor_ids:=[${[...actorIds].map((actorId) => `\`ssh-open-marketplace:${actorId}\``).join(",")}]`,
+		filterBy: `type:=software && source:=ssh-open-marketplace && national_consortia:=[${[...consortiumSlugs].map((slug) => `\`${slug}\``).join(",")}]`,
 		perPage: 100,
 		query: "*",
 		queryBy: ["label", "description", "keywords"],
 		sortBy: [{ field: "label", direction: "asc" }],
 	};
 	const firstSoftwareResult =
-		actorIds.size === 0
+		consortiumSlugs.size === 0
 			? null
 			: await search.collections.resources.search({ ...softwareSearchParams, page: 1 });
 	const remainingSoftwareResults =
@@ -146,9 +146,9 @@ export default async function DashboardReportingCountryReportSoftwarePage(
 				<p className="text-sm text-muted-fg">
 					{t("Software contributions from the SSH Open Marketplace.")}
 				</p>
-				{actorIds.size === 0 ? (
+				{consortiumSlugs.size === 0 ? (
 					<p className="text-sm text-muted-fg italic">
-						{t("This country has no national consortium with an SSH Open Marketplace actor id.")}
+						{t("This country has no national consortium for the selected year.")}
 					</p>
 				) : software.length === 0 ? (
 					<p className="text-sm text-muted-fg italic">

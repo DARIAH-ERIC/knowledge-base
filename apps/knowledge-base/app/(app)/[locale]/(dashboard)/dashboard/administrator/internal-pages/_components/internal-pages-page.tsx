@@ -1,9 +1,6 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Button } from "@dariah-eric/ui/button";
-import { Menu, MenuContent, MenuItem, MenuLabel } from "@dariah-eric/ui/menu";
-import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import {
 	Table,
 	TableBody,
@@ -12,19 +9,17 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { EllipsisHorizontalIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { EntityLifecycleStatusBadge } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-status-badge";
 import {
-	Header,
-	HeaderAction,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
-import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+	EntityListHeader,
+	EntityListPagination,
+	EntityListSearchField,
+	RowActionsMenu,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { dashboardPageSize } from "@/config/pagination.config";
 
@@ -57,37 +52,26 @@ export function InternalPagesPage(props: Readonly<InternalPagesPageProps>): Reac
 	} = props;
 
 	const t = useExtracted();
-	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
-		useUrlPaginatedSearch({
-			dir: initialDir,
-			page: initialPage,
-			q: initialQ,
-			sort: initialSort,
-		});
-
-	const totalPages = Math.max(Math.ceil(internalPages.total / pageSize), 1);
+	const search = useUrlPaginatedSearch({
+		dir: initialDir,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+	});
 
 	return (
 		<Fragment>
-			<Header>
-				<HeaderContent>
-					<HeaderTitle>{t("Internal pages")}</HeaderTitle>
-					<HeaderDescription>
-						{t("Manage internal knowledge base pages such as legal pages.")}
-					</HeaderDescription>
-				</HeaderContent>
-				<HeaderAction>
-					<SearchField onChange={setInputValue} value={inputValue}>
-						<SearchInput placeholder={t("Search")} />
-					</SearchField>
-				</HeaderAction>
-			</Header>
+			<EntityListHeader
+				title={t("Internal pages")}
+				description={t("Manage internal knowledge base pages such as legal pages.")}
+				action={<EntityListSearchField search={search} />}
+			/>
 
 			<Table
 				aria-label="internal-pages"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
-				onSortChange={setSortDescriptor}
-				sortDescriptor={sortDescriptor}
+				onSortChange={search.setSortDescriptor}
+				sortDescriptor={search.sortDescriptor}
 			>
 				<TableHeader>
 					<TableColumn allowsSorting={true} id="title" isRowHeader={true}>
@@ -109,37 +93,21 @@ export function InternalPagesPage(props: Readonly<InternalPagesPageProps>): Reac
 								/>
 							</TableCell>
 							<TableCell className="text-end">
-								<Menu>
-									<Button
-										aria-label={t("Open actions menu")}
-										className="block-7 sm:block-7"
-										intent="plain"
-										size="sq-sm"
+								<RowActionsMenu>
+									<RowActionsMenu.Link
+										href={`/dashboard/administrator/internal-pages/${item.entity.slug}/edit`}
+										icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
 									>
-										<EllipsisHorizontalIcon className="block-5 inline-5" />
-									</Button>
-									<MenuContent placement="left top">
-										<MenuItem
-											href={`/dashboard/administrator/internal-pages/${item.entity.slug}/edit`}
-										>
-											<PencilSquareIcon className="me-2 block-4 inline-4" />
-											<MenuLabel>{t("Edit")}</MenuLabel>
-										</MenuItem>
-									</MenuContent>
-								</Menu>
+										{t("Edit")}
+									</RowActionsMenu.Link>
+								</RowActionsMenu>
 							</TableCell>
 						</TableRow>
 					)}
 				</TableBody>
 			</Table>
 
-			<Paginate
-				isPending={isPending}
-				page={page}
-				setPage={setPage}
-				total={totalPages}
-				totalItems={internalPages.total}
-			/>
+			<EntityListPagination search={search} total={internalPages.total} pageSize={pageSize} />
 		</Fragment>
 	);
 }

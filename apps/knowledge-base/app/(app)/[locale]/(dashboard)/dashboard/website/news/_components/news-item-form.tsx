@@ -2,9 +2,8 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { createActionStateInitial } from "@dariah-eric/next-lib/actions";
-import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
+import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
-import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
 import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
@@ -16,14 +15,13 @@ import {
 	type ContentBlock,
 	ContentBlocks,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
-import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
+import { EntityFormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form-actions";
 import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import {
-	FormActions,
 	FormLayout,
 	FormSection,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
-import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
+import { ImageSelectField } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/image-select-field";
 import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface NewsItemFormProps {
@@ -67,8 +65,6 @@ export function NewsItemForm(props: Readonly<NewsItemFormProps>): ReactNode {
 		newsItem?.image ?? null,
 	);
 
-	const [imageKeyError, setImageKeyError] = useState(false);
-
 	return (
 		<FormLayout>
 			<Form action={action} className="flex flex-col gap-y-6" state={state}>
@@ -88,39 +84,19 @@ export function NewsItemForm(props: Readonly<NewsItemFormProps>): ReactNode {
 
 				<Separator className="my-6" />
 
-				<FormSection description={t("Select or upload an image.")} title={t("Image")}>
-					{selectedImage != null && (
-						<img
-							alt={t("Selected image")}
-							className="block-24 inline-24 rounded-lg object-cover"
-							src={selectedImage.url}
-						/>
-					)}
-					<MediaLibraryDialog
+				<FormSection
+					description={t("Select or upload an image.")}
+					isRequired={true}
+					title={t("Image")}
+				>
+					<ImageSelectField
 						defaultPrefix="images"
 						initialAssets={initialAssets}
-						onSelect={(key, url) => {
-							setSelectedImage({ key, url });
-						}}
+						isRequired={true}
+						onChange={setSelectedImage}
 						prefixes={["avatars", "images", "logos"]}
+						selectedImage={selectedImage}
 					/>
-
-					<input
-						aria-hidden={true}
-						className="sr-only"
-						name="imageKey"
-						onInvalid={(e) => {
-							e.preventDefault();
-							setImageKeyError(true);
-						}}
-						readOnly={true}
-						// required={true}
-						tabIndex={-1}
-						value={selectedImage?.key ?? ""}
-					/>
-					{imageKeyError ? (
-						<div className={fieldErrorStyles()}>{t("Please select an image.")}</div>
-					) : null}
 				</FormSection>
 
 				<Separator className="my-6" />
@@ -149,14 +125,7 @@ export function NewsItemForm(props: Readonly<NewsItemFormProps>): ReactNode {
 					</Fragment>
 				) : null}
 
-				<FormActions>
-					<FormStatus state={state} />
-					<DraftFormSubmitButtons
-						isDisabled={selectedImage == null}
-						isPending={isPending}
-						showSaveAndPublish={true}
-					/>
-				</FormActions>
+				<EntityFormActions entityName={t("News item")} isPending={isPending} state={state} />
 			</Form>
 		</FormLayout>
 	);

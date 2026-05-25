@@ -1,54 +1,32 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
+import { createActionStateError } from "@dariah-eric/next-lib/actions";
+import { getExtracted } from "next-intl/server";
 
 import { CreateWorkingGroupReportSocialMediaActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/create-working-group-report-social-media.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
 import { assertCan } from "@/lib/auth/permissions";
-import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export const createWorkingGroupReportSocialMediaAction = createServerAction(
-	async function createWorkingGroupReportSocialMediaAction(_state, formData) {
-		const locale = await getLocale();
+export const createWorkingGroupReportSocialMediaAction = createMutationAction({
+	schema: CreateWorkingGroupReportSocialMediaActionInputSchema,
+	requireAuth: true,
+	audit: { action: "create", subjectType: "working_group_report" },
+	revalidate: "/[locale]/dashboard/reporting",
+
+	async preCheck({ input, ctx }) {
 		const t = await getExtracted();
-
-		const { user } = await assertAuthenticated();
-
-		const result = await v.safeParseAsync(
-			CreateWorkingGroupReportSocialMediaActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateWorkingGroupReportSocialMediaActionInputSchema>(
-				result.issues,
-			);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { workingGroupReportId, socialMediaId } = result.output;
-
-		await assertCan(user, "update", { type: "working_group_report", id: workingGroupReportId });
+		await assertCan(ctx.user!, "update", {
+			type: "working_group_report",
+			id: input.workingGroupReportId,
+		});
 
 		const existing = await db.query.workingGroupReportSocialMedia.findFirst({
-			where: { workingGroupReportId, socialMediaId },
+			where: {
+				workingGroupReportId: input.workingGroupReportId,
+				socialMediaId: input.socialMediaId,
+			},
 			columns: { id: true },
 		});
 
@@ -56,20 +34,17 @@ export const createWorkingGroupReportSocialMediaAction = createServerAction(
 			return createActionStateError({ message: t("This account is already listed.") });
 		}
 
-		await db
-			.insert(schema.workingGroupReportSocialMedia)
-			.values({ workingGroupReportId, socialMediaId });
+		return undefined;
+	},
 
-		await recordAuditEvent(db, {
-			actorUserId: user.id,
-			action: "create",
-			subjectType: "working_group_report",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
+	async mutate(tx, input) {
+		const t = await getExtracted();
+
+		await tx.insert(schema.workingGroupReportSocialMedia).values({
+			workingGroupReportId: input.workingGroupReportId,
+			socialMediaId: input.socialMediaId,
 		});
 
-		revalidatePath("/[locale]/dashboard/reporting", "layout");
-
-		return createActionStateSuccess({ message: t("Added.") });
+		return { subjectId: input.workingGroupReportId, successMessage: t("Added.") };
 	},
-);
+});

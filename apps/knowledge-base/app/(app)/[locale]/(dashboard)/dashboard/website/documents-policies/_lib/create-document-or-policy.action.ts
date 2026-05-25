@@ -1,178 +1,109 @@
 "use server";
 
-import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
+import { assert, keyBy } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import slugify from "@sindresorhus/slugify";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-import * as v from "valibot";
 
 import { CreateDocumentOrPolicyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-or-policy.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
-import { type Transaction, db } from "@/lib/db";
+import { ensureEntityVersionField } from "@/lib/data/entity-version-fields";
+import { db } from "@/lib/db";
 import { eq, isNull } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export const createDocumentOrPolicyAction = createServerAction(
-	async function createDocumentOrPolicyAction(state, formData) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+export const createDocumentOrPolicyAction = createMutationAction<
+	typeof CreateDocumentOrPolicyActionInputSchema,
+	{ documentId: string; published: boolean }
+>({
+	schema: CreateDocumentOrPolicyActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "create", subjectType: "documents_policies" },
+	revalidate: "/[locale]/dashboard/website/documents-policies",
+	redirect: "/dashboard/website/documents-policies",
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
+	async mutate(tx, input, { formData }) {
+		const slug = slugify(input.title);
 
-		const auditSession = await assertAdmin();
+		const type = await tx.query.entityTypes.findFirst({
+			where: { type: "documents_policies" },
+			columns: { id: true },
+		});
 
-		const result = await v.safeParseAsync(
-			CreateDocumentOrPolicyActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
+		assert(type);
 
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateDocumentOrPolicyActionInputSchema>(result.issues);
+		const { documentId, versionId } = await createDraftDocument(tx, type.id, slug);
 
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
+		const asset = await tx.query.assets.findFirst({
+			where: { key: input.documentKey },
+			columns: { id: true },
+		});
 
-		const { contentBlocks, title, documentKey, summary, url, groupId } = result.output;
+		assert(asset);
 
-		const slug = slugify(title);
-		let entityDocumentId: string | null = null;
-
-		await db.transaction(async (tx) => {
-			const type = await tx.query.entityTypes.findFirst({
-				where: {
-					type: "documents_policies",
-				},
-				columns: {
-					id: true,
-				},
-			});
-
-			assert(type);
-
-			const { documentId, versionId } = await createDraftDocument(tx, type.id, slug);
-			entityDocumentId = documentId;
-
-			const asset = await tx.query.assets.findFirst({
-				where: { key: documentKey },
-				columns: { id: true },
-			});
-
-			assert(asset);
-
-			const siblings = await tx
-				.select({ id: schema.documentsPolicies.id })
-				.from(schema.documentsPolicies)
-				.where(
-					groupId != null
-						? eq(schema.documentsPolicies.groupId, groupId)
-						: isNull(schema.documentsPolicies.groupId),
-				);
-
-			await tx.insert(schema.documentsPolicies).values({
-				id: versionId,
-				documentId: asset.id,
-				title,
-				summary,
-				url: url != null && url.length > 0 ? url : null,
-				groupId: groupId ?? null,
-				position: siblings.length,
-			});
-
-			const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({
-				where: {
-					entityTypeId: type.id,
-					fieldName: "content",
-				},
-				columns: { id: true },
-			});
-
-			assert(contentFieldName);
-
-			const [contentField] = await tx
-				.insert(schema.fields)
-				.values({ entityVersionId: versionId, fieldNameId: contentFieldName.id })
-				.returning({ id: schema.fields.id });
-
-			assert(contentField);
-
-			const contentBlockTypes = await db.query.contentBlockTypes.findMany();
-			const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
-
-			async function insertTypeBlock(tx: Transaction, block: ContentBlockInput, blockId: string) {
-				await upsertTypedContentBlock(tx, block, blockId, true);
-			}
-
-			await Promise.all(
-				contentBlocks.map(async (contentBlock, index) => {
-					const [added] = await tx
-						.insert(schema.contentBlocks)
-						.values({
-							fieldId: contentField.id,
-							typeId: contentBlockTypesByType[contentBlock.type].id,
-							position: index,
-						})
-						.returning({ id: schema.contentBlocks.id });
-
-					assert(added);
-
-					await insertTypeBlock(tx, contentBlock, added.id);
-				}),
+		const siblings = await tx
+			.select({ id: schema.documentsPolicies.id })
+			.from(schema.documentsPolicies)
+			.where(
+				input.groupId != null
+					? eq(schema.documentsPolicies.groupId, input.groupId)
+					: isNull(schema.documentsPolicies.groupId),
 			);
 
-			if (shouldSaveAndPublish(formData)) {
-				await publishVersion(tx, documentId, documentsPoliciesLifecycleAdapter);
-			}
+		await tx.insert(schema.documentsPolicies).values({
+			id: versionId,
+			documentId: asset.id,
+			title: input.title,
+			summary: input.summary,
+			url: input.url != null && input.url.length > 0 ? input.url : null,
+			groupId: input.groupId ?? null,
+			position: siblings.length,
 		});
 
-		after(async () => {
-			if (!shouldSaveAndPublish(formData)) {
-				return;
-			}
+		const contentField = await ensureEntityVersionField(tx, versionId, "description");
 
-			if (entityDocumentId != null) {
-				await syncWebsiteDocumentForEntity(entityDocumentId);
-			}
+		const contentBlockTypes = await db.query.contentBlockTypes.findMany();
+		const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
 
-			await dispatchWebhook({ type: "documents-policies" });
-		});
+		await Promise.all(
+			input.contentBlocks.map(async (contentBlock, index) => {
+				const [added] = await tx
+					.insert(schema.contentBlocks)
+					.values({
+						fieldId: contentField.id,
+						typeId: contentBlockTypesByType[contentBlock.type].id,
+						position: index,
+					})
+					.returning({ id: schema.contentBlocks.id });
 
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "create",
-			subjectType: "documents_policies",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: {
-				...getAuditSummaryFromFormData(formData),
-				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
-			},
-		});
+				assert(added);
 
-		revalidatePath("/[locale]/dashboard/website/documents-policies", "layout");
+				await upsertTypedContentBlock(tx, contentBlock, added.id, true);
+			}),
+		);
 
-		redirect({ href: "/dashboard/website/documents-policies", locale });
+		const published = shouldSaveAndPublish(formData);
+		if (published) {
+			await publishVersion(tx, documentId, documentsPoliciesLifecycleAdapter);
+		}
+
+		return {
+			subjectId: documentId,
+			auditSummary: { lifecycle: published ? "published" : "draft" },
+			successData: { documentId, published },
+		};
 	},
-);
+
+	async postCommit({ result }) {
+		if (result.successData == null || !result.successData.published) {
+			return;
+		}
+
+		await syncWebsiteDocumentForEntity(result.successData.documentId);
+		await dispatchWebhook({ type: "documents-policies" });
+	},
+});

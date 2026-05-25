@@ -42,6 +42,13 @@ function getConfig():
 			command: `pnpm run --filter "@dariah-eric/knowledge-base" start --port ${String(port)}`,
 			url: baseUrl,
 			reuseExistingServer: !isCI,
+			env: {
+				/**
+				 * Enables the `x-e2e-force-failure` test header in createServerAction. The header itself is
+				 * only honored when this flag is set on the server.
+				 */
+				E2E_FAILURE_INJECTION: "1",
+			},
 		},
 	};
 }
@@ -51,6 +58,7 @@ const config = getConfig();
 export default defineConfig({
 	testDir: "../e2e",
 	snapshotDir: "../e2e/snapshots",
+	timeout: isCI ? 60_000 : 30_000,
 	fullyParallel: true,
 	forbidOnly: isCI,
 	retries: isCI ? 2 : 0,
@@ -58,25 +66,27 @@ export default defineConfig({
 	workers: isCI ? 1 : undefined,
 	reporter: isCI ? [["github"], ["html", { open: "never" }]] : [["html"]],
 	globalSetup: "./lib/global-setup.ts",
+	globalTeardown: "./lib/global-teardown.ts",
 	use: {
 		baseURL: config.baseUrl,
+		navigationTimeout: isCI ? 60_000 : 30_000,
 		screenshot: "on-first-failure",
 		trace: "on-first-retry",
 	},
 	projects: [
 		{
 			name: "chromium",
-			testIgnore: "**/admin/**/*.test.ts",
+			testIgnore: ["**/admin/**/*.test.ts", "**/non-admin/**/*.test.ts"],
 			use: { ...devices["Desktop Chrome"], channel: "chromium" },
 		},
 		{
 			name: "firefox",
-			testIgnore: "**/admin/**/*.test.ts",
+			testIgnore: ["**/admin/**/*.test.ts", "**/non-admin/**/*.test.ts"],
 			use: { ...devices["Desktop Firefox"] },
 		},
 		{
 			name: "webkit",
-			testIgnore: "**/admin/**/*.test.ts",
+			testIgnore: ["**/admin/**/*.test.ts", "**/non-admin/**/*.test.ts"],
 			use: { ...devices["Desktop Safari"] },
 		},
 		{
@@ -85,6 +95,14 @@ export default defineConfig({
 			use: {
 				...devices["Desktop Chrome"],
 				storageState: join(import.meta.dirname, ".auth/admin.json"),
+			},
+		},
+		{
+			name: "non-admin",
+			testMatch: "**/non-admin/**/*.test.ts",
+			use: {
+				...devices["Desktop Chrome"],
+				storageState: join(import.meta.dirname, ".auth/non-admin.json"),
 			},
 		},
 		/** Test against mobile viewports. */

@@ -3,10 +3,11 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
+import { generateImageUrl } from "@/lib/images";
 import type { Database, Transaction } from "@/middlewares/db";
-import { and, count, eq, not, sql } from "@/services/db/sql";
-import { images } from "@/services/images";
+import { count, eq, not, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
 interface GetProjectsParams {
@@ -88,34 +89,25 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 			.select({ total: count() })
 			.from(schema.projects)
 			.innerJoin(schema.entityVersions, eq(schema.projects.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			)
 			.where(
-				and(
-					eq(schema.entityStatus.type, "published"),
-					status != null
-						? status === "active"
-							? sql`${schema.projects.duration} @> NOW()::TIMESTAMPTZ`
-							: not(sql`${schema.projects.duration} @> NOW()::TIMESTAMPTZ`)
-						: undefined,
-				),
+				status != null
+					? status === "active"
+						? sql`${schema.projects.duration} @> NOW()::TIMESTAMPTZ`
+						: not(sql`${schema.projects.duration} @> NOW()::TIMESTAMPTZ`)
+					: undefined,
 			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image =
-			item.image != null
-				? images.generateSignedImageUrl({
-						key: item.image.key,
-						options: { width: imageWidth.preview },
-					})
-				: null;
+		const image = generateImageUrl(item.image, imageWidth.preview);
 
-		const duration = {
-			start: item.duration.start.toISOString(),
-			end: item.duration.end?.toISOString(),
-		};
+		const duration = serializeDateRange(item.duration);
 
 		const socialMedia = item.socialMedia.map((sm) => {
 			return {
@@ -241,18 +233,9 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 		return null;
 	}
 
-	const image =
-		item.image != null
-			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
-			: null;
+	const image = generateImageUrl(item.image, imageWidth.featured);
 
-	const duration = {
-		start: item.duration.start.toISOString(),
-		end: item.duration.end?.toISOString(),
-	};
+	const duration = serializeDateRange(item.duration);
 
 	const socialMedia = item.socialMedia.map((sm) => {
 		return {
@@ -343,8 +326,10 @@ export async function getProjectSlugs(db: Database | Transaction, params: GetPro
 			.select({ total: count() })
 			.from(schema.projects)
 			.innerJoin(schema.entityVersions, eq(schema.projects.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -461,13 +446,7 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 		return null;
 	}
 
-	const image =
-		item.image != null
-			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
-			: null;
+	const image = generateImageUrl(item.image, imageWidth.featured);
 
 	const socialMedia = item.socialMedia.map((sm) => {
 		return {
@@ -476,10 +455,7 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 		};
 	});
 
-	const duration = {
-		start: item.duration.start.toISOString(),
-		end: item.duration.end?.toISOString(),
-	};
+	const duration = serializeDateRange(item.duration);
 
 	const fields = await getContentBlocks(db, item.id);
 

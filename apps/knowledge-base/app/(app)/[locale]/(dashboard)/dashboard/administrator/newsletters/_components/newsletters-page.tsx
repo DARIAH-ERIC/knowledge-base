@@ -1,7 +1,6 @@
 "use client";
 
 import { Badge } from "@dariah-eric/ui/badge";
-import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import {
 	Table,
 	TableBody,
@@ -14,13 +13,10 @@ import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import {
-	Header,
-	HeaderAction,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
-import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+	EntityListHeader,
+	EntityListPagination,
+	EntityListSearchField,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { dashboardPageSize } from "@/config/pagination.config";
 import type { NewslettersResult } from "@/lib/data/newsletters";
@@ -38,28 +34,15 @@ export function NewslettersPage(props: Readonly<NewslettersPageProps>): ReactNod
 
 	const t = useExtracted();
 	const format = useFormatter();
-	const { inputValue, isPending, page, setInputValue, setPage } = useUrlPaginatedSearch({
-		page: initialPage,
-		q: initialQ,
-	});
-
-	const totalPages = Math.max(Math.ceil(newsletters.total / pageSize), 1);
+	const search = useUrlPaginatedSearch({ page: initialPage, q: initialQ });
 
 	return (
 		<Fragment>
-			<Header>
-				<HeaderContent>
-					<HeaderTitle>{t("Newsletters")}</HeaderTitle>
-					<HeaderDescription>
-						{t("View all newsletters in the DARIAH knowledge base.")}
-					</HeaderDescription>
-				</HeaderContent>
-				<HeaderAction>
-					<SearchField onChange={setInputValue} value={inputValue}>
-						<SearchInput placeholder={t("Search")} />
-					</SearchField>
-				</HeaderAction>
-			</Header>
+			<EntityListHeader
+				title={t("Newsletters")}
+				description={t("View all newsletters in the DARIAH knowledge base.")}
+				action={<EntityListSearchField search={search} />}
+			/>
 
 			<Table
 				aria-label="newsletters"
@@ -115,13 +98,7 @@ export function NewslettersPage(props: Readonly<NewslettersPageProps>): ReactNod
 				</TableBody>
 			</Table>
 
-			<Paginate
-				isPending={isPending}
-				page={page}
-				setPage={setPage}
-				total={totalPages}
-				totalItems={newsletters.total}
-			/>
+			<EntityListPagination search={search} total={newsletters.total} pageSize={pageSize} />
 		</Fragment>
 	);
 }

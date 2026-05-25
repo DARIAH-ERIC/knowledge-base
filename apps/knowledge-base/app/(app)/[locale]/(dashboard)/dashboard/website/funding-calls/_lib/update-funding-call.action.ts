@@ -1,140 +1,91 @@
 "use server";
 
-import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
+import { assert, keyBy } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-import * as v from "valibot";
 
 import { UpdateFundingCallActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/funding-calls/_lib/update-funding-call.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { ensureEntityVersionField } from "@/lib/data/entity-version-fields";
 import { fundingCallsLifecycleAdapter } from "@/lib/data/funding-calls.lifecycle-adapter";
-import { type Transaction, db } from "@/lib/db";
+import { db } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export const updateFundingCallAction = createServerAction(
-	async function updateFundingCallAction(state, formData) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+export const updateFundingCallAction = createMutationAction({
+	schema: UpdateFundingCallActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "update", subjectType: "funding_calls" },
+	revalidate: "/[locale]/dashboard/website/funding-calls",
+	redirect: "/dashboard/website/funding-calls",
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
-
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			UpdateFundingCallActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+	async mutate(tx, input, { formData }) {
+		const draftVersionId = await ensureDraftVersion(
+			tx,
+			input.documentId,
+			fundingCallsLifecycleAdapter,
 		);
 
-		if (!result.success) {
-			const errors = v.flatten<typeof UpdateFundingCallActionInputSchema>(result.issues);
+		await tx
+			.update(schema.fundingCalls)
+			.set({ title: input.title, summary: input.summary, duration: input.duration })
+			.where(eq(schema.fundingCalls.id, draftVersionId));
 
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
+		const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");
+		const contentBlockTypes = await db.query.contentBlockTypes.findMany();
+		const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
+
+		const existingBlocks = await tx.query.contentBlocks.findMany({
+			where: { fieldId: contentField.id },
+			columns: { id: true },
+		});
+
+		if (existingBlocks.length > 0) {
+			await tx.delete(schema.contentBlocks).where(
+				inArray(
+					schema.contentBlocks.id,
+					existingBlocks.map((b) => b.id),
+				),
+			);
 		}
 
-		const { contentBlocks, documentId, title, summary, duration } = result.output;
+		await Promise.all(
+			input.contentBlocks.map(async (contentBlock, index) => {
+				const [added] = await tx
+					.insert(schema.contentBlocks)
+					.values({
+						fieldId: contentField.id,
+						typeId: contentBlockTypesByType[contentBlock.type].id,
+						position: index,
+					})
+					.returning({ id: schema.contentBlocks.id });
+				assert(added);
+				await upsertTypedContentBlock(tx, contentBlock, added.id, true);
+			}),
+		);
 
-		await db.transaction(async (tx) => {
-			const draftVersionId = await ensureDraftVersion(tx, documentId, fundingCallsLifecycleAdapter);
+		await touchVersion(tx, draftVersionId);
 
-			await tx
-				.update(schema.fundingCalls)
-				.set({ title, summary, duration })
-				.where(eq(schema.fundingCalls.id, draftVersionId));
+		if (shouldSaveAndPublish(formData)) {
+			await publishVersion(tx, input.documentId, fundingCallsLifecycleAdapter);
+		}
 
-			const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");
-
-			const contentBlockTypes = await db.query.contentBlockTypes.findMany();
-			const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
-
-			async function upsertTypeBlock(tx: Transaction, block: ContentBlockInput, blockId: string) {
-				await upsertTypedContentBlock(tx, block, blockId, true);
-			}
-
-			const existingBlocks = await tx.query.contentBlocks.findMany({
-				where: { fieldId: contentField.id },
-				columns: { id: true },
-			});
-
-			if (existingBlocks.length > 0) {
-				await tx.delete(schema.contentBlocks).where(
-					inArray(
-						schema.contentBlocks.id,
-						existingBlocks.map((b) => b.id),
-					),
-				);
-			}
-
-			await Promise.all(
-				contentBlocks.map(async (contentBlock, index) => {
-					const [added] = await tx
-						.insert(schema.contentBlocks)
-						.values({
-							fieldId: contentField.id,
-							typeId: contentBlockTypesByType[contentBlock.type].id,
-							position: index,
-						})
-						.returning({ id: schema.contentBlocks.id });
-
-					assert(added);
-
-					await upsertTypeBlock(tx, contentBlock, added.id);
-				}),
-			);
-
-			await touchVersion(tx, draftVersionId);
-
-			if (shouldSaveAndPublish(formData)) {
-				await publishVersion(tx, documentId, fundingCallsLifecycleAdapter);
-			}
-		});
-
-		after(async () => {
-			if (!shouldSaveAndPublish(formData)) {
-				return;
-			}
-
-			await syncWebsiteDocumentForEntity(documentId);
-			await dispatchWebhook({ type: "funding-calls" });
-		});
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "update",
-			subjectType: "funding_calls",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: {
-				...getAuditSummaryFromFormData(formData),
+		return {
+			subjectId: input.documentId,
+			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},
-		});
-
-		revalidatePath("/[locale]/dashboard/website/funding-calls", "layout");
-
-		redirect({ href: "/dashboard/website/funding-calls", locale });
+		};
 	},
-);
+
+	async postCommit({ result, ctx }) {
+		if (!shouldSaveAndPublish(ctx.formData)) {
+			return;
+		}
+		await syncWebsiteDocumentForEntity(result.subjectId);
+		await dispatchWebhook({ type: "funding-calls" });
+	},
+});

@@ -2,33 +2,30 @@
 
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
 
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { getDocumentVersions } from "@/lib/data/entity-lifecycle";
 import { eventsLifecycleAdapter } from "@/lib/data/events.lifecycle-adapter";
-import { db } from "@/lib/db";
 import { eq, inArray, or } from "@/lib/db/sql";
 import {
 	deleteWebsiteDocument,
 	getWebsiteDocumentDescriptorByEntityId,
 } from "@/lib/search/website-index";
+import { createCommandAction } from "@/lib/server/create-command-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export async function deleteEventAction(documentId: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const deleteEventAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "delete", subjectType: "events" },
+	revalidate: "/[locale]/dashboard/website/events",
 
-	const descriptor = await db.transaction(async (tx) => {
+	async mutate(tx, [documentId]: [string]) {
 		const entity = await tx.query.entities.findFirst({
 			where: { id: documentId },
 			columns: { id: true },
 		});
-
 		assert(entity, "Document not found.");
 
-		const documentDescriptor = await getWebsiteDocumentDescriptorByEntityId(documentId);
+		const descriptor = await getWebsiteDocumentDescriptorByEntityId(documentId);
 
 		const { draftId, publishedId } = await getDocumentVersions(tx, documentId);
 		const versionIds = [draftId, publishedId].filter((id): id is string => id != null);
@@ -71,24 +68,16 @@ export async function deleteEventAction(documentId: string): Promise<void> {
 
 		await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
 
-		return documentDescriptor;
-	});
+		return {
+			subjectId: documentId,
+			descriptor,
+		};
+	},
 
-	after(async () => {
-		if (descriptor != null) {
-			await deleteWebsiteDocument(descriptor);
+	async postCommit({ result }) {
+		if (result.descriptor != null) {
+			await deleteWebsiteDocument(result.descriptor);
 		}
-
 		await dispatchWebhook({ type: "events" });
-	});
-
-	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
-		action: "delete",
-		subjectType: "events",
-		subjectId: documentId,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/website/events", "layout");
-}
+	},
+});

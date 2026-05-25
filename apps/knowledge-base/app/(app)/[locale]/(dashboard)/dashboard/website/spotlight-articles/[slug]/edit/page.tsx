@@ -128,7 +128,7 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 		[
 			getEntityRelations(documentId),
 			getSpotlightArticleContributors(draftVersionId),
-			getEntityContentBlocks(draftVersionId),
+			getEntityContentBlocks(draftVersionId, "content"),
 		],
 	);
 

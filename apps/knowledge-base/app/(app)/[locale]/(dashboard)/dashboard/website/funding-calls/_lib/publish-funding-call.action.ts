@@ -1,40 +1,24 @@
 "use server";
 
-import { getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { publishVersion } from "@/lib/data/entity-lifecycle";
 import { fundingCallsLifecycleAdapter } from "@/lib/data/funding-calls.lifecycle-adapter";
-import { db } from "@/lib/db";
-import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
+import { createCommandAction } from "@/lib/server/create-command-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export async function publishFundingCallAction(documentId: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const publishFundingCallAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "publish", subjectType: "funding_calls" },
+	revalidate: "/[locale]/dashboard/website/funding-calls",
+	redirect: "/dashboard/website/funding-calls",
 
-	await db.transaction(async (tx) => {
+	async mutate(tx, [documentId]: [string]) {
 		await publishVersion(tx, documentId, fundingCallsLifecycleAdapter);
-	});
+		return { subjectId: documentId };
+	},
 
-	after(async () => {
-		await syncWebsiteDocumentForEntity(documentId);
+	async postCommit({ result }) {
+		await syncWebsiteDocumentForEntity(result.subjectId);
 		await dispatchWebhook({ type: "funding-calls" });
-	});
-
-	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
-		action: "publish",
-		subjectType: "funding_calls",
-		subjectId: documentId,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/website/funding-calls", "layout");
-
-	const locale = await getLocale();
-	redirect({ href: "/dashboard/website/funding-calls", locale });
-}
+	},
+});

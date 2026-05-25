@@ -1,10 +1,10 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { ServiceForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_components/service-form";
 import { createServiceAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_lib/create-service.action";
 
@@ -22,7 +22,7 @@ export function ServiceCreateForm(props: Readonly<ServiceCreateFormProps>): Reac
 
 	return (
 		<Fragment>
-			<Heading>{t("New internal service")}</Heading>
+			<EntityFormHeader title={t("New internal service")} />
 
 			<ServiceForm
 				formAction={createServiceAction}

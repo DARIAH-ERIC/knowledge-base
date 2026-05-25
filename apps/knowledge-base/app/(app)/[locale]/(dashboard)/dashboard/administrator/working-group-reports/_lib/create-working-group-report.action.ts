@@ -1,55 +1,26 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
+import { getExtracted } from "next-intl/server";
 
 import { CreateWorkingGroupReportActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_lib/create-working-group-report.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export const createWorkingGroupReportAction = createServerAction(
-	async function createWorkingGroupReportAction(state, formData) {
-		const locale = await getLocale();
+export const createWorkingGroupReportAction = createMutationAction({
+	schema: CreateWorkingGroupReportActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "create", subjectType: "working_group_reports" },
+	revalidate: "/[locale]/dashboard/administrator/working-group-reports",
+	redirect: "/dashboard/administrator/working-group-reports",
+
+	async preCheck({ input }) {
 		const t = await getExtracted();
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
-
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			CreateWorkingGroupReportActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateWorkingGroupReportActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { campaignId, workingGroupId, status } = result.output;
-
 		const campaign = await db.query.reportingCampaigns.findFirst({
-			where: { id: campaignId },
+			where: { id: input.campaignId },
 			columns: { status: true },
 		});
 
@@ -60,7 +31,7 @@ export const createWorkingGroupReportAction = createServerAction(
 		}
 
 		const existing = await db.query.workingGroupReports.findFirst({
-			where: { campaignId, workingGroupId },
+			where: { campaignId: input.campaignId, workingGroupId: input.workingGroupId },
 			columns: { id: true },
 		});
 
@@ -70,18 +41,21 @@ export const createWorkingGroupReportAction = createServerAction(
 			});
 		}
 
-		await db.insert(schema.workingGroupReports).values({ campaignId, workingGroupId, status });
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "create",
-			subjectType: "working_group_reports",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
-
-		revalidatePath("/[locale]/dashboard/administrator/working-group-reports", "layout");
-
-		redirect({ href: "/dashboard/administrator/working-group-reports", locale });
+		return undefined;
 	},
-);
+
+	async mutate(tx, input) {
+		const [created] = await tx
+			.insert(schema.workingGroupReports)
+			.values({
+				campaignId: input.campaignId,
+				workingGroupId: input.workingGroupId,
+				status: input.status,
+			})
+			.returning({ id: schema.workingGroupReports.id });
+
+		assert(created);
+
+		return { subjectId: created.id };
+	},
+});

@@ -44,22 +44,16 @@ export default async function DashboardAdministratorEditPersonPage(
 
 	await assertAuthenticated();
 
-	const anyVersion = await db.query.persons.findFirst({
-		where: { entityVersion: { entity: { slug } } },
-		columns: {},
-		with: {
-			entityVersion: {
-				columns: {},
-				with: { entity: { columns: { id: true } } },
-			},
-		},
+	const entity = await db.query.entities.findFirst({
+		where: { slug },
+		columns: { id: true },
 	});
 
-	if (anyVersion == null) {
+	if (entity == null) {
 		notFound();
 	}
 
-	const documentId = anyVersion.entityVersion.entity.id;
+	const documentId = entity.id;
 
 	const { draftVersionId, hasDraftChanges, publishedId } = await db.transaction(async (tx) => {
 		const draftVersionId = await ensureDraftVersion(tx, documentId, personsLifecycleAdapter);

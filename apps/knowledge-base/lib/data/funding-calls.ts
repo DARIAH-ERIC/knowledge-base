@@ -3,7 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike, sql } from "@/lib/db/sql";
 
 export type FundingCallsSort = "title" | "updatedAt";
 
@@ -31,6 +31,8 @@ export async function getFundingCalls(params: GetFundingCallsParams) {
 				? schema.entityVersions.updatedAt
 				: desc(schema.entityVersions.updatedAt);
 
+	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
+
 	const [items, aggregate] = await Promise.all([
 		db
 			.select({
@@ -40,47 +42,8 @@ export async function getFundingCalls(params: GetFundingCallsParams) {
 				slug: schema.entities.slug,
 				summary: schema.fundingCalls.summary,
 				title: schema.fundingCalls.title,
-				isPublished: sql<boolean>`
-					EXISTS (
-						SELECT
-							1
-						FROM
-							"entity_versions" AS "pv"
-							INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
-						WHERE
-							"pv"."entity_id" = ${schema.entityVersions.entityId}
-							AND "ps"."type" = 'published'
-					)
-				`,
-				hasDraft: sql<boolean>`
-					EXISTS (
-						SELECT 1
-						FROM "entity_versions" AS "dv"
-						INNER JOIN "entity_status" AS "ds" ON "dv"."status_id" = "ds"."id"
-						WHERE
-							"dv"."entity_id" = ${schema.entityVersions.entityId}
-							AND "ds"."type" = 'draft'
-							AND (
-								NOT EXISTS (
-									SELECT 1
-									FROM "entity_versions" AS "pv"
-									INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
-									WHERE
-										"pv"."entity_id" = ${schema.entityVersions.entityId}
-										AND "ps"."type" = 'published'
-								)
-								OR "dv"."updated_at" > (
-									SELECT "pv"."updated_at"
-									FROM "entity_versions" AS "pv"
-									INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
-									WHERE
-										"pv"."entity_id" = ${schema.entityVersions.entityId}
-										AND "ps"."type" = 'published'
-									LIMIT 1
-								)
-							)
-					)
-				`,
+				isPublished: sql<boolean>`${schema.documentLifecycle.publishedId} IS NOT NULL`,
+				hasDraft: schema.documentLifecycle.hasDraftChanges,
 				status: schema.entityStatus.type,
 				updatedAt: schema.entityVersions.updatedAt,
 			})
@@ -88,29 +51,11 @@ export async function getFundingCalls(params: GetFundingCallsParams) {
 			.innerJoin(schema.entityVersions, eq(schema.fundingCalls.id, schema.entityVersions.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(
-				and(
-					or(
-						eq(schema.entityStatus.type, "draft"),
-						and(
-							eq(schema.entityStatus.type, "published"),
-							sql`
-								NOT EXISTS (
-									SELECT
-										1
-									FROM
-										"entity_versions" AS "ev2"
-										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
-									WHERE
-										"ev2"."entity_id" = ${schema.entityVersions.entityId}
-										AND "es2"."type" = 'draft'
-								)
-							`,
-						),
-					),
-					where,
-				),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.documentId, schema.entities.id),
 			)
+			.where(and(sql`${schema.entityVersions.id} = ${pickedVersion}`, where))
 			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
@@ -118,30 +63,11 @@ export async function getFundingCalls(params: GetFundingCallsParams) {
 			.select({ total: count() })
 			.from(schema.fundingCalls)
 			.innerJoin(schema.entityVersions, eq(schema.fundingCalls.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(
-				and(
-					or(
-						eq(schema.entityStatus.type, "draft"),
-						and(
-							eq(schema.entityStatus.type, "published"),
-							sql`
-								NOT EXISTS (
-									SELECT
-										1
-									FROM
-										"entity_versions" AS "ev2"
-										INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
-									WHERE
-										"ev2"."entity_id" = ${schema.entityVersions.entityId}
-										AND "es2"."type" = 'draft'
-								)
-							`,
-						),
-					),
-					where,
-				),
-			),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.documentId, schema.entityVersions.entityId),
+			)
+			.where(and(sql`${schema.entityVersions.id} = ${pickedVersion}`, where)),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;

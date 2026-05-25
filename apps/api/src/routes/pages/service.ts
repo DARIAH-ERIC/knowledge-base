@@ -4,10 +4,10 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
+import { generateImageUrl } from "@/lib/images";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq } from "@/services/db/sql";
-import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
 interface GetPagesParams {
@@ -59,20 +59,16 @@ export async function getPages(db: Database | Transaction, params: GetPagesParam
 			.select({ total: count() })
 			.from(schema.pages)
 			.innerJoin(schema.entityVersions, eq(schema.pages.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const image =
-			item.image != null
-				? images.generateSignedImageUrl({
-						key: item.image.key,
-						options: { width: imageWidth.preview },
-					})
-				: null;
+		const image = generateImageUrl(item.image, imageWidth.preview);
 
 		return { ...flattenEntityVersion(item), image };
 	});
@@ -132,13 +128,7 @@ export async function getPageById(db: Database | Transaction, params: GetPageByI
 		getRelatedResources(db, id),
 	]);
 
-	const image =
-		item.image != null
-			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
-			: null;
+	const image = generateImageUrl(item.image, imageWidth.featured);
 
 	return {
 		...flattenEntityVersion(item),
@@ -198,8 +188,10 @@ export async function getPageSlugs(db: Database | Transaction, params: GetPageSl
 			.select({ total: count() })
 			.from(schema.pages)
 			.innerJoin(schema.entityVersions, eq(schema.pages.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -257,13 +249,7 @@ export async function getPageBySlug(db: Database | Transaction, params: GetPageB
 		return null;
 	}
 
-	const image =
-		item.image != null
-			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
-			: null;
+	const image = generateImageUrl(item.image, imageWidth.featured);
 
 	const [fields, relatedEntities, relatedResources] = await Promise.all([
 		getContentBlocks(db, item.id),

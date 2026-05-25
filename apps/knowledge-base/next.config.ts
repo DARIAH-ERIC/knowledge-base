@@ -17,6 +17,13 @@ const config: Config = {
 		authInterrupts: true,
 		globalNotFound: true,
 		rootParams: true,
+		serverActions: {
+			/**
+			 * Must be larger than `imageSizeLimit` in `config/assets.config.ts` to allow multipart
+			 * form-data overhead.
+			 */
+			bodySizeLimit: "8mb",
+		},
 		turbopackFileSystemCacheForDev: true,
 		viewTransition: true,
 	},
@@ -42,6 +49,8 @@ const config: Config = {
 		"/api/reporting/**/*": ["./node_modules/pdfkit/js/data/*.afm"],
 	},
 	reactCompiler: true,
+	/** @see {@link https://github.com/foliojs/pdfkit/issues/1549} */
+	serverExternalPackages: ["pdfkit"],
 	turbopack: {
 		rules: {
 			/** @see {@link https://github.com/vercel/next.js/discussions/77721#discussioncomment-14576268} */

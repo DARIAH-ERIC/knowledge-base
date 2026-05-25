@@ -1,5 +1,6 @@
 export * from "./schema/audit-logs";
 export * from "./schema/assets";
+export * from "./schema/background-jobs";
 export * from "./schema/content-blocks";
 export * from "./schema/document-policy-groups";
 export * from "./schema/documentation-pages";

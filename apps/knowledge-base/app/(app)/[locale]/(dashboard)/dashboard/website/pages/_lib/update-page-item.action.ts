@@ -1,163 +1,104 @@
 "use server";
 
-import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
+import { assert, keyBy } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-import * as v from "valibot";
 
 import { UpdatePageItemActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/update-page-item.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { ensureEntityVersionField } from "@/lib/data/entity-version-fields";
 import { pagesLifecycleAdapter } from "@/lib/data/pages.lifecycle-adapter";
 import { syncEntityRelations } from "@/lib/data/relations";
-import { type Transaction, db } from "@/lib/db";
+import { db } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export const updatePageItemAction = createServerAction(
-	async function updatePageItemAction(state, formData) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+export const updatePageItemAction = createMutationAction({
+	schema: UpdatePageItemActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "update", subjectType: "pages" },
+	revalidate: "/[locale]/dashboard/website/pages",
+	redirect: "/dashboard/website/pages",
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
+	async mutate(tx, input, { formData }) {
+		const draftVersionId = await ensureDraftVersion(tx, input.documentId, pagesLifecycleAdapter);
 
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			UpdatePageItemActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof UpdatePageItemActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const {
-			contentBlocks,
-			documentId,
-			title,
-			imageKey,
-			summary,
-			relatedEntityIds,
-			relatedResourceIds,
-		} = result.output;
-
-		await db.transaction(async (tx) => {
-			const draftVersionId = await ensureDraftVersion(tx, documentId, pagesLifecycleAdapter);
-
-			let imageId: string | null = null;
-
-			if (imageKey != null) {
-				const asset = await tx.query.assets.findFirst({
-					where: { key: imageKey },
-					columns: { id: true },
-				});
-
-				assert(asset);
-
-				imageId = asset.id;
-			}
-
-			await tx
-				.update(schema.pages)
-				.set({ imageId: imageId ?? undefined, title, summary })
-				.where(eq(schema.pages.id, draftVersionId));
-
-			const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");
-
-			const contentBlockTypes = await db.query.contentBlockTypes.findMany();
-			const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
-
-			async function upsertTypeBlock(tx: Transaction, block: ContentBlockInput, blockId: string) {
-				await upsertTypedContentBlock(tx, block, blockId, true);
-			}
-
-			const existingBlocks = await tx.query.contentBlocks.findMany({
-				where: { fieldId: contentField.id },
+		let imageId: string | null = null;
+		if (input.imageKey != null) {
+			const asset = await tx.query.assets.findFirst({
+				where: { key: input.imageKey },
 				columns: { id: true },
 			});
+			assert(asset);
+			imageId = asset.id;
+		}
 
-			if (existingBlocks.length > 0) {
-				await tx.delete(schema.contentBlocks).where(
-					inArray(
-						schema.contentBlocks.id,
-						existingBlocks.map((b) => b.id),
-					),
-				);
-			}
+		await tx
+			.update(schema.pages)
+			.set({ imageId, title: input.title, summary: input.summary })
+			.where(eq(schema.pages.id, draftVersionId));
 
-			await Promise.all(
-				contentBlocks.map(async (contentBlock, index) => {
-					const [added] = await tx
-						.insert(schema.contentBlocks)
-						.values({
-							fieldId: contentField.id,
-							typeId: contentBlockTypesByType[contentBlock.type].id,
-							position: index,
-						})
-						.returning({ id: schema.contentBlocks.id });
+		const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");
+		const contentBlockTypes = await db.query.contentBlockTypes.findMany();
+		const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
 
-					assert(added);
+		const existingBlocks = await tx.query.contentBlocks.findMany({
+			where: { fieldId: contentField.id },
+			columns: { id: true },
+		});
 
-					await upsertTypeBlock(tx, contentBlock, added.id);
-				}),
+		if (existingBlocks.length > 0) {
+			await tx.delete(schema.contentBlocks).where(
+				inArray(
+					schema.contentBlocks.id,
+					existingBlocks.map((b) => b.id),
+				),
 			);
+		}
 
-			await syncEntityRelations(tx, documentId, relatedEntityIds, relatedResourceIds);
-			await touchVersion(tx, draftVersionId);
+		await Promise.all(
+			input.contentBlocks.map(async (contentBlock, index) => {
+				const [added] = await tx
+					.insert(schema.contentBlocks)
+					.values({
+						fieldId: contentField.id,
+						typeId: contentBlockTypesByType[contentBlock.type].id,
+						position: index,
+					})
+					.returning({ id: schema.contentBlocks.id });
+				assert(added);
+				await upsertTypedContentBlock(tx, contentBlock, added.id, true);
+			}),
+		);
 
-			if (shouldSaveAndPublish(formData)) {
-				await publishVersion(tx, documentId, pagesLifecycleAdapter);
-			}
-		});
+		await syncEntityRelations(
+			tx,
+			input.documentId,
+			input.relatedEntityIds,
+			input.relatedResourceIds,
+		);
+		await touchVersion(tx, draftVersionId);
 
-		after(async () => {
-			if (!shouldSaveAndPublish(formData)) {
-				return;
-			}
+		if (shouldSaveAndPublish(formData)) {
+			await publishVersion(tx, input.documentId, pagesLifecycleAdapter);
+		}
 
-			await syncWebsiteDocumentForEntity(documentId);
-			await dispatchWebhook({ type: "pages" });
-		});
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "update",
-			subjectType: "pages",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: {
-				...getAuditSummaryFromFormData(formData),
+		return {
+			subjectId: input.documentId,
+			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},
-		});
-
-		revalidatePath("/[locale]/dashboard/website/pages", "layout");
-
-		redirect({ href: "/dashboard/website/pages", locale });
+		};
 	},
-);
+
+	async postCommit({ result, ctx }) {
+		if (!shouldSaveAndPublish(ctx.formData)) {
+			return;
+		}
+		await syncWebsiteDocumentForEntity(result.subjectId);
+		await dispatchWebhook({ type: "pages" });
+	},
+});

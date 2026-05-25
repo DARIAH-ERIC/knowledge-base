@@ -3,7 +3,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, inArray, or, sql } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
 
 export type CountryMemberObserverStatus = "is_member_of" | "is_observer_of" | null;
 
@@ -78,155 +78,34 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 	const nameOrderBy =
 		dir === "desc" ? desc(schema.organisationalUnits.name) : schema.organisationalUnits.name;
 	const needsDerivedSort = sort === "status";
-	const lifecycleWhere = or(
-		eq(schema.entityStatus.type, "draft"),
-		and(
-			eq(schema.entityStatus.type, "published"),
-			sql`
-				NOT EXISTS (
-					SELECT
-						1
-					FROM
-						"entity_versions" AS "ev2"
-						INNER JOIN "entity_status" AS "es2" ON "ev2"."status_id" = "es2"."id"
-					WHERE
-						"ev2"."entity_id" = ${schema.entityVersions.entityId}
-						AND "es2"."type" = 'draft'
-				)
-			`,
-		),
-	);
+
+	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
+	const versionPick = sql`${schema.entityVersions.id} = ${pickedVersion}`;
+
+	const baseItemsQuery = db
+		.select({
+			id: schema.organisationalUnits.id,
+			name: schema.organisationalUnits.name,
+			slug: schema.entities.slug,
+			hasDraft: schema.documentLifecycle.hasDraftChanges,
+			isPublished: sql<boolean>`${schema.documentLifecycle.publishedId} IS NOT NULL`,
+		})
+		.from(schema.organisationalUnits)
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+		)
+		.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.documentId, schema.entities.id),
+		)
+		.where(and(versionPick, where))
+		.orderBy(nameOrderBy);
 
 	const [items, aggregate, erics] = await Promise.all([
-		needsDerivedSort
-			? db
-					.select({
-						id: schema.organisationalUnits.id,
-						name: schema.organisationalUnits.name,
-						slug: schema.entities.slug,
-						hasDraft: sql<boolean>`
-							EXISTS (
-								SELECT
-									1
-								FROM
-									"entity_versions" AS "dv"
-									INNER JOIN "entity_status" AS "ds" ON "dv"."status_id" = "ds"."id"
-								WHERE
-									"dv"."entity_id" = ${schema.entityVersions.entityId}
-									AND "ds"."type" = 'draft'
-									AND (
-										NOT EXISTS (
-											SELECT
-												1
-											FROM
-												"entity_versions" AS "pv"
-												INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
-											WHERE
-												"pv"."entity_id" = ${schema.entityVersions.entityId}
-												AND "ps"."type" = 'published'
-										)
-										OR "dv"."updated_at" > (
-											SELECT
-												"pv"."updated_at"
-											FROM
-												"entity_versions" AS "pv"
-												INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
-											WHERE
-												"pv"."entity_id" = ${schema.entityVersions.entityId}
-												AND "ps"."type" = 'published'
-											LIMIT 1
-										)
-									)
-							)
-						`,
-						isPublished: sql<boolean>`EXISTS (
-							SELECT 1 FROM "entity_versions" AS "published_versions"
-							INNER JOIN "entity_status" AS "published_status" ON "published_versions"."status_id" = "published_status"."id"
-							WHERE "published_versions"."entity_id" = ${schema.entities.id}
-							AND "published_status"."type" = 'published'
-						)`,
-					})
-					.from(schema.organisationalUnits)
-					.innerJoin(
-						schema.organisationalUnitTypes,
-						eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
-					)
-					.innerJoin(
-						schema.entityVersions,
-						eq(schema.organisationalUnits.id, schema.entityVersions.id),
-					)
-					.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-					.innerJoin(
-						schema.entityStatus,
-						eq(schema.entityVersions.statusId, schema.entityStatus.id),
-					)
-					.where(and(lifecycleWhere, where))
-					.orderBy(nameOrderBy)
-			: db
-					.select({
-						id: schema.organisationalUnits.id,
-						name: schema.organisationalUnits.name,
-						slug: schema.entities.slug,
-						hasDraft: sql<boolean>`
-							EXISTS (
-								SELECT
-									1
-								FROM
-									"entity_versions" AS "dv"
-									INNER JOIN "entity_status" AS "ds" ON "dv"."status_id" = "ds"."id"
-								WHERE
-									"dv"."entity_id" = ${schema.entityVersions.entityId}
-									AND "ds"."type" = 'draft'
-									AND (
-										NOT EXISTS (
-											SELECT
-												1
-											FROM
-												"entity_versions" AS "pv"
-												INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
-											WHERE
-												"pv"."entity_id" = ${schema.entityVersions.entityId}
-												AND "ps"."type" = 'published'
-										)
-										OR "dv"."updated_at" > (
-											SELECT
-												"pv"."updated_at"
-											FROM
-												"entity_versions" AS "pv"
-												INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
-											WHERE
-												"pv"."entity_id" = ${schema.entityVersions.entityId}
-												AND "ps"."type" = 'published'
-											LIMIT 1
-										)
-									)
-							)
-						`,
-						isPublished: sql<boolean>`EXISTS (
-							SELECT 1 FROM "entity_versions" AS "published_versions"
-							INNER JOIN "entity_status" AS "published_status" ON "published_versions"."status_id" = "published_status"."id"
-							WHERE "published_versions"."entity_id" = ${schema.entities.id}
-							AND "published_status"."type" = 'published'
-						)`,
-					})
-					.from(schema.organisationalUnits)
-					.innerJoin(
-						schema.organisationalUnitTypes,
-						eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
-					)
-					.innerJoin(
-						schema.entityVersions,
-						eq(schema.organisationalUnits.id, schema.entityVersions.id),
-					)
-					.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-					.innerJoin(
-						schema.entityStatus,
-						eq(schema.entityVersions.statusId, schema.entityStatus.id),
-					)
-					.where(and(lifecycleWhere, where))
-					.orderBy(nameOrderBy)
-					.limit(limit)
-					.offset(offset),
+		needsDerivedSort ? baseItemsQuery : baseItemsQuery.limit(limit).offset(offset),
 		db
 			.select({ total: count() })
 			.from(schema.organisationalUnits)
@@ -235,9 +114,11 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 			)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
-			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(and(lifecycleWhere, where)),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.documentId, schema.entityVersions.entityId),
+			)
+			.where(and(versionPick, where)),
 		db.query.organisationalUnits.findMany({
 			where: { type: { type: "eric" } },
 			columns: { id: true },

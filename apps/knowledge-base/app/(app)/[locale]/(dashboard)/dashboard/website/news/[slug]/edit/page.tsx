@@ -114,7 +114,7 @@ export default async function DashboardWebsiteEditNewsItemPage(
 		key: newsItem.image.key,
 		options: imageGridOptions,
 	});
-	const contentBlocks = await getEntityContentBlocks(newsItem.id);
+	const contentBlocks = await getEntityContentBlocks(newsItem.id, "content");
 
 	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(documentId);
 

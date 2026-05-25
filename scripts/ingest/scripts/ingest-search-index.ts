@@ -7,7 +7,7 @@ import { createSshocClient } from "@dariah-eric/client-sshoc";
 import { createZoteroClient } from "@dariah-eric/client-zotero";
 import { createDatabaseService } from "@dariah-eric/database";
 import { createSearchService } from "@dariah-eric/search";
-import { createSearchResourcesService } from "@dariah-eric/search-resources";
+import { createSearchResourcesService, loadOrgUnitLookups } from "@dariah-eric/search-resources";
 import { createWebsiteSearchIndexService } from "@dariah-eric/search-website";
 import { createSearchAdminService } from "@dariah-eric/search/admin";
 
@@ -73,6 +73,9 @@ assert(
 assert(env.ZOTERO_API_BASE_URL, "Missing environment variable: `ZOTERO_API_BASE_URL`.");
 assert(env.ZOTERO_GROUP_ID, "Missing environment variable: `ZOTERO_GROUP_ID`.");
 
+const sshocMarketplaceBaseUrl = env.SSHOC_MARKETPLACE_BASE_URL;
+const zoteroGroupId = env.ZOTERO_GROUP_ID;
+
 const campus = createDariahCampusClient({
 	config: {
 		baseUrl: env.CAMPUS_API_BASE_URL,
@@ -98,20 +101,23 @@ const zotero = createZoteroClient({
 	},
 });
 
-const searchResources = createSearchResourcesService({
-	campus,
-	episciences,
-	search,
-	searchService,
-	sshoc,
-	sshocMarketplaceBaseUrl: env.SSHOC_MARKETPLACE_BASE_URL,
-	zotero,
-	zoteroGroupId: env.ZOTERO_GROUP_ID,
-});
-
 const websiteSearchIndex = createWebsiteSearchIndexService({ db, search, searchService });
 
 async function main(): Promise<void> {
+	const orgUnits = await loadOrgUnitLookups(db);
+
+	const searchResources = createSearchResourcesService({
+		campus,
+		episciences,
+		search,
+		searchService,
+		sshoc,
+		sshocMarketplaceBaseUrl,
+		zotero,
+		zoteroGroupId,
+		orgUnits,
+	});
+
 	const resources = await searchResources.syncSearchResources({ cache });
 
 	log.success(

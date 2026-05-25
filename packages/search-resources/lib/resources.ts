@@ -1,13 +1,18 @@
 import type { DariahCampusCurriculum, DariahCampusResource } from "@dariah-eric/client-campus";
 import type { EpisciencesSearchDocument } from "@dariah-eric/client-episciences";
 import type { SearchItem } from "@dariah-eric/client-sshoc";
-import type { ZoteroJsonItem } from "@dariah-eric/client-zotero";
+import type { ZoteroCollection, ZoteroJsonItem } from "@dariah-eric/client-zotero";
 import type { ResourceDocument, WebsiteDocument } from "@dariah-eric/search";
 
 import { createCampusCurriculum, createCampusResource } from "./campus";
 import { createEpisciencesDocument } from "./episciences";
 import { createSshocItem } from "./sshoc";
-import { type ZoteroJsonItemData, createZoteroItem, isZoteroItemInCollection } from "./zotero";
+import {
+	type ZoteroCollectionLookup,
+	type ZoteroJsonItemData,
+	createZoteroItem,
+	isZoteroItemInCollection,
+} from "./zotero";
 
 export interface SearchIndexResourceSourceData {
 	campusCurricula: Array<DariahCampusCurriculum>;
@@ -15,28 +20,55 @@ export interface SearchIndexResourceSourceData {
 	episciencesDocuments: Array<EpisciencesSearchDocument>;
 	sshocItems: Array<SearchItem>;
 	zoteroItems: Array<ZoteroJsonItem<ZoteroJsonItemData>>;
+	zoteroCollections: Array<ZoteroCollection>;
+}
+
+export interface OrgUnitResourceLookups {
+	sshocActorIdToNc: Map<number, Set<string>>;
+	sshocActorIdToWg: Map<number, Set<string>>;
+	countrySlugToNc: Map<string, Set<string>>;
+	wgSlugs: Set<string>;
 }
 
 export interface CreateSearchIndexResourceDocumentsParams {
 	sourceData: SearchIndexResourceSourceData;
 	sshocMarketplaceBaseUrl: string;
+	orgUnits: OrgUnitResourceLookups;
+}
+
+function buildZoteroCollectionLookup(
+	zoteroCollections: Array<ZoteroCollection>,
+): ZoteroCollectionLookup {
+	const namesByKey = new Map<string, string>();
+	for (const collection of zoteroCollections) {
+		namesByKey.set(collection.key, collection.data.name);
+	}
+	return { namesByKey };
 }
 
 export function createSearchIndexResourceDocuments(
 	params: CreateSearchIndexResourceDocumentsParams,
 ): Array<ResourceDocument> {
-	const { sourceData, sshocMarketplaceBaseUrl } = params;
-	const { campusCurricula, campusResources, episciencesDocuments, sshocItems, zoteroItems } =
-		sourceData;
+	const { sourceData, sshocMarketplaceBaseUrl, orgUnits } = params;
+	const {
+		campusCurricula,
+		campusResources,
+		episciencesDocuments,
+		sshocItems,
+		zoteroItems,
+		zoteroCollections,
+	} = sourceData;
+
+	const zoteroCollectionLookup = buildZoteroCollectionLookup(zoteroCollections);
 
 	return [
-		...sshocItems.map((item) => createSshocItem(item, sshocMarketplaceBaseUrl)),
+		...sshocItems.map((item) => createSshocItem(item, sshocMarketplaceBaseUrl, orgUnits)),
 		...campusResources.map((item) => createCampusResource(item)),
 		...campusCurricula.map((item) => createCampusCurriculum(item)),
 		...episciencesDocuments.map((item) => createEpisciencesDocument(item)),
 		...zoteroItems
 			.filter((item) => isZoteroItemInCollection(item))
-			.map((item) => createZoteroItem(item)),
+			.map((item) => createZoteroItem(item, zoteroCollectionLookup, orgUnits)),
 	];
 }
 

@@ -1,68 +1,29 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-import * as v from "valibot";
 
 import { CreateNavigationMenuActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_lib/create-navigation-menu.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import { db } from "@/lib/db";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export const createNavigationMenuAction = createServerAction(
-	async function createNavigationMenuAction(state, formData) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+export const createNavigationMenuAction = createMutationAction({
+	schema: CreateNavigationMenuActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "create", subjectType: "navigation" },
+	revalidate: "/[locale]/dashboard/website/navigation",
 
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			CreateNavigationMenuActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateNavigationMenuActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { name } = result.output;
-
-		const [menu] = await db
+	async mutate(tx, input) {
+		const [menu] = await tx
 			.insert(schema.navigationMenus)
-			.values({ name })
+			.values({ name: input.name })
 			.returning({ id: schema.navigationMenus.id });
+		assert(menu);
 
-		after(async () => {
-			await dispatchWebhook({ type: "navigation" });
-		});
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "create",
-			subjectType: "navigation",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
-
-		revalidatePath("/[locale]/dashboard/website/navigation", "layout");
-
-		return createActionStateSuccess({ data: menu });
+		return { subjectId: menu.id };
 	},
-);
+
+	async postCommit() {
+		await dispatchWebhook({ type: "navigation" });
+	},
+});

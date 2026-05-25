@@ -3,11 +3,12 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { getContentBlocks } from "@/lib/content-blocks";
+import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import type { FundingCallStatus } from "@/routes/funding-calls/schemas";
-import { type SQL, type SQLWrapper, and, count, desc, eq, or, sql } from "@/services/db/sql";
+import { type SQL, type SQLWrapper, count, desc, eq, or, sql } from "@/services/db/sql";
 
 interface GetFundingCallsParams {
 	/** @default 10 */
@@ -80,17 +81,17 @@ export async function getFundingCalls(db: Database | Transaction, params: GetFun
 			.select({ total: count() })
 			.from(schema.fundingCalls)
 			.innerJoin(schema.entityVersions, eq(schema.fundingCalls.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(and(eq(schema.entityStatus.type, "published"), aggregateStatusFilter)),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			)
+			.where(aggregateStatusFilter),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
 
 	const data = items.map((item) => {
-		const duration = {
-			start: item.duration.start.toISOString(),
-			end: item.duration.end?.toISOString(),
-		};
+		const duration = serializeDateRange(item.duration);
 
 		return { ...flattenEntityVersion(item), duration };
 	});
@@ -149,10 +150,7 @@ export async function getFundingCallById(
 		getRelatedResources(db, id),
 	]);
 
-	const duration = {
-		start: item.duration.start.toISOString(),
-		end: item.duration.end?.toISOString(),
-	};
+	const duration = serializeDateRange(item.duration);
 
 	return {
 		...flattenEntityVersion(item),
@@ -210,8 +208,10 @@ export async function getFundingCallSlugs(
 			.select({ total: count() })
 			.from(schema.fundingCalls)
 			.innerJoin(schema.entityVersions, eq(schema.fundingCalls.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -274,10 +274,7 @@ export async function getFundingCallBySlug(
 		getRelatedResources(db, item.id),
 	]);
 
-	const duration = {
-		start: item.duration.start.toISOString(),
-		end: item.duration.end?.toISOString(),
-	};
+	const duration = serializeDateRange(item.duration);
 
 	return {
 		...flattenEntityVersion(item),

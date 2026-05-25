@@ -121,7 +121,6 @@ export default async function DashboardReportingWorkingGroupReportDataPage(
 		(s) => !claimedSocialMediaIds.has(s.id),
 	);
 
-	// oxlint-disable-next-line unicorn/consistent-function-scoping
 	function formatRole(role: string): string {
 		return role
 			.replaceAll("_", " ")

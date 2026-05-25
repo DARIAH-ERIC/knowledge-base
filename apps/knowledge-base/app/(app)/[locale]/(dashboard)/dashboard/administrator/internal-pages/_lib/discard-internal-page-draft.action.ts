@@ -1,34 +1,17 @@
 "use server";
 
-import { getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { discardDraftVersion } from "@/lib/data/entity-lifecycle";
 import { internalPagesLifecycleAdapter } from "@/lib/data/internal-pages.lifecycle-adapter";
-import { db } from "@/lib/db";
-import { redirect } from "@/lib/navigation/navigation";
+import { createCommandAction } from "@/lib/server/create-command-action";
 
-export async function discardInternalPageDraftAction(documentId: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const discardInternalPageDraftAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "discard_draft", subjectType: "internal_pages" },
+	revalidate: "/[locale]/dashboard/administrator/internal-pages",
+	redirect: "/dashboard/administrator/internal-pages",
 
-	await db.transaction(async (tx) => {
+	async mutate(tx, [documentId]: [string]) {
 		await discardDraftVersion(tx, documentId, internalPagesLifecycleAdapter);
-	});
-
-	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
-		action: "discard_draft",
-		subjectType: "internal_pages",
-		subjectId: documentId,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/administrator/internal-pages", "layout");
-	revalidatePath("/[locale]/privacy-policy", "page");
-	revalidatePath("/[locale]/terms-of-use", "page");
-
-	const locale = await getLocale();
-	redirect({ href: "/dashboard/administrator/internal-pages", locale });
-}
+		return { subjectId: documentId };
+	},
+});

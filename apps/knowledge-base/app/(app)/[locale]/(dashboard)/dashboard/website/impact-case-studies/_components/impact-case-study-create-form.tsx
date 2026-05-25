@@ -1,9 +1,9 @@
 "use client";
 
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { ImpactCaseStudyForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form";
 import { createImpactCaseStudyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/create-impact-case-study.action";
 
@@ -30,7 +30,7 @@ export function ImpactCaseStudyCreateForm(
 
 	return (
 		<Fragment>
-			<Heading>{t("New impact case study")}</Heading>
+			<EntityFormHeader title={t("New impact case study")} />
 
 			<ImpactCaseStudyForm
 				formAction={createImpactCaseStudyAction}

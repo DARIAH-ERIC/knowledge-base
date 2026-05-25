@@ -1,9 +1,9 @@
 "use client";
 
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { UserForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_components/user-form";
 import { createUserAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/users/_lib/create-user.action";
 
@@ -17,7 +17,7 @@ export function UserCreateForm(props: Readonly<UserCreateFormProps>): ReactNode 
 
 	return (
 		<Fragment>
-			<Heading>{t("New user")}</Heading>
+			<EntityFormHeader title={t("New user")} />
 
 			<UserForm
 				canCurrentUserManageAdmins={canCurrentUserManageAdmins}

@@ -7,12 +7,7 @@ import { getExtracted, getLocale } from "next-intl/server";
 import * as v from "valibot";
 
 import { CreateSocialMediaSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-social-media.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
+import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -24,12 +19,12 @@ export interface CreatedSocialMedia {
 	type: { type: string };
 }
 
+/** Uses createServerAction because the success response carries typed data. */
 export const createSocialMediaAction = createServerAction<CreatedSocialMedia>(
-	async function createSocialMediaAction(_state, formData) {
+	{ requireAdmin: true },
+	async function createSocialMediaAction(_state, formData, { user }) {
 		const locale = await getLocale();
 		const t = await getExtracted();
-
-		const auditSession = await assertAdmin();
 
 		const result = await v.safeParseAsync(CreateSocialMediaSchema, getFormDataValues(formData), {
 			lang: getIntlLanguage(locale),
@@ -37,7 +32,6 @@ export const createSocialMediaAction = createServerAction<CreatedSocialMedia>(
 
 		if (!result.success) {
 			const errors = v.flatten<typeof CreateSocialMediaSchema>(result.issues);
-
 			return createActionStateError({
 				message: errors.root ?? t("Invalid or missing fields."),
 				validationErrors: errors.nested,
@@ -55,24 +49,27 @@ export const createSocialMediaAction = createServerAction<CreatedSocialMedia>(
 			return createActionStateError({ message: t("Invalid social media type.") });
 		}
 
-		const [created] = await db
-			.insert(schema.socialMedia)
-			.values({
-				name,
-				url,
-				typeId: socialMediaType.id,
-				duration: duration?.start != null ? { start: duration.start, end: duration.end } : null,
-			})
-			.returning({ id: schema.socialMedia.id });
+		const created = await db.transaction(async (tx) => {
+			const [row] = await tx
+				.insert(schema.socialMedia)
+				.values({
+					name,
+					url,
+					typeId: socialMediaType.id,
+					duration: duration?.start != null ? { start: duration.start, end: duration.end } : null,
+				})
+				.returning({ id: schema.socialMedia.id });
+			assert(row);
 
-		assert(created);
+			await recordAuditEvent(tx, {
+				actorUserId: user?.id,
+				action: "create",
+				subjectType: "projects",
+				subjectId: row.id,
+				summary: getAuditSummaryFromFormData(formData),
+			});
 
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "create",
-			subjectType: "projects",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
+			return row;
 		});
 
 		return createActionStateSuccess({

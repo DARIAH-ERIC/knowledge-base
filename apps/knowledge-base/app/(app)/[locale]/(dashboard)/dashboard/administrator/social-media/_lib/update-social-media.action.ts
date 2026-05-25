@@ -1,79 +1,41 @@
 "use server";
 
-import { assert, getFormDataValues } from "@acdh-oeaw/lib";
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
 
 import { UpdateSocialMediaActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/social-media/_lib/update-social-media.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export const updateSocialMediaAction = createServerAction(
-	async function updateSocialMediaAction(state, formData) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+export const updateSocialMediaAction = createMutationAction({
+	schema: UpdateSocialMediaActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "update", subjectType: "social_media" },
+	revalidate: "/[locale]/dashboard/administrator/social-media",
+	redirect: "/dashboard/administrator/social-media",
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
-
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			UpdateSocialMediaActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof UpdateSocialMediaActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { id, name, url, type, duration } = result.output;
-
-		const socialMediaType = await db.query.socialMediaTypes.findFirst({
-			where: { type },
+	async mutate(tx, input) {
+		const socialMediaType = await tx.query.socialMediaTypes.findFirst({
+			where: { type: input.type },
 			columns: { id: true },
 		});
-
 		assert(socialMediaType, "Social media type not found.");
 
 		const durationValue =
-			duration?.start != null ? { start: duration.start, end: duration.end } : null;
+			input.duration?.start != null
+				? { start: input.duration.start, end: input.duration.end }
+				: null;
 
-		await db
+		await tx
 			.update(schema.socialMedia)
-			.set({ name, url, typeId: socialMediaType.id, duration: durationValue })
-			.where(eq(schema.socialMedia.id, id));
+			.set({
+				name: input.name,
+				url: input.url,
+				typeId: socialMediaType.id,
+				duration: durationValue,
+			})
+			.where(eq(schema.socialMedia.id, input.id));
 
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "update",
-			subjectType: "social_media",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
-
-		revalidatePath("/[locale]/dashboard/administrator/social-media", "layout");
-
-		redirect({ href: "/dashboard/administrator/social-media", locale });
+		return { subjectId: input.id };
 	},
-);
+});

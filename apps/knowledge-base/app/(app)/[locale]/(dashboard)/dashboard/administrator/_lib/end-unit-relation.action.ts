@@ -49,7 +49,7 @@ export async function endUnitRelationAction(id: string, end: Date): Promise<void
 	});
 
 	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
+		actorUserId: auditSession.user.id,
 		action: "relation_end",
 		subjectType: "end_unit_relation",
 		subjectId: id,

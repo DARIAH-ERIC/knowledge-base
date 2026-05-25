@@ -2,18 +2,35 @@
 
 import { Button } from "@dariah-eric/ui/button";
 import { ModalClose, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
+import { AlertTriangleIcon } from "lucide-react";
 import { useExtracted } from "next-intl";
 import type { ReactNode } from "react";
 
 interface DeleteModalProps {
-	model: string;
+	/**
+	 * When true (default), the dialog auto-closes when the Delete button is pressed. Set to false to
+	 * keep the dialog open while the action runs — useful when the caller wants to render an inline
+	 * error on failure.
+	 */
+	closeOnAction?: boolean;
+	errorMessage?: string | null;
 	isOpen: boolean;
-	onOpenChange: (isOpen: boolean) => void;
+	isPending?: boolean;
+	model: string;
 	onAction: () => void;
+	onOpenChange: (isOpen: boolean) => void;
 }
 
 export function DeleteModal(props: Readonly<DeleteModalProps>): ReactNode {
-	const { model, onAction, onOpenChange, isOpen } = props;
+	const {
+		closeOnAction = true,
+		errorMessage,
+		isOpen,
+		isPending = false,
+		model,
+		onAction,
+		onOpenChange,
+	} = props;
 
 	const t = useExtracted();
 
@@ -23,13 +40,27 @@ export function DeleteModal(props: Readonly<DeleteModalProps>): ReactNode {
 	return (
 		<ModalContent isOpen={isOpen} onOpenChange={onOpenChange}>
 			<ModalHeader description={description} title={title} />
+			{errorMessage != null ? (
+				<div className="px-6 pbe-2">
+					<p
+						className="flex items-center gap-x-2 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
+						role="alert"
+					>
+						<AlertTriangleIcon aria-hidden={true} className="block-4 inline-4" />
+						{errorMessage}
+					</p>
+				</div>
+			) : null}
 			<ModalFooter>
-				<ModalClose>{t("Cancel")}</ModalClose>
+				<ModalClose isDisabled={isPending}>{t("Cancel")}</ModalClose>
 				<Button
 					intent="danger"
+					isPending={isPending}
 					onPress={() => {
 						onAction();
-						onOpenChange(false);
+						if (closeOnAction) {
+							onOpenChange(false);
+						}
 					}}
 				>
 					{t("Delete")}

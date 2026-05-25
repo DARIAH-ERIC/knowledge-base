@@ -20,6 +20,9 @@ ingress:
   enabled: true
   path: "/"
   className: "nginx-proxy-protocol"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
 livenessProbe:
   path: /health
   initialDelaySeconds: 15

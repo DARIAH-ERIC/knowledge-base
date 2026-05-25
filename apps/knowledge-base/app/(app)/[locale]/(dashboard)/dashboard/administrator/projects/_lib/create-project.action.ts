@@ -1,181 +1,106 @@
 "use server";
 
-import { assert, getFormDataValues } from "@acdh-oeaw/lib";
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import slugify from "@sindresorhus/slugify";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-import * as v from "valibot";
 
 import { CreateProjectActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-project.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
 import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
-import { db } from "@/lib/db";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export const createProjectAction = createServerAction(
-	async function createProjectAction(state, formData) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+export const createProjectAction = createMutationAction({
+	schema: CreateProjectActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "create", subjectType: "projects" },
+	revalidate: "/[locale]/dashboard/administrator/projects",
+	redirect: "/dashboard/administrator/projects",
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
+	async mutate(tx, input, { formData }) {
+		const slug = slugify(input.name);
 
-		const auditSession = await assertAdmin();
+		const type = await tx.query.entityTypes.findFirst({
+			where: { type: "projects" },
+			columns: { id: true },
+		});
+		assert(type);
 
-		const result = await v.safeParseAsync(
-			CreateProjectActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
+		const { documentId, versionId } = await createDraftDocument(tx, type.id, slug);
 
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateProjectActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const {
-			acronym,
-			call,
-			description,
-			duration,
-			funding,
-			imageKey,
-			name,
-			scopeId,
-			summary,
-			topic,
-		} = result.output;
-
-		const slug = slugify(name);
-		let documentId: string | null = null;
-
-		await db.transaction(async (tx) => {
-			const type = await tx.query.entityTypes.findFirst({
-				where: {
-					type: "projects",
-				},
-				columns: {
-					id: true,
-				},
-			});
-
-			assert(type);
-
-			const { documentId: docId, versionId } = await createDraftDocument(tx, type.id, slug);
-			documentId = docId;
-
-			let imageId = null;
-
-			if (imageKey != null) {
-				const asset = await tx.query.assets.findFirst({
-					where: { key: imageKey },
-					columns: { id: true },
-				});
-
-				assert(asset);
-
-				imageId = asset.id;
-			}
-
-			await tx.insert(schema.projects).values({
-				id: versionId,
-				acronym,
-				call,
-				duration,
-				funding,
-				imageId,
-				name,
-				scopeId,
-				summary,
-				topic,
-			});
-
-			const descriptionFieldName = await tx.query.entityTypesFieldsNames.findFirst({
-				where: {
-					entityTypeId: type.id,
-					fieldName: "description",
-				},
+		let imageId: string | null = null;
+		if (input.imageKey != null) {
+			const asset = await tx.query.assets.findFirst({
+				where: { key: input.imageKey },
 				columns: { id: true },
 			});
+			assert(asset);
+			imageId = asset.id;
+		}
 
+		await tx.insert(schema.projects).values({
+			id: versionId,
+			acronym: input.acronym,
+			call: input.call,
+			duration: input.duration,
+			funding: input.funding,
+			imageId,
+			name: input.name,
+			scopeId: input.scopeId,
+			summary: input.summary,
+			topic: input.topic,
+		});
+
+		if (input.description != null) {
+			const descriptionFieldName = await tx.query.entityTypesFieldsNames.findFirst({
+				where: { entityTypeId: type.id, fieldName: "description" },
+				columns: { id: true },
+			});
 			assert(descriptionFieldName);
 
 			const [descriptionField] = await tx
 				.insert(schema.fields)
 				.values({ entityVersionId: versionId, fieldNameId: descriptionFieldName.id })
 				.returning({ id: schema.fields.id });
-
 			assert(descriptionField);
 
 			const richTextType = await tx.query.contentBlockTypes.findFirst({
 				where: { type: "rich_text" },
 				columns: { id: true },
 			});
-
 			assert(richTextType);
 
 			const [contentBlock] = await tx
 				.insert(schema.contentBlocks)
 				.values({ fieldId: descriptionField.id, typeId: richTextType.id, position: 0 })
 				.returning({ id: schema.contentBlocks.id });
-
 			assert(contentBlock);
 
 			await tx.insert(schema.richTextContentBlocks).values({
 				id: contentBlock.id,
-				content: JSON.parse(description) as schema.RichTextContentBlock["content"],
+				content: JSON.parse(input.description) as schema.RichTextContentBlock["content"],
 			});
+		}
 
-			if (shouldSaveAndPublish(formData)) {
-				await publishVersion(tx, docId, projectsLifecycleAdapter);
-			}
-		});
+		if (shouldSaveAndPublish(formData)) {
+			await publishVersion(tx, documentId, projectsLifecycleAdapter);
+		}
 
-		after(async () => {
-			if (!shouldSaveAndPublish(formData)) {
-				return;
-			}
-
-			if (documentId != null) {
-				await syncWebsiteDocumentForEntity(documentId);
-			}
-
-			await dispatchWebhook({ type: "dariah-projects" });
-		});
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "create",
-			subjectType: "projects",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: {
-				...getAuditSummaryFromFormData(formData),
+		return {
+			subjectId: documentId,
+			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},
-		});
-
-		revalidatePath("/[locale]/dashboard/administrator/projects", "layout");
-
-		redirect({ href: "/dashboard/administrator/projects", locale });
+		};
 	},
-);
+
+	async postCommit({ result, ctx }) {
+		if (!shouldSaveAndPublish(ctx.formData)) {
+			return;
+		}
+		await syncWebsiteDocumentForEntity(result.subjectId);
+		await dispatchWebhook({ type: "dariah-projects" });
+	},
+});

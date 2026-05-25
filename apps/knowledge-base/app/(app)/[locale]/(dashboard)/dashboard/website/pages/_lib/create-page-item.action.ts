@@ -1,188 +1,117 @@
 "use server";
 
-import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
+import { assert, keyBy } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import slugify from "@sindresorhus/slugify";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-import * as v from "valibot";
 
 import { CreatePageItemActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/create-page-item.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
 import { pagesLifecycleAdapter } from "@/lib/data/pages.lifecycle-adapter";
-import { type Transaction, db } from "@/lib/db";
+import { db } from "@/lib/db";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export const createPageItemAction = createServerAction(
-	async function createPageItemAction(state, formData) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+export const createPageItemAction = createMutationAction({
+	schema: CreatePageItemActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "create", subjectType: "pages" },
+	revalidate: "/[locale]/dashboard/website/pages",
+	redirect: "/dashboard/website/pages",
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
+	async mutate(tx, input, { formData }) {
+		const slug = slugify(input.title);
 
-		const auditSession = await assertAdmin();
+		const type = await tx.query.entityTypes.findFirst({
+			where: { type: "pages" },
+			columns: { id: true },
+		});
+		assert(type);
 
-		const result = await v.safeParseAsync(
-			CreatePageItemActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
+		const { documentId, versionId } = await createDraftDocument(tx, type.id, slug);
 
-		if (!result.success) {
-			const errors = v.flatten<typeof CreatePageItemActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { contentBlocks, title, imageKey, summary, relatedEntityIds, relatedResourceIds } =
-			result.output;
-
-		const slug = slugify(title);
-		let documentId: string | null = null;
-
-		await db.transaction(async (tx) => {
-			const type = await tx.query.entityTypes.findFirst({
-				where: {
-					type: "pages",
-				},
-				columns: {
-					id: true,
-				},
-			});
-
-			assert(type);
-
-			const { documentId: docId, versionId } = await createDraftDocument(tx, type.id, slug);
-			documentId = docId;
-
-			let imageId: string | undefined;
-
-			if (imageKey != null) {
-				const asset = await tx.query.assets.findFirst({
-					where: { key: imageKey },
-					columns: { id: true },
-				});
-
-				assert(asset);
-
-				imageId = asset.id;
-			}
-
-			await tx.insert(schema.pages).values({
-				id: versionId,
-				imageId,
-				title,
-				summary,
-			});
-
-			if (relatedEntityIds.length > 0) {
-				await tx.insert(schema.entitiesToEntities).values(
-					relatedEntityIds.map((relatedEntityId) => {
-						return { entityId: docId, relatedEntityId };
-					}),
-				);
-			}
-
-			if (relatedResourceIds.length > 0) {
-				await tx.insert(schema.entitiesToResources).values(
-					relatedResourceIds.map((resourceId) => {
-						return { entityId: docId, resourceId };
-					}),
-				);
-			}
-
-			const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({
-				where: {
-					entityTypeId: type.id,
-					fieldName: "content",
-				},
+		let imageId: string | undefined;
+		if (input.imageKey != null) {
+			const asset = await tx.query.assets.findFirst({
+				where: { key: input.imageKey },
 				columns: { id: true },
 			});
+			assert(asset);
+			imageId = asset.id;
+		}
 
-			assert(contentFieldName);
+		await tx.insert(schema.pages).values({
+			id: versionId,
+			imageId,
+			title: input.title,
+			summary: input.summary,
+		});
 
-			const [contentField] = await tx
-				.insert(schema.fields)
-				.values({ entityVersionId: versionId, fieldNameId: contentFieldName.id })
-				.returning({ id: schema.fields.id });
-
-			assert(contentField);
-
-			const contentBlockTypes = await db.query.contentBlockTypes.findMany();
-			const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
-
-			async function insertTypeBlock(tx: Transaction, block: ContentBlockInput, blockId: string) {
-				await upsertTypedContentBlock(tx, block, blockId, true);
-			}
-
-			await Promise.all(
-				contentBlocks.map(async (contentBlock, index) => {
-					const [added] = await tx
-						.insert(schema.contentBlocks)
-						.values({
-							fieldId: contentField.id,
-							typeId: contentBlockTypesByType[contentBlock.type].id,
-							position: index,
-						})
-						.returning({ id: schema.contentBlocks.id });
-
-					assert(added);
-
-					await insertTypeBlock(tx, contentBlock, added.id);
+		if (input.relatedEntityIds.length > 0) {
+			await tx.insert(schema.entitiesToEntities).values(
+				input.relatedEntityIds.map((relatedEntityId) => {
+					return { entityId: documentId, relatedEntityId };
 				}),
 			);
+		}
 
-			if (shouldSaveAndPublish(formData)) {
-				await publishVersion(tx, docId, pagesLifecycleAdapter);
-			}
+		if (input.relatedResourceIds.length > 0) {
+			await tx.insert(schema.entitiesToResources).values(
+				input.relatedResourceIds.map((resourceId) => {
+					return { entityId: documentId, resourceId };
+				}),
+			);
+		}
+
+		const contentFieldName = await tx.query.entityTypesFieldsNames.findFirst({
+			where: { entityTypeId: type.id, fieldName: "content" },
+			columns: { id: true },
 		});
+		assert(contentFieldName);
 
-		after(async () => {
-			if (!shouldSaveAndPublish(formData)) {
-				return;
-			}
+		const [contentField] = await tx
+			.insert(schema.fields)
+			.values({ entityVersionId: versionId, fieldNameId: contentFieldName.id })
+			.returning({ id: schema.fields.id });
+		assert(contentField);
 
-			if (documentId != null) {
-				await syncWebsiteDocumentForEntity(documentId);
-			}
+		const contentBlockTypes = await db.query.contentBlockTypes.findMany();
+		const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
 
-			await dispatchWebhook({ type: "pages" });
-		});
+		await Promise.all(
+			input.contentBlocks.map(async (contentBlock, index) => {
+				const [added] = await tx
+					.insert(schema.contentBlocks)
+					.values({
+						fieldId: contentField.id,
+						typeId: contentBlockTypesByType[contentBlock.type].id,
+						position: index,
+					})
+					.returning({ id: schema.contentBlocks.id });
+				assert(added);
+				await upsertTypedContentBlock(tx, contentBlock, added.id, true);
+			}),
+		);
 
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "create",
-			subjectType: "pages",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: {
-				...getAuditSummaryFromFormData(formData),
+		if (shouldSaveAndPublish(formData)) {
+			await publishVersion(tx, documentId, pagesLifecycleAdapter);
+		}
+
+		return {
+			subjectId: documentId,
+			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},
-		});
-
-		revalidatePath("/[locale]/dashboard/website/pages", "layout");
-
-		redirect({ href: "/dashboard/website/pages", locale });
+		};
 	},
-);
+
+	async postCommit({ result, ctx }) {
+		if (!shouldSaveAndPublish(ctx.formData)) {
+			return;
+		}
+		await syncWebsiteDocumentForEntity(result.subjectId);
+		await dispatchWebhook({ type: "pages" });
+	},
+});

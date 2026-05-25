@@ -156,9 +156,20 @@ export const relations = defineRelations(schema, (r) => {
 				from: r.entities.id,
 				to: r.entityVersions.entityId,
 			}),
+			lifecycle: r.one.documentLifecycle({
+				from: r.entities.id,
+				to: r.documentLifecycle.documentId,
+			}),
 			relatedEntities: r.many.entities({
 				from: r.entities.id.through(r.entitiesToEntities.entityId),
 				to: r.entities.id.through(r.entitiesToEntities.relatedEntityId),
+			}),
+		},
+		documentLifecycle: {
+			entity: r.one.entities({
+				from: r.documentLifecycle.documentId,
+				to: r.entities.id,
+				optional: false,
 			}),
 		},
 		entityVersions: {

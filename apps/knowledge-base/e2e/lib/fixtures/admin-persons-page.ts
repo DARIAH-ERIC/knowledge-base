@@ -47,7 +47,7 @@ export class AdminPersonsPage {
 	}
 
 	async submitForm(): Promise<void> {
-		await this.page.getByRole("button", { name: /^(?:Save|Save \(as draft\))$/ }).click();
+		await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
 		/** After a successful create/edit, the server action redirects back to the list. */
 		await this.page.waitForURL(`**${BASE_PATH}`);
 	}
@@ -73,5 +73,89 @@ export class AdminPersonsPage {
 
 	async confirmDelete(dialog: Locator): Promise<void> {
 		await dialog.getByRole("button", { name: "Delete" }).click();
+	}
+
+	// ---------------------------------------------------------------------------
+	// Details page — navigation
+	// ---------------------------------------------------------------------------
+
+	async gotoDetailsFromList(name: string): Promise<void> {
+		const row = this.rowByName(name);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await this.page.getByRole("menuitem", { name: "View" }).click();
+		await this.page.waitForURL(`**${BASE_PATH}/**/details`);
+	}
+
+	async gotoEditFromDetails(): Promise<void> {
+		const editHref = await this.page.getByRole("link", { name: "Edit" }).getAttribute("href");
+
+		if (editHref == null) {
+			throw new Error("Could not find edit link on person details page.");
+		}
+
+		await this.page.goto(editHref);
+		await this.page.waitForURL(`**${BASE_PATH}/**/edit`);
+	}
+
+	// ---------------------------------------------------------------------------
+	// Details page — status badges
+	// ---------------------------------------------------------------------------
+
+	/** "Draft" badge in the lifecycle bar (only present when no published version exists). */
+	detailsDraftBadge(): Locator {
+		return this.page.getByText("Draft", { exact: true });
+	}
+
+	/** "Published" badge in the lifecycle bar (only present when published-only, no draft). */
+	detailsPublishedBadge(): Locator {
+		return this.page.getByText("Published", { exact: true });
+	}
+
+	/** "Published with draft changes" badge in the lifecycle bar (draft + published both exist). */
+	detailsPublishedWithDraftChangesBadge(): Locator {
+		return this.page.getByText("Published with draft changes");
+	}
+
+	// ---------------------------------------------------------------------------
+	// Details page — lifecycle actions
+	// ---------------------------------------------------------------------------
+
+	async publishItem(): Promise<void> {
+		await this.page.getByRole("button", { name: "Publish" }).click();
+		await this.page.waitForURL(`**${BASE_PATH}`);
+	}
+
+	async discardDraft(): Promise<void> {
+		await this.page.getByRole("button", { name: "Discard draft" }).click();
+		const dialog = this.page.getByRole("dialog");
+		await dialog.waitFor({ state: "visible" });
+		await dialog.getByRole("button", { name: "Discard" }).click();
+		await this.page.waitForURL(`**${BASE_PATH}`);
+	}
+
+	// ---------------------------------------------------------------------------
+	// Details page — version selector
+	// ---------------------------------------------------------------------------
+
+	versionSelectorDraftLink(): Locator {
+		return this.page.getByRole("link", { name: "Draft" });
+	}
+
+	versionSelectorPublishedLink(): Locator {
+		return this.page.getByRole("link", { name: "Published" });
+	}
+
+	// ---------------------------------------------------------------------------
+	// List page — status badge within a row
+	// ---------------------------------------------------------------------------
+
+	/** "Published" status badge inside a specific list row. */
+	publishedBadgeInRow(name: string): Locator {
+		return this.rowByName(name).getByText("Published", { exact: true });
+	}
+
+	/** "Draft" status badge inside a specific list row. */
+	draftBadgeInRow(name: string): Locator {
+		return this.rowByName(name).getByText("Draft", { exact: true });
 	}
 }

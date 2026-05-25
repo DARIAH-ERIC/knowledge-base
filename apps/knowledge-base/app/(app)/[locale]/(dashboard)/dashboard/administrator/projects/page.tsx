@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { ProjectsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/projects-page";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getProjectsForAdmin } from "@/lib/data/projects";
+import { getProjectsForAdmin } from "@/lib/data/cached/projects";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";

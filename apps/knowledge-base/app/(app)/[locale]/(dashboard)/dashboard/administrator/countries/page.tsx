@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { CountriesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/countries-page";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getCountriesForAdmin } from "@/lib/data/countries";
+import { getCountriesForAdmin } from "@/lib/data/cached/countries";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";

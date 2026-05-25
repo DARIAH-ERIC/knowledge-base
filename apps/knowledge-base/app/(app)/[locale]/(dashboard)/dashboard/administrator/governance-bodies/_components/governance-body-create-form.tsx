@@ -1,9 +1,9 @@
 "use client";
 
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { GovernanceBodyForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form";
 import { createGovernanceBodyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/create-governance-body.action";
 
@@ -30,7 +30,7 @@ export function GovernanceBodyCreateForm(
 
 	return (
 		<Fragment>
-			<Heading>{t("New governance body")}</Heading>
+			<EntityFormHeader title={t("New governance body")} />
 
 			<GovernanceBodyForm
 				formAction={createGovernanceBodyAction}

@@ -1,9 +1,9 @@
 "use client";
 
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { InstitutionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form";
 import { createInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/create-institution.action";
 
@@ -28,7 +28,7 @@ export function InstitutionCreateForm(props: Readonly<InstitutionCreateFormProps
 
 	return (
 		<Fragment>
-			<Heading>{t("New institution")}</Heading>
+			<EntityFormHeader title={t("New institution")} />
 
 			<InstitutionForm
 				formAction={createInstitutionAction}

@@ -1,7 +1,27 @@
 import { createUrl, createUrlSearchParams } from "@acdh-oeaw/lib";
-import { type RequestResult, request } from "@dariah-eric/request";
-import type { RequestError } from "@dariah-eric/request/errors";
+import { type RequestOptions, type RequestResult, request } from "@dariah-eric/request";
+import { HttpError, type RequestError } from "@dariah-eric/request/errors";
 import { Result } from "better-result";
+
+/**
+ * Retry transient failures (network errors, timeouts, 5xx and 429). The SSH Open Marketplace API is
+ * occasionally slow; sequential pagination during ingest amplifies the chance of a transient
+ * failure killing a whole run.
+ */
+const retry: RequestOptions["retry"] = {
+	backoff: "exponential",
+	delayMs: 1000,
+	times: 3,
+	shouldRetry(error) {
+		if (error._tag === "NetworkError" || error._tag === "TimeoutError") {
+			return true;
+		}
+		if (HttpError.is(error)) {
+			return error.response.status >= 500 || error.response.status === 429;
+		}
+		return false;
+	},
+};
 
 export type ItemCategory =
 	| "tool-or-service"
@@ -276,7 +296,7 @@ export function createSshocClient(params: CreateSshocClientParams) {
 					...prefixedParams,
 				}),
 			}),
-			{ responseType: "json" },
+			{ responseType: "json", retry, timeout: 30_000 },
 		);
 	}
 

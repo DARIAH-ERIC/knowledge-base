@@ -4,11 +4,12 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { type ContentBlock, getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
+import { generateImageUrl } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
+import { mapSocialMedia } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
 import { type SQLWrapper, and, count, eq, exists, sql } from "@/services/db/sql";
-import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
 interface GetMembersAndPartnersParams {
@@ -82,8 +83,10 @@ export async function getMembersAndPartners(
 			.select({ total: count() })
 			.from(schema.membersAndPartners)
 			.innerJoin(schema.entityVersions, eq(schema.membersAndPartners.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -94,27 +97,8 @@ export async function getMembersAndPartners(
 				item.status === "is_member_of" || item.status === "is_observer_of"
 					? await getNationalConsortium(db, item.id)
 					: null;
-			const image =
-				nationalConsortium?.image ??
-				(item.image != null
-					? images.generateSignedImageUrl({
-							key: item.image.key,
-							options: { width: imageWidth.preview },
-						})
-					: null);
-
-			const socialMedia = item.socialMedia.map((sm) => {
-				return {
-					...sm,
-					type: sm.type.type,
-					duration: sm.duration
-						? {
-								start: sm.duration.start.toISOString(),
-								end: sm.duration.end?.toISOString() ?? null,
-							}
-						: null,
-				};
-			});
+			const image = nationalConsortium?.image ?? generateImageUrl(item.image, imageWidth.preview);
+			const socialMedia = mapSocialMedia(item.socialMedia);
 
 			return { ...flattenEntityVersion(item), image, socialMedia };
 		}),
@@ -124,29 +108,6 @@ export async function getMembersAndPartners(
 }
 
 //
-
-function mapSocialMedia(
-	socialMedia: Array<{
-		id: string;
-		name: string;
-		url: string;
-		duration: { start: Date; end?: Date | null } | null;
-		type: { type: string };
-	}>,
-) {
-	return socialMedia.map((sm) => {
-		return {
-			...sm,
-			type: sm.type.type,
-			duration: sm.duration
-				? {
-						start: sm.duration.start.toISOString(),
-						end: sm.duration.end?.toISOString() ?? null,
-					}
-				: null,
-		};
-	});
-}
 
 function mapPersonContributors(
 	rows: Array<{
@@ -164,10 +125,7 @@ function mapPersonContributors(
 			position: positions.get(row.id) ?? null,
 			role,
 			slug: row.slug,
-			image: images.generateSignedImageUrl({
-				key: imageKey,
-				options: { width: imageWidth.avatar },
-			}),
+			image: generateImageUrl({ key: imageKey }, imageWidth.avatar),
 		};
 	});
 }
@@ -515,13 +473,7 @@ async function getNationalConsortium(
 	return {
 		name: item.name,
 		slug: item.entityVersion.entity.slug,
-		image:
-			item.image != null
-				? images.generateSignedImageUrl({
-						key: item.image.key,
-						options: { width: options?.imageSize ?? imageWidth.preview },
-					})
-				: null,
+		image: generateImageUrl(item.image, options?.imageSize ?? imageWidth.preview),
 		description: fields.description,
 	};
 }
@@ -539,7 +491,10 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
 		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
 		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+		)
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.innerJoin(
 			schema.personRoleTypes,
@@ -548,7 +503,6 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 		.where(
 			and(
 				eq(schema.personsToOrganisationalUnits.organisationalUnitId, countryId),
-				eq(schema.entityStatus.type, "published"),
 				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
 				sql`
 					${schema.personRoleTypes.type} IN (
@@ -659,14 +613,7 @@ export async function getMemberOrPartnerById(
 			: Promise.resolve(null),
 	]);
 
-	const image =
-		nationalConsortium?.image ??
-		(item.image != null
-			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
-			: null);
+	const image = nationalConsortium?.image ?? generateImageUrl(item.image, imageWidth.featured);
 	const description = hasContentBlocks(nationalConsortium?.description)
 		? nationalConsortium.description
 		: fields.description;
@@ -737,8 +684,10 @@ export async function getMemberOrPartnerSlugs(
 			.select({ total: count() })
 			.from(schema.membersAndPartners)
 			.innerJoin(schema.entityVersions, eq(schema.membersAndPartners.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -847,14 +796,7 @@ export async function getMemberOrPartnerBySlug(
 		getRelatedResources(db, item.id),
 	]);
 
-	const image =
-		nationalConsortium?.image ??
-		(item.image != null
-			? images.generateSignedImageUrl({
-					key: item.image.key,
-					options: { width: imageWidth.featured },
-				})
-			: null);
+	const image = nationalConsortium?.image ?? generateImageUrl(item.image, imageWidth.featured);
 	const description = hasContentBlocks(nationalConsortium?.description)
 		? nationalConsortium.description
 		: fields.description;

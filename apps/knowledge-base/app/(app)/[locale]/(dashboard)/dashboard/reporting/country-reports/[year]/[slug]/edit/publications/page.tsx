@@ -66,10 +66,10 @@ export default async function DashboardReportingCountryReportPublicationsPage(
 
 	const t = await getExtracted();
 	const year = Number(routeYear);
-	const actorIds = new Set<number>();
+	const consortiumSlugs = new Set<string>();
 
-	const nationalConsortiumActorIds = await db
-		.select({ sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId })
+	const nationalConsortiumSlugs = await db
+		.select({ slug: schema.entities.slug })
 		.from(schema.organisationalUnitsRelations)
 		.innerJoin(
 			schema.organisationalUnitStatus,
@@ -83,6 +83,8 @@ export default async function DashboardReportingCountryReportPublicationsPage(
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 		)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.organisationalUnits.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 		.where(
 			and(
 				eq(schema.organisationalUnitsRelations.relatedUnitId, report.country.id),
@@ -100,21 +102,19 @@ export default async function DashboardReportingCountryReportPublicationsPage(
 			),
 		);
 
-	for (const { sshocMarketplaceActorId } of nationalConsortiumActorIds) {
-		if (sshocMarketplaceActorId != null) {
-			actorIds.add(sshocMarketplaceActorId);
-		}
+	for (const { slug } of nationalConsortiumSlugs) {
+		consortiumSlugs.add(slug);
 	}
 
 	const publicationsSearchParams: SearchResourcesParams = {
-		filterBy: `type:=publication && source:=zotero && year:=${year} && source_actor_ids:=[${[...actorIds].map((actorId) => `\`ssh-open-marketplace:${actorId}\``).join(",")}]`,
+		filterBy: `type:=publication && source:=zotero && year:=${year} && national_consortia:=[${[...consortiumSlugs].map((slug) => `\`${slug}\``).join(",")}]`,
 		perPage: 100,
 		query: "*",
 		queryBy: ["label", "description", "keywords"],
 		sortBy: [{ field: "label", direction: "asc" }],
 	};
 	const firstPublicationsResult =
-		actorIds.size === 0
+		consortiumSlugs.size === 0
 			? null
 			: await search.collections.resources.search({ ...publicationsSearchParams, page: 1 });
 	const remainingPublicationsResults =
@@ -144,9 +144,9 @@ export default async function DashboardReportingCountryReportPublicationsPage(
 		<div className="flex flex-col gap-y-12">
 			<div className="flex flex-col gap-y-4">
 				<p className="text-sm text-muted-fg">{t("Publications from the Zotero library.")}</p>
-				{actorIds.size === 0 ? (
+				{consortiumSlugs.size === 0 ? (
 					<p className="text-sm text-muted-fg italic">
-						{t("This country has no national consortium with an SSH Open Marketplace actor id.")}
+						{t("This country has no national consortium for the selected year.")}
 					</p>
 				) : publications.length === 0 ? (
 					<p className="text-sm text-muted-fg italic">

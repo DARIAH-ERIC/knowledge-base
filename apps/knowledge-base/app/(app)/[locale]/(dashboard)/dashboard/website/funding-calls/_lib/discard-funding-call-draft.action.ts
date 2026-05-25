@@ -1,32 +1,17 @@
 "use server";
 
-import { getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { discardDraftVersion } from "@/lib/data/entity-lifecycle";
 import { fundingCallsLifecycleAdapter } from "@/lib/data/funding-calls.lifecycle-adapter";
-import { db } from "@/lib/db";
-import { redirect } from "@/lib/navigation/navigation";
+import { createCommandAction } from "@/lib/server/create-command-action";
 
-export async function discardFundingCallDraftAction(documentId: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const discardFundingCallDraftAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "discard_draft", subjectType: "funding_calls" },
+	revalidate: "/[locale]/dashboard/website/funding-calls",
+	redirect: "/dashboard/website/funding-calls",
 
-	await db.transaction(async (tx) => {
+	async mutate(tx, [documentId]: [string]) {
 		await discardDraftVersion(tx, documentId, fundingCallsLifecycleAdapter);
-	});
-
-	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
-		action: "discard_draft",
-		subjectType: "funding_calls",
-		subjectId: documentId,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/website/funding-calls", "layout");
-
-	const locale = await getLocale();
-	redirect({ href: "/dashboard/website/funding-calls", locale });
-}
+		return { subjectId: documentId };
+	},
+});

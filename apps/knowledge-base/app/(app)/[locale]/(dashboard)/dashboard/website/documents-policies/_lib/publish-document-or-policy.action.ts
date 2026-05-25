@@ -26,7 +26,7 @@ export async function publishDocumentOrPolicyAction(documentId: string): Promise
 	});
 
 	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
+		actorUserId: auditSession.user.id,
 		action: "publish",
 		subjectType: "documents_policies",
 		subjectId: documentId,

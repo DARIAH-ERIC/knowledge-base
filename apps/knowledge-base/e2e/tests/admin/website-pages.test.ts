@@ -50,8 +50,10 @@ test.describe("website pages admin", () => {
 		await expect(row).toBeVisible();
 
 		await row.getByRole("button", { name: "Open actions menu" }).click();
-		await page.getByRole("menuitem", { name: "Edit" }).click();
-		await page.waitForURL("**/edit");
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
 
 		const updatedTitle = `${pagesPage.workerPrefix} Updated ${randomUUID()}`;
 		const titleField = page.getByLabel("Title");
@@ -64,6 +66,39 @@ test.describe("website pages admin", () => {
 		await expect(pagesPage.pageRowByTitle(updatedTitle)).toBeVisible();
 		await pagesPage.searchByTitle(originalTitle);
 		await expect(pagesPage.pageRowByTitle(originalTitle)).toBeHidden();
+	});
+
+	test("should clear an optional image when editing a page", async ({
+		db,
+		page,
+		createWebsitePagesPage,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const pagesPage = createWebsitePagesPage(workerIndex);
+
+		const title = `${pagesPage.workerPrefix} Clear Image ${randomUUID()}`;
+		await pagesPage.gotoCreate();
+		await pagesPage.fillTitle(title);
+		await pagesPage.fillSummary("E2E test page with image to clear");
+		await pagesPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await pagesPage.submitForm();
+
+		const createdPage = await db.getPageItemByTitle(title);
+		expect(createdPage?.imageId).not.toBeNull();
+
+		await pagesPage.searchByTitle(title);
+		const row = pagesPage.pageRowByTitle(title);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
+		await pagesPage.removeImage();
+		await pagesPage.submitForm();
+
+		const updatedPage = await db.getPageItemByTitle(title);
+		expect(updatedPage?.imageId).toBeNull();
 	});
 
 	test("should delete a page", async ({ createWebsitePagesPage }) => {

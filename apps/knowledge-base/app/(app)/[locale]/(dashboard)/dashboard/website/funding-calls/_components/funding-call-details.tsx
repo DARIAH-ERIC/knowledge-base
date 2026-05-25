@@ -23,8 +23,8 @@ interface FundingCallDetailsProps {
 	fundingCall: Pick<schema.FundingCall, "id" | "duration" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	};
-	publishAction: (documentId: string) => Promise<void>;
-	discardDraftAction?: (documentId: string) => Promise<void>;
+	publishAction: (documentId: string) => Promise<unknown>;
+	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
 
 export function FundingCallDetails(props: Readonly<FundingCallDetailsProps>): ReactNode {

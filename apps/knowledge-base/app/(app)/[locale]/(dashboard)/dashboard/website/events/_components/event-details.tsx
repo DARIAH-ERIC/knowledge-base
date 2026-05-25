@@ -23,8 +23,8 @@ interface EventDetailsProps {
 	event: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
-	publishAction: (documentId: string) => Promise<void>;
-	discardDraftAction?: (documentId: string) => Promise<void>;
+	publishAction: (documentId: string) => Promise<unknown>;
+	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
 
 export function EventDetails(props: Readonly<EventDetailsProps>): ReactNode {

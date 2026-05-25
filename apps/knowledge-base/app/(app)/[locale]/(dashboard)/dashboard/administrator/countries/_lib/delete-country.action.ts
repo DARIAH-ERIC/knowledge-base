@@ -2,49 +2,82 @@
 
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { revalidatePath } from "next/cache";
 
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import { deleteDocumentVersionTail } from "@/lib/data/entity-lifecycle";
-import { db } from "@/lib/db";
-import { eq, or } from "@/lib/db/sql";
+import { getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
+import { eq, inArray, or } from "@/lib/db/sql";
+import {
+	deleteWebsiteDocument,
+	getWebsiteDocumentDescriptorByEntityId,
+} from "@/lib/search/website-index";
+import { createCommandAction } from "@/lib/server/create-command-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export async function deleteCountryAction(id: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const deleteCountryAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "delete", subjectType: "countries" },
+	revalidate: "/[locale]/dashboard/administrator/countries",
 
-	await db.transaction(async (tx) => {
-		const entityVersion = await tx.query.entityVersions.findFirst({
-			where: { id },
-			columns: { id: true, entityId: true },
+	async mutate(tx, [documentId]: [string]) {
+		const entity = await tx.query.entities.findFirst({
+			where: { id: documentId },
+			columns: { id: true },
 		});
+		assert(entity, "Document not found.");
 
-		assert(entityVersion);
+		const descriptor = await getWebsiteDocumentDescriptorByEntityId(documentId);
+
+		const { draftId, publishedId } = await getDocumentVersions(tx, documentId);
+		const versionIds = [draftId, publishedId].filter((id): id is string => id != null);
+
+		for (const versionId of versionIds) {
+			await organisationalUnitsLifecycleAdapter.wipeSubtype(tx, versionId);
+		}
+
+		for (const versionId of versionIds) {
+			const fieldRows = await tx
+				.select({ id: schema.fields.id })
+				.from(schema.fields)
+				.where(eq(schema.fields.entityVersionId, versionId));
+
+			if (fieldRows.length > 0) {
+				const fieldIds = fieldRows.map((f) => f.id);
+				await tx
+					.delete(schema.contentBlocks)
+					.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+				await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+			}
+		}
 
 		await tx
-			.delete(schema.organisationalUnitsRelations)
+			.delete(schema.entitiesToResources)
+			.where(eq(schema.entitiesToResources.entityId, documentId));
+
+		await tx
+			.delete(schema.entitiesToEntities)
 			.where(
 				or(
-					eq(schema.organisationalUnitsRelations.unitId, entityVersion.id),
-					eq(schema.organisationalUnitsRelations.relatedUnitId, entityVersion.id),
+					eq(schema.entitiesToEntities.entityId, documentId),
+					eq(schema.entitiesToEntities.relatedEntityId, documentId),
 				),
 			);
 
-		await tx
-			.delete(schema.organisationalUnits)
-			.where(eq(schema.organisationalUnits.id, entityVersion.id));
-		await deleteDocumentVersionTail(tx, entityVersion.id, entityVersion.entityId);
-	});
+		if (versionIds.length > 0) {
+			await tx.delete(schema.entityVersions).where(inArray(schema.entityVersions.id, versionIds));
+		}
 
-	await dispatchWebhook({ type: "members-partners" });
-	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
-		action: "delete",
-		subjectType: "countries",
-		subjectId: id,
-		summary: {},
-	});
+		await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
 
-	revalidatePath("/[locale]/dashboard/administrator/countries", "layout");
-}
+		return {
+			subjectId: documentId,
+			descriptor,
+		};
+	},
+
+	async postCommit({ result }) {
+		if (result.descriptor != null) {
+			await deleteWebsiteDocument(result.descriptor);
+		}
+		await dispatchWebhook({ type: "members-partners" });
+	},
+});
