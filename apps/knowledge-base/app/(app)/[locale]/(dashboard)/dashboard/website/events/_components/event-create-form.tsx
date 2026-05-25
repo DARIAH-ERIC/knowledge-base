@@ -1,9 +1,9 @@
 "use client";
 
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EventForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_components/event-form";
 import { createEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/create-event.action";
 
@@ -28,7 +28,7 @@ export function EventCreateForm(props: Readonly<EventCreateFormProps>): ReactNod
 
 	return (
 		<Fragment>
-			<Heading>{t("New event")}</Heading>
+			<EntityFormHeader title={t("New event")} />
 
 			<EventForm
 				formAction={createEventAction}

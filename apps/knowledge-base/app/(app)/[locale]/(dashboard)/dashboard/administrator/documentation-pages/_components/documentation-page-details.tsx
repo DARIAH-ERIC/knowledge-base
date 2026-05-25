@@ -24,7 +24,7 @@ interface DocumentationPageDetailsProps {
 		entityVersion: { entity: Pick<schema.Entity, "id" | "slug"> };
 	};
 	publishAction?: (documentId: string) => Promise<void>;
-	discardDraftAction?: (documentId: string) => Promise<void>;
+	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
 
 export function DocumentationPageDetails(

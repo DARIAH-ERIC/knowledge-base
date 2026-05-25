@@ -14,7 +14,7 @@ export async function deleteSocialMediaAction(id: string): Promise<void> {
 	await db.delete(schema.socialMedia).where(eq(schema.socialMedia.id, id));
 
 	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
+		actorUserId: auditSession.user.id,
 		action: "delete",
 		subjectType: "social_media",
 		subjectId: id,

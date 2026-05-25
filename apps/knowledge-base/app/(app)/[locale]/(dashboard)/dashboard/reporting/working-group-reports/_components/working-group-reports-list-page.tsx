@@ -53,7 +53,6 @@ export async function WorkingGroupReportsListPage(
 								<div className="flex flex-col gap-y-0.5">
 									<span className="text-sm font-medium">{report.workingGroupName}</span>
 									<span className="text-xs text-muted-fg">
-										{/* eslint-disable-next-line react/jsx-no-literals */}
 										{report.campaignYear} &middot; {formatStatus(report.reportStatus)}
 									</span>
 								</div>

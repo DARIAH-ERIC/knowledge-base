@@ -1,85 +1,40 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { reportingCampaignContributionRoleEnum } from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
+import { getExtracted } from "next-intl/server";
 
 import { UpsertCampaignContributionAmountsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/upsert-campaign-contribution-amounts.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import { db } from "@/lib/db";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export const upsertCampaignContributionAmountsAction = createServerAction(
-	async function upsertCampaignContributionAmountsAction(state, formData) {
-		const locale = await getLocale();
+export const upsertCampaignContributionAmountsAction = createMutationAction({
+	schema: UpsertCampaignContributionAmountsActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "update", subjectType: "reporting_campaigns" },
+	revalidate: "/[locale]/dashboard/administrator/reporting-campaigns",
+
+	async mutate(tx, input) {
 		const t = await getExtracted();
+		const { id, ...amounts } = input;
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
-
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			UpsertCampaignContributionAmountsActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof UpsertCampaignContributionAmountsActionInputSchema>(
-				result.issues,
-			);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { id, ...amounts } = result.output;
-
-		await db.transaction(async (tx) => {
-			for (const roleType of reportingCampaignContributionRoleEnum) {
-				const amount = amounts[roleType];
-				if (amount == null) {
-					continue;
-				}
-
-				await tx
-					.insert(schema.reportingCampaignContributionAmounts)
-					.values({ campaignId: id, roleType, amount })
-					.onConflictDoUpdate({
-						target: [
-							schema.reportingCampaignContributionAmounts.campaignId,
-							schema.reportingCampaignContributionAmounts.roleType,
-						],
-						set: { amount },
-					});
+		for (const roleType of reportingCampaignContributionRoleEnum) {
+			const amount = amounts[roleType];
+			if (amount == null) {
+				continue;
 			}
-		});
 
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "update",
-			subjectType: "reporting_campaigns",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
+			await tx
+				.insert(schema.reportingCampaignContributionAmounts)
+				.values({ campaignId: id, roleType, amount })
+				.onConflictDoUpdate({
+					target: [
+						schema.reportingCampaignContributionAmounts.campaignId,
+						schema.reportingCampaignContributionAmounts.roleType,
+					],
+					set: { amount },
+				});
+		}
 
-		revalidatePath("/[locale]/dashboard/administrator/reporting-campaigns", "layout");
-
-		return createActionStateSuccess({ message: t("Saved.") });
+		return { subjectId: id, successMessage: t("Saved.") };
 	},
-);
+});

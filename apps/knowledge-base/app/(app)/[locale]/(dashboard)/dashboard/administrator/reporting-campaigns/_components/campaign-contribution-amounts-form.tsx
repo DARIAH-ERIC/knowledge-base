@@ -32,9 +32,7 @@ export function CampaignContributionAmountsForm(
 	const t = useExtracted();
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
-	const amountMap = Object.fromEntries(
-		amounts.map((a) => [a.roleType, a.amount != null ? String(a.amount) : undefined]),
-	);
+	const amountMap = Object.fromEntries(amounts.map((a) => [a.roleType, String(a.amount)]));
 
 	return (
 		<FormLayout variant="stacked">

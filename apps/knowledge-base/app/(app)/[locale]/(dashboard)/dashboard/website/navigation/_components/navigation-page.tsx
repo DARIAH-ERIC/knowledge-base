@@ -13,16 +13,12 @@ import {
 	TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, useState } from "react";
+import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
-import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
-	Header,
-	HeaderAction,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+	EntityDeleteModal,
+	EntityListHeader,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import {
 	type EntityOption,
 	NavigationItemFormDialog,
@@ -212,6 +208,8 @@ function MenuTabPanel(props: Readonly<MenuTabPanelProps>): ReactNode {
 	}>({ isOpen: false });
 
 	const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+	const [deleteItemError, setDeleteItemError] = useState<string | null>(null);
+	const [isDeleteItemPending, startDeleteItemTransition] = useTransition();
 
 	return (
 		<Fragment>
@@ -273,22 +271,29 @@ function MenuTabPanel(props: Readonly<MenuTabPanelProps>): ReactNode {
 				parentId={itemDialogState.parentId}
 			/>
 
-			<DeleteModal
-				isOpen={itemToDelete != null}
+			<EntityDeleteModal
+				item={itemToDelete != null ? { id: itemToDelete } : null}
 				model={t("navigation item")}
-				onAction={() => {
+				isPending={isDeleteItemPending}
+				error={deleteItemError}
+				onClose={() => {
+					setItemToDelete(null);
+					setDeleteItemError(null);
+				}}
+				onConfirm={() => {
 					if (itemToDelete == null) {
 						return;
 					}
-					startTransition(async () => {
-						await deleteNavigationItemAction(itemToDelete);
-						setItemToDelete(null);
+					const id = itemToDelete;
+					setDeleteItemError(null);
+					startDeleteItemTransition(async () => {
+						try {
+							await deleteNavigationItemAction(id);
+							setItemToDelete(null);
+						} catch {
+							setDeleteItemError(t("Could not delete navigation item. Please try again."));
+						}
 					});
-				}}
-				onOpenChange={(open) => {
-					if (!open) {
-						setItemToDelete(null);
-					}
 				}}
 			/>
 		</Fragment>
@@ -301,18 +306,16 @@ export function NavigationPage(props: Readonly<NavigationPageProps>): ReactNode 
 	const t = useExtracted();
 
 	const [menuToDelete, setMenuToDelete] = useState<string | null>(null);
+	const [deleteMenuError, setDeleteMenuError] = useState<string | null>(null);
+	const [isDeleteMenuPending, startDeleteMenuTransition] = useTransition();
 
 	return (
 		<Fragment>
-			<Header>
-				<HeaderContent>
-					<HeaderTitle>{t("Website navigation")}</HeaderTitle>
-					<HeaderDescription>{t("Manage website navigation.")}</HeaderDescription>
-				</HeaderContent>
-				<HeaderAction>
-					<NavigationMenuCreateDialog />
-				</HeaderAction>
-			</Header>
+			<EntityListHeader
+				title={t("Website navigation")}
+				description={t("Manage website navigation.")}
+				action={<NavigationMenuCreateDialog />}
+			/>
 
 			<div className="p-(--layout-padding)">
 				{menus.length === 0 ? (
@@ -357,22 +360,29 @@ export function NavigationPage(props: Readonly<NavigationPageProps>): ReactNode 
 				)}
 			</div>
 
-			<DeleteModal
-				isOpen={menuToDelete != null}
+			<EntityDeleteModal
+				item={menuToDelete != null ? { id: menuToDelete } : null}
 				model={t("navigation menu")}
-				onAction={() => {
+				isPending={isDeleteMenuPending}
+				error={deleteMenuError}
+				onClose={() => {
+					setMenuToDelete(null);
+					setDeleteMenuError(null);
+				}}
+				onConfirm={() => {
 					if (menuToDelete == null) {
 						return;
 					}
-					startTransition(async () => {
-						await deleteNavigationMenuAction(menuToDelete);
-						setMenuToDelete(null);
+					const id = menuToDelete;
+					setDeleteMenuError(null);
+					startDeleteMenuTransition(async () => {
+						try {
+							await deleteNavigationMenuAction(id);
+							setMenuToDelete(null);
+						} catch {
+							setDeleteMenuError(t("Could not delete navigation menu. Please try again."));
+						}
 					});
-				}}
-				onOpenChange={(open) => {
-					if (!open) {
-						setMenuToDelete(null);
-					}
 				}}
 			/>
 		</Fragment>

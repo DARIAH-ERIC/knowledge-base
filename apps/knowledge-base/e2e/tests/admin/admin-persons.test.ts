@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { withFailureInjection } from "@/e2e/lib/fixtures/failure-injection";
 import { expect, test } from "@/e2e/lib/test";
 
 test.describe("persons admin", () => {
@@ -66,6 +67,33 @@ test.describe("persons admin", () => {
 		await expect(personsPage.rowByName(updatedName)).toBeVisible();
 		await personsPage.searchByName(originalName);
 		await expect(personsPage.rowByName(originalName)).toBeHidden();
+	});
+
+	test("failure injection forces createServerAction to return an error state", async ({
+		page,
+		createAdminPersonsPage,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const personsPage = createAdminPersonsPage(workerIndex);
+
+		const name = `${personsPage.workerPrefix} FailureInjection ${randomUUID()}`;
+
+		await personsPage.gotoCreate();
+		await personsPage.fillName(name);
+		await personsPage.fillSortName("FailureInjection, Person");
+		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
+
+		await withFailureInjection(page, async () => {
+			await page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
+			/** Action returns error state; URL stays on the create page. */
+			await expect(page).toHaveURL(/\/dashboard\/administrator\/persons\/create$/);
+			await expect(page.getByText("Internal server error.")).toBeVisible();
+		});
+
+		/** Sanity check: nothing was persisted. */
+		await personsPage.goto();
+		await personsPage.searchByName(name);
+		await expect(personsPage.rowByName(name)).toBeHidden();
 	});
 
 	test("should delete a person", async ({ createAdminPersonsPage }) => {

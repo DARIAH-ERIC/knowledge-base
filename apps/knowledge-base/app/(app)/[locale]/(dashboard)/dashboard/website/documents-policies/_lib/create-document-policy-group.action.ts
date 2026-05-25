@@ -1,66 +1,32 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
 
 import { CreateDocumentPolicyGroupActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/create-document-policy-group.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import { db } from "@/lib/db";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export const createDocumentPolicyGroupAction = createServerAction(
-	async function createDocumentPolicyGroupAction(state, formData) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+export const createDocumentPolicyGroupAction = createMutationAction({
+	schema: CreateDocumentPolicyGroupActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "create", subjectType: "documents_policies" },
+	revalidate: "/[locale]/dashboard/website/documents-policies",
 
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			CreateDocumentPolicyGroupActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateDocumentPolicyGroupActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { label } = result.output;
-
-		const existing = await db.query.documentPolicyGroups.findMany({
+	async mutate(tx, input) {
+		const existing = await tx.query.documentPolicyGroups.findMany({
 			columns: { id: true },
 		});
 
-		await db.insert(schema.documentPolicyGroups).values({
-			label,
-			position: existing.length,
-		});
+		const [created] = await tx
+			.insert(schema.documentPolicyGroups)
+			.values({
+				label: input.label,
+				position: existing.length,
+			})
+			.returning({ id: schema.documentPolicyGroups.id });
 
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "create",
-			subjectType: "documents_policies",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
+		assert(created);
 
-		revalidatePath("/[locale]/dashboard/website/documents-policies", "layout");
-
-		return createActionStateSuccess({});
+		return { subjectId: created.id };
 	},
-);
+});

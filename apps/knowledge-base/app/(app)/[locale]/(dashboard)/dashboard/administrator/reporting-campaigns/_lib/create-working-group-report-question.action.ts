@@ -1,88 +1,50 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import type { JSONContent } from "@tiptap/core";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
+import { getExtracted } from "next-intl/server";
 import * as v from "valibot";
 
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import { db } from "@/lib/db";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
 const CreateWorkingGroupReportQuestionSchema = v.object({
 	campaignId: v.pipe(v.string(), v.uuid()),
-	question: v.pipe(v.string(), v.nonEmpty()),
+	question: v.pipe(
+		v.string(),
+		v.nonEmpty(),
+		v.rawTransform(({ dataset, addIssue, NEVER }) => {
+			try {
+				return JSON.parse(dataset.value) as JSONContent;
+			} catch {
+				addIssue({ message: "Invalid question content." });
+				return NEVER;
+			}
+		}),
+	),
 });
 
-export const createWorkingGroupReportQuestionAction = createServerAction(
-	async function createWorkingGroupReportQuestionAction(state, formData) {
-		const locale = await getLocale();
+export const createWorkingGroupReportQuestionAction = createMutationAction({
+	schema: CreateWorkingGroupReportQuestionSchema,
+	requireAdmin: true,
+	audit: { action: "create", subjectType: "reporting_campaigns" },
+	revalidate: "/[locale]/dashboard/administrator/reporting-campaigns",
+
+	async mutate(tx, input) {
 		const t = await getExtracted();
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
-
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			CreateWorkingGroupReportQuestionSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateWorkingGroupReportQuestionSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { campaignId, question: questionJson } = result.output;
-
-		const existing = await db.query.workingGroupReportQuestions.findMany({
-			where: { campaignId },
+		const existing = await tx.query.workingGroupReportQuestions.findMany({
+			where: { campaignId: input.campaignId },
 			columns: { position: true },
 			orderBy: { position: "desc" },
 		});
-
 		const nextPosition = existing.length > 0 ? existing[0]!.position + 1 : 1;
 
-		let question: JSONContent;
-		try {
-			question = JSON.parse(questionJson) as JSONContent;
-		} catch {
-			return createActionStateError({ message: t("Invalid question content.") });
-		}
-
-		await db.insert(schema.workingGroupReportQuestions).values({
-			campaignId,
-			question,
+		await tx.insert(schema.workingGroupReportQuestions).values({
+			campaignId: input.campaignId,
+			question: input.question,
 			position: nextPosition,
 		});
 
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "create",
-			subjectType: "reporting_campaigns",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
-
-		revalidatePath("/[locale]/dashboard/administrator/reporting-campaigns", "layout");
-
-		return createActionStateSuccess({ message: t("Added.") });
+		return { subjectId: input.campaignId, successMessage: t("Added.") };
 	},
-);
+});

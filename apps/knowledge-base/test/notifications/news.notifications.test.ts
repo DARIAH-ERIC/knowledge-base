@@ -33,11 +33,18 @@ vi.mock("next/cache", () => {
 });
 
 vi.mock("next-intl/server", () => {
-	return { getLocale: vi.fn().mockResolvedValue("en") };
+	return {
+		getLocale: vi.fn().mockResolvedValue("en"),
+		getExtracted: vi.fn().mockResolvedValue((key: string) => key),
+	};
+});
+
+vi.mock("@dariah-eric/next-lib/rate-limiter", () => {
+	return { globalPostRequestRateLimit: vi.fn().mockResolvedValue(true) };
 });
 
 vi.mock("@/lib/auth/session", () => {
-	return { assertAdmin: vi.fn().mockResolvedValue(undefined) };
+	return { assertAdmin: vi.fn().mockResolvedValue({ user: null }) };
 });
 
 vi.mock("@/lib/navigation/navigation", () => {

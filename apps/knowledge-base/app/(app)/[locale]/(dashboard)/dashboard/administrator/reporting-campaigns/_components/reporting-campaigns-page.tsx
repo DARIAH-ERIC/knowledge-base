@@ -1,10 +1,6 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Button } from "@dariah-eric/ui/button";
-import { buttonStyles } from "@dariah-eric/ui/button-styles";
-import { Link } from "@dariah-eric/ui/link";
-import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
 import {
 	Table,
 	TableBody,
@@ -13,69 +9,64 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import {
-	EllipsisHorizontalIcon,
-	PencilSquareIcon,
-	PlusIcon,
-	TrashIcon,
-} from "@heroicons/react/24/outline";
+import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, startTransition, use, useOptimistic, useState } from "react";
+import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
-import { DeleteModal } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/delete-modal";
 import {
-	Header,
-	HeaderAction,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+	EntityDeleteModal,
+	EntityListHeader,
+	EntityListPagination,
+	EntityListSearchField,
+	NewLink,
+	RowActionsMenu,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
+import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { deleteReportingCampaignAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/delete-reporting-campaign.action";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface ReportingCampaignsPageProps {
-	campaigns: Promise<
-		Array<
+	campaigns: {
+		data: Array<
 			Pick<schema.ReportingCampaign, "id" | "year" | "status"> & {
 				hasReports: boolean;
 				reportCount: number;
 			}
-		>
-	>;
+		>;
+		total: number;
+	};
+	page: number;
+	q: string;
 }
 
-export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPageProps>): ReactNode {
-	const { campaigns: campaignsPromise } = props;
+const pageSize = dashboardPageSize;
 
-	const resolvedCampaigns = use(campaignsPromise);
+export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPageProps>): ReactNode {
+	const { campaigns, page: initialPage, q: initialQ } = props;
 
 	const t = useExtracted();
 	const router = useRouter();
-	const [campaigns, optimisticallyRemoveCampaign] = useOptimistic(
-		resolvedCampaigns,
-		(state, id: string) => state.filter((c) => c.id !== id),
+	const [items, optimisticallyRemoveCampaign] = useOptimistic(campaigns.data, (state, id: string) =>
+		state.filter((c) => c.id !== id),
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
+	const [isDeletePending, startDeleteTransition] = useTransition();
+	const search = useUrlPaginatedSearch({ page: initialPage, q: initialQ });
 
 	return (
 		<Fragment>
-			<Header>
-				<HeaderContent>
-					<HeaderTitle>{t("Reporting campaigns")}</HeaderTitle>
-					<HeaderDescription>
-						{t("Manage all reporting campaigns in the DARIAH knowledge base.")}
-					</HeaderDescription>
-				</HeaderContent>
-				<HeaderAction>
-					<Link
-						className={buttonStyles({ intent: "secondary" })}
-						href="/dashboard/administrator/reporting-campaigns/create"
-					>
-						<PlusIcon className="me-2 block-4 inline-4" />
-						{t("New")}
-					</Link>
-				</HeaderAction>
-			</Header>
+			<EntityListHeader
+				title={t("Reporting campaigns")}
+				description={t("Manage all reporting campaigns in the DARIAH knowledge base.")}
+				action={
+					<>
+						<EntityListSearchField search={search} />
+						<NewLink href="/dashboard/administrator/reporting-campaigns/create">{t("New")}</NewLink>
+					</>
+				}
+			/>
 
 			<Table
 				aria-label="reporting campaigns"
@@ -87,65 +78,67 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 					<TableColumn>{t("Reports")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
-				<TableBody items={campaigns}>
+				<TableBody items={items}>
 					{(item) => (
 						<TableRow id={item.id}>
 							<TableCell>{item.year}</TableCell>
 							<TableCell>{item.status}</TableCell>
 							<TableCell>{item.reportCount}</TableCell>
 							<TableCell className="text-end">
-								<Menu>
-									<Button
-										aria-label={t("Open actions menu")}
-										className="block-7 sm:block-7"
-										intent="plain"
-										size="sq-sm"
+								<RowActionsMenu>
+									<RowActionsMenu.Link
+										href={`/dashboard/administrator/reporting-campaigns/${item.id}/edit`}
+										icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
 									>
-										<EllipsisHorizontalIcon className="block-5 inline-5" />
-									</Button>
-									<MenuContent placement="left top">
-										<MenuItem href={`/dashboard/administrator/reporting-campaigns/${item.id}/edit`}>
-											<PencilSquareIcon className="me-2 block-4 inline-4" />
-											<MenuLabel>{t("Edit")}</MenuLabel>
-										</MenuItem>
-										<MenuSeparator />
-										<MenuItem
-											intent="danger"
-											isDisabled={item.hasReports}
-											onAction={() => {
-												setItemToDelete({ id: item.id });
-											}}
-										>
-											<TrashIcon className="me-2 block-4 inline-4" />
-											<MenuLabel>{t("Delete")}</MenuLabel>
-										</MenuItem>
-									</MenuContent>
-								</Menu>
+										{t("Edit")}
+									</RowActionsMenu.Link>
+									<RowActionsMenu.Separator />
+									<RowActionsMenu.Action
+										danger={true}
+										icon={<TrashIcon className="me-2 block-4 inline-4" />}
+										isDisabled={item.hasReports}
+										onAction={() => {
+											setItemToDelete({ id: item.id });
+										}}
+									>
+										{t("Delete")}
+									</RowActionsMenu.Action>
+								</RowActionsMenu>
 							</TableCell>
 						</TableRow>
 					)}
 				</TableBody>
 			</Table>
 
-			<DeleteModal
-				isOpen={itemToDelete != null}
+			<EntityListPagination search={search} total={campaigns.total} pageSize={pageSize} />
+
+			<EntityDeleteModal
+				item={itemToDelete}
 				model={t("reporting campaign")}
-				onAction={() => {
+				isPending={isDeletePending}
+				error={deleteError}
+				onClose={() => {
+					setItemToDelete(null);
+					setDeleteError(null);
+				}}
+				onConfirm={() => {
 					if (itemToDelete == null) {
 						return;
 					}
 
-					startTransition(async () => {
-						optimisticallyRemoveCampaign(itemToDelete.id);
-						await deleteReportingCampaignAction(itemToDelete.id);
-						router.refresh();
-						setItemToDelete(null);
+					const id = itemToDelete.id;
+					setDeleteError(null);
+
+					startDeleteTransition(async () => {
+						optimisticallyRemoveCampaign(id);
+						try {
+							await deleteReportingCampaignAction(id);
+							router.refresh();
+							setItemToDelete(null);
+						} catch {
+							setDeleteError(t("Could not delete reporting campaign. Please try again."));
+						}
 					});
-				}}
-				onOpenChange={(open) => {
-					if (!open) {
-						setItemToDelete(null);
-					}
 				}}
 			/>
 		</Fragment>

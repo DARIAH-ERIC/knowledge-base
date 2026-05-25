@@ -1,43 +1,24 @@
 "use server";
 
-import { assert } from "@acdh-oeaw/lib";
-import { getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { publishVersion } from "@/lib/data/entity-lifecycle";
 import { newsLifecycleAdapter } from "@/lib/data/news.lifecycle-adapter";
-import { db } from "@/lib/db";
-import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
+import { createCommandAction } from "@/lib/server/create-command-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export async function publishNewsItemAction(documentId: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const publishNewsItemAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "publish", subjectType: "news" },
+	revalidate: "/[locale]/dashboard/website/news",
+	redirect: "/dashboard/website/news",
 
-	assert(documentId, "Missing documentId.");
-
-	await db.transaction(async (tx) => {
+	async mutate(tx, [documentId]: [string]) {
 		await publishVersion(tx, documentId, newsLifecycleAdapter);
-	});
+		return { subjectId: documentId };
+	},
 
-	after(async () => {
-		await syncWebsiteDocumentForEntity(documentId);
+	async postCommit({ result }) {
+		await syncWebsiteDocumentForEntity(result.subjectId);
 		await dispatchWebhook({ type: "news" });
-	});
-
-	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
-		action: "publish",
-		subjectType: "news",
-		subjectId: documentId,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/website/news", "layout");
-
-	const locale = await getLocale();
-	redirect({ href: "/dashboard/website/news", locale });
-}
+	},
+});

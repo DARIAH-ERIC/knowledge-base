@@ -39,7 +39,7 @@ export function CampaignCountryThresholdsForm(
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
 	const thresholdMap = Object.fromEntries(
-		thresholds.map((th) => [th.countryId, th.amount != null ? String(th.amount) : undefined]),
+		thresholds.map((th) => [th.countryId, String(th.amount)]),
 	);
 
 	return (

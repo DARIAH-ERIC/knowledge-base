@@ -1,9 +1,9 @@
 "use client";
 
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { PageItemForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_components/page-item-form";
 import { createPageItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/pages/_lib/create-page-item.action";
 
@@ -28,7 +28,7 @@ export function PageItemCreateForm(props: Readonly<PageItemCreateFormProps>): Re
 
 	return (
 		<Fragment>
-			<Heading>{t("New page")}</Heading>
+			<EntityFormHeader title={t("New page")} />
 
 			<PageItemForm
 				formAction={createPageItemAction}

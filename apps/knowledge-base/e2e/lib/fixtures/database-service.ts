@@ -468,6 +468,77 @@ export class DatabaseService {
 	}
 
 	/**
+	 * Deletes ALL versions (draft + published) of a person document and the document row itself. Use
+	 * this instead of `deletePerson` when the document may have more than one version (e.g. after
+	 * publish or edit-after-publish flows).
+	 */
+	async deletePersonDocument(documentId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const versions = await tx
+				.select({ id: schema.entityVersions.id })
+				.from(schema.entityVersions)
+				.where(eq(schema.entityVersions.entityId, documentId));
+
+			for (const version of versions) {
+				const entityFields = await tx
+					.select({ id: schema.fields.id })
+					.from(schema.fields)
+					.where(eq(schema.fields.entityVersionId, version.id));
+
+				if (entityFields.length > 0) {
+					const fieldIds = (entityFields as Array<{ id: string }>).map((f) => f.id);
+					await tx
+						.delete(schema.contentBlocks)
+						.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+					await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+				}
+
+				await tx
+					.delete(schema.personsToOrganisationalUnits)
+					.where(eq(schema.personsToOrganisationalUnits.personId, version.id));
+				await tx.delete(schema.persons).where(eq(schema.persons.id, version.id));
+				await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, version.id));
+			}
+
+			await tx
+				.delete(schema.entitiesToResources)
+				.where(eq(schema.entitiesToResources.entityId, documentId));
+
+			await tx
+				.delete(schema.entitiesToEntities)
+				.where(
+					or(
+						eq(schema.entitiesToEntities.entityId, documentId),
+						eq(schema.entitiesToEntities.relatedEntityId, documentId),
+					),
+				);
+
+			await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
+		});
+	}
+
+	/**
+	 * Finds all person documents whose name starts with `[e2e-worker-{workerIndex}]` (across any
+	 * version) and deletes all their versions. Safe for lifecycle tests where items may be in
+	 * published, draft+published, or published-only state.
+	 */
+	async cleanupWorkerPersonsLifecycleItems(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const rows = await this.db
+			.select({ documentId: schema.entityVersions.entityId })
+			.from(schema.persons)
+			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+			.where(sql`${schema.persons.name} LIKE ${`${prefix}%`}`);
+
+		const documentIds = [...new Set(rows.map((r) => r.documentId))];
+
+		for (const documentId of documentIds) {
+			await this.deletePersonDocument(documentId);
+		}
+	}
+
+	/**
 	 * Cascade-deletes a working group and all its related records. Replicates the logic in
 	 * `delete-working-group.action.ts`.
 	 */

@@ -1,14 +1,35 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import { type ReactNode, Suspense } from "react";
+import type { ReactNode } from "react";
 
-import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
 import { WorkingGroupReportsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_components/working-group-reports-page";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getWorkingGroupReportsForAdmin } from "@/lib/data/admin-reporting";
+import type { IntlLocale } from "@/lib/i18n/locales";
+import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { getListSearchParams } from "@/lib/server/list-search-params";
 
 interface DashboardAdministratorWorkingGroupReportsPageProps extends PageProps<"/[locale]/dashboard/administrator/working-group-reports"> {}
+
+const pageSize = dashboardPageSize;
+
+function createListHref(q: string, page: number): string {
+	const searchParams = new URLSearchParams();
+
+	if (q !== "") {
+		searchParams.set("q", q);
+	}
+
+	if (page > 1) {
+		searchParams.set("page", String(page));
+	}
+
+	const query = searchParams.toString();
+
+	return `/dashboard/administrator/working-group-reports${query !== "" ? `?${query}` : ""}`;
+}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorWorkingGroupReportsPageProps>,
@@ -23,14 +44,23 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardAdministratorWorkingGroupReportsPage(
-	_props: Readonly<DashboardAdministratorWorkingGroupReportsPageProps>,
-): ReactNode {
-	const reports = assertAuthenticated().then(({ user }) => getWorkingGroupReportsForAdmin(user));
+export default async function DashboardAdministratorWorkingGroupReportsPage(
+	props: Readonly<DashboardAdministratorWorkingGroupReportsPageProps>,
+): Promise<ReactNode> {
+	const { params, searchParams } = props;
+	const [{ locale }, rawSearchParams] = await Promise.all([params, searchParams]);
+	const { page, q } = getListSearchParams(rawSearchParams);
+	const { user } = await assertAuthenticated();
+	const reports = await getWorkingGroupReportsForAdmin(user, {
+		limit: pageSize,
+		offset: (page - 1) * pageSize,
+		q,
+	});
+	const totalPages = Math.max(Math.ceil(reports.total / pageSize), 1);
 
-	return (
-		<Suspense fallback={<LoadingScreen />}>
-			<WorkingGroupReportsPage reports={reports} />
-		</Suspense>
-	);
+	if (page > totalPages) {
+		redirect({ href: createListHref(q, totalPages), locale: locale as IntlLocale });
+	}
+
+	return <WorkingGroupReportsPage reports={reports} page={page} q={q} />;
 }

@@ -42,7 +42,7 @@ export async function deleteDocumentPolicyGroupAction(id: string): Promise<void>
 	});
 
 	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
+		actorUserId: auditSession.user.id,
 		action: "delete",
 		subjectType: "documents_policies",
 		subjectId: id,

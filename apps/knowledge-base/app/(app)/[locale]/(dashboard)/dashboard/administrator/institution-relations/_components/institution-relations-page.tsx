@@ -4,7 +4,6 @@ import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { Label } from "@dariah-eric/ui/field";
-import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator } from "@dariah-eric/ui/menu";
 import {
 	ModalBody,
 	ModalClose,
@@ -12,7 +11,6 @@ import {
 	ModalFooter,
 	ModalHeader,
 } from "@dariah-eric/ui/modal";
-import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import {
 	Table,
 	TableBody,
@@ -21,23 +19,17 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import {
-	ArchiveBoxXMarkIcon,
-	EllipsisHorizontalIcon,
-	PencilSquareIcon,
-} from "@heroicons/react/24/outline";
+import { ArchiveBoxXMarkIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import { type CalendarDate, getLocalTimeZone } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
 import {
-	Header,
-	HeaderAction,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
-import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+	EntityListHeader,
+	EntityListPagination,
+	EntityListSearchField,
+	RowActionsMenu,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { endUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-unit-relation.action";
 import { dashboardPageSize } from "@/config/pagination.config";
@@ -121,40 +113,29 @@ export function InstitutionRelationsPage(
 	);
 	const [itemToEnd, setItemToEnd] = useState<{ id: string } | null>(null);
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
-	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
-		useUrlPaginatedSearch({
-			dir: initialDir,
-			page: initialPage,
-			q: initialQ,
-			sort: initialSort,
-		});
+	const search = useUrlPaginatedSearch({
+		dir: initialDir,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+	});
 	const [isEndPending, startEndTransition] = useTransition();
-
-	const totalPages = Math.max(Math.ceil(institutionRelations.total / pageSize), 1);
 
 	return (
 		<Fragment>
-			<Header>
-				<HeaderContent>
-					<HeaderTitle>{t("Institution relations")}</HeaderTitle>
-					<HeaderDescription>
-						{t(
-							"Review dated institution-to-organisation relations and manage them from institution edit pages.",
-						)}
-					</HeaderDescription>
-				</HeaderContent>
-				<HeaderAction>
-					<SearchField onChange={setInputValue} value={inputValue}>
-						<SearchInput placeholder={t("Search")} />
-					</SearchField>
-				</HeaderAction>
-			</Header>
+			<EntityListHeader
+				title={t("Institution relations")}
+				description={t(
+					"Review dated institution-to-organisation relations and manage them from institution edit pages.",
+				)}
+				action={<EntityListSearchField search={search} />}
+			/>
 
 			<Table
 				aria-label="institution relations"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
-				onSortChange={setSortDescriptor}
-				sortDescriptor={sortDescriptor}
+				onSortChange={search.setSortDescriptor}
+				sortDescriptor={search.sortDescriptor}
 			>
 				<TableHeader>
 					<TableColumn allowsSorting={true} id="institutionName" isRowHeader={true}>
@@ -195,51 +176,38 @@ export function InstitutionRelationsPage(
 									: t("present")}
 							</TableCell>
 							<TableCell className="text-end">
-								<Menu>
-									<Button
-										aria-label={t("Open actions menu")}
-										className="block-7 sm:block-7"
-										intent="plain"
-										size="sq-sm"
+								<RowActionsMenu>
+									<RowActionsMenu.Link
+										href={`/dashboard/administrator/institutions/${item.institutionSlug}/edit`}
+										icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
 									>
-										<EllipsisHorizontalIcon className="block-5 inline-5" />
-									</Button>
-									<MenuContent placement="left top">
-										<MenuItem
-											href={`/dashboard/administrator/institutions/${item.institutionSlug}/edit`}
-										>
-											<PencilSquareIcon className="me-2 block-4 inline-4" />
-											<MenuLabel>{t("Edit institution")}</MenuLabel>
-										</MenuItem>
-										{item.durationEnd == null ? (
-											<Fragment>
-												<MenuSeparator />
-												<MenuItem
-													onAction={() => {
-														setItemToEnd({ id: item.id });
-														setSelectedEndDate(null);
-													}}
-												>
-													<ArchiveBoxXMarkIcon className="me-2 block-4 inline-4" />
-													<MenuLabel>{t("End relation")}</MenuLabel>
-												</MenuItem>
-											</Fragment>
-										) : null}
-									</MenuContent>
-								</Menu>
+										{t("Edit institution")}
+									</RowActionsMenu.Link>
+									{item.durationEnd == null ? (
+										<Fragment>
+											<RowActionsMenu.Separator />
+											<RowActionsMenu.Action
+												icon={<ArchiveBoxXMarkIcon className="me-2 block-4 inline-4" />}
+												onAction={() => {
+													setItemToEnd({ id: item.id });
+													setSelectedEndDate(null);
+												}}
+											>
+												{t("End relation")}
+											</RowActionsMenu.Action>
+										</Fragment>
+									) : null}
+								</RowActionsMenu>
 							</TableCell>
 						</TableRow>
 					)}
 				</TableBody>
 			</Table>
 
-			<Paginate
-				isPending={isPending}
-				page={page}
-				perPage={pageSize}
-				setPage={setPage}
-				total={totalPages}
-				totalItems={institutionRelations.total}
+			<EntityListPagination
+				search={search}
+				total={institutionRelations.total}
+				pageSize={pageSize}
 			/>
 
 			<ModalContent

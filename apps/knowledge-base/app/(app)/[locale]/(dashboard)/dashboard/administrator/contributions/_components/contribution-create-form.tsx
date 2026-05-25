@@ -1,9 +1,9 @@
 "use client";
 
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action";
 import { ContributionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contribution-form";
 import type { ContributionPersonOption, ContributionRoleOption } from "@/lib/data/contributions";
@@ -21,7 +21,7 @@ export function ContributionCreateForm(props: Readonly<ContributionCreateFormPro
 
 	return (
 		<Fragment>
-			<Heading>{t("New person relation")}</Heading>
+			<EntityFormHeader title={t("New person relation")} />
 
 			<ContributionForm
 				description={t("Create a new person-to-organisation relation.")}

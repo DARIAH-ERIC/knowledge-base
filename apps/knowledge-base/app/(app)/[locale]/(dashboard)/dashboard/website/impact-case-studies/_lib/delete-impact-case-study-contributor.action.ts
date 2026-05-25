@@ -35,7 +35,7 @@ export async function deleteImpactCaseStudyContributorAction(
 	});
 
 	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
+		actorUserId: auditSession.user.id,
 		action: "delete",
 		subjectType: "impact_case_studies",
 		subjectId: articleId,

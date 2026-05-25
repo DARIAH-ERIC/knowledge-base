@@ -7,12 +7,12 @@ import { Button } from "@dariah-eric/ui/button";
 import { FieldError, Label } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
-import { Heading } from "@dariah-eric/ui/heading";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import {
 	FormLayout,
 	FormSection,
@@ -46,7 +46,7 @@ export function WorkingGroupReportCreateForm(
 
 	return (
 		<Fragment>
-			<Heading>{t("New working group report")}</Heading>
+			<EntityFormHeader title={t("New working group report")} />
 
 			<FormLayout>
 				<Form action={action} className="flex flex-col gap-y-6" state={state}>

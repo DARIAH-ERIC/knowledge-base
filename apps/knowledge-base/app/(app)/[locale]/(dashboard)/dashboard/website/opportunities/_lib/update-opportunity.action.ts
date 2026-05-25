@@ -1,145 +1,97 @@
 "use server";
 
-import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
+import { assert, keyBy } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-import * as v from "valibot";
 
 import { UpdateOpportunityActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/opportunities/_lib/update-opportunity.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { ensureEntityVersionField } from "@/lib/data/entity-version-fields";
 import { opportunitiesLifecycleAdapter } from "@/lib/data/opportunities.lifecycle-adapter";
-import { type Transaction, db } from "@/lib/db";
+import { db } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export const updateOpportunityAction = createServerAction(
-	async function updateOpportunityAction(state, formData) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+export const updateOpportunityAction = createMutationAction({
+	schema: UpdateOpportunityActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "update", subjectType: "opportunities" },
+	revalidate: "/[locale]/dashboard/website/opportunities",
+	redirect: "/dashboard/website/opportunities",
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
-
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			UpdateOpportunityActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+	async mutate(tx, input, { formData }) {
+		const draftVersionId = await ensureDraftVersion(
+			tx,
+			input.documentId,
+			opportunitiesLifecycleAdapter,
 		);
 
-		if (!result.success) {
-			const errors = v.flatten<typeof UpdateOpportunityActionInputSchema>(result.issues);
+		await tx
+			.update(schema.opportunities)
+			.set({
+				title: input.title,
+				summary: input.summary,
+				sourceId: input.sourceId,
+				website: input.website,
+				duration: input.duration,
+			})
+			.where(eq(schema.opportunities.id, draftVersionId));
 
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
+		const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");
+		const contentBlockTypes = await db.query.contentBlockTypes.findMany();
+		const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
+
+		const existingBlocks = await tx.query.contentBlocks.findMany({
+			where: { fieldId: contentField.id },
+			columns: { id: true },
+		});
+
+		if (existingBlocks.length > 0) {
+			await tx.delete(schema.contentBlocks).where(
+				inArray(
+					schema.contentBlocks.id,
+					existingBlocks.map((b) => b.id),
+				),
+			);
 		}
 
-		const { contentBlocks, documentId, sourceId, title, summary, duration, website } =
-			result.output;
+		await Promise.all(
+			input.contentBlocks.map(async (contentBlock, index) => {
+				const [added] = await tx
+					.insert(schema.contentBlocks)
+					.values({
+						fieldId: contentField.id,
+						typeId: contentBlockTypesByType[contentBlock.type].id,
+						position: index,
+					})
+					.returning({ id: schema.contentBlocks.id });
+				assert(added);
+				await upsertTypedContentBlock(tx, contentBlock, added.id, true);
+			}),
+		);
 
-		await db.transaction(async (tx) => {
-			const draftVersionId = await ensureDraftVersion(
-				tx,
-				documentId,
-				opportunitiesLifecycleAdapter,
-			);
+		await touchVersion(tx, draftVersionId);
 
-			await tx
-				.update(schema.opportunities)
-				.set({ title, summary, sourceId, website, duration })
-				.where(eq(schema.opportunities.id, draftVersionId));
+		if (shouldSaveAndPublish(formData)) {
+			await publishVersion(tx, input.documentId, opportunitiesLifecycleAdapter);
+		}
 
-			const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");
-
-			const contentBlockTypes = await db.query.contentBlockTypes.findMany();
-			const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
-
-			async function upsertTypeBlock(tx: Transaction, block: ContentBlockInput, blockId: string) {
-				await upsertTypedContentBlock(tx, block, blockId, true);
-			}
-
-			const existingBlocks = await tx.query.contentBlocks.findMany({
-				where: { fieldId: contentField.id },
-				columns: { id: true },
-			});
-
-			if (existingBlocks.length > 0) {
-				await tx.delete(schema.contentBlocks).where(
-					inArray(
-						schema.contentBlocks.id,
-						existingBlocks.map((b) => b.id),
-					),
-				);
-			}
-
-			await Promise.all(
-				contentBlocks.map(async (contentBlock, index) => {
-					const [added] = await tx
-						.insert(schema.contentBlocks)
-						.values({
-							fieldId: contentField.id,
-							typeId: contentBlockTypesByType[contentBlock.type].id,
-							position: index,
-						})
-						.returning({ id: schema.contentBlocks.id });
-
-					assert(added);
-
-					await upsertTypeBlock(tx, contentBlock, added.id);
-				}),
-			);
-
-			await touchVersion(tx, draftVersionId);
-
-			if (shouldSaveAndPublish(formData)) {
-				await publishVersion(tx, documentId, opportunitiesLifecycleAdapter);
-			}
-		});
-
-		after(async () => {
-			if (!shouldSaveAndPublish(formData)) {
-				return;
-			}
-
-			await syncWebsiteDocumentForEntity(documentId);
-			await dispatchWebhook({ type: "opportunities" });
-		});
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "update",
-			subjectType: "opportunities",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: {
-				...getAuditSummaryFromFormData(formData),
+		return {
+			subjectId: input.documentId,
+			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},
-		});
-
-		revalidatePath("/[locale]/dashboard/website/opportunities", "layout");
-
-		redirect({ href: "/dashboard/website/opportunities", locale });
+		};
 	},
-);
+
+	async postCommit({ result, ctx }) {
+		if (!shouldSaveAndPublish(ctx.formData)) {
+			return;
+		}
+		await syncWebsiteDocumentForEntity(result.subjectId);
+		await dispatchWebhook({ type: "opportunities" });
+	},
+});

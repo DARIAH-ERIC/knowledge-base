@@ -1,14 +1,35 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
-import { type ReactNode, Suspense } from "react";
+import type { ReactNode } from "react";
 
-import { LoadingScreen } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/loading-screen";
 import { CountryReportsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-reports-page";
+import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getCountryReportsForAdmin } from "@/lib/data/admin-reporting";
+import type { IntlLocale } from "@/lib/i18n/locales";
+import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
+import { getListSearchParams } from "@/lib/server/list-search-params";
 
 interface DashboardAdministratorCountryReportsPageProps extends PageProps<"/[locale]/dashboard/administrator/country-reports"> {}
+
+const pageSize = dashboardPageSize;
+
+function createListHref(q: string, page: number): string {
+	const searchParams = new URLSearchParams();
+
+	if (q !== "") {
+		searchParams.set("q", q);
+	}
+
+	if (page > 1) {
+		searchParams.set("page", String(page));
+	}
+
+	const query = searchParams.toString();
+
+	return `/dashboard/administrator/country-reports${query !== "" ? `?${query}` : ""}`;
+}
 
 export async function generateMetadata(
 	_props: Readonly<DashboardAdministratorCountryReportsPageProps>,
@@ -23,14 +44,23 @@ export async function generateMetadata(
 	return metadata;
 }
 
-export default function DashboardAdministratorCountryReportsPage(
-	_props: Readonly<DashboardAdministratorCountryReportsPageProps>,
-): ReactNode {
-	const reports = assertAuthenticated().then(({ user }) => getCountryReportsForAdmin(user));
+export default async function DashboardAdministratorCountryReportsPage(
+	props: Readonly<DashboardAdministratorCountryReportsPageProps>,
+): Promise<ReactNode> {
+	const { params, searchParams } = props;
+	const [{ locale }, rawSearchParams] = await Promise.all([params, searchParams]);
+	const { page, q } = getListSearchParams(rawSearchParams);
+	const { user } = await assertAuthenticated();
+	const reports = await getCountryReportsForAdmin(user, {
+		limit: pageSize,
+		offset: (page - 1) * pageSize,
+		q,
+	});
+	const totalPages = Math.max(Math.ceil(reports.total / pageSize), 1);
 
-	return (
-		<Suspense fallback={<LoadingScreen />}>
-			<CountryReportsPage reports={reports} />
-		</Suspense>
-	);
+	if (page > totalPages) {
+		redirect({ href: createListHref(q, totalPages), locale: locale as IntlLocale });
+	}
+
+	return <CountryReportsPage reports={reports} page={page} q={q} />;
 }

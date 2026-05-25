@@ -1,9 +1,9 @@
 "use client";
 
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { SpotlightArticleForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form";
 import { createSpotlightArticleAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article.action";
 
@@ -30,7 +30,7 @@ export function SpotlightArticleCreateForm(
 
 	return (
 		<Fragment>
-			<Heading>{t("New spotlight article")}</Heading>
+			<EntityFormHeader title={t("New spotlight article")} />
 
 			<SpotlightArticleForm
 				formAction={createSpotlightArticleAction}

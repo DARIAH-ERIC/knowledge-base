@@ -1,9 +1,9 @@
 "use client";
 
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { DocumentationPageForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form";
 import { createDocumentationPageAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_lib/create-documentation-page.action";
 
@@ -12,7 +12,7 @@ export function DocumentationPageCreateForm(): ReactNode {
 
 	return (
 		<Fragment>
-			<Heading>{t("New documentation page")}</Heading>
+			<EntityFormHeader title={t("New documentation page")} />
 			<DocumentationPageForm formAction={createDocumentationPageAction} />
 		</Fragment>
 	);

@@ -2,7 +2,6 @@
 
 import * as schema from "@dariah-eric/database/schema";
 
-import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { and, count, desc, eq, ilike, sql } from "@/lib/db/sql";
 
@@ -23,7 +22,6 @@ export async function getDocumentationPages(params: GetDocumentationPagesParams)
 		query != null && query !== ""
 			? ilike(schema.documentationPages.title, `%${query}%`)
 			: undefined;
-	const where = and(currentEntityVersionWhere(), searchWhere);
 	const orderBy =
 		sort === "title"
 			? dir === "asc"
@@ -33,60 +31,26 @@ export async function getDocumentationPages(params: GetDocumentationPagesParams)
 				? schema.entityVersions.updatedAt
 				: desc(schema.entityVersions.updatedAt);
 
+	const pickedVersion = sql`COALESCE(${schema.documentLifecycle.draftId}, ${schema.documentLifecycle.publishedId})`;
+
 	const [items, aggregate] = await Promise.all([
 		db
 			.select({
 				id: schema.documentationPages.id,
 				slug: schema.entities.slug,
-				hasDraft: sql<boolean>`
-					EXISTS (
-						SELECT
-							1
-						FROM
-							"entity_versions" AS "dv"
-							INNER JOIN "entity_status" AS "ds" ON "dv"."status_id" = "ds"."id"
-						WHERE
-							"dv"."entity_id" = ${schema.entityVersions.entityId}
-							AND "ds"."type" = 'draft'
-							AND (
-								NOT EXISTS (
-									SELECT
-										1
-									FROM
-										"entity_versions" AS "pv"
-										INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
-									WHERE
-										"pv"."entity_id" = ${schema.entityVersions.entityId}
-										AND "ps"."type" = 'published'
-								)
-								OR "dv"."updated_at" > (
-									SELECT
-										"pv"."updated_at"
-									FROM
-										"entity_versions" AS "pv"
-										INNER JOIN "entity_status" AS "ps" ON "pv"."status_id" = "ps"."id"
-									WHERE
-										"pv"."entity_id" = ${schema.entityVersions.entityId}
-										AND "ps"."type" = 'published'
-									LIMIT 1
-								)
-							)
-					)
-				`,
-				isPublished: sql<boolean>`EXISTS (
-					SELECT 1 FROM "entity_versions" AS "published_versions"
-					INNER JOIN "entity_status" AS "published_status" ON "published_versions"."status_id" = "published_status"."id"
-					WHERE "published_versions"."entity_id" = ${schema.entities.id}
-					AND "published_status"."type" = 'published'
-				)`,
+				hasDraft: schema.documentLifecycle.hasDraftChanges,
+				isPublished: sql<boolean>`${schema.documentLifecycle.publishedId} IS NOT NULL`,
 				title: schema.documentationPages.title,
 				updatedAt: schema.entityVersions.updatedAt,
 			})
 			.from(schema.documentationPages)
 			.innerJoin(schema.entityVersions, eq(schema.documentationPages.id, schema.entityVersions.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(where)
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.documentId, schema.entities.id),
+			)
+			.where(and(sql`${schema.entityVersions.id} = ${pickedVersion}`, searchWhere))
 			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
@@ -94,8 +58,11 @@ export async function getDocumentationPages(params: GetDocumentationPagesParams)
 			.select({ total: count() })
 			.from(schema.documentationPages)
 			.innerJoin(schema.entityVersions, eq(schema.documentationPages.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(where),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.documentId, schema.entityVersions.entityId),
+			)
+			.where(and(sql`${schema.entityVersions.id} = ${pickedVersion}`, searchWhere)),
 	]);
 
 	return {

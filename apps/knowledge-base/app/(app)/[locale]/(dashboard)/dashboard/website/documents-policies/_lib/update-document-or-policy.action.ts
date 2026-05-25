@@ -1,181 +1,133 @@
 "use server";
 
-import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
+import { assert, keyBy } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-import * as v from "valibot";
 
 import { UpdateDocumentOrPolicyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_lib/update-document-or-policy.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { documentsPoliciesLifecycleAdapter } from "@/lib/data/documents-policies.lifecycle-adapter";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { ensureEntityVersionField } from "@/lib/data/entity-version-fields";
-import { type Transaction, db } from "@/lib/db";
+import { db } from "@/lib/db";
 import { eq, inArray, isNull } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export const updateDocumentOrPolicyAction = createServerAction(
-	async function updateDocumentOrPolicyAction(state, formData) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+export const updateDocumentOrPolicyAction = createMutationAction<
+	typeof UpdateDocumentOrPolicyActionInputSchema,
+	{ published: boolean }
+>({
+	schema: UpdateDocumentOrPolicyActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "update", subjectType: "documents_policies" },
+	revalidate: "/[locale]/dashboard/website/documents-policies",
+	redirect: "/dashboard/website/documents-policies",
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
-
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			UpdateDocumentOrPolicyActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+	async mutate(tx, input, { formData }) {
+		const draftVersionId = await ensureDraftVersion(
+			tx,
+			input.documentId,
+			documentsPoliciesLifecycleAdapter,
 		);
 
-		if (!result.success) {
-			const errors = v.flatten<typeof UpdateDocumentOrPolicyActionInputSchema>(result.issues);
+		const asset = await tx.query.assets.findFirst({
+			where: { key: input.documentKey },
+			columns: { id: true },
+		});
 
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
+		assert(asset);
+
+		const current = await tx.query.documentsPolicies.findFirst({
+			where: { id: draftVersionId },
+			columns: { groupId: true },
+		});
+
+		const newGroupId = input.groupId ?? null;
+		let newPosition: number | undefined;
+
+		if (current != null && current.groupId !== newGroupId) {
+			const siblings = await tx
+				.select({ id: schema.documentsPolicies.id })
+				.from(schema.documentsPolicies)
+				.where(
+					newGroupId != null
+						? eq(schema.documentsPolicies.groupId, newGroupId)
+						: isNull(schema.documentsPolicies.groupId),
+				);
+
+			newPosition = siblings.length;
 		}
 
-		const { contentBlocks, documentId, documentKey, title, summary, url, groupId } = result.output;
+		await tx
+			.update(schema.documentsPolicies)
+			.set({
+				documentId: asset.id,
+				title: input.title,
+				summary: input.summary,
+				url: input.url != null && input.url.length > 0 ? input.url : null,
+				groupId: newGroupId,
+				...(newPosition !== undefined ? { position: newPosition } : {}),
+			})
+			.where(eq(schema.documentsPolicies.id, draftVersionId));
 
-		await db.transaction(async (tx) => {
-			const draftVersionId = await ensureDraftVersion(
-				tx,
-				documentId,
-				documentsPoliciesLifecycleAdapter,
+		const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");
+
+		const contentBlockTypes = await db.query.contentBlockTypes.findMany();
+		const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
+
+		const existingBlocks = await tx.query.contentBlocks.findMany({
+			where: { fieldId: contentField.id },
+			columns: { id: true },
+		});
+
+		if (existingBlocks.length > 0) {
+			await tx.delete(schema.contentBlocks).where(
+				inArray(
+					schema.contentBlocks.id,
+					existingBlocks.map((b) => b.id),
+				),
 			);
+		}
 
-			const asset = await tx.query.assets.findFirst({
-				where: { key: documentKey },
-				columns: { id: true },
-			});
+		await Promise.all(
+			input.contentBlocks.map(async (contentBlock, index) => {
+				const [added] = await tx
+					.insert(schema.contentBlocks)
+					.values({
+						fieldId: contentField.id,
+						typeId: contentBlockTypesByType[contentBlock.type].id,
+						position: index,
+					})
+					.returning({ id: schema.contentBlocks.id });
 
-			assert(asset);
+				assert(added);
 
-			const assetId = asset.id;
+				await upsertTypedContentBlock(tx, contentBlock, added.id, true);
+			}),
+		);
 
-			const current = await tx.query.documentsPolicies.findFirst({
-				where: { id: draftVersionId },
-				columns: { groupId: true },
-			});
+		await touchVersion(tx, draftVersionId);
 
-			const newGroupId = groupId ?? null;
-			let newPosition: number | undefined;
+		const published = shouldSaveAndPublish(formData);
+		if (published) {
+			await publishVersion(tx, input.documentId, documentsPoliciesLifecycleAdapter);
+		}
 
-			if (current != null && current.groupId !== newGroupId) {
-				const siblings = await tx
-					.select({ id: schema.documentsPolicies.id })
-					.from(schema.documentsPolicies)
-					.where(
-						newGroupId != null
-							? eq(schema.documentsPolicies.groupId, newGroupId)
-							: isNull(schema.documentsPolicies.groupId),
-					);
-
-				newPosition = siblings.length;
-			}
-
-			await tx
-				.update(schema.documentsPolicies)
-				.set({
-					documentId: assetId,
-					title,
-					summary,
-					url: url != null && url.length > 0 ? url : null,
-					groupId: newGroupId,
-					...(newPosition !== undefined ? { position: newPosition } : {}),
-				})
-				.where(eq(schema.documentsPolicies.id, draftVersionId));
-
-			const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");
-
-			const contentBlockTypes = await db.query.contentBlockTypes.findMany();
-			const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
-
-			async function upsertTypeBlock(tx: Transaction, block: ContentBlockInput, blockId: string) {
-				await upsertTypedContentBlock(tx, block, blockId, true);
-			}
-
-			const existingBlocks = await tx.query.contentBlocks.findMany({
-				where: { fieldId: contentField.id },
-				columns: { id: true },
-			});
-
-			if (existingBlocks.length > 0) {
-				await tx.delete(schema.contentBlocks).where(
-					inArray(
-						schema.contentBlocks.id,
-						existingBlocks.map((b) => b.id),
-					),
-				);
-			}
-
-			await Promise.all(
-				contentBlocks.map(async (contentBlock, index) => {
-					const [added] = await tx
-						.insert(schema.contentBlocks)
-						.values({
-							fieldId: contentField.id,
-							typeId: contentBlockTypesByType[contentBlock.type].id,
-							position: index,
-						})
-						.returning({ id: schema.contentBlocks.id });
-
-					assert(added);
-
-					await upsertTypeBlock(tx, contentBlock, added.id);
-				}),
-			);
-
-			await touchVersion(tx, draftVersionId);
-
-			if (shouldSaveAndPublish(formData)) {
-				await publishVersion(tx, documentId, documentsPoliciesLifecycleAdapter);
-			}
-		});
-
-		after(async () => {
-			if (!shouldSaveAndPublish(formData)) {
-				return;
-			}
-
-			await syncWebsiteDocumentForEntity(documentId);
-			await dispatchWebhook({ type: "documents-policies" });
-		});
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "update",
-			subjectType: "documents_policies",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: {
-				...getAuditSummaryFromFormData(formData),
-				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
-			},
-		});
-
-		revalidatePath("/[locale]/dashboard/website/documents-policies", "layout");
-
-		redirect({ href: "/dashboard/website/documents-policies", locale });
+		return {
+			subjectId: input.documentId,
+			auditSummary: { lifecycle: published ? "published" : "draft" },
+			successData: { published },
+		};
 	},
-);
+
+	async postCommit({ result, input }) {
+		if (result.successData == null || !result.successData.published) {
+			return;
+		}
+
+		await syncWebsiteDocumentForEntity(input.documentId);
+		await dispatchWebhook({ type: "documents-policies" });
+	},
+});

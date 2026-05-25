@@ -1,32 +1,17 @@
 "use server";
 
-import { getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { discardDraftVersion } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
-import { db } from "@/lib/db";
-import { redirect } from "@/lib/navigation/navigation";
+import { createCommandAction } from "@/lib/server/create-command-action";
 
-export async function discardCountryDraftAction(documentId: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const discardCountryDraftAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "discard_draft", subjectType: "countries" },
+	revalidate: "/[locale]/dashboard/administrator/countries",
+	redirect: "/dashboard/administrator/countries",
 
-	await db.transaction(async (tx) => {
+	async mutate(tx, [documentId]: [string]) {
 		await discardDraftVersion(tx, documentId, organisationalUnitsLifecycleAdapter);
-	});
-
-	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
-		action: "discard_draft",
-		subjectType: "countries",
-		subjectId: documentId,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/administrator/countries", "layout");
-
-	const locale = await getLocale();
-	redirect({ href: "/dashboard/administrator/countries", locale });
-}
+		return { subjectId: documentId };
+	},
+});

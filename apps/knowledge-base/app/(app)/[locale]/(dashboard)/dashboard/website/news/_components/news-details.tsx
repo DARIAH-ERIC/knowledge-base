@@ -23,8 +23,8 @@ interface NewsItemDetailsProps {
 	newsItem: Pick<schema.NewsItem, "id" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
-	publishAction: (documentId: string) => Promise<void>;
-	discardDraftAction?: (documentId: string) => Promise<void>;
+	publishAction: (documentId: string) => Promise<unknown>;
+	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
 
 export function NewsItemDetails(props: Readonly<NewsItemDetailsProps>): ReactNode {

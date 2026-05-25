@@ -42,8 +42,8 @@ interface ProjectDetailsProps {
 			type: { type: string };
 		}>;
 	} & { image: { key: string; label: string; url: string } | null };
-	publishAction: (documentId: string) => Promise<void>;
-	discardDraftAction?: (documentId: string) => Promise<void>;
+	publishAction: (documentId: string) => Promise<unknown>;
+	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
 
 export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode {

@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { NationalConsortiaPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortia-page";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getNationalConsortiaForAdmin } from "@/lib/data/national-consortia";
+import { getNationalConsortiaForAdmin } from "@/lib/data/cached/national-consortia";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";

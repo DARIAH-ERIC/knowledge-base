@@ -6,7 +6,7 @@ import { ProjectCreateForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/ad
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
-import { getProjectCreateDataForAdmin } from "@/lib/data/projects";
+import { getProjectCreateDataForAdmin } from "@/lib/data/cached/projects";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardAdministratorCreateProjectPageProps extends PageProps<"/[locale]/dashboard/administrator/projects/create"> {}

@@ -1,40 +1,24 @@
 "use server";
 
-import { getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { publishVersion } from "@/lib/data/entity-lifecycle";
 import { impactCaseStudiesLifecycleAdapter } from "@/lib/data/impact-case-studies.lifecycle-adapter";
-import { db } from "@/lib/db";
-import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
+import { createCommandAction } from "@/lib/server/create-command-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export async function publishImpactCaseStudyAction(documentId: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const publishImpactCaseStudyAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "publish", subjectType: "impact_case_studies" },
+	revalidate: "/[locale]/dashboard/website/impact-case-studies",
+	redirect: "/dashboard/website/impact-case-studies",
 
-	await db.transaction(async (tx) => {
+	async mutate(tx, [documentId]: [string]) {
 		await publishVersion(tx, documentId, impactCaseStudiesLifecycleAdapter);
-	});
+		return { subjectId: documentId };
+	},
 
-	after(async () => {
-		await syncWebsiteDocumentForEntity(documentId);
+	async postCommit({ result }) {
+		await syncWebsiteDocumentForEntity(result.subjectId);
 		await dispatchWebhook({ type: "impact-case-studies" });
-	});
-
-	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
-		action: "publish",
-		subjectType: "impact_case_studies",
-		subjectId: documentId,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/website/impact-case-studies", "layout");
-
-	const locale = await getLocale();
-	redirect({ href: "/dashboard/website/impact-case-studies", locale });
-}
+	},
+});

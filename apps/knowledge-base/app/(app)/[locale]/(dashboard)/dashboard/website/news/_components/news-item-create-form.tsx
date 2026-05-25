@@ -1,9 +1,9 @@
 "use client";
 
-import { Heading } from "@dariah-eric/ui/heading";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { NewsItemForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form";
 import { createNewsItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/create-news-item.action";
 
@@ -28,7 +28,7 @@ export function NewsItemCreateForm(props: Readonly<NewsItemCreateFormProps>): Re
 
 	return (
 		<Fragment>
-			<Heading>{t("New news item")}</Heading>
+			<EntityFormHeader title={t("New news item")} />
 
 			<NewsItemForm
 				formAction={createNewsItemAction}

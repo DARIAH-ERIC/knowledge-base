@@ -6,11 +6,7 @@ import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { getExtracted, getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
+import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
@@ -36,10 +32,10 @@ export async function deleteWorkingGroupReportQuestionAction(formData: FormData)
 		.where(eq(schema.workingGroupReportQuestions.id, id));
 
 	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
+		actorUserId: auditSession.user.id,
 		action: "delete",
 		subjectType: "reporting_campaigns",
-		subjectId: getAuditSubjectIdFromFormData(formData),
+		subjectId: campaignId,
 		summary: getAuditSummaryFromFormData(formData),
 	});
 

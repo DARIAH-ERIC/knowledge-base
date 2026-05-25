@@ -14,7 +14,7 @@ export async function deleteCountryReportAction(id: string): Promise<void> {
 	await db.delete(schema.countryReports).where(eq(schema.countryReports.id, id));
 
 	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
+		actorUserId: auditSession.user.id,
 		action: "delete",
 		subjectType: "country_reports",
 		subjectId: id,

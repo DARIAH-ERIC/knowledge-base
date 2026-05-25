@@ -1,66 +1,37 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
+import { getExtracted } from "next-intl/server";
 
 import { CreateWorkingGroupReportEventActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/create-working-group-report-event.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
 import { assertCan } from "@/lib/auth/permissions";
-import { assertAuthenticated } from "@/lib/auth/session";
-import { db } from "@/lib/db";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export const createWorkingGroupReportEventAction = createServerAction(
-	async function createWorkingGroupReportEventAction(_state, formData) {
-		const locale = await getLocale();
+export const createWorkingGroupReportEventAction = createMutationAction({
+	schema: CreateWorkingGroupReportEventActionInputSchema,
+	requireAuth: true,
+	audit: { action: "create", subjectType: "working_group_report" },
+	revalidate: "/[locale]/dashboard/reporting",
+
+	async preCheck({ input, ctx }) {
+		await assertCan(ctx.user!, "update", {
+			type: "working_group_report",
+			id: input.workingGroupReportId,
+		});
+		return undefined;
+	},
+
+	async mutate(tx, input) {
 		const t = await getExtracted();
 
-		const { user } = await assertAuthenticated();
-
-		const result = await v.safeParseAsync(
-			CreateWorkingGroupReportEventActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof CreateWorkingGroupReportEventActionInputSchema>(
-				result.issues,
-			);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const { workingGroupReportId, title, date, url, role } = result.output;
-
-		await assertCan(user, "update", { type: "working_group_report", id: workingGroupReportId });
-
-		await db
-			.insert(schema.workingGroupReportEvents)
-			.values({ workingGroupReportId, title, date, url: url ?? null, role });
-
-		await recordAuditEvent(db, {
-			actorUserId: user.id,
-			action: "create",
-			subjectType: "working_group_report",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
+		await tx.insert(schema.workingGroupReportEvents).values({
+			workingGroupReportId: input.workingGroupReportId,
+			title: input.title,
+			date: input.date,
+			url: input.url ?? null,
+			role: input.role,
 		});
 
-		revalidatePath("/[locale]/dashboard/reporting", "layout");
-
-		return createActionStateSuccess({ message: t("Added.") });
+		return { subjectId: input.workingGroupReportId, successMessage: t("Added.") };
 	},
-);
+});

@@ -9,13 +9,16 @@ import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { type ReactNode, useState, useTransition } from "react";
 
+/** Lifecycle command actions return an ActionState on completion; the bar ignores it. */
+type LifecycleAction = (documentId: string) => Promise<unknown>;
+
 interface EntityLifecycleBarProps {
 	documentId: string;
 	isPublished: boolean;
 	hasDraft: boolean;
 	editHref?: string;
-	publishAction?: (documentId: string) => Promise<void>;
-	discardDraftAction?: (documentId: string) => Promise<void>;
+	publishAction?: LifecycleAction;
+	discardDraftAction?: LifecycleAction;
 }
 
 export function EntityLifecycleBar(props: Readonly<EntityLifecycleBarProps>): ReactNode {

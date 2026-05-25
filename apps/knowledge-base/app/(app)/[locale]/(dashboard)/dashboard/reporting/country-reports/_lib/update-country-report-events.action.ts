@@ -1,86 +1,39 @@
 "use server";
 
-import { getFormDataValues } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError, createActionStateSuccess } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import * as v from "valibot";
+import { getExtracted } from "next-intl/server";
 
 import { UpdateCountryReportEventsActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/update-country-report-events.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
 import { assertCan } from "@/lib/auth/permissions";
-import { assertAuthenticated } from "@/lib/auth/session";
-import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 
-export const updateCountryReportEventsAction = createServerAction(
-	async function updateCountryReportEventsAction(state, formData) {
-		const locale = await getLocale();
+export const updateCountryReportEventsAction = createMutationAction({
+	schema: UpdateCountryReportEventsActionInputSchema,
+	requireAuth: true,
+	audit: { action: "update", subjectType: "country_report" },
+	revalidate: "/[locale]/dashboard/reporting",
+
+	async preCheck({ input, ctx }) {
+		await assertCan(ctx.user!, "update", { type: "country_report", id: input.id });
+		return undefined;
+	},
+
+	async mutate(tx, input) {
 		const t = await getExtracted();
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
-		}
-
-		const { user } = await assertAuthenticated();
-
-		const result = await v.safeParseAsync(
-			UpdateCountryReportEventsActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
-		);
-
-		if (!result.success) {
-			const errors = v.flatten<typeof UpdateCountryReportEventsActionInputSchema>(result.issues);
-
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
-		}
-
-		const {
-			id,
-			smallEvents,
-			mediumEvents,
-			largeEvents,
-			veryLargeEvents,
-			dariahCommissionedEvent,
-			reusableOutcomes,
-		} = result.output;
-
-		await assertCan(user, "update", { type: "country_report", id });
-
-		await db
+		await tx
 			.update(schema.countryReports)
 			.set({
-				smallEvents: smallEvents ?? null,
-				mediumEvents: mediumEvents ?? null,
-				largeEvents: largeEvents ?? null,
-				veryLargeEvents: veryLargeEvents ?? null,
-				dariahCommissionedEvent: dariahCommissionedEvent ?? null,
-				reusableOutcomes: reusableOutcomes ?? null,
+				smallEvents: input.smallEvents ?? null,
+				mediumEvents: input.mediumEvents ?? null,
+				largeEvents: input.largeEvents ?? null,
+				veryLargeEvents: input.veryLargeEvents ?? null,
+				dariahCommissionedEvent: input.dariahCommissionedEvent ?? null,
+				reusableOutcomes: input.reusableOutcomes ?? null,
 			})
-			.where(eq(schema.countryReports.id, id));
+			.where(eq(schema.countryReports.id, input.id));
 
-		await recordAuditEvent(db, {
-			actorUserId: user.id,
-			action: "update",
-			subjectType: "country_report",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: getAuditSummaryFromFormData(formData),
-		});
-
-		revalidatePath("/[locale]/dashboard/reporting", "layout");
-
-		return createActionStateSuccess({ message: t("Saved.") });
+		return { subjectId: input.id, successMessage: t("Saved.") };
 	},
-);
+});

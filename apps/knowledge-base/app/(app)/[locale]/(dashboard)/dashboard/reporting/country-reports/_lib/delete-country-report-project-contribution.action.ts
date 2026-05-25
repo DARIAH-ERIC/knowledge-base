@@ -4,11 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
 import { revalidatePath } from "next/cache";
 
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
+import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -38,7 +34,7 @@ export async function deleteCountryReportProjectContributionAction(
 		actorUserId: user.id,
 		action: "delete",
 		subjectType: "country_report",
-		subjectId: getAuditSubjectIdFromFormData(formData),
+		subjectId: countryReportId,
 		summary: getAuditSummaryFromFormData(formData),
 	});
 

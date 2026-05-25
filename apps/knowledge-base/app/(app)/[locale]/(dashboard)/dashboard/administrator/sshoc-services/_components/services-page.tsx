@@ -2,9 +2,6 @@
 
 import type * as schema from "@dariah-eric/database/schema";
 import { Badge } from "@dariah-eric/ui/badge";
-import { Button } from "@dariah-eric/ui/button";
-import { Menu, MenuContent, MenuItem, MenuLabel } from "@dariah-eric/ui/menu";
-import { SearchField, SearchInput } from "@dariah-eric/ui/search-field";
 import {
 	Table,
 	TableBody,
@@ -13,18 +10,16 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { EllipsisHorizontalIcon, EyeIcon } from "@heroicons/react/24/outline";
+import { EyeIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic } from "react";
 
 import {
-	Header,
-	HeaderAction,
-	HeaderContent,
-	HeaderDescription,
-	HeaderTitle,
-} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
-import { Paginate } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/paginate";
+	EntityListHeader,
+	EntityListPagination,
+	EntityListSearchField,
+	RowActionsMenu,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
 import { dashboardPageSize } from "@/config/pagination.config";
 
@@ -77,37 +72,26 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 	const [items] = useOptimistic(services.data, (state, id: string) =>
 		state.filter((item) => item.id !== id),
 	);
-	const { inputValue, isPending, page, setInputValue, setPage, setSortDescriptor, sortDescriptor } =
-		useUrlPaginatedSearch({
-			dir: initialDir,
-			page: initialPage,
-			q: initialQ,
-			sort: initialSort,
-		});
-
-	const totalPages = Math.max(Math.ceil(services.total / pageSize), 1);
+	const search = useUrlPaginatedSearch({
+		dir: initialDir,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+	});
 
 	return (
 		<Fragment>
-			<Header>
-				<HeaderContent>
-					<HeaderTitle>{t("Services")}</HeaderTitle>
-					<HeaderDescription>
-						{t("Manage all SSHOC services in the DARIAH knowledge base.")}
-					</HeaderDescription>
-				</HeaderContent>
-				<HeaderAction>
-					<SearchField onChange={setInputValue} value={inputValue}>
-						<SearchInput placeholder={t("Search")} />
-					</SearchField>
-				</HeaderAction>
-			</Header>
+			<EntityListHeader
+				title={t("Services")}
+				description={t("Manage all SSHOC services in the DARIAH knowledge base.")}
+				action={<EntityListSearchField search={search} />}
+			/>
 
 			<Table
 				aria-label="services"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
-				onSortChange={setSortDescriptor}
-				sortDescriptor={sortDescriptor}
+				onSortChange={search.setSortDescriptor}
+				sortDescriptor={search.sortDescriptor}
 			>
 				<TableHeader>
 					<TableColumn allowsSorting={true} id="name" isRowHeader={true}>
@@ -136,35 +120,21 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 							</TableCell>
 							<TableCell>{item.sshocMarketplaceId ?? "—"}</TableCell>
 							<TableCell className="text-end">
-								<Menu>
-									<Button
-										aria-label={t("Open actions menu")}
-										className="block-7 sm:block-7"
-										intent="plain"
-										size="sq-sm"
+								<RowActionsMenu>
+									<RowActionsMenu.Link
+										href={`/dashboard/administrator/sshoc-services/${item.id}/view`}
+										icon={<EyeIcon className="me-2 block-4 inline-4" />}
 									>
-										<EllipsisHorizontalIcon className="block-5 inline-5" />
-									</Button>
-									<MenuContent placement="left top">
-										<MenuItem href={`/dashboard/administrator/sshoc-services/${item.id}/view`}>
-											<EyeIcon className="me-2 block-4 inline-4" />
-											<MenuLabel>{t("View")}</MenuLabel>
-										</MenuItem>
-									</MenuContent>
-								</Menu>
+										{t("View")}
+									</RowActionsMenu.Link>
+								</RowActionsMenu>
 							</TableCell>
 						</TableRow>
 					)}
 				</TableBody>
 			</Table>
 
-			<Paginate
-				isPending={isPending}
-				page={page}
-				setPage={setPage}
-				total={totalPages}
-				totalItems={services.total}
-			/>
+			<EntityListPagination search={search} total={services.total} pageSize={pageSize} />
 		</Fragment>
 	);
 }

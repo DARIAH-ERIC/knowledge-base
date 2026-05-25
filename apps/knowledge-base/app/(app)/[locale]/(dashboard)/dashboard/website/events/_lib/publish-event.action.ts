@@ -1,43 +1,24 @@
 "use server";
 
-import { assert } from "@acdh-oeaw/lib";
-import { getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-
-import { recordAuditEvent } from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
 import { publishVersion } from "@/lib/data/entity-lifecycle";
 import { eventsLifecycleAdapter } from "@/lib/data/events.lifecycle-adapter";
-import { db } from "@/lib/db";
-import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
+import { createCommandAction } from "@/lib/server/create-command-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export async function publishEventAction(documentId: string): Promise<void> {
-	const auditSession = await assertAdmin();
+export const publishEventAction = createCommandAction({
+	requireAdmin: true,
+	audit: { action: "publish", subjectType: "events" },
+	revalidate: "/[locale]/dashboard/website/events",
+	redirect: "/dashboard/website/events",
 
-	assert(documentId, "Missing documentId.");
-
-	await db.transaction(async (tx) => {
+	async mutate(tx, [documentId]: [string]) {
 		await publishVersion(tx, documentId, eventsLifecycleAdapter);
-	});
+		return { subjectId: documentId };
+	},
 
-	after(async () => {
-		await syncWebsiteDocumentForEntity(documentId);
+	async postCommit({ result }) {
+		await syncWebsiteDocumentForEntity(result.subjectId);
 		await dispatchWebhook({ type: "events" });
-	});
-
-	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
-		action: "publish",
-		subjectType: "events",
-		subjectId: documentId,
-		summary: {},
-	});
-
-	revalidatePath("/[locale]/dashboard/website/events", "layout");
-
-	const locale = await getLocale();
-	redirect({ href: "/dashboard/website/events", locale });
-}
+	},
+});

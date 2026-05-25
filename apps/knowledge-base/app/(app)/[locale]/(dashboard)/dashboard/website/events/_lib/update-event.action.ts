@@ -1,161 +1,108 @@
 "use server";
 
-import { assert, getFormDataValues, keyBy } from "@acdh-oeaw/lib";
+import { assert, keyBy } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
-import { createActionStateError } from "@dariah-eric/next-lib/actions";
-import { globalPostRequestRateLimit } from "@dariah-eric/next-lib/rate-limiter";
-import { getExtracted, getLocale } from "next-intl/server";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-import * as v from "valibot";
 
 import { UpdateEventActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/events/_lib/update-event.schema";
-import {
-	getAuditSubjectIdFromFormData,
-	getAuditSummaryFromFormData,
-	recordAuditEvent,
-} from "@/lib/audit/audit-log";
-import { assertAdmin } from "@/lib/auth/session";
-import type { ContentBlockInput } from "@/lib/content-block-input";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { ensureEntityVersionField } from "@/lib/data/entity-version-fields";
 import { eventsLifecycleAdapter } from "@/lib/data/events.lifecycle-adapter";
 import { syncEntityRelations } from "@/lib/data/relations";
-import { type Transaction, db } from "@/lib/db";
+import { db } from "@/lib/db";
 import { eq, inArray } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
-import { getIntlLanguage } from "@/lib/i18n/locales";
-import { redirect } from "@/lib/navigation/navigation";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
-import { createServerAction } from "@/lib/server/create-server-action";
+import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
 
-export const updateEventAction = createServerAction(
-	async function updateEventAction(state, formData) {
-		const locale = await getLocale();
-		const t = await getExtracted();
+export const updateEventAction = createMutationAction({
+	schema: UpdateEventActionInputSchema,
+	requireAdmin: true,
+	audit: { action: "update", subjectType: "events" },
+	revalidate: "/[locale]/dashboard/website/events",
+	redirect: "/dashboard/website/events",
 
-		if (!(await globalPostRequestRateLimit())) {
-			return createActionStateError({ message: t("Too many requests.") });
+	async mutate(tx, input, { formData }) {
+		const draftVersionId = await ensureDraftVersion(tx, input.documentId, eventsLifecycleAdapter);
+
+		const asset = await tx.query.assets.findFirst({
+			where: { key: input.imageKey },
+			columns: { id: true },
+		});
+		assert(asset);
+
+		await tx
+			.update(schema.events)
+			.set({
+				imageId: asset.id,
+				title: input.title,
+				summary: input.summary,
+				location: input.location,
+				website: input.website,
+				duration: input.duration,
+				isFullDay: input.isFullDay,
+			})
+			.where(eq(schema.events.id, draftVersionId));
+
+		const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");
+		const contentBlockTypes = await db.query.contentBlockTypes.findMany();
+		const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
+
+		const existingBlocks = await tx.query.contentBlocks.findMany({
+			where: { fieldId: contentField.id },
+			columns: { id: true },
+		});
+
+		if (existingBlocks.length > 0) {
+			await tx.delete(schema.contentBlocks).where(
+				inArray(
+					schema.contentBlocks.id,
+					existingBlocks.map((b) => b.id),
+				),
+			);
 		}
 
-		const auditSession = await assertAdmin();
-
-		const result = await v.safeParseAsync(
-			UpdateEventActionInputSchema,
-			getFormDataValues(formData),
-			{ lang: getIntlLanguage(locale) },
+		await Promise.all(
+			input.contentBlocks.map(async (contentBlock, index) => {
+				const [added] = await tx
+					.insert(schema.contentBlocks)
+					.values({
+						fieldId: contentField.id,
+						typeId: contentBlockTypesByType[contentBlock.type].id,
+						position: index,
+					})
+					.returning({ id: schema.contentBlocks.id });
+				assert(added);
+				await upsertTypedContentBlock(tx, contentBlock, added.id, true);
+			}),
 		);
 
-		if (!result.success) {
-			const errors = v.flatten<typeof UpdateEventActionInputSchema>(result.issues);
+		await syncEntityRelations(
+			tx,
+			input.documentId,
+			input.relatedEntityIds,
+			input.relatedResourceIds,
+		);
+		await touchVersion(tx, draftVersionId);
 
-			return createActionStateError({
-				message: errors.root ?? t("Invalid or missing fields."),
-				validationErrors: errors.nested,
-			});
+		if (shouldSaveAndPublish(formData)) {
+			await publishVersion(tx, input.documentId, eventsLifecycleAdapter);
 		}
 
-		const {
-			contentBlocks,
-			documentId,
-			title,
-			imageKey,
-			isFullDay,
-			summary,
-			duration,
-			location,
-			website,
-			relatedEntityIds,
-			relatedResourceIds,
-		} = result.output;
-
-		await db.transaction(async (tx) => {
-			const draftVersionId = await ensureDraftVersion(tx, documentId, eventsLifecycleAdapter);
-
-			const asset = await tx.query.assets.findFirst({
-				where: { key: imageKey },
-				columns: { id: true },
-			});
-
-			assert(asset);
-
-			await tx
-				.update(schema.events)
-				.set({ imageId: asset.id, title, summary, location, website, duration, isFullDay })
-				.where(eq(schema.events.id, draftVersionId));
-
-			const contentField = await ensureEntityVersionField(tx, draftVersionId, "content");
-
-			const contentBlockTypes = await db.query.contentBlockTypes.findMany();
-			const contentBlockTypesByType = keyBy(contentBlockTypes, (item) => item.type);
-
-			async function upsertTypeBlock(tx: Transaction, block: ContentBlockInput, blockId: string) {
-				await upsertTypedContentBlock(tx, block, blockId, true);
-			}
-
-			const existingBlocks = await tx.query.contentBlocks.findMany({
-				where: { fieldId: contentField.id },
-				columns: { id: true },
-			});
-
-			if (existingBlocks.length > 0) {
-				await tx.delete(schema.contentBlocks).where(
-					inArray(
-						schema.contentBlocks.id,
-						existingBlocks.map((b) => b.id),
-					),
-				);
-			}
-
-			await Promise.all(
-				contentBlocks.map(async (contentBlock, index) => {
-					const [added] = await tx
-						.insert(schema.contentBlocks)
-						.values({
-							fieldId: contentField.id,
-							typeId: contentBlockTypesByType[contentBlock.type].id,
-							position: index,
-						})
-						.returning({ id: schema.contentBlocks.id });
-
-					assert(added);
-
-					await upsertTypeBlock(tx, contentBlock, added.id);
-				}),
-			);
-
-			await syncEntityRelations(tx, documentId, relatedEntityIds, relatedResourceIds);
-			await touchVersion(tx, draftVersionId);
-
-			if (shouldSaveAndPublish(formData)) {
-				await publishVersion(tx, documentId, eventsLifecycleAdapter);
-			}
-		});
-
-		after(async () => {
-			if (!shouldSaveAndPublish(formData)) {
-				return;
-			}
-
-			await syncWebsiteDocumentForEntity(documentId);
-			await dispatchWebhook({ type: "events" });
-		});
-
-		await recordAuditEvent(db, {
-			actorUserId: auditSession?.user.id,
-			action: "update",
-			subjectType: "events",
-			subjectId: getAuditSubjectIdFromFormData(formData),
-			summary: {
-				...getAuditSummaryFromFormData(formData),
+		return {
+			subjectId: input.documentId,
+			auditSummary: {
 				lifecycle: shouldSaveAndPublish(formData) ? "published" : "draft",
 			},
-		});
-
-		revalidatePath("/[locale]/dashboard/website/events", "layout");
-
-		redirect({ href: "/dashboard/website/events", locale });
+		};
 	},
-);
+
+	async postCommit({ result, ctx }) {
+		if (!shouldSaveAndPublish(ctx.formData)) {
+			return;
+		}
+		await syncWebsiteDocumentForEntity(result.subjectId);
+		await dispatchWebhook({ type: "events" });
+	},
+});

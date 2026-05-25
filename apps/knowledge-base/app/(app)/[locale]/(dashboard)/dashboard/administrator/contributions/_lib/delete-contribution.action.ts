@@ -59,7 +59,7 @@ export async function deleteContributionAction(id: string): Promise<void> {
 	});
 
 	await recordAuditEvent(db, {
-		actorUserId: auditSession?.user.id,
+		actorUserId: auditSession.user.id,
 		action: "delete",
 		subjectType: "contributions",
 		subjectId: id,
