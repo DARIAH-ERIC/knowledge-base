@@ -138,12 +138,12 @@
 		},
 		"test:e2e": {
 			"dependsOn": ["^build"],
-			"env": ["PLAYWRIGHT_TEST_APP_BASE_URL"],
+			"env": ["PLAYWRIGHT_BROWSERS_PATH", "PLAYWRIGHT_TEST_APP_BASE_URL"],
 			"inputs": ["$TURBO_DEFAULT$", "**/.env.local", "**/.env.*.local"]
 		},
 		"test:e2e:update-snapshots": {
 			"dependsOn": ["^build"],
-			"env": ["PLAYWRIGHT_TEST_APP_BASE_URL"],
+			"env": ["PLAYWRIGHT_BROWSERS_PATH", "PLAYWRIGHT_TEST_APP_BASE_URL"],
 			"inputs": ["$TURBO_DEFAULT$", "**/.env.local", "**/.env.*.local"]
 		},
 		"types:check": {
