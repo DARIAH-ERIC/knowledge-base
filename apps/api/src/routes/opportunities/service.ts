@@ -109,18 +109,15 @@ export async function getOpportunities(db: Database | Transaction, params: GetOp
 			.select({ total: count() })
 			.from(schema.opportunities)
 			.innerJoin(schema.entityVersions, eq(schema.opportunities.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			)
 			.innerJoin(
 				schema.opportunitySources,
 				eq(schema.opportunities.sourceId, schema.opportunitySources.id),
 			)
-			.where(
-				and(
-					eq(schema.entityStatus.type, "published"),
-					aggregateStatusFilter,
-					aggregateSourceFilter,
-				),
-			),
+			.where(and(aggregateStatusFilter, aggregateSourceFilter)),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -256,8 +253,10 @@ export async function getOpportunitySlugs(
 			.select({ total: count() })
 			.from(schema.opportunities)
 			.innerJoin(schema.entityVersions, eq(schema.opportunities.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;

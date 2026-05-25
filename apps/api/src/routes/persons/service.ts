@@ -61,8 +61,10 @@ export async function getPersons(db: Database | Transaction, params: GetPersonsP
 			.select({ total: count() })
 			.from(schema.persons)
 			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -195,8 +197,10 @@ export async function getPersonSlugs(db: Database | Transaction, params: GetPers
 			.select({ total: count() })
 			.from(schema.persons)
 			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;

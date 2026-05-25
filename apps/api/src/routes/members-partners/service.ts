@@ -82,8 +82,10 @@ export async function getMembersAndPartners(
 			.select({ total: count() })
 			.from(schema.membersAndPartners)
 			.innerJoin(schema.entityVersions, eq(schema.membersAndPartners.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -539,7 +541,10 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
 		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
 		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+		)
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.innerJoin(
 			schema.personRoleTypes,
@@ -548,7 +553,6 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 		.where(
 			and(
 				eq(schema.personsToOrganisationalUnits.organisationalUnitId, countryId),
-				eq(schema.entityStatus.type, "published"),
 				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
 				sql`
 					${schema.personRoleTypes.type} IN (
@@ -737,8 +741,10 @@ export async function getMemberOrPartnerSlugs(
 			.select({ total: count() })
 			.from(schema.membersAndPartners)
 			.innerJoin(schema.entityVersions, eq(schema.membersAndPartners.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;

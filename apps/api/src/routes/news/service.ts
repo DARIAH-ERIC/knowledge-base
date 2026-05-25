@@ -59,8 +59,10 @@ export async function getNews(db: Database | Transaction, params: GetNewsParams)
 			.select({ total: count() })
 			.from(schema.news)
 			.innerJoin(schema.entityVersions, eq(schema.news.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -192,8 +194,10 @@ export async function getNewsItemSlugs(db: Database | Transaction, params: GetNe
 			.select({ total: count() })
 			.from(schema.news)
 			.innerJoin(schema.entityVersions, eq(schema.news.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;

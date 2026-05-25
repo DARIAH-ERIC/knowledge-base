@@ -7,7 +7,7 @@ import { flattenEntityVersion } from "@/lib/entity-version";
 import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
-import { and, count, eq } from "@/services/db/sql";
+import { count, eq } from "@/services/db/sql";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
@@ -63,8 +63,10 @@ export async function getImpactCaseStudies(
 			.select({ total: count() })
 			.from(schema.impactCaseStudies)
 			.innerJoin(schema.entityVersions, eq(schema.impactCaseStudies.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -100,14 +102,12 @@ async function getContributors(db: Database | Transaction, impactCaseStudyId: st
 		.innerJoin(schema.persons, eq(schema.impactCaseStudiesToPersons.personId, schema.persons.id))
 		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
 		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+		)
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
-		.where(
-			and(
-				eq(schema.impactCaseStudiesToPersons.impactCaseStudyId, impactCaseStudyId),
-				eq(schema.entityStatus.type, "published"),
-			),
-		);
+		.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyId, impactCaseStudyId));
 
 	const positions = await getPersonPositions(
 		db,
@@ -245,8 +245,10 @@ export async function getImpactCaseStudySlugs(
 			.select({ total: count() })
 			.from(schema.impactCaseStudies)
 			.innerJoin(schema.entityVersions, eq(schema.impactCaseStudies.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;

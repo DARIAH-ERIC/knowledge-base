@@ -116,13 +116,11 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 			.select({ total: count() })
 			.from(schema.workingGroups)
 			.innerJoin(schema.entityVersions, eq(schema.workingGroups.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(
-				and(
-					eq(schema.entityStatus.type, "published"),
-					status != null ? buildStatusFilter(db, schema.workingGroups.id, status) : undefined,
-				),
-			),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			)
+			.where(status != null ? buildStatusFilter(db, schema.workingGroups.id, status) : undefined),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -178,13 +176,15 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
 		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
 		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+		)
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.where(
 			and(
 				eq(schema.personsToOrganisationalUnits.organisationalUnitId, workingGroupId),
 				eq(schema.personRoleTypes.type, "is_chair_of"),
-				eq(schema.entityStatus.type, "published"),
 				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
 			),
 		);
@@ -360,8 +360,10 @@ export async function getWorkingGroupSlugs(
 			.select({ total: count() })
 			.from(schema.workingGroups)
 			.innerJoin(schema.entityVersions, eq(schema.workingGroups.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;

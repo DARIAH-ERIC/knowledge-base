@@ -59,8 +59,10 @@ export async function getPages(db: Database | Transaction, params: GetPagesParam
 			.select({ total: count() })
 			.from(schema.pages)
 			.innerJoin(schema.entityVersions, eq(schema.pages.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -198,8 +200,10 @@ export async function getPageSlugs(db: Database | Transaction, params: GetPageSl
 			.select({ total: count() })
 			.from(schema.pages)
 			.innerJoin(schema.entityVersions, eq(schema.pages.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;

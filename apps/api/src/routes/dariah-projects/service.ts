@@ -6,7 +6,7 @@ import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
-import { and, count, eq, not, sql } from "@/services/db/sql";
+import { count, eq, not, sql } from "@/services/db/sql";
 import { images } from "@/services/images";
 import { imageWidth } from "~/config/api.config";
 
@@ -161,16 +161,16 @@ export async function getDariahProjects(
 			.select({ total: count() })
 			.from(schema.dariahProjects)
 			.innerJoin(schema.entityVersions, eq(schema.dariahProjects.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			)
 			.where(
-				and(
-					eq(schema.entityStatus.type, "published"),
-					status != null
-						? status === "active"
-							? sql`${schema.dariahProjects.duration} @> NOW()::TIMESTAMPTZ`
-							: not(sql`${schema.dariahProjects.duration} @> NOW()::TIMESTAMPTZ`)
-						: undefined,
-				),
+				status != null
+					? status === "active"
+						? sql`${schema.dariahProjects.duration} @> NOW()::TIMESTAMPTZ`
+						: not(sql`${schema.dariahProjects.duration} @> NOW()::TIMESTAMPTZ`)
+					: undefined,
 			),
 	]);
 
@@ -394,8 +394,10 @@ export async function getDariahProjectSlugs(
 			.select({ total: count() })
 			.from(schema.dariahProjects)
 			.innerJoin(schema.entityVersions, eq(schema.dariahProjects.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;

@@ -100,13 +100,15 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
 		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
 		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+		)
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.where(
 			and(
 				eq(schema.personRoleTypes.type, "is_chair_of"),
 				eq(schema.organisationalUnitTypes.type, "working_group"),
-				eq(schema.entityStatus.type, "published"),
 				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
 			),
 		);
@@ -199,12 +201,14 @@ async function getActiveGovernanceBodyPersons(
 		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
 		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
 		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+		)
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.where(
 			and(
 				inArray(schema.personsToOrganisationalUnits.organisationalUnitId, governanceBodyIds),
-				eq(schema.entityStatus.type, "published"),
 				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
 			),
 		);
@@ -317,17 +321,15 @@ export async function getGovernanceBodies(
 			.select({ total: count() })
 			.from(schema.organisationalUnits)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			)
 			.innerJoin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 			)
-			.where(
-				and(
-					eq(schema.entityStatus.type, "published"),
-					eq(schema.organisationalUnitTypes.type, "governance_body"),
-				),
-			),
+			.where(eq(schema.organisationalUnitTypes.type, "governance_body")),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -503,17 +505,15 @@ export async function getGovernanceBodySlugs(
 			.select({ total: count() })
 			.from(schema.organisationalUnits)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			)
 			.innerJoin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 			)
-			.where(
-				and(
-					eq(schema.entityStatus.type, "published"),
-					eq(schema.organisationalUnitTypes.type, "governance_body"),
-				),
-			),
+			.where(eq(schema.organisationalUnitTypes.type, "governance_body")),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;

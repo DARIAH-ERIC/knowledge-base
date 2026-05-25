@@ -87,9 +87,12 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 			.from(schema.events)
 			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			)
 			.leftJoin(schema.assets, eq(schema.assets.id, schema.events.imageId))
-			.where(and(rangeFilter, eq(schema.entityStatus.type, "published")))
+			.where(rangeFilter)
 			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
@@ -97,8 +100,11 @@ export async function getEvents(db: Database | Transaction, params: GetEventsPar
 			.select({ total: count() })
 			.from(schema.events)
 			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(and(rangeFilter, eq(schema.entityStatus.type, "published"))),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			)
+			.where(rangeFilter),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
@@ -187,8 +193,11 @@ async function getAdjacentEvents(db: Database | Transaction, params: GetAdjacent
 			.from(schema.events)
 			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(and(sql`${cursor} < ${currentCursor}`, eq(schema.entityStatus.type, "published")))
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			)
+			.where(sql`${cursor} < ${currentCursor}`)
 			.orderBy(desc(lower), desc(schema.events.id))
 			.limit(1),
 		db
@@ -196,8 +205,11 @@ async function getAdjacentEvents(db: Database | Transaction, params: GetAdjacent
 			.from(schema.events)
 			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(and(sql`${cursor} > ${currentCursor}`, eq(schema.entityStatus.type, "published")))
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			)
+			.where(sql`${cursor} > ${currentCursor}`)
 			.orderBy(asc(lower), asc(schema.events.id))
 			.limit(1),
 	]);
@@ -338,8 +350,10 @@ export async function getEventSlugs(db: Database | Transaction, params: GetEvent
 			.select({ total: count() })
 			.from(schema.events)
 			.innerJoin(schema.entityVersions, eq(schema.events.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(eq(schema.entityStatus.type, "published")),
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			),
 	]);
 
 	const total = aggregate.at(0)?.total ?? 0;
