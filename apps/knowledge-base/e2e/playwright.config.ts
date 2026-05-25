@@ -79,21 +79,16 @@ export default defineConfig({
 			testIgnore: ["**/admin/**/*.test.ts", "**/non-admin/**/*.test.ts"],
 			use: { ...devices["Desktop Chrome"], channel: "chromium" },
 		},
-		// oxlint-disable-next-line node/no-process-env
-		...(isCI && process.env.E2E_ALL_BROWSERS !== "true"
-			? []
-			: [
-					{
-						name: "firefox",
-						testIgnore: ["**/admin/**/*.test.ts", "**/non-admin/**/*.test.ts"],
-						use: { ...devices["Desktop Firefox"] },
-					},
-					{
-						name: "webkit",
-						testIgnore: ["**/admin/**/*.test.ts", "**/non-admin/**/*.test.ts"],
-						use: { ...devices["Desktop Safari"] },
-					},
-				]),
+		{
+			name: "firefox",
+			testIgnore: ["**/admin/**/*.test.ts", "**/non-admin/**/*.test.ts"],
+			use: { ...devices["Desktop Firefox"] },
+		},
+		{
+			name: "webkit",
+			testIgnore: ["**/admin/**/*.test.ts", "**/non-admin/**/*.test.ts"],
+			use: { ...devices["Desktop Safari"] },
+		},
 		{
 			name: "admin",
 			testMatch: "**/admin/**/*.test.ts",
