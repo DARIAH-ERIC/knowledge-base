@@ -267,22 +267,11 @@ jobs:
       - name: Build packages
         run: turbo run --filter "./packages/*" build
 
+      - name: Prepare dev environment
+        run: pnpm run dev:prepare
+
       - name: Setup services
         run: pnpm run dev:services:setup
-
-      - name: Export search api key
-        shell: bash
-        run: |
-          set -euo pipefail
-          SEARCH_API_KEY="$(sed -n -E 's/^TYPESENSE_SEARCH_API_KEY="?([^"]*)"?$/\1/p' ./.devcontainer/.env)"
-          if [ -z "$SEARCH_API_KEY" ]; then
-            echo "Failed to read generated search api key." >&2
-            exit 1
-          fi
-          {
-            echo "NEXT_PUBLIC_TYPESENSE_SEARCH_API_KEY=$SEARCH_API_KEY"
-            echo "TYPESENSE_SEARCH_API_KEY=$SEARCH_API_KEY"
-          } >> "$GITHUB_ENV"
 
       - name: Seed kitchen sink data
         run: pnpm run data:seed:kitchen-sink
