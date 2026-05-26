@@ -14,7 +14,7 @@
 		"i18n:extract-messages": "tsx ./scripts/i18n/extract-messages.ts",
 		"lint:check": "run-p --continue-on-error \"lint:*:check\"",
 		"lint:code:check": "oxlint --report-unused-disable-directives --type-aware --type-check",
-		"lint:code:fix": "oxlint --fix --report-unused-disable-directives --type-aware --type-check --quiet",
+		"lint:code:fix": "oxlint --fix --report-unused-disable-directives --type-aware --type-check",
 		"lint:fix": "run-p --continue-on-error \"lint:*:fix\"",
 		"lint:styles:check": "stylelint \"./styles/**/*.css\" --cache --ignore-path ./../../.gitignore",
 		"lint:styles:fix": "stylelint \"./styles/**/*.css\" --cache --fix --ignore-path ./../../.gitignore",

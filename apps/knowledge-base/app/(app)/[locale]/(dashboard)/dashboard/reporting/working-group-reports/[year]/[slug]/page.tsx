@@ -61,7 +61,7 @@ export default async function DashboardReportingWorkingGroupReportPage(
 		<div>
 			<Header>
 				<HeaderContent>
-					<HeaderTitle>{report.workingGroup.name}</HeaderTitle>
+					<HeaderTitle className="leading-tight">{report.workingGroup.name}</HeaderTitle>
 					<HeaderDescription>
 						{t("Campaign {year}", { year: String(report.campaign.year) })}
 						{" · "}
@@ -80,7 +80,7 @@ export default async function DashboardReportingWorkingGroupReportPage(
 				</HeaderAction>
 			</Header>
 
-			<div className="px-(--layout-padding) pbs-6">
+			<div className="mbs-8 px-(--layout-padding)">
 				<WorkingGroupReportSummary data={report.summary} />
 			</div>
 		</div>

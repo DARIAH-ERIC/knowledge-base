@@ -30,32 +30,41 @@ function collectPdf(document: PDFKit.PDFDocument): Promise<ArrayBuffer> {
 	});
 }
 
-function drawLogo(document: PDFKit.PDFDocument): void {
-	const logoSize = 34;
-	const scale = logoSize / 142;
+function drawLogo(document: PDFKit.PDFDocument, x: number, y: number, size: number): void {
+	const scale = size / 142;
 
-	document
-		.save()
-		.translate(document.page.margins.left, document.page.margins.top)
-		.scale(scale)
-		.fillColor("#111827")
-		.path(logoPath)
-		.fill()
-		.restore();
+	document.save().translate(x, y).scale(scale).fillColor("#111827").path(logoPath).fill().restore();
 }
 
 function addHeader(document: PDFKit.PDFDocument, title: string): void {
-	drawLogo(document);
+	const logoSize = 34;
+	const gap = 12;
+	const rowY = document.page.margins.top;
+	const titleX = document.page.margins.left + logoSize + gap;
+	const titleWidth = document.page.width - document.page.margins.right - titleX;
+
+	document.fillColor("#111827").font("Helvetica-Bold").fontSize(18);
+
+	const textHeight = document.heightOfString(normalizeText(title), {
+		lineGap: 2,
+		width: titleWidth,
+	});
+	const rowHeight = Math.max(logoSize, textHeight);
+	const logoY = rowY + (rowHeight - logoSize) / 2;
+	const titleY = rowY + (rowHeight - textHeight) / 2;
+
+	drawLogo(document, document.page.margins.left, logoY, logoSize);
 
 	document
 		.fillColor("#111827")
 		.font("Helvetica-Bold")
 		.fontSize(18)
-		.text(normalizeText(title), document.page.margins.left + 46, document.page.margins.top + 4, {
+		.text(normalizeText(title), titleX, titleY, {
 			lineGap: 2,
+			width: titleWidth,
 		});
 
-	document.moveDown(2);
+	document.y = rowY + rowHeight + 22;
 	document
 		.moveTo(document.page.margins.left, document.y)
 		.lineTo(document.page.width - document.page.margins.right, document.y)
