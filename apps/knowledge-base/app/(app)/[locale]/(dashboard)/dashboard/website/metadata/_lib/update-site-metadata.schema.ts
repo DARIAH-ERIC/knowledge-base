@@ -6,5 +6,5 @@ export const UpdateSiteMetadataActionInputSchema = v.object({
 	ogTitle: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	ogDescription: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	imageKey: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
-	featuredItemIds: v.optional(v.array(v.string())),
+	featuredItemIds: v.optional(v.array(v.string()), []),
 });
