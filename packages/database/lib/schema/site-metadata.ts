@@ -14,6 +14,7 @@ export const siteMetadata = p.snakeCase.table(
 		ogTitle: p.text("og_title"),
 		ogDescription: p.text("og_description"),
 		ogImageId: p.uuid("og_image_id").references(() => assets.id),
+		featuredItemIds: p.jsonb("featured_item_ids"),
 		...f.timestamps(),
 	},
 	(t) => [p.check("site_metadata_singleton", sql`${t.id} = 1`)],

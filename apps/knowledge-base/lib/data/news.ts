@@ -3,8 +3,9 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
+import { relationOptionsPageSize } from "@/lib/constants/relations";
 import { type Database, type Transaction, db } from "@/lib/db";
-import { and, count, desc, eq, ilike, sql } from "@/lib/db/sql";
+import { and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images/";
 
 export type NewsSort = "title" | "updatedAt";
@@ -135,6 +136,66 @@ export async function getNewsItemById(params: GetNewsItemByIdParams) {
 	const data = { ...rest, entity: entityVersion.entity, image };
 
 	return data;
+}
+
+export interface NewsItemOption {
+	id: string;
+	name: string;
+}
+
+interface GetNewsItemOptionsParams {
+	limit?: number;
+	offset?: number;
+	q?: string;
+}
+
+export async function getNewsItemOptions(
+	params: GetNewsItemOptionsParams = {},
+): Promise<{ items: Array<NewsItemOption>; total: number }> {
+	const { limit = relationOptionsPageSize, offset = 0, q } = params;
+	const query = q?.trim();
+	const searchWhere =
+		query != null && query !== "" ? ilike(schema.news.title, `%${query}%`) : undefined;
+	const where = and(eq(schema.entityStatus.type, "published"), searchWhere);
+
+	const [items, aggregate] = await Promise.all([
+		db
+			.select({ id: schema.news.id, name: schema.news.title })
+			.from(schema.news)
+			.innerJoin(schema.entityVersions, eq(schema.news.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(where)
+			.orderBy(schema.news.title)
+			.limit(limit)
+			.offset(offset),
+		db
+			.select({ total: count() })
+			.from(schema.news)
+			.innerJoin(schema.entityVersions, eq(schema.news.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(where),
+	]);
+
+	return { items, total: aggregate.at(0)?.total ?? 0 };
+}
+
+export async function getNewsItemOptionsByIds(ids: ReadonlyArray<string>) {
+	if (ids.length === 0) {
+		return [];
+	}
+
+	const rows = await db
+		.select({ id: schema.news.id, name: schema.news.title })
+		.from(schema.news)
+		.where(inArray(schema.news.id, [...ids]))
+		.orderBy(schema.news.title);
+
+	const itemById = new Map(rows.map((row) => [row.id, row] as const));
+
+	return ids.flatMap((id) => {
+		const item = itemById.get(id);
+		return item != null ? [item] : [];
+	});
 }
 
 export type NewsWithEntities = Awaited<ReturnType<typeof getNews>>;

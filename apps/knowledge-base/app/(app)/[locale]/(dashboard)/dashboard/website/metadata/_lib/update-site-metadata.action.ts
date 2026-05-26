@@ -38,6 +38,7 @@ export const updateSiteMetadataAction = createMutationAction({
 				ogTitle: input.ogTitle,
 				ogDescription: input.ogDescription,
 				ogImageId,
+				featuredItemIds: input.featuredItemIds,
 			})
 			.onConflictDoUpdate({
 				target: schema.siteMetadata.id,
@@ -47,6 +48,7 @@ export const updateSiteMetadataAction = createMutationAction({
 					ogTitle: input.ogTitle,
 					ogDescription: input.ogDescription,
 					ogImageId,
+					featuredItemIds: input.featuredItemIds,
 					updatedAt: sql`NOW()`,
 				},
 			});
