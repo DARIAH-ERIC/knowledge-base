@@ -5227,7 +5227,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "nationalConsortium": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/NationalConsortium",
+                "$ref": "#/components/schemas/RelatedNationalConsortium",
               },
               {
                 "type": "null",
@@ -8609,6 +8609,41 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "inactive",
         ],
         "type": "string",
+      },
+      "RelatedNationalConsortium": {
+        "description": "National consortium",
+        "properties": {
+          "image": {
+            "anyOf": [
+              {
+                "properties": {
+                  "url": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "url",
+                ],
+                "type": "object",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+          "name": {
+            "type": "string",
+          },
+          "slug": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "name",
+          "slug",
+          "image",
+        ],
+        "type": "object",
       },
       "SiteMetadata": {
         "description": "Site metadata",
