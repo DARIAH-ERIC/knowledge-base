@@ -10,7 +10,7 @@ import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import { mapSocialMedia } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
 import { hardcodedWorkingGroups } from "@/routes/governance-bodies/hardcoded-working-groups";
-import { and, count, eq, inArray, sql } from "@/services/db/sql";
+import { alias, and, count, eq, inArray, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
 interface GetGovernanceBodiesParams {
@@ -47,6 +47,8 @@ const hardcodedWorkingGroupsGovernanceBody = {
 };
 
 async function getActiveWorkingGroupChairs(db: Database | Transaction) {
+	const workingGroupEntityVersions = alias(schema.entityVersions, "working_group_entity_versions");
+
 	const rows = await db
 		.select({
 			id: schema.persons.id,
@@ -71,6 +73,14 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 		.innerJoin(
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+		)
+		.innerJoin(
+			workingGroupEntityVersions,
+			eq(schema.organisationalUnits.id, workingGroupEntityVersions.id),
+		)
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.publishedId, workingGroupEntityVersions.id),
 		)
 		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
 		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))

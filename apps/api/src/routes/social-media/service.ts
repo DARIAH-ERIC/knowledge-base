@@ -58,6 +58,13 @@ export async function getSocialMediaList(
 					},
 				},
 				organisationalUnits: {
+					where: {
+						entityVersion: {
+							status: {
+								type: "published",
+							},
+						},
+					},
 					columns: {
 						id: true,
 						name: true,
@@ -113,6 +120,13 @@ export async function getSocialMediaById(
 				},
 			},
 			organisationalUnits: {
+				where: {
+					entityVersion: {
+						status: {
+							type: "published",
+						},
+					},
+				},
 				columns: {
 					id: true,
 					name: true,
