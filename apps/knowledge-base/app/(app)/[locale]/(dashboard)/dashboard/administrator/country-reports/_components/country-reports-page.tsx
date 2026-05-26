@@ -25,6 +25,7 @@ import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { deleteCountryReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_lib/delete-country-report.action";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
+import type { ListSortDirection } from "@/lib/server/list-search-params";
 
 type CountryReportRow = Pick<schema.CountryReport, "id" | "status"> & {
 	campaign: Pick<schema.ReportingCampaign, "id" | "year">;
@@ -32,9 +33,11 @@ type CountryReportRow = Pick<schema.CountryReport, "id" | "status"> & {
 };
 
 interface CountryReportsPageProps {
+	dir: ListSortDirection;
 	reports: { data: Array<CountryReportRow>; total: number };
 	page: number;
 	q: string;
+	sort: "campaignYear" | "country";
 }
 
 function formatStatus(status: string): string {
@@ -44,7 +47,7 @@ function formatStatus(status: string): string {
 const pageSize = dashboardPageSize;
 
 export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): ReactNode {
-	const { reports, page: initialPage, q: initialQ } = props;
+	const { dir: initialDir, reports, page: initialPage, q: initialQ, sort: initialSort } = props;
 
 	const t = useExtracted();
 	const router = useRouter();
@@ -54,7 +57,12 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const [isDeletePending, startDeleteTransition] = useTransition();
-	const search = useUrlPaginatedSearch({ page: initialPage, q: initialQ });
+	const search = useUrlPaginatedSearch({
+		dir: initialDir,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+	});
 
 	return (
 		<Fragment>
@@ -72,10 +80,16 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 			<Table
 				aria-label="country reports"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={search.setSortDescriptor}
+				sortDescriptor={search.sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Country")}</TableColumn>
-					<TableColumn>{t("Campaign")}</TableColumn>
+					<TableColumn allowsSorting={true} id="country" isRowHeader={true}>
+						{t("Country")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="campaignYear">
+						{t("Campaign")}
+					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
