@@ -139,7 +139,7 @@ describe("governance-bodies", () => {
 
 				expect(workingGroups).toMatchObject({
 					id: workingGroupsGovernanceBodyId,
-					name: "working groups",
+					name: "Working groups",
 					entity: { slug: "working-groups" },
 				});
 				expect(workingGroups?.persons).toEqual(
@@ -170,7 +170,7 @@ describe("governance-bodies", () => {
 
 				expect(data).toMatchObject({
 					id: workingGroupsGovernanceBodyId,
-					name: "working groups",
+					name: "Working groups",
 					entity: { slug: "working-groups" },
 				});
 				expect(data.persons).toEqual(

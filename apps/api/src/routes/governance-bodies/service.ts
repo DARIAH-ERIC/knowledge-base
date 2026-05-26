@@ -35,7 +35,7 @@ interface GovernanceBodyPerson {
 
 const hardcodedWorkingGroupsGovernanceBody = {
 	id: "019b7a56-b301-7f93-9d24-91333bdc3ca8",
-	name: "working groups",
+	name: "Working groups",
 	acronym: null,
 	summary:
 		"Self-organised communities of practice within DARIAH which contribute to bringing together state-of-art digital arts and humanities activities and scaling their results to a European level.",
@@ -48,6 +48,10 @@ const hardcodedWorkingGroupsGovernanceBody = {
 
 async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 	const workingGroupEntityVersions = alias(schema.entityVersions, "working_group_entity_versions");
+	const workingGroupDocumentLifecycle = alias(
+		schema.documentLifecycle,
+		"working_group_document_lifecycle",
+	);
 
 	const rows = await db
 		.select({
@@ -79,8 +83,8 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 			eq(schema.organisationalUnits.id, workingGroupEntityVersions.id),
 		)
 		.innerJoin(
-			schema.documentLifecycle,
-			eq(schema.documentLifecycle.publishedId, workingGroupEntityVersions.id),
+			workingGroupDocumentLifecycle,
+			eq(workingGroupDocumentLifecycle.publishedId, workingGroupEntityVersions.id),
 		)
 		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
 		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))

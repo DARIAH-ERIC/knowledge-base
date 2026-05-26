@@ -67,7 +67,7 @@ export async function getNavigation(db: Database | Transaction, params: GetNavig
 				menu != null ? eq(schema.navigationMenus.name, menu) : undefined,
 				or(
 					isNull(schema.navigationItems.id),
-					isNotNull(schema.navigationItems.href),
+					isNull(schema.navigationItems.entityId),
 					isNotNull(schema.documentLifecycle.publishedId),
 				),
 			),
