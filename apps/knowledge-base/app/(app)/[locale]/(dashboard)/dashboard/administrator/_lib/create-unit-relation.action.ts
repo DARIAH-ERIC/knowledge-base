@@ -9,6 +9,7 @@ import * as v from "valibot";
 
 import { CreateUnitRelationActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-unit-relation.schema";
 import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
+import { isPublishedEntityVersions } from "@/lib/data/current-entity-version";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { ensureOrganisationalUnitDraftVersion } from "@/lib/data/organisational-unit-drafts";
 import { db } from "@/lib/db";
@@ -39,6 +40,10 @@ export const createUnitRelationAction = createServerAction(
 		const { unitId, statusId, relatedUnitId, duration } = result.output;
 
 		const returned = await db.transaction(async (tx) => {
+			if (!(await isPublishedEntityVersions(tx, [unitId, relatedUnitId]))) {
+				return { error: "not-published" as const };
+			}
+
 			const draftUnitId = await ensureOrganisationalUnitDraftVersion(tx, unitId);
 			const existing = await tx.query.organisationalUnitsRelations.findFirst({
 				where: {
@@ -79,6 +84,11 @@ export const createUnitRelationAction = createServerAction(
 		});
 
 		if ("error" in returned) {
+			if (returned.error === "not-published") {
+				return createActionStateError({
+					message: t("Relations can only target published entities."),
+				});
+			}
 			return createActionStateError({ message: t("This relation already exists.") });
 		}
 

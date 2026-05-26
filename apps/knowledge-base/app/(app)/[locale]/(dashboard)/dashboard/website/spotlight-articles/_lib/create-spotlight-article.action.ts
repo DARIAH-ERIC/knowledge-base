@@ -7,6 +7,7 @@ import slugify from "@sindresorhus/slugify";
 import { CreateSpotlightArticleActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article.schema";
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
+import { filterToPublishedDocumentIds } from "@/lib/data/relations";
 import { spotlightArticlesLifecycleAdapter } from "@/lib/data/spotlight-articles.lifecycle-adapter";
 import { db } from "@/lib/db";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
@@ -45,9 +46,13 @@ export const createSpotlightArticleAction = createMutationAction({
 			summary: input.summary,
 		});
 
-		if (input.relatedEntityIds.length > 0) {
+		const publishedRelatedEntityIds = await filterToPublishedDocumentIds(
+			tx,
+			input.relatedEntityIds,
+		);
+		if (publishedRelatedEntityIds.length > 0) {
 			await tx.insert(schema.entitiesToEntities).values(
-				input.relatedEntityIds.map((relatedEntityId) => {
+				publishedRelatedEntityIds.map((relatedEntityId) => {
 					return { entityId: documentId, relatedEntityId };
 				}),
 			);

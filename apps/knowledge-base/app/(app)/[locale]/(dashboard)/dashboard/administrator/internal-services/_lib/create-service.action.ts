@@ -2,8 +2,12 @@
 
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
+import { createActionStateError } from "@dariah-eric/next-lib/actions";
+import { getExtracted } from "next-intl/server";
 
 import { CreateServiceActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_lib/create-service.schema";
+import { isPublishedEntityVersions } from "@/lib/data/current-entity-version";
+import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
@@ -13,6 +17,19 @@ export const createServiceAction = createMutationAction({
 	audit: { action: "create", subjectType: "internal_services" },
 	revalidate: "/[locale]/dashboard/administrator/internal-services",
 	redirect: "/dashboard/administrator/internal-services",
+
+	async preCheck({ input }) {
+		const t = await getExtracted();
+		const unitIds = [...new Set([...input.ownerUnitIds, ...input.providerUnitIds])];
+
+		if (!(await isPublishedEntityVersions(db, unitIds))) {
+			return createActionStateError({
+				message: t("Relations can only target published entities."),
+			});
+		}
+
+		return undefined;
+	},
 
 	async mutate(tx, input) {
 		const [serviceType] = await tx

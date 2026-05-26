@@ -2,11 +2,15 @@
 
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
+import { createActionStateError } from "@dariah-eric/next-lib/actions";
+import { getExtracted } from "next-intl/server";
 
 import { UpdateProjectActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/update-project.schema";
+import { isPublishedEntityVersions } from "@/lib/data/current-entity-version";
 import { ensureDraftVersion, publishVersion, touchVersion } from "@/lib/data/entity-lifecycle";
 import { upsertRichTextEntityVersionField } from "@/lib/data/entity-version-fields";
 import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
+import { db } from "@/lib/db";
 import { and, eq, inArray, notInArray } from "@/lib/db/sql";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -19,6 +23,19 @@ export const updateProjectAction = createMutationAction({
 	audit: { action: "update", subjectType: "projects" },
 	revalidate: "/[locale]/dashboard/administrator/projects",
 	redirect: "/dashboard/administrator/projects",
+
+	async preCheck({ input }) {
+		const t = await getExtracted();
+		const partnerUnitIds = [...new Set(input.partners.map((p) => p.unitId))];
+
+		if (!(await isPublishedEntityVersions(db, partnerUnitIds))) {
+			return createActionStateError({
+				message: t("Relations can only target published entities."),
+			});
+		}
+
+		return undefined;
+	},
 
 	async mutate(tx, input, { formData }) {
 		const draftVersionId = await ensureDraftVersion(tx, input.documentId, projectsLifecycleAdapter);

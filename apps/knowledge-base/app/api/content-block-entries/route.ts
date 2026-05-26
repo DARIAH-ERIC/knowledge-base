@@ -2,7 +2,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/lib/auth/session";
-import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
+import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { type SQL, and, count, eq, ilike, inArray } from "@/lib/db/sql";
 
@@ -37,7 +37,7 @@ function createWhere(
 				? inArray(id, ids)
 				: undefined;
 
-	return and(currentEntityVersionWhere(), entryWhere);
+	return and(publishedEntityVersionWhere(), entryWhere);
 }
 
 async function getEntries(

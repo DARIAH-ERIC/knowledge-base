@@ -10,7 +10,7 @@ import { createCountryReportProjectContributionAction } from "@/app/(app)/[local
 import { deleteCountryReportProjectContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/delete-country-report-project-contribution.action";
 import { getAuthorizedCountryReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
+import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { resolveCountryReportId } from "@/lib/data/reporting-urls";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
@@ -66,7 +66,7 @@ export default async function DashboardReportingCountryReportProjectsPage(
 			.from(schema.projects)
 			.innerJoin(schema.entityVersions, eq(schema.projects.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(currentEntityVersionWhere())
+			.where(publishedEntityVersionWhere())
 			.orderBy(schema.projects.name),
 	]);
 

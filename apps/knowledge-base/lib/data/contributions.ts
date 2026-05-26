@@ -3,7 +3,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { contributionOptionsPageSize } from "@/lib/constants/contributions";
-import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
+import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { alias, and, count, desc, eq, ilike, inArray, or, sql } from "@/lib/db/sql";
 
@@ -315,7 +315,7 @@ export async function getContributionPersonOptions(params: GetContributionOption
 		query != null && query !== ""
 			? or(ilike(schema.persons.name, `%${query}%`), ilike(schema.persons.sortName, `%${query}%`))
 			: undefined;
-	const lifecycleWhere = currentEntityVersionWhere();
+	const lifecycleWhere = publishedEntityVersionWhere();
 	const where = and(lifecycleWhere, searchWhere);
 
 	const [items, aggregate] = await Promise.all([
@@ -359,7 +359,7 @@ export async function getContributionOrganisationalUnitOptions(
 
 	const query = q?.trim();
 	const where = and(
-		currentEntityVersionWhere(),
+		publishedEntityVersionWhere(),
 		eq(schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.roleTypeId, roleTypeId),
 		query != null && query !== ""
 			? ilike(schema.organisationalUnits.name, `%${query}%`)
@@ -441,7 +441,7 @@ export async function getContributionOptions() {
 		.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
 		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 		.where(
-			and(currentEntityVersionWhere(), inArray(schema.organisationalUnits.typeId, unitTypeIds)),
+			and(publishedEntityVersionWhere(), inArray(schema.organisationalUnits.typeId, unitTypeIds)),
 		);
 
 	const byRole = new Map<
@@ -483,7 +483,7 @@ export async function getCountryOptions(params: GetContributionOptionsParams = {
 	const query = q?.trim();
 
 	const where = and(
-		currentEntityVersionWhere(),
+		publishedEntityVersionWhere(),
 		eq(schema.organisationalUnitTypes.type, "country"),
 		query != null && query !== ""
 			? ilike(schema.organisationalUnits.name, `%${query}%`)

@@ -8,6 +8,7 @@ import { CreateNewsItemActionInputSchema } from "@/app/(app)/[locale]/(dashboard
 import { upsertTypedContentBlock } from "@/lib/content-blocks-service";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
 import { newsLifecycleAdapter } from "@/lib/data/news.lifecycle-adapter";
+import { filterToPublishedDocumentIds } from "@/lib/data/relations";
 import { db } from "@/lib/db";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { syncWebsiteDocumentForEntity } from "@/lib/search/website-index";
@@ -45,9 +46,13 @@ export const createNewsItemAction = createMutationAction({
 			summary: input.summary,
 		});
 
-		if (input.relatedEntityIds.length > 0) {
+		const publishedRelatedEntityIds = await filterToPublishedDocumentIds(
+			tx,
+			input.relatedEntityIds,
+		);
+		if (publishedRelatedEntityIds.length > 0) {
 			await tx.insert(schema.entitiesToEntities).values(
-				input.relatedEntityIds.map((relatedEntityId) => {
+				publishedRelatedEntityIds.map((relatedEntityId) => {
 					return { entityId: documentId, relatedEntityId };
 				}),
 			);

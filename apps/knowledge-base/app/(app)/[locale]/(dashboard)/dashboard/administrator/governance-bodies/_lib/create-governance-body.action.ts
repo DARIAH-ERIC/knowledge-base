@@ -7,6 +7,7 @@ import slugify from "@sindresorhus/slugify";
 import { CreateGovernanceBodyActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_lib/create-governance-body.schema";
 import { createDraftDocument, publishVersion } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
+import { filterToPublishedDocumentIds } from "@/lib/data/relations";
 import { shouldSaveAndPublish } from "@/lib/form-intent";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 import { dispatchWebhook } from "@/lib/webhook/dispatch-webhook";
@@ -54,9 +55,13 @@ export const createGovernanceBodyAction = createMutationAction({
 			typeId: orgUnitType.id,
 		});
 
-		if (input.relatedEntityIds.length > 0) {
+		const publishedRelatedEntityIds = await filterToPublishedDocumentIds(
+			tx,
+			input.relatedEntityIds,
+		);
+		if (publishedRelatedEntityIds.length > 0) {
 			await tx.insert(schema.entitiesToEntities).values(
-				input.relatedEntityIds.map((relatedEntityId) => {
+				publishedRelatedEntityIds.map((relatedEntityId) => {
 					return { entityId: documentId, relatedEntityId };
 				}),
 			);
