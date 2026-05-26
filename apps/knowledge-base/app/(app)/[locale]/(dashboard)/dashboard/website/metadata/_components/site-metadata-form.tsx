@@ -60,9 +60,7 @@ export function SiteMetadataForm(props: Readonly<SiteMetadataFormProps>): ReactN
 
 	const selectedItemsList = useListData<NewsItemOption>({
 		initialItems: ((siteMetadata?.featuredItemIds as Array<string>) ?? [])
-			.map((fI) => {
-				return optionsById[fI];
-			})
+			.map((fI) => optionsById[fI])
 			.filter((item): item is NewsItemOption => item !== undefined),
 		getKey(item) {
 			return item.id;
