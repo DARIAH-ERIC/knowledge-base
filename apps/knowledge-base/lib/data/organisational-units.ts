@@ -3,7 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
-import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
+import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { and, count, eq, ilike, inArray } from "@/lib/db/sql";
 import { images } from "@/lib/images";
@@ -35,7 +35,7 @@ export async function getOrganisationalUnitOptions(
 		query != null && query !== ""
 			? ilike(schema.organisationalUnits.name, `%${query}%`)
 			: undefined;
-	const where = and(currentEntityVersionWhere(), searchWhere);
+	const where = and(publishedEntityVersionWhere(), searchWhere);
 
 	const [items, aggregate] = await Promise.all([
 		db
@@ -66,7 +66,9 @@ export async function getOrganisationalUnitOptionsByIds(ids: ReadonlyArray<strin
 	const rows = await db
 		.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
 		.from(schema.organisationalUnits)
-		.where(inArray(schema.organisationalUnits.id, [...ids]))
+		.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.where(and(publishedEntityVersionWhere(), inArray(schema.organisationalUnits.id, [...ids])))
 		.orderBy(schema.organisationalUnits.name);
 
 	const itemById = new Map(rows.map((row) => [row.id, row] as const));

@@ -1,7 +1,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { relationOptionsPageSize } from "@/lib/constants/relations";
-import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
+import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { and, count, eq, ilike, inArray } from "@/lib/db/sql";
 
@@ -151,7 +151,7 @@ export async function getUnitRelationRelatedUnitOptions(
 	}
 
 	const where = and(
-		currentEntityVersionWhere(),
+		publishedEntityVersionWhere(),
 		inArray(schema.organisationalUnits.typeId, relatedUnitTypeIds),
 		query != null && query !== ""
 			? ilike(schema.organisationalUnits.name, `%${query}%`)
@@ -226,7 +226,7 @@ export async function getUnitRelationOptions(unitType: string) {
 		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 		.where(
 			and(
-				currentEntityVersionWhere(),
+				publishedEntityVersionWhere(),
 				inArray(schema.organisationalUnits.typeId, relatedUnitTypeIds),
 			),
 		);

@@ -10,7 +10,7 @@ import { createCountryReportInstitutionAction } from "@/app/(app)/[locale]/(dash
 import { deleteCountryReportInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/delete-country-report-institution.action";
 import { getAuthorizedCountryReportForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
+import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { resolveCountryReportId } from "@/lib/data/reporting-urls";
 import { db } from "@/lib/db";
 import { and, eq, inArray, notInArray, sql } from "@/lib/db/sql";
@@ -93,7 +93,7 @@ export default async function DashboardReportingCountryReportInstitutionsPage(
 		)
 		.where(
 			and(
-				currentEntityVersionWhere(),
+				publishedEntityVersionWhere(),
 				eq(schema.organisationalUnitsRelations.relatedUnitId, report.country.id),
 				inArray(schema.organisationalUnitStatus.status, [
 					"is_partner_institution_of",

@@ -4,6 +4,7 @@ import * as schema from "@dariah-eric/database/schema";
 
 import { imageAssetWidth } from "@/config/assets.config";
 import { relationOptionsPageSize } from "@/lib/constants/relations";
+import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { type Database, type Transaction, db } from "@/lib/db";
 import { and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images/";
@@ -156,7 +157,7 @@ export async function getNewsItemOptions(
 	const query = q?.trim();
 	const searchWhere =
 		query != null && query !== "" ? ilike(schema.news.title, `%${query}%`) : undefined;
-	const where = and(eq(schema.entityStatus.type, "published"), searchWhere);
+	const where = and(publishedEntityVersionWhere(), searchWhere);
 
 	const [items, aggregate] = await Promise.all([
 		db
@@ -187,7 +188,9 @@ export async function getNewsItemOptionsByIds(ids: ReadonlyArray<string>) {
 	const rows = await db
 		.select({ id: schema.news.id, name: schema.news.title })
 		.from(schema.news)
-		.where(inArray(schema.news.id, [...ids]))
+		.innerJoin(schema.entityVersions, eq(schema.news.id, schema.entityVersions.id))
+		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.where(and(publishedEntityVersionWhere(), inArray(schema.news.id, [...ids])))
 		.orderBy(schema.news.title);
 
 	const itemById = new Map(rows.map((row) => [row.id, row] as const));

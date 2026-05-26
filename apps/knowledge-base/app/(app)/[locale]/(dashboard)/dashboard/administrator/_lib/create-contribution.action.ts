@@ -9,6 +9,7 @@ import * as v from "valibot";
 
 import { CreateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.schema";
 import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
+import { isPublishedEntityVersions } from "@/lib/data/current-entity-version";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { ensureOrganisationalUnitDraftVersion } from "@/lib/data/organisational-unit-drafts";
 import { ensurePersonDraftVersion } from "@/lib/data/person-drafts";
@@ -41,6 +42,10 @@ export const createContributionAction = createServerAction(
 		const { personId, roleTypeId, organisationalUnitId, duration } = result.output;
 
 		const returned = await db.transaction(async (tx) => {
+			if (!(await isPublishedEntityVersions(tx, [personId, organisationalUnitId]))) {
+				return { error: "not-published" as const };
+			}
+
 			const draftPersonId = await ensurePersonDraftVersion(tx, personId);
 			const draftOrganisationalUnitId = await ensureOrganisationalUnitDraftVersion(
 				tx,
@@ -119,6 +124,11 @@ export const createContributionAction = createServerAction(
 		if ("error" in returned) {
 			if (returned.error === "duplicate") {
 				return createActionStateError({ message: t("This contribution already exists.") });
+			}
+			if (returned.error === "not-published") {
+				return createActionStateError({
+					message: t("Relations can only target published entities."),
+				});
 			}
 			return createActionStateError({
 				message: t("The selected role is not allowed for this organisation."),

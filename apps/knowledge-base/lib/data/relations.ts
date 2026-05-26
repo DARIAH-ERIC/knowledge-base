@@ -3,8 +3,9 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { relationOptionsPageSize } from "@/lib/constants/relations";
+import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { type Transaction, db } from "@/lib/db";
-import { and, count, eq, ilike, inArray, or } from "@/lib/db/sql";
+import { and, eq, ilike, inArray, or, sql } from "@/lib/db/sql";
 import { search } from "@/lib/search";
 
 export interface RelationOptionItem {
@@ -24,28 +25,33 @@ export async function getEntityRelationOptions(
 ): Promise<{ items: Array<RelationOptionItem>; total: number }> {
 	const { limit = relationOptionsPageSize, offset = 0, q } = params;
 	const query = q?.trim();
-	const where =
+	const searchWhere =
 		query != null && query !== ""
 			? or(ilike(schema.entities.slug, `%${query}%`), ilike(schema.entityTypes.type, `%${query}%`))
 			: undefined;
+	const where = and(publishedEntityVersionWhere(), searchWhere);
 
 	const [rows, aggregate] = await Promise.all([
 		db
-			.select({
+			.selectDistinct({
 				entityType: schema.entityTypes.type,
 				id: schema.entities.id,
 				slug: schema.entities.slug,
 			})
 			.from(schema.entities)
 			.innerJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
+			.innerJoin(schema.entityVersions, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where)
 			.orderBy(schema.entities.slug)
 			.limit(limit)
 			.offset(offset),
 		db
-			.select({ total: count() })
+			.select({ total: sql<number>`COUNT(DISTINCT ${schema.entities.id})` })
 			.from(schema.entities)
 			.innerJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
+			.innerJoin(schema.entityVersions, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.where(where),
 	]);
 
@@ -63,14 +69,16 @@ export async function getEntityRelationOptionsByIds(ids: ReadonlyArray<string>) 
 	}
 
 	const rows = await db
-		.select({
+		.selectDistinct({
 			entityType: schema.entityTypes.type,
 			id: schema.entities.id,
 			slug: schema.entities.slug,
 		})
 		.from(schema.entities)
 		.innerJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
-		.where(inArray(schema.entities.id, [...ids]))
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.entityId, schema.entities.id))
+		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.where(and(publishedEntityVersionWhere(), inArray(schema.entities.id, [...ids])))
 		.orderBy(schema.entities.slug);
 
 	const itemById = new Map(
@@ -174,6 +182,30 @@ export async function getAvailableResources() {
 	});
 }
 
+/**
+ * Filter the given document ids down to those that have at least one published version. Used as a
+ * server-side backstop before persisting any document-level relation — the picker already restricts
+ * choices to published entities, but stale or tampered submissions are silently dropped rather than
+ * written through.
+ */
+export async function filterToPublishedDocumentIds(
+	tx: Transaction,
+	documentIds: ReadonlyArray<string>,
+): Promise<Array<string>> {
+	if (documentIds.length === 0) {
+		return [];
+	}
+
+	const rows = await tx
+		.selectDistinct({ id: schema.entities.id })
+		.from(schema.entities)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.entityId, schema.entities.id))
+		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.where(and(publishedEntityVersionWhere(), inArray(schema.entities.id, [...documentIds])));
+
+	return rows.map((row) => row.id);
+}
+
 export async function syncEntityRelations(
 	tx: Transaction,
 	documentId: string,
@@ -197,7 +229,10 @@ export async function syncEntityRelations(
 	const documentIdsToDelete = [...existingDocumentIds].filter(
 		(x) => !relatedDocumentIds.includes(x),
 	);
-	const documentIdsToAdd = relatedDocumentIds.filter((x) => !existingDocumentIds.has(x));
+	const documentIdsToAdd = await filterToPublishedDocumentIds(
+		tx,
+		relatedDocumentIds.filter((x) => !existingDocumentIds.has(x)),
+	);
 
 	const resourceIdsToDelete = [...existingResourceIds].filter(
 		(x) => !relatedResourceIds.includes(x),

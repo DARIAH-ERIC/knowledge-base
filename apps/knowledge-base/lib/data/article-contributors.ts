@@ -3,7 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { relationOptionsPageSize } from "@/lib/constants/relations";
-import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
+import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { and, count, eq, ilike, inArray } from "@/lib/db/sql";
 
@@ -25,7 +25,7 @@ export async function getPersonOptions(
 	const query = q?.trim();
 	const searchWhere =
 		query != null && query !== "" ? ilike(schema.persons.name, `%${query}%`) : undefined;
-	const where = and(currentEntityVersionWhere(), searchWhere);
+	const where = and(publishedEntityVersionWhere(), searchWhere);
 
 	const [items, aggregate] = await Promise.all([
 		db
@@ -56,7 +56,9 @@ export async function getPersonOptionsByIds(ids: ReadonlyArray<string>) {
 	const rows = await db
 		.select({ id: schema.persons.id, name: schema.persons.name })
 		.from(schema.persons)
-		.where(inArray(schema.persons.id, [...ids]))
+		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.where(and(publishedEntityVersionWhere(), inArray(schema.persons.id, [...ids])))
 		.orderBy(schema.persons.sortName);
 
 	const itemById = new Map(rows.map((row) => [row.id, row] as const));

@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 
 import type { EntityOption } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-item-form-dialog";
 import { NavigationPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/navigation/_components/navigation-page";
-import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
+import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -40,21 +40,21 @@ export default async function DashboardWebsiteNavigationPage(
 			.from(schema.pages)
 			.innerJoin(schema.entityVersions, eq(schema.pages.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(currentEntityVersionWhere())
+			.where(publishedEntityVersionWhere())
 			.orderBy(schema.pages.title),
 		db
 			.select({ id: schema.spotlightArticles.id, title: schema.spotlightArticles.title })
 			.from(schema.spotlightArticles)
 			.innerJoin(schema.entityVersions, eq(schema.spotlightArticles.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(currentEntityVersionWhere())
+			.where(publishedEntityVersionWhere())
 			.orderBy(schema.spotlightArticles.title),
 		db
 			.select({ id: schema.impactCaseStudies.id, title: schema.impactCaseStudies.title })
 			.from(schema.impactCaseStudies)
 			.innerJoin(schema.entityVersions, eq(schema.impactCaseStudies.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-			.where(currentEntityVersionWhere())
+			.where(publishedEntityVersionWhere())
 			.orderBy(schema.impactCaseStudies.title),
 	]);
 

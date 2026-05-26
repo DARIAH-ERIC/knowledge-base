@@ -4,7 +4,7 @@ import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
-import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
+import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
 
@@ -174,7 +174,7 @@ export async function getCountryReportCreateDataForAdmin(currentUser: Pick<User,
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 			)
-			.where(and(currentEntityVersionWhere(), eq(schema.organisationalUnitTypes.type, "country")))
+			.where(and(publishedEntityVersionWhere(), eq(schema.organisationalUnitTypes.type, "country")))
 			.orderBy(schema.organisationalUnits.name),
 	]);
 
@@ -264,7 +264,10 @@ export async function getWorkingGroupReportCreateDataForAdmin(currentUser: Pick<
 				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 			)
 			.where(
-				and(currentEntityVersionWhere(), eq(schema.organisationalUnitTypes.type, "working_group")),
+				and(
+					publishedEntityVersionWhere(),
+					eq(schema.organisationalUnitTypes.type, "working_group"),
+				),
 			)
 			.orderBy(schema.organisationalUnits.name),
 	]);
@@ -638,7 +641,7 @@ export async function getReportingCampaignCountryThresholdsForAdmin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 			)
-			.where(and(currentEntityVersionWhere(), eq(schema.organisationalUnitTypes.type, "country")))
+			.where(and(publishedEntityVersionWhere(), eq(schema.organisationalUnitTypes.type, "country")))
 			.orderBy(schema.organisationalUnits.name),
 	]);
 

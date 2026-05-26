@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { DocumentsPoliciesPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/documents-policies/_components/documents-policies-page";
 import { imageGridOptions } from "@/config/assets.config";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
-import { currentEntityVersionWhere } from "@/lib/data/current-entity-version";
+import { latestEditableEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { asc, eq, sql } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -91,7 +91,7 @@ export default async function DashboardWebsiteDocumentsPoliciesPage(
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 			.innerJoin(schema.assets, eq(schema.documentsPolicies.documentId, schema.assets.id))
-			.where(currentEntityVersionWhere())
+			.where(latestEditableEntityVersionWhere())
 			.orderBy(asc(schema.documentsPolicies.position)),
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "documents" }),
 	]);
