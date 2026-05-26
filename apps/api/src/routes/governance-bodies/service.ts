@@ -10,7 +10,7 @@ import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import { mapSocialMedia } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
 import { hardcodedWorkingGroups } from "@/routes/governance-bodies/hardcoded-working-groups";
-import { and, count, eq, inArray, sql } from "@/services/db/sql";
+import { alias, and, count, eq, inArray, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
 interface GetGovernanceBodiesParams {
@@ -35,7 +35,7 @@ interface GovernanceBodyPerson {
 
 const hardcodedWorkingGroupsGovernanceBody = {
 	id: "019b7a56-b301-7f93-9d24-91333bdc3ca8",
-	name: "working groups",
+	name: "Working groups",
 	acronym: null,
 	summary:
 		"Self-organised communities of practice within DARIAH which contribute to bringing together state-of-art digital arts and humanities activities and scaling their results to a European level.",
@@ -47,6 +47,12 @@ const hardcodedWorkingGroupsGovernanceBody = {
 };
 
 async function getActiveWorkingGroupChairs(db: Database | Transaction) {
+	const workingGroupEntityVersions = alias(schema.entityVersions, "working_group_entity_versions");
+	const workingGroupDocumentLifecycle = alias(
+		schema.documentLifecycle,
+		"working_group_document_lifecycle",
+	);
+
 	const rows = await db
 		.select({
 			id: schema.persons.id,
@@ -71,6 +77,14 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 		.innerJoin(
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+		)
+		.innerJoin(
+			workingGroupEntityVersions,
+			eq(schema.organisationalUnits.id, workingGroupEntityVersions.id),
+		)
+		.innerJoin(
+			workingGroupDocumentLifecycle,
+			eq(workingGroupDocumentLifecycle.publishedId, workingGroupEntityVersions.id),
 		)
 		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
 		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))

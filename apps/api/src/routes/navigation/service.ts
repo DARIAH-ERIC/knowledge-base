@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
+import * as schema from "@dariah-eric/database/schema";
+
 import type { Database, Transaction } from "@/middlewares/db";
+import { and, asc, eq, isNotNull, isNull, or } from "@/services/db/sql";
 
 interface NavigationItem {
 	id: string;
@@ -41,57 +44,62 @@ interface GetNavigationParams {
 export async function getNavigation(db: Database | Transaction, params: GetNavigationParams) {
 	const { menu } = params;
 
-	const menus = await db.query.navigationMenus.findMany({
-		where: menu != null ? { name: menu } : undefined,
-		columns: {
-			id: true,
-			name: true,
-		},
-		with: {
-			items: {
-				columns: {
-					id: true,
-					label: true,
-					href: true,
-					isExternal: true,
-					position: true,
-					parentId: true,
-				},
-				with: {
-					entity: {
-						columns: {
-							slug: true,
-						},
-						with: {
-							type: {
-								columns: {
-									type: true,
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		orderBy: {
-			name: "asc",
-		},
-	});
+	const rows = await db
+		.select({
+			menuId: schema.navigationMenus.id,
+			menuName: schema.navigationMenus.name,
+			itemId: schema.navigationItems.id,
+			label: schema.navigationItems.label,
+			href: schema.navigationItems.href,
+			isExternal: schema.navigationItems.isExternal,
+			position: schema.navigationItems.position,
+			parentId: schema.navigationItems.parentId,
+			entitySlug: schema.entities.slug,
+			entityType: schema.entityTypes.type,
+		})
+		.from(schema.navigationMenus)
+		.leftJoin(schema.navigationItems, eq(schema.navigationMenus.id, schema.navigationItems.menuId))
+		.leftJoin(schema.entities, eq(schema.navigationItems.entityId, schema.entities.id))
+		.leftJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
+		.leftJoin(schema.documentLifecycle, eq(schema.documentLifecycle.documentId, schema.entities.id))
+		.where(
+			and(
+				menu != null ? eq(schema.navigationMenus.name, menu) : undefined,
+				or(
+					isNull(schema.navigationItems.id),
+					isNull(schema.navigationItems.entityId),
+					isNotNull(schema.documentLifecycle.publishedId),
+				),
+			),
+		)
+		.orderBy(asc(schema.navigationMenus.name), asc(schema.navigationItems.position));
 
-	return menus.map((m) => {
-		const items: Array<NavigationItem> = m.items.map((item) => {
-			return {
-				id: item.id,
-				label: item.label,
-				href: item.href ?? null,
-				entity:
-					item.entity != null ? { type: item.entity.type.type, slug: item.entity.slug } : null,
-				isExternal: item.isExternal,
-				position: item.position,
-				parentId: item.parentId ?? null,
-			};
+	const menus = new Map<string, { id: string; name: string; items: Array<NavigationItem> }>();
+
+	for (const row of rows) {
+		const item = menus.get(row.menuId) ?? { id: row.menuId, name: row.menuName, items: [] };
+		menus.set(row.menuId, item);
+
+		if (row.itemId == null) {
+			continue;
+		}
+
+		item.items.push({
+			id: row.itemId,
+			label: row.label!,
+			href: row.href ?? null,
+			entity:
+				row.entitySlug != null && row.entityType != null
+					? { type: row.entityType, slug: row.entitySlug }
+					: null,
+			isExternal: row.isExternal!,
+			position: row.position!,
+			parentId: row.parentId ?? null,
 		});
-		const tree = buildTree(items, null);
+	}
+
+	return [...menus.values()].map((m) => {
+		const tree = buildTree(m.items, null);
 		return { id: m.id, name: m.name, items: tree };
 	});
 }

@@ -8,7 +8,7 @@ const validate = define({
 		CAMPUS_API_BASE_URL: v.optional(v.pipe(v.string(), v.url())),
 		DATABASE_HOST: v.pipe(v.string(), v.nonEmpty()),
 		DATABASE_NAME: v.pipe(v.string(), v.nonEmpty()),
-		DATABASE_PASSWORD: v.pipe(v.string(), v.minLength(32)),
+		DATABASE_PASSWORD: v.pipe(v.string(), v.minLength(8)),
 		DATABASE_PORT: v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
 		DATABASE_SSL_CONNECTION: v.optional(v.picklist(["disabled", "enabled"]), "disabled"),
 		DATABASE_USER: v.pipe(v.string(), v.nonEmpty()),

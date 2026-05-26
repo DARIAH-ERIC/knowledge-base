@@ -1,7 +1,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import type { Database, Transaction } from "@/middlewares/db";
-import { and, eq, inArray, sql } from "@/services/db/sql";
+import { alias, and, eq, inArray, sql } from "@/services/db/sql";
 
 export interface PersonPosition {
 	role: (typeof schema.personRoleTypesEnum)[number];
@@ -23,6 +23,11 @@ export async function getPersonPositions(
 		return positions;
 	}
 
+	const organisationalUnitEntityVersions = alias(
+		schema.entityVersions,
+		"organisational_unit_entity_versions",
+	);
+
 	const rows = await db
 		.select({
 			personId: schema.personsToOrganisationalUnits.personId,
@@ -42,6 +47,14 @@ export async function getPersonPositions(
 		.innerJoin(
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+		)
+		.innerJoin(
+			organisationalUnitEntityVersions,
+			eq(schema.organisationalUnits.id, organisationalUnitEntityVersions.id),
+		)
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.publishedId, organisationalUnitEntityVersions.id),
 		)
 		.where(
 			and(

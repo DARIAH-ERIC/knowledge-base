@@ -121,6 +121,13 @@ export async function getDariahProjects(
 								in: ["coordinator", "participant"],
 							},
 						},
+						unit: {
+							entityVersion: {
+								status: {
+									type: "published",
+								},
+							},
+						},
 					},
 					columns: {},
 					with: {
@@ -250,6 +257,13 @@ export async function getDariahProjectById(
 						role: {
 							role: {
 								in: ["coordinator", "participant"],
+							},
+						},
+						unit: {
+							entityVersion: {
+								status: {
+									type: "published",
+								},
 							},
 						},
 					},
@@ -468,6 +482,13 @@ export async function getDariahProjectBySlug(
 					role: {
 						role: {
 							in: ["coordinator", "participant"],
+						},
+					},
+					unit: {
+						entityVersion: {
+							status: {
+								type: "published",
+							},
 						},
 					},
 				},

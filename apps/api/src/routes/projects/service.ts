@@ -188,6 +188,15 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 					},
 				},
 				projectsToOrganisationalUnits: {
+					where: {
+						unit: {
+							entityVersion: {
+								status: {
+									type: "published",
+								},
+							},
+						},
+					},
 					columns: {},
 					with: {
 						role: {
@@ -403,6 +412,15 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 				},
 			},
 			projectsToOrganisationalUnits: {
+				where: {
+					unit: {
+						entityVersion: {
+							status: {
+								type: "published",
+							},
+						},
+					},
+				},
 				columns: {},
 				with: {
 					role: {
