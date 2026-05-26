@@ -123,6 +123,23 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "type": "string",
         },
       },
+      "GetNationalConsortiumByIdParams": {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "format": "uuid",
+          "type": "string",
+        },
+      },
+      "GetNationalConsortiumBySlugParams": {
+        "in": "path",
+        "name": "slug",
+        "required": true,
+        "schema": {
+          "type": "string",
+        },
+      },
       "GetNavigationQuery": {
         "in": "query",
         "name": "menu",
@@ -2917,6 +2934,54 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         ],
         "type": "object",
       },
+      "GetNationalConsortiaResponse": {
+        "description": "Paginated list of national consortia",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/NationalConsortiumList",
+          },
+          "limit": {
+            "type": "number",
+          },
+          "offset": {
+            "type": "number",
+          },
+          "total": {
+            "type": "number",
+          },
+        },
+        "required": [
+          "limit",
+          "offset",
+          "total",
+          "data",
+        ],
+        "type": "object",
+      },
+      "GetNationalConsortiumSlugsResponse": {
+        "description": "Paginated list of national consortium slugs",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/NationalConsortiumSlugList",
+          },
+          "limit": {
+            "type": "number",
+          },
+          "offset": {
+            "type": "number",
+          },
+          "total": {
+            "type": "number",
+          },
+        },
+        "required": [
+          "limit",
+          "offset",
+          "total",
+          "data",
+        ],
+        "type": "object",
+      },
       "GetNewsItemSlugsResponse": {
         "description": "Paginated list of news item slugs",
         "properties": {
@@ -5607,7 +5672,48 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       "NationalConsortium": {
         "description": "National consortium",
         "properties": {
-          "image": {
+          "acronym": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+          "country": {
+            "anyOf": [
+              {
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string",
+                  },
+                  "name": {
+                    "type": "string",
+                  },
+                  "slug": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "slug",
+                ],
+                "type": "object",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string",
+          },
+          "logo": {
             "anyOf": [
               {
                 "properties": {
@@ -5633,11 +5739,45 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           },
         },
         "required": [
+          "id",
           "name",
+          "acronym",
           "slug",
-          "image",
+          "country",
+          "logo",
         ],
         "type": "object",
+      },
+      "NationalConsortiumList": {
+        "description": "List of national consortia",
+        "items": {
+          "$ref": "#/components/schemas/NationalConsortium",
+        },
+        "type": "array",
+      },
+      "NationalConsortiumSlug": {
+        "description": "National consortium slug",
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string",
+          },
+          "slug": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "id",
+          "slug",
+        ],
+        "type": "object",
+      },
+      "NationalConsortiumSlugList": {
+        "description": "List of national consortium slugs",
+        "items": {
+          "$ref": "#/components/schemas/NationalConsortiumSlug",
+        },
+        "type": "array",
       },
       "NavigationItem": {
         "description": "Navigation item",
@@ -11398,6 +11538,196 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "summary": "Get member or partner by id",
         "tags": [
           "members-partners",
+        ],
+      },
+    },
+    "/api/v1/national-consortia": {
+      "get": {
+        "description": "Retrieve a paginated list of national consortia",
+        "operationId": "getNationalConsortia",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "$ref": "#/components/schemas/LimitParam",
+            },
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "$ref": "#/components/schemas/OffsetParam",
+            },
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNationalConsortiaResponse",
+                },
+              },
+            },
+            "description": "Success response",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+        },
+        "summary": "Get national consortia",
+        "tags": [
+          "national-consortia",
+        ],
+      },
+    },
+    "/api/v1/national-consortia/slugs": {
+      "get": {
+        "description": "Retrieve a paginated list of national consortium slugs",
+        "operationId": "getNationalConsortiumSlugs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "$ref": "#/components/schemas/LimitParam",
+            },
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "$ref": "#/components/schemas/OffsetParam",
+            },
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNationalConsortiumSlugsResponse",
+                },
+              },
+            },
+            "description": "Success response",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+        },
+        "summary": "Get national consortium slugs",
+        "tags": [
+          "national-consortia",
+        ],
+      },
+    },
+    "/api/v1/national-consortia/slugs/{slug}": {
+      "get": {
+        "description": "Retrieve a national consortium by slug",
+        "operationId": "getNationalConsortiumBySlug",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GetNationalConsortiumBySlugParams",
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NationalConsortium",
+                },
+              },
+            },
+            "description": "Success response",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse",
+                },
+              },
+            },
+            "description": "Not Found",
+          },
+        },
+        "summary": "Get national consortium by slug",
+        "tags": [
+          "national-consortia",
+        ],
+      },
+    },
+    "/api/v1/national-consortia/{id}": {
+      "get": {
+        "description": "Retrieve a national consortium by id",
+        "operationId": "getNationalConsortiumById",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GetNationalConsortiumByIdParams",
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NationalConsortium",
+                },
+              },
+            },
+            "description": "Success response",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse",
+                },
+              },
+            },
+            "description": "Not Found",
+          },
+        },
+        "summary": "Get national consortium by id",
+        "tags": [
+          "national-consortia",
         ],
       },
     },

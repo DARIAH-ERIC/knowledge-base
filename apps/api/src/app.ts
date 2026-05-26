@@ -12,6 +12,7 @@ import { router as fundingCalls } from "@/routes/funding-calls";
 import { router as governanceBodies } from "@/routes/governance-bodies";
 import { router as impactCaseStudies } from "@/routes/impact-case-studies";
 import { router as membersAndPartners } from "@/routes/members-partners";
+import { router as nationalConsortia } from "@/routes/national-consortia";
 import { router as navigation } from "@/routes/navigation";
 import { router as news } from "@/routes/news";
 import { router as newsletters } from "@/routes/newsletters";
@@ -39,6 +40,7 @@ const api = createRouter()
 	.route("/impact-case-studies", impactCaseStudies)
 	.route("/members-partners", membersAndPartners)
 	.route("/news", news)
+	.route("/national-consortia", nationalConsortia)
 	.route("/newsletters", newsletters)
 	.route("/opportunities", opportunities)
 	.route("/pages", pages)
