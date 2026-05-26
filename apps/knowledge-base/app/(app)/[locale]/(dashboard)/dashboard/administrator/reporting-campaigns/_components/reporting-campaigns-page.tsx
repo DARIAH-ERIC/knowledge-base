@@ -25,25 +25,29 @@ import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { deleteReportingCampaignAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_lib/delete-reporting-campaign.action";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
+import type { ListSortDirection } from "@/lib/server/list-search-params";
 
 interface ReportingCampaignsPageProps {
 	campaigns: {
 		data: Array<
 			Pick<schema.ReportingCampaign, "id" | "year" | "status"> & {
 				hasReports: boolean;
-				reportCount: number;
+				countryReportCount: number;
+				workingGroupReportCount: number;
 			}
 		>;
 		total: number;
 	};
+	dir: ListSortDirection;
 	page: number;
 	q: string;
+	sort: "year";
 }
 
 const pageSize = dashboardPageSize;
 
 export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPageProps>): ReactNode {
-	const { campaigns, page: initialPage, q: initialQ } = props;
+	const { campaigns, dir: initialDir, page: initialPage, q: initialQ, sort: initialSort } = props;
 
 	const t = useExtracted();
 	const router = useRouter();
@@ -53,7 +57,12 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const [isDeletePending, startDeleteTransition] = useTransition();
-	const search = useUrlPaginatedSearch({ page: initialPage, q: initialQ });
+	const search = useUrlPaginatedSearch({
+		dir: initialDir,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+	});
 
 	return (
 		<Fragment>
@@ -71,11 +80,16 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 			<Table
 				aria-label="reporting campaigns"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={search.setSortDescriptor}
+				sortDescriptor={search.sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Year")}</TableColumn>
+					<TableColumn allowsSorting={true} id="year" isRowHeader={true}>
+						{t("Year")}
+					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
-					<TableColumn>{t("Reports")}</TableColumn>
+					<TableColumn>{t("Country reports")}</TableColumn>
+					<TableColumn>{t("Working group reports")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
 				<TableBody items={items}>
@@ -83,7 +97,8 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 						<TableRow id={item.id}>
 							<TableCell>{item.year}</TableCell>
 							<TableCell>{item.status}</TableCell>
-							<TableCell>{item.reportCount}</TableCell>
+							<TableCell>{item.countryReportCount}</TableCell>
+							<TableCell>{item.workingGroupReportCount}</TableCell>
 							<TableCell className="text-end">
 								<RowActionsMenu>
 									<RowActionsMenu.Link

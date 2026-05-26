@@ -25,6 +25,7 @@ import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { deleteWorkingGroupReportAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-group-reports/_lib/delete-working-group-report.action";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { useRouter } from "@/lib/navigation/navigation";
+import type { ListSortDirection } from "@/lib/server/list-search-params";
 
 type WorkingGroupReportRow = Pick<schema.WorkingGroupReport, "id" | "status"> & {
 	campaign: Pick<schema.ReportingCampaign, "id" | "year">;
@@ -32,9 +33,11 @@ type WorkingGroupReportRow = Pick<schema.WorkingGroupReport, "id" | "status"> & 
 };
 
 interface WorkingGroupReportsPageProps {
+	dir: ListSortDirection;
 	reports: { data: Array<WorkingGroupReportRow>; total: number };
 	page: number;
 	q: string;
+	sort: "campaignYear" | "workingGroup";
 }
 
 function formatStatus(status: string): string {
@@ -44,7 +47,7 @@ function formatStatus(status: string): string {
 const pageSize = dashboardPageSize;
 
 export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageProps>): ReactNode {
-	const { reports, page: initialPage, q: initialQ } = props;
+	const { dir: initialDir, reports, page: initialPage, q: initialQ, sort: initialSort } = props;
 
 	const t = useExtracted();
 	const router = useRouter();
@@ -54,7 +57,12 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const [isDeletePending, startDeleteTransition] = useTransition();
-	const search = useUrlPaginatedSearch({ page: initialPage, q: initialQ });
+	const search = useUrlPaginatedSearch({
+		dir: initialDir,
+		page: initialPage,
+		q: initialQ,
+		sort: initialSort,
+	});
 
 	return (
 		<Fragment>
@@ -74,10 +82,16 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 			<Table
 				aria-label="working group reports"
 				className="[--gutter:var(--layout-padding)] sm:[--gutter:var(--layout-padding)]"
+				onSortChange={search.setSortDescriptor}
+				sortDescriptor={search.sortDescriptor}
 			>
 				<TableHeader>
-					<TableColumn isRowHeader={true}>{t("Working group")}</TableColumn>
-					<TableColumn>{t("Campaign")}</TableColumn>
+					<TableColumn allowsSorting={true} id="workingGroup" isRowHeader={true}>
+						{t("Working group")}
+					</TableColumn>
+					<TableColumn allowsSorting={true} id="campaignYear">
+						{t("Campaign")}
+					</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>

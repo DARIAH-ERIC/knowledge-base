@@ -6,12 +6,32 @@ import { forbidden } from "next/navigation";
 
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
+import { and, asc, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
+import type { ListSortDirection } from "@/lib/server/list-search-params";
 
 interface GetReportingListParams {
 	limit: number;
 	offset: number;
 	q?: string;
+}
+
+type ReportingCampaignsSort = "year";
+type CountryReportsSort = "campaignYear" | "country";
+type WorkingGroupReportsSort = "campaignYear" | "workingGroup";
+
+interface GetCountryReportsListParams extends GetReportingListParams {
+	dir?: ListSortDirection;
+	sort?: CountryReportsSort;
+}
+
+interface GetWorkingGroupReportsListParams extends GetReportingListParams {
+	dir?: ListSortDirection;
+	sort?: WorkingGroupReportsSort;
+}
+
+interface GetReportingCampaignsListParams extends GetReportingListParams {
+	dir?: ListSortDirection;
+	sort?: ReportingCampaignsSort;
 }
 
 function assertAdminUser(user: Pick<User, "role">): void {
@@ -94,11 +114,11 @@ export interface ReportingStatisticsFilters {
 
 export async function getCountryReportsForAdmin(
 	currentUser: Pick<User, "role">,
-	params: Readonly<GetReportingListParams>,
+	params: Readonly<GetCountryReportsListParams>,
 ) {
 	assertAdminUser(currentUser);
 
-	const { limit, offset, q } = params;
+	const { dir = "desc", limit, offset, q, sort = "campaignYear" } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""
@@ -110,6 +130,18 @@ export async function getCountryReportsForAdmin(
 						.where(ilike(schema.organisationalUnits.name, `%${query}%`)),
 				)
 			: undefined;
+	const primaryOrderBy =
+		sort === "country"
+			? dir === "asc"
+				? schema.organisationalUnits.name
+				: desc(schema.organisationalUnits.name)
+			: dir === "asc"
+				? schema.reportingCampaigns.year
+				: desc(schema.reportingCampaigns.year);
+	const secondaryOrderBy =
+		sort === "country"
+			? desc(schema.reportingCampaigns.year)
+			: asc(schema.organisationalUnits.name);
 
 	const [data, aggregate] = await Promise.all([
 		db
@@ -135,6 +167,7 @@ export async function getCountryReportsForAdmin(
 				eq(schema.countryReports.countryId, schema.organisationalUnits.id),
 			)
 			.where(where)
+			.orderBy(primaryOrderBy, secondaryOrderBy)
 			.limit(limit)
 			.offset(offset),
 		db.select({ total: count() }).from(schema.countryReports).where(where),
@@ -183,11 +216,11 @@ export async function getCountryReportCreateDataForAdmin(currentUser: Pick<User,
 
 export async function getWorkingGroupReportsForAdmin(
 	currentUser: Pick<User, "role">,
-	params: Readonly<GetReportingListParams>,
+	params: Readonly<GetWorkingGroupReportsListParams>,
 ) {
 	assertAdminUser(currentUser);
 
-	const { limit, offset, q } = params;
+	const { dir = "desc", limit, offset, q, sort = "campaignYear" } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""
@@ -199,6 +232,18 @@ export async function getWorkingGroupReportsForAdmin(
 						.where(ilike(schema.organisationalUnits.name, `%${query}%`)),
 				)
 			: undefined;
+	const primaryOrderBy =
+		sort === "workingGroup"
+			? dir === "asc"
+				? schema.organisationalUnits.name
+				: desc(schema.organisationalUnits.name)
+			: dir === "asc"
+				? schema.reportingCampaigns.year
+				: desc(schema.reportingCampaigns.year);
+	const secondaryOrderBy =
+		sort === "workingGroup"
+			? desc(schema.reportingCampaigns.year)
+			: asc(schema.organisationalUnits.name);
 
 	const [data, aggregate] = await Promise.all([
 		db
@@ -224,6 +269,7 @@ export async function getWorkingGroupReportsForAdmin(
 				eq(schema.workingGroupReports.workingGroupId, schema.organisationalUnits.id),
 			)
 			.where(where)
+			.orderBy(primaryOrderBy, secondaryOrderBy)
 			.limit(limit)
 			.offset(offset),
 		db.select({ total: count() }).from(schema.workingGroupReports).where(where),
@@ -277,16 +323,18 @@ export async function getWorkingGroupReportCreateDataForAdmin(currentUser: Pick<
 
 export async function getReportingCampaignsForAdmin(
 	currentUser: Pick<User, "role">,
-	params: Readonly<GetReportingListParams>,
+	params: Readonly<GetReportingCampaignsListParams>,
 ) {
 	assertAdminUser(currentUser);
 
-	const { limit, offset, q } = params;
+	const { dir = "desc", limit, offset, q } = params;
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""
 			? sql<boolean>`${schema.reportingCampaigns.year}::text ilike ${`%${query}%`}`
 			: undefined;
+	const orderBy =
+		dir === "asc" ? schema.reportingCampaigns.year : desc(schema.reportingCampaigns.year);
 
 	const [campaigns, aggregate] = await Promise.all([
 		db
@@ -294,25 +342,34 @@ export async function getReportingCampaignsForAdmin(
 				id: schema.reportingCampaigns.id,
 				year: schema.reportingCampaigns.year,
 				status: schema.reportingCampaigns.status,
-				countryReportCount: sql<number>`(select count(*) from ${schema.countryReports} where ${schema.countryReports.campaignId} = ${schema.reportingCampaigns.id})`,
-				workingGroupReportCount: sql<number>`(select count(*) from ${schema.workingGroupReports} where ${schema.workingGroupReports.campaignId} = ${schema.reportingCampaigns.id})`,
+				countryReportCount: sql<number>`count(distinct ${schema.countryReports.id})::int`,
+				workingGroupReportCount: sql<number>`count(distinct ${schema.workingGroupReports.id})::int`,
 			})
 			.from(schema.reportingCampaigns)
+			.leftJoin(
+				schema.countryReports,
+				eq(schema.countryReports.campaignId, schema.reportingCampaigns.id),
+			)
+			.leftJoin(
+				schema.workingGroupReports,
+				eq(schema.workingGroupReports.campaignId, schema.reportingCampaigns.id),
+			)
 			.where(where)
-			.orderBy(desc(schema.reportingCampaigns.year))
+			.groupBy(schema.reportingCampaigns.id)
+			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
 		db.select({ total: count() }).from(schema.reportingCampaigns).where(where),
 	]);
 
 	const data = campaigns.map((campaign) => {
-		const reportCount = campaign.countryReportCount + campaign.workingGroupReportCount;
 		return {
 			id: campaign.id,
 			year: campaign.year,
 			status: campaign.status,
-			reportCount,
-			hasReports: reportCount > 0,
+			countryReportCount: campaign.countryReportCount,
+			workingGroupReportCount: campaign.workingGroupReportCount,
+			hasReports: campaign.countryReportCount + campaign.workingGroupReportCount > 0,
 		};
 	});
 
