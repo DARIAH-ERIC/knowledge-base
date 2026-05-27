@@ -116,10 +116,7 @@ export async function getContributions(
 			)
 			.innerJoin(personEntityVersions, eq(schema.persons.id, personEntityVersions.id))
 			.innerJoin(personEntities, eq(personEntityVersions.entityId, personEntities.id))
-			.innerJoin(
-				personDocumentLifecycle,
-				eq(personDocumentLifecycle.documentId, personEntities.id),
-			)
+			.innerJoin(personDocumentLifecycle, eq(personDocumentLifecycle.documentId, personEntities.id))
 			.innerJoin(
 				schema.personRoleTypes,
 				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
@@ -153,10 +150,7 @@ export async function getContributions(
 			)
 			.innerJoin(personEntityVersions, eq(schema.persons.id, personEntityVersions.id))
 			.innerJoin(personEntities, eq(personEntityVersions.entityId, personEntities.id))
-			.innerJoin(
-				personDocumentLifecycle,
-				eq(personDocumentLifecycle.documentId, personEntities.id),
-			)
+			.innerJoin(personDocumentLifecycle, eq(personDocumentLifecycle.documentId, personEntities.id))
 			.innerJoin(
 				schema.personRoleTypes,
 				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
