@@ -64,8 +64,8 @@ test.describe("projects admin", () => {
 			summary,
 			topic,
 		});
-		expect(created?.duration?.start).toEqual(new Date("2024-01-15T00:00:00.000Z"));
-		expect(created?.duration?.end).toEqual(new Date("2024-12-31T00:00:00.000Z"));
+		expect(created?.duration?.start).toStrictEqual(new Date("2024-01-15T00:00:00.000Z"));
+		expect(created?.duration?.end).toStrictEqual(new Date("2024-12-31T00:00:00.000Z"));
 		expect(JSON.stringify(await db.getProjectDescriptionByName(projectName))).toContain(
 			description,
 		);
@@ -146,8 +146,8 @@ test.describe("projects admin", () => {
 			summary: updatedSummary,
 			topic: updatedTopic,
 		});
-		expect(updated?.duration?.start).toEqual(new Date("2025-02-16T00:00:00.000Z"));
-		expect(updated?.duration?.end).toEqual(new Date("2025-11-30T00:00:00.000Z"));
+		expect(updated?.duration?.start).toStrictEqual(new Date("2025-02-16T00:00:00.000Z"));
+		expect(updated?.duration?.end).toStrictEqual(new Date("2025-11-30T00:00:00.000Z"));
 		expect(JSON.stringify(await db.getProjectDescriptionByName(updatedName))).toContain(
 			updatedDescription,
 		);

@@ -224,7 +224,7 @@ export class DatabaseService {
 		return row ?? null;
 	}
 
-	async getWorkingGroupDescriptionByName(name: string): Promise<unknown | null> {
+	async getWorkingGroupDescriptionByName(name: string): Promise<unknown> {
 		const workingGroup = await this.getWorkingGroupByName(name);
 
 		if (workingGroup == null) {
@@ -278,7 +278,7 @@ export class DatabaseService {
 		return row ?? null;
 	}
 
-	async getPersonBiographyByName(name: string): Promise<unknown | null> {
+	async getPersonBiographyByName(name: string): Promise<unknown> {
 		const person = await this.getPersonByName(name);
 
 		if (person == null) {
@@ -363,7 +363,7 @@ export class DatabaseService {
 		return row ?? null;
 	}
 
-	async getProjectDescriptionByName(name: string): Promise<unknown | null> {
+	async getProjectDescriptionByName(name: string): Promise<unknown> {
 		const project = await this.getProjectByName(name);
 
 		if (project == null) {

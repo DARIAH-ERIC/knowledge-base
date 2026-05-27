@@ -40,8 +40,8 @@ test.describe("website opportunities lifecycle", () => {
 
 		let opportunity = await db.getOpportunityByTitle(title);
 		expect(opportunity).toMatchObject({ sourceId: source.id, summary, website });
-		expect(opportunity?.duration.start).toEqual(new Date("2025-06-01T00:00:00.000Z"));
-		expect(opportunity?.duration.end).toEqual(new Date("2025-07-01T00:00:00.000Z"));
+		expect(opportunity?.duration.start).toStrictEqual(new Date("2025-06-01T00:00:00.000Z"));
+		expect(opportunity?.duration.end).toStrictEqual(new Date("2025-07-01T00:00:00.000Z"));
 		let contentBlocks = await db.getOpportunityContentBlocksByTitle(title);
 		expect(contentBlocks).toHaveLength(1);
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(content);
@@ -93,8 +93,8 @@ test.describe("website opportunities lifecycle", () => {
 			summary: updatedSummary,
 			website: updatedWebsite,
 		});
-		expect(opportunity?.duration.start).toEqual(new Date("2026-08-02T00:00:00.000Z"));
-		expect(opportunity?.duration.end).toEqual(new Date("2026-09-02T00:00:00.000Z"));
+		expect(opportunity?.duration.start).toStrictEqual(new Date("2026-08-02T00:00:00.000Z"));
+		expect(opportunity?.duration.end).toStrictEqual(new Date("2026-09-02T00:00:00.000Z"));
 		contentBlocks = await db.getOpportunityContentBlocksByTitle(`${title} Edited`);
 		expect(contentBlocks).toHaveLength(1);
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(updatedContent);

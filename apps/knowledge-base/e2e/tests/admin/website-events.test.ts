@@ -53,7 +53,7 @@ test.describe("website events admin", () => {
 			summary,
 			website,
 		});
-		expect(created?.duration.start).toEqual(new Date("2025-06-15T00:00:00.000Z"));
+		expect(created?.duration.start).toStrictEqual(new Date("2025-06-15T00:00:00.000Z"));
 		const contentBlocks = await db.getEventContentBlocksByTitle(title);
 		expect(contentBlocks).toHaveLength(1);
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(content);
@@ -115,7 +115,7 @@ test.describe("website events admin", () => {
 			summary: updatedSummary,
 			website: updatedWebsite,
 		});
-		expect(updated?.duration.start).toEqual(new Date("2026-07-16T00:00:00.000Z"));
+		expect(updated?.duration.start).toStrictEqual(new Date("2026-07-16T00:00:00.000Z"));
 		const contentBlocks = await db.getEventContentBlocksByTitle(updatedTitle);
 		expect(contentBlocks).toHaveLength(1);
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(updatedContent);

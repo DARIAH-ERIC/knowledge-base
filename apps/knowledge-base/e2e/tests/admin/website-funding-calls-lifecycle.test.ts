@@ -32,8 +32,8 @@ test.describe("website funding calls lifecycle", () => {
 
 		let fundingCall = await db.getFundingCallByTitle(title);
 		expect(fundingCall).toMatchObject({ summary });
-		expect(fundingCall?.duration.start).toEqual(new Date("2025-06-01T00:00:00.000Z"));
-		expect(fundingCall?.duration.end).toEqual(new Date("2025-07-01T00:00:00.000Z"));
+		expect(fundingCall?.duration.start).toStrictEqual(new Date("2025-06-01T00:00:00.000Z"));
+		expect(fundingCall?.duration.end).toStrictEqual(new Date("2025-07-01T00:00:00.000Z"));
 		let contentBlocks = await db.getFundingCallContentBlocksByTitle(title);
 		expect(contentBlocks).toHaveLength(1);
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(content);
@@ -78,8 +78,8 @@ test.describe("website funding calls lifecycle", () => {
 
 		fundingCall = await db.getFundingCallByTitle(`${title} Edited`);
 		expect(fundingCall).toMatchObject({ summary: updatedSummary });
-		expect(fundingCall?.duration.start).toEqual(new Date("2026-08-02T00:00:00.000Z"));
-		expect(fundingCall?.duration.end).toEqual(new Date("2026-09-02T00:00:00.000Z"));
+		expect(fundingCall?.duration.start).toStrictEqual(new Date("2026-08-02T00:00:00.000Z"));
+		expect(fundingCall?.duration.end).toStrictEqual(new Date("2026-09-02T00:00:00.000Z"));
 		contentBlocks = await db.getFundingCallContentBlocksByTitle(`${title} Edited`);
 		expect(contentBlocks).toHaveLength(1);
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(updatedContent);
