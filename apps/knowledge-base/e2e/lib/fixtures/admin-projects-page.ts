@@ -52,7 +52,7 @@ export class AdminProjectsPage {
 	}
 
 	async fillFunding(funding: number): Promise<void> {
-		await this.page.locator('input[name="funding"]').fill(String(funding));
+		await this.page.getByLabel("Funding").fill(String(funding));
 	}
 
 	async fillTopic(topic: string): Promise<void> {
