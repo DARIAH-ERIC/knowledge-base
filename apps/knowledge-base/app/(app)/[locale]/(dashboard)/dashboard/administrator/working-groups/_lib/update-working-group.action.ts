@@ -40,7 +40,13 @@ export const updateWorkingGroupAction = createMutationAction({
 
 		await tx
 			.update(schema.organisationalUnits)
-			.set({ acronym: input.acronym, imageId, name: input.name, summary: input.summary })
+			.set({
+				acronym: input.acronym,
+				imageId,
+				name: input.name,
+				sshocMarketplaceActorId: input.sshocMarketplaceActorId,
+				summary: input.summary,
+			})
 			.where(eq(schema.organisationalUnits.id, draftVersionId));
 
 		const parsedContent = JSON.parse(input.description) as schema.RichTextContentBlock["content"];

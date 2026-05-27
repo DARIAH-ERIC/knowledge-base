@@ -51,6 +51,7 @@ export const createWorkingGroupAction = createMutationAction({
 			acronym: input.acronym,
 			imageId,
 			name: input.name,
+			sshocMarketplaceActorId: input.sshocMarketplaceActorId,
 			summary: input.summary,
 			typeId: orgUnitType.id,
 		});
