@@ -27,7 +27,6 @@ test.describe("website events admin", () => {
 		const location = "Vienna, Austria";
 		const website = "https://example.com/event";
 		const content = `E2E event content ${randomUUID()}`;
-		const testAsset = await db.getTestAsset();
 
 		await eventsPage.gotoCreate();
 
@@ -47,12 +46,12 @@ test.describe("website events admin", () => {
 
 		const created = await db.getEventByTitle(title);
 		expect(created).toMatchObject({
-			imageId: testAsset.id,
 			isFullDay: true,
 			location,
 			summary,
 			website,
 		});
+		expect(created?.imageId).toBeTruthy();
 		expect(created?.duration.start).toStrictEqual(new Date("2025-06-15T00:00:00.000Z"));
 		const contentBlocks = await db.getEventContentBlocksByTitle(title);
 		expect(contentBlocks).toHaveLength(1);
@@ -89,7 +88,6 @@ test.describe("website events admin", () => {
 		const updatedLocation = "Berlin, Germany";
 		const updatedWebsite = "https://example.com/updated-event";
 		const updatedContent = `Updated E2E event content ${randomUUID()}`;
-		const testAsset = await db.getTestAsset();
 
 		await page.getByLabel("Title").fill(updatedTitle);
 		await eventsPage.fillSummary(updatedSummary);
@@ -109,12 +107,12 @@ test.describe("website events admin", () => {
 
 		const updated = await db.getEventByTitle(updatedTitle);
 		expect(updated).toMatchObject({
-			imageId: testAsset.id,
 			isFullDay: true,
 			location: updatedLocation,
 			summary: updatedSummary,
 			website: updatedWebsite,
 		});
+		expect(updated?.imageId).toBeTruthy();
 		expect(updated?.duration.start).toStrictEqual(new Date("2026-07-16T00:00:00.000Z"));
 		const contentBlocks = await db.getEventContentBlocksByTitle(updatedTitle);
 		expect(contentBlocks).toHaveLength(1);

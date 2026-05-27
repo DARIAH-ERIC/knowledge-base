@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import { type Locator, type Page, expect } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
@@ -56,9 +56,16 @@ export class AdminServicesPage {
 	}
 
 	async setFlag(name: "dariahBranding" | "monitoring" | "privateSupplier"): Promise<void> {
-		const checkbox = this.page.locator(`input[name="${name}"]`);
+		const labelByName = {
+			dariahBranding: "DARIAH branding",
+			monitoring: "Monitoring",
+			privateSupplier: "Private supplier",
+		} as const;
+		const checkbox = this.page.getByRole("checkbox", { name: labelByName[name] });
 		if (!(await checkbox.isChecked())) {
-			await checkbox.check();
+			await checkbox.focus();
+			await this.page.keyboard.press("Space");
+			await expect(checkbox).toBeChecked();
 		}
 	}
 

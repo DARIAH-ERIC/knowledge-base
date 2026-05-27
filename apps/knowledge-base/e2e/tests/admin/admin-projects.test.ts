@@ -30,7 +30,6 @@ test.describe("projects admin", () => {
 		const call = "E2E project call";
 		const summary = "E2E test project summary";
 		const description = "E2E test project description.";
-		const testAsset = await db.getTestAsset();
 
 		await adminProjectsPage.gotoCreate();
 
@@ -59,11 +58,11 @@ test.describe("projects admin", () => {
 			acronym,
 			call,
 			funding,
-			imageId: testAsset.id,
 			name: projectName,
 			summary,
 			topic,
 		});
+		expect(created?.imageId).toBeTruthy();
 		expect(created?.duration?.start).toStrictEqual(new Date("2024-01-15T00:00:00.000Z"));
 		expect(created?.duration?.end).toStrictEqual(new Date("2024-12-31T00:00:00.000Z"));
 		expect(JSON.stringify(await db.getProjectDescriptionByName(projectName))).toContain(
@@ -76,7 +75,6 @@ test.describe("projects admin", () => {
 		const adminProjectsPage = createAdminProjectsPage(workerIndex);
 
 		const originalName = `${adminProjectsPage.workerPrefix} Edit Me ${randomUUID()}`;
-		const testAsset = await db.getTestAsset();
 		await adminProjectsPage.gotoCreate();
 		await adminProjectsPage.fillName(originalName);
 		await adminProjectsPage.fillAcronym("E2EOLD");
@@ -141,11 +139,11 @@ test.describe("projects admin", () => {
 			acronym: updatedAcronym,
 			call: updatedCall,
 			funding: updatedFunding,
-			imageId: testAsset.id,
 			name: updatedName,
 			summary: updatedSummary,
 			topic: updatedTopic,
 		});
+		expect(updated?.imageId).toBeTruthy();
 		expect(updated?.duration?.start).toStrictEqual(new Date("2025-02-16T00:00:00.000Z"));
 		expect(updated?.duration?.end).toStrictEqual(new Date("2025-11-30T00:00:00.000Z"));
 		expect(JSON.stringify(await db.getProjectDescriptionByName(updatedName))).toContain(

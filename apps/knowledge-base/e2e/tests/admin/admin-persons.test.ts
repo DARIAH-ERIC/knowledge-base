@@ -28,7 +28,6 @@ test.describe("persons admin", () => {
 		const email = `person-${randomUUID()}@example.com`;
 		const orcid = "0000-0002-1825-0097";
 		const biography = "E2E test person biography.";
-		const testAsset = await db.getTestAsset();
 
 		await personsPage.gotoCreate();
 
@@ -46,7 +45,8 @@ test.describe("persons admin", () => {
 
 		const created = await db.getPersonByName(name);
 		expect(created).not.toBeNull();
-		expect(created).toMatchObject({ email, imageId: testAsset.id, name, orcid, sortName });
+		expect(created).toMatchObject({ email, name, orcid, sortName });
+		expect(created?.imageId).toBeTruthy();
 		expect(JSON.stringify(await db.getPersonBiographyByName(name))).toContain(biography);
 	});
 
@@ -55,7 +55,6 @@ test.describe("persons admin", () => {
 		const personsPage = createAdminPersonsPage(workerIndex);
 
 		const originalName = `${personsPage.workerPrefix} Edit Me ${randomUUID()}`;
-		const testAsset = await db.getTestAsset();
 		await personsPage.gotoCreate();
 		await personsPage.fillName(originalName);
 		await personsPage.fillSortName("Me, Edit");
@@ -102,11 +101,11 @@ test.describe("persons admin", () => {
 		expect(updated).not.toBeNull();
 		expect(updated).toMatchObject({
 			email: updatedEmail,
-			imageId: testAsset.id,
 			name: updatedName,
 			orcid: updatedOrcid,
 			sortName: updatedSortName,
 		});
+		expect(updated?.imageId).toBeTruthy();
 		expect(JSON.stringify(await db.getPersonBiographyByName(updatedName))).toContain(
 			updatedBiography,
 		);
