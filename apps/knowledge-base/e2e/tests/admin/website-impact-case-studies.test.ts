@@ -18,27 +18,38 @@ test.describe("website impact case studies admin", () => {
 		await db.cleanupWorkerImpactCaseStudies(testInfo.workerIndex);
 	});
 
-	test("should create an impact case study", async ({ createWebsiteImpactCaseStudiesPage }) => {
+	test("should create an impact case study", async ({ createWebsiteImpactCaseStudiesPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const impactCaseStudiesPage = createWebsiteImpactCaseStudiesPage(workerIndex);
 
 		const title = `${impactCaseStudiesPage.workerPrefix} Test ICS ${randomUUID()}`;
+		const summary = "E2E test impact case study summary";
+		const content = `E2E impact case study content ${randomUUID()}`;
+		const testAsset = await db.getTestAsset();
 
 		await impactCaseStudiesPage.gotoCreate();
 
 		await impactCaseStudiesPage.fillTitle(title);
-		await impactCaseStudiesPage.fillSummary("E2E test impact case study summary");
+		await impactCaseStudiesPage.fillSummary(summary);
 		await impactCaseStudiesPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await impactCaseStudiesPage.addContentBlock(content);
 
 		await impactCaseStudiesPage.submitForm();
 
 		await impactCaseStudiesPage.searchByTitle(title);
 		await expect(impactCaseStudiesPage.rowByTitle(title)).toBeVisible();
+
+		const created = await db.getImpactCaseStudyByTitle(title);
+		expect(created).toMatchObject({ imageId: testAsset.id, summary });
+		const contentBlocks = await db.getImpactCaseStudyContentBlocksByTitle(title);
+		expect(contentBlocks).toHaveLength(1);
+		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(content);
 	});
 
 	test("should edit an impact case study title", async ({
 		page,
 		createWebsiteImpactCaseStudiesPage,
+		db,
 	}) => {
 		const workerIndex = test.info().workerIndex;
 		const impactCaseStudiesPage = createWebsiteImpactCaseStudiesPage(workerIndex);
@@ -48,6 +59,7 @@ test.describe("website impact case studies admin", () => {
 		await impactCaseStudiesPage.fillTitle(originalTitle);
 		await impactCaseStudiesPage.fillSummary("E2E test impact case study to be edited");
 		await impactCaseStudiesPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await impactCaseStudiesPage.addContentBlock("Old impact case study content");
 		await impactCaseStudiesPage.submitForm();
 
 		await impactCaseStudiesPage.searchByTitle(originalTitle);
@@ -61,9 +73,13 @@ test.describe("website impact case studies admin", () => {
 		]);
 
 		const updatedTitle = `${impactCaseStudiesPage.workerPrefix} Updated ${randomUUID()}`;
-		const titleField = page.getByLabel("Title");
-		await titleField.clear();
-		await titleField.fill(updatedTitle);
+		const updatedSummary = "Updated E2E impact case study summary";
+		const updatedContent = `Updated impact case study content ${randomUUID()}`;
+		const testAsset = await db.getTestAsset();
+		await page.getByLabel("Title").fill(updatedTitle);
+		await impactCaseStudiesPage.fillSummary(updatedSummary);
+		await impactCaseStudiesPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await impactCaseStudiesPage.updateContentBlockText(updatedContent);
 
 		await impactCaseStudiesPage.submitForm();
 
@@ -71,6 +87,12 @@ test.describe("website impact case studies admin", () => {
 		await expect(impactCaseStudiesPage.rowByTitle(updatedTitle)).toBeVisible();
 		await impactCaseStudiesPage.searchByTitle(originalTitle);
 		await expect(impactCaseStudiesPage.rowByTitle(originalTitle)).toBeHidden();
+
+		const updated = await db.getImpactCaseStudyByTitle(updatedTitle);
+		expect(updated).toMatchObject({ imageId: testAsset.id, summary: updatedSummary });
+		const contentBlocks = await db.getImpactCaseStudyContentBlocksByTitle(updatedTitle);
+		expect(contentBlocks).toHaveLength(1);
+		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(updatedContent);
 	});
 
 	test("should delete an impact case study", async ({ createWebsiteImpactCaseStudiesPage }) => {

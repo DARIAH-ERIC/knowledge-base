@@ -13,31 +13,59 @@ test.describe("working groups admin", () => {
 		await db.cleanupWorkerWorkingGroups(testInfo.workerIndex);
 	});
 
-	test("should create a working group", async ({ createAdminWorkingGroupsPage }) => {
+	test("should create a working group", async ({ createAdminWorkingGroupsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const workingGroupsPage = createAdminWorkingGroupsPage(workerIndex);
 
 		const name = `${workingGroupsPage.workerPrefix} Test WG ${randomUUID()}`;
+		const acronym = "E2EWG";
+		const sshocMarketplaceActorId = 123456;
+		const summary = "E2E test working group summary.";
+		const description = "E2E test working group description.";
+		const testAsset = await db.getTestAsset();
 
 		await workingGroupsPage.gotoCreate();
 
 		await workingGroupsPage.fillName(name);
-		await workingGroupsPage.fillSummary("E2E test working group summary.");
-		await workingGroupsPage.fillDescription("E2E test working group description.");
+		await workingGroupsPage.fillAcronym(acronym);
+		await workingGroupsPage.fillSshocMarketplaceActorId(sshocMarketplaceActorId);
+		await workingGroupsPage.selectTestImage();
+		await workingGroupsPage.fillSummary(summary);
+		await workingGroupsPage.fillDescription(description);
 
 		await workingGroupsPage.submitForm();
 
 		await workingGroupsPage.searchByName(name);
 		await expect(workingGroupsPage.rowByName(name)).toBeVisible();
+
+		const created = await db.getWorkingGroupByName(name);
+		expect(created).not.toBeNull();
+		expect(created).toMatchObject({
+			acronym,
+			imageId: testAsset.id,
+			name,
+			sshocMarketplaceActorId,
+			summary,
+		});
+		expect(JSON.stringify(await db.getWorkingGroupDescriptionByName(name))).toContain(description);
 	});
 
-	test("should edit a working group name", async ({ page, createAdminWorkingGroupsPage }) => {
+	test("should edit all working group form fields", async ({
+		page,
+		createAdminWorkingGroupsPage,
+		db,
+	}) => {
 		const workerIndex = test.info().workerIndex;
 		const workingGroupsPage = createAdminWorkingGroupsPage(workerIndex);
 
 		const originalName = `${workingGroupsPage.workerPrefix} Edit Me ${randomUUID()}`;
+		const testAsset = await db.getTestAsset();
+
 		await workingGroupsPage.gotoCreate();
 		await workingGroupsPage.fillName(originalName);
+		await workingGroupsPage.fillAcronym("E2EOLD");
+		await workingGroupsPage.fillSshocMarketplaceActorId(123457);
+		await workingGroupsPage.selectTestImage();
 		await workingGroupsPage.fillSummary("E2E test working group to be edited.");
 		await workingGroupsPage.fillDescription("Description for edit test.");
 		await workingGroupsPage.submitForm();
@@ -53,9 +81,20 @@ test.describe("working groups admin", () => {
 		]);
 
 		const updatedName = `${workingGroupsPage.workerPrefix} Updated ${randomUUID()}`;
-		const nameField = page.getByLabel("Name", { exact: true });
-		await nameField.clear();
-		await nameField.fill(updatedName);
+		const updatedAcronym = "E2ENEW";
+		const updatedSshocMarketplaceActorId = 123458;
+		const updatedSummary = "Updated E2E test working group summary.";
+		const updatedDescription = "Updated E2E test working group description.";
+
+		await page.getByLabel("Name", { exact: true }).fill(updatedName);
+		await workingGroupsPage.fillAcronym(updatedAcronym);
+		await workingGroupsPage.fillSshocMarketplaceActorId(updatedSshocMarketplaceActorId);
+		await workingGroupsPage.selectTestImage();
+		await workingGroupsPage.fillSummary(updatedSummary);
+		const descriptionEditor = page.getByRole("textbox", { name: "Description" });
+		await descriptionEditor.click();
+		await page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
+		await page.keyboard.type(updatedDescription);
 
 		await workingGroupsPage.submitForm();
 
@@ -63,6 +102,19 @@ test.describe("working groups admin", () => {
 		await expect(workingGroupsPage.rowByName(updatedName)).toBeVisible();
 		await workingGroupsPage.searchByName(originalName);
 		await expect(workingGroupsPage.rowByName(originalName)).toBeHidden();
+
+		const updated = await db.getWorkingGroupByName(updatedName);
+		expect(updated).not.toBeNull();
+		expect(updated).toMatchObject({
+			acronym: updatedAcronym,
+			imageId: testAsset.id,
+			name: updatedName,
+			sshocMarketplaceActorId: updatedSshocMarketplaceActorId,
+			summary: updatedSummary,
+		});
+		expect(JSON.stringify(await db.getWorkingGroupDescriptionByName(updatedName))).toContain(
+			updatedDescription,
+		);
 	});
 
 	test("should delete a working group", async ({ createAdminWorkingGroupsPage }) => {

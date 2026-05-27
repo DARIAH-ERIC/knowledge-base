@@ -41,22 +41,27 @@ test.describe("website news admin", () => {
 		await expect(newsPage.page.getByText("Please select an image.")).toBeVisible();
 	});
 
-	test("should create a news item", async ({ createWebsiteNewsPage }) => {
+	test("should create a news item", async ({ createWebsiteNewsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const newsPage = createWebsiteNewsPage(workerIndex);
 
 		const title = `${newsPage.workerPrefix} Test News ${randomUUID()}`;
+		const summary = "E2E test news item summary";
+		const testAsset = await db.getTestAsset();
 
 		await newsPage.gotoCreate();
 
 		await newsPage.fillTitle(title);
-		await newsPage.fillSummary("E2E test news item summary");
+		await newsPage.fillSummary(summary);
 		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
 
 		await newsPage.submitForm();
 
 		await newsPage.searchByTitle(title);
 		await expect(newsPage.rowByTitle(title)).toBeVisible();
+
+		const created = await db.getNewsItemByTitle(title);
+		expect(created).toMatchObject({ imageId: testAsset.id, summary });
 	});
 
 	test("should create a news item with an uploaded image", async ({ createWebsiteNewsPage }) => {
@@ -139,11 +144,12 @@ test.describe("website news admin", () => {
 		await expect(dialog.getByRole("button", { name: "Upload" })).toBeDisabled();
 	});
 
-	test("should edit a news item title", async ({ page, createWebsiteNewsPage }) => {
+	test("should edit all news item form fields", async ({ page, createWebsiteNewsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const newsPage = createWebsiteNewsPage(workerIndex);
 
 		const originalTitle = `${newsPage.workerPrefix} Edit Me ${randomUUID()}`;
+		const testAsset = await db.getTestAsset();
 		await newsPage.gotoCreate();
 		await newsPage.fillTitle(originalTitle);
 		await newsPage.fillSummary("E2E test news item to be edited");
@@ -161,9 +167,10 @@ test.describe("website news admin", () => {
 		]);
 
 		const updatedTitle = `${newsPage.workerPrefix} Updated ${randomUUID()}`;
-		const titleField = page.getByLabel("Title");
-		await titleField.clear();
-		await titleField.fill(updatedTitle);
+		const updatedSummary = "Updated E2E test news item summary";
+		await page.getByLabel("Title").fill(updatedTitle);
+		await newsPage.fillSummary(updatedSummary);
+		await newsPage.selectImageFromMediaLibrary("E2E Test Asset");
 
 		await newsPage.submitForm();
 
@@ -171,6 +178,9 @@ test.describe("website news admin", () => {
 		await expect(newsPage.rowByTitle(updatedTitle)).toBeVisible();
 		await newsPage.searchByTitle(originalTitle);
 		await expect(newsPage.rowByTitle(originalTitle)).toBeHidden();
+
+		const updated = await db.getNewsItemByTitle(updatedTitle);
+		expect(updated).toMatchObject({ imageId: testAsset.id, summary: updatedSummary });
 	});
 
 	test("should add, edit, and remove content blocks", async ({

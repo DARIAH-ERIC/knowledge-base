@@ -16,18 +16,35 @@ test.describe("website opportunities lifecycle", () => {
 	test("draft → publish → edit → discard draft", async ({
 		page,
 		createWebsiteOpportunitiesPage,
+		db,
 	}) => {
 		const workerIndex = test.info().workerIndex;
 		const opportunitiesPage = createWebsiteOpportunitiesPage(workerIndex);
 
 		const title = `${opportunitiesPage.workerPrefix} Lifecycle ${randomUUID()}`;
+		const summary = "E2E opportunity summary";
+		const website = "https://example.com/opportunity";
+		const content = `E2E opportunity content ${randomUUID()}`;
+		const source = await db.getOpportunitySource();
 
 		// Create — item starts in draft state.
 		await opportunitiesPage.gotoCreate();
 		await opportunitiesPage.fillTitle(title);
 		await opportunitiesPage.selectFirstSource();
+		await opportunitiesPage.fillSummary(summary);
 		await opportunitiesPage.fillDatePicker("Start date", 2025, 6, 1);
+		await opportunitiesPage.fillDatePicker("End date", 2025, 7, 1);
+		await opportunitiesPage.fillWebsite(website);
+		await opportunitiesPage.addContentBlock(content);
 		await opportunitiesPage.submitForm();
+
+		let opportunity = await db.getOpportunityByTitle(title);
+		expect(opportunity).toMatchObject({ sourceId: source.id, summary, website });
+		expect(opportunity?.duration.start).toStrictEqual(new Date("2025-06-01T00:00:00.000Z"));
+		expect(opportunity?.duration.end).toStrictEqual(new Date("2025-07-01T00:00:00.000Z"));
+		let contentBlocks = await db.getOpportunityContentBlocksByTitle(title);
+		expect(contentBlocks).toHaveLength(1);
+		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(content);
 
 		// List: draft badge visible.
 		await opportunitiesPage.searchByTitle(title);
@@ -59,7 +76,28 @@ test.describe("website opportunities lifecycle", () => {
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();
 		await titleField.fill(`${title} Edited`);
+		const updatedSummary = "Updated E2E opportunity summary";
+		const updatedWebsite = "https://example.com/updated-opportunity";
+		const updatedContent = `Updated opportunity content ${randomUUID()}`;
+		await opportunitiesPage.selectFirstSource();
+		await opportunitiesPage.fillSummary(updatedSummary);
+		await opportunitiesPage.fillDatePicker("Start date", 2026, 8, 2);
+		await opportunitiesPage.fillDatePicker("End date", 2026, 9, 2);
+		await opportunitiesPage.fillWebsite(updatedWebsite);
+		await opportunitiesPage.updateContentBlockText(updatedContent);
 		await opportunitiesPage.submitForm();
+
+		opportunity = await db.getOpportunityByTitle(`${title} Edited`);
+		expect(opportunity).toMatchObject({
+			sourceId: source.id,
+			summary: updatedSummary,
+			website: updatedWebsite,
+		});
+		expect(opportunity?.duration.start).toStrictEqual(new Date("2026-08-02T00:00:00.000Z"));
+		expect(opportunity?.duration.end).toStrictEqual(new Date("2026-09-02T00:00:00.000Z"));
+		contentBlocks = await db.getOpportunityContentBlocksByTitle(`${title} Edited`);
+		expect(contentBlocks).toHaveLength(1);
+		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(updatedContent);
 
 		// List: both badges now visible.
 		await opportunitiesPage.searchByTitle(`${title} Edited`);
@@ -89,18 +127,23 @@ test.describe("website opportunities lifecycle", () => {
 	test("version selector shows correct content per version", async ({
 		page,
 		createWebsiteOpportunitiesPage,
+		db,
 	}) => {
 		const workerIndex = test.info().workerIndex;
 		const opportunitiesPage = createWebsiteOpportunitiesPage(workerIndex);
 
 		const originalTitle = `${opportunitiesPage.workerPrefix} Original ${randomUUID()}`;
 		const updatedTitle = `${opportunitiesPage.workerPrefix} Updated ${randomUUID()}`;
+		const originalContent = `Original opportunity content ${randomUUID()}`;
+		const updatedContent = `Updated opportunity content ${randomUUID()}`;
 
 		// Create → Publish.
 		await opportunitiesPage.gotoCreate();
 		await opportunitiesPage.fillTitle(originalTitle);
 		await opportunitiesPage.selectFirstSource();
+		await opportunitiesPage.fillSummary("Original E2E opportunity summary");
 		await opportunitiesPage.fillDatePicker("Start date", 2025, 6, 1);
+		await opportunitiesPage.addContentBlock(originalContent);
 		await opportunitiesPage.submitForm();
 
 		await opportunitiesPage.searchByTitle(originalTitle);
@@ -116,7 +159,13 @@ test.describe("website opportunities lifecycle", () => {
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();
 		await titleField.fill(updatedTitle);
+		await opportunitiesPage.fillSummary("Updated E2E opportunity summary");
+		await opportunitiesPage.updateContentBlockText(updatedContent);
 		await opportunitiesPage.submitForm();
+
+		const contentBlocks = await db.getOpportunityContentBlocksByTitle(updatedTitle);
+		expect(contentBlocks).toHaveLength(1);
+		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(updatedContent);
 
 		// Details: "Published with draft changes" with version selector.
 		await opportunitiesPage.searchByTitle(updatedTitle);
@@ -127,12 +176,15 @@ test.describe("website opportunities lifecycle", () => {
 
 		// Currently on draft tab — updated title shown.
 		await expect(page.getByText(updatedTitle)).toBeVisible();
+		await expect(page.getByText(updatedContent)).toBeVisible();
 
 		// Switch to published tab — original title shown.
 		await opportunitiesPage.versionSelectorPublishedLink().click();
 		await page.waitForURL((url) => url.searchParams.get("version") === "published");
 		await expect(page.getByText(originalTitle)).toBeVisible();
+		await expect(page.getByText(originalContent)).toBeVisible();
 		await expect(page.getByText(updatedTitle)).toBeHidden();
+		await expect(page.getByText(updatedContent)).toBeHidden();
 
 		// Switch back to draft tab — updated title shown again.
 		await opportunitiesPage.versionSelectorDraftLink().click();

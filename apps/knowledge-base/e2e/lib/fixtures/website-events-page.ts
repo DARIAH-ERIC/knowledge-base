@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import { type Locator, type Page, expect } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
@@ -43,6 +43,35 @@ export class WebsiteEventsPage {
 		await this.page.getByLabel("Location").fill(location);
 	}
 
+	async fillWebsite(website: string): Promise<void> {
+		await this.page.locator('input[name="website"]').fill(website);
+	}
+
+	async setFullDay(): Promise<void> {
+		const checkbox = this.page.getByRole("checkbox", { name: "Full day" });
+		if (!(await checkbox.isChecked())) {
+			await checkbox.focus();
+			await this.page.keyboard.press("Space");
+			await expect(checkbox).toBeChecked();
+		}
+	}
+
+	private contentBlockEditor(): Locator {
+		return this.page.getByRole("textbox", { name: "Content" });
+	}
+
+	async addContentBlock(text: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.contentBlockEditor().fill(text);
+	}
+
+	async updateContentBlockText(text: string): Promise<void> {
+		const editor = this.contentBlockEditor();
+		await editor.clear();
+		await editor.fill(text);
+	}
+
 	async fillDatePicker(label: string, year: number, month: number, day: number): Promise<void> {
 		const group = this.page.getByRole("group", { name: label });
 
@@ -64,7 +93,9 @@ export class WebsiteEventsPage {
 		await this.page.getByRole("button", { name: "Select image" }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
 		await dialog.waitFor({ state: "visible" });
-		await dialog.getByRole("gridcell", { name: assetLabel }).click();
+		const asset = dialog.getByRole("gridcell", { name: assetLabel });
+		await expect(asset).toHaveCount(1);
+		await asset.click();
 		await dialog.getByRole("button", { name: "Select" }).click();
 		await dialog.waitFor({ state: "hidden" });
 	}

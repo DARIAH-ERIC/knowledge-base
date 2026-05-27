@@ -18,27 +18,38 @@ test.describe("website spotlight articles admin", () => {
 		await db.cleanupWorkerSpotlightArticles(testInfo.workerIndex);
 	});
 
-	test("should create a spotlight article", async ({ createWebsiteSpotlightArticlesPage }) => {
+	test("should create a spotlight article", async ({ createWebsiteSpotlightArticlesPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const spotlightArticlesPage = createWebsiteSpotlightArticlesPage(workerIndex);
 
 		const title = `${spotlightArticlesPage.workerPrefix} Test SA ${randomUUID()}`;
+		const summary = "E2E test spotlight article summary";
+		const content = `E2E spotlight article content ${randomUUID()}`;
+		const testAsset = await db.getTestAsset();
 
 		await spotlightArticlesPage.gotoCreate();
 
 		await spotlightArticlesPage.fillTitle(title);
-		await spotlightArticlesPage.fillSummary("E2E test spotlight article summary");
+		await spotlightArticlesPage.fillSummary(summary);
 		await spotlightArticlesPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await spotlightArticlesPage.addContentBlock(content);
 
 		await spotlightArticlesPage.submitForm();
 
 		await spotlightArticlesPage.searchByTitle(title);
 		await expect(spotlightArticlesPage.rowByTitle(title)).toBeVisible();
+
+		const created = await db.getSpotlightArticleByTitle(title);
+		expect(created).toMatchObject({ imageId: testAsset.id, summary });
+		const contentBlocks = await db.getSpotlightArticleContentBlocksByTitle(title);
+		expect(contentBlocks).toHaveLength(1);
+		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(content);
 	});
 
 	test("should edit a spotlight article title", async ({
 		page,
 		createWebsiteSpotlightArticlesPage,
+		db,
 	}) => {
 		const workerIndex = test.info().workerIndex;
 		const spotlightArticlesPage = createWebsiteSpotlightArticlesPage(workerIndex);
@@ -48,6 +59,7 @@ test.describe("website spotlight articles admin", () => {
 		await spotlightArticlesPage.fillTitle(originalTitle);
 		await spotlightArticlesPage.fillSummary("E2E test spotlight article to be edited");
 		await spotlightArticlesPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await spotlightArticlesPage.addContentBlock("Old spotlight article content");
 		await spotlightArticlesPage.submitForm();
 
 		await spotlightArticlesPage.searchByTitle(originalTitle);
@@ -61,9 +73,13 @@ test.describe("website spotlight articles admin", () => {
 		]);
 
 		const updatedTitle = `${spotlightArticlesPage.workerPrefix} Updated ${randomUUID()}`;
-		const titleField = page.getByLabel("Title");
-		await titleField.clear();
-		await titleField.fill(updatedTitle);
+		const updatedSummary = "Updated E2E spotlight article summary";
+		const updatedContent = `Updated spotlight article content ${randomUUID()}`;
+		const testAsset = await db.getTestAsset();
+		await page.getByLabel("Title").fill(updatedTitle);
+		await spotlightArticlesPage.fillSummary(updatedSummary);
+		await spotlightArticlesPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await spotlightArticlesPage.updateContentBlockText(updatedContent);
 
 		await spotlightArticlesPage.submitForm();
 
@@ -71,6 +87,12 @@ test.describe("website spotlight articles admin", () => {
 		await expect(spotlightArticlesPage.rowByTitle(updatedTitle)).toBeVisible();
 		await spotlightArticlesPage.searchByTitle(originalTitle);
 		await expect(spotlightArticlesPage.rowByTitle(originalTitle)).toBeHidden();
+
+		const updated = await db.getSpotlightArticleByTitle(updatedTitle);
+		expect(updated).toMatchObject({ imageId: testAsset.id, summary: updatedSummary });
+		const contentBlocks = await db.getSpotlightArticleContentBlocksByTitle(updatedTitle);
+		expect(contentBlocks).toHaveLength(1);
+		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(updatedContent);
 	});
 
 	test("should delete a spotlight article", async ({ createWebsiteSpotlightArticlesPage }) => {

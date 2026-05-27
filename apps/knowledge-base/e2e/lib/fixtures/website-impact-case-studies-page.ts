@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import { type Locator, type Page, expect } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
@@ -39,12 +39,30 @@ export class WebsiteImpactCaseStudiesPage {
 		await this.page.getByLabel("Summary").fill(summary);
 	}
 
+	private contentBlockEditor(): Locator {
+		return this.page.getByRole("textbox", { name: "Content" });
+	}
+
+	async addContentBlock(text: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.contentBlockEditor().fill(text);
+	}
+
+	async updateContentBlockText(text: string): Promise<void> {
+		const editor = this.contentBlockEditor();
+		await editor.clear();
+		await editor.fill(text);
+	}
+
 	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Select image" }).click();
 		await this.page.waitForSelector('[role="dialog"]');
-		await this.page.waitForSelector('[role="gridcell"]');
-		await this.page.getByRole("gridcell", { name: assetLabel }).click();
-		await this.page.getByRole("dialog").getByRole("button", { name: "Select" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		const asset = dialog.getByRole("gridcell", { name: assetLabel });
+		await expect(asset).toHaveCount(1);
+		await asset.click();
+		await dialog.getByRole("button", { name: "Select" }).click();
 	}
 
 	async submitForm(): Promise<void> {

@@ -96,7 +96,11 @@ export function PersonForm(props: Readonly<PersonFormProps>): ReactNode {
 					title={t("Biography")}
 					variant="stacked"
 				>
-					<RichTextEditor content={person?.biography} name="biography" />
+					<RichTextEditor
+						aria-label={t("Biography")}
+						content={person?.biography}
+						name="biography"
+					/>
 				</FormSection>
 
 				{person != null ? (

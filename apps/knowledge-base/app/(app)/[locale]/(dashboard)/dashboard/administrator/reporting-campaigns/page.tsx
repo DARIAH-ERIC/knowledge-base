@@ -37,7 +37,7 @@ function createListHref(
 		searchParams.set("page", String(page));
 	}
 
-	if (sort !== defaultSort || dir !== "desc") {
+	if (dir !== "desc") {
 		searchParams.set("sort", sort);
 		searchParams.set("dir", dir);
 	}

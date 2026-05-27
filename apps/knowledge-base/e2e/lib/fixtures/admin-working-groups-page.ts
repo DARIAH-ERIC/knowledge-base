@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
+import { E2E_TEST_ASSET_KEY } from "@/e2e/lib/fixtures/database-service";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/administrator/working-groups";
@@ -35,8 +36,23 @@ export class AdminWorkingGroupsPage {
 		await this.page.getByLabel("Name", { exact: true }).fill(name);
 	}
 
+	async fillAcronym(acronym: string): Promise<void> {
+		await this.page.getByLabel("Acronym").fill(acronym);
+	}
+
+	async fillSshocMarketplaceActorId(id: number): Promise<void> {
+		await this.page.locator('input[name="sshocMarketplaceActorId"]').fill(String(id));
+	}
+
 	async fillSummary(text: string): Promise<void> {
 		await this.page.getByLabel("Summary").fill(text);
+	}
+
+	async selectTestImage(): Promise<void> {
+		await this.page.locator('input[name="imageKey"]').evaluate((input, value) => {
+			(input as HTMLInputElement).value = value;
+			input.dispatchEvent(new Event("input", { bubbles: true }));
+		}, E2E_TEST_ASSET_KEY);
 	}
 
 	async fillDescription(text: string): Promise<void> {

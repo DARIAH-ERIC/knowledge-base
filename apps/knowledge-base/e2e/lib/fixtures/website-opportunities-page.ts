@@ -35,6 +35,14 @@ export class WebsiteOpportunitiesPage {
 		await this.page.getByLabel("Title").fill(title);
 	}
 
+	async fillSummary(summary: string): Promise<void> {
+		await this.page.getByLabel("Summary").fill(summary);
+	}
+
+	async fillWebsite(website: string): Promise<void> {
+		await this.page.locator('input[name="website"]').fill(website);
+	}
+
 	async selectFirstSource(): Promise<void> {
 		const sourceControl = this.page
 			.locator('[data-slot="control"]')
@@ -58,6 +66,22 @@ export class WebsiteOpportunitiesPage {
 
 		await yearSegment.click();
 		await this.page.keyboard.type(String(year));
+	}
+
+	private contentBlockEditor(): Locator {
+		return this.page.getByRole("textbox", { name: "Content" });
+	}
+
+	async addContentBlock(text: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.contentBlockEditor().fill(text);
+	}
+
+	async updateContentBlockText(text: string): Promise<void> {
+		const editor = this.contentBlockEditor();
+		await editor.clear();
+		await editor.fill(text);
 	}
 
 	async submitForm(): Promise<void> {

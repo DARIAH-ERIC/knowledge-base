@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import { type Locator, type Page, expect } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
@@ -47,6 +47,22 @@ export class AdminProjectsPage {
 		await this.page.getByRole("main").getByLabel("Name").fill(name);
 	}
 
+	async fillAcronym(acronym: string): Promise<void> {
+		await this.page.locator('input[name="acronym"]').fill(acronym);
+	}
+
+	async fillFunding(funding: number): Promise<void> {
+		await this.page.getByLabel("Funding").fill(String(funding));
+	}
+
+	async fillTopic(topic: string): Promise<void> {
+		await this.page.locator('input[name="topic"]').fill(topic);
+	}
+
+	async fillCall(call: string): Promise<void> {
+		await this.page.locator('input[name="call"]').fill(call);
+	}
+
 	async fillSummary(text: string): Promise<void> {
 		await this.page.getByLabel("Summary").fill(text);
 	}
@@ -79,10 +95,11 @@ export class AdminProjectsPage {
 	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Select image" }).click();
 		await this.page.waitForSelector('[role="dialog"]');
-		await this.page.waitForSelector('[role="gridcell"]');
-		await this.page.getByRole("gridcell", { name: assetLabel }).click();
-
-		await this.page.getByRole("dialog").getByRole("button", { name: "Select" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Media library" });
+		const asset = dialog.getByRole("gridcell", { name: assetLabel });
+		await expect(asset).toHaveCount(1);
+		await asset.click();
+		await dialog.getByRole("button", { name: "Select" }).click();
 	}
 
 	async fillDescription(text: string): Promise<void> {
