@@ -52,13 +52,16 @@ export async function getContributions(
 	const { limit, offset, q, sort = "personName", dir = "asc" } = params;
 	const personEntityVersions = alias(schema.entityVersions, "person_entity_versions");
 	const personEntities = alias(schema.entities, "person_entities");
+	const personDocumentLifecycle = alias(schema.documentLifecycle, "person_document_lifecycle");
 	const organisationalUnitEntityVersions = alias(
 		schema.entityVersions,
 		"organisational_unit_entity_versions",
 	);
 	const organisationalUnitEntities = alias(schema.entities, "organisational_unit_entities");
 	const query = q?.trim();
-	const where =
+	const personPickedVersion = sql`COALESCE(${personDocumentLifecycle.draftId}, ${personDocumentLifecycle.publishedId})`;
+	const lifecycleWhere = sql`${personEntityVersions.id} = ${personPickedVersion}`;
+	const searchWhere =
 		query != null && query !== ""
 			? or(
 					ilike(schema.persons.name, `%${query}%`),
@@ -68,6 +71,7 @@ export async function getContributions(
 					ilike(schema.personRoleTypes.type, `%${query}%`),
 				)
 			: undefined;
+	const where = and(lifecycleWhere, searchWhere);
 	const orderBy =
 		sort === "roleType"
 			? dir === "asc"
@@ -113,6 +117,10 @@ export async function getContributions(
 			.innerJoin(personEntityVersions, eq(schema.persons.id, personEntityVersions.id))
 			.innerJoin(personEntities, eq(personEntityVersions.entityId, personEntities.id))
 			.innerJoin(
+				personDocumentLifecycle,
+				eq(personDocumentLifecycle.documentId, personEntities.id),
+			)
+			.innerJoin(
 				schema.personRoleTypes,
 				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
 			)
@@ -143,6 +151,12 @@ export async function getContributions(
 				schema.persons,
 				eq(schema.persons.id, schema.personsToOrganisationalUnits.personId),
 			)
+			.innerJoin(personEntityVersions, eq(schema.persons.id, personEntityVersions.id))
+			.innerJoin(personEntities, eq(personEntityVersions.entityId, personEntities.id))
+			.innerJoin(
+				personDocumentLifecycle,
+				eq(personDocumentLifecycle.documentId, personEntities.id),
+			)
 			.innerJoin(
 				schema.personRoleTypes,
 				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
@@ -150,6 +164,14 @@ export async function getContributions(
 			.innerJoin(
 				schema.organisationalUnits,
 				eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
+			)
+			.innerJoin(
+				organisationalUnitEntityVersions,
+				eq(schema.organisationalUnits.id, organisationalUnitEntityVersions.id),
+			)
+			.innerJoin(
+				organisationalUnitEntities,
+				eq(organisationalUnitEntityVersions.entityId, organisationalUnitEntities.id),
 			)
 			.innerJoin(
 				schema.organisationalUnitTypes,
