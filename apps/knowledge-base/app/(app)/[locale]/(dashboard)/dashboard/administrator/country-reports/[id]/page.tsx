@@ -3,7 +3,7 @@ import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 
 import {
 	Header,
@@ -12,6 +12,11 @@ import {
 	HeaderDescription,
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+import {
+	LiveReportResources,
+	LiveReportResourcesFallback,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/live-report-resources";
+import { LiveReportResourcesErrorBoundary } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/live-report-resources-error-boundary";
 import { CountryReportSummary } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary";
 import { getCountryReportDataForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { assertAuthenticated } from "@/lib/auth/session";
@@ -62,7 +67,7 @@ export default async function DashboardAdministratorCountryReportPage(
 		<div>
 			<Header>
 				<HeaderContent>
-					<HeaderTitle>{report.country.name}</HeaderTitle>
+					<HeaderTitle className="leading-tight">{report.country.name}</HeaderTitle>
 					<HeaderDescription>
 						{t("Campaign {year}", { year: String(report.campaign.year) })}
 						{" · "}
@@ -89,8 +94,29 @@ export default async function DashboardAdministratorCountryReportPage(
 				</HeaderAction>
 			</Header>
 
-			<div className="px-(--layout-padding) pbs-6">
+			<div className="mbs-8 flex flex-col gap-y-10 px-(--layout-padding)">
 				<CountryReportSummary data={report.summary} />
+				<LiveReportResourcesErrorBoundary
+					description={t(
+						"Live external data could not be loaded. Stored report data is unaffected.",
+					)}
+					retryLabel={t("Retry")}
+					title={t("Live external data")}
+				>
+					<Suspense
+						fallback={
+							<LiveReportResourcesFallback
+								description={t(
+									"This fetches current search-index data on demand. These results are not stored as a report snapshot in the database.",
+								)}
+								loadingLabel={t("Loading live external data…")}
+								title={t("Live external data")}
+							/>
+						}
+					>
+						<LiveReportResources reportId={id} reportKind="country" />
+					</Suspense>
+				</LiveReportResourcesErrorBoundary>
 			</div>
 		</div>
 	);

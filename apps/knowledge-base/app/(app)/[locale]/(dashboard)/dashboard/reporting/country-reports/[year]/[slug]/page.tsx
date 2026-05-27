@@ -61,7 +61,7 @@ export default async function DashboardReportingCountryReportPage(
 		<div>
 			<Header>
 				<HeaderContent>
-					<HeaderTitle>{report.country.name}</HeaderTitle>
+					<HeaderTitle className="leading-tight">{report.country.name}</HeaderTitle>
 					<HeaderDescription>
 						{t("Campaign {year}", { year: String(report.campaign.year) })}
 						{" · "}
@@ -80,7 +80,7 @@ export default async function DashboardReportingCountryReportPage(
 				</HeaderAction>
 			</Header>
 
-			<div className="px-(--layout-padding) pbs-6">
+			<div className="mbs-8 px-(--layout-padding)">
 				<CountryReportSummary data={report.summary} />
 			</div>
 		</div>
