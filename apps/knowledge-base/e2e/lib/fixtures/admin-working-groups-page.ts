@@ -1,5 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 
+import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { E2E_TEST_ASSET_KEY } from "@/e2e/lib/fixtures/database-service";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
@@ -61,10 +62,13 @@ export class AdminWorkingGroupsPage {
 	}
 
 	async submitForm(): Promise<void> {
-		await Promise.all([
-			this.page.waitForURL(`**${BASE_PATH}`),
-			this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click(),
-		]);
+		await waitForActionRedirect({
+			page: this.page,
+			redirectPathname: BASE_PATH,
+			trigger: async () => {
+				await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
+			},
+		});
 	}
 
 	// ---------------------------------------------------------------------------
