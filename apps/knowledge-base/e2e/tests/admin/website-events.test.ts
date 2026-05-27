@@ -18,27 +18,48 @@ test.describe("website events admin", () => {
 		await db.cleanupWorkerEvents(testInfo.workerIndex);
 	});
 
-	test("should create an event", async ({ createWebsiteEventsPage }) => {
+	test("should create an event", async ({ createWebsiteEventsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const eventsPage = createWebsiteEventsPage(workerIndex);
 
 		const title = `${eventsPage.workerPrefix} Test Event ${randomUUID()}`;
+		const summary = "E2E test event summary";
+		const location = "Vienna, Austria";
+		const website = "https://example.com/event";
+		const content = `E2E event content ${randomUUID()}`;
+		const testAsset = await db.getTestAsset();
 
 		await eventsPage.gotoCreate();
 
 		await eventsPage.fillTitle(title);
-		await eventsPage.fillSummary("E2E test event summary");
+		await eventsPage.fillSummary(summary);
 		await eventsPage.fillDatePicker("Start date", 2025, 6, 15);
-		await eventsPage.fillLocation("Vienna, Austria");
+		await eventsPage.fillLocation(location);
+		await eventsPage.fillWebsite(website);
+		await eventsPage.setFullDay();
 		await eventsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await eventsPage.addContentBlock(content);
 
 		await eventsPage.submitForm();
 
 		await eventsPage.searchByTitle(title);
 		await expect(eventsPage.rowByTitle(title)).toBeVisible();
+
+		const created = await db.getEventByTitle(title);
+		expect(created).toMatchObject({
+			imageId: testAsset.id,
+			isFullDay: true,
+			location,
+			summary,
+			website,
+		});
+		expect(created?.duration.start).toEqual(new Date("2025-06-15T00:00:00.000Z"));
+		const contentBlocks = await db.getEventContentBlocksByTitle(title);
+		expect(contentBlocks).toHaveLength(1);
+		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(content);
 	});
 
-	test("should edit an event title", async ({ page, createWebsiteEventsPage }) => {
+	test("should edit all event form fields", async ({ page, createWebsiteEventsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const eventsPage = createWebsiteEventsPage(workerIndex);
 
@@ -48,7 +69,9 @@ test.describe("website events admin", () => {
 		await eventsPage.fillSummary("E2E test event to be edited");
 		await eventsPage.fillDatePicker("Start date", 2025, 6, 15);
 		await eventsPage.fillLocation("Vienna, Austria");
+		await eventsPage.fillWebsite("https://example.com/old-event");
 		await eventsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await eventsPage.addContentBlock("Old event content");
 		await eventsPage.submitForm();
 
 		await eventsPage.searchByTitle(originalTitle);
@@ -62,9 +85,20 @@ test.describe("website events admin", () => {
 		]);
 
 		const updatedTitle = `${eventsPage.workerPrefix} Updated ${randomUUID()}`;
-		const titleField = page.getByLabel("Title");
-		await titleField.clear();
-		await titleField.fill(updatedTitle);
+		const updatedSummary = "Updated E2E test event summary";
+		const updatedLocation = "Berlin, Germany";
+		const updatedWebsite = "https://example.com/updated-event";
+		const updatedContent = `Updated E2E event content ${randomUUID()}`;
+		const testAsset = await db.getTestAsset();
+
+		await page.getByLabel("Title").fill(updatedTitle);
+		await eventsPage.fillSummary(updatedSummary);
+		await eventsPage.fillDatePicker("Start date", 2026, 7, 16);
+		await eventsPage.fillLocation(updatedLocation);
+		await eventsPage.fillWebsite(updatedWebsite);
+		await eventsPage.setFullDay();
+		await eventsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await eventsPage.updateContentBlockText(updatedContent);
 
 		await eventsPage.submitForm();
 
@@ -72,6 +106,19 @@ test.describe("website events admin", () => {
 		await expect(eventsPage.rowByTitle(updatedTitle)).toBeVisible();
 		await eventsPage.searchByTitle(originalTitle);
 		await expect(eventsPage.rowByTitle(originalTitle)).toBeHidden();
+
+		const updated = await db.getEventByTitle(updatedTitle);
+		expect(updated).toMatchObject({
+			imageId: testAsset.id,
+			isFullDay: true,
+			location: updatedLocation,
+			summary: updatedSummary,
+			website: updatedWebsite,
+		});
+		expect(updated?.duration.start).toEqual(new Date("2026-07-16T00:00:00.000Z"));
+		const contentBlocks = await db.getEventContentBlocksByTitle(updatedTitle);
+		expect(contentBlocks).toHaveLength(1);
+		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(updatedContent);
 	});
 
 	test("should delete an event", async ({ createWebsiteEventsPage }) => {

@@ -34,6 +34,28 @@ export class AdminDocumentationPagesPage {
 		await this.page.getByLabel("Title").fill(title);
 	}
 
+	private contentBlockEditor(): Locator {
+		return this.page.getByRole("textbox", { name: "Content" });
+	}
+
+	async addContentBlock(text: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.contentBlockEditor().fill(text);
+	}
+
+	async updateContentBlockText(text: string): Promise<void> {
+		const editor = this.contentBlockEditor();
+		await editor.clear();
+		await editor.fill(text);
+	}
+
+	async removeFirstContentBlock(): Promise<void> {
+		await this.page.getByRole("button", { name: "Remove block" }).first().click();
+		const dialog = this.page.getByRole("alertdialog", { name: "Remove block" });
+		await dialog.getByRole("button", { name: "Remove" }).click();
+	}
+
 	async submitForm(): Promise<void> {
 		await Promise.all([
 			this.page.waitForURL(`**${BASE_PATH}`),

@@ -18,31 +18,39 @@ test.describe("website pages admin", () => {
 		await db.cleanupWorkerPageItems(testInfo.workerIndex);
 	});
 
-	test("should create a page", async ({ createWebsitePagesPage }) => {
+	test("should create a page", async ({ createWebsitePagesPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const pagesPage = createWebsitePagesPage(workerIndex);
 
 		const title = `${pagesPage.workerPrefix} Test Page ${randomUUID()}`;
+		const summary = "E2E test page summary";
+		const testAsset = await db.getTestAsset();
 
 		await pagesPage.gotoCreate();
 
 		await pagesPage.fillTitle(title);
-		await pagesPage.fillSummary("E2E test page summary");
+		await pagesPage.fillSummary(summary);
+		await pagesPage.selectImageFromMediaLibrary("E2E Test Asset");
 
 		await pagesPage.submitForm();
 
 		await pagesPage.searchByTitle(title);
 		await expect(pagesPage.pageRowByTitle(title)).toBeVisible();
+
+		const created = await db.getPageItemByTitle(title);
+		expect(created).toMatchObject({ imageId: testAsset.id, summary });
 	});
 
-	test("should edit a page title", async ({ page, createWebsitePagesPage }) => {
+	test("should edit all page form fields", async ({ page, createWebsitePagesPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const pagesPage = createWebsitePagesPage(workerIndex);
 
 		const originalTitle = `${pagesPage.workerPrefix} Edit Me ${randomUUID()}`;
+		const testAsset = await db.getTestAsset();
 		await pagesPage.gotoCreate();
 		await pagesPage.fillTitle(originalTitle);
 		await pagesPage.fillSummary("E2E test page to be edited");
+		await pagesPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await pagesPage.submitForm();
 
 		await pagesPage.searchByTitle(originalTitle);
@@ -56,9 +64,10 @@ test.describe("website pages admin", () => {
 		]);
 
 		const updatedTitle = `${pagesPage.workerPrefix} Updated ${randomUUID()}`;
-		const titleField = page.getByLabel("Title");
-		await titleField.clear();
-		await titleField.fill(updatedTitle);
+		const updatedSummary = "Updated E2E test page summary";
+		await page.getByLabel("Title").fill(updatedTitle);
+		await pagesPage.fillSummary(updatedSummary);
+		await pagesPage.selectImageFromMediaLibrary("E2E Test Asset");
 
 		await pagesPage.submitForm();
 
@@ -66,6 +75,9 @@ test.describe("website pages admin", () => {
 		await expect(pagesPage.pageRowByTitle(updatedTitle)).toBeVisible();
 		await pagesPage.searchByTitle(originalTitle);
 		await expect(pagesPage.pageRowByTitle(originalTitle)).toBeHidden();
+
+		const updated = await db.getPageItemByTitle(updatedTitle);
+		expect(updated).toMatchObject({ imageId: testAsset.id, summary: updatedSummary });
 	});
 
 	test("should clear an optional image when editing a page", async ({

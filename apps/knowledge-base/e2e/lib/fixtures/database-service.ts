@@ -127,9 +127,15 @@ export class DatabaseService {
 	 * Finds a news item by exact title. Returns the document entity ID (entities.id) so callers can
 	 * use it with getEntityRelations / getEntitiesToEntitiesRow.
 	 */
-	async getNewsItemByTitle(title: string): Promise<{ id: string; imageId: string } | null> {
+	async getNewsItemByTitle(
+		title: string,
+	): Promise<{ id: string; imageId: string; summary: string } | null> {
 		const [row] = await this.db
-			.select({ id: schema.entityVersions.entityId, imageId: schema.news.imageId })
+			.select({
+				id: schema.entityVersions.entityId,
+				imageId: schema.news.imageId,
+				summary: schema.news.summary,
+			})
 			.from(schema.news)
 			.innerJoin(schema.entityVersions, eq(schema.news.id, schema.entityVersions.id))
 			.where(eq(schema.news.title, title))
@@ -438,15 +444,245 @@ export class DatabaseService {
 		return row ?? null;
 	}
 
-	async getPageItemByTitle(title: string): Promise<{ id: string; imageId: string | null } | null> {
+	async getPageItemByTitle(
+		title: string,
+	): Promise<{ id: string; imageId: string | null; summary: string } | null> {
 		const [row] = await this.db
-			.select({ id: schema.entityVersions.entityId, imageId: schema.pages.imageId })
+			.select({
+				id: schema.entityVersions.entityId,
+				imageId: schema.pages.imageId,
+				summary: schema.pages.summary,
+			})
 			.from(schema.pages)
 			.innerJoin(schema.entityVersions, eq(schema.pages.id, schema.entityVersions.id))
 			.where(eq(schema.pages.title, title))
 			.limit(1);
 
 		return row ?? null;
+	}
+
+	async getDocumentationPageByTitle(
+		title: string,
+	): Promise<{ documentId: string; id: string } | null> {
+		const [row] = await this.db
+			.select({
+				documentId: schema.entityVersions.entityId,
+				id: schema.documentationPages.id,
+			})
+			.from(schema.documentationPages)
+			.innerJoin(schema.entityVersions, eq(schema.documentationPages.id, schema.entityVersions.id))
+			.where(eq(schema.documentationPages.title, title))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getDocumentationPageContentBlocksByTitle(
+		title: string,
+	): Promise<Array<{ type: string; position: number; content: unknown }>> {
+		const documentationPage = await this.getDocumentationPageByTitle(title);
+
+		if (documentationPage == null) {
+			return [];
+		}
+
+		const rows = await this.db
+			.select({
+				content: sql<unknown>`${schema.richTextContentBlocks.content}`,
+				position: schema.contentBlocks.position,
+				type: schema.contentBlockTypes.type,
+			})
+			.from(schema.contentBlocks)
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.contentBlockTypes,
+				eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
+			)
+			.leftJoin(
+				schema.richTextContentBlocks,
+				eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
+			)
+			.where(eq(schema.fields.entityVersionId, documentationPage.id))
+			.orderBy(schema.contentBlocks.position);
+
+		return rows;
+	}
+
+	async getEventByTitle(title: string): Promise<{
+		duration: { start: Date; end?: Date };
+		id: string;
+		imageId: string;
+		isFullDay: boolean | null;
+		location: string | null;
+		summary: string;
+		website: string | null;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				duration: schema.events.duration,
+				id: schema.events.id,
+				imageId: schema.events.imageId,
+				isFullDay: schema.events.isFullDay,
+				location: schema.events.location,
+				summary: schema.events.summary,
+				website: schema.events.website,
+			})
+			.from(schema.events)
+			.where(eq(schema.events.title, title))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getEventContentBlocksByTitle(
+		title: string,
+	): Promise<Array<{ type: string; position: number; content: unknown }>> {
+		const [event] = await this.db
+			.select({ id: schema.events.id })
+			.from(schema.events)
+			.where(eq(schema.events.title, title))
+			.limit(1);
+
+		return event != null ? this.getContentBlocksByVersionId(event.id) : [];
+	}
+
+	async getImpactCaseStudyByTitle(title: string): Promise<{
+		id: string;
+		imageId: string;
+		summary: string;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				id: schema.impactCaseStudies.id,
+				imageId: schema.impactCaseStudies.imageId,
+				summary: schema.impactCaseStudies.summary,
+			})
+			.from(schema.impactCaseStudies)
+			.where(eq(schema.impactCaseStudies.title, title))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getImpactCaseStudyContentBlocksByTitle(
+		title: string,
+	): Promise<Array<{ type: string; position: number; content: unknown }>> {
+		const [item] = await this.db
+			.select({ id: schema.impactCaseStudies.id })
+			.from(schema.impactCaseStudies)
+			.where(eq(schema.impactCaseStudies.title, title))
+			.limit(1);
+
+		return item != null ? this.getContentBlocksByVersionId(item.id) : [];
+	}
+
+	async getSpotlightArticleByTitle(title: string): Promise<{
+		id: string;
+		imageId: string;
+		summary: string;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				id: schema.spotlightArticles.id,
+				imageId: schema.spotlightArticles.imageId,
+				summary: schema.spotlightArticles.summary,
+			})
+			.from(schema.spotlightArticles)
+			.where(eq(schema.spotlightArticles.title, title))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getSpotlightArticleContentBlocksByTitle(
+		title: string,
+	): Promise<Array<{ type: string; position: number; content: unknown }>> {
+		const [item] = await this.db
+			.select({ id: schema.spotlightArticles.id })
+			.from(schema.spotlightArticles)
+			.where(eq(schema.spotlightArticles.title, title))
+			.limit(1);
+
+		return item != null ? this.getContentBlocksByVersionId(item.id) : [];
+	}
+
+	async getFundingCallByTitle(title: string): Promise<{
+		duration: { start: Date; end?: Date };
+		id: string;
+		summary: string | null;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				duration: schema.fundingCalls.duration,
+				id: schema.fundingCalls.id,
+				summary: schema.fundingCalls.summary,
+			})
+			.from(schema.fundingCalls)
+			.where(eq(schema.fundingCalls.title, title))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getFundingCallContentBlocksByTitle(
+		title: string,
+	): Promise<Array<{ type: string; position: number; content: unknown }>> {
+		const item = await this.getFundingCallByTitle(title);
+
+		return item != null ? this.getContentBlocksByVersionId(item.id) : [];
+	}
+
+	async getOpportunityByTitle(title: string): Promise<{
+		duration: { start: Date; end?: Date };
+		id: string;
+		sourceId: string;
+		summary: string | null;
+		website: string | null;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				duration: schema.opportunities.duration,
+				id: schema.opportunities.id,
+				sourceId: schema.opportunities.sourceId,
+				summary: schema.opportunities.summary,
+				website: schema.opportunities.website,
+			})
+			.from(schema.opportunities)
+			.where(eq(schema.opportunities.title, title))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getOpportunityContentBlocksByTitle(
+		title: string,
+	): Promise<Array<{ type: string; position: number; content: unknown }>> {
+		const item = await this.getOpportunityByTitle(title);
+
+		return item != null ? this.getContentBlocksByVersionId(item.id) : [];
+	}
+
+	private async getContentBlocksByVersionId(
+		versionId: string,
+	): Promise<Array<{ type: string; position: number; content: unknown }>> {
+		return this.db
+			.select({
+				content: sql<unknown>`${schema.richTextContentBlocks.content}`,
+				position: schema.contentBlocks.position,
+				type: schema.contentBlockTypes.type,
+			})
+			.from(schema.contentBlocks)
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.contentBlockTypes,
+				eq(schema.contentBlocks.typeId, schema.contentBlockTypes.id),
+			)
+			.leftJoin(
+				schema.richTextContentBlocks,
+				eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
+			)
+			.where(eq(schema.fields.entityVersionId, versionId))
+			.orderBy(schema.contentBlocks.position);
 	}
 
 	/** Returns any project scope from the database (needed as a required field). */

@@ -34,6 +34,26 @@ export class WebsiteFundingCallsPage {
 		await this.page.getByLabel("Title").fill(title);
 	}
 
+	async fillSummary(summary: string): Promise<void> {
+		await this.page.getByLabel("Summary").fill(summary);
+	}
+
+	private contentBlockEditor(): Locator {
+		return this.page.getByRole("textbox", { name: "Content" });
+	}
+
+	async addContentBlock(text: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.contentBlockEditor().fill(text);
+	}
+
+	async updateContentBlockText(text: string): Promise<void> {
+		const editor = this.contentBlockEditor();
+		await editor.clear();
+		await editor.fill(text);
+	}
+
 	async fillDatePicker(label: string, year: number, month: number, day: number): Promise<void> {
 		const group = this.page.getByRole("group", { name: label });
 
