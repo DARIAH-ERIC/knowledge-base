@@ -58,9 +58,17 @@ export async function getContributions(
 		"organisational_unit_entity_versions",
 	);
 	const organisationalUnitEntities = alias(schema.entities, "organisational_unit_entities");
+	const organisationalUnitDocumentLifecycle = alias(
+		schema.documentLifecycle,
+		"organisational_unit_document_lifecycle",
+	);
 	const query = q?.trim();
 	const personPickedVersion = sql`COALESCE(${personDocumentLifecycle.draftId}, ${personDocumentLifecycle.publishedId})`;
-	const lifecycleWhere = sql`${personEntityVersions.id} = ${personPickedVersion}`;
+	const organisationalUnitPickedVersion = sql`COALESCE(${organisationalUnitDocumentLifecycle.draftId}, ${organisationalUnitDocumentLifecycle.publishedId})`;
+	const lifecycleWhere = and(
+		sql`${personEntityVersions.id} = ${personPickedVersion}`,
+		sql`${organisationalUnitEntityVersions.id} = ${organisationalUnitPickedVersion}`,
+	);
 	const searchWhere =
 		query != null && query !== ""
 			? or(
@@ -134,6 +142,10 @@ export async function getContributions(
 				eq(organisationalUnitEntityVersions.entityId, organisationalUnitEntities.id),
 			)
 			.innerJoin(
+				organisationalUnitDocumentLifecycle,
+				eq(organisationalUnitDocumentLifecycle.documentId, organisationalUnitEntities.id),
+			)
+			.innerJoin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 			)
@@ -166,6 +178,10 @@ export async function getContributions(
 			.innerJoin(
 				organisationalUnitEntities,
 				eq(organisationalUnitEntityVersions.entityId, organisationalUnitEntities.id),
+			)
+			.innerJoin(
+				organisationalUnitDocumentLifecycle,
+				eq(organisationalUnitDocumentLifecycle.documentId, organisationalUnitEntities.id),
 			)
 			.innerJoin(
 				schema.organisationalUnitTypes,
