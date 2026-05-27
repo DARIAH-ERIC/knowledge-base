@@ -1,5 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 
+import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/administrator/documentation-pages";
@@ -35,10 +36,13 @@ export class AdminDocumentationPagesPage {
 	}
 
 	async submitForm(): Promise<void> {
-		await Promise.all([
-			this.page.waitForURL(`**${BASE_PATH}`),
-			this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click(),
-		]);
+		await waitForActionRedirect({
+			page: this.page,
+			redirectPathname: BASE_PATH,
+			trigger: async () => {
+				await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
+			},
+		});
 	}
 
 	// ---------------------------------------------------------------------------
@@ -107,16 +111,26 @@ export class AdminDocumentationPagesPage {
 	// ---------------------------------------------------------------------------
 
 	async publishItem(): Promise<void> {
-		await this.page.getByRole("button", { name: "Publish" }).click();
-		await this.page.waitForURL(`**${BASE_PATH}`);
+		await waitForActionRedirect({
+			page: this.page,
+			redirectPathname: BASE_PATH,
+			trigger: async () => {
+				await this.page.getByRole("button", { name: "Publish" }).click();
+			},
+		});
 	}
 
 	async discardDraft(): Promise<void> {
 		await this.page.getByRole("button", { name: "Discard draft" }).click();
 		const dialog = this.page.getByRole("dialog");
 		await dialog.waitFor({ state: "visible" });
-		await dialog.getByRole("button", { name: "Discard" }).click();
-		await this.page.waitForURL(`**${BASE_PATH}`);
+		await waitForActionRedirect({
+			page: this.page,
+			redirectPathname: BASE_PATH,
+			trigger: async () => {
+				await dialog.getByRole("button", { name: "Discard" }).click();
+			},
+		});
 	}
 
 	// ---------------------------------------------------------------------------
