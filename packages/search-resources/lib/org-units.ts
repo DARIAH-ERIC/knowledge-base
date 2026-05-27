@@ -16,12 +16,13 @@ function addToMapSet<K, V>(map: Map<K, Set<V>>, key: K, value: V): void {
 /**
  * Build the lookups needed to resolve sshoc actor ids and zotero collection names to the slugs of
  * the national consortia and working groups that own a resource. Reads from the database the set of
- * currently-published national consortia, working groups, and countries, plus the currently-active
- * `is_national_consortium_of` relations.
+ * national consortia, working groups, and countries that have a published version, plus the
+ * currently-active `is_national_consortium_of` relations.
  */
 export async function loadOrgUnitLookups(db: Database): Promise<OrgUnitResourceLookups> {
 	const orgUnits = await db
 		.select({
+			acronym: schema.organisationalUnits.acronym,
 			id: schema.organisationalUnits.id,
 			slug: schema.entities.slug,
 			type: schema.organisationalUnitTypes.type,
@@ -34,8 +35,11 @@ export async function loadOrgUnitLookups(db: Database): Promise<OrgUnitResourceL
 		)
 		.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
 		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
-		.where(eq(schema.entityStatus.type, "published"));
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.documentId, schema.entities.id),
+		)
+		.where(sql`${schema.documentLifecycle.publishedId} IS NOT NULL`);
 
 	const sshocActorIdToNc = new Map<number, Set<string>>();
 	const sshocActorIdToWg = new Map<number, Set<string>>();
@@ -50,12 +54,12 @@ export async function loadOrgUnitLookups(db: Database): Promise<OrgUnitResourceL
 				addToMapSet(sshocActorIdToNc, unit.sshocMarketplaceActorId, unit.slug);
 			}
 		} else if (unit.type === "working_group") {
-			wgSlugs.add(unit.slug);
+			wgSlugs.add(unit.slug.toLowerCase());
 			if (unit.sshocMarketplaceActorId != null) {
 				addToMapSet(sshocActorIdToWg, unit.sshocMarketplaceActorId, unit.slug);
 			}
 		} else if (unit.type === "country") {
-			countryIdToSlug.set(unit.id, unit.slug);
+			countryIdToSlug.set(unit.id, unit.acronym ?? unit.slug);
 		}
 	}
 

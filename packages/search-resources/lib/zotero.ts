@@ -21,7 +21,7 @@ export interface ZoteroJsonItemData {
 }
 
 export interface ZoteroOrgUnitLookups {
-	/** Lowercased country slug → set of currently-active national-consortium slugs for that country. */
+	/** Lowercased country code → set of currently-active national-consortium slugs for that country. */
 	countrySlugToNc: Map<string, Set<string>>;
 	/** Slugs of currently published working groups. */
 	wgSlugs: Set<string>;
@@ -69,15 +69,16 @@ export function createZoteroItem(
 			log.warn(`Zotero item ${item.key} references unknown collection key ${collectionKey}.`);
 			continue;
 		}
-		const ncSlugs = orgUnits.countrySlugToNc.get(name.toLowerCase());
+		const slug = name.trim().toLowerCase();
+		const ncSlugs = orgUnits.countrySlugToNc.get(slug);
 		if (ncSlugs != null) {
 			for (const slug of ncSlugs) {
 				nationalConsortia.add(slug);
 			}
 			continue;
 		}
-		if (orgUnits.wgSlugs.has(name)) {
-			workingGroups.add(name);
+		if (orgUnits.wgSlugs.has(slug)) {
+			workingGroups.add(slug);
 			continue;
 		}
 		log.warn(
