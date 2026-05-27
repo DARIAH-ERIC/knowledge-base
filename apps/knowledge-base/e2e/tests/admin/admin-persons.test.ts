@@ -19,33 +19,50 @@ test.describe("persons admin", () => {
 		await db.cleanupWorkerPersons(testInfo.workerIndex);
 	});
 
-	test("should create a person", async ({ createAdminPersonsPage }) => {
+	test("should create a person", async ({ createAdminPersonsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const personsPage = createAdminPersonsPage(workerIndex);
 
 		const name = `${personsPage.workerPrefix} Test Person ${randomUUID()}`;
+		const sortName = "Person, Test";
+		const email = `person-${randomUUID()}@example.com`;
+		const orcid = "0000-0002-1825-0097";
+		const biography = "E2E test person biography.";
+		const testAsset = await db.getTestAsset();
 
 		await personsPage.gotoCreate();
 
 		await personsPage.fillName(name);
-		await personsPage.fillSortName("Person, Test");
+		await personsPage.fillSortName(sortName);
+		await personsPage.fillEmail(email);
+		await personsPage.fillOrcid(orcid);
 		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await personsPage.fillBiography(biography);
 
 		await personsPage.submitForm();
 
 		await personsPage.searchByName(name);
 		await expect(personsPage.rowByName(name)).toBeVisible();
+
+		const created = await db.getPersonByName(name);
+		expect(created).not.toBeNull();
+		expect(created).toMatchObject({ email, imageId: testAsset.id, name, orcid, sortName });
+		expect(JSON.stringify(await db.getPersonBiographyByName(name))).toContain(biography);
 	});
 
-	test("should edit a person name", async ({ page, createAdminPersonsPage }) => {
+	test("should edit all person form fields", async ({ page, createAdminPersonsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const personsPage = createAdminPersonsPage(workerIndex);
 
 		const originalName = `${personsPage.workerPrefix} Edit Me ${randomUUID()}`;
+		const testAsset = await db.getTestAsset();
 		await personsPage.gotoCreate();
 		await personsPage.fillName(originalName);
 		await personsPage.fillSortName("Me, Edit");
+		await personsPage.fillEmail(`edit-${randomUUID()}@example.com`);
+		await personsPage.fillOrcid("0000-0002-1825-0097");
 		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await personsPage.fillBiography("Description for edit test.");
 		await personsPage.submitForm();
 
 		await personsPage.searchByName(originalName);
@@ -59,9 +76,20 @@ test.describe("persons admin", () => {
 		]);
 
 		const updatedName = `${personsPage.workerPrefix} Updated ${randomUUID()}`;
-		const nameField = page.getByLabel("Name", { exact: true });
-		await nameField.clear();
-		await nameField.fill(updatedName);
+		const updatedSortName = "Updated, Person";
+		const updatedEmail = `updated-${randomUUID()}@example.com`;
+		const updatedOrcid = "0000-0003-1415-9265";
+		const updatedBiography = "Updated E2E test person biography.";
+
+		await page.getByLabel("Name", { exact: true }).fill(updatedName);
+		await personsPage.fillSortName(updatedSortName);
+		await personsPage.fillEmail(updatedEmail);
+		await personsPage.fillOrcid(updatedOrcid);
+		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		const biographyEditor = page.getByRole("textbox", { name: "Biography" });
+		await biographyEditor.click();
+		await page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
+		await page.keyboard.type(updatedBiography);
 
 		await personsPage.submitForm();
 
@@ -69,6 +97,19 @@ test.describe("persons admin", () => {
 		await expect(personsPage.rowByName(updatedName)).toBeVisible();
 		await personsPage.searchByName(originalName);
 		await expect(personsPage.rowByName(originalName)).toBeHidden();
+
+		const updated = await db.getPersonByName(updatedName);
+		expect(updated).not.toBeNull();
+		expect(updated).toMatchObject({
+			email: updatedEmail,
+			imageId: testAsset.id,
+			name: updatedName,
+			orcid: updatedOrcid,
+			sortName: updatedSortName,
+		});
+		expect(JSON.stringify(await db.getPersonBiographyByName(updatedName))).toContain(
+			updatedBiography,
+		);
 	});
 
 	test("failure injection forces createServerAction to return an error state", async ({
@@ -84,6 +125,7 @@ test.describe("persons admin", () => {
 		await personsPage.fillName(name);
 		await personsPage.fillSortName("FailureInjection, Person");
 		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await personsPage.fillBiography("Failure injection biography.");
 
 		await withFailureInjection(page, async () => {
 			await page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
@@ -107,6 +149,7 @@ test.describe("persons admin", () => {
 		await personsPage.fillName(name);
 		await personsPage.fillSortName("Me, Delete");
 		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await personsPage.fillBiography("Description for delete test.");
 		await personsPage.submitForm();
 
 		await personsPage.searchByName(name);

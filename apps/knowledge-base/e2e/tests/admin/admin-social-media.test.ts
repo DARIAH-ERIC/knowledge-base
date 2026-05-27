@@ -13,25 +13,39 @@ test.describe("social media admin", () => {
 		await db.cleanupWorkerSocialMedia(testInfo.workerIndex);
 	});
 
-	test("should create a social media entry", async ({ createAdminSocialMediaPage }) => {
+	test("should create a social media entry", async ({ createAdminSocialMediaPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const socialMediaPage = createAdminSocialMediaPage(workerIndex);
 
 		const name = `${socialMediaPage.workerPrefix} Test Social Media ${randomUUID()}`;
+		const url = "https://example.com/social-media-create";
 
 		await socialMediaPage.gotoCreate();
 
 		await socialMediaPage.fillName(name);
-		await socialMediaPage.fillUrl("https://example.com");
+		await socialMediaPage.fillUrl(url);
 		await socialMediaPage.selectFirstType();
+		await socialMediaPage.fillDatePicker("Start date", 2024, 1, 15);
+		await socialMediaPage.fillDatePicker("End date", 2024, 12, 31);
 
 		await socialMediaPage.submitForm();
 
 		await socialMediaPage.searchByName(name);
 		await expect(socialMediaPage.rowByName(name)).toBeVisible();
+
+		const created = await db.getSocialMediaByName(name);
+		expect(created).not.toBeNull();
+		expect(created).toMatchObject({ name, url });
+		expect(created?.type).toBeTruthy();
+		expect(created?.duration?.start).toEqual(new Date("2024-01-15T00:00:00.000Z"));
+		expect(created?.duration?.end).toEqual(new Date("2024-12-31T00:00:00.000Z"));
 	});
 
-	test("should edit a social media name", async ({ page, createAdminSocialMediaPage }) => {
+	test("should edit all social media form fields", async ({
+		page,
+		createAdminSocialMediaPage,
+		db,
+	}) => {
 		const workerIndex = test.info().workerIndex;
 		const socialMediaPage = createAdminSocialMediaPage(workerIndex);
 
@@ -41,6 +55,8 @@ test.describe("social media admin", () => {
 		await socialMediaPage.fillName(originalName);
 		await socialMediaPage.fillUrl("https://example.com");
 		await socialMediaPage.selectFirstType();
+		await socialMediaPage.fillDatePicker("Start date", 2024, 1, 15);
+		await socialMediaPage.fillDatePicker("End date", 2024, 12, 31);
 		await socialMediaPage.submitForm();
 
 		await socialMediaPage.searchByName(originalName);
@@ -54,9 +70,13 @@ test.describe("social media admin", () => {
 		]);
 
 		const updatedName = `${socialMediaPage.workerPrefix} Updated ${randomUUID()}`;
-		const nameField = page.getByLabel("Name", { exact: true });
-		await nameField.clear();
-		await nameField.fill(updatedName);
+		const updatedUrl = "https://example.com/social-media-updated";
+
+		await page.getByLabel("Name", { exact: true }).fill(updatedName);
+		await socialMediaPage.fillUrl(updatedUrl);
+		await socialMediaPage.selectFirstType();
+		await socialMediaPage.fillDatePicker("Start date", 2025, 2, 16);
+		await socialMediaPage.fillDatePicker("End date", 2025, 11, 30);
 
 		await socialMediaPage.submitForm();
 
@@ -64,6 +84,13 @@ test.describe("social media admin", () => {
 		await expect(socialMediaPage.rowByName(updatedName)).toBeVisible();
 		await socialMediaPage.searchByName(originalName);
 		await expect(socialMediaPage.rowByName(originalName)).toBeHidden();
+
+		const updated = await db.getSocialMediaByName(updatedName);
+		expect(updated).not.toBeNull();
+		expect(updated).toMatchObject({ name: updatedName, url: updatedUrl });
+		expect(updated?.type).toBeTruthy();
+		expect(updated?.duration?.start).toEqual(new Date("2025-02-16T00:00:00.000Z"));
+		expect(updated?.duration?.end).toEqual(new Date("2025-11-30T00:00:00.000Z"));
 	});
 
 	test("should delete a social media entry", async ({ createAdminSocialMediaPage }) => {

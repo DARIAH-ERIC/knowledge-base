@@ -182,6 +182,262 @@ export class DatabaseService {
 		return rows;
 	}
 
+	async getWorkingGroupByName(name: string): Promise<{
+		acronym: string | null;
+		documentId: string;
+		id: string;
+		imageId: string | null;
+		name: string;
+		sshocMarketplaceActorId: number | null;
+		summary: string | null;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				acronym: schema.organisationalUnits.acronym,
+				documentId: schema.entityVersions.entityId,
+				id: schema.organisationalUnits.id,
+				imageId: schema.organisationalUnits.imageId,
+				name: schema.organisationalUnits.name,
+				sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
+				summary: schema.organisationalUnits.summary,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					eq(schema.organisationalUnits.name, name),
+					eq(schema.organisationalUnitTypes.type, "working_group"),
+				),
+			)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getWorkingGroupDescriptionByName(name: string): Promise<unknown | null> {
+		const workingGroup = await this.getWorkingGroupByName(name);
+
+		if (workingGroup == null) {
+			return null;
+		}
+
+		const [row] = await this.db
+			.select({ content: sql<unknown>`${schema.richTextContentBlocks.content}` })
+			.from(schema.richTextContentBlocks)
+			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.where(
+				and(
+					eq(schema.fields.entityVersionId, workingGroup.id),
+					eq(schema.entityTypesFieldsNames.fieldName, "description"),
+				),
+			)
+			.limit(1);
+
+		return row?.content ?? null;
+	}
+
+	async getPersonByName(name: string): Promise<{
+		documentId: string;
+		email: string | null;
+		id: string;
+		imageId: string;
+		name: string;
+		orcid: string | null;
+		sortName: string;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				documentId: schema.entityVersions.entityId,
+				email: schema.persons.email,
+				id: schema.persons.id,
+				imageId: schema.persons.imageId,
+				name: schema.persons.name,
+				orcid: schema.persons.orcid,
+				sortName: schema.persons.sortName,
+			})
+			.from(schema.persons)
+			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+			.where(eq(schema.persons.name, name))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getPersonBiographyByName(name: string): Promise<unknown | null> {
+		const person = await this.getPersonByName(name);
+
+		if (person == null) {
+			return null;
+		}
+
+		const [row] = await this.db
+			.select({ content: sql<unknown>`${schema.richTextContentBlocks.content}` })
+			.from(schema.richTextContentBlocks)
+			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.where(
+				and(
+					eq(schema.fields.entityVersionId, person.id),
+					eq(schema.entityTypesFieldsNames.fieldName, "biography"),
+				),
+			)
+			.limit(1);
+
+		return row?.content ?? null;
+	}
+
+	async getSocialMediaByName(name: string): Promise<{
+		duration: { start?: Date; end?: Date } | null;
+		id: string;
+		name: string;
+		type: string;
+		url: string;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				duration: schema.socialMedia.duration,
+				id: schema.socialMedia.id,
+				name: schema.socialMedia.name,
+				type: schema.socialMediaTypes.type,
+				url: schema.socialMedia.url,
+			})
+			.from(schema.socialMedia)
+			.innerJoin(schema.socialMediaTypes, eq(schema.socialMedia.typeId, schema.socialMediaTypes.id))
+			.where(eq(schema.socialMedia.name, name))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getProjectByName(name: string): Promise<{
+		acronym: string | null;
+		call: string | null;
+		documentId: string;
+		duration: { start: Date; end?: Date } | null;
+		funding: number | null;
+		id: string;
+		imageId: string | null;
+		name: string;
+		scopeId: string;
+		summary: string;
+		topic: string | null;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				acronym: schema.projects.acronym,
+				call: schema.projects.call,
+				documentId: schema.entityVersions.entityId,
+				duration: schema.projects.duration,
+				funding: schema.projects.funding,
+				id: schema.projects.id,
+				imageId: schema.projects.imageId,
+				name: schema.projects.name,
+				scopeId: schema.projects.scopeId,
+				summary: schema.projects.summary,
+				topic: schema.projects.topic,
+			})
+			.from(schema.projects)
+			.innerJoin(schema.entityVersions, eq(schema.projects.id, schema.entityVersions.id))
+			.where(eq(schema.projects.name, name))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getProjectDescriptionByName(name: string): Promise<unknown | null> {
+		const project = await this.getProjectByName(name);
+
+		if (project == null) {
+			return null;
+		}
+
+		const [row] = await this.db
+			.select({ content: sql<unknown>`${schema.richTextContentBlocks.content}` })
+			.from(schema.richTextContentBlocks)
+			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.where(
+				and(
+					eq(schema.fields.entityVersionId, project.id),
+					eq(schema.entityTypesFieldsNames.fieldName, "description"),
+				),
+			)
+			.limit(1);
+
+		return row?.content ?? null;
+	}
+
+	async getServiceByName(name: string): Promise<{
+		comment: string | null;
+		dariahBranding: boolean | null;
+		id: string;
+		metadata: unknown;
+		monitoring: boolean | null;
+		name: string;
+		privateSupplier: boolean | null;
+		statusId: string;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				comment: schema.services.comment,
+				dariahBranding: schema.services.dariahBranding,
+				id: schema.services.id,
+				metadata: schema.services.metadata,
+				monitoring: schema.services.monitoring,
+				name: schema.services.name,
+				privateSupplier: schema.services.privateSupplier,
+				statusId: schema.services.statusId,
+			})
+			.from(schema.services)
+			.where(eq(schema.services.name, name))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getUserByName(name: string): Promise<{
+		canManageAdmins: boolean;
+		email: string;
+		id: string;
+		name: string;
+		organisationalUnitId: string | null;
+		personId: string | null;
+		role: "admin" | "user";
+	} | null> {
+		const [row] = await this.db
+			.select({
+				canManageAdmins: schema.users.canManageAdmins,
+				email: schema.users.email,
+				id: schema.users.id,
+				name: schema.users.name,
+				organisationalUnitId: schema.users.organisationalUnitId,
+				personId: schema.users.personId,
+				role: schema.users.role,
+			})
+			.from(schema.users)
+			.where(eq(schema.users.name, name))
+			.limit(1);
+
+		return row ?? null;
+	}
+
 	async getPageItemByTitle(title: string): Promise<{ id: string; imageId: string | null } | null> {
 		const [row] = await this.db
 			.select({ id: schema.entityVersions.entityId, imageId: schema.pages.imageId })

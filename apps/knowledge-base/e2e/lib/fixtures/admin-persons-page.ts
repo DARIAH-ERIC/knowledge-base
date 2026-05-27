@@ -38,6 +38,20 @@ export class AdminPersonsPage {
 		await this.page.getByLabel("Sort name").fill(sortName);
 	}
 
+	async fillEmail(email: string): Promise<void> {
+		await this.page.locator('input[name="email"]').fill(email);
+	}
+
+	async fillOrcid(orcid: string): Promise<void> {
+		await this.page.locator('input[name="orcid"]').fill(orcid);
+	}
+
+	async fillBiography(text: string): Promise<void> {
+		const editor = this.page.getByRole("textbox", { name: "Biography" });
+		await editor.click();
+		await this.page.keyboard.type(text);
+	}
+
 	async selectImageFromMediaLibrary(assetLabel: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Select image" }).click();
 		await this.page.waitForSelector('[role="dialog"]');

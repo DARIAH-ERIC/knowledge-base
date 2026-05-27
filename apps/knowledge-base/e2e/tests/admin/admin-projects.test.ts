@@ -19,38 +19,73 @@ test.describe("projects admin", () => {
 		await db.cleanupWorkerProjects(testInfo.workerIndex);
 	});
 
-	test("should create a project", async ({ createAdminProjectsPage }) => {
+	test("should create a project", async ({ createAdminProjectsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const adminProjectsPage = createAdminProjectsPage(workerIndex);
 
 		const projectName = `${adminProjectsPage.workerPrefix} Test Project ${randomUUID()}`;
+		const acronym = "E2EP";
+		const funding = 12345;
+		const topic = "E2E project topic";
+		const call = "E2E project call";
+		const summary = "E2E test project summary";
+		const description = "E2E test project description.";
+		const testAsset = await db.getTestAsset();
 
 		await adminProjectsPage.gotoCreate();
 
 		await adminProjectsPage.fillName(projectName);
+		await adminProjectsPage.fillAcronym(acronym);
+		await adminProjectsPage.fillFunding(funding);
+		await adminProjectsPage.fillTopic(topic);
+		await adminProjectsPage.fillCall(call);
 		await adminProjectsPage.selectFirstScope();
 		await adminProjectsPage.fillDatePicker("Start date", 2024, 1, 15);
-		await adminProjectsPage.fillSummary("E2E test project summary");
+		await adminProjectsPage.fillDatePicker("End date", 2024, 12, 31);
+		await adminProjectsPage.fillSummary(summary);
 
 		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
 
-		await adminProjectsPage.fillDescription("E2E test project description.");
+		await adminProjectsPage.fillDescription(description);
 
 		await adminProjectsPage.submitForm();
 
 		await adminProjectsPage.searchByName(projectName);
 		await expect(adminProjectsPage.projectRowByName(projectName)).toBeVisible();
+
+		const created = await db.getProjectByName(projectName);
+		expect(created).not.toBeNull();
+		expect(created).toMatchObject({
+			acronym,
+			call,
+			funding,
+			imageId: testAsset.id,
+			name: projectName,
+			summary,
+			topic,
+		});
+		expect(created?.duration?.start).toEqual(new Date("2024-01-15T00:00:00.000Z"));
+		expect(created?.duration?.end).toEqual(new Date("2024-12-31T00:00:00.000Z"));
+		expect(JSON.stringify(await db.getProjectDescriptionByName(projectName))).toContain(
+			description,
+		);
 	});
 
-	test("should edit a project name", async ({ page, createAdminProjectsPage }) => {
+	test("should edit all project form fields", async ({ page, createAdminProjectsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const adminProjectsPage = createAdminProjectsPage(workerIndex);
 
 		const originalName = `${adminProjectsPage.workerPrefix} Edit Me ${randomUUID()}`;
+		const testAsset = await db.getTestAsset();
 		await adminProjectsPage.gotoCreate();
 		await adminProjectsPage.fillName(originalName);
+		await adminProjectsPage.fillAcronym("E2EOLD");
+		await adminProjectsPage.fillFunding(1000);
+		await adminProjectsPage.fillTopic("Old E2E project topic");
+		await adminProjectsPage.fillCall("Old E2E project call");
 		await adminProjectsPage.selectFirstScope();
 		await adminProjectsPage.fillDatePicker("Start date", 2024, 1, 15);
+		await adminProjectsPage.fillDatePicker("End date", 2024, 12, 31);
 		await adminProjectsPage.fillSummary("E2E test project to be edited");
 		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
 		await adminProjectsPage.fillDescription("Description for edit test.");
@@ -69,11 +104,28 @@ test.describe("projects admin", () => {
 			page.getByRole("menuitem", { name: "Edit" }).click(),
 		]);
 
-		// Update the project name.
 		const updatedName = `${adminProjectsPage.workerPrefix} Updated ${randomUUID()}`;
-		const nameField = page.getByRole("main").getByLabel("Name");
-		await nameField.clear();
-		await nameField.fill(updatedName);
+		const updatedAcronym = "E2ENEW";
+		const updatedFunding = 67890;
+		const updatedTopic = "Updated E2E project topic";
+		const updatedCall = "Updated E2E project call";
+		const updatedSummary = "Updated E2E test project summary";
+		const updatedDescription = "Updated E2E test project description.";
+
+		await page.getByRole("main").getByLabel("Name").fill(updatedName);
+		await adminProjectsPage.fillAcronym(updatedAcronym);
+		await adminProjectsPage.fillFunding(updatedFunding);
+		await adminProjectsPage.fillTopic(updatedTopic);
+		await adminProjectsPage.fillCall(updatedCall);
+		await adminProjectsPage.selectFirstScope();
+		await adminProjectsPage.fillDatePicker("Start date", 2025, 2, 16);
+		await adminProjectsPage.fillDatePicker("End date", 2025, 11, 30);
+		await adminProjectsPage.fillSummary(updatedSummary);
+		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		const descriptionEditor = page.getByRole("textbox", { name: "Description" });
+		await descriptionEditor.click();
+		await page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
+		await page.keyboard.type(updatedDescription);
 
 		await adminProjectsPage.submitForm();
 
@@ -82,6 +134,23 @@ test.describe("projects admin", () => {
 		await expect(adminProjectsPage.projectRowByName(updatedName)).toBeVisible();
 		await adminProjectsPage.searchByName(originalName);
 		await expect(adminProjectsPage.projectRowByName(originalName)).toBeHidden();
+
+		const updated = await db.getProjectByName(updatedName);
+		expect(updated).not.toBeNull();
+		expect(updated).toMatchObject({
+			acronym: updatedAcronym,
+			call: updatedCall,
+			funding: updatedFunding,
+			imageId: testAsset.id,
+			name: updatedName,
+			summary: updatedSummary,
+			topic: updatedTopic,
+		});
+		expect(updated?.duration?.start).toEqual(new Date("2025-02-16T00:00:00.000Z"));
+		expect(updated?.duration?.end).toEqual(new Date("2025-11-30T00:00:00.000Z"));
+		expect(JSON.stringify(await db.getProjectDescriptionByName(updatedName))).toContain(
+			updatedDescription,
+		);
 	});
 
 	test("should delete a project", async ({ createAdminProjectsPage }) => {

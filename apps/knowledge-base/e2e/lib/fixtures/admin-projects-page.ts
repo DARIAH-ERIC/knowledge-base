@@ -46,6 +46,22 @@ export class AdminProjectsPage {
 		await this.page.getByRole("main").getByLabel("Name").fill(name);
 	}
 
+	async fillAcronym(acronym: string): Promise<void> {
+		await this.page.locator('input[name="acronym"]').fill(acronym);
+	}
+
+	async fillFunding(funding: number): Promise<void> {
+		await this.page.locator('input[name="funding"]').fill(String(funding));
+	}
+
+	async fillTopic(topic: string): Promise<void> {
+		await this.page.locator('input[name="topic"]').fill(topic);
+	}
+
+	async fillCall(call: string): Promise<void> {
+		await this.page.locator('input[name="call"]').fill(call);
+	}
+
 	async fillSummary(text: string): Promise<void> {
 		await this.page.getByLabel("Summary").fill(text);
 	}

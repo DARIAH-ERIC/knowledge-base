@@ -13,7 +13,7 @@ test.describe("users admin", () => {
 		await db.cleanupWorkerUsers(testInfo.workerIndex);
 	});
 
-	test("should create a user", async ({ createAdminUsersPage }) => {
+	test("should create a user", async ({ createAdminUsersPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const usersPage = createAdminUsersPage(workerIndex);
 
@@ -30,9 +30,20 @@ test.describe("users admin", () => {
 
 		await usersPage.searchByName(name);
 		await expect(usersPage.rowByName(name)).toBeVisible();
+
+		const created = await db.getUserByName(name);
+		expect(created).not.toBeNull();
+		expect(created).toMatchObject({
+			canManageAdmins: false,
+			email,
+			name,
+			organisationalUnitId: null,
+			personId: null,
+			role: "user",
+		});
 	});
 
-	test("should edit a user name", async ({ page, createAdminUsersPage }) => {
+	test("should edit all user form fields", async ({ page, createAdminUsersPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const usersPage = createAdminUsersPage(workerIndex);
 
@@ -56,9 +67,10 @@ test.describe("users admin", () => {
 		]);
 
 		const updatedName = `${usersPage.workerPrefix} Updated ${randomUUID()}`;
-		const nameField = page.getByLabel("Name", { exact: true });
-		await nameField.clear();
-		await nameField.fill(updatedName);
+		const updatedEmail = `e2e-worker-${String(workerIndex)}+updated-${randomUUID()}@example.com`;
+
+		await page.getByLabel("Name", { exact: true }).fill(updatedName);
+		await usersPage.fillEmail(updatedEmail);
 
 		await usersPage.submitForm();
 
@@ -66,6 +78,17 @@ test.describe("users admin", () => {
 		await expect(usersPage.rowByName(updatedName)).toBeVisible();
 		await usersPage.searchByName(originalName);
 		await expect(usersPage.rowByName(originalName)).toBeHidden();
+
+		const updated = await db.getUserByName(updatedName);
+		expect(updated).not.toBeNull();
+		expect(updated).toMatchObject({
+			canManageAdmins: false,
+			email: updatedEmail,
+			name: updatedName,
+			organisationalUnitId: null,
+			personId: null,
+			role: "user",
+		});
 	});
 
 	test("should delete a user", async ({ createAdminUsersPage }) => {

@@ -50,6 +50,17 @@ export class AdminServicesPage {
 		await this.page.getByRole("option").first().click();
 	}
 
+	async fillComment(comment: string): Promise<void> {
+		await this.page.locator('textarea[name="comment"]').fill(comment);
+	}
+
+	async setFlag(name: "dariahBranding" | "monitoring" | "privateSupplier"): Promise<void> {
+		const checkbox = this.page.locator(`input[name="${name}"]`);
+		if (!(await checkbox.isChecked())) {
+			await checkbox.check();
+		}
+	}
+
 	async submitForm(): Promise<void> {
 		await Promise.all([
 			this.page.waitForURL(`**${BASE_PATH}`),

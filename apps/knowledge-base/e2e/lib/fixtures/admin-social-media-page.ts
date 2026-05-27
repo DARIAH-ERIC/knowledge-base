@@ -46,6 +46,19 @@ export class AdminSocialMediaPage {
 		await this.page.getByRole("option").first().click();
 	}
 
+	async fillDatePicker(label: string, year: number, month: number, day: number): Promise<void> {
+		const group = this.page.getByRole("group", { name: label });
+
+		await group.getByRole("spinbutton", { name: /day/i }).click();
+		await this.page.keyboard.type(String(day).padStart(2, "0"));
+
+		await group.getByRole("spinbutton", { name: /month/i }).click();
+		await this.page.keyboard.type(String(month).padStart(2, "0"));
+
+		await group.getByRole("spinbutton", { name: /year/i }).click();
+		await this.page.keyboard.type(String(year));
+	}
+
 	async submitForm(): Promise<void> {
 		await Promise.all([
 			this.page.waitForURL(`**${BASE_PATH}`),
