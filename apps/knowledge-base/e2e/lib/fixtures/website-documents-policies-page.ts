@@ -1,5 +1,6 @@
 import { type Locator, type Page, expect } from "@playwright/test";
 
+import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/website/documents-policies";
@@ -50,19 +51,13 @@ export class WebsiteDocumentsPoliciesPage {
 	}
 
 	async submitForm(): Promise<void> {
-		const serverError = this.page.getByText("Internal server error.", { exact: true });
-
-		await Promise.all([
-			Promise.race([
-				this.page.waitForURL(`**${BASE_PATH}`),
-				serverError.waitFor({ state: "visible" }),
-			]),
-			this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click(),
-		]);
-		await expect(
-			serverError,
-			"document or policy form should not surface a server action error",
-		).toBeHidden();
+		await waitForActionRedirect({
+			page: this.page,
+			redirectPathname: BASE_PATH,
+			trigger: async () => {
+				await this.page.getByRole("button", { name: /^Save(?! and publish\b).*$/ }).click();
+			},
+		});
 	}
 
 	// ---------------------------------------------------------------------------
@@ -143,16 +138,26 @@ export class WebsiteDocumentsPoliciesPage {
 	// ---------------------------------------------------------------------------
 
 	async publishItem(): Promise<void> {
-		await this.page.getByRole("button", { name: "Publish" }).click();
-		await this.page.waitForURL(`**${BASE_PATH}`);
+		await waitForActionRedirect({
+			page: this.page,
+			redirectPathname: BASE_PATH,
+			trigger: async () => {
+				await this.page.getByRole("button", { name: "Publish" }).click();
+			},
+		});
 	}
 
 	async discardDraft(): Promise<void> {
 		await this.page.getByRole("button", { name: "Discard draft" }).click();
 		const dialog = this.page.getByRole("dialog");
 		await dialog.waitFor({ state: "visible" });
-		await dialog.getByRole("button", { name: "Discard" }).click();
-		await this.page.waitForURL(`**${BASE_PATH}`);
+		await waitForActionRedirect({
+			page: this.page,
+			redirectPathname: BASE_PATH,
+			trigger: async () => {
+				await dialog.getByRole("button", { name: "Discard" }).click();
+			},
+		});
 	}
 
 	// ---------------------------------------------------------------------------
