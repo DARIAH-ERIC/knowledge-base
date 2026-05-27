@@ -25,7 +25,7 @@ export const resourcesCollection = defineCollection({
 		{ name: "kind", type: "string", index: false, optional: true },
 		{ name: "links", type: "string[]", index: false },
 		{ name: "authors", type: "string[]", index: false, optional: true },
-		{ name: "year", type: "int32", index: false, optional: true },
+		{ name: "year", type: "int32", index: true, facet: true, optional: true },
 		{ name: "pid", type: "string", index: false, optional: true },
 	] as const,
 });
