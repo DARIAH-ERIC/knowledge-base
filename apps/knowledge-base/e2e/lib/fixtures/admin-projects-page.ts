@@ -108,6 +108,59 @@ export class AdminProjectsPage {
 		await this.page.keyboard.type(text);
 	}
 
+	async selectFirstOptionInControl(label: string): Promise<void> {
+		const control = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.getByText(label, { exact: true }) })
+			.last();
+		await control.locator("button").click();
+		await this.page.getByRole("option").first().click();
+	}
+
+	async selectAsyncOption(label: string, name: string): Promise<void> {
+		const control = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.getByText(label, { exact: true }) })
+			.last();
+		await control.locator("button").click();
+		await this.page.getByRole("searchbox", { name: "Search" }).fill(name);
+		await this.page.keyboard.press("Enter");
+		const option = this.page.getByRole("option", { name, exact: true });
+		await expect(option).toBeVisible();
+		await option.click();
+	}
+
+	async createSocialMediaInForm(name: string, url: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Create social media" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Create social media" });
+		await dialog.getByLabel("Name", { exact: true }).fill(name);
+		await dialog.getByLabel("URL").fill(url);
+		const typeControl = dialog
+			.locator('[data-slot="control"]')
+			.filter({ has: dialog.getByText("Type", { exact: true }) });
+		await typeControl.locator("button").click();
+		await this.page.getByRole("option").first().click();
+		await dialog.getByRole("button", { name: "Create" }).click();
+		await dialog.waitFor({ state: "hidden" });
+		await expect(this.page.getByText(name, { exact: true })).toBeVisible();
+	}
+
+	async addPartner(unitName: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Add partner" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Add partner" });
+		await this.selectAsyncOption("Organisation", unitName);
+		const roleControl = dialog
+			.locator('[data-slot="control"]')
+			.filter({ has: dialog.getByText("Role", { exact: true }) });
+		await roleControl.locator("button").click();
+		await this.page.getByRole("option").first().click();
+		await this.fillDatePicker("Start date (optional)", 2024, 3, 1);
+		await this.fillDatePicker("End date (optional)", 2024, 9, 30);
+		await dialog.getByRole("button", { name: "Add" }).click();
+		await dialog.waitFor({ state: "hidden" });
+		await expect(this.page.getByText(unitName, { exact: true })).toBeVisible();
+	}
+
 	async submitForm(): Promise<void> {
 		await waitForActionRedirect({
 			page: this.page,

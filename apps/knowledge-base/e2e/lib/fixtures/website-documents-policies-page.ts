@@ -39,6 +39,34 @@ export class WebsiteDocumentsPoliciesPage {
 		await this.page.getByLabel("Summary").fill(summary);
 	}
 
+	async fillUrl(url: string): Promise<void> {
+		await this.page.getByLabel("URL").fill(url);
+	}
+
+	async selectFirstGroup(): Promise<void> {
+		const groupControl = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.getByText("Group", { exact: true }) });
+		await groupControl.locator("button").click();
+		await this.page.getByRole("option").nth(1).click();
+	}
+
+	private contentBlockEditor(): Locator {
+		return this.page.getByRole("textbox", { name: "Content" });
+	}
+
+	async addContentBlock(text: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.contentBlockEditor().fill(text);
+	}
+
+	async updateContentBlockText(text: string): Promise<void> {
+		const editor = this.contentBlockEditor();
+		await editor.clear();
+		await editor.fill(text);
+	}
+
 	async selectDocumentFromMediaLibrary(assetLabel: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Select image" }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });

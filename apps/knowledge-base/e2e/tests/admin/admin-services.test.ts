@@ -19,12 +19,20 @@ test.describe("services admin", () => {
 
 		const name = `${servicesPage.workerPrefix} Test Service ${randomUUID()}`;
 		const comment = "E2E test service comment.";
+		const organisationalUnits = await db.getOrganisationalUnitOptions(2);
+		expect(organisationalUnits).toHaveLength(2);
+		const [ownerUnit, providerUnit] = organisationalUnits as [
+			{ id: string; name: string },
+			{ id: string; name: string },
+		];
 
 		await servicesPage.gotoCreate();
 
 		await servicesPage.fillName(name);
 		await servicesPage.selectFirstStatus();
 		await servicesPage.fillComment(comment);
+		await servicesPage.selectServiceOwner(ownerUnit.name);
+		await servicesPage.selectServiceProvider(providerUnit.name);
 		await servicesPage.setFlag("dariahBranding");
 		await servicesPage.setFlag("monitoring");
 		await servicesPage.setFlag("privateSupplier");
@@ -42,7 +50,9 @@ test.describe("services admin", () => {
 			metadata: {},
 			monitoring: true,
 			name,
+			ownerUnitIds: [ownerUnit.id],
 			privateSupplier: true,
+			providerUnitIds: [providerUnit.id],
 		});
 		expect(created?.statusId).toBeTruthy();
 	});
@@ -52,6 +62,12 @@ test.describe("services admin", () => {
 		const servicesPage = createAdminServicesPage(workerIndex);
 
 		const originalName = `${servicesPage.workerPrefix} Edit Me ${randomUUID()}`;
+		const organisationalUnits = await db.getOrganisationalUnitOptions(2);
+		expect(organisationalUnits).toHaveLength(2);
+		const [ownerUnit, providerUnit] = organisationalUnits as [
+			{ id: string; name: string },
+			{ id: string; name: string },
+		];
 
 		await servicesPage.gotoCreate();
 		await servicesPage.fillName(originalName);
@@ -75,6 +91,8 @@ test.describe("services admin", () => {
 		await page.getByLabel("Name", { exact: true }).fill(updatedName);
 		await servicesPage.selectFirstStatus();
 		await servicesPage.fillComment(updatedComment);
+		await servicesPage.selectServiceOwner(ownerUnit.name);
+		await servicesPage.selectServiceProvider(providerUnit.name);
 		await servicesPage.setFlag("dariahBranding");
 		await servicesPage.setFlag("monitoring");
 		await servicesPage.setFlag("privateSupplier");
@@ -94,7 +112,9 @@ test.describe("services admin", () => {
 			metadata: {},
 			monitoring: true,
 			name: updatedName,
+			ownerUnitIds: [ownerUnit.id],
 			privateSupplier: true,
+			providerUnitIds: [providerUnit.id],
 		});
 		expect(updated?.statusId).toBeTruthy();
 	});

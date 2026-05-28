@@ -55,6 +55,34 @@ export class AdminServicesPage {
 		await this.page.locator('textarea[name="comment"]').fill(comment);
 	}
 
+	async selectOrganisationalUnit(
+		label: "Service owners" | "Service providers",
+		name: string,
+	): Promise<void> {
+		const control = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.getByText(label, { exact: true }) })
+			.first();
+
+		await control.getByRole("button", { name: "Open options" }).click();
+		await this.page.getByRole("searchbox", { name: "Search" }).fill(name);
+		await this.page.keyboard.press("Enter");
+
+		const option = this.page.getByRole("option", { name, exact: true });
+		await expect(option).toBeVisible();
+		await option.click();
+		await expect(control.getByText(name, { exact: true })).toBeVisible();
+		await this.page.keyboard.press("Escape");
+	}
+
+	async selectServiceOwner(name: string): Promise<void> {
+		await this.selectOrganisationalUnit("Service owners", name);
+	}
+
+	async selectServiceProvider(name: string): Promise<void> {
+		await this.selectOrganisationalUnit("Service providers", name);
+	}
+
 	async setFlag(name: "dariahBranding" | "monitoring" | "privateSupplier"): Promise<void> {
 		const labelByName = {
 			dariahBranding: "DARIAH branding",

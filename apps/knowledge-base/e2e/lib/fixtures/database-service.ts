@@ -363,6 +363,54 @@ export class DatabaseService {
 		return row ?? null;
 	}
 
+	async getProjectRole(): Promise<{ id: string; role: string }> {
+		const [role] = await this.db
+			.select({ id: schema.projectRoles.id, role: schema.projectRoles.role })
+			.from(schema.projectRoles)
+			.orderBy(schema.projectRoles.role)
+			.limit(1);
+
+		if (role == null) {
+			throw new Error("Expected at least one project role for e2e tests.");
+		}
+
+		return role;
+	}
+
+	async getProjectRelationsByName(name: string): Promise<{
+		partners: Array<{
+			duration: { start?: Date; end?: Date } | null;
+			roleId: string;
+			unitId: string;
+		}>;
+		socialMediaIds: Array<string>;
+	} | null> {
+		const project = await this.getProjectByName(name);
+
+		if (project == null) {
+			return null;
+		}
+
+		const partners = await this.db
+			.select({
+				duration: schema.projectsToOrganisationalUnits.duration,
+				roleId: schema.projectsToOrganisationalUnits.roleId,
+				unitId: schema.projectsToOrganisationalUnits.unitId,
+			})
+			.from(schema.projectsToOrganisationalUnits)
+			.where(eq(schema.projectsToOrganisationalUnits.projectId, project.id));
+
+		const socialMedia = await this.db
+			.select({ socialMediaId: schema.projectsToSocialMedia.socialMediaId })
+			.from(schema.projectsToSocialMedia)
+			.where(eq(schema.projectsToSocialMedia.projectId, project.id));
+
+		return {
+			partners,
+			socialMediaIds: socialMedia.map((item) => item.socialMediaId),
+		};
+	}
+
 	async getProjectDescriptionByName(name: string): Promise<unknown> {
 		const project = await this.getProjectByName(name);
 
@@ -397,7 +445,9 @@ export class DatabaseService {
 		metadata: unknown;
 		monitoring: boolean | null;
 		name: string;
+		ownerUnitIds: Array<string>;
 		privateSupplier: boolean | null;
+		providerUnitIds: Array<string>;
 		statusId: string;
 	} | null> {
 		const [row] = await this.db
@@ -415,7 +465,74 @@ export class DatabaseService {
 			.where(eq(schema.services.name, name))
 			.limit(1);
 
-		return row ?? null;
+		if (row == null) {
+			return null;
+		}
+
+		const unitRoleRows = await this.db
+			.select({
+				organisationalUnitId: schema.servicesToOrganisationalUnits.organisationalUnitId,
+				role: schema.organisationalUnitServiceRoles.role,
+			})
+			.from(schema.servicesToOrganisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitServiceRoles,
+				eq(schema.servicesToOrganisationalUnits.roleId, schema.organisationalUnitServiceRoles.id),
+			)
+			.where(eq(schema.servicesToOrganisationalUnits.serviceId, row.id));
+
+		const ownerUnitIds = unitRoleRows
+			.filter((unitRole) => unitRole.role === "service_owner")
+			.map((unitRole) => unitRole.organisationalUnitId);
+		const providerUnitIds = unitRoleRows
+			.filter((unitRole) => unitRole.role === "service_provider")
+			.map((unitRole) => unitRole.organisationalUnitId);
+
+		return { ...row, ownerUnitIds, providerUnitIds };
+	}
+
+	async getOrganisationalUnitOptions(limit = 4): Promise<Array<{ id: string; name: string }>> {
+		return this.db
+			.select({
+				id: schema.organisationalUnits.id,
+				name: schema.organisationalUnits.name,
+			})
+			.from(schema.organisationalUnits)
+			.orderBy(schema.organisationalUnits.name)
+			.limit(limit);
+	}
+
+	async getPersonOption(): Promise<{ id: string; name: string }> {
+		const [row] = await this.db
+			.select({ id: schema.persons.id, name: schema.persons.name })
+			.from(schema.persons)
+			.orderBy(schema.persons.name)
+			.limit(1);
+
+		if (row == null) {
+			throw new Error("Expected at least one person for e2e tests.");
+		}
+
+		return row;
+	}
+
+	async getCountryOption(): Promise<{ id: string; name: string }> {
+		const [row] = await this.db
+			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(eq(schema.organisationalUnitTypes.type, "country"))
+			.orderBy(schema.organisationalUnits.name)
+			.limit(1);
+
+		if (row == null) {
+			throw new Error("Expected at least one country for e2e tests.");
+		}
+
+		return row;
 	}
 
 	async getUserByName(name: string): Promise<{
@@ -1315,6 +1432,50 @@ export class DatabaseService {
 		}
 
 		return asset;
+	}
+
+	async getDocumentPolicyGroup(): Promise<{ id: string; label: string }> {
+		const [group] = await this.db
+			.select({ id: schema.documentPolicyGroups.id, label: schema.documentPolicyGroups.label })
+			.from(schema.documentPolicyGroups)
+			.orderBy(schema.documentPolicyGroups.position, schema.documentPolicyGroups.label)
+			.limit(1);
+
+		if (group == null) {
+			throw new Error("Expected at least one document policy group for e2e tests.");
+		}
+
+		return group;
+	}
+
+	async getDocumentOrPolicyByTitle(title: string): Promise<{
+		documentId: string;
+		groupId: string | null;
+		id: string;
+		summary: string;
+		url: string | null;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				documentId: schema.documentsPolicies.documentId,
+				groupId: schema.documentsPolicies.groupId,
+				id: schema.documentsPolicies.id,
+				summary: schema.documentsPolicies.summary,
+				url: schema.documentsPolicies.url,
+			})
+			.from(schema.documentsPolicies)
+			.where(eq(schema.documentsPolicies.title, title))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getDocumentOrPolicyContentBlocksByTitle(
+		title: string,
+	): Promise<Array<{ type: string; position: number; content: unknown }>> {
+		const item = await this.getDocumentOrPolicyByTitle(title);
+
+		return item != null ? this.getContentBlocksByVersionId(item.id) : [];
 	}
 
 	/** Returns the first opportunity source from the database. */

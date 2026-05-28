@@ -7,6 +7,7 @@ test.describe("website documents-policies lifecycle", () => {
 
 	test.beforeAll(async ({ db }) => {
 		await db.getTestDocumentAsset();
+		await db.getDocumentPolicyGroup();
 	});
 
 	test.afterAll(async ({ db }, testInfo) => {
@@ -14,6 +15,7 @@ test.describe("website documents-policies lifecycle", () => {
 	});
 
 	test("draft → publish → edit → discard draft", async ({
+		db,
 		page,
 		createWebsiteDocumentsPoliciesPage,
 	}) => {
@@ -21,13 +23,32 @@ test.describe("website documents-policies lifecycle", () => {
 		const docPoliciesPage = createWebsiteDocumentsPoliciesPage(workerIndex);
 
 		const title = `${docPoliciesPage.workerPrefix} Lifecycle ${randomUUID()}`;
+		const summary = "Lifecycle test document or policy summary";
+		const url = "https://example.com/document-policy";
+		const content = `E2E document or policy content ${randomUUID()}`;
+		const testDocument = await db.getTestDocumentAsset();
+		const group = await db.getDocumentPolicyGroup();
 
 		// Create — item starts in draft state.
 		await docPoliciesPage.gotoCreate();
 		await docPoliciesPage.fillTitle(title);
-		await docPoliciesPage.fillSummary("Lifecycle test document or policy summary");
+		await docPoliciesPage.fillSummary(summary);
+		await docPoliciesPage.fillUrl(url);
+		await docPoliciesPage.selectFirstGroup();
 		await docPoliciesPage.selectDocumentFromMediaLibrary("E2E Test Document");
+		await docPoliciesPage.addContentBlock(content);
 		await docPoliciesPage.submitForm();
+
+		let documentOrPolicy = await db.getDocumentOrPolicyByTitle(title);
+		expect(documentOrPolicy).toMatchObject({
+			documentId: testDocument.id,
+			groupId: group.id,
+			summary,
+			url,
+		});
+		let contentBlocks = await db.getDocumentOrPolicyContentBlocksByTitle(title);
+		expect(contentBlocks).toHaveLength(1);
+		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(content);
 
 		// List: draft badge visible.
 		await docPoliciesPage.searchByTitle(title);
@@ -59,7 +80,26 @@ test.describe("website documents-policies lifecycle", () => {
 		const titleField = page.getByLabel("Title");
 		await titleField.clear();
 		await titleField.fill(`${title} Edited`);
+		const updatedSummary = "Updated lifecycle document or policy summary";
+		const updatedUrl = "https://example.com/updated-document-policy";
+		const updatedContent = `Updated document or policy content ${randomUUID()}`;
+		await docPoliciesPage.fillSummary(updatedSummary);
+		await docPoliciesPage.fillUrl(updatedUrl);
+		await docPoliciesPage.selectFirstGroup();
+		await docPoliciesPage.selectDocumentFromMediaLibrary("E2E Test Document");
+		await docPoliciesPage.updateContentBlockText(updatedContent);
 		await docPoliciesPage.submitForm();
+
+		documentOrPolicy = await db.getDocumentOrPolicyByTitle(`${title} Edited`);
+		expect(documentOrPolicy).toMatchObject({
+			documentId: testDocument.id,
+			groupId: group.id,
+			summary: updatedSummary,
+			url: updatedUrl,
+		});
+		contentBlocks = await db.getDocumentOrPolicyContentBlocksByTitle(`${title} Edited`);
+		expect(contentBlocks).toHaveLength(1);
+		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(updatedContent);
 
 		// List: both badges now visible.
 		await docPoliciesPage.searchByTitle(`${title} Edited`);

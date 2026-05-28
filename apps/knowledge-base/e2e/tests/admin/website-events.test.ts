@@ -33,6 +33,7 @@ test.describe("website events admin", () => {
 		await eventsPage.fillTitle(title);
 		await eventsPage.fillSummary(summary);
 		await eventsPage.fillDatePicker("Start date", 2025, 6, 15);
+		await eventsPage.fillDatePicker("End date", 2025, 6, 16);
 		await eventsPage.fillLocation(location);
 		await eventsPage.fillWebsite(website);
 		await eventsPage.setFullDay();
@@ -53,6 +54,7 @@ test.describe("website events admin", () => {
 		});
 		expect(created?.imageId).toBeTruthy();
 		expect(created?.duration.start).toStrictEqual(new Date("2025-06-15T00:00:00.000Z"));
+		expect(created?.duration.end).toStrictEqual(new Date("2025-06-16T00:00:00.000Z"));
 		const contentBlocks = await db.getEventContentBlocksByTitle(title);
 		expect(contentBlocks).toHaveLength(1);
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(content);
@@ -92,6 +94,7 @@ test.describe("website events admin", () => {
 		await page.getByLabel("Title").fill(updatedTitle);
 		await eventsPage.fillSummary(updatedSummary);
 		await eventsPage.fillDatePicker("Start date", 2026, 7, 16);
+		await eventsPage.fillDatePicker("End date", 2026, 7, 17);
 		await eventsPage.fillLocation(updatedLocation);
 		await eventsPage.fillWebsite(updatedWebsite);
 		await eventsPage.setFullDay();
@@ -114,6 +117,7 @@ test.describe("website events admin", () => {
 		});
 		expect(updated?.imageId).toBeTruthy();
 		expect(updated?.duration.start).toStrictEqual(new Date("2026-07-16T00:00:00.000Z"));
+		expect(updated?.duration.end).toStrictEqual(new Date("2026-07-17T00:00:00.000Z"));
 		const contentBlocks = await db.getEventContentBlocksByTitle(updatedTitle);
 		expect(contentBlocks).toHaveLength(1);
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(updatedContent);
