@@ -111,18 +111,18 @@ export class AdminProjectsPage {
 	async selectFirstOptionInControl(label: string): Promise<void> {
 		const control = this.page
 			.locator('[data-slot="control"]')
-			.filter({ has: this.page.getByText(label, { exact: true }) })
+			.filter({ has: this.page.locator("label").filter({ hasText: label }) })
 			.last();
-		await control.locator("button").click();
+		await control.getByRole("button").click();
 		await this.page.getByRole("option").first().click();
 	}
 
 	async selectAsyncOption(label: string, name: string): Promise<void> {
 		const control = this.page
 			.locator('[data-slot="control"]')
-			.filter({ has: this.page.getByText(label, { exact: true }) })
+			.filter({ has: this.page.locator("label").filter({ hasText: label }) })
 			.last();
-		await control.locator("button").click();
+		await control.getByRole("button").click();
 		await this.page.getByRole("searchbox", { name: "Search" }).fill(name);
 		await this.page.keyboard.press("Enter");
 		const option = this.page.getByRole("option", { name, exact: true });
@@ -141,6 +141,7 @@ export class AdminProjectsPage {
 			await this.page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
 			await this.page.keyboard.press("Backspace");
 		}
+		await this.page.keyboard.press("Tab");
 	}
 
 	async removeImage(): Promise<void> {
@@ -172,8 +173,8 @@ export class AdminProjectsPage {
 		await dialog.getByLabel("URL").fill(url);
 		const typeControl = dialog
 			.locator('[data-slot="control"]')
-			.filter({ has: dialog.getByText("Type", { exact: true }) });
-		await typeControl.locator("button").click();
+			.filter({ has: dialog.locator("label").filter({ hasText: "Type" }) });
+		await typeControl.getByRole("button").click();
 		await this.page.getByRole("option").first().click();
 		await dialog.getByRole("button", { name: "Create" }).click();
 		await dialog.waitFor({ state: "hidden" });
@@ -186,8 +187,8 @@ export class AdminProjectsPage {
 		await this.selectAsyncOption("Organisation", unitName);
 		const roleControl = dialog
 			.locator('[data-slot="control"]')
-			.filter({ has: dialog.getByText("Role", { exact: true }) });
-		await roleControl.locator("button").click();
+			.filter({ has: dialog.locator("label").filter({ hasText: "Role" }) });
+		await roleControl.getByRole("button").click();
 		await this.page.getByRole("option").first().click();
 		await this.fillDatePicker("Start date (optional)", 2024, 3, 1);
 		await this.fillDatePicker("End date (optional)", 2024, 9, 30);

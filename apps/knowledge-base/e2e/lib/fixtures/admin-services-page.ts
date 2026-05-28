@@ -61,10 +61,10 @@ export class AdminServicesPage {
 	): Promise<void> {
 		const control = this.page
 			.locator('[data-slot="control"]')
-			.filter({ has: this.page.getByText(label, { exact: true }) })
+			.filter({ has: this.page.locator("label").filter({ hasText: label }) })
 			.first();
 
-		await control.getByRole("button", { name: "Open options" }).click();
+		await control.click();
 		await this.page.getByRole("searchbox", { name: "Search" }).fill(name);
 		await this.page.keyboard.press("Enter");
 
@@ -116,7 +116,7 @@ export class AdminServicesPage {
 	): Promise<void> {
 		const control = this.page
 			.locator('[data-slot="control"]')
-			.filter({ has: this.page.getByText(label, { exact: true }) })
+			.filter({ has: this.page.locator("label").filter({ hasText: label }) })
 			.first();
 		const removeButtons = control.getByRole("button", { name: "Remove tag" });
 		while ((await removeButtons.count()) > 0) {

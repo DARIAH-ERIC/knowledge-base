@@ -120,6 +120,7 @@ export class WebsiteEventsPage {
 			await this.page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
 			await this.page.keyboard.press("Backspace");
 		}
+		await this.page.keyboard.press("Tab");
 	}
 
 	async removeFirstContentBlock(): Promise<void> {

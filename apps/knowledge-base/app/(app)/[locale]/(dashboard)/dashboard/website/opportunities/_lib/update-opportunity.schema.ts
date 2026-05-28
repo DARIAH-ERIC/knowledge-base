@@ -11,6 +11,7 @@ export const UpdateOpportunityActionInputSchema = v.object({
 		start: v.pipe(v.string(), v.isoDate(), v.toDate()),
 		end: v.optional(v.pipe(v.string(), v.isoDate(), v.toDate())),
 	}),
+	website: v.nullish(v.pipe(v.string(), v.url()), null),
 	contentBlocks: v.optional(
 		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),
 		[],

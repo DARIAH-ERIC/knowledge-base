@@ -71,10 +71,10 @@ export class AdminUsersPage {
 	async selectActor(label: "Person" | "Country", name: string): Promise<void> {
 		const control = this.page
 			.locator('[data-slot="control"]')
-			.filter({ has: this.page.getByText(label, { exact: true }) })
+			.filter({ has: this.page.locator("label").filter({ hasText: label }) })
 			.last();
 
-		await control.locator("button").click();
+		await control.getByRole("button").click();
 		await this.page.getByRole("searchbox", { name: "Search" }).fill(name);
 		await this.page.keyboard.press("Enter");
 		const option = this.page.getByRole("option", { name, exact: true });
