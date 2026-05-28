@@ -72,6 +72,25 @@ export class WebsiteFundingCallsPage {
 		await this.page.keyboard.type(String(year));
 	}
 
+	async clearDatePicker(label: string): Promise<void> {
+		const group = this.page.getByRole("group", { name: label });
+		for (const segment of [
+			group.getByRole("spinbutton", { name: /day/i }),
+			group.getByRole("spinbutton", { name: /month/i }),
+			group.getByRole("spinbutton", { name: /year/i }),
+		]) {
+			await segment.click();
+			await this.page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
+			await this.page.keyboard.press("Backspace");
+		}
+	}
+
+	async removeFirstContentBlock(): Promise<void> {
+		await this.page.getByRole("button", { name: "Remove block" }).first().click();
+		const dialog = this.page.getByRole("alertdialog", { name: "Remove block" });
+		await dialog.getByRole("button", { name: "Remove" }).click();
+	}
+
 	async submitForm(): Promise<void> {
 		await waitForActionRedirect({
 			page: this.page,

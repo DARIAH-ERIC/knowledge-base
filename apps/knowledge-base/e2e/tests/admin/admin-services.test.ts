@@ -119,6 +119,57 @@ test.describe("services admin", () => {
 		expect(updated?.statusId).toBeTruthy();
 	});
 
+	test("should clear optional service fields", async ({ page, createAdminServicesPage, db }) => {
+		const workerIndex = test.info().workerIndex;
+		const servicesPage = createAdminServicesPage(workerIndex);
+		const originalName = `${servicesPage.workerPrefix} Clear Optional ${randomUUID()}`;
+		const organisationalUnits = await db.getOrganisationalUnitOptions(2);
+		expect(organisationalUnits).toHaveLength(2);
+		const [ownerUnit, providerUnit] = organisationalUnits as [
+			{ id: string; name: string },
+			{ id: string; name: string },
+		];
+
+		await servicesPage.gotoCreate();
+		await servicesPage.fillName(originalName);
+		await servicesPage.selectFirstStatus();
+		await servicesPage.fillComment("Optional comment to clear.");
+		await servicesPage.selectServiceOwner(ownerUnit.name);
+		await servicesPage.selectServiceProvider(providerUnit.name);
+		await servicesPage.setFlag("dariahBranding");
+		await servicesPage.setFlag("monitoring");
+		await servicesPage.setFlag("privateSupplier");
+		await servicesPage.submitForm();
+
+		await servicesPage.searchByName(originalName);
+		const row = servicesPage.rowByName(originalName);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
+		const updatedName = `${servicesPage.workerPrefix} Cleared ${randomUUID()}`;
+		await page.getByLabel("Name", { exact: true }).fill(updatedName);
+		await servicesPage.fillComment("");
+		await servicesPage.unsetFlag("dariahBranding");
+		await servicesPage.unsetFlag("monitoring");
+		await servicesPage.unsetFlag("privateSupplier");
+		await servicesPage.removeSelectedOrganisationalUnits("Service owners");
+		await servicesPage.removeSelectedOrganisationalUnits("Service providers");
+		await servicesPage.submitForm();
+
+		const updated = await db.getServiceByName(updatedName);
+		expect(updated).toMatchObject({
+			comment: null,
+			dariahBranding: false,
+			monitoring: false,
+			ownerUnitIds: [],
+			privateSupplier: false,
+			providerUnitIds: [],
+		});
+	});
+
 	test("should delete a service", async ({ createAdminServicesPage }) => {
 		const workerIndex = test.info().workerIndex;
 		const servicesPage = createAdminServicesPage(workerIndex);

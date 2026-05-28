@@ -55,6 +55,10 @@ export class AdminWorkingGroupsPage {
 		}, E2E_TEST_ASSET_KEY);
 	}
 
+	async removeImage(): Promise<void> {
+		await this.page.getByRole("button", { name: "Remove image" }).click();
+	}
+
 	async fillDescription(text: string): Promise<void> {
 		const editor = this.page.getByRole("textbox", { name: "Description" });
 		await editor.click();

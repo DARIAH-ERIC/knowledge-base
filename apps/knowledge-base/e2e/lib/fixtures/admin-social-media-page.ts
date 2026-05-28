@@ -60,6 +60,19 @@ export class AdminSocialMediaPage {
 		await this.page.keyboard.type(String(year));
 	}
 
+	async clearDatePicker(label: string): Promise<void> {
+		const group = this.page.getByRole("group", { name: label });
+		for (const segment of [
+			group.getByRole("spinbutton", { name: /day/i }),
+			group.getByRole("spinbutton", { name: /month/i }),
+			group.getByRole("spinbutton", { name: /year/i }),
+		]) {
+			await segment.click();
+			await this.page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
+			await this.page.keyboard.press("Backspace");
+		}
+	}
+
 	async submitForm(): Promise<void> {
 		await waitForActionRedirect({
 			page: this.page,

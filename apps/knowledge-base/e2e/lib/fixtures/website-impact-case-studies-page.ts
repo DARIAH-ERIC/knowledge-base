@@ -65,6 +65,12 @@ export class WebsiteImpactCaseStudiesPage {
 		await dialog.getByRole("button", { name: "Select" }).click();
 	}
 
+	async removeFirstContentBlock(): Promise<void> {
+		await this.page.getByRole("button", { name: "Remove block" }).first().click();
+		const dialog = this.page.getByRole("alertdialog", { name: "Remove block" });
+		await dialog.getByRole("button", { name: "Remove" }).click();
+	}
+
 	async submitForm(): Promise<void> {
 		await waitForActionRedirect({
 			page: this.page,

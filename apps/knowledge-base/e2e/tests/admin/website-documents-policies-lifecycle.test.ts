@@ -179,4 +179,41 @@ test.describe("website documents-policies lifecycle", () => {
 		await page.waitForURL((url) => url.searchParams.get("version") == null);
 		await expect(page.getByText(updatedTitle)).toBeVisible();
 	});
+
+	test("should clear optional document or policy fields", async ({
+		page,
+		createWebsiteDocumentsPoliciesPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const docPoliciesPage = createWebsiteDocumentsPoliciesPage(workerIndex);
+		const title = `${docPoliciesPage.workerPrefix} Clear Optional ${randomUUID()}`;
+
+		await docPoliciesPage.gotoCreate();
+		await docPoliciesPage.fillTitle(title);
+		await docPoliciesPage.fillSummary("Document or policy with optional fields to clear");
+		await docPoliciesPage.fillUrl("https://example.com/document-policy-clear");
+		await docPoliciesPage.selectFirstGroup();
+		await docPoliciesPage.selectDocumentFromMediaLibrary("E2E Test Document");
+		await docPoliciesPage.addContentBlock("Optional document or policy content");
+		await docPoliciesPage.submitForm();
+
+		await docPoliciesPage.searchByTitle(title);
+		const row = docPoliciesPage.rowByTitle(title);
+		const editHref = await row.getByRole("link", { name: "Content" }).getAttribute("href");
+		if (editHref == null) {
+			throw new Error("Could not find edit link for document or policy.");
+		}
+		await page.goto(editHref);
+		await page.waitForURL("**/edit");
+
+		await docPoliciesPage.fillUrl("");
+		await docPoliciesPage.selectNoGroup();
+		await docPoliciesPage.removeFirstContentBlock();
+		await docPoliciesPage.submitForm();
+
+		const updated = await db.getDocumentOrPolicyByTitle(title);
+		expect(updated).toMatchObject({ groupId: null, url: null });
+		expect(await db.getDocumentOrPolicyContentBlocksByTitle(title)).toHaveLength(0);
+	});
 });

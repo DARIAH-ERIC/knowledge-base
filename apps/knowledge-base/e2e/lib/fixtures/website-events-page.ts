@@ -56,6 +56,15 @@ export class WebsiteEventsPage {
 		}
 	}
 
+	async unsetFullDay(): Promise<void> {
+		const checkbox = this.page.getByRole("checkbox", { name: "Full day" });
+		if (await checkbox.isChecked()) {
+			await checkbox.focus();
+			await this.page.keyboard.press("Space");
+			await expect(checkbox).not.toBeChecked();
+		}
+	}
+
 	private contentBlockEditor(): Locator {
 		return this.page.getByRole("textbox", { name: "Content" });
 	}
@@ -98,6 +107,25 @@ export class WebsiteEventsPage {
 		await asset.click();
 		await dialog.getByRole("button", { name: "Select" }).click();
 		await dialog.waitFor({ state: "hidden" });
+	}
+
+	async clearDatePicker(label: string): Promise<void> {
+		const group = this.page.getByRole("group", { name: label });
+		for (const segment of [
+			group.getByRole("spinbutton", { name: /day/i }),
+			group.getByRole("spinbutton", { name: /month/i }),
+			group.getByRole("spinbutton", { name: /year/i }),
+		]) {
+			await segment.click();
+			await this.page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
+			await this.page.keyboard.press("Backspace");
+		}
+	}
+
+	async removeFirstContentBlock(): Promise<void> {
+		await this.page.getByRole("button", { name: "Remove block" }).first().click();
+		const dialog = this.page.getByRole("alertdialog", { name: "Remove block" });
+		await dialog.getByRole("button", { name: "Remove" }).click();
 	}
 
 	async submitForm(): Promise<void> {

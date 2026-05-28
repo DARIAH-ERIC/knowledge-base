@@ -95,6 +95,35 @@ test.describe("website impact case studies admin", () => {
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(updatedContent);
 	});
 
+	test("should clear optional impact case study content blocks", async ({
+		page,
+		createWebsiteImpactCaseStudiesPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const impactCaseStudiesPage = createWebsiteImpactCaseStudiesPage(workerIndex);
+		const title = `${impactCaseStudiesPage.workerPrefix} Clear Optional ${randomUUID()}`;
+
+		await impactCaseStudiesPage.gotoCreate();
+		await impactCaseStudiesPage.fillTitle(title);
+		await impactCaseStudiesPage.fillSummary("Impact case study with content to clear");
+		await impactCaseStudiesPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await impactCaseStudiesPage.addContentBlock("Optional impact case study content");
+		await impactCaseStudiesPage.submitForm();
+
+		await impactCaseStudiesPage.searchByTitle(title);
+		const row = impactCaseStudiesPage.rowByTitle(title);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+		await impactCaseStudiesPage.removeFirstContentBlock();
+		await impactCaseStudiesPage.submitForm();
+
+		expect(await db.getImpactCaseStudyContentBlocksByTitle(title)).toHaveLength(0);
+	});
+
 	test("should delete an impact case study", async ({ createWebsiteImpactCaseStudiesPage }) => {
 		const workerIndex = test.info().workerIndex;
 		const impactCaseStudiesPage = createWebsiteImpactCaseStudiesPage(workerIndex);

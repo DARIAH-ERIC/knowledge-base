@@ -122,7 +122,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 
 	const validationErrors =
 		state.status === "error"
-			? (state.validationErrors as ContributionValidationErrors | undefined)
+			? (state.validationErrors)
 			: undefined;
 	const selectedRoleOption = roleOptions.find((option) => option.roleTypeId === selectedRoleTypeId);
 

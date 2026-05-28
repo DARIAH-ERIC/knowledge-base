@@ -130,6 +130,41 @@ export class AdminProjectsPage {
 		await option.click();
 	}
 
+	async clearDatePicker(label: string): Promise<void> {
+		const group = this.page.getByRole("group", { name: label });
+		for (const segment of [
+			group.getByRole("spinbutton", { name: /day/i }),
+			group.getByRole("spinbutton", { name: /month/i }),
+			group.getByRole("spinbutton", { name: /year/i }),
+		]) {
+			await segment.click();
+			await this.page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
+			await this.page.keyboard.press("Backspace");
+		}
+	}
+
+	async removeImage(): Promise<void> {
+		await this.page.getByRole("button", { name: "Remove image" }).click();
+	}
+
+	async removeAllTagsInControl(label: string): Promise<void> {
+		const control = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.getByText(label, { exact: true }) })
+			.last();
+		const removeButtons = control.getByRole("button", { name: "Remove tag" });
+		while ((await removeButtons.count()) > 0) {
+			await removeButtons.first().click();
+		}
+	}
+
+	async removeAllPartners(): Promise<void> {
+		const removeButtons = this.page.getByRole("button", { name: "Remove partner" });
+		while ((await removeButtons.count()) > 0) {
+			await removeButtons.first().click();
+		}
+	}
+
 	async createSocialMediaInForm(name: string, url: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Create social media" }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Create social media" });

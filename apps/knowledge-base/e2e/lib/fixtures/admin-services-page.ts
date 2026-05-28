@@ -97,6 +97,33 @@ export class AdminServicesPage {
 		}
 	}
 
+	async unsetFlag(name: "dariahBranding" | "monitoring" | "privateSupplier"): Promise<void> {
+		const labelByName = {
+			dariahBranding: "DARIAH branding",
+			monitoring: "Monitoring",
+			privateSupplier: "Private supplier",
+		} as const;
+		const checkbox = this.page.getByRole("checkbox", { name: labelByName[name] });
+		if (await checkbox.isChecked()) {
+			await checkbox.focus();
+			await this.page.keyboard.press("Space");
+			await expect(checkbox).not.toBeChecked();
+		}
+	}
+
+	async removeSelectedOrganisationalUnits(
+		label: "Service owners" | "Service providers",
+	): Promise<void> {
+		const control = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.getByText(label, { exact: true }) })
+			.first();
+		const removeButtons = control.getByRole("button", { name: "Remove tag" });
+		while ((await removeButtons.count()) > 0) {
+			await removeButtons.first().click();
+		}
+	}
+
 	async submitForm(): Promise<void> {
 		await waitForActionRedirect({
 			page: this.page,

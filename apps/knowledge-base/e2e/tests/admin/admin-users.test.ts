@@ -99,6 +99,49 @@ test.describe("users admin", () => {
 		});
 	});
 
+	test("should clear optional user actor and admin fields", async ({
+		page,
+		createAdminUsersPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const usersPage = createAdminUsersPage(workerIndex);
+		const person = await db.getPersonOption();
+		const originalName = `${usersPage.workerPrefix} Clear Optional ${randomUUID()}`;
+		const email = `e2e-worker-${String(workerIndex)}+clear-${randomUUID()}@example.com`;
+
+		await usersPage.gotoCreate();
+		await usersPage.fillName(originalName);
+		await usersPage.fillEmail(email);
+		await usersPage.selectRole("Admin");
+		await usersPage.setCanManageAdmins();
+		await usersPage.fillPassword("TestPassword123!");
+		await usersPage.selectPersonActor(person.name);
+		await usersPage.submitForm();
+
+		await usersPage.searchByName(originalName);
+		const row = usersPage.rowByName(originalName);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
+		const updatedName = `${usersPage.workerPrefix} Cleared ${randomUUID()}`;
+		await page.getByLabel("Name", { exact: true }).fill(updatedName);
+		await usersPage.selectRole("User");
+		await usersPage.selectActorType("None");
+		await usersPage.submitForm();
+
+		const updated = await db.getUserByName(updatedName);
+		expect(updated).toMatchObject({
+			canManageAdmins: false,
+			organisationalUnitId: null,
+			personId: null,
+			role: "user",
+		});
+	});
+
 	test("should delete a user", async ({ createAdminUsersPage }) => {
 		const workerIndex = test.info().workerIndex;
 		const usersPage = createAdminUsersPage(workerIndex);

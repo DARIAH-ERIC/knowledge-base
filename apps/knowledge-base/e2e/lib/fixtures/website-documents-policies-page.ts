@@ -51,6 +51,14 @@ export class WebsiteDocumentsPoliciesPage {
 		await this.page.getByRole("option").nth(1).click();
 	}
 
+	async selectNoGroup(): Promise<void> {
+		const groupControl = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.getByText("Group", { exact: true }) });
+		await groupControl.locator("button").click();
+		await this.page.getByRole("option", { name: "None", exact: true }).click();
+	}
+
 	private contentBlockEditor(): Locator {
 		return this.page.getByRole("textbox", { name: "Content" });
 	}
@@ -78,6 +86,25 @@ export class WebsiteDocumentsPoliciesPage {
 		await dialog.waitFor({ state: "hidden" });
 		await this.page.getByText(assetLabel, { exact: true }).waitFor({ state: "visible" });
 		await expect(this.page.locator('input[name="documentKey"]')).not.toHaveValue("");
+	}
+
+	async clearDatePicker(label: string): Promise<void> {
+		const group = this.page.getByRole("group", { name: label });
+		for (const segment of [
+			group.getByRole("spinbutton", { name: /day/i }),
+			group.getByRole("spinbutton", { name: /month/i }),
+			group.getByRole("spinbutton", { name: /year/i }),
+		]) {
+			await segment.click();
+			await this.page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
+			await this.page.keyboard.press("Backspace");
+		}
+	}
+
+	async removeFirstContentBlock(): Promise<void> {
+		await this.page.getByRole("button", { name: "Remove block" }).first().click();
+		const dialog = this.page.getByRole("alertdialog", { name: "Remove block" });
+		await dialog.getByRole("button", { name: "Remove" }).click();
 	}
 
 	async submitForm(): Promise<void> {

@@ -15,7 +15,7 @@ export const updateCountryReportContributorsAction = createMutationAction({
 	revalidate: "/[locale]/dashboard/reporting",
 
 	async preCheck({ input, ctx }) {
-		await assertCan(ctx.user!, "update", { type: "country_report", id: input.id });
+		await assertCan(ctx.user, "update", { type: "country_report", id: input.id });
 		return undefined;
 	},
 

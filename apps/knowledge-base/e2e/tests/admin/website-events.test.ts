@@ -123,6 +123,43 @@ test.describe("website events admin", () => {
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(updatedContent);
 	});
 
+	test("should clear optional event fields", async ({ page, createWebsiteEventsPage, db }) => {
+		const workerIndex = test.info().workerIndex;
+		const eventsPage = createWebsiteEventsPage(workerIndex);
+		const title = `${eventsPage.workerPrefix} Clear Optional ${randomUUID()}`;
+
+		await eventsPage.gotoCreate();
+		await eventsPage.fillTitle(title);
+		await eventsPage.fillSummary("Event with optional fields to clear");
+		await eventsPage.fillDatePicker("Start date", 2025, 6, 15);
+		await eventsPage.fillDatePicker("End date", 2025, 6, 16);
+		await eventsPage.fillLocation("Vienna, Austria");
+		await eventsPage.fillWebsite("https://example.com/event-clear");
+		await eventsPage.setFullDay();
+		await eventsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await eventsPage.addContentBlock("Optional event content");
+		await eventsPage.submitForm();
+
+		await eventsPage.searchByTitle(title);
+		const row = eventsPage.rowByTitle(title);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
+		await eventsPage.fillWebsite("");
+		await eventsPage.unsetFullDay();
+		await eventsPage.clearDatePicker("End date");
+		await eventsPage.removeFirstContentBlock();
+		await eventsPage.submitForm();
+
+		const updated = await db.getEventByTitle(title);
+		expect(updated).toMatchObject({ isFullDay: false, website: null });
+		expect(updated?.duration.end).toBeUndefined();
+		expect(await db.getEventContentBlocksByTitle(title)).toHaveLength(0);
+	});
+
 	test("should delete an event", async ({ createWebsiteEventsPage }) => {
 		const workerIndex = test.info().workerIndex;
 		const eventsPage = createWebsiteEventsPage(workerIndex);
