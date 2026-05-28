@@ -10,7 +10,6 @@ import * as v from "valibot";
 
 import { CreateWorkingGroupChairActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/create-working-group-chair.schema";
 import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
-import { isPublishedEntityVersions } from "@/lib/data/current-entity-version";
 import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { ensureOrganisationalUnitDraftVersion } from "@/lib/data/organisational-unit-drafts";
 import { db } from "@/lib/db";
@@ -51,10 +50,6 @@ export const createWorkingGroupChairAction = createServerAction(
 		}
 
 		const returned = await db.transaction(async (tx) => {
-			if (!(await isPublishedEntityVersions(tx, [personId, unitId]))) {
-				return { error: "not-published" as const };
-			}
-
 			const draftUnitId = await ensureOrganisationalUnitDraftVersion(tx, unitId);
 			const existing = await tx.query.personsToOrganisationalUnits.findFirst({
 				where: { personId, organisationalUnitId: draftUnitId, roleTypeId: roleType.id },
@@ -85,11 +80,6 @@ export const createWorkingGroupChairAction = createServerAction(
 		});
 
 		if ("error" in returned) {
-			if (returned.error === "not-published") {
-				return createActionStateError({
-					message: t("Relations can only target published entities."),
-				});
-			}
 			return createActionStateError({ message: t("This chair relation already exists.") });
 		}
 
