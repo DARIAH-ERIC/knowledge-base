@@ -11,6 +11,11 @@ import { images } from "@/lib/images";
 export interface OrganisationalUnitOption {
 	id: string;
 	name: string;
+	description: string;
+}
+
+function formatOrganisationalUnitType(type: string): string {
+	return type.replaceAll("_", " ");
 }
 
 interface GetOrganisationalUnitsParams {
@@ -39,10 +44,18 @@ export async function getOrganisationalUnitOptions(
 
 	const [items, aggregate] = await Promise.all([
 		db
-			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+			.select({
+				id: schema.organisationalUnits.id,
+				name: schema.organisationalUnits.name,
+				type: schema.organisationalUnitTypes.type,
+			})
 			.from(schema.organisationalUnits)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+			)
 			.where(where)
 			.orderBy(schema.organisationalUnits.name)
 			.limit(limit)
@@ -55,7 +68,16 @@ export async function getOrganisationalUnitOptions(
 			.where(where),
 	]);
 
-	return { items, total: aggregate.at(0)?.total ?? 0 };
+	return {
+		items: items.map((item) => {
+			return {
+				id: item.id,
+				name: item.name,
+				description: formatOrganisationalUnitType(item.type),
+			};
+		}),
+		total: aggregate.at(0)?.total ?? 0,
+	};
 }
 
 export async function getOrganisationalUnitOptionsByIds(ids: ReadonlyArray<string>) {
@@ -64,14 +86,34 @@ export async function getOrganisationalUnitOptionsByIds(ids: ReadonlyArray<strin
 	}
 
 	const rows = await db
-		.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+		.select({
+			id: schema.organisationalUnits.id,
+			name: schema.organisationalUnits.name,
+			type: schema.organisationalUnitTypes.type,
+		})
 		.from(schema.organisationalUnits)
 		.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
 		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+		.innerJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+		)
 		.where(and(publishedEntityVersionWhere(), inArray(schema.organisationalUnits.id, [...ids])))
 		.orderBy(schema.organisationalUnits.name);
 
-	const itemById = new Map(rows.map((row) => [row.id, row] as const));
+	const itemById = new Map(
+		rows.map(
+			(row) =>
+				[
+					row.id,
+					{
+						id: row.id,
+						name: row.name,
+						description: formatOrganisationalUnitType(row.type),
+					},
+				] as const,
+		),
+	);
 
 	return ids.flatMap((id) => {
 		const item = itemById.get(id);
