@@ -79,7 +79,7 @@ test.describe("projects admin", () => {
 		expect(createdSocialMedia).toMatchObject({ name: socialMediaName, url: socialMediaUrl });
 		const createdRelations = await db.getProjectRelationsByName(projectName);
 		expect(createdRelations?.socialMediaIds).toContain(createdSocialMedia!.id);
-		expect(createdRelations?.partners).toEqual([
+		expect(createdRelations?.partners).toStrictEqual([
 			expect.objectContaining({
 				duration: {
 					start: new Date("2024-03-01T00:00:00.000Z"),
@@ -182,7 +182,7 @@ test.describe("projects admin", () => {
 		});
 		const updatedRelations = await db.getProjectRelationsByName(updatedName);
 		expect(updatedRelations?.socialMediaIds).toContain(updatedSocialMedia!.id);
-		expect(updatedRelations?.partners).toEqual([
+		expect(updatedRelations?.partners).toStrictEqual([
 			expect.objectContaining({
 				duration: {
 					start: new Date("2024-03-01T00:00:00.000Z"),
