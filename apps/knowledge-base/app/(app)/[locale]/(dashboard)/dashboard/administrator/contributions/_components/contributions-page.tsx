@@ -18,7 +18,6 @@ import {
 	EntityListHeader,
 	EntityListPagination,
 	EntityListSearchField,
-	NewLink,
 	RowActionsMenu,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
@@ -135,12 +134,7 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 			<EntityListHeader
 				title={t("Person relations")}
 				description={t("All person-to-organisation relations in the DARIAH knowledge base.")}
-				action={
-					<>
-						<EntityListSearchField search={search} />
-						<NewLink href="/dashboard/administrator/person-relations/create">{t("New")}</NewLink>
-					</>
-				}
+				action={<EntityListSearchField search={search} />}
 			/>
 
 			<Table
