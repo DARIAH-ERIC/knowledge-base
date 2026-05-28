@@ -137,15 +137,6 @@ export type AnyCreateMutationActionOptions<
  * mutation too.
  */
 export function createMutationAction<TSchema extends v.GenericSchema, TSuccessData = unknown>(
-	opts: CreateAdminMutationActionOptions<TSchema, TSuccessData>,
-): ServerAction;
-export function createMutationAction<TSchema extends v.GenericSchema, TSuccessData = unknown>(
-	opts: CreateAuthenticatedMutationActionOptions<TSchema, TSuccessData>,
-): ServerAction;
-export function createMutationAction<TSchema extends v.GenericSchema, TSuccessData = unknown>(
-	opts: CreateMutationActionOptions<TSchema, TSuccessData>,
-): ServerAction;
-export function createMutationAction<TSchema extends v.GenericSchema, TSuccessData = unknown>(
 	opts: AnyCreateMutationActionOptions<TSchema, TSuccessData>,
 ): ServerAction {
 	return createServerAction(
