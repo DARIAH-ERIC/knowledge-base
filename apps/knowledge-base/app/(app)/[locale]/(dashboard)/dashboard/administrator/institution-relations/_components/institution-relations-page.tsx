@@ -1,16 +1,6 @@
 "use client";
 
 import { Badge } from "@dariah-eric/ui/badge";
-import { Button } from "@dariah-eric/ui/button";
-import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
-import { Label } from "@dariah-eric/ui/field";
-import {
-	ModalBody,
-	ModalClose,
-	ModalContent,
-	ModalFooter,
-	ModalHeader,
-} from "@dariah-eric/ui/modal";
 import {
 	Table,
 	TableBody,
@@ -19,10 +9,9 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { ArchiveBoxXMarkIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
-import { type CalendarDate, getLocalTimeZone } from "@internationalized/date";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useExtracted, useFormatter } from "next-intl";
-import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
+import { Fragment, type ReactNode } from "react";
 
 import {
 	EntityListHeader,
@@ -31,7 +20,6 @@ import {
 	RowActionsMenu,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
-import { endUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-unit-relation.action";
 import { dashboardPageSize } from "@/config/pagination.config";
 import type { InstitutionRelationsResult } from "@/lib/data/institution-relations";
 
@@ -86,11 +74,6 @@ function organisationalUnitTypeIntent(
 
 const pageSize = dashboardPageSize;
 
-interface EndRelationAction {
-	end: Date;
-	id: string;
-}
-
 export function InstitutionRelationsPage(
 	props: Readonly<InstitutionRelationsPageProps>,
 ): ReactNode {
@@ -104,22 +87,12 @@ export function InstitutionRelationsPage(
 
 	const t = useExtracted();
 	const format = useFormatter();
-	const [items, optimisticallyEndItem] = useOptimistic(
-		institutionRelations.data,
-		(state, action: EndRelationAction) =>
-			state.map((relation) =>
-				relation.id === action.id ? { ...relation, durationEnd: action.end } : relation,
-			),
-	);
-	const [itemToEnd, setItemToEnd] = useState<{ id: string } | null>(null);
-	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
 	const search = useUrlPaginatedSearch({
 		dir: initialDir,
 		page: initialPage,
 		q: initialQ,
 		sort: initialSort,
 	});
-	const [isEndPending, startEndTransition] = useTransition();
 
 	return (
 		<Fragment>
@@ -158,7 +131,7 @@ export function InstitutionRelationsPage(
 					</TableColumn>
 					<TableColumn />
 				</TableHeader>
-				<TableBody items={items}>
+				<TableBody items={institutionRelations.data}>
 					{(item) => (
 						<TableRow id={item.id}>
 							<TableCell>{item.institutionName}</TableCell>
@@ -183,20 +156,6 @@ export function InstitutionRelationsPage(
 									>
 										{t("Edit institution")}
 									</RowActionsMenu.Link>
-									{item.durationEnd == null ? (
-										<Fragment>
-											<RowActionsMenu.Separator />
-											<RowActionsMenu.Action
-												icon={<ArchiveBoxXMarkIcon className="me-2 block-4 inline-4" />}
-												onAction={() => {
-													setItemToEnd({ id: item.id });
-													setSelectedEndDate(null);
-												}}
-											>
-												{t("End relation")}
-											</RowActionsMenu.Action>
-										</Fragment>
-									) : null}
 								</RowActionsMenu>
 							</TableCell>
 						</TableRow>
@@ -209,55 +168,6 @@ export function InstitutionRelationsPage(
 				total={institutionRelations.total}
 				pageSize={pageSize}
 			/>
-
-			<ModalContent
-				isOpen={itemToEnd != null}
-				onOpenChange={(open) => {
-					if (!open && !isEndPending) {
-						setItemToEnd(null);
-					}
-				}}
-				role="alertdialog"
-				size="sm"
-			>
-				<ModalHeader
-					description={t("Set the date on which this institution relation ended.")}
-					title={t("End relation")}
-				/>
-				<ModalBody>
-					<DatePicker
-						granularity="day"
-						onChange={(date) => {
-							setSelectedEndDate(date);
-						}}
-						value={selectedEndDate}
-					>
-						<Label>{t("End date")}</Label>
-						<DatePickerTrigger />
-					</DatePicker>
-				</ModalBody>
-				<ModalFooter>
-					<ModalClose>{t("Cancel")}</ModalClose>
-					<Button
-						isDisabled={selectedEndDate == null}
-						onPress={() => {
-							if (itemToEnd == null || selectedEndDate == null) {
-								return;
-							}
-
-							const end = selectedEndDate.toDate(getLocalTimeZone());
-
-							startEndTransition(async () => {
-								optimisticallyEndItem({ id: itemToEnd.id, end });
-								await endUnitRelationAction(itemToEnd.id, end);
-								setItemToEnd(null);
-							});
-						}}
-					>
-						{t("Confirm")}
-					</Button>
-				</ModalFooter>
-			</ModalContent>
 		</Fragment>
 	);
 }
