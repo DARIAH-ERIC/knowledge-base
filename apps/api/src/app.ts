@@ -8,6 +8,7 @@ import { storage as storageMiddleware } from "@/middlewares/storage";
 import { router as dariahProjects } from "@/routes/dariah-projects";
 import { router as documentsPolicies } from "@/routes/documents-policies";
 import { router as events } from "@/routes/events";
+import { router as featuredEntities } from "@/routes/featured-entities";
 import { router as fundingCalls } from "@/routes/funding-calls";
 import { router as governanceBodies } from "@/routes/governance-bodies";
 import { router as impactCaseStudies } from "@/routes/impact-case-studies";
@@ -35,6 +36,7 @@ const api = createRouter()
 	.route("/documents-policies", documentsPolicies)
 	.route("/navigation", navigation)
 	.route("/events", events)
+	.route("/featured-entities", featuredEntities)
 	.route("/funding-calls", fundingCalls)
 	.route("/governance-bodies", governanceBodies)
 	.route("/impact-case-studies", impactCaseStudies)
