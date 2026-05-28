@@ -17,7 +17,7 @@ export const createWorkingGroupReportSocialMediaAction = createMutationAction({
 
 	async preCheck({ input, ctx }) {
 		const t = await getExtracted();
-		await assertCan(ctx.user, "update", {
+		await assertCan(ctx.user!, "update", {
 			type: "working_group_report",
 			id: input.workingGroupReportId,
 		});

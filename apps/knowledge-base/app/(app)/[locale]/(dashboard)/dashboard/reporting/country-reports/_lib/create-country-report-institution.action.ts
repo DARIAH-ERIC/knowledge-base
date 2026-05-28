@@ -17,7 +17,7 @@ export const createCountryReportInstitutionAction = createMutationAction({
 
 	async preCheck({ input, ctx }) {
 		const t = await getExtracted();
-		await assertCan(ctx.user, "update", {
+		await assertCan(ctx.user!, "update", {
 			type: "country_report",
 			id: input.countryReportId,
 		});

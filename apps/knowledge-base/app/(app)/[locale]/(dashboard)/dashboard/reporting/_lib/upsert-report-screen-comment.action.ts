@@ -39,7 +39,7 @@ export const upsertReportScreenCommentAction = createMutationAction({
 	revalidate: "/[locale]/dashboard/reporting",
 
 	async preCheck({ input, ctx }) {
-		await assertCan(ctx.user, "update", {
+		await assertCan(ctx.user!, "update", {
 			type: input.reportType === "country" ? "country_report" : "working_group_report",
 			id: input.reportId,
 		});
