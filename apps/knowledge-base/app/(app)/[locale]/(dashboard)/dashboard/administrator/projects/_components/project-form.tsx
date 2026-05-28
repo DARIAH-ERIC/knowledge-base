@@ -7,7 +7,7 @@ import { AsyncMultipleSelect } from "@dariah-eric/ui/async-multiple-select";
 import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
-import { FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
+import { Description, FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
 import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Input } from "@dariah-eric/ui/input";
@@ -304,6 +304,7 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 					>
 						<Label>{t("Funding")}</Label>
 						<Input />
+						<Description>{t("Enter the funding amount in euros.")}</Description>
 						<FieldError />
 					</NumberField>
 
