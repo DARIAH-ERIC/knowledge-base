@@ -120,10 +120,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 	const [state, setState] = useState<ActionState>(createActionStateInitial());
 	const [isPending, startFormTransition] = useTransition();
 
-	const validationErrors =
-		state.status === "error"
-			? (state.validationErrors)
-			: undefined;
+	const validationErrors = state.status === "error" ? state.validationErrors : undefined;
 	const selectedRoleOption = roleOptions.find((option) => option.roleTypeId === selectedRoleTypeId);
 
 	function formAction(formData: FormData) {

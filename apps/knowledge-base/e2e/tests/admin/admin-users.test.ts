@@ -19,16 +19,12 @@ test.describe("users admin", () => {
 
 		const name = `${usersPage.workerPrefix} Test User ${randomUUID()}`;
 		const email = `e2e-worker-${String(workerIndex)}+${randomUUID()}@example.com`;
-		const person = await db.getPersonOption();
 
 		await usersPage.gotoCreate();
 
 		await usersPage.fillName(name);
 		await usersPage.fillEmail(email);
-		await usersPage.selectRole("Admin");
-		await usersPage.setCanManageAdmins();
 		await usersPage.fillPassword("TestPassword123!");
-		await usersPage.selectPersonActor(person.name);
 
 		await usersPage.submitForm();
 
@@ -38,12 +34,12 @@ test.describe("users admin", () => {
 		const created = await db.getUserByName(name);
 		expect(created).not.toBeNull();
 		expect(created).toMatchObject({
-			canManageAdmins: true,
+			canManageAdmins: false,
 			email,
 			name,
 			organisationalUnitId: null,
-			personId: person.id,
-			role: "admin",
+			personId: null,
+			role: "user",
 		});
 	});
 
@@ -53,7 +49,6 @@ test.describe("users admin", () => {
 
 		const originalName = `${usersPage.workerPrefix} Edit Me ${randomUUID()}`;
 		const email = `e2e-worker-${String(workerIndex)}+${randomUUID()}@example.com`;
-		const country = await db.getCountryOption();
 
 		await usersPage.gotoCreate();
 		await usersPage.fillName(originalName);
@@ -76,10 +71,6 @@ test.describe("users admin", () => {
 
 		await page.getByLabel("Name", { exact: true }).fill(updatedName);
 		await usersPage.fillEmail(updatedEmail);
-		await usersPage.selectRole("Admin");
-		await usersPage.setCanManageAdmins();
-		await usersPage.selectCountryActor(country.name);
-
 		await usersPage.submitForm();
 
 		await usersPage.searchByName(updatedName);
@@ -90,12 +81,12 @@ test.describe("users admin", () => {
 		const updated = await db.getUserByName(updatedName);
 		expect(updated).not.toBeNull();
 		expect(updated).toMatchObject({
-			canManageAdmins: true,
+			canManageAdmins: false,
 			email: updatedEmail,
 			name: updatedName,
-			organisationalUnitId: country.id,
+			organisationalUnitId: null,
 			personId: null,
-			role: "admin",
+			role: "user",
 		});
 	});
 

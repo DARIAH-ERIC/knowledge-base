@@ -498,6 +498,9 @@ export class DatabaseService {
 				name: schema.organisationalUnits.name,
 			})
 			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(eq(schema.entityStatus.type, "published"))
 			.orderBy(schema.organisationalUnits.name)
 			.limit(limit);
 	}
@@ -506,6 +509,9 @@ export class DatabaseService {
 		const [row] = await this.db
 			.select({ id: schema.persons.id, name: schema.persons.name })
 			.from(schema.persons)
+			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(eq(schema.entityStatus.type, "published"))
 			.orderBy(schema.persons.name)
 			.limit(1);
 
@@ -524,7 +530,14 @@ export class DatabaseService {
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 			)
-			.where(eq(schema.organisationalUnitTypes.type, "country"))
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					eq(schema.organisationalUnitTypes.type, "country"),
+					eq(schema.entityStatus.type, "published"),
+				),
+			)
 			.orderBy(schema.organisationalUnits.name)
 			.limit(1);
 

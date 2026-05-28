@@ -19,20 +19,11 @@ test.describe("services admin", () => {
 
 		const name = `${servicesPage.workerPrefix} Test Service ${randomUUID()}`;
 		const comment = "E2E test service comment.";
-		const organisationalUnits = await db.getOrganisationalUnitOptions(2);
-		expect(organisationalUnits).toHaveLength(2);
-		const [ownerUnit, providerUnit] = organisationalUnits as [
-			{ id: string; name: string },
-			{ id: string; name: string },
-		];
-
 		await servicesPage.gotoCreate();
 
 		await servicesPage.fillName(name);
 		await servicesPage.selectFirstStatus();
 		await servicesPage.fillComment(comment);
-		await servicesPage.selectServiceOwner(ownerUnit.name);
-		await servicesPage.selectServiceProvider(providerUnit.name);
 		await servicesPage.setFlag("dariahBranding");
 		await servicesPage.setFlag("monitoring");
 		await servicesPage.setFlag("privateSupplier");
@@ -50,9 +41,7 @@ test.describe("services admin", () => {
 			metadata: {},
 			monitoring: true,
 			name,
-			ownerUnitIds: [ownerUnit.id],
 			privateSupplier: true,
-			providerUnitIds: [providerUnit.id],
 		});
 		expect(created?.statusId).toBeTruthy();
 	});
@@ -62,13 +51,6 @@ test.describe("services admin", () => {
 		const servicesPage = createAdminServicesPage(workerIndex);
 
 		const originalName = `${servicesPage.workerPrefix} Edit Me ${randomUUID()}`;
-		const organisationalUnits = await db.getOrganisationalUnitOptions(2);
-		expect(organisationalUnits).toHaveLength(2);
-		const [ownerUnit, providerUnit] = organisationalUnits as [
-			{ id: string; name: string },
-			{ id: string; name: string },
-		];
-
 		await servicesPage.gotoCreate();
 		await servicesPage.fillName(originalName);
 		await servicesPage.selectFirstStatus();
@@ -91,8 +73,6 @@ test.describe("services admin", () => {
 		await page.getByLabel("Name", { exact: true }).fill(updatedName);
 		await servicesPage.selectFirstStatus();
 		await servicesPage.fillComment(updatedComment);
-		await servicesPage.selectServiceOwner(ownerUnit.name);
-		await servicesPage.selectServiceProvider(providerUnit.name);
 		await servicesPage.setFlag("dariahBranding");
 		await servicesPage.setFlag("monitoring");
 		await servicesPage.setFlag("privateSupplier");
@@ -112,11 +92,51 @@ test.describe("services admin", () => {
 			metadata: {},
 			monitoring: true,
 			name: updatedName,
-			ownerUnitIds: [ownerUnit.id],
 			privateSupplier: true,
-			providerUnitIds: [providerUnit.id],
 		});
 		expect(updated?.statusId).toBeTruthy();
+	});
+
+	test("should persist service owner and provider fields", async ({
+		page,
+		createAdminServicesPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const servicesPage = createAdminServicesPage(workerIndex);
+		const originalName = `${servicesPage.workerPrefix} Relations ${randomUUID()}`;
+		const organisationalUnits = await db.getOrganisationalUnitOptions(2);
+		expect(organisationalUnits).toHaveLength(2);
+		const [ownerUnit, providerUnit] = organisationalUnits as [
+			{ id: string; name: string },
+			{ id: string; name: string },
+		];
+
+		await servicesPage.gotoCreate();
+		await servicesPage.fillName(originalName);
+		await servicesPage.selectFirstStatus();
+		await servicesPage.submitForm();
+
+		await servicesPage.searchByName(originalName);
+		const row = servicesPage.rowByName(originalName);
+		await expect(row).toBeVisible();
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
+		const updatedName = `${servicesPage.workerPrefix} Relations Updated ${randomUUID()}`;
+		await page.getByLabel("Name", { exact: true }).fill(updatedName);
+		await servicesPage.selectServiceOwner(ownerUnit.name);
+		await servicesPage.selectServiceProvider(providerUnit.name);
+		await servicesPage.submitForm();
+
+		const updated = await db.getServiceByName(updatedName);
+		expect(updated).toMatchObject({
+			ownerUnitIds: [ownerUnit.id],
+			providerUnitIds: [providerUnit.id],
+		});
 	});
 
 	test("should clear optional service fields", async ({ page, createAdminServicesPage, db }) => {
