@@ -4,6 +4,7 @@ import * as v from "valibot";
 export const UpdateWorkingGroupActionInputSchema = v.object({
 	documentId: v.pipe(v.string(), v.uuid()),
 	...v.pick(OrganisationalUnitUpdateSchema, ["name", "summary"]).entries,
+	summary: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	acronym: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	sshocMarketplaceActorId: v.nullish(
 		v.pipe(v.string(), v.toNumber(), v.integer(), v.minValue(1)),
