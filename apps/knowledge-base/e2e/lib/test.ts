@@ -5,12 +5,20 @@ import { test as base } from "@playwright/test";
 
 import { env } from "@/config/env.config";
 import { type AccessibilityScanner, createAccessibilityScanner } from "@/e2e/lib/fixtures/a11y";
+import { AdminCountriesPage } from "@/e2e/lib/fixtures/admin-countries-page";
+import { AdminCountryReportsPage } from "@/e2e/lib/fixtures/admin-country-reports-page";
 import { AdminDocumentationPagesPage } from "@/e2e/lib/fixtures/admin-documentation-pages-page";
+import { AdminGovernanceBodiesPage } from "@/e2e/lib/fixtures/admin-governance-bodies-page";
+import { AdminInstitutionsPage } from "@/e2e/lib/fixtures/admin-institutions-page";
+import { AdminInternalPagesPage } from "@/e2e/lib/fixtures/admin-internal-pages-page";
+import { AdminNationalConsortiaPage } from "@/e2e/lib/fixtures/admin-national-consortia-page";
 import { AdminPersonsPage } from "@/e2e/lib/fixtures/admin-persons-page";
 import { AdminProjectsPage } from "@/e2e/lib/fixtures/admin-projects-page";
+import { AdminReportingCampaignsPage } from "@/e2e/lib/fixtures/admin-reporting-campaigns-page";
 import { AdminServicesPage } from "@/e2e/lib/fixtures/admin-services-page";
 import { AdminSocialMediaPage } from "@/e2e/lib/fixtures/admin-social-media-page";
 import { AdminUsersPage } from "@/e2e/lib/fixtures/admin-users-page";
+import { AdminWorkingGroupReportsPage } from "@/e2e/lib/fixtures/admin-working-group-reports-page";
 import { AdminWorkingGroupsPage } from "@/e2e/lib/fixtures/admin-working-groups-page";
 import { ContactPage } from "@/e2e/lib/fixtures/contact-page";
 import { DatabaseService } from "@/e2e/lib/fixtures/database-service";
@@ -38,12 +46,20 @@ interface TestFixtures {
 	createContactPage: (locale: IntlLocale) => Promise<WithI18n<{ contactPage: ContactPage }>>;
 	createImprintPage: (locale: IntlLocale) => Promise<WithI18n<{ imprintPage: ImprintPage }>>;
 	createIndexPage: (locale: IntlLocale) => Promise<WithI18n<{ indexPage: IndexPage }>>;
+	createAdminCountriesPage: (workerIndex: number) => AdminCountriesPage;
+	createAdminCountryReportsPage: (workerIndex: number) => AdminCountryReportsPage;
 	createAdminDocumentationPagesPage: (workerIndex: number) => AdminDocumentationPagesPage;
+	createAdminGovernanceBodiesPage: (workerIndex: number) => AdminGovernanceBodiesPage;
+	createAdminInstitutionsPage: (workerIndex: number) => AdminInstitutionsPage;
+	createAdminInternalPagesPage: () => AdminInternalPagesPage;
+	createAdminNationalConsortiaPage: (workerIndex: number) => AdminNationalConsortiaPage;
 	createAdminPersonsPage: (workerIndex: number) => AdminPersonsPage;
 	createAdminProjectsPage: (workerIndex: number) => AdminProjectsPage;
+	createAdminReportingCampaignsPage: (workerIndex: number) => AdminReportingCampaignsPage;
 	createAdminServicesPage: (workerIndex: number) => AdminServicesPage;
 	createAdminSocialMediaPage: (workerIndex: number) => AdminSocialMediaPage;
 	createAdminUsersPage: (workerIndex: number) => AdminUsersPage;
+	createAdminWorkingGroupReportsPage: (workerIndex: number) => AdminWorkingGroupReportsPage;
 	createAdminWorkingGroupsPage: (workerIndex: number) => AdminWorkingGroupsPage;
 	createWebsiteDocumentsPoliciesPage: (workerIndex: number) => WebsiteDocumentsPoliciesPage;
 	createWebsiteEventsPage: (workerIndex: number) => WebsiteEventsPage;
@@ -134,12 +150,40 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 		await use(createIndexPage);
 	},
 
+	async createAdminCountriesPage({ page }, use) {
+		await use((workerIndex: number) => new AdminCountriesPage(page, workerIndex));
+	},
+
+	async createAdminCountryReportsPage({ page }, use) {
+		await use((workerIndex: number) => new AdminCountryReportsPage(page, workerIndex));
+	},
+
 	async createAdminDocumentationPagesPage({ page }, use) {
 		await use((workerIndex: number) => new AdminDocumentationPagesPage(page, workerIndex));
 	},
 
+	async createAdminGovernanceBodiesPage({ page }, use) {
+		await use((workerIndex: number) => new AdminGovernanceBodiesPage(page, workerIndex));
+	},
+
+	async createAdminInstitutionsPage({ page }, use) {
+		await use((workerIndex: number) => new AdminInstitutionsPage(page, workerIndex));
+	},
+
+	async createAdminInternalPagesPage({ page }, use) {
+		await use(() => new AdminInternalPagesPage(page));
+	},
+
+	async createAdminNationalConsortiaPage({ page }, use) {
+		await use((workerIndex: number) => new AdminNationalConsortiaPage(page, workerIndex));
+	},
+
 	async createAdminProjectsPage({ page }, use) {
 		await use((workerIndex: number) => new AdminProjectsPage(page, workerIndex));
+	},
+
+	async createAdminReportingCampaignsPage({ page }, use) {
+		await use((workerIndex: number) => new AdminReportingCampaignsPage(page, workerIndex));
 	},
 
 	async createAdminPersonsPage({ page }, use) {
@@ -156,6 +200,10 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 
 	async createAdminUsersPage({ page }, use) {
 		await use((workerIndex: number) => new AdminUsersPage(page, workerIndex));
+	},
+
+	async createAdminWorkingGroupReportsPage({ page }, use) {
+		await use((workerIndex: number) => new AdminWorkingGroupReportsPage(page, workerIndex));
 	},
 
 	async createAdminWorkingGroupsPage({ page }, use) {

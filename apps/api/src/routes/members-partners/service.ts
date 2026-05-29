@@ -291,6 +291,7 @@ async function getMemberObserverInstitutions(
 		},
 		columns: {
 			name: true,
+			ror: true,
 		},
 		with: {
 			entityVersion: {
@@ -319,6 +320,7 @@ async function getMemberObserverInstitutions(
 		},
 	})) as unknown as Array<{
 		name: string;
+		ror: string | null;
 		entityVersion: {
 			entity: {
 				slug: string;
@@ -337,6 +339,7 @@ async function getMemberObserverInstitutions(
 
 		return {
 			name: item.name,
+			ror: item.ror,
 			slug: item.entityVersion.entity.slug,
 			website,
 		};
@@ -366,6 +369,7 @@ async function getCooperatingPartnerInstitutions(
 		},
 		columns: {
 			name: true,
+			ror: true,
 		},
 		with: {
 			entityVersion: {
@@ -394,6 +398,7 @@ async function getCooperatingPartnerInstitutions(
 		},
 	})) as unknown as Array<{
 		name: string;
+		ror: string | null;
 		entityVersion: {
 			entity: {
 				slug: string;
@@ -412,6 +417,7 @@ async function getCooperatingPartnerInstitutions(
 
 		return {
 			name: item.name,
+			ror: item.ror,
 			slug: item.entityVersion.entity.slug,
 			website,
 		};

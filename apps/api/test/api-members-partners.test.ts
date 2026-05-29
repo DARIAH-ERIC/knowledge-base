@@ -690,6 +690,7 @@ describe("members-partners", () => {
 				expect(data.institutions[0]).toMatchObject({
 					name: partnerInstitution.organisationalUnit.name,
 					slug: partnerInstitution.entity.slug,
+					ror: null,
 					website: null,
 				});
 				expect(data.contributors).toHaveLength(1);
@@ -714,6 +715,51 @@ describe("members-partners", () => {
 				});
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
+			});
+		});
+
+		it("should return ror for partner institutions", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const ror = "https://ror.org/05n09v162";
+
+				// items[0] = ERIC, items[1] = member country
+				const items = createItems(2);
+				await seed(db, items);
+
+				const ericItem = items[0]!;
+				const countryItem = items[1]!;
+
+				const institutionItems = createItems(1);
+				await seedPartnerInstitutions(
+					db,
+					ericItem.organisationalUnit.id,
+					countryItem.organisationalUnit.id,
+					institutionItems,
+				);
+				const institution = institutionItems[0]!;
+
+				await db
+					.update(schema.organisationalUnits)
+					.set({ ror })
+					.where(eq(schema.organisationalUnits.id, institution.organisationalUnit.id));
+
+				const response = await client["members-partners"][":id"].$get({
+					param: { id: countryItem.version.id },
+				});
+
+				expect(response.status).toBe(200);
+
+				const data = (await response.json()) as unknown as {
+					institutions: Array<{ name: string; ror: string | null }>;
+				};
+
+				expect(data.institutions).toHaveLength(1);
+				expect(data.institutions[0]).toMatchObject({
+					name: institution.organisationalUnit.name,
+					ror,
+				});
 			});
 		});
 

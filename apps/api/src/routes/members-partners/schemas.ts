@@ -68,6 +68,7 @@ export const PartnerInstitutionSchema = v.pipe(
 	v.object({
 		name: v.string(),
 		slug: v.string(),
+		ror: v.nullable(v.string()),
 		website: v.nullable(v.string()),
 	}),
 	v.description("Partner institution"),

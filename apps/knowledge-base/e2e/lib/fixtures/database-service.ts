@@ -188,6 +188,178 @@ export class DatabaseService {
 		return rows;
 	}
 
+	async getInstitutionByName(name: string): Promise<{
+		acronym: string | null;
+		documentId: string;
+		id: string;
+		imageId: string | null;
+		name: string;
+		ror: string | null;
+		summary: string | null;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				acronym: schema.organisationalUnits.acronym,
+				documentId: schema.entityVersions.entityId,
+				id: schema.organisationalUnits.id,
+				imageId: schema.organisationalUnits.imageId,
+				name: schema.organisationalUnits.name,
+				ror: schema.organisationalUnits.ror,
+				summary: schema.organisationalUnits.summary,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					eq(schema.organisationalUnits.name, name),
+					eq(schema.organisationalUnitTypes.type, "institution"),
+				),
+			)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getInstitutionDescriptionByName(name: string): Promise<unknown> {
+		const institution = await this.getInstitutionByName(name);
+		if (institution == null) {
+			return null;
+		}
+		return this.getOrganisationalUnitDescriptionByVersionId(institution.id);
+	}
+
+	async getCountryByName(name: string): Promise<{
+		acronym: string | null;
+		documentId: string;
+		id: string;
+		imageId: string | null;
+		name: string;
+		summary: string | null;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				acronym: schema.organisationalUnits.acronym,
+				documentId: schema.entityVersions.entityId,
+				id: schema.organisationalUnits.id,
+				imageId: schema.organisationalUnits.imageId,
+				name: schema.organisationalUnits.name,
+				summary: schema.organisationalUnits.summary,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					eq(schema.organisationalUnits.name, name),
+					eq(schema.organisationalUnitTypes.type, "country"),
+				),
+			)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getCountryDescriptionByName(name: string): Promise<unknown> {
+		const country = await this.getCountryByName(name);
+		if (country == null) {
+			return null;
+		}
+		return this.getOrganisationalUnitDescriptionByVersionId(country.id);
+	}
+
+	async getGovernanceBodyByName(name: string): Promise<{
+		acronym: string | null;
+		documentId: string;
+		id: string;
+		imageId: string | null;
+		name: string;
+		summary: string | null;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				acronym: schema.organisationalUnits.acronym,
+				documentId: schema.entityVersions.entityId,
+				id: schema.organisationalUnits.id,
+				imageId: schema.organisationalUnits.imageId,
+				name: schema.organisationalUnits.name,
+				summary: schema.organisationalUnits.summary,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					eq(schema.organisationalUnits.name, name),
+					eq(schema.organisationalUnitTypes.type, "governance_body"),
+				),
+			)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getGovernanceBodyDescriptionByName(name: string): Promise<unknown> {
+		const body = await this.getGovernanceBodyByName(name);
+		if (body == null) {
+			return null;
+		}
+		return this.getOrganisationalUnitDescriptionByVersionId(body.id);
+	}
+
+	async getNationalConsortiumByName(name: string): Promise<{
+		acronym: string | null;
+		documentId: string;
+		id: string;
+		imageId: string | null;
+		name: string;
+		sshocMarketplaceActorId: number | null;
+		summary: string | null;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				acronym: schema.organisationalUnits.acronym,
+				documentId: schema.entityVersions.entityId,
+				id: schema.organisationalUnits.id,
+				imageId: schema.organisationalUnits.imageId,
+				name: schema.organisationalUnits.name,
+				sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
+				summary: schema.organisationalUnits.summary,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					eq(schema.organisationalUnits.name, name),
+					eq(schema.organisationalUnitTypes.type, "national_consortium"),
+				),
+			)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getNationalConsortiumDescriptionByName(name: string): Promise<unknown> {
+		const consortium = await this.getNationalConsortiumByName(name);
+		if (consortium == null) {
+			return null;
+		}
+		return this.getOrganisationalUnitDescriptionByVersionId(consortium.id);
+	}
+
 	async getWorkingGroupByName(name: string): Promise<{
 		acronym: string | null;
 		documentId: string;
@@ -249,6 +421,91 @@ export class DatabaseService {
 			.limit(1);
 
 		return row?.content ?? null;
+	}
+
+	async getFirstInternalPage(): Promise<{
+		documentId: string;
+		id: string;
+		slug: string;
+		title: string;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				documentId: schema.entities.id,
+				id: schema.internalPages.id,
+				slug: schema.entities.slug,
+				title: schema.internalPages.title,
+			})
+			.from(schema.internalPages)
+			.innerJoin(schema.entityVersions, eq(schema.internalPages.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(eq(schema.entityStatus.type, "published"))
+			.orderBy(schema.internalPages.title)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getInternalPageByTitle(title: string): Promise<{
+		documentId: string;
+		id: string;
+		title: string;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				documentId: schema.entityVersions.entityId,
+				id: schema.internalPages.id,
+				title: schema.internalPages.title,
+			})
+			.from(schema.internalPages)
+			.innerJoin(schema.entityVersions, eq(schema.internalPages.id, schema.entityVersions.id))
+			.where(eq(schema.internalPages.title, title))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	/**
+	 * Discards the draft version of an internal page document if one exists. Reverts the page to its
+	 * last published state. Used in afterAll to undo edits made during e2e tests.
+	 */
+	async discardInternalPageDraft(documentId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const [draftRow] = await tx
+				.select({ id: schema.entityVersions.id })
+				.from(schema.entityVersions)
+				.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+				.where(
+					and(
+						eq(schema.entityVersions.entityId, documentId),
+						eq(schema.entityStatus.type, "draft"),
+					),
+				)
+				.limit(1);
+
+			if (draftRow == null) {
+				return;
+			}
+
+			const draftVersionId = draftRow.id;
+
+			const entityFields = await tx
+				.select({ id: schema.fields.id })
+				.from(schema.fields)
+				.where(eq(schema.fields.entityVersionId, draftVersionId));
+
+			if (entityFields.length > 0) {
+				const fieldIds = (entityFields as Array<{ id: string }>).map((f) => f.id);
+				await tx
+					.delete(schema.contentBlocks)
+					.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+				await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+			}
+
+			await tx.delete(schema.internalPages).where(eq(schema.internalPages.id, draftVersionId));
+			await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, draftVersionId));
+		});
 	}
 
 	async getPersonByName(name: string): Promise<{
@@ -548,6 +805,284 @@ export class DatabaseService {
 		return row;
 	}
 
+	async getWorkingGroupOption(): Promise<{ id: string; name: string }> {
+		const [row] = await this.db
+			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					eq(schema.organisationalUnitTypes.type, "working_group"),
+					eq(schema.entityStatus.type, "published"),
+				),
+			)
+			.orderBy(schema.organisationalUnits.name)
+			.limit(1);
+
+		if (row == null) {
+			throw new Error("Expected at least one working group for e2e tests.");
+		}
+
+		return row;
+	}
+
+	async createOpenCampaign(year: number): Promise<{ id: string }> {
+		const [campaign] = await this.db
+			.insert(schema.reportingCampaigns)
+			.values({ year, status: "open" })
+			.returning({ id: schema.reportingCampaigns.id });
+
+		if (campaign == null) {
+			throw new Error(`Failed to create open campaign for year ${String(year)}.`);
+		}
+
+		return campaign;
+	}
+
+	async getReportingCampaignByYear(
+		year: number,
+	): Promise<{ id: string; status: string; year: number } | null> {
+		const [row] = await this.db
+			.select({
+				id: schema.reportingCampaigns.id,
+				status: schema.reportingCampaigns.status,
+				year: schema.reportingCampaigns.year,
+			})
+			.from(schema.reportingCampaigns)
+			.where(eq(schema.reportingCampaigns.year, year))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getReportingCampaignById(
+		id: string,
+	): Promise<{ id: string; status: string; year: number } | null> {
+		const [row] = await this.db
+			.select({
+				id: schema.reportingCampaigns.id,
+				status: schema.reportingCampaigns.status,
+				year: schema.reportingCampaigns.year,
+			})
+			.from(schema.reportingCampaigns)
+			.where(eq(schema.reportingCampaigns.id, id))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async cleanupCampaignSubTables(id: string): Promise<void> {
+		const wgReportRows = await this.db
+			.select({ id: schema.workingGroupReports.id })
+			.from(schema.workingGroupReports)
+			.where(eq(schema.workingGroupReports.campaignId, id));
+
+		if (wgReportRows.length > 0) {
+			const wgReportIds = wgReportRows.map((r) => r.id);
+			await this.db
+				.delete(schema.workingGroupReportAnswers)
+				.where(inArray(schema.workingGroupReportAnswers.workingGroupReportId, wgReportIds));
+			await this.db
+				.delete(schema.workingGroupReportEvents)
+				.where(inArray(schema.workingGroupReportEvents.workingGroupReportId, wgReportIds));
+			await this.db
+				.delete(schema.workingGroupReportSocialMedia)
+				.where(inArray(schema.workingGroupReportSocialMedia.workingGroupReportId, wgReportIds));
+			await this.db
+				.delete(schema.workingGroupReports)
+				.where(inArray(schema.workingGroupReports.id, wgReportIds));
+		}
+
+		await this.db
+			.delete(schema.workingGroupReportQuestions)
+			.where(eq(schema.workingGroupReportQuestions.campaignId, id));
+
+		const countryReportRows = await this.db
+			.select({ id: schema.countryReports.id })
+			.from(schema.countryReports)
+			.where(eq(schema.countryReports.campaignId, id));
+
+		if (countryReportRows.length > 0) {
+			const countryReportIds = countryReportRows.map((r) => r.id);
+			await this.db
+				.delete(schema.countryReportContributions)
+				.where(inArray(schema.countryReportContributions.countryReportId, countryReportIds));
+			await this.db
+				.delete(schema.countryReportSocialMediaKpis)
+				.where(inArray(schema.countryReportSocialMediaKpis.countryReportId, countryReportIds));
+			await this.db
+				.delete(schema.countryReportServiceKpis)
+				.where(inArray(schema.countryReportServiceKpis.countryReportId, countryReportIds));
+			await this.db
+				.delete(schema.countryReportProjectContributions)
+				.where(inArray(schema.countryReportProjectContributions.countryReportId, countryReportIds));
+			await this.db
+				.delete(schema.countryReportInstitutions)
+				.where(inArray(schema.countryReportInstitutions.countryReportId, countryReportIds));
+			await this.db
+				.delete(schema.countryReports)
+				.where(inArray(schema.countryReports.id, countryReportIds));
+		}
+
+		await this.db
+			.delete(schema.reportingCampaignEventAmounts)
+			.where(eq(schema.reportingCampaignEventAmounts.campaignId, id));
+		await this.db
+			.delete(schema.reportingCampaignContributionAmounts)
+			.where(eq(schema.reportingCampaignContributionAmounts.campaignId, id));
+		await this.db
+			.delete(schema.reportingCampaignServiceSizes)
+			.where(eq(schema.reportingCampaignServiceSizes.campaignId, id));
+		await this.db
+			.delete(schema.reportingCampaignSocialMediaAmounts)
+			.where(eq(schema.reportingCampaignSocialMediaAmounts.campaignId, id));
+		await this.db
+			.delete(schema.reportingCampaignCountryThresholds)
+			.where(eq(schema.reportingCampaignCountryThresholds.campaignId, id));
+	}
+
+	async deleteReportingCampaign(id: string): Promise<void> {
+		await this.cleanupCampaignSubTables(id);
+		await this.db.delete(schema.reportingCampaigns).where(eq(schema.reportingCampaigns.id, id));
+	}
+
+	async getCampaignEventAmounts(
+		campaignId: string,
+	): Promise<Array<{ amount: number; eventType: string }>> {
+		return this.db
+			.select({
+				amount: schema.reportingCampaignEventAmounts.amount,
+				eventType: schema.reportingCampaignEventAmounts.eventType,
+			})
+			.from(schema.reportingCampaignEventAmounts)
+			.where(eq(schema.reportingCampaignEventAmounts.campaignId, campaignId));
+	}
+
+	async getCampaignContributionAmounts(
+		campaignId: string,
+	): Promise<Array<{ amount: number; roleType: string }>> {
+		return this.db
+			.select({
+				amount: schema.reportingCampaignContributionAmounts.amount,
+				roleType: schema.reportingCampaignContributionAmounts.roleType,
+			})
+			.from(schema.reportingCampaignContributionAmounts)
+			.where(eq(schema.reportingCampaignContributionAmounts.campaignId, campaignId));
+	}
+
+	async getCampaignServiceSizes(
+		campaignId: string,
+	): Promise<
+		Array<{ amount: number | null; serviceSize: string; visitsThreshold: number | null }>
+	> {
+		return this.db
+			.select({
+				amount: schema.reportingCampaignServiceSizes.amount,
+				serviceSize: schema.reportingCampaignServiceSizes.serviceSize,
+				visitsThreshold: schema.reportingCampaignServiceSizes.visitsThreshold,
+			})
+			.from(schema.reportingCampaignServiceSizes)
+			.where(eq(schema.reportingCampaignServiceSizes.campaignId, campaignId));
+	}
+
+	async getCampaignSocialMediaAmounts(
+		campaignId: string,
+	): Promise<Array<{ amount: number; category: string }>> {
+		return this.db
+			.select({
+				amount: schema.reportingCampaignSocialMediaAmounts.amount,
+				category: schema.reportingCampaignSocialMediaAmounts.category,
+			})
+			.from(schema.reportingCampaignSocialMediaAmounts)
+			.where(eq(schema.reportingCampaignSocialMediaAmounts.campaignId, campaignId));
+	}
+
+	async getCountryReportByCampaignAndCountry(
+		campaignId: string,
+		countryId: string,
+	): Promise<{ id: string; status: string } | null> {
+		const [row] = await this.db
+			.select({ id: schema.countryReports.id, status: schema.countryReports.status })
+			.from(schema.countryReports)
+			.where(
+				and(
+					eq(schema.countryReports.campaignId, campaignId),
+					eq(schema.countryReports.countryId, countryId),
+				),
+			)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getCountryReportById(
+		id: string,
+	): Promise<{ campaignId: string; countryId: string; id: string; status: string } | null> {
+		const [row] = await this.db
+			.select({
+				campaignId: schema.countryReports.campaignId,
+				countryId: schema.countryReports.countryId,
+				id: schema.countryReports.id,
+				status: schema.countryReports.status,
+			})
+			.from(schema.countryReports)
+			.where(eq(schema.countryReports.id, id))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async deleteCountryReport(id: string): Promise<void> {
+		await this.db.delete(schema.countryReports).where(eq(schema.countryReports.id, id));
+	}
+
+	async getWorkingGroupReportByCampaignAndGroup(
+		campaignId: string,
+		workingGroupId: string,
+	): Promise<{ id: string; status: string } | null> {
+		const [row] = await this.db
+			.select({ id: schema.workingGroupReports.id, status: schema.workingGroupReports.status })
+			.from(schema.workingGroupReports)
+			.where(
+				and(
+					eq(schema.workingGroupReports.campaignId, campaignId),
+					eq(schema.workingGroupReports.workingGroupId, workingGroupId),
+				),
+			)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getWorkingGroupReportById(id: string): Promise<{
+		campaignId: string;
+		id: string;
+		status: string;
+		workingGroupId: string;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				campaignId: schema.workingGroupReports.campaignId,
+				id: schema.workingGroupReports.id,
+				status: schema.workingGroupReports.status,
+				workingGroupId: schema.workingGroupReports.workingGroupId,
+			})
+			.from(schema.workingGroupReports)
+			.where(eq(schema.workingGroupReports.id, id))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async deleteWorkingGroupReport(id: string): Promise<void> {
+		await this.db.delete(schema.workingGroupReports).where(eq(schema.workingGroupReports.id, id));
+	}
+
 	async getUserByName(name: string): Promise<{
 		canManageAdmins: boolean;
 		email: string;
@@ -790,6 +1325,27 @@ export class DatabaseService {
 		const item = await this.getOpportunityByTitle(title);
 
 		return item != null ? this.getContentBlocksByVersionId(item.id) : [];
+	}
+
+	private async getOrganisationalUnitDescriptionByVersionId(versionId: string): Promise<unknown> {
+		const [row] = await this.db
+			.select({ content: sql<unknown>`${schema.richTextContentBlocks.content}` })
+			.from(schema.richTextContentBlocks)
+			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.where(
+				and(
+					eq(schema.fields.entityVersionId, versionId),
+					eq(schema.entityTypesFieldsNames.fieldName, "description"),
+				),
+			)
+			.limit(1);
+
+		return row?.content ?? null;
 	}
 
 	private async getContentBlocksByVersionId(
@@ -1272,6 +1828,223 @@ export class DatabaseService {
 
 		for (const item of items) {
 			await this.deleteWorkingGroup(item.id);
+		}
+	}
+
+	/**
+	 * Cascade-deletes an institution and all its related records. Replicates the logic in
+	 * `delete-institution.action.ts`.
+	 */
+	async deleteInstitution(versionId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const ids = await this.resolveVersion(tx, versionId);
+			if (ids == null) {
+				return;
+			}
+			const { documentId } = ids;
+
+			await tx
+				.delete(schema.organisationalUnitsToSocialMedia)
+				.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, versionId));
+			await tx
+				.delete(schema.personsToOrganisationalUnits)
+				.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, versionId));
+			await tx
+				.delete(schema.organisationalUnitsRelations)
+				.where(
+					or(
+						eq(schema.organisationalUnitsRelations.unitId, versionId),
+						eq(schema.organisationalUnitsRelations.relatedUnitId, versionId),
+					),
+				);
+
+			await tx
+				.delete(schema.organisationalUnits)
+				.where(eq(schema.organisationalUnits.id, versionId));
+
+			await this.deleteDocumentVersionTail(tx, versionId, documentId);
+		});
+	}
+
+	/**
+	 * Finds all institutions whose name starts with `[e2e-worker-{workerIndex}]` and deletes them.
+	 * Called in afterAll to ensure a clean state.
+	 */
+	async cleanupWorkerInstitutions(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const items = await this.db
+			.select({ id: schema.organisationalUnits.id })
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					sql`${schema.organisationalUnits.name} LIKE ${`${prefix}%`}`,
+					eq(schema.organisationalUnitTypes.type, "institution"),
+				),
+			);
+
+		for (const item of items) {
+			await this.deleteInstitution(item.id);
+		}
+	}
+
+	/** Cascade-deletes a country and all its related records. */
+	async deleteCountry(versionId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const ids = await this.resolveVersion(tx, versionId);
+			if (ids == null) {
+				return;
+			}
+			const { documentId } = ids;
+
+			await tx
+				.delete(schema.organisationalUnitsRelations)
+				.where(
+					or(
+						eq(schema.organisationalUnitsRelations.unitId, versionId),
+						eq(schema.organisationalUnitsRelations.relatedUnitId, versionId),
+					),
+				);
+
+			await tx
+				.delete(schema.organisationalUnits)
+				.where(eq(schema.organisationalUnits.id, versionId));
+
+			await this.deleteDocumentVersionTail(tx, versionId, documentId);
+		});
+	}
+
+	/**
+	 * Finds all countries whose name starts with `[e2e-worker-{workerIndex}]` and deletes them.
+	 * Called in afterAll to ensure a clean state.
+	 */
+	async cleanupWorkerCountries(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const items = await this.db
+			.select({ id: schema.organisationalUnits.id })
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					sql`${schema.organisationalUnits.name} LIKE ${`${prefix}%`}`,
+					eq(schema.organisationalUnitTypes.type, "country"),
+				),
+			);
+
+		for (const item of items) {
+			await this.deleteCountry(item.id);
+		}
+	}
+
+	/** Cascade-deletes a governance body and all its related records. */
+	async deleteGovernanceBody(versionId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const ids = await this.resolveVersion(tx, versionId);
+			if (ids == null) {
+				return;
+			}
+			const { documentId } = ids;
+
+			await tx
+				.delete(schema.organisationalUnitsRelations)
+				.where(
+					or(
+						eq(schema.organisationalUnitsRelations.unitId, versionId),
+						eq(schema.organisationalUnitsRelations.relatedUnitId, versionId),
+					),
+				);
+
+			await tx
+				.delete(schema.organisationalUnits)
+				.where(eq(schema.organisationalUnits.id, versionId));
+
+			await this.deleteDocumentVersionTail(tx, versionId, documentId);
+		});
+	}
+
+	/**
+	 * Finds all governance bodies whose name starts with `[e2e-worker-{workerIndex}]` and deletes
+	 * them. Called in afterAll to ensure a clean state.
+	 */
+	async cleanupWorkerGovernanceBodies(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const items = await this.db
+			.select({ id: schema.organisationalUnits.id })
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					sql`${schema.organisationalUnits.name} LIKE ${`${prefix}%`}`,
+					eq(schema.organisationalUnitTypes.type, "governance_body"),
+				),
+			);
+
+		for (const item of items) {
+			await this.deleteGovernanceBody(item.id);
+		}
+	}
+
+	/** Cascade-deletes a national consortium and all its related records. */
+	async deleteNationalConsortium(versionId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const ids = await this.resolveVersion(tx, versionId);
+			if (ids == null) {
+				return;
+			}
+			const { documentId } = ids;
+
+			await tx
+				.delete(schema.organisationalUnitsRelations)
+				.where(
+					or(
+						eq(schema.organisationalUnitsRelations.unitId, versionId),
+						eq(schema.organisationalUnitsRelations.relatedUnitId, versionId),
+					),
+				);
+
+			await tx
+				.delete(schema.organisationalUnits)
+				.where(eq(schema.organisationalUnits.id, versionId));
+
+			await this.deleteDocumentVersionTail(tx, versionId, documentId);
+		});
+	}
+
+	/**
+	 * Finds all national consortia whose name starts with `[e2e-worker-{workerIndex}]` and deletes
+	 * them. Called in afterAll to ensure a clean state.
+	 */
+	async cleanupWorkerNationalConsortiа(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const items = await this.db
+			.select({ id: schema.organisationalUnits.id })
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					sql`${schema.organisationalUnits.name} LIKE ${`${prefix}%`}`,
+					eq(schema.organisationalUnitTypes.type, "national_consortium"),
+				),
+			);
+
+		for (const item of items) {
+			await this.deleteNationalConsortium(item.id);
 		}
 	}
 
@@ -2163,6 +2936,10 @@ export class DatabaseService {
 			await this.cleanupWorkerNewsItems(workerIndex);
 			await this.cleanupWorkerPersons(workerIndex);
 			await this.cleanupWorkerWorkingGroups(workerIndex);
+			await this.cleanupWorkerInstitutions(workerIndex);
+			await this.cleanupWorkerCountries(workerIndex);
+			await this.cleanupWorkerGovernanceBodies(workerIndex);
+			await this.cleanupWorkerNationalConsortiа(workerIndex);
 			await this.cleanupWorkerServices(workerIndex);
 			await this.cleanupWorkerSocialMedia(workerIndex);
 			await this.cleanupWorkerUsers(workerIndex);
