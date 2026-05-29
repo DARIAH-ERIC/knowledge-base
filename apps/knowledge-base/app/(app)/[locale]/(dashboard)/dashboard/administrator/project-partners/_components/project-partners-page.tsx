@@ -126,7 +126,11 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 				<TableBody items={projectPartners.data}>
 					{(item) => (
 						<TableRow id={item.id}>
-							<TableCell>{item.projectAcronym ?? item.projectName}</TableCell>
+							<TableCell>
+								<div className="max-inline-64 truncate">
+									{item.projectAcronym ?? item.projectName}
+								</div>
+							</TableCell>
 							<TableCell>{formatValue(item.roleType)}</TableCell>
 							<TableCell>
 								<Badge intent={organisationalUnitTypeIntent(item.unitType)}>
