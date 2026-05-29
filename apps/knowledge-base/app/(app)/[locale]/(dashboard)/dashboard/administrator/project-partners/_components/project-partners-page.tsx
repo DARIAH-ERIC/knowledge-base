@@ -113,7 +113,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 						{t("Type")}
 					</TableColumn>
 					<TableColumn allowsSorting={true} id="unitName">
-						{t("Name")}
+						{t("Partner")}
 					</TableColumn>
 					<TableColumn allowsSorting={true} id="durationStart">
 						{t("From")}
@@ -126,7 +126,7 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 				<TableBody items={projectPartners.data}>
 					{(item) => (
 						<TableRow id={item.id}>
-							<TableCell>{item.projectName}</TableCell>
+							<TableCell>{item.projectAcronym ?? item.projectName}</TableCell>
 							<TableCell>{formatValue(item.roleType)}</TableCell>
 							<TableCell>
 								<Badge intent={organisationalUnitTypeIntent(item.unitType)}>

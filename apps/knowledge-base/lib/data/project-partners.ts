@@ -25,6 +25,7 @@ interface GetProjectPartnersParams {
 export interface ProjectPartnersResult {
 	data: Array<{
 		id: string;
+		projectAcronym: string | null;
 		projectName: string;
 		projectSlug: string;
 		roleType: string;
@@ -89,6 +90,7 @@ export async function getProjectPartners(
 		db
 			.select({
 				id: schema.projectsToOrganisationalUnits.id,
+				projectAcronym: schema.projects.acronym,
 				projectName: schema.projects.name,
 				projectSlug: schema.entities.slug,
 				roleType: schema.projectRoles.role,
@@ -148,6 +150,7 @@ export async function getProjectPartners(
 		data: rows.map((row) => {
 			return {
 				id: row.id,
+				projectAcronym: row.projectAcronym,
 				projectName: row.projectName,
 				projectSlug: row.projectSlug,
 				roleType: row.roleType,
