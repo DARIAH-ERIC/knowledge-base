@@ -226,7 +226,7 @@ export class DatabaseService {
 
 	async getInstitutionDescriptionByName(name: string): Promise<unknown> {
 		const institution = await this.getInstitutionByName(name);
-		if (institution == null) return null;
+		if (institution == null) {return null;}
 		return this.getOrganisationalUnitDescriptionByVersionId(institution.id);
 	}
 
@@ -266,7 +266,7 @@ export class DatabaseService {
 
 	async getCountryDescriptionByName(name: string): Promise<unknown> {
 		const country = await this.getCountryByName(name);
-		if (country == null) return null;
+		if (country == null) {return null;}
 		return this.getOrganisationalUnitDescriptionByVersionId(country.id);
 	}
 
@@ -306,7 +306,7 @@ export class DatabaseService {
 
 	async getGovernanceBodyDescriptionByName(name: string): Promise<unknown> {
 		const body = await this.getGovernanceBodyByName(name);
-		if (body == null) return null;
+		if (body == null) {return null;}
 		return this.getOrganisationalUnitDescriptionByVersionId(body.id);
 	}
 
@@ -348,7 +348,7 @@ export class DatabaseService {
 
 	async getNationalConsortiumDescriptionByName(name: string): Promise<unknown> {
 		const consortium = await this.getNationalConsortiumByName(name);
-		if (consortium == null) return null;
+		if (consortium == null) {return null;}
 		return this.getOrganisationalUnitDescriptionByVersionId(consortium.id);
 	}
 
