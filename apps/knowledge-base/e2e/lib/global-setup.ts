@@ -200,14 +200,13 @@ export default async function globalSetup(): Promise<void> {
 
 		// Pre-clean any `[e2e-worker-N]`-prefixed rows left behind by a previous run that died
 		// before its afterAll could finish, so the leak check in globalTeardown stays meaningful.
+		// `DatabaseService` reuses the same pool as `db` above (cached on `globalThis.__db`), so we
+		// must NOT close it here — `db.$client.end()` in the outer finally will close the shared
+		// pool, and a second `.end()` raises "Called end on pool more than once".
 		const { DatabaseService } = await import("./fixtures/database-service");
 		const dbService = new DatabaseService();
-		try {
-			await dbService.cleanupAllE2EWorkerLeaks();
-			log.info("[globalSetup] Pre-cleaned any leaked e2e-worker rows from prior runs.");
-		} finally {
-			await dbService.close();
-		}
+		await dbService.cleanupAllE2EWorkerLeaks();
+		log.info("[globalSetup] Pre-cleaned any leaked e2e-worker rows from prior runs.");
 	} finally {
 		await db.$client.end();
 	}
