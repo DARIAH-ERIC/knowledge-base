@@ -423,6 +423,91 @@ export class DatabaseService {
 		return row?.content ?? null;
 	}
 
+	async getFirstInternalPage(): Promise<{
+		documentId: string;
+		id: string;
+		slug: string;
+		title: string;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				documentId: schema.entities.id,
+				id: schema.internalPages.id,
+				slug: schema.entities.slug,
+				title: schema.internalPages.title,
+			})
+			.from(schema.internalPages)
+			.innerJoin(schema.entityVersions, eq(schema.internalPages.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(eq(schema.entityStatus.type, "published"))
+			.orderBy(schema.internalPages.title)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getInternalPageByTitle(title: string): Promise<{
+		documentId: string;
+		id: string;
+		title: string;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				documentId: schema.entityVersions.entityId,
+				id: schema.internalPages.id,
+				title: schema.internalPages.title,
+			})
+			.from(schema.internalPages)
+			.innerJoin(schema.entityVersions, eq(schema.internalPages.id, schema.entityVersions.id))
+			.where(eq(schema.internalPages.title, title))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	/**
+	 * Discards the draft version of an internal page document if one exists. Reverts the page to its
+	 * last published state. Used in afterAll to undo edits made during e2e tests.
+	 */
+	async discardInternalPageDraft(documentId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const [draftRow] = await tx
+				.select({ id: schema.entityVersions.id })
+				.from(schema.entityVersions)
+				.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+				.where(
+					and(
+						eq(schema.entityVersions.entityId, documentId),
+						eq(schema.entityStatus.type, "draft"),
+					),
+				)
+				.limit(1);
+
+			if (draftRow == null) {
+				return;
+			}
+
+			const draftVersionId = draftRow.id;
+
+			const entityFields = await tx
+				.select({ id: schema.fields.id })
+				.from(schema.fields)
+				.where(eq(schema.fields.entityVersionId, draftVersionId));
+
+			if (entityFields.length > 0) {
+				const fieldIds = (entityFields as Array<{ id: string }>).map((f) => f.id);
+				await tx
+					.delete(schema.contentBlocks)
+					.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+				await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+			}
+
+			await tx.delete(schema.internalPages).where(eq(schema.internalPages.id, draftVersionId));
+			await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, draftVersionId));
+		});
+	}
+
 	async getPersonByName(name: string): Promise<{
 		documentId: string;
 		email: string | null;
@@ -718,6 +803,213 @@ export class DatabaseService {
 		}
 
 		return row;
+	}
+
+	async getWorkingGroupOption(): Promise<{ id: string; name: string }> {
+		const [row] = await this.db
+			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					eq(schema.organisationalUnitTypes.type, "working_group"),
+					eq(schema.entityStatus.type, "published"),
+				),
+			)
+			.orderBy(schema.organisationalUnits.name)
+			.limit(1);
+
+		if (row == null) {
+			throw new Error("Expected at least one working group for e2e tests.");
+		}
+
+		return row;
+	}
+
+	async createOpenCampaign(year: number): Promise<{ id: string }> {
+		const [campaign] = await this.db
+			.insert(schema.reportingCampaigns)
+			.values({ year, status: "open" })
+			.returning({ id: schema.reportingCampaigns.id });
+
+		if (campaign == null) {
+			throw new Error(`Failed to create open campaign for year ${String(year)}.`);
+		}
+
+		return campaign;
+	}
+
+	async getReportingCampaignByYear(
+		year: number,
+	): Promise<{ id: string; status: string; year: number } | null> {
+		const [row] = await this.db
+			.select({
+				id: schema.reportingCampaigns.id,
+				status: schema.reportingCampaigns.status,
+				year: schema.reportingCampaigns.year,
+			})
+			.from(schema.reportingCampaigns)
+			.where(eq(schema.reportingCampaigns.year, year))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getReportingCampaignById(
+		id: string,
+	): Promise<{ id: string; status: string; year: number } | null> {
+		const [row] = await this.db
+			.select({
+				id: schema.reportingCampaigns.id,
+				status: schema.reportingCampaigns.status,
+				year: schema.reportingCampaigns.year,
+			})
+			.from(schema.reportingCampaigns)
+			.where(eq(schema.reportingCampaigns.id, id))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async deleteReportingCampaign(id: string): Promise<void> {
+		await this.db.delete(schema.reportingCampaigns).where(eq(schema.reportingCampaigns.id, id));
+	}
+
+	async getCampaignEventAmounts(
+		campaignId: string,
+	): Promise<Array<{ amount: number; eventType: string }>> {
+		return this.db
+			.select({
+				amount: schema.reportingCampaignEventAmounts.amount,
+				eventType: schema.reportingCampaignEventAmounts.eventType,
+			})
+			.from(schema.reportingCampaignEventAmounts)
+			.where(eq(schema.reportingCampaignEventAmounts.campaignId, campaignId));
+	}
+
+	async getCampaignContributionAmounts(
+		campaignId: string,
+	): Promise<Array<{ amount: number; roleType: string }>> {
+		return this.db
+			.select({
+				amount: schema.reportingCampaignContributionAmounts.amount,
+				roleType: schema.reportingCampaignContributionAmounts.roleType,
+			})
+			.from(schema.reportingCampaignContributionAmounts)
+			.where(eq(schema.reportingCampaignContributionAmounts.campaignId, campaignId));
+	}
+
+	async getCampaignServiceSizes(
+		campaignId: string,
+	): Promise<
+		Array<{ amount: number | null; serviceSize: string; visitsThreshold: number | null }>
+	> {
+		return this.db
+			.select({
+				amount: schema.reportingCampaignServiceSizes.amount,
+				serviceSize: schema.reportingCampaignServiceSizes.serviceSize,
+				visitsThreshold: schema.reportingCampaignServiceSizes.visitsThreshold,
+			})
+			.from(schema.reportingCampaignServiceSizes)
+			.where(eq(schema.reportingCampaignServiceSizes.campaignId, campaignId));
+	}
+
+	async getCampaignSocialMediaAmounts(
+		campaignId: string,
+	): Promise<Array<{ amount: number; category: string }>> {
+		return this.db
+			.select({
+				amount: schema.reportingCampaignSocialMediaAmounts.amount,
+				category: schema.reportingCampaignSocialMediaAmounts.category,
+			})
+			.from(schema.reportingCampaignSocialMediaAmounts)
+			.where(eq(schema.reportingCampaignSocialMediaAmounts.campaignId, campaignId));
+	}
+
+	async getCountryReportByCampaignAndCountry(
+		campaignId: string,
+		countryId: string,
+	): Promise<{ id: string; status: string } | null> {
+		const [row] = await this.db
+			.select({ id: schema.countryReports.id, status: schema.countryReports.status })
+			.from(schema.countryReports)
+			.where(
+				and(
+					eq(schema.countryReports.campaignId, campaignId),
+					eq(schema.countryReports.countryId, countryId),
+				),
+			)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getCountryReportById(
+		id: string,
+	): Promise<{ campaignId: string; countryId: string; id: string; status: string } | null> {
+		const [row] = await this.db
+			.select({
+				campaignId: schema.countryReports.campaignId,
+				countryId: schema.countryReports.countryId,
+				id: schema.countryReports.id,
+				status: schema.countryReports.status,
+			})
+			.from(schema.countryReports)
+			.where(eq(schema.countryReports.id, id))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async deleteCountryReport(id: string): Promise<void> {
+		await this.db.delete(schema.countryReports).where(eq(schema.countryReports.id, id));
+	}
+
+	async getWorkingGroupReportByCampaignAndGroup(
+		campaignId: string,
+		workingGroupId: string,
+	): Promise<{ id: string; status: string } | null> {
+		const [row] = await this.db
+			.select({ id: schema.workingGroupReports.id, status: schema.workingGroupReports.status })
+			.from(schema.workingGroupReports)
+			.where(
+				and(
+					eq(schema.workingGroupReports.campaignId, campaignId),
+					eq(schema.workingGroupReports.workingGroupId, workingGroupId),
+				),
+			)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getWorkingGroupReportById(id: string): Promise<{
+		campaignId: string;
+		id: string;
+		status: string;
+		workingGroupId: string;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				campaignId: schema.workingGroupReports.campaignId,
+				id: schema.workingGroupReports.id,
+				status: schema.workingGroupReports.status,
+				workingGroupId: schema.workingGroupReports.workingGroupId,
+			})
+			.from(schema.workingGroupReports)
+			.where(eq(schema.workingGroupReports.id, id))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async deleteWorkingGroupReport(id: string): Promise<void> {
+		await this.db.delete(schema.workingGroupReports).where(eq(schema.workingGroupReports.id, id));
 	}
 
 	async getUserByName(name: string): Promise<{
