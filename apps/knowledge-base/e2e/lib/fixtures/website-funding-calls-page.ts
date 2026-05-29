@@ -114,11 +114,22 @@ export class WebsiteFundingCallsPage {
 
 	async confirmDelete(dialog: Locator): Promise<void> {
 		await dialog.getByRole("button", { name: "Delete" }).click();
+		await dialog.waitFor({ state: "hidden" });
 	}
 
 	// ---------------------------------------------------------------------------
 	// Details page — navigation
 	// ---------------------------------------------------------------------------
+
+	async gotoEditFromList(title: string): Promise<void> {
+		await this.searchByTitle(title);
+		const row = this.rowByTitle(title);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			this.page.waitForURL("**/edit"),
+			this.page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+	}
 
 	async gotoDetailsFromList(title: string): Promise<void> {
 		const row = this.rowByTitle(title);

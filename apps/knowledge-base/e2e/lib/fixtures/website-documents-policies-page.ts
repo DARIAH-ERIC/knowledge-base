@@ -128,15 +128,30 @@ export class WebsiteDocumentsPoliciesPage {
 			.locator("xpath=ancestor::div[contains(@class, 'rounded-md')][1]");
 	}
 
+	async openEditDialog(title: string): Promise<void> {
+		await this.searchByTitle(title);
+		const row = this.rowByTitle(title);
+		await row.getByRole("button", { name: "Edit" }).click();
+		await this.page
+			.getByRole("dialog", { name: /Edit document or policy/i })
+			.waitFor({ state: "visible" });
+	}
+
+	async submitEditDialog(): Promise<void> {
+		const dialog = this.page.getByRole("dialog", { name: /Edit document or policy/i });
+		await dialog.getByRole("button", { name: /^Save/ }).click();
+		await dialog.waitFor({ state: "hidden" });
+	}
+
 	async openDeleteDialog(title: string): Promise<Locator> {
 		const row = this.rowByTitle(title);
-		await row.getByRole("button", { name: "Open actions menu" }).click();
-		await this.page.getByRole("menuitem", { name: "Delete" }).click();
+		await row.getByRole("button", { name: "Delete" }).click();
 		return this.page.getByRole("dialog", { name: /Delete document or policy/i });
 	}
 
 	async confirmDelete(dialog: Locator): Promise<void> {
 		await dialog.getByRole("button", { name: "Delete" }).click();
+		await dialog.waitFor({ state: "hidden" });
 	}
 
 	// ---------------------------------------------------------------------------
