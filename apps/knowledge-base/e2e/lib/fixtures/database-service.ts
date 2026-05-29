@@ -920,9 +920,7 @@ export class DatabaseService {
 				.where(inArray(schema.countryReportServiceKpis.countryReportId, countryReportIds));
 			await this.db
 				.delete(schema.countryReportProjectContributions)
-				.where(
-					inArray(schema.countryReportProjectContributions.countryReportId, countryReportIds),
-				);
+				.where(inArray(schema.countryReportProjectContributions.countryReportId, countryReportIds));
 			await this.db
 				.delete(schema.countryReportInstitutions)
 				.where(inArray(schema.countryReportInstitutions.countryReportId, countryReportIds));
