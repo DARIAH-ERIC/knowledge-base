@@ -71,11 +71,11 @@ export class AdminUsersPage {
 	async selectActor(label: "Person" | "Country", name: string): Promise<void> {
 		const control = this.page
 			.locator('[data-slot="control"]')
-			.filter({ has: this.page.locator("label").filter({ hasText: label }) })
-			.last();
+			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: label }) });
 
-		await control.getByRole("button").click();
-		await this.page.getByRole("searchbox", { name: "Search" }).fill(name);
+		// Trigger has aria-label="ui" (i18n build bug); target by aria-expanded instead.
+		await control.locator("button[aria-expanded]:not([slot])").click();
+		await this.page.getByRole("searchbox").fill(name);
 		await this.page.keyboard.press("Enter");
 		const option = this.page.getByRole("option", { name, exact: true });
 		await expect(option).toBeVisible();

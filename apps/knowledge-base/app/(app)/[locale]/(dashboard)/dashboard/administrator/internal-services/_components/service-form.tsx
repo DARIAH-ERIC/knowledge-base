@@ -165,8 +165,13 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 						selectedItems={selectedOrganisationalUnits}
 						value={selectedOwnerUnitIds}
 					/>
-					{selectedOwnerUnitIds.map((id) => (
-						<input key={id} name="ownerUnitIds" type="hidden" value={id} />
+					{selectedOwnerUnitIds.map((id, index) => (
+						<input
+							key={id}
+							name={`ownerUnitIds.${String(index)}`}
+							type="hidden"
+							value={id}
+						/>
 					))}
 
 					<AsyncMultipleSelect
@@ -180,8 +185,13 @@ export function ServiceForm(props: Readonly<ServiceFormProps>): ReactNode {
 						selectedItems={selectedOrganisationalUnits}
 						value={selectedProviderUnitIds}
 					/>
-					{selectedProviderUnitIds.map((id) => (
-						<input key={id} name="providerUnitIds" type="hidden" value={id} />
+					{selectedProviderUnitIds.map((id, index) => (
+						<input
+							key={id}
+							name={`providerUnitIds.${String(index)}`}
+							type="hidden"
+							value={id}
+						/>
 					))}
 				</FormSection>
 

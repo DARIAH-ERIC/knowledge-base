@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
+import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/website/funding-calls";
@@ -73,17 +74,7 @@ export class WebsiteFundingCallsPage {
 	}
 
 	async clearDatePicker(label: string): Promise<void> {
-		const group = this.page.getByRole("group", { name: label });
-		for (const segment of [
-			group.getByRole("spinbutton", { name: /day/i }),
-			group.getByRole("spinbutton", { name: /month/i }),
-			group.getByRole("spinbutton", { name: /year/i }),
-		]) {
-			await segment.click();
-			await this.page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
-			await this.page.keyboard.press("Backspace");
-		}
-		await this.page.keyboard.press("Tab");
+		await clearDateSegments(this.page, label);
 	}
 
 	async removeFirstContentBlock(): Promise<void> {

@@ -1,6 +1,7 @@
 import { type Locator, type Page, expect } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
+import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/administrator/projects";
@@ -117,31 +118,8 @@ export class AdminProjectsPage {
 		await this.page.getByRole("option").first().click();
 	}
 
-	async selectAsyncOption(label: string, name: string): Promise<void> {
-		const control = this.page
-			.locator('[data-slot="control"]')
-			.filter({ has: this.page.locator("label").filter({ hasText: label }) })
-			.last();
-		await control.getByRole("button").click();
-		await this.page.getByRole("searchbox", { name: "Search" }).fill(name);
-		await this.page.keyboard.press("Enter");
-		const option = this.page.getByRole("option", { name, exact: true });
-		await expect(option).toBeVisible();
-		await option.click();
-	}
-
 	async clearDatePicker(label: string): Promise<void> {
-		const group = this.page.getByRole("group", { name: label });
-		for (const segment of [
-			group.getByRole("spinbutton", { name: /day/i }),
-			group.getByRole("spinbutton", { name: /month/i }),
-			group.getByRole("spinbutton", { name: /year/i }),
-		]) {
-			await segment.click();
-			await this.page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
-			await this.page.keyboard.press("Backspace");
-		}
-		await this.page.keyboard.press("Tab");
+		await clearDateSegments(this.page, label);
 	}
 
 	async removeImage(): Promise<void> {
@@ -153,7 +131,8 @@ export class AdminProjectsPage {
 			.locator('[data-slot="control"]')
 			.filter({ has: this.page.getByText(label, { exact: true }) })
 			.last();
-		const removeButtons = control.getByRole("button", { name: "Remove tag" });
+		// Remove tag's aria-label extracts as "ui" (i18n build bug); match by slot="remove" instead.
+		const removeButtons = control.locator('button[slot="remove"]');
 		while ((await removeButtons.count()) > 0) {
 			await removeButtons.first().click();
 		}
@@ -173,8 +152,8 @@ export class AdminProjectsPage {
 		await dialog.getByLabel("URL").fill(url);
 		const typeControl = dialog
 			.locator('[data-slot="control"]')
-			.filter({ has: dialog.locator("label").filter({ hasText: "Type" }) });
-		await typeControl.getByRole("button").click();
+			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: "Type" }) });
+		await typeControl.locator("button[aria-expanded]:not([slot])").click();
 		await this.page.getByRole("option").first().click();
 		await dialog.getByRole("button", { name: "Create" }).click();
 		await dialog.waitFor({ state: "hidden" });
@@ -184,11 +163,19 @@ export class AdminProjectsPage {
 	async addPartner(unitName: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Add partner" }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Add partner" });
-		await this.selectAsyncOption("Organisation", unitName);
+		const organisationControl = dialog
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: "Organisation" }) });
+		await organisationControl.locator("button[aria-expanded]:not([slot])").click();
+		await this.page.getByRole("searchbox").fill(unitName);
+		await this.page.keyboard.press("Enter");
+		const option = this.page.getByRole("option", { name: unitName, exact: true });
+		await expect(option).toBeVisible();
+		await option.click();
 		const roleControl = dialog
 			.locator('[data-slot="control"]')
-			.filter({ has: dialog.locator("label").filter({ hasText: "Role" }) });
-		await roleControl.getByRole("button").click();
+			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: "Role" }) });
+		await roleControl.locator("button[aria-expanded]:not([slot])").click();
 		await this.page.getByRole("option").first().click();
 		await this.fillDatePicker("Start date (optional)", 2024, 3, 1);
 		await this.fillDatePicker("End date (optional)", 2024, 9, 30);

@@ -61,18 +61,22 @@ export class AdminServicesPage {
 	): Promise<void> {
 		const control = this.page
 			.locator('[data-slot="control"]')
-			.filter({ has: this.page.locator("label").filter({ hasText: label }) })
-			.first();
+			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: label }) });
 
-		await control.click();
-		await this.page.getByRole("searchbox", { name: "Search" }).fill(name);
+		// The chevron trigger's aria-label currently extracts as "ui" (i18n build bug in
+		// packages/ui), so target it by `aria-expanded` instead.
+		await control.locator("button[aria-expanded]:not([slot])").click();
+		await this.page.getByRole("searchbox").fill(name);
 		await this.page.keyboard.press("Enter");
 
 		const option = this.page.getByRole("option", { name, exact: true });
 		await expect(option).toBeVisible();
 		await option.click();
 		await expect(control.getByText(name, { exact: true })).toBeVisible();
-		await this.page.keyboard.press("Escape");
+		// Multi-select popover stays open after picking an item; toggle the trigger (force, since the
+		// popover overlay intercepts pointer events) to dismiss it.
+		await control.locator("button[aria-expanded]:not([slot])").click({ force: true });
+		await expect(this.page.getByRole("listbox", { name: label })).toBeHidden();
 	}
 
 	async selectServiceOwner(name: string): Promise<void> {
@@ -116,11 +120,18 @@ export class AdminServicesPage {
 	): Promise<void> {
 		const control = this.page
 			.locator('[data-slot="control"]')
-			.filter({ has: this.page.locator("label").filter({ hasText: label }) })
-			.first();
-		const removeButtons = control.getByRole("button", { name: "Remove tag" });
+			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: label }) });
+		// Remove tag's aria-label extracts as "ui" (i18n build bug); match by slot="remove" instead.
+		// The Remove button is inside the AsyncMultipleSelect's DialogTrigger, so clicking it also
+		// toggles the popover open. Close it after each removal so subsequent clicks aren't blocked.
+		const removeButtons = control.locator('button[slot="remove"]');
 		while ((await removeButtons.count()) > 0) {
 			await removeButtons.first().click();
+			const trigger = control.locator('button[aria-expanded]:not([slot])');
+			if ((await trigger.getAttribute("aria-expanded")) === "true") {
+				await trigger.click({ force: true });
+				await expect(this.page.getByRole("listbox", { name: label })).toBeHidden();
+			}
 		}
 	}
 
