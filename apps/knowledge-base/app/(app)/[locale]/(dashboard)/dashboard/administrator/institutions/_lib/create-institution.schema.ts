@@ -4,6 +4,7 @@ import * as v from "valibot";
 export const CreateInstitutionActionInputSchema = v.object({
 	...v.pick(OrganisationalUnitInsertSchema, ["name", "summary"]).entries,
 	acronym: v.optional(v.pipe(v.string(), v.nonEmpty())),
+	ror: v.optional(v.pipe(v.string(), v.nonEmpty())),
 	imageKey: v.optional(v.pipe(v.string(), v.nonEmpty())),
 	description: v.pipe(v.string(), v.nonEmpty()),
 	relatedEntityIds: v.optional(v.array(v.pipe(v.string(), v.uuid())), []),

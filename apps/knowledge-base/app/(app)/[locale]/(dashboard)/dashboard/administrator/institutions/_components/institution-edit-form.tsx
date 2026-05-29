@@ -18,7 +18,7 @@ interface InstitutionEditFormProps {
 	documentId: string;
 	hasDraftChanges: boolean;
 	isPublished: boolean;
-	institution: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
+	institution: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "ror" | "summary"> & {
 		description?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };

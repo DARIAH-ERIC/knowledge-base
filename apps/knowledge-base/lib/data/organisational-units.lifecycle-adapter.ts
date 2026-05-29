@@ -8,6 +8,7 @@ export const organisationalUnitsLifecycleAdapter: EntityLifecycleAdapter = {
 		const [source] = await tx
 			.select({
 				acronym: schema.organisationalUnits.acronym,
+				ror: schema.organisationalUnits.ror,
 				imageId: schema.organisationalUnits.imageId,
 				metadata: schema.organisationalUnits.metadata,
 				name: schema.organisationalUnits.name,
@@ -75,6 +76,7 @@ export const organisationalUnitsLifecycleAdapter: EntityLifecycleAdapter = {
 		const [source] = await tx
 			.select({
 				acronym: schema.organisationalUnits.acronym,
+				ror: schema.organisationalUnits.ror,
 				imageId: schema.organisationalUnits.imageId,
 				metadata: schema.organisationalUnits.metadata,
 				name: schema.organisationalUnits.name,
