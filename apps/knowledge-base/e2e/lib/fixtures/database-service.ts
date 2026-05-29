@@ -188,6 +188,170 @@ export class DatabaseService {
 		return rows;
 	}
 
+	async getInstitutionByName(name: string): Promise<{
+		acronym: string | null;
+		documentId: string;
+		id: string;
+		imageId: string | null;
+		name: string;
+		ror: string | null;
+		summary: string | null;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				acronym: schema.organisationalUnits.acronym,
+				documentId: schema.entityVersions.entityId,
+				id: schema.organisationalUnits.id,
+				imageId: schema.organisationalUnits.imageId,
+				name: schema.organisationalUnits.name,
+				ror: schema.organisationalUnits.ror,
+				summary: schema.organisationalUnits.summary,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					eq(schema.organisationalUnits.name, name),
+					eq(schema.organisationalUnitTypes.type, "institution"),
+				),
+			)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getInstitutionDescriptionByName(name: string): Promise<unknown> {
+		const institution = await this.getInstitutionByName(name);
+		if (institution == null) return null;
+		return this.getOrganisationalUnitDescriptionByVersionId(institution.id);
+	}
+
+	async getCountryByName(name: string): Promise<{
+		acronym: string | null;
+		documentId: string;
+		id: string;
+		imageId: string | null;
+		name: string;
+		summary: string | null;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				acronym: schema.organisationalUnits.acronym,
+				documentId: schema.entityVersions.entityId,
+				id: schema.organisationalUnits.id,
+				imageId: schema.organisationalUnits.imageId,
+				name: schema.organisationalUnits.name,
+				summary: schema.organisationalUnits.summary,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					eq(schema.organisationalUnits.name, name),
+					eq(schema.organisationalUnitTypes.type, "country"),
+				),
+			)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getCountryDescriptionByName(name: string): Promise<unknown> {
+		const country = await this.getCountryByName(name);
+		if (country == null) return null;
+		return this.getOrganisationalUnitDescriptionByVersionId(country.id);
+	}
+
+	async getGovernanceBodyByName(name: string): Promise<{
+		acronym: string | null;
+		documentId: string;
+		id: string;
+		imageId: string | null;
+		name: string;
+		summary: string | null;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				acronym: schema.organisationalUnits.acronym,
+				documentId: schema.entityVersions.entityId,
+				id: schema.organisationalUnits.id,
+				imageId: schema.organisationalUnits.imageId,
+				name: schema.organisationalUnits.name,
+				summary: schema.organisationalUnits.summary,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					eq(schema.organisationalUnits.name, name),
+					eq(schema.organisationalUnitTypes.type, "governance_body"),
+				),
+			)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getGovernanceBodyDescriptionByName(name: string): Promise<unknown> {
+		const body = await this.getGovernanceBodyByName(name);
+		if (body == null) return null;
+		return this.getOrganisationalUnitDescriptionByVersionId(body.id);
+	}
+
+	async getNationalConsortiumByName(name: string): Promise<{
+		acronym: string | null;
+		documentId: string;
+		id: string;
+		imageId: string | null;
+		name: string;
+		sshocMarketplaceActorId: number | null;
+		summary: string | null;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				acronym: schema.organisationalUnits.acronym,
+				documentId: schema.entityVersions.entityId,
+				id: schema.organisationalUnits.id,
+				imageId: schema.organisationalUnits.imageId,
+				name: schema.organisationalUnits.name,
+				sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
+				summary: schema.organisationalUnits.summary,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					eq(schema.organisationalUnits.name, name),
+					eq(schema.organisationalUnitTypes.type, "national_consortium"),
+				),
+			)
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getNationalConsortiumDescriptionByName(name: string): Promise<unknown> {
+		const consortium = await this.getNationalConsortiumByName(name);
+		if (consortium == null) return null;
+		return this.getOrganisationalUnitDescriptionByVersionId(consortium.id);
+	}
+
 	async getWorkingGroupByName(name: string): Promise<{
 		acronym: string | null;
 		documentId: string;
@@ -792,6 +956,27 @@ export class DatabaseService {
 		return item != null ? this.getContentBlocksByVersionId(item.id) : [];
 	}
 
+	private async getOrganisationalUnitDescriptionByVersionId(versionId: string): Promise<unknown> {
+		const [row] = await this.db
+			.select({ content: sql<unknown>`${schema.richTextContentBlocks.content}` })
+			.from(schema.richTextContentBlocks)
+			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.where(
+				and(
+					eq(schema.fields.entityVersionId, versionId),
+					eq(schema.entityTypesFieldsNames.fieldName, "description"),
+				),
+			)
+			.limit(1);
+
+		return row?.content ?? null;
+	}
+
 	private async getContentBlocksByVersionId(
 		versionId: string,
 	): Promise<Array<{ type: string; position: number; content: unknown }>> {
@@ -1272,6 +1457,223 @@ export class DatabaseService {
 
 		for (const item of items) {
 			await this.deleteWorkingGroup(item.id);
+		}
+	}
+
+	/**
+	 * Cascade-deletes an institution and all its related records. Replicates the logic in
+	 * `delete-institution.action.ts`.
+	 */
+	async deleteInstitution(versionId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const ids = await this.resolveVersion(tx, versionId);
+			if (ids == null) {
+				return;
+			}
+			const { documentId } = ids;
+
+			await tx
+				.delete(schema.organisationalUnitsToSocialMedia)
+				.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, versionId));
+			await tx
+				.delete(schema.personsToOrganisationalUnits)
+				.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, versionId));
+			await tx
+				.delete(schema.organisationalUnitsRelations)
+				.where(
+					or(
+						eq(schema.organisationalUnitsRelations.unitId, versionId),
+						eq(schema.organisationalUnitsRelations.relatedUnitId, versionId),
+					),
+				);
+
+			await tx
+				.delete(schema.organisationalUnits)
+				.where(eq(schema.organisationalUnits.id, versionId));
+
+			await this.deleteDocumentVersionTail(tx, versionId, documentId);
+		});
+	}
+
+	/**
+	 * Finds all institutions whose name starts with `[e2e-worker-{workerIndex}]` and deletes them.
+	 * Called in afterAll to ensure a clean state.
+	 */
+	async cleanupWorkerInstitutions(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const items = await this.db
+			.select({ id: schema.organisationalUnits.id })
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					sql`${schema.organisationalUnits.name} LIKE ${`${prefix}%`}`,
+					eq(schema.organisationalUnitTypes.type, "institution"),
+				),
+			);
+
+		for (const item of items) {
+			await this.deleteInstitution(item.id);
+		}
+	}
+
+	/** Cascade-deletes a country and all its related records. */
+	async deleteCountry(versionId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const ids = await this.resolveVersion(tx, versionId);
+			if (ids == null) {
+				return;
+			}
+			const { documentId } = ids;
+
+			await tx
+				.delete(schema.organisationalUnitsRelations)
+				.where(
+					or(
+						eq(schema.organisationalUnitsRelations.unitId, versionId),
+						eq(schema.organisationalUnitsRelations.relatedUnitId, versionId),
+					),
+				);
+
+			await tx
+				.delete(schema.organisationalUnits)
+				.where(eq(schema.organisationalUnits.id, versionId));
+
+			await this.deleteDocumentVersionTail(tx, versionId, documentId);
+		});
+	}
+
+	/**
+	 * Finds all countries whose name starts with `[e2e-worker-{workerIndex}]` and deletes them.
+	 * Called in afterAll to ensure a clean state.
+	 */
+	async cleanupWorkerCountries(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const items = await this.db
+			.select({ id: schema.organisationalUnits.id })
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					sql`${schema.organisationalUnits.name} LIKE ${`${prefix}%`}`,
+					eq(schema.organisationalUnitTypes.type, "country"),
+				),
+			);
+
+		for (const item of items) {
+			await this.deleteCountry(item.id);
+		}
+	}
+
+	/** Cascade-deletes a governance body and all its related records. */
+	async deleteGovernanceBody(versionId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const ids = await this.resolveVersion(tx, versionId);
+			if (ids == null) {
+				return;
+			}
+			const { documentId } = ids;
+
+			await tx
+				.delete(schema.organisationalUnitsRelations)
+				.where(
+					or(
+						eq(schema.organisationalUnitsRelations.unitId, versionId),
+						eq(schema.organisationalUnitsRelations.relatedUnitId, versionId),
+					),
+				);
+
+			await tx
+				.delete(schema.organisationalUnits)
+				.where(eq(schema.organisationalUnits.id, versionId));
+
+			await this.deleteDocumentVersionTail(tx, versionId, documentId);
+		});
+	}
+
+	/**
+	 * Finds all governance bodies whose name starts with `[e2e-worker-{workerIndex}]` and deletes
+	 * them. Called in afterAll to ensure a clean state.
+	 */
+	async cleanupWorkerGovernanceBodies(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const items = await this.db
+			.select({ id: schema.organisationalUnits.id })
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					sql`${schema.organisationalUnits.name} LIKE ${`${prefix}%`}`,
+					eq(schema.organisationalUnitTypes.type, "governance_body"),
+				),
+			);
+
+		for (const item of items) {
+			await this.deleteGovernanceBody(item.id);
+		}
+	}
+
+	/** Cascade-deletes a national consortium and all its related records. */
+	async deleteNationalConsortium(versionId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const ids = await this.resolveVersion(tx, versionId);
+			if (ids == null) {
+				return;
+			}
+			const { documentId } = ids;
+
+			await tx
+				.delete(schema.organisationalUnitsRelations)
+				.where(
+					or(
+						eq(schema.organisationalUnitsRelations.unitId, versionId),
+						eq(schema.organisationalUnitsRelations.relatedUnitId, versionId),
+					),
+				);
+
+			await tx
+				.delete(schema.organisationalUnits)
+				.where(eq(schema.organisationalUnits.id, versionId));
+
+			await this.deleteDocumentVersionTail(tx, versionId, documentId);
+		});
+	}
+
+	/**
+	 * Finds all national consortia whose name starts with `[e2e-worker-{workerIndex}]` and deletes
+	 * them. Called in afterAll to ensure a clean state.
+	 */
+	async cleanupWorkerNationalConsortiа(workerIndex: number): Promise<void> {
+		const prefix = `[e2e-worker-${String(workerIndex)}]`;
+
+		const items = await this.db
+			.select({ id: schema.organisationalUnits.id })
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.where(
+				and(
+					sql`${schema.organisationalUnits.name} LIKE ${`${prefix}%`}`,
+					eq(schema.organisationalUnitTypes.type, "national_consortium"),
+				),
+			);
+
+		for (const item of items) {
+			await this.deleteNationalConsortium(item.id);
 		}
 	}
 
@@ -2163,6 +2565,10 @@ export class DatabaseService {
 			await this.cleanupWorkerNewsItems(workerIndex);
 			await this.cleanupWorkerPersons(workerIndex);
 			await this.cleanupWorkerWorkingGroups(workerIndex);
+			await this.cleanupWorkerInstitutions(workerIndex);
+			await this.cleanupWorkerCountries(workerIndex);
+			await this.cleanupWorkerGovernanceBodies(workerIndex);
+			await this.cleanupWorkerNationalConsortiа(workerIndex);
 			await this.cleanupWorkerServices(workerIndex);
 			await this.cleanupWorkerSocialMedia(workerIndex);
 			await this.cleanupWorkerUsers(workerIndex);
