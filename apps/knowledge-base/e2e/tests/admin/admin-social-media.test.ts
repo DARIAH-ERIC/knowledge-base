@@ -93,6 +93,41 @@ test.describe("social media admin", () => {
 		expect(updated?.duration?.end).toStrictEqual(new Date("2025-11-30T00:00:00.000Z"));
 	});
 
+	test("should clear optional social media dates", async ({
+		page,
+		createAdminSocialMediaPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const socialMediaPage = createAdminSocialMediaPage(workerIndex);
+		const originalName = `${socialMediaPage.workerPrefix} Clear Optional ${randomUUID()}`;
+
+		await socialMediaPage.gotoCreate();
+		await socialMediaPage.fillName(originalName);
+		await socialMediaPage.fillUrl("https://example.com/social-clear");
+		await socialMediaPage.selectFirstType();
+		await socialMediaPage.fillDatePicker("Start date", 2024, 1, 15);
+		await socialMediaPage.fillDatePicker("End date", 2024, 12, 31);
+		await socialMediaPage.submitForm();
+
+		await socialMediaPage.searchByName(originalName);
+		const row = socialMediaPage.rowByName(originalName);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
+		const updatedName = `${socialMediaPage.workerPrefix} Cleared ${randomUUID()}`;
+		await page.getByLabel("Name", { exact: true }).fill(updatedName);
+		await socialMediaPage.clearDatePicker("Start date");
+		await socialMediaPage.clearDatePicker("End date");
+		await socialMediaPage.submitForm();
+
+		const updated = await db.getSocialMediaByName(updatedName);
+		expect(updated?.duration).toBeNull();
+	});
+
 	test("should delete a social media entry", async ({ createAdminSocialMediaPage }) => {
 		const workerIndex = test.info().workerIndex;
 		const socialMediaPage = createAdminSocialMediaPage(workerIndex);

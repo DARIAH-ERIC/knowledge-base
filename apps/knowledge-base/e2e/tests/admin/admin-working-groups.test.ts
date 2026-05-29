@@ -117,6 +117,49 @@ test.describe("working groups admin", () => {
 		);
 	});
 
+	test("should clear optional working group fields", async ({
+		page,
+		createAdminWorkingGroupsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const workingGroupsPage = createAdminWorkingGroupsPage(workerIndex);
+		const originalName = `${workingGroupsPage.workerPrefix} Clear Optional ${randomUUID()}`;
+
+		await workingGroupsPage.gotoCreate();
+		await workingGroupsPage.fillName(originalName);
+		await workingGroupsPage.fillAcronym("OPTWG");
+		await workingGroupsPage.fillSshocMarketplaceActorId(123459);
+		await workingGroupsPage.selectTestImage();
+		await workingGroupsPage.fillSummary("Optional working group summary");
+		await workingGroupsPage.fillDescription("Required description for clear test.");
+		await workingGroupsPage.submitForm();
+
+		await workingGroupsPage.searchByName(originalName);
+		const row = workingGroupsPage.rowByName(originalName);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
+		const updatedName = `${workingGroupsPage.workerPrefix} Cleared ${randomUUID()}`;
+		await page.getByLabel("Name", { exact: true }).fill(updatedName);
+		await workingGroupsPage.fillAcronym("");
+		await page.locator('input[name="sshocMarketplaceActorId"]').fill("");
+		await workingGroupsPage.fillSummary("");
+		await workingGroupsPage.removeImage();
+		await workingGroupsPage.submitForm();
+
+		const updated = await db.getWorkingGroupByName(updatedName);
+		expect(updated).toMatchObject({
+			acronym: null,
+			imageId: null,
+			sshocMarketplaceActorId: null,
+			summary: null,
+		});
+	});
+
 	test("should delete a working group", async ({ createAdminWorkingGroupsPage }) => {
 		const workerIndex = test.info().workerIndex;
 		const workingGroupsPage = createAdminWorkingGroupsPage(workerIndex);

@@ -1,6 +1,7 @@
 import { type Locator, type Page, expect } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
+import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/website/events";
@@ -56,6 +57,15 @@ export class WebsiteEventsPage {
 		}
 	}
 
+	async unsetFullDay(): Promise<void> {
+		const checkbox = this.page.getByRole("checkbox", { name: "Full day" });
+		if (await checkbox.isChecked()) {
+			await checkbox.focus();
+			await this.page.keyboard.press("Space");
+			await expect(checkbox).not.toBeChecked();
+		}
+	}
+
 	private contentBlockEditor(): Locator {
 		return this.page.getByRole("textbox", { name: "Content" });
 	}
@@ -98,6 +108,16 @@ export class WebsiteEventsPage {
 		await asset.click();
 		await dialog.getByRole("button", { name: "Select" }).click();
 		await dialog.waitFor({ state: "hidden" });
+	}
+
+	async clearDatePicker(label: string): Promise<void> {
+		await clearDateSegments(this.page, label);
+	}
+
+	async removeFirstContentBlock(): Promise<void> {
+		await this.page.getByRole("button", { name: "Remove block" }).first().click();
+		const dialog = this.page.getByRole("alertdialog", { name: "Remove block" });
+		await dialog.getByRole("button", { name: "Remove" }).click();
 	}
 
 	async submitForm(): Promise<void> {

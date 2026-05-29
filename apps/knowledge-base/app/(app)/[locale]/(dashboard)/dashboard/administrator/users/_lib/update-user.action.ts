@@ -36,14 +36,13 @@ export const updateUserAction = createMutationAction({
 		}
 
 		const isPrivilegedUser = existing.role === "admin" || input.role === "admin";
-		if (isPrivilegedUser && (ctx.user == null || !canManageAdminAccounts(ctx.user))) {
+		if (isPrivilegedUser && !canManageAdminAccounts(ctx.user)) {
 			return createActionStateError({
 				message: t("You are not allowed to change admin accounts."),
 			});
 		}
 
 		if (
-			ctx.user != null &&
 			ctx.user.id === input.id &&
 			isRemovingAdminManagementPrivilege(existing, {
 				role: input.role,

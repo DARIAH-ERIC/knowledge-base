@@ -6,15 +6,15 @@ export const UpdateServiceActionInputSchema = v.object({
 	statusId: v.pipe(v.string(), v.uuid()),
 	comment: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	dariahBranding: v.pipe(
-		v.optional(v.string()),
+		v.optional(v.string(), "false"),
 		v.transform((s) => s === "true"),
 	),
 	monitoring: v.pipe(
-		v.optional(v.string()),
+		v.optional(v.string(), "false"),
 		v.transform((s) => s === "true"),
 	),
 	privateSupplier: v.pipe(
-		v.optional(v.string()),
+		v.optional(v.string(), "false"),
 		v.transform((s) => s === "true"),
 	),
 	metadata: v.optional(v.pipe(v.looseObject({}))),

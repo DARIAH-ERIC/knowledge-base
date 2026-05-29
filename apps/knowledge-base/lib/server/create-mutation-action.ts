@@ -39,9 +39,14 @@ export interface MutationContext {
 	locale: IntlLocale;
 }
 
-export interface CreateMutationActionOptions<
+export interface AuthenticatedMutationContext extends MutationContext {
+	user: User;
+}
+
+interface BaseCreateMutationActionOptions<
 	TSchema extends v.GenericSchema,
-	TSuccessData = unknown,
+	TSuccessData,
+	TContext extends MutationContext,
 > {
 	schema: TSchema;
 	requireAdmin?: boolean;
@@ -58,13 +63,13 @@ export interface CreateMutationActionOptions<
 	mutate: (
 		tx: Transaction,
 		input: v.InferOutput<TSchema>,
-		ctx: MutationContext,
+		ctx: TContext,
 	) => Promise<MutationResult<TSuccessData>>;
 	/** Fire-and-forget work after the transaction commits (sync indexes, dispatch webhooks). */
 	postCommit?: (params: {
 		result: MutationResult<TSuccessData>;
 		input: v.InferOutput<TSchema>;
-		ctx: MutationContext;
+		ctx: TContext;
 	}) => Promise<void> | void;
 	/** One or more paths to revalidate (always with "layout" mode). */
 	revalidate?: string | ReadonlyArray<string>;
@@ -74,7 +79,7 @@ export interface CreateMutationActionOptions<
 		| ((params: {
 				result: MutationResult<TSuccessData>;
 				input: v.InferOutput<TSchema>;
-				ctx: MutationContext;
+				ctx: TContext;
 		  }) => string);
 	/**
 	 * Optional static success message returned when `redirect` is not set. For translated messages
@@ -89,9 +94,41 @@ export interface CreateMutationActionOptions<
 	 */
 	preCheck?: (params: {
 		input: v.InferOutput<TSchema>;
-		ctx: MutationContext;
+		ctx: TContext;
 	}) => Promise<ActionState | undefined>;
 }
+
+export interface CreateMutationActionOptions<
+	TSchema extends v.GenericSchema,
+	TSuccessData = unknown,
+> extends BaseCreateMutationActionOptions<TSchema, TSuccessData, MutationContext> {
+	requireAdmin?: false;
+	requireAuth?: false;
+}
+
+export interface CreateAuthenticatedMutationActionOptions<
+	TSchema extends v.GenericSchema,
+	TSuccessData = unknown,
+> extends BaseCreateMutationActionOptions<TSchema, TSuccessData, AuthenticatedMutationContext> {
+	requireAdmin?: boolean;
+	requireAuth: true;
+}
+
+export interface CreateAdminMutationActionOptions<
+	TSchema extends v.GenericSchema,
+	TSuccessData = unknown,
+> extends BaseCreateMutationActionOptions<TSchema, TSuccessData, AuthenticatedMutationContext> {
+	requireAdmin: true;
+	requireAuth?: boolean;
+}
+
+export type AnyCreateMutationActionOptions<
+	TSchema extends v.GenericSchema,
+	TSuccessData = unknown,
+> =
+	| CreateMutationActionOptions<TSchema, TSuccessData>
+	| CreateAuthenticatedMutationActionOptions<TSchema, TSuccessData>
+	| CreateAdminMutationActionOptions<TSchema, TSuccessData>;
 
 /**
  * Bundles the standard create/update server-action shape: rate-limit + auth + parse + transaction
@@ -100,7 +137,7 @@ export interface CreateMutationActionOptions<
  * mutation too.
  */
 export function createMutationAction<TSchema extends v.GenericSchema, TSuccessData = unknown>(
-	opts: CreateMutationActionOptions<TSchema, TSuccessData>,
+	opts: AnyCreateMutationActionOptions<TSchema, TSuccessData>,
 ): ServerAction {
 	return createServerAction(
 		{ requireAdmin: opts.requireAdmin, requireAuth: opts.requireAuth },
@@ -121,7 +158,7 @@ export function createMutationAction<TSchema extends v.GenericSchema, TSuccessDa
 			}
 
 			const input = parsed.output;
-			const ctx: MutationContext = { user, formData, locale };
+			const ctx = { user, formData, locale } as MutationContext & AuthenticatedMutationContext;
 
 			if (opts.preCheck != null) {
 				const preCheckResult = await opts.preCheck({ input, ctx });

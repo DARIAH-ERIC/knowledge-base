@@ -7,7 +7,7 @@ export const UpdateEventActionInputSchema = v.object({
 	documentId: v.pipe(v.string(), v.uuid()),
 	...v.pick(EventUpdateSchema, ["title", "summary", "location", "website"]).entries,
 	isFullDay: v.pipe(
-		v.optional(v.string()),
+		v.optional(v.string(), "false"),
 		v.transform((s) => s === "true"),
 	),
 	duration: v.object({
@@ -15,6 +15,7 @@ export const UpdateEventActionInputSchema = v.object({
 		end: v.optional(v.pipe(v.string(), v.isoDate(), v.toDate())),
 	}),
 	imageKey: v.pipe(v.string(), v.nonEmpty()),
+	website: v.nullish(v.pipe(v.string(), v.url()), null),
 	contentBlocks: v.optional(
 		v.array(v.pipe(v.string(), v.parseJson(), ContentBlockInputSchema)),
 		[],

@@ -1,10 +1,6 @@
 "use client";
 
-import {
-	type ActionState,
-	type GetValidationErrors,
-	createActionStateInitial,
-} from "@dariah-eric/next-lib/actions";
+import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Badge } from "@dariah-eric/ui/badge";
 import { Button } from "@dariah-eric/ui/button";
@@ -42,7 +38,6 @@ import {
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action";
-import type { CreateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.schema";
 import { endContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-contribution.action";
 import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
 
@@ -53,8 +48,6 @@ interface PersonRelationsSectionProps {
 	initialPersonItems: Array<AsyncOption>;
 	initialPersonTotal: number;
 }
-
-type ContributionValidationErrors = GetValidationErrors<typeof CreateContributionActionInputSchema>;
 
 async function fetchPersonOptionsPage(
 	params: Readonly<AsyncOptionsFetchPageParams>,
@@ -111,10 +104,7 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
 	const [isPending, startFormTransition] = useTransition();
 
-	const validationErrors =
-		state.status === "error"
-			? (state.validationErrors as ContributionValidationErrors | undefined)
-			: undefined;
+	const validationErrors = state.status === "error" ? state.validationErrors : undefined;
 	const selectedRoleOption = roleOptions.find((option) => option.roleTypeId === selectedRoleTypeId);
 
 	function formAction(formData: FormData) {

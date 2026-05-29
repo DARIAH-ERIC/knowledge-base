@@ -191,4 +191,44 @@ test.describe("website opportunities lifecycle", () => {
 		await page.waitForURL((url) => url.searchParams.get("version") == null);
 		await expect(page.getByText(updatedTitle)).toBeVisible();
 	});
+
+	test("should clear optional opportunity fields", async ({
+		page,
+		createWebsiteOpportunitiesPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const opportunitiesPage = createWebsiteOpportunitiesPage(workerIndex);
+		const title = `${opportunitiesPage.workerPrefix} Clear Optional ${randomUUID()}`;
+
+		await opportunitiesPage.gotoCreate();
+		await opportunitiesPage.fillTitle(title);
+		await opportunitiesPage.selectFirstSource();
+		await opportunitiesPage.fillSummary("Optional opportunity summary");
+		await opportunitiesPage.fillDatePicker("Start date", 2025, 6, 1);
+		await opportunitiesPage.fillDatePicker("End date", 2025, 7, 1);
+		await opportunitiesPage.fillWebsite("https://example.com/opportunity-clear");
+		await opportunitiesPage.addContentBlock("Optional opportunity content");
+		await opportunitiesPage.submitForm();
+
+		await opportunitiesPage.searchByTitle(title);
+		const row = opportunitiesPage.rowByTitle(title);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
+		await opportunitiesPage.fillSummary("");
+		await opportunitiesPage.fillWebsite("");
+		await opportunitiesPage.clearDatePicker("End date");
+		await opportunitiesPage.removeFirstContentBlock();
+		await opportunitiesPage.submitForm();
+
+		const updated = await db.getOpportunityByTitle(title);
+		expect(updated?.summary).toBeNull();
+		expect(updated?.website).toBeNull();
+		expect(updated?.duration.end).toBeUndefined();
+		expect(await db.getOpportunityContentBlocksByTitle(title)).toHaveLength(0);
+	});
 });

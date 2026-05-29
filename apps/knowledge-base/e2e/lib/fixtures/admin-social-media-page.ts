@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
+import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/administrator/social-media";
@@ -58,6 +59,10 @@ export class AdminSocialMediaPage {
 
 		await group.getByRole("spinbutton", { name: /year/i }).click();
 		await this.page.keyboard.type(String(year));
+	}
+
+	async clearDatePicker(label: string): Promise<void> {
+		await clearDateSegments(this.page, label);
 	}
 
 	async submitForm(): Promise<void> {

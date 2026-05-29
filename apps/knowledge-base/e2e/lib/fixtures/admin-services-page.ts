@@ -55,6 +55,40 @@ export class AdminServicesPage {
 		await this.page.locator('textarea[name="comment"]').fill(comment);
 	}
 
+	async selectOrganisationalUnit(
+		label: "Service owners" | "Service providers",
+		name: string,
+	): Promise<void> {
+		const control = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: label }) });
+
+		// The chevron trigger's aria-label currently extracts as "ui" (i18n build bug in
+		// packages/ui), so target it by `aria-expanded` instead.
+		await control.locator("button[aria-expanded]:not([slot])").click();
+		await this.page.getByRole("searchbox").fill(name);
+		await this.page.keyboard.press("Enter");
+
+		const option = this.page.getByRole("option", { name, exact: true });
+		await expect(option).toBeVisible();
+		await option.click();
+		await expect(control.getByText(name, { exact: true })).toBeVisible();
+		// Multi-select popover stays open after picking an item; toggle the trigger to dismiss it.
+		// `force` is required because the popover's modal overlay intercepts pointer events even
+		// over the trigger button itself.
+		// oxlint-disable-next-line playwright/no-force-option
+		await control.locator("button[aria-expanded]:not([slot])").click({ force: true });
+		await expect(this.page.getByRole("listbox", { name: label })).toBeHidden();
+	}
+
+	async selectServiceOwner(name: string): Promise<void> {
+		await this.selectOrganisationalUnit("Service owners", name);
+	}
+
+	async selectServiceProvider(name: string): Promise<void> {
+		await this.selectOrganisationalUnit("Service providers", name);
+	}
+
 	async setFlag(name: "dariahBranding" | "monitoring" | "privateSupplier"): Promise<void> {
 		const labelByName = {
 			dariahBranding: "DARIAH branding",
@@ -66,6 +100,43 @@ export class AdminServicesPage {
 			await checkbox.focus();
 			await this.page.keyboard.press("Space");
 			await expect(checkbox).toBeChecked();
+		}
+	}
+
+	async unsetFlag(name: "dariahBranding" | "monitoring" | "privateSupplier"): Promise<void> {
+		const labelByName = {
+			dariahBranding: "DARIAH branding",
+			monitoring: "Monitoring",
+			privateSupplier: "Private supplier",
+		} as const;
+		const checkbox = this.page.getByRole("checkbox", { name: labelByName[name] });
+		if (await checkbox.isChecked()) {
+			await checkbox.focus();
+			await this.page.keyboard.press("Space");
+			await expect(checkbox).not.toBeChecked();
+		}
+	}
+
+	async removeSelectedOrganisationalUnits(
+		label: "Service owners" | "Service providers",
+	): Promise<void> {
+		const control = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: label }) });
+		// Remove tag's aria-label extracts as "ui" (i18n build bug); match by slot="remove" instead.
+		// The Remove button is inside the AsyncMultipleSelect's DialogTrigger, so clicking it also
+		// toggles the popover open. Close it after each removal so subsequent clicks aren't blocked.
+		const removeButtons = control.locator('button[slot="remove"]');
+		while ((await removeButtons.count()) > 0) {
+			await removeButtons.first().click();
+			const trigger = control.locator("button[aria-expanded]:not([slot])");
+			if ((await trigger.getAttribute("aria-expanded")) === "true") {
+				// `force` for the same reason as in `selectOrganisationalUnit` — the popover
+				// overlay intercepts pointer events even over the trigger.
+				// oxlint-disable-next-line playwright/no-force-option
+				await trigger.click({ force: true });
+				await expect(this.page.getByRole("listbox", { name: label })).toBeHidden();
+			}
 		}
 	}
 

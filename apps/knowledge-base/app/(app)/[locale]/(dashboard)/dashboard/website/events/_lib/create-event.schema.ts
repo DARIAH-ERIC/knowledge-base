@@ -6,7 +6,7 @@ import { ContentBlockInputSchema } from "@/lib/content-block-input";
 export const CreateEventActionInputSchema = v.object({
 	...v.pick(EventInsertSchema, ["title", "summary", "location", "website"]).entries,
 	isFullDay: v.pipe(
-		v.optional(v.string()),
+		v.optional(v.string(), "false"),
 		v.transform((s) => s === "true"),
 	),
 	duration: v.object({

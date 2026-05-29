@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
+import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/website/opportunities";
@@ -82,6 +83,16 @@ export class WebsiteOpportunitiesPage {
 		const editor = this.contentBlockEditor();
 		await editor.clear();
 		await editor.fill(text);
+	}
+
+	async clearDatePicker(label: string): Promise<void> {
+		await clearDateSegments(this.page, label);
+	}
+
+	async removeFirstContentBlock(): Promise<void> {
+		await this.page.getByRole("button", { name: "Remove block" }).first().click();
+		const dialog = this.page.getByRole("alertdialog", { name: "Remove block" });
+		await dialog.getByRole("button", { name: "Remove" }).click();
 	}
 
 	async submitForm(): Promise<void> {

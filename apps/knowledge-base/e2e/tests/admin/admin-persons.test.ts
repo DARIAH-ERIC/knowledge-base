@@ -111,6 +111,38 @@ test.describe("persons admin", () => {
 		);
 	});
 
+	test("should clear optional person fields", async ({ page, createAdminPersonsPage, db }) => {
+		const workerIndex = test.info().workerIndex;
+		const personsPage = createAdminPersonsPage(workerIndex);
+		const originalName = `${personsPage.workerPrefix} Clear Optional ${randomUUID()}`;
+
+		await personsPage.gotoCreate();
+		await personsPage.fillName(originalName);
+		await personsPage.fillSortName("Optional, Clear");
+		await personsPage.fillEmail(`clear-${randomUUID()}@example.com`);
+		await personsPage.fillOrcid("0000-0002-1825-0097");
+		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await personsPage.fillBiography("Required biography for clear test.");
+		await personsPage.submitForm();
+
+		await personsPage.searchByName(originalName);
+		const row = personsPage.rowByName(originalName);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
+		const updatedName = `${personsPage.workerPrefix} Cleared ${randomUUID()}`;
+		await page.getByLabel("Name", { exact: true }).fill(updatedName);
+		await personsPage.fillEmail("");
+		await personsPage.fillOrcid("");
+		await personsPage.submitForm();
+
+		const updated = await db.getPersonByName(updatedName);
+		expect(updated).toMatchObject({ email: null, orcid: null });
+	});
+
 	test("failure injection forces createServerAction to return an error state", async ({
 		page,
 		createAdminPersonsPage,

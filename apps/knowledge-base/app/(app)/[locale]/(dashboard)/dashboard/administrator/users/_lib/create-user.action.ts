@@ -20,7 +20,7 @@ export const createUserAction = createMutationAction({
 	async preCheck({ input, ctx }) {
 		const t = await getExtracted();
 
-		if (input.role === "admin" && (ctx.user == null || !canManageAdminAccounts(ctx.user))) {
+		if (input.role === "admin" && !canManageAdminAccounts(ctx.user)) {
 			return createActionStateError({
 				message: t("You are not allowed to create admin users."),
 			});

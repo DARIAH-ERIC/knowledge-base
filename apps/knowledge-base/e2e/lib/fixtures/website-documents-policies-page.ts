@@ -1,6 +1,7 @@
 import { type Locator, type Page, expect } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
+import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/website/documents-policies";
@@ -39,6 +40,42 @@ export class WebsiteDocumentsPoliciesPage {
 		await this.page.getByLabel("Summary").fill(summary);
 	}
 
+	async fillUrl(url: string): Promise<void> {
+		await this.page.getByLabel("URL").fill(url);
+	}
+
+	async selectFirstGroup(): Promise<void> {
+		const groupControl = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.getByText("Group", { exact: true }) });
+		await groupControl.locator("button").click();
+		await this.page.getByRole("option").nth(1).click();
+	}
+
+	async selectNoGroup(): Promise<void> {
+		const groupControl = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.getByText("Group", { exact: true }) });
+		await groupControl.locator("button").click();
+		await this.page.getByRole("option", { name: "None", exact: true }).click();
+	}
+
+	private contentBlockEditor(): Locator {
+		return this.page.getByRole("textbox", { name: "Content" });
+	}
+
+	async addContentBlock(text: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Add block" }).click();
+		await this.page.getByRole("menuitem", { name: "Content" }).click();
+		await this.contentBlockEditor().fill(text);
+	}
+
+	async updateContentBlockText(text: string): Promise<void> {
+		const editor = this.contentBlockEditor();
+		await editor.clear();
+		await editor.fill(text);
+	}
+
 	async selectDocumentFromMediaLibrary(assetLabel: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Select image" }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Media library" });
@@ -50,6 +87,16 @@ export class WebsiteDocumentsPoliciesPage {
 		await dialog.waitFor({ state: "hidden" });
 		await this.page.getByText(assetLabel, { exact: true }).waitFor({ state: "visible" });
 		await expect(this.page.locator('input[name="documentKey"]')).not.toHaveValue("");
+	}
+
+	async clearDatePicker(label: string): Promise<void> {
+		await clearDateSegments(this.page, label);
+	}
+
+	async removeFirstContentBlock(): Promise<void> {
+		await this.page.getByRole("button", { name: "Remove block" }).first().click();
+		const dialog = this.page.getByRole("alertdialog", { name: "Remove block" });
+		await dialog.getByRole("button", { name: "Remove" }).click();
 	}
 
 	async submitForm(): Promise<void> {

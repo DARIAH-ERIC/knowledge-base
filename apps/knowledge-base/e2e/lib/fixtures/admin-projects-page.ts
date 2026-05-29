@@ -1,6 +1,7 @@
 import { type Locator, type Page, expect } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
+import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/administrator/projects";
@@ -106,6 +107,81 @@ export class AdminProjectsPage {
 		const editor = this.page.getByRole("textbox", { name: "Description" });
 		await editor.click();
 		await this.page.keyboard.type(text);
+	}
+
+	async selectFirstOptionInControl(label: string): Promise<void> {
+		const control = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.locator("label").filter({ hasText: label }) })
+			.last();
+		await control.getByRole("button").click();
+		await this.page.getByRole("option").first().click();
+	}
+
+	async clearDatePicker(label: string): Promise<void> {
+		await clearDateSegments(this.page, label);
+	}
+
+	async removeImage(): Promise<void> {
+		await this.page.getByRole("button", { name: "Remove image" }).click();
+	}
+
+	async removeAllTagsInControl(label: string): Promise<void> {
+		const control = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.getByText(label, { exact: true }) })
+			.last();
+		// Remove tag's aria-label extracts as "ui" (i18n build bug); match by slot="remove" instead.
+		const removeButtons = control.locator('button[slot="remove"]');
+		while ((await removeButtons.count()) > 0) {
+			await removeButtons.first().click();
+		}
+	}
+
+	async removeAllPartners(): Promise<void> {
+		const removeButtons = this.page.getByRole("button", { name: "Remove partner" });
+		while ((await removeButtons.count()) > 0) {
+			await removeButtons.first().click();
+		}
+	}
+
+	async createSocialMediaInForm(name: string, url: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Create social media" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Create social media" });
+		await dialog.getByLabel("Name", { exact: true }).fill(name);
+		await dialog.getByLabel("URL").fill(url);
+		const typeControl = dialog
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: "Type" }) });
+		await typeControl.locator("button[aria-expanded]:not([slot])").click();
+		await this.page.getByRole("option").first().click();
+		await dialog.getByRole("button", { name: "Create" }).click();
+		await dialog.waitFor({ state: "hidden" });
+		await expect(this.page.getByText(name, { exact: true })).toBeVisible();
+	}
+
+	async addPartner(unitName: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Add partner" }).click();
+		const dialog = this.page.getByRole("dialog", { name: "Add partner" });
+		const organisationControl = dialog
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: "Organisation" }) });
+		await organisationControl.locator("button[aria-expanded]:not([slot])").click();
+		await this.page.getByRole("searchbox").fill(unitName);
+		await this.page.keyboard.press("Enter");
+		const option = this.page.getByRole("option", { name: unitName, exact: true });
+		await expect(option).toBeVisible();
+		await option.click();
+		const roleControl = dialog
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: "Role" }) });
+		await roleControl.locator("button[aria-expanded]:not([slot])").click();
+		await this.page.getByRole("option").first().click();
+		await this.fillDatePicker("Start date (optional)", 2024, 3, 1);
+		await this.fillDatePicker("End date (optional)", 2024, 9, 30);
+		await dialog.getByRole("button", { name: "Add" }).click();
+		await dialog.waitFor({ state: "hidden" });
+		await expect(this.page.getByText(unitName, { exact: true })).toBeVisible();
 	}
 
 	async submitForm(): Promise<void> {

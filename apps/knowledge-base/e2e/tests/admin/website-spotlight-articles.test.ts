@@ -95,6 +95,35 @@ test.describe("website spotlight articles admin", () => {
 		expect(JSON.stringify(contentBlocks[0]!.content)).toContain(updatedContent);
 	});
 
+	test("should clear optional spotlight article content blocks", async ({
+		page,
+		createWebsiteSpotlightArticlesPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const spotlightArticlesPage = createWebsiteSpotlightArticlesPage(workerIndex);
+		const title = `${spotlightArticlesPage.workerPrefix} Clear Optional ${randomUUID()}`;
+
+		await spotlightArticlesPage.gotoCreate();
+		await spotlightArticlesPage.fillTitle(title);
+		await spotlightArticlesPage.fillSummary("Spotlight article with content to clear");
+		await spotlightArticlesPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await spotlightArticlesPage.addContentBlock("Optional spotlight article content");
+		await spotlightArticlesPage.submitForm();
+
+		await spotlightArticlesPage.searchByTitle(title);
+		const row = spotlightArticlesPage.rowByTitle(title);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+		await spotlightArticlesPage.removeFirstContentBlock();
+		await spotlightArticlesPage.submitForm();
+
+		expect(await db.getSpotlightArticleContentBlocksByTitle(title)).toHaveLength(0);
+	});
+
 	test("should delete a spotlight article", async ({ createWebsiteSpotlightArticlesPage }) => {
 		const workerIndex = test.info().workerIndex;
 		const spotlightArticlesPage = createWebsiteSpotlightArticlesPage(workerIndex);

@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import { type Locator, type Page, expect } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
@@ -41,6 +41,56 @@ export class AdminUsersPage {
 
 	async fillPassword(password: string): Promise<void> {
 		await this.page.getByLabel("Password").fill(password);
+	}
+
+	async selectRole(role: "Admin" | "User"): Promise<void> {
+		const control = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.getByText("Role", { exact: true }) });
+		await control.locator("button").click();
+		await this.page.getByRole("option", { name: role, exact: true }).click();
+	}
+
+	async setCanManageAdmins(): Promise<void> {
+		const checkbox = this.page.getByRole("checkbox", { name: "Can manage other admin users" });
+		if (!(await checkbox.isChecked())) {
+			await checkbox.focus();
+			await this.page.keyboard.press("Space");
+			await expect(checkbox).toBeChecked();
+		}
+	}
+
+	async selectActorType(actorType: "Person" | "Country" | "None"): Promise<void> {
+		const control = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.getByText("Link to", { exact: true }) });
+		await control.locator("button").click();
+		await this.page.getByRole("option", { name: actorType, exact: true }).click();
+	}
+
+	async selectActor(label: "Person" | "Country", name: string): Promise<void> {
+		const control = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: label }) });
+
+		// Trigger has aria-label="ui" (i18n build bug); target by aria-expanded instead.
+		await control.locator("button[aria-expanded]:not([slot])").click();
+		await this.page.getByRole("searchbox").fill(name);
+		await this.page.keyboard.press("Enter");
+		const option = this.page.getByRole("option", { name, exact: true });
+		await expect(option).toBeVisible();
+		await option.click();
+		await expect(control.getByText(name, { exact: true })).toBeVisible();
+	}
+
+	async selectPersonActor(name: string): Promise<void> {
+		await this.selectActorType("Person");
+		await this.selectActor("Person", name);
+	}
+
+	async selectCountryActor(name: string): Promise<void> {
+		await this.selectActorType("Country");
+		await this.selectActor("Country", name);
 	}
 
 	async submitForm(): Promise<void> {

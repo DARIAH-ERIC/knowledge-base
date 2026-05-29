@@ -14,7 +14,7 @@ export const createWorkingGroupReportEventAction = createMutationAction({
 	revalidate: "/[locale]/dashboard/reporting",
 
 	async preCheck({ input, ctx }) {
-		await assertCan(ctx.user!, "update", {
+		await assertCan(ctx.user, "update", {
 			type: "working_group_report",
 			id: input.workingGroupReportId,
 		});

@@ -363,6 +363,54 @@ export class DatabaseService {
 		return row ?? null;
 	}
 
+	async getProjectRole(): Promise<{ id: string; role: string }> {
+		const [role] = await this.db
+			.select({ id: schema.projectRoles.id, role: schema.projectRoles.role })
+			.from(schema.projectRoles)
+			.orderBy(schema.projectRoles.role)
+			.limit(1);
+
+		if (role == null) {
+			throw new Error("Expected at least one project role for e2e tests.");
+		}
+
+		return role;
+	}
+
+	async getProjectRelationsByName(name: string): Promise<{
+		partners: Array<{
+			duration: { start?: Date; end?: Date } | null;
+			roleId: string;
+			unitId: string;
+		}>;
+		socialMediaIds: Array<string>;
+	} | null> {
+		const project = await this.getProjectByName(name);
+
+		if (project == null) {
+			return null;
+		}
+
+		const partners = await this.db
+			.select({
+				duration: schema.projectsToOrganisationalUnits.duration,
+				roleId: schema.projectsToOrganisationalUnits.roleId,
+				unitId: schema.projectsToOrganisationalUnits.unitId,
+			})
+			.from(schema.projectsToOrganisationalUnits)
+			.where(eq(schema.projectsToOrganisationalUnits.projectId, project.id));
+
+		const socialMedia = await this.db
+			.select({ socialMediaId: schema.projectsToSocialMedia.socialMediaId })
+			.from(schema.projectsToSocialMedia)
+			.where(eq(schema.projectsToSocialMedia.projectId, project.id));
+
+		return {
+			partners,
+			socialMediaIds: socialMedia.map((item) => item.socialMediaId),
+		};
+	}
+
 	async getProjectDescriptionByName(name: string): Promise<unknown> {
 		const project = await this.getProjectByName(name);
 
@@ -397,7 +445,9 @@ export class DatabaseService {
 		metadata: unknown;
 		monitoring: boolean | null;
 		name: string;
+		ownerUnitIds: Array<string>;
 		privateSupplier: boolean | null;
+		providerUnitIds: Array<string>;
 		statusId: string;
 	} | null> {
 		const [row] = await this.db
@@ -415,7 +465,87 @@ export class DatabaseService {
 			.where(eq(schema.services.name, name))
 			.limit(1);
 
-		return row ?? null;
+		if (row == null) {
+			return null;
+		}
+
+		const unitRoleRows = await this.db
+			.select({
+				organisationalUnitId: schema.servicesToOrganisationalUnits.organisationalUnitId,
+				role: schema.organisationalUnitServiceRoles.role,
+			})
+			.from(schema.servicesToOrganisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitServiceRoles,
+				eq(schema.servicesToOrganisationalUnits.roleId, schema.organisationalUnitServiceRoles.id),
+			)
+			.where(eq(schema.servicesToOrganisationalUnits.serviceId, row.id));
+
+		const ownerUnitIds = unitRoleRows
+			.filter((unitRole) => unitRole.role === "service_owner")
+			.map((unitRole) => unitRole.organisationalUnitId);
+		const providerUnitIds = unitRoleRows
+			.filter((unitRole) => unitRole.role === "service_provider")
+			.map((unitRole) => unitRole.organisationalUnitId);
+
+		return { ...row, ownerUnitIds, providerUnitIds };
+	}
+
+	async getOrganisationalUnitOptions(limit = 4): Promise<Array<{ id: string; name: string }>> {
+		return this.db
+			.select({
+				id: schema.organisationalUnits.id,
+				name: schema.organisationalUnits.name,
+			})
+			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(eq(schema.entityStatus.type, "published"))
+			.orderBy(schema.organisationalUnits.name)
+			.limit(limit);
+	}
+
+	async getPersonOption(): Promise<{ id: string; name: string }> {
+		const [row] = await this.db
+			.select({ id: schema.persons.id, name: schema.persons.name })
+			.from(schema.persons)
+			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(eq(schema.entityStatus.type, "published"))
+			.orderBy(schema.persons.name)
+			.limit(1);
+
+		if (row == null) {
+			throw new Error("Expected at least one person for e2e tests.");
+		}
+
+		return row;
+	}
+
+	async getCountryOption(): Promise<{ id: string; name: string }> {
+		const [row] = await this.db
+			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+			.from(schema.organisationalUnits)
+			.innerJoin(
+				schema.organisationalUnitTypes,
+				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+			)
+			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
+			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.where(
+				and(
+					eq(schema.organisationalUnitTypes.type, "country"),
+					eq(schema.entityStatus.type, "published"),
+				),
+			)
+			.orderBy(schema.organisationalUnits.name)
+			.limit(1);
+
+		if (row == null) {
+			throw new Error("Expected at least one country for e2e tests.");
+		}
+
+		return row;
 	}
 
 	async getUserByName(name: string): Promise<{
@@ -1317,6 +1447,50 @@ export class DatabaseService {
 		return asset;
 	}
 
+	async getDocumentPolicyGroup(): Promise<{ id: string; label: string }> {
+		const [group] = await this.db
+			.select({ id: schema.documentPolicyGroups.id, label: schema.documentPolicyGroups.label })
+			.from(schema.documentPolicyGroups)
+			.orderBy(schema.documentPolicyGroups.position, schema.documentPolicyGroups.label)
+			.limit(1);
+
+		if (group == null) {
+			throw new Error("Expected at least one document policy group for e2e tests.");
+		}
+
+		return group;
+	}
+
+	async getDocumentOrPolicyByTitle(title: string): Promise<{
+		documentId: string;
+		groupId: string | null;
+		id: string;
+		summary: string;
+		url: string | null;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				documentId: schema.documentsPolicies.documentId,
+				groupId: schema.documentsPolicies.groupId,
+				id: schema.documentsPolicies.id,
+				summary: schema.documentsPolicies.summary,
+				url: schema.documentsPolicies.url,
+			})
+			.from(schema.documentsPolicies)
+			.where(eq(schema.documentsPolicies.title, title))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async getDocumentOrPolicyContentBlocksByTitle(
+		title: string,
+	): Promise<Array<{ type: string; position: number; content: unknown }>> {
+		const item = await this.getDocumentOrPolicyByTitle(title);
+
+		return item != null ? this.getContentBlocksByVersionId(item.id) : [];
+	}
+
 	/** Returns the first opportunity source from the database. */
 	async getOpportunitySource(): Promise<{ id: string; source: string }> {
 		const [source] = await this.db
@@ -1870,6 +2044,129 @@ export class DatabaseService {
 
 		for (const documentId of documentIds) {
 			await this.deleteOpportunityDocument(documentId);
+		}
+	}
+
+	/**
+	 * Pre-flight cleanup that wipes every leaked `[e2e-worker-N]`-prefixed row, across all worker
+	 * indices, by running every per-worker cleanup we have. Intended to be called from `globalSetup`
+	 * so that a worker which died abnormally in a previous run can't leave the DB in a state that
+	 * fails the leak check in `globalTeardown`.
+	 *
+	 * Approach: scan every tracked title/name column for the prefix, parse the worker index out of
+	 * each match, then fan all the existing per-worker cleanups out across that set.
+	 */
+	async cleanupAllE2EWorkerLeaks(): Promise<void> {
+		const indices = new Set<number>();
+		const pattern = /^\[e2e-worker-(\d+)\]/;
+		const collect = (identifier: string | null): void => {
+			const match = pattern.exec(identifier ?? "");
+			if (match?.[1] != null) {
+				indices.add(Number(match[1]));
+			}
+		};
+
+		for (const row of await this.db
+			.select({ identifier: schema.persons.name })
+			.from(schema.persons)
+			.where(sql`${schema.persons.name} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.projects.name })
+			.from(schema.projects)
+			.where(sql`${schema.projects.name} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.pages.title })
+			.from(schema.pages)
+			.where(sql`${schema.pages.title} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.impactCaseStudies.title })
+			.from(schema.impactCaseStudies)
+			.where(sql`${schema.impactCaseStudies.title} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.spotlightArticles.title })
+			.from(schema.spotlightArticles)
+			.where(sql`${schema.spotlightArticles.title} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.events.title })
+			.from(schema.events)
+			.where(sql`${schema.events.title} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.news.title })
+			.from(schema.news)
+			.where(sql`${schema.news.title} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.organisationalUnits.name })
+			.from(schema.organisationalUnits)
+			.where(sql`${schema.organisationalUnits.name} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.services.name })
+			.from(schema.services)
+			.where(sql`${schema.services.name} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.socialMedia.name })
+			.from(schema.socialMedia)
+			.where(sql`${schema.socialMedia.name} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.users.name })
+			.from(schema.users)
+			.where(sql`${schema.users.name} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.assets.label })
+			.from(schema.assets)
+			.where(sql`${schema.assets.label} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+
+		for (const workerIndex of indices) {
+			// Lifecycle subtypes first — they share the same backing tables as their non-lifecycle
+			// counterparts, but their cleanups follow the document-versioning rules.
+			await this.cleanupWorkerProjectsLifecycleItems(workerIndex);
+			await this.cleanupWorkerEventsLifecycleItems(workerIndex);
+			await this.cleanupWorkerNewsLifecycleItems(workerIndex);
+			await this.cleanupWorkerSpotlightArticlesLifecycleItems(workerIndex);
+			await this.cleanupWorkerImpactCaseStudiesLifecycleItems(workerIndex);
+			await this.cleanupWorkerPageItemsLifecycleItems(workerIndex);
+			await this.cleanupWorkerDocumentationPagesLifecycleItems(workerIndex);
+			await this.cleanupWorkerDocumentsPoliciesLifecycleItems(workerIndex);
+			await this.cleanupWorkerFundingCallsLifecycleItems(workerIndex);
+			await this.cleanupWorkerOpportunitiesLifecycleItems(workerIndex);
+			await this.cleanupWorkerPersonsLifecycleItems(workerIndex);
+
+			// Then the non-lifecycle / simple cleanups.
+			await this.cleanupWorkerProjects(workerIndex);
+			await this.cleanupWorkerPageItems(workerIndex);
+			await this.cleanupWorkerImpactCaseStudies(workerIndex);
+			await this.cleanupWorkerSpotlightArticles(workerIndex);
+			await this.cleanupWorkerEvents(workerIndex);
+			await this.cleanupWorkerNewsItems(workerIndex);
+			await this.cleanupWorkerPersons(workerIndex);
+			await this.cleanupWorkerWorkingGroups(workerIndex);
+			await this.cleanupWorkerServices(workerIndex);
+			await this.cleanupWorkerSocialMedia(workerIndex);
+			await this.cleanupWorkerUsers(workerIndex);
+			await this.cleanupWorkerAssets(workerIndex);
 		}
 	}
 

@@ -17,6 +17,7 @@ test.describe("projects admin", () => {
 
 	test.afterAll(async ({ db }, testInfo) => {
 		await db.cleanupWorkerProjects(testInfo.workerIndex);
+		await db.cleanupWorkerSocialMedia(testInfo.workerIndex);
 	});
 
 	test("should create a project", async ({ createAdminProjectsPage, db }) => {
@@ -30,7 +31,6 @@ test.describe("projects admin", () => {
 		const call = "E2E project call";
 		const summary = "E2E test project summary";
 		const description = "E2E test project description.";
-
 		await adminProjectsPage.gotoCreate();
 
 		await adminProjectsPage.fillName(projectName);
@@ -109,7 +109,6 @@ test.describe("projects admin", () => {
 		const updatedCall = "Updated E2E project call";
 		const updatedSummary = "Updated E2E test project summary";
 		const updatedDescription = "Updated E2E test project description.";
-
 		await page.getByRole("main").getByLabel("Name").fill(updatedName);
 		await adminProjectsPage.fillAcronym(updatedAcronym);
 		await adminProjectsPage.fillFunding(updatedFunding);
@@ -149,6 +148,115 @@ test.describe("projects admin", () => {
 		expect(JSON.stringify(await db.getProjectDescriptionByName(updatedName))).toContain(
 			updatedDescription,
 		);
+	});
+
+	test("should persist project relation fields", async ({ page, createAdminProjectsPage, db }) => {
+		const workerIndex = test.info().workerIndex;
+		const adminProjectsPage = createAdminProjectsPage(workerIndex);
+		const originalName = `${adminProjectsPage.workerPrefix} Relations ${randomUUID()}`;
+		const socialMediaName = `${adminProjectsPage.workerPrefix} Relation Project Social ${randomUUID()}`;
+		const socialMediaUrl = "https://example.com/project-social-relations";
+		const [partnerUnit] = await db.getOrganisationalUnitOptions(1);
+		expect(partnerUnit).toBeDefined();
+
+		await adminProjectsPage.gotoCreate();
+		await adminProjectsPage.fillName(originalName);
+		await adminProjectsPage.selectFirstScope();
+		await adminProjectsPage.fillDatePicker("Start date", 2024, 1, 15);
+		await adminProjectsPage.fillSummary("Project relation test");
+		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await adminProjectsPage.fillDescription("Description for relation test.");
+		await adminProjectsPage.submitForm();
+
+		await adminProjectsPage.searchByName(originalName);
+		const row = adminProjectsPage.projectRowByName(originalName);
+		await expect(row).toBeVisible();
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
+		const updatedName = `${adminProjectsPage.workerPrefix} Relations Updated ${randomUUID()}`;
+		await page.getByRole("main").getByLabel("Name").fill(updatedName);
+		await adminProjectsPage.createSocialMediaInForm(socialMediaName, socialMediaUrl);
+		await adminProjectsPage.addPartner(partnerUnit!.name);
+		await adminProjectsPage.submitForm();
+
+		const socialMedia = await db.getSocialMediaByName(socialMediaName);
+		expect(socialMedia).toMatchObject({ name: socialMediaName, url: socialMediaUrl });
+		const relations = await db.getProjectRelationsByName(updatedName);
+		expect(relations?.socialMediaIds).toContain(socialMedia!.id);
+		expect(relations?.partners).toStrictEqual([
+			expect.objectContaining({
+				duration: {
+					start: new Date("2024-03-01T00:00:00.000Z"),
+					end: new Date("2024-09-30T00:00:00.000Z"),
+				},
+				unitId: partnerUnit!.id,
+			}),
+		]);
+	});
+
+	test("should clear optional project fields", async ({ page, createAdminProjectsPage, db }) => {
+		const workerIndex = test.info().workerIndex;
+		const adminProjectsPage = createAdminProjectsPage(workerIndex);
+		const originalName = `${adminProjectsPage.workerPrefix} Clear Optional ${randomUUID()}`;
+		const socialMediaName = `${adminProjectsPage.workerPrefix} Clear Project Social ${randomUUID()}`;
+		const [partnerUnit] = await db.getOrganisationalUnitOptions(1);
+		expect(partnerUnit).toBeDefined();
+
+		await adminProjectsPage.gotoCreate();
+		await adminProjectsPage.fillName(originalName);
+		await adminProjectsPage.fillAcronym("OPT");
+		await adminProjectsPage.fillFunding(100);
+		await adminProjectsPage.fillTopic("Optional topic");
+		await adminProjectsPage.fillCall("Optional call");
+		await adminProjectsPage.selectFirstScope();
+		await adminProjectsPage.fillDatePicker("Start date", 2024, 1, 15);
+		await adminProjectsPage.fillDatePicker("End date", 2024, 12, 31);
+		await adminProjectsPage.fillSummary("Project with optional fields to clear");
+		await adminProjectsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await adminProjectsPage.fillDescription("Optional description to clear.");
+		await adminProjectsPage.createSocialMediaInForm(
+			socialMediaName,
+			"https://example.com/project-clear",
+		);
+		await adminProjectsPage.addPartner(partnerUnit!.name);
+		await adminProjectsPage.submitForm();
+
+		await adminProjectsPage.searchByName(originalName);
+		const row = adminProjectsPage.projectRowByName(originalName);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
+		const updatedName = `${adminProjectsPage.workerPrefix} Cleared ${randomUUID()}`;
+		await page.getByRole("main").getByLabel("Name").fill(updatedName);
+		await adminProjectsPage.fillAcronym("");
+		await adminProjectsPage.fillFunding(0);
+		await page.getByLabel("Funding").clear();
+		await adminProjectsPage.fillTopic("");
+		await adminProjectsPage.fillCall("");
+		await adminProjectsPage.clearDatePicker("End date");
+		await adminProjectsPage.removeImage();
+		await adminProjectsPage.removeAllTagsInControl("Social media");
+		await adminProjectsPage.removeAllPartners();
+		await adminProjectsPage.submitForm();
+
+		const updated = await db.getProjectByName(updatedName);
+		expect(updated).toMatchObject({
+			acronym: null,
+			call: null,
+			funding: null,
+			imageId: null,
+			topic: null,
+		});
+		expect(updated?.duration?.end).toBeUndefined();
+		const relations = await db.getProjectRelationsByName(updatedName);
+		expect(relations).toMatchObject({ partners: [], socialMediaIds: [] });
 	});
 
 	test("should delete a project", async ({ createAdminProjectsPage }) => {

@@ -175,4 +175,40 @@ test.describe("website funding calls lifecycle", () => {
 		await page.waitForURL((url) => url.searchParams.get("version") == null);
 		await expect(page.getByText(updatedTitle)).toBeVisible();
 	});
+
+	test("should clear optional funding call fields", async ({
+		page,
+		createWebsiteFundingCallsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const fundingCallsPage = createWebsiteFundingCallsPage(workerIndex);
+		const title = `${fundingCallsPage.workerPrefix} Clear Optional ${randomUUID()}`;
+
+		await fundingCallsPage.gotoCreate();
+		await fundingCallsPage.fillTitle(title);
+		await fundingCallsPage.fillSummary("Optional funding call summary");
+		await fundingCallsPage.fillDatePicker("Start date", 2025, 6, 1);
+		await fundingCallsPage.fillDatePicker("End date", 2025, 7, 1);
+		await fundingCallsPage.addContentBlock("Optional funding call content");
+		await fundingCallsPage.submitForm();
+
+		await fundingCallsPage.searchByTitle(title);
+		const row = fundingCallsPage.rowByTitle(title);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			page.waitForURL("**/edit"),
+			page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+
+		await fundingCallsPage.fillSummary("");
+		await fundingCallsPage.clearDatePicker("End date");
+		await fundingCallsPage.removeFirstContentBlock();
+		await fundingCallsPage.submitForm();
+
+		const updated = await db.getFundingCallByTitle(title);
+		expect(updated?.summary).toBeNull();
+		expect(updated?.duration.end).toBeUndefined();
+		expect(await db.getFundingCallContentBlocksByTitle(title)).toHaveLength(0);
+	});
 });
