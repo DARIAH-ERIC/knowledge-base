@@ -197,6 +197,17 @@ export default async function globalSetup(): Promise<void> {
 			canManageAdmins: false,
 			storageFile: "non-admin.json",
 		});
+
+		// Pre-clean any `[e2e-worker-N]`-prefixed rows left behind by a previous run that died
+		// before its afterAll could finish, so the leak check in globalTeardown stays meaningful.
+		const { DatabaseService } = await import("./fixtures/database-service");
+		const dbService = new DatabaseService();
+		try {
+			await dbService.cleanupAllE2EWorkerLeaks();
+			log.info("[globalSetup] Pre-cleaned any leaked e2e-worker rows from prior runs.");
+		} finally {
+			await dbService.close();
+		}
 	} finally {
 		await db.$client.end();
 	}

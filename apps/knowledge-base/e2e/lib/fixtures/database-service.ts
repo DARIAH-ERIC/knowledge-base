@@ -2047,6 +2047,129 @@ export class DatabaseService {
 		}
 	}
 
+	/**
+	 * Pre-flight cleanup that wipes every leaked `[e2e-worker-N]`-prefixed row, across all worker
+	 * indices, by running every per-worker cleanup we have. Intended to be called from `globalSetup`
+	 * so that a worker which died abnormally in a previous run can't leave the DB in a state that
+	 * fails the leak check in `globalTeardown`.
+	 *
+	 * Approach: scan every tracked title/name column for the prefix, parse the worker index out of
+	 * each match, then fan all the existing per-worker cleanups out across that set.
+	 */
+	async cleanupAllE2EWorkerLeaks(): Promise<void> {
+		const indices = new Set<number>();
+		const pattern = /^\[e2e-worker-(\d+)\]/;
+		const collect = (identifier: string | null): void => {
+			const match = pattern.exec(identifier ?? "");
+			if (match?.[1] != null) {
+				indices.add(Number(match[1]));
+			}
+		};
+
+		for (const row of await this.db
+			.select({ identifier: schema.persons.name })
+			.from(schema.persons)
+			.where(sql`${schema.persons.name} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.projects.name })
+			.from(schema.projects)
+			.where(sql`${schema.projects.name} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.pages.title })
+			.from(schema.pages)
+			.where(sql`${schema.pages.title} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.impactCaseStudies.title })
+			.from(schema.impactCaseStudies)
+			.where(sql`${schema.impactCaseStudies.title} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.spotlightArticles.title })
+			.from(schema.spotlightArticles)
+			.where(sql`${schema.spotlightArticles.title} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.events.title })
+			.from(schema.events)
+			.where(sql`${schema.events.title} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.news.title })
+			.from(schema.news)
+			.where(sql`${schema.news.title} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.organisationalUnits.name })
+			.from(schema.organisationalUnits)
+			.where(sql`${schema.organisationalUnits.name} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.services.name })
+			.from(schema.services)
+			.where(sql`${schema.services.name} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.socialMedia.name })
+			.from(schema.socialMedia)
+			.where(sql`${schema.socialMedia.name} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.users.name })
+			.from(schema.users)
+			.where(sql`${schema.users.name} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+		for (const row of await this.db
+			.select({ identifier: schema.assets.label })
+			.from(schema.assets)
+			.where(sql`${schema.assets.label} LIKE '[e2e-worker-%'`)) {
+			collect(row.identifier);
+		}
+
+		for (const workerIndex of indices) {
+			// Lifecycle subtypes first — they share the same backing tables as their non-lifecycle
+			// counterparts, but their cleanups follow the document-versioning rules.
+			await this.cleanupWorkerProjectsLifecycleItems(workerIndex);
+			await this.cleanupWorkerEventsLifecycleItems(workerIndex);
+			await this.cleanupWorkerNewsLifecycleItems(workerIndex);
+			await this.cleanupWorkerSpotlightArticlesLifecycleItems(workerIndex);
+			await this.cleanupWorkerImpactCaseStudiesLifecycleItems(workerIndex);
+			await this.cleanupWorkerPageItemsLifecycleItems(workerIndex);
+			await this.cleanupWorkerDocumentationPagesLifecycleItems(workerIndex);
+			await this.cleanupWorkerDocumentsPoliciesLifecycleItems(workerIndex);
+			await this.cleanupWorkerFundingCallsLifecycleItems(workerIndex);
+			await this.cleanupWorkerOpportunitiesLifecycleItems(workerIndex);
+			await this.cleanupWorkerPersonsLifecycleItems(workerIndex);
+
+			// Then the non-lifecycle / simple cleanups.
+			await this.cleanupWorkerProjects(workerIndex);
+			await this.cleanupWorkerPageItems(workerIndex);
+			await this.cleanupWorkerImpactCaseStudies(workerIndex);
+			await this.cleanupWorkerSpotlightArticles(workerIndex);
+			await this.cleanupWorkerEvents(workerIndex);
+			await this.cleanupWorkerNewsItems(workerIndex);
+			await this.cleanupWorkerPersons(workerIndex);
+			await this.cleanupWorkerWorkingGroups(workerIndex);
+			await this.cleanupWorkerServices(workerIndex);
+			await this.cleanupWorkerSocialMedia(workerIndex);
+			await this.cleanupWorkerUsers(workerIndex);
+			await this.cleanupWorkerAssets(workerIndex);
+		}
+	}
+
 	/** Closes the underlying pg pool. Called in worker teardown. */
 	async close(): Promise<void> {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access

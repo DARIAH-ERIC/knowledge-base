@@ -73,8 +73,10 @@ export class AdminServicesPage {
 		await expect(option).toBeVisible();
 		await option.click();
 		await expect(control.getByText(name, { exact: true })).toBeVisible();
-		// Multi-select popover stays open after picking an item; toggle the trigger (force, since the
-		// popover overlay intercepts pointer events) to dismiss it.
+		// Multi-select popover stays open after picking an item; toggle the trigger to dismiss it.
+		// `force` is required because the popover's modal overlay intercepts pointer events even
+		// over the trigger button itself.
+		// oxlint-disable-next-line playwright/no-force-option
 		await control.locator("button[aria-expanded]:not([slot])").click({ force: true });
 		await expect(this.page.getByRole("listbox", { name: label })).toBeHidden();
 	}
@@ -127,8 +129,11 @@ export class AdminServicesPage {
 		const removeButtons = control.locator('button[slot="remove"]');
 		while ((await removeButtons.count()) > 0) {
 			await removeButtons.first().click();
-			const trigger = control.locator('button[aria-expanded]:not([slot])');
+			const trigger = control.locator("button[aria-expanded]:not([slot])");
 			if ((await trigger.getAttribute("aria-expanded")) === "true") {
+				// `force` for the same reason as in `selectOrganisationalUnit` — the popover
+				// overlay intercepts pointer events even over the trigger.
+				// oxlint-disable-next-line playwright/no-force-option
 				await trigger.click({ force: true });
 				await expect(this.page.getByRole("listbox", { name: label })).toBeHidden();
 			}
