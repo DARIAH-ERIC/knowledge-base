@@ -68,6 +68,7 @@ export const organisationalUnits = p.snakeCase.table("organisational_units", {
 	metadata: p.jsonb("metadata"),
 	name: p.text("name").notNull(),
 	acronym: p.text("acronym"),
+	ror: p.text("ror"),
 	summary: p.text("summary"),
 	imageId: p.uuid("image_id").references(() => assets.id),
 	typeId: p

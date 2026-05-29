@@ -49,6 +49,7 @@ export const createInstitutionAction = createMutationAction({
 		await tx.insert(schema.organisationalUnits).values({
 			id: versionId,
 			acronym: input.acronym,
+			ror: input.ror,
 			imageId,
 			name: input.name,
 			summary: input.summary,
