@@ -26,7 +26,7 @@ test.describe("internal pages admin", () => {
 
 		await internalPagesPage.goto();
 
-		await expect(internalPagesPage.page.getByRole("table")).toBeVisible();
+		await expect(internalPagesPage.page.getByRole("grid")).toBeVisible();
 		await expect(internalPagesPage.page.getByRole("row").nth(1)).toBeVisible();
 	});
 

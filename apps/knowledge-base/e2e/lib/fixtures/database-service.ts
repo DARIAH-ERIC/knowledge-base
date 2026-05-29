@@ -876,7 +876,80 @@ export class DatabaseService {
 		return row ?? null;
 	}
 
+	async cleanupCampaignSubTables(id: string): Promise<void> {
+		const wgReportRows = await this.db
+			.select({ id: schema.workingGroupReports.id })
+			.from(schema.workingGroupReports)
+			.where(eq(schema.workingGroupReports.campaignId, id));
+
+		if (wgReportRows.length > 0) {
+			const wgReportIds = wgReportRows.map((r) => r.id);
+			await this.db
+				.delete(schema.workingGroupReportAnswers)
+				.where(inArray(schema.workingGroupReportAnswers.workingGroupReportId, wgReportIds));
+			await this.db
+				.delete(schema.workingGroupReportEvents)
+				.where(inArray(schema.workingGroupReportEvents.workingGroupReportId, wgReportIds));
+			await this.db
+				.delete(schema.workingGroupReportSocialMedia)
+				.where(inArray(schema.workingGroupReportSocialMedia.workingGroupReportId, wgReportIds));
+			await this.db
+				.delete(schema.workingGroupReports)
+				.where(inArray(schema.workingGroupReports.id, wgReportIds));
+		}
+
+		await this.db
+			.delete(schema.workingGroupReportQuestions)
+			.where(eq(schema.workingGroupReportQuestions.campaignId, id));
+
+		const countryReportRows = await this.db
+			.select({ id: schema.countryReports.id })
+			.from(schema.countryReports)
+			.where(eq(schema.countryReports.campaignId, id));
+
+		if (countryReportRows.length > 0) {
+			const countryReportIds = countryReportRows.map((r) => r.id);
+			await this.db
+				.delete(schema.countryReportContributions)
+				.where(inArray(schema.countryReportContributions.countryReportId, countryReportIds));
+			await this.db
+				.delete(schema.countryReportSocialMediaKpis)
+				.where(inArray(schema.countryReportSocialMediaKpis.countryReportId, countryReportIds));
+			await this.db
+				.delete(schema.countryReportServiceKpis)
+				.where(inArray(schema.countryReportServiceKpis.countryReportId, countryReportIds));
+			await this.db
+				.delete(schema.countryReportProjectContributions)
+				.where(
+					inArray(schema.countryReportProjectContributions.countryReportId, countryReportIds),
+				);
+			await this.db
+				.delete(schema.countryReportInstitutions)
+				.where(inArray(schema.countryReportInstitutions.countryReportId, countryReportIds));
+			await this.db
+				.delete(schema.countryReports)
+				.where(inArray(schema.countryReports.id, countryReportIds));
+		}
+
+		await this.db
+			.delete(schema.reportingCampaignEventAmounts)
+			.where(eq(schema.reportingCampaignEventAmounts.campaignId, id));
+		await this.db
+			.delete(schema.reportingCampaignContributionAmounts)
+			.where(eq(schema.reportingCampaignContributionAmounts.campaignId, id));
+		await this.db
+			.delete(schema.reportingCampaignServiceSizes)
+			.where(eq(schema.reportingCampaignServiceSizes.campaignId, id));
+		await this.db
+			.delete(schema.reportingCampaignSocialMediaAmounts)
+			.where(eq(schema.reportingCampaignSocialMediaAmounts.campaignId, id));
+		await this.db
+			.delete(schema.reportingCampaignCountryThresholds)
+			.where(eq(schema.reportingCampaignCountryThresholds.campaignId, id));
+	}
+
 	async deleteReportingCampaign(id: string): Promise<void> {
+		await this.cleanupCampaignSubTables(id);
 		await this.db.delete(schema.reportingCampaigns).where(eq(schema.reportingCampaigns.id, id));
 	}
 

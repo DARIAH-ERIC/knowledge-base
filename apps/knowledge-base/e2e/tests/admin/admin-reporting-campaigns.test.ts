@@ -146,6 +146,10 @@ test.describe("reporting campaigns admin", () => {
 		const campaignYear = 3100 + workerIndex;
 		const campaignsPage = createAdminReportingCampaignsPage(workerIndex);
 
+		// Previous tab-form tests wrote rows to FK-constrained sub-tables. Clean
+		// them up so the app's simple DELETE action can succeed.
+		await db.cleanupCampaignSubTables(campaignId!);
+
 		await campaignsPage.goto();
 		await campaignsPage.searchByYear(campaignYear);
 		await expect(campaignsPage.rowByYear(campaignYear)).toBeVisible();

@@ -91,5 +91,6 @@ export class AdminCountryReportsPage {
 
 	async confirmDelete(dialog: Locator): Promise<void> {
 		await dialog.getByRole("button", { name: "Delete" }).click();
+		await dialog.waitFor({ state: "hidden" });
 	}
 }
