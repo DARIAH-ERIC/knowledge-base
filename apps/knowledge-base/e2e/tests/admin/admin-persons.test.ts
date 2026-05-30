@@ -171,6 +171,51 @@ test.describe("persons admin", () => {
 		await expect(personsPage.rowByName(name)).toBeHidden();
 	});
 
+	test("should manage contributions", async ({ createAdminPersonsPage, db }) => {
+		const workerIndex = test.info().workerIndex;
+		const personsPage = createAdminPersonsPage(workerIndex);
+
+		const name = `${personsPage.workerPrefix} Contributions ${randomUUID()}`;
+		await personsPage.gotoCreate();
+		await personsPage.fillName(name);
+		await personsPage.fillSortName("Contributions, Person");
+		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await personsPage.fillBiography("Biography for contribution test.");
+		await personsPage.submitForm();
+
+		await personsPage.gotoEditFromList(name);
+
+		// Add a contribution.
+		await personsPage.selectFirstContributionRole();
+		await personsPage.selectFirstContributionOrg();
+		await personsPage.fillContributionDatePicker("Start date", 2025, 1, 1);
+		await personsPage.submitAddContribution();
+
+		// Verify contribution row appears (header row + 1 data row = 2).
+		await expect(personsPage.contributionsTable().getByRole("row")).toHaveCount(2);
+
+		const person = await db.getPersonByName(name);
+		const contributions = await db.getContributionsByPersonVersionId(person!.id);
+		expect(contributions).toHaveLength(1);
+		expect(contributions[0]!.duration.start).toStrictEqual(new Date("2025-01-01T00:00:00.000Z"));
+		expect(contributions[0]!.duration.end).toBeUndefined();
+
+		// End the contribution.
+		await personsPage.clickEndContribution();
+		await personsPage.fillEndContributionDate(2025, 12, 31);
+		await personsPage.confirmEndContribution();
+
+		// Verify "End contribution" button is gone and "present" is replaced by a date.
+		await expect(
+			personsPage.contributionsTable().getByRole("button", { name: "End contribution" }),
+		).toBeHidden();
+		await expect(personsPage.contributionsTable().getByText("present")).toBeHidden();
+
+		// Verify end date persisted.
+		const updatedContributions = await db.getContributionsByPersonVersionId(person!.id);
+		expect(updatedContributions[0]!.duration.end).toBeDefined();
+	});
+
 	test("should delete a person", async ({ createAdminPersonsPage }) => {
 		const workerIndex = test.info().workerIndex;
 		const personsPage = createAdminPersonsPage(workerIndex);

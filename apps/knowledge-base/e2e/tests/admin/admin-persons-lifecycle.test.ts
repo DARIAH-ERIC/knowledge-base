@@ -85,6 +85,43 @@ test.describe("persons admin lifecycle", () => {
 		await expect(personsPage.versionSelectorDraftLink()).toBeHidden();
 	});
 
+	test("contributions are cloned to published version", async ({
+		createAdminPersonsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const personsPage = createAdminPersonsPage(workerIndex);
+
+		const name = `${personsPage.workerPrefix} Publish Contributions ${randomUUID()}`;
+		await personsPage.gotoCreate();
+		await personsPage.fillName(name);
+		await personsPage.fillSortName("Contributions, Publish");
+		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await personsPage.submitForm();
+
+		// Add a contribution on the draft.
+		await personsPage.gotoEditFromList(name);
+		await personsPage.selectFirstContributionRole();
+		await personsPage.selectFirstContributionOrg();
+		await personsPage.fillContributionDatePicker("Start date", 2025, 1, 1);
+		await personsPage.submitAddContribution();
+
+		// Verify draft has the contribution.
+		const person = await db.getPersonByName(name);
+		expect(await db.getContributionsByPersonVersionId(person!.id)).toHaveLength(1);
+
+		// Publish.
+		await personsPage.goto();
+		await personsPage.searchByName(name);
+		await personsPage.gotoDetailsFromList(name);
+		await personsPage.publishItem();
+
+		// Verify the contribution is present on the published version.
+		const publishedId = await db.getPublishedVersionId(person!.documentId);
+		expect(publishedId).not.toBeNull();
+		expect(await db.getContributionsByPersonVersionId(publishedId!)).toHaveLength(1);
+	});
+
 	test("version selector shows correct content per version", async ({
 		page,
 		createAdminPersonsPage,

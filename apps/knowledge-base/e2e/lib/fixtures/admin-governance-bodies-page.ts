@@ -110,6 +110,91 @@ export class AdminGovernanceBodiesPage {
 	}
 
 	// ---------------------------------------------------------------------------
+	// Edit page — lifecycle actions
+	// ---------------------------------------------------------------------------
+
+	async publishItem(): Promise<void> {
+		await waitForActionRedirect({
+			page: this.page,
+			redirectPathname: BASE_PATH,
+			trigger: async () => {
+				await this.page.getByRole("button", { name: "Publish saved draft" }).click();
+			},
+		});
+	}
+
+	// ---------------------------------------------------------------------------
+	// Edit page — unit relations section
+	// ---------------------------------------------------------------------------
+
+	relationsTable(): Locator {
+		return this.page.getByRole("grid", { name: "relations" });
+	}
+
+	async selectFirstRelationType(): Promise<void> {
+		const control = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.getByText("Relation type", { exact: true }) });
+		await control.locator("button").click();
+		await this.page.getByRole("option").first().click();
+	}
+
+	async selectFirstRelatedUnit(): Promise<void> {
+		await this.page.getByRole("button", { name: "No related unit selected" }).click();
+		await this.page.getByRole("option").first().waitFor({ state: "visible" });
+		await this.page.getByRole("option").first().click();
+	}
+
+	async fillRelationDatePicker(
+		label: string,
+		year: number,
+		month: number,
+		day: number,
+	): Promise<void> {
+		const form = this.page
+			.locator("form")
+			.filter({ has: this.page.getByRole("button", { name: "Add relation" }) });
+		const group = form.getByRole("group", { name: label });
+		await group.getByRole("spinbutton", { name: /day/i }).click();
+		await this.page.keyboard.type(String(day).padStart(2, "0"));
+		await group.getByRole("spinbutton", { name: /month/i }).click();
+		await this.page.keyboard.type(String(month).padStart(2, "0"));
+		await group.getByRole("spinbutton", { name: /year/i }).click();
+		await this.page.keyboard.type(String(year));
+	}
+
+	async submitAddRelation(): Promise<void> {
+		await waitForActionSuccess({
+			page: this.page,
+			trigger: async () => {
+				await this.page.getByRole("button", { name: "Add relation" }).click();
+			},
+		});
+	}
+
+	async clickEndRelation(): Promise<void> {
+		await this.relationsTable().getByRole("button", { name: "End relation" }).first().click();
+	}
+
+	async fillEndRelationDate(year: number, month: number, day: number): Promise<void> {
+		const dialog = this.page.getByRole("alertdialog", { name: "End relation" });
+		await dialog.waitFor({ state: "visible" });
+		const group = dialog.getByRole("group", { name: "End date" });
+		await group.getByRole("spinbutton", { name: /day/i }).click();
+		await this.page.keyboard.type(String(day).padStart(2, "0"));
+		await group.getByRole("spinbutton", { name: /month/i }).click();
+		await this.page.keyboard.type(String(month).padStart(2, "0"));
+		await group.getByRole("spinbutton", { name: /year/i }).click();
+		await this.page.keyboard.type(String(year));
+	}
+
+	async confirmEndRelation(): Promise<void> {
+		const dialog = this.page.getByRole("alertdialog", { name: "End relation" });
+		await dialog.getByRole("button", { name: "Confirm" }).click();
+		await dialog.waitFor({ state: "hidden" });
+	}
+
+	// ---------------------------------------------------------------------------
 	// Edit page — person relations section
 	// ---------------------------------------------------------------------------
 
@@ -162,10 +247,7 @@ export class AdminGovernanceBodiesPage {
 	}
 
 	async clickEndPersonRelation(): Promise<void> {
-		await this.peopleTable()
-			.getByRole("button", { name: "End person relation" })
-			.first()
-			.click();
+		await this.peopleTable().getByRole("button", { name: "End person relation" }).first().click();
 	}
 
 	async fillEndPersonRelationDate(year: number, month: number, day: number): Promise<void> {
