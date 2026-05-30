@@ -423,6 +423,52 @@ export class DatabaseService {
 		return row?.content ?? null;
 	}
 
+	async getPersonRelationsByUnitVersionId(versionId: string): Promise<
+		Array<{
+			id: string;
+			personId: string;
+			roleType: string;
+			duration: { start: Date; end?: Date };
+		}>
+	> {
+		return this.db
+			.select({
+				id: schema.personsToOrganisationalUnits.id,
+				personId: schema.personsToOrganisationalUnits.personId,
+				roleType: schema.personRoleTypes.type,
+				duration: schema.personsToOrganisationalUnits.duration,
+			})
+			.from(schema.personsToOrganisationalUnits)
+			.innerJoin(
+				schema.personRoleTypes,
+				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
+			)
+			.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, versionId));
+	}
+
+	async getUnitRelationsByUnitVersionId(versionId: string): Promise<
+		Array<{
+			id: string;
+			relatedUnitId: string;
+			statusType: string;
+			duration: { start: Date; end?: Date };
+		}>
+	> {
+		return this.db
+			.select({
+				id: schema.organisationalUnitsRelations.id,
+				relatedUnitId: schema.organisationalUnitsRelations.relatedUnitId,
+				statusType: schema.organisationalUnitStatus.status,
+				duration: schema.organisationalUnitsRelations.duration,
+			})
+			.from(schema.organisationalUnitsRelations)
+			.innerJoin(
+				schema.organisationalUnitStatus,
+				eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+			)
+			.where(eq(schema.organisationalUnitsRelations.unitId, versionId));
+	}
+
 	async getFirstInternalPage(): Promise<{
 		documentId: string;
 		id: string;
@@ -1963,6 +2009,10 @@ export class DatabaseService {
 				);
 
 			await tx
+				.delete(schema.personsToOrganisationalUnits)
+				.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, versionId));
+
+			await tx
 				.delete(schema.organisationalUnits)
 				.where(eq(schema.organisationalUnits.id, versionId));
 
@@ -2944,6 +2994,17 @@ export class DatabaseService {
 			await this.cleanupWorkerSocialMedia(workerIndex);
 			await this.cleanupWorkerUsers(workerIndex);
 			await this.cleanupWorkerAssets(workerIndex);
+		}
+
+		// Reporting campaigns use year 3100+workerIndex as their identifier (no [e2e-worker-N] prefix),
+		// so they are not discovered by the name scan above. Delete any leftover campaigns in the
+		// reserved year range directly.
+		const leakedCampaigns = await this.db
+			.select({ id: schema.reportingCampaigns.id })
+			.from(schema.reportingCampaigns)
+			.where(sql`${schema.reportingCampaigns.year} >= 3100 AND ${schema.reportingCampaigns.year} < 3200`);
+		for (const campaign of leakedCampaigns) {
+			await this.deleteReportingCampaign(campaign.id);
 		}
 	}
 

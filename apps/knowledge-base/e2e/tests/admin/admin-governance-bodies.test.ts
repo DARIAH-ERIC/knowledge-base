@@ -141,6 +141,49 @@ test.describe("governance bodies admin", () => {
 		expect(updated).toMatchObject({ acronym: null, imageId: null, summary: null });
 	});
 
+	test("should manage person relations", async ({ createAdminGovernanceBodiesPage, db }) => {
+		const workerIndex = test.info().workerIndex;
+		const governanceBodiesPage = createAdminGovernanceBodiesPage(workerIndex);
+
+		const name = `${governanceBodiesPage.workerPrefix} Person Relations ${randomUUID()}`;
+		await governanceBodiesPage.gotoCreate();
+		await governanceBodiesPage.fillName(name);
+		await governanceBodiesPage.fillDescription("Description for person relation test.");
+		await governanceBodiesPage.submitForm();
+
+		await governanceBodiesPage.gotoEditFromList(name);
+
+		// Add a person relation.
+		await governanceBodiesPage.selectFirstPersonRole();
+		await governanceBodiesPage.selectFirstPerson();
+		await governanceBodiesPage.fillPersonRelationDatePicker("Start date", 2025, 1, 1);
+		await governanceBodiesPage.submitAddPerson();
+
+		// Verify person row appears (header row + 1 data row = 2).
+		await expect(governanceBodiesPage.peopleTable().getByRole("row")).toHaveCount(2);
+
+		const governanceBody = await db.getGovernanceBodyByName(name);
+		const relations = await db.getPersonRelationsByUnitVersionId(governanceBody!.id);
+		expect(relations).toHaveLength(1);
+		expect(relations[0]!.duration.start).toStrictEqual(new Date("2025-01-01T00:00:00.000Z"));
+		expect(relations[0]!.duration.end).toBeUndefined();
+
+		// End the person relation.
+		await governanceBodiesPage.clickEndPersonRelation();
+		await governanceBodiesPage.fillEndPersonRelationDate(2025, 12, 31);
+		await governanceBodiesPage.confirmEndPersonRelation();
+
+		// Verify "End person relation" button is gone and "present" is replaced by a date.
+		await expect(
+			governanceBodiesPage.peopleTable().getByRole("button", { name: "End person relation" }),
+		).toBeHidden();
+		await expect(governanceBodiesPage.peopleTable().getByText("present")).toBeHidden();
+
+		// Verify end date persisted.
+		const updatedRelations = await db.getPersonRelationsByUnitVersionId(governanceBody!.id);
+		expect(updatedRelations[0]!.duration.end).toBeDefined();
+	});
+
 	test("should delete a governance body", async ({ createAdminGovernanceBodiesPage }) => {
 		const workerIndex = test.info().workerIndex;
 		const governanceBodiesPage = createAdminGovernanceBodiesPage(workerIndex);

@@ -160,6 +160,50 @@ test.describe("working groups admin", () => {
 		});
 	});
 
+	test("should manage unit relations", async ({ createAdminWorkingGroupsPage, db }) => {
+		const workerIndex = test.info().workerIndex;
+		const workingGroupsPage = createAdminWorkingGroupsPage(workerIndex);
+
+		const name = `${workingGroupsPage.workerPrefix} Relations ${randomUUID()}`;
+		await workingGroupsPage.gotoCreate();
+		await workingGroupsPage.fillName(name);
+		await workingGroupsPage.fillSummary("Working group for relation test.");
+		await workingGroupsPage.fillDescription("Description for relation test.");
+		await workingGroupsPage.submitForm();
+
+		await workingGroupsPage.gotoEditFromList(name);
+
+		// Add a relation.
+		await workingGroupsPage.selectFirstRelationType();
+		await workingGroupsPage.selectFirstRelatedUnit();
+		await workingGroupsPage.fillRelationDatePicker("Start date", 2025, 1, 1);
+		await workingGroupsPage.submitAddRelation();
+
+		// Verify relation row appears (header row + 1 data row = 2).
+		await expect(workingGroupsPage.relationsTable().getByRole("row")).toHaveCount(2);
+
+		const workingGroup = await db.getWorkingGroupByName(name);
+		const relations = await db.getUnitRelationsByUnitVersionId(workingGroup!.id);
+		expect(relations).toHaveLength(1);
+		expect(relations[0]!.duration.start).toStrictEqual(new Date("2025-01-01T00:00:00.000Z"));
+		expect(relations[0]!.duration.end).toBeUndefined();
+
+		// End the relation.
+		await workingGroupsPage.clickEndRelation();
+		await workingGroupsPage.fillEndRelationDate(2025, 12, 31);
+		await workingGroupsPage.confirmEndRelation();
+
+		// Verify "End relation" button is gone and "present" is replaced by a date.
+		await expect(
+			workingGroupsPage.relationsTable().getByRole("button", { name: "End relation" }),
+		).toBeHidden();
+		await expect(workingGroupsPage.relationsTable().getByText("present")).toBeHidden();
+
+		// Verify end date persisted.
+		const updatedRelations = await db.getUnitRelationsByUnitVersionId(workingGroup!.id);
+		expect(updatedRelations[0]!.duration.end).toBeDefined();
+	});
+
 	test("should delete a working group", async ({ createAdminWorkingGroupsPage }) => {
 		const workerIndex = test.info().workerIndex;
 		const workingGroupsPage = createAdminWorkingGroupsPage(workerIndex);
