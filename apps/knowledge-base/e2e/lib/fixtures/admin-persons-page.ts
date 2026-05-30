@@ -1,6 +1,7 @@
 import { type Locator, type Page, expect } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
+import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
 const BASE_PATH = "/en/dashboard/administrator/persons";
@@ -94,6 +95,95 @@ export class AdminPersonsPage {
 
 	async confirmDelete(dialog: Locator): Promise<void> {
 		await dialog.getByRole("button", { name: "Delete" }).click();
+	}
+
+	async gotoEditFromList(name: string): Promise<void> {
+		await this.searchByName(name);
+		const row = this.rowByName(name);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await Promise.all([
+			this.page.waitForURL("**/edit"),
+			this.page.getByRole("menuitem", { name: "Edit" }).click(),
+		]);
+	}
+
+	// ---------------------------------------------------------------------------
+	// Edit page — contributions section
+	// ---------------------------------------------------------------------------
+
+	contributionsTable(): Locator {
+		return this.page.getByRole("grid", { name: "contributions" });
+	}
+
+	async selectFirstContributionRole(): Promise<void> {
+		const control = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.getByText("Role", { exact: true }) });
+		await control.locator("button").click();
+		await this.page.getByRole("option").first().click();
+	}
+
+	async selectFirstContributionOrg(): Promise<void> {
+		await this.page.getByRole("button", { name: "Select an organisation" }).click();
+		await this.page.getByRole("option").first().waitFor({ state: "visible" });
+		await this.page.getByRole("option").first().click();
+	}
+
+	async selectContributionOrgByName(searchText: string): Promise<void> {
+		await this.page.getByRole("button", { name: "Select an organisation" }).click();
+		await this.page.keyboard.type(searchText);
+		await this.page.keyboard.press("Enter");
+		await this.page.getByRole("option").first().waitFor({ state: "visible" });
+		await this.page.getByRole("option").first().click();
+	}
+
+	async fillContributionDatePicker(
+		label: string,
+		year: number,
+		month: number,
+		day: number,
+	): Promise<void> {
+		const group = this.page.getByRole("group", { name: label });
+		await group.getByRole("spinbutton", { name: /day/i }).click();
+		await this.page.keyboard.type(String(day).padStart(2, "0"));
+		await group.getByRole("spinbutton", { name: /month/i }).click();
+		await this.page.keyboard.type(String(month).padStart(2, "0"));
+		await group.getByRole("spinbutton", { name: /year/i }).click();
+		await this.page.keyboard.type(String(year));
+	}
+
+	async submitAddContribution(): Promise<void> {
+		await waitForActionSuccess({
+			page: this.page,
+			trigger: async () => {
+				await this.page.getByRole("button", { name: "Add contribution" }).click();
+			},
+		});
+	}
+
+	async clickEndContribution(): Promise<void> {
+		await this.contributionsTable()
+			.getByRole("button", { name: "End contribution" })
+			.first()
+			.click();
+	}
+
+	async fillEndContributionDate(year: number, month: number, day: number): Promise<void> {
+		const dialog = this.page.getByRole("alertdialog", { name: "End contribution" });
+		await dialog.waitFor({ state: "visible" });
+		const group = dialog.getByRole("group", { name: "End date" });
+		await group.getByRole("spinbutton", { name: /day/i }).click();
+		await this.page.keyboard.type(String(day).padStart(2, "0"));
+		await group.getByRole("spinbutton", { name: /month/i }).click();
+		await this.page.keyboard.type(String(month).padStart(2, "0"));
+		await group.getByRole("spinbutton", { name: /year/i }).click();
+		await this.page.keyboard.type(String(year));
+	}
+
+	async confirmEndContribution(): Promise<void> {
+		const dialog = this.page.getByRole("alertdialog", { name: "End contribution" });
+		await dialog.getByRole("button", { name: "Confirm" }).click();
+		await dialog.waitFor({ state: "hidden" });
 	}
 
 	// ---------------------------------------------------------------------------

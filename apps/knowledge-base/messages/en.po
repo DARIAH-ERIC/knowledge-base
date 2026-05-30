@@ -2345,10 +2345,6 @@ msgid "zF7zQ6"
 msgstr "Edit country"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:80
-msgid "zhG4Ek"
-msgstr "Enter the country details."
-
-#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:80
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-create-form.tsx:53
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/country-reports/_components/country-report-edit-form.tsx:51
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/documentation-pages/_components/documentation-page-form.tsx:41
@@ -2375,6 +2371,10 @@ msgstr "Enter the country details."
 #: app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form.tsx:70
 msgid "Lv0zJu"
 msgstr "Details"
+
+#: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:80
+msgid "zhG4Ek"
+msgstr "Enter the country details."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form.tsx:88
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-bodies-page.tsx:100

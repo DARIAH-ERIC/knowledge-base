@@ -423,6 +423,90 @@ export class DatabaseService {
 		return row?.content ?? null;
 	}
 
+	async getPersonRelationsByUnitVersionId(versionId: string): Promise<
+		Array<{
+			id: string;
+			personId: string;
+			roleType: string;
+			duration: { start: Date; end?: Date };
+		}>
+	> {
+		return this.db
+			.select({
+				id: schema.personsToOrganisationalUnits.id,
+				personId: schema.personsToOrganisationalUnits.personId,
+				roleType: schema.personRoleTypes.type,
+				duration: schema.personsToOrganisationalUnits.duration,
+			})
+			.from(schema.personsToOrganisationalUnits)
+			.innerJoin(
+				schema.personRoleTypes,
+				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
+			)
+			.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, versionId));
+	}
+
+	async getContributionsByPersonVersionId(versionId: string): Promise<
+		Array<{
+			id: string;
+			organisationalUnitId: string;
+			roleType: string;
+			duration: { start: Date; end?: Date };
+		}>
+	> {
+		return this.db
+			.select({
+				id: schema.personsToOrganisationalUnits.id,
+				organisationalUnitId: schema.personsToOrganisationalUnits.organisationalUnitId,
+				roleType: schema.personRoleTypes.type,
+				duration: schema.personsToOrganisationalUnits.duration,
+			})
+			.from(schema.personsToOrganisationalUnits)
+			.innerJoin(
+				schema.personRoleTypes,
+				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
+			)
+			.where(eq(schema.personsToOrganisationalUnits.personId, versionId));
+	}
+
+	async getUnitRelationsByUnitVersionId(versionId: string): Promise<
+		Array<{
+			id: string;
+			relatedUnitId: string;
+			statusType: string;
+			duration: { start: Date; end?: Date };
+		}>
+	> {
+		return this.db
+			.select({
+				id: schema.organisationalUnitsRelations.id,
+				relatedUnitId: schema.organisationalUnitsRelations.relatedUnitId,
+				statusType: schema.organisationalUnitStatus.status,
+				duration: schema.organisationalUnitsRelations.duration,
+			})
+			.from(schema.organisationalUnitsRelations)
+			.innerJoin(
+				schema.organisationalUnitStatus,
+				eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+			)
+			.where(eq(schema.organisationalUnitsRelations.unitId, versionId));
+	}
+
+	async getPublishedVersionId(documentId: string): Promise<string | null> {
+		const [row] = await this.db
+			.select({ id: schema.entityVersions.id })
+			.from(schema.entityVersions)
+			.innerJoin(schema.entityStatus, eq(schema.entityStatus.id, schema.entityVersions.statusId))
+			.where(
+				and(
+					eq(schema.entityVersions.entityId, documentId),
+					eq(schema.entityStatus.type, "published"),
+				),
+			)
+			.limit(1);
+		return row?.id ?? null;
+	}
+
 	async getFirstInternalPage(): Promise<{
 		documentId: string;
 		id: string;
@@ -1963,10 +2047,75 @@ export class DatabaseService {
 				);
 
 			await tx
+				.delete(schema.personsToOrganisationalUnits)
+				.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, versionId));
+
+			await tx
 				.delete(schema.organisationalUnits)
 				.where(eq(schema.organisationalUnits.id, versionId));
 
 			await this.deleteDocumentVersionTail(tx, versionId, documentId);
+		});
+	}
+
+	/**
+	 * Deletes all versions of a governance body document. Unlike deleteGovernanceBody (which handles
+	 * a single version), this handles published entities that have both draft and published
+	 * versions.
+	 */
+	async deleteGovernanceBodyDocument(documentId: string): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const versions = await tx
+				.select({ id: schema.entityVersions.id })
+				.from(schema.entityVersions)
+				.where(eq(schema.entityVersions.entityId, documentId));
+
+			for (const version of versions) {
+				await tx
+					.delete(schema.organisationalUnitsRelations)
+					.where(
+						or(
+							eq(schema.organisationalUnitsRelations.unitId, version.id),
+							eq(schema.organisationalUnitsRelations.relatedUnitId, version.id),
+						),
+					);
+				await tx
+					.delete(schema.personsToOrganisationalUnits)
+					.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, version.id));
+				await tx
+					.delete(schema.organisationalUnitsToSocialMedia)
+					.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, version.id));
+
+				const fieldRows = await tx
+					.select({ id: schema.fields.id })
+					.from(schema.fields)
+					.where(eq(schema.fields.entityVersionId, version.id));
+				if (fieldRows.length > 0) {
+					const fieldIds = fieldRows.map((f) => f.id);
+					await tx
+						.delete(schema.contentBlocks)
+						.where(inArray(schema.contentBlocks.fieldId, fieldIds));
+					await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
+				}
+
+				await tx
+					.delete(schema.organisationalUnits)
+					.where(eq(schema.organisationalUnits.id, version.id));
+				await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, version.id));
+			}
+
+			await tx
+				.delete(schema.entitiesToResources)
+				.where(eq(schema.entitiesToResources.entityId, documentId));
+			await tx
+				.delete(schema.entitiesToEntities)
+				.where(
+					or(
+						eq(schema.entitiesToEntities.entityId, documentId),
+						eq(schema.entitiesToEntities.relatedEntityId, documentId),
+					),
+				);
+			await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
 		});
 	}
 
@@ -1977,9 +2126,10 @@ export class DatabaseService {
 	async cleanupWorkerGovernanceBodies(workerIndex: number): Promise<void> {
 		const prefix = `[e2e-worker-${String(workerIndex)}]`;
 
-		const items = await this.db
-			.select({ id: schema.organisationalUnits.id })
+		const rows = await this.db
+			.select({ documentId: schema.entityVersions.entityId })
 			.from(schema.organisationalUnits)
+			.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.organisationalUnits.id))
 			.innerJoin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
@@ -1991,8 +2141,10 @@ export class DatabaseService {
 				),
 			);
 
-		for (const item of items) {
-			await this.deleteGovernanceBody(item.id);
+		const documentIds = [...new Set(rows.map((r) => r.documentId))];
+
+		for (const documentId of documentIds) {
+			await this.deleteGovernanceBodyDocument(documentId);
 		}
 	}
 
@@ -2944,6 +3096,19 @@ export class DatabaseService {
 			await this.cleanupWorkerSocialMedia(workerIndex);
 			await this.cleanupWorkerUsers(workerIndex);
 			await this.cleanupWorkerAssets(workerIndex);
+		}
+
+		// Reporting campaigns use year 3100+workerIndex as their identifier (no [e2e-worker-N] prefix),
+		// so they are not discovered by the name scan above. Delete any leftover campaigns in the
+		// reserved year range directly.
+		const leakedCampaigns = await this.db
+			.select({ id: schema.reportingCampaigns.id })
+			.from(schema.reportingCampaigns)
+			.where(
+				sql`${schema.reportingCampaigns.year} >= 3100 AND ${schema.reportingCampaigns.year} < 3200`,
+			);
+		for (const campaign of leakedCampaigns) {
+			await this.deleteReportingCampaign(campaign.id);
 		}
 	}
 
