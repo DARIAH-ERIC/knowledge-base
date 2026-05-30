@@ -85,10 +85,7 @@ test.describe("persons admin lifecycle", () => {
 		await expect(personsPage.versionSelectorDraftLink()).toBeHidden();
 	});
 
-	test("contributions are cloned to published version", async ({
-		createAdminPersonsPage,
-		db,
-	}) => {
+	test("contributions are cloned to published version", async ({ createAdminPersonsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
 		const personsPage = createAdminPersonsPage(workerIndex);
 

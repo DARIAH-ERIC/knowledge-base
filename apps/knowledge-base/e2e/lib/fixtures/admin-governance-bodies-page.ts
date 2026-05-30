@@ -218,6 +218,14 @@ export class AdminGovernanceBodiesPage {
 		await this.page.getByRole("option").first().click();
 	}
 
+	async selectPersonByName(searchText: string): Promise<void> {
+		await this.page.getByRole("button", { name: "No person selected" }).click();
+		await this.page.keyboard.type(searchText);
+		await this.page.keyboard.press("Enter");
+		await this.page.getByRole("option").first().waitFor({ state: "visible" });
+		await this.page.getByRole("option").first().click();
+	}
+
 	async fillPersonRelationDatePicker(
 		label: string,
 		year: number,

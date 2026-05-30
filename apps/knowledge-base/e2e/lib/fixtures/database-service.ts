@@ -2060,7 +2060,8 @@ export class DatabaseService {
 
 	/**
 	 * Deletes all versions of a governance body document. Unlike deleteGovernanceBody (which handles
-	 * a single version), this handles published entities that have both draft and published versions.
+	 * a single version), this handles published entities that have both draft and published
+	 * versions.
 	 */
 	async deleteGovernanceBodyDocument(documentId: string): Promise<void> {
 		await this.db.transaction(async (tx) => {
@@ -2100,9 +2101,7 @@ export class DatabaseService {
 				await tx
 					.delete(schema.organisationalUnits)
 					.where(eq(schema.organisationalUnits.id, version.id));
-				await tx
-					.delete(schema.entityVersions)
-					.where(eq(schema.entityVersions.id, version.id));
+				await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, version.id));
 			}
 
 			await tx
