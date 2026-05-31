@@ -19,27 +19,13 @@ export const spotlightArticlesLifecycleAdapter: EntityLifecycleAdapter = {
 		}
 		await tx.insert(schema.spotlightArticles).values({ id: targetVersionId, ...source });
 
-		const contributors = await tx
-			.select({
-				personId: schema.spotlightArticlesToPersons.personId,
-				role: schema.spotlightArticlesToPersons.role,
-			})
-			.from(schema.spotlightArticlesToPersons)
-			.where(eq(schema.spotlightArticlesToPersons.spotlightArticleId, sourceVersionId));
-
-		if (contributors.length > 0) {
-			await tx.insert(schema.spotlightArticlesToPersons).values(
-				contributors.map((c) => {
-					return { spotlightArticleId: targetVersionId, ...c };
-				}),
-			);
-		}
+		// Contributors (spotlightArticlesToPersons) are document-level and shared across versions, so
+		// they are not cloned here.
 	},
 
 	async wipeSubtype(tx, versionId) {
-		await tx
-			.delete(schema.spotlightArticlesToPersons)
-			.where(eq(schema.spotlightArticlesToPersons.spotlightArticleId, versionId));
+		// Contributors are document-level; they are removed by deleteDocumentVersionTail when the whole
+		// document is deleted, not when a single version is wiped.
 		await tx.delete(schema.spotlightArticles).where(eq(schema.spotlightArticles.id, versionId));
 	},
 };

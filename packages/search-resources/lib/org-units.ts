@@ -20,10 +20,11 @@ function addToMapSet<K, V>(map: Map<K, Set<V>>, key: K, value: V): void {
  * currently-active `is_national_consortium_of` relations.
  */
 export async function loadOrgUnitLookups(db: Database): Promise<OrgUnitResourceLookups> {
+	// Unit↔unit relations are document-level; key org units by their document id (published version).
 	const orgUnits = await db
 		.select({
 			acronym: schema.organisationalUnits.acronym,
-			id: schema.organisationalUnits.id,
+			id: schema.entities.id,
 			slug: schema.entities.slug,
 			type: schema.organisationalUnitTypes.type,
 			sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
@@ -39,7 +40,7 @@ export async function loadOrgUnitLookups(db: Database): Promise<OrgUnitResourceL
 			schema.documentLifecycle,
 			eq(schema.documentLifecycle.documentId, schema.entities.id),
 		)
-		.where(sql`${schema.documentLifecycle.publishedId} IS NOT NULL`);
+		.where(eq(schema.organisationalUnits.id, schema.documentLifecycle.publishedId));
 
 	const sshocActorIdToNc = new Map<number, Set<string>>();
 	const sshocActorIdToWg = new Map<number, Set<string>>();
@@ -65,8 +66,8 @@ export async function loadOrgUnitLookups(db: Database): Promise<OrgUnitResourceL
 
 	const relations = await db
 		.select({
-			ncId: schema.organisationalUnitsRelations.unitId,
-			countryId: schema.organisationalUnitsRelations.relatedUnitId,
+			ncId: schema.organisationalUnitsRelations.unitDocumentId,
+			countryId: schema.organisationalUnitsRelations.relatedUnitDocumentId,
 		})
 		.from(schema.organisationalUnitsRelations)
 		.innerJoin(

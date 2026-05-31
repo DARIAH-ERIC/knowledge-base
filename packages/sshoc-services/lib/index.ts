@@ -100,8 +100,9 @@ export async function ingestSshocServices(
 				inArray(schema.organisationalUnitServiceRoles.role, ["service_owner", "service_provider"]),
 			),
 		db
+			// service↔unit relations are document-level; key units by their document id (published).
 			.select({
-				id: schema.organisationalUnits.id,
+				id: schema.entityVersions.entityId,
 				sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
 			})
 			.from(schema.organisationalUnits)
@@ -245,17 +246,17 @@ export async function ingestSshocServices(
 							});
 
 			const relations = [
-				...[...ownerUnitIds].map((organisationalUnitId) => {
+				...[...ownerUnitIds].map((organisationalUnitDocumentId) => {
 					return {
 						serviceId,
-						organisationalUnitId,
+						organisationalUnitDocumentId,
 						roleId: ownerRoleId,
 					};
 				}),
-				...[...providerUnitIds].map((organisationalUnitId) => {
+				...[...providerUnitIds].map((organisationalUnitDocumentId) => {
 					return {
 						serviceId,
-						organisationalUnitId,
+						organisationalUnitDocumentId,
 						roleId: providerRoleId,
 					};
 				}),
@@ -264,7 +265,8 @@ export async function ingestSshocServices(
 			if (relations.length > 0) {
 				const existingRelations = await tx
 					.select({
-						organisationalUnitId: schema.servicesToOrganisationalUnits.organisationalUnitId,
+						organisationalUnitDocumentId:
+							schema.servicesToOrganisationalUnits.organisationalUnitDocumentId,
 						roleId: schema.servicesToOrganisationalUnits.roleId,
 					})
 					.from(schema.servicesToOrganisationalUnits)
@@ -272,7 +274,7 @@ export async function ingestSshocServices(
 
 				const existingRelationKeys = new Set(
 					existingRelations.map((relation) =>
-						[relation.organisationalUnitId, relation.roleId].join(":"),
+						[relation.organisationalUnitDocumentId, relation.roleId].join(":"),
 					),
 				);
 
@@ -284,7 +286,9 @@ export async function ingestSshocServices(
 				 */
 				const missingRelations = relations.filter(
 					(relation) =>
-						!existingRelationKeys.has([relation.organisationalUnitId, relation.roleId].join(":")),
+						!existingRelationKeys.has(
+							[relation.organisationalUnitDocumentId, relation.roleId].join(":"),
+						),
 				);
 
 				if (missingRelations.length > 0) {

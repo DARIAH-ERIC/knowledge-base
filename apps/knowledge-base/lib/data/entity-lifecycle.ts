@@ -497,6 +497,72 @@ export async function deleteDocumentVersionTail(
 ): Promise<void> {
 	await wipeVersionContent(tx, versionId);
 
+	// Document-level person↔org relations reference this document on either endpoint. Remove their
+	// report references first (no ON DELETE CASCADE), then the relation rows themselves.
+	const personOrgRelations = await tx
+		.select({ id: schema.personsToOrganisationalUnits.id })
+		.from(schema.personsToOrganisationalUnits)
+		.where(
+			or(
+				eq(schema.personsToOrganisationalUnits.personDocumentId, documentId),
+				eq(schema.personsToOrganisationalUnits.organisationalUnitDocumentId, documentId),
+			),
+		);
+
+	if (personOrgRelations.length > 0) {
+		const relationIds = personOrgRelations.map((r) => r.id);
+		await tx
+			.delete(schema.countryReportContributions)
+			.where(inArray(schema.countryReportContributions.personToOrgUnitId, relationIds));
+		await tx
+			.delete(schema.personsToOrganisationalUnits)
+			.where(inArray(schema.personsToOrganisationalUnits.id, relationIds));
+	}
+
+	// Document-level project↔org relations reference this document on either endpoint.
+	await tx
+		.delete(schema.projectsToOrganisationalUnits)
+		.where(
+			or(
+				eq(schema.projectsToOrganisationalUnits.projectDocumentId, documentId),
+				eq(schema.projectsToOrganisationalUnits.unitDocumentId, documentId),
+			),
+		);
+
+	// Document-level unit↔unit relations reference this document on either endpoint.
+	await tx
+		.delete(schema.organisationalUnitsRelations)
+		.where(
+			or(
+				eq(schema.organisationalUnitsRelations.unitDocumentId, documentId),
+				eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, documentId),
+			),
+		);
+
+	// Document-level article contributors reference this document as either the article or the person.
+	await tx
+		.delete(schema.impactCaseStudiesToPersons)
+		.where(
+			or(
+				eq(schema.impactCaseStudiesToPersons.impactCaseStudyDocumentId, documentId),
+				eq(schema.impactCaseStudiesToPersons.personDocumentId, documentId),
+			),
+		);
+
+	await tx
+		.delete(schema.spotlightArticlesToPersons)
+		.where(
+			or(
+				eq(schema.spotlightArticlesToPersons.spotlightArticleDocumentId, documentId),
+				eq(schema.spotlightArticlesToPersons.personDocumentId, documentId),
+			),
+		);
+
+	// Document-level service↔unit relations reference this document on their (versioned) unit endpoint.
+	await tx
+		.delete(schema.servicesToOrganisationalUnits)
+		.where(eq(schema.servicesToOrganisationalUnits.organisationalUnitDocumentId, documentId));
+
 	await tx
 		.delete(schema.entitiesToResources)
 		.where(eq(schema.entitiesToResources.entityId, documentId));

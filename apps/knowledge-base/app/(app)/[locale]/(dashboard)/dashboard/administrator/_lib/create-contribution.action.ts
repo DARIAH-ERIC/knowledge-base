@@ -9,11 +9,8 @@ import * as v from "valibot";
 
 import { CreateContributionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.schema";
 import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
-import { touchVersion } from "@/lib/data/entity-lifecycle";
-import { ensureOrganisationalUnitDraftVersion } from "@/lib/data/organisational-unit-drafts";
-import { ensurePersonDraftVersion } from "@/lib/data/person-drafts";
 import { db } from "@/lib/db";
-import { and, eq } from "@/lib/db/sql";
+import { and, eq, sql } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 
@@ -41,41 +38,49 @@ export const createContributionAction = createServerAction(
 		const { personId, roleTypeId, organisationalUnitId, duration } = result.output;
 
 		const returned = await db.transaction(async (tx) => {
-			const draftPersonId = await ensurePersonDraftVersion(tx, personId);
-			const draftOrganisationalUnitId = await ensureOrganisationalUnitDraftVersion(
-				tx,
-				organisationalUnitId,
-			);
-			const allowedRelation = await tx
-				.select({ id: schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.id })
+			// personId / organisationalUnitId are document ids (entities.id). Relations are document-level
+			// and do not require the edited entity to be published (the picker restricts the *target* to
+			// published). Resolve the org to its current version (draft-or-published) to validate the
+			// role/unit-type combination and report back the unit type.
+			const unit = await tx
+				.select({
+					unitType: schema.organisationalUnitTypes.type,
+					allowedRelationId: schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.id,
+				})
 				.from(schema.organisationalUnits)
 				.innerJoin(
-					schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations,
-					eq(
-						schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.unitTypeId,
-						schema.organisationalUnits.typeId,
-					),
+					schema.documentLifecycle,
+					sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
 				)
-				.where(
+				.innerJoin(
+					schema.organisationalUnitTypes,
+					eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+				)
+				.leftJoin(
+					schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations,
 					and(
-						eq(schema.organisationalUnits.id, draftOrganisationalUnitId),
+						eq(
+							schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.unitTypeId,
+							schema.organisationalUnits.typeId,
+						),
 						eq(
 							schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations.roleTypeId,
 							roleTypeId,
 						),
 					),
 				)
+				.where(eq(schema.documentLifecycle.documentId, organisationalUnitId))
 				.limit(1)
 				.then((rows) => rows[0] ?? null);
 
-			if (allowedRelation == null) {
+			if (unit == null || unit.allowedRelationId == null) {
 				return { error: "role-not-allowed" as const };
 			}
 
 			const existing = await tx.query.personsToOrganisationalUnits.findFirst({
 				where: {
-					personId: draftPersonId,
-					organisationalUnitId: draftOrganisationalUnitId,
+					personDocumentId: personId,
+					organisationalUnitDocumentId: organisationalUnitId,
 					roleTypeId,
 				},
 				columns: { id: true },
@@ -85,25 +90,16 @@ export const createContributionAction = createServerAction(
 				return { error: "duplicate" as const };
 			}
 
-			const unit = await tx.query.organisationalUnits.findFirst({
-				where: { id: draftOrganisationalUnitId },
-				columns: {},
-				with: { type: { columns: { type: true } } },
-			});
-
 			const row = await tx
 				.insert(schema.personsToOrganisationalUnits)
 				.values({
-					personId: draftPersonId,
-					organisationalUnitId: draftOrganisationalUnitId,
+					personDocumentId: personId,
+					organisationalUnitDocumentId: organisationalUnitId,
 					roleTypeId,
 					duration,
 				})
 				.returning({ id: schema.personsToOrganisationalUnits.id })
 				.then((rows) => rows[0]!);
-
-			await touchVersion(tx, draftPersonId);
-			await touchVersion(tx, draftOrganisationalUnitId);
 
 			await recordAuditEvent(tx, {
 				actorUserId: user?.id,
@@ -113,7 +109,7 @@ export const createContributionAction = createServerAction(
 				summary: getAuditSummaryFromFormData(formData),
 			});
 
-			return { row, targetUnitType: unit?.type.type };
+			return { row, targetUnitType: unit.unitType };
 		});
 
 		if ("error" in returned) {

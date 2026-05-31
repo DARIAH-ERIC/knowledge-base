@@ -2,7 +2,6 @@ import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
-import { latestEditableEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
 import { alias, and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
 
@@ -60,12 +59,19 @@ export async function getInstitutionRelations(
 		schema.organisationalUnitTypes.type,
 		"institution" as typeof schema.organisationalUnitTypes.$inferSelect.type,
 	);
-	const lifecycleWhere = latestEditableEntityVersionWhere();
+	// Unit↔unit relations are document-level; resolve both endpoints to their latest editable version.
+	const institutionEntities = alias(schema.entities, "institution_entities");
+	const institutionDocumentLifecycle = alias(
+		schema.documentLifecycle,
+		"institution_document_lifecycle",
+	);
+	const relatedDocumentLifecycle = alias(schema.documentLifecycle, "related_document_lifecycle");
+	const institutionPickedVersion = sql`COALESCE(${institutionDocumentLifecycle.draftId}, ${institutionDocumentLifecycle.publishedId})`;
+	const relatedPickedVersion = sql`COALESCE(${relatedDocumentLifecycle.draftId}, ${relatedDocumentLifecycle.publishedId})`;
 	const query = q?.trim();
 	const where =
 		query != null && query !== ""
 			? and(
-					lifecycleWhere,
 					baseWhere,
 					or(
 						ilike(schema.organisationalUnits.name, `%${query}%`),
@@ -105,7 +111,7 @@ export async function getInstitutionRelations(
 			.select({
 				id: schema.organisationalUnitsRelations.id,
 				institutionName: schema.organisationalUnits.name,
-				institutionSlug: schema.entities.slug,
+				institutionSlug: institutionEntities.slug,
 				statusType: schema.organisationalUnitStatus.status,
 				relatedUnitName: relatedOrganisationalUnits.name,
 				relatedUnitType: relatedOrganisationalUnitTypes.type,
@@ -113,12 +119,17 @@ export async function getInstitutionRelations(
 			})
 			.from(schema.organisationalUnitsRelations)
 			.innerJoin(
-				schema.organisationalUnits,
-				eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.unitId),
+				institutionEntities,
+				eq(institutionEntities.id, schema.organisationalUnitsRelations.unitDocumentId),
 			)
-			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
-			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(
+				institutionDocumentLifecycle,
+				eq(institutionDocumentLifecycle.documentId, institutionEntities.id),
+			)
+			.innerJoin(
+				schema.organisationalUnits,
+				sql`${schema.organisationalUnits.id} = ${institutionPickedVersion}`,
+			)
 			.innerJoin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
@@ -128,14 +139,21 @@ export async function getInstitutionRelations(
 				eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
 			)
 			.innerJoin(
+				relatedDocumentLifecycle,
+				eq(
+					relatedDocumentLifecycle.documentId,
+					schema.organisationalUnitsRelations.relatedUnitDocumentId,
+				),
+			)
+			.innerJoin(
 				relatedOrganisationalUnits,
-				eq(relatedOrganisationalUnits.id, schema.organisationalUnitsRelations.relatedUnitId),
+				sql`${relatedOrganisationalUnits.id} = ${relatedPickedVersion}`,
 			)
 			.innerJoin(
 				relatedOrganisationalUnitTypes,
 				eq(relatedOrganisationalUnitTypes.id, relatedOrganisationalUnits.typeId),
 			)
-			.where(where ?? and(lifecycleWhere, baseWhere))
+			.where(where ?? baseWhere)
 			.orderBy(orderBy)
 			.limit(limit)
 			.offset(offset),
@@ -143,11 +161,16 @@ export async function getInstitutionRelations(
 			.select({ total: count() })
 			.from(schema.organisationalUnitsRelations)
 			.innerJoin(
-				schema.organisationalUnits,
-				eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.unitId),
+				institutionDocumentLifecycle,
+				eq(
+					institutionDocumentLifecycle.documentId,
+					schema.organisationalUnitsRelations.unitDocumentId,
+				),
 			)
-			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
-			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
+			.innerJoin(
+				schema.organisationalUnits,
+				sql`${schema.organisationalUnits.id} = ${institutionPickedVersion}`,
+			)
 			.innerJoin(
 				schema.organisationalUnitTypes,
 				eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
@@ -157,14 +180,21 @@ export async function getInstitutionRelations(
 				eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
 			)
 			.innerJoin(
+				relatedDocumentLifecycle,
+				eq(
+					relatedDocumentLifecycle.documentId,
+					schema.organisationalUnitsRelations.relatedUnitDocumentId,
+				),
+			)
+			.innerJoin(
 				relatedOrganisationalUnits,
-				eq(relatedOrganisationalUnits.id, schema.organisationalUnitsRelations.relatedUnitId),
+				sql`${relatedOrganisationalUnits.id} = ${relatedPickedVersion}`,
 			)
 			.innerJoin(
 				relatedOrganisationalUnitTypes,
 				eq(relatedOrganisationalUnitTypes.id, relatedOrganisationalUnits.typeId),
 			)
-			.where(where ?? and(lifecycleWhere, baseWhere)),
+			.where(where ?? baseWhere),
 	]);
 
 	return {

@@ -19,27 +19,13 @@ export const impactCaseStudiesLifecycleAdapter: EntityLifecycleAdapter = {
 		}
 		await tx.insert(schema.impactCaseStudies).values({ id: targetVersionId, ...source });
 
-		const contributors = await tx
-			.select({
-				personId: schema.impactCaseStudiesToPersons.personId,
-				role: schema.impactCaseStudiesToPersons.role,
-			})
-			.from(schema.impactCaseStudiesToPersons)
-			.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyId, sourceVersionId));
-
-		if (contributors.length > 0) {
-			await tx.insert(schema.impactCaseStudiesToPersons).values(
-				contributors.map((c) => {
-					return { impactCaseStudyId: targetVersionId, ...c };
-				}),
-			);
-		}
+		// Contributors (impactCaseStudiesToPersons) are document-level and shared across versions, so
+		// they are not cloned here.
 	},
 
 	async wipeSubtype(tx, versionId) {
-		await tx
-			.delete(schema.impactCaseStudiesToPersons)
-			.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyId, versionId));
+		// Contributors are document-level; they are removed by deleteDocumentVersionTail when the whole
+		// document is deleted, not when a single version is wiped.
 		await tx.delete(schema.impactCaseStudies).where(eq(schema.impactCaseStudies.id, versionId));
 	},
 };

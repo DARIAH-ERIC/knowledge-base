@@ -1,10 +1,11 @@
+import { assert } from "@acdh-oeaw/lib";
 import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
 
 import type { WorkingGroupReportSummaryData } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-summary";
 import { type Action, can } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
-import { and, eq, inArray, sql } from "@/lib/db/sql";
+import { alias, and, eq, inArray, sql } from "@/lib/db/sql";
 
 export interface WorkingGroupReportData {
 	id: string;
@@ -33,7 +34,7 @@ async function getWorkingGroupReportData(id: string): Promise<WorkingGroupReport
 			numberOfMembers: true,
 			mailingList: true,
 			campaignId: true,
-			workingGroupId: true,
+			workingGroupDocumentId: true,
 		},
 		with: {
 			campaign: { columns: { year: true, status: true } },
@@ -56,6 +57,7 @@ async function getWorkingGroupReportData(id: string): Promise<WorkingGroupReport
 		return null;
 	}
 
+	const personDocumentLifecycle = alias(schema.documentLifecycle, "person_document_lifecycle");
 	const [chairs, questions] = await Promise.all([
 		db
 			.select({
@@ -65,8 +67,15 @@ async function getWorkingGroupReportData(id: string): Promise<WorkingGroupReport
 			})
 			.from(schema.personsToOrganisationalUnits)
 			.innerJoin(
+				personDocumentLifecycle,
+				eq(
+					personDocumentLifecycle.documentId,
+					schema.personsToOrganisationalUnits.personDocumentId,
+				),
+			)
+			.innerJoin(
 				schema.persons,
-				eq(schema.persons.id, schema.personsToOrganisationalUnits.personId),
+				sql`${schema.persons.id} = COALESCE(${personDocumentLifecycle.draftId}, ${personDocumentLifecycle.publishedId})`,
 			)
 			.innerJoin(
 				schema.personRoleTypes,
@@ -74,7 +83,11 @@ async function getWorkingGroupReportData(id: string): Promise<WorkingGroupReport
 			)
 			.where(
 				and(
-					eq(schema.personsToOrganisationalUnits.organisationalUnitId, report.workingGroupId),
+					// report.workingGroupDocumentId is the org-unit document id directly.
+					eq(
+						schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
+						report.workingGroupDocumentId,
+					),
 					inArray(schema.personRoleTypes.type, ["is_chair_of", "is_vice_chair_of"]),
 					sql`
 						${schema.personsToOrganisationalUnits.duration} && tstzrange (
@@ -93,6 +106,9 @@ async function getWorkingGroupReportData(id: string): Promise<WorkingGroupReport
 	]);
 
 	const answerMap = new Map(report.answers.map((a) => [a.questionId, a.answer]));
+
+	// A working group report always references a published working group.
+	assert(report.workingGroup, "Working group report is missing its published working group.");
 
 	return {
 		id: report.id,
@@ -131,6 +147,9 @@ async function getWorkingGroupReportHeader(
 	if (report == null) {
 		return null;
 	}
+
+	// A working group report always references a published working group.
+	assert(report.workingGroup, "Working group report is missing its published working group.");
 
 	return {
 		id: report.id,

@@ -110,13 +110,13 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 				initialPersonTotal={initialPersonTotal}
 				relations={personRelations}
 				roleOptions={personRelationRoleOptions}
-				unitId={governanceBody.id}
+				unitId={documentId}
 			/>
 
 			<UnitRelationsSection
 				relations={relations}
 				statusOptions={unitRelationStatusOptions}
-				unitId={governanceBody.id}
+				unitId={documentId}
 			/>
 		</Fragment>
 	);

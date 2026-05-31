@@ -158,8 +158,8 @@ async function seedWithMixedStatuses(db: Database) {
 	await db.insert(schema.organisationalUnitsRelations).values(
 		items.slice(1, 3).map((item) => {
 			return {
-				unitId: item.organisationalUnit.id,
-				relatedUnitId: items[0]!.organisationalUnit.id,
+				unitDocumentId: item.entity.id,
+				relatedUnitDocumentId: items[0]!.entity.id,
 				status: memberStatusId,
 				duration: { start: pastStart },
 			};
@@ -169,8 +169,8 @@ async function seedWithMixedStatuses(db: Database) {
 	// Inactive: end date in the past
 	const inactiveEnd = f.date.between({ from: pastStart, to: new Date() });
 	await db.insert(schema.organisationalUnitsRelations).values({
-		unitId: items[3]!.organisationalUnit.id,
-		relatedUnitId: items[0]!.organisationalUnit.id,
+		unitDocumentId: items[3]!.entity.id,
+		relatedUnitDocumentId: items[0]!.entity.id,
 		status: memberStatusId,
 		duration: { start: pastStart, end: inactiveEnd },
 	});
@@ -277,8 +277,8 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 	await db.insert(schema.organisationalUnitsRelations).values(
 		items.slice(1).map((item) => {
 			return {
-				unitId: item.organisationalUnit.id,
-				relatedUnitId: items[0]!.organisationalUnit.id,
+				unitDocumentId: item.entity.id,
+				relatedUnitDocumentId: items[0]!.entity.id,
 				status: f.helpers.arrayElement(unitStatus).id,
 				duration: {
 					start,
@@ -321,8 +321,8 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 	});
 
 	await db.insert(schema.personsToOrganisationalUnits).values({
-		personId: chair.person.id,
-		organisationalUnitId: chair.affiliation.organisationalUnit.id,
+		personDocumentId: chair.entity.id,
+		organisationalUnitDocumentId: chair.affiliation.entity.id,
 		roleTypeId: affiliatedRoleType.id,
 		duration: { start },
 	});
@@ -330,8 +330,8 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 	await db.insert(schema.personsToOrganisationalUnits).values(
 		items.slice(1).map((item) => {
 			return {
-				personId: chair.person.id,
-				organisationalUnitId: item.organisationalUnit.id,
+				personDocumentId: chair.entity.id,
+				organisationalUnitDocumentId: item.entity.id,
 				roleTypeId: chairRoleType.id,
 				duration: { start },
 			};

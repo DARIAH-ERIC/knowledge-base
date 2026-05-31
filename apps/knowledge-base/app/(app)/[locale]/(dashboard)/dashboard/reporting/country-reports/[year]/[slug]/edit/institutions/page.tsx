@@ -48,12 +48,11 @@ export default async function DashboardReportingCountryReportInstitutionsPage(
 		(id) =>
 			db.query.countryReports.findFirst({
 				where: { id },
-				columns: { id: true },
+				columns: { id: true, countryDocumentId: true },
 				with: {
 					campaign: { columns: { year: true } },
-					country: { columns: { id: true } },
 					institutions: {
-						columns: { id: true, organisationalUnitId: true },
+						columns: { id: true, organisationalUnitDocumentId: true },
 						with: {
 							organisationalUnit: { columns: { name: true, acronym: true } },
 						},
@@ -72,11 +71,12 @@ export default async function DashboardReportingCountryReportInstitutionsPage(
 	}
 
 	const { year } = report.campaign;
-	const claimedOrgUnitIds = report.institutions.map((i) => i.organisationalUnitId);
+	const claimedOrgUnitIds = report.institutions.map((i) => i.organisationalUnitDocumentId);
 
 	const availableInstitutions = await db
 		.selectDistinct({
-			id: schema.organisationalUnits.id,
+			// institutions in a report are keyed by document id.
+			id: schema.entityVersions.entityId,
 			name: schema.organisationalUnits.name,
 			acronym: schema.organisationalUnits.acronym,
 		})
@@ -85,7 +85,7 @@ export default async function DashboardReportingCountryReportInstitutionsPage(
 		.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
 		.innerJoin(
 			schema.organisationalUnitsRelations,
-			eq(schema.organisationalUnitsRelations.unitId, schema.organisationalUnits.id),
+			eq(schema.organisationalUnitsRelations.unitDocumentId, schema.entityVersions.entityId),
 		)
 		.innerJoin(
 			schema.organisationalUnitStatus,
@@ -94,7 +94,8 @@ export default async function DashboardReportingCountryReportInstitutionsPage(
 		.where(
 			and(
 				publishedEntityVersionWhere(),
-				eq(schema.organisationalUnitsRelations.relatedUnitId, report.country.id),
+				// unit↔unit relations and the report's country are both document-level.
+				eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, report.countryDocumentId),
 				inArray(schema.organisationalUnitStatus.status, [
 					"is_partner_institution_of",
 					"is_national_coordinating_institution_in",
@@ -107,7 +108,7 @@ export default async function DashboardReportingCountryReportInstitutionsPage(
 					)
 				`,
 				...(claimedOrgUnitIds.length > 0
-					? [notInArray(schema.organisationalUnits.id, claimedOrgUnitIds)]
+					? [notInArray(schema.entityVersions.entityId, claimedOrgUnitIds)]
 					: []),
 			),
 		)

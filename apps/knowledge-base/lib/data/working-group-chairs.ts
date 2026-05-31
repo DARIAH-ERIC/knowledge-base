@@ -3,57 +3,41 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { db } from "@/lib/db";
-import { and, eq } from "@/lib/db/sql";
+import { alias, and, eq, sql } from "@/lib/db/sql";
 
-export async function getWorkingGroupChairs(unitId: string) {
+/**
+ * `unitDocumentId` is the working group's `entities.id`. Each chair person is resolved to its
+ * latest editable version for display.
+ */
+export async function getWorkingGroupChairs(unitDocumentId: string) {
+	const personDocumentLifecycle = alias(schema.documentLifecycle, "person_document_lifecycle");
+
 	return db
 		.select({
 			id: schema.personsToOrganisationalUnits.id,
-			personId: schema.personsToOrganisationalUnits.personId,
+			personId: schema.personsToOrganisationalUnits.personDocumentId,
 			personName: schema.persons.name,
 			duration: schema.personsToOrganisationalUnits.duration,
 		})
 		.from(schema.personsToOrganisationalUnits)
-		.innerJoin(schema.persons, eq(schema.persons.id, schema.personsToOrganisationalUnits.personId))
+		.innerJoin(
+			personDocumentLifecycle,
+			eq(personDocumentLifecycle.documentId, schema.personsToOrganisationalUnits.personDocumentId),
+		)
+		.innerJoin(
+			schema.persons,
+			sql`${schema.persons.id} = COALESCE(${personDocumentLifecycle.draftId}, ${personDocumentLifecycle.publishedId})`,
+		)
 		.innerJoin(
 			schema.personRoleTypes,
 			eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
 		)
 		.where(
 			and(
-				eq(schema.personsToOrganisationalUnits.organisationalUnitId, unitId),
+				eq(schema.personsToOrganisationalUnits.organisationalUnitDocumentId, unitDocumentId),
 				eq(schema.personRoleTypes.type, "is_chair_of"),
 			),
 		);
 }
 
 export type WorkingGroupChair = Awaited<ReturnType<typeof getWorkingGroupChairs>>[number];
-
-export type RelationLifecycleStatus = "changed" | "new";
-
-function durationKey(duration: WorkingGroupChair["duration"]): string {
-	return [duration.start.toISOString(), duration.end?.toISOString() ?? ""].join(":");
-}
-
-export function annotateWorkingGroupChairLifecycle(
-	draftChairs: Array<WorkingGroupChair>,
-	publishedChairs: Array<WorkingGroupChair>,
-): Array<WorkingGroupChair & { lifecycleStatus?: RelationLifecycleStatus }> {
-	const publishedByPersonId = new Map(
-		publishedChairs.map((chair) => [chair.personId, chair] as const),
-	);
-
-	return draftChairs.map((chair) => {
-		const published = publishedByPersonId.get(chair.personId);
-
-		if (published == null) {
-			return { ...chair, lifecycleStatus: "new" };
-		}
-
-		if (durationKey(chair.duration) !== durationKey(published.duration)) {
-			return { ...chair, lifecycleStatus: "changed" };
-		}
-
-		return chair;
-	});
-}

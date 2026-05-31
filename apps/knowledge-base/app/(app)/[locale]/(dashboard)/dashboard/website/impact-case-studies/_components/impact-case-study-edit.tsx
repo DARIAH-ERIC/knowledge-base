@@ -89,7 +89,7 @@ export function ImpactCaseStudyEditForm(props: Readonly<ImpactCaseStudyEditFormP
 			/>
 
 			<ArticleContributorsSection
-				articleId={impactCaseStudy.id}
+				articleId={documentId}
 				contributors={contributors}
 				createAction={createImpactCaseStudyContributorAction}
 				deleteAction={deleteImpactCaseStudyContributorAction}

@@ -98,7 +98,7 @@ export function CountryEditForm(props: Readonly<CountryEditFormProps>): ReactNod
 			<UnitRelationsSection
 				relations={relations}
 				statusOptions={unitRelationStatusOptions}
-				unitId={country.id}
+				unitId={documentId}
 			/>
 		</Fragment>
 	);

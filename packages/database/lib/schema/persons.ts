@@ -5,8 +5,8 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { assets } from "./assets";
-import { entityVersions } from "./entities";
-import { organisationalUnitTypes, organisationalUnits } from "./organisational-units";
+import { entities, entityVersions } from "./entities";
+import { organisationalUnitTypes } from "./organisational-units";
 
 export const personRoleTypesEnum = [
 	"is_affiliated_with",
@@ -55,23 +55,36 @@ export const personRoleTypes = p.snakeCase.table(
 	(t) => [p.check("person_role_types_type_enum_check", inArray(t.type, personRoleTypesEnum))],
 );
 
-export const personsToOrganisationalUnits = p.snakeCase.table("persons_to_organisational_units", {
-	id: p.uuid("id").primaryKey().default(uuidv7()),
-	personId: p
-		.uuid("person_id")
-		.notNull()
-		.references(() => persons.id),
-	organisationalUnitId: p
-		.uuid("organisational_unit_id")
-		.notNull()
-		.references(() => organisationalUnits.id),
-	roleTypeId: p
-		.uuid("role_type_id")
-		.notNull()
-		.references(() => personRoleTypes.id),
-	duration: f.timestampRange("duration").notNull(),
-	...f.timestamps(),
-});
+/**
+ * Document-level relation: a person's membership/role in an organisational unit. Both endpoints
+ * reference `entities.id` (document IDs), not version IDs, so a relation is stable across the
+ * draft/publish lifecycle of either side and is never cloned by the lifecycle adapters. Public
+ * reads resolve each endpoint through its published version; admin reads through
+ * draft-or-published.
+ */
+export const personsToOrganisationalUnits = p.snakeCase.table(
+	"persons_to_organisational_units",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		personDocumentId: p
+			.uuid("person_document_id")
+			.notNull()
+			.references(() => entities.id),
+		organisationalUnitDocumentId: p
+			.uuid("organisational_unit_document_id")
+			.notNull()
+			.references(() => entities.id),
+		roleTypeId: p
+			.uuid("role_type_id")
+			.notNull()
+			.references(() => personRoleTypes.id),
+		duration: f.timestampRange("duration").notNull(),
+		...f.timestamps(),
+	},
+	// The same (person, org, role) relation may recur over non-overlapping periods, so uniqueness is
+	// enforced by a GiST exclusion constraint on the duration (drizzle has no builder for it, so it
+	// lives in the migration `*_person_org_role_no_overlap`), not a plain unique constraint here.
+);
 
 export type PersonToOrganisationalUnit = typeof personsToOrganisationalUnits.$inferSelect;
 export type PersonToOrganisationalUnitInput = typeof personsToOrganisationalUnits.$inferInsert;

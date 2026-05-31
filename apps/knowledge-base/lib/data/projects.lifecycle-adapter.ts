@@ -26,22 +26,8 @@ export const projectsLifecycleAdapter: EntityLifecycleAdapter = {
 		}
 		await tx.insert(schema.projects).values({ id: targetVersionId, ...source });
 
-		const partners = await tx
-			.select({
-				unitId: schema.projectsToOrganisationalUnits.unitId,
-				roleId: schema.projectsToOrganisationalUnits.roleId,
-				duration: schema.projectsToOrganisationalUnits.duration,
-			})
-			.from(schema.projectsToOrganisationalUnits)
-			.where(eq(schema.projectsToOrganisationalUnits.projectId, sourceVersionId));
-
-		if (partners.length > 0) {
-			await tx.insert(schema.projectsToOrganisationalUnits).values(
-				partners.map((p) => {
-					return { projectId: targetVersionId, ...p };
-				}),
-			);
-		}
+		// projectsToOrganisationalUnits is a document-level relation (keyed by entities.id) and is not
+		// cloned per version — see projects.ts schema.
 
 		const socialMedia = await tx
 			.select({ socialMediaId: schema.projectsToSocialMedia.socialMediaId })
@@ -58,9 +44,6 @@ export const projectsLifecycleAdapter: EntityLifecycleAdapter = {
 	},
 
 	async wipeSubtype(tx, versionId) {
-		await tx
-			.delete(schema.projectsToOrganisationalUnits)
-			.where(eq(schema.projectsToOrganisationalUnits.projectId, versionId));
 		await tx
 			.delete(schema.projectsToSocialMedia)
 			.where(eq(schema.projectsToSocialMedia.projectId, versionId));

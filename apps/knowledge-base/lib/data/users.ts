@@ -3,7 +3,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { count, desc, eq, ilike, or } from "@/lib/db/sql";
+import { count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
 
 export type UsersSort = "name" | "email" | "role" | "canManageAdmins" | "isEmailVerified";
 
@@ -120,8 +120,8 @@ export async function getUserForAdmin(
 			email: true,
 			role: true,
 			canManageAdmins: true,
-			personId: true,
-			organisationalUnitId: true,
+			personDocumentId: true,
+			organisationalUnitDocumentId: true,
 		},
 	});
 
@@ -129,25 +129,44 @@ export async function getUserForAdmin(
 		return null;
 	}
 
+	// The actor is stored as a document id; resolve it to its latest editable version for the name,
+	// and report the document id back (matching the document-id actor pickers).
 	const [person, organisationalUnit] = await Promise.all([
-		user.personId != null
+		user.personDocumentId != null
 			? db
-					.select({ id: schema.persons.id, name: schema.persons.name })
+					.select({ id: schema.documentLifecycle.documentId, name: schema.persons.name })
 					.from(schema.persons)
-					.where(eq(schema.persons.id, user.personId))
+					.innerJoin(
+						schema.documentLifecycle,
+						sql`${schema.persons.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
+					)
+					.where(eq(schema.documentLifecycle.documentId, user.personDocumentId))
 					.then((rows) => rows[0] ?? null)
 			: null,
-		user.organisationalUnitId != null
+		user.organisationalUnitDocumentId != null
 			? db
-					.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+					.select({
+						id: schema.documentLifecycle.documentId,
+						name: schema.organisationalUnits.name,
+					})
 					.from(schema.organisationalUnits)
-					.where(eq(schema.organisationalUnits.id, user.organisationalUnitId))
+					.innerJoin(
+						schema.documentLifecycle,
+						sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
+					)
+					.where(eq(schema.documentLifecycle.documentId, user.organisationalUnitDocumentId))
 					.then((rows) => rows[0] ?? null)
 			: null,
 	]);
 
 	return {
-		...user,
+		id: user.id,
+		name: user.name,
+		email: user.email,
+		role: user.role,
+		canManageAdmins: user.canManageAdmins,
+		personId: user.personDocumentId,
+		organisationalUnitId: user.organisationalUnitDocumentId,
 		person,
 		organisationalUnit,
 	};

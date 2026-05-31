@@ -6,6 +6,7 @@ import { getContentBlocks } from "@/lib/content-blocks";
 import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
 import { generateImageUrl } from "@/lib/images";
+import { getPublishedProjectPartners } from "@/lib/project-partners";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq, not, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
@@ -51,7 +52,7 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 					columns: { updatedAt: true },
 					with: {
 						entity: {
-							columns: { slug: true },
+							columns: { slug: true, id: true },
 						},
 					},
 				},
@@ -160,7 +161,7 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 					columns: { updatedAt: true },
 					with: {
 						entity: {
-							columns: { slug: true },
+							columns: { slug: true, id: true },
 						},
 					},
 				},
@@ -187,52 +188,6 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 						},
 					},
 				},
-				projectsToOrganisationalUnits: {
-					where: {
-						unit: {
-							entityVersion: {
-								status: {
-									type: "published",
-								},
-							},
-						},
-					},
-					columns: {},
-					with: {
-						role: {
-							columns: {
-								id: true,
-								role: true,
-							},
-						},
-						unit: {
-							columns: {
-								id: true,
-								acronym: true,
-								name: true,
-							},
-							with: {
-								socialMedia: {
-									columns: {
-										url: true,
-									},
-									with: {
-										type: {
-											columns: {
-												type: true,
-											},
-										},
-									},
-								},
-								type: {
-									columns: {
-										type: true,
-									},
-								},
-							},
-						},
-					},
-				},
 			},
 		}),
 		getContentBlocks(db, id),
@@ -253,31 +208,18 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 		};
 	});
 
-	const { projectsToOrganisationalUnits, ...rest } = flattenEntityVersion(item);
+	const projectPartners = await getPublishedProjectPartners(db, item.entityVersion.entity.id);
+	const rest = flattenEntityVersion(item);
 
-	const funders = projectsToOrganisationalUnits
+	const funders = projectPartners
 		.filter((r) => r.role.role === "funder")
 		.map((r) => {
-			return {
-				...r.unit,
-				socialMedia: r.unit.socialMedia.map((sm) => {
-					return { url: sm.url, type: sm.type.type };
-				}),
-				type: r.unit.type.type,
-				role: r.role.role,
-			};
+			return { ...r.unit, role: r.role.role };
 		});
-	const partners = projectsToOrganisationalUnits
+	const partners = projectPartners
 		.filter((r) => r.role.role !== "funder")
 		.map((r) => {
-			return {
-				...r.unit,
-				socialMedia: r.unit.socialMedia.map((sm) => {
-					return { url: sm.url, type: sm.type.type };
-				}),
-				type: r.unit.type.type,
-				role: r.role.role,
-			};
+			return { ...r.unit, role: r.role.role };
 		});
 
 	return {
@@ -320,7 +262,7 @@ export async function getProjectSlugs(db: Database | Transaction, params: GetPro
 					columns: { updatedAt: true },
 					with: {
 						entity: {
-							columns: { slug: true },
+							columns: { slug: true, id: true },
 						},
 					},
 				},
@@ -384,7 +326,7 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 				columns: { updatedAt: true },
 				with: {
 					entity: {
-						columns: { slug: true },
+						columns: { slug: true, id: true },
 					},
 				},
 			},
@@ -411,52 +353,6 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 					},
 				},
 			},
-			projectsToOrganisationalUnits: {
-				where: {
-					unit: {
-						entityVersion: {
-							status: {
-								type: "published",
-							},
-						},
-					},
-				},
-				columns: {},
-				with: {
-					role: {
-						columns: {
-							id: true,
-							role: true,
-						},
-					},
-					unit: {
-						columns: {
-							id: true,
-							acronym: true,
-							name: true,
-						},
-						with: {
-							socialMedia: {
-								columns: {
-									url: true,
-								},
-								with: {
-									type: {
-										columns: {
-											type: true,
-										},
-									},
-								},
-							},
-							type: {
-								columns: {
-									type: true,
-								},
-							},
-						},
-					},
-				},
-			},
 		},
 	});
 
@@ -477,31 +373,18 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 
 	const fields = await getContentBlocks(db, item.id);
 
-	const { projectsToOrganisationalUnits, ...rest } = flattenEntityVersion(item);
+	const projectPartners = await getPublishedProjectPartners(db, item.entityVersion.entity.id);
+	const rest = flattenEntityVersion(item);
 
-	const funders = projectsToOrganisationalUnits
+	const funders = projectPartners
 		.filter((r) => r.role.role === "funder")
 		.map((r) => {
-			return {
-				...r.unit,
-				socialMedia: r.unit.socialMedia.map((sm) => {
-					return { url: sm.url, type: sm.type.type };
-				}),
-				type: r.unit.type.type,
-				role: r.role.role,
-			};
+			return { ...r.unit, role: r.role.role };
 		});
-	const partners = projectsToOrganisationalUnits
+	const partners = projectPartners
 		.filter((r) => r.role.role !== "funder")
 		.map((r) => {
-			return {
-				...r.unit,
-				socialMedia: r.unit.socialMedia.map((sm) => {
-					return { url: sm.url, type: sm.type.type };
-				}),
-				type: r.unit.type.type,
-				role: r.role.role,
-			};
+			return { ...r.unit, role: r.role.role };
 		});
 
 	return {

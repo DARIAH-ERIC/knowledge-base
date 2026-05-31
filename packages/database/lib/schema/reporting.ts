@@ -5,7 +5,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
-import { organisationalUnits } from "./organisational-units";
+import { entities } from "./entities";
 import { personsToOrganisationalUnits } from "./persons";
 import { projects } from "./projects";
 import { services } from "./services";
@@ -60,10 +60,12 @@ export const countryReports = p.snakeCase.table(
 			.uuid("campaign_id")
 			.notNull()
 			.references(() => reportingCampaigns.id),
-		countryId: p
-			.uuid("country_id")
+		// Document-level: references the country's `entities.id`, not a version id, so the report's
+		// identity is stable across the country's draft/publish lifecycle.
+		countryDocumentId: p
+			.uuid("country_document_id")
 			.notNull()
-			.references(() => organisationalUnits.id),
+			.references(() => entities.id),
 		status: p.text("status", { enum: reportStatusEnum }).notNull().default("draft"),
 		totalContributors: p.integer("total_contributors"),
 		smallEvents: p.integer("small_events"),
@@ -75,7 +77,9 @@ export const countryReports = p.snakeCase.table(
 		...f.timestamps(),
 	},
 	(t) => [
-		p.unique("country_reports_campaign_id_country_id_unique").on(t.campaignId, t.countryId),
+		p
+			.unique("country_reports_campaign_id_country_document_id_unique")
+			.on(t.campaignId, t.countryDocumentId),
 		p.check("country_reports_status_enum_check", inArray(t.status, reportStatusEnum)),
 	],
 );
@@ -95,10 +99,11 @@ export const workingGroupReports = p.snakeCase.table(
 			.uuid("campaign_id")
 			.notNull()
 			.references(() => reportingCampaigns.id),
-		workingGroupId: p
-			.uuid("working_group_id")
+		// Document-level: references the working group's `entities.id`, not a version id.
+		workingGroupDocumentId: p
+			.uuid("working_group_document_id")
 			.notNull()
-			.references(() => organisationalUnits.id),
+			.references(() => entities.id),
 		status: p.text("status", { enum: reportStatusEnum }).notNull().default("draft"),
 		numberOfMembers: p.integer("number_of_members"),
 		mailingList: p.text("mailing_list"),
@@ -106,8 +111,8 @@ export const workingGroupReports = p.snakeCase.table(
 	},
 	(t) => [
 		p
-			.unique("working_group_reports_campaign_id_working_group_id_unique")
-			.on(t.campaignId, t.workingGroupId),
+			.unique("working_group_reports_campaign_wg_document_unique")
+			.on(t.campaignId, t.workingGroupDocumentId),
 		p.check("working_group_reports_status_enum_check", inArray(t.status, reportStatusEnum)),
 	],
 );
@@ -308,12 +313,13 @@ export const countryReportInstitutions = p.snakeCase.table(
 			.uuid("country_report_id")
 			.notNull()
 			.references(() => countryReports.id),
-		organisationalUnitId: p
-			.uuid("organisational_unit_id")
+		// Document-level: references the institution's `entities.id`, not a version id.
+		organisationalUnitDocumentId: p
+			.uuid("organisational_unit_document_id")
 			.notNull()
-			.references(() => organisationalUnits.id),
+			.references(() => entities.id),
 	},
-	(t) => [p.unique().on(t.countryReportId, t.organisationalUnitId)],
+	(t) => [p.unique().on(t.countryReportId, t.organisationalUnitDocumentId)],
 );
 
 export type CountryReportInstitution = typeof countryReportInstitutions.$inferSelect;
@@ -577,13 +583,14 @@ export const reportingCampaignCountryThresholds = p.snakeCase.table(
 			.uuid("campaign_id")
 			.notNull()
 			.references(() => reportingCampaigns.id),
-		countryId: p
-			.uuid("country_id")
+		// Document-level: references the country's `entities.id`, not a version id.
+		countryDocumentId: p
+			.uuid("country_document_id")
 			.notNull()
-			.references(() => organisationalUnits.id),
+			.references(() => entities.id),
 		amount: p.numeric("amount", { mode: "number", precision: 12, scale: 2 }).notNull(),
 	},
-	(t) => [p.unique().on(t.campaignId, t.countryId)],
+	(t) => [p.unique().on(t.campaignId, t.countryDocumentId)],
 );
 
 export type ReportingCampaignCountryThreshold =

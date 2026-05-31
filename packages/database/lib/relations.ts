@@ -236,8 +236,10 @@ export const relations = defineRelations(schema, (r) => {
 		},
 		impactCaseStudies: {
 			contributors: r.many.persons({
-				from: r.impactCaseStudies.id.through(r.impactCaseStudiesToPersons.impactCaseStudyId),
-				to: r.persons.id.through(r.impactCaseStudiesToPersons.personId),
+				from: r.impactCaseStudies.id.through(
+					r.impactCaseStudiesToPersons.impactCaseStudyDocumentId,
+				),
+				to: r.persons.id.through(r.impactCaseStudiesToPersons.personDocumentId),
 			}),
 			entityVersion: r.one.entityVersions({
 				from: r.impactCaseStudies.id,
@@ -262,7 +264,7 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 			projectsToOrganisationalUnits: r.many.projectsToOrganisationalUnits({
 				from: r.dariahProjects.id,
-				to: r.projectsToOrganisationalUnits.projectId,
+				to: r.projectsToOrganisationalUnits.projectDocumentId,
 			}),
 			scope: r.one.projectScopes({
 				from: r.dariahProjects.scopeId,
@@ -348,8 +350,8 @@ export const relations = defineRelations(schema, (r) => {
 				optional: false,
 			}),
 			organisationalUnits: r.many.organisationalUnits({
-				from: r.organisationalUnits.id.through(r.organisationalUnitsRelations.unitId),
-				to: r.organisationalUnits.id.through(r.organisationalUnitsRelations.relatedUnitId),
+				from: r.organisationalUnits.id.through(r.organisationalUnitsRelations.unitDocumentId),
+				to: r.organisationalUnits.id.through(r.organisationalUnitsRelations.relatedUnitDocumentId),
 			}),
 			socialMedia: r.many.socialMedia({
 				from: r.organisationalUnits.id.through(
@@ -364,7 +366,7 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 			services: r.many.services({
 				from: r.organisationalUnits.id.through(
-					r.servicesToOrganisationalUnits.organisationalUnitId,
+					r.servicesToOrganisationalUnits.organisationalUnitDocumentId,
 				),
 				to: r.services.id.through(r.servicesToOrganisationalUnits.serviceId),
 			}),
@@ -380,8 +382,8 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.assets.id,
 			}),
 			organisationalUnits: r.many.organisationalUnits({
-				from: r.projects.id.through(r.projectsToOrganisationalUnits.projectId),
-				to: r.organisationalUnits.id.through(r.projectsToOrganisationalUnits.unitId),
+				from: r.projects.id.through(r.projectsToOrganisationalUnits.projectDocumentId),
+				to: r.organisationalUnits.id.through(r.projectsToOrganisationalUnits.unitDocumentId),
 			}),
 			scope: r.one.projectScopes({
 				from: r.projects.scopeId,
@@ -394,18 +396,18 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 			projectsToOrganisationalUnits: r.many.projectsToOrganisationalUnits({
 				from: r.projects.id,
-				to: r.projectsToOrganisationalUnits.projectId,
+				to: r.projectsToOrganisationalUnits.projectDocumentId,
 			}),
 		},
 		projectsToOrganisationalUnits: {
-			project: r.one.projects({
-				from: r.projectsToOrganisationalUnits.projectId,
-				to: r.projects.id,
+			projectEntity: r.one.entities({
+				from: r.projectsToOrganisationalUnits.projectDocumentId,
+				to: r.entities.id,
 				optional: false,
 			}),
-			unit: r.one.organisationalUnits({
-				from: r.projectsToOrganisationalUnits.unitId,
-				to: r.organisationalUnits.id,
+			unitEntity: r.one.entities({
+				from: r.projectsToOrganisationalUnits.unitDocumentId,
+				to: r.entities.id,
 				optional: false,
 			}),
 			role: r.one.projectRoles({
@@ -438,14 +440,14 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 		},
 		personsToOrganisationalUnits: {
-			person: r.one.persons({
-				from: r.personsToOrganisationalUnits.personId,
-				to: r.persons.id,
+			personEntity: r.one.entities({
+				from: r.personsToOrganisationalUnits.personDocumentId,
+				to: r.entities.id,
 				optional: false,
 			}),
-			organisationalUnit: r.one.organisationalUnits({
-				from: r.personsToOrganisationalUnits.organisationalUnitId,
-				to: r.organisationalUnits.id,
+			organisationalUnitEntity: r.one.entities({
+				from: r.personsToOrganisationalUnits.organisationalUnitDocumentId,
+				to: r.entities.id,
 				optional: false,
 			}),
 			roleType: r.one.personRoleTypes({
@@ -497,7 +499,9 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 			organisationalUnits: r.many.organisationalUnits({
 				from: r.services.id.through(r.servicesToOrganisationalUnits.serviceId),
-				to: r.organisationalUnits.id.through(r.servicesToOrganisationalUnits.organisationalUnitId),
+				to: r.organisationalUnits.id.through(
+					r.servicesToOrganisationalUnits.organisationalUnitDocumentId,
+				),
 			}),
 			socialMedia: r.many.socialMedia({
 				from: r.services.id.through(r.servicesToSocialMedia.serviceId),
@@ -510,9 +514,9 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.services.id,
 				optional: false,
 			}),
-			organisationalUnit: r.one.organisationalUnits({
-				from: r.servicesToOrganisationalUnits.organisationalUnitId,
-				to: r.organisationalUnits.id,
+			organisationalUnitEntity: r.one.entities({
+				from: r.servicesToOrganisationalUnits.organisationalUnitDocumentId,
+				to: r.entities.id,
 				optional: false,
 			}),
 			role: r.one.organisationalUnitServiceRoles({
@@ -586,14 +590,14 @@ export const relations = defineRelations(schema, (r) => {
 			}),
 		},
 		users: {
-			person: r.one.persons({
-				from: r.users.personId,
-				to: r.persons.id,
+			personEntity: r.one.entities({
+				from: r.users.personDocumentId,
+				to: r.entities.id,
 				optional: true,
 			}),
-			organisationalUnit: r.one.organisationalUnits({
-				from: r.users.organisationalUnitId,
-				to: r.organisationalUnits.id,
+			organisationalUnitEntity: r.one.entities({
+				from: r.users.organisationalUnitDocumentId,
+				to: r.entities.id,
 				optional: true,
 			}),
 		},
@@ -637,10 +641,11 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.reportingCampaigns.id,
 				optional: false,
 			}),
+			// The report's country is a document id; resolve it to its published org-unit version through
+			// the documentLifecycle view so `with: { country }` keeps returning the org unit (nullable).
 			country: r.one.organisationalUnits({
-				from: r.countryReports.countryId,
-				to: r.organisationalUnits.id,
-				optional: false,
+				from: r.countryReports.countryDocumentId.through(r.documentLifecycle.documentId),
+				to: r.organisationalUnits.id.through(r.documentLifecycle.publishedId),
 			}),
 			contributions: r.many.countryReportContributions({
 				from: r.countryReports.id,
@@ -717,10 +722,12 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.countryReports.id,
 				optional: false,
 			}),
+			// Resolve the document id to its published org-unit version through the documentLifecycle view (nullable).
 			organisationalUnit: r.one.organisationalUnits({
-				from: r.countryReportInstitutions.organisationalUnitId,
-				to: r.organisationalUnits.id,
-				optional: false,
+				from: r.countryReportInstitutions.organisationalUnitDocumentId.through(
+					r.documentLifecycle.documentId,
+				),
+				to: r.organisationalUnits.id.through(r.documentLifecycle.publishedId),
 			}),
 		},
 		workingGroupReports: {
@@ -729,10 +736,10 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.reportingCampaigns.id,
 				optional: false,
 			}),
+			// Resolve the document id to its published org-unit version through the documentLifecycle view (nullable).
 			workingGroup: r.one.organisationalUnits({
-				from: r.workingGroupReports.workingGroupId,
-				to: r.organisationalUnits.id,
-				optional: false,
+				from: r.workingGroupReports.workingGroupDocumentId.through(r.documentLifecycle.documentId),
+				to: r.organisationalUnits.id.through(r.documentLifecycle.publishedId),
 			}),
 			socialMedia: r.many.workingGroupReportSocialMedia({
 				from: r.workingGroupReports.id,
@@ -823,10 +830,12 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.reportingCampaigns.id,
 				optional: false,
 			}),
+			// Resolve the document id to its published org-unit version through the documentLifecycle view (nullable).
 			country: r.one.organisationalUnits({
-				from: r.reportingCampaignCountryThresholds.countryId,
-				to: r.organisationalUnits.id,
-				optional: false,
+				from: r.reportingCampaignCountryThresholds.countryDocumentId.through(
+					r.documentLifecycle.documentId,
+				),
+				to: r.organisationalUnits.id.through(r.documentLifecycle.publishedId),
 			}),
 		},
 		navigationMenus: {
@@ -858,8 +867,10 @@ export const relations = defineRelations(schema, (r) => {
 		},
 		spotlightArticles: {
 			contributors: r.many.persons({
-				from: r.spotlightArticles.id.through(r.spotlightArticlesToPersons.spotlightArticleId),
-				to: r.persons.id.through(r.spotlightArticlesToPersons.personId),
+				from: r.spotlightArticles.id.through(
+					r.spotlightArticlesToPersons.spotlightArticleDocumentId,
+				),
+				to: r.persons.id.through(r.spotlightArticlesToPersons.personDocumentId),
 			}),
 			entityVersion: r.one.entityVersions({
 				from: r.spotlightArticles.id,

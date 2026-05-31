@@ -21,28 +21,11 @@ export const personsLifecycleAdapter: EntityLifecycleAdapter = {
 		}
 		await tx.insert(schema.persons).values({ id: targetVersionId, ...source });
 
-		const memberships = await tx
-			.select({
-				organisationalUnitId: schema.personsToOrganisationalUnits.organisationalUnitId,
-				roleTypeId: schema.personsToOrganisationalUnits.roleTypeId,
-				duration: schema.personsToOrganisationalUnits.duration,
-			})
-			.from(schema.personsToOrganisationalUnits)
-			.where(eq(schema.personsToOrganisationalUnits.personId, sourceVersionId));
-
-		if (memberships.length > 0) {
-			await tx.insert(schema.personsToOrganisationalUnits).values(
-				memberships.map((m) => {
-					return { personId: targetVersionId, ...m };
-				}),
-			);
-		}
+		// personsToOrganisationalUnits is a document-level relation (keyed by entities.id) and is
+		// not cloned per version — see persons.ts schema.
 	},
 
 	async wipeSubtype(tx, versionId) {
-		await tx
-			.delete(schema.personsToOrganisationalUnits)
-			.where(eq(schema.personsToOrganisationalUnits.personId, versionId));
 		await tx.delete(schema.persons).where(eq(schema.persons.id, versionId));
 	},
 };

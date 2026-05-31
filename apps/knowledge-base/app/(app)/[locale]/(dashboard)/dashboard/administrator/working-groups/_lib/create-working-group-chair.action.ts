@@ -10,8 +10,6 @@ import * as v from "valibot";
 
 import { CreateWorkingGroupChairActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/create-working-group-chair.schema";
 import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
-import { touchVersion } from "@/lib/data/entity-lifecycle";
-import { ensureOrganisationalUnitDraftVersion } from "@/lib/data/organisational-unit-drafts";
 import { db } from "@/lib/db";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
@@ -50,9 +48,14 @@ export const createWorkingGroupChairAction = createServerAction(
 		}
 
 		const returned = await db.transaction(async (tx) => {
-			const draftUnitId = await ensureOrganisationalUnitDraftVersion(tx, unitId);
+			// personId / unitId are document ids (entities.id). Relations are document-level and do not
+			// require the edited working group to be published (the person picker restricts to published).
 			const existing = await tx.query.personsToOrganisationalUnits.findFirst({
-				where: { personId, organisationalUnitId: draftUnitId, roleTypeId: roleType.id },
+				where: {
+					personDocumentId: personId,
+					organisationalUnitDocumentId: unitId,
+					roleTypeId: roleType.id,
+				},
 				columns: { id: true },
 			});
 
@@ -62,11 +65,14 @@ export const createWorkingGroupChairAction = createServerAction(
 
 			const row = await tx
 				.insert(schema.personsToOrganisationalUnits)
-				.values({ personId, organisationalUnitId: draftUnitId, roleTypeId: roleType.id, duration })
+				.values({
+					personDocumentId: personId,
+					organisationalUnitDocumentId: unitId,
+					roleTypeId: roleType.id,
+					duration,
+				})
 				.returning({ id: schema.personsToOrganisationalUnits.id })
 				.then((rows) => rows[0]!);
-
-			await touchVersion(tx, draftUnitId);
 
 			await recordAuditEvent(tx, {
 				actorUserId: user?.id,

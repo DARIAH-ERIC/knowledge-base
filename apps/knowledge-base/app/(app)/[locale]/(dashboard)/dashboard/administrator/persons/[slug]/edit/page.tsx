@@ -8,11 +8,7 @@ import { PersonEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/admin
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
-import {
-	annotatePersonContributionLifecycle,
-	getContributionRoleOptions,
-	getPersonContributions,
-} from "@/lib/data/contributions";
+import { getContributionRoleOptions, getPersonContributions } from "@/lib/data/contributions";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
 import { db } from "@/lib/db";
@@ -104,31 +100,26 @@ export default async function DashboardAdministratorEditPersonPage(
 		notFound();
 	}
 
-	const [contributions, contributionRoleOptions, biographyRows, publishedContributions] =
-		await Promise.all([
-			getPersonContributions(person.id),
-			getContributionRoleOptions(),
-			db
-				.select({ content: schema.richTextContentBlocks.content })
-				.from(schema.richTextContentBlocks)
-				.innerJoin(
-					schema.contentBlocks,
-					eq(schema.richTextContentBlocks.id, schema.contentBlocks.id),
-				)
-				.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
-				.innerJoin(
-					schema.entityTypesFieldsNames,
-					eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
-				)
-				.where(
-					and(
-						eq(schema.fields.entityVersionId, person.id),
-						eq(schema.entityTypesFieldsNames.fieldName, "biography"),
-					),
-				)
-				.limit(1),
-			publishedId != null ? getPersonContributions(publishedId) : Promise.resolve([]),
-		]);
+	const [contributions, contributionRoleOptions, biographyRows] = await Promise.all([
+		getPersonContributions(documentId),
+		getContributionRoleOptions(),
+		db
+			.select({ content: schema.richTextContentBlocks.content })
+			.from(schema.richTextContentBlocks)
+			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.where(
+				and(
+					eq(schema.fields.entityVersionId, person.id),
+					eq(schema.entityTypesFieldsNames.fieldName, "biography"),
+				),
+			)
+			.limit(1),
+	]);
 
 	const biography = biographyRows.at(0)?.content;
 
@@ -143,7 +134,7 @@ export default async function DashboardAdministratorEditPersonPage(
 	return (
 		<PersonEditForm
 			contributionRoleOptions={contributionRoleOptions}
-			contributions={annotatePersonContributionLifecycle(contributions, publishedContributions)}
+			contributions={contributions}
 			documentId={documentId}
 			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}

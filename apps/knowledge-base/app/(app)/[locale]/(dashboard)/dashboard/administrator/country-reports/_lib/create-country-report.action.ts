@@ -31,7 +31,8 @@ export const createCountryReportAction = createMutationAction({
 		}
 
 		const existing = await db.query.countryReports.findFirst({
-			where: { campaignId: input.campaignId, countryId: input.countryId },
+			// input.countryId is the country's document id.
+			where: { campaignId: input.campaignId, countryDocumentId: input.countryId },
 			columns: { id: true },
 		});
 
@@ -49,7 +50,7 @@ export const createCountryReportAction = createMutationAction({
 			.insert(schema.countryReports)
 			.values({
 				campaignId: input.campaignId,
-				countryId: input.countryId,
+				countryDocumentId: input.countryId,
 				status: input.status,
 			})
 			.returning({ id: schema.countryReports.id });

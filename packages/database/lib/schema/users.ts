@@ -4,8 +4,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 import { lower, uuidv7 } from "../functions";
-import { organisationalUnits } from "./organisational-units";
-import { persons } from "./persons";
+import { entities } from "./entities";
 
 export const userRoleEnum = ["admin", "user"] as const;
 
@@ -21,8 +20,12 @@ export const users = p.snakeCase.table(
 		name: p.text("name").notNull(),
 		role: p.text("role", { enum: userRoleEnum }).notNull().default("user"),
 		canManageAdmins: p.boolean("can_manage_admins").notNull().default(false),
-		personId: p.uuid("person_id").references(() => persons.id),
-		organisationalUnitId: p.uuid("organisational_unit_id").references(() => organisationalUnits.id),
+		// A user's actor (person or country) is document-level: these reference `entities.id` (document
+		// ids), not version ids, so the link stays valid across the actor's draft/publish lifecycle.
+		personDocumentId: p.uuid("person_document_id").references(() => entities.id),
+		organisationalUnitDocumentId: p
+			.uuid("organisational_unit_document_id")
+			.references(() => entities.id),
 		...f.timestamps(),
 	},
 	(t) => [
@@ -41,8 +44,8 @@ export const users = p.snakeCase.table(
 			"users_actor_xor_check",
 			sql`
 					NOT (
-						${t.personId} IS NOT NULL
-						AND ${t.organisationalUnitId} IS NOT NULL
+						${t.personDocumentId} IS NOT NULL
+						AND ${t.organisationalUnitDocumentId} IS NOT NULL
 					)
 				`,
 		),

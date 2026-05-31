@@ -7,7 +7,7 @@ import { getExtracted } from "next-intl/server";
 import { UpdateServiceActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/internal-services/_lib/update-service.schema";
 import { isPublishedEntityVersions } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { eq } from "@/lib/db/sql";
+import { eq, inArray } from "@/lib/db/sql";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
 export const updateServiceAction = createMutationAction({
@@ -58,13 +58,32 @@ export const updateServiceAction = createMutationAction({
 			columns: { id: true },
 		});
 
+		// The picker submits org-unit *version* ids; the relation is document-level, so resolve each to
+		// its document id.
+		const unitVersionIds = [...new Set([...input.ownerUnitIds, ...input.providerUnitIds])];
+		const unitDocuments =
+			unitVersionIds.length > 0
+				? await tx
+						.select({
+							versionId: schema.entityVersions.id,
+							documentId: schema.entityVersions.entityId,
+						})
+						.from(schema.entityVersions)
+						.where(inArray(schema.entityVersions.id, unitVersionIds))
+				: [];
+		const documentByVersion = new Map(unitDocuments.map((r) => [r.versionId, r.documentId]));
+
 		const relations: Array<typeof schema.servicesToOrganisationalUnits.$inferInsert> = [];
 
 		if (ownerRole != null) {
 			for (const unitId of input.ownerUnitIds) {
+				const organisationalUnitDocumentId = documentByVersion.get(unitId);
+				if (organisationalUnitDocumentId == null) {
+					continue;
+				}
 				relations.push({
 					serviceId: input.id,
-					organisationalUnitId: unitId,
+					organisationalUnitDocumentId,
 					roleId: ownerRole.id,
 				});
 			}
@@ -72,9 +91,13 @@ export const updateServiceAction = createMutationAction({
 
 		if (providerRole != null) {
 			for (const unitId of input.providerUnitIds) {
+				const organisationalUnitDocumentId = documentByVersion.get(unitId);
+				if (organisationalUnitDocumentId == null) {
+					continue;
+				}
 				relations.push({
 					serviceId: input.id,
-					organisationalUnitId: unitId,
+					organisationalUnitDocumentId,
 					roleId: providerRole.id,
 				});
 			}

@@ -6,8 +6,9 @@ import type { ReactNode } from "react";
 import { SpotlightArticleEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-edit";
 import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
-import { getPersonOptions, getSpotlightArticleContributors } from "@/lib/data/article-contributors";
+import { getSpotlightArticleContributors } from "@/lib/data/article-contributors";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { getContributionPersonOptions } from "@/lib/data/contributions";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import {
 	getEntityRelationOptions,
@@ -113,7 +114,7 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 		}),
 		getEntityRelationOptions(),
 		getResourceRelationOptions(),
-		getPersonOptions(),
+		getContributionPersonOptions(),
 	]);
 
 	if (spotlightArticle == null) {
@@ -127,7 +128,7 @@ export default async function DashboardWebsiteEditSpotlightArticlePage(
 	const [{ relatedEntityIds, relatedResourceIds }, contributors, contentBlocks] = await Promise.all(
 		[
 			getEntityRelations(documentId),
-			getSpotlightArticleContributors(draftVersionId),
+			getSpotlightArticleContributors(documentId),
 			getEntityContentBlocks(draftVersionId, "content"),
 		],
 	);

@@ -5,7 +5,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { assets } from "./assets";
-import { entityVersions } from "./entities";
+import { entities, entityVersions } from "./entities";
 import { socialMedia } from "./social-media";
 
 export const organisationalUnitTypesEnum = [
@@ -86,22 +86,36 @@ export const OrganisationalUnitSelectSchema = createSelectSchema(organisationalU
 export const OrganisationalUnitInsertSchema = createInsertSchema(organisationalUnits);
 export const OrganisationalUnitUpdateSchema = createUpdateSchema(organisationalUnits);
 
-export const organisationalUnitsRelations = p.snakeCase.table("organisational_units_to_units", {
-	id: p.uuid("id").primaryKey().default(uuidv7()),
-	unitId: p
-		.uuid("unit_id")
-		.notNull()
-		.references(() => organisationalUnits.id),
-	relatedUnitId: p
-		.uuid("related_unit_id")
-		.notNull()
-		.references(() => organisationalUnits.id),
-	duration: f.timestampRange("duration").notNull(),
-	status: p
-		.uuid("status")
-		.notNull()
-		.references(() => organisationalUnitStatus.id),
-});
+/**
+ * Document-level relation: a directed relation between two organisational units (e.g. is_member_of,
+ * is_located_in, is_cooperating_partner_of). Both endpoints reference `entities.id` (document IDs),
+ * not version IDs, so the relation is stable across the draft/publish lifecycle of either side and
+ * is never cloned by the lifecycle adapters. Public reads resolve each endpoint through its
+ * published version; admin reads through draft-or-published.
+ */
+export const organisationalUnitsRelations = p.snakeCase.table(
+	"organisational_units_to_units",
+	{
+		id: p.uuid("id").primaryKey().default(uuidv7()),
+		unitDocumentId: p
+			.uuid("unit_document_id")
+			.notNull()
+			.references(() => entities.id),
+		relatedUnitDocumentId: p
+			.uuid("related_unit_document_id")
+			.notNull()
+			.references(() => entities.id),
+		duration: f.timestampRange("duration").notNull(),
+		status: p
+			.uuid("status")
+			.notNull()
+			.references(() => organisationalUnitStatus.id),
+	},
+	// The same (unit, related unit, status) relation may recur over non-overlapping periods, so
+	// uniqueness is enforced by a GiST exclusion constraint on the duration (drizzle has no builder
+	// for it, so it lives in the migration `*_unit_related_status_no_overlap`), not a plain unique
+	// constraint here.
+);
 
 export type OrganisationalUnitRelation = typeof organisationalUnitsRelations.$inferSelect;
 export type OrganisationalUnitRelationInput = typeof organisationalUnitsRelations.$inferInsert;

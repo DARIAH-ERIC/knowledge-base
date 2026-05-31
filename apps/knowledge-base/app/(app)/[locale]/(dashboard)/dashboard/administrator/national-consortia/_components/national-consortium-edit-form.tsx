@@ -103,7 +103,7 @@ export function NationalConsortiumEditForm(
 			<UnitRelationsSection
 				relations={relations}
 				statusOptions={unitRelationStatusOptions}
-				unitId={nationalConsortium.id}
+				unitId={documentId}
 			/>
 		</Fragment>
 	);

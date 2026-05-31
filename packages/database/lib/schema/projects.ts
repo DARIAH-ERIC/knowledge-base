@@ -5,8 +5,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { assets } from "./assets";
-import { entityVersions } from "./entities";
-import { organisationalUnits } from "./organisational-units";
+import { entities, entityVersions } from "./entities";
 import { socialMedia } from "./social-media";
 
 export const projectScopesEnum = ["eu", "national", "regional"] as const;
@@ -72,25 +71,39 @@ export const ProjectSelectSchema = createSelectSchema(projects, { duration: f.Ti
 export const ProjectInsertSchema = createInsertSchema(projects, { duration: f.TimestampRange });
 export const ProjectUpdateSchema = createUpdateSchema(projects, { duration: f.TimestampRange });
 
+/**
+ * Document-level relation: a project's partner organisational unit in a given role. Both endpoints
+ * reference `entities.id` (document IDs), not version IDs, so the relation is stable across the
+ * draft/publish lifecycle of either side and is never cloned by the lifecycle adapters. Public
+ * reads resolve each endpoint through its published version; admin reads through
+ * draft-or-published.
+ */
 export const projectsToOrganisationalUnits = p.snakeCase.table(
 	"projects_to_organisational_units",
 	{
 		id: p.uuid("id").primaryKey().default(uuidv7()),
-		projectId: p
-			.uuid("project_id")
+		projectDocumentId: p
+			.uuid("project_document_id")
 			.notNull()
-			.references(() => projects.id),
-		unitId: p
-			.uuid("unit_id")
+			.references(() => entities.id),
+		unitDocumentId: p
+			.uuid("unit_document_id")
 			.notNull()
-			.references(() => organisationalUnits.id),
+			.references(() => entities.id),
 		roleId: p
 			.uuid("role_id")
 			.notNull()
 			.references(() => projectRoles.id),
 		duration: f.timestampRange("duration"),
 	},
-	(t) => [p.unique().on(t.projectId, t.roleId, t.unitId)],
+	// Unlike person↔org / org↔org, a project partnership is not temporal: the same unit cannot be a
+	// partner of the same project in the same role twice (duration is usually empty / the project's
+	// own duration), so a plain unique on (project, unit, role) is correct here.
+	(t) => [
+		p
+			.unique("projects_to_organisational_units_project_role_unit_unique")
+			.on(t.projectDocumentId, t.roleId, t.unitDocumentId),
+	],
 );
 
 export type ProjectToOrganisationalUnit = typeof projectsToOrganisationalUnits.$inferSelect;

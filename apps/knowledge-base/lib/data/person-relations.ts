@@ -1,14 +1,25 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import { db } from "@/lib/db";
-import { and, eq } from "@/lib/db/sql";
+import { alias, and, eq, sql } from "@/lib/db/sql";
 
+/**
+ * `organisationalUnitDocumentId` is the org's `entities.id`. Each related person is resolved to its
+ * latest editable version for display. Person↔org relations are document-level, so there is a
+ * single set per org document (no draft/published relation diff).
+ */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function getPersonRelations(organisationalUnitId: string) {
+export async function getPersonRelations(organisationalUnitDocumentId: string) {
+	const personDocumentLifecycle = alias(schema.documentLifecycle, "person_document_lifecycle");
+	const organisationalUnitDocumentLifecycle = alias(
+		schema.documentLifecycle,
+		"organisational_unit_document_lifecycle",
+	);
+
 	return db
 		.select({
 			id: schema.personsToOrganisationalUnits.id,
-			personId: schema.personsToOrganisationalUnits.personId,
+			personId: schema.personsToOrganisationalUnits.personDocumentId,
 			personName: schema.persons.name,
 			roleTypeId: schema.personsToOrganisationalUnits.roleTypeId,
 			roleType: schema.personRoleTypes.type,
@@ -16,54 +27,42 @@ export async function getPersonRelations(organisationalUnitId: string) {
 			targetUnitType: schema.organisationalUnitTypes.type,
 		})
 		.from(schema.personsToOrganisationalUnits)
-		.innerJoin(schema.persons, eq(schema.persons.id, schema.personsToOrganisationalUnits.personId))
+		.innerJoin(
+			personDocumentLifecycle,
+			eq(personDocumentLifecycle.documentId, schema.personsToOrganisationalUnits.personDocumentId),
+		)
+		.innerJoin(
+			schema.persons,
+			sql`${schema.persons.id} = COALESCE(${personDocumentLifecycle.draftId}, ${personDocumentLifecycle.publishedId})`,
+		)
 		.innerJoin(
 			schema.personRoleTypes,
 			eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
 		)
 		.innerJoin(
+			organisationalUnitDocumentLifecycle,
+			eq(
+				organisationalUnitDocumentLifecycle.documentId,
+				schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
+			),
+		)
+		.innerJoin(
 			schema.organisationalUnits,
-			eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
+			sql`${schema.organisationalUnits.id} = COALESCE(${organisationalUnitDocumentLifecycle.draftId}, ${organisationalUnitDocumentLifecycle.publishedId})`,
 		)
 		.innerJoin(
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 		)
-		.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, organisationalUnitId));
+		.where(
+			eq(
+				schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
+				organisationalUnitDocumentId,
+			),
+		);
 }
 
 export type PersonRelation = Awaited<ReturnType<typeof getPersonRelations>>[number];
-
-export type RelationLifecycleStatus = "changed" | "new";
-
-function durationKey(duration: PersonRelation["duration"]): string {
-	return [duration.start.toISOString(), duration.end?.toISOString() ?? ""].join(":");
-}
-
-export function annotatePersonRelationLifecycle(
-	draftRelations: Array<PersonRelation>,
-	publishedRelations: Array<PersonRelation>,
-): Array<PersonRelation & { lifecycleStatus?: RelationLifecycleStatus }> {
-	const publishedByIdentity = new Map(
-		publishedRelations.map(
-			(relation) => [[relation.personId, relation.roleTypeId].join(":"), relation] as const,
-		),
-	);
-
-	return draftRelations.map((relation) => {
-		const published = publishedByIdentity.get([relation.personId, relation.roleTypeId].join(":"));
-
-		if (published == null) {
-			return { ...relation, lifecycleStatus: "new" };
-		}
-
-		if (durationKey(relation.duration) !== durationKey(published.duration)) {
-			return { ...relation, lifecycleStatus: "changed" };
-		}
-
-		return relation;
-	});
-}
 
 export async function getPersonRelationRoleOptions(
 	unitType: string,

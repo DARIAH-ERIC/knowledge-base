@@ -3,7 +3,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
+import { alias, and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
 
 export type NationalConsortiaSort = "name" | "country";
 
@@ -59,11 +59,15 @@ async function getCountryNamesByUnitIds(
 		return new Map();
 	}
 
+	// Unit↔unit relations are document-level; re-key the consortium through entity_versions to keep
+	// the version ids passed in, and resolve the country by document.
+	const consortiumVersions = alias(schema.entityVersions, "consortium_versions");
+	const countryDocumentLifecycle = alias(schema.documentLifecycle, "country_document_lifecycle");
 	const relatedCountries = await db
 		.select({
 			countryName: schema.organisationalUnits.name,
 			duration: schema.organisationalUnitsRelations.duration,
-			unitId: schema.organisationalUnitsRelations.unitId,
+			unitId: consortiumVersions.id,
 		})
 		.from(schema.organisationalUnitsRelations)
 		.innerJoin(
@@ -71,8 +75,19 @@ async function getCountryNamesByUnitIds(
 			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
 		)
 		.innerJoin(
+			consortiumVersions,
+			eq(consortiumVersions.entityId, schema.organisationalUnitsRelations.unitDocumentId),
+		)
+		.innerJoin(
+			countryDocumentLifecycle,
+			eq(
+				countryDocumentLifecycle.documentId,
+				schema.organisationalUnitsRelations.relatedUnitDocumentId,
+			),
+		)
+		.innerJoin(
 			schema.organisationalUnits,
-			eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.relatedUnitId),
+			sql`${schema.organisationalUnits.id} = COALESCE(${countryDocumentLifecycle.publishedId}, ${countryDocumentLifecycle.draftId})`,
 		)
 		.innerJoin(
 			schema.organisationalUnitTypes,
@@ -80,7 +95,7 @@ async function getCountryNamesByUnitIds(
 		)
 		.where(
 			and(
-				inArray(schema.organisationalUnitsRelations.unitId, [...ids]),
+				inArray(consortiumVersions.id, [...ids]),
 				eq(schema.organisationalUnitStatus.status, "is_national_consortium_of"),
 				eq(
 					schema.organisationalUnitTypes.type,
@@ -223,6 +238,11 @@ export async function getNationalConsortia(
 		};
 	}
 
+	const searchConsortiumVersions = alias(schema.entityVersions, "search_consortium_versions");
+	const searchCountryDocumentLifecycle = alias(
+		schema.documentLifecycle,
+		"search_country_document_lifecycle",
+	);
 	const [nameMatches, countryMatches] = await Promise.all([
 		db
 			.select({ id: schema.organisationalUnits.id })
@@ -238,15 +258,26 @@ export async function getNationalConsortia(
 				),
 			),
 		db
-			.select({ id: schema.organisationalUnitsRelations.unitId })
+			.select({ id: searchConsortiumVersions.id })
 			.from(schema.organisationalUnitsRelations)
 			.innerJoin(
 				schema.organisationalUnitStatus,
 				eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
 			)
 			.innerJoin(
+				searchConsortiumVersions,
+				eq(searchConsortiumVersions.entityId, schema.organisationalUnitsRelations.unitDocumentId),
+			)
+			.innerJoin(
+				searchCountryDocumentLifecycle,
+				eq(
+					searchCountryDocumentLifecycle.documentId,
+					schema.organisationalUnitsRelations.relatedUnitDocumentId,
+				),
+			)
+			.innerJoin(
 				schema.organisationalUnits,
-				eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.relatedUnitId),
+				sql`${schema.organisationalUnits.id} = COALESCE(${searchCountryDocumentLifecycle.publishedId}, ${searchCountryDocumentLifecycle.draftId})`,
 			)
 			.innerJoin(
 				schema.organisationalUnitTypes,

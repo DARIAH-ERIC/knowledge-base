@@ -105,8 +105,8 @@ async function seedWorkingGroupChair(
 	await db.insert(schema.persons).values(chair.person);
 
 	await db.insert(schema.personsToOrganisationalUnits).values({
-		personId: chair.person.id,
-		organisationalUnitId: workingGroup.organisationalUnit.id,
+		personDocumentId: chair.entity.id,
+		organisationalUnitDocumentId: workingGroup.entity.id,
 		roleTypeId: chairRoleType.id,
 		duration: { start: f.date.past({ years: 5 }) },
 	});

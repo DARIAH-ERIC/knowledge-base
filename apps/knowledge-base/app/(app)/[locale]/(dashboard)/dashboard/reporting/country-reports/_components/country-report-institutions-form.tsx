@@ -20,8 +20,9 @@ interface AvailableInstitution {
 
 interface ClaimedInstitution {
 	id: string;
-	organisationalUnitId: string;
-	organisationalUnit: { name: string; acronym: string | null };
+	organisationalUnitDocumentId: string;
+	// resolved through the institution's published version; may be absent.
+	organisationalUnit: { name: string; acronym: string | null } | null;
 }
 
 interface CountryReportInstitutionsFormProps {
@@ -43,7 +44,7 @@ export function CountryReportInstitutionsForm(
 	const [state, action, isPending] = useActionState(addAction, createActionStateInitial());
 	const [selectedId, setSelectedId] = useState<string>("");
 
-	const claimedOrgUnitIds = new Set(report.institutions.map((i) => i.organisationalUnitId));
+	const claimedOrgUnitIds = new Set(report.institutions.map((i) => i.organisationalUnitDocumentId));
 	const available = availableInstitutions.filter((i) => !claimedOrgUnitIds.has(i.id));
 
 	return (
@@ -59,9 +60,9 @@ export function CountryReportInstitutionsForm(
 							>
 								<div>
 									<p className="text-sm font-medium text-fg">
-										{institution.organisationalUnit.name}
+										{institution.organisationalUnit?.name ?? ""}
 									</p>
-									{institution.organisationalUnit.acronym != null && (
+									{institution.organisationalUnit?.acronym != null && (
 										<p className="text-xs text-muted-fg">
 											{institution.organisationalUnit.acronym}
 										</p>

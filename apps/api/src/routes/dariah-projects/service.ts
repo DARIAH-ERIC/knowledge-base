@@ -6,6 +6,10 @@ import { getContentBlocks } from "@/lib/content-blocks";
 import { serializeDateRange } from "@/lib/date-range";
 import { flattenEntityVersion } from "@/lib/entity-version";
 import { generateImageUrl } from "@/lib/images";
+import {
+	getPublishedProjectPartners,
+	getPublishedProjectPartnersByDocuments,
+} from "@/lib/project-partners";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq, not, sql } from "@/services/db/sql";
@@ -87,7 +91,7 @@ export async function getDariahProjects(
 					columns: { updatedAt: true },
 					with: {
 						entity: {
-							columns: { slug: true },
+							columns: { slug: true, id: true },
 						},
 					},
 				},
@@ -110,40 +114,6 @@ export async function getDariahProjects(
 						type: {
 							columns: {
 								type: true,
-							},
-						},
-					},
-				},
-				projectsToOrganisationalUnits: {
-					where: {
-						role: {
-							role: {
-								in: ["coordinator", "participant"],
-							},
-						},
-						unit: {
-							entityVersion: {
-								status: {
-									type: "published",
-								},
-							},
-						},
-					},
-					columns: {},
-					with: {
-						unit: {
-							columns: {},
-							with: {
-								type: {
-									columns: {
-										type: true,
-									},
-								},
-							},
-						},
-						role: {
-							columns: {
-								role: true,
 							},
 						},
 					},
@@ -174,14 +144,17 @@ export async function getDariahProjects(
 
 	const total = aggregate.at(0)?.total ?? 0;
 
-	const data = items.map((item) => {
-		const { projectsToOrganisationalUnits, ...rest } = item;
+	const partnersByDocument = await getPublishedProjectPartnersByDocuments(
+		db,
+		items.map((item) => item.entityVersion.entity.id),
+	);
 
-		const role =
-			projectsToOrganisationalUnits.find((r) => r.unit.type.type === "eric")?.role.role ?? null;
+	const data = items.map((item) => {
+		const partners = partnersByDocument.get(item.entityVersion.entity.id) ?? [];
+		const role = partners.find((r) => r.unit.type === "eric")?.role.role ?? null;
 
 		return {
-			...mapItem(rest, imageWidth.preview),
+			...mapItem(item, imageWidth.preview),
 			role,
 		};
 	});
@@ -225,7 +198,7 @@ export async function getDariahProjectById(
 					columns: { updatedAt: true },
 					with: {
 						entity: {
-							columns: { slug: true },
+							columns: { slug: true, id: true },
 						},
 					},
 				},
@@ -252,56 +225,6 @@ export async function getDariahProjectById(
 						},
 					},
 				},
-				projectsToOrganisationalUnits: {
-					where: {
-						role: {
-							role: {
-								in: ["coordinator", "participant"],
-							},
-						},
-						unit: {
-							entityVersion: {
-								status: {
-									type: "published",
-								},
-							},
-						},
-					},
-					columns: {},
-					with: {
-						unit: {
-							columns: {
-								id: true,
-								acronym: true,
-								name: true,
-							},
-							with: {
-								socialMedia: {
-									columns: {
-										url: true,
-									},
-									with: {
-										type: {
-											columns: {
-												type: true,
-											},
-										},
-									},
-								},
-								type: {
-									columns: {
-										type: true,
-									},
-								},
-							},
-						},
-						role: {
-							columns: {
-								role: true,
-							},
-						},
-					},
-				},
 			},
 		}),
 		getContentBlocks(db, id),
@@ -316,31 +239,16 @@ export async function getDariahProjectById(
 		getRelatedResources(db, id),
 	]);
 
-	const { projectsToOrganisationalUnits, ...rest } = item;
+	const projectPartners = await getPublishedProjectPartners(db, item.entityVersion.entity.id);
+	const rest = item;
 
-	const participants = projectsToOrganisationalUnits
+	const participants = projectPartners
 		.filter((r) => r.role.role === "participant")
-		.map((r) => {
-			return {
-				...r.unit,
-				socialMedia: r.unit.socialMedia.map((sm) => {
-					return { url: sm.url, type: sm.type.type };
-				}),
-				type: r.unit.type.type,
-			};
-		});
+		.map((r) => r.unit);
 
-	const coordinators = projectsToOrganisationalUnits
+	const coordinators = projectPartners
 		.filter((r) => r.role.role === "coordinator")
-		.map((r) => {
-			return {
-				...r.unit,
-				socialMedia: r.unit.socialMedia.map((sm) => {
-					return { url: sm.url, type: sm.type.type };
-				}),
-				type: r.unit.type.type,
-			};
-		});
+		.map((r) => r.unit);
 
 	return {
 		...mapItem(rest, imageWidth.featured),
@@ -384,7 +292,7 @@ export async function getDariahProjectSlugs(
 					columns: { updatedAt: true },
 					with: {
 						entity: {
-							columns: { slug: true },
+							columns: { slug: true, id: true },
 						},
 					},
 				},
@@ -450,7 +358,7 @@ export async function getDariahProjectBySlug(
 				columns: { updatedAt: true },
 				with: {
 					entity: {
-						columns: { slug: true },
+						columns: { slug: true, id: true },
 					},
 				},
 			},
@@ -477,56 +385,6 @@ export async function getDariahProjectBySlug(
 					},
 				},
 			},
-			projectsToOrganisationalUnits: {
-				where: {
-					role: {
-						role: {
-							in: ["coordinator", "participant"],
-						},
-					},
-					unit: {
-						entityVersion: {
-							status: {
-								type: "published",
-							},
-						},
-					},
-				},
-				columns: {},
-				with: {
-					unit: {
-						columns: {
-							id: true,
-							acronym: true,
-							name: true,
-						},
-						with: {
-							socialMedia: {
-								columns: {
-									url: true,
-								},
-								with: {
-									type: {
-										columns: {
-											type: true,
-										},
-									},
-								},
-							},
-							type: {
-								columns: {
-									type: true,
-								},
-							},
-						},
-					},
-					role: {
-						columns: {
-							role: true,
-						},
-					},
-				},
-			},
 		},
 	});
 
@@ -540,31 +398,16 @@ export async function getDariahProjectBySlug(
 		getRelatedResources(db, item.id),
 	]);
 
-	const { projectsToOrganisationalUnits, ...rest } = item;
+	const projectPartners = await getPublishedProjectPartners(db, item.entityVersion.entity.id);
+	const rest = item;
 
-	const participants = projectsToOrganisationalUnits
+	const participants = projectPartners
 		.filter((r) => r.role.role === "participant")
-		.map((r) => {
-			return {
-				...r.unit,
-				socialMedia: r.unit.socialMedia.map((sm) => {
-					return { url: sm.url, type: sm.type.type };
-				}),
-				type: r.unit.type.type,
-			};
-		});
+		.map((r) => r.unit);
 
-	const coordinators = projectsToOrganisationalUnits
+	const coordinators = projectPartners
 		.filter((r) => r.role.role === "coordinator")
-		.map((r) => {
-			return {
-				...r.unit,
-				socialMedia: r.unit.socialMedia.map((sm) => {
-					return { url: sm.url, type: sm.type.type };
-				}),
-				type: r.unit.type.type,
-			};
-		});
+		.map((r) => r.unit);
 
 	return {
 		...mapItem(rest, imageWidth.featured),

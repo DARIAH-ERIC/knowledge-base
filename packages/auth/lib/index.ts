@@ -87,8 +87,8 @@ export interface User extends Pick<
 	| "role"
 	| "canManageAdmins"
 	| "isEmailVerified"
-	| "personId"
-	| "organisationalUnitId"
+	| "personDocumentId"
+	| "organisationalUnitDocumentId"
 > {
 	isTwoFactorRegistered: boolean;
 }
@@ -198,8 +198,8 @@ export async function createUserWithPassword(params: CreateUserWithPasswordParam
 			role: schema.users.role,
 			canManageAdmins: schema.users.canManageAdmins,
 			isEmailVerified: schema.users.isEmailVerified,
-			personId: schema.users.personId,
-			organisationalUnitId: schema.users.organisationalUnitId,
+			personDocumentId: schema.users.personDocumentId,
+			organisationalUnitDocumentId: schema.users.organisationalUnitDocumentId,
 			isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
 		});
 
@@ -322,8 +322,8 @@ export function createAuthService(params: CreateAuthServiceParams) {
 					role: schema.users.role,
 					canManageAdmins: schema.users.canManageAdmins,
 					isEmailVerified: schema.users.isEmailVerified,
-					personId: schema.users.personId,
-					organisationalUnitId: schema.users.organisationalUnitId,
+					personDocumentId: schema.users.personDocumentId,
+					organisationalUnitDocumentId: schema.users.organisationalUnitDocumentId,
 					isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
 				},
 				session: {
@@ -411,8 +411,8 @@ export function createAuthService(params: CreateAuthServiceParams) {
 				role: schema.users.role,
 				canManageAdmins: schema.users.canManageAdmins,
 				isEmailVerified: schema.users.isEmailVerified,
-				personId: schema.users.personId,
-				organisationalUnitId: schema.users.organisationalUnitId,
+				personDocumentId: schema.users.personDocumentId,
+				organisationalUnitDocumentId: schema.users.organisationalUnitDocumentId,
 				isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
 			})
 			.from(schema.users)
@@ -765,8 +765,8 @@ export function createAuthService(params: CreateAuthServiceParams) {
 					role: schema.users.role,
 					canManageAdmins: schema.users.canManageAdmins,
 					isEmailVerified: schema.users.isEmailVerified,
-					personId: schema.users.personId,
-					organisationalUnitId: schema.users.organisationalUnitId,
+					personDocumentId: schema.users.personDocumentId,
+					organisationalUnitDocumentId: schema.users.organisationalUnitDocumentId,
 					isTwoFactorRegistered: sql<boolean>`${schema.users.twoFactorTotpKey} IS NOT NULL`,
 				},
 			})

@@ -78,12 +78,14 @@ export class AdminCountryReportsPage {
 		await fillSearchAndWaitForUrl(this.page, BASE_PATH, text);
 	}
 
-	rowByCountry(name: string): Locator {
-		return this.page.getByRole("row").filter({ hasText: name });
+	rowByCountry(name: string, campaignYear?: number): Locator {
+		const row = this.page.getByRole("row").filter({ hasText: name });
+		// the country name is not unique against real data; narrow by the test's unique campaign year.
+		return campaignYear == null ? row : row.filter({ hasText: String(campaignYear) });
 	}
 
-	async openDeleteDialog(countryName: string): Promise<Locator> {
-		const row = this.rowByCountry(countryName);
+	async openDeleteDialog(countryName: string, campaignYear?: number): Promise<Locator> {
+		const row = this.rowByCountry(countryName, campaignYear);
 		await row.getByRole("button", { name: "Open actions menu" }).click();
 		await this.page.getByRole("menuitem", { name: "Delete" }).click();
 		return this.page.getByRole("dialog", { name: /Delete country report/i });

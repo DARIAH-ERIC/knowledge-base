@@ -23,42 +23,48 @@ export async function getPersonPositions(
 		return positions;
 	}
 
-	const organisationalUnitEntityVersions = alias(
-		schema.entityVersions,
-		"organisational_unit_entity_versions",
+	// person↔org relations are document-level. `personIds` are published version ids; re-key the
+	// relation join through each endpoint's document and resolve the org to its published version.
+	const personEntityVersions = alias(schema.entityVersions, "person_entity_versions");
+	const organisationalUnitDocumentLifecycle = alias(
+		schema.documentLifecycle,
+		"organisational_unit_document_lifecycle",
 	);
 
 	const rows = await db
 		.select({
-			personId: schema.personsToOrganisationalUnits.personId,
+			personId: personEntityVersions.id,
 			role: schema.personRoleTypes.type,
 			name: schema.organisationalUnits.name,
 			type: schema.organisationalUnitTypes.type,
 		})
 		.from(schema.personsToOrganisationalUnits)
 		.innerJoin(
+			personEntityVersions,
+			eq(personEntityVersions.entityId, schema.personsToOrganisationalUnits.personDocumentId),
+		)
+		.innerJoin(
 			schema.personRoleTypes,
 			eq(schema.personsToOrganisationalUnits.roleTypeId, schema.personRoleTypes.id),
 		)
 		.innerJoin(
+			organisationalUnitDocumentLifecycle,
+			eq(
+				organisationalUnitDocumentLifecycle.documentId,
+				schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
+			),
+		)
+		.innerJoin(
 			schema.organisationalUnits,
-			eq(schema.personsToOrganisationalUnits.organisationalUnitId, schema.organisationalUnits.id),
+			eq(schema.organisationalUnits.id, organisationalUnitDocumentLifecycle.publishedId),
 		)
 		.innerJoin(
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 		)
-		.innerJoin(
-			organisationalUnitEntityVersions,
-			eq(schema.organisationalUnits.id, organisationalUnitEntityVersions.id),
-		)
-		.innerJoin(
-			schema.documentLifecycle,
-			eq(schema.documentLifecycle.publishedId, organisationalUnitEntityVersions.id),
-		)
 		.where(
 			and(
-				inArray(schema.personsToOrganisationalUnits.personId, personIds),
+				inArray(personEntityVersions.id, personIds),
 				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
 			),
 		);

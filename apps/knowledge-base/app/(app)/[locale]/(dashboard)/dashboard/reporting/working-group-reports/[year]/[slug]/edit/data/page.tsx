@@ -1,3 +1,4 @@
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 import { Button } from "@dariah-eric/ui/button";
 import { Label } from "@dariah-eric/ui/field";
@@ -17,7 +18,7 @@ import { updateWorkingGroupReportDataAction } from "@/app/(app)/[locale]/(dashbo
 import { assertAuthenticated } from "@/lib/auth/session";
 import { resolveWorkingGroupReportId } from "@/lib/data/reporting-urls";
 import { db } from "@/lib/db";
-import { and, eq, inArray, sql } from "@/lib/db/sql";
+import { alias, and, eq, inArray, sql } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardReportingWorkingGroupReportDataPageProps extends PageProps<"/[locale]/dashboard/reporting/working-group-reports/[year]/[slug]/edit/data"> {}
@@ -56,7 +57,7 @@ export default async function DashboardReportingWorkingGroupReportDataPage(
 					id: true,
 					numberOfMembers: true,
 					mailingList: true,
-					workingGroupId: true,
+					workingGroupDocumentId: true,
 					campaignId: true,
 				},
 				with: {
@@ -88,6 +89,7 @@ export default async function DashboardReportingWorkingGroupReportDataPage(
 
 	const { year } = report.campaign;
 
+	const personDocumentLifecycle = alias(schema.documentLifecycle, "person_document_lifecycle");
 	const chairs = await db
 		.select({
 			id: schema.personsToOrganisationalUnits.id,
@@ -95,14 +97,25 @@ export default async function DashboardReportingWorkingGroupReportDataPage(
 			roleType: schema.personRoleTypes.type,
 		})
 		.from(schema.personsToOrganisationalUnits)
-		.innerJoin(schema.persons, eq(schema.persons.id, schema.personsToOrganisationalUnits.personId))
+		.innerJoin(
+			personDocumentLifecycle,
+			eq(personDocumentLifecycle.documentId, schema.personsToOrganisationalUnits.personDocumentId),
+		)
+		.innerJoin(
+			schema.persons,
+			sql`${schema.persons.id} = COALESCE(${personDocumentLifecycle.draftId}, ${personDocumentLifecycle.publishedId})`,
+		)
 		.innerJoin(
 			schema.personRoleTypes,
 			eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
 		)
 		.where(
 			and(
-				eq(schema.personsToOrganisationalUnits.organisationalUnitId, report.workingGroupId),
+				// report.workingGroupDocumentId is the org-unit document id directly.
+				eq(
+					schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
+					report.workingGroupDocumentId,
+				),
 				inArray(schema.personRoleTypes.type, ["is_chair_of", "is_vice_chair_of"]),
 				sql`
 					${schema.personsToOrganisationalUnits.duration} && tstzrange (
@@ -117,6 +130,8 @@ export default async function DashboardReportingWorkingGroupReportDataPage(
 	const t = await getExtracted();
 
 	const claimedSocialMediaIds = new Set(report.socialMedia.map((s) => s.socialMediaId));
+	// A working group report always references a published working group.
+	assert(report.workingGroup, "Working group report is missing its published working group.");
 	const availableSocialMedia = report.workingGroup.socialMedia.filter(
 		(s) => !claimedSocialMediaIds.has(s.id),
 	);

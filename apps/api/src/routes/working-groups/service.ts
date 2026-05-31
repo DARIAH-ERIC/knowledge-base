@@ -9,7 +9,7 @@ import { getPersonPositions } from "@/lib/persons";
 import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
 import { mapSocialMedia } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
-import { type SQLWrapper, and, count, eq, exists, not, sql } from "@/services/db/sql";
+import { type SQLWrapper, alias, and, count, eq, exists, not, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
 interface GetWorkingGroupsParams {
@@ -30,6 +30,10 @@ function buildStatusFilter(
 	`;
 	const durationCondition = status === "active" ? durationContainsNow : not(durationContainsNow);
 
+	// Unit↔unit relations are document-level; idRef is the working group's version id, resolved to
+	// its document id, and the related eric is reached through any of its versions.
+	const relatedUnitVersion = alias(schema.entityVersions, "wg_status_related_version");
+
 	return exists(
 		db
 			.select({ one: sql<number>`1` })
@@ -39,8 +43,12 @@ function buildStatusFilter(
 				eq(schema.organisationalUnitsRelations.status, schema.organisationalUnitStatus.id),
 			)
 			.innerJoin(
+				relatedUnitVersion,
+				eq(relatedUnitVersion.entityId, schema.organisationalUnitsRelations.relatedUnitDocumentId),
+			)
+			.innerJoin(
 				schema.organisationalUnits,
-				eq(schema.organisationalUnitsRelations.relatedUnitId, schema.organisationalUnits.id),
+				eq(schema.organisationalUnits.id, relatedUnitVersion.id),
 			)
 			.innerJoin(
 				schema.organisationalUnitTypes,
@@ -48,7 +56,7 @@ function buildStatusFilter(
 			)
 			.where(
 				and(
-					eq(schema.organisationalUnitsRelations.unitId, idRef),
+					sql`${schema.organisationalUnitsRelations.unitDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${idRef})`,
 					eq(schema.organisationalUnitStatus.status, "is_part_of"),
 					eq(schema.organisationalUnitTypes.type, "eric"),
 					durationCondition,
@@ -156,17 +164,21 @@ async function getChairs(db: Database | Transaction, workingGroupId: string) {
 			schema.personRoleTypes,
 			eq(schema.personsToOrganisationalUnits.roleTypeId, schema.personRoleTypes.id),
 		)
-		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
-		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
-		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+		// person↔org relations are document-level; resolve the person to its published version and
+		// match the working group by its document id (workingGroupId is a published org version id).
 		.innerJoin(
 			schema.documentLifecycle,
-			eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			eq(schema.documentLifecycle.documentId, schema.personsToOrganisationalUnits.personDocumentId),
+		)
+		.innerJoin(schema.persons, eq(schema.persons.id, schema.documentLifecycle.publishedId))
+		.innerJoin(
+			schema.entities,
+			eq(schema.entities.id, schema.personsToOrganisationalUnits.personDocumentId),
 		)
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.where(
 			and(
-				eq(schema.personsToOrganisationalUnits.organisationalUnitId, workingGroupId),
+				sql`${schema.personsToOrganisationalUnits.organisationalUnitDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${workingGroupId})`,
 				eq(schema.personRoleTypes.type, "is_chair_of"),
 				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
 			),

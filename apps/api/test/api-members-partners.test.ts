@@ -138,6 +138,13 @@ async function seedCooperatingPartner(
 	assert(country);
 	assert(institution);
 
+	// unit↔unit relations are document-level; resolve the eric version id to its document id.
+	const ericDocument = await db.query.entityVersions.findFirst({
+		columns: { entityId: true },
+		where: { id: ericUnitId },
+	});
+	assert(ericDocument, "No eric entity version in database.");
+
 	const start = f.date.past({ years: 5 });
 
 	await db.insert(schema.organisationalUnits).values([
@@ -147,14 +154,14 @@ async function seedCooperatingPartner(
 
 	await db.insert(schema.organisationalUnitsRelations).values([
 		{
-			unitId: institution.organisationalUnit.id,
-			relatedUnitId: country.organisationalUnit.id,
+			unitDocumentId: institution.entity.id,
+			relatedUnitDocumentId: country.entity.id,
 			status: locatedInStatus.id,
 			duration: { start },
 		},
 		{
-			unitId: institution.organisationalUnit.id,
-			relatedUnitId: ericUnitId,
+			unitDocumentId: institution.entity.id,
+			relatedUnitDocumentId: ericDocument.entityId,
 			status: cooperatingPartnerStatus.id,
 			duration: { start },
 		},
@@ -197,6 +204,14 @@ async function seedPartnerInstitutions(
 	const [institution] = items;
 	assert(institution);
 
+	// unit↔unit relations are document-level; resolve the version ids to their document ids.
+	const [ericDocument, countryDocument] = await Promise.all([
+		db.query.entityVersions.findFirst({ columns: { entityId: true }, where: { id: ericUnitId } }),
+		db.query.entityVersions.findFirst({ columns: { entityId: true }, where: { id: countryId } }),
+	]);
+	assert(ericDocument, "No eric entity version in database.");
+	assert(countryDocument, "No country entity version in database.");
+
 	const start = f.date.past({ years: 5 });
 
 	await db.insert(schema.entities).values({
@@ -216,14 +231,14 @@ async function seedPartnerInstitutions(
 
 	await db.insert(schema.organisationalUnitsRelations).values([
 		{
-			unitId: institution.organisationalUnit.id,
-			relatedUnitId: countryId,
+			unitDocumentId: institution.entity.id,
+			relatedUnitDocumentId: countryDocument.entityId,
 			status: locatedInStatus.id,
 			duration: { start },
 		},
 		{
-			unitId: institution.organisationalUnit.id,
-			relatedUnitId: ericUnitId,
+			unitDocumentId: institution.entity.id,
+			relatedUnitDocumentId: ericDocument.entityId,
 			status: partnerInstitutionStatus.id,
 			duration: { start },
 		},
@@ -276,6 +291,13 @@ async function seedContributor(
 	const [person] = items;
 	assert(person);
 
+	// person↔org relations are document-level; resolve the country version id to its document id.
+	const countryDocument = await db.query.entityVersions.findFirst({
+		columns: { entityId: true },
+		where: { id: countryId },
+	});
+	assert(countryDocument, "No country entity version in database.");
+
 	const start = f.date.past({ years: 5 });
 
 	await db.insert(schema.assets).values(person.asset);
@@ -301,14 +323,14 @@ async function seedContributor(
 		typeId: institutionType.id,
 	});
 	await db.insert(schema.personsToOrganisationalUnits).values({
-		personId: person.person.id,
-		organisationalUnitId: countryId,
+		personDocumentId: person.entity.id,
+		organisationalUnitDocumentId: countryDocument.entityId,
 		roleTypeId: personRoleType.id,
 		duration: { start },
 	});
 	await db.insert(schema.personsToOrganisationalUnits).values({
-		personId: person.person.id,
-		organisationalUnitId: person.affiliation.organisationalUnit.id,
+		personDocumentId: person.entity.id,
+		organisationalUnitDocumentId: person.affiliation.entity.id,
 		roleTypeId: affiliatedRoleType.id,
 		duration: { start },
 	});
@@ -347,6 +369,13 @@ async function seedNationalConsortium(
 	const [consortium] = items;
 	assert(consortium);
 
+	// unit↔unit relations are document-level; resolve the country version id to its document id.
+	const countryDocument = await db.query.entityVersions.findFirst({
+		columns: { entityId: true },
+		where: { id: countryId },
+	});
+	assert(countryDocument, "No country entity version in database.");
+
 	const start = f.date.past({ years: 5 });
 
 	await db.insert(schema.entities).values({
@@ -366,8 +395,8 @@ async function seedNationalConsortium(
 	});
 
 	await db.insert(schema.organisationalUnitsRelations).values({
-		unitId: consortium.organisationalUnit.id,
-		relatedUnitId: countryId,
+		unitDocumentId: consortium.entity.id,
+		relatedUnitDocumentId: countryDocument.entityId,
 		status: nationalConsortiumStatus.id,
 		duration: { start },
 	});
@@ -438,8 +467,8 @@ async function seed(
 	await db.insert(schema.organisationalUnitsRelations).values(
 		items.slice(1).map((item) => {
 			return {
-				unitId: item.organisationalUnit.id,
-				relatedUnitId: items[0]!.organisationalUnit.id,
+				unitDocumentId: item.entity.id,
+				relatedUnitDocumentId: items[0]!.entity.id,
 				status: f.helpers.arrayElement(memberObserverStatus).id,
 				duration: {
 					start,

@@ -51,7 +51,7 @@ async function searchAllResources(params: SearchResourcesParams): Promise<Array<
 }
 
 async function getCountryNationalConsortiumSlugs(
-	countryId: string,
+	countryDocumentId: string,
 	year: number,
 ): Promise<Array<string>> {
 	const rows = await db
@@ -62,18 +62,25 @@ async function getCountryNationalConsortiumSlugs(
 			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
 		)
 		.innerJoin(
+			schema.entities,
+			eq(schema.entities.id, schema.organisationalUnitsRelations.unitDocumentId),
+		)
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.documentId, schema.entities.id),
+		)
+		.innerJoin(
 			schema.organisationalUnits,
-			eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.unitId),
+			sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
 		)
 		.innerJoin(
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 		)
-		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.organisationalUnits.id))
-		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 		.where(
 			and(
-				eq(schema.organisationalUnitsRelations.relatedUnitId, countryId),
+				// unit↔unit relations and the report's country are both document-level.
+				eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, countryDocumentId),
 				eq(schema.organisationalUnitStatus.status, "is_national_consortium_of"),
 				eq(
 					schema.organisationalUnitTypes.type,
@@ -91,13 +98,11 @@ async function getCountryNationalConsortiumSlugs(
 	return rows.map((row) => row.slug);
 }
 
-async function getWorkingGroupSlug(workingGroupId: string): Promise<string | null> {
+async function getWorkingGroupSlug(workingGroupDocumentId: string): Promise<string | null> {
 	const rows = await db
 		.select({ slug: schema.entities.slug })
-		.from(schema.organisationalUnits)
-		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.organisationalUnits.id))
-		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
-		.where(eq(schema.organisationalUnits.id, workingGroupId))
+		.from(schema.entities)
+		.where(eq(schema.entities.id, workingGroupDocumentId))
 		.limit(1);
 
 	return rows[0]?.slug ?? null;
@@ -107,7 +112,7 @@ async function getCountrySections(reportId: string): Promise<Array<LiveResourceS
 	const t = await getExtracted();
 	const report = await db.query.countryReports.findFirst({
 		where: { id: reportId },
-		columns: { countryId: true },
+		columns: { countryDocumentId: true },
 		with: { campaign: { columns: { year: true } } },
 	});
 
@@ -116,7 +121,7 @@ async function getCountrySections(reportId: string): Promise<Array<LiveResourceS
 	}
 
 	const consortiumSlugs = await getCountryNationalConsortiumSlugs(
-		report.countryId,
+		report.countryDocumentId,
 		report.campaign.year,
 	);
 	const consortiumFilter = `[${consortiumSlugs.map(quoteFilterValue).join(",")}]`;
@@ -180,7 +185,7 @@ async function getWorkingGroupSections(reportId: string): Promise<Array<LiveReso
 	const t = await getExtracted();
 	const report = await db.query.workingGroupReports.findFirst({
 		where: { id: reportId },
-		columns: { workingGroupId: true },
+		columns: { workingGroupDocumentId: true },
 		with: { campaign: { columns: { year: true } } },
 	});
 
@@ -188,7 +193,7 @@ async function getWorkingGroupSections(reportId: string): Promise<Array<LiveReso
 		return [];
 	}
 
-	const slug = await getWorkingGroupSlug(report.workingGroupId);
+	const slug = await getWorkingGroupSlug(report.workingGroupDocumentId);
 
 	if (slug == null) {
 		return [

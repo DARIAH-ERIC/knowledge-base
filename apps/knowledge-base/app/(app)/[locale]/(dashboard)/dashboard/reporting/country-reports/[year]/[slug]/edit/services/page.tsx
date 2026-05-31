@@ -1,3 +1,4 @@
+import { assert } from "@acdh-oeaw/lib";
 import { serviceKpiCategoryEnum } from "@dariah-eric/database/schema";
 import { Button } from "@dariah-eric/ui/button";
 import { Label } from "@dariah-eric/ui/field";
@@ -82,6 +83,8 @@ export default async function DashboardReportingCountryReportServicesPage(
 
 	const kpiMap = new Map(report.serviceKpis.map((k) => [`${k.serviceId}-${k.kpi}`, k.value]));
 
+	// A country report always references a published country.
+	assert(report.country, "Country report is missing its published country.");
 	const services = report.country.services;
 
 	return (

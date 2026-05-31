@@ -97,7 +97,7 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 			<UnitRelationsSection
 				relations={relations}
 				statusOptions={unitRelationStatusOptions}
-				unitId={institution.id}
+				unitId={documentId}
 			/>
 		</Fragment>
 	);

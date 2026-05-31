@@ -16,7 +16,7 @@ import {
 import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { db } from "@/lib/db";
-import { and, eq } from "@/lib/db/sql";
+import { alias, and, eq } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -154,14 +154,33 @@ export default async function DashboardAdministratorEditProjectPage(
 			columns: { id: true, role: true },
 		}),
 		getSocialMediaOptions(),
-		db.query.projectsToOrganisationalUnits.findMany({
-			where: { projectId: project.id },
-			columns: { id: true, unitId: true, roleId: true, duration: true },
-			with: {
-				unit: { columns: { name: true } },
-				role: { columns: { role: true } },
-			},
-		}),
+		(() => {
+			const unitDocumentLifecycle = alias(schema.documentLifecycle, "unit_document_lifecycle");
+			return db
+				.select({
+					id: schema.projectsToOrganisationalUnits.id,
+					// the org's published version id, for the (version-id) shared unit picker.
+					unitId: schema.organisationalUnits.id,
+					unitName: schema.organisationalUnits.name,
+					roleId: schema.projectsToOrganisationalUnits.roleId,
+					roleName: schema.projectRoles.role,
+					duration: schema.projectsToOrganisationalUnits.duration,
+				})
+				.from(schema.projectsToOrganisationalUnits)
+				.innerJoin(
+					unitDocumentLifecycle,
+					eq(unitDocumentLifecycle.documentId, schema.projectsToOrganisationalUnits.unitDocumentId),
+				)
+				.innerJoin(
+					schema.organisationalUnits,
+					eq(schema.organisationalUnits.id, unitDocumentLifecycle.publishedId),
+				)
+				.innerJoin(
+					schema.projectRoles,
+					eq(schema.projectRoles.id, schema.projectsToOrganisationalUnits.roleId),
+				)
+				.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, documentId));
+		})(),
 		db.query.projectsToSocialMedia.findMany({
 			where: { projectId: project.id },
 			columns: { socialMediaId: true },
@@ -172,9 +191,9 @@ export default async function DashboardAdministratorEditProjectPage(
 		return {
 			id: partner.id,
 			unitId: partner.unitId,
-			unitName: partner.unit.name,
+			unitName: partner.unitName,
 			roleId: partner.roleId,
-			roleName: partner.role.role,
+			roleName: partner.roleName,
 			durationStart:
 				partner.duration?.start != null ? partner.duration.start.toISOString().slice(0, 10) : null,
 			durationEnd:

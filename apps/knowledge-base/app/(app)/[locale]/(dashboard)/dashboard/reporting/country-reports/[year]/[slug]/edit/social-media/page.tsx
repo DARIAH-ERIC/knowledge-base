@@ -1,3 +1,4 @@
+import { assert } from "@acdh-oeaw/lib";
 import { socialMediaKpiCategoryEnum } from "@dariah-eric/database/schema";
 import { Button } from "@dariah-eric/ui/button";
 import { Label } from "@dariah-eric/ui/field";
@@ -84,6 +85,8 @@ export default async function DashboardReportingCountryReportSocialMediaPage(
 		report.socialMediaKpis.map((k) => [`${k.socialMediaId}-${k.kpi}`, k.value]),
 	);
 
+	// A country report always references a published country.
+	assert(report.country, "Country report is missing its published country.");
 	const accounts = report.country.socialMedia;
 
 	return (

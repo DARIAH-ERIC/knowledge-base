@@ -31,7 +31,8 @@ export const createWorkingGroupReportAction = createMutationAction({
 		}
 
 		const existing = await db.query.workingGroupReports.findFirst({
-			where: { campaignId: input.campaignId, workingGroupId: input.workingGroupId },
+			// input.workingGroupId is the working group's document id.
+			where: { campaignId: input.campaignId, workingGroupDocumentId: input.workingGroupId },
 			columns: { id: true },
 		});
 
@@ -49,7 +50,7 @@ export const createWorkingGroupReportAction = createMutationAction({
 			.insert(schema.workingGroupReports)
 			.values({
 				campaignId: input.campaignId,
-				workingGroupId: input.workingGroupId,
+				workingGroupDocumentId: input.workingGroupId,
 				status: input.status,
 			})
 			.returning({ id: schema.workingGroupReports.id });

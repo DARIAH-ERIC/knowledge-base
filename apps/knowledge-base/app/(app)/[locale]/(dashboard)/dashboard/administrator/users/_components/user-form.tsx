@@ -35,6 +35,8 @@ async function fetchPersonOptionsPage(
 		searchParams.set("q", params.q);
 	}
 
+	// `users.personDocumentId` is a person document id, so this picker uses the document-id contribution
+	// options endpoint.
 	const response = await fetch(`/api/contributions/options?${searchParams.toString()}`, {
 		signal: params.signal,
 	});
