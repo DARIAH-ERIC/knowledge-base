@@ -1,7 +1,7 @@
 import { appendFileSync } from "node:fs";
 
 import { assert, groupBy, keyBy, log } from "@acdh-oeaw/lib";
-import { createDatabaseService } from "@dariah-eric/database";
+import { type Transaction, createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { type AssetMetadata, createStorageService } from "@dariah-eric/storage";
 import { createStorageAdminService } from "@dariah-eric/storage/admin";
@@ -98,6 +98,21 @@ const db = createDatabaseService({
 	},
 	logger: false,
 }).unwrap();
+
+/**
+ * Relations, reports, the user actor, and service↔unit links are now keyed by document id
+ * (`entities.id`). This import builds entity _version_ ids, so resolve a version id to its document
+ * id before inserting into those tables.
+ */
+async function documentIdOf(tx: Transaction, versionId: string): Promise<string> {
+	const [row] = await tx
+		.select({ entityId: schema.entityVersions.entityId })
+		.from(schema.entityVersions)
+		.where(eq(schema.entityVersions.id, versionId))
+		.limit(1);
+	assert(row, `No entity version found for id "${versionId}".`);
+	return row.entityId;
+}
 
 const storage = createStorageService({
 	config: {
@@ -323,8 +338,8 @@ async function main() {
 
 			if (umbrellaUnit) {
 				await tx.insert(schema.organisationalUnitsRelations).values({
-					unitId: orgUnit.id,
-					relatedUnitId: umbrellaUnit.id,
+					unitDocumentId: await documentIdOf(tx, orgUnit.id),
+					relatedUnitDocumentId: await documentIdOf(tx, umbrellaUnit.id),
 					duration: {
 						start: workingGroup.startDate ?? new Date(Date.UTC(1900, 0, 1)),
 						end: workingGroup.endDate ?? undefined,
@@ -570,8 +585,8 @@ async function main() {
 
 				// create a relationship between a country and consortium
 				await tx.insert(schema.organisationalUnitsRelations).values({
-					unitId: consortiumOrgUnit.id,
-					relatedUnitId: countryOrgUnit.id,
+					unitDocumentId: await documentIdOf(tx, consortiumOrgUnit.id),
+					relatedUnitDocumentId: await documentIdOf(tx, countryOrgUnit.id),
 					duration: { start: new Date(Date.UTC(1900, 0, 1)) },
 					status: organisationalUnitStatusByType.is_national_consortium_of.id,
 				});
@@ -581,8 +596,8 @@ async function main() {
 
 			if (country.type === "member_country") {
 				await tx.insert(schema.organisationalUnitsRelations).values({
-					unitId: countryOrgUnit.id,
-					relatedUnitId: umbrellaUnit.id,
+					unitDocumentId: await documentIdOf(tx, countryOrgUnit.id),
+					relatedUnitDocumentId: await documentIdOf(tx, umbrellaUnit.id),
 					duration: {
 						start: country.startDate ?? new Date(Date.UTC(1900, 0, 1)),
 						end: country.endDate ?? undefined,
@@ -593,8 +608,8 @@ async function main() {
 
 			if (country.type === "cooperating_partnership") {
 				await tx.insert(schema.organisationalUnitsRelations).values({
-					unitId: countryOrgUnit.id,
-					relatedUnitId: umbrellaUnit.id,
+					unitDocumentId: await documentIdOf(tx, countryOrgUnit.id),
+					relatedUnitDocumentId: await documentIdOf(tx, umbrellaUnit.id),
 					duration: {
 						start: country.startDate ?? new Date(Date.UTC(1900, 0, 1)),
 						end: country.endDate ?? undefined,
@@ -712,8 +727,8 @@ async function main() {
 					for (const type of institutionTypes) {
 						if (type === "cooperating_partner") {
 							await tx.insert(schema.organisationalUnitsRelations).values({
-								unitId: orgUnit.id,
-								relatedUnitId: umbrellaUnit.id,
+								unitDocumentId: await documentIdOf(tx, orgUnit.id),
+								relatedUnitDocumentId: await documentIdOf(tx, umbrellaUnit.id),
 								duration: {
 									start: institution.startDate ?? new Date(Date.UTC(1900, 0, 1)),
 									end: institution.endDate ?? undefined,
@@ -723,8 +738,8 @@ async function main() {
 						}
 						if (type === "national_coordinating_institution") {
 							await tx.insert(schema.organisationalUnitsRelations).values({
-								unitId: orgUnit.id,
-								relatedUnitId: umbrellaUnit.id,
+								unitDocumentId: await documentIdOf(tx, orgUnit.id),
+								relatedUnitDocumentId: await documentIdOf(tx, umbrellaUnit.id),
 								duration: {
 									start: institution.startDate ?? new Date(Date.UTC(1900, 0, 1)),
 									end: institution.endDate ?? undefined,
@@ -734,8 +749,8 @@ async function main() {
 						}
 						if (type === "national_representative_institution") {
 							await tx.insert(schema.organisationalUnitsRelations).values({
-								unitId: orgUnit.id,
-								relatedUnitId: umbrellaUnit.id,
+								unitDocumentId: await documentIdOf(tx, orgUnit.id),
+								relatedUnitDocumentId: await documentIdOf(tx, umbrellaUnit.id),
 								duration: {
 									start: institution.startDate ?? new Date(Date.UTC(1900, 0, 1)),
 									end: institution.endDate ?? undefined,
@@ -745,8 +760,8 @@ async function main() {
 						}
 						if (type === "partner_institution") {
 							await tx.insert(schema.organisationalUnitsRelations).values({
-								unitId: orgUnit.id,
-								relatedUnitId: umbrellaUnit.id,
+								unitDocumentId: await documentIdOf(tx, orgUnit.id),
+								relatedUnitDocumentId: await documentIdOf(tx, umbrellaUnit.id),
 								duration: {
 									start: institution.startDate ?? new Date(Date.UTC(1900, 0, 1)),
 									end: institution.endDate ?? undefined,
@@ -771,8 +786,8 @@ async function main() {
 				assert(countryOrgaUnitId);
 
 				await tx.insert(schema.organisationalUnitsRelations).values({
-					unitId: orgUnit.id,
-					relatedUnitId: countryOrgaUnitId,
+					unitDocumentId: await documentIdOf(tx, orgUnit.id),
+					relatedUnitDocumentId: await documentIdOf(tx, countryOrgaUnitId),
 					duration: { start: new Date(Date.UTC(1900, 0, 1)) },
 					status: organisationalUnitStatusByType.is_located_in.id,
 				});
@@ -874,7 +889,7 @@ async function main() {
 
 			await tx.insert(schema.servicesToOrganisationalUnits).values({
 				serviceId: kbService.id,
-				organisationalUnitId: institutionOrgaUnitId,
+				organisationalUnitDocumentId: await documentIdOf(tx, institutionOrgaUnitId),
 				roleId: role.id,
 			});
 
@@ -896,7 +911,7 @@ async function main() {
 
 			await tx.insert(schema.servicesToOrganisationalUnits).values({
 				serviceId: kbService.id,
-				organisationalUnitId: countryOrgaUnitId,
+				organisationalUnitDocumentId: await documentIdOf(tx, countryOrgaUnitId),
 				roleId: organisationalUnitServiceRolesByRole.service_provider.id,
 			});
 		});
@@ -1245,8 +1260,8 @@ async function main() {
 				assert(institutionOrgaUnitId);
 
 				await tx.insert(schema.personsToOrganisationalUnits).values({
-					personId: kbPerson.id,
-					organisationalUnitId: institutionOrgaUnitId,
+					personDocumentId: await documentIdOf(tx, kbPerson.id),
+					organisationalUnitDocumentId: await documentIdOf(tx, institutionOrgaUnitId),
 					duration: { start: new Date(Date.UTC(1900, 0, 1)) },
 					roleTypeId: personRoleTypesByType.is_affiliated_with.id,
 				});
@@ -1338,8 +1353,8 @@ async function main() {
 				assert(relatedOrgaUnitId);
 
 				await tx.insert(schema.personsToOrganisationalUnits).values({
-					personId: kbPerson.id,
-					organisationalUnitId: relatedOrgaUnitId,
+					personDocumentId: await documentIdOf(tx, kbPerson.id),
+					organisationalUnitDocumentId: await documentIdOf(tx, relatedOrgaUnitId),
 					duration: {
 						start: startDate ?? new Date(Date.UTC(1900, 0, 1)),
 						end: endDate ?? undefined,
@@ -1567,7 +1582,7 @@ async function main() {
 				.insert(schema.countryReports)
 				.values({
 					campaignId,
-					countryId,
+					countryDocumentId: await documentIdOf(tx, countryId),
 					status: "accepted",
 					dariahCommissionedEvent: eventReports?.dariahCommissionedEvent,
 					smallEvents: eventReports?.smallMeetings,
@@ -1587,7 +1602,7 @@ async function main() {
 
 			await tx.insert(schema.reportingCampaignCountryThresholds).values({
 				campaignId,
-				countryId,
+				countryDocumentId: await documentIdOf(tx, countryId),
 				amount: Number(report.operationalCostThreshold),
 			});
 
@@ -1759,7 +1774,7 @@ async function main() {
 				.insert(schema.workingGroupReports)
 				.values({
 					campaignId: reportCampaignId,
-					workingGroupId,
+					workingGroupDocumentId: await documentIdOf(tx, workingGroupId),
 					numberOfMembers: workingGroupReport.members,
 					status: "accepted",
 					createdAt: workingGroupReport.createdAt,
@@ -2025,8 +2040,8 @@ async function main() {
 				assert(fundingUnit);
 
 				await tx.insert(schema.projectsToOrganisationalUnits).values({
-					projectId: kbProject.id,
-					unitId: fundingUnit.id,
+					projectDocumentId: await documentIdOf(tx, kbProject.id),
+					unitDocumentId: await documentIdOf(tx, fundingUnit.id),
 					roleId: projectRolesByRole.funder.id,
 					duration: kbProject.duration,
 				});

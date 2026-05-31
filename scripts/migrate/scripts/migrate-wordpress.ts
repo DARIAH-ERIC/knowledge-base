@@ -4,7 +4,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
 import { assert, isNonEmptyString, keyBy, log, unreachable } from "@acdh-oeaw/lib";
-import { type Transaction, createDatabaseService } from "@dariah-eric/database";
+import { type Database, type Transaction, createDatabaseService } from "@dariah-eric/database";
 import * as schema from "@dariah-eric/database/schema";
 import { createStorageService } from "@dariah-eric/storage";
 import type { AssetPrefix } from "@dariah-eric/storage/config";
@@ -40,6 +40,21 @@ const db = createDatabaseService({
 	},
 	logger: false,
 }).unwrap();
+
+/**
+ * Relations and article contributors are now keyed by document id (`entities.id`). This import
+ * builds entity _version_ ids, so resolve a version id to its document id before inserting into
+ * those tables.
+ */
+async function documentIdOf(executor: Database | Transaction, versionId: string): Promise<string> {
+	const [row] = await executor
+		.select({ entityId: schema.entityVersions.entityId })
+		.from(schema.entityVersions)
+		.where(eq(schema.entityVersions.id, versionId))
+		.limit(1);
+	assert(row, `No entity version found for id "${versionId}".`);
+	return row.entityId;
+}
 
 const processor = unified().use(fromHtml);
 
@@ -888,13 +903,17 @@ async function main() {
 		tx: Transaction,
 		args: { unitId: string; relatedUnitId: string; statusId: string },
 	): Promise<void> {
+		// unit↔unit relations are document-level; resolve the version-id args to their document ids.
+		const unitDocumentId = await documentIdOf(tx, args.unitId);
+		const relatedUnitDocumentId = await documentIdOf(tx, args.relatedUnitId);
+
 		const [existingRelation] = await tx
 			.select({ id: schema.organisationalUnitsRelations.id })
 			.from(schema.organisationalUnitsRelations)
 			.where(
 				and(
-					eq(schema.organisationalUnitsRelations.unitId, args.unitId),
-					eq(schema.organisationalUnitsRelations.relatedUnitId, args.relatedUnitId),
+					eq(schema.organisationalUnitsRelations.unitDocumentId, unitDocumentId),
+					eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, relatedUnitDocumentId),
 					eq(schema.organisationalUnitsRelations.status, args.statusId),
 				),
 			)
@@ -905,8 +924,8 @@ async function main() {
 		}
 
 		await tx.insert(schema.organisationalUnitsRelations).values({
-			unitId: args.unitId,
-			relatedUnitId: args.relatedUnitId,
+			unitDocumentId,
+			relatedUnitDocumentId,
 			duration: { start: new Date(Date.UTC(1900, 0, 1)) },
 			status: args.statusId,
 		});
@@ -2010,8 +2029,8 @@ async function main() {
 					await tx
 						.insert(schema.projectsToOrganisationalUnits)
 						.values({
-							projectId: createdProject.id,
-							unitId: umbrellaUnit.id,
+							projectDocumentId: await documentIdOf(tx, createdProject.id),
+							unitDocumentId: await documentIdOf(tx, umbrellaUnit.id),
 							roleId: projectRolesByType.participant.id,
 						})
 						.onConflictDoNothing();
@@ -2160,8 +2179,8 @@ async function main() {
 					await tx
 						.insert(schema.projectsToOrganisationalUnits)
 						.values({
-							projectId,
-							unitId: coordinatorOrgUnitId,
+							projectDocumentId: await documentIdOf(tx, projectId),
+							unitDocumentId: await documentIdOf(tx, coordinatorOrgUnitId),
 							roleId: projectRolesByType.coordinator.id,
 						})
 						.onConflictDoNothing();
@@ -2180,8 +2199,8 @@ async function main() {
 					await tx
 						.insert(schema.projectsToOrganisationalUnits)
 						.values({
-							projectId,
-							unitId,
+							projectDocumentId: await documentIdOf(tx, projectId),
+							unitDocumentId: await documentIdOf(tx, unitId),
 							roleId: projectRolesByType.participant.id,
 						})
 						.onConflictDoNothing();
@@ -2305,8 +2324,8 @@ async function main() {
 		for (const authorName of authorNames) {
 			const personDbId = await ensurePersonByName(authorName);
 			await db.insert(schema.spotlightArticlesToPersons).values({
-				spotlightArticleId: articleId,
-				personId: personDbId,
+				spotlightArticleDocumentId: await documentIdOf(db, articleId),
+				personDocumentId: await documentIdOf(db, personDbId),
 				role: "author",
 			});
 		}
@@ -2316,8 +2335,8 @@ async function main() {
 		for (const authorName of authorNames) {
 			const personDbId = await ensurePersonByName(authorName);
 			await db.insert(schema.impactCaseStudiesToPersons).values({
-				impactCaseStudyId: articleId,
-				personId: personDbId,
+				impactCaseStudyDocumentId: await documentIdOf(db, articleId),
+				personDocumentId: await documentIdOf(db, personDbId),
 				role: "author",
 			});
 		}

@@ -123,36 +123,10 @@ export class AdminPersonsPage {
 		await this.page.getByRole("option").first().click();
 	}
 
-	/**
-	 * Select a contribution role whose allowed organisation types include `allowedType` (e.g.
-	 * "governance body"). Each role option's label lists its allowed unit types, so this picks a role
-	 * that can target an organisation of that type.
-	 */
-	async selectContributionRoleByAllowedType(allowedType: string): Promise<void> {
-		const control = this.page
-			.locator('[data-slot="control"]')
-			.filter({ has: this.page.getByText("Role", { exact: true }) });
-		await control.locator("button").click();
-		await this.page
-			.getByRole("option", { name: new RegExp(allowedType, "i") })
-			.first()
-			.click();
-	}
-
 	async selectFirstContributionOrg(): Promise<void> {
 		await this.page.getByRole("button", { name: "Select an organisation" }).click();
 		await this.page.getByRole("option").first().waitFor({ state: "visible" });
 		await this.page.getByRole("option").first().click();
-	}
-
-	async selectContributionOrgByName(searchText: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Select an organisation" }).click();
-		// Type to filter, then click the matching option. Avoid pressing Enter, which would submit the
-		// enclosing contribution form before the organisation is committed.
-		await this.page.keyboard.type(searchText);
-		const option = this.page.getByRole("option", { name: searchText });
-		await option.first().waitFor({ state: "visible" });
-		await option.first().click();
 	}
 
 	async fillContributionDatePicker(

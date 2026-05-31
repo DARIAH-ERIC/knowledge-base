@@ -184,7 +184,13 @@ test.describe("governance bodies admin", () => {
 		expect(updatedRelations[0]!.duration.end).toBeDefined();
 	});
 
-	test("should clone relations to published version", async ({
+	/**
+	 * Unit↔unit and person↔org relations are document-level (keyed by entities.id): a single logical
+	 * relation is one row that the lifecycle adapters never clone or wipe. Publishing — and
+	 * re-publishing — the governance body must therefore leave each published version showing the
+	 * relation exactly once: no loss, no version cross-product duplication.
+	 */
+	test("should keep document-level relations across publish and re-publish", async ({
 		createAdminGovernanceBodiesPage,
 		db,
 	}) => {
@@ -219,11 +225,25 @@ test.describe("governance bodies admin", () => {
 		// Publish from the edit form (governance bodies have no separate details page).
 		await governanceBodiesPage.publishItem();
 
-		// Verify both relations are present on the published version.
+		// The relations are document-level, so the published version's read resolves them exactly once.
 		const publishedId = await db.getPublishedVersionId(draft!.documentId);
 		expect(publishedId).not.toBeNull();
 		expect(await db.getUnitRelationsByUnitVersionId(publishedId!)).toHaveLength(1);
 		expect(await db.getPersonRelationsByUnitVersionId(publishedId!)).toHaveLength(1);
+
+		// Re-publish: edit a field to create a new draft, save it, then publish again. This wipes and
+		// rebuilds the published subtype, but must leave the document-level relations untouched — still
+		// exactly once on the new published version (no loss, no cross-product duplication).
+		await governanceBodiesPage.gotoEditFromList(name);
+		await governanceBodiesPage.fillDescription(" (re-published)");
+		await governanceBodiesPage.submitForm();
+		await governanceBodiesPage.gotoEditFromList(name);
+		await governanceBodiesPage.publishItem();
+
+		const republishedId = await db.getPublishedVersionId(draft!.documentId);
+		expect(republishedId).not.toBeNull();
+		expect(await db.getUnitRelationsByUnitVersionId(republishedId!)).toHaveLength(1);
+		expect(await db.getPersonRelationsByUnitVersionId(republishedId!)).toHaveLength(1);
 	});
 
 	test("should manage unit relations", async ({ createAdminGovernanceBodiesPage, db }) => {

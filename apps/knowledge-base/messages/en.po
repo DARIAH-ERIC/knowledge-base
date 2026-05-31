@@ -907,7 +907,7 @@ msgstr "Cancel"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks.tsx:498
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-questions-form.tsx:57
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-claimed-contributors-form.tsx:83
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:77
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:75
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx:67
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-events-form.tsx:65
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx:64
@@ -1416,7 +1416,7 @@ msgstr "Governance bodies"
 #: app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar.tsx:69
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institutions-page.tsx:77
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-statistics/_components/reporting-statistics-page.tsx:282
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:56
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:54
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-summary.tsx:48
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/_components/country-report-step-nav.tsx:28
 msgid "/XO6LE"
@@ -2137,13 +2137,13 @@ msgid "143+dO"
 msgstr "Zotero publications"
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/live-report-resources.tsx:171
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/software/page.tsx:160
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/software/page.tsx:157
 msgid "xDI7dT"
 msgstr "No SSH Open Marketplace software found for this country."
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/live-report-resources.tsx:177
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/_components/live-report-resources.tsx:247
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/publications/page.tsx:159
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/publications/page.tsx:156
 msgid "ljnVdm"
 msgstr "No Zotero publications found for this reporting year."
 
@@ -2731,7 +2731,7 @@ msgstr "Review dated institution-to-organisation relations and manage them from 
 
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institution-relations/_components/institution-relations-page.tsx:115
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form.tsx:191
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:99
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:97
 msgid "dMwAna"
 msgstr "Institution"
 
@@ -3156,7 +3156,7 @@ msgstr "No organisation selected"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form.tsx:621
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-questions-form.tsx:80
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-claimed-contributors-form.tsx:130
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:120
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:118
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx:115
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-social-media-form.tsx:107
 msgid "2/2yg+"
@@ -3280,8 +3280,8 @@ msgstr "Add question"
 #: app/(app)/[locale]/(dashboard)/dashboard/administrator/reporting-campaigns/_components/campaign-questions-form.tsx:77
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-claimed-contributors-form.tsx:126
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-claimed-contributors-form.tsx:127
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:116
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:117
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:114
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:115
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx:111
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-projects-form.tsx:112
 #: app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-events-form.tsx:110
@@ -4126,11 +4126,11 @@ msgstr "Event counts"
 msgid "LMWgVR"
 msgstr "Reusable outcomes"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:88
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:86
 msgid "6WNnjG"
 msgstr "Add institution"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:130
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-institutions-form.tsx:128
 msgid "3htDiS"
 msgstr "No institutions available."
 
@@ -4244,16 +4244,16 @@ msgstr "Dashboard - Country report project contributions"
 msgid "17EnsP"
 msgstr "Dashboard - Country report publications"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/publications/page.tsx:152
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/publications/page.tsx:149
 msgid "DJLEaf"
 msgstr "Publications from the Zotero library."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/publications/page.tsx:155
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/software/page.tsx:156
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/publications/page.tsx:152
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/software/page.tsx:153
 msgid "4YVAgn"
 msgstr "This country has no national consortium for the selected year."
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/publications/page.tsx:190
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/publications/page.tsx:187
 msgid "1NK1bA"
 msgstr "DOI: {doi}"
 
@@ -4277,7 +4277,7 @@ msgstr "No social media accounts linked to this country."
 msgid "ILhv6W"
 msgstr "Dashboard - Country report software"
 
-#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/software/page.tsx:152
+#: app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/software/page.tsx:149
 msgid "t+OI1b"
 msgstr "Software contributions from the SSH Open Marketplace."
 

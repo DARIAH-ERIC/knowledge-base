@@ -73,7 +73,7 @@ export const createContributionAction = createServerAction(
 				.limit(1)
 				.then((rows) => rows[0] ?? null);
 
-			if (unit == null || unit.allowedRelationId == null) {
+			if (unit?.allowedRelationId == null) {
 				return { error: "role-not-allowed" as const };
 			}
 
