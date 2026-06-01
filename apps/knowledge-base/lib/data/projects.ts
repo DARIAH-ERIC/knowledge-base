@@ -10,7 +10,7 @@ import {
 } from "@/lib/data/organisational-units";
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { db } from "@/lib/db";
-import { alias, and, count, desc, eq, ilike, sql } from "@/lib/db/sql";
+import { alias, and, count, desc, eq, ilike, or, sql } from "@/lib/db/sql";
 
 export type ProjectsSort = "name" | "acronym" | "funding" | "scope";
 
@@ -48,7 +48,9 @@ export async function getProjects(params: Readonly<GetProjectsParams>): Promise<
 	const { limit, offset, q, sort = "name", dir = "asc" } = params;
 	const query = q?.trim();
 	const where =
-		query != null && query !== "" ? ilike(schema.projects.name, `%${query}%`) : undefined;
+		query != null && query !== ""
+			? or(ilike(schema.projects.name, `%${query}%`), ilike(schema.projects.acronym, `%${query}%`))
+			: undefined;
 	const orderBy =
 		sort === "acronym"
 			? dir === "asc"

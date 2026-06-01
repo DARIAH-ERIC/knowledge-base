@@ -59,6 +59,7 @@ export async function getProjectPartners(
 		query != null && query !== ""
 			? or(
 					ilike(schema.projects.name, `%${query}%`),
+					ilike(schema.projects.acronym, `%${query}%`),
 					ilike(schema.projectRoles.role, `%${query}%`),
 					ilike(schema.organisationalUnits.name, `%${query}%`),
 					ilike(schema.organisationalUnitTypes.type, `%${query}%`),
