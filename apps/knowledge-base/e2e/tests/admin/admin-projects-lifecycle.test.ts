@@ -211,6 +211,6 @@ test.describe("admin projects lifecycle", () => {
 				countryReportId: report.id,
 				projectId: publishedProject!.id,
 			});
-		}).toPass();
+		}).toPass({ timeout: 10_000 });
 	});
 });

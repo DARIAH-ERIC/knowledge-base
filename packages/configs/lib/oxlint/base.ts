@@ -208,7 +208,7 @@ const config = defineConfig({
 		 * ============================================================================================
 		 */
 
-		"no-await-in-loop": "warn",
+		"no-await-in-loop": "off",
 		"no-useless-call": "error",
 
 		"oxc/no-accumulating-spread": "error",
