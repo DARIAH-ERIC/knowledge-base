@@ -23,7 +23,7 @@ interface GetInstitutionsParams {
 
 export interface InstitutionsResult {
 	data: Array<
-		Pick<schema.OrganisationalUnit, "acronym" | "id" | "name"> & {
+		Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "ror"> & {
 			countryName: string | null;
 			ericRelationStatuses: Array<InstitutionEricRelationStatus>;
 			entity: Pick<schema.Entity, "slug">;
@@ -213,6 +213,7 @@ const itemSelect = {
 	acronym: schema.organisationalUnits.acronym,
 	id: schema.organisationalUnits.id,
 	name: schema.organisationalUnits.name,
+	ror: schema.organisationalUnits.ror,
 	slug: schema.entities.slug,
 	hasDraft: schema.documentLifecycle.hasDraftChanges,
 	isPublished: sql<boolean>`${schema.documentLifecycle.publishedId} IS NOT NULL`,
@@ -282,6 +283,7 @@ export async function getInstitutions(
 					acronym: institution.acronym,
 					id: institution.id,
 					name: institution.name,
+					ror: institution.ror,
 				};
 			}),
 			limit,
@@ -295,6 +297,7 @@ export async function getInstitutions(
 		acronym: string | null;
 		id: string;
 		name: string;
+		ror: string | null;
 		slug: string;
 		hasDraft: boolean;
 		isPublished: boolean;
@@ -461,6 +464,7 @@ export async function getInstitutions(
 					acronym: institution.acronym,
 					id: institution.id,
 					name: institution.name,
+					ror: institution.ror,
 				};
 			}),
 			limit,
@@ -483,6 +487,7 @@ export async function getInstitutions(
 				acronym: institution.acronym,
 				id: institution.id,
 				name: institution.name,
+				ror: institution.ror,
 			};
 		})
 		.toSorted((a, b) => {

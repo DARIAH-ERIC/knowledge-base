@@ -99,7 +99,7 @@ organisational unit of type ERIC:
 | unr     | kb                                | comment |
 | ------- | --------------------------------- | ------- |
 | name    | organisational_units.name         |         |
-| ror     | organisational_units.metadata.ror |         |
+| ror     | organisational_units.ror          |         |
 | url     | organisational_units.metadata.url |         |
 | types\* |                                   |         |
 

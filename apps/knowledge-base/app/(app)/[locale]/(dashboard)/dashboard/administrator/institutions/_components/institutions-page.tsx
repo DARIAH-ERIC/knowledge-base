@@ -31,7 +31,7 @@ import { useRouter } from "@/lib/navigation/navigation";
 interface InstitutionsPageProps {
 	institutions: {
 		data: Array<
-			Pick<schema.OrganisationalUnit, "acronym" | "id" | "name"> & {
+			Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "ror"> & {
 				entity: Pick<schema.Entity, "slug">;
 				hasDraft: boolean;
 				isPublished: boolean;
@@ -95,6 +95,7 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 						{t("Name")}
 					</TableColumn>
 					<TableColumn>{t("Acronym")}</TableColumn>
+					<TableColumn>{t("ROR")}</TableColumn>
 					<TableColumn>{t("Status")}</TableColumn>
 					<TableColumn />
 				</TableHeader>
@@ -103,6 +104,7 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 						<TableRow>
 							<TableCell>{item.name}</TableCell>
 							<TableCell>{item.acronym}</TableCell>
+							<TableCell>{item.ror}</TableCell>
 							<TableCell>
 								<EntityLifecycleStatusBadge
 									hasDraft={item.hasDraft}
