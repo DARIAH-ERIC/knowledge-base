@@ -484,12 +484,12 @@ export async function getDocumentIdForVersion(tx: Transaction, versionId: string
 }
 
 /**
- * Delete every document-level relation in which `documentId` is an endpoint. These relations are keyed
- * by `entities.id` and the FKs have no `ON DELETE CASCADE`, so they must be removed before deleting the
- * `entities` row — otherwise the delete aborts with a foreign-key violation. Reporting org refs
- * (country/working-group reports, institutions, thresholds) are intentionally NOT removed here: like
- * before this migration, a report blocks deletion of the org unit it is about; reports are removed only
- * by their own delete actions.
+ * Delete every document-level relation in which `documentId` is an endpoint. These relations are
+ * keyed by `entities.id` and the FKs have no `ON DELETE CASCADE`, so they must be removed before
+ * deleting the `entities` row — otherwise the delete aborts with a foreign-key violation. Reporting
+ * org refs (country/working-group reports, institutions, thresholds) are intentionally NOT removed
+ * here: like before this migration, a report blocks deletion of the org unit it is about; reports
+ * are removed only by their own delete actions.
  */
 export async function deleteDocumentRelations(tx: Transaction, documentId: string): Promise<void> {
 	// Person↔org relations reference this document on either endpoint. Remove their report references
@@ -560,8 +560,9 @@ export async function deleteDocumentRelations(tx: Transaction, documentId: strin
 }
 
 /**
- * Delete the generic tail of a document: fields and content blocks under `versionId`, document-level
- * relations, cross-document relations, the version row, and the document row itself.
+ * Delete the generic tail of a document: fields and content blocks under `versionId`,
+ * document-level relations, cross-document relations, the version row, and the document row
+ * itself.
  *
  * The subtype row must be deleted by the caller before calling this — each subtype lives in a
  * different table, and this helper does not know which.

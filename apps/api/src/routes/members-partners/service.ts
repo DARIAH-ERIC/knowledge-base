@@ -6,7 +6,7 @@ import { type ContentBlock, getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
 import { generateImageUrl } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
-import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
+import { getRelatedEntities, getRelatedResources, resolveDocumentId } from "@/lib/relations";
 import { mapSocialMedia } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
 import { type SQLWrapper, alias, and, count, eq, exists, sql } from "@/services/db/sql";
@@ -501,6 +501,8 @@ async function getNationalConsortium(
 }
 
 async function getContributors(db: Database | Transaction, countryId: string) {
+	// countryId is a published org version id; resolve it to its document id once here.
+	const countryDocumentId = await resolveDocumentId(db, countryId);
 	const rows = await db
 		.select({
 			id: schema.persons.id,
@@ -528,7 +530,7 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 		)
 		.where(
 			and(
-				sql`${schema.personsToOrganisationalUnits.organisationalUnitDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${countryId})`,
+				eq(schema.personsToOrganisationalUnits.organisationalUnitDocumentId, countryDocumentId),
 				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
 				sql`
 					${schema.personRoleTypes.type} IN (

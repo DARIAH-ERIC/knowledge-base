@@ -293,8 +293,8 @@ test.describe("governance bodies admin", () => {
 	 * Relations are document-level (keyed by entities.id) with no `ON DELETE CASCADE`, so the delete
 	 * action must remove them on both endpoints before deleting the entity row — otherwise the
 	 * `DELETE FROM entities` aborts with a FK violation. Delete a body that participates in both a
-	 * unit↔unit and a person↔org relation to exercise that cleanup against the production action
-	 * (not the test fixture's own teardown copy).
+	 * unit↔unit and a person↔org relation to exercise that cleanup against the production action (not
+	 * the test fixture's own teardown copy).
 	 */
 	test("should delete a governance body that participates in relations", async ({
 		createAdminGovernanceBodiesPage,

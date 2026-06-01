@@ -6,9 +6,9 @@ import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
 import { generateImageUrl } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
-import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
+import { getRelatedEntities, getRelatedResources, resolveDocumentId } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
-import { count, eq, sql } from "@/services/db/sql";
+import { count, eq } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
 interface GetSpotlightArticlesParams {
@@ -89,7 +89,8 @@ interface GetSpotlightArticleByIdParams {
 async function getContributors(db: Database | Transaction, spotlightArticleId: string) {
 	// Contributors are document-level. Resolve the person endpoint (a document id) to its published
 	// version for its name/slug/image, and match the article by document (spotlightArticleId is a
-	// published article version id).
+	// published article version id, resolved to its document id once here).
+	const spotlightArticleDocumentId = await resolveDocumentId(db, spotlightArticleId);
 	const rows = await db
 		.select({
 			id: schema.persons.id,
@@ -110,7 +111,7 @@ async function getContributors(db: Database | Transaction, spotlightArticleId: s
 		.innerJoin(schema.persons, eq(schema.persons.id, schema.documentLifecycle.publishedId))
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.where(
-			sql`${schema.spotlightArticlesToPersons.spotlightArticleDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${spotlightArticleId})`,
+			eq(schema.spotlightArticlesToPersons.spotlightArticleDocumentId, spotlightArticleDocumentId),
 		);
 
 	const positions = await getPersonPositions(

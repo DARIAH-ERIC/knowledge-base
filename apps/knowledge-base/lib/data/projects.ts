@@ -223,6 +223,41 @@ export async function getProjectBySlugForAdmin(currentUser: Pick<User, "role">, 
 	});
 }
 
+/**
+ * Project partner rows (project↔org-unit relations) for a single project, for the admin surfaces.
+ * Each partner's unit is resolved to its published version: a partner is only ever created against
+ * a published unit and that published version is never removed without deleting the whole document
+ * (which also removes the partner row), so `publishedId` is always present here — i.e. equivalent
+ * to `COALESCE(publishedId, draftId)` for partner rows. `unitId` is the published version id, which
+ * the shared (version-id) unit picker expects.
+ */
+function getProjectPartnerRowsForAdmin(projectDocumentId: string) {
+	const unitDocumentLifecycle = alias(schema.documentLifecycle, "unit_document_lifecycle");
+	return db
+		.select({
+			id: schema.projectsToOrganisationalUnits.id,
+			unitId: schema.organisationalUnits.id,
+			unitName: schema.organisationalUnits.name,
+			roleId: schema.projectsToOrganisationalUnits.roleId,
+			roleName: schema.projectRoles.role,
+			duration: schema.projectsToOrganisationalUnits.duration,
+		})
+		.from(schema.projectsToOrganisationalUnits)
+		.innerJoin(
+			unitDocumentLifecycle,
+			eq(unitDocumentLifecycle.documentId, schema.projectsToOrganisationalUnits.unitDocumentId),
+		)
+		.innerJoin(
+			schema.organisationalUnits,
+			eq(schema.organisationalUnits.id, unitDocumentLifecycle.publishedId),
+		)
+		.innerJoin(
+			schema.projectRoles,
+			eq(schema.projectRoles.id, schema.projectsToOrganisationalUnits.roleId),
+		)
+		.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, projectDocumentId));
+}
+
 export async function getProjectDetailsForAdmin(currentUser: Pick<User, "role">, slug: string) {
 	assertAdminUser(currentUser);
 
@@ -249,35 +284,7 @@ export async function getProjectDetailsForAdmin(currentUser: Pick<User, "role">,
 				),
 			)
 			.limit(1),
-		(() => {
-			const unitDocumentLifecycle = alias(schema.documentLifecycle, "unit_document_lifecycle");
-			return db
-				.select({
-					id: schema.projectsToOrganisationalUnits.id,
-					duration: schema.projectsToOrganisationalUnits.duration,
-					unitName: schema.organisationalUnits.name,
-					roleName: schema.projectRoles.role,
-				})
-				.from(schema.projectsToOrganisationalUnits)
-				.innerJoin(
-					unitDocumentLifecycle,
-					eq(unitDocumentLifecycle.documentId, schema.projectsToOrganisationalUnits.unitDocumentId),
-				)
-				.innerJoin(
-					schema.organisationalUnits,
-					sql`${schema.organisationalUnits.id} = COALESCE(${unitDocumentLifecycle.publishedId}, ${unitDocumentLifecycle.draftId})`,
-				)
-				.innerJoin(
-					schema.projectRoles,
-					eq(schema.projectRoles.id, schema.projectsToOrganisationalUnits.roleId),
-				)
-				.where(
-					eq(
-						schema.projectsToOrganisationalUnits.projectDocumentId,
-						project.entityVersion.entity.id,
-					),
-				);
-		})(),
+		getProjectPartnerRowsForAdmin(project.entityVersion.entity.id),
 		db.query.projectsToSocialMedia.findMany({
 			where: { projectId: project.id },
 			columns: {},
@@ -349,38 +356,7 @@ export async function getProjectEditDataForAdmin(currentUser: Pick<User, "role">
 			columns: { id: true, role: true },
 		}),
 		getSocialMediaOptions(),
-		(() => {
-			const unitDocumentLifecycle = alias(schema.documentLifecycle, "unit_document_lifecycle");
-			return db
-				.select({
-					id: schema.projectsToOrganisationalUnits.id,
-					// the org's published version id, for the (version-id) shared unit picker.
-					unitId: schema.organisationalUnits.id,
-					unitName: schema.organisationalUnits.name,
-					roleId: schema.projectsToOrganisationalUnits.roleId,
-					roleName: schema.projectRoles.role,
-					duration: schema.projectsToOrganisationalUnits.duration,
-				})
-				.from(schema.projectsToOrganisationalUnits)
-				.innerJoin(
-					unitDocumentLifecycle,
-					eq(unitDocumentLifecycle.documentId, schema.projectsToOrganisationalUnits.unitDocumentId),
-				)
-				.innerJoin(
-					schema.organisationalUnits,
-					eq(schema.organisationalUnits.id, unitDocumentLifecycle.publishedId),
-				)
-				.innerJoin(
-					schema.projectRoles,
-					eq(schema.projectRoles.id, schema.projectsToOrganisationalUnits.roleId),
-				)
-				.where(
-					eq(
-						schema.projectsToOrganisationalUnits.projectDocumentId,
-						project.entityVersion.entity.id,
-					),
-				);
-		})(),
+		getProjectPartnerRowsForAdmin(project.entityVersion.entity.id),
 		db.query.projectsToSocialMedia.findMany({
 			where: { projectId: project.id },
 			columns: { socialMediaId: true },
