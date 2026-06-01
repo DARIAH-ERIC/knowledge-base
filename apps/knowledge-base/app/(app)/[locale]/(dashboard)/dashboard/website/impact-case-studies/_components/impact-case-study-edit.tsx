@@ -1,11 +1,14 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Tab, TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { ArticleContributorsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section";
 import { ImpactCaseStudyForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form";
 import { createImpactCaseStudyContributorAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/create-impact-case-study-contributor.action";
@@ -62,40 +65,52 @@ export function ImpactCaseStudyEditForm(props: Readonly<ImpactCaseStudyEditFormP
 
 	return (
 		<Fragment>
-			<EntityFormHeader
-				title={t("Edit impact case study")}
-				lifecycle={{
-					documentId,
-					hasDraft: hasDraftChanges,
-					isPublished,
-					publishAction: publishImpactCaseStudyAction,
-					discardDraftAction: discardImpactCaseStudyDraftAction,
-				}}
-			/>
+			<EntityFormHeader title={t("Edit impact case study")} />
 
-			<ImpactCaseStudyForm
-				contentBlocks={contentBlocks}
-				formAction={updateImpactCaseStudyAction}
-				impactCaseStudy={impactCaseStudy}
-				initialAssets={initialAssets}
-				initialRelatedEntityIds={initialRelatedEntityIds}
-				initialRelatedEntityItems={initialRelatedEntityItems}
-				initialRelatedEntityTotal={initialRelatedEntityTotal}
-				initialRelatedResourceIds={initialRelatedResourceIds}
-				initialRelatedResourceItems={initialRelatedResourceItems}
-				initialRelatedResourceTotal={initialRelatedResourceTotal}
-				selectedRelatedEntities={selectedRelatedEntities}
-				selectedRelatedResources={selectedRelatedResources}
-			/>
+			<EntityEditTabs defaultTab="details">
+				<TabList aria-label={t("Edit impact case study")}>
+					<Tab id="details">{t("Details")}</Tab>
+					<Tab id="contributors">{t("Contributors")}</Tab>
+				</TabList>
 
-			<ArticleContributorsSection
-				articleId={documentId}
-				contributors={contributors}
-				createAction={createImpactCaseStudyContributorAction}
-				deleteAction={deleteImpactCaseStudyContributorAction}
-				initialPersonItems={initialPersonItems}
-				initialPersonTotal={initialPersonTotal}
-			/>
+				<TabPanel className="flex flex-col gap-y-(--layout-padding)" id="details">
+					<div className="flex justify-end">
+						<EntityLifecycleBar
+							discardDraftAction={discardImpactCaseStudyDraftAction}
+							documentId={documentId}
+							hasDraft={hasDraftChanges}
+							isPublished={isPublished}
+							publishAction={publishImpactCaseStudyAction}
+						/>
+					</div>
+
+					<ImpactCaseStudyForm
+						contentBlocks={contentBlocks}
+						formAction={updateImpactCaseStudyAction}
+						impactCaseStudy={impactCaseStudy}
+						initialAssets={initialAssets}
+						initialRelatedEntityIds={initialRelatedEntityIds}
+						initialRelatedEntityItems={initialRelatedEntityItems}
+						initialRelatedEntityTotal={initialRelatedEntityTotal}
+						initialRelatedResourceIds={initialRelatedResourceIds}
+						initialRelatedResourceItems={initialRelatedResourceItems}
+						initialRelatedResourceTotal={initialRelatedResourceTotal}
+						selectedRelatedEntities={selectedRelatedEntities}
+						selectedRelatedResources={selectedRelatedResources}
+					/>
+				</TabPanel>
+
+				<TabPanel id="contributors">
+					<ArticleContributorsSection
+						articleId={documentId}
+						contributors={contributors}
+						createAction={createImpactCaseStudyContributorAction}
+						deleteAction={deleteImpactCaseStudyContributorAction}
+						initialPersonItems={initialPersonItems}
+						initialPersonTotal={initialPersonTotal}
+					/>
+				</TabPanel>
+			</EntityEditTabs>
 		</Fragment>
 	);
 }

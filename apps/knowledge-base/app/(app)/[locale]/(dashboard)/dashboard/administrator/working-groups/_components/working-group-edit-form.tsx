@@ -1,11 +1,14 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Tab, TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { WorkingGroupChairsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-chairs-section";
 import { WorkingGroupForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form";
@@ -77,47 +80,62 @@ export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>)
 
 	return (
 		<Fragment>
-			<EntityFormHeader
-				title={t("Edit working group")}
-				lifecycle={{
-					documentId,
-					hasDraft: hasDraftChanges,
-					isPublished,
-					publishAction: publishWorkingGroupAction,
-					discardDraftAction: discardWorkingGroupDraftAction,
-				}}
-			/>
+			<EntityFormHeader title={t("Edit working group")} />
 
-			<WorkingGroupForm
-				formAction={updateWorkingGroupAction}
-				initialAssets={initialAssets}
-				initialRelatedEntityIds={initialRelatedEntityIds}
-				initialRelatedEntityItems={initialRelatedEntityItems}
-				initialRelatedEntityTotal={initialRelatedEntityTotal}
-				initialRelatedResourceIds={initialRelatedResourceIds}
-				initialRelatedResourceItems={initialRelatedResourceItems}
-				initialRelatedResourceTotal={initialRelatedResourceTotal}
-				initialSocialMediaIds={initialSocialMediaIds}
-				initialSocialMediaItems={initialSocialMediaItems}
-				initialSocialMediaTotal={initialSocialMediaTotal}
-				selectedRelatedEntities={selectedRelatedEntities}
-				selectedRelatedResources={selectedRelatedResources}
-				selectedSocialMediaItems={selectedSocialMediaItems}
-				workingGroup={workingGroup}
-			/>
+			<EntityEditTabs defaultTab="details">
+				<TabList aria-label={t("Edit working group")}>
+					<Tab id="details">{t("Details")}</Tab>
+					<Tab id="chairs">{t("Chairs")}</Tab>
+					<Tab id="relations">{t("Relations")}</Tab>
+				</TabList>
 
-			<WorkingGroupChairsSection
-				chairs={chairs}
-				initialPersonItems={initialPersonItems}
-				initialPersonTotal={initialPersonTotal}
-				unitId={documentId}
-			/>
+				<TabPanel className="flex flex-col gap-y-(--layout-padding)" id="details">
+					<div className="flex justify-end">
+						<EntityLifecycleBar
+							discardDraftAction={discardWorkingGroupDraftAction}
+							documentId={documentId}
+							hasDraft={hasDraftChanges}
+							isPublished={isPublished}
+							publishAction={publishWorkingGroupAction}
+						/>
+					</div>
 
-			<UnitRelationsSection
-				relations={relations}
-				statusOptions={unitRelationStatusOptions}
-				unitId={documentId}
-			/>
+					<WorkingGroupForm
+						formAction={updateWorkingGroupAction}
+						initialAssets={initialAssets}
+						initialRelatedEntityIds={initialRelatedEntityIds}
+						initialRelatedEntityItems={initialRelatedEntityItems}
+						initialRelatedEntityTotal={initialRelatedEntityTotal}
+						initialRelatedResourceIds={initialRelatedResourceIds}
+						initialRelatedResourceItems={initialRelatedResourceItems}
+						initialRelatedResourceTotal={initialRelatedResourceTotal}
+						initialSocialMediaIds={initialSocialMediaIds}
+						initialSocialMediaItems={initialSocialMediaItems}
+						initialSocialMediaTotal={initialSocialMediaTotal}
+						selectedRelatedEntities={selectedRelatedEntities}
+						selectedRelatedResources={selectedRelatedResources}
+						selectedSocialMediaItems={selectedSocialMediaItems}
+						workingGroup={workingGroup}
+					/>
+				</TabPanel>
+
+				<TabPanel id="chairs">
+					<WorkingGroupChairsSection
+						chairs={chairs}
+						initialPersonItems={initialPersonItems}
+						initialPersonTotal={initialPersonTotal}
+						unitId={documentId}
+					/>
+				</TabPanel>
+
+				<TabPanel id="relations">
+					<UnitRelationsSection
+						relations={relations}
+						statusOptions={unitRelationStatusOptions}
+						unitId={documentId}
+					/>
+				</TabPanel>
+			</EntityEditTabs>
 		</Fragment>
 	);
 }

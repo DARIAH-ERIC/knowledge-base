@@ -1,11 +1,14 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Tab, TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { PersonRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { GovernanceBodyForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form";
@@ -76,48 +79,63 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 
 	return (
 		<Fragment>
-			<EntityFormHeader
-				title={t("Edit governance body")}
-				lifecycle={{
-					documentId,
-					hasDraft: hasDraftChanges,
-					isPublished,
-					publishAction: publishGovernanceBodyAction,
-					discardDraftAction: discardGovernanceBodyDraftAction,
-				}}
-			/>
+			<EntityFormHeader title={t("Edit governance body")} />
 
-			<GovernanceBodyForm
-				formAction={updateGovernanceBodyAction}
-				governanceBody={governanceBody}
-				initialAssets={initialAssets}
-				initialRelatedEntityIds={initialRelatedEntityIds}
-				initialRelatedEntityItems={initialRelatedEntityItems}
-				initialRelatedEntityTotal={initialRelatedEntityTotal}
-				initialRelatedResourceIds={initialRelatedResourceIds}
-				initialRelatedResourceItems={initialRelatedResourceItems}
-				initialRelatedResourceTotal={initialRelatedResourceTotal}
-				initialSocialMediaIds={initialSocialMediaIds}
-				initialSocialMediaItems={initialSocialMediaItems}
-				initialSocialMediaTotal={initialSocialMediaTotal}
-				selectedRelatedEntities={selectedRelatedEntities}
-				selectedRelatedResources={selectedRelatedResources}
-				selectedSocialMediaItems={selectedSocialMediaItems}
-			/>
+			<EntityEditTabs defaultTab="details">
+				<TabList aria-label={t("Edit governance body")}>
+					<Tab id="details">{t("Details")}</Tab>
+					<Tab id="people">{t("People")}</Tab>
+					<Tab id="relations">{t("Relations")}</Tab>
+				</TabList>
 
-			<PersonRelationsSection
-				initialPersonItems={initialPersonItems}
-				initialPersonTotal={initialPersonTotal}
-				relations={personRelations}
-				roleOptions={personRelationRoleOptions}
-				unitId={documentId}
-			/>
+				<TabPanel className="flex flex-col gap-y-(--layout-padding)" id="details">
+					<div className="flex justify-end">
+						<EntityLifecycleBar
+							discardDraftAction={discardGovernanceBodyDraftAction}
+							documentId={documentId}
+							hasDraft={hasDraftChanges}
+							isPublished={isPublished}
+							publishAction={publishGovernanceBodyAction}
+						/>
+					</div>
 
-			<UnitRelationsSection
-				relations={relations}
-				statusOptions={unitRelationStatusOptions}
-				unitId={documentId}
-			/>
+					<GovernanceBodyForm
+						formAction={updateGovernanceBodyAction}
+						governanceBody={governanceBody}
+						initialAssets={initialAssets}
+						initialRelatedEntityIds={initialRelatedEntityIds}
+						initialRelatedEntityItems={initialRelatedEntityItems}
+						initialRelatedEntityTotal={initialRelatedEntityTotal}
+						initialRelatedResourceIds={initialRelatedResourceIds}
+						initialRelatedResourceItems={initialRelatedResourceItems}
+						initialRelatedResourceTotal={initialRelatedResourceTotal}
+						initialSocialMediaIds={initialSocialMediaIds}
+						initialSocialMediaItems={initialSocialMediaItems}
+						initialSocialMediaTotal={initialSocialMediaTotal}
+						selectedRelatedEntities={selectedRelatedEntities}
+						selectedRelatedResources={selectedRelatedResources}
+						selectedSocialMediaItems={selectedSocialMediaItems}
+					/>
+				</TabPanel>
+
+				<TabPanel id="people">
+					<PersonRelationsSection
+						initialPersonItems={initialPersonItems}
+						initialPersonTotal={initialPersonTotal}
+						relations={personRelations}
+						roleOptions={personRelationRoleOptions}
+						unitId={documentId}
+					/>
+				</TabPanel>
+
+				<TabPanel id="relations">
+					<UnitRelationsSection
+						relations={relations}
+						statusOptions={unitRelationStatusOptions}
+						unitId={documentId}
+					/>
+				</TabPanel>
+			</EntityEditTabs>
 		</Fragment>
 	);
 }
