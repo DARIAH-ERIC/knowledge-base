@@ -142,8 +142,8 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 	await db.insert(schema.projectsToOrganisationalUnits).values(
 		dariahItems.map((item) => {
 			return {
-				projectId: item.project.id,
-				unitId: umbrellaUnitId,
+				projectDocumentId: item.entity.id,
+				unitDocumentId: umbrellaEntityId,
 				roleId: projectRole.id,
 			};
 		}),
@@ -151,8 +151,8 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 
 	// Link non-DARIAH project to a non-umbrella unit only
 	await db.insert(schema.projectsToOrganisationalUnits).values({
-		projectId: nonDariahItem.project.id,
-		unitId: otherUnitId,
+		projectDocumentId: nonDariahItem.entity.id,
+		unitDocumentId: otherEntityId,
 		roleId: projectRole.id,
 	});
 
@@ -256,8 +256,8 @@ async function seedWithMixedStatuses(db: Database): Promise<{
 	await db.insert(schema.projectsToOrganisationalUnits).values(
 		allItems.map((item) => {
 			return {
-				projectId: item.project.id,
-				unitId: umbrellaUnitId,
+				projectDocumentId: item.entity.id,
+				unitDocumentId: umbrellaEntityId,
 				roleId: projectRole.id,
 			};
 		}),

@@ -42,8 +42,7 @@ export async function resolveCountryReportId(params: ReportRouteParams): Promise
 			schema.reportingCampaigns,
 			eq(schema.reportingCampaigns.id, schema.countryReports.campaignId),
 		)
-		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.countryReports.countryId))
-		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.countryReports.countryDocumentId))
 		.where(and(eq(schema.reportingCampaigns.year, year), eq(schema.entities.slug, params.slug)))
 		.limit(1);
 
@@ -67,10 +66,9 @@ export async function resolveWorkingGroupReportId(
 			eq(schema.reportingCampaigns.id, schema.workingGroupReports.campaignId),
 		)
 		.innerJoin(
-			schema.entityVersions,
-			eq(schema.entityVersions.id, schema.workingGroupReports.workingGroupId),
+			schema.entities,
+			eq(schema.entities.id, schema.workingGroupReports.workingGroupDocumentId),
 		)
-		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 		.where(and(eq(schema.reportingCampaigns.year, year), eq(schema.entities.slug, params.slug)))
 		.limit(1);
 
@@ -88,8 +86,7 @@ export async function getCountryReportEditHrefById(id: string, step?: string): P
 			schema.reportingCampaigns,
 			eq(schema.reportingCampaigns.id, schema.countryReports.campaignId),
 		)
-		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.countryReports.countryId))
-		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.countryReports.countryDocumentId))
 		.where(eq(schema.countryReports.id, id))
 		.limit(1);
 
@@ -115,10 +112,9 @@ export async function getWorkingGroupReportEditHrefById(
 			eq(schema.reportingCampaigns.id, schema.workingGroupReports.campaignId),
 		)
 		.innerJoin(
-			schema.entityVersions,
-			eq(schema.entityVersions.id, schema.workingGroupReports.workingGroupId),
+			schema.entities,
+			eq(schema.entities.id, schema.workingGroupReports.workingGroupDocumentId),
 		)
-		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 		.where(eq(schema.workingGroupReports.id, id))
 		.limit(1);
 

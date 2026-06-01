@@ -1,7 +1,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import type { EntityLifecycleAdapter } from "@/lib/data/entity-lifecycle";
-import { eq, or } from "@/lib/db/sql";
+import { eq } from "@/lib/db/sql";
 
 export const organisationalUnitsLifecycleAdapter: EntityLifecycleAdapter = {
 	async cloneSubtype(tx, sourceVersionId, targetVersionId) {
@@ -24,39 +24,8 @@ export const organisationalUnitsLifecycleAdapter: EntityLifecycleAdapter = {
 		}
 		await tx.insert(schema.organisationalUnits).values({ id: targetVersionId, ...source });
 
-		const relations = await tx
-			.select({
-				relatedUnitId: schema.organisationalUnitsRelations.relatedUnitId,
-				duration: schema.organisationalUnitsRelations.duration,
-				status: schema.organisationalUnitsRelations.status,
-			})
-			.from(schema.organisationalUnitsRelations)
-			.where(eq(schema.organisationalUnitsRelations.unitId, sourceVersionId));
-
-		if (relations.length > 0) {
-			await tx.insert(schema.organisationalUnitsRelations).values(
-				relations.map((r) => {
-					return { unitId: targetVersionId, ...r };
-				}),
-			);
-		}
-
-		const personRelations = await tx
-			.select({
-				personId: schema.personsToOrganisationalUnits.personId,
-				roleTypeId: schema.personsToOrganisationalUnits.roleTypeId,
-				duration: schema.personsToOrganisationalUnits.duration,
-			})
-			.from(schema.personsToOrganisationalUnits)
-			.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, sourceVersionId));
-
-		if (personRelations.length > 0) {
-			await tx.insert(schema.personsToOrganisationalUnits).values(
-				personRelations.map((r) => {
-					return { organisationalUnitId: targetVersionId, ...r };
-				}),
-			);
-		}
+		// personsToOrganisationalUnits and organisationalUnitsRelations are document-level relations
+		// (keyed by entities.id) and are not cloned per version — see the schema.
 
 		const socialMedia = await tx
 			.select({ socialMediaId: schema.organisationalUnitsToSocialMedia.socialMediaId })
@@ -99,46 +68,6 @@ export const organisationalUnitsLifecycleAdapter: EntityLifecycleAdapter = {
 		await tx
 			.delete(schema.organisationalUnitsToSocialMedia)
 			.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, targetVersionId));
-		await tx
-			.delete(schema.personsToOrganisationalUnits)
-			.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, targetVersionId));
-		await tx
-			.delete(schema.organisationalUnitsRelations)
-			.where(eq(schema.organisationalUnitsRelations.unitId, targetVersionId));
-
-		const relations = await tx
-			.select({
-				relatedUnitId: schema.organisationalUnitsRelations.relatedUnitId,
-				duration: schema.organisationalUnitsRelations.duration,
-				status: schema.organisationalUnitsRelations.status,
-			})
-			.from(schema.organisationalUnitsRelations)
-			.where(eq(schema.organisationalUnitsRelations.unitId, sourceVersionId));
-
-		if (relations.length > 0) {
-			await tx.insert(schema.organisationalUnitsRelations).values(
-				relations.map((r) => {
-					return { unitId: targetVersionId, ...r };
-				}),
-			);
-		}
-
-		const personRelations = await tx
-			.select({
-				personId: schema.personsToOrganisationalUnits.personId,
-				roleTypeId: schema.personsToOrganisationalUnits.roleTypeId,
-				duration: schema.personsToOrganisationalUnits.duration,
-			})
-			.from(schema.personsToOrganisationalUnits)
-			.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, sourceVersionId));
-
-		if (personRelations.length > 0) {
-			await tx.insert(schema.personsToOrganisationalUnits).values(
-				personRelations.map((r) => {
-					return { organisationalUnitId: targetVersionId, ...r };
-				}),
-			);
-		}
 
 		const socialMedia = await tx
 			.select({ socialMediaId: schema.organisationalUnitsToSocialMedia.socialMediaId })
@@ -158,17 +87,6 @@ export const organisationalUnitsLifecycleAdapter: EntityLifecycleAdapter = {
 		await tx
 			.delete(schema.organisationalUnitsToSocialMedia)
 			.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, versionId));
-		await tx
-			.delete(schema.personsToOrganisationalUnits)
-			.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, versionId));
-		await tx
-			.delete(schema.organisationalUnitsRelations)
-			.where(
-				or(
-					eq(schema.organisationalUnitsRelations.unitId, versionId),
-					eq(schema.organisationalUnitsRelations.relatedUnitId, versionId),
-				),
-			);
 		await tx.delete(schema.organisationalUnits).where(eq(schema.organisationalUnits.id, versionId));
 	},
 };

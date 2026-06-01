@@ -91,7 +91,7 @@ export function SpotlightArticleEditForm(
 			/>
 
 			<ArticleContributorsSection
-				articleId={spotlightArticle.id}
+				articleId={documentId}
 				contributors={contributors}
 				createAction={createSpotlightArticleContributorAction}
 				deleteAction={deleteSpotlightArticleContributorAction}

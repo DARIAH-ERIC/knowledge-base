@@ -262,11 +262,12 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 			}),
 		);
 
+		// Contributors are document-level; key both endpoints to their document ids.
 		const impactCaseStudiesToPersons = impactCaseStudyIds.flatMap(
-			({ versionId: impactCaseStudyId }) => {
+			({ documentId: impactCaseStudyDocumentId }) => {
 				const selected = f.helpers.arrayElements(personIds, { min: 0, max: 3 });
-				return selected.map(({ versionId: personId }) => {
-					return { impactCaseStudyId, personId };
+				return selected.map(({ documentId: personDocumentId }) => {
+					return { impactCaseStudyDocumentId, personDocumentId };
 				});
 			},
 		);
@@ -544,20 +545,26 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 			)
 			.returning({ id: schema.organisationalUnits.id, typeId: schema.organisationalUnits.typeId });
 
+		// relations are document-level; zip in each org's document id (same order as the versions).
+		const organisationalUnitsWithDocument = organisationalUnitsIds.map((unit, index) => {
+			return { ...unit, documentId: organisationalUnitIds[index]!.documentId };
+		});
+
+		const seenUnitRelations = new Set<string>();
 		const unitsToUnits: Array<schema.OrganisationalUnitRelationInput> = f.helpers
 			.multiple(() => f.helpers.arrayElement(organisationalUnitsAllowedRelationsValues), {
 				count: 25,
 			})
 			.map((organisationalUnitsAllowedRelation) => {
 				const unit = f.helpers.arrayElement(
-					organisationalUnitsIds.filter(
+					organisationalUnitsWithDocument.filter(
 						(organisationalUnit) =>
 							organisationalUnit.typeId === organisationalUnitsAllowedRelation.unitTypeId,
 					),
 				);
 
 				const relatedUnit = f.helpers.arrayElement(
-					organisationalUnitsIds.filter(
+					organisationalUnitsWithDocument.filter(
 						(organisationalUnit) =>
 							organisationalUnit.typeId === organisationalUnitsAllowedRelation.relatedUnitTypeId,
 					),
@@ -570,8 +577,8 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 				minEndDate.setFullYear(start.getFullYear() + 1);
 
 				return {
-					unitId: unit.id,
-					relatedUnitId: relatedUnit.id,
+					unitDocumentId: unit.documentId,
+					relatedUnitDocumentId: relatedUnit.documentId,
 					status: organisationalUnitsAllowedRelation.relationTypeId,
 					duration: {
 						start,
@@ -583,6 +590,15 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 								: undefined,
 					},
 				};
+			})
+			// the (unit, related unit, status) unique constraint forbids duplicates.
+			.filter((row) => {
+				const key = [row.unitDocumentId, row.relatedUnitDocumentId, row.status].join(":");
+				if (seenUnitRelations.has(key)) {
+					return false;
+				}
+				seenUnitRelations.add(key);
+				return true;
 			});
 
 		await db.insert(schema.organisationalUnitsRelations).values(unitsToUnits);
@@ -594,39 +610,52 @@ export async function seed(db: Database, config: SeedConfig = {}): Promise<void>
 			})
 			.from(schema.personRoleTypesToOrganisationalUnitTypesAllowedRelations);
 
-		const personsToOrganisationalUnits = f.helpers.multiple(
-			() => {
-				const { roleTypeId, unitTypeId } = f.helpers.arrayElement(
-					personsToOrganisationalUnitsAllowedRelations,
-				);
-				const organisationalUnit = f.helpers.arrayElement(
-					organisationalUnitsIds.filter(
-						(organisationalUnit) => organisationalUnit.typeId === unitTypeId,
-					),
-				);
+		const seenContributions = new Set<string>();
+		const personsToOrganisationalUnits = f.helpers
+			.multiple(
+				() => {
+					const { roleTypeId, unitTypeId } = f.helpers.arrayElement(
+						personsToOrganisationalUnitsAllowedRelations,
+					);
+					const organisationalUnit = f.helpers.arrayElement(
+						organisationalUnitsWithDocument.filter(
+							(organisationalUnit) => organisationalUnit.typeId === unitTypeId,
+						),
+					);
 
-				const start = f.date.past({ years: 5 });
-				const end = f.helpers.maybe(() => f.date.between({ from: start, to: Date.now() }), {
-					probability: 0.25,
-				});
-				const isFullDay = f.datatype.boolean({ probability: 0.75 });
-				if (isFullDay) {
-					start.setUTCHours(0, 0, 0, 0);
-					end?.setUTCHours(23, 59, 59, 999);
+					const start = f.date.past({ years: 5 });
+					const end = f.helpers.maybe(() => f.date.between({ from: start, to: Date.now() }), {
+						probability: 0.25,
+					});
+					const isFullDay = f.datatype.boolean({ probability: 0.75 });
+					if (isFullDay) {
+						start.setUTCHours(0, 0, 0, 0);
+						end?.setUTCHours(23, 59, 59, 999);
+					}
+
+					return {
+						personDocumentId: f.helpers.arrayElement(personIds).documentId,
+						roleTypeId,
+						organisationalUnitDocumentId: organisationalUnit.documentId,
+						duration: {
+							start,
+							end,
+						},
+					};
+				},
+				{ count: 10 },
+			)
+			// the (person, org, role) unique constraint forbids duplicates.
+			.filter((row) => {
+				const key = [row.personDocumentId, row.organisationalUnitDocumentId, row.roleTypeId].join(
+					":",
+				);
+				if (seenContributions.has(key)) {
+					return false;
 				}
-
-				return {
-					personId: f.helpers.arrayElement(personIds).versionId,
-					roleTypeId,
-					organisationalUnitId: organisationalUnit.id,
-					duration: {
-						start,
-						end,
-					},
-				};
-			},
-			{ count: 10 },
-		);
+				seenContributions.add(key);
+				return true;
+			});
 
 		await db.insert(schema.personsToOrganisationalUnits).values(personsToOrganisationalUnits);
 	});

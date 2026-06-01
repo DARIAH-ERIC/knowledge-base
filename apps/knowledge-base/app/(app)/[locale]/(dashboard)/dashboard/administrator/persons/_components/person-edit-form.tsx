@@ -56,7 +56,7 @@ export function PersonEditForm(props: Readonly<PersonEditFormProps>): ReactNode 
 
 			<ContributionsSection
 				contributions={contributions}
-				personId={person.id}
+				personId={documentId}
 				roleOptions={contributionRoleOptions}
 			/>
 		</Fragment>

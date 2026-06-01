@@ -110,13 +110,13 @@ export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>)
 				chairs={chairs}
 				initialPersonItems={initialPersonItems}
 				initialPersonTotal={initialPersonTotal}
-				unitId={workingGroup.id}
+				unitId={documentId}
 			/>
 
 			<UnitRelationsSection
 				relations={relations}
 				statusOptions={unitRelationStatusOptions}
-				unitId={workingGroup.id}
+				unitId={documentId}
 			/>
 		</Fragment>
 	);

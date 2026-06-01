@@ -26,6 +26,8 @@ export const updateProjectAction = createMutationAction({
 
 	async preCheck({ input }) {
 		const t = await getExtracted();
+		// partner unit ids are published org *version* ids (the picker is shared with services); the
+		// action resolves them to document ids before storing.
 		const partnerUnitIds = [...new Set(input.partners.map((p) => p.unitId))];
 
 		if (!(await isPublishedEntityVersions(db, partnerUnitIds))) {
@@ -74,36 +76,58 @@ export const updateProjectAction = createMutationAction({
 			.map((p) => p.id)
 			.filter((pid): pid is string => pid != null);
 
+		// Partners are document-level (keyed by the project's entities.id), not per-version.
 		if (submittedPartnerIds.length > 0) {
 			await tx
 				.delete(schema.projectsToOrganisationalUnits)
 				.where(
 					and(
-						eq(schema.projectsToOrganisationalUnits.projectId, draftVersionId),
+						eq(schema.projectsToOrganisationalUnits.projectDocumentId, input.documentId),
 						notInArray(schema.projectsToOrganisationalUnits.id, submittedPartnerIds),
 					),
 				);
 		} else {
 			await tx
 				.delete(schema.projectsToOrganisationalUnits)
-				.where(eq(schema.projectsToOrganisationalUnits.projectId, draftVersionId));
+				.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, input.documentId));
 		}
+
+		// Resolve the partner unit *version* ids (from the shared picker) to their document ids.
+		const unitVersionIds = [...new Set(input.partners.map((p) => p.unitId))];
+		const unitDocumentRows =
+			unitVersionIds.length > 0
+				? await tx
+						.select({
+							versionId: schema.entityVersions.id,
+							documentId: schema.entityVersions.entityId,
+						})
+						.from(schema.entityVersions)
+						.where(inArray(schema.entityVersions.id, unitVersionIds))
+				: [];
+		const unitDocumentByVersion = new Map(
+			unitDocumentRows.map((row) => [row.versionId, row.documentId]),
+		);
 
 		for (const p of input.partners) {
 			const duration =
 				p.durationStart != null
 					? { start: p.durationStart, end: p.durationEnd ?? undefined }
 					: undefined;
+			const unitDocumentId = unitDocumentByVersion.get(p.unitId);
+			assert(unitDocumentId, `No document for organisational unit version "${p.unitId}".`);
 
 			if (p.id != null) {
 				await tx
 					.update(schema.projectsToOrganisationalUnits)
-					.set({ unitId: p.unitId, roleId: p.roleId, duration: duration ?? null })
+					.set({ unitDocumentId, roleId: p.roleId, duration: duration ?? null })
 					.where(eq(schema.projectsToOrganisationalUnits.id, p.id));
 			} else {
-				await tx
-					.insert(schema.projectsToOrganisationalUnits)
-					.values({ projectId: draftVersionId, unitId: p.unitId, roleId: p.roleId, duration });
+				await tx.insert(schema.projectsToOrganisationalUnits).values({
+					projectDocumentId: input.documentId,
+					unitDocumentId,
+					roleId: p.roleId,
+					duration,
+				});
 			}
 		}
 

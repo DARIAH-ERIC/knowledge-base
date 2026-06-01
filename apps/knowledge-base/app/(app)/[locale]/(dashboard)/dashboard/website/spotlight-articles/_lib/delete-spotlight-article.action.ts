@@ -3,7 +3,7 @@
 import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
-import { getDocumentVersions } from "@/lib/data/entity-lifecycle";
+import { deleteDocumentRelations, getDocumentVersions } from "@/lib/data/entity-lifecycle";
 import { spotlightArticlesLifecycleAdapter } from "@/lib/data/spotlight-articles.lifecycle-adapter";
 import { eq, inArray, or } from "@/lib/db/sql";
 import {
@@ -65,6 +65,9 @@ export const deleteSpotlightArticleAction = createCommandAction({
 		if (versionIds.length > 0) {
 			await tx.delete(schema.entityVersions).where(inArray(schema.entityVersions.id, versionIds));
 		}
+
+		// Document-level relations have no ON DELETE CASCADE; remove them before the entity row.
+		await deleteDocumentRelations(tx, documentId);
 
 		await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
 

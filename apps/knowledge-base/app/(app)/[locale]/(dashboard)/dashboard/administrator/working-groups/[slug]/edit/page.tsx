@@ -7,8 +7,8 @@ import type { ReactNode } from "react";
 import { WorkingGroupEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-edit-form";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getPersonOptions } from "@/lib/data/article-contributors";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { getContributionPersonOptions } from "@/lib/data/contributions";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
 import {
@@ -19,15 +19,8 @@ import {
 	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
-import {
-	annotateUnitRelationLifecycle,
-	getUnitRelationStatusOptions,
-	getUnitRelations,
-} from "@/lib/data/unit-relations";
-import {
-	annotateWorkingGroupChairLifecycle,
-	getWorkingGroupChairs,
-} from "@/lib/data/working-group-chairs";
+import { getUnitRelationStatusOptions, getUnitRelations } from "@/lib/data/unit-relations";
+import { getWorkingGroupChairs } from "@/lib/data/working-group-chairs";
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
 import { images } from "@/lib/images";
@@ -94,7 +87,7 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
 		getEntityRelationOptions(),
 		getResourceRelationOptions(),
-		getPersonOptions(),
+		getContributionPersonOptions(),
 		getSocialMediaOptions(),
 		db.query.organisationalUnits.findFirst({
 			where: { id: draftVersionId },
@@ -137,12 +130,10 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 		chairs,
 		descriptionRows,
 		socialMediaRows,
-		publishedRelations,
-		publishedChairs,
 	] = await Promise.all([
 		getEntityRelations(documentId),
-		getUnitRelations(workingGroup.id),
-		getWorkingGroupChairs(workingGroup.id),
+		getUnitRelations(documentId),
+		getWorkingGroupChairs(documentId),
 		db
 			.select({ content: schema.richTextContentBlocks.content })
 			.from(schema.richTextContentBlocks)
@@ -163,8 +154,6 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 			where: { organisationalUnitId: workingGroup.id },
 			columns: { socialMediaId: true },
 		}),
-		publishedId != null ? getUnitRelations(publishedId) : Promise.resolve([]),
-		publishedId != null ? getWorkingGroupChairs(publishedId) : Promise.resolve([]),
 	]);
 
 	const description = descriptionRows.at(0)?.content;
@@ -192,7 +181,7 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 
 	return (
 		<WorkingGroupEditForm
-			chairs={annotateWorkingGroupChairLifecycle(chairs, publishedChairs)}
+			chairs={chairs}
 			documentId={documentId}
 			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
@@ -208,7 +197,7 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 			initialSocialMediaItems={initialSocialMedia.items}
 			initialSocialMediaTotal={initialSocialMedia.total}
 			isPublished={publishedId != null}
-			relations={annotateUnitRelationLifecycle(relations, publishedRelations)}
+			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}
 			selectedSocialMediaItems={selectedSocialMediaItems}

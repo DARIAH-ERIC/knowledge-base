@@ -434,7 +434,7 @@ export class DatabaseService {
 		return this.db
 			.select({
 				id: schema.personsToOrganisationalUnits.id,
-				personId: schema.personsToOrganisationalUnits.personId,
+				personId: schema.personsToOrganisationalUnits.personDocumentId,
 				roleType: schema.personRoleTypes.type,
 				duration: schema.personsToOrganisationalUnits.duration,
 			})
@@ -443,7 +443,9 @@ export class DatabaseService {
 				schema.personRoleTypes,
 				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
 			)
-			.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, versionId));
+			.where(
+				sql`${schema.personsToOrganisationalUnits.organisationalUnitDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${versionId})`,
+			);
 	}
 
 	async getContributionsByPersonVersionId(versionId: string): Promise<
@@ -457,7 +459,7 @@ export class DatabaseService {
 		return this.db
 			.select({
 				id: schema.personsToOrganisationalUnits.id,
-				organisationalUnitId: schema.personsToOrganisationalUnits.organisationalUnitId,
+				organisationalUnitId: schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
 				roleType: schema.personRoleTypes.type,
 				duration: schema.personsToOrganisationalUnits.duration,
 			})
@@ -466,7 +468,9 @@ export class DatabaseService {
 				schema.personRoleTypes,
 				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
 			)
-			.where(eq(schema.personsToOrganisationalUnits.personId, versionId));
+			.where(
+				sql`${schema.personsToOrganisationalUnits.personDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${versionId})`,
+			);
 	}
 
 	async getUnitRelationsByUnitVersionId(versionId: string): Promise<
@@ -480,7 +484,8 @@ export class DatabaseService {
 		return this.db
 			.select({
 				id: schema.organisationalUnitsRelations.id,
-				relatedUnitId: schema.organisationalUnitsRelations.relatedUnitId,
+				// resolve the related unit document back to its published version id.
+				relatedUnitId: schema.organisationalUnits.id,
 				statusType: schema.organisationalUnitStatus.status,
 				duration: schema.organisationalUnitsRelations.duration,
 			})
@@ -489,7 +494,20 @@ export class DatabaseService {
 				schema.organisationalUnitStatus,
 				eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
 			)
-			.where(eq(schema.organisationalUnitsRelations.unitId, versionId));
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(
+					schema.documentLifecycle.documentId,
+					schema.organisationalUnitsRelations.relatedUnitDocumentId,
+				),
+			)
+			.innerJoin(
+				schema.organisationalUnits,
+				eq(schema.organisationalUnits.id, schema.documentLifecycle.publishedId),
+			)
+			.where(
+				sql`${schema.organisationalUnitsRelations.unitDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${versionId})`,
+			);
 	}
 
 	async getPublishedVersionId(documentId: string): Promise<string | null> {
@@ -736,10 +754,24 @@ export class DatabaseService {
 			.select({
 				duration: schema.projectsToOrganisationalUnits.duration,
 				roleId: schema.projectsToOrganisationalUnits.roleId,
-				unitId: schema.projectsToOrganisationalUnits.unitId,
+				// resolve the unit document back to its published version id (what the picker submitted).
+				unitId: schema.organisationalUnits.id,
 			})
 			.from(schema.projectsToOrganisationalUnits)
-			.where(eq(schema.projectsToOrganisationalUnits.projectId, project.id));
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(
+					schema.documentLifecycle.documentId,
+					schema.projectsToOrganisationalUnits.unitDocumentId,
+				),
+			)
+			.innerJoin(
+				schema.organisationalUnits,
+				eq(schema.organisationalUnits.id, schema.documentLifecycle.publishedId),
+			)
+			.where(
+				sql`${schema.projectsToOrganisationalUnits.projectDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${project.id})`,
+			);
 
 		const socialMedia = await this.db
 			.select({ socialMediaId: schema.projectsToSocialMedia.socialMediaId })
@@ -810,9 +842,15 @@ export class DatabaseService {
 			return null;
 		}
 
+		// service↔unit relations are document-level; resolve the unit's document id to its published
+		// version id to match the picker / form id space.
 		const unitRoleRows = await this.db
 			.select({
-				organisationalUnitId: schema.servicesToOrganisationalUnits.organisationalUnitId,
+				organisationalUnitId: sql<string | null>`(
+					SELECT ${schema.documentLifecycle.publishedId}
+					FROM ${schema.documentLifecycle}
+					WHERE ${schema.documentLifecycle.documentId} = ${schema.servicesToOrganisationalUnits.organisationalUnitDocumentId}
+				)`,
 				role: schema.organisationalUnitServiceRoles.role,
 			})
 			.from(schema.servicesToOrganisationalUnits)
@@ -824,10 +862,12 @@ export class DatabaseService {
 
 		const ownerUnitIds = unitRoleRows
 			.filter((unitRole) => unitRole.role === "service_owner")
-			.map((unitRole) => unitRole.organisationalUnitId);
+			.map((unitRole) => unitRole.organisationalUnitId)
+			.filter((unitId): unitId is string => unitId != null);
 		const providerUnitIds = unitRoleRows
 			.filter((unitRole) => unitRole.role === "service_provider")
-			.map((unitRole) => unitRole.organisationalUnitId);
+			.map((unitRole) => unitRole.organisationalUnitId)
+			.filter((unitId): unitId is string => unitId != null);
 
 		return { ...row, ownerUnitIds, providerUnitIds };
 	}
@@ -865,7 +905,8 @@ export class DatabaseService {
 
 	async getCountryOption(): Promise<{ id: string; name: string }> {
 		const [row] = await this.db
-			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+			// reports key the country by document id.
+			.select({ id: schema.entityVersions.entityId, name: schema.organisationalUnits.name })
 			.from(schema.organisationalUnits)
 			.innerJoin(
 				schema.organisationalUnitTypes,
@@ -891,7 +932,8 @@ export class DatabaseService {
 
 	async getWorkingGroupOption(): Promise<{ id: string; name: string }> {
 		const [row] = await this.db
-			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+			// reports key the working group by document id.
+			.select({ id: schema.entityVersions.entityId, name: schema.organisationalUnits.name })
 			.from(schema.organisationalUnits)
 			.innerJoin(
 				schema.organisationalUnitTypes,
@@ -1096,7 +1138,8 @@ export class DatabaseService {
 			.where(
 				and(
 					eq(schema.countryReports.campaignId, campaignId),
-					eq(schema.countryReports.countryId, countryId),
+					// reports are keyed by country document id.
+					eq(schema.countryReports.countryDocumentId, countryId),
 				),
 			)
 			.limit(1);
@@ -1110,7 +1153,7 @@ export class DatabaseService {
 		const [row] = await this.db
 			.select({
 				campaignId: schema.countryReports.campaignId,
-				countryId: schema.countryReports.countryId,
+				countryId: schema.countryReports.countryDocumentId,
 				id: schema.countryReports.id,
 				status: schema.countryReports.status,
 			})
@@ -1135,7 +1178,8 @@ export class DatabaseService {
 			.where(
 				and(
 					eq(schema.workingGroupReports.campaignId, campaignId),
-					eq(schema.workingGroupReports.workingGroupId, workingGroupId),
+					// reports are keyed by working group document id.
+					eq(schema.workingGroupReports.workingGroupDocumentId, workingGroupId),
 				),
 			)
 			.limit(1);
@@ -1154,7 +1198,7 @@ export class DatabaseService {
 				campaignId: schema.workingGroupReports.campaignId,
 				id: schema.workingGroupReports.id,
 				status: schema.workingGroupReports.status,
-				workingGroupId: schema.workingGroupReports.workingGroupId,
+				workingGroupId: schema.workingGroupReports.workingGroupDocumentId,
 			})
 			.from(schema.workingGroupReports)
 			.where(eq(schema.workingGroupReports.id, id))
@@ -1182,8 +1226,9 @@ export class DatabaseService {
 				email: schema.users.email,
 				id: schema.users.id,
 				name: schema.users.name,
-				organisationalUnitId: schema.users.organisationalUnitId,
-				personId: schema.users.personId,
+				// The actor is stored as a document id.
+				organisationalUnitId: schema.users.organisationalUnitDocumentId,
+				personId: schema.users.personDocumentId,
 				role: schema.users.role,
 			})
 			.from(schema.users)
@@ -1486,6 +1531,30 @@ export class DatabaseService {
 			await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
 		}
 
+		// Document-level article contributors may reference this document as the article or the person.
+		await tx
+			.delete(schema.impactCaseStudiesToPersons)
+			.where(
+				or(
+					eq(schema.impactCaseStudiesToPersons.impactCaseStudyDocumentId, documentId),
+					eq(schema.impactCaseStudiesToPersons.personDocumentId, documentId),
+				),
+			);
+
+		await tx
+			.delete(schema.spotlightArticlesToPersons)
+			.where(
+				or(
+					eq(schema.spotlightArticlesToPersons.spotlightArticleDocumentId, documentId),
+					eq(schema.spotlightArticlesToPersons.personDocumentId, documentId),
+				),
+			);
+
+		// Document-level service↔unit relations reference this document on their unit endpoint.
+		await tx
+			.delete(schema.servicesToOrganisationalUnits)
+			.where(eq(schema.servicesToOrganisationalUnits.organisationalUnitDocumentId, documentId));
+
 		await tx
 			.delete(schema.entitiesToResources)
 			.where(eq(schema.entitiesToResources.entityId, documentId));
@@ -1533,7 +1602,7 @@ export class DatabaseService {
 
 			await tx
 				.delete(schema.projectsToOrganisationalUnits)
-				.where(eq(schema.projectsToOrganisationalUnits.projectId, versionId));
+				.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, documentId));
 
 			await tx
 				.delete(schema.projectsToSocialMedia)
@@ -1609,7 +1678,7 @@ export class DatabaseService {
 
 			await tx
 				.delete(schema.impactCaseStudiesToPersons)
-				.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyId, versionId));
+				.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyDocumentId, documentId));
 
 			await tx.delete(schema.impactCaseStudies).where(eq(schema.impactCaseStudies.id, versionId));
 
@@ -1648,7 +1717,7 @@ export class DatabaseService {
 
 			await tx
 				.delete(schema.spotlightArticlesToPersons)
-				.where(eq(schema.spotlightArticlesToPersons.spotlightArticleId, versionId));
+				.where(eq(schema.spotlightArticlesToPersons.spotlightArticleDocumentId, documentId));
 
 			await tx.delete(schema.spotlightArticles).where(eq(schema.spotlightArticles.id, versionId));
 
@@ -1765,7 +1834,7 @@ export class DatabaseService {
 
 			await tx
 				.delete(schema.personsToOrganisationalUnits)
-				.where(eq(schema.personsToOrganisationalUnits.personId, versionId));
+				.where(eq(schema.personsToOrganisationalUnits.personDocumentId, documentId));
 
 			await tx.delete(schema.persons).where(eq(schema.persons.id, versionId));
 			await this.deleteDocumentVersionTail(tx, versionId, documentId);
@@ -1817,7 +1886,7 @@ export class DatabaseService {
 
 				await tx
 					.delete(schema.personsToOrganisationalUnits)
-					.where(eq(schema.personsToOrganisationalUnits.personId, version.id));
+					.where(eq(schema.personsToOrganisationalUnits.personDocumentId, documentId));
 				await tx.delete(schema.persons).where(eq(schema.persons.id, version.id));
 				await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, version.id));
 			}
@@ -1876,8 +1945,8 @@ export class DatabaseService {
 				.delete(schema.organisationalUnitsRelations)
 				.where(
 					or(
-						eq(schema.organisationalUnitsRelations.unitId, versionId),
-						eq(schema.organisationalUnitsRelations.relatedUnitId, versionId),
+						eq(schema.organisationalUnitsRelations.unitDocumentId, documentId),
+						eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, documentId),
 					),
 				);
 
@@ -1932,13 +2001,13 @@ export class DatabaseService {
 				.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, versionId));
 			await tx
 				.delete(schema.personsToOrganisationalUnits)
-				.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, versionId));
+				.where(eq(schema.personsToOrganisationalUnits.organisationalUnitDocumentId, documentId));
 			await tx
 				.delete(schema.organisationalUnitsRelations)
 				.where(
 					or(
-						eq(schema.organisationalUnitsRelations.unitId, versionId),
-						eq(schema.organisationalUnitsRelations.relatedUnitId, versionId),
+						eq(schema.organisationalUnitsRelations.unitDocumentId, documentId),
+						eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, documentId),
 					),
 				);
 
@@ -1989,8 +2058,8 @@ export class DatabaseService {
 				.delete(schema.organisationalUnitsRelations)
 				.where(
 					or(
-						eq(schema.organisationalUnitsRelations.unitId, versionId),
-						eq(schema.organisationalUnitsRelations.relatedUnitId, versionId),
+						eq(schema.organisationalUnitsRelations.unitDocumentId, documentId),
+						eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, documentId),
 					),
 				);
 
@@ -2041,14 +2110,14 @@ export class DatabaseService {
 				.delete(schema.organisationalUnitsRelations)
 				.where(
 					or(
-						eq(schema.organisationalUnitsRelations.unitId, versionId),
-						eq(schema.organisationalUnitsRelations.relatedUnitId, versionId),
+						eq(schema.organisationalUnitsRelations.unitDocumentId, documentId),
+						eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, documentId),
 					),
 				);
 
 			await tx
 				.delete(schema.personsToOrganisationalUnits)
-				.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, versionId));
+				.where(eq(schema.personsToOrganisationalUnits.organisationalUnitDocumentId, documentId));
 
 			await tx
 				.delete(schema.organisationalUnits)
@@ -2075,13 +2144,13 @@ export class DatabaseService {
 					.delete(schema.organisationalUnitsRelations)
 					.where(
 						or(
-							eq(schema.organisationalUnitsRelations.unitId, version.id),
-							eq(schema.organisationalUnitsRelations.relatedUnitId, version.id),
+							eq(schema.organisationalUnitsRelations.unitDocumentId, documentId),
+							eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, documentId),
 						),
 					);
 				await tx
 					.delete(schema.personsToOrganisationalUnits)
-					.where(eq(schema.personsToOrganisationalUnits.organisationalUnitId, version.id));
+					.where(eq(schema.personsToOrganisationalUnits.organisationalUnitDocumentId, documentId));
 				await tx
 					.delete(schema.organisationalUnitsToSocialMedia)
 					.where(eq(schema.organisationalUnitsToSocialMedia.organisationalUnitId, version.id));
@@ -2161,8 +2230,8 @@ export class DatabaseService {
 				.delete(schema.organisationalUnitsRelations)
 				.where(
 					or(
-						eq(schema.organisationalUnitsRelations.unitId, versionId),
-						eq(schema.organisationalUnitsRelations.relatedUnitId, versionId),
+						eq(schema.organisationalUnitsRelations.unitDocumentId, documentId),
+						eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, documentId),
 					),
 				);
 
@@ -2453,7 +2522,7 @@ export class DatabaseService {
 
 				await tx
 					.delete(schema.projectsToOrganisationalUnits)
-					.where(eq(schema.projectsToOrganisationalUnits.projectId, version.id));
+					.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, documentId));
 				await tx
 					.delete(schema.projectsToSocialMedia)
 					.where(eq(schema.projectsToSocialMedia.projectId, version.id));
@@ -2573,9 +2642,10 @@ export class DatabaseService {
 					await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
 				}
 
+				// Contributors are document-level; remove them once by document id.
 				await tx
 					.delete(schema.spotlightArticlesToPersons)
-					.where(eq(schema.spotlightArticlesToPersons.spotlightArticleId, version.id));
+					.where(eq(schema.spotlightArticlesToPersons.spotlightArticleDocumentId, documentId));
 				await tx
 					.delete(schema.spotlightArticles)
 					.where(eq(schema.spotlightArticles.id, version.id));
@@ -2636,9 +2706,10 @@ export class DatabaseService {
 					await tx.delete(schema.fields).where(inArray(schema.fields.id, fieldIds));
 				}
 
+				// Contributors are document-level; remove them once by document id.
 				await tx
 					.delete(schema.impactCaseStudiesToPersons)
-					.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyId, version.id));
+					.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyDocumentId, documentId));
 				await tx
 					.delete(schema.impactCaseStudies)
 					.where(eq(schema.impactCaseStudies.id, version.id));

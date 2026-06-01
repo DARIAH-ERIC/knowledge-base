@@ -3,17 +3,27 @@ import * as schema from "@dariah-eric/database/schema";
 import { relationOptionsPageSize } from "@/lib/constants/relations";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { and, count, eq, ilike, inArray } from "@/lib/db/sql";
+import { alias, and, count, eq, ilike, inArray, sql } from "@/lib/db/sql";
 
+/**
+ * `unitDocumentId` is the owner unit's `entities.id`. Unit↔unit relations are document-level, so
+ * there is a single set per unit document (no draft/published diff); the related unit is resolved
+ * to its latest editable version for display.
+ */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function getUnitRelations(unitId: string) {
+export async function getUnitRelations(unitDocumentId: string) {
+	const relatedUnitDocumentLifecycle = alias(
+		schema.documentLifecycle,
+		"related_unit_document_lifecycle",
+	);
+
 	return db
 		.select({
 			id: schema.organisationalUnitsRelations.id,
 			duration: schema.organisationalUnitsRelations.duration,
 			statusId: schema.organisationalUnitsRelations.status,
 			statusType: schema.organisationalUnitStatus.status,
-			relatedUnitId: schema.organisationalUnitsRelations.relatedUnitId,
+			relatedUnitId: schema.organisationalUnitsRelations.relatedUnitDocumentId,
 			relatedUnitName: schema.organisationalUnits.name,
 			relatedUnitType: schema.organisationalUnitTypes.type,
 		})
@@ -23,50 +33,24 @@ export async function getUnitRelations(unitId: string) {
 			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
 		)
 		.innerJoin(
+			relatedUnitDocumentLifecycle,
+			eq(
+				relatedUnitDocumentLifecycle.documentId,
+				schema.organisationalUnitsRelations.relatedUnitDocumentId,
+			),
+		)
+		.innerJoin(
 			schema.organisationalUnits,
-			eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.relatedUnitId),
+			sql`${schema.organisationalUnits.id} = COALESCE(${relatedUnitDocumentLifecycle.draftId}, ${relatedUnitDocumentLifecycle.publishedId})`,
 		)
 		.innerJoin(
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 		)
-		.where(eq(schema.organisationalUnitsRelations.unitId, unitId));
+		.where(eq(schema.organisationalUnitsRelations.unitDocumentId, unitDocumentId));
 }
 
 export type UnitRelation = Awaited<ReturnType<typeof getUnitRelations>>[number];
-
-export type RelationLifecycleStatus = "changed" | "new";
-
-function durationKey(duration: UnitRelation["duration"]): string {
-	return [duration.start.toISOString(), duration.end?.toISOString() ?? ""].join(":");
-}
-
-export function annotateUnitRelationLifecycle(
-	draftRelations: Array<UnitRelation>,
-	publishedRelations: Array<UnitRelation>,
-): Array<UnitRelation & { lifecycleStatus?: RelationLifecycleStatus }> {
-	const publishedByIdentity = new Map(
-		publishedRelations.map(
-			(relation) => [[relation.relatedUnitId, relation.statusId].join(":"), relation] as const,
-		),
-	);
-
-	return draftRelations.map((relation) => {
-		const published = publishedByIdentity.get(
-			[relation.relatedUnitId, relation.statusId].join(":"),
-		);
-
-		if (published == null) {
-			return { ...relation, lifecycleStatus: "new" };
-		}
-
-		if (durationKey(relation.duration) !== durationKey(published.duration)) {
-			return { ...relation, lifecycleStatus: "changed" };
-		}
-
-		return relation;
-	});
-}
 
 export interface UnitRelationStatusOption {
 	statusId: string;
@@ -123,10 +107,17 @@ export async function getUnitRelationRelatedUnitOptions(
 	const { unitId, statusId, limit = relationOptionsPageSize, offset = 0, q } = params;
 	const query = q?.trim();
 
-	const currentUnit = await db.query.organisationalUnits.findFirst({
-		where: { id: unitId },
-		columns: { typeId: true },
-	});
+	// `unitId` is the owner unit's document id; resolve it to its current version for the type.
+	const currentUnit = await db
+		.select({ typeId: schema.organisationalUnits.typeId })
+		.from(schema.documentLifecycle)
+		.innerJoin(
+			schema.organisationalUnits,
+			sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
+		)
+		.where(eq(schema.documentLifecycle.documentId, unitId))
+		.limit(1)
+		.then((rows) => rows[0] ?? null);
 
 	if (currentUnit == null) {
 		return { items: [], total: 0 };
@@ -160,7 +151,7 @@ export async function getUnitRelationRelatedUnitOptions(
 
 	const [items, aggregate] = await Promise.all([
 		db
-			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+			.select({ id: schema.entityVersions.entityId, name: schema.organisationalUnits.name })
 			.from(schema.organisationalUnits)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
@@ -217,7 +208,7 @@ export async function getUnitRelationOptions(unitType: string) {
 
 	const relatedUnits = await db
 		.select({
-			id: schema.organisationalUnits.id,
+			id: schema.entityVersions.entityId,
 			name: schema.organisationalUnits.name,
 			typeId: schema.organisationalUnits.typeId,
 		})

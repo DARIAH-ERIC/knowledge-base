@@ -1,7 +1,8 @@
+import { assert } from "@acdh-oeaw/lib";
 import * as schema from "@dariah-eric/database/schema";
 
 import { db } from "@/lib/db";
-import { and, eq } from "@/lib/db/sql";
+import { and, eq, sql } from "@/lib/db/sql";
 
 type BreadcrumbSegments = Array<string>;
 
@@ -32,7 +33,13 @@ async function getCountryReportLabel(id: string): Promise<string | null> {
 		},
 	});
 
-	return report == null ? null : formatReportLabel(report.country.name, report.campaign.year);
+	if (report == null) {
+		return null;
+	}
+
+	// A country report always references a published country.
+	assert(report.country, "Country report is missing its published country.");
+	return formatReportLabel(report.country.name, report.campaign.year);
 }
 
 async function getWorkingGroupReportLabel(id: string): Promise<string | null> {
@@ -45,7 +52,13 @@ async function getWorkingGroupReportLabel(id: string): Promise<string | null> {
 		},
 	});
 
-	return report == null ? null : formatReportLabel(report.workingGroup.name, report.campaign.year);
+	if (report == null) {
+		return null;
+	}
+
+	// A working group report always references a published working group.
+	assert(report.workingGroup, "Working group report is missing its published working group.");
+	return formatReportLabel(report.workingGroup.name, report.campaign.year);
 }
 
 async function getCountryReportLabelByRoute(year: string, slug: string): Promise<string | null> {
@@ -62,12 +75,15 @@ async function getCountryReportLabelByRoute(year: string, slug: string): Promise
 			schema.reportingCampaigns,
 			eq(schema.reportingCampaigns.id, schema.countryReports.campaignId),
 		)
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.countryReports.countryDocumentId))
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.documentId, schema.entities.id),
+		)
 		.innerJoin(
 			schema.organisationalUnits,
-			eq(schema.organisationalUnits.id, schema.countryReports.countryId),
+			sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
 		)
-		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.organisationalUnits.id))
-		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 		.where(and(eq(schema.reportingCampaigns.year, campaignYear), eq(schema.entities.slug, slug)))
 		.limit(1);
 
@@ -92,11 +108,17 @@ async function getWorkingGroupReportLabelByRoute(
 			eq(schema.reportingCampaigns.id, schema.workingGroupReports.campaignId),
 		)
 		.innerJoin(
-			schema.organisationalUnits,
-			eq(schema.organisationalUnits.id, schema.workingGroupReports.workingGroupId),
+			schema.entities,
+			eq(schema.entities.id, schema.workingGroupReports.workingGroupDocumentId),
 		)
-		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.organisationalUnits.id))
-		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.documentId, schema.entities.id),
+		)
+		.innerJoin(
+			schema.organisationalUnits,
+			sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
+		)
 		.where(and(eq(schema.reportingCampaigns.year, campaignYear), eq(schema.entities.slug, slug)))
 		.limit(1);
 

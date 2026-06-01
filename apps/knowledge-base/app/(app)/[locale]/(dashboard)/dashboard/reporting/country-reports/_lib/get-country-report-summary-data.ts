@@ -1,7 +1,10 @@
+import { assert } from "@acdh-oeaw/lib";
 import type { User } from "@dariah-eric/auth";
+import * as schema from "@dariah-eric/database/schema";
 
 import { type Action, can } from "@/lib/auth/permissions";
 import { db } from "@/lib/db";
+import { alias, eq, sql } from "@/lib/db/sql";
 
 export interface CountryReportSummaryData {
 	totalContributors: number | null;
@@ -80,20 +83,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 				with: {
 					organisationalUnit: { columns: { name: true, acronym: true } },
 				},
-				orderBy: { organisationalUnitId: "asc" },
-			},
-			contributions: {
-				columns: { id: true },
-				with: {
-					personToOrgUnit: {
-						columns: { id: true },
-						with: {
-							person: { columns: { name: true } },
-							organisationalUnit: { columns: { name: true } },
-							roleType: { columns: { type: true } },
-						},
-					},
-				},
+				orderBy: { organisationalUnitDocumentId: "asc" },
 			},
 			socialMediaKpis: {
 				columns: { socialMediaId: true, kpi: true, value: true },
@@ -120,6 +110,53 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 	if (report == null) {
 		return null;
 	}
+
+	// Claimed contributions are document-level person↔org relations; resolve each endpoint to its
+	// latest editable version for display.
+	const personDocumentLifecycle = alias(schema.documentLifecycle, "person_document_lifecycle");
+	const organisationalUnitDocumentLifecycle = alias(
+		schema.documentLifecycle,
+		"organisational_unit_document_lifecycle",
+	);
+	const reportContributions = await db
+		.select({
+			id: schema.countryReportContributions.id,
+			personName: schema.persons.name,
+			orgUnitName: schema.organisationalUnits.name,
+			roleType: schema.personRoleTypes.type,
+		})
+		.from(schema.countryReportContributions)
+		.innerJoin(
+			schema.personsToOrganisationalUnits,
+			eq(
+				schema.personsToOrganisationalUnits.id,
+				schema.countryReportContributions.personToOrgUnitId,
+			),
+		)
+		.innerJoin(
+			personDocumentLifecycle,
+			eq(personDocumentLifecycle.documentId, schema.personsToOrganisationalUnits.personDocumentId),
+		)
+		.innerJoin(
+			schema.persons,
+			sql`${schema.persons.id} = COALESCE(${personDocumentLifecycle.draftId}, ${personDocumentLifecycle.publishedId})`,
+		)
+		.innerJoin(
+			organisationalUnitDocumentLifecycle,
+			eq(
+				organisationalUnitDocumentLifecycle.documentId,
+				schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
+			),
+		)
+		.innerJoin(
+			schema.organisationalUnits,
+			sql`${schema.organisationalUnits.id} = COALESCE(${organisationalUnitDocumentLifecycle.draftId}, ${organisationalUnitDocumentLifecycle.publishedId})`,
+		)
+		.innerJoin(
+			schema.personRoleTypes,
+			eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
+		)
+		.where(eq(schema.countryReportContributions.countryReportId, id));
 
 	const socialMediaMap = new Map<
 		string,
@@ -154,6 +191,9 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 		}
 	}
 
+	// A country report always references a published country.
+	assert(report.country, "Country report is missing its published country.");
+
 	return {
 		id: report.id,
 		status: report.status,
@@ -170,18 +210,11 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 			institutions: report.institutions.map((i) => {
 				return {
 					id: i.id,
-					name: i.organisationalUnit.name,
-					acronym: i.organisationalUnit.acronym,
+					name: i.organisationalUnit?.name ?? "",
+					acronym: i.organisationalUnit?.acronym ?? null,
 				};
 			}),
-			contributions: report.contributions.map((c) => {
-				return {
-					id: c.id,
-					personName: c.personToOrgUnit.person.name,
-					orgUnitName: c.personToOrgUnit.organisationalUnit.name,
-					roleType: c.personToOrgUnit.roleType.type,
-				};
-			}),
+			contributions: reportContributions,
 			socialMediaAccounts: Array.from(socialMediaMap.entries()).map(([socialMediaId, data]) => {
 				return { socialMediaId, ...data };
 			}),
@@ -212,6 +245,9 @@ async function getCountryReportHeader(id: string): Promise<CountryReportHeaderDa
 	if (report == null) {
 		return null;
 	}
+
+	// A country report always references a published country.
+	assert(report.country, "Country report is missing its published country.");
 
 	return {
 		id: report.id,

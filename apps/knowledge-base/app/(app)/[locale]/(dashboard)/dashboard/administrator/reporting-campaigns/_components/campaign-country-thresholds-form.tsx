@@ -26,7 +26,7 @@ interface Country {
 interface CampaignCountryThresholdsFormProps {
 	campaignId: string;
 	countries: Array<Country>;
-	thresholds: Array<Pick<schema.ReportingCampaignCountryThreshold, "countryId" | "amount">>;
+	thresholds: Array<Pick<schema.ReportingCampaignCountryThreshold, "countryDocumentId" | "amount">>;
 	formAction: ServerAction;
 }
 
@@ -39,7 +39,7 @@ export function CampaignCountryThresholdsForm(
 	const [state, action, isPending] = useActionState(formAction, createActionStateInitial());
 
 	const thresholdMap = Object.fromEntries(
-		thresholds.map((th) => [th.countryId, String(th.amount)]),
+		thresholds.map((th) => [th.countryDocumentId, String(th.amount)]),
 	);
 
 	return (

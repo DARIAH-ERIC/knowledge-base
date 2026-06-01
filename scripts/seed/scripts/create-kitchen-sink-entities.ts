@@ -639,6 +639,7 @@ async function main() {
 			const projectEntityId = entityIdsBySeedId.get(projectDocument.id)!.documentId;
 			const projectVersionId = entityIdsBySeedId.get(projectDocument.id)!.versionId;
 			const dariahEricVersionId = entityIdsBySeedId.get(dariahEricDocument.id)!.versionId;
+			const dariahEricEntityId = entityIdsBySeedId.get(dariahEricDocument.id)!.documentId;
 			const workingGroupEntityId = entityIdsBySeedId.get(workingGroupDocument.id)!.documentId;
 			const workingGroupVersionId = entityIdsBySeedId.get(workingGroupDocument.id)!.versionId;
 			const governanceBodyEntityId = entityIdsBySeedId.get(governanceBodyDocument.id)!.documentId;
@@ -646,7 +647,9 @@ async function main() {
 			const memberCountryEntityId = entityIdsBySeedId.get(memberCountryDocument.id)!.documentId;
 			const memberCountryVersionId = entityIdsBySeedId.get(memberCountryDocument.id)!.versionId;
 			const institutionVersionId = entityIdsBySeedId.get(institutionDocument.id)!.versionId;
+			const institutionEntityId = entityIdsBySeedId.get(institutionDocument.id)!.documentId;
 			const consortiumVersionId = entityIdsBySeedId.get(consortiumDocument.id)!.versionId;
+			const consortiumEntityId = entityIdsBySeedId.get(consortiumDocument.id)!.documentId;
 			const kitchenSinkPersonEntityId = entityIdsBySeedId.get(
 				kitchenSinkPersonDocument.id,
 			)!.documentId;
@@ -654,6 +657,7 @@ async function main() {
 				kitchenSinkPersonDocument.id,
 			)!.versionId;
 			const relatedPersonVersionId = entityIdsBySeedId.get(relatedPersonDocument.id)!.versionId;
+			const relatedPersonEntityId = entityIdsBySeedId.get(relatedPersonDocument.id)!.documentId;
 			const eventEntityId = entityIdsBySeedId.get(eventDocument.id)!.documentId;
 			const eventVersionId = entityIdsBySeedId.get(eventDocument.id)!.versionId;
 			const prevEventVersionId = entityIdsBySeedId.get(prevEventDocument.id)!.versionId;
@@ -939,31 +943,31 @@ async function main() {
 
 			await tx
 				.delete(schema.projectsToOrganisationalUnits)
-				.where(eq(schema.projectsToOrganisationalUnits.projectId, projectVersionId));
+				.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, projectEntityId));
 			await tx
 				.delete(schema.personsToOrganisationalUnits)
 				.where(
-					inArray(schema.personsToOrganisationalUnits.personId, [
-						kitchenSinkPersonVersionId,
-						relatedPersonVersionId,
+					inArray(schema.personsToOrganisationalUnits.personDocumentId, [
+						kitchenSinkPersonEntityId,
+						relatedPersonEntityId,
 					]),
 				);
 			await tx
 				.delete(schema.organisationalUnitsRelations)
 				.where(
-					inArray(schema.organisationalUnitsRelations.unitId, [
-						workingGroupVersionId,
-						memberCountryVersionId,
-						institutionVersionId,
-						consortiumVersionId,
+					inArray(schema.organisationalUnitsRelations.unitDocumentId, [
+						workingGroupEntityId,
+						memberCountryEntityId,
+						institutionEntityId,
+						consortiumEntityId,
 					]),
 				);
 
 			await tx.insert(schema.organisationalUnitsRelations).values([
 				{
 					id: createId("relation:working-group-to-eric"),
-					unitId: workingGroupVersionId,
-					relatedUnitId: dariahEricVersionId,
+					unitDocumentId: workingGroupEntityId,
+					relatedUnitDocumentId: dariahEricEntityId,
 					status: assertLookupId(
 						unitStatusIds.get("is_part_of"),
 						'Missing organisational unit status "is_part_of".',
@@ -972,8 +976,8 @@ async function main() {
 				},
 				{
 					id: createId("relation:country-to-eric"),
-					unitId: memberCountryVersionId,
-					relatedUnitId: dariahEricVersionId,
+					unitDocumentId: memberCountryEntityId,
+					relatedUnitDocumentId: dariahEricEntityId,
 					status: assertLookupId(
 						unitStatusIds.get("is_member_of"),
 						'Missing organisational unit status "is_member_of".',
@@ -982,8 +986,8 @@ async function main() {
 				},
 				{
 					id: createId("relation:institution-to-eric"),
-					unitId: institutionVersionId,
-					relatedUnitId: dariahEricVersionId,
+					unitDocumentId: institutionEntityId,
+					relatedUnitDocumentId: dariahEricEntityId,
 					status: assertLookupId(
 						unitStatusIds.get("is_partner_institution_of"),
 						'Missing organisational unit status "is_partner_institution_of".',
@@ -992,8 +996,8 @@ async function main() {
 				},
 				{
 					id: createId("relation:institution-to-country"),
-					unitId: institutionVersionId,
-					relatedUnitId: memberCountryVersionId,
+					unitDocumentId: institutionEntityId,
+					relatedUnitDocumentId: memberCountryEntityId,
 					status: assertLookupId(
 						unitStatusIds.get("is_located_in"),
 						'Missing organisational unit status "is_located_in".',
@@ -1002,8 +1006,8 @@ async function main() {
 				},
 				{
 					id: createId("relation:consortium-to-country"),
-					unitId: consortiumVersionId,
-					relatedUnitId: memberCountryVersionId,
+					unitDocumentId: consortiumEntityId,
+					relatedUnitDocumentId: memberCountryEntityId,
 					status: assertLookupId(
 						unitStatusIds.get("is_national_consortium_of"),
 						'Missing organisational unit status "is_national_consortium_of".',
@@ -1015,8 +1019,8 @@ async function main() {
 			await tx.insert(schema.personsToOrganisationalUnits).values([
 				{
 					id: createId("person-org:wg-chair"),
-					personId: kitchenSinkPersonVersionId,
-					organisationalUnitId: workingGroupVersionId,
+					personDocumentId: kitchenSinkPersonEntityId,
+					organisationalUnitDocumentId: workingGroupEntityId,
 					roleTypeId: assertLookupId(
 						personRoleIds.get("is_chair_of"),
 						'Missing person role type "is_chair_of".',
@@ -1025,8 +1029,8 @@ async function main() {
 				},
 				{
 					id: createId("person-org:governance-president"),
-					personId: kitchenSinkPersonVersionId,
-					organisationalUnitId: governanceBodyVersionId,
+					personDocumentId: kitchenSinkPersonEntityId,
+					organisationalUnitDocumentId: governanceBodyEntityId,
 					roleTypeId: assertLookupId(
 						personRoleIds.get("is_president_of"),
 						'Missing person role type "is_president_of".',
@@ -1035,8 +1039,8 @@ async function main() {
 				},
 				{
 					id: createId("person-org:governance-member"),
-					personId: relatedPersonVersionId,
-					organisationalUnitId: governanceBodyVersionId,
+					personDocumentId: relatedPersonEntityId,
+					organisationalUnitDocumentId: governanceBodyEntityId,
 					roleTypeId: assertLookupId(
 						personRoleIds.get("is_member_of"),
 						'Missing person role type "is_member_of".',
@@ -1045,8 +1049,8 @@ async function main() {
 				},
 				{
 					id: createId("person-org:country-national-coordinator"),
-					personId: kitchenSinkPersonVersionId,
-					organisationalUnitId: memberCountryVersionId,
+					personDocumentId: kitchenSinkPersonEntityId,
+					organisationalUnitDocumentId: memberCountryEntityId,
 					roleTypeId: assertLookupId(
 						personRoleIds.get("national_coordinator"),
 						'Missing person role type "national_coordinator".',
@@ -1055,8 +1059,8 @@ async function main() {
 				},
 				{
 					id: createId("person-org:country-national-representative"),
-					personId: relatedPersonVersionId,
-					organisationalUnitId: memberCountryVersionId,
+					personDocumentId: relatedPersonEntityId,
+					organisationalUnitDocumentId: memberCountryEntityId,
 					roleTypeId: assertLookupId(
 						personRoleIds.get("national_representative"),
 						'Missing person role type "national_representative".',
@@ -1068,8 +1072,8 @@ async function main() {
 			await tx.insert(schema.projectsToOrganisationalUnits).values([
 				{
 					id: createId("project-org:coordinator-eric"),
-					projectId: projectVersionId,
-					unitId: dariahEricVersionId,
+					projectDocumentId: projectEntityId,
+					unitDocumentId: dariahEricEntityId,
 					roleId: assertLookupId(
 						projectRoleIds.get("coordinator"),
 						'Missing project role "coordinator".',
@@ -1078,8 +1082,8 @@ async function main() {
 				},
 				{
 					id: createId("project-org:participant-institution"),
-					projectId: projectVersionId,
-					unitId: institutionVersionId,
+					projectDocumentId: projectEntityId,
+					unitDocumentId: institutionEntityId,
 					roleId: assertLookupId(
 						projectRoleIds.get("participant"),
 						'Missing project role "participant".',
@@ -1088,15 +1092,15 @@ async function main() {
 				},
 				{
 					id: createId("project-org:funder-country"),
-					projectId: projectVersionId,
-					unitId: memberCountryVersionId,
+					projectDocumentId: projectEntityId,
+					unitDocumentId: memberCountryEntityId,
 					roleId: assertLookupId(projectRoleIds.get("funder"), 'Missing project role "funder".'),
 					duration: createTimestampRange("2025-01-01T00:00:00.000Z", null),
 				},
 				{
 					id: createId("project-org:participant-governance"),
-					projectId: projectVersionId,
-					unitId: governanceBodyVersionId,
+					projectDocumentId: projectEntityId,
+					unitDocumentId: governanceBodyEntityId,
 					roleId: assertLookupId(
 						projectRoleIds.get("participant"),
 						'Missing project role "participant".',
@@ -1105,34 +1109,35 @@ async function main() {
 				},
 			]);
 
+			// Contributors are document-level; key both endpoints to their document ids.
 			await tx
 				.delete(schema.spotlightArticlesToPersons)
-				.where(eq(schema.spotlightArticlesToPersons.spotlightArticleId, spotlightVersionId));
+				.where(eq(schema.spotlightArticlesToPersons.spotlightArticleDocumentId, spotlightEntityId));
 			await tx
 				.delete(schema.impactCaseStudiesToPersons)
-				.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyId, impactVersionId));
+				.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyDocumentId, impactEntityId));
 
 			await tx.insert(schema.spotlightArticlesToPersons).values([
 				{
-					spotlightArticleId: spotlightVersionId,
-					personId: kitchenSinkPersonVersionId,
+					spotlightArticleDocumentId: spotlightEntityId,
+					personDocumentId: kitchenSinkPersonEntityId,
 					role: "author",
 				},
 				{
-					spotlightArticleId: spotlightVersionId,
-					personId: relatedPersonVersionId,
+					spotlightArticleDocumentId: spotlightEntityId,
+					personDocumentId: relatedPersonEntityId,
 					role: "editor",
 				},
 			]);
 			await tx.insert(schema.impactCaseStudiesToPersons).values([
 				{
-					impactCaseStudyId: impactVersionId,
-					personId: kitchenSinkPersonVersionId,
+					impactCaseStudyDocumentId: impactEntityId,
+					personDocumentId: kitchenSinkPersonEntityId,
 					role: "author",
 				},
 				{
-					impactCaseStudyId: impactVersionId,
-					personId: relatedPersonVersionId,
+					impactCaseStudyDocumentId: impactEntityId,
+					personDocumentId: relatedPersonEntityId,
 					role: "contributor",
 				},
 			]);

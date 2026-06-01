@@ -1425,18 +1425,22 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			)
 			.innerJoin(
 				schema.organisationalUnitsRelations,
-				eq(schema.organisationalUnitsRelations.unitId, schema.organisationalUnits.id),
+				// unit↔unit relations are document-level; the owner unit is pinned to its published version.
+				eq(schema.organisationalUnitsRelations.unitDocumentId, itemEntities.id),
 			)
 			.innerJoin(
 				organisationalRelationStatus,
 				eq(schema.organisationalUnitsRelations.status, organisationalRelationStatus.id),
 			)
 			.innerJoin(
-				schema.membersAndPartners,
-				eq(schema.organisationalUnitsRelations.relatedUnitId, schema.membersAndPartners.id),
+				countryEntities,
+				eq(countryEntities.id, schema.organisationalUnitsRelations.relatedUnitDocumentId),
 			)
-			.innerJoin(countryEntityVersions, eq(schema.membersAndPartners.id, countryEntityVersions.id))
-			.innerJoin(countryEntities, eq(countryEntityVersions.entityId, countryEntities.id))
+			.innerJoin(countryEntityVersions, eq(countryEntityVersions.entityId, countryEntities.id))
+			.innerJoin(
+				schema.membersAndPartners,
+				eq(schema.membersAndPartners.id, countryEntityVersions.id),
+			)
 			.where(
 				and(
 					eq(publishedEntityStatus.type, "published"),
@@ -1483,18 +1487,22 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			)
 			.innerJoin(
 				schema.organisationalUnitsRelations,
-				eq(schema.organisationalUnitsRelations.unitId, schema.organisationalUnits.id),
+				// unit↔unit relations are document-level; the owner unit is pinned to its published version.
+				eq(schema.organisationalUnitsRelations.unitDocumentId, itemEntities.id),
 			)
 			.innerJoin(
 				organisationalRelationStatus,
 				eq(schema.organisationalUnitsRelations.status, organisationalRelationStatus.id),
 			)
 			.innerJoin(
-				schema.membersAndPartners,
-				eq(schema.organisationalUnitsRelations.relatedUnitId, schema.membersAndPartners.id),
+				countryEntities,
+				eq(countryEntities.id, schema.organisationalUnitsRelations.relatedUnitDocumentId),
 			)
-			.innerJoin(countryEntityVersions, eq(schema.membersAndPartners.id, countryEntityVersions.id))
-			.innerJoin(countryEntities, eq(countryEntityVersions.entityId, countryEntities.id))
+			.innerJoin(countryEntityVersions, eq(countryEntityVersions.entityId, countryEntities.id))
+			.innerJoin(
+				schema.membersAndPartners,
+				eq(schema.membersAndPartners.id, countryEntityVersions.id),
+			)
 			.where(
 				and(
 					eq(publishedEntityStatus.type, "published"),
@@ -1508,10 +1516,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 							FROM
 								${schema.organisationalUnitsRelations} partner_relations
 								INNER JOIN ${schema.organisationalUnitStatus} partner_relation_status ON partner_relations.status = partner_relation_status.id
-								INNER JOIN ${schema.organisationalUnits} related_units ON partner_relations.related_unit_id = related_units.id
+								INNER JOIN ${schema.entityVersions} partner_related_v ON partner_related_v.entity_id = partner_relations.related_unit_document_id
+								INNER JOIN ${schema.organisationalUnits} related_units ON related_units.id = partner_related_v.id
 								INNER JOIN ${schema.organisationalUnitTypes} related_unit_types ON related_units.type_id = related_unit_types.id
 							WHERE
-								partner_relations.unit_id = ${schema.organisationalUnits.id}
+								partner_relations.unit_document_id = ${itemEntities.id}
 								AND partner_relation_status.status = 'is_partner_institution_of'
 								AND related_unit_types.type = 'eric'
 								AND partner_relations.duration @> NOW()::TIMESTAMPTZ
@@ -1557,18 +1566,22 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 			)
 			.innerJoin(
 				schema.organisationalUnitsRelations,
-				eq(schema.organisationalUnitsRelations.unitId, schema.organisationalUnits.id),
+				// unit↔unit relations are document-level; the owner unit is pinned to its published version.
+				eq(schema.organisationalUnitsRelations.unitDocumentId, itemEntities.id),
 			)
 			.innerJoin(
 				organisationalRelationStatus,
 				eq(schema.organisationalUnitsRelations.status, organisationalRelationStatus.id),
 			)
 			.innerJoin(
-				schema.membersAndPartners,
-				eq(schema.organisationalUnitsRelations.relatedUnitId, schema.membersAndPartners.id),
+				countryEntities,
+				eq(countryEntities.id, schema.organisationalUnitsRelations.relatedUnitDocumentId),
 			)
-			.innerJoin(countryEntityVersions, eq(schema.membersAndPartners.id, countryEntityVersions.id))
-			.innerJoin(countryEntities, eq(countryEntityVersions.entityId, countryEntities.id))
+			.innerJoin(countryEntityVersions, eq(countryEntityVersions.entityId, countryEntities.id))
+			.innerJoin(
+				schema.membersAndPartners,
+				eq(schema.membersAndPartners.id, countryEntityVersions.id),
+			)
 			.where(
 				and(
 					eq(publishedEntityStatus.type, "published"),
@@ -1582,10 +1595,11 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 							FROM
 								${schema.organisationalUnitsRelations} cooperating_relations
 								INNER JOIN ${schema.organisationalUnitStatus} cooperating_relation_status ON cooperating_relations.status = cooperating_relation_status.id
-								INNER JOIN ${schema.organisationalUnits} related_units ON cooperating_relations.related_unit_id = related_units.id
+								INNER JOIN ${schema.entityVersions} cooperating_related_v ON cooperating_related_v.entity_id = cooperating_relations.related_unit_document_id
+								INNER JOIN ${schema.organisationalUnits} related_units ON related_units.id = cooperating_related_v.id
 								INNER JOIN ${schema.organisationalUnitTypes} related_unit_types ON related_units.type_id = related_unit_types.id
 							WHERE
-								cooperating_relations.unit_id = ${schema.organisationalUnits.id}
+								cooperating_relations.unit_document_id = ${itemEntities.id}
 								AND cooperating_relation_status.status = 'is_cooperating_partner_of'
 								AND related_unit_types.type = 'eric'
 								AND cooperating_relations.duration @> NOW()::TIMESTAMPTZ
@@ -1623,23 +1637,28 @@ export function createWebsiteSearchIndexService(params: CreateWebsiteSearchIndex
 				sourceUpdatedAt: schema.persons.updatedAt,
 			})
 			.from(schema.personsToOrganisationalUnits)
+			// person↔org relations are document-level; resolve the person to its published version.
 			.innerJoin(
-				schema.persons,
-				eq(schema.personsToOrganisationalUnits.personId, schema.persons.id),
+				itemEntities,
+				eq(itemEntities.id, schema.personsToOrganisationalUnits.personDocumentId),
 			)
-			.innerJoin(itemEntityVersions, eq(schema.persons.id, itemEntityVersions.id))
-			.innerJoin(itemEntities, eq(itemEntityVersions.entityId, itemEntities.id))
+			.innerJoin(itemEntityVersions, eq(itemEntityVersions.entityId, itemEntities.id))
 			.innerJoin(publishedEntityStatus, eq(itemEntityVersions.statusId, publishedEntityStatus.id))
+			.innerJoin(schema.persons, eq(schema.persons.id, itemEntityVersions.id))
 			.innerJoin(
 				personRoleType,
 				eq(schema.personsToOrganisationalUnits.roleTypeId, personRoleType.id),
 			)
+			// resolve the org to its published version via the members-and-partners view.
+			.innerJoin(
+				countryEntities,
+				eq(countryEntities.id, schema.personsToOrganisationalUnits.organisationalUnitDocumentId),
+			)
+			.innerJoin(countryEntityVersions, eq(countryEntityVersions.entityId, countryEntities.id))
 			.innerJoin(
 				schema.membersAndPartners,
-				eq(schema.personsToOrganisationalUnits.organisationalUnitId, schema.membersAndPartners.id),
+				eq(schema.membersAndPartners.id, countryEntityVersions.id),
 			)
-			.innerJoin(countryEntityVersions, eq(schema.membersAndPartners.id, countryEntityVersions.id))
-			.innerJoin(countryEntities, eq(countryEntityVersions.entityId, countryEntities.id))
 			.where(
 				and(
 					eq(publishedEntityStatus.type, "published"),

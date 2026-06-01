@@ -3,7 +3,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
+import { alias, and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
 
 export type CountryMemberObserverStatus = "is_member_of" | "is_observer_of" | null;
 
@@ -133,21 +133,33 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 	>();
 
 	if (countryIds.length > 0 && ericIds.length > 0) {
+		// Unit↔unit relations are document-level; re-key through entity_versions so the result keeps the
+		// country *version* ids the caller passed in.
+		const countryVersions = alias(schema.entityVersions, "country_versions");
+		const ericVersions = alias(schema.entityVersions, "eric_versions");
 		const relations = await db
 			.select({
 				duration: schema.organisationalUnitsRelations.duration,
 				status: schema.organisationalUnitStatus.status,
-				unitId: schema.organisationalUnitsRelations.unitId,
+				unitId: countryVersions.id,
 			})
 			.from(schema.organisationalUnitsRelations)
 			.innerJoin(
 				schema.organisationalUnitStatus,
 				eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
 			)
+			.innerJoin(
+				countryVersions,
+				eq(countryVersions.entityId, schema.organisationalUnitsRelations.unitDocumentId),
+			)
+			.innerJoin(
+				ericVersions,
+				eq(ericVersions.entityId, schema.organisationalUnitsRelations.relatedUnitDocumentId),
+			)
 			.where(
 				and(
-					inArray(schema.organisationalUnitsRelations.unitId, countryIds),
-					inArray(schema.organisationalUnitsRelations.relatedUnitId, ericIds),
+					inArray(countryVersions.id, countryIds),
+					inArray(ericVersions.id, ericIds),
 					inArray(schema.organisationalUnitStatus.status, ["is_member_of", "is_observer_of"]),
 				),
 			);

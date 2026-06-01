@@ -11,7 +11,7 @@ import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
-import { and, eq } from "@/lib/db/sql";
+import { alias, and, eq, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -144,14 +144,30 @@ export default async function DashboardAdministratorProjectDetailsPage(
 				),
 			)
 			.limit(1),
-		db.query.projectsToOrganisationalUnits.findMany({
-			where: { projectId: project.id },
-			columns: { id: true, duration: true },
-			with: {
-				unit: { columns: { name: true } },
-				role: { columns: { role: true } },
-			},
-		}),
+		(() => {
+			const unitDocumentLifecycle = alias(schema.documentLifecycle, "unit_document_lifecycle");
+			return db
+				.select({
+					id: schema.projectsToOrganisationalUnits.id,
+					duration: schema.projectsToOrganisationalUnits.duration,
+					unitName: schema.organisationalUnits.name,
+					roleName: schema.projectRoles.role,
+				})
+				.from(schema.projectsToOrganisationalUnits)
+				.innerJoin(
+					unitDocumentLifecycle,
+					eq(unitDocumentLifecycle.documentId, schema.projectsToOrganisationalUnits.unitDocumentId),
+				)
+				.innerJoin(
+					schema.organisationalUnits,
+					sql`${schema.organisationalUnits.id} = COALESCE(${unitDocumentLifecycle.publishedId}, ${unitDocumentLifecycle.draftId})`,
+				)
+				.innerJoin(
+					schema.projectRoles,
+					eq(schema.projectRoles.id, schema.projectsToOrganisationalUnits.roleId),
+				)
+				.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, doc.id));
+		})(),
 		db.query.projectsToSocialMedia.findMany({
 			where: { projectId: project.id },
 			columns: {},
@@ -190,8 +206,8 @@ export default async function DashboardAdministratorProjectDetailsPage(
 				partners: partners.map((partner) => {
 					return {
 						id: partner.id,
-						unitName: partner.unit.name,
-						roleName: partner.role.role,
+						unitName: partner.unitName,
+						roleName: partner.roleName,
 						duration: partner.duration ?? null,
 					};
 				}),

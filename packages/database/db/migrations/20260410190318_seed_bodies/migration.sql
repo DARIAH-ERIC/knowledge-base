@@ -113,29 +113,29 @@ WITH
 		RETURNING
 			"id"
 	)
+-- unit↔unit relations are document-level: key both endpoints to their entity (document) ids.
 INSERT INTO
 	"organisational_units_to_units" (
-		"unit_id",
-		"related_unit_id",
+		"unit_document_id",
+		"related_unit_document_id",
 		"status",
 		"duration"
 	)
 SELECT
-	"body_units"."id",
+	"body_versions"."entity_id",
 	"dariah_eu"."id",
 	"organisational_unit_status"."id",
 	-- @see {@link https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32014D0526}
 	'[2014-08-06,)'::tstzrange
 FROM
-	"body_units"
+	"body_versions"
 	CROSS JOIN "organisational_unit_status"
 	CROSS JOIN (
-		-- DARIAH-EU's organisational_unit row id == its entity_version id
+		-- DARIAH-EU's entity (document) id
 		SELECT
-			"entity_versions"."id"
+			"entities"."id"
 		FROM
 			"entities"
-			JOIN "entity_versions" ON "entity_versions"."entity_id" = "entities"."id"
 		WHERE
 			"entities"."slug" = 'dariah-eu'
 	) AS "dariah_eu"

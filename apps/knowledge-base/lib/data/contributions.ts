@@ -50,25 +50,18 @@ export async function getContributions(
 	params: Readonly<GetContributionsParams>,
 ): Promise<ContributionsResult> {
 	const { limit, offset, q, sort = "personName", dir = "asc" } = params;
-	const personEntityVersions = alias(schema.entityVersions, "person_entity_versions");
 	const personEntities = alias(schema.entities, "person_entities");
 	const personDocumentLifecycle = alias(schema.documentLifecycle, "person_document_lifecycle");
-	const organisationalUnitEntityVersions = alias(
-		schema.entityVersions,
-		"organisational_unit_entity_versions",
-	);
 	const organisationalUnitEntities = alias(schema.entities, "organisational_unit_entities");
 	const organisationalUnitDocumentLifecycle = alias(
 		schema.documentLifecycle,
 		"organisational_unit_document_lifecycle",
 	);
 	const query = q?.trim();
+	// personDocumentId / organisationalUnitDocumentId are document ids; resolve each to its latest
+	// editable version (draft when present, else published) for display.
 	const personPickedVersion = sql`COALESCE(${personDocumentLifecycle.draftId}, ${personDocumentLifecycle.publishedId})`;
 	const organisationalUnitPickedVersion = sql`COALESCE(${organisationalUnitDocumentLifecycle.draftId}, ${organisationalUnitDocumentLifecycle.publishedId})`;
-	const lifecycleWhere = and(
-		sql`${personEntityVersions.id} = ${personPickedVersion}`,
-		sql`${organisationalUnitEntityVersions.id} = ${organisationalUnitPickedVersion}`,
-	);
 	const searchWhere =
 		query != null && query !== ""
 			? or(
@@ -79,7 +72,7 @@ export async function getContributions(
 					ilike(schema.personRoleTypes.type, `%${query}%`),
 				)
 			: undefined;
-	const where = and(lifecycleWhere, searchWhere);
+	const where = searchWhere;
 	const orderBy =
 		sort === "roleType"
 			? dir === "asc"
@@ -119,31 +112,29 @@ export async function getContributions(
 			})
 			.from(schema.personsToOrganisationalUnits)
 			.innerJoin(
-				schema.persons,
-				eq(schema.persons.id, schema.personsToOrganisationalUnits.personId),
+				personEntities,
+				eq(personEntities.id, schema.personsToOrganisationalUnits.personDocumentId),
 			)
-			.innerJoin(personEntityVersions, eq(schema.persons.id, personEntityVersions.id))
-			.innerJoin(personEntities, eq(personEntityVersions.entityId, personEntities.id))
 			.innerJoin(personDocumentLifecycle, eq(personDocumentLifecycle.documentId, personEntities.id))
+			.innerJoin(schema.persons, sql`${schema.persons.id} = ${personPickedVersion}`)
 			.innerJoin(
 				schema.personRoleTypes,
 				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
 			)
 			.innerJoin(
-				schema.organisationalUnits,
-				eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
-			)
-			.innerJoin(
-				organisationalUnitEntityVersions,
-				eq(schema.organisationalUnits.id, organisationalUnitEntityVersions.id),
-			)
-			.innerJoin(
 				organisationalUnitEntities,
-				eq(organisationalUnitEntityVersions.entityId, organisationalUnitEntities.id),
+				eq(
+					organisationalUnitEntities.id,
+					schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
+				),
 			)
 			.innerJoin(
 				organisationalUnitDocumentLifecycle,
 				eq(organisationalUnitDocumentLifecycle.documentId, organisationalUnitEntities.id),
+			)
+			.innerJoin(
+				schema.organisationalUnits,
+				sql`${schema.organisationalUnits.id} = ${organisationalUnitPickedVersion}`,
 			)
 			.innerJoin(
 				schema.organisationalUnitTypes,
@@ -157,31 +148,29 @@ export async function getContributions(
 			.select({ total: count() })
 			.from(schema.personsToOrganisationalUnits)
 			.innerJoin(
-				schema.persons,
-				eq(schema.persons.id, schema.personsToOrganisationalUnits.personId),
+				personEntities,
+				eq(personEntities.id, schema.personsToOrganisationalUnits.personDocumentId),
 			)
-			.innerJoin(personEntityVersions, eq(schema.persons.id, personEntityVersions.id))
-			.innerJoin(personEntities, eq(personEntityVersions.entityId, personEntities.id))
 			.innerJoin(personDocumentLifecycle, eq(personDocumentLifecycle.documentId, personEntities.id))
+			.innerJoin(schema.persons, sql`${schema.persons.id} = ${personPickedVersion}`)
 			.innerJoin(
 				schema.personRoleTypes,
 				eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
 			)
 			.innerJoin(
-				schema.organisationalUnits,
-				eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
-			)
-			.innerJoin(
-				organisationalUnitEntityVersions,
-				eq(schema.organisationalUnits.id, organisationalUnitEntityVersions.id),
-			)
-			.innerJoin(
 				organisationalUnitEntities,
-				eq(organisationalUnitEntityVersions.entityId, organisationalUnitEntities.id),
+				eq(
+					organisationalUnitEntities.id,
+					schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
+				),
 			)
 			.innerJoin(
 				organisationalUnitDocumentLifecycle,
 				eq(organisationalUnitDocumentLifecycle.documentId, organisationalUnitEntities.id),
+			)
+			.innerJoin(
+				schema.organisationalUnits,
+				sql`${schema.organisationalUnits.id} = ${organisationalUnitPickedVersion}`,
 			)
 			.innerJoin(
 				schema.organisationalUnitTypes,
@@ -219,15 +208,24 @@ export async function getContributionsForAdmin(
 	return getContributions(params);
 }
 
+/**
+ * `personDocumentId` is the person's `entities.id`. The org endpoint is resolved to its latest
+ * editable version for display.
+ */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function getPersonContributions(personId: string) {
+export async function getPersonContributions(personDocumentId: string) {
+	const organisationalUnitDocumentLifecycle = alias(
+		schema.documentLifecycle,
+		"organisational_unit_document_lifecycle",
+	);
+
 	return db
 		.select({
 			id: schema.personsToOrganisationalUnits.id,
 			duration: schema.personsToOrganisationalUnits.duration,
 			roleTypeId: schema.personsToOrganisationalUnits.roleTypeId,
 			roleType: schema.personRoleTypes.type,
-			organisationalUnitId: schema.personsToOrganisationalUnits.organisationalUnitId,
+			organisationalUnitId: schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
 			organisationalUnitName: schema.organisationalUnits.name,
 			organisationalUnitType: schema.organisationalUnitTypes.type,
 		})
@@ -237,54 +235,24 @@ export async function getPersonContributions(personId: string) {
 			eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
 		)
 		.innerJoin(
+			organisationalUnitDocumentLifecycle,
+			eq(
+				organisationalUnitDocumentLifecycle.documentId,
+				schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
+			),
+		)
+		.innerJoin(
 			schema.organisationalUnits,
-			eq(schema.organisationalUnits.id, schema.personsToOrganisationalUnits.organisationalUnitId),
+			sql`${schema.organisationalUnits.id} = COALESCE(${organisationalUnitDocumentLifecycle.draftId}, ${organisationalUnitDocumentLifecycle.publishedId})`,
 		)
 		.innerJoin(
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 		)
-		.where(eq(schema.personsToOrganisationalUnits.personId, personId));
+		.where(eq(schema.personsToOrganisationalUnits.personDocumentId, personDocumentId));
 }
 
 export type PersonContribution = Awaited<ReturnType<typeof getPersonContributions>>[number];
-
-export type ContributionLifecycleStatus = "changed" | "new";
-
-function durationKey(duration: PersonContribution["duration"]): string {
-	return [duration.start.toISOString(), duration.end?.toISOString() ?? ""].join(":");
-}
-
-export function annotatePersonContributionLifecycle(
-	draftContributions: Array<PersonContribution>,
-	publishedContributions: Array<PersonContribution>,
-): Array<PersonContribution & { lifecycleStatus?: ContributionLifecycleStatus }> {
-	const publishedByIdentity = new Map(
-		publishedContributions.map(
-			(contribution) =>
-				[
-					[contribution.organisationalUnitId, contribution.roleTypeId].join(":"),
-					contribution,
-				] as const,
-		),
-	);
-
-	return draftContributions.map((contribution) => {
-		const published = publishedByIdentity.get(
-			[contribution.organisationalUnitId, contribution.roleTypeId].join(":"),
-		);
-
-		if (published == null) {
-			return { ...contribution, lifecycleStatus: "new" };
-		}
-
-		if (durationKey(contribution.duration) !== durationKey(published.duration)) {
-			return { ...contribution, lifecycleStatus: "changed" };
-		}
-
-		return contribution;
-	});
-}
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getContributionRoleOptions() {
@@ -352,7 +320,7 @@ export async function getContributionPersonOptions(params: GetContributionOption
 
 	const [items, aggregate] = await Promise.all([
 		db
-			.select({ id: schema.persons.id, name: schema.persons.name })
+			.select({ id: schema.entityVersions.entityId, name: schema.persons.name })
 			.from(schema.persons)
 			.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
@@ -401,7 +369,7 @@ export async function getContributionOrganisationalUnitOptions(
 	const [items, aggregate] = await Promise.all([
 		db
 			.select({
-				id: schema.organisationalUnits.id,
+				id: schema.entityVersions.entityId,
 				name: schema.organisationalUnits.name,
 			})
 			.from(schema.organisationalUnits)
@@ -465,7 +433,7 @@ export async function getContributionOptions() {
 
 	const orgUnits = await db
 		.select({
-			id: schema.organisationalUnits.id,
+			id: schema.entityVersions.entityId,
 			name: schema.organisationalUnits.name,
 			typeId: schema.organisationalUnits.typeId,
 		})
@@ -509,6 +477,11 @@ export async function getContributionOptions() {
 
 export type ContributionOption = Awaited<ReturnType<typeof getContributionOptions>>[number];
 
+/**
+ * Country options for the user "country actor" picker. Returns organisational-unit _document_ ids
+ * (resolved from the published version) because `users.organisationalUnitDocumentId` is a document
+ * id.
+ */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getCountryOptions(params: GetContributionOptionsParams = {}) {
 	const { limit = contributionOptionsPageSize, offset = 0, q } = params;
@@ -524,7 +497,7 @@ export async function getCountryOptions(params: GetContributionOptionsParams = {
 
 	const [items, aggregate] = await Promise.all([
 		db
-			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+			.select({ id: schema.entityVersions.entityId, name: schema.organisationalUnits.name })
 			.from(schema.organisationalUnits)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))

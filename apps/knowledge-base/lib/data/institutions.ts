@@ -3,7 +3,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
 
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, inArray, or, sql } from "@/lib/db/sql";
+import { alias, and, count, desc, eq, ilike, inArray, or, sql } from "@/lib/db/sql";
 
 export type InstitutionEricRelationStatus =
 	| "is_cooperating_partner_of"
@@ -107,22 +107,35 @@ async function getInstitutionRelationData(ids: ReadonlyArray<string>) {
 	});
 	const ericIds = erics.map((eric) => eric.id);
 
+	// Unit↔unit relations are document-level; re-key the owner through entity_versions to keep the
+	// institution *version* ids the caller passed in, and resolve related units by document.
+	const instVersions = alias(schema.entityVersions, "inst_versions");
+	const ericVersions = alias(schema.entityVersions, "eric_versions");
+	const countryDocumentLifecycle = alias(schema.documentLifecycle, "country_document_lifecycle");
 	const [relations, countries] = await Promise.all([
 		ericIds.length > 0
 			? db
 					.select({
 						status: schema.organisationalUnitStatus.status,
-						unitId: schema.organisationalUnitsRelations.unitId,
+						unitId: instVersions.id,
 					})
 					.from(schema.organisationalUnitsRelations)
 					.innerJoin(
 						schema.organisationalUnitStatus,
 						eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
 					)
+					.innerJoin(
+						instVersions,
+						eq(instVersions.entityId, schema.organisationalUnitsRelations.unitDocumentId),
+					)
+					.innerJoin(
+						ericVersions,
+						eq(ericVersions.entityId, schema.organisationalUnitsRelations.relatedUnitDocumentId),
+					)
 					.where(
 						and(
-							inArray(schema.organisationalUnitsRelations.unitId, [...ids]),
-							inArray(schema.organisationalUnitsRelations.relatedUnitId, ericIds),
+							inArray(instVersions.id, [...ids]),
+							inArray(ericVersions.id, ericIds),
 							inArray(schema.organisationalUnitStatus.status, institutionStatuses),
 							sql`${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ`,
 						),
@@ -131,7 +144,7 @@ async function getInstitutionRelationData(ids: ReadonlyArray<string>) {
 		db
 			.select({
 				countryName: schema.organisationalUnits.name,
-				unitId: schema.organisationalUnitsRelations.unitId,
+				unitId: instVersions.id,
 			})
 			.from(schema.organisationalUnitsRelations)
 			.innerJoin(
@@ -139,8 +152,19 @@ async function getInstitutionRelationData(ids: ReadonlyArray<string>) {
 				eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
 			)
 			.innerJoin(
+				instVersions,
+				eq(instVersions.entityId, schema.organisationalUnitsRelations.unitDocumentId),
+			)
+			.innerJoin(
+				countryDocumentLifecycle,
+				eq(
+					countryDocumentLifecycle.documentId,
+					schema.organisationalUnitsRelations.relatedUnitDocumentId,
+				),
+			)
+			.innerJoin(
 				schema.organisationalUnits,
-				eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.relatedUnitId),
+				sql`${schema.organisationalUnits.id} = COALESCE(${countryDocumentLifecycle.publishedId}, ${countryDocumentLifecycle.draftId})`,
 			)
 			.innerJoin(
 				schema.organisationalUnitTypes,
@@ -148,7 +172,7 @@ async function getInstitutionRelationData(ids: ReadonlyArray<string>) {
 			)
 			.where(
 				and(
-					inArray(schema.organisationalUnitsRelations.unitId, [...ids]),
+					inArray(instVersions.id, [...ids]),
 					eq(schema.organisationalUnitStatus.status, "is_located_in"),
 					eq(
 						schema.organisationalUnitTypes.type,
@@ -301,6 +325,15 @@ export async function getInstitutions(
 			institutionStatusLabels[status].toLowerCase().includes(query.toLowerCase()),
 		);
 
+		// Unit↔unit relations are document-level; re-key the owner through entity_versions (all versions
+		// of the institution document, so versionPick below still matches) and resolve the country by
+		// document.
+		const searchInstVersions = alias(schema.entityVersions, "search_inst_versions");
+		const searchCountryDocumentLifecycle = alias(
+			schema.documentLifecycle,
+			"search_country_document_lifecycle",
+		);
+
 		const [nameMatches, countryMatches, statusMatches] = await Promise.all([
 			db
 				.select({ id: schema.organisationalUnits.id })
@@ -319,15 +352,26 @@ export async function getInstitutions(
 					),
 				),
 			db
-				.select({ id: schema.organisationalUnitsRelations.unitId })
+				.select({ id: searchInstVersions.id })
 				.from(schema.organisationalUnitsRelations)
 				.innerJoin(
 					schema.organisationalUnitStatus,
 					eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
 				)
 				.innerJoin(
+					searchInstVersions,
+					eq(searchInstVersions.entityId, schema.organisationalUnitsRelations.unitDocumentId),
+				)
+				.innerJoin(
+					searchCountryDocumentLifecycle,
+					eq(
+						searchCountryDocumentLifecycle.documentId,
+						schema.organisationalUnitsRelations.relatedUnitDocumentId,
+					),
+				)
+				.innerJoin(
 					schema.organisationalUnits,
-					eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.relatedUnitId),
+					sql`${schema.organisationalUnits.id} = COALESCE(${searchCountryDocumentLifecycle.publishedId}, ${searchCountryDocumentLifecycle.draftId})`,
 				)
 				.innerJoin(
 					schema.organisationalUnitTypes,
@@ -346,11 +390,15 @@ export async function getInstitutions(
 				),
 			matchingStatuses.length > 0
 				? db
-						.select({ id: schema.organisationalUnitsRelations.unitId })
+						.select({ id: searchInstVersions.id })
 						.from(schema.organisationalUnitsRelations)
 						.innerJoin(
 							schema.organisationalUnitStatus,
 							eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+						)
+						.innerJoin(
+							searchInstVersions,
+							eq(searchInstVersions.entityId, schema.organisationalUnitsRelations.unitDocumentId),
 						)
 						.where(
 							and(

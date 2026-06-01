@@ -46,12 +46,7 @@ export default async function DashboardReportingCountryReportPublicationsPage(
 		(id) =>
 			db.query.countryReports.findFirst({
 				where: { id },
-				columns: { id: true },
-				with: {
-					country: {
-						columns: { id: true },
-					},
-				},
+				columns: { id: true, countryDocumentId: true },
 			}),
 		"update",
 	);
@@ -68,6 +63,8 @@ export default async function DashboardReportingCountryReportPublicationsPage(
 	const year = Number(routeYear);
 	const consortiumSlugs = new Set<string>();
 
+	// unit↔unit relations are document-level; resolve the consortium owner via its document and match
+	// the report's country by document.
 	const nationalConsortiumSlugs = await db
 		.select({ slug: schema.entities.slug })
 		.from(schema.organisationalUnitsRelations)
@@ -76,18 +73,24 @@ export default async function DashboardReportingCountryReportPublicationsPage(
 			eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
 		)
 		.innerJoin(
+			schema.entities,
+			eq(schema.entities.id, schema.organisationalUnitsRelations.unitDocumentId),
+		)
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.documentId, schema.entities.id),
+		)
+		.innerJoin(
 			schema.organisationalUnits,
-			eq(schema.organisationalUnits.id, schema.organisationalUnitsRelations.unitId),
+			sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
 		)
 		.innerJoin(
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 		)
-		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.organisationalUnits.id))
-		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 		.where(
 			and(
-				eq(schema.organisationalUnitsRelations.relatedUnitId, report.country.id),
+				eq(schema.organisationalUnitsRelations.relatedUnitDocumentId, report.countryDocumentId),
 				eq(schema.organisationalUnitStatus.status, "is_national_consortium_of"),
 				eq(
 					schema.organisationalUnitTypes.type,

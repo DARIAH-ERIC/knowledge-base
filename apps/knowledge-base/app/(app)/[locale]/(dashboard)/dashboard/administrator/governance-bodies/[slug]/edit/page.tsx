@@ -11,11 +11,7 @@ import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { getContributionPersonOptions } from "@/lib/data/contributions";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
-import {
-	annotatePersonRelationLifecycle,
-	getPersonRelationRoleOptions,
-	getPersonRelations,
-} from "@/lib/data/person-relations";
+import { getPersonRelationRoleOptions, getPersonRelations } from "@/lib/data/person-relations";
 import {
 	getEntityRelationOptions,
 	getEntityRelationOptionsByIds,
@@ -24,11 +20,7 @@ import {
 	getResourceRelationOptionsByIds,
 } from "@/lib/data/relations";
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
-import {
-	annotateUnitRelationLifecycle,
-	getUnitRelationStatusOptions,
-	getUnitRelations,
-} from "@/lib/data/unit-relations";
+import { getUnitRelationStatusOptions, getUnitRelations } from "@/lib/data/unit-relations";
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
 import { images } from "@/lib/images";
@@ -138,14 +130,12 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 		unitRelationStatusOptions,
 		descriptionRows,
 		socialMediaRows,
-		publishedPersonRelations,
-		publishedUnitRelations,
 	] = await Promise.all([
 		getContributionPersonOptions(),
-		getPersonRelations(governanceBody.id),
+		getPersonRelations(documentId),
 		getPersonRelationRoleOptions("governance_body"),
 		getEntityRelations(documentId),
-		getUnitRelations(governanceBody.id),
+		getUnitRelations(documentId),
 		getUnitRelationStatusOptions("governance_body"),
 		db
 			.select({ content: schema.richTextContentBlocks.content })
@@ -167,8 +157,6 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 			where: { organisationalUnitId: governanceBody.id },
 			columns: { socialMediaId: true },
 		}),
-		publishedId != null ? getPersonRelations(publishedId) : Promise.resolve([]),
-		publishedId != null ? getUnitRelations(publishedId) : Promise.resolve([]),
 	]);
 
 	const description = descriptionRows.at(0)?.content;
@@ -211,8 +199,8 @@ export default async function DashboardAdministratorEditGovernanceBodyPage(
 			initialSocialMediaTotal={initialSocialMedia.total}
 			isPublished={publishedId != null}
 			personRelationRoleOptions={personRelationRoleOptions}
-			personRelations={annotatePersonRelationLifecycle(personRelations, publishedPersonRelations)}
-			relations={annotateUnitRelationLifecycle(relations, publishedUnitRelations)}
+			personRelations={personRelations}
+			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}
 			selectedSocialMediaItems={selectedSocialMediaItems}

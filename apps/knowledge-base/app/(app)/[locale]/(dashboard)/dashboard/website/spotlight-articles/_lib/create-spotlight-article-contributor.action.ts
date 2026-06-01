@@ -5,8 +5,6 @@ import { createActionStateError } from "@dariah-eric/next-lib/actions";
 import { getExtracted } from "next-intl/server";
 
 import { CreateSpotlightArticleContributorActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article-contributor.schema";
-import { isPublishedEntityVersions } from "@/lib/data/current-entity-version";
-import { touchVersion } from "@/lib/data/entity-lifecycle";
 import { db } from "@/lib/db";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
@@ -19,15 +17,11 @@ export const createSpotlightArticleContributorAction = createMutationAction({
 	async preCheck({ input }) {
 		const t = await getExtracted();
 
-		if (!(await isPublishedEntityVersions(db, [input.personId]))) {
-			return createActionStateError({
-				message: t("Relations can only target published entities."),
-			});
-		}
-
+		// articleId and personId are document ids (entities.id). Contributors are document-level and do
+		// not require the edited article to be published (the person picker restricts to published).
 		const existing = await db.query.spotlightArticlesToPersons.findFirst({
-			where: { spotlightArticleId: input.articleId, personId: input.personId },
-			columns: { personId: true },
+			where: { spotlightArticleDocumentId: input.articleId, personDocumentId: input.personId },
+			columns: { personDocumentId: true },
 		});
 
 		if (existing != null) {
@@ -39,12 +33,10 @@ export const createSpotlightArticleContributorAction = createMutationAction({
 
 	async mutate(tx, input) {
 		await tx.insert(schema.spotlightArticlesToPersons).values({
-			spotlightArticleId: input.articleId,
-			personId: input.personId,
+			spotlightArticleDocumentId: input.articleId,
+			personDocumentId: input.personId,
 			role: input.role,
 		});
-
-		await touchVersion(tx, input.articleId);
 
 		return { subjectId: input.articleId };
 	},

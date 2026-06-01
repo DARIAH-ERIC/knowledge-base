@@ -6,8 +6,9 @@ import type { ReactNode } from "react";
 import { ImpactCaseStudyEditForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-edit";
 import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
-import { getImpactCaseStudyContributors, getPersonOptions } from "@/lib/data/article-contributors";
+import { getImpactCaseStudyContributors } from "@/lib/data/article-contributors";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { getContributionPersonOptions } from "@/lib/data/contributions";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { impactCaseStudiesLifecycleAdapter } from "@/lib/data/impact-case-studies.lifecycle-adapter";
 import {
@@ -113,7 +114,7 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 		}),
 		getEntityRelationOptions(),
 		getResourceRelationOptions(),
-		getPersonOptions(),
+		getContributionPersonOptions(),
 	]);
 
 	if (impactCaseStudy == null) {
@@ -127,7 +128,7 @@ export default async function DashboardWebsiteEditImpactCaseStudyPage(
 	const [{ relatedEntityIds, relatedResourceIds }, contributors, contentBlocks] = await Promise.all(
 		[
 			getEntityRelations(documentId),
-			getImpactCaseStudyContributors(draftVersionId),
+			getImpactCaseStudyContributors(documentId),
 			getEntityContentBlocks(draftVersionId, "content"),
 		],
 	);

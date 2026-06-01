@@ -61,11 +61,16 @@ test.describe("country reports admin", () => {
 
 	test("should delete a country report", async ({ createAdminCountryReportsPage, db }) => {
 		const workerIndex = test.info().workerIndex;
+		const campaignYear = 3200 + workerIndex;
 		const reportsPage = createAdminCountryReportsPage(workerIndex);
 
 		await reportsPage.goto();
 
-		const deleteDialog = await reportsPage.openDeleteDialog((await db.getCountryOption()).name);
+		// scope by the test's unique campaign year — the country name alone is not unique against real data.
+		const deleteDialog = await reportsPage.openDeleteDialog(
+			(await db.getCountryOption()).name,
+			campaignYear,
+		);
 		await expect(deleteDialog).toBeVisible();
 		await reportsPage.confirmDelete(deleteDialog);
 

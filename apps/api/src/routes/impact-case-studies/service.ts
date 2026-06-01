@@ -6,7 +6,7 @@ import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
 import { generateImageUrl } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
-import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
+import { getRelatedEntities, getRelatedResources, resolveDocumentId } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
@@ -87,6 +87,10 @@ interface GetImpactCaseStudyByIdParams {
 }
 
 async function getContributors(db: Database | Transaction, impactCaseStudyId: string) {
+	// Contributors are document-level. Resolve the person endpoint (a document id) to its published
+	// version for its name/slug/image, and match the case study by document (impactCaseStudyId is a
+	// published case study version id, resolved to its document id once here).
+	const impactCaseStudyDocumentId = await resolveDocumentId(db, impactCaseStudyId);
 	const rows = await db
 		.select({
 			id: schema.persons.id,
@@ -96,15 +100,19 @@ async function getContributors(db: Database | Transaction, impactCaseStudyId: st
 			role: schema.impactCaseStudiesToPersons.role,
 		})
 		.from(schema.impactCaseStudiesToPersons)
-		.innerJoin(schema.persons, eq(schema.impactCaseStudiesToPersons.personId, schema.persons.id))
-		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
-		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+		.innerJoin(
+			schema.entities,
+			eq(schema.entities.id, schema.impactCaseStudiesToPersons.personDocumentId),
+		)
 		.innerJoin(
 			schema.documentLifecycle,
-			eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			eq(schema.documentLifecycle.documentId, schema.entities.id),
 		)
+		.innerJoin(schema.persons, eq(schema.persons.id, schema.documentLifecycle.publishedId))
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
-		.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyId, impactCaseStudyId));
+		.where(
+			eq(schema.impactCaseStudiesToPersons.impactCaseStudyDocumentId, impactCaseStudyDocumentId),
+		);
 
 	const positions = await getPersonPositions(
 		db,

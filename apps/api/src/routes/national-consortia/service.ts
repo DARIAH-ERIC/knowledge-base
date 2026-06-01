@@ -18,7 +18,7 @@ const countryRelations = alias(schema.organisationalUnitsRelations, "country_rel
 const countryRelationStatus = alias(schema.organisationalUnitStatus, "country_relation_status");
 const countries = alias(schema.organisationalUnits, "countries");
 const countryTypes = alias(schema.organisationalUnitTypes, "country_types");
-const countryEntityVersions = alias(schema.entityVersions, "country_entity_versions");
+const countryLifecycle = alias(schema.documentLifecycle, "country_lifecycle");
 const countryEntities = alias(schema.entities, "country_entities");
 const consortiumEntities = alias(schema.entities, "consortium_entities");
 
@@ -73,21 +73,22 @@ function fromNationalConsortia(db: Database | Transaction) {
 		.leftJoin(
 			countryRelations,
 			and(
-				eq(countryRelations.unitId, schema.organisationalUnits.id),
+				// unit↔unit relations are document-level; the consortium is pinned to its published version.
+				eq(countryRelations.unitDocumentId, schema.entityVersions.entityId),
 				sql`${countryRelations.duration} @> NOW()::TIMESTAMPTZ`,
 			),
 		)
 		.leftJoin(countryRelationStatus, eq(countryRelations.status, countryRelationStatus.id))
 		.leftJoin(
-			countries,
+			countryLifecycle,
 			and(
-				eq(countryRelations.relatedUnitId, countries.id),
+				eq(countryLifecycle.documentId, countryRelations.relatedUnitDocumentId),
 				eq(countryRelationStatus.status, "is_national_consortium_of"),
 			),
 		)
+		.leftJoin(countries, eq(countries.id, countryLifecycle.publishedId))
 		.leftJoin(countryTypes, eq(countries.typeId, countryTypes.id))
-		.leftJoin(countryEntityVersions, eq(countries.id, countryEntityVersions.id))
-		.leftJoin(countryEntities, eq(countryEntityVersions.entityId, countryEntities.id));
+		.leftJoin(countryEntities, eq(countryEntities.id, countryLifecycle.documentId));
 }
 
 function mapNationalConsortiumRow(row: NationalConsortiumRow) {

@@ -4,7 +4,7 @@ import { createInsertSchema, createSelectSchema, createUpdateSchema } from "driz
 
 import * as f from "../fields";
 import { uuidv7 } from "../functions";
-import { organisationalUnits } from "./organisational-units";
+import { entities } from "./entities";
 import { socialMedia } from "./social-media";
 
 export const serviceTypesEnum = ["community", "core", "internal"] as const;
@@ -121,16 +121,22 @@ export const OrganisationalUnitServiceRoleUpdateSchema = createUpdateSchema(
 	organisationalUnitServiceRoles,
 );
 
+/**
+ * Services are not versioned entities (their `id` is a standalone key), so `serviceId` is stable.
+ * The organisational-unit endpoint, however, is a versioned entity: it references `entities.id` (a
+ * document id), not a version id, so the relation stays valid across the unit's draft/publish
+ * lifecycle. Reads resolve the unit endpoint to its published version.
+ */
 export const servicesToOrganisationalUnits = p.snakeCase.table("services_to_organisational_units", {
 	id: p.uuid("id").primaryKey().default(uuidv7()),
 	serviceId: p
 		.uuid("service_id")
 		.notNull()
 		.references(() => services.id),
-	organisationalUnitId: p
-		.uuid("organisational_unit_id")
+	organisationalUnitDocumentId: p
+		.uuid("organisational_unit_document_id")
 		.notNull()
-		.references(() => organisationalUnits.id),
+		.references(() => entities.id),
 	roleId: p
 		.uuid("role_id")
 		.notNull()

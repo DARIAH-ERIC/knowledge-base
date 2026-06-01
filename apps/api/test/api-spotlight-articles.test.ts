@@ -171,17 +171,18 @@ async function seed(
 	});
 
 	await db.insert(schema.personsToOrganisationalUnits).values({
-		personId: contributor.person.id,
-		organisationalUnitId: contributor.affiliation.organisationalUnit.id,
+		personDocumentId: contributor.entity.id,
+		organisationalUnitDocumentId: contributor.affiliation.entity.id,
 		roleTypeId: affiliatedRoleType.id,
 		duration: { start: f.date.past({ years: 5 }) },
 	});
 
+	// Contributors are document-level; key both endpoints to their document ids.
 	await db.insert(schema.spotlightArticlesToPersons).values(
 		items.map((item) => {
 			return {
-				spotlightArticleId: item.version.id,
-				personId: contributor.person.id,
+				spotlightArticleDocumentId: item.entity.id,
+				personDocumentId: contributor.entity.id,
 			};
 		}),
 	);

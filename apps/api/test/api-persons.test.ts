@@ -123,8 +123,8 @@ async function seed(db: Database, items: ReturnType<typeof createItems>) {
 	await db.insert(schema.personsToOrganisationalUnits).values(
 		items.map((item) => {
 			return {
-				personId: item.person.id,
-				organisationalUnitId: item.affiliation.organisationalUnit.id,
+				personDocumentId: item.entity.id,
+				organisationalUnitDocumentId: item.affiliation.entity.id,
 				roleTypeId: affiliatedRoleType.id,
 				duration: { start: f.date.past({ years: 5 }) },
 			};

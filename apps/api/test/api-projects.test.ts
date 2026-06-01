@@ -160,7 +160,7 @@ async function seedSocialMedia(db: Database, projectId: string) {
 
 async function seedOrganisationalUnit(
 	db: Database,
-	projectId: string,
+	projectDocumentId: string,
 	roleName: "coordinator" | "participant" | "funder",
 ) {
 	const [status, unitEntityType, unitType, role] = await Promise.all([
@@ -211,8 +211,8 @@ async function seedOrganisationalUnit(
 	assert(organisationalUnit);
 
 	await db.insert(schema.projectsToOrganisationalUnits).values({
-		projectId,
-		unitId: organisationalUnit.id,
+		projectDocumentId,
+		unitDocumentId: unitEntityId,
 		roleId: role.id,
 	});
 
@@ -340,9 +340,9 @@ describe("projects", () => {
 				const id = item.version.id;
 				const name = item.project.name;
 
-				await seedOrganisationalUnit(db, id, "coordinator");
-				await seedOrganisationalUnit(db, id, "participant");
-				await seedOrganisationalUnit(db, id, "funder");
+				await seedOrganisationalUnit(db, item.entity.id, "coordinator");
+				await seedOrganisationalUnit(db, item.entity.id, "participant");
+				await seedOrganisationalUnit(db, item.entity.id, "funder");
 
 				const response = await client.projects[":id"].$get({
 					param: { id },

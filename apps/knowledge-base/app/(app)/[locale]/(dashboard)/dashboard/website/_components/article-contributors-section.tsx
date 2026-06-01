@@ -52,13 +52,15 @@ async function fetchPersonOptionsPage(
 	const searchParams = new URLSearchParams({
 		limit: String(params.limit),
 		offset: String(params.offset),
+		resource: "persons",
 	});
 
 	if (params.q !== "") {
 		searchParams.set("q", params.q);
 	}
 
-	const response = await fetch(`/api/persons/options?${searchParams.toString()}`, {
+	// Contributors are document-level; this endpoint returns person *document* ids.
+	const response = await fetch(`/api/contributions/options?${searchParams.toString()}`, {
 		signal: params.signal,
 	});
 

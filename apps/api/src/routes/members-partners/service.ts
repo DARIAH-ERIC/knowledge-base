@@ -6,10 +6,10 @@ import { type ContentBlock, getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
 import { generateImageUrl } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
-import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
+import { getRelatedEntities, getRelatedResources, resolveDocumentId } from "@/lib/relations";
 import { mapSocialMedia } from "@/lib/social-media";
 import type { Database, Transaction } from "@/middlewares/db";
-import { type SQLWrapper, and, count, eq, exists, sql } from "@/services/db/sql";
+import { type SQLWrapper, alias, and, count, eq, exists, sql } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
 
 interface GetMembersAndPartnersParams {
@@ -196,6 +196,10 @@ function buildActiveRelationExistsFilter(
 		${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ
 	`;
 
+	// Unit↔unit relations are document-level; the related unit is resolved from its document id to
+	// any of its versions to check the related type. idRef is a version id of the owning unit.
+	const relatedUnitVersion = alias(schema.entityVersions, "exists_related_unit_version");
+
 	return exists(
 		db
 			.select({ one: sql<number>`1` })
@@ -205,8 +209,12 @@ function buildActiveRelationExistsFilter(
 				eq(schema.organisationalUnitsRelations.status, schema.organisationalUnitStatus.id),
 			)
 			.innerJoin(
+				relatedUnitVersion,
+				eq(relatedUnitVersion.entityId, schema.organisationalUnitsRelations.relatedUnitDocumentId),
+			)
+			.innerJoin(
 				schema.organisationalUnits,
-				eq(schema.organisationalUnitsRelations.relatedUnitId, schema.organisationalUnits.id),
+				eq(schema.organisationalUnits.id, relatedUnitVersion.id),
 			)
 			.innerJoin(
 				schema.organisationalUnitTypes,
@@ -214,7 +222,7 @@ function buildActiveRelationExistsFilter(
 			)
 			.where(
 				and(
-					eq(schema.organisationalUnitsRelations.unitId, idRef),
+					sql`${schema.organisationalUnitsRelations.unitDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${idRef})`,
 					eq(schema.organisationalUnitStatus.status, status),
 					eq(schema.organisationalUnitTypes.type, relatedType),
 					durationContainsNow,
@@ -240,6 +248,10 @@ function buildActiveRelationToUnitFilter(
 		${schema.organisationalUnitsRelations.duration} @> NOW()::TIMESTAMPTZ
 	`;
 
+	// Unit↔unit relations are document-level; idRef and relatedUnitId are version ids resolved to
+	// their document ids, and the related unit's type is checked via any of its versions.
+	const relatedUnitVersion = alias(schema.entityVersions, "exists_to_unit_related_version");
+
 	return exists(
 		db
 			.select({ one: sql<number>`1` })
@@ -249,8 +261,12 @@ function buildActiveRelationToUnitFilter(
 				eq(schema.organisationalUnitsRelations.status, schema.organisationalUnitStatus.id),
 			)
 			.innerJoin(
+				relatedUnitVersion,
+				eq(relatedUnitVersion.entityId, schema.organisationalUnitsRelations.relatedUnitDocumentId),
+			)
+			.innerJoin(
 				schema.organisationalUnits,
-				eq(schema.organisationalUnitsRelations.relatedUnitId, schema.organisationalUnits.id),
+				eq(schema.organisationalUnits.id, relatedUnitVersion.id),
 			)
 			.innerJoin(
 				schema.organisationalUnitTypes,
@@ -258,8 +274,8 @@ function buildActiveRelationToUnitFilter(
 			)
 			.where(
 				and(
-					eq(schema.organisationalUnitsRelations.unitId, idRef),
-					eq(schema.organisationalUnitsRelations.relatedUnitId, relatedUnitId),
+					sql`${schema.organisationalUnitsRelations.unitDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${idRef})`,
+					sql`${schema.organisationalUnitsRelations.relatedUnitDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${relatedUnitId})`,
 					eq(schema.organisationalUnitStatus.status, status),
 					eq(schema.organisationalUnitTypes.type, relatedType),
 					durationContainsNow,
@@ -485,6 +501,8 @@ async function getNationalConsortium(
 }
 
 async function getContributors(db: Database | Transaction, countryId: string) {
+	// countryId is a published org version id; resolve it to its document id once here.
+	const countryDocumentId = await resolveDocumentId(db, countryId);
 	const rows = await db
 		.select({
 			id: schema.persons.id,
@@ -494,12 +512,16 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 			role: schema.personRoleTypes.type,
 		})
 		.from(schema.personsToOrganisationalUnits)
-		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
-		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
-		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+		// person↔org relations are document-level; resolve the person to its published version and
+		// match the org by its document id (countryId is a published org version id).
 		.innerJoin(
 			schema.documentLifecycle,
-			eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			eq(schema.documentLifecycle.documentId, schema.personsToOrganisationalUnits.personDocumentId),
+		)
+		.innerJoin(schema.persons, eq(schema.persons.id, schema.documentLifecycle.publishedId))
+		.innerJoin(
+			schema.entities,
+			eq(schema.entities.id, schema.personsToOrganisationalUnits.personDocumentId),
 		)
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.innerJoin(
@@ -508,7 +530,7 @@ async function getContributors(db: Database | Transaction, countryId: string) {
 		)
 		.where(
 			and(
-				eq(schema.personsToOrganisationalUnits.organisationalUnitId, countryId),
+				eq(schema.personsToOrganisationalUnits.organisationalUnitDocumentId, countryDocumentId),
 				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
 				sql`
 					${schema.personRoleTypes.type} IN (

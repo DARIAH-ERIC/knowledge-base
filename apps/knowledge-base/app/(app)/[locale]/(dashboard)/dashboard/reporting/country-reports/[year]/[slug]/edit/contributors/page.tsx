@@ -14,7 +14,7 @@ import { updateCountryReportContributorsAction } from "@/app/(app)/[locale]/(das
 import { assertAuthenticated } from "@/lib/auth/session";
 import { resolveCountryReportId } from "@/lib/data/reporting-urls";
 import { db } from "@/lib/db";
-import { and, eq, inArray, notInArray, or, sql } from "@/lib/db/sql";
+import { alias, and, eq, inArray, notInArray, or, sql } from "@/lib/db/sql";
 import { createMetadata } from "@/lib/server/create-metadata";
 
 interface DashboardReportingCountryReportContributorsPageProps extends PageProps<"/[locale]/dashboard/reporting/country-reports/[year]/[slug]/edit/contributors"> {}
@@ -46,28 +46,88 @@ export default async function DashboardReportingCountryReportContributorsPage(
 	const result = await getAuthorizedCountryReportForUser(
 		user,
 		id,
-		(id) =>
-			db.query.countryReports.findFirst({
+		async (id) => {
+			const base = await db.query.countryReports.findFirst({
 				where: { id },
-				columns: { id: true, totalContributors: true },
+				// countryDocumentId is the country's document id (entities.id), used to match
+				// document-level person↔org relations below.
+				columns: { id: true, totalContributors: true, countryDocumentId: true },
 				with: {
 					campaign: { columns: { year: true } },
-					country: { columns: { id: true } },
-					contributions: {
-						columns: { id: true },
-						with: {
-							personToOrgUnit: {
-								columns: { id: true },
-								with: {
-									person: { columns: { name: true } },
-									organisationalUnit: { columns: { name: true } },
-									roleType: { columns: { type: true } },
-								},
-							},
-						},
-					},
 				},
-			}),
+			});
+
+			if (base == null) {
+				return null;
+			}
+
+			const personDocumentLifecycle = alias(schema.documentLifecycle, "person_document_lifecycle");
+			const organisationalUnitDocumentLifecycle = alias(
+				schema.documentLifecycle,
+				"organisational_unit_document_lifecycle",
+			);
+			const claimedRows = await db
+				.select({
+					id: schema.countryReportContributions.id,
+					personToOrgUnitId: schema.countryReportContributions.personToOrgUnitId,
+					personName: schema.persons.name,
+					orgUnitName: schema.organisationalUnits.name,
+					roleType: schema.personRoleTypes.type,
+				})
+				.from(schema.countryReportContributions)
+				.innerJoin(
+					schema.personsToOrganisationalUnits,
+					eq(
+						schema.personsToOrganisationalUnits.id,
+						schema.countryReportContributions.personToOrgUnitId,
+					),
+				)
+				.innerJoin(
+					personDocumentLifecycle,
+					eq(
+						personDocumentLifecycle.documentId,
+						schema.personsToOrganisationalUnits.personDocumentId,
+					),
+				)
+				.innerJoin(
+					schema.persons,
+					sql`${schema.persons.id} = COALESCE(${personDocumentLifecycle.draftId}, ${personDocumentLifecycle.publishedId})`,
+				)
+				.innerJoin(
+					organisationalUnitDocumentLifecycle,
+					eq(
+						organisationalUnitDocumentLifecycle.documentId,
+						schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
+					),
+				)
+				.innerJoin(
+					schema.organisationalUnits,
+					sql`${schema.organisationalUnits.id} = COALESCE(${organisationalUnitDocumentLifecycle.draftId}, ${organisationalUnitDocumentLifecycle.publishedId})`,
+				)
+				.innerJoin(
+					schema.personRoleTypes,
+					eq(schema.personRoleTypes.id, schema.personsToOrganisationalUnits.roleTypeId),
+				)
+				.where(eq(schema.countryReportContributions.countryReportId, id));
+
+			return {
+				id: base.id,
+				totalContributors: base.totalContributors,
+				campaign: base.campaign,
+				country: { id: base.countryDocumentId },
+				contributions: claimedRows.map((row) => {
+					return {
+						id: row.id,
+						personToOrgUnit: {
+							id: row.personToOrgUnitId,
+							person: { name: row.personName },
+							organisationalUnit: { name: row.orgUnitName },
+							roleType: { type: row.roleType },
+						},
+					};
+				}),
+			};
+		},
 		"update",
 	);
 
@@ -82,6 +142,14 @@ export default async function DashboardReportingCountryReportContributorsPage(
 	const { year } = report.campaign;
 	const claimedIds = report.contributions.map((c) => c.personToOrgUnit.id);
 
+	const availablePersonDocumentLifecycle = alias(
+		schema.documentLifecycle,
+		"available_person_document_lifecycle",
+	);
+	const availableOrganisationalUnitDocumentLifecycle = alias(
+		schema.documentLifecycle,
+		"available_organisational_unit_document_lifecycle",
+	);
 	const availablePersonToOrgUnits = await db
 		.select({
 			id: schema.personsToOrganisationalUnits.id,
@@ -90,10 +158,27 @@ export default async function DashboardReportingCountryReportContributorsPage(
 			roleType: schema.personRoleTypes.type,
 		})
 		.from(schema.personsToOrganisationalUnits)
-		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
+		.innerJoin(
+			availablePersonDocumentLifecycle,
+			eq(
+				availablePersonDocumentLifecycle.documentId,
+				schema.personsToOrganisationalUnits.personDocumentId,
+			),
+		)
+		.innerJoin(
+			schema.persons,
+			sql`${schema.persons.id} = COALESCE(${availablePersonDocumentLifecycle.draftId}, ${availablePersonDocumentLifecycle.publishedId})`,
+		)
+		.innerJoin(
+			availableOrganisationalUnitDocumentLifecycle,
+			eq(
+				availableOrganisationalUnitDocumentLifecycle.documentId,
+				schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
+			),
+		)
 		.innerJoin(
 			schema.organisationalUnits,
-			eq(schema.personsToOrganisationalUnits.organisationalUnitId, schema.organisationalUnits.id),
+			sql`${schema.organisationalUnits.id} = COALESCE(${availableOrganisationalUnitDocumentLifecycle.draftId}, ${availableOrganisationalUnitDocumentLifecycle.publishedId})`,
 		)
 		.innerJoin(
 			schema.organisationalUnitTypes,
@@ -113,7 +198,7 @@ export default async function DashboardReportingCountryReportContributorsPage(
 							"national_representative",
 							"national_representative_deputy",
 						]),
-						eq(schema.personsToOrganisationalUnits.organisationalUnitId, report.country.id),
+						eq(schema.personsToOrganisationalUnits.organisationalUnitDocumentId, report.country.id),
 					),
 					and(
 						inArray(schema.personRoleTypes.type, ["is_chair_of", "is_vice_chair_of"]),

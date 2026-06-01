@@ -129,14 +129,6 @@ export class AdminPersonsPage {
 		await this.page.getByRole("option").first().click();
 	}
 
-	async selectContributionOrgByName(searchText: string): Promise<void> {
-		await this.page.getByRole("button", { name: "Select an organisation" }).click();
-		await this.page.keyboard.type(searchText);
-		await this.page.keyboard.press("Enter");
-		await this.page.getByRole("option").first().waitFor({ state: "visible" });
-		await this.page.getByRole("option").first().click();
-	}
-
 	async fillContributionDatePicker(
 		label: string,
 		year: number,

@@ -4,7 +4,13 @@ import type { Database, Transaction } from "@/middlewares/db";
 import { alias, and, eq, sql } from "@/services/db/sql";
 import { search } from "@/services/search";
 
-async function resolveDocumentId(db: Database | Transaction, id: string) {
+/**
+ * Resolve a (published/draft) entity version id to its owning document id (`entities.id`). Returns
+ * the input unchanged when it is already a document id (no matching version row). Use this to
+ * resolve a known version id once in JS rather than embedding a `(SELECT entity_id FROM
+ * entity_versions …)` scalar subquery in a filter.
+ */
+export async function resolveDocumentId(db: Database | Transaction, id: string): Promise<string> {
 	const entityVersion = await db.query.entityVersions.findFirst({
 		where: { id },
 		columns: { entityId: true },

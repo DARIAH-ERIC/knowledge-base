@@ -9,9 +9,8 @@ import * as v from "valibot";
 
 import { CreateUnitRelationActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-unit-relation.schema";
 import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
-import { touchVersion } from "@/lib/data/entity-lifecycle";
-import { ensureOrganisationalUnitDraftVersion } from "@/lib/data/organisational-unit-drafts";
 import { db } from "@/lib/db";
+import { eq, sql } from "@/lib/db/sql";
 import { getIntlLanguage } from "@/lib/i18n/locales";
 import { createServerAction } from "@/lib/server/create-server-action";
 
@@ -39,11 +38,12 @@ export const createUnitRelationAction = createServerAction(
 		const { unitId, statusId, relatedUnitId, duration } = result.output;
 
 		const returned = await db.transaction(async (tx) => {
-			const draftUnitId = await ensureOrganisationalUnitDraftVersion(tx, unitId);
+			// unitId / relatedUnitId are document ids (entities.id). Relations are document-level and do
+			// not require the edited unit to be published (the picker restricts the *target*).
 			const existing = await tx.query.organisationalUnitsRelations.findFirst({
 				where: {
-					unitId: draftUnitId,
-					relatedUnitId,
+					unitDocumentId: unitId,
+					relatedUnitDocumentId: relatedUnitId,
 					status: statusId,
 				},
 				columns: { id: true },
@@ -53,19 +53,32 @@ export const createUnitRelationAction = createServerAction(
 				return { error: "duplicate" as const };
 			}
 
-			const relatedUnit = await tx.query.organisationalUnits.findFirst({
-				where: { id: relatedUnitId },
-				columns: {},
-				with: { type: { columns: { type: true } } },
-			});
+			// Resolve the related unit's current version (draft-or-published) for its type.
+			const relatedUnit = await tx
+				.select({ unitType: schema.organisationalUnitTypes.type })
+				.from(schema.organisationalUnits)
+				.innerJoin(
+					schema.documentLifecycle,
+					sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
+				)
+				.innerJoin(
+					schema.organisationalUnitTypes,
+					eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
+				)
+				.where(eq(schema.documentLifecycle.documentId, relatedUnitId))
+				.limit(1)
+				.then((rows) => rows[0] ?? null);
 
 			const row = await tx
 				.insert(schema.organisationalUnitsRelations)
-				.values({ unitId: draftUnitId, relatedUnitId, status: statusId, duration })
+				.values({
+					unitDocumentId: unitId,
+					relatedUnitDocumentId: relatedUnitId,
+					status: statusId,
+					duration,
+				})
 				.returning({ id: schema.organisationalUnitsRelations.id })
 				.then((rows) => rows[0]!);
-
-			await touchVersion(tx, draftUnitId);
 
 			await recordAuditEvent(tx, {
 				actorUserId: user?.id,
@@ -75,7 +88,7 @@ export const createUnitRelationAction = createServerAction(
 				summary: getAuditSummaryFromFormData(formData),
 			});
 
-			return { relatedUnitType: relatedUnit?.type.type, row };
+			return { relatedUnitType: relatedUnit?.unitType, row };
 		});
 
 		if ("error" in returned) {

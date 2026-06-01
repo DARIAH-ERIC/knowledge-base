@@ -9,7 +9,7 @@ import {
 	getOrganisationalUnitOptionsByIds,
 } from "@/lib/data/organisational-units";
 import { db } from "@/lib/db";
-import { and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
+import { alias, and, count, desc, eq, ilike, inArray, sql } from "@/lib/db/sql";
 
 export type ServicesSort = "name" | "type" | "status" | "sshocMarketplaceId";
 type ServiceTypes = (typeof schema.serviceTypesEnum)[number];
@@ -181,12 +181,22 @@ export async function getServiceForAdmin(currentUser: Pick<User, "role">, id: st
 		return null;
 	}
 
+	// The relation stores the unit's document id; resolve it to its published version id so it matches
+	// the (published) version-id space of the organisational-unit picker.
+	const unitDocumentLifecycle = alias(schema.documentLifecycle, "unit_document_lifecycle");
 	const unitRoleRows = await db
 		.select({
-			organisationalUnitId: schema.servicesToOrganisationalUnits.organisationalUnitId,
+			organisationalUnitId: unitDocumentLifecycle.publishedId,
 			roleId: schema.servicesToOrganisationalUnits.roleId,
 		})
 		.from(schema.servicesToOrganisationalUnits)
+		.innerJoin(
+			unitDocumentLifecycle,
+			eq(
+				unitDocumentLifecycle.documentId,
+				schema.servicesToOrganisationalUnits.organisationalUnitDocumentId,
+			),
+		)
 		.where(eq(schema.servicesToOrganisationalUnits.serviceId, id));
 
 	const ownerRoleId = serviceRoles.find((r) => r.role === "service_owner")?.id;
@@ -194,11 +204,13 @@ export async function getServiceForAdmin(currentUser: Pick<User, "role">, id: st
 
 	const ownerUnitIds = unitRoleRows
 		.filter((r) => r.roleId === ownerRoleId)
-		.map((r) => r.organisationalUnitId);
+		.map((r) => r.organisationalUnitId)
+		.filter((unitId): unitId is string => unitId != null);
 
 	const providerUnitIds = unitRoleRows
 		.filter((r) => r.roleId === providerRoleId)
-		.map((r) => r.organisationalUnitId);
+		.map((r) => r.organisationalUnitId)
+		.filter((unitId): unitId is string => unitId != null);
 
 	const selectedOrganisationalUnits = await getOrganisationalUnitOptionsByIds([
 		...new Set([...ownerUnitIds, ...providerUnitIds]),

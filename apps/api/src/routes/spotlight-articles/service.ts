@@ -6,7 +6,7 @@ import { getContentBlocks } from "@/lib/content-blocks";
 import { flattenEntityVersion } from "@/lib/entity-version";
 import { generateImageUrl } from "@/lib/images";
 import { getPersonPositions } from "@/lib/persons";
-import { getRelatedEntities, getRelatedResources } from "@/lib/relations";
+import { getRelatedEntities, getRelatedResources, resolveDocumentId } from "@/lib/relations";
 import type { Database, Transaction } from "@/middlewares/db";
 import { count, eq } from "@/services/db/sql";
 import { imageWidth } from "~/config/api.config";
@@ -87,6 +87,10 @@ interface GetSpotlightArticleByIdParams {
 }
 
 async function getContributors(db: Database | Transaction, spotlightArticleId: string) {
+	// Contributors are document-level. Resolve the person endpoint (a document id) to its published
+	// version for its name/slug/image, and match the article by document (spotlightArticleId is a
+	// published article version id, resolved to its document id once here).
+	const spotlightArticleDocumentId = await resolveDocumentId(db, spotlightArticleId);
 	const rows = await db
 		.select({
 			id: schema.persons.id,
@@ -96,15 +100,19 @@ async function getContributors(db: Database | Transaction, spotlightArticleId: s
 			role: schema.spotlightArticlesToPersons.role,
 		})
 		.from(schema.spotlightArticlesToPersons)
-		.innerJoin(schema.persons, eq(schema.spotlightArticlesToPersons.personId, schema.persons.id))
-		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
-		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+		.innerJoin(
+			schema.entities,
+			eq(schema.entities.id, schema.spotlightArticlesToPersons.personDocumentId),
+		)
 		.innerJoin(
 			schema.documentLifecycle,
-			eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			eq(schema.documentLifecycle.documentId, schema.entities.id),
 		)
+		.innerJoin(schema.persons, eq(schema.persons.id, schema.documentLifecycle.publishedId))
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
-		.where(eq(schema.spotlightArticlesToPersons.spotlightArticleId, spotlightArticleId));
+		.where(
+			eq(schema.spotlightArticlesToPersons.spotlightArticleDocumentId, spotlightArticleDocumentId),
+		);
 
 	const positions = await getPersonPositions(
 		db,

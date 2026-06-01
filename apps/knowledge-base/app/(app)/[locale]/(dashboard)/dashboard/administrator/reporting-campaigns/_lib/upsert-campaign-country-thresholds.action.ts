@@ -16,14 +16,15 @@ export const upsertCampaignCountryThresholdsAction = createMutationAction({
 		const t = await getExtracted();
 
 		if (input.amounts != null) {
-			for (const [countryId, amount] of Object.entries(input.amounts)) {
+			// the form keys amounts by country document id.
+			for (const [countryDocumentId, amount] of Object.entries(input.amounts)) {
 				await tx
 					.insert(schema.reportingCampaignCountryThresholds)
-					.values({ campaignId: input.id, countryId, amount })
+					.values({ campaignId: input.id, countryDocumentId, amount })
 					.onConflictDoUpdate({
 						target: [
 							schema.reportingCampaignCountryThresholds.campaignId,
-							schema.reportingCampaignCountryThresholds.countryId,
+							schema.reportingCampaignCountryThresholds.countryDocumentId,
 						],
 						set: { amount },
 					});

@@ -93,6 +93,10 @@ export class AdminGovernanceBodiesPage {
 
 	async confirmDelete(dialog: Locator): Promise<void> {
 		await dialog.getByRole("button", { name: "Delete" }).click();
+		// Wait for the action to resolve (the dialog closes only on success) so callers don't observe
+		// the list/db mid-delete. While the modal is open the background is inert, so a `toBeHidden`
+		// row check would otherwise pass spuriously without the delete having completed.
+		await dialog.waitFor({ state: "hidden" });
 	}
 
 	// ---------------------------------------------------------------------------

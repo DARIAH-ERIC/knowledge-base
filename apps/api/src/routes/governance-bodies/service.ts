@@ -47,11 +47,11 @@ const hardcodedWorkingGroupsGovernanceBody = {
 };
 
 async function getActiveWorkingGroupChairs(db: Database | Transaction) {
-	const workingGroupEntityVersions = alias(schema.entityVersions, "working_group_entity_versions");
 	const workingGroupDocumentLifecycle = alias(
 		schema.documentLifecycle,
 		"working_group_document_lifecycle",
 	);
+	const personDocumentLifecycle = alias(schema.documentLifecycle, "person_document_lifecycle");
 
 	const rows = await db
 		.select({
@@ -70,28 +70,30 @@ async function getActiveWorkingGroupChairs(db: Database | Transaction) {
 			schema.personRoleTypes,
 			eq(schema.personsToOrganisationalUnits.roleTypeId, schema.personRoleTypes.id),
 		)
+		// person↔org relations are document-level; resolve each endpoint to its published version.
+		.innerJoin(
+			workingGroupDocumentLifecycle,
+			eq(
+				workingGroupDocumentLifecycle.documentId,
+				schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
+			),
+		)
 		.innerJoin(
 			schema.organisationalUnits,
-			eq(schema.personsToOrganisationalUnits.organisationalUnitId, schema.organisationalUnits.id),
+			eq(schema.organisationalUnits.id, workingGroupDocumentLifecycle.publishedId),
 		)
 		.innerJoin(
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
 		)
 		.innerJoin(
-			workingGroupEntityVersions,
-			eq(schema.organisationalUnits.id, workingGroupEntityVersions.id),
+			personDocumentLifecycle,
+			eq(personDocumentLifecycle.documentId, schema.personsToOrganisationalUnits.personDocumentId),
 		)
+		.innerJoin(schema.persons, eq(schema.persons.id, personDocumentLifecycle.publishedId))
 		.innerJoin(
-			workingGroupDocumentLifecycle,
-			eq(workingGroupDocumentLifecycle.publishedId, workingGroupEntityVersions.id),
-		)
-		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
-		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
-		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
-		.innerJoin(
-			schema.documentLifecycle,
-			eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			schema.entities,
+			eq(schema.entities.id, schema.personsToOrganisationalUnits.personDocumentId),
 		)
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.where(
@@ -166,9 +168,18 @@ async function getActiveGovernanceBodyPersons(
 		return personsByGovernanceBody;
 	}
 
+	// person↔org relations are document-level. `governanceBodyIds` are published GB version ids; the
+	// result must stay keyed by those, so re-key through the GB document and resolve persons to their
+	// published version.
+	const governanceBodyEntityVersions = alias(
+		schema.entityVersions,
+		"governance_body_entity_versions",
+	);
+	const personDocumentLifecycle = alias(schema.documentLifecycle, "person_document_lifecycle");
+
 	const rows = await db
 		.select({
-			governanceBodyId: schema.personsToOrganisationalUnits.organisationalUnitId,
+			governanceBodyId: governanceBodyEntityVersions.id,
 			id: schema.persons.id,
 			name: schema.persons.name,
 			sortName: schema.persons.sortName,
@@ -184,17 +195,26 @@ async function getActiveGovernanceBodyPersons(
 			schema.personRoleTypes,
 			eq(schema.personsToOrganisationalUnits.roleTypeId, schema.personRoleTypes.id),
 		)
-		.innerJoin(schema.persons, eq(schema.personsToOrganisationalUnits.personId, schema.persons.id))
-		.innerJoin(schema.entityVersions, eq(schema.persons.id, schema.entityVersions.id))
-		.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
 		.innerJoin(
-			schema.documentLifecycle,
-			eq(schema.documentLifecycle.publishedId, schema.entityVersions.id),
+			governanceBodyEntityVersions,
+			eq(
+				governanceBodyEntityVersions.entityId,
+				schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
+			),
+		)
+		.innerJoin(
+			personDocumentLifecycle,
+			eq(personDocumentLifecycle.documentId, schema.personsToOrganisationalUnits.personDocumentId),
+		)
+		.innerJoin(schema.persons, eq(schema.persons.id, personDocumentLifecycle.publishedId))
+		.innerJoin(
+			schema.entities,
+			eq(schema.entities.id, schema.personsToOrganisationalUnits.personDocumentId),
 		)
 		.innerJoin(schema.assets, eq(schema.persons.imageId, schema.assets.id))
 		.where(
 			and(
-				inArray(schema.personsToOrganisationalUnits.organisationalUnitId, governanceBodyIds),
+				inArray(governanceBodyEntityVersions.id, governanceBodyIds),
 				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
 			),
 		);

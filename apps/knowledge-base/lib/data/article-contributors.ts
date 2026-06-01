@@ -5,7 +5,7 @@ import * as schema from "@dariah-eric/database/schema";
 import { relationOptionsPageSize } from "@/lib/constants/relations";
 import { publishedEntityVersionWhere } from "@/lib/data/current-entity-version";
 import { db } from "@/lib/db";
-import { and, count, eq, ilike, inArray } from "@/lib/db/sql";
+import { and, count, eq, ilike, inArray, sql } from "@/lib/db/sql";
 
 export interface PersonOption {
 	id: string;
@@ -76,32 +76,54 @@ export async function getAvailablePersons() {
 
 export type AvailablePerson = PersonOption;
 
-export async function getImpactCaseStudyContributors(articleId: string) {
+/**
+ * `documentId` is the impact case study's `entities.id`. Contributors are document-level; each
+ * person endpoint (also a document id) is resolved to its latest editable version for its name.
+ */
+export async function getImpactCaseStudyContributors(documentId: string) {
 	return db
 		.select({
-			personId: schema.impactCaseStudiesToPersons.personId,
+			personId: schema.impactCaseStudiesToPersons.personDocumentId,
 			personName: schema.persons.name,
 			role: schema.impactCaseStudiesToPersons.role,
 		})
 		.from(schema.impactCaseStudiesToPersons)
-		.innerJoin(schema.persons, eq(schema.persons.id, schema.impactCaseStudiesToPersons.personId))
-		.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyId, articleId));
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.documentId, schema.impactCaseStudiesToPersons.personDocumentId),
+		)
+		.innerJoin(
+			schema.persons,
+			sql`${schema.persons.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
+		)
+		.where(eq(schema.impactCaseStudiesToPersons.impactCaseStudyDocumentId, documentId));
 }
 
 export type ImpactCaseStudyContributor = Awaited<
 	ReturnType<typeof getImpactCaseStudyContributors>
 >[number];
 
-export async function getSpotlightArticleContributors(articleId: string) {
+/**
+ * `documentId` is the spotlight article's `entities.id`. Contributors are document-level; each
+ * person endpoint (also a document id) is resolved to its latest editable version for its name.
+ */
+export async function getSpotlightArticleContributors(documentId: string) {
 	return db
 		.select({
-			personId: schema.spotlightArticlesToPersons.personId,
+			personId: schema.spotlightArticlesToPersons.personDocumentId,
 			personName: schema.persons.name,
 			role: schema.spotlightArticlesToPersons.role,
 		})
 		.from(schema.spotlightArticlesToPersons)
-		.innerJoin(schema.persons, eq(schema.persons.id, schema.spotlightArticlesToPersons.personId))
-		.where(eq(schema.spotlightArticlesToPersons.spotlightArticleId, articleId));
+		.innerJoin(
+			schema.documentLifecycle,
+			eq(schema.documentLifecycle.documentId, schema.spotlightArticlesToPersons.personDocumentId),
+		)
+		.innerJoin(
+			schema.persons,
+			sql`${schema.persons.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
+		)
+		.where(eq(schema.spotlightArticlesToPersons.spotlightArticleDocumentId, documentId));
 }
 
 export type SpotlightArticleContributor = Awaited<

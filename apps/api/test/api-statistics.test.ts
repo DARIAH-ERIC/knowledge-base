@@ -73,6 +73,13 @@ async function seedMemberCountryCountFixtures(db: Database) {
 
 	assert(eric, "No eric organisational unit in database.");
 
+	// unit↔unit relations are document-level; resolve the eric version id to its document id.
+	const ericDocument = await db.query.entityVersions.findFirst({
+		columns: { entityId: true },
+		where: { id: eric.id },
+	});
+	assert(ericDocument, "No eric entity version in database.");
+
 	const publishedCountry = createOrganisationalUnit(publishedStatus.id, entityType.id);
 	const draftCountry = createOrganisationalUnit(draftStatus.id, entityType.id);
 	const start = f.date.past({ years: 5 });
@@ -84,22 +91,18 @@ async function seedMemberCountryCountFixtures(db: Database) {
 		{ ...draftCountry.unit, typeId: countryType.id },
 	]);
 
+	// The (unit, related, status) uniqueness is now enforced by a constraint, so a published country
+	// can only carry one active is_member_of relation; the draft country must not be counted.
 	await db.insert(schema.organisationalUnitsRelations).values([
 		{
-			unitId: publishedCountry.unit.id,
-			relatedUnitId: eric.id,
+			unitDocumentId: publishedCountry.entity.id,
+			relatedUnitDocumentId: ericDocument.entityId,
 			status: memberStatus.id,
 			duration: { start },
 		},
 		{
-			unitId: publishedCountry.unit.id,
-			relatedUnitId: eric.id,
-			status: memberStatus.id,
-			duration: { start },
-		},
-		{
-			unitId: draftCountry.unit.id,
-			relatedUnitId: eric.id,
+			unitDocumentId: draftCountry.entity.id,
+			relatedUnitDocumentId: ericDocument.entityId,
 			status: memberStatus.id,
 			duration: { start },
 		},
@@ -142,6 +145,13 @@ async function seedWorkingGroupCountFixtures(db: Database) {
 
 	assert(eric, "No eric organisational unit in database.");
 
+	// unit↔unit relations are document-level; resolve the eric version id to its document id.
+	const ericDocument = await db.query.entityVersions.findFirst({
+		columns: { entityId: true },
+		where: { id: eric.id },
+	});
+	assert(ericDocument, "No eric entity version in database.");
+
 	const publishedWorkingGroup = createOrganisationalUnit(publishedStatus.id, entityType.id);
 	const draftWorkingGroup = createOrganisationalUnit(draftStatus.id, entityType.id);
 	const start = f.date.past({ years: 5 });
@@ -155,22 +165,18 @@ async function seedWorkingGroupCountFixtures(db: Database) {
 		{ ...draftWorkingGroup.unit, typeId: workingGroupType.id },
 	]);
 
+	// The (unit, related, status) uniqueness is now enforced by a constraint, so a published working
+	// group can only carry one active is_part_of relation; the draft working group must not count.
 	await db.insert(schema.organisationalUnitsRelations).values([
 		{
-			unitId: publishedWorkingGroup.unit.id,
-			relatedUnitId: eric.id,
+			unitDocumentId: publishedWorkingGroup.entity.id,
+			relatedUnitDocumentId: ericDocument.entityId,
 			status: memberStatus.id,
 			duration: { start },
 		},
 		{
-			unitId: publishedWorkingGroup.unit.id,
-			relatedUnitId: eric.id,
-			status: memberStatus.id,
-			duration: { start },
-		},
-		{
-			unitId: draftWorkingGroup.unit.id,
-			relatedUnitId: eric.id,
+			unitDocumentId: draftWorkingGroup.entity.id,
+			relatedUnitDocumentId: ericDocument.entityId,
 			status: memberStatus.id,
 			duration: { start },
 		},

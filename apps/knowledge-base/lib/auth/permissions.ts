@@ -19,10 +19,12 @@ const coordinatorRoles = ["national_coordinator", "national_coordinator_deputy"]
 const representativeRoles = ["national_representative", "national_representative_deputy"] as const;
 
 async function hasActiveRelation(
-	personId: string,
-	orgUnitId: string,
+	personDocumentId: string,
+	orgUnitDocumentId: string,
 	roleTypes: ReadonlyArray<(typeof schema.personRoleTypesEnum)[number]>,
 ): Promise<boolean> {
+	// The user's person actor and the report's org-unit target are both document ids now, matching the
+	// relation table directly.
 	const rows = await db
 		.select({ id: schema.personsToOrganisationalUnits.id })
 		.from(schema.personsToOrganisationalUnits)
@@ -32,8 +34,8 @@ async function hasActiveRelation(
 		)
 		.where(
 			and(
-				eq(schema.personsToOrganisationalUnits.personId, personId),
-				eq(schema.personsToOrganisationalUnits.organisationalUnitId, orgUnitId),
+				eq(schema.personsToOrganisationalUnits.personDocumentId, personDocumentId),
+				eq(schema.personsToOrganisationalUnits.organisationalUnitDocumentId, orgUnitDocumentId),
 				inArray(schema.personRoleTypes.type, roleTypes),
 				sql`${schema.personsToOrganisationalUnits.duration} @> NOW()::TIMESTAMPTZ`,
 			),
@@ -52,35 +54,35 @@ export async function can(user: User, action: Action, resource: Resource): Promi
 		if (action !== "update") {
 			return false;
 		}
-		if (user.personId == null) {
+		if (user.personDocumentId == null) {
 			return false;
 		}
-		return hasActiveRelation(user.personId, resource.id, chairRoles);
+		return hasActiveRelation(user.personDocumentId, resource.id, chairRoles);
 	}
 
 	if (resource.type === "working_group_report") {
 		if (action !== "read" && action !== "update" && action !== "confirm") {
 			return false;
 		}
-		if (user.personId == null) {
+		if (user.personDocumentId == null) {
 			return false;
 		}
 
 		const report = await db.query.workingGroupReports.findFirst({
 			where: { id: resource.id },
-			columns: { workingGroupId: true },
+			columns: { workingGroupDocumentId: true },
 		});
 		if (report == null) {
 			return false;
 		}
 
 		if (action === "confirm") {
-			return hasActiveRelation(user.personId, report.workingGroupId, chairRoles);
+			return hasActiveRelation(user.personDocumentId, report.workingGroupDocumentId, chairRoles);
 		}
 
 		return (
-			(await hasActiveRelation(user.personId, report.workingGroupId, chairRoles)) ||
-			hasActiveRelation(user.personId, report.workingGroupId, memberRoles)
+			(await hasActiveRelation(user.personDocumentId, report.workingGroupDocumentId, chairRoles)) ||
+			hasActiveRelation(user.personDocumentId, report.workingGroupDocumentId, memberRoles)
 		);
 	}
 
@@ -92,7 +94,7 @@ export async function can(user: User, action: Action, resource: Resource): Promi
 
 		const report = await db.query.countryReports.findFirst({
 			where: { id: resource.id },
-			columns: { countryId: true },
+			columns: { countryDocumentId: true },
 		});
 		if (report == null) {
 			return false;
@@ -100,22 +102,26 @@ export async function can(user: User, action: Action, resource: Resource): Promi
 
 		if (
 			(action === "read" || action === "update") &&
-			user.organisationalUnitId === report.countryId
+			user.organisationalUnitDocumentId === report.countryDocumentId
 		) {
+			// Both the user's country actor and the report's country are document ids.
 			return true;
 		}
 
-		if (user.personId == null) {
+		if (user.personDocumentId == null) {
 			return false;
 		}
 
 		if (action === "confirm") {
-			return hasActiveRelation(user.personId, report.countryId, coordinatorRoles);
+			return hasActiveRelation(user.personDocumentId, report.countryDocumentId, coordinatorRoles);
 		}
 
 		return (
-			(await hasActiveRelation(user.personId, report.countryId, coordinatorRoles)) ||
-			hasActiveRelation(user.personId, report.countryId, representativeRoles)
+			(await hasActiveRelation(
+				user.personDocumentId,
+				report.countryDocumentId,
+				coordinatorRoles,
+			)) || hasActiveRelation(user.personDocumentId, report.countryDocumentId, representativeRoles)
 		);
 	}
 

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
+import { assert } from "@acdh-oeaw/lib";
 import type { User } from "@dariah-eric/auth";
 import * as schema from "@dariah-eric/database/schema";
 import { forbidden } from "next/navigation";
@@ -120,13 +121,18 @@ export async function getCountryReportsForAdmin(
 
 	const { dir = "desc", limit, offset, q, sort = "campaignYear" } = params;
 	const query = q?.trim();
+	// The report's country is a document id; match it against the documents of name-matching org units.
 	const where =
 		query != null && query !== ""
 			? inArray(
-					schema.countryReports.countryId,
+					schema.countryReports.countryDocumentId,
 					db
-						.select({ id: schema.organisationalUnits.id })
+						.select({ id: schema.entityVersions.entityId })
 						.from(schema.organisationalUnits)
+						.innerJoin(
+							schema.entityVersions,
+							eq(schema.entityVersions.id, schema.organisationalUnits.id),
+						)
 						.where(ilike(schema.organisationalUnits.name, `%${query}%`)),
 				)
 			: undefined;
@@ -162,9 +168,15 @@ export async function getCountryReportsForAdmin(
 				schema.reportingCampaigns,
 				eq(schema.countryReports.campaignId, schema.reportingCampaigns.id),
 			)
+			// resolve the country document → its latest editable org-unit version for the name.
+			.innerJoin(schema.entities, eq(schema.entities.id, schema.countryReports.countryDocumentId))
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.documentId, schema.entities.id),
+			)
 			.innerJoin(
 				schema.organisationalUnits,
-				eq(schema.countryReports.countryId, schema.organisationalUnits.id),
+				sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
 			)
 			.where(where)
 			.orderBy(primaryOrderBy, secondaryOrderBy)
@@ -179,14 +191,23 @@ export async function getCountryReportsForAdmin(
 export async function getCountryReportForAdmin(currentUser: Pick<User, "role">, id: string) {
 	assertAdminUser(currentUser);
 
-	return db.query.countryReports.findFirst({
+	const report = await db.query.countryReports.findFirst({
 		where: { id },
 		columns: { id: true, status: true },
 		with: {
 			campaign: { columns: { year: true } },
+			// resolved through the published version; may be absent.
 			country: { columns: { name: true } },
 		},
 	});
+
+	if (report == null) {
+		return null;
+	}
+
+	// A country report always references a published country.
+	assert(report.country, "Country report is missing its published country.");
+	return { ...report, country: report.country };
 }
 
 export async function getCountryReportCreateDataForAdmin(currentUser: Pick<User, "role">) {
@@ -199,7 +220,8 @@ export async function getCountryReportCreateDataForAdmin(currentUser: Pick<User,
 			columns: { id: true, year: true },
 		}),
 		db
-			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+			// reports are keyed by document id; return the country's document id.
+			.select({ id: schema.entityVersions.entityId, name: schema.organisationalUnits.name })
 			.from(schema.organisationalUnits)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
@@ -222,13 +244,18 @@ export async function getWorkingGroupReportsForAdmin(
 
 	const { dir = "desc", limit, offset, q, sort = "campaignYear" } = params;
 	const query = q?.trim();
+	// The report's working group is a document id; match it against the documents of name-matching units.
 	const where =
 		query != null && query !== ""
 			? inArray(
-					schema.workingGroupReports.workingGroupId,
+					schema.workingGroupReports.workingGroupDocumentId,
 					db
-						.select({ id: schema.organisationalUnits.id })
+						.select({ id: schema.entityVersions.entityId })
 						.from(schema.organisationalUnits)
+						.innerJoin(
+							schema.entityVersions,
+							eq(schema.entityVersions.id, schema.organisationalUnits.id),
+						)
 						.where(ilike(schema.organisationalUnits.name, `%${query}%`)),
 				)
 			: undefined;
@@ -264,9 +291,18 @@ export async function getWorkingGroupReportsForAdmin(
 				schema.reportingCampaigns,
 				eq(schema.workingGroupReports.campaignId, schema.reportingCampaigns.id),
 			)
+			// resolve the working group document → its latest editable org-unit version for the name.
+			.innerJoin(
+				schema.entities,
+				eq(schema.entities.id, schema.workingGroupReports.workingGroupDocumentId),
+			)
+			.innerJoin(
+				schema.documentLifecycle,
+				eq(schema.documentLifecycle.documentId, schema.entities.id),
+			)
 			.innerJoin(
 				schema.organisationalUnits,
-				eq(schema.workingGroupReports.workingGroupId, schema.organisationalUnits.id),
+				sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
 			)
 			.where(where)
 			.orderBy(primaryOrderBy, secondaryOrderBy)
@@ -281,14 +317,23 @@ export async function getWorkingGroupReportsForAdmin(
 export async function getWorkingGroupReportForAdmin(currentUser: Pick<User, "role">, id: string) {
 	assertAdminUser(currentUser);
 
-	return db.query.workingGroupReports.findFirst({
+	const report = await db.query.workingGroupReports.findFirst({
 		where: { id },
 		columns: { id: true, status: true },
 		with: {
 			campaign: { columns: { year: true } },
+			// resolved through the published version; may be absent.
 			workingGroup: { columns: { name: true } },
 		},
 	});
+
+	if (report == null) {
+		return null;
+	}
+
+	// A working group report always references a published working group.
+	assert(report.workingGroup, "Working group report is missing its published working group.");
+	return { ...report, workingGroup: report.workingGroup };
 }
 
 export async function getWorkingGroupReportCreateDataForAdmin(currentUser: Pick<User, "role">) {
@@ -301,7 +346,8 @@ export async function getWorkingGroupReportCreateDataForAdmin(currentUser: Pick<
 			columns: { id: true, year: true },
 		}),
 		db
-			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+			// reports are keyed by document id; return the working group's document id.
+			.select({ id: schema.entityVersions.entityId, name: schema.organisationalUnits.name })
 			.from(schema.organisationalUnits)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
@@ -422,7 +468,7 @@ export async function getReportingStatisticsForAdmin(
 		countries: Array.from(
 			new Set(
 				campaigns.flatMap((campaign) =>
-					campaign.countryReports.map((report) => report.country.name),
+					campaign.countryReports.map((report) => report.country?.name ?? ""),
 				),
 			),
 		).toSorted((left, right) => left.localeCompare(right)),
@@ -432,7 +478,7 @@ export async function getReportingStatisticsForAdmin(
 		.filter((campaign) => filters.campaignYear == null || campaign.year === filters.campaignYear)
 		.map((campaign) => {
 			const countryReports = campaign.countryReports.filter(
-				(report) => filters.countryName == null || report.country.name === filters.countryName,
+				(report) => filters.countryName == null || report.country?.name === filters.countryName,
 			);
 			const workingGroupReports = filters.countryName == null ? campaign.workingGroupReports : [];
 
@@ -515,7 +561,7 @@ export async function getReportingStatisticsForAdmin(
 
 			countryTrendBaseRows.push({
 				campaignYear: campaign.year,
-				countryName: report.country.name,
+				countryName: report.country?.name ?? "",
 				status: report.status,
 				totalContributors: contributors,
 				totalEvents: events,
@@ -685,12 +731,13 @@ export async function getReportingCampaignCountryThresholdsForAdmin(
 			columns: { id: true },
 			with: {
 				countryThresholds: {
-					columns: { countryId: true, amount: true },
+					columns: { countryDocumentId: true, amount: true },
 				},
 			},
 		}),
 		db
-			.select({ id: schema.organisationalUnits.id, name: schema.organisationalUnits.name })
+			// thresholds are keyed by country document id; return the document id.
+			.select({ id: schema.entityVersions.entityId, name: schema.organisationalUnits.name })
 			.from(schema.organisationalUnits)
 			.innerJoin(schema.entityVersions, eq(schema.organisationalUnits.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))

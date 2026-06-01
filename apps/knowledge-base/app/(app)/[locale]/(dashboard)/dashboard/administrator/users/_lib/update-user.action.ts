@@ -88,8 +88,9 @@ export const updateUserAction = createMutationAction({
 				email: input.email,
 				role: input.role,
 				canManageAdmins: canManageAdminsFlag,
-				personId: input.personId ?? null,
-				organisationalUnitId: input.organisationalUnitId ?? null,
+				// The form submits actor *document* ids.
+				personDocumentId: input.personId ?? null,
+				organisationalUnitDocumentId: input.organisationalUnitId ?? null,
 			})
 			.where(eq(schema.users.id, input.id));
 
