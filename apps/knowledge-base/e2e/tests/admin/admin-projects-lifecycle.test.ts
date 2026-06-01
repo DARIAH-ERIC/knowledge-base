@@ -5,11 +5,16 @@ import { expect, test } from "@/e2e/lib/test";
 test.describe("admin projects lifecycle", () => {
 	test.describe.configure({ mode: "default" });
 
+	const campaignIds: Array<string> = [];
+
 	test.beforeAll(async ({ db }) => {
 		await db.getTestAsset();
 	});
 
 	test.afterAll(async ({ db }, testInfo) => {
+		for (const campaignId of campaignIds) {
+			await db.deleteReportingCampaign(campaignId);
+		}
 		await db.cleanupWorkerProjectsLifecycleItems(testInfo.workerIndex);
 	});
 
@@ -141,5 +146,71 @@ test.describe("admin projects lifecycle", () => {
 		await projectsPage.versionSelectorDraftLink().click();
 		await page.waitForURL((url) => url.searchParams.get("version") == null);
 		await expect(page.getByText(updatedName)).toBeVisible();
+	});
+
+	test("re-publish preserves project row referenced by country report contributions", async ({
+		page,
+		createAdminProjectsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const projectsPage = createAdminProjectsPage(workerIndex);
+
+		const originalName = `${projectsPage.workerPrefix} Reported ${randomUUID()}`;
+		const updatedName = `${projectsPage.workerPrefix} Reported Updated ${randomUUID()}`;
+		const year = 3100 + workerIndex;
+
+		await projectsPage.gotoCreate();
+		await projectsPage.fillName(originalName);
+		await projectsPage.selectFirstScope();
+		await projectsPage.fillDatePicker("Start date", 2025, 1, 15);
+		await projectsPage.fillSummary("Reported project lifecycle test");
+		await projectsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await projectsPage.submitForm();
+
+		await projectsPage.searchByName(originalName);
+		await projectsPage.gotoDetailsFromList(originalName);
+		await projectsPage.publishItem();
+
+		const publishedProject = await db.getProjectByName(originalName);
+		expect(publishedProject).not.toBeNull();
+
+		const campaign = await db.createOpenCampaign(year);
+		campaignIds.push(campaign.id);
+		const country = await db.getCountryOption();
+		const report = await db.createCountryReport({
+			campaignId: campaign.id,
+			countryDocumentId: country.id,
+		});
+		await db.createCountryReportProjectContribution({
+			amountEuros: 1234,
+			countryReportId: report.id,
+			projectId: publishedProject!.id,
+		});
+
+		await projectsPage.searchByName(originalName);
+		await projectsPage.gotoDetailsFromList(originalName);
+		await projectsPage.gotoEditFromDetails();
+		const nameField = page.getByRole("main").getByLabel("Name");
+		await nameField.clear();
+		await nameField.fill(updatedName);
+		await projectsPage.submitForm();
+
+		await projectsPage.searchByName(updatedName);
+		await projectsPage.gotoDetailsFromList(updatedName);
+		await projectsPage.publishItem();
+
+		const republishedProject = await db.getProjectByName(updatedName);
+		expect(republishedProject).toMatchObject({ id: publishedProject!.id });
+		await expect(async () => {
+			const contribution = await db.getCountryReportProjectContributionByProjectId(
+				publishedProject!.id,
+			);
+			expect(contribution).toMatchObject({
+				amountEuros: 1234,
+				countryReportId: report.id,
+				projectId: publishedProject!.id,
+			});
+		}).toPass();
 	});
 });

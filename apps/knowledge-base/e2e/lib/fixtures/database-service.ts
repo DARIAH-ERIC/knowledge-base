@@ -1164,6 +1164,61 @@ export class DatabaseService {
 		return row ?? null;
 	}
 
+	async createCountryReport(params: {
+		campaignId: string;
+		countryDocumentId: string;
+		status?: "accepted" | "draft" | "submitted";
+	}): Promise<{ id: string }> {
+		const { campaignId, countryDocumentId, status = "draft" } = params;
+		const [row] = await this.db
+			.insert(schema.countryReports)
+			.values({ campaignId, countryDocumentId, status })
+			.returning({ id: schema.countryReports.id });
+
+		if (row == null) {
+			throw new Error("Failed to create country report.");
+		}
+
+		return row;
+	}
+
+	async createCountryReportProjectContribution(params: {
+		amountEuros: number;
+		countryReportId: string;
+		projectId: string;
+	}): Promise<{ id: string }> {
+		const [row] = await this.db
+			.insert(schema.countryReportProjectContributions)
+			.values(params)
+			.returning({ id: schema.countryReportProjectContributions.id });
+
+		if (row == null) {
+			throw new Error("Failed to create country report project contribution.");
+		}
+
+		return row;
+	}
+
+	async getCountryReportProjectContributionByProjectId(projectId: string): Promise<{
+		amountEuros: number;
+		countryReportId: string;
+		id: string;
+		projectId: string;
+	} | null> {
+		const [row] = await this.db
+			.select({
+				amountEuros: schema.countryReportProjectContributions.amountEuros,
+				countryReportId: schema.countryReportProjectContributions.countryReportId,
+				id: schema.countryReportProjectContributions.id,
+				projectId: schema.countryReportProjectContributions.projectId,
+			})
+			.from(schema.countryReportProjectContributions)
+			.where(eq(schema.countryReportProjectContributions.projectId, projectId))
+			.limit(1);
+
+		return row ?? null;
+	}
+
 	async deleteCountryReport(id: string): Promise<void> {
 		await this.db.delete(schema.countryReports).where(eq(schema.countryReports.id, id));
 	}
