@@ -25,9 +25,10 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
+import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
-import { ArchiveBoxXMarkIcon } from "@heroicons/react/24/outline";
-import { type CalendarDate, getLocalTimeZone } from "@internationalized/date";
+import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { type CalendarDate, getLocalTimeZone, parseDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
@@ -37,7 +38,9 @@ import {
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { createUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-unit-relation.action";
+import { deleteUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/delete-unit-relation.action";
 import { endUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-unit-relation.action";
+import { updateUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-unit-relation.action";
 import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
 
 interface UnitRelationsSectionProps {
@@ -88,6 +91,10 @@ function formatLifecycleStatus(
 	return status === "new" ? t("New") : t("Changed");
 }
 
+function dateToCalendarDate(date: Date | undefined): CalendarDate | null {
+	return date != null ? parseDate(date.toISOString().slice(0, 10)) : null;
+}
+
 export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>): ReactNode {
 	const { unitId, relations, statusOptions } = props;
 
@@ -96,13 +103,21 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 
 	const [localRelations, setLocalRelations] = useState(relations);
 	const [itemToEnd, setItemToEnd] = useState<{ id: string } | null>(null);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
+	const [itemToEdit, setItemToEdit] = useState<UnitRelation | null>(null);
+	const [editStatusId, setEditStatusId] = useState<string | null>(null);
+	const [editUnitItem, setEditUnitItem] = useState<AsyncOption | null>(null);
+	const [editStartDate, setEditStartDate] = useState<CalendarDate | null>(null);
+	const [editEndDate, setEditEndDate] = useState<CalendarDate | null>(null);
 
 	const [selectedStatusId, setSelectedStatusId] = useState<string | null>(null);
 	const [selectedUnitItem, setSelectedUnitItem] = useState<AsyncOption | null>(null);
 
 	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
+	const [editState, setEditState] = useState<ActionState>(() => createActionStateInitial());
 	const [isPending, startFormTransition] = useTransition();
+	const [isEditPending, startEditTransition] = useTransition();
 
 	function formAction(formData: FormData) {
 		const statusId = selectedStatusId;
@@ -143,6 +158,56 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 
 				setSelectedStatusId(null);
 				setSelectedUnitItem(null);
+			}
+		});
+	}
+
+	function openEditDialog(relation: UnitRelation) {
+		setEditState(createActionStateInitial());
+		setItemToEdit(relation);
+		setEditStatusId(relation.statusId);
+		setEditUnitItem({
+			id: relation.relatedUnitId,
+			name: relation.relatedUnitName,
+			description: formatUnitType(relation.relatedUnitType),
+		});
+		setEditStartDate(dateToCalendarDate(relation.duration.start));
+		setEditEndDate(dateToCalendarDate(relation.duration.end));
+	}
+
+	function editFormAction(formData: FormData) {
+		const statusId = editStatusId;
+		const relatedUnit = editUnitItem;
+		const option = statusOptions.find((entry) => entry.statusId === statusId);
+
+		startEditTransition(async () => {
+			const newState = await updateUnitRelationAction(editState, formData);
+			setEditState(newState);
+
+			if (
+				newState.status === "success" &&
+				itemToEdit != null &&
+				option != null &&
+				relatedUnit != null
+			) {
+				const start = editStartDate?.toDate(getLocalTimeZone()) ?? itemToEdit.duration.start;
+				const end = editEndDate?.toDate(getLocalTimeZone()) ?? undefined;
+
+				setLocalRelations((prev) =>
+					prev.map((relation) =>
+						relation.id === itemToEdit.id
+							? {
+									...relation,
+									statusId: option.statusId,
+									statusType: option.statusType as UnitRelation["statusType"],
+									relatedUnitId: relatedUnit.id,
+									relatedUnitName: relatedUnit.name,
+									duration: { start, ...(end != null ? { end } : {}) },
+								}
+							: relation,
+					),
+				);
+				setItemToEdit(null);
 			}
 		});
 	}
@@ -190,20 +255,53 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 											: t("present")}
 									</TableCell>
 									<TableCell className="text-end">
-										{relation.duration.end == null && (
-											<Button
-												aria-label={t("End relation")}
-												className="block-7 sm:block-7"
-												intent="plain"
-												onPress={() => {
-													setItemToEnd({ id: relation.id });
-													setSelectedEndDate(null);
-												}}
-												size="sq-sm"
-											>
-												<ArchiveBoxXMarkIcon className="block-4 inline-4" />
-											</Button>
-										)}
+										<div className="flex justify-end gap-1">
+											<Tooltip>
+												<Button
+													aria-label={t("Edit relation")}
+													className="block-7 sm:block-7"
+													intent="plain"
+													onPress={() => {
+														openEditDialog(relation);
+													}}
+													size="sq-sm"
+												>
+													<PencilSquareIcon className="block-4 inline-4" />
+												</Button>
+												<TooltipContent inverse={true}>{t("Edit relation")}</TooltipContent>
+											</Tooltip>
+											{relation.duration.end == null && (
+												<Tooltip>
+													<Button
+														aria-label={t("End relation")}
+														className="block-7 sm:block-7"
+														intent="plain"
+														onPress={() => {
+															setItemToEnd({ id: relation.id });
+															setSelectedEndDate(null);
+														}}
+														size="sq-sm"
+													>
+														<ArchiveBoxXMarkIcon className="block-4 inline-4" />
+													</Button>
+													<TooltipContent inverse={true}>{t("End relation")}</TooltipContent>
+												</Tooltip>
+											)}
+											<Tooltip>
+												<Button
+													aria-label={t("Delete relation")}
+													className="block-7 sm:block-7"
+													intent="plain"
+													onPress={() => {
+														setItemToDelete({ id: relation.id });
+													}}
+													size="sq-sm"
+												>
+													<TrashIcon className="block-4 inline-4" />
+												</Button>
+												<TooltipContent inverse={true}>{t("Delete relation")}</TooltipContent>
+											</Tooltip>
+										</div>
 									</TableCell>
 								</TableRow>
 							)}
@@ -349,6 +447,144 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 						}}
 					>
 						{t("Confirm")}
+					</Button>
+				</ModalFooter>
+			</ModalContent>
+
+			<ModalContent
+				isOpen={itemToEdit != null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setItemToEdit(null);
+					}
+				}}
+			>
+				<ModalHeader
+					description={t("Update the related unit, relation type, and duration.")}
+					title={t("Edit relation")}
+				/>
+				<Form action={editFormAction} state={editState}>
+					<ModalBody className="flex flex-col gap-y-4">
+						<input name="id" type="hidden" value={itemToEdit?.id ?? ""} />
+						<input name="unitId" type="hidden" value={unitId} />
+						<Select
+							isRequired={true}
+							onChange={(key) => {
+								setEditStatusId(String(key));
+								setEditUnitItem(null);
+							}}
+							value={editStatusId}
+						>
+							<Label>{t("Relation type")}</Label>
+							<SelectTrigger />
+							<FieldError />
+							<SelectContent>
+								{statusOptions.map((option) => (
+									<SelectItem key={option.statusId} id={option.statusId}>
+										{formatStatus(option.statusType)}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						<input name="statusId" type="hidden" value={editStatusId ?? ""} />
+						<AsyncSelect
+							aria-label={t("Related unit")}
+							cacheKey={editStatusId ?? "none"}
+							emptyMessage={t("No related units found.")}
+							fetchPage={(params) => {
+								if (editStatusId == null) {
+									return Promise.resolve({ items: [], total: 0 });
+								}
+
+								return fetchRelatedUnitOptionsPage(unitId, editStatusId, params);
+							}}
+							initialItems={[]}
+							initialTotal={0}
+							isDisabled={editStatusId == null}
+							label={t("Related unit")}
+							loadOnMount={editStatusId != null}
+							onSelect={(item) => {
+								setEditUnitItem(item);
+							}}
+							placeholder={t("No related unit selected")}
+							selectedItem={editUnitItem}
+						/>
+						<input name="relatedUnitId" type="hidden" value={editUnitItem?.id ?? ""} />
+						<DatePicker
+							granularity="day"
+							isRequired={true}
+							name="duration.start"
+							onChange={(date) => {
+								setEditStartDate(date);
+							}}
+							value={editStartDate}
+						>
+							<Label>{t("Start date")}</Label>
+							<DatePickerTrigger />
+							<FieldError />
+						</DatePicker>
+						<DatePicker
+							granularity="day"
+							name="duration.end"
+							onChange={(date) => {
+								setEditEndDate(date);
+							}}
+							value={editEndDate}
+						>
+							<Label>{t("End date")}</Label>
+							<DatePickerTrigger />
+							<FieldError />
+						</DatePicker>
+						<FormStatus className="self-start" state={editState} />
+					</ModalBody>
+					<ModalFooter>
+						<ModalClose>{t("Cancel")}</ModalClose>
+						<Button isPending={isEditPending} type="submit">
+							{isEditPending ? (
+								<Fragment>
+									<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
+									<span aria-hidden={true}>{t("Saving...")}</span>
+								</Fragment>
+							) : (
+								t("Save")
+							)}
+						</Button>
+					</ModalFooter>
+				</Form>
+			</ModalContent>
+
+			<ModalContent
+				isOpen={itemToDelete != null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setItemToDelete(null);
+					}
+				}}
+				role="alertdialog"
+				size="sm"
+			>
+				<ModalHeader
+					description={t("This will permanently delete this relation.")}
+					title={t("Delete relation")}
+				/>
+				<ModalFooter>
+					<ModalClose>{t("Cancel")}</ModalClose>
+					<Button
+						intent="danger"
+						onPress={() => {
+							if (itemToDelete == null) {
+								return;
+							}
+
+							const id = itemToDelete.id;
+							startTransition(async () => {
+								await deleteUnitRelationAction(id);
+								setLocalRelations((prev) => prev.filter((relation) => relation.id !== id));
+								setItemToDelete(null);
+							});
+						}}
+					>
+						{t("Delete")}
 					</Button>
 				</ModalFooter>
 			</ModalContent>

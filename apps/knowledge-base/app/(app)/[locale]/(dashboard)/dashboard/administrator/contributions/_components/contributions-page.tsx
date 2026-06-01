@@ -1,6 +1,22 @@
 "use client";
 
+import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
+import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Badge } from "@dariah-eric/ui/badge";
+import { Button } from "@dariah-eric/ui/button";
+import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
+import { FieldError, Label } from "@dariah-eric/ui/field";
+import { Form } from "@dariah-eric/ui/form";
+import { FormStatus } from "@dariah-eric/ui/form-status";
+import {
+	ModalBody,
+	ModalClose,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+} from "@dariah-eric/ui/modal";
+import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
 import {
 	Table,
 	TableBody,
@@ -9,7 +25,9 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
+import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { type CalendarDate, parseDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
@@ -21,13 +39,16 @@ import {
 	RowActionsMenu,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-list";
 import { useUrlPaginatedSearch } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/use-url-paginated-search";
+import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action";
+import { updateContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.action";
 import { deleteContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_lib/delete-contribution.action";
 import { dashboardPageSize } from "@/config/pagination.config";
-import type { ContributionsResult } from "@/lib/data/contributions";
+import type { ContributionRoleOption, ContributionsResult } from "@/lib/data/contributions";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface ContributionsPageProps {
 	contributions: ContributionsResult;
+	roleOptions: Array<ContributionRoleOption>;
 	dir: "asc" | "desc";
 	page: number;
 	q: string;
@@ -39,6 +60,28 @@ interface ContributionsPageProps {
 		| "durationStart"
 		| "durationEnd";
 }
+
+type ContributionItem = ContributionsResult["data"][number];
+
+interface ContributionDialogState {
+	isOpen: boolean;
+	item: ContributionItem | null;
+	person: AsyncOption | null;
+	roleTypeId: string | null;
+	organisationalUnit: AsyncOption | null;
+	durationStart: CalendarDate | null;
+	durationEnd: CalendarDate | null;
+}
+
+const emptyDialog: ContributionDialogState = {
+	isOpen: false,
+	item: null,
+	person: null,
+	roleTypeId: null,
+	organisationalUnit: null,
+	durationStart: null,
+	durationEnd: null,
+};
 
 function formatRoleType(type: string): string {
 	return type.replaceAll("_", " ");
@@ -104,9 +147,68 @@ function getOrganisationalUnitEditHref(type: string, slug: string): string | nul
 
 const pageSize = dashboardPageSize;
 
+async function fetchPersonOptionsPage(
+	params: Readonly<AsyncOptionsFetchPageParams>,
+): Promise<{ items: Array<AsyncOption>; total: number }> {
+	const searchParams = new URLSearchParams({
+		limit: String(params.limit),
+		offset: String(params.offset),
+		resource: "persons",
+	});
+
+	if (params.q !== "") {
+		searchParams.set("q", params.q);
+	}
+
+	const response = await fetch(`/api/contributions/options?${searchParams.toString()}`, {
+		signal: params.signal,
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to load persons.");
+	}
+
+	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+}
+
+async function fetchOrganisationalUnitOptionsPage(
+	roleTypeId: string | null,
+	params: Readonly<AsyncOptionsFetchPageParams>,
+): Promise<{ items: Array<AsyncOption>; total: number }> {
+	if (roleTypeId == null) {
+		return { items: [], total: 0 };
+	}
+
+	const searchParams = new URLSearchParams({
+		limit: String(params.limit),
+		offset: String(params.offset),
+		resource: "organisational-units",
+		roleTypeId,
+	});
+
+	if (params.q !== "") {
+		searchParams.set("q", params.q);
+	}
+
+	const response = await fetch(`/api/contributions/options?${searchParams.toString()}`, {
+		signal: params.signal,
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to load organisational units.");
+	}
+
+	return (await response.json()) as { items: Array<AsyncOption>; total: number };
+}
+
+function dateToCalendarDate(date: Date | undefined): CalendarDate | null {
+	return date != null ? parseDate(date.toISOString().slice(0, 10)) : null;
+}
+
 export function ContributionsPage(props: Readonly<ContributionsPageProps>): ReactNode {
 	const {
 		contributions,
+		roleOptions,
 		dir: initialDir,
 		page: initialPage,
 		q: initialQ,
@@ -121,6 +223,8 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 	);
 	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const [deleteError, setDeleteError] = useState<string | null>(null);
+	const [dialog, setDialog] = useState<ContributionDialogState>(emptyDialog);
+	const [formState, setFormState] = useState<ActionState>(() => createActionStateInitial());
 	const search = useUrlPaginatedSearch({
 		dir: initialDir,
 		page: initialPage,
@@ -128,13 +232,63 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 		sort: initialSort,
 	});
 	const [isDeletePending, startDeleteTransition] = useTransition();
+	const [isFormPending, startFormTransition] = useTransition();
+
+	function openCreateDialog() {
+		setDialog(emptyDialog);
+		setFormState(createActionStateInitial());
+		setDialog((prev) => {
+			return { ...prev, isOpen: true };
+		});
+	}
+
+	function openEditDialog(item: ContributionItem) {
+		setFormState(createActionStateInitial());
+		setDialog({
+			isOpen: true,
+			item,
+			person: { id: item.personId, name: item.personName },
+			roleTypeId: item.roleTypeId,
+			organisationalUnit: {
+				id: item.organisationalUnitId,
+				name: item.organisationalUnitName,
+				description: formatOrganisationalUnitType(item.organisationalUnitType),
+			},
+			durationStart: dateToCalendarDate(item.durationStart),
+			durationEnd: dateToCalendarDate(item.durationEnd),
+		});
+	}
+
+	function formAction(formData: FormData) {
+		startFormTransition(async () => {
+			const newState =
+				dialog.item == null
+					? await createContributionAction(formState, formData)
+					: await updateContributionAction(formState, formData);
+
+			setFormState(newState);
+
+			if (newState.status === "success") {
+				setDialog(emptyDialog);
+				router.refresh();
+			}
+		});
+	}
 
 	return (
 		<Fragment>
 			<EntityListHeader
 				title={t("Person relations")}
 				description={t("All person-to-organisation relations in the DARIAH knowledge base.")}
-				action={<EntityListSearchField search={search} />}
+				action={
+					<div className="flex items-center gap-2">
+						<Button onPress={openCreateDialog}>
+							<PlusIcon />
+							{t("Add relation")}
+						</Button>
+						<EntityListSearchField search={search} />
+					</div>
+				}
 			/>
 
 			<Table
@@ -195,6 +349,14 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 										>
 											{t("Edit person")}
 										</RowActionsMenu.Link>
+										<RowActionsMenu.Action
+											icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
+											onAction={() => {
+												openEditDialog(item);
+											}}
+										>
+											{t("Edit relation")}
+										</RowActionsMenu.Action>
 										{organisationalUnitEditHref != null ? (
 											<RowActionsMenu.Link
 												href={organisationalUnitEditHref}
@@ -222,6 +384,131 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 			</Table>
 
 			<EntityListPagination search={search} total={contributions.total} pageSize={pageSize} />
+
+			<ModalContent
+				isOpen={dialog.isOpen}
+				onOpenChange={(open) => {
+					if (!open) {
+						setDialog(emptyDialog);
+					}
+				}}
+			>
+				<ModalHeader
+					title={dialog.item == null ? t("Add relation") : t("Edit relation")}
+					description={t("Select a person, organisation, role, and duration.")}
+				/>
+				<Form action={formAction} state={formState}>
+					<ModalBody className="flex flex-col gap-y-4">
+						{dialog.item != null ? <input name="id" type="hidden" value={dialog.item.id} /> : null}
+						<AsyncSelect
+							aria-label={t("Person")}
+							emptyMessage={t("No persons found.")}
+							fetchPage={fetchPersonOptionsPage}
+							initialItems={[]}
+							initialTotal={0}
+							label={t("Person")}
+							onSelect={(item) => {
+								setDialog((prev) => {
+									return { ...prev, person: item };
+								});
+							}}
+							placeholder={t("No person selected")}
+							selectedItem={dialog.person}
+						/>
+						<input name="personId" type="hidden" value={dialog.person?.id ?? ""} />
+						<Select
+							isRequired={true}
+							onChange={(key) => {
+								setDialog((prev) => {
+									return {
+										...prev,
+										roleTypeId: String(key),
+										organisationalUnit: null,
+									};
+								});
+							}}
+							value={dialog.roleTypeId}
+						>
+							<Label>{t("Role")}</Label>
+							<SelectTrigger />
+							<FieldError />
+							<SelectContent>
+								{roleOptions.map((option) => (
+									<SelectItem key={option.roleTypeId} id={option.roleTypeId}>
+										{formatRoleType(option.roleType)}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						<input name="roleTypeId" type="hidden" value={dialog.roleTypeId ?? ""} />
+						<AsyncSelect
+							aria-label={t("Organisation")}
+							cacheKey={dialog.roleTypeId ?? "none"}
+							emptyMessage={t("No organisations found.")}
+							fetchPage={(params) => fetchOrganisationalUnitOptionsPage(dialog.roleTypeId, params)}
+							initialItems={[]}
+							initialTotal={0}
+							isDisabled={dialog.roleTypeId == null}
+							label={t("Organisation")}
+							onSelect={(item) => {
+								setDialog((prev) => {
+									return { ...prev, organisationalUnit: item };
+								});
+							}}
+							placeholder={t("No organisation selected")}
+							selectedItem={dialog.organisationalUnit}
+						/>
+						<input
+							name="organisationalUnitId"
+							type="hidden"
+							value={dialog.organisationalUnit?.id ?? ""}
+						/>
+						<DatePicker
+							granularity="day"
+							isRequired={true}
+							name="duration.start"
+							onChange={(date) => {
+								setDialog((prev) => {
+									return { ...prev, durationStart: date };
+								});
+							}}
+							value={dialog.durationStart}
+						>
+							<Label>{t("Start date")}</Label>
+							<DatePickerTrigger />
+							<FieldError />
+						</DatePicker>
+						<DatePicker
+							granularity="day"
+							name="duration.end"
+							onChange={(date) => {
+								setDialog((prev) => {
+									return { ...prev, durationEnd: date };
+								});
+							}}
+							value={dialog.durationEnd}
+						>
+							<Label>{t("End date")}</Label>
+							<DatePickerTrigger />
+							<FieldError />
+						</DatePicker>
+						<FormStatus state={formState} />
+					</ModalBody>
+					<ModalFooter>
+						<ModalClose>{t("Cancel")}</ModalClose>
+						<Button isPending={isFormPending} type="submit">
+							{isFormPending ? (
+								<Fragment>
+									<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
+									<span aria-hidden={true}>{t("Saving...")}</span>
+								</Fragment>
+							) : (
+								t("Save")
+							)}
+						</Button>
+					</ModalFooter>
+				</Form>
+			</ModalContent>
 
 			<EntityDeleteModal
 				item={itemToDelete}

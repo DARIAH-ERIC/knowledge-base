@@ -24,10 +24,14 @@ interface GetProjectPartnersParams {
 export interface ProjectPartnersResult {
 	data: Array<{
 		id: string;
+		projectId: string;
 		projectAcronym: string | null;
 		projectName: string;
 		projectSlug: string;
+		roleId: string;
 		roleType: string;
+		unitId: string;
+		unitVersionId: string;
 		unitName: string;
 		unitType: string;
 		durationStart: Date | undefined;
@@ -95,10 +99,14 @@ export async function getProjectPartners(
 		db
 			.select({
 				id: schema.projectsToOrganisationalUnits.id,
+				projectId: schema.projectsToOrganisationalUnits.projectDocumentId,
 				projectAcronym: schema.projects.acronym,
 				projectName: schema.projects.name,
 				projectSlug: projectEntities.slug,
+				roleId: schema.projectsToOrganisationalUnits.roleId,
 				roleType: schema.projectRoles.role,
+				unitId: schema.projectsToOrganisationalUnits.unitDocumentId,
+				unitVersionId: schema.organisationalUnits.id,
 				unitName: schema.organisationalUnits.name,
 				unitType: schema.organisationalUnitTypes.type,
 				duration: schema.projectsToOrganisationalUnits.duration,
@@ -168,10 +176,14 @@ export async function getProjectPartners(
 		data: rows.map((row) => {
 			return {
 				id: row.id,
+				projectId: row.projectId,
 				projectAcronym: row.projectAcronym,
 				projectName: row.projectName,
 				projectSlug: row.projectSlug,
+				roleId: row.roleId,
 				roleType: row.roleType,
+				unitId: row.unitId,
+				unitVersionId: row.unitVersionId,
 				unitName: row.unitName,
 				unitType: row.unitType,
 				durationStart: row.duration?.start,
@@ -180,6 +192,71 @@ export async function getProjectPartners(
 		}),
 		limit,
 		offset,
+		total: aggregate.at(0)?.total ?? 0,
+	};
+}
+
+interface GetProjectOptionsParams {
+	limit?: number;
+	offset?: number;
+	q?: string;
+}
+
+export async function getProjectOptions(
+	params: Readonly<GetProjectOptionsParams> = {},
+): Promise<{
+	items: Array<{ id: string; name: string; description: string | undefined }>;
+	total: number;
+}> {
+	const { limit = 20, offset = 0, q } = params;
+	const query = q?.trim();
+	const where =
+		query != null && query !== ""
+			? or(ilike(schema.projects.name, `%${query}%`), ilike(schema.projects.acronym, `%${query}%`))
+			: undefined;
+	const projectEntities = alias(schema.entities, "project_option_entities");
+	const projectDocumentLifecycle = alias(
+		schema.documentLifecycle,
+		"project_option_document_lifecycle",
+	);
+	const projectPickedVersion = sql`COALESCE(${projectDocumentLifecycle.draftId}, ${projectDocumentLifecycle.publishedId})`;
+
+	const [items, aggregate] = await Promise.all([
+		db
+			.select({
+				id: projectEntities.id,
+				name: schema.projects.name,
+				acronym: schema.projects.acronym,
+			})
+			.from(projectEntities)
+			.innerJoin(
+				projectDocumentLifecycle,
+				eq(projectDocumentLifecycle.documentId, projectEntities.id),
+			)
+			.innerJoin(schema.projects, sql`${schema.projects.id} = ${projectPickedVersion}`)
+			.where(where)
+			.orderBy(schema.projects.name)
+			.limit(limit)
+			.offset(offset),
+		db
+			.select({ total: count() })
+			.from(projectEntities)
+			.innerJoin(
+				projectDocumentLifecycle,
+				eq(projectDocumentLifecycle.documentId, projectEntities.id),
+			)
+			.innerJoin(schema.projects, sql`${schema.projects.id} = ${projectPickedVersion}`)
+			.where(where),
+	]);
+
+	return {
+		items: items.map((item) => {
+			return {
+				id: item.id,
+				name: item.acronym ?? item.name,
+				description: item.acronym != null ? item.name : undefined,
+			};
+		}),
 		total: aggregate.at(0)?.total ?? 0,
 	};
 }

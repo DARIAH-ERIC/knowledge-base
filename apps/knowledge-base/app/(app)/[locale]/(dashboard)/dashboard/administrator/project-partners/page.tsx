@@ -6,6 +6,7 @@ import { ProjectPartnersPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/
 import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getProjectPartnersForAdmin } from "@/lib/data/project-partners";
+import { db } from "@/lib/db";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -79,13 +80,19 @@ export default async function DashboardAdministratorProjectPartnersPage(
 		validSorts,
 	});
 	const { user } = await assertAuthenticated();
-	const projectPartners = await getProjectPartnersForAdmin(user, {
-		limit: pageSize,
-		offset: (page - 1) * pageSize,
-		q,
-		sort,
-		dir,
-	});
+	const [projectPartners, roles] = await Promise.all([
+		getProjectPartnersForAdmin(user, {
+			limit: pageSize,
+			offset: (page - 1) * pageSize,
+			q,
+			sort,
+			dir,
+		}),
+		db.query.projectRoles.findMany({
+			orderBy: { role: "asc" },
+			columns: { id: true, role: true },
+		}),
+	]);
 	const totalPages = Math.max(Math.ceil(projectPartners.total / pageSize), 1);
 
 	if (page > totalPages) {
@@ -98,6 +105,7 @@ export default async function DashboardAdministratorProjectPartnersPage(
 			page={page}
 			projectPartners={projectPartners}
 			q={q}
+			roles={roles}
 			sort={sort}
 		/>
 	);
