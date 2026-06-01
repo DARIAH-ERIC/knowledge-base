@@ -184,6 +184,7 @@ test.describe("persons admin", () => {
 		await personsPage.submitForm();
 
 		await personsPage.gotoEditFromList(name);
+		await personsPage.goToContributionsTab();
 
 		// Add a contribution.
 		await personsPage.selectFirstContributionRole();
