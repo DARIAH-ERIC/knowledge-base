@@ -289,7 +289,17 @@ test.describe("governance bodies admin", () => {
 		expect(updatedRelations[0]!.duration.end).toBeDefined();
 	});
 
-	test("should delete a governance body", async ({ createAdminGovernanceBodiesPage }) => {
+	/**
+	 * Relations are document-level (keyed by entities.id) with no `ON DELETE CASCADE`, so the delete
+	 * action must remove them on both endpoints before deleting the entity row — otherwise the
+	 * `DELETE FROM entities` aborts with a FK violation. Delete a body that participates in both a
+	 * unit↔unit and a person↔org relation to exercise that cleanup against the production action
+	 * (not the test fixture's own teardown copy).
+	 */
+	test("should delete a governance body that participates in relations", async ({
+		createAdminGovernanceBodiesPage,
+		db,
+	}) => {
 		const workerIndex = test.info().workerIndex;
 		const governanceBodiesPage = createAdminGovernanceBodiesPage(workerIndex);
 
@@ -299,6 +309,22 @@ test.describe("governance bodies admin", () => {
 		await governanceBodiesPage.fillDescription("Description for delete test.");
 		await governanceBodiesPage.submitForm();
 
+		// Give the body relations on both endpoints so the FK cleanup is actually exercised.
+		await governanceBodiesPage.gotoEditFromList(name);
+		await governanceBodiesPage.selectFirstRelationType();
+		await governanceBodiesPage.selectFirstRelatedUnit();
+		await governanceBodiesPage.fillRelationDatePicker("Start date", 2025, 1, 1);
+		await governanceBodiesPage.submitAddRelation();
+		await governanceBodiesPage.selectFirstPersonRole();
+		await governanceBodiesPage.selectFirstPerson();
+		await governanceBodiesPage.fillPersonRelationDatePicker("Start date", 2025, 1, 1);
+		await governanceBodiesPage.submitAddPerson();
+
+		const created = await db.getGovernanceBodyByName(name);
+		expect(await db.getUnitRelationsByUnitVersionId(created!.id)).toHaveLength(1);
+		expect(await db.getPersonRelationsByUnitVersionId(created!.id)).toHaveLength(1);
+
+		await governanceBodiesPage.goto();
 		await governanceBodiesPage.searchByName(name);
 		await expect(governanceBodiesPage.rowByName(name)).toBeVisible();
 
@@ -306,6 +332,10 @@ test.describe("governance bodies admin", () => {
 		await expect(deleteDialog).toBeVisible();
 		await governanceBodiesPage.confirmDelete(deleteDialog);
 
+		// With the relations present, a missing FK cleanup would make the delete action throw and leave
+		// the row in place; succeeding here is the regression signal. (The relation rows are keyed by the
+		// document id, which is gone once the entity is deleted, so they cannot be re-queried afterwards.)
 		await expect(governanceBodiesPage.rowByName(name)).toBeHidden();
+		expect(await db.getGovernanceBodyByName(name)).toBeNull();
 	});
 });

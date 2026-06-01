@@ -484,21 +484,16 @@ export async function getDocumentIdForVersion(tx: Transaction, versionId: string
 }
 
 /**
- * Delete the generic tail of a document: fields and content blocks under `versionId`,
- * cross-document relations, the version row, and the document row itself.
- *
- * The subtype row must be deleted by the caller before calling this — each subtype lives in a
- * different table, and this helper does not know which.
+ * Delete every document-level relation in which `documentId` is an endpoint. These relations are keyed
+ * by `entities.id` and the FKs have no `ON DELETE CASCADE`, so they must be removed before deleting the
+ * `entities` row — otherwise the delete aborts with a foreign-key violation. Reporting org refs
+ * (country/working-group reports, institutions, thresholds) are intentionally NOT removed here: like
+ * before this migration, a report blocks deletion of the org unit it is about; reports are removed only
+ * by their own delete actions.
  */
-export async function deleteDocumentVersionTail(
-	tx: Transaction,
-	versionId: string,
-	documentId: string,
-): Promise<void> {
-	await wipeVersionContent(tx, versionId);
-
-	// Document-level person↔org relations reference this document on either endpoint. Remove their
-	// report references first (no ON DELETE CASCADE), then the relation rows themselves.
+export async function deleteDocumentRelations(tx: Transaction, documentId: string): Promise<void> {
+	// Person↔org relations reference this document on either endpoint. Remove their report references
+	// first (no ON DELETE CASCADE), then the relation rows themselves.
 	const personOrgRelations = await tx
 		.select({ id: schema.personsToOrganisationalUnits.id })
 		.from(schema.personsToOrganisationalUnits)
@@ -519,7 +514,7 @@ export async function deleteDocumentVersionTail(
 			.where(inArray(schema.personsToOrganisationalUnits.id, relationIds));
 	}
 
-	// Document-level project↔org relations reference this document on either endpoint.
+	// Project↔org relations reference this document on either endpoint.
 	await tx
 		.delete(schema.projectsToOrganisationalUnits)
 		.where(
@@ -529,7 +524,7 @@ export async function deleteDocumentVersionTail(
 			),
 		);
 
-	// Document-level unit↔unit relations reference this document on either endpoint.
+	// Unit↔unit relations reference this document on either endpoint.
 	await tx
 		.delete(schema.organisationalUnitsRelations)
 		.where(
@@ -539,7 +534,7 @@ export async function deleteDocumentVersionTail(
 			),
 		);
 
-	// Document-level article contributors reference this document as either the article or the person.
+	// Article contributors reference this document as either the article or the person.
 	await tx
 		.delete(schema.impactCaseStudiesToPersons)
 		.where(
@@ -558,10 +553,27 @@ export async function deleteDocumentVersionTail(
 			),
 		);
 
-	// Document-level service↔unit relations reference this document on their (versioned) unit endpoint.
+	// Service↔unit relations reference this document on their (versioned) unit endpoint.
 	await tx
 		.delete(schema.servicesToOrganisationalUnits)
 		.where(eq(schema.servicesToOrganisationalUnits.organisationalUnitDocumentId, documentId));
+}
+
+/**
+ * Delete the generic tail of a document: fields and content blocks under `versionId`, document-level
+ * relations, cross-document relations, the version row, and the document row itself.
+ *
+ * The subtype row must be deleted by the caller before calling this — each subtype lives in a
+ * different table, and this helper does not know which.
+ */
+export async function deleteDocumentVersionTail(
+	tx: Transaction,
+	versionId: string,
+	documentId: string,
+): Promise<void> {
+	await wipeVersionContent(tx, versionId);
+
+	await deleteDocumentRelations(tx, documentId);
 
 	await tx
 		.delete(schema.entitiesToResources)
