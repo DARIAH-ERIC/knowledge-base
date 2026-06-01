@@ -31,7 +31,7 @@ const config = defineConfig({
 				"playwright/no-networkidle": "error",
 				"playwright/no-nth-methods": "off",
 				"playwright/no-page-pause": "error",
-				"playwright/no-raw-locators": "warn",
+				"playwright/no-raw-locators": "off",
 				"playwright/no-restricted-locators": "off",
 				"playwright/no-restricted-matchers": "off",
 				"playwright/no-restricted-roles": "off",
