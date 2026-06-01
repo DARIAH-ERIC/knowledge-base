@@ -98,6 +98,7 @@ test.describe("persons admin lifecycle", () => {
 
 		// Add a contribution on the draft.
 		await personsPage.gotoEditFromList(name);
+		await personsPage.goToContributionsTab();
 		await personsPage.selectFirstContributionRole();
 		await personsPage.selectFirstContributionOrg();
 		await personsPage.fillContributionDatePicker("Start date", 2025, 1, 1);

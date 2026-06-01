@@ -117,7 +117,13 @@ export class AdminGovernanceBodiesPage {
 	// Edit page — lifecycle actions
 	// ---------------------------------------------------------------------------
 
+	async goToDetailsTab(): Promise<void> {
+		await this.page.getByRole("tab", { name: "Details" }).click();
+	}
+
 	async publishItem(): Promise<void> {
+		// The lifecycle bar lives on the "Details" tab, so make sure it is active first.
+		await this.goToDetailsTab();
 		await waitForActionRedirect({
 			page: this.page,
 			redirectPathname: BASE_PATH,
@@ -130,6 +136,10 @@ export class AdminGovernanceBodiesPage {
 	// ---------------------------------------------------------------------------
 	// Edit page — unit relations section
 	// ---------------------------------------------------------------------------
+
+	async goToRelationsTab(): Promise<void> {
+		await this.page.getByRole("tab", { name: "Relations" }).click();
+	}
 
 	relationsTable(): Locator {
 		return this.page.getByRole("grid", { name: "relations" });
@@ -201,6 +211,10 @@ export class AdminGovernanceBodiesPage {
 	// ---------------------------------------------------------------------------
 	// Edit page — person relations section
 	// ---------------------------------------------------------------------------
+
+	async goToPeopleTab(): Promise<void> {
+		await this.page.getByRole("tab", { name: "People" }).click();
+	}
 
 	peopleTable(): Locator {
 		return this.page.getByRole("grid", { name: "people" });

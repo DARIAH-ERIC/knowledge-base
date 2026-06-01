@@ -1,12 +1,15 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Tab, TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { ContributionsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/contributions-section";
+import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { PersonForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_components/person-form";
 import { discardPersonDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/discard-person-draft.action";
 import { publishPersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/publish-person.action";
@@ -41,24 +44,40 @@ export function PersonEditForm(props: Readonly<PersonEditFormProps>): ReactNode 
 
 	return (
 		<Fragment>
-			<EntityFormHeader
-				title={t("Edit person")}
-				lifecycle={{
-					documentId,
-					hasDraft: hasDraftChanges,
-					isPublished,
-					publishAction: publishPersonAction,
-					discardDraftAction: discardPersonDraftAction,
-				}}
-			/>
+			<EntityFormHeader title={t("Edit person")} />
 
-			<PersonForm formAction={updatePersonAction} initialAssets={initialAssets} person={person} />
+			<EntityEditTabs defaultTab="details">
+				<TabList aria-label={t("Edit person")}>
+					<Tab id="details">{t("Details")}</Tab>
+					<Tab id="contributions">{t("Contributions")}</Tab>
+				</TabList>
 
-			<ContributionsSection
-				contributions={contributions}
-				personId={documentId}
-				roleOptions={contributionRoleOptions}
-			/>
+				<TabPanel className="flex flex-col gap-y-(--layout-padding)" id="details">
+					<div className="flex justify-end">
+						<EntityLifecycleBar
+							discardDraftAction={discardPersonDraftAction}
+							documentId={documentId}
+							hasDraft={hasDraftChanges}
+							isPublished={isPublished}
+							publishAction={publishPersonAction}
+						/>
+					</div>
+
+					<PersonForm
+						formAction={updatePersonAction}
+						initialAssets={initialAssets}
+						person={person}
+					/>
+				</TabPanel>
+
+				<TabPanel id="contributions">
+					<ContributionsSection
+						contributions={contributions}
+						personId={documentId}
+						roleOptions={contributionRoleOptions}
+					/>
+				</TabPanel>
+			</EntityEditTabs>
 		</Fragment>
 	);
 }

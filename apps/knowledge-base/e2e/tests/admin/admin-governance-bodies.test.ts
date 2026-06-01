@@ -152,6 +152,7 @@ test.describe("governance bodies admin", () => {
 		await governanceBodiesPage.submitForm();
 
 		await governanceBodiesPage.gotoEditFromList(name);
+		await governanceBodiesPage.goToPeopleTab();
 
 		// Add a person relation.
 		await governanceBodiesPage.selectFirstPersonRole();
@@ -206,12 +207,14 @@ test.describe("governance bodies admin", () => {
 		await governanceBodiesPage.gotoEditFromList(name);
 
 		// Add a unit relation.
+		await governanceBodiesPage.goToRelationsTab();
 		await governanceBodiesPage.selectFirstRelationType();
 		await governanceBodiesPage.selectFirstRelatedUnit();
 		await governanceBodiesPage.fillRelationDatePicker("Start date", 2025, 1, 1);
 		await governanceBodiesPage.submitAddRelation();
 
 		// Add a person relation.
+		await governanceBodiesPage.goToPeopleTab();
 		await governanceBodiesPage.selectFirstPersonRole();
 		await governanceBodiesPage.selectFirstPerson();
 		await governanceBodiesPage.fillPersonRelationDatePicker("Start date", 2025, 1, 1);
@@ -259,6 +262,7 @@ test.describe("governance bodies admin", () => {
 		await governanceBodiesPage.gotoEditFromList(name);
 
 		// Add a unit relation.
+		await governanceBodiesPage.goToRelationsTab();
 		await governanceBodiesPage.selectFirstRelationType();
 		await governanceBodiesPage.selectFirstRelatedUnit();
 		await governanceBodiesPage.fillRelationDatePicker("Start date", 2025, 1, 1);
@@ -311,10 +315,12 @@ test.describe("governance bodies admin", () => {
 
 		// Give the body relations on both endpoints so the FK cleanup is actually exercised.
 		await governanceBodiesPage.gotoEditFromList(name);
+		await governanceBodiesPage.goToRelationsTab();
 		await governanceBodiesPage.selectFirstRelationType();
 		await governanceBodiesPage.selectFirstRelatedUnit();
 		await governanceBodiesPage.fillRelationDatePicker("Start date", 2025, 1, 1);
 		await governanceBodiesPage.submitAddRelation();
+		await governanceBodiesPage.goToPeopleTab();
 		await governanceBodiesPage.selectFirstPersonRole();
 		await governanceBodiesPage.selectFirstPerson();
 		await governanceBodiesPage.fillPersonRelationDatePicker("Start date", 2025, 1, 1);

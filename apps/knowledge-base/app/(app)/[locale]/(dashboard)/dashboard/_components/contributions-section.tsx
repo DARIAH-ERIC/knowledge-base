@@ -17,7 +17,6 @@ import {
 } from "@dariah-eric/ui/modal";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
-import { Separator } from "@dariah-eric/ui/separator";
 import {
 	Table,
 	TableBody,
@@ -152,8 +151,6 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 
 	return (
 		<Fragment>
-			<Separator className="my-8" />
-
 			<div className="max-inline-3xl space-y-6">
 				<div className="space-y-1">
 					<FormSectionTitle title={t("Contributions")} />

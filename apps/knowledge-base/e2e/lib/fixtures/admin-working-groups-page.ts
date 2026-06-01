@@ -113,6 +113,10 @@ export class AdminWorkingGroupsPage {
 	// Edit page — unit relations section
 	// ---------------------------------------------------------------------------
 
+	async goToRelationsTab(): Promise<void> {
+		await this.page.getByRole("tab", { name: "Relations" }).click();
+	}
+
 	relationsTable(): Locator {
 		return this.page.getByRole("grid", { name: "relations" });
 	}

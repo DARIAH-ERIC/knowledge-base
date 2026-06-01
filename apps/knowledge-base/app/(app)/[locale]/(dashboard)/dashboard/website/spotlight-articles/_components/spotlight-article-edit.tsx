@@ -1,11 +1,14 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Tab, TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { ArticleContributorsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section";
 import { SpotlightArticleForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form";
 import { createSpotlightArticleContributorAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article-contributor.action";
@@ -64,40 +67,52 @@ export function SpotlightArticleEditForm(
 
 	return (
 		<Fragment>
-			<EntityFormHeader
-				title={t("Edit spotlight article")}
-				lifecycle={{
-					documentId,
-					hasDraft: hasDraftChanges,
-					isPublished,
-					publishAction: publishSpotlightArticleAction,
-					discardDraftAction: discardSpotlightArticleDraftAction,
-				}}
-			/>
+			<EntityFormHeader title={t("Edit spotlight article")} />
 
-			<SpotlightArticleForm
-				contentBlocks={contentBlocks}
-				formAction={updateSpotlightArticleAction}
-				initialAssets={initialAssets}
-				initialRelatedEntityIds={initialRelatedEntityIds}
-				initialRelatedEntityItems={initialRelatedEntityItems}
-				initialRelatedEntityTotal={initialRelatedEntityTotal}
-				initialRelatedResourceIds={initialRelatedResourceIds}
-				initialRelatedResourceItems={initialRelatedResourceItems}
-				initialRelatedResourceTotal={initialRelatedResourceTotal}
-				selectedRelatedEntities={selectedRelatedEntities}
-				selectedRelatedResources={selectedRelatedResources}
-				spotlightArticle={spotlightArticle}
-			/>
+			<EntityEditTabs defaultTab="details">
+				<TabList aria-label={t("Edit spotlight article")}>
+					<Tab id="details">{t("Details")}</Tab>
+					<Tab id="contributors">{t("Contributors")}</Tab>
+				</TabList>
 
-			<ArticleContributorsSection
-				articleId={documentId}
-				contributors={contributors}
-				createAction={createSpotlightArticleContributorAction}
-				deleteAction={deleteSpotlightArticleContributorAction}
-				initialPersonItems={initialPersonItems}
-				initialPersonTotal={initialPersonTotal}
-			/>
+				<TabPanel className="flex flex-col gap-y-(--layout-padding)" id="details">
+					<div className="flex justify-end">
+						<EntityLifecycleBar
+							discardDraftAction={discardSpotlightArticleDraftAction}
+							documentId={documentId}
+							hasDraft={hasDraftChanges}
+							isPublished={isPublished}
+							publishAction={publishSpotlightArticleAction}
+						/>
+					</div>
+
+					<SpotlightArticleForm
+						contentBlocks={contentBlocks}
+						formAction={updateSpotlightArticleAction}
+						initialAssets={initialAssets}
+						initialRelatedEntityIds={initialRelatedEntityIds}
+						initialRelatedEntityItems={initialRelatedEntityItems}
+						initialRelatedEntityTotal={initialRelatedEntityTotal}
+						initialRelatedResourceIds={initialRelatedResourceIds}
+						initialRelatedResourceItems={initialRelatedResourceItems}
+						initialRelatedResourceTotal={initialRelatedResourceTotal}
+						selectedRelatedEntities={selectedRelatedEntities}
+						selectedRelatedResources={selectedRelatedResources}
+						spotlightArticle={spotlightArticle}
+					/>
+				</TabPanel>
+
+				<TabPanel id="contributors">
+					<ArticleContributorsSection
+						articleId={documentId}
+						contributors={contributors}
+						createAction={createSpotlightArticleContributorAction}
+						deleteAction={deleteSpotlightArticleContributorAction}
+						initialPersonItems={initialPersonItems}
+						initialPersonTotal={initialPersonTotal}
+					/>
+				</TabPanel>
+			</EntityEditTabs>
 		</Fragment>
 	);
 }

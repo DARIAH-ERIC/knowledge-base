@@ -16,7 +16,6 @@ import {
 	ModalHeader,
 } from "@dariah-eric/ui/modal";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
-import { Separator } from "@dariah-eric/ui/separator";
 import {
 	Table,
 	TableBody,
@@ -131,8 +130,6 @@ export function WorkingGroupChairsSection(
 
 	return (
 		<Fragment>
-			<Separator className="my-8" />
-
 			<div className="max-inline-3xl space-y-6">
 				<div className="space-y-1">
 					<FormSectionTitle title={t("Chairs")} />

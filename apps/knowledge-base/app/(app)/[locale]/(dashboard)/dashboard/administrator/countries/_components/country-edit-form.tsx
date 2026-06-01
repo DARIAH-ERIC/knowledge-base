@@ -1,11 +1,14 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Tab, TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { CountryForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_components/country-form";
 import { discardCountryDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/countries/_lib/discard-country-draft.action";
@@ -65,41 +68,53 @@ export function CountryEditForm(props: Readonly<CountryEditFormProps>): ReactNod
 
 	return (
 		<Fragment>
-			<EntityFormHeader
-				title={t("Edit country")}
-				lifecycle={{
-					documentId,
-					hasDraft: hasDraftChanges,
-					isPublished,
-					publishAction: publishCountryAction,
-					discardDraftAction: discardCountryDraftAction,
-				}}
-			/>
+			<EntityFormHeader title={t("Edit country")} />
 
-			<CountryForm
-				country={country}
-				formAction={updateCountryAction}
-				initialAssets={initialAssets}
-				initialRelatedEntityIds={initialRelatedEntityIds}
-				initialRelatedEntityItems={initialRelatedEntityItems}
-				initialRelatedEntityTotal={initialRelatedEntityTotal}
-				initialRelatedResourceIds={initialRelatedResourceIds}
-				initialRelatedResourceItems={initialRelatedResourceItems}
-				initialRelatedResourceTotal={initialRelatedResourceTotal}
-				initialSocialMediaIds={initialSocialMediaIds}
-				initialSocialMediaItems={initialSocialMediaItems}
-				initialSocialMediaTotal={initialSocialMediaTotal}
-				selectedRelatedEntities={selectedRelatedEntities}
-				selectedRelatedResources={selectedRelatedResources}
-				selectedSocialMediaItems={selectedSocialMediaItems}
-				showSaveAndPublish={true}
-			/>
+			<EntityEditTabs defaultTab="details">
+				<TabList aria-label={t("Edit country")}>
+					<Tab id="details">{t("Details")}</Tab>
+					<Tab id="relations">{t("Relations")}</Tab>
+				</TabList>
 
-			<UnitRelationsSection
-				relations={relations}
-				statusOptions={unitRelationStatusOptions}
-				unitId={documentId}
-			/>
+				<TabPanel className="flex flex-col gap-y-(--layout-padding)" id="details">
+					<div className="flex justify-end">
+						<EntityLifecycleBar
+							discardDraftAction={discardCountryDraftAction}
+							documentId={documentId}
+							hasDraft={hasDraftChanges}
+							isPublished={isPublished}
+							publishAction={publishCountryAction}
+						/>
+					</div>
+
+					<CountryForm
+						country={country}
+						formAction={updateCountryAction}
+						initialAssets={initialAssets}
+						initialRelatedEntityIds={initialRelatedEntityIds}
+						initialRelatedEntityItems={initialRelatedEntityItems}
+						initialRelatedEntityTotal={initialRelatedEntityTotal}
+						initialRelatedResourceIds={initialRelatedResourceIds}
+						initialRelatedResourceItems={initialRelatedResourceItems}
+						initialRelatedResourceTotal={initialRelatedResourceTotal}
+						initialSocialMediaIds={initialSocialMediaIds}
+						initialSocialMediaItems={initialSocialMediaItems}
+						initialSocialMediaTotal={initialSocialMediaTotal}
+						selectedRelatedEntities={selectedRelatedEntities}
+						selectedRelatedResources={selectedRelatedResources}
+						selectedSocialMediaItems={selectedSocialMediaItems}
+						showSaveAndPublish={true}
+					/>
+				</TabPanel>
+
+				<TabPanel id="relations">
+					<UnitRelationsSection
+						relations={relations}
+						statusOptions={unitRelationStatusOptions}
+						unitId={documentId}
+					/>
+				</TabPanel>
+			</EntityEditTabs>
 		</Fragment>
 	);
 }

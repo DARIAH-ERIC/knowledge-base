@@ -1,11 +1,14 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Tab, TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { InstitutionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form";
 import { discardInstitutionDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/discard-institution-draft.action";
@@ -65,40 +68,52 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 
 	return (
 		<Fragment>
-			<EntityFormHeader
-				title={t("Edit institution")}
-				lifecycle={{
-					documentId,
-					hasDraft: hasDraftChanges,
-					isPublished,
-					publishAction: publishInstitutionAction,
-					discardDraftAction: discardInstitutionDraftAction,
-				}}
-			/>
+			<EntityFormHeader title={t("Edit institution")} />
 
-			<InstitutionForm
-				formAction={updateInstitutionAction}
-				initialAssets={initialAssets}
-				initialRelatedEntityIds={initialRelatedEntityIds}
-				initialRelatedEntityItems={initialRelatedEntityItems}
-				initialRelatedEntityTotal={initialRelatedEntityTotal}
-				initialRelatedResourceIds={initialRelatedResourceIds}
-				initialRelatedResourceItems={initialRelatedResourceItems}
-				initialRelatedResourceTotal={initialRelatedResourceTotal}
-				initialSocialMediaIds={initialSocialMediaIds}
-				initialSocialMediaItems={initialSocialMediaItems}
-				initialSocialMediaTotal={initialSocialMediaTotal}
-				institution={institution}
-				selectedRelatedEntities={selectedRelatedEntities}
-				selectedRelatedResources={selectedRelatedResources}
-				selectedSocialMediaItems={selectedSocialMediaItems}
-			/>
+			<EntityEditTabs defaultTab="details">
+				<TabList aria-label={t("Edit institution")}>
+					<Tab id="details">{t("Details")}</Tab>
+					<Tab id="relations">{t("Relations")}</Tab>
+				</TabList>
 
-			<UnitRelationsSection
-				relations={relations}
-				statusOptions={unitRelationStatusOptions}
-				unitId={documentId}
-			/>
+				<TabPanel className="flex flex-col gap-y-(--layout-padding)" id="details">
+					<div className="flex justify-end">
+						<EntityLifecycleBar
+							discardDraftAction={discardInstitutionDraftAction}
+							documentId={documentId}
+							hasDraft={hasDraftChanges}
+							isPublished={isPublished}
+							publishAction={publishInstitutionAction}
+						/>
+					</div>
+
+					<InstitutionForm
+						formAction={updateInstitutionAction}
+						initialAssets={initialAssets}
+						initialRelatedEntityIds={initialRelatedEntityIds}
+						initialRelatedEntityItems={initialRelatedEntityItems}
+						initialRelatedEntityTotal={initialRelatedEntityTotal}
+						initialRelatedResourceIds={initialRelatedResourceIds}
+						initialRelatedResourceItems={initialRelatedResourceItems}
+						initialRelatedResourceTotal={initialRelatedResourceTotal}
+						initialSocialMediaIds={initialSocialMediaIds}
+						initialSocialMediaItems={initialSocialMediaItems}
+						initialSocialMediaTotal={initialSocialMediaTotal}
+						institution={institution}
+						selectedRelatedEntities={selectedRelatedEntities}
+						selectedRelatedResources={selectedRelatedResources}
+						selectedSocialMediaItems={selectedSocialMediaItems}
+					/>
+				</TabPanel>
+
+				<TabPanel id="relations">
+					<UnitRelationsSection
+						relations={relations}
+						statusOptions={unitRelationStatusOptions}
+						unitId={documentId}
+					/>
+				</TabPanel>
+			</EntityEditTabs>
 		</Fragment>
 	);
 }

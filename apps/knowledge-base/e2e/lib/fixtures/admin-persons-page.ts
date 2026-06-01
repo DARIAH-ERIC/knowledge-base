@@ -111,6 +111,10 @@ export class AdminPersonsPage {
 	// Edit page — contributions section
 	// ---------------------------------------------------------------------------
 
+	async goToContributionsTab(): Promise<void> {
+		await this.page.getByRole("tab", { name: "Contributions" }).click();
+	}
+
 	contributionsTable(): Locator {
 		return this.page.getByRole("grid", { name: "contributions" });
 	}

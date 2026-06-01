@@ -9,7 +9,6 @@ import { Form } from "@dariah-eric/ui/form";
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { ProgressCircle } from "@dariah-eric/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@dariah-eric/ui/select";
-import { Separator } from "@dariah-eric/ui/separator";
 import {
 	Table,
 	TableBody,
@@ -117,8 +116,6 @@ export function ArticleContributorsSection(
 
 	return (
 		<Fragment>
-			<Separator className="my-8" />
-
 			<div className="max-inline-3xl space-y-6">
 				<div className="space-y-1">
 					<FormSectionTitle title={t("Contributors")} />

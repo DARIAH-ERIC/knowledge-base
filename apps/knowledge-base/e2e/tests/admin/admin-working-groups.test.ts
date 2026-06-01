@@ -172,6 +172,7 @@ test.describe("working groups admin", () => {
 		await workingGroupsPage.submitForm();
 
 		await workingGroupsPage.gotoEditFromList(name);
+		await workingGroupsPage.goToRelationsTab();
 
 		// Add a relation.
 		await workingGroupsPage.selectFirstRelationType();
