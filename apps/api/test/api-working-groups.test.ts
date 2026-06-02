@@ -14,6 +14,20 @@ import { createTestClient } from "~/test/lib/create-test-client";
 import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";
 
+const dariahEuSlug = "dariah-eu";
+
+async function getDariahEu(db: Database) {
+	const unit = await db.query.organisationalUnits.findFirst({
+		columns: { id: true },
+		where: { entityVersion: { entity: { slug: dariahEuSlug } }, type: { type: "eric" } },
+		with: { entityVersion: { columns: { entityId: true } } },
+	});
+
+	assert(unit, "No DARIAH-EU organisational unit in database.");
+
+	return { documentId: unit.entityVersion.entityId, versionId: unit.id };
+}
+
 function createItems(count: number) {
 	const items = f.helpers.multiple(
 		() => {
@@ -92,57 +106,46 @@ function createRelatedPage() {
 }
 
 async function seedWithMixedStatuses(db: Database) {
-	const [status, entityType, asset, workingGroupType, umbrellaConsortiumType, unitStatus] =
-		await Promise.all([
-			db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
-			db.query.entityTypes.findFirst({
-				columns: { id: true },
-				where: { type: "organisational_units" },
-			}),
-			db.query.assets.findFirst({ columns: { id: true } }),
-			db.query.organisationalUnitTypes.findFirst({
-				columns: { id: true },
-				where: { type: "working_group" },
-			}),
-			db.query.organisationalUnitTypes.findFirst({
-				columns: { id: true },
-				where: { type: "eric" },
-			}),
-			db
-				.select()
-				.from(schema.organisationalUnitStatus)
-				.where(inArray(schema.organisationalUnitStatus.status, ["is_part_of"])),
-		]);
+	const [status, entityType, asset, workingGroupType, unitStatus] = await Promise.all([
+		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+		db.query.entityTypes.findFirst({
+			columns: { id: true },
+			where: { type: "organisational_units" },
+		}),
+		db.query.assets.findFirst({ columns: { id: true } }),
+		db.query.organisationalUnitTypes.findFirst({
+			columns: { id: true },
+			where: { type: "working_group" },
+		}),
+		db
+			.select()
+			.from(schema.organisationalUnitStatus)
+			.where(inArray(schema.organisationalUnitStatus.status, ["is_part_of"])),
+	]);
 
 	assert(status, "No entity status in database.");
 	assert(entityType, "No entity type in database.");
 	assert(asset, "No assets in database.");
 	assert(workingGroupType, "No working_group type in database.");
-	assert(umbrellaConsortiumType, "No eric type in database.");
 	assert(unitStatus.length, "No unit status in database.");
+	const umbrella = await getDariahEu(db);
 
-	// [0] = umbrella consortium, [1][2] = active working groups, [3] = inactive working group
+	// [0] = unused placeholder, [1][2] = active working groups, [3] = inactive working group
 	const items = createItems(4);
 	const memberStatusId = unitStatus[0]!.id;
 	const pastStart = f.date.past({ years: 5 });
 
 	await db.insert(schema.entities).values(
-		items.map((item) => {
+		items.slice(1).map((item) => {
 			return { ...item.entity, typeId: entityType.id };
 		}),
 	);
 
 	await db.insert(schema.entityVersions).values(
-		items.map((item) => {
+		items.slice(1).map((item) => {
 			return { ...item.version, statusId: status.id };
 		}),
 	);
-
-	await db.insert(schema.organisationalUnits).values({
-		...items[0]!.organisationalUnit,
-		typeId: umbrellaConsortiumType.id,
-		imageId: asset.id,
-	});
 
 	await db.insert(schema.organisationalUnits).values(
 		items.slice(1).map((item) => {
@@ -159,7 +162,7 @@ async function seedWithMixedStatuses(db: Database) {
 		items.slice(1, 3).map((item) => {
 			return {
 				unitDocumentId: item.entity.id,
-				relatedUnitDocumentId: items[0]!.entity.id,
+				relatedUnitDocumentId: umbrella.documentId,
 				status: memberStatusId,
 				duration: { start: pastStart },
 			};
@@ -170,7 +173,7 @@ async function seedWithMixedStatuses(db: Database) {
 	const inactiveEnd = f.date.between({ from: pastStart, to: new Date() });
 	await db.insert(schema.organisationalUnitsRelations).values({
 		unitDocumentId: items[3]!.entity.id,
-		relatedUnitDocumentId: items[0]!.entity.id,
+		relatedUnitDocumentId: umbrella.documentId,
 		status: memberStatusId,
 		duration: { start: pastStart, end: inactiveEnd },
 	});
@@ -182,6 +185,7 @@ async function seedWithMixedStatuses(db: Database) {
 }
 
 async function seed(db: Database, items: ReturnType<typeof createItems>, chair = createChair()) {
+	const umbrella = await getDariahEu(db);
 	const [
 		status,
 		entityType,
@@ -192,7 +196,6 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 		asset,
 		workingGroupType,
 		institutionType,
-		umbrellaConsortiumType,
 		unitStatus,
 	] = await Promise.all([
 		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
@@ -225,10 +228,6 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 			columns: { id: true },
 			where: { type: "institution" },
 		}),
-		db.query.organisationalUnitTypes.findFirst({
-			columns: { id: true },
-			where: { type: "eric" },
-		}),
 		db
 			.select()
 			.from(schema.organisationalUnitStatus)
@@ -244,26 +243,19 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 	assert(asset, "No assets in database.");
 	assert(workingGroupType, "No working_group type in database.");
 	assert(institutionType, "No institution type in database.");
-	assert(umbrellaConsortiumType, "No eric type in database.");
 	assert(unitStatus.length, "No unit status in database.");
 
 	await db.insert(schema.entities).values(
-		items.map((item) => {
+		items.slice(1).map((item) => {
 			return { ...item.entity, typeId: entityType.id };
 		}),
 	);
 
 	await db.insert(schema.entityVersions).values(
-		items.map((item) => {
+		items.slice(1).map((item) => {
 			return { ...item.version, statusId: status.id };
 		}),
 	);
-
-	await db.insert(schema.organisationalUnits).values({
-		...items[0]!.organisationalUnit,
-		typeId: umbrellaConsortiumType.id,
-		imageId: asset.id,
-	});
 
 	await db.insert(schema.organisationalUnits).values(
 		// oxlint-disable-next-line oxc/no-map-spread
@@ -278,7 +270,7 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 		items.slice(1).map((item) => {
 			return {
 				unitDocumentId: item.entity.id,
-				relatedUnitDocumentId: items[0]!.entity.id,
+				relatedUnitDocumentId: umbrella.documentId,
 				status: f.helpers.arrayElement(unitStatus).id,
 				duration: {
 					start,
@@ -288,7 +280,9 @@ async function seed(db: Database, items: ReturnType<typeof createItems>, chair =
 	);
 
 	await Promise.all(
-		items.map((item) => seedContentBlock(db, item.version.id, entityType.id, "description")),
+		items
+			.slice(1)
+			.map((item) => seedContentBlock(db, item.version.id, entityType.id, "description")),
 	);
 
 	await db.insert(schema.assets).values(chair.asset);
