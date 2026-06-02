@@ -3,7 +3,7 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import type { Database, Transaction } from "@/middlewares/db";
-import { and, asc, eq, isNotNull, isNull, or } from "@/services/db/sql";
+import { and, asc, eq, isNotNull, isNull, or, sql } from "@/services/db/sql";
 
 interface NavigationItem {
 	id: string;
@@ -55,13 +55,27 @@ export async function getNavigation(db: Database | Transaction, params: GetNavig
 			position: schema.navigationItems.position,
 			parentId: schema.navigationItems.parentId,
 			entitySlug: schema.entities.slug,
-			entityType: schema.entityTypes.type,
+			entityType: sql<string>`
+				CASE
+					WHEN ${schema.entityTypes.type} = 'organisational_units'
+					THEN ${schema.organisationalUnitTypes.type}
+					ELSE ${schema.entityTypes.type}
+				END
+			`.as("entity_type"),
 		})
 		.from(schema.navigationMenus)
 		.leftJoin(schema.navigationItems, eq(schema.navigationMenus.id, schema.navigationItems.menuId))
 		.leftJoin(schema.entities, eq(schema.navigationItems.entityId, schema.entities.id))
 		.leftJoin(schema.entityTypes, eq(schema.entities.typeId, schema.entityTypes.id))
 		.leftJoin(schema.documentLifecycle, eq(schema.documentLifecycle.documentId, schema.entities.id))
+		.leftJoin(
+			schema.organisationalUnits,
+			eq(schema.documentLifecycle.publishedId, schema.organisationalUnits.id),
+		)
+		.leftJoin(
+			schema.organisationalUnitTypes,
+			eq(schema.organisationalUnits.typeId, schema.organisationalUnitTypes.id),
+		)
 		.where(
 			and(
 				menu != null ? eq(schema.navigationMenus.name, menu) : undefined,
