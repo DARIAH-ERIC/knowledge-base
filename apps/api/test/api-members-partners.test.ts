@@ -12,6 +12,20 @@ import { createTestClient } from "~/test/lib/create-test-client";
 import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";
 
+const dariahEuSlug = "dariah-eu";
+
+async function getDariahEu(db: Database) {
+	const unit = await db.query.organisationalUnits.findFirst({
+		columns: { id: true },
+		where: { entityVersion: { entity: { slug: dariahEuSlug } }, type: { type: "eric" } },
+		with: { entityVersion: { columns: { entityId: true } } },
+	});
+
+	assert(unit, "No DARIAH-EU organisational unit in database.");
+
+	return { documentId: unit.entityVersion.entityId, versionId: unit.id };
+}
+
 function createItems(count: number) {
 	const items = f.helpers.multiple(
 		() => {
@@ -409,52 +423,44 @@ async function seed(
 	items: ReturnType<typeof createItems>,
 	descriptionContentByVersionId = new Map<string, Parameters<typeof seedContentBlock>[4]>(),
 ) {
-	const [status, entityType, asset, countryType, umbrellaConsortiumType, memberObserverStatus] =
-		await Promise.all([
-			db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
-			db.query.entityTypes.findFirst({
-				columns: { id: true },
-				where: { type: "organisational_units" },
-			}),
-			db.query.assets.findFirst({ columns: { id: true } }),
-			db.query.organisationalUnitTypes.findFirst({
-				columns: { id: true },
-				where: { type: "country" },
-			}),
-			db.query.organisationalUnitTypes.findFirst({
-				columns: { id: true },
-				where: { type: "eric" },
-			}),
-			db
-				.select()
-				.from(schema.organisationalUnitStatus)
-				.where(inArray(schema.organisationalUnitStatus.status, ["is_member_of", "is_observer_of"])),
-		]);
+	const umbrella = await getDariahEu(db);
+	items[0]!.entity.id = umbrella.documentId;
+	items[0]!.version.id = umbrella.versionId;
+	items[0]!.organisationalUnit.id = umbrella.versionId;
+	const [status, entityType, asset, countryType, memberObserverStatus] = await Promise.all([
+		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+		db.query.entityTypes.findFirst({
+			columns: { id: true },
+			where: { type: "organisational_units" },
+		}),
+		db.query.assets.findFirst({ columns: { id: true } }),
+		db.query.organisationalUnitTypes.findFirst({
+			columns: { id: true },
+			where: { type: "country" },
+		}),
+		db
+			.select()
+			.from(schema.organisationalUnitStatus)
+			.where(inArray(schema.organisationalUnitStatus.status, ["is_member_of", "is_observer_of"])),
+	]);
 
 	assert(status, "No entity status in database.");
 	assert(entityType, "No entity type in database.");
 	assert(asset, "No assets in database.");
 	assert(countryType, "No country type in database.");
-	assert(umbrellaConsortiumType, "No umbrella consortium type in database.");
 	assert(memberObserverStatus.length, "No member or observer status in database.");
 
 	await db.insert(schema.entities).values(
-		items.map((item) => {
+		items.slice(1).map((item) => {
 			return { ...item.entity, typeId: entityType.id };
 		}),
 	);
 
 	await db.insert(schema.entityVersions).values(
-		items.map((item) => {
+		items.slice(1).map((item) => {
 			return { ...item.version, statusId: status.id };
 		}),
 	);
-
-	await db.insert(schema.organisationalUnits).values({
-		...items[0]!.organisationalUnit,
-		typeId: umbrellaConsortiumType.id,
-		imageId: asset.id,
-	});
 
 	await db.insert(schema.organisationalUnits).values(
 		items.slice(1).map((item) => {
@@ -468,7 +474,7 @@ async function seed(
 		items.slice(1).map((item) => {
 			return {
 				unitDocumentId: item.entity.id,
-				relatedUnitDocumentId: items[0]!.entity.id,
+				relatedUnitDocumentId: umbrella.documentId,
 				status: f.helpers.arrayElement(memberObserverStatus).id,
 				duration: {
 					start,
@@ -499,46 +505,17 @@ describe("members-partners", () => {
 
 				const client = createTestClient(db);
 
-				const [status, entityType, ericType] = await Promise.all([
+				const [status, entityType] = await Promise.all([
 					db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
 					db.query.entityTypes.findFirst({
 						columns: { id: true },
 						where: { type: "organisational_units" },
 					}),
-					db.query.organisationalUnitTypes.findFirst({
-						columns: { id: true },
-						where: { type: "eric" },
-					}),
 				]);
 
 				assert(status);
 				assert(entityType);
-				assert(ericType);
-
-				// eric unit (not exposed, used as relation target)
-				const ericItems = createItems(1);
-				const [ericItem] = ericItems;
-				assert(ericItem);
-
-				await db.insert(schema.entities).values(
-					ericItems.map((item) => {
-						return {
-							...item.entity,
-							typeId: entityType.id,
-						};
-					}),
-				);
-				await db.insert(schema.entityVersions).values(
-					ericItems.map((item) => {
-						return {
-							...item.version,
-							statusId: status.id,
-						};
-					}),
-				);
-				await db
-					.insert(schema.organisationalUnits)
-					.values({ ...ericItem.organisationalUnit, typeId: ericType.id });
+				const umbrella = await getDariahEu(db);
 
 				// country + institution as cooperating partner
 				const partnerItems = createItems(2);
@@ -558,7 +535,7 @@ describe("members-partners", () => {
 						};
 					}),
 				);
-				await seedCooperatingPartner(db, ericItem.organisationalUnit.id, partnerItems);
+				await seedCooperatingPartner(db, umbrella.versionId, partnerItems);
 
 				const country = partnerItems[0]!;
 
@@ -645,50 +622,10 @@ describe("members-partners", () => {
 				const name = item.organisationalUnit.name;
 				const countryId = item.organisationalUnit.id;
 
-				const [status, entityType, ericType] = await Promise.all([
-					db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
-					db.query.entityTypes.findFirst({
-						columns: { id: true },
-						where: { type: "organisational_units" },
-					}),
-					db.query.organisationalUnitTypes.findFirst({
-						columns: { id: true },
-						where: { type: "eric" },
-					}),
-				]);
-
-				assert(status);
-				assert(entityType);
-				assert(ericType);
-
-				const ericItems = createItems(1);
-				const [ericItem] = ericItems;
-				assert(ericItem);
-
-				await db.insert(schema.entities).values(
-					ericItems.map((entry) => {
-						return {
-							...entry.entity,
-							typeId: entityType.id,
-						};
-					}),
-				);
-				await db.insert(schema.entityVersions).values(
-					ericItems.map((entry) => {
-						return {
-							...entry.version,
-							statusId: status.id,
-						};
-					}),
-				);
-				await db
-					.insert(schema.organisationalUnits)
-					.values({ ...ericItem.organisationalUnit, typeId: ericType.id });
-
 				const partnerInstitutionItems = createItems(1);
 				await seedPartnerInstitutions(
 					db,
-					ericItem.organisationalUnit.id,
+					items[0]!.organisationalUnit.id,
 					countryId,
 					partnerInstitutionItems,
 				);
@@ -906,45 +843,17 @@ describe("members-partners", () => {
 			await withTransaction(async (db) => {
 				const client = createTestClient(db);
 
-				const [status, entityType, ericType] = await Promise.all([
+				const [status, entityType] = await Promise.all([
 					db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
 					db.query.entityTypes.findFirst({
 						columns: { id: true },
 						where: { type: "organisational_units" },
 					}),
-					db.query.organisationalUnitTypes.findFirst({
-						columns: { id: true },
-						where: { type: "eric" },
-					}),
 				]);
 
 				assert(status);
 				assert(entityType);
-				assert(ericType);
-
-				const ericItems = createItems(1);
-				const [ericItem] = ericItems;
-				assert(ericItem);
-
-				await db.insert(schema.entities).values(
-					ericItems.map((entry) => {
-						return {
-							...entry.entity,
-							typeId: entityType.id,
-						};
-					}),
-				);
-				await db.insert(schema.entityVersions).values(
-					ericItems.map((entry) => {
-						return {
-							...entry.version,
-							statusId: status.id,
-						};
-					}),
-				);
-				await db
-					.insert(schema.organisationalUnits)
-					.values({ ...ericItem.organisationalUnit, typeId: ericType.id });
+				const umbrella = await getDariahEu(db);
 
 				const partnerItems = createItems(2);
 				await db.insert(schema.entities).values(
@@ -963,7 +872,7 @@ describe("members-partners", () => {
 						};
 					}),
 				);
-				await seedCooperatingPartner(db, ericItem.organisationalUnit.id, partnerItems);
+				await seedCooperatingPartner(db, umbrella.versionId, partnerItems);
 
 				const country = partnerItems[0]!;
 
@@ -1081,50 +990,10 @@ describe("members-partners", () => {
 				const name = item.organisationalUnit.name;
 				const countryId = item.organisationalUnit.id;
 
-				const [status, entityType, ericType] = await Promise.all([
-					db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
-					db.query.entityTypes.findFirst({
-						columns: { id: true },
-						where: { type: "organisational_units" },
-					}),
-					db.query.organisationalUnitTypes.findFirst({
-						columns: { id: true },
-						where: { type: "eric" },
-					}),
-				]);
-
-				assert(status);
-				assert(entityType);
-				assert(ericType);
-
-				const ericItems = createItems(1);
-				const [ericItem] = ericItems;
-				assert(ericItem);
-
-				await db.insert(schema.entities).values(
-					ericItems.map((entry) => {
-						return {
-							...entry.entity,
-							typeId: entityType.id,
-						};
-					}),
-				);
-				await db.insert(schema.entityVersions).values(
-					ericItems.map((entry) => {
-						return {
-							...entry.version,
-							statusId: status.id,
-						};
-					}),
-				);
-				await db
-					.insert(schema.organisationalUnits)
-					.values({ ...ericItem.organisationalUnit, typeId: ericType.id });
-
 				const partnerInstitutionItems = createItems(1);
 				await seedPartnerInstitutions(
 					db,
-					ericItem.organisationalUnit.id,
+					items[0]!.organisationalUnit.id,
 					countryId,
 					partnerInstitutionItems,
 				);

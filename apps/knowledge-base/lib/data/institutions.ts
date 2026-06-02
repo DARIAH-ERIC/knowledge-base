@@ -49,6 +49,7 @@ const institutionStatuses = [
 	"is_national_coordinating_institution_in",
 	"is_national_representative_institution_in",
 ] as const satisfies Array<InstitutionEricRelationStatus>;
+const dariahEuSlug = "dariah-eu";
 const institutionStatusLabels: Record<InstitutionEricRelationStatus, string> = {
 	is_cooperating_partner_of: "Cooperating partner",
 	is_national_coordinating_institution_in: "National coordinating institution",
@@ -102,7 +103,7 @@ async function getInstitutionRelationData(ids: ReadonlyArray<string>) {
 	}
 
 	const erics = await db.query.organisationalUnits.findMany({
-		where: { type: { type: "eric" } },
+		where: { entityVersion: { entity: { slug: dariahEuSlug } }, type: { type: "eric" } },
 		columns: { id: true },
 	});
 	const ericIds = erics.map((eric) => eric.id);

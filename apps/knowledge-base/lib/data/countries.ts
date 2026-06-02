@@ -39,6 +39,8 @@ function assertAdminUser(user: Pick<User, "role">): void {
 	}
 }
 
+const dariahEuSlug = "dariah-eu";
+
 function compareStrings(a: string, b: string, dir: "asc" | "desc"): number {
 	return dir === "asc" ? a.localeCompare(b) : b.localeCompare(a);
 }
@@ -120,7 +122,7 @@ export async function getCountries(params: Readonly<GetCountriesParams>): Promis
 			)
 			.where(and(versionPick, where)),
 		db.query.organisationalUnits.findMany({
-			where: { type: { type: "eric" } },
+			where: { entityVersion: { entity: { slug: dariahEuSlug } }, type: { type: "eric" } },
 			columns: { id: true },
 		}),
 	]);

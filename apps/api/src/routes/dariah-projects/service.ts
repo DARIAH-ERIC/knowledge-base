@@ -151,7 +151,9 @@ export async function getDariahProjects(
 
 	const data = items.map((item) => {
 		const partners = partnersByDocument.get(item.entityVersion.entity.id) ?? [];
-		const role = partners.find((r) => r.unit.type === "eric")?.role.role ?? null;
+		const role =
+			partners.find((r) => r.unit.type === "eric" && r.unit.slug === "dariah-eu")?.role.role ??
+			null;
 
 		return {
 			...mapItem(item, imageWidth.preview),

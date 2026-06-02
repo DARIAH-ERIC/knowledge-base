@@ -11,6 +11,20 @@ import { createTestClient } from "~/test/lib/create-test-client";
 import { seedContentBlock } from "~/test/lib/seed-content-block";
 import { withTransaction } from "~/test/lib/with-transaction";
 
+const dariahEuSlug = "dariah-eu";
+
+async function getDariahEu(db: Database) {
+	const unit = await db.query.organisationalUnits.findFirst({
+		columns: { id: true },
+		where: { entityVersion: { entity: { slug: dariahEuSlug } }, type: { type: "eric" } },
+		with: { entityVersion: { columns: { entityId: true } } },
+	});
+
+	assert(unit, "No DARIAH-EU organisational unit in database.");
+
+	return { documentId: unit.entityVersion.entityId, versionId: unit.id };
+}
+
 function createProjectData() {
 	const versionId = uuidv7();
 	const entityId = uuidv7();
@@ -42,33 +56,28 @@ interface SeedResult {
 }
 
 async function seed(db: Database, count: number): Promise<SeedResult> {
-	const [status, entityType, scope, unitEntityType, umbrellaType, otherType, projectRole] =
-		await Promise.all([
-			db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
-			db.query.entityTypes.findFirst({ columns: { id: true }, where: { type: "projects" } }),
-			db.query.projectScopes.findFirst({ columns: { id: true } }),
-			db.query.entityTypes.findFirst({
-				columns: { id: true },
-				where: { type: "organisational_units" },
-			}),
-			db.query.organisationalUnitTypes.findFirst({
-				columns: { id: true },
-				where: { type: "eric" },
-			}),
-			db.query.organisationalUnitTypes.findFirst({
-				columns: { id: true },
-				where: { type: "national_consortium" },
-			}),
-			db.query.projectRoles.findFirst({ where: { role: "participant" }, columns: { id: true } }),
-		]);
+	const [status, entityType, scope, unitEntityType, otherType, projectRole] = await Promise.all([
+		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+		db.query.entityTypes.findFirst({ columns: { id: true }, where: { type: "projects" } }),
+		db.query.projectScopes.findFirst({ columns: { id: true } }),
+		db.query.entityTypes.findFirst({
+			columns: { id: true },
+			where: { type: "organisational_units" },
+		}),
+		db.query.organisationalUnitTypes.findFirst({
+			columns: { id: true },
+			where: { type: "national_consortium" },
+		}),
+		db.query.projectRoles.findFirst({ where: { role: "participant" }, columns: { id: true } }),
+	]);
 
 	assert(status, "No entity status in database.");
 	assert(entityType, "No entity type in database.");
 	assert(scope, "No project scope in database.");
 	assert(unitEntityType, "No organisational unit entity type in database.");
-	assert(umbrellaType, "No eric type in database.");
 	assert(otherType, "No consortium type in database.");
 	assert(projectRole, "No project role in database.");
+	const umbrella = await getDariahEu(db);
 
 	const dariahItems = f.helpers.multiple(() => createProjectData(), { count });
 	const nonDariahItem = createProjectData();
@@ -91,29 +100,6 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 			return { ...item.project, scopeId: scope.id };
 		}),
 	);
-
-	// Create eric unit (linked to DARIAH projects)
-	const umbrellaEntityId = uuidv7();
-	const umbrellaUnitId = uuidv7();
-
-	await db.insert(schema.entities).values({
-		id: umbrellaEntityId,
-		slug: `umbrella-${umbrellaUnitId}`,
-		typeId: unitEntityType.id,
-	});
-
-	await db.insert(schema.entityVersions).values({
-		id: umbrellaUnitId,
-		entityId: umbrellaEntityId,
-		statusId: status.id,
-	});
-
-	await db.insert(schema.organisationalUnits).values({
-		id: umbrellaUnitId,
-		name: f.company.name(),
-		summary: f.lorem.paragraph(),
-		typeId: umbrellaType.id,
-	});
 
 	// Create non-umbrella unit (linked to the non-DARIAH project)
 	const otherEntityId = uuidv7();
@@ -143,7 +129,7 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 		dariahItems.map((item) => {
 			return {
 				projectDocumentId: item.entity.id,
-				unitDocumentId: umbrellaEntityId,
+				unitDocumentId: umbrella.documentId,
 				roleId: projectRole.id,
 			};
 		}),
@@ -160,34 +146,25 @@ async function seed(db: Database, count: number): Promise<SeedResult> {
 		allItems.map((item) => seedContentBlock(db, item.version.id, entityType.id, "description")),
 	);
 
-	return { dariahItems, nonDariahItem, umbrellaUnitId, roleId: projectRole.id };
+	return { dariahItems, nonDariahItem, umbrellaUnitId: umbrella.versionId, roleId: projectRole.id };
 }
 
 async function seedWithMixedStatuses(db: Database): Promise<{
 	activeItem: ReturnType<typeof createProjectData>;
 	inactiveItem: ReturnType<typeof createProjectData>;
 }> {
-	const [status, entityType, scope, unitEntityType, umbrellaType, projectRole] = await Promise.all([
+	const [status, entityType, scope, projectRole] = await Promise.all([
 		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
 		db.query.entityTypes.findFirst({ columns: { id: true }, where: { type: "projects" } }),
 		db.query.projectScopes.findFirst({ columns: { id: true } }),
-		db.query.entityTypes.findFirst({
-			columns: { id: true },
-			where: { type: "organisational_units" },
-		}),
-		db.query.organisationalUnitTypes.findFirst({
-			columns: { id: true },
-			where: { type: "eric" },
-		}),
 		db.query.projectRoles.findFirst({ where: { role: "participant" }, columns: { id: true } }),
 	]);
 
 	assert(status, "No entity status in database.");
 	assert(entityType, "No entity type in database.");
 	assert(scope, "No project scope in database.");
-	assert(unitEntityType, "No organisational unit entity type in database.");
-	assert(umbrellaType, "No eric type in database.");
 	assert(projectRole, "No project role in database.");
+	const umbrella = await getDariahEu(db);
 
 	const activeItem = createProjectData();
 	const inactiveItem = (() => {
@@ -231,33 +208,11 @@ async function seedWithMixedStatuses(db: Database): Promise<{
 		}),
 	);
 
-	const umbrellaEntityId = uuidv7();
-	const umbrellaUnitId = uuidv7();
-
-	await db.insert(schema.entities).values({
-		id: umbrellaEntityId,
-		slug: `umbrella-${umbrellaUnitId}`,
-		typeId: unitEntityType.id,
-	});
-
-	await db.insert(schema.entityVersions).values({
-		id: umbrellaUnitId,
-		entityId: umbrellaEntityId,
-		statusId: status.id,
-	});
-
-	await db.insert(schema.organisationalUnits).values({
-		id: umbrellaUnitId,
-		name: f.company.name(),
-		summary: f.lorem.paragraph(),
-		typeId: umbrellaType.id,
-	});
-
 	await db.insert(schema.projectsToOrganisationalUnits).values(
 		allItems.map((item) => {
 			return {
 				projectDocumentId: item.entity.id,
-				unitDocumentId: umbrellaEntityId,
+				unitDocumentId: umbrella.documentId,
 				roleId: projectRole.id,
 			};
 		}),
