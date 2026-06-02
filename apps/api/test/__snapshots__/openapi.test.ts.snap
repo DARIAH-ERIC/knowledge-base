@@ -710,13 +710,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -1899,13 +1897,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -2464,13 +2460,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -3951,13 +3945,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -4839,13 +4831,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -5373,13 +5363,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -6361,13 +6349,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -6870,13 +6856,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -7424,13 +7408,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -9384,13 +9366,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -10019,13 +9999,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
