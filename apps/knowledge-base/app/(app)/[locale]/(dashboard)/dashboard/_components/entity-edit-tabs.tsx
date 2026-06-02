@@ -1,7 +1,7 @@
 "use client";
 
 import { Tabs } from "@dariah-eric/ui/tabs";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import type { Key } from "react-aria-components";
 
 import { useSearchParams } from "@/lib/navigation/navigation";
@@ -26,12 +26,23 @@ export function EntityEditTabs(props: Readonly<EntityEditTabsProps>): ReactNode 
 	const searchParams = useSearchParams();
 	const [selectedKey, setSelectedKey] = useState<Key>(() => searchParams.get("tab") ?? defaultTab);
 
+	useEffect(() => {
+		setSelectedKey(searchParams.get("tab") ?? defaultTab);
+	}, [defaultTab, searchParams]);
+
 	function handleSelectionChange(key: Key) {
-		setSelectedKey(key);
+		const nextKey = String(key);
+		setSelectedKey(nextKey);
 
 		const params = new URLSearchParams(window.location.search);
-		params.set("tab", String(key));
-		window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
+		params.set("tab", nextKey);
+
+		const query = params.toString();
+		window.history.replaceState(
+			null,
+			"",
+			`${window.location.pathname}${query !== "" ? `?${query}` : ""}`,
+		);
 	}
 
 	return (

@@ -9,6 +9,7 @@ import { Fragment, type ReactNode } from "react";
 import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { NationalConsortiumForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_components/national-consortium-form";
 import { discardNationalConsortiumDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/national-consortia/_lib/discard-national-consortium-draft.action";
@@ -70,6 +71,7 @@ export function NationalConsortiumEditForm(
 	} = props;
 
 	const t = useExtracted();
+	const formId = "national-consortium-edit-form";
 
 	return (
 		<Fragment>
@@ -78,6 +80,7 @@ export function NationalConsortiumEditForm(
 			<EntityEditTabs defaultTab="details">
 				<TabList aria-label={t("Edit national consortium")}>
 					<Tab id="details">{t("Details")}</Tab>
+					<Tab id="related">{t("Related")}</Tab>
 					<Tab id="relations">{t("Relations")}</Tab>
 				</TabList>
 
@@ -98,21 +101,33 @@ export function NationalConsortiumEditForm(
 
 					<NationalConsortiumForm
 						formAction={updateNationalConsortiumAction}
+						formId={formId}
 						initialAssets={initialAssets}
-						initialRelatedEntityIds={initialRelatedEntityIds}
 						initialRelatedEntityItems={initialRelatedEntityItems}
 						initialRelatedEntityTotal={initialRelatedEntityTotal}
-						initialRelatedResourceIds={initialRelatedResourceIds}
 						initialRelatedResourceItems={initialRelatedResourceItems}
 						initialRelatedResourceTotal={initialRelatedResourceTotal}
 						initialSocialMediaIds={initialSocialMediaIds}
 						initialSocialMediaItems={initialSocialMediaItems}
 						initialSocialMediaTotal={initialSocialMediaTotal}
 						nationalConsortium={nationalConsortium}
+						selectedSocialMediaItems={selectedSocialMediaItems}
+						showRelationFields={false}
+						showSaveAndPublish={true}
+					/>
+				</TabPanel>
+
+				<TabPanel id="related" shouldForceMount={true}>
+					<EntityRelationsFields
+						formId={formId}
+						initialRelatedEntityIds={initialRelatedEntityIds}
+						initialRelatedEntityItems={initialRelatedEntityItems}
+						initialRelatedEntityTotal={initialRelatedEntityTotal}
+						initialRelatedResourceIds={initialRelatedResourceIds}
+						initialRelatedResourceItems={initialRelatedResourceItems}
+						initialRelatedResourceTotal={initialRelatedResourceTotal}
 						selectedRelatedEntities={selectedRelatedEntities}
 						selectedRelatedResources={selectedRelatedResources}
-						selectedSocialMediaItems={selectedSocialMediaItems}
-						showSaveAndPublish={true}
 					/>
 				</TabPanel>
 

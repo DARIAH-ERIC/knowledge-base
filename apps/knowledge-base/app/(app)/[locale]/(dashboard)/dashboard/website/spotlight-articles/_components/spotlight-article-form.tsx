@@ -30,6 +30,7 @@ interface SpotlightArticleFormProps {
 	spotlightArticle?: Pick<schema.SpotlightArticle, "id" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
+	formId?: string;
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
 	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
@@ -39,6 +40,7 @@ interface SpotlightArticleFormProps {
 	initialRelatedResourceTotal: number;
 	selectedRelatedEntities?: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources?: Array<{ id: string; name: string; description?: string }>;
+	showRelationFields?: boolean;
 }
 
 export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>): ReactNode {
@@ -46,6 +48,7 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 		initialAssets,
 		contentBlocks,
 		formAction,
+		formId,
 		spotlightArticle,
 		initialRelatedEntityIds,
 		initialRelatedEntityItems,
@@ -55,6 +58,7 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 		initialRelatedResourceTotal,
 		selectedRelatedEntities,
 		selectedRelatedResources,
+		showRelationFields = true,
 	} = props;
 
 	const t = useExtracted();
@@ -66,7 +70,7 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 	);
 	return (
 		<FormLayout>
-			<Form action={action} className="flex flex-col gap-y-6" state={state}>
+			<Form action={action} className="flex flex-col gap-y-6" id={formId} state={state}>
 				<FormSection description={t("Enter the spotlight article details.")} title={t("Details")}>
 					<TextField defaultValue={spotlightArticle?.title} isRequired={true} name="title">
 						<Label>{t("Title")}</Label>
@@ -104,18 +108,23 @@ export function SpotlightArticleForm(props: Readonly<SpotlightArticleFormProps>)
 
 				<Separator className="my-6" />
 
-				<EntityRelationsFields
-					initialRelatedEntityIds={initialRelatedEntityIds}
-					initialRelatedEntityItems={initialRelatedEntityItems}
-					initialRelatedEntityTotal={initialRelatedEntityTotal}
-					initialRelatedResourceIds={initialRelatedResourceIds}
-					initialRelatedResourceItems={initialRelatedResourceItems}
-					initialRelatedResourceTotal={initialRelatedResourceTotal}
-					selectedRelatedEntities={selectedRelatedEntities}
-					selectedRelatedResources={selectedRelatedResources}
-				/>
+				{showRelationFields ? (
+					<Fragment>
+						<EntityRelationsFields
+							formId={formId}
+							initialRelatedEntityIds={initialRelatedEntityIds}
+							initialRelatedEntityItems={initialRelatedEntityItems}
+							initialRelatedEntityTotal={initialRelatedEntityTotal}
+							initialRelatedResourceIds={initialRelatedResourceIds}
+							initialRelatedResourceItems={initialRelatedResourceItems}
+							initialRelatedResourceTotal={initialRelatedResourceTotal}
+							selectedRelatedEntities={selectedRelatedEntities}
+							selectedRelatedResources={selectedRelatedResources}
+						/>
 
-				<Separator className="my-6" />
+						<Separator className="my-6" />
+					</Fragment>
+				) : null}
 
 				<FormSection description={t("Add the content.")} title={t("Content")} variant="stacked">
 					<ContentBlocks initialAssets={initialAssets} items={contentBlocks ?? []} />

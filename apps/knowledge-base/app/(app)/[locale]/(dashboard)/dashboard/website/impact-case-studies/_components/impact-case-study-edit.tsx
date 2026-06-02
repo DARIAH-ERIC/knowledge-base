@@ -9,6 +9,7 @@ import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import { ArticleContributorsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section";
 import { ImpactCaseStudyForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_components/impact-case-study-form";
 import { createImpactCaseStudyContributorAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/create-impact-case-study-contributor.action";
@@ -62,6 +63,7 @@ export function ImpactCaseStudyEditForm(props: Readonly<ImpactCaseStudyEditFormP
 	} = props;
 
 	const t = useExtracted();
+	const formId = "impact-case-study-edit-form";
 
 	return (
 		<Fragment>
@@ -70,6 +72,7 @@ export function ImpactCaseStudyEditForm(props: Readonly<ImpactCaseStudyEditFormP
 			<EntityEditTabs defaultTab="details">
 				<TabList aria-label={t("Edit impact case study")}>
 					<Tab id="details">{t("Details")}</Tab>
+					<Tab id="relations">{t("Relations")}</Tab>
 					<Tab id="contributors">{t("Contributors")}</Tab>
 				</TabList>
 
@@ -91,8 +94,20 @@ export function ImpactCaseStudyEditForm(props: Readonly<ImpactCaseStudyEditFormP
 					<ImpactCaseStudyForm
 						contentBlocks={contentBlocks}
 						formAction={updateImpactCaseStudyAction}
+						formId={formId}
 						impactCaseStudy={impactCaseStudy}
 						initialAssets={initialAssets}
+						initialRelatedEntityItems={initialRelatedEntityItems}
+						initialRelatedEntityTotal={initialRelatedEntityTotal}
+						initialRelatedResourceItems={initialRelatedResourceItems}
+						initialRelatedResourceTotal={initialRelatedResourceTotal}
+						showRelationFields={false}
+					/>
+				</TabPanel>
+
+				<TabPanel id="relations" shouldForceMount={true}>
+					<EntityRelationsFields
+						formId={formId}
 						initialRelatedEntityIds={initialRelatedEntityIds}
 						initialRelatedEntityItems={initialRelatedEntityItems}
 						initialRelatedEntityTotal={initialRelatedEntityTotal}

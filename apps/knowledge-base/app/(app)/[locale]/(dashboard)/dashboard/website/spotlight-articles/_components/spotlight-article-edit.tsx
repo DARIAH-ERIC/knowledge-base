@@ -9,6 +9,7 @@ import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import { ArticleContributorsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section";
 import { SpotlightArticleForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form";
 import { createSpotlightArticleContributorAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article-contributor.action";
@@ -64,6 +65,7 @@ export function SpotlightArticleEditForm(
 	} = props;
 
 	const t = useExtracted();
+	const formId = "spotlight-article-edit-form";
 
 	return (
 		<Fragment>
@@ -72,6 +74,7 @@ export function SpotlightArticleEditForm(
 			<EntityEditTabs defaultTab="details">
 				<TabList aria-label={t("Edit spotlight article")}>
 					<Tab id="details">{t("Details")}</Tab>
+					<Tab id="relations">{t("Relations")}</Tab>
 					<Tab id="contributors">{t("Contributors")}</Tab>
 				</TabList>
 
@@ -93,7 +96,20 @@ export function SpotlightArticleEditForm(
 					<SpotlightArticleForm
 						contentBlocks={contentBlocks}
 						formAction={updateSpotlightArticleAction}
+						formId={formId}
 						initialAssets={initialAssets}
+						initialRelatedEntityItems={initialRelatedEntityItems}
+						initialRelatedEntityTotal={initialRelatedEntityTotal}
+						initialRelatedResourceItems={initialRelatedResourceItems}
+						initialRelatedResourceTotal={initialRelatedResourceTotal}
+						showRelationFields={false}
+						spotlightArticle={spotlightArticle}
+					/>
+				</TabPanel>
+
+				<TabPanel id="relations" shouldForceMount={true}>
+					<EntityRelationsFields
+						formId={formId}
 						initialRelatedEntityIds={initialRelatedEntityIds}
 						initialRelatedEntityItems={initialRelatedEntityItems}
 						initialRelatedEntityTotal={initialRelatedEntityTotal}
@@ -102,7 +118,6 @@ export function SpotlightArticleEditForm(
 						initialRelatedResourceTotal={initialRelatedResourceTotal}
 						selectedRelatedEntities={selectedRelatedEntities}
 						selectedRelatedResources={selectedRelatedResources}
-						spotlightArticle={spotlightArticle}
 					/>
 				</TabPanel>
 

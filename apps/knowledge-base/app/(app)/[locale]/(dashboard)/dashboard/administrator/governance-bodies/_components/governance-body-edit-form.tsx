@@ -9,6 +9,7 @@ import { Fragment, type ReactNode } from "react";
 import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import { PersonRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { GovernanceBodyForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/governance-bodies/_components/governance-body-form";
@@ -76,6 +77,7 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 	} = props;
 
 	const t = useExtracted();
+	const formId = "governance-body-edit-form";
 
 	return (
 		<Fragment>
@@ -84,6 +86,7 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 			<EntityEditTabs defaultTab="details">
 				<TabList aria-label={t("Edit governance body")}>
 					<Tab id="details">{t("Details")}</Tab>
+					<Tab id="related">{t("Related")}</Tab>
 					<Tab id="people">{t("People")}</Tab>
 					<Tab id="relations">{t("Relations")}</Tab>
 				</TabList>
@@ -105,20 +108,32 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 
 					<GovernanceBodyForm
 						formAction={updateGovernanceBodyAction}
+						formId={formId}
 						governanceBody={governanceBody}
 						initialAssets={initialAssets}
+						initialRelatedEntityItems={initialRelatedEntityItems}
+						initialRelatedEntityTotal={initialRelatedEntityTotal}
+						initialRelatedResourceItems={initialRelatedResourceItems}
+						initialRelatedResourceTotal={initialRelatedResourceTotal}
+						initialSocialMediaIds={initialSocialMediaIds}
+						initialSocialMediaItems={initialSocialMediaItems}
+						initialSocialMediaTotal={initialSocialMediaTotal}
+						selectedSocialMediaItems={selectedSocialMediaItems}
+						showRelationFields={false}
+					/>
+				</TabPanel>
+
+				<TabPanel id="related" shouldForceMount={true}>
+					<EntityRelationsFields
+						formId={formId}
 						initialRelatedEntityIds={initialRelatedEntityIds}
 						initialRelatedEntityItems={initialRelatedEntityItems}
 						initialRelatedEntityTotal={initialRelatedEntityTotal}
 						initialRelatedResourceIds={initialRelatedResourceIds}
 						initialRelatedResourceItems={initialRelatedResourceItems}
 						initialRelatedResourceTotal={initialRelatedResourceTotal}
-						initialSocialMediaIds={initialSocialMediaIds}
-						initialSocialMediaItems={initialSocialMediaItems}
-						initialSocialMediaTotal={initialSocialMediaTotal}
 						selectedRelatedEntities={selectedRelatedEntities}
 						selectedRelatedResources={selectedRelatedResources}
-						selectedSocialMediaItems={selectedSocialMediaItems}
 					/>
 				</TabPanel>
 

@@ -33,6 +33,7 @@ interface WorkingGroupFormProps {
 		description?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
+	formId?: string;
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
 	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
@@ -46,12 +47,14 @@ interface WorkingGroupFormProps {
 	selectedRelatedEntities?: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources?: Array<{ id: string; name: string; description?: string }>;
 	selectedSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
+	showRelationFields?: boolean;
 }
 
 export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactNode {
 	const {
 		initialAssets,
 		formAction,
+		formId,
 		workingGroup,
 		initialRelatedEntityIds,
 		initialRelatedEntityItems,
@@ -65,6 +68,7 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 		selectedRelatedEntities,
 		selectedRelatedResources,
 		selectedSocialMediaItems,
+		showRelationFields = true,
 	} = props;
 
 	const t = useExtracted();
@@ -77,7 +81,7 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 
 	return (
 		<FormLayout>
-			<Form action={action} className="flex flex-col gap-y-6" state={state}>
+			<Form action={action} className="flex flex-col gap-y-6" id={formId} state={state}>
 				<FormSection description={t("Enter the working group details.")} title={t("Details")}>
 					<TextField defaultValue={workingGroup?.name} isRequired={true} name="name">
 						<Label>{t("Name")}</Label>
@@ -181,16 +185,19 @@ export function WorkingGroupForm(props: Readonly<WorkingGroupFormProps>): ReactN
 					</Fragment>
 				) : null}
 
-				<EntityRelationsFields
-					initialRelatedEntityIds={initialRelatedEntityIds}
-					initialRelatedEntityItems={initialRelatedEntityItems}
-					initialRelatedEntityTotal={initialRelatedEntityTotal}
-					initialRelatedResourceIds={initialRelatedResourceIds}
-					initialRelatedResourceItems={initialRelatedResourceItems}
-					initialRelatedResourceTotal={initialRelatedResourceTotal}
-					selectedRelatedEntities={selectedRelatedEntities}
-					selectedRelatedResources={selectedRelatedResources}
-				/>
+				{showRelationFields ? (
+					<EntityRelationsFields
+						formId={formId}
+						initialRelatedEntityIds={initialRelatedEntityIds}
+						initialRelatedEntityItems={initialRelatedEntityItems}
+						initialRelatedEntityTotal={initialRelatedEntityTotal}
+						initialRelatedResourceIds={initialRelatedResourceIds}
+						initialRelatedResourceItems={initialRelatedResourceItems}
+						initialRelatedResourceTotal={initialRelatedResourceTotal}
+						selectedRelatedEntities={selectedRelatedEntities}
+						selectedRelatedResources={selectedRelatedResources}
+					/>
+				) : null}
 
 				{workingGroup != null ? (
 					<Fragment>

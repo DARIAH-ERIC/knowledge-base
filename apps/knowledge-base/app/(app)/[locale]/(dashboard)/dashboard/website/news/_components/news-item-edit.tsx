@@ -1,11 +1,14 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Tab, TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
+import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import { NewsItemForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_components/news-item-form";
 import { discardNewsItemDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/discard-news-item-draft.action";
 import { publishNewsItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/news/_lib/publish-news-item.action";
@@ -49,6 +52,7 @@ export function NewsItemEditForm(props: Readonly<NewsItemEditFormProps>): ReactN
 	} = props;
 
 	const t = useExtracted();
+	const formId = "news-item-edit-form";
 
 	return (
 		<Fragment>
@@ -63,20 +67,41 @@ export function NewsItemEditForm(props: Readonly<NewsItemEditFormProps>): ReactN
 				}}
 			/>
 
-			<NewsItemForm
-				contentBlocks={contentBlocks}
-				formAction={updateNewsItemAction}
-				initialAssets={initialAssets}
-				initialRelatedEntityIds={initialRelatedEntityIds}
-				initialRelatedEntityItems={initialRelatedEntityItems}
-				initialRelatedEntityTotal={initialRelatedEntityTotal}
-				initialRelatedResourceIds={initialRelatedResourceIds}
-				initialRelatedResourceItems={initialRelatedResourceItems}
-				initialRelatedResourceTotal={initialRelatedResourceTotal}
-				newsItem={newsItem}
-				selectedRelatedEntities={selectedRelatedEntities}
-				selectedRelatedResources={selectedRelatedResources}
-			/>
+			<EntityEditTabs defaultTab="details">
+				<TabList aria-label={t("Edit news item")}>
+					<Tab id="details">{t("Details")}</Tab>
+					<Tab id="relations">{t("Relations")}</Tab>
+				</TabList>
+
+				<TabPanel id="details" shouldForceMount={true}>
+					<NewsItemForm
+						contentBlocks={contentBlocks}
+						formAction={updateNewsItemAction}
+						formId={formId}
+						initialAssets={initialAssets}
+						initialRelatedEntityItems={initialRelatedEntityItems}
+						initialRelatedEntityTotal={initialRelatedEntityTotal}
+						initialRelatedResourceItems={initialRelatedResourceItems}
+						initialRelatedResourceTotal={initialRelatedResourceTotal}
+						newsItem={newsItem}
+						showRelationFields={false}
+					/>
+				</TabPanel>
+
+				<TabPanel id="relations" shouldForceMount={true}>
+					<EntityRelationsFields
+						formId={formId}
+						initialRelatedEntityIds={initialRelatedEntityIds}
+						initialRelatedEntityItems={initialRelatedEntityItems}
+						initialRelatedEntityTotal={initialRelatedEntityTotal}
+						initialRelatedResourceIds={initialRelatedResourceIds}
+						initialRelatedResourceItems={initialRelatedResourceItems}
+						initialRelatedResourceTotal={initialRelatedResourceTotal}
+						selectedRelatedEntities={selectedRelatedEntities}
+						selectedRelatedResources={selectedRelatedResources}
+					/>
+				</TabPanel>
+			</EntityEditTabs>
 		</Fragment>
 	);
 }

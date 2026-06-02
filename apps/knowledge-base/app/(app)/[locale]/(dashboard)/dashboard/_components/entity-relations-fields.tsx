@@ -9,6 +9,7 @@ import { Fragment, type ReactNode, useState } from "react";
 import { FormSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 
 interface EntityRelationsFieldsProps {
+	formId?: string;
 	initialRelatedEntityIds?: Array<string>;
 	initialRelatedEntityItems: Array<AsyncOption>;
 	initialRelatedEntityTotal: number;
@@ -45,6 +46,7 @@ async function fetchRelationOptionsPage(
 
 export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps>): ReactNode {
 	const {
+		formId,
 		initialRelatedEntityIds,
 		initialRelatedEntityItems,
 		initialRelatedEntityTotal,
@@ -83,6 +85,7 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 				{selectedEntityIds.map((entityId, index) => (
 					<input
 						key={entityId}
+						form={formId}
 						name={`relatedEntityIds.${String(index)}`}
 						type="hidden"
 						value={entityId}
@@ -109,6 +112,7 @@ export function EntityRelationsFields(props: Readonly<EntityRelationsFieldsProps
 				{selectedResourceIds.map((resourceId, index) => (
 					<input
 						key={resourceId}
+						form={formId}
 						name={`relatedResourceIds.${String(index)}`}
 						type="hidden"
 						value={resourceId}
