@@ -81,7 +81,11 @@ export function NationalConsortiumEditForm(
 					<Tab id="relations">{t("Relations")}</Tab>
 				</TabList>
 
-				<TabPanel className="flex flex-col gap-y-(--layout-padding)" id="details">
+				<TabPanel
+					className="flex flex-col gap-y-(--layout-padding)"
+					id="details"
+					shouldForceMount={true}
+				>
 					<div className="flex justify-end">
 						<EntityLifecycleBar
 							discardDraftAction={discardNationalConsortiumDraftAction}
@@ -112,7 +116,7 @@ export function NationalConsortiumEditForm(
 					/>
 				</TabPanel>
 
-				<TabPanel id="relations">
+				<TabPanel id="relations" shouldForceMount={true}>
 					<UnitRelationsSection
 						relations={relations}
 						statusOptions={unitRelationStatusOptions}
