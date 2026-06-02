@@ -155,6 +155,7 @@ export const dariahProjects = p.snakeCase
 		id: p.uuid("id").notNull(),
 		metadata: p.jsonb("metadata"),
 		name: p.text("name").notNull(),
+		acronym: p.text("acronym"),
 		summary: p.text("summary").notNull(),
 		updatedAt: f.timestamp("updated_at").notNull(),
 		duration: f.timestampRange("duration").notNull(),

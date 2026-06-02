@@ -24,6 +24,7 @@ function createItems(count: number) {
 			const project = {
 				id: versionId,
 				name,
+				acronym: f.string.alpha({ length: { min: 3, max: 8 }, casing: "upper" }),
 				summary: f.lorem.paragraph(),
 				call: f.lorem.word(),
 				topic: f.lorem.word(),
@@ -97,6 +98,7 @@ async function seedWithMixedStatuses(db: Database) {
 			project: {
 				id: versionId,
 				name,
+				acronym: f.string.alpha({ length: { min: 3, max: 8 }, casing: "upper" }),
 				summary: f.lorem.paragraph(),
 				call: f.lorem.word(),
 				topic: f.lorem.word(),
@@ -233,6 +235,7 @@ describe("projects", () => {
 
 				const item = items.at(1)!;
 				const name = item.project.name;
+				const acronym = item.project.acronym;
 
 				const response = await client.projects.$get({
 					query: {
@@ -246,7 +249,9 @@ describe("projects", () => {
 				const data = await response.json();
 
 				expect(data.total).toBeGreaterThanOrEqual(items.length);
-				expect(data.data).toEqual(expect.arrayContaining([expect.objectContaining({ name })]));
+				expect(data.data).toEqual(
+					expect.arrayContaining([expect.objectContaining({ acronym, name })]),
+				);
 				expect(data.limit).toBe(limit);
 				expect(data.offset).toBe(offset);
 			});
@@ -339,6 +344,7 @@ describe("projects", () => {
 				const item = items.at(1)!;
 				const id = item.version.id;
 				const name = item.project.name;
+				const acronym = item.project.acronym;
 
 				await seedOrganisationalUnit(db, item.entity.id, "coordinator");
 				await seedOrganisationalUnit(db, item.entity.id, "participant");
@@ -353,7 +359,7 @@ describe("projects", () => {
 				/** @see {@link https://github.com/honojs/hono/issues/2280} */
 				const data = (await response.json()) as Project;
 
-				expect(data).toMatchObject({ name });
+				expect(data).toMatchObject({ acronym, name });
 				expect(data.partners).toHaveLength(2);
 				expect(data.funders).toHaveLength(1);
 				expect(data.description).toHaveLength(1);
@@ -432,6 +438,7 @@ describe("projects", () => {
 				const item = items.at(1)!;
 				const slug = item.entity.slug;
 				const name = item.project.name;
+				const acronym = item.project.acronym;
 
 				const response = await client.projects.slugs[":slug"].$get({
 					param: { slug },
@@ -442,7 +449,7 @@ describe("projects", () => {
 				const data = await response.json();
 
 				assert("description" in data);
-				expect(data).toMatchObject({ name });
+				expect(data).toMatchObject({ acronym, name });
 				expect(data.description).toHaveLength(1);
 				expect(data.description[0]).toMatchObject({ type: "rich_text" });
 			});

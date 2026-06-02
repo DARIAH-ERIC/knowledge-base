@@ -37,6 +37,7 @@ function createProjectData() {
 	const project = {
 		id: versionId,
 		name,
+		acronym: f.string.alpha({ length: { min: 3, max: 8 }, casing: "upper" }),
 		summary: f.lorem.paragraph(),
 		call: f.lorem.word(),
 		topic: f.lorem.word(),
@@ -180,6 +181,7 @@ async function seedWithMixedStatuses(db: Database): Promise<{
 			project: {
 				id: versionId,
 				name,
+				acronym: f.string.alpha({ length: { min: 3, max: 8 }, casing: "upper" }),
 				summary: f.lorem.paragraph(),
 				call: f.lorem.word(),
 				topic: f.lorem.word(),
@@ -264,6 +266,7 @@ describe("dariah-projects", () => {
 
 				const item = dariahItems.at(1)!;
 				const name = item.project.name;
+				const acronym = item.project.acronym;
 
 				const response = await client["dariah-projects"].$get({
 					query: {
@@ -278,7 +281,7 @@ describe("dariah-projects", () => {
 
 				expect(data.total).toBeGreaterThanOrEqual(dariahItems.length);
 				expect(data.data).toEqual(
-					expect.arrayContaining([expect.objectContaining({ name, role: "participant" })]),
+					expect.arrayContaining([expect.objectContaining({ acronym, name, role: "participant" })]),
 				);
 				expect(data.limit).toBe(limit);
 				expect(data.offset).toBe(offset);
@@ -370,6 +373,7 @@ describe("dariah-projects", () => {
 				const item = dariahItems.at(1)!;
 				const id = item.project.id;
 				const name = item.project.name;
+				const acronym = item.project.acronym;
 
 				const response = await client["dariah-projects"][":id"].$get({
 					param: { id },
@@ -380,7 +384,7 @@ describe("dariah-projects", () => {
 				/** @see {@link https://github.com/honojs/hono/issues/2280} */
 				const data = (await response.json()) as DariahProject;
 
-				expect(data).toMatchObject({ name });
+				expect(data).toMatchObject({ acronym, name });
 				expect(data.participants).toHaveLength(1);
 				expect(data.coordinators).toHaveLength(0);
 				expect(data.description).toHaveLength(1);

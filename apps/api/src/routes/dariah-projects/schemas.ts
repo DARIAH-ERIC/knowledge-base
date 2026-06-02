@@ -35,8 +35,15 @@ export const DariahProjectSocialMediaSchema = v.pipe(
 
 export const DariahProjectBaseSchema = v.pipe(
 	v.object({
-		...v.pick(schema.ProjectSelectSchema, ["id", "name", "summary", "call", "topic", "funding"])
-			.entries,
+		...v.pick(schema.ProjectSelectSchema, [
+			"id",
+			"name",
+			"acronym",
+			"summary",
+			"call",
+			"topic",
+			"funding",
+		]).entries,
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
 			end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
@@ -64,8 +71,15 @@ export type DariahProjectList = v.InferOutput<typeof DariahProjectListSchema>;
 
 export const DariahProjectSchema = v.pipe(
 	v.object({
-		...v.pick(schema.ProjectSelectSchema, ["id", "name", "summary", "call", "topic", "funding"])
-			.entries,
+		...v.pick(schema.ProjectSelectSchema, [
+			"id",
+			"name",
+			"acronym",
+			"summary",
+			"call",
+			"topic",
+			"funding",
+		]).entries,
 		image: v.nullable(v.object({ url: v.string() })),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),

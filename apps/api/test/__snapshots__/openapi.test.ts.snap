@@ -390,6 +390,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       "DariahProject": {
         "description": "DARIAH project",
         "properties": {
+          "acronym": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "call": {
             "anyOf": [
               {
@@ -700,13 +710,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -821,6 +829,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "required": [
           "id",
           "name",
+          "acronym",
           "summary",
           "call",
           "topic",
@@ -839,6 +848,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       "DariahProjectBase": {
         "description": "DARIAH project",
         "properties": {
+          "acronym": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "call": {
             "anyOf": [
               {
@@ -972,6 +991,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "required": [
           "id",
           "name",
+          "acronym",
           "summary",
           "call",
           "topic",
@@ -1877,13 +1897,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -2442,13 +2460,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -3929,13 +3945,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -4817,13 +4831,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -5351,13 +5363,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -6339,13 +6349,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -6848,13 +6856,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -7402,13 +7408,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -8139,6 +8143,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       "Project": {
         "description": "Project",
         "properties": {
+          "acronym": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "call": {
             "anyOf": [
               {
@@ -8482,6 +8496,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "required": [
           "id",
           "name",
+          "acronym",
           "summary",
           "call",
           "topic",
@@ -8500,6 +8515,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       "ProjectBase": {
         "description": "Project",
         "properties": {
+          "acronym": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "call": {
             "anyOf": [
               {
@@ -8617,6 +8642,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "required": [
           "id",
           "name",
+          "acronym",
           "summary",
           "call",
           "topic",
@@ -9340,13 +9366,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
@@ -9975,13 +9999,11 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
               "properties": {
                 "entityType": {
                   "enum": [
-                    "documentation_pages",
                     "documents_policies",
                     "events",
                     "external_links",
                     "funding_calls",
                     "impact_case_studies",
-                    "internal_pages",
                     "news",
                     "opportunities",
                     "organisational_units",
