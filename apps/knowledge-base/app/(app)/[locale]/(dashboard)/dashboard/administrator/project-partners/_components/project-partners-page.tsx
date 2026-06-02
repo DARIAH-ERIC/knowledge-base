@@ -237,13 +237,17 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 				title={t("Project partners")}
 				description={t("Review and manage project-to-organisation partner relations.")}
 				action={
-					<div className="flex items-center gap-2">
-						<Button onPress={openCreateDialog}>
-							<PlusIcon />
+					<>
+						<EntityListSearchField search={search} />
+						<Button
+							className="shrink-0 whitespace-pre"
+							intent="secondary"
+							onPress={openCreateDialog}
+						>
+							<PlusIcon className="me-2 block-4 inline-4" />
 							{t("Add partner")}
 						</Button>
-						<EntityListSearchField search={search} />
-					</div>
+					</>
 				}
 			/>
 
