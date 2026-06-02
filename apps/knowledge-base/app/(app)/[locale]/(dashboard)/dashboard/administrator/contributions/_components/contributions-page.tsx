@@ -281,13 +281,13 @@ export function ContributionsPage(props: Readonly<ContributionsPageProps>): Reac
 				title={t("Person relations")}
 				description={t("All person-to-organisation relations in the DARIAH knowledge base.")}
 				action={
-					<div className="flex items-center gap-2">
-						<Button onPress={openCreateDialog}>
-							<PlusIcon />
+					<>
+						<EntityListSearchField search={search} />
+						<Button intent="secondary" onPress={openCreateDialog}>
+							<PlusIcon className="me-2 block-4 inline-4" />
 							{t("Add relation")}
 						</Button>
-						<EntityListSearchField search={search} />
-					</div>
+					</>
 				}
 			/>
 
