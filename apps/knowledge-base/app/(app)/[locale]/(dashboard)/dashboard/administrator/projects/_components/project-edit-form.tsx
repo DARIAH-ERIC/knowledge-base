@@ -76,7 +76,11 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 					<Tab id="project-partners">{t("Project partners")}</Tab>
 				</TabList>
 
-				<TabPanel className="flex flex-col gap-y-(--layout-padding)" id="details">
+				<TabPanel
+					className="flex flex-col gap-y-(--layout-padding)"
+					id="details"
+					shouldForceMount={true}
+				>
 					<div className="flex justify-end">
 						<EntityLifecycleBar
 							discardDraftAction={discardProjectDraftAction}
@@ -99,7 +103,7 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 					/>
 				</TabPanel>
 
-				<TabPanel id="project-partners">
+				<TabPanel id="project-partners" shouldForceMount={true}>
 					<ProjectPartnersSection partners={initialPartners} projectId={documentId} roles={roles} />
 				</TabPanel>
 			</EntityEditTabs>

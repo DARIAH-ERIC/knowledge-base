@@ -88,7 +88,11 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 					<Tab id="relations">{t("Relations")}</Tab>
 				</TabList>
 
-				<TabPanel className="flex flex-col gap-y-(--layout-padding)" id="details">
+				<TabPanel
+					className="flex flex-col gap-y-(--layout-padding)"
+					id="details"
+					shouldForceMount={true}
+				>
 					<div className="flex justify-end">
 						<EntityLifecycleBar
 							discardDraftAction={discardGovernanceBodyDraftAction}
@@ -118,7 +122,7 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 					/>
 				</TabPanel>
 
-				<TabPanel id="people">
+				<TabPanel id="people" shouldForceMount={true}>
 					<PersonRelationsSection
 						initialPersonItems={initialPersonItems}
 						initialPersonTotal={initialPersonTotal}
@@ -128,7 +132,7 @@ export function GovernanceBodyEditForm(props: Readonly<GovernanceBodyEditFormPro
 					/>
 				</TabPanel>
 
-				<TabPanel id="relations">
+				<TabPanel id="relations" shouldForceMount={true}>
 					<UnitRelationsSection
 						relations={relations}
 						statusOptions={unitRelationStatusOptions}

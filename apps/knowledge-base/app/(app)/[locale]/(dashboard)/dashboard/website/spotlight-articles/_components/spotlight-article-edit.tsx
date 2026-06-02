@@ -75,7 +75,11 @@ export function SpotlightArticleEditForm(
 					<Tab id="contributors">{t("Contributors")}</Tab>
 				</TabList>
 
-				<TabPanel className="flex flex-col gap-y-(--layout-padding)" id="details">
+				<TabPanel
+					className="flex flex-col gap-y-(--layout-padding)"
+					id="details"
+					shouldForceMount={true}
+				>
 					<div className="flex justify-end">
 						<EntityLifecycleBar
 							discardDraftAction={discardSpotlightArticleDraftAction}
@@ -102,7 +106,7 @@ export function SpotlightArticleEditForm(
 					/>
 				</TabPanel>
 
-				<TabPanel id="contributors">
+				<TabPanel id="contributors" shouldForceMount={true}>
 					<ArticleContributorsSection
 						articleId={documentId}
 						contributors={contributors}
