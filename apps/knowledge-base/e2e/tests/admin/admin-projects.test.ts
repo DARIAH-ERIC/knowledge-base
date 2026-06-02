@@ -150,14 +150,16 @@ test.describe("projects admin", () => {
 		);
 	});
 
-	test("should persist project relation fields", async ({ page, createAdminProjectsPage, db }) => {
+	test("should persist project social media fields", async ({
+		page,
+		createAdminProjectsPage,
+		db,
+	}) => {
 		const workerIndex = test.info().workerIndex;
 		const adminProjectsPage = createAdminProjectsPage(workerIndex);
 		const originalName = `${adminProjectsPage.workerPrefix} Relations ${randomUUID()}`;
 		const socialMediaName = `${adminProjectsPage.workerPrefix} Relation Project Social ${randomUUID()}`;
 		const socialMediaUrl = "https://example.com/project-social-relations";
-		const [partnerUnit] = await db.getOrganisationalUnitOptions(1);
-		expect(partnerUnit).toBeDefined();
 
 		await adminProjectsPage.gotoCreate();
 		await adminProjectsPage.fillName(originalName);
@@ -180,22 +182,12 @@ test.describe("projects admin", () => {
 		const updatedName = `${adminProjectsPage.workerPrefix} Relations Updated ${randomUUID()}`;
 		await page.getByRole("main").getByLabel("Name").fill(updatedName);
 		await adminProjectsPage.createSocialMediaInForm(socialMediaName, socialMediaUrl);
-		await adminProjectsPage.addPartner(partnerUnit!.name);
 		await adminProjectsPage.submitForm();
 
 		const socialMedia = await db.getSocialMediaByName(socialMediaName);
 		expect(socialMedia).toMatchObject({ name: socialMediaName, url: socialMediaUrl });
 		const relations = await db.getProjectRelationsByName(updatedName);
 		expect(relations?.socialMediaIds).toContain(socialMedia!.id);
-		expect(relations?.partners).toStrictEqual([
-			expect.objectContaining({
-				duration: {
-					start: new Date("2024-03-01T00:00:00.000Z"),
-					end: new Date("2024-09-30T00:00:00.000Z"),
-				},
-				unitId: partnerUnit!.id,
-			}),
-		]);
 	});
 
 	test("should clear optional project fields", async ({ page, createAdminProjectsPage, db }) => {
@@ -203,8 +195,6 @@ test.describe("projects admin", () => {
 		const adminProjectsPage = createAdminProjectsPage(workerIndex);
 		const originalName = `${adminProjectsPage.workerPrefix} Clear Optional ${randomUUID()}`;
 		const socialMediaName = `${adminProjectsPage.workerPrefix} Clear Project Social ${randomUUID()}`;
-		const [partnerUnit] = await db.getOrganisationalUnitOptions(1);
-		expect(partnerUnit).toBeDefined();
 
 		await adminProjectsPage.gotoCreate();
 		await adminProjectsPage.fillName(originalName);
@@ -222,7 +212,6 @@ test.describe("projects admin", () => {
 			socialMediaName,
 			"https://example.com/project-clear",
 		);
-		await adminProjectsPage.addPartner(partnerUnit!.name);
 		await adminProjectsPage.submitForm();
 
 		await adminProjectsPage.searchByName(originalName);
@@ -243,7 +232,6 @@ test.describe("projects admin", () => {
 		await adminProjectsPage.clearDatePicker("End date");
 		await adminProjectsPage.removeImage();
 		await adminProjectsPage.removeAllTagsInControl("Social media");
-		await adminProjectsPage.removeAllPartners();
 		await adminProjectsPage.submitForm();
 
 		const updated = await db.getProjectByName(updatedName);
@@ -256,7 +244,7 @@ test.describe("projects admin", () => {
 		});
 		expect(updated?.duration?.end).toBeUndefined();
 		const relations = await db.getProjectRelationsByName(updatedName);
-		expect(relations).toMatchObject({ partners: [], socialMediaIds: [] });
+		expect(relations).toMatchObject({ socialMediaIds: [] });
 	});
 
 	test("should delete a project", async ({ createAdminProjectsPage }) => {

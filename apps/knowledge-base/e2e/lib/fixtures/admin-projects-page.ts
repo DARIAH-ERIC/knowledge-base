@@ -1,6 +1,7 @@
 import { type Locator, type Page, expect } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
+import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
 import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
 
@@ -138,13 +139,6 @@ export class AdminProjectsPage {
 		}
 	}
 
-	async removeAllPartners(): Promise<void> {
-		const removeButtons = this.page.getByRole("button", { name: "Remove partner" });
-		while ((await removeButtons.count()) > 0) {
-			await removeButtons.first().click();
-		}
-	}
-
 	async createSocialMediaInForm(name: string, url: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Create social media" }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Create social media" });
@@ -160,13 +154,21 @@ export class AdminProjectsPage {
 		await expect(this.page.getByText(name, { exact: true })).toBeVisible();
 	}
 
-	async addPartner(unitName: string): Promise<void> {
+	async goToProjectPartnersTab(): Promise<void> {
+		await this.page.getByRole("tab", { name: "Project partners" }).click();
+	}
+
+	projectPartnersTable(): Locator {
+		return this.page.getByRole("grid", { name: "project partners" });
+	}
+
+	async addProjectPartner(unitName: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Add partner" }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Add partner" });
-		const organisationControl = dialog
+		const partnerControl = dialog
 			.locator('[data-slot="control"]')
-			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: "Organisation" }) });
-		await organisationControl.locator("button[aria-expanded]:not([slot])").click();
+			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: "Partner" }) });
+		await partnerControl.locator("button[aria-expanded]:not([slot])").click();
 		await this.page.getByRole("searchbox").fill(unitName);
 		await this.page.keyboard.press("Enter");
 		const option = this.page.getByRole("option", { name: unitName, exact: true });
@@ -177,11 +179,70 @@ export class AdminProjectsPage {
 			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: "Role" }) });
 		await roleControl.locator("button[aria-expanded]:not([slot])").click();
 		await this.page.getByRole("option").first().click();
-		await this.fillDatePicker("Start date (optional)", 2024, 3, 1);
-		await this.fillDatePicker("End date (optional)", 2024, 9, 30);
-		await dialog.getByRole("button", { name: "Add" }).click();
+		await this.fillProjectPartnerDate("Start date", 2024, 3, 1);
+		await this.fillProjectPartnerDate("End date", 2024, 9, 30);
+		await waitForActionSuccess({
+			page: this.page,
+			trigger: async () => {
+				await dialog.getByRole("button", { name: "Save" }).click();
+			},
+		});
 		await dialog.waitFor({ state: "hidden" });
 		await expect(this.page.getByText(unitName, { exact: true })).toBeVisible();
+	}
+
+	async clickEditProjectPartner(): Promise<void> {
+		await this.projectPartnersTable().getByRole("button", { name: "Edit partner" }).first().click();
+	}
+
+	async fillProjectPartnerEditDate(
+		label: string,
+		year: number,
+		month: number,
+		day: number,
+	): Promise<void> {
+		const dialog = this.page.getByRole("dialog", { name: "Edit partner" });
+		await this.fillProjectPartnerDate(label, year, month, day, dialog);
+	}
+
+	async saveProjectPartnerEdit(): Promise<void> {
+		const dialog = this.page.getByRole("dialog", { name: "Edit partner" });
+		await waitForActionSuccess({
+			page: this.page,
+			trigger: async () => {
+				await dialog.getByRole("button", { name: "Save" }).click();
+			},
+		});
+		await dialog.waitFor({ state: "hidden" });
+	}
+
+	async clickDeleteProjectPartner(): Promise<void> {
+		await this.projectPartnersTable()
+			.getByRole("button", { name: "Delete partner" })
+			.first()
+			.click();
+	}
+
+	async confirmDeleteProjectPartner(): Promise<void> {
+		const dialog = this.page.getByRole("alertdialog", { name: "Delete project partner" });
+		await dialog.getByRole("button", { name: "Delete" }).click();
+		await dialog.waitFor({ state: "hidden" });
+	}
+
+	private async fillProjectPartnerDate(
+		label: string,
+		year: number,
+		month: number,
+		day: number,
+		scope: Locator = this.page.getByRole("dialog", { name: "Add partner" }),
+	): Promise<void> {
+		const group = scope.getByRole("group", { name: label });
+		await group.getByRole("spinbutton", { name: /day/i }).click();
+		await this.page.keyboard.type(String(day).padStart(2, "0"));
+		await group.getByRole("spinbutton", { name: /month/i }).click();
+		await this.page.keyboard.type(String(month).padStart(2, "0"));
+		await group.getByRole("spinbutton", { name: /year/i }).click();
+		await this.page.keyboard.type(String(year));
 	}
 
 	async submitForm(): Promise<void> {

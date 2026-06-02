@@ -202,9 +202,7 @@ interface GetProjectOptionsParams {
 	q?: string;
 }
 
-export async function getProjectOptions(
-	params: Readonly<GetProjectOptionsParams> = {},
-): Promise<{
+export async function getProjectOptions(params: Readonly<GetProjectOptionsParams> = {}): Promise<{
 	items: Array<{ id: string; name: string; description: string | undefined }>;
 	total: number;
 }> {

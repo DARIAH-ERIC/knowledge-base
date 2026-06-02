@@ -63,7 +63,7 @@ export const upsertProjectPartnerAction = createServerAction(
 			return createActionStateError({ message: t("This partner already exists.") });
 		}
 
-		await db.transaction(async (tx) => {
+		const partnerId = await db.transaction(async (tx) => {
 			const row =
 				id != null
 					? await tx
@@ -97,9 +97,11 @@ export const upsertProjectPartnerAction = createServerAction(
 				subjectId: row.id,
 				summary: getAuditSummaryFromFormData(formData),
 			});
+
+			return row.id;
 		});
 
 		revalidatePath("/[locale]/dashboard/administrator", "layout");
-		return createActionStateSuccess({});
+		return createActionStateSuccess({ data: { id: partnerId } });
 	},
 );
