@@ -2,7 +2,12 @@ import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
-import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
+import {
+	PaginatedResponseSchema,
+	PaginationQuerySchema,
+	RelatedEntitiesSchema,
+	RelatedResourcesSchema,
+} from "@/lib/schemas";
 
 export const PageBaseSchema = v.pipe(
 	v.object({
@@ -32,28 +37,8 @@ export const PageSchema = v.pipe(
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		content: v.optional(v.array(ContentBlockSchema), []),
-		relatedEntities: v.optional(
-			v.array(
-				v.object({
-					id: v.pipe(v.string(), v.uuid()),
-					slug: v.string(),
-					entityType: v.string(),
-					label: v.nullable(v.string()),
-				}),
-			),
-			[],
-		),
-		relatedResources: v.optional(
-			v.array(
-				v.object({
-					id: v.string(),
-					label: v.string(),
-					type: v.nullable(v.string()),
-					links: v.array(v.string()),
-				}),
-			),
-			[],
-		),
+		relatedEntities: v.optional(RelatedEntitiesSchema, []),
+		relatedResources: v.optional(RelatedResourcesSchema, []),
 	}),
 	v.description("Page"),
 	v.metadata({ ref: "Page" }),

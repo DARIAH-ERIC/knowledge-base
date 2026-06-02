@@ -1,3 +1,4 @@
+import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { maxLimit } from "~/config/api.config";
@@ -23,3 +24,21 @@ export const PaginatedResponseSchema = v.object({
 	offset: v.number(),
 	total: v.number(),
 });
+
+export const RelatedEntitiesSchema = v.array(
+	v.object({
+		id: v.pipe(v.string(), v.uuid()),
+		slug: v.string(),
+		entityType: v.picklist(schema.entityTypesEnum),
+		label: v.nullable(v.string()),
+	}),
+);
+
+export const RelatedResourcesSchema = v.array(
+	v.object({
+		id: v.string(),
+		label: v.string(),
+		type: v.nullable(v.string()),
+		links: v.array(v.string()),
+	}),
+);

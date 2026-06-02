@@ -4,6 +4,13 @@ import type { Database, Transaction } from "@/middlewares/db";
 import { alias, and, eq, sql } from "@/services/db/sql";
 import { search } from "@/services/search";
 
+export interface RelatedEntity {
+	id: string;
+	slug: string;
+	entityType: (typeof schema.entityTypesEnum)[number];
+	label: string | null;
+}
+
 /**
  * Resolve a (published/draft) entity version id to its owning document id (`entities.id`). Returns
  * the input unchanged when it is already a document id (no matching version row). Use this to
@@ -19,8 +26,10 @@ export async function resolveDocumentId(db: Database | Transaction, id: string):
 	return entityVersion?.entityId ?? id;
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function getRelatedEntities(db: Database | Transaction, entityId: string) {
+export async function getRelatedEntities(
+	db: Database | Transaction,
+	entityId: string,
+): Promise<Array<RelatedEntity>> {
 	const documentId = await resolveDocumentId(db, entityId);
 	const publishedEntityVersions = alias(schema.entityVersions, "published_entity_versions");
 	const publishedEntityStatus = alias(schema.entityStatus, "published_entity_status");

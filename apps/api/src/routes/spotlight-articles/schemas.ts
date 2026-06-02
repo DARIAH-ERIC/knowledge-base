@@ -2,7 +2,12 @@ import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
-import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
+import {
+	PaginatedResponseSchema,
+	PaginationQuerySchema,
+	RelatedEntitiesSchema,
+	RelatedResourcesSchema,
+} from "@/lib/schemas";
 
 export const SpotlightArticleBaseSchema = v.pipe(
 	v.object({
@@ -32,17 +37,7 @@ export const SpotlightArticleSchema = v.pipe(
 		entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 		publishedAt: v.pipe(v.string(), v.isoTimestamp()),
 		content: v.optional(v.array(ContentBlockSchema), []),
-		relatedEntities: v.optional(
-			v.array(
-				v.object({
-					id: v.pipe(v.string(), v.uuid()),
-					slug: v.string(),
-					entityType: v.string(),
-					label: v.nullable(v.string()),
-				}),
-			),
-			[],
-		),
+		relatedEntities: v.optional(RelatedEntitiesSchema, []),
 		contributors: v.array(
 			v.object({
 				...v.pick(schema.PersonSelectSchema, ["id", "name"]).entries,
@@ -60,17 +55,7 @@ export const SpotlightArticleSchema = v.pipe(
 				role: v.picklist(schema.articleContributorRolesEnum),
 			}),
 		),
-		relatedResources: v.optional(
-			v.array(
-				v.object({
-					id: v.string(),
-					label: v.string(),
-					type: v.nullable(v.string()),
-					links: v.array(v.string()),
-				}),
-			),
-			[],
-		),
+		relatedResources: v.optional(RelatedResourcesSchema, []),
 	}),
 	v.description("Spotlight article"),
 	v.metadata({ ref: "SpotlightArticle" }),
