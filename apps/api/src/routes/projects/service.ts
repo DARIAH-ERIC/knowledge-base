@@ -41,6 +41,7 @@ export async function getProjects(db: Database | Transaction, params: GetProject
 			columns: {
 				id: true,
 				name: true,
+				acronym: true,
 				summary: true,
 				duration: true,
 				call: true,
@@ -150,6 +151,7 @@ export async function getProjectById(db: Database | Transaction, params: GetProj
 			columns: {
 				id: true,
 				name: true,
+				acronym: true,
 				summary: true,
 				duration: true,
 				call: true,
@@ -315,6 +317,7 @@ export async function getProjectBySlug(db: Database | Transaction, params: GetPr
 		columns: {
 			id: true,
 			name: true,
+			acronym: true,
 			summary: true,
 			duration: true,
 			call: true,

@@ -1,13 +1,18 @@
 import * as schema from "@dariah-eric/database/schema";
 
 import type { Database, Transaction } from "@/middlewares/db";
-import { alias, and, eq, sql } from "@/services/db/sql";
+import { alias, and, eq, notInArray, sql } from "@/services/db/sql";
 import { search } from "@/services/search";
+
+type RelatedEntityType = Exclude<
+	(typeof schema.entityTypesEnum)[number],
+	"documentation_pages" | "internal_pages"
+>;
 
 export interface RelatedEntity {
 	id: string;
 	slug: string;
-	entityType: (typeof schema.entityTypesEnum)[number];
+	entityType: RelatedEntityType;
 	label: string | null;
 }
 
@@ -38,7 +43,7 @@ export async function getRelatedEntities(
 		.select({
 			id: schema.entities.id,
 			slug: schema.entities.slug,
-			entityType: schema.entityTypes.type,
+			entityType: sql<RelatedEntityType>`${schema.entityTypes.type}`.as("entityType"),
 			label: sql<string>`
 				COALESCE(
 					${schema.news.title},
@@ -78,7 +83,12 @@ export async function getRelatedEntities(
 			eq(publishedEntityVersions.id, schema.organisationalUnits.id),
 		)
 		.leftJoin(schema.projects, eq(publishedEntityVersions.id, schema.projects.id))
-		.where(eq(schema.entitiesToEntities.entityId, documentId));
+		.where(
+			and(
+				eq(schema.entitiesToEntities.entityId, documentId),
+				notInArray(schema.entityTypes.type, ["documentation_pages", "internal_pages"]),
+			),
+		);
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types

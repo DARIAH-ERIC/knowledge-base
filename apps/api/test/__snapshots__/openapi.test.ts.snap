@@ -390,6 +390,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       "DariahProject": {
         "description": "DARIAH project",
         "properties": {
+          "acronym": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "call": {
             "anyOf": [
               {
@@ -821,6 +831,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "required": [
           "id",
           "name",
+          "acronym",
           "summary",
           "call",
           "topic",
@@ -839,6 +850,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       "DariahProjectBase": {
         "description": "DARIAH project",
         "properties": {
+          "acronym": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "call": {
             "anyOf": [
               {
@@ -972,6 +993,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "required": [
           "id",
           "name",
+          "acronym",
           "summary",
           "call",
           "topic",
@@ -8139,6 +8161,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       "Project": {
         "description": "Project",
         "properties": {
+          "acronym": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "call": {
             "anyOf": [
               {
@@ -8482,6 +8514,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "required": [
           "id",
           "name",
+          "acronym",
           "summary",
           "call",
           "topic",
@@ -8500,6 +8533,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       "ProjectBase": {
         "description": "Project",
         "properties": {
+          "acronym": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "call": {
             "anyOf": [
               {
@@ -8617,6 +8660,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "required": [
           "id",
           "name",
+          "acronym",
           "summary",
           "call",
           "topic",

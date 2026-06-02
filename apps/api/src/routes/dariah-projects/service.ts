@@ -80,6 +80,7 @@ export async function getDariahProjects(
 			columns: {
 				id: true,
 				name: true,
+				acronym: true,
 				summary: true,
 				duration: true,
 				call: true,
@@ -189,6 +190,7 @@ export async function getDariahProjectById(
 			columns: {
 				id: true,
 				name: true,
+				acronym: true,
 				summary: true,
 				duration: true,
 				call: true,
@@ -349,6 +351,7 @@ export async function getDariahProjectBySlug(
 		columns: {
 			id: true,
 			name: true,
+			acronym: true,
 			summary: true,
 			duration: true,
 			call: true,

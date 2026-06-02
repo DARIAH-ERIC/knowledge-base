@@ -31,8 +31,15 @@ export const ProjectSocialMediaSchema = v.pipe(
 
 export const ProjectBaseSchema = v.pipe(
 	v.object({
-		...v.pick(schema.ProjectSelectSchema, ["id", "name", "summary", "call", "topic", "funding"])
-			.entries,
+		...v.pick(schema.ProjectSelectSchema, [
+			"id",
+			"name",
+			"acronym",
+			"summary",
+			"call",
+			"topic",
+			"funding",
+		]).entries,
 		image: v.nullable(v.object({ url: v.string() })),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),
@@ -59,8 +66,15 @@ export type ProjectList = v.InferOutput<typeof ProjectListSchema>;
 
 export const ProjectSchema = v.pipe(
 	v.object({
-		...v.pick(schema.ProjectSelectSchema, ["id", "name", "summary", "call", "topic", "funding"])
-			.entries,
+		...v.pick(schema.ProjectSelectSchema, [
+			"id",
+			"name",
+			"acronym",
+			"summary",
+			"call",
+			"topic",
+			"funding",
+		]).entries,
 		image: v.nullable(v.object({ url: v.string() })),
 		duration: v.object({
 			start: v.pipe(v.string(), v.isoTimestamp()),

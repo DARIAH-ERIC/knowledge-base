@@ -3,6 +3,15 @@ import * as v from "valibot";
 
 import { maxLimit } from "~/config/api.config";
 
+export type RelatedEntityType = Exclude<
+	(typeof schema.entityTypesEnum)[number],
+	"documentation_pages" | "internal_pages"
+>;
+
+export const relatedEntityTypesEnum = schema.entityTypesEnum.filter(
+	(entityType) => entityType !== "documentation_pages" && entityType !== "internal_pages",
+) as Array<RelatedEntityType>;
+
 export const PaginationQuerySchema = v.object({
 	limit: v.pipe(
 		v.optional(
@@ -29,7 +38,7 @@ export const RelatedEntitiesSchema = v.array(
 	v.object({
 		id: v.pipe(v.string(), v.uuid()),
 		slug: v.string(),
-		entityType: v.picklist(schema.entityTypesEnum),
+		entityType: v.picklist(relatedEntityTypesEnum),
 		label: v.nullable(v.string()),
 	}),
 );
