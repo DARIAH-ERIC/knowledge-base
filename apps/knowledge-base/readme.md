@@ -1,3 +1,3 @@
-# dariah knowledge base
+# @dariah-eric/app
 
-deployed at <https://knowledgebase.dariah.eu>.
+dariah knowledge base, deployed at <https://knowledgebase.dariah.eu>.
