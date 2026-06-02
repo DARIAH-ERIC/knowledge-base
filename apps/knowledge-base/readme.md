@@ -1,3 +1,3 @@
 # dariah knowledge base
 
-deployed at <https://knowledgebase.dariah.eu>!
+deployed at <https://knowledgebase.dariah.eu>.

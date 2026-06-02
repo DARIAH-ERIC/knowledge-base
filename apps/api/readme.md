@@ -1,4 +1,4 @@
-# dariah knowledge base api server
+# dariah knowledge base api
 
 deployed at <https://knowledgebase-api.dariah.eu>.
 
