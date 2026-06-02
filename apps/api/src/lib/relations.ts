@@ -5,11 +5,6 @@ import type { Database, Transaction } from "@/middlewares/db";
 import { alias, and, eq, notInArray, sql } from "@/services/db/sql";
 import { search } from "@/services/search";
 
-type RelatedEntityType = Exclude<
-	(typeof schema.entityTypesEnum)[number],
-	"documentation_pages" | "internal_pages"
->;
-
 export interface RelatedEntity {
 	id: string;
 	slug: string;
