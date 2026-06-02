@@ -239,7 +239,11 @@ export function ProjectPartnersPage(props: Readonly<ProjectPartnersPageProps>): 
 				action={
 					<>
 						<EntityListSearchField search={search} />
-						<Button intent="secondary" onPress={openCreateDialog}>
+						<Button
+							className="shrink-0 whitespace-pre"
+							intent="secondary"
+							onPress={openCreateDialog}
+						>
 							<PlusIcon className="me-2 block-4 inline-4" />
 							{t("Add partner")}
 						</Button>
