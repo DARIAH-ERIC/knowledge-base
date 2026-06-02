@@ -14,17 +14,5 @@ export const UpdateProjectActionInputSchema = v.object({
 	topic: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	imageKey: v.nullish(v.pipe(v.string(), v.nonEmpty()), null),
 	description: v.optional(v.pipe(v.string(), v.nonEmpty())),
-	partners: v.optional(
-		v.array(
-			v.object({
-				id: v.optional(v.pipe(v.string(), v.uuid())),
-				unitId: v.pipe(v.string(), v.uuid()),
-				roleId: v.pipe(v.string(), v.uuid()),
-				durationStart: v.optional(v.pipe(v.string(), v.isoDate(), v.toDate())),
-				durationEnd: v.optional(v.pipe(v.string(), v.isoDate(), v.toDate())),
-			}),
-		),
-		[],
-	),
 	socialMediaIds: v.optional(v.array(v.pipe(v.string(), v.uuid())), []),
 });

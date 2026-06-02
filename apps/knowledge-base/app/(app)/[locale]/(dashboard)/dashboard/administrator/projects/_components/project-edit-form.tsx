@@ -1,12 +1,16 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
+import { Tab, TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
+import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
+import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { ProjectForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form";
+import { ProjectPartnersSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-partners-section";
 import { discardProjectDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/discard-project-draft.action";
 import { publishProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/publish-project.action";
 import { updateProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/update-project.action";
@@ -28,8 +32,6 @@ interface ProjectEditFormProps {
 		scope: Pick<schema.ProjectScope, "id" | "scope">;
 	} & { image: { key: string; label: string; url: string } | null };
 	scopes: Array<Pick<schema.ProjectScope, "id" | "scope">>;
-	initialOrgUnitItems: Array<{ id: string; name: string }>;
-	initialOrgUnitTotal: number;
 	roles: Array<Pick<schema.ProjectRole, "id" | "role">>;
 	initialSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
 	initialSocialMediaTotal: number;
@@ -40,8 +42,8 @@ interface ProjectEditFormProps {
 		unitName: string;
 		roleId: string;
 		roleName: string;
-		durationStart: string | null;
-		durationEnd: string | null;
+		durationStart: Date | null;
+		durationEnd: Date | null;
 	}>;
 	initialSocialMediaIds: Array<string>;
 }
@@ -54,8 +56,6 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 		isPublished,
 		project,
 		scopes,
-		initialOrgUnitItems,
-		initialOrgUnitTotal,
 		roles,
 		initialSocialMediaItems,
 		initialSocialMediaTotal,
@@ -68,31 +68,41 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 
 	return (
 		<Fragment>
-			<EntityFormHeader
-				title={t("Edit project")}
-				lifecycle={{
-					documentId,
-					hasDraft: hasDraftChanges,
-					isPublished,
-					publishAction: publishProjectAction,
-					discardDraftAction: discardProjectDraftAction,
-				}}
-			/>
+			<EntityFormHeader title={t("Edit project")} />
 
-			<ProjectForm
-				formAction={updateProjectAction}
-				initialAssets={initialAssets}
-				initialOrgUnitItems={initialOrgUnitItems}
-				initialOrgUnitTotal={initialOrgUnitTotal}
-				initialPartners={initialPartners}
-				initialSocialMediaIds={initialSocialMediaIds}
-				initialSocialMediaItems={initialSocialMediaItems}
-				initialSocialMediaTotal={initialSocialMediaTotal}
-				project={project}
-				roles={roles}
-				scopes={scopes}
-				selectedSocialMediaItems={selectedSocialMediaItems}
-			/>
+			<EntityEditTabs defaultTab="details">
+				<TabList aria-label={t("Edit project")}>
+					<Tab id="details">{t("Details")}</Tab>
+					<Tab id="project-partners">{t("Project partners")}</Tab>
+				</TabList>
+
+				<TabPanel className="flex flex-col gap-y-(--layout-padding)" id="details">
+					<div className="flex justify-end">
+						<EntityLifecycleBar
+							discardDraftAction={discardProjectDraftAction}
+							documentId={documentId}
+							hasDraft={hasDraftChanges}
+							isPublished={isPublished}
+							publishAction={publishProjectAction}
+						/>
+					</div>
+
+					<ProjectForm
+						formAction={updateProjectAction}
+						initialAssets={initialAssets}
+						initialSocialMediaIds={initialSocialMediaIds}
+						initialSocialMediaItems={initialSocialMediaItems}
+						initialSocialMediaTotal={initialSocialMediaTotal}
+						project={project}
+						scopes={scopes}
+						selectedSocialMediaItems={selectedSocialMediaItems}
+					/>
+				</TabPanel>
+
+				<TabPanel id="project-partners">
+					<ProjectPartnersSection partners={initialPartners} projectId={documentId} roles={roles} />
+				</TabPanel>
+			</EntityEditTabs>
 		</Fragment>
 	);
 }

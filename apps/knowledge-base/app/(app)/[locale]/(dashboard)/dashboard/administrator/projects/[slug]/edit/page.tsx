@@ -9,10 +9,7 @@ import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
-import {
-	getOrganisationalUnitOptions,
-	getOrganisationalUnitOptionsByIds,
-} from "@/lib/data/organisational-units";
+import { getOrganisationalUnitOptionsByIds } from "@/lib/data/organisational-units";
 import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { db } from "@/lib/db";
@@ -122,7 +119,6 @@ export default async function DashboardAdministratorEditProjectPage(
 	const [
 		descriptionRows,
 		scopes,
-		initialOrgUnits,
 		roles,
 		initialSocialMedia,
 		existingPartners,
@@ -148,7 +144,6 @@ export default async function DashboardAdministratorEditProjectPage(
 			orderBy: { scope: "asc" },
 			columns: { id: true, scope: true },
 		}),
-		getOrganisationalUnitOptions(),
 		db.query.projectRoles.findMany({
 			orderBy: { role: "asc" },
 			columns: { id: true, role: true },
@@ -194,10 +189,8 @@ export default async function DashboardAdministratorEditProjectPage(
 			unitName: partner.unitName,
 			roleId: partner.roleId,
 			roleName: partner.roleName,
-			durationStart:
-				partner.duration?.start != null ? partner.duration.start.toISOString().slice(0, 10) : null,
-			durationEnd:
-				partner.duration?.end != null ? partner.duration.end.toISOString().slice(0, 10) : null,
+			durationStart: partner.duration?.start ?? null,
+			durationEnd: partner.duration?.end ?? null,
 		};
 	});
 
@@ -232,8 +225,6 @@ export default async function DashboardAdministratorEditProjectPage(
 			documentId={documentId}
 			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
-			initialOrgUnitItems={initialOrgUnits.items}
-			initialOrgUnitTotal={initialOrgUnits.total}
 			initialPartners={resolvedPartners}
 			initialSocialMediaIds={initialSocialMediaIds}
 			initialSocialMediaItems={initialSocialMedia.items}

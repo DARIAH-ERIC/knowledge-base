@@ -4,7 +4,6 @@ import type * as schema from "@dariah-eric/database/schema";
 import { socialMediaTypesEnum } from "@dariah-eric/database/schema";
 import { type ActionState, createActionStateInitial } from "@dariah-eric/next-lib/actions";
 import { AsyncMultipleSelect } from "@dariah-eric/ui/async-multiple-select";
-import { AsyncSelect } from "@dariah-eric/ui/async-select";
 import { Button } from "@dariah-eric/ui/button";
 import { DatePicker, DatePickerTrigger } from "@dariah-eric/ui/date-picker";
 import { Description, FieldError, Label, fieldErrorStyles } from "@dariah-eric/ui/field";
@@ -26,8 +25,8 @@ import { Separator } from "@dariah-eric/ui/separator";
 import { TextField } from "@dariah-eric/ui/text-field";
 import { TextArea } from "@dariah-eric/ui/textarea";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
-import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/20/solid";
-import { CalendarDate, parseDate } from "@internationalized/date";
+import { PlusIcon } from "@heroicons/react/20/solid";
+import { CalendarDate } from "@internationalized/date";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useActionState, useState, useTransition } from "react";
@@ -43,60 +42,6 @@ import {
 	createSocialMediaAction,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/create-social-media.action";
 import type { ServerAction } from "@/lib/server/create-server-action";
-
-interface PartnerEntry {
-	_tempId: string;
-	existingId: string | null;
-	unitId: string;
-	unitName: string;
-	roleId: string;
-	roleName: string;
-	durationStart: string | null;
-	durationEnd: string | null;
-}
-
-interface DialogState {
-	isOpen: boolean;
-	editingIndex: number | null;
-	unitId: string;
-	unitItem: AsyncOption | null;
-	roleId: string;
-	durationStart: CalendarDate | null;
-	durationEnd: CalendarDate | null;
-}
-
-const emptyDialog: DialogState = {
-	isOpen: false,
-	editingIndex: null,
-	unitId: "",
-	unitItem: null,
-	roleId: "",
-	durationStart: null,
-	durationEnd: null,
-};
-
-async function fetchOrganisationalUnitOptionsPage(
-	params: Readonly<AsyncOptionsFetchPageParams>,
-): Promise<{ items: Array<AsyncOption>; total: number }> {
-	const searchParams = new URLSearchParams({
-		limit: String(params.limit),
-		offset: String(params.offset),
-	});
-
-	if (params.q !== "") {
-		searchParams.set("q", params.q);
-	}
-
-	const response = await fetch(`/api/organisational-units/options?${searchParams.toString()}`, {
-		signal: params.signal,
-	});
-
-	if (!response.ok) {
-		throw new Error("Failed to load organisational units.");
-	}
-
-	return (await response.json()) as { items: Array<AsyncOption>; total: number };
-}
 
 async function fetchSocialMediaOptionsPage(
 	params: Readonly<AsyncOptionsFetchPageParams>,
@@ -136,21 +81,9 @@ interface ProjectFormProps {
 	} & { image: { key: string; label: string; url: string } | null };
 	formAction: ServerAction;
 	scopes: Array<Pick<schema.ProjectScope, "id" | "scope">>;
-	initialOrgUnitItems: Array<AsyncOption>;
-	initialOrgUnitTotal: number;
-	roles: Array<Pick<schema.ProjectRole, "id" | "role">>;
 	initialSocialMediaItems: Array<AsyncOption>;
 	initialSocialMediaTotal: number;
 	selectedSocialMediaItems?: Array<AsyncOption>;
-	initialPartners?: Array<{
-		id: string;
-		unitId: string;
-		unitName: string;
-		roleId: string;
-		roleName: string;
-		durationStart: string | null;
-		durationEnd: string | null;
-	}>;
 	initialSocialMediaIds?: Array<string>;
 }
 
@@ -160,13 +93,9 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 		formAction,
 		project,
 		scopes,
-		initialOrgUnitItems,
-		initialOrgUnitTotal,
-		roles,
 		initialSocialMediaItems,
 		initialSocialMediaTotal,
 		selectedSocialMediaItems,
-		initialPartners,
 		initialSocialMediaIds,
 	} = props;
 
@@ -178,13 +107,6 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 		project?.image ?? null,
 	);
 	const [imageKeyError, setImageKeyError] = useState(false);
-
-	const [partners, setPartners] = useState<Array<PartnerEntry>>(
-		() =>
-			initialPartners?.map((p) => {
-				return { ...p, _tempId: p.id, existingId: p.id };
-			}) ?? [],
-	);
 
 	const [selectedSocialMediaIds, setSelectedSocialMediaIds] = useState<Array<string>>(
 		initialSocialMediaIds ?? [],
@@ -220,65 +142,6 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 				setCreateSocialMediaFormKey((prev) => prev + 1);
 			}
 		});
-	}
-
-	const [dialog, setDialog] = useState<DialogState>(emptyDialog);
-
-	function openAddDialog() {
-		setDialog({ ...emptyDialog, isOpen: true });
-	}
-
-	function openEditDialog(index: number) {
-		const p = partners[index];
-
-		if (p == null) {
-			return;
-		}
-
-		setDialog({
-			isOpen: true,
-			editingIndex: index,
-			unitId: p.unitId,
-			unitItem: { id: p.unitId, name: p.unitName },
-			roleId: p.roleId,
-			durationStart: p.durationStart != null ? parseDate(p.durationStart) : null,
-			durationEnd: p.durationEnd != null ? parseDate(p.durationEnd) : null,
-		});
-	}
-
-	function handleConfirmDialog() {
-		if (!dialog.unitId || !dialog.roleId) {
-			return;
-		}
-
-		const role = roles.find((r) => r.id === dialog.roleId);
-
-		const entry: PartnerEntry = {
-			_tempId:
-				dialog.editingIndex !== null
-					? (partners[dialog.editingIndex]?._tempId ?? crypto.randomUUID())
-					: crypto.randomUUID(),
-			existingId:
-				dialog.editingIndex !== null ? (partners[dialog.editingIndex]?.existingId ?? null) : null,
-			unitId: dialog.unitId,
-			unitName: dialog.unitItem?.name ?? "",
-			roleId: dialog.roleId,
-			roleName: role?.role ?? "",
-			durationStart: dialog.durationStart?.toString() ?? null,
-			durationEnd: dialog.durationEnd?.toString() ?? null,
-		};
-
-		if (dialog.editingIndex !== null) {
-			setPartners((prev) => prev.map((p, i) => (i === dialog.editingIndex ? entry : p)));
-		} else {
-			setPartners((prev) => [...prev, entry]);
-		}
-
-		setDialog(emptyDialog);
-	}
-
-	function removePartner(index: number) {
-		setPartners((prev) => prev.filter((_, i) => i !== index));
 	}
 
 	return (
@@ -470,158 +333,6 @@ export function ProjectForm(props: Readonly<ProjectFormProps>): ReactNode {
 						<input key={id} name={`socialMediaIds.${String(index)}`} type="hidden" value={id} />
 					))}
 				</FormSection>
-
-				<Separator className="my-6" />
-
-				<FormSection
-					description={t("Add partner organisations and their roles in this project.")}
-					title={t("Partners")}
-				>
-					<div className="flex flex-col gap-3">
-						{partners.map((partner, index) => (
-							<div
-								key={partner._tempId}
-								className="flex items-center gap-3 rounded-lg border px-4 py-3"
-							>
-								<div className="min-inline-0 flex-1">
-									<p className="truncate text-sm font-medium">{partner.unitName}</p>
-									<p className="text-xs text-muted-fg">
-										{partner.roleName}
-										{partner.durationStart != null ? ` · ${partner.durationStart}` : null}
-										{partner.durationEnd != null ? ` – ${partner.durationEnd}` : null}
-									</p>
-								</div>
-								<Button
-									aria-label={t("Edit partner")}
-									intent="plain"
-									onPress={() => {
-										openEditDialog(index);
-									}}
-									size="sq-xs"
-								>
-									<PencilSquareIcon />
-								</Button>
-								<Button
-									aria-label={t("Remove partner")}
-									intent="plain"
-									onPress={() => {
-										removePartner(index);
-									}}
-									size="sq-xs"
-								>
-									<TrashIcon />
-								</Button>
-							</div>
-						))}
-						<Button className="self-start" intent="outline" onPress={openAddDialog}>
-							<PlusIcon />
-							{t("Add partner")}
-						</Button>
-					</div>
-					{partners.map(
-						({ _tempId, existingId, unitId, roleId, durationStart, durationEnd }, index) => (
-							<Fragment key={_tempId}>
-								{existingId != null && (
-									<input name={`partners.${String(index)}.id`} type="hidden" value={existingId} />
-								)}
-								<input name={`partners.${String(index)}.unitId`} type="hidden" value={unitId} />
-								<input name={`partners.${String(index)}.roleId`} type="hidden" value={roleId} />
-								{durationStart != null && (
-									<input
-										name={`partners.${String(index)}.durationStart`}
-										type="hidden"
-										value={durationStart}
-									/>
-								)}
-								{durationEnd != null && (
-									<input
-										name={`partners.${String(index)}.durationEnd`}
-										type="hidden"
-										value={durationEnd}
-									/>
-								)}
-							</Fragment>
-						),
-					)}
-				</FormSection>
-
-				<ModalContent
-					isOpen={dialog.isOpen}
-					onOpenChange={(open) => {
-						setDialog((prev) => {
-							return { ...prev, isOpen: open };
-						});
-					}}
-				>
-					<ModalHeader
-						description={t("Select an organisation, its role, and an optional involvement period.")}
-						title={dialog.editingIndex !== null ? t("Edit partner") : t("Add partner")}
-					/>
-					<ModalBody className="flex flex-col gap-y-4">
-						<AsyncSelect
-							aria-label={t("Organisation")}
-							fetchPage={fetchOrganisationalUnitOptionsPage}
-							initialItems={initialOrgUnitItems}
-							initialTotal={initialOrgUnitTotal}
-							label={t("Organisation")}
-							onSelect={(item) => {
-								setDialog((prev) => {
-									return { ...prev, unitId: item.id, unitItem: item };
-								});
-							}}
-							placeholder={t("No organisation selected")}
-							selectedItem={dialog.unitItem}
-						/>
-
-						<Select
-							isRequired={true}
-							onChange={(key) => {
-								setDialog((prev) => {
-									return { ...prev, roleId: String(key) };
-								});
-							}}
-							value={dialog.roleId || null}
-						>
-							<Label>{t("Role")}</Label>
-							<SelectTrigger />
-							<SelectContent items={roles}>
-								{(role) => <SelectItem id={role.id}>{role.role}</SelectItem>}
-							</SelectContent>
-						</Select>
-
-						<DatePicker
-							granularity="day"
-							onChange={(date) => {
-								setDialog((prev) => {
-									return { ...prev, durationStart: date };
-								});
-							}}
-							value={dialog.durationStart}
-						>
-							<Label>{t("Start date (optional)")}</Label>
-							<DatePickerTrigger />
-						</DatePicker>
-
-						<DatePicker
-							granularity="day"
-							onChange={(date) => {
-								setDialog((prev) => {
-									return { ...prev, durationEnd: date };
-								});
-							}}
-							value={dialog.durationEnd}
-						>
-							<Label>{t("End date (optional)")}</Label>
-							<DatePickerTrigger />
-						</DatePicker>
-					</ModalBody>
-					<ModalFooter>
-						<ModalClose>{t("Cancel")}</ModalClose>
-						<Button isDisabled={!dialog.unitId || !dialog.roleId} onPress={handleConfirmDialog}>
-							{dialog.editingIndex !== null ? t("Update") : t("Add")}
-						</Button>
-					</ModalFooter>
-				</ModalContent>
 
 				<ModalContent
 					isOpen={isCreateSocialMediaOpen}

@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { ContributionsPage } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_components/contributions-page";
 import { dashboardPageSize } from "@/config/pagination.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getContributionsForAdmin } from "@/lib/data/contributions";
+import { getContributionRoleOptions, getContributionsForAdmin } from "@/lib/data/contributions";
 import type { IntlLocale } from "@/lib/i18n/locales";
 import { redirect } from "@/lib/navigation/navigation";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -79,13 +79,16 @@ export default async function DashboardAdministratorPersonRelationsPage(
 		validSorts,
 	});
 	const { user } = await assertAuthenticated();
-	const contributions = await getContributionsForAdmin(user, {
-		limit: pageSize,
-		offset: (page - 1) * pageSize,
-		q,
-		sort,
-		dir,
-	});
+	const [contributions, roleOptions] = await Promise.all([
+		getContributionsForAdmin(user, {
+			limit: pageSize,
+			offset: (page - 1) * pageSize,
+			q,
+			sort,
+			dir,
+		}),
+		getContributionRoleOptions(),
+	]);
 	const totalPages = Math.max(Math.ceil(contributions.total / pageSize), 1);
 
 	if (page > totalPages) {
@@ -93,6 +96,13 @@ export default async function DashboardAdministratorPersonRelationsPage(
 	}
 
 	return (
-		<ContributionsPage contributions={contributions} dir={dir} page={page} q={q} sort={sort} />
+		<ContributionsPage
+			contributions={contributions}
+			dir={dir}
+			page={page}
+			q={q}
+			roleOptions={roleOptions}
+			sort={sort}
+		/>
 	);
 }

@@ -26,9 +26,12 @@ interface GetContributionsParams {
 export interface ContributionsResult {
 	data: Array<{
 		id: string;
+		personId: string;
 		personName: string;
 		personSlug: string;
+		roleTypeId: string;
 		roleType: string;
+		organisationalUnitId: string;
 		organisationalUnitName: string;
 		organisationalUnitSlug: string;
 		organisationalUnitType: string;
@@ -102,9 +105,12 @@ export async function getContributions(
 		db
 			.select({
 				id: schema.personsToOrganisationalUnits.id,
+				personId: schema.personsToOrganisationalUnits.personDocumentId,
 				personName: schema.persons.name,
 				personSlug: personEntities.slug,
+				roleTypeId: schema.personsToOrganisationalUnits.roleTypeId,
 				roleType: schema.personRoleTypes.type,
+				organisationalUnitId: schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
 				organisationalUnitName: schema.organisationalUnits.name,
 				organisationalUnitSlug: organisationalUnitEntities.slug,
 				organisationalUnitType: schema.organisationalUnitTypes.type,
@@ -183,9 +189,12 @@ export async function getContributions(
 		data: rows.map((row) => {
 			return {
 				id: row.id,
+				personId: row.personId,
 				personName: row.personName,
 				personSlug: row.personSlug,
+				roleTypeId: row.roleTypeId,
 				roleType: row.roleType,
+				organisationalUnitId: row.organisationalUnitId,
 				organisationalUnitName: row.organisationalUnitName,
 				organisationalUnitSlug: row.organisationalUnitSlug,
 				organisationalUnitType: row.organisationalUnitType,

@@ -33,17 +33,13 @@ export default async function DashboardAdministratorCreateProjectPage(
 	});
 
 	const { user } = await assertAuthenticated();
-	const { initialOrgUnits, initialSocialMedia, roles, scopes } =
-		await getProjectCreateDataForAdmin(user);
+	const { initialSocialMedia, scopes } = await getProjectCreateDataForAdmin(user);
 
 	return (
 		<ProjectCreateForm
 			initialAssets={initialAssets}
-			initialOrgUnitItems={initialOrgUnits.items}
-			initialOrgUnitTotal={initialOrgUnits.total}
 			initialSocialMediaItems={initialSocialMedia.items}
 			initialSocialMediaTotal={initialSocialMedia.total}
-			roles={roles}
 			scopes={scopes}
 		/>
 	);
