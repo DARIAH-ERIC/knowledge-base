@@ -199,6 +199,7 @@ function buildActiveRelationExistsFilter(
 	// Unit↔unit relations are document-level; the related unit is resolved from its document id to
 	// any of its versions to check the related type. idRef is a version id of the owning unit.
 	const relatedUnitVersion = alias(schema.entityVersions, "exists_related_unit_version");
+	const relatedEntity = alias(schema.entities, "exists_related_entity");
 
 	return exists(
 		db
@@ -212,6 +213,7 @@ function buildActiveRelationExistsFilter(
 				relatedUnitVersion,
 				eq(relatedUnitVersion.entityId, schema.organisationalUnitsRelations.relatedUnitDocumentId),
 			)
+			.innerJoin(relatedEntity, eq(relatedEntity.id, relatedUnitVersion.entityId))
 			.innerJoin(
 				schema.organisationalUnits,
 				eq(schema.organisationalUnits.id, relatedUnitVersion.id),
@@ -225,6 +227,7 @@ function buildActiveRelationExistsFilter(
 					sql`${schema.organisationalUnitsRelations.unitDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${idRef})`,
 					eq(schema.organisationalUnitStatus.status, status),
 					eq(schema.organisationalUnitTypes.type, relatedType),
+					relatedType === "eric" ? eq(relatedEntity.slug, "dariah-eu") : undefined,
 					durationContainsNow,
 				),
 			),
@@ -251,6 +254,7 @@ function buildActiveRelationToUnitFilter(
 	// Unit↔unit relations are document-level; idRef and relatedUnitId are version ids resolved to
 	// their document ids, and the related unit's type is checked via any of its versions.
 	const relatedUnitVersion = alias(schema.entityVersions, "exists_to_unit_related_version");
+	const relatedEntity = alias(schema.entities, "exists_to_unit_related_entity");
 
 	return exists(
 		db
@@ -264,6 +268,7 @@ function buildActiveRelationToUnitFilter(
 				relatedUnitVersion,
 				eq(relatedUnitVersion.entityId, schema.organisationalUnitsRelations.relatedUnitDocumentId),
 			)
+			.innerJoin(relatedEntity, eq(relatedEntity.id, relatedUnitVersion.entityId))
 			.innerJoin(
 				schema.organisationalUnits,
 				eq(schema.organisationalUnits.id, relatedUnitVersion.id),
@@ -278,6 +283,7 @@ function buildActiveRelationToUnitFilter(
 					sql`${schema.organisationalUnitsRelations.relatedUnitDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${relatedUnitId})`,
 					eq(schema.organisationalUnitStatus.status, status),
 					eq(schema.organisationalUnitTypes.type, relatedType),
+					relatedType === "eric" ? eq(relatedEntity.slug, "dariah-eu") : undefined,
 					durationContainsNow,
 				),
 			),

@@ -8,6 +8,7 @@ export interface ProjectPartner {
 		id: string;
 		acronym: string | null;
 		name: string;
+		slug: string;
 		type: (typeof schema.organisationalUnitTypesEnum)[number];
 		socialMedia: Array<{ url: string; type: (typeof schema.socialMediaTypesEnum)[number] }>;
 	};
@@ -43,6 +44,7 @@ export async function getPublishedProjectPartnersByDocuments(
 			unitVersionId: schema.organisationalUnits.id,
 			acronym: schema.organisationalUnits.acronym,
 			name: schema.organisationalUnits.name,
+			slug: schema.entities.slug,
 			unitType: schema.organisationalUnitTypes.type,
 			roleId: schema.projectRoles.id,
 			roleName: schema.projectRoles.role,
@@ -60,6 +62,8 @@ export async function getPublishedProjectPartnersByDocuments(
 			schema.organisationalUnits,
 			eq(schema.organisationalUnits.id, schema.documentLifecycle.publishedId),
 		)
+		.innerJoin(schema.entityVersions, eq(schema.entityVersions.id, schema.organisationalUnits.id))
+		.innerJoin(schema.entities, eq(schema.entities.id, schema.entityVersions.entityId))
 		.innerJoin(
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
@@ -109,6 +113,7 @@ export async function getPublishedProjectPartnersByDocuments(
 				id: row.unitVersionId,
 				acronym: row.acronym,
 				name: row.name,
+				slug: row.slug,
 				type: row.unitType,
 				socialMedia: socialMediaByUnit.get(row.unitVersionId) ?? [],
 			},

@@ -33,6 +33,7 @@ function buildStatusFilter(
 	// Unit↔unit relations are document-level; idRef is the working group's version id, resolved to
 	// its document id, and the related eric is reached through any of its versions.
 	const relatedUnitVersion = alias(schema.entityVersions, "wg_status_related_version");
+	const relatedEntity = alias(schema.entities, "wg_status_related_entity");
 
 	return exists(
 		db
@@ -46,6 +47,7 @@ function buildStatusFilter(
 				relatedUnitVersion,
 				eq(relatedUnitVersion.entityId, schema.organisationalUnitsRelations.relatedUnitDocumentId),
 			)
+			.innerJoin(relatedEntity, eq(relatedEntity.id, relatedUnitVersion.entityId))
 			.innerJoin(
 				schema.organisationalUnits,
 				eq(schema.organisationalUnits.id, relatedUnitVersion.id),
@@ -59,6 +61,7 @@ function buildStatusFilter(
 					sql`${schema.organisationalUnitsRelations.unitDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${idRef})`,
 					eq(schema.organisationalUnitStatus.status, "is_part_of"),
 					eq(schema.organisationalUnitTypes.type, "eric"),
+					eq(relatedEntity.slug, "dariah-eu"),
 					durationCondition,
 				),
 			),

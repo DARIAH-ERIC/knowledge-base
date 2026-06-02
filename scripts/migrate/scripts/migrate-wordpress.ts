@@ -818,6 +818,11 @@ async function main() {
 
 	const umbrellaUnit = await db.query.organisationalUnits.findFirst({
 		where: {
+			entityVersion: {
+				entity: {
+					slug: "dariah-eu",
+				},
+			},
 			type: {
 				type: "eric",
 			},

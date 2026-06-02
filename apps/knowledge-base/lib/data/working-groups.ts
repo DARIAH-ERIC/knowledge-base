@@ -38,6 +38,8 @@ function assertAdminUser(user: Pick<User, "role">): void {
 	}
 }
 
+const dariahEuSlug = "dariah-eu";
+
 export async function getWorkingGroups(
 	params: Readonly<GetWorkingGroupsParams>,
 ): Promise<WorkingGroupsResult> {
@@ -110,7 +112,7 @@ export async function getWorkingGroups(
 			)
 			.where(and(versionPick, where)),
 		db.query.organisationalUnits.findMany({
-			where: { type: { type: "eric" } },
+			where: { entityVersion: { entity: { slug: dariahEuSlug } }, type: { type: "eric" } },
 			columns: { id: true },
 		}),
 	]);
