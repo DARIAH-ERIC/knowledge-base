@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, type ReactNode, type RefObject, use } from "react";
+import { Activity, Fragment, type ReactNode, type RefObject, use } from "react";
 import {
 	SelectionIndicator,
 	TabList as TabListPrimitive,
@@ -156,21 +156,22 @@ export function TabPanel(props: Readonly<TabPanelProps>): ReactNode {
 			{...rest}
 			id={id}
 			ref={ref}
-			className={cx(
-				"flex-1 text-fg text-sm/6 focus-visible:outline-hidden",
-				// When state is preserved the inactive panel stays mounted (so uncontrolled form fields keep
-				// their values across tab switches) but must be hidden visually. Use CSS `display: none`
-				// rather than React's `<Activity mode="hidden">`: Activity tears down the subtree's effects,
-				// which leaves react-aria controls (e.g. a `Select`) without their interaction handlers once
-				// the panel is revealed again — and they never recover. `display: none` keeps both the DOM
-				// state and the live effects/handlers. react-aria marks inactive panels with `data-inert`.
-				"data-inert:hidden",
-				className,
-			)}
+			className={cx("flex-1 text-fg text-sm/6 focus-visible:outline-hidden", className)}
 			data-slot="tab-panel"
 			shouldForceMount={shouldPreserveState ? true : shouldForceMount}
 		>
-			{children}
+			{/* TEMP: reintroduce the buggy <Activity> hiding to prove the edit-form-tabs regression test
+			    catches it (interactivity breaks in a prod build). REVERT before merging. */}
+			{shouldPreserveState
+				? (values) => (
+						<Activity
+							mode={values.isInert ? "hidden" : "visible"}
+							name={typeof id === "string" ? id : undefined}
+						>
+							{typeof children === "function" ? children(values) : children}
+						</Activity>
+					)
+				: children}
 		</TabPanelPrimitive>
 	);
 }
