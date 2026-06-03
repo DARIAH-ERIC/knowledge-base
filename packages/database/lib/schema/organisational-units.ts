@@ -235,6 +235,7 @@ export const workingGroups = p.snakeCase
 			contactEmail?: string;
 		}>(),
 		name: p.text("name").notNull(),
+		acronym: p.text("acronym"),
 		summary: p.text("summary"),
 		updatedAt: f.timestamp("updated_at").notNull(),
 		imageId: p.uuid("image_id"),

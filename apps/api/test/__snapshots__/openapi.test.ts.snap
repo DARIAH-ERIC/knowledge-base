@@ -9668,6 +9668,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       "WorkingGroup": {
         "description": "Working group",
         "properties": {
+          "acronym": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "chairs": {
             "items": {
               "properties": {
@@ -10244,6 +10254,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         },
         "required": [
           "id",
+          "acronym",
           "name",
           "summary",
           "metadata",
@@ -10259,6 +10270,16 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
       "WorkingGroupBase": {
         "description": "Working group",
         "properties": {
+          "acronym": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
           "entity": {
             "properties": {
               "slug": {
@@ -10424,6 +10445,7 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         },
         "required": [
           "id",
+          "acronym",
           "name",
           "summary",
           "metadata",
