@@ -3,14 +3,23 @@ import * as v from "valibot";
 
 import { maxLimit } from "~/config/api.config";
 
-export type RelatedEntityType = Exclude<
-	(typeof schema.entityTypesEnum)[number],
-	"documentation_pages" | "internal_pages"
+export const publicRelatedEntityTypesEnum = [
+	"documents_policies",
+	"events",
+	"funding_calls",
+	"impact_case_studies",
+	"news",
+	"opportunities",
+	"pages",
+	"persons",
+	"projects",
+	"spotlight_articles",
+	...schema.organisationalUnitTypesEnum,
+] as const satisfies ReadonlyArray<
+	(typeof schema.entityTypesEnum)[number] | (typeof schema.organisationalUnitTypesEnum)[number]
 >;
 
-export const relatedEntityTypesEnum = schema.entityTypesEnum.filter(
-	(entityType) => entityType !== "documentation_pages" && entityType !== "internal_pages",
-) as Array<RelatedEntityType>;
+export type PublicRelatedEntityType = (typeof publicRelatedEntityTypesEnum)[number];
 
 export const PaginationQuerySchema = v.object({
 	limit: v.pipe(
@@ -38,7 +47,7 @@ export const RelatedEntitiesSchema = v.array(
 	v.object({
 		id: v.pipe(v.string(), v.uuid()),
 		slug: v.string(),
-		entityType: v.picklist(relatedEntityTypesEnum),
+		entityType: v.picklist(publicRelatedEntityTypesEnum),
 		label: v.nullable(v.string()),
 	}),
 );
