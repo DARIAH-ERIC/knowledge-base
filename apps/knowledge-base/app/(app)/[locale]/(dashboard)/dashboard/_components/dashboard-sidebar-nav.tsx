@@ -25,24 +25,23 @@ import {
 	SunIcon as IconSun,
 } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useState } from "react";
+import { Fragment, type ReactNode } from "react";
 
-import { CommandPalette } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/command-palette";
+import { useDashboardCommandPalette } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-command-palette-context";
 import { ColorSchemeToggle } from "@/app/(app)/[locale]/_components/color-scheme-toggle.client";
 import { signOutAction } from "@/lib/auth/sign-out.action";
 import { useColorScheme } from "@/lib/color-scheme/use-color-scheme";
 
 interface DashboardSidebarNavProps {
-	isAdmin: boolean;
 	breadcrumbs: ReactNode;
 	user: User;
 }
 
 export function DashboardSidebarNav(props: Readonly<DashboardSidebarNavProps>): ReactNode {
-	const { isAdmin, breadcrumbs, user } = props;
+	const { breadcrumbs, user } = props;
 
 	const { isMobile } = useSidebar();
-	const [isCmdOpen, setIsCmdOpen] = useState(false);
+	const { openCommandPalette } = useDashboardCommandPalette();
 
 	const t = useExtracted();
 
@@ -60,28 +59,26 @@ export function DashboardSidebarNav(props: Readonly<DashboardSidebarNavProps>): 
 							aria-label={t("Open command menu")}
 							intent="plain"
 							isCircle={true}
-							onPress={() => {
-								setIsCmdOpen(true);
-							}}
+							onPress={openCommandPalette}
 							size="sq-sm"
 						>
 							<IconSearch />
 						</Button>
-						<CommandPalette isAdmin={isAdmin} isOpen={isCmdOpen} setIsOpen={setIsCmdOpen} />
 					</Fragment>
 				) : null}
-				<UserMenu user={user} />
+				<UserMenu onOpenCommandMenu={openCommandPalette} user={user} />
 			</div>
 		</SidebarNav>
 	);
 }
 
 interface UserMenuProps {
+	onOpenCommandMenu: () => void;
 	user: User;
 }
 
 function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
-	const { user } = props;
+	const { onOpenCommandMenu, user } = props;
 
 	const { colorScheme } = useColorScheme();
 
@@ -108,7 +105,7 @@ function UserMenu(props: Readonly<UserMenuProps>): ReactNode {
 					<MenuLabel>{t("Settings")}</MenuLabel>
 				</MenuItem>
 				<MenuSeparator />
-				<MenuItem>
+				<MenuItem onAction={onOpenCommandMenu}>
 					<IconCommandRegular />
 					<MenuLabel>{t("Command menu")}</MenuLabel>
 				</MenuItem>
