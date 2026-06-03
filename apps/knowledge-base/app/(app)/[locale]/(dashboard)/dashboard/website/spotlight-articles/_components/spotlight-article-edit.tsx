@@ -1,15 +1,17 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Tab, TabList, TabPanel } from "@dariah-eric/ui/tabs";
+import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
-import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
+import {
+	EntityEditTab,
+	EntityEditTabs,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
-import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import { ArticleContributorsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section";
 import { SpotlightArticleForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_components/spotlight-article-form";
 import { createSpotlightArticleContributorAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/spotlight-articles/_lib/create-spotlight-article-contributor.action";
@@ -73,15 +75,14 @@ export function SpotlightArticleEditForm(
 
 			<EntityEditTabs defaultTab="details">
 				<TabList aria-label={t("Edit spotlight article")}>
-					<Tab id="details">{t("Details")}</Tab>
-					<Tab id="relations">{t("Relations")}</Tab>
-					<Tab id="contributors">{t("Contributors")}</Tab>
+					<EntityEditTab id="details">{t("Details")}</EntityEditTab>
+					<EntityEditTab id="contributors">{t("Contributors")}</EntityEditTab>
 				</TabList>
 
 				<TabPanel
 					className="flex flex-col gap-y-(--layout-padding)"
 					id="details"
-					shouldForceMount={true}
+					shouldPreserveState={true}
 				>
 					<div className="flex justify-end">
 						<EntityLifecycleBar
@@ -98,30 +99,19 @@ export function SpotlightArticleEditForm(
 						formAction={updateSpotlightArticleAction}
 						formId={formId}
 						initialAssets={initialAssets}
-						initialRelatedEntityItems={initialRelatedEntityItems}
-						initialRelatedEntityTotal={initialRelatedEntityTotal}
-						initialRelatedResourceItems={initialRelatedResourceItems}
-						initialRelatedResourceTotal={initialRelatedResourceTotal}
-						showRelationFields={false}
-						spotlightArticle={spotlightArticle}
-					/>
-				</TabPanel>
-
-				<TabPanel id="relations" shouldForceMount={true}>
-					<EntityRelationsFields
-						formId={formId}
 						initialRelatedEntityIds={initialRelatedEntityIds}
 						initialRelatedEntityItems={initialRelatedEntityItems}
 						initialRelatedEntityTotal={initialRelatedEntityTotal}
 						initialRelatedResourceIds={initialRelatedResourceIds}
 						initialRelatedResourceItems={initialRelatedResourceItems}
 						initialRelatedResourceTotal={initialRelatedResourceTotal}
+						spotlightArticle={spotlightArticle}
 						selectedRelatedEntities={selectedRelatedEntities}
 						selectedRelatedResources={selectedRelatedResources}
 					/>
 				</TabPanel>
 
-				<TabPanel id="contributors" shouldForceMount={true}>
+				<TabPanel id="contributors" shouldPreserveState={true}>
 					<ArticleContributorsSection
 						articleId={documentId}
 						contributors={contributors}

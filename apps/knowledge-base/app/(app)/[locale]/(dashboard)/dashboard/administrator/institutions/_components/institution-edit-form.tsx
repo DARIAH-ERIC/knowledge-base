@@ -1,15 +1,17 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Tab, TabList, TabPanel } from "@dariah-eric/ui/tabs";
+import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
-import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
+import {
+	EntityEditTab,
+	EntityEditTabs,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
-import { EntityRelationsFields } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-relations-fields";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { InstitutionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form";
 import { discardInstitutionDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/discard-institution-draft.action";
@@ -74,15 +76,14 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 
 			<EntityEditTabs defaultTab="details">
 				<TabList aria-label={t("Edit institution")}>
-					<Tab id="details">{t("Details")}</Tab>
-					<Tab id="related">{t("Related")}</Tab>
-					<Tab id="relations">{t("Relations")}</Tab>
+					<EntityEditTab id="details">{t("Details")}</EntityEditTab>
+					<EntityEditTab id="relations">{t("Relations")}</EntityEditTab>
 				</TabList>
 
 				<TabPanel
 					className="flex flex-col gap-y-(--layout-padding)"
 					id="details"
-					shouldForceMount={true}
+					shouldPreserveState={true}
 				>
 					<div className="flex justify-end">
 						<EntityLifecycleBar
@@ -98,34 +99,23 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 						formAction={updateInstitutionAction}
 						formId={formId}
 						initialAssets={initialAssets}
-						initialRelatedEntityItems={initialRelatedEntityItems}
-						initialRelatedEntityTotal={initialRelatedEntityTotal}
-						initialRelatedResourceItems={initialRelatedResourceItems}
-						initialRelatedResourceTotal={initialRelatedResourceTotal}
-						initialSocialMediaIds={initialSocialMediaIds}
-						initialSocialMediaItems={initialSocialMediaItems}
-						initialSocialMediaTotal={initialSocialMediaTotal}
-						institution={institution}
-						selectedSocialMediaItems={selectedSocialMediaItems}
-						showRelationFields={false}
-					/>
-				</TabPanel>
-
-				<TabPanel id="related" shouldForceMount={true}>
-					<EntityRelationsFields
-						formId={formId}
 						initialRelatedEntityIds={initialRelatedEntityIds}
 						initialRelatedEntityItems={initialRelatedEntityItems}
 						initialRelatedEntityTotal={initialRelatedEntityTotal}
 						initialRelatedResourceIds={initialRelatedResourceIds}
 						initialRelatedResourceItems={initialRelatedResourceItems}
 						initialRelatedResourceTotal={initialRelatedResourceTotal}
+						initialSocialMediaIds={initialSocialMediaIds}
+						initialSocialMediaItems={initialSocialMediaItems}
+						initialSocialMediaTotal={initialSocialMediaTotal}
+						institution={institution}
 						selectedRelatedEntities={selectedRelatedEntities}
 						selectedRelatedResources={selectedRelatedResources}
+						selectedSocialMediaItems={selectedSocialMediaItems}
 					/>
 				</TabPanel>
 
-				<TabPanel id="relations" shouldForceMount={true}>
+				<TabPanel id="relations" shouldPreserveState={true}>
 					<UnitRelationsSection
 						relations={relations}
 						statusOptions={unitRelationStatusOptions}

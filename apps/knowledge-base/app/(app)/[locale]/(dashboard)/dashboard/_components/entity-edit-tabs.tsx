@@ -1,10 +1,9 @@
 "use client";
 
-import { Tabs } from "@dariah-eric/ui/tabs";
-import { type ReactNode, useEffect, useState } from "react";
-import type { Key } from "react-aria-components";
+import { Tab, type TabProps, Tabs } from "@dariah-eric/ui/tabs";
+import type { ReactNode } from "react";
 
-import { useSearchParams } from "@/lib/navigation/navigation";
+import { LocaleLink, useSearchParams } from "@/lib/navigation/navigation";
 
 interface EntityEditTabsProps {
 	/** Tab id selected when no `?tab=` search param is present. */
@@ -15,39 +14,41 @@ interface EntityEditTabsProps {
 /**
  * Tabs for the entity edit screens whose selected tab is reflected in the `?tab=` search param, so
  * it survives a refresh and can be deep-linked.
- *
- * The tab is switched client-side via the History API rather than a router navigation: every panel
- * is already rendered on the client, so there is no need to re-run the page's server data loading
- * when the editor flips between the entity (lifecycle-bound) tab and a decoupled relation tab.
  */
 export function EntityEditTabs(props: Readonly<EntityEditTabsProps>): ReactNode {
 	const { defaultTab, children } = props;
 
 	const searchParams = useSearchParams();
-	const [selectedKey, setSelectedKey] = useState<Key>(() => searchParams.get("tab") ?? defaultTab);
+	const selectedKey = searchParams.get("tab") ?? defaultTab;
 
-	useEffect(() => {
-		setSelectedKey(searchParams.get("tab") ?? defaultTab);
-	}, [defaultTab, searchParams]);
+	return <Tabs selectedKey={selectedKey}>{children}</Tabs>;
+}
 
-	function handleSelectionChange(key: Key) {
-		const nextKey = String(key);
-		setSelectedKey(nextKey);
+interface EntityEditTabProps extends Omit<TabProps, "href" | "render"> {
+	id: string;
+}
 
-		const params = new URLSearchParams(window.location.search);
-		params.set("tab", nextKey);
-
-		const query = params.toString();
-		window.history.replaceState(
-			null,
-			"",
-			`${window.location.pathname}${query !== "" ? `?${query}` : ""}`,
-		);
-	}
+export function EntityEditTab(props: Readonly<EntityEditTabProps>): ReactNode {
+	const { id, ...rest } = props;
 
 	return (
-		<Tabs onSelectionChange={handleSelectionChange} selectedKey={selectedKey}>
-			{children}
-		</Tabs>
+		<Tab
+			{...rest}
+			href={`?tab=${id}`}
+			id={id}
+			render={(domProps, renderProps) => {
+				if ("href" in domProps && domProps.href && !renderProps.isDisabled) {
+					return <LocaleLink {...domProps} shallow={true} />;
+				}
+
+				return (
+					<div
+						{...domProps}
+						// @ts-expect-error -- Link may be disabled but have `href`.
+						href={undefined}
+					/>
+				);
+			}}
+		/>
 	);
 }

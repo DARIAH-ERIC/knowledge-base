@@ -291,7 +291,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 						}}
 						selectedKey={activeTab}
 					>
-						<TabList>
+						<TabList aria-label={t("Media library")}>
 							<Tab id="select">{t("Select")}</Tab>
 							<Tab id="upload">{t("Upload")}</Tab>
 						</TabList>
