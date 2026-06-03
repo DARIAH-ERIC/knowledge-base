@@ -44,6 +44,67 @@ async function seed(db: Database) {
 	return { menuId, menuName, parentItemId, parentItemLabel, childItemId, childItemLabel };
 }
 
+async function seedWithWorkingGroupEntity(db: Database) {
+	const [status, entityType, organisationalUnitType] = await Promise.all([
+		db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
+		db.query.entityTypes.findFirst({
+			columns: { id: true },
+			where: { type: "organisational_units" },
+		}),
+		db.query.organisationalUnitTypes.findFirst({
+			columns: { id: true },
+			where: { type: "working_group" },
+		}),
+	]);
+
+	expect(status).toBeDefined();
+	expect(entityType).toBeDefined();
+	expect(organisationalUnitType).toBeDefined();
+
+	const menuId = uuidv7();
+	const itemId = uuidv7();
+	const entityId = uuidv7();
+	const versionId = uuidv7();
+	const menuName = f.word.noun();
+	const label = f.lorem.word();
+	const slug = `working-group-${uuidv7()}`;
+
+	await db.insert(schema.navigationMenus).values({
+		id: menuId,
+		name: menuName,
+	});
+
+	await db.insert(schema.entities).values({
+		id: entityId,
+		slug,
+		typeId: entityType!.id,
+	});
+
+	await db.insert(schema.entityVersions).values({
+		id: versionId,
+		entityId,
+		statusId: status!.id,
+	});
+
+	await db.insert(schema.organisationalUnits).values({
+		id: versionId,
+		name: label,
+		typeId: organisationalUnitType!.id,
+	});
+
+	await db.insert(schema.navigationItems).values({
+		id: itemId,
+		menuId,
+		parentId: null,
+		label,
+		href: null,
+		entityId,
+		position: 0,
+	});
+
+	return { menuName, label, slug };
+}
+
 describe("navigation", () => {
 	describe("GET /api/navigation", () => {
 		it("should return all navigation menus with items tree", async () => {
@@ -94,6 +155,29 @@ describe("navigation", () => {
 				expect(data[0]).toMatchObject({ name: menuName });
 				expect(data[0]!.items).toEqual(
 					expect.arrayContaining([expect.objectContaining({ label: parentItemLabel })]),
+				);
+			});
+		});
+
+		it("should return organisational unit subtype for entity type", async () => {
+			await withTransaction(async (db) => {
+				const client = createTestClient(db);
+
+				const { menuName, label, slug } = await seedWithWorkingGroupEntity(db);
+
+				const response = await client.navigation.$get({ query: { menu: menuName } });
+
+				expect(response.status).toBe(200);
+
+				const data = await response.json();
+
+				expect(data[0]!.items).toEqual(
+					expect.arrayContaining([
+						expect.objectContaining({
+							label,
+							entity: { type: "working_group", slug },
+						}),
+					]),
 				);
 			});
 		});
