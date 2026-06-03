@@ -13,8 +13,8 @@ interface EntityEditTabsProps {
 }
 
 /**
- * Tabs for the entity edit screens whose selected tab is reflected in the `?tab=` search param, so it
- * survives a refresh and can be deep-linked.
+ * Tabs for the entity edit screens whose selected tab is reflected in the `?tab=` search param, so
+ * it survives a refresh and can be deep-linked.
  *
  * The tab is switched client-side via the native History API rather than a router navigation: every
  * panel is already rendered on the client (the panels preserve their state), so there is no need to
