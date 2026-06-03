@@ -74,10 +74,10 @@ export function EventsPage(props: Readonly<EventsPageProps>): ReactNode {
 				title={t("Events")}
 				description={t("Manage all events in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/website/events/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 

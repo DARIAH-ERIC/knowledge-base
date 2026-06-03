@@ -101,6 +101,7 @@
 	"dependencies": {
 		"@acdh-oeaw/lib": "catalog:",
 		"@acdh-oeaw/style-variants": "catalog:",
+		"@handlewithcare/react-prosemirror": "catalog:",
 		"@heroicons/react": "catalog:",
 		"@internationalized/date": "catalog:",
 		"@react-aria/utils": "catalog:",

@@ -4,7 +4,7 @@ import type { AssetPrefix } from "@dariah-eric/storage/config";
 import { Button } from "@dariah-eric/ui/button";
 import { fieldErrorStyles } from "@dariah-eric/ui/field";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useState } from "react";
+import { Fragment, type ReactNode, useState } from "react";
 
 import type { MediaLibraryAsset } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-asset";
 import { MediaLibraryDialog } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/media-library-dialog";
@@ -48,7 +48,7 @@ export function ImageSelectField<T extends AssetPrefix>(
 	}
 
 	return (
-		<>
+		<Fragment>
 			{selectedImage != null ? (
 				<img
 					alt={t("Selected image")}
@@ -90,6 +90,6 @@ export function ImageSelectField<T extends AssetPrefix>(
 				value={selectedImage?.key ?? ""}
 			/>
 			{error ? <div className={fieldErrorStyles()}>{t("Please select an image.")}</div> : null}
-		</>
+		</Fragment>
 	);
 }

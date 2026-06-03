@@ -70,10 +70,10 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 				title={t("Country reports")}
 				description={t("Manage all country reports in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/administrator/country-reports/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 

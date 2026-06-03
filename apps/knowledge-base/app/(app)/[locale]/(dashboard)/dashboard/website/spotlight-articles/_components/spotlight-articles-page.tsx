@@ -81,10 +81,10 @@ export function SpotlightArticlesPage(props: Readonly<SpotlightArticlesPageProps
 				title={t("Spotlight articles")}
 				description={t("Manage all spotlight articles in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/website/spotlight-articles/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 

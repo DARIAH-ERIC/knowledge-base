@@ -79,10 +79,10 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 				title={t("Governance bodies")}
 				description={t("Manage all governance bodies in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/administrator/governance-bodies/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 

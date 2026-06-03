@@ -255,7 +255,7 @@ export function InstitutionRelationsPage(
 				title={t("Institution relations")}
 				description={t("Review and manage dated institution-to-organisation relations.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<Button
 							className="shrink-0 whitespace-pre"
@@ -265,7 +265,7 @@ export function InstitutionRelationsPage(
 							<PlusIcon className="me-2 block-4 inline-4" />
 							{t("Add relation")}
 						</Button>
-					</>
+					</Fragment>
 				}
 			/>
 

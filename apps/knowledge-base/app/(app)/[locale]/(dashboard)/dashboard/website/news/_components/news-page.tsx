@@ -74,10 +74,10 @@ export function NewsPage(props: Readonly<NewsPageProps>): ReactNode {
 				title={t("News")}
 				description={t("Manage all news items in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/website/news/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 

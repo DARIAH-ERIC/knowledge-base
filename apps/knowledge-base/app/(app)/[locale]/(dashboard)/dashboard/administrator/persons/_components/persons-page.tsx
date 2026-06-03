@@ -72,10 +72,10 @@ export function PersonsPage(props: Readonly<PersonsPageProps>): ReactNode {
 				title={t("Persons")}
 				description={t("Manage all persons in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/administrator/persons/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 

@@ -74,10 +74,10 @@ export function PagesPage(props: Readonly<PagesPageProps>): ReactNode {
 				title={t("Pages")}
 				description={t("Manage all pages in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/website/pages/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 
