@@ -12,6 +12,7 @@ const relevantRoles = [
 	"is_vice_chair_of",
 	"national_coordinator",
 	"national_coordinator_deputy",
+	"national_coordination_staff",
 	"national_representative",
 	"national_representative_deputy",
 ] as const;
