@@ -19,13 +19,23 @@ export async function fillSearchAndWaitForUrl(
 ): Promise<void> {
 	const nextQuery = query.trim();
 	const searchbox = page.getByRole("searchbox");
+	const matches = (url: URL) => matchesSearchUrl(url, pathname, nextQuery);
 
-	// The search field drives the URL from a client effect, so a `fill` that lands before the list
-	// page has hydrated is silently dropped and the URL never updates. Re-issue the input (clearing
-	// first to force a change event even if the value is already present) until the URL reflects it.
+	// Type once and give the resulting navigation time to settle. Under load the search-driven URL
+	// update can take a few seconds (Next defers it until the RSC fetch resolves), so we must NOT keep
+	// re-typing — that aborts the in-flight navigation before it can land.
+	await searchbox.fill(query);
+	try {
+		await page.waitForURL(matches, { timeout: 10_000 });
+		return;
+	} catch {
+		// The input likely landed before the list page had hydrated, so the change was dropped and no
+		// navigation started. Re-issue it (clearing first to force a change event) until it takes.
+	}
+
 	await expect(async () => {
 		await searchbox.fill("");
 		await searchbox.fill(query);
-		await page.waitForURL((url) => matchesSearchUrl(url, pathname, nextQuery), { timeout: 2_000 });
+		await page.waitForURL(matches, { timeout: 5_000 });
 	}).toPass({ timeout: 20_000 });
 }
