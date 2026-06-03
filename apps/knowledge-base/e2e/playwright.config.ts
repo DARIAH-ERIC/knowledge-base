@@ -17,9 +17,12 @@ dotenv({
 	quiet: true,
 });
 
+/** Playwright does not export the single web server config type, so we derive it. */
+type WebServer = Extract<NonNullable<PlaywrightTestConfig["webServer"]>, { command: string }>;
+
 function getConfig():
 	| { kind: "remote"; baseUrl: string; webServer: undefined }
-	| { kind: "local"; baseUrl: string; webServer: PlaywrightTestConfig["webServer"] } {
+	| { kind: "local"; baseUrl: string; webServer: WebServer } {
 	// oxlint-disable-next-line node/no-process-env
 	const remoteBaseUrl = process.env.PLAYWRIGHT_TEST_APP_BASE_URL;
 
@@ -53,7 +56,41 @@ function getConfig():
 	};
 }
 
+/**
+ * Server actions dispatch revalidation webhooks via `after()`. The real endpoint is not available
+ * during e2e tests, so we run a stand-in that answers with `204` to keep the server logs clean.
+ */
+function getWebhookMockServer(): WebServer | undefined {
+	// oxlint-disable-next-line node/no-process-env
+	const webhookUrl = process.env.REVALIDATION_WEBHOOK_URL;
+
+	if (!isNonEmptyString(webhookUrl)) {
+		return undefined;
+	}
+
+	const port = Number(new URL(webhookUrl).port) || 3002;
+
+	return {
+		command: `tsx ${join(import.meta.dirname, "lib/webhook-mock-server.ts")}`,
+		port,
+		reuseExistingServer: !isCI,
+	};
+}
+
 const config = getConfig();
+
+const webServers: Array<WebServer> = [];
+
+if (config.kind === "local") {
+	const webhookMockServer = getWebhookMockServer();
+	if (webhookMockServer != null) {
+		webServers.push(webhookMockServer);
+	}
+}
+
+if (config.webServer != null) {
+	webServers.push(config.webServer);
+}
 
 export default defineConfig({
 	testDir: "../e2e",
@@ -124,5 +161,5 @@ export default defineConfig({
 		//     use: { ...devices["Desktop Chrome"], channel: "chrome" },
 		// },
 	],
-	webServer: config.webServer,
+	webServer: webServers,
 });
