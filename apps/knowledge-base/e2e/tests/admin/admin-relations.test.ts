@@ -81,7 +81,11 @@ test.describe("admin relation management", () => {
 		await governanceBodiesPage.submitAddPerson();
 
 		const governanceBody = await db.getGovernanceBodyByName(name);
-		expect(await db.getPersonRelationsByUnitVersionId(governanceBody!.id)).toHaveLength(1);
+		// Poll: the add action reports success before its write is necessarily visible to this separate
+		// DB connection, so read until it settles instead of racing the commit.
+		await expect
+			.poll(async () => (await db.getPersonRelationsByUnitVersionId(governanceBody!.id)).length)
+			.toBe(1);
 
 		const listPath = "/en/dashboard/administrator/person-relations";
 		await page.goto(listPath);
@@ -130,7 +134,11 @@ test.describe("admin relation management", () => {
 		await institutionsPage.submitAddRelation();
 
 		const institution = await db.getInstitutionByName(name);
-		expect(await db.getUnitRelationsByUnitVersionId(institution!.id)).toHaveLength(1);
+		// Poll: the add action reports success before its write is necessarily visible to this separate
+		// DB connection, so read until it settles instead of racing the commit.
+		await expect
+			.poll(async () => (await db.getUnitRelationsByUnitVersionId(institution!.id)).length)
+			.toBe(1);
 
 		const listPath = "/en/dashboard/administrator/institution-relations";
 		await page.goto(listPath);

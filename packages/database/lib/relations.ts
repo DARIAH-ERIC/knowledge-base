@@ -710,10 +710,12 @@ export const relations = defineRelations(schema, (r) => {
 				to: r.countryReports.id,
 				optional: false,
 			}),
+			// Resolve the document id to its published project version through the documentLifecycle view (nullable).
 			project: r.one.projects({
-				from: r.countryReportProjectContributions.projectId,
-				to: r.projects.id,
-				optional: false,
+				from: r.countryReportProjectContributions.projectDocumentId.through(
+					r.documentLifecycle.documentId,
+				),
+				to: r.projects.id.through(r.documentLifecycle.publishedId),
 			}),
 		},
 		countryReportInstitutions: {

@@ -2059,13 +2059,13 @@ async function main() {
 				const [countryReportProjectContributionId] = await tx
 					.insert(schema.countryReportProjectContributions)
 					.values({
-						projectId: kbProject.id,
+						projectDocumentId: await documentIdOf(tx, kbProject.id),
 						amountEuros: Number(projectLeverage.amount),
 						countryReportId,
 					})
 					.onConflictDoNothing({
 						target: [
-							schema.countryReportProjectContributions.projectId,
+							schema.countryReportProjectContributions.projectDocumentId,
 							schema.countryReportProjectContributions.countryReportId,
 						],
 					})

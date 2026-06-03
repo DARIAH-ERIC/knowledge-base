@@ -104,9 +104,12 @@ test.describe("persons admin lifecycle", () => {
 		await personsPage.fillContributionDatePicker("Start date", 2025, 1, 1);
 		await personsPage.submitAddContribution();
 
-		// Verify draft has the contribution.
+		// Verify draft has the contribution. Poll: the add action reports success before its write is
+		// necessarily visible to this separate DB connection, so read until it settles.
 		const person = await db.getPersonByName(name);
-		expect(await db.getContributionsByPersonVersionId(person!.id)).toHaveLength(1);
+		await expect
+			.poll(async () => (await db.getContributionsByPersonVersionId(person!.id)).length)
+			.toBe(1);
 
 		// Publish.
 		await personsPage.goto();
@@ -117,7 +120,9 @@ test.describe("persons admin lifecycle", () => {
 		// Verify the contribution is present on the published version.
 		const publishedId = await db.getPublishedVersionId(person!.documentId);
 		expect(publishedId).not.toBeNull();
-		expect(await db.getContributionsByPersonVersionId(publishedId!)).toHaveLength(1);
+		await expect
+			.poll(async () => (await db.getContributionsByPersonVersionId(publishedId!)).length)
+			.toBe(1);
 	});
 
 	test("version selector shows correct content per version", async ({
