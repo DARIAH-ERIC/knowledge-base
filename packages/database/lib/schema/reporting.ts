@@ -7,7 +7,6 @@ import * as f from "../fields";
 import { uuidv7 } from "../functions";
 import { entities } from "./entities";
 import { personsToOrganisationalUnits } from "./persons";
-import { projects } from "./projects";
 import { services } from "./services";
 import { socialMedia } from "./social-media";
 
@@ -281,13 +280,16 @@ export const countryReportProjectContributions = p.snakeCase.table(
 			.uuid("country_report_id")
 			.notNull()
 			.references(() => countryReports.id),
-		projectId: p
-			.uuid("project_id")
+		// Document-level: references the project's `entities.id`, not a version id, so the contribution
+		// stays attached to the project across its draft/publish lifecycle (resolved to the published
+		// version at read time).
+		projectDocumentId: p
+			.uuid("project_document_id")
 			.notNull()
-			.references(() => projects.id),
+			.references(() => entities.id),
 		amountEuros: p.numeric("amount_euros", { mode: "number", precision: 12, scale: 2 }).notNull(),
 	},
-	(t) => [p.unique().on(t.countryReportId, t.projectId)],
+	(t) => [p.unique().on(t.countryReportId, t.projectDocumentId)],
 );
 
 export type CountryReportProjectContribution =

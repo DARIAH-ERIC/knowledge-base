@@ -18,7 +18,8 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 interface Contribution {
 	id: string;
 	amountEuros: number;
-	project: Pick<schema.Project, "id" | "name">;
+	projectDocumentId: string;
+	project: Pick<schema.Project, "name"> | null;
 }
 
 interface CountryReportProjectsFormProps {
@@ -26,7 +27,8 @@ interface CountryReportProjectsFormProps {
 		id: string;
 		projectContributions: Array<Contribution>;
 	};
-	allProjects: Array<Pick<schema.Project, "id" | "name">>;
+	/** `id` is the project document id (entities.id). */
+	allProjects: Array<{ id: string; name: string }>;
 	addAction: ServerAction;
 	deleteAction: (formData: FormData) => Promise<void>;
 }
@@ -40,7 +42,7 @@ export function CountryReportProjectsForm(
 	const [state, action, isPending] = useActionState(addAction, createActionStateInitial());
 	const [selectedProjectId, setSelectedProjectId] = useState<string>("");
 
-	const existingProjectIds = new Set(report.projectContributions.map((c) => c.project.id));
+	const existingProjectIds = new Set(report.projectContributions.map((c) => c.projectDocumentId));
 	const availableProjects = allProjects.filter((p) => !existingProjectIds.has(p.id));
 
 	return (
@@ -55,7 +57,7 @@ export function CountryReportProjectsForm(
 								className="flex items-center justify-between gap-x-4 px-4 py-3"
 							>
 								<div>
-									<p className="text-sm font-medium text-fg">{contribution.project.name}</p>
+									<p className="text-sm font-medium text-fg">{contribution.project?.name ?? ""}</p>
 									<p className="text-xs text-muted-fg">
 										{t("Amount")}: {contribution.amountEuros.toLocaleString()} {"EUR"}
 									</p>
@@ -97,7 +99,7 @@ export function CountryReportProjectsForm(
 								))}
 							</SelectContent>
 						</Select>
-						<input name="projectId" type="hidden" value={selectedProjectId} />
+						<input name="projectDocumentId" type="hidden" value={selectedProjectId} />
 
 						<TextField isRequired={true} name="amountEuros" type="number">
 							<Label>{t("Amount (EUR)")}</Label>

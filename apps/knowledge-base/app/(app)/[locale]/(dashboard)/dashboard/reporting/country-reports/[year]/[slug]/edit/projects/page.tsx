@@ -52,9 +52,9 @@ export default async function DashboardReportingCountryReportProjectsPage(
 					columns: { id: true },
 					with: {
 						projectContributions: {
-							columns: { id: true, amountEuros: true },
+							columns: { id: true, amountEuros: true, projectDocumentId: true },
 							with: {
-								project: { columns: { id: true, name: true } },
+								project: { columns: { name: true } },
 							},
 						},
 					},
@@ -62,7 +62,9 @@ export default async function DashboardReportingCountryReportProjectsPage(
 			"update",
 		),
 		db
-			.select({ id: schema.projects.id, name: schema.projects.name })
+			// `id` is the project document id (entities.id) so it lines up with the document-level
+			// project_document_id stored on the contribution.
+			.select({ id: schema.entityVersions.entityId, name: schema.projects.name })
 			.from(schema.projects)
 			.innerJoin(schema.entityVersions, eq(schema.projects.id, schema.entityVersions.id))
 			.innerJoin(schema.entityStatus, eq(schema.entityVersions.statusId, schema.entityStatus.id))
