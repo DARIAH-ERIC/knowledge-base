@@ -1185,7 +1185,7 @@ export class DatabaseService {
 	async createCountryReportProjectContribution(params: {
 		amountEuros: number;
 		countryReportId: string;
-		projectId: string;
+		projectDocumentId: string;
 	}): Promise<{ id: string }> {
 		const [row] = await this.db
 			.insert(schema.countryReportProjectContributions)
@@ -1199,21 +1199,21 @@ export class DatabaseService {
 		return row;
 	}
 
-	async getCountryReportProjectContributionByProjectId(projectId: string): Promise<{
+	async getCountryReportProjectContributionByProjectDocumentId(projectDocumentId: string): Promise<{
 		amountEuros: number;
 		countryReportId: string;
 		id: string;
-		projectId: string;
+		projectDocumentId: string;
 	} | null> {
 		const [row] = await this.db
 			.select({
 				amountEuros: schema.countryReportProjectContributions.amountEuros,
 				countryReportId: schema.countryReportProjectContributions.countryReportId,
 				id: schema.countryReportProjectContributions.id,
-				projectId: schema.countryReportProjectContributions.projectId,
+				projectDocumentId: schema.countryReportProjectContributions.projectDocumentId,
 			})
 			.from(schema.countryReportProjectContributions)
-			.where(eq(schema.countryReportProjectContributions.projectId, projectId))
+			.where(eq(schema.countryReportProjectContributions.projectDocumentId, projectDocumentId))
 			.limit(1);
 
 		return row ?? null;

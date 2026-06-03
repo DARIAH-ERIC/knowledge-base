@@ -102,7 +102,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 				with: {
 					project: { columns: { name: true } },
 				},
-				orderBy: { projectId: "asc" },
+				orderBy: { projectDocumentId: "asc" },
 			},
 		},
 	});
@@ -224,7 +224,7 @@ async function getCountryReportData(id: string): Promise<CountryReportData | nul
 			projectContributions: report.projectContributions.map((p) => {
 				return {
 					id: p.id,
-					projectName: p.project.name,
+					projectName: p.project?.name ?? "",
 					amountEuros: p.amountEuros,
 				};
 			}),

@@ -222,8 +222,14 @@ test.describe("governance bodies admin", () => {
 
 		// Verify draft version has both relations.
 		const draft = await db.getGovernanceBodyByName(name);
-		expect(await db.getUnitRelationsByUnitVersionId(draft!.id)).toHaveLength(1);
-		expect(await db.getPersonRelationsByUnitVersionId(draft!.id)).toHaveLength(1);
+		// Poll: the add-relation actions report success before their write is necessarily visible to this
+		// separate DB connection, so read until it settles instead of racing the commit.
+		await expect
+			.poll(async () => (await db.getUnitRelationsByUnitVersionId(draft!.id)).length)
+			.toBe(1);
+		await expect
+			.poll(async () => (await db.getPersonRelationsByUnitVersionId(draft!.id)).length)
+			.toBe(1);
 
 		// Publish from the edit form (governance bodies have no separate details page).
 		await governanceBodiesPage.publishItem();
@@ -231,8 +237,12 @@ test.describe("governance bodies admin", () => {
 		// The relations are document-level, so the published version's read resolves them exactly once.
 		const publishedId = await db.getPublishedVersionId(draft!.documentId);
 		expect(publishedId).not.toBeNull();
-		expect(await db.getUnitRelationsByUnitVersionId(publishedId!)).toHaveLength(1);
-		expect(await db.getPersonRelationsByUnitVersionId(publishedId!)).toHaveLength(1);
+		await expect
+			.poll(async () => (await db.getUnitRelationsByUnitVersionId(publishedId!)).length)
+			.toBe(1);
+		await expect
+			.poll(async () => (await db.getPersonRelationsByUnitVersionId(publishedId!)).length)
+			.toBe(1);
 
 		// Re-publish: edit a field to create a new draft, save it, then publish again. This wipes and
 		// rebuilds the published subtype, but must leave the document-level relations untouched — still
@@ -245,8 +255,12 @@ test.describe("governance bodies admin", () => {
 
 		const republishedId = await db.getPublishedVersionId(draft!.documentId);
 		expect(republishedId).not.toBeNull();
-		expect(await db.getUnitRelationsByUnitVersionId(republishedId!)).toHaveLength(1);
-		expect(await db.getPersonRelationsByUnitVersionId(republishedId!)).toHaveLength(1);
+		await expect
+			.poll(async () => (await db.getUnitRelationsByUnitVersionId(republishedId!)).length)
+			.toBe(1);
+		await expect
+			.poll(async () => (await db.getPersonRelationsByUnitVersionId(republishedId!)).length)
+			.toBe(1);
 	});
 
 	test("should manage unit relations", async ({ createAdminGovernanceBodiesPage, db }) => {
@@ -327,8 +341,14 @@ test.describe("governance bodies admin", () => {
 		await governanceBodiesPage.submitAddPerson();
 
 		const created = await db.getGovernanceBodyByName(name);
-		expect(await db.getUnitRelationsByUnitVersionId(created!.id)).toHaveLength(1);
-		expect(await db.getPersonRelationsByUnitVersionId(created!.id)).toHaveLength(1);
+		// Poll: the add-relation actions report success before their write is necessarily visible to this
+		// separate DB connection, so read until it settles instead of racing the commit.
+		await expect
+			.poll(async () => (await db.getUnitRelationsByUnitVersionId(created!.id)).length)
+			.toBe(1);
+		await expect
+			.poll(async () => (await db.getPersonRelationsByUnitVersionId(created!.id)).length)
+			.toBe(1);
 
 		await governanceBodiesPage.goto();
 		await governanceBodiesPage.searchByName(name);
