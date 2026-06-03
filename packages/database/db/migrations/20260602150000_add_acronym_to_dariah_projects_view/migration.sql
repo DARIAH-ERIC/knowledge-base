@@ -1,4 +1,4 @@
-DROP VIEW dariah_projects;
+DROP VIEW IF EXISTS dariah_projects;
 
 --> statement-breakpoint
 
