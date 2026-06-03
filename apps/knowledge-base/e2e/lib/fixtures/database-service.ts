@@ -476,38 +476,43 @@ export class DatabaseService {
 	async getUnitRelationsByUnitVersionId(versionId: string): Promise<
 		Array<{
 			id: string;
-			relatedUnitId: string;
+			relatedUnitId: string | null;
 			statusType: string;
 			duration: { start: Date; end?: Date };
 		}>
 	> {
-		return this.db
-			.select({
-				id: schema.organisationalUnitsRelations.id,
-				// resolve the related unit document back to its published version id.
-				relatedUnitId: schema.organisationalUnits.id,
-				statusType: schema.organisationalUnitStatus.status,
-				duration: schema.organisationalUnitsRelations.duration,
-			})
-			.from(schema.organisationalUnitsRelations)
-			.innerJoin(
-				schema.organisationalUnitStatus,
-				eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
-			)
-			.innerJoin(
-				schema.documentLifecycle,
-				eq(
-					schema.documentLifecycle.documentId,
-					schema.organisationalUnitsRelations.relatedUnitDocumentId,
-				),
-			)
-			.innerJoin(
-				schema.organisationalUnits,
-				eq(schema.organisationalUnits.id, schema.documentLifecycle.publishedId),
-			)
-			.where(
-				sql`${schema.organisationalUnitsRelations.unitDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${versionId})`,
-			);
+		return (
+			this.db
+				.select({
+					id: schema.organisationalUnitsRelations.id,
+					// resolve the related unit document back to its published version id.
+					relatedUnitId: schema.organisationalUnits.id,
+					statusType: schema.organisationalUnitStatus.status,
+					duration: schema.organisationalUnitsRelations.duration,
+				})
+				.from(schema.organisationalUnitsRelations)
+				.innerJoin(
+					schema.organisationalUnitStatus,
+					eq(schema.organisationalUnitStatus.id, schema.organisationalUnitsRelations.status),
+				)
+				// Resolve the related unit for display only — LEFT joins so the relation is still counted when
+				// the related unit has no published version at query time (e.g. a concurrent worker is
+				// re-publishing or cleaning it up). The relation row itself is the source of truth.
+				.leftJoin(
+					schema.documentLifecycle,
+					eq(
+						schema.documentLifecycle.documentId,
+						schema.organisationalUnitsRelations.relatedUnitDocumentId,
+					),
+				)
+				.leftJoin(
+					schema.organisationalUnits,
+					sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
+				)
+				.where(
+					sql`${schema.organisationalUnitsRelations.unitDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${versionId})`,
+				)
+		);
 	}
 
 	async getPublishedVersionId(documentId: string): Promise<string | null> {
@@ -740,7 +745,7 @@ export class DatabaseService {
 		partners: Array<{
 			duration: { start?: Date; end?: Date } | null;
 			roleId: string;
-			unitId: string;
+			unitId: string | null;
 		}>;
 		socialMediaIds: Array<string>;
 	} | null> {
@@ -758,16 +763,19 @@ export class DatabaseService {
 				unitId: schema.organisationalUnits.id,
 			})
 			.from(schema.projectsToOrganisationalUnits)
-			.innerJoin(
+			// Resolve the partner unit for display only — LEFT joins so the partnership is still counted
+			// when the unit has no published version at query time (e.g. a concurrent worker is
+			// re-publishing or cleaning it up). The partnership row itself is the source of truth.
+			.leftJoin(
 				schema.documentLifecycle,
 				eq(
 					schema.documentLifecycle.documentId,
 					schema.projectsToOrganisationalUnits.unitDocumentId,
 				),
 			)
-			.innerJoin(
+			.leftJoin(
 				schema.organisationalUnits,
-				eq(schema.organisationalUnits.id, schema.documentLifecycle.publishedId),
+				sql`${schema.organisationalUnits.id} = COALESCE(${schema.documentLifecycle.publishedId}, ${schema.documentLifecycle.draftId})`,
 			)
 			.where(
 				sql`${schema.projectsToOrganisationalUnits.projectDocumentId} = (SELECT ${schema.entityVersions.entityId} FROM ${schema.entityVersions} WHERE ${schema.entityVersions.id} = ${project.id})`,
