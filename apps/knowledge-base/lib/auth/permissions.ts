@@ -16,6 +16,7 @@ export type Resource =
 const chairRoles = ["is_chair_of", "is_vice_chair_of", "is_director_of"] as const;
 const memberRoles = ["is_member_of"] as const;
 const coordinatorRoles = ["national_coordinator", "national_coordinator_deputy"] as const;
+const coordinationStaffRoles = ["national_coordination_staff"] as const;
 const representativeRoles = ["national_representative", "national_representative_deputy"] as const;
 
 async function hasActiveRelation(
@@ -116,12 +117,19 @@ export async function can(user: User, action: Action, resource: Resource): Promi
 			return hasActiveRelation(user.personDocumentId, report.countryDocumentId, coordinatorRoles);
 		}
 
+		// `national_coordination_staff` may read and edit country reports, but not confirm them.
 		return (
 			(await hasActiveRelation(
 				user.personDocumentId,
 				report.countryDocumentId,
 				coordinatorRoles,
-			)) || hasActiveRelation(user.personDocumentId, report.countryDocumentId, representativeRoles)
+			)) ||
+			(await hasActiveRelation(
+				user.personDocumentId,
+				report.countryDocumentId,
+				coordinationStaffRoles,
+			)) ||
+			hasActiveRelation(user.personDocumentId, report.countryDocumentId, representativeRoles)
 		);
 	}
 
