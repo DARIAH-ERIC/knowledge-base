@@ -37,6 +37,7 @@ export function CommandPalette(props: Readonly<CommandPaletteProps>): ReactNode 
 
 	const [searchInput, setSearchInput] = useState("");
 	const [searchResults, setSearchResults] = useState<Array<DashboardSearchResult>>([]);
+	const [searchError, setSearchError] = useState<"rate-limit" | null>(null);
 	const [isSearching, setIsSearching] = useState(false);
 
 	const router = useRouter();
@@ -45,12 +46,14 @@ export function CommandPalette(props: Readonly<CommandPaletteProps>): ReactNode 
 	useEffect(() => {
 		if (!isOpen || query.length < 2) {
 			setSearchResults([]);
+			setSearchError(null);
 			setIsSearching(false);
 			return;
 		}
 
 		const controller = new AbortController();
 		setSearchResults([]);
+		setSearchError(null);
 		const timeoutId = window.setTimeout(() => {
 			setIsSearching(true);
 
@@ -62,16 +65,24 @@ export function CommandPalette(props: Readonly<CommandPaletteProps>): ReactNode 
 					});
 
 					if (!response.ok) {
+						if (response.status === 429) {
+							setSearchError("rate-limit");
+							setSearchResults([]);
+							return;
+						}
+
 						throw new Error("Failed to search dashboard entities.");
 					}
 
 					const result = (await response.json()) as { items?: Array<DashboardSearchResult> };
+					setSearchError(null);
 					setSearchResults(result.items ?? []);
 				} catch (error: unknown) {
 					if (error instanceof DOMException && error.name === "AbortError") {
 						return;
 					}
 
+					setSearchError(null);
 					setSearchResults([]);
 				} finally {
 					if (!controller.signal.aborted) {
@@ -121,6 +132,11 @@ export function CommandPalette(props: Readonly<CommandPaletteProps>): ReactNode 
 							</CommandMenuItem>
 						))}
 					</CommandMenuSection>
+				) : null}
+				{searchError === "rate-limit" ? (
+					<div className="col-span-full px-2.5 py-2 text-muted-fg text-sm">
+						{t("Too many requests. Please wait a moment and try again.")}
+					</div>
 				) : null}
 				{sidebarMenu.map((section, index) => (
 					// eslint-disable-next-line @eslint-react/no-array-index-key

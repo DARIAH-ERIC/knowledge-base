@@ -3,8 +3,14 @@ import { type NextRequest, NextResponse } from "next/server";
 import { imageGridOptions, mediaLibraryPageSize } from "@/config/assets.config";
 import { getCurrentSession } from "@/lib/auth/session";
 import { type AssetPrefix, assetPrefixes, getMediaLibraryAssets } from "@/lib/data/assets";
+import { enforceApiGetRateLimit } from "@/lib/server/api-rate-limit";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
+	const rateLimitResponse = await enforceApiGetRateLimit();
+	if (rateLimitResponse != null) {
+		return rateLimitResponse;
+	}
+
 	const { session } = await getCurrentSession();
 
 	if (session == null) {
