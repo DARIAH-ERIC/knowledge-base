@@ -940,7 +940,7 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		],
 		content: initialContent,
 		editable: isEditable,
-		immediatelyRender: false,
+		immediatelyRender: true,
 		onUpdate({ editor: updatedEditor }) {
 			const json = updatedEditor.getJSON();
 			// oxlint-disable-next-line no-use-before-define
