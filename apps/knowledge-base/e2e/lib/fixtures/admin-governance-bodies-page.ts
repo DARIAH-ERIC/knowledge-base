@@ -4,6 +4,7 @@ import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
 import { E2E_TEST_ASSET_KEY } from "@/e2e/lib/fixtures/database-service";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
+import { pickFirstSelectOption } from "@/e2e/lib/fixtures/select";
 
 const BASE_PATH = "/en/dashboard/administrator/governance-bodies";
 
@@ -149,8 +150,7 @@ export class AdminGovernanceBodiesPage {
 		const control = this.page
 			.locator('[data-slot="control"]')
 			.filter({ has: this.page.getByText("Relation type", { exact: true }) });
-		await control.locator("button").click();
-		await this.page.getByRole("option").first().click();
+		await pickFirstSelectOption(this.page, control.locator("button"));
 	}
 
 	async selectFirstRelatedUnit(): Promise<void> {
@@ -270,8 +270,7 @@ export class AdminGovernanceBodiesPage {
 		const control = this.page
 			.locator('[data-slot="control"]')
 			.filter({ has: this.page.getByText("Role", { exact: true }) });
-		await control.locator("button").click();
-		await this.page.getByRole("option").first().click();
+		await pickFirstSelectOption(this.page, control.locator("button"));
 	}
 
 	async selectFirstPerson(): Promise<void> {
