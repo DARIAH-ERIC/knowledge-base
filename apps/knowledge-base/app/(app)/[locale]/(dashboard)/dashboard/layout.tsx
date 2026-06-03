@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { connection } from "next/server";
 import { Fragment, type ReactNode } from "react";
 
+import { DashboardCommandPaletteProvider } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-command-palette";
 import { DashboardSidebar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar";
 import { DashboardSidebarNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-sidebar-nav";
 import { mainContentId } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/main";
@@ -38,19 +39,17 @@ export default async function DashbardLayout(
 			<SkipLink href={`#${mainContentId}`}>{t("Skip to main content")}</SkipLink>
 
 			<SidebarProvider defaultOpen={defaultOpen}>
-				<DashboardSidebar collapsible="dock" isAdmin={user.role === "admin"} />
+				<DashboardCommandPaletteProvider isAdmin={user.role === "admin"}>
+					<DashboardSidebar collapsible="dock" isAdmin={user.role === "admin"} />
 
-				<SidebarInset>
-					<DashboardSidebarNav
-						breadcrumbs={breadcrumbs}
-						isAdmin={user.role === "admin"}
-						user={user}
-					/>
+					<SidebarInset>
+						<DashboardSidebarNav breadcrumbs={breadcrumbs} user={user} />
 
-					<div className="flex flex-col gap-y-(--layout-padding) p-(--layout-padding) [--layout-padding:--spacing(4)] sm:[--layout-padding:--spacing(6)]">
-						{children}
-					</div>
-				</SidebarInset>
+						<div className="flex flex-col gap-y-(--layout-padding) p-(--layout-padding) [--layout-padding:--spacing(4)] sm:[--layout-padding:--spacing(6)]">
+							{children}
+						</div>
+					</SidebarInset>
+				</DashboardCommandPaletteProvider>
 			</SidebarProvider>
 		</Fragment>
 	);

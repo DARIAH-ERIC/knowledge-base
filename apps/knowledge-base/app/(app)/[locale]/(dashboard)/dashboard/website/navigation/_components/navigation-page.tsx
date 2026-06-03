@@ -324,7 +324,7 @@ export function NavigationPage(props: Readonly<NavigationPageProps>): ReactNode 
 					</p>
 				) : (
 					<Tabs>
-						<TabList className="mbe-4">
+						<TabList aria-label={t("Navigation menus")} className="mbe-4">
 							{menus.map((menu) => (
 								<Tab key={menu.id} id={menu.id}>
 									{menu.name}

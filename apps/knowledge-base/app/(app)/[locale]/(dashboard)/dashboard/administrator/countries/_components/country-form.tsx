@@ -30,6 +30,7 @@ interface CountryFormProps {
 		description?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
+	formId?: string;
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
 	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
@@ -43,6 +44,7 @@ interface CountryFormProps {
 	selectedRelatedEntities?: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources?: Array<{ id: string; name: string; description?: string }>;
 	selectedSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
+	showRelationFields?: boolean;
 	showSaveAndPublish?: boolean;
 }
 
@@ -50,6 +52,7 @@ export function CountryForm(props: Readonly<CountryFormProps>): ReactNode {
 	const {
 		initialAssets,
 		formAction,
+		formId,
 		country,
 		initialRelatedEntityIds,
 		initialRelatedEntityItems,
@@ -63,6 +66,7 @@ export function CountryForm(props: Readonly<CountryFormProps>): ReactNode {
 		selectedRelatedEntities,
 		selectedRelatedResources,
 		selectedSocialMediaItems,
+		showRelationFields = true,
 		showSaveAndPublish,
 	} = props;
 
@@ -76,7 +80,7 @@ export function CountryForm(props: Readonly<CountryFormProps>): ReactNode {
 
 	return (
 		<FormLayout>
-			<Form action={action} className="flex flex-col gap-y-6" state={state}>
+			<Form action={action} className="flex flex-col gap-y-6" id={formId} state={state}>
 				<FormSection description={t("Enter the country details.")} title={t("Details")}>
 					<TextField defaultValue={country?.name} isRequired={true} name="name">
 						<Label>{t("Name")}</Label>
@@ -166,16 +170,19 @@ export function CountryForm(props: Readonly<CountryFormProps>): ReactNode {
 					</Fragment>
 				) : null}
 
-				<EntityRelationsFields
-					initialRelatedEntityIds={initialRelatedEntityIds}
-					initialRelatedEntityItems={initialRelatedEntityItems}
-					initialRelatedEntityTotal={initialRelatedEntityTotal}
-					initialRelatedResourceIds={initialRelatedResourceIds}
-					initialRelatedResourceItems={initialRelatedResourceItems}
-					initialRelatedResourceTotal={initialRelatedResourceTotal}
-					selectedRelatedEntities={selectedRelatedEntities}
-					selectedRelatedResources={selectedRelatedResources}
-				/>
+				{showRelationFields ? (
+					<EntityRelationsFields
+						formId={formId}
+						initialRelatedEntityIds={initialRelatedEntityIds}
+						initialRelatedEntityItems={initialRelatedEntityItems}
+						initialRelatedEntityTotal={initialRelatedEntityTotal}
+						initialRelatedResourceIds={initialRelatedResourceIds}
+						initialRelatedResourceItems={initialRelatedResourceItems}
+						initialRelatedResourceTotal={initialRelatedResourceTotal}
+						selectedRelatedEntities={selectedRelatedEntities}
+						selectedRelatedResources={selectedRelatedResources}
+					/>
+				) : null}
 
 				{country != null ? (
 					<Fragment>

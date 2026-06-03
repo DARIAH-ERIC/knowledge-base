@@ -148,7 +148,7 @@ test.describe("admin projects lifecycle", () => {
 		await expect(page.getByText(updatedName)).toBeVisible();
 	});
 
-	test("re-publish preserves project row referenced by country report contributions", async ({
+	test("re-publish keeps country report contribution linked to the project (document-level)", async ({
 		page,
 		createAdminProjectsPage,
 		db,
@@ -182,10 +182,12 @@ test.describe("admin projects lifecycle", () => {
 			campaignId: campaign.id,
 			countryDocumentId: country.id,
 		});
+		// Contributions reference the project by its document id, so the link must survive re-publish
+		// regardless of whether the published version id changes.
 		await db.createCountryReportProjectContribution({
 			amountEuros: 1234,
 			countryReportId: report.id,
-			projectId: publishedProject!.id,
+			projectDocumentId: publishedProject!.documentId,
 		});
 
 		await projectsPage.searchByName(originalName);
@@ -200,16 +202,17 @@ test.describe("admin projects lifecycle", () => {
 		await projectsPage.gotoDetailsFromList(updatedName);
 		await projectsPage.publishItem();
 
+		// Same logical project (stable document id) even though re-publishing may mint a new version id.
 		const republishedProject = await db.getProjectByName(updatedName);
-		expect(republishedProject).toMatchObject({ id: publishedProject!.id });
+		expect(republishedProject).toMatchObject({ documentId: publishedProject!.documentId });
 		await expect(async () => {
-			const contribution = await db.getCountryReportProjectContributionByProjectId(
-				publishedProject!.id,
+			const contribution = await db.getCountryReportProjectContributionByProjectDocumentId(
+				publishedProject!.documentId,
 			);
 			expect(contribution).toMatchObject({
 				amountEuros: 1234,
 				countryReportId: report.id,
-				projectId: publishedProject!.id,
+				projectDocumentId: publishedProject!.documentId,
 			});
 		}).toPass({ timeout: 10_000 });
 	});

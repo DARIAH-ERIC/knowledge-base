@@ -23,7 +23,10 @@ export const createCountryReportProjectContributionAction = createMutationAction
 		});
 
 		const existing = await db.query.countryReportProjectContributions.findFirst({
-			where: { countryReportId: input.countryReportId, projectId: input.projectId },
+			where: {
+				countryReportId: input.countryReportId,
+				projectDocumentId: input.projectDocumentId,
+			},
 			columns: { id: true },
 		});
 
@@ -31,7 +34,7 @@ export const createCountryReportProjectContributionAction = createMutationAction
 			return createActionStateError({
 				message: t("A contribution for this project already exists."),
 				validationErrors: {
-					projectId: [t("A contribution for this project already exists.")],
+					projectDocumentId: [t("A contribution for this project already exists.")],
 				},
 			});
 		}
@@ -44,7 +47,7 @@ export const createCountryReportProjectContributionAction = createMutationAction
 
 		await tx.insert(schema.countryReportProjectContributions).values({
 			countryReportId: input.countryReportId,
-			projectId: input.projectId,
+			projectDocumentId: input.projectDocumentId,
 			amountEuros: input.amountEuros,
 		});
 

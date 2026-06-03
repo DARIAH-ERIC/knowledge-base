@@ -49,6 +49,7 @@ export function NewsItemEditForm(props: Readonly<NewsItemEditFormProps>): ReactN
 	} = props;
 
 	const t = useExtracted();
+	const formId = "news-item-edit-form";
 
 	return (
 		<Fragment>
@@ -66,6 +67,7 @@ export function NewsItemEditForm(props: Readonly<NewsItemEditFormProps>): ReactN
 			<NewsItemForm
 				contentBlocks={contentBlocks}
 				formAction={updateNewsItemAction}
+				formId={formId}
 				initialAssets={initialAssets}
 				initialRelatedEntityIds={initialRelatedEntityIds}
 				initialRelatedEntityItems={initialRelatedEntityItems}

@@ -33,6 +33,7 @@ interface NationalConsortiumFormProps {
 		description?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
+	formId?: string;
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
 	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
@@ -46,6 +47,7 @@ interface NationalConsortiumFormProps {
 	selectedRelatedEntities?: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources?: Array<{ id: string; name: string; description?: string }>;
 	selectedSocialMediaItems?: Array<{ id: string; name: string; description?: string }>;
+	showRelationFields?: boolean;
 	showSaveAndPublish?: boolean;
 }
 
@@ -53,6 +55,7 @@ export function NationalConsortiumForm(props: Readonly<NationalConsortiumFormPro
 	const {
 		initialAssets,
 		formAction,
+		formId,
 		nationalConsortium,
 		initialRelatedEntityIds,
 		initialRelatedEntityItems,
@@ -66,6 +69,7 @@ export function NationalConsortiumForm(props: Readonly<NationalConsortiumFormPro
 		selectedRelatedEntities,
 		selectedRelatedResources,
 		selectedSocialMediaItems,
+		showRelationFields = true,
 		showSaveAndPublish,
 	} = props;
 
@@ -79,7 +83,7 @@ export function NationalConsortiumForm(props: Readonly<NationalConsortiumFormPro
 
 	return (
 		<FormLayout>
-			<Form action={action} className="flex flex-col gap-y-6" state={state}>
+			<Form action={action} className="flex flex-col gap-y-6" id={formId} state={state}>
 				<FormSection description={t("Enter the national consortium details.")} title={t("Details")}>
 					<TextField defaultValue={nationalConsortium?.name} isRequired={true} name="name">
 						<Label>{t("Name")}</Label>
@@ -183,16 +187,19 @@ export function NationalConsortiumForm(props: Readonly<NationalConsortiumFormPro
 					</Fragment>
 				) : null}
 
-				<EntityRelationsFields
-					initialRelatedEntityIds={initialRelatedEntityIds}
-					initialRelatedEntityItems={initialRelatedEntityItems}
-					initialRelatedEntityTotal={initialRelatedEntityTotal}
-					initialRelatedResourceIds={initialRelatedResourceIds}
-					initialRelatedResourceItems={initialRelatedResourceItems}
-					initialRelatedResourceTotal={initialRelatedResourceTotal}
-					selectedRelatedEntities={selectedRelatedEntities}
-					selectedRelatedResources={selectedRelatedResources}
-				/>
+				{showRelationFields ? (
+					<EntityRelationsFields
+						formId={formId}
+						initialRelatedEntityIds={initialRelatedEntityIds}
+						initialRelatedEntityItems={initialRelatedEntityItems}
+						initialRelatedEntityTotal={initialRelatedEntityTotal}
+						initialRelatedResourceIds={initialRelatedResourceIds}
+						initialRelatedResourceItems={initialRelatedResourceItems}
+						initialRelatedResourceTotal={initialRelatedResourceTotal}
+						selectedRelatedEntities={selectedRelatedEntities}
+						selectedRelatedResources={selectedRelatedResources}
+					/>
+				) : null}
 
 				{nationalConsortium != null ? (
 					<Fragment>

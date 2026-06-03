@@ -29,7 +29,6 @@ export function Tabs(props: Readonly<TabsProps>): ReactNode {
 	const { className, ref, orientation = "horizontal", ...rest } = props;
 
 	return (
-		// eslint-disable-next-line @eslint-react/no-unstable-context-value
 		<TabsContext value={{ orientation }}>
 			<TabsPrimitive
 				{...rest}
@@ -77,7 +76,7 @@ export interface TabProps extends TabPrimitiveProps {
 }
 
 export function Tab(props: Readonly<TabProps>): ReactNode {
-	const { children, className, ref, ...rest } = props;
+	const { children, className, ref, render, ...rest } = props;
 
 	const { LinkComponent = "a" } = use(UiContext);
 
@@ -101,6 +100,10 @@ export function Tab(props: Readonly<TabProps>): ReactNode {
 			)}
 			data-slot="tab"
 			render={(domProps, renderProps) => {
+				if (render != null) {
+					return render(domProps, renderProps);
+				}
+
 				if ("href" in domProps && domProps.href && !renderProps.isDisabled) {
 					return <LinkComponent {...domProps} />;
 				}
@@ -134,17 +137,40 @@ export function Tab(props: Readonly<TabProps>): ReactNode {
 
 export interface TabPanelProps extends TabPanelAriaProps {
 	ref?: RefObject<HTMLDivElement>;
+	shouldPreserveState?: boolean;
 }
 
 export function TabPanel(props: Readonly<TabPanelProps>): ReactNode {
-	const { className, ref, ...rest } = props;
+	const {
+		children,
+		className,
+		id,
+		ref,
+		shouldForceMount,
+		shouldPreserveState = false,
+		...rest
+	} = props;
 
 	return (
 		<TabPanelPrimitive
 			{...rest}
+			id={id}
 			ref={ref}
-			className={cx("flex-1 text-fg text-sm/6 focus-visible:outline-hidden", className)}
+			className={cx(
+				"flex-1 text-fg text-sm/6 focus-visible:outline-hidden",
+				// When state is preserved the inactive panel stays mounted (so uncontrolled form fields keep
+				// their values across tab switches) but must be hidden visually. Use CSS `display: none`
+				// rather than React's `<Activity mode="hidden">`: Activity tears down the subtree's effects,
+				// which leaves react-aria controls (e.g. a `Select`) without their interaction handlers once
+				// the panel is revealed again — and they never recover. `display: none` keeps both the DOM
+				// state and the live effects/handlers. react-aria marks inactive panels with `data-inert`.
+				"data-inert:hidden",
+				className,
+			)}
 			data-slot="tab-panel"
-		/>
+			shouldForceMount={shouldPreserveState ? true : shouldForceMount}
+		>
+			{children}
+		</TabPanelPrimitive>
 	);
 }
