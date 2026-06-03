@@ -1,12 +1,15 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Tab, TabList, TabPanel } from "@dariah-eric/ui/tabs";
+import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
-import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
+import {
+	EntityEditTab,
+	EntityEditTabs,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { ArticleContributorsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section";
@@ -64,6 +67,7 @@ export function SpotlightArticleEditForm(
 	} = props;
 
 	const t = useExtracted();
+	const formId = "spotlight-article-edit-form";
 
 	return (
 		<Fragment>
@@ -71,14 +75,14 @@ export function SpotlightArticleEditForm(
 
 			<EntityEditTabs defaultTab="details">
 				<TabList aria-label={t("Edit spotlight article")}>
-					<Tab id="details">{t("Details")}</Tab>
-					<Tab id="contributors">{t("Contributors")}</Tab>
+					<EntityEditTab id="details">{t("Details")}</EntityEditTab>
+					<EntityEditTab id="contributors">{t("Contributors")}</EntityEditTab>
 				</TabList>
 
 				<TabPanel
 					className="flex flex-col gap-y-(--layout-padding)"
 					id="details"
-					shouldForceMount={true}
+					shouldPreserveState={true}
 				>
 					<div className="flex justify-end">
 						<EntityLifecycleBar
@@ -93,6 +97,7 @@ export function SpotlightArticleEditForm(
 					<SpotlightArticleForm
 						contentBlocks={contentBlocks}
 						formAction={updateSpotlightArticleAction}
+						formId={formId}
 						initialAssets={initialAssets}
 						initialRelatedEntityIds={initialRelatedEntityIds}
 						initialRelatedEntityItems={initialRelatedEntityItems}
@@ -100,13 +105,13 @@ export function SpotlightArticleEditForm(
 						initialRelatedResourceIds={initialRelatedResourceIds}
 						initialRelatedResourceItems={initialRelatedResourceItems}
 						initialRelatedResourceTotal={initialRelatedResourceTotal}
+						spotlightArticle={spotlightArticle}
 						selectedRelatedEntities={selectedRelatedEntities}
 						selectedRelatedResources={selectedRelatedResources}
-						spotlightArticle={spotlightArticle}
 					/>
 				</TabPanel>
 
-				<TabPanel id="contributors" shouldForceMount={true}>
+				<TabPanel id="contributors" shouldPreserveState={true}>
 					<ArticleContributorsSection
 						articleId={documentId}
 						contributors={contributors}

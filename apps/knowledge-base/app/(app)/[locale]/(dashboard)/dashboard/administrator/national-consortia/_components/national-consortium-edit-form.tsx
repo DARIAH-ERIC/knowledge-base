@@ -1,12 +1,15 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Tab, TabList, TabPanel } from "@dariah-eric/ui/tabs";
+import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
-import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
+import {
+	EntityEditTab,
+	EntityEditTabs,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
@@ -70,6 +73,7 @@ export function NationalConsortiumEditForm(
 	} = props;
 
 	const t = useExtracted();
+	const formId = "national-consortium-edit-form";
 
 	return (
 		<Fragment>
@@ -77,14 +81,14 @@ export function NationalConsortiumEditForm(
 
 			<EntityEditTabs defaultTab="details">
 				<TabList aria-label={t("Edit national consortium")}>
-					<Tab id="details">{t("Details")}</Tab>
-					<Tab id="relations">{t("Relations")}</Tab>
+					<EntityEditTab id="details">{t("Details")}</EntityEditTab>
+					<EntityEditTab id="relations">{t("Relations")}</EntityEditTab>
 				</TabList>
 
 				<TabPanel
 					className="flex flex-col gap-y-(--layout-padding)"
 					id="details"
-					shouldForceMount={true}
+					shouldPreserveState={true}
 				>
 					<div className="flex justify-end">
 						<EntityLifecycleBar
@@ -98,6 +102,7 @@ export function NationalConsortiumEditForm(
 
 					<NationalConsortiumForm
 						formAction={updateNationalConsortiumAction}
+						formId={formId}
 						initialAssets={initialAssets}
 						initialRelatedEntityIds={initialRelatedEntityIds}
 						initialRelatedEntityItems={initialRelatedEntityItems}
@@ -116,7 +121,7 @@ export function NationalConsortiumEditForm(
 					/>
 				</TabPanel>
 
-				<TabPanel id="relations" shouldForceMount={true}>
+				<TabPanel id="relations" shouldPreserveState={true}>
 					<UnitRelationsSection
 						relations={relations}
 						statusOptions={unitRelationStatusOptions}

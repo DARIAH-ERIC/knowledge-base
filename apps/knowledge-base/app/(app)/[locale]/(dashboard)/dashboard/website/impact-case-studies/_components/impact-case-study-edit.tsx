@@ -1,12 +1,15 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Tab, TabList, TabPanel } from "@dariah-eric/ui/tabs";
+import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
-import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
+import {
+	EntityEditTab,
+	EntityEditTabs,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { ArticleContributorsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/_components/article-contributors-section";
@@ -62,6 +65,7 @@ export function ImpactCaseStudyEditForm(props: Readonly<ImpactCaseStudyEditFormP
 	} = props;
 
 	const t = useExtracted();
+	const formId = "impact-case-study-edit-form";
 
 	return (
 		<Fragment>
@@ -69,14 +73,14 @@ export function ImpactCaseStudyEditForm(props: Readonly<ImpactCaseStudyEditFormP
 
 			<EntityEditTabs defaultTab="details">
 				<TabList aria-label={t("Edit impact case study")}>
-					<Tab id="details">{t("Details")}</Tab>
-					<Tab id="contributors">{t("Contributors")}</Tab>
+					<EntityEditTab id="details">{t("Details")}</EntityEditTab>
+					<EntityEditTab id="contributors">{t("Contributors")}</EntityEditTab>
 				</TabList>
 
 				<TabPanel
 					className="flex flex-col gap-y-(--layout-padding)"
 					id="details"
-					shouldForceMount={true}
+					shouldPreserveState={true}
 				>
 					<div className="flex justify-end">
 						<EntityLifecycleBar
@@ -91,6 +95,7 @@ export function ImpactCaseStudyEditForm(props: Readonly<ImpactCaseStudyEditFormP
 					<ImpactCaseStudyForm
 						contentBlocks={contentBlocks}
 						formAction={updateImpactCaseStudyAction}
+						formId={formId}
 						impactCaseStudy={impactCaseStudy}
 						initialAssets={initialAssets}
 						initialRelatedEntityIds={initialRelatedEntityIds}
@@ -104,7 +109,7 @@ export function ImpactCaseStudyEditForm(props: Readonly<ImpactCaseStudyEditFormP
 					/>
 				</TabPanel>
 
-				<TabPanel id="contributors" shouldForceMount={true}>
+				<TabPanel id="contributors" shouldPreserveState={true}>
 					<ArticleContributorsSection
 						articleId={documentId}
 						contributors={contributors}

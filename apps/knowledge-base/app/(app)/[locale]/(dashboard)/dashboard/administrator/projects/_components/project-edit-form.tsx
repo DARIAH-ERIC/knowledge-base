@@ -1,12 +1,15 @@
 "use client";
 
 import type * as schema from "@dariah-eric/database/schema";
-import { Tab, TabList, TabPanel } from "@dariah-eric/ui/tabs";
+import { TabList, TabPanel } from "@dariah-eric/ui/tabs";
 import type { JSONContent } from "@tiptap/core";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
-import { EntityEditTabs } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
+import {
+	EntityEditTab,
+	EntityEditTabs,
+} from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { ProjectForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_components/project-form";
@@ -56,12 +59,12 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 		isPublished,
 		project,
 		scopes,
-		roles,
+		initialSocialMediaIds,
 		initialSocialMediaItems,
 		initialSocialMediaTotal,
 		selectedSocialMediaItems,
+		roles,
 		initialPartners,
-		initialSocialMediaIds,
 	} = props;
 
 	const t = useExtracted();
@@ -72,14 +75,14 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 
 			<EntityEditTabs defaultTab="details">
 				<TabList aria-label={t("Edit project")}>
-					<Tab id="details">{t("Details")}</Tab>
-					<Tab id="project-partners">{t("Project partners")}</Tab>
+					<EntityEditTab id="details">{t("Details")}</EntityEditTab>
+					<EntityEditTab id="project-partners">{t("Project partners")}</EntityEditTab>
 				</TabList>
 
 				<TabPanel
 					className="flex flex-col gap-y-(--layout-padding)"
 					id="details"
-					shouldForceMount={true}
+					shouldPreserveState={true}
 				>
 					<div className="flex justify-end">
 						<EntityLifecycleBar
@@ -103,7 +106,7 @@ export function ProjectEditForm(props: Readonly<ProjectEditFormProps>): ReactNod
 					/>
 				</TabPanel>
 
-				<TabPanel id="project-partners" shouldForceMount={true}>
+				<TabPanel id="project-partners" shouldPreserveState={true}>
 					<ProjectPartnersSection partners={initialPartners} projectId={documentId} roles={roles} />
 				</TabPanel>
 			</EntityEditTabs>

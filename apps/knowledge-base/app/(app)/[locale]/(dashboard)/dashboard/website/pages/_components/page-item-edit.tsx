@@ -49,6 +49,7 @@ export function PageItemEditForm(props: Readonly<PageItemEditFormProps>): ReactN
 	} = props;
 
 	const t = useExtracted();
+	const formId = "page-item-edit-form";
 
 	return (
 		<Fragment>
@@ -66,6 +67,7 @@ export function PageItemEditForm(props: Readonly<PageItemEditFormProps>): ReactN
 			<PageItemForm
 				contentBlocks={contentBlocks}
 				formAction={updatePageItemAction}
+				formId={formId}
 				initialAssets={initialAssets}
 				initialRelatedEntityIds={initialRelatedEntityIds}
 				initialRelatedEntityItems={initialRelatedEntityItems}

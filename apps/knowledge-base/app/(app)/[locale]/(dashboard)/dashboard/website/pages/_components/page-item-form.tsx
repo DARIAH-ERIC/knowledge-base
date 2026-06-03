@@ -31,6 +31,7 @@ interface PageItemFormProps {
 	pageItem?: Pick<schema.Page, "id" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
+	formId?: string;
 	formAction: ServerAction;
 	initialRelatedEntityIds?: Array<string>;
 	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
@@ -40,6 +41,7 @@ interface PageItemFormProps {
 	initialRelatedResourceTotal: number;
 	selectedRelatedEntities?: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources?: Array<{ id: string; name: string; description?: string }>;
+	showRelationFields?: boolean;
 }
 
 export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
@@ -47,6 +49,7 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 		initialAssets,
 		contentBlocks,
 		formAction,
+		formId,
 		pageItem,
 		initialRelatedEntityIds,
 		initialRelatedEntityItems,
@@ -56,6 +59,7 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 		initialRelatedResourceTotal,
 		selectedRelatedEntities,
 		selectedRelatedResources,
+		showRelationFields = true,
 	} = props;
 
 	const t = useExtracted();
@@ -70,7 +74,7 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 
 	return (
 		<FormLayout>
-			<Form action={action} className="flex flex-col gap-y-6" state={state}>
+			<Form action={action} className="flex flex-col gap-y-6" id={formId} state={state}>
 				<FormSection description={t("Enter the page details.")} title={t("Details")}>
 					<TextField defaultValue={pageItem?.title} isRequired={true} name="title">
 						<Label>{t("Title")}</Label>
@@ -136,18 +140,23 @@ export function PageItemForm(props: Readonly<PageItemFormProps>): ReactNode {
 
 				<Separator className="my-6" />
 
-				<EntityRelationsFields
-					initialRelatedEntityIds={initialRelatedEntityIds}
-					initialRelatedEntityItems={initialRelatedEntityItems}
-					initialRelatedEntityTotal={initialRelatedEntityTotal}
-					initialRelatedResourceIds={initialRelatedResourceIds}
-					initialRelatedResourceItems={initialRelatedResourceItems}
-					initialRelatedResourceTotal={initialRelatedResourceTotal}
-					selectedRelatedEntities={selectedRelatedEntities}
-					selectedRelatedResources={selectedRelatedResources}
-				/>
+				{showRelationFields ? (
+					<Fragment>
+						<EntityRelationsFields
+							formId={formId}
+							initialRelatedEntityIds={initialRelatedEntityIds}
+							initialRelatedEntityItems={initialRelatedEntityItems}
+							initialRelatedEntityTotal={initialRelatedEntityTotal}
+							initialRelatedResourceIds={initialRelatedResourceIds}
+							initialRelatedResourceItems={initialRelatedResourceItems}
+							initialRelatedResourceTotal={initialRelatedResourceTotal}
+							selectedRelatedEntities={selectedRelatedEntities}
+							selectedRelatedResources={selectedRelatedResources}
+						/>
 
-				<Separator className="my-6" />
+						<Separator className="my-6" />
+					</Fragment>
+				) : null}
 
 				<FormSection description={t("Add the content.")} title={t("Content")} variant="stacked">
 					<ContentBlocks initialAssets={initialAssets} items={contentBlocks ?? []} />

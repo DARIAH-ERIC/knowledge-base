@@ -52,6 +52,7 @@ export function EventEditForm(props: Readonly<EventEditFormProps>): ReactNode {
 	} = props;
 
 	const t = useExtracted();
+	const formId = "event-edit-form";
 
 	return (
 		<Fragment>
@@ -70,6 +71,7 @@ export function EventEditForm(props: Readonly<EventEditFormProps>): ReactNode {
 				contentBlocks={contentBlocks}
 				event={event}
 				formAction={updateEventAction}
+				formId={formId}
 				initialAssets={initialAssets}
 				initialRelatedEntityIds={initialRelatedEntityIds}
 				initialRelatedEntityItems={initialRelatedEntityItems}

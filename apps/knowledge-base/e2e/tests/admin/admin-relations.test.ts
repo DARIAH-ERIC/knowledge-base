@@ -93,6 +93,10 @@ test.describe("admin relation management", () => {
 		await fillDatePicker(page, editDialog, "End date", 2025, 6, 30);
 		await saveRelationDialog(page);
 
+		// Gate the DB read on the refreshed list reflecting the new end date, so we only query once the
+		// action has actually committed (and not on a dialog that closed for any other reason).
+		await expect(rowByText(page, name)).toContainText("30/06/2025");
+
 		let relations = await db.getPersonRelationsByUnitVersionId(governanceBody!.id);
 		expect(relations[0]!.duration.end).toStrictEqual(new Date("2025-06-30T00:00:00.000Z"));
 
@@ -137,6 +141,10 @@ test.describe("admin relation management", () => {
 		const editDialog = page.getByRole("dialog", { name: "Edit relation" });
 		await fillDatePicker(page, editDialog, "End date", 2025, 6, 30);
 		await saveRelationDialog(page);
+
+		// Gate the DB read on the refreshed list reflecting the new end date, so we only query once the
+		// action has actually committed (and not on a dialog that closed for any other reason).
+		await expect(rowByText(page, name)).toContainText("30/06/2025");
 
 		let relations = await db.getUnitRelationsByUnitVersionId(institution!.id);
 		expect(relations[0]!.duration.end).toStrictEqual(new Date("2025-06-30T00:00:00.000Z"));
@@ -217,6 +225,10 @@ test.describe("admin relation management", () => {
 			},
 		});
 		await editDialog.waitFor({ state: "hidden" });
+
+		// Gate the DB read on the refreshed list reflecting the new end date, so we only query once the
+		// action has actually committed (and not on a dialog that closed for any other reason).
+		await expect(rowByText(page, projectName)).toContainText("30/06/2025");
 
 		relations = await db.getProjectRelationsByName(projectName);
 		expect(relations?.partners[0]!.duration?.end).toStrictEqual(
