@@ -20,9 +20,9 @@ import {
 import { ListBulletIcon, MagnifyingGlassIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import cn from "clsx/lite";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useEffect, useState } from "react";
+import { Fragment, type ReactNode, useEffect } from "react";
 
-import { CommandPalette } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/command-palette";
+import { useDashboardCommandPalette } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/dashboard-command-palette-context";
 import { Logo } from "@/components/logo";
 import { useMetadata } from "@/lib/i18n/metadata";
 import { usePathname } from "@/lib/navigation/navigation";
@@ -336,7 +336,7 @@ interface DashboardSidebarProps extends SidebarProps {
 export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactNode {
 	const { isAdmin, ...sidebarProps } = props;
 	const { state, isMobile, setIsOpenOnMobile } = useSidebar();
-	const [isCmdOpen, setIsCmdOpen] = useState(false);
+	const { openCommandPalette } = useDashboardCommandPalette();
 	const pathname = usePathname();
 	const sidebarMenu = useSidebarMenu(isAdmin);
 	const currentHref = getCurrentSidebarHref(pathname, sidebarMenu);
@@ -362,7 +362,6 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 				<SidebarSectionGroup className="pbe-4">
 					{!isMobile ? (
 						<Fragment>
-							<CommandPalette isAdmin={isAdmin} isOpen={isCmdOpen} setIsOpen={setIsCmdOpen} />
 							<div className="px-4 pbs-2">
 								<Button
 									aria-label={t("Open quick search")}
@@ -372,9 +371,7 @@ export function DashboardSidebar(props: Readonly<DashboardSidebarProps>): ReactN
 											"bg-bg sm:inline-full sm:justify-between dark:bg-secondary/50",
 									)}
 									intent={state === "expanded" ? "outline" : "plain"}
-									onPress={() => {
-										setIsCmdOpen(true);
-									}}
+									onPress={openCommandPalette}
 									size={state === "expanded" ? "md" : "sq-md"}
 								>
 									{state === "expanded" ? (
