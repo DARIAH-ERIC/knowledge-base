@@ -7,8 +7,14 @@ import {
 	getContributionPersonOptions,
 	getCountryOptions,
 } from "@/lib/data/contributions";
+import { enforceApiGetRateLimit } from "@/lib/server/api-rate-limit";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
+	const rateLimitResponse = await enforceApiGetRateLimit();
+	if (rateLimitResponse != null) {
+		return rateLimitResponse;
+	}
+
 	const { session } = await getCurrentSession();
 
 	if (session == null) {
