@@ -195,6 +195,7 @@ export default async function DashboardReportingCountryReportContributorsPage(
 						inArray(schema.personRoleTypes.type, [
 							"national_coordinator",
 							"national_coordinator_deputy",
+							"national_coordination_staff",
 							"national_representative",
 							"national_representative_deputy",
 						]),
