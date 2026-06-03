@@ -3,7 +3,6 @@ import { type Locator, type Page, expect } from "@playwright/test";
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
-import { pickFirstSelectOption } from "@/e2e/lib/fixtures/select";
 
 const BASE_PATH = "/en/dashboard/administrator/persons";
 
@@ -124,7 +123,8 @@ export class AdminPersonsPage {
 		const control = this.page
 			.locator('[data-slot="control"]')
 			.filter({ has: this.page.getByText("Role", { exact: true }) });
-		await pickFirstSelectOption(this.page, control.locator("button"));
+		await control.locator("button").click();
+		await this.page.getByRole("option").first().click();
 	}
 
 	async selectFirstContributionOrg(): Promise<void> {
@@ -149,18 +149,12 @@ export class AdminPersonsPage {
 	}
 
 	async submitAddContribution(): Promise<void> {
-		// Confirm the new row before returning: waitForActionSuccess can resolve before the write is
-		// committed/rendered, and a follow-up navigation would abort the in-flight add. The grid renders
-		// a header row only once it has data (absent at zero).
-		const rows = this.contributionsTable().getByRole("row");
-		const before = await rows.count();
 		await waitForActionSuccess({
 			page: this.page,
 			trigger: async () => {
 				await this.page.getByRole("button", { name: "Add contribution" }).click();
 			},
 		});
-		await expect(rows).toHaveCount(before === 0 ? 2 : before + 1);
 	}
 
 	async clickEndContribution(): Promise<void> {

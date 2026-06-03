@@ -4,7 +4,6 @@ import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
 import { clearDateSegments } from "@/e2e/lib/fixtures/date-picker";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
-import { pickFirstSelectOption } from "@/e2e/lib/fixtures/select";
 
 const BASE_PATH = "/en/dashboard/administrator/projects";
 
@@ -166,30 +165,20 @@ export class AdminProjectsPage {
 	async addProjectPartner(unitName: string): Promise<void> {
 		await this.page.getByRole("button", { name: "Add partner" }).click();
 		const dialog = this.page.getByRole("dialog", { name: "Add partner" });
-		await expect(dialog).toBeVisible();
-
-		// Partner: open the async select (retrying the open — the dialog's controls can be briefly
-		// non-interactive while it mounts), search for the unit, then pick it.
-		const partnerTrigger = dialog
+		const partnerControl = dialog
 			.locator('[data-slot="control"]')
-			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: "Partner" }) })
-			.locator("button[aria-expanded]:not([slot])");
-		const searchbox = this.page.getByRole("searchbox");
-		await expect(async () => {
-			await partnerTrigger.click();
-			await expect(searchbox).toBeVisible({ timeout: 2_000 });
-		}).toPass({ timeout: 30_000 });
-		await searchbox.fill(unitName);
+			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: "Partner" }) });
+		await partnerControl.locator("button[aria-expanded]:not([slot])").click();
+		await this.page.getByRole("searchbox").fill(unitName);
 		await this.page.keyboard.press("Enter");
 		const option = this.page.getByRole("option", { name: unitName, exact: true });
 		await expect(option).toBeVisible();
 		await option.click();
-
-		const roleTrigger = dialog
+		const roleControl = dialog
 			.locator('[data-slot="control"]')
-			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: "Role" }) })
-			.locator("button[aria-expanded]:not([slot])");
-		await pickFirstSelectOption(this.page, roleTrigger);
+			.filter({ has: this.page.locator('[data-slot="label"]', { hasText: "Role" }) });
+		await roleControl.locator("button[aria-expanded]:not([slot])").click();
+		await this.page.getByRole("option").first().click();
 		await this.fillProjectPartnerDate("Start date", 2024, 3, 1);
 		await this.fillProjectPartnerDate("End date", 2024, 9, 30);
 		await waitForActionSuccess({

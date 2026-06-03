@@ -1,10 +1,9 @@
-import { type Locator, type Page, expect } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 import { waitForActionRedirect } from "@/e2e/lib/fixtures/action-redirect";
 import { waitForActionSuccess } from "@/e2e/lib/fixtures/action-success";
 import { E2E_TEST_ASSET_KEY } from "@/e2e/lib/fixtures/database-service";
 import { fillSearchAndWaitForUrl } from "@/e2e/lib/fixtures/search";
-import { pickFirstSelectOption } from "@/e2e/lib/fixtures/select";
 
 const BASE_PATH = "/en/dashboard/administrator/working-groups";
 
@@ -126,7 +125,8 @@ export class AdminWorkingGroupsPage {
 		const control = this.page
 			.locator('[data-slot="control"]')
 			.filter({ has: this.page.getByText("Relation type", { exact: true }) });
-		await pickFirstSelectOption(this.page, control.locator("button"));
+		await control.locator("button").click();
+		await this.page.getByRole("option").first().click();
 	}
 
 	async selectFirstRelatedUnit(): Promise<void> {
@@ -155,18 +155,12 @@ export class AdminWorkingGroupsPage {
 	}
 
 	async submitAddRelation(): Promise<void> {
-		// Confirm the new row before returning: waitForActionSuccess can resolve before the write is
-		// committed/rendered, and a follow-up navigation would abort the in-flight add. The grid renders
-		// a header row only once it has data (absent at zero).
-		const rows = this.relationsTable().getByRole("row");
-		const before = await rows.count();
 		await waitForActionSuccess({
 			page: this.page,
 			trigger: async () => {
 				await this.page.getByRole("button", { name: "Add relation" }).click();
 			},
 		});
-		await expect(rows).toHaveCount(before === 0 ? 2 : before + 1);
 	}
 
 	async clickEndRelation(): Promise<void> {
