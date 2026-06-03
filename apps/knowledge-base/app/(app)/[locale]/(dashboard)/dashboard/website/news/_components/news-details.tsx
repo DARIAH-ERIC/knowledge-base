@@ -24,6 +24,8 @@ interface NewsItemDetailsProps {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 	publishAction: (documentId: string) => Promise<unknown>;
+	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
 
@@ -36,6 +38,8 @@ export function NewsItemDetails(props: Readonly<NewsItemDetailsProps>): ReactNod
 		newsItem,
 		publishAction,
 		discardDraftAction,
+		selectedRelatedEntities,
+		selectedRelatedResources,
 		selectedVersion,
 	} = props;
 
@@ -61,7 +65,7 @@ export function NewsItemDetails(props: Readonly<NewsItemDetailsProps>): ReactNod
 				/>
 			</div>
 			<DescriptionList>
-				<DescriptionTerm>{t("Name")}</DescriptionTerm>
+				<DescriptionTerm>{t("Title")}</DescriptionTerm>
 				<DescriptionDetails>{newsItem.title}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Slug")}</DescriptionTerm>
@@ -78,6 +82,32 @@ export function NewsItemDetails(props: Readonly<NewsItemDetailsProps>): ReactNod
 				<DescriptionTerm>{t("Content")}</DescriptionTerm>
 				<DescriptionDetails>
 					<ContentBlocksView contentBlocks={contentBlocks} />
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Related entities")}</DescriptionTerm>
+				<DescriptionDetails>
+					{selectedRelatedEntities.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{selectedRelatedEntities.map((relatedEntity) => (
+								<li key={relatedEntity.id} className="text-sm">
+									<span className="font-medium">{relatedEntity.name}</span>
+								</li>
+							))}
+						</ul>
+					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Related resources")}</DescriptionTerm>
+				<DescriptionDetails>
+					{selectedRelatedResources.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{selectedRelatedResources.map((relatedResource) => (
+								<li key={relatedResource.id} className="text-sm">
+									<span className="font-medium">{relatedResource.name}</span>
+								</li>
+							))}
+						</ul>
+					) : null}
 				</DescriptionDetails>
 			</DescriptionList>
 		</Fragment>

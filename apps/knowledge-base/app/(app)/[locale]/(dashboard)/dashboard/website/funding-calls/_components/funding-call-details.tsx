@@ -6,7 +6,7 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
@@ -40,6 +40,7 @@ export function FundingCallDetails(props: Readonly<FundingCallDetailsProps>): Re
 	} = props;
 
 	const t = useExtracted();
+	const format = useFormatter();
 
 	return (
 		<Fragment>
@@ -61,7 +62,7 @@ export function FundingCallDetails(props: Readonly<FundingCallDetailsProps>): Re
 				/>
 			</div>
 			<DescriptionList>
-				<DescriptionTerm>{t("Name")}</DescriptionTerm>
+				<DescriptionTerm>{t("Title")}</DescriptionTerm>
 				<DescriptionDetails>{fundingCall.title}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Slug")}</DescriptionTerm>
@@ -69,6 +70,15 @@ export function FundingCallDetails(props: Readonly<FundingCallDetailsProps>): Re
 
 				<DescriptionTerm>{t("Summary")}</DescriptionTerm>
 				<DescriptionDetails>{fundingCall.summary}</DescriptionDetails>
+
+				<DescriptionTerm>{t("Duration")}</DescriptionTerm>
+				<DescriptionDetails>
+					{fundingCall.duration.end
+						? format.dateTimeRange(fundingCall.duration.start, fundingCall.duration.end, {
+								dateStyle: "short",
+							})
+						: format.dateTime(fundingCall.duration.start, { dateStyle: "short" })}
+				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Content")}</DescriptionTerm>
 				<DescriptionDetails>

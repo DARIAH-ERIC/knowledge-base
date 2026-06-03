@@ -10,7 +10,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { EyeIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
@@ -130,6 +130,12 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 							</TableCell>
 							<TableCell className="text-end">
 								<RowActionsMenu>
+									<RowActionsMenu.Link
+										href={`/dashboard/administrator/internal-services/${item.id}/details`}
+										icon={<EyeIcon className="me-2 block-4 inline-4" />}
+									>
+										{t("View")}
+									</RowActionsMenu.Link>
 									<RowActionsMenu.Link
 										href={`/dashboard/administrator/internal-services/${item.id}/edit`}
 										icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}
