@@ -5,6 +5,7 @@ import { getCurrentSession } from "@/lib/auth/session";
 import { getUserAllCountryReports, getUserAllWorkingGroupReports } from "@/lib/data/reporting";
 import { db } from "@/lib/db";
 import { alias, and, desc, eq, ilike, or, sql } from "@/lib/db/sql";
+import { enforceApiGetRateLimit } from "@/lib/server/api-rate-limit";
 
 interface DashboardSearchResult {
 	id: string;
@@ -27,6 +28,11 @@ function formatOrganisationalUnitType(type: string): string {
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
+	const rateLimitResponse = await enforceApiGetRateLimit();
+	if (rateLimitResponse != null) {
+		return rateLimitResponse;
+	}
+
 	const { session, user } = await getCurrentSession();
 
 	if (session == null) {

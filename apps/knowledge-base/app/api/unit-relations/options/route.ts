@@ -2,8 +2,14 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/lib/auth/session";
 import { getUnitRelationRelatedUnitOptions } from "@/lib/data/unit-relations";
+import { enforceApiGetRateLimit } from "@/lib/server/api-rate-limit";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
+	const rateLimitResponse = await enforceApiGetRateLimit();
+	if (rateLimitResponse != null) {
+		return rateLimitResponse;
+	}
+
 	const { session } = await getCurrentSession();
 
 	if (session == null) {
