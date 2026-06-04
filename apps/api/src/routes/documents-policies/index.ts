@@ -49,7 +49,7 @@ function getDownloadFilename(asset: {
 		return asset.filename;
 	}
 
-	const extension = extname(asset.key) || mimeTypeExtensions.get(asset.mimeType) || "";
+	const extension = extname(asset.key) ?? mimeTypeExtensions.get(asset.mimeType) ?? "";
 
 	return `${slugify(asset.label)}${extension}`;
 }
