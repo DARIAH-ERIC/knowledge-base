@@ -333,4 +333,49 @@ export class AdminGovernanceBodiesPage {
 		await dialog.getByRole("button", { name: "Confirm" }).click();
 		await dialog.waitFor({ state: "hidden" });
 	}
+
+	async clickEditPersonRelation(): Promise<void> {
+		await this.peopleTable().getByRole("button", { name: "Edit person relation" }).first().click();
+		await this.page
+			.getByRole("dialog", { name: "Edit person relation" })
+			.waitFor({ state: "visible" });
+	}
+
+	async fillEditPersonRelationDate(
+		label: string,
+		year: number,
+		month: number,
+		day: number,
+	): Promise<void> {
+		const dialog = this.page.getByRole("dialog", { name: "Edit person relation" });
+		const group = dialog.getByRole("group", { name: label });
+		await group.getByRole("spinbutton", { name: /day/i }).click();
+		await this.page.keyboard.type(String(day).padStart(2, "0"));
+		await group.getByRole("spinbutton", { name: /month/i }).click();
+		await this.page.keyboard.type(String(month).padStart(2, "0"));
+		await group.getByRole("spinbutton", { name: /year/i }).click();
+		await this.page.keyboard.type(String(year));
+	}
+
+	async saveEditPersonRelation(): Promise<void> {
+		const dialog = this.page.getByRole("dialog", { name: "Edit person relation" });
+		await dialog.getByRole("button", { name: "Save" }).click();
+		await dialog.waitFor({ state: "hidden" });
+	}
+
+	async clickDeletePersonRelation(): Promise<void> {
+		await this.peopleTable()
+			.getByRole("button", { name: "Delete person relation" })
+			.first()
+			.click();
+		await this.page
+			.getByRole("alertdialog", { name: "Delete person relation" })
+			.waitFor({ state: "visible" });
+	}
+
+	async confirmDeletePersonRelation(): Promise<void> {
+		const dialog = this.page.getByRole("alertdialog", { name: "Delete person relation" });
+		await dialog.getByRole("button", { name: "Delete" }).click();
+		await dialog.waitFor({ state: "hidden" });
+	}
 }
