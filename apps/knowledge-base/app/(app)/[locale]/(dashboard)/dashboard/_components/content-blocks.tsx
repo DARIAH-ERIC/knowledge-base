@@ -705,7 +705,7 @@ function GalleryContentBlockPanel({
 							{galleryItem.imageUrl != null && (
 								<img
 									alt={galleryItem.caption ?? t("Selected image")}
-									className="block-24 inline-24 shrink-0 rounded-lg object-cover"
+									className="block-24 inline-auto max-inline-full shrink-0 rounded-lg object-cover"
 									src={galleryItem.imageUrl}
 								/>
 							)}
@@ -1020,7 +1020,7 @@ function ImageContentBlockPanel({
 				{imageUrl != null && (
 					<img
 						alt={caption ?? t("Selected image")}
-						className="block-24 inline-24 rounded-lg object-cover shrink-0"
+						className="block-24 inline-auto max-inline-full rounded-lg object-cover shrink-0"
 						src={imageUrl}
 					/>
 				)}
@@ -1095,7 +1095,7 @@ function HeroContentBlockPanel({
 					{imageUrl != null && (
 						<img
 							alt={t("Selected image")}
-							className="block-24 inline-24 rounded-lg object-cover shrink-0"
+							className="block-24 inline-auto max-inline-full rounded-lg object-cover shrink-0"
 							src={imageUrl}
 						/>
 					)}
