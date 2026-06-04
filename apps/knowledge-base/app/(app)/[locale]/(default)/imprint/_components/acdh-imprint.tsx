@@ -41,10 +41,5 @@ export async function AcdhImprint(props: Readonly<AcdhImprintProps>): Promise<Re
 
 	const html = await getImprintHtml(locale);
 
-	return (
-		<div
-			className="richtext richtext-sm max-inline-(--breakpoint-md)"
-			dangerouslySetInnerHTML={{ __html: html }}
-		/>
-	);
+	return <div className="richtext richtext-sm" dangerouslySetInnerHTML={{ __html: html }} />;
 }

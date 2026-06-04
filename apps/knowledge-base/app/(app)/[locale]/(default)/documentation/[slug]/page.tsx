@@ -60,7 +60,7 @@ export default async function DocumentationPage(
 
 	return (
 		<Main className="container flex-1 px-8 py-12 xs:px-16">
-			<section className="flex flex-col gap-y-8">
+			<section className="flex max-inline-(--breakpoint-md) flex-col gap-y-8">
 				<h1 className="text-5xl font-extrabold tracking-tight text-text-strong">{page.title}</h1>
 				{contentBlocks.length > 0 ? <ContentBlocksView contentBlocks={contentBlocks} /> : null}
 			</section>
