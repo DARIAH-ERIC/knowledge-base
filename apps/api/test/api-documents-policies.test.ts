@@ -256,7 +256,12 @@ describe("documents-policies", () => {
 	});
 
 	describe("GET /api/documents-policies/:id/document", () => {
-		async function seedDocument(db: Database, key: string) {
+		async function seedDocument(
+			db: Database,
+			key: string,
+			filename: string | null = "policy-2024.pdf",
+			mimeType = "application/pdf",
+		) {
 			const [status, type] = await Promise.all([
 				db.query.entityStatus.findFirst({ columns: { id: true }, where: { type: "published" } }),
 				db.query.entityTypes.findFirst({
@@ -273,9 +278,7 @@ describe("documents-policies", () => {
 			const assetId = uuidv7();
 			const title = "Test Policy";
 			const summary = "Test summary";
-			const mimeType = "text/plain";
-
-			await db.insert(schema.assets).values({ id: assetId, key, label: title, mimeType });
+			await db.insert(schema.assets).values({ id: assetId, key, label: title, filename, mimeType });
 			await db
 				.insert(schema.entities)
 				.values({ id: entityId, slug: `doc-${versionId}`, typeId: type.id });
@@ -296,7 +299,7 @@ describe("documents-policies", () => {
 		it("should stream file with correct headers for existing record", async () => {
 			await withTransaction(async (db) => {
 				const content = "test file content";
-				const key = "documents/policy-2024.pdf";
+				const key = "documents/019b7605-b88f-7893-84af-22aaf476e41f";
 				const { id } = await seedDocument(db, key);
 				const client = createTestClient(db, createMockStorage(content));
 
@@ -314,10 +317,10 @@ describe("documents-policies", () => {
 			});
 		});
 
-		it("should use last segment of asset key as download filename", async () => {
+		it("should slugify asset label and append inferred extension when original filename is missing", async () => {
 			await withTransaction(async (db) => {
-				const key = "some/nested/path/annual-report.pdf";
-				const { id } = await seedDocument(db, key);
+				const key = "some/nested/path/019b7605-b88f-7893-84af-22aaf476e41f";
+				const { id } = await seedDocument(db, key, null);
 				const client = createTestClient(db, createMockStorage());
 
 				const response = await client["documents-policies"][":id"].document.$get({
@@ -326,7 +329,7 @@ describe("documents-policies", () => {
 
 				expect(response.status).toBe(200);
 				expect(response.headers.get("Content-Disposition")).toBe(
-					`attachment; filename="annual-report.pdf"`,
+					`attachment; filename="test-policy.pdf"`,
 				);
 			});
 		});
