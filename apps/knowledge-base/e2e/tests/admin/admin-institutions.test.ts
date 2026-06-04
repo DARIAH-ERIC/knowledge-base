@@ -165,4 +165,59 @@ test.describe("institutions admin", () => {
 
 		await expect(institutionsPage.rowByName(name)).toBeHidden();
 	});
+
+	test("version selector shows correct content per version", async ({
+		page,
+		createAdminInstitutionsPage,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const institutionsPage = createAdminInstitutionsPage(workerIndex);
+
+		const name = `${institutionsPage.workerPrefix} VersionSelector ${randomUUID()}`;
+		const originalSummary = `${institutionsPage.workerPrefix} Original summary ${randomUUID()}`;
+		const updatedSummary = `${institutionsPage.workerPrefix} Updated summary ${randomUUID()}`;
+
+		// Create → Publish. Right after publishing the details page reads as published-only
+		// (the cloned draft row exists but has no changes from the published version).
+		await institutionsPage.gotoCreate();
+		await institutionsPage.fillName(name);
+		await institutionsPage.fillSummary(originalSummary);
+		await institutionsPage.selectTestImage();
+		await institutionsPage.fillDescription("Version selector test description.");
+		await institutionsPage.submitForm();
+
+		await institutionsPage.searchByName(name);
+		await institutionsPage.gotoDetailsFromList(name);
+		await institutionsPage.publishFromDetails();
+
+		// Edit the draft's summary so it diverges from the published version.
+		await institutionsPage.searchByName(name);
+		await institutionsPage.gotoDetailsFromList(name);
+		await expect(institutionsPage.detailsPublishedBadge()).toBeVisible();
+		await institutionsPage.gotoEditFromDetails();
+		await institutionsPage.fillSummary(updatedSummary);
+		await institutionsPage.submitForm();
+
+		// Details: "Published with draft changes" with both version links.
+		await institutionsPage.searchByName(name);
+		await institutionsPage.gotoDetailsFromList(name);
+		await expect(institutionsPage.detailsPublishedWithDraftChangesBadge()).toBeVisible();
+		await expect(institutionsPage.versionSelectorDraftLink()).toBeVisible();
+		await expect(institutionsPage.versionSelectorPublishedLink()).toBeVisible();
+
+		// Draft tab (default) — updated summary shown.
+		await expect(page.getByText(updatedSummary)).toBeVisible();
+
+		// Switch to the published tab — original summary shown, updated hidden. This is the assertion
+		// that guards against the details page rendering draft scalars under the published version.
+		await institutionsPage.versionSelectorPublishedLink().click();
+		await page.waitForURL((url) => url.searchParams.get("version") === "published");
+		await expect(page.getByText(originalSummary)).toBeVisible();
+		await expect(page.getByText(updatedSummary)).toBeHidden();
+
+		// Switch back to the draft tab — updated summary shown again.
+		await institutionsPage.versionSelectorDraftLink().click();
+		await page.waitForURL((url) => url.searchParams.get("version") == null);
+		await expect(page.getByText(updatedSummary)).toBeVisible();
+	});
 });

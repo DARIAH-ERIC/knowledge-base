@@ -344,4 +344,59 @@ test.describe("governance bodies admin", () => {
 		await expect(governanceBodiesPage.rowByName(name)).toBeHidden();
 		expect(await db.getGovernanceBodyByName(name)).toBeNull();
 	});
+
+	test("version selector shows correct content per version", async ({
+		page,
+		createAdminGovernanceBodiesPage,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const governanceBodiesPage = createAdminGovernanceBodiesPage(workerIndex);
+
+		const name = `${governanceBodiesPage.workerPrefix} VersionSelector ${randomUUID()}`;
+		const originalSummary = `${governanceBodiesPage.workerPrefix} Original summary ${randomUUID()}`;
+		const updatedSummary = `${governanceBodiesPage.workerPrefix} Updated summary ${randomUUID()}`;
+
+		// Create → Publish. Right after publishing the details page reads as published-only
+		// (the cloned draft row exists but has no changes from the published version).
+		await governanceBodiesPage.gotoCreate();
+		await governanceBodiesPage.fillName(name);
+		await governanceBodiesPage.fillSummary(originalSummary);
+		await governanceBodiesPage.selectTestImage();
+		await governanceBodiesPage.fillDescription("Version selector test description.");
+		await governanceBodiesPage.submitForm();
+
+		await governanceBodiesPage.searchByName(name);
+		await governanceBodiesPage.gotoDetailsFromList(name);
+		await governanceBodiesPage.publishFromDetails();
+
+		// Edit the draft's summary so it diverges from the published version.
+		await governanceBodiesPage.searchByName(name);
+		await governanceBodiesPage.gotoDetailsFromList(name);
+		await expect(governanceBodiesPage.detailsPublishedBadge()).toBeVisible();
+		await governanceBodiesPage.gotoEditFromDetails();
+		await governanceBodiesPage.fillSummary(updatedSummary);
+		await governanceBodiesPage.submitForm();
+
+		// Details: "Published with draft changes" with both version links.
+		await governanceBodiesPage.searchByName(name);
+		await governanceBodiesPage.gotoDetailsFromList(name);
+		await expect(governanceBodiesPage.detailsPublishedWithDraftChangesBadge()).toBeVisible();
+		await expect(governanceBodiesPage.versionSelectorDraftLink()).toBeVisible();
+		await expect(governanceBodiesPage.versionSelectorPublishedLink()).toBeVisible();
+
+		// Draft tab (default) — updated summary shown.
+		await expect(page.getByText(updatedSummary)).toBeVisible();
+
+		// Switch to the published tab — original summary shown, updated hidden. This is the assertion
+		// that guards against the details page rendering draft scalars under the published version.
+		await governanceBodiesPage.versionSelectorPublishedLink().click();
+		await page.waitForURL((url) => url.searchParams.get("version") === "published");
+		await expect(page.getByText(originalSummary)).toBeVisible();
+		await expect(page.getByText(updatedSummary)).toBeHidden();
+
+		// Switch back to the draft tab — updated summary shown again.
+		await governanceBodiesPage.versionSelectorDraftLink().click();
+		await page.waitForURL((url) => url.searchParams.get("version") == null);
+		await expect(page.getByText(updatedSummary)).toBeVisible();
+	});
 });

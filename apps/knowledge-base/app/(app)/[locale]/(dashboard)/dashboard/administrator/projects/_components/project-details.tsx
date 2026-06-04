@@ -130,7 +130,9 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 
 				<DescriptionTerm>{t("Description")}</DescriptionTerm>
 				<DescriptionDetails>
-					{project.description != null ? <RichTextRenderer content={project.description} /> : null}
+					{project.description != null ? (
+						<RichTextRenderer key={selectedVersion} content={project.description} />
+					) : null}
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Social media")}</DescriptionTerm>

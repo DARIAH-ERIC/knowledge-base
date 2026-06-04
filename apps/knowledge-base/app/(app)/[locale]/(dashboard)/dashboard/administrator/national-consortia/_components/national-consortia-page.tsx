@@ -10,7 +10,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
-import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { EyeIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
@@ -117,6 +117,12 @@ export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps
 							</TableCell>
 							<TableCell className="text-end">
 								<RowActionsMenu>
+									<RowActionsMenu.Link
+										href={`/dashboard/administrator/national-consortia/${item.entity.slug}/details`}
+										icon={<EyeIcon className="me-2 block-4 inline-4" />}
+									>
+										{t("View")}
+									</RowActionsMenu.Link>
 									<RowActionsMenu.Link
 										href={`/dashboard/administrator/national-consortia/${item.entity.slug}/edit`}
 										icon={<PencilSquareIcon className="me-2 block-4 inline-4" />}

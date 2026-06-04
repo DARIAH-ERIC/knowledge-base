@@ -179,4 +179,59 @@ test.describe("national consortia admin", () => {
 
 		await expect(nationalConsortiaPage.rowByName(name)).toBeHidden();
 	});
+
+	test("version selector shows correct content per version", async ({
+		page,
+		createAdminNationalConsortiaPage,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const nationalConsortiaPage = createAdminNationalConsortiaPage(workerIndex);
+
+		const name = `${nationalConsortiaPage.workerPrefix} VersionSelector ${randomUUID()}`;
+		const originalSummary = `${nationalConsortiaPage.workerPrefix} Original summary ${randomUUID()}`;
+		const updatedSummary = `${nationalConsortiaPage.workerPrefix} Updated summary ${randomUUID()}`;
+
+		// Create → Publish. Right after publishing the details page reads as published-only
+		// (the cloned draft row exists but has no changes from the published version).
+		await nationalConsortiaPage.gotoCreate();
+		await nationalConsortiaPage.fillName(name);
+		await nationalConsortiaPage.fillSummary(originalSummary);
+		await nationalConsortiaPage.selectTestImage();
+		await nationalConsortiaPage.fillDescription("Version selector test description.");
+		await nationalConsortiaPage.submitForm();
+
+		await nationalConsortiaPage.searchByName(name);
+		await nationalConsortiaPage.gotoDetailsFromList(name);
+		await nationalConsortiaPage.publishFromDetails();
+
+		// Edit the draft's summary so it diverges from the published version.
+		await nationalConsortiaPage.searchByName(name);
+		await nationalConsortiaPage.gotoDetailsFromList(name);
+		await expect(nationalConsortiaPage.detailsPublishedBadge()).toBeVisible();
+		await nationalConsortiaPage.gotoEditFromDetails();
+		await nationalConsortiaPage.fillSummary(updatedSummary);
+		await nationalConsortiaPage.submitForm();
+
+		// Details: "Published with draft changes" with both version links.
+		await nationalConsortiaPage.searchByName(name);
+		await nationalConsortiaPage.gotoDetailsFromList(name);
+		await expect(nationalConsortiaPage.detailsPublishedWithDraftChangesBadge()).toBeVisible();
+		await expect(nationalConsortiaPage.versionSelectorDraftLink()).toBeVisible();
+		await expect(nationalConsortiaPage.versionSelectorPublishedLink()).toBeVisible();
+
+		// Draft tab (default) — updated summary shown.
+		await expect(page.getByText(updatedSummary)).toBeVisible();
+
+		// Switch to the published tab — original summary shown, updated hidden. This is the assertion
+		// that guards against the details page rendering draft scalars under the published version.
+		await nationalConsortiaPage.versionSelectorPublishedLink().click();
+		await page.waitForURL((url) => url.searchParams.get("version") === "published");
+		await expect(page.getByText(originalSummary)).toBeVisible();
+		await expect(page.getByText(updatedSummary)).toBeHidden();
+
+		// Switch back to the draft tab — updated summary shown again.
+		await nationalConsortiaPage.versionSelectorDraftLink().click();
+		await page.waitForURL((url) => url.searchParams.get("version") == null);
+		await expect(page.getByText(updatedSummary)).toBeVisible();
+	});
 });

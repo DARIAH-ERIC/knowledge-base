@@ -293,4 +293,52 @@ export class AdminWorkingGroupsPage {
 		await dialog.getByRole("button", { name: "Delete" }).click();
 		await dialog.waitFor({ state: "hidden" });
 	}
+
+	// ---------------------------------------------------------------------------
+	// Details page — navigation, lifecycle, version selector
+	// ---------------------------------------------------------------------------
+
+	async gotoDetailsFromList(name: string): Promise<void> {
+		const row = this.rowByName(name);
+		await row.getByRole("button", { name: "Open actions menu" }).click();
+		await this.page.getByRole("menuitem", { name: "View" }).click();
+		await this.page.waitForURL(`**${BASE_PATH}/**/details`);
+	}
+
+	async gotoEditFromDetails(): Promise<void> {
+		const editHref = await this.page.getByRole("link", { name: "Edit" }).getAttribute("href");
+
+		if (editHref == null) {
+			throw new Error("Could not find edit link on details page.");
+		}
+
+		await this.page.goto(editHref);
+		await this.page.waitForURL(`**${BASE_PATH}/**/edit`);
+	}
+
+	async publishFromDetails(): Promise<void> {
+		await waitForActionRedirect({
+			page: this.page,
+			redirectPathname: BASE_PATH,
+			trigger: async () => {
+				await this.page.getByRole("button", { name: "Publish saved draft" }).click();
+			},
+		});
+	}
+
+	detailsPublishedBadge(): Locator {
+		return this.page.getByText("Published", { exact: true });
+	}
+
+	detailsPublishedWithDraftChangesBadge(): Locator {
+		return this.page.getByText("Published with draft changes");
+	}
+
+	versionSelectorDraftLink(): Locator {
+		return this.page.getByRole("link", { name: "Draft" });
+	}
+
+	versionSelectorPublishedLink(): Locator {
+		return this.page.getByRole("link", { name: "Published" });
+	}
 }

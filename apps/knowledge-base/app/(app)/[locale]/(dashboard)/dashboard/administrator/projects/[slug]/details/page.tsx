@@ -9,7 +9,8 @@ import { discardProjectDraftAction } from "@/app/(app)/[locale]/(dashboard)/dash
 import { publishProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/publish-project.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
+import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
+import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
 import { db } from "@/lib/db";
 import { alias, and, eq, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
@@ -39,25 +40,35 @@ export default async function DashboardAdministratorProjectDetailsPage(
 
 	await assertAuthenticated();
 
-	const doc = await db.query.entities.findFirst({
-		where: { slug },
-		columns: { id: true },
+	const anyVersion = await db.query.projects.findFirst({
+		where: { entityVersion: { entity: { slug } } },
+		columns: {},
+		with: {
+			entityVersion: {
+				columns: {},
+				with: { entity: { columns: { id: true } } },
+			},
+		},
 	});
 
-	if (doc == null) {
+	if (anyVersion == null) {
 		notFound();
 	}
 
-	const { draftId, publishedId, hasDraftChanges } = await db.transaction(async (tx) =>
-		getDocumentLifecycleState(tx, doc.id),
-	);
+	const documentId = anyVersion.entityVersion.entity.id;
+
+	const { draftVersionId, hasDraftChanges, publishedId } = await db.transaction(async (tx) => {
+		const draftVersionId = await ensureDraftVersion(tx, documentId, projectsLifecycleAdapter);
+		const { hasDraftChanges, publishedId } = await getDocumentLifecycleState(tx, documentId);
+		return { draftVersionId, hasDraftChanges, publishedId };
+	});
 
 	/**
 	 * The version selector and "with draft changes" UX only kick in when the draft actually diverges
 	 * from the published version. Right after publish, a draft row still exists as a clone of the new
 	 * published version but has no real changes — we treat that as published-only.
 	 */
-	const showVersionSelector = hasDraftChanges && publishedId != null && draftId != null;
+	const showVersionSelector = hasDraftChanges && publishedId != null;
 
 	const { version } = await searchParamsPromise;
 	let selectedVersion: "draft" | "published";
@@ -65,16 +76,16 @@ export default async function DashboardAdministratorProjectDetailsPage(
 
 	if (showVersionSelector) {
 		selectedVersion = version === "published" ? "published" : "draft";
-		versionId = selectedVersion === "published" ? publishedId : draftId;
+		versionId = selectedVersion === "published" ? publishedId : draftVersionId;
 	} else if (publishedId != null) {
 		selectedVersion = "published";
 		versionId = publishedId;
 	} else {
 		selectedVersion = "draft";
-		versionId = draftId;
+		versionId = draftVersionId;
 	}
 
-	if (versionId == null) {
+	if (!versionId) {
 		notFound();
 	}
 
@@ -129,7 +140,10 @@ export default async function DashboardAdministratorProjectDetailsPage(
 
 	const [descriptionRows, partners, socialMediaLinks] = await Promise.all([
 		db
-			.select({ content: schema.richTextContentBlocks.content })
+			.select({
+				content: schema.richTextContentBlocks.content,
+				id: schema.richTextContentBlocks.id,
+			})
 			.from(schema.richTextContentBlocks)
 			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
 			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
@@ -139,7 +153,7 @@ export default async function DashboardAdministratorProjectDetailsPage(
 			)
 			.where(
 				and(
-					eq(schema.fields.entityVersionId, project.id),
+					eq(schema.fields.entityVersionId, versionId),
 					eq(schema.entityTypesFieldsNames.fieldName, "description"),
 				),
 			)
@@ -166,7 +180,7 @@ export default async function DashboardAdministratorProjectDetailsPage(
 					schema.projectRoles,
 					eq(schema.projectRoles.id, schema.projectsToOrganisationalUnits.roleId),
 				)
-				.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, doc.id));
+				.where(eq(schema.projectsToOrganisationalUnits.projectDocumentId, documentId));
 		})(),
 		db.query.projectsToSocialMedia.findMany({
 			where: { projectId: project.id },
@@ -196,7 +210,7 @@ export default async function DashboardAdministratorProjectDetailsPage(
 	return (
 		<ProjectDetails
 			discardDraftAction={discardProjectDraftAction}
-			documentId={doc.id}
+			documentId={documentId}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
 			project={{

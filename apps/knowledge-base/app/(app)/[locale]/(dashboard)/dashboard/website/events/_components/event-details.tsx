@@ -6,7 +6,7 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
-import { useExtracted } from "next-intl";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
@@ -23,6 +23,8 @@ interface EventDetailsProps {
 	event: Pick<schema.Event, "id" | "duration" | "location" | "title" | "summary" | "website"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
+	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	publishAction: (documentId: string) => Promise<unknown>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
@@ -36,10 +38,13 @@ export function EventDetails(props: Readonly<EventDetailsProps>): ReactNode {
 		event,
 		publishAction,
 		discardDraftAction,
+		selectedRelatedEntities,
+		selectedRelatedResources,
 		selectedVersion,
 	} = props;
 
 	const t = useExtracted();
+	const format = useFormatter();
 
 	return (
 		<Fragment>
@@ -70,14 +75,55 @@ export function EventDetails(props: Readonly<EventDetailsProps>): ReactNode {
 				<DescriptionTerm>{t("Summary")}</DescriptionTerm>
 				<DescriptionDetails>{event.summary}</DescriptionDetails>
 
+				<DescriptionTerm>{t("Duration")}</DescriptionTerm>
+				<DescriptionDetails>
+					{event.duration.end
+						? format.dateTimeRange(event.duration.start, event.duration.end, {
+								dateStyle: "short",
+							})
+						: format.dateTime(event.duration.start, { dateStyle: "short" })}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Location")}</DescriptionTerm>
+				<DescriptionDetails>{event.location}</DescriptionDetails>
+
+				<DescriptionTerm>{t("Website")}</DescriptionTerm>
+				<DescriptionDetails>{event.website}</DescriptionDetails>
+
+				<DescriptionTerm>{t("Content")}</DescriptionTerm>
+				<DescriptionDetails>
+					<ContentBlocksView contentBlocks={contentBlocks} />
+				</DescriptionDetails>
+
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
 					<img alt="" src={event.image.url} />
 				</DescriptionDetails>
 
-				<DescriptionTerm>{t("Content")}</DescriptionTerm>
+				<DescriptionTerm>{t("Related entities")}</DescriptionTerm>
 				<DescriptionDetails>
-					<ContentBlocksView contentBlocks={contentBlocks} />
+					{selectedRelatedEntities.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{selectedRelatedEntities.map((relatedEntity) => (
+								<li key={relatedEntity.id} className="text-sm">
+									<span className="font-medium">{relatedEntity.name}</span>
+								</li>
+							))}
+						</ul>
+					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Related resources")}</DescriptionTerm>
+				<DescriptionDetails>
+					{selectedRelatedResources.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{selectedRelatedResources.map((relatedResource) => (
+								<li key={relatedResource.id} className="text-sm">
+									<span className="font-medium">{relatedResource.name}</span>
+								</li>
+							))}
+						</ul>
+					) : null}
 				</DescriptionDetails>
 			</DescriptionList>
 		</Fragment>

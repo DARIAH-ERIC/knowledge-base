@@ -23,6 +23,8 @@ interface SpotlightArticleDetailsProps {
 	spotlightArticle: Pick<schema.SpotlightArticle, "id" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
+	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	publishAction: (documentId: string) => Promise<unknown>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
@@ -36,6 +38,8 @@ export function SpotlightArticleDetails(props: Readonly<SpotlightArticleDetailsP
 		spotlightArticle,
 		publishAction,
 		discardDraftAction,
+		selectedRelatedEntities,
+		selectedRelatedResources,
 		selectedVersion,
 	} = props;
 
@@ -61,7 +65,7 @@ export function SpotlightArticleDetails(props: Readonly<SpotlightArticleDetailsP
 				/>
 			</div>
 			<DescriptionList>
-				<DescriptionTerm>{t("Name")}</DescriptionTerm>
+				<DescriptionTerm>{t("Title")}</DescriptionTerm>
 				<DescriptionDetails>{spotlightArticle.title}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Slug")}</DescriptionTerm>
@@ -78,6 +82,32 @@ export function SpotlightArticleDetails(props: Readonly<SpotlightArticleDetailsP
 				<DescriptionTerm>{t("Content")}</DescriptionTerm>
 				<DescriptionDetails>
 					<ContentBlocksView contentBlocks={contentBlocks} />
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Related entities")}</DescriptionTerm>
+				<DescriptionDetails>
+					{selectedRelatedEntities.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{selectedRelatedEntities.map((relatedEntity) => (
+								<li key={relatedEntity.id} className="text-sm">
+									<span className="font-medium">{relatedEntity.name}</span>
+								</li>
+							))}
+						</ul>
+					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Related resources")}</DescriptionTerm>
+				<DescriptionDetails>
+					{selectedRelatedResources.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{selectedRelatedResources.map((relatedResource) => (
+								<li key={relatedResource.id} className="text-sm">
+									<span className="font-medium">{relatedResource.name}</span>
+								</li>
+							))}
+						</ul>
+					) : null}
 				</DescriptionDetails>
 			</DescriptionList>
 		</Fragment>

@@ -9,6 +9,11 @@ import { publishSpotlightArticleAction } from "@/app/(app)/[locale]/(dashboard)/
 import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
+import {
+	getEntityRelationOptionsByIds,
+	getEntityRelations,
+	getResourceRelationOptionsByIds,
+} from "@/lib/data/relations";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -113,8 +118,17 @@ export default async function DashboardWebsiteSpotlightArticleDetailsPage(
 
 	const contentBlocks = await getEntityContentBlocks(spotlightArticle.id, "content");
 
+	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(doc.id);
+
+	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
+		getEntityRelationOptionsByIds(relatedEntityIds),
+		getResourceRelationOptionsByIds(relatedResourceIds),
+	]);
+
 	return (
 		<SpotlightArticleDetails
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
 			contentBlocks={contentBlocks}
 			discardDraftAction={discardSpotlightArticleDraftAction}
 			documentId={doc.id}

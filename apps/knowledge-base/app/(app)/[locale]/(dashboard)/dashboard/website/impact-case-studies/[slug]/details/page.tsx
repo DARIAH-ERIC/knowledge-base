@@ -8,7 +8,13 @@ import { discardImpactCaseStudyDraftAction } from "@/app/(app)/[locale]/(dashboa
 import { publishImpactCaseStudyAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/website/impact-case-studies/_lib/publish-impact-case-study.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
+import { getImpactCaseStudyContributors } from "@/lib/data/article-contributors";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
+import {
+	getEntityRelationOptionsByIds,
+	getEntityRelations,
+	getResourceRelationOptionsByIds,
+} from "@/lib/data/relations";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -113,8 +119,20 @@ export default async function DashboardWebsiteImpactCaseStudyDetailsPage(
 
 	const contentBlocks = await getEntityContentBlocks(impactCaseStudy.id, "content");
 
+	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(doc.id);
+
+	const [selectedRelatedEntities, selectedRelatedResources, impactCaseStudyContributors] =
+		await Promise.all([
+			getEntityRelationOptionsByIds(relatedEntityIds),
+			getResourceRelationOptionsByIds(relatedResourceIds),
+			getImpactCaseStudyContributors(doc.id),
+		]);
+
 	return (
 		<ImpactCaseStudyDetails
+			contributors={impactCaseStudyContributors}
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
 			contentBlocks={contentBlocks}
 			discardDraftAction={discardImpactCaseStudyDraftAction}
 			documentId={doc.id}

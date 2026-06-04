@@ -1,3 +1,4 @@
+import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -8,8 +9,11 @@ import { discardPersonDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 import { publishPersonAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/persons/_lib/publish-person.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
+import { getPersonContributions } from "@/lib/data/contributions";
+import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
+import { personsLifecycleAdapter } from "@/lib/data/persons.lifecycle-adapter";
 import { db } from "@/lib/db";
+import { and, eq } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -46,16 +50,20 @@ export default async function DashboardAdministratorPersonDetailsPage(
 		notFound();
 	}
 
-	const { draftId, publishedId, hasDraftChanges } = await db.transaction(async (tx) =>
-		getDocumentLifecycleState(tx, doc.id),
-	);
+	const documentId = doc.id;
+
+	const { draftVersionId, hasDraftChanges, publishedId } = await db.transaction(async (tx) => {
+		const draftVersionId = await ensureDraftVersion(tx, documentId, personsLifecycleAdapter);
+		const { hasDraftChanges, publishedId } = await getDocumentLifecycleState(tx, documentId);
+		return { draftVersionId, hasDraftChanges, publishedId };
+	});
 
 	/**
 	 * The version selector and "with draft changes" UX only kick in when the draft actually diverges
 	 * from the published version. Right after publish, a draft row still exists as a clone of the new
 	 * published version but has no real changes — we treat that as published-only.
 	 */
-	const showVersionSelector = hasDraftChanges && publishedId != null && draftId != null;
+	const showVersionSelector = hasDraftChanges && publishedId != null;
 
 	const { version } = await searchParamsPromise;
 	let selectedVersion: "draft" | "published";
@@ -63,16 +71,16 @@ export default async function DashboardAdministratorPersonDetailsPage(
 
 	if (showVersionSelector) {
 		selectedVersion = version === "published" ? "published" : "draft";
-		versionId = selectedVersion === "published" ? publishedId : draftId;
+		versionId = selectedVersion === "published" ? publishedId : draftVersionId;
 	} else if (publishedId != null) {
 		selectedVersion = "published";
 		versionId = publishedId;
 	} else {
 		selectedVersion = "draft";
-		versionId = draftId;
+		versionId = draftVersionId;
 	}
 
-	if (versionId == null) {
+	if (!versionId) {
 		notFound();
 	}
 
@@ -116,6 +124,28 @@ export default async function DashboardAdministratorPersonDetailsPage(
 		notFound();
 	}
 
+	const [contributions, biographyRows] = await Promise.all([
+		getPersonContributions(documentId),
+		db
+			.select({ content: schema.richTextContentBlocks.content })
+			.from(schema.richTextContentBlocks)
+			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
+			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
+			.innerJoin(
+				schema.entityTypesFieldsNames,
+				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
+			)
+			.where(
+				and(
+					eq(schema.fields.entityVersionId, person.id),
+					eq(schema.entityTypesFieldsNames.fieldName, "biography"),
+				),
+			)
+			.limit(1),
+	]);
+
+	const biography = biographyRows.at(0)?.content;
+
 	const image = {
 		...person.image,
 		url: images.generateSignedImageUrl({
@@ -126,11 +156,12 @@ export default async function DashboardAdministratorPersonDetailsPage(
 
 	return (
 		<PersonDetails
+			contributions={contributions}
 			discardDraftAction={discardPersonDraftAction}
 			documentId={doc.id}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
-			person={{ ...person, image }}
+			person={{ ...person, biography, image }}
 			publishAction={publishPersonAction}
 			selectedVersion={selectedVersion}
 		/>

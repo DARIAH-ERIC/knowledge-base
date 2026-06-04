@@ -9,6 +9,11 @@ import { publishEventAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/w
 import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
+import {
+	getEntityRelationOptionsByIds,
+	getEntityRelations,
+	getResourceRelationOptionsByIds,
+} from "@/lib/data/relations";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -122,8 +127,17 @@ export default async function DashboardWebsiteEventDetailsPage(
 
 	const contentBlocks = await getEntityContentBlocks(event.id, "content");
 
+	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(doc.id);
+
+	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
+		getEntityRelationOptionsByIds(relatedEntityIds),
+		getResourceRelationOptionsByIds(relatedResourceIds),
+	]);
+
 	return (
 		<EventDetails
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
 			contentBlocks={contentBlocks}
 			discardDraftAction={discardEventDraftAction}
 			documentId={doc.id}
