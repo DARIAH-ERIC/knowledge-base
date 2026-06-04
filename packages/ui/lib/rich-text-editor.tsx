@@ -30,7 +30,16 @@ import {
 	Trash2Icon,
 } from "lucide-react";
 import { useExtracted } from "next-intl";
-import { Fragment, type ReactNode, useCallback, useId, useMemo, useRef, useState } from "react";
+import {
+	Fragment,
+	type ReactNode,
+	useCallback,
+	useEffect,
+	useId,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { Button as ButtonPrimitive } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
@@ -976,26 +985,33 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	const [editorJson, setEditorJson] = useState<JSONContent | undefined>(initialContent);
 
+	const [isMounted, setIsMounted] = useState(false);
+	useEffect(() => {
+		setIsMounted(true);
+	}, []);
+
 	return (
 		<div
 			className={twMerge("relative overflow-clip rounded-lg border border-input bg-bg", className)}
 		>
-			<TiptapEditorView editor={editor} nodeViewComponents={nodeViewComponents}>
-				{isEditable ? (
-					<RichTextEditorToolbar
-						renderEmbedInsert={renderEmbedInsert}
-						renderImagePicker={renderImagePicker}
-					/>
-				) : null}
-				{name != null && (
-					<input
-						name={name}
-						type="hidden"
-						value={JSON.stringify(editorJson ?? { type: "doc", content: [] })}
-					/>
-				)}
-				<TiptapEditorContent editor={editor} />
-			</TiptapEditorView>
+			{name != null && (
+				<input
+					name={name}
+					type="hidden"
+					value={JSON.stringify(editorJson ?? { type: "doc", content: [] })}
+				/>
+			)}
+			{isMounted ? (
+				<TiptapEditorView editor={editor} nodeViewComponents={nodeViewComponents}>
+					{isEditable ? (
+						<RichTextEditorToolbar
+							renderEmbedInsert={renderEmbedInsert}
+							renderImagePicker={renderImagePicker}
+						/>
+					) : null}
+					<TiptapEditorContent editor={editor} />
+				</TiptapEditorView>
+			) : null}
 		</div>
 	);
 }
