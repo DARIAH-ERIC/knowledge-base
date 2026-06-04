@@ -1,6 +1,8 @@
+import { extname } from "node:path";
 import { Readable } from "node:stream";
 
 import { assert } from "@acdh-oeaw/lib";
+import slugify from "@sindresorhus/slugify";
 import { describeRoute } from "hono-openapi";
 
 import { createRouter } from "@/lib/factory";
@@ -24,6 +26,32 @@ import { env } from "~/config/env.config";
 
 function documentUrl(id: string) {
 	return new URL(`/api/v1/documents-policies/${id}/document`, env.API_BASE_URL).href;
+}
+
+const mimeTypeExtensions = new Map([
+	["application/pdf", ".pdf"],
+	["application/msword", ".doc"],
+	["application/vnd.openxmlformats-officedocument.wordprocessingml.document", ".docx"],
+	["application/vnd.ms-excel", ".xls"],
+	["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", ".xlsx"],
+	["application/vnd.ms-powerpoint", ".ppt"],
+	["application/vnd.openxmlformats-officedocument.presentationml.presentation", ".pptx"],
+	["text/plain", ".txt"],
+]);
+
+function getDownloadFilename(asset: {
+	filename: string | null;
+	key: string;
+	label: string;
+	mimeType: string;
+}) {
+	if (asset.filename != null) {
+		return asset.filename;
+	}
+
+	const extension = extname(asset.key) || mimeTypeExtensions.get(asset.mimeType) || "";
+
+	return `${slugify(asset.label)}${extension}`;
 }
 
 export const router = createRouter()
@@ -178,7 +206,7 @@ export const router = createRouter()
 			}
 
 			const { key } = item.document;
-			const filename = key.split("/").pop() ?? "document";
+			const filename = getDownloadFilename(item.document);
 
 			const storage = c.get("storage");
 			assert(storage, "Storage must be provided via middleware.");
