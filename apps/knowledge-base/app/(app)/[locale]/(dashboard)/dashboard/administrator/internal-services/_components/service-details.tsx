@@ -24,14 +24,14 @@ interface ServiceDetailsProps {
 }
 
 export function ServiceDetails(props: Readonly<ServiceDetailsProps>): ReactNode {
-	const { service, serviceStatuses, initialOrganisationalUnitItems } = props;
+	const { service, serviceStatuses, selectedOrganisationalUnits } = props;
 
 	const t = useExtracted();
 
-	const owners = initialOrganisationalUnitItems.filter((orgaUnit) =>
+	const owners = selectedOrganisationalUnits.filter((orgaUnit) =>
 		service.ownerUnitIds.includes(orgaUnit.id),
 	);
-	const providers = initialOrganisationalUnitItems.filter((orgaUnit) =>
+	const providers = selectedOrganisationalUnits.filter((orgaUnit) =>
 		service.providerUnitIds.includes(orgaUnit.id),
 	);
 

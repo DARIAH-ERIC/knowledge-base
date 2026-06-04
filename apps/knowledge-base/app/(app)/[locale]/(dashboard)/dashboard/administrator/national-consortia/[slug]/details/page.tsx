@@ -125,7 +125,7 @@ export default async function DashboardAdministratorNationalConsortiumDetailsPag
 		getOrganisationalUnitEditDataForAdmin(user, {
 			slug,
 			unitType: "national_consortium",
-			versionId: draftVersionId,
+			versionId,
 			publishedVersionId: publishedId,
 		}),
 	]);

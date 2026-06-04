@@ -128,7 +128,7 @@ export default async function DashboardAdministratorWorkingGroupDetailsPage(
 		getOrganisationalUnitEditDataForAdmin(user, {
 			slug,
 			unitType: "working_group",
-			versionId: draftVersionId,
+			versionId,
 			publishedVersionId: publishedId,
 		}),
 	]);

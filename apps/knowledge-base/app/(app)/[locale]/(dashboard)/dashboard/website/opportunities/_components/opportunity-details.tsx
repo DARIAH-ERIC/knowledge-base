@@ -63,7 +63,7 @@ export function OpportunityDetails(props: Readonly<OpportunityDetailsProps>): Re
 				/>
 			</div>
 			<DescriptionList>
-				<DescriptionTerm>{t("TItle")}</DescriptionTerm>
+				<DescriptionTerm>{t("Title")}</DescriptionTerm>
 				<DescriptionDetails>{opportunity.title}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Slug")}</DescriptionTerm>

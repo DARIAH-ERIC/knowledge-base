@@ -127,6 +127,7 @@ export default async function DashboardAdministratorCountryDetailsPage(
 		getOrganisationalUnitEditDataForAdmin(user, {
 			slug,
 			unitType: "country",
+			versionId,
 			publishedVersionId: publishedId,
 		}),
 	]);

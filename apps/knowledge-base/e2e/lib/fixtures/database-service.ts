@@ -1624,7 +1624,20 @@ export class DatabaseService {
 			);
 
 		await tx.delete(schema.entityVersions).where(eq(schema.entityVersions.id, versionId));
-		await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
+
+		// A published document keeps more than one version (e.g. draft + published), each referencing
+		// `entities.id` via a non-cascading FK. Per-version cleanup iterates every matching version, so
+		// only drop the document row once its last version is gone — otherwise the `DELETE FROM entities`
+		// trips the FK from a still-surviving version.
+		const remainingVersions = await tx
+			.select({ id: schema.entityVersions.id })
+			.from(schema.entityVersions)
+			.where(eq(schema.entityVersions.entityId, documentId))
+			.limit(1);
+
+		if (remainingVersions.length === 0) {
+			await tx.delete(schema.entities).where(eq(schema.entities.id, documentId));
+		}
 	}
 
 	private async resolveVersion(

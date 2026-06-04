@@ -97,11 +97,13 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
-					<img
-						alt=""
-						className="block-24 inline-24 rounded-lg object-cover"
-						src={country.image?.url}
-					/>
+					{country.image != null ? (
+						<img
+							alt=""
+							className="block-24 inline-24 rounded-lg object-cover"
+							src={country.image.url}
+						/>
+					) : null}
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Description")}</DescriptionTerm>
@@ -113,7 +115,7 @@ export function CountryDetails(props: Readonly<CountryDetailsProps>): ReactNode 
 
 				<DescriptionTerm>{t("Social Media")}</DescriptionTerm>
 				<DescriptionDetails>
-					{relations.length > 0 ? (
+					{selectedSocialMediaItems.length > 0 ? (
 						<ul className="flex flex-col gap-1">
 							{selectedSocialMediaItems.map((socialMediaItem) => (
 								<li key={socialMediaItem.id} className="text-sm">

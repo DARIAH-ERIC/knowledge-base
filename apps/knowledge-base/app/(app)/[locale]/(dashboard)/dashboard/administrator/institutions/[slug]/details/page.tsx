@@ -107,7 +107,7 @@ export default async function DashboardAdministratorInstitutionDetailsPage(
 			getResourceRelationOptions(),
 			getSocialMediaOptions(),
 			db.query.organisationalUnits.findFirst({
-				where: { id: draftVersionId },
+				where: { id: versionId },
 				columns: {
 					acronym: true,
 					id: true,

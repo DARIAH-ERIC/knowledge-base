@@ -225,4 +225,59 @@ test.describe("working groups admin", () => {
 
 		await expect(workingGroupsPage.rowByName(name)).toBeHidden();
 	});
+
+	test("version selector shows correct content per version", async ({
+		page,
+		createAdminWorkingGroupsPage,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const workingGroupsPage = createAdminWorkingGroupsPage(workerIndex);
+
+		const name = `${workingGroupsPage.workerPrefix} VersionSelector ${randomUUID()}`;
+		const originalSummary = `${workingGroupsPage.workerPrefix} Original summary ${randomUUID()}`;
+		const updatedSummary = `${workingGroupsPage.workerPrefix} Updated summary ${randomUUID()}`;
+
+		// Create → Publish. Right after publishing the details page reads as published-only
+		// (the cloned draft row exists but has no changes from the published version).
+		await workingGroupsPage.gotoCreate();
+		await workingGroupsPage.fillName(name);
+		await workingGroupsPage.fillSummary(originalSummary);
+		await workingGroupsPage.selectTestImage();
+		await workingGroupsPage.fillDescription("Version selector test description.");
+		await workingGroupsPage.submitForm();
+
+		await workingGroupsPage.searchByName(name);
+		await workingGroupsPage.gotoDetailsFromList(name);
+		await workingGroupsPage.publishFromDetails();
+
+		// Edit the draft's summary so it diverges from the published version.
+		await workingGroupsPage.searchByName(name);
+		await workingGroupsPage.gotoDetailsFromList(name);
+		await expect(workingGroupsPage.detailsPublishedBadge()).toBeVisible();
+		await workingGroupsPage.gotoEditFromDetails();
+		await workingGroupsPage.fillSummary(updatedSummary);
+		await workingGroupsPage.submitForm();
+
+		// Details: "Published with draft changes" with both version links.
+		await workingGroupsPage.searchByName(name);
+		await workingGroupsPage.gotoDetailsFromList(name);
+		await expect(workingGroupsPage.detailsPublishedWithDraftChangesBadge()).toBeVisible();
+		await expect(workingGroupsPage.versionSelectorDraftLink()).toBeVisible();
+		await expect(workingGroupsPage.versionSelectorPublishedLink()).toBeVisible();
+
+		// Draft tab (default) — updated summary shown.
+		await expect(page.getByText(updatedSummary)).toBeVisible();
+
+		// Switch to the published tab — original summary shown, updated hidden. This is the assertion
+		// that guards against the details page rendering draft scalars under the published version.
+		await workingGroupsPage.versionSelectorPublishedLink().click();
+		await page.waitForURL((url) => url.searchParams.get("version") === "published");
+		await expect(page.getByText(originalSummary)).toBeVisible();
+		await expect(page.getByText(updatedSummary)).toBeHidden();
+
+		// Switch back to the draft tab — updated summary shown again.
+		await workingGroupsPage.versionSelectorDraftLink().click();
+		await page.waitForURL((url) => url.searchParams.get("version") == null);
+		await expect(page.getByText(updatedSummary)).toBeVisible();
+	});
 });
