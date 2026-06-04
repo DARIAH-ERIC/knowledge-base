@@ -158,7 +158,8 @@
 		"vitest": "catalog:"
 	},
 	"peerDependencies": {
-		"@dariah-eric/next-lib": "workspace:^"
+		"@dariah-eric/next-lib": "workspace:^",
+		"next": "catalog:"
 	},
 	"stylelint": {
 		"extends": "@dariah-eric/configs/stylelint/base"

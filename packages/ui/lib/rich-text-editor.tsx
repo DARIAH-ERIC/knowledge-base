@@ -30,16 +30,8 @@ import {
 	Trash2Icon,
 } from "lucide-react";
 import { useExtracted } from "next-intl";
-import {
-	Fragment,
-	type ReactNode,
-	useCallback,
-	useEffect,
-	useId,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import dynamic from "next/dynamic";
+import { Fragment, type ReactNode, useCallback, useId, useMemo, useRef, useState } from "react";
 import { Button as ButtonPrimitive } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
@@ -918,7 +910,7 @@ function RichTextEditorToolbar({
 	);
 }
 
-export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode {
+function RichTextEditorImpl(props: Readonly<RichTextEditorProps>): ReactNode {
 	const {
 		"aria-label": ariaLabel,
 		content,
@@ -933,6 +925,8 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 	const initialContent = useMemo(() => normalizeInitialContent(content), [content]);
 
 	const assetImageNode = useMemo(() => createAssetImageNode(), []);
+
+	const [editorJson, setEditorJson] = useState<JSONContent | undefined>(initialContent);
 
 	const editor = useTiptapEditor({
 		extensions: [
@@ -952,7 +946,6 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		immediatelyRender: true,
 		onUpdate({ editor: updatedEditor }) {
 			const json = updatedEditor.getJSON();
-			// oxlint-disable-next-line no-use-before-define
 			setEditorJson(json);
 			onChange?.(json);
 		},
@@ -983,38 +976,31 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		};
 	}, [assetImageNode, renderImagePicker]);
 
-	const [editorJson, setEditorJson] = useState<JSONContent | undefined>(initialContent);
-
-	const [isMounted, setIsMounted] = useState(false);
-	useEffect(() => {
-		setIsMounted(true);
-	}, []);
-
 	return (
 		<div
 			className={twMerge("relative overflow-clip rounded-lg border border-input bg-bg", className)}
 		>
-			{name != null && (
-				<input
-					name={name}
-					type="hidden"
-					value={JSON.stringify(editorJson ?? { type: "doc", content: [] })}
-				/>
-			)}
-			{isMounted ? (
-				<TiptapEditorView editor={editor} nodeViewComponents={nodeViewComponents}>
-					{isEditable ? (
-						<RichTextEditorToolbar
-							renderEmbedInsert={renderEmbedInsert}
-							renderImagePicker={renderImagePicker}
-						/>
-					) : null}
-					<TiptapEditorContent editor={editor} />
-				</TiptapEditorView>
-			) : null}
+			<TiptapEditorView editor={editor} nodeViewComponents={nodeViewComponents}>
+				{isEditable ? (
+					<RichTextEditorToolbar
+						renderEmbedInsert={renderEmbedInsert}
+						renderImagePicker={renderImagePicker}
+					/>
+				) : null}
+				{name != null && (
+					<input
+						name={name}
+						type="hidden"
+						value={JSON.stringify(editorJson ?? { type: "doc", content: [] })}
+					/>
+				)}
+				<TiptapEditorContent editor={editor} />
+			</TiptapEditorView>
 		</div>
 	);
 }
+
+export const RichTextEditor = dynamic(() => Promise.resolve(RichTextEditorImpl), { ssr: false });
 
 interface RichTextRendererProps {
 	content: JSONContent;
