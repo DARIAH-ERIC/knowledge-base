@@ -80,10 +80,10 @@ export function FundingCallsPage(props: Readonly<FundingCallsPageProps>): ReactN
 				title={t("Funding Calls")}
 				description={t("Manage all funding calls in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/website/funding-calls/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 

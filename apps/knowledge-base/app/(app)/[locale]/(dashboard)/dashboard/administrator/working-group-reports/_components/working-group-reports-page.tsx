@@ -70,12 +70,12 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 				title={t("Working group reports")}
 				description={t("Manage all working group reports in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/administrator/working-group-reports/create">
 							{t("New")}
 						</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 

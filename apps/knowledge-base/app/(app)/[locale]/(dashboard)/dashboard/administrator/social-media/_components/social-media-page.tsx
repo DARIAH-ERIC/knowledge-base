@@ -74,10 +74,10 @@ export function SocialMediaPage(props: Readonly<SocialMediaPageProps>): ReactNod
 				title={t("Social media")}
 				description={t("Manage all social media in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/administrator/social-media/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 

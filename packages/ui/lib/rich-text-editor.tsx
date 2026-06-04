@@ -2,16 +2,17 @@
 
 "use client";
 
+import { useEditorState as useProseMirrorEditorState } from "@handlewithcare/react-prosemirror";
+import {
+	TiptapEditorContent,
+	TiptapEditorView,
+	tiptapNodeView,
+	useTiptapEditor,
+	useTiptapEditorEventCallback,
+} from "@handlewithcare/react-prosemirror/tiptap";
 import { type JSONContent, Node, mergeAttributes } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
-import {
-	EditorContent,
-	type NodeViewProps,
-	NodeViewWrapper,
-	ReactNodeViewRenderer,
-	useEditor,
-	useEditorState,
-} from "@tiptap/react";
+import { type NodeViewProps, useCurrentEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import cn from "clsx/lite";
 import {
@@ -29,7 +30,8 @@ import {
 	Trash2Icon,
 } from "lucide-react";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useCallback, useId, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import { Fragment, type ReactNode, useCallback, useId, useMemo, useRef, useState } from "react";
 import { Button as ButtonPrimitive } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
@@ -117,27 +119,26 @@ function BlockNodeSurface({
 	onDoubleClick,
 }: Readonly<BlockNodeSurfaceProps>): ReactNode {
 	return (
-		<NodeViewWrapper data-drag-handle="">
-			<div
-				aria-label={label}
-				className={twMerge(
-					"my-2 overflow-clip rounded-lg border border-input bg-bg transition-shadow",
-					isEditable && "cursor-default",
-					isSelected && "border-primary ring-2 ring-primary/20",
-					className,
-				)}
-				contentEditable={false}
-				onDoubleClick={(e) => {
-					if (!isEditable || onDoubleClick == null) {
-						return;
-					}
-					e.preventDefault();
-					onDoubleClick();
-				}}
-			>
-				{children}
-			</div>
-		</NodeViewWrapper>
+		<div
+			aria-label={label}
+			className={twMerge(
+				"my-2 overflow-clip rounded-lg border border-input bg-bg transition-shadow",
+				isEditable && "cursor-default",
+				isSelected && "border-primary ring-2 ring-primary/20",
+				className,
+			)}
+			contentEditable={false}
+			data-drag-handle=""
+			onDoubleClick={(e) => {
+				if (!isEditable || onDoubleClick == null) {
+					return;
+				}
+				e.preventDefault();
+				onDoubleClick();
+			}}
+		>
+			{children}
+		</div>
 	);
 }
 
@@ -177,7 +178,7 @@ function EmbedNodeView({
 		updateAttributes({
 			url: urlInput.trim(),
 			title: titleInput.trim(),
-			caption: captionInput.trim() ?? null,
+			caption: captionInput.trim() || null,
 		});
 		setIsEditing(false);
 	}
@@ -389,10 +390,6 @@ export const EmbedNode = Node.create({
 			},
 		];
 	},
-
-	addNodeView() {
-		return ReactNodeViewRenderer(EmbedNodeView);
-	},
 });
 
 interface AssetImageNodeViewProps extends NodeViewProps {
@@ -444,9 +441,9 @@ function AssetImageNodeView({
 		}
 
 		updateAttributes({
-			imageKey: imageKeyInput.trim() ?? null,
+			imageKey: imageKeyInput.trim() || null,
 			imageUrl: nextImageUrl,
-			caption: captionInput.trim() ?? null,
+			caption: captionInput.trim() || null,
 		});
 		setIsEditing(false);
 	}
@@ -471,7 +468,7 @@ function AssetImageNodeView({
 								updateAttributes({
 									imageKey: nextImageKey,
 									imageUrl: nextImageUrl,
-									caption: captionInput.trim() ?? null,
+									caption: captionInput.trim() || null,
 								});
 								setImageKeyInput(nextImageKey);
 								setImageUrlInput(nextImageUrl);
@@ -479,7 +476,7 @@ function AssetImageNodeView({
 						</div>
 					) : null}
 					{renderImagePicker == null ? (
-						<>
+						<Fragment>
 							<div className="flex flex-col gap-y-1">
 								<label className="text-sm/6 font-medium" htmlFor={imageKeyInputId}>
 									{"Asset key"}
@@ -508,7 +505,7 @@ function AssetImageNodeView({
 									value={imageUrlInput}
 								/>
 							</div>
-						</>
+						</Fragment>
 					) : null}
 					<div className="flex flex-col gap-y-1">
 						<label className="text-sm/6 font-medium" htmlFor={captionInputId}>
@@ -596,7 +593,7 @@ function AssetImageNodeView({
 	);
 }
 
-function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
+function createAssetImageNode(): Node {
 	return Node.create({
 		name: "assetImage",
 		group: "block",
@@ -641,16 +638,279 @@ function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
 				),
 			];
 		},
-
-		addNodeView() {
-			return ReactNodeViewRenderer((props) => (
-				<AssetImageNodeView {...props} renderImagePicker={renderImagePicker} />
-			));
-		},
 	});
 }
 
-export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode {
+interface RichTextEditorToolbarProps {
+	renderEmbedInsert?: RichTextEditorProps["renderEmbedInsert"];
+	renderImagePicker?: RichTextEditorProps["renderImagePicker"];
+}
+
+function RichTextEditorToolbar({
+	renderEmbedInsert,
+	renderImagePicker,
+}: Readonly<RichTextEditorToolbarProps>): ReactNode {
+	const t = useExtracted("ui");
+	const { editor } = useCurrentEditor();
+	const editorState = useProseMirrorEditorState();
+
+	const activeState = useMemo(() => {
+		if (editor == null || editor.state !== editorState) {
+			return null;
+		}
+
+		return {
+			isBold: editor.isActive("bold"),
+			isItalic: editor.isActive("italic"),
+			isCode: editor.isActive("code"),
+			isHeading2: editor.isActive("heading", { level: 2 }),
+			isHeading3: editor.isActive("heading", { level: 3 }),
+			isHeading4: editor.isActive("heading", { level: 4 }),
+			isBulletList: editor.isActive("bulletList"),
+			isOrderedList: editor.isActive("orderedList"),
+			isBlockquote: editor.isActive("blockquote"),
+			isLink: editor.isActive("link"),
+			linkHref: editor.getAttributes("link").href as string | undefined,
+		};
+	}, [editor, editorState]);
+
+	const [isLinkPopoverOpen, setIsLinkPopoverOpen] = useState(false);
+	const [linkHrefInput, setLinkHrefInput] = useState("");
+	const savedSelectionRef = useRef<{ from: number; to: number } | null>(null);
+
+	const handleLinkPopoverOpenChange = useCallback(
+		(open: boolean) => {
+			if (open && editor != null) {
+				savedSelectionRef.current = {
+					from: editor.state.selection.from,
+					to: editor.state.selection.to,
+				};
+				setLinkHrefInput(activeState?.linkHref ?? "");
+			}
+			setIsLinkPopoverOpen(open);
+		},
+		[editor, activeState?.linkHref],
+	);
+
+	const toggleBold = useTiptapEditorEventCallback((editor) => {
+		editor.chain().focus().toggleBold().run();
+	});
+
+	const toggleItalic = useTiptapEditorEventCallback((editor) => {
+		editor.chain().focus().toggleItalic().run();
+	});
+
+	const toggleCode = useTiptapEditorEventCallback((editor) => {
+		editor.chain().focus().toggleCode().run();
+	});
+
+	const toggleHeading2 = useTiptapEditorEventCallback((editor) => {
+		editor.chain().focus().toggleHeading({ level: 2 }).run();
+	});
+
+	const toggleHeading3 = useTiptapEditorEventCallback((editor) => {
+		editor.chain().focus().toggleHeading({ level: 3 }).run();
+	});
+
+	const toggleHeading4 = useTiptapEditorEventCallback((editor) => {
+		editor.chain().focus().toggleHeading({ level: 4 }).run();
+	});
+
+	const toggleBulletList = useTiptapEditorEventCallback((editor) => {
+		editor.chain().focus().toggleBulletList().run();
+	});
+
+	const toggleOrderedList = useTiptapEditorEventCallback((editor) => {
+		editor.chain().focus().toggleOrderedList().run();
+	});
+
+	const toggleBlockquote = useTiptapEditorEventCallback((editor) => {
+		editor.chain().focus().toggleBlockquote().run();
+	});
+
+	const applyLink = useTiptapEditorEventCallback((editor) => {
+		const href = linkHrefInput.trim();
+		if (!href) {
+			return;
+		}
+
+		const sel = savedSelectionRef.current;
+		const chain = editor.chain().focus();
+		if (sel) {
+			chain.setTextSelection(sel);
+		}
+
+		if (sel && sel.from === sel.to && activeState?.isLink !== true) {
+			chain
+				.insertContent({ type: "text", text: href, marks: [{ type: "link", attrs: { href } }] })
+				.run();
+		} else {
+			if (activeState?.isLink === true) {
+				chain.extendMarkRange("link");
+			}
+			chain.setLink({ href }).run();
+		}
+
+		setIsLinkPopoverOpen(false);
+	});
+
+	const removeLink = useTiptapEditorEventCallback((editor) => {
+		const sel = savedSelectionRef.current;
+		const chain = editor.chain().focus();
+		if (sel) {
+			chain.setTextSelection(sel);
+		}
+		if (activeState?.isLink === true) {
+			chain.extendMarkRange("link");
+		}
+		chain.unsetLink().run();
+		setIsLinkPopoverOpen(false);
+	});
+
+	const insertEmbed = useTiptapEditorEventCallback((editor) => {
+		editor
+			.chain()
+			.focus()
+			.insertContent({ type: "embedBlock", attrs: { url: null, title: null, caption: null } })
+			.run();
+	});
+
+	const insertImage = useTiptapEditorEventCallback((editor, imageKey: string, imageUrl: string) => {
+		if (imageKey) {
+			editor
+				.chain()
+				.focus()
+				.insertContent({ type: "assetImage", attrs: { imageKey, imageUrl } })
+				.run();
+		} else {
+			editor.chain().focus().setImage({ src: imageUrl }).run();
+		}
+	});
+
+	if (editor == null || activeState == null) {
+		return null;
+	}
+
+	return (
+		<div className="sticky inset-bs-0 z-10 flex flex-wrap items-center gap-0.5 border-be border-border bg-muted px-2 py-1.5">
+			<RichTextEditorIconButton
+				aria-label={t("Bold")}
+				icon={BoldIcon}
+				isActive={activeState.isBold}
+				onClick={toggleBold}
+			/>
+			<RichTextEditorIconButton
+				aria-label={t("Italic")}
+				icon={ItalicIcon}
+				isActive={activeState.isItalic}
+				onClick={toggleItalic}
+			/>
+			<RichTextEditorIconButton
+				aria-label={t("Code")}
+				icon={CodeIcon}
+				isActive={activeState.isCode}
+				onClick={toggleCode}
+			/>
+			<span className="mx-1 block-4 inline-px bg-border" />
+			<RichTextEditorIconButton
+				aria-label={t("Heading 2")}
+				icon={Heading2Icon}
+				isActive={activeState.isHeading2}
+				onClick={toggleHeading2}
+			/>
+			<RichTextEditorIconButton
+				aria-label={t("Heading 3")}
+				icon={Heading3Icon}
+				isActive={activeState.isHeading3}
+				onClick={toggleHeading3}
+			/>
+			<RichTextEditorIconButton
+				aria-label={t("Heading 4")}
+				icon={Heading4Icon}
+				isActive={activeState.isHeading4}
+				onClick={toggleHeading4}
+			/>
+			<span className="mx-1 block-4 inline-px bg-border" />
+			<RichTextEditorIconButton
+				aria-label={t("Bullet List")}
+				icon={ListIcon}
+				isActive={activeState.isBulletList}
+				onClick={toggleBulletList}
+			/>
+			<RichTextEditorIconButton
+				aria-label={t("Ordered List")}
+				icon={ListOrderedIcon}
+				isActive={activeState.isOrderedList}
+				onClick={toggleOrderedList}
+			/>
+			<RichTextEditorIconButton
+				aria-label={t("Blockquote")}
+				icon={QuoteIcon}
+				isActive={activeState.isBlockquote}
+				onClick={toggleBlockquote}
+			/>
+			<span className="mx-1 block-4 inline-px bg-border" />
+			<Popover isOpen={isLinkPopoverOpen} onOpenChange={handleLinkPopoverOpenChange}>
+				<Tooltip>
+					<PopoverTrigger
+						aria-label={t("Link")}
+						className={twMerge(
+							"relative inline-flex block-8 inline-8 cursor-pointer items-center justify-center rounded-md border-transparent bg-transparent transition-colors text-muted-fg hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+							activeState.isLink && "bg-primary-subtle/50 text-fg",
+						)}
+					>
+						<LinkIcon className="block-4 inline-4" />
+					</PopoverTrigger>
+					<TooltipContent inverse={true}>{t("Link")}</TooltipContent>
+				</Tooltip>
+				<PopoverContent className="p-3">
+					<form
+						className="flex inline-56 flex-col gap-2"
+						onSubmit={(e) => {
+							e.preventDefault();
+							applyLink();
+						}}
+					>
+						<Input
+							autoFocus={true}
+							onChange={(e) => {
+								setLinkHrefInput(e.target.value);
+							}}
+							placeholder="https://example.com"
+							required={true}
+							type="text"
+							value={linkHrefInput}
+						/>
+						<div className="flex gap-2">
+							<Button className="flex-1" intent="primary" size="sm" type="submit">
+								{t("Apply")}
+							</Button>
+							{activeState.isLink ? (
+								<Button intent="outline" onPress={removeLink} size="sm" type="button">
+									{t("Remove")}
+								</Button>
+							) : null}
+						</div>
+					</form>
+				</PopoverContent>
+			</Popover>
+			{renderImagePicker != null ? (
+				<Fragment>
+					<span className="mx-1 block-4 inline-px bg-border" />
+					{renderImagePicker(insertImage)}
+				</Fragment>
+			) : null}
+			{renderEmbedInsert != null ? (
+				<Fragment>
+					{renderImagePicker == null ? <span className="mx-1 block-4 inline-px bg-border" /> : null}
+					{renderEmbedInsert(insertEmbed)}
+				</Fragment>
+			) : null}
+		</div>
+	);
+}
+
+function RichTextEditorImpl(props: Readonly<RichTextEditorProps>): ReactNode {
 	const {
 		"aria-label": ariaLabel,
 		content,
@@ -662,16 +922,13 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		renderImagePicker,
 	} = props;
 
-	const t = useExtracted("ui");
-
 	const initialContent = useMemo(() => normalizeInitialContent(content), [content]);
 
-	const assetImageNode = useMemo(
-		() => createAssetImageNode(renderImagePicker),
-		[renderImagePicker],
-	);
+	const assetImageNode = useMemo(() => createAssetImageNode(), []);
 
-	const editor = useEditor({
+	const [editorJson, setEditorJson] = useState<JSONContent | undefined>(initialContent);
+
+	const editor = useTiptapEditor({
 		extensions: [
 			StarterKit.configure({
 				heading: { levels: [2, 3, 4] },
@@ -686,14 +943,11 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		],
 		content: initialContent,
 		editable: isEditable,
-		immediatelyRender: false,
-		onUpdate() {
-			if (editor) {
-				const json = editor.getJSON();
-				// oxlint-disable-next-line no-use-before-define
-				setEditorJson(json);
-				onChange?.(json);
-			}
+		immediatelyRender: true,
+		onUpdate({ editor: updatedEditor }) {
+			const json = updatedEditor.getJSON();
+			setEditorJson(json);
+			onChange?.(json);
 		},
 		editorProps: {
 			attributes: {
@@ -705,275 +959,48 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 		},
 	});
 
-	const activeState = useEditorState({
-		editor,
-		selector(ctx) {
-			return {
-				isBold: ctx.editor?.isActive("bold"),
-				isItalic: ctx.editor?.isActive("italic"),
-				isCode: ctx.editor?.isActive("code"),
-				isHeading2: ctx.editor?.isActive("heading", { level: 2 }),
-				isHeading3: ctx.editor?.isActive("heading", { level: 3 }),
-				isHeading4: ctx.editor?.isActive("heading", { level: 4 }),
-				isBulletList: ctx.editor?.isActive("bulletList"),
-				isOrderedList: ctx.editor?.isActive("orderedList"),
-				isBlockquote: ctx.editor?.isActive("blockquote"),
-				isLink: ctx.editor?.isActive("link"),
-				linkHref: ctx.editor?.getAttributes("link").href as string | undefined,
-			};
-		},
-	});
+	const nodeViewComponents = useMemo(() => {
+		const AssetImageNodeViewWithPicker = (nodeViewProps: NodeViewProps) => (
+			<AssetImageNodeView {...nodeViewProps} renderImagePicker={renderImagePicker} />
+		);
 
-	const [editorJson, setEditorJson] = useState<JSONContent | undefined>(initialContent);
-
-	const [isLinkPopoverOpen, setIsLinkPopoverOpen] = useState(false);
-	const [linkHrefInput, setLinkHrefInput] = useState("");
-	const savedSelectionRef = useRef<{ from: number; to: number } | null>(null);
-
-	const handleLinkPopoverOpenChange = useCallback(
-		(open: boolean) => {
-			if (open && editor) {
-				savedSelectionRef.current = {
-					from: editor.state.selection.from,
-					to: editor.state.selection.to,
-				};
-				setLinkHrefInput(activeState?.linkHref ?? "");
-			}
-			setIsLinkPopoverOpen(open);
-		},
-		[editor, activeState?.linkHref],
-	);
-
-	const applyLink = useCallback(() => {
-		if (!editor) {
-			return;
-		}
-		const href = linkHrefInput.trim();
-		if (!href) {
-			return;
-		}
-
-		const sel = savedSelectionRef.current;
-		const chain = editor.chain().focus();
-		if (sel) {
-			chain.setTextSelection(sel);
-		}
-
-		if (sel && sel.from === sel.to && !(activeState?.isLink ?? false)) {
-			chain
-				.insertContent({ type: "text", text: href, marks: [{ type: "link", attrs: { href } }] })
-				.run();
-		} else {
-			if (activeState?.isLink === true) {
-				chain.extendMarkRange("link");
-			}
-			chain.setLink({ href }).run();
-		}
-
-		setIsLinkPopoverOpen(false);
-	}, [editor, linkHrefInput, activeState?.isLink]);
-
-	const removeLink = useCallback(() => {
-		if (!editor) {
-			return;
-		}
-		const sel = savedSelectionRef.current;
-		const chain = editor.chain().focus();
-		if (sel) {
-			chain.setTextSelection(sel);
-		}
-		if (activeState?.isLink === true) {
-			chain.extendMarkRange("link");
-		}
-		chain.unsetLink().run();
-		setIsLinkPopoverOpen(false);
-	}, [editor, activeState?.isLink]);
-
-	const insertEmbed = useCallback(() => {
-		if (!editor) {
-			return;
-		}
-		editor
-			.chain()
-			.focus()
-			.insertContent({ type: "embedBlock", attrs: { url: null, title: null, caption: null } })
-			.run();
-	}, [editor]);
-
-	const insertImage = useCallback(
-		(imageKey: string, imageUrl: string) => {
-			if (!editor) {
-				return;
-			}
-			if (imageKey) {
-				editor
-					.chain()
-					.focus()
-					.insertContent({ type: "assetImage", attrs: { imageKey, imageUrl } })
-					.run();
-			} else {
-				editor.chain().focus().setImage({ src: imageUrl }).run();
-			}
-		},
-		[editor],
-	);
-
-	if (editor == null) {
-		return null;
-	}
+		return {
+			assetImage: tiptapNodeView({
+				component: AssetImageNodeViewWithPicker,
+				extension: assetImageNode,
+			}),
+			embedBlock: tiptapNodeView({
+				component: EmbedNodeView,
+				extension: EmbedNode,
+			}),
+		};
+	}, [assetImageNode, renderImagePicker]);
 
 	return (
 		<div
 			className={twMerge("relative overflow-clip rounded-lg border border-input bg-bg", className)}
 		>
-			{isEditable ? (
-				<div className="sticky inset-bs-0 z-10 flex flex-wrap items-center gap-0.5 border-be border-border bg-muted px-2 py-1.5">
-					<RichTextEditorIconButton
-						aria-label={t("Bold")}
-						icon={BoldIcon}
-						isActive={activeState?.isBold}
-						onClick={() => {
-							editor.chain().focus().toggleBold().run();
-						}}
+			<TiptapEditorView editor={editor} nodeViewComponents={nodeViewComponents}>
+				{isEditable ? (
+					<RichTextEditorToolbar
+						renderEmbedInsert={renderEmbedInsert}
+						renderImagePicker={renderImagePicker}
 					/>
-					<RichTextEditorIconButton
-						aria-label={t("Italic")}
-						icon={ItalicIcon}
-						isActive={activeState?.isItalic}
-						onClick={() => {
-							editor.chain().focus().toggleItalic().run();
-						}}
+				) : null}
+				{name != null && (
+					<input
+						name={name}
+						type="hidden"
+						value={JSON.stringify(editorJson ?? { type: "doc", content: [] })}
 					/>
-					<RichTextEditorIconButton
-						aria-label={t("Code")}
-						icon={CodeIcon}
-						isActive={activeState?.isCode}
-						onClick={() => {
-							editor.chain().focus().toggleCode().run();
-						}}
-					/>
-					<span className="mx-1 block-4 inline-px bg-border" />
-					<RichTextEditorIconButton
-						aria-label={t("Heading 2")}
-						icon={Heading2Icon}
-						isActive={activeState?.isHeading2}
-						onClick={() => {
-							editor.chain().focus().toggleHeading({ level: 2 }).run();
-						}}
-					/>
-					<RichTextEditorIconButton
-						aria-label={t("Heading 3")}
-						icon={Heading3Icon}
-						isActive={activeState?.isHeading3}
-						onClick={() => {
-							editor.chain().focus().toggleHeading({ level: 3 }).run();
-						}}
-					/>
-					<RichTextEditorIconButton
-						aria-label={t("Heading 4")}
-						icon={Heading4Icon}
-						isActive={activeState?.isHeading4}
-						onClick={() => {
-							editor.chain().focus().toggleHeading({ level: 4 }).run();
-						}}
-					/>
-					<span className="mx-1 block-4 inline-px bg-border" />
-					<RichTextEditorIconButton
-						aria-label={t("Bullet List")}
-						icon={ListIcon}
-						isActive={activeState?.isBulletList}
-						onClick={() => {
-							editor.chain().focus().toggleBulletList().run();
-						}}
-					/>
-					<RichTextEditorIconButton
-						aria-label={t("Ordered List")}
-						icon={ListOrderedIcon}
-						isActive={activeState?.isOrderedList}
-						onClick={() => {
-							editor.chain().focus().toggleOrderedList().run();
-						}}
-					/>
-					<RichTextEditorIconButton
-						aria-label={t("Blockquote")}
-						icon={QuoteIcon}
-						isActive={activeState?.isBlockquote}
-						onClick={() => {
-							editor.chain().focus().toggleBlockquote().run();
-						}}
-					/>
-					<span className="mx-1 block-4 inline-px bg-border" />
-					<Popover isOpen={isLinkPopoverOpen} onOpenChange={handleLinkPopoverOpenChange}>
-						<Tooltip>
-							<PopoverTrigger
-								aria-label={t("Link")}
-								className={twMerge(
-									"relative inline-flex block-8 inline-8 cursor-pointer items-center justify-center rounded-md border-transparent bg-transparent transition-colors text-muted-fg hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-									activeState?.isLink === true && "bg-primary-subtle/50 text-fg",
-								)}
-							>
-								<LinkIcon className="block-4 inline-4" />
-							</PopoverTrigger>
-							<TooltipContent inverse={true}>{t("Link")}</TooltipContent>
-						</Tooltip>
-						<PopoverContent className="p-3">
-							<form
-								className="flex inline-56 flex-col gap-2"
-								onSubmit={(e) => {
-									e.preventDefault();
-									applyLink();
-								}}
-							>
-								<Input
-									autoFocus={true}
-									onChange={(e) => {
-										setLinkHrefInput(e.target.value);
-									}}
-									placeholder="https://example.com"
-									required={true}
-									type="text"
-									value={linkHrefInput}
-								/>
-								<div className="flex gap-2">
-									<Button className="flex-1" intent="primary" size="sm" type="submit">
-										{t("Apply")}
-									</Button>
-									{activeState?.isLink === true && (
-										<Button intent="outline" onPress={removeLink} size="sm" type="button">
-											{t("Remove")}
-										</Button>
-									)}
-								</div>
-							</form>
-						</PopoverContent>
-					</Popover>
-					{renderImagePicker != null ? (
-						<>
-							<span className="mx-1 block-4 inline-px bg-border" />
-							{renderImagePicker(insertImage)}
-						</>
-					) : null}
-					{renderEmbedInsert != null ? (
-						<>
-							{renderImagePicker == null ? (
-								<span className="mx-1 block-4 inline-px bg-border" />
-							) : null}
-							{renderEmbedInsert(insertEmbed)}
-						</>
-					) : null}
-				</div>
-			) : null}
-			{name != null && (
-				<input
-					name={name}
-					type="hidden"
-					value={JSON.stringify(editorJson ?? { type: "doc", content: [] })}
-				/>
-			)}
-			<EditorContent editor={editor} />
+				)}
+				<TiptapEditorContent editor={editor} />
+			</TiptapEditorView>
 		</div>
 	);
 }
+
+export const RichTextEditor = dynamic(() => Promise.resolve(RichTextEditorImpl), { ssr: false });
 
 interface RichTextRendererProps {
 	content: JSONContent;

@@ -82,10 +82,10 @@ export function OpportunitiesPage(props: Readonly<OpportunitiesPageProps>): Reac
 				title={t("Opportunities")}
 				description={t("Manage all opportunities in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/website/opportunities/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 

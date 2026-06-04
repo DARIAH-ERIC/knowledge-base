@@ -36,6 +36,9 @@ catalogs:
     '@fontsource-variable/inter':
       specifier: ^5.2.8
       version: 5.2.8
+    '@handlewithcare/react-prosemirror':
+      specifier: ^3.1.1
+      version: 3.1.1
     '@heroicons/react':
       specifier: ^2.2.0
       version: 2.2.0
@@ -1725,6 +1728,9 @@ importers:
       '@acdh-oeaw/style-variants':
         specifier: 'catalog:'
         version: 0.1.0
+      '@handlewithcare/react-prosemirror':
+        specifier: 'catalog:'
+        version: 3.1.1(@tiptap/core@3.23.4(@tiptap/pm@3.23.4))(@tiptap/pm@3.23.4)(@tiptap/react@3.23.4(@floating-ui/dom@1.7.6)(@tiptap/core@3.23.4(@tiptap/pm@3.23.4))(@tiptap/pm@3.23.4)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.7)(react-dom@19.2.6(react@19.2.6))(react-reconciler@0.33.0(react@19.2.6))(react@19.2.6)
       '@heroicons/react':
         specifier: 'catalog:'
         version: 2.2.0(react@19.2.6)
@@ -1758,6 +1764,9 @@ importers:
       lucide-react:
         specifier: 'catalog:'
         version: 1.14.0(react@19.2.6)
+      next:
+        specifier: 'catalog:'
+        version: 16.2.6(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       next-intl:
         specifier: 'catalog:'
         version: 4.11.2(@swc/helpers@0.5.21)(next@16.2.6(patch_hash=de17907a43a1b46b5534a9628cc7b229f5c0cce5a5f7b19baa0dde85ba1b7624)(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)(typescript@6.0.3)
@@ -2686,6 +2695,27 @@ packages:
 
   '@formatjs/intl-localematcher@0.8.7':
     resolution: {integrity: sha512-1R/ljfRKG1fUhKG4F0lUmrEKPkr/PlHqbgQ8xeYQYYunXu5/0+vbQeeVgGAgydp13Tq+S1X5Qjn6L90hijXjHg==}
+
+  '@handlewithcare/react-prosemirror@3.1.1':
+    resolution: {integrity: sha512-tpxf0H3/dwbiLM2SfPmxt6QKkUlxOxXjK4urnW7dEwMWho8hRKWoXZZ8qzvXGvThjIvpbE1lqieuGWqTYma7Aw==}
+    engines: {node: '>=16.9'}
+    peerDependencies:
+      '@tiptap/core': ^3.15.3
+      '@tiptap/pm': ^3.15.3
+      '@tiptap/react': ^3.15.3
+      prosemirror-model: ^1.0.0
+      prosemirror-state: ^1.0.0
+      prosemirror-view: 1.41.7
+      react: '>=17 <20'
+      react-dom: '>=17 <20'
+      react-reconciler: '>=0.26.1 <=0.33.0'
+    peerDependenciesMeta:
+      '@tiptap/core':
+        optional: true
+      '@tiptap/pm':
+        optional: true
+      '@tiptap/react':
+        optional: true
 
   '@heroicons/react@2.2.0':
     resolution: {integrity: sha512-LMcepvRaS9LYHJGsF0zzmgKCUim/X3N/DQKc4jepAXJ7l8QxJ1PmxJzqplF2Z3FE4PqBAIGyJAQ/w4B5dsqbtQ==}
@@ -5498,6 +5528,9 @@ packages:
   cjs-module-lexer@2.2.0:
     resolution: {integrity: sha512-4bHTS2YuzUvtoLjdy+98ykbNB5jS0+07EvFNXerqZQJ89F7DI6ET7OQo/HJuW6K0aVsKA9hj9/RVb2kQVOrPDQ==}
 
+  classnames@2.5.1:
+    resolution: {integrity: sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==}
+
   cli-width@4.1.0:
     resolution: {integrity: sha512-ouuZd4/dm2Sw5Gmqy6bGyNNNe1qt9RpmxveLSO7KcgsTnU7RXfsw+/bukWGo1abgBiMAic068rclZsO4IWmmxQ==}
     engines: {node: '>= 12'}
@@ -7577,6 +7610,9 @@ packages:
   prosemirror-transform@1.12.0:
     resolution: {integrity: sha512-GxboyN4AMIsoHNtz5uf2r2Ru551i5hWeCMD6E2Ib4Eogqoub0NflniaBPVQ4MrGE5yZ8JV9tUHg9qcZTTrcN4w==}
 
+  prosemirror-view@1.41.7:
+    resolution: {integrity: sha512-jUwKNCEIGiqdvhlS91/2QAg21e4dfU5bH2iwmSDQeosXJgKF7smG0YSplOWK0cjSNgIqXe7VXqo7EIfUFJdt3w==}
+
   prosemirror-view@1.41.8:
     resolution: {integrity: sha512-TnKDdohEatgyZNGCDWIdccOHXhYloJwbwU+phw/a23KBvJIR9lWQWW7WHHK3vBdOLDNuF7TaX98GObUZOWkOnA==}
 
@@ -7658,6 +7694,12 @@ packages:
 
   react-is@17.0.2:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
+
+  react-reconciler@0.33.0:
+    resolution: {integrity: sha512-KetWRytFv1epdpJc3J4G75I4WrplZE5jOL7Yq0p34+OVOKF4Se7WrdIdVC45XsSSmUTlht2FM/fM1FZb1mfQeA==}
+    engines: {node: '>=0.10.0'}
+    peerDependencies:
+      react: ^19.2.0
 
   react-redux@9.2.0:
     resolution: {integrity: sha512-ROY9fvHhwOD9ySfrF0wmvu//bKCQ6AeZZq1nJNtbDC+kk5DuSuNX/n6YWYF/SYy7bSba4D4FSz8DJeKY/S/r+g==}
@@ -9291,6 +9333,20 @@ snapshots:
   '@formatjs/intl-localematcher@0.8.7':
     dependencies:
       '@formatjs/fast-memoize': 3.1.5
+
+  '@handlewithcare/react-prosemirror@3.1.1(@tiptap/core@3.23.4(@tiptap/pm@3.23.4))(@tiptap/pm@3.23.4)(@tiptap/react@3.23.4(@floating-ui/dom@1.7.6)(@tiptap/core@3.23.4(@tiptap/pm@3.23.4))(@tiptap/pm@3.23.4)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.7)(react-dom@19.2.6(react@19.2.6))(react-reconciler@0.33.0(react@19.2.6))(react@19.2.6)':
+    dependencies:
+      classnames: 2.5.1
+      prosemirror-model: 1.25.4
+      prosemirror-state: 1.4.4
+      prosemirror-view: 1.41.7
+      react: 19.2.6
+      react-dom: 19.2.6(react@19.2.6)
+      react-reconciler: 0.33.0(react@19.2.6)
+    optionalDependencies:
+      '@tiptap/core': 3.23.4(@tiptap/pm@3.23.4)
+      '@tiptap/pm': 3.23.4
+      '@tiptap/react': 3.23.4(@floating-ui/dom@1.7.6)(@tiptap/core@3.23.4(@tiptap/pm@3.23.4))(@tiptap/pm@3.23.4)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
 
   '@heroicons/react@2.2.0(react@19.2.6)':
     dependencies:
@@ -11866,6 +11922,8 @@ snapshots:
 
   cjs-module-lexer@2.2.0: {}
 
+  classnames@2.5.1: {}
+
   cli-width@4.1.0: {}
 
   client-only@0.0.1: {}
@@ -13912,6 +13970,12 @@ snapshots:
     dependencies:
       prosemirror-model: 1.25.4
 
+  prosemirror-view@1.41.7:
+    dependencies:
+      prosemirror-model: 1.25.4
+      prosemirror-state: 1.4.4
+      prosemirror-transform: 1.12.0
+
   prosemirror-view@1.41.8:
     dependencies:
       prosemirror-model: 1.25.4
@@ -14016,6 +14080,11 @@ snapshots:
       scheduler: 0.27.0
 
   react-is@17.0.2: {}
+
+  react-reconciler@0.33.0(react@19.2.6):
+    dependencies:
+      react: 19.2.6
+      scheduler: 0.27.0
 
   react-redux@9.2.0(@types/react@19.2.14)(react@19.2.6)(redux@5.0.1):
     dependencies:

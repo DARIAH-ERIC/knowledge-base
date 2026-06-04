@@ -81,10 +81,10 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 				title={t("Working groups")}
 				description={t("Manage all working groups in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/administrator/working-groups/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 

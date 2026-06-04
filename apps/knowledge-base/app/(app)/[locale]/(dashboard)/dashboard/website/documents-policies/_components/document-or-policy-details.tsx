@@ -71,10 +71,10 @@ export function DocumentOrPolicyDetails(props: Readonly<DocumentOrPolicyDetailsP
 				<DescriptionDetails>{documentOrPolicy.summary}</DescriptionDetails>
 
 				{documentOrPolicy.url != null ? (
-					<>
+					<Fragment>
 						<DescriptionTerm>{t("URL")}</DescriptionTerm>
 						<DescriptionDetails>{documentOrPolicy.url}</DescriptionDetails>
-					</>
+					</Fragment>
 				) : null}
 
 				<DescriptionTerm>{t("Document")}</DescriptionTerm>

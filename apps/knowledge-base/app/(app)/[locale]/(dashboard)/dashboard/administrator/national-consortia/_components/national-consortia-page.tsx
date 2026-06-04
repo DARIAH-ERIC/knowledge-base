@@ -79,10 +79,10 @@ export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps
 				title={t("National consortia")}
 				description={t("Manage all national consortia in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/administrator/national-consortia/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 

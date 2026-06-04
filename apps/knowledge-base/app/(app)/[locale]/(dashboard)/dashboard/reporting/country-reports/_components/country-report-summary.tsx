@@ -1,5 +1,5 @@
 import { getExtracted } from "next-intl/server";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 import type { CountryReportSummaryData } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 
@@ -96,16 +96,16 @@ export async function CountryReportSummary(
 						<dt className="text-muted-fg">{t("Very large")}</dt>
 						<dd>{data.veryLargeEvents ?? "—"}</dd>
 						{data.dariahCommissionedEvent != null && (
-							<>
+							<Fragment>
 								<dt className="text-muted-fg">{t("DARIAH commissioned event")}</dt>
 								<dd>{data.dariahCommissionedEvent}</dd>
-							</>
+							</Fragment>
 						)}
 						{data.reusableOutcomes != null && (
-							<>
+							<Fragment>
 								<dt className="text-muted-fg">{t("Reusable outcomes")}</dt>
 								<dd>{data.reusableOutcomes}</dd>
-							</>
+							</Fragment>
 						)}
 					</dl>
 				</section>

@@ -404,7 +404,7 @@ function ContentBlockItem({
 	};
 
 	return (
-		<>
+		<Fragment>
 			{isDropTarget && dropPosition === "before" && (
 				<div aria-hidden={true} className="mx-1 block-0.5 rounded-full bg-accent" />
 			)}
@@ -509,7 +509,7 @@ function ContentBlockItem({
 			{isDropTarget && dropPosition === "after" && (
 				<div aria-hidden={true} className="mx-1 block-0.5 rounded-full bg-accent" />
 			)}
-		</>
+		</Fragment>
 	);
 }
 

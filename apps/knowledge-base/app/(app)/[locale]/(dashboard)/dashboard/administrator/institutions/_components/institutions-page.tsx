@@ -77,10 +77,10 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 				title={t("Institutions")}
 				description={t("Manage all institutions in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/administrator/institutions/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 

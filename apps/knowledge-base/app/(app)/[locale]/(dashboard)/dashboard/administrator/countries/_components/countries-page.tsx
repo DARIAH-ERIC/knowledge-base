@@ -83,10 +83,10 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 				title={t("Countries")}
 				description={t("Manage all countries in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/administrator/countries/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 

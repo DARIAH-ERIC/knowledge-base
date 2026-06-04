@@ -7,7 +7,7 @@ import { Link } from "@dariah-eric/ui/link";
 import { ModalClose, ModalContent, ModalFooter, ModalHeader } from "@dariah-eric/ui/modal";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useExtracted } from "next-intl";
-import { type ReactNode, useState, useTransition } from "react";
+import { Fragment, type ReactNode, useState, useTransition } from "react";
 
 /** Lifecycle command actions return an ActionState on completion; the bar ignores it. */
 type LifecycleAction = (documentId: string) => Promise<unknown>;
@@ -72,7 +72,7 @@ export function EntityLifecycleBar(props: Readonly<EntityLifecycleBarProps>): Re
 			) : null}
 
 			{hasDraft && isPublished && discardDraftAction != null ? (
-				<>
+				<Fragment>
 					<Button
 						intent="plain"
 						isPending={isDiscarding}
@@ -104,7 +104,7 @@ export function EntityLifecycleBar(props: Readonly<EntityLifecycleBarProps>): Re
 							</Button>
 						</ModalFooter>
 					</ModalContent>
-				</>
+				</Fragment>
 			) : null}
 		</div>
 	);

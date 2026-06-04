@@ -93,10 +93,10 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 				title={t("Internal Services")}
 				description={t("Manage all internal services in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/administrator/internal-services/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 

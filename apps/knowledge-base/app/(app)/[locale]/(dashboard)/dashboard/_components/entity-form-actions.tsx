@@ -3,7 +3,7 @@
 import { FormStatus } from "@dariah-eric/ui/form-status";
 import { Separator } from "@dariah-eric/ui/separator";
 import { useExtracted } from "next-intl";
-import type { ComponentProps, ReactNode } from "react";
+import { type ComponentProps, Fragment, type ReactNode } from "react";
 
 import { DraftFormSubmitButtons } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/draft-form-submit-buttons";
 import { FormActions } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
@@ -23,7 +23,7 @@ export function EntityFormActions(props: Readonly<EntityFormActionsProps>): Reac
 	const normalizedEntityName = entityName.toLocaleLowerCase();
 
 	return (
-		<>
+		<Fragment>
 			<Separator className="my-6" />
 
 			<FormActions className="flex-col items-start justify-start gap-y-4">
@@ -53,6 +53,6 @@ export function EntityFormActions(props: Readonly<EntityFormActionsProps>): Reac
 					/>
 				</div>
 			</FormActions>
-		</>
+		</Fragment>
 	);
 }

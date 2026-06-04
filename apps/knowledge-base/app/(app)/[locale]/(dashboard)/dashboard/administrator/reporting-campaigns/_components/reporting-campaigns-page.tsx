@@ -70,10 +70,10 @@ export function ReportingCampaignsPage(props: Readonly<ReportingCampaignsPagePro
 				title={t("Reporting campaigns")}
 				description={t("Manage all reporting campaigns in the DARIAH knowledge base.")}
 				action={
-					<>
+					<Fragment>
 						<EntityListSearchField search={search} />
 						<NewLink href="/dashboard/administrator/reporting-campaigns/create">{t("New")}</NewLink>
-					</>
+					</Fragment>
 				}
 			/>
 
