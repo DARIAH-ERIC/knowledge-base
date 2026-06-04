@@ -158,12 +158,12 @@ export function TabPanel(props: Readonly<TabPanelProps>): ReactNode {
 			ref={ref}
 			className={cx(
 				"flex-1 text-fg text-sm/6 focus-visible:outline-hidden",
-				// When state is preserved the inactive panel stays mounted (so uncontrolled form fields keep
-				// their values across tab switches) but must be hidden visually. Use CSS `display: none`
-				// rather than React's `<Activity mode="hidden">`: Activity tears down the subtree's effects,
-				// which leaves react-aria controls (e.g. a `Select`) without their interaction handlers once
-				// the panel is revealed again — and they never recover. `display: none` keeps both the DOM
-				// state and the live effects/handlers. react-aria marks inactive panels with `data-inert`.
+				// When state is preserved the inactive panel stays mounted (so its in-progress, uncontrolled
+				// form fields keep their values across tab switches) but must be hidden visually. Hide it
+				// with CSS `display: none` (react-aria marks inactive panels with `data-inert`) rather than
+				// unmounting it or wrapping it in React's `<Activity mode="hidden">` — both of which would
+				// tear down the subtree's effects. CSS hiding keeps the DOM state and the panel's live
+				// effects intact.
 				"data-inert:hidden",
 				className,
 			)}

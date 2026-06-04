@@ -16,11 +16,13 @@ interface EntityEditTabsProps {
  * Tabs for the entity edit screens whose selected tab is reflected in the `?tab=` search param, so
  * it survives a refresh and can be deep-linked.
  *
- * The tab is switched client-side via the native History API rather than a router navigation: every
- * panel is already rendered on the client (the panels preserve their state), so there is no need to
- * re-run the page's server data loading when flipping tabs. App Router has no shallow routing, so a
- * `<Link>` here would always trigger a full navigation. `history.replaceState` is picked up by
- * `useSearchParams`, which drives the selected tab.
+ * The tab is switched client-side via the native History API rather than a router navigation. This
+ * is not just an optimization: switching via a `<Link>` re-renders the target panel, after which
+ * its react-aria controls (e.g. a `Select`) are left non-interactive — the trigger focuses on click
+ * but the listbox never opens. (App Router has no shallow routing, so a `<Link>` here always
+ * triggers a full navigation.) The panels are already rendered and keep their state on the client,
+ * so there is nothing to re-run. `history.replaceState` is picked up by `useSearchParams`, which
+ * drives the selected tab. The `edit-form-tabs` e2e test guards this.
  */
 export function EntityEditTabs(props: Readonly<EntityEditTabsProps>): ReactNode {
 	const { defaultTab, children } = props;
