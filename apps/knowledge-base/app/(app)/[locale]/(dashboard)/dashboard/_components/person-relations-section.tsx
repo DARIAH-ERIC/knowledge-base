@@ -25,9 +25,10 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
+import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
-import { ArchiveBoxXMarkIcon } from "@heroicons/react/24/outline";
-import { type CalendarDate, getLocalTimeZone } from "@internationalized/date";
+import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { type CalendarDate, getLocalTimeZone, parseDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
@@ -38,6 +39,8 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action";
 import { endContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-contribution.action";
+import { updateContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.action";
+import { deleteContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_lib/delete-contribution.action";
 import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
 
 interface PersonRelationsSectionProps {
@@ -87,6 +90,10 @@ function formatLifecycleStatus(
 	return status === "new" ? t("New") : t("Changed");
 }
 
+function dateToCalendarDate(date: Date | undefined): CalendarDate | null {
+	return date != null ? parseDate(date.toISOString().slice(0, 10)) : null;
+}
+
 export function PersonRelationsSection(props: Readonly<PersonRelationsSectionProps>): ReactNode {
 	const { unitId, relations, roleOptions, initialPersonItems, initialPersonTotal } = props;
 
@@ -95,16 +102,28 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 
 	const [localRelations, setLocalRelations] = useState(relations);
 	const [itemToEnd, setItemToEnd] = useState<{ id: string } | null>(null);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
 
 	const [selectedRoleTypeId, setSelectedRoleTypeId] = useState<string | null>(null);
 	const [selectedPerson, setSelectedPerson] = useState<AsyncOption | null>(null);
 
+	const [itemToEdit, setItemToEdit] = useState<PersonRelation | null>(null);
+	const [editRoleTypeId, setEditRoleTypeId] = useState<string | null>(null);
+	const [editPerson, setEditPerson] = useState<AsyncOption | null>(null);
+	const [editStartDate, setEditStartDate] = useState<CalendarDate | null>(null);
+	const [editEndDate, setEditEndDate] = useState<CalendarDate | null>(null);
+
 	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
+	const [editState, setEditState] = useState<ActionState>(() => createActionStateInitial());
 	const [isPending, startFormTransition] = useTransition();
+	const [isEditPending, startEditTransition] = useTransition();
 
 	const validationErrors = state.status === "error" ? state.validationErrors : undefined;
 	const selectedRoleOption = roleOptions.find((option) => option.roleTypeId === selectedRoleTypeId);
+	const editValidationErrors =
+		editState.status === "error" ? editState.validationErrors : undefined;
+	const editRoleOption = roleOptions.find((option) => option.roleTypeId === editRoleTypeId);
 
 	function formAction(formData: FormData) {
 		const person = selectedPerson;
@@ -144,6 +163,46 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 
 				setSelectedRoleTypeId(null);
 				setSelectedPerson(null);
+			}
+		});
+	}
+
+	function openEditDialog(relation: PersonRelation) {
+		setEditState(createActionStateInitial());
+		setItemToEdit(relation);
+		setEditRoleTypeId(relation.roleTypeId);
+		setEditPerson({ id: relation.personId, name: relation.personName });
+		setEditStartDate(dateToCalendarDate(relation.duration.start));
+		setEditEndDate(dateToCalendarDate(relation.duration.end));
+	}
+
+	function editFormAction(formData: FormData) {
+		const person = editPerson;
+		const option = editRoleOption;
+
+		startEditTransition(async () => {
+			const newState = await updateContributionAction(editState, formData);
+			setEditState(newState);
+
+			if (newState.status === "success" && itemToEdit != null && option != null && person != null) {
+				const start = editStartDate?.toDate(getLocalTimeZone()) ?? itemToEdit.duration.start;
+				const end = editEndDate?.toDate(getLocalTimeZone()) ?? undefined;
+
+				setLocalRelations((prev) =>
+					prev.map((relation) =>
+						relation.id === itemToEdit.id
+							? {
+									...relation,
+									personId: person.id,
+									personName: person.name,
+									roleTypeId: option.roleTypeId,
+									roleType: option.roleType as PersonRelation["roleType"],
+									duration: { start, ...(end != null ? { end } : {}) },
+								}
+							: relation,
+					),
+				);
+				setItemToEdit(null);
 			}
 		});
 	}
@@ -191,20 +250,55 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 											: t("present")}
 									</TableCell>
 									<TableCell className="text-end">
-										{relation.duration.end == null && (
-											<Button
-												aria-label={t("End person relation")}
-												className="block-7 sm:block-7"
-												intent="plain"
-												onPress={() => {
-													setItemToEnd({ id: relation.id });
-													setSelectedEndDate(null);
-												}}
-												size="sq-sm"
-											>
-												<ArchiveBoxXMarkIcon className="block-4 inline-4" />
-											</Button>
-										)}
+										<div className="flex justify-end gap-1">
+											<Tooltip>
+												<Button
+													aria-label={t("Edit person relation")}
+													className="block-7 sm:block-7"
+													intent="plain"
+													onPress={() => {
+														openEditDialog(relation);
+													}}
+													size="sq-sm"
+												>
+													<PencilSquareIcon className="block-4 inline-4" />
+												</Button>
+												<TooltipContent inverse={true}>{t("Edit person relation")}</TooltipContent>
+											</Tooltip>
+											{relation.duration.end == null && (
+												<Tooltip>
+													<Button
+														aria-label={t("End person relation")}
+														className="block-7 sm:block-7"
+														intent="plain"
+														onPress={() => {
+															setItemToEnd({ id: relation.id });
+															setSelectedEndDate(null);
+														}}
+														size="sq-sm"
+													>
+														<ArchiveBoxXMarkIcon className="block-4 inline-4" />
+													</Button>
+													<TooltipContent inverse={true}>{t("End person relation")}</TooltipContent>
+												</Tooltip>
+											)}
+											<Tooltip>
+												<Button
+													aria-label={t("Delete person relation")}
+													className="block-7 sm:block-7"
+													intent="plain"
+													onPress={() => {
+														setItemToDelete({ id: relation.id });
+													}}
+													size="sq-sm"
+												>
+													<TrashIcon className="block-4 inline-4" />
+												</Button>
+												<TooltipContent inverse={true}>
+													{t("Delete person relation")}
+												</TooltipContent>
+											</Tooltip>
+										</div>
 									</TableCell>
 								</TableRow>
 							)}
@@ -343,6 +437,137 @@ export function PersonRelationsSection(props: Readonly<PersonRelationsSectionPro
 						}}
 					>
 						{t("Confirm")}
+					</Button>
+				</ModalFooter>
+			</ModalContent>
+
+			<ModalContent
+				isOpen={itemToEdit != null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setItemToEdit(null);
+					}
+				}}
+			>
+				<ModalHeader
+					description={t("Update the person, role, and duration.")}
+					title={t("Edit person relation")}
+				/>
+				<Form action={editFormAction} state={editState}>
+					<ModalBody className="flex flex-col gap-y-4">
+						<input name="id" type="hidden" value={itemToEdit?.id ?? ""} />
+						<input name="organisationalUnitId" type="hidden" value={unitId} />
+						<Select
+							isRequired={true}
+							onChange={(key) => {
+								setEditRoleTypeId(String(key));
+							}}
+							value={editRoleTypeId}
+						>
+							<Label>{t("Role")}</Label>
+							<SelectTrigger />
+							<FieldError />
+							<SelectContent>
+								{roleOptions.map((option) => (
+									<SelectItem key={option.roleTypeId} id={option.roleTypeId}>
+										{formatRoleType(option.roleType)}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						<input name="roleTypeId" type="hidden" value={editRoleTypeId ?? ""} />
+						<AsyncSelect
+							aria-label={t("Person")}
+							emptyMessage={t("No persons found.")}
+							errorMessage={
+								typeof editValidationErrors?.personId === "string"
+									? editValidationErrors.personId
+									: undefined
+							}
+							fetchPage={fetchPersonOptionsPage}
+							initialItems={initialPersonItems}
+							initialTotal={initialPersonTotal}
+							label={t("Person")}
+							onSelect={setEditPerson}
+							placeholder={t("No person selected")}
+							selectedItem={editPerson}
+						/>
+						<input name="personId" type="hidden" value={editPerson?.id ?? ""} />
+						<DatePicker
+							granularity="day"
+							isRequired={true}
+							name="duration.start"
+							onChange={(date) => {
+								setEditStartDate(date);
+							}}
+							value={editStartDate}
+						>
+							<Label>{t("Start date")}</Label>
+							<DatePickerTrigger />
+							<FieldError />
+						</DatePicker>
+						<DatePicker
+							granularity="day"
+							name="duration.end"
+							onChange={(date) => {
+								setEditEndDate(date);
+							}}
+							value={editEndDate}
+						>
+							<Label>{t("End date")}</Label>
+							<DatePickerTrigger />
+							<FieldError />
+						</DatePicker>
+						<FormStatus className="self-start" state={editState} />
+					</ModalBody>
+					<ModalFooter>
+						<ModalClose>{t("Cancel")}</ModalClose>
+						<Button isPending={isEditPending} type="submit">
+							{isEditPending ? (
+								<Fragment>
+									<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
+									<span aria-hidden={true}>{t("Saving...")}</span>
+								</Fragment>
+							) : (
+								t("Save")
+							)}
+						</Button>
+					</ModalFooter>
+				</Form>
+			</ModalContent>
+
+			<ModalContent
+				isOpen={itemToDelete != null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setItemToDelete(null);
+					}
+				}}
+				role="alertdialog"
+				size="sm"
+			>
+				<ModalHeader
+					description={t("This will permanently delete this person relation.")}
+					title={t("Delete person relation")}
+				/>
+				<ModalFooter>
+					<ModalClose>{t("Cancel")}</ModalClose>
+					<Button
+						intent="danger"
+						onPress={() => {
+							if (itemToDelete == null) {
+								return;
+							}
+
+							const id = itemToDelete.id;
+							startTransition(async () => {
+								await deleteContributionAction(id);
+								setLocalRelations((prev) => prev.filter((relation) => relation.id !== id));
+								setItemToDelete(null);
+							});
+						}}
+					>
+						{t("Delete")}
 					</Button>
 				</ModalFooter>
 			</ModalContent>

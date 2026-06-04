@@ -52,7 +52,7 @@ export function ImageSelectField<T extends AssetPrefix>(
 			{selectedImage != null ? (
 				<img
 					alt={t("Selected image")}
-					className="block-24 inline-24 rounded-lg object-cover"
+					className="block-24 inline-auto max-inline-full rounded-lg object-cover"
 					src={selectedImage.url}
 				/>
 			) : null}

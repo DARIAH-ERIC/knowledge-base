@@ -13,6 +13,7 @@ export const WorkingGroupBaseSchema = v.pipe(
 	v.object({
 		...v.pick(schema.OrganisationalUnitSelectSchema, [
 			"id",
+			"acronym",
 			"name",
 			"summary",
 			"metadata",
@@ -50,6 +51,7 @@ export const WorkingGroupSchema = v.pipe(
 	v.object({
 		...v.pick(schema.OrganisationalUnitSelectSchema, [
 			"id",
+			"acronym",
 			"name",
 			"summary",
 			"metadata",

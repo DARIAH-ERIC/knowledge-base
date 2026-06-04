@@ -59,7 +59,7 @@ export function SiteMetadataForm(props: Readonly<SiteMetadataFormProps>): ReactN
 	);
 
 	const selectedItemsList = useListData<NewsItemOption>({
-		initialItems: (siteMetadata == null ? [] : (siteMetadata.featuredItemIds as Array<string>))
+		initialItems: ((siteMetadata?.featuredItemIds as Array<string> | null | undefined) ?? [])
 			.map((fI) => optionsById[fI])
 			.filter((item): item is NewsItemOption => item !== undefined),
 		getKey(item) {
@@ -158,7 +158,7 @@ export function SiteMetadataForm(props: Readonly<SiteMetadataFormProps>): ReactN
 					{selectedImage != null && (
 						<img
 							alt={t("Selected OG image")}
-							className="block-24 inline-24 rounded-lg object-cover"
+							className="block-24 inline-auto max-inline-full rounded-lg object-cover"
 							src={selectedImage.url}
 						/>
 					)}

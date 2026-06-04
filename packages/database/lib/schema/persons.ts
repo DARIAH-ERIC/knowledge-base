@@ -18,6 +18,7 @@ export const personRoleTypesEnum = [
 	"is_contact_for",
 	"national_coordinator",
 	"national_coordinator_deputy",
+	"national_coordination_staff",
 	"national_representative",
 	"national_representative_deputy",
 ] as const;

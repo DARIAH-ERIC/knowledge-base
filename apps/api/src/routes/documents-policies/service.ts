@@ -220,7 +220,10 @@ export async function getDocumentOrPolicyDocument(
 		with: {
 			document: {
 				columns: {
+					filename: true,
 					key: true,
+					label: true,
+					mimeType: true,
 				},
 			},
 		},

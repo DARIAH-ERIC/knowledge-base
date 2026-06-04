@@ -248,6 +248,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 
 			if (result.status === "success") {
 				onSelect(result.data.key, result.data.url);
+				resetUploadTab();
 				setIsOpen(false);
 			}
 		});
@@ -258,6 +259,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 			return;
 		}
 		onSelect(selectedAsset.key, selectedAsset.url);
+		resetUploadTab();
 		setIsOpen(false);
 	}
 
@@ -284,9 +286,6 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 					<Tabs
 						className="flex flex-1 flex-col min-block-0"
 						onSelectionChange={(key) => {
-							if (activeTab === "upload" && key !== "upload") {
-								resetUploadTab();
-							}
 							setActiveTab(key as ActiveTab);
 						}}
 						selectedKey={activeTab}
@@ -296,7 +295,11 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 							<Tab id="upload">{t("Upload")}</Tab>
 						</TabList>
 
-						<TabPanel className="flex flex-1 flex-col gap-3 min-block-0" id="select">
+						<TabPanel
+							className="flex flex-1 flex-col gap-3 min-block-0"
+							id="select"
+							shouldPreserveState={true}
+						>
 							<div className="flex gap-2">
 								{prefixes.map((p) => (
 									<Button
@@ -312,7 +315,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 								))}
 							</div>
 
-							<form className="flex gap-2" onSubmit={handleSearch}>
+							<form className="flex gap-2" id="media-library-search-form" onSubmit={handleSearch}>
 								<input
 									ref={searchInputRef}
 									className="block-9 flex-1 rounded-md border border-input bg-transparent px-3 text-sm outline-none placeholder:text-muted-fg focus:ring-2 focus:ring-ring"
@@ -387,12 +390,16 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 							</div>
 						</TabPanel>
 
-						<TabPanel className="flex flex-1 flex-col gap-4 overflow-y-auto p-1" id="upload">
+						<TabPanel
+							className="flex flex-1 flex-col gap-4 overflow-y-auto p-1"
+							id="upload"
+							shouldPreserveState={true}
+						>
 							<form ref={uploadFormRef} action={handleUploadAction} id="upload-form">
 								<input name="prefix" type="hidden" value={selectedPrefix} />
 
 								<div className="flex flex-col gap-4">
-									<div className="flex items-start gap-4">
+									<div className="flex flex-wrap items-start gap-4">
 										<FileTrigger acceptedFileTypes={acceptedFileTypes} onSelect={handleFileChoose}>
 											<Button intent="outline" type="button">
 												{t("Choose file...")}
@@ -402,7 +409,7 @@ export function MediaLibraryDialog<T extends AssetPrefix>(
 										{pendingFileUrl != null ? (
 											<img
 												alt={t("Preview")}
-												className="block-24 inline-24 rounded-sm object-cover"
+												className="block-24 inline-auto max-inline-full rounded-sm"
 												src={pendingFileUrl}
 											/>
 										) : null}

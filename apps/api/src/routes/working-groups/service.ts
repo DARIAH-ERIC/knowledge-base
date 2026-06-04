@@ -83,6 +83,7 @@ export async function getWorkingGroups(db: Database | Transaction, params: GetWo
 			},
 			columns: {
 				id: true,
+				acronym: true,
 				metadata: true,
 				name: true,
 				summary: true,
@@ -222,6 +223,7 @@ export async function getWorkingGroupById(
 			},
 			columns: {
 				id: true,
+				acronym: true,
 				metadata: true,
 				name: true,
 				summary: true,
@@ -377,6 +379,7 @@ export async function getWorkingGroupBySlug(
 		},
 		columns: {
 			id: true,
+			acronym: true,
 			metadata: true,
 			name: true,
 			summary: true,
