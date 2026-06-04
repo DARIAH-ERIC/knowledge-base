@@ -182,6 +182,54 @@ export class AdminPersonsPage {
 		await dialog.waitFor({ state: "hidden" });
 	}
 
+	async clickEditContribution(): Promise<void> {
+		await this.contributionsTable()
+			.getByRole("button", { name: "Edit contribution" })
+			.first()
+			.click();
+		await this.page
+			.getByRole("dialog", { name: "Edit contribution" })
+			.waitFor({ state: "visible" });
+	}
+
+	async fillEditContributionDate(
+		label: string,
+		year: number,
+		month: number,
+		day: number,
+	): Promise<void> {
+		const dialog = this.page.getByRole("dialog", { name: "Edit contribution" });
+		const group = dialog.getByRole("group", { name: label });
+		await group.getByRole("spinbutton", { name: /day/i }).click();
+		await this.page.keyboard.type(String(day).padStart(2, "0"));
+		await group.getByRole("spinbutton", { name: /month/i }).click();
+		await this.page.keyboard.type(String(month).padStart(2, "0"));
+		await group.getByRole("spinbutton", { name: /year/i }).click();
+		await this.page.keyboard.type(String(year));
+	}
+
+	async saveEditContribution(): Promise<void> {
+		const dialog = this.page.getByRole("dialog", { name: "Edit contribution" });
+		await dialog.getByRole("button", { name: "Save" }).click();
+		await dialog.waitFor({ state: "hidden" });
+	}
+
+	async clickDeleteContribution(): Promise<void> {
+		await this.contributionsTable()
+			.getByRole("button", { name: "Delete contribution" })
+			.first()
+			.click();
+		await this.page
+			.getByRole("alertdialog", { name: "Delete contribution" })
+			.waitFor({ state: "visible" });
+	}
+
+	async confirmDeleteContribution(): Promise<void> {
+		const dialog = this.page.getByRole("alertdialog", { name: "Delete contribution" });
+		await dialog.getByRole("button", { name: "Delete" }).click();
+		await dialog.waitFor({ state: "hidden" });
+	}
+
 	// ---------------------------------------------------------------------------
 	// Details page — navigation
 	// ---------------------------------------------------------------------------

@@ -57,6 +57,8 @@ test.describe("admin relation management", () => {
 		await db.cleanupWorkerProjects(testInfo.workerIndex);
 		await db.cleanupWorkerInstitutions(testInfo.workerIndex);
 		await db.cleanupWorkerGovernanceBodies(testInfo.workerIndex);
+		await db.cleanupWorkerWorkingGroups(testInfo.workerIndex);
+		await db.cleanupWorkerPersons(testInfo.workerIndex);
 	});
 
 	test("should edit and delete a person relation from the standalone list", async ({
@@ -305,5 +307,142 @@ test.describe("admin relation management", () => {
 
 		relations = await db.getUnitRelationsByUnitVersionId(governanceBody!.id);
 		expect(relations).toHaveLength(0);
+	});
+
+	test("should edit and delete a person relation from the people tab", async ({
+		createAdminGovernanceBodiesPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const governanceBodiesPage = createAdminGovernanceBodiesPage(workerIndex);
+		const name = `${governanceBodiesPage.workerPrefix} People Tab Actions ${randomUUID()}`;
+
+		await governanceBodiesPage.gotoCreate();
+		await governanceBodiesPage.fillName(name);
+		await governanceBodiesPage.fillDescription("Description for people tab action test.");
+		await governanceBodiesPage.submitForm();
+
+		await governanceBodiesPage.gotoEditFromList(name);
+		await governanceBodiesPage.goToPeopleTab();
+		await governanceBodiesPage.selectFirstPersonRole();
+		await governanceBodiesPage.selectFirstPerson();
+		await governanceBodiesPage.fillPersonRelationDatePicker("Start date", 2025, 1, 1);
+		await governanceBodiesPage.submitAddPerson();
+
+		await expect(
+			governanceBodiesPage.peopleTable().getByRole("button", { name: "Edit person relation" }),
+		).toBeVisible();
+		await expect(
+			governanceBodiesPage.peopleTable().getByRole("button", { name: "Delete person relation" }),
+		).toBeVisible();
+
+		const governanceBody = await db.getGovernanceBodyByName(name);
+		await governanceBodiesPage.clickEditPersonRelation();
+		await governanceBodiesPage.fillEditPersonRelationDate("End date", 2025, 6, 30);
+		await governanceBodiesPage.saveEditPersonRelation();
+
+		let relations = await db.getPersonRelationsByUnitVersionId(governanceBody!.id);
+		expect(relations[0]!.duration.end).toStrictEqual(new Date("2025-06-30T00:00:00.000Z"));
+
+		await governanceBodiesPage.clickDeletePersonRelation();
+		await governanceBodiesPage.confirmDeletePersonRelation();
+		await expect(governanceBodiesPage.peopleTable()).toBeHidden();
+		await expect(governanceBodiesPage.page.getByText("No people assigned.")).toBeVisible();
+
+		relations = await db.getPersonRelationsByUnitVersionId(governanceBody!.id);
+		expect(relations).toHaveLength(0);
+	});
+
+	test("should edit and delete a chair from the chairs tab", async ({
+		createAdminWorkingGroupsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const workingGroupsPage = createAdminWorkingGroupsPage(workerIndex);
+		const name = `${workingGroupsPage.workerPrefix} Chairs Tab Actions ${randomUUID()}`;
+
+		await workingGroupsPage.gotoCreate();
+		await workingGroupsPage.fillName(name);
+		await workingGroupsPage.fillDescription("Description for chairs tab action test.");
+		await workingGroupsPage.submitForm();
+
+		await workingGroupsPage.gotoEditFromList(name);
+		await workingGroupsPage.goToChairsTab();
+		await workingGroupsPage.selectFirstChair();
+		await workingGroupsPage.fillChairDatePicker("Start date", 2025, 1, 1);
+		await workingGroupsPage.submitAddChair();
+
+		await expect(
+			workingGroupsPage.chairsTable().getByRole("button", { name: "Edit chair" }),
+		).toBeVisible();
+		await expect(
+			workingGroupsPage.chairsTable().getByRole("button", { name: "Delete chair" }),
+		).toBeVisible();
+
+		const workingGroup = await db.getWorkingGroupByName(name);
+		let chairs = await db.getPersonRelationsByUnitVersionId(workingGroup!.id);
+		expect(chairs).toHaveLength(1);
+		expect(chairs[0]!.roleType).toBe("is_chair_of");
+
+		await workingGroupsPage.clickEditChair();
+		await workingGroupsPage.fillEditChairDate("End date", 2025, 6, 30);
+		await workingGroupsPage.saveEditChair();
+
+		chairs = await db.getPersonRelationsByUnitVersionId(workingGroup!.id);
+		expect(chairs[0]!.duration.end).toStrictEqual(new Date("2025-06-30T00:00:00.000Z"));
+
+		await workingGroupsPage.clickDeleteChair();
+		await workingGroupsPage.confirmDeleteChair();
+		await expect(workingGroupsPage.chairsTable()).toBeHidden();
+		await expect(workingGroupsPage.page.getByText("No chairs.")).toBeVisible();
+
+		chairs = await db.getPersonRelationsByUnitVersionId(workingGroup!.id);
+		expect(chairs).toHaveLength(0);
+	});
+
+	test("should edit and delete a contribution from the contributions tab", async ({
+		createAdminPersonsPage,
+		db,
+	}) => {
+		const workerIndex = test.info().workerIndex;
+		const personsPage = createAdminPersonsPage(workerIndex);
+		const name = `${personsPage.workerPrefix} Contributions Tab Actions ${randomUUID()}`;
+
+		await personsPage.gotoCreate();
+		await personsPage.fillName(name);
+		await personsPage.fillSortName("Tab Actions, Person");
+		await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
+		await personsPage.fillBiography("Biography for contributions tab action test.");
+		await personsPage.submitForm();
+
+		await personsPage.gotoEditFromList(name);
+		await personsPage.goToContributionsTab();
+		await personsPage.selectFirstContributionRole();
+		await personsPage.selectFirstContributionOrg();
+		await personsPage.fillContributionDatePicker("Start date", 2025, 1, 1);
+		await personsPage.submitAddContribution();
+
+		await expect(
+			personsPage.contributionsTable().getByRole("button", { name: "Edit contribution" }),
+		).toBeVisible();
+		await expect(
+			personsPage.contributionsTable().getByRole("button", { name: "Delete contribution" }),
+		).toBeVisible();
+
+		const person = await db.getPersonByName(name);
+		await personsPage.clickEditContribution();
+		await personsPage.fillEditContributionDate("End date", 2025, 6, 30);
+		await personsPage.saveEditContribution();
+
+		let contributions = await db.getContributionsByPersonVersionId(person!.id);
+		expect(contributions[0]!.duration.end).toStrictEqual(new Date("2025-06-30T00:00:00.000Z"));
+
+		await personsPage.clickDeleteContribution();
+		await personsPage.confirmDeleteContribution();
+		await expect(personsPage.contributionsTable()).toBeHidden();
+		await expect(personsPage.page.getByText("No contributions.")).toBeVisible();
+
+		contributions = await db.getContributionsByPersonVersionId(person!.id);
+		expect(contributions).toHaveLength(0);
 	});
 });
