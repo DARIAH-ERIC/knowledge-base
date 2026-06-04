@@ -25,9 +25,10 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
+import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
-import { ArchiveBoxXMarkIcon } from "@heroicons/react/24/outline";
-import { type CalendarDate, getLocalTimeZone } from "@internationalized/date";
+import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { type CalendarDate, getLocalTimeZone, parseDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
@@ -38,6 +39,8 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { createContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/create-contribution.action";
 import { endContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-contribution.action";
+import { updateContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.action";
+import { deleteContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_lib/delete-contribution.action";
 import type { ContributionRoleOption, PersonContribution } from "@/lib/data/contributions";
 
 interface ContributionsSectionProps {
@@ -96,6 +99,10 @@ function formatRoleOptionLabel(option: ContributionRoleOption): string {
 	return `${formatRoleType(option.roleType)} - ${allowedTypes}`;
 }
 
+function dateToCalendarDate(date: Date | undefined): CalendarDate | null {
+	return date != null ? parseDate(date.toISOString().slice(0, 10)) : null;
+}
+
 export function ContributionsSection(props: Readonly<ContributionsSectionProps>): ReactNode {
 	const { personId, roleOptions, contributions } = props;
 
@@ -104,16 +111,28 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 
 	const [localContributions, setLocalContributions] = useState(contributions);
 	const [itemToEnd, setItemToEnd] = useState<{ id: string } | null>(null);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
 
 	const [selectedRoleTypeId, setSelectedRoleTypeId] = useState<string | null>(null);
 	const [selectedUnit, setSelectedUnit] = useState<AsyncOption | null>(null);
 
+	const [itemToEdit, setItemToEdit] = useState<PersonContribution | null>(null);
+	const [editRoleTypeId, setEditRoleTypeId] = useState<string | null>(null);
+	const [editUnit, setEditUnit] = useState<AsyncOption | null>(null);
+	const [editStartDate, setEditStartDate] = useState<CalendarDate | null>(null);
+	const [editEndDate, setEditEndDate] = useState<CalendarDate | null>(null);
+
 	const [state, setState] = useState<ActionState>(createActionStateInitial());
+	const [editState, setEditState] = useState<ActionState>(() => createActionStateInitial());
 	const [isPending, startFormTransition] = useTransition();
+	const [isEditPending, startEditTransition] = useTransition();
 
 	const validationErrors = state.status === "error" ? state.validationErrors : undefined;
 	const selectedRoleOption = roleOptions.find((option) => option.roleTypeId === selectedRoleTypeId);
+	const editValidationErrors =
+		editState.status === "error" ? editState.validationErrors : undefined;
+	const editRoleOption = roleOptions.find((option) => option.roleTypeId === editRoleTypeId);
 
 	function formAction(formData: FormData) {
 		const roleTypeId = selectedRoleTypeId;
@@ -145,6 +164,50 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 
 				setSelectedRoleTypeId(null);
 				setSelectedUnit(null);
+			}
+		});
+	}
+
+	function openEditDialog(contribution: PersonContribution) {
+		setEditState(createActionStateInitial());
+		setItemToEdit(contribution);
+		setEditRoleTypeId(contribution.roleTypeId);
+		setEditUnit({
+			id: contribution.organisationalUnitId,
+			name: contribution.organisationalUnitName,
+			description: formatRoleType(contribution.organisationalUnitType),
+		});
+		setEditStartDate(dateToCalendarDate(contribution.duration.start));
+		setEditEndDate(dateToCalendarDate(contribution.duration.end));
+	}
+
+	function editFormAction(formData: FormData) {
+		const unit = editUnit;
+		const option = editRoleOption;
+
+		startEditTransition(async () => {
+			const newState = await updateContributionAction(editState, formData);
+			setEditState(newState);
+
+			if (newState.status === "success" && itemToEdit != null && option != null && unit != null) {
+				const start = editStartDate?.toDate(getLocalTimeZone()) ?? itemToEdit.duration.start;
+				const end = editEndDate?.toDate(getLocalTimeZone()) ?? undefined;
+
+				setLocalContributions((prev) =>
+					prev.map((contribution) =>
+						contribution.id === itemToEdit.id
+							? {
+									...contribution,
+									roleTypeId: option.roleTypeId,
+									roleType: option.roleType as PersonContribution["roleType"],
+									organisationalUnitId: unit.id,
+									organisationalUnitName: unit.name,
+									duration: { start, ...(end != null ? { end } : {}) },
+								}
+							: contribution,
+					),
+				);
+				setItemToEdit(null);
 			}
 		});
 	}
@@ -196,20 +259,53 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 											: t("present")}
 									</TableCell>
 									<TableCell className="text-end">
-										{contribution.duration.end == null && (
-											<Button
-												aria-label={t("End contribution")}
-												className="block-7 sm:block-7"
-												intent="plain"
-												onPress={() => {
-													setItemToEnd({ id: contribution.id });
-													setSelectedEndDate(null);
-												}}
-												size="sq-sm"
-											>
-												<ArchiveBoxXMarkIcon className="block-4 inline-4" />
-											</Button>
-										)}
+										<div className="flex justify-end gap-1">
+											<Tooltip>
+												<Button
+													aria-label={t("Edit contribution")}
+													className="block-7 sm:block-7"
+													intent="plain"
+													onPress={() => {
+														openEditDialog(contribution);
+													}}
+													size="sq-sm"
+												>
+													<PencilSquareIcon className="block-4 inline-4" />
+												</Button>
+												<TooltipContent inverse={true}>{t("Edit contribution")}</TooltipContent>
+											</Tooltip>
+											{contribution.duration.end == null && (
+												<Tooltip>
+													<Button
+														aria-label={t("End contribution")}
+														className="block-7 sm:block-7"
+														intent="plain"
+														onPress={() => {
+															setItemToEnd({ id: contribution.id });
+															setSelectedEndDate(null);
+														}}
+														size="sq-sm"
+													>
+														<ArchiveBoxXMarkIcon className="block-4 inline-4" />
+													</Button>
+													<TooltipContent inverse={true}>{t("End contribution")}</TooltipContent>
+												</Tooltip>
+											)}
+											<Tooltip>
+												<Button
+													aria-label={t("Delete contribution")}
+													className="block-7 sm:block-7"
+													intent="plain"
+													onPress={() => {
+														setItemToDelete({ id: contribution.id });
+													}}
+													size="sq-sm"
+												>
+													<TrashIcon className="block-4 inline-4" />
+												</Button>
+												<TooltipContent inverse={true}>{t("Delete contribution")}</TooltipContent>
+											</Tooltip>
+										</div>
 									</TableCell>
 								</TableRow>
 							)}
@@ -364,6 +460,153 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 						}}
 					>
 						{t("Confirm")}
+					</Button>
+				</ModalFooter>
+			</ModalContent>
+
+			<ModalContent
+				isOpen={itemToEdit != null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setItemToEdit(null);
+					}
+				}}
+			>
+				<ModalHeader
+					description={t("Update the organisation, role, and duration.")}
+					title={t("Edit contribution")}
+				/>
+				<Form action={editFormAction} state={editState}>
+					<ModalBody className="flex flex-col gap-y-4">
+						<input name="id" type="hidden" value={itemToEdit?.id ?? ""} />
+						<input name="personId" type="hidden" value={personId} />
+						<Select
+							isRequired={true}
+							onChange={(key) => {
+								setEditRoleTypeId(String(key));
+								setEditUnit(null);
+							}}
+							value={editRoleTypeId}
+						>
+							<Label>{t("Role")}</Label>
+							<SelectTrigger />
+							<FieldError />
+							<SelectContent>
+								{roleOptions.map((option) => (
+									<SelectItem key={option.roleTypeId} id={option.roleTypeId}>
+										{formatRoleOptionLabel(option)}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						<input name="roleTypeId" type="hidden" value={editRoleTypeId ?? ""} />
+						<AsyncSelect
+							aria-label={t("Organisation")}
+							cacheKey={editRoleTypeId ?? "none"}
+							emptyMessage={
+								editRoleOption != null ? t("No organisations found.") : t("Select a role first.")
+							}
+							errorMessage={
+								typeof editValidationErrors?.organisationalUnitId === "string"
+									? editValidationErrors.organisationalUnitId
+									: undefined
+							}
+							fetchPage={(params) => {
+								if (editRoleTypeId == null) {
+									return Promise.resolve({ items: [], total: 0 });
+								}
+
+								return fetchOrganisationalUnitOptionsPage(editRoleTypeId, params);
+							}}
+							initialItems={[]}
+							initialTotal={0}
+							isDisabled={editRoleOption == null}
+							label={t("Organisation")}
+							loadOnMount={editRoleTypeId != null}
+							onSelect={setEditUnit}
+							placeholder={
+								editRoleOption != null ? t("Select an organisation") : t("Select a role first")
+							}
+							selectedItem={editUnit}
+						/>
+						<input name="organisationalUnitId" type="hidden" value={editUnit?.id ?? ""} />
+						<DatePicker
+							granularity="day"
+							isRequired={true}
+							name="duration.start"
+							onChange={(date) => {
+								setEditStartDate(date);
+							}}
+							value={editStartDate}
+						>
+							<Label>{t("Start date")}</Label>
+							<DatePickerTrigger />
+							<FieldError />
+						</DatePicker>
+						<DatePicker
+							granularity="day"
+							name="duration.end"
+							onChange={(date) => {
+								setEditEndDate(date);
+							}}
+							value={editEndDate}
+						>
+							<Label>{t("End date")}</Label>
+							<DatePickerTrigger />
+							<FieldError />
+						</DatePicker>
+						<FormStatus className="self-start" state={editState} />
+					</ModalBody>
+					<ModalFooter>
+						<ModalClose>{t("Cancel")}</ModalClose>
+						<Button isPending={isEditPending} type="submit">
+							{isEditPending ? (
+								<Fragment>
+									<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
+									<span aria-hidden={true}>{t("Saving...")}</span>
+								</Fragment>
+							) : (
+								t("Save")
+							)}
+						</Button>
+					</ModalFooter>
+				</Form>
+			</ModalContent>
+
+			<ModalContent
+				isOpen={itemToDelete != null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setItemToDelete(null);
+					}
+				}}
+				role="alertdialog"
+				size="sm"
+			>
+				<ModalHeader
+					description={t("This will permanently delete this contribution.")}
+					title={t("Delete contribution")}
+				/>
+				<ModalFooter>
+					<ModalClose>{t("Cancel")}</ModalClose>
+					<Button
+						intent="danger"
+						onPress={() => {
+							if (itemToDelete == null) {
+								return;
+							}
+
+							const id = itemToDelete.id;
+							startTransition(async () => {
+								await deleteContributionAction(id);
+								setLocalContributions((prev) =>
+									prev.filter((contribution) => contribution.id !== id),
+								);
+								setItemToDelete(null);
+							});
+						}}
+					>
+						{t("Delete")}
 					</Button>
 				</ModalFooter>
 			</ModalContent>

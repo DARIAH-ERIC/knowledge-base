@@ -24,9 +24,10 @@ import {
 	TableHeader,
 	TableRow,
 } from "@dariah-eric/ui/table";
+import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import type { AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
-import { ArchiveBoxXMarkIcon } from "@heroicons/react/24/outline";
-import { type CalendarDate, getLocalTimeZone } from "@internationalized/date";
+import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { type CalendarDate, getLocalTimeZone, parseDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
@@ -36,7 +37,9 @@ import {
 	FormSectionTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { createWorkingGroupChairAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/create-working-group-chair.action";
+import { deleteWorkingGroupChairAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/delete-working-group-chair.action";
 import { endWorkingGroupChairAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/end-working-group-chair.action";
+import { updateWorkingGroupChairAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/update-working-group-chair.action";
 import type { AvailablePerson } from "@/lib/data/article-contributors";
 import type { WorkingGroupChair } from "@/lib/data/working-group-chairs";
 
@@ -52,6 +55,10 @@ function formatLifecycleStatus(
 	t: ReturnType<typeof useExtracted>,
 ): string {
 	return status === "new" ? t("New") : t("Changed");
+}
+
+function dateToCalendarDate(date: Date | undefined): CalendarDate | null {
+	return date != null ? parseDate(date.toISOString().slice(0, 10)) : null;
 }
 
 async function fetchPersonOptionsPage(
@@ -89,12 +96,23 @@ export function WorkingGroupChairsSection(
 
 	const [localChairs, setLocalChairs] = useState(() => chairs);
 	const [itemToEnd, setItemToEnd] = useState<{ id: string } | null>(null);
+	const [itemToDelete, setItemToDelete] = useState<{ id: string } | null>(null);
 	const [selectedEndDate, setSelectedEndDate] = useState<CalendarDate | null>(null);
 
 	const [selectedPerson, setSelectedPerson] = useState<AvailablePerson | null>(null);
 
+	const [itemToEdit, setItemToEdit] = useState<WorkingGroupChair | null>(null);
+	const [editPerson, setEditPerson] = useState<AvailablePerson | null>(null);
+	const [editStartDate, setEditStartDate] = useState<CalendarDate | null>(null);
+	const [editEndDate, setEditEndDate] = useState<CalendarDate | null>(null);
+
 	const [state, setState] = useState<ActionState>(() => createActionStateInitial());
+	const [editState, setEditState] = useState<ActionState>(() => createActionStateInitial());
 	const [isPending, startFormTransition] = useTransition();
+	const [isEditPending, startEditTransition] = useTransition();
+
+	const editValidationErrors =
+		editState.status === "error" ? editState.validationErrors : undefined;
 
 	function formAction(formData: FormData) {
 		const person = selectedPerson;
@@ -124,6 +142,42 @@ export function WorkingGroupChairsSection(
 				}
 
 				setSelectedPerson(null);
+			}
+		});
+	}
+
+	function openEditDialog(chair: WorkingGroupChair) {
+		setEditState(createActionStateInitial());
+		setItemToEdit(chair);
+		setEditPerson({ id: chair.personId, name: chair.personName });
+		setEditStartDate(dateToCalendarDate(chair.duration.start));
+		setEditEndDate(dateToCalendarDate(chair.duration.end));
+	}
+
+	function editFormAction(formData: FormData) {
+		const person = editPerson;
+
+		startEditTransition(async () => {
+			const newState = await updateWorkingGroupChairAction(editState, formData);
+			setEditState(newState);
+
+			if (newState.status === "success" && itemToEdit != null && person != null) {
+				const start = editStartDate?.toDate(getLocalTimeZone()) ?? itemToEdit.duration.start;
+				const end = editEndDate?.toDate(getLocalTimeZone()) ?? undefined;
+
+				setLocalChairs((prev) =>
+					prev.map((chair) =>
+						chair.id === itemToEdit.id
+							? {
+									...chair,
+									personId: person.id,
+									personName: person.name,
+									duration: { start, ...(end != null ? { end } : {}) },
+								}
+							: chair,
+					),
+				);
+				setItemToEdit(null);
 			}
 		});
 	}
@@ -165,20 +219,53 @@ export function WorkingGroupChairsSection(
 											: t("present")}
 									</TableCell>
 									<TableCell className="text-end">
-										{chair.duration.end == null && (
-											<Button
-												aria-label={t("End chairship")}
-												className="block-7 sm:block-7"
-												intent="plain"
-												onPress={() => {
-													setItemToEnd({ id: chair.id });
-													setSelectedEndDate(null);
-												}}
-												size="sq-sm"
-											>
-												<ArchiveBoxXMarkIcon className="block-4 inline-4" />
-											</Button>
-										)}
+										<div className="flex justify-end gap-1">
+											<Tooltip>
+												<Button
+													aria-label={t("Edit chair")}
+													className="block-7 sm:block-7"
+													intent="plain"
+													onPress={() => {
+														openEditDialog(chair);
+													}}
+													size="sq-sm"
+												>
+													<PencilSquareIcon className="block-4 inline-4" />
+												</Button>
+												<TooltipContent inverse={true}>{t("Edit chair")}</TooltipContent>
+											</Tooltip>
+											{chair.duration.end == null && (
+												<Tooltip>
+													<Button
+														aria-label={t("End chairship")}
+														className="block-7 sm:block-7"
+														intent="plain"
+														onPress={() => {
+															setItemToEnd({ id: chair.id });
+															setSelectedEndDate(null);
+														}}
+														size="sq-sm"
+													>
+														<ArchiveBoxXMarkIcon className="block-4 inline-4" />
+													</Button>
+													<TooltipContent inverse={true}>{t("End chairship")}</TooltipContent>
+												</Tooltip>
+											)}
+											<Tooltip>
+												<Button
+													aria-label={t("Delete chair")}
+													className="block-7 sm:block-7"
+													intent="plain"
+													onPress={() => {
+														setItemToDelete({ id: chair.id });
+													}}
+													size="sq-sm"
+												>
+													<TrashIcon className="block-4 inline-4" />
+												</Button>
+												<TooltipContent inverse={true}>{t("Delete chair")}</TooltipContent>
+											</Tooltip>
+										</div>
 									</TableCell>
 								</TableRow>
 							)}
@@ -290,6 +377,117 @@ export function WorkingGroupChairsSection(
 						}}
 					>
 						{t("Confirm")}
+					</Button>
+				</ModalFooter>
+			</ModalContent>
+
+			<ModalContent
+				isOpen={itemToEdit != null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setItemToEdit(null);
+					}
+				}}
+			>
+				<ModalHeader description={t("Update the chair and duration.")} title={t("Edit chair")} />
+				<Form action={editFormAction} state={editState}>
+					<ModalBody className="flex flex-col gap-y-4">
+						<input name="id" type="hidden" value={itemToEdit?.id ?? ""} />
+						<input name="unitId" type="hidden" value={unitId} />
+						<AsyncSelect
+							aria-label={t("Person")}
+							emptyMessage={t("No persons found.")}
+							errorMessage={
+								typeof editValidationErrors?.personId === "string"
+									? editValidationErrors.personId
+									: undefined
+							}
+							fetchPage={fetchPersonOptionsPage}
+							initialItems={initialPersonItems}
+							initialTotal={initialPersonTotal}
+							label={t("Person")}
+							onSelect={(item) => {
+								setEditPerson(item);
+							}}
+							placeholder={t("No person selected")}
+							selectedItem={editPerson}
+						/>
+						<input name="personId" type="hidden" value={editPerson?.id ?? ""} />
+						<DatePicker
+							granularity="day"
+							isRequired={true}
+							name="duration.start"
+							onChange={(date) => {
+								setEditStartDate(date);
+							}}
+							value={editStartDate}
+						>
+							<Label>{t("Start date")}</Label>
+							<DatePickerTrigger />
+							<FieldError />
+						</DatePicker>
+						<DatePicker
+							granularity="day"
+							name="duration.end"
+							onChange={(date) => {
+								setEditEndDate(date);
+							}}
+							value={editEndDate}
+						>
+							<Label>{t("End date")}</Label>
+							<DatePickerTrigger />
+							<FieldError />
+						</DatePicker>
+						<FormStatus className="self-start" state={editState} />
+					</ModalBody>
+					<ModalFooter>
+						<ModalClose>{t("Cancel")}</ModalClose>
+						<Button isPending={isEditPending} type="submit">
+							{isEditPending ? (
+								<Fragment>
+									<ProgressCircle aria-label={t("Saving...")} isIndeterminate={true} />
+									<span aria-hidden={true}>{t("Saving...")}</span>
+								</Fragment>
+							) : (
+								t("Save")
+							)}
+						</Button>
+					</ModalFooter>
+				</Form>
+			</ModalContent>
+
+			<ModalContent
+				isOpen={itemToDelete != null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setItemToDelete(null);
+					}
+				}}
+				role="alertdialog"
+				size="sm"
+			>
+				<ModalHeader
+					description={t("This will permanently delete this chair relation.")}
+					title={t("Delete chair")}
+				/>
+				<ModalFooter>
+					<ModalClose>{t("Cancel")}</ModalClose>
+					<Button
+						intent="danger"
+						onPress={() => {
+							if (itemToDelete == null) {
+								return;
+							}
+
+							const id = itemToDelete.id;
+							startTransition(async () => {
+								await deleteWorkingGroupChairAction(id);
+								setLocalChairs((prev) => prev.filter((chair) => chair.id !== id));
+								setItemToDelete(null);
+							});
+						}}
+					>
+						{t("Delete")}
 					</Button>
 				</ModalFooter>
 			</ModalContent>
