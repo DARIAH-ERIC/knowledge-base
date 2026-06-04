@@ -1,6 +1,12 @@
 import type { ImageUrlOptions } from "@/lib/images";
 
-export const imageMimeTypes = ["image/jpeg", "image/png", "image/webp"] as const;
+export const imageMimeTypes = [
+	"image/jpeg",
+	"image/png",
+	"image/webp",
+	"image/avif",
+	"image/svg+xml",
+] as const;
 
 export const mediaLibraryPageSize = 20;
 
