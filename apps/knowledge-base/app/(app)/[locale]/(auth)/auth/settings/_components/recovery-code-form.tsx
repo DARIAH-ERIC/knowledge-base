@@ -11,7 +11,7 @@ import { type ReactNode, useActionState } from "react";
 import { regenerateRecoveryCodeAction } from "@/app/(app)/[locale]/(auth)/auth/settings/_lib/regenerate-recovery-code.action";
 
 interface RecoveryCodeFormProps {
-	recoveryCode: string;
+	recoveryCode: string | null;
 }
 
 export function RecoveryCodeForm(props: Readonly<RecoveryCodeFormProps>): ReactNode {
@@ -29,10 +29,12 @@ export function RecoveryCodeForm(props: Readonly<RecoveryCodeFormProps>): ReactN
 		<Form action={action} className="flex flex-col gap-y-6" state={state}>
 			<FormStatus state={state} />
 
-			<Text>
-				{t("Your recovery code is:")}{" "}
-				<span className="text-fg">{newRecoveryCode ?? recoveryCode}</span>
-			</Text>
+			{newRecoveryCode != null || recoveryCode != null ? (
+				<Text>
+					{t("Your recovery code is:")}{" "}
+					<span className="text-fg">{newRecoveryCode ?? recoveryCode}</span>
+				</Text>
+			) : null}
 
 			<SubmitButton className="mbs-2">{t("Generate new code")}</SubmitButton>
 		</Form>
