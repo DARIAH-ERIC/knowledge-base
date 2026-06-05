@@ -45,6 +45,10 @@ export class AdminInstitutionsPage {
 		await this.page.locator('input[name="ror"]').fill(ror);
 	}
 
+	async fillSshocMarketplaceActorId(id: number): Promise<void> {
+		await this.page.locator('input[name="sshocMarketplaceActorId"]').fill(String(id));
+	}
+
 	async fillSummary(text: string): Promise<void> {
 		await this.page.getByLabel("Summary").fill(text);
 	}

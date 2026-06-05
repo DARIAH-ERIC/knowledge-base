@@ -45,6 +45,7 @@ export const updateInstitutionAction = createMutationAction({
 				ror: input.ror,
 				imageId,
 				name: input.name,
+				sshocMarketplaceActorId: input.sshocMarketplaceActorId,
 				summary: input.summary,
 			})
 			.where(eq(schema.organisationalUnits.id, draftVersionId));

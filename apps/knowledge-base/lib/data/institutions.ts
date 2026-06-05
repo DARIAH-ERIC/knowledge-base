@@ -23,7 +23,10 @@ interface GetInstitutionsParams {
 
 export interface InstitutionsResult {
 	data: Array<
-		Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "ror"> & {
+		Pick<
+			schema.OrganisationalUnit,
+			"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId"
+		> & {
 			countryName: string | null;
 			ericRelationStatuses: Array<InstitutionEricRelationStatus>;
 			entity: Pick<schema.Entity, "slug">;
@@ -215,6 +218,7 @@ const itemSelect = {
 	id: schema.organisationalUnits.id,
 	name: schema.organisationalUnits.name,
 	ror: schema.organisationalUnits.ror,
+	sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
 	slug: schema.entities.slug,
 	hasDraft: schema.documentLifecycle.hasDraftChanges,
 	isPublished: sql<boolean>`${schema.documentLifecycle.publishedId} IS NOT NULL`,
@@ -285,6 +289,7 @@ export async function getInstitutions(
 					id: institution.id,
 					name: institution.name,
 					ror: institution.ror,
+					sshocMarketplaceActorId: institution.sshocMarketplaceActorId,
 				};
 			}),
 			limit,
@@ -299,6 +304,7 @@ export async function getInstitutions(
 		id: string;
 		name: string;
 		ror: string | null;
+		sshocMarketplaceActorId: number | null;
 		slug: string;
 		hasDraft: boolean;
 		isPublished: boolean;
@@ -466,6 +472,7 @@ export async function getInstitutions(
 					id: institution.id,
 					name: institution.name,
 					ror: institution.ror,
+					sshocMarketplaceActorId: institution.sshocMarketplaceActorId,
 				};
 			}),
 			limit,
@@ -489,6 +496,7 @@ export async function getInstitutions(
 				id: institution.id,
 				name: institution.name,
 				ror: institution.ror,
+				sshocMarketplaceActorId: institution.sshocMarketplaceActorId,
 			};
 		})
 		.toSorted((a, b) => {

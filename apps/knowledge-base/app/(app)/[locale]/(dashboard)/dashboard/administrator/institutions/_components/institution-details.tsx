@@ -21,7 +21,10 @@ interface InstitutionDetailsProps {
 	hasDraft: boolean;
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
-	institution: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
+	institution: Pick<
+		schema.OrganisationalUnit,
+		"acronym" | "id" | "name" | "sshocMarketplaceActorId" | "summary"
+	> & {
 		description: JSONContent | null;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
@@ -86,6 +89,9 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 
 				<DescriptionTerm>{t("Acronym")}</DescriptionTerm>
 				<DescriptionDetails>{institution.acronym}</DescriptionDetails>
+
+				<DescriptionTerm>{t("SSHOC actor ID")}</DescriptionTerm>
+				<DescriptionDetails>{institution.sshocMarketplaceActorId}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Summary")}</DescriptionTerm>
 				<DescriptionDetails>{institution.summary}</DescriptionDetails>
