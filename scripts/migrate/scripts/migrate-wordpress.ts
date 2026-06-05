@@ -63,6 +63,27 @@ function toPlaintext(html: string): string {
 	return toText(ast);
 }
 
+/**
+ * WordPress stores `post_name`/slug values URL-encoded for non-Latin titles (e.g. Cyrillic "а" →
+ * "%d0%b0"). Inserted verbatim, such slugs don't survive the browser→server URL round-trip and 404
+ * on both the dashboard and the public site. Percent-decode, then slugify, so the stored slug is
+ * clean transliterated ASCII — matching how UI-created entities and the institution import already
+ * build slugs. Idempotent for already-clean slugs; falls back to the title when the slug is empty
+ * or slugifies to nothing.
+ */
+function normalizeWordPressSlug(rawSlug: string | null | undefined, fallback: string): string {
+	const source = isNonEmptyString(rawSlug) ? rawSlug : fallback;
+	let decoded: string;
+	try {
+		decoded = decodeURIComponent(source);
+	} catch {
+		// `source` had a malformed percent-sequence; slugify it as-is.
+		decoded = source;
+	}
+	const slug = slugify(decoded);
+	return slug !== "" ? slug : slugify(fallback);
+}
+
 function toSummary(html: string): string {
 	return toPlaintext(html)
 		.replace(/\s*read more\s*$/i, "")
@@ -1067,7 +1088,7 @@ async function main() {
 			const [entity] = await tx
 				.insert(schema.entities)
 				.values({
-					slug: page.slug,
+					slug: normalizeWordPressSlug(page.slug, toPlaintext(page.title.rendered)),
 					typeId: entityTypeId,
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),
@@ -1608,7 +1629,7 @@ async function main() {
 			const [entity] = await tx
 				.insert(schema.entities)
 				.values({
-					slug: page.slug,
+					slug: normalizeWordPressSlug(page.slug, toPlaintext(page.title.rendered)),
 					typeId: typesByType.pages.id,
 					createdAt: new Date(page.date_gmt),
 					updatedAt: new Date(page.modified_gmt),
@@ -1709,7 +1730,7 @@ async function main() {
 			const [entity] = await tx
 				.insert(schema.entities)
 				.values({
-					slug: post.slug,
+					slug: normalizeWordPressSlug(post.slug, toPlaintext(post.title.rendered)),
 					typeId: typesByType.news.id,
 					createdAt: new Date(post.date_gmt),
 					updatedAt: new Date(post.modified_gmt),
@@ -1799,7 +1820,7 @@ async function main() {
 			const [entity] = await tx
 				.insert(schema.entities)
 				.values({
-					slug: event.slug,
+					slug: normalizeWordPressSlug(event.slug, toPlaintext(event.title)),
 					typeId: typesByType.events.id,
 					createdAt: new Date(event.date_utc),
 					updatedAt: new Date(event.modified_utc),
@@ -1966,7 +1987,7 @@ async function main() {
 				const [entity] = await tx
 					.insert(schema.entities)
 					.values({
-						slug: project.slug,
+						slug: normalizeWordPressSlug(project.slug, toPlaintext(project.title.rendered)),
 						typeId: typesByType.projects.id,
 						createdAt: new Date(project.date_gmt),
 						updatedAt: new Date(project.modified_gmt),
