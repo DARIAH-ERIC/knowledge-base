@@ -3,6 +3,7 @@ import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import {
+	CalendarDateSchema,
 	PaginatedResponseSchema,
 	PaginationQuerySchema,
 	RelatedEntitiesSchema,
@@ -28,8 +29,8 @@ export const MemberOrPartnerBaseSchema = v.pipe(
 				...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,
 				duration: v.nullable(
 					v.object({
-						start: v.string(),
-						end: v.nullable(v.string()),
+						start: CalendarDateSchema,
+						end: v.nullable(CalendarDateSchema),
 					}),
 				),
 				type: v.picklist(schema.socialMediaTypesEnum),
@@ -124,8 +125,8 @@ export const MemberOrPartnerSchema = v.pipe(
 				...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,
 				duration: v.nullable(
 					v.object({
-						start: v.string(),
-						end: v.nullable(v.string()),
+						start: CalendarDateSchema,
+						end: v.nullable(CalendarDateSchema),
 					}),
 				),
 				type: v.picklist(schema.socialMediaTypesEnum),

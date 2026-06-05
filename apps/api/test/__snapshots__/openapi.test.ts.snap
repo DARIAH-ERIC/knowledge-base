@@ -2026,10 +2026,12 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "duration": {
             "properties": {
               "end": {
+                "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
                 "format": "date-time",
                 "type": "string",
               },
               "start": {
+                "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
                 "format": "date-time",
                 "type": "string",
               },
@@ -2106,10 +2108,12 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "duration": {
             "properties": {
               "end": {
+                "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
                 "format": "date-time",
                 "type": "string",
               },
               "start": {
+                "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
                 "format": "date-time",
                 "type": "string",
               },
@@ -5489,6 +5493,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "end": {
                           "anyOf": [
                             {
+                              "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                              "format": "date-time",
                               "type": "string",
                             },
                             {
@@ -5497,6 +5503,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           ],
                         },
                         "start": {
+                          "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                          "format": "date-time",
                           "type": "string",
                         },
                       },
@@ -5691,6 +5699,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                         "end": {
                           "anyOf": [
                             {
+                              "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                              "format": "date-time",
                               "type": "string",
                             },
                             {
@@ -5699,6 +5709,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                           ],
                         },
                         "start": {
+                          "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                          "format": "date-time",
                           "type": "string",
                         },
                       },
@@ -8985,6 +8997,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                   "end": {
                     "anyOf": [
                       {
+                        "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                        "format": "date-time",
                         "type": "string",
                       },
                       {
@@ -8993,6 +9007,8 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
                     ],
                   },
                   "start": {
+                    "description": "Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+                    "format": "date-time",
                     "type": "string",
                   },
                 },

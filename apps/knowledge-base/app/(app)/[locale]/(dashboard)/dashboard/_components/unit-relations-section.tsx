@@ -28,7 +28,7 @@ import {
 import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { type CalendarDate, getLocalTimeZone, parseDate } from "@internationalized/date";
+import type { CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
@@ -42,6 +42,7 @@ import { deleteUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 import { endUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/end-unit-relation.action";
 import { updateUnitRelationAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-unit-relation.action";
 import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
+import { dateToCalendarDate } from "@/lib/date";
 
 interface UnitRelationsSectionProps {
 	unitId: string;
@@ -89,10 +90,6 @@ function formatLifecycleStatus(
 	t: ReturnType<typeof useExtracted>,
 ): string {
 	return status === "new" ? t("New") : t("Changed");
-}
-
-function dateToCalendarDate(date: Date | undefined): CalendarDate | null {
-	return date != null ? parseDate(date.toISOString().slice(0, 10)) : null;
 }
 
 export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>): ReactNode {
@@ -190,8 +187,8 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 				option != null &&
 				relatedUnit != null
 			) {
-				const start = editStartDate?.toDate(getLocalTimeZone()) ?? itemToEdit.duration.start;
-				const end = editEndDate?.toDate(getLocalTimeZone()) ?? undefined;
+				const start = editStartDate?.toDate("UTC") ?? itemToEdit.duration.start;
+				const end = editEndDate?.toDate("UTC") ?? undefined;
 
 				setLocalRelations((prev) =>
 					prev.map((relation) =>
@@ -431,7 +428,7 @@ export function UnitRelationsSection(props: Readonly<UnitRelationsSectionProps>)
 								return;
 							}
 
-							const end = selectedEndDate.toDate(getLocalTimeZone());
+							const end = selectedEndDate.toDate("UTC");
 
 							startTransition(async () => {
 								await endUnitRelationAction(itemToEnd.id, end);
