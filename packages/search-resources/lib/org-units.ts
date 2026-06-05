@@ -15,9 +15,9 @@ function addToMapSet<K, V>(map: Map<K, Set<V>>, key: K, value: V): void {
 
 /**
  * Build the lookups needed to resolve sshoc actor ids and zotero collection names to the slugs of
- * the national consortia and working groups that own a resource. Reads from the database the set of
- * national consortia, working groups, and countries that have a published version, plus the
- * currently-active `is_national_consortium_of` relations.
+ * the national consortia, working groups, and institutions that own a resource. Reads from the
+ * database the set of national consortia, working groups, institutions, and countries that have a
+ * published version, plus the currently-active `is_national_consortium_of` relations.
  */
 export async function loadOrgUnitLookups(db: Database): Promise<OrgUnitResourceLookups> {
 	// Unit↔unit relations are document-level; key org units by their document id (published version).
@@ -44,6 +44,7 @@ export async function loadOrgUnitLookups(db: Database): Promise<OrgUnitResourceL
 
 	const sshocActorIdToNc = new Map<number, Set<string>>();
 	const sshocActorIdToWg = new Map<number, Set<string>>();
+	const sshocActorIdToInstitution = new Map<number, Set<string>>();
 	const wgSlugs = new Set<string>();
 	const ncIdToSlug = new Map<string, string>();
 	const countryIdToSlug = new Map<string, string>();
@@ -58,6 +59,10 @@ export async function loadOrgUnitLookups(db: Database): Promise<OrgUnitResourceL
 			wgSlugs.add(unit.slug.toLowerCase());
 			if (unit.sshocMarketplaceActorId != null) {
 				addToMapSet(sshocActorIdToWg, unit.sshocMarketplaceActorId, unit.slug);
+			}
+		} else if (unit.type === "institution") {
+			if (unit.sshocMarketplaceActorId != null) {
+				addToMapSet(sshocActorIdToInstitution, unit.sshocMarketplaceActorId, unit.slug);
 			}
 		} else if (unit.type === "country") {
 			countryIdToSlug.set(unit.id, unit.acronym ?? unit.slug);
@@ -95,6 +100,7 @@ export async function loadOrgUnitLookups(db: Database): Promise<OrgUnitResourceL
 	return {
 		sshocActorIdToNc,
 		sshocActorIdToWg,
+		sshocActorIdToInstitution,
 		countrySlugToNc,
 		wgSlugs,
 	};

@@ -26,6 +26,7 @@ export interface SearchIndexResourceSourceData {
 export interface OrgUnitResourceLookups {
 	sshocActorIdToNc: Map<number, Set<string>>;
 	sshocActorIdToWg: Map<number, Set<string>>;
+	sshocActorIdToInstitution: Map<number, Set<string>>;
 	countrySlugToNc: Map<string, Set<string>>;
 	wgSlugs: Set<string>;
 }

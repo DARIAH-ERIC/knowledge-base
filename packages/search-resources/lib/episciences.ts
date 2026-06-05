@@ -48,6 +48,7 @@ export function createEpisciencesDocument(item: EpisciencesSearchDocument): Reso
 		kind: null,
 		national_consortia: [],
 		working_groups: [],
+		institutions: [],
 		upstream_sources: null,
 		authors,
 		year: year != null && !Number.isNaN(year) ? year : null,

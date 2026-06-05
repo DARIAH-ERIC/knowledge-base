@@ -16,6 +16,7 @@ export const resourcesCollection = defineCollection({
 		{ name: "source_updated_at", type: "int64", index: true, optional: true, sort: true },
 		{ name: "national_consortia", type: "string[]", index: true, facet: true, optional: true },
 		{ name: "working_groups", type: "string[]", index: true, facet: true, optional: true },
+		{ name: "institutions", type: "string[]", index: true, facet: true, optional: true },
 		{ name: "upstream_sources", type: "string[]", index: true, facet: true, optional: true },
 		{ name: "imported_at", type: "int64", index: false },
 		{ name: "type", type: "string", index: true, facet: true },
@@ -64,6 +65,7 @@ export interface PublicationResourceDocument extends ResourceDocumentBase {
 	source: "episciences" | "hal" | "open-aire" | "zenodo" | "zotero";
 	national_consortia: Array<string>;
 	working_groups: Array<string>;
+	institutions: Array<string>;
 	upstream_sources: Array<string> | null;
 	authors: Array<string>;
 	year: number | null;
@@ -76,6 +78,7 @@ export interface ServiceResourceDocument extends ResourceDocumentBase {
 	source: "ssh-open-marketplace";
 	national_consortia: Array<string>;
 	working_groups: Array<string>;
+	institutions: Array<string>;
 	upstream_sources: null;
 	authors: null;
 	year: null;
@@ -88,6 +91,7 @@ export interface SoftwareResourceDocument extends ResourceDocumentBase {
 	source: "ssh-open-marketplace";
 	national_consortia: Array<string>;
 	working_groups: Array<string>;
+	institutions: Array<string>;
 	upstream_sources: null;
 	authors: null;
 	year: null;
@@ -100,6 +104,7 @@ export interface TrainingMaterialResourceDocument extends ResourceDocumentBase {
 	source: "dariah-campus" | "ssh-open-marketplace";
 	national_consortia: Array<string>;
 	working_groups: Array<string>;
+	institutions: Array<string>;
 	upstream_sources: Array<string>;
 	authors: Array<string> | null;
 	year: number | null;
@@ -112,6 +117,7 @@ export interface WorkflowResourceDocument extends ResourceDocumentBase {
 	source: "ssh-open-marketplace";
 	national_consortia: Array<string>;
 	working_groups: Array<string>;
+	institutions: Array<string>;
 	upstream_sources: null;
 	authors: null;
 	year: null;

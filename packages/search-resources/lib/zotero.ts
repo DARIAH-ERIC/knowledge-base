@@ -100,6 +100,7 @@ export function createZoteroItem(
 		kind: data.itemType ?? null,
 		national_consortia: [...nationalConsortia],
 		working_groups: [...workingGroups],
+		institutions: [],
 		upstream_sources: null,
 		authors,
 		year,
