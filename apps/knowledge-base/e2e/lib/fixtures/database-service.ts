@@ -195,6 +195,7 @@ export class DatabaseService {
 		imageId: string | null;
 		name: string;
 		ror: string | null;
+		sshocMarketplaceActorId: number | null;
 		summary: string | null;
 	} | null> {
 		const [row] = await this.db
@@ -205,6 +206,7 @@ export class DatabaseService {
 				imageId: schema.organisationalUnits.imageId,
 				name: schema.organisationalUnits.name,
 				ror: schema.organisationalUnits.ror,
+				sshocMarketplaceActorId: schema.organisationalUnits.sshocMarketplaceActorId,
 				summary: schema.organisationalUnits.summary,
 			})
 			.from(schema.organisationalUnits)

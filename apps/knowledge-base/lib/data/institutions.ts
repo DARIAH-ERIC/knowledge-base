@@ -23,7 +23,10 @@ interface GetInstitutionsParams {
 
 export interface InstitutionsResult {
 	data: Array<
-		Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId"> & {
+		Pick<
+			schema.OrganisationalUnit,
+			"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId"
+		> & {
 			countryName: string | null;
 			ericRelationStatuses: Array<InstitutionEricRelationStatus>;
 			entity: Pick<schema.Entity, "slug">;

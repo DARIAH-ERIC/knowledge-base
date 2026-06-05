@@ -31,7 +31,10 @@ import { useRouter } from "@/lib/navigation/navigation";
 interface InstitutionsPageProps {
 	institutions: {
 		data: Array<
-			Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId"> & {
+			Pick<
+				schema.OrganisationalUnit,
+				"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId"
+			> & {
 				entity: Pick<schema.Entity, "slug">;
 				hasDraft: boolean;
 				isPublished: boolean;
