@@ -400,6 +400,53 @@ test.describe("admin relation management", () => {
 		expect(relations).toHaveLength(0);
 	});
 
+	/**
+	 * Regression test for the date picker assuming the browser's local timezone instead of UTC. In a
+	 * timezone ahead of UTC (here Vienna, UTC+1), entering `31/12/2025` used to be converted to
+	 * `2025-12-30T23:00:00Z` and therefore both stored and displayed as `30/12/2025`. Dates are
+	 * stored as UTC, so the picker must interpret the entered calendar date as UTC midnight.
+	 *
+	 * This case only reproduces under a non-UTC browser timezone, which the CI runner (UTC) does not
+	 * exercise by default — hence the scoped `timezoneId` override below.
+	 */
+	test.describe("in a non-UTC timezone", () => {
+		test.use({ timezoneId: "Europe/Vienna" });
+
+		test("should end a contribution with the entered date", async ({
+			createAdminPersonsPage,
+			db,
+		}) => {
+			const workerIndex = test.info().workerIndex;
+			const personsPage = createAdminPersonsPage(workerIndex);
+			const name = `${personsPage.workerPrefix} Contribution End Date ${randomUUID()}`;
+
+			await personsPage.gotoCreate();
+			await personsPage.fillName(name);
+			await personsPage.fillSortName("End Date, Person");
+			await personsPage.selectImageFromMediaLibrary("E2E Test Asset");
+			await personsPage.fillBiography("Biography for contribution end date test.");
+			await personsPage.submitForm();
+
+			await personsPage.gotoEditFromList(name);
+			await personsPage.goToContributionsTab();
+			await personsPage.selectFirstContributionRole();
+			await personsPage.selectFirstContributionOrg();
+			await personsPage.fillContributionDatePicker("Start date", 2025, 1, 1);
+			await personsPage.submitAddContribution();
+
+			await personsPage.clickEndContribution();
+			await personsPage.fillEndContributionDate(2025, 12, 31);
+			await personsPage.confirmEndContribution();
+
+			// The entered date must be preserved verbatim, not shifted to the previous day.
+			await expect(personsPage.contributionsTable()).toContainText("31/12/2025");
+
+			const person = await db.getPersonByName(name);
+			const contributions = await db.getContributionsByPersonVersionId(person!.id);
+			expect(contributions[0]!.duration.end).toStrictEqual(new Date("2025-12-31T00:00:00.000Z"));
+		});
+	});
+
 	test("should edit and delete a contribution from the contributions tab", async ({
 		createAdminPersonsPage,
 		db,

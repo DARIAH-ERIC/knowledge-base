@@ -27,7 +27,7 @@ import {
 import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { type CalendarDate, getLocalTimeZone, parseDate } from "@internationalized/date";
+import { type CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useState, useTransition } from "react";
 
@@ -38,6 +38,7 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/form-section";
 import { deleteProjectPartnerAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_lib/delete-project-partner.action";
 import { upsertProjectPartnerAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/project-partners/_lib/upsert-project-partner.action";
+import { dateToCalendarDate } from "@/lib/date";
 
 interface ProjectPartner {
 	id: string;
@@ -100,10 +101,6 @@ function formatValue(value: string): string {
 	return value.replaceAll("_", " ");
 }
 
-function dateToCalendarDate(date: Date | null): CalendarDate | null {
-	return date != null ? parseDate(date.toISOString().slice(0, 10)) : null;
-}
-
 export function ProjectPartnersSection(props: Readonly<ProjectPartnersSectionProps>): ReactNode {
 	const { projectId, partners, roles } = props;
 
@@ -145,8 +142,8 @@ export function ProjectPartnersSection(props: Readonly<ProjectPartnersSectionPro
 
 			if (newState.status === "success" && unit != null && role != null) {
 				const data = newState.data as { id: string } | undefined;
-				const start = dialog.durationStart?.toDate(getLocalTimeZone()) ?? null;
-				const end = dialog.durationEnd?.toDate(getLocalTimeZone()) ?? null;
+				const start = dialog.durationStart?.toDate("UTC") ?? null;
+				const end = dialog.durationEnd?.toDate("UTC") ?? null;
 
 				if (dialog.item != null) {
 					setItems((prev) =>

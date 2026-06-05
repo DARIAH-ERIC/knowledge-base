@@ -27,7 +27,7 @@ import {
 } from "@dariah-eric/ui/table";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { type CalendarDate, parseDate } from "@internationalized/date";
+import { type CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, useOptimistic, useState, useTransition } from "react";
 
@@ -44,6 +44,7 @@ import { updateContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashb
 import { deleteContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_lib/delete-contribution.action";
 import { dashboardPageSize } from "@/config/pagination.config";
 import type { ContributionRoleOption, ContributionsResult } from "@/lib/data/contributions";
+import { dateToCalendarDate } from "@/lib/date";
 import { useRouter } from "@/lib/navigation/navigation";
 
 interface ContributionsPageProps {
@@ -199,10 +200,6 @@ async function fetchOrganisationalUnitOptionsPage(
 	}
 
 	return (await response.json()) as { items: Array<AsyncOption>; total: number };
-}
-
-function dateToCalendarDate(date: Date | undefined): CalendarDate | null {
-	return date != null ? parseDate(date.toISOString().slice(0, 10)) : null;
 }
 
 export function ContributionsPage(props: Readonly<ContributionsPageProps>): ReactNode {

@@ -28,7 +28,7 @@ import {
 import { Tooltip, TooltipContent } from "@dariah-eric/ui/tooltip";
 import type { AsyncOption, AsyncOptionsFetchPageParams } from "@dariah-eric/ui/use-async-options";
 import { ArchiveBoxXMarkIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { type CalendarDate, getLocalTimeZone, parseDate } from "@internationalized/date";
+import { type CalendarDate } from "@internationalized/date";
 import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode, startTransition, useState, useTransition } from "react";
 
@@ -42,6 +42,7 @@ import { endContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { updateContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/_lib/update-contribution.action";
 import { deleteContributionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/contributions/_lib/delete-contribution.action";
 import type { ContributionRoleOption, PersonContribution } from "@/lib/data/contributions";
+import { dateToCalendarDate } from "@/lib/date";
 
 interface ContributionsSectionProps {
 	personId: string;
@@ -97,10 +98,6 @@ function formatRoleOptionLabel(option: ContributionRoleOption): string {
 	const allowedTypes = option.allowedUnitTypes.map(formatRoleType).join(", ");
 
 	return `${formatRoleType(option.roleType)} - ${allowedTypes}`;
-}
-
-function dateToCalendarDate(date: Date | undefined): CalendarDate | null {
-	return date != null ? parseDate(date.toISOString().slice(0, 10)) : null;
 }
 
 export function ContributionsSection(props: Readonly<ContributionsSectionProps>): ReactNode {
@@ -190,8 +187,8 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 			setEditState(newState);
 
 			if (newState.status === "success" && itemToEdit != null && option != null && unit != null) {
-				const start = editStartDate?.toDate(getLocalTimeZone()) ?? itemToEdit.duration.start;
-				const end = editEndDate?.toDate(getLocalTimeZone()) ?? undefined;
+				const start = editStartDate?.toDate("UTC") ?? itemToEdit.duration.start;
+				const end = editEndDate?.toDate("UTC") ?? undefined;
 
 				setLocalContributions((prev) =>
 					prev.map((contribution) =>
@@ -446,7 +443,7 @@ export function ContributionsSection(props: Readonly<ContributionsSectionProps>)
 								return;
 							}
 
-							const end = selectedEndDate.toDate(getLocalTimeZone());
+							const end = selectedEndDate.toDate("UTC");
 
 							startTransition(async () => {
 								await endContributionAction(itemToEnd.id, end);
