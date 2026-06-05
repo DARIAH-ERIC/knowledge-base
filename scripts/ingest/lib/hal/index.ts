@@ -63,6 +63,7 @@ export function createHalItem(item: HalIngestDocument): ResourceDocument {
 		kind: item.docType_s ?? null,
 		national_consortia: [],
 		working_groups: [],
+		institutions: [],
 		upstream_sources: null,
 		authors,
 		year,

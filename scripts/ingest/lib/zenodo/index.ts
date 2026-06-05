@@ -50,6 +50,7 @@ export function createZenodoItem(item: ZenodoRecord): ResourceDocument {
 		kind: item.metadata.resource_type?.type ?? null,
 		national_consortia: [],
 		working_groups: [],
+		institutions: [],
 		upstream_sources: null,
 		authors,
 		year,

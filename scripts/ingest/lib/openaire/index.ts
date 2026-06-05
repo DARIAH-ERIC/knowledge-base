@@ -30,6 +30,7 @@ export function createOpenAirePublication(item: ResearchProduct): ResourceDocume
 		kind: null,
 		national_consortia: [],
 		working_groups: [],
+		institutions: [],
 		upstream_sources: null,
 		authors: [],
 		year: null,
