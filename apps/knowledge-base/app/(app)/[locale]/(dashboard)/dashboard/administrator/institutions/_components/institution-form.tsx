@@ -26,7 +26,10 @@ import type { ServerAction } from "@/lib/server/create-server-action";
 
 interface InstitutionFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
-	institution?: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "ror" | "summary"> & {
+	institution?: Pick<
+		schema.OrganisationalUnit,
+		"acronym" | "id" | "name" | "ror" | "sshocMarketplaceActorId" | "summary"
+	> & {
 		description?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
@@ -94,6 +97,20 @@ export function InstitutionForm(props: Readonly<InstitutionFormProps>): ReactNod
 
 					<TextField defaultValue={institution?.ror ?? undefined} name="ror">
 						<Label>{t("ROR")}</Label>
+						<Input />
+						<FieldError />
+					</TextField>
+
+					<TextField
+						defaultValue={
+							institution?.sshocMarketplaceActorId != null
+								? String(institution.sshocMarketplaceActorId)
+								: undefined
+						}
+						name="sshocMarketplaceActorId"
+						type="number"
+					>
+						<Label>{t("SSHOC actor ID")}</Label>
 						<Input />
 						<FieldError />
 					</TextField>

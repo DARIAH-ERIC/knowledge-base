@@ -52,6 +52,7 @@ export const createInstitutionAction = createMutationAction({
 			ror: input.ror,
 			imageId,
 			name: input.name,
+			sshocMarketplaceActorId: input.sshocMarketplaceActorId,
 			summary: input.summary,
 			typeId: orgUnitType.id,
 		});
