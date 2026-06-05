@@ -89,7 +89,7 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 					{institution.image != null ? (
 						<img
 							alt=""
-							className="block-24 inline-24 rounded-lg object-cover"
+							className="block-24 inline-auto max-inline-full rounded-lg object-cover"
 							src={institution.image.url}
 						/>
 					) : null}

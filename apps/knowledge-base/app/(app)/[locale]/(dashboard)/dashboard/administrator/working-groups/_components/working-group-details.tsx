@@ -97,7 +97,7 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 					{workingGroup.image != null ? (
 						<img
 							alt=""
-							className="block-24 inline-24 rounded-lg object-cover"
+							className="block-24 inline-auto max-inline-full rounded-lg object-cover"
 							src={workingGroup.image.url}
 						/>
 					) : null}
