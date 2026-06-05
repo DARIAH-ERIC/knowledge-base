@@ -1457,6 +1457,76 @@ export class DatabaseService {
 		return item != null ? this.getContentBlocksByVersionId(item.id) : [];
 	}
 
+	/** Returns the document slug for the spotlight article identified by its exact title. */
+	async getSpotlightArticleSlugByTitle(title: string): Promise<string | null> {
+		const [row] = await this.db
+			.select({ slug: schema.entities.slug })
+			.from(schema.spotlightArticles)
+			.innerJoin(schema.entityVersions, eq(schema.spotlightArticles.id, schema.entityVersions.id))
+			.innerJoin(schema.entities, eq(schema.entityVersions.entityId, schema.entities.id))
+			.where(eq(schema.spotlightArticles.title, title))
+			.limit(1);
+
+		return row?.slug ?? null;
+	}
+
+	/**
+	 * Inserts a published news document that deliberately shares `slug` with another entity type.
+	 * Slugs are unique only per `(type, slug)`, so this is valid data — it reproduces the cross-type
+	 * collision behind the spotlight details 404. The news title is worker-prefixed so the standard
+	 * `cleanupWorkerNewsItems` helper removes it.
+	 */
+	async createCollidingPublishedNewsDocument(params: {
+		slug: string;
+		title: string;
+		imageId: string;
+	}): Promise<{ documentId: string; versionId: string }> {
+		const { slug, title, imageId } = params;
+
+		return this.db.transaction(async (tx) => {
+			const type = await tx.query.entityTypes.findFirst({
+				where: { type: "news" },
+				columns: { id: true },
+			});
+			if (type == null) {
+				throw new Error('Entity type "news" not found.');
+			}
+
+			const status = await tx.query.entityStatus.findFirst({
+				where: { type: "published" },
+				columns: { id: true },
+			});
+			if (status == null) {
+				throw new Error('Entity status "published" not found.');
+			}
+
+			const [document] = await tx
+				.insert(schema.entities)
+				.values({ slug, typeId: type.id })
+				.returning({ id: schema.entities.id });
+			if (document == null) {
+				throw new Error("Failed to insert colliding entity document.");
+			}
+
+			const [version] = await tx
+				.insert(schema.entityVersions)
+				.values({ entityId: document.id, statusId: status.id })
+				.returning({ id: schema.entityVersions.id });
+			if (version == null) {
+				throw new Error("Failed to insert colliding entity version.");
+			}
+
+			await tx.insert(schema.news).values({
+				id: version.id,
+				title,
+				summary: "Colliding slug news item",
+				imageId,
+			});
+
+			return { documentId: document.id, versionId: version.id };
+		});
+	}
+
 	async getFundingCallByTitle(title: string): Promise<{
 		duration: { start: Date; end?: Date };
 		id: string;
