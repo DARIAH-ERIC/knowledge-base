@@ -12,6 +12,7 @@ import { router as featuredEntities } from "@/routes/featured-entities";
 import { router as fundingCalls } from "@/routes/funding-calls";
 import { router as governanceBodies } from "@/routes/governance-bodies";
 import { router as impactCaseStudies } from "@/routes/impact-case-studies";
+import { router as institutions } from "@/routes/institutions";
 import { router as membersAndPartners } from "@/routes/members-partners";
 import { router as nationalConsortia } from "@/routes/national-consortia";
 import { router as navigation } from "@/routes/navigation";
@@ -40,6 +41,7 @@ const api = createRouter()
 	.route("/funding-calls", fundingCalls)
 	.route("/governance-bodies", governanceBodies)
 	.route("/impact-case-studies", impactCaseStudies)
+	.route("/institutions", institutions)
 	.route("/members-partners", membersAndPartners)
 	.route("/news", news)
 	.route("/national-consortia", nationalConsortia)
