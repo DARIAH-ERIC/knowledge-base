@@ -2,11 +2,13 @@
 
 "use client";
 
-import { StarterKit } from "@tiptap/starter-kit";
+import { createRichTextExtensions } from "@dariah-eric/ui/rich-text-editor";
 import { renderToReactElement } from "@tiptap/static-renderer/pm/react";
 import type { ReactNode } from "react";
 
 import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks";
+
+const richTextExtensions = createRichTextExtensions();
 
 function getEmbedUrl(url: string): string {
 	const watchMatch = /youtube\.com\/watch\?.*?v=([\w-]+)/.exec(url);
@@ -69,7 +71,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 								<div className="richtext richtext-sm pbe-3">
 									{renderToReactElement({
 										content: accordionItem.content,
-										extensions: [StarterKit],
+										extensions: richTextExtensions,
 									})}
 								</div>
 							)}
@@ -223,7 +225,7 @@ function ContentBlockView({ contentBlock }: Readonly<ContentBlockViewProps>): Re
 
 			return (
 				<div className="richtext richtext-sm">
-					{renderToReactElement({ content: contentBlock.content, extensions: [StarterKit] })}
+					{renderToReactElement({ content: contentBlock.content, extensions: richTextExtensions })}
 				</div>
 			);
 		}

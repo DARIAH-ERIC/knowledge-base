@@ -2,7 +2,7 @@
 
 "use client";
 
-import { type JSONContent, Node, mergeAttributes } from "@tiptap/core";
+import { type Extensions, type JSONContent, Node, mergeAttributes } from "@tiptap/core";
 import { Image } from "@tiptap/extension-image";
 import {
 	EditorContent,
@@ -650,6 +650,33 @@ function createAssetImageNode(renderImagePicker?: ImagePickerRenderer): Node {
 	});
 }
 
+interface CreateRichTextExtensionsOptions {
+	renderImagePicker?: ImagePickerRenderer;
+}
+
+/**
+ * Canonical extension set for the rich text editor. Shared with the static renderer so that the
+ * read-only details views resolve the same node types the editor can produce (e.g. `image`,
+ * `assetImage`, `embedBlock`); otherwise rendering content authored in the editor or imported from
+ * WordPress throws `Unknown node type`.
+ */
+export function createRichTextExtensions(
+	options?: Readonly<CreateRichTextExtensionsOptions>,
+): Extensions {
+	return [
+		StarterKit.configure({
+			heading: { levels: [2, 3, 4] },
+			link: {
+				openOnClick: false,
+				defaultProtocol: "https",
+			},
+		}),
+		Image,
+		createAssetImageNode(options?.renderImagePicker),
+		EmbedNode,
+	];
+}
+
 export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode {
 	const {
 		"aria-label": ariaLabel,
@@ -666,24 +693,13 @@ export function RichTextEditor(props: Readonly<RichTextEditorProps>): ReactNode 
 
 	const initialContent = useMemo(() => normalizeInitialContent(content), [content]);
 
-	const assetImageNode = useMemo(
-		() => createAssetImageNode(renderImagePicker),
+	const extensions = useMemo(
+		() => createRichTextExtensions({ renderImagePicker }),
 		[renderImagePicker],
 	);
 
 	const editor = useEditor({
-		extensions: [
-			StarterKit.configure({
-				heading: { levels: [2, 3, 4] },
-				link: {
-					openOnClick: false,
-					defaultProtocol: "https",
-				},
-			}),
-			Image,
-			assetImageNode,
-			EmbedNode,
-		],
+		extensions,
 		content: initialContent,
 		editable: isEditable,
 		immediatelyRender: false,
