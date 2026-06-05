@@ -106,6 +106,23 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "type": "string",
         },
       },
+      "GetInstitutionByIdParams": {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "format": "uuid",
+          "type": "string",
+        },
+      },
+      "GetInstitutionBySlugParams": {
+        "in": "path",
+        "name": "slug",
+        "required": true,
+        "schema": {
+          "type": "string",
+        },
+      },
       "GetMemberOrPartnerByIdParams": {
         "in": "path",
         "name": "id",
@@ -2997,6 +3014,54 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         ],
         "type": "object",
       },
+      "GetInstitutionSlugsResponse": {
+        "description": "Paginated list of institution slugs",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/InstitutionSlugList",
+          },
+          "limit": {
+            "type": "number",
+          },
+          "offset": {
+            "type": "number",
+          },
+          "total": {
+            "type": "number",
+          },
+        },
+        "required": [
+          "limit",
+          "offset",
+          "total",
+          "data",
+        ],
+        "type": "object",
+      },
+      "GetInstitutionsResponse": {
+        "description": "Paginated list of institutions",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/InstitutionList",
+          },
+          "limit": {
+            "type": "number",
+          },
+          "offset": {
+            "type": "number",
+          },
+          "total": {
+            "type": "number",
+          },
+        },
+        "required": [
+          "limit",
+          "offset",
+          "total",
+          "data",
+        ],
+        "type": "object",
+      },
       "GetMemberOrPartnerSlugsResponse": {
         "description": "Paginated list of member or partner slugs",
         "properties": {
@@ -5052,6 +5117,160 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
           "$ref": "#/components/schemas/ImpactCaseStudySlug",
         },
         "type": "array",
+      },
+      "Institution": {
+        "description": "Institution",
+        "properties": {
+          "acronym": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+          "country": {
+            "anyOf": [
+              {
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string",
+                  },
+                  "name": {
+                    "type": "string",
+                  },
+                  "slug": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "slug",
+                ],
+                "type": "object",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string",
+          },
+          "logo": {
+            "anyOf": [
+              {
+                "properties": {
+                  "url": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "url",
+                ],
+                "type": "object",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+          "name": {
+            "type": "string",
+          },
+          "ror": {
+            "anyOf": [
+              {
+                "type": "string",
+              },
+              {
+                "type": "null",
+              },
+            ],
+          },
+          "slug": {
+            "type": "string",
+          },
+          "status": {
+            "enum": [
+              "partner_institution",
+              "cooperating_partner",
+              "none",
+            ],
+            "type": "string",
+          },
+        },
+        "required": [
+          "id",
+          "name",
+          "acronym",
+          "ror",
+          "slug",
+          "status",
+          "country",
+          "logo",
+        ],
+        "type": "object",
+      },
+      "InstitutionList": {
+        "description": "List of institutions",
+        "items": {
+          "$ref": "#/components/schemas/Institution",
+        },
+        "type": "array",
+      },
+      "InstitutionSlug": {
+        "description": "Institution slug",
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string",
+          },
+          "slug": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "id",
+          "slug",
+        ],
+        "type": "object",
+      },
+      "InstitutionSlugList": {
+        "description": "List of institution slugs",
+        "items": {
+          "$ref": "#/components/schemas/InstitutionSlug",
+        },
+        "type": "array",
+      },
+      "InstitutionStatusParam": {
+        "anyOf": [
+          {
+            "items": {
+              "enum": [
+                "partner_institution",
+                "cooperating_partner",
+                "none",
+              ],
+              "type": "string",
+            },
+            "type": "array",
+          },
+          {
+            "enum": [
+              "partner_institution",
+              "cooperating_partner",
+              "none",
+            ],
+            "type": "string",
+          },
+        ],
+        "description": "Filter institutions by their relation to the DARIAH-EU ERIC (repeatable)",
       },
       "InternalServerErrorResponse": {
         "description": "Internal server error response",
@@ -11767,6 +11986,203 @@ exports[`openapi > GET /docs/openapi.json > should match the api contract snapsh
         "summary": "Get impact case study by id",
         "tags": [
           "impact-case-studies",
+        ],
+      },
+    },
+    "/api/v1/institutions": {
+      "get": {
+        "description": "Retrieve a paginated list of institutions that are partner institutions or cooperating partners of the DARIAH-EU ERIC, optionally filtered by relation status",
+        "operationId": "getInstitutions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "$ref": "#/components/schemas/LimitParam",
+            },
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "$ref": "#/components/schemas/OffsetParam",
+            },
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "$ref": "#/components/schemas/InstitutionStatusParam",
+            },
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetInstitutionsResponse",
+                },
+              },
+            },
+            "description": "Success response",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+        },
+        "summary": "Get institutions",
+        "tags": [
+          "institutions",
+        ],
+      },
+    },
+    "/api/v1/institutions/slugs": {
+      "get": {
+        "description": "Retrieve a paginated list of institution slugs",
+        "operationId": "getInstitutionSlugs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "$ref": "#/components/schemas/LimitParam",
+            },
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "$ref": "#/components/schemas/OffsetParam",
+            },
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetInstitutionSlugsResponse",
+                },
+              },
+            },
+            "description": "Success response",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+        },
+        "summary": "Get institution slugs",
+        "tags": [
+          "institutions",
+        ],
+      },
+    },
+    "/api/v1/institutions/slugs/{slug}": {
+      "get": {
+        "description": "Retrieve an institution by slug",
+        "operationId": "getInstitutionBySlug",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GetInstitutionBySlugParams",
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Institution",
+                },
+              },
+            },
+            "description": "Success response",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse",
+                },
+              },
+            },
+            "description": "Not Found",
+          },
+        },
+        "summary": "Get institution by slug",
+        "tags": [
+          "institutions",
+        ],
+      },
+    },
+    "/api/v1/institutions/{id}": {
+      "get": {
+        "description": "Retrieve an institution by id",
+        "operationId": "getInstitutionById",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GetInstitutionByIdParams",
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Institution",
+                },
+              },
+            },
+            "description": "Success response",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse",
+                },
+              },
+            },
+            "description": "Bad Request",
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse",
+                },
+              },
+            },
+            "description": "Not Found",
+          },
+        },
+        "summary": "Get institution by id",
+        "tags": [
+          "institutions",
         ],
       },
     },
