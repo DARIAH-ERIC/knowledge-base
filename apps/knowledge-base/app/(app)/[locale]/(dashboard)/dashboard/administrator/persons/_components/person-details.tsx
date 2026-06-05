@@ -13,6 +13,7 @@ import { Fragment, type ReactNode } from "react";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 import type { PersonContribution } from "@/lib/data/contributions";
+import { formatRoleType } from "@/lib/format-role-type";
 
 interface PersonDetailsProps {
 	documentId: string;
@@ -20,7 +21,7 @@ interface PersonDetailsProps {
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
 	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
-		biography?: JSONContent;
+		biography: JSONContent | null;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
 	contributions: Array<PersonContribution>;
@@ -42,10 +43,6 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 
 	const t = useExtracted();
 	const format = useFormatter();
-
-	function formatRoleType(type: string): string {
-		return type.replaceAll("_", " ");
-	}
 
 	return (
 		<Fragment>

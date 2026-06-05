@@ -14,6 +14,7 @@ import { Fragment, type ReactNode } from "react";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 import type { UnitRelation } from "@/lib/data/unit-relations";
+import { formatRoleType } from "@/lib/format-role-type";
 
 interface InstitutionDetailsProps {
 	documentId: string;
@@ -21,18 +22,9 @@ interface InstitutionDetailsProps {
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
 	institution: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
-		description?: JSONContent;
+		description: JSONContent | null;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
-	initialRelatedEntityIds: Array<string>;
-	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
-	initialRelatedEntityTotal: number;
-	initialRelatedResourceIds: Array<string>;
-	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
-	initialRelatedResourceTotal: number;
-	initialSocialMediaIds: Array<string>;
-	initialSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
-	initialSocialMediaTotal: number;
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	selectedSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
@@ -59,10 +51,6 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 
 	const t = useExtracted();
 	const format = useFormatter();
-
-	function formatRoleType(type: string): string {
-		return type.replaceAll("_", " ");
-	}
 
 	return (
 		<Fragment>
@@ -159,9 +147,9 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 						<ul className="flex flex-col gap-1">
 							{relations.map((relation) => (
 								<li key={relation.id} className="text-sm">
-									<span className="text-muted-fg">{formatRoleType(relation.statusType)}</span>
+									<span className="font-medium">{formatRoleType(relation.statusType)}</span>
 									{" · "}
-									<span className="font-medium">{relation.relatedUnitName}</span>
+									<span className="text-muted-fg">{relation.relatedUnitName}</span>
 									<span className="text-muted-fg">
 										{" · "}
 										{relation.duration.end

@@ -9,10 +9,12 @@ import { discardProjectDraftAction } from "@/app/(app)/[locale]/(dashboard)/dash
 import { publishProjectAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/projects/_lib/publish-project.action";
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
-import { projectsLifecycleAdapter } from "@/lib/data/projects.lifecycle-adapter";
+import {
+	getRichTextFieldContent,
+	resolveSelectedDetailVersion,
+} from "@/lib/data/entity-detail-view";
 import { db } from "@/lib/db";
-import { alias, and, eq, sql } from "@/lib/db/sql";
+import { alias, eq, sql } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -57,37 +59,13 @@ export default async function DashboardAdministratorProjectDetailsPage(
 
 	const documentId = anyVersion.entityVersion.entity.id;
 
-	const { draftVersionId, hasDraftChanges, publishedId } = await db.transaction(async (tx) => {
-		const draftVersionId = await ensureDraftVersion(tx, documentId, projectsLifecycleAdapter);
-		const { hasDraftChanges, publishedId } = await getDocumentLifecycleState(tx, documentId);
-		return { draftVersionId, hasDraftChanges, publishedId };
-	});
-
-	/**
-	 * The version selector and "with draft changes" UX only kick in when the draft actually diverges
-	 * from the published version. Right after publish, a draft row still exists as a clone of the new
-	 * published version but has no real changes — we treat that as published-only.
-	 */
-	const showVersionSelector = hasDraftChanges && publishedId != null;
-
 	const { version } = await searchParamsPromise;
-	let selectedVersion: "draft" | "published";
-	let versionId: string | null;
 
-	if (showVersionSelector) {
-		selectedVersion = version === "published" ? "published" : "draft";
-		versionId = selectedVersion === "published" ? publishedId : draftVersionId;
-	} else if (publishedId != null) {
-		selectedVersion = "published";
-		versionId = publishedId;
-	} else {
-		selectedVersion = "draft";
-		versionId = draftVersionId;
-	}
-
-	if (!versionId) {
+	const versionState = await resolveSelectedDetailVersion(documentId, version);
+	if (versionState == null) {
 		notFound();
 	}
+	const { hasDraftChanges, publishedId, selectedVersion, versionId } = versionState;
 
 	const project = await db.query.projects.findFirst({
 		where: { id: versionId },
@@ -138,26 +116,8 @@ export default async function DashboardAdministratorProjectDetailsPage(
 		notFound();
 	}
 
-	const [descriptionRows, partners, socialMediaLinks] = await Promise.all([
-		db
-			.select({
-				content: schema.richTextContentBlocks.content,
-				id: schema.richTextContentBlocks.id,
-			})
-			.from(schema.richTextContentBlocks)
-			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
-			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
-			.innerJoin(
-				schema.entityTypesFieldsNames,
-				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
-			)
-			.where(
-				and(
-					eq(schema.fields.entityVersionId, versionId),
-					eq(schema.entityTypesFieldsNames.fieldName, "description"),
-				),
-			)
-			.limit(1),
+	const [description, partners, socialMediaLinks] = await Promise.all([
+		getRichTextFieldContent(versionId, "description"),
 		(() => {
 			const unitDocumentLifecycle = alias(schema.documentLifecycle, "unit_document_lifecycle");
 			return db
@@ -193,8 +153,6 @@ export default async function DashboardAdministratorProjectDetailsPage(
 			},
 		}),
 	]);
-
-	const description = descriptionRows.at(0)?.content ?? null;
 
 	const image =
 		project.image != null

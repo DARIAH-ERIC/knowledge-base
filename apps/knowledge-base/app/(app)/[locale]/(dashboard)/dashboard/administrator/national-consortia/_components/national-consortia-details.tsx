@@ -14,6 +14,7 @@ import { Fragment, type ReactNode } from "react";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 import type { UnitRelation } from "@/lib/data/unit-relations";
+import { formatRoleType } from "@/lib/format-role-type";
 
 interface NationalConsortiumDetailsProps {
 	documentId: string;
@@ -27,15 +28,6 @@ interface NationalConsortiumDetailsProps {
 		description: JSONContent | null;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
-	initialRelatedEntityIds: Array<string>;
-	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
-	initialRelatedEntityTotal: number;
-	initialRelatedResourceIds: Array<string>;
-	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
-	initialRelatedResourceTotal: number;
-	initialSocialMediaIds: Array<string>;
-	initialSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
-	initialSocialMediaTotal: number;
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	selectedSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
@@ -63,10 +55,6 @@ export function NationalConsortiumDetails(
 
 	const t = useExtracted();
 	const format = useFormatter();
-
-	function formatRoleType(type: string): string {
-		return type.replaceAll("_", " ");
-	}
 
 	return (
 		<Fragment>
