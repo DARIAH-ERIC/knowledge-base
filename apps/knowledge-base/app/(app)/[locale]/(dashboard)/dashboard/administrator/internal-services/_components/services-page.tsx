@@ -120,7 +120,10 @@ export function ServicesPage(props: Readonly<ServicesPageProps>): ReactNode {
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-						<TableRow id={item.id}>
+						<TableRow
+							href={`/dashboard/administrator/internal-services/${item.id}/details`}
+							id={item.id}
+						>
 							<TableCell>{item.name}</TableCell>
 							<TableCell>{item.type.type}</TableCell>
 							<TableCell>

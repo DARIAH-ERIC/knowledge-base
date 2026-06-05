@@ -110,7 +110,7 @@ export function CountriesPage(props: Readonly<CountriesPageProps>): ReactNode {
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-						<TableRow>
+						<TableRow href={`/dashboard/administrator/countries/${item.entity.slug}/details`}>
 							<TableCell>{item.name}</TableCell>
 							<TableCell>
 								{item.memberObserverStatus != null ? (

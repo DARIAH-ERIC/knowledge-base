@@ -104,7 +104,9 @@ export function GovernanceBodiesPage(props: Readonly<GovernanceBodiesPageProps>)
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-						<TableRow>
+						<TableRow
+							href={`/dashboard/administrator/governance-bodies/${item.entity.slug}/details`}
+						>
 							<TableCell>{item.name}</TableCell>
 							<TableCell className="uppercase">{item.acronym}</TableCell>
 							<TableCell>
