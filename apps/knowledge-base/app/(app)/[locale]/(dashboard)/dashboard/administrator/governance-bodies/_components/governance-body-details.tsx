@@ -28,7 +28,13 @@ interface GovernanceBodyDetailsProps {
 	} & { image: { key: string; label: string; url: string } | null };
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
-	selectedSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
+	selectedSocialMediaItems: Array<{
+		id: string;
+		name: string;
+		type?: string;
+		url?: string;
+		description?: string;
+	}>;
 	personRelations: Array<PersonRelation>;
 	relations: Array<UnitRelation>;
 	publishAction: (documentId: string) => Promise<unknown>;
@@ -111,6 +117,25 @@ export function GovernanceBodyDetails(props: Readonly<GovernanceBodyDetailsProps
 							{selectedSocialMediaItems.map((socialMediaItem) => (
 								<li key={socialMediaItem.id} className="text-sm">
 									<span className="font-medium">{socialMediaItem.name}</span>
+									{socialMediaItem.type != null ? (
+										<Fragment>
+											{" · "}
+											<span className="text-muted-fg">{socialMediaItem.type}</span>
+										</Fragment>
+									) : null}
+									{socialMediaItem.url != null ? (
+										<Fragment>
+											{" · "}
+											<a
+												className="underline"
+												href={socialMediaItem.url}
+												rel="noreferrer"
+												target="_blank"
+											>
+												{socialMediaItem.url}
+											</a>
+										</Fragment>
+									) : null}
 								</li>
 							))}
 						</ul>
