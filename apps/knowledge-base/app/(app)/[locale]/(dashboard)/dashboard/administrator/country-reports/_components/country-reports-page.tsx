@@ -95,7 +95,7 @@ export function CountryReportsPage(props: Readonly<CountryReportsPageProps>): Re
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-						<TableRow id={item.id}>
+						<TableRow href={`/dashboard/administrator/country-reports/${item.id}`} id={item.id}>
 							<TableCell>{item.country.name}</TableCell>
 							<TableCell>{item.campaign.year}</TableCell>
 							<TableCell>{formatStatus(item.status)}</TableCell>

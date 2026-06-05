@@ -97,7 +97,10 @@ export function WorkingGroupReportsPage(props: Readonly<WorkingGroupReportsPageP
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-						<TableRow id={item.id}>
+						<TableRow
+							href={`/dashboard/administrator/working-group-reports/${item.id}`}
+							id={item.id}
+						>
 							<TableCell>{item.workingGroup.name}</TableCell>
 							<TableCell>{item.campaign.year}</TableCell>
 							<TableCell>{formatStatus(item.status)}</TableCell>
