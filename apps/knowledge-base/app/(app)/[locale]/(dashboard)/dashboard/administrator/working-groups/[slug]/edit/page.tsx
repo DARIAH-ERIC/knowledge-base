@@ -11,6 +11,7 @@ import { getMediaLibraryAssets } from "@/lib/data/assets";
 import { getContributionPersonOptions } from "@/lib/data/contributions";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
+import { getPersonRelationRoleOptions, getPersonRelations } from "@/lib/data/person-relations";
 import {
 	getEntityRelationOptions,
 	getEntityRelationOptionsByIds,
@@ -20,7 +21,6 @@ import {
 } from "@/lib/data/relations";
 import { getSocialMediaOptions, getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { getUnitRelationStatusOptions, getUnitRelations } from "@/lib/data/unit-relations";
-import { getWorkingGroupChairs } from "@/lib/data/working-group-chairs";
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
 import { images } from "@/lib/images";
@@ -127,13 +127,15 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 	const [
 		{ relatedEntityIds, relatedResourceIds },
 		relations,
-		chairs,
+		personRelations,
+		personRelationRoleOptions,
 		descriptionRows,
 		socialMediaRows,
 	] = await Promise.all([
 		getEntityRelations(documentId),
 		getUnitRelations(documentId),
-		getWorkingGroupChairs(documentId),
+		getPersonRelations(documentId),
+		getPersonRelationRoleOptions("working_group"),
 		db
 			.select({ content: schema.richTextContentBlocks.content })
 			.from(schema.richTextContentBlocks)
@@ -181,7 +183,6 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 
 	return (
 		<WorkingGroupEditForm
-			chairs={chairs}
 			documentId={documentId}
 			hasDraftChanges={hasDraftChanges}
 			initialAssets={initialAssets}
@@ -197,6 +198,8 @@ export default async function DashboardAdministratorEditWorkingGroupPage(
 			initialSocialMediaItems={initialSocialMedia.items}
 			initialSocialMediaTotal={initialSocialMedia.total}
 			isPublished={publishedId != null}
+			personRelationRoleOptions={personRelationRoleOptions}
+			personRelations={personRelations}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}

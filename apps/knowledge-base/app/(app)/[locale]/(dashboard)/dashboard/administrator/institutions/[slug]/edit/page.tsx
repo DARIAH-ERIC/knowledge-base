@@ -8,8 +8,10 @@ import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getOrganisationalUnitEditDataForAdmin } from "@/lib/data/admin-organisational-units";
 import { getMediaLibraryAssets } from "@/lib/data/assets";
+import { getContributionPersonOptions } from "@/lib/data/contributions";
 import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
 import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
+import { getPersonRelationRoleOptions, getPersonRelations } from "@/lib/data/person-relations";
 import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
 import { getSocialMediaOptions } from "@/lib/data/social-media";
 import { db } from "@/lib/db";
@@ -71,6 +73,9 @@ export default async function DashboardAdministratorEditInstitutionPage(
 		initialRelatedResources,
 		initialSocialMedia,
 		institutionData,
+		{ items: initialPersonItems, total: initialPersonTotal },
+		personRelations,
+		personRelationRoleOptions,
 	] = await Promise.all([
 		getMediaLibraryAssets({ imageUrlOptions: imageGridOptions, prefix: "logos" }),
 		getEntityRelationOptions(),
@@ -82,6 +87,9 @@ export default async function DashboardAdministratorEditInstitutionPage(
 			versionId: draftVersionId,
 			publishedVersionId: publishedId,
 		}),
+		getContributionPersonOptions(),
+		getPersonRelations(documentId),
+		getPersonRelationRoleOptions("institution"),
 	]);
 
 	if (institutionData == null) {
@@ -125,8 +133,12 @@ export default async function DashboardAdministratorEditInstitutionPage(
 			initialSocialMediaIds={socialMediaIds}
 			initialSocialMediaItems={initialSocialMedia.items}
 			initialSocialMediaTotal={initialSocialMedia.total}
+			initialPersonItems={initialPersonItems}
+			initialPersonTotal={initialPersonTotal}
 			institution={{ ...institution, image }}
 			isPublished={publishedId != null}
+			personRelationRoleOptions={personRelationRoleOptions}
+			personRelations={personRelations}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}

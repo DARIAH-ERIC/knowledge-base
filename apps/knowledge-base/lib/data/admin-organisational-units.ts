@@ -10,7 +10,6 @@ import {
 } from "@/lib/data/relations";
 import { getSocialMediaOptionsByIds } from "@/lib/data/social-media";
 import { getUnitRelationStatusOptions, getUnitRelations } from "@/lib/data/unit-relations";
-import { getWorkingGroupChairs } from "@/lib/data/working-group-chairs";
 import { db } from "@/lib/db";
 import { and, eq } from "@/lib/db/sql";
 
@@ -144,22 +143,4 @@ export async function getOrganisationalUnitEditDataForAdmin(
 		},
 		unitRelationStatusOptions,
 	};
-}
-
-export async function getWorkingGroupEditDataForAdmin(
-	currentUser: Pick<User, "role">,
-	slug: string,
-) {
-	const data = await getOrganisationalUnitEditDataForAdmin(currentUser, {
-		slug,
-		unitType: "working_group",
-	});
-
-	if (data == null) {
-		return null;
-	}
-
-	const chairs = await getWorkingGroupChairs(data.unit.entityVersion.entity.id);
-
-	return { ...data, chairs };
 }
