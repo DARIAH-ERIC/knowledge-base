@@ -107,7 +107,7 @@ export function WorkingGroupsPage(props: Readonly<WorkingGroupsPageProps>): Reac
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-						<TableRow>
+						<TableRow href={`/dashboard/administrator/working-groups/${item.entity.slug}/details`}>
 							<TableCell>{item.name}</TableCell>
 							<TableCell>{item.acronym}</TableCell>
 							<TableCell>{item.sshocMarketplaceActorId ?? "—"}</TableCell>

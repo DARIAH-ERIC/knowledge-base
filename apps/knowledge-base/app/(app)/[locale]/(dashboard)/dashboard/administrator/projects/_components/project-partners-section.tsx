@@ -201,7 +201,11 @@ export function ProjectPartnersSection(props: Readonly<ProjectPartnersSectionPro
 							{(item) => (
 								<TableRow id={item.id}>
 									<TableCell>{formatValue(item.roleName)}</TableCell>
-									<TableCell>{item.unitName}</TableCell>
+									<TableCell>
+										<div className="max-inline-64 truncate" title={item.unitName}>
+											{item.unitName}
+										</div>
+									</TableCell>
 									<TableCell>
 										{item.durationStart != null
 											? format.dateTime(item.durationStart, { dateStyle: "short" })

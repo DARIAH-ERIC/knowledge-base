@@ -185,6 +185,8 @@ export async function getSocialMediaOptionsByIds(ids: ReadonlyArray<string>) {
 						description: `${row.type} · ${row.url}`,
 						id: row.id,
 						name: row.name,
+						type: row.type,
+						url: row.url,
 					},
 				] as const,
 		),

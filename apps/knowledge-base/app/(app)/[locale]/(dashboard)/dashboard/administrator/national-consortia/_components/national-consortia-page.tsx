@@ -105,7 +105,9 @@ export function NationalConsortiaPage(props: Readonly<NationalConsortiaPageProps
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-						<TableRow>
+						<TableRow
+							href={`/dashboard/administrator/national-consortia/${item.entity.slug}/details`}
+						>
 							<TableCell>{item.name}</TableCell>
 							<TableCell>{item.countryName ?? "—"}</TableCell>
 							<TableCell>{item.sshocMarketplaceActorId ?? "—"}</TableCell>

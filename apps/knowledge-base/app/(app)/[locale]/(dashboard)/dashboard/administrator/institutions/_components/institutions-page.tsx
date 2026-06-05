@@ -101,7 +101,7 @@ export function InstitutionsPage(props: Readonly<InstitutionsPageProps>): ReactN
 				</TableHeader>
 				<TableBody items={items}>
 					{(item) => (
-						<TableRow>
+						<TableRow href={`/dashboard/administrator/institutions/${item.entity.slug}/details`}>
 							<TableCell>{item.name}</TableCell>
 							<TableCell>{item.acronym}</TableCell>
 							<TableCell>{item.ror}</TableCell>
