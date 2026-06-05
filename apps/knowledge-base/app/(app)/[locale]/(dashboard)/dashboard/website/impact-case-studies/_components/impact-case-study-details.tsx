@@ -14,6 +14,7 @@ import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
 import type { ImpactCaseStudyContributor } from "@/lib/data/article-contributors";
+import { formatRoleType } from "@/lib/format-role-type";
 
 interface ImpactCaseStudyDetailsProps {
 	contentBlocks: Array<ContentBlock>;
@@ -47,10 +48,6 @@ export function ImpactCaseStudyDetails(props: Readonly<ImpactCaseStudyDetailsPro
 	} = props;
 
 	const t = useExtracted();
-
-	function formatRoleType(type: string): string {
-		return type.replaceAll("_", " ");
-	}
 
 	return (
 		<Fragment>

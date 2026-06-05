@@ -13,9 +13,9 @@ import { Fragment, type ReactNode } from "react";
 
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
-import type { ContributionPersonOption } from "@/lib/data/contributions";
-import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
+import type { PersonRelation } from "@/lib/data/person-relations";
 import type { UnitRelation } from "@/lib/data/unit-relations";
+import { formatRoleType } from "@/lib/format-role-type";
 
 interface GovernanceBodyDetailsProps {
 	documentId: string;
@@ -23,25 +23,13 @@ interface GovernanceBodyDetailsProps {
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
 	governanceBody: Pick<schema.OrganisationalUnit, "acronym" | "id" | "name" | "summary"> & {
-		description?: JSONContent;
+		description: JSONContent | null;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } | null };
-	initialRelatedEntityIds: Array<string>;
-	initialRelatedEntityItems: Array<{ id: string; name: string; description?: string }>;
-	initialRelatedEntityTotal: number;
-	initialRelatedResourceIds: Array<string>;
-	initialRelatedResourceItems: Array<{ id: string; name: string; description?: string }>;
-	initialRelatedResourceTotal: number;
-	initialSocialMediaIds: Array<string>;
-	initialSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
-	initialSocialMediaTotal: number;
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	selectedSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
 	personRelations: Array<PersonRelation>;
-	personRelationRoleOptions: Array<PersonRelationRoleOption>;
-	initialPersonItems: Array<ContributionPersonOption>;
-	initialPersonTotal: number;
 	relations: Array<UnitRelation>;
 	publishAction: (documentId: string) => Promise<unknown>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
@@ -65,10 +53,6 @@ export function GovernanceBodyDetails(props: Readonly<GovernanceBodyDetailsProps
 
 	const t = useExtracted();
 	const format = useFormatter();
-
-	function formatRoleType(type: string): string {
-		return type.replaceAll("_", " ");
-	}
 
 	return (
 		<Fragment>

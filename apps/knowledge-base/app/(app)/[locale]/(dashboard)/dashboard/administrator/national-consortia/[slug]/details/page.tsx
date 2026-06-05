@@ -1,4 +1,3 @@
-import * as schema from "@dariah-eric/database/schema";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getExtracted } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -9,12 +8,11 @@ import { publishNationalConsortiumAction } from "@/app/(app)/[locale]/(dashboard
 import { imageGridOptions } from "@/config/assets.config";
 import { assertAuthenticated } from "@/lib/auth/session";
 import { getOrganisationalUnitEditDataForAdmin } from "@/lib/data/admin-organisational-units";
-import { ensureDraftVersion, getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
-import { organisationalUnitsLifecycleAdapter } from "@/lib/data/organisational-units.lifecycle-adapter";
-import { getEntityRelationOptions, getResourceRelationOptions } from "@/lib/data/relations";
-import { getSocialMediaOptions } from "@/lib/data/social-media";
+import {
+	getRichTextFieldContent,
+	resolveSelectedDetailVersion,
+} from "@/lib/data/entity-detail-view";
 import { db } from "@/lib/db";
-import { and, eq } from "@/lib/db/sql";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
 
@@ -42,7 +40,7 @@ export default async function DashboardAdministratorNationalConsortiumDetailsPag
 	const { user } = await assertAuthenticated();
 
 	const anyVersion = await db.query.organisationalUnits.findFirst({
-		where: { entityVersion: { entity: { slug } }, type: { type: "national_consortium" } },
+		where: { entityVersion: { entity: { slug } } },
 		columns: {},
 		with: {
 			entityVersion: {
@@ -57,71 +55,17 @@ export default async function DashboardAdministratorNationalConsortiumDetailsPag
 	}
 
 	const documentId = anyVersion.entityVersion.entity.id;
-	const { draftVersionId, hasDraftChanges, publishedId } = await db.transaction(async (tx) => {
-		const draftVersionId = await ensureDraftVersion(
-			tx,
-			documentId,
-			organisationalUnitsLifecycleAdapter,
-		);
-		const { hasDraftChanges, publishedId } = await getDocumentLifecycleState(tx, documentId);
-		return { draftVersionId, hasDraftChanges, publishedId };
-	});
-
-	/**
-	 * The version selector and "with draft changes" UX only kick in when the draft actually diverges
-	 * from the published version. Right after publish, a draft row still exists as a clone of the new
-	 * published version but has no real changes — we treat that as published-only.
-	 */
-	const showVersionSelector = hasDraftChanges && publishedId != null;
 
 	const { version } = await searchParamsPromise;
-	let selectedVersion: "draft" | "published";
-	let versionId: string | null;
 
-	if (showVersionSelector) {
-		selectedVersion = version === "published" ? "published" : "draft";
-		versionId = selectedVersion === "published" ? publishedId : draftVersionId;
-	} else if (publishedId != null) {
-		selectedVersion = "published";
-		versionId = publishedId;
-	} else {
-		selectedVersion = "draft";
-		versionId = draftVersionId;
-	}
-
-	if (!versionId) {
+	const versionState = await resolveSelectedDetailVersion(documentId, version);
+	if (versionState == null) {
 		notFound();
 	}
+	const { hasDraftChanges, publishedId, selectedVersion, versionId } = versionState;
 
-	const [
-		descriptionRows,
-		initialRelatedEntities,
-		initialRelatedResources,
-		initialSocialMedia,
-		nationalConsortiumData,
-	] = await Promise.all([
-		db
-			.select({
-				content: schema.richTextContentBlocks.content,
-				id: schema.richTextContentBlocks.id,
-			})
-			.from(schema.richTextContentBlocks)
-			.innerJoin(schema.contentBlocks, eq(schema.richTextContentBlocks.id, schema.contentBlocks.id))
-			.innerJoin(schema.fields, eq(schema.contentBlocks.fieldId, schema.fields.id))
-			.innerJoin(
-				schema.entityTypesFieldsNames,
-				eq(schema.fields.fieldNameId, schema.entityTypesFieldsNames.id),
-			)
-			.where(
-				and(
-					eq(schema.fields.entityVersionId, versionId),
-					eq(schema.entityTypesFieldsNames.fieldName, "description"),
-				),
-			)
-			.limit(1),
-		getEntityRelationOptions(),
-		getResourceRelationOptions(),
-		getSocialMediaOptions(),
+	const [description, nationalConsortiumData] = await Promise.all([
+		getRichTextFieldContent(versionId, "description"),
 		getOrganisationalUnitEditDataForAdmin(user, {
 			slug,
 			unitType: "national_consortium",
@@ -136,16 +80,11 @@ export default async function DashboardAdministratorNationalConsortiumDetailsPag
 
 	const {
 		relations,
-		relatedEntityIds,
-		relatedResourceIds,
 		selectedRelatedEntities,
 		selectedRelatedResources,
 		selectedSocialMediaItems,
-		socialMediaIds,
 		unit: nationalConsortium,
 	} = nationalConsortiumData;
-
-	const description = descriptionRows.at(0)?.content ?? null;
 
 	const image =
 		nationalConsortium.image != null
@@ -162,15 +101,6 @@ export default async function DashboardAdministratorNationalConsortiumDetailsPag
 		<NationalConsortiumDetails
 			documentId={documentId}
 			hasDraft={hasDraftChanges}
-			initialRelatedEntityIds={relatedEntityIds}
-			initialRelatedEntityItems={initialRelatedEntities.items}
-			initialRelatedEntityTotal={initialRelatedEntities.total}
-			initialRelatedResourceIds={relatedResourceIds}
-			initialRelatedResourceItems={initialRelatedResources.items}
-			initialRelatedResourceTotal={initialRelatedResources.total}
-			initialSocialMediaIds={socialMediaIds}
-			initialSocialMediaItems={initialSocialMedia.items}
-			initialSocialMediaTotal={initialSocialMedia.total}
 			isPublished={publishedId != null}
 			nationalConsortium={{ ...nationalConsortium, description, image }}
 			relations={relations}
