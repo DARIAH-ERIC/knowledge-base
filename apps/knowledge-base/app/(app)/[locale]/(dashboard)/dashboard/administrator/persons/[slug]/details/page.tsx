@@ -41,16 +41,22 @@ export default async function DashboardAdministratorPersonDetailsPage(
 
 	await assertAuthenticated();
 
-	const doc = await db.query.entities.findFirst({
-		where: { slug },
-		columns: { id: true },
+	const anyVersion = await db.query.persons.findFirst({
+		where: { entityVersion: { entity: { slug } } },
+		columns: {},
+		with: {
+			entityVersion: {
+				columns: {},
+				with: { entity: { columns: { id: true } } },
+			},
+		},
 	});
 
-	if (doc == null) {
+	if (anyVersion == null) {
 		notFound();
 	}
 
-	const documentId = doc.id;
+	const documentId = anyVersion.entityVersion.entity.id;
 
 	const { version } = await searchParamsPromise;
 
@@ -117,7 +123,7 @@ export default async function DashboardAdministratorPersonDetailsPage(
 		<PersonDetails
 			contributions={contributions}
 			discardDraftAction={discardPersonDraftAction}
-			documentId={doc.id}
+			documentId={documentId}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
 			person={{ ...person, biography, image }}

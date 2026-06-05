@@ -40,14 +40,22 @@ export default async function DashboardWebsitePageItemDetailsPage(
 
 	const { slug } = await params;
 
-	const doc = await db.query.entities.findFirst({
-		where: { slug },
-		columns: { id: true },
+	const anyVersion = await db.query.pages.findFirst({
+		where: { entityVersion: { entity: { slug } } },
+		columns: {},
+		with: {
+			entityVersion: {
+				columns: {},
+				with: { entity: { columns: { id: true } } },
+			},
+		},
 	});
 
-	if (doc == null) {
+	if (anyVersion == null) {
 		notFound();
 	}
+
+	const doc = { id: anyVersion.entityVersion.entity.id };
 
 	const { draftId, publishedId, hasDraftChanges } = await db.transaction(async (tx) =>
 		getDocumentLifecycleState(tx, doc.id),
