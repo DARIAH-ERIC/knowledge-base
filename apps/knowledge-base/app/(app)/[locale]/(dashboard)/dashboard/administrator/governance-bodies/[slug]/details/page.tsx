@@ -105,17 +105,22 @@ export default async function DashboardAdministratorGovernanceBodyDetailsPage(
 		notFound();
 	}
 
-	const [personRelations, { relatedEntityIds, relatedResourceIds }, relations, socialMediaRows, description] =
-		await Promise.all([
-			getPersonRelations(documentId),
-			getEntityRelations(documentId),
-			getUnitRelations(documentId),
-			db.query.organisationalUnitsToSocialMedia.findMany({
-				where: { organisationalUnitId: governanceBody.id },
-				columns: { socialMediaId: true },
-			}),
-			getRichTextFieldContent(versionId, "description"),
-		]);
+	const [
+		personRelations,
+		{ relatedEntityIds, relatedResourceIds },
+		relations,
+		socialMediaRows,
+		description,
+	] = await Promise.all([
+		getPersonRelations(documentId),
+		getEntityRelations(documentId),
+		getUnitRelations(documentId),
+		db.query.organisationalUnitsToSocialMedia.findMany({
+			where: { organisationalUnitId: governanceBody.id },
+			columns: { socialMediaId: true },
+		}),
+		getRichTextFieldContent(versionId, "description"),
+	]);
 
 	const socialMediaIds = socialMediaRows.map((row) => row.socialMediaId);
 
