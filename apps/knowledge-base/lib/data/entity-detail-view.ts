@@ -21,9 +21,9 @@ export async function resolveSelectedDetailVersion(
 	documentId: string,
 	version: string | Array<string> | undefined,
 ): Promise<SelectedDetailVersion | null> {
-	const { draftId, hasDraftChanges, publishedId } = await db.transaction((tx) => {
-		return getDocumentLifecycleState(tx, documentId);
-	});
+	const { draftId, hasDraftChanges, publishedId } = await db.transaction((tx) =>
+		getDocumentLifecycleState(tx, documentId),
+	);
 
 	// The version selector only kicks in when the draft actually diverges from published. Right after
 	// publish a draft clone exists with no real changes -> treat as published-only.
