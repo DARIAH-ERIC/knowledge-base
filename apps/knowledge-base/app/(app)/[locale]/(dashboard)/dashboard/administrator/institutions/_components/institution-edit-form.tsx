@@ -12,11 +12,14 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { PersonRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
 import { InstitutionForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_components/institution-form";
 import { discardInstitutionDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/discard-institution-draft.action";
 import { publishInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/publish-institution.action";
 import { updateInstitutionAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/institutions/_lib/update-institution.action";
+import type { ContributionPersonOption } from "@/lib/data/contributions";
+import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
 import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
 
 interface InstitutionEditFormProps {
@@ -40,6 +43,10 @@ interface InstitutionEditFormProps {
 	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
 	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	selectedSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
+	personRelations: Array<PersonRelation>;
+	personRelationRoleOptions: Array<PersonRelationRoleOption>;
+	initialPersonItems: Array<ContributionPersonOption>;
+	initialPersonTotal: number;
 	relations: Array<UnitRelation>;
 	unitRelationStatusOptions: Array<UnitRelationStatusOption>;
 }
@@ -63,6 +70,10 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 		selectedRelatedEntities,
 		selectedRelatedResources,
 		selectedSocialMediaItems,
+		personRelations,
+		personRelationRoleOptions,
+		initialPersonItems,
+		initialPersonTotal,
 		relations,
 		unitRelationStatusOptions,
 	} = props;
@@ -77,6 +88,7 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 			<EntityEditTabs defaultTab="details">
 				<TabList aria-label={t("Edit institution")}>
 					<EntityEditTab id="details">{t("Details")}</EntityEditTab>
+					<EntityEditTab id="people">{t("People")}</EntityEditTab>
 					<EntityEditTab id="relations">{t("Relations")}</EntityEditTab>
 				</TabList>
 
@@ -112,6 +124,16 @@ export function InstitutionEditForm(props: Readonly<InstitutionEditFormProps>): 
 						selectedRelatedEntities={selectedRelatedEntities}
 						selectedRelatedResources={selectedRelatedResources}
 						selectedSocialMediaItems={selectedSocialMediaItems}
+					/>
+				</TabPanel>
+
+				<TabPanel id="people" shouldPreserveState={true}>
+					<PersonRelationsSection
+						initialPersonItems={initialPersonItems}
+						initialPersonTotal={initialPersonTotal}
+						relations={personRelations}
+						roleOptions={personRelationRoleOptions}
+						unitId={documentId}
 					/>
 				</TabPanel>
 

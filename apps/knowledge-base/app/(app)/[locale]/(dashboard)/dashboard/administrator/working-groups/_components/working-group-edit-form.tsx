@@ -12,15 +12,15 @@ import {
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-edit-tabs";
 import { EntityFormHeader } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-form";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
+import { PersonRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/person-relations-section";
 import { UnitRelationsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/unit-relations-section";
-import { WorkingGroupChairsSection } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-chairs-section";
 import { WorkingGroupForm } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_components/working-group-form";
 import { discardWorkingGroupDraftAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/discard-working-group-draft.action";
 import { publishWorkingGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/publish-working-group.action";
 import { updateWorkingGroupAction } from "@/app/(app)/[locale]/(dashboard)/dashboard/administrator/working-groups/_lib/update-working-group.action";
-import type { AvailablePerson } from "@/lib/data/article-contributors";
+import type { ContributionPersonOption } from "@/lib/data/contributions";
+import type { PersonRelation, PersonRelationRoleOption } from "@/lib/data/person-relations";
 import type { UnitRelation, UnitRelationStatusOption } from "@/lib/data/unit-relations";
-import type { WorkingGroupChair } from "@/lib/data/working-group-chairs";
 
 interface WorkingGroupEditFormProps {
 	initialAssets: Array<{ key: string; label: string; url: string }>;
@@ -48,8 +48,9 @@ interface WorkingGroupEditFormProps {
 	selectedSocialMediaItems: Array<{ id: string; name: string; description?: string }>;
 	relations: Array<UnitRelation>;
 	unitRelationStatusOptions: Array<UnitRelationStatusOption>;
-	chairs: Array<WorkingGroupChair>;
-	initialPersonItems: Array<AvailablePerson>;
+	personRelations: Array<PersonRelation>;
+	personRelationRoleOptions: Array<PersonRelationRoleOption>;
+	initialPersonItems: Array<ContributionPersonOption>;
 	initialPersonTotal: number;
 }
 
@@ -74,7 +75,8 @@ export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>)
 		selectedSocialMediaItems,
 		relations,
 		unitRelationStatusOptions,
-		chairs,
+		personRelations,
+		personRelationRoleOptions,
 		initialPersonItems,
 		initialPersonTotal,
 	} = props;
@@ -89,7 +91,7 @@ export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>)
 			<EntityEditTabs defaultTab="details">
 				<TabList aria-label={t("Edit working group")}>
 					<EntityEditTab id="details">{t("Details")}</EntityEditTab>
-					<EntityEditTab id="chairs">{t("Chairs")}</EntityEditTab>
+					<EntityEditTab id="people">{t("People")}</EntityEditTab>
 					<EntityEditTab id="relations">{t("Relations")}</EntityEditTab>
 				</TabList>
 
@@ -128,11 +130,12 @@ export function WorkingGroupEditForm(props: Readonly<WorkingGroupEditFormProps>)
 					/>
 				</TabPanel>
 
-				<TabPanel id="chairs" shouldPreserveState={true}>
-					<WorkingGroupChairsSection
-						chairs={chairs}
+				<TabPanel id="people" shouldPreserveState={true}>
+					<PersonRelationsSection
 						initialPersonItems={initialPersonItems}
 						initialPersonTotal={initialPersonTotal}
+						relations={personRelations}
+						roleOptions={personRelationRoleOptions}
 						unitId={documentId}
 					/>
 				</TabPanel>

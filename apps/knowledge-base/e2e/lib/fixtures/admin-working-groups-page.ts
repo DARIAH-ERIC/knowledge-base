@@ -141,7 +141,7 @@ export class AdminWorkingGroupsPage {
 		month: number,
 		day: number,
 	): Promise<void> {
-		// Scoped to the "add relation" form to avoid collision with the chairs section date pickers.
+		// Scoped to the "add relation" form to avoid collision with the people section date pickers.
 		const form = this.page
 			.locator("form")
 			.filter({ has: this.page.getByRole("button", { name: "Add relation" }) });
@@ -186,22 +186,30 @@ export class AdminWorkingGroupsPage {
 	}
 
 	// ---------------------------------------------------------------------------
-	// Edit page — chairs section
+	// Edit page — people section
 	// ---------------------------------------------------------------------------
 
-	async goToChairsTab(): Promise<void> {
-		await this.page.getByRole("tab", { name: "Chairs" }).click();
+	async goToPeopleTab(): Promise<void> {
+		await this.page.getByRole("tab", { name: "People" }).click();
 	}
 
-	chairsTable(): Locator {
-		return this.page.getByRole("grid", { name: "chairs" });
+	peopleTable(): Locator {
+		return this.page.getByRole("grid", { name: "people" });
 	}
 
-	async selectFirstChair(): Promise<void> {
-		// Scoped to the "add chair" form to avoid the person picker inside the edit-chair dialog.
+	async selectFirstPersonRole(): Promise<void> {
+		const control = this.page
+			.locator('[data-slot="control"]')
+			.filter({ has: this.page.getByText("Role", { exact: true }) });
+		await control.locator("button").click();
+		await this.page.getByRole("option").first().click();
+	}
+
+	async selectFirstPerson(): Promise<void> {
+		// Scoped to the "add person" form to avoid the person picker inside the edit dialog.
 		const form = this.page
 			.locator("form")
-			.filter({ has: this.page.getByRole("button", { name: "Add chair" }) });
+			.filter({ has: this.page.getByRole("button", { name: "Add person" }) });
 		await form.getByRole("button", { name: "No person selected" }).click();
 		// Search field is auto-focused; press Enter to trigger a search with an empty query.
 		await this.page.keyboard.press("Enter");
@@ -209,16 +217,16 @@ export class AdminWorkingGroupsPage {
 		await this.page.getByRole("option").first().click();
 	}
 
-	async fillChairDatePicker(
+	async fillPersonRelationDatePicker(
 		label: string,
 		year: number,
 		month: number,
 		day: number,
 	): Promise<void> {
-		// Scoped to the "add chair" form to avoid collision with the unit relations date pickers.
+		// Scoped to the "add person" form to avoid collision with the unit relations date pickers.
 		const form = this.page
 			.locator("form")
-			.filter({ has: this.page.getByRole("button", { name: "Add chair" }) });
+			.filter({ has: this.page.getByRole("button", { name: "Add person" }) });
 		const group = form.getByRole("group", { name: label });
 		await group.getByRole("spinbutton", { name: /day/i }).click();
 		await this.page.keyboard.type(String(day).padStart(2, "0"));
@@ -228,21 +236,21 @@ export class AdminWorkingGroupsPage {
 		await this.page.keyboard.type(String(year));
 	}
 
-	async submitAddChair(): Promise<void> {
+	async submitAddPerson(): Promise<void> {
 		await waitForActionSuccess({
 			page: this.page,
 			trigger: async () => {
-				await this.page.getByRole("button", { name: "Add chair" }).click();
+				await this.page.getByRole("button", { name: "Add person" }).click();
 			},
 		});
 	}
 
-	async clickEndChair(): Promise<void> {
-		await this.chairsTable().getByRole("button", { name: "End chairship" }).first().click();
+	async clickEndPersonRelation(): Promise<void> {
+		await this.peopleTable().getByRole("button", { name: "End person relation" }).first().click();
 	}
 
-	async fillEndChairDate(year: number, month: number, day: number): Promise<void> {
-		const dialog = this.page.getByRole("alertdialog", { name: "End chairship" });
+	async fillEndPersonRelationDate(year: number, month: number, day: number): Promise<void> {
+		const dialog = this.page.getByRole("alertdialog", { name: "End person relation" });
 		await dialog.waitFor({ state: "visible" });
 		const group = dialog.getByRole("group", { name: "End date" });
 		await group.getByRole("spinbutton", { name: /day/i }).click();
@@ -253,19 +261,26 @@ export class AdminWorkingGroupsPage {
 		await this.page.keyboard.type(String(year));
 	}
 
-	async confirmEndChair(): Promise<void> {
-		const dialog = this.page.getByRole("alertdialog", { name: "End chairship" });
+	async confirmEndPersonRelation(): Promise<void> {
+		const dialog = this.page.getByRole("alertdialog", { name: "End person relation" });
 		await dialog.getByRole("button", { name: "Confirm" }).click();
 		await dialog.waitFor({ state: "hidden" });
 	}
 
-	async clickEditChair(): Promise<void> {
-		await this.chairsTable().getByRole("button", { name: "Edit chair" }).first().click();
-		await this.page.getByRole("dialog", { name: "Edit chair" }).waitFor({ state: "visible" });
+	async clickEditPersonRelation(): Promise<void> {
+		await this.peopleTable().getByRole("button", { name: "Edit person relation" }).first().click();
+		await this.page
+			.getByRole("dialog", { name: "Edit person relation" })
+			.waitFor({ state: "visible" });
 	}
 
-	async fillEditChairDate(label: string, year: number, month: number, day: number): Promise<void> {
-		const dialog = this.page.getByRole("dialog", { name: "Edit chair" });
+	async fillEditPersonRelationDate(
+		label: string,
+		year: number,
+		month: number,
+		day: number,
+	): Promise<void> {
+		const dialog = this.page.getByRole("dialog", { name: "Edit person relation" });
 		const group = dialog.getByRole("group", { name: label });
 		await group.getByRole("spinbutton", { name: /day/i }).click();
 		await this.page.keyboard.type(String(day).padStart(2, "0"));
@@ -275,21 +290,24 @@ export class AdminWorkingGroupsPage {
 		await this.page.keyboard.type(String(year));
 	}
 
-	async saveEditChair(): Promise<void> {
-		const dialog = this.page.getByRole("dialog", { name: "Edit chair" });
+	async saveEditPersonRelation(): Promise<void> {
+		const dialog = this.page.getByRole("dialog", { name: "Edit person relation" });
 		await dialog.getByRole("button", { name: "Save" }).click();
 		await dialog.waitFor({ state: "hidden" });
 	}
 
-	async clickDeleteChair(): Promise<void> {
-		await this.chairsTable().getByRole("button", { name: "Delete chair" }).first().click();
+	async clickDeletePersonRelation(): Promise<void> {
+		await this.peopleTable()
+			.getByRole("button", { name: "Delete person relation" })
+			.first()
+			.click();
 		await this.page
-			.getByRole("alertdialog", { name: "Delete chair" })
+			.getByRole("alertdialog", { name: "Delete person relation" })
 			.waitFor({ state: "visible" });
 	}
 
-	async confirmDeleteChair(): Promise<void> {
-		const dialog = this.page.getByRole("alertdialog", { name: "Delete chair" });
+	async confirmDeletePersonRelation(): Promise<void> {
+		const dialog = this.page.getByRole("alertdialog", { name: "Delete person relation" });
 		await dialog.getByRole("button", { name: "Delete" }).click();
 		await dialog.waitFor({ state: "hidden" });
 	}

@@ -353,51 +353,51 @@ test.describe("admin relation management", () => {
 		expect(relations).toHaveLength(0);
 	});
 
-	test("should edit and delete a chair from the chairs tab", async ({
+	test("should edit and delete a person relation from the people tab", async ({
 		createAdminWorkingGroupsPage,
 		db,
 	}) => {
 		const workerIndex = test.info().workerIndex;
 		const workingGroupsPage = createAdminWorkingGroupsPage(workerIndex);
-		const name = `${workingGroupsPage.workerPrefix} Chairs Tab Actions ${randomUUID()}`;
+		const name = `${workingGroupsPage.workerPrefix} People Tab Actions ${randomUUID()}`;
 
 		await workingGroupsPage.gotoCreate();
 		await workingGroupsPage.fillName(name);
-		await workingGroupsPage.fillDescription("Description for chairs tab action test.");
+		await workingGroupsPage.fillDescription("Description for people tab action test.");
 		await workingGroupsPage.submitForm();
 
 		await workingGroupsPage.gotoEditFromList(name);
-		await workingGroupsPage.goToChairsTab();
-		await workingGroupsPage.selectFirstChair();
-		await workingGroupsPage.fillChairDatePicker("Start date", 2025, 1, 1);
-		await workingGroupsPage.submitAddChair();
+		await workingGroupsPage.goToPeopleTab();
+		await workingGroupsPage.selectFirstPersonRole();
+		await workingGroupsPage.selectFirstPerson();
+		await workingGroupsPage.fillPersonRelationDatePicker("Start date", 2025, 1, 1);
+		await workingGroupsPage.submitAddPerson();
 
 		await expect(
-			workingGroupsPage.chairsTable().getByRole("button", { name: "Edit chair" }),
+			workingGroupsPage.peopleTable().getByRole("button", { name: "Edit person relation" }),
 		).toBeVisible();
 		await expect(
-			workingGroupsPage.chairsTable().getByRole("button", { name: "Delete chair" }),
+			workingGroupsPage.peopleTable().getByRole("button", { name: "Delete person relation" }),
 		).toBeVisible();
 
 		const workingGroup = await db.getWorkingGroupByName(name);
-		let chairs = await db.getPersonRelationsByUnitVersionId(workingGroup!.id);
-		expect(chairs).toHaveLength(1);
-		expect(chairs[0]!.roleType).toBe("is_chair_of");
+		let relations = await db.getPersonRelationsByUnitVersionId(workingGroup!.id);
+		expect(relations).toHaveLength(1);
 
-		await workingGroupsPage.clickEditChair();
-		await workingGroupsPage.fillEditChairDate("End date", 2025, 6, 30);
-		await workingGroupsPage.saveEditChair();
+		await workingGroupsPage.clickEditPersonRelation();
+		await workingGroupsPage.fillEditPersonRelationDate("End date", 2025, 6, 30);
+		await workingGroupsPage.saveEditPersonRelation();
 
-		chairs = await db.getPersonRelationsByUnitVersionId(workingGroup!.id);
-		expect(chairs[0]!.duration.end).toStrictEqual(new Date("2025-06-30T00:00:00.000Z"));
+		relations = await db.getPersonRelationsByUnitVersionId(workingGroup!.id);
+		expect(relations[0]!.duration.end).toStrictEqual(new Date("2025-06-30T00:00:00.000Z"));
 
-		await workingGroupsPage.clickDeleteChair();
-		await workingGroupsPage.confirmDeleteChair();
-		await expect(workingGroupsPage.chairsTable()).toBeHidden();
-		await expect(workingGroupsPage.page.getByText("No chairs.")).toBeVisible();
+		await workingGroupsPage.clickDeletePersonRelation();
+		await workingGroupsPage.confirmDeletePersonRelation();
+		await expect(workingGroupsPage.peopleTable()).toBeHidden();
+		await expect(workingGroupsPage.page.getByText("No people assigned.")).toBeVisible();
 
-		chairs = await db.getPersonRelationsByUnitVersionId(workingGroup!.id);
-		expect(chairs).toHaveLength(0);
+		relations = await db.getPersonRelationsByUnitVersionId(workingGroup!.id);
+		expect(relations).toHaveLength(0);
 	});
 
 	test("should edit and delete a contribution from the contributions tab", async ({
