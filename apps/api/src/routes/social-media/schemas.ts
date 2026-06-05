@@ -1,15 +1,15 @@
 import * as schema from "@dariah-eric/database/schema";
 import * as v from "valibot";
 
-import { PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
+import { CalendarDateSchema, PaginatedResponseSchema, PaginationQuerySchema } from "@/lib/schemas";
 
 export const SocialMediaSchema = v.pipe(
 	v.object({
 		...v.pick(schema.SocialMediaSelectSchema, ["id", "name", "url"]).entries,
 		duration: v.nullable(
 			v.object({
-				start: v.string(),
-				end: v.nullable(v.string()),
+				start: CalendarDateSchema,
+				end: v.nullable(CalendarDateSchema),
 			}),
 		),
 		type: v.picklist(schema.socialMediaTypesEnum),

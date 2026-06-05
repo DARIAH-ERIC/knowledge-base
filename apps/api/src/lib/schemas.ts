@@ -43,6 +43,18 @@ export const PaginatedResponseSchema = v.object({
 	total: v.number(),
 });
 
+/**
+ * Duration/date fields are stored as a UTC calendar date — the time is pinned to midnight UTC as a
+ * placeholder, so consumers should treat the value as a plain date and never localize it.
+ */
+export const CalendarDateSchema = v.pipe(
+	v.string(),
+	v.isoTimestamp(),
+	v.description(
+		"Calendar date (day granularity); the time-of-day component carries no meaning. Do not convert to local time, or the day may shift.",
+	),
+);
+
 export const RelatedEntitiesSchema = v.array(
 	v.object({
 		id: v.pipe(v.string(), v.uuid()),

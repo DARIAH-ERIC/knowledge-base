@@ -3,6 +3,7 @@ import * as v from "valibot";
 
 import { ContentBlockSchema } from "@/lib/content-blocks";
 import {
+	CalendarDateSchema,
 	PaginatedResponseSchema,
 	PaginationQuerySchema,
 	RelatedEntitiesSchema,
@@ -13,8 +14,8 @@ const eventBaseObject = v.object({
 	...v.pick(schema.EventSelectSchema, ["id", "title", "summary", "location", "isFullDay"]).entries,
 	image: v.object({ url: v.string() }),
 	duration: v.object({
-		start: v.pipe(v.string(), v.isoTimestamp()),
-		end: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+		start: CalendarDateSchema,
+		end: v.optional(CalendarDateSchema),
 	}),
 	entity: v.pick(schema.EntitySelectSchema, ["slug"]),
 	publishedAt: v.pipe(v.string(), v.isoTimestamp()),
