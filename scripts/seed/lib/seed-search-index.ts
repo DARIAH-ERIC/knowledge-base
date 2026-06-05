@@ -41,6 +41,7 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 						source_id: f.string.alphanumeric(12),
 						national_consortia: [],
 						working_groups: [],
+						institutions: [],
 						upstream_sources: null,
 						kind: f.helpers.arrayElement(["article", "book", "conference", "thesis", null]),
 						authors: f.helpers.multiple(() => f.person.fullName(), { count: { min: 1, max: 5 } }),
@@ -63,6 +64,9 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 						working_groups: f.helpers.multiple(() => f.lorem.slug(2), {
 							count: { min: 0, max: 2 },
 						}),
+						institutions: f.helpers.multiple(() => f.lorem.slug(2), {
+							count: { min: 0, max: 2 },
+						}),
 						authors: null,
 						year: null,
 						pid: null,
@@ -83,6 +87,9 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 						working_groups: f.helpers.multiple(() => f.lorem.slug(2), {
 							count: { min: 0, max: 2 },
 						}),
+						institutions: f.helpers.multiple(() => f.lorem.slug(2), {
+							count: { min: 0, max: 2 },
+						}),
 						authors: null,
 						year: null,
 						pid: null,
@@ -99,6 +106,9 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 							count: { min: 0, max: 2 },
 						}),
 						working_groups: f.helpers.multiple(() => f.lorem.slug(2), {
+							count: { min: 0, max: 2 },
+						}),
+						institutions: f.helpers.multiple(() => f.lorem.slug(2), {
 							count: { min: 0, max: 2 },
 						}),
 						upstream_sources: [],
@@ -119,6 +129,9 @@ export async function seed(client: Client, config: SeedConfig = {}): Promise<voi
 							count: { min: 0, max: 2 },
 						}),
 						working_groups: f.helpers.multiple(() => f.lorem.slug(2), {
+							count: { min: 0, max: 2 },
+						}),
+						institutions: f.helpers.multiple(() => f.lorem.slug(2), {
 							count: { min: 0, max: 2 },
 						}),
 						upstream_sources: null,

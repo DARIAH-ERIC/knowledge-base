@@ -7,6 +7,7 @@ import { toPlainText } from "./markdown/to-plain-text";
 export interface SshocOrgUnitLookups {
 	sshocActorIdToNc: Map<number, Set<string>>;
 	sshocActorIdToWg: Map<number, Set<string>>;
+	sshocActorIdToInstitution: Map<number, Set<string>>;
 }
 
 export function createSshocItem(
@@ -50,6 +51,7 @@ export function createSshocItem(
 
 	const nationalConsortia = new Set<string>();
 	const workingGroups = new Set<string>();
+	const institutionSlugs = new Set<string>();
 	for (const contributor of item.contributors) {
 		const actorId = contributor.actor.id;
 		const ncSlugs = orgUnits.sshocActorIdToNc.get(actorId);
@@ -64,9 +66,16 @@ export function createSshocItem(
 				workingGroups.add(slug);
 			}
 		}
+		const instSlugs = orgUnits.sshocActorIdToInstitution.get(actorId);
+		if (instSlugs != null) {
+			for (const slug of instSlugs) {
+				institutionSlugs.add(slug);
+			}
+		}
 	}
 	const national_consortia = [...nationalConsortia];
 	const working_groups = [...workingGroups];
+	const institutions = [...institutionSlugs];
 
 	const sourceUpdatedAt = new Date(item.lastInfoUpdate).getTime();
 
@@ -86,6 +95,7 @@ export function createSshocItem(
 					links,
 					national_consortia,
 					working_groups,
+					institutions,
 					upstream_sources: null,
 					kind: null,
 					authors: null,
@@ -107,6 +117,7 @@ export function createSshocItem(
 				links,
 				national_consortia,
 				working_groups,
+				institutions,
 				upstream_sources: null,
 				kind: isCoreService(item) ? "core" : "community",
 				authors: null,
@@ -129,6 +140,7 @@ export function createSshocItem(
 				links,
 				national_consortia,
 				working_groups,
+				institutions,
 				upstream_sources: [],
 				kind: null,
 				authors: null,
@@ -151,6 +163,7 @@ export function createSshocItem(
 				links,
 				national_consortia,
 				working_groups,
+				institutions,
 				upstream_sources: null,
 				kind: null,
 				authors: null,
