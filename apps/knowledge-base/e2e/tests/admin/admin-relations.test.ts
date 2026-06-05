@@ -353,7 +353,7 @@ test.describe("admin relation management", () => {
 		expect(relations).toHaveLength(0);
 	});
 
-	test("should edit and delete a person relation from the people tab", async ({
+	test("should edit and delete a person relation from the working group people tab", async ({
 		createAdminWorkingGroupsPage,
 		db,
 	}) => {
