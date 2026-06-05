@@ -52,9 +52,16 @@ export default async function SettingsPage(
 	}
 
 	let recoveryCode: string | null = null;
+	let showRecoveryCodeForm = false;
 
 	if (user.isTwoFactorRegistered) {
-		recoveryCode = await auth.getRecoveryCode(user.id);
+		showRecoveryCodeForm = true;
+
+		try {
+			recoveryCode = await auth.getRecoveryCode(user.id);
+		} catch {
+			recoveryCode = null;
+		}
 	}
 
 	return (
@@ -107,7 +114,7 @@ export default async function SettingsPage(
 					</section>
 				) : null}
 
-				{recoveryCode != null && (
+				{showRecoveryCodeForm ? (
 					<section className="flex flex-col gap-y-4">
 						<div>
 							<h2 className="text-base/8 font-semibold">{t("Recovery code")}</h2>
@@ -115,7 +122,7 @@ export default async function SettingsPage(
 
 						<RecoveryCodeForm recoveryCode={recoveryCode} />
 					</section>
-				)}
+				) : null}
 			</div>
 		</Main>
 	);
