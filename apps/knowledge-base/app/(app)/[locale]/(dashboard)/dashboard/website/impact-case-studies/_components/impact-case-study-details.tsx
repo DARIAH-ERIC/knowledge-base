@@ -13,9 +13,11 @@ import type { ContentBlock } from "@/app/(app)/[locale]/(dashboard)/dashboard/_c
 import { ContentBlocksView } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/content-blocks-view";
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
+import type { ImpactCaseStudyContributor } from "@/lib/data/article-contributors";
 
 interface ImpactCaseStudyDetailsProps {
 	contentBlocks: Array<ContentBlock>;
+	contributors: Array<ImpactCaseStudyContributor>;
 	documentId: string;
 	hasDraft: boolean;
 	isPublished: boolean;
@@ -23,6 +25,8 @@ interface ImpactCaseStudyDetailsProps {
 	impactCaseStudy: Pick<schema.ImpactCaseStudy, "id" | "title" | "summary"> & {
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
+	selectedRelatedEntities: Array<{ id: string; name: string; description?: string }>;
+	selectedRelatedResources: Array<{ id: string; name: string; description?: string }>;
 	publishAction: (documentId: string) => Promise<unknown>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
@@ -30,16 +34,23 @@ interface ImpactCaseStudyDetailsProps {
 export function ImpactCaseStudyDetails(props: Readonly<ImpactCaseStudyDetailsProps>): ReactNode {
 	const {
 		contentBlocks,
+		contributors,
 		documentId,
 		hasDraft,
 		isPublished,
 		impactCaseStudy,
 		publishAction,
 		discardDraftAction,
+		selectedRelatedEntities,
+		selectedRelatedResources,
 		selectedVersion,
 	} = props;
 
 	const t = useExtracted();
+
+	function formatRoleType(type: string): string {
+		return type.replaceAll("_", " ");
+	}
 
 	return (
 		<Fragment>
@@ -61,7 +72,7 @@ export function ImpactCaseStudyDetails(props: Readonly<ImpactCaseStudyDetailsPro
 				/>
 			</div>
 			<DescriptionList>
-				<DescriptionTerm>{t("Name")}</DescriptionTerm>
+				<DescriptionTerm>{t("Title")}</DescriptionTerm>
 				<DescriptionDetails>{impactCaseStudy.title}</DescriptionDetails>
 
 				<DescriptionTerm>{t("Slug")}</DescriptionTerm>
@@ -73,6 +84,49 @@ export function ImpactCaseStudyDetails(props: Readonly<ImpactCaseStudyDetailsPro
 				<DescriptionTerm>{t("Image")}</DescriptionTerm>
 				<DescriptionDetails>
 					<img alt="" src={impactCaseStudy.image.url} />
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Related entities")}</DescriptionTerm>
+				<DescriptionDetails>
+					{selectedRelatedEntities.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{selectedRelatedEntities.map((relatedEntity) => (
+								<li key={relatedEntity.id} className="text-sm">
+									<span className="font-medium">{relatedEntity.name}</span>
+								</li>
+							))}
+						</ul>
+					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Related resources")}</DescriptionTerm>
+				<DescriptionDetails>
+					{selectedRelatedResources.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{selectedRelatedResources.map((relatedResource) => (
+								<li key={relatedResource.id} className="text-sm">
+									<span className="font-medium">{relatedResource.name}</span>
+								</li>
+							))}
+						</ul>
+					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Contributors")}</DescriptionTerm>
+				<DescriptionDetails>
+					{contributors.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{contributors.map((contributor) => (
+								<li key={contributor.personId} className="text-sm">
+									<span className="font-medium">{contributor.personName}</span>
+									<span className="text-muted-fg">
+										{" · "}
+										<span className="text-muted-fg">{formatRoleType(contributor.role)}</span>
+									</span>
+								</li>
+							))}
+						</ul>
+					) : null}
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Content")}</DescriptionTerm>

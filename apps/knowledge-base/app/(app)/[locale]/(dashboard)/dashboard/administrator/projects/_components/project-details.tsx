@@ -119,7 +119,7 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 					{project.image ? (
 						<img
 							alt=""
-							className="block-24 inline-24 rounded-lg object-cover"
+							className="block-24 inline-auto max-inline-full rounded-lg object-cover"
 							src={project.image.url}
 						/>
 					) : null}
@@ -130,7 +130,9 @@ export function ProjectDetails(props: Readonly<ProjectDetailsProps>): ReactNode 
 
 				<DescriptionTerm>{t("Description")}</DescriptionTerm>
 				<DescriptionDetails>
-					{project.description != null ? <RichTextRenderer content={project.description} /> : null}
+					{project.description != null ? (
+						<RichTextRenderer key={selectedVersion} content={project.description} />
+					) : null}
 				</DescriptionDetails>
 
 				<DescriptionTerm>{t("Social media")}</DescriptionTerm>

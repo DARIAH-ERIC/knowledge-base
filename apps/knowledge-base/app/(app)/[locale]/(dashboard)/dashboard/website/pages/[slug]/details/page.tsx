@@ -9,6 +9,11 @@ import { publishPageItemAction } from "@/app/(app)/[locale]/(dashboard)/dashboar
 import { imageGridOptions } from "@/config/assets.config";
 import { getEntityContentBlocks } from "@/lib/content-blocks-service";
 import { getDocumentLifecycleState } from "@/lib/data/entity-lifecycle";
+import {
+	getEntityRelationOptionsByIds,
+	getEntityRelations,
+	getResourceRelationOptionsByIds,
+} from "@/lib/data/relations";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -115,8 +120,17 @@ export default async function DashboardWebsitePageItemDetailsPage(
 
 	const contentBlocks = await getEntityContentBlocks(pageItem.id, "content");
 
+	const { relatedEntityIds, relatedResourceIds } = await getEntityRelations(doc.id);
+
+	const [selectedRelatedEntities, selectedRelatedResources] = await Promise.all([
+		getEntityRelationOptionsByIds(relatedEntityIds),
+		getResourceRelationOptionsByIds(relatedResourceIds),
+	]);
+
 	return (
 		<PageItemDetails
+			selectedRelatedEntities={selectedRelatedEntities}
+			selectedRelatedResources={selectedRelatedResources}
 			contentBlocks={contentBlocks}
 			discardDraftAction={discardPageItemDraftAction}
 			documentId={doc.id}

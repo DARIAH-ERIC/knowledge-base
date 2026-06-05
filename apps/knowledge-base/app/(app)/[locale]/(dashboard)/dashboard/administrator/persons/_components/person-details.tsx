@@ -6,11 +6,13 @@ import {
 	DescriptionList,
 	DescriptionTerm,
 } from "@dariah-eric/ui/description-list";
-import { useExtracted } from "next-intl";
+import type { JSONContent } from "@tiptap/core";
+import { useExtracted, useFormatter } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
+import type { PersonContribution } from "@/lib/data/contributions";
 
 interface PersonDetailsProps {
 	documentId: string;
@@ -18,14 +20,17 @@ interface PersonDetailsProps {
 	isPublished: boolean;
 	selectedVersion: "draft" | "published";
 	person: Pick<schema.Person, "email" | "id" | "name" | "orcid" | "sortName"> & {
+		biography?: JSONContent;
 		entityVersion: { entity: { id: string; slug: string } };
 	} & { image: { key: string; label: string; url: string } };
+	contributions: Array<PersonContribution>;
 	publishAction: (documentId: string) => Promise<unknown>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
 }
 
 export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 	const {
+		contributions,
 		documentId,
 		hasDraft,
 		isPublished,
@@ -36,6 +41,11 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 	} = props;
 
 	const t = useExtracted();
+	const format = useFormatter();
+
+	function formatRoleType(type: string): string {
+		return type.replaceAll("_", " ");
+	}
 
 	return (
 		<Fragment>
@@ -76,9 +86,36 @@ export function PersonDetails(props: Readonly<PersonDetailsProps>): ReactNode {
 				<DescriptionDetails>
 					<img
 						alt=""
-						className="block-24 inline-24 rounded-lg object-cover"
+						className="block-24 inline-auto max-inline-full rounded-lg object-cover"
 						src={person.image.url}
 					/>
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("Relations")}</DescriptionTerm>
+				<DescriptionDetails>
+					{contributions.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{contributions.map((contribution) => (
+								<li key={contribution.id} className="text-sm">
+									<span className="font-medium">{formatRoleType(contribution.roleType)}</span>
+									{" · "}
+									<span className="text-muted-fg">{contribution.organisationalUnitName}</span>
+									<span className="text-muted-fg">
+										{" · "}
+										{contribution.duration.end
+											? format.dateTimeRange(
+													contribution.duration.start,
+													contribution.duration.end,
+													{
+														dateStyle: "short",
+													},
+												)
+											: format.dateTime(contribution.duration.start, { dateStyle: "short" })}
+									</span>
+								</li>
+							))}
+						</ul>
+					) : null}
 				</DescriptionDetails>
 			</DescriptionList>
 		</Fragment>

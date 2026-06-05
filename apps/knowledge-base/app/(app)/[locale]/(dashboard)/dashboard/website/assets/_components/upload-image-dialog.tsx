@@ -118,7 +118,7 @@ export function UploadImageDialog(props: Readonly<UploadImageDialogProps>): Reac
 							{filePreview != null && (
 								<img
 									alt={t("Preview")}
-									className="mbs-1 block-24 inline-24 rounded-lg object-cover"
+									className="mbs-1 block-24 inline-auto max-inline-full rounded-lg object-cover"
 									src={filePreview}
 								/>
 							)}
