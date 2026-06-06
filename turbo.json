@@ -127,6 +127,7 @@
 			"outputs": [
 				".next/**",
 				"!.next/cache/**",
+				"!.next/dev/**",
 				"dist/**",
 				"out/**",
 				"storybook-static/**",

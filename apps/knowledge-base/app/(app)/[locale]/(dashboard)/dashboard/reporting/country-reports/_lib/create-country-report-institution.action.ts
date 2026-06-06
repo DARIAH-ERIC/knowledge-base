@@ -6,6 +6,7 @@ import { getExtracted } from "next-intl/server";
 
 import { CreateCountryReportInstitutionActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/create-country-report-institution.schema";
 import { assertCan } from "@/lib/auth/permissions";
+import { countryReportRevalidatePaths } from "@/lib/data/reporting-urls";
 import { db } from "@/lib/db";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
@@ -13,7 +14,7 @@ export const createCountryReportInstitutionAction = createMutationAction({
 	schema: CreateCountryReportInstitutionActionInputSchema,
 	requireAuth: true,
 	audit: { action: "create", subjectType: "country_report" },
-	revalidate: "/[locale]/dashboard/reporting",
+	revalidate: countryReportRevalidatePaths,
 
 	async preCheck({ input, ctx }) {
 		const t = await getExtracted();

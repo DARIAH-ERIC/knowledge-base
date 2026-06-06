@@ -7,10 +7,10 @@ import {
 	HeaderDescription,
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
-import { CountryReportStepNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/[year]/[slug]/edit/_components/country-report-step-nav";
+import { CountryReportStepNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_components/country-report-step-nav";
 import { getCountryReportHeaderForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/country-reports/_lib/get-country-report-summary-data";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getCountryReportHref, resolveCountryReportId } from "@/lib/data/reporting-urls";
+import { getCountryReportEditHref, resolveCountryReportId } from "@/lib/data/reporting-urls";
 
 interface CountryReportEditLayoutProps extends LayoutProps<"/[locale]/dashboard/reporting/country-reports/[year]/[slug]/edit"> {}
 
@@ -47,7 +47,10 @@ export default async function CountryReportEditLayout(
 			</Header>
 
 			<div className="flex flex-col gap-y-6 px-(--layout-padding) pbs-6">
-				<CountryReportStepNav reportHref={getCountryReportHref(Number(routeYear), slug)} />
+				<CountryReportStepNav
+					editBasePath={getCountryReportEditHref(Number(routeYear), slug)}
+					variant="reporting"
+				/>
 				{children}
 			</div>
 		</div>
