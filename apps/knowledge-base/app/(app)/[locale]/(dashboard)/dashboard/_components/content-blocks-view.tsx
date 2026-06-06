@@ -29,9 +29,13 @@ interface ContentBlocksViewProps {
 }
 
 export function ContentBlocksView({ contentBlocks }: Readonly<ContentBlocksViewProps>): ReactNode {
-	return contentBlocks.map((contentBlock) => (
-		<ContentBlockView key={String(contentBlock.id)} contentBlock={contentBlock} />
-	));
+	return (
+		<div className="flex flex-col gap-y-8">
+			{contentBlocks.map((contentBlock) => (
+				<ContentBlockView key={String(contentBlock.id)} contentBlock={contentBlock} />
+			))}
+		</div>
+	);
 }
 
 interface ContentBlockViewProps {
