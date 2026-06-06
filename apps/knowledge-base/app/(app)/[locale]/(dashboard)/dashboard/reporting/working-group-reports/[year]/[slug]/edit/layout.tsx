@@ -7,6 +7,7 @@ import {
 	HeaderDescription,
 	HeaderTitle,
 } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/header";
+import { ReportEditGuard } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/_components/report-edit-guard";
 import { WorkingGroupReportStepNav } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_components/working-group-report-step-nav";
 import { getWorkingGroupReportHeaderForUser } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/get-working-group-report-summary-data";
 import { assertAuthenticated } from "@/lib/auth/session";
@@ -50,11 +51,13 @@ export default async function WorkingGroupReportEditLayout(
 			</Header>
 
 			<div className="flex flex-col gap-y-6 px-(--layout-padding) pbs-6">
-				<WorkingGroupReportStepNav
-					editBasePath={getWorkingGroupReportEditHref(Number(routeYear), slug)}
-					variant="reporting"
-				/>
-				{children}
+				<ReportEditGuard>
+					<WorkingGroupReportStepNav
+						editBasePath={getWorkingGroupReportEditHref(Number(routeYear), slug)}
+						variant="reporting"
+					/>
+					{children}
+				</ReportEditGuard>
 			</div>
 		</div>
 	);
