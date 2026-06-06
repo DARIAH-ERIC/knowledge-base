@@ -26,8 +26,8 @@ export function ReportStepTabs(props: Readonly<ReportStepTabsProps>): ReactNode 
 
 	const pathname = usePathname();
 
-	const active = [...steps]
-		.sort((a, b) => b.href.length - a.href.length)
+	const active = steps
+		.toSorted((a, b) => b.href.length - a.href.length)
 		.find((step) => pathname === step.href || pathname.startsWith(`${step.href}/`));
 	const selectedKey = active?.href ?? steps[0]?.href;
 
