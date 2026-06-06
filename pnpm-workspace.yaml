@@ -10,7 +10,6 @@ allowBuilds:
   esbuild: true
   lefthook: true
   sharp: true
-  unrs-resolver: true
 
 catalog:
   "@acdh-oeaw/color-schemes": ^0.1.0
@@ -157,7 +156,16 @@ catalogMode: strict
 
 cleanupUnusedCatalogs: true
 
+engineStrict: true
+
+minimumReleaseAge: 1440
+
 patchedDependencies:
   next: patches/next.patch
+
+# @see {@link https://docs.sentry.io/platforms/javascript/guides/node/troubleshooting/#pnpm-resolving-import-in-the-middle-external-package-errors}
+publicHoistPattern:
+  - '*import-in-the-middle*'
+  - '*require-in-the-middle*'
 
 shellEmulator: true
