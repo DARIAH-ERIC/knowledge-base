@@ -11,6 +11,7 @@ import {
 	getRichTextFieldContent,
 	resolveSelectedDetailVersion,
 } from "@/lib/data/entity-detail-view";
+import { getPersonRelations } from "@/lib/data/person-relations";
 import {
 	getEntityRelationOptionsByIds,
 	getEntityRelations,
@@ -105,16 +106,22 @@ export default async function DashboardAdministratorInstitutionDetailsPage(
 		notFound();
 	}
 
-	const [{ relatedEntityIds, relatedResourceIds }, relations, socialMediaRows, description] =
-		await Promise.all([
-			getEntityRelations(documentId),
-			getUnitRelations(documentId),
-			db.query.organisationalUnitsToSocialMedia.findMany({
-				where: { organisationalUnitId: institution.id },
-				columns: { socialMediaId: true },
-			}),
-			getRichTextFieldContent(versionId, "description"),
-		]);
+	const [
+		personRelations,
+		{ relatedEntityIds, relatedResourceIds },
+		relations,
+		socialMediaRows,
+		description,
+	] = await Promise.all([
+		getPersonRelations(documentId),
+		getEntityRelations(documentId),
+		getUnitRelations(documentId),
+		db.query.organisationalUnitsToSocialMedia.findMany({
+			where: { organisationalUnitId: institution.id },
+			columns: { socialMediaId: true },
+		}),
+		getRichTextFieldContent(versionId, "description"),
+	]);
 
 	const socialMediaIds = socialMediaRows.map((row) => row.socialMediaId);
 
@@ -142,6 +149,7 @@ export default async function DashboardAdministratorInstitutionDetailsPage(
 			institution={{ ...institution, description, image }}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
+			personRelations={personRelations}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}

@@ -12,6 +12,7 @@ import {
 	getRichTextFieldContent,
 	resolveSelectedDetailVersion,
 } from "@/lib/data/entity-detail-view";
+import { getPersonRelations } from "@/lib/data/person-relations";
 import { db } from "@/lib/db";
 import { images } from "@/lib/images";
 import { createMetadata } from "@/lib/server/create-metadata";
@@ -65,7 +66,8 @@ export default async function DashboardAdministratorCountryDetailsPage(
 	}
 	const { hasDraftChanges, publishedId, selectedVersion, versionId } = versionState;
 
-	const [description, countryData] = await Promise.all([
+	const [personRelations, description, countryData] = await Promise.all([
+		getPersonRelations(documentId),
 		getRichTextFieldContent(versionId, "description"),
 		getOrganisationalUnitEditDataForAdmin(user, {
 			slug,
@@ -104,6 +106,7 @@ export default async function DashboardAdministratorCountryDetailsPage(
 			documentId={documentId}
 			hasDraft={hasDraftChanges}
 			isPublished={publishedId != null}
+			personRelations={personRelations}
 			relations={relations}
 			selectedRelatedEntities={selectedRelatedEntities}
 			selectedRelatedResources={selectedRelatedResources}

@@ -13,8 +13,8 @@ import { Fragment, type ReactNode } from "react";
 
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
+import type { PersonRelation } from "@/lib/data/person-relations";
 import type { UnitRelation } from "@/lib/data/unit-relations";
-import type { WorkingGroupChair } from "@/lib/data/working-group-chairs";
 import { formatRoleType } from "@/lib/format-role-type";
 
 interface WorkingGroupDetailsProps {
@@ -38,7 +38,7 @@ interface WorkingGroupDetailsProps {
 		url?: string;
 		description?: string;
 	}>;
-	chairs: Array<WorkingGroupChair>;
+	personRelations: Array<PersonRelation>;
 	relations: Array<UnitRelation>;
 	publishAction: (documentId: string) => Promise<unknown>;
 	discardDraftAction?: (documentId: string) => Promise<unknown>;
@@ -46,11 +46,11 @@ interface WorkingGroupDetailsProps {
 
 export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): ReactNode {
 	const {
-		chairs,
 		documentId,
 		hasDraft,
 		isPublished,
 		workingGroup,
+		personRelations,
 		relations,
 		publishAction,
 		discardDraftAction,
@@ -174,20 +174,22 @@ export function WorkingGroupDetails(props: Readonly<WorkingGroupDetailsProps>): 
 					) : null}
 				</DescriptionDetails>
 
-				<DescriptionTerm>{t("Chairs")}</DescriptionTerm>
+				<DescriptionTerm>{t("People")}</DescriptionTerm>
 				<DescriptionDetails>
-					{chairs.length > 0 ? (
+					{personRelations.length > 0 ? (
 						<ul className="flex flex-col gap-1">
-							{chairs.map((chair) => (
-								<li key={chair.id} className="text-sm">
-									<span className="font-medium">{chair.personName}</span>
+							{personRelations.map((relation) => (
+								<li key={relation.id} className="text-sm">
+									<span className="font-medium">{relation.personName}</span>
+									{" · "}
+									<span className="text-muted-fg">{formatRoleType(relation.roleType)}</span>
 									<span className="text-muted-fg">
 										{" · "}
-										{chair.duration.end
-											? format.dateTimeRange(chair.duration.start, chair.duration.end, {
+										{relation.duration.end
+											? format.dateTimeRange(relation.duration.start, relation.duration.end, {
 													dateStyle: "short",
 												})
-											: format.dateTime(chair.duration.start, { dateStyle: "short" })}
+											: format.dateTime(relation.duration.start, { dateStyle: "short" })}
 									</span>
 								</li>
 							))}

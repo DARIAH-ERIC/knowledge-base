@@ -59,6 +59,10 @@ export async function getPersonRelations(organisationalUnitDocumentId: string) {
 				schema.personsToOrganisationalUnits.organisationalUnitDocumentId,
 				organisationalUnitDocumentId,
 			),
+		)
+		.orderBy(
+			sql`UPPER(${schema.personsToOrganisationalUnits.duration}) DESC NULLS FIRST`,
+			sql`LOWER(${schema.personsToOrganisationalUnits.duration}) DESC`,
 		);
 }
 

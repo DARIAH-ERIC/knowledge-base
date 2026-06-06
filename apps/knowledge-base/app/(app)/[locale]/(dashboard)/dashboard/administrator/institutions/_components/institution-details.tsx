@@ -13,6 +13,7 @@ import { Fragment, type ReactNode } from "react";
 
 import { EntityLifecycleBar } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/entity-lifecycle-bar";
 import { VersionSelector } from "@/app/(app)/[locale]/(dashboard)/dashboard/_components/version-selector";
+import type { PersonRelation } from "@/lib/data/person-relations";
 import type { UnitRelation } from "@/lib/data/unit-relations";
 import { formatRoleType } from "@/lib/format-role-type";
 
@@ -37,6 +38,7 @@ interface InstitutionDetailsProps {
 		url?: string;
 		description?: string;
 	}>;
+	personRelations: Array<PersonRelation>;
 	relations: Array<UnitRelation>;
 
 	publishAction: (documentId: string) => Promise<unknown>;
@@ -49,6 +51,7 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 		hasDraft,
 		isPublished,
 		institution,
+		personRelations,
 		relations,
 		publishAction,
 		discardDraftAction,
@@ -166,6 +169,29 @@ export function InstitutionDetails(props: Readonly<InstitutionDetailsProps>): Re
 							{selectedRelatedResources.map((relatedResource) => (
 								<li key={relatedResource.id} className="text-sm">
 									<span className="font-medium">{relatedResource.name}</span>
+								</li>
+							))}
+						</ul>
+					) : null}
+				</DescriptionDetails>
+
+				<DescriptionTerm>{t("People")}</DescriptionTerm>
+				<DescriptionDetails>
+					{personRelations.length > 0 ? (
+						<ul className="flex flex-col gap-1">
+							{personRelations.map((relation) => (
+								<li key={relation.id} className="text-sm">
+									<span className="font-medium">{relation.personName}</span>
+									{" · "}
+									<span className="text-muted-fg">{formatRoleType(relation.roleType)}</span>
+									<span className="text-muted-fg">
+										{" · "}
+										{relation.duration.end
+											? format.dateTimeRange(relation.duration.start, relation.duration.end, {
+													dateStyle: "short",
+												})
+											: format.dateTime(relation.duration.start, { dateStyle: "short" })}
+									</span>
 								</li>
 							))}
 						</ul>
