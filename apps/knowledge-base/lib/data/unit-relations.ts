@@ -47,7 +47,11 @@ export async function getUnitRelations(unitDocumentId: string) {
 			schema.organisationalUnitTypes,
 			eq(schema.organisationalUnitTypes.id, schema.organisationalUnits.typeId),
 		)
-		.where(eq(schema.organisationalUnitsRelations.unitDocumentId, unitDocumentId));
+		.where(eq(schema.organisationalUnitsRelations.unitDocumentId, unitDocumentId))
+		.orderBy(
+			sql`UPPER(${schema.organisationalUnitsRelations.duration}) DESC NULLS FIRST`,
+			sql`LOWER(${schema.organisationalUnitsRelations.duration}) DESC`,
+		);
 }
 
 export type UnitRelation = Awaited<ReturnType<typeof getUnitRelations>>[number];
