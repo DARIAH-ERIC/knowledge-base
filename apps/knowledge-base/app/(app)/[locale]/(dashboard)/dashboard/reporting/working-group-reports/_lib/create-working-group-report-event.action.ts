@@ -5,13 +5,14 @@ import { getExtracted } from "next-intl/server";
 
 import { CreateWorkingGroupReportEventActionInputSchema } from "@/app/(app)/[locale]/(dashboard)/dashboard/reporting/working-group-reports/_lib/create-working-group-report-event.schema";
 import { assertCan } from "@/lib/auth/permissions";
+import { workingGroupReportRevalidatePaths } from "@/lib/data/reporting-urls";
 import { createMutationAction } from "@/lib/server/create-mutation-action";
 
 export const createWorkingGroupReportEventAction = createMutationAction({
 	schema: CreateWorkingGroupReportEventActionInputSchema,
 	requireAuth: true,
 	audit: { action: "create", subjectType: "working_group_report" },
-	revalidate: "/[locale]/dashboard/reporting",
+	revalidate: workingGroupReportRevalidatePaths,
 
 	async preCheck({ input, ctx }) {
 		await assertCan(ctx.user, "update", {

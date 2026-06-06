@@ -17,18 +17,21 @@ interface WorkingGroupReportQuestionsFormProps {
 	questions: Array<Question>;
 	answerMap: Record<string, unknown>;
 	formAction: (formData: FormData) => Promise<void>;
+	/** Where the save action should return to (defaults to the reporting flow when omitted). */
+	redirectTo?: string;
 }
 
 export function WorkingGroupReportQuestionsForm(
 	props: Readonly<WorkingGroupReportQuestionsFormProps>,
 ): ReactNode {
-	const { reportId, questions, answerMap, formAction } = props;
+	const { reportId, questions, answerMap, formAction, redirectTo } = props;
 
 	const t = useExtracted();
 
 	return (
 		<form action={formAction} className="flex flex-col gap-y-8">
 			<input name="id" type="hidden" value={reportId} />
+			{redirectTo != null && <input name="redirectTo" type="hidden" value={redirectTo} />}
 
 			{questions.map((question) => {
 				const existingAnswer = answerMap[question.id];

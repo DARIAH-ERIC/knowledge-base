@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
+import { countryReportRevalidatePaths } from "@/lib/data/reporting-urls";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 
@@ -36,5 +37,7 @@ export async function deleteCountryReportContributionAction(formData: FormData):
 		summary: getAuditSummaryFromFormData(formData),
 	});
 
-	revalidatePath("/[locale]/dashboard/reporting", "layout");
+	for (const path of countryReportRevalidatePaths) {
+		revalidatePath(path, "layout");
+	}
 }

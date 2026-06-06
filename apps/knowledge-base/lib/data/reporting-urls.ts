@@ -8,6 +8,29 @@ export interface ReportRouteParams {
 	slug: string;
 }
 
+/**
+ * Paths revalidated after a country-report mutation. Covers both the user-facing reporting flow and
+ * the admin tree, which render the same report data through shared screen components.
+ */
+export const countryReportRevalidatePaths = [
+	"/[locale]/dashboard/reporting",
+	"/[locale]/dashboard/administrator/country-reports/[id]",
+] as const;
+
+/** Paths revalidated after a working-group-report mutation. See {@link countryReportRevalidatePaths}. */
+export const workingGroupReportRevalidatePaths = [
+	"/[locale]/dashboard/reporting",
+	"/[locale]/dashboard/administrator/working-group-reports/[id]",
+] as const;
+
+/**
+ * Actions that redirect after saving accept an optional `redirectTo` field so the same action can
+ * be driven from both the reporting and admin trees. Only same-app dashboard paths are honoured.
+ */
+export function sanitizeReportRedirectTo(value: FormDataEntryValue | null): string | null {
+	return typeof value === "string" && value.startsWith("/dashboard/") ? value : null;
+}
+
 export function getCountryReportHref(year: number, slug: string): string {
 	return `/dashboard/reporting/country-reports/${year}/${slug}`;
 }

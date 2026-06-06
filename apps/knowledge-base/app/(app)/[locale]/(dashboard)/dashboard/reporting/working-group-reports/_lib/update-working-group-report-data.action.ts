@@ -10,7 +10,11 @@ import * as v from "valibot";
 import { getAuditSummaryFromFormData, recordAuditEvent } from "@/lib/audit/audit-log";
 import { assertCan } from "@/lib/auth/permissions";
 import { assertAuthenticated } from "@/lib/auth/session";
-import { getWorkingGroupReportEditHrefById } from "@/lib/data/reporting-urls";
+import {
+	getWorkingGroupReportEditHrefById,
+	sanitizeReportRedirectTo,
+	workingGroupReportRevalidatePaths,
+} from "@/lib/data/reporting-urls";
 import { db } from "@/lib/db";
 import { eq } from "@/lib/db/sql";
 import { redirect } from "@/lib/navigation/navigation";
@@ -53,7 +57,10 @@ export async function updateWorkingGroupReportDataAction(formData: FormData): Pr
 		summary: getAuditSummaryFromFormData(formData),
 	});
 
-	revalidatePath("/[locale]/dashboard/reporting", "layout");
+	for (const path of workingGroupReportRevalidatePaths) {
+		revalidatePath(path, "layout");
+	}
 
-	redirect({ href: await getWorkingGroupReportEditHrefById(id, "data"), locale });
+	const redirectTo = sanitizeReportRedirectTo(formData.get("redirectTo"));
+	redirect({ href: redirectTo ?? (await getWorkingGroupReportEditHrefById(id, "data")), locale });
 }
